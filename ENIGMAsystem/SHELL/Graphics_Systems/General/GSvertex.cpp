@@ -92,21 +92,6 @@ void vertex_delete_buffer(int buffer) {
   enigma::vertexBuffers[buffer] = nullptr;
 }
 
-void vertex_begin(int buffer, int format) {
-  enigma::vertexBuffers[buffer]->vertices.clear();
-  enigma::vertexBuffers[buffer]->format = format;
-}
-
-void vertex_end(int buffer) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
-
-  // we can only flag the vertex buffer contents as dirty and needing an update
-  // if the vertex buffer hasn't been frozen, otherwise we just ignore it
-  if (vertexBuffer->frozen) return;
-  vertexBuffer->dirty = true;
-  vertexBuffer->number = vertexBuffer->vertices.size();
-}
-
 unsigned vertex_get_size(int buffer) {
   return enigma::vertexBuffers[buffer]->number * sizeof(gs_scalar);
 }
@@ -141,40 +126,19 @@ void vertex_clear(int buffer) {
   vertexBuffer->dirty = true;
 }
 
-void vertex_submit(int buffer, int primitive) {
-  vertex_submit(buffer, primitive, 0, vertex_get_number(buffer));
+void vertex_begin(int buffer, int format) {
+  enigma::vertexBuffers[buffer]->vertices.clear();
+  enigma::vertexBuffers[buffer]->format = format;
 }
 
-void vertex_submit(int buffer, int primitive, int texture) {
-  texture_set(texture);
-  vertex_submit(buffer, primitive);
-}
+void vertex_end(int buffer) {
+  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
-void vertex_submit(int buffer, int primitive, int texture, unsigned vertex_start, unsigned vertex_count) {
-  texture_set(texture);
-  vertex_submit(buffer, primitive, vertex_start, vertex_count);
-}
-
-void vertex_position(int buffer, gs_scalar x, gs_scalar y) {
-  enigma::vertexBuffers[buffer]->vertices.push_back(x);
-  enigma::vertexBuffers[buffer]->vertices.push_back(y);
-}
-
-void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z) {
-  enigma::vertexBuffers[buffer]->vertices.push_back(x);
-  enigma::vertexBuffers[buffer]->vertices.push_back(y);
-  enigma::vertexBuffers[buffer]->vertices.push_back(z);
-}
-
-void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz) {
-  enigma::vertexBuffers[buffer]->vertices.push_back(nx);
-  enigma::vertexBuffers[buffer]->vertices.push_back(ny);
-  enigma::vertexBuffers[buffer]->vertices.push_back(nz);
-}
-
-void vertex_texcoord(int buffer, gs_scalar u, gs_scalar v) {
-  enigma::vertexBuffers[buffer]->vertices.push_back(u);
-  enigma::vertexBuffers[buffer]->vertices.push_back(v);
+  // we can only flag the vertex buffer contents as dirty and needing an update
+  // if the vertex buffer hasn't been frozen, otherwise we just ignore it
+  if (vertexBuffer->frozen) return;
+  vertexBuffer->dirty = true;
+  vertexBuffer->number = vertexBuffer->vertices.size();
 }
 
 void vertex_data(int buffer, const enigma::varargs& data) {
@@ -212,6 +176,28 @@ void vertex_data(int buffer, const enigma::varargs& data) {
   }
 }
 
+void vertex_position(int buffer, gs_scalar x, gs_scalar y) {
+  enigma::vertexBuffers[buffer]->vertices.push_back(x);
+  enigma::vertexBuffers[buffer]->vertices.push_back(y);
+}
+
+void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z) {
+  enigma::vertexBuffers[buffer]->vertices.push_back(x);
+  enigma::vertexBuffers[buffer]->vertices.push_back(y);
+  enigma::vertexBuffers[buffer]->vertices.push_back(z);
+}
+
+void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz) {
+  enigma::vertexBuffers[buffer]->vertices.push_back(nx);
+  enigma::vertexBuffers[buffer]->vertices.push_back(ny);
+  enigma::vertexBuffers[buffer]->vertices.push_back(nz);
+}
+
+void vertex_texcoord(int buffer, gs_scalar u, gs_scalar v) {
+  enigma::vertexBuffers[buffer]->vertices.push_back(u);
+  enigma::vertexBuffers[buffer]->vertices.push_back(v);
+}
+
 void vertex_float1(int buffer, float f1) {
   enigma::vertexBuffers[buffer]->vertices.push_back(f1);
 }
@@ -239,6 +225,20 @@ void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char
   enigma::vertexBuffers[buffer]->vertices.push_back(val);
 }
 
+void vertex_submit(int buffer, int primitive) {
+  vertex_submit(buffer, primitive, 0, vertex_get_number(buffer));
+}
+
+void vertex_submit(int buffer, int primitive, int texture) {
+  texture_set(texture);
+  vertex_submit(buffer, primitive);
+}
+
+void vertex_submit(int buffer, int primitive, int texture, unsigned vertex_start, unsigned vertex_count) {
+  texture_set(texture);
+  vertex_submit(buffer, primitive, vertex_start, vertex_count);
+}
+
 int index_create_buffer() {
   int id = enigma::indexBuffers.size();
   enigma::indexBuffers.push_back(new enigma::IndexBuffer());
@@ -254,21 +254,6 @@ int index_create_buffer_ext(unsigned size) {
 void index_delete_buffer(int buffer) {
   delete enigma::indexBuffers[buffer];
   enigma::indexBuffers[buffer] = nullptr;
-}
-
-void index_begin(int buffer, int type) {
-  enigma::indexBuffers[buffer]->indices.clear();
-  enigma::indexBuffers[buffer]->type = type;
-}
-
-void index_end(int buffer) {
-  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
-
-  // we can only flag the index buffer contents as dirty and needing an update
-  // if the index buffer hasn't been frozen, otherwise we just ignore it
-  if (indexBuffer->frozen) return;
-  indexBuffer->dirty = true;
-  indexBuffer->number = indexBuffer->indices.size();
 }
 
 unsigned index_get_size(int buffer) {
@@ -300,6 +285,28 @@ void index_clear(int buffer) {
   if (!indexBuffer->frozen) return;
   indexBuffer->frozen = false;
   indexBuffer->dirty = true;
+}
+
+void index_begin(int buffer, int type) {
+  enigma::indexBuffers[buffer]->indices.clear();
+  enigma::indexBuffers[buffer]->type = type;
+}
+
+void index_end(int buffer) {
+  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+
+  // we can only flag the index buffer contents as dirty and needing an update
+  // if the index buffer hasn't been frozen, otherwise we just ignore it
+  if (indexBuffer->frozen) return;
+  indexBuffer->dirty = true;
+  indexBuffer->number = indexBuffer->indices.size();
+}
+
+void index_data(int buffer, const enigma::varargs& data) {
+  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  for (int i = 0; i < data.argc; ++i) {
+    indexBuffer->indices.push_back(data.get(i));
+  }
 }
 
 }
