@@ -103,8 +103,8 @@ unsigned index_get_number(int buffer);
 void index_freeze(int buffer);
 void index_clear(int buffer);
 void index_begin(int buffer, int type);
-void index_data(int buffer, const enigma::varargs& data);
 void index_end(int buffer);
+void index_data(int buffer, const enigma::varargs& data);
 
 }
 

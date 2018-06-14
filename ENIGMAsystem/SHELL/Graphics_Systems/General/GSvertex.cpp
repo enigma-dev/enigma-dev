@@ -239,4 +239,67 @@ void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char
   enigma::vertexBuffers[buffer]->vertices.push_back(val);
 }
 
+int index_create_buffer() {
+  int id = enigma::indexBuffers.size();
+  enigma::indexBuffers.push_back(new enigma::IndexBuffer());
+  return id;
+}
+
+int index_create_buffer_ext(unsigned size) {
+  int id = enigma::indexBuffers.size();
+  enigma::indexBuffers.push_back(new enigma::IndexBuffer());
+  return id;
+}
+
+void index_delete_buffer(int buffer) {
+  delete enigma::indexBuffers[buffer];
+  enigma::indexBuffers[buffer] = nullptr;
+}
+
+void index_begin(int buffer, int type) {
+  enigma::indexBuffers[buffer]->indices.clear();
+  enigma::indexBuffers[buffer]->type = type;
+}
+
+void index_end(int buffer) {
+  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+
+  // we can only flag the index buffer contents as dirty and needing an update
+  // if the index buffer hasn't been frozen, otherwise we just ignore it
+  if (indexBuffer->frozen) return;
+  indexBuffer->dirty = true;
+  indexBuffer->number = indexBuffer->indices.size();
+}
+
+unsigned index_get_size(int buffer) {
+  return enigma::indexBuffers[buffer]->number * sizeof(unsigned short);
+}
+
+unsigned index_get_number(int buffer) {
+  return enigma::indexBuffers[buffer]->number;
+}
+
+void index_freeze(int buffer) {
+  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+
+  // we can freeze the index buffer only if it isn't already frozen
+  // if it's not frozen, then we'll freeze it when we do a dirty update
+  if (indexBuffer->frozen) return;
+  indexBuffer->frozen = true;
+  indexBuffer->dirty = true;
+}
+
+void index_clear(int buffer) {
+  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+
+  // clear it just for good measure, even though it's probably already empty
+  // since we do that just after uploading it to the GPU "peer"
+  indexBuffer->indices.clear();
+
+  // we can clear a.k.a. "unfreeze" the index buffer only if it is actually frozen
+  if (!indexBuffer->frozen) return;
+  indexBuffer->frozen = false;
+  indexBuffer->dirty = true;
+}
+
 }

@@ -83,9 +83,11 @@ struct VertexBuffer {
 
 struct IndexBuffer {
   vector<int32_t> indices;
-  bool frozen;
+  bool frozen, dirty;
+  int type;
   std::size_t number;
-  IndexBuffer(): frozen(false), number(0) {}
+
+  IndexBuffer(): frozen(false), dirty(false), type(-1), number(0) {}
 };
 
 extern vector<VertexFormat*> vertexFormats;
