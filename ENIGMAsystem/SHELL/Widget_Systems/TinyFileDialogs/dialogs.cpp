@@ -24,42 +24,53 @@ namespace enigma
   }
 }
 
-class FileFilter {
-  string filter_buf;
+class FileFilter
+{
+  std::string filter_buf;
   std::vector<const char*> descriptions_;
   std::vector<std::vector<const char*>> patterns_;
   std::vector<const char* const*> cpatterns_;
   std::vector<int> pattern_counts_;
-
- public:
-  FileFilter(const string &filter): filter_buf(filter + "|") {
-    if (!filter.empty()) {
+  
+  public:
+    FileFilter(const std::string &filter): filter_buf(filter + "|") {
+    if (!filter.empty())
+    {
       size_t start = 0;
       std::vector<const char*> *curfilter = nullptr;
-      for (size_t i = 0; i < filter_buf.length(); ++i) {
-        if (filter_buf[i] == '|') {
+      for (size_t i = 0; i < filter_buf.length(); ++i)
+      {
+        if (filter_buf[i] == '|')
+        {
           filter_buf[i] = 0;
-          if (curfilter) {
+          if (curfilter)
+          {
             curfilter->push_back(filter_buf.c_str() + start);
             curfilter = nullptr;
-          } else {
+          }
+          else
+          {
             descriptions_.push_back(filter_buf.c_str() + start);
             patterns_.push_back({});
             curfilter = &patterns_.back();
           }
           start = i + 1;
-        } else if (curfilter && filter_buf[i] == ';') {
+        }
+        else if (curfilter && filter_buf[i] == ';')
+        {
           filter_buf[i] = 0;
           curfilter->push_back(filter_buf.c_str() + start);
           start = i + 1;
         }
       }
-      if (descriptions_.size() > patterns_.size()) {
+      if (descriptions_.size() > patterns_.size())
+      {
         descriptions_.pop_back();
       }
     }
     pattern_counts_.reserve(descriptions_.size());
-    for (auto &pv : patterns_) {
+    for (auto &pv : patterns_)
+    {
       pattern_counts_.push_back(pv.size());
       pv.push_back(nullptr);
       cpatterns_.push_back(pv.data());
@@ -268,17 +279,26 @@ namespace enigma_user
     return path ? : "";
   }
 
+  string get_save_filename(string filter, string fname)
+  {
+    fname = string_replace_all(fname, "\"", "\\\"");
+    filter = string_replace_all(filter, "\"", "\\\"");
+    FileFilter ff(filter.c_str());
+
+    const char *path = tinyfd_saveFileDialog("Save As", fname.c_str(),
+      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str());
+
+    return path ? : "";
+  }
+  
   string get_open_filename_ext(string filter, string fname, string dir, string title)
   {
-    const char *fname_or_dir;
-
-    fname = string_replace_all(fname, "\"", "\\\"");
-    dir = string_replace_all(dir, "\"", "\\\"");
+    string fname_or_dir;
 
     if (access(fname.c_str(), F_OK) != -1)
-      fname_or_dir = fname.c_str();
+      fname_or_dir = fname;
     else
-      fname_or_dir = dir.c_str();
+      fname_or_dir = dir;
 
     struct stat sb;
 
@@ -292,39 +312,25 @@ namespace enigma_user
     else
       titlebar = title;
 
-    filter = string_replace_all(filter, "\"", "\\\"");
+    fname_or_dir = string_replace_all(fname_or_dir, "\"", "\\\"");
     titlebar = string_replace_all(titlebar, "\"", "\\\"");
-    FileFilter ff(filter.c_str());
-
-    const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir,
-      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0);
-
-    return path ? : "";
-  }
-
-  string get_save_filename(string filter, string fname)
-  {
-    fname = string_replace_all(fname, "\"", "\\\"");
     filter = string_replace_all(filter, "\"", "\\\"");
     FileFilter ff(filter.c_str());
 
-    const char *path = tinyfd_saveFileDialog("Save As", fname.c_str(),
-      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str());
+    const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
+      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0);
 
     return path ? : "";
   }
 
   string get_save_filename_ext(string filter, string fname, string dir, string title)
   {
-    const char *fname_or_dir;
-
-    fname = string_replace_all(fname, "\"", "\\\"");
-    dir = string_replace_all(dir, "\"", "\\\"");
+    string fname_or_dir;
 
     if (access(fname.c_str(), F_OK) != -1)
-      fname_or_dir = fname.c_str();
+      fname_or_dir = fname;
     else
-      fname_or_dir = dir.c_str();
+      fname_or_dir = dir;
 
     struct stat sb;
 
@@ -338,11 +344,12 @@ namespace enigma_user
     else
       titlebar = title;
 
-    filter = string_replace_all(filter, "\"", "\\\"");
+    fname_or_dir = string_replace_all(fname_or_dir, "\"", "\\\"");
     titlebar = string_replace_all(titlebar, "\"", "\\\"");
+    filter = string_replace_all(filter, "\"", "\\\"");
     FileFilter ff(filter.c_str());
 
-    const char *path = tinyfd_saveFileDialog(titlebar.c_str(), fname_or_dir,
+    const char *path = tinyfd_saveFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
       ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str());
 
     return path ? : "";
