@@ -151,7 +151,7 @@ void vertex_data(int buffer, const enigma::varargs& data) {
     std::pair<int,int> attr = vertexFormat->flags[attrIndex++];
     switch (attr.first) {
       case vertex_type_float1:
-        vertex_float1(buffer, data.get(++i));
+        vertex_float1(buffer, data.get(i++));
         continue;
       case vertex_type_float2:
         vertex_float2(buffer, data.get(i), data.get(i + 1));
@@ -166,7 +166,7 @@ void vertex_data(int buffer, const enigma::varargs& data) {
         i += 4;
         continue;
       case vertex_type_color:
-        vertex_argb(buffer, data.get(++i));
+        vertex_argb(buffer, data.get(i++));
         continue;
       case vertex_type_ubyte4:
         vertex_ubyte4(buffer, data.get(i), data.get(i + 1), data.get(i + 2), data.get(i + 3));
