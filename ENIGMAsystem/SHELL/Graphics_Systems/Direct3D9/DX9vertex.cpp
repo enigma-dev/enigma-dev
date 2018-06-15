@@ -33,59 +33,20 @@ D3DDECLUSAGE usage_types[] = { D3DDECLUSAGE_POSITION, D3DDECLUSAGE_COLOR, D3DDEC
   D3DDECLUSAGE_BLENDINDICES, D3DDECLUSAGE_DEPTH, D3DDECLUSAGE_TANGENT, D3DDECLUSAGE_BINORMAL, D3DDECLUSAGE_FOG, D3DDECLUSAGE_SAMPLE };
 
 map<int, LPDIRECT3DVERTEXBUFFER9> vertexBufferPeers;
+map<int, LPDIRECT3DINDEXBUFFER9> indexBufferPeers;
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
   vertexBufferPeers[buffer]->Release();
   vertexBufferPeers.erase(buffer);
 }
 
-inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::VertexFormat* vertexFormat, size_t &stride) {
-  vector<D3DVERTEXELEMENT9> vertexDeclarationElements(vertexFormat->flags.size() + 1);
-
-  WORD offset = 0;
-  map<int,int> useCount;
-  for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
-    const pair<int, int> flag = vertexFormat->flags[i];
-    D3DVERTEXELEMENT9 *vertexDeclarationElement = &vertexDeclarationElements[i];
-
-    vertexDeclarationElement->Stream = 0;
-    vertexDeclarationElement->Offset = offset;
-    vertexDeclarationElement->Type = declaration_types[flag.first];
-    vertexDeclarationElement->Method = D3DDECLMETHOD_DEFAULT;
-    vertexDeclarationElement->Usage = usage_types[flag.second];
-    vertexDeclarationElement->UsageIndex = useCount[flag.second]++;
-
-    offset += declaration_type_sizes[flag.first];
-  }
-  stride = offset;
-  vertexDeclarationElements[vertexFormat->flags.size()] = D3DDECL_END();
-
-  LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration;
-  d3dmgr->CreateVertexDeclaration(&vertexDeclarationElements[0], &vertexDeclaration);
-
-  return vertexDeclaration;
+void graphics_delete_index_buffer_peer(int buffer) {
+  indexBufferPeers[buffer]->Release();
+  indexBufferPeers.erase(buffer);
 }
 
-}
-
-namespace enigma_user {
-
-void vertex_argb(int buffer, unsigned argb) {
-  enigma::vertexBuffers[buffer]->vertices.push_back(argb);
-}
-
-void vertex_color(int buffer, int color, double alpha) {
-  enigma::color_t finalcol = (CLAMP_ALPHA(alpha) << 24) | (COL_GET_R(color) << 16) | (COL_GET_G(color) << 8) | COL_GET_B(color);
-  enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
-}
-
-void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {
+void graphics_prepare_vertex_buffer(const int buffer) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
-
-  // this is fucking temporary until we rewrite the model classes and
-  // figure out a proper way to flush
-  d3dmgr->EndShapesBatching();
 
   // if the contents of the vertex buffer are dirty then we need to update
   // our native vertex buffer object "peer"
@@ -128,16 +89,142 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
     vertexBuffer->vertices.clear();
     vertexBuffer->dirty = false;
   }
+}
+
+void graphics_prepare_index_buffer(const int buffer) {
+  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+
+  // if the contents of the index buffer are dirty then we need to update
+  // our native index buffer object "peer"
+  if (indexBuffer->dirty) {
+    LPDIRECT3DINDEXBUFFER9 indexBufferPeer = NULL;
+    auto it = enigma::indexBufferPeers.find(buffer);
+    size_t size = enigma_user::index_get_size(buffer);
+
+    // if we have already created a native "peer" ibo for this user buffer,
+    // then we have to release it if it isn't big enough to hold the new contents
+    // or if it has just been frozen (so we can remove its D3DUSAGE_DYNAMIC)
+    if (it != enigma::indexBufferPeers.end()) {
+      indexBufferPeer = it->second;
+
+      D3DINDEXBUFFER_DESC pDesc;
+      indexBufferPeer->GetDesc(&pDesc);
+
+      if (size > pDesc.Size || indexBuffer->frozen) {
+        indexBufferPeer->Release();
+        indexBufferPeer = NULL;
+      }
+    }
+
+    // create either a static or dynamic ibo peer depending on if the user called
+    // index_freeze on the buffer
+    if (!indexBufferPeer) {
+      d3dmgr->CreateIndexBuffer(
+        size, indexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
+        (indexBuffer->type == index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &indexBufferPeer, NULL
+      );
+      enigma::indexBufferPeers[buffer] = indexBufferPeer;
+    }
+
+    // copy the index buffer contents over to the native peer ibo on the GPU
+    VOID* pVoid;
+    indexBufferPeer->Lock(0, 0, (VOID**)&pVoid, D3DLOCK_DISCARD);
+    memcpy(pVoid, indexBuffer->indices.data(), size);
+    indexBufferPeer->Unlock();
+
+    indexBuffer->indices.clear();
+    indexBuffer->dirty = false;
+  }
+}
+
+inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::VertexFormat* vertexFormat, size_t &stride) {
+  vector<D3DVERTEXELEMENT9> vertexDeclarationElements(vertexFormat->flags.size() + 1);
+
+  WORD offset = 0;
+  map<int,int> useCount;
+  for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
+    const pair<int, int> flag = vertexFormat->flags[i];
+    D3DVERTEXELEMENT9 *vertexDeclarationElement = &vertexDeclarationElements[i];
+
+    vertexDeclarationElement->Stream = 0;
+    vertexDeclarationElement->Offset = offset;
+    vertexDeclarationElement->Type = declaration_types[flag.first];
+    vertexDeclarationElement->Method = D3DDECLMETHOD_DEFAULT;
+    vertexDeclarationElement->Usage = usage_types[flag.second];
+    vertexDeclarationElement->UsageIndex = useCount[flag.second]++;
+
+    offset += declaration_type_sizes[flag.first];
+  }
+  stride = offset;
+  vertexDeclarationElements[vertexFormat->flags.size()] = D3DDECL_END();
+
+  LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration;
+  d3dmgr->CreateVertexDeclaration(&vertexDeclarationElements[0], &vertexDeclaration);
+
+  return vertexDeclaration;
+}
+
+}
+
+namespace enigma_user {
+
+void vertex_argb(int buffer, unsigned argb) {
+  enigma::vertexBuffers[buffer]->vertices.push_back(argb);
+}
+
+void vertex_color(int buffer, int color, double alpha) {
+  enigma::color_t finalcol = (CLAMP_ALPHA(alpha) << 24) | (COL_GET_R(color) << 16) | (COL_GET_G(color) << 8) | COL_GET_B(color);
+  enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
+}
+
+void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
+
+  // this is fucking temporary until we rewrite the model classes and
+  // figure out a proper way to flush
+  d3dmgr->EndShapesBatching();
+
+  enigma::graphics_prepare_vertex_buffer(buffer);
 
   size_t stride = 0;
   LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
-  LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = enigma::vertexBufferPeers[buffer];
   d3dmgr->SetVertexDeclaration(vertexDeclaration);
-  d3dmgr->SetStreamSource(0, vertexBufferPeer, vertex_start * stride, stride);
 
-  int primitive_count = enigma_user::draw_primitive_count(primitive, vertex_count);
+  LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = enigma::vertexBufferPeers[buffer];
+  d3dmgr->SetStreamSource(0, vertexBufferPeer, 0, stride);
 
-  d3dmgr->DrawPrimitive(enigma::primitive_types[primitive], 0, primitive_count);
+  int primitive_count = enigma_user::draw_primitive_count(primitive, count);
+
+  d3dmgr->DrawPrimitive(enigma::primitive_types[primitive], start, primitive_count);
+
+  vertexDeclaration->Release();
+}
+
+void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
+
+  // this is fucking temporary until we rewrite the model classes and
+  // figure out a proper way to flush
+  d3dmgr->EndShapesBatching();
+
+  enigma::graphics_prepare_vertex_buffer(vertex);
+  enigma::graphics_prepare_index_buffer(buffer);
+
+  size_t stride = 0;
+  LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
+  d3dmgr->SetVertexDeclaration(vertexDeclaration);
+
+  LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = enigma::vertexBufferPeers[vertex];
+  d3dmgr->SetStreamSource(0, vertexBufferPeer, 0, stride);
+
+  LPDIRECT3DINDEXBUFFER9 indexBufferPeer = enigma::indexBufferPeers[buffer];
+  d3dmgr->SetIndices(indexBufferPeer);
+
+  int primitive_count = enigma_user::draw_primitive_count(primitive, count);
+
+  d3dmgr->DrawIndexedPrimitive(enigma::primitive_types[primitive], 0, 0, count, start, primitive_count);
 
   vertexDeclaration->Release();
 }
