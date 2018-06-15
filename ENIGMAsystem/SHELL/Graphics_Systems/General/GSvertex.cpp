@@ -119,6 +119,7 @@ void vertex_clear(int buffer) {
   // clear it just for good measure, even though it's probably already empty
   // since we do that just after uploading it to the GPU "peer"
   vertexBuffer->vertices.clear();
+  vertexBuffer->number = 0;
 
   // we can clear a.k.a. "unfreeze" the vertex buffer only if it is actually frozen
   if (!vertexBuffer->frozen) return;
@@ -281,6 +282,7 @@ void index_clear(int buffer) {
   // clear it just for good measure, even though it's probably already empty
   // since we do that just after uploading it to the GPU "peer"
   indexBuffer->indices.clear();
+  indexBuffer->number = 0;
 
   // we can clear a.k.a. "unfreeze" the index buffer only if it is actually frozen
   if (!indexBuffer->frozen) return;

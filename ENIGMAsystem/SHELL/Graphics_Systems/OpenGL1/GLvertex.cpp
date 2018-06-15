@@ -187,7 +187,7 @@ void vertex_color(int buffer, int color, double alpha) {
 }
 
 void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   enigma::graphics_prepare_buffer(buffer, false);
   enigma::graphics_apply_vertex_format(vertexBuffer->format);
@@ -196,13 +196,18 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
 }
 
 void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
+  const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 
   enigma::graphics_prepare_buffer(vertex, false);
   enigma::graphics_prepare_buffer(buffer, true);
   enigma::graphics_apply_vertex_format(vertexBuffer->format);
 
-  glDrawElements(enigma::primitive_types[primitive], count, GL_UNSIGNED_SHORT, (void*)(start * sizeof(unsigned short)));
+  GLenum indexType = GL_UNSIGNED_SHORT;
+  if (indexBuffer->type == index_type_uint)
+    indexType = GL_UNSIGNED_INT;
+
+  glDrawElements(enigma::primitive_types[primitive], count, indexType, (void*)(start * sizeof(unsigned short)));
 }
 
 }
