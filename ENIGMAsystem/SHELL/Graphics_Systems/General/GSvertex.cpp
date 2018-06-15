@@ -259,7 +259,7 @@ void index_delete_buffer(int buffer) {
 }
 
 unsigned index_get_size(int buffer) {
-  return enigma::indexBuffers[buffer]->number * sizeof(unsigned short);
+  return enigma::indexBuffers[buffer]->indices.size() * sizeof(uint16_t);
 }
 
 unsigned index_get_number(int buffer) {
@@ -303,12 +303,20 @@ void index_end(int buffer) {
   if (indexBuffer->frozen) return;
   indexBuffer->dirty = true;
   indexBuffer->number = indexBuffer->indices.size();
+  if (indexBuffer->type == index_type_uint)
+    indexBuffer->number /= 2;
 }
 
 void index_data(int buffer, const enigma::varargs& data) {
   enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
-  for (int i = 0; i < data.argc; ++i) {
-    indexBuffer->indices.push_back(data.get(i));
+  for (int i = 0; i < data.argc; i++) {
+    if (indexBuffer->type == index_type_uint) {
+      uint32_t ind = data.get(i);
+      indexBuffer->indices.push_back(ind);
+      indexBuffer->indices.push_back(ind << 16);
+    } else {
+      indexBuffer->indices.push_back((uint16_t)data.get(i));
+    }
   }
 }
 

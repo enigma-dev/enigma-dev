@@ -83,7 +83,7 @@ struct VertexBuffer {
 };
 
 struct IndexBuffer {
-  vector<int32_t> indices;
+  vector<uint16_t> indices;
   bool frozen, dirty;
   int type;
   std::size_t number;

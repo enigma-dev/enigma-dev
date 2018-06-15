@@ -204,10 +204,14 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   enigma::graphics_apply_vertex_format(vertexBuffer->format);
 
   GLenum indexType = GL_UNSIGNED_SHORT;
-  if (indexBuffer->type == index_type_uint)
+  if (indexBuffer->type == index_type_uint) {
     indexType = GL_UNSIGNED_INT;
+    start *= sizeof(unsigned int);
+  } else {
+    start *= sizeof(unsigned short);
+  }
 
-  glDrawElements(enigma::primitive_types[primitive], count, indexType, (void*)(start * sizeof(unsigned short)));
+  glDrawElements(enigma::primitive_types[primitive], count, indexType, (void*)start);
 }
 
 }
