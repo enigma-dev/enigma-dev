@@ -234,9 +234,9 @@ void vertex_submit(int buffer, int primitive, int texture) {
   vertex_submit(buffer, primitive);
 }
 
-void vertex_submit(int buffer, int primitive, int texture, unsigned vertex_start, unsigned vertex_count) {
+void vertex_submit(int buffer, int primitive, int texture, unsigned start, unsigned count) {
   texture_set(texture);
-  vertex_submit(buffer, primitive, vertex_start, vertex_count);
+  vertex_submit(buffer, primitive, start, count);
 }
 
 int index_create_buffer() {
@@ -252,6 +252,7 @@ int index_create_buffer_ext(unsigned size) {
 }
 
 void index_delete_buffer(int buffer) {
+  enigma::graphics_delete_index_buffer_peer(buffer);
   delete enigma::indexBuffers[buffer];
   enigma::indexBuffers[buffer] = nullptr;
 }
@@ -307,6 +308,20 @@ void index_data(int buffer, const enigma::varargs& data) {
   for (int i = 0; i < data.argc; ++i) {
     indexBuffer->indices.push_back(data.get(i));
   }
+}
+
+void index_submit(int buffer, int vertex, int primitive) {
+  index_submit(buffer, vertex, primitive, 0, index_get_number(buffer));
+}
+
+void index_submit(int buffer, int vertex, int primitive, int texture) {
+  texture_set(texture);
+  index_submit(buffer, vertex, primitive);
+}
+
+void index_submit(int buffer, int vertex, int primitive, int texture, unsigned start, unsigned count) {
+  texture_set(texture);
+  index_submit(buffer, vertex, primitive, start, count);
 }
 
 }
