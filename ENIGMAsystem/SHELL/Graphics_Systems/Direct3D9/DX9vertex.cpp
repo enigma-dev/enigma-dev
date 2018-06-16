@@ -202,7 +202,7 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
 }
 
 void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
   // this is fucking temporary until we rewrite the model classes and
