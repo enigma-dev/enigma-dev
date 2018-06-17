@@ -33,6 +33,15 @@
 #define bind_array_buffer(vbo) if (enigma::bound_vbo != vbo) glBindBuffer( GL_ARRAY_BUFFER, enigma::bound_vbo = vbo );
 #define bind_element_buffer(vboi) if (enigma::bound_vboi != vboi) glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, enigma::bound_vboi = vboi );
 
+namespace {
+
+GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN };
+
+map<int, GLuint> vertexBufferPeers;
+map<int, GLuint> indexBufferPeers;
+
+}
+
 namespace enigma {
 
 extern unsigned char currentcolor[4];
@@ -40,11 +49,6 @@ extern unsigned bound_vbo;
 extern unsigned bound_vboi;
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
-
-GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN };
-
-map<int, GLuint> vertexBufferPeers;
-map<int, GLuint> indexBufferPeers;
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
   glDeleteBuffers(1, &vertexBufferPeers[buffer]);
@@ -104,7 +108,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     // or freeze was called, then we need to make a call to glBufferData
     // to allocate a bigger peer or remove the GL_DYNAMIC_DRAW usage
     const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
-    if (size > pSize || frozen) {
+    if (size > (size_t)pSize || frozen) {
       GLenum usage = frozen ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
       glBufferData(target, size, data, usage);
     } else {
@@ -236,12 +240,13 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
 
   #ifdef DEBUG_MODE
   enigma::GPUProfilerBatch& vbd = oglmgr->gpuprof.add_drawcall();
+  ++vbd.drawcalls;
   #endif
 
   enigma::graphics_prepare_buffer(buffer, false);
   enigma::graphics_apply_vertex_format(vertexBuffer->format);
 
-	glDrawArrays(enigma::primitive_types[primitive], start, count);
+	glDrawArrays(primitive_types[primitive], start, count);
 }
 
 void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
@@ -250,6 +255,7 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
 
   #ifdef DEBUG_MODE
   enigma::GPUProfilerBatch& vbd = oglmgr->gpuprof.add_drawcall();
+  ++vbd.drawcalls;
   #endif
 
   enigma::graphics_prepare_buffer(vertex, false);
@@ -264,7 +270,7 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
     start *= sizeof(unsigned short);
   }
 
-  glDrawElements(enigma::primitive_types[primitive], count, indexType, (void*)start);
+  glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)(intptr_t)start);
 }
 
 }

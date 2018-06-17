@@ -23,12 +23,16 @@
 #include <map>
 using std::map;
 
-namespace enigma {
+namespace {
 
 GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN };
 
 map<int, GLuint> vertexBufferPeers;
 map<int, GLuint> indexBufferPeers;
+
+}
+
+namespace enigma {
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
   glDeleteBuffers(1, &vertexBufferPeers[buffer]);
@@ -73,7 +77,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     // or freeze was called, then we need to make a call to glBufferData
     // to allocate a bigger peer or remove the GL_DYNAMIC_DRAW usage
     const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
-    if (size > pSize || frozen) {
+    if (size > (size_t)pSize || frozen) {
       GLenum usage = frozen ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
       glBufferData(target, size, data, usage);
     } else {
@@ -97,7 +101,7 @@ void graphics_apply_vertex_format(int format) {
 
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
 
-  bool useVertices = false, useNormals = false, useColors = false, useTextCoords = false, useFogCoords = false;
+  bool useVertices = false, useNormals = false, useColors = false, useFogCoords = false;
   size_t offset = 0, texture = 0;
   const size_t stride = vertexFormat->stride * sizeof(float);
   for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
@@ -138,7 +142,6 @@ void graphics_apply_vertex_format(int format) {
         break;
       case vertex_usage_textcoord:
         if (texture >= GL_MAX_TEXTURE_UNITS) break;
-        useTextCoords = true;
         glClientActiveTexture(GL_TEXTURE0 + texture++);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glTexCoordPointer(elements, type, stride, GL_ATTRIB_OFFSET(offset));
@@ -192,7 +195,7 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   enigma::graphics_prepare_buffer(buffer, false);
   enigma::graphics_apply_vertex_format(vertexBuffer->format);
 
-	glDrawArrays(enigma::primitive_types[primitive], start, count);
+	glDrawArrays(primitive_types[primitive], start, count);
 }
 
 void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
@@ -211,7 +214,7 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
     start *= sizeof(unsigned short);
   }
 
-  glDrawElements(enigma::primitive_types[primitive], count, indexType, (void*)start);
+  glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)(intptr_t)start);
 }
 
 }

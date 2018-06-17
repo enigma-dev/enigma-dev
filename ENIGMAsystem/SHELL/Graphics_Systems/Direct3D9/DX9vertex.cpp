@@ -24,7 +24,7 @@
 #include <map>
 using std::map;
 
-namespace enigma {
+namespace {
 
 D3DPRIMITIVETYPE primitive_types[] = { static_cast<D3DPRIMITIVETYPE>(0), D3DPT_POINTLIST, D3DPT_LINELIST, D3DPT_LINESTRIP, D3DPT_TRIANGLELIST, D3DPT_TRIANGLESTRIP, D3DPT_TRIANGLEFAN };
 D3DDECLTYPE declaration_types[] = { D3DDECLTYPE_FLOAT1, D3DDECLTYPE_FLOAT2, D3DDECLTYPE_FLOAT3, D3DDECLTYPE_FLOAT4, D3DDECLTYPE_D3DCOLOR, D3DDECLTYPE_UBYTE4 };
@@ -34,6 +34,10 @@ D3DDECLUSAGE usage_types[] = { D3DDECLUSAGE_POSITION, D3DDECLUSAGE_COLOR, D3DDEC
 
 map<int, LPDIRECT3DVERTEXBUFFER9> vertexBufferPeers;
 map<int, LPDIRECT3DINDEXBUFFER9> indexBufferPeers;
+
+}
+
+namespace enigma {
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
   vertexBufferPeers[buffer]->Release();
@@ -52,13 +56,13 @@ void graphics_prepare_vertex_buffer(const int buffer) {
   // our native vertex buffer object "peer"
   if (vertexBuffer->dirty) {
     LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = NULL;
-    auto it = enigma::vertexBufferPeers.find(buffer);
+    auto it = vertexBufferPeers.find(buffer);
     size_t size = enigma_user::vertex_get_size(buffer);
 
     // if we have already created a native "peer" vbo for this user buffer,
     // then we have to release it if it isn't big enough to hold the new contents
     // or if it has just been frozen (so we can remove its D3DUSAGE_DYNAMIC)
-    if (it != enigma::vertexBufferPeers.end()) {
+    if (it != vertexBufferPeers.end()) {
       vertexBufferPeer = it->second;
 
       D3DVERTEXBUFFER_DESC pDesc;
@@ -77,7 +81,7 @@ void graphics_prepare_vertex_buffer(const int buffer) {
         size, vertexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
         0, D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
       );
-      enigma::vertexBufferPeers[buffer] = vertexBufferPeer;
+      vertexBufferPeers[buffer] = vertexBufferPeer;
     }
 
     // copy the vertex buffer contents over to the native peer vbo on the GPU
@@ -98,13 +102,13 @@ void graphics_prepare_index_buffer(const int buffer) {
   // our native index buffer object "peer"
   if (indexBuffer->dirty) {
     LPDIRECT3DINDEXBUFFER9 indexBufferPeer = NULL;
-    auto it = enigma::indexBufferPeers.find(buffer);
+    auto it = indexBufferPeers.find(buffer);
     size_t size = enigma_user::index_get_size(buffer);
 
     // if we have already created a native "peer" ibo for this user buffer,
     // then we have to release it if it isn't big enough to hold the new contents
     // or if it has just been frozen (so we can remove its D3DUSAGE_DYNAMIC)
-    if (it != enigma::indexBufferPeers.end()) {
+    if (it != indexBufferPeers.end()) {
       indexBufferPeer = it->second;
 
       D3DINDEXBUFFER_DESC pDesc;
@@ -123,7 +127,7 @@ void graphics_prepare_index_buffer(const int buffer) {
         size, indexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
         (indexBuffer->type == index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &indexBufferPeer, NULL
       );
-      enigma::indexBufferPeers[buffer] = indexBufferPeer;
+      indexBufferPeers[buffer] = indexBufferPeer;
     }
 
     // copy the index buffer contents over to the native peer ibo on the GPU
@@ -191,12 +195,12 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
   d3dmgr->SetVertexDeclaration(vertexDeclaration);
 
-  LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = enigma::vertexBufferPeers[buffer];
+  LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[buffer];
   d3dmgr->SetStreamSource(0, vertexBufferPeer, 0, stride);
 
   int primitive_count = enigma_user::draw_primitive_count(primitive, count);
 
-  d3dmgr->DrawPrimitive(enigma::primitive_types[primitive], start, primitive_count);
+  d3dmgr->DrawPrimitive(primitive_types[primitive], start, primitive_count);
 
   vertexDeclaration->Release();
 }
@@ -216,15 +220,15 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
   d3dmgr->SetVertexDeclaration(vertexDeclaration);
 
-  LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = enigma::vertexBufferPeers[vertex];
+  LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[vertex];
   d3dmgr->SetStreamSource(0, vertexBufferPeer, 0, stride);
 
-  LPDIRECT3DINDEXBUFFER9 indexBufferPeer = enigma::indexBufferPeers[buffer];
+  LPDIRECT3DINDEXBUFFER9 indexBufferPeer = indexBufferPeers[buffer];
   d3dmgr->SetIndices(indexBufferPeer);
 
   int primitive_count = enigma_user::draw_primitive_count(primitive, count);
 
-  d3dmgr->DrawIndexedPrimitive(enigma::primitive_types[primitive], 0, 0, count, start, primitive_count);
+  d3dmgr->DrawIndexedPrimitive(primitive_types[primitive], 0, 0, count, start, primitive_count);
 
   vertexDeclaration->Release();
 }
