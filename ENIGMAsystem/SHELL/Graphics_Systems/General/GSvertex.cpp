@@ -19,6 +19,8 @@
 #include "GSprimitives.h"
 #include "GStextures.h"
 
+#include "Widget_Systems/widgets_mandatory.h"
+
 namespace enigma {
 
 vector<VertexFormat*> vertexFormats;
@@ -173,6 +175,9 @@ void vertex_data(int buffer, const enigma::varargs& data) {
         i += 4;
         continue;
     }
+
+    show_error("Vertex format " + enigma_user::toString(vertexBuffer->format) +
+               " contains attribute with unknown type " + enigma_user::toString(attr.first), false);
     break;
   }
 }
