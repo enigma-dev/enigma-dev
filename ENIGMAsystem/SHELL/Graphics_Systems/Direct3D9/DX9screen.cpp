@@ -18,7 +18,7 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSbackground.h"
-#include "Graphics_Systems/General/GStiles.h"
+#include "Graphics_Systems/General/GStilestruct.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSvertex.h"
@@ -141,12 +141,14 @@ static inline void draw_insts()
 */
 static inline int draw_tiles()
 {
+  enigma::load_tiles();
   for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
   {
     if (dit->second.tiles.size())
     {
+      auto buffers = tile_layer_buffers[dit->second.tiles[0].depth];
       for (auto &t : tile_layer_metadata[dit->second.tiles[0].depth]){
-        enigma_user::vertex_submit(tile_layer_buffers[dit->second.tiles[0].depth], enigma_user::pr_trianglelist, t[0], t[1], t[2]);
+        enigma_user::index_submit(buffers.second, buffers.first, enigma_user::pr_trianglelist, t[0], t[1], t[2]);
       }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;
