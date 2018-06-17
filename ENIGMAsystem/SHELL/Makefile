@@ -51,7 +51,8 @@ SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AU
 
 OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 
-SHARED_SOURCES := ../../shared
+SHARED_SRC_DIR := ../../shared
+include $(SHARED_SRC_DIR)/Makefile
 
 ###########
 # options #
@@ -81,10 +82,10 @@ endif
 
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
-override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SOURCES)/lodepng
+override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)/lodepng -I$(SHARED_SRC_DIR)
 
 # Unconditional LDLIBS
-override LDLIBS += -L$(SHARED_SOURCES)/lodepng -llodepng
+override LDLIBS += -L$(SHARED_SRC_DIR)/lodepng -llodepng
 
 .PHONY: all clean
 
@@ -107,6 +108,10 @@ OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(
 #RCFILES := $(addprefix $(WORKDIR),$(RESOURCES))
 DEPENDS := $(OBJECTS:.o=.d)
 
+SOURCES += $(addprefix $(SHARED_SRC_DIR),$(SHARED_SOURCES))
+OBJECTS += $(addprefix $(OBJDIR)/shared/,$(SHARED_SOURCES:.cpp=.o))
+DEPENDS += $(addprefix $(OBJDIR)/shared/,$(SHARED_SOURCES:.cpp=.d))
+
 OBJDIRS := $(sort $(dir $(OBJECTS) $(RCFILES)))
 
 ifeq ($(RESOURCES),)
@@ -127,6 +132,9 @@ compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 # -MP gives phony rules for non-target files, avoiding problems with missing files
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+	
+$(OBJDIR)/shared/%.o $(OBJDIR)/%.d: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/shared/$*.o $<
 
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
