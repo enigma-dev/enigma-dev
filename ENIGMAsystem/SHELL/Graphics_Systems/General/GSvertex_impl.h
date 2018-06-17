@@ -17,6 +17,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #ifndef ENIGMA_GSVERTEX_IMPL_H
 #define ENIGMA_GSVERTEX_IMPL_H
 
@@ -31,6 +35,7 @@ using std::pair;
 namespace enigma {
 
 void graphics_delete_vertex_buffer_peer(int buffer);
+void graphics_delete_index_buffer_peer(int buffer);
 
 struct VertexFormat {
   vector<pair<int,int> > flags;
@@ -81,8 +86,18 @@ struct VertexBuffer {
   VertexBuffer(): frozen(false), dirty(false), format(-1), number(0) {}
 };
 
+struct IndexBuffer {
+  vector<uint16_t> indices;
+  bool frozen, dirty;
+  int type;
+  std::size_t number;
+
+  IndexBuffer(): frozen(false), dirty(false), type(-1), number(0) {}
+};
+
 extern vector<VertexFormat*> vertexFormats;
 extern vector<VertexBuffer*> vertexBuffers;
+extern vector<IndexBuffer*> indexBuffers;
 
 }
 
