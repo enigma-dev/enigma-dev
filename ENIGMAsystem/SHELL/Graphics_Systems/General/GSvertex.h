@@ -20,6 +20,7 @@
 #define ENIGMA_GSVERTEX_H
 
 #include "Universal_System/scalar.h"
+#include "Universal_System/dynamic_args.h" // for vertex_data
 
 namespace enigma_user {
 
@@ -65,15 +66,13 @@ void vertex_format_add_custom(int type, int usage);
 int vertex_create_buffer();
 int vertex_create_buffer_ext(unsigned size);
 void vertex_delete_buffer(int buffer);
-void vertex_begin(int buffer, int format);
-void vertex_end(int buffer);
 unsigned vertex_get_size(int buffer);
 unsigned vertex_get_number(int buffer);
 void vertex_freeze(int buffer);
-void vertex_submit(int buffer, int primitive);
-void vertex_submit(int buffer, int primitive, unsigned offset, unsigned count);
-void vertex_submit(int buffer, int primitive, int texture);
-void vertex_submit(int buffer, int primitive, int texture, unsigned offset, unsigned count);
+void vertex_clear(int buffer);
+void vertex_begin(int buffer, int format);
+void vertex_end(int buffer);
+void vertex_data(int buffer, const enigma::varargs& data);
 void vertex_position(int buffer, gs_scalar x, gs_scalar y);
 void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z);
 void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz);
@@ -86,6 +85,30 @@ void vertex_float2(int buffer, float f1, float f2);
 void vertex_float3(int buffer, float f1, float f2, float f3);
 void vertex_float4(int buffer, float f1, float f2, float f3, float f4);
 void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4);
+void vertex_submit(int buffer, int primitive);
+void vertex_submit(int buffer, int primitive, unsigned start, unsigned count);
+void vertex_submit(int buffer, int primitive, int texture);
+void vertex_submit(int buffer, int primitive, int texture, unsigned start, unsigned count);
+
+enum {
+  index_type_ushort,
+  index_type_uint
+};
+
+int index_create_buffer();
+int index_create_buffer_ext(unsigned size);
+void index_delete_buffer(int buffer);
+unsigned index_get_size(int buffer);
+unsigned index_get_number(int buffer);
+void index_freeze(int buffer);
+void index_clear(int buffer);
+void index_begin(int buffer, int type);
+void index_end(int buffer);
+void index_data(int buffer, const enigma::varargs& data);
+void index_submit(int buffer, int vertex, int primitive);
+void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count);
+void index_submit(int buffer, int vertex, int primitive, int texture);
+void index_submit(int buffer, int vertex, int primitive, int texture, unsigned start, unsigned count);
 
 }
 
