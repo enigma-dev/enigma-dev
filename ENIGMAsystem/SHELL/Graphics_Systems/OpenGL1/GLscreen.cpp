@@ -143,9 +143,8 @@ static inline int draw_tiles()
   {
     if (dit->second.tiles.size())
     {
-      auto buffers = tile_layer_buffers[dit->second.tiles[0].depth];
       for (auto &t : tile_layer_metadata[dit->second.tiles[0].depth]){
-        enigma_user::index_submit(buffers.second, buffers.first, enigma_user::pr_trianglelist, t[0], t[1], t[2]);
+        enigma_user::index_submit(enigma::tile_index_buffer, enigma::tile_vertex_buffer, enigma_user::pr_trianglelist, t[0], t[1], t[2]);
       }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;

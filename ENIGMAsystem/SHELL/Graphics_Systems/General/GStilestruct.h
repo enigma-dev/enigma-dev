@@ -29,7 +29,7 @@
 
 namespace enigma
 {
-    extern std::map<int,std::pair<int, int> > tile_layer_buffers;
+    extern int tile_vertex_buffer, tile_index_buffer;
     extern std::map<int,std::vector<std::vector<int> > > tile_layer_metadata;
 
     struct bkinxop
