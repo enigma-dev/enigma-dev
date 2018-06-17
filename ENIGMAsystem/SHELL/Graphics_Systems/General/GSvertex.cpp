@@ -15,6 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+// This file declares methods for creating generic vertex and index
+// buffer representations for the backend equivalents (e.g, OpenGL).
+// Systems which would like to offer support for ENIGMA's vertex
+// functions and the rendering functions which utilize them need
+// only to implement the following methods:
+// void vertex_argb(int buffer, unsigned argb);
+// void vertex_color(int buffer, int color, double alpha);
+// void vertex_submit(int buffer, int primitive, unsigned start, unsigned count);
+// void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count);
+
 #include "GSvertex_impl.h"
 #include "GSprimitives.h"
 #include "GStextures.h"
