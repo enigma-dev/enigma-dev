@@ -98,7 +98,7 @@ enum {
 int index_create_buffer();
 int index_create_buffer_ext(unsigned size);
 void index_delete_buffer(int buffer);
-unsigned index_get_size(int buffer);
+unsigned index_get_buffer_size(int buffer);
 unsigned index_get_number(int buffer);
 void index_freeze(int buffer);
 void index_clear(int buffer);

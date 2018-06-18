@@ -273,7 +273,7 @@ void index_delete_buffer(int buffer) {
   enigma::indexBuffers[buffer] = nullptr;
 }
 
-unsigned index_get_size(int buffer) {
+unsigned index_get_buffer_size(int buffer) {
   return enigma::indexBuffers[buffer]->indices.size() * sizeof(uint16_t);
 }
 
