@@ -104,7 +104,7 @@ void vertex_delete_buffer(int buffer) {
   enigma::vertexBuffers[buffer] = nullptr;
 }
 
-unsigned vertex_get_size(int buffer) {
+unsigned vertex_get_buffer_size(int buffer) {
   return enigma::vertexBuffers[buffer]->number * sizeof(gs_scalar);
 }
 
