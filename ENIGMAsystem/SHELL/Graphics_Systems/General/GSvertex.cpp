@@ -104,6 +104,10 @@ void vertex_delete_buffer(int buffer) {
   enigma::vertexBuffers[buffer] = nullptr;
 }
 
+bool vertex_exists(int id) {
+  return (id >= 0 && (unsigned)id < enigma::vertexBuffers.size() && enigma::vertexBuffers[id] != nullptr);
+}
+
 unsigned vertex_get_buffer_size(int buffer) {
   return enigma::vertexBuffers[buffer]->number * sizeof(gs_scalar);
 }
@@ -271,6 +275,10 @@ void index_delete_buffer(int buffer) {
   enigma::graphics_delete_index_buffer_peer(buffer);
   delete enigma::indexBuffers[buffer];
   enigma::indexBuffers[buffer] = nullptr;
+}
+
+bool index_exists(int id) {
+  return (id >= 0 && (unsigned)id < enigma::indexBuffers.size() && enigma::indexBuffers[id] != nullptr);
 }
 
 unsigned index_get_buffer_size(int buffer) {
