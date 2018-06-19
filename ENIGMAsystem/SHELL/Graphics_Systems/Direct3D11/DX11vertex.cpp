@@ -21,6 +21,8 @@ namespace enigma {
 
 void graphics_delete_vertex_buffer_peer(int buffer) {}
 
+void graphics_delete_index_buffer_peer(int buffer) {}
+
 }
 
 namespace enigma_user {
@@ -30,5 +32,7 @@ void vertex_argb(int buffer, unsigned argb) {}
 void vertex_color(int buffer, int color, double alpha) {}
 
 void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {}
+
+void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {}
 
 }

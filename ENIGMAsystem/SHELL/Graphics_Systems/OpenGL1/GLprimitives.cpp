@@ -15,23 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GStextures.h"
-#include "../General/GSprimitives.h"
 #include "GLTextureStruct.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
-#include <string>
 #include "Widget_Systems/widgets_mandatory.h"
 
-#define GETR(x) ((x & 0x0000FF))
-#define GETG(x) ((x & 0x00FF00)>>8)
-#define GETB(x) ((x & 0xFF0000)>>16)
-
+#include <string>
 #include <math.h>
+#include <floatcomp.h>
 
 using namespace std;
-
-#include <floatcomp.h>
 
 GLenum ptypes_by_id[16] = {
   GL_POINTS, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES,
@@ -122,7 +118,7 @@ void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z) {
 }
 
 void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha) {
-  glColor4ub(GETR(color), GETG(color), GETB(color), (unsigned char)(alpha*255));
+  glColor4ub(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), (unsigned char)(alpha*255));
   glVertex3d(x,y,z);
   glColor4ubv(enigma::currentcolor);
 }
@@ -133,7 +129,7 @@ void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_
 }
 
 void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha) {
-  glColor4ub(GETR(color), GETG(color), GETB(color), (unsigned char)(alpha*255));
+  glColor4ub(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), (unsigned char)(alpha*255));
   glTexCoord2f(tx,ty);
   glVertex3d(x,y,z);
   glColor4ubv(enigma::currentcolor);
@@ -147,7 +143,7 @@ void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_s
 
 void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int color, double alpha)
 {
-  glColor4ub(GETR(color), GETG(color), GETB(color), (unsigned char)(alpha*255));
+  glColor4ub(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), (unsigned char)(alpha*255));
   glNormal3f(nx, ny, nz);
   glVertex3d(x,y,z);
   glColor4ubv(enigma::currentcolor);
@@ -162,7 +158,7 @@ void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar 
 
 void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha)
 {
-  glColor4ub(GETR(color), GETG(color), GETB(color), (unsigned char)(alpha*255));
+  glColor4ub(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), (unsigned char)(alpha*255));
   glTexCoord2f(tx,ty);
   glNormal3f(nx, ny, nz);
   glVertex3d(x,y,z);
@@ -272,9 +268,9 @@ void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, g
   const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
   double a, px, py, tp;
   int k;
-  
+
   texture_set(texId);
-  
+
   //SIDES
   glBegin(GL_TRIANGLE_STRIP);
   a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
@@ -343,9 +339,9 @@ void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
   float t[(steps + 1)*3 + 1][2];
   double a, px, py, tp;
   int k = 0;
-  
+
   texture_set(texId);
-  
+
   glBegin(GL_TRIANGLE_STRIP);
   a = 0; px = cx+rx; py = cy; tp = 0;
   for (int i = 0; i <= steps; i++)
@@ -411,9 +407,9 @@ void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, 
       a += pr; tp += invstep;
   }
   int k = 0, kk;
-  
+
   texture_set(texId);
-  
+
   b = M_PI/2;
   cosb = cos(b);
   pz = rz*sin(b);
@@ -509,4 +505,3 @@ void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scal
 }
 
 }
-

@@ -19,6 +19,8 @@
 #ifndef ENIGMA_WIDGETS_MANDATORY_H
 #define ENIGMA_WIDGETS_MANDATORY_H
 
+#include "libEGMstd.h"
+
 #include <string>
 using std::string;
 
@@ -37,10 +39,10 @@ void show_error(std::string msg, const bool fatal);
 
 namespace enigma_user {
 
-int show_message(string str);
-inline int action_show_message(string str)
-{
-  return show_message(str);
+int show_message(const std::string &msg);
+template<typename T> int show_message(T msg) { return show_message(enigma_user::toString(msg)); }
+inline int action_show_message(string msg) {
+  return show_message(msg);
 }
 void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBackgroundColor, int left=enigma::gameInfoLeft, int top=enigma::gameInfoTop, int width=enigma::gameInfoWidth, int height=enigma::gameInfoHeight,
 	bool embedGameWindow=enigma::gameInfoEmbedGameWindow, bool showBorder=enigma::gameInfoShowBorder, bool allowResize=enigma::gameInfoAllowResize, bool stayOnTop=enigma::gameInfoStayOnTop,
