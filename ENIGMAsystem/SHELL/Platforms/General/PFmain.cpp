@@ -10,7 +10,7 @@ bool game_isending = false;
 int game_return = 0;
 int pausedSteps = 0;
 int current_room_speed;
-std::string *parameters;
+std::string* parameters;
 int parameterc;
 int frames_count = 0;
 unsigned long current_time_mcs = 0;
@@ -55,12 +55,12 @@ int main(int argc, char** argv, void* windowHandle) {
   // Copy our parameters
   set_program_args(argc, argv);
 
-  initInput();
-
   if (!initGameWindow()) {
     printf("Failed to create game window\n");
     return -4;
   }
+
+  initInput();
 
   EnableDrawing(windowHandle);
 

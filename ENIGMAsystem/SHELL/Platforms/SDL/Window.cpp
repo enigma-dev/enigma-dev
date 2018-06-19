@@ -1,9 +1,11 @@
 #include "Window.h"
 #include "Event.h"
+#include "Gamepad.h"
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 
+#include <array>
 #include <string>
 
 using enigma::windowHandle;
@@ -11,14 +13,43 @@ using enigma::windowHandle;
 namespace enigma {
 SDL_Window* windowHandle = nullptr;
 static SDL_Event_Handler eventHandler;
+static std::array<SDL_Cursor*, -enigma_user::cr_size_all> cursors;
 
-void initInput() {}
-
-void handleInput() { input_push(); }
+void handleInput() {
+  input_push();
+  pushGamepads();
+}
 
 void showWindow() { SDL_ShowWindow(windowHandle); }
 
+void initCursors() {
+  // cursors are negative ids 0 to -22
+  cursors[-enigma_user::cr_arrow] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+  cursors[-enigma_user::cr_default] = cursors[-enigma_user::cr_arrow];
+  cursors[-enigma_user::cr_cross] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
+  cursors[-enigma_user::cr_beam] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
+  cursors[-enigma_user::cr_size_nesw] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
+  cursors[-enigma_user::cr_size_ns] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENS);
+  cursors[-enigma_user::cr_size_nwse] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
+  cursors[-enigma_user::cr_size_we] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEWE);
+  cursors[-enigma_user::cr_no] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
+  cursors[-enigma_user::cr_nodrop] = cursors[-enigma_user::cr_no];
+  cursors[-enigma_user::cr_handpoint] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+  cursors[-enigma_user::cr_size_all] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL);
+}
+
+void cleanupCursors() {
+  for (int i = enigma_user::cr_size_all; i <= 0; ++i) SDL_FreeCursor(cursors[-i]);
+}
+
+void initInput() {
+  initCursors();
+  initGamepads();
+}
+
 void destroyWindow() {
+  cleanupGamepads();
+  cleanupCursors();
   SDL_DestroyWindow(windowHandle);
   SDL_Quit();
 }
@@ -75,7 +106,6 @@ void display_mouse_set(int x, int y) { SDL_WarpMouseGlobal(x, y); }
 #warning "display_mouse_get_x(), display_mouse_get_y() and display_mouse_set() require SDL >= 2.0.4"
 #endif
 
-
 #if SDL_VERSION_ATLEAST(2, 0, 5)
 bool window_get_stayontop() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);
@@ -86,12 +116,7 @@ bool window_get_stayontop() {
 #warning "window_get_stayontop() and window_set_stayontop() require SDL >= 2.0.5"
 #endif
 
-void window_set_stayontop(bool stay) {
-  /* SDL (as of 2.0.5) can set SDL_WINDOW_ALWAYS_ON_TOP 
-  *  upon creation but not after. Also, this only works 
-  * in X11
-  */
-}
+void window_set_stayontop(bool top) {}
 
 bool window_get_sizeable() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);
@@ -179,73 +204,26 @@ void window_set_fullscreen(bool fullscreen) {
 }
 
 int window_set_cursor(int cursorID) {
-  SDL_Cursor* cursor;
-
   if (cursorID == cr_none)
     SDL_ShowCursor(SDL_DISABLE);
   else
     SDL_ShowCursor(SDL_ENABLE);
 
-  switch (cursorID) {
-    case cr_default:
-    case cr_arrow:
-      cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
-      break;
-
-    case cr_cross:
-      cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
-      break;
-
-    case cr_beam:
-      cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
-      break;
-
-    case cr_size_nesw:
-      cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
-      break;
-
-    case cr_size_ns:
-      cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENS);
-      break;
-
-    case cr_size_nwse:
-      cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
-      break;
-
-    case cr_size_we:
-      cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEWE);
-      break;
-
-    case cr_nodrop:
-    case cr_no:
-      cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
-      break;
-
-    case cr_handpoint:
-      cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
-      break;
-
-    case cr_size_all:
-      cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL);
-      break;
-
-    default:
-      printf("Cursor lookup failure\n");
-      break;
-  }
-
-  if (cursor != nullptr) {
-    //enigma::cursorInt = cursor;
-    SDL_SetCursor(cursor);
+  if (cursorID <= 0 && cursorID >= cr_size_all && enigma::cursors[-cursorID] != nullptr) {
+    SDL_SetCursor(enigma::cursors[-cursorID]);
     return 1;
   }
+
+#ifdef DEBUG_MODE
+  printf("Cursor lookup failure\n");
+#endif
 
   return 0;
 }
 
 bool os_is_paused() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);
-  return enigma::freezeOnLoseFocus && flags & SDL_WINDOW_INPUT_FOCUS;
+  return enigma::freezeOnLoseFocus && (flags & SDL_WINDOW_INPUT_FOCUS);
 }
 
 int display_get_width() {

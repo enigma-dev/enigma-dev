@@ -13,13 +13,12 @@ class SDL_Event_Handler {
  protected:
   void windowEvent(const SDL_Event *event);
   
-  /*
-  void unkownEvent(const SDL_Event *event) {}
+  void windowResized(const SDL_Event *event);
+  /*void unkownEvent(const SDL_Event *event) {}
   void windowShown(const SDL_Event *event) {}
   void windowHidden(const SDL_Event *event) {}
   void windowExposed(const SDL_Event *event) {}
   void windowMoved(const SDL_Event *event) {}
-  void windowResized(const SDL_Event *event) {}
   void windowMinimized(const SDL_Event *event) {}
   void windowMaximized(const SDL_Event *event) {}
   void windowRestored(const SDL_Event *event) {}
@@ -37,11 +36,13 @@ class SDL_Event_Handler {
   void joyBallAxisMotion(const SDL_Event *event) {}
   void joyHatMotion(const SDL_Event *event) {}
   void joyButtonDown(const SDL_Event *event) {}
-  void joyButtonUp(const SDL_Event *event) {}
-  void joyDeviceAdded(const SDL_Event *event) {}
-  void joyDeviceRemoved(const SDL_Event *event) {}
+  void joyButtonUp(const SDL_Event *event) {}*/
+  void joyDeviceAdded(const SDL_Event *event);
+  void joyDeviceRemoved(const SDL_Event *event);
   
-  void controllerAxisMotion(const SDL_Event *event) {}
+  void controllerButtonDown(const SDL_Event *event);
+  void controllerButtonUp(const SDL_Event *event);
+  /*void controllerAxisMotion(const SDL_Event *event) {}
   void controllerButtonDown(const SDL_Event *event) {}
   void controllerButtonUp(const SDL_Event *event) {}
   void controllerDeviceAdded(const SDL_Event *event) {}

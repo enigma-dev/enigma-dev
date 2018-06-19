@@ -1,7 +1,10 @@
 #include "Event.h"
+#include "Gamepad.h"
 
-#include "Platforms/General/PFmain.h"  //game_end
-#include "Platforms/General/PFwindow.h" // mouse / keyboard
+#include "Platforms/General/PFmain.h"    //game_end
+#include "Platforms/General/PFwindow.h"  // mouse / keyboard
+
+#include "Graphics_Systems/General/GScolors.h"  // draw_clear
 
 #include <iostream>
 
@@ -56,19 +59,19 @@ int SDL_Event_Handler::processEvents() {
         //joyButtonUp(&e);
         break;
       case SDL_JOYDEVICEADDED:
-        //joyDeviceAdded(&e);
+        joyDeviceAdded(&e);
         break;
       case SDL_JOYDEVICEREMOVED:
-        //joyDeviceRemoved(&e);
+        joyDeviceRemoved(&e);
         break;
       case SDL_CONTROLLERAXISMOTION:
         //controllerAxisMotion(&e);
         break;
       case SDL_CONTROLLERBUTTONDOWN:
-        //controllerButtonDown(&e);
+        controllerButtonDown(&e);
         break;
       case SDL_CONTROLLERBUTTONUP:
-        //controllerButtonUp(&e);
+        controllerButtonUp(&e);
         break;
       case SDL_CONTROLLERDEVICEADDED:
         //controllerDeviceAdded(&e);
@@ -79,14 +82,14 @@ int SDL_Event_Handler::processEvents() {
       case SDL_CONTROLLERDEVICEREMAPPED:
         //controllerDeviceRemmaped(&e);
         break;
-      #if SDL_VERSION_ATLEAST(2, 0, 4)
+#if SDL_VERSION_ATLEAST(2, 0, 4)
       case SDL_AUDIODEVICEADDED:
         //audioDeviceAdded(&e);
         break;
       case SDL_AUDIODEVICEREMOVED:
         //audioDeviceRemoved(&e);
         break;
-      #endif
+#endif
       case SDL_QUIT:
         quit(&e);
         return 1;
@@ -111,7 +114,7 @@ int SDL_Event_Handler::processEvents() {
       case SDL_DROPFILE:
         //dropFile(&e);
         break;
-      #if SDL_VERSION_ATLEAST(2, 0, 5)
+#if SDL_VERSION_ATLEAST(2, 0, 5)
       case SDL_DROPTEXT:
         //dropText(&e);
         break;
@@ -121,7 +124,7 @@ int SDL_Event_Handler::processEvents() {
       case SDL_DROPCOMPLETE:
         //dropEnd(&e);
         break;
-      #endif
+#endif
     }
   }
 
@@ -143,7 +146,7 @@ void SDL_Event_Handler::windowEvent(const SDL_Event *event) {
       //windowMoved(event);
       break;
     case SDL_WINDOWEVENT_RESIZED:
-      //windowResized(event);
+      windowResized(event);
       break;
     case SDL_WINDOWEVENT_SIZE_CHANGED:
       break;  // will trigger above event too
@@ -171,18 +174,34 @@ void SDL_Event_Handler::windowEvent(const SDL_Event *event) {
     case SDL_WINDOWEVENT_CLOSE:
       //windowClose(event);
       break;
-    #if SDL_VERSION_ATLEAST(2, 0, 5)
+#if SDL_VERSION_ATLEAST(2, 0, 5)
     case SDL_WINDOWEVENT_TAKE_FOCUS:
       //windowTakeFocus(event);
       break;
     case SDL_WINDOWEVENT_HIT_TEST:
       //windowHitTest(event);
       break;
-    #endif
+#endif
     default:
       //unkownEvent(event);
       break;
   }
+}
+
+void SDL_Event_Handler::windowResized(const SDL_Event *event) {
+  enigma_user::draw_clear(enigma_user::window_get_color());
+}
+
+void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) { addGamepad(event->cdevice.which); }
+
+void SDL_Event_Handler::joyDeviceRemoved(const SDL_Event *event) { removeGamepad(event->cdevice.which); }
+
+void SDL_Event_Handler::controllerButtonDown(const SDL_Event *event) {
+  setGamepadButton(event->cdevice.which, event->cbutton.button, true);
+}
+
+void SDL_Event_Handler::controllerButtonUp(const SDL_Event *event) {
+  setGamepadButton(event->cdevice.which, event->cbutton.button, false);
 }
 
 void SDL_Event_Handler::keyboardDown(const SDL_Event *event) {
@@ -190,7 +209,7 @@ void SDL_Event_Handler::keyboardDown(const SDL_Event *event) {
   enigma::last_keybdstatus[key] = enigma::keybdstatus[key];
   enigma::keybdstatus[key] = true;
 
-  //if (key == SDLK_BACKSPACE && !enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
+  if (key == SDLK_BACKSPACE && !enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
 }
 
 void SDL_Event_Handler::keyboardUp(const SDL_Event *event) {
@@ -200,8 +219,8 @@ void SDL_Event_Handler::keyboardUp(const SDL_Event *event) {
 }
 
 void SDL_Event_Handler::textInput(const SDL_Event *event) {
-  /*enigma_user::keyboard_string += event->text.text;
-  enigma_user::keyboard_lastchar = enigma_user::keyboard_string.back();*/
+  enigma_user::keyboard_string += event->text.text;
+  enigma_user::keyboard_lastchar = enigma_user::keyboard_string.back();
 }
 
 void SDL_Event_Handler::mouseButtonDown(const SDL_Event *event) {

@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 forthevin
+/** Copyright (C) 2018 Greg Williamson
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -37,6 +37,7 @@ SDL_GLContext context;
 SDL_Renderer *renderer;
 
 bool initGameWindow() {
+  SDL_Init(SDL_INIT_VIDEO);
   windowHandle = SDL_CreateWindow("SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   return (windowHandle != nullptr);
 }
