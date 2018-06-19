@@ -71,7 +71,7 @@ void window_set_visible(bool visible) { (visible) ? SDL_ShowWindow(windowHandle)
 
 std::string window_get_caption() { return SDL_GetWindowTitle(windowHandle); }
 
-void window_set_caption(std::string caption) { SDL_SetWindowTitle(windowHandle, caption.c_str()); }
+void window_set_caption(const std::string& caption) { SDL_SetWindowTitle(windowHandle, caption.c_str()); }
 
 int window_mouse_get_x() {
   int x;

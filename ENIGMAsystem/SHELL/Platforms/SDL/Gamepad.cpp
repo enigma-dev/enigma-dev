@@ -223,7 +223,7 @@ void gamepad_set_vibration(int id, double left, double right) {
 
 float gamepad_get_button_threshold(int id) {
 #ifdef DEBUG_MODE
-  if (id < 0 || id >= static_cast<int>(gamepads.size())) return;
+  if (id < 0 || id >= static_cast<int>(gamepads.size())) return 0;
 #endif
 
   return gamepads[id].thresh;
@@ -237,9 +237,9 @@ void gamepad_set_button_threshold(int id, double threshold) {
   gamepads[id].thresh = threshold;
 }
 
-void gamepad_get_axis_deadzone(int id, double deadzone) {
+float gamepad_get_axis_deadzone(int id, double deadzone) {
 #ifdef DEBUG_MODE
-  if (id < 0 || id >= static_cast<int>(gamepads.size())) return;
+  if (id < 0 || id >= static_cast<int>(gamepads.size())) return 0;
 #endif
 
   return gamepads[id].deadzone;
