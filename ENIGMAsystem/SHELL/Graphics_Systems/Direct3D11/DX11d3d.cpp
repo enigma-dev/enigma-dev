@@ -15,17 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "Bridges/General/DX11Context.h"
-#include "Graphics_Systems/General/GSd3d.h"
 #include "Direct3D11Headers.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmodel.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
-#include "../General/GSmodel.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
-
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
 namespace enigma {
   bool d3dMode = false;

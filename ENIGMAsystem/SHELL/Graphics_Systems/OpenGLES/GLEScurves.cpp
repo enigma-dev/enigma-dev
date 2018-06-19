@@ -16,15 +16,11 @@
 **/
 
 #include "OpenGLHeaders.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include <stack>
 #include <vector>
 #include <math.h>
-
-#define __GETR(x) (((x & 0x0000FF))/255.0)
-#define __GETG(x) (((x & 0x00FF00)>>8)/255.0)
-#define __GETB(x) (((x & 0xFF0000)>>16)/255.0)
-
 
 namespace enigma{
     extern unsigned bound_texture;
@@ -95,7 +91,7 @@ void draw_bezier_quadratic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y
         al = pr_curve_alpha1 + (pr_curve_alpha2-pr_curve_alpha1)*b;
         col = merge_color(pr_curve_color1, pr_curve_color2, b);
 
-        glColor4f(__GETR(col),__GETG(col),__GETB(col),al);
+        glColor4f(COL_GET_R(col),COL_GET_G(col),COL_GET_B(col),al);
         glVertex2f(x, y);
 
         a -= det;
@@ -123,7 +119,7 @@ void draw_bezier_cubic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, g
         al = pr_curve_alpha1 + (pr_curve_alpha2-pr_curve_alpha1)*b;
         col = merge_color(pr_curve_color1, pr_curve_color2, b);
 
-        glColor4f(__GETR(col),__GETG(col),__GETB(col),al);
+        glColor4f(COL_GET_R(col),COL_GET_G(col),COL_GET_B(col),al);
         glVertex2f(x, y);
 
         a -= det;
@@ -180,7 +176,7 @@ void draw_spline_part(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs
         ( -x1 + 3.0 * x2 - 3.0 * x3 + x4 ) * t3 );
         y = 0.5 * ( ( 2.0 * y2 ) + ( -y1 + y3 ) * t + ( 2.0 * y1 - 5.0 * y2 + 4 * y3 - y4 ) * t2 +
         ( -y1 + 3.0 * y2 - 3.0 * y3 + y4 ) * t3 );
-        glColor4f(__GETR(col),__GETG(col),__GETB(col),al);
+        glColor4f(COL_GET_R(col),COL_GET_G(col),COL_GET_B(col),al);
      //   glVertex2f(x, y);
         t += det;
     }
@@ -311,7 +307,7 @@ void draw_spline_end()
               draw_spline_part(arr[i-3].x, arr[i-3].y, arr[i-2].x, arr[i-2].y, arr[i-1].x, arr[i-1].y, arr[i].x, arr[i].y, arr[i-2].col, arr[i-1].col, arr[i-2].al, arr[i-1].al);
       glEnd();
     glPopAttrib();
-    glColor4ubv(enigma::currentcolor); 
+    glColor4ubv(enigma::currentcolor);
     delete &arr;
     startedSplines.pop();
     startedSplinesMode.pop();*/

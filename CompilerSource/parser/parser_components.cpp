@@ -609,8 +609,8 @@ void parser_add_semicolons(string &code,string &synt)
   synt = string(syntbuf,bufpos);
 
   //Free memory here, lest it leak.
-  delete codebuf;
-  delete syntbuf;
+  delete[] codebuf;
+  delete[] syntbuf;
 
   //cout << code << endl << synt << endl << endl;
   //cout << "cp1"; fflush(stdout);

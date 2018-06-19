@@ -16,14 +16,9 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include <math.h>
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
-
-#define bind_alpha(alpha) (alpha>1?255:(alpha<0?0:(unsigned char)(alpha*255)))
 
 namespace enigma
 {
@@ -34,9 +29,9 @@ namespace enigma_user
 {
 	void draw_set_color(int color)
 	{
-		enigma::currentcolor[0] = __GETR(color);
-		enigma::currentcolor[1] = __GETG(color);
-		enigma::currentcolor[2] = __GETB(color);
+		enigma::currentcolor[0] = COL_GET_R(color);
+		enigma::currentcolor[1] = COL_GET_G(color);
+		enigma::currentcolor[2] = COL_GET_B(color);
 	}
 
 
@@ -49,7 +44,7 @@ namespace enigma_user
 
 	void draw_set_alpha(float alpha)
 	{
-		enigma::currentcolor[3] = bind_alpha(alpha);
+		enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 	}
 
 	void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
@@ -57,7 +52,7 @@ namespace enigma_user
 		enigma::currentcolor[0] = red;
 		enigma::currentcolor[1] = green;
 		enigma::currentcolor[2] = blue;
-		enigma::currentcolor[3] = bind_alpha(alpha);
+		enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 	}
 
 	void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha){}

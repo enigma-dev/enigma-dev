@@ -87,6 +87,7 @@ namespace enigma
 	unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight){return NULL;}
 
 	void graphics_delete_vertex_buffer_peer(int buffer) {}
+	void graphics_delete_index_buffer_peer(int buffer) {}
 
 	bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles){return false;}
 }
@@ -98,6 +99,7 @@ namespace enigma_user
 	void vertex_argb(int buffer, unsigned argb) {}
 	void vertex_color(int buffer, int color, double alpha) {}
 	void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {}
+	void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {}
 
 	int texture_add(string filename, bool mipmap){return -1;}
 	void texture_save(int texid, string fname){}

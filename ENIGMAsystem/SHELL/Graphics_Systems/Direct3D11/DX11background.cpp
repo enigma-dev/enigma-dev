@@ -22,6 +22,7 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/background_internal.h"
 #include "Universal_System/sprites_internal.h"
@@ -49,10 +50,6 @@
     const enigma::background *const bck2d = enigma::backgroundstructarray[back];
 #endif
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
-
 namespace enigma_user {
   extern int room_width, room_height;
 }
@@ -75,4 +72,3 @@ int background_create_from_screen(int x, int y, int w, int h, bool removeback, b
 }
 
 }
-
