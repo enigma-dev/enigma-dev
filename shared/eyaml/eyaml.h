@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef EYAML_H
+#define EYAML_H
+
 #include <string>
 #include <fstream>
 #include <map>
@@ -82,4 +85,6 @@ ey_data parse_eyaml_str(string, string = "LGM Settings");
 
 ey_string &eyscalar(ey_base* x);
 ey_string &eyscalar(eycit x);
-ey_string &eyscalar(eyit x); 
+ey_string &eyscalar(eyit x);
+
+#endif
