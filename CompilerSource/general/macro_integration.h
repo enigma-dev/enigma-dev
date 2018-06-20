@@ -27,13 +27,15 @@
 
 #include "darray.h"
 
+#include <string>
+
 struct macro_push_info {
   pt pos;
-  string name, code;
-  void grab(string id, string c, pt p);
-  void release(string &c, pt &p);
+  std::string name, code;
+  void grab(std::string id, std::string c, pt p);
+  void release(std::string &c, pt &p);
 };
 
 typedef varray<macro_push_info> macro_stack_t;
-bool macro_recurses(string name, macro_stack_t &mymacrostack, unsigned mymacroind);
-pt skip_comments(const string& code, pt cwp); // Useful for locating opening parenthesis to test if a macro is being called as a function
+bool macro_recurses(std::string name, macro_stack_t &mymacrostack, unsigned mymacroind);
+pt skip_comments(const std::string& code, pt cwp); // Useful for locating opening parenthesis to test if a macro is being called as a function
