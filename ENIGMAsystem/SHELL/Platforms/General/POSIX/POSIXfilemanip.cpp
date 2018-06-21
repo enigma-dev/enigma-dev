@@ -57,7 +57,7 @@ int directory_exists(string dname) {
 }
 
 int directory_create(string dname) {
-  #if CURRENT_PLATFORM_ID != OS_WINDOWS
+  #if defined(_WIN32)
   return mkdir(dname.c_str(), S_IRUSR | S_IWUSR | S_IXUSR);
   #endif
 }
