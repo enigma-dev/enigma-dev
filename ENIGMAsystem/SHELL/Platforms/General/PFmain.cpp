@@ -15,7 +15,7 @@
 
 namespace enigma {
 
-#if CURRENT_PLATFORM_ID == OS_WINDOWS && defined(ENIGMA_WS_SDL)
+#if defined(_WIN32) && defined(ENIGMA_WS_SDL)
 HWND hWnd;
 extern SDL_Window* windowHandle;
 #endif
@@ -74,7 +74,7 @@ int main(int argc, char** argv, void* windowHandle) {
     return -4;
   }
 
-#if CURRENT_PLATFORM_ID == OS_WINDOWS && defined(ENIGMA_WS_SDL)
+#if defined(_WIN32) && defined(ENIGMA_WS_SDL)
   SDL_SysWMinfo systemInfo;
   SDL_VERSION(&systemInfo.version);
   SDL_GetWindowWMInfo((SDL_Window*)enigma::windowHandle, &systemInfo);
