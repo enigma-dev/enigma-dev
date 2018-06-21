@@ -153,7 +153,6 @@ MSG msg;
 bool initGameWindow() {
   int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
   if (!wid || !hgt) wid = 640, hgt = 480;
-  enigma::hInstance = hInstance;
   enigma::mainthread = GetCurrentThread();
 
   //Register window class
@@ -432,6 +431,12 @@ void action_webpage(const std::string &url) {
 }  // namespace enigma_user
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow) {
+  // DO NOT move this out of WinMain like a fucking idiot
+  // we are setting the hInstance in the enigma namespace
+  // to the local one passed as a parameter here so that
+  // we can use it for the CreateWindow call and icon
+  enigma::hInstance = hInstance;
+
   int argc = 0;
   std::vector<const char*> argv;
   std::vector<string> shortened;
