@@ -2,12 +2,11 @@
 
 #include "Platforms/platforms_mandatory.h"
 
-#include "CompilerSource/OS_Switchboard.h" // <- must be at the tippy tippy top of CURRENT_PLATFORM_ID checks!
 // MUST include this before unistd.h or else it errors
 // and it's used to ensure that enigma::hWnd is available
 // for all Win32-based extensions or systems, like
 // Direct3D or DirectSound
-#if CURRENT_PLATFORM_ID == OS_WINDOWS && defined(ENIGMA_WS_SDL)
+#if defined(_WIN32) && defined(ENIGMA_WS_SDL)
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 #endif
