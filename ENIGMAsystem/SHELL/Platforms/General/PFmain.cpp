@@ -1,13 +1,8 @@
-#if CURRENT_PLATFORM_ID == OS_WINDOWS && defined(ENIGMA_WS_SDL)
-#include <windows.h> // for HWND trash
-#endif
-
 #include "PFmain.h"
 
 #include "Platforms/platforms_mandatory.h"
 
-#include "CompilerSource/OS_Switchboard.h"
-
+#include "CompilerSource/OS_Switchboard.h" // <- must be at the tippy tippy top of CURRENT_PLATFORM_ID checks!
 // MUST include this before unistd.h or else it errors
 // and it's used to ensure that enigma::hWnd is available
 // for all Win32-based extensions or systems, like
