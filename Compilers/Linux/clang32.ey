@@ -23,7 +23,7 @@ Parser-Vars:
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
 
-Exe-Vars:
+EXE-Vars:
   resources: $exe
   Build-Extension:
   Run-output: $tempfile
