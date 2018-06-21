@@ -52,7 +52,7 @@ int gamepad_get_max_device_count() {
 	return XUSER_MAX_COUNT;
 }
 	
-string gamepad_get_description(int device) {
+std::string gamepad_get_description(int device) {
 	if (gamepad_is_connected(device)) {
 		return "Xbox 360 Controller (XInput STANDARD GAMEPAD)";
 	} else {
