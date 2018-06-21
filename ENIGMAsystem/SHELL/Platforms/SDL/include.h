@@ -1,6 +1,3 @@
-#include "Window.h"
-#include "Gamepad.h"
-#include "Clipboard.h"
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFthreads.h"
 #include "Platforms/General/PFini.h"

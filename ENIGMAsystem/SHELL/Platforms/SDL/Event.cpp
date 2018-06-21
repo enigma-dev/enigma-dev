@@ -1,4 +1,5 @@
 #include "Event.h"
+#include "Window.h"
 #include "Gamepad.h"
 
 #include "Platforms/General/PFmain.h"    //game_end
@@ -205,15 +206,15 @@ void SDL_Event_Handler::controllerButtonUp(const SDL_Event *event) {
 }
 
 void SDL_Event_Handler::keyboardDown(const SDL_Event *event) {
-  int key = event->key.keysym.sym;
+  int key = enigma::keyboard::keymap[event->key.keysym.sym];
   enigma::last_keybdstatus[key] = enigma::keybdstatus[key];
   enigma::keybdstatus[key] = true;
 
-  if (key == SDLK_BACKSPACE && !enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
+  if (key == enigma_user::vk_backspace && !enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
 }
 
 void SDL_Event_Handler::keyboardUp(const SDL_Event *event) {
-  int key = event->key.keysym.sym;
+  int key = enigma::keyboard::keymap[event->key.keysym.sym];
   enigma::last_keybdstatus[key] = enigma::keybdstatus[key];
   enigma::keybdstatus[key] = false;
 }

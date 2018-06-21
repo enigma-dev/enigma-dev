@@ -12,6 +12,30 @@ using enigma::windowHandle;
 
 namespace enigma {
 SDL_Window* windowHandle = nullptr;
+
+namespace keyboard {
+  using namespace enigma_user;
+  std::map<int,SDL_Keycode> keymap = {
+    {SDLK_LEFT, vk_left}, {SDLK_RIGHT, vk_right}, {SDLK_UP, vk_up}, {SDLK_DOWN, vk_down},
+    {SDLK_TAB, vk_tab}, {SDLK_RETURN, vk_enter}, {SDLK_SPACE, vk_space},
+    {SDLK_LSHIFT, vk_shift}, {SDLK_LCTRL, vk_control}, {SDLK_LALT, vk_alt},
+    {SDLK_RSHIFT, vk_shift}, {SDLK_RCTRL, vk_control}, {SDLK_RALT, vk_alt},
+    {SDLK_0, vk_numpad0}, {SDLK_1, vk_numpad1}, {SDLK_2, vk_numpad2}, {SDLK_3, vk_numpad3},
+    {SDLK_4, vk_numpad4}, {SDLK_5, vk_numpad5}, {SDLK_6, vk_numpad6}, {SDLK_7, vk_numpad7},
+    {SDLK_8, vk_numpad8}, {SDLK_9, vk_numpad9},
+    {SDLK_KP_MULTIPLY, vk_multiply}, {SDLK_KP_PLUS, vk_add}, {SDLK_KP_MINUS, vk_subtract},
+    {SDLK_KP_DECIMAL, vk_decimal}, {SDLK_KP_DIVIDE, vk_divide},
+    {SDLK_F1, vk_f1}, {SDLK_F2, vk_f2}, {SDLK_F3, vk_f3}, {SDLK_F4, vk_f4}, {SDLK_F5, vk_f5},
+    {SDLK_F6, vk_f6}, {SDLK_F7, vk_f7}, {SDLK_F8, vk_f8}, {SDLK_F9, vk_f9}, {SDLK_F10, vk_f10},
+    {SDLK_F11, vk_f11}, {SDLK_F12, vk_f12},
+    {SDLK_BACKSPACE, vk_backspace}, {SDLK_ESCAPE, vk_escape}, {SDLK_PAGEUP, vk_pageup},
+    {SDLK_PAGEDOWN, vk_pagedown}, {SDLK_END, vk_end}, {SDLK_HOME, vk_home},
+    {SDLK_INSERT, vk_insert}, {SDLK_DELETE, vk_delete},
+    {SDLK_PRINTSCREEN, vk_printscreen}, {SDLK_CAPSLOCK, vk_caps}, {SDLK_SCROLLLOCK, vk_scroll},
+    {SDLK_PAUSE, vk_pause}, {SDLK_LGUI, vk_lsuper}, {SDLK_RGUI, vk_rsuper}
+  };
+}
+
 static SDL_Event_Handler eventHandler;
 static std::array<SDL_Cursor*, -enigma_user::cr_size_all> cursors;
 
@@ -242,4 +266,5 @@ bool keyboard_check_direct(int key) {
   const Uint8* state = SDL_GetKeyboardState(nullptr);
   return state[key];
 }
+
 }  // namespace enigma_user
