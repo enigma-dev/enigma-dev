@@ -1,7 +1,5 @@
 #include "Platforms/General/PFmain.h"
 
-#include "CompilerSource/OS_Switchboard.h"
-
 #include <time.h> //CLOCK_MONOTONIC
 #if defined(_WIN32)
 #include <sys/resource.h>  //setpriority
