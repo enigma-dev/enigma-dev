@@ -56,7 +56,11 @@ int directory_exists(string dname) {
   return (stat(dname.c_str(), &st) == 0) and (S_ISDIR(st.st_mode));
 }
 
-int directory_create(string dname) { return mkdir(dname.c_str(), S_IRUSR | S_IWUSR | S_IXUSR); }
+int directory_create(string dname) {
+  #if CURRENT_PLATFORM_ID != OS_WINDOWS
+  return mkdir(dname.c_str(), S_IRUSR | S_IWUSR | S_IXUSR);
+  #endif
+}
 
 int directory_delete(string dname) { return rmdir(dname.c_str()); }
 
@@ -118,4 +122,3 @@ extern string temp_directory;
 */
 
 }  // namespace enigma_user
-

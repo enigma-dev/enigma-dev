@@ -19,6 +19,8 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
 
+#if CURRENT_PLATFORM_ID != OS_WINDOWS
+
 #include "Platforms/General/PFthreads.h"
 
 std::deque<ethread*> threads;
@@ -83,3 +85,5 @@ variant thread_get_return(int thread) {
 }
 
 }
+
+#endif

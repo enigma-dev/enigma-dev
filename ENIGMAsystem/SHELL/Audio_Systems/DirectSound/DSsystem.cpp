@@ -51,12 +51,13 @@ clock_t lasttime;
 using std::string;
 using std::stringstream;
 
-#include "Platforms/Win32/WINDOWSmain.h"
 IDirectSoundBuffer* primaryBuffer;
 
 vector<SoundResource*> sound_resources(0);
 
 namespace enigma {
+
+extern HWND hWnd;
 
 void eos_callback(void* soundID, unsigned src) {
   get_sound(snd, (ptrdiff_t)soundID, );
