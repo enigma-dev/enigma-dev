@@ -1,10 +1,30 @@
+#if CURRENT_PLATFORM_ID == OS_WINDOWS && defined(ENIGMA_WS_SDL)
+#include <windows.h> // for HWND trash
+#endif
+
 #include "PFmain.h"
 
 #include "Platforms/platforms_mandatory.h"
 
+#include "CompilerSource/OS_Switchboard.h"
+
+// MUST include this before unistd.h or else it errors
+// and it's used to ensure that enigma::hWnd is available
+// for all Win32-based extensions or systems, like
+// Direct3D or DirectSound
+#if CURRENT_PLATFORM_ID == OS_WINDOWS && defined(ENIGMA_WS_SDL)
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_syswm.h>
+#endif
+
 #include <unistd.h>  //getcwd, usleep
 
 namespace enigma {
+
+#if CURRENT_PLATFORM_ID == OS_WINDOWS && defined(ENIGMA_WS_SDL)
+HWND hWnd;
+extern SDL_Window* windowHandle;
+#endif
 
 bool game_isending = false;
 int game_return = 0;
@@ -59,6 +79,14 @@ int main(int argc, char** argv, void* windowHandle) {
     printf("Failed to create game window\n");
     return -4;
   }
+
+#if CURRENT_PLATFORM_ID == OS_WINDOWS && defined(ENIGMA_WS_SDL)
+  SDL_SysWMinfo systemInfo;
+  SDL_VERSION(&systemInfo.version);
+  SDL_GetWindowWMInfo((SDL_Window*)enigma::windowHandle, &systemInfo);
+
+  enigma::hWnd = systemInfo.info.win.window;
+#endif
 
   initInput();
 
