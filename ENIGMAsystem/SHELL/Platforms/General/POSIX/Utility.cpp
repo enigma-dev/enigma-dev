@@ -132,7 +132,7 @@ void execute_program(std::string operation, std::string fname, std::string args,
 
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("", fname, args, wait); }
 
-#if CURRENT_PLATFORM_ID != OS_WINDOWS
+#if !defined(_WIN32)
 void url_open(std::string url, std::string target, std::string options) {
   if (!fork()) {
     execlp("xdg-open", "xdg-open", url.c_str(), NULL);
