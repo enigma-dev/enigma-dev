@@ -3,7 +3,7 @@
 #include "CompilerSource/OS_Switchboard.h"
 
 #include <time.h> //CLOCK_MONOTONIC
-#if CURRENT_PLATFORM_ID != OS_WINDOWS
+#if defined(_WIN32)
 #include <sys/resource.h>  //setpriority
 #include <sys/types.h>     //getpid
 #endif
