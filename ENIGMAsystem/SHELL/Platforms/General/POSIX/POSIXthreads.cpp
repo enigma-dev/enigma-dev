@@ -19,7 +19,7 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
 
-#if CURRENT_PLATFORM_ID != OS_WINDOWS
+#if defined(_WIN32)
 
 #include "Platforms/General/PFthreads.h"
 
