@@ -1,5 +1,10 @@
 PATH := $(eTCpath)$(PATH)
 
+# disable the server by default because we aren't sure in what
+# capacity we are using it yet, Travis can't build it
+# and neither can anybody else because of Ubuntu being 100 years old
+disable_server ?= true
+
 .PHONY: ENIGMA all clean Game clean-game liblodepng libProtocols libEGM required-directories .FORCE
 
 ENIGMA: .FORCE
