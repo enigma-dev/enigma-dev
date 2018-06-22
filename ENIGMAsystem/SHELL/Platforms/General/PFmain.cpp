@@ -2,23 +2,9 @@
 
 #include "Platforms/platforms_mandatory.h"
 
-// MUST include this before unistd.h or else it errors
-// and it's used to ensure that enigma::hWnd is available
-// for all Win32-based extensions or systems, like
-// Direct3D or DirectSound
-#if defined(_WIN32) && defined(ENIGMA_WS_SDL)
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_syswm.h>
-#endif
-
 #include <unistd.h>  //getcwd, usleep
 
 namespace enigma {
-
-#if defined(_WIN32) && defined(ENIGMA_WS_SDL)
-HWND hWnd;
-extern SDL_Window* windowHandle;
-#endif
 
 bool game_isending = false;
 int game_return = 0;
@@ -62,7 +48,7 @@ void set_program_args(int argc, char** argv) {
   for (int i = 0; i < argc; i++) parameters[i] = argv[i];
 }
 
-int main(int argc, char** argv, void* windowHandle) {
+int enigma_main(int argc, char** argv, void* windowHandle) {
   // Set the working_directory
   set_working_directory();
 
@@ -73,14 +59,6 @@ int main(int argc, char** argv, void* windowHandle) {
     printf("Failed to create game window\n");
     return -4;
   }
-
-#if defined(_WIN32) && defined(ENIGMA_WS_SDL)
-  SDL_SysWMinfo systemInfo;
-  SDL_VERSION(&systemInfo.version);
-  SDL_GetWindowWMInfo((SDL_Window*)enigma::windowHandle, &systemInfo);
-
-  enigma::hWnd = systemInfo.info.win.window;
-#endif
 
   initInput();
 

@@ -1,8 +1,13 @@
-SOURCES += $(wildcard Platforms/SDL/*.cpp) $(wildcard Platforms/General/POSIX/*.cpp)
-override CXXFLAGS += $(shell pkg-config --cflags sdl2) -DENIGMA_WS_SDL
+ifndef PKG-CONFIG
+	PKG-CONFIG := pkg-config
+endif
+
+SOURCES += $(wildcard Platforms/SDL/*.cpp) Platforms/General/POSIX/Utility.cpp
+override CXXFLAGS += $(shell $(PKG-CONFIG) --cflags sdl2) -DENIGMA_PTFRM_SDL
 
 ifeq ($(TARGET-PLATFORM), Windows)
-override LDLIBS += -lz -lpthread $(shell pkg-config --libs sdl2) -limm32 -lole32 -loleaut32 -lversion
+SOURCES += $(wildcard Bridges/SDL-Win32/*.cpp)
+override LDLIBS += $(shell $(PKG-CONFIG) --libs --static sdl2)
 else
-override LDLIBS += -lz -lpthread $(shell pkg-config --libs sdl2)
+override LDLIBS += -lpthread $(shell $(PKG-CONFIG) --libs sdl2)
 endif

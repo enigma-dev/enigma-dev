@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/Win32/WINDOWShandle.h" //get_window_handle()
+
 #include <stdio.h>
 
 #include "DSsystem.h"
@@ -66,6 +68,11 @@ void eos_callback(void* soundID, unsigned src) {
 }
 
 int audiosystem_initialize() {
+  if (get_window_handle() == NULL) {
+    MessageBox(NULL, "Window handle is NULL.", "Error", MB_OK);
+    return false;
+  }
+
   starttime = clock();
   elapsedtime = starttime;
   lasttime = elapsedtime;

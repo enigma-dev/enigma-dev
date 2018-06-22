@@ -1,5 +1,4 @@
-/** Copyright (C) 2008-2011 Josh Ventura
-*** Copyright (C) 2014 Robert B. Colton
+/** Copyright (C) 2018 Greg Williamson
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -24,17 +23,24 @@ using enigma::thread_script_func;
 
 namespace enigma_user {
 
+int _thread_script_func(void* data) {
+  thread_script_func(data);
+  return 0;
+}
+
 int thread_start(int thread) {
-  if (threads[thread]->active) { return -1; }
-  if (pthread_create(&threads[thread]->handle, NULL, thread_script_func, threads[thread]->sd)) {
+  if (threads[thread]->active) return -1;
+  threads[thread]->handle = SDL_CreateThread(_thread_script_func, NULL, (void *)threads[thread]->sd);
+  
+  if (threads[thread]->handle == NULL)
     return -2;
-  }
+
   threads[thread]->active = true;
   return 0;
 }
 
 void thread_join(int thread) {
-  pthread_join(threads[thread]->handle, NULL);
+  SDL_WaitThread(threads[thread]->handle, NULL);
 }
 
 } //namespace enigma_user

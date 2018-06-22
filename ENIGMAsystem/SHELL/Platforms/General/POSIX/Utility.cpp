@@ -1,10 +1,7 @@
 #include "Platforms/General/PFmain.h"
 
 #include <time.h> //CLOCK_MONOTONIC
-#ifndef _WIN32
-#include <sys/resource.h>  //setpriority
 #include <sys/types.h>     //getpid
-#endif
 #include <unistd.h>        //usleep
 
 namespace enigma {
@@ -130,12 +127,8 @@ void execute_program(std::string operation, std::string fname, std::string args,
 
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("", fname, args, wait); }
 
-#ifndef _WIN32
 void url_open(std::string url, std::string target, std::string options) {
-  if (!fork()) {
-    execlp("xdg-open", "xdg-open", url.c_str(), NULL);
-    exit(0);
-  }
+  execute_program("xdg-open", url, false);
 }
 
 void url_open_ext(std::string url, std::string target) { url_open(url, target); }
@@ -143,17 +136,10 @@ void url_open_ext(std::string url, std::string target) { url_open(url, target); 
 void url_open_full(std::string url, std::string target, std::string options) { url_open(url, target, options); }
 
 void action_webpage(const std::string& url) { url_open(url); }
-#endif
 
 std::string environment_get_variable(std::string name) {
   char* ev = getenv(name.c_str());
   return ev ? ev : "";
 }
-
-#ifndef _WIN32
-void set_program_priority(int value) {
-  setpriority(PRIO_PROCESS, getpid(), value);
-}
-#endif
 
 }  //namespace enigma_user
