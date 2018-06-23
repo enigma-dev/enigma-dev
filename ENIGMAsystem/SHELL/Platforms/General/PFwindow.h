@@ -70,7 +70,7 @@ enum {
   mb_none   =  0,
   mb_left   =  1,
   mb_right  =  2,
-  mb_middle =  3,
+  mb_middle =  3
 };
 
 enum {
@@ -144,7 +144,7 @@ enum {
   vk_scroll = 145,
   vk_pause  = 19,
   vk_lsuper = 91,
-  vk_rsuper = 92,
+  vk_rsuper = 92
 };
 
 extern double mouse_x, mouse_y;
