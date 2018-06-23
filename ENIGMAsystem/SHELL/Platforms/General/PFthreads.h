@@ -20,10 +20,10 @@
 
 #include "Universal_System/var4.h"
 
-#ifdef ENIGMA_PTFRM_SDL
+#ifdef ENIGMA_PLATFORM_SDL
   #include <SDL2/SDL.h>
   using pltfrm_thread_t = SDL_Thread*;
-#elif ENIGMA_PTFRM_WIN 
+#elif ENIGMA_PLATFORM_WINDOWS 
   #include <windows.h>
   using pltfrm_thread_t = HANDLE;
 #else

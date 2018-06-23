@@ -21,9 +21,9 @@
 #include <cstdlib>
 #include <string>
 
+#include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <dirent.h>
 
 #define u_root 0
 
@@ -57,9 +57,11 @@ int directory_exists(string dname) {
 }
 
 int directory_create(string dname) {
-  #if defined(_WIN32)
+#ifdef _WIN32
+  return mkdir(dname.c_str());
+#else
   return mkdir(dname.c_str(), S_IRUSR | S_IWUSR | S_IXUSR);
-  #endif
+#endif
 }
 
 int directory_delete(string dname) { return rmdir(dname.c_str()); }
