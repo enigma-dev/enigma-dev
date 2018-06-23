@@ -48,7 +48,7 @@ void set_program_args(int argc, char** argv) {
   for (int i = 0; i < argc; i++) parameters[i] = argv[i];
 }
 
-int enigma_main(int argc, char** argv, void* windowHandle) {
+int enigma_main(int argc, char** argv) {
   // Set the working_directory
   set_working_directory();
 
@@ -62,7 +62,7 @@ int enigma_main(int argc, char** argv, void* windowHandle) {
 
   initInput();
 
-  EnableDrawing(windowHandle);
+  EnableDrawing(nullptr);
 
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
@@ -79,7 +79,7 @@ int enigma_main(int argc, char** argv, void* windowHandle) {
   }
 
   game_ending();
-  DisableDrawing(windowHandle);
+  DisableDrawing(nullptr);
   destroyWindow();
   return game_return;
 }

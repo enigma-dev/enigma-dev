@@ -26,6 +26,8 @@ static std::unordered_map<V,K> inverse_map(std::unordered_map<K,V> &map) {
 using enigma::windowHandle;
 
 namespace enigma {
+void (*WindowResizedCallback)();
+
 SDL_Window* windowHandle = nullptr;
 
 namespace keyboard {
