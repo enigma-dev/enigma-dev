@@ -17,6 +17,8 @@
 
 #include "Platforms/General/PFthreads.h"
 
+#include <functional>
+
 using enigma::ethread;
 using enigma::threads;
 using enigma::thread_script_func;

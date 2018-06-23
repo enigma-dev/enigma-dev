@@ -35,15 +35,11 @@ namespace enigma {
   }
 }
 
-struct MessageData {
-  unsigned id;
-  string text1;
-  string text2;
-  string text3;
-  MessageData(string t1, string t2, string t3): id(-1), text1(t1), text2(t2), text3(t3) { }
-};
-
 using namespace enigma_user;
+
+using enigma::threads;
+using enigma::MessageData;
+using enigma::createThread;
 
 static void fireAsyncDialogEvent() {
   enigma::instance_event_iterator = new enigma::inst_iter(NULL,NULL,NULL);
@@ -114,34 +110,6 @@ static void* getLoginAsync(void* data) {
   ds_map_replaceanyway(async_load, "password", password);
   fireAsyncDialogEvent();
   return NULL;
-}
-
-static int createThread(void* (*fnc)(void*), MessageData* md) {
-  //TODO: According to Studio's manual each time these async functions are called
-  //they get their own map and async_load is only set to that map when the async dialog
-  //event is fired.
-  //This is inferred from the get_login_async documentation.
-  if (!ds_map_exists(async_load)) async_load = ds_map_create();
-
-  ethread* newthread = new ethread();
-  md->id = threads.size();
-#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
-  DWORD dwThreadId;
-  newthread->handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)fnc, (LPVOID)md, 0, &dwThreadId);
-
-  //TODO: May need to check if ret is -1L, and yes it is quite obvious the return value is
-  //an unsigned integer, but Microsoft says to for some reason. See their documentation here.
-  //http://msdn.microsoft.com/en-us/library/kdzttdcb.aspx
-  //NOTE: Same issue is in Platforms/General/PFthreads.cpp
-  if (newthread->handle == NULL) {
-#else
-  if (pthread_create(&newthread->handle, NULL, fnc, md)) {
-#endif
-    delete md; delete newthread;
-    return -1;
-  }
-  threads.push_back(newthread);
-  return threads.size() - 1;
 }
 
 namespace enigma_user {
