@@ -5,13 +5,14 @@
 
 #include <SDL2/SDL.h>
 
-#include <map>
+#include <unordered_map>
 
 namespace enigma
 {
   extern SDL_Window* windowHandle;
   namespace keyboard {
-    extern std::map<SDL_Keycode,int> keymap;
+    extern std::unordered_map<SDL_Keycode,int> keymap;
+    extern std::unordered_map<SDL_Keycode, int> inverse_keymap;
   }
 } //namespace enigma
 

@@ -7,6 +7,19 @@
 
 #include <array>
 #include <string>
+#include <algorithm>
+
+template<typename K, typename V>
+static std::unordered_map<V,K> inverse_map(std::unordered_map<K,V> &map) {
+    std::unordered_map<V,K> inv;
+    std::for_each(map.begin(), map.end(),
+                [&inv] (const std::pair<K,V> &p)
+                {
+                    inv.insert(std::make_pair(p.second, p.first));
+                });
+    return inv;
+}
+
 
 using enigma::windowHandle;
 
@@ -15,7 +28,7 @@ SDL_Window* windowHandle = nullptr;
 
 namespace keyboard {
   using namespace enigma_user;
-  std::map<int,SDL_Keycode> keymap = {
+  std::unordered_map<int,SDL_Keycode> keymap = {
     {SDLK_LEFT, vk_left}, {SDLK_RIGHT, vk_right}, {SDLK_UP, vk_up}, {SDLK_DOWN, vk_down},
     {SDLK_TAB, vk_tab}, {SDLK_RETURN, vk_enter}, {SDLK_SPACE, vk_space},
     {SDLK_LSHIFT, vk_shift}, {SDLK_LCTRL, vk_control}, {SDLK_LALT, vk_alt},
@@ -34,6 +47,8 @@ namespace keyboard {
     {SDLK_PRINTSCREEN, vk_printscreen}, {SDLK_CAPSLOCK, vk_caps}, {SDLK_SCROLLLOCK, vk_scroll},
     {SDLK_PAUSE, vk_pause}, {SDLK_LGUI, vk_lsuper}, {SDLK_RGUI, vk_rsuper}
   };
+
+  std::unordered_map<SDL_Keycode, int> inverse_keymap;
 }
 
 static SDL_Event_Handler eventHandler;
@@ -67,6 +82,7 @@ void cleanupCursors() {
 }
 
 void initInput() {
+  keyboard::inverse_keymap = inverse_map(keyboard::keymap);
   initCursors();
   initGamepads();
 }
@@ -264,7 +280,7 @@ int display_get_height() {
 
 bool keyboard_check_direct(int key) {
   const Uint8* state = SDL_GetKeyboardState(nullptr);
-  return state[key];
+  return state[enigma::keyboard::inverse_keymap[key]];
 }
 
 }  // namespace enigma_user
