@@ -1,11 +1,11 @@
-%E-YAML
+%e-yaml
 ---
 
 Name: Windows Touch
 Identifier: WindowsTouch
+Author: Robert
 Description: Touch support for Windows based environments.
 Default: false
-Build-date: 10/04/2014
 Icon: touchlogo.png
 
 Depends: None

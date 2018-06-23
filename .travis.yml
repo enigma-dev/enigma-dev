@@ -17,17 +17,17 @@ before_install:
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
       sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
-      sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev \
+      sudo apt-get -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev \
         libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libglew-dev     \
         libprotobuf-dev protobuf-compiler;
 
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
-        sudo apt-get -qq -y install libc++-dev:i386 libglu1-mesa:i386\
+        sudo apt-get -y install libc++-dev:i386 libglu1-mesa:i386\
           libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libx11-6:i386 libglew1.10:i386;
 
         if [ "$COMPILER" == "gcc32" ]; then
-          sudo apt-get -qq -y install gcc-multilib g++-multilib;
+          sudo apt-get -y install gcc-multilib g++-multilib;
         fi
 
         sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so;
@@ -36,24 +36,24 @@ before_install:
         sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include;
         sudo ln -s /usr/lib/i386-linux-gnu/libGLEW.so.1.10 /usr/lib/i386-linux-gnu/libGLEW.so;
       elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
-        sudo apt-get -qq -y install mingw-w64 wine;
+        sudo apt-get -y install mingw-w64 wine;
         curl -L https://github.com/fundies/enigma-libs/files/1620148/enigma-libs.zip > enigma-libs.zip;
         unzip enigma-libs.zip -d ENIGMAsystem/;
         mv ENIGMAsystem/Install ENIGMAsystem/Additional;
       else
-        sudo apt-get -qq -y install libc++-dev libglu1-mesa-dev;
+        sudo apt-get -y install libc++-dev libglu1-mesa-dev;
       fi
 
       if [ "$AUDIO" == "OpenAL" ]; then
-        sudo apt-get -qq -y install libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev;
+        sudo apt-get -y install libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev;
       elif [ "$AUDIO" == "SFML" ]; then
-        sudo apt-get -qq -y install libsfml-dev;
+        sudo apt-get -y install libsfml-dev;
       fi
 
       if [ "$TEST_HARNESS" == true ]; then
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test;
         sudo apt-get update;
-        sudo apt-get -qq -y install cmake libgtest-dev xvfb wmctrl xdotool xfwm4 lcov gcc-7\
+        sudo apt-get -y install cmake libgtest-dev xvfb wmctrl xdotool xfwm4 lcov gcc-7\
           g++-7 cpp-7 pulseaudio libpugixml-dev libyaml-cpp-dev;
 
         # download rapidjson manually because ubuntu is ancient
@@ -147,27 +147,30 @@ env:
     - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
 matrix:
   include:
+    # SDL
+    - env: COMPILER=gcc PLATFORM=SDL MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+      before_script: sudo apt-get -y install libsdl2-dev libegl1-mesa-dev libgles2-mesa-dev
     # Widgets
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=GTK+ EXTENSIONS="None"
-      before_script: sudo apt-get -qq -y install libgtk2.0-dev
+      before_script: sudo apt-get -y install libgtk2.0-dev
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=TinyFileDialogs EXTENSIONS="None"
-      before_script: sudo apt-get -qq -y install zenity
+      before_script: sudo apt-get -y install zenity
     # GME (Note: requires an Audio system)
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=OpenAL COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GME"
-      before_script: sudo apt-get -qq -y install libgme-dev
+      before_script: sudo apt-get -y install libgme-dev
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=SFML COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GME"
-      before_script: sudo apt-get -qq -y install libgme-dev
+      before_script: sudo apt-get -y install libgme-dev
     # Box2D
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Box2DPhysics"
-      before_script: sudo apt-get -qq -y install libbox2d-dev
+      before_script: sudo apt-get -y install libbox2d-dev
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="StudioPhysics"
-      before_script: sudo apt-get -qq -y install libbox2d-dev
+      before_script: sudo apt-get -y install libbox2d-dev
     # Bullet Physics
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="BulletDynamics"
-      before_script: sudo apt-get -qq -y install libbullet-dev
+      before_script: sudo apt-get -y install libbullet-dev
     #FreeType
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="ttf"
-      before_script: sudo apt-get -qq -y install libfreetype6-dev
+      before_script: sudo apt-get -y install libfreetype6-dev
     # OSX
     - { os: osx, osx_image: xcode9.2,
         env: COMPILER=clang PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None" }

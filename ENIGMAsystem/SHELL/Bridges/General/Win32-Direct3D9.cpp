@@ -15,16 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <windows.h>
-#include <windowsx.h>
-#include <d3d9.h>
-#include <dxerr9.h>
-using namespace std;
-
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Universal_System/roomsystem.h"
@@ -33,12 +25,16 @@ using namespace std;
 #include "Bridges/General/DX9Context.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include <windows.h>
+#include <windowsx.h>
+#include <d3d9.h>
+#include <dxerr9.h>
+#include <string>
+using namespace std;
+
 // global declarations
 LPDIRECT3D9 d3dobj; // the pointer to our Direct3D interface
 ContextManager* d3dmgr; // the pointer to the device class
-
-// the WindowProc function prototype
-LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 namespace enigma
 {
@@ -77,7 +73,6 @@ namespace enigma
   }
 
   void EnableDrawing(void* handle) {
-    HGLRC *hRC = static_cast<HGLRC*>(handle);
     WindowResizedCallback = &WindowResized;
 
     d3dmgr = new ContextManager();
