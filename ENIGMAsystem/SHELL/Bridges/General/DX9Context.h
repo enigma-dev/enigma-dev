@@ -18,25 +18,30 @@
 #ifndef DIRECTX9CONTEXTMANAGER
 #define DIRECTX9CONTEXTMANAGER
 
+#include "Graphics_Systems/Direct3D9/Direct3D9Headers.h"
+#include "Graphics_Systems/General/GSmodel.h"
+#include "Widget_Systems/widgets_mandatory.h"
+
 #include <windows.h>
 #include <windowsx.h>
 #include <d3d9.h>
 #include <dxerr9.h>
-#include "Graphics_Systems/Direct3D9/Direct3D9Headers.h"
-#include "Graphics_Systems/General/GSmodel.h"
-#include "Platforms/Win32/WINDOWSmain.h"
-using namespace enigma_user;
 
+#include <sstream>
+#include <string.h>
 #include <vector>
 #include <map>
+
+using namespace enigma_user;
+
+using std::string;
+using std::stringstream;
 using std::vector;
 using std::map;
 
-#include "Widget_Systems/widgets_mandatory.h"
-#include <sstream>
-#include <string.h>
-using std::string;
-using std::stringstream;
+namespace enigma {
+	extern HWND hWnd;
+}
 
 extern LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
 

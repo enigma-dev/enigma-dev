@@ -21,6 +21,20 @@
 #include <string>
 using std::string;
 
+namespace enigma {
+
+struct MessageData {
+  unsigned id;
+  string text1;
+  string text2;
+  string text3;
+  MessageData(string t1, string t2, string t3): id(-1), text1(t1), text2(t2), text3(t3) { }
+};
+
+int createThread(void* (*fnc)(void*), MessageData* md);
+
+}
+
 namespace enigma_user {
   extern unsigned async_load;
 

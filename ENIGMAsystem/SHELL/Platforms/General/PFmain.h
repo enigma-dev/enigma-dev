@@ -31,7 +31,7 @@ namespace enigma {
   extern int frames_count;
   extern unsigned long current_time_mcs;
 
-  int main(int argc, char** argv, void* windowHandle = nullptr);
+  int enigma_main(int argc, char** argv);
   int game_ending();
   long clamp(long value, long min, long max);
   void Sleep(int ms);
