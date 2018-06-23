@@ -5,6 +5,8 @@
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 
+#include "Universal_System/estring.h" // ord
+
 #include <array>
 #include <string>
 #include <algorithm>
@@ -82,6 +84,15 @@ void cleanupCursors() {
 }
 
 void initInput() {
+  for (int i = 0; i <= 9; i++) {
+    enigma::keyboard::keymap[SDLK_0 + i] = 48 + i;
+  }
+
+  for (char i = 'A'; i <= 'Z'; i++) {
+    int idx = i - 'A';
+    enigma::keyboard::keymap[SDLK_a + idx] = 65 + idx;
+  }
+
   keyboard::inverse_keymap = inverse_map(keyboard::keymap);
   initCursors();
   initGamepads();
