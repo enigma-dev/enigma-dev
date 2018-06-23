@@ -7,7 +7,7 @@ Description: Render using OpenGLES, offering high portability but requiring spec
 Author: Josh Ventura, serprex, TGMG
 
 Depends:
-	Windowing: Xlib, Cocoa
+	Windowing: Xlib, Cocoa, SDL
 Represents:
-	Build-platforms: iPhone, Android
+	Build-platforms: None
 
