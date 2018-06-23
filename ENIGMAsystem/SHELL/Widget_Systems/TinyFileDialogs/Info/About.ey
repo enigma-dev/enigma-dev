@@ -3,7 +3,7 @@
 
 Name: Tiny File Dialogs
 Identifier: TinyFileDialogs
-Build-Platforms: MacOSX, Linux
+Build-Platforms: MacOSX, Linux, SDL
 Represents: 
 Description: Create Widgets using Tiny File Dialogs, with AppleScript on Mac, and Zenity on Linux.
 Author: Samuel Venable

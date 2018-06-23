@@ -1,0 +1,6 @@
+{
+	"files.associations": {
+		"*.gmx": "xml",
+		"xstring": "cpp"
+	}
+}

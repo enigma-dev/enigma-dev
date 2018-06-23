@@ -21,9 +21,9 @@
 #include <cstdlib>
 #include <string>
 
+#include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <dirent.h>
 
 #define u_root 0
 
@@ -56,7 +56,13 @@ int directory_exists(string dname) {
   return (stat(dname.c_str(), &st) == 0) and (S_ISDIR(st.st_mode));
 }
 
-int directory_create(string dname) { return mkdir(dname.c_str(), S_IRUSR | S_IWUSR | S_IXUSR); }
+int directory_create(string dname) {
+#ifdef _WIN32
+  return mkdir(dname.c_str());
+#else
+  return mkdir(dname.c_str(), S_IRUSR | S_IWUSR | S_IXUSR);
+#endif
+}
 
 int directory_delete(string dname) { return rmdir(dname.c_str()); }
 
@@ -118,4 +124,3 @@ extern string temp_directory;
 */
 
 }  // namespace enigma_user
-

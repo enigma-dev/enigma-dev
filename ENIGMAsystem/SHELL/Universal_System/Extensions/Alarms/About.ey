@@ -1,10 +1,10 @@
-%E-YAML
+%e-yaml
 ---
 
 Name: Alarms
 Identifier: Alarms
+Author: Josh
 Description: Adds the local alarm variable and alarm-related DND tiles.
-Build-date: 6/17/2011
 Icon: alarm.png
 
 Depends: None

@@ -3,7 +3,7 @@
 
 Name: GTK+
 Identifier: GTK+
-Build-Platforms: MacOSX, Windows, Linux
+Build-Platforms: MacOSX, Windows, Linux, SDL
 Represents: Linux
 Description: Create Widgets using GTK+, the primary widget toolkit of GNOME.
 Author: Josh Ventura

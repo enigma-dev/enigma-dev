@@ -1,10 +1,10 @@
-%E-YAML
+%e-yaml
 ---
 
 Name: Matrix Math
 Identifier: MatrixMath
+Author: Harri
 Description: Adds templated matrix and quaternion classes.
-Build-date: 26/01/2014
 Default: false
 Icon: matrix.png
 

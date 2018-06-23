@@ -7,7 +7,7 @@ Description: Play sounds using OpenAL, which is standard on Mac OSX and Linux, b
 Author: Josh Ventura
 
 Depends:
-	Build-platforms: Windows, Linux, MacOSX
+	Build-platforms: Windows, Linux, MacOSX, SDL
 Represents:
-	Build-platforms: Windows, Linux, MacOSX
+	Build-platforms: Linux, MacOSX, SDL
 

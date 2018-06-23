@@ -16,7 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "XIgamepad.h"
+#include "Platforms/General/PFgamepad.h"
 
 #include <windows.h>
 #include <XInput.h>
@@ -52,7 +52,7 @@ int gamepad_get_max_device_count() {
 	return XUSER_MAX_COUNT;
 }
 	
-string gamepad_get_description(int device) {
+std::string gamepad_get_description(int device) {
 	if (gamepad_is_connected(device)) {
 		return "Xbox 360 Controller (XInput STANDARD GAMEPAD)";
 	} else {

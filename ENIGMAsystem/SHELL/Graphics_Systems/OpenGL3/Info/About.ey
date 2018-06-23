@@ -7,7 +7,7 @@ Description: High quality optimized rendering using OpenGL3.3 making full use of
 Author: Harijs Grinbergs, Robert B. Colton et al.
 
 Depends:
-	Windowing: xlib, Win32, Cocoa
+	Windowing: xlib, Win32, Cocoa, SDL
 
 Represents:
 	Build-platforms: None

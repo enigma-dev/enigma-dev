@@ -1,11 +1,11 @@
-%E-YAML
+%e-yaml
 ---
 
 Name: DirectShow
 Identifier: DirectShow
+Author: Robert
 Description: Video playback support on Windows platforms.
 Default: false
-Build-date: 10/26/2013
 Icon: dshowlogo.png
 
 Depends: None

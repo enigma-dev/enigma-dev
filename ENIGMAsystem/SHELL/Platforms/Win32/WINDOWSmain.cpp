@@ -58,6 +58,10 @@ void Sleep(int ms) { ::Sleep(ms); }
 
 void initInput(){};
 
+HWND get_window_handle() {
+  return hWnd;
+}
+
 }  // namespace enigma
 
 namespace enigma {
@@ -449,5 +453,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   }
 
   //Main loop
-  return enigma::main(argc, const_cast<char**>(argv.data()), &enigma::hRC);
+  return enigma::enigma_main(argc, const_cast<char**>(argv.data()));
 }

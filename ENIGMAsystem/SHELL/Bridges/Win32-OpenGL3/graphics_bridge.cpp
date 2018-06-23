@@ -84,9 +84,10 @@ namespace enigma
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
 
-  void EnableDrawing(void* handle)
+  extern HGLRC hRC;
+
+  void EnableDrawing(void*)
   {
-    HGLRC *hRC = static_cast<HGLRC*>(handle);
     WindowResizedCallback = &WindowResized;
     /**
      * Edited by Cool Breeze on 16th October 2013
@@ -139,14 +140,14 @@ namespace enigma
 
     if ( wglewIsSupported("WGL_ARB_create_context") )
     {
-      *hRC = wglCreateContextAttribsARB( enigma::window_hDC,0, attribs );
+      hRC = wglCreateContextAttribsARB( enigma::window_hDC,0, attribs );
       wglMakeCurrent( NULL,NULL );
       wglDeleteContext( LegacyRC );
-      wglMakeCurrent(enigma::window_hDC, *hRC );
+      wglMakeCurrent(enigma::window_hDC, hRC );
     }
     else // Unable to get a 3.3 Core Context, use the Legacy 1.x context
     {
-      *hRC = LegacyRC;
+      hRC = LegacyRC;
     }
 
     #ifdef DEBUG_MODE
@@ -166,11 +167,9 @@ namespace enigma
     glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
   }
 
-  void DisableDrawing(void* handle) {
-    HGLRC *hRC = static_cast<HGLRC*>(handle);
-
+  void DisableDrawing(void*) {
     wglMakeCurrent (NULL, NULL);
-    wglDeleteContext (*hRC);
+    wglDeleteContext (hRC);
     ReleaseDC (enigma::hWnd, enigma::window_hDC);
   }
 }

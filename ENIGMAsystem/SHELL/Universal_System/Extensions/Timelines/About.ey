@@ -1,8 +1,9 @@
-%E-YAML
+%e-yaml
 ---
 
 Name: Timelines
 Identifier: Timelines
+Author: To be decided
 Description: Adds timeline local variables and functions.
 Icon: timeline.png
 
