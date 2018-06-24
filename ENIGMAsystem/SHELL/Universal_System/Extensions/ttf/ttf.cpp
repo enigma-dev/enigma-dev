@@ -1,3 +1,5 @@
+#include "find.h"
+
 #include "Universal_System/fonts_internal.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/sprites.h"
@@ -9,7 +11,6 @@
 
 #include <iostream>
 #include <algorithm>
-
 
 namespace enigma {
 
@@ -40,61 +41,9 @@ private:
 FT_Library FontManager::library;
 static bool FreeTypeAlive = FontManager::Init();
 
-#include <windows.h>
-
-// if name, bold, and italic all match
-// then it's a perfect score and we can
-// return early from our search
-static const unsigned WIN_FONT_PERFECT_SCORE = 3;
-
-struct WinFontDescription {
-  std::string name;
-  bool bold, italic;
-  unsigned matchScore;
-  std::string fullName;
-};
-
-int CALLBACK EnumFamCallback(ENUMLOGFONT *lpelf, NEWTEXTMETRIC *lpntm, DWORD FontType, LPVOID lParam) {
-  if (FontType != TRUETYPE_FONTTYPE) return TRUE;
-
-  WinFontDescription *fontDesc = (WinFontDescription*) lParam;
-  bool nameEqual = (fontDesc->name.c_str() == lpelf->elfLogFont.lfFaceName);
-  bool boldEqual = false;
-  if (!fontDesc->bold) {
-    if (lpelf->elfLogFont.lfWeight == FW_NORMAL)
-      boldEqual = true;
-  } else {
-    if (lpelf->elfLogFont.lfWeight == FW_BOLD)
-      boldEqual = true;
-  }
-  bool italicEqual = (fontDesc->italic == lpelf->elfLogFont.lfItalic);
-
-  unsigned matchScore = nameEqual + boldEqual + italicEqual;
-  if (matchScore > fontDesc->matchScore) {
-    fontDesc->fullName = lpelf->elfLogFont.lfFaceName;
-    fontDesc->matchScore = matchScore;
-  }
-
-  if (matchScore == WIN_FONT_PERFECT_SCORE) {
-    return FALSE;
-  }
-  return TRUE;
-}
-
 bool string_has_suffix(const std::string &str, const std::string &suffix) {
   return str.size() >= suffix.size() &&
          str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-
-std::string font_lookup(std::string name, bool bold, bool italic) {
-  std::string font_dir = std::string(getenv("windir")) + "/fonts/";
-  WinFontDescription fontDesc = { name, bold, italic, 0, "" };
-  EnumFontFamilies(GetDC(NULL), name.c_str(), (FONTENUMPROC)EnumFamCallback, (LPARAM)&fontDesc);
-  if (fontDesc.fullName.empty()) {
-    return "";
-  } else {
-    return font_dir + fontDesc.fullName + ".ttf";
-  }
 }
 
 }
