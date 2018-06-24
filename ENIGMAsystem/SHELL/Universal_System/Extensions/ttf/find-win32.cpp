@@ -46,7 +46,9 @@ int CALLBACK EnumFamCallback(ENUMLOGFONT *lpelf, NEWTEXTMETRIC *lpntm, DWORD Fon
 std::string font_lookup(std::string name, bool bold, bool italic) {
   std::string font_dir = std::string(getenv("windir")) + "/fonts/";
   WinFontDescription fontDesc = { name, bold, italic, 0, "" };
-  EnumFontFamilies(GetDC(NULL), name.c_str(), (FONTENUMPROC)EnumFamCallback, (LPARAM)&fontDesc);
+  HDC hDC = GetDC(NULL); // just grab the "common" device context of the entire desktop
+  EnumFontFamilies(hDC, name.c_str(), (FONTENUMPROC)EnumFamCallback, (LPARAM)&fontDesc);
+  ReleaseDC(NULL, hDC); // the desktop is a "common" device context and must be released
   if (fontDesc.fullName.empty()) {
     return "";
   } else {
