@@ -83,6 +83,11 @@ int CALLBACK EnumFamCallback(ENUMLOGFONT *lpelf, NEWTEXTMETRIC *lpntm, DWORD Fon
   return TRUE;
 }
 
+bool string_has_suffix(const std::string &str, const std::string &suffix) {
+  return str.size() >= suffix.size() &&
+         str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
 std::string font_lookup(std::string name, bool bold, bool italic) {
   std::string font_dir = std::string(getenv("windir")) + "/fonts/";
   WinFontDescription fontDesc = { name, bold, italic, 0, "" };
@@ -116,9 +121,14 @@ namespace enigma_user {
     FT_GlyphSlot slot;
     FT_Error error;
 
-    name = enigma::font_lookup(name, bold, italic);
-    if (name.empty())
-      return -1;
+    // if it's not a full path to a ttf file then we will
+    // have to use our lookup method to find the font by
+    // name from the installed fonts
+    if (!enigma::string_has_suffix(name, ".ttf")) {
+      name = enigma::font_lookup(name, bold, italic);
+      if (name.empty())
+        return -1;
+    }
 
     error = FT_New_Face(enigma::FontManager::GetLibrary(), name.c_str(), 0, &face );
 
