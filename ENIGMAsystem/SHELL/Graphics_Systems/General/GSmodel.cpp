@@ -1,4 +1,6 @@
-/** Copyright (C) 2017 Robert Colton
+/** Copyright (C) 2013 Robert Colton, Adriano Tumminelli
+*** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2017 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,6 +17,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "GSmodel_impl.h"
 #include "GSmodel.h"
 #include "GSprimitives.h"
 
