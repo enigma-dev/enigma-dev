@@ -135,7 +135,7 @@ namespace enigma_user {
     if (error != 0)
       return -1;
 
-    error = FT_Set_Char_Size(face, size * 64, 0, 96, 0); // 72 dpi, 64 is 26.6 fixed point conversion
+    error = FT_Set_Char_Size(face, size * 64, 0, 96, 0); // 96 dpi, 64 is 26.6 fixed point conversion
 
     if (error != 0)
       return -1;
