@@ -135,7 +135,6 @@ namespace enigma
                         prev_bkid = t.bckid;
                     }
                 }
-                tile_layer_metadata[dit->second.tiles[0].depth].back()[2] += 6; //Add last quad
             }
         }
 
