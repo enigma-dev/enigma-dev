@@ -44,6 +44,11 @@ static bool FreeTypeAlive = FontManager::Init();
 
 extern HWND hWnd;
 
+// if name, bold, and italic all match
+// then it's a perfect score and we can
+// return early from our search
+static const unsigned WIN_FONT_PERFECT_SCORE = 3;
+
 struct WinFontDescription {
   std::string name;
   bool bold, italic;
@@ -71,6 +76,11 @@ int CALLBACK EnumFamCallback(ENUMLOGFONT *lpelf, NEWTEXTMETRIC *lpntm, DWORD Fon
     fontDesc->fullName = lpelf->elfLogFont.lfFaceName;
     fontDesc->matchScore = matchScore;
   }
+
+  if (matchScore == WIN_FONT_PERFECT_SCORE) {
+    return FALSE;
+  }
+  return TRUE;
 }
 
 std::string font_lookup(std::string name, bool bold, bool italic) {
