@@ -86,7 +86,7 @@ void graphics_prepare_vertex_buffer(const int buffer) {
 
     // copy the vertex buffer contents over to the native peer vbo on the GPU
     VOID* pVoid;
-    vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, D3DLOCK_DISCARD);
+    vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, vertexBuffer->frozen ? 0 : D3DLOCK_DISCARD);
     memcpy(pVoid, vertexBuffer->vertices.data(), size);
     vertexBufferPeer->Unlock();
 
