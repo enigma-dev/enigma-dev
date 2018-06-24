@@ -42,8 +42,6 @@ static bool FreeTypeAlive = FontManager::Init();
 
 #include <windows.h>
 
-extern HWND hWnd;
-
 // if name, bold, and italic all match
 // then it's a perfect score and we can
 // return early from our search
@@ -91,7 +89,7 @@ bool string_has_suffix(const std::string &str, const std::string &suffix) {
 std::string font_lookup(std::string name, bool bold, bool italic) {
   std::string font_dir = std::string(getenv("windir")) + "/fonts/";
   WinFontDescription fontDesc = { name, bold, italic, 0, "" };
-  EnumFontFamilies(GetDC(hWnd), name.c_str(), (FONTENUMPROC)EnumFamCallback, (LPARAM)&fontDesc);
+  EnumFontFamilies(GetDC(NULL), name.c_str(), (FONTENUMPROC)EnumFamCallback, (LPARAM)&fontDesc);
   if (fontDesc.fullName.empty()) {
     return "";
   } else {
