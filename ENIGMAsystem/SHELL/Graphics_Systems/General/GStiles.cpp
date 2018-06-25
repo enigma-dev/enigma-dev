@@ -27,12 +27,12 @@
 #include "Universal_System/background.h"
 #include "Universal_System/background_internal.h"
 
-#include <algorithm>
+#define INCLUDED_FROM_SHELLMAIN Not really.
+// make an exception just for point_in_rectangle
+#include "Universal_System/mathnc.h"
+#undef INCLUDED_FROM_SHELLMAIN
 
-// not allowed to include mathnc.h outside of SHELLmain
-namespace enigma_user {
-    bool point_in_rectangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2);
-}
+#include <algorithm>
 
 namespace enigma
 {
