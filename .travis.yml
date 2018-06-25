@@ -90,7 +90,7 @@ install:
     if [ "$TEST_HARNESS" == true ]; then
       make -j4 emake
     else
-      make -j4 emake disable_egm=true
+      CLI_ENABLE_EGM=FALSE make -j4 emake
     fi
 
 # by default most of our jobs will be run on a linux instance
