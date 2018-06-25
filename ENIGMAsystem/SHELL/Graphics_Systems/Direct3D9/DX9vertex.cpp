@@ -168,6 +168,20 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
   return vertexDeclaration;
 }
 
+inline void graphics_apply_vertex_format(int format, size_t &stride) {
+  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
+
+  static int last_format = -1;
+  static LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = 0;
+  // cache the format and only recreate it when switching formats
+  if (last_format != format) {
+    last_format = format;
+    if (vertexDeclaration) vertexDeclaration->Release();
+    vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
+  }
+  d3dmgr->SetVertexDeclaration(vertexDeclaration);
+}
+
 }
 
 namespace enigma_user {
@@ -183,7 +197,6 @@ void vertex_color(int buffer, int color, double alpha) {
 
 void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
   // this is fucking temporary until we rewrite the model classes and
   // figure out a proper way to flush
@@ -191,9 +204,8 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
 
   enigma::graphics_prepare_vertex_buffer(buffer);
 
-  size_t stride = 0;
-  LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
-  d3dmgr->SetVertexDeclaration(vertexDeclaration);
+  static size_t stride = 0;
+  enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[buffer];
   d3dmgr->SetStreamSource(0, vertexBufferPeer, 0, stride);
@@ -201,13 +213,10 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   int primitive_count = enigma_user::draw_primitive_count(primitive, count);
 
   d3dmgr->DrawPrimitive(primitive_types[primitive], start, primitive_count);
-
-  vertexDeclaration->Release();
 }
 
 void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
   // this is fucking temporary until we rewrite the model classes and
   // figure out a proper way to flush
@@ -216,9 +225,8 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   enigma::graphics_prepare_vertex_buffer(vertex);
   enigma::graphics_prepare_index_buffer(buffer);
 
-  size_t stride = 0;
-  LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
-  d3dmgr->SetVertexDeclaration(vertexDeclaration);
+  static size_t stride = 0;
+  enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[vertex];
   d3dmgr->SetStreamSource(0, vertexBufferPeer, 0, stride);
@@ -229,8 +237,6 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   int primitive_count = enigma_user::draw_primitive_count(primitive, count);
 
   d3dmgr->DrawIndexedPrimitive(primitive_types[primitive], 0, 0, count, start, primitive_count);
-
-  vertexDeclaration->Release();
 }
 
 }
