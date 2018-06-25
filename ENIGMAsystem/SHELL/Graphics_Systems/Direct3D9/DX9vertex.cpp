@@ -172,13 +172,15 @@ inline void graphics_apply_vertex_format(int format, size_t &stride) {
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
 
   static int last_format = -1;
-  static LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = 0;
+  static size_t last_stride = 0;
+  static LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = nullptr;
   // cache the format and only recreate it when switching formats
   if (last_format != format) {
     last_format = format;
     if (vertexDeclaration) vertexDeclaration->Release();
-    vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
+    vertexDeclaration = vertex_format_declaration(vertexFormat, last_stride);
   }
+  stride = last_stride;
   d3dmgr->SetVertexDeclaration(vertexDeclaration);
 }
 
@@ -204,7 +206,7 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
 
   enigma::graphics_prepare_vertex_buffer(buffer);
 
-  static size_t stride = 0;
+  size_t stride = 0;
   enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[buffer];
@@ -225,7 +227,7 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   enigma::graphics_prepare_vertex_buffer(vertex);
   enigma::graphics_prepare_index_buffer(buffer);
 
-  static size_t stride = 0;
+  size_t stride = 0;
   enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[vertex];
