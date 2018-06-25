@@ -171,7 +171,7 @@ ClientState graphics_apply_vertex_format(int format) {
   return state;
 }
 
-graphics_reset_client_state(ClientState &state) {
+void graphics_reset_client_state(ClientState &state) {
   if (state.useVertices) glDisableClientState(GL_VERTEX_ARRAY);
   if (state.useNormals) glDisableClientState(GL_NORMAL_ARRAY);
   if (state.useColors) glDisableClientState(GL_COLOR_ARRAY);
