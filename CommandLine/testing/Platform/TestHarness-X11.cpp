@@ -103,8 +103,7 @@ class X11_TestHarness final: public TestHarness {
     system(("import -window " + to_string(window_id) + " " + fPath).c_str()); 
   }
   int image_compare(std::string image1, std::string image2, std::string diff) final {
-    //ret 0 no problem, 1 mismatch, 2 no file
-    std::cout << "compare -metric AE " + image1 + " " + image2 + " " + diff << std::endl;
+    //ret 0 = no problemo
     return system(("compare -metric AE " + image1 + " " + image2 + " " + diff).c_str());
   }
   
