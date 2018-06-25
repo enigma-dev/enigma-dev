@@ -32,9 +32,7 @@ OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURC
 PROTO_SOURCES = $(call rwildcard,$(SRC_DIR),*.pb.cc)
 PROTO_OBJECTS = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.pb.cc, %.o, $(PROTO_SOURCES)))
 
-ifeq ($(TRAVIS), true)
-	CXXFLAGS += -DCLI_DISABLE_SERVER
-else
+ifeq ($(CLI_ENABLE_SERVER), TRUE)
 	PROTO_OUT += $(PROTO_DIR)/server.grpc.pb.cc
 	PROTO_OBJECTS += $(OBJ_DIR)/codegen/server.grpc.o
 	LIBLDFLAGS := -lgrpc++
