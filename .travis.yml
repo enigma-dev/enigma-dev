@@ -85,6 +85,7 @@ before_install:
 # build JDI and the CLI
 install:
   - chmod +x ./ci-build.sh
+  - chmod +x ./CommandLine/testing/EnigmaBot-GitHub.sh
   - make -j4
   - |
     if [ "$TEST_HARNESS" == true ]; then
@@ -98,6 +99,12 @@ os: linux
 group: travis_latest
 compiler: gcc
 language: cpp
+
+after_failure:
+  - |
+    if [ "$TEST_HARNESS" == true ]; then
+      ./CommandLine/testing/EnigmaBot-GitHub.sh
+    fi
 
 env:
   global:
