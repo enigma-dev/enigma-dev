@@ -25,58 +25,46 @@
 #ifndef ENIGMA_SPRITESTRUCT
 #define ENIGMA_SPRITESTRUCT
 
-#include "Collision_Systems/collision_types.h"
-#include "var4.h"
+#include "resource_vec.h"
+#include "nlpo2.h"
 
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <array>
 
 namespace enigma {
 struct bbox_rect_t {
-  int bottom, left, right, top;
+  int bottom = 0, left = 0, right = 0, top = 0;
 };
 
-struct sprite {
-  int width, height, subcount, xoffset, yoffset, id;
-
-  std::vector<int> texturearray;      //Each subimage has a texture
-  std::vector<double> texturexarray;  //Offset in texture (used in texture atlas, otherwise 0)
-  std::vector<double> textureyarray;
-  std::vector<double> texturewarray;  //width of valid texture space
-  std::vector<double> textureharray;  //ditto height
-  std::vector<void *> colldata;       // Each subimage has collision data
-
-  //void*  *pixeldata;
-  bbox_rect_t bbox, bbox_relative;
-  int bbox_mode = 0;  //Default is automatic
-  bool where, smooth = false;
-
-  sprite();
-  sprite(int);
+struct SubImage {
+  SubImage() = default;
+  SubImage(const SubImage &copy);
+  unsigned textureID = -1;
+  double x = 0, y = 0, w = 0, h = 0;
+  std::vector<void*> collisionData;
 };
-extern sprite **spritestructarray;  // INVARIANT: Should only be modified inside spritestruct.cpp.
-extern size_t sprite_idmax;
 
-/// Called at game start.
-void sprites_init();  /// This should allocate room for sprites and perform any other necessary actions.
+struct Sprite {
+  Sprite(bool precise = false, bool transparent = false, bool smooth = false, bool preload = false, int xoffset = 0,
+         int yoffset = 0, bool mipmap = false)
+      : subimages(0) {}
 
-int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr,
-                     bool pl, bool sm);
-void sprite_add_to_index(sprite *ns, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth,
-                         int x_offset, int y_offset, bool mipmap);
-void sprite_add_copy(sprite *spr, sprite *spr_copy);
+  void freeTextures();
+  int width = 0, height = 0, xoffset = 0, yoffset = 0;
+  bool smooth = false, preload = false, mipmap = false;
+  std::array<bbox_rect_t, 2> bbox;
+  std::vector<SubImage> subimages;
+};
 
-//Sets the subimage
-void sprite_set_subimage(int sprid, int imgindex, unsigned int w, unsigned int h, unsigned char *chunk,
-                         unsigned char *collision_data, collision_type ct);
-//Appends a subimage
-void sprite_add_subimage(int sprid, unsigned int w, unsigned int h, unsigned char *chunk, unsigned char *collision_data,
-                         collision_type ct);
-void spritestructarray_reallocate();
+int sprite_add(unsigned char *pxdata, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int xoffset, int yoffset, bool mipmap);
+int sprite_set(unsigned char *pxdata, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int xoffset, int yoffset, bool mipmap);
+int sprite_add_subimage(unsigned char *pxdata, int id, int imgCount, bool precise, bool transparent, bool smooth, int xoffset, int yoffset, bool mipmap);
+const bbox_rect_t &sprite_get_bbox(int sprid);
+const bbox_rect_t &sprite_get_bbox_relative(int sprid);
 
-extern const bbox_rect_t &sprite_get_bbox(int sprid);
-extern const bbox_rect_t &sprite_get_bbox_relative(int sprid);
-}  //namespace enigma
+}  // namespace enigma
 
-#endif  // ENIGMA_SPRITESTRUCT
+#endif // ENIGMA_SPRITESTRUCT
+

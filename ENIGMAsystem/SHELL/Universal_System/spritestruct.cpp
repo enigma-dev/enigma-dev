@@ -17,656 +17,420 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "estring.h"
-#include "graphics_object.h"
-#include "image_formats.h"
-#include "libEGMstd.h"
-#include "sprites_internal.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 #include "Collision_Systems/collision_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/instance_system.h"
-#include "Widget_Systems/widgets_mandatory.h"
 
-#include <cstring>
-#include <string>
+#include "image_formats.h"
+#include "sprites_internal.h"
 
-#define get_current_instance() \
-    ((enigma::object_graphics*) enigma::instance_event_iterator->inst)
-
-bool get_sprite(enigma::sprite* &spr, int id)
-{
-#ifdef DEBUG_MODE
-    if (id < -1 || size_t(id) > enigma::sprite_idmax || !enigma::spritestructarray[id]) {
-        show_error("Cannot access sprite with id " + toString(id), false);
-        return false;
-    }
-#endif
-    spr = enigma::spritestructarray[id];
-    return true;
-}
-
-bool get_sprite_mtx(enigma::sprite* &spr, int id)
-{
-    bool rtn = get_sprite(spr, id);
-    if (rtn) {
-        // TODO: Lock a lock by reference and allow it to be timely destructed and released
-    }
-    return rtn;
-}
+using enigma::Sprite;
 
 namespace enigma {
-  sprite** spritestructarray;
-  extern size_t sprite_idmax;
-  sprite::sprite() {}
-  sprite::sprite(int x) {}
+
+ResourceVec<Sprite> sprites("sprite");
+
+void Sprite::freeTextures() {
+  for (unsigned i = 0; i < subimages.size(); ++i) enigma::graphics_delete_texture(subimages[i].textureID);
 }
 
-namespace enigma_user
-{
-
-int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool mipmap)
-{
-    enigma::spritestructarray_reallocate();
-    enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite();
-    enigma::sprite_add_to_index(spr, filename, imgnumb, precise, transparent, smooth, x_offset, y_offset, mipmap);
-    return enigma::sprite_idmax++;
+SubImage::SubImage(const SubImage &copy) {
+  textureID = graphics_duplicate_texture(copy.textureID);
+  x = copy.x;
+  y = copy.y;
+  w = copy.w;
+  h = copy.h;
+  for (void *c : copy.collisionData) collisionData.push_back(c);
 }
 
-int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap)
-{
-    return sprite_add(filename, imgnumb, false, transparent, smooth, true, x_offset, y_offset, mipmap);
+inline void lowerLeftToTransparent(unsigned char *pxdata, unsigned w, unsigned h) {
+  int idx = (h - 1) * w * 4;
+  int color[3];
+  color[0] = pxdata[idx];
+  color[1] = pxdata[idx + 1];
+  color[2] = pxdata[idx + 2];
+  for (unsigned i = 0; i < w * h * 4; i += 4) {
+    idx = (h - 1) * w * 4;
+    int color2[3];
+    color2[0] = pxdata[idx];
+    color2[1] = pxdata[idx + 1];
+    color2[2] = pxdata[idx + 2];
+
+    if (color == color2) pxdata[idx + 3] = 0;
+  }
 }
 
-bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture, bool mipmap)
-{
-    enigma::sprite *spr;
-    if (!get_sprite_mtx(spr, ind))
-        return false;
+inline std::array<bbox_rect_t, 2> calculateBBox(unsigned w, unsigned h, int xoffset, int yoffset) {
+  // FIXME: Calculate and assign correct bbox values.
+  std::array<bbox_rect_t, 2> b;
 
-  if (free_texture) {
-    for (int ii = 0; ii < spr->subcount; ii++) {
-      enigma::graphics_delete_texture(spr->texturearray[ii]);
+  b[0].bottom = h;
+  b[0].left = 0;
+  b[0].top = 0;
+  b[0].right = w;
+
+  b[1].bottom = b[0].bottom - yoffset;
+  b[1].left = b[0].left - xoffset;
+  b[1].top = b[0].top - yoffset;
+  b[1].right = b[0].right - xoffset;
+
+  return b;
+}
+
+inline void addTexture(Sprite *spr, unsigned char *pxdata, unsigned fullWidth, unsigned fullHeight,
+                       unsigned targetWidth, unsigned targetHeight, unsigned imgCount, bool precise, bool mipmap) {
+  unsigned fullcellwidth = nlpo2dc(fullWidth) + 1;
+
+  unsigned char *pixels = new unsigned char[fullcellwidth * fullHeight * 4]();
+  for (unsigned ii = 0; ii < imgCount; ii++) {
+    unsigned ih, iw;
+    unsigned xcelloffset = ii * targetWidth * 4;
+    for (ih = 0; ih < targetHeight; ih++) {
+      unsigned tmp = ih * fullWidth * 4 + xcelloffset;
+      unsigned tmpcell = ih * fullcellwidth * 4;
+      for (iw = 0; iw < targetWidth; iw++) {
+        pixels[tmpcell + 0] = pxdata[tmp + 0];
+        pixels[tmpcell + 1] = pxdata[tmp + 1];
+        pixels[tmpcell + 2] = pxdata[tmp + 2];
+        pixels[tmpcell + 3] = pxdata[tmp + 3];
+        tmp += 4;
+        tmpcell += 4;
+      }
     }
+
+    SubImage s;
+    s.textureID = graphics_create_texture(targetWidth, targetHeight, fullcellwidth, fullHeight, pixels, mipmap);
+    s.x = 0;
+    s.y = 0;
+    s.w = static_cast<double>(targetWidth) / fullcellwidth;
+    s.h = static_cast<double>(targetHeight) / fullHeight;
+
+    collision_type coll_type = precise ? ct_precise : ct_bbox;
+    s.collisionData.push_back(get_collision_mask(spr, static_cast<unsigned char *>(pixels), coll_type));
+
+    spr->subimages.push_back(std::move(s));
   }
 
-    spr->texturearray.clear();
-    spr->texturexarray.clear();
-    spr->textureyarray.clear();
-    spr->texturewarray.clear();
-    spr->textureharray.clear();
-  enigma::sprite_add_to_index(spr, filename, imgnumb, precise, transparent,
-      smooth, x_offset, y_offset, mipmap);
-    return true;
+  delete pixels;
 }
 
-bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture, bool mipmap)
-{
-  return sprite_replace(ind, filename, imgnumb, false, transparent, smooth,
-      true, x_offset, y_offset, free_texture, mipmap);
+int sprite_add_subimage(unsigned char *pxdata, int id, int imgCount, bool precise, bool transparent, bool smooth,
+                        int xoffset, int yoffset, bool mipmap) {
+  unsigned int width, height, fullwidth, fullheight;
+  int imgnumb;
+  unsigned char *pxdata = enigma::image_load(filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
+
+#ifdef DEBUG_MODE
+  if (pxdata == nullptr) {
+    printf("ERROR - Failed to append sprite to index!\n");
+    return -1;
+  }
+#endif
+
+  if (transparent) enigma::lowerLeftToTransparent(pxdata, fullwidth, fullheight);
+
+  unsigned cellwidth = width / imgCount;
+
+  Sprite *spr;
+  get_resi(sprites, id, spr);
+
+  spr->bbox = enigma::calculateBBox(cellwidth, height, xoffset, yoffset);
+  spr->width = cellwidth;
+  spr->height = height;
+  spr->xoffset = xoffset;
+  spr->yoffset = yoffset;
+  spr->smooth = smooth;
+
+  addTexture(spr, pxdata, fullwidth, fullheight, cellwidth, height, imgnumb, precise, mipmap);
+
+  delete pxdata;
+
+  return spr->subimages.size() - 1;
 }
 
-bool sprite_exists(int spr) {
-    return (unsigned(spr) < enigma::sprite_idmax) and bool(enigma::spritestructarray[spr]);
+bool sprite_set(int index, unsigned char *pxdata, int imgnumb, bool precise, bool transparent, bool smooth, bool preload,
+                int xoffset, int yoffset, bool mipmap) {
+  sprites.assign(
+      index, std::move(enigma::make_unique<Sprite>(precise, transparent, smooth, preload, xoffset, yoffset, mipmap)));
+  sprite_add_subimage(pxdata, sprites.size() - 1, imgnumb, precise, transparent, smooth, xoffset, yoffset, mipmap);
+
+  return true;
 }
+
+int sprite_add(unsigned char *pxdata, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int xoffset, int yoffset, bool mipmap) {
+  int id = sprites.size();
+
+  sprites.push_back(nullptr);
+  if (!sprite_set(id, filename, imgnumb, precise, transparent, smooth, preload, xoffset, yoffset, mipmap)) {
+    sprites.pop_back();
+    return -1;
+  }
+
+  return id;
+}
+
+}  // namespace enigma
+
+using enigma::sprites;
+
+namespace enigma_user {
+
+int sprite_add_subimage(std::string filename, int id, int imgCount, bool precise, bool transparent, bool smooth,
+                        int xoffset, int yoffset, bool mipmap) {
+  unsigned char *pxdata = enigma::image_load(filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
+  return enigma::sprite_add_subimage(pxdata, id, imgCount, precise, transparent, smooth, xoffset, yoffset, mipmap);
+}
+
+bool sprite_set(int index, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload,
+                int xoffset, int yoffset, bool mipmap) {
+  sprites.assign(
+      index, std::move(enigma::make_unique<Sprite>(precise, transparent, smooth, preload, xoffset, yoffset, mipmap)));
+  sprite_add_subimage(filename, sprites.size() - 1, imgnumb, precise, transparent, smooth, xoffset, yoffset, mipmap);
+
+  return true;
+}
+
+int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload,
+               int xoffset, int yoffset, bool mipmap) {
+  int id = sprites.size();
+
+  sprites.push_back(nullptr);
+  if (!sprite_set(id, filename, imgnumb, precise, transparent, smooth, preload, xoffset, yoffset, mipmap)) {
+    sprites.pop_back();
+    return -1;
+  }
+
+  return id;
+}
+
+enigma::bbox_rect_t dummy_bbox = {32, 0, 32, 0};
+
+const enigma::bbox_rect_t &sprite_get_bbox(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(spr, sprid, sprites)) return dummy_bbox;
+
+  return spr->bbox;
+}
+
+const enigma::bbox_rect_t &sprite_get_bbox_relative(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(spr, sprid, sprites)) return dummy_bbox;
+
+  return spr->bbox_relative;
+}
+
+int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap) {
+  return sprite_add(filename, imgnumb, false, transparent, smooth, true, x_offset, y_offset, mipmap);
+}
+
+bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload,
+                    int x_offset, int y_offset, bool free_texture, bool mipmap) {
+  Sprite *spr;
+  get_resb(sprites, ind, spr);
+
+  if (free_texture) spr->freeTextures();
+
+  sprite_set(ind, filename, imgnumb, precise, transparent, smooth, preload, x_offet, y_offset, mipmap);
+
+  return true;
+}
+
+bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset,
+                    bool free_texture, bool mipmap) {
+  return sprite_replace(ind, filename, imgnumb, false, transparent, smooth, true, x_offset, y_offset, free_texture,
+                        mipmap);
+}
+
+bool sprite_exists(int spr) { return sprites.exists(spr); }
 
 void sprite_save(int ind, unsigned subimg, string fname) {
-    enigma::sprite *spr;
-    if (!get_sprite_mtx(spr, ind))
-        return;
+  Sprite *spr;
+  get_resv(sprites, ind, spr);
 
   unsigned w, h;
-  unsigned char* rgbdata =
-      enigma::graphics_get_texture_pixeldata(spr->texturearray[subimg], &w, &h);
+  unsigned char *rgbdata = enigma::graphics_get_texture_pixeldata(spr->subimages[subimg].textureID, &w, &h);
 
   enigma::image_save(fname, rgbdata, spr->width, spr->height, w, h, false);
 
   delete[] rgbdata;
 }
 
-void sprite_save_strip(int ind, string fname) {
-
+void sprite_delete(int ind, bool free_texture) {
+  Sprite *spr;
+  get_resv(sprites, ind, spr);
+  if (free_texture) spr->freeTextures();
+  sprites.remove(ind);
 }
 
-void sprite_delete(int ind, bool free_texture)
-{
-    enigma::sprite* spr;
-    if (!get_sprite_mtx(spr, ind))
-        return;
+void sprite_duplicate(int ind) { sprites.duplicate(ind); }
 
-    if (free_texture)
-        for (int ii = 0; ii < spr->subcount; ii++)
-            enigma::graphics_delete_texture(spr->texturearray[ii]);
-
-    delete enigma::spritestructarray[ind];
-    enigma::spritestructarray[ind] = NULL;
+void sprite_assign(int ind, int copy_sprite, bool free_texture) {
+  Sprite *spr;
+  get_resv(sprites, ind, spr);
+  sprites.assign(copy_sprite, enigma::make_unique<Sprite>(*spr));
 }
 
-int sprite_duplicate(int copy_sprite)
-{
-    enigma::sprite* spr_copy;
-    if (!get_sprite_mtx(spr_copy, copy_sprite))
-        return -1;
+void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture) {
+  Sprite *spr;
+  get_resv(sprites, ind, spr);
 
-    enigma::spritestructarray_reallocate();
-    enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite();
-    spr->id = enigma::sprite_idmax;
-    enigma::sprite_add_copy(spr, spr_copy);
-    return enigma::sprite_idmax++;
+  Sprite *spr2;
+  get_resv(sprites, ind, spr2);
+
+  for (unsigned i = 0; i < spr->subimages.size(); i++)
+    enigma::graphics_replace_texture_alpha_from_texture(spr->subimages[i].textureID,
+                                                        spr2->subimages[i % spr2->subimages.size()].textureID);
+  if (free_texture) spr->freeTextures();
 }
 
-void sprite_assign(int ind, int copy_sprite, bool free_texture)
-{
-    enigma::sprite *spr, *spr_copy;
-    if (!get_sprite_mtx(spr, ind))
-        return;
-    if (!get_sprite_mtx(spr_copy, copy_sprite))
-        return;
+void sprite_merge(int ind, int copy_sprite) {
+  Sprite *spr, *spr_copy;
+  get_resv(sprites, ind, spr);
+  get_resv(sprites, copy_sprite, spr_copy);
 
-    if (free_texture)
-        for (int ii = 0; ii < spr->subcount; ii++)
-            enigma::graphics_delete_texture(spr->texturearray[ii]);
-
-    spr->texturearray.clear();
-    spr->texturexarray.clear();
-    spr->textureyarray.clear();
-    spr->texturewarray.clear();
-    spr->textureharray.clear();
-    enigma::sprite_add_copy(spr, spr_copy);
-}
-
-void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture)
-{
-    enigma::sprite *spr, *spr_copy;
-    if (!get_sprite_mtx(spr, ind))
-        return;
-    if (!get_sprite_mtx(spr_copy, copy_sprite))
-        return;
-
-    for (int i = 0; i < spr->subcount; i++)
-        enigma::graphics_replace_texture_alpha_from_texture(spr->texturearray[i], spr_copy->texturearray[i % spr_copy->subcount]);
-}
-
-void sprite_merge(int ind, int copy_sprite)
-{
-    enigma::sprite *spr, *spr_copy;
-    if (!get_sprite_mtx(spr, ind))
-        return;
-    if (!get_sprite_mtx(spr_copy, copy_sprite))
-        return;
-
-    int i = 0, j = 0, t_subcount = spr->subcount + spr_copy->subcount;
-    while (j < spr_copy->subcount)
-    {
-        spr->texturearray.push_back(enigma::graphics_duplicate_texture(spr_copy->texturearray[j]));
-        spr->texturexarray.push_back(spr_copy->texturexarray[j]);
-        spr->textureyarray.push_back(spr_copy->textureyarray[j]);
-        spr->texturewarray.push_back(spr_copy->texturewarray[j]);
-        spr->textureharray.push_back(spr_copy->textureharray[j]);
-        i++; j++;
-    }
-    spr->subcount = t_subcount;
-    spr->width    = (spr->width > spr_copy->width)?spr->width:spr_copy->width;
-    spr->height   = (spr->height > spr_copy->height)?spr->height:spr_copy->height;
-}
-
-}
-
-/* These functions are primarily for use of the engine. Experienced users
- * who are familiar with C++ can make use of these, but they were made to
- * use at load time with data read from the executable. These both expect
- * RAW format, RGB only.
- */
-#include "nlpo2.h"
-
-namespace enigma
-{
-  // INVARIANT: Should always be equal to the actual size of spritestructarray.
-  size_t spritestructarray_actualsize = 0;
-  
-  //Allocates and zero-fills the array at game start
-  void sprites_init() {
-    spritestructarray_actualsize = sprite_idmax+1;
-    spritestructarray = new sprite*[spritestructarray_actualsize];
-    for (unsigned i = 0; i < sprite_idmax; i++)
-      spritestructarray[i] = NULL;
+  for (unsigned j = 0; j < spr_copy->subimages.size(); ++j) {
+    spr->subimages.push_back(spr_copy->subimages[j]);
   }
 
-  void spritestructarray_reallocate() {
-    if (spritestructarray_actualsize > sprite_idmax + 2) {
-      return; // Ignore reallocation request if array is big enough.
-        }
-        sprite** spriteold = spritestructarray;
-    // Grow by doubling size, minimizing needed reallocations.
-    spritestructarray_actualsize = (sprite_idmax + 2) * 2;
-        spritestructarray = new sprite*[spritestructarray_actualsize];
-    for (size_t i = 0; i < sprite_idmax; i++) {
-      spritestructarray[i] = spriteold[i];
-    }
-        delete[] spriteold;
-    }
-
-    //Adds an empty sprite to the list
-  int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h,
-      int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm) {
-        sprite *as = new sprite(subc);
-        spritestructarray[sprid] = as;
-
-        as->id = sprid;
-        as->subcount = subc;
-        as->width  = w;
-        as->height = h;
-        as->bbox.bottom  = bbb;
-          as->bbox.left  = bbl;
-          as->bbox.top   = bbt;
-          as->bbox.right = bbr;
-        as->bbox_relative.bottom  = bbb - y;
-          as->bbox_relative.left  = bbl - x;
-          as->bbox_relative.top   = bbt - y;
-          as->bbox_relative.right = bbr - x;
-        as->xoffset = x;
-        as->yoffset = y;
-
-        if (sprite_idmax < sprid+1)
-          sprite_idmax = sprid+1;
-
-        return sprid;
-    }
-
-  void sprite_add_to_index(sprite *ns, string filename, int imgnumb,
-      bool precise, bool transparent, bool smooth, int x_offset, int y_offset,
-      bool mipmap) {
-  
-        unsigned int width, height, fullwidth, fullheight;
-    unsigned char *pxdata = image_load(
-        filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
-
-    if (pxdata == NULL) {
-      printf("ERROR - Failed to append sprite to index!\n");
-      return;
-    }
-
-    // If sprite transparent, set the alpha to zero for pixels that should be
-    // transparent from lower left pixel color
-        if (transparent)
-        {
-          int t_pixel_b = pxdata[(height-1)*fullwidth*4];
-          int t_pixel_g = pxdata[(height-1)*fullwidth*4+1];
-          int t_pixel_r = pxdata[(height-1)*fullwidth*4+2];
-          unsigned int ih, iw;
-      for (ih = 0; ih < height; ih++) {
-            int tmp = ih*fullwidth*4;
-            for (iw = 0; iw < width; iw++)
-            {
-          if (pxdata[tmp] == t_pixel_b 
-              && pxdata[tmp+1] == t_pixel_g 
-              && pxdata[tmp+2] == t_pixel_r) {
-                pxdata[tmp+3] = 0;
-          }
-
-              tmp+=4;
-            }
-          }
-        }
-
-        unsigned cellwidth = width/imgnumb;
-    unsigned fullcellwidth = nlpo2dc(cellwidth) + 1;
-
-        ns->id = sprite_idmax;
-        ns->subcount  = imgnumb;
-        ns->width     = cellwidth;
-        ns->height    = height;
-        // FIXME: Calculate and assign correct bbox values.
-        int bbb = height;
-        int bbl = 0;
-        int bbt = 0;
-        int bbr = cellwidth;
-        ns->bbox.bottom  = bbb;
-          ns->bbox.left  = bbl;
-          ns->bbox.top   = bbt;
-          ns->bbox.right = bbr;
-        ns->bbox_relative.bottom  = bbb - y_offset;
-          ns->bbox_relative.left  = bbl - x_offset;
-          ns->bbox_relative.top   = bbt - y_offset;
-          ns->bbox_relative.right = bbr - x_offset;
-        ns->xoffset   = (int)x_offset;
-        ns->yoffset   = (int)y_offset;
-        ns->smooth = smooth;
-
-        unsigned char* pixels=new unsigned char[fullcellwidth*fullheight*4]();
-        for (int ii = 0; ii < imgnumb; ii++)
-        {
-      unsigned ih,iw;
-      unsigned xcelloffset = ii * cellwidth * 4;
-      for (ih = 0; ih < height; ih++)
-      {
-        unsigned tmp = ih * fullwidth * 4 + xcelloffset;
-        unsigned tmpcell = ih * fullcellwidth * 4;
-        for (iw = 0; iw < cellwidth; iw++)
-        {
-          pixels[tmpcell+0] = pxdata[tmp+0];
-          pixels[tmpcell+1] = pxdata[tmp+1];
-          pixels[tmpcell+2] = pxdata[tmp+2];
-          pixels[tmpcell+3] = pxdata[tmp+3];
-          tmp += 4;
-          tmpcell += 4;
-        }
-      }
-      unsigned texture = graphics_create_texture(
-          cellwidth, height, fullcellwidth, fullheight, pixels, mipmap);
-      ns->texturearray.push_back(texture);
-          ns->texturexarray.push_back((double) 0);
-          ns->textureyarray.push_back((double) 0);
-          ns->texturewarray.push_back((double) cellwidth/fullcellwidth);
-          ns->textureharray.push_back((double) height/fullheight);
-
-      collision_type coll_type = precise ? ct_precise : ct_bbox;
-      ns->colldata.push_back(get_collision_mask(ns,(unsigned char*)pixels,coll_type));
-        }
-        delete[] pixels;
-        delete[] pxdata;
-    }
-
-  void sprite_add_copy(sprite *spr, sprite *spr_copy) {
-        spr->subcount  = spr_copy->subcount;
-        spr->width     = spr_copy->width;
-        spr->height    = spr_copy->height;
-        spr->xoffset   = spr_copy->xoffset;
-        spr->yoffset   = spr_copy->yoffset;
-        spr->bbox.bottom  = spr_copy->bbox.bottom;
-        spr->bbox.left  = spr_copy->bbox.left;
-        spr->bbox.top   = spr_copy->bbox.top;
-        spr->bbox.right = spr_copy->bbox.right;
-        spr->bbox_relative.bottom  = spr_copy->bbox_relative.bottom;
-        spr->bbox_relative.left  = spr_copy->bbox_relative.left;
-        spr->bbox_relative.top   = spr_copy->bbox_relative.top;
-        spr->bbox_relative.right = spr_copy->bbox_relative.right;
-        spr->smooth = spr_copy->smooth;
-
-
-        for (int i = 0; i < spr->subcount; i++)
-        {
-            spr->texturearray.push_back(graphics_duplicate_texture(spr_copy->texturearray[i]));
-            spr->texturexarray.push_back(spr_copy->texturexarray[i]);
-            spr->textureyarray.push_back(spr_copy->textureyarray[i]);
-            spr->texturewarray.push_back(spr_copy->texturewarray[i]);
-            spr->textureharray.push_back(spr_copy->textureharray[i]);
-        }
-    }
-
-  //Sets the subimage
-  void sprite_set_subimage(int sprid, int imgindex,
-      unsigned int w, unsigned int h, unsigned char* chunk,
-      unsigned char* collision_data, collision_type ct) {
-    unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
-    unsigned int rowindex,colindex;
-    for (rowindex = 0; rowindex < h; rowindex++)
-    {
-      for(colindex = 0; colindex < w; colindex++)
-      {
-        *imgpxptr++ = *chunk++;
-        *imgpxptr++ = *chunk++;
-        *imgpxptr++ = *chunk++;
-        *imgpxptr++ = *chunk++;
-      }
-      memset(imgpxptr, 0, (fullwidth-colindex) << 2);
-      imgpxptr += (fullwidth-colindex) << 2;
-    }
-    memset(imgpxptr,0,(fullheight-h) * fullwidth);
-
-    unsigned texture =
-        graphics_create_texture(w, h, fullwidth, fullheight, imgpxdata, false);
-
-    sprite* sprstr = spritestructarray[sprid];
-
-    sprstr->texturearray.push_back(texture);
-    sprstr->texturexarray.push_back(0.0);
-    sprstr->textureyarray.push_back(0.0);
-    sprstr->texturewarray.push_back((double) w/fullwidth);
-    sprstr->textureharray.push_back((double) h/fullheight);
-    sprstr->colldata.push_back(get_collision_mask(sprstr,collision_data,ct));
-
-    delete[] imgpxdata;
-  }
-
-  //Appends a subimage
-  void sprite_add_subimage(int sprid, unsigned int w, unsigned int h,
-      unsigned char* chunk, unsigned char* collision_data, collision_type ct) {
-  unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
-    unsigned int rowindex,colindex;
-    for (rowindex = 0; rowindex < h; rowindex++)
-    {
-      for(colindex = 0; colindex < w; colindex++)
-      {
-        *imgpxptr++ = *chunk++;
-        *imgpxptr++ = *chunk++;
-        *imgpxptr++ = *chunk++;
-        *imgpxptr++ = *chunk++;
-      }
-      memset(imgpxptr, 0, (fullwidth-colindex) << 2);
-      imgpxptr += (fullwidth-colindex) << 2;
-    }
-    memset(imgpxptr,0,(fullheight-h) * fullwidth);
-
-  unsigned texture =
-      graphics_create_texture(w, h, fullwidth,fullheight,imgpxdata,false);
-
-    sprite* sprstr = spritestructarray[sprid];
-
-    sprstr->texturearray.push_back(texture);
-    sprstr->texturexarray.push_back(0.0);
-    sprstr->textureyarray.push_back(0.0);
-    sprstr->texturewarray.push_back((double) w/fullwidth);
-    sprstr->textureharray.push_back((double) h/fullheight);
-    sprstr->colldata.push_back(get_collision_mask(sprstr,collision_data,ct));
-
-  sprstr->subcount += 1;
-
-    delete[] imgpxdata;
-  }
-  
-  bbox_rect_t dummy_bbox = {32,0,32,0};
-
-  const bbox_rect_t &sprite_get_bbox(int sprid)
-  {
-    sprite *spr;
-    if (!get_sprite(spr,sprid))
-      return dummy_bbox;
-
-    return spr->bbox;
-  }
-  
-  const bbox_rect_t &sprite_get_bbox_relative(int sprid)
-  {
-    sprite *spr;
-    if (!get_sprite(spr,sprid))
-      return dummy_bbox;
-
-    return spr->bbox_relative;
-  }
+  spr->width = (spr->width > spr_copy->width) ? spr->width : spr_copy->width;
+  spr->height = (spr->height > spr_copy->height) ? spr->height : spr_copy->height;
 }
 
-namespace enigma_user
-{
-
-int sprite_get_width(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 32;
+int sprite_get_width(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 32;
 
   return spr->width;
 }
 
-int sprite_get_height(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 32;
+int sprite_get_height(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 32;
 
   return spr->height;
 }
 
-double sprite_get_texture_width_factor(int sprid, int subimg)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 32;
+double sprite_get_texture_width_factor(int sprid, int subimg) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 32;
 
   return spr->texturewarray[subimg];
 }
 
-double sprite_get_texture_height_factor(int sprid, int subimg)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 32;
+double sprite_get_texture_height_factor(int sprid, int subimg) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 32;
 
   return spr->textureharray[subimg];
 }
 
-int sprite_get_bbox_bottom(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 32;
+int sprite_get_bbox_bottom(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 32;
 
   return spr->bbox.bottom;
 }
-int sprite_get_bbox_left(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 0;
+int sprite_get_bbox_left(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 0;
 
   return spr->bbox.left;
 }
-int sprite_get_bbox_right(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 32;
+int sprite_get_bbox_right(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 32;
 
   return spr->bbox.right;
 }
-int sprite_get_bbox_top(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 0;
+int sprite_get_bbox_top(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 0;
 
   return spr->bbox.top;
 }
 
-int sprite_get_bbox_bottom_relative(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 32;
+int sprite_get_bbox_bottom_relative(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 32;
 
   return spr->bbox_relative.bottom;
 }
-int sprite_get_bbox_left_relative(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 0;
+int sprite_get_bbox_left_relative(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 0;
 
   return spr->bbox_relative.left;
 }
 
-int sprite_get_bbox_right_relative(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 32;
+int sprite_get_bbox_right_relative(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 32;
 
   return spr->bbox_relative.right;
 }
-int sprite_get_bbox_top_relative(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 0;
+int sprite_get_bbox_top_relative(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 0;
 
   return spr->bbox_relative.top;
 }
 
-int sprite_get_number(int sprid)
-{
+int sprite_get_number(int sprid) {
   if (sprid == -1) return 0;
 
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 0;
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 0;
 
   return spr->subcount;
 }
 
-int sprite_get_texture(int sprid,int subimage)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 0;
+int sprite_get_texture(int sprid, int subimage) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 0;
 
-  const int usi = subimage >= 0
-      ? (subimage % spr->subcount)
-      : int(get_current_instance()->image_index) % spr->subcount;
+  const int usi = subimage >= 0 ? (subimage % spr->subcount) : int(get_current_instance()->image_index) % spr->subcount;
   return spr->texturearray[usi];
 }
 
-int sprite_get_xoffset(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 0;
+int sprite_get_xoffset(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 0;
 
   return spr->xoffset;
 }
 
-int sprite_get_yoffset(int sprid)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprid))
-    return 0;
+int sprite_get_yoffset(int sprid) {
+  enigma::Sprite *spr;
+  if (!get_res(sprites, sprid, spr)) return 0;
 
   return spr->yoffset;
 }
 
-void sprite_set_offset(int ind, int xoff, int yoff)
-{
-  enigma::sprite *spr;
-  if (!get_sprite_mtx(spr,ind))
-    return;
+void sprite_set_offset(int ind, int xoff, int yoff) {
+  enigma::Sprite *spr;
+  if (!get_sprite_mtx(spr, ind)) return;
 
   spr->xoffset = xoff;
   spr->yoffset = yoff;
 }
 
 void sprite_set_bbox_mode(int ind, int mode) {
-  enigma::sprite *spr;
-  if (!get_sprite_mtx(spr,ind))
-    return;
+  enigma::Sprite *spr;
+  if (!get_sprite_mtx(spr, ind)) return;
 
   spr->bbox_mode = mode;
 }
 
 int sprite_get_bbox_mode(int ind) {
-  enigma::sprite *spr;
-  if (!get_sprite_mtx(spr,ind))
-    return 0;
+  enigma::Sprite *spr;
+  if (!get_sprite_mtx(spr, ind)) return 0;
 
   return spr->bbox_mode;
 }
 
-
-void sprite_set_bbox(int ind, int left, int top, int right, int bottom)
-{
-  enigma::sprite *spr;
-  if (!get_sprite_mtx(spr,ind))
-    return;
+void sprite_set_bbox(int ind, int left, int top, int right, int bottom) {
+  enigma::Sprite *spr;
+  if (!get_sprite_mtx(spr, ind)) return;
 
   spr->bbox.left = left;
   spr->bbox.top = top;
@@ -678,19 +442,17 @@ void sprite_set_bbox(int ind, int left, int top, int right, int bottom)
   spr->bbox_relative.bottom = bottom - spr->yoffset;
 }
 
-void sprite_collision_mask(int ind, bool sepmasks, int mode,
-    int left, int top, int right, int bottom, int kind,
-    unsigned char tolerance) {
+void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int top, int right, int bottom, int kind,
+                           unsigned char tolerance) {
   sprite_set_bbox(ind, left, top, right, bottom);
 }
 
-var sprite_get_uvs(int ind, int subimg){
+var sprite_get_uvs(int ind, int subimg) {
   var uvs;
-  uvs[4] = 0; 
+  uvs[4] = 0;
 
-  enigma::sprite *spr;
-  if (!get_sprite(spr,ind))
-    return uvs;
+  enigma::Sprite *spr;
+  if (!get_sprite(spr, ind)) return uvs;
 
   uvs[0] = spr->texturexarray[subimg];
   uvs[1] = spr->textureyarray[subimg];
@@ -699,5 +461,4 @@ var sprite_get_uvs(int ind, int subimg){
   return uvs;
 }
 
-}
-
+}  // namespace enigma_user

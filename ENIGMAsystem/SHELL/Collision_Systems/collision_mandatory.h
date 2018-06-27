@@ -29,7 +29,7 @@ namespace enigma
   // the input_data argument contains the collision data for the subimage,
   // and the collision_type argument indicates the format of the collision data
   // and how it should be used.
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct);
+  void *get_collision_mask(Sprite* spr, unsigned char* input_data, collision_type ct);
 
   // This function frees a collision mask fetched using "get_collision_mask".
   // It is used to clean up on game termination.
