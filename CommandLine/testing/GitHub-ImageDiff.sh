@@ -36,8 +36,6 @@ gh_comment="Graphics fidelity seems to have been compromised by changes in this 
 Carefully review the following image comparison for anomalies and adjust the changeset accordingly.\n\
 ### Diff\n\
 ![Diff Graphics Results]($imgur_diff_url)\n\
-### Expected Results\n\
-![Expected Graphics Results]($1)\n\
 ### Actual Results\n\
 ![Actual Graphics Results]($imgur_url)\n"
 
