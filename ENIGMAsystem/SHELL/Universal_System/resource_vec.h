@@ -21,7 +21,7 @@ class ResourceVec {
   T* operator[](int index) {
 #ifdef DEBUG_MODE
     if (!exists(index)) {
-      show_error("Attempting to access non-existing " + toString(type) + " " + toString(index), false);
+      //show_error("Attempting to access non-existing " + toString(type) + " " + toString(index), false);
       return nullptr;
     }
 #endif

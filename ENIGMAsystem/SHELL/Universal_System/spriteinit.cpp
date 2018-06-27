@@ -79,7 +79,7 @@ namespace enigma
       };
       
       int subimages;
-      if (!fread(&subimages,4,1,exe)) return; //co//ut << "Subimages: " << subimages << endl;
+      if (!fread(&subimages,4,1,exe)) return;
       
       int sprid = sprite_add(nullptr, width, height, 0, coll_type, false, false, true, xorig, yorig, false);
       enigma_user::sprite_set_bbox(sprid, bbl, bbt, bbr, bbb);
@@ -88,7 +88,7 @@ namespace enigma
         int unpacked;
         if (!fread(&unpacked,4,1,exe)) return;
         unsigned int size;
-        if (!fread(&size,4,1,exe)) return; //co//ut << "Alloc size: " << size << endl;
+        if (!fread(&size,4,1,exe)) return;
         unsigned char* cpixels=new unsigned char[size+1];
         if (!cpixels)
         {
@@ -107,22 +107,9 @@ namespace enigma
           continue;
         }
         delete[] cpixels;
-        
-        unsigned char* collision_data = 0;
-        switch (coll_type)
-        {
-          case ct_precise: collision_data = pixels; break;
-          case ct_circle:
-          case ct_ellipse:
-          case ct_diamond:
-          case ct_bbox: collision_data = 0; break;
-          case ct_polygon: collision_data = 0; break; //FIXME: Support vertex data.
-          default: collision_data = 0; break;
-        };
 
-        sprite_add_subimage(pixels, width, height, sprid, 1, coll_type, false, false, xorig, yorig, false);         
+        sprite_add_subimage(pixels, width, height, sprid, 1, coll_type, false, false, xorig, yorig, false);
         
-        delete[] pixels;
         if (!fread(&nullhere,4,1,exe)) return;
         
         if (nullhere)

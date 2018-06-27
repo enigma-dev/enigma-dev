@@ -154,7 +154,7 @@ bool sprite_set(int index, unsigned char *pxdata, unsigned w, unsigned h, int im
   sprites.assign(index,
                  std::move(make_unique<Sprite>(precise, transparent, smooth, preload, xoffset, yoffset, mipmap)));
 
-  if (imgnumb > 0)
+  if (imgnumb == 0)
     return true;
   else
     return (sprite_add_subimage(pxdata, w, h, sprites.size() - 1, imgnumb, precise, transparent, smooth, xoffset,
