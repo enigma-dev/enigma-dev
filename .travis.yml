@@ -82,6 +82,9 @@ before_install:
       brew install glew protobuf pugixml;
     fi
 
+    # reset this so that after_failure behaves accordingly
+    set +eo pipefail
+
 # build JDI and the CLI
 install:
   - chmod +x ./ci-build.sh
