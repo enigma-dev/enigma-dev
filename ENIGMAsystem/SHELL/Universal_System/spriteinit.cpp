@@ -17,12 +17,14 @@
 
 #include "libEGMstd.h"
 #include "resinit.h"
+#include "sprites.h"
 #include "sprites_internal.h"
 #include "zlib.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Collision_Systems/collision_mandatory.h"
 
 #include <cstring>
 #include <cstdio>
@@ -49,7 +51,6 @@ namespace enigma
     // Fetch the highest ID we will be using
     int spr_highid;
     if (!fread(&spr_highid,4,1,exe)) return;
-    sprites_init();
     
     for (int i = 0; i < sprcount; i++)
     {
@@ -80,7 +81,8 @@ namespace enigma
       int subimages;
       if (!fread(&subimages,4,1,exe)) return; //co//ut << "Subimages: " << subimages << endl;
       
-      sprite_new_empty(sprid, subimages, width, height, xorig, yorig, bbt, bbb, bbl, bbr, 1,0);
+      int sprid = sprite_add(nullptr, width, height, 0, coll_type, false, false, true, xorig, yorig, false);
+      enigma_user::sprite_set_bbox(sprid, bbl, bbt, bbr, bbb);
       for (int ii=0;ii<subimages;ii++) 
       {
         int unpacked;
@@ -89,7 +91,7 @@ namespace enigma
         if (!fread(&size,4,1,exe)) return; //co//ut << "Alloc size: " << size << endl;
         unsigned char* cpixels=new unsigned char[size+1];
         if (!cpixels)
-        {  //FIXME: Uncomment these when tostring is available
+        {
           show_error("Failed to load sprite: Cannot allocate enough memory "+toString(unpacked),0);
           break;
         }
@@ -117,8 +119,8 @@ namespace enigma
           case ct_polygon: collision_data = 0; break; //FIXME: Support vertex data.
           default: collision_data = 0; break;
         };
-        
-        sprite_set_subimage(sprid, ii, width, height, pixels, collision_data, coll_type);
+
+        sprite_add_subimage(pixels, width, height, sprid, 1, coll_type, false, false, xorig, yorig, false);         
         
         delete[] pixels;
         if (!fread(&nullhere,4,1,exe)) return;

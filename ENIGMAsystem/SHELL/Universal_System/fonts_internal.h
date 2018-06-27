@@ -25,6 +25,8 @@
 #ifndef ENIGMA_FONTS_INTERNAL_H
 #define ENIGMA_FONTS_INTERNAL_H
 
+#include "sprites_internal.h"
+
 #include <string>
 #include <vector>
 #include <stdint.h>
@@ -72,7 +74,7 @@ namespace enigma
 
   extern int rawfontcount, rawfontmaxid;
   int font_new(uint32_t gs, uint32_t gc); // Creates a new font, allocating 'gc' glyphs
-  int font_pack(enigma::font *font, int spr, uint32_t gcount, bool prop, int sep);
+  int font_pack(Sprite *sspr, font *font, uint32_t gcount, bool prop, int sep);
   fontglyph findGlyph(const font *const fnt, uint32_t character);
 } //namespace enigma
 

@@ -361,21 +361,14 @@ int background_create_from_surface(int id, int x, int y, int w, int h, bool remo
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
 {
   get_surfacev(surf,id,-1);
-  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
-  enigma::spritestructarray_reallocate();
-  int sprid=enigma::sprite_idmax;
-  enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
-
-  unsigned sz=full_width*full_height;
+  unsigned sz=w*h;
   unsigned char *surfbuf=new unsigned char[sz*4];
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf.fbo);
   glReadPixels(x,y,w,h,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
-  enigma::sprite_set_subimage(sprid, 0, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
-  delete[] surfbuf;
-  return sprid;
+  return enigma::sprite_add(surfbuf, w, h, 1, enigma::ct_precise, removeback, smooth, preload, xorig, yorig, false);
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h,
@@ -387,17 +380,15 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h,
 void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
 {
   get_surface(surf,id);
-  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 
-  unsigned sz=full_width*full_height;
+  unsigned sz=w*h;
   unsigned char *surfbuf=new unsigned char[sz*4];
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf.fbo);
   glReadPixels(x,y,w,h,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
-  enigma::sprite_add_subimage(ind, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
-  delete[] surfbuf;
+  enigma::sprite_add_subimage(surfbuf, w, h, id, 1, enigma::ct_precise, removeback, smooth, x, y, false);
 }
 
 void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)

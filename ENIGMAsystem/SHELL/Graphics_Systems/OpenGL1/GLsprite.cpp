@@ -24,37 +24,12 @@
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
 
+#include "Collision_Systems/collision_types.h"
+
 #include <cmath>
 #include <cstdlib>
 #include <string>
 using std::string;
-
-#ifdef DEBUG_MODE
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_sprite(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev(spr,id) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_null(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-#else
-  #define get_sprite(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev(spr,id) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_null(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-#endif
 
 // These two leave a bad taste in my mouth because they depend on views, which should be removable.
 // However, for now, they stay.
@@ -72,24 +47,16 @@ namespace enigma_user
 {
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
-  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
  	glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-	int patchSize = full_width*full_height;
+	int patchSize = w*h;
 	std::vector<unsigned char> rgbdata(4*patchSize);
 	glReadPixels(x,enigma_user::window_get_region_height_scaled()-h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
 
 	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
-
-	enigma::spritestructarray_reallocate();
-  int sprid=enigma::sprite_idmax;
-  enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
-	enigma::sprite_set_subimage(sprid, 0, w, h, &data[0], &data[0], enigma::ct_precise); //TODO: Support toggling of precise.
-  rgbdata.clear(); // Clear the temporary array
-	delete[] data;
-  return sprid;
+  return enigma::sprite_add(data, w, h, 1, enigma::ct_precise, removeback, smooth, preload, xorig, yorig, false);
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
@@ -97,20 +64,16 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
 }
 
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
-  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
  	glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-	int patchSize = full_width*full_height;
+	int patchSize = w*h;
 	std::vector<unsigned char> rgbdata(4*patchSize);
 	glReadPixels(x,enigma_user::window_get_region_height_scaled()-h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
 
 	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
-
-	enigma::sprite_add_subimage(id, w, h, &data[0], &data[0], enigma::ct_precise); //TODO: Support toggling of precise.
-	delete[] data;
-	rgbdata.clear();
+  enigma::sprite_add_subimage(data, w, h, id, 1, enigma::ct_precise, removeback, smooth, x, y, false);
 }
 
 }

@@ -6,16 +6,13 @@
 #include "libEGMstd.h"
 #endif
 
+#include "make_unique.h"
+
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace enigma {
-
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
 
 template <class T>
 class ResourceVec {
@@ -24,7 +21,7 @@ class ResourceVec {
   T* operator[](int index) {
 #ifdef DEBUG_MODE
     if (!exists(index)) {
-      show_error("Attempting to access non-existing " + toString(type) + toString(index), false);
+      show_error("Attempting to access non-existing " + toString(type) + " " + toString(index), false);
       return nullptr;
     }
 #endif
@@ -35,12 +32,12 @@ class ResourceVec {
   void assign(int index, std::unique_ptr<T> r) { res[index] = std::move(r); }
   void push_back(std::unique_ptr<T> r) { res.push_back(std::move(r)); }
   void pop_back() { res.pop_back(); }
-  bool exists(int index) { return index > 0 || index < static_cast<int>(res.size()) || res[index] == nullptr; }
-  size_t size() { return size(); }
+  bool exists(int index) { return index >= 0 && index < static_cast<int>(res.size()) && res[index] != nullptr; }
+  size_t size() { return res.size(); }
   void remove(int index) {
 #ifdef DEBUG_MODE
     if (!exists(index)) {
-      show_error("Attempting to delete non-existing " + toString(type) + toString(index), false);
+      show_error("Attempting to delete non-existing " + toString(type) + " " + toString(index), false);
       return;
     }
 #endif
@@ -48,7 +45,7 @@ class ResourceVec {
     res[index] = nullptr;
   }
   void duplicate(int index) {
-    res.push_back(make_unique<T>(res[index]));
+    res.push_back(make_unique<T>(*res[index]));
   }
 
  protected:

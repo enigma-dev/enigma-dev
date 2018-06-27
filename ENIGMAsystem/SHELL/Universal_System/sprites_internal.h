@@ -35,7 +35,9 @@
 
 namespace enigma {
 struct bbox_rect_t {
-  int bottom = 0, left = 0, right = 0, top = 0;
+  bbox_rect_t() : left(0), top(0), right(0), bottom(0) {}
+  bbox_rect_t(int left, int top, int right, int bottom) : left(left), top(top), right(right), bottom(bottom) {}
+  int left, top, right, bottom;
 };
 
 struct SubImage {
@@ -51,18 +53,22 @@ struct Sprite {
          int yoffset = 0, bool mipmap = false)
       : subimages(0) {}
 
+  size_t subcount();
   void freeTextures();
   int width = 0, height = 0, xoffset = 0, yoffset = 0;
   bool smooth = false, preload = false, mipmap = false;
+  int bbox_mode = 0;
   std::array<bbox_rect_t, 2> bbox;
   std::vector<SubImage> subimages;
 };
 
-int sprite_add(unsigned char *pxdata, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int xoffset, int yoffset, bool mipmap);
-int sprite_set(unsigned char *pxdata, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int xoffset, int yoffset, bool mipmap);
-int sprite_add_subimage(unsigned char *pxdata, int id, int imgCount, bool precise, bool transparent, bool smooth, int xoffset, int yoffset, bool mipmap);
+int sprite_add(unsigned char *pxdata, unsigned w, unsigned h, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int xoffset, int yoffset, bool mipmap);
+int sprite_set(unsigned char *pxdata, unsigned w, unsigned h, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int xoffset, int yoffset, bool mipmap);
+int sprite_add_subimage(unsigned char *pxdata, unsigned w, unsigned h, int id, int imgCount, bool precise, bool transparent, bool smooth, int xoffset, int yoffset, bool mipmap);
 const bbox_rect_t &sprite_get_bbox(int sprid);
 const bbox_rect_t &sprite_get_bbox_relative(int sprid);
+
+extern ResourceVec<Sprite> sprites;
 
 }  // namespace enigma
 

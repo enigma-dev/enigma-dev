@@ -28,7 +28,7 @@ static inline int max(int x, int y) { return x>y? x : y; }
 namespace enigma
 {
   // A non-NULL pointer is a sprite mask, a NULL pointer means bbox should be used.
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
+  void *get_collision_mask(Sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
   {
     switch (ct)
     {

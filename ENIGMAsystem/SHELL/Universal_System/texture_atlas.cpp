@@ -28,19 +28,6 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/rectpack.h"
 
-#ifdef DEBUG_MODE
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_sprite(spr,id) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return; \
-    } enigma::sprite *const spr = enigma::spritestructarray[id];
-#else
-  #define get_sprite(spr,id) \
-    enigma::sprite *const spr = enigma::spritestructarray[id];
-#endif
-
 using std::unordered_map;
 using std::vector;
 
@@ -64,8 +51,9 @@ namespace enigma {
     for (unsigned int i = 0; i < textures.size(); i++){ //This adds the rest of the images
       switch (textures[i].type){
         case 0: { //Add all sprite subimages
-          enigma::sprite *sspr = enigma::spritestructarray[textures[i].id];
-          for (int s = 0; s < sspr->subcount; s++){
+          enigma::Sprite *sspr;
+          get_resb(sprites, textures[i].id, sspr);
+          for (size_t s = 0; s < sspr->subcount(); s++){
             metrics.emplace_back();
           }
         } break;
@@ -89,8 +77,9 @@ namespace enigma {
       // TODO: This should maybe crop the images so it's totally fit (this can be done on compile time by LGM or compiler even, but it's possible the user has loaded the image at runtime)
       switch (textures[i].type){
         case 0: { //Metrics all sprite subimages
-          enigma::sprite *sspr = enigma::spritestructarray[textures[i].id];
-          for (int s = 0; s < sspr->subcount; s++){
+          enigma::Sprite *sspr;
+          get_resb(sprites, textures[i].id, sspr);
+          for (size_t s = 0; s < sspr->subcount(); s++){
             metrics[counter].w = sspr->width, metrics[counter].h = sspr->height;
             counter++;
           }
@@ -157,17 +146,18 @@ namespace enigma {
     for (unsigned int i = 0; i < textures.size(); i++){
       switch (textures[i].type){
         case 0: { //Copy textures for all sprite subimages
-          enigma::sprite *sspr = enigma::spritestructarray[textures[i].id];
-          for (int s = 0; s < sspr->subcount; s++){
-            enigma::graphics_copy_texture(sspr->texturearray[s], enigma::texture_atlas_array[ta].texture, metrics[counter].x, metrics[counter].y);
+          enigma::Sprite *sspr;
+          get_resb(sprites, textures[i].id, sspr);
+          for (size_t s = 0; s < sspr->subcount(); s++){
+            enigma::graphics_copy_texture(sspr->subimages[s].textureID, enigma::texture_atlas_array[ta].texture, metrics[counter].x, metrics[counter].y);
             if (free_textures == true){
-              enigma::graphics_delete_texture(sspr->texturearray[s]);
+              enigma::graphics_delete_texture(sspr->subimages[s].textureID);
             }
-            sspr->texturearray[s] = enigma::texture_atlas_array[ta].texture;
-            sspr->texturexarray[s] = (double)metrics[counter].x/(double)(enigma::texture_atlas_array[ta].width);
-            sspr->textureyarray[s] = (double)metrics[counter].y/(double)(enigma::texture_atlas_array[ta].height);
-            sspr->texturewarray[s] = (double)sspr->width/(double)(enigma::texture_atlas_array[ta].width);
-            sspr->textureharray[s] = (double)sspr->height/(double)(enigma::texture_atlas_array[ta].height);
+            sspr->subimages[s].textureID = enigma::texture_atlas_array[ta].texture;
+            sspr->subimages[s].x = (double)metrics[counter].x/(double)(enigma::texture_atlas_array[ta].width);
+            sspr->subimages[s].y = (double)metrics[counter].y/(double)(enigma::texture_atlas_array[ta].height);
+            sspr->subimages[s].w = (double)sspr->width/(double)(enigma::texture_atlas_array[ta].width);
+            sspr->subimages[s].h = (double)sspr->height/(double)(enigma::texture_atlas_array[ta].height);
             //printf("Sprite %i subimage %i placed at x = %f and y = %f, w = %f, h = %f\n", i, s,(double)metrics[counter].x, (double)metrics[counter].y, (double)sspr->width/(double)(enigma::texture_atlas_array[ta].width), (double)sspr->height/(double)(enigma::texture_atlas_array[ta].height));
 
             counter++;
@@ -266,15 +256,16 @@ namespace enigma_user {
   //Manually add sprite at position (NOT RECOMMENDED)
   void texture_atlas_add_sprite_position(int tp, int sprid, int subimg, int x, int y, bool free_texture){
     ///TODO: NEEDS ERROR CHECKING
-    get_sprite(spr, sprid);
-    enigma::graphics_copy_texture(spr->texturearray[subimg], enigma::texture_atlas_array[tp].texture, x, y);
+    enigma::Sprite *spr;
+    get_resv(enigma::sprites, sprid, spr);
+    enigma::graphics_copy_texture(spr->subimages[subimg].textureID, enigma::texture_atlas_array[tp].texture, x, y);
     if (free_texture == true){
-      enigma::graphics_delete_texture(spr->texturearray[subimg]);
+      enigma::graphics_delete_texture(spr->subimages[subimg].textureID);
     }
-    spr->texturearray[subimg] = enigma::texture_atlas_array[tp].texture;
-    spr->texturexarray[subimg] = (double)x/(double)(enigma::texture_atlas_array[tp].width);
-    spr->textureyarray[subimg] = (double)y/(double)(enigma::texture_atlas_array[tp].height);
-    spr->texturewarray[subimg] = (double)spr->width/(double)(enigma::texture_atlas_array[tp].width);
-    spr->textureharray[subimg] = (double)spr->height/(double)(enigma::texture_atlas_array[tp].height);
+    spr->subimages[subimg].textureID = enigma::texture_atlas_array[tp].texture;
+    spr->subimages[subimg].x = (double)x/(double)(enigma::texture_atlas_array[tp].width);
+    spr->subimages[subimg].y = (double)y/(double)(enigma::texture_atlas_array[tp].height);
+    spr->subimages[subimg].w = (double)spr->width/(double)(enigma::texture_atlas_array[tp].width);
+    spr->subimages[subimg].h = (double)spr->height/(double)(enigma::texture_atlas_array[tp].height);
   }
 }
