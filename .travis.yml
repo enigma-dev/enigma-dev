@@ -85,7 +85,7 @@ before_install:
 # build JDI and the CLI
 install:
   - chmod +x ./ci-build.sh
-  - chmod +x ./CommandLine/testing/EnigmaBot-GitHub.sh
+  - chmod +x ./CommandLine/testing/GitHub-ImageDiff.sh
   - make -j4
   - |
     if [ "$TEST_HARNESS" == true ]; then
@@ -103,7 +103,7 @@ language: cpp
 after_failure:
   - |
     if [ "$TEST_HARNESS" == true ]; then
-      ./CommandLine/testing/EnigmaBot-GitHub.sh
+      ./CommandLine/testing/GitHub-ImageDiff.sh
     fi
 
 env:
