@@ -3,13 +3,13 @@
 #include "EnigmaPlugin.hpp"
 #include "Game.hpp"
 
-#ifndef CLI_DISABLE_SERVER
+#ifdef CLI_ENABLE_SERVER
 #include "Server.hpp"
 #endif
 
 #include "SOG.hpp"
 
-#ifndef CLI_DISABLE_EGM
+#ifdef CLI_ENABLE_EGM
 #include "gmk.h"
 #include "gmx.h"
 #include "yyp.h"
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     outputStream.rdbuf(nullptr);
     errorStream.rdbuf(nullptr);
   }
-#ifndef CLI_DISABLE_EGM
+#ifdef CLI_ENABLE_EGM
   yyp::bind_output_streams(outputStream, errorStream);
   gmx::bind_output_streams(outputStream, errorStream);
   gmk::bind_output_streams(outputStream, errorStream);
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
   bool run = options.GetOption("run").as<bool>();
   if (!run) plugin.HandleGameLaunch();
 
-#ifndef CLI_DISABLE_SERVER
+#ifdef CLI_ENABLE_SERVER
   bool server = options.GetOption("server").as<bool>();
   if (server) {
     int port = options.GetOption("port").as<int>();
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
     if (ext == "sog") {
       if (!ReadSOG(input_file, &game)) return 1;
       return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
-#ifndef CLI_DISABLE_EGM
+#ifdef CLI_ENABLE_EGM
     } else if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
       buffers::Project* project;
       if (!(project = gmk::LoadGMK(input_file))) return 1;

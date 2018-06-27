@@ -17,30 +17,27 @@ else
 endif
 
 PROTO_DIR := ../protos
-# As a "temporary hack," allow including from CompilerSource to give access to backend/ folder.
-CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SRC_DIR)/lodepng -std=c++11 -Wall -Wextra -Wpedantic -g
+CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I../../shared -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SRC_DIR)/lodepng -std=c++11 -Wall -Wextra -Wpedantic -g
 LDFLAGS   := $(OS_LIBS) -L../../ -lz -L$(SHARED_SRC_DIR)/lodepng -llodepng -lProtocols -lprotobuf
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 
-# disable the server by default because we aren't sure in what
-# capacity we are using it yet, Travis can't build it
-# and neither can anybody else because of Ubuntu being 100 years old
-disable_server ?= true
+#ON BY DEFAULT
+ifneq ($(CLI_ENABLE_EGM), FALSE)
+	override CXXFLAGS += -DCLI_ENABLE_EGM
+	override CXXFLAGS += -I../libEGM -I../libEGM
+	override LDFLAGS += -lEGM
+endif
 
-ifeq (_$(disable_egm),$(filter _$(disable_egm),_true _1 _yes _y))
-	CXXFLAGS += -DCLI_DISABLE_EGM
+#OFF BY DEFAULT
+ifeq ($(CLI_ENABLE_SERVER), TRUE)
+	override CXXFLAGS += -DCLI_ENABLE_SERVER
+	override LDFLAGS += -lgrpc++
 else
-	CXXFLAGS += -I../libEGM -I../libEGM
-	LDFLAGS += -lEGM
-endif
-ifeq (_$(disable_server),$(filter _$(disable_server),_true _1 _yes _y))
 	SOURCES := $(filter-out ./Server.cpp, $(SOURCES))
-	CXXFLAGS += -DCLI_DISABLE_SERVER
-else
-	LDFLAGS += -lgrpc++
 endif
+
 OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURCES)))
 DEPENDS := $(OBJECTS:.o=.d)
 

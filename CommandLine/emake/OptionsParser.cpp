@@ -97,7 +97,7 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
     ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
     ("quiet,q", opt::bool_switch()->default_value(false), "Suppresses output to std::out and std::err streams.")
-#ifndef CLI_DISABLE_SERVER
+#ifdef CLI_ENABLE_SERVER
     ("server,s", opt::bool_switch()->default_value(false), "Starts the CLI in server mode (ignores input file).")
     ("ip", opt::value<std::string>()->default_value("localhost"), "The ip address of the server when running in server mode.")
     ("port", opt::value<int>()->default_value(37818), "The port number to bind when in server mode.")
