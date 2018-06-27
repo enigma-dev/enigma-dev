@@ -83,7 +83,7 @@ before_install:
     fi
 
     # reset this so that after_failure behaves accordingly
-    set +eo pipefail
+    set +e
 
 # build JDI and the CLI
 install:
