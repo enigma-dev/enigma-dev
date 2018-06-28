@@ -82,7 +82,7 @@ OptionsParser::OptionsParser() : _desc("Options")
     def_workdir = "%LOCALAPPDATA%/ENIGMA/";
     def_compiler = "gcc";
   #elif CURRENT_PLATFORM_ID ==  OS_MACOSX
-    def_platform = "Cocoa";
+    def_platform = "SDL";
     def_workdir = "/tmp/ENIGMA/";
     def_compiler = "clang";
   #else
@@ -103,7 +103,7 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("port", opt::value<int>()->default_value(37818), "The port number to bind when in server mode.")
 #endif
     ("output,o", opt::value<std::string>(), "Output executable file")
-    ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
+    ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, SDL)")
     ("workdir,d", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
     ("codegen,k", opt::value<std::string>()->default_value(def_workdir), "Codegen Directory")
     ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Release, Debug, Design)")

@@ -1,12 +1,15 @@
+CODECS := vorbisfile vorbis ogg flac sndfile libmodplug libmpg123
 SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
 
-ifeq ($(TARGET-PLATFORM), Linux)
-	override LDLIBS += -lopenal -lalure -lvorbisfile -lvorbis -ldumb
-else ifeq ($(TARGET-PLATFORM), Windows)
-	override CXXFLAGS += $(shell pkg-config --cflags openal)
-	override LDLIBS += -lALURE32-static -lopenal.dll -lvorbisfile -lvorbis -logg -lFLAC -lsndfile -lmodplug -lmpg123 -lole32 -lwinmm
-else ifeq ($(TARGET-PLATFORM), MacOSX)
-	override LDLIBS += -framework OpenAL
-	SOURCES += $(wildcard ../additional/alure/enigma_alure/*.cpp)
-	include $(addsuffix /Makefile, ../additional/alure/Codecs)
+ifeq ($(TARGET-PLATFORM), Windows)
+	override CXXFLAGS += $(shell pkg-config --cflags --static openal alure $(CODECS))
+	#unsure if pkgconfig sets this on windows or not
+	override CXXFLAGS += -DALURE_STATIC_LIBRARY
+	override LDLIBS += $(shell pkg-config --libs --static openal alure $(CODECS))
+else
+	override CXXFLAGS += $(shell pkg-config --cflags openal alure $(CODECS))
+	override LDLIBS += $(shell pkg-config --libs openal alure $(CODECS))
 endif
+
+#pkgconf for dumb incorrectly list dumb's lib as -llibdumb. move dumb to codecs if it's ever fixed
+override LDLIBS += -ldumb

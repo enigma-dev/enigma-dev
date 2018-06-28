@@ -79,7 +79,7 @@ before_install:
       fi
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
-      brew install glew protobuf pugixml;
+      brew install sdl2 openal-soft dumb alure libvorbis libsndfile flac mpg123 libmodplug boost glew protobuf pugixml rapidjson yaml-cpp pkg-config;
     fi
 
 # build JDI and the CLI
@@ -173,9 +173,9 @@ matrix:
       before_script: sudo apt-get -y install libfreetype6-dev
     # OSX
     - { os: osx, osx_image: xcode9.2,
-        env: COMPILER=clang PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None" }
+        env: COMPILER=clang PLATFORM=SDL MODE=Debug GRAPHICS=OpenGL1 AUDIO=OpenAL COLLISION=BBox NETWORK=None WIDGETS=None EXTENSIONS="None" }
     - { os: osx, osx_image: xcode9.2,
-        env: COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None" }
+        env: COMPILER=gcc PLATFORM=SDL MODE=Debug GRAPHICS=OpenGL3 AUDIO=None COLLISION=Precise NETWORK=None WIDGETS=None EXTENSIONS="None" }
   # don't wait for OSX
   fast_finish: true
   allow_failures:

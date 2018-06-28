@@ -48,12 +48,21 @@ DEPENDS += $(addprefix $(OBJ_DIR)/shared/,$(SHARED_SOURCES:.cpp=.d))
 
 OBJDIRS := $(sort $(OBJ_DIR) $(dir $(OBJECTS)))
 
+LINKING_TARGETS := $(BINARY)
+ifeq ($(OS), Darwin)
+	LINKING_TARGETS += AppleSucks
+endif
+
+AppleSucks:
+	install_name_tool -change ../../libEGM.dylib @loader_path/./libEGM.dylib $(BINARY)
+	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib ../../libEGM.dylib
+
 $(BINARY): $(OBJECTS)
 	g++ $^ $(LDFLAGS) -o $@
 
 .PHONY: all clean obj_dirs
 
-all: $(BINARY)
+all: $(LINKING_TARGETS)
 
 clean:
 	rm -rf $(BINARY) $(OBJ_DIR)

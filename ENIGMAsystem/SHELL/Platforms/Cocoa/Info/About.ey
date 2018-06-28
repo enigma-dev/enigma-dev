@@ -4,7 +4,7 @@
 Name: Mac OS X
 Identifier: Cocoa
 Represents:
-	Build-Platforms: MacOSX
+	Build-Platforms: None
 Description: Run on Apple Mac OS X, or other Cocoa-enabled Apple systems.
 Author: TGMG
 

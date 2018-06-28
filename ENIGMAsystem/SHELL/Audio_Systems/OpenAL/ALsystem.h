@@ -16,18 +16,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// We don't want to load ALURE from a DLL. Would be kind of a waste.
-#define ALURE_STATIC_LIBRARY 1
-
 #ifndef ENIGMA_AL_SYSTEM_H
 #define ENIGMA_AL_SYSTEM_H
 #include <stddef.h>
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
+#include <alure.h>
 
 extern bool load_al_dll();
 extern size_t channel_num;
