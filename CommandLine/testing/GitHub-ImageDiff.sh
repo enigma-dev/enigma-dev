@@ -10,6 +10,8 @@ orgrepo=$gh_organization'/'$gh_repository                 # This is just YOURORG
 repo=$gh_api'repos/'$orgrepo                              # This is the full URL that fetches us repository information.
 pullrequest=$repo"/issues/$TRAVIS_PULL_REQUEST/comments"  # Full URL to current pullrequest.
 
+echo $pullrequest
+
 imgur_api='https://api.imgur.com/3/image'  # This is the Imgur API URL. We need this to upload images.
 
 function imgur_upload {
@@ -19,21 +21,20 @@ function imgur_upload {
               --form "image=@$1")
 }
 
-echo $pullrequest
-
 imgur_diff_response=$( imgur_upload '/tmp/enigma_draw_diff.png' )
 imgur_response=$( imgur_upload '/tmp/enigma_draw_test.png' )
 
 imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
 imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
 
+echo $imgur_diff_url
 echo $imgur_url
 
-gh_comment="Graphics fidelity seems to have been compromised by changes in $TRAVIS_COMMIT. \
+gh_comment="Graphics fidelity seems to have been compromised by changes in $TRAVIS_PULL_REQUEST_SHA. \
 Carefully review the following image comparison for anomalies and adjust the changeset accordingly.\n\
 ### Image Diff & Screen Save\n\
-<a href='$imgur_diff_url'><img src='$imgur_diff_url' align='left' width='200'></a>\
-<a href='$imgur_url'><img src='$imgur_url' align='left' width='200'></a>\n"
+<a target='_blank' href='$imgur_diff_url'><img alt='Image Diff' src='$imgur_diff_url' align='left' width='200'></a>\
+<a target='_blank' href='$imgur_url'><img alt='Screen Save' src='$imgur_url' align='left' width='200'></a>\n"
 
 curl -u $bot_user':'$bot_password \
   --header "Content-Type: application/json" \
