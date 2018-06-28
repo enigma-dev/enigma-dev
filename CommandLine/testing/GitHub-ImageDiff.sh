@@ -35,8 +35,8 @@ echo $imgur_url
 gh_comment="Graphics fidelity seems to have been compromised by changes in this pull request. \
 Carefully review the following image comparison for anomalies and adjust the changeset accordingly.\n\
 ### Diff\n\
-<a href="$imgur_diff_url"><img src="$imgur_diff_url" align=\"left\" width=\"200\"></a>\
-<a href="$imgur_url"><img src="$imgur_url" align=\"left\" width=\"200\"></a>\n"
+<a href='$imgur_diff_url'><img src='$imgur_diff_url' align='left' width='200'></a>\
+<a href='$imgur_url'><img src='$imgur_url' align='left' width='200'></a>\n"
 
 curl -u $bot_user':'$bot_password \
   --header "Content-Type: application/json" \
