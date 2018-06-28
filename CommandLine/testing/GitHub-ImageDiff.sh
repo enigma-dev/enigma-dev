@@ -32,9 +32,11 @@ echo $imgur_url
 
 gh_comment="Graphics fidelity seems to have been compromised by changes in $TRAVIS_PULL_REQUEST_SHA. \
 Carefully review the following image comparison for anomalies and adjust the changeset accordingly.\n\
-### Image Diff & Screen Save\n\
-<a target='_blank' href='$imgur_diff_url'><img alt='Image Diff' src='$imgur_diff_url' align='left' width='200'></a>\
-<a target='_blank' href='$imgur_url'><img alt='Screen Save' src='$imgur_url' align='left' width='200'></a>\n"
+\n\
+Image Diff | Screen Save\n\
+--- | ---\n\
+<kbd><a href='$imgur_diff_url'><img alt='Image Diff' src='$imgur_diff_url'/></a></kbd>|\
+<kbd><a href='$imgur_url'><img alt='Screen Save' src='$imgur_url'/></a></kbd>\n"
 
 curl -u $bot_user':'$bot_password \
   --header "Content-Type: application/json" \
