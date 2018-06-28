@@ -21,17 +21,17 @@ function imgur_upload {
 
 echo $pullrequest
 
-imgur_diff_response=$( imgur_upload '/tmp/diff.png' )
-imgur_response=$( imgur_upload '/tmp/test.png' )
+imgur_diff_response=$( imgur_upload '/tmp/enigma_draw_diff.png' )
+imgur_response=$( imgur_upload '/tmp/enigma_draw_test.png' )
 
 imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
 imgur_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
 
 echo $imgur_url
 
-gh_comment="Graphics fidelity seems to have been compromised by changes in this pull request. \
+gh_comment="Graphics fidelity seems to have been compromised by changes in $TRAVIS_COMMIT. \
 Carefully review the following image comparison for anomalies and adjust the changeset accordingly.\n\
-### Diff\n\
+### ImageMagick Diff & Screen Save\n\
 <a href='$imgur_diff_url'><img src='$imgur_diff_url' align='left' width='200'></a>\
 <a href='$imgur_url'><img src='$imgur_url' align='left' width='200'></a>\n"
 

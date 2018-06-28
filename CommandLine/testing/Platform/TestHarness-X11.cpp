@@ -102,6 +102,9 @@ class X11_TestHarness final: public TestHarness {
   void screen_save(std::string fPath) final {
     system(("import -window " + to_string(window_id) + " " + fPath).c_str());
   }
+  void file_delete(std::string fPath) final {
+    system(("rm -f " + fPath).c_str());
+  }
   int image_compare(std::string image1, std::string image2, std::string diff) final {
     //ret 0 = no problemo
     return system(("compare -metric AE " + image1 + " " + image2 + " " + diff).c_str());
