@@ -35,8 +35,8 @@ Carefully review the following image comparison for anomalies and adjust the cha
 \n\
 Image Diff | Screen Save\n\
 --- | ---\n\
-<kbd><a href='$imgur_diff_url'><img alt='Image Diff' src='$imgur_diff_url'/></a></kbd>|\
-<kbd><a href='$imgur_url'><img alt='Screen Save' src='$imgur_url'/></a></kbd>\n"
+<a href='$imgur_diff_url'><img alt='Image Diff' src='$imgur_diff_url'/></a>|\
+<a href='$imgur_url'><img alt='Screen Save' src='$imgur_url'/></a>\n"
 
 curl -u $bot_user':'$bot_password \
   --header "Content-Type: application/json" \
