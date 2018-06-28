@@ -82,9 +82,6 @@ before_install:
       brew install glew protobuf pugixml;
     fi
 
-    # reset this so that after_failure behaves accordingly
-    set +e
-
 # build JDI and the CLI
 install:
   - chmod +x ./ci-build.sh
@@ -193,16 +190,11 @@ script:
       Xvfb :1 -screen 0 1024x768x24 &
       xfwm4 &
       ASAN_OPTIONS=detect_leaks=0
-      if [ ./test-runner ]; then
+      if ./test-runner ; then
+        ./CommandLine/testing/GitHub-ImageDiff.sh
         exit 1
       fi
       bash <(curl -s https://codecov.io/bash) -f "*.info"
     else
       ./ci-build.sh
-    fi
-
-after_failure:
-  - |
-    if [ "$TEST_HARNESS" == true ]; then
-      ./CommandLine/testing/GitHub-ImageDiff.sh
     fi
