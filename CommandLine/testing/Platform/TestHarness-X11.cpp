@@ -100,7 +100,9 @@ class X11_TestHarness final: public TestHarness {
     system(("wmctrl -i -c " + to_string(window_id)).c_str());
   }
   void screen_save(std::string fPath) final {
-    system(("magick import -window " + to_string(window_id) + " " + fPath).c_str());
+    system("chvt 7");
+    system(("import -window " + to_string(window_id) + " " + fPath).c_str());
+    system("chvt 1");
   }
   void file_delete(std::string fPath) final {
     system(("rm -f " + fPath).c_str());
