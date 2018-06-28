@@ -191,7 +191,9 @@ script:
       xfwm4 &
       export ASAN_OPTIONS=detect_leaks=0
       if ! ./test-runner ; then
-        ./CommandLine/testing/GitHub-ImageDiff.sh
+        if [ "$IMAGE_COMPARE_FAILED" == true ]; then
+          ./CommandLine/testing/GitHub-ImageDiff.sh
+        fi
         exit 1
       fi
       bash <(curl -s https://codecov.io/bash) -f "*.info"

@@ -100,13 +100,13 @@ class X11_TestHarness final: public TestHarness {
     system(("wmctrl -i -c " + to_string(window_id)).c_str());
   }
   void screen_save(std::string fPath) final {
-    system(("import -window " + to_string(window_id) + " " + fPath).c_str()); 
+    system(("import -window " + to_string(window_id) + " " + fPath).c_str());
   }
   int image_compare(std::string image1, std::string image2, std::string diff) final {
     //ret 0 = no problemo
     return system(("compare -metric AE " + image1 + " " + image2 + " " + diff).c_str());
   }
-  
+
 
   bool game_is_running() final {
     if (pid == -1) return false;

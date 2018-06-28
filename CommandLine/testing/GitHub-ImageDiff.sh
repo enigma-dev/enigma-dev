@@ -21,11 +21,8 @@ function imgur_upload {
 
 echo $pullrequest
 
-# temporarily caching the imgur upload until the rest is worked out to preserve rate limit
-# imgur_diff_response=$( imgur_upload '/tmp/diff.png' )
-# imgur_response=$( imgur_upload '/tmp/test.png' )
-imgur_diff_response='{"data":{"id":"k1Y5Mqe","title":null,"description":null,"datetime":1530076880,"type":"image\/png","animated":false,"width":640,"height":480,"size":2441,"views":0,"bandwidth":0,"vote":null,"favorite":false,"nsfw":null,"section":null,"account_url":null,"account_id":0,"is_ad":false,"in_most_viral":false,"has_sound":false,"tags":[],"ad_type":0,"ad_url":"","in_gallery":false,"deletehash":"qQYUJmlu0ilBr1W","name":"","link":"https:\/\/i.imgur.com\/k1Y5Mqe.png"},"success":true,"status":200}'
-imgur_response=$imgur_diff_response
+imgur_diff_response=$( imgur_upload '/tmp/diff.png' )
+imgur_response=$( imgur_upload '/tmp/test.png' )
 
 imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
 imgur_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )

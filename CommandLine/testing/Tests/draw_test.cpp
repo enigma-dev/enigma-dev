@@ -13,7 +13,9 @@ TEST(Game, draw_test) {
   // Test our image compare returns correct values (first 2 should fail)
   ASSERT_NE(test_harness->image_compare("CommandLine/testing/data/draw_test.png", "CommandLine/testing/data/sprite.png", "/tmp/diff.png"), 0);
   ASSERT_NE(test_harness->image_compare("CommandLine/testing/data/draw_test.png", "CommandLine/testing/data/noexisto.png", "/tmp/diff.png"), 0);
-  ASSERT_NE(test_harness->image_compare("CommandLine/testing/data/draw_test.png", "/tmp/test.png", "/tmp/diff.png"), 0);
+  int imgcmp = test_harness->image_compare("CommandLine/testing/data/draw_test.png", "/tmp/test.png", "/tmp/diff.png");
+  if (imgcmp) setenv("IMAGE_COMPARE_FAILED", "true", true);
+  ASSERT_NE(imgcmp, 0);
 
   test_harness->close_window();
   bool game_running = test_harness->game_is_running();
