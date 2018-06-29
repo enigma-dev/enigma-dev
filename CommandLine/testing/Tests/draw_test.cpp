@@ -13,7 +13,7 @@ TEST(Game, draw_test) {
   // Test our image compare returns correct values (first 2 should fail)
   ASSERT_NE(test_harness->image_compare("CommandLine/testing/data/draw_test.png", "CommandLine/testing/data/sprite.png", "/tmp/enigma_draw_diff.png"), 0);
   ASSERT_NE(test_harness->image_compare("CommandLine/testing/data/draw_test.png", "CommandLine/testing/data/noexisto.png", "/tmp/enigma_draw_diff.png"), 0);
-  ASSERT_NE(test_harness->image_compare("CommandLine/testing/data/draw_test.png", "/tmp/enigma_draw_test.png", "/tmp/enigma_draw_diff.png"), 0);
+  ASSERT_EQ(test_harness->image_compare("CommandLine/testing/data/draw_test.png", "/tmp/enigma_draw_test.png", "/tmp/enigma_draw_diff.png"), 0);
   // if the image comparison did not fail, then we can delete the files
   // so our Travis CI script knows not to upload them
   test_harness->file_delete("/tmp/enigma_draw_test.png");
