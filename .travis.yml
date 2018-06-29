@@ -79,7 +79,7 @@ before_install:
       fi
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
-      brew install sdl2 openal-soft dumb alure libvorbis libsndfile flac mpg123 libmodplug boost glew protobuf pugixml rapidjson yaml-cpp pkg-config;
+      brew install sdl2 openal-soft dumb alure libvorbis libsndfile flac mpg123 libmodplug boost glew protobuf pugixml rapidjson yaml-cpp pkg-config || true;
     fi
 
 # build JDI and the CLI
