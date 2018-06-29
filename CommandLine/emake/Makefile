@@ -51,17 +51,17 @@ OBJDIRS := $(sort $(OBJ_DIR) $(dir $(OBJECTS)))
 ifeq ($(OS), Darwin)
 	LINKING_TARGETS += make AppleProto
 	ifneq ($(CLI_ENABLE_EGM), FALSE)
-		MORE_APPLE_NONSENSE += AppleEGM
+		MORE_APPLE_NONSENSE := AppleEGM
 	endif
 endif
 
 all: $(BINARY)
 
-AppleEGM: $(MORE_APPLE_NONSENSE)
+AppleEGM:
 	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib ../../libEGM.dylib
 	install_name_tool -change ../../libEGM.dylib @loader_path/./libEGM.dylib $(BINARY)
 
-AppleProto: 
+AppleProto: $(MORE_APPLE_NONSENSE)
 	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib $(BINARY)
 
 $(BINARY): $(OBJECTS)
