@@ -48,12 +48,12 @@ DEPENDS += $(addprefix $(OBJ_DIR)/shared/,$(SHARED_SOURCES:.cpp=.d))
 
 OBJDIRS := $(sort $(OBJ_DIR) $(dir $(OBJECTS)))
 
-LINKING_TARGETS := $(BINARY)
 ifeq ($(OS), Darwin)
-	LINKING_TARGETS += AppleSucks
+	LINKING_TARGETS += make AppleSucks
 endif
 
-all: $(LINKING_TARGETS)
+all: $(BINARY)
+	$(LINKING_TARGETS)
 
 AppleSucks:
 	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib ../../libEGM.dylib
@@ -63,7 +63,7 @@ AppleSucks:
 $(BINARY): $(OBJECTS)
 	g++ $^ $(LDFLAGS) -o $@
 
-.PHONY: all clean obj_dirs
+.PHONY: all clean obj_dirs AppleSucks
 
 clean:
 	rm -rf $(BINARY) $(OBJ_DIR)
