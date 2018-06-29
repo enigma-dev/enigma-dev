@@ -15,6 +15,7 @@ Make-Vars:
   cflags:
   ldflags:
   links:
+  pkg_config_path: /usr/local/opt/openal-soft/lib/pkgconfig/
 
 Parser-Vars:
   defines: cpp-8 -dM -x c++ --std=c++03 -E $blank

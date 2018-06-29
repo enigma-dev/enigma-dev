@@ -20,7 +20,11 @@
 #define ENIGMA_AL_SYSTEM_H
 #include <stddef.h>
 
+#ifdef __APPLE__
+#include <OpenAL/alure.h>
+#else
 #include <alure.h>
+#endif
 
 extern bool load_al_dll();
 extern size_t channel_num;

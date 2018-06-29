@@ -53,16 +53,17 @@ ifeq ($(OS), Darwin)
 	LINKING_TARGETS += AppleSucks
 endif
 
+all: $(LINKING_TARGETS)
+
 AppleSucks:
-	install_name_tool -change ../../libEGM.dylib @loader_path/./libEGM.dylib $(BINARY)
 	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib ../../libEGM.dylib
+	install_name_tool -change ../../libEGM.dylib @loader_path/./libEGM.dylib $(BINARY)
+	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib $(BINARY)
 
 $(BINARY): $(OBJECTS)
 	g++ $^ $(LDFLAGS) -o $@
 
 .PHONY: all clean obj_dirs
-
-all: $(LINKING_TARGETS)
 
 clean:
 	rm -rf $(BINARY) $(OBJ_DIR)
