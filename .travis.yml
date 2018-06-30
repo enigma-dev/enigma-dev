@@ -45,7 +45,8 @@ before_install:
       fi
 
       if [ "$AUDIO" == "OpenAL" ]; then
-        sudo apt-get -y install libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev;
+        sudo apt-get -y install libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev libflac-dev libmodplug-dev \ 
+          libmpg123-dev libsndfile-dev;
       elif [ "$AUDIO" == "SFML" ]; then
         sudo apt-get -y install libsfml-dev;
       fi
