@@ -11,5 +11,8 @@ else
 	override LDLIBS += $(shell pkg-config --libs --static openal alure $(CODECS))
 endif
 
+#pkgconf for alure on travis-ci is incorrect
+override CXXFLAGS += -I/usr/include/AL
+
 #pkgconf for dumb incorrectly list dumb's lib as -llibdumb. move dumb to codecs if it's ever fixed
 override LDLIBS += -ldumb
