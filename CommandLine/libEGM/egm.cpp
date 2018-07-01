@@ -17,18 +17,25 @@
 
 #include "egm.h"
 
-#include "yaml-cpp/yaml.h"
-#include <iostream>
-#include <fstream>
-
-static_assert(__cplusplus >= 201103L, "C++11 is required");
-#if __cplusplus >= 201703L
+#ifdef USE_BOOST_FS
+  #include <boost/filesystem.hpp>
+  #include <boost/system/error_code.hpp>
+  namespace fs = boost::filesystem;
+  using errc = boost::system::error_code;
+  namespace boost {
+	template< class ForwardIt >
+	ForwardIt next(ForwardIt it, typename std::iterator_traits<ForwardIt>::difference_type n = 1 );
+  } //namespace boost
+#else
   #include <filesystem>
   namespace fs = std::filesystem;
-#else
-  #include <experimental/filesystem>
-  namespace fs = std::experimental::filesystem;
+  using errc = std::error_code;
 #endif
+
+#include <yaml-cpp/yaml.h>
+
+#include <iostream>
+#include <fstream>
 
 namespace proto = google::protobuf;
 using CppType = proto::FieldDescriptor::CppType;
@@ -37,7 +44,7 @@ using std::string;
 namespace {
 
 bool CreateDirectory(const fs::path &directory) {
-  std::error_code ec;
+  errc ec;
   if (fs::create_directory(directory, ec) || !ec) return true;
   std::cerr << "Failed to create directory " << directory << std::endl;
   return false;
@@ -88,7 +95,7 @@ fs::path InternalizeFile(const fs::path &file,
                          const fs::path &directory, const fs::path &egm_root) {
   const fs::path data = "data";
   fs::path demistified = fs::canonical(fs::absolute(file));
-  if (StartsWith(demistified, egm_root)) {
+  if (StartsWith(demistified.string(), egm_root.string())) {
     return fs::relative(demistified, directory);
   }
   if (!CreateDirectory(directory/data)) {
@@ -96,11 +103,17 @@ fs::path InternalizeFile(const fs::path &file,
               << "\" into EGM: could not create output directory." << std::endl;
     return "";
   }
-  fs::path relative = data/StripPath(file);
-  if (!fs::copy_file(file, directory/relative)) {
-    std::cerr << "Failed to copy \"" << file << "\" into EGM." << std::endl;
-    return "";
-  }
+  fs::path relative = data/StripPath(file.string());
+
+  #ifdef USE_BOOST_FS
+    fs::copy_file(file, directory/relative);
+  #else
+    if (!fs::copy_file(file, directory/relative)) {
+      std::cerr << "Failed to copy \"" << file << "\" into EGM." << std::endl;
+      return "";
+    }
+  #endif
+
   return relative;
 }
 
@@ -138,7 +151,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
           if (isFilePath) {
             const fs::path internalized = InternalizeFile(str, dir, egm_root);
             if (internalized.empty()) return false;
-            refl->SetRepeatedString(m, field, i, internalized);
+            refl->SetRepeatedString(m, field, i, internalized.string());
           }
           yaml << refl->GetRepeatedString(*m, field, i);
         }
@@ -154,7 +167,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
           const fs::path src = Proto2String(*m, field);
           const fs::path internalized = InternalizeFile(src, dir, egm_root);
           if (internalized.empty()) return false;
-          refl->SetString(m, field, internalized);
+          refl->SetString(m, field, internalized.string());
         }
         yaml << YAML::Value << Proto2String(*m, field);
       }
@@ -172,7 +185,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir, proto::Message *m)
     return false;
 
   yaml << YAML::EndMap;
-  if (std::ofstream out{dir/"properties.yaml"}) {
+  if (std::ofstream out{dir.string() + "/properties.yaml"}) {
     out << yaml.c_str();
   } else {
     std::cerr << "Failed to open resource properties file "
@@ -207,7 +220,7 @@ bool WriteShader(string fName, buffers::resources::Shader* shdr) {
 }
 
 bool WriteRes(buffers::TreeNode* res, const fs::path &dir, const fs::path &egm_root) {
-  string newDir = dir/res->name();
+  string newDir = dir.string() + "/" + res->name();
   using Type = buffers::TreeNode::TypeCase;
   switch (res->type_case()) {
    case Type::kBackground:
@@ -269,7 +282,7 @@ bool WriteEGM(string fName, buffers::Project* project) {
     return false;
 
   fs::path abs_root = fs::canonical(fs::absolute(fName));
-  return WriteNode(project->mutable_game()->mutable_root(), fName, abs_root);
+  return WriteNode(project->mutable_game()->mutable_root(), fName, abs_root.string());
 }
 
 } //namespace egm

@@ -7,12 +7,20 @@ else
 	EXT := .dll
 endif
 
+GCCVER := $(shell gcc -dumpversion | cut -c 1)
 SHARED_SOURCES := ../../shared
 LIBRARY   := ../../libEGM$(EXT)
 PROTO_DIR := ../protos
-CXXFLAGS  := $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SOURCES)/lodepng -std=c++17 -Wall -Wextra -Wpedantic -g -fPIC
+CXXFLAGS  := $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SOURCES)/lodepng -Wall -Wextra -Wpedantic -g -fPIC
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
+
+#if gcc >= 8 use std::filesystem instead of boost
+ifeq ($(shell expr $(GCCVER) \>= 8), 1)
+	override CXXFLAGS += -std=c++17
+else
+	override CXXFLAGS += -std=c++14 -DUSE_BOOST_FS
+endif
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 
