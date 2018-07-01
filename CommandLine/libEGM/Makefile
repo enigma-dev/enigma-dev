@@ -10,7 +10,7 @@ endif
 SHARED_SOURCES := ../../shared
 LIBRARY   := ../../libEGM$(EXT)
 PROTO_DIR := ../protos
-CXXFLAGS  := $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SOURCES)/lodepng -std=c++14 -Wall -Wextra -Wpedantic -g -fPIC
+CXXFLAGS  := $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SOURCES)/lodepng -std=c++17 -Wall -Wextra -Wpedantic -g -fPIC
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
 
@@ -34,7 +34,7 @@ clean:
 # --libs-only-L is specified because the Trusty Tahr package for pugixml does not have a proper pkg-config
 # hence we only use pkg-config for the lib dirs and just always link pugixml whether in travis, on ubuntu, or in msys2
 $(LIBRARY): $(OBJECTS)
-	$(CXX) -shared -o $@ $^ -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -L$(SHARED_SOURCES)/lodepng -llodepng
+	$(CXX) -shared -o $@ $^ -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -lstdc++fs -L$(SHARED_SOURCES)/lodepng -llodepng
 
 # Create the object directories
 $(OBJDIRS):
