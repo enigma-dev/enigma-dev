@@ -274,11 +274,6 @@ int window_set_cursor(int cursorID) {
   return 0;
 }
 
-bool os_is_paused() {
-  Uint32 flags = SDL_GetWindowFlags(windowHandle);
-  return enigma::freezeOnLoseFocus && (flags & SDL_WINDOW_INPUT_FOCUS);
-}
-
 int display_get_width() {
   SDL_DisplayMode DM;
   SDL_GetCurrentDisplayMode(0, &DM);
