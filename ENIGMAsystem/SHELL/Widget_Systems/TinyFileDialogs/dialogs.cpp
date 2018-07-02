@@ -373,8 +373,8 @@ namespace enigma_user
       char cstr_path[PATH_MAX];
       strncpy(cstr_path, path, PATH_MAX);
 
-      char *slash = (char *)"/";
-      strcat(cstr_path, slash);
+      char slash[] = "/";
+      strncat(cstr_path, slash);
 
       str_result = string_replace_all(cstr_path, "//", "/");
     }
@@ -410,8 +410,8 @@ namespace enigma_user
       char cstr_path[PATH_MAX];
       strncpy(cstr_path, path, PATH_MAX);
 
-      char *slash = (char *)"/";
-      strcat(cstr_path, slash);
+      char slash[] = "/";
+      strncat(cstr_path, slash);
 
       str_result = string_replace_all(cstr_path, "//", "/");
     }
