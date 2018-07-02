@@ -225,13 +225,25 @@ void SDL_Event_Handler::textInput(const SDL_Event *event) {
 }
 
 void SDL_Event_Handler::mouseButtonDown(const SDL_Event *event) {
-  int btn = event->button.button;
+  int btn;
+  switch (event->button.button) {
+    case SDL_BUTTON_LEFT: btn = 0;  break;
+    case SDL_BUTTON_MIDDLE: btn = 1; break;
+    case SDL_BUTTON_RIGHT: btn = 2; break;
+    default: return;
+  }
   enigma::last_mousestatus[btn] = enigma::mousestatus[btn];
   enigma::mousestatus[btn] = true;
 }
 
 void SDL_Event_Handler::mouseButtonUp(const SDL_Event *event) {
-  int btn = event->button.button;
+  int btn;
+  switch (event->button.button) {
+    case SDL_BUTTON_LEFT: btn = 0;  break;
+    case SDL_BUTTON_MIDDLE: btn = 1; break;
+    case SDL_BUTTON_RIGHT: btn = 2; break;
+    default: return;
+  }
   enigma::last_mousestatus[btn] = enigma::mousestatus[btn];
   enigma::mousestatus[btn] = false;
 }
