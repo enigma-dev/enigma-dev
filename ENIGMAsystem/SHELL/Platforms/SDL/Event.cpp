@@ -132,6 +132,15 @@ int SDL_Event_Handler::processEvents() {
   return 0;
 }
 
+int SDL_map_button_enum(const char button) {
+  switch (button) {
+    case SDL_BUTTON_LEFT: return 0;
+    case SDL_BUTTON_MIDDLE: return 1;
+    case SDL_BUTTON_RIGHT: return 2;
+    default: return -1;
+  }
+}
+
 void SDL_Event_Handler::windowEvent(const SDL_Event *event) {
   switch (event->window.event) {
     case SDL_WINDOWEVENT_SHOWN:
@@ -167,10 +176,10 @@ void SDL_Event_Handler::windowEvent(const SDL_Event *event) {
       //windowLeave(event);
       break;
     case SDL_WINDOWEVENT_FOCUS_GAINED:
-      //windowFocusGain(event);
+      windowFocusGain(event);
       break;
     case SDL_WINDOWEVENT_FOCUS_LOST:
-      //windowFocusLost(event);
+      windowFocusLost(event);
       break;
     case SDL_WINDOWEVENT_CLOSE:
       //windowClose(event);
@@ -187,6 +196,15 @@ void SDL_Event_Handler::windowEvent(const SDL_Event *event) {
       //unkownEvent(event);
       break;
   }
+}
+
+void SDL_Event_Handler::windowFocusGain(const SDL_Event *event) {
+  game_window_focused = true;
+  pausedSteps = 0;
+}
+
+void SDL_Event_Handler::windowFocusLost(const SDL_Event *event) {
+  game_window_focused = false;
 }
 
 void SDL_Event_Handler::windowResized(const SDL_Event *event) {
@@ -225,13 +243,15 @@ void SDL_Event_Handler::textInput(const SDL_Event *event) {
 }
 
 void SDL_Event_Handler::mouseButtonDown(const SDL_Event *event) {
-  int btn = event->button.button;
+  int btn = SDL_map_button_enum(event->button.button);
+  if (btn < 0) return;
   enigma::last_mousestatus[btn] = enigma::mousestatus[btn];
   enigma::mousestatus[btn] = true;
 }
 
 void SDL_Event_Handler::mouseButtonUp(const SDL_Event *event) {
-  int btn = event->button.button;
+  int btn = SDL_map_button_enum(event->button.button);
+  if (btn < 0) return;
   enigma::last_mousestatus[btn] = enigma::mousestatus[btn];
   enigma::mousestatus[btn] = false;
 }

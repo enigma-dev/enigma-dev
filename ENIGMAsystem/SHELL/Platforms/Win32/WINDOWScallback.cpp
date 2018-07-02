@@ -24,7 +24,6 @@ using std::map;
 //#include <winuser.h> // includes windows.h
 
 #include "../General/PFwindow.h"
-#include "WINDOWScallback.h"
 
 #include "Platforms/General/PFmain.h" // For those damn vk_ constants.
 #include "Universal_System/instance_system.h"
@@ -43,10 +42,6 @@ extern string keyboard_lastchar;
 extern string keyboard_string;
 void draw_clear(int col);
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
-}
-
-namespace enigma_win32 {
-  bool game_window_focused = true;
 }
 
 namespace enigma
@@ -95,7 +90,7 @@ namespace enigma
 
       case WM_SETFOCUS:
         input_initialize();
-        enigma_win32::game_window_focused = true;
+        game_window_focused = true;
         pausedSteps = 0;
         return 0;
 
@@ -110,7 +105,7 @@ namespace enigma
             last_mousestatus[i] = mousestatus[i];
             mousestatus[i] = 0;
         }
-        enigma_win32::game_window_focused = false;
+        game_window_focused = false;
         return 0;
 
       case WM_SIZE:

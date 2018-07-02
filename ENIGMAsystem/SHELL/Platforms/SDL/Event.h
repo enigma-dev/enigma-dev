@@ -14,6 +14,8 @@ class SDL_Event_Handler {
   void windowEvent(const SDL_Event *event);
   
   void windowResized(const SDL_Event *event);
+  void windowFocusGain(const SDL_Event *event);
+  void windowFocusLost(const SDL_Event *event);
   /*void unkownEvent(const SDL_Event *event) {}
   void windowShown(const SDL_Event *event) {}
   void windowHidden(const SDL_Event *event) {}
@@ -24,8 +26,6 @@ class SDL_Event_Handler {
   void windowRestored(const SDL_Event *event) {}
   void windowEntered(const SDL_Event *event) {}
   void windowLeave(const SDL_Event *event) {}
-  void windowFocusGain(const SDL_Event *event) {}
-  void windowFocusLost(const SDL_Event *event) {}
   void windowClose(const SDL_Event *event) {}
   void windowTakeFocus(const SDL_Event *event) {}
   void windowHitTest(const SDL_Event *event) {}

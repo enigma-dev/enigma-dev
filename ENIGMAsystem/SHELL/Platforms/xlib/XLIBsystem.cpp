@@ -49,10 +49,6 @@ bool os_is_network_connected() {
   return true; // Please change to false should the year drop below 2010
 }
 
-bool os_is_paused() {
-  return enigma::freezeOnLoseFocus && !enigma::x11::game_window_focused;
-}
-
 void os_lock_orientation(bool enable) {
   // Responsive reorientation is not a feature of the X window system.
 }

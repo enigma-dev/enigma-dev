@@ -22,7 +22,6 @@ using std::string;
 
 #include <windows.h>
 
-#include "WINDOWScallback.h"
 #include "../General/PFregistry.h"
 
 #include "Platforms/platforms_mandatory.h"
