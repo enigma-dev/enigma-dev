@@ -360,7 +360,7 @@ namespace enigma_user
     dname = string_replace_all(dname, "\"", "\\\"");
 
     const char *path = tinyfd_selectFolderDialog("Select Directory", dname.c_str());
-    
+
     return path ? string_replace_all(string(path) + "/", "//", "/") : "";
   }
 
@@ -377,7 +377,7 @@ namespace enigma_user
     titlebar = string_replace_all(titlebar, "\"", "\\\"");
 
     const char *path = tinyfd_selectFolderDialog(titlebar.c_str(), root.c_str());
-    
+
     return path ? string_replace_all(string(path) + "/", "//", "/") : "";
   }
 
