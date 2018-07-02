@@ -361,7 +361,27 @@ namespace enigma_user
 
     const char *path = tinyfd_selectFolderDialog("Select Directory", dname.c_str());
 
-    return path ? : "";
+    bool ok_pressed = true;
+
+    if (path == NULL)
+      ok_pressed = false;
+
+    static string str_result;
+    
+    if (ok_pressed == true)
+    {
+      char cstr_path[PATH_MAX];
+      strncpy(cstr_path, path, PATH_MAX);
+
+      char *slash = (char *)"/";
+      strcat(cstr_path, slash);
+
+      str_result = string_replace_all(cstr_path, "//", "/");
+    }
+    else
+      str_result = "";
+    
+    return str_result;
   }
 
   string get_directory_alt(string capt, string root)
@@ -377,8 +397,28 @@ namespace enigma_user
     titlebar = string_replace_all(titlebar, "\"", "\\\"");
 
     const char *path = tinyfd_selectFolderDialog(titlebar.c_str(), root.c_str());
+    
+    bool ok_pressed = true;
 
-    return path ? : "";
+    if (path == NULL)
+      ok_pressed = false;
+
+    static string str_result;
+    
+    if (ok_pressed == true)
+    {
+      char cstr_path[PATH_MAX];
+      strncpy(cstr_path, path, PATH_MAX);
+
+      char *slash = (char *)"/";
+      strcat(cstr_path, slash);
+
+      str_result = string_replace_all(cstr_path, "//", "/");
+    }
+    else
+      str_result = "";
+    
+    return str_result;
   }
 
   double get_color(double defcol)
