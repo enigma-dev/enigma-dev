@@ -18,7 +18,6 @@
 #include <wininet.h>
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
-#include "WINDOWScallback.h"
 
 namespace enigma_user {
 
@@ -32,10 +31,6 @@ void os_powersave_enable(bool enable) {}
 bool os_is_network_connected() {
 	DWORD dwFlags = 0;
 	return InternetGetConnectedState(&dwFlags, NULL);
-}
-
-bool os_is_paused() {
-	return !enigma_win32::game_window_focused && enigma::freezeOnLoseFocus;
 }
 
 }  // namespace enigma_user
