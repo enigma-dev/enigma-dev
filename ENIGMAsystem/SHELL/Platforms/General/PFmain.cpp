@@ -14,6 +14,7 @@ std::string* parameters;
 int parameterc;
 int frames_count = 0;
 unsigned long current_time_mcs = 0;
+bool game_window_focused = true;
 
 long clamp(long value, long min, long max) {
   if (value < min) return min;
@@ -95,6 +96,8 @@ int keyboard_key = 0;
 double fps = 0;
 unsigned long delta_time = 0;
 unsigned long current_time = 0;
+
+bool os_is_paused() { return !enigma::game_window_focused && enigma::freezeOnLoseFocus; }
 
 std::string parameter_string(int num) { return num < enigma::parameterc ? enigma::parameters[num] : ""; }
 
