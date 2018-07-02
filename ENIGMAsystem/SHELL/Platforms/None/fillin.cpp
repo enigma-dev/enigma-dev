@@ -76,7 +76,6 @@ bool os_is_network_connected() {
   return true;  // Please change to false should the year drop below 2010
 }
 
-bool os_is_paused() { return false; }
 void os_lock_orientation(bool enable) {}
 void os_powersave_enable(bool enable) {}
 
