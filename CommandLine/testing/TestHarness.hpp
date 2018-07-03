@@ -36,6 +36,10 @@ class TestHarness {
   virtual void unfullscreen_window() = 0;
   virtual void close_window() = 0;
 
+  virtual void screen_save(std::string fPath) = 0;
+  virtual void file_delete(std::string fPath) = 0;
+  virtual int image_compare(std::string image1, std::string image2, std::string diff) = 0;
+
   /// Wait for an arbitrary amount of time to let things settle.
   virtual void wait() = 0;
 
