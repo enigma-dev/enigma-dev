@@ -30,7 +30,6 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/extensions/XTest.h>
 #include <stdio.h>   //printf, NULL
 #include <stdlib.h>  //malloc
 #include <time.h>    //clock
