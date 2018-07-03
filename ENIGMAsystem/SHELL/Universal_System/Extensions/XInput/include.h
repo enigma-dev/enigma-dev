@@ -15,4 +15,4 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "XIgamepad.h"
+#include "Platforms/General/PFgamepad.h"

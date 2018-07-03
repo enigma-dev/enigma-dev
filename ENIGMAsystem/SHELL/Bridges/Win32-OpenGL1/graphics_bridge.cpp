@@ -48,10 +48,10 @@ namespace enigma
       enigma_user::draw_clear(enigma_user::window_get_color());
     }
 
-    void EnableDrawing(void* handle)
-    {
-      HGLRC *hRC = static_cast<HGLRC*>(handle);
+    extern HGLRC hRC;
 
+    void EnableDrawing(void*)
+    {
       WindowResizedCallback = &WindowResized;
 
       PIXELFORMATDESCRIPTOR pfd;
@@ -72,19 +72,17 @@ namespace enigma
       if (iFormat==0) { show_error("Failed to set the format of the OpenGL graphics device.",1); }
 
       SetPixelFormat (enigma::window_hDC, iFormat, &pfd);
-      *hRC = wglCreateContext( enigma::window_hDC );
-      wglMakeCurrent( enigma::window_hDC, *hRC );
+      hRC = wglCreateContext( enigma::window_hDC );
+      wglMakeCurrent( enigma::window_hDC, hRC );
 
       //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
       glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
     }
 
-    void DisableDrawing(void* handle)
+    void DisableDrawing(void*)
     {
-      HGLRC *hRC = static_cast<HGLRC*>(handle);
-
       wglMakeCurrent (NULL, NULL);
-      wglDeleteContext (*hRC);
+      wglDeleteContext (hRC);
       ReleaseDC (enigma::hWnd, enigma::window_hDC);
     }
 }

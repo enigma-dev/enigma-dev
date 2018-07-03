@@ -18,16 +18,22 @@
 #ifndef ENIGMA_PLATFORM_THREADS_H
 #define ENIGMA_PLATFORM_THREADS_H
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
-#include <windows.h>
+#include "Universal_System/var4.h"
+
+#ifdef ENIGMA_PLATFORM_SDL
+  #include <SDL2/SDL.h>
+  using pltfrm_thread_t = SDL_Thread*;
+#elif ENIGMA_PLATFORM_WINDOWS 
+  #include <windows.h>
+  using pltfrm_thread_t = HANDLE;
 #else
-#include <pthread.h> // use POSIX threads
+  #include <pthread.h> // use POSIX threads
+  using pltfrm_thread_t = pthread_t;
 #endif
 
 #include <deque>
-#include <stdio.h>
 
-#include "Universal_System/var4.h"
+namespace enigma {
 
 struct ethread;
 
@@ -38,13 +44,8 @@ struct scrtdata {
   scrtdata(int s, variant nargs[8], ethread* mythread): scr(s), mt(mythread) { for (int i = 0; i < 8; i++) args[i] = nargs[i]; }
 };
 
-struct ethread
-{
-#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
-  HANDLE handle;
-#else
-  pthread_t handle;
-#endif
+struct ethread {
+  pltfrm_thread_t handle;
   scrtdata *sd;
   bool active;
   variant ret;
@@ -58,9 +59,12 @@ struct ethread
 
 extern std::deque<ethread*> threads;
 
+void* thread_script_func(void* data);
+
+}
+
 namespace enigma_user {
   int script_thread(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0);
-  
   int thread_create_script(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0);
   int thread_start(int thread);
   void thread_join(int thread);
@@ -68,6 +72,6 @@ namespace enigma_user {
   bool thread_exists(int thread);
   bool thread_get_finished(int thread);
   variant thread_get_return(int thread);
-}
+} //namespace enigma_user
 
 #endif //ENIGMA_PLATFORM_THREADS_H

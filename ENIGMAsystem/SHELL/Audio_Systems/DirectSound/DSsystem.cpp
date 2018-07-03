@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/Win32/WINDOWShandle.h" //get_window_handle()
+
 #include <stdio.h>
 
 #include "DSsystem.h"
@@ -51,12 +53,13 @@ clock_t lasttime;
 using std::string;
 using std::stringstream;
 
-#include "Platforms/Win32/WINDOWSmain.h"
 IDirectSoundBuffer* primaryBuffer;
 
 vector<SoundResource*> sound_resources(0);
 
 namespace enigma {
+
+extern HWND hWnd;
 
 void eos_callback(void* soundID, unsigned src) {
   get_sound(snd, (ptrdiff_t)soundID, );
@@ -65,6 +68,11 @@ void eos_callback(void* soundID, unsigned src) {
 }
 
 int audiosystem_initialize() {
+  if (get_window_handle() == NULL) {
+    MessageBox(NULL, "Window handle is NULL.", "Error", MB_OK);
+    return false;
+  }
+
   starttime = clock();
   elapsedtime = starttime;
   lasttime = elapsedtime;
