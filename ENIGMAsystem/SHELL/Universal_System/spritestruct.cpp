@@ -113,7 +113,7 @@ inline void addTexture(Sprite *spr, unsigned char *pxdata, unsigned fullWidth, u
     spr->subimages.push_back(std::move(s));
   }
 
-  delete pixels;
+  delete[] pixels;
 }
 
 int sprite_add_subimage(unsigned char *pxdata, unsigned w, unsigned h, int id, int imgCount, bool precise,
@@ -142,7 +142,7 @@ int sprite_add_subimage(unsigned char *pxdata, unsigned w, unsigned h, int id, i
   spr->yoffset = yoffset;
   spr->smooth = smooth;
 
-  addTexture(spr, pxdata, fullwidth, fullheight, cellwidth, h, imgCount, precise, mipmap);
+  addTexture(spr, pxdata, cellwidth, h, fullwidth, fullheight, imgCount, precise, mipmap);
 
   delete pxdata;
 
