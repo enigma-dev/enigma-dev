@@ -1,24 +1,21 @@
 #include <gtest/gtest.h>
 
+#include <string>
 #include <cstdlib>
+#include <iostream> 
 
-int main(int argc, char** argv) {
+std::string gitMasterDir = "/tmp/enigma-master";
+
+int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
-  // run all of the tests on HEAD
-  auto result = RUN_ALL_TESTS();
+  if (argc == 1) {
+    int ret = system(("bash ./ci-regression.sh " + gitMasterDir).c_str());
+    if (ret != 0) {
+      std::cerr << "Error: ci-regression.sh returned non-zero." << std::endl;
+      return ret;
+    }
+  }
 
-  // git checkout the HEAD of the master branch to compare
-  // for regressions
-  system("git checkout HEAD");
-
-  // run only the regression tests on HEAD^
-  ::testing::GTEST_FLAG(filter) = "Regression.*";
-  result = RUN_ALL_TESTS();
-
-  // reset the git state in case somebody wants to
-  // run these regression tests locally
-  system("git checkout HEAD^");
-
-  return 0;
+  return RUN_ALL_TESTS();
 }

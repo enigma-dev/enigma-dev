@@ -5,7 +5,7 @@ TESTCASES_DIR := $(SRC_DIR)/Tests
 
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
-	OS_SRCS=./Platform/TestHarness-X11.cpp
+	OS_SRCS=$(wildcard ./Platform/*-X11.cpp)
 	OS_LIBS=-lX11 -lboost_filesystem -lboost_system
 else ifeq ($(OS), Darwin)
 	OS_SRCS=./Platform/TestHarness-Cocoa.cpp

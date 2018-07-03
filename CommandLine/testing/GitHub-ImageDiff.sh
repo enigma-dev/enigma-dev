@@ -22,7 +22,7 @@ function imgur_upload {
 }
 
 imgur_diff_response=$( imgur_upload '/tmp/enigma_draw_diff.png' )
-imgur_response=$( imgur_upload '/tmp/enigma_draw_test.png' )
+imgur_response=$( imgur_upload './enigma_draw_test.png' )
 
 imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
 imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
