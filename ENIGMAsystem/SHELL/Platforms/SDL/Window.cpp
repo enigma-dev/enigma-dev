@@ -6,6 +6,8 @@
 #include "Platforms/platforms_mandatory.h"
 
 #include "Universal_System/estring.h" // ord
+#include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
+
 
 #include <array>
 #include <string>
@@ -113,7 +115,11 @@ int handleEvents() { return eventHandler.processEvents(); }
 
 namespace enigma_user {
 
-void io_handle() {}
+void io_handle() {
+  enigma::input_push();
+  if (enigma::handleEvents() != 0) exit(0);
+  enigma::update_mouse_variables();
+}
 
 int window_get_visible() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);

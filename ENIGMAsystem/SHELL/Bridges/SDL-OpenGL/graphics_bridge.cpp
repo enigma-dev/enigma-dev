@@ -73,6 +73,7 @@ namespace enigma_user {
   void screen_refresh() {
     SDL_GL_SwapWindow(enigma::windowHandle);
     window_set_caption(room_caption);
+    enigma::update_mouse_variables();
   }
 
 }
