@@ -8,5 +8,6 @@ Description: Adds Xlib operating system-level keyboard simulation using XTEST Ex
 Default: false
 Icon: xtest.png
 
-Depends: None
+Depends:
+	Build-Platforms: Linux
 Dependencies: None
