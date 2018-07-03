@@ -31,6 +31,16 @@
 #include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
 
 #define bind_array_buffer(vbo) if (enigma::bound_vbo != vbo) glBindBuffer( GL_ARRAY_BUFFER, enigma::bound_vbo = vbo );
+#define bind_element_buffer(vboi) if (enigma::bound_vboi != vboi) glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, enigma::bound_vboi = vboi );
+
+namespace {
+
+GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN };
+
+map<int, GLuint> vertexBufferPeers;
+map<int, GLuint> indexBufferPeers;
+
+}
 
 namespace enigma {
 
@@ -40,13 +50,14 @@ extern unsigned bound_vboi;
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 
-GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN };
-
-map<int, GLuint> vertexBufferPeers;
-
 void graphics_delete_vertex_buffer_peer(int buffer) {
   glDeleteBuffers(1, &vertexBufferPeers[buffer]);
   vertexBufferPeers.erase(buffer);
+}
+
+void graphics_delete_index_buffer_peer(int buffer) {
+  glDeleteBuffers(1, &indexBufferPeers[buffer]);
+  indexBufferPeers.erase(buffer);
 }
 
 static inline int graphics_find_attribute_location(std::string name, int usageIndex) {
@@ -60,82 +71,87 @@ static inline int graphics_find_attribute_location(std::string name, int usageIn
   return location;
 }
 
+void graphics_prepare_buffer(const int buffer, const bool isIndex) {
+  const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
+  const bool frozen = isIndex ? indexBuffers[buffer]->frozen : vertexBuffers[buffer]->frozen;
+  GLuint bufferPeer;
+  auto it = isIndex ? indexBufferPeers.find(buffer) : vertexBufferPeers.find(buffer);
+  const GLenum target = isIndex ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER;
+
+  // if the contents of the buffer are dirty then we need to update
+  // our native buffer object "peer"
+  if (dirty) {
+    size_t size = isIndex ? enigma_user::index_get_size(buffer) : enigma_user::vertex_get_size(buffer);
+
+    // if we haven't created a native "peer" for this buffer yet,
+    // then we need to do so now
+    if (it == (isIndex ? indexBufferPeers.end() : vertexBufferPeers.end())) {
+      glGenBuffers(1, &bufferPeer);
+      if (isIndex) {
+        indexBufferPeers[buffer] = bufferPeer;
+      } else {
+        vertexBufferPeers[buffer] = bufferPeer;
+      }
+    } else {
+      bufferPeer = it->second;
+    }
+
+    if (isIndex) {
+      bind_element_buffer(bufferPeer);
+    } else {
+      bind_array_buffer(bufferPeer);
+    }
+    GLint pSize;
+    glGetBufferParameteriv(target, GL_BUFFER_SIZE, &pSize);
+
+    // if the size of the peer isn't big enough to hold the new contents
+    // or freeze was called, then we need to make a call to glBufferData
+    // to allocate a bigger peer or remove the GL_DYNAMIC_DRAW usage
+    const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
+    if (size > (size_t)pSize || frozen) {
+      GLenum usage = frozen ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
+      glBufferData(target, size, data, usage);
+    } else {
+      glBufferSubData(target, 0, size, data);
+    }
+
+    if (isIndex) {
+      indexBuffers[buffer]->indices.clear();
+      indexBuffers[buffer]->dirty = false;
+    } else {
+      vertexBuffers[buffer]->vertices.clear();
+      vertexBuffers[buffer]->dirty = false;
+    }
+  } else {
+    if (isIndex) {
+      bind_element_buffer(it->second);
+    } else {
+      bind_array_buffer(it->second);
+    }
+  }
 }
 
-namespace enigma_user {
+void graphics_apply_vertex_format(int format) {
+  using namespace enigma_user;
 
-void vertex_argb(int buffer, unsigned argb) {
-  enigma::color_t finalcol = (COL_GET_A(argb) << 24) | (COL_GET_R(argb) << 16) | (COL_GET_G(argb) << 8) | COL_GET_B(argb);
-  enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
-}
+  const VertexFormat* vertexFormat = vertexFormats[format];
 
-void vertex_color(int buffer, int color, double alpha) {
-  enigma::color_t finalcol = color + (CLAMP_ALPHA(alpha) << 24);
-  enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
-}
-
-void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
-
-  #ifdef DEBUG_MODE
-  enigma::GPUProfilerBatch& vbd = oglmgr->gpuprof.add_drawcall();
-  #endif
-
-  if (enigma::transform_needs_update == true){
-    enigma::transformation_update();
+  if (transform_needs_update == true){
+    transformation_update();
   }
 
   //Send transposed (done by GL because of "true" in the function below) matrices to shader
-  enigma::glsl_uniform_matrix4fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_viewMatrix,  1, enigma::view_matrix);
-  enigma::glsl_uniform_matrix4fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_projectionMatrix,  1, enigma::projection_matrix);
-  enigma::glsl_uniform_matrix4fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_modelMatrix,  1, enigma::model_matrix);
-  enigma::glsl_uniform_matrix4fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_mvMatrix,  1, enigma::mv_matrix);
-  enigma::glsl_uniform_matrix4fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_mvpMatrix,  1, enigma::mvp_matrix);
-  enigma::glsl_uniform_matrix3fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_normalMatrix,  1, enigma::normal_matrix);
+  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_viewMatrix,  1, view_matrix);
+  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_projectionMatrix,  1, projection_matrix);
+  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_modelMatrix,  1, model_matrix);
+  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_mvMatrix,  1, mv_matrix);
+  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_mvpMatrix,  1, mvp_matrix);
+  glsl_uniform_matrix3fv_internal(shaderprograms[bound_shader]->uni_normalMatrix,  1, normal_matrix);
 
   //Bind texture
-  enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
+  glsl_uniformi_internal(shaderprograms[bound_shader]->uni_texSampler, 0);
 
-  // if the contents of the vertex buffer are dirty then we need to update
-  // our native vertex buffer object "peer"
-  if (vertexBuffer->dirty) {
-    GLuint vertexBufferPeer;
-    auto it = enigma::vertexBufferPeers.find(buffer);
-    size_t size = enigma_user::vertex_get_size(buffer);
-
-    // if we haven't created a native "peer" vbo for this vertex buffer yet,
-    // then we need to do so now
-    if (it == enigma::vertexBufferPeers.end()) {
-      glGenBuffers(1, &vertexBufferPeer);
-      enigma::vertexBufferPeers[buffer] = vertexBufferPeer;
-    } else {
-      vertexBufferPeer = it->second;
-    }
-
-    bind_array_buffer(vertexBufferPeer);
-    GLint pSize;
-    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &pSize);
-
-    // if the size of the peer vbo isn't big enough to hold the new contents
-    // or vertex_freeze was called, then we need to make a call to glBufferData
-    // to allocate a bigger peer vbo or remove the GL_DYNAMIC_DRAW usage
-    if (size > pSize || vertexBuffer->frozen) {
-      GLenum usage = vertexBuffer->frozen ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
-      glBufferData(GL_ARRAY_BUFFER, size, &vertexBuffer->vertices[0], usage);
-    } else {
-      glBufferSubData(GL_ARRAY_BUFFER, 0, size, &vertexBuffer->vertices[0]);
-    }
-
-    vertexBuffer->vertices.clear();
-    vertexBuffer->dirty = false;
-  } else {
-    bind_array_buffer(enigma::vertexBufferPeers[buffer]);
-  }
-
-  //(enigma::vertexBufferPeers[buffer]);
-
-  enigma::glsl_attribute_enable_all_internal(false); //Disable all attributes
+  glsl_attribute_enable_all_internal(false); //Disable all attributes
 
   bool useTextCoords = false, useColors = false;
   size_t offset = 0;
@@ -173,35 +189,88 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
       case vertex_usage_textcoord: name = "in_TextureCoord"; break;
     }
     if (!name.empty()) {
-      int location = enigma::graphics_find_attribute_location(name, usageIndex);
+      int location = graphics_find_attribute_location(name, usageIndex);
       if (location == -1 && flag.second == vertex_usage_color) {
-        location = enigma::graphics_find_attribute_location("in_Colour", usageIndex);
+        location = graphics_find_attribute_location("in_Colour", usageIndex);
       }
 
       if (location != -1) {
-        enigma::glsl_attribute_enable_internal(location, true);
-        enigma::glsl_attribute_set_internal(location, elements, type, (type == GL_UNSIGNED_BYTE), stride, offset);
+        glsl_attribute_enable_internal(location, true);
+        glsl_attribute_set_internal(location, elements, type, (type == GL_UNSIGNED_BYTE), stride, offset);
       }
     }
 
     offset += size;
   }
 
-  enigma::glsl_uniformf_internal(enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0f, (float)enigma::currentcolor[1]/255.0f, (float)enigma::currentcolor[2]/255.0f, (float)enigma::currentcolor[3]/255.0f);
+  glsl_uniformf_internal(shaderprograms[bound_shader]->uni_color,
+                         (float)currentcolor[0]/255.0f,
+                         (float)currentcolor[1]/255.0f,
+                         (float)currentcolor[2]/255.0f,
+                         (float)currentcolor[3]/255.0f);
 
   if (useTextCoords) {
     if (oglmgr->GetBoundTexture() != 0){
-      enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
+      glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 1);
     } else {
-      enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+      glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 0);
     }
   } else {
-    enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+    glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 0);
   }
-  enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, useColors);
+  glsl_uniformi_internal(shaderprograms[bound_shader]->uni_colorEnable, useColors);
+}
 
-  vertex_start *= (stride / 4);
-	glDrawArrays(enigma::primitive_types[primitive], vertex_start, vertex_count);
+}
+
+namespace enigma_user {
+
+void vertex_argb(int buffer, unsigned argb) {
+  enigma::color_t finalcol = (COL_GET_A(argb) << 24) | (COL_GET_R(argb) << 16) | (COL_GET_G(argb) << 8) | COL_GET_B(argb);
+  enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
+}
+
+void vertex_color(int buffer, int color, double alpha) {
+  enigma::color_t finalcol = color + (CLAMP_ALPHA(alpha) << 24);
+  enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
+}
+
+void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+
+  #ifdef DEBUG_MODE
+  enigma::GPUProfilerBatch& vbd = oglmgr->gpuprof.add_drawcall();
+  ++vbd.drawcalls;
+  #endif
+
+  enigma::graphics_prepare_buffer(buffer, false);
+  enigma::graphics_apply_vertex_format(vertexBuffer->format);
+
+	glDrawArrays(primitive_types[primitive], start, count);
+}
+
+void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
+  const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+
+  #ifdef DEBUG_MODE
+  enigma::GPUProfilerBatch& vbd = oglmgr->gpuprof.add_drawcall();
+  ++vbd.drawcalls;
+  #endif
+
+  enigma::graphics_prepare_buffer(vertex, false);
+  enigma::graphics_prepare_buffer(buffer, true);
+  enigma::graphics_apply_vertex_format(vertexBuffer->format);
+
+  GLenum indexType = GL_UNSIGNED_SHORT;
+  if (indexBuffer->type == index_type_uint) {
+    indexType = GL_UNSIGNED_INT;
+    start *= sizeof(unsigned int);
+  } else {
+    start *= sizeof(unsigned short);
+  }
+
+  glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)(intptr_t)start);
 }
 
 }
