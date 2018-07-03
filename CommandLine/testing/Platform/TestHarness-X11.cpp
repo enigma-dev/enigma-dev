@@ -100,7 +100,6 @@ class X11_TestHarness final: public TestHarness {
     system(("wmctrl -i -c " + to_string(window_id)).c_str());
   }
   void screen_save(std::string fPath) final {
-    sleep(3); // give the game a chance to render a frame first
     system(("import -window " + to_string(window_id) + " " + fPath).c_str());
   }
 
