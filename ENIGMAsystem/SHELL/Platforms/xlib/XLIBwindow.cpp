@@ -609,16 +609,6 @@ bool keyboard_check_direct(int key) {
   return (keyState[key >> 3] & (1 << (key & 7)));
 }
 
-void keyboard_key_press(int key) {
-  key = XKeysymToKeycode(enigma::x11::disp, enigma::keyrmap[key]);
-  XTestFakeKeyEvent(enigma::x11::disp, key, True, 0);
-}
-
-void keyboard_key_release(int key) {
-  key = XKeysymToKeycode(enigma::x11::disp, enigma::keyrmap[key]);
-  XTestFakeKeyEvent(enigma::x11::disp, key, False, 0);
-}
-
 void clipboard_set_text(string text) {
   Atom XA_UTF8 = XInternAtom(disp, "UTF8", 0);
   Atom XA_CLIPBOARD = XInternAtom(disp, "CLIPBOARD", False);

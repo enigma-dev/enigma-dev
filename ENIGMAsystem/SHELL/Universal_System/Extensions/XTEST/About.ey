@@ -1,0 +1,12 @@
+%E-YAML
+---
+
+Name: XTEST
+Identifier: XTEST
+Author: Robert Colton
+Description: Adds Xlib operating system-level keyboard simulation using XTEST Extension Protocol
+Default: false
+Icon: xtest.png
+
+Depends: None
+Dependencies: None
