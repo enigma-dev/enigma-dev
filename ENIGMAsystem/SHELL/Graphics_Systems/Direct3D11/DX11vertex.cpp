@@ -23,7 +23,7 @@
 #include <D3Dcompiler.h>
 
 namespace {
-CHAR* g_strVS =
+const char* g_strVS =
   "struct VertexInputType {\n"
   "  float4 position : POSITION;\n"
   "  float4 color : COLOR;\n"
@@ -39,7 +39,7 @@ CHAR* g_strVS =
   "  return output;\n"
   "}\n";
 
-CHAR* g_strPS =
+const char* g_strPS =
   "struct PixelInputType {\n"
   "  float4 position : SV_POSITION;\n"
   "  float4 color : COLOR;\n"
