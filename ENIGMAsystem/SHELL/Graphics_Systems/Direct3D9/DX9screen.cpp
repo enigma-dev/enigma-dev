@@ -47,11 +47,6 @@ using namespace std;
 #include "Graphics_Systems/graphics_mandatory.h"
 #include <limits>
 
-//Fuck whoever did this to the spec
-#ifndef GL_BGR
-  #define GL_BGR 0x80E0
-#endif
-
 using namespace enigma;
 
 #include "../General/GSmodel.h"
