@@ -97,53 +97,64 @@ void graphics_delete_index_buffer_peer(int buffer) {
   indexBufferPeers.erase(buffer);
 }
 
-void graphics_prepare_vertex_buffer(const int buffer) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+void graphics_prepare_buffer(const int buffer, const bool isIndex) {
+  const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
+  const bool frozen = isIndex ? indexBuffers[buffer]->frozen : vertexBuffers[buffer]->frozen;
 
   // if the contents of the vertex buffer are dirty then we need to update
   // our native vertex buffer object "peer"
-  if (vertexBuffer->dirty) {
-    ID3D11Buffer* vertexBufferPeer = NULL;
-    auto it = vertexBufferPeers.find(buffer);
-    size_t size = enigma_user::vertex_get_size(buffer);
+  if (dirty) {
+    ID3D11Buffer* bufferPeer = NULL;
+    auto it = isIndex ? indexBufferPeers.find(buffer) : vertexBufferPeers.find(buffer);
+    size_t size = isIndex ? enigma_user::index_get_size(buffer) : enigma_user::vertex_get_size(buffer);
 
     // if we have already created a native "peer" vbo for this user buffer,
     // then we have to release it if it isn't big enough to hold the new contents
     // or if it has just been frozen (so we can remove its D3DUSAGE_DYNAMIC)
-    if (it != vertexBufferPeers.end()) {
-      vertexBufferPeer = it->second;
+    if (it != (isIndex ? indexBufferPeers.end() : vertexBufferPeers.end())) {
+      bufferPeer = it->second;
 
       D3D11_BUFFER_DESC pDesc;
-      vertexBufferPeer->GetDesc(&pDesc);
+      bufferPeer->GetDesc(&pDesc);
 
-      if (size > pDesc.ByteWidth || vertexBuffer->frozen) {
-        vertexBufferPeer->Release();
-        vertexBufferPeer = NULL;
+      if (size > pDesc.ByteWidth || frozen) {
+        bufferPeer->Release();
+        bufferPeer = NULL;
       }
     }
 
-    if (!vertexBufferPeer) {
+    const void *data = isIndex ? (const void *)&indexBuffers[buffer]->indices[0] : (const void *)&vertexBuffers[buffer]->vertices[0];
+    if (!bufferPeer) {
       // create either a static or dynamic vbo peer depending on if the user called
       // vertex_freeze on the buffer and initialize it with the vertex data
       D3D11_BUFFER_DESC bd;
-      bd.Usage = vertexBuffer->frozen ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DYNAMIC;
+      bd.Usage = frozen ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DYNAMIC;
       bd.ByteWidth = size;
-      bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-      bd.CPUAccessFlags = vertexBuffer->frozen ? 0 : D3D11_CPU_ACCESS_WRITE;
+      bd.BindFlags = isIndex ? D3D11_BIND_INDEX_BUFFER : D3D11_BIND_VERTEX_BUFFER;
+      bd.CPUAccessFlags = frozen ? 0 : D3D11_CPU_ACCESS_WRITE;
       bd.MiscFlags = 0;
       bd.StructureByteStride = 0;
       D3D11_SUBRESOURCE_DATA initData;
-      initData.pSysMem = vertexBuffer->vertices.data();
-      m_device->CreateBuffer(&bd, &initData, &vertexBufferPeer);
+      initData.pSysMem = data;
+      m_device->CreateBuffer(&bd, &initData, &bufferPeer);
 
-      vertexBufferPeers[buffer] = vertexBufferPeer;
+      if (isIndex) {
+        indexBufferPeers[buffer] = bufferPeer;
+      } else {
+        vertexBufferPeers[buffer] = bufferPeer;
+      }
     } else {
       // update the contents of the native peer vbo on the GPU
-      m_deviceContext->UpdateSubresource(vertexBufferPeer, 0, NULL, vertexBuffer->vertices.data(), 0, 0);
+      m_deviceContext->UpdateSubresource(bufferPeer, 0, NULL, data, 0, 0);
     }
 
-    vertexBuffer->vertices.clear();
-    vertexBuffer->dirty = false;
+    if (isIndex) {
+      indexBuffers[buffer]->indices.clear();
+      indexBuffers[buffer]->dirty = false;
+    } else {
+      vertexBuffers[buffer]->vertices.clear();
+      vertexBuffers[buffer]->dirty = false;
+    }
   }
 }
 
@@ -235,7 +246,7 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
   enigma::graphics_prepare_default_shader();
-  enigma::graphics_prepare_vertex_buffer(buffer);
+  enigma::graphics_prepare_buffer(buffer, false);
 
   UINT stride = 0;
   ID3D11InputLayout* vertexLayout = vertex_format_layout(vertexFormat, stride);
@@ -257,7 +268,8 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 
   enigma::graphics_prepare_default_shader();
-  enigma::graphics_prepare_vertex_buffer(vertex);
+  enigma::graphics_prepare_buffer(buffer, true);
+  enigma::graphics_prepare_buffer(vertex, false);
 
   UINT stride = 0;
   ID3D11InputLayout* vertexLayout = vertex_format_layout(vertexFormat, stride);
