@@ -29,7 +29,7 @@ if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
   git checkout "$TRAVIS_BRANCH"
 elif [[ -n "$TRAVIS_COMMIT_RANGE" ]]; then
   prev=${TRAVIS_COMMIT_RANGE%%.*}~1
-  echo "You appear to be on branch master with no changes. Checking out '$prev' for the comparison."
+  echo "This appears to be a Travis push integration run; checking out '$prev' for the comparison."
   git checkout "$prev"
 elif [[ "${GIT_BRANCH}" == "master" && "${GIT_DETACHED}" == "FALSE" ]]; then
   echo "You appear to be on branch master with no changes. Checking out HEAD~1 for the comparison"
