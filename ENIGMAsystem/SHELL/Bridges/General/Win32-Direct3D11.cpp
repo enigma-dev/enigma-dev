@@ -57,8 +57,6 @@ namespace enigma
     d3dmgr = new ContextManager();
     int screenWidth = window_get_width(),
         screenHeight = window_get_height();
-    screenWidth = screenWidth <= 0 ? 1 : screenWidth;
-    screenHeight = screenHeight <= 0 ? 1 : screenHeight;
 
     HRESULT result;
 
@@ -69,19 +67,24 @@ namespace enigma
     swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
-    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swapChainDesc.OutputWindow = enigma::hWnd;
-    swapChainDesc.SampleDesc.Count = 1;
-    swapChainDesc.SampleDesc.Quality = 0;
-    swapChainDesc.Windowed = true; // initially windowed and not fullscreen
     swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
     swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    swapChainDesc.SampleDesc.Count = 1;
+    swapChainDesc.SampleDesc.Quality = 0;
+    swapChainDesc.OutputWindow = enigma::hWnd;
+    swapChainDesc.Windowed = true; // initially windowed and not fullscreen
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     swapChainDesc.Flags = 0;
 
     D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
+    #ifdef DEBUG_MODE
+    result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, D3D11_CREATE_DEVICE_DEBUG, &featureLevel, 1,
+                                           D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
+    #else
     result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1,
-                   D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
+                                           D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
+    #endif
 
     if (FAILED(result)) {
       //return false;
@@ -125,11 +128,11 @@ namespace enigma
 
     // Set up the description of the stencil state.
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
-    depthStencilDesc.DepthEnable = true;
+    depthStencilDesc.DepthEnable = false;
     depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
     depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
 
-    depthStencilDesc.StencilEnable = true;
+    depthStencilDesc.StencilEnable = false;
     depthStencilDesc.StencilReadMask = 0xFF;
     depthStencilDesc.StencilWriteMask = 0xFF;
 
@@ -168,10 +171,10 @@ namespace enigma
     // Setup the raster description which will determine how and what polygons will be drawn.
     D3D11_RASTERIZER_DESC rasterDesc;
     rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_BACK;
+    rasterDesc.CullMode = D3D11_CULL_NONE;
     rasterDesc.DepthBias = 0;
     rasterDesc.DepthBiasClamp = 0.0f;
-    rasterDesc.DepthClipEnable = true;
+    rasterDesc.DepthClipEnable = false;
     rasterDesc.FillMode = D3D11_FILL_SOLID;
     rasterDesc.FrontCounterClockwise = false;
     rasterDesc.MultisampleEnable = false;
@@ -212,8 +215,8 @@ namespace enigma_user
   }
 
   void screen_refresh() {
-      window_set_caption(room_caption);
-      enigma::update_mouse_variables();
+    window_set_caption(room_caption);
+    enigma::update_mouse_variables();
     m_swapChain->Present(0, 0);
   }
 

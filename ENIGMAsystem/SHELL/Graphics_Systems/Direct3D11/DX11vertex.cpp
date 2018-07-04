@@ -24,19 +24,29 @@
 
 namespace {
 CHAR* g_strVS =
-    "void VS( in float4 posIn : POSITION,\n"
-    "         out float4 posOut : SV_Position )\n"
-    "{\n"
-    "    // Output the vertex position, unchanged\n"
-    "    posOut = posIn;\n"
-    "}\n";
+  "struct VertexInputType {\n"
+  "  float4 position : POSITION;\n"
+  "  float4 color : COLOR;\n"
+  "};\n"
+  "struct PixelInputType {\n"
+  "  float4 position : SV_POSITION;\n"
+  "  float4 color : COLOR;\n"
+  "};\n"
+  "PixelInputType VS(VertexInputType input) {\n"
+  "  PixelInputType output;\n"
+  "  output.position = input.position;\n"
+  "  output.color = input.color;\n"
+  "  return output;\n"
+  "}\n";
 
 CHAR* g_strPS =
-    "void PS( out float4 colorOut : SV_Target )\n"
-    "{\n"
-    "    // Make each pixel yellow, with alpha = 1\n"
-    "    colorOut = float4( 1.0f, 1.0f, 0.0f, 1.0f );\n"
-    "}\n";
+  "struct PixelInputType {\n"
+  "  float4 position : SV_POSITION;\n"
+  "  float4 color : COLOR;\n"
+  "};\n"
+  "float4 PS(PixelInputType input) : SV_TARGET {\n"
+  "  return input.color;\n"
+  "}\n";
 
 ID3D10Blob* pBlobVS = NULL;
 ID3D10Blob* pBlobPS = NULL;
@@ -59,7 +69,7 @@ DXGI_FORMAT dxgi_formats[] = {
   DXGI_FORMAT_R32G32_FLOAT,
   DXGI_FORMAT_R32G32B32_FLOAT,
   DXGI_FORMAT_R32G32B32A32_FLOAT,
-  DXGI_FORMAT_R8G8B8A8_UINT,
+  DXGI_FORMAT_R8G8B8A8_UNORM,
   DXGI_FORMAT_R8G8B8A8_UINT
 };
 size_t dxgi_format_sizes[] = {
@@ -171,26 +181,33 @@ void graphics_prepare_default_shader() {
 
   if (g_pVertexShader == NULL) {
     DWORD dwShaderFlags = D3D10_SHADER_ENABLE_STRICTNESS;
-#ifdef _DEBUG
-    dwShaderFlags |= D3D10_SHADER_DEBUG;
+#ifdef DEBUG_MODE
+    dwShaderFlags |= D3D10_SHADER_DEBUG | D3D10_SHADER_SKIP_OPTIMIZATION;
 #endif
 
     ID3D10Blob* pBlobError = NULL;
+    HRESULT hr;
 
     // create the vertex shader
-    D3DCompile(g_strVS, lstrlenA( g_strVS ) + 1, "VS", NULL, NULL, "VS",
+    hr = D3DCompile(g_strVS, lstrlenA(g_strVS) + 1, "VS", NULL, NULL, "VS",
               "vs_4_0", dwShaderFlags, 0, &pBlobVS, &pBlobError);
-    if (pBlobError != NULL) {
-      pBlobError->Release();
+    if (FAILED(hr)) {
+      if (pBlobError != NULL) {
+        OutputDebugStringA((CHAR*)pBlobError->GetBufferPointer());
+        pBlobError->Release();
+      }
     }
     m_device->CreateVertexShader(pBlobVS->GetBufferPointer(), pBlobVS->GetBufferSize(),
                                 NULL, &g_pVertexShader);
 
     // create the pixel shader
-    D3DCompile(g_strPS, lstrlenA( g_strPS ) + 1, "PS", NULL, NULL, "PS",
+    hr = D3DCompile(g_strPS, lstrlenA(g_strPS) + 1, "PS", NULL, NULL, "PS",
               "ps_4_0", dwShaderFlags, 0, &pBlobPS, &pBlobError);
-    if (pBlobError != NULL) {
-      pBlobError->Release();
+    if (FAILED(hr)) {
+      if (pBlobError != NULL) {
+        OutputDebugStringA((CHAR*)pBlobError->GetBufferPointer());
+        pBlobError->Release();
+      }
     }
     m_device->CreatePixelShader(pBlobPS->GetBufferPointer(), pBlobPS->GetBufferSize(),
                                 NULL, &g_pPixelShader);
