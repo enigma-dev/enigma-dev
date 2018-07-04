@@ -22,7 +22,16 @@ cp -p -r "${PWD}" "${TEST_HARNESS_MASTER_DIR}"
 
 pushd "${TEST_HARNESS_MASTER_DIR}"
 
-if [[ "${GIT_BRANCH}" == "master" && "${GIT_DETACHED}" == "FALSE" ]]; then
+
+if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
+  echo "This appears to be a Travis pull request integration run; checking out '$TRAVIS_BRANCH' for the comparison."
+  git stash
+  git checkout "$TRAVIS_BRANCH"
+elif [[ -n "$TRAVIS_COMMIT_RANGE" ]]; then
+  prev=${TRAVIS_COMMIT_RANGE%%.*}~1
+  echo "You appear to be on branch master with no changes. Checking out '$prev' for the comparison."
+  git checkout "$prev"
+elif [[ "${GIT_BRANCH}" == "master" && "${GIT_DETACHED}" == "FALSE" ]]; then
   echo "You appear to be on branch master with no changes. Checking out HEAD~1 for the comparison"
   git checkout HEAD~1
 else
