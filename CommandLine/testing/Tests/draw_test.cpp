@@ -12,7 +12,7 @@ TEST(Regression, draw_test) {
   ASSERT_TRUE(test_harness->game_is_running())
       << "Game stopped running unexpectedly";
 
-  test_harness->screen_save("/tmp/enigma_draw_test.png");
+  test_harness->screen_save("./enigma_draw_test.png");
 
   test_harness->close_window();
   bool game_running = test_harness->game_is_running();
