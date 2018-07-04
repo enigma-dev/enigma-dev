@@ -101,16 +101,15 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
   const bool frozen = isIndex ? indexBuffers[buffer]->frozen : vertexBuffers[buffer]->frozen;
 
-  // if the contents of the vertex buffer are dirty then we need to update
-  // our native vertex buffer object "peer"
+  // if the contents of the buffer are dirty then we need to update our native "peer"
   if (dirty) {
     ID3D11Buffer* bufferPeer = NULL;
     auto it = isIndex ? indexBufferPeers.find(buffer) : vertexBufferPeers.find(buffer);
     size_t size = isIndex ? enigma_user::index_get_size(buffer) : enigma_user::vertex_get_size(buffer);
 
-    // if we have already created a native "peer" vbo for this user buffer,
+    // if we have already created a native "peer" for this user buffer,
     // then we have to release it if it isn't big enough to hold the new contents
-    // or if it has just been frozen (so we can remove its D3DUSAGE_DYNAMIC)
+    // or if it has just been frozen (so we can remove its D3D11_USAGE_DYNAMIC)
     if (it != (isIndex ? indexBufferPeers.end() : vertexBufferPeers.end())) {
       bufferPeer = it->second;
 
@@ -125,8 +124,8 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
 
     const void *data = isIndex ? (const void *)&indexBuffers[buffer]->indices[0] : (const void *)&vertexBuffers[buffer]->vertices[0];
     if (!bufferPeer) {
-      // create either a static or dynamic vbo peer depending on if the user called
-      // vertex_freeze on the buffer and initialize it with the vertex data
+      // create either a static or dynamic peer, depending on if the user called
+      // freeze on the buffer, and initialize its contents
       D3D11_BUFFER_DESC bd;
       bd.Usage = frozen ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DYNAMIC;
       bd.ByteWidth = size;
@@ -144,7 +143,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
         vertexBufferPeers[buffer] = bufferPeer;
       }
     } else {
-      // update the contents of the native peer vbo on the GPU
+      // update the contents of the native peer on the GPU
       m_deviceContext->UpdateSubresource(bufferPeer, 0, NULL, data, 0, 0);
     }
 
