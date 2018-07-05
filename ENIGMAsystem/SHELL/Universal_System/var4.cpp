@@ -524,5 +524,5 @@ namespace enigma_user {
   bool is_ptr(variant val)   { return val.type == ty_pointer; }
   
   variant pointer_null = nullptr;
-  variant pointer_invalid = (val.type == ty_undefined);
+  variant pointer_invalid = ty_undefined;
 }
