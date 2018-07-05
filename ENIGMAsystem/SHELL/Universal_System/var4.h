@@ -397,7 +397,8 @@ namespace enigma_user {
   bool is_string(variant val);
   bool is_ptr(variant var);
   
-  extern variant pointer_null, pointer_invalid;
+  extern variant pointer_null;
+  extern variant pointer_invalid;
 }
 
 #endif //ENIGMA_VAR4_H
