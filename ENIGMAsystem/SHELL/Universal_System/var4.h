@@ -34,8 +34,6 @@
 
 #include <string>
 
-#define pointer_null nullptr;
-
 namespace enigma {
   union rvt {
     double d;
@@ -157,7 +155,7 @@ struct variant
   ~variant();
 };
 
-
+extern variant pointer_null, pointer_invalid;
 
 #undef types_extrapolate_alldec
 #define types_extrapolate_alldec(prefix)\
