@@ -34,6 +34,8 @@
 
 #include <string>
 
+#define pointer_null nullptr;
+
 namespace enigma {
   union rvt {
     double d;
