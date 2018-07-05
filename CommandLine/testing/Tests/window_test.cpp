@@ -1,5 +1,6 @@
-#include <gtest/gtest.h>
 #include "TestHarness.hpp"
+
+#include <gtest/gtest.h>
 
 TEST(Game, window_test) {
   if (!TestHarness::windowing_supported()) return;

@@ -85,6 +85,8 @@ before_install:
 # build JDI and the CLI
 install:
   - chmod +x ./ci-build.sh
+  - chmod +x ./ci-regression.sh
+  - chmod +x ./CommandLine/testing/GitHub-ImageDiff.sh
   - make -j4
   - |
     if [ "$TEST_HARNESS" == true ]; then
@@ -188,7 +190,8 @@ script:
       export DISPLAY=:1
       Xvfb :1 -screen 0 1024x768x24 &
       xfwm4 &
-      ASAN_OPTIONS=detect_leaks=0 ./test-runner
+      export ASAN_OPTIONS=detect_leaks=0;
+      ./test-runner
       bash <(curl -s https://codecov.io/bash) -f "*.info"
     else
       ./ci-build.sh

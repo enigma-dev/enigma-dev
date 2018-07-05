@@ -99,6 +99,9 @@ class X11_TestHarness final: public TestHarness {
   void close_window() final {
     system(("wmctrl -i -c " + to_string(window_id)).c_str());
   }
+  void screen_save(std::string fPath) final {
+    system(("import -window " + to_string(window_id) + " " + fPath).c_str());
+  }
 
   bool game_is_running() final {
     if (pid == -1) return false;
