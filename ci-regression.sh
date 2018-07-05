@@ -4,7 +4,7 @@ set -e #exit if any command fails
 export TEST_HARNESS_MASTER_DIR="$1"
 
 GIT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
-if [ -z $(git status | grep detached) ]; then
+if [ -z "$(git status | grep detached)" ]; then
   GIT_DETATCHED="FALSE"
 else
   GIT_DETATCHED="TRUE"
