@@ -38,9 +38,9 @@ Carefully review the following image comparison for anomalies and adjust the cha
 \n\
 $TRAVIS_PULL_REQUEST_SHA | Master | Diff\n\
 --- | --- | ---\n\
-<a href='$imgur_url'><img alt='Image Diff' src='$imgur_url'/></a>|\
-<a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url'/></a>|\
-<a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url'/></a>\n"
+<a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
+<a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
+<a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
 
 curl -u $bot_user':'$bot_password \
   --header "Content-Type: application/json" \
