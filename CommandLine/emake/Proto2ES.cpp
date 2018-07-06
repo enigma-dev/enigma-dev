@@ -670,7 +670,7 @@ Instance AddInstance(const buffers::resources::Room::Instance& inst) {
   i.objectId = Name2Id(inst.object_type());
   i.x = inst.x();
   i.y = inst.y();
-  i.locked = inst.locked();
+  i.locked = inst.editor_settings().locked();
   i.creationCode = inst.code().c_str();
   i.preCreationCode = "";
 
@@ -684,7 +684,7 @@ Tile AddTile(const buffers::resources::Room::Tile& tile) {
   t.backgroundId = Name2Id(tile.background_name());
   t.roomX = tile.x();
   t.roomY = tile.y();
-  t.locked = tile.locked();
+  t.locked = tile.editor_settings().locked();
   t.bgX = tile.xoffset();
   t.bgY = tile.yoffset();
   t.width = tile.width();

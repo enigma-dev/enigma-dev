@@ -59,14 +59,22 @@ message Room {
     optional string name = 1;
     optional int32 id = 2 [(id_start) = 100000];
     optional string object_type = 3 [(gmx) = "objName"];
-    optional int32 x = 4;
-    optional int32 y = 5;
-    optional bool locked = 6;
+    optional double x = 4;
+    optional double y = 5;
+    optional double z = 6;
     optional string code = 7;
-    optional double xscale = 8 [(gmx) = "scaleX"];
-    optional double yscale = 9 [(gmx) = "scaleY"];
-    optional int32 color = 10 [(gmx) = "colour"];
-    optional double rotation = 11;
+    optional double xscale = 8 [default = 1, (gmx) = "scaleX"];
+    optional double yscale = 9 [default = 1, (gmx) = "scaleY"];
+    optional double zscale = 10 [default = 1, (gmx) = "scaleY"];
+    optional double rotation  = 11;
+    optional double zrotation = 12;
+    optional int32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
+    
+    message EditorSettings {
+      optional bool locked = 1;
+    }
+    
+    optional EditorSettings editor_settings = 31;
   }
 
   repeated Instance instances = 17 [(gmx) = "instances/instance"];
@@ -75,30 +83,35 @@ message Room {
     optional string name = 1;
     optional int32 id = 2 [(id_start) = 10000000];
     optional string background_name = 3 [(gmx) = "bgName"];
-    optional int32 x = 4;
-    optional int32 y = 5;
-    optional bool locked = 6;
-    optional int32 xoffset = 7 [(gmx) = "xo"];
-    optional int32 yoffset = 8 [(gmx) = "yo"];
-    optional uint32 width = 9 [(gmx) = "w"];
-    optional uint32 height = 10 [(gmx) = "h"];
-    optional int32 depth = 11;
-    optional double xscale = 12 [(gmx) = "scaleX"];
-    optional double yscale = 13 [(gmx) = "scaleY"];
-    optional int32 color = 14 [(gmx) = "colour"];
+    optional double x = 4;
+    optional double y = 5;
+    optional int32 xoffset = 6 [(gmx) = "xo"];
+    optional int32 yoffset = 7 [(gmx) = "yo"];
+    optional uint32 width = 8 [(gmx) = "w"];
+    optional uint32 height = 9 [(gmx) = "h"];
+    optional int32 depth = 10;
+    optional double xscale = 11 [(gmx) = "scaleX"];
+    optional double yscale = 12 [(gmx) = "scaleY"];
+    optional int32 color = 13 [(gmx) = "colour"];
+    
+    message EditorSettings {
+      optional bool locked = 1;
+    }
+    
+    optional EditorSettings editor_settings = 31;
   }
 
   repeated Tile tiles = 18 [(gmx) = "tiles/tile"];
 
   message RoomPhysicsSettings {
-    optional bool use_physics = 19 [(gmx) = "PhysicsWorld"];
-    optional int32 phy_world_top = 20 [(gmx) = "PhysicsWorldTop"];
-    optional int32 phy_world_left = 21 [(gmx) = "PhysicsWorldLeft"];
-    optional int32 phy_world_right = 22 [(gmx) = "PhysicsWorldRight"];
-    optional int32 phy_world_bottom = 23 [(gmx) = "PhysicsWorldBottom"];
-    optional double phy_world_xgravity = 24 [(gmx) = "PhysicsWorldGravityX"];
-    optional double phy_world_ygravity = 25 [(gmx) = "PhysicsWorldGravityY"];
-    optional double phy_world_pixel_meters = 26 [(gmx) = "PhysicsWorldPixToMeters"];
+    optional bool use_physics = 1 [(gmx) = "PhysicsWorld"];
+    optional int32 phy_world_top = 2 [(gmx) = "PhysicsWorldTop"];
+    optional int32 phy_world_left = 3 [(gmx) = "PhysicsWorldLeft"];
+    optional int32 phy_world_right = 4 [(gmx) = "PhysicsWorldRight"];
+    optional int32 phy_world_bottom = 5 [(gmx) = "PhysicsWorldBottom"];
+    optional double phy_world_xgravity = 6 [(gmx) = "PhysicsWorldGravityX"];
+    optional double phy_world_ygravity = 7 [(gmx) = "PhysicsWorldGravityY"];
+    optional double phy_world_pixel_meters = 8 [(gmx) = "PhysicsWorldPixToMeters"];
   }
 
   optional RoomPhysicsSettings physics_settings = 19 [(gmx) = "EGM_NESTED"];
