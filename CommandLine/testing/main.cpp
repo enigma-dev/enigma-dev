@@ -7,7 +7,7 @@
 std::string gitMasterDir = "/tmp/enigma-master";
 
 int main(int argc, char **argv) {
-  std::cerr << "who da bitch: " << argc << std::endl;
+  std::cerr << "who da bitch 2: " << argc << std::endl;
   std::cerr << std::flush;
 
   if (argc == 1) {
