@@ -7,9 +7,6 @@
 std::string gitMasterDir = "/tmp/enigma-master";
 
 int main(int argc, char **argv) {
-  std::cerr << "who da bitch 2: " << argc << std::endl;
-  std::cerr << std::flush;
-
   if (argc == 1) {
     int ret = system(("bash ./ci-regression.sh " + gitMasterDir).c_str());
     if (ret != 0) {
