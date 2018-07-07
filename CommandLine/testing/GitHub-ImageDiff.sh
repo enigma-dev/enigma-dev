@@ -21,22 +21,26 @@ function imgur_upload {
               --form "image=@$1")
 }
 
-imgur_diff_response=$( imgur_upload '/tmp/enigma_draw_diff.png' )
 imgur_response=$( imgur_upload './enigma_draw_test.png' )
+imgur_master_response=$( imgur_upload '/tmp/enigma-master/enigma_draw_test.png' )
+imgur_diff_response=$( imgur_upload '/tmp/enigma_draw_diff.png' )
 
-imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
 imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
+imgur_master_url=$(echo $imgur_master_response | jq --raw-output '.data."link"' )
+imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
 
-echo $imgur_diff_url
 echo $imgur_url
+echo $imgur_master_url
+echo $imgur_diff_url
 
-gh_comment="Graphics fidelity seems to have been compromised by changes in $TRAVIS_PULL_REQUEST_SHA. \
+gh_comment="Regression tests have indicated that graphical changes have been introduced. \
 Carefully review the following image comparison for anomalies and adjust the changeset accordingly.\n\
 \n\
-Image Diff | Screen Save\n\
---- | ---\n\
-<a href='$imgur_diff_url'><img alt='Image Diff' src='$imgur_diff_url'/></a>|\
-<a href='$imgur_url'><img alt='Screen Save' src='$imgur_url'/></a>\n"
+$TRAVIS_PULL_REQUEST_SHA | Master | Diff\n\
+--- | --- | ---\n\
+<a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
+<a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
+<a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
 
 curl -u $bot_user':'$bot_password \
   --header "Content-Type: application/json" \
