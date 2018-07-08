@@ -9,7 +9,7 @@ namespace enigma {
 // return early from our search
 static const unsigned X11_FONT_PERFECT_SCORE = 3;
 
-std::string font_lookup(std::string name, bool bold, bool italic) {
+std::string font_lookup(std::string name, bool bold, bool italic, unsigned char** buffer, size_t &buffer_size) {
   Display *display = XOpenDisplay(NULL);
 
   char** fontNames;

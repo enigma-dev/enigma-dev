@@ -60,24 +60,30 @@ namespace enigma_user {
   };
 
   int font_add(std::string name, unsigned size, bool bold, bool italic, unsigned first, unsigned last) {
-
     if (!enigma::FreeTypeAlive)
       return -1;
 
     FT_Face face;
     FT_GlyphSlot slot;
-    FT_Error error;
+    FT_Error error = 0;
 
     // if it's not a full path to a ttf file then we will
     // have to use our lookup method to find the font by
     // name from the installed fonts
+    unsigned char* buffer = nullptr;
+    size_t buffer_size = 0;
     if (!enigma::string_has_suffix(name, ".ttf")) {
-      name = enigma::font_lookup(name, bold, italic);
-      if (name.empty())
-        return -1;
+      name = enigma::font_lookup(name, bold, italic, &buffer, buffer_size);
+      if (buffer == nullptr) {
+        if (name.empty())
+          return -1;
+      } else {
+        error = FT_New_Memory_Face(enigma::FontManager::GetLibrary(), buffer, buffer_size, 0, &face);
+      }
     }
 
-    error = FT_New_Face(enigma::FontManager::GetLibrary(), name.c_str(), 0, &face );
+    if (buffer == nullptr)
+      error = FT_New_Face(enigma::FontManager::GetLibrary(), name.c_str(), 0, &face);
 
     if (error != 0)
       return -1;
@@ -117,7 +123,6 @@ namespace enigma_user {
 
       glyphmetrics[c-first] = pvrect(0, 0, charBitmap.width, charBitmap.rows, -1);
       glyphPairs[c-first] = GlyphPair(c-first, charBitmap.width * charBitmap.rows);
-
     }
 
     std::sort(glyphPairs.begin(), glyphPairs.end(), [](const GlyphPair &a, const GlyphPair &b) {
