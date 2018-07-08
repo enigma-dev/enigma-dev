@@ -1,6 +1,8 @@
 {
 	"files.associations": {
 		"*.gmx": "xml",
-		"xstring": "cpp"
+		"xstring": "cpp",
+		"algorithm": "cpp",
+		"limits": "cpp"
 	}
 }
