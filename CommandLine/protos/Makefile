@@ -18,9 +18,19 @@ OBJ_DIR := .eobjs
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 PROTOS := $(call rwildcard,$(SRC_DIR),*.proto)
+PROTOS := $(filter-out ./server.proto, $(PROTOS))
 PROTO_OUT := $(patsubst $(SRC_DIR)/%, $(PROTO_DIR)/%, $(patsubst %.proto, %.pb.cc, $(PROTOS)))
 
+ifeq ($(CLI_ENABLE_SERVER), TRUE)
+	PROTOS += $(SRC_DIR)/server.proto
+	PROTO_OUT += $(PROTO_DIR)/server.grpc.pb.cc
+	PROTO_OBJECTS += $(OBJ_DIR)/codegen/server.o
+	LIBLDFLAGS := -lgrpc++
+	CXXFLAGS += -D_WIN32_WINNT=0x0600
+endif
+
 $(PROTO_DIR)/%.grpc.pb.cc: $(SRC_DIR)/server.proto
+	protoc -I=. -I=/usr/include --cpp_out=$(PROTO_DIR) server.proto
 	protoc -I=. -I=/usr/include --grpc_out=$(PROTO_DIR) --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) server.proto
 
 $(PROTO_DIR)/%.pb.cc: $(SRC_DIR)/%.proto
@@ -31,15 +41,6 @@ OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURC
 
 PROTO_SOURCES = $(call rwildcard,$(SRC_DIR),*.pb.cc)
 PROTO_OBJECTS = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.pb.cc, %.o, $(PROTO_SOURCES)))
-
-ifeq ($(TRAVIS), true)
-	CXXFLAGS += -DCLI_DISABLE_SERVER
-else
-	PROTO_OUT += $(PROTO_DIR)/server.grpc.pb.cc
-	PROTO_OBJECTS += $(OBJ_DIR)/codegen/server.grpc.o
-	LIBLDFLAGS := -lgrpc++
-	CXXFLAGS += -D_WIN32_WINNT=0x0600
-endif
 
 OBJDIRS = $(sort $(OBJ_DIR) $(dir $(PROTO_OBJECTS)) $(dir $(OBJECTS)))
 DEPENDS = $(PROTO_OBJECTS:.o=.d) $(OBJECTS:.o=.d)

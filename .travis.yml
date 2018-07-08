@@ -85,12 +85,14 @@ before_install:
 # build JDI and the CLI
 install:
   - chmod +x ./ci-build.sh
+  - chmod +x ./ci-regression.sh
+  - chmod +x ./CommandLine/testing/GitHub-ImageDiff.sh
   - make -j4
   - |
     if [ "$TEST_HARNESS" == true ]; then
       make -j4 emake
     else
-      make -j4 emake disable_egm=true
+      CLI_ENABLE_EGM=FALSE make -j4 emake
     fi
 
 # by default most of our jobs will be run on a linux instance
@@ -188,7 +190,13 @@ script:
       export DISPLAY=:1
       Xvfb :1 -screen 0 1024x768x24 &
       xfwm4 &
-      ASAN_OPTIONS=detect_leaks=0 ./test-runner
+      export ASAN_OPTIONS=detect_leaks=0;
+      if ! ./test-runner ; then
+        if [ -f "/tmp/enigma_draw_diff.png" ]; then
+          ./CommandLine/testing/GitHub-ImageDiff.sh
+        fi
+        exit 1
+      fi
       bash <(curl -s https://codecov.io/bash) -f "*.info"
     else
       ./ci-build.sh

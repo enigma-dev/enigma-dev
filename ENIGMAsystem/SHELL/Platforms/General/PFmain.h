@@ -30,6 +30,7 @@ namespace enigma {
   extern int current_room_speed;
   extern int frames_count;
   extern unsigned long current_time_mcs;
+  extern bool game_window_focused;
 
   int enigma_main(int argc, char** argv);
   int game_ending();

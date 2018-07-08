@@ -31,7 +31,6 @@ extern Display* disp;
 extern Screen* screen;
 extern Window win;
 extern Atom wm_delwin;
-extern bool game_window_focused;
 }  // namespace x11
 
 XVisualInfo* CreateVisualInfo();
