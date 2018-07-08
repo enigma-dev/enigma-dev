@@ -2,6 +2,8 @@
 
 #include <X11/Xlib.h>
 
+#include <climits>
+
 namespace enigma {
 
 // if name, bold, and italic all match
@@ -16,7 +18,7 @@ std::string font_lookup(std::string name, bool bold, bool italic, unsigned char*
   int fontCount = 0;
   XFontStruct *fontInfos;
 
-  fontNames = XListFontsWithInfo(display, name.c_str(), INT_MAX, &fontCount, &fontInfo);
+  fontNames = XListFontsWithInfo(display, name.c_str(), INT_MAX, &fontCount, &fontInfos);
 
   std::string bestMatch = "";
   unsigned bestScore = 0;
@@ -30,7 +32,7 @@ std::string font_lookup(std::string name, bool bold, bool italic, unsigned char*
     for (int j = 0; j < fontInfo.n_properties; ++j) {
       XFontProp &fontProp = fontInfo.properties[j];
 
-      if (fontProp.name == RELATIVE_WEIGHT) {
+      if (strcmp(XGetAtomName(display, fontProp.name), "RELATIVE_WEIGHT") == 0) {
         if (bold) {
           if (fontProp.card32 == 70) // bold
             matchScore++;
@@ -38,8 +40,8 @@ std::string font_lookup(std::string name, bool bold, bool italic, unsigned char*
           if (fontProp.card32 == 50) // normal
             matchScore++;
         }
-      } else if (fontProp.name == SLANT) {
-        matchScore += (fontProp.card32 == "I"); // code-string for Italic
+      } else if (strcmp(XGetAtomName(display, fontProp.name), "SLANT") == 0) {
+        matchScore += (fontProp.card32 == 'I'); // code-string for Italic
       }
 
       if (matchScore == X11_FONT_PERFECT_SCORE)
