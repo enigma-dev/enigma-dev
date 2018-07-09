@@ -166,9 +166,18 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
     return -1;
   }
 
+  const char* env_workdir = std::getenv("TEST_HARNESS_WORKDIR");
+  if (!env_workdir) env_workdir = "";
+  const char* env_codegen = std::getenv("TEST_HARNESS_CODEGEN");
+  if (!env_codegen) env_codegen = "";
+
   // Invoke the compiler via emake
   using TC = TestConfig;
   string emake_cmd = "./emake";
+  string workdir = (tc.workdir.empty() ? std::string(env_workdir) : tc.workdir);
+  if (!workdir.empty()) workdir = "--workdir=" + workdir;
+  string codegen = (tc.codegen.empty() ? std::string(env_codegen) : tc.codegen);
+  if (!codegen.empty()) codegen = "--codegen=" + codegen;
   string compiler = "--compiler=" + tc.get_or(&TC::compiler, "TestHarness");
   string mode = "--mode=" + tc.get_or(&TC::mode, "Debug");
   string graphics = "--graphics=" + tc.get_or(&TC::graphics, "OpenGL1");
@@ -192,6 +201,8 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
     game.c_str(),
     "-o",
     out.c_str(),
+    workdir.empty() ? nullptr : workdir.c_str(),
+    codegen.empty() ? nullptr : codegen.c_str(),
     nullptr
   };
 
@@ -232,7 +243,7 @@ void gather_coverage(const TestConfig &config) {
     return;
   }
 
-  string src_dir = "--directory=/tmp/ENIGMA/.eobjs/Linux/Linux/TestHarness/"
+  string src_dir = "--directory=/tmp/ENIGMA-Travis/.eobjs/Linux/Linux/TestHarness/"
                  + config.get_or(&TestConfig::mode, "Debug") + "/";
   string out_file = "--output-file=coverage_" + to_string(test_num) + ".info";
 

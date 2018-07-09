@@ -211,7 +211,7 @@ void initTimer() {
 
 int updateTimer() {
   // Update current time.
-  enigma::update_current_time();
+  update_current_time();
   {
     // Find diff between current and offset.
 
