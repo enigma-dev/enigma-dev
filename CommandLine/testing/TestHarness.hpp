@@ -7,6 +7,8 @@
 const std::string kGamesDir = "CommandLine/testing/Tests/";
 
 struct TestConfig {
+  std::string workdir;
+  std::string codegen;
   std::string compiler;
   std::string mode;
   std::string graphics;

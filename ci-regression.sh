@@ -43,6 +43,4 @@ fi
 make all #rebuild emake and plugin incase we changed something there
 ./test-runner --gtest_filter=Regression.draw_test
 
-rm -rf /tmp/ENIGMA/
-
 popd
