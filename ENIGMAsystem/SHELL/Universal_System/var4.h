@@ -155,8 +155,6 @@ struct variant
   ~variant();
 };
 
-
-
 #undef types_extrapolate_alldec
 #define types_extrapolate_alldec(prefix)\
  types_extrapolate_real_p  (prefix,;)\
@@ -398,6 +396,9 @@ namespace enigma_user {
   bool is_real(variant val);
   bool is_string(variant val);
   bool is_ptr(variant var);
+  
+  extern variant pointer_null;
+  extern variant pointer_invalid;
 }
 
 #endif //ENIGMA_VAR4_H
