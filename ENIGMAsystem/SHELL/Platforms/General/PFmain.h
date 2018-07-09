@@ -43,7 +43,6 @@ namespace enigma {
   int updateTimer();
   int gameWait();
   void set_room_speed(int rs);
-  unsigned long get_timer();
 }
 
 namespace enigma_user {
