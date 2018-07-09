@@ -12,6 +12,7 @@ clean: .FORCE
 	$(MAKE) -C CommandLine/protos/ clean
 	$(MAKE) -C CommandLine/testing/ clean
 	$(MAKE) -C shared/lodepng/ clean
+	rm ./gm2egm
 
 all: liblodepng libProtocols libEGM ENIGMA emake test-runner .FORCE
 
@@ -27,10 +28,10 @@ liblodepng: .FORCE
 libProtocols: .FORCE
 	$(MAKE) -C CommandLine/protos/
 
-libEGM: .FORCE libProtocols
+libEGM: .FORCE liblodepng libProtocols
 	$(MAKE) -C CommandLine/libEGM/
 
-EMAKE_TARGETS = .FORCE
+EMAKE_TARGETS = .FORCE liblodepng
 
 ifneq ($(CLI_ENABLE_EGM), FALSE)
 	EMAKE_TARGETS += libEGM
@@ -38,8 +39,11 @@ else
 	EMAKE_TARGETS += libProtocols
 endif
 
-emake: liblodepng $(EMAKE_TARGETS)
+emake: $(EMAKE_TARGETS)
 	$(MAKE) -C CommandLine/emake/
+
+gm2egm: libEGM .FORCE
+	$(CXX) -ICommandLine/libEGM/ -ICommandLine/protos/ -ICommandLine/protos/codegen CommandLine/gm2egm/main.cpp -Wl,-rpath=. -L. -lEGM -lProtocols -o gm2egm
 
 test-runner: emake .FORCE
 	$(MAKE) -C CommandLine/testing/
