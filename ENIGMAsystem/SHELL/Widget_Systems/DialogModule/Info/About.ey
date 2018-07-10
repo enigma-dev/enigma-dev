@@ -1,8 +1,1 @@
-%e-yaml
----
-Name: Dialog Module
-Identifier: DialogModule
-Build-Platforms: Windows
-Represents: 
-Description: A Windows port of the "Tiny File Dialogs" Widget System's set of functions. It doesn't use any of Tiny File Dialog's original source code; this was written as a separate project, from a different author, to make all the same functions available for Windows, while giving the same look and feel of GameMaker to about half of the functions.
-Author: Samuel Venable
+
