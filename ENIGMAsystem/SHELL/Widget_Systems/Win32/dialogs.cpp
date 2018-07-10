@@ -672,7 +672,7 @@ string get_password(string str, string def)
   wcsncpy(wstrWindowStr, tstrWindowCaption.c_str(), MAX_PATH);
 
   HideInput = 1;
-  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(PasswordBoxHookProc));
+  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
 
   static string strResult;
   strResult = shorten(wstrTextEntry);
@@ -718,7 +718,7 @@ double get_passcode(string str, double def)
   wcsncpy(wstrWindowStr, tstrWindowCaption.c_str(), MAX_PATH);
 
   HideInput = 1;
-  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(PasswordBoxHookProc));
+  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
 
   static string strResult;
   strResult = shorten(wstrTextEntry);
