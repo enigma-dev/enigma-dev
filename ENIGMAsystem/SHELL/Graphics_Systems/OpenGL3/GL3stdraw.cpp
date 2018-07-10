@@ -81,11 +81,13 @@ void draw_set_alpha_test_ref_value(unsigned val)
 
 void draw_set_line_pattern(int pattern, int scale)
 {
+  /*
   if (pattern == -1)
       glDisable(GL_LINE_STIPPLE);
   else
     glEnable(GL_LINE_STIPPLE),
     glLineStipple(scale,(short)pattern);
+  */
 }
 
 }
