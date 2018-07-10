@@ -25,6 +25,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "glad.h"
+
 #include <iostream>
 #include <cstring>
 #include <stdio.h>
@@ -50,6 +52,7 @@ void EnableDrawing(void*) {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     context = SDL_GL_CreateContext(windowHandle);
     renderer = SDL_CreateRenderer(windowHandle, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+    gladLoadGLLoader(SDL_GL_GetProcAddress);
 }
 
 void DisableDrawing(void*) {

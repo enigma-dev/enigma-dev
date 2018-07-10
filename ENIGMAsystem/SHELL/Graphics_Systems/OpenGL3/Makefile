@@ -1,10 +1,10 @@
-SOURCES += $(wildcard Graphics_Systems/OpenGL3/*.cpp) $(wildcard Graphics_Systems/General/*.cpp)
+override CXXFLAGS += -IGraphics_Systems/OpenGL3/glad/
+SOURCES += $(wildcard Graphics_Systems/OpenGL3/*.cpp) $(wildcard Graphics_Systems/General/*.cpp) Graphics_Systems/OpenGL3/glad/glad.c
 
 ifeq ($(TARGET-PLATFORM), Windows)
-	override CXXFLAGS += -DGLEW_STATIC
-	override LDLIBS += -lglew32 -lopengl32 -lglu32
+	override LDLIBS += -lopengl32 -lglu32
 else ifeq ($(TARGET-PLATFORM), Linux)
-	override LDLIBS += -lGL -lGLU -lGLEW
+	override LDLIBS += -lGL -lGLU
 else ifeq ($(TARGET-PLATFORM), MacOSX)
-	override LDLIBS += -framework OpenGL -lGLEW
+	override LDLIBS += -framework OpenGL
 endif
