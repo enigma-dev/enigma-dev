@@ -201,6 +201,7 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
 WCHAR wstrPromptStr[4096];
 WCHAR wstrTextEntry[MAX_PATH];
 WCHAR wstrWindowStr[MAX_PATH];
+bool HideInput = 0;
 
 void ClientResize(HWND hWnd, int nWidth, int nHeight)
 {
@@ -234,54 +235,9 @@ LRESULT CALLBACK InputBoxHookProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
     SetDlgItemTextW(hWndDlg, 992, wstrPromptStr);
     SetDlgItemTextW(hWndDlg, 990, wstrTextEntry);
     SetWindowTextW(hWndDlg, wstrWindowStr);
+    if (HideInput == 1)
+      SendDlgItemMessage(hWndDlg, 990, EM_SETPASSWORDCHAR, '*', NULL);
     SendDlgItemMessage(hWndDlg, 990, EM_SETSEL, '*', NULL);
-    SendDlgItemMessage(hWndDlg, 990, WM_SETFOCUS, NULL, NULL);
-    return TRUE;
-
-  case WM_COMMAND:
-    switch (wParam)
-    {
-    case IDOK:
-      GetDlgItemTextW(hWndDlg, 990, wstrTextEntry, MAX_PATH);
-      gs_form_canceled = 0;
-      EndDialog(hWndDlg, 0);
-      return TRUE;
-    case IDCANCEL:
-      tstring wstrEmpty = widen("");
-      wcsncpy(wstrTextEntry, wstrEmpty.c_str(), MAX_PATH);
-      gs_form_canceled = 1;
-      EndDialog(hWndDlg, 0);
-      return TRUE;
-    }
-    break;
-  }
-
-  return FALSE;
-}
-
-LRESULT CALLBACK PasswordBoxHookProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-  switch (Msg)
-  {
-  case WM_INITDIALOG:
-    ClientResize(hWndDlg, 357, 128);
-    RECT rect;
-    GetWindowRect(hWndDlg, &rect);
-    MoveWindow(hWndDlg,
-      (GetSystemMetrics(SM_CXSCREEN) / 2) - ((rect.right - rect.left) / 2),
-      (GetSystemMetrics(SM_CYSCREEN) / 3) - ((rect.bottom - rect.top) / 3),
-      rect.right - rect.left, rect.bottom - rect.top, TRUE);
-    MoveWindow(GetDlgItem(hWndDlg, IDOK), 272, 10, 75, 23, TRUE);
-    MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), 272, 39, 75, 23, TRUE);
-    MoveWindow(GetDlgItem(hWndDlg, 990), 11, 94, 336, 23, TRUE);
-    MoveWindow(GetDlgItem(hWndDlg, 992), 11, 11, 252, 66, TRUE);
-    SetWindowLongPtr(hWndDlg, GWL_EXSTYLE, GetWindowLongPtr(hWndDlg, GWL_EXSTYLE) | WS_EX_DLGMODALFRAME);
-    SetWindowPos(hWndDlg, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
-    SetDlgItemTextW(hWndDlg, 992, wstrPromptStr);
-    SetDlgItemTextW(hWndDlg, 990, wstrTextEntry);
-    SetWindowTextW(hWndDlg, wstrWindowStr);
-    SendDlgItemMessage(hWndDlg, 990, EM_SETPASSWORDCHAR, '*', NULL);
-    SendDlgItemMessage(hWndDlg, 990, EM_SETSEL , '*', NULL);
     SendDlgItemMessage(hWndDlg, 990, WM_SETFOCUS, NULL, NULL);
     return TRUE;
 
@@ -697,6 +653,7 @@ string get_string(string str, string def)
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
   wcsncpy(wstrWindowStr, tstrWindowCaption.c_str(), MAX_PATH);
 
+  HideInput = 0;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
 
   static string strResult;
@@ -714,6 +671,7 @@ string get_password(string str, string def)
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
   wcsncpy(wstrWindowStr, tstrWindowCaption.c_str(), MAX_PATH);
 
+  HideInput = 1;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(PasswordBoxHookProc));
 
   static string strResult;
@@ -735,6 +693,7 @@ double get_integer(string str, double def)
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
   wcsncpy(wstrWindowStr, tstrWindowCaption.c_str(), MAX_PATH);
 
+  HideInput = 0;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
 
   static string strResult;
@@ -758,6 +717,7 @@ double get_passcode(string str, double def)
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
   wcsncpy(wstrWindowStr, tstrWindowCaption.c_str(), MAX_PATH);
 
+  HideInput = 1;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(PasswordBoxHookProc));
 
   static string strResult;
