@@ -46,7 +46,7 @@ unsigned gui_height;
 particles_implementation* particles_impl;
 void set_particles_implementation(particles_implementation* part_impl)
 {
-    particles_impl = part_impl;
+  particles_impl = part_impl;
 }
 
 }
@@ -272,8 +272,6 @@ void screen_redraw()
 
   ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are separate functions for a reason.
   screen_refresh();
-
-
 }
 
 }
