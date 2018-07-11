@@ -44,10 +44,6 @@ GLenum renderstates[3] = {
   GL_NICEST, GL_FASTEST, GL_DONT_CARE
 };
 
-GLenum fogmodes[3] = {
-  GL_EXP, GL_EXP2, GL_LINEAR
-};
-
 GLenum depthoperators[8] = {
   GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL,
   GL_GEQUAL, GL_ALWAYS
@@ -74,7 +70,7 @@ namespace enigma_user
 
 void d3d_depth_clear_value(float value) {
   oglmgr->BlendFunc();
-  glClearDepthf(value);
+  glClearDepth(value);
 }
 
 void d3d_set_software_vertex_processing(bool software) {

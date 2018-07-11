@@ -358,8 +358,6 @@ void texture_preload(int texid)
 void texture_set_priority(int texid, double prio)
 {
   // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-  oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
 }
 
 void texture_set_enabled(bool enable)

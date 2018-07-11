@@ -461,7 +461,7 @@ bool tile_layer_delete(int layer_depth)
         {
             if (dit->second.tiles[0].depth != layer_depth)
                 continue;
-            glDeleteLists(enigma::drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
+            //glDeleteLists(enigma::drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
             dit->second.tiles.clear();
             return true;
         }
@@ -578,4 +578,3 @@ bool tile_layer_shift(int layer_depth, int x, int y)
 }
 
 }
-

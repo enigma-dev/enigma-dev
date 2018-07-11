@@ -74,7 +74,7 @@ namespace enigma
 
   unsigned gui_width;
   unsigned gui_height;
-  unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
+  unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo); don't need to be called (they are very slow)
   int viewport_x, viewport_y, viewport_w, viewport_h; //These are used by surfaces, to set back the viewport
 }
 
@@ -307,7 +307,7 @@ void screen_redraw()
 
   if (enigma::msaa_fbo != 0) {
     GLint fbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::msaa_fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     //TODO: Change the code below to fix this to size properly to views

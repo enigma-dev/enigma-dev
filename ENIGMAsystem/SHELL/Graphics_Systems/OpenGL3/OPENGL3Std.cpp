@@ -53,6 +53,7 @@ namespace enigma
   void graphicssystem_initialize()
   {
     oglmgr = new ContextManager();
+    /*
     #ifdef DEBUG_MODE
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -62,7 +63,7 @@ namespace enigma
     #else
     glewInit();
     #endif
-
+    */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glDisable(GL_DEPTH_TEST);
