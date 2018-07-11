@@ -55,7 +55,7 @@ FONT 8, "MS Shell Dlg 2"
 
   LTEXT "&Files: (*.*)", stc3, 232, 56, 72, 16
   LISTBOX lst1, 232, 72, 185, 93, LBS_SORT | LBS_HASSTRINGS | LBS_NOTIFY | WS_VSCROLL |
-  WS_TABSTOP | LBS_OWNERDRAWFIXED
+  LBS_OWNERDRAWFIXED
 
   LTEXT "Directory &Name:", stc2, 8, 8, 93, 16
 
