@@ -45,8 +45,8 @@ bool initGameWindow() {
 }
 
 void EnableDrawing(void*) {
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAJOR_VERSION);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR_VERSION);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetSwapInterval(0);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -68,11 +68,11 @@ namespace enigma_user {
   void set_synchronization(bool enable) {
     SDL_GL_SetSwapInterval(enable);
   }
-    
+
   void display_reset(int samples, bool vsync) {
     set_synchronization(vsync);
   }
-    
+
   void screen_refresh() {
     SDL_GL_SwapWindow(enigma::windowHandle);
     window_set_caption(room_caption);
@@ -80,4 +80,3 @@ namespace enigma_user {
   }
 
 }
-
