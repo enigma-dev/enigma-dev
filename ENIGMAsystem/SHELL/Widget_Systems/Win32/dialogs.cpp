@@ -200,6 +200,17 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
   return 0;
 }
 
+static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
+{
+  if (uMsg == BFFM_INITIALIZED)
+  {
+    tstring tstr_cap = widen(gs_cap);
+    SetWindowTextW(hwnd, tstr_cap.c_str());
+  }
+
+  return 0;
+}
+
 WCHAR wstrPromptStr[4096];
 WCHAR wstrTextEntry[MAX_PATH];
 bool HideInput = 0;
@@ -237,7 +248,7 @@ LRESULT CALLBACK InputBoxHookProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
     SetDlgItemTextW(hWndDlg, 992, wstrPromptStr);
     SetDlgItemTextW(hWndDlg, 990, wstrTextEntry);
     WCHAR wstrWindowCaption[MAX_PATH];
-    tstring tstrWindowCaption = widen(window_get_caption());
+    tstring tstrWindowCaption = widen(gs_cap);
     wcsncpy(wstrWindowCaption, tstrWindowCaption.c_str(), MAX_PATH);
     SetWindowTextW(hWndDlg, wstrWindowCaption);
     if (HideInput == 1)
@@ -372,6 +383,8 @@ UINT_PTR CALLBACK CCHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam
       (GetSystemMetrics(SM_CXSCREEN) / 2) - ((rect.right - rect.left) / 2),
       (GetSystemMetrics(SM_CYSCREEN) / 3) - ((rect.bottom - rect.top) / 3),
       rect.right - rect.left, rect.bottom - rect.top, TRUE);
+    tstring tstr_cap = widen(gs_cap);
+    SetWindowTextW(hdlg, tstr_cap.c_str());
     PostMessageW(hdlg, WM_SETFOCUS, 0, 0);
   }
 
@@ -609,19 +622,21 @@ bool show_question(string str)
   return (result == IDYES);
 }
 
-string get_login(string username, string password, string cap)
+string get_login(string username, string password, string title)
 {
-  gs_cap = cap; gs_username = username; gs_password = password;
+  if (title == "") title = "Login";
+  gs_cap = title; gs_username = username; gs_password = password;
   DialogBox(enigma::hInstance,"getlogindialog",enigma::hWnd,GetLoginProc);
 
   return gs_str_submitted;
 }
 
-string get_string(string str, string def)
+string get_string(string str, string def, string title)
 {
   tstring tstrStr = widen(str);
   tstring tstrDef = widen(def);
-  tstring tstrWindowCaption = widen(window_get_caption());
+  if (title == "") title = window_get_caption();
+  gs_cap = title;
 
   wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
@@ -634,11 +649,12 @@ string get_string(string str, string def)
   return strResult;
 }
 
-string get_password(string str, string def)
+string get_password(string str, string def, string title)
 {
   tstring tstrStr = widen(str);
   tstring tstrDef = widen(def);
-  tstring tstrWindowCaption = widen(window_get_caption());
+  if (title == "") title = window_get_caption();
+  gs_cap = title;
 
   wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
@@ -651,7 +667,7 @@ string get_password(string str, string def)
   return strResult;
 }
 
-double get_integer(string str, double def)
+double get_integer(string str, double def, string title)
 {
   std::ostringstream defInteger;
   defInteger << def;
@@ -659,7 +675,8 @@ double get_integer(string str, double def)
 
   tstring tstrStr = widen(str);
   tstring tstrDef = widen(strDef);
-  tstring tstrWindowCaption = widen(window_get_caption());
+  if (title == "") title = window_get_caption();
+  gs_cap = title;
 
   wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
@@ -674,7 +691,7 @@ double get_integer(string str, double def)
   return cstrResult ? strtod(cstrResult, NULL) : 0;
 }
 
-double get_passcode(string str, double def)
+double get_passcode(string str, double def, string title)
 {
   std::ostringstream defInteger;
   defInteger << def;
@@ -682,7 +699,8 @@ double get_passcode(string str, double def)
 
   tstring tstrStr = widen(str);
   tstring tstrDef = widen(strDef);
-  tstring tstrWindowCaption = widen(window_get_caption());
+  if (title == "") title = window_get_caption();
+  gs_cap = title;
 
   wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
@@ -701,7 +719,7 @@ bool get_string_canceled() {
   return gs_form_canceled;
 }
 
-string get_open_filename(string filter, string fname)
+string get_open_filename(string filter, string fname, string title)
 {
   OPENFILENAMEW ofn;
 
@@ -710,6 +728,9 @@ string get_open_filename(string filter, string fname)
   tstring tstr_filter = widen(str_filter);
   replace(tstr_filter.begin(), tstr_filter.end(), '|', '\0');
   tstring tstr_fname = widen(fname);
+  tstring tstr_title = widen(title);
+  if (title == "") title = "Open";
+  gs_cap = title;
 
   WCHAR wstr_fname[MAX_PATH];
   wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
@@ -721,7 +742,8 @@ string get_open_filename(string filter, string fname)
   ofn.nMaxFile = MAX_PATH;
   ofn.lpstrFilter = tstr_filter.c_str();
   ofn.nFilterIndex = 0;
-  ofn.lpstrTitle = NULL;
+  ofn.lpstrTitle = tstr_title.c_str();
+  if (title == "") ofn.lpstrTitle = NULL;
   ofn.lpstrInitialDir = NULL;
   ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 
@@ -735,7 +757,7 @@ string get_open_filename(string filter, string fname)
   return "";
 }
 
-string get_save_filename(string filter, string fname)
+string get_save_filename(string filter, string fname, string title)
 {
   OPENFILENAMEW ofn;
 
@@ -744,6 +766,9 @@ string get_save_filename(string filter, string fname)
   tstring tstr_filter = widen(str_filter);
   replace(tstr_filter.begin(), tstr_filter.end(), '|', '\0');
   tstring tstr_fname = widen(fname);
+  tstring tstr_title = widen(title);
+  if (title == "") title = "Save As";
+  gs_cap = title;
 
   WCHAR wstr_fname[MAX_PATH];
   wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
@@ -755,7 +780,8 @@ string get_save_filename(string filter, string fname)
   ofn.nMaxFile = MAX_PATH;
   ofn.lpstrFilter = tstr_filter.c_str();
   ofn.nFilterIndex = 0;
-  ofn.lpstrTitle = NULL;
+  ofn.lpstrTitle = tstr_title.c_str();
+  if (title == "") ofn.lpstrTitle = NULL;
   ofn.lpstrInitialDir = NULL;
   ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 
@@ -780,6 +806,8 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   tstring tstr_fname = widen(fname);
   tstring tstr_dir = widen(dir);
   tstring tstr_title = widen(title);
+  if (title == "") title = "Open";
+  gs_cap = title;
 
   WCHAR wstr_fname[MAX_PATH];
   wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
@@ -816,6 +844,8 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   tstring tstr_fname = widen(fname);
   tstring tstr_dir = widen(dir);
   tstring tstr_title = widen(title);
+  if (title == "") title = "Save As";
+  gs_cap = title;
 
   WCHAR wstr_fname[MAX_PATH];
   wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
@@ -841,9 +871,12 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   return "";
 }
 
-double get_color(double defcol)
+double get_color(double defcol, bool advanced, string title)
 {
   CHOOSECOLOR cc;
+
+  if (title == "") title = "Color";
+  gs_cap = title;
 
   COLORREF DefColor = (int)defcol;
   static COLORREF CustColors[16];
@@ -854,6 +887,7 @@ double get_color(double defcol)
   cc.rgbResult = DefColor;
   cc.lpCustColors = CustColors;
   cc.Flags = CC_RGBINIT | CC_ENABLEHOOK;
+  if (advanced) cc.Flags |= CC_FULLOPEN;
   cc.lpfnHook = CCHookProc;
 
   if (ChooseColor(&cc) != 0)
@@ -862,15 +896,17 @@ double get_color(double defcol)
   return -1;
 }
 
-string get_directory(string dname)
+string get_directory(string dname, string title)
 {
   OPENFILENAMEW ofn;
 
   tstring tstr_filter = widen("*.*|*.*|");
   replace(tstr_filter.begin(), tstr_filter.end(), '|', '\0');
   tstring tstr_dname = widen(dname);
-  tstring tstr_title = widen("Select Directory");
+  tstring tstr_title = widen(title);
   tstring tstr_empty = widen("");
+  if (title == "") title = "Select Directory";
+  gs_cap = title;
 
   if (tstr_dname == tstr_empty)
     GetCurrentDirectoryW(MAX_PATH, wstr_dname);
@@ -905,7 +941,7 @@ string get_directory(string dname)
   return "";
 }
 
-string get_directory_alt(string capt, string root)
+string get_directory_alt(string capt, string root, bool modern, string title)
 {
   BROWSEINFOW bi;
 
@@ -914,6 +950,8 @@ string get_directory_alt(string capt, string root)
   tstring tstr_slash = widen("\\");
   tstring tstr_empty = widen("");
   tstring tstr_zero = widen("0");
+  if (title == "") title = "Browse For Folder";
+  gs_cap = title;
 
   LPITEMIDLIST pstr_root;
 
@@ -923,24 +961,34 @@ string get_directory_alt(string capt, string root)
     SHParseDisplayName(tstr_root.c_str(), 0, &pstr_root, 0, 0);
 
   WCHAR wstr_dir[MAX_PATH];
+  LPMALLOC pMalloc;
+  gs_cap = title;
 
-  ZeroMemory(&bi, sizeof(bi));
-  bi.hwndOwner = enigma::hWnd;
-  bi.pidlRoot = pstr_root;
-  bi.pszDisplayName = wstr_dir;
-  bi.lpszTitle = tstr_capt.c_str();
-  bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON;
-
-  LPITEMIDLIST lpItem = SHBrowseForFolderW(&bi);
-  if (lpItem != NULL)
+  if (SUCCEEDED(SHGetMalloc(&pMalloc)))
   {
-    if (SHGetPathFromIDListW(lpItem, wstr_dir) == 0)
-      return "";
-    else
+    ZeroMemory(&bi, sizeof(bi));
+    bi.hwndOwner = enigma::hWnd;
+    bi.pidlRoot = pstr_root;
+    bi.pszDisplayName = wstr_dir;
+    bi.lpszTitle = tstr_capt.c_str();
+    bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON;
+    if (modern) bi.ulFlags |= BIF_EDITBOX;
+    bi.lpfn = GetDirectoryAltProc;
+
+    LPITEMIDLIST lpItem = SHBrowseForFolderW(&bi);
+    if (lpItem != NULL)
     {
-      static string result;
-      result = string_replace_all(shorten(wstr_dir) + shorten(tstr_slash), "\\\\", "\\");
-      return result;
+      if (SHGetPathFromIDListW(lpItem, wstr_dir) == 0)
+        return "";
+      else
+      {
+        static string result;
+        result = string_replace_all(shorten(wstr_dir) + shorten(tstr_slash), "\\\\", "\\");
+        return result;
+      }
+
+      pMalloc->Free(lpItem);
+      pMalloc->Release();
     }
   }
 
