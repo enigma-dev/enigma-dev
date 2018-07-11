@@ -77,20 +77,20 @@ enum {
   // IMPLEMENTS from widgets_mandatory:
   // void show_error(string errortext, const bool fatal);
 
-  double get_color(double defcol);
+  double get_color(double defcol, bool advanced = false, string title = "");
 
-  string get_open_filename(string filter, string fname);
-  string get_save_filename(string filter, string fname);
+  string get_open_filename(string filter, string fname, string title = "");
+  string get_save_filename(string filter, string fname, string title = "");
   string get_open_filename_ext(string filter, string fname, string dir, string title);
   string get_save_filename_ext(string filter, string fname, string dir, string title);
-  string get_directory(string dname);
-  string get_directory_alt(string capt, string root);
+  string get_directory(string dname, string title = "");
+  string get_directory_alt(string capt, string root, bool modern = false, string title = "");
 
-  string get_login(string username, string password, string cap="");
-  string get_string(string str, string def);
-  string get_password(string str, string def);
-  double get_integer(string str, double def);
-  double get_passcode(string str, double def);
+  string get_login(string username, string password, string title = "");
+  string get_string(string str, string def, string title = "");
+  string get_password(string str, string def, string title = "");
+  double get_integer(string str, double def, string title = "");
+  double get_passcode(string str, double def, string title = "");
   bool   get_string_canceled();
 
 }
