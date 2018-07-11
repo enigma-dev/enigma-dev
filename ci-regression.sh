@@ -22,8 +22,7 @@ cp -p -r "${PWD}" "${TEST_HARNESS_MASTER_DIR}"
 
 pushd "${TEST_HARNESS_MASTER_DIR}"
 
-# git gets triggered by our chmod calls for some of the sh scripts
-# stash changes before checking stuff out
+# stash changes that may have occurred from the install step before checking stuff out
 git stash
 
 if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
