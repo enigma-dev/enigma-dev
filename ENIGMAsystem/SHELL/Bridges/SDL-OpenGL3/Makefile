@@ -1,2 +1,2 @@
-override CXXFLAGS += -IGraphics_Systems/OpenGL3/glad
+override CXXFLAGS += -IGraphics_Systems/OpenGL3/glad -DGL_CONTEXT_MAJOR_VERSION=3 -DGL_CONTEXT_MINOR_VERSION=3 -DGL_CONTEXT_PROFILE=SDL_GL_CONTEXT_PROFILE_CORE
 SOURCES += $(wildcard Bridges/SDL-OpenGL/*.cpp)

@@ -1,5 +1,5 @@
-override CXXFLAGS += -IGraphics_Systems/OpenGL3/glad/ -IGraphics_Systems/OpenGL3/glad/KHR
-SOURCES += $(wildcard Graphics_Systems/OpenGL3/*.cpp) $(wildcard Graphics_Systems/General/*.cpp) Graphics_Systems/OpenGL3/glad/glad.c
+override CXXFLAGS += -IGraphics_Systems/OpenGLES3/glad/ -IGraphics_Systems/OpenGLES3/glad/KHR
+SOURCES += $(wildcard Graphics_Systems/OpenGL3/*.cpp) $(wildcard Graphics_Systems/General/*.cpp) Graphics_Systems/OpenGLES3/glad/glad.c
 
 ifeq ($(TARGET-PLATFORM), Windows)
 	override LDLIBS += -lopengl32 -lglu32
