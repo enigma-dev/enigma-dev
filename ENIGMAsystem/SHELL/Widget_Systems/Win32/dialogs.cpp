@@ -38,11 +38,13 @@
 
 using namespace std;
 #include "Platforms/Win32/WINDOWSmain.h"
+#include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/estring.h"
 #include "GameSettings.h"
 
 using enigma_user::string_replace_all;
+using enigma_user::window_get_caption;
 
 #include "../General/WSdialogs.h"
 
@@ -200,7 +202,6 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
 
 WCHAR wstrPromptStr[4096];
 WCHAR wstrTextEntry[MAX_PATH];
-WCHAR wstrWindowStr[MAX_PATH];
 bool HideInput = 0;
 
 void ClientResize(HWND hWnd, int nWidth, int nHeight)
@@ -219,6 +220,7 @@ LRESULT CALLBACK InputBoxHookProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
   switch (Msg)
   {
   case WM_INITDIALOG:
+    {
     ClientResize(hWndDlg, 357, 128);
     RECT rect;
     GetWindowRect(hWndDlg, &rect);
@@ -234,12 +236,17 @@ LRESULT CALLBACK InputBoxHookProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
     SetWindowPos(hWndDlg, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
     SetDlgItemTextW(hWndDlg, 992, wstrPromptStr);
     SetDlgItemTextW(hWndDlg, 990, wstrTextEntry);
-    SetWindowTextW(hWndDlg, wstrWindowStr);
+    WCHAR wstrWindowCaption[MAX_PATH];
+    tstring tstrWindowCaption = widen(window_get_caption());
+    wcsncpy(wstrWindowCaption, tstrWindowCaption.c_str(), MAX_PATH);
+    SetWindowTextW(hWndDlg, wstrWindowCaption);
     if (HideInput == 1)
       SendDlgItemMessage(hWndDlg, 990, EM_SETPASSWORDCHAR, '*', 0);
     SendDlgItemMessage(hWndDlg, 990, EM_SETSEL, '*', 0);
     SendDlgItemMessage(hWndDlg, 990, WM_SETFOCUS, 0, 0);
     return TRUE;
+    }
+  break;
 
   case WM_COMMAND:
     switch (wParam)
@@ -250,8 +257,8 @@ LRESULT CALLBACK InputBoxHookProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
       EndDialog(hWndDlg, 0);
       return TRUE;
     case IDCANCEL:
-      tstring wstrEmpty = widen("");
-      wcsncpy(wstrTextEntry, wstrEmpty.c_str(), MAX_PATH);
+      tstring tstrEmpty = widen("");
+      wcsncpy(wstrTextEntry, tstrEmpty.c_str(), MAX_PATH);
       gs_form_canceled = 1;
       EndDialog(hWndDlg, 0);
       return TRUE;
@@ -315,6 +322,7 @@ UINT APIENTRY OFNHookProcOldStyle(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
   {
     SetWindowLongPtr(hWnd, GWL_STYLE, GetWindowLongPtr(hWnd, GWL_STYLE) | DS_FIXEDSYS);
     SetWindowPos(hWnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+    SendDlgItemMessage(hWnd, lst1, WM_KILLFOCUS, 0, 0);
   }
 
   if (uMsg == WM_PAINT)
@@ -372,8 +380,6 @@ UINT_PTR CALLBACK CCHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam
 }
 
 namespace enigma_user {
-
-extern string window_get_caption();
 
 void message_alpha(double alpha) {
 
@@ -620,7 +626,6 @@ string get_string(string str, string def)
 
   wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
-  wcsncpy(wstrWindowStr, tstrWindowCaption.c_str(), MAX_PATH);
 
   HideInput = 0;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
@@ -638,7 +643,6 @@ string get_password(string str, string def)
 
   wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
-  wcsncpy(wstrWindowStr, tstrWindowCaption.c_str(), MAX_PATH);
 
   HideInput = 1;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
@@ -660,7 +664,6 @@ double get_integer(string str, double def)
 
   wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
-  wcsncpy(wstrWindowStr, tstrWindowCaption.c_str(), MAX_PATH);
 
   HideInput = 0;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
@@ -684,7 +687,6 @@ double get_passcode(string str, double def)
 
   wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
-  wcsncpy(wstrWindowStr, tstrWindowCaption.c_str(), MAX_PATH);
 
   HideInput = 1;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
