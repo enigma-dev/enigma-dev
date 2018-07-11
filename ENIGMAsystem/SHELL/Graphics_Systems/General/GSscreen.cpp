@@ -278,7 +278,8 @@ void screen_redraw()
 
   enigma::scene_end();
 
-  ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are separate functions for a reason.
+  // GM8.1 manual specifies that screen_redraw should call screen_refresh
+  // "The first function redraws the internal image and then refreshes the screen image."
   screen_refresh();
 }
 
