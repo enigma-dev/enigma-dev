@@ -40,8 +40,8 @@ using namespace std;
 
 namespace enigma {
 
-unsigned gui_width;
-unsigned gui_height;
+unsigned gui_width = 0;
+unsigned gui_height = 0;
 
 particles_implementation* particles_impl;
 void set_particles_implementation(particles_implementation* part_impl)

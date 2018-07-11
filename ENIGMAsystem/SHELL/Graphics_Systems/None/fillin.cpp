@@ -199,14 +199,11 @@ namespace enigma_user
 	extern int window_get_region_width();
 	extern int window_get_region_height();
 
-	void screen_redraw(){}
 	void screen_init(){}
 	int screen_save(string filename){return -1;}
 	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h){return -1;}
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 	void display_set_gui_size(unsigned int width, unsigned int height){}
-	unsigned int display_get_gui_width(){return 0;}
-	unsigned int display_get_gui_height(){return 0;}
 
 	void draw_primitive_begin(int kind){}
 	void draw_primitive_begin_texture(int kind, int tex){}

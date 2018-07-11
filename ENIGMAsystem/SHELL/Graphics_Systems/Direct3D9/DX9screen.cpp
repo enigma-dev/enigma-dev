@@ -26,131 +26,31 @@
 #include "../General/GSmatrix.h"
 #include "../General/GStextures.h"
 #include "../General/GScolors.h"
-
-using namespace std;
+#include "../General/GSmodel.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background_internal.h"
 #include "Universal_System/background.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
-
-#include "Graphics_Systems/General/GScolor_macros.h"
-
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
 #include "Universal_System/depth_draw.h"
+
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFmain.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+
 #include <limits>
 
-//Fuck whoever did this to the spec
-#ifndef GL_BGR
-  #define GL_BGR 0x80E0
-#endif
-
 using namespace enigma;
-
-#include "../General/GSmodel.h"
-
-namespace enigma_user {
-  extern int window_get_width();
-  extern int window_get_height();
-  extern int window_get_region_width();
-  extern int window_get_region_height();
-}
-
-namespace enigma
-{
-  extern bool d3dMode;
-  extern bool d3dHidden;
-  extern int d3dCulling;
-  particles_implementation* particles_impl;
-  void set_particles_implementation(particles_implementation* part_impl)
-  {
-      particles_impl = part_impl;
-  }
-
-	unsigned gui_width;
-	unsigned gui_height;
-}
+using namespace std;
 
 namespace enigma_user
 {
-
-void screen_redraw()
-{
-  //d3dmgr->EndShapesBatching(); //If called inside bound surface we need to finish drawing
-  d3dmgr->BeginScene();
-  // Clean up any textures that ENIGMA may still think are binded but actually are not
-  d3d_set_zwriteenable(true);
-  if (!view_enabled)
-  {
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-
-    clear_view(0, 0, window_get_region_width(), window_get_region_height(), 0, background_showcolor);
-    draw_back();
-    draw_insts();
-    draw_tiles();
-  }
-  else
-  {
-    //TODO: Possibly implement view option from Stupido to control which view clears the background
-    // Only clear the background on the first visible view by checking if it hasn't been cleared yet
-    bool draw_backs = true;
-    bool background_allviews = true; // FIXME: Create a setting for this.
-    for (view_current = 0; view_current < 8; view_current++)
-    {
-      int vc = (int)view_current;
-      if (!view_visible[vc])
-        continue;
-
-      int vob = (int)view_object[vc];
-      if (vob != -1)
-        follow_object(vob, vc);
-
-      screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
-
-      clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc], background_showcolor && draw_backs);
-
-      if (draw_backs)
-        draw_back();
-
-      draw_insts();
-
-      if (draw_tiles())
-        break;
-      draw_backs = background_allviews;
-    }
-    // In Studio this variable is not reset until the next iteration of views as is actually 7 in the draw_gui event, in 8.1 however view_current will always be 0 in the step event.
-    view_current = 0;
-  }
-
-  // Now process the sub event of draw called draw gui
-  // It is for drawing GUI elements without view scaling and transformation
-  if (enigma::gui_used)
-  {
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
-
-    // Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
-    if (enigma::d3dMode)
-      d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-
-    draw_gui();
-  }
-
-  if (sprite_exists(cursor_sprite))
-    draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
-
-  d3dmgr->EndScene();
-
-  ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are separate functions for a reason.
-  screen_refresh();
-}
 
 void screen_init()
 {
