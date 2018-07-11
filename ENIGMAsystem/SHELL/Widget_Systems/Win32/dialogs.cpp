@@ -236,9 +236,9 @@ LRESULT CALLBACK InputBoxHookProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
     SetDlgItemTextW(hWndDlg, 990, wstrTextEntry);
     SetWindowTextW(hWndDlg, wstrWindowStr);
     if (HideInput == 1)
-      SendDlgItemMessage(hWndDlg, 990, EM_SETPASSWORDCHAR, '*', NULL);
-    SendDlgItemMessage(hWndDlg, 990, EM_SETSEL, '*', NULL);
-    SendDlgItemMessage(hWndDlg, 990, WM_SETFOCUS, NULL, NULL);
+      SendDlgItemMessage(hWndDlg, 990, EM_SETPASSWORDCHAR, '*', 0);
+    SendDlgItemMessage(hWndDlg, 990, EM_SETSEL, '*', 0);
+    SendDlgItemMessage(hWndDlg, 990, WM_SETFOCUS, 0, 0);
     return TRUE;
 
   case WM_COMMAND:
