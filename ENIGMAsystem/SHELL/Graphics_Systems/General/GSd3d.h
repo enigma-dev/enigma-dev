@@ -92,7 +92,7 @@ namespace enigma_user {
   {
 
   void d3d_clear_depth();
-  void d3d_depth_clear_value(float value);
+  void d3d_clear_depth_value(float value);
   void d3d_start();
   void d3d_end();
   void d3d_set_hidden(bool enable);

@@ -22,6 +22,14 @@
 using std::string;
 #include "Universal_System/scalar.h"
 
+namespace enigma {
+  extern unsigned gui_width;
+  extern unsigned gui_height;
+
+  void scene_begin();
+  void scene_end();
+}
+
 namespace enigma_user {
   int screen_save(string filename);
   inline int action_snapshot(string filename)
