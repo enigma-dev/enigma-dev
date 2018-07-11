@@ -274,6 +274,7 @@ WCHAR *LowerCaseToActualPathName(WCHAR *wstr_dname)
 
 WCHAR wstr_dname[MAX_PATH];
 WCHAR wstr_label5[MAX_PATH];
+static string DlgItemText;
 tstring ActualPath;
 HWND label6;
 
@@ -282,16 +283,13 @@ UINT APIENTRY OFNHookProcOldStyle(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
   if (uMsg == WM_INITDIALOG)
   {
     ClientResize(hWnd, 424, 255);
-
     RECT rect;
     GetWindowRect(hWnd, &rect);
     MoveWindow(hWnd,
       (GetSystemMetrics(SM_CXSCREEN) / 2) - ((rect.right - rect.left) / 2),
       (GetSystemMetrics(SM_CYSCREEN) / 2) - ((rect.bottom - rect.top) / 2),
       rect.right - rect.left, rect.bottom - rect.top, TRUE);
-
     label6 = GetDlgItem(hWnd, 991);
-
     MoveWindow(GetDlgItem(hWnd, IDOK), 256, 224, 77, 27, TRUE);
     MoveWindow(GetDlgItem(hWnd, IDCANCEL), 340, 224, 77, 27, TRUE);
     MoveWindow(GetDlgItem(hWnd, stc3), 232, 56, 72, 16, TRUE);
@@ -304,17 +302,12 @@ UINT APIENTRY OFNHookProcOldStyle(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
     MoveWindow(GetDlgItem(hWnd, lst2), 8, 72, 213, 123, TRUE);
     MoveWindow(GetDlgItem(hWnd, cmb2), 232, 192, 185, 19, TRUE);
     ShowWindow(GetDlgItem(hWnd, stc1), SW_HIDE);
-
     DlgDirListW(hWnd, wstr_dname, lst1, stc1, DDL_ARCHIVE | DDL_READWRITE | DDL_READONLY);
-
     GetDlgItemTextW(hWnd, stc1, wstr_label5, MAX_PATH);
-
     static string DlgItemText;
     DlgItemText = shorten(LowerCaseToActualPathName(wstr_label5));
     ActualPath = widen(string_replace_all(DlgItemText + "\\", "\\\\", "\\"));
-
     SetDlgItemTextW(hWnd, GetDlgCtrlID(label6), ActualPath.c_str());
-
     PostMessageW(hWnd, WM_SETFOCUS, 0, 0);
   }
 
@@ -327,11 +320,9 @@ UINT APIENTRY OFNHookProcOldStyle(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
   if (uMsg == WM_PAINT)
   {
     GetDlgItemTextW(hWnd, stc1, wstr_label5, MAX_PATH);
-
     static string DlgItemText;
     DlgItemText = shorten(LowerCaseToActualPathName(wstr_label5));
     ActualPath = widen(string_replace_all(DlgItemText + "\\", "\\\\", "\\"));
-
     SetDlgItemTextW(hWnd, GetDlgCtrlID(label6), ActualPath.c_str());
   }
 
@@ -374,7 +365,6 @@ UINT_PTR CALLBACK CCHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam
       (GetSystemMetrics(SM_CXSCREEN) / 2) - ((rect.right - rect.left) / 2),
       (GetSystemMetrics(SM_CYSCREEN) / 3) - ((rect.bottom - rect.top) / 3),
       rect.right - rect.left, rect.bottom - rect.top, TRUE);
-
     PostMessageW(hdlg, WM_SETFOCUS, 0, 0);
   }
 
