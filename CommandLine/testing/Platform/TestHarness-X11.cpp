@@ -157,7 +157,7 @@ constexpr const char *kDefaultExtensions =
     "Paths,DateTime,DataStructures,MotionPlanning,Alarms,Timelines,"
     "ParticleSystems";
 
-int build_game(const string &game, const TestConfig &tc, const string &out) {
+int build_game(const string &game, TestConfig &tc, const string &out) {
   if (pid_t emake = fork()) {
     int status = 0;
     if (emake == -1) return -1;
@@ -174,10 +174,10 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   // Invoke the compiler via emake
   using TC = TestConfig;
   string emake_cmd = "./emake";
-  string workdir = (tc.workdir.empty() ? std::string(env_workdir) : tc.workdir);
-  if (!workdir.empty()) workdir = "--workdir=" + workdir;
-  string codegen = (tc.codegen.empty() ? std::string(env_codegen) : tc.codegen);
-  if (!codegen.empty()) codegen = "--codegen=" + codegen;
+  tc.workdir = (tc.workdir.empty() ? std::string(env_workdir) : tc.workdir);
+  string workdir = (tc.workdir.empty() ? std::string("") : ("--workdir=" + workdir));
+  tc.codegen = (tc.codegen.empty() ? std::string(env_codegen) : tc.codegen);
+  string codegen = (tc.codegen.empty() ? std::string("") : ("--codegen=" + codegen));
   string compiler = "--compiler=" + tc.get_or(&TC::compiler, "TestHarness");
   string mode = "--mode=" + tc.get_or(&TC::mode, "Debug");
   string graphics = "--graphics=" + tc.get_or(&TC::graphics, "OpenGL1");
@@ -243,8 +243,9 @@ void gather_coverage(const TestConfig &config) {
     return;
   }
 
-  string src_dir = "--directory=/tmp/ENIGMA-Travis/.eobjs/Linux/Linux/TestHarness/"
-                 + config.get_or(&TestConfig::mode, "Debug") + "/";
+  string src_dir = "--directory=";
+  src_dir += config.workdir.empty() ? "/tmp/ENIGMA/" : config.workdir.c_str();
+  src_dir += ".eobjs/Linux/Linux/TestHarness/" + config.get_or(&TestConfig::mode, "Debug") + "/";
   string out_file = "--output-file=coverage_" + to_string(test_num) + ".info";
 
   const char *const lcovArgs[] = {
@@ -269,7 +270,7 @@ bool TestHarness::windowing_supported() {
 }
 
 unique_ptr<TestHarness>
-TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
+TestHarness::launch_and_attach(const string &game, TestConfig &tc) {
   string out = "/tmp/test-game";
   if (int retcode = build_game(game, tc, out)) {
     if (retcode != -1) {
@@ -305,7 +306,7 @@ constexpr int operator"" _million(unsigned long long x) {
   return x * 1000 * 1000;
 }
 
-int TestHarness::run_to_completion(const string &game, const TestConfig &tc) {
+int TestHarness::run_to_completion(const string &game, TestConfig &tc) {
   string out = "/tmp/test-game";
   if (int retcode = build_game(game, tc, out)) {
     if (retcode != -1) {
