@@ -322,7 +322,6 @@ UINT APIENTRY OFNHookProcOldStyle(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
   {
     SetWindowLongPtr(hWnd, GWL_STYLE, GetWindowLongPtr(hWnd, GWL_STYLE) | DS_FIXEDSYS);
     SetWindowPos(hWnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
-    SendDlgItemMessage(hWnd, lst1, WM_KILLFOCUS, 0, 0);
   }
 
   if (uMsg == WM_PAINT)
