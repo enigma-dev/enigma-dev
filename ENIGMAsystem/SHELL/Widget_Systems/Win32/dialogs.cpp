@@ -290,39 +290,20 @@ UINT APIENTRY OFNHookProcOldStyle(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
       (GetSystemMetrics(SM_CYSCREEN) / 2) - ((rect.bottom - rect.top) / 2),
       rect.right - rect.left, rect.bottom - rect.top, TRUE);
 
-    HWND bttn1 = GetDlgItem(hWnd, IDOK);
-    HWND bttn2 = GetDlgItem(hWnd, IDCANCEL);
-    HWND list1 = GetDlgItem(hWnd, lst1);
-    HWND list2 = GetDlgItem(hWnd, lst2);
-    HWND label1 = GetDlgItem(hWnd, stc3);
-    HWND label2 = GetDlgItem(hWnd, 65535);
-    HWND label3 = GetDlgItem(hWnd, stc2);
-    HWND label4 = GetDlgItem(hWnd, stc4);
-    HWND label5 = GetDlgItem(hWnd, stc1);
     label6 = GetDlgItem(hWnd, 991);
-    HWND cmbbx1 = GetDlgItem(hWnd, cmb1);
-    HWND cmbbx2 = GetDlgItem(hWnd, cmb2);
-    HWND txtbx1 = GetDlgItem(hWnd, edt1);
 
-    SetWindowText(label1, "&Files: (*.*)");
-    SetWindowText(label2, "&Directories:");
-    SetWindowText(label3, "Directory &Name:");
-    SetWindowText(label4, "D&rives:");
-    DestroyWindow(cmbbx1);
-    DestroyWindow(txtbx1);
-
-    MoveWindow(bttn1, 256, 224, 77, 27, TRUE);
-    MoveWindow(bttn2, 340, 224, 77, 27, TRUE);
-    MoveWindow(label1, 232, 56, 72, 16, TRUE);
-    MoveWindow(label2, 8, 56, 72, 16, TRUE);
-    MoveWindow(label3, 8, 8, 93, 16, TRUE);
-    MoveWindow(label4, 232, 176, 50, 16, TRUE);
-    MoveWindow(label5, 8, 24, 409 * 100, 16, TRUE);
-    MoveWindow(label6, 8, 24, 409, 16, TRUE);
-    MoveWindow(list1, 232, 72, 185, 93, TRUE);
-    MoveWindow(list2, 8, 72, 213, 123, TRUE);
-    MoveWindow(cmbbx2, 232, 192, 185, 19, TRUE);
-    ShowWindow(label5, SW_HIDE);
+    MoveWindow(GetDlgItem(hWnd, IDOK), 256, 224, 77, 27, TRUE);
+    MoveWindow(GetDlgItem(hWnd, IDCANCEL), 340, 224, 77, 27, TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc3), 232, 56, 72, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, 994), 8, 56, 72, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc2), 8, 8, 93, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc4), 232, 176, 50, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc1), 8, 24, 409 * 100, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, 991), 8, 24, 409, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, lst1), 232, 72, 185, 93, TRUE);
+    MoveWindow(GetDlgItem(hWnd, lst2), 8, 72, 213, 123, TRUE);
+    MoveWindow(GetDlgItem(hWnd, cmb2), 232, 192, 185, 19, TRUE);
+    ShowWindow(GetDlgItem(hWnd, stc1), SW_HIDE);
 
     DlgDirListW(hWnd, wstr_dname, lst1, stc1, DDL_ARCHIVE | DDL_READWRITE | DDL_READONLY);
 
@@ -353,8 +334,6 @@ UINT APIENTRY OFNHookProcOldStyle(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
     SetDlgItemTextW(hWnd, GetDlgCtrlID(label6), ActualPath.c_str());
   }
-
-  HWND list1 = GetDlgItem(hWnd, lst1);
 
   if (uMsg == WM_COMMAND && HIWORD(wParam) == LBN_DBLCLK && LOWORD(wParam) == lst1)
     return TRUE;
