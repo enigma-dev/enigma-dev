@@ -152,7 +152,6 @@ void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
 {
   d3d_set_projection_ortho(x, y, w, h, angle);
 
-  int clear_bits = 0;
   if (showcolor)
     enigma_user::draw_clear(background_color);
 
