@@ -196,6 +196,14 @@ static inline void draw_gui()
 
 namespace enigma_user {
 
+unsigned int display_get_gui_width(){
+  return enigma::gui_width;
+}
+
+unsigned int display_get_gui_height(){
+  return enigma::gui_height;
+}
+
 void screen_redraw()
 {
   enigma::scene_begin();

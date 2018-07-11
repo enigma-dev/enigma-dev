@@ -186,12 +186,4 @@ void display_set_gui_size(unsigned int width, unsigned int height) {
   enigma::gui_height = height;
 }
 
-unsigned int display_get_gui_width(){
-  return enigma::gui_width;
-}
-
-unsigned int display_get_gui_height(){
-  return enigma::gui_height;
-}
-
 }
