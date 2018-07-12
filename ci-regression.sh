@@ -24,6 +24,7 @@ pushd "${TEST_HARNESS_MASTER_DIR}"
 
 if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
   echo "This appears to be a Travis pull request integration run; checking out '$TRAVIS_BRANCH' for the comparison."
+  git stash
   git checkout "$TRAVIS_BRANCH"
 elif [[ -n "$TRAVIS_COMMIT_RANGE" ]]; then
   prev=${TRAVIS_COMMIT_RANGE%%.*}~1
@@ -34,6 +35,7 @@ elif [[ "${GIT_BRANCH}" == "master" && "${GIT_DETACHED}" == "FALSE" ]]; then
   git checkout HEAD~1
 else
   echo "You appear to be on branch ${GIT_BRANCH}. Checking out branch master for the comparison"
+  git stash
   git checkout master
 fi
 
