@@ -10,8 +10,8 @@ int main(int argc, char **argv) {
   if (argc == 1) {
     int ret = system(("bash ./ci-regression.sh " + gitMasterDir).c_str());
     if (ret != 0) {
-      std::cerr << "Error: ci-regression.sh returned non-zero." << std::endl;
-      return ret;
+      std::cerr << "Error: ci-regression.sh returned non-zero " << ret << std::endl;
+      return 1;
     }
 
     // have the regular tests output to a different directory now to avoid

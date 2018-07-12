@@ -5,9 +5,9 @@ export TEST_HARNESS_MASTER_DIR="$1"
 
 GIT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
 if [ -z "$(git status | grep detached)" ]; then
-  GIT_DETATCHED="FALSE"
+  GIT_DETACHED="FALSE"
 else
-  GIT_DETATCHED="TRUE"
+  GIT_DETACHED="TRUE"
 fi
 
 if [ -d "${TEST_HARNESS_MASTER_DIR}" ]; then
@@ -21,7 +21,6 @@ echo "Copying ${PWD} to ${TEST_HARNESS_MASTER_DIR}"
 cp -p -r "${PWD}" "${TEST_HARNESS_MASTER_DIR}"
 
 pushd "${TEST_HARNESS_MASTER_DIR}"
-
 
 if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
   echo "This appears to be a Travis pull request integration run; checking out '$TRAVIS_BRANCH' for the comparison."
