@@ -5,8 +5,7 @@
 
 TEST(Regression, draw_test) {
   if (!TestHarness::windowing_supported()) return;
-  TestConfig tc;
-  auto test_harness = LAUNCH_HARNESS_FOR_SOG(tc);
+  auto test_harness = LAUNCH_HARNESS_FOR_SOG(TestConfig());
   if (!test_harness) FAIL() << "Game could not be run.";
 
   test_harness->wait();  // Let the game render a frame first.

@@ -61,11 +61,11 @@ class TestHarness {
   /// Launch a game's executable file and "attach" to it.
   /// Not in a debugger sense, but in a "grabbing the window" sense.
   static std::unique_ptr<TestHarness>
-      launch_and_attach(const std::string &game, TestConfig &tc);
+      launch_and_attach(const std::string &game, const TestConfig &tc);
 
   /// Launch a game's executable file and let it run to completion.
   /// Return its exit code.
-  static int run_to_completion(const std::string &game, TestConfig &tc);
+  static int run_to_completion(const std::string &game, const TestConfig &tc);
 
   enum ErrorCodes {
     BUILD_FAILED = -1,      ///< Used if the game failed to build.
