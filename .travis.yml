@@ -192,7 +192,7 @@ script:
         if [ -f "/tmp/enigma_draw_diff.png" ]; then
           ./CommandLine/testing/GitHub-ImageDiff.sh
         fi
-        exit 1
+        travis_terminate 1
       fi
       bash <(curl -s https://codecov.io/bash) -f "*.info"
     else
