@@ -15,36 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <cstdio>
 #include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
-#include "../General/GSsprite.h"
-#include "../General/GSbackground.h"
-#include "../General/GSscreen.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GStextures.h"
-#include "../General/GScolors.h"
-#include "../General/GSmodel.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GScolors.h"
 
 #include "Universal_System/image_formats.h"
-#include "Universal_System/background_internal.h"
-#include "Universal_System/background.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/estring.h"
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
-#include "Universal_System/depth_draw.h"
 
 #include "Platforms/General/PFwindow.h"
-#include "Platforms/General/PFmain.h"
-#include "Platforms/platforms_mandatory.h"
 
-#include <limits>
+#include <string>
+#include <cstdio>
 
 using namespace enigma;
 using namespace std;
