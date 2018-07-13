@@ -17,28 +17,13 @@
 
 #include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
-#include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GSscreen.h"
-#include "Graphics_Systems/General/GSd3d.h"
-#include "Graphics_Systems/General/GSmodel.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-
-#include "Universal_System/var4.h"
-#include "Universal_System/estring.h"
-#include "Universal_System/background.h"
-#include "Universal_System/background_internal.h"
 
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
-#include "Universal_System/depth_draw.h"
-#include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
-#include "Platforms/General/PFmain.h"
 
 #include <string>
 #include <cstdio>

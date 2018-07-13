@@ -15,12 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/General/GL3Context.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
-#include "Bridges/General/GL3Context.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/roomsystem.h"
