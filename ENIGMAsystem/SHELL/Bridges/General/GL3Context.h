@@ -37,7 +37,7 @@ protected:
 public:
 
 float last_depth;
-int last_stride;
+unsigned last_stride;
 bool hasdrawn;
 int shapes_d3d_model;
 int shapes_d3d_texture;
@@ -47,7 +47,7 @@ ContextManager() {
 	hasdrawn = false;
 	shapes_d3d_model = -1;
 	shapes_d3d_texture = -1;
-	last_stride = -1;
+	last_stride = 0;
 	last_depth = 0.0f;
 	bound_tex = 0;
 }
@@ -87,9 +87,9 @@ void RestoreState() {
 void BeginShapesBatching(int texId) {
 	if (shapes_d3d_model == -1) {
 		shapes_d3d_model = enigma_user::d3d_model_create(enigma_user::model_stream);
-		last_stride = -1;
-	} else if (texId != shapes_d3d_texture || (enigma_user::d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
-		last_stride = -1;
+		last_stride = 0;
+	} else if (texId != shapes_d3d_texture || (enigma_user::d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != 0)) {
+		last_stride = 0;
 		if (!hasdrawn) {
 			enigma_user::d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
 			enigma_user::d3d_model_clear(shapes_d3d_model);
@@ -108,7 +108,7 @@ void EndShapesBatching() {
 	enigma_user::d3d_model_clear(shapes_d3d_model);
 
 	shapes_d3d_texture = -1;
-	last_stride = -1;
+	last_stride = 0;
   last_depth -= 1;
 }
 
