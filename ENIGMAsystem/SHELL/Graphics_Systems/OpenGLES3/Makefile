@@ -1,4 +1,4 @@
-override CXXFLAGS += -IGraphics_Systems/OpenGLES3/glad/ -IGraphics_Systems/OpenGLES3/glad/KHR
+override CXXFLAGS += -IGraphics_Systems/OpenGLES3/glad/
 SOURCES += $(wildcard Graphics_Systems/OpenGL3/*.cpp) $(wildcard Graphics_Systems/General/*.cpp) Graphics_Systems/OpenGLES3/glad/glad.c
 
 ifeq ($(TARGET-PLATFORM), Windows)
