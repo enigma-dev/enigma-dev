@@ -814,7 +814,7 @@ namespace enigma {
         vbd.triangles_indexed+=(vertex_count==-1?triangleIndexedCount:vertex_count);
         #endif
 
-        glDrawElementsBaseVertex (GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset), ringBufferVDrawOffset);
+        glDrawElements(GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset));
         offset += triangleIndexedCount;
       }
       if (lineIndexedCount > 0) {
@@ -823,7 +823,7 @@ namespace enigma {
         vbd.lines_indexed+=lineIndexedCount;
         #endif
 
-        glDrawElementsBaseVertex (GL_LINES, lineIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset), ringBufferVDrawOffset);
+        glDrawElements(GL_LINES, lineIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
         offset += lineIndexedCount;
       }
       if (pointIndexedCount > 0) {
@@ -832,7 +832,7 @@ namespace enigma {
         vbd.points_indexed+=pointIndexedCount;
         #endif
 
-        glDrawElementsBaseVertex (GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset), ringBufferVDrawOffset);
+        glDrawElements(GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
       }
 
       offset = ringBufferVDrawOffset + indexedoffset/stride;
