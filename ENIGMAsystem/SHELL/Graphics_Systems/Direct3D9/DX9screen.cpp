@@ -49,6 +49,20 @@
 using namespace enigma;
 using namespace std;
 
+namespace enigma
+{
+
+void scene_begin() {
+  //d3dmgr->EndShapesBatching(); //If called inside bound surface we need to finish drawing
+  d3dmgr->BeginScene();
+}
+
+void scene_end() {
+  d3dmgr->EndScene();
+}
+
+}
+
 namespace enigma_user
 {
 
