@@ -40,39 +40,23 @@
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFmain.h"
 
-#include <limits>
 #include <string>
 #include <cstdio>
 
-using namespace std;
-
-//Fuck whoever did this to the spec
-#ifndef GL_BGR
-  #define GL_BGR 0x80E0
-#endif
-
 using namespace enigma;
-
-namespace enigma_user {
-  extern int window_get_width();
-  extern int window_get_height();
-  extern int window_get_region_width();
-  extern int window_get_region_height();
-}
+using namespace std;
 
 namespace enigma
 {
-  extern bool d3dMode;
-  extern bool d3dHidden;
-  extern int d3dCulling;
-  particles_implementation* particles_impl;
-  void set_particles_implementation(particles_implementation* part_impl)
-  {
-      particles_impl = part_impl;
-  }
 
-	unsigned gui_width;
-	unsigned gui_height;
+void scene_begin() {
+
+}
+
+void scene_end() {
+
+}
+
 }
 
 namespace enigma_user
@@ -80,32 +64,29 @@ namespace enigma_user
 
 void screen_init()
 {
-	enigma::gui_width = window_get_region_width();
-	enigma::gui_height = window_get_region_height();
+  enigma::gui_width = window_get_region_width();
+  enigma::gui_height = window_get_region_height();
 
-	//d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-	//d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+  //d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+  //d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-    if (!view_enabled)
-    {
-		//d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+  if (!view_enabled) {
+  //d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-		screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-		d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
-    } else {
-		for (view_current = 0; view_current < 7; view_current++)
-        {
-            if (view_visible[(int)view_current])
-            {
-                int vc = (int)view_current;
+  screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+  d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
+  } else {
+    for (view_current = 0; view_current < 7; view_current++) {
+      if (view_visible[(int)view_current]) {
+        int vc = (int)view_current;
 
-				screen_set_viewport(view_xport[vc], view_yport[vc],
-					(window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
-				d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0);
-                break;
-            }
-        }
-	}
+        screen_set_viewport(view_xport[vc], view_yport[vc],
+          (window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
+        d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0);
+        break;
+      }
+    }
+  }
 }
 
 int screen_save(string filename) //Assumes native integers are little endian
@@ -119,29 +100,29 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
-    x = (x / window_get_region_width()) * window_get_region_width_scaled();
-    y = (y / window_get_region_height()) * window_get_region_height_scaled();
-    width = (width / window_get_region_width()) * window_get_region_width_scaled();
-    height = (height / window_get_region_height()) * window_get_region_height_scaled();
-    gs_scalar sx, sy;
-    sx = (window_get_width() - window_get_region_width_scaled()) / 2;
-    sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+  x = (x / window_get_region_width()) * window_get_region_width_scaled();
+  y = (y / window_get_region_height()) * window_get_region_height_scaled();
+  width = (width / window_get_region_width()) * window_get_region_width_scaled();
+  height = (height / window_get_region_height()) * window_get_region_height_scaled();
+  gs_scalar sx, sy;
+  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
 
-    D3D11_VIEWPORT viewport;
-    ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+  D3D11_VIEWPORT viewport;
+  ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
-    viewport.TopLeftX = sx + x;
-    viewport.TopLeftY = sy + y;
-    viewport.Width = width;
-    viewport.Height = height;
+  viewport.TopLeftX = sx + x;
+  viewport.TopLeftY = sy + y;
+  viewport.Width = width;
+  viewport.Height = height;
 
-    m_deviceContext->RSSetViewports(1, &viewport);
+  m_deviceContext->RSSetViewports(1, &viewport);
 }
 
 //TODO: These need to be in some kind of General
 void display_set_gui_size(unsigned int width, unsigned int height) {
-	enigma::gui_width = width;
-	enigma::gui_height = height;
+  enigma::gui_width = width;
+  enigma::gui_height = height;
 }
 
 }
