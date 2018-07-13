@@ -23,22 +23,13 @@
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/estring.h"
-
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/graphics_object.h"
-#include "Universal_System/depth_draw.h"
 #include "Platforms/General/PFwindow.h"
-#include "Platforms/platforms_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
 
 #include <string>
 #include <cstdio>
-#include <limits>
 
 using namespace enigma;
-using namespace enigma_user;
-using namespace std;
 
 namespace enigma
 {
