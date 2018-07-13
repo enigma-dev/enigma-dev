@@ -1,5 +1,6 @@
 /** Copyright (C) 2011, 2017 Josh Ventura
 *** Copyright (C) 2014, 2017 Robert B. Colton
+*** Copyright (C) 2018 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -26,11 +27,24 @@
 #include <richedit.h>
 #include <stdio.h>
 #include <string>
+#include <Commdlg.h>
+#include <comutil.h>
+#include <Shlobj.h>
+#include <wchar.h>
+#include <Dlgs.h>
+#include <algorithm>
+#include <sstream>
+#include <vector>
 
 using namespace std;
+#include "Platforms/Win32/WINDOWSmain.h"
+#include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/estring.h"
 #include "GameSettings.h"
+
+using enigma_user::string_replace_all;
+using enigma_user::window_get_caption;
 
 #include "../General/WSdialogs.h"
 
@@ -57,19 +71,38 @@ void show_error(string errortext, const bool fatal)
   #ifdef DEBUG_MODE
     errortext += enigma::debug_scope::GetErrors();
   #else
-  errortext = "Error in some event or another for some object: \r\n" + errortext;
+    errortext = "Error in some event or another for some object: \r\n" + errortext;
   #endif
 
-  if (MessageBox(NULL,errortext.c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
-    exit(0);
+  string strStr = errortext;
+  string strWindowCaption = "Error";
 
-  if (fatal)
-    printf("FATAL ERROR: %s\n",errortext.c_str()),
-    exit(0);
+  if (strStr != "")
+    strStr = strStr + "\n\n";
+
+  if (fatal == 0)
+    strStr = strStr + "Do you want to abort the application?";
   else
-    printf("ERROR: %s\n",errortext.c_str());
+    strStr = strStr + "Click 'OK' to abort the application.";
 
-  //ABORT_ON_ALL_ERRORS();
+  tstring tstrStr = widen(strStr);
+  tstring tstrWindowCaption = widen(strWindowCaption);
+
+  double result;
+
+  if (fatal == 0)
+  {
+    result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_YESNO | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
+    printf("ERROR: %s\n", errortext.c_str());
+  }
+  else
+  {
+    result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_OK | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
+    printf("FATAL ERROR: %s\n", errortext.c_str());
+  }
+
+  if (result == IDOK || result == IDYES)
+    exit(0);
 }
 
 namespace enigma {
@@ -95,31 +128,6 @@ static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
   }
 
   return DefWindowProc(hwndDlg, uMsg, wParam, lParam);
-}
-
-static INT_PTR CALLBACK GetStrProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-  if (uMsg == WM_INITDIALOG) {
-    SetWindowText(hwndDlg, gs_cap.c_str());
-    SetDlgItemText(hwndDlg, 12, gs_def.c_str());
-    SetDlgItemText(hwndDlg, 13, gs_message.c_str());
-  }
-
-  if (uMsg == WM_COMMAND) {
-    if (wParam == 2 || wParam == 11) {
-      gs_str_submitted = "";
-      gs_form_canceled = 1;
-      EndDialog(hwndDlg, 1);
-    } else if (wParam == 10) {
-      char strget[1024];
-      GetDlgItemText(hwndDlg, 12, strget, 1024);
-      gs_str_submitted = strget;
-      gs_form_canceled = 0;
-      EndDialog(hwndDlg, 2);
-    }
-  }
-
-  return 0;
 }
 
 static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -195,14 +203,195 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
 static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
 {
   if (uMsg == BFFM_INITIALIZED)
-    SetWindowText(hwnd, gs_cap.c_str());
+  {
+    tstring tstr_cap = widen(gs_cap);
+    SetWindowTextW(hwnd, tstr_cap.c_str());
+  }
 
   return 0;
 }
 
-namespace enigma_user {
+WCHAR wstrPromptStr[4096];
+WCHAR wstrTextEntry[MAX_PATH];
+bool HideInput = 0;
 
-extern string window_get_caption();
+void ClientResize(HWND hWnd, int nWidth, int nHeight)
+{
+  RECT rcClient, rcWind;
+  POINT ptDiff;
+  GetClientRect(hWnd, &rcClient);
+  GetWindowRect(hWnd, &rcWind);
+  ptDiff.x = (rcWind.right - rcWind.left) - rcClient.right;
+  ptDiff.y = (rcWind.bottom - rcWind.top) - rcClient.bottom;
+  MoveWindow(hWnd, rcWind.left, rcWind.top, nWidth + ptDiff.x, nHeight + ptDiff.y, TRUE);
+}
+
+LRESULT CALLBACK InputBoxHookProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+  switch (Msg)
+  {
+  case WM_INITDIALOG:
+    {
+    ClientResize(hWndDlg, 357, 128);
+    RECT rect;
+    GetWindowRect(hWndDlg, &rect);
+    MoveWindow(hWndDlg,
+      (GetSystemMetrics(SM_CXSCREEN) / 2) - ((rect.right - rect.left) / 2),
+      (GetSystemMetrics(SM_CYSCREEN) / 3) - ((rect.bottom - rect.top) / 3),
+      rect.right - rect.left, rect.bottom - rect.top, TRUE);
+    MoveWindow(GetDlgItem(hWndDlg, IDOK), 272, 10, 75, 23, TRUE);
+    MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), 272, 39, 75, 23, TRUE);
+    MoveWindow(GetDlgItem(hWndDlg, 990), 11, 94, 336, 23, TRUE);
+    MoveWindow(GetDlgItem(hWndDlg, 992), 11, 11, 252, 66, TRUE);
+    SetWindowLongPtr(hWndDlg, GWL_EXSTYLE, GetWindowLongPtr(hWndDlg, GWL_EXSTYLE) | WS_EX_DLGMODALFRAME);
+    SetWindowPos(hWndDlg, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+    SetDlgItemTextW(hWndDlg, 992, wstrPromptStr);
+    SetDlgItemTextW(hWndDlg, 990, wstrTextEntry);
+    WCHAR wstrWindowCaption[MAX_PATH];
+    tstring tstrWindowCaption = widen(gs_cap);
+    wcsncpy(wstrWindowCaption, tstrWindowCaption.c_str(), MAX_PATH);
+    SetWindowTextW(hWndDlg, wstrWindowCaption);
+    if (HideInput == 1)
+      SendDlgItemMessage(hWndDlg, 990, EM_SETPASSWORDCHAR, '*', 0);
+    SendDlgItemMessage(hWndDlg, 990, EM_SETSEL, '*', 0);
+    SendDlgItemMessage(hWndDlg, 990, WM_SETFOCUS, 0, 0);
+    return TRUE;
+    }
+  break;
+
+  case WM_COMMAND:
+    switch (wParam)
+    {
+    case IDOK:
+      GetDlgItemTextW(hWndDlg, 990, wstrTextEntry, MAX_PATH);
+      gs_form_canceled = 0;
+      EndDialog(hWndDlg, 0);
+      return TRUE;
+    case IDCANCEL:
+      tstring tstrEmpty = widen("");
+      wcsncpy(wstrTextEntry, tstrEmpty.c_str(), MAX_PATH);
+      gs_form_canceled = 1;
+      EndDialog(hWndDlg, 0);
+      return TRUE;
+    }
+    break;
+  }
+
+  return FALSE;
+}
+
+WCHAR *LowerCaseToActualPathName(WCHAR *wstr_dname)
+{
+  LPITEMIDLIST pstr_dname;
+  SHParseDisplayName(wstr_dname, 0, &pstr_dname, 0, 0);
+
+  static WCHAR wstr_result[MAX_PATH];
+  SHGetPathFromIDListW(pstr_dname, wstr_result);
+  return wstr_result;
+}
+
+WCHAR wstr_dname[MAX_PATH];
+WCHAR wstr_label5[MAX_PATH];
+static string DlgItemText;
+tstring ActualPath;
+HWND label6;
+
+UINT APIENTRY OFNHookProcOldStyle(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+  if (uMsg == WM_INITDIALOG)
+  {
+    ClientResize(hWnd, 424, 255);
+    RECT rect;
+    GetWindowRect(hWnd, &rect);
+    MoveWindow(hWnd,
+      (GetSystemMetrics(SM_CXSCREEN) / 2) - ((rect.right - rect.left) / 2),
+      (GetSystemMetrics(SM_CYSCREEN) / 2) - ((rect.bottom - rect.top) / 2),
+      rect.right - rect.left, rect.bottom - rect.top, TRUE);
+    label6 = GetDlgItem(hWnd, 991);
+    MoveWindow(GetDlgItem(hWnd, IDOK), 256, 224, 77, 27, TRUE);
+    MoveWindow(GetDlgItem(hWnd, IDCANCEL), 340, 224, 77, 27, TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc3), 232, 56, 72, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, 994), 8, 56, 72, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc2), 8, 8, 93, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc4), 232, 176, 50, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc1), 8, 24, 409 * 100, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, 991), 8, 24, 409, 16, TRUE);
+    MoveWindow(GetDlgItem(hWnd, lst1), 232, 72, 185, 93, TRUE);
+    MoveWindow(GetDlgItem(hWnd, lst2), 8, 72, 213, 123, TRUE);
+    MoveWindow(GetDlgItem(hWnd, cmb2), 232, 192, 185, 19, TRUE);
+    ShowWindow(GetDlgItem(hWnd, stc1), SW_HIDE);
+    DlgDirListW(hWnd, wstr_dname, lst1, stc1, DDL_ARCHIVE | DDL_READWRITE | DDL_READONLY);
+    GetDlgItemTextW(hWnd, stc1, wstr_label5, MAX_PATH);
+    static string DlgItemText;
+    DlgItemText = shorten(LowerCaseToActualPathName(wstr_label5));
+    ActualPath = widen(string_replace_all(DlgItemText + "\\", "\\\\", "\\"));
+    SetDlgItemTextW(hWnd, GetDlgCtrlID(label6), ActualPath.c_str());
+    PostMessageW(hWnd, WM_SETFOCUS, 0, 0);
+  }
+
+  if (uMsg == WM_CREATE)
+  {
+    SetWindowLongPtr(hWnd, GWL_STYLE, GetWindowLongPtr(hWnd, GWL_STYLE) | DS_FIXEDSYS);
+    SetWindowPos(hWnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+  }
+
+  if (uMsg == WM_PAINT)
+  {
+    GetDlgItemTextW(hWnd, stc1, wstr_label5, MAX_PATH);
+    static string DlgItemText;
+    DlgItemText = shorten(LowerCaseToActualPathName(wstr_label5));
+    ActualPath = widen(string_replace_all(DlgItemText + "\\", "\\\\", "\\"));
+    SetDlgItemTextW(hWnd, GetDlgCtrlID(label6), ActualPath.c_str());
+  }
+
+  if (uMsg == WM_COMMAND && HIWORD(wParam) == LBN_DBLCLK && LOWORD(wParam) == lst1)
+    return TRUE;
+
+  if (uMsg == WM_COMMAND && HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDOK)
+  {
+    wcsncpy(wstr_dname, ActualPath.c_str(), MAX_PATH);
+    PostMessageW(hWnd, WM_COMMAND, IDABORT, 0);
+    return TRUE;
+  }
+
+  if (uMsg == WM_COMMAND && HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDCANCEL)
+  {
+    tstring tstr_dname = widen("");
+    wcsncpy(wstr_dname, tstr_dname.c_str(), MAX_PATH);
+    PostMessageW(hWnd, WM_COMMAND, IDABORT, 0);
+    return TRUE;
+  }
+
+  if (uMsg == WM_CLOSE)
+  {
+    tstring tstr_dname = widen("");
+    wcsncpy(wstr_dname, tstr_dname.c_str(), MAX_PATH);
+    PostMessageW(hWnd, WM_COMMAND, IDABORT, 0);
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+UINT_PTR CALLBACK CCHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
+{
+  if (uiMsg == WM_INITDIALOG)
+  {
+    RECT rect;
+    GetWindowRect(hdlg, &rect);
+    MoveWindow(hdlg,
+      (GetSystemMetrics(SM_CXSCREEN) / 2) - ((rect.right - rect.left) / 2),
+      (GetSystemMetrics(SM_CYSCREEN) / 3) - ((rect.bottom - rect.top) / 3),
+      rect.right - rect.left, rect.bottom - rect.top, TRUE);
+    tstring tstr_cap = widen(gs_cap);
+    SetWindowTextW(hdlg, tstr_cap.c_str());
+    PostMessageW(hdlg, WM_SETFOCUS, 0, 0);
+  }
+
+  return FALSE;
+}
+
+namespace enigma_user {
 
 void message_alpha(double alpha) {
 
@@ -405,10 +594,10 @@ int show_message(const string &str)
   //In Studio this function will cause the window to be minimized and the message shown, fullscreen will not be restored.
   //A possible alternative is fake fullscreen for Win32, but who knows if we have to do that on XLIB or anywhere else.
 
-  tstring message = widen(str);
-  tstring caption = widen(window_get_caption());
+  tstring tstrStr = widen(str);
+  tstring tstrWindowCaption = widen(window_get_caption());
 
-  MessageBoxW(enigma::hWnd, message.c_str(), caption.c_str(), MB_OK);
+  MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_OK | MB_ICONINFORMATION | MB_DEFBUTTON1 | MB_APPLMODAL);
 
   return 0;
 }
@@ -424,199 +613,386 @@ int show_message_ext(string msg, string but1, string but2, string but3)
 
 bool show_question(string str)
 {
-  return (MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_YESNO) == IDYES);
+  tstring tstrStr = widen(str);
+  tstring tstrWindowCaption = widen(window_get_caption());
+
+  double result;
+  result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON1 | MB_APPLMODAL);
+
+  return (result == IDYES);
 }
 
-string get_login(string username, string password, string cap)
+string get_login(string username, string password, string title)
 {
-  gs_cap = cap; gs_username = username; gs_password = password;
+  if (title == "") title = "Login";
+  gs_cap = title; gs_username = username; gs_password = password;
   DialogBox(enigma::hInstance,"getlogindialog",enigma::hWnd,GetLoginProc);
 
   return gs_str_submitted;
 }
 
-string get_string(string message,string def,string cap)
+string get_string(string str, string def, string title)
 {
-  gs_cap = cap; gs_message = message; gs_def = def;
-  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
+  tstring tstrStr = widen(str);
+  tstring tstrDef = widen(def);
+  if (title == "") title = window_get_caption();
+  gs_cap = title;
 
-  return gs_str_submitted;
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
+  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
+
+  HideInput = 0;
+  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
+
+  static string strResult;
+  strResult = shorten(wstrTextEntry);
+  return strResult;
 }
 
-int get_integer(string message,string def,string cap)
+string get_password(string str, string def, string title)
 {
-  gs_cap = cap; gs_message = message; gs_def = def;
-  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
-  if (gs_str_submitted == "") return 0;
-  puts(gs_str_submitted.c_str());
+  tstring tstrStr = widen(str);
+  tstring tstrDef = widen(def);
+  if (title == "") title = window_get_caption();
+  gs_cap = title;
 
-  return atol(gs_str_submitted.c_str());
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
+  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
+
+  HideInput = 1;
+  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
+
+  static string strResult;
+  strResult = shorten(wstrTextEntry);
+  return strResult;
 }
 
-double get_number(string message,string def,string cap)
+double get_integer(string str, double def, string title)
 {
-  gs_cap = cap; gs_message = message; gs_def = def;
-  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
-  if (gs_str_submitted == "") return 0;
-  puts(gs_str_submitted.c_str());
+  std::ostringstream defInteger;
+  defInteger << def;
+  string strDef = defInteger.str();
 
-  return atof(gs_str_submitted.c_str());
+  tstring tstrStr = widen(str);
+  tstring tstrDef = widen(strDef);
+  if (title == "") title = window_get_caption();
+  gs_cap = title;
+
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
+  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
+
+  HideInput = 0;
+  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
+
+  static string strResult;
+  strResult = shorten(wstrTextEntry);
+  char *cstrResult = (char *)strResult.c_str();
+
+  return cstrResult ? strtod(cstrResult, NULL) : 0;
+}
+
+double get_passcode(string str, double def, string title)
+{
+  std::ostringstream defInteger;
+  defInteger << def;
+  string strDef = defInteger.str();
+
+  tstring tstrStr = widen(str);
+  tstring tstrDef = widen(strDef);
+  if (title == "") title = window_get_caption();
+  gs_cap = title;
+
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
+  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
+
+  HideInput = 1;
+  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(993), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
+
+  static string strResult;
+  strResult = shorten(wstrTextEntry);
+  char *cstrResult = (char *)strResult.c_str();
+
+  return cstrResult ? strtod(cstrResult, NULL) : 0;
 }
 
 bool get_string_canceled() {
   return gs_form_canceled;
 }
 
-string get_open_filename(string filter,string filename,string caption)
+string get_open_filename(string filter, string fname, string title)
 {
-  filter.append("||");
-  const unsigned int l = filter.length();
-  for (unsigned int i = 0; i < l; i++)
-    if (filter[i] == '|') filter[i] = 0;
+  OPENFILENAMEW ofn;
 
-  char fn[MAX_PATH];
-  strcpy(fn, filename.c_str());
+  string str_filter = filter.append("||");
 
-  OPENFILENAME ofn;
-  ofn.lStructSize = sizeof(ofn); ofn.hwndOwner = enigma::hWnd; ofn.hInstance = NULL;
-  ofn.lpstrFilter = filter.c_str(); ofn.lpstrCustomFilter = NULL;
-  ofn.nMaxCustFilter = 0; ofn.nFilterIndex = 0;
-  ofn.lpstrFile = fn; ofn.nMaxFile = MAX_PATH;
-  ofn.lpstrFileTitle = NULL; ofn.nMaxFileTitle = 0;
-  ofn.lpstrInitialDir = NULL; ofn.lpstrTitle = caption.length() ? caption.c_str() : NULL;
-  ofn.Flags=OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
-  ofn.nFileOffset = 0; ofn.nFileExtension = 0;
-  ofn.lpstrDefExt = NULL; ofn.lCustData = 0;
-  ofn.lpfnHook = NULL; ofn.lpTemplateName = 0;
+  tstring tstr_filter = widen(str_filter);
+  replace(tstr_filter.begin(), tstr_filter.end(), '|', '\0');
+  tstring tstr_fname = widen(fname);
+  tstring tstr_title = widen(title);
+  if (title == "") title = "Open";
+  gs_cap = title;
 
-  bool ret = GetOpenFileName(&ofn);
-  return ret == 0 ? "-1" : fn;
-}
+  WCHAR wstr_fname[MAX_PATH];
+  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
 
-string get_save_filename(string filter, string filename, string caption)
-{
-  filter.append("||");
-  const unsigned int l = filter.length();
-  for (unsigned int i = 0;i < l; i++)
-    if (filter[i] == '|')
-      filter[i] = 0;
+  ZeroMemory(&ofn, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = enigma::hWnd;
+  ofn.lpstrFile = wstr_fname;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrFilter = tstr_filter.c_str();
+  ofn.nFilterIndex = 0;
+  ofn.lpstrTitle = tstr_title.c_str();
+  if (title == "") ofn.lpstrTitle = NULL;
+  ofn.lpstrInitialDir = NULL;
+  ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 
-  char fn[MAX_PATH];
-  strcpy(fn, filename.c_str());
-
-  OPENFILENAME ofn;
-  ofn.lStructSize = sizeof(ofn); ofn.hwndOwner = enigma::hWnd; ofn.hInstance = NULL;
-  ofn.lpstrFilter = filter.c_str(); ofn.lpstrCustomFilter = NULL;
-  ofn.nMaxCustFilter = 0; ofn.nFilterIndex = 0;
-  ofn.lpstrFile = fn; ofn.nMaxFile = MAX_PATH;
-  ofn.lpstrFileTitle = NULL; ofn.nMaxFileTitle = 0;
-  ofn.lpstrInitialDir = NULL; ofn.lpstrTitle = caption.length() ? caption.c_str() : NULL;
-  ofn.Flags = OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
-  ofn.nFileOffset = 0; ofn.nFileExtension = 0;
-  ofn.lpstrDefExt = NULL; ofn.lCustData = 0;
-  ofn.lpfnHook = NULL; ofn.lpTemplateName = 0;
-
-  bool ret = GetSaveFileName(&ofn);
-  return ret == 0 ? "-1" : fn;
-}
-
-int get_color(int defcolor, bool advanced)
-{
-    COLORREF defc=(int)defcolor;
-    static COLORREF custcs[16];
-
-    CHOOSECOLOR gcol;
-    gcol.lStructSize=sizeof(CHOOSECOLOR);
-    gcol.hwndOwner=enigma::hWnd;
-    gcol.rgbResult=defc;
-    gcol.lpCustColors=custcs;
-  if (advanced) {
-    gcol.Flags= CC_FULLOPEN | CC_RGBINIT;
-  } else {
-    gcol.Flags= CC_RGBINIT;
-  }
-    gcol.lpTemplateName="";
-
-    if (ChooseColor(&gcol))
-      return (int)gcol.rgbResult;
-    else return defc;
-}
-
-string get_directory(string dname, string caption)
-{
-//NOTE: This uses the Windows Vista or later file chooser, which is different than the one used by GM8 and lower
-//because I could not find out which one it uses, since IFileDialog is used by both wxWidgets and QtFramework
-//and there doesn't appear to be a standard file picker for XP or lower in the Windows API except SHBrowseForFolder that is
-//used by Game Maker for get_directory_alt
-  IFileDialog* fileDialog;
-  CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog));
-
-  DWORD options;
-  fileDialog->GetOptions(&options);
-  options &= ~FOS_FILEMUSTEXIST;
-  options &= ~FOS_PATHMUSTEXIST;
-  fileDialog->SetOptions(options | FOS_PICKFOLDERS);
-  //TODO: Set default directory to dname
-  //fileDialog->SetDefaultFolder(std::wstring(dname.begin(), dname.end()).c_str());
-  fileDialog->SetTitle(std::wstring(caption.begin(), caption.end()).c_str());
-
-  fileDialog->Show(enigma::hWnd);
-
-  string res = "";
-  IShellItem *psi;
-
-  if (SUCCEEDED(fileDialog->GetResult(&psi))) {
-    LPWSTR wideres;
-    psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &wideres);
-    psi->Release();
-
-    std::wstring wstr = wideres;
-    res = string(wstr.begin(), wstr.end());
-  }
-
-  return res;
-}
-
-string get_directory_alt(string message, string root, bool modern, string caption) {
-  //standard use of the Shell API to browse for folders
-  bool f_selected = false;
-
-  char szDir [MAX_PATH];
-  BROWSEINFO bi;
-  LPITEMIDLIST pidl;
-  LPMALLOC pMalloc;
-
-  if (SUCCEEDED (::SHGetMalloc (&pMalloc)))
+  if (GetOpenFileNameW(&ofn) != 0)
   {
-    ::ZeroMemory (&bi,sizeof(bi));
+    static string result;
+    result = shorten(wstr_fname);
+    return result;
+  }
 
-    bi.lpszTitle = message.c_str();
+  return "";
+}
+
+string get_save_filename(string filter, string fname, string title)
+{
+  OPENFILENAMEW ofn;
+
+  string str_filter = filter.append("||");
+
+  tstring tstr_filter = widen(str_filter);
+  replace(tstr_filter.begin(), tstr_filter.end(), '|', '\0');
+  tstring tstr_fname = widen(fname);
+  tstring tstr_title = widen(title);
+  if (title == "") title = "Save As";
+  gs_cap = title;
+
+  WCHAR wstr_fname[MAX_PATH];
+  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
+
+  ZeroMemory(&ofn, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = enigma::hWnd;
+  ofn.lpstrFile = wstr_fname;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrFilter = tstr_filter.c_str();
+  ofn.nFilterIndex = 0;
+  ofn.lpstrTitle = tstr_title.c_str();
+  if (title == "") ofn.lpstrTitle = NULL;
+  ofn.lpstrInitialDir = NULL;
+  ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+
+  if (GetSaveFileNameW(&ofn) != 0)
+  {
+    static string result;
+    result = shorten(wstr_fname);
+    return result;
+  }
+
+  return "";
+}
+
+string get_open_filename_ext(string filter, string fname, string dir, string title)
+{
+  OPENFILENAMEW ofn;
+
+  string str_filter = filter.append("||");
+
+  tstring tstr_filter = widen(str_filter);
+  replace(tstr_filter.begin(), tstr_filter.end(), '|', '\0');
+  tstring tstr_fname = widen(fname);
+  tstring tstr_dir = widen(dir);
+  tstring tstr_title = widen(title);
+  if (title == "") title = "Open";
+  gs_cap = title;
+
+  WCHAR wstr_fname[MAX_PATH];
+  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
+
+  ZeroMemory(&ofn, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = enigma::hWnd;
+  ofn.lpstrFile = wstr_fname;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrFilter = tstr_filter.c_str();
+  ofn.nFilterIndex = 0;
+  ofn.lpstrTitle = tstr_title.c_str();
+  ofn.lpstrInitialDir = tstr_dir.c_str();
+  ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+
+  if (GetOpenFileNameW(&ofn) != 0)
+  {
+    static string result;
+    result = shorten(wstr_fname);
+    return result;
+  }
+
+  return "";
+}
+
+string get_save_filename_ext(string filter, string fname, string dir, string title)
+{
+  OPENFILENAMEW ofn;
+
+  string str_filter = filter.append("||");
+
+  tstring tstr_filter = widen(str_filter);
+  replace(tstr_filter.begin(), tstr_filter.end(), '|', '\0');
+  tstring tstr_fname = widen(fname);
+  tstring tstr_dir = widen(dir);
+  tstring tstr_title = widen(title);
+  if (title == "") title = "Save As";
+  gs_cap = title;
+
+  WCHAR wstr_fname[MAX_PATH];
+  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
+
+  ZeroMemory(&ofn, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = enigma::hWnd;
+  ofn.lpstrFile = wstr_fname;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrFilter = tstr_filter.c_str();
+  ofn.nFilterIndex = 0;
+  ofn.lpstrTitle = tstr_title.c_str();
+  ofn.lpstrInitialDir = tstr_dir.c_str();
+  ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+
+  if (GetSaveFileNameW(&ofn) != 0)
+  {
+    static string result;
+    result = shorten(wstr_fname);
+    return result;
+  }
+
+  return "";
+}
+
+double get_color(double defcol, bool advanced, string title)
+{
+  CHOOSECOLOR cc;
+
+  if (title == "") title = "Color";
+  gs_cap = title;
+
+  COLORREF DefColor = (int)defcol;
+  static COLORREF CustColors[16];
+
+  ZeroMemory(&cc, sizeof(cc));
+  cc.lStructSize = sizeof(CHOOSECOLOR);
+  cc.hwndOwner = enigma::hWnd;
+  cc.rgbResult = DefColor;
+  cc.lpCustColors = CustColors;
+  cc.Flags = CC_RGBINIT | CC_ENABLEHOOK;
+  if (advanced) cc.Flags |= CC_FULLOPEN;
+  cc.lpfnHook = CCHookProc;
+
+  if (ChooseColor(&cc) != 0)
+    return (int)cc.rgbResult;
+
+  return -1;
+}
+
+string get_directory(string dname, string title)
+{
+  OPENFILENAMEW ofn;
+
+  tstring tstr_filter = widen("*.*|*.*|");
+  replace(tstr_filter.begin(), tstr_filter.end(), '|', '\0');
+  tstring tstr_dname = widen(dname);
+  tstring tstr_title = widen(title);
+  tstring tstr_empty = widen("");
+  if (title == "") title = "Select Directory";
+  gs_cap = title;
+
+  if (tstr_dname == tstr_empty)
+    GetCurrentDirectoryW(MAX_PATH, wstr_dname);
+  else
+    wcsncpy(wstr_dname, tstr_dname.c_str(), MAX_PATH);
+
+  ZeroMemory(&ofn, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = enigma::hWnd;
+  ofn.lpstrFile = NULL;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrFilter = tstr_filter.c_str();
+  ofn.nFilterIndex = 0;
+  ofn.lpstrTitle = tstr_title.c_str();
+  ofn.lpstrInitialDir = wstr_dname;
+  ofn.Flags = OFN_ENABLETEMPLATE | OFN_ENABLEHOOK | OFN_NONETWORKBUTTON | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_LONGNAMES;
+  ofn.lpTemplateName = (LPCWSTR)MAKEINTRESOURCE(FILEOPENORD);
+  ofn.lpfnHook = (LPOFNHOOKPROC)OFNHookProcOldStyle;
+  ofn.hInstance = enigma::hInstance;
+
+  GetOpenFileNameW(&ofn);
+
+  DWORD attrib = GetFileAttributesW(wstr_dname);
+
+  if (attrib != INVALID_FILE_ATTRIBUTES && (attrib & FILE_ATTRIBUTE_DIRECTORY))
+  {
+    static string result;
+    result = shorten(wstr_dname);
+    return result;
+  }
+
+  return "";
+}
+
+string get_directory_alt(string capt, string root, bool modern, string title)
+{
+  BROWSEINFOW bi;
+
+  tstring tstr_capt = widen(capt);
+  tstring tstr_root = widen(root);
+  tstring tstr_slash = widen("\\");
+  tstring tstr_empty = widen("");
+  tstring tstr_zero = widen("0");
+  if (title == "") title = "Browse For Folder";
+  gs_cap = title;
+
+  LPITEMIDLIST pstr_root;
+
+  if (tstr_root == tstr_empty)
+    SHParseDisplayName(tstr_zero.c_str(), 0, &pstr_root, 0, 0);
+  else
+    SHParseDisplayName(tstr_root.c_str(), 0, &pstr_root, 0, 0);
+
+  WCHAR wstr_dir[MAX_PATH];
+  LPMALLOC pMalloc;
+  gs_cap = title;
+
+  if (SUCCEEDED(SHGetMalloc(&pMalloc)))
+  {
+    ZeroMemory(&bi, sizeof(bi));
     bi.hwndOwner = enigma::hWnd;
-    bi.pszDisplayName = 0;
-    bi.pidlRoot = 0;
-    bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT;
-    if (modern) {
-    bi.ulFlags |= BIF_EDITBOX | BIF_NEWDIALOGSTYLE;
-    }
-    gs_cap = caption;
-    bi.lpfn =  GetDirectoryAltProc;      //callback to set window caption
+    bi.pidlRoot = pstr_root;
+    bi.pszDisplayName = wstr_dir;
+    bi.lpszTitle = tstr_capt.c_str();
+    bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON;
+    if (modern) bi.ulFlags |= BIF_EDITBOX;
+    bi.lpfn = GetDirectoryAltProc;
 
-    pidl = ::SHBrowseForFolder(&bi);
-    if (pidl) {
-      if (::SHGetPathFromIDList(pidl, szDir)) {
-        f_selected = true;
+    LPITEMIDLIST lpItem = SHBrowseForFolderW(&bi);
+    if (lpItem != NULL)
+    {
+      if (SHGetPathFromIDListW(lpItem, wstr_dir) == 0)
+        return "";
+      else
+      {
+        static string result;
+        result = string_replace_all(shorten(wstr_dir) + shorten(tstr_slash), "\\\\", "\\");
+        return result;
       }
 
-      pMalloc->Free(pidl);
+      pMalloc->Free(lpItem);
       pMalloc->Release();
     }
   }
 
-  if (f_selected) {
-    return szDir;
-  } else {
-    return "";
-  }
+  return "";
 }
 
 }
