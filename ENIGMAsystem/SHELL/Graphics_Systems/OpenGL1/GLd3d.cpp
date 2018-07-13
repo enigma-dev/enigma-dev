@@ -61,12 +61,9 @@ GLenum cullingstates[3] = {
 namespace enigma_user
 {
 
-void d3d_clear_depth() {
-  d3d_clear_depth_value(1.0f);
-}
-
-void d3d_clear_depth_value(float value) {
-  glClearDepthf(value);
+void d3d_clear_depth(double value) {
+  glClearDepth(value);
+  glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void d3d_set_software_vertex_processing(bool software) {
