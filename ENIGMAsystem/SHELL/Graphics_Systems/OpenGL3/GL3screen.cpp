@@ -15,39 +15,23 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
-#include "../General/OpenGLHeaders.h"
-#include "../General/GStextures.h"
-#include "../General/GSsprite.h"
-#include "../General/GSbackground.h"
-#include "../General/GSscreen.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Bridges/General/GL3Context.h"
 
 #include "Universal_System/image_formats.h"
-#include "Universal_System/background_internal.h"
-#include "Universal_System/background.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/estring.h"
-
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
-#include "Universal_System/depth_draw.h"
 #include "Platforms/General/PFwindow.h"
-#include "Platforms/platforms_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
 
 #include <string>
 #include <cstdio>
-#include <limits>
 
 //WE SHOULDN'T DO THIS! Don't specify namespaces like this - Harijs
 using namespace enigma;
 using namespace enigma_user;
-using namespace std;
 
 namespace enigma
 {
