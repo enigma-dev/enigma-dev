@@ -1,4 +1,4 @@
-override CXXFLAGS += -IGraphics_Systems/OpenGLES3/glad/ -DglClearDepth=glClearDepthf
+override CXXFLAGS += -IGraphics_Systems/OpenGLES3/glad/ -DglClearDepth=glClearDepthf -DENIGMA_GRAPHICS_OPENGLES3
 SOURCES += $(wildcard Graphics_Systems/OpenGL3/*.cpp) $(wildcard Graphics_Systems/General/*.cpp) Graphics_Systems/OpenGLES3/glad/glad.c
 
 ifeq ($(TARGET-PLATFORM), Windows)
