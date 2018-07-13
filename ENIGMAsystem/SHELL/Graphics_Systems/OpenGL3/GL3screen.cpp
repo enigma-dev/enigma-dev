@@ -313,7 +313,7 @@ void screen_redraw()
     //TODO: Change the code below to fix this to size properly to views
     glBlitFramebuffer(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-    // glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+    // glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
   }
 
   ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are separate functions for a reason.
@@ -372,7 +372,7 @@ int screen_save(string filename) //Assumes native integers are little endian
   glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-  glReadPixels(0,0,w,h, GL_BGRA, GL_UNSIGNED_BYTE, rgbdata);
+  glReadPixels(0,0,w,h, GL_RGBA, GL_UNSIGNED_BYTE, rgbdata);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
 
   int ret = image_save(filename, rgbdata, w, h, w, h, false);
@@ -393,7 +393,7 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
   glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-  glReadPixels(x,window_get_region_height_scaled()-h-y,w,h, GL_BGRA, GL_UNSIGNED_BYTE, rgbdata);
+  glReadPixels(x,window_get_region_height_scaled()-h-y,w,h, GL_RGBA, GL_UNSIGNED_BYTE, rgbdata);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
 
   int ret = image_save(filename, rgbdata, w, h, w, h, false);

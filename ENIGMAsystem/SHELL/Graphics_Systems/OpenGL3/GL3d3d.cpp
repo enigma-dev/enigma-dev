@@ -49,9 +49,10 @@ GLenum depthoperators[8] = {
   GL_GEQUAL, GL_ALWAYS
 };
 
+/*
 GLenum fillmodes[3] = {
   GL_POINT, GL_LINE, GL_FILL
-};
+};*/
 
 GLenum windingstates[2] = {
   GL_CW, GL_CCW
@@ -199,8 +200,8 @@ int d3d_get_culling() {
 
 void d3d_set_fill_mode(int fill)
 {
-  oglmgr->BlendFunc();
-  glPolygonMode(GL_FRONT_AND_BACK, fillmodes[fill]);
+  //oglmgr->BlendFunc();
+  //glPolygonMode(GL_FRONT_AND_BACK, fillmodes[fill]);
 }
 
 void d3d_set_line_width(float value) {
@@ -209,8 +210,9 @@ void d3d_set_line_width(float value) {
 }
 
 void d3d_set_point_size(float value) {
-  oglmgr->BlendFunc();
-  glPointSize(value);
+  //TODO: fixme
+  //oglmgr->BlendFunc();
+  //glPointSize(value);
 }
 
 void d3d_set_depth_operator(int mode) {
@@ -235,7 +237,9 @@ void d3d_set_shading(bool smooth)
 
 void d3d_set_clip_plane(bool enable)
 {
+#ifdef GL_CLIP_DISTANCE0
   (enable?glEnable:glDisable)(GL_CLIP_DISTANCE0);
+#endif
 }
 
 }

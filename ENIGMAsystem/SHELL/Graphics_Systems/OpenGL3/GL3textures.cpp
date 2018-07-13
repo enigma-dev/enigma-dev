@@ -57,7 +57,7 @@ using std::vector;
   tx_rgb = GL_RGB,
   tx_rg = GL_RG,
   tx_red = GL_RED,
-  tx_bgra = GL_BGRA,
+  tx_bgra = GL_RGBA,
   tx_bgr =  GL_BGR,
   tx_depth_component = GL_DEPTH_COMPONENT
 };
@@ -139,7 +139,7 @@ namespace enigma
     glGenTextures(1, &texture);
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fullwidth, fullheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pxdata);
     if (mipmap) {
       // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
       // Honestly not a big deal, Unity3D doesn't allow you to specify either.
@@ -155,7 +155,7 @@ namespace enigma
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
     textureStruct->internalFormat = GL_RGBA;
-    textureStruct->format = GL_BGRA;
+    textureStruct->format = GL_RGBA;
     textureStruct->type = GL_UNSIGNED_BYTE;
     textureStructs.push_back(textureStruct);
     return textureStructs.size()-1;
@@ -171,7 +171,7 @@ namespace enigma
     fw = textureStructs[tex]->fullwidth;
     fh = textureStructs[tex]->fullheight;
     char* bitmap = new char[(fh<<(lgpp2(fw)+2))|2];
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+    //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
     delete[] bitmap;
     return dup_tex;
@@ -189,7 +189,7 @@ namespace enigma
     oglmgr->BindTexture(GL_TEXTURE_2D, src);
     //We could use glCopyImageSubData here, but it's GL4.3
     char* bitmap = new char[(sfh<<(lgpp2(sfw)+2))|2];
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+    //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
 
     char* cropped_bitmap = new char[sw*sh*4];
     for (unsigned int i=0; i<sh; ++i){
@@ -200,7 +200,7 @@ namespace enigma
     unsigned dw, dh;
     dw = textureStructs[destination]->width;
     dh = textureStructs[destination]->height;
-    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_BGRA, GL_UNSIGNED_BYTE, cropped_bitmap);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_RGBA, GL_UNSIGNED_BYTE, cropped_bitmap);
 
     oglmgr->BindTexture(GL_TEXTURE_2D, 0);
 
@@ -220,7 +220,7 @@ namespace enigma
     oglmgr->BindTexture(GL_TEXTURE_2D, src);
     //We could use glCopyImageSubData here, but it's GL4.3
     char* bitmap = new char[(sfh<<(lgpp2(sfw)+2))|2];
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+    //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
 
     if (xoff+sw>sfw) sw = sfw-xoff;
     if (yoff+sh>sfh) sh = sfh-yoff;
@@ -233,7 +233,7 @@ namespace enigma
     unsigned dw, dh;
     dw = textureStructs[destination]->width;
     dh = textureStructs[destination]->height;
-    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_BGRA, GL_UNSIGNED_BYTE, cropped_bitmap);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_RGBA, GL_UNSIGNED_BYTE, cropped_bitmap);
 
     oglmgr->BindTexture(GL_TEXTURE_2D, 0);
 
@@ -253,15 +253,15 @@ namespace enigma
     size = (fh<<(lgpp2(fw)+2))|2;
     char* bitmap = new char[size];
     char* bitmap2 = new char[size];
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+    //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
     oglmgr->BindTexture(GL_TEXTURE_2D, copy_texture);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap2);
+    //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap2);
 
     for (unsigned  int i = 3; i < size; i += 4)
         bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
 
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fw, fh, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
 
     oglmgr->BindTexture(GL_TEXTURE_2D, 0);
 
@@ -283,7 +283,7 @@ namespace enigma
 
     unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, ret);
+    //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
 
     return ret;
   }
@@ -433,8 +433,10 @@ void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 {
   //TODO(harijs): Check if sampler <0
+#ifdef GL_TEXTURE_BORDER_COLOR
   GLint bordercolor[4] = { r, g, b, int(a * 255) };
   glSamplerParameteriv(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_BORDER_COLOR, bordercolor);
+#endif
 }
 
 void texture_set_filter_ext(int sampler, int filter)

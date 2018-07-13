@@ -52,7 +52,9 @@ bool draw_get_msaa_supported()
 
 void draw_set_msaa_enabled(bool enable)
 {
+#ifdef GL_MULTISAMPLE
   (enable?glEnable:glDisable)(GL_MULTISAMPLE);
+#endif
 }
 
 void draw_enable_alphablend(bool enable) {
@@ -158,7 +160,7 @@ int draw_getpixel_ext(int x,int y)
     return ret;
   #elif defined __LITTLE_ENDIAN__ || defined __LITTLE_ENDIAN
     int ret;
-    glReadPixels(x,y,1,1,GL_BGRA,GL_UNSIGNED_BYTE,&ret);
+    glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&ret);
     return ret>>8;
   #else
     unsigned char rgba[4];

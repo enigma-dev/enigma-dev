@@ -441,10 +441,15 @@ void main()
       case GL_FLOAT_MAT3x4: return 12;
       case GL_FLOAT_MAT4x2: return 8;
       case GL_FLOAT_MAT4x3: return 12;
-
+#ifdef GL_SAMPLER_1D
       case GL_SAMPLER_1D: return 1;
+#endif
+#ifdef GL_SAMPLER_2D
       case GL_SAMPLER_2D: return 1;
+#endif
+#ifdef GL_SAMPLER_3D
       case GL_SAMPLER_3D: return 1;
+#endif
 
       default: { printf("getGLTypeSize Asking size for unknown type - %i!\n", type); return 1; }
     }
