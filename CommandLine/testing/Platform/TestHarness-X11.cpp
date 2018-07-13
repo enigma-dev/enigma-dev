@@ -175,9 +175,9 @@ int build_game(const string &game, TestConfig* tc, const string &out) {
   using TC = TestConfig;
   string emake_cmd = "./emake";
   tc->workdir = (tc->workdir.empty() ? std::string(env_workdir) : tc->workdir);
-  string workdir = (tc->workdir.empty() ? std::string() : ("--workdir=" + workdir));
+  string workdir = (tc->workdir.empty() ? std::string() : ("--workdir=" + tc->workdir));
   tc->codegen = (tc->codegen.empty() ? std::string(env_codegen) : tc->codegen);
-  string codegen = (tc->codegen.empty() ? std::string() : ("--codegen=" + codegen));
+  string codegen = (tc->codegen.empty() ? std::string() : ("--codegen=" + tc->codegen));
   string compiler = "--compiler=" + tc->get_or(&TC::compiler, "TestHarness");
   string mode = "--mode=" + tc->get_or(&TC::mode, "Debug");
   string graphics = "--graphics=" + tc->get_or(&TC::graphics, "OpenGL1");
