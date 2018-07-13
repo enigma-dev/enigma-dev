@@ -15,8 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <cstdio>
+
 #include "../General/OpenGLHeaders.h"
 #include "../General/GStextures.h"
 #include "../General/GSsprite.h"
@@ -27,14 +26,11 @@
 #include "../General/GScolors.h"
 #include "Bridges/General/GL3Context.h"
 
-using namespace std;
-
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background_internal.h"
 #include "Universal_System/background.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
-
 
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/instance_system.h"
@@ -43,39 +39,43 @@ using namespace std;
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include <limits>
 
-//Fuck whoever did this to the spec
-#ifndef GL_BGR
-  #define GL_BGR 0x80E0
-#endif
+#include <string>
+#include <cstdio>
+#include <limits>
 
 //WE SHOULDN'T DO THIS! Don't specify namespaces like this - Harijs
 using namespace enigma;
 using namespace enigma_user;
-
-namespace enigma_user {
-  extern int window_get_width();
-  extern int window_get_height();
-  extern int window_get_region_width();
-  extern int window_get_region_height();
-}
+using namespace std;
 
 namespace enigma
 {
-  extern GLuint msaa_fbo;
-  extern bool d3dMode;
-  extern bool d3dZWriteEnable;
-  extern int d3dCulling;
-  particles_implementation* particles_impl;
-  void set_particles_implementation(particles_implementation* part_impl) {
-    particles_impl = part_impl;
-  }
 
-  unsigned gui_width;
-  unsigned gui_height;
-  unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
-  int viewport_x, viewport_y, viewport_w, viewport_h; //These are used by surfaces, to set back the viewport
+extern GLuint msaa_fbo;
+unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
+int viewport_x, viewport_y, viewport_w, viewport_h; //These are used by surfaces, to set back the viewport
+
+void scene_begin() {
+  //oglmgr->EndShapesBatching(); //If called inside bound surface we need to finish drawing
+  oglmgr->BeginScene();
+}
+
+void scene_end() {
+  oglmgr->EndScene();
+
+  if (enigma::msaa_fbo != 0) {
+    GLint fbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::msaa_fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    //TODO: Change the code below to fix this to size properly to views
+    glBlitFramebuffer(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+    // glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+  }
+}
+
 }
 
 namespace enigma_user

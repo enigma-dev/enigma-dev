@@ -33,6 +33,7 @@ using namespace enigma;
 
 namespace enigma
 {
+
 extern GLuint msaa_fbo;
 unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
 int viewport_x, viewport_y, viewport_w, viewport_h; //These are used by surfaces, to set back the viewport
