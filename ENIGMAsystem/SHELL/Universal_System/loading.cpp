@@ -37,6 +37,8 @@ namespace enigma_user
   //FIXME: These two functions are declared in mathnc.h but we arent allowed to include that here
   extern int random_set_seed(int seed);
   extern int mtrandom_seed(int x);
+  
+  extern const char *resource_file_path;
 } //namespace enigma_user
 
 namespace enigma 
@@ -69,43 +71,51 @@ namespace enigma
     backgrounds_init();
     widget_system_initialize();
 
-    // Open the exe for resource load
-    char exename[1025];
-    windowsystem_write_exename(exename);
-    FILE* exe = fopen(exename,"rb");
-    if (!exe)
-      show_error("Resource load fail: exe unopenable",0);
-    else do
-    {
+    do { // Allows break
+      FILE* resfile;
+      if (resource_file_path) {
+        if (!(resfile = fopen(resource_file_path,"rb"))) {
+          show_error("Resource load fail: exe unopenable",0);
+          break;
+        }
+      } else {
+        char exename[4097];
+        windowsystem_write_exename(exename);
+        if (!(resfile = fopen(exename,"rb"))) {
+          show_error("Resource load fail: exe unopenable",0);
+          break;
+        }
+      }
+    
       int nullhere;
       // Read the magic number so we know we're looking at our own data
-      fseek(exe,-8,SEEK_END);
+      fseek(resfile, -8, SEEK_END);
       char str_quad[4];
-      if (!fread(str_quad,4,1,exe) or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
+      if (!fread(str_quad, 4, 1, resfile)
+          or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
         printf("No resource data in exe\n");
         break;
       }
 
       // Get where our resources are located in the module
       int pos;
-      if (!fread(&pos,4,1,exe)) break;
+      if (!fread(&pos, 4, 1, resfile)) break;
 
       // Go to the start of the resource data
-      fseek(exe,pos,SEEK_SET);
-      if (!fread(&nullhere,4,1,exe)) break;
-      if(nullhere) break;
+      fseek(resfile, pos, SEEK_SET);
+      if (!fread(&nullhere, 4, 1, resfile)) break;
+      if (nullhere) break;
 
-      enigma::exe_loadsprs(exe);
-      enigma::exe_loadsounds(exe);
-      enigma::exe_loadbackgrounds(exe);
-      enigma::exe_loadfonts(exe);
-    #ifdef PATH_EXT_SET
-    enigma::exe_loadpaths(exe);
-    #endif
+      enigma::exe_loadsprs(resfile);
+      enigma::exe_loadsounds(resfile);
+      enigma::exe_loadbackgrounds(resfile);
+      enigma::exe_loadfonts(resfile);
+#     ifdef PATH_EXT_SET
+      enigma::exe_loadpaths(resfile); // FIXME: WHY is this a thing? This isn't binary data; it should be compiled in!
+#     endif
 
-      fclose(exe);
-    }
-    while (false);
+      fclose(resfile);
+    } while (false);
 
     //Load object struct
     enigma::objectdata_load();
@@ -117,7 +127,7 @@ namespace enigma
     if (enigma_user::room_count)
       enigma::game_start();
     else
-        enigma_user::window_default();
+      enigma_user::window_default();
 
     return 0;
   }
