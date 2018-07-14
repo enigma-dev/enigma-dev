@@ -81,11 +81,4 @@ void EnableDrawing(void*)
   glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
 }
 
-void DisableDrawing(void*)
-{
-  wglMakeCurrent (NULL, NULL);
-  wglDeleteContext (hRC);
-  ReleaseDC (enigma::hWnd, enigma::window_hDC);
-}
-
 }

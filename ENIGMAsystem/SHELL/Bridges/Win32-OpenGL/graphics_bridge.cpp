@@ -26,13 +26,20 @@
 namespace enigma {
 
 GLuint msaa_fbo = 0;
+extern HGLRC hRC;
+
+void DisableDrawing(void*)
+{
+  wglMakeCurrent(NULL, NULL);
+  wglDeleteContext(hRC);
+  ReleaseDC(enigma::hWnd, enigma::window_hDC);
+}
 
 namespace swaphandling {
   bool has_checked_extensions = false;
   bool ext_swapcontrol_supported;
 
   void investigate_swapcontrol_support() {
-
     if (has_checked_extensions) return; // Already calculated, no need to calculate it more.
 
     const char *wgl_extensions = wglGetExtensionsStringARB(window_hDC);
