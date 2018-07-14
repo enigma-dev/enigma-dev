@@ -2,6 +2,9 @@ const char* VertexShaderPrefix =
 #ifdef ENIGMA_GRAPHICS_OPENGLES3
   "#version 300 es\n"
   "precision mediump float;\n"
+#elif defined ENIGMA_GRAPHICS_OPENGLES2
+  "#version 200 es\n"
+  "precision mediump float;\n"
 #else
   "#version 330 core\n"
 #endif
@@ -120,6 +123,9 @@ const char* DefaultVertexShader =
 const char* FragmentShaderPrefix =
 #ifdef ENIGMA_GRAPHICS_OPENGLES3
   "#version 300 es\n"
+  "precision mediump float;\n"
+#elif defined ENIGMA_GRAPHICS_OPENGLES2
+  "#version 200 es\n"
   "precision mediump float;\n"
 #else
   "#version 330 core\n"

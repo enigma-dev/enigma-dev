@@ -7,7 +7,7 @@ Description: Render using OpenGLES3, offering high portability but requiring spe
 Author: Robert and Fundies
 
 Depends:
-	Windowing: Xlib, Cocoa, SDL
+	Windowing: SDL
 Represents:
 	Build-platforms: None
 
