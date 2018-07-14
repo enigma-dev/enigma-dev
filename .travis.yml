@@ -189,7 +189,7 @@ script:
       xfwm4 &
       export ASAN_OPTIONS=detect_leaks=0;
       if ! ./test-runner ; then
-        if [ -f "/tmp/enigma_draw_diff.png" ]; then
+        if [ -f "/tmp/enigma_draw_diff.png" ] && [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
           ./CommandLine/testing/GitHub-ImageDiff.sh
         fi
         travis_terminate 1

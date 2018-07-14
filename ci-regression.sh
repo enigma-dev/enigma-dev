@@ -27,7 +27,7 @@ if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
   git stash
   git checkout "$TRAVIS_BRANCH"
 elif [[ -n "$TRAVIS_COMMIT_RANGE" ]]; then
-  prev=${TRAVIS_COMMIT_RANGE%%.*}~1
+  prev=${TRAVIS_COMMIT_RANGE%%.*}
   echo "This appears to be a Travis push integration run; checking out '$prev' for the comparison."
   git checkout "$prev"
 elif [[ "${GIT_BRANCH}" == "master" && "${GIT_DETACHED}" == "FALSE" ]]; then
