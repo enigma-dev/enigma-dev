@@ -39,10 +39,6 @@ int gameWait() {
 
 void set_room_speed(int rs) { current_room_speed = rs; }
 
-unsigned long get_timer() {  // microseconds since the start of the game
-  return current_time_mcs;
-}
-
 void set_program_args(int argc, char** argv) {
   parameters = new std::string[argc];
   parameterc = argc;
