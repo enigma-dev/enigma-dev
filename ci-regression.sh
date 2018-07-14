@@ -28,6 +28,7 @@ if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
   git checkout "$TRAVIS_BRANCH"
 elif [[ -n "$TRAVIS_COMMIT_RANGE" ]]; then
   echo $TRAVIS_COMMIT_RANGE
+  echo "i'm a biggayass"
   prev=${TRAVIS_COMMIT_RANGE%%.*}~1
   echo "This appears to be a Travis push integration run; checking out '$prev' for the comparison."
   git checkout "$prev"
