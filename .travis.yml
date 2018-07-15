@@ -194,7 +194,10 @@ script:
         fi
         travis_terminate 1
       fi
+      # upload coverage report for regression tests
       bash <(curl -s https://codecov.io/bash) -f "*.info" -s "/tmp/enigma-master"
+      # upload coverage report for normal tests
+      bash <(curl -s https://codecov.io/bash) -f "*.info"
     else
       ./ci-build.sh
     fi
