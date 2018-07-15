@@ -1,1 +1,1 @@
-SOURCES += $(wildcard Bridges/xlib-OpenGL1/*.cpp)
+SOURCES += $(wildcard Bridges/xlib-OpenGL/*.cpp)

@@ -57,6 +57,16 @@ namespace enigma {
     //apply context
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+    
+    #ifdef DEBUG_MODE
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+      std::cout<<"GLEW ERROR!"<<std::endl;
+    }
+    #else
+    glewInit();
+    #endif
   }
   
   void DisableDrawing(void* handle) {
