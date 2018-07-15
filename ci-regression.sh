@@ -43,7 +43,5 @@ fi
 make all
 # run only the regression tests now
 ./test-runner --gtest_filter=Regression.draw_test
-# upload coverage reports from regression tests before we pop the directory
-bash <(curl -s https://codecov.io/bash) -f "*.info"
 
 popd

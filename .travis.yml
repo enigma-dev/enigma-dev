@@ -194,7 +194,7 @@ script:
         fi
         travis_terminate 1
       fi
-      bash <(curl -s https://codecov.io/bash) -f "*.info"
+      bash <(curl -s https://codecov.io/bash) -f "*.info" -s "/tmp/enigma-master"
     else
       ./ci-build.sh
     fi
