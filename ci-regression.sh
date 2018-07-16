@@ -39,7 +39,9 @@ else
   git checkout master
 fi
 
-make all #rebuild emake and plugin incase we changed something there
+# rebuild emake and plugin in case we changed something there
+make all
+# run only the regression tests now
 ./test-runner --gtest_filter=Regression.draw_test
 
 popd
