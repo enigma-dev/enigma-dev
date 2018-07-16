@@ -250,7 +250,7 @@ void gather_coverage(const TestConfig &config) {
 
   const char *const lcovArgs[] = {
     "lcov",
-    "--quiet",
+    //"--quiet",
     "--no-external",
     "--base-directory=ENIGMAsystem/SHELL/",
     "--capture",
