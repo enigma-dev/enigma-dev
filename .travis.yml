@@ -189,12 +189,10 @@ script:
       xfwm4 &
       export ASAN_OPTIONS=detect_leaks=0;
       if ! ./test-runner ; then
-        if [ -f "/tmp/enigma_draw_diff.png" ] && [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
-          ./CommandLine/testing/GitHub-ImageDiff.sh
-        fi
         travis_terminate 1
       fi
-      bash <(curl -s https://codecov.io/bash) -f "*.info"
+      # upload coverage report for regression tests
+      bash <(curl -s https://codecov.io/bash) -f "*.info" -s . -s "/tmp/enigma-master"
     else
       ./ci-build.sh
     fi
