@@ -266,7 +266,6 @@ namespace enigma_user
 	void d3d_set_point_size(float value){}
 	void d3d_set_depth_operator(int mode){}
 	void d3d_set_depth(double dep){}
-	void d3d_clear_depth(){}
 	void d3d_set_shading(bool smooth){}
 	void d3d_set_clip_plane(bool enable){}
 
