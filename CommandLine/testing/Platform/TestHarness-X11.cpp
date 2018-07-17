@@ -177,7 +177,9 @@ int build_game(const string &game, TestConfig* tc, const string &out) {
   // Invoke the compiler via emake
   using TC = TestConfig;
   string emake_cmd = "./emake";
+  std::cerr << "lolbutmid1: " << tc->workdir << std::endl;
   tc->workdir = (tc->workdir.empty() ? std::string(env_workdir) : tc->workdir);
+  std::cerr << "lolbutmid2: " << tc->workdir << std::endl;
   string workdir = (tc->workdir.empty() ? std::string() : ("--workdir=" + tc->workdir));
   tc->codegen = (tc->codegen.empty() ? std::string(env_codegen) : tc->codegen);
   string codegen = (tc->codegen.empty() ? std::string() : ("--codegen=" + tc->codegen));
