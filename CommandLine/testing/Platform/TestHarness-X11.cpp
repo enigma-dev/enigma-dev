@@ -135,12 +135,15 @@ class X11_TestHarness final: public TestHarness {
   }
   X11_TestHarness(Display *disp, pid_t game_pid, Window game_window,
                   const TestConfig &tc):
-      pid(game_pid), window_id(game_window), display(disp), test_config(tc) {}
+      pid(game_pid), window_id(game_window), display(disp), test_config(tc) {
+        std::cerr << "lolbutts4: " << tc.workdir << std::endl;
+      }
   ~X11_TestHarness() {
     if (game_is_running()) {
       kill(pid, SIGKILL);
       std::cerr << "Game still running; killed" << std::endl;
     }
+    std::cerr << "lolbutts5: " << test_config.workdir << std::endl;
     gather_coverage(test_config);
   }
 
@@ -211,6 +214,7 @@ int build_game(const string &game, TestConfig* tc, const string &out) {
 }
 
 void gather_coverage(const TestConfig &config) {
+  std::cerr << "lolbutts6: " << config.workdir << std::endl;
   static int test_num = 0;
   test_num++;
 
@@ -278,6 +282,7 @@ TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
   // build_game mutates its TestConfig parameter's workdir and codegen
   // so let's make a copy of it so that gather_coverage gets the right dir
   TestConfig tc_realized = tc;
+  std::cerr << "lolbutts1: " << tc_realized.workdir << std::endl;
   if (int retcode = build_game(game, &tc_realized, out)) {
     if (retcode != -1) {
       std::cerr << "Failed to run emake." << std::endl;
@@ -286,6 +291,7 @@ TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
     }
     return nullptr;
   }
+  std::cerr << "lolbutts2: " << tc_realized.workdir << std::endl;
 
   pid_t pid = fork();
   if (!pid) {
@@ -299,6 +305,7 @@ TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
   Window root = XDefaultRootWindow(display);
   for (int i = 0; i < 50; ++i) {  // Try for over ten seconds to grab the window
     Window win = find_window_by_pid(display, root, pid);
+    std::cerr << "lolbutts3: " << tc_realized.workdir << std::endl;
     if (win != None)
       return std::unique_ptr<X11_TestHarness>(
           new X11_TestHarness(display, pid, win, tc_realized));
