@@ -181,6 +181,7 @@ int build_game(const string &game, TestConfig* tc, const string &out) {
   tc->workdir = (tc->workdir.empty() ? std::string(env_workdir) : tc->workdir);
   std::cerr << "lolbutmid2: " << tc->workdir << std::endl;
   string workdir = (tc->workdir.empty() ? std::string() : ("--workdir=" + tc->workdir));
+  std::cerr << "lolbutmid3: " << tc->workdir << std::endl;
   tc->codegen = (tc->codegen.empty() ? std::string(env_codegen) : tc->codegen);
   string codegen = (tc->codegen.empty() ? std::string() : ("--codegen=" + tc->codegen));
   string compiler = "--compiler=" + tc->get_or(&TC::compiler, "TestHarness");
@@ -193,6 +194,7 @@ int build_game(const string &game, TestConfig* tc, const string &out) {
   string extensions = "--extensions="
       + tc->get_or(&TC::extensions, kDefaultExtensions);
 
+  std::cerr << "lolbutmid4: " << tc->workdir << std::endl;
   const char *const args[] = {
     emake_cmd.c_str(),
     compiler.c_str(),
@@ -211,7 +213,9 @@ int build_game(const string &game, TestConfig* tc, const string &out) {
     nullptr
   };
 
+  std::cerr << "lolbutmid5: " << tc->workdir << std::endl;
   execvp(emake_cmd.c_str(), (char**) args);
+  std::cerr << "lolbutmid6: " << tc->workdir << std::endl;
   abort();
 }
 
