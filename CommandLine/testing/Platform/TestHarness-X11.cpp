@@ -135,12 +135,15 @@ class X11_TestHarness final: public TestHarness {
   }
   X11_TestHarness(Display *disp, pid_t game_pid, Window game_window,
                   const TestConfig &tc):
-      pid(game_pid), window_id(game_window), display(disp), test_config(tc) {}
+      pid(game_pid), window_id(game_window), display(disp), test_config(tc) {
+        std::cerr << "lolbutts4: " << tc.workdir << std::endl;
+      }
   ~X11_TestHarness() {
     if (game_is_running()) {
       kill(pid, SIGKILL);
       std::cerr << "Game still running; killed" << std::endl;
     }
+    std::cerr << "lolbutts5: " << test_config.workdir << std::endl;
     gather_coverage(test_config);
   }
 
@@ -174,8 +177,11 @@ int build_game(const string &game, TestConfig* tc, const string &out) {
   // Invoke the compiler via emake
   using TC = TestConfig;
   string emake_cmd = "./emake";
+  std::cerr << "lolbutmid1: " << tc->workdir << std::endl;
   tc->workdir = (tc->workdir.empty() ? std::string(env_workdir) : tc->workdir);
+  std::cerr << "lolbutmid2: " << tc->workdir << std::endl;
   string workdir = (tc->workdir.empty() ? std::string() : ("--workdir=" + tc->workdir));
+  std::cerr << "lolbutmid3: " << tc->workdir << std::endl;
   tc->codegen = (tc->codegen.empty() ? std::string(env_codegen) : tc->codegen);
   string codegen = (tc->codegen.empty() ? std::string() : ("--codegen=" + tc->codegen));
   string compiler = "--compiler=" + tc->get_or(&TC::compiler, "TestHarness");
@@ -188,6 +194,7 @@ int build_game(const string &game, TestConfig* tc, const string &out) {
   string extensions = "--extensions="
       + tc->get_or(&TC::extensions, kDefaultExtensions);
 
+  std::cerr << "lolbutmid4: " << tc->workdir << std::endl;
   const char *const args[] = {
     emake_cmd.c_str(),
     compiler.c_str(),
@@ -206,11 +213,14 @@ int build_game(const string &game, TestConfig* tc, const string &out) {
     nullptr
   };
 
+  std::cerr << "lolbutmid5: " << tc->workdir << std::endl;
   execvp(emake_cmd.c_str(), (char**) args);
+  std::cerr << "lolbutmid6: " << tc->workdir << std::endl;
   abort();
 }
 
 void gather_coverage(const TestConfig &config) {
+  std::cerr << "lolbutts6: " << config.workdir << std::endl;
   static int test_num = 0;
   test_num++;
 
@@ -248,6 +258,9 @@ void gather_coverage(const TestConfig &config) {
   src_dir += ".eobjs/Linux/Linux/TestHarness/" + config.get_or(&TestConfig::mode, "Debug") + "/";
   string out_file = "--output-file=coverage_" + to_string(test_num) + ".info";
 
+  std::cerr << "frogbutts: " << config.workdir << std::endl;
+  std::cerr << src_dir << " " << out_file << std::endl;
+
   const char *const lcovArgs[] = {
     "lcov",
     "--quiet",
@@ -275,6 +288,7 @@ TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
   // build_game mutates its TestConfig parameter's workdir and codegen
   // so let's make a copy of it so that gather_coverage gets the right dir
   TestConfig tc_realized = tc;
+  std::cerr << "lolbutts1: " << tc_realized.workdir << std::endl;
   if (int retcode = build_game(game, &tc_realized, out)) {
     if (retcode != -1) {
       std::cerr << "Failed to run emake." << std::endl;
@@ -283,6 +297,7 @@ TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
     }
     return nullptr;
   }
+  std::cerr << "lolbutts2: " << tc_realized.workdir << std::endl;
 
   pid_t pid = fork();
   if (!pid) {
@@ -296,6 +311,7 @@ TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
   Window root = XDefaultRootWindow(display);
   for (int i = 0; i < 50; ++i) {  // Try for over ten seconds to grab the window
     Window win = find_window_by_pid(display, root, pid);
+    std::cerr << "lolbutts3: " << tc_realized.workdir << std::endl;
     if (win != None)
       return std::unique_ptr<X11_TestHarness>(
           new X11_TestHarness(display, pid, win, tc_realized));
