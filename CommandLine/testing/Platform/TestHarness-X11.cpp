@@ -248,6 +248,8 @@ void gather_coverage(const TestConfig &config) {
   src_dir += ".eobjs/Linux/Linux/TestHarness/" + config.get_or(&TestConfig::mode, "Debug") + "/";
   string out_file = "--output-file=coverage_" + to_string(test_num) + ".info";
 
+  std::cerr << src_dir << " " << out_file << std::endl;
+
   const char *const lcovArgs[] = {
     "lcov",
     "--quiet",
