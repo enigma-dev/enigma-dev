@@ -45,17 +45,10 @@ else
   git clean -f -d
 fi
 
-<<<<<<< HEAD
-# rebuild emake and plugin in case we changed something there
-make all
-# run only the regression tests now
-=======
-
 #echo "Rebuilding plugin and harness from last commit..."
 #make all
 echo "Generating regression comparison images..."
 mkdir -p "${PWD}/test-harness-out"
->>>>>>> rubbert-is-a-bitch
 ./test-runner --gtest_filter=Regression.draw_test
 
 popd
