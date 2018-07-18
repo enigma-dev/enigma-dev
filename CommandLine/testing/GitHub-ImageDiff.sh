@@ -73,4 +73,6 @@ if [[ ! -z "${gh_comment_images}" ]]; then
     --request POST \
     --data '{"body":"'"${gh_comment_header}${gh_comment_images}"'"}' \
     $pullrequest
+    
+  travis_terminate 1
 fi

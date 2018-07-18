@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     int ret = system(("bash ./ci-regression.sh " + gitMasterDir).c_str());
     if (ret != 0) {
       std::cerr << "Error: ci-regression.sh returned non-zero." << std::endl;
-      return ret;
+      return 1;
     }
   }
   
