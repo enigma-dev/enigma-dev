@@ -1,5 +1,4 @@
 #include "TestHarness.hpp"
-#include "Utility.hpp"
 
 #include <gtest/gtest.h>
 
@@ -12,7 +11,7 @@ TEST(Regression, draw_test) {
   ASSERT_TRUE(test_harness->game_is_running())
       << "Game stopped running unexpectedly";
 
-  test_harness->screen_save("./enigma_draw_test.png");
+  test_harness->screen_save("./test-harness-out/enigma_draw_test.png");
 
   test_harness->close_window();
   bool game_running = test_harness->game_is_running();
@@ -21,8 +20,4 @@ TEST(Regression, draw_test) {
     game_running = test_harness->game_is_running();
   }
   ASSERT_FALSE(game_running) << "Game did not exit after window was closed!";
-}
-
-TEST(Regression, draw_compare_test) {
-
 }

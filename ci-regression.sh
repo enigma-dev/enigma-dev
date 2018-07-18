@@ -17,6 +17,8 @@ if [ -d "${TEST_HARNESS_MASTER_DIR}" ]; then
   fi
 fi
 
+mkdir -p "${PWD}/test-harness-out"
+
 echo "Copying ${PWD} to ${TEST_HARNESS_MASTER_DIR}"
 cp -p -r "${PWD}" "${TEST_HARNESS_MASTER_DIR}"
 
@@ -26,21 +28,29 @@ pushd "${TEST_HARNESS_MASTER_DIR}"
 if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
   echo "This appears to be a Travis pull request integration run; checking out '$TRAVIS_BRANCH' for the comparison."
   git stash
-  git checkout "$TRAVIS_BRANCH"
+  git reset --hard "$TRAVIS_BRANCH"
+  git clean -f -d
 elif [[ -n "$TRAVIS_COMMIT_RANGE" ]]; then
-  prev=${TRAVIS_COMMIT_RANGE%%.*}~1
+  prev=${TRAVIS_COMMIT_RANGE%%.*}
   echo "This appears to be a Travis push integration run; checking out '$prev' for the comparison."
-  git checkout "$prev"
+  git reset --hard "$prev"
+  git clean -f -d
 elif [[ "${GIT_BRANCH}" == "master" && "${GIT_DETACHED}" == "FALSE" ]]; then
   echo "You appear to be on branch master with no changes. Checking out HEAD~1 for the comparison"
-  git checkout HEAD~1
+  git reset --hard HEAD~1
+  git clean -f -d
 else
   echo "You appear to be on branch ${GIT_BRANCH}. Checking out branch master for the comparison"
   git stash
-  git checkout master
+  git reset --hard master
+  git clean -f -d
 fi
 
-make all #rebuild emake and plugin incase we changed something there
+
+#echo "Rebuilding plugin and harness from last commit..."
+#make all
+echo "Generating regression comparison images..."
+mkdir -p "${PWD}/test-harness-out"
 ./test-runner --gtest_filter=Regression.draw_test
 
 popd
