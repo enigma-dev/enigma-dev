@@ -39,19 +39,22 @@ namespace enigma
     int nullhere;
     unsigned sprid, width, height, bbt, bbb, bbl, bbr, bbm, shape;
     int xorig, yorig;
-    
+
     if (!fread(&nullhere,4,1,exe)) return;
     if (memcmp(&nullhere, "SPR ", sizeof(int)) != 0)
       return;
-    
+
     // Determine how many sprites we have
     int sprcount;
     if (!fread(&sprcount,4,1,exe)) return;
-    
+
     // Fetch the highest ID we will be using
     int spr_highid;
     if (!fread(&spr_highid,4,1,exe)) return;
-    
+    // allocate all the sprites at once for efficiency
+    // requires a single reallocation of the sprites resource vector
+    sprites_resize(spr_highid + 1);
+
     for (int i = 0; i < sprcount; i++)
     {
       if (!fread(&sprid, 4,1,exe)) return;
@@ -77,13 +80,13 @@ namespace enigma
         case ct_circle: coll_type = ct_circle; break;
         default: coll_type = ct_bbox; break;
       };
-      
+
       int subimages;
       if (!fread(&subimages,4,1,exe)) return;
-      
-      int sprid = sprite_add(nullptr, width, height, 0, coll_type, false, false, true, xorig, yorig, false);
+
+      sprite_add(sprid);
       enigma_user::sprite_set_bbox(sprid, bbl, bbt, bbr, bbb);
-      for (int ii=0;ii<subimages;ii++) 
+      for (int ii=0;ii<subimages;ii++)
       {
         int unpacked;
         if (!fread(&unpacked,4,1,exe)) return;
@@ -107,11 +110,9 @@ namespace enigma
           continue;
         }
         delete[] cpixels;
-
         sprite_add_subimage(pixels, width, height, sprid, 1, coll_type, false, false, xorig, yorig, false);
-        
         if (!fread(&nullhere,4,1,exe)) return;
-        
+
         if (nullhere)
         {
           show_error("Sprite load error: Null terminator expected",0);

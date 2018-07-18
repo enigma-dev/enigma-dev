@@ -30,6 +30,14 @@ namespace enigma {
 
 ResourceVec<Sprite> sprites("sprite");
 
+void sprites_resize(size_t size) {
+  sprites.resize(size);
+}
+
+void sprite_add(size_t id) {
+  sprites.assign(id, std::move(make_unique<Sprite>()));
+}
+
 void Sprite::freeTextures() {
   for (unsigned i = 0; i < subimages.size(); ++i) enigma::graphics_delete_texture(subimages[i].textureID);
 }

@@ -29,6 +29,7 @@ class ResourceVec {
     return res[index].get();
   }
 
+  void resize(size_t size) { res.resize(size); }
   void assign(int index, std::unique_ptr<T> r) { res[index] = std::move(r); }
   void push_back(std::unique_ptr<T> r) { res.push_back(std::move(r)); }
   void pop_back() { res.pop_back(); }

@@ -62,6 +62,8 @@ struct Sprite {
   std::vector<SubImage> subimages;
 };
 
+void sprites_resize(size_t size);
+void sprite_add(size_t id);
 int sprite_add(unsigned char *pxdata, unsigned w, unsigned h, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int xoffset, int yoffset, bool mipmap);
 int sprite_set(unsigned char *pxdata, unsigned w, unsigned h, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int xoffset, int yoffset, bool mipmap);
 int sprite_add_subimage(unsigned char *pxdata, unsigned w, unsigned h, int id, int imgCount, bool precise, bool transparent, bool smooth, int xoffset, int yoffset, bool mipmap);
@@ -73,4 +75,3 @@ extern ResourceVec<Sprite> sprites;
 }  // namespace enigma
 
 #endif // ENIGMA_SPRITESTRUCT
-
