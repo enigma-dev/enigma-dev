@@ -21,29 +21,56 @@ function imgur_upload {
               --form "image=@$1")
 }
 
-imgur_response=$( imgur_upload './enigma_draw_test.png' )
-imgur_master_response=$( imgur_upload '/tmp/enigma-master/enigma_draw_test.png' )
-imgur_diff_response=$( imgur_upload '/tmp/enigma_draw_diff.png' )
-
-imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
-imgur_master_url=$(echo $imgur_master_response | jq --raw-output '.data."link"' )
-imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
-
-echo $imgur_url
-echo $imgur_master_url
-echo $imgur_diff_url
-
-gh_comment="Regression tests have indicated that graphical changes have been introduced. \
+gh_comment_header="Regression tests have indicated that graphical changes have been introduced. \
 Carefully review the following image comparison for anomalies and adjust the changeset accordingly.\n\
 \n\
 $TRAVIS_PULL_REQUEST_SHA | Master | Diff\n\
---- | --- | ---\n\
-<a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
-<a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
-<a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
+--- | --- | ---\n"
 
-curl -u $bot_user':'$bot_password \
-  --header "Content-Type: application/json" \
-  --request POST \
-  --data '{"body":"'"$gh_comment"'"}' \
-  $pullrequest
+gh_comment_images=""
+
+images=$(ls ./test-harness-out/*.png)
+
+if [[ -z "${images}" ]]; then
+  echo "Error: Comparison image folder is empty. Something is horribly wrong..."
+else
+  for image in "${images}"
+  do
+    diffname="/tmp/"$(basename "$image" .png)"_diff.png"
+          
+    echo "Comparing ${image} to /tmp/enigma-master/${image}..."
+    compare -metric AE "${image}" "/tmp/enigma-master/${image}" "${diffname}"
+    result=$?
+    echo ""
+    if [[ "$result" -eq "0" ]]; then
+      echo "No differences detected :)"
+    else
+      echo "Mismatches detected :("
+      echo "Uploading images..."
+      
+      imgur_response=$(imgur_upload "${image}")
+      imgur_master_response=$(imgur_upload "/tmp/enigma-master/${image}")
+      imgur_diff_response=$(imgur_upload "/tmp/${diffname}")
+      
+      imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
+      imgur_master_url=$(echo $imgur_master_response | jq --raw-output '.data."link"' )
+      imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
+      
+      echo $imgur_url
+      
+      gh_comment_images="${gh_comment_images}\
+        <a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
+        <a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
+        <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
+      
+    fi
+  done
+fi
+
+if [[ ! -z "${gh_comment_images}" ]]; then
+  curl -u $bot_user':'$bot_password \
+    --header "Content-Type: application/json" \
+    --request POST \
+    --data '{"body":"'"${gh_comment_header}${gh_comment_images}"'"}' \
+    $pullrequest
+fi
