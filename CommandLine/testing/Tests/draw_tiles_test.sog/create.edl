@@ -1,0 +1,15 @@
+var background0 = background_add("../data/ball.png", false, false);
+
+set_synchronization(false);
+room_speed = 9999;
+random_set_seed(236732942);
+for (i = 0; i < 10000; i += 1) {
+  var tid = tile_add(
+    background0,
+    0,0,32,32,
+    irandom(room_width) - 16,
+    irandom(room_height) - 16,
+    irandom(100)
+  );
+  tile_set_blend(tid, make_color_hsv(irandom(255), irandom(255), irandom(255)));
+}
