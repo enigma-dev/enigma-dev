@@ -47,8 +47,9 @@ pr_images=$(ls ${pr_dir}/*.png | xargs basename | sort)
 echo "${master_images}" > "/tmp/master_images.txt"
 echo "${pr_images}" > "/tmp/pr_images.txt"
 
-com_master_pr=$(comm -2 -3 "/tmp/master_images.txt" "/tmp/pr_images.txt")
-com_pr_master=$(comm -1 -3 "/tmp/master_images.txt" "/tmp/pr_images.txt")
+# GitHub/JSON don't like tabs which comm can output
+com_master_pr=$(comm -2 -3 "/tmp/master_images.txt" "/tmp/pr_images.txt" | tr -d '\t')
+com_pr_master=$(comm -1 -3 "/tmp/master_images.txt" "/tmp/pr_images.txt" | tr -d '\t')
 
 if [[ ! -z "${com_master_pr}" ]]; then
   deleted_images_comment="Error: The following images are found in master but not the pull request:\n\
