@@ -168,4 +168,3 @@ namespace enigma_user {
   }
 
 }
-
