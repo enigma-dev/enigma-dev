@@ -29,50 +29,73 @@ $TRAVIS_PULL_REQUEST_SHA | Master | Diff\n\
 
 gh_comment_images=""
 
-images=$(ls ./test-harness-out/*.png)
+master_dir="/tmp/enigma-master/test-harness-out"
+pr_dir="${PWD}/test-harness-out"
+diff_dir="/tmp"
 
-if [[ -z "${images}" ]]; then
-  echo "Error: Comparison image folder is empty. Something is horribly wrong..."
-else
-  for image in "${images}"
-  do
-    diffname="/tmp/"$(basename "$image" .png)"_diff.png"
-          
-    echo "Comparing ${image} to /tmp/enigma-master/${image}..."
-    compare -metric AE "${image}" "/tmp/enigma-master/${image}" "${diffname}"
-    result=$?
-    echo ""
-    if [[ "$result" -eq "0" ]]; then
-      echo "No differences detected :)"
-    else
-      echo "Mismatches detected :("
-      echo "Uploading images..."
-      
-      imgur_response=$(imgur_upload "${image}")
-      imgur_master_response=$(imgur_upload "/tmp/enigma-master/${image}")
-      imgur_diff_response=$(imgur_upload "/tmp/${diffname}")
-      
-      imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
-      imgur_master_url=$(echo $imgur_master_response | jq --raw-output '.data."link"' )
-      imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
-      
-      echo $imgur_url
-      
-      gh_comment_images="${gh_comment_images}\
-        <a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
-        <a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
-        <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
-      
-    fi
-  done
-fi
+master_images=$(ls ${master_dir}/*.png | xargs basename | sort)
+pr_images=$(ls ${pr_dir}/*.png | xargs basename | sort)
 
-if [[ ! -z "${gh_comment_images}" ]]; then
-  curl -u $bot_user':'$bot_password \
-    --header "Content-Type: application/json" \
-    --request POST \
-    --data '{"body":"'"${gh_comment_header}${gh_comment_images}"'"}' \
-    $pullrequest
-    
+echo "${master_images}" > "/tmp/master_images.txt"
+echo "${pr_images}" > "/tmp/pr_images.txt"
+
+com_master_pr=$(comm -3 "/tmp/master_images.txt" "/tmp/pr_images.txt")
+com_pr_master=$(comm -3 "/tmp/master_images.txt" "/tmp/pr_images.txt")
+
+if [[ ! -z "${com_master_pr}" ]]; then
+  echo "Error the following images are found in master but not the pull request:"
+  echo "${com_master_pr}"
+  echo "Aborting!"
   travis_terminate 1
+else
+  if [[ ! -z "${com_pr_master}" ]]; then
+    echo "Warning Error the following images are found in the pull request but not master (new tests?):"
+    echo "${com_pr_master}"
+    eco "Continuing..."
+  fi
+  
+  if [[ -z "${master_images}" ]]; then
+    echo "Error: Comparison image folder is empty. Something is horribly wrong..."
+  else
+    for image in "${master_images}"
+    do
+      diffname="${diff_dir}"/$(basename "${image}" .png)"_diff.png"
+      echo "Comparing ${master_dir}/${image} to ${pr_dir}/${image}..."
+      compare -metric AE "${master_dir}/${image}" "${pr_dir}/${image}" "${diffname}"
+      result=$?
+      echo ""
+      if [[ "$result" -eq "0" ]]; then
+        echo "No differences detected :)"
+      else
+        echo "Mismatches detected :("
+        echo "Uploading images..."
+        
+        imgur_response=$(imgur_upload "${pr_dir}/${image}")
+        imgur_master_response=$(imgur_upload "${master_dir}/${image}")
+        imgur_diff_response=$(imgur_upload "${diffname}")
+        
+        imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
+        imgur_master_url=$(echo $imgur_master_response | jq --raw-output '.data."link"' )
+        imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
+        
+        echo $imgur_url
+        
+        gh_comment_images="${gh_comment_images}\
+          <a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
+          <a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
+          <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
+        
+      fi
+    done
+  fi
+
+  if [[ ! -z "${gh_comment_images}" ]]; then
+    curl -u $bot_user':'$bot_password \
+      --header "Content-Type: application/json" \
+      --request POST \
+      --data '{"body":"'"${gh_comment_header}${gh_comment_images}"'"}' \
+      $pullrequest
+      
+    travis_terminate 1
+  fi
 fi
