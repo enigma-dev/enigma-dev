@@ -26,7 +26,7 @@ pushd "${TEST_HARNESS_MASTER_DIR}"
 
 if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   git stash
-    
+
   if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
     echo "This appears to be a Travis pull request integration run; checking out '$TRAVIS_BRANCH' for the comparison."
     git reset --hard "$TRAVIS_BRANCH"
@@ -44,8 +44,8 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
 
   git clean -f -d
 
-  #echo "Rebuilding plugin and harness from last commit..."
-  #make all
+  echo "Rebuilding plugin and harness from last commit..."
+  make all
   echo "Generating regression comparison images..."
   mkdir -p "${PWD}/test-harness-out"
   ./test-runner --gtest_filter=Regression.draw_test
