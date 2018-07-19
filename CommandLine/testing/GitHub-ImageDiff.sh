@@ -21,11 +21,19 @@ function imgur_upload {
               --form "image=@$1")
 }
 
+function enigmabot_post_comment {
+  echo $(curl -u $bot_user':'$bot_password \
+      --header "Content-Type: application/json" \
+      --request POST \
+      --data '{"body":"'"$1"'"}' \
+      $pullrequest)
+}
+
 gh_comment_header="Regression tests have indicated that graphical changes have been introduced. \
-Carefully review the following image comparison for anomalies and adjust the changeset accordingly.\n\
-\n\
-$TRAVIS_PULL_REQUEST_SHA | Master | Diff\n\
---- | --- | ---\n"
+  Carefully review the following image comparison for anomalies and adjust the changeset accordingly.\n\
+  \n\
+  $TRAVIS_PULL_REQUEST_SHA | Master | Diff\n\
+  --- | --- | ---\n"
 
 gh_comment_images=""
 
@@ -43,17 +51,23 @@ com_master_pr=$(comm -3 "/tmp/master_images.txt" "/tmp/pr_images.txt")
 com_pr_master=$(comm -3 "/tmp/master_images.txt" "/tmp/pr_images.txt")
 
 if [[ ! -z "${com_master_pr}" ]]; then
-  echo "Error the following images are found in master but not the pull request:"
-  echo "${com_master_pr}"
+  deleted_images_comment="Error the following images are found in master but not the pull request:\n\
+    ${com_master_pr}\n"
+
+  echo "${deleted_images_comment}"
   echo "Aborting!"
+  enigmabot_post_comment "${deleted_images_comment}"
   travis_terminate 1
 else
   if [[ ! -z "${com_pr_master}" ]]; then
-    echo "Warning Error the following images are found in the pull request but not master (new tests?):"
-    echo "${com_pr_master}"
-    eco "Continuing..."
+    new_images_comment="Warning Error the following images are found in the pull request but not master (new tests?):\n\
+      ${com_pr_master}\n"
+
+    echo "${new_images_comment}"
+    echo "Continuing..."
+    enigmabot_post_comment "${new_images_comment}"
   fi
-  
+
   if [[ -z "${master_images}" ]]; then
     echo "Error: Comparison image folder is empty. Something is horribly wrong..."
   else
@@ -69,33 +83,28 @@ else
       else
         echo "Mismatches detected :("
         echo "Uploading images..."
-        
+
         imgur_response=$(imgur_upload "${pr_dir}/${image}")
         imgur_master_response=$(imgur_upload "${master_dir}/${image}")
         imgur_diff_response=$(imgur_upload "${diffname}")
-        
+
         imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
         imgur_master_url=$(echo $imgur_master_response | jq --raw-output '.data."link"' )
         imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
-        
+
         echo $imgur_url
-        
+
         gh_comment_images="${gh_comment_images}\
           <a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
           <a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
           <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
-        
       fi
     done
   fi
 
   if [[ ! -z "${gh_comment_images}" ]]; then
-    curl -u $bot_user':'$bot_password \
-      --header "Content-Type: application/json" \
-      --request POST \
-      --data '{"body":"'"${gh_comment_header}${gh_comment_images}"'"}' \
-      $pullrequest
-      
+    enigmabot_post_comment "${gh_comment_header}${gh_comment_images}"
+
     travis_terminate 1
   fi
 fi
