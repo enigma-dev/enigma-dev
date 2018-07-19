@@ -23,17 +23,17 @@ function imgur_upload {
 
 function enigmabot_post_comment {
   echo $(curl -u $bot_user':'$bot_password \
-      --header "Content-Type: application/json" \
-      --request POST \
-      --data '{"body":"'"$1"'"}' \
-      $pullrequest)
+              --header "Content-Type: application/json" \
+              --request POST \
+              --data '{"body":"'"$1"'"}' \
+              $pullrequest)
 }
 
 gh_comment_header="Regression tests have indicated that graphical changes have been introduced. \
-  Carefully review the following image comparison for anomalies and adjust the changeset accordingly.\n\
-  \n\
-  $TRAVIS_PULL_REQUEST_SHA | Master | Diff\n\
-  --- | --- | ---\n"
+Carefully review the following image comparison for anomalies and adjust the changeset accordingly.\n\
+\n\
+$TRAVIS_PULL_REQUEST_SHA | Master | Diff\n\
+--- | --- | ---\n"
 
 gh_comment_images=""
 
@@ -47,23 +47,23 @@ pr_images=$(ls ${pr_dir}/*.png | xargs basename | sort)
 echo "${master_images}" > "/tmp/master_images.txt"
 echo "${pr_images}" > "/tmp/pr_images.txt"
 
-com_master_pr=$(comm -3 "/tmp/master_images.txt" "/tmp/pr_images.txt")
-com_pr_master=$(comm -3 "/tmp/master_images.txt" "/tmp/pr_images.txt")
+com_master_pr=$(comm -2 -3 "/tmp/master_images.txt" "/tmp/pr_images.txt")
+com_pr_master=$(comm -1 -3 "/tmp/master_images.txt" "/tmp/pr_images.txt")
 
 if [[ ! -z "${com_master_pr}" ]]; then
-  deleted_images_comment="Error the following images are found in master but not the pull request:\n\
-    ${com_master_pr}\n"
+  deleted_images_comment="Error: The following images are found in master but not the pull request:\n\
+  ${com_master_pr}\n"
 
-  echo "${deleted_images_comment}"
+  echo -e "${deleted_images_comment}"
   echo "Aborting!"
   enigmabot_post_comment "${deleted_images_comment}"
   travis_terminate 1
 else
   if [[ ! -z "${com_pr_master}" ]]; then
-    new_images_comment="Warning Error the following images are found in the pull request but not master (new tests?):\n\
-      ${com_pr_master}\n"
+    new_images_comment="Warning: The following images are found in the pull request but not master (new tests?):\n\
+    ${com_pr_master}\n"
 
-    echo "${new_images_comment}"
+    echo -e "${new_images_comment}"
     echo "Continuing..."
     enigmabot_post_comment "${new_images_comment}"
   fi
