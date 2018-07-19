@@ -17,31 +17,42 @@ if [ -d "${TEST_HARNESS_MASTER_DIR}" ]; then
   fi
 fi
 
+mkdir -p "${PWD}/test-harness-out"
+
 echo "Copying ${PWD} to ${TEST_HARNESS_MASTER_DIR}"
 cp -p -r "${PWD}" "${TEST_HARNESS_MASTER_DIR}"
 
 pushd "${TEST_HARNESS_MASTER_DIR}"
 
-if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
-  echo "This appears to be a Travis pull request integration run; checking out '$TRAVIS_BRANCH' for the comparison."
+if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   git stash
-  git checkout "$TRAVIS_BRANCH"
-elif [[ -n "$TRAVIS_COMMIT_RANGE" ]]; then
-  prev=${TRAVIS_COMMIT_RANGE%%.*}
-  echo "This appears to be a Travis push integration run; checking out '$prev' for the comparison."
-  git checkout "$prev"
-elif [[ "${GIT_BRANCH}" == "master" && "${GIT_DETACHED}" == "FALSE" ]]; then
-  echo "You appear to be on branch master with no changes. Checking out HEAD~1 for the comparison"
-  git checkout HEAD~1
+
+  if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
+    echo "This appears to be a Travis pull request integration run; checking out '$TRAVIS_BRANCH' for the comparison."
+    git reset --hard "$TRAVIS_BRANCH"
+  elif [[ -n "$TRAVIS_COMMIT_RANGE" ]]; then
+    prev=${TRAVIS_COMMIT_RANGE%%.*}
+    echo "This appears to be a Travis push integration run; checking out '$prev' for the comparison."
+    git reset --hard "$prev"
+  elif [[ "${GIT_BRANCH}" == "master" && "${GIT_DETACHED}" == "FALSE" ]]; then
+    echo "You appear to be on branch master with no changes. Checking out HEAD~1 for the comparison"
+    git reset --hard HEAD~1
+  else
+    echo "You appear to be on branch ${GIT_BRANCH}. Checking out branch master for the comparison"
+    git reset --hard master
+  fi
+
+  git clean -f -d
+
+  echo "Rebuilding plugin and harness from last commit..."
+  make all
+  echo "Generating regression comparison images..."
+  mkdir -p "${PWD}/test-harness-out"
+  ./test-runner --gtest_filter=Regression.draw_test
+
+  popd
 else
-  echo "You appear to be on branch ${GIT_BRANCH}. Checking out branch master for the comparison"
-  git stash
-  git checkout master
+  echo "Failed to change directory to ${TEST_HARNESS_MASTER_DIR}. Something is horribly wrong..."
+  echo "Aborting!"
+  travis_terminate 1
 fi
-
-# rebuild emake and plugin in case we changed something there
-make all
-# run only the regression tests now
-./test-runner --gtest_filter=Regression.draw_test
-
-popd

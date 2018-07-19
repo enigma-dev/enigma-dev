@@ -191,8 +191,9 @@ script:
       if ! ./test-runner ; then
         travis_terminate 1
       fi
+      ./CommandLine/testing/GitHub-ImageDiff.sh  
       # upload coverage report for regression tests
-      bash <(curl -s https://codecov.io/bash) -f "*.info" -s . -s "/tmp/enigma-master"
+      bash <(curl -s https://codecov.io/bash) -f "*.info"
     else
       ./ci-build.sh
     fi

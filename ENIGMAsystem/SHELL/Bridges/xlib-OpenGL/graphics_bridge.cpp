@@ -167,4 +167,3 @@ namespace enigma_user {
   }
 
 }
-
