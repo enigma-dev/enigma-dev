@@ -24,7 +24,7 @@ cp -p -r "${PWD}" "${TEST_HARNESS_MASTER_DIR}"
 
 pushd "${TEST_HARNESS_MASTER_DIR}"
 
-if [[ "${PWD}" -eq "${TEST_HARNESS_MASTER_DIR}" ]]; then
+if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   git stash
     
   if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
