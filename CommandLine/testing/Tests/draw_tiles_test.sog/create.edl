@@ -12,4 +12,7 @@ for (i = 0; i < 10000; i += 1) {
     irandom(100)
   );
   tile_set_blend(tid, make_color_hsv(irandom(255), irandom(255), irandom(255)));
+  tile_set_depth(tid, irandom(200));
+  tile_set_alpha(tid, irandom(255)/255);
+  tile_set_scale(tid, (100 + irandom(100))/100, (100 + irandom(100))/100);
 }
