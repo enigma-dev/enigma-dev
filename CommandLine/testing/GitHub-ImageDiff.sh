@@ -41,8 +41,8 @@ master_dir="/tmp/enigma-master/test-harness-out"
 pr_dir="${PWD}/test-harness-out"
 diff_dir="/tmp"
 
-master_images=$(ls ${master_dir}/*.png | xargs basename | sort)
-pr_images=$(ls ${pr_dir}/*.png | xargs basename | sort)
+master_images=$(ls ${master_dir}/*.png | xargs -n1 basename | sort)
+pr_images=$(ls ${pr_dir}/*.png | xargs -n1 basename | sort)
 
 echo "${master_images}" > "/tmp/master_images.txt"
 echo "${pr_images}" > "/tmp/pr_images.txt"
@@ -66,20 +66,19 @@ else
     echo "${new_images_comment}"
     echo "${com_pr_master}"
     echo "Continuing..."
-    for image in "${pr_images}"
-    do
+    new_images_comment+="\n"
+    while read -r image; do
       imgur_response=$(imgur_upload "${pr_dir}/${image}")
       imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
-      new_images_comment+="###${image}\n<a href='$imgur_url'><img alt='${image}' src='$imgur_url' width='200'/></a>\n"
-    done
+      new_images_comment+="### ${image}\n<a href='$imgur_url'><img alt='${image}' src='$imgur_url' width='200'/></a>\n"
+    done <<< "${pr_images}"
     enigmabot_post_comment "${new_images_comment}"
   fi
 
   if [[ -z "${master_images}" ]]; then
     echo "Error: Comparison image folder is empty. Something is horribly wrong..."
   else
-    for image in "${master_images}"
-    do
+    while read -r image; do
       diffname="${diff_dir}"/$(basename "${image}" .png)"_diff.png"
       echo "Comparing ${master_dir}/${image} to ${pr_dir}/${image}..."
       compare -metric AE "${master_dir}/${image}" "${pr_dir}/${image}" "${diffname}"
@@ -106,7 +105,7 @@ else
           <a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
           <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
       fi
-    done
+    done <<< "${master_images}"
   fi
 
   if [[ ! -z "${gh_comment_images}" ]]; then
