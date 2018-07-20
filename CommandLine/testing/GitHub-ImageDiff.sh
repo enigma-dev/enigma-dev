@@ -61,11 +61,17 @@ if [[ ! -z "${com_master_pr}" ]]; then
   travis_terminate 1
 else
   if [[ ! -z "${com_pr_master}" ]]; then
-    new_images_comment="Warning: The following images are found in the pull request but not master (new tests?):\n\
-    ${com_pr_master}\n"
+    new_images_comment="Warning: The following images are found in the pull request but not master (new tests?):"
 
-    echo -e "${new_images_comment}"
+    echo "${new_images_comment}"
+    echo "${com_pr_master}"
     echo "Continuing..."
+    for image in "${pr_images}"
+    do
+      imgur_response=$(imgur_upload "${pr_dir}/${image}")
+      imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
+      new_images_comment+="###${image}\n<a href='$imgur_url'><img alt='${image}' src='$imgur_url' width='200'/></a>\n"
+    done
     enigmabot_post_comment "${new_images_comment}"
   fi
 
