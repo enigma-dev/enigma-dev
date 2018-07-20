@@ -1,4 +1,4 @@
-var background0 = background_add("../data/ball.png", false, false);
+var background0 = background_add("CommandLine/testing/data/ball.png", false, false);
 
 set_synchronization(false);
 room_speed = 9999;

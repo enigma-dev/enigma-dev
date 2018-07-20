@@ -231,7 +231,7 @@ namespace enigma
     }
   }
 
-  SamplerState samplerstates[8] = { 0 };
+  SamplerState samplerstates[8];
 }
 
 namespace enigma_user
