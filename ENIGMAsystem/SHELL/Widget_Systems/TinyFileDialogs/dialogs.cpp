@@ -361,7 +361,7 @@ namespace enigma_user
 
     const char *path = tinyfd_selectFolderDialog("Select Directory", dname.c_str());
 
-    return path ? : "";
+    return path ? string_replace_all(string(path) + "/", "//", "/") : "";
   }
 
   string get_directory_alt(string capt, string root)
@@ -378,7 +378,7 @@ namespace enigma_user
 
     const char *path = tinyfd_selectFolderDialog(titlebar.c_str(), root.c_str());
 
-    return path ? : "";
+    return path ? string_replace_all(string(path) + "/", "//", "/") : "";
   }
 
   double get_color(double defcol)

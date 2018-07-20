@@ -30,8 +30,9 @@ namespace enigma {
   extern int current_room_speed;
   extern int frames_count;
   extern unsigned long current_time_mcs;
+  extern bool game_window_focused;
 
-  int main(int argc, char** argv, void* windowHandle = nullptr);
+  int enigma_main(int argc, char** argv);
   int game_ending();
   long clamp(long value, long min, long max);
   void Sleep(int ms);
@@ -42,7 +43,6 @@ namespace enigma {
   int updateTimer();
   int gameWait();
   void set_room_speed(int rs);
-  unsigned long get_timer();
 }
 
 namespace enigma_user {

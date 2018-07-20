@@ -32,7 +32,7 @@ libEGM: .FORCE libProtocols
 
 EMAKE_TARGETS = .FORCE
 
-ifneq (_$(disable_egm),$(filter _$(disable_egm),_true _1 _yes _y))
+ifneq ($(CLI_ENABLE_EGM), FALSE)
 	EMAKE_TARGETS += libEGM
 else
 	EMAKE_TARGETS += libProtocols

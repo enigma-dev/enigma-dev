@@ -4,7 +4,7 @@
 Name: iPhone
 Identifier: iPhone
 Represents:
-	Build-Platforms: iPhone
+	Build-Platforms: None
 Description: Build for Apple iPhone.
 Author: TGMG
 
