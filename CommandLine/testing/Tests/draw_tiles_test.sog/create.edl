@@ -3,7 +3,7 @@ var background0 = background_add("../data/ball.png", false, false);
 set_synchronization(false);
 room_speed = 9999;
 random_set_seed(236732942);
-for (i = 0; i < 10000; i += 1) {
+for (i = 0; i < 2; i += 1) {
   var tid = tile_add(
     background0,
     0,0,32,32,
