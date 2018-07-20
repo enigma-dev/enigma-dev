@@ -48,7 +48,7 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   make all
   echo "Generating regression comparison images..."
   mkdir -p "${PWD}/test-harness-out"
-  ./test-runner --gtest_filter=Regression.draw_test
+  ./test-runner --gtest_filter=Regression.*
 
   popd
 else
