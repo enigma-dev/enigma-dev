@@ -51,7 +51,7 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
     git checkout master
   fi
 
-  git clean -f -d
+  #git clean -f -d
 
   echo "Rebuilding plugin and harness from last commit..."
   make all
