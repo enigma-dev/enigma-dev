@@ -58,7 +58,7 @@ if [[ ! -z "${com_master_pr}" ]]; then
   echo -e "${deleted_images_comment}"
   echo "Aborting!"
   enigmabot_post_comment "${deleted_images_comment}"
-  travis_terminate 1
+  exit 1
 else
   if [[ ! -z "${com_pr_master}" ]]; then
     new_images_comment="Warning: The following images are found in the pull request but not master (new tests?):"
@@ -111,6 +111,6 @@ else
   if [[ ! -z "${gh_comment_images}" ]]; then
     enigmabot_post_comment "${gh_comment_header}${gh_comment_images}"
 
-    travis_terminate 1
+    exit 1
   fi
 fi

@@ -1,6 +1,11 @@
 #!/bin/bash +x
 set -e #exit if any command fails
 
+if [ -z "$1" ]; then
+  echo "No directory specified to check out master for regression tests."
+  echo "Aborting!"
+  exit 1
+fi
 export TEST_HARNESS_MASTER_DIR="$1"
 
 GIT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
@@ -58,5 +63,5 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
 else
   echo "Failed to change directory to ${TEST_HARNESS_MASTER_DIR}. Something is horribly wrong..."
   echo "Aborting!"
-  travis_terminate 1
+  exit 1
 fi
