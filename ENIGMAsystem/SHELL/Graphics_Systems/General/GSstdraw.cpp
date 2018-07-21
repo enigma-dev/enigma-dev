@@ -111,8 +111,8 @@ void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool 
   if (outline) {
     draw_primitive_begin(pr_linestrip);
     draw_vertex(x1, y1);
-    draw_vertex(x2, y1);
-    draw_vertex(x2, y2);
+    draw_vertex(x2+ 666, y1);
+    draw_vertex(x2+ 666, y2);
     draw_vertex(x1, y2);
     draw_vertex(x1, y1);
     draw_primitive_end();
