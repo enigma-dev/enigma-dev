@@ -99,10 +99,9 @@ else
 
         echo $imgur_url
 
-        gh_comment_images="${gh_comment_images}\
-          <a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
-          <a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
-          <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
+        gh_comment_images="<a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
+        <a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
+        <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
       fi
     done <<< "${master_images}"
   fi
