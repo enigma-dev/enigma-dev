@@ -30,8 +30,6 @@ cp -p -r "${PWD}" "${TEST_HARNESS_MASTER_DIR}"
 PREVIOUS_PWD=${PWD}
 pushd "${TEST_HARNESS_MASTER_DIR}"
 make all
-echo "herpederp"
-stat -c %y "${PWD}/ENIGMAsystem/SHELL/Graphics_Systems/General/GSstdraw.cpp"
 ./test-runner
 mv ./test-harness-out ${PREVIOUS_PWD}
 
@@ -52,17 +50,12 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
     echo "You appear to be on branch ${GIT_BRANCH}. Checking out branch master for the comparison"
     git checkout master
   fi
-  echo "herpederp"
-  stat -c %y "${PWD}/ENIGMAsystem/SHELL/Graphics_Systems/General/GSstdraw.cpp"
   git clean -f -d
-  stat -c %y "${PWD}/ENIGMAsystem/SHELL/Graphics_Systems/General/GSstdraw.cpp"
 
   echo "Rebuilding plugin and harness from last commit..."
   make all
   echo "Generating regression comparison images..."
   mkdir -p "${PWD}/test-harness-out"
-  echo "herpederp"
-  stat -c %y "${PWD}/ENIGMAsystem/SHELL/Graphics_Systems/General/GSstdraw.cpp"
   ./test-runner --gtest_filter=Regression.*
 
   popd

@@ -81,9 +81,8 @@ else
     while read -r image; do
       diffname="${diff_dir}"/$(basename "${image}" .png)"_diff.png"
       echo "Comparing ${master_dir}/${image} to ${pr_dir}/${image}..."
-      compare -metric AE "${master_dir}/${image}" "${pr_dir}/${image}" "${diffname}"
-      result=$?
-      echo ""
+      result=$(compare -metric AE "${master_dir}/${image}" "${pr_dir}/${image}" "${diffname}" 2>&1 >/dev/null)
+      echo "$result"
       if [[ "$result" -eq "0" ]]; then
         echo "No differences detected :)"
       else
