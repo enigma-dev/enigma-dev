@@ -1,18 +1,24 @@
 var background0 = background_add("CommandLine/testing/data/ball.png", false, false);
 
-set_synchronization(false);
-room_speed = 9999;
-random_set_seed(236732942);
-for (i = 0; i < 2; i += 1) {
-  var tid = tile_add(
-    background0,
-    0,0,32,32,
-    irandom(room_width) - 16,
-    irandom(room_height) - 16,
-    irandom(100)
-  );
-  tile_set_blend(tid, make_color_hsv(irandom(255), irandom(255), irandom(255)));
-  tile_set_depth(tid, irandom(200));
-  tile_set_alpha(tid, irandom(255)/255);
-  tile_set_scale(tid, (100 + irandom(100))/100, (100 + irandom(100))/100);
-}
+var red_tid = tile_add(background0,0,0,32,32,0,0,0);
+tile_set_blend(red_tid, make_color_rgb(255, 0, 0));
+var green_tid = tile_add(background0,0,0,32,32,32,0,0);
+tile_set_blend(green_tid, make_color_rgb(0, 255, 0));
+var blue_tid = tile_add(background0,0,0,32,32,64,0,0);
+tile_set_blend(blue_tid, make_color_rgb(0, 0, 255));
+var alpha_tid = tile_add(background0,0,0,32,32,96,0,0);
+tile_set_blend(alpha_tid, make_color_rgb(0, 0, 0));
+tile_set_alpha(alpha_tid, 0.5);
+
+var depth_one_tid = tile_add(background0,0,0,32,32,0,64,0);
+tile_set_depth(depth_one_tid, 0);
+var depth_two_tid = tile_add(background0,0,0,32,32,8,64,0);
+tile_set_depth(depth_two_tid, 100);
+var depth_three_tid = tile_add(background0,0,0,32,32,16,64,0);
+tile_set_depth(depth_three_tid, -100);
+
+var scale_tid = tile_add(background0,0,0,32,32,0,0,0);
+tile_set_position(scale_tid, 0, 64);
+tile_set_scale(scale_tid, 3, 3);
+var visible_tid = tile_add(background0,0,0,32,32,96,64,0);
+tile_set_visible(visible, false);
