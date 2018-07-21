@@ -38,17 +38,17 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
 
   if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
     echo "This appears to be a Travis pull request integration run; checking out '$TRAVIS_BRANCH' for the comparison."
-    git reset --hard "$TRAVIS_BRANCH"
+    git checkout "$TRAVIS_BRANCH"
   elif [[ -n "$TRAVIS_COMMIT_RANGE" ]]; then
     prev=${TRAVIS_COMMIT_RANGE%%.*}
     echo "This appears to be a Travis push integration run; checking out '$prev' for the comparison."
-    git reset --hard "$prev"
+    git checkout "$prev"
   elif [[ "${GIT_BRANCH}" == "master" && "${GIT_DETACHED}" == "FALSE" ]]; then
     echo "You appear to be on branch master with no changes. Checking out HEAD~1 for the comparison"
-    git reset --hard HEAD~1
+    git checkout HEAD~1
   else
     echo "You appear to be on branch ${GIT_BRANCH}. Checking out branch master for the comparison"
-    git reset --hard master
+    git checkout master
   fi
 
   git clean -f -d
