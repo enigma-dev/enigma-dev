@@ -71,7 +71,7 @@ else
       imgur_response=$(imgur_upload "${pr_dir}/${image}")
       imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
       new_images_comment+="### ${image}\n<a href='$imgur_url'><img alt='${image}' src='$imgur_url' width='200'/></a>\n"
-    done <<< "${pr_images}"
+    done <<< "${com_pr_master}"
     enigmabot_post_comment "${new_images_comment}"
   fi
 
