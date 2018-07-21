@@ -64,3 +64,5 @@ else
   echo "Aborting!"
   exit 1
 fi
+
+./CommandLine/testing/GitHub-ImageDiff.sh

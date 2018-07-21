@@ -57,7 +57,9 @@ if [[ ! -z "${com_master_pr}" ]]; then
 
   echo -e "${deleted_images_comment}"
   echo "Aborting!"
-  enigmabot_post_comment "${deleted_images_comment}"
+  if [[ "$TRAVIS" -eq "true" ]]; then
+    enigmabot_post_comment "${deleted_images_comment}"
+  fi
   exit 1
 else
   if [[ ! -z "${com_pr_master}" ]]; then
@@ -66,13 +68,15 @@ else
     echo "${new_images_comment}"
     echo "${com_pr_master}"
     echo "Continuing..."
-    new_images_comment+="\n"
-    while read -r image; do
-      imgur_response=$(imgur_upload "${pr_dir}/${image}")
-      imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
-      new_images_comment+="### ${image}\n<a href='$imgur_url'><img alt='${image}' src='$imgur_url' width='200'/></a>\n"
-    done <<< "${com_pr_master}"
-    enigmabot_post_comment "${new_images_comment}"
+    if [[ "$TRAVIS" -eq "true" ]]; then
+      new_images_comment+="\n"
+      while read -r image; do
+        imgur_response=$(imgur_upload "${pr_dir}/${image}")
+        imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
+        new_images_comment+="### ${image}\n<a href='$imgur_url'><img alt='${image}' src='$imgur_url' width='200'/></a>\n"
+      done <<< "${com_pr_master}"
+      enigmabot_post_comment "${new_images_comment}"
+    fi
   fi
 
   if [[ -z "${master_images}" ]]; then
@@ -87,26 +91,29 @@ else
         echo "No differences detected :)"
       else
         echo "Mismatches detected :("
-        echo "Uploading images..."
 
-        imgur_response=$(imgur_upload "${pr_dir}/${image}")
-        imgur_master_response=$(imgur_upload "${master_dir}/${image}")
-        imgur_diff_response=$(imgur_upload "${diffname}")
+        if [[ "$TRAVIS" -eq "true" ]]; then
+          echo "Uploading images..."
 
-        imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
-        imgur_master_url=$(echo $imgur_master_response | jq --raw-output '.data."link"' )
-        imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
+          imgur_response=$(imgur_upload "${pr_dir}/${image}")
+          imgur_master_response=$(imgur_upload "${master_dir}/${image}")
+          imgur_diff_response=$(imgur_upload "${diffname}")
 
-        echo $imgur_url
+          imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
+          imgur_master_url=$(echo $imgur_master_response | jq --raw-output '.data."link"' )
+          imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
 
-        gh_comment_images="<a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
-        <a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
-        <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
+          echo $imgur_url
+
+          gh_comment_images="<a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
+          <a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
+          <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
+        fi
       fi
     done <<< "${master_images}"
   fi
 
-  if [[ ! -z "${gh_comment_images}" ]]; then
+  if [[ "$TRAVIS" -eq "true" ]] && [[ ! -z "${gh_comment_images}" ]]; then
     enigmabot_post_comment "${gh_comment_header}${gh_comment_images}"
 
     exit 1
