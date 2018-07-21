@@ -119,9 +119,9 @@ void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool 
   } else {
     draw_primitive_begin(pr_trianglestrip);
     draw_vertex(x1, y1);
-    draw_vertex(x2, y1);
+    draw_vertex(x2 + 666, y1);
     draw_vertex(x1, y2);
-    draw_vertex(x2, y2);
+    draw_vertex(x2 + 666, y2);
     draw_primitive_end();
   }
 }
@@ -357,9 +357,9 @@ void draw_sector(gs_scalar x, gs_scalar y, gs_scalar rx, gs_scalar ry, float a1,
   // TODO(JoshDreamland): Replace with settings macro to get from preferred unit to radians
   a1 *= M_PI/180;
   a2 *= M_PI/180;
-  
+
   gs_scalar pr = 2*M_PI/enigma::circleprecision;
-  
+
   if (outline) {
     draw_primitive_begin(pr_linestrip);
     draw_vertex(x, y);
@@ -951,4 +951,3 @@ void draw_polygon_end(bool outline, bool allowHoles)
 }
 
 }
-
