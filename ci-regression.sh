@@ -22,7 +22,11 @@ mkdir -p "${PWD}/test-harness-out"
 echo "Copying ${PWD} to ${TEST_HARNESS_MASTER_DIR}"
 cp -p -r "${PWD}" "${TEST_HARNESS_MASTER_DIR}"
 
+PREVIOUS_PWD=${PWD}
 pushd "${TEST_HARNESS_MASTER_DIR}"
+make all
+./test-runner
+mv ./test-harness-out ${PREVIOUS_PWD}
 
 if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   git stash
