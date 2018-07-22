@@ -16,7 +16,7 @@ else
 endif
 
 CXXFLAGS  := -I$(SRC_DIR) -Wall -Wextra -Wpedantic -g -std=c++11
-LDFLAGS   := $(OS_LIBS) -lgtest -lpthread
+LDFLAGS   := $(OS_LIBS) -lgtest -lpthread -lgtest_main
 
 SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(TESTCASES_DIR)/*.cpp) $(OS_SRCS)
 OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURCES)))

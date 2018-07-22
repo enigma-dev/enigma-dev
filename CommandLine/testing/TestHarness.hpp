@@ -76,7 +76,6 @@ class TestHarness {
   };
 };
 
-
 /// Construct a test harness attached to the SOG with the same name as the
 /// calling source file.
 #define LAUNCH_HARNESS_FOR_SOG(config)                                 \

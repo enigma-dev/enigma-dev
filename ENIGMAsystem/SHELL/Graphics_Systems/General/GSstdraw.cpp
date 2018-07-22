@@ -955,4 +955,3 @@ void draw_polygon_end(bool outline, bool allowHoles)
 }
 
 }
-
