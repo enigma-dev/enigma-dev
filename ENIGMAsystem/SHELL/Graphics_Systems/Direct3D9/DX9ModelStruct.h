@@ -568,7 +568,7 @@ class Mesh
   {
     if (!GetStride()) { return; }
     if (vertexbuffer == NULL || !vbobuffered) {
-	  vbobuffered = true;
+      vbobuffered = true;
       BufferGenerate();
     }
 

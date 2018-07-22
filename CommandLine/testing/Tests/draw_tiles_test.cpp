@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(Regression, draw_test) {
+TEST(Regression, draw_tiles_test) {
   if (!TestHarness::windowing_supported()) return;
   auto test_harness = LAUNCH_HARNESS_FOR_SOG(TestConfig());
   if (!test_harness) FAIL() << "Game could not be run.";
@@ -11,7 +11,7 @@ TEST(Regression, draw_test) {
   ASSERT_TRUE(test_harness->game_is_running())
       << "Game stopped running unexpectedly";
 
-  test_harness->screen_save("./test-harness-out/enigma_draw_test.png");
+  test_harness->screen_save("./test-harness-out/enigma_draw_tiles_test.png");
 
   test_harness->close_window();
   bool game_running = test_harness->game_is_running();
