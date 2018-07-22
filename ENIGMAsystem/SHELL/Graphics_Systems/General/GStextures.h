@@ -22,10 +22,10 @@
  * RAW format, RGB only.
  */
 
-#include "Universal_System/scalar.h"
-
 #ifndef ENIGMA_GSTEXTURES_H
 #define ENIGMA_GSTEXTURES_H
+
+#include "Universal_System/scalar.h"
 
 #include <string>
 using std::string;

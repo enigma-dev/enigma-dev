@@ -1,6 +1,6 @@
 #include "OPENGLStd.h"
-#include "GLshader.h"
 #include "Info/graphics_info.h"
+#include "GLshader.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GStextures.h"
