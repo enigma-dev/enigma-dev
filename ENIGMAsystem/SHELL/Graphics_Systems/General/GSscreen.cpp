@@ -17,9 +17,12 @@
 
 #include "GSscreen.h"
 #include "GSsprite.h"
+#include "GStilestruct.h"
 #include "GSbackground.h"
 #include "GSd3d.h"
 #include "GSmatrix.h"
+#include "GSprimitives.h"
+#include "GSvertex.h"
 #include "GScolors.h"
 
 #include "Universal_System/background.h"
@@ -117,13 +120,13 @@ static inline void draw_insts()
 */
 static inline int draw_tiles()
 {
+  enigma::load_tiles();
   for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
   {
     if (dit->second.tiles.size())
     {
-      for (auto &t : drawing_depths[dit->second.tiles[0].depth].tilevector){
-        //TODO: This is separately fixed by my tiles pull request
-        //d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, t[0], t[1], t[2]);
+      for (auto &t : tile_layer_metadata[dit->second.tiles[0].depth]) {
+        enigma_user::index_submit(enigma::tile_index_buffer, enigma::tile_vertex_buffer, enigma_user::pr_trianglelist, t[0], t[1], t[2]);
       }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;

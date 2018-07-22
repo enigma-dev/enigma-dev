@@ -30,6 +30,8 @@
 #include <cstdio>
 
 //WE SHOULDN'T DO THIS! Don't specify namespaces like this - Harijs
+using namespace std;
+
 using namespace enigma;
 using namespace enigma_user;
 

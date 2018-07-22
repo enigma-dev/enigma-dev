@@ -297,26 +297,26 @@ bool d3d_model_load(int id, string fname)
 
 void d3d_model_draw(int id) // overload for no additional texture or transformation call's
 {
-    meshes[id]->Draw();
+  meshes[id]->Draw();
 }
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) // overload for no additional texture call's
 {
-    d3d_transform_add_translation(x, y, z);
-    meshes[id]->Draw();
-    d3d_transform_add_translation(-x, -y, -z);
+  d3d_transform_add_translation(x, y, z);
+  meshes[id]->Draw();
+  d3d_transform_add_translation(-x, -y, -z);
 }
 
 void d3d_model_draw(int id, int texId)
 {
-    texture_set(texId);
-    meshes[id]->Draw();
+  texture_set(texId);
+  meshes[id]->Draw();
 }
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId)
 {
-    texture_set(texId);
-    d3d_model_draw(id, x, y, z);
+  texture_set(texId);
+  d3d_model_draw(id, x, y, z);
 }
 
 void d3d_model_primitive_begin(int id, int kind, int format)

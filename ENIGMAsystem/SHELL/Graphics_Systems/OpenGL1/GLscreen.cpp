@@ -14,10 +14,13 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSvertex.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolors.h"
 
@@ -29,6 +32,7 @@
 #include <string>
 #include <cstdio>
 
+using namespace std;
 using namespace enigma;
 
 namespace enigma

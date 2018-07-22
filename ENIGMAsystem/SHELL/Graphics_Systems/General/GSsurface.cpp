@@ -16,22 +16,22 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cstddef>
-#include <iostream>
-#include <math.h>
+#include "GSprimitives.h"
+#include "GSsurface.h"
+#include "GScolor_macros.h"
 
-using namespace std;
-
-#include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 #include "Universal_System/math_consts.h"
 
-#include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/GSsurface.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
+#include <stdio.h> //for file writing (surface_save)
+#include <cstddef>
+#include <iostream>
+#include <math.h>
+
+using namespace std;
 
 namespace enigma_user {
 extern int room_width, room_height/*, sprite_idmax*/;

@@ -29,6 +29,7 @@
 #include <string>
 #include <cstdio>
 
+using namespace std;
 using namespace enigma;
 using namespace std;
 

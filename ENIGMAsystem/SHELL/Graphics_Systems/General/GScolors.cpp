@@ -18,6 +18,7 @@
 **/
 #include "GScolors.h"
 #include "GScolor_macros.h"
+
 #include <math.h>
 
 static inline int min(int x,int y){return x<y ? x:y;}

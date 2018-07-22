@@ -157,7 +157,7 @@ constexpr const char *kDefaultExtensions =
     "Paths,DateTime,DataStructures,MotionPlanning,Alarms,Timelines,"
     "ParticleSystems";
 
-int build_game(const string &game, TestConfig* tc, const string &out) {
+int build_game(const string &game, const TestConfig &tc, const string &out) {
   if (pid_t emake = fork()) {
     int status = 0;
     if (emake == -1) return -1;
@@ -166,27 +166,18 @@ int build_game(const string &game, TestConfig* tc, const string &out) {
     return -1;
   }
 
-  const char* env_workdir = std::getenv("TEST_HARNESS_WORKDIR");
-  if (!env_workdir) env_workdir = "";
-  const char* env_codegen = std::getenv("TEST_HARNESS_CODEGEN");
-  if (!env_codegen) env_codegen = "";
-
   // Invoke the compiler via emake
   using TC = TestConfig;
   string emake_cmd = "./emake";
-  tc->workdir = (tc->workdir.empty() ? std::string(env_workdir) : tc->workdir);
-  string workdir = (tc->workdir.empty() ? std::string() : ("--workdir=" + tc->workdir));
-  tc->codegen = (tc->codegen.empty() ? std::string(env_codegen) : tc->codegen);
-  string codegen = (tc->codegen.empty() ? std::string() : ("--codegen=" + tc->codegen));
-  string compiler = "--compiler=" + tc->get_or(&TC::compiler, "TestHarness");
-  string mode = "--mode=" + tc->get_or(&TC::mode, "Debug");
-  string graphics = "--graphics=" + tc->get_or(&TC::graphics, "OpenGL1");
-  string audio = "--audio=" + tc->get_or(&TC::audio, "OpenAL");
-  string widgets = "--widgets=" + tc->get_or(&TC::widgets, "None");
-  string network = "--network=" + tc->get_or(&TC::network, "None");
-  string collision = "--collision=" + tc->get_or(&TC::collision, "Precise");
+  string compiler = "--compiler=" + tc.get_or(&TC::compiler, "TestHarness");
+  string mode = "--mode=" + tc.get_or(&TC::mode, "Debug");
+  string graphics = "--graphics=" + tc.get_or(&TC::graphics, "OpenGL1");
+  string audio = "--audio=" + tc.get_or(&TC::audio, "OpenAL");
+  string widgets = "--widgets=" + tc.get_or(&TC::widgets, "None");
+  string network = "--network=" + tc.get_or(&TC::network, "None");
+  string collision = "--collision=" + tc.get_or(&TC::collision, "Precise");
   string extensions = "--extensions="
-      + tc->get_or(&TC::extensions, kDefaultExtensions);
+      + tc.get_or(&TC::extensions, kDefaultExtensions);
 
   const char *const args[] = {
     emake_cmd.c_str(),
@@ -201,8 +192,6 @@ int build_game(const string &game, TestConfig* tc, const string &out) {
     game.c_str(),
     "-o",
     out.c_str(),
-    workdir.empty() ? nullptr : workdir.c_str(),
-    codegen.empty() ? nullptr : codegen.c_str(),
     nullptr
   };
 
@@ -243,9 +232,8 @@ void gather_coverage(const TestConfig &config) {
     return;
   }
 
-  string src_dir = "--directory=";
-  src_dir += config.workdir.empty() ? "/tmp/ENIGMA/" : config.workdir.c_str();
-  src_dir += ".eobjs/Linux/Linux/TestHarness/" + config.get_or(&TestConfig::mode, "Debug") + "/";
+  string src_dir = "--directory=/tmp/ENIGMA/.eobjs/Linux/Linux/TestHarness/"
+                 + config.get_or(&TestConfig::mode, "Debug") + "/";
   string out_file = "--output-file=coverage_" + to_string(test_num) + ".info";
 
   const char *const lcovArgs[] = {
@@ -272,10 +260,7 @@ bool TestHarness::windowing_supported() {
 unique_ptr<TestHarness>
 TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
   string out = "/tmp/test-game";
-  // build_game mutates its TestConfig parameter's workdir and codegen
-  // so let's make a copy of it so that gather_coverage gets the right dir
-  TestConfig tc_realized = tc;
-  if (int retcode = build_game(game, &tc_realized, out)) {
+  if (int retcode = build_game(game, tc, out)) {
     if (retcode != -1) {
       std::cerr << "Failed to run emake." << std::endl;
     } else {
@@ -298,7 +283,7 @@ TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
     Window win = find_window_by_pid(display, root, pid);
     if (win != None)
       return std::unique_ptr<X11_TestHarness>(
-          new X11_TestHarness(display, pid, win, tc_realized));
+          new X11_TestHarness(display, pid, win, tc));
     usleep(250000);
   }
 
@@ -311,10 +296,7 @@ constexpr int operator"" _million(unsigned long long x) {
 
 int TestHarness::run_to_completion(const string &game, const TestConfig &tc) {
   string out = "/tmp/test-game";
-  // build_game mutates its TestConfig parameter's workdir and codegen
-  // so let's make a copy of it so that gather_coverage gets the right dir
-  TestConfig tc_realized = tc;
-  if (int retcode = build_game(game, &tc_realized, out)) {
+  if (int retcode = build_game(game, tc, out)) {
     if (retcode != -1) {
       std::cerr << "Failed to run emake." << std::endl;
     } else {
@@ -337,7 +319,7 @@ int TestHarness::run_to_completion(const string &game, const TestConfig &tc) {
     if (wr) {
       if (wr != -1) {
         if (WIFEXITED(status)) {
-          gather_coverage(tc_realized);
+          gather_coverage(tc);
           return WEXITSTATUS(status);
         }
         return ErrorCodes::GAME_CRASHED;
