@@ -87,6 +87,9 @@ namespace enigma
 	void graphics_delete_index_buffer_peer(int buffer) {}
 
 	bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles){return false;}
+
+	void scene_begin() {}
+	void scene_end() {}
 }
 
 namespace enigma_user
@@ -196,14 +199,11 @@ namespace enigma_user
 	extern int window_get_region_width();
 	extern int window_get_region_height();
 
-	void screen_redraw(){}
 	void screen_init(){}
 	int screen_save(string filename){return -1;}
 	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h){return -1;}
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 	void display_set_gui_size(unsigned int width, unsigned int height){}
-	unsigned int display_get_gui_width(){return 0;}
-	unsigned int display_get_gui_height(){return 0;}
 
 	void draw_primitive_begin(int kind){}
 	void draw_primitive_begin_texture(int kind, int tex){}
@@ -266,7 +266,6 @@ namespace enigma_user
 	void d3d_set_point_size(float value){}
 	void d3d_set_depth_operator(int mode){}
 	void d3d_set_depth(double dep){}
-	void d3d_clear_depth(){}
 	void d3d_set_shading(bool smooth){}
 	void d3d_set_clip_plane(bool enable){}
 
