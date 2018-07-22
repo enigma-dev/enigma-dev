@@ -1,6 +1,11 @@
 #!/bin/bash +x
 set -e #exit if any command fails
 
+if [ -z "$1" ]; then
+  echo "No directory specified to check out master for regression tests."
+  echo "Aborting!"
+  exit 1
+fi
 export TEST_HARNESS_MASTER_DIR="$1"
 
 GIT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
@@ -22,37 +27,47 @@ mkdir -p "${PWD}/test-harness-out"
 echo "Copying ${PWD} to ${TEST_HARNESS_MASTER_DIR}"
 cp -p -r "${PWD}" "${TEST_HARNESS_MASTER_DIR}"
 
+PREVIOUS_PWD=${PWD}
 pushd "${TEST_HARNESS_MASTER_DIR}"
+make all
+./test-runner
+if [[ "$TRAVIS" -eq "true" ]]; then
+  # upload coverage report before running regression tests
+  bash <(curl -s https://codecov.io/bash) -f "*.info"
+fi
+# move output to safe space until we can compare
+mv ./test-harness-out ${PREVIOUS_PWD}
 
 if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   git stash
 
   if [[ -n "$TRAVIS_PULL_REQUEST_SHA" ]] && [[ -n "$TRAVIS_BRANCH" ]]; then
     echo "This appears to be a Travis pull request integration run; checking out '$TRAVIS_BRANCH' for the comparison."
-    git reset --hard "$TRAVIS_BRANCH"
+    git checkout "$TRAVIS_BRANCH"
   elif [[ -n "$TRAVIS_COMMIT_RANGE" ]]; then
     prev=${TRAVIS_COMMIT_RANGE%%.*}
     echo "This appears to be a Travis push integration run; checking out '$prev' for the comparison."
-    git reset --hard "$prev"
+    git checkout "$prev"
   elif [[ "${GIT_BRANCH}" == "master" && "${GIT_DETACHED}" == "FALSE" ]]; then
     echo "You appear to be on branch master with no changes. Checking out HEAD~1 for the comparison"
-    git reset --hard HEAD~1
+    git checkout HEAD~1
   else
     echo "You appear to be on branch ${GIT_BRANCH}. Checking out branch master for the comparison"
-    git reset --hard master
+    git checkout master
   fi
-
   git clean -f -d
 
   echo "Rebuilding plugin and harness from last commit..."
   make all
   echo "Generating regression comparison images..."
   mkdir -p "${PWD}/test-harness-out"
-  ./test-runner --gtest_filter=Regression.draw_test
+  ./test-runner --gtest_filter=Regression.*
 
   popd
 else
   echo "Failed to change directory to ${TEST_HARNESS_MASTER_DIR}. Something is horribly wrong..."
   echo "Aborting!"
-  travis_terminate 1
+  exit 1
 fi
+
+./CommandLine/testing/GitHub-ImageDiff.sh
