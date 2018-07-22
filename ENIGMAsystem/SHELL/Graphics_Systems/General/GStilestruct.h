@@ -15,16 +15,30 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_GLTILESTRUCT_H
-#define ENIGMA_GLTILESTRUCT_H
+#ifdef INCLUDED_FROM_SHELLMAIN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
+#ifndef ENIGMA_GSTILESTRUCT_H
+#define ENIGMA_GSTILESTRUCT_H
 
 #include "Universal_System/roomsystem.h"
+
+#include <map>
+#include <vector>
+
 namespace enigma
 {
+    extern int tile_vertex_buffer, tile_index_buffer;
+    extern std::map<int,std::vector<std::vector<int> > > tile_layer_metadata;
+
     struct bkinxop
     {
         bool operator() (const tile a, const tile b) {return (a.bckid < b.bckid);}
-    }   bkinxcomp;
+    };
+
+    extern bkinxop bkinxcomp;
+
     void draw_tile();
     void delete_tiles();
     void load_tiles();

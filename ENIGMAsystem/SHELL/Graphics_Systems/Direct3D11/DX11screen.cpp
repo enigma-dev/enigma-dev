@@ -45,12 +45,6 @@
 #include <cstdio>
 
 using namespace std;
-
-//Fuck whoever did this to the spec
-#ifndef GL_BGR
-  #define GL_BGR 0x80E0
-#endif
-
 using namespace enigma;
 
 namespace enigma_user {

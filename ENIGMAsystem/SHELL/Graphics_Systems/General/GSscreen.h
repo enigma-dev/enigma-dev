@@ -18,9 +18,10 @@
 #ifndef ENIGMA_GSSCREEN_H
 #define ENIGMA_GSSCREEN_H
 
+#include "Universal_System/scalar.h"
+
 #include <string>
 using std::string;
-#include "Universal_System/scalar.h"
 
 namespace enigma_user {
   int screen_save(string filename);

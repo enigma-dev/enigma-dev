@@ -15,100 +15,144 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// Tile system
-#include "Graphics_Systems/General/GSprimitives.h"
+#include "GSprimitives.h"
+#include "GSbackground.h"
+#include "GStextures.h"
+#include "GSvertex.h"
+#include "GStiles.h"
+#include "GStilestruct.h"
+#include "GSvertex_impl.h"
+
 #include "Universal_System/depth_draw.h"
-#include <algorithm>
-#include "../General/GSbackground.h"
 #include "Universal_System/background.h"
 #include "Universal_System/background_internal.h"
-#include "../General/GStextures.h"
-#include "../General/GStiles.h"
-#include "../General/GLtilestruct.h"
-#include "../General/OpenGLHeaders.h"
-#include "GLTextureStruct.h"
 
-// not allowed to include mathnc.h outside of SHELLmain
-namespace enigma_user {
-    bool point_in_rectangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2);
-}
+#define INCLUDED_FROM_SHELLMAIN Not really.
+// make an exception just for point_in_rectangle
+#include "Universal_System/mathnc.h"
+#undef INCLUDED_FROM_SHELLMAIN
+
+#include <algorithm>
 
 namespace enigma
 {
-    static void draw_tile(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+    int tile_vertex_buffer = -1, tile_index_buffer = -1;
+    //Tile vector holds several values, like number of vertices to render, texture to use and so on
+    //The structure is like this [render batch][batch info]
+    //batch info - 0 = texture to use, 1 = vertices to render,
+    std::map<int,std::vector<std::vector<int> > > tile_layer_metadata;
+
+    bool tiles_are_dirty = true;
+
+    bkinxop bkinxcomp;
+
+    static void draw_tile(int &ind, int index, int vertex, int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
     {
-        if (!enigma_user::background_exists(back)) return;
-        get_background(bck2d,back);
+      if (!enigma_user::background_exists(back)) return;
+      get_background(bck2d,back);
 
-        const gs_scalar tbx = bck2d->texturex, tby = bck2d->texturey,
-                        tbw = bck2d->width/(gs_scalar)bck2d->texturew, tbh = bck2d->height/(gs_scalar)bck2d->textureh,
-                        xvert1 = x, xvert2 = xvert1 + width*xscale,
-                        yvert1 = y, yvert2 = yvert1 + height*yscale,
-                        tbx1 = tbx+left/tbw, tbx2 = tbx1 + width/tbw,
-                        tby1 = tby+top/tbh, tby2 = tby1 + height/tbh;
+      const gs_scalar tbx = bck2d->texturex, tby = bck2d->texturey,
+                      tbw = bck2d->width/(gs_scalar)bck2d->texturew, tbh = bck2d->height/(gs_scalar)bck2d->textureh,
+                      xvert1 = x, xvert2 = xvert1 + width*xscale,
+                      yvert1 = y, yvert2 = yvert1 + height*yscale,
+                      tbx1 = tbx+left/tbw, tbx2 = tbx1 + width/tbw,
+                      tby1 = tby+top/tbh, tby2 = tby1 + height/tbh;
 
-        enigma_user::draw_primitive_begin_texture(enigma_user::pr_trianglestrip, bck2d->texture);
-        enigma_user::draw_vertex_texture_color(xvert1,yvert1,tbx1,tby1,color,alpha);
-        enigma_user::draw_vertex_texture_color(xvert2,yvert1,tbx2,tby1,color,alpha);
-        enigma_user::draw_vertex_texture_color(xvert1,yvert2,tbx1,tby2,color,alpha);
-        enigma_user::draw_vertex_texture_color(xvert2,yvert2,tbx2,tby2,color,alpha);
-        enigma_user::draw_primitive_end();
+      enigma_user::vertex_position(vertex, xvert1, yvert1);
+      enigma_user::vertex_texcoord(vertex, tbx1, tby1);
+      enigma_user::vertex_color(vertex, color, alpha);
 
+      enigma_user::vertex_position(vertex, xvert2, yvert1);
+      enigma_user::vertex_texcoord(vertex, tbx2, tby1);
+      enigma_user::vertex_color(vertex, color, alpha);
+
+      enigma_user::vertex_position(vertex, xvert1, yvert2);
+      enigma_user::vertex_texcoord(vertex, tbx1, tby2);
+      enigma_user::vertex_color(vertex, color, alpha);
+
+      enigma_user::vertex_position(vertex, xvert2, yvert2);
+      enigma_user::vertex_texcoord(vertex, tbx2, tby2);
+      enigma_user::vertex_color(vertex, color, alpha);
+
+      IndexBuffer* indexBuffer = indexBuffers[index];
+      int indices[] = {ind + 0, ind + 1, ind + 2, ind + 2, ind + 1, ind + 3};
+      indexBuffer->indices.insert(indexBuffer->indices.end(), indices, indices + 6);
+      ind += 4;
     }
 
     void load_tiles()
     {
-        glPushAttrib(GL_CURRENT_BIT);
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+        if (!tiles_are_dirty) return;
+        tiles_are_dirty = false;
+
+        static int vertexFormat = -1;
+        if (vertexFormat == -1) {
+            enigma_user::vertex_format_begin();
+            enigma_user::vertex_format_add_position();
+            enigma_user::vertex_format_add_textcoord();
+            enigma_user::vertex_format_add_color();
+            vertexFormat = enigma_user::vertex_format_end();
+        }
+        if (tile_vertex_buffer == -1) {
+            tile_vertex_buffer = enigma_user::vertex_create_buffer();
+        } else {
+            enigma_user::vertex_clear(tile_vertex_buffer);
+        }
+        if (tile_index_buffer == -1) {
+            tile_index_buffer = enigma_user::index_create_buffer();
+        } else {
+            enigma_user::index_clear(tile_index_buffer);
+        }
+
+        enigma_user::vertex_begin(tile_vertex_buffer, vertexFormat);
+        enigma_user::index_begin(tile_index_buffer, enigma_user::index_type_ushort);
+
+        int prev_bkid;
+        int index_start = 0;
+        int index_count = 0;
+        int vertex_ind = 0;
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
             if (dit->second.tiles.size())
             {
-                enigma_user::texture_reset();
+                //TODO: Should they really be sorted by background? This may help batching, but breaks compatiblity. Nothing texture atlas wouldn't solve.
                 sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
-                int index = int(glGenLists(1));
-                drawing_depths[dit->second.tiles[0].depth].tilelist = index;
-                glNewList(index, GL_COMPILE);
-                for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
+                for(std::vector<tile>::size_type i = 0; i != dit->second.tiles.size(); ++i)
                 {
                     tile t = dit->second.tiles[i];
-                    draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    if (i==0){ prev_bkid = t.bckid; }
+                    draw_tile(vertex_ind, tile_index_buffer, tile_vertex_buffer, t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    index_count += 6;
+                    if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1){ //Texture switch has happened. Create new batch
+                        get_background(bck2d,prev_bkid);
+                        tile_layer_metadata[dit->second.tiles[0].depth].push_back( std::vector< int >(3) );
+                        tile_layer_metadata[dit->second.tiles[0].depth].back()[0] = bck2d->texture;
+                        tile_layer_metadata[dit->second.tiles[0].depth].back()[1] = index_start;
+                        tile_layer_metadata[dit->second.tiles[0].depth].back()[2] = index_count;
+
+                        index_start += index_count;
+                        index_count = 0;
+
+                        prev_bkid = t.bckid;
+                    }
                 }
-                glEndList();
             }
-        glPopAttrib();
+        }
+
+        enigma_user::vertex_end(tile_vertex_buffer);
+        enigma_user::index_end(tile_index_buffer);
+        enigma_user::vertex_freeze(tile_vertex_buffer);
+        enigma_user::index_freeze(tile_index_buffer);
     }
 
     void delete_tiles()
     {
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
-            if (dit->second.tiles.size())
-                glDeleteLists(drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
+        if (tile_vertex_buffer != -1) enigma_user::vertex_delete_buffer(tile_vertex_buffer);
+        if (tile_index_buffer != -1) enigma_user::index_delete_buffer(tile_index_buffer);
     }
 
     void rebuild_tile_layer(int layer_depth)
     {
-        glPushAttrib(GL_CURRENT_BIT);
-        enigma_user::texture_reset();
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
-            if (dit->second.tiles.size())
-            {
-                if (dit->second.tiles[0].depth != layer_depth)
-                    continue;
-
-                enigma_user::texture_reset();
-                glDeleteLists(drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
-                int index = int(glGenLists(1));
-                drawing_depths[dit->second.tiles[0].depth].tilelist = index;
-                glNewList(index, GL_COMPILE);
-                for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
-                {
-                    tile t = dit->second.tiles[i];
-                    draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
-                }
-                glEndList();
-                break;
-            }
-        }
-        glPopAttrib();
+        tiles_are_dirty = true;
     }
 }
 
@@ -423,7 +467,7 @@ bool tile_layer_delete(int layer_depth)
         {
             if (dit->second.tiles[0].depth != layer_depth)
                 continue;
-            glDeleteLists(enigma::drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
+            enigma::rebuild_tile_layer(layer_depth);
             dit->second.tiles.clear();
             return true;
         }
@@ -456,7 +500,6 @@ bool tile_layer_depth(int layer_depth, int depth)
         {
             if (dit->second.tiles[0].depth != layer_depth)
                 continue;
-            enigma::drawing_depths[depth].tilelist = enigma::drawing_depths[layer_depth].tilelist;
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
                 enigma::tile t = dit->second.tiles[i];

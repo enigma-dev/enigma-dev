@@ -16,17 +16,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <math.h>
 #include "GSprimitives.h"
-#include "Graphics_Systems/General/GSstdraw.h"
-#include "Graphics_Systems/General/GScolors.h"
+#include "GSstdraw.h"
+#include "GScolors.h"
 
-#include <stdio.h>
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/math_consts.h"
 
 #include <list>
 #include <vector>
+#include <math.h>
+#include <stdio.h>
+
 using std::vector;
 
 #define M_PI		  3.14159265358979323846

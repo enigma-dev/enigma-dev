@@ -74,9 +74,6 @@ namespace enigma
 	void d3d_light_update_positions(){}
 
 	void graphicssystem_initialize(){}
-	void load_tiles(){}
-	void delete_tiles(){}
-	void rebuild_tile_layer(int layer_depth){}
 
 	int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap){return -1;}
 	int graphics_duplicate_texture(int tex, bool mipmap){return -1;}

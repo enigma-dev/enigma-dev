@@ -24,7 +24,7 @@
 #include <math.h>
 
 namespace enigma {
-depth_layer::depth_layer() : draw_events(new event_iter("Draw")), tilelist(-1) {}
+depth_layer::depth_layer() : draw_events(new event_iter("Draw")) {}
 std::map<double, depth_layer> drawing_depths;
 std::map<int, std::pair<double, double> > id_to_currentnextdepth;
 }  // namespace enigma

@@ -16,21 +16,22 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cmath>
-#include <string>
-#include <cstdint>
 #include "libEGMstd.h"
-#include "Universal_System/var4.h"
-#include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-#include "Graphics_Systems/General/GSfont.h"
-#include "Graphics_Systems/General/GStextures.h"
-#include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/GSsprite.h"
 
+#include "GScolors.h"
+#include "GSfont.h"
+#include "GStextures.h"
+#include "GSprimitives.h"
+#include "GSsprite.h"
+
+#include "Universal_System/var4.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/fonts_internal.h"
 #include "Universal_System/sprites.h"
+
+#include <cmath>
+#include <string>
+#include <cstdint>
 
 using namespace std;
 

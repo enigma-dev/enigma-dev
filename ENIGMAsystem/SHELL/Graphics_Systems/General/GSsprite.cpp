@@ -15,11 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-#include "Graphics_Systems/General/GSsprite.h"
-#include "Graphics_Systems/General/GStextures.h"
-#include "Graphics_Systems/General/GSprimitives.h"
+#include "GScolors.h"
+#include "GScolor_macros.h"
+#include "GSsprite.h"
+#include "GStextures.h"
+#include "GSprimitives.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites.h"

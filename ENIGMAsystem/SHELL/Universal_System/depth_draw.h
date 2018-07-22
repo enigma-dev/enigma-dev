@@ -42,18 +42,12 @@
 #include <set>
 #include <vector>
 
-namespace enigma 
+namespace enigma
 {
-struct depth_layer 
+struct depth_layer
 {
   std::vector<tile> tiles;
   event_iter* draw_events;
-  int tilelist;
-
-  //TODO: This should probably be moved into graphics_systems/GENERAL?
-  std::vector<std::vector<int> > tilevector; //Tile vector holds several values, like number of vertices to render, texture to use and so on
-  //The structure is like this [render batch][batch info]
-  //batch info - 0 = texture to use, 1 = vertices to render,
 
   depth_layer();
 };
