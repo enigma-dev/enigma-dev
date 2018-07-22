@@ -188,8 +188,6 @@ script:
       xfwm4 &
       export ASAN_OPTIONS=detect_leaks=0;
       ./ci-regression.sh "/tmp/enigma-master"
-      # upload coverage report for regression tests
-      bash <(curl -s https://codecov.io/bash) -f "*.info"
     else
       ./ci-build.sh
     fi

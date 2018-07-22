@@ -31,6 +31,11 @@ PREVIOUS_PWD=${PWD}
 pushd "${TEST_HARNESS_MASTER_DIR}"
 make all
 ./test-runner
+if [[ "$TRAVIS" -eq "true" ]]; then
+  # upload coverage report before running regression tests
+  bash <(curl -s https://codecov.io/bash) -f "*.info"
+fi
+# move output to safe space until we can compare
 mv ./test-harness-out ${PREVIOUS_PWD}
 
 if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
