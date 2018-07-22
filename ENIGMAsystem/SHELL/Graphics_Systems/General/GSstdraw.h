@@ -19,10 +19,9 @@
 #ifndef ENIGMA_GSSTDRAW_H
 #define ENIGMA_GSSTDRAW_H
 
-#include <list>
-
 #include "Universal_System/scalar.h"
 
+#include <list>
 
 namespace enigma_user
 {

@@ -15,19 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <cstdio>
-#include "../General/OpenGLHeaders.h"
-#include "../General/GStextures.h"
-#include "../General/GSsprite.h"
-#include "../General/GSbackground.h"
-#include "../General/GSscreen.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GStilestruct.h"
+#include "Graphics_Systems/General/GSsprite.h"
+#include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSvertex.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GScolors.h"
 #include "Bridges/General/GL3Context.h"
-
-using namespace std;
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background_internal.h"
@@ -35,22 +35,20 @@ using namespace std;
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
 
-
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
 #include "Universal_System/depth_draw.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+
+#include <string>
+#include <cstdio>
 #include <limits>
 
-//Fuck whoever did this to the spec
-#ifndef GL_BGR
-  #define GL_BGR 0x80E0
-#endif
-
 //WE SHOULDN'T DO THIS! Don't specify namespaces like this - Harijs
+using namespace std;
+
 using namespace enigma;
 using namespace enigma_user;
 
@@ -146,12 +144,13 @@ static inline void draw_insts()
 */
 static inline int draw_tiles()
 {
+  enigma::load_tiles();
   for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
   {
     if (dit->second.tiles.size())
     {
-      for (auto &t : drawing_depths[dit->second.tiles[0].depth].tilevector){
-        d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, t[0], t[1], t[2]);
+      for (auto &t : tile_layer_metadata[dit->second.tiles[0].depth]){
+        enigma_user::index_submit(enigma::tile_index_buffer, enigma::tile_vertex_buffer, enigma_user::pr_trianglelist, t[0], t[1], t[2]);
       }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;

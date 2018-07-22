@@ -121,11 +121,11 @@ namespace enigma
   struct inst {
     int id,obj,x,y;
   };
-    struct tile {
-        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY;
-        double alpha, xscale, yscale;
-        int color;
-    };
+  struct tile {
+      int id,bckid,bgx,bgy,depth,height,width,roomX,roomY;
+      double alpha, xscale, yscale;
+      int color;
+  };
   struct viewstruct
   {
     int start_vis;
@@ -193,4 +193,3 @@ namespace enigma_user {
 #define action_restart_game game_restart
 
 #endif
-
