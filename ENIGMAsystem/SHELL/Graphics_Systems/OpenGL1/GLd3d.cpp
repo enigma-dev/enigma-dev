@@ -61,12 +61,9 @@ GLenum cullingstates[3] = {
 namespace enigma_user
 {
 
-void d3d_depth_clear() {
-  d3d_depth_clear_value(1.0f);
-}
-
-void d3d_depth_clear_value(float value) {
-  glClearDepthf(value);
+void d3d_clear_depth(double value) {
+  glClearDepth(value);
+  glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void d3d_set_software_vertex_processing(bool software) {
@@ -124,9 +121,9 @@ void d3d_end()
 // disabling hidden surface removal in means there is no depth buffer
 void d3d_set_hidden(bool enable)
 {
-	(enable?glEnable:glDisable)(GL_DEPTH_TEST);
-	enigma::d3dHidden = enable;
-	//d3d_set_zwriteenable(enable);
+  (enable?glEnable:glDisable)(GL_DEPTH_TEST);
+  enigma::d3dHidden = enable;
+  //d3d_set_zwriteenable(enable);
 }
 
 // disabling zwriting can let you turn off testing for a single model, for instance
@@ -134,13 +131,13 @@ void d3d_set_hidden(bool enable)
 // properly particle effects are usually drawn with zwriting disabled because of this as well
 void d3d_set_zwriteenable(bool enable)
 {
-	glDepthMask(enable);
-	enigma::d3dZWriteEnable = enable;
+  glDepthMask(enable);
+  enigma::d3dZWriteEnable = enable;
 }
 
 void d3d_set_lighting(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_LIGHTING);
+  (enable?glEnable:glDisable)(GL_LIGHTING);
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)
@@ -169,11 +166,11 @@ void d3d_set_fog_hint(int mode) {
 
 void d3d_set_fog_color(int color)
 {
-   GLfloat fog_color[3];
-   fog_color[0] = COL_GET_R(color);
-   fog_color[1] = COL_GET_G(color);
-   fog_color[2] = COL_GET_B(color);
-   glFogfv(GL_FOG_COLOR, fog_color);
+  GLfloat fog_color[3];
+  fog_color[0] = COL_GET_R(color);
+  fog_color[1] = COL_GET_G(color);
+  fog_color[2] = COL_GET_B(color);
+  glFogfv(GL_FOG_COLOR, fog_color);
 }
 
 void d3d_set_fog_start(double start)
@@ -193,24 +190,24 @@ void d3d_set_fog_density(double density)
 
 void d3d_set_culling(int mode)
 {
-	enigma::d3dCulling = mode;
-	(mode>0?glEnable:glDisable)(GL_CULL_FACE);
-	if (mode > 0){
-		glFrontFace(windingstates[mode-1]);
-	}
+  enigma::d3dCulling = mode;
+  (mode>0?glEnable:glDisable)(GL_CULL_FACE);
+  if (mode > 0){
+    glFrontFace(windingstates[mode-1]);
+  }
 }
 
 bool d3d_get_mode()
 {
-    return enigma::d3dMode;
+  return enigma::d3dMode;
 }
 
 bool d3d_get_hidden() {
-	return enigma::d3dHidden;
+  return enigma::d3dHidden;
 }
 
 int d3d_get_culling() {
-	return enigma::d3dCulling;
+  return enigma::d3dCulling;
 }
 
 void d3d_set_fill_mode(int fill)
@@ -232,23 +229,19 @@ void d3d_set_depth_operator(int mode) {
 
 void d3d_set_depth(double dep)
 {
-
-}//TODO: Write function
-
-void d3d_clear_depth(){
-  glClear(GL_DEPTH_BUFFER_BIT);
+  //TODO: Write function
 }
 
 void d3d_set_shading(bool smooth)
 {
-    glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
+  glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
 }
 
 void d3d_set_clip_plane(bool enable)
 {
-    //GL1 doesn't really support clip planes. There could be ways around that though
-	//printf not declared
-    //printf("warning: d3d_set_clip_plane(bool enable) called even though GL1 doesn't support this!\n");
+  //GL1 doesn't really support clip planes. There could be ways around that though
+  //printf not declared
+  //printf("warning: d3d_set_clip_plane(bool enable) called even though GL1 doesn't support this!\n");
 }
 
 }
