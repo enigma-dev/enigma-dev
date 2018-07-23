@@ -7,6 +7,8 @@
 const std::string kGamesDir = "CommandLine/testing/Tests/";
 
 struct TestConfig {
+  std::string workdir;
+  std::string codegen;
   std::string compiler;
   std::string mode;
   std::string graphics;
@@ -35,6 +37,8 @@ class TestHarness {
   virtual void unmaximize_window() = 0;
   virtual void unfullscreen_window() = 0;
   virtual void close_window() = 0;
+
+  virtual void screen_save(std::string fPath) = 0;
 
   /// Wait for an arbitrary amount of time to let things settle.
   virtual void wait() = 0;
@@ -71,7 +75,6 @@ class TestHarness {
     TIMED_OUT = -5,     ///< Used if the game is killed for not exiting in time.
   };
 };
-
 
 /// Construct a test harness attached to the SOG with the same name as the
 /// calling source file.
