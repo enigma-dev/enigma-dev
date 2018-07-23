@@ -96,7 +96,7 @@ std::string Proto2String(google::protobuf::Message *m, const google::protobuf::F
     case CppType::CPPTYPE_BOOL:
       return std::to_string(refl->GetBool(*m, field));
     case CppType::CPPTYPE_ENUM:
-      return std::to_string(refl->GetEnumValue(*m, field));
+      return std::to_string(refl->GetEnum(*m, field)->number());
     case CppType::CPPTYPE_STRING:
       return refl->GetString(*m, field);
   }
