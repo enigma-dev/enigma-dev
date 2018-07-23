@@ -16,7 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GLshapes.h"
 #include "GLTextureStruct.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
