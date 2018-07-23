@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "../General/GSblend.h"
 #include "Bridges/General/GL3Context.h"
 namespace enigma
@@ -77,4 +77,3 @@ int draw_get_blend_mode_type(){
 }
 
 }
-

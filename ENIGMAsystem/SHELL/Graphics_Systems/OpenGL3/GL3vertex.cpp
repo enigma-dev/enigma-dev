@@ -26,7 +26,7 @@
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSmath.h"
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 
 #include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
 

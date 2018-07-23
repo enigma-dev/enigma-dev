@@ -16,7 +16,7 @@
 **/
 
 /*
-#include "../General/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "GLTextureStruct.h"
 
 TextureStruct::TextureStruct(unsigned gtex): gltex(gtex) {

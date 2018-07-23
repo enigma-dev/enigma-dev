@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "Bridges/General/GL3Context.h"
-#include "../General/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "../General/GStextures.h"
 #include "GL3shader.h"
 #include "GLSLshader.h"

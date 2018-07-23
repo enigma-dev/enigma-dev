@@ -19,7 +19,7 @@
 #ifndef GL_SHADER_H
 #define GL_SHADER_H
 
-#include "../General/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include <string>
 using std::string;
 

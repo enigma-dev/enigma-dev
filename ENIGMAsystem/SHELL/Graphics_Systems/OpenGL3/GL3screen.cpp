@@ -20,7 +20,7 @@
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/roomsystem.h"

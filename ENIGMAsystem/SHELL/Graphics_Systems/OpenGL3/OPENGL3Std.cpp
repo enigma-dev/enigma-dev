@@ -20,7 +20,7 @@
 #include <stdlib.h>     /* malloc, free, rand */
 
 #include "Bridges/General/GL3Context.h"
-#include "../General/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "../General/GSmatrix.h" //For d3d_set_projection_ortho
 using namespace std;
 #include "OPENGL3Std.h"

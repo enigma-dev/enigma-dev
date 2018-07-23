@@ -16,7 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "../General/GSd3d.h"
 #include "../General/GSmatrix.h"
 #include "../General/GSmath.h"
@@ -303,7 +303,7 @@ namespace enigma_user
       oglmgr->Transformation();
       enigma::transformation_update();
   }
-  
+
   void d3d_projection_set_array(const gs_scalar *matrix)
   {
       oglmgr->Transformation();
@@ -320,7 +320,7 @@ namespace enigma_user
       enigma::view_matrix.init_identity();
       enigma::transform_needs_update = true;
   }
-  
+
   gs_scalar * d3d_projection_get_array_pointer(){
       return enigma::projection_matrix;
   }

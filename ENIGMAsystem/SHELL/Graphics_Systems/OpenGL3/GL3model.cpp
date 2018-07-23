@@ -16,7 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "GL3ModelStruct.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSmodel.h"
 #include "Graphics_Systems/General/GStextures.h"

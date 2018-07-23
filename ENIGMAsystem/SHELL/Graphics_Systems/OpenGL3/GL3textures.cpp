@@ -17,7 +17,7 @@
 **/
 
 #include <stdio.h>
-#include "../General/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include <string.h>
 #include "../General/GStextures.h"
 #include "GL3TextureStruct.h"

@@ -18,9 +18,9 @@
 #ifndef OPENGL3CONTEXTMANAGER
 #define OPENGL3CONTEXTMANAGER
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
-#include "Graphics_Systems/General/GSmodel.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/OpenGL3/GL3profiler.h"
+#include "Graphics_Systems/General/GSmodel.h"
 
 #include <vector>
 #include <map>
