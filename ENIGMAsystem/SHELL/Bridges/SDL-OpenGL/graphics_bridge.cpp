@@ -23,9 +23,9 @@
 
 #include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
 
-#include <SDL2/SDL.h>
+#include "Bridges/General/GLinit.h"
 
-#include "glad.h"
+#include <SDL2/SDL.h>
 
 #include <iostream>
 #include <cstring>
@@ -45,15 +45,18 @@ bool initGameWindow() {
 }
 
 void EnableDrawing(void*) {
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, GL_CONTEXT_PROFILE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_CONTEXT_MAJOR_VERSION);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_CONTEXT_MINOR_VERSION);
-    SDL_GL_SetSwapInterval(0);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    context = SDL_GL_CreateContext(windowHandle);
-    renderer = SDL_CreateRenderer(windowHandle, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
-    gladLoadGLLoader(SDL_GL_GetProcAddress);
+  if (graphics_is_gles)
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+  else
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor);
+  SDL_GL_SetSwapInterval(0);
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+  context = SDL_GL_CreateContext(windowHandle);
+  renderer = SDL_CreateRenderer(windowHandle, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+  gl_init();
 }
 
 void DisableDrawing(void*) {
