@@ -1,4 +1,4 @@
-override CXXFLAGS += -IGraphics_Systems/OpenGLES/
+override CXXFLAGS += -IGraphics_Systems/OpenGLES/ -IBridges/SDL-OpenGLES
 SOURCES += $(wildcard Graphics_Systems/OpenGLES/*.cpp) $(wildcard Graphics_Systems/General/*.cpp)
 
 ifeq ($(TARGET-PLATFORM), Windows)

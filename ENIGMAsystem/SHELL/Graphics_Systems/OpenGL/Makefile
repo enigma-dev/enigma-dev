@@ -1,4 +1,4 @@
-override CXXFLAGS += -IGraphics_Systems/OpenGL/
+override CXXFLAGS += -IGraphics_Systems/OpenGL/ -IBridges/Glew-OpenGL
 SOURCES += $(wildcard Graphics_Systems/OpenGL/*.cpp) $(wildcard Graphics_Systems/General/*.cpp)
 
 ifeq ($(TARGET-PLATFORM), Windows)

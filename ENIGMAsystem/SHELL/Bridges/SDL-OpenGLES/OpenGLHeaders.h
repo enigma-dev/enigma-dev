@@ -16,3 +16,6 @@
 **/
 
 #include "glad.h"
+
+extern GLenum GL_BGRA;
+void glClearDepth(GLfloat depth);
