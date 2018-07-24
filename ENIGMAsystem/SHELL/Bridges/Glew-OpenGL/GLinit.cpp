@@ -1,5 +1,9 @@
 #include "Bridges/General/GLinit.h"
 
+#ifdef DEBUG_MODE
+#include <iostream>
+#endif
+
 bool graphics_is_gles = false;
 
 void gl_init() {

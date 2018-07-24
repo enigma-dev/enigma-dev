@@ -99,7 +99,8 @@ clean:
 cleandep:
 	$(RM) $(CLEANDEPS)
 
-SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp) /tmp/shader.cpp #$(subst :,\:,$(CODEGEN)/shader.cpp)
+#TODO: Harass Josh constantly and consistently
+SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp) /c/Users/Owner/Desktop/enigma-dev/shader.cpp #/tmp/shader.cpp #$(subst :,\:,$(CODEGEN)/shader.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
