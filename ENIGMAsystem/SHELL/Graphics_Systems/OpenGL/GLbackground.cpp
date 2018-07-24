@@ -15,18 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cstddef>
-#include <math.h>
 #include "OpenGLHeaders.h"
-#include "../General/GSbackground.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GSbackground.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/background_internal.h"
-#include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/sprites_internal.h"
 
 #include "Universal_System/roomsystem.h"
+
+#include <cstddef>
+#include <math.h>
 
 namespace enigma_user {
   extern int window_get_region_height_scaled();
@@ -35,8 +36,6 @@ namespace enigma_user {
 namespace enigma {
   extern size_t background_idmax;
 }
-
-//#include <string.h> // needed for querying ARB extensions
 
 namespace enigma_user
 {
