@@ -99,7 +99,7 @@ clean:
 cleandep:
 	$(RM) $(CLEANDEPS)
 
-SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
+SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp) $(CODEGEN)/shaders.cpp
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
@@ -123,7 +123,10 @@ endif
 # building #
 ############
 
-compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
+compile_shaders:
+	./shader_build.sh $(CODEGEN)/shader.cpp $(VERTEX_SHADER_PREFIX) $(VERTEX_SHADER) $(FRAGMENT_SHADER_PREFIX) $(FRAGMENT_SHADER)
+
+compile_game: cleandep compile_shaders $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 	@echo Built to "$(OUTPUTNAME)"
 
@@ -132,7 +135,7 @@ compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 # -MP gives phony rules for non-target files, avoiding problems with missing files
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
-	
+
 $(OBJDIR)/shared/%.o $(OBJDIR)/%.d: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/shared/$*.o $<
 
