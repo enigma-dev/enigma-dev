@@ -32,7 +32,7 @@
 #include "../General/GStextures.h"
 #include "GL3shader.h"
 #include "GLSLshader.h"
-#include "Shaders.h"
+#include "Graphics_Systems/General/GSshader.h"
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -112,16 +112,16 @@ namespace enigma
   extern unsigned bound_shader;
   extern unsigned bound_vbo;
   string getVertexShaderPrefix(){
-    return VertexShaderPrefix;
+    return vertex_prefix;
   }
   string getFragmentShaderPrefix(){
-    return FragmentShaderPrefix;
+    return fragment_prefix;
   }
   string getDefaultVertexShader(){
-    return DefaultVertexShader;
+    return vertex_body;
   }
   string getDefaultFragmentShader(){
-    return DefaultFragmentShader;
+    return fragment_body;
   }
   void getUniforms(int prog_id){
     int uniform_count, max_length, uniform_count_arr = 0;

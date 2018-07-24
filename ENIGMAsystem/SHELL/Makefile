@@ -99,7 +99,7 @@ clean:
 cleandep:
 	$(RM) $(CLEANDEPS)
 
-SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp) $(CODEGEN)/shaders.cpp
+SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp) /tmp/shader.cpp #$(subst :,\:,$(CODEGEN)/shader.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
@@ -123,12 +123,12 @@ endif
 # building #
 ############
 
-compile_shaders:
-	./shader_build.sh $(CODEGEN)/shader.cpp $(VERTEX_SHADER_PREFIX) $(VERTEX_SHADER) $(FRAGMENT_SHADER_PREFIX) $(FRAGMENT_SHADER)
-
 compile_game: cleandep compile_shaders $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 	@echo Built to "$(OUTPUTNAME)"
+
+compile_shaders: $(VERTEX_SHADER_PREFIX) $(VERTEX_SHADER) $(FRAGMENT_SHADER_PREFIX) $(FRAGMENT_SHADER)
+	./shader_build.sh $(CODEGEN)/shader.cpp $(VERTEX_SHADER_PREFIX) $(VERTEX_SHADER) $(FRAGMENT_SHADER_PREFIX) $(FRAGMENT_SHADER)
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
