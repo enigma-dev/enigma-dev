@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: OpenGL 2
+Identifier: OpenGL2
+Description: High quality optimized rendering using OpenGL 2 making full use of the latest features and the graphics pipeline, but may not be as compatible on very old hardware and graphics cards.
+Author: Harijs Grinbergs, Robert B. Colton et al.
+
+Depends:
+	Windowing: xlib, Win32, Cocoa, SDL
+
+Represents:
+	Build-platforms: None

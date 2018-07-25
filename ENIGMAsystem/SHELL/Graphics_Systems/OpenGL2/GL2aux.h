@@ -1,4 +1,4 @@
-/** Copyright (C) 2010-2013 Josh Ventura, Robert B. Colton, Alasdair Morrison
+/** Copyright (C) 2014 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,8 +14,13 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#ifndef GL2_AUX_H
+#define GL2_AUX_H
 
-#include "glad.h"
+#include <string>
 
-extern GLenum GL_BGRA, GL_CLAMP;
-void glClearDepth(GLfloat depth);
+namespace enigma {
+	bool gl_extension_supported(std::string extension);
+}
+
+#endif

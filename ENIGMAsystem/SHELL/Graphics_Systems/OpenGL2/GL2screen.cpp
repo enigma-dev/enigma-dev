@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL3Context.h"
+#include "Bridges/General/GL2Context.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSmatrix.h"
@@ -52,11 +52,12 @@ void scene_end() {
   if (enigma::msaa_fbo != 0) {
     GLint fbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::msaa_fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    //glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::msaa_fbo); TODO: draw me
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     //TODO: Change the code below to fix this to size properly to views
-    glBlitFramebuffer(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+    //TODO: draw fullscreen quad
+    //glBlitFramebuffer(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   }
 }
 
@@ -116,9 +117,9 @@ int screen_save(string filename) //Assumes native integers are little endian
   GLint prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
-  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glReadPixels(0,0,w,h, GL_BGRA, GL_UNSIGNED_BYTE, rgbdata);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
 
   int ret = image_save(filename, rgbdata, w, h, w, h, false);
 
@@ -137,9 +138,9 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
   GLint prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
-  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glReadPixels(x,window_get_region_height_scaled()-h-y,w,h, GL_BGRA, GL_UNSIGNED_BYTE, rgbdata);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
 
   int ret = image_save(filename, rgbdata, w, h, w, h, false);
 

@@ -1,4 +1,4 @@
-/** Copyright (C) 2010-2013 Josh Ventura, Robert B. Colton, Alasdair Morrison
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,7 +15,28 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "glad.h"
+#ifndef ENIGMA_GL_TEXTURESTRUCT_H
+#define ENIGMA_GL_TEXTURESTRUCT_H
 
-extern GLenum GL_BGRA, GL_CLAMP;
-void glClearDepth(GLfloat depth);
+#include "Universal_System/scalar.h"
+#include "GL2SamplerState.h"
+
+#include <vector>
+using std::vector;
+
+struct TextureStruct {
+  enigma::SamplerState* sampler;
+	unsigned gltex;
+	unsigned width,height;
+	unsigned fullwidth,fullheight;
+	TextureStruct(unsigned gtex);
+	~TextureStruct();
+};
+extern vector<TextureStruct*> textureStructs;
+
+namespace enigma {
+unsigned get_texture(int texid);
+void graphics_samplers_apply();
+}
+
+#endif // ENIGMA_GL_TEXTURESTRUCT_H

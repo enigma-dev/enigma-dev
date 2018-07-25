@@ -1,4 +1,4 @@
-/** Copyright (C) 2010-2013 Josh Ventura, Robert B. Colton, Alasdair Morrison
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,7 +15,29 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "glad.h"
+/*
+#ifdef CODEBLOX
+#  include <GL/glee.h>
+#else
+#  include <additional/glee/GLee.h>
+#endif*/
 
-extern GLenum GL_BGRA, GL_CLAMP;
-void glClearDepth(GLfloat depth);
+//#include "OpenGLHeaders.h"
+
+namespace enigma
+{
+  extern unsigned char currentcolor[4];
+  extern int currentblendmode[2];
+  extern int currentblendtype;
+  extern bool glew_isgo;
+  extern bool pbo_isgo;
+}
+
+#include "../General/GScolors.h"
+#include "../General/GSprimitives.h"
+#include "../General/GSd3d.h"
+#include "../General/GSstdraw.h"
+#include "../General/GSblend.h"
+#include "../General/GSsurface.h"
+#include "../General/GSscreen.h"
+#include "../General/GSvertex.h"

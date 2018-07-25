@@ -1,4 +1,4 @@
-/** Copyright (C) 2010-2013 Josh Ventura, Robert B. Colton, Alasdair Morrison
+/** Copyright (C) 2014 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,7 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "glad.h"
+#include "Bridges/General/GL2Context.h"
+#include "GL2profiler.h"
 
-extern GLenum GL_BGRA, GL_CLAMP;
-void glClearDepth(GLfloat depth);
+namespace enigma_user{
+	int profiler_get_vertex_count() { return oglmgr->gpuprof.drawn_vertex_number; }
+	int profiler_get_drawcall_count() { return oglmgr->gpuprof.drawn_drawcall_number; }
+	int profiler_get_vbo_count() { return oglmgr->gpuprof.drawn_vbo_number; }
+}
