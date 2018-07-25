@@ -87,20 +87,20 @@ namespace enigma
     #endif
 
     if (FAILED(result)) {
-      //return false;
+      show_error("Failed to create Direct3D11 device and swap chain.", true);
     }
 
     // Get the pointer to the back buffer.
     ID3D11Texture2D* backBufferPtr;
     result = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBufferPtr);
     if (FAILED(result)) {
-      //return false;
+      show_error("Failed to obtain pointer to Direct3D11 back buffer.", true);
     }
 
     // Create the render target view with the back buffer pointer.
     result = m_device->CreateRenderTargetView(backBufferPtr, NULL, &m_renderTargetView);
     if (FAILED(result)) {
-      //return false;
+      show_error("Failed to create Direct3D11 render target view.", true);
     }
 
     // Release pointer to the back buffer as we no longer need it.
@@ -123,7 +123,7 @@ namespace enigma
 
     result = m_device->CreateTexture2D(&depthBufferDesc, NULL, &m_depthStencilBuffer);
     if (FAILED(result)) {
-      //return false;
+      show_error("Failed to create Direct3D11 Texture2D for depth stencil buffer.", true);
     }
 
     // Set up the description of the stencil state.
@@ -150,7 +150,7 @@ namespace enigma
 
     result = m_device->CreateDepthStencilState(&depthStencilDesc, &m_depthStencilState);
     if (FAILED(result)) {
-      //return false;
+      show_error("Failed to create Direct3D11 depth stencil state.", true);
     }
 
     m_deviceContext->OMSetDepthStencilState(m_depthStencilState, 1);
@@ -163,7 +163,7 @@ namespace enigma
 
     result = m_device->CreateDepthStencilView(m_depthStencilBuffer, &depthStencilViewDesc, &m_depthStencilView);
     if (FAILED(result)) {
-      //return false;
+      show_error("Failed to create Direct3D11 depth stencil view.", true);
     }
 
     m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
@@ -183,7 +183,7 @@ namespace enigma
 
     result = m_device->CreateRasterizerState(&rasterDesc, &m_rasterState);
     if (FAILED(result)) {
-      //return false;
+      show_error("Failed to create Direct3D11 rasterizer state.", true);
     }
 
     m_deviceContext->RSSetState(m_rasterState);
