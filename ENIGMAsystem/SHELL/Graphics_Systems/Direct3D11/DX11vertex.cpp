@@ -23,30 +23,32 @@
 #include <D3Dcompiler.h>
 
 namespace {
-const char* g_strVS =
-  "struct VertexInputType {\n"
-  "  float4 position : POSITION;\n"
-  "  float4 color : COLOR;\n"
-  "};\n"
-  "struct PixelInputType {\n"
-  "  float4 position : SV_POSITION;\n"
-  "  float4 color : COLOR;\n"
-  "};\n"
-  "PixelInputType VS(VertexInputType input) {\n"
-  "  PixelInputType output;\n"
-  "  output.position = input.position;\n"
-  "  output.color = input.color;\n"
-  "  return output;\n"
-  "}\n";
+const char* g_strVS = R"(
+struct VertexInputType {
+  float4 position : POSITION;
+  float4 color : COLOR;
+};
+struct PixelInputType {
+  float4 position : SV_POSITION;
+  float4 color : COLOR;
+};
+PixelInputType VS(VertexInputType input) {
+  PixelInputType output;
+  output.position = input.position;
+  output.color = input.color;
+  return output;
+}
+)";
 
-const char* g_strPS =
-  "struct PixelInputType {\n"
-  "  float4 position : SV_POSITION;\n"
-  "  float4 color : COLOR;\n"
-  "};\n"
-  "float4 PS(PixelInputType input) : SV_TARGET {\n"
-  "  return input.color;\n"
-  "}\n";
+const char* g_strPS = R"(
+struct PixelInputType {
+  float4 position : SV_POSITION;
+  float4 color : COLOR;
+};
+float4 PS(PixelInputType input) : SV_TARGET {
+  return input.color;
+}
+)";
 
 ID3D10Blob* pBlobVS = NULL;
 ID3D10Blob* pBlobPS = NULL;
