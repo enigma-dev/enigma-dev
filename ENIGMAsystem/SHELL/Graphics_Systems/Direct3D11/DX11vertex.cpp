@@ -100,19 +100,20 @@ void graphics_delete_index_buffer_peer(int buffer) {
 }
 
 void graphics_prepare_buffer(const int buffer, const bool isIndex) {
+  auto &bufferPeers = isIndex ? indexBufferPeers : vertexBufferPeers;
   const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
   const bool frozen = isIndex ? indexBuffers[buffer]->frozen : vertexBuffers[buffer]->frozen;
 
   // if the contents of the buffer are dirty then we need to update our native "peer"
   if (dirty) {
     ID3D11Buffer* bufferPeer = NULL;
-    auto it = isIndex ? indexBufferPeers.find(buffer) : vertexBufferPeers.find(buffer);
+    auto it = bufferPeers.find(buffer);
     size_t size = isIndex ? enigma_user::index_get_size(buffer) : enigma_user::vertex_get_size(buffer);
 
     // if we have already created a native "peer" for this user buffer,
     // then we have to release it if it isn't big enough to hold the new contents
     // or if it has just been frozen (so we can remove its D3D11_USAGE_DYNAMIC)
-    if (it != (isIndex ? indexBufferPeers.end() : vertexBufferPeers.end())) {
+    if (it != bufferPeers.end()) {
       bufferPeer = it->second;
 
       D3D11_BUFFER_DESC pDesc;
@@ -139,11 +140,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
       initData.pSysMem = data;
       m_device->CreateBuffer(&bd, &initData, &bufferPeer);
 
-      if (isIndex) {
-        indexBufferPeers[buffer] = bufferPeer;
-      } else {
-        vertexBufferPeers[buffer] = bufferPeer;
-      }
+      bufferPeers[buffer] = bufferPeer;
     } else {
       // update the contents of the native peer on the GPU
       m_deviceContext->UpdateSubresource(bufferPeer, 0, NULL, data, 0, 0);
