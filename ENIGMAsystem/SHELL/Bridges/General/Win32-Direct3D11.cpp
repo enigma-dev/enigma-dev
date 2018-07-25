@@ -169,7 +169,7 @@ namespace enigma
     m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
 
     // Setup the raster description which will determine how and what polygons will be drawn.
-    D3D11_RASTERIZER_DESC rasterDesc;
+    D3D11_RASTERIZER_DESC rasterDesc = { };
     rasterDesc.AntialiasedLineEnable = false;
     rasterDesc.CullMode = D3D11_CULL_NONE;
     rasterDesc.DepthBias = 0;
@@ -189,13 +189,13 @@ namespace enigma
     m_deviceContext->RSSetState(m_rasterState);
 
     // Setup the viewport for rendering.
-    D3D11_VIEWPORT viewport;
+    D3D11_VIEWPORT viewport = { };
+    viewport.TopLeftX = 0.0f;
+    viewport.TopLeftY = 0.0f;
     viewport.Width = (float)screenWidth;
     viewport.Height = (float)screenHeight;
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
-    viewport.TopLeftX = 0.0f;
-    viewport.TopLeftY = 0.0f;
 
     m_deviceContext->RSSetViewports(1, &viewport);
   }
