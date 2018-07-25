@@ -184,40 +184,36 @@ inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* verte
   return vertexLayout;
 }
 
+void graphics_compile_shader(const char* src, ID3D10Blob** pBlob, const char* name, const char* entryPoint, const char* target) {
+  DWORD dwShaderFlags = D3D10_SHADER_ENABLE_STRICTNESS;
+#ifdef DEBUG_MODE
+  dwShaderFlags |= D3D10_SHADER_DEBUG | D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+  ID3D10Blob* pBlobError = NULL;
+  HRESULT hr;
+
+  hr = D3DCompile(src, lstrlenA(src) + 1, name, NULL, NULL, entryPoint, target, dwShaderFlags, 0, pBlob, &pBlobError);
+  if (FAILED(hr)) {
+    if (pBlobError != NULL) {
+      OutputDebugStringA((CHAR*)pBlobError->GetBufferPointer());
+      pBlobError->Release();
+    }
+  }
+}
+
 void graphics_prepare_default_shader() {
   static ID3D11VertexShader* g_pVertexShader = NULL;
   static ID3D11PixelShader* g_pPixelShader = NULL;
 
   if (g_pVertexShader == NULL) {
-    DWORD dwShaderFlags = D3D10_SHADER_ENABLE_STRICTNESS;
-#ifdef DEBUG_MODE
-    dwShaderFlags |= D3D10_SHADER_DEBUG | D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
-
-    ID3D10Blob* pBlobError = NULL;
-    HRESULT hr;
-
     // create the vertex shader
-    hr = D3DCompile(g_strVS, lstrlenA(g_strVS) + 1, "VS", NULL, NULL, "VS",
-              "vs_4_0", dwShaderFlags, 0, &pBlobVS, &pBlobError);
-    if (FAILED(hr)) {
-      if (pBlobError != NULL) {
-        OutputDebugStringA((CHAR*)pBlobError->GetBufferPointer());
-        pBlobError->Release();
-      }
-    }
+    graphics_compile_shader(g_strVS, &pBlobVS, "VS", "VS", "vs_4_0");
     m_device->CreateVertexShader(pBlobVS->GetBufferPointer(), pBlobVS->GetBufferSize(),
                                 NULL, &g_pVertexShader);
 
     // create the pixel shader
-    hr = D3DCompile(g_strPS, lstrlenA(g_strPS) + 1, "PS", NULL, NULL, "PS",
-              "ps_4_0", dwShaderFlags, 0, &pBlobPS, &pBlobError);
-    if (FAILED(hr)) {
-      if (pBlobError != NULL) {
-        OutputDebugStringA((CHAR*)pBlobError->GetBufferPointer());
-        pBlobError->Release();
-      }
-    }
+    graphics_compile_shader(g_strPS, &pBlobPS, "PS", "PS", "ps_4_0");
     m_device->CreatePixelShader(pBlobPS->GetBufferPointer(), pBlobPS->GetBufferSize(),
                                 NULL, &g_pPixelShader);
   }
