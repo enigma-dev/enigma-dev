@@ -269,7 +269,7 @@ var::var(variant x, size_t length, size_t length2) : values(NULL) {
   initialize();
   for (size_t j = 0; j < length2; ++j) {
     for (size_t i = 0; i < length; ++i) {
-      (*this)(i, j) = x; 
+      (*this)(j, i) = x; 
     }
   }
 }
