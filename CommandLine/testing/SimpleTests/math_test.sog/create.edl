@@ -221,7 +221,7 @@ gtest_assert_eq(array_length_2d(user_array_2d, 4), 3);
 gtest_assert_eq(array_height_2d(user_array_2d), 5);
 for (i = 0; i < 5; i += 1) {
   for (j = 0; j < 3; j += 1) {
-    gtest_assert_eq(user_array_2d[i][j], 256);
+    gtest_assert_eq(user_array_2d[i,j], 256);
   }
 }
 
