@@ -2,4 +2,4 @@
 #include "Info/graphics_info.h"
 #include "GL2shader.h"
 #include "GL2profiler.h"
-#include "Graphics_Systems/General/GSgeneral.h"
+#include "Graphics_Systems/General/include.h"
