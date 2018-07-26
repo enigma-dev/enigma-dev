@@ -265,9 +265,9 @@ var::operator const variant&() const { return **this; }
 
 var::var() : values(NULL) { initialize(); }
 var::var(variant x) : values(NULL) { initialize(); **this = x; }
-var::var(variant x, size_t length, size_t length2) : values(NULL) {
+var::var(variant x, size_t length, size_t height) : values(NULL) {
   initialize();
-  for (size_t j = 0; j < length2; ++j) {
+  for (size_t j = 0; j < height; ++j) {
     for (size_t i = 0; i < length; ++i) {
       (*this)(j, i) = x; 
     }
