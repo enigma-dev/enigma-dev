@@ -25,6 +25,7 @@
 #include "Universal_System/background_internal.h"
 #include "Universal_System/sprites_internal.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Bridges/General/GL2Context.h"
 #include "GL2TextureStruct.h"
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
@@ -280,7 +281,7 @@ void texture_preload(int texid)
 void texture_set_priority(int texid, double prio)
 {
   // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
+  //glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
   //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
 }
 
@@ -318,7 +319,7 @@ void texture_set_stage(int stage, int texid) {
   if (enigma::samplerstates[stage].bound_texture != texid) {
     glActiveTexture(GL_TEXTURE0 + stage);
     enigma::samplerstates[stage].bound_texture = texid;
-    glBindTexture(GL_TEXTURE_2D, get_texture(texid));
+    oglmgr->BindTexture(GL_TEXTURE_2D, get_texture(texid));
   }
   // Must be applied regardless of whether the texture is already bound because the sampler state could have been changed.
   enigma::samplerstates[stage].CompareAndApply(textureStructs[texid]->sampler);
@@ -327,7 +328,7 @@ void texture_set_stage(int stage, int texid) {
 void texture_reset() {
   glActiveTexture(GL_TEXTURE0);
   enigma::samplerstates[0].bound_texture = -1;
-  glBindTexture(GL_TEXTURE_2D, 0);
+  oglmgr->BindTexture(GL_TEXTURE_2D, 0);
   //Should only rarely apply the full state, I believe it is unnecessary to do it when we set no texture and it does not appear
   //to cause any issues so leave it commented.
   //enigma::samplerstates[0].ApplyState();
