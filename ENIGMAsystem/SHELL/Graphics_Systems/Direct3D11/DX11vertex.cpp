@@ -53,7 +53,8 @@ float4 PS(PixelInputType input) : SV_TARGET {
 ID3D10Blob* pBlobVS = NULL;
 ID3D10Blob* pBlobPS = NULL;
 
-D3D_PRIMITIVE_TOPOLOGY primitive_types[] = {
+static const size_t primitive_types_size = 7;
+D3D_PRIMITIVE_TOPOLOGY primitive_types[primitive_types_size] = {
   static_cast<D3D_PRIMITIVE_TOPOLOGY>(0),
   D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
   D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
@@ -222,6 +223,18 @@ void graphics_prepare_default_shader() {
   m_deviceContext->PSSetShader(g_pPixelShader, NULL, 0);
 }
 
+#ifdef DEBUG_MODE
+#define set_primitive_mode(primitive)                                                            \
+  if (primitive < 0 || primitive >= (int)primitive_types_size) {                                 \
+    show_error("Primitive type " + enigma_user::toString(primitive) + " does not exist", false); \
+    vertexLayout->Release();                                                                     \
+    return;                                                                                      \
+  }                                                                                              \
+  m_deviceContext->IASetPrimitiveTopology(primitive_types[primitive]);
+#else
+#define set_primitive_mode(primitive) m_deviceContext->IASetPrimitiveTopology(primitive_types[primitive]);
+#endif
+
 }
 
 namespace enigma_user {
@@ -250,7 +263,7 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   ID3D11Buffer* vertexBufferPeer = vertexBufferPeers[buffer];
   m_deviceContext->IASetVertexBuffers(0, 1, &vertexBufferPeer, &stride, &offset);
 
-  m_deviceContext->IASetPrimitiveTopology(primitive_types[primitive]);
+  set_primitive_mode(primitive);
   m_deviceContext->Draw(count, start);
 
   vertexLayout->Release();
@@ -280,7 +293,7 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
     0
   );
 
-  m_deviceContext->IASetPrimitiveTopology(primitive_types[primitive]);
+  set_primitive_mode(primitive);
   m_deviceContext->DrawIndexed(count, start, 0);
 
   vertexLayout->Release();
