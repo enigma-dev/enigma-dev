@@ -209,7 +209,6 @@ struct var
   
   var();
   var(const var&);
-  //TODO: Overload var for std::array
   var(variant value, size_t length, size_t length2 = 1);
   types_extrapolate_alldec(var)
   

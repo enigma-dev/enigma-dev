@@ -265,7 +265,6 @@ var::operator const variant&() const { return **this; }
 
 var::var() : values(NULL) { initialize(); }
 var::var(variant x) : values(NULL) { initialize(); **this = x; }
-//TODO: Overload var for std::array
 var::var(variant x, size_t length, size_t length2) : values(NULL) {
   initialize();
   for (size_t j = 0; j < length2; ++j) {
