@@ -99,7 +99,7 @@ clean:
 cleandep:
 	$(RM) $(CLEANDEPS)
 
-SHADER_CPP := /$(subst //,/,$(subst :,,$(CODEGEN)/shader.cpp))
+SHADER_CPP := $(subst //,/,/$(subst :,,$(CODEGEN)/$(GRAPHICS)_shader.cpp))
 
 SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp) $(SHADER_CPP)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
@@ -129,8 +129,9 @@ compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 	@echo Built to "$(OUTPUTNAME)"
 
-$(SHADER_CPP): $(VERTEX_SHADER_PREFIX) $(VERTEX_SHADER) $(FRAGMENT_SHADER_PREFIX) $(FRAGMENT_SHADER)
-	./shader_build.sh $(SHADER_CPP) $(VERTEX_SHADER_PREFIX) $(VERTEX_SHADER) $(FRAGMENT_SHADER_PREFIX) $(FRAGMENT_SHADER)
+#We want to update shader cpp when there are any changes to generator script or any of the files we concat
+$(SHADER_CPP): ./shader_build.sh $(SHADER_VERSION) $(VERTEX_SHADER_PREFIX) $(VERTEX_SHADER) $(FRAGMENT_SHADER_PREFIX) $(FRAGMENT_SHADER)
+	./shader_build.sh $(SHADER_CPP) $(SHADER_VERSION) $(VERTEX_SHADER_PREFIX) $(VERTEX_SHADER) $(FRAGMENT_SHADER_PREFIX) $(FRAGMENT_SHADER)
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers

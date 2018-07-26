@@ -112,10 +112,10 @@ namespace enigma
   extern unsigned bound_shader;
   extern unsigned bound_vbo;
   string getVertexShaderPrefix(){
-    return vertex_prefix;
+    return string(shader_version) + vertex_prefix;
   }
   string getFragmentShaderPrefix(){
-    return fragment_prefix;
+    return string(shader_version) + fragment_prefix;
   }
   string getDefaultVertexShader(){
     return vertex_body;

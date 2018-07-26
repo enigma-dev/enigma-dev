@@ -1,31 +1,30 @@
 #!/bin/bash
 
 output_location="$1"
-vertex_prefix="$2"
-vertex_body="$3"
-fragment_prefix="$4"
-fragment_body="$5"
+shader_version="$2"
+vertex_prefix="$3"
+vertex_body="$4"
+fragment_prefix="$5"
+fragment_body="$6"
 
-function write_shader_source() {
-  file_name="$1"
-  variable_name="$2"
-  preserve_empty_lines="$3"
-  echo "const char* ${variable_name}=" >> $output_location
-  while read p; do
-    # in the shader prefix we don't care to preserve empty lines
-    # because it always ends with a line directive so that line
-    # numbers in the body match the ones the user sees in the IDE
-    if [[ ! -z ${p::-1} ]] || [ $preserve_empty_lines = true ]; then
-      echo -n '"' >> "$output_location"
-      echo -n "${p::-1}" >> "$output_location"
-      echo '\n"' >> "$output_location"
-    fi
-  done < "$file_name"
-  echo "\"\\n\";" >> "$output_location"
+deref() { echo "${!1}"; }
+
+function write_glsl_cpp() {
+  in="$1"
+  out="$2"
+  while read -r p; do
+    echo -n '"' >> "$out"
+    echo -n "$p" >> "$out"
+    echo '\n"' >> "$out"
+  done < "$in"
 }
 
-echo "/// Combined shader codes" > "$output_location"
-write_shader_source "$vertex_prefix" "vertex_prefix" false
-write_shader_source "$vertex_body" "vertex_body" true
-write_shader_source "$fragment_prefix" "fragment_prefix" false
-write_shader_source "$fragment_body" "fragment_body" true
+echo "namespace enigma {" > "$output_location"
+
+for var in shader_version vertex_prefix vertex_body fragment_prefix fragment_body; do
+  echo "const char* ${var}=" >> "$output_location"
+  write_glsl_cpp $(deref $var) "$output_location"
+  echo ";" >> "$output_location"
+done
+
+echo "} //namespace enigma" >> "$output_location"

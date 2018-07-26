@@ -1,13 +1,3 @@
-#ifdef ENIGMA_GRAPHICS_OPENGLES3
-  #version 300 es
-  precision mediump float;
-#elif defined ENIGMA_GRAPHICS_OPENGLES2
-  #version 200 es
-  precision mediump float;
-#else
-  #version 330 core
-#endif
-
 #define MATRIX_VIEW                                    0
 #define MATRIX_PROJECTION                              1
 #define MATRIX_WORLD                                   2
