@@ -185,6 +185,46 @@ gtest_assert_true(point_in_rectangle(-2, -2, -3, -3, -1, -1));
 gtest_assert_true(point_in_rectangle(-3, -3, -3, -3, -1, -1));
 gtest_assert_false(point_in_rectangle(-4, -4, -3, -3, -1, -1));
 
+// Simple array function tests
+var user_array = array_create(5, 555);
+gtest_assert_true(is_array(user_array));
+for (i = 0; i < 5; i += 1) {
+  gtest_assert_eq(user_array[i], 555);
+}
+var user_array_smaller = array_create(3, 555);
+gtest_assert_eq(array_length_1d(user_array_smaller), 3);
+gtest_assert_false(array_equals(user_array, user_array_smaller));
+var user_array_larger = array_create(7, 555);
+gtest_assert_eq(array_length_1d(user_array_larger), 7);
+gtest_assert_false(array_equals(user_array, user_array_larger));
+var user_array_same = array_create(5, 555);
+gtest_assert_eq(array_length_1d(user_array_same), 5);
+gtest_assert_true(array_equals(user_array, user_array_same));
+var user_array_copy = array_create(3, 24);
+var user_array_copy2 = array_create(7, 347);
+array_copy(user_array_same, 0, user_array_copy, 0, 3);
+array_copy(user_array_same, 3, user_array_copy2, 6, 1);
+gtest_assert_eq(user_array_same[0], 24);
+gtest_assert_eq(user_array_same[1], 24);
+gtest_assert_eq(user_array_same[2], 24);
+gtest_assert_eq(user_array_same[3], 347);
+gtest_assert_eq(user_array_same[4], 555);
+
+// Simple 2D array tests
+var user_array_2d = array_create_2d(3, 5, 256);
+gtest_assert_true(is_array(user_array_2d));
+gtest_assert_eq(array_length_2d(user_array_2d, 0), 3);
+gtest_assert_eq(array_length_2d(user_array_2d, 1), 3);
+gtest_assert_eq(array_length_2d(user_array_2d, 2), 3);
+gtest_assert_eq(array_length_2d(user_array_2d, 3), 3);
+gtest_assert_eq(array_length_2d(user_array_2d, 4), 3);
+gtest_assert_eq(array_height_2d(user_array_2d), 5);
+for (i = 0; i < 5; i += 1) {
+  for (j = 0; j < 3; j += 1) {
+    gtest_assert_eq(user_array_2d[i,j], 256);
+  }
+}
+
 // These are common variable names that happen to conflict with Bessel functions.
 j0 = 1;
 y0 = 2;
