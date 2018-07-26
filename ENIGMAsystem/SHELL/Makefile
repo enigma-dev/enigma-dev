@@ -99,7 +99,7 @@ clean:
 cleandep:
 	$(RM) $(CLEANDEPS)
 
-SHADER_CPP := $(subst //,/,$(subst :,,$(CODEGEN)/shader.cpp))
+SHADER_CPP := /$(subst //,/,$(subst :,,$(CODEGEN)/shader.cpp))
 
 SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp) $(SHADER_CPP)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
