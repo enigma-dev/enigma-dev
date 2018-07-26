@@ -1,10 +1,10 @@
-in vec3 in_Position;      // (x,y,z)
-in vec3 in_Normal;        // (x,y,z)
-in vec4 in_Color;         // (r,g,b,a)
-in vec2 in_TextureCoord;  // (u,v)
+attribute vec3 in_Position;      // (x,y,z)
+attribute vec3 in_Normal;        // (x,y,z)
+attribute vec4 in_Color;         // (r,g,b,a)
+attribute vec2 in_TextureCoord;  // (u,v)
 
-out vec2 v_TextureCoord;
-out vec4 v_Color;
+varying vec2 v_TextureCoord;
+varying vec4 v_Color;
 uniform int en_ActiveLights;
 uniform bool en_ColorEnabled;
 
@@ -83,7 +83,7 @@ void main() {
   }else{
     v_Color = iColor;
   }
-  gl_Position = modelViewProjectionMatrix * vec4( in_Position.xyz, 1.0);
+  gl_Position = modelViewProjectionMatrix * vec4(in_Position.xyz, 1.0);
 
   v_TextureCoord = in_TextureCoord;
 }
