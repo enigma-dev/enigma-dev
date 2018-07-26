@@ -19,6 +19,7 @@
 #define ENIGMA_GSSURFACE_H
 
 #include "GScolors.h"
+
 #include "Universal_System/scalar.h"
 
 #include <string>

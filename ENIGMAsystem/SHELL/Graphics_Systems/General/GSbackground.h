@@ -17,8 +17,9 @@
 #ifndef ENIGMA_GSBACKGROUND_H
 #define ENIGMA_GSBACKGROUND_H
 
-#include "Universal_System/scalar.h"
 #include "GScolors.h"
+
+#include "Universal_System/scalar.h"
 
 #if GM_COMPATIBILITY_VERSION <= 81
 #  define DEFAULT_ALPHA 1
