@@ -12,9 +12,7 @@ deref() { echo "${!1}"; }
 function write_glsl_cpp() {
   in="$1"
   out="$2"
-  while read -r p; do
-    echo "$p" >> "$out"
-  done < "$in"
+  echo "$(cat "$in")" >> "$out"
 }
 
 echo "namespace enigma {" > "$output_location"
