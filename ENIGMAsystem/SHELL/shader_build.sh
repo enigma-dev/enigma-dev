@@ -13,18 +13,16 @@ function write_glsl_cpp() {
   in="$1"
   out="$2"
   while read -r p; do
-    echo -n '"' >> "$out"
-    echo -n "$p" >> "$out"
-    echo '\n"' >> "$out"
+    echo "$p" >> "$out"
   done < "$in"
 }
 
 echo "namespace enigma {" > "$output_location"
 
 for var in shader_version vertex_prefix vertex_body fragment_prefix fragment_body; do
-  echo "const char* ${var}=" >> "$output_location"
+  echo "const char* ${var}=R\"(" >> "$output_location"
   write_glsl_cpp $(deref $var) "$output_location"
-  echo ";" >> "$output_location"
+  echo ")\";" >> "$output_location"
 done
 
 echo "} //namespace enigma" >> "$output_location"
