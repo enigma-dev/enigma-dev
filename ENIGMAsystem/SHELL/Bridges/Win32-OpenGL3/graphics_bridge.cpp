@@ -21,6 +21,8 @@
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "Bridges/General/GLinit.h"
+
 #include <string>
 #include <windows.h>
 #include <GL/glew.h>

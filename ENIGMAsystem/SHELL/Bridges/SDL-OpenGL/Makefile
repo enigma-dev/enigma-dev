@@ -1,1 +1,2 @@
-SOURCES += $(wildcard Bridges/Glew-OpenGL/*.cpp) $(wildcard Bridges/SDL-OpenGL/*.cpp)
+include Bridges/Glew-OpenGL/Makefile
+SOURCES += $(wildcard Bridges/SDL-OpenGL/*.cpp)

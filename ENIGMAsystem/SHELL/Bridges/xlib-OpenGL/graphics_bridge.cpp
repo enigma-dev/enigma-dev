@@ -22,6 +22,8 @@
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "Bridges/General/GLinit.h"
+
 #include <iostream>
 #include <cstring>
 #include <stdio.h>
