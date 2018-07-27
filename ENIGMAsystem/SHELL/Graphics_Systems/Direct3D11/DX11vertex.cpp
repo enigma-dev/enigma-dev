@@ -130,14 +130,14 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     if (!bufferPeer) {
       // create either a static or dynamic peer, depending on if the user called
       // freeze on the buffer, and initialize its contents
-      D3D11_BUFFER_DESC bd;
+      D3D11_BUFFER_DESC bd = { };
       bd.Usage = frozen ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DYNAMIC;
       bd.ByteWidth = size;
       bd.BindFlags = isIndex ? D3D11_BIND_INDEX_BUFFER : D3D11_BIND_VERTEX_BUFFER;
       bd.CPUAccessFlags = frozen ? 0 : D3D11_CPU_ACCESS_WRITE;
       bd.MiscFlags = 0;
       bd.StructureByteStride = 0;
-      D3D11_SUBRESOURCE_DATA initData;
+      D3D11_SUBRESOURCE_DATA initData = { };
       initData.pSysMem = data;
       m_device->CreateBuffer(&bd, &initData, &bufferPeer);
 
@@ -165,6 +165,7 @@ inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* verte
   for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
     const pair<int, int> flag = vertexFormat->flags[i];
     D3D11_INPUT_ELEMENT_DESC *vertexLayoutElement = &vertexLayoutElements[i];
+    *vertexLayoutElement = { };
 
     vertexLayoutElement->SemanticName = semantic_names[flag.second];
     vertexLayoutElement->SemanticIndex = useCount[flag.second]++;
