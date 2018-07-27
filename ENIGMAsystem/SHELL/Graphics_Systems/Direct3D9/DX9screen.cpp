@@ -26,10 +26,6 @@
 
 #include "Platforms/General/PFwindow.h"
 
-#include <string>
-#include <cstdio>
-
-using namespace std;
 using namespace enigma;
 using namespace std;
 
@@ -58,26 +54,22 @@ void screen_init()
   d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
   d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-    if (!view_enabled)
-    {
-      d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+  if (!view_enabled)
+  {
+    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+    d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
+  } else {
+    for (view_current = 0; view_current < 7; view_current++) {
+      if (view_visible[(int)view_current]) {
+        int vc = (int)view_current;
 
-      screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-      d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
-    } else {
-      for (view_current = 0; view_current < 7; view_current++)
-      {
-        if (view_visible[(int)view_current])
-        {
-          int vc = (int)view_current;
-
-          screen_set_viewport(view_xport[vc], view_yport[vc],
-            (window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
-          d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], view_angle[vc]);
-          break;
-        }
+        screen_set_viewport(view_xport[vc], view_yport[vc],
+          (window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
+        d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], view_angle[vc]);
+        break;
       }
     }
+  }
 
   d3dmgr->SetRenderState(D3DRS_LIGHTING, FALSE);
   d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
