@@ -42,6 +42,12 @@ ID3D11RasterizerState* m_rasterState;
 // global declarations
 ContextManager* d3dmgr;    // the pointer to the device class
 
+#ifdef DEBUG_MODE
+constexpr bool kDebugMode = true;
+#else
+constexpr bool kDebugMode = false;
+#endif
+
 namespace enigma
 {
 
@@ -78,14 +84,9 @@ namespace enigma
     swapChainDesc.Flags = 0;
 
     D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
-    #ifdef DEBUG_MODE
-    result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, D3D11_CREATE_DEVICE_DEBUG, &featureLevel, 1,
-                                           D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
-    #else
-    result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1,
-                                           D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
-    #endif
 
+    result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, kDebugMode ? D3D11_CREATE_DEVICE_DEBUG : 0, &featureLevel, 1,
+                                           D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
     if (FAILED(result)) {
       show_error("Failed to create Direct3D11 device and swap chain.", true);
     }
