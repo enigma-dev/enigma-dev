@@ -52,14 +52,12 @@ void screen_init()
   enigma::gui_width = window_get_region_width();
   enigma::gui_height = window_get_region_height();
 
-  //d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-  //d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+  m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-  if (!view_enabled) {
-  //d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-
-  screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-  d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
+  if (!view_enabled)
+  {
+    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+    d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
   } else {
     for (view_current = 0; view_current < 7; view_current++) {
       if (view_visible[(int)view_current]) {
@@ -67,7 +65,7 @@ void screen_init()
 
         screen_set_viewport(view_xport[vc], view_yport[vc],
           (window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
-        d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0);
+        d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], view_angle[vc]);
         break;
       }
     }
@@ -93,13 +91,13 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   sx = (window_get_width() - window_get_region_width_scaled()) / 2;
   sy = (window_get_height() - window_get_region_height_scaled()) / 2;
 
-  D3D11_VIEWPORT viewport;
-  ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-
+  D3D11_VIEWPORT viewport = { };
   viewport.TopLeftX = sx + x;
   viewport.TopLeftY = sy + y;
   viewport.Width = width;
   viewport.Height = height;
+  viewport.MinDepth = 0.0f;
+  viewport.MaxDepth = 1.0f;
 
   m_deviceContext->RSSetViewports(1, &viewport);
 }
