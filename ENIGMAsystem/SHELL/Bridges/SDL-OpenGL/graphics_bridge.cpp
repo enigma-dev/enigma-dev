@@ -18,10 +18,7 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GScolors.h"
 
-#include "Platforms/General/PFwindow.h"
 #include "Platforms/SDL/Window.h"
-
-#include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
 
 #include <SDL2/SDL.h>
 
@@ -65,16 +62,13 @@ namespace enigma_user {
   void set_synchronization(bool enable) {
     SDL_GL_SetSwapInterval(enable);
   }
-    
+
   void display_reset(int samples, bool vsync) {
     set_synchronization(vsync);
   }
-    
+
   void screen_refresh() {
     SDL_GL_SwapWindow(enigma::windowHandle);
-    window_set_caption(room_caption);
-    enigma::update_mouse_variables();
   }
 
 }
-

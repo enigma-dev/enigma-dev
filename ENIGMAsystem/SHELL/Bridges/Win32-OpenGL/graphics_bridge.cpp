@@ -57,8 +57,6 @@ bool is_ext_swapcontrol_supported() {
 
 }
 
-#include "Universal_System/roomsystem.h"
-
 namespace enigma_user {
 
 int display_aa = 0;
@@ -105,8 +103,6 @@ void display_reset(int samples, bool vsync) {
 }
 
 void screen_refresh() {
-  window_set_caption(room_caption);
-  enigma::update_mouse_variables();
   SwapBuffers(enigma::window_hDC);
 }
 
