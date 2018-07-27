@@ -17,8 +17,8 @@
 
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
+#include "Platforms/General/PFwindow.h"
 #include "Universal_System/roomsystem.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Bridges/General/DX11Context.h"
@@ -214,7 +214,6 @@ namespace enigma_user
   }
 
   void screen_refresh() {
-    window_set_caption(room_caption);
     enigma::update_mouse_variables();
     m_swapChain->Present(0, 0);
   }
