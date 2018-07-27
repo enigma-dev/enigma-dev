@@ -15,21 +15,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/General/GScolors.h"
 
 #include <iostream>
 #include <cstring>
 #include <stdio.h>
-#include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
 
 namespace enigma_user {
   int display_aa = 14;
 
   void set_synchronization(bool enable){}
-    
+
   void display_reset(int samples, bool vsync){}
-    
+
   void screen_refresh(){}
 }
-
