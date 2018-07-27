@@ -20,7 +20,6 @@
 #include <iostream>
 #include <cstring>
 #include <stdio.h>
-#include <Universal_System/roomsystem.h> // update_mouse_variables
 
 namespace enigma_user {
   int display_aa = 14;

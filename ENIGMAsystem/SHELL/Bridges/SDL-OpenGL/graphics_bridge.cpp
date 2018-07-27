@@ -20,8 +20,6 @@
 
 #include "Platforms/SDL/Window.h"
 
-#include "Universal_System/roomsystem.h" // update_mouse_variables
-
 #include <SDL2/SDL.h>
 
 #include <iostream>
@@ -71,7 +69,6 @@ namespace enigma_user {
 
   void screen_refresh() {
     SDL_GL_SwapWindow(enigma::windowHandle);
-    enigma::update_mouse_variables();
   }
 
 }

@@ -46,8 +46,6 @@ namespace enigma {
   }
 }
 
-#include "Universal_System/roomsystem.h" // update_mouse_variables
-
 namespace enigma_user {
   // Don't know where to query this on Cocoa, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
   int display_aa = 14;
@@ -63,7 +61,6 @@ namespace enigma_user {
 
   void screen_refresh() {
     cocoa_screen_refresh();
-    enigma::update_mouse_variables();
     cocoa_flush_opengl();
   }
 

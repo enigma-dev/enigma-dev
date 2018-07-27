@@ -118,8 +118,6 @@ namespace enigma {
   }
 }
 
-#include <Universal_System/roomsystem.h> // update_mouse_variables
-
 namespace enigma_user {
   // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
   int display_aa = 14;
@@ -161,7 +159,6 @@ namespace enigma_user {
 
   void screen_refresh() {
     glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
-    enigma::update_mouse_variables();
   }
 
 }
