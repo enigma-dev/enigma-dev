@@ -276,10 +276,8 @@ void window_set_sizeable(bool sizeable) {
   enigma::isSizeable = sizeable;
 
   XSizeHints hints;
-  hints.min_width = 640;
-  hints.min_height = 480;
-  hints.max_width = 641;
-  hints.max_height = 481;
+  hints.min_width = hints.max_width = (sizeable ? 0 : window_get_width());
+  hints.min_height = hints.max_height = (sizeable ? 0 : window_get_height());
   XSetWMNormalHints(disp, win, &hints);
 }
 
