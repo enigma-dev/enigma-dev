@@ -23,9 +23,7 @@
 #include <X11/Xlib.h>
 #include <GL/glxew.h>
 
-#include <iostream>
 #include <cstring>
-#include <stdio.h>
 
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
