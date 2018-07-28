@@ -44,10 +44,8 @@ void EnableDrawing(void*) {
   renderer = SDL_CreateRenderer(windowHandle, -1, SDL_RENDERER_ACCELERATED);
 
   GLenum err = glewInit();
-  if (GLEW_OK != err) {
+  if (GLEW_OK != err)
     show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
-    return;
-  }
 }
 
 void DisableDrawing(void*) {
