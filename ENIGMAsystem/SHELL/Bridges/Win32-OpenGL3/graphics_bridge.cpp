@@ -110,10 +110,9 @@ void EnableDrawing(void*)
   LegacyRC = wglCreateContext( enigma::window_hDC );
   wglMakeCurrent( enigma::window_hDC, LegacyRC );
 
-  // -- Initialise GLEW
   GLenum err = glewInit();
-  if (GLEW_OK != err)
-  {
+  if (GLEW_OK != err) {
+    show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
     return;
   }
 
