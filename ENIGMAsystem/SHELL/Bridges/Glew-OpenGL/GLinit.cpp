@@ -1,17 +1,12 @@
 #include "Bridges/General/GLinit.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
-#ifdef DEBUG_MODE
-#include <iostream>
-#endif
+#include <string>
 
 bool graphics_is_gles = false;
 
 void gl_init() {
-#ifdef DEBUG_MODE
   GLenum err = glewInit();
   if (GLEW_OK != err)
-    std::cerr << "GLEW ERROR!" << std::endl;
-#else
-  glewInit();
-#endif
+    show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
 }

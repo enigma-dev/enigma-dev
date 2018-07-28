@@ -15,21 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/General/GScolors.h"
-
-#include "Platforms/General/PFwindow.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/SDL/Window.h"
-
-#include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
-
 #include "Bridges/General/GLinit.h"
 
 #include <SDL2/SDL.h>
-
-#include <iostream>
-#include <cstring>
-#include <stdio.h>
 
 namespace enigma {
 
@@ -66,21 +56,20 @@ void DisableDrawing(void*) {
 }
 
 namespace enigma_user {
-  // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
-  int display_aa = 14;
 
-  void set_synchronization(bool enable) {
-    SDL_GL_SetSwapInterval(enable);
-  }
+// Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
+int display_aa = 14;
 
-  void display_reset(int samples, bool vsync) {
-    set_synchronization(vsync);
-  }
+void set_synchronization(bool enable) {
+  SDL_GL_SetSwapInterval(enable);
+}
 
-  void screen_refresh() {
-    SDL_GL_SwapWindow(enigma::windowHandle);
-    window_set_caption(room_caption);
-    enigma::update_mouse_variables();
-  }
+void display_reset(int samples, bool vsync) {
+  set_synchronization(vsync);
+}
+
+void screen_refresh() {
+  SDL_GL_SwapWindow(enigma::windowHandle);
+}
 
 }

@@ -14,19 +14,17 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-//#include <GL/glx.h>
-#include <X11/Xlib.h>
-#include <GL/glxew.h>
-#include "Platforms/xlib/XLIBwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/General/GScolors.h"
 
 #include "Bridges/General/GLinit.h"
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Platforms/xlib/XLIBwindow.h"
 
-#include <iostream>
+#include <X11/Xlib.h>
+#include <GL/glxew.h>
+
 #include <cstring>
-#include <stdio.h>
 
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
@@ -46,10 +44,8 @@ namespace enigma {
     // Prepare openGL
     GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
     vi = glXChooseVisual(enigma::x11::disp,0,att);
-    if(!vi){
-        printf("Failed to Obtain GL Visual Info\n");
-        return NULL;
-    }
+    if (!vi)
+      show_error("Failed to Obtain GL Visual Info", true);
     return vi;
   }
 
@@ -58,10 +54,8 @@ namespace enigma {
 
     //give us a GL context
     glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
-    if (!glxc){
-        printf("Failed to Create Graphics Context\n");
-        return;
-    }
+    if (!glxc)
+      show_error("Failed to Create Graphics Context", true);
 
     //apply context
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
@@ -113,9 +107,6 @@ namespace enigma {
   }
 }
 
-#include <Platforms/xlib/XLIBwindow.h> // window_set_caption
-#include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
-
 namespace enigma_user {
   // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
   int display_aa = 14;
@@ -157,8 +148,6 @@ namespace enigma_user {
 
   void screen_refresh() {
     glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
-    enigma::update_mouse_variables();
-    window_set_caption(room_caption);
   }
 
 }
