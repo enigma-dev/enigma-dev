@@ -15,16 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/General/GScolors.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/SDL/Window.h"
 
 #include <SDL2/SDL.h>
-
-#include <iostream>
-#include <cstring>
-#include <stdio.h>
+#include <GL/glew.h>
 
 namespace enigma {
 
@@ -40,13 +35,17 @@ bool initGameWindow() {
 }
 
 void EnableDrawing(void*) {
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAJOR_VERSION);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR_VERSION);
-    SDL_GL_SetSwapInterval(0);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    context = SDL_GL_CreateContext(windowHandle);
-    renderer = SDL_CreateRenderer(windowHandle, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, ENIGMA_GL_MAJOR_VERSION);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, ENIGMA_GL_MINOR_VERSION);
+  SDL_GL_SetSwapInterval(0);
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+  context = SDL_GL_CreateContext(windowHandle);
+  renderer = SDL_CreateRenderer(windowHandle, -1, SDL_RENDERER_ACCELERATED);
+
+  GLenum err = glewInit();
+  if (GLEW_OK != err)
+    show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
 }
 
 void DisableDrawing(void*) {
