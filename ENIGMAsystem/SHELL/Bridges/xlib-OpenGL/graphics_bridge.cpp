@@ -14,12 +14,14 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-//#include <GL/glx.h>
-#include <X11/Xlib.h>
-#include <GL/glxew.h>
-#include "Platforms/xlib/XLIBwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GScolors.h"
+
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Platforms/xlib/XLIBwindow.h"
+
+#include <X11/Xlib.h>
+#include <GL/glxew.h>
 
 #include <iostream>
 #include <cstring>
@@ -44,7 +46,7 @@ namespace enigma {
     GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
     vi = glXChooseVisual(enigma::x11::disp,0,att);
     if(!vi){
-        printf("Failed to Obtain GL Visual Info\n");
+        show_error("Failed to Obtain GL Visual Info", true);
         return NULL;
     }
     return vi;
@@ -56,7 +58,7 @@ namespace enigma {
     //give us a GL context
     glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
     if (!glxc){
-        printf("Failed to Create Graphics Context\n");
+        show_error("Failed to Create Graphics Context", true);
         return;
     }
 
