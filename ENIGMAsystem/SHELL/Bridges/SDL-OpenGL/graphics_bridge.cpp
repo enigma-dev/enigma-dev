@@ -15,18 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/General/GScolors.h"
-
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/SDL/Window.h"
 
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
-
-#include <iostream>
-#include <cstring>
-#include <stdio.h>
 
 namespace enigma {
 
