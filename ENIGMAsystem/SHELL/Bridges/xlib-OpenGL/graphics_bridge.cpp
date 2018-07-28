@@ -14,16 +14,16 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-//#include <GL/glx.h>
-#include <X11/Xlib.h>
-#include <GL/glxew.h>
-#include "Platforms/xlib/XLIBwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GScolors.h"
 
-#include <iostream>
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Platforms/xlib/XLIBwindow.h"
+
+#include <X11/Xlib.h>
+#include <GL/glxew.h>
+
 #include <cstring>
-#include <stdio.h>
 
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
@@ -43,10 +43,8 @@ namespace enigma {
     // Prepare openGL
     GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
     vi = glXChooseVisual(enigma::x11::disp,0,att);
-    if(!vi){
-        printf("Failed to Obtain GL Visual Info\n");
-        return NULL;
-    }
+    if (!vi)
+      show_error("Failed to Obtain GL Visual Info", true);
     return vi;
   }
 
@@ -55,24 +53,16 @@ namespace enigma {
 
     //give us a GL context
     glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
-    if (!glxc){
-        printf("Failed to Create Graphics Context\n");
-        return;
-    }
+    if (!glxc)
+      show_error("Failed to Create Graphics Context", true);
 
     //apply context
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
-    #ifdef DEBUG_MODE
     GLenum err = glewInit();
     if (GLEW_OK != err)
-    {
-      std::cout<<"GLEW ERROR!"<<std::endl;
-    }
-    #else
-    glewInit();
-    #endif
+      show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
   }
 
   void DisableDrawing(void* handle) {
