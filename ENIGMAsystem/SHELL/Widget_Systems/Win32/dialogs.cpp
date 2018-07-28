@@ -16,7 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// Windows Vista or later for IFileDialog
 #include <windows.h>
 #include <shlwapi.h> //for Shell API
 #include <shlobj.h> //for Shell API
@@ -126,10 +125,7 @@ static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
   return DefWindowProc(hwndDlg, uMsg, wParam, lParam);
 }
 
-WCHAR wstrPromptStr[4096];
-WCHAR wstrTextEntry[MAX_PATH];
-bool HideInput = 0;
-
+/* < Used by InputBoxProc > */
 void ClientResize(HWND hWnd, int nWidth, int nHeight)
 {
   RECT rcClient, rcWind;
@@ -141,7 +137,13 @@ void ClientResize(HWND hWnd, int nWidth, int nHeight)
   MoveWindow(hWnd, rcWind.left, rcWind.top, nWidth + ptDiff.x, nHeight + ptDiff.y, TRUE);
 }
 
-LRESULT CALLBACK InputBoxHookProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+WCHAR wstrPromptStr[4096];
+WCHAR wstrTextEntry[MAX_PATH];
+bool HideInput = 0;
+/* < / Used by InputBoxProc > */
+
+/* < Used by get_string, get_password, get_integer, and get_passcode > */
+LRESULT CALLBACK InputBoxProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   switch (Msg)
   {
@@ -194,6 +196,7 @@ LRESULT CALLBACK InputBoxHookProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 
   return FALSE;
 }
+/* < / Used by get_string, get_password, get_integer, and get_passcode > */
 
 static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -265,17 +268,7 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
   return 0;
 }
 
-static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
-{
-  if (uMsg == BFFM_INITIALIZED)
-  {
-    tstring tstr_cap = widen(gs_cap);
-    SetWindowTextW(hwnd, tstr_cap.c_str());
-  }
-
-  return 0;
-}
-
+/* < Used by GetDirectoryProc > */
 WCHAR *LowerCaseToActualPathName(WCHAR *wstr_dname)
 {
   LPITEMIDLIST pstr_dname;
@@ -290,8 +283,9 @@ WCHAR wstr_dname[MAX_PATH];
 WCHAR wstr_stc1[MAX_PATH];
 static string DlgItemText;
 tstring ActualPath;
+/* < / Used by GetDirectoryProc > */
 
-UINT APIENTRY OFNHookProcOldStyle(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   switch (uMsg)
   {
@@ -375,7 +369,18 @@ UINT APIENTRY OFNHookProcOldStyle(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
   return FALSE;
 }
 
-UINT_PTR CALLBACK CCHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
+static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
+{
+  if (uMsg == BFFM_INITIALIZED)
+  {
+    tstring tstr_cap = widen(gs_cap);
+    SetWindowTextW(hwnd, tstr_cap.c_str());
+  }
+
+  return 0;
+}
+
+UINT_PTR CALLBACK GetColorProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 {
   if (uiMsg == WM_INITDIALOG)
   {
@@ -643,7 +648,7 @@ string get_string(string str, string def, string title)
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
 
   HideInput = 0;
-  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
+  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxProc));
 
   static string strResult;
   strResult = shorten(wstrTextEntry);
@@ -661,7 +666,7 @@ string get_password(string str, string def, string title)
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
 
   HideInput = 1;
-  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
+  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxProc));
 
   static string strResult;
   strResult = shorten(wstrTextEntry);
@@ -683,7 +688,7 @@ double get_integer(string str, double def, string title)
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
 
   HideInput = 0;
-  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
+  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxProc));
 
   static string strResult;
   strResult = shorten(wstrTextEntry);
@@ -707,7 +712,7 @@ double get_passcode(string str, double def, string title)
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
 
   HideInput = 1;
-  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxHookProc));
+  DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxProc));
 
   static string strResult;
   strResult = shorten(wstrTextEntry);
@@ -889,7 +894,7 @@ double get_color(double defcol, bool advanced, string title)
   cc.lpCustColors = CustColors;
   cc.Flags = CC_RGBINIT | CC_ENABLEHOOK;
   if (advanced) cc.Flags |= CC_FULLOPEN;
-  cc.lpfnHook = CCHookProc;
+  cc.lpfnHook = GetColorProc;
 
   if (ChooseColor(&cc) != 0)
     return (int)cc.rgbResult;
@@ -925,7 +930,7 @@ string get_directory(string dname, string title)
   ofn.lpstrInitialDir = wstr_dname;
   ofn.Flags = OFN_ENABLETEMPLATE | OFN_ENABLEHOOK | OFN_NONETWORKBUTTON | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_LONGNAMES;
   ofn.lpTemplateName = (LPCWSTR)MAKEINTRESOURCE(FILEOPENORD);
-  ofn.lpfnHook = (LPOFNHOOKPROC)OFNHookProcOldStyle;
+  ofn.lpfnHook = (LPOFNHOOKPROC)GetDirectoryProc;
   ofn.hInstance = enigma::hInstance;
 
   GetOpenFileNameW(&ofn);
