@@ -82,9 +82,31 @@ static void* getStringAsync(void* data) {
   return NULL;
 }
 
+static void* getPasswordAsync(void* data) {
+  const MessageData* const md = (MessageData*)data;
+  threads[md->id]->ret = get_password(md->text1, md->text2, md->text3);
+  threads[md->id]->active = false;
+  ds_map_replaceanyway(async_load, "id", md->id);
+  ds_map_replaceanyway(async_load, "status", true);
+  ds_map_replaceanyway(async_load, "result", threads[md->id]->ret);
+  fireAsyncDialogEvent();
+  return NULL;
+}
+
 static void* getIntegerAsync(void* data) {
   const MessageData* const md = (MessageData*)data;
   threads[md->id]->ret = get_integer(md->text1, md->text2, md->text3);
+  threads[md->id]->active = false;
+  ds_map_replaceanyway(async_load, "id", md->id);
+  ds_map_replaceanyway(async_load, "status", true);
+  ds_map_replaceanyway(async_load, "result", threads[md->id]->ret);
+  fireAsyncDialogEvent();
+  return NULL;
+}
+
+static void* getPasscodeAsync(void* data) {
+  const MessageData* const md = (MessageData*)data;
+  threads[md->id]->ret = get_passcode(md->text1, md->text2, md->text3);
   threads[md->id]->active = false;
   ds_map_replaceanyway(async_load, "id", md->id);
   ds_map_replaceanyway(async_load, "status", true);
@@ -129,10 +151,20 @@ namespace enigma_user {
     MessageData* md = new MessageData(message, def, cap);
     return createThread(getStringAsync, md);
   }
+  
+  int get_password_async(string message, string def, string cap) {
+    MessageData* md = new MessageData(message, def, cap);
+    return createThread(getPasswordAsync, md);
+  }
 
   int get_integer_async(string message, double def, string cap) {
     MessageData* md = new MessageData(message, def, cap);
     return createThread(getIntegerAsync, md);
+  }
+  
+  int get_passcode_async(string message, double def, string cap) {
+    MessageData* md = new MessageData(message, def, cap);
+    return createThread(getPasscodeAsync, md);
   }
 
   int get_login_async(string username, string password, string cap) {
