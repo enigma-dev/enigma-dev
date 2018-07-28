@@ -130,7 +130,7 @@ namespace enigma_user {
     return createThread(getStringAsync, md);
   }
 
-  int get_integer_async(string message, string def, string cap) {
+  int get_integer_async(string message, double def, string cap) {
     MessageData* md = new MessageData(message, def, cap);
     return createThread(getIntegerAsync, md);
   }
