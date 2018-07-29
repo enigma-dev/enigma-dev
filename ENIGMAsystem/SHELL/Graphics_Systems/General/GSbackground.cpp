@@ -39,6 +39,11 @@ namespace enigma {
 namespace enigma_user
 {
 
+int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
+{
+
+}
+
 void draw_background(int back, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
   alpha=CLAMP_ALPHAF(alpha);
