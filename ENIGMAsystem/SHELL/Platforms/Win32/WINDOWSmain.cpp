@@ -17,7 +17,6 @@
 **/
 
 #include "WINDOWSmain.h"
-#include "WINDOWScallback.h"
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
@@ -212,7 +211,7 @@ void initTimer() {
 
 int updateTimer() {
   // Update current time.
-  enigma::update_current_time();
+  update_current_time();
   {
     // Find diff between current and offset.
 
