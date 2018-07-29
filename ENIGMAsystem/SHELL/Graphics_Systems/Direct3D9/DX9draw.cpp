@@ -94,26 +94,62 @@ void draw_set_line_pattern(int pattern, int scale)
 //   // Doing so is necessary for the function to work at its peak.
 //   // When ENIGMA generates configuration files, one should be included here.
 
+namespace
+{
+
+void wrap_screen_coords(int &x, int &y) {
+	if (view_enabled) {
+		x = x + enigma_user::view_xview[enigma_user::view_current];
+		y = (y + enigma_user::view_yview[enigma_user::view_current]) - 1;
+		if (x < 0) x = 0;
+		if (y < 0) y = 0;
+		//if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return 0;
+	} else {
+		if (x < 0) x = 0;
+		if (y < 0) y = 0;
+		//if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
+	}
+}
+
+
+
+}
+
 namespace enigma_user
 {
 
+int* draw_getpixels_ext(int x, int y, int w, int h)
+{
+    //wrap_screen_coords(x, y);
+	d3dmgr->EndShapesBatching();
+	LPDIRECT3DSURFACE9 pBackBuffer;
+	LPDIRECT3DSURFACE9 pDestBuffer;
+	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	D3DSURFACE_DESC desc;
+	pBackBuffer->GetDesc(&desc);
+	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+	d3dmgr->device->GetRenderTargetData(pBackBuffer, pDestBuffer);
+
+	D3DLOCKED_RECT rect;
+
+	pDestBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+	int* ret = new int[w * h];
+	for (int sy = 0; sy < h; sy++) {
+		unsigned offset = (y + sy) * rect.Pitch + x * 4;
+		memcpy(ret + (sy * w), bitmap + offset, w * 4);
+	}
+	pDestBuffer->UnlockRect();
+
+	pBackBuffer->Release();
+	pDestBuffer->Release();
+	return ret;
+}
+
 int draw_getpixel(int x, int y)
 {
-    if (view_enabled)
-    {
-        x = x + enigma_user::view_xview[enigma_user::view_current];
-        y = (y + enigma_user::view_yview[enigma_user::view_current]) - 1;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return 0;
-    } else {
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
-    }
-
-	draw_batch_flush(batch_flush_deferred);
-
+    wrap_screen_coords(x, y);
+	d3dmgr->EndShapesBatching();
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
 	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
@@ -139,21 +175,8 @@ int draw_getpixel(int x, int y)
 
 int draw_getpixel_ext(int x, int y)
 {
-    if (view_enabled)
-    {
-        x = x + enigma_user::view_xview[enigma_user::view_current];
-        y = (y + enigma_user::view_yview[enigma_user::view_current]) - 1;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return 0;
-    } else {
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
-    }
-
-	draw_batch_flush(batch_flush_deferred);
-
+	wrap_screen_coords(x, y);
+	d3dmgr->EndShapesBatching();
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
 	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
