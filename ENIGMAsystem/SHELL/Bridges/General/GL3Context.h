@@ -19,7 +19,7 @@
 #define OPENGL3CONTEXTMANAGER
 
 #include "OpenGLHeaders.h"
-#include "Graphics_Systems/OpenGL3/GL3profiler.h"
+#include "Graphics_Systems/OpenGL3-OpenGLES3/GL3profiler.h"
 #include "Graphics_Systems/General/GSmodel.h"
 
 #include <vector>
