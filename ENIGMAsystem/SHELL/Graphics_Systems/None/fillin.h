@@ -153,10 +153,6 @@ namespace enigma_user
 
 	extern int window_get_region_height_scaled();
 
-	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig);
-	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig);
-	void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth);
-
 	void shader_set(int id);
 	void shader_reset();
 	int shader_get_uniform(int program, string name);
@@ -272,6 +268,5 @@ namespace enigma_user
 	void draw_clear(int col);
 
 	extern int window_get_region_height_scaled();
-	int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload);
 }
 #endif
