@@ -15,33 +15,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "GSstdraw.h"
 #include "GScolors.h"
 #include "GSprimitives.h"
 #include "GSbackground.h"
 #include "GStextures.h"
 
-#include "Universal_System/nlpo2.h"
+#include "Universal_System/roomsystem.h"
 #include "Universal_System/background_internal.h"
-#include "Universal_System/sprites_internal.h"
-#include "Universal_System/math_consts.h"
-
-#include <cstddef>
-#include <math.h>
-#include <string.h> // needed for querying ARB extensions
-
-namespace enigma_user {
-  extern int room_width, room_height;
-}
-namespace enigma {
-  extern size_t background_idmax;
-}
 
 namespace enigma_user
 {
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
 {
-
+  int* data = draw_get_pixels_ext(x, y, w, h);
+  enigma::backgroundstructarray_reallocate();
+  int bckid=enigma::background_idmax;
+  enigma::background_new(bckid, w, h, (unsigned char*)&data[0], removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
+  delete[] data;
+  enigma::background_idmax++;
+  return bckid;
 }
 
 void draw_background(int back, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)

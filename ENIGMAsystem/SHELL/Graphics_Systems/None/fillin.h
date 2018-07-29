@@ -117,9 +117,6 @@ namespace enigma_user
 	void draw_set_alpha_test_ref_value(unsigned val);
 	void draw_set_line_pattern(int pattern, int scale);
 
-	int draw_getpixel(int x,int y);
-	int draw_getpixel_ext(int x,int y);
-
 	extern int window_get_region_height_scaled();
 
 	void shader_set(int id);

@@ -109,27 +109,51 @@ void draw_set_line_pattern(int pattern, int scale)
 //   // Doing so is necessary for the function to work at its peak.
 //   // When ENIGMA generates configuration files, one should be included here.
 
-namespace enigma_user {
+namespace {
+
+void wrap_screen_coordinate(int &x, int &y)
+{
+  if (enigma_user::view_enabled)
+  {
+    x = x - enigma_user::view_xview[enigma_user::view_current];
+    y = enigma_user::view_hview[enigma_user::view_current] - (y - enigma_user::view_yview[enigma_user::view_current]) - 1;
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    //if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return 0;
+  }
+  else
+  {
+    y = enigma_user::room_height - y - 1;
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    //if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
+  }
+}
+
+} // anonymous namespace
+
+namespace enigma_user
+{
+
+int* draw_getpixels_ext(int x, int y, int w, int h)
+{
+  //wrap_screen_coordinate(x, y);
+  y = enigma_user::room_height - y - h;
+  int* pixels = new int[w * h];
+
+  #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
+    glReadPixels(x,y,w,h,GL_BGRA,GL_UNSIGNED_BYTE,&pixels[0]);
+  #elif defined __LITTLE_ENDIAN__ || defined __LITTLE_ENDIAN
+    glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,&pixels[0]);
+  #else
+    glReadPixels(x,y,w,h,GL_BGRA,GL_UNSIGNED_BYTE,&pixels[0]);
+  #endif
+  return pixels;
+}
 
 int draw_getpixel(int x,int y)
 {
-    if (view_enabled)
-    {
-        x = x - enigma_user::view_xview[enigma_user::view_current];
-        y = enigma_user::view_hview[enigma_user::view_current] - (y - enigma_user::view_yview[enigma_user::view_current]) - 1;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return 0;
-    }
-    else
-    {
-        y = enigma_user::room_height - y - 1;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
-    }
-
-    draw_batch_flush(batch_flush_deferred);
+  wrap_screen_coordinate(x, y);
 
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
@@ -148,23 +172,7 @@ int draw_getpixel(int x,int y)
 
 int draw_getpixel_ext(int x,int y)
 {
-    if (view_enabled)
-    {
-        x = x - enigma_user::view_xview[enigma_user::view_current];
-        y = enigma_user::view_hview[enigma_user::view_current] - (y - enigma_user::view_yview[enigma_user::view_current]) - 1;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return 0;
-    }
-    else
-    {
-        y = enigma_user::room_height - y - 1;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
-    }
-
-    draw_batch_flush(batch_flush_deferred);
+  wrap_screen_coordinate(x, y);
 
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;

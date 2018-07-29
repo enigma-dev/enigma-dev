@@ -85,8 +85,10 @@ namespace enigma_user
   void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float border_width, bool up);
   void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool up);
   int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsigned iter);
-  int draw_getpixel(int,int);
-  int draw_getpixel_ext(int, int);
+  int draw_getpixel(int x, int y);
+  int draw_getpixel_ext(int x, int y);
+  int* draw_getpixels(int x, int y, int w, int h);
+  int* draw_getpixels_ext(int x, int y, int w, int h);
 
   void draw_polygon_begin();
   void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color=-1);
@@ -94,6 +96,8 @@ namespace enigma_user
 
   #define draw_get_pixel draw_getpixel
   #define draw_get_pixel_ext draw_getpixel_ext
+  #define draw_get_pixels draw_getpixels
+  #define draw_get_pixels_ext draw_getpixels_ext
 }
 
 namespace enigma

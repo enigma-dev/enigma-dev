@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "GSstdraw.h"
 #include "GScolors.h"
 #include "GScolor_macros.h"
 #include "GSsprite.h"
@@ -26,10 +27,7 @@
 #include "Universal_System/sprites.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
-#include "Universal_System/math_consts.h"
 
-#include <cmath>
-#include <cstdlib>
 #include <string>
 using std::string;
 
@@ -65,17 +63,26 @@ namespace enigma_user
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
 {
-
+  int* data = draw_get_pixels_ext(x, y, w, h);
+  enigma::spritestructarray_reallocate();
+  int sprid=enigma::sprite_idmax;
+  enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
+  //TODO: Support toggling of precise.
+  enigma::sprite_set_subimage(sprid, 0, w, h, (unsigned char*)&data[0], (unsigned char*)&data[0], enigma::ct_precise);
+  delete[] data;
+  return sprid;
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
 {
-	return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
+  return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
 }
 
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth)
 {
-
+  int* data = draw_get_pixels_ext(x, y, w, h);
+  enigma::sprite_add_subimage(id, w, h, (unsigned char*)&data[0], (unsigned char*)&data[0], enigma::ct_precise); //TODO: Support toggling of precise.
+  delete[] data;
 }
 
 void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
