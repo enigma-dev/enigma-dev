@@ -107,48 +107,6 @@ void screen_init()
   draw_set_color(c_white);
 }
 
-int screen_save(string filename) //Assumes native integers are little endian
-{
-  oglmgr->EndShapesBatching();
-  unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
-
-  string ext = enigma::image_get_format(filename);
-
-  unsigned char *rgbdata = new unsigned char[sz*4];
-  GLint prevFbo;
-  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-  glPixelStorei(GL_PACK_ALIGNMENT, 1);
-  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-  glReadPixels(0,0,w,h, GL_BGRA, GL_UNSIGNED_BYTE, rgbdata);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-
-  int ret = image_save(filename, rgbdata, w, h, w, h, false);
-
-  delete[] rgbdata;
-  return ret;
-}
-
-int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
-{
-  oglmgr->EndShapesBatching();
-  unsigned sz = w*h;
-
-  string ext = enigma::image_get_format(filename);
-
-  unsigned char *rgbdata = new unsigned char[sz*4];
-  GLint prevFbo;
-  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-  glPixelStorei(GL_PACK_ALIGNMENT, 1);
-  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-  glReadPixels(x,window_get_region_height_scaled()-h-y,w,h, GL_BGRA, GL_UNSIGNED_BYTE, rgbdata);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-
-  int ret = image_save(filename, rgbdata, w, h, w, h, false);
-
-  delete[] rgbdata;
-  return ret;
-}
-
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
   x = (x / window_get_region_width()) * window_get_region_width_scaled();
   y = (y / window_get_region_height()) * window_get_region_height_scaled();

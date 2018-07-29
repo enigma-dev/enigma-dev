@@ -72,16 +72,6 @@ void screen_init()
   }
 }
 
-int screen_save(string filename) //Assumes native integers are little endian
-{
-
-}
-
-int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
-{
-
-}
-
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
   x = (x / window_get_region_width()) * window_get_region_width_scaled();
   y = (y / window_get_region_height()) * window_get_region_height_scaled();
