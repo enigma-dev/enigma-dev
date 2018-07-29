@@ -72,16 +72,6 @@ void screen_init()
   }
 }
 
-int screen_save(string filename) //Assumes native integers are little endian
-{
-  draw_batch_flush(batch_flush_deferred);
-}
-
-int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
-{
-  draw_batch_flush(batch_flush_deferred);
-}
-
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
   draw_batch_flush(batch_flush_deferred);
 

@@ -196,8 +196,6 @@ namespace enigma_user
 	extern int window_get_region_height();
 
 	void screen_init(){}
-	int screen_save(string filename){return -1;}
-	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h){return -1;}
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 	void display_set_gui_size(unsigned int width, unsigned int height){}
 

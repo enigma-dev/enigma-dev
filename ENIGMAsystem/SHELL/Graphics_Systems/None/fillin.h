@@ -139,8 +139,6 @@ namespace enigma_user
 
 	void screen_redraw();
 	void screen_init();
-	int screen_save(string filename);
-	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h);
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
 	void display_set_gui_size(unsigned int width, unsigned int height);
 	unsigned int display_get_gui_width();
