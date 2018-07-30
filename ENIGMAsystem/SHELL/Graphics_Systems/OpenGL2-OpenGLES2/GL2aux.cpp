@@ -14,12 +14,13 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include <cstring>
+
+#include "GLaux.h"
 #include "OpenGLHeaders.h"
-#include "GL2aux.h"
+
+#include <cstring>
 
 namespace enigma {
-
 	bool gl_extension_supported(std::string extension){
 		return (std::strstr((const char*)glGetString(GL_EXTENSIONS),extension.c_str())!=NULL);
 	}

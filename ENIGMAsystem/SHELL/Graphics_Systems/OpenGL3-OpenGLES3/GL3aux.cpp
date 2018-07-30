@@ -14,12 +14,13 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include <cstring>
+
+#include "GLaux.h"
 #include "OpenGLHeaders.h"
-#include "GL3aux.h"
+
+#include <cstring>
 
 namespace enigma {
-
 	bool gl_extension_supported(std::string extension){
 		GLint n, i;
 		glGetIntegerv(GL_NUM_EXTENSIONS, &n);
