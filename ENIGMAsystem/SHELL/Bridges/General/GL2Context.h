@@ -19,7 +19,7 @@
 #define OPENGL2CONTEXTMANAGER
 
 #include "OpenGLHeaders.h"
-#include "Graphics_Systems/OpenGL2-OpenGLES2/GL2profiler.h"
+#include "Graphics_Systems/OpenGL-OpenGLES/GLprofiler.h"
 #include "Graphics_Systems/General/GSmodel.h"
 
 #include <vector>

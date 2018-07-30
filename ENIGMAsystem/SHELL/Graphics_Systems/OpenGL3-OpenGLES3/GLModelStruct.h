@@ -23,7 +23,7 @@
 #include "Graphics_Systems/General/GSmath.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-#include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
+#include "GLcontext.h" //Needed to get if bound texture == -1
 #include "GLSLshader.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"

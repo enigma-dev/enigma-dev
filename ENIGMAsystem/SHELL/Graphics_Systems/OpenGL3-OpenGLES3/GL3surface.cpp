@@ -20,7 +20,7 @@
 
 #include "GL3TextureStruct.h"
 #include "OpenGLHeaders.h"
-#include "Graphics_Systems/OpenGL/GLSurfaceStruct.h"
+#include "Graphics_Systems/OpenGL-OpenGLES/GLSurfaceStruct.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolor_macros.h"

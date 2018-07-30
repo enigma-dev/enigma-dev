@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef GL2_PROFILER_H
-#define GL2_PROFILER_H
+#ifndef ENIGMA_GL_PROFILER_H
+#define ENIGMA_GL_PROFILER_H
 
 #include <vector>
 

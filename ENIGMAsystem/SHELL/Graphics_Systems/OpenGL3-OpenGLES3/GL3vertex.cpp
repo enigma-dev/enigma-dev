@@ -17,7 +17,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GL3profiler.h"
+#include "GLprofiler.h"
 #include "GL3shader.h"
 #include "GLSLshader.h"
 

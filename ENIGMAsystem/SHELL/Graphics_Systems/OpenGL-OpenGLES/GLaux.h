@@ -14,8 +14,8 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#ifndef GL_AUX_H
-#define GL_AUX_H
+#ifndef ENIGMA_GL_AUX_H
+#define ENIGMA_GL_AUX_H
 
 #include <string>
 
