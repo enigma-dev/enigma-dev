@@ -16,7 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL2Context.h"
+#include "Bridges/General/GLmanager.h"
 
 #include "GL2TextureStruct.h"
 #include "OpenGLHeaders.h"

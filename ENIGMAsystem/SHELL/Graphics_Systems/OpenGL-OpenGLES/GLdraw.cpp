@@ -21,7 +21,7 @@
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Universal_System/roomsystem.h"
-#include "Bridges/General/GL2Context.h"
+#include "Bridges/General/GLmanager.h"
 #include "GLSLshader.h"
 #include "GLshader.h"
 

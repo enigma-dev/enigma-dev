@@ -16,7 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GLcontext.h"
+#include "GLmanager.h"
 #include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSmatrix.h"

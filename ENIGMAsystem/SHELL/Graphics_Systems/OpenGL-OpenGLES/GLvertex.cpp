@@ -28,7 +28,7 @@
 
 #include "OpenGLHeaders.h"
 
-#include "GLcontext.h" //Needed to get if bound texture == -1
+#include "GLmanager.h" //Needed to get if bound texture == -1
 
 #define bind_array_buffer(vbo) if (enigma::bound_vbo != vbo) glBindBuffer( GL_ARRAY_BUFFER, enigma::bound_vbo = vbo );
 #define bind_element_buffer(vboi) if (enigma::bound_vboi != vboi) glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, enigma::bound_vboi = vboi );

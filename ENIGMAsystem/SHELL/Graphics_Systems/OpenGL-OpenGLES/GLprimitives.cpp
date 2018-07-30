@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GLcontext.h"
+#include "GLmanager.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GStextures.h"

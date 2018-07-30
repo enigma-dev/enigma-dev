@@ -25,7 +25,7 @@
 #include "Universal_System/background_internal.h"
 #include "Universal_System/sprites_internal.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Bridges/General/GL2Context.h"
+#include "Bridges/General/GLmanager.h"
 #include "GL2TextureStruct.h"
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE

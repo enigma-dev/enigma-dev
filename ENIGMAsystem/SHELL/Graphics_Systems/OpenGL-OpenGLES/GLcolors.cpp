@@ -19,7 +19,7 @@
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-#include "Bridges/General/GL3Context.h"
+#include "Bridges/General/GLmanager.h"
 
 #include <math.h>
 
