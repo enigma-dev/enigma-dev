@@ -16,13 +16,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "GLcontext.h"
 #include "OpenGLHeaders.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GSmath.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GSmath.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
-#include "Bridges/General/GL2Context.h"
+
 #include <math.h>
 
 #define M_PI    3.14159265358979323846
@@ -76,7 +77,7 @@ namespace enigma_user
       enigma::transform_needs_update = true;
     // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
     // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
-    // See also OpenGL2/GL2d3d.cpp Direct3D9/DX9d3d.cpp OpenGL1/GLd3d.cpp
+    // See also OpenGL3/GL3d3d.cpp Direct3D9/DX9d3d.cpp OpenGL1/GLd3d.cpp
   }
 
   void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)

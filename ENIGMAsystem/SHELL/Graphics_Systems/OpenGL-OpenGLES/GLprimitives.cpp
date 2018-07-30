@@ -15,16 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL2Context.h"
-#include "../General/GScolors.h"
-#include "../General/GSprimitives.h"
-#include "../General/GStextures.h"
-#include "../General/GSmodel.h"
+#include "GLcontext.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSmodel.h"
 
-#include <stdio.h>
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
-#include "Widget_Systems/widgets_mandatory.h"
+#include <stdio.h>
 
 namespace enigma_user
 {
