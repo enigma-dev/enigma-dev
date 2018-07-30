@@ -39,7 +39,7 @@ bool array_equals(const var& arr1, const var& arr2) {
   }
   return true;
 }
-void array_copy(var& dest, size_t dest_index, var& src, size_t src_index, size_t length) {
+void array_copy(var& dest, size_t dest_index, const var& src, size_t src_index, size_t length) {
   for (size_t i = 0; i < length; i++) {
     dest[dest_index + i] = src[src_index + i];
   }
