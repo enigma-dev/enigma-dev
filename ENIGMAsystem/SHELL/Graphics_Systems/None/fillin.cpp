@@ -167,7 +167,6 @@ namespace enigma_user
 	extern int window_get_region_height_scaled();
 
 	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig){return -1;}
-	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig){return -1;}
 	void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth){}
 
 	int glsl_shader_create(int type){return -1;}

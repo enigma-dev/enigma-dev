@@ -72,10 +72,6 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
 
 }
 
-int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
-	return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
-}
-
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
 
 }

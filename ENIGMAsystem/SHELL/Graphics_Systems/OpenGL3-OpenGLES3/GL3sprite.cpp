@@ -47,10 +47,6 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
   return sprid;
 }
 
-int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
-  return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
-}
-
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
   int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
