@@ -1,1 +1,1 @@
-#version 120 core
+#version 120
