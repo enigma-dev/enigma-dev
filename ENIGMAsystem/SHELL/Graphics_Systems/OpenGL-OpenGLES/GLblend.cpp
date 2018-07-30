@@ -16,8 +16,8 @@
 **/
 
 #include "OpenGLHeaders.h"
-#include "../General/GSblend.h"
-#include "Bridges/General/GL2Context.h"
+#include "Graphics_Systems/General/GSblend.h"
+#include "GLcontext.h"
 namespace enigma
 {
   extern int currentblendmode[2];
