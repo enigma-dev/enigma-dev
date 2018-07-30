@@ -52,7 +52,6 @@ std::string writeTempDataFile(char *bytes, size_t length) {
   char temp[] = "gmk_data.XXXXXX";
   int fd = mkstemp(temp);
   if (fd == -1) return "";
-  tempFilesCreated.push_back(temp);
   write(fd, bytes, length);
   close(fd);
   return temp;
@@ -186,7 +185,9 @@ class Decoder {
 
   void processTempFileFutures() {
     for (auto &tempFilePair : tempFileFuturesCreated) {
-      tempFilePair.second->append(tempFilePair.first.get());
+      std::string temp_file_path = tempFilePair.first.get();
+      tempFilePair.second->append(temp_file_path);
+      tempFilesCreated.push_back(temp_file_path);
     }
   }
 
