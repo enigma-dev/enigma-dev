@@ -23,12 +23,3 @@ namespace enigma
   extern bool glew_isgo;
   extern bool pbo_isgo;
 }
-
-#include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/GSd3d.h"
-#include "Graphics_Systems/General/GSstdraw.h"
-#include "Graphics_Systems/General/GSblend.h"
-#include "Graphics_Systems/General/GSsurface.h"
-#include "Graphics_Systems/General/GSscreen.h"
-#include "Graphics_Systems/General/GSvertex.h"

@@ -15,25 +15,22 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <iostream>
-#include <string>
-#include <stdlib.h>     /* malloc, free, rand */
-
 #include "Bridges/General/GL2Context.h"
-#include "OpenGLHeaders.h"
-#include "../General/GSmatrix.h" //For d3d_set_projection_ortho
-using namespace std;
 #include "GLmain.h"
 #include "GLshader.h"
 #include "GLSLshader.h"
-#include "Universal_System/shaderstruct.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h" // Room dimensions.
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSmatrix.h" //For d3d_set_projection_ortho
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
+#include "Universal_System/shaderstruct.h"
+#include "Universal_System/roomsystem.h" // Room dimensions.
+#include "Universal_System/var4.h"
+
+using std::string;
 
 ContextManager* oglmgr = NULL;
 
-namespace enigma_user{
+namespace enigma_user {
 	extern string shader_get_name(int i);
 }
 
