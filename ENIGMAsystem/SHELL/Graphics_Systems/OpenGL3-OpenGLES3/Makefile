@@ -1,3 +1,4 @@
+override CXXFLAGS += -IGraphics_Systems/OpenGL3-OpenGLES3/
 SOURCES += $(wildcard Graphics_Systems/OpenGL3-OpenGLES3/*.cpp)
 
 SHADER_FOLDER := Graphics_Systems/OpenGL3-OpenGLES3/shaders

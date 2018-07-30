@@ -1,3 +1,4 @@
+override CXXFLAGS += -IGraphics_Systems/OpenGL2-OpenGLES2/
 SOURCES += $(wildcard Graphics_Systems/OpenGL2-OpenGLES2/*.cpp)
 
 SHADER_FOLDER := Graphics_Systems/OpenGL2-OpenGLES2/shaders
