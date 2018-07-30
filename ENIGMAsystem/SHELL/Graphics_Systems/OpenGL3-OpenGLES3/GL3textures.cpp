@@ -26,7 +26,7 @@
 #include "Universal_System/sprites_internal.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Bridges/General/GL3Context.h"
-#include "GL3aux.h" //glExtension_supported
+#include "GLaux.h" //glExtension_supported
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF

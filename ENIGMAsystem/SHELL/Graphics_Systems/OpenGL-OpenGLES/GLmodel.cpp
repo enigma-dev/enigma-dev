@@ -15,7 +15,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include "GL2ModelStruct.h"
+#include "GLModelStruct.h"
 #include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSmodel.h"
