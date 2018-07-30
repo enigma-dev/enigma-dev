@@ -147,7 +147,78 @@ namespace enigma
             glDeleteProgram(shaderprogram);
         }
     };
+
+    extern vector<enigma::Shader*> shaders;
+    extern vector<enigma::ShaderProgram*> shaderprograms;
+
+    extern unsigned bound_shader;
+    bool UATypeUIComp(UAType i, unsigned int j);
+    bool UATypeIComp(UAType i, int j);
+    bool UATypeFComp(UAType i, float j);
 }
+
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_uniform(uniter,location,usize)\
+    string name = enigma::shaderprograms[enigma::bound_shader]->name;\
+    char str[128];\
+    if (name == ""){\
+        sprintf(str, "Program[%i]", enigma::bound_shader);\
+    }else{\
+        sprintf(str, "Program[%s = %i]", name.c_str(), enigma::bound_shader);\
+    }\
+    if (location < 0) { printf("%s - Uniform location < 0 given (%i)!\n", str, location); return; }\
+    std::unordered_map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
+    if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
+        printf("%s - Uniform at location %i not found!\n", str, location);\
+        return;\
+    }else if ( uniter->second.size != usize ){\
+        printf("%s - Uniform [%s] at location %i with %i arguments is accesed by a function with %i arguments!\n", str, uniter->second.name.c_str(), location, uniter->second.size, usize);\
+    }
+
+  #define get_attribute(atiter,location)\
+    string name = enigma::shaderprograms[enigma::bound_shader]->name;\
+    char str[128];\
+    if (name == ""){\
+        sprintf(str, "Program[%i]", enigma::bound_shader);\
+    }else{\
+        sprintf(str, "Program[%s = %i]", name.c_str(), enigma::bound_shader);\
+    }\
+    if (location < 0) { printf("%s - Attribute location < 0 given (%i)!\n", str, location); return; }\
+    std::unordered_map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader]->attributes.find(location);\
+    if (atiter == enigma::shaderprograms[enigma::bound_shader]->attributes.end()){\
+        printf("%s - Attribute at location %i not found!\n", str, location);\
+        return;\
+    }
+
+    #define get_program(ptiter,program,err)\
+    if (program < 0) { printf("Program id [%i] < 0 given!\n", program); return err; }\
+    if (program >= enigma::shaderprograms.size()) { printf("Program id [%i] > size() [%i] given!\n", program, enigma::shaderprograms.size()); return err; }\
+    if (enigma::shaderprograms[program] == nullptr) { printf("Program with id [%i] is deleted!\n", program); return err; }\
+    enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
+#else
+    #define get_uniform(uniter,location,usize)\
+    if (location < 0) return; \
+    std::unordered_map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
+    if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
+        return;\
+    }
+
+    #define get_attribute(atiter,location)\
+    if (location < 0) return; \
+    std::unordered_map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader]->attributes.find(location);\
+    if (atiter == enigma::shaderprograms[enigma::bound_shader]->attributes.end()){\
+        return;\
+    }
+
+    #define get_program(ptiter,program,err)\
+    if (program < 0) { return err; }\
+    if (program >= enigma::shaderprograms.size()) { return err; }\
+    if (enigma::shaderprograms[program] == nullptr) { return err; }\
+    enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
+#endif
 
 //Specialize std::hash for attribute hashing
 /*namespace std
@@ -166,8 +237,5 @@ namespace enigma
         }
     };
 }*/
-
-//extern vector<enigma::Shader*> shaders;
-//extern vector<enigma::ShaderProgram*> shaderprograms;
 
 #endif
