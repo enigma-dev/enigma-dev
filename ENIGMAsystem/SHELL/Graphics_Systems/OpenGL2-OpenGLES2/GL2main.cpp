@@ -23,7 +23,7 @@
 #include "OpenGLHeaders.h"
 #include "../General/GSmatrix.h" //For d3d_set_projection_ortho
 using namespace std;
-#include "OPENGL2Std.h"
+#include "GLmain.h"
 #include "GLshader.h"
 #include "GLSLshader.h"
 #include "Universal_System/shaderstruct.h"

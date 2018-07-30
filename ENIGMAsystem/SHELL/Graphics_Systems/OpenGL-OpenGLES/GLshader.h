@@ -16,8 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef GL_SHADER_H
-#define GL_SHADER_H
+#ifndef ENIGMA_GL_SHADER_H
+#define ENIGMA_GL_SHADER_H
 
 #include "OpenGLHeaders.h"
 #include <string>

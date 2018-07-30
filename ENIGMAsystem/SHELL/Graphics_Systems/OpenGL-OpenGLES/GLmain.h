@@ -15,15 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
-
-//#include "OpenGLHeaders.h"
-
 namespace enigma
 {
   extern unsigned char currentcolor[4];
@@ -33,11 +24,11 @@ namespace enigma
   extern bool pbo_isgo;
 }
 
-#include "../General/GScolors.h"
-#include "../General/GSprimitives.h"
-#include "../General/GSd3d.h"
-#include "../General/GSstdraw.h"
-#include "../General/GSblend.h"
-#include "../General/GSsurface.h"
-#include "../General/GSscreen.h"
-#include "../General/GSvertex.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSstdraw.h"
+#include "Graphics_Systems/General/GSblend.h"
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSvertex.h"
