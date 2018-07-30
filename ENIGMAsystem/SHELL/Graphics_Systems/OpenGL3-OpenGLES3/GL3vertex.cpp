@@ -18,7 +18,7 @@
 **/
 
 #include "GLprofiler.h"
-#include "GL3shader.h"
+#include "GLshader.h"
 #include "GLSLshader.h"
 
 #include "Graphics_Systems/General/GSvertex_impl.h"

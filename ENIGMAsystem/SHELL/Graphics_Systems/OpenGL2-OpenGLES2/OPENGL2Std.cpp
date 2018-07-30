@@ -24,7 +24,7 @@
 #include "../General/GSmatrix.h" //For d3d_set_projection_ortho
 using namespace std;
 #include "OPENGL2Std.h"
-#include "GL2shader.h"
+#include "GLshader.h"
 #include "GLSLshader.h"
 #include "Universal_System/shaderstruct.h"
 #include "Universal_System/var4.h"

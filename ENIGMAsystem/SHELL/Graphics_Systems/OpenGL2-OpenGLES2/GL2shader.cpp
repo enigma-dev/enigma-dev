@@ -15,6 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/General/GL2Context.h"
+#include "OpenGLHeaders.h"
+#include "../General/GStextures.h"
+#include "GLshader.h"
+#include "GLSLshader.h"
+#include "Graphics_Systems/General/GSshader.h"
+
 #include <math.h>
 
 #include <stdio.h>      /* printf, scanf, NULL */
@@ -26,13 +33,6 @@
 #include <sstream>
 
 #include <vector>
-
-#include "Bridges/General/GL2Context.h"
-#include "OpenGLHeaders.h"
-#include "../General/GStextures.h"
-#include "GL2shader.h"
-#include "GLSLshader.h"
-#include "Graphics_Systems/General/GSshader.h"
 
 #ifdef DEBUG_MODE
   #include <string>

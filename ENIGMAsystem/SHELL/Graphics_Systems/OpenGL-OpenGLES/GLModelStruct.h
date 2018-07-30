@@ -27,7 +27,7 @@
 #include "GLSLshader.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
-#include "GL2shader.h"
+#include "GLshader.h"
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>

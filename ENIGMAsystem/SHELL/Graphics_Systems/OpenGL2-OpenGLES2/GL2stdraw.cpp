@@ -23,7 +23,7 @@
 #include "Universal_System/roomsystem.h"
 #include "Bridges/General/GL2Context.h"
 #include "GLSLshader.h"
-#include "GL2shader.h"
+#include "GLshader.h"
 
 #include <stdio.h>
 #include <math.h>
