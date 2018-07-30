@@ -18,6 +18,8 @@
 #ifndef ENIGMA_GLSLSHADER_H
 #define ENIGMA_GLSLSHADER_H
 
+#include "OpenGLHeaders.h"
+
 //#include <functional> //For std::hash
 #include <vector>
 #include <string>
@@ -25,8 +27,6 @@
 using std::string;
 using std::vector;
 using std::unordered_map;
-
-#include "OpenGLHeaders.h"
 
 extern GLenum shadertypes[];
 
