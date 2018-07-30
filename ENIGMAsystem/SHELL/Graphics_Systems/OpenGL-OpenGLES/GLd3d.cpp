@@ -24,7 +24,7 @@
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
-#include "Bridges/General/GL2Context.h"
+#include "GLcontext.h"
 
 #include <math.h>
 #include <floatcomp.h>
