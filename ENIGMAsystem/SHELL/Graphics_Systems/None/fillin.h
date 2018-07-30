@@ -157,19 +157,6 @@ namespace enigma_user
 	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig);
 	void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth);
 
-	void shader_set(int id);
-	void shader_reset();
-	int shader_get_uniform(int program, string name);
-	int shader_get_sampler_index(int program, string name);
-	void shader_set_uniform_f(int location, float v0);
-	void shader_set_uniform_f(int location, float v0, float v1);
-	void shader_set_uniform_f(int location, float v0, float v1, float v2);
-	void shader_set_uniform_f(int location, float v0, float v1, float v2, float v3);
-	void shader_set_uniform_i(int location, int v0);
-	void shader_set_uniform_i(int location, int v0, int v1);
-	void shader_set_uniform_i(int location, int v0, int v1, int v2);
-	void shader_set_uniform_i(int location, int v0, int v1, int v2, int v3);
-
 	extern int window_get_width();
 	extern int window_get_height();
 	extern int window_get_region_width();
