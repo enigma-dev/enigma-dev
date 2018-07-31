@@ -34,7 +34,7 @@ namespace enigma_user {
 var array_create(size_t size, variant value=0);
 var array_create_2d(size_t length, size_t height, variant value=0);
 bool array_equals(const var& arr1, const var& arr2);
-void array_copy(var& dest, size_t dest_index, var& src, size_t src_index, size_t length);
+void array_copy(var& dest, size_t dest_index, const var& src, size_t src_index, size_t length);
 int array_length_1d(const var& v);
 int array_length_2d(const var& v, int n);
 int array_height_2d(const var& v);
