@@ -37,7 +37,6 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 
 #include <string>
-#include <cstdio>
 #include <limits>
 
 using namespace enigma;

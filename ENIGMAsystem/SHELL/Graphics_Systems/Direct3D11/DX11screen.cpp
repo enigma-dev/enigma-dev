@@ -16,20 +16,17 @@
 **/
 
 #include "Bridges/General/DX11Context.h"
-#include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSscreen.h"
-#include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GStextures.h"
-#include "Graphics_Systems/General/GScolors.h"
+#include "Direct3D11Headers.h"
 
 #include "Universal_System/roomsystem.h"
 #include "Platforms/General/PFwindow.h"
 
 #include <string>
-#include <cstdio>
 
 using namespace enigma;
-using namespace std;
+
+using std::string;
 
 namespace enigma
 {

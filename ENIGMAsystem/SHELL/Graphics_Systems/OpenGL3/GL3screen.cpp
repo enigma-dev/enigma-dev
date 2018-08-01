@@ -16,10 +16,7 @@
 **/
 
 #include "Bridges/General/GL3Context.h"
-#include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSscreen.h"
-#include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 
 #include "Universal_System/image_formats.h"
@@ -27,13 +24,11 @@
 #include "Platforms/General/PFwindow.h"
 
 #include <string>
-#include <cstdio>
-
-//WE SHOULDN'T DO THIS! Don't specify namespaces like this - Harijs
-using namespace std;
 
 using namespace enigma;
 using namespace enigma_user;
+
+using std::string;
 
 namespace enigma
 {
@@ -56,7 +51,11 @@ void scene_end() {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::msaa_fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     //TODO: Change the code below to fix this to size properly to views
-    glBlitFramebuffer(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(
+      0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(),
+      0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(),
+      GL_COLOR_BUFFER_BIT, GL_NEAREST
+    );
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
     // glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
   }

@@ -154,7 +154,7 @@ namespace enigma_user
 	int draw_get_msaa_maxlevel(){return 0;}
 	bool draw_get_msaa_supported(){return false;}
 	void draw_set_msaa_enabled(bool enable){}
-	void draw_enable_alphablend(bool enable){}
+	void draw_set_blend(bool enable){}
 	bool draw_get_alpha_test(){return false;}
 	unsigned draw_get_alpha_test_ref_value(){return 0;}
 	void draw_set_alpha_test(bool enable){}
