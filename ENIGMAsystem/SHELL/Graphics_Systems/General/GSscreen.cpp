@@ -217,6 +217,12 @@ unsigned int display_get_gui_height(){
 
 void screen_init()
 {
+  // this function is for generically initializing render state that
+  // applies to all of the graphics systems
+  // if a system has state that needs initiailized that is unique to
+  // that graphics system only, then it should be dealt with from
+  // graphicssystem_initialize
+
   enigma::gui_width = window_get_region_width();
   enigma::gui_height = window_get_region_height();
 
