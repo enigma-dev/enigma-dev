@@ -252,6 +252,7 @@ void screen_init()
   // configure default rendering state
   texture_reset();
   draw_set_color(c_white);
+  draw_set_color_write_enable(true, true, true, true);
   draw_set_alpha(1.0);
   draw_set_alpha_test(false);
   draw_set_alpha_test_ref_value(0);

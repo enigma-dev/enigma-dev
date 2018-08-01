@@ -54,14 +54,8 @@ namespace enigma
   {
     oglmgr = new ContextManager();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glDisable(GL_DEPTH_TEST);
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glBindTexture(GL_TEXTURE_2D,0);
 
     init_shaders();
     // read shaders into graphics system structure and compile and link them if needed
@@ -112,11 +106,6 @@ namespace enigma
     //END DEFAULT SHADER
 
     graphics_initialize_samplers();
-
-    using enigma_user::room_width;
-    using enigma_user::room_height;
-    glViewport(0,0,(int)room_width,(int)room_height);
-    enigma_user::d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
 
     //In GL3.3 Core VAO is mandatory. So we create one and never change it
     GLuint vertexArrayObject;
