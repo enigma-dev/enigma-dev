@@ -53,7 +53,7 @@ void draw_set_msaa_enabled(bool enable)
 
 }
 
-void draw_enable_alphablend(bool enable) {
+void draw_set_blend(bool enable) {
 	d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, enable);
 }
 

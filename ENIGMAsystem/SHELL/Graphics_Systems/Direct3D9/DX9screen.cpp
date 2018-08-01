@@ -46,46 +46,6 @@ void scene_end() {
 namespace enigma_user
 {
 
-void screen_init()
-{
-  enigma::gui_width = window_get_region_width();
-  enigma::gui_height = window_get_region_height();
-
-  d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-  d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-
-  if (!view_enabled)
-  {
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
-  } else {
-    for (view_current = 0; view_current < 7; view_current++) {
-      if (view_visible[(int)view_current]) {
-        int vc = (int)view_current;
-
-        screen_set_viewport(view_xport[vc], view_yport[vc],
-          (window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
-        d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], view_angle[vc]);
-        break;
-      }
-    }
-  }
-
-  d3dmgr->SetRenderState(D3DRS_LIGHTING, FALSE);
-  d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
-  // make the same default as GL, keep in mind GM uses reverse depth ordering for ortho projections, where the higher the z value the further into the screen you are
-  // but that is currently taken care of by using 32000/-32000 for znear/zfar respectively
-  d3dmgr->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESS);
-  d3dmgr->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-  d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-  d3dmgr->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
-  d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-  d3dmgr->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
-  d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-  d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-  draw_set_color(c_white);
-}
-
 int screen_save(string filename) //Assumes native integers are little endian
 {
 	string ext = enigma::image_get_format(filename);
@@ -153,12 +113,6 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   sy = (window_get_height() - window_get_region_height_scaled()) / 2;
 	D3DVIEWPORT9 pViewport = { sx + x, sy + y, width, height, 0, 1.0f };
 	d3dmgr->SetViewport(&pViewport);
-}
-
-//TODO: These need to be in some kind of General
-void display_set_gui_size(unsigned int width, unsigned int height) {
-	enigma::gui_width = width;
-	enigma::gui_height = height;
 }
 
 }

@@ -16,6 +16,8 @@
 **/
 
 #include "GSscreen.h"
+#include "GSstdraw.h"
+#include "GStextures.h"
 #include "GSsprite.h"
 #include "GStilestruct.h"
 #include "GSbackground.h"
@@ -23,6 +25,7 @@
 #include "GSmatrix.h"
 #include "GSprimitives.h"
 #include "GSvertex.h"
+#include "GSblend.h"
 #include "GScolors.h"
 
 #include "Universal_System/background.h"
@@ -199,12 +202,63 @@ static inline void draw_gui()
 
 namespace enigma_user {
 
+void display_set_gui_size(unsigned int width, unsigned int height) {
+	enigma::gui_width = width;
+	enigma::gui_height = height;
+}
+
 unsigned int display_get_gui_width(){
   return enigma::gui_width;
 }
 
 unsigned int display_get_gui_height(){
   return enigma::gui_height;
+}
+
+void screen_init()
+{
+  enigma::gui_width = window_get_region_width();
+  enigma::gui_height = window_get_region_height();
+
+  // first we clear the color and depth buffers to the window color from game settings
+  enigma_user::draw_clear(c_black);
+  enigma_user::d3d_clear_depth();
+
+  if (!view_enabled)
+  {
+    // clear the area of the room to the background color
+    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+    d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
+    enigma_user::draw_clear(background_color);
+  } else {
+    // clear all visible views to the background color
+    for (view_current = 0; view_current < 7; view_current++)
+    {
+      if (view_visible[(int)view_current])
+      {
+        int vc = (int)view_current;
+        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
+        d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
+        enigma_user::draw_clear(background_color);
+      }
+    }
+  }
+
+  // configure default rendering state
+  texture_reset();
+  draw_set_color(c_white);
+  draw_set_alpha(1.0);
+  draw_set_alpha_test(false);
+  draw_set_alpha_test_ref_value(0);
+  draw_set_blend(true);
+  draw_set_blend_mode(bm_normal);
+
+  // configure default 3D-related rendering state
+  d3d_set_hidden(false);
+  d3d_set_culling(false);
+  d3d_set_shading(true);
+  d3d_set_lighting(false);
+  d3d_set_zwriteenable(true);
 }
 
 void screen_redraw()
