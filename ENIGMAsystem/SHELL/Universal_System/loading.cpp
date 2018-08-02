@@ -37,11 +37,11 @@ namespace enigma_user
   //FIXME: These two functions are declared in mathnc.h but we arent allowed to include that here
   extern int random_set_seed(int seed);
   extern int mtrandom_seed(int x);
-  
+
   extern const char *resource_file_path;
 } //namespace enigma_user
 
-namespace enigma 
+namespace enigma
 {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
   extern void timeline_system_initialize();
@@ -73,8 +73,8 @@ namespace enigma
 
     do { // Allows break
       FILE* resfile;
-      if (resource_file_path) {
-        if (!(resfile = fopen(resource_file_path,"rb"))) {
+      if (enigma_user::resource_file_path) {
+        if (!(resfile = fopen(enigma_user::resource_file_path,"rb"))) {
           show_error("Resource load fail: exe unopenable",0);
           break;
         }
@@ -86,7 +86,7 @@ namespace enigma
           break;
         }
       }
-    
+
       int nullhere;
       // Read the magic number so we know we're looking at our own data
       fseek(resfile, -8, SEEK_END);

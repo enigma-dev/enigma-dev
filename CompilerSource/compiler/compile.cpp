@@ -167,7 +167,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   ide_dia_clear();
   ide_dia_open();
   cout << "Initialized." << endl;
-  
+
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
   string compilepath = CURRENT_PLATFORM_NAME "/" + compilerInfo.target_platform + "/" + name;
@@ -385,6 +385,9 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
   wto << license;
 
+  wto << "namespace enigma_user {\n";
+  wto << "const char *resource_file_path=\"" << compilerInfo.exe_vars["RESOURCES"] << "\";\n";
+  wto << "}\n";
 
   stringstream ss;
 
@@ -618,7 +621,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
   make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
   make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
-  
+
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")
       make += key.first + "=\"" + key.second + "\" ";
