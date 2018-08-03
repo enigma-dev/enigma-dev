@@ -214,19 +214,42 @@ unsigned int display_get_gui_height(){
   return enigma::gui_height;
 }
 
-void screen_init()
-{
+void screen_init_state() {
   // this function is for generically initializing render state that
-  // applies to all of the graphics systems
+  // applies to all of the graphics systems a SINGLE time during startup
   // if a system has state that needs initiailized that is unique to
   // that graphics system only, then it should be dealt with from
-  // graphicssystem_initialize
+  // graphicssystem_initialize during startup
+  // NOTE: DO NOT call this during room transition (GameMaker/GMS doesn't)
+
+  // configure default rendering state
+  texture_reset();
+  draw_set_color(c_white);
+  draw_set_color_write_enable(true, true, true, true);
+  draw_set_alpha(1.0);
+  draw_set_alpha_test(false);
+  draw_set_alpha_test_ref_value(0);
+  draw_set_blend(true);
+  draw_set_blend_mode(bm_normal);
+
+  // configure default 3D-related rendering state
+  d3d_set_hidden(false);
+  d3d_set_culling(false);
+  d3d_set_shading(true);
+  d3d_set_lighting(false);
+  d3d_set_zwriteenable(true);
+}
+
+void screen_init()
+{
+  // this function is for resetting the views and projection matrix
+  // during a room transition
 
   enigma::gui_width = window_get_region_width();
   enigma::gui_height = window_get_region_height();
 
   // first we clear the color and depth buffers to the window color from game settings
-  enigma_user::draw_clear(c_black);
+  enigma_user::draw_clear(window_get_color());
   enigma_user::d3d_clear_depth();
 
   if (!view_enabled)
@@ -248,23 +271,6 @@ void screen_init()
       }
     }
   }
-
-  // configure default rendering state
-  texture_reset();
-  draw_set_color(c_white);
-  draw_set_color_write_enable(true, true, true, true);
-  draw_set_alpha(1.0);
-  draw_set_alpha_test(false);
-  draw_set_alpha_test_ref_value(0);
-  draw_set_blend(true);
-  draw_set_blend_mode(bm_normal);
-
-  // configure default 3D-related rendering state
-  d3d_set_hidden(false);
-  d3d_set_culling(false);
-  d3d_set_shading(true);
-  d3d_set_lighting(false);
-  d3d_set_zwriteenable(true);
 }
 
 void screen_redraw()
