@@ -16,8 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <sstream> // std::stringstream, std::stringbuf
-
 #include "ASYNCdialog.h"
 #include "Widget_Systems/General/WSdialogs.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -33,6 +31,7 @@
 #include <thread>
 #include <chrono>
 #include <vector>
+
 using namespace enigma_user;
 
 namespace enigma {
