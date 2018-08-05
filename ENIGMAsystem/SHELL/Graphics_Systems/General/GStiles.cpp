@@ -34,6 +34,11 @@
 
 #include <algorithm>
 
+namespace {
+    bool tiles_are_dirty = true;
+    enigma::bkinxop bkinxcomp;
+}
+
 namespace enigma
 {
     int tile_vertex_buffer = -1, tile_index_buffer = -1;
@@ -41,10 +46,6 @@ namespace enigma
     //The structure is like this [render batch][batch info]
     //batch info - 0 = texture to use, 1 = vertices to render,
     std::map<int,std::vector<std::vector<int> > > tile_layer_metadata;
-
-    bool tiles_are_dirty = true;
-
-    bkinxop bkinxcomp;
 
     static void draw_tile(int &ind, int index, int vertex, int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
     {
@@ -86,23 +87,23 @@ namespace enigma
         tiles_are_dirty = false;
 
         static int vertexFormat = -1;
-        if (vertexFormat == -1) {
+        if (!enigma_user::vertex_format_exists(vertexFormat)) {
             enigma_user::vertex_format_begin();
             enigma_user::vertex_format_add_position();
             enigma_user::vertex_format_add_textcoord();
             enigma_user::vertex_format_add_color();
             vertexFormat = enigma_user::vertex_format_end();
         }
-        if (tile_vertex_buffer == -1) {
+        // Create a vertex buffer or clear the existing one
+        if (!enigma_user::vertex_exists(tile_vertex_buffer))
             tile_vertex_buffer = enigma_user::vertex_create_buffer();
-        } else {
+        else
             enigma_user::vertex_clear(tile_vertex_buffer);
-        }
-        if (tile_index_buffer == -1) {
+        // Create an index buffer or clear the existing one
+        if (!enigma_user::index_exists(tile_vertex_buffer))
             tile_index_buffer = enigma_user::index_create_buffer();
-        } else {
+        else
             enigma_user::index_clear(tile_index_buffer);
-        }
 
         enigma_user::vertex_begin(tile_vertex_buffer, vertexFormat);
         enigma_user::index_begin(tile_index_buffer, enigma_user::index_type_ushort);
@@ -146,12 +147,16 @@ namespace enigma
 
     void delete_tiles()
     {
-        if (tile_vertex_buffer != -1) enigma_user::vertex_delete_buffer(tile_vertex_buffer);
-        if (tile_index_buffer != -1) enigma_user::index_delete_buffer(tile_index_buffer);
+        tiles_are_dirty = true;
     }
 
     void rebuild_tile_layer(int layer_depth)
     {
+        // Yes, this does the same as delete_tiles for now, but is being left
+        // because tiles could be futher optimized by only rebuilding a single
+        // layer instead of all the layers when changed. This requires the
+        // vertex_* functions be extended with the ability to rewrite only part
+        // of their buffers.
         tiles_are_dirty = true;
     }
 }
