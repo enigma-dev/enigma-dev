@@ -16,10 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <sstream> // std::stringstream, std::stringbuf
-
 #include "ASYNCdialog.h"
-#include "Platforms/General/PFthreads.h"
 #include "Widget_Systems/General/WSdialogs.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
@@ -34,6 +31,7 @@
 #include <thread>
 #include <chrono>
 #include <vector>
+
 using namespace enigma_user;
 
 namespace enigma {
@@ -102,71 +100,6 @@ namespace enigma {
   extension_async::extension_async() {
     extension_update_hooks.push_back(process_async_jobs);
   }
-}
-
-using enigma::threads;
-using enigma::MessageData;
-using enigma::createThread;
-
-static void* showMessageAsync(void* data) {
-  const MessageData* const md = (MessageData*)data;
-  threads[md->id]->ret = show_message(md->text1);
-  threads[md->id]->active = false;
-  ds_map_replaceanyway(async_load, "id", md->id);
-  ds_map_replaceanyway(async_load, "status", true); //TODO: Stupido is so god damn retarded, it gives a cancel operation for a rhetorical message according to the manual
-  fireAsyncDialogEvent();
-  return NULL;
-}
-
-static void* showQuestionAsync(void* data) {
-  const MessageData* const md = (MessageData*)data;
-  threads[md->id]->ret = show_question(md->text1);
-  threads[md->id]->active = false;
-  ds_map_replaceanyway(async_load, "id", md->id);
-  ds_map_replaceanyway(async_load, "status", threads[md->id]->ret);
-  fireAsyncDialogEvent();
-  return NULL;
-}
-
-static void* getStringAsync(void* data) {
-  const MessageData* const md = (MessageData*)data;
-  threads[md->id]->ret = get_string(md->text1, md->text2, md->text3);
-  threads[md->id]->active = false;
-  ds_map_replaceanyway(async_load, "id", md->id);
-  ds_map_replaceanyway(async_load, "status", true);
-  ds_map_replaceanyway(async_load, "result", threads[md->id]->ret);
-  fireAsyncDialogEvent();
-  return NULL;
-}
-
-static void* getIntegerAsync(void* data) {
-  const MessageData* const md = (MessageData*)data;
-  threads[md->id]->ret = get_integer(md->text1, md->text2, md->text3);
-  threads[md->id]->active = false;
-  ds_map_replaceanyway(async_load, "id", md->id);
-  ds_map_replaceanyway(async_load, "status", true);
-  ds_map_replaceanyway(async_load, "result", threads[md->id]->ret);
-  fireAsyncDialogEvent();
-  return NULL;
-}
-
-static void* getLoginAsync(void* data) {
-  const MessageData* const md = (MessageData*)data;
-  threads[md->id]->ret = get_login(md->text1, md->text2, md->text3);
-  threads[md->id]->active = false;
-  ds_map_replaceanyway(async_load, "id", md->id);
-  string ret = threads[md->id]->ret;
-  size_t end = ret.find('\0', 0);
-  string username, password;
-  // must still check if the string is empty which is the case when the user cancels the dialog
-  if (end != string::npos) {
-    username = ret.substr(0, end);
-    password = ret.substr(end + 1, ret.size() - end);
-  }
-  ds_map_replaceanyway(async_load, "username", username);
-  ds_map_replaceanyway(async_load, "password", password);
-  fireAsyncDialogEvent();
-  return NULL;
 }
 
 namespace enigma_user {
