@@ -4,7 +4,7 @@
 
 TEST(Regression, tiles_room_transition_test) {
   if (!TestHarness::windowing_supported()) return;
-  auto test_harness = LAUNCH_HARNESS_FOR_SOG(TestConfig());
+  auto test_harness = LAUNCH_HARNESS_FOR_GAME(TestConfig(), "gmx");
   if (!test_harness) FAIL() << "Game could not be run.";
 
   test_harness->wait();  // Let the game render a frame first.
