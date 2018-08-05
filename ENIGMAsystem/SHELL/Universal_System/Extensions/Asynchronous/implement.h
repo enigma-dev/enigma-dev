@@ -21,7 +21,7 @@
 namespace enigma {
   struct extension_async
   {
-    extension_async() {}
+    extension_async();
 
     virtual variant myevent_asyncdialog() { return 0; }
     virtual variant myevent_asynchttp() { return 0; }
