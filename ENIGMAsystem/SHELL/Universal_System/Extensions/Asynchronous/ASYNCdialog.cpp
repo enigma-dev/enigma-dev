@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Robert B. Colton
+/** Copyright (C) 2014, 2018 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
