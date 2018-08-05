@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <assets>
-  <Configs name="configs">
-    <Config>Configs\Default</Config>
-  </Configs>
+  <Configs name="configs"/>
   <sprites name="sprites"/>
   <sounds name="sound"/>
   <backgrounds name="background">
@@ -21,7 +19,5 @@
     <room>rooms\rm_1</room>
   </rooms>
   <constants number="0"/>
-  <help>
-    <rtf>help.rtf</rtf>
-  </help>
+  <help/>
 </assets>
