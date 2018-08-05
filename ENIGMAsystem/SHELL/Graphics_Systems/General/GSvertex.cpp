@@ -31,6 +31,8 @@
 
 #include "Widget_Systems/widgets_mandatory.h"
 
+#define RESOURCE_EXISTS(id, container) return (id >= 0 && (unsigned)id < enigma::container.size() && enigma::container[id] != nullptr);
+
 namespace enigma {
 
 vector<VertexFormat*> vertexFormats;
@@ -78,7 +80,7 @@ int vertex_format_end() {
 }
 
 bool vertex_format_exists(int id) {
-  return (id >= 0 && (unsigned)id < enigma::vertexFormats.size() && enigma::vertexFormats[id] != nullptr);
+  RESOURCE_EXISTS(id, vertexFormats);
 }
 
 void vertex_format_delete(int id) {
@@ -102,6 +104,10 @@ void vertex_delete_buffer(int buffer) {
   enigma::graphics_delete_vertex_buffer_peer(buffer);
   delete enigma::vertexBuffers[buffer];
   enigma::vertexBuffers[buffer] = nullptr;
+}
+
+bool vertex_exists(int buffer) {
+  RESOURCE_EXISTS(buffer, vertexBuffers);
 }
 
 unsigned vertex_get_size(int buffer) {
@@ -271,6 +277,10 @@ void index_delete_buffer(int buffer) {
   enigma::graphics_delete_index_buffer_peer(buffer);
   delete enigma::indexBuffers[buffer];
   enigma::indexBuffers[buffer] = nullptr;
+}
+
+bool index_exists(int buffer) {
+  RESOURCE_EXISTS(buffer, indexBuffers);
 }
 
 unsigned index_get_size(int buffer) {

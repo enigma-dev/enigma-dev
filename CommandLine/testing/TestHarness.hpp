@@ -78,9 +78,10 @@ class TestHarness {
 
 /// Construct a test harness attached to the SOG with the same name as the
 /// calling source file.
-#define LAUNCH_HARNESS_FOR_SOG(config)                                 \
+#define LAUNCH_HARNESS_FOR_GAME(config, ext)                           \
   (TestHarness::launch_and_attach(                                     \
-      kGamesDir + TestHarness::swap_extension(__FILE__, "sog"), config))
-
+      kGamesDir + TestHarness::swap_extension(__FILE__, ext), config))
+#define LAUNCH_HARNESS_FOR_SOG(config)                                 \
+  LAUNCH_HARNESS_FOR_GAME(config, "sog")
 
 #endif  // EMAKE_TESTHARNESS_HPP
