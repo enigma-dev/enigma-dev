@@ -23,10 +23,12 @@ OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURC
 OBJDIRS := $(sort $(OBJ_DIR) $(dir $(OBJECTS)))
 DEPENDS := $(OBJECTS:.o=.d)
 
-$(BINARY): $(OBJECTS)
-	g++ $^ -o $@ $(LDFLAGS)
+$(BINARY): $(OBJECTS) .FORCE
+	g++ $(filter-out .FORCE, $^) -o $@ $(LDFLAGS)
 
-.PHONY: all clean obj_dirs
+.PHONY: all clean obj_dirs .FORCE
+
+.FORCE:
 
 all: $(BINARY)
 clean:
