@@ -1,10 +1,14 @@
 #include "PFmain.h"
 
 #include "Platforms/platforms_mandatory.h"
+#include "Platforms/General/PFwindow.h"
+#include "Universal_System/roomsystem.h"
 
 #include <unistd.h>  //getcwd, usleep
 
 namespace enigma {
+
+std::vector<std::function<void()> > extension_update_hooks;
 
 bool game_isending = false;
 int game_return = 0;
@@ -67,9 +71,18 @@ int enigma_main(int argc, char** argv) {
   showWindow();
 
   while (!game_isending) {
+    if (!((std::string)enigma_user::room_caption).empty())
+      enigma_user::window_set_caption(enigma_user::room_caption);
+    update_mouse_variables();
+
     if (updateTimer() != 0) continue;
     if (handleEvents() != 0) break;
     if (gameWait() != 0) continue;
+
+    // if any extensions need updated, update them now
+    // just before we fire off user events like step
+    for (auto update_hook : extension_update_hooks)
+      update_hook();
 
     ENIGMA_events();
     handleInput();

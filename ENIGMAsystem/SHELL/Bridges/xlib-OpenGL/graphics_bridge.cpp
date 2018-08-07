@@ -14,17 +14,16 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-//#include <GL/glx.h>
-#include <X11/Xlib.h>
-#include <GL/glxew.h>
-#include "Platforms/xlib/XLIBwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/General/GScolors.h"
 
-#include <iostream>
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Platforms/xlib/XLIBwindow.h"
+
+#include <X11/Xlib.h>
+#include <GL/glxew.h>
+
 #include <cstring>
-#include <stdio.h>
 
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
@@ -32,40 +31,40 @@ namespace enigma {
   GLuint msaa_fbo = 0;
   GLXContext glxc;
   XVisualInfo *vi;
-  
+
   extern void (*WindowResizedCallback)();
   void WindowResized() {
     glViewport(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
     glScissor(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
-  
+
   XVisualInfo* CreateVisualInfo() {
     // Prepare openGL
     GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
     vi = glXChooseVisual(enigma::x11::disp,0,att);
-    if(!vi){
-        printf("Failed to Obtain GL Visual Info\n");
-        return NULL;
-    }
+    if (!vi)
+      show_error("Failed to Obtain GL Visual Info", true);
     return vi;
   }
 
   void EnableDrawing(void* handle) {
     WindowResizedCallback = &WindowResized;
-    
+
     //give us a GL context
     glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
-    if (!glxc){
-        printf("Failed to Create Graphics Context\n");
-        return;
-    }
-    
+    if (!glxc)
+      show_error("Failed to Create Graphics Context", true);
+
     //apply context
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+      show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
   }
-  
+
   void DisableDrawing(void* handle) {
    glXDestroyContext(enigma::x11::disp,glxc);
       /*
@@ -77,7 +76,7 @@ namespace enigma {
     XCloseDisplay(disp);
     return 0;*/
   }
-  
+
   namespace swaphandling {
     static bool has_checked_extensions = false;
     static bool ext_swapcontrol_supported;
@@ -108,9 +107,6 @@ namespace enigma {
     return swaphandling::mesa_swapcontrol_supported;
   }
 }
-
-#include <Platforms/xlib/XLIBwindow.h> // window_set_caption
-#include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
 
 namespace enigma_user {
   // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
@@ -145,17 +141,14 @@ namespace enigma_user {
       // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
     }
   }
-    
+
   void display_reset(int samples, bool vsync) {
     set_synchronization(vsync);
     //TODO: Copy over from the Win32 bridge
   }
-    
+
   void screen_refresh() {
     glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
-    enigma::update_mouse_variables();
-    window_set_caption(room_caption);
   }
 
 }
-

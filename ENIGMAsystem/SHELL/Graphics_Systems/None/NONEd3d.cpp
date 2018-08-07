@@ -43,8 +43,7 @@ namespace enigma {
 
 namespace enigma_user
 {
-	void d3d_depth_clear(){}
-	void d3d_depth_clear_value(float value){}
+	void d3d_clear_depth(double value){}
 	void d3d_set_software_vertex_processing(bool software){}
 
 	void d3d_start()

@@ -66,6 +66,7 @@ void vertex_format_add_custom(int type, int usage);
 int vertex_create_buffer();
 int vertex_create_buffer_ext(unsigned size);
 void vertex_delete_buffer(int buffer);
+bool vertex_exists(int buffer);
 unsigned vertex_get_size(int buffer);
 unsigned vertex_get_number(int buffer);
 void vertex_freeze(int buffer);
@@ -98,6 +99,7 @@ enum {
 int index_create_buffer();
 int index_create_buffer_ext(unsigned size);
 void index_delete_buffer(int buffer);
+bool index_exists(int buffer);
 unsigned index_get_size(int buffer);
 unsigned index_get_number(int buffer);
 void index_freeze(int buffer);
