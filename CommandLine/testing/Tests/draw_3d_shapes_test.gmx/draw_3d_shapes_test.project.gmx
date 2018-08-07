@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<assets>
+  <Configs name="configs"/>
+  <sprites name="sprites"/>
+  <sounds name="sound"/>
+  <backgrounds name="background">
+    <background>background\bkg_test</background>
+  </backgrounds>
+  <paths name="paths"/>
+  <scripts name="scripts">
+    <script>scripts\d3d_draw_shape.gml</script>
+  </scripts>
+  <shaders name="shaders"/>
+  <fonts name="fonts"/>
+  <timelines name="timelines"/>
+  <objects name="objects">
+    <object>objects\obj_0</object>
+  </objects>
+  <rooms name="rooms">
+    <room>rooms\rm_0</room>
+  </rooms>
+  <constants number="0"/>
+  <help/>
+</assets>
