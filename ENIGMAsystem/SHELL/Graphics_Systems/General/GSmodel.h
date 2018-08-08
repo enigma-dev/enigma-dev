@@ -42,12 +42,6 @@ namespace enigma_user {
   void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId);
   void d3d_model_primitive_begin(int id, int kind, int format = -1);
   void d3d_model_primitive_end(int id);
-  //unsigned d3d_model_get_stride(int id);
-  //void d3d_model_format(int id, int fmt);
-  //bool d3d_model_has_color(int id);
-  //bool d3d_model_has_texture(int id);
-  //bool d3d_model_has_normals(int id);
-  //void d3d_model_index(int id, unsigned ind);
 
   // Custom granular model specification functions
   // These assume that a valid vertex format was supplied when d3d_model_primitive_begin was called
