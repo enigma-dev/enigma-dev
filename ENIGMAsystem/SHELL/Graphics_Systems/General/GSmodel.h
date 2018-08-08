@@ -65,7 +65,7 @@ namespace enigma_user {
   void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z);
   void d3d_model_color(int id, int col, double alpha);
   void d3d_model_argb(int id, unsigned argb);
-  void d3d_model_texcoord(int id, gs_scalar tx, gs_scalar ty);
+  void d3d_model_texture(int id, gs_scalar tx, gs_scalar ty);
   void d3d_model_normal(int id, gs_scalar nx, gs_scalar ny, gs_scalar nz);
 
   // Custom granular model specification functions

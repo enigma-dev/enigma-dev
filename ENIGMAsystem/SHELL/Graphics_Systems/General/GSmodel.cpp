@@ -24,6 +24,8 @@
 #include "GStextures.h"
 #include "GSprimitives.h"
 
+#include "Universal_System/fileio.h"
+
 #include <math.h>
 
 using namespace std;
@@ -31,6 +33,106 @@ using namespace std;
 namespace enigma {
 
 vector<Model*> models;
+extern unsigned char currentcolor[4];
+
+unsigned int split(const std::string &txt, std::vector<std::string> &strs, char ch)
+{
+	size_t pos = txt.find( ch );
+	size_t initialPos = 0;
+	strs.clear();
+
+	// Decompose statement
+	while( pos != std::string::npos ) {
+		strs.push_back( txt.substr( initialPos, pos - initialPos + 1 ) );
+		initialPos = pos + 1;
+
+		pos = txt.find( ch, initialPos );
+	}
+
+	// Add the last one
+	strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
+
+	return strs.size();
+}
+
+//split a string and convert to float
+vector<float> float_split(const string& str, const char& ch) {
+  string next;
+  vector<float> result;
+
+  for (string::const_iterator it = str.begin(); it != str.end(); it++)
+  {
+    if (*it == ch) {
+      if (!next.empty()) {
+        result.push_back(atof(next.c_str()));
+        next.clear();
+      }
+    } else {
+      next += *it;
+    }
+  }
+  if (!next.empty())
+    result.push_back(atof(next.c_str()));
+  return result;
+}
+
+//obj model parsing functions
+void string_parse(string *s) {
+  size_t spaces = 0;
+  bool trimmed = false;
+  bool checknormal = false;
+  for (unsigned int i = 0; i < s->size() ; i++)
+  {
+    //comment
+    if ((*s)[i] == '#')
+    {
+      s->erase(i, s->length() - i);
+      break;
+    }
+    else if((*s)[i] == ' ')
+    {
+      if (!trimmed)
+      {
+        s->erase(i,1);
+        i--;
+      }
+      else
+      {
+        if (spaces >= 1)
+        {
+          s->erase(i,1);
+          i--;
+        }
+        spaces++;
+      }
+    }
+    else
+    {
+      if((*s)[i] == '/')
+      {
+        (*s)[i] = ' ';
+        if(checknormal)
+        {
+          s->erase(i, 1);
+          checknormal = false;
+        }
+        else
+          checknormal = true;
+      }
+      else
+        checknormal = false;
+      spaces = 0;
+      trimmed = true;
+    }
+  }
+  //end trim
+  if (s->size() > 0) {
+    if ((*s)[s->size()-1] == ' ')
+    {
+      s->erase(s->size()-1, 1);
+    }
+  }
+}
 
 }
 
@@ -192,7 +294,7 @@ void d3d_model_argb(int id, unsigned argb) {
   vertex_argb(model->vertex_buffer, argb);
 }
 
-void d3d_model_texcoord(int id, gs_scalar tx, gs_scalar ty) {
+void d3d_model_texture(int id, gs_scalar tx, gs_scalar ty) {
   const enigma::Model* model = enigma::models[id];
   const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
   if (!vertex_format_exists(primitive->format)) {
@@ -272,23 +374,23 @@ void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, int c
 
 void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty) {
   d3d_model_vertex(id, x, y);
-  d3d_model_texcoord(id, tx, ty);
+  d3d_model_texture(id, tx, ty);
 }
 
 void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty) {
   d3d_model_vertex(id, x, y, z);
-  d3d_model_texcoord(id, tx, ty);
+  d3d_model_texture(id, tx, ty);
 }
 
 void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, double alpha) {
   d3d_model_vertex(id, x, y);
-  d3d_model_texcoord(id, tx, ty);
+  d3d_model_texture(id, tx, ty);
   d3d_model_color(id, col, alpha);
 }
 
 void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha) {
   d3d_model_vertex(id, x, y, z);
-  d3d_model_texcoord(id, tx, ty);
+  d3d_model_texture(id, tx, ty);
   d3d_model_color(id, col, alpha);
 }
 
@@ -306,13 +408,13 @@ void d3d_model_vertex_normal_color(int id, gs_scalar x, gs_scalar y, gs_scalar z
 void d3d_model_vertex_normal_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty) {
   d3d_model_vertex(id, x, y, z);
   d3d_model_normal(id, nx, ny, nz);
-  d3d_model_texcoord(id, tx, ty);
+  d3d_model_texture(id, tx, ty);
 }
 
 void d3d_model_vertex_normal_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int col, double alpha) {
   d3d_model_vertex(id, x, y, z);
   d3d_model_normal(id, nx, ny, nz);
-  d3d_model_texcoord(id, tx, ty);
+  d3d_model_texture(id, tx, ty);
   d3d_model_color(id, col, alpha);
 }
 
@@ -321,7 +423,196 @@ void d3d_model_save(int id, string fname) {
 }
 
 bool d3d_model_load(int id, string fname) {
+  //TODO: this needs to be rewritten properly not using the file_text functions
+  using namespace enigma_user;
+
+  // clear the old contents first since we are loading a new model
+  // this is dictated by the GMS manual
   d3d_model_clear(id);
+
+  int file = file_text_open_read(fname);
+
+  if (file == -1) {
+    return false;
+  }
+
+  string fileExt = fname.substr(fname.find_last_of(".") + 1) ;
+  if (fileExt == "obj") {
+    vector< float > vertices;
+    vector< float > uvs;
+    vector< float > normals;
+
+    int faceCount = 0;
+    bool hasTexture = false;
+    bool hasNormals = false;
+    d3d_model_primitive_begin(id, pr_trianglelist);
+
+    while (!file_text_eof(file)) {
+      string line = file_text_read_string(file);
+      file_text_readln(file);
+      enigma::string_parse(&line);
+      if (line.length() > 0) {
+        if(line[0] == 'v') {
+          vector<float> floats = enigma::float_split(line, ' ');
+          floats.erase(floats.begin());
+
+          int n = 0;
+          switch(line[1]) {
+          case ' ':
+            n = 0;
+            for (vector<float>::const_iterator i = floats.begin(); i != floats.end(); ++i) {
+              if(n < 3) vertices.push_back(*i);
+              n++;
+            }
+            break;
+          case 't':
+            n = 0;
+            for (vector<float>::const_iterator i = floats.begin(); i != floats.end(); ++i) {
+              if(n < 2) uvs.push_back(*i);
+              n++;
+            }
+            hasTexture = true;
+            break;
+          case 'n':
+            n = 0;
+            for (vector<float>::const_iterator i = floats.begin(); i != floats.end(); ++i) {
+              if(n < 3) normals.push_back(*i);
+              n++;
+            }
+            hasNormals = true;
+            break;
+          default:
+            break;
+          }
+        } else if (line[0] == 'f') {
+          faceCount++;
+          vector<float> f = enigma::float_split(line, ' ');
+          f.erase(f.begin());
+          int faceVertices = f.size() / (1 + hasTexture + hasNormals);
+          int of = 1 + hasTexture + hasNormals;
+          int nof = 1 + hasTexture;
+
+          d3d_model_vertex(id, vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
+          if (hasTexture) d3d_model_texture(id, uvs[(f[1]-1)*2], 1 - uvs[(f[1]-1)*2 +1]);
+          if (hasNormals) d3d_model_normal(id, normals[(f[nof]-1)*3], normals[(f[nof]-1)*3 +1], normals[(f[nof]-1)*3 +2]);
+
+          d3d_model_vertex(id, vertices[(f[1*of]-1)*3],  vertices[(f[1*of]-1)*3 +1] , vertices[(f[1*of]-1)*3 +2]);
+          if (hasTexture) d3d_model_texture(id, uvs[(f[1*of + 1]-1)*2], 1 - uvs[(f[1*of + 1]-1)*2 +1]);
+          if (hasNormals) d3d_model_normal(id, normals[(f[of + nof]-1)*3], normals[(f[of  + nof]-1)*3 +1], normals[(f[of  + nof]-1)*3 +2]);
+
+          d3d_model_vertex(id, vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
+          if (hasTexture) d3d_model_texture(id, uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
+          if (hasNormals) d3d_model_normal(id, normals[(f[2*of +nof]-1)*3], normals[(f[2*of  + nof]-1)*3 +1], normals[(f[2*of  + nof]-1)*3 +2]);
+
+          //is a quad
+          if (faceVertices == 4) {
+            d3d_model_vertex(id, vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
+            if (hasTexture) d3d_model_texture(id, uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
+            if (hasNormals) d3d_model_normal(id, normals[(f[2*of + nof]-1)*3], normals[(f[2*of  + nof]-1)*3 +1], normals[(f[2*of  + nof]-1)*3 +2]);
+
+            d3d_model_vertex(id, vertices[(f[3*of]-1)*3],  vertices[(f[3*of]-1)*3 +1] , vertices[(f[3*of]-1)*3 +2]);
+            if (hasTexture) d3d_model_texture(id, uvs[(f[3*of + 1]-1)*2], 1 - uvs[(f[3*of + 1]-1)*2 +1]);
+            if (hasNormals) d3d_model_normal(id, normals[(f[3*of + nof]-1)*3], normals[(f[3*of  + nof]-1)*3 +1], normals[(f[3*of  + nof]-1)*3 +2]);
+
+            d3d_model_vertex(id, vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
+            if (hasTexture) d3d_model_texture(id, uvs[(f[0 + 1]-1)*2], 1 - uvs[(f[0 + 1]-1)*2 +1]);
+            if (hasNormals) d3d_model_normal(id, normals[(f[nof]-1)*3], normals[(f[nof]-1)*3 +1], normals[(f[nof]-1)*3 +2]);
+          }
+        }
+      }
+    }
+    d3d_model_primitive_end(id);
+  } else {
+    int something = file_text_read_real(file);
+    if (something != 100) {
+      return false;
+    }
+    file_text_readln(file);
+    unsigned count = file_text_read_real(file);
+    file_text_readln(file);
+    int kind;
+    float v[3], n[3], t[2];
+    double col, alpha;
+    for (unsigned i = 0; i < count; i++) {
+      string str = file_text_read_string(file);
+      std::vector<std::string> dat;
+      enigma::split(str, dat, ' ');
+      switch (atoi(dat[0].c_str())) {
+      case  0:
+        kind = atoi(dat[1].c_str());
+        d3d_model_primitive_begin(id, kind);
+        break;
+      case  1:
+        d3d_model_primitive_end(id);
+        break;
+      case  2:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        d3d_model_vertex(id, v[0],v[1],v[2]);
+        break;
+      case  3:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        col = atoi(dat[4].c_str()); alpha = atof(dat[5].c_str());
+        d3d_model_vertex_color(id, v[0],v[1],v[2],col,alpha);
+        break;
+      case  4:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        t[0] = atof(dat[4].c_str()); t[1] = atof(dat[5].c_str());
+        d3d_model_vertex_texture(id, v[0],v[1],v[2],t[0],t[1]);
+        break;
+      case  5:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        t[0] = atof(dat[4].c_str()); t[1] = atof(dat[5].c_str());
+        col = atoi(dat[6].c_str()); alpha = atof(dat[7].c_str());
+        d3d_model_vertex_texture_color(id, v[0],v[1],v[2],t[0],t[1],col,alpha);
+        break;
+      case  6:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
+        d3d_model_vertex_normal(id, v[0],v[1],v[2],n[0],n[1],n[2]);
+        break;
+      case  7:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
+        col = atoi(dat[7].c_str()); alpha = atof(dat[8].c_str());
+        d3d_model_vertex_normal_color(id, v[0],v[1],v[2],n[0],n[1],n[2],col,alpha);
+        break;
+      case  8:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
+        t[0] = atof(dat[7].c_str()); t[1] = atof(dat[8].c_str());
+        d3d_model_vertex_normal_texture(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1]);
+        break;
+      case  9:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
+        t[0] = atof(dat[7].c_str()); t[1] = atof(dat[8].c_str());
+        col = atoi(dat[9].c_str()); alpha = atof(dat[10].c_str());
+        d3d_model_vertex_normal_texture_color(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1],col,alpha);
+        break;
+      case  10:
+        d3d_model_block(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), true);
+        break;
+      case  11:
+        d3d_model_cylinder(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), atoi(dat[10].c_str()), atoi(dat[11].c_str()));
+        break;
+      case  12:
+        d3d_model_cone(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), atoi(dat[10].c_str()), atoi(dat[11].c_str()));
+        break;
+      case  13:
+        d3d_model_ellipsoid(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), atoi(dat[10].c_str()));
+        break;
+      case  14:
+        d3d_model_wall(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()));
+        break;
+      case  15:
+        d3d_model_floor(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()));
+        break;
+      }
+      file_text_readln(file);
+    }
+  }
+  file_text_close(file);
+  return true;
 }
 
 void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep) {
