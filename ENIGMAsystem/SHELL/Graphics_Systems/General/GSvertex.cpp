@@ -130,7 +130,7 @@ void vertex_set_format(int buffer, int format) {
 unsigned vertex_get_size(int buffer) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
-  return (vertexBuffer->dirty ? vertexBuffer->vertices.size() : vertexBuffer->number) * sizeof(gs_scalar);
+  return vertexBuffer->getNumber() * sizeof(gs_scalar);
 }
 
 unsigned vertex_get_number(int buffer) {
@@ -138,7 +138,7 @@ unsigned vertex_get_number(int buffer) {
   if (vertex_format_exists(vertexBuffer->format)) {
     const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
-    return (vertexBuffer->dirty ? vertexBuffer->vertices.size() : vertexBuffer->number) / vertexFormat->stride;
+    return vertexBuffer->getNumber() / vertexFormat->stride;
   }
 
   return 0;
@@ -183,6 +183,7 @@ void vertex_begin(int buffer, int format) {
 void vertex_end(int buffer) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
+  if (vertexBuffer->frozen) return;
   vertexBuffer->number = vertexBuffer->vertices.size();
 }
 
@@ -317,11 +318,11 @@ bool index_exists(int buffer) {
 }
 
 unsigned index_get_size(int buffer) {
-  return enigma::indexBuffers[buffer]->indices.size() * sizeof(uint16_t);
+  return enigma::indexBuffers[buffer]->getNumber() * sizeof(uint16_t);
 }
 
 unsigned index_get_number(int buffer) {
-  return enigma::indexBuffers[buffer]->number;
+  return enigma::indexBuffers[buffer]->getNumber();
 }
 
 void index_freeze(int buffer) {
@@ -349,17 +350,21 @@ void index_clear(int buffer) {
 }
 
 void index_begin(int buffer, int type) {
-  enigma::indexBuffers[buffer]->indices.clear();
-  enigma::indexBuffers[buffer]->type = type;
-}
-
-void index_end(int buffer) {
   enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+
+  indexBuffer->indices.clear();
+  indexBuffer->type = type;
 
   // we can only flag the index buffer contents as dirty and needing an update
   // if the index buffer hasn't been frozen, otherwise we just ignore it
   if (indexBuffer->frozen) return;
   indexBuffer->dirty = true;
+}
+
+void index_end(int buffer) {
+  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+
+  if (indexBuffer->frozen) return;
   indexBuffer->number = indexBuffer->indices.size();
   if (indexBuffer->type == index_type_uint)
     indexBuffer->number /= 2;

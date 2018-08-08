@@ -84,6 +84,9 @@ struct VertexBuffer {
   std::size_t number;
 
   VertexBuffer(): frozen(false), dirty(false), format(-1), number(0) {}
+  int getNumber() const {
+    return dirty ? vertices.size() : number;
+  }
 };
 
 struct IndexBuffer {
@@ -93,6 +96,9 @@ struct IndexBuffer {
   std::size_t number;
 
   IndexBuffer(): frozen(false), dirty(false), type(-1), number(0) {}
+  int getNumber() const {
+    return dirty ? indices.size() : number;
+  }
 };
 
 extern vector<VertexFormat*> vertexFormats;

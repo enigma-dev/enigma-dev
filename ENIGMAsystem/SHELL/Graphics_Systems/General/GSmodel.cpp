@@ -254,6 +254,11 @@ void d3d_model_ubyte4(int id, int usage, uint8_t u1, uint8_t u2, uint8_t u3, uin
   vertex_ubyte4(model->vertex_buffer, u1, u2, u3, u4);
 }
 
+void d3d_model_vertex_data(int id, const enigma::varargs& data) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_data(model->vertex_buffer, data);
+}
+
 void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, int col, double alpha) {
   d3d_model_vertex(id, x, y);
   d3d_model_color(id, col, alpha);

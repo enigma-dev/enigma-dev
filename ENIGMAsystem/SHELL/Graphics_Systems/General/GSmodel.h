@@ -19,6 +19,7 @@
 #define ENIGMA_GSMODEL_H
 
 #include "Universal_System/scalar.h"
+#include "Universal_System/dynamic_args.h" // for d3d_model_vertex_data
 
 #include <string>
 
@@ -68,13 +69,19 @@ namespace enigma_user {
   void d3d_model_normal(int id, gs_scalar nx, gs_scalar ny, gs_scalar nz);
 
   // Custom granular model specification functions
-  // These are part of the granular model specification functions but you must use the overload which accepts
-  // a vertex format usage if you did not specify a vertex format when calling d3d_model_primitive_begin.
+  // These are part of the granular model specification functions but accept a vertex format usage
+  // to assist in determining the vertex format since one was not supplied during d3d_model_primitive_begin.
   void d3d_model_float1(int id, int usage, float f1);
   void d3d_model_float2(int id, int usage, float f1, float f2);
   void d3d_model_float3(int id, int usage, float f1, float f2, float f3);
   void d3d_model_float4(int id, int usage, float f1, float f2, float f3, float f4);
   void d3d_model_ubyte4(int id, int usage, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4);
+
+  // Custom composite specification functions
+  // These assume that a valid vertex format was supplied when d3d_model_primitive_begin was called
+  // and may not work correctly if that precondition is false. They allow you to specify the model
+  // data in a more expressive way.
+  void d3d_model_vertex_data(int id, const enigma::varargs& data);
 
   // Composite model specification functions
   // These call the granular specification functions so that the vertex format can be correctly guessed.
