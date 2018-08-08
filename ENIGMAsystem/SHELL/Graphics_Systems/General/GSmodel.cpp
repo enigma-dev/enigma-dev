@@ -63,12 +63,13 @@ void d3d_model_clear(int id) {
 }
 
 void d3d_model_draw(int id) {
-  const enigma::Model* model = enigma::models[id];
+  enigma::Model* model = enigma::models[id];
   if (model->vertex_started) {
+    model->vertex_started = false;
     vertex_end(model->vertex_buffer);
-  }
-  if (model->type == model_static) {
-    vertex_freeze(model->vertex_buffer);
+    if (model->type == model_static) {
+      vertex_freeze(model->vertex_buffer);
+    }
   }
   for (auto primitive : model->primitives) {
     vertex_set_format(model->vertex_buffer, primitive.format);
