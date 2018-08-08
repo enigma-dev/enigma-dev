@@ -20,6 +20,8 @@
 #include "GSmodel_impl.h"
 #include "GSmodel.h"
 #include "GSvertex.h"
+#include "GSmatrix.h"
+#include "GStextures.h"
 #include "GSprimitives.h"
 
 #include <math.h>
@@ -68,7 +70,7 @@ void d3d_model_draw(int id) {
     vertex_freeze(model->vertex_buffer);
   }
   for (auto primitive : model->primitives) {
-    vertex_set_format(primitive->format);
+    vertex_set_format(model->vertex_buffer, primitive.format);
     vertex_submit(
       model->vertex_buffer,
       primitive.type,
@@ -109,6 +111,31 @@ void d3d_model_primitive_end(int id) {
   enigma::Model* model = enigma::models[id];
   enigma::Primitive *primitive = &model->primitives[model->current_primitive++];
   primitive->vertex_count = vertex_get_number(model->vertex_buffer) - primitive->vertex_start;
+}
+
+void d3d_model_float1(int id, float f1) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_float1(model->vertex_buffer, f1);
+}
+
+void d3d_model_float2(int id, float f1, float f2) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_float2(model->vertex_buffer, f1, f2);
+}
+
+void d3d_model_float3(int id, float f1, float f2, float f3) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_float3(model->vertex_buffer, f1, f2, f3);
+}
+
+void d3d_model_float4(int id, float f1, float f2, float f3, float f4) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_float4(model->vertex_buffer, f1, f2, f3, f4);
+}
+
+void d3d_model_ubyte4(int id, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_ubyte4(model->vertex_buffer, u1, u2, u3, u4);
 }
 
 void d3d_model_vertex(int id, gs_scalar x, gs_scalar y) {

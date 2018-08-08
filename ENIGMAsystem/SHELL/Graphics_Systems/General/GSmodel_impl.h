@@ -34,8 +34,8 @@ struct Primitive {
   int type, format;
   size_t vertex_start, vertex_count;
 
-  Primitive(int type, int format, ize_t start): type(type), format(format), vertex_start(start), vertex_count(0) {}
-}
+  Primitive(int type, int format, size_t start): type(type), format(format), vertex_start(start), vertex_count(0) {}
+};
 
 struct Model {
   int type, vertex_buffer;

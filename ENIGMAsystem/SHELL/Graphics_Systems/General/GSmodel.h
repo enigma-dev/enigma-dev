@@ -52,23 +52,36 @@ namespace enigma_user {
   //bool d3d_model_has_normals(int id);
   //void d3d_model_index(int id, unsigned ind);
 
+  // Custom granular model specification functions
+  // These assume that a valid vertex format was supplied when d3d_model_primitive_begin was called
+  // and may not work correctly if that precondition is false.
+  void d3d_model_float1(int id, float f1);
+  void d3d_model_float2(int id, float f1, float f2);
+  void d3d_model_float3(int id, float f1, float f2, float f3);
+  void d3d_model_float4(int id, float f1, float f2, float f3, float f4);
+  void d3d_model_ubyte4(int id, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4);
+
   // Granular model specification functions
   // If a vertex format is not specified during d3d_model_primitive_begin, it will be calculated
-  // between calls to d3d_model_vertex based on the order the following functions were called.
+  // between calls to d3d_model_vertex based on the order that the following functions were called.
   void d3d_model_vertex(int id, gs_scalar x, gs_scalar y);
   void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z);
   void d3d_model_color(int id, int col, double alpha);
   void d3d_model_argb(int id, unsigned argb);
   void d3d_model_texcoord(int id, gs_scalar tx, gs_scalar ty);
   void d3d_model_normal(int id, gs_scalar nx, gs_scalar ny, gs_scalar nz);
-  void d3d_model_float1(int id, int usage = -1, float f1);
-  void d3d_model_float2(int id, int usage = -1, float f1, float f2);
-  void d3d_model_float3(int id, int usage = -1, float f1, float f2, float f3);
-  void d3d_model_float4(int id, int usage = -1, float f1, float f2, float f3, float f4);
-  void d3d_model_ubyte4(int id, int usage = -1, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4);
+
+  // Custom granular model specification functions
+  // These are part of the granular model specification functions but you must use the overload which accepts
+  // a vertex format usage if you did not specify a vertex format when calling d3d_model_primitive_begin.
+  void d3d_model_float1(int id, int usage, float f1);
+  void d3d_model_float2(int id, int usage, float f1, float f2);
+  void d3d_model_float3(int id, int usage, float f1, float f2, float f3);
+  void d3d_model_float4(int id, int usage, float f1, float f2, float f3, float f4);
+  void d3d_model_ubyte4(int id, int usage, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4);
 
   // Composite model specification functions
-  // These call the granular specification functions so that the vertex format can be correctly guessed
+  // These call the granular specification functions so that the vertex format can be correctly guessed.
   void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, int col, double alpha);
   void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha);
   void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty);
