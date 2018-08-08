@@ -53,12 +53,15 @@ enum {
 
 void vertex_format_begin();
 int vertex_format_end();
+bool vertex_format_exists();
 bool vertex_format_exists(int id);
-void vertex_format_delete(int index);
-void vertex_format_add_color();
-#define vertex_format_add_colour vertex_format_add_color
+void vertex_format_delete(int id);
+unsigned vertex_format_get_stride(int id);
+unsigned vertex_format_get_stride();
 void vertex_format_add_position();
 void vertex_format_add_position_3d();
+void vertex_format_add_color();
+#define vertex_format_add_colour vertex_format_add_color
 void vertex_format_add_textcoord();
 void vertex_format_add_normal();
 void vertex_format_add_custom(int type, int usage);

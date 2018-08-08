@@ -49,6 +49,10 @@ void vertex_format_begin() {
   enigma::vertexFormat = new enigma::VertexFormat();
 }
 
+unsigned vertex_format_get_stride() {
+  return enigma::vertexFormat->stride;
+}
+
 void vertex_format_add_color() {
   enigma::vertexFormat->AddAttribute(vertex_type_color, vertex_usage_color);
 }
@@ -76,11 +80,20 @@ void vertex_format_add_custom(int type, int usage) {
 int vertex_format_end() {
   int id = enigma::vertexFormats.size();
   enigma::vertexFormats.push_back(enigma::vertexFormat);
+  enigma::vertexFormat = 0;
   return id;
+}
+
+bool vertex_format_exists() {
+  return (enigma::vertexFormat != 0);
 }
 
 bool vertex_format_exists(int id) {
   RESOURCE_EXISTS(id, vertexFormats);
+}
+
+unsigned vertex_format_get_stride(int id) {
+  return enigma::vertexFormats[id]->stride;
 }
 
 void vertex_format_delete(int id) {
@@ -115,14 +128,20 @@ void vertex_set_format(int buffer, int format) {
 }
 
 unsigned vertex_get_size(int buffer) {
-  return enigma::vertexBuffers[buffer]->number * sizeof(gs_scalar);
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+
+  return (vertexBuffer->dirty ? vertexBuffer->vertices.size() : vertexBuffer->number) * sizeof(gs_scalar);
 }
 
 unsigned vertex_get_number(int buffer) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
+  if (vertex_format_exists(vertexBuffer->format)) {
+    const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
-  return vertexBuffer->number / vertexFormat->stride;
+    return (vertexBuffer->dirty ? vertexBuffer->vertices.size() : vertexBuffer->number) / vertexFormat->stride;
+  }
+
+  return 0;
 }
 
 void vertex_freeze(int buffer) {
@@ -150,24 +169,27 @@ void vertex_clear(int buffer) {
 }
 
 void vertex_begin(int buffer, int format) {
-  enigma::vertexBuffers[buffer]->vertices.clear();
-  enigma::vertexBuffers[buffer]->format = format;
-}
-
-void vertex_end(int buffer) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+
+  vertexBuffer->vertices.clear();
+  vertexBuffer->format = format;
 
   // we can only flag the vertex buffer contents as dirty and needing an update
   // if the vertex buffer hasn't been frozen, otherwise we just ignore it
   if (vertexBuffer->frozen) return;
   vertexBuffer->dirty = true;
+}
+
+void vertex_end(int buffer) {
+  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+
   vertexBuffer->number = vertexBuffer->vertices.size();
 }
 
 void vertex_data(int buffer, const enigma::varargs& data) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
   #ifdef DEBUG_MODE
-  if (!vertex_format_exists(VertexBuffer->format)) {
+  if (!vertex_format_exists(vertexBuffer->format)) {
     show_error("Vertex format " + enigma_user::toString(vertexBuffer->format) +
                " does not exist and is required for vertex_data to decode varargs", false);
     return;

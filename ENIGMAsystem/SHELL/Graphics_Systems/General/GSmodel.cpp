@@ -57,8 +57,9 @@ bool d3d_model_exists(int id) {
 }
 
 void d3d_model_clear(int id) {
-  const enigma::Model* model = enigma::models[id];
+  enigma::Model* model = enigma::models[id];
   vertex_clear(model->vertex_buffer);
+  model->primitives.clear();
 }
 
 void d3d_model_draw(int id) {
@@ -103,13 +104,19 @@ void d3d_model_primitive_begin(int id, int kind, int format) {
     model->vertex_started = true;
     vertex_begin(model->vertex_buffer);
   }
-  enigma::Primitive primitive(kind, format, vertex_get_number(model->vertex_buffer));
+  size_t start = 0;
+  if (model->current_primitive > 0) {
+    const enigma::Primitive& last_primitive = model->primitives[model->current_primitive - 1];
+    start = last_primitive.vertex_start + last_primitive.vertex_count;
+  }
+  enigma::Primitive primitive(kind, format, start);
   model->primitives.push_back(primitive);
 }
 
 void d3d_model_primitive_end(int id) {
   enigma::Model* model = enigma::models[id];
   enigma::Primitive *primitive = &model->primitives[model->current_primitive++];
+  vertex_set_format(model->vertex_buffer, primitive->format);
   primitive->vertex_count = vertex_get_number(model->vertex_buffer) - primitive->vertex_start;
 }
 
@@ -139,21 +146,29 @@ void d3d_model_ubyte4(int id, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4) {
 }
 
 void d3d_model_vertex(int id, gs_scalar x, gs_scalar y) {
-  const enigma::Model* model = enigma::models[id];
-  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
-  if (!vertex_format_exists(primitive->format)) {
-    vertex_format_begin();
-    vertex_format_add_position();
+  enigma::Model* model = enigma::models[id];
+  enigma::Primitive &primitive = model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive.format)) {
+    if (vertex_format_exists()) {
+      primitive.format = vertex_format_end();
+    } else {
+      vertex_format_begin();
+      vertex_format_add_position();
+    }
   }
   vertex_position(model->vertex_buffer, x, y);
 }
 
 void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
-  const enigma::Model* model = enigma::models[id];
-  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
-  if (!vertex_format_exists(primitive->format)) {
-    vertex_format_begin();
-    vertex_format_add_position_3d();
+  enigma::Model* model = enigma::models[id];
+  enigma::Primitive &primitive = model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive.format)) {
+    if (vertex_format_exists()) {
+      primitive.format = vertex_format_end();
+    } else {
+      vertex_format_begin();
+      vertex_format_add_position_3d();
+    }
   }
   vertex_position_3d(model->vertex_buffer, x, y, z);
 }
