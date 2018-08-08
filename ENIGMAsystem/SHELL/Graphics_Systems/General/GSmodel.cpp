@@ -1,6 +1,6 @@
 /** Copyright (C) 2013 Robert Colton, Adriano Tumminelli
 *** Copyright (C) 2014 Seth N. Hetu
-*** Copyright (C) 2017 Robert Colton
+*** Copyright (C) 2017, 2018 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,13 +19,262 @@
 
 #include "GSmodel_impl.h"
 #include "GSmodel.h"
+#include "GSvertex.h"
 #include "GSprimitives.h"
 
 #include <math.h>
 
 using namespace std;
 
+namespace enigma {
+
+vector<Model*> models;
+
+}
+
 namespace enigma_user {
+
+int d3d_model_create(int type) {
+  int id = enigma::models.size();
+  enigma::Model* model = new enigma::Model(type);
+  model->vertex_buffer = vertex_create_buffer();
+  enigma::models.push_back(model);
+  return id;
+}
+
+void d3d_model_destroy(int id) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_delete_buffer(model->vertex_buffer);
+
+  delete enigma::models[id];
+  enigma::models[id] = nullptr;
+}
+
+bool d3d_model_exists(int id) {
+  return (id >= 0 && (unsigned)id < enigma::models.size() && enigma::models[id] != nullptr);
+}
+
+void d3d_model_clear(int id) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_clear(model->vertex_buffer);
+}
+
+void d3d_model_draw(int id) {
+  const enigma::Model* model = enigma::models[id];
+  if (model->vertex_started) {
+    vertex_end(model->vertex_buffer);
+  }
+  if (model->type == model_static) {
+    vertex_freeze(model->vertex_buffer);
+  }
+  for (auto primitive : model->primitives) {
+    vertex_set_format(primitive->format);
+    vertex_submit(
+      model->vertex_buffer,
+      primitive.type,
+      primitive.vertex_start,
+      primitive.vertex_count
+    );
+  }
+}
+
+void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
+  d3d_transform_add_translation(x, y, z);
+  d3d_model_draw(id);
+  d3d_transform_add_translation(-x, -y, -z);
+}
+
+void d3d_model_draw(int id, int texId) {
+  texture_set(texId);
+  d3d_model_draw(id);
+}
+
+void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId) {
+  d3d_transform_add_translation(x, y, z);
+  d3d_model_draw(id, texId);
+  d3d_transform_add_translation(-x, -y, -z);
+}
+
+void d3d_model_primitive_begin(int id, int kind, int format) {
+  enigma::Model* model = enigma::models[id];
+  if (!model->vertex_started) {
+    model->vertex_started = true;
+    vertex_begin(model->vertex_buffer);
+  }
+  enigma::Primitive primitive(kind, format, vertex_get_number(model->vertex_buffer));
+  model->primitives.push_back(primitive);
+}
+
+void d3d_model_primitive_end(int id) {
+  enigma::Model* model = enigma::models[id];
+  enigma::Primitive *primitive = &model->primitives[model->current_primitive++];
+  primitive->vertex_count = vertex_get_number(model->vertex_buffer) - primitive->vertex_start;
+}
+
+void d3d_model_vertex(int id, gs_scalar x, gs_scalar y) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive->format)) {
+    vertex_format_begin();
+    vertex_format_add_position();
+  }
+  vertex_position(model->vertex_buffer, x, y);
+}
+
+void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive->format)) {
+    vertex_format_begin();
+    vertex_format_add_position_3d();
+  }
+  vertex_position_3d(model->vertex_buffer, x, y, z);
+}
+
+void d3d_model_color(int id, int col, double alpha) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive->format)) {
+    vertex_format_add_color();
+  }
+  vertex_color(model->vertex_buffer, col, alpha);
+}
+
+void d3d_model_argb(int id, unsigned argb) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive->format)) {
+    vertex_format_add_color();
+  }
+  vertex_argb(model->vertex_buffer, argb);
+}
+
+void d3d_model_texcoord(int id, gs_scalar tx, gs_scalar ty) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive->format)) {
+    vertex_format_add_textcoord();
+  }
+  vertex_texcoord(model->vertex_buffer, tx, ty);
+}
+
+void d3d_model_normal(int id, gs_scalar nx, gs_scalar ny, gs_scalar nz) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive->format)) {
+    vertex_format_add_normal();
+  }
+  vertex_normal(model->vertex_buffer, nx, ny, nz);
+}
+
+void d3d_model_float1(int id, int usage, float f1) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive->format)) {
+    vertex_format_add_custom(vertex_type_float1, usage);
+  }
+  vertex_float1(model->vertex_buffer, f1);
+}
+
+void d3d_model_float2(int id, int usage, float f1, float f2) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive->format)) {
+    vertex_format_add_custom(vertex_type_float2, usage);
+  }
+  vertex_float2(model->vertex_buffer, f1, f2);
+}
+
+void d3d_model_float3(int id, int usage, float f1, float f2, float f3) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive->format)) {
+    vertex_format_add_custom(vertex_type_float3, usage);
+  }
+  vertex_float3(model->vertex_buffer, f1, f2, f3);
+}
+
+void d3d_model_float4(int id, int usage, float f1, float f2, float f3, float f4) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive->format)) {
+    vertex_format_add_custom(vertex_type_float4, usage);
+  }
+  vertex_float4(model->vertex_buffer, f1, f2, f3, f4);
+}
+
+void d3d_model_ubyte4(int id, int usage, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive *primitive = &model->primitives[model->current_primitive];
+  if (!vertex_format_exists(primitive->format)) {
+    vertex_format_add_custom(vertex_type_ubyte4, usage);
+  }
+  vertex_ubyte4(model->vertex_buffer, u1, u2, u3, u4);
+}
+
+void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, int col, double alpha) {
+  d3d_model_vertex(id, x, y);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty) {
+  d3d_model_vertex(id, x, y);
+  d3d_model_texcoord(id, tx, ty);
+}
+
+void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_texcoord(id, tx, ty);
+}
+
+void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, double alpha) {
+  d3d_model_vertex(id, x, y);
+  d3d_model_texcoord(id, tx, ty);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_texcoord(id, tx, ty);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_vertex_normal(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_normal(id, nx, ny, nz);
+}
+
+void d3d_model_vertex_normal_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int col, double alpha) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_normal(id, nx, ny, nz);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_vertex_normal_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_normal(id, nx, ny, nz);
+  d3d_model_texcoord(id, tx, ty);
+}
+
+void d3d_model_vertex_normal_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int col, double alpha) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_normal(id, nx, ny, nz);
+  d3d_model_texcoord(id, tx, ty);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_save(int id, string fname) {
+  //TODO: Write save code that has never been done before yet
+}
+
+bool d3d_model_load(int id, string fname) {
+  d3d_model_clear(id);
+}
 
 void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep) {
   // Setup U and V vectors
@@ -78,10 +327,11 @@ void d3d_model_wall(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar 
 
 void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
-  //NOTE: This is the fastest way to batch cubes with uninterpolated normals thanks to my model batching, still slower than a triangle strip with interpolated normals
-  //however.
+  // GM's block model function requires uninterpolated "flat" normals if we want to be visually authentic
+  // This is slightly slower because it requires more vertices to make the normals flat but we have to...
+
   // Negative X
-  d3d_model_primitive_begin( id, pr_trianglefan );
+  d3d_model_primitive_begin(id, pr_trianglestrip);
   d3d_model_vertex_normal_texture( id, x1,y1,z1, -1,0,0, 0,1 );
   d3d_model_vertex_normal_texture( id, x1,y1,z2, -1,0,0, 0,0 );
   d3d_model_vertex_normal_texture( id, x1,y2,z2, -1,0,0, 1,0 );
@@ -89,45 +339,45 @@ void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
   d3d_model_primitive_end(id);
 
   // Positive X
-  d3d_model_primitive_begin( id, pr_trianglefan );
+  d3d_model_primitive_begin(id, pr_trianglestrip);
   d3d_model_vertex_normal_texture( id, x2,y1,z1, 1,0,0, 1,1 );
   d3d_model_vertex_normal_texture( id, x2,y2,z1, 1,0,0, 0,1 );
   d3d_model_vertex_normal_texture( id, x2,y2,z2, 1,0,0, 0,0 );
   d3d_model_vertex_normal_texture( id, x2,y1,z2, 1,0,0, 1,0 );
-  d3d_model_primitive_end( id );
+  d3d_model_primitive_end(id);
 
   // Negative Y
-  d3d_model_primitive_begin( id, pr_trianglefan );
+  d3d_model_primitive_begin(id, pr_trianglestrip);
   d3d_model_vertex_normal_texture( id, x1,y1,z1, 0,-1,0, 0,1 );
   d3d_model_vertex_normal_texture( id, x2,y1,z1, 0,-1,0, 1,1 );
   d3d_model_vertex_normal_texture( id, x2,y1,z2, 0,-1,0, 1,0 );
   d3d_model_vertex_normal_texture( id, x1,y1,z2, 0,-1,0, 0,0 );
-  d3d_model_primitive_end( id );
+  d3d_model_primitive_end(id);
 
   // Positive Y
-  d3d_model_primitive_begin( id, pr_trianglefan );
+  d3d_model_primitive_begin(id, pr_trianglestrip);
   d3d_model_vertex_normal_texture( id, x1,y2,z1, 0,1,0, 1,1 );
   d3d_model_vertex_normal_texture( id, x1,y2,z2, 0,1,0, 1,0 );
   d3d_model_vertex_normal_texture( id, x2,y2,z2, 0,1,0, 0,0 );
   d3d_model_vertex_normal_texture( id, x2,y2,z1, 0,1,0, 0,1 );
-  d3d_model_primitive_end( id );
+  d3d_model_primitive_end(id);
 
   if (closed) {
     // Negative Z
-    d3d_model_primitive_begin( id, pr_trianglefan );
+    d3d_model_primitive_begin(id, pr_trianglestrip);
     d3d_model_vertex_normal_texture( id, x1,y1,z1, 0,0,-1, 0,0 );
     d3d_model_vertex_normal_texture( id, x1,y2,z1, 0,0,-1, 0,1 );
     d3d_model_vertex_normal_texture( id, x2,y2,z1, 0,0,-1, 1,1 );
     d3d_model_vertex_normal_texture( id, x2,y1,z1, 0,0,-1, 1,0 );
-    d3d_model_primitive_end( id );
+    d3d_model_primitive_end(id);
 
     // Positive Z
-    d3d_model_primitive_begin( id, pr_trianglefan );
+    d3d_model_primitive_begin(id, pr_trianglestrip);
     d3d_model_vertex_normal_texture( id, x1,y1,z2, 0,0,1, 0,0 );
     d3d_model_vertex_normal_texture( id, x2,y1,z2, 0,0,1, 1,0 );
     d3d_model_vertex_normal_texture( id, x2,y2,z2, 0,0,1, 1,1 );
     d3d_model_vertex_normal_texture( id, x1,y2,z2, 0,0,1, 0,1 );
-    d3d_model_primitive_end( id );
+    d3d_model_primitive_end(id);
   }
 }
 

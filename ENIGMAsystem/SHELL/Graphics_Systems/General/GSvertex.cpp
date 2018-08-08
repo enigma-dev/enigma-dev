@@ -110,6 +110,10 @@ bool vertex_exists(int buffer) {
   RESOURCE_EXISTS(buffer, vertexBuffers);
 }
 
+void vertex_set_format(int buffer, int format) {
+  enigma::vertexBuffers[buffer]->format = format;
+}
+
 unsigned vertex_get_size(int buffer) {
   return enigma::vertexBuffers[buffer]->number * sizeof(gs_scalar);
 }
@@ -162,6 +166,13 @@ void vertex_end(int buffer) {
 
 void vertex_data(int buffer, const enigma::varargs& data) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  #ifdef DEBUG_MODE
+  if (!vertex_format_exists(VertexBuffer->format)) {
+    show_error("Vertex format " + enigma_user::toString(vertexBuffer->format) +
+               " does not exist and is required for vertex_data to decode varargs", false);
+    return;
+  }
+  #endif
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
   int attrIndex = 0;
   for (int i = 0; i < data.argc;) {

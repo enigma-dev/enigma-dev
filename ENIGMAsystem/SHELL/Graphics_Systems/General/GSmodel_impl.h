@@ -30,10 +30,20 @@ using std::vector;
 
 namespace enigma {
 
-struct Model {
-  int vertex_buffer, index_buffer;
+struct Primitive {
+  int type, format;
+  size_t vertex_start, vertex_count;
 
-  Model(): {}
+  Primitive(int type, int format, ize_t start): type(type), format(format), vertex_start(start), vertex_count(0) {}
+}
+
+struct Model {
+  int type, vertex_buffer;
+  size_t current_primitive;
+  bool vertex_started;
+  vector<Primitive> primitives;
+
+  Model(int type): type(type), vertex_buffer(-1), current_primitive(0), vertex_started(false) {}
 };
 
 
