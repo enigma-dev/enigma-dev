@@ -223,30 +223,37 @@ void d3d_model_primitive_begin(int id, int kind, int format) {
 
 void d3d_model_primitive_end(int id) {
   enigma::Model* model = enigma::models[id];
-  enigma::Primitive *primitive = model->current_primitive;
-  if (!vertex_format_exists(primitive->format))
-    primitive->format = vertex_format_end();
-  vertex_set_format(model->vertex_buffer, primitive->format);
-  primitive->vertex_count = vertex_get_number(model->vertex_buffer) - primitive->vertex_start;
-  // if this is the first primitive, we can't combine it yet so just return
+  // copy current primitive to the stack
+  enigma::Primitive primitive = *model->current_primitive;
+  // delete the current primitive from the heap
+  delete model->current_primitive;
+  model->current_primitive = 0;
+
+  // if we are guessing the format of the model, end the vertex format now
+  if (!vertex_format_exists(primitive.format))
+    primitive.format = vertex_format_end();
+
+  // apply the vertex format to the vertex buffer now so we can get the correct vertex count
+  vertex_set_format(model->vertex_buffer, primitive.format);
+  primitive.vertex_count = vertex_get_number(model->vertex_buffer) - primitive.vertex_start;
+
+  // if this is the first primitive, we can't combine it yet so keep and return
   if (model->primitives.empty()) {
-    model->primitives.push_back(*primitive);
-    model->current_primitive = 0;
+    model->primitives.push_back(primitive);
     return;
   }
 
   // combine adjacent primitives that are list types with logically the same format
   enigma::Primitive& prev = model->primitives.back();
-  if (vertex_format_get_hash(prev.format) == vertex_format_get_hash(primitive->format) &&
-      ((prev.type == pr_pointlist && primitive->type == pr_pointlist) ||
-       (prev.type == pr_linelist && primitive->type == pr_linelist) ||
-       (prev.type == pr_trianglelist && primitive->type == pr_trianglelist))) {
-    prev.vertex_count += primitive->vertex_count;
-    delete model->current_primitive;
+  if (vertex_format_get_hash(prev.format) == vertex_format_get_hash(primitive.format) &&
+      ((prev.type == pr_pointlist && primitive.type == pr_pointlist) ||
+       (prev.type == pr_linelist && primitive.type == pr_linelist) ||
+       (prev.type == pr_trianglelist && primitive.type == pr_trianglelist))) {
+    prev.vertex_count += primitive.vertex_count;
   } else {
-    model->primitives.push_back(*primitive);
+    // not mergeable with the previous primitive so looks like we have to keep it
+    model->primitives.push_back(primitive);
   }
-  model->current_primitive = 0;
 }
 
 void d3d_model_float1(int id, float f1) {
