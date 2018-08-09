@@ -32,14 +32,14 @@ namespace enigma {
 
 struct Primitive {
   int type, format;
-  size_t vertex_start, vertex_count;
+  unsigned vertex_start, vertex_count;
 
-  Primitive(int type, int format, size_t start): type(type), format(format), vertex_start(start), vertex_count(0) {}
+  Primitive(int type, int format, unsigned start): type(type), format(format), vertex_start(start), vertex_count(0) {}
 };
 
 struct Model {
   int type, vertex_buffer;
-  size_t current_primitive;
+  unsigned current_primitive;
   bool vertex_started;
   vector<Primitive> primitives;
 
