@@ -39,7 +39,7 @@ struct Primitive {
 
 struct Model {
   int type, vertex_buffer;
-  unsigned current_primitive;
+  Primitive* current_primitive;
   bool vertex_started;
   vector<Primitive> primitives;
 

@@ -49,6 +49,10 @@ void vertex_format_begin() {
   enigma::vertexFormat = new enigma::VertexFormat();
 }
 
+unsigned vertex_format_get_hash() {
+  return enigma::vertexFormat->hash;
+}
+
 unsigned vertex_format_get_stride() {
   return enigma::vertexFormat->stride;
 }
@@ -94,6 +98,10 @@ bool vertex_format_exists(int id) {
 
 unsigned vertex_format_get_stride(int id) {
   return enigma::vertexFormats[id]->stride;
+}
+
+unsigned vertex_format_get_hash(int id) {
+  return enigma::vertexFormats[id]->hash;
 }
 
 void vertex_format_delete(int id) {

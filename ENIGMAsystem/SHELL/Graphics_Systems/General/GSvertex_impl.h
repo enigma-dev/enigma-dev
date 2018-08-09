@@ -28,6 +28,7 @@
 
 #include <vector>
 #include <utility>
+#include <functional>
 #include <stdint.h>
 using std::vector;
 using std::pair;
@@ -37,14 +38,24 @@ namespace enigma {
 void graphics_delete_vertex_buffer_peer(int buffer);
 void graphics_delete_index_buffer_peer(int buffer);
 
+template <class T>
+inline void hash_combine(std::size_t& seed, const T& v)
+{
+  std::hash<T> hasher;
+  seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+}
+
 struct VertexFormat {
   vector<pair<int,int> > flags;
-  std::size_t stride;
+  std::size_t stride, hash;
 
-  VertexFormat(): stride(0) {}
+  VertexFormat(): stride(0), hash(0) {}
 
   void AddAttribute(int type, int attribute) {
     using namespace enigma_user;
+
+    hash_combine(hash, type);
+    hash_combine(hash, attribute);
 
     switch (type) {
       case vertex_type_float1: stride += 1; break;
