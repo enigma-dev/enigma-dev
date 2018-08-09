@@ -665,7 +665,7 @@ void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
   // This is slightly slower because it requires more vertices to make the normals flat but we have to...
 
   // Negative X
-  d3d_model_primitive_begin(id, pr_trianglestrip);
+  d3d_model_primitive_begin(id, pr_trianglefan);
   d3d_model_vertex_normal_texture( id, x1,y1,z1, -1,0,0, 0,1 );
   d3d_model_vertex_normal_texture( id, x1,y1,z2, -1,0,0, 0,0 );
   d3d_model_vertex_normal_texture( id, x1,y2,z2, -1,0,0, 1,0 );
@@ -673,7 +673,7 @@ void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
   d3d_model_primitive_end(id);
 
   // Positive X
-  d3d_model_primitive_begin(id, pr_trianglestrip);
+  d3d_model_primitive_begin(id, pr_trianglefan);
   d3d_model_vertex_normal_texture( id, x2,y1,z1, 1,0,0, 1,1 );
   d3d_model_vertex_normal_texture( id, x2,y2,z1, 1,0,0, 0,1 );
   d3d_model_vertex_normal_texture( id, x2,y2,z2, 1,0,0, 0,0 );
@@ -681,7 +681,7 @@ void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
   d3d_model_primitive_end(id);
 
   // Negative Y
-  d3d_model_primitive_begin(id, pr_trianglestrip);
+  d3d_model_primitive_begin(id, pr_trianglefan);
   d3d_model_vertex_normal_texture( id, x1,y1,z1, 0,-1,0, 0,1 );
   d3d_model_vertex_normal_texture( id, x2,y1,z1, 0,-1,0, 1,1 );
   d3d_model_vertex_normal_texture( id, x2,y1,z2, 0,-1,0, 1,0 );
@@ -689,7 +689,7 @@ void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
   d3d_model_primitive_end(id);
 
   // Positive Y
-  d3d_model_primitive_begin(id, pr_trianglestrip);
+  d3d_model_primitive_begin(id, pr_trianglefan);
   d3d_model_vertex_normal_texture( id, x1,y2,z1, 0,1,0, 1,1 );
   d3d_model_vertex_normal_texture( id, x1,y2,z2, 0,1,0, 1,0 );
   d3d_model_vertex_normal_texture( id, x2,y2,z2, 0,1,0, 0,0 );
@@ -698,7 +698,7 @@ void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
 
   if (closed) {
     // Negative Z
-    d3d_model_primitive_begin(id, pr_trianglestrip);
+    d3d_model_primitive_begin(id, pr_trianglefan);
     d3d_model_vertex_normal_texture( id, x1,y1,z1, 0,0,-1, 0,0 );
     d3d_model_vertex_normal_texture( id, x1,y2,z1, 0,0,-1, 0,1 );
     d3d_model_vertex_normal_texture( id, x2,y2,z1, 0,0,-1, 1,1 );
@@ -706,7 +706,7 @@ void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
     d3d_model_primitive_end(id);
 
     // Positive Z
-    d3d_model_primitive_begin(id, pr_trianglestrip);
+    d3d_model_primitive_begin(id, pr_trianglefan);
     d3d_model_vertex_normal_texture( id, x1,y1,z2, 0,0,1, 0,0 );
     d3d_model_vertex_normal_texture( id, x2,y1,z2, 0,0,1, 1,0 );
     d3d_model_vertex_normal_texture( id, x2,y2,z2, 0,0,1, 1,1 );
