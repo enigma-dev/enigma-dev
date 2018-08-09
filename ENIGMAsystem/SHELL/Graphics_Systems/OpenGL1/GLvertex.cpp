@@ -182,6 +182,8 @@ void graphics_reset_client_state(const ClientState &state) {
       glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
   }
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 }
