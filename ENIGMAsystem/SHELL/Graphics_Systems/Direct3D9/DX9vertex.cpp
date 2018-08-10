@@ -34,6 +34,7 @@ D3DDECLUSAGE usage_types[] = { D3DDECLUSAGE_POSITION, D3DDECLUSAGE_COLOR, D3DDEC
 
 map<int, LPDIRECT3DVERTEXBUFFER9> vertexBufferPeers;
 map<int, LPDIRECT3DINDEXBUFFER9> indexBufferPeers;
+map<int, std::pair<LPDIRECT3DVERTEXDECLARATION9, size_t> > vertexFormatPeers;
 
 }
 
@@ -171,16 +172,16 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
 inline void graphics_apply_vertex_format(int format, size_t &stride) {
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
 
-  static int last_format = -1;
-  static size_t last_stride = 0;
-  static LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = nullptr;
-  // cache the format and only recreate it when switching formats
-  if (last_format != format) {
-    last_format = format;
-    if (vertexDeclaration) vertexDeclaration->Release();
-    vertexDeclaration = vertex_format_declaration(vertexFormat, last_stride);
+  auto search = vertexFormatPeers.find(format);
+  LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = NULL;
+  if (search == vertexFormatPeers.end()) {
+     vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
+     vertexFormatPeers[format] = std::make_pair(vertexDeclaration, stride);
+  } else {
+    vertexDeclaration = search->second.first;
+    stride = search->second.second;
   }
-  stride = last_stride;
+
   d3dmgr->SetVertexDeclaration(vertexDeclaration);
 }
 
