@@ -229,28 +229,22 @@ void d3d_model_primitive_end(int id) {
   delete model->current_primitive;
   model->current_primitive = 0;
 
+  // if we are guessing the format of the model, end the vertex format now
+  if (!vertex_format_exists(primitive.format))
+    primitive.format = vertex_format_end();
+
   // combine adjacent primitives that are list types with logically the same format
   if (!model->primitives.empty()) {
     enigma::Primitive& prev = model->primitives.back();
 
-    if (vertex_format_get_hash(prev.format) == vertex_format_get_hash() &&
+    if (vertex_format_get_hash(prev.format) == vertex_format_get_hash(primitive.format) &&
        ((prev.type == pr_pointlist && primitive.type == pr_pointlist) ||
         (prev.type == pr_linelist && primitive.type == pr_linelist) ||
         (prev.type == pr_trianglelist && primitive.type == pr_trianglelist))) {
       prev.vertex_count += vertex_get_number(model->vertex_buffer) - primitive.vertex_start;
-      if (vertex_format_exists()) {
-        vertex_format_delete();
-      }
       return;
     }
     // not mergeable with the previous primitive so looks like we have to keep it...
-  }
-
-  // if we are guessing the format of the model, end the vertex format now
-  if (!vertex_format_exists(primitive.format))
-    primitive.format = vertex_format_end();
-  else if (vertex_format_exists()) {
-    vertex_format_delete();
   }
 
   // apply the vertex format to the vertex buffer now so we can get the correct vertex count

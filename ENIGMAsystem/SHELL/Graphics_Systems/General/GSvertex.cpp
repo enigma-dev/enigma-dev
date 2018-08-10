@@ -31,6 +31,8 @@
 
 #include "Widget_Systems/widgets_mandatory.h"
 
+#include <unordered_map>
+
 #define RESOURCE_EXISTS(id, container) return (id >= 0 && (unsigned)id < enigma::container.size() && enigma::container[id] != nullptr);
 
 namespace enigma {
@@ -38,6 +40,8 @@ namespace enigma {
 vector<VertexFormat*> vertexFormats;
 vector<VertexBuffer*> vertexBuffers;
 vector<IndexBuffer*> indexBuffers;
+
+std::unordered_map<size_t, int> vertexFormatCache;
 
 VertexFormat* vertexFormat = 0;
 
@@ -82,19 +86,22 @@ void vertex_format_add_custom(int type, int usage) {
 }
 
 int vertex_format_end() {
-  int id = enigma::vertexFormats.size();
-  enigma::vertexFormats.push_back(enigma::vertexFormat);
+  int id = -1;
+  auto search = enigma::vertexFormatCache.find(enigma::vertexFormat->hash);
+  if (search != enigma::vertexFormatCache.end()) {
+    id = search->second;
+    delete enigma::vertexFormat;
+  } else {
+    id = enigma::vertexFormats.size();
+    enigma::vertexFormats.push_back(enigma::vertexFormat);
+    enigma::vertexFormatCache[enigma::vertexFormat->hash] = id;
+  }
   enigma::vertexFormat = 0;
   return id;
 }
 
 bool vertex_format_exists() {
   return (enigma::vertexFormat != 0);
-}
-
-void vertex_format_delete() {
-  delete enigma::vertexFormat;
-  enigma::vertexFormat = 0;
 }
 
 bool vertex_format_exists(int id) {
@@ -107,11 +114,6 @@ unsigned vertex_format_get_stride(int id) {
 
 unsigned vertex_format_get_hash(int id) {
   return enigma::vertexFormats[id]->hash;
-}
-
-void vertex_format_delete(int id) {
-  delete enigma::vertexFormats[id];
-  enigma::vertexFormats[id] = nullptr;
 }
 
 int vertex_create_buffer() {
