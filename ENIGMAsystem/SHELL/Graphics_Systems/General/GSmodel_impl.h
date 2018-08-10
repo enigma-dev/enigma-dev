@@ -32,9 +32,11 @@ namespace enigma {
 
 struct Primitive {
   int type, format;
+  bool format_defined;
   unsigned vertex_start, vertex_count;
 
-  Primitive(int type, int format, unsigned start): type(type), format(format), vertex_start(start), vertex_count(0) {}
+  Primitive(int type, int format, bool format_defined, unsigned start):
+    type(type), format(format), format_defined(format_defined), vertex_start(start), vertex_count(0) {}
 };
 
 struct Model {

@@ -92,6 +92,11 @@ bool vertex_format_exists() {
   return (enigma::vertexFormat != 0);
 }
 
+void vertex_format_delete() {
+  delete enigma::vertexFormat;
+  enigma::vertexFormat = 0;
+}
+
 bool vertex_format_exists(int id) {
   RESOURCE_EXISTS(id, vertexFormats);
 }

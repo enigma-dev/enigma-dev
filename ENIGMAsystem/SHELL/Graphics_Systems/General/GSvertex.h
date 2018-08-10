@@ -54,6 +54,7 @@ enum {
 void vertex_format_begin();
 int vertex_format_end();
 bool vertex_format_exists();
+void vertex_format_delete();
 bool vertex_format_exists(int id);
 void vertex_format_delete(int id);
 unsigned vertex_format_get_hash(int id);
