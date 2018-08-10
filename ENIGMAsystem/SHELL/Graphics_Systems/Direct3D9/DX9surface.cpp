@@ -57,7 +57,7 @@ bool surface_is_supported()
   return true;
 }
 
-int surface_create(int width, int height, bool depth)
+int surface_create(int width, int height, bool depthbuffer, bool, bool)
 {
 	LPDIRECT3DTEXTURE9 texture = NULL;
 	d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);

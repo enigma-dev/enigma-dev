@@ -55,7 +55,7 @@ bool surface_is_supported()
   return true;
 }
 
-int surface_create(int width, int height, bool depthbuffer)
+int surface_create(int width, int height, bool depthbuffer, bool, bool)
 {
   ID3D11Texture2D *renderTargetTexture;
   ID3D11RenderTargetView* renderTargetView;

@@ -127,7 +127,7 @@ namespace enigma_user
 	void texture_anisotropy_filter(int sampler, gs_scalar levels){}
 
 	bool surface_is_supported(){return false;}
-	int surface_create(int width, int height, bool depthbuffer){return -1;}
+	int surface_create(int width, int height, bool depthbuffer, bool, bool){return -1;}
 	int surface_create_msaa(int width, int height, int samples){return -1;}
 	void surface_set_target(int id){}
 	void surface_reset_target(void){}

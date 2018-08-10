@@ -84,7 +84,7 @@ bool surface_is_supported()
     return GLEW_EXT_framebuffer_object;
 }
 
-int surface_create(int width, int height, bool depthbuffer)
+int surface_create(int width, int height, bool depthbuffer, bool, bool)
 {
     if (!GLEW_EXT_framebuffer_object) {
       return -1;
