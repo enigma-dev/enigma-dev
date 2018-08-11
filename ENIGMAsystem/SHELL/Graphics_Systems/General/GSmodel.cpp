@@ -20,6 +20,7 @@
 #include "GSmodel_impl.h"
 #include "GSmodel.h"
 #include "GSvertex.h"
+#include "GSvertex_impl.h"
 #include "GSmatrix.h"
 #include "GStextures.h"
 #include "GSprimitives.h"
@@ -237,12 +238,32 @@ void d3d_model_primitive_end(int id) {
   if (!model->primitives.empty()) {
     enigma::Primitive& prev = model->primitives.back();
 
-    if (vertex_format_get_hash(prev.format) == vertex_format_get_hash(primitive.format) &&
-       ((prev.type == pr_pointlist && primitive.type == pr_pointlist) ||
-        (prev.type == pr_linelist && primitive.type == pr_linelist) ||
-        (prev.type == pr_trianglelist && primitive.type == pr_trianglelist))) {
-      prev.vertex_count += vertex_get_number(model->vertex_buffer) - primitive.vertex_start;
-      return;
+    if (vertex_format_get_hash(prev.format) == vertex_format_get_hash(primitive.format)) {
+      if ((prev.type == pr_pointlist && primitive.type == pr_pointlist) ||
+          (prev.type == pr_linelist && primitive.type == pr_linelist) ||
+          (prev.type == pr_trianglelist && primitive.type == pr_trianglelist)) {
+        prev.vertex_count += vertex_get_number(model->vertex_buffer) - primitive.vertex_start;
+        return;
+      } else if (prev.type == pr_trianglestrip && primitive.type == pr_trianglestrip) {
+        // use a degenerate triangle to combine the adjacent strips
+        enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[model->vertex_buffer];
+        const size_t stride = vertex_format_get_stride(prev.format);
+        std::vector<enigma::VertexElement>& vertices = vertexBuffer->vertices;
+
+        auto degenerates = std::vector<enigma::VertexElement>(
+          vertices.begin() + (primitive.vertex_start * stride - stride), // last vertex of the first strip
+          vertices.begin() + (primitive.vertex_start * stride + stride)  // first vertex of the second strip
+        );
+
+        vertices.insert(
+          vertices.begin() + primitive.vertex_start * stride,
+          degenerates.begin(),
+          degenerates.end()
+        );
+
+        prev.vertex_count = vertex_get_number(model->vertex_buffer) - prev.vertex_start;
+        return;
+      }
     }
     // not mergeable with the previous primitive so looks like we have to keep it...
   }
