@@ -63,10 +63,10 @@ void graphics_delete_index_buffer_peer(int buffer) {
 static inline int graphics_find_attribute_location(std::string name, int usageIndex) {
   int location = -1;
   if (usageIndex == 0) {
-    location = glGetAttribLocation(enigma::shaderprograms[enigma::bound_shader]->shaderprogram, name.c_str());
+    location = enigma_user::glsl_get_attribute_location(enigma::bound_shader, name);
   }
   if (usageIndex > 0 || location == -1) {
-    location = glGetAttribLocation(enigma::shaderprograms[enigma::bound_shader]->shaderprogram, (name + std::to_string(usageIndex)).c_str());
+    location = enigma_user::glsl_get_attribute_location(enigma::bound_shader, name + std::to_string(usageIndex));
   }
   return location;
 }
