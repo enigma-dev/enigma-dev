@@ -159,13 +159,14 @@ unsigned vertex_get_number(int buffer) {
   return 0;
 }
 
-void vertex_freeze(int buffer) {
+void vertex_freeze(int buffer, bool dynamic) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   // we can freeze the vertex buffer only if it isn't already frozen
   // if it's not frozen, then we'll freeze it when we do a dirty update
   if (vertexBuffer->frozen) return;
   vertexBuffer->frozen = true;
+  vertexBuffer->dynamic = dynamic;
   vertexBuffer->dirty = true;
 }
 
@@ -180,6 +181,7 @@ void vertex_clear(int buffer) {
   // we can clear a.k.a. "unfreeze" the vertex buffer only if it is actually frozen
   if (!vertexBuffer->frozen) return;
   vertexBuffer->frozen = false;
+  vertexBuffer->dynamic = false;
   vertexBuffer->dirty = true;
 }
 
@@ -340,13 +342,14 @@ unsigned index_get_number(int buffer) {
   return enigma::indexBuffers[buffer]->getNumber();
 }
 
-void index_freeze(int buffer) {
+void index_freeze(int buffer, bool dynamic) {
   enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 
   // we can freeze the index buffer only if it isn't already frozen
   // if it's not frozen, then we'll freeze it when we do a dirty update
   if (indexBuffer->frozen) return;
   indexBuffer->frozen = true;
+  indexBuffer->dynamic = dynamic;
   indexBuffer->dirty = true;
 }
 
@@ -361,6 +364,7 @@ void index_clear(int buffer) {
   // we can clear a.k.a. "unfreeze" the index buffer only if it is actually frozen
   if (!indexBuffer->frozen) return;
   indexBuffer->frozen = false;
+  indexBuffer->dynamic = false;
   indexBuffer->dirty = true;
 }
 

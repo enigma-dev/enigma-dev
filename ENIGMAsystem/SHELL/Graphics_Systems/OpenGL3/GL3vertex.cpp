@@ -74,6 +74,7 @@ static inline int graphics_find_attribute_location(std::string name, int usageIn
 void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
   const bool frozen = isIndex ? indexBuffers[buffer]->frozen : vertexBuffers[buffer]->frozen;
+  const bool dynamic = isIndex ? indexBuffers[buffer]->dynamic : vertexBuffers[buffer]->dynamic;
   GLuint bufferPeer;
   auto it = isIndex ? indexBufferPeers.find(buffer) : vertexBufferPeers.find(buffer);
   const GLenum target = isIndex ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER;
@@ -103,10 +104,8 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     }
 
     const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
-    GLenum usage = frozen ? GL_STATIC_DRAW : GL_STREAM_DRAW;
-    // orphan the buffer first to avoid synchronization overhead
-    glBufferData(target, size, NULL, usage);
-    glBufferSubData(target, 0, size, data);
+    GLenum usage = frozen ? (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW) : GL_STREAM_DRAW;
+    glBufferData(target, size, data, usage);
 
     if (isIndex) {
       indexBuffers[buffer]->indices.clear();

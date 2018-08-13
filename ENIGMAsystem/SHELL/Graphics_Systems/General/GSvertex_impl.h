@@ -90,7 +90,7 @@ union VertexElement {
 
 struct VertexBuffer {
   vector<VertexElement> vertices;
-  bool frozen, dirty;
+  bool frozen, dynamic, dirty;
   int format;
   std::size_t number;
 
@@ -102,7 +102,7 @@ struct VertexBuffer {
 
 struct IndexBuffer {
   vector<uint16_t> indices;
-  bool frozen, dirty;
+  bool frozen, dynamic, dirty;
   int type;
   std::size_t number;
 
