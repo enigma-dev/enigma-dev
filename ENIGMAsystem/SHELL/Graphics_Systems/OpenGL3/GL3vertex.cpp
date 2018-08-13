@@ -101,19 +101,12 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     } else {
       bind_array_buffer(bufferPeer);
     }
-    GLint pSize;
-    glGetBufferParameteriv(target, GL_BUFFER_SIZE, &pSize);
 
-    // if the size of the peer isn't big enough to hold the new contents
-    // or freeze was called, then we need to make a call to glBufferData
-    // to allocate a bigger peer or remove the GL_DYNAMIC_DRAW usage
     const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
-    if (size > (size_t)pSize || frozen) {
-      GLenum usage = frozen ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
-      glBufferData(target, size, data, usage);
-    } else {
-      glBufferSubData(target, 0, size, data);
-    }
+    GLenum usage = frozen ? GL_STATIC_DRAW : GL_STREAM_DRAW;
+    // orphan the buffer first to avoid synchronization overhead
+    glBufferData(target, size, NULL, usage);
+    glBufferSubData(target, 0, size, data);
 
     if (isIndex) {
       indexBuffers[buffer]->indices.clear();

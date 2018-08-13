@@ -70,19 +70,12 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     }
 
     glBindBuffer(target, bufferPeer);
-    GLint pSize;
-    glGetBufferParameteriv(target, GL_BUFFER_SIZE, &pSize);
 
-    // if the size of the peer isn't big enough to hold the new contents
-    // or freeze was called, then we need to make a call to glBufferData
-    // to allocate a bigger peer or remove the GL_DYNAMIC_DRAW usage
     const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
-    if (size > (size_t)pSize || frozen) {
-      GLenum usage = frozen ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
-      glBufferData(target, size, data, usage);
-    } else {
-      glBufferSubData(target, 0, size, data);
-    }
+    GLenum usage = frozen ? GL_STATIC_DRAW : GL_STREAM_DRAW;
+    // orphan the buffer first to avoid synchronization overhead
+    glBufferData(target, size, NULL, usage);
+    glBufferSubData(target, 0, size, data);
 
     if (isIndex) {
       indexBuffers[buffer]->indices.clear();
@@ -168,7 +161,6 @@ void graphics_apply_vertex_format(int format) {
 void graphics_reset_client_state() {
   glPopClientAttrib();
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 }
@@ -215,6 +207,7 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)(intptr_t)start);
 
   enigma::graphics_reset_client_state();
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 }
