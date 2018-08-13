@@ -185,7 +185,7 @@ int GetShapesModel() {
 
 void BeginShapesBatching(int texId) {
 	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(model_dynamic);
+		shapes_d3d_model = d3d_model_create(model_stream);
 	} else if (texId != shapes_d3d_texture) {
 		if (!hasdrawn) {
 			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);

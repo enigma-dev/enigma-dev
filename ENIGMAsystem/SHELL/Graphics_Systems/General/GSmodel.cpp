@@ -173,11 +173,15 @@ void d3d_model_draw(int id) {
     model->vertex_started = false;
     vertex_end(model->vertex_buffer);
 
-    // freeze the model if it's static to indicate to the driver
+    // freeze the model if it's static to indicate to the driver that
     // we don't intend on updating this sucker so it will draw faster
     if (model->type == model_static) {
-      vertex_freeze(model->vertex_buffer);
+      vertex_freeze(model->vertex_buffer, false);
+    } else if (model->type == model_dynamic) {
+      vertex_freeze(model->vertex_buffer, true);
     }
+    // model_stream type is never frozen because it means the user
+    // will be updating and specifying new primitives every frame
   }
   for (auto primitive : model->primitives) {
     vertex_set_format(model->vertex_buffer, primitive.format);
