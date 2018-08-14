@@ -133,15 +133,19 @@ GLvoid* graphics_prepare_buffer(const int buffer, const bool isIndex) {
   }
 }
 
-void graphics_apply_vertex_format(int format, const GLvoid* base_pointer) {
+struct ClientState {
+  bool useVertices = false, useNormals = false, useColors = false, useFogCoords = false;
+  size_t texture = 0;
+};
+
+ClientState graphics_apply_vertex_format(int format, const GLvoid* base_pointer) {
   using namespace enigma_user;
 
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
 
-  bool useVertices = false, useNormals = false, useColors = false, useFogCoords = false;
-  size_t texture = 0, offset = 0;
+  ClientState state;
+  size_t offset = 0;
   const size_t stride = vertexFormat->stride * sizeof(float);
-  glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
   for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
     const pair<int, int> flag = vertexFormat->flags[i];
 
@@ -161,26 +165,26 @@ void graphics_apply_vertex_format(int format, const GLvoid* base_pointer) {
     // this is an "emulation" of vertex format declarations for the OpenGL fixed-function pipeline
     switch (flag.second) {
       case vertex_usage_position:
-        if (useVertices) break;
-        useVertices = true;
+        if (state.useVertices) break;
+        state.useVertices = true;
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(elements, type, stride, GL_ATTRIB_OFFSET(offset));
         break;
       case vertex_usage_color:
-        if (useColors) break;
-        useColors = true;
+        if (state.useColors) break;
+        state.useColors = true;
         glEnableClientState(GL_COLOR_ARRAY);
         glColorPointer(elements, type, stride, GL_ATTRIB_OFFSET(offset));
         break;
       case vertex_usage_normal:
-        if (useNormals) break;
-        useNormals = true;
+        if (state.useNormals) break;
+        state.useNormals = true;
         glEnableClientState(GL_NORMAL_ARRAY);
         glNormalPointer(type, stride, GL_ATTRIB_OFFSET(offset));
         break;
       case vertex_usage_textcoord:
-        if (texture >= GL_MAX_TEXTURE_UNITS) break;
-        glClientActiveTexture(GL_TEXTURE0 + texture++);
+        if (state.texture >= GL_MAX_TEXTURE_UNITS) break;
+        glClientActiveTexture(GL_TEXTURE0 + state.texture++);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glTexCoordPointer(elements, type, stride, GL_ATTRIB_OFFSET(offset));
         break;
@@ -190,8 +194,8 @@ void graphics_apply_vertex_format(int format, const GLvoid* base_pointer) {
       case vertex_usage_tangent: break;
       case vertex_usage_binormal: break;
       case vertex_usage_fog:
-        if (useFogCoords) break;
-        useFogCoords = true;
+        if (state.useFogCoords) break;
+        state.useFogCoords = true;
         glEnableClientState(GL_FOG_COORD_ARRAY);
         glFogCoordPointer(type, stride, GL_ATTRIB_OFFSET(offset));
         break;
@@ -200,10 +204,21 @@ void graphics_apply_vertex_format(int format, const GLvoid* base_pointer) {
 
     offset += size;
   }
+
+  return state;
 }
 
-void graphics_reset_client_state() {
-  glPopClientAttrib();
+void graphics_reset_client_state(const ClientState &state) {
+  if (state.useVertices) glDisableClientState(GL_VERTEX_ARRAY);
+  if (state.useNormals) glDisableClientState(GL_NORMAL_ARRAY);
+  if (state.useColors) glDisableClientState(GL_COLOR_ARRAY);
+  if (state.useFogCoords) glDisableClientState(GL_FOG_COORD_ARRAY);
+  if (state.texture > 0) {
+    for (size_t i = 0; i < state.texture; ++i) {
+      glClientActiveTexture(GL_TEXTURE0 + i);
+      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
+  }
   if (vbo_is_supported) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
@@ -227,11 +242,11 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   GLvoid* base_pointer = enigma::graphics_prepare_buffer(buffer, false);
-  enigma::graphics_apply_vertex_format(vertexBuffer->format, base_pointer);
+  enigma::ClientState state = enigma::graphics_apply_vertex_format(vertexBuffer->format, base_pointer);
 
 	glDrawArrays(primitive_types[primitive], start, count);
 
-  enigma::graphics_reset_client_state();
+  enigma::graphics_reset_client_state(state);
 }
 
 void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
@@ -240,7 +255,7 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
 
   GLvoid* base_vertex_pointer = enigma::graphics_prepare_buffer(vertex, false);
   GLvoid* base_index_pointer = enigma::graphics_prepare_buffer(buffer, true);
-  enigma::graphics_apply_vertex_format(vertexBuffer->format, base_vertex_pointer);
+  enigma::ClientState state = enigma::graphics_apply_vertex_format(vertexBuffer->format, base_vertex_pointer);
 
   GLenum indexType = GL_UNSIGNED_SHORT;
   if (indexBuffer->type == index_type_uint) {
@@ -252,7 +267,7 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
 
   glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)((intptr_t)base_index_pointer + start));
 
-  enigma::graphics_reset_client_state();
+  enigma::graphics_reset_client_state(state);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
