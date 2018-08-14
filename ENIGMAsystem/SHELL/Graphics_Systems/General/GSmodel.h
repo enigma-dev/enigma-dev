@@ -25,9 +25,18 @@
 
 namespace enigma_user {
   enum {
-    model_static   = 0, // write to buffer peer once (e.g, single time in the create event)
-    model_dynamic  = 1, // write to buffer peer infrequently (e.g, every other step or in an alarm event)
-    model_stream   = 2  // write to buffer peer every frame (e.g, specifying primitives in the draw event)
+    // write to buffer peer once
+    // aka GL_STATIC_DRAW or D3DUSAGE_WRITEONLY
+    // (e.g, single time in the create event)
+    model_static   = 0,
+    // write to buffer peer infrequently
+    // aka GL_DYNAMIC_DRAW or D3DUSAGE_WRITEONLY
+    // (e.g, every other step or in an alarm event)
+    model_dynamic  = 1,
+    // write to buffer peer every frame
+    // aka GL_STREAM_DRAW or D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC
+    // (e.g, specifying primitives in the draw event)
+    model_stream   = 2,
   };
 
   int d3d_model_create(int type = model_static);
