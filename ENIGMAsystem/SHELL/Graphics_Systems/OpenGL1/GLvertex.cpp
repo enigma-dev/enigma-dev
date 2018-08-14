@@ -27,6 +27,12 @@ namespace {
 
 GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN };
 
+bool vbo_is_supported = GL_ARB_vertex_buffer_object;
+
+// for OpenGL1.1
+map<int, std::vector<enigma::VertexElement> > vertexBufferArrays;
+map<int, std::vector<short unsigned int> > indexBufferArrays;
+// for OpenGL1.5 or ARB_vertex_buffer_object support
 map<int, GLuint> vertexBufferPeers;
 map<int, GLuint> indexBufferPeers;
 
@@ -35,16 +41,46 @@ map<int, GLuint> indexBufferPeers;
 namespace enigma {
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
-  glDeleteBuffers(1, &vertexBufferPeers[buffer]);
-  vertexBufferPeers.erase(buffer);
+  if (vbo_is_supported) {
+    glDeleteBuffers(1, &vertexBufferPeers[buffer]);
+    vertexBufferPeers.erase(buffer);
+  } else {
+    vertexBufferArrays.erase(buffer);
+  }
 }
 
 void graphics_delete_index_buffer_peer(int buffer) {
-  glDeleteBuffers(1, &indexBufferPeers[buffer]);
-  indexBufferPeers.erase(buffer);
+  if (vbo_is_supported) {
+    glDeleteBuffers(1, &indexBufferPeers[buffer]);
+    indexBufferPeers.erase(buffer);
+  } else {
+    indexBufferArrays.erase(buffer);
+  }
 }
 
-void graphics_prepare_buffer(const int buffer, const bool isIndex) {
+GLvoid* graphics_prepare_buffer_array(const int buffer, const bool isIndex) {
+  const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
+  if (dirty) {
+    if (isIndex) {
+      IndexBuffer* indexBuffer = indexBuffers[buffer];
+      indexBufferArrays[buffer] = indexBuffer->indices;
+      indexBuffer->indices.clear();
+      indexBuffer->dirty = false;
+    } else {
+      VertexBuffer* vertexBuffer = vertexBuffers[buffer];
+      vertexBufferArrays[buffer] = vertexBuffer->vertices;
+      vertexBuffer->vertices.clear();
+      vertexBuffer->dirty = false;
+    }
+  }
+  if (isIndex) {
+    return (GLvoid*)indexBufferArrays[buffer].data();
+  } else {
+    return (GLvoid*)vertexBufferArrays[buffer].data();
+  }
+}
+
+void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
   const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
   const bool frozen = isIndex ? indexBuffers[buffer]->frozen : vertexBuffers[buffer]->frozen;
   const bool dynamic = isIndex ? indexBuffers[buffer]->dynamic : vertexBuffers[buffer]->dynamic;
@@ -88,7 +124,16 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   }
 }
 
-void graphics_apply_vertex_format(int format) {
+GLvoid* graphics_prepare_buffer(const int buffer, const bool isIndex) {
+  if (vbo_is_supported) {
+    graphics_prepare_buffer_peer(buffer, isIndex);
+    return NULL;
+  } else {
+    return graphics_prepare_buffer_array(buffer, isIndex);
+  }
+}
+
+void graphics_apply_vertex_format(int format, const GLvoid* base_pointer) {
   using namespace enigma_user;
 
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
@@ -111,7 +156,7 @@ void graphics_apply_vertex_format(int format) {
       case vertex_type_ubyte4: elements = 4; size = 1; type = GL_UNSIGNED_BYTE; break;
     }
 
-    #define GL_ATTRIB_OFFSET(P) ((const GLvoid *) (sizeof(gs_scalar) * P))
+    #define GL_ATTRIB_OFFSET(P) ((const GLvoid *) ((intptr_t)base_pointer + (sizeof(gs_scalar) * P)))
 
     // this is an "emulation" of vertex format declarations for the OpenGL fixed-function pipeline
     switch (flag.second) {
@@ -159,7 +204,9 @@ void graphics_apply_vertex_format(int format) {
 
 void graphics_reset_client_state() {
   glPopClientAttrib();
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  if (vbo_is_supported) {
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
 }
 
 }
@@ -179,8 +226,8 @@ void vertex_color(int buffer, int color, double alpha) {
 void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
-  enigma::graphics_prepare_buffer(buffer, false);
-  enigma::graphics_apply_vertex_format(vertexBuffer->format);
+  GLvoid* base_pointer = enigma::graphics_prepare_buffer(buffer, false);
+  enigma::graphics_apply_vertex_format(vertexBuffer->format, base_pointer);
 
 	glDrawArrays(primitive_types[primitive], start, count);
 
@@ -191,9 +238,9 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 
-  enigma::graphics_prepare_buffer(vertex, false);
-  enigma::graphics_prepare_buffer(buffer, true);
-  enigma::graphics_apply_vertex_format(vertexBuffer->format);
+  GLvoid* base_vertex_pointer = enigma::graphics_prepare_buffer(vertex, false);
+  GLvoid* base_index_pointer = enigma::graphics_prepare_buffer(buffer, true);
+  enigma::graphics_apply_vertex_format(vertexBuffer->format, base_vertex_pointer);
 
   GLenum indexType = GL_UNSIGNED_SHORT;
   if (indexBuffer->type == index_type_uint) {
@@ -203,7 +250,7 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
     start *= sizeof(unsigned short);
   }
 
-  glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)(intptr_t)start);
+  glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)((intptr_t)base_index_pointer + start));
 
   enigma::graphics_reset_client_state();
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
