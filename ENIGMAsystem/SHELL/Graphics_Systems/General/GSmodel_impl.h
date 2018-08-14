@@ -31,19 +31,28 @@ using std::vector;
 namespace enigma {
 
 struct Primitive {
-  int type, format;
-  bool format_defined;
-  unsigned vertex_start, vertex_count;
+  int type; // one of the enigma_user primitive type constants (e.g, pr_trianglelist)
+  int format; // index of the user vertex format that describes the vertex data of this primitive
+  bool format_defined; // if the format has been guessed yet from how vertex data is being specified
+  unsigned vertex_start, vertex_count; // range of vertices in the vertex buffer this primitive specified
+
+  // NOTE: format may not exist until d3d_model_primitive_end is called
+  // NOTE: when format_defined is true the format may still not exist yet
 
   Primitive(int type, int format, bool format_defined, unsigned start):
     type(type), format(format), format_defined(format_defined), vertex_start(start), vertex_count(0) {}
 };
 
 struct Model {
-  int type, vertex_buffer;
-  Primitive* current_primitive;
-  bool vertex_started;
-  vector<Primitive> primitives;
+  int type; // one of the enigma_user model type constants (e.g, model_static is the default)
+  int vertex_buffer; // index of the user vertex buffer this model uses to buffer its vertex data
+  Primitive* current_primitive; // pointer to the current primitive being specified by the user
+  bool vertex_started; // whether the user has begun specifying the model by starting a primitive
+  vector<Primitive> primitives; // all primitives the user has finished specifying for this model
+
+  // NOTE: vertex_buffer should always exist but not outlive the model
+  // NOTE: current_primitive does not exist outside of the begin/end calls
+  // NOTE: vertex_started is true until the user attempts to draw the model
 
   Model(int type): type(type), vertex_buffer(-1), current_primitive(0), vertex_started(false) {}
 };
