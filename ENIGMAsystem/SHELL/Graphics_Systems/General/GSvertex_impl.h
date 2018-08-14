@@ -39,10 +39,8 @@ void graphics_delete_vertex_buffer_peer(int buffer);
 void graphics_delete_index_buffer_peer(int buffer);
 
 template <class T>
-inline void hash_combine(std::size_t& seed, const T& v)
-{
-  std::hash<T> hasher;
-  seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+inline void hash_combine(std::size_t& seed, const T& v) {
+  seed ^= std::hash<T>()(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
 }
 
 struct VertexFormat {
