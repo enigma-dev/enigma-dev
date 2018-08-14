@@ -36,7 +36,7 @@ map<int, LPDIRECT3DVERTEXBUFFER9> vertexBufferPeers;
 map<int, LPDIRECT3DINDEXBUFFER9> indexBufferPeers;
 map<int, std::pair<LPDIRECT3DVERTEXDECLARATION9, size_t> > vertexFormatPeers;
 
-}
+} // anonymous namespace
 
 namespace enigma {
 
@@ -185,7 +185,7 @@ inline void graphics_apply_vertex_format(int format, size_t &stride) {
   d3dmgr->SetVertexDeclaration(vertexDeclaration);
 }
 
-}
+} // namespace enigma
 
 namespace enigma_user {
 
@@ -242,4 +242,4 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   d3dmgr->DrawIndexedPrimitive(primitive_types[primitive], 0, 0, count, start, primitive_count);
 }
 
-}
+} // namespace enigma_user

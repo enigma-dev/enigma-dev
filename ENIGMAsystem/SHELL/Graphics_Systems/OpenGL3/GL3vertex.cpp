@@ -40,7 +40,7 @@ GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES
 map<int, GLuint> vertexBufferPeers;
 map<int, GLuint> indexBufferPeers;
 
-}
+} // anonymous namespace
 
 namespace enigma {
 
@@ -213,7 +213,7 @@ void graphics_apply_vertex_format(int format) {
   glsl_uniformi_internal(shaderprograms[bound_shader]->uni_colorEnable, useColors);
 }
 
-}
+} // namespace enigma
 
 namespace enigma_user {
 
@@ -265,4 +265,4 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)(intptr_t)start);
 }
 
-}
+} // namespace enigma_user

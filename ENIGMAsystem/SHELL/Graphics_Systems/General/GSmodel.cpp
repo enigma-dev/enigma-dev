@@ -135,7 +135,7 @@ void string_parse(string *s) {
   }
 }
 
-}
+} // namespace enigma
 
 namespace enigma_user {
 
@@ -966,4 +966,4 @@ void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
   }
 }
 
-}
+} // namespace enigma_user

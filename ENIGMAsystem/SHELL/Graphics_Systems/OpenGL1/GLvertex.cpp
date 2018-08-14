@@ -36,7 +36,7 @@ map<int, std::vector<short unsigned int> > indexBufferArrays;
 map<int, GLuint> vertexBufferPeers;
 map<int, GLuint> indexBufferPeers;
 
-}
+} // anonymous namespace
 
 namespace enigma {
 
@@ -224,7 +224,7 @@ void graphics_reset_client_state(const ClientState &state) {
   }
 }
 
-}
+} // namespace enigma
 
 namespace enigma_user {
 
@@ -271,4 +271,4 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-}
+} // namespace enigma_user

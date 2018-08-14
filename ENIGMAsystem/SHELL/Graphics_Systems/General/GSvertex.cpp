@@ -45,7 +45,7 @@ std::unordered_map<size_t, int> vertexFormatCache;
 
 VertexFormat* vertexFormat = 0;
 
-}
+} // namespace enigma
 
 namespace enigma_user {
 
@@ -416,4 +416,4 @@ void index_submit(int buffer, int vertex, int primitive, int texture, unsigned s
   index_submit(buffer, vertex, primitive, start, count);
 }
 
-}
+} // namespace enigma_user
