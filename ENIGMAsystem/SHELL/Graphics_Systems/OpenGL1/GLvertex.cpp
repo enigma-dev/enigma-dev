@@ -36,29 +36,9 @@ map<int, std::vector<short unsigned int> > indexBufferArrays;
 map<int, GLuint> vertexBufferPeers;
 map<int, GLuint> indexBufferPeers;
 
-} // anonymous namespace
-
-namespace enigma {
-
-void graphics_delete_vertex_buffer_peer(int buffer) {
-  if (vbo_is_supported) {
-    glDeleteBuffers(1, &vertexBufferPeers[buffer]);
-    vertexBufferPeers.erase(buffer);
-  } else {
-    vertexBufferArrays.erase(buffer);
-  }
-}
-
-void graphics_delete_index_buffer_peer(int buffer) {
-  if (vbo_is_supported) {
-    glDeleteBuffers(1, &indexBufferPeers[buffer]);
-    indexBufferPeers.erase(buffer);
-  } else {
-    indexBufferArrays.erase(buffer);
-  }
-}
-
 GLvoid* graphics_prepare_buffer_array(const int buffer, const bool isIndex) {
+  using namespace enigma;
+
   const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
   if (dirty) {
     if (isIndex) {
@@ -81,6 +61,8 @@ GLvoid* graphics_prepare_buffer_array(const int buffer, const bool isIndex) {
 }
 
 void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
+  using namespace enigma;
+
   const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
   const bool frozen = isIndex ? indexBuffers[buffer]->frozen : vertexBuffers[buffer]->frozen;
   const bool dynamic = isIndex ? indexBuffers[buffer]->dynamic : vertexBuffers[buffer]->dynamic;
@@ -121,6 +103,28 @@ void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
     }
   } else {
     glBindBuffer(target, it->second);
+  }
+}
+
+} // anonymous namespace
+
+namespace enigma {
+
+void graphics_delete_vertex_buffer_peer(int buffer) {
+  if (vbo_is_supported) {
+    glDeleteBuffers(1, &vertexBufferPeers[buffer]);
+    vertexBufferPeers.erase(buffer);
+  } else {
+    vertexBufferArrays.erase(buffer);
+  }
+}
+
+void graphics_delete_index_buffer_peer(int buffer) {
+  if (vbo_is_supported) {
+    glDeleteBuffers(1, &indexBufferPeers[buffer]);
+    indexBufferPeers.erase(buffer);
+  } else {
+    indexBufferArrays.erase(buffer);
   }
 }
 
