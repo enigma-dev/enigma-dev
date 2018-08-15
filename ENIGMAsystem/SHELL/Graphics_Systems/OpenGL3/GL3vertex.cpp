@@ -40,7 +40,7 @@ GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES
 map<int, GLuint> vertexBufferPeers;
 map<int, GLuint> indexBufferPeers;
 
-}
+} // anonymous namespace
 
 namespace enigma {
 
@@ -63,10 +63,10 @@ void graphics_delete_index_buffer_peer(int buffer) {
 static inline int graphics_find_attribute_location(std::string name, int usageIndex) {
   int location = -1;
   if (usageIndex == 0) {
-    location = glGetAttribLocation(enigma::shaderprograms[enigma::bound_shader]->shaderprogram, name.c_str());
+    location = enigma_user::glsl_get_attribute_location(enigma::bound_shader, name);
   }
   if (usageIndex > 0 || location == -1) {
-    location = glGetAttribLocation(enigma::shaderprograms[enigma::bound_shader]->shaderprogram, (name + std::to_string(usageIndex)).c_str());
+    location = enigma_user::glsl_get_attribute_location(enigma::bound_shader, name + std::to_string(usageIndex));
   }
   return location;
 }
@@ -74,6 +74,7 @@ static inline int graphics_find_attribute_location(std::string name, int usageIn
 void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
   const bool frozen = isIndex ? indexBuffers[buffer]->frozen : vertexBuffers[buffer]->frozen;
+  const bool dynamic = isIndex ? indexBuffers[buffer]->dynamic : vertexBuffers[buffer]->dynamic;
   GLuint bufferPeer;
   auto it = isIndex ? indexBufferPeers.find(buffer) : vertexBufferPeers.find(buffer);
   const GLenum target = isIndex ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER;
@@ -101,19 +102,10 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     } else {
       bind_array_buffer(bufferPeer);
     }
-    GLint pSize;
-    glGetBufferParameteriv(target, GL_BUFFER_SIZE, &pSize);
 
-    // if the size of the peer isn't big enough to hold the new contents
-    // or freeze was called, then we need to make a call to glBufferData
-    // to allocate a bigger peer or remove the GL_DYNAMIC_DRAW usage
     const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
-    if (size > (size_t)pSize || frozen) {
-      GLenum usage = frozen ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
-      glBufferData(target, size, data, usage);
-    } else {
-      glBufferSubData(target, 0, size, data);
-    }
+    GLenum usage = frozen ? (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW) : GL_STREAM_DRAW;
+    glBufferData(target, size, data, usage);
 
     if (isIndex) {
       indexBuffers[buffer]->indices.clear();
@@ -221,7 +213,7 @@ void graphics_apply_vertex_format(int format) {
   glsl_uniformi_internal(shaderprograms[bound_shader]->uni_colorEnable, useColors);
 }
 
-}
+} // namespace enigma
 
 namespace enigma_user {
 
@@ -273,4 +265,4 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)(intptr_t)start);
 }
 
-}
+} // namespace enigma_user

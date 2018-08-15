@@ -59,7 +59,6 @@ LPDIRECT3DSURFACE9 pBackBuffer;
 LPDIRECT3DSURFACE9 pRenderTarget;
 
 float last_depth;
-unsigned last_stride;
 bool hasdrawn;
 int shapes_d3d_model;
 int shapes_d3d_texture;
@@ -80,7 +79,6 @@ ContextManager() {
 	hasdrawn = false;
 	shapes_d3d_model = -1;
 	shapes_d3d_texture = -1;
-	last_stride = 0;
 	vertexShader = NULL;
 	pixelShader = NULL;
 	last_depth = 0.0f;
@@ -187,16 +185,12 @@ int GetShapesModel() {
 
 void BeginShapesBatching(int texId) {
 	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(model_dynamic);
-		last_stride = 0;
-	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride)) {
-		last_stride = 0;
+		shapes_d3d_model = d3d_model_create(model_stream);
+	} else if (texId != shapes_d3d_texture) {
 		if (!hasdrawn) {
 			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
 			d3d_model_clear(shapes_d3d_model);
 		}
-	} else {
-		last_stride = d3d_model_get_stride(shapes_d3d_model);
 	}
 	hasdrawn = false;
 	shapes_d3d_texture = texId;
@@ -209,7 +203,6 @@ void EndShapesBatching() {
 	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
 	d3d_model_clear(shapes_d3d_model);
 	shapes_d3d_texture = -1;
-	last_stride = 0;
 }
 
 void Clear(DWORD Count, const D3DRECT *pRects, DWORD Flags, D3DCOLOR Color, float Z, DWORD Stencil) {
