@@ -140,12 +140,22 @@ string get_string(string message, string def, string cap="") {
   return (input.empty()) ? def : input;
 }
 
-int get_integer(string message, string def, string cap="") {
+string get_password(string message, string def, string cap="") {
+  //TODO: Add support for hidden input.
   printf("%s\n%s\n", cap.c_str(), message.c_str());
   string input;
   cin >> input;
-  if (input.empty()) input = def;
-  return stoi(input);
+  return (input.empty()) ? def : input;
+}
+
+double get_integer(string message, double def, string cap="") {
+  //temp stub
+  return 0;
+}
+
+double get_passcode(string message, double def, string cap="") {
+  //temp stub
+  return 0;
 }
 
 }
