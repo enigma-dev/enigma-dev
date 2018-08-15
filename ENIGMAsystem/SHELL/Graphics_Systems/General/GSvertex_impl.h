@@ -117,10 +117,13 @@ struct VertexBuffer {
   // for future primitives to be specified
   void clearData() {
     if (frozen) {
+      // this will give us 0 size and 0 capacity
       std::vector<enigma::VertexElement>().swap(vertices);
     } else {
+      // this will give us 0 size but keep capacity
       vertices.clear();
     }
+    dirty = false; // we aren't dirty anymore
   }
 };
 
@@ -150,10 +153,13 @@ struct IndexBuffer {
   // for future primitives to be specified
   void clearData() {
     if (frozen) {
+      // this will give us 0 size and 0 capacity
       std::vector<uint16_t>().swap(indices);
     } else {
+      // this will give us 0 size but keep capacity
       indices.clear();
     }
+    dirty = false; // we aren't dirty anymore
   }
 };
 

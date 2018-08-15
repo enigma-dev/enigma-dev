@@ -109,10 +109,8 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
 
     if (isIndex) {
       indexBuffers[buffer]->clearData();
-      indexBuffers[buffer]->dirty = false;
     } else {
       vertexBuffers[buffer]->clearData();
-      vertexBuffers[buffer]->dirty = false;
     }
   } else {
     if (isIndex) {

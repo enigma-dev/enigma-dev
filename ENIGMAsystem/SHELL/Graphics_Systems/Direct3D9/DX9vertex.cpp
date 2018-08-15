@@ -92,7 +92,6 @@ void graphics_prepare_vertex_buffer(const int buffer) {
     vertexBufferPeer->Unlock();
 
     vertexBuffer->clearData();
-    vertexBuffer->dirty = false;
   }
 }
 
@@ -138,7 +137,6 @@ void graphics_prepare_index_buffer(const int buffer) {
     indexBufferPeer->Unlock();
 
     indexBuffer->clearData();
-    indexBuffer->dirty = false;
   }
 }
 

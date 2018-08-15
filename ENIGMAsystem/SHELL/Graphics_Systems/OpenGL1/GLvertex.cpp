@@ -45,12 +45,10 @@ GLvoid* graphics_prepare_buffer_array(const int buffer, const bool isIndex) {
       IndexBuffer* indexBuffer = indexBuffers[buffer];
       indexBufferArrays[buffer] = indexBuffer->indices;
       indexBuffer->clearData();
-      indexBuffer->dirty = false;
     } else {
       VertexBuffer* vertexBuffer = vertexBuffers[buffer];
       vertexBufferArrays[buffer] = vertexBuffer->vertices;
       vertexBuffer->clearData();
-      vertexBuffer->dirty = false;
     }
   }
   if (isIndex) {
@@ -96,10 +94,8 @@ void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
 
     if (isIndex) {
       indexBuffers[buffer]->clearData();
-      indexBuffers[buffer]->dirty = false;
     } else {
       vertexBuffers[buffer]->clearData();
-      vertexBuffers[buffer]->dirty = false;
     }
   } else {
     glBindBuffer(target, it->second);
