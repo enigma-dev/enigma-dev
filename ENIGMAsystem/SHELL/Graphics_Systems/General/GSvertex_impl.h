@@ -112,8 +112,8 @@ struct VertexBuffer {
 
   // intuitively clears the vertex data on the CPU side
   // intended to be called by the backend so that static
-  // buffers shrink all CPU resources and stream/dynamic
-  // buffers only clear them leaving the reserved capacity
+  // buffers shrink all CPU resources and stream buffers
+  // only clear them leaving the reserved capacity
   // for future primitives to be specified
   void clearData() {
     if (frozen) {
@@ -148,8 +148,8 @@ struct IndexBuffer {
 
   // intuitively clears the index data on the CPU side
   // intended to be called by the backend so that static
-  // buffers shrink all CPU resources and stream/dynamic
-  // buffers only clear them leaving the reserved capacity
+  // buffers shrink all CPU resources and stream buffers
+  // only clear them leaving the reserved capacity
   // for future primitives to be specified
   void clearData() {
     if (frozen) {
