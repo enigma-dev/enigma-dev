@@ -1,2 +1,7 @@
 include $(SHARED_SRC_DIR)/tinyfiledialogs/Makefile
-SOURCES += $(wildcard Widget_Systems/TinyFileDialogs/*.cpp)
+
+ifeq ($(TARGET-PLATFORM), MacOS)
+	SOURCES += $(wildcard Widget_Systems/TinyFileDialogs/dialogs-macos.cpp)
+
+ifeq ($(TARGET-PLATFORM), Linux)
+	SOURCES += $(wildcard Widget_Systems/TinyFileDialogs/dialogs-linux.cpp)
