@@ -150,7 +150,7 @@ void vertex_set_format(int buffer, int format) {
   enigma::vertexBuffers[buffer]->format = format;
 }
 
-unsigned vertex_get_size(int buffer) {
+unsigned vertex_get_buffer_size(int buffer) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   return vertexBuffer->getNumber() * sizeof(gs_scalar);
@@ -342,7 +342,7 @@ bool index_exists(int buffer) {
   RESOURCE_EXISTS(buffer, indexBuffers);
 }
 
-unsigned index_get_size(int buffer) {
+unsigned index_get_buffer_size(int buffer) {
   return enigma::indexBuffers[buffer]->getNumber() * sizeof(uint16_t);
 }
 
