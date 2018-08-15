@@ -1,8 +1,9 @@
 #include "Universal_System/estring.h"
 #include <string>
 
-using enigma_user::string_replace_all;
 using std::string;
+
+using enigma_user::string_replace_all;
 
 namespace enigms
 {
