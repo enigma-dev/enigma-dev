@@ -28,6 +28,7 @@
 
 #include <vector>
 #include <utility>
+#include <functional>
 #include <stdint.h>
 using std::vector;
 using std::pair;
@@ -37,14 +38,27 @@ namespace enigma {
 void graphics_delete_vertex_buffer_peer(int buffer);
 void graphics_delete_index_buffer_peer(int buffer);
 
-struct VertexFormat {
-  vector<pair<int,int> > flags;
-  std::size_t stride;
+template <class T>
+inline void hash_combine(std::size_t& seed, const T& v) {
+  seed ^= std::hash<T>()(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+}
 
-  VertexFormat(): stride(0) {}
+struct VertexFormat {
+  vector<pair<int,int> > flags; // order of elements for each vertex in insertion order
+  std::size_t stride; // number of elements each vertex is comprised of, not in bytes
+  std::size_t hash; // hash that uniquely identifies this vertex format
+
+  // NOTE: flags should only be mutated using AddAttribute so the hash is correct!
+  // NOTE: stride is not in number of bytes because each backend uses the native size of the type
+  // NOTE: hash is cached for performance reasons
+
+  VertexFormat(): stride(0), hash(0) {}
 
   void AddAttribute(int type, int attribute) {
     using namespace enigma_user;
+
+    hash_combine(hash, type);
+    hash_combine(hash, attribute);
 
     switch (type) {
       case vertex_type_float1: stride += 1; break;
@@ -78,21 +92,41 @@ union VertexElement {
 };
 
 struct VertexBuffer {
-  vector<VertexElement> vertices;
-  bool frozen, dirty;
-  int format;
-  std::size_t number;
+  vector<VertexElement> vertices; // interleaved vertex elements
+  bool frozen; // whether vertex_freeze has been called
+  bool dynamic; // if the user wants to update the buffer infrequently
+  bool dirty; // whether the user has begun specifying new vertex data
+  int format; // index of the vertex format describing this buffer
+  std::size_t number; // cached size of vertices
+
+  // NOTE: dynamic does not mean updating the buffer every frame!
+  // NOTE: format may not exist when this buffer is first created
+  // NOTE: number is only intended to be accessed with getNumber()!
 
   VertexBuffer(): frozen(false), dirty(false), format(-1), number(0) {}
+
+  int getNumber() const {
+    return dirty ? vertices.size() : number;
+  }
 };
 
 struct IndexBuffer {
-  vector<uint16_t> indices;
-  bool frozen, dirty;
-  int type;
-  std::size_t number;
+  vector<uint16_t> indices; // index data of this buffer
+  bool frozen; // whether index_freeze has been called
+  bool dynamic; // if the user wants to update the buffer infrequently
+  bool dirty; // whether the user has begun specifying new index data
+  int type; // how the indices in this buffer are to be interpreted
+  std::size_t number; // cached size of indices
+
+  // NOTE: dynamic does not mean updating the buffer every frame!
+  // NOTE: some types are not available on certain backends
+  // NOTE: number is only intended to be accessed with getNumber()!
 
   IndexBuffer(): frozen(false), dirty(false), type(-1), number(0) {}
+
+  int getNumber() const {
+    return dirty ? indices.size() : number;
+  }
 };
 
 extern vector<VertexFormat*> vertexFormats;

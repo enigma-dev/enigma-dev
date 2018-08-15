@@ -265,7 +265,7 @@ void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
-void d3d_transform_set_rotation_x(double angle)
+void d3d_transform_set_rotation_x(gs_scalar angle)
 {
 	// build a matrix to rotate the model by so many radians
 	D3DXMatrixRotationX(&matWorld, gs_angle_to_radians(-angle));

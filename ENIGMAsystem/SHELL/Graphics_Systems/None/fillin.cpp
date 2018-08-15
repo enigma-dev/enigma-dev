@@ -233,16 +233,6 @@ namespace enigma_user
 	void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps){}
 	void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius){}
 
-
-	void d3d_model_part_draw(int id, int vertex_start, int vertex_count){}
-	void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vertex_start, int vertex_count){}
-	void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count){}
-	void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_start, int vertex_count){}
-	void d3d_model_draw(int id){}
-	void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z){}
-	void d3d_model_draw(int id, int texId){}
-	void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId){}
-
 	void d3d_set_perspective(bool enable){}
 	void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup){}
 	void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar){}
