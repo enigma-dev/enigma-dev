@@ -108,10 +108,10 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     glBufferData(target, size, data, usage);
 
     if (isIndex) {
-      indexBuffers[buffer]->indices.clear();
+      indexBuffers[buffer]->clearData();
       indexBuffers[buffer]->dirty = false;
     } else {
-      vertexBuffers[buffer]->vertices.clear();
+      vertexBuffers[buffer]->clearData();
       vertexBuffers[buffer]->dirty = false;
     }
   } else {

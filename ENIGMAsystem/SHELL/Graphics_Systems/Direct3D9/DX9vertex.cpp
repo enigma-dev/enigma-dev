@@ -91,7 +91,7 @@ void graphics_prepare_vertex_buffer(const int buffer) {
     memcpy(pVoid, vertexBuffer->vertices.data(), size);
     vertexBufferPeer->Unlock();
 
-    vertexBuffer->vertices.clear();
+    vertexBuffer->clearData();
     vertexBuffer->dirty = false;
   }
 }
@@ -137,7 +137,7 @@ void graphics_prepare_index_buffer(const int buffer) {
     memcpy(pVoid, indexBuffer->indices.data(), size);
     indexBufferPeer->Unlock();
 
-    indexBuffer->indices.clear();
+    indexBuffer->clearData();
     indexBuffer->dirty = false;
   }
 }

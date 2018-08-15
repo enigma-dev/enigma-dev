@@ -105,8 +105,22 @@ struct VertexBuffer {
 
   VertexBuffer(): frozen(false), dirty(false), format(-1), number(0) {}
 
+  // returns the number of vertex elements in the buffer
   int getNumber() const {
     return dirty ? vertices.size() : number;
+  }
+
+  // intuitively clears the vertex data on the CPU side
+  // intended to be called by the backend so that static
+  // buffers shrink all CPU resources and stream/dynamic
+  // buffers only clear them leaving the reserved capacity
+  // for future primitives to be specified
+  void clearData() {
+    if (frozen) {
+      std::vector<enigma::VertexElement>().swap(vertices);
+    } else {
+      vertices.clear();
+    }
   }
 };
 
@@ -124,8 +138,22 @@ struct IndexBuffer {
 
   IndexBuffer(): frozen(false), dirty(false), type(-1), number(0) {}
 
+  // returns the number of index elements in the buffer
   int getNumber() const {
     return dirty ? indices.size() : number;
+  }
+
+  // intuitively clears the index data on the CPU side
+  // intended to be called by the backend so that static
+  // buffers shrink all CPU resources and stream/dynamic
+  // buffers only clear them leaving the reserved capacity
+  // for future primitives to be specified
+  void clearData() {
+    if (frozen) {
+      std::vector<uint16_t>().swap(indices);
+    } else {
+      indices.clear();
+    }
   }
 };
 
