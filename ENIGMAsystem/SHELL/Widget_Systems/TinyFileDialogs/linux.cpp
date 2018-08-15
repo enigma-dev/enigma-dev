@@ -1,3 +1,4 @@
+#include "Universal_System/estring.h"
 #include <string>
 
 using enigma_user::string_replace_all;
