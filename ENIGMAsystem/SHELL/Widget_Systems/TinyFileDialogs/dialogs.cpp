@@ -1,4 +1,5 @@
 #include "dialogs.h"
+#include "unix.h"
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
