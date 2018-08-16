@@ -2,7 +2,7 @@
 
 using std::string;
 
-namespace enigms
+namespace enigma
 {
   string tfd_add_escaping(string str);
 }
