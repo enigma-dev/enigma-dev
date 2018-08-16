@@ -58,7 +58,7 @@ void graphics_prepare_vertex_buffer(const int buffer) {
   if (vertexBuffer->dirty) {
     LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = NULL;
     auto it = vertexBufferPeers.find(buffer);
-    size_t size = enigma_user::vertex_get_size(buffer);
+    size_t size = enigma_user::vertex_get_buffer_size(buffer);
 
     // if we have already created a native "peer" vbo for this user buffer,
     // then we have to release it if it isn't big enough to hold the new contents
@@ -91,8 +91,7 @@ void graphics_prepare_vertex_buffer(const int buffer) {
     memcpy(pVoid, vertexBuffer->vertices.data(), size);
     vertexBufferPeer->Unlock();
 
-    vertexBuffer->vertices.clear();
-    vertexBuffer->dirty = false;
+    vertexBuffer->clearData();
   }
 }
 
@@ -104,7 +103,7 @@ void graphics_prepare_index_buffer(const int buffer) {
   if (indexBuffer->dirty) {
     LPDIRECT3DINDEXBUFFER9 indexBufferPeer = NULL;
     auto it = indexBufferPeers.find(buffer);
-    size_t size = enigma_user::index_get_size(buffer);
+    size_t size = enigma_user::index_get_buffer_size(buffer);
 
     // if we have already created a native "peer" ibo for this user buffer,
     // then we have to release it if it isn't big enough to hold the new contents
@@ -137,8 +136,7 @@ void graphics_prepare_index_buffer(const int buffer) {
     memcpy(pVoid, indexBuffer->indices.data(), size);
     indexBufferPeer->Unlock();
 
-    indexBuffer->indices.clear();
-    indexBuffer->dirty = false;
+    indexBuffer->clearData();
   }
 }
 
