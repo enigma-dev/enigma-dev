@@ -109,7 +109,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   if (dirty) {
     ID3D11Buffer* bufferPeer = NULL;
     auto it = bufferPeers.find(buffer);
-    size_t size = isIndex ? enigma_user::index_get_size(buffer) : enigma_user::vertex_get_size(buffer);
+    size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
 
     // if we have already created a native "peer" for this user buffer,
     // then we have to release it if it isn't big enough to hold the new contents
@@ -148,11 +148,9 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     }
 
     if (isIndex) {
-      indexBuffers[buffer]->indices.clear();
-      indexBuffers[buffer]->dirty = false;
+      indexBuffers[buffer]->clearData();
     } else {
-      vertexBuffers[buffer]->vertices.clear();
-      vertexBuffers[buffer]->dirty = false;
+      vertexBuffers[buffer]->clearData();
     }
   }
 }
