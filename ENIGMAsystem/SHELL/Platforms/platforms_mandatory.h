@@ -25,6 +25,9 @@
 
 #include "Platforms/General/PFsystem.h"
 
+#include <functional>
+#include <vector>
+
 namespace enigma_user {
   extern const int os_type;
   extern unsigned long current_time; // milliseconds since the start of the game
@@ -33,6 +36,8 @@ namespace enigma_user {
 
 namespace enigma
 {
+  extern std::vector<std::function<void()> > extension_update_hooks;
+
   bool initGameWindow();
 
   void destroyWindow();

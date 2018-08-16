@@ -34,8 +34,9 @@ D3DDECLUSAGE usage_types[] = { D3DDECLUSAGE_POSITION, D3DDECLUSAGE_COLOR, D3DDEC
 
 map<int, LPDIRECT3DVERTEXBUFFER9> vertexBufferPeers;
 map<int, LPDIRECT3DINDEXBUFFER9> indexBufferPeers;
+map<int, std::pair<LPDIRECT3DVERTEXDECLARATION9, size_t> > vertexFormatPeers;
 
-}
+} // anonymous namespace
 
 namespace enigma {
 
@@ -57,7 +58,7 @@ void graphics_prepare_vertex_buffer(const int buffer) {
   if (vertexBuffer->dirty) {
     LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = NULL;
     auto it = vertexBufferPeers.find(buffer);
-    size_t size = enigma_user::vertex_get_size(buffer);
+    size_t size = enigma_user::vertex_get_buffer_size(buffer);
 
     // if we have already created a native "peer" vbo for this user buffer,
     // then we have to release it if it isn't big enough to hold the new contents
@@ -90,8 +91,7 @@ void graphics_prepare_vertex_buffer(const int buffer) {
     memcpy(pVoid, vertexBuffer->vertices.data(), size);
     vertexBufferPeer->Unlock();
 
-    vertexBuffer->vertices.clear();
-    vertexBuffer->dirty = false;
+    vertexBuffer->clearData();
   }
 }
 
@@ -103,7 +103,7 @@ void graphics_prepare_index_buffer(const int buffer) {
   if (indexBuffer->dirty) {
     LPDIRECT3DINDEXBUFFER9 indexBufferPeer = NULL;
     auto it = indexBufferPeers.find(buffer);
-    size_t size = enigma_user::index_get_size(buffer);
+    size_t size = enigma_user::index_get_buffer_size(buffer);
 
     // if we have already created a native "peer" ibo for this user buffer,
     // then we have to release it if it isn't big enough to hold the new contents
@@ -136,8 +136,7 @@ void graphics_prepare_index_buffer(const int buffer) {
     memcpy(pVoid, indexBuffer->indices.data(), size);
     indexBufferPeer->Unlock();
 
-    indexBuffer->indices.clear();
-    indexBuffer->dirty = false;
+    indexBuffer->clearData();
   }
 }
 
@@ -171,20 +170,20 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
 inline void graphics_apply_vertex_format(int format, size_t &stride) {
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
 
-  static int last_format = -1;
-  static size_t last_stride = 0;
-  static LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = nullptr;
-  // cache the format and only recreate it when switching formats
-  if (last_format != format) {
-    last_format = format;
-    if (vertexDeclaration) vertexDeclaration->Release();
-    vertexDeclaration = vertex_format_declaration(vertexFormat, last_stride);
+  auto search = vertexFormatPeers.find(format);
+  LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = NULL;
+  if (search == vertexFormatPeers.end()) {
+     vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
+     vertexFormatPeers[format] = std::make_pair(vertexDeclaration, stride);
+  } else {
+    vertexDeclaration = search->second.first;
+    stride = search->second.second;
   }
-  stride = last_stride;
+
   d3dmgr->SetVertexDeclaration(vertexDeclaration);
 }
 
-}
+} // namespace enigma
 
 namespace enigma_user {
 
@@ -241,4 +240,4 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   d3dmgr->DrawIndexedPrimitive(primitive_types[primitive], 0, 0, count, start, primitive_count);
 }
 
-}
+} // namespace enigma_user

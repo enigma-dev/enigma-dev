@@ -53,12 +53,16 @@ enum {
 
 void vertex_format_begin();
 int vertex_format_end();
+bool vertex_format_exists();
 bool vertex_format_exists(int id);
-void vertex_format_delete(int index);
-void vertex_format_add_color();
-#define vertex_format_add_colour vertex_format_add_color
+unsigned vertex_format_get_hash(int id);
+unsigned vertex_format_get_stride(int id);
+unsigned vertex_format_get_hash();
+unsigned vertex_format_get_stride();
 void vertex_format_add_position();
 void vertex_format_add_position_3d();
+void vertex_format_add_color();
+#define vertex_format_add_colour vertex_format_add_color
 void vertex_format_add_textcoord();
 void vertex_format_add_normal();
 void vertex_format_add_custom(int type, int usage);
@@ -66,11 +70,13 @@ void vertex_format_add_custom(int type, int usage);
 int vertex_create_buffer();
 int vertex_create_buffer_ext(unsigned size);
 void vertex_delete_buffer(int buffer);
-unsigned vertex_get_size(int buffer);
+bool vertex_exists(int buffer);
+void vertex_set_format(int buffer, int format);
+unsigned vertex_get_buffer_size(int buffer);
 unsigned vertex_get_number(int buffer);
-void vertex_freeze(int buffer);
+void vertex_freeze(int buffer, bool dynamic = false);
 void vertex_clear(int buffer);
-void vertex_begin(int buffer, int format);
+void vertex_begin(int buffer, int format = -1);
 void vertex_end(int buffer);
 void vertex_data(int buffer, const enigma::varargs& data);
 void vertex_position(int buffer, gs_scalar x, gs_scalar y);
@@ -98,9 +104,10 @@ enum {
 int index_create_buffer();
 int index_create_buffer_ext(unsigned size);
 void index_delete_buffer(int buffer);
-unsigned index_get_size(int buffer);
+bool index_exists(int buffer);
+unsigned index_get_buffer_size(int buffer);
 unsigned index_get_number(int buffer);
-void index_freeze(int buffer);
+void index_freeze(int buffer, bool dynamic = false);
 void index_clear(int buffer);
 void index_begin(int buffer, int type);
 void index_end(int buffer);
