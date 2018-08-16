@@ -44,13 +44,11 @@ GLvoid* graphics_prepare_buffer_array(const int buffer, const bool isIndex) {
     if (isIndex) {
       IndexBuffer* indexBuffer = indexBuffers[buffer];
       indexBufferArrays[buffer] = indexBuffer->indices;
-      indexBuffer->indices.clear();
-      indexBuffer->dirty = false;
+      indexBuffer->clearData();
     } else {
       VertexBuffer* vertexBuffer = vertexBuffers[buffer];
       vertexBufferArrays[buffer] = vertexBuffer->vertices;
-      vertexBuffer->vertices.clear();
-      vertexBuffer->dirty = false;
+      vertexBuffer->clearData();
     }
   }
   if (isIndex) {
@@ -73,7 +71,7 @@ void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
   // if the contents of the buffer are dirty then we need to update
   // our native buffer object "peer"
   if (dirty) {
-    size_t size = isIndex ? enigma_user::index_get_size(buffer) : enigma_user::vertex_get_size(buffer);
+    size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
 
     // if we haven't created a native "peer" for this buffer yet,
     // then we need to do so now
@@ -95,11 +93,9 @@ void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
     glBufferData(target, size, data, usage);
 
     if (isIndex) {
-      indexBuffers[buffer]->indices.clear();
-      indexBuffers[buffer]->dirty = false;
+      indexBuffers[buffer]->clearData();
     } else {
-      vertexBuffers[buffer]->vertices.clear();
-      vertexBuffers[buffer]->dirty = false;
+      vertexBuffers[buffer]->clearData();
     }
   } else {
     glBindBuffer(target, it->second);
