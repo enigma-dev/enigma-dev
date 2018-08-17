@@ -33,7 +33,6 @@ namespace enigma
 {
 
 void scene_begin() {
-  //d3dmgr->EndShapesBatching(); //If called inside bound surface we need to finish drawing
   d3dmgr->BeginScene();
 }
 
@@ -90,7 +89,6 @@ int screen_save(string filename) //Assumes native integers are little endian
 {
 	string ext = enigma::image_get_format(filename);
 
-	d3dmgr->EndShapesBatching();
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
 	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
@@ -119,7 +117,6 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 {
 	string ext = enigma::image_get_format(filename);
 
-	d3dmgr->EndShapesBatching();
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
 	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);

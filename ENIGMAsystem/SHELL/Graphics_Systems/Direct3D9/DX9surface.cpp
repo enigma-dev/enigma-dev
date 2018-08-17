@@ -103,7 +103,6 @@ void surface_set_target(int id)
 void surface_reset_target()
 {
   //d3dmgr->ResetRenderTarget();
-  d3dmgr->EndShapesBatching();
   d3dmgr->device->SetRenderTarget(0, pBackBuffer);
   pBackBuffer->Release();
   pBackBuffer = NULL;
@@ -150,7 +149,6 @@ int surface_getpixel(int id, int x, int y)
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
 
-  d3dmgr->EndShapesBatching();
   LPDIRECT3DSURFACE9 pBuffer = surface->surf;
   d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
   D3DSURFACE_DESC desc;
@@ -175,7 +173,6 @@ int surface_getpixel_ext(int id, int x, int y)
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
 
-  d3dmgr->EndShapesBatching();
   LPDIRECT3DSURFACE9 pBuffer = surface->surf;
   d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
   D3DSURFACE_DESC desc;
@@ -200,7 +197,6 @@ int surface_getpixel_alpha(int id, int x, int y)
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
 
-  d3dmgr->EndShapesBatching();
   LPDIRECT3DSURFACE9 pBuffer = surface->surf;
   d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
   D3DSURFACE_DESC desc;
@@ -237,7 +233,6 @@ int surface_save(int id, string filename)
   get_surfacev(surface,id,-1);
   string ext = enigma::image_get_format(filename);
 
-  d3dmgr->EndShapesBatching();
   LPDIRECT3DSURFACE9 pDestBuffer;
   D3DSURFACE_DESC desc;
   surface->surf->GetDesc(&desc);

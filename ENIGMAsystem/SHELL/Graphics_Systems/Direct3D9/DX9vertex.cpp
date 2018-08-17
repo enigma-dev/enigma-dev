@@ -199,10 +199,6 @@ void vertex_color(int buffer, int color, double alpha) {
 void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
-  // this is fucking temporary until we rewrite the model classes and
-  // figure out a proper way to flush
-  d3dmgr->EndShapesBatching();
-
   enigma::graphics_prepare_vertex_buffer(buffer);
 
   size_t stride = 0;
@@ -218,10 +214,6 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
 
 void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
-
-  // this is fucking temporary until we rewrite the model classes and
-  // figure out a proper way to flush
-  d3dmgr->EndShapesBatching();
 
   enigma::graphics_prepare_vertex_buffer(vertex);
   enigma::graphics_prepare_index_buffer(buffer);

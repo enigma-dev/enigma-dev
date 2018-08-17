@@ -395,7 +395,6 @@ void texture_set_stage(int stage, int texid) {
   //TODO(harijs): Check if stage <0
   get_texture(gt,texid,);
   if (enigma::samplerstates[stage].bound_texture != gt) {
-    oglmgr->EndShapesBatching();
     if ((unsigned int)enigma::bound_texture_stage != GL_TEXTURE0 + stage) { glActiveTexture(enigma::bound_texture_stage = (GL_TEXTURE0 + stage)); }
     oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
   }
@@ -403,7 +402,6 @@ void texture_set_stage(int stage, int texid) {
 
 void texture_reset() {
   if (enigma::samplerstates[0].bound_texture != 0){
-    oglmgr->EndShapesBatching();
   	if (enigma::bound_texture_stage != GL_TEXTURE0) { glActiveTexture(enigma::bound_texture_stage = GL_TEXTURE0); }
   	oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
   }

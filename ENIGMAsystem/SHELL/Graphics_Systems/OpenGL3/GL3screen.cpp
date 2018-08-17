@@ -43,7 +43,6 @@ unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetInteg
 int viewport_x, viewport_y, viewport_w, viewport_h; //These are used by surfaces, to set back the viewport
 
 void scene_begin() {
-  //oglmgr->EndShapesBatching(); //If called inside bound surface we need to finish drawing
   oglmgr->BeginScene();
 }
 
@@ -69,7 +68,6 @@ namespace enigma_user
 
 void screen_init()
 {
-  oglmgr->EndShapesBatching();
   enigma::gui_width = window_get_region_width();
   enigma::gui_height = window_get_region_height();
 
@@ -109,7 +107,6 @@ void screen_init()
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
-  oglmgr->EndShapesBatching();
   unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
 
   string ext = enigma::image_get_format(filename);
@@ -130,7 +127,6 @@ int screen_save(string filename) //Assumes native integers are little endian
 
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
-  oglmgr->EndShapesBatching();
   unsigned sz = w*h;
 
   string ext = enigma::image_get_format(filename);
