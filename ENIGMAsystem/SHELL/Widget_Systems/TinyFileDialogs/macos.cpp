@@ -6,7 +6,7 @@ using std::string;
 
 using enigma_user::string_replace_all;
 
-namespace enigms
+namespace enigma
 {
   string tfd_add_escaping(string str)
   {
