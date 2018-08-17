@@ -32,6 +32,7 @@ namespace enigma_user
   };
 
   unsigned draw_primitive_count(int kind, unsigned vertex_count);
+  void draw_primitive_flush();
   void draw_primitive_begin(int kind);
   void draw_primitive_begin_texture(int kind, int texId);
   void draw_primitive_end();
