@@ -143,42 +143,42 @@ void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 
 void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
-	d3d_model_floor(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep);
+  d3d_model_floor(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep);
   d3d_model_draw(draw_primitive_model, texId);
   d3d_model_clear(draw_primitive_model);
 }
 
 void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
-	d3d_model_wall(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep);
+  d3d_model_wall(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep);
   d3d_model_draw(draw_primitive_model, texId);
   d3d_model_clear(draw_primitive_model);
 }
 
 void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
-	d3d_model_block(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
+  d3d_model_block(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
   d3d_model_draw(draw_primitive_model, texId);
   d3d_model_clear(draw_primitive_model);
 }
 
 void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-	d3d_model_cylinder(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
+  d3d_model_cylinder(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
   d3d_model_draw(draw_primitive_model, texId);
   d3d_model_clear(draw_primitive_model);
 }
 
 void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-	d3d_model_cone(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
+  d3d_model_cone(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
   d3d_model_draw(draw_primitive_model, texId);
   d3d_model_clear(draw_primitive_model);
 }
 
 void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps)
 {
-	d3d_model_ellipsoid(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
+  d3d_model_ellipsoid(draw_primitive_model, x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
   d3d_model_draw(draw_primitive_model, texId);
   d3d_model_clear(draw_primitive_model);
 }
@@ -187,7 +187,7 @@ void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2
 }
 
 void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
-	d3d_model_torus(draw_primitive_model, x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius);
+  d3d_model_torus(draw_primitive_model, x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius);
   d3d_model_draw(draw_primitive_model, texId);
   d3d_model_clear(draw_primitive_model);
 }
