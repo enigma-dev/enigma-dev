@@ -2,9 +2,7 @@ include $(SHARED_SRC_DIR)/tinyfiledialogs/Makefile
 
 ifeq ($(TARGET-PLATFORM), MacOSX)
 	SOURCES += Widget_Systems/TinyFileDialogs/macos.cpp
-endif
-
-ifeq ($(TARGET-PLATFORM), Linux)
+else ifeq ($(TARGET-PLATFORM), Linux)
 	SOURCES += Widget_Systems/TinyFileDialogs/linux.cpp
 endif
 
