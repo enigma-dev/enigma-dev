@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2008-2013 Robert Colton
+*** Copyright (C) 2018 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,19 +16,30 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL3Context.h"
-#include "../General/GScolors.h"
-#include "../General/GSprimitives.h"
-#include "../General/GStextures.h"
-#include "../General/GSmodel.h"
+#include "GSprimitives.h"
+#include "GScolors.h"
+#include "GStextures.h"
+#include "GSmodel.h"
 
-#include <stdio.h>
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
-#include "Widget_Systems/widgets_mandatory.h"
+#include <stdio.h>
 
 namespace enigma_user
 {
+
+unsigned draw_primitive_count(int kind, unsigned vertex_count) {
+  switch (kind) {
+    case pr_pointlist: return vertex_count;
+    case pr_linelist: return vertex_count / 2;
+    case pr_linestrip: if (vertex_count > 1) return vertex_count - 1; break;
+    case pr_trianglelist: return vertex_count / 3;
+    case pr_trianglestrip: if (vertex_count > 2) return vertex_count - 2; break;
+    case pr_trianglefan: if (vertex_count > 2) return vertex_count - 2; break;
+  }
+  return 0;
+}
 
 void draw_primitive_begin(int kind)
 {
@@ -168,4 +180,3 @@ void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scal
 }
 
 }
-
