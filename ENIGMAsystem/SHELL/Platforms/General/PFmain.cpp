@@ -61,13 +61,13 @@ int enigma_main(int argc, char** argv) {
     return -4;
   }
 
+  initTimer();
   initInput();
 
   EnableDrawing(nullptr);
 
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
-  initTimer();
   showWindow();
 
   while (!game_isending) {
