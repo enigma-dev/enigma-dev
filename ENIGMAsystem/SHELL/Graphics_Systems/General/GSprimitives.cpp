@@ -24,13 +24,20 @@
 namespace {
 
 // the batching mode is initialized to the default here
-int draw_batch_mode = enigma_user::batch_flush_immediate;
+int draw_batch_mode = enigma_user::batch_flush_deferred;
 // the texture that was specified when the current primitive batch began
 int draw_batch_texture = -1;
 // lazy create the batch stream that we use for combining primitives
 inline int draw_get_batch_stream() {
   static int draw_batch_stream = enigma_user::d3d_model_create(enigma_user::model_stream);
   return draw_batch_stream;
+}
+
+void draw_batch_begin_deferred(int texId) {
+  if (draw_batch_texture != texId) {
+    enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+    draw_batch_texture = texId;
+  }
 }
 
 } // anonymous namespace
@@ -80,14 +87,14 @@ int draw_get_batch_mode() {
 
 void draw_primitive_begin(int kind)
 {
+  draw_batch_begin_deferred(-1);
   d3d_model_primitive_begin(draw_get_batch_stream(), kind);
-  draw_batch_texture = -1;
 }
 
 void draw_primitive_begin_texture(int kind, int texId)
 {
+  draw_batch_begin_deferred(texId);
   d3d_model_primitive_begin(draw_get_batch_stream(), kind);
-  draw_batch_texture = texId;
 }
 
 void draw_primitive_end()
@@ -173,43 +180,43 @@ void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 
 void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
+  draw_batch_begin_deferred(texId);
   d3d_model_floor(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep);
-  draw_batch_texture = texId;
   draw_batch_flush(batch_flush_immediate);
 }
 
 void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
+  draw_batch_begin_deferred(texId);
   d3d_model_wall(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep);
-  draw_batch_texture = texId;
   draw_batch_flush(batch_flush_immediate);
 }
 
 void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
+  draw_batch_begin_deferred(texId);
   d3d_model_block(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
-  draw_batch_texture = texId;
   draw_batch_flush(batch_flush_immediate);
 }
 
 void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
+  draw_batch_begin_deferred(texId);
   d3d_model_cylinder(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
-  draw_batch_texture = texId;
   draw_batch_flush(batch_flush_immediate);
 }
 
 void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
+  draw_batch_begin_deferred(texId);
   d3d_model_cone(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
-  draw_batch_texture = texId;
   draw_batch_flush(batch_flush_immediate);
 }
 
 void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps)
 {
+  draw_batch_begin_deferred(texId);
   d3d_model_ellipsoid(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
-  draw_batch_texture = texId;
   draw_batch_flush(batch_flush_immediate);
 }
 
@@ -217,8 +224,8 @@ void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2
 }
 
 void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
+  draw_batch_begin_deferred(texId);
   d3d_model_torus(draw_get_batch_stream(), x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius);
-  draw_batch_texture = texId;
   draw_batch_flush(batch_flush_immediate);
 }
 
