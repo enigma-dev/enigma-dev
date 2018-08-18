@@ -230,8 +230,6 @@ void LightEnable(DWORD Index, BOOL bEnable) {
 void BeginScene() {
 	last_depth = 0;
 	device->BeginScene();
-	// Reapply the stored render states and what not
-	RestoreState();
 }
 
 void EndScene() {
@@ -249,13 +247,17 @@ void Release() {
 
 void Reset(D3DPRESENT_PARAMETERS *pPresentationParameters) {
 	HRESULT hr = device->Reset(pPresentationParameters);
-		if(FAILED(hr)){
-			MessageBox(enigma::hWnd,
-               "Failed to reset Direct3D 9.0 Device",
-			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-               MB_ICONERROR | MB_OK);
-			return;  // should probably force the game closed
-		}
+	if (FAILED(hr)) {
+		MessageBox(
+			enigma::hWnd,
+			"Failed to reset Direct3D 9.0 Device",
+			DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
+			MB_ICONERROR | MB_OK
+		);
+		return;  // should probably force the game closed
+	}
+	// Reapply the stored render states and what not
+	RestoreState();
 }
 
 void DrawIndexedPrimitive(D3DPRIMITIVETYPE Type, INT BaseVertexIndex, UINT MinIndex, UINT NumVertices, UINT StartIndex, UINT PrimitiveCount) {
