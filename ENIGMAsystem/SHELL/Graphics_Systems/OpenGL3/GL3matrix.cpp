@@ -62,8 +62,9 @@ namespace enigma
     }
 
     void transformation_mark_dirty() {
-        transform_needs_update = true;
         enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+        // set after so the batch drawing doesn't update the transform
+        transform_needs_update = true;
     }
 }
 
