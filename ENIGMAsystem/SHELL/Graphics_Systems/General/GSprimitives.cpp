@@ -21,6 +21,10 @@
 #include "GScolors.h"
 #include "GStextures.h"
 
+#ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h"
+#endif
+
 namespace {
 
 // the batching mode is initialized to the default here
@@ -55,6 +59,9 @@ unsigned draw_primitive_count(int kind, unsigned vertex_count) {
     case pr_trianglelist: return vertex_count / 3;
     case pr_trianglestrip: if (vertex_count > 2) return vertex_count - 2; break;
     case pr_trianglefan: if (vertex_count > 2) return vertex_count - 2; break;
+    #ifdef DEBUG_MODE
+    default: show_error("Unknown primitive kind: " + std::to_string(kind), true);
+    #endif
   }
   return 0;
 }
