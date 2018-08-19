@@ -31,6 +31,8 @@ namespace {
 int draw_batch_mode = enigma_user::batch_flush_deferred;
 // the texture that was specified when the current primitive batch began
 int draw_batch_texture = -1;
+// whether a batch has been started but not flushed yet
+bool draw_batch_dirty = false;
 // lazy create the batch stream that we use for combining primitives
 int draw_get_batch_stream() {
   static int draw_batch_stream = -1;
@@ -44,6 +46,7 @@ void draw_batch_begin_deferred(int texId) {
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     draw_batch_texture = texId;
   }
+  draw_batch_dirty = true;
 }
 
 } // anonymous namespace
@@ -75,7 +78,7 @@ void draw_batch_flush(int kind) {
 
   // guard against infinite recursion in case this flush
   // leads to other state changes that trigger another flush
-  if (flushing) return;
+  if (flushing || !draw_batch_dirty) return;
   flushing = true;
 
   // the never flush mode means the batch isn't drawn
@@ -86,6 +89,7 @@ void draw_batch_flush(int kind) {
   d3d_model_clear(draw_get_batch_stream());
 
   flushing = false;
+  draw_batch_dirty = false;
 }
 
 void draw_set_batch_mode(int mode) {

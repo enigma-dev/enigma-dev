@@ -270,10 +270,11 @@ void screen_redraw()
       d3d_clear_depth();
 
     draw_gui();
+
+    // do an implicit flush to catch anything from the draw GUI events
+    draw_batch_flush(batch_flush_deferred);
   }
 
-  // do an implicit flush to catch anything from the draw GUI events
-  draw_batch_flush(batch_flush_deferred);
   // must do at least one flush for the never mode to prevent leaks
   draw_batch_flush(batch_flush_never);
 
