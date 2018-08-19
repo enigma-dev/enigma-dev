@@ -544,7 +544,6 @@ void d3d_set_lighting(bool enable)
 {
   draw_batch_flush(batch_flush_deferred);
   enigma::d3d_lighting.lights_enable(enable);
-	oglmgr->Lighting();
   enigma::d3d_lighting.light_update();
   if (enable == true){
     enigma::d3d_lighting.lightsource_update();

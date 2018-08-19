@@ -131,20 +131,6 @@ void ResetTextureStates() {
 	// loop through and check if any of the texture states opengl has set do not match the ones we've cached
 }
 
-void Viewport() {
-
-}
-
-void ColorFunc() { //Used when calling color functions
-
-}
-
-void Lighting() { //Used when lighting is enabled/disabled
-}
-
-void ShaderFunc() { //Used when calling shader functions, like uniform changes
-}
-
 GLuint GetBoundTexture() { //This is used for cases when there are texture coordinates provided, but texture is 0 (like d3d_model_block)
 	return bound_tex;
 }
