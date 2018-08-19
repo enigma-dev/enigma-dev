@@ -16,6 +16,7 @@
 **/
 
 #include "gmk.h"
+#include "filesystem.h"
 
 #include "lodepng.h"
 #include <zlib.h>
@@ -47,8 +48,8 @@ ostream err(nullptr);
 static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
 static void atexit_tempdata_cleanup() {
-  for (std::string &tempFile : tempFilesCreated)
-    std::remove(tempFile.c_str());
+  for (const std::string &tempFile : tempFilesCreated)
+    DeleteFile(tempFile);
 }
 
 std::string writeTempDataFile(char *bytes, size_t length) {
