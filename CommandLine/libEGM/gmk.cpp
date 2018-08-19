@@ -44,17 +44,21 @@ ostream err(nullptr);
 static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
 static void atexit_tempdata_cleanup() {
-  for (std::string &tempFile : tempFilesCreated)
-    unlink(tempFile.c_str());
+  //for (std::string &tempFile : tempFilesCreated)
+    //unlink(tempFile.c_str());
 }
 
 std::string writeTempDataFile(char *bytes, size_t length) {
-  char temp[] = "gmk_data.XXXXXX";
-  int fd = mkstemp(temp);
-  if (fd == -1) return "";
-  write(fd, bytes, length);
-  close(fd);
-  return temp;
+  char name[L_tmpnam];
+  if (!std::tmpnam(name)) return "";
+  err << "TEMP FILE NAME: " << name << std::endl;
+  std::fstream fs(name, std::fstream::out | std::fstream::binary);
+  if (!fs.is_open()) return "";
+  err << "TEMP FILE OPENED: " << name << std::endl;
+  fs.write(bytes, length);
+  //fs.close();
+  err << "TEMP FILE CREATED: " << name << std::endl;
+  return name;
 }
 
 std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {
