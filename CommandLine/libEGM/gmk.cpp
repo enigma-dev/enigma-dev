@@ -29,6 +29,9 @@
 #include <vector>
 #include <set>
 
+#include <cstdlib>     /* srand, rand */
+#include <ctime>       /* time */
+
 using namespace buffers;
 using namespace buffers::resources;
 using namespace std;
@@ -44,20 +47,25 @@ ostream err(nullptr);
 static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
 static void atexit_tempdata_cleanup() {
-  //for (std::string &tempFile : tempFilesCreated)
-    //unlink(tempFile.c_str());
+  for (std::string &tempFile : tempFilesCreated)
+    unlink(tempFile.c_str());
 }
 
 std::string writeTempDataFile(char *bytes, size_t length) {
-  char name[L_tmpnam];
-  if (!std::tmpnam(name)) return "";
-  err << "TEMP FILE NAME: " << name << std::endl;
+  static int increment = 0;
+  static std::string prefix = "";
+  if (prefix.empty()) {
+    // init random seed
+    srand(time(NULL));
+    // prefix 5 random digits
+    for (size_t i = 0; i < 5; ++i)
+      prefix += std::to_string(rand() % 10);
+  }
+  std::string name = prefix + "gmk_data" + std::to_string(increment++);
   std::fstream fs(name, std::fstream::out | std::fstream::binary);
   if (!fs.is_open()) return "";
-  err << "TEMP FILE OPENED: " << name << std::endl;
   fs.write(bytes, length);
-  //fs.close();
-  err << "TEMP FILE CREATED: " << name << std::endl;
+  fs.close();
   return name;
 }
 
