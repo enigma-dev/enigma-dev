@@ -17,8 +17,8 @@
 #include "Bridges/General/DX9Context.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Direct3D9Headers.h"
-#include "Graphics_Systems/General/GStextures.h"
 
 #include "../General/GSmodel.h"
 #include "Universal_System/var4.h"
@@ -31,6 +31,8 @@ namespace enigma_user
 
 void d3d_set_perspective(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   D3DXMATRIX matProjection;
   if (enable) {
     D3DXMatrixPerspectiveFovLH(&matProjection, 45, -view_wview[view_current] / (double)view_hview[view_current], 32000, -32000);
@@ -46,6 +48,8 @@ void d3d_set_perspective(bool enable)
 
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
+	draw_batch_flush(batch_flush_deferred);
+
 	D3DXVECTOR3 vEyePt( xfrom, yfrom, zfrom );
 	D3DXVECTOR3 vLookatPt( xto, yto, zto );
 	D3DXVECTOR3 vUpVec( xup, yup, zup );
@@ -65,6 +69,8 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
+	draw_batch_flush(batch_flush_deferred);
+
 	D3DXVECTOR3 vEyePt( xfrom, yfrom, zfrom );
 	D3DXVECTOR3 vLookatPt( xto, yto, zto );
 	D3DXVECTOR3 vUpVec( xup, yup, zup );
@@ -84,6 +90,8 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   // This fixes font glyph edge artifacting and vertical scroll gaps
   // seen by mostly NVIDIA GPU users.  Rounds x and y and adds +0.01 offset.
   // This will prevent the fix from being negated through moving projections
@@ -127,6 +135,8 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   D3DXMATRIX matView, matRotZ;    // the projection transform matrix
 
   D3DXMatrixOrthoOffCenterLH(&matView,

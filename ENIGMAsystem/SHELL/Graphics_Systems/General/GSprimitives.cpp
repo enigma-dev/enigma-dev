@@ -34,7 +34,7 @@ int draw_get_batch_stream() {
     draw_batch_stream = enigma_user::d3d_model_create(enigma_user::model_stream);
   return draw_batch_stream;
 }
-
+// helper function for beginning a deferred batch to determine when texture swap occurs
 void draw_batch_begin_deferred(int texId) {
   if (draw_batch_texture != texId) {
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
