@@ -21,12 +21,12 @@
 #include "GL3shader.h"
 #include "GLSLshader.h"
 
+#include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSmath.h"
-
-#include "Graphics_Systems/General/OpenGLHeaders.h"
 
 #include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
 
@@ -226,6 +226,8 @@ void vertex_color(int buffer, int color, double alpha) {
 }
 
 void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   #ifdef DEBUG_MODE
@@ -240,6 +242,8 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
 }
 
 void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 

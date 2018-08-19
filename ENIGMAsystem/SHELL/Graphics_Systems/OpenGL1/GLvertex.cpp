@@ -15,10 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/General/GSvertex_impl.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-
 #include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSvertex_impl.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #include <map>
 using std::map;
@@ -239,6 +239,8 @@ void vertex_color(int buffer, int color, double alpha) {
 }
 
 void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   GLvoid* base_pointer = enigma::graphics_prepare_buffer(buffer, false);
@@ -250,6 +252,8 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
 }
 
 void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 

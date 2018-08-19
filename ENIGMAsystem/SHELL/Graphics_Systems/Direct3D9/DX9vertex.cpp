@@ -15,11 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/General/DX9Context.h"
+
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h" // for enigma_user::draw_primitive_count
 #include "Graphics_Systems/General/GScolor_macros.h"
-
-#include "Bridges/General/DX9Context.h"
 
 #include <map>
 using std::map;
@@ -197,6 +197,8 @@ void vertex_color(int buffer, int color, double alpha) {
 }
 
 void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   enigma::graphics_prepare_vertex_buffer(buffer);
@@ -213,6 +215,8 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
 }
 
 void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
 
   enigma::graphics_prepare_vertex_buffer(vertex);
