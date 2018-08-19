@@ -187,7 +187,7 @@ script:
       Xvfb :1 -screen 0 1024x768x24 &
       xfwm4 &
       export ASAN_OPTIONS=detect_leaks=0;
-      ./ci-regression.sh "/tmp/enigma-master"
+      ./ci-regression.sh "/tmp/enigma-master" || true
     else
       ./ci-build.sh
     fi
