@@ -32,13 +32,6 @@ namespace enigma
     extern int tile_vertex_buffer, tile_index_buffer;
     extern std::map<int,std::vector<std::vector<int> > > tile_layer_metadata;
 
-    struct bkinxop
-    {
-        bool operator() (const tile a, const tile b) {return (a.bckid < b.bckid);}
-    };
-
-    extern bkinxop bkinxcomp;
-
     void draw_tile();
     void delete_tiles();
     void load_tiles();
