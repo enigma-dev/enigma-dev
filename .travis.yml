@@ -193,7 +193,7 @@ script:
   - |
     if [ "$TEST_HARNESS" == true ]; then
       export ASAN_OPTIONS=detect_leaks=0;
-      ./ci-regression.sh "/tmp/enigma-master" || true
+      ./ci-regression.sh "/tmp/enigma-master"
     else
       ./ci-build.sh
     fi
