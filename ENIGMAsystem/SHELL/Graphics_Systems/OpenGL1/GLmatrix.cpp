@@ -21,13 +21,12 @@
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSmath.h"
 #include "Graphics_Systems/General/GSprimitives.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
-#include <math.h>
 
-//using namespace std;
+#include "Universal_System/roomsystem.h"
+#include "Universal_System/var4.h"
 
 #include <floatcomp.h>
+#include <math.h>
 
 namespace enigma
 {
@@ -41,14 +40,16 @@ namespace enigma
 
     //This is the user can access it
     enigma::Matrix4 mvp_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
-}
+} // namespace enigma
 
 //NOTE: THIS IS STILL FFP
 #ifdef GS_SCALAR_64
-#define glLoadMatrix(m) glLoadMatrixd((gs_scalar*)m.transpose());
+#define glLoadMatrix(m) draw_batch_flush(batch_flush_deferred);\
+                        glLoadMatrixd((gs_scalar*)m.transpose());
 #define glGet(m,n)        glGetDoublev(m,(gs_scalar*)n); //For debug
 #else
-#define glLoadMatrix(m) glLoadMatrixf((gs_scalar*)m.transpose());
+#define glLoadMatrix(m) draw_batch_flush(batch_flush_deferred);\
+                        glLoadMatrixf((gs_scalar*)m.transpose());
 #define glGet(m,n)        glGetFloatv(m,(gs_scalar*)n); //For debug
 #endif
 
@@ -59,8 +60,6 @@ namespace enigma_user
 
 void d3d_set_perspective(bool enable)
 {
-    draw_batch_flush(batch_flush_deferred);
-
     if (enable) {
       enigma::projection_matrix.init_perspective_proj_transform(45, -view_wview[view_current] / (gs_scalar)view_hview[view_current], 1, 32000);
     } else {
@@ -76,8 +75,6 @@ void d3d_set_perspective(bool enable)
 
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
-    draw_batch_flush(batch_flush_deferred);
-
     (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
     enigma::projection_matrix.init_perspective_proj_transform(45, -view_wview[view_current] / (gs_scalar)view_hview[view_current], 1, 32000);
     enigma::view_matrix.init_camera_transform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
@@ -95,8 +92,6 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_sc
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
-    draw_batch_flush(batch_flush_deferred);
-
     if (angle == 0 || znear == 0) return; //THEY CANNOT BE 0!!!
     (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
 
@@ -117,8 +112,6 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-    draw_batch_flush(batch_flush_deferred);
-
     // This fixes font glyph edge artifacting and vertical scroll gaps
     // seen by mostly NVIDIA GPU users.  Rounds x and y and adds +0.01 offset.
     // This will prevent the fix from being negated through moving projections
@@ -151,8 +144,6 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-    draw_batch_flush(batch_flush_deferred);
-
     enigma::projection_matrix.init_rotate_z_transform(angle);
 
     enigma::Matrix4 persp, ortho;

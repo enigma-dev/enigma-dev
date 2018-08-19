@@ -15,24 +15,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "Bridges/General/DX9Context.h"
-#include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Direct3D9Headers.h"
 
-#include "../General/GSmodel.h"
-#include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/var4.h"
 
-#include "Graphics_Systems/General/GScolor_macros.h"
+namespace {
+
+void graphics_set_transform(D3DTRANSFORMSTATETYPE State, const D3DMATRIX *pMatrix) {
+  draw_batch_flush(batch_flush_deferred);
+  d3dmgr->SetTransform(State, pMatrix);
+}
+
+} // anonymous namespace
 
 namespace enigma_user
 {
 
 void d3d_set_perspective(bool enable)
 {
-  draw_batch_flush(batch_flush_deferred);
-
   D3DXMATRIX matProjection;
   if (enable) {
     D3DXMatrixPerspectiveFovLH(&matProjection, 45, -view_wview[view_current] / (double)view_hview[view_current], 32000, -32000);
@@ -40,7 +43,7 @@ void d3d_set_perspective(bool enable)
     D3DXMatrixPerspectiveFovLH(&matProjection, 0, 1, 0, 1);
   }
   //set projection matrix
-  d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);
+  graphics_set_transform(D3DTS_PROJECTION, &matProjection);
   // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
   // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
   // See also OpenGL3/GL3d3d.cpp Direct3D9/DX9d3d.cpp OpenGL1/GLd3d.cpp
@@ -48,8 +51,6 @@ void d3d_set_perspective(bool enable)
 
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
-	draw_batch_flush(batch_flush_deferred);
-
 	D3DXVECTOR3 vEyePt( xfrom, yfrom, zfrom );
 	D3DXVECTOR3 vLookatPt( xto, yto, zto );
 	D3DXVECTOR3 vUpVec( xup, yup, zup );
@@ -59,18 +60,16 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 	D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
 
 	// Set our view matrix
-	d3dmgr->SetTransform( D3DTS_VIEW, &matView );
+	graphics_set_transform( D3DTS_VIEW, &matView );
 
 	D3DXMATRIX matProj;
 
 	D3DXMatrixPerspectiveFovLH( &matProj, D3DXToRadian(45), view_wview[view_current] / (double)view_hview[view_current], 1.0f, 32000.0f );
-	d3dmgr->SetTransform( D3DTS_PROJECTION, &matProj );
+	graphics_set_transform( D3DTS_PROJECTION, &matProj );
 }
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
-	draw_batch_flush(batch_flush_deferred);
-
 	D3DXVECTOR3 vEyePt( xfrom, yfrom, zfrom );
 	D3DXVECTOR3 vLookatPt( xto, yto, zto );
 	D3DXVECTOR3 vUpVec( xup, yup, zup );
@@ -80,18 +79,16 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 	D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
 
 	// Set our view matrix
-	d3dmgr->SetTransform( D3DTS_VIEW, &matView );
+	graphics_set_transform( D3DTS_VIEW, &matView );
 
 	D3DXMATRIX matProj;
 
 	D3DXMatrixPerspectiveFovLH( &matProj, gs_angle_to_radians(angle), aspect, znear, zfar );
-	d3dmgr->SetTransform( D3DTS_PROJECTION, &matProj );
+	graphics_set_transform( D3DTS_PROJECTION, &matProj );
 }
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-  draw_batch_flush(batch_flush_deferred);
-
   // This fixes font glyph edge artifacting and vertical scroll gaps
   // seen by mostly NVIDIA GPU users.  Rounds x and y and adds +0.01 offset.
   // This will prevent the fix from being negated through moving projections
@@ -119,7 +116,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	D3DXMATRIX matView=mat1Trans*matRotZ*mat2Trans*matScale;
 
 	// Set the matrix to be applied to anything we render from now on
-	d3dmgr->SetTransform( D3DTS_VIEW, &matView);
+	graphics_set_transform( D3DTS_VIEW, &matView);
 
 	D3DXMATRIX matProjection;    // the projection transform matrix
 	D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -130,13 +127,11 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 							32000.0f,    // the near view-plane
 							-32000.0f);    // the far view-plane
 
-	d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+	graphics_set_transform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 }
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-  draw_batch_flush(batch_flush_deferred);
-
   D3DXMATRIX matView, matRotZ;    // the projection transform matrix
 
   D3DXMatrixOrthoOffCenterLH(&matView,
@@ -152,13 +147,13 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
   matView *= matRotZ;
 
   // Set the matrix to be applied to anything we render from now on
-  d3dmgr->SetTransform( D3DTS_VIEW, &matView);
+  graphics_set_transform( D3DTS_VIEW, &matView);
 
   D3DXMATRIX matProj;    // the projection transform matrix
   D3DXMatrixPerspectiveFovLH(&matProj,
     D3DXToRadian(60), width/height, 0.1, 32000);    // the far view-plane
 
-  d3dmgr->SetTransform(D3DTS_PROJECTION, &matProj);    // set the projection transform
+  graphics_set_transform(D3DTS_PROJECTION, &matProj);    // set the projection transform
 }
 
 D3DXMATRIX matWorld;
@@ -169,7 +164,7 @@ void d3d_transform_set_identity()
 {
 	matWorld = matNull;
 	D3DXMatrixIdentity( &matWorld );
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
@@ -183,7 +178,7 @@ void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 	matWorld *= matTranslate;
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 
 }
 
@@ -198,7 +193,7 @@ void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 	matWorld *= matScale;
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_add_rotation_x(gs_scalar angle)
@@ -211,7 +206,7 @@ void d3d_transform_add_rotation_x(gs_scalar angle)
 	matWorld *= matRot;
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_add_rotation_y(gs_scalar angle)
@@ -225,7 +220,7 @@ void d3d_transform_add_rotation_y(gs_scalar angle)
 	matWorld *= matRot;
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_add_rotation_z(gs_scalar angle)
@@ -238,7 +233,7 @@ void d3d_transform_add_rotation_z(gs_scalar angle)
 	matWorld *= matRot;
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
@@ -252,7 +247,7 @@ void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 	matWorld *= matRot;
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
@@ -262,7 +257,7 @@ void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 	D3DXMatrixTranslation(&matWorld, xt, yt, zt);
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
@@ -272,7 +267,7 @@ void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 	D3DXMatrixScaling(&matWorld, xs, ys, zs);
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_x(gs_scalar angle)
@@ -281,7 +276,7 @@ void d3d_transform_set_rotation_x(gs_scalar angle)
 	D3DXMatrixRotationX(&matWorld, gs_angle_to_radians(-angle));
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_y(gs_scalar angle)
@@ -290,7 +285,7 @@ void d3d_transform_set_rotation_y(gs_scalar angle)
 	D3DXMatrixRotationY(&matWorld, gs_angle_to_radians(-angle));
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_z(gs_scalar angle)
@@ -300,7 +295,7 @@ void d3d_transform_set_rotation_z(gs_scalar angle)
 	D3DXMatrixRotationZ(&matWorld, gs_angle_to_radians(-angle));
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
@@ -310,7 +305,7 @@ void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 	D3DXMatrixRotationYawPitchRoll(&matWorld, y * angle, x * angle, z * angle);
 
 	// tell Direct3D about our matrix
-	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
+	graphics_set_transform(D3DTS_WORLD, &matWorld);
 }
 
 }

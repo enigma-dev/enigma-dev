@@ -135,10 +135,6 @@ void Viewport() {
 
 }
 
-void Transformation() { //Used when calling 3d transformations (translation, scaling etc.)
-
-}
-
 void BlendFunc() { //Used when calling blend functions
 
 }

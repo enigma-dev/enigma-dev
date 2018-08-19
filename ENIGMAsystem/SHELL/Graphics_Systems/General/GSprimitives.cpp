@@ -67,9 +67,16 @@ unsigned draw_primitive_count(int kind, unsigned vertex_count) {
 }
 
 void draw_batch_flush(int kind) {
+  static bool flushing = false;
+
   // return if the kind of flush being requested
   // is not the mode of flushing we have enabled
   if (draw_batch_mode != kind) return;
+
+  // guard against infinite recursion in case this flush
+  // leads to other state changes that trigger another flush
+  if (flushing) return;
+  flushing = true;
 
   // the never flush mode means the batch isn't drawn
   // we must still clear it from memory to avoid leaks
@@ -77,6 +84,8 @@ void draw_batch_flush(int kind) {
     d3d_model_draw(draw_get_batch_stream(), draw_batch_texture);
   }
   d3d_model_clear(draw_get_batch_stream());
+
+  flushing = false;
 }
 
 void draw_set_batch_mode(int mode) {
