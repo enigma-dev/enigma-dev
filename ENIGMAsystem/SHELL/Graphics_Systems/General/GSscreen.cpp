@@ -274,14 +274,13 @@ void screen_redraw()
 
   // do an implicit flush to catch anything from the draw GUI events
   draw_batch_flush(batch_flush_deferred);
+  // must do at least one flush for the never mode to prevent leaks
+  draw_batch_flush(batch_flush_never);
 
   if (sprite_exists(cursor_sprite))
     draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
 
   enigma::scene_end();
-
-  // must do at least one flush for the never mode to prevent leaks
-  draw_batch_flush(batch_flush_never);
 
   // GM8.1 manual specifies that screen_redraw should call screen_refresh
   // "The first function redraws the internal image and then refreshes the screen image."
