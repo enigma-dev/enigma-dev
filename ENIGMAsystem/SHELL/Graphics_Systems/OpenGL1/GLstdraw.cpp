@@ -17,6 +17,7 @@
 **/
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSstdraw.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
@@ -39,7 +40,7 @@
 #endif
 
 namespace enigma {
-  extern unsigned char currentcolor[4];
+extern unsigned char currentcolor[4];
 }
 
 namespace enigma_user
@@ -59,10 +60,12 @@ bool draw_get_msaa_supported()
 
 void draw_set_msaa_enabled(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_MULTISAMPLE);
 }
 
 void draw_enable_alphablend(bool enable) {
+  draw_batch_flush(batch_flush_deferred);
 	(enable?glEnable:glDisable)(GL_BLEND);
 }
 
@@ -79,35 +82,39 @@ unsigned draw_get_alpha_test_ref_value()
 
 void draw_set_alpha_test(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
 	(enable?glEnable:glDisable)(GL_ALPHA_TEST);
 }
 
 void draw_set_alpha_test_ref_value(unsigned val)
 {
+  draw_batch_flush(batch_flush_deferred);
 	glAlphaFunc(GL_GREATER, val/256);
 }
 
 void draw_set_line_pattern(int pattern, int scale)
 {
+  draw_batch_flush(batch_flush_deferred);
   if (pattern == -1)
-      glDisable(GL_LINE_STIPPLE);
+    glDisable(GL_LINE_STIPPLE);
   else
     glEnable(GL_LINE_STIPPLE),
     glLineStipple(scale,(short)pattern);
 }
 
-}
+} // namespace enigma
 
 //#include <endian.h>
 //TODO: Though serprex, the author of the function below, never included endian.h,
 //   // Doing so is necessary for the function to work at its peak.
 //   // When ENIGMA generates configuration files, one should be included here.
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 int draw_getpixel(int x,int y)
 {
+    draw_batch_flush(batch_flush_deferred);
+
     if (view_enabled)
     {
         x = x - enigma_user::view_xview[enigma_user::view_current];
@@ -140,6 +147,8 @@ int draw_getpixel(int x,int y)
 
 int draw_getpixel_ext(int x,int y)
 {
+    draw_batch_flush(batch_flush_deferred);
+
     if (view_enabled)
     {
         x = x - enigma_user::view_xview[enigma_user::view_current];
@@ -169,7 +178,8 @@ int draw_getpixel_ext(int x,int y)
     return rgba[0] | rgba[1] << 8 | rgba[2] << 16 | rgba[3] << 24;
   #endif
 }
-}
+
+} // namespace enigma_user
 
 namespace {
 
@@ -217,13 +227,14 @@ void CALLBACK vertexCallback(GLvoid *vertex)
   glColor3dv(ptr + 3);
   glVertex2dv(ptr);
 }
-}
 
-namespace enigma
-{
+} // anonymous namespace
+
+namespace enigma {
 
 bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
 {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   //Supposedly this is required; see notes in GLPrimities.cpp
   enigma_user::texture_reset();
 
@@ -268,4 +279,4 @@ bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
   return true;
 }
 
-}
+} // namespace enigma
