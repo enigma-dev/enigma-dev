@@ -28,8 +28,10 @@ int draw_batch_mode = enigma_user::batch_flush_deferred;
 // the texture that was specified when the current primitive batch began
 int draw_batch_texture = -1;
 // lazy create the batch stream that we use for combining primitives
-inline int draw_get_batch_stream() {
-  static int draw_batch_stream = enigma_user::d3d_model_create(enigma_user::model_stream);
+int draw_get_batch_stream() {
+  static int draw_batch_stream = -1;
+  if (!enigma_user::d3d_model_exists(draw_batch_stream))
+    draw_batch_stream = enigma_user::d3d_model_create(enigma_user::model_stream);
   return draw_batch_stream;
 }
 
