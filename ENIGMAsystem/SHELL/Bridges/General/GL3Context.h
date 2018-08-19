@@ -135,10 +135,6 @@ void Viewport() {
 
 }
 
-void BlendFunc() { //Used when calling blend functions
-
-}
-
 void ColorFunc() { //Used when calling color functions
 
 }
