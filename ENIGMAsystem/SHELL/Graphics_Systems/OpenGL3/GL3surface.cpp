@@ -20,11 +20,12 @@
 
 #include "GL3TextureStruct.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GLSurfaceStruct.h"
 #include "Graphics_Systems/General/GStextures.h"
 
@@ -40,10 +41,6 @@
 #include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
-
-namespace enigma_user {
-  extern int room_width, room_height/*, sprite_idmax*/;
-}
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -244,6 +241,8 @@ void surface_add_depthbuffer(int id, int internalFormat, unsigned format, unsign
 
 void surface_set_target(int id)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surface(surf,id);
   oglmgr->Bind();
   //This fixes several consecutive surface_set_target() calls without surface_reset_target.
@@ -259,6 +258,8 @@ void surface_set_target(int id)
 
 void surface_reset_target(void)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   oglmgr->Bind();
   enigma::bound_framebuffer = 0;
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

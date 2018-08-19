@@ -16,15 +16,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "GLTextureStruct.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
-#include "Graphics_Systems/General/GSscreen.h"
-#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GLSurfaceStruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
-#include "Graphics_Systems/General/GLSurfaceStruct.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-#include "GLTextureStruct.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
@@ -41,10 +42,6 @@
 #include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
-
-namespace enigma_user {
-  extern int room_width, room_height/*, sprite_idmax*/;
-}
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -178,6 +175,8 @@ int surface_create_msaa(int width, int height, int samples)
 
 void surface_set_target(int id)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   //This fixes several consecutive surface_set_target() calls without surface_reset_target.
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
@@ -194,6 +193,8 @@ void surface_set_target(int id)
 
 void surface_reset_target(void)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glPopAttrib();
   glPopMatrix();
