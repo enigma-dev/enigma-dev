@@ -275,11 +275,14 @@ void screen_redraw()
     draw_batch_flush(batch_flush_deferred);
   }
 
+  if (sprite_exists(cursor_sprite)) {
+    draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
+    // cursor sprite needs its own flush before this frame ends
+    draw_batch_flush(batch_flush_deferred);
+  }
+
   // must do at least one flush for the never mode to prevent leaks
   draw_batch_flush(batch_flush_never);
-
-  if (sprite_exists(cursor_sprite))
-    draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
 
   enigma::scene_end();
 
