@@ -48,7 +48,7 @@ static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
 static void atexit_tempdata_cleanup() {
   for (std::string &tempFile : tempFilesCreated)
-    unlink(tempFile.c_str());
+    std::remove(tempFile.c_str());
 }
 
 std::string writeTempDataFile(char *bytes, size_t length) {
