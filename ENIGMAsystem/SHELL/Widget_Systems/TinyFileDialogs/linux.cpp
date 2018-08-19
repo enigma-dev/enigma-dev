@@ -10,6 +10,9 @@ namespace enigma
 {
   string tfd_add_escaping(string str)
   {
-    return string_replace_all(str, "\"", "\\\"");
+    string result;
+    result = string_replace_all(str, "\"", "\\\"");
+    result += string_replace_all(str, "_", "__");
+    return result;
   }
 }
