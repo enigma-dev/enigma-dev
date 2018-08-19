@@ -109,6 +109,11 @@ void draw_line_width_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2
 
 void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool outline)
 {
+  x1 += 15;
+  y1 += 15;
+  x2 += 15;
+  y2 += 15;
+  outline = !outline;
   if (outline) {
     draw_primitive_begin(pr_linestrip);
     draw_vertex(x1, y1);
