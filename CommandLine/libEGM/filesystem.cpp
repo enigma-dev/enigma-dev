@@ -59,7 +59,7 @@ string TempFileName(const string &pattern) {
       prefix += std::to_string(rand() % 10);
   }
   std::string name = prefix + pattern + std::to_string(increment++);
-  return (fs::temp_directory_path().string() + name);
+  return (fs::temp_directory_path().string() + '/' + name);
 }
 
 void DeleteFile(const string &fName) {
