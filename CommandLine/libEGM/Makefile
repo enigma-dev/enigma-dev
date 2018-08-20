@@ -22,11 +22,11 @@ ifeq ($(shell expr $(GCCVER) \>= 8), 1)
 else
 	override CXXFLAGS += -std=c++14 -DUSE_BOOST_FS
 	ifeq ($(OS), Linux)
-		FS_LIBS=-lboost_filesystem
+		FS_LIBS=-lboost_system -lboost_filesystem
 	else ifeq ($(OS), Darwin)
-		FS_LIBS=-lboost_filesystem
+		FS_LIBS=-lboost_system -lboost_filesystem
 	else
-		FS_LIBS=-lboost_filesystem-mt
+		FS_LIBS=-lboost_system-mt -lboost_filesystem-mt
 	endif
 endif
 
