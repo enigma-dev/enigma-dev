@@ -53,16 +53,7 @@ static void atexit_tempdata_cleanup() {
 }
 
 std::string writeTempDataFile(char *bytes, size_t length) {
-  static int increment = 0;
-  static std::string prefix = "";
-  if (prefix.empty()) {
-    // init random seed
-    srand(time(NULL));
-    // prefix 5 random digits
-    for (size_t i = 0; i < 5; ++i)
-      prefix += std::to_string(rand() % 10);
-  }
-  std::string name = prefix + "gmk_data" + std::to_string(increment++);
+  std::string name = TempFileName("gmk_data");
   std::fstream fs(name, std::fstream::out | std::fstream::binary);
   if (!fs.is_open()) return "";
   fs.write(bytes, length);

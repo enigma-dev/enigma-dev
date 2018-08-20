@@ -48,6 +48,20 @@ fs::path InternalizeFile(const fs::path &file,
   return relative;
 }
 
+string TempFileName(const string &pattern) {
+  static int increment = 0;
+  static std::string prefix = "";
+  if (prefix.empty()) {
+    // init random seed
+    srand(time(NULL));
+    // prefix 5 random digits
+    for (size_t i = 0; i < 5; ++i)
+      prefix += std::to_string(rand() % 10);
+  }
+  std::string name = prefix + pattern + std::to_string(increment++);
+  return (fs::temp_directory_path().string() + name);
+}
+
 void DeleteFile(const string &fName) {
 #ifdef USE_BOOST_FS
   fs::remove(fName.c_str());
