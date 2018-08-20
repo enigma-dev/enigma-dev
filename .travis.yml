@@ -180,12 +180,18 @@ matrix:
   allow_failures:
     - os: osx
 
-script:
+before_script:
   - |
     if [ "$TEST_HARNESS" == true ]; then
+      # Start xvfb before the script phase
       export DISPLAY=:1
       Xvfb :1 -screen 0 1024x768x24 &
       xfwm4 &
+    fi
+
+script:
+  - |
+    if [ "$TEST_HARNESS" == true ]; then
       export ASAN_OPTIONS=detect_leaks=0;
       ./ci-regression.sh "/tmp/enigma-master"
     else
