@@ -16,10 +16,10 @@ before_install:
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
+      sudo add-apt-repository -y ppa:mhier/libboost-latest;
       sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
-      sudo apt-get -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev \
-        libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libglew-dev     \
-        libprotobuf-dev protobuf-compiler;
+      sudo apt-get -y install build-essential zlib1g-dev libboost1.67-dev \
+        libglew-dev libprotobuf-dev protobuf-compiler;
 
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
@@ -52,7 +52,7 @@ before_install:
 
       if [ "$TEST_HARNESS" == true ]; then
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test;
-        sudo apt-get update;
+        sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
         sudo apt-get -y install cmake libgtest-dev xvfb wmctrl xdotool xfwm4 lcov gcc-7\
           g++-7 cpp-7 pulseaudio libpugixml-dev libyaml-cpp-dev;
 
@@ -180,12 +180,18 @@ matrix:
   allow_failures:
     - os: osx
 
-script:
+before_script:
   - |
     if [ "$TEST_HARNESS" == true ]; then
+      # Start xvfb before the script phase
       export DISPLAY=:1
       Xvfb :1 -screen 0 1024x768x24 &
       xfwm4 &
+    fi
+
+script:
+  - |
+    if [ "$TEST_HARNESS" == true ]; then
       export ASAN_OPTIONS=detect_leaks=0;
       ./ci-regression.sh "/tmp/enigma-master"
     else

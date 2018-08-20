@@ -956,7 +956,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
     dec.postponeName(instance->mutable_object_type(), dec.read4(), TypeCase::kObject);
     instance->set_id(dec.read4());
     instance->set_code(dec.readStr());
-    instance->set_locked(dec.readBool());
+    instance->mutable_editor_settings()->set_locked(dec.readBool());
   }
 
   int notiles = dec.read4();
@@ -971,7 +971,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
     tile->set_height(dec.read4());
     tile->set_depth(dec.read4());
     tile->set_id(dec.read4());
-    tile->set_locked(dec.readBool());
+    tile->mutable_editor_settings()->set_locked(dec.readBool());
   }
 
   dec.readBool(); // REMEMBER_WINDOW_SIZE
