@@ -28,7 +28,7 @@ FONT 8, "MS Shell Dlg 2"
   EDITTEXT        IDC_EDIT, 11, 94, 336, 23, ES_AUTOHSCROLL | ES_NOHIDESEL | WS_GROUP
   DEFPUSHBUTTON   "OK", IDOK, 273, 11, 73, 21
   PUSHBUTTON      "Cancel", IDCANCEL, 273, 40, 73, 21
-  LTEXT           "Prompt", IDC_PROMPT, 11, 11, 252, 73, SS_NOPREFIX
+  LTEXT           "Prompt", IDC_PROMPT, 11, 11, 252, 73, SS_NOPREFIX | SS_EDITCONTROL
 }
 
 /* --- show_message_ext --- */
