@@ -141,7 +141,6 @@ namespace enigma_user
 	int draw_get_msaa_maxlevel();
 	bool draw_get_msaa_supported();
 	void draw_set_msaa_enabled(bool enable);
-	void draw_enable_alphablend(bool enable);
 	bool draw_get_alpha_test();
 	unsigned draw_get_alpha_test_ref_value();
 	void draw_set_alpha_test(bool enable);
@@ -176,7 +175,6 @@ namespace enigma_user
 	extern int window_get_region_height();
 
 	void screen_redraw();
-	void screen_init();
 	int screen_save(string filename);
 	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h);
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);

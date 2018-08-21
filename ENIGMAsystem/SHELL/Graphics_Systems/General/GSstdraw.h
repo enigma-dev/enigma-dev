@@ -33,7 +33,7 @@ namespace enigma_user
   unsigned draw_get_alpha_test_ref_value();
   void draw_set_alpha_test(bool enable);
   void draw_set_alpha_test_ref_value(unsigned val);
-  void draw_enable_alphablend(bool enable);
+  void draw_set_blend(bool enable);
   void draw_set_line_pattern(int pattern, int scale);
   void draw_point(gs_scalar x, gs_scalar y);
   void draw_point_color(gs_scalar x, gs_scalar y, int color);

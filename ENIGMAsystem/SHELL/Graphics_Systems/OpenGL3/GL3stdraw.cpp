@@ -54,7 +54,7 @@ void draw_set_msaa_enabled(bool enable)
   (enable?glEnable:glDisable)(GL_MULTISAMPLE);
 }
 
-void draw_enable_alphablend(bool enable) {
+void draw_set_blend(bool enable) {
 	(enable?glEnable:glDisable)(GL_BLEND);
 }
 

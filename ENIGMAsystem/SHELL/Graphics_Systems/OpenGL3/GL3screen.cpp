@@ -16,10 +16,7 @@
 **/
 
 #include "Bridges/General/GL3Context.h"
-#include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSscreen.h"
-#include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 
 #include "Universal_System/image_formats.h"
@@ -27,13 +24,11 @@
 #include "Platforms/General/PFwindow.h"
 
 #include <string>
-#include <cstdio>
-
-//WE SHOULDN'T DO THIS! Don't specify namespaces like this - Harijs
-using namespace std;
 
 using namespace enigma;
 using namespace enigma_user;
+
+using std::string;
 
 namespace enigma
 {
@@ -56,7 +51,11 @@ void scene_end() {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::msaa_fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     //TODO: Change the code below to fix this to size properly to views
-    glBlitFramebuffer(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(
+      0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(),
+      0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(),
+      GL_COLOR_BUFFER_BIT, GL_NEAREST
+    );
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
     // glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
   }
@@ -66,46 +65,6 @@ void scene_end() {
 
 namespace enigma_user
 {
-
-void screen_init()
-{
-  oglmgr->EndShapesBatching();
-  enigma::gui_width = window_get_region_width();
-  enigma::gui_height = window_get_region_height();
-
-  glClearColor(0,0,0,0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  if (!view_enabled)
-  {
-    glClearColor(0,0,0,0);
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
-  } else {
-    for (view_current = 0; view_current < 7; view_current++)
-    {
-      if (view_visible[(int)view_current])
-      {
-        int vc = (int)view_current;
-
-        glClearColor(0,0,0,0);
-
-        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
-        d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
-        break;
-      }
-    }
-  }
-
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_CULL_FACE);
-  glEnable(GL_BLEND);
-  glEnable(GL_SCISSOR_TEST);
-
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  texture_reset();
-  draw_set_color(c_white);
-}
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
@@ -164,12 +123,6 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   //NOTE: OpenGL viewports are bottom left unlike Direct3D viewports which are top left
   glViewport(viewport_x, viewport_y, viewport_w, viewport_h);
   glScissor(viewport_x, viewport_y, viewport_w, viewport_h);
-}
-
-//TODO: These need to be in some kind of General
-void display_set_gui_size(unsigned int width, unsigned int height) {
-  enigma::gui_width = width;
-  enigma::gui_height = height;
 }
 
 }

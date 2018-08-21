@@ -14,26 +14,18 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
-#include "Graphics_Systems/General/GSscreen.h"
-#include "Graphics_Systems/General/GStextures.h"
-#include "Graphics_Systems/General/GSd3d.h"
-#include "Graphics_Systems/General/GSvertex.h"
-#include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GScolors.h"
 
 #include "Universal_System/image_formats.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
 #include "Platforms/General/PFwindow.h"
 
 #include <string>
-#include <cstdio>
 
-using namespace std;
 using namespace enigma;
+
+using std::string;
 
 namespace enigma
 {
@@ -54,47 +46,6 @@ void scene_end() {
 
 namespace enigma_user
 {
-
-void screen_init()
-{
-  enigma::gui_width = window_get_region_width();
-  enigma::gui_height = window_get_region_height();
-
-  glClearColor(0,0,0,0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  if (!view_enabled)
-  {
-    glClearColor(0,0,0,0);
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
-  } else {
-    for (view_current = 0; view_current < 7; view_current++)
-    {
-      if (view_visible[(int)view_current])
-      {
-        int vc = (int)view_current;
-
-        glClearColor(0,0,0,0);
-
-        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
-        d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
-        break;
-      }
-    }
-  }
-
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_CULL_FACE);
-  glEnable(GL_BLEND);
-  glEnable(GL_SCISSOR_TEST);
-  glEnable(GL_ALPHA_TEST);
-  glEnable(GL_TEXTURE_2D);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glAlphaFunc(GL_ALWAYS,0);
-  texture_reset();
-  draw_set_color(c_white);
-}
 
 int screen_save(string filename) { //Assumes native integers are little endian
 	unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
@@ -149,12 +100,6 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   //NOTE: OpenGL viewports are bottom left unlike Direct3D viewports which are top left
   glViewport(viewport_x, viewport_y, viewport_w, viewport_h);
   glScissor(viewport_x, viewport_y, viewport_w, viewport_h);
-}
-
-//TODO: These need to be in some kind of General
-void display_set_gui_size(unsigned int width, unsigned int height) {
-	enigma::gui_width = width;
-	enigma::gui_height = height;
 }
 
 }

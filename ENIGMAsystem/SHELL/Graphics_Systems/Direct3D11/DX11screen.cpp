@@ -16,20 +16,17 @@
 **/
 
 #include "Bridges/General/DX11Context.h"
-#include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSscreen.h"
-#include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GStextures.h"
-#include "Graphics_Systems/General/GScolors.h"
+#include "Direct3D11Headers.h"
 
 #include "Universal_System/roomsystem.h"
 #include "Platforms/General/PFwindow.h"
 
 #include <string>
-#include <cstdio>
 
 using namespace enigma;
-using namespace std;
+
+using std::string;
 
 namespace enigma
 {
@@ -46,31 +43,6 @@ void scene_end() {
 
 namespace enigma_user
 {
-
-void screen_init()
-{
-  enigma::gui_width = window_get_region_width();
-  enigma::gui_height = window_get_region_height();
-
-  m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-  if (!view_enabled)
-  {
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
-  } else {
-    for (view_current = 0; view_current < 7; view_current++) {
-      if (view_visible[(int)view_current]) {
-        int vc = (int)view_current;
-
-        screen_set_viewport(view_xport[vc], view_yport[vc],
-          (window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
-        d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], view_angle[vc]);
-        break;
-      }
-    }
-  }
-}
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
@@ -100,12 +72,6 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   viewport.MaxDepth = 1.0f;
 
   m_deviceContext->RSSetViewports(1, &viewport);
-}
-
-//TODO: These need to be in some kind of General
-void display_set_gui_size(unsigned int width, unsigned int height) {
-  enigma::gui_width = width;
-  enigma::gui_height = height;
 }
 
 }
