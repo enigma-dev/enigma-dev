@@ -18,7 +18,6 @@
 
 #include "GSprimitives.h"
 #include "GSmodel.h"
-#include "GScolors.h"
 #include "GStextures.h"
 
 #ifdef DEBUG_MODE
@@ -37,7 +36,7 @@ bool draw_batch_dirty = false;
 int draw_get_batch_stream() {
   static int draw_batch_stream = -1;
   if (!enigma_user::d3d_model_exists(draw_batch_stream))
-    draw_batch_stream = enigma_user::d3d_model_create(enigma_user::model_stream);
+    draw_batch_stream = enigma_user::d3d_model_create(enigma_user::model_stream, true);
   return draw_batch_stream;
 }
 // helper function for beginning a deferred batch to determine when texture swap occurs
@@ -127,7 +126,7 @@ void draw_primitive_end()
 
 void draw_vertex(gs_scalar x, gs_scalar y)
 {
-  d3d_model_vertex_color(draw_get_batch_stream(), x, y, draw_get_color(), draw_get_alpha());
+  d3d_model_vertex(draw_get_batch_stream(), x, y);
 }
 
 void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
@@ -137,7 +136,7 @@ void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 
 void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_vertex_texture_color(draw_get_batch_stream(), x, y, tx, ty, draw_get_color(), draw_get_alpha());
+  d3d_model_vertex_texture(draw_get_batch_stream(), x, y, tx, ty);
 }
 
 void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
@@ -162,7 +161,7 @@ void d3d_primitive_end()
 
 void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
 {
-  d3d_model_vertex_color(draw_get_batch_stream(), x, y, z, draw_get_color(), draw_get_alpha());
+  d3d_model_vertex(draw_get_batch_stream(), x, y, z);
 }
 
 void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha)
@@ -172,7 +171,7 @@ void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double a
 
 void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_vertex_texture_color(draw_get_batch_stream(), x, y, z, tx, ty, draw_get_color(), draw_get_alpha());
+  d3d_model_vertex_texture(draw_get_batch_stream(), x, y, z, tx, ty);
 }
 
 void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha)
@@ -182,7 +181,7 @@ void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar t
 
 void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
-  d3d_model_vertex_normal_color(draw_get_batch_stream(), x, y, z, nx, ny, nz, draw_get_color(), draw_get_alpha());
+  d3d_model_vertex_normal(draw_get_batch_stream(), x, y, z, nx, ny, nz);
 }
 
 void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int color, double alpha)
@@ -192,7 +191,7 @@ void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx
 
 void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_vertex_normal_texture_color(draw_get_batch_stream(), x, y, z, nx, ny, nz, tx, ty, draw_get_color(), draw_get_alpha());
+  d3d_model_vertex_normal_texture(draw_get_batch_stream(), x, y, z, nx, ny, nz, tx, ty);
 }
 
 void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha)

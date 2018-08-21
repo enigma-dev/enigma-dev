@@ -21,9 +21,10 @@
 #include "GSmodel.h"
 #include "GSvertex.h"
 #include "GSvertex_impl.h"
+#include "GSprimitives.h"
+#include "GScolors.h"
 #include "GSmatrix.h"
 #include "GStextures.h"
-#include "GSprimitives.h"
 
 #include "Universal_System/fileio.h"
 
@@ -139,9 +140,9 @@ void string_parse(string *s) {
 
 namespace enigma_user {
 
-int d3d_model_create(int type) {
+int d3d_model_create(int type, bool use_draw_color) {
   int id = enigma::models.size();
-  enigma::Model* model = new enigma::Model(type);
+  enigma::Model* model = new enigma::Model(type, use_draw_color);
   model->vertex_buffer = vertex_create_buffer();
   enigma::models.push_back(model);
   return id;
@@ -234,9 +235,19 @@ void d3d_model_primitive_end(int id) {
   delete model->current_primitive;
   model->current_primitive = 0;
 
+  if (model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+  }
+
   // if we are guessing the format of the model, end the vertex format now
-  if (!vertex_format_exists(primitive.format))
+  if (!vertex_format_exists(primitive.format)) {
+    if (!primitive.format_defined && model->use_draw_color && !model->vertex_colored) {
+      vertex_format_add_color();
+    }
+    model->vertex_colored = false;
     primitive.format = vertex_format_end();
+    primitive.format_defined = true;
+  }
 
   // combine adjacent primitives that are list types with logically the same format
   if (!model->primitives.empty()) {
@@ -309,13 +320,22 @@ void d3d_model_vertex(int id, gs_scalar x, gs_scalar y) {
   enigma::Primitive* primitive = model->current_primitive;
   if (!primitive->format_defined) {
     if (vertex_format_exists()) {
+      if (model->use_draw_color && !model->vertex_colored) {
+        vertex_format_add_color();
+      }
       primitive->format_defined = true;
     } else {
       vertex_format_begin();
       vertex_format_add_position();
     }
   }
+  if (primitive->format_defined && model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+  }
   vertex_position(model->vertex_buffer, x, y);
+  model->vertex_colored = false;
+  model->vertex_color = draw_get_color();
+  model->vertex_alpha = draw_get_alpha();
 }
 
 void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
@@ -323,29 +343,40 @@ void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
   enigma::Primitive* primitive = model->current_primitive;
   if (!primitive->format_defined) {
     if (vertex_format_exists()) {
+      if (model->use_draw_color && !model->vertex_colored) {
+        vertex_format_add_color();
+      }
       primitive->format_defined = true;
     } else {
       vertex_format_begin();
       vertex_format_add_position_3d();
     }
   }
+  if (primitive->format_defined && model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+  }
   vertex_position_3d(model->vertex_buffer, x, y, z);
+  model->vertex_colored = false;
+  model->vertex_color = draw_get_color();
+  model->vertex_alpha = draw_get_alpha();
 }
 
 void d3d_model_color(int id, int col, double alpha) {
-  const enigma::Model* model = enigma::models[id];
+  enigma::Model* model = enigma::models[id];
   const enigma::Primitive* primitive = model->current_primitive;
   if (!primitive->format_defined)
     vertex_format_add_color();
   vertex_color(model->vertex_buffer, col, alpha);
+  model->vertex_colored = true;
 }
 
 void d3d_model_argb(int id, unsigned argb) {
-  const enigma::Model* model = enigma::models[id];
+  enigma::Model* model = enigma::models[id];
   const enigma::Primitive* primitive = model->current_primitive;
   if (!primitive->format_defined)
     vertex_format_add_color();
   vertex_argb(model->vertex_buffer, argb);
+  model->vertex_colored = true;
 }
 
 void d3d_model_texture(int id, gs_scalar tx, gs_scalar ty) {

@@ -25,6 +25,9 @@
 #ifndef ENIGMA_GSMODEL_IMPL_H
 #define ENIGMA_GSMODEL_IMPL_H
 
+#include "GScolors.h"
+#include "Universal_System/scalar.h"
+
 #include <vector>
 using std::vector;
 
@@ -50,11 +53,20 @@ struct Model {
   bool vertex_started; // whether the user has begun specifying the model by starting a primitive
   vector<Primitive> primitives; // all primitives the user has finished specifying for this model
 
+  bool use_draw_color; // whether to store the current color per-vertex when no format given
+  bool vertex_colored; // whether the last vertex specified color or not
+  int vertex_color; // the color that was set when the last vertex was added
+  gs_scalar vertex_alpha; // the alpha that was set when the last vertex was added
+
   // NOTE: vertex_buffer should always exist but not outlive the model
   // NOTE: current_primitive does not exist outside of the begin/end calls
   // NOTE: vertex_started is true until the user attempts to draw the model
+  // NOTE: vertex_colored waits until the next vertex or primitive end to add the color
+  //       because GM has always specified color as the last argument on its vertex formats
 
-  Model(int type): type(type), vertex_buffer(-1), current_primitive(0), vertex_started(false) {}
+  Model(int type, bool use_draw_color):
+    type(type), vertex_buffer(-1), current_primitive(0), vertex_started(false), use_draw_color(use_draw_color),
+    vertex_colored(false), vertex_color(enigma_user::c_white), vertex_alpha(1.0) {}
 };
 
 
