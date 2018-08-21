@@ -141,12 +141,11 @@ int surface_get_height(int id)
 
 int surface_getpixel(int id, int x, int y)
 {
-  draw_batch_flush(batch_flush_deferred);
-
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
+  draw_batch_flush(batch_flush_deferred);
 
   LPDIRECT3DSURFACE9 pBuffer = surface->surf;
   d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
@@ -167,12 +166,11 @@ int surface_getpixel(int id, int x, int y)
 
 int surface_getpixel_ext(int id, int x, int y)
 {
-  draw_batch_flush(batch_flush_deferred);
-
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
+  draw_batch_flush(batch_flush_deferred);
 
   LPDIRECT3DSURFACE9 pBuffer = surface->surf;
   d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
@@ -193,12 +191,11 @@ int surface_getpixel_ext(int id, int x, int y)
 
 int surface_getpixel_alpha(int id, int x, int y)
 {
-  draw_batch_flush(batch_flush_deferred);
-
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
+  draw_batch_flush(batch_flush_deferred);
 
   LPDIRECT3DSURFACE9 pBuffer = surface->surf;
   d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);

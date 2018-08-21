@@ -113,8 +113,6 @@ namespace enigma_user {
 
 int draw_getpixel(int x,int y)
 {
-    draw_batch_flush(batch_flush_deferred);
-
     if (view_enabled)
     {
         x = x - enigma_user::view_xview[enigma_user::view_current];
@@ -130,6 +128,9 @@ int draw_getpixel(int x,int y)
         if (y < 0) y = 0;
         if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
     }
+
+    draw_batch_flush(batch_flush_deferred);
+
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
     glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&ret);
@@ -147,8 +148,6 @@ int draw_getpixel(int x,int y)
 
 int draw_getpixel_ext(int x,int y)
 {
-    draw_batch_flush(batch_flush_deferred);
-
     if (view_enabled)
     {
         x = x - enigma_user::view_xview[enigma_user::view_current];
@@ -164,6 +163,9 @@ int draw_getpixel_ext(int x,int y)
         if (y < 0) y = 0;
         if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
     }
+
+    draw_batch_flush(batch_flush_deferred);
+
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
     glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&ret);
