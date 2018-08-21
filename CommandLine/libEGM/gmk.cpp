@@ -16,6 +16,7 @@
 **/
 
 #include "gmk.h"
+#include "filesystem.h"
 
 #include "lodepng.h"
 #include <zlib.h>
@@ -28,6 +29,9 @@
 #include <unordered_map>
 #include <vector>
 #include <set>
+
+#include <cstdlib>     /* srand, rand */
+#include <ctime>       /* time */
 
 using namespace buffers;
 using namespace buffers::resources;
@@ -44,17 +48,17 @@ ostream err(nullptr);
 static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
 static void atexit_tempdata_cleanup() {
-  for (std::string &tempFile : tempFilesCreated)
-    unlink(tempFile.c_str());
+  for (const std::string &tempFile : tempFilesCreated)
+    DeleteFile(tempFile);
 }
 
 std::string writeTempDataFile(char *bytes, size_t length) {
-  char temp[] = "gmk_data.XXXXXX";
-  int fd = mkstemp(temp);
-  if (fd == -1) return "";
-  write(fd, bytes, length);
-  close(fd);
-  return temp;
+  std::string name = TempFileName("gmk_data");
+  std::fstream fs(name, std::fstream::out | std::fstream::binary);
+  if (!fs.is_open()) return "";
+  fs.write(bytes, length);
+  fs.close();
+  return name;
 }
 
 std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {

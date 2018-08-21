@@ -17,23 +17,7 @@
 
 #include "egm.h"
 #include "egm-rooms.h"
-
-#ifdef USE_BOOST_FS
-  #include <boost/filesystem.hpp>
-  #include <boost/system/error_code.hpp>
-  namespace fs = boost::filesystem;
-  using errc = boost::system::error_code;
-  namespace boost {
-    template<class ForwardIt>
-    ForwardIt next(
-        ForwardIt it,
-        typename std::iterator_traits<ForwardIt>::difference_type n = 1);
-  }  // namespace boost
-#else
-  #include <filesystem>
-  namespace fs = std::filesystem;
-  using errc = std::error_code;
-#endif
+#include "filesystem.h"
 
 #include <yaml-cpp/yaml.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -46,26 +30,6 @@ using CppType = proto::FieldDescriptor::CppType;
 using std::string;
 
 namespace {
-
-bool CreateDirectory(const fs::path &directory) {
-  errc ec;
-  if (fs::create_directory(directory, ec) || !ec) return true;
-  std::cerr << "Failed to create directory " << directory << std::endl;
-  return false;
-}
-
-bool StartsWith(const string &str, const string &prefix) {
-  if (prefix.length() > str.length()) return false;
-  return str.substr(0, prefix.length()) == prefix;
-}
-
-string StripPath(string fName) {
-  size_t pos = fName.find_last_of('/');
-  if (pos == string::npos)
-    return fName;
-
-  return fName.substr(pos+1, fName.length());
-}
 
 string Proto2String(const proto::Message &m, const proto::FieldDescriptor *field) {
   const proto::Reflection *refl = m.GetReflection();
@@ -93,32 +57,6 @@ string Proto2String(const proto::Message &m, const proto::FieldDescriptor *field
   }
 
   return "";
-}
-
-fs::path InternalizeFile(const fs::path &file,
-                         const fs::path &directory, const fs::path &egm_root) {
-  const fs::path data = "data";
-  fs::path demistified = fs::canonical(fs::absolute(file));
-  if (StartsWith(demistified.string(), egm_root.string())) {
-    return fs::relative(demistified, directory);
-  }
-  if (!CreateDirectory(directory/data)) {
-    std::cerr << "Failed to copy \"" << file
-              << "\" into EGM: could not create output directory." << std::endl;
-    return "";
-  }
-  fs::path relative = data/StripPath(file.string());
-
-  #ifdef USE_BOOST_FS
-    fs::copy_file(file, directory/relative);
-  #else
-    if (!fs::copy_file(file, directory/relative)) {
-      std::cerr << "Failed to copy \"" << file << "\" into EGM." << std::endl;
-      return "";
-    }
-  #endif
-
-  return relative;
 }
 
 bool FieldIsPresent(proto::Message *m,
