@@ -641,7 +641,7 @@ void glsl_program_detach(int id, int sid)
 
 void glsl_program_set(int id)
 {
-  if (enigma::bound_shader != id){
+  if (enigma::bound_shader != id) {
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     enigma::bound_shader = id;
     glUseProgram(enigma::shaderprograms[id]->shaderprogram);
