@@ -141,6 +141,8 @@ int surface_get_height(int id)
 
 int surface_getpixel(int id, int x, int y)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
@@ -165,6 +167,8 @@ int surface_getpixel(int id, int x, int y)
 
 int surface_getpixel_ext(int id, int x, int y)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
@@ -189,6 +193,8 @@ int surface_getpixel_ext(int id, int x, int y)
 
 int surface_getpixel_alpha(int id, int x, int y)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
@@ -227,6 +233,8 @@ namespace enigma_user
 
 int surface_save(int id, string filename)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surface,id,-1);
   string ext = enigma::image_get_format(filename);
 
