@@ -32,9 +32,9 @@ namespace enigma_user
   };
 
   enum {
-    batch_flush_never = 0, // flushing never occurs (for debugging purposes)
+    batch_flush_never = 0,     // flushing never occurs (for debugging purposes)
     batch_flush_immediate = 1, // flush immediately after primitives are ended
-    batch_flush_deferred = 2, // defer flushing until a state change occurs (e.g, draw_set_blend_mode)
+    batch_flush_deferred = 2,  // defer flushing until a state change occurs (e.g, draw_set_blend_mode)
   };
 
   void draw_set_batch_mode(int mode);

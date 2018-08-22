@@ -121,7 +121,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   }
 }
 
-void graphics_apply_vertex_format(int format) {
+void graphics_apply_vertex_format(int format, size_t offset) {
   using namespace enigma_user;
 
   const VertexFormat* vertexFormat = vertexFormats[format];
@@ -144,9 +144,8 @@ void graphics_apply_vertex_format(int format) {
   glsl_attribute_enable_all_internal(false); //Disable all attributes
 
   bool useTextCoords = false, useColors = false;
-  size_t offset = 0;
   map<int,int> useCount;
-  const size_t stride = vertexFormat->stride * sizeof(float);
+  const size_t stride = enigma_user::vertex_format_get_stride_size(format);
   for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
     const pair<int, int> flag = vertexFormat->flags[i];
 
@@ -190,7 +189,7 @@ void graphics_apply_vertex_format(int format) {
       }
     }
 
-    offset += size;
+    offset += size * sizeof(enigma::VertexElement);
   }
 
   glsl_uniformf_internal(shaderprograms[bound_shader]->uni_color,
@@ -225,7 +224,7 @@ void vertex_color(int buffer, int color, double alpha) {
   enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 
-void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
+void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
   draw_batch_flush(batch_flush_deferred);
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
@@ -236,12 +235,12 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   #endif
 
   enigma::graphics_prepare_buffer(buffer, false);
-  enigma::graphics_apply_vertex_format(vertexBuffer->format);
+  enigma::graphics_apply_vertex_format(vertexBuffer->format, offset);
 
 	glDrawArrays(primitive_types[primitive], start, count);
 }
 
-void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   draw_batch_flush(batch_flush_deferred);
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
@@ -254,7 +253,7 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
 
   enigma::graphics_prepare_buffer(vertex, false);
   enigma::graphics_prepare_buffer(buffer, true);
-  enigma::graphics_apply_vertex_format(vertexBuffer->format);
+  enigma::graphics_apply_vertex_format(vertexBuffer->format, 0);
 
   GLenum indexType = GL_UNSIGNED_SHORT;
   if (indexBuffer->type == index_type_uint) {

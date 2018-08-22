@@ -1013,11 +1013,11 @@ void glsl_attribute_enable(int location, bool enable){
   }
 }
 
-void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset){
+void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, unsigned offset){
   get_attribute(it,location);
   //if (/*it->second.enabled == true*/ (it->second.vao != enigma::bound_vbo || it->second.datatype != type || it->second.datasize != size || it->second.normalize != normalize || it->second.stride != stride || it->second.offset != offset)){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
+    glVertexAttribPointer(location, size, type, normalize, stride, (const GLvoid*)(intptr_t)offset);
     it->second.datatype = type;
     it->second.datasize = size;
     it->second.normalize = normalize;
@@ -1089,10 +1089,10 @@ namespace enigma
     }
   }
 
-  void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, int offset){
+  void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, unsigned offset){
     get_attribute(it,location);
     //if (/*it->second.enabled == true*/ (it->second.vao != enigma::bound_vbo || it->second.datatype != type || it->second.datasize != size || it->second.normalize != normalize || it->second.stride != stride || it->second.offset != offset)){
-      glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
+      glVertexAttribPointer(location, size, type, normalize, stride, (const GLvoid*)(intptr_t)offset);
       it->second.datatype = type;
       it->second.datasize = size;
       it->second.normalize = normalize;

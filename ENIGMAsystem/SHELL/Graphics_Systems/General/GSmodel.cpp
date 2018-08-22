@@ -186,11 +186,9 @@ void d3d_model_draw(int id) {
   }
   for (auto primitive : model->primitives) {
     vertex_set_format(model->vertex_buffer, primitive.format);
-    vertex_submit(
-      model->vertex_buffer,
-      primitive.type,
-      primitive.vertex_start,
-      primitive.vertex_count
+    vertex_submit_offset(
+      model->vertex_buffer, primitive.type,
+      primitive.vertex_offset, 0, primitive.vertex_count
     );
   }
 }
@@ -219,12 +217,12 @@ void d3d_model_primitive_begin(int id, int kind, int format) {
     vertex_begin(model->vertex_buffer);
   }
 
-  size_t start = 0;
-  if (!model->primitives.empty()) {
-    const enigma::Primitive& last_primitive = model->primitives.back();
-    start = last_primitive.vertex_start + last_primitive.vertex_count;
-  }
-  model->current_primitive = new enigma::Primitive(kind, format, vertex_format_exists(format), start);
+  model->current_primitive = new enigma::Primitive(
+    kind,
+    format,
+    vertex_format_exists(format),
+    vertex_get_buffer_size(model->vertex_buffer)
+  );
 }
 
 void d3d_model_primitive_end(int id) {
@@ -249,6 +247,9 @@ void d3d_model_primitive_end(int id) {
     primitive.format_defined = true;
   }
 
+  size_t vertex_size = vertex_get_buffer_size(model->vertex_buffer) - primitive.vertex_offset;
+  primitive.vertex_count = vertex_size / vertex_format_get_stride_size(primitive.format);
+
   // combine adjacent primitives that are list types with logically the same format
   if (!model->primitives.empty()) {
     enigma::Primitive& prev = model->primitives.back();
@@ -257,35 +258,32 @@ void d3d_model_primitive_end(int id) {
       if ((prev.type == pr_pointlist && primitive.type == pr_pointlist) ||
           (prev.type == pr_linelist && primitive.type == pr_linelist) ||
           (prev.type == pr_trianglelist && primitive.type == pr_trianglelist)) {
-        prev.vertex_count += vertex_get_number(model->vertex_buffer) - primitive.vertex_start;
+        prev.vertex_count += primitive.vertex_count;
         return;
       } else if (prev.type == pr_trianglestrip && primitive.type == pr_trianglestrip) {
         // use a degenerate triangle to combine the adjacent strips
         enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[model->vertex_buffer];
-        const size_t stride = vertex_format_get_stride(prev.format);
         std::vector<enigma::VertexElement>& vertices = vertexBuffer->vertices;
+        const size_t stride = vertex_format_get_stride(prev.format);
+        const size_t vertex_start = primitive.vertex_offset / sizeof(enigma::VertexElement);
 
         auto degenerates = std::vector<enigma::VertexElement>(
-          vertices.begin() + (primitive.vertex_start * stride - stride), // last vertex of the first strip
-          vertices.begin() + (primitive.vertex_start * stride + stride)  // first vertex of the second strip
+          vertices.begin() + (vertex_start - stride), // last vertex of the first strip
+          vertices.begin() + (vertex_start + stride)  // first vertex of the second strip
         );
 
         vertices.insert(
-          vertices.begin() + primitive.vertex_start * stride,
+          vertices.begin() + vertex_start,
           degenerates.begin(),
           degenerates.end()
         );
 
-        prev.vertex_count = vertex_get_number(model->vertex_buffer) - prev.vertex_start;
+        prev.vertex_count += primitive.vertex_count + 2;
         return;
       }
     }
     // not mergeable with the previous primitive so looks like we have to keep it...
   }
-
-  // apply the vertex format to the vertex buffer now so we can get the correct vertex count
-  vertex_set_format(model->vertex_buffer, primitive.format);
-  primitive.vertex_count = vertex_get_number(model->vertex_buffer) - primitive.vertex_start;
 
   model->primitives.push_back(primitive);
 }

@@ -196,7 +196,7 @@ void vertex_color(int buffer, int color, double alpha) {
   enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 
-void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
+void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
   draw_batch_flush(batch_flush_deferred);
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
@@ -207,14 +207,14 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[buffer];
-  d3dmgr->SetStreamSource(0, vertexBufferPeer, 0, stride);
+  d3dmgr->SetStreamSource(0, vertexBufferPeer, offset, stride);
 
   int primitive_count = enigma_user::draw_primitive_count(primitive, count);
 
   d3dmgr->DrawPrimitive(primitive_types[primitive], start, primitive_count);
 }
 
-void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   draw_batch_flush(batch_flush_deferred);
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];

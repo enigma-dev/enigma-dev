@@ -57,8 +57,10 @@ bool vertex_format_exists();
 bool vertex_format_exists(int id);
 unsigned vertex_format_get_hash(int id);
 unsigned vertex_format_get_stride(int id);
+unsigned vertex_format_get_stride_size(int id);
 unsigned vertex_format_get_hash();
 unsigned vertex_format_get_stride();
+unsigned vertex_format_get_stride_size();
 void vertex_format_add_position();
 void vertex_format_add_position_3d();
 void vertex_format_add_color();
@@ -92,9 +94,11 @@ void vertex_float3(int buffer, float f1, float f2, float f3);
 void vertex_float4(int buffer, float f1, float f2, float f3, float f4);
 void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4);
 void vertex_submit(int buffer, int primitive);
-void vertex_submit(int buffer, int primitive, unsigned start, unsigned count);
 void vertex_submit(int buffer, int primitive, int texture);
-void vertex_submit(int buffer, int primitive, int texture, unsigned start, unsigned count);
+void vertex_submit_range(int buffer, int primitive, unsigned start, unsigned count);
+void vertex_submit_range(int buffer, int primitive, int texture, unsigned start, unsigned count);
+void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count);
+void vertex_submit_offset(int buffer, int primitive, int texture, unsigned offset, unsigned start, unsigned count);
 
 enum {
   index_type_ushort,
@@ -113,9 +117,9 @@ void index_begin(int buffer, int type);
 void index_end(int buffer);
 void index_data(int buffer, const enigma::varargs& data);
 void index_submit(int buffer, int vertex, int primitive);
-void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count);
 void index_submit(int buffer, int vertex, int primitive, int texture);
-void index_submit(int buffer, int vertex, int primitive, int texture, unsigned start, unsigned count);
+void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count);
+void index_submit_range(int buffer, int vertex, int primitive, int texture, unsigned start, unsigned count);
 
 }
 

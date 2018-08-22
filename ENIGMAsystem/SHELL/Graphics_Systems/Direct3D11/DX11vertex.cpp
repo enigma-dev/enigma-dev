@@ -248,7 +248,7 @@ void vertex_color(int buffer, int color, double alpha) {
   enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 
-void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
+void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
   draw_batch_flush(batch_flush_deferred);
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
@@ -261,7 +261,6 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   ID3D11InputLayout* vertexLayout = vertex_format_layout(vertexFormat, stride);
   m_deviceContext->IASetInputLayout(vertexLayout);
 
-  UINT offset = 0;
   ID3D11Buffer* vertexBufferPeer = vertexBufferPeers[buffer];
   m_deviceContext->IASetVertexBuffers(0, 1, &vertexBufferPeer, &stride, &offset);
 
@@ -271,7 +270,7 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   vertexLayout->Release();
 }
 
-void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   draw_batch_flush(batch_flush_deferred);
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];

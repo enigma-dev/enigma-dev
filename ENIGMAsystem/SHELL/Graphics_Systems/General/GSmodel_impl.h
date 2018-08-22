@@ -37,13 +37,14 @@ struct Primitive {
   int type; // one of the enigma_user primitive type constants (e.g, pr_trianglelist)
   int format; // index of the user vertex format that describes the vertex data of this primitive
   bool format_defined; // if the format has been guessed yet from how vertex data is being specified
-  unsigned vertex_start, vertex_count; // range of vertices in the vertex buffer this primitive specified
+  unsigned vertex_offset; // byte offset into the vertex buffer where this primitive's data begins
+  unsigned vertex_count; // number of vertices this primitive is composed of
 
   // NOTE: format may not exist until d3d_model_primitive_end is called
   // NOTE: when format_defined is true the format may still not exist yet
 
-  Primitive(int type, int format, bool format_defined, unsigned start):
-    type(type), format(format), format_defined(format_defined), vertex_start(start), vertex_count(0) {}
+  Primitive(int type, int format, bool format_defined, unsigned offset):
+    type(type), format(format), format_defined(format_defined), vertex_offset(offset), vertex_count(0) {}
 };
 
 struct Model {
