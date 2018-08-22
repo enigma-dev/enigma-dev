@@ -103,7 +103,7 @@ struct VertexBuffer {
   // NOTE: format may not exist when this buffer is first created
   // NOTE: number is only intended to be accessed with getNumber()!
 
-  VertexBuffer(): frozen(false), dirty(false), format(-1), number(0) {}
+  VertexBuffer(): frozen(false), dynamic(false), dirty(false), format(-1), number(0) {}
 
   // returns the number of vertex elements in the buffer
   int getNumber() const {
@@ -139,7 +139,7 @@ struct IndexBuffer {
   // NOTE: some types are not available on certain backends
   // NOTE: number is only intended to be accessed with getNumber()!
 
-  IndexBuffer(): frozen(false), dirty(false), type(-1), number(0) {}
+  IndexBuffer(): frozen(false), dynamic(false), dirty(false), type(-1), number(0) {}
 
   // returns the number of index elements in the buffer
   int getNumber() const {
