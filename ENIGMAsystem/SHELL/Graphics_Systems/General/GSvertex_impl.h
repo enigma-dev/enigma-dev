@@ -46,13 +46,14 @@ inline void hash_combine(std::size_t& seed, const T& v) {
 struct VertexFormat {
   vector<pair<int,int> > flags; // order of elements for each vertex in insertion order
   std::size_t stride; // number of elements each vertex is comprised of, not in bytes
+  std::size_t stride_size; // size of the stride (aka vertex) in bytes
   std::size_t hash; // hash that uniquely identifies this vertex format
 
   // NOTE: flags should only be mutated using AddAttribute so the hash is correct!
   // NOTE: stride is not in number of bytes because each backend uses the native size of the type
   // NOTE: hash is cached for performance reasons
 
-  VertexFormat(): stride(0), hash(0) {}
+  VertexFormat(): stride(0), stride_size(0), hash(0) {}
 
   void AddAttribute(int type, int attribute) {
     using namespace enigma_user;
@@ -61,12 +62,12 @@ struct VertexFormat {
     hash_combine(hash, attribute);
 
     switch (type) {
-      case vertex_type_float1: stride += 1; break;
-      case vertex_type_float2: stride += 2; break;
-      case vertex_type_float3: stride += 3; break;
-      case vertex_type_float4: stride += 4; break;
-      case vertex_type_color: stride += 1; break;
-      case vertex_type_ubyte4: stride += 1; break;
+      case vertex_type_float1: stride += 1; stride_size += 1 * sizeof(float); break;
+      case vertex_type_float2: stride += 2; stride_size += 2 * sizeof(float); break;
+      case vertex_type_float3: stride += 3; stride_size += 3 * sizeof(float); break;
+      case vertex_type_float4: stride += 4; stride_size += 4 * sizeof(float); break;
+      case vertex_type_color: stride += 1; stride_size += 4 * sizeof(unsigned char); break;
+      case vertex_type_ubyte4: stride += 1; stride_size += 4 * sizeof(unsigned char); break;
     }
     flags.push_back(std::make_pair(type, attribute));
   }
