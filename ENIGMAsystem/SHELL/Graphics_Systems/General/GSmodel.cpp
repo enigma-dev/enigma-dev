@@ -26,6 +26,7 @@
 #include "GSmatrix.h"
 #include "GStextures.h"
 
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/fileio.h"
 
 #include <math.h>
@@ -213,6 +214,13 @@ void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId) {
 
 void d3d_model_primitive_begin(int id, int kind, int format) {
   enigma::Model* model = enigma::models[id];
+  #ifdef DEBUG_MODE
+  if (model->current_primitive) {
+    show_error("d3d_model_primitive_begin called before d3d_model_primitive_end " \
+               "on the previous primitive for model: " + std::to_string(id), false);
+    return;
+  }
+  #endif
   if (!model->vertex_started) {
     model->vertex_started = true;
     vertex_begin(model->vertex_buffer);
@@ -228,6 +236,13 @@ void d3d_model_primitive_begin(int id, int kind, int format) {
 
 void d3d_model_primitive_end(int id) {
   enigma::Model* model = enigma::models[id];
+  #ifdef DEBUG_MODE
+  if (!model->current_primitive) {
+    show_error("d3d_model_primitive_end called for model " + std::to_string(id) + " and no current primitive exists!\n" \
+               "This can occur if you call end without actually calling begin.", false);
+    return;
+  }
+  #endif
   // copy current primitive to the stack
   enigma::Primitive primitive = *model->current_primitive;
   // delete the current primitive from the heap
@@ -252,7 +267,13 @@ void d3d_model_primitive_end(int id) {
   }
 
   size_t vertex_size = vertex_get_buffer_size(model->vertex_buffer) - primitive.vertex_offset;
-  if (!vertex_size) return; // don't keep empty primitives
+  // don't keep empty primitives
+  if (!vertex_size) {
+    #ifdef DEBUG_MODE
+    show_error("A primitive was ended that had 0 size on model: " + std::to_string(id), false);
+    #endif
+    return;
+  }
   primitive.vertex_count = vertex_size / vertex_format_get_stride_size(primitive.format);
 
   // combine adjacent primitives that are list types with logically the same format
