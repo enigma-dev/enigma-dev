@@ -166,6 +166,7 @@ void d3d_model_clear(int id) {
   model->primitives.clear();
   model->current_primitive = 0;
   model->vertex_started = false;
+  model->vertex_colored = true;
 }
 
 void d3d_model_draw(int id) {
@@ -216,7 +217,7 @@ void d3d_model_primitive_begin(int id, int kind, int format) {
     model->vertex_started = true;
     vertex_begin(model->vertex_buffer);
   }
-
+  model->vertex_colored = true;
   model->current_primitive = new enigma::Primitive(
     kind,
     format,
@@ -233,21 +234,25 @@ void d3d_model_primitive_end(int id) {
   delete model->current_primitive;
   model->current_primitive = 0;
 
-  if (model->use_draw_color && !model->vertex_colored) {
-    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
-  }
-
-  // if we are guessing the format of the model, end the vertex format now
-  if (!vertex_format_exists(primitive.format)) {
+  // if the primitive doesn't have a valid vertex format
+  // and one does exist that we were guessing, then end
+  // that vertex format now
+  if (!vertex_format_exists(primitive.format) && vertex_format_exists()) {
     if (!primitive.format_defined && model->use_draw_color && !model->vertex_colored) {
       vertex_format_add_color();
     }
-    model->vertex_colored = false;
     primitive.format = vertex_format_end();
     primitive.format_defined = true;
   }
 
+  // if the last vertex didn't specify a color then we have to do so now
+  if (model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+    model->vertex_colored = true;
+  }
+
   size_t vertex_size = vertex_get_buffer_size(model->vertex_buffer) - primitive.vertex_offset;
+  if (!vertex_size) return; // don't keep empty primitives
   primitive.vertex_count = vertex_size / vertex_format_get_stride_size(primitive.format);
 
   // combine adjacent primitives that are list types with logically the same format
