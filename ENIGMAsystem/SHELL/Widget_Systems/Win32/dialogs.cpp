@@ -138,8 +138,8 @@ void ClientResize(HWND hWnd, int nWidth, int nHeight)
   MoveWindow(hWnd, rcWind.left, rcWind.top, nWidth + ptDiff.x, nHeight + ptDiff.y, TRUE);
 }
 
-WCHAR wstrPromptStr[4096];
-WCHAR wstrTextEntry[MAX_PATH];
+WCHAR wstrPromptStr[4096 + 1];
+WCHAR wstrTextEntry[MAX_PATH + 1];
 bool HideInput = 0;
 /* < / Used by InputBoxProc > */
 
@@ -165,9 +165,9 @@ LRESULT CALLBACK InputBoxProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
       SetWindowPos(hWndDlg, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
       SetDlgItemTextW(hWndDlg, IDC_PROMPT, wstrPromptStr);
       SetDlgItemTextW(hWndDlg, IDC_EDIT, wstrTextEntry);
-      WCHAR wstrWindowCaption[MAX_PATH];
+      WCHAR wstrWindowCaption[MAX_PATH + 1];
       tstring tstrWindowCaption = widen(gs_cap);
-      wcsncpy(wstrWindowCaption, tstrWindowCaption.c_str(), MAX_PATH);
+      wcsncpy(wstrWindowCaption, tstrWindowCaption.c_str(), MAX_PATH + 1);
       SetWindowTextW(hWndDlg, wstrWindowCaption);
       if (HideInput == 1)
         SendDlgItemMessage(hWndDlg, IDC_EDIT, EM_SETPASSWORDCHAR, '*', 0);
@@ -181,13 +181,13 @@ LRESULT CALLBACK InputBoxProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
     switch (wParam)
     {
     case IDOK:
-      GetDlgItemTextW(hWndDlg, IDC_EDIT, wstrTextEntry, MAX_PATH);
+      GetDlgItemTextW(hWndDlg, IDC_EDIT, wstrTextEntry, MAX_PATH + 1);
       gs_form_canceled = 0;
       EndDialog(hWndDlg, 0);
       return TRUE;
     case IDCANCEL:
       tstring tstrEmpty = widen("");
-      wcsncpy(wstrTextEntry, tstrEmpty.c_str(), MAX_PATH);
+      wcsncpy(wstrTextEntry, tstrEmpty.c_str(), MAX_PATH + 1);
       gs_form_canceled = 1;
       EndDialog(hWndDlg, 0);
       return TRUE;
@@ -275,13 +275,13 @@ WCHAR *LowerCaseToActualPathName(WCHAR *wstr_dname)
   LPITEMIDLIST pstr_dname;
   SHParseDisplayName(wstr_dname, 0, &pstr_dname, 0, 0);
 
-  static WCHAR wstr_result[MAX_PATH];
+  static WCHAR wstr_result[MAX_PATH + 1];
   SHGetPathFromIDListW(pstr_dname, wstr_result);
   return wstr_result;
 }
 
-WCHAR wstr_dname[MAX_PATH];
-WCHAR wstr_stc1[MAX_PATH];
+WCHAR wstr_dname[MAX_PATH + 1];
+WCHAR wstr_stc1[MAX_PATH + 1];
 static string DlgItemText;
 tstring ActualPath;
 /* < / Used by GetDirectoryProc > */
@@ -312,7 +312,7 @@ UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       MoveWindow(GetDlgItem(hWnd, cmb2), 232, 192, 185, 19, TRUE);
       ShowWindow(GetDlgItem(hWnd, stc1), SW_HIDE);
       DlgDirListW(hWnd, wstr_dname, lst1, stc1, DDL_ARCHIVE | DDL_READWRITE | DDL_READONLY);
-      GetDlgItemTextW(hWnd, stc1, wstr_stc1, MAX_PATH);
+      GetDlgItemTextW(hWnd, stc1, wstr_stc1, MAX_PATH + 1);
       static string DlgItemText;
       DlgItemText = shorten(LowerCaseToActualPathName(wstr_stc1));
       ActualPath = widen(string_replace_all(DlgItemText + "\\", "\\\\", "\\"));
@@ -329,7 +329,7 @@ UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 
   case WM_PAINT:
     {
-      GetDlgItemTextW(hWnd, stc1, wstr_stc1, MAX_PATH);
+      GetDlgItemTextW(hWnd, stc1, wstr_stc1, MAX_PATH + 1);
       static string DlgItemText;
       DlgItemText = shorten(LowerCaseToActualPathName(wstr_stc1));
       ActualPath = widen(string_replace_all(DlgItemText + "\\", "\\\\", "\\"));
@@ -343,14 +343,14 @@ UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         return TRUE;
       else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDOK)
       {
-        wcsncpy(wstr_dname, ActualPath.c_str(), MAX_PATH);
+        wcsncpy(wstr_dname, ActualPath.c_str(), MAX_PATH + 1);
         PostMessageW(hWnd, WM_COMMAND, IDABORT, 0);
         return TRUE;
       }
       else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDCANCEL)
       {
         tstring tstr_dname = widen("");
-        wcsncpy(wstr_dname, tstr_dname.c_str(), MAX_PATH);
+        wcsncpy(wstr_dname, tstr_dname.c_str(), MAX_PATH + 1);
         PostMessageW(hWnd, WM_COMMAND, IDABORT, 0);
         return TRUE;
       }
@@ -360,7 +360,7 @@ UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
   case WM_CLOSE:
     {
       tstring tstr_dname = widen("");
-      wcsncpy(wstr_dname, tstr_dname.c_str(), MAX_PATH);
+      wcsncpy(wstr_dname, tstr_dname.c_str(), MAX_PATH + 1);
       PostMessageW(hWnd, WM_COMMAND, IDABORT, 0);
       return TRUE;
     }
@@ -645,8 +645,8 @@ string get_string(string str, string def, string title)
   if (title == "") title = window_get_caption();
   gs_cap = title;
 
-  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
-  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096 + 1);
+  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH + 1);
 
   HideInput = 0;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxProc));
@@ -663,8 +663,8 @@ string get_password(string str, string def, string title)
   if (title == "") title = window_get_caption();
   gs_cap = title;
 
-  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
-  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096 + 1);
+  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH + 1);
 
   HideInput = 1;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxProc));
@@ -685,8 +685,8 @@ double get_integer(string str, double def, string title)
   if (title == "") title = window_get_caption();
   gs_cap = title;
 
-  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
-  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096 + 1);
+  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH + 1);
 
   HideInput = 0;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxProc));
@@ -709,8 +709,8 @@ double get_passcode(string str, double def, string title)
   if (title == "") title = window_get_caption();
   gs_cap = title;
 
-  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
-  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH);
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096 + 1);
+  wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH + 1);
 
   HideInput = 1;
   DialogBoxW(enigma::hInstance, MAKEINTRESOURCEW(IDD_INPUTBOX), enigma::hWnd, reinterpret_cast<DLGPROC>(InputBoxProc));
@@ -739,14 +739,14 @@ string get_open_filename(string filter, string fname, string title)
   if (title == "") title = "Open";
   gs_cap = title;
 
-  WCHAR wstr_fname[MAX_PATH];
-  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
+  WCHAR wstr_fname[MAX_PATH + 1];
+  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH + 1);
 
   ZeroMemory(&ofn, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner = enigma::hWnd;
   ofn.lpstrFile = wstr_fname;
-  ofn.nMaxFile = MAX_PATH;
+  ofn.nMaxFile = MAX_PATH + 1;
   ofn.lpstrFilter = tstr_filter.c_str();
   ofn.nFilterIndex = 0;
   ofn.lpstrTitle = tstr_title.c_str();
@@ -777,14 +777,14 @@ string get_save_filename(string filter, string fname, string title)
   if (title == "") title = "Save As";
   gs_cap = title;
 
-  WCHAR wstr_fname[MAX_PATH];
-  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
+  WCHAR wstr_fname[MAX_PATH + 1];
+  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH + 1);
 
   ZeroMemory(&ofn, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner = enigma::hWnd;
   ofn.lpstrFile = wstr_fname;
-  ofn.nMaxFile = MAX_PATH;
+  ofn.nMaxFile = MAX_PATH + 1;
   ofn.lpstrFilter = tstr_filter.c_str();
   ofn.nFilterIndex = 0;
   ofn.lpstrTitle = tstr_title.c_str();
@@ -816,14 +816,14 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   if (title == "") title = "Open";
   gs_cap = title;
 
-  WCHAR wstr_fname[MAX_PATH];
-  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
+  WCHAR wstr_fname[MAX_PATH + 1];
+  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH + 1);
 
   ZeroMemory(&ofn, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner = enigma::hWnd;
   ofn.lpstrFile = wstr_fname;
-  ofn.nMaxFile = MAX_PATH;
+  ofn.nMaxFile = MAX_PATH + 1;
   ofn.lpstrFilter = tstr_filter.c_str();
   ofn.nFilterIndex = 0;
   ofn.lpstrTitle = tstr_title.c_str();
@@ -854,14 +854,14 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   if (title == "") title = "Save As";
   gs_cap = title;
 
-  WCHAR wstr_fname[MAX_PATH];
-  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH);
+  WCHAR wstr_fname[MAX_PATH + 1];
+  wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH + 1);
 
   ZeroMemory(&ofn, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner = enigma::hWnd;
   ofn.lpstrFile = wstr_fname;
-  ofn.nMaxFile = MAX_PATH;
+  ofn.nMaxFile = MAX_PATH + 1;
   ofn.lpstrFilter = tstr_filter.c_str();
   ofn.nFilterIndex = 0;
   ofn.lpstrTitle = tstr_title.c_str();
@@ -916,15 +916,15 @@ string get_directory(string dname, string title)
   gs_cap = title;
 
   if (tstr_dname == tstr_empty)
-    GetCurrentDirectoryW(MAX_PATH, wstr_dname);
+    GetCurrentDirectoryW(MAX_PATH + 1, wstr_dname);
   else
-    wcsncpy(wstr_dname, tstr_dname.c_str(), MAX_PATH);
+    wcsncpy(wstr_dname, tstr_dname.c_str(), MAX_PATH + 1);
 
   ZeroMemory(&ofn, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner = enigma::hWnd;
   ofn.lpstrFile = NULL;
-  ofn.nMaxFile = MAX_PATH;
+  ofn.nMaxFile = MAX_PATH + 1;
   ofn.lpstrFilter = tstr_filter.c_str();
   ofn.nFilterIndex = 0;
   ofn.lpstrTitle = tstr_title.c_str();
@@ -967,7 +967,7 @@ string get_directory_alt(string capt, string root, bool modern, string title)
   else
     SHParseDisplayName(tstr_root.c_str(), 0, &pstr_root, 0, 0);
 
-  WCHAR wstr_dir[MAX_PATH];
+  WCHAR wstr_dir[MAX_PATH + 1];
   LPMALLOC pMalloc;
   gs_cap = title;
 
