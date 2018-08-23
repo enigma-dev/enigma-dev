@@ -15,17 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <stdio.h>
-#include "Direct3D11Headers.h"
 #include "Bridges/General/DX11Context.h"
-#include <string.h>
-using std::string;
-#include "../General/GStextures.h"
 #include "DX11TextureStruct.h"
+#include "Direct3D11Headers.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background_internal.h"
 #include "Universal_System/sprites_internal.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+
+#include <stdio.h>
+#include <string.h>
+
+using std::string;
 
 vector<TextureStruct*> textureStructs(0);
 

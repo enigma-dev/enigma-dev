@@ -17,9 +17,10 @@
 
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+
+#include "Universal_System/roomsystem.h" // for view variables
 
 #include <math.h>
 #include <floatcomp.h>
@@ -62,6 +63,7 @@ namespace enigma_user
 {
 
 void d3d_clear_depth(double value) {
+  draw_batch_flush(batch_flush_deferred);
   glClearDepth(value);
   glClear(GL_DEPTH_BUFFER_BIT);
 }
@@ -73,6 +75,8 @@ void d3d_set_software_vertex_processing(bool software) {
 
 void d3d_start()
 {
+  draw_batch_flush(batch_flush_deferred);
+
   // Set global ambient lighting to nothing.
   float global_ambient[] = { 0.0f, 0.0f, 0.0f, 0.0f };
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
@@ -103,6 +107,8 @@ void d3d_start()
 
 void d3d_end()
 {
+  draw_batch_flush(batch_flush_deferred);
+
   enigma::d3dMode = false;
   enigma::d3dHidden = false;
   enigma::d3dZWriteEnable = false;
@@ -121,6 +127,7 @@ void d3d_end()
 // disabling hidden surface removal in means there is no depth buffer
 void d3d_set_hidden(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_DEPTH_TEST);
   enigma::d3dHidden = enable;
   //d3d_set_zwriteenable(enable);
@@ -131,12 +138,14 @@ void d3d_set_hidden(bool enable)
 // properly particle effects are usually drawn with zwriting disabled because of this as well
 void d3d_set_zwriteenable(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   glDepthMask(enable);
   enigma::d3dZWriteEnable = enable;
 }
 
 void d3d_set_lighting(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_LIGHTING);
 }
 
@@ -152,20 +161,24 @@ void d3d_set_fog(bool enable, int color, double start, double end)
 
 void d3d_set_fog_enabled(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_FOG);
 }
 
 void d3d_set_fog_mode(int mode)
 {
+  draw_batch_flush(batch_flush_deferred);
   glFogi(GL_FOG_MODE, fogmodes[mode]);
 }
 
 void d3d_set_fog_hint(int mode) {
+  draw_batch_flush(batch_flush_deferred);
   glHint(GL_FOG_HINT, mode);
 }
 
 void d3d_set_fog_color(int color)
 {
+  draw_batch_flush(batch_flush_deferred);
   GLfloat fog_color[3];
   fog_color[0] = COL_GET_R(color);
   fog_color[1] = COL_GET_G(color);
@@ -175,21 +188,25 @@ void d3d_set_fog_color(int color)
 
 void d3d_set_fog_start(double start)
 {
+  draw_batch_flush(batch_flush_deferred);
   glFogf(GL_FOG_START, start);
 }
 
 void d3d_set_fog_end(double end)
 {
+  draw_batch_flush(batch_flush_deferred);
   glFogf(GL_FOG_END, end);
 }
 
 void d3d_set_fog_density(double density)
 {
+  draw_batch_flush(batch_flush_deferred);
   glFogf(GL_FOG_DENSITY, density);
 }
 
 void d3d_set_culling(int mode)
 {
+  draw_batch_flush(batch_flush_deferred);
   enigma::d3dCulling = mode;
   (mode>0?glEnable:glDisable)(GL_CULL_FACE);
   if (mode > 0){
@@ -212,18 +229,22 @@ int d3d_get_culling() {
 
 void d3d_set_fill_mode(int fill)
 {
+  draw_batch_flush(batch_flush_deferred);
   glPolygonMode(GL_FRONT_AND_BACK, fillmodes[fill]);
 }
 
 void d3d_set_line_width(float value) {
+  draw_batch_flush(batch_flush_deferred);
   glLineWidth(value);
 }
 
 void d3d_set_point_size(float value) {
+  draw_batch_flush(batch_flush_deferred);
   glPointSize(value);
 }
 
 void d3d_set_depth_operator(int mode) {
+  draw_batch_flush(batch_flush_deferred);
   glDepthFunc(depthoperators[mode]);
 }
 
@@ -234,6 +255,7 @@ void d3d_set_depth(double dep)
 
 void d3d_set_shading(bool smooth)
 {
+  draw_batch_flush(batch_flush_deferred);
   glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
 }
 
@@ -447,51 +469,59 @@ namespace enigma_user
 
 bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
 {
-    return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
+  draw_batch_flush(batch_flush_deferred);
+  return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
 }
 
 bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
 {
-    return d3d_lighting.light_define_point(id, x, y, z, range, col);
+  draw_batch_flush(batch_flush_deferred);
+  return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
 bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 {
-    return d3d_lighting.light_define_specularity(id, r, g, b, a);
+  draw_batch_flush(batch_flush_deferred);
+  return d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
+  draw_batch_flush(batch_flush_deferred);
   double specular[4] = {(double)r, (double)g, (double)b, a};
   glMaterialfv(renderstates[facemode], GL_SPECULAR, (float*)specular);
 }
 
 bool d3d_light_set_ambient(int id, int r, int g, int b, double a)
 {
+  draw_batch_flush(batch_flush_deferred);
   return d3d_lighting.light_set_ambient(id, r, g, b, a);
 }
 
 bool d3d_light_set_specularity(int id, int r, int g, int b, double a)
 {
+  draw_batch_flush(batch_flush_deferred);
   return d3d_lighting.light_set_specular(id, r, g, b, a);
 }
 
 void d3d_light_shininess(int facemode, int shine)
 {
+  draw_batch_flush(batch_flush_deferred);
   glMateriali(renderstates[facemode], GL_SHININESS, shine);
 }
 
 void d3d_light_define_ambient(int col)
 {
-    float color[4] = {float(COL_GET_R(col)), float(COL_GET_G(col)), float(COL_GET_B(col)), 1.0f};
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
+  draw_batch_flush(batch_flush_deferred);
+  float color[4] = {float(COL_GET_R(col)), float(COL_GET_G(col)), float(COL_GET_B(col)), 1.0f};
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
 }
 
 bool d3d_light_enable(int id, bool enable)
 {
-    return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
+  draw_batch_flush(batch_flush_deferred);
+  return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
 }
-
 
 void d3d_stencil_start_mask(){
   glEnable(GL_STENCIL_TEST);
@@ -527,6 +557,6 @@ void d3d_stencil_end_mask(){
 namespace enigma {
     void d3d_light_update_positions()
     {
-        d3d_lighting.light_update_positions();
+      d3d_lighting.light_update_positions();
     }
 }

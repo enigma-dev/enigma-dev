@@ -19,6 +19,7 @@
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include <math.h>
 
 namespace enigma {
@@ -30,6 +31,7 @@ namespace enigma_user
 
 void draw_clear_alpha(int col, float alpha)
 {
+	draw_batch_flush(batch_flush_deferred);
 	float color[4];
 
 	// Setup the color to clear the buffer to.
@@ -44,6 +46,7 @@ void draw_clear_alpha(int col, float alpha)
 
 void draw_clear(int col)
 {
+	draw_batch_flush(batch_flush_deferred);
 	float color[4];
 
 	// Setup the color to clear the buffer to.
@@ -85,6 +88,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
 {
-
+	draw_batch_flush(batch_flush_deferred);
 }
+
 }

@@ -15,11 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/General/GL3Context.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-#include "Bridges/General/GL3Context.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 #include <math.h>
 
@@ -32,12 +32,14 @@ namespace enigma_user
 
 void draw_clear_alpha(int col,float alpha)
 {
+	draw_batch_flush(batch_flush_deferred);
   //Unfortunately, we lack a 255-based method for setting ClearColor.
 	glClearColor(COL_GET_R(col)/255.0,COL_GET_G(col)/255.0,COL_GET_B(col)/255.0,alpha);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 void draw_clear(int col)
 {
+	draw_batch_flush(batch_flush_deferred);
 	glClearColor(COL_GET_R(col)/255.0,COL_GET_G(col)/255.0,COL_GET_B(col)/255.0,1);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -45,7 +47,6 @@ void draw_clear(int col)
 void draw_set_color(int color)
 {
 	if (enigma::currentcolor[0] == COL_GET_R(color) && enigma::currentcolor[1] == COL_GET_G(color) && enigma::currentcolor[2] == COL_GET_B(color)) return;
-	oglmgr->ColorFunc();
 	enigma::currentcolor[0] = COL_GET_R(color);
 	enigma::currentcolor[1] = COL_GET_G(color);
 	enigma::currentcolor[2] = COL_GET_B(color);
@@ -54,7 +55,6 @@ void draw_set_color(int color)
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
 {
 	if (enigma::currentcolor[0] == red && enigma::currentcolor[1] == green && enigma::currentcolor[2] == blue) return;
-	oglmgr->ColorFunc();
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
@@ -63,14 +63,12 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 void draw_set_alpha(float alpha)
 {
 	if (enigma::currentcolor[3] == CLAMP_ALPHA(alpha)) return;
-	oglmgr->ColorFunc();
 	enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 }
 
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
 {
 	if (enigma::currentcolor[0] == red && enigma::currentcolor[1] == green && enigma::currentcolor[2] == blue && enigma::currentcolor[3] == CLAMP_ALPHA(alpha)) return;
-	oglmgr->ColorFunc();
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
@@ -79,6 +77,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
 {
+	draw_batch_flush(batch_flush_deferred);
 	glColorMask(red, green, blue, alpha);
 }
 

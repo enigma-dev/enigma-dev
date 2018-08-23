@@ -108,28 +108,6 @@ int GetShapesModel() {
 	return shapes_d3d_model;
 }
 
-void BeginShapesBatching(int texId) {
-	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(true);
-	} else if (texId != shapes_d3d_texture) {
-		if (!hasdrawn) {
-			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-			d3d_model_clear(shapes_d3d_model);
-		}
-	}
-	hasdrawn = false;
-	shapes_d3d_texture = texId;
-}
-
-void EndShapesBatching() {
-	last_depth -= 1;
-	if (hasdrawn || shapes_d3d_model == -1) { return; }
-	hasdrawn = true;
-	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-	d3d_model_clear(shapes_d3d_model);
-	shapes_d3d_texture = -1;
-}
-
 };
 
 extern ContextManager* d3dmgr; // point to our device manager

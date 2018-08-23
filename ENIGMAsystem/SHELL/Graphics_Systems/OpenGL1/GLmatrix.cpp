@@ -16,17 +16,17 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GSmath.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
-#include <math.h>
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GSmath.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
-//using namespace std;
+#include "Universal_System/roomsystem.h"
+#include "Universal_System/var4.h"
 
 #include <floatcomp.h>
+#include <math.h>
 
 namespace enigma
 {
@@ -40,14 +40,16 @@ namespace enigma
 
     //This is the user can access it
     enigma::Matrix4 mvp_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
-}
+} // namespace enigma
 
 //NOTE: THIS IS STILL FFP
 #ifdef GS_SCALAR_64
-#define glLoadMatrix(m) glLoadMatrixd((gs_scalar*)m.transpose());
+#define glLoadMatrix(m) draw_batch_flush(batch_flush_deferred);\
+                        glLoadMatrixd((gs_scalar*)m.transpose());
 #define glGet(m,n)        glGetDoublev(m,(gs_scalar*)n); //For debug
 #else
-#define glLoadMatrix(m) glLoadMatrixf((gs_scalar*)m.transpose());
+#define glLoadMatrix(m) draw_batch_flush(batch_flush_deferred);\
+                        glLoadMatrixf((gs_scalar*)m.transpose());
 #define glGet(m,n)        glGetFloatv(m,(gs_scalar*)n); //For debug
 #endif
 

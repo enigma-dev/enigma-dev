@@ -82,29 +82,6 @@ void RestoreState() {
 
 }
 
-void BeginShapesBatching(int texId) {
-	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = enigma_user::d3d_model_create(enigma_user::model_stream);
-	} else if (texId != shapes_d3d_texture) {
-		if (!hasdrawn) {
-			enigma_user::d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-			enigma_user::d3d_model_clear(shapes_d3d_model);
-		}
-	}
-	hasdrawn = false;
-	shapes_d3d_texture = texId;
-}
-
-void EndShapesBatching() {
-	if (hasdrawn || shapes_d3d_model == -1) { return; }
-	hasdrawn = true;
-	enigma_user::d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-	enigma_user::d3d_model_clear(shapes_d3d_model);
-
-	shapes_d3d_texture = -1;
-  	last_depth -= 1;
-}
-
 void BeginScene() {
 	last_depth = 0;
 	// Reapply the stored render states and what not
@@ -113,30 +90,27 @@ void BeginScene() {
 
 void EndScene() {
   gpuprof.end_frame();
-  EndShapesBatching();
 }
 
 void SetEnabled(GLenum cap, bool enabled) {
-	EndShapesBatching();
 	(enabled?glEnable:glDisable)(cap);
 }
 
 void Bind() {
-	EndShapesBatching();
+
 }
 
 void ActiveTexture() {
-	EndShapesBatching();
+
 }
 
 void ReadPixels() {
-	EndShapesBatching();
+
 }
 
 // Function no longer used since introduction of sampler states for compatibility with Studio.
 void BindTexture(GLenum target,  GLuint texture) {
   if (bound_tex != texture) {
-      //EndShapesBatching();
       glBindTexture(target, bound_tex = texture);
   }
   return;
@@ -145,46 +119,16 @@ void BindTexture(GLenum target,  GLuint texture) {
   map< GLenum, GLuint >::iterator it = cacheTextureStates.find( target );
   if ( cacheTextureStates.end() == it ) {
     cacheTextureStates.insert( map< GLenum, GLuint >::value_type(target, texture) );
-    EndShapesBatching();
     glBindTexture(target, texture);
   }
   if( it->second == texture )
       return;
   it->second = texture;
-  EndShapesBatching();
   glBindTexture(target, texture);
 }
 
 void ResetTextureStates() {
 	// loop through and check if any of the texture states opengl has set do not match the ones we've cached
-}
-
-void Viewport() {
-	EndShapesBatching();
-}
-
-void Transformation() { //Used when calling 3d transformations (translation, scaling etc.)
-	EndShapesBatching();
-}
-
-void BlendFunc() { //Used when calling blend functions
-	EndShapesBatching();
-}
-
-void ColorFunc() { //Used when calling color functions
-	if (shapes_d3d_model != -1){
-		//if (enigma_user::d3d_model_has_color(shapes_d3d_model) == false){
-			EndShapesBatching();
-		//}
-	}
-}
-
-void Lighting() { //Used when lighting is enabled/disabled
-	EndShapesBatching();
-}
-
-void ShaderFunc() { //Used when calling shader functions, like uniform changes
-  EndShapesBatching();
 }
 
 GLuint GetBoundTexture() { //This is used for cases when there are texture coordinates provided, but texture is 0 (like d3d_model_block)

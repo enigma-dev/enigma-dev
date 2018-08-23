@@ -15,17 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <stdio.h>
-#include "Direct3D9Headers.h"
 #include "Bridges/General/DX9Context.h"
-#include <string.h>
-//using std::string;
-#include "../General/GStextures.h"
 #include "DX9TextureStruct.h"
+#include "Direct3D9Headers.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background_internal.h"
 #include "Universal_System/sprites_internal.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+
+#include <stdio.h>
+#include <string.h>
 
 vector<TextureStruct*> textureStructs(0);
 
@@ -227,6 +229,7 @@ void texture_preload(int texid)
 
 void texture_set_priority(int texid, double prio)
 {
+  draw_batch_flush(batch_flush_deferred);
   // Deprecated in ENIGMA and GM: Studio
   textureStructs[texid]->gTexture->SetPriority(prio);
 }
@@ -251,33 +254,38 @@ gs_scalar texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
+  draw_batch_flush(batch_flush_deferred);
   if (texid == -1) { d3dmgr->SetTexture(0, NULL); return; }
 	d3dmgr->SetTexture(stage, get_texture(texid));
 	d3dmgr->SetTextureStageState(stage,D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 }
 
 void texture_reset() {
+  draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetTexture(0, NULL);
 }
 
 void texture_set_blending(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->SetTextureStageState(0, D3DTSS_COLOROP, enable?D3DTOP_MODULATE:D3DTOP_DISABLE);
 }
 
 void texture_set_enabled(bool enable)
 {
-
+  draw_batch_flush(batch_flush_deferred);
 }
 
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat)
 {
+  draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSU, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSV, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSW, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
@@ -285,6 +293,7 @@ void texture_set_repeat_ext(int sampler, bool repeat)
 
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
+  draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSU, wrapu?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSV, wrapv?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSW, wrapw?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
@@ -292,11 +301,13 @@ void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 
 void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 {
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->SetSamplerState( sampler, D3DSAMP_BORDERCOLOR, D3DCOLOR_RGBA(r, g, b, (unsigned)(a * 255)) );
 }
 
 void texture_set_filter_ext(int sampler, int filter)
 {
+  draw_batch_flush(batch_flush_deferred);
   if (filter == tx_trilinear) {
     d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
     d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
@@ -318,6 +329,7 @@ void texture_set_filter_ext(int sampler, int filter)
 
 void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel)
 {
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->SetSamplerState( sampler, D3DSAMP_MAXMIPLEVEL, maxlevel );
 }
 
@@ -344,6 +356,7 @@ float texture_anisotropy_maxlevel()
 
 void texture_anisotropy_filter(int sampler, gs_scalar level)
 {
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->SetSamplerState( sampler, D3DSAMP_MAXANISOTROPY, level );
 }
 

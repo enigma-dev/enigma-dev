@@ -14,15 +14,18 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSsprite.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
+
+#include "Platforms/General/PFwindow.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -59,19 +62,12 @@ using std::string;
 // These two leave a bad taste in my mouth because they depend on views, which should be removable.
 // However, for now, they stay.
 
-#include <string>
-using std::string;
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
-
-namespace enigma_user {
-  extern int window_get_region_height_scaled();
-}
-
 namespace enigma_user
 {
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
+  draw_batch_flush(batch_flush_deferred);
+
   int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
@@ -97,6 +93,8 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
 }
 
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
+  draw_batch_flush(batch_flush_deferred);
+
   int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);

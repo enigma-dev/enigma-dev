@@ -69,6 +69,10 @@ unsigned vertex_format_get_stride() {
   return currentVertexFormat->stride;
 }
 
+unsigned vertex_format_get_stride_size() {
+  return currentVertexFormat->stride_size;
+}
+
 void vertex_format_add_color() {
   currentVertexFormat->AddAttribute(vertex_type_color, vertex_usage_color);
 }
@@ -120,6 +124,10 @@ unsigned vertex_format_get_stride(int id) {
   return enigma::vertexFormats[id]->stride;
 }
 
+unsigned vertex_format_get_stride_size(int id) {
+  return enigma::vertexFormats[id]->stride_size;
+}
+
 unsigned vertex_format_get_hash(int id) {
   return enigma::vertexFormats[id]->hash;
 }
@@ -153,7 +161,7 @@ void vertex_set_format(int buffer, int format) {
 unsigned vertex_get_buffer_size(int buffer) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
-  return vertexBuffer->getNumber() * sizeof(gs_scalar);
+  return vertexBuffer->getNumber() * sizeof(enigma::VertexElement);
 }
 
 unsigned vertex_get_number(int buffer) {
@@ -307,7 +315,11 @@ void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char
 }
 
 void vertex_submit(int buffer, int primitive) {
-  vertex_submit(buffer, primitive, 0, vertex_get_number(buffer));
+  vertex_submit_offset(buffer, primitive, 0, 0, vertex_get_number(buffer));
+}
+
+void vertex_submit_range(int buffer, int primitive, unsigned start, unsigned count) {
+  vertex_submit_offset(buffer, primitive, 0, start, count);
 }
 
 void vertex_submit(int buffer, int primitive, int texture) {
@@ -315,9 +327,13 @@ void vertex_submit(int buffer, int primitive, int texture) {
   vertex_submit(buffer, primitive);
 }
 
-void vertex_submit(int buffer, int primitive, int texture, unsigned start, unsigned count) {
+void vertex_submit_range(int buffer, int primitive, int texture, unsigned start, unsigned count) {
+  vertex_submit_offset(buffer, primitive, texture, 0, start, count);
+}
+
+void vertex_submit_offset(int buffer, int primitive, int texture, unsigned offset, unsigned start, unsigned count) {
   texture_set(texture);
-  vertex_submit(buffer, primitive, start, count);
+  vertex_submit_offset(buffer, primitive, offset, start, count);
 }
 
 int index_create_buffer() {
@@ -411,7 +427,7 @@ void index_data(int buffer, const enigma::varargs& data) {
 }
 
 void index_submit(int buffer, int vertex, int primitive) {
-  index_submit(buffer, vertex, primitive, 0, index_get_number(buffer));
+  index_submit_range(buffer, vertex, primitive, 0, index_get_number(buffer));
 }
 
 void index_submit(int buffer, int vertex, int primitive, int texture) {
@@ -419,9 +435,9 @@ void index_submit(int buffer, int vertex, int primitive, int texture) {
   index_submit(buffer, vertex, primitive);
 }
 
-void index_submit(int buffer, int vertex, int primitive, int texture, unsigned start, unsigned count) {
+void index_submit_range(int buffer, int vertex, int primitive, int texture, unsigned start, unsigned count) {
   texture_set(texture);
-  index_submit(buffer, vertex, primitive, start, count);
+  index_submit_range(buffer, vertex, primitive, start, count);
 }
 
 } // namespace enigma_user

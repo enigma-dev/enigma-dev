@@ -57,37 +57,6 @@ namespace enigma_user
 {
 	string draw_get_graphics_error();
 
-	unsigned vertex_create_buffer();
-	unsigned vertex_create_buffer_ext(unsigned size);
-	void vertex_delete_buffer(int buffer);
-	void vertex_begin(int buffer, int format);
-	void vertex_end(int buffer);
-	void vertex_freeze(int buffer);
-	void vertex_submit(int buffer, int primitive);
-	void vertex_submit(int buffer, int primitive, int texture);
-	void vertex_delete(int buffer);
-	void vertex_index(int buffer, unsigned id);
-	void vertex_position(int buffer, gs_scalar x, gs_scalar y);
-	void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z);
-	void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz);
-	void vertex_texcoord(int buffer, gs_scalar u, gs_scalar v);
-	void vertex_argb(int buffer, double alpha, unsigned char r, unsigned char g, unsigned char b);
-	void vertex_colour(int buffer, int color, double alpha);
-	void vertex_float1(int buffer, float f1);
-	void vertex_float2(int buffer, float f1, float f2);
-	void vertex_float3(int buffer, float f1, float f2, float f3);
-	void vertex_float4(int buffer, float f1, float f2, float f3, float f4);
-	void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4);
-	void vertex_format_begin();
-	void vertex_format_add(int id, int type, int attribute);
-	void vertex_format_add_colour();
-	void vertex_format_add_position();
-	void vertex_format_add_position_3d();
-	void vertex_format_add_textcoord();
-	void vertex_format_add_normal();
-	void vertex_format_add_custom(int type, int usage);
-	unsigned vertex_format_end();
-
 	int texture_add(string filename, bool mipmap);
 	void texture_save(int texid, string fname);
 	void texture_delete(int texid);
@@ -184,15 +153,6 @@ namespace enigma_user
 	unsigned int display_get_gui_width();
 	unsigned int display_get_gui_height();
 
-	void draw_primitive_begin(int kind);
-	void draw_primitive_begin_texture(int kind, int tex);
-	void draw_primitive_end();
-	void draw_vertex(gs_scalar x, gs_scalar y);
-	void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha);
-	void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty);
-	void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha);
-
-
 
 	void d3d_set_lighting(bool enable);
 
@@ -204,25 +164,6 @@ namespace enigma_user
 	void d3d_set_fog_start(double start);
 	void d3d_set_fog_end(double end);
 	void d3d_set_fog_density(double density);
-	void d3d_primitive_begin(int kind);
-	void d3d_primitive_begin_texture(int kind, int texId);
-	void d3d_primitive_end();
-	void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z);
-	void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha);
-	void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty);
-	void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha);
-	void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz);
-	void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int color, double alpha);
-	void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty);
-	void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha);
-	void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed);
-	void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep);
-	void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep);
-	void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps);
-	void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps);
-	void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps);
-	void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps);
-	void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius);
 
 	void d3d_set_perspective(bool enable);
 	void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup);
