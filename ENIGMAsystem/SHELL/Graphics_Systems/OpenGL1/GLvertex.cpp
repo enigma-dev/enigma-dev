@@ -15,10 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/General/GSvertex_impl.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-
 #include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSvertex_impl.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #include <map>
 using std::map;
@@ -36,7 +36,7 @@ map<int, std::vector<short unsigned int> > indexBufferArrays;
 map<int, GLuint> vertexBufferPeers;
 map<int, GLuint> indexBufferPeers;
 
-GLvoid* graphics_prepare_buffer_array(const int buffer, const bool isIndex) {
+void* graphics_prepare_buffer_array(const int buffer, const bool isIndex) {
   using namespace enigma;
 
   const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
@@ -52,9 +52,9 @@ GLvoid* graphics_prepare_buffer_array(const int buffer, const bool isIndex) {
     }
   }
   if (isIndex) {
-    return (GLvoid*)indexBufferArrays[buffer].data();
+    return (void*)indexBufferArrays[buffer].data();
   } else {
-    return (GLvoid*)vertexBufferArrays[buffer].data();
+    return (void*)vertexBufferArrays[buffer].data();
   }
 }
 
@@ -238,23 +238,27 @@ void vertex_color(int buffer, int color, double alpha) {
   enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 
-void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
+void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
-  GLvoid* base_pointer = enigma::graphics_prepare_buffer(buffer, false);
-  enigma::ClientState state = enigma::graphics_apply_vertex_format(vertexBuffer->format, base_pointer);
+  void* base_pointer = enigma::graphics_prepare_buffer(buffer, false);
+  enigma::ClientState state = enigma::graphics_apply_vertex_format(vertexBuffer->format, (GLvoid*)((intptr_t)base_pointer + offset));
 
 	glDrawArrays(primitive_types[primitive], start, count);
 
   enigma::graphics_reset_client_state(state);
 }
 
-void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 
-  GLvoid* base_vertex_pointer = enigma::graphics_prepare_buffer(vertex, false);
-  GLvoid* base_index_pointer = enigma::graphics_prepare_buffer(buffer, true);
+  void* base_vertex_pointer = enigma::graphics_prepare_buffer(vertex, false);
+  void* base_index_pointer = enigma::graphics_prepare_buffer(buffer, true);
   enigma::ClientState state = enigma::graphics_apply_vertex_format(vertexBuffer->format, base_vertex_pointer);
 
   GLenum indexType = GL_UNSIGNED_SHORT;

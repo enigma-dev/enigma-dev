@@ -40,7 +40,7 @@ namespace enigma_user {
     model_stream   = 2,
   };
 
-  int d3d_model_create(int type = model_static);
+  int d3d_model_create(int type = model_static, bool use_draw_color = false);
   void d3d_model_destroy(int id);
   bool d3d_model_exists(int id);
   void d3d_model_clear(int id);

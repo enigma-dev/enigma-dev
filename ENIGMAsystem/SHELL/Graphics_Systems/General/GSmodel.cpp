@@ -21,9 +21,10 @@
 #include "GSmodel.h"
 #include "GSvertex.h"
 #include "GSvertex_impl.h"
+#include "GSprimitives.h"
+#include "GScolors.h"
 #include "GSmatrix.h"
 #include "GStextures.h"
-#include "GSprimitives.h"
 
 #include "Universal_System/fileio.h"
 
@@ -139,9 +140,9 @@ void string_parse(string *s) {
 
 namespace enigma_user {
 
-int d3d_model_create(int type) {
+int d3d_model_create(int type, bool use_draw_color) {
   int id = enigma::models.size();
-  enigma::Model* model = new enigma::Model(type);
+  enigma::Model* model = new enigma::Model(type, use_draw_color);
   model->vertex_buffer = vertex_create_buffer();
   enigma::models.push_back(model);
   return id;
@@ -185,11 +186,9 @@ void d3d_model_draw(int id) {
   }
   for (auto primitive : model->primitives) {
     vertex_set_format(model->vertex_buffer, primitive.format);
-    vertex_submit(
-      model->vertex_buffer,
-      primitive.type,
-      primitive.vertex_start,
-      primitive.vertex_count
+    vertex_submit_offset(
+      model->vertex_buffer, primitive.type,
+      primitive.vertex_offset, 0, primitive.vertex_count
     );
   }
 }
@@ -218,12 +217,12 @@ void d3d_model_primitive_begin(int id, int kind, int format) {
     vertex_begin(model->vertex_buffer);
   }
 
-  size_t start = 0;
-  if (!model->primitives.empty()) {
-    const enigma::Primitive& last_primitive = model->primitives.back();
-    start = last_primitive.vertex_start + last_primitive.vertex_count;
-  }
-  model->current_primitive = new enigma::Primitive(kind, format, vertex_format_exists(format), start);
+  model->current_primitive = new enigma::Primitive(
+    kind,
+    format,
+    vertex_format_exists(format),
+    vertex_get_buffer_size(model->vertex_buffer)
+  );
 }
 
 void d3d_model_primitive_end(int id) {
@@ -234,9 +233,22 @@ void d3d_model_primitive_end(int id) {
   delete model->current_primitive;
   model->current_primitive = 0;
 
+  if (model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+  }
+
   // if we are guessing the format of the model, end the vertex format now
-  if (!vertex_format_exists(primitive.format))
+  if (!vertex_format_exists(primitive.format)) {
+    if (!primitive.format_defined && model->use_draw_color && !model->vertex_colored) {
+      vertex_format_add_color();
+    }
+    model->vertex_colored = false;
     primitive.format = vertex_format_end();
+    primitive.format_defined = true;
+  }
+
+  size_t vertex_size = vertex_get_buffer_size(model->vertex_buffer) - primitive.vertex_offset;
+  primitive.vertex_count = vertex_size / vertex_format_get_stride_size(primitive.format);
 
   // combine adjacent primitives that are list types with logically the same format
   if (!model->primitives.empty()) {
@@ -246,35 +258,32 @@ void d3d_model_primitive_end(int id) {
       if ((prev.type == pr_pointlist && primitive.type == pr_pointlist) ||
           (prev.type == pr_linelist && primitive.type == pr_linelist) ||
           (prev.type == pr_trianglelist && primitive.type == pr_trianglelist)) {
-        prev.vertex_count += vertex_get_number(model->vertex_buffer) - primitive.vertex_start;
+        prev.vertex_count += primitive.vertex_count;
         return;
       } else if (prev.type == pr_trianglestrip && primitive.type == pr_trianglestrip) {
         // use a degenerate triangle to combine the adjacent strips
         enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[model->vertex_buffer];
-        const size_t stride = vertex_format_get_stride(prev.format);
         std::vector<enigma::VertexElement>& vertices = vertexBuffer->vertices;
+        const size_t stride = vertex_format_get_stride(prev.format);
+        const size_t vertex_start = primitive.vertex_offset / sizeof(enigma::VertexElement);
 
         auto degenerates = std::vector<enigma::VertexElement>(
-          vertices.begin() + (primitive.vertex_start * stride - stride), // last vertex of the first strip
-          vertices.begin() + (primitive.vertex_start * stride + stride)  // first vertex of the second strip
+          vertices.begin() + (vertex_start - stride), // last vertex of the first strip
+          vertices.begin() + (vertex_start + stride)  // first vertex of the second strip
         );
 
         vertices.insert(
-          vertices.begin() + primitive.vertex_start * stride,
+          vertices.begin() + vertex_start,
           degenerates.begin(),
           degenerates.end()
         );
 
-        prev.vertex_count = vertex_get_number(model->vertex_buffer) - prev.vertex_start;
+        prev.vertex_count += primitive.vertex_count + 2;
         return;
       }
     }
     // not mergeable with the previous primitive so looks like we have to keep it...
   }
-
-  // apply the vertex format to the vertex buffer now so we can get the correct vertex count
-  vertex_set_format(model->vertex_buffer, primitive.format);
-  primitive.vertex_count = vertex_get_number(model->vertex_buffer) - primitive.vertex_start;
 
   model->primitives.push_back(primitive);
 }
@@ -309,13 +318,22 @@ void d3d_model_vertex(int id, gs_scalar x, gs_scalar y) {
   enigma::Primitive* primitive = model->current_primitive;
   if (!primitive->format_defined) {
     if (vertex_format_exists()) {
+      if (model->use_draw_color && !model->vertex_colored) {
+        vertex_format_add_color();
+      }
       primitive->format_defined = true;
     } else {
       vertex_format_begin();
       vertex_format_add_position();
     }
   }
+  if (primitive->format_defined && model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+  }
   vertex_position(model->vertex_buffer, x, y);
+  model->vertex_colored = false;
+  model->vertex_color = draw_get_color();
+  model->vertex_alpha = draw_get_alpha();
 }
 
 void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
@@ -323,29 +341,40 @@ void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
   enigma::Primitive* primitive = model->current_primitive;
   if (!primitive->format_defined) {
     if (vertex_format_exists()) {
+      if (model->use_draw_color && !model->vertex_colored) {
+        vertex_format_add_color();
+      }
       primitive->format_defined = true;
     } else {
       vertex_format_begin();
       vertex_format_add_position_3d();
     }
   }
+  if (primitive->format_defined && model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+  }
   vertex_position_3d(model->vertex_buffer, x, y, z);
+  model->vertex_colored = false;
+  model->vertex_color = draw_get_color();
+  model->vertex_alpha = draw_get_alpha();
 }
 
 void d3d_model_color(int id, int col, double alpha) {
-  const enigma::Model* model = enigma::models[id];
+  enigma::Model* model = enigma::models[id];
   const enigma::Primitive* primitive = model->current_primitive;
   if (!primitive->format_defined)
     vertex_format_add_color();
   vertex_color(model->vertex_buffer, col, alpha);
+  model->vertex_colored = true;
 }
 
 void d3d_model_argb(int id, unsigned argb) {
-  const enigma::Model* model = enigma::models[id];
+  enigma::Model* model = enigma::models[id];
   const enigma::Primitive* primitive = model->current_primitive;
   if (!primitive->format_defined)
     vertex_format_add_color();
   vertex_argb(model->vertex_buffer, argb);
+  model->vertex_colored = true;
 }
 
 void d3d_model_texture(int id, gs_scalar tx, gs_scalar ty) {
