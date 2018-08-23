@@ -183,28 +183,6 @@ int GetShapesModel() {
 	return shapes_d3d_model;
 }
 
-void BeginShapesBatching(int texId) {
-	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(model_stream);
-	} else if (texId != shapes_d3d_texture) {
-		if (!hasdrawn) {
-			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-			d3d_model_clear(shapes_d3d_model);
-		}
-	}
-	hasdrawn = false;
-	shapes_d3d_texture = texId;
-}
-
-void EndShapesBatching() {
-	last_depth -= 1;
-	if (hasdrawn || shapes_d3d_model == -1) { return; }
-	hasdrawn = true;
-	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-	d3d_model_clear(shapes_d3d_model);
-	shapes_d3d_texture = -1;
-}
-
 void Clear(DWORD Count, const D3DRECT *pRects, DWORD Flags, D3DCOLOR Color, float Z, DWORD Stencil) {
 	device->Clear(Count, pRects, Flags, Color, Z, Stencil);
 }
@@ -216,14 +194,12 @@ void LightEnable(DWORD Index, BOOL bEnable) {
     if( cacheLightEnable.end() == it )
     {
         cacheLightEnable.insert( map< DWORD, BOOL >::value_type(Index, bEnable) );
-		EndShapesBatching();
         device->LightEnable( Index, bEnable );
 		return;
     }
     if( it->second == bEnable )
         return;
     it->second = bEnable;
-	EndShapesBatching();
     device->LightEnable( Index, bEnable );
 }
 
@@ -233,7 +209,6 @@ void BeginScene() {
 }
 
 void EndScene() {
-	EndShapesBatching();
 	device->EndScene();
 }
 
@@ -261,17 +236,14 @@ void Reset(D3DPRESENT_PARAMETERS *pPresentationParameters) {
 }
 
 void DrawIndexedPrimitive(D3DPRIMITIVETYPE Type, INT BaseVertexIndex, UINT MinIndex, UINT NumVertices, UINT StartIndex, UINT PrimitiveCount) {
-	//EndShapesBatching();
 	device->DrawIndexedPrimitive(Type, BaseVertexIndex, MinIndex, NumVertices, StartIndex, PrimitiveCount);
 }
 
 void DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT StartVertex, UINT PrimitiveCount) {
-	//EndShapesBatching();
 	device->DrawPrimitive(PrimitiveType, StartVertex, PrimitiveCount);
 }
 
 void DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT PrimitiveCount, const void *pVertexStreamZeroData, UINT VertexStreamZeroStride) {
-	//EndShapesBatching();
 	device->DrawPrimitiveUP(PrimitiveType, PrimitiveCount, pVertexStreamZeroData, VertexStreamZeroStride);
 }
 
@@ -352,12 +324,10 @@ void SetMaterial(const D3DMATERIAL9 *pMaterial) {
 }
 
 void SetFVF(DWORD FVF) {
-	//EndShapesBatching();
 	device->SetFVF(FVF);
 }
 
 void SetViewport(const D3DVIEWPORT9 *pViewport) {
-	EndShapesBatching();
 	device->SetViewport(pViewport);
 }
 
@@ -369,20 +339,16 @@ device->SetLight( Index, pLight );
 	map< DWORD, D3DLIGHT9 >::iterator it = cacheLightStates.find( Index );
     if ( cacheLightStates.end() == it ) {
         cacheLightStates.insert( map< DWORD, D3DLIGHT9 >::value_type(Index, *pLight) );
-		EndShapesBatching();
         device->SetLight( Index, pLight );
 		return;
     }
     //if( it->second == *pLight )
         //return;
     it->second = *pLight;
-	EndShapesBatching();
     device->SetLight( Index, pLight );
 }
 
 void SetTransform(D3DTRANSFORMSTATETYPE State, const D3DMATRIX *pMatrix) {
-	// if projection EndShapesBatching();
-	EndShapesBatching();
 	device->SetTransform(State, pMatrix);
 }
 
@@ -392,13 +358,11 @@ void SetRenderState(D3DRENDERSTATETYPE State, DWORD Value) {
 	map< D3DRENDERSTATETYPE, DWORD >::iterator it = cacheRenderStates.find( State );
     if ( cacheRenderStates.end() == it ) {
         cacheRenderStates.insert( map< D3DRENDERSTATETYPE, DWORD >::value_type(State, Value) );
-		EndShapesBatching();
         device->SetRenderState( State, Value );
     }
     if( it->second == Value )
         return;
     it->second = Value;
-	EndShapesBatching();
     device->SetRenderState( State, Value );
 }
 
@@ -409,7 +373,6 @@ void GetBackBuffer(UINT  iSwapChain, UINT BackBuffer, D3DBACKBUFFER_TYPE Type, I
 void SetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9 *pTarget) {
 	device->GetRenderTarget(0, &pBackBuffer);
 	if (pBackBuffer == pTarget) { return; }
-	EndShapesBatching();
 	device->SetRenderTarget(RenderTargetIndex, pTarget);
 	pRenderTarget = pTarget;
 }
@@ -417,7 +380,6 @@ void SetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9 *pTarget) {
 void ResetRenderTarget() {
 	device->GetRenderTarget(0, &pBackBuffer);
 	if (pBackBuffer == pRenderTarget) { return; }
-	EndShapesBatching();
 	device->SetRenderTarget(0, pBackBuffer);
 }
 
@@ -431,7 +393,6 @@ void SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value) {
 		innerType inner;
 		inner.insert(pair<D3DSAMPLERSTATETYPE, DWORD>(Type, Value));
         cacheSamplerStates.insert( pair<DWORD, innerType>(Sampler, inner) );
-		//EndShapesBatching();
         device->SetSamplerState( Sampler, Type, Value );
     }
 	map< D3DSAMPLERSTATETYPE, DWORD >::iterator sit = it->second.find( Type );
@@ -440,7 +401,6 @@ void SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value) {
 			return;
 		}
 		sit->second = Value;
-		//EndShapesBatching();
 		device->SetSamplerState( Sampler, Type, Value );
 	} else {
 		it->second.insert(map< D3DSAMPLERSTATETYPE, DWORD >::value_type(Type, Value));
@@ -454,13 +414,11 @@ void SetTexture(DWORD Sampler, LPDIRECT3DTEXTURE9 pTexture) {
 	map< DWORD, LPDIRECT3DTEXTURE9 >::iterator it = cacheTextureStates.find( Sampler );
     if ( cacheTextureStates.end() == it ) {
         cacheTextureStates.insert( map< DWORD, LPDIRECT3DTEXTURE9 >::value_type(Sampler, pTexture) );
-		//EndShapesBatching();
         device->SetTexture( Sampler, pTexture );
     }
     if( it->second == pTexture )
         return;
     it->second = pTexture;
-	//EndShapesBatching();
     device->SetTexture( Sampler, pTexture );
 }
 
@@ -484,7 +442,6 @@ void SetPixelShader(LPDIRECT3DPIXELSHADER9 shader)
 {
 	//Nothing to do, return
 	if (shader == pixelShader) return;
-	EndShapesBatching();
 	pixelShader = shader;
 	device->SetPixelShader(shader);
 }
@@ -493,7 +450,6 @@ void SetVertexShader(LPDIRECT3DVERTEXSHADER9 shader)
 {
 	//Nothing to do, return
 	if (shader == vertexShader) return;
-	EndShapesBatching();
 	vertexShader = shader;
 	device->SetVertexShader(shader);
 }

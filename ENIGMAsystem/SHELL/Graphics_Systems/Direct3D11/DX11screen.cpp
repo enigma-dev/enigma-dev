@@ -18,8 +18,8 @@
 #include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolors.h"
 
 #include "Universal_System/roomsystem.h"
@@ -74,15 +74,17 @@ void screen_init()
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
-
+  draw_batch_flush(batch_flush_deferred);
 }
 
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
-
+  draw_batch_flush(batch_flush_deferred);
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
+  draw_batch_flush(batch_flush_deferred);
+
   x = (x / window_get_region_width()) * window_get_region_width_scaled();
   y = (y / window_get_region_height()) * window_get_region_height_scaled();
   width = (width / window_get_region_width()) * window_get_region_width_scaled();
