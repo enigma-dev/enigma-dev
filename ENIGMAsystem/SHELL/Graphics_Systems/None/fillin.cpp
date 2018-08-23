@@ -98,8 +98,8 @@ namespace enigma_user
 
 	void vertex_argb(int buffer, unsigned argb) {}
 	void vertex_color(int buffer, int color, double alpha) {}
-	void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {}
-	void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {}
+	void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned vertex_start, unsigned vertex_count) {}
+	void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {}
 
 	int texture_add(string filename, bool mipmap){return -1;}
 	void texture_save(int texid, string fname){}
