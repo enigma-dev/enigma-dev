@@ -216,8 +216,8 @@ void d3d_model_primitive_begin(int id, int kind, int format) {
   enigma::Model* model = enigma::models[id];
   #ifdef DEBUG_MODE
   if (model->current_primitive) {
-    show_error("d3d_model_primitive_begin called before d3d_model_primitive_end " \
-               "on the previous primitive for model: " + std::to_string(id), false);
+    show_error("d3d_model_primitive_begin called again without ending " \
+               "the previous primitive for model: " + std::to_string(id), false);
     return;
   }
   #endif
@@ -238,7 +238,7 @@ void d3d_model_primitive_end(int id) {
   enigma::Model* model = enigma::models[id];
   #ifdef DEBUG_MODE
   if (!model->current_primitive) {
-    show_error("d3d_model_primitive_end called for model " + std::to_string(id) + " and no current primitive exists!\n" \
+    show_error("d3d_model_primitive_end called for model " + std::to_string(id) + " and no current primitive exists! " \
                "This can occur if you call end without actually calling begin.", false);
     return;
   }
@@ -252,7 +252,15 @@ void d3d_model_primitive_end(int id) {
   // if the primitive doesn't have a valid vertex format
   // and one does exist that we were guessing, then end
   // that vertex format now
-  if (!vertex_format_exists(primitive.format) && vertex_format_exists()) {
+  if (!vertex_format_exists(primitive.format)) {
+    // we can't do anything if we can't figure out the format
+    if (!vertex_format_exists()) {
+      #ifdef DEBUG_MODE
+      show_error("d3d_model_primitive_end called for primitive of model " + std::to_string(id) + " that has " \
+                 "non-existant vertex format and one could not be determined based on vertex specification", false);
+      #endif
+      return;
+    }
     if (!primitive.format_defined && model->use_draw_color && !model->vertex_colored) {
       vertex_format_add_color();
     }
@@ -267,13 +275,13 @@ void d3d_model_primitive_end(int id) {
   }
 
   size_t vertex_size = vertex_get_buffer_size(model->vertex_buffer) - primitive.vertex_offset;
-  // don't keep empty primitives
+  #ifdef DEBUG_MODE
+  // there's ZERO reason to keep an empty primitive
   if (!vertex_size) {
-    #ifdef DEBUG_MODE
     show_error("A primitive was ended that had 0 size on model: " + std::to_string(id), false);
-    #endif
     return;
   }
+  #endif
   primitive.vertex_count = vertex_size / vertex_format_get_stride_size(primitive.format);
 
   // combine adjacent primitives that are list types with logically the same format

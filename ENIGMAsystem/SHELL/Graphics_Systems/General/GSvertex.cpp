@@ -59,8 +59,11 @@ namespace enigma_user {
 
 void vertex_format_begin() {
   #ifdef DEBUG_MODE
-  if (currentVertexFormat)
-    show_error("vertex_format_begin called before vertex_format_end on the previous format", false);
+  if (currentVertexFormat) {
+    show_error("vertex_format_begin called again without ending the previous format", false);
+    delete currentVertexFormat;
+    currentVertexFormat = 0;
+  }
   #endif
   currentVertexFormat = new enigma::VertexFormat();
 }
@@ -105,7 +108,7 @@ int vertex_format_end() {
   int id = -1;
   #ifdef DEBUG_MODE
   if (!currentVertexFormat) {
-    show_error("vertex_format_end called and no current vertex format exists!\n" \
+    show_error("vertex_format_end called and no current vertex format exists! " \
                "This can occur if you call end without actually calling begin.", false);
     return id;
   }
