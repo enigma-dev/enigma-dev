@@ -138,7 +138,7 @@ void ClientResize(HWND hWnd, int nWidth, int nHeight)
   MoveWindow(hWnd, rcWind.left, rcWind.top, nWidth + ptDiff.x, nHeight + ptDiff.y, TRUE);
 }
 
-WCHAR wstrPromptStr[4096 + 1];
+WCHAR wstrPromptStr[4096];
 WCHAR wstrTextEntry[MAX_PATH + 1];
 bool HideInput = 0;
 /* < / Used by InputBoxProc > */
@@ -645,7 +645,7 @@ string get_string(string str, string def, string title)
   if (title == "") title = window_get_caption();
   gs_cap = title;
 
-  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096 + 1);
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH + 1);
 
   HideInput = 0;
@@ -663,7 +663,7 @@ string get_password(string str, string def, string title)
   if (title == "") title = window_get_caption();
   gs_cap = title;
 
-  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096 + 1);
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH + 1);
 
   HideInput = 1;
@@ -685,7 +685,7 @@ double get_integer(string str, double def, string title)
   if (title == "") title = window_get_caption();
   gs_cap = title;
 
-  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096 + 1);
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH + 1);
 
   HideInput = 0;
@@ -709,7 +709,7 @@ double get_passcode(string str, double def, string title)
   if (title == "") title = window_get_caption();
   gs_cap = title;
 
-  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096 + 1);
+  wcsncpy(wstrPromptStr, tstrStr.c_str(), 4096);
   wcsncpy(wstrTextEntry, tstrDef.c_str(), MAX_PATH + 1);
 
   HideInput = 1;
