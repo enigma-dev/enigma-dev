@@ -26,6 +26,7 @@
 #include "GSmatrix.h"
 #include "GStextures.h"
 
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/fileio.h"
 
 #include <math.h>
@@ -166,6 +167,7 @@ void d3d_model_clear(int id) {
   model->primitives.clear();
   model->current_primitive = 0;
   model->vertex_started = false;
+  model->vertex_colored = true;
 }
 
 void d3d_model_draw(int id) {
@@ -212,11 +214,18 @@ void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId) {
 
 void d3d_model_primitive_begin(int id, int kind, int format) {
   enigma::Model* model = enigma::models[id];
+  #ifdef DEBUG_MODE
+  if (model->current_primitive) {
+    show_error("d3d_model_primitive_begin called again without ending " \
+               "the previous primitive for model: " + std::to_string(id), false);
+    return;
+  }
+  #endif
   if (!model->vertex_started) {
     model->vertex_started = true;
     vertex_begin(model->vertex_buffer);
   }
-
+  model->vertex_colored = true;
   model->current_primitive = new enigma::Primitive(
     kind,
     format,
@@ -227,27 +236,52 @@ void d3d_model_primitive_begin(int id, int kind, int format) {
 
 void d3d_model_primitive_end(int id) {
   enigma::Model* model = enigma::models[id];
+  #ifdef DEBUG_MODE
+  if (!model->current_primitive) {
+    show_error("d3d_model_primitive_end called for model " + std::to_string(id) + " and no current primitive exists! " \
+               "This can occur if you call end without actually calling begin.", false);
+    return;
+  }
+  #endif
   // copy current primitive to the stack
   enigma::Primitive primitive = *model->current_primitive;
   // delete the current primitive from the heap
   delete model->current_primitive;
   model->current_primitive = 0;
 
-  if (model->use_draw_color && !model->vertex_colored) {
-    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
-  }
-
-  // if we are guessing the format of the model, end the vertex format now
+  // if the primitive doesn't have a valid vertex format
+  // and one does exist that we were guessing, then end
+  // that vertex format now
   if (!vertex_format_exists(primitive.format)) {
+    // we can't do anything if we can't figure out the format
+    if (!vertex_format_exists()) {
+      #ifdef DEBUG_MODE
+      show_error("d3d_model_primitive_end called for primitive of model " + std::to_string(id) + " that has " \
+                 "non-existant vertex format and one could not be determined based on vertex specification", false);
+      #endif
+      return;
+    }
     if (!primitive.format_defined && model->use_draw_color && !model->vertex_colored) {
       vertex_format_add_color();
     }
-    model->vertex_colored = false;
     primitive.format = vertex_format_end();
     primitive.format_defined = true;
   }
 
+  // if the last vertex didn't specify a color then we have to do so now
+  if (model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+    model->vertex_colored = true;
+  }
+
   size_t vertex_size = vertex_get_buffer_size(model->vertex_buffer) - primitive.vertex_offset;
+  #ifdef DEBUG_MODE
+  // there's ZERO reason to keep an empty primitive
+  if (!vertex_size) {
+    show_error("A primitive was ended that had 0 size on model: " + std::to_string(id), false);
+    return;
+  }
+  #endif
   primitive.vertex_count = vertex_size / vertex_format_get_stride_size(primitive.format);
 
   // combine adjacent primitives that are list types with logically the same format

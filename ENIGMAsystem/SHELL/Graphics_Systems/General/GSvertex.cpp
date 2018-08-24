@@ -33,8 +33,6 @@
 
 #include <unordered_map>
 
-#define RESOURCE_EXISTS(id, container) return (id >= 0 && (unsigned)id < enigma::container.size() && enigma::container[id] != nullptr);
-
 namespace {
 
 // cache of all vertex formats that are logically unique
@@ -44,6 +42,8 @@ std::unordered_map<size_t, int> vertexFormatCache;
 // current vertex format being specified
 // NOTE: this is NULl outside of vertex_format_begin and vertex_format_end
 enigma::VertexFormat* currentVertexFormat = 0;
+
+#define RESOURCE_EXISTS(id, container) return (id >= 0 && (unsigned)id < enigma::container.size() && enigma::container[id] != nullptr);
 
 } // anonymous namespace
 
@@ -58,6 +58,12 @@ vector<IndexBuffer*> indexBuffers;
 namespace enigma_user {
 
 void vertex_format_begin() {
+  #ifdef DEBUG_MODE
+  if (currentVertexFormat) {
+    show_error("vertex_format_begin called again without ending the previous format", false);
+    vertex_format_end();
+  }
+  #endif
   currentVertexFormat = new enigma::VertexFormat();
 }
 
@@ -99,6 +105,13 @@ void vertex_format_add_custom(int type, int usage) {
 
 int vertex_format_end() {
   int id = -1;
+  #ifdef DEBUG_MODE
+  if (!currentVertexFormat) {
+    show_error("vertex_format_end called and no current vertex format exists! " \
+               "This can occur if you call end without actually calling begin.", false);
+    return id;
+  }
+  #endif
   auto search = vertexFormatCache.find(currentVertexFormat->hash);
   if (search != vertexFormatCache.end()) {
     id = search->second;
