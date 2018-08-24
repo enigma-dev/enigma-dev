@@ -61,8 +61,7 @@ void vertex_format_begin() {
   #ifdef DEBUG_MODE
   if (currentVertexFormat) {
     show_error("vertex_format_begin called again without ending the previous format", false);
-    delete currentVertexFormat;
-    currentVertexFormat = 0;
+    vertex_format_end();
   }
   #endif
   currentVertexFormat = new enigma::VertexFormat();
