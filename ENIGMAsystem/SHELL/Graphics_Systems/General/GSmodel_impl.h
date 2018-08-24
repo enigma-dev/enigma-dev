@@ -67,7 +67,7 @@ struct Model {
 
   Model(int type, bool use_draw_color):
     type(type), vertex_buffer(-1), current_primitive(0), vertex_started(false), use_draw_color(use_draw_color),
-    vertex_colored(false), vertex_color(enigma_user::c_white), vertex_alpha(1.0) {}
+    vertex_colored(true), vertex_color(enigma_user::c_white), vertex_alpha(1.0) {}
 };
 
 
