@@ -53,7 +53,6 @@ enum {
 
 void vertex_format_begin();
 int vertex_format_end();
-bool vertex_format_exists();
 bool vertex_format_exists(int id);
 unsigned vertex_format_get_hash(int id);
 unsigned vertex_format_get_stride(int id);

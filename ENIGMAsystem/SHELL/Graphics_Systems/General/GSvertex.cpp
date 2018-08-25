@@ -40,8 +40,9 @@ namespace {
 std::unordered_map<size_t, int> vertexFormatCache;
 
 // current vertex format being specified
-// NOTE: this is NULl outside of vertex_format_begin and vertex_format_end
-enigma::VertexFormat* currentVertexFormat = 0;
+// NOTE: this is not reset until the next vertex_format_begin
+// NOTE: this uses the stack until vertex_format_end to speed up creation
+enigma::VertexFormat currentVertexFormat;
 
 #define RESOURCE_EXISTS(id, container) return (id >= 0 && (unsigned)id < enigma::container.size() && enigma::container[id] != nullptr);
 
@@ -58,75 +59,56 @@ vector<IndexBuffer*> indexBuffers;
 namespace enigma_user {
 
 void vertex_format_begin() {
-  #ifdef DEBUG_MODE
-  if (currentVertexFormat) {
-    show_error("vertex_format_begin called again without ending the previous format", false);
-    vertex_format_end();
-  }
-  #endif
-  currentVertexFormat = new enigma::VertexFormat();
+  currentVertexFormat = enigma::VertexFormat();
 }
 
 unsigned vertex_format_get_hash() {
-  return currentVertexFormat->hash;
+  return currentVertexFormat.hash;
 }
 
 unsigned vertex_format_get_stride() {
-  return currentVertexFormat->stride;
+  return currentVertexFormat.stride;
 }
 
 unsigned vertex_format_get_stride_size() {
-  return currentVertexFormat->stride_size;
+  return currentVertexFormat.stride_size;
 }
 
 void vertex_format_add_color() {
-  currentVertexFormat->AddAttribute(vertex_type_color, vertex_usage_color);
+  currentVertexFormat.AddAttribute(vertex_type_color, vertex_usage_color);
 }
 
 void vertex_format_add_position() {
-  currentVertexFormat->AddAttribute(vertex_type_float2, vertex_usage_position);
+  currentVertexFormat.AddAttribute(vertex_type_float2, vertex_usage_position);
 }
 
 void vertex_format_add_position_3d() {
-  currentVertexFormat->AddAttribute(vertex_type_float3, vertex_usage_position);
+  currentVertexFormat.AddAttribute(vertex_type_float3, vertex_usage_position);
 }
 
 void vertex_format_add_textcoord() {
-  currentVertexFormat->AddAttribute(vertex_type_float2, vertex_usage_textcoord);
+  currentVertexFormat.AddAttribute(vertex_type_float2, vertex_usage_textcoord);
 }
 
 void vertex_format_add_normal() {
-  currentVertexFormat->AddAttribute(vertex_type_float3, vertex_usage_normal);
+  currentVertexFormat.AddAttribute(vertex_type_float3, vertex_usage_normal);
 }
 
 void vertex_format_add_custom(int type, int usage) {
-  currentVertexFormat->AddAttribute(type, usage);
+  currentVertexFormat.AddAttribute(type, usage);
 }
 
 int vertex_format_end() {
   int id = -1;
-  #ifdef DEBUG_MODE
-  if (!currentVertexFormat) {
-    show_error("vertex_format_end called and no current vertex format exists! " \
-               "This can occur if you call end without actually calling begin.", false);
-    return id;
-  }
-  #endif
-  auto search = vertexFormatCache.find(currentVertexFormat->hash);
+  auto search = vertexFormatCache.find(currentVertexFormat.hash);
   if (search != vertexFormatCache.end()) {
     id = search->second;
-    delete currentVertexFormat;
   } else {
     id = enigma::vertexFormats.size();
-    enigma::vertexFormats.push_back(currentVertexFormat);
-    vertexFormatCache[currentVertexFormat->hash] = id;
+    enigma::vertexFormats.emplace_back(new enigma::VertexFormat(currentVertexFormat));
+    vertexFormatCache[currentVertexFormat.hash] = id;
   }
-  currentVertexFormat = 0;
   return id;
-}
-
-bool vertex_format_exists() {
-  return (currentVertexFormat != 0);
 }
 
 bool vertex_format_exists(int id) {
