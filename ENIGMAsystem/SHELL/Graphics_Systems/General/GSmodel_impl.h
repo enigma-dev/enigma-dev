@@ -36,6 +36,7 @@ namespace enigma {
 struct Primitive {
   int type; // one of the enigma_user primitive type constants (e.g, pr_trianglelist)
   int format; // index of the user vertex format that describes the vertex data of this primitive
+  bool format_started; // if the format has been started yet from specifying any vertex data
   bool format_defined; // if the format has been guessed yet from how vertex data is being specified
   unsigned vertex_offset; // byte offset into the vertex buffer where this primitive's data begins
   unsigned vertex_count; // number of vertices this primitive is composed of
@@ -43,14 +44,15 @@ struct Primitive {
   // NOTE: format may not exist until d3d_model_primitive_end is called
   // NOTE: when format_defined is true the format may still not exist yet
 
-  Primitive(int type, int format, bool format_defined, unsigned offset):
-    type(type), format(format), format_defined(format_defined), vertex_offset(offset), vertex_count(0) {}
+  Primitive(): type(0), format(-1), format_started(false), format_defined(false), vertex_offset(0), vertex_count(0) {}
+  Primitive(int type, int format, bool format_exists, unsigned offset):
+    type(type), format(format), format_started(format_exists), format_defined(format_exists), vertex_offset(offset), vertex_count(0) {}
 };
 
 struct Model {
   int type; // one of the enigma_user model type constants (e.g, model_static is the default)
   int vertex_buffer; // index of the user vertex buffer this model uses to buffer its vertex data
-  Primitive* current_primitive; // pointer to the current primitive being specified by the user
+  Primitive current_primitive; // the current primitive being specified by the user
   bool vertex_started; // whether the user has begun specifying the model by starting a primitive
   vector<Primitive> primitives; // all primitives the user has finished specifying for this model
 
@@ -60,13 +62,14 @@ struct Model {
   gs_scalar vertex_alpha; // the alpha that was set when the last vertex was added
 
   // NOTE: vertex_buffer should always exist but not outlive the model
-  // NOTE: current_primitive does not exist outside of the begin/end calls
+  // NOTE: current_primitive is not reset until the next begin call
+  // NOTE: current_primitive is not a pointer (same allocation) to avoid allocation overhead
   // NOTE: vertex_started is true until the user attempts to draw the model
   // NOTE: vertex_colored waits until the next vertex or primitive end to add the color
   //       because GM has always specified color as the last argument on its vertex formats
 
   Model(int type, bool use_draw_color):
-    type(type), vertex_buffer(-1), current_primitive(0), vertex_started(false), use_draw_color(use_draw_color),
+    type(type), vertex_buffer(-1), current_primitive(), vertex_started(false), use_draw_color(use_draw_color),
     vertex_colored(true), vertex_color(enigma_user::c_white), vertex_alpha(1.0) {}
 };
 
