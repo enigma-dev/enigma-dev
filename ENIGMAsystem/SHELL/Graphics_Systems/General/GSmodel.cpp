@@ -165,7 +165,6 @@ void d3d_model_clear(int id) {
   enigma::Model* model = enigma::models[id];
   vertex_clear(model->vertex_buffer);
   model->primitives.clear();
-  model->current_primitive = 0;
   model->vertex_started = false;
   model->vertex_colored = true;
 }
@@ -214,19 +213,12 @@ void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId) {
 
 void d3d_model_primitive_begin(int id, int kind, int format) {
   enigma::Model* model = enigma::models[id];
-  #ifdef DEBUG_MODE
-  if (model->current_primitive) {
-    show_error("d3d_model_primitive_begin called again without ending " \
-               "the previous primitive for model: " + std::to_string(id), false);
-    return;
-  }
-  #endif
   if (!model->vertex_started) {
     model->vertex_started = true;
     vertex_begin(model->vertex_buffer);
   }
   model->vertex_colored = true;
-  model->current_primitive = new enigma::Primitive(
+  model->current_primitive = enigma::Primitive(
     kind,
     format,
     vertex_format_exists(format),
@@ -236,32 +228,13 @@ void d3d_model_primitive_begin(int id, int kind, int format) {
 
 void d3d_model_primitive_end(int id) {
   enigma::Model* model = enigma::models[id];
-  #ifdef DEBUG_MODE
-  if (!model->current_primitive) {
-    show_error("d3d_model_primitive_end called for model " + std::to_string(id) + " and no current primitive exists! " \
-               "This can occur if you call end without actually calling begin.", false);
-    return;
-  }
-  #endif
-  // copy current primitive to the stack
-  enigma::Primitive primitive = *model->current_primitive;
-  // delete the current primitive from the heap
-  delete model->current_primitive;
-  model->current_primitive = 0;
+  enigma::Primitive& primitive = model->current_primitive;
 
   // if the primitive doesn't have a valid vertex format
   // and one does exist that we were guessing, then end
   // that vertex format now
-  if (!vertex_format_exists(primitive.format)) {
-    // we can't do anything if we can't figure out the format
-    if (!vertex_format_exists()) {
-      #ifdef DEBUG_MODE
-      show_error("d3d_model_primitive_end called for primitive of model " + std::to_string(id) + " that has " \
-                 "non-existant vertex format and one could not be determined based on vertex specification", false);
-      #endif
-      return;
-    }
-    if (!primitive.format_defined && model->use_draw_color && !model->vertex_colored) {
+  if (!primitive.format_defined) {
+    if (primitive.format_started && model->use_draw_color && !model->vertex_colored) {
       vertex_format_add_color();
     }
     primitive.format = vertex_format_end();
@@ -319,7 +292,7 @@ void d3d_model_primitive_end(int id) {
     // not mergeable with the previous primitive so looks like we have to keep it...
   }
 
-  model->primitives.push_back(primitive);
+  model->primitives.emplace_back(primitive);
 }
 
 void d3d_model_float1(int id, float f1) {
@@ -349,20 +322,22 @@ void d3d_model_ubyte4(int id, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4) {
 
 void d3d_model_vertex(int id, gs_scalar x, gs_scalar y) {
   enigma::Model* model = enigma::models[id];
-  enigma::Primitive* primitive = model->current_primitive;
-  if (!primitive->format_defined) {
-    if (vertex_format_exists()) {
+  enigma::Primitive& primitive = model->current_primitive;
+  if (primitive.format_started && model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+  }
+  if (!primitive.format_defined) {
+    if (primitive.format_started) {
       if (model->use_draw_color && !model->vertex_colored) {
         vertex_format_add_color();
       }
-      primitive->format_defined = true;
+      primitive.format = vertex_format_end();
+      primitive.format_defined = true;
     } else {
       vertex_format_begin();
       vertex_format_add_position();
+      primitive.format_started = true;
     }
-  }
-  if (primitive->format_defined && model->use_draw_color && !model->vertex_colored) {
-    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
   }
   vertex_position(model->vertex_buffer, x, y);
   model->vertex_colored = false;
@@ -372,20 +347,22 @@ void d3d_model_vertex(int id, gs_scalar x, gs_scalar y) {
 
 void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
   enigma::Model* model = enigma::models[id];
-  enigma::Primitive* primitive = model->current_primitive;
-  if (!primitive->format_defined) {
-    if (vertex_format_exists()) {
+  enigma::Primitive& primitive = model->current_primitive;
+  if (primitive.format_started && model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+  }
+  if (!primitive.format_defined) {
+    if (primitive.format_started) {
       if (model->use_draw_color && !model->vertex_colored) {
         vertex_format_add_color();
       }
-      primitive->format_defined = true;
+      primitive.format = vertex_format_end();
+      primitive.format_defined = true;
     } else {
       vertex_format_begin();
       vertex_format_add_position_3d();
+      primitive.format_started = true;
     }
-  }
-  if (primitive->format_defined && model->use_draw_color && !model->vertex_colored) {
-    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
   }
   vertex_position_3d(model->vertex_buffer, x, y, z);
   model->vertex_colored = false;
@@ -395,8 +372,8 @@ void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
 
 void d3d_model_color(int id, int col, double alpha) {
   enigma::Model* model = enigma::models[id];
-  const enigma::Primitive* primitive = model->current_primitive;
-  if (!primitive->format_defined)
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
     vertex_format_add_color();
   vertex_color(model->vertex_buffer, col, alpha);
   model->vertex_colored = true;
@@ -404,8 +381,8 @@ void d3d_model_color(int id, int col, double alpha) {
 
 void d3d_model_argb(int id, unsigned argb) {
   enigma::Model* model = enigma::models[id];
-  const enigma::Primitive* primitive = model->current_primitive;
-  if (!primitive->format_defined)
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
     vertex_format_add_color();
   vertex_argb(model->vertex_buffer, argb);
   model->vertex_colored = true;
@@ -413,56 +390,56 @@ void d3d_model_argb(int id, unsigned argb) {
 
 void d3d_model_texture(int id, gs_scalar tx, gs_scalar ty) {
   const enigma::Model* model = enigma::models[id];
-  const enigma::Primitive* primitive = model->current_primitive;
-  if (!primitive->format_defined)
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
     vertex_format_add_textcoord();
   vertex_texcoord(model->vertex_buffer, tx, ty);
 }
 
 void d3d_model_normal(int id, gs_scalar nx, gs_scalar ny, gs_scalar nz) {
   const enigma::Model* model = enigma::models[id];
-  const enigma::Primitive* primitive = model->current_primitive;
-  if (!primitive->format_defined)
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
     vertex_format_add_normal();
   vertex_normal(model->vertex_buffer, nx, ny, nz);
 }
 
 void d3d_model_float1(int id, int usage, float f1) {
   const enigma::Model* model = enigma::models[id];
-  const enigma::Primitive* primitive = model->current_primitive;
-  if (!primitive->format_defined)
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
     vertex_format_add_custom(vertex_type_float1, usage);
   vertex_float1(model->vertex_buffer, f1);
 }
 
 void d3d_model_float2(int id, int usage, float f1, float f2) {
   const enigma::Model* model = enigma::models[id];
-  const enigma::Primitive* primitive = model->current_primitive;
-  if (!primitive->format_defined)
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
     vertex_format_add_custom(vertex_type_float2, usage);
   vertex_float2(model->vertex_buffer, f1, f2);
 }
 
 void d3d_model_float3(int id, int usage, float f1, float f2, float f3) {
   const enigma::Model* model = enigma::models[id];
-  const enigma::Primitive* primitive = model->current_primitive;
-  if (!primitive->format_defined)
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
     vertex_format_add_custom(vertex_type_float3, usage);
   vertex_float3(model->vertex_buffer, f1, f2, f3);
 }
 
 void d3d_model_float4(int id, int usage, float f1, float f2, float f3, float f4) {
   const enigma::Model* model = enigma::models[id];
-  const enigma::Primitive* primitive = model->current_primitive;
-  if (!primitive->format_defined)
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
     vertex_format_add_custom(vertex_type_float4, usage);
   vertex_float4(model->vertex_buffer, f1, f2, f3, f4);
 }
 
 void d3d_model_ubyte4(int id, int usage, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4) {
   const enigma::Model* model = enigma::models[id];
-  const enigma::Primitive* primitive = model->current_primitive;
-  if (!primitive->format_defined)
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
     vertex_format_add_custom(vertex_type_ubyte4, usage);
   vertex_ubyte4(model->vertex_buffer, u1, u2, u3, u4);
 }
