@@ -84,11 +84,9 @@ before_install:
 
 # build JDI and the CLI
 install:
-  - make -j4
   - |
-    if [ "$TEST_HARNESS" == true ]; then
-      make -j4 emake
-    else
+    if [ "$TEST_HARNESS" != true ]; then
+      make -j4
       CLI_ENABLE_EGM=FALSE make -j4 emake
     fi
 
@@ -193,7 +191,7 @@ script:
   - |
     if [ "$TEST_HARNESS" == true ]; then
       export ASAN_OPTIONS=detect_leaks=0;
-      ./ci-regression.sh "/tmp/enigma-master"
+      ./ci-regression.sh "/tmp/enigma-master" 4
     else
       ./ci-build.sh
     fi
