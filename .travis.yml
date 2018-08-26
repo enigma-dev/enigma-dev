@@ -84,11 +84,9 @@ before_install:
 
 # build JDI and the CLI
 install:
-  - make -j4
   - |
-    if [ "$TEST_HARNESS" == true ]; then
-      make -j4 emake
-    else
+    if [ "$TEST_HARNESS" != true ]; then
+      make -j4
       CLI_ENABLE_EGM=FALSE make -j4 emake
     fi
 

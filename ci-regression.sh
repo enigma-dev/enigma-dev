@@ -9,7 +9,7 @@ fi
 export TEST_HARNESS_MASTER_DIR="$1"
 
 if [ -z "$2" ]; then
-  MAKE_CORES="-j$2"
+  MAKE_CORES=$2
 fi
 
 GIT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
@@ -33,7 +33,7 @@ cp -p -r "${PWD}" "${TEST_HARNESS_MASTER_DIR}"
 
 PREVIOUS_PWD=${PWD}
 pushd "${TEST_HARNESS_MASTER_DIR}"
-make all $MAKE_CORES
+make all -j$MAKE_CORES
 ./test-runner
 if [[ "$TRAVIS" -eq "true" ]]; then
   # upload coverage report before running regression tests
@@ -63,7 +63,7 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
 
   echo "Rebuilding plugin and harness from last commit..."
   make clean
-  make all $MAKE_CORES
+  make all -j$MAKE_CORES
   echo "Generating regression comparison images..."
   mkdir -p "${PWD}/test-harness-out"
   ./test-runner --gtest_filter=Regression.*
