@@ -256,6 +256,10 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
 
 #include "Universal_System/var4.h"
 
+#include "Graphics_Systems/General/GSfont.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolors.h"
+
 namespace enigma_user
 {
 

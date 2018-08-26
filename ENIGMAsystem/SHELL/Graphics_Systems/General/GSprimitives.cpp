@@ -106,22 +106,10 @@ int draw_get_batch_mode() {
   return draw_batch_mode;
 }
 
-void draw_primitive_begin(int kind)
-{
-  draw_batch_begin_deferred(-1);
-  d3d_model_primitive_begin(draw_get_batch_stream(), kind);
-}
-
 void draw_primitive_begin(int kind, int format)
 {
   draw_batch_begin_deferred(-1);
   d3d_model_primitive_begin(draw_get_batch_stream(), kind, format);
-}
-
-void draw_primitive_begin_texture(int kind, int texId)
-{
-  draw_batch_begin_deferred(texId);
-  d3d_model_primitive_begin(draw_get_batch_stream(), kind);
 }
 
 void draw_primitive_begin_texture(int kind, int texId, int format)
@@ -156,14 +144,14 @@ void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar
   d3d_model_vertex_texture_color(draw_get_batch_stream(), x, y, tx, ty, col, alpha);
 }
 
-void d3d_primitive_begin(int kind)
+void d3d_primitive_begin(int kind, int format)
 {
-  draw_primitive_begin(kind);
+  draw_primitive_begin(kind, format);
 }
 
-void d3d_primitive_begin_texture(int kind, int texId)
+void d3d_primitive_begin_texture(int kind, int texId, int format)
 {
-  draw_primitive_begin_texture(kind, texId);
+  draw_primitive_begin_texture(kind, texId, format);
 }
 
 void d3d_primitive_end()
