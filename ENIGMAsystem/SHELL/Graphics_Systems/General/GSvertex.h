@@ -68,6 +68,8 @@ void vertex_format_add_textcoord();
 void vertex_format_add_normal();
 void vertex_format_add_custom(int type, int usage);
 
+// these common vertex formats are analogous to Direct3D FVF flags
+// we have them only to express simple common vertex formats easily
 enum {
   cvf_xy     = 1 << 0,
   cvf_xyz    = 1 << 1,
@@ -84,6 +86,9 @@ enum {
   cvf_tex8   = 1 << 12,
 };
 
+// these are combined common vertex formats for even more expressiveness
+// it should be noted that there is an intentional parity here to several
+// of the vertex functions from older GameMaker versions
 #define cvf_xy_color                  (cvf_xy  | cvf_color                        )
 #define cvf_xy_tex                    (cvf_xy  | cvf_tex1                         )
 #define cvf_xy_tex_color              (cvf_xy  | cvf_tex1   | cvf_color           )
@@ -95,6 +100,7 @@ enum {
 #define cvf_xyz_normal_color          (cvf_xyz | cvf_normal | cvf_color           )
 #define cvf_xyz_normal_tex_color      (cvf_xyz | cvf_normal | cvf_tex1 | cvf_color)
 
+// this function returns a vertex format from the set of cvf flags
 int vertex_format_define(int flags);
 
 int vertex_create_buffer();
