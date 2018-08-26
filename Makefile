@@ -12,7 +12,7 @@ clean: .FORCE
 	$(MAKE) -C CommandLine/protos/ clean
 	$(MAKE) -C CommandLine/testing/ clean
 	$(MAKE) -C shared/lodepng/ clean
-	rm ./gm2egm
+	rm -f ./gm2egm
 
 all: liblodepng libProtocols libEGM ENIGMA emake test-runner .FORCE
 
