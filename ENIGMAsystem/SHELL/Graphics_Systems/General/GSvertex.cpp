@@ -130,6 +130,37 @@ unsigned vertex_format_get_hash(int id) {
   return enigma::vertexFormats[id]->hash;
 }
 
+int vertex_format_define(int flags) {
+  static std::unordered_map<int, int> cache;
+  auto search = cache.find(flags);
+  if (search != cache.end()) {
+    return search->second;
+  }
+  vertex_format_begin();
+  if (flags & cvf_xy) {
+    vertex_format_add_position();
+  }
+  if (flags & cvf_xyz) {
+    vertex_format_add_position_3d();
+  }
+  if (flags & cvf_normal) {
+    vertex_format_add_normal();
+  }
+  for (int i = 0; i < 8; ++i) {
+    int tex_flag = cvf_tex1 << i;
+    if (!(flags & tex_flag)) {
+      break;
+    }
+    vertex_format_add_textcoord();
+  }
+  if (flags & cvf_color) {
+    vertex_format_add_color();
+  }
+  int id = vertex_format_end();
+  cache.emplace(flags, id);
+  return id;
+}
+
 int vertex_create_buffer() {
   int id = enigma::vertexBuffers.size();
   enigma::vertexBuffers.push_back(new enigma::VertexBuffer());

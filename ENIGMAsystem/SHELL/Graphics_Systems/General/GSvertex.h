@@ -68,6 +68,35 @@ void vertex_format_add_textcoord();
 void vertex_format_add_normal();
 void vertex_format_add_custom(int type, int usage);
 
+enum {
+  cvf_xy     = 1 << 0,
+  cvf_xyz    = 1 << 1,
+  cvf_color  = 1 << 2,
+  cvf_normal = 1 << 3,
+  cvf_tex0   = 1 << 4,
+  cvf_tex1   = 1 << 5,
+  cvf_tex2   = 1 << 6,
+  cvf_tex3   = 1 << 7,
+  cvf_tex4   = 1 << 8,
+  cvf_tex5   = 1 << 9,
+  cvf_tex6   = 1 << 10,
+  cvf_tex7   = 1 << 11,
+  cvf_tex8   = 1 << 12,
+};
+
+#define cvf_xy_color                  (cvf_xy  | cvf_color                        )
+#define cvf_xy_tex                    (cvf_xy  | cvf_tex1                         )
+#define cvf_xy_tex_color              (cvf_xy  | cvf_tex1   | cvf_color           )
+#define cvf_xyz_color                 (cvf_xyz | cvf_color                        )
+#define cvf_xyz_tex                   (cvf_xyz | cvf_tex1                         )
+#define cvf_xyz_tex_color             (cvf_xyz | cvf_tex1   | cvf_color           )
+#define cvf_xyz_normal                (cvf_xyz | cvf_normal                       )
+#define cvf_xyz_normal_tex            (cvf_xyz | cvf_normal | cvf_tex1            )
+#define cvf_xyz_normal_color          (cvf_xyz | cvf_normal | cvf_color           )
+#define cvf_xyz_normal_tex_color      (cvf_xyz | cvf_normal | cvf_tex1 | cvf_color)
+
+int vertex_format_define(int flags);
+
 int vertex_create_buffer();
 int vertex_create_buffer_ext(unsigned size);
 void vertex_delete_buffer(int buffer);

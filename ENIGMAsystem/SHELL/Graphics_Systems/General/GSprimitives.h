@@ -42,7 +42,9 @@ namespace enigma_user
   void draw_batch_flush(int kind = draw_get_batch_mode());
   unsigned draw_primitive_count(int kind, unsigned vertex_count);
   void draw_primitive_begin(int kind);
+  void draw_primitive_begin(int kind, int format);
   void draw_primitive_begin_texture(int kind, int texId);
+  void draw_primitive_begin_texture(int kind, int texId, int format);
   void draw_primitive_end();
   void draw_vertex(gs_scalar x, gs_scalar y);
   void draw_vertex_color(gs_scalar x, gs_scalar y, int color, float alpha);

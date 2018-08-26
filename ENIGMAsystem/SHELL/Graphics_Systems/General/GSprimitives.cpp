@@ -112,10 +112,22 @@ void draw_primitive_begin(int kind)
   d3d_model_primitive_begin(draw_get_batch_stream(), kind);
 }
 
+void draw_primitive_begin(int kind, int format)
+{
+  draw_batch_begin_deferred(-1);
+  d3d_model_primitive_begin(draw_get_batch_stream(), kind, format);
+}
+
 void draw_primitive_begin_texture(int kind, int texId)
 {
   draw_batch_begin_deferred(texId);
   d3d_model_primitive_begin(draw_get_batch_stream(), kind);
+}
+
+void draw_primitive_begin_texture(int kind, int texId, int format)
+{
+  draw_batch_begin_deferred(texId);
+  d3d_model_primitive_begin(draw_get_batch_stream(), kind, format);
 }
 
 void draw_primitive_end()
