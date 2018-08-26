@@ -9,7 +9,7 @@ fi
 export TEST_HARNESS_MASTER_DIR="$1"
 
 if [ -z "$2" ]; then
-  MAKE_CORES=-j$2
+  MAKE_CORES="-j$2"
 fi
 
 GIT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
