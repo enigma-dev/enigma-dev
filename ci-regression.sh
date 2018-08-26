@@ -41,6 +41,8 @@ if [[ "$TRAVIS" -eq "true" ]]; then
 fi
 # move output to safe space until we can compare
 mv ./test-harness-out ${PREVIOUS_PWD}
+# clean before we checkout
+make clean
 
 if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   git stash
@@ -62,7 +64,6 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   git clean -f -d
 
   echo "Rebuilding plugin and harness from last commit..."
-  make clean
   make all -j$MAKE_CORES
   echo "Generating regression comparison images..."
   mkdir -p "${PWD}/test-harness-out"
