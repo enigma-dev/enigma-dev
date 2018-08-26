@@ -1,0 +1,6 @@
+[submodule "CommandLine/protos/third-party/protobuf"]
+	path = CommandLine/protos/third-party/protobuf
+	url = https://github.com/google/protobuf.git
+[submodule "CommandLine/protos/third-party/zlib"]
+	path = CommandLine/protos/third-party/zlib
+	url = https://github.com/madler/zlib.git
