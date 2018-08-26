@@ -42,7 +42,7 @@ namespace enigma
 
   void glsl_attribute_enable_all_internal(bool enable);
   void glsl_attribute_enable_internal(int location, bool enable);
-  void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, int offset);
+  void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, unsigned offset);
 }
 
 namespace enigma_user
@@ -119,7 +119,7 @@ void glsl_uniform_matrix4fv(int location, int size, const float *matrix);
 
 void glsl_attribute_enable_all(bool enable);
 void glsl_attribute_enable(int location, bool enable);
-void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset);
+void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, unsigned offset);
 
 // Wrap our abstracted version to the GameMaker version
 #define shader_set            glsl_program_set

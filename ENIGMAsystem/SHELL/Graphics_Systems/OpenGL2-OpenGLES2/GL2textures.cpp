@@ -16,17 +16,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <stdio.h>
+#include "Bridges/General/GLmanager.h"
+#include "GL2TextureStruct.h"
 #include "OpenGLHeaders.h"
-#include <string.h>
-//using std::string;
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background_internal.h"
 #include "Universal_System/sprites_internal.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Bridges/General/GLmanager.h"
-#include "GL2TextureStruct.h"
+
+#include <stdio.h>
+#include <string.h>
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
@@ -280,6 +282,7 @@ void texture_preload(int texid)
 
 void texture_set_priority(int texid, double prio)
 {
+  draw_batch_flush(batch_flush_deferred);
   // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
   //glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
   //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
@@ -287,11 +290,13 @@ void texture_set_priority(int texid, double prio)
 
 void texture_set_enabled(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_TEXTURE_2D);
 }
 
 void texture_set_blending(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_BLEND);
 }
 
@@ -315,6 +320,7 @@ gs_scalar texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
+  draw_batch_flush(batch_flush_deferred);
   if (texid == -1) { texture_reset(); return; }
   if (enigma::samplerstates[stage].bound_texture != texid) {
     glActiveTexture(GL_TEXTURE0 + stage);
@@ -326,6 +332,7 @@ void texture_set_stage(int stage, int texid) {
 }
 
 void texture_reset() {
+  draw_batch_flush(batch_flush_deferred);
   glActiveTexture(GL_TEXTURE0);
   enigma::samplerstates[0].bound_texture = -1;
   oglmgr->BindTexture(GL_TEXTURE_2D, 0);
@@ -336,12 +343,14 @@ void texture_reset() {
 
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   enigma::samplerstates[sampler].min = enable?GL_LINEAR:GL_NEAREST;
   enigma::samplerstates[sampler].mag = enable?GL_LINEAR:GL_NEAREST;
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat)
 {
+  draw_batch_flush(batch_flush_deferred);
   enigma::samplerstates[sampler].wrapu = repeat;
   enigma::samplerstates[sampler].wrapv = repeat;
   enigma::samplerstates[sampler].wrapw = repeat;
@@ -349,6 +358,7 @@ void texture_set_repeat_ext(int sampler, bool repeat)
 
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
+  draw_batch_flush(batch_flush_deferred);
   enigma::samplerstates[sampler].wrapu = wrapu;
   enigma::samplerstates[sampler].wrapv = wrapv;
   enigma::samplerstates[sampler].wrapw = wrapw;
@@ -356,6 +366,7 @@ void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 
 void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 {
+  draw_batch_flush(batch_flush_deferred);
   enigma::samplerstates[sampler].bordercolor[0] = r;
   enigma::samplerstates[sampler].bordercolor[1] = g;
   enigma::samplerstates[sampler].bordercolor[2] = b;
@@ -364,6 +375,7 @@ void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 
 void texture_set_filter_ext(int sampler, int filter)
 {
+  draw_batch_flush(batch_flush_deferred);
   if (filter == tx_trilinear) {
     enigma::samplerstates[sampler].min = GL_LINEAR_MIPMAP_LINEAR;
     enigma::samplerstates[sampler].mag = GL_LINEAR;
@@ -381,6 +393,7 @@ void texture_set_filter_ext(int sampler, int filter)
 
 void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel)
 {
+  draw_batch_flush(batch_flush_deferred);
   enigma::samplerstates[sampler].minlod = minlod;
   enigma::samplerstates[sampler].maxlod = maxlod;
   enigma::samplerstates[sampler].maxlevel = maxlevel;
@@ -405,8 +418,9 @@ float texture_anisotropy_maxlevel()
   return maximumAnisotropy;
 }
 
-void  texture_anisotropy_filter(int sampler, gs_scalar levels)
+void texture_anisotropy_filter(int sampler, gs_scalar levels)
 {
+  draw_batch_flush(batch_flush_deferred);
   enigma::samplerstates[sampler].anisotropy = levels;
 }
 

@@ -17,16 +17,16 @@
 **/
 
 #include "Bridges/General/GLmanager.h"
-
 #include "GL2TextureStruct.h"
 #include "OpenGLHeaders.h"
-#include "Graphics_Systems/OpenGL-OpenGLES/GLSurfaceStruct.h"
+#include "GLSurfaceStruct.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-#include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GStextures.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
@@ -40,10 +40,6 @@
 #include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
-
-namespace enigma_user {
-  extern int room_width, room_height/*, sprite_idmax*/;
-}
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -210,6 +206,7 @@ void surface_add_depthbuffer(int id, int internalFormat, unsigned format, unsign
 
 void surface_set_target(int id)
 {
+  draw_batch_flush(batch_flush_deferred);
   get_surface(surf,id);
   oglmgr->Bind();
   //This fixes several consecutive surface_set_target() calls without surface_reset_target.
@@ -225,6 +222,7 @@ void surface_set_target(int id)
 
 void surface_reset_target(void)
 {
+  draw_batch_flush(batch_flush_deferred);
   oglmgr->Bind();
   enigma::bound_framebuffer = 0;
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -292,6 +290,8 @@ int surface_get_height(int id)
 
 int surface_getpixel(int id, int x, int y)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surf,id,-1);
   unsigned char *pixelbuf=new unsigned char[3];
   glBindFramebuffer(GL_FRAMEBUFFER, surf.fbo);
@@ -302,6 +302,8 @@ int surface_getpixel(int id, int x, int y)
 
 int surface_getpixel_ext(int id, int x, int y)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surf,id,-1);
   unsigned char *pixelbuf=new unsigned char[4];
   glBindFramebuffer(GL_FRAMEBUFFER, surf.fbo);
@@ -313,6 +315,8 @@ int surface_getpixel_ext(int id, int x, int y)
 
 int surface_getpixel_alpha(int id, int x, int y)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surf,id,-1);
   unsigned char *pixelbuf=new unsigned char[1];
   glBindFramebuffer(GL_FRAMEBUFFER, surf.fbo);
@@ -337,6 +341,8 @@ namespace enigma_user
 
 int surface_save(int id, string filename)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surf,id,-1);
   unsigned int w=surf.width,h=surf.height,sz=w*h;
 
@@ -357,6 +363,8 @@ int surface_save(int id, string filename)
 
 int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surf,id,-1);
   unsigned int sz=w*h;
 
@@ -377,6 +385,8 @@ int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned 
 
 int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surf,id,-1);
   int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 
@@ -395,6 +405,8 @@ int background_create_from_surface(int id, int x, int y, int w, int h, bool remo
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surf,id,-1);
   int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
   enigma::spritestructarray_reallocate();
@@ -418,6 +430,8 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
 
 void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surface(surf,id);
   int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 
@@ -432,6 +446,8 @@ void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool r
 
 void surface_copy_part(int destination, float x, float y, int source, int xs, int ys, int ws, int hs)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surface(ssurf,source);
   get_surface(dsurf,destination);
   unsigned char *surfbuf=new unsigned char[ws*hs*4];
@@ -452,6 +468,8 @@ void surface_copy_part(int destination, float x, float y, int source, int xs, in
 
 void surface_copy(int destination, float x, float y, int source)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surface(ssurf,source);
   get_surface(dsurf,destination);
   unsigned char *surfbuf=new unsigned char[dsurf.width*dsurf.height*4];

@@ -141,8 +141,6 @@ for console mode:
 
 static int gWarningDisplayed = 0 ;
 
-static char const gTitle[]="";
-
 #ifdef _MSC_VER
 #pragma warning(disable:4996) /* allows usage of strncpy, strcpy, strcat, sprintf, fopen */
 #pragma warning(disable:4100) /* allows usage of strncpy, strcpy, strcat, sprintf, fopen */
@@ -484,7 +482,7 @@ static int osx9orBetter( )
         if ( lOsx9orBetter < 0 )
         {
                 lOsx9orBetter = 0 ;
-                lIn = popen( "osascript -e 'set osver to system version of (system info)'" , "r" ) ;
+                lIn = popen( "osascript -e \"set osver to system version of (system info)\"" , "r" ) ;
                 if ( ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
                         && ( 2 == sscanf(lBuff, "%d.%d", &V, &v) ) )
                 {
@@ -529,18 +527,18 @@ int tinyfd_messageBox(
                 if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"applescript");return 1;}
 
                 strcpy( lDialogString , "osascript ");
-                if ( ! osx9orBetter() ) strcat( lDialogString , " -e 'tell application \"System Events\"' -e 'Activate'");
-                strcat( lDialogString , " -e 'try' -e 'set {vButton} to {button returned} of ( display dialog \"") ;
+                if ( ! osx9orBetter() ) strcat( lDialogString , " -e \"tell application \\\"System Events\\\"\" -e \"Activate\"");
+                strcat( lDialogString , " -e \"try\" -e \"set {vButton} to {button returned} of ( display dialog \\\"") ;
                 if ( aMessage && strlen(aMessage) )
                 {
                         strcat(lDialogString, aMessage) ;
                 }
-                strcat(lDialogString, "\" ") ;
+                strcat(lDialogString, "\\\" ") ;
                 if ( aTitle && strlen(aTitle) )
                 {
-                        strcat(lDialogString, "with title \"") ;
+                        strcat(lDialogString, "with title \\\"") ;
                         strcat(lDialogString, aTitle) ;
-                        strcat(lDialogString, "\" ") ;
+                        strcat(lDialogString, "\\\" ") ;
                 }
                 strcat(lDialogString, "with icon ") ;
                 if ( aIconType && ! strcmp( "error" , aIconType ) )
@@ -559,51 +557,51 @@ int tinyfd_messageBox(
                 {
                         if ( ! aDefaultButton )
                         {
-                                strcat( lDialogString ,"default button \"Cancel\" " ) ;
+                                strcat( lDialogString ,"default button \\\"Cancel\\\" " ) ;
                         }
                 }
                 else if ( aDialogType && ! strcmp( "yesno" , aDialogType ) )
                 {
-                        strcat( lDialogString ,"buttons {\"No\", \"Yes\"} " ) ;
+                        strcat( lDialogString ,"buttons {\\\"No\\\", \\\"Yes\\\"} " ) ;
                         if (aDefaultButton)
                         {
-                                strcat( lDialogString ,"default button \"Yes\" " ) ;
+                                strcat( lDialogString ,"default button \\\"Yes\\\" " ) ;
                         }
                         else
                         {
-                                strcat( lDialogString ,"default button \"No\" " ) ;
+                                strcat( lDialogString ,"default button \\\"No\\\" " ) ;
                         }
-                        strcat( lDialogString ,"cancel button \"No\"" ) ;
+                        strcat( lDialogString ,"cancel button \\\"No\\\"" ) ;
                 }
                 else if ( aDialogType && ! strcmp( "yesnocancel" , aDialogType ) )
                 {
-                        strcat( lDialogString ,"buttons {\"No\", \"Yes\", \"Cancel\"} " ) ;
+                        strcat( lDialogString ,"buttons {\\\"No\\\", \\\"Yes\\\", \\\"Cancel\\\"} " ) ;
                         switch (aDefaultButton)
                         {
-                                case 1: strcat( lDialogString ,"default button \"Yes\" " ) ; break;
-                                case 2: strcat( lDialogString ,"default button \"No\" " ) ; break;
-                                case 0: strcat( lDialogString ,"default button \"Cancel\" " ) ; break;
+                                case 1: strcat( lDialogString ,"default button \\\"Yes\\\" " ) ; break;
+                                case 2: strcat( lDialogString ,"default button \\\"No\\\" " ) ; break;
+                                case 0: strcat( lDialogString ,"default button \\\"Cancel\\\" " ) ; break;
                         }
-                        strcat( lDialogString ,"cancel button \"Cancel\"" ) ;
+                        strcat( lDialogString ,"cancel button \\\"Cancel\\\"" ) ;
                 }
                 else
                 {
-                        strcat( lDialogString ,"buttons {\"OK\"} " ) ;
-                        strcat( lDialogString ,"default button \"OK\" " ) ;
+                        strcat( lDialogString ,"buttons {\\\"OK\\\"} " ) ;
+                        strcat( lDialogString ,"default button \\\"OK\\\" " ) ;
                 }
-                strcat( lDialogString, ")' ") ;
+                strcat( lDialogString, ")\" ") ;
 
                 strcat( lDialogString,
-"-e 'if vButton is \"Yes\" then' -e 'return 1'\
- -e 'else if vButton is \"OK\" then' -e 'return 1'\
- -e 'else if vButton is \"No\" then' -e 'return 2'\
- -e 'else' -e 'return 0' -e 'end if' " );
+"-e \"if vButton is \\\"Yes\\\" then\" -e \"return 1\"\
+ -e \"else if vButton is \\\"OK\\\" then\" -e \"return 1\"\
+ -e \"else if vButton is \\\"No\\\" then\" -e \"return 2\"\
+ -e \"else\" -e \"return 0\" -e \"end if\" " );
 
-                strcat( lDialogString, "-e 'on error number -128' " ) ;
-                strcat( lDialogString, "-e '0' " );
+                strcat( lDialogString, "-e \"on error number -128\" " ) ;
+                strcat( lDialogString, "-e \"0\" " );
 
-                strcat( lDialogString, "-e 'end try'") ;
-                if ( ! osx9orBetter() ) strcat( lDialogString, " -e 'end tell'") ;
+                strcat( lDialogString, "-e \"end try\"") ;
+                if ( ! osx9orBetter() ) strcat( lDialogString, " -e \"end tell\"") ;
         }
         else if ( zenityPresent() )
         {
@@ -745,31 +743,31 @@ char const * tinyfd_inputBox(
         {
                 if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"applescript");return (char const *)1;}
                 strcpy( lDialogString , "osascript ");
-                if ( ! osx9orBetter() ) strcat( lDialogString , " -e 'tell application \"System Events\"' -e 'Activate'");
-                strcat( lDialogString , " -e 'try' -e 'display dialog \"") ;
+                if ( ! osx9orBetter() ) strcat( lDialogString , " -e \"tell application \\\"System Events\\\"\" -e \"Activate\"");
+                strcat( lDialogString , " -e \"try\" -e \"display dialog \\\"") ;
                 if ( aMessage && strlen(aMessage) )
                 {
                         strcat(lDialogString, aMessage) ;
                 }
-                strcat(lDialogString, "\" ") ;
-                strcat(lDialogString, "default answer \"") ;
+                strcat(lDialogString, "\\\" ") ;
+                strcat(lDialogString, "default answer \\\"") ;
                 if ( aDefaultInput && strlen(aDefaultInput) )
                 {
                         strcat(lDialogString, aDefaultInput) ;
                 }
-                strcat(lDialogString, "\" ") ;
+                strcat(lDialogString, "\\\" ") ;
                 if ( aTitle && strlen(aTitle) )
                 {
-                        strcat(lDialogString, "with title \"") ;
+                        strcat(lDialogString, "with title \\\"") ;
                         strcat(lDialogString, aTitle) ;
-                        strcat(lDialogString, "\" ") ;
+                        strcat(lDialogString, "\\\" ") ;
                 }
-                strcat(lDialogString, "with icon note' ") ;
-                strcat(lDialogString, "-e '\"1\" & text returned of result' " );
-                strcat(lDialogString, "-e 'on error number -128' " ) ;
-                strcat(lDialogString, "-e '0' " );
-                strcat(lDialogString, "-e 'end try'") ;
-                if ( ! osx9orBetter() ) strcat(lDialogString, " -e 'end tell'") ;
+                strcat(lDialogString, "with icon note\" ") ;
+                strcat(lDialogString, "-e \"\\\"1\\\" & text returned of result\" " );
+                strcat(lDialogString, "-e \"on error number -128\" " ) ;
+                strcat(lDialogString, "-e \"0\" " );
+                strcat(lDialogString, "-e \"end try\"") ;
+                if ( ! osx9orBetter() ) strcat(lDialogString, " -e \"end tell\"") ;
         }
         else if ( zenityPresent() )
         {
@@ -897,34 +895,34 @@ char const * tinyfd_passwordBox(
         {
                 if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"applescript");return (char const *)1;}
                 strcpy( lDialogString , "osascript ");
-                if ( ! osx9orBetter() ) strcat( lDialogString , " -e 'tell application \"System Events\"' -e 'Activate'");
-                strcat( lDialogString , " -e 'try' -e 'display dialog \"") ;
+                if ( ! osx9orBetter() ) strcat( lDialogString , " -e \"tell application \\\"System Events\\\"\" -e \"Activate\"");
+                strcat( lDialogString , " -e \"try\" -e \"display dialog \\\"") ;
                 if ( aMessage && strlen(aMessage) )
                 {
                         strcat(lDialogString, aMessage) ;
                 }
-                strcat(lDialogString, "\" ") ;
-                strcat(lDialogString, "default answer \"") ;
+                strcat(lDialogString, "\\\" ") ;
+                strcat(lDialogString, "default answer \\\"") ;
                 if ( aDefaultInput && strlen(aDefaultInput) )
                 {
                         strcat(lDialogString, aDefaultInput) ;
                 }
-                strcat(lDialogString, "\" ") ;
+                strcat(lDialogString, "\\\" ") ;
 
                 strcat(lDialogString, "hidden answer true ") ;
 
                 if ( aTitle && strlen(aTitle) )
                 {
-                        strcat(lDialogString, "with title \"") ;
+                        strcat(lDialogString, "with title \\\"") ;
                         strcat(lDialogString, aTitle) ;
-                        strcat(lDialogString, "\" ") ;
+                        strcat(lDialogString, "\\\" ") ;
                 }
-                strcat(lDialogString, "with icon note' ") ;
-                strcat(lDialogString, "-e '\"1\" & text returned of result' " );
-                strcat(lDialogString, "-e 'on error number -128' " ) ;
-                strcat(lDialogString, "-e '0' " );
-                strcat(lDialogString, "-e 'end try'") ;
-                if ( ! osx9orBetter() ) strcat(lDialogString, " -e 'end tell'") ;
+                strcat(lDialogString, "with icon note\" ") ;
+                strcat(lDialogString, "-e \"\\\"1\\\" & text returned of result\" " );
+                strcat(lDialogString, "-e \"on error number -128\" " ) ;
+                strcat(lDialogString, "-e \"0\" " );
+                strcat(lDialogString, "-e \"end try\"") ;
+                if ( ! osx9orBetter() ) strcat(lDialogString, " -e \"end tell\"") ;
         }
         else if ( zenityPresent() )
         {
@@ -1079,32 +1077,32 @@ char const * tinyfd_saveFileDialog(
         {
                 if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"applescript");return (char const *)1;}
                 strcpy( lDialogString , "osascript ");
-                if ( ! osx9orBetter() ) strcat( lDialogString , " -e 'tell application \"Finder\"' -e 'Activate'");
-                strcat( lDialogString , " -e 'try' -e 'POSIX path of ( choose file name " );
+                if ( ! osx9orBetter() ) strcat( lDialogString , " -e \"tell application \\\"Finder\\\"\" -e \"Activate\"");
+                strcat( lDialogString , " -e \"try\" -e \"POSIX path of ( choose file name " );
                 if ( aTitle && strlen(aTitle) )
                 {
-                        strcat(lDialogString, "with prompt \"") ;
+                        strcat(lDialogString, "with prompt \\\"") ;
                         strcat(lDialogString, aTitle) ;
-                        strcat(lDialogString, "\" ") ;
+                        strcat(lDialogString, "\\\" ") ;
                 }
                 getPathWithoutFinalSlash( lString , aDefaultPathAndFile ) ;
                 if ( strlen(lString) )
                 {
-                        strcat(lDialogString, "default location \"") ;
+                        strcat(lDialogString, "default location \\\"") ;
                         strcat(lDialogString, lString ) ;
-                        strcat(lDialogString , "\" " ) ;
+                        strcat(lDialogString , "\\\" " ) ;
                 }
                 getLastName( lString , aDefaultPathAndFile ) ;
                 if ( strlen(lString) )
                 {
-                        strcat(lDialogString, "default name \"") ;
+                        strcat(lDialogString, "default name \\\"") ;
                         strcat(lDialogString, lString ) ;
-                        strcat(lDialogString , "\" " ) ;
+                        strcat(lDialogString , "\\\" " ) ;
                 }
-                strcat( lDialogString , ")' " ) ;
-                strcat(lDialogString, "-e 'on error number -128' " ) ;
-                strcat(lDialogString, "-e 'end try'") ;
-                if ( ! osx9orBetter() ) strcat( lDialogString, " -e 'end tell'") ;
+                strcat( lDialogString , ")\" " ) ;
+                strcat(lDialogString, "-e \"on error number -128\" " ) ;
+                strcat(lDialogString, "-e \"end try\"") ;
+                if ( ! osx9orBetter() ) strcat( lDialogString, " -e \"end tell\"") ;
         }
         else if ( zenityPresent() )
         {
@@ -1191,8 +1189,8 @@ char const * tinyfd_openFileDialog(
         {
                 if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"applescript");return (char const *)1;}
                 strcpy( lDialogString , "osascript ");
-                if ( ! osx9orBetter() ) strcat( lDialogString , " -e 'tell application \"System Events\"' -e 'Activate'");
-                strcat( lDialogString , " -e 'try' -e '" );
+                if ( ! osx9orBetter() ) strcat( lDialogString , " -e \"tell application \\\"System Events\\\"\" -e \"Activate\"");
+                strcat( lDialogString , " -e \"try\" -e \"" );
     if ( ! aAllowMultipleSelects )
     {
 
@@ -1206,50 +1204,50 @@ char const * tinyfd_openFileDialog(
                 strcat( lDialogString , "choose file " );
             if ( aTitle && strlen(aTitle) )
             {
-                        strcat(lDialogString, "with prompt \"") ;
+                        strcat(lDialogString, "with prompt \\\"") ;
                         strcat(lDialogString, aTitle) ;
-                        strcat(lDialogString, "\" ") ;
+                        strcat(lDialogString, "\\\" ") ;
             }
                 getPathWithoutFinalSlash( lString , aDefaultPathAndFile ) ;
                 if ( strlen(lString) )
                 {
-                        strcat(lDialogString, "default location \"") ;
+                        strcat(lDialogString, "default location \\\"") ;
                         strcat(lDialogString, lString ) ;
-                        strcat(lDialogString , "\" " ) ;
+                        strcat(lDialogString , "\\\" " ) ;
                 }
                 if ( aNumOfFilterPatterns > 0 )
                 {
-                        strcat(lDialogString , "of type {\"" );
+                        strcat(lDialogString , "of type {\\\"" );
                         strcat( lDialogString , aFilterPatterns [0] + 2 ) ;
-                        strcat( lDialogString , "\"" ) ;
+                        strcat( lDialogString , "\\\"" ) ;
                         for ( i = 1 ; i < aNumOfFilterPatterns ; i ++ )
                         {
-                                strcat( lDialogString , ",\"" ) ;
+                                strcat( lDialogString , ",\\\"" ) ;
                                 strcat( lDialogString , aFilterPatterns [i] + 2) ;
-                                strcat( lDialogString , "\"" ) ;
+                                strcat( lDialogString , "\\\"" ) ;
                         }
                         strcat( lDialogString , "} " ) ;
                 }
                 if ( aAllowMultipleSelects )
                 {
-                        strcat( lDialogString , "multiple selections allowed true ' " ) ;
+                        strcat( lDialogString , "multiple selections allowed true \" " ) ;
                         strcat( lDialogString ,
-                                        "-e 'set mystring to POSIX path of item 1 of mylist' " );
+                                        "-e \"set mystring to POSIX path of item 1 of mylist\" " );
                         strcat( lDialogString ,
-                                        "-e 'repeat with  i from 2 to the count of mylist' " );
-                        strcat( lDialogString , "-e 'set mystring to mystring & \"|\"' " );
+                                        "-e \"repeat with  i from 2 to the count of mylist\" " );
+                        strcat( lDialogString , "-e \"set mystring to mystring & \\\"|\\\"\" " );
                         strcat( lDialogString ,
-                        "-e 'set mystring to mystring & POSIX path of item i of mylist' " );
-                        strcat( lDialogString , "-e 'end repeat' " );
-                        strcat( lDialogString , "-e 'mystring' " );
+                        "-e \"set mystring to mystring & POSIX path of item i of mylist\" " );
+                        strcat( lDialogString , "-e \"end repeat\" " );
+                        strcat( lDialogString , "-e \"mystring\" " );
                 }
                 else
                 {
-                        strcat( lDialogString , ")' " ) ;
+                        strcat( lDialogString , ")\" " ) ;
                 }
-                strcat(lDialogString, "-e 'on error number -128' " ) ;
-                strcat(lDialogString, "-e 'end try'") ;
-                if ( ! osx9orBetter() ) strcat( lDialogString, " -e 'end tell'") ;
+                strcat(lDialogString, "-e \"on error number -128\" " ) ;
+                strcat(lDialogString, "-e \"end try\"") ;
+                if ( ! osx9orBetter() ) strcat( lDialogString, " -e \"end tell\"") ;
         }
         else if ( zenityPresent() )
         {
@@ -1340,24 +1338,24 @@ char const * tinyfd_selectFolderDialog(
         {
                 if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"applescript");return (char const *)1;}
                 strcpy( lDialogString , "osascript ");
-                if ( ! osx9orBetter() ) strcat( lDialogString , " -e 'tell application \"System Events\"' -e 'Activate'");
-                strcat( lDialogString , " -e 'try' -e 'POSIX path of ( choose folder ");
+                if ( ! osx9orBetter() ) strcat( lDialogString , " -e \"tell application \\\"System Events\\\"\" -e \"Activate\"");
+                strcat( lDialogString , " -e \"try\" -e \"POSIX path of ( choose folder ");
                 if ( aTitle && strlen(aTitle) )
                 {
-                strcat(lDialogString, "with prompt \"") ;
+                strcat(lDialogString, "with prompt \\\"") ;
                 strcat(lDialogString, aTitle) ;
-                strcat(lDialogString, "\" ") ;
+                strcat(lDialogString, "\\\" ") ;
                 }
                 if ( aDefaultPath && strlen(aDefaultPath) )
                 {
-                        strcat(lDialogString, "default location \"") ;
+                        strcat(lDialogString, "default location \\\"") ;
                         strcat(lDialogString, aDefaultPath ) ;
-                        strcat(lDialogString , "\" " ) ;
+                        strcat(lDialogString , "\\\" " ) ;
                 }
-                strcat( lDialogString , ")' " ) ;
-                strcat(lDialogString, "-e 'on error number -128' " ) ;
-                strcat(lDialogString, "-e 'end try'") ;
-                if ( ! osx9orBetter() ) strcat( lDialogString, " -e 'end tell'") ;
+                strcat( lDialogString , ")\" " ) ;
+                strcat(lDialogString, "-e \"on error number -128\" " ) ;
+                strcat(lDialogString, "-e \"end try\"") ;
+                if ( ! osx9orBetter() ) strcat( lDialogString, " -e \"end tell\"") ;
         }
         else if ( zenityPresent() )
         {
@@ -1445,42 +1443,42 @@ char const * tinyfd_colorChooser(
 
         if ( osascriptPresent( ) )
         {
-                if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"applescript");return (char const *)1;}
-                lWasOsascript = 1 ;
-                strcpy( lDialogString , "osascript");
-
-                if ( ! osx9orBetter() )
-                {
-                        strcat( lDialogString , " -e 'tell application \"System Events\"' -e 'Activate'");
-                        strcat( lDialogString , " -e 'try' -e 'set mycolor to choose color default color {");
-                }
-                else
-                {
-                        strcat( lDialogString ,
-" -e 'try' -e 'tell app (path to frontmost application as Unicode text) \
-to set mycolor to choose color default color {");
-                }
-
-                sprintf(lTmp, "%d", 256 * lDefaultRGB[0] ) ;
-                strcat(lDialogString, lTmp ) ;
-                strcat(lDialogString, "," ) ;
-                sprintf(lTmp, "%d", 256 * lDefaultRGB[1] ) ;
-                strcat(lDialogString, lTmp ) ;
-                strcat(lDialogString, "," ) ;
-                sprintf(lTmp, "%d", 256 * lDefaultRGB[2] ) ;
-                strcat(lDialogString, lTmp ) ;
-                strcat(lDialogString, "}' " ) ;
+            if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"applescript");return (char const *)1;}
+            lWasOsascript = 1 ;
+            strcpy( lDialogString , "osascript");
+            
+            if ( ! osx9orBetter() )
+            {
+                strcat( lDialogString , " -e \"tell application \\\"System Events\\\"\" -e \"Activate\"");
+                strcat( lDialogString , " -e \"try\" -e \"set mycolor to choose color default color {");
+            }
+            else
+            {
                 strcat( lDialogString ,
-"-e 'set mystring to ((item 1 of mycolor) div 256 as integer) as string' " );
-                strcat( lDialogString ,
-"-e 'repeat with i from 2 to the count of mycolor' " );
-                strcat( lDialogString ,
-"-e 'set mystring to mystring & \" \" & ((item i of mycolor) div 256 as integer) as string' " );
-                strcat( lDialogString , "-e 'end repeat' " );
-                strcat( lDialogString , "-e 'mystring' ");
-                strcat(lDialogString, "-e 'on error number -128' " ) ;
-                strcat(lDialogString, "-e 'end try'") ;
-                if ( ! osx9orBetter() ) strcat( lDialogString, " -e 'end tell'") ;
+                       " -e \"try\" -e \"tell app (path to frontmost application as Unicode text) \
+                       to set mycolor to choose color default color {");
+            }
+            
+            sprintf(lTmp, "%d", 256 * lDefaultRGB[0] ) ;
+            strcat(lDialogString, lTmp ) ;
+            strcat(lDialogString, "," ) ;
+            sprintf(lTmp, "%d", 256 * lDefaultRGB[1] ) ;
+            strcat(lDialogString, lTmp ) ;
+            strcat(lDialogString, "," ) ;
+            sprintf(lTmp, "%d", 256 * lDefaultRGB[2] ) ;
+            strcat(lDialogString, lTmp ) ;
+            strcat(lDialogString, "}\" " ) ;
+            strcat( lDialogString ,
+                   "-e \"set mystring to ((item 1 of mycolor) div 256 as integer) as string\" " );
+            strcat( lDialogString ,
+                   "-e \"repeat with i from 2 to the count of mycolor\" " );
+            strcat( lDialogString ,
+                   "-e \"set mystring to mystring & \\\" \\\" & ((item i of mycolor) div 256 as integer) as string\" " );
+            strcat( lDialogString , "-e \"end repeat\" " );
+            strcat( lDialogString , "-e \"mystring\" ");
+            strcat(lDialogString, "-e \"on error number -128\" " ) ;
+            strcat(lDialogString, "-e \"end try\"") ;
+            if ( ! osx9orBetter() ) strcat( lDialogString, " -e \"end tell\"") ;
         }
         else if ( zenity3Present() )
         {

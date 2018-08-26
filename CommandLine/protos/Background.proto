@@ -1,0 +1,30 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+message Background {
+  optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
+
+  optional bool preload = 4 [(gmx) = "GMX_DEPRECATED"];
+  optional bool transparent = 5 [(gmx) = "GMX_DEPRECATED"];
+  optional bool smooth_edges = 6 [(gmx) = "GMX_DEPRECATED"];
+
+  optional bool use_as_tileset = 7 [(gmx) = "istileset"];
+
+  optional int32 tile_width         = 11 [(gmx) = "tilewidth"];
+  optional int32 tile_height        = 12 [(gmx) = "tileheight"];
+  optional int32 horizontal_offset  = 13 [(gmx) = "tilexoff"];
+  optional int32 vertical_offset    = 14 [(gmx) = "tileyoff"];
+  optional int32 horizontal_spacing = 15 [(gmx) = "tilehsep"];
+  optional int32 vertical_spacing   = 16 [(gmx) = "tilevsep"];
+
+  optional int32 h_tile = 17 [(gmx) = "HTile"];
+  optional int32 v_tile = 18 [(gmx) = "VTile"];
+  optional int32 texture_group = 19 [(gmx) = "TextureGroups/TextureGroup0"];
+  optional bool for3D = 20 [(gmx) = "For3D"];
+  optional uint32 width = 21;
+  optional uint32 height = 22;
+
+  optional string image = 3 [(gmx) = "data", (file_path) = true];
+}

@@ -16,23 +16,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGLHeaders.h"
-#include "Graphics_Systems/General/GSstdraw.h"
-#include "Graphics_Systems/General/GStextures.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-#include "Universal_System/roomsystem.h"
 #include "Bridges/General/GLmanager.h"
 #include "GLSLshader.h"
 #include "GLshader.h"
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSstdraw.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
+
+#include "Universal_System/roomsystem.h"
 
 #include <stdio.h>
 #include <math.h>
 
 namespace enigma {
-  extern unsigned char currentcolor[4];
-  extern unsigned bound_shader;
-  extern vector<enigma::ShaderProgram*> shaderprograms;
-}
+
+extern unsigned char currentcolor[4];
+extern unsigned bound_shader;
+extern vector<enigma::ShaderProgram*> shaderprograms;
+
+} // namespace enigma
 
 namespace enigma_user
 {
@@ -53,11 +57,13 @@ bool draw_get_msaa_supported()
 void draw_set_msaa_enabled(bool enable)
 {
 #ifdef GL_MULTISAMPLE
+  draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_MULTISAMPLE);
 #endif
 }
 
 void draw_enable_alphablend(bool enable) {
+  draw_batch_flush(batch_flush_deferred);
 	(enable?glEnable:glDisable)(GL_BLEND);
 }
 
@@ -74,26 +80,29 @@ unsigned draw_get_alpha_test_ref_value()
 
 void draw_set_alpha_test(bool enable)
 {
-    enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTestEnable, enable);
+  draw_batch_flush(batch_flush_deferred);
+  enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTestEnable, enable);
 }
 
 void draw_set_alpha_test_ref_value(unsigned val)
 {
-    enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTest, (gs_scalar)val/256.0);
+  draw_batch_flush(batch_flush_deferred);
+  enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTest, (gs_scalar)val/256.0);
 }
 
 void draw_set_line_pattern(int pattern, int scale)
 {
   /*
+  draw_batch_flush(batch_flush_deferred);
   if (pattern == -1)
-      glDisable(GL_LINE_STIPPLE);
+    glDisable(GL_LINE_STIPPLE);
   else
     glEnable(GL_LINE_STIPPLE),
     glLineStipple(scale,(short)pattern);
   */
 }
 
-}
+} // namespace enigma
 
 //#include <endian.h>
 //TODO: Though serprex, the author of the function below, never included endian.h,
@@ -120,7 +129,10 @@ int draw_getpixel(int x,int y)
         if (y < 0) y = 0;
         if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
     }
-  oglmgr->ReadPixels();
+
+    draw_batch_flush(batch_flush_deferred);
+    oglmgr->ReadPixels();
+
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
     glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&ret);
@@ -153,7 +165,10 @@ int draw_getpixel_ext(int x,int y)
         if (y < 0) y = 0;
         if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
     }
-  oglmgr->ReadPixels();
+
+    draw_batch_flush(batch_flush_deferred);
+    oglmgr->ReadPixels();
+
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
     glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&ret);
@@ -169,18 +184,16 @@ int draw_getpixel_ext(int x,int y)
   #endif
 }
 
-}
+} // namespace enigma_user
 
-namespace enigma
-{
-
+namespace enigma {
 
 bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
 {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   //TODO: Complex polygon supported only in OpenGL1 at the moment. By returning false here, we fall back
   //      on a convex-only polygon drawing routine that works on any platform.
   return false;
 }
 
-
-}
+} // namespace enigma

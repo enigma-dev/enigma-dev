@@ -28,9 +28,18 @@ namespace enigma_user
     pr_linestrip      = 3,     // GL_LINE_STRIP        D3DPT_LINESTRIP
     pr_trianglelist   = 4,     // GL_TRIANGLES         D3DPT_TRIANGLELIST
     pr_trianglestrip  = 5,     // GL_TRIANGLE_STRIP    D3DPT_TRIANGLESTRIP
-    pr_trianglefan    = 6      // GL_TRIANGLE_FAN      D3DPT_TRIANGLEFAN
+    pr_trianglefan    = 6,     // GL_TRIANGLE_FAN      D3DPT_TRIANGLEFAN
   };
 
+  enum {
+    batch_flush_never = 0,     // flushing never occurs (for debugging purposes)
+    batch_flush_immediate = 1, // flush immediately after primitives are ended
+    batch_flush_deferred = 2,  // defer flushing until a state change occurs (e.g, draw_set_blend_mode)
+  };
+
+  void draw_set_batch_mode(int mode);
+  int draw_get_batch_mode();
+  void draw_batch_flush(int kind = draw_get_batch_mode());
   unsigned draw_primitive_count(int kind, unsigned vertex_count);
   void draw_primitive_begin(int kind);
   void draw_primitive_begin_texture(int kind, int texId);

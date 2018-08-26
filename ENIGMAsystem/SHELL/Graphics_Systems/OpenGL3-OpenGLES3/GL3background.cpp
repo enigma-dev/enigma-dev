@@ -16,19 +16,24 @@
 **/
 
 #include "OpenGLHeaders.h"
-
-#include "Platforms/General/PFwindow.h"
+#include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/background_internal.h"
 
-#include <vector>
+#include "Platforms/General/PFwindow.h"
+
+#include <cstddef>
+#include <math.h>
 
 namespace enigma_user
 {
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {
+	draw_batch_flush(batch_flush_deferred);
+
   int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   int patchSize = full_width*full_height;

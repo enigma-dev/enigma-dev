@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GLmanager.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "GLSLshader.h"
 #include "OpenGLHeaders.h"
 
@@ -73,7 +73,7 @@ namespace enigma_user
 void glsl_uniformui(int location, unsigned v0) {
   get_uniform(it,location,1);
   if (it->second.data[0].ui != v0){
-    oglmgr->ShaderFunc();
+    enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     glUniform1ui(location, v0);
     it->second.data[0].ui = v0;
   }
@@ -82,7 +82,7 @@ void glsl_uniformui(int location, unsigned v0) {
 void glsl_uniformui(int location, unsigned v0, unsigned v1) {
   get_uniform(it,location,2);
   if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1){
-    oglmgr->ShaderFunc();
+    enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     glUniform2ui(location, v0, v1);
     it->second.data[0].ui = v0, it->second.data[1].ui = v1;
   }
@@ -91,7 +91,7 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1) {
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2) {
   get_uniform(it,location,3);
   if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1 || it->second.data[2].ui != v2){
-    oglmgr->ShaderFunc();
+    enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     glUniform3ui(location, v0, v1, v2);
     it->second.data[0].ui = v0, it->second.data[1].ui = v1, it->second.data[2].ui = v2;
   }
@@ -100,7 +100,7 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2) {
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3) {
   get_uniform(it,location,4);
   if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1 || it->second.data[2].ui != v2 || it->second.data[3].ui != v3){
-    oglmgr->ShaderFunc();
+    enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     glUniform4ui(location, v0, v1, v2, v3);
     it->second.data[0].ui = v0, it->second.data[1].ui = v1, it->second.data[2].ui = v2, it->second.data[3].ui = v3;
   }
@@ -110,7 +110,7 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigne
 void glsl_uniform1uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,1);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
-    oglmgr->ShaderFunc();
+    enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     glUniform1uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
@@ -121,7 +121,7 @@ void glsl_uniform1uiv(int location, int size, const unsigned int *value){
 void glsl_uniform2uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,2);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
-    oglmgr->ShaderFunc();
+    enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     glUniform2uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
@@ -132,7 +132,7 @@ void glsl_uniform2uiv(int location, int size, const unsigned int *value){
 void glsl_uniform3uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,3);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
-    oglmgr->ShaderFunc();
+    enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     glUniform3uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
@@ -143,7 +143,7 @@ void glsl_uniform3uiv(int location, int size, const unsigned int *value){
 void glsl_uniform4uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
-    oglmgr->ShaderFunc();
+    enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     glUniform4uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];

@@ -15,12 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GLmanager.h"
-#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolors.h"
-#include "OpenGLHeaders.h"
 
 #include "Universal_System/roomsystem.h"
 #include "Platforms/General/PFwindow.h"
@@ -36,7 +38,7 @@ using namespace enigma;
 
 void screen_init()
 {
-  oglmgr->EndShapesBatching();
+  draw_batch_flush(batch_flush_deferred);
   enigma::gui_width = window_get_region_width();
   enigma::gui_height = window_get_region_height();
 
@@ -75,6 +77,8 @@ void screen_init()
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
+  draw_batch_flush(batch_flush_deferred);
+
   x = (x / window_get_region_width()) * window_get_region_width_scaled();
   y = (y / window_get_region_height()) * window_get_region_height_scaled();
   width = (width / window_get_region_width()) * window_get_region_width_scaled();
@@ -86,6 +90,7 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   viewport_y = window_get_height() - (sy + y) - height;
   viewport_w = width;
   viewport_h = height;
+
   //NOTE: OpenGL viewports are bottom left unlike Direct3D viewports which are top left
   glViewport(viewport_x, viewport_y, viewport_w, viewport_h);
   glScissor(viewport_x, viewport_y, viewport_w, viewport_h);

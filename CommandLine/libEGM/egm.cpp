@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Greg Williamson, Robert B. Colton
+/** Copyright (C) 2018 Greg Williamson, Robert B. Colton, Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,126 +16,88 @@
 **/
 
 #include "egm.h"
+#include "egm-rooms.h"
+#include "filesystem.h"
 
-#include "yaml-cpp/yaml.h"
-
-#include <sys/types.h> //mkdir
-#include <sys/stat.h>
-#include <unistd.h> //chdir
+#include <yaml-cpp/yaml.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/util/message_differencer.h>
 #include <iostream>
 #include <fstream>
 
-using CppType = google::protobuf::FieldDescriptor::CppType;
+namespace proto = google::protobuf;
+using CppType = proto::FieldDescriptor::CppType;
+using std::string;
 
-namespace egm {
+namespace {
 
-bool CreateDirectory(std::string dir) {
-  /* MSYS2/MINGW64 error:
-  egm.cpp:33:39: error: too many arguments to function 'int mkdir(const char*)'
-   int result = mkdir(dir.c_str(), 0777);
-                                       ^
-  */
-  /*
-  int result = mkdir(dir.c_str(), 0777);
-  if (result != 0 && errno != EEXIST) {
-    std::cerr << "Error: Failed to Create Directory: " << dir << " " << errno << std::endl;
-    return false;
-  }
-  */
-
-  return true;
-}
-
-bool ChangeDirectory(std::string dir) {
-  if (chdir(dir.c_str()) != 0) {
-    std::cerr << "Error: Failed to Change Directory to: " << dir << std::endl;
-    return false;
-  }
-
-  return true;
-}
-
-bool CopyFile(std::string src, std::string dst) {
-  //std::cout << src << " > " << dst << std::endl;
-
-  if (src == dst)
-    return true;
-
-  std::ifstream s(src, std::ios::binary);
-  std::ofstream d(dst, std::ios::binary);
-
-  d << s.rdbuf();
-
-  return true; // how 2 check for errors?
-}
-
-std::string RemovePath(std::string fName) {
-  size_t pos = fName.find_last_of('/');
-  if (pos == std::string::npos)
-    return fName;
-
-  return fName.substr(pos+1, fName.length());
-}
-
-std::string Proto2String(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *field) {
-  const google::protobuf::Descriptor *desc = m->GetDescriptor();
-  const google::protobuf::Reflection *refl = m->GetReflection();
+string Proto2String(const proto::Message &m, const proto::FieldDescriptor *field) {
+  const proto::Reflection *refl = m.GetReflection();
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_INT32:
-      return std::to_string(refl->GetInt32(*m, field));
+      return std::to_string(refl->GetInt32(m, field));
     case CppType::CPPTYPE_INT64:
-      return std::to_string(refl->GetInt64(*m, field));
+      return std::to_string(refl->GetInt64(m, field));
     case CppType::CPPTYPE_UINT32:
-      return std::to_string(refl->GetUInt32(*m, field));
+      return std::to_string(refl->GetUInt32(m, field));
     case CppType::CPPTYPE_UINT64:
-      return std::to_string(refl->GetUInt64(*m, field));
+      return std::to_string(refl->GetUInt64(m, field));
     case CppType::CPPTYPE_DOUBLE:
-      return std::to_string(refl->GetDouble(*m, field));
+      return std::to_string(refl->GetDouble(m, field));
     case CppType::CPPTYPE_FLOAT:
-      return std::to_string(refl->GetFloat(*m, field));
+      return std::to_string(refl->GetFloat(m, field));
     case CppType::CPPTYPE_BOOL:
-      return std::to_string(refl->GetBool(*m, field));
+      return std::to_string(refl->GetBool(m, field));
     case CppType::CPPTYPE_ENUM:
-      return std::to_string(refl->GetEnumValue(*m, field));
+      return std::to_string(refl->GetEnumValue(m, field));
     case CppType::CPPTYPE_STRING:
-      return refl->GetString(*m, field);
+      return refl->GetString(m, field);
+    case CppType::CPPTYPE_MESSAGE: // Handled by caller.
+      break;
   }
 
   return "";
 }
 
-bool WriteYaml(std::string& dir, std::string& lastDir, std::string& ext, YAML::Emitter& yaml, google::protobuf::Message *m) {
-  std::string newDir = dir + ext;
-  std::vector<std::string> files;
+bool FieldIsPresent(proto::Message *m,
+    const proto::Reflection *refl, const proto::FieldDescriptor *field) {
+  if (field->is_repeated()) return refl->FieldSize(*m, field);
+  return refl->HasField(*m, field);
+}
 
-  const google::protobuf::Descriptor *desc = m->GetDescriptor();
-  const google::protobuf::Reflection *refl = m->GetReflection();
+bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
+               YAML::Emitter &yaml, proto::Message *m) {
+  const proto::Descriptor *desc = m->GetDescriptor();
+  const proto::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
 
-    const google::protobuf::FieldDescriptor *field = desc->field(i);
-    const google::protobuf::OneofDescriptor *oneof = field->containing_oneof();
+    const proto::FieldDescriptor *field = desc->field(i);
+    const proto::OneofDescriptor *oneof = field->containing_oneof();
     if (oneof && refl->HasOneof(*m, oneof)) continue;
-    const google::protobuf::FieldOptions opts = field->options();
+    if (!FieldIsPresent(m, refl, field)) continue;
+    const proto::FieldOptions opts = field->options();
     const bool isFilePath = opts.GetExtension(buffers::file_path);
 
+    yaml << YAML::Key << field->name();
     if (field->is_repeated()) {
       if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
         yaml << YAML::BeginSeq;
         for (int i = 0; i < refl->FieldSize(*m, field); i++) {
           yaml << YAML::BeginMap;
-          WriteYaml(dir,lastDir, ext, yaml, refl->MutableRepeatedMessage(m, field, i));
+          WriteYaml(egm_root, dir, yaml,
+                    refl->MutableRepeatedMessage(m, field, i));
           yaml << YAML::EndMap;
         }
         yaml << YAML::EndSeq;
       }
       else if (field->cpp_type() == CppType::CPPTYPE_STRING) {
-        yaml << YAML::Key << field->name();
         yaml << YAML::BeginSeq;
         for (int i = 0; i < refl->FieldSize(*m, field); i++) {
-          std::string str = refl->GetRepeatedString(*m, field, i);
+          const string str = refl->GetRepeatedString(*m, field, i);
           if (isFilePath) {
-            files.push_back(str);
-            refl->SetRepeatedString(m, field, i, newDir + "/data/" + RemovePath(str));
+            const fs::path internalized = InternalizeFile(str, dir, egm_root);
+            if (internalized.empty()) return false;
+            refl->SetRepeatedString(m, field, i, internalized.string());
           }
           yaml << refl->GetRepeatedString(*m, field, i);
         }
@@ -143,136 +105,212 @@ bool WriteYaml(std::string& dir, std::string& lastDir, std::string& ext, YAML::E
       }
     } else {
       if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
-        yaml << YAML::Key << field->name();
         yaml << YAML::BeginMap;
-        WriteYaml(dir, lastDir, ext, yaml, refl->MutableMessage(m, field));
+        WriteYaml(egm_root, dir, yaml, refl->MutableMessage(m, field));
         yaml << YAML::EndMap;
       } else {
         if (isFilePath) {
-          files.push_back(Proto2String(m, field));
-          refl->SetString(m, field, newDir + "/data/" + RemovePath(Proto2String(m, field)));
+          const fs::path src = Proto2String(*m, field);
+          const fs::path internalized = InternalizeFile(src, dir, egm_root);
+          if (internalized.empty()) return false;
+          refl->SetString(m, field, internalized.string());
         }
-        yaml << YAML::Key << field->name();
-        yaml << YAML::Value << Proto2String(m, field);
+        yaml << YAML::Value << Proto2String(*m, field);
       }
     }
   }
 
-  if (!CreateDirectory(newDir) || !ChangeDirectory(newDir))
-      return false;
+  return true;
+}
 
-  yaml << YAML::EndMap;
-  std::ofstream fout("properties.yaml");
-  fout << yaml.c_str();
-
-  if (files.size() > 0) {
-    if (!CreateDirectory(newDir + "/data") || !ChangeDirectory(newDir + "/data"))
-      return false;
-
-    for (std::string& f : files) {
-      if (!CopyFile(f, RemovePath(f))) return false;
-    }
-  }
-
-  if (!ChangeDirectory(lastDir))
+bool WriteYaml(const fs::path &egm_root, const fs::path &dir, proto::Message *m) {
+  if (!CreateDirectory(dir))
     return false;
-}
 
-void WriteScript(std::string fName, buffers::resources::Script* scr) {
-  std::ofstream fout(fName);
-  fout << scr->code();
-}
-
-void WriteShader(std::string fName, buffers::resources::Shader* shdr) {
-  std::ofstream vout(fName + ".vert");
-  vout << shdr->vertex_code();
-
-  std::ofstream fout(fName + ".frag");
-  fout << shdr->fragment_code();
-}
-
-bool WriteRes(buffers::TreeNode* res, std::string& dir) {
-  std::string ext;
-  std::string newDir = dir + res->name();
   YAML::Emitter yaml;
   yaml << YAML::BeginMap;
 
-  if (res->has_background()) {
-    ext = ".bkg";
-    WriteYaml(newDir, dir, ext, yaml, res->mutable_background());
-  }
-  else if (res->has_font()) {
-    ext = ".fnt";
-    WriteYaml(newDir, dir, ext, yaml, res->mutable_font());
-  }
-  //if (res->has_include)
-  else if (res->has_object()) {
-    ext = ".obj";
-    WriteYaml(newDir, dir, ext, yaml, res->mutable_object());
-  }
-  else if (res->has_path()) {
-    ext = ".pth";
-    WriteYaml(newDir, dir, ext, yaml, res->mutable_path());
-  }
-  else if (res->has_room()) {
-    ext = ".rm";
-    WriteYaml(newDir, dir, ext, yaml, res->mutable_room());
-  }
-  else if (res->has_script()) {
-    ext = ".edl";
-    WriteScript(newDir + ext, res->mutable_script());
-  }
-  else if (res->has_shader()) {
-    WriteShader(newDir, res->mutable_shader());
-  }
-  else if (res->has_sound()) {
-    ext = ".snd";
-    WriteYaml(newDir, dir, ext, yaml, res->mutable_sound());
-  }
-  else if (res->has_sprite()) {
-    ext = ".spr";
-    WriteYaml(newDir, dir, ext, yaml, res->mutable_sprite());
-  }
-  else if (res->has_timeline()) {
-    ext = ".tml";
-    WriteYaml(newDir, dir, ext, yaml, res->mutable_timeline());
-  }
-  else {
-    std::cerr << "Error: Unsupported Resource Type" << std::endl;
-    //return false;
+  if (!WriteYaml(egm_root, dir, yaml, m))
+    return false;
+
+  yaml << YAML::EndMap;
+  if (std::ofstream out{(dir/"properties.yaml").string()}) {
+    out << yaml.c_str();
+  } else {
+    std::cerr << "Failed to open resource properties file "
+              << dir/"properties.yaml" << " for write!" << std::endl;
+    return false;
   }
 
   return true;
 }
 
+bool WriteScript(string fName, const buffers::resources::Script &scr) {
+  if (std::ofstream fout{fName}) {
+    fout << scr.code();
+    return true;
+  }
+  std::cerr << "Failed to open script " << fName << " for write" << std::endl;
+  return false;
+}
 
-bool WriteNode(buffers::TreeNode* folder, std::string dir) {
-  for (unsigned i = 0; i < folder->child_size(); i++) {
+bool WriteShader(string fName, const buffers::resources::Shader &shdr) {
+  if (std::ofstream vout{fName + ".vert"}) {
+    vout << shdr.vertex_code();
+
+    if (std::ofstream fout{fName + ".frag"}) {
+      fout << shdr.fragment_code();
+      return true;
+    }
+  }
+
+  std::cerr << "Failed to open shader " << fName << " for write" << std::endl;
+  return false;
+}
+
+template<typename T>
+bool WriteRoomSnowflakes(const fs::path &egm_root, const fs::path &dir,
+                         YAML::Emitter &yaml, T *layers) {
+  if (layers->snowflakes.size()) {
+    yaml << YAML::BeginMap;
+    yaml << YAML::Key << "Format" << "yaml-proto";
+    yaml << YAML::Key << "Data";
+    yaml << YAML::BeginSeq;
+    for (auto &inst : layers->snowflakes) {
+      if (!WriteYaml(egm_root, dir, yaml, &inst)) return false;
+    }
+    yaml << YAML::EndSeq;
+    yaml << YAML::EndMap;
+  }
+  return true;
+}
+
+bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
+               buffers::resources::Room *room) {
+  if (!CreateDirectory(dir))
+    return false;
+
+  buffers::resources::Room cleaned = *room;
+  cleaned.clear_instances();
+  cleaned.clear_tiles();
+
+  // Build tile and instance layers.
+  auto tile_layers = egm::util::BuildTileLayers(*room);
+
+  YAML::Emitter yaml;
+  yaml << YAML::BeginMap;
+
+  if (!WriteYaml(egm_root, dir, yaml, &cleaned))
+    return false;
+
+  *cleaned.mutable_instances() = room->instances();
+  *cleaned.mutable_tiles() = room->tiles();
+
+  if (!proto::util::MessageDifferencer::Equivalent(*room, cleaned)) {
+    std::cerr << "WARNING: Room " << dir << " contained external file "
+                 "references or has otherwise been modified for no reason. "
+                 "Neither possibility is expected. Diff:" << std::endl;
+    /* Destruct reporters before modifying protos. */ {
+      proto::io::OstreamOutputStream  gcout(&std::cout);
+      proto::util::MessageDifferencer::StreamReporter reporter(&gcout);
+      proto::util::MessageDifferencer differ;
+      differ.ReportDifferencesTo(&reporter);
+      differ.Compare(*room, cleaned);
+    }
+    *room = cleaned;  // Propagate the subroutine's changes...
+  }
+
+  // Build and append instance layers.
+  auto inst_layers = egm::util::BuildInstanceLayers(*room);
+  yaml << YAML::Key << "instance-layers";
+  yaml << YAML::BeginSeq;
+  for (const auto &layer : inst_layers.layers) {
+    yaml << YAML::BeginMap;
+    yaml << YAML::Key << "Format" << layer.format;
+    yaml << YAML::Key << "Data" << YAML::Literal << layer.data;
+    yaml << YAML::EndMap;
+  }
+  WriteRoomSnowflakes(egm_root, dir, yaml, &inst_layers);
+  yaml << YAML::EndSeq;
+
+  // Append tile layers.
+  yaml << YAML::Key << "tile-layers" << YAML::BeginSeq;
+  for (const auto &layer : tile_layers.layers) {
+    yaml << YAML::BeginMap;
+    yaml << YAML::Key << "Format" << layer.format;
+    yaml << YAML::Key << "Data" << layer.data;
+    yaml << YAML::EndMap;
+  }
+  WriteRoomSnowflakes(egm_root, dir, yaml, &tile_layers);
+  yaml << YAML::EndSeq;
+
+  yaml << YAML::EndMap;
+  if (std::ofstream out{(dir/"properties.yaml").string()}) {
+    out << yaml.c_str();
+  } else {
+    std::cerr << "Failed to open resource properties file "
+              << dir/"properties.yaml" << " for write!" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+bool WriteRes(buffers::TreeNode* res, const fs::path &dir, const fs::path &egm_root) {
+  string newDir = (dir/res->name()).string();
+  using Type = buffers::TreeNode::TypeCase;
+  switch (res->type_case()) {
+   case Type::kBackground:
+    return WriteYaml(egm_root, newDir + ".bkg", res->mutable_background());
+   case Type::kFont:
+    return WriteYaml(egm_root, newDir + ".fnt", res->mutable_font());
+   case Type::kObject:
+    return WriteYaml(egm_root, newDir + ".obj", res->mutable_object());
+   case Type::kPath:
+    return WriteYaml(egm_root, newDir + ".pth", res->mutable_path());
+   case Type::kRoom:
+    return WriteRoom(egm_root, newDir + ".rm", res->mutable_room());
+   case Type::kScript:
+    return WriteScript(newDir + ".edl", res->script());
+   case Type::kShader:
+    return WriteShader(newDir, res->shader());
+   case Type::kSound:
+    return WriteYaml(egm_root, newDir + ".snd", res->mutable_sound());
+   case Type::kSprite:
+    return WriteYaml(egm_root, newDir + ".spr", res->mutable_sprite());
+   case Type::kTimeline:
+    return WriteYaml(egm_root, newDir + ".tln", res->mutable_timeline());
+   default:
+    std::cerr << "Error: Unsupported Resource Type" << std::endl;
+    return false;
+  }
+}
+
+bool WriteNode(buffers::TreeNode* folder, string dir, const fs::path &egm_root) {
+  for (int i = 0; i < folder->child_size(); i++) {
     auto child = folder->mutable_child(i);
     if (child->has_folder()) {
-      if (!CreateDirectory(child->name()))
+      if (!CreateDirectory(dir + "/" + child->name()))
         return false;
 
-      std::string lastDir = dir;
-      std::string newDir = dir + child->name() + "/";
+      string lastDir = dir;
+      string newDir = dir + child->name() + "/";
 
-      if (!ChangeDirectory(newDir))
-        return false;
-
-      if (!WriteNode(child, newDir))
-        return false;
-
-      if (!ChangeDirectory(lastDir))
+      if (!WriteNode(child, newDir, egm_root))
         return false;
     }
-    else if (!WriteRes(child, dir))
+    else if (!WriteRes(child, dir, egm_root))
       return false;
   }
 
   return true;
 }
 
-bool WriteEGM(std::string fName, buffers::Project* project) {
+}  // namespace
+
+namespace egm {
+
+bool WriteEGM(string fName, buffers::Project* project) {
 
   if (fName.back() != '/')
     fName += '/';
@@ -280,10 +318,8 @@ bool WriteEGM(std::string fName, buffers::Project* project) {
   if (!CreateDirectory(fName))
     return false;
 
-  if (!ChangeDirectory(fName))
-    return false;
-
-  return WriteNode(project->mutable_game()->mutable_root(), fName);
+  fs::path abs_root = fs::canonical(fs::absolute(fName));
+  return WriteNode(project->mutable_game()->mutable_root(), fName, abs_root);
 }
 
 } //namespace egm
