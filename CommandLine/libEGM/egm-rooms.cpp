@@ -253,7 +253,7 @@ string SVGDInstanceDescriptors(char ich, const InstSimple &inst, const InstSimpl
       if (inst.zscale != prev.zscale) str << " D " << inst.zscale;
     }
   }
-  if (inst.rotation or inst.zrotation) {
+  if (inst.rotation || inst.zrotation) {
     str << " R " << inst.rotation;
     if (inst.zrotation) str << ", " << inst.zrotation;
   }
@@ -572,7 +572,7 @@ std::vector<Line> ConnectTheDots(const std::multiset<Coords> &cloud) {
 
 void WriteSVGDCoords(std::stringstream &str, const Coords &coords) {
   str << coords.x;
-  if (coords.y or coords.z) str << ", " << coords.y;
+  if (coords.y || coords.z) str << ", " << coords.y;
   if (coords.z) str << ", " << coords.z;
 }
 

@@ -1,0 +1,10 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+message Script {
+  optional int32 id = 2;
+
+  optional string code = 3;
+}

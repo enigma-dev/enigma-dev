@@ -1,17 +1,17 @@
 syntax = "proto2";
 package buffers;
 
-import "resources/Sprite.proto";
-import "resources/Sound.proto";
-import "resources/Background.proto";
-import "resources/Object.proto";
-import "resources/Script.proto";
-import "resources/Shader.proto";
-import "resources/Path.proto";
-import "resources/Font.proto";
-import "resources/Timeline.proto";
-import "resources/Room.proto";
-import "resources/Include.proto";
+import "Sprite.proto";
+import "Sound.proto";
+import "Background.proto";
+import "Object.proto";
+import "Script.proto";
+import "Shader.proto";
+import "Path.proto";
+import "Font.proto";
+import "Timeline.proto";
+import "Room.proto";
+import "Include.proto";
 
 message TreeNode {
   oneof type {
