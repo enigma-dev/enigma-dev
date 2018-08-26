@@ -15,20 +15,20 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GStextures.h"
 #include "GLshader.h"
 #include "GLSLshader.h"
-#include <math.h>
-
-#include <stdio.h>      /* printf, scanf, NULL */
-#include <stdlib.h>     /* malloc, free, rand */
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 #include <iostream>
 #include <fstream>
-using namespace std;
-
 #include <vector>
+
+#include <math.h>
+#include <stdio.h>      /* printf, scanf, NULL */
+#include <stdlib.h>     /* malloc, free, rand */
+
+using namespace std;
 using std::vector;
 
 GLenum shadertypes[5] = {
@@ -192,13 +192,13 @@ void glsl_program_detach(int id, int sid)
 
 void glsl_program_set(int id)
 {
+  draw_batch_flush(batch_flush_deferred);
   glUseProgram(shaderprograms[id]->shaderprogram);
 }
 
 void glsl_program_reset()
 {
-  //NOTE: Texture must be reset first so the Global VBO can draw and let people use shaders on text.
-  texture_reset();
+  draw_batch_flush(batch_flush_deferred);
   glUseProgram(0);
 }
 
@@ -212,52 +212,63 @@ int glsl_get_uniform_location(int program, string name) {
 }
 
 void glsl_uniformf(int location, float v0) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform1f(location, v0);
 }
 
 void glsl_uniformf(int location, float v0, float v1) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform2f(location, v0, v1);
 }
 
 void glsl_uniformf(int location, float v0, float v1, float v2) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform3f(location, v0, v1, v2);
 }
 
 void glsl_uniformf(int location, float v0, float v1, float v2, float v3) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform4f(location, v0, v1, v2, v3);
 }
 
 void glsl_uniformi(int location, int v0) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform1i(location, v0);
 }
 
 void glsl_uniformi(int location, int v0, int v1) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform2i(location, v0, v1);
 }
 
 void glsl_uniformi(int location, int v0, int v1, int v2) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform3i(location, v0, v1, v2);
 }
 
 void glsl_uniformi(int location, int v0, int v1, int v2, int v3) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform4i(location, v0, v1, v2, v3);
 }
 
 void glsl_uniformui(int location, unsigned v0) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform1ui(location, v0);
 }
 
 void glsl_uniformui(int location, unsigned v0, unsigned v1) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform2ui(location, v0, v1);
 }
 
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform3ui(location, v0, v1, v2);
 }
 
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3) {
+  draw_batch_flush(batch_flush_deferred);
 	glUniform4ui(location, v0, v1, v2, v3);
 }
 
 }
-

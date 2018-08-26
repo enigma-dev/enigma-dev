@@ -15,16 +15,17 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/General/GL3Context.h"
 #include "GLSLshader.h"
 #include "GL3shader.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSmath.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
-#include "Bridges/General/GL3Context.h"
+
+#include "Universal_System/roomsystem.h" // for view variables
 
 #include <math.h>
 #include <floatcomp.h>
@@ -73,7 +74,7 @@ namespace enigma_user
 {
 
 void d3d_clear_depth(double value) {
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glClearDepth(value);
   glClear(GL_DEPTH_BUFFER_BIT);
 }
@@ -85,6 +86,8 @@ void d3d_set_software_vertex_processing(bool software) {
 
 void d3d_start()
 {
+  draw_batch_flush(batch_flush_deferred);
+
   // Enable depth buffering
   enigma::d3dMode = true;
   enigma::d3dHidden = true;
@@ -105,6 +108,8 @@ void d3d_start()
 
 void d3d_end()
 {
+  draw_batch_flush(batch_flush_deferred);
+
   enigma::d3dMode = false;
   enigma::d3dHidden = false;
   enigma::d3dZWriteEnable = false;
@@ -117,6 +122,7 @@ void d3d_end()
 // disabling hidden surface removal in means there is no depth buffer
 void d3d_set_hidden(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   oglmgr->SetEnabled(GL_DEPTH_TEST, enable);
   enigma::d3dHidden = enable;
 	d3d_set_zwriteenable(enable);
@@ -127,7 +133,7 @@ void d3d_set_hidden(bool enable)
 // properly particle effects are usually drawn with zwriting disabled because of this as well
 void d3d_set_zwriteenable(bool enable)
 {
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
 	glDepthMask(enable);
 	enigma::d3dZWriteEnable = enable;
 }
@@ -177,6 +183,7 @@ void d3d_set_fog_density(double density)
 
 void d3d_set_culling(int mode)
 {
+  draw_batch_flush(batch_flush_deferred);
 	enigma::d3dCulling = mode;
 	oglmgr->SetEnabled(GL_CULL_FACE, (mode>0));
 	if (mode > 0){
@@ -185,13 +192,13 @@ void d3d_set_culling(int mode)
 }
 
 void d3d_set_color_mask(bool r, bool g, bool b, bool a){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glColorMask(r,g,b,a);
 }
 
 bool d3d_get_mode()
 {
-    return enigma::d3dMode;
+  return enigma::d3dMode;
 }
 
 bool d3d_get_hidden() {
@@ -204,27 +211,27 @@ int d3d_get_culling() {
 
 void d3d_set_fill_mode(int fill)
 {
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glPolygonMode(GL_FRONT_AND_BACK, fillmodes[fill]);
 }
 
 void d3d_set_line_width(float value) {
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glLineWidth(value);
 }
 
 void d3d_set_point_size(float value) {
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glPointSize(value);
 }
 
 void d3d_set_depth_operator(int mode) {
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glDepthFunc(depthoperators[mode]);
 }
 
 void d3d_clear_depth(){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glClear(GL_DEPTH_BUFFER_BIT);
 }
 
@@ -240,6 +247,7 @@ void d3d_set_shading(bool smooth)
 
 void d3d_set_clip_plane(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_CLIP_DISTANCE0);
 }
 
@@ -495,26 +503,31 @@ namespace enigma_user
 
 bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
 {
+  draw_batch_flush(batch_flush_deferred);
   return enigma::d3d_lighting.light_define_direction(id, dx, dy, dz, col);
 }
 
 bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
 {
+  draw_batch_flush(batch_flush_deferred);
   return enigma::d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
 bool d3d_light_set_specularity(int id, int r, int g, int b, double a)
 {
+  draw_batch_flush(batch_flush_deferred);
   return enigma::d3d_lighting.light_set_specularity(id, (gs_scalar)r/255.0, (gs_scalar)g/255.0, (gs_scalar)b/255.0, a);
 }
 
 bool d3d_light_set_ambient(int id, int r, int g, int b, double a)
 {
+  draw_batch_flush(batch_flush_deferred);
   return enigma::d3d_lighting.light_set_ambient(id, (gs_scalar)r/255.0, (gs_scalar)g/255.0, (gs_scalar)b/255.0, a);
 }
 
 void d3d_light_define_ambient(int col)
 {
+  draw_batch_flush(batch_flush_deferred);
   enigma::d3d_lighting.global_ambient_color[0] = COL_GET_R(col);
   enigma::d3d_lighting.global_ambient_color[1] = COL_GET_G(col);
   enigma::d3d_lighting.global_ambient_color[2] = COL_GET_B(col);
@@ -523,13 +536,14 @@ void d3d_light_define_ambient(int col)
 
 bool d3d_light_enable(int id, bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   return enable?enigma::d3d_lighting.light_enable(id):enigma::d3d_lighting.light_disable(id);
 }
 
 void d3d_set_lighting(bool enable)
 {
+  draw_batch_flush(batch_flush_deferred);
   enigma::d3d_lighting.lights_enable(enable);
-	oglmgr->Lighting();
   enigma::d3d_lighting.light_update();
   if (enable == true){
     enigma::d3d_lighting.lightsource_update();
@@ -537,7 +551,7 @@ void d3d_set_lighting(bool enable)
 }
 
 void d3d_stencil_start_mask(){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glEnable(GL_STENCIL_TEST);
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
   glDepthMask(GL_FALSE);
@@ -548,7 +562,7 @@ void d3d_stencil_start_mask(){
 }
 
 void d3d_stencil_continue_mask(){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
   glDepthMask(GL_FALSE);
   glStencilMask(0x1);
@@ -557,7 +571,7 @@ void d3d_stencil_continue_mask(){
 }
 
 void d3d_stencil_use_mask(){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   glDepthMask(GL_TRUE);
   glStencilMask(0x0);
@@ -565,38 +579,38 @@ void d3d_stencil_use_mask(){
 }
 
 void d3d_stencil_end_mask(){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glDisable(GL_STENCIL_TEST);
 }
 
 void d3d_stencil_enable(bool enable){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   oglmgr->SetEnabled(GL_STENCIL_TEST, enable);
 }
 
 void d3d_stencil_clear_value(int value){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glClearStencil(value);
   glClear(GL_STENCIL_BUFFER_BIT);
 }
 
 void d3d_stencil_mask(unsigned int mask){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glStencilMask(mask);
 }
 
 void d3d_stencil_clear(){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glClear(GL_STENCIL_BUFFER_BIT);
 }
 
 void d3d_stencil_function(int func, int ref, unsigned int mask){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glStencilFunc(depthoperators[func], ref, mask);
 }
 
 void d3d_stencil_operator(int sfail, int dpfail, int dppass){
-  oglmgr->BlendFunc();
+  draw_batch_flush(batch_flush_deferred);
   glStencilOp(stenciloperators[sfail], stenciloperators[dpfail], stenciloperators[dppass]);
 }
 

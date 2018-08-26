@@ -18,7 +18,7 @@
 #ifndef ENIGMA_GL_SAMPLERSTATE_H
 #define ENIGMA_GL_SAMPLERSTATE_H
 
-#include "../General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
 
 namespace enigma {
   //NOTE: OpenGL 1 hardware does not support sampler objects, some versions of 2 and usually over 3 do. We use this class
@@ -28,18 +28,18 @@ namespace enigma {
     bool wrapu, wrapv, wrapw;
     GLint bordercolor[4], min, mag, maxlevel;
     GLfloat anisotropy, minlod, maxlod;
-    
+
     SamplerState(): bound_texture(-1), wrapu(true), wrapv(true), wrapw(true), min(GL_NEAREST), mag(GL_NEAREST), maxlevel(1000), anisotropy(1), minlod(-1000), maxlod(1000) {
       bordercolor[0] = 0;
       bordercolor[1] = 0;
       bordercolor[2] = 0;
       bordercolor[3] = 0;
     }
-    
+
     ~SamplerState() {
-    
+
     }
-    
+
     void ApplyState() {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, minlod);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, maxlod);
@@ -50,11 +50,11 @@ namespace enigma {
 
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP); 
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
       glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
     }
-    
+
     void CompareAndApply(SamplerState* sampler) {
       if (sampler->wrapu != wrapu) {
         sampler->wrapu = wrapu;
@@ -68,7 +68,7 @@ namespace enigma {
         sampler->wrapw = wrapw;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP);
       }
-      
+
       if (sampler->min != min) {
         sampler->min = min;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min);
@@ -77,7 +77,7 @@ namespace enigma {
         sampler->mag = mag;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag);
       }
-      
+
       if (sampler->bordercolor[0] != bordercolor[0] || sampler->bordercolor[1] != bordercolor[1] ||
           sampler->bordercolor[2] != bordercolor[2] || sampler->bordercolor[3] != bordercolor[3]) {
         sampler->bordercolor[0] = bordercolor[0];
@@ -86,12 +86,12 @@ namespace enigma {
         sampler->bordercolor[3] = bordercolor[3];
         glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
       }
-      
+
       if (sampler->anisotropy != anisotropy) {
         sampler->anisotropy = anisotropy;
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
       }
-      
+
       if (sampler->minlod != minlod) {
         sampler->minlod = minlod;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, minlod);
@@ -106,7 +106,7 @@ namespace enigma {
       }
     }
   };
-  
+
   extern SamplerState samplerstates[8];
 }
 

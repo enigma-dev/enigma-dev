@@ -16,14 +16,9 @@
 **/
 
 #include "Bridges/General/DX9Context.h"
-#include "Graphics_Systems/General/GSd3d.h"
 #include "Direct3D9Headers.h"
-#include "Graphics_Systems/General/GStextures.h"
-
-#include "../General/GSmodel.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
-
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 namespace enigma {
@@ -55,11 +50,13 @@ namespace enigma_user
 {
 
 void d3d_clear_depth(double value) {
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
 }
 
 void d3d_start()
 {
+    draw_batch_flush(batch_flush_deferred);
 	enigma::d3dMode = true;
 	enigma::d3dCulling =  rs_none;
 	d3dmgr->device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
@@ -73,6 +70,7 @@ void d3d_start()
 
 void d3d_end()
 {
+    draw_batch_flush(batch_flush_deferred);
 	enigma::d3dMode = false;
 	enigma::d3dCulling = rs_none;
 	d3d_set_hidden(false);
@@ -84,6 +82,7 @@ void d3d_set_software_vertex_processing(bool software) {
 
 void d3d_set_hidden(bool enable)
 {
+    draw_batch_flush(batch_flush_deferred);
 	//d3d_set_zwriteenable(enable);
 	d3dmgr->SetRenderState(D3DRS_ZENABLE, enable); // enable/disable the z-buffer
     enigma::d3dHidden = enable;
@@ -91,12 +90,14 @@ void d3d_set_hidden(bool enable)
 
 void d3d_set_zwriteenable(bool enable)
 {
+    draw_batch_flush(batch_flush_deferred);
 	enigma::d3dZWriteEnable = enable;
 	d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, enable);    // enable/disable z-writing
 }
 
 void d3d_set_lighting(bool enable)
 {
+    draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_LIGHTING, enable);    // enable/disable the 3D lighting
 }
 
@@ -112,12 +113,14 @@ void d3d_set_fog(bool enable, int color, double start, double end)
 
 void d3d_set_fog_enabled(bool enable)
 {
+    draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FOGENABLE, enable);
 	d3dmgr->SetRenderState(D3DRS_RANGEFOGENABLE, enable);
 }
 
 void d3d_set_fog_mode(int mode)
 {
+    draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[mode]);
 	d3dmgr->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[mode]);
 }
@@ -128,29 +131,34 @@ void d3d_set_fog_hint(int mode) {
 
 void d3d_set_fog_color(int color)
 {
+    draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FOGCOLOR,
                     D3DCOLOR_COLORVALUE(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), 1.0f)); // Highest 8 bits are not used.
 }
 
 void d3d_set_fog_start(double start)
 {
+    draw_batch_flush(batch_flush_deferred);
 	float fFogStart = start;
 	d3dmgr->SetRenderState(D3DRS_FOGSTART,*(DWORD*)(&fFogStart));
 }
 
 void d3d_set_fog_end(double end)
 {
+  draw_batch_flush(batch_flush_deferred);
   float fFogEnd = end;
   d3dmgr->SetRenderState(D3DRS_FOGEND,*(DWORD*)(&fFogEnd));
 }
 
 void d3d_set_fog_density(double density)
 {
+	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FOGDENSITY, *(DWORD *)(&density));
 }
 
 void d3d_set_culling(int mode)
 {
+	draw_batch_flush(batch_flush_deferred);
 	enigma::d3dCulling = mode;
 	d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[mode]);
 }
@@ -171,6 +179,7 @@ int d3d_get_culling() {
 
 void d3d_set_fill_mode(int fill)
 {
+	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FILLMODE, fillmodes[fill]);
 }
 
@@ -179,10 +188,12 @@ void d3d_set_line_width(float value) {
 }
 
 void d3d_set_point_size(float value) {
+	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_POINTSIZE, value);
 }
 
 void d3d_set_depth_operator(int mode) {
+	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_ZFUNC, depthoperators[mode]);
 }
 
@@ -193,6 +204,7 @@ void d3d_set_depth(double dep)
 
 void d3d_set_shading(bool smooth)
 {
+	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_SHADEMODE, smooth?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
 }
 
@@ -387,43 +399,49 @@ namespace enigma_user
 
 bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
 {
+    draw_batch_flush(batch_flush_deferred);
     return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
 }
 
 bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
 {
+    draw_batch_flush(batch_flush_deferred);
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
 bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 {
+    draw_batch_flush(batch_flush_deferred);
     return d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
-  float specular[4] = {r, g, b, a};
-
+    draw_batch_flush(batch_flush_deferred);
+    float specular[4] = {r, g, b, a};
 }
 
 void d3d_light_shininess(int facemode, int shine)
 {
-
+    draw_batch_flush(batch_flush_deferred);
 }
 
 void d3d_light_define_ambient(int col)
 {
-	d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), 1));
+    draw_batch_flush(batch_flush_deferred);
+    d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), 1));
 }
 
 bool d3d_light_enable(int id, bool enable)
 {
+    draw_batch_flush(batch_flush_deferred);
     return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
 }
 
 
 //TODO(harijs) - This seems to be broken like this. Almost works, but stencilmask needs some different value
 void d3d_stencil_start_mask(){
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->SetRenderState(D3DRS_STENCILENABLE, true);
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, false);
   d3dmgr->SetRenderState(D3DRS_COLORWRITEENABLE, false);
@@ -439,6 +457,7 @@ void d3d_stencil_start_mask(){
 }
 
 void d3d_stencil_use_mask(){
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, true);
   d3dmgr->SetRenderState(D3DRS_COLORWRITEENABLE, true);
 
@@ -447,6 +466,7 @@ void d3d_stencil_use_mask(){
 }
 
 void d3d_stencil_end_mask(){
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->SetRenderState(D3DRS_STENCILENABLE, false);
 }
 
