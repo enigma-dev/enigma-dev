@@ -12,7 +12,7 @@ namespace enigma
   {
     string result;
     result = string_replace_all(str, "\"", "\\\"");
-    result += string_replace_all(str, "_", "__");
+    result = string_replace_all(str, "_", "__");
     return result;
   }
 }
