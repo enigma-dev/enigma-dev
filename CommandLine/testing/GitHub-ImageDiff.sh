@@ -22,11 +22,10 @@ function imgur_upload {
 }
 
 function enigmabot_post_comment {
-  echo $(curl -u $bot_user':'$bot_password \
-              --header "Content-Type: application/json" \
+  echo $(curl --header "Content-Type: application/json" \
               --request POST \
               --data '{"body":"'"$1"'"}' \
-              $pullrequest)
+              "$pullrequest?access_token=$bot_comment_token")
 }
 
 gh_comment_header="Regression tests have indicated that graphical changes have been introduced. \
