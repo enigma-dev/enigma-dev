@@ -695,6 +695,7 @@ namespace {
   string ofn_init(bool open, LPWSTR fname, LPCWSTR filter, LPCWSTR dir, LPCWSTR title, DWORD flags) {
     OPENFILENAMEW ofn;
     
+    tstring tstr_empty = widen("");
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
     ofn.hwndOwner = enigma::hWnd;
@@ -703,7 +704,7 @@ namespace {
     ofn.lpstrFilter = filter;
     ofn.nFilterIndex = 0;
     ofn.lpstrTitle = title;
-    if (title == "") ofn.lpstrTitle = NULL;
+    if (title == tstr_empty.c_str()) ofn.lpstrTitle = NULL;
     ofn.lpstrInitialDir = dir;
     ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | flags;
 
