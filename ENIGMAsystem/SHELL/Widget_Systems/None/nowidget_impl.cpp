@@ -149,13 +149,20 @@ string get_password(string message, string def, string cap="") {
 }
 
 double get_integer(string message, double def, string cap="") {
-  //temp stub
-  return 0;
+  printf("%s\n%s\n", cap.c_str(), message.c_str());
+  string input;
+  cin >> input;
+  string::size_type sz;
+  return (input.empty()) ? def : stod(input, &sz);
 }
 
 double get_passcode(string message, double def, string cap="") {
-  //temp stub
-  return 0;
+  //TODO: Add support for hidden input.
+  printf("%s\n%s\n", cap.c_str(), message.c_str());
+  string input;
+  cin >> input;
+  string::size_type sz;
+  return (input.empty()) ? def : stod(input, &sz);
 }
 
 }
