@@ -62,8 +62,7 @@ static string gs_but1, gs_but2, gs_but3;
 #include "Universal_System/debugscope.h"
 #endif
 
-void show_error(string errortext, const bool fatal)
-{
+void show_error(string errortext, const bool fatal) {
   #ifdef DEBUG_MODE
     errortext += enigma::debug_scope::GetErrors();
   #else
@@ -76,7 +75,7 @@ void show_error(string errortext, const bool fatal)
   if (strStr != "")
     strStr = strStr + "\n\n";
 
-  if (fatal == 0)
+  if (!fatal)
     strStr = strStr + "Do you want to abort the application?";
   else
     strStr = strStr + "Click 'OK' to abort the application.";
@@ -86,13 +85,10 @@ void show_error(string errortext, const bool fatal)
 
   double result;
 
-  if (fatal == 0)
-  {
+  if (!fatal) {
     result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_YESNO | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
     printf("ERROR: %s\n", errortext.c_str());
-  }
-  else
-  {
+  } else {
     result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_OK | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
     printf("FATAL ERROR: %s\n", errortext.c_str());
   }
@@ -107,8 +103,7 @@ namespace enigma {
   HWND infore;
 }
 
-static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
+static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   if (uMsg == WM_KEYUP) {
     switch (wParam) {
       case VK_ESCAPE:
@@ -127,8 +122,7 @@ static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 }
 
 /* < Used by InputBoxProc > */
-void ClientResize(HWND hWnd, int nWidth, int nHeight)
-{
+void ClientResize(HWND hWnd, int nWidth, int nHeight) {
   RECT rcClient, rcWind;
   POINT ptDiff;
   GetClientRect(hWnd, &rcClient);
@@ -144,12 +138,9 @@ bool HideInput = 0;
 /* < / Used by InputBoxProc > */
 
 /* < Used by get_string, get_password, get_integer, and get_passcode > */
-LRESULT CALLBACK InputBoxProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-  switch (Msg)
-  {
-  case WM_INITDIALOG:
-    {
+LRESULT CALLBACK InputBoxProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam) {
+  switch (Msg) {
+  case WM_INITDIALOG: {
       ClientResize(hWndDlg, 357, 128);
       RECT rect;
       GetWindowRect(hWndDlg, &rect);
@@ -178,8 +169,7 @@ LRESULT CALLBACK InputBoxProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
   break;
 
   case WM_COMMAND:
-    switch (wParam)
-    {
+    switch (wParam) {
     case IDOK:
       GetDlgItemTextW(hWndDlg, IDC_EDIT, wstrTextEntry, MAX_PATH + 1);
       gs_form_canceled = 0;
@@ -199,8 +189,7 @@ LRESULT CALLBACK InputBoxProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 }
 /* < / Used by get_string, get_password, get_integer, and get_passcode > */
 
-static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
+static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   if (uMsg == WM_INITDIALOG) {
     SetWindowText(hwndDlg, gs_cap.c_str());
     SetDlgItemText(hwndDlg, 14, gs_username.c_str());
@@ -226,8 +215,7 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
   return 0;
 }
 
-static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
+static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   if (uMsg == WM_INITDIALOG) {
     SetWindowText(hwndDlg,gs_cap.c_str());
     SetDlgItemText(hwndDlg, 10, gs_message.c_str());
@@ -270,8 +258,7 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
 }
 
 /* < Used by GetDirectoryProc > */
-WCHAR *LowerCaseToActualPathName(WCHAR *wstr_dname)
-{
+WCHAR *LowerCaseToActualPathName(WCHAR *wstr_dname) {
   LPITEMIDLIST pstr_dname;
   SHParseDisplayName(wstr_dname, 0, &pstr_dname, 0, 0);
 
@@ -286,12 +273,9 @@ static string DlgItemText;
 tstring ActualPath;
 /* < / Used by GetDirectoryProc > */
 
-UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-  switch (uMsg)
-  {
-  case WM_INITDIALOG:
-    {
+UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  switch (uMsg) {
+  case WM_INITDIALOG: {
       ClientResize(hWnd, 424, 255);
       RECT rect;
       GetWindowRect(hWnd, &rect);
@@ -321,14 +305,12 @@ UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     }
   break;
 
-  case WM_CREATE:
-    {
+  case WM_CREATE: {
       SetWindowLongPtr(hWnd, GWL_STYLE, GetWindowLongPtr(hWnd, GWL_STYLE) | DS_FIXEDSYS);
       SetWindowPos(hWnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
     }
 
-  case WM_PAINT:
-    {
+  case WM_PAINT: {
       GetDlgItemTextW(hWnd, stc1, wstr_stc1, MAX_PATH + 1);
       static string DlgItemText;
       DlgItemText = shorten(LowerCaseToActualPathName(wstr_stc1));
@@ -337,18 +319,14 @@ UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     }
   break;
 
-  case WM_COMMAND:
-    {
+  case WM_COMMAND: {
       if (HIWORD(wParam) == LBN_DBLCLK && LOWORD(wParam) == lst1)
         return TRUE;
-      else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDOK)
-      {
+      else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDOK) {
         wcsncpy(wstr_dname, ActualPath.c_str(), MAX_PATH + 1);
         PostMessageW(hWnd, WM_COMMAND, IDABORT, 0);
         return TRUE;
-      }
-      else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDCANCEL)
-      {
+      } else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDCANCEL) {
         tstring tstr_dname = widen("");
         wcsncpy(wstr_dname, tstr_dname.c_str(), MAX_PATH + 1);
         PostMessageW(hWnd, WM_COMMAND, IDABORT, 0);
@@ -357,8 +335,7 @@ UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     }
   break;
 
-  case WM_CLOSE:
-    {
+  case WM_CLOSE: {
       tstring tstr_dname = widen("");
       wcsncpy(wstr_dname, tstr_dname.c_str(), MAX_PATH + 1);
       PostMessageW(hWnd, WM_COMMAND, IDABORT, 0);
@@ -370,10 +347,8 @@ UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
   return FALSE;
 }
 
-static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
-{
-  if (uMsg == BFFM_INITIALIZED)
-  {
+static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData) {
+  if (uMsg == BFFM_INITIALIZED) {
     tstring tstr_cap = widen(gs_cap);
     SetWindowTextW(hwnd, tstr_cap.c_str());
   }
@@ -381,10 +356,8 @@ static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM 
   return 0;
 }
 
-UINT_PTR CALLBACK GetColorProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
-{
-  if (uiMsg == WM_INITDIALOG)
-  {
+UINT_PTR CALLBACK GetColorProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) {
+  if (uiMsg == WM_INITDIALOG) {
     RECT rect;
     GetWindowRect(hdlg, &rect);
     MoveWindow(hdlg,
@@ -594,8 +567,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
   */
 }
 
-int show_message(const string &str)
-{
+int show_message(const string &str) {
   //NOTE: This will not work with a fullscreen application, it is an issue with Windows
   //this could be why GM8.1, unlike Studio, did not use native dialogs and custom
   //rendered its own message boxes like most game engines.
@@ -610,8 +582,7 @@ int show_message(const string &str)
   return 0;
 }
 
-int show_message_ext(string msg, string but1, string but2, string but3)
-{
+int show_message_ext(string msg, string but1, string but2, string but3) {
   gs_cap = window_get_caption();
   gs_message = msg;
   gs_but1 = but1; gs_but2 = but2; gs_but3 = but3;
@@ -619,8 +590,7 @@ int show_message_ext(string msg, string but1, string but2, string but3)
   return DialogBox(enigma::hInstance,"showmessageext",enigma::hWnd,ShowMessageExtProc);
 }
 
-bool show_question(string str)
-{
+bool show_question(string str) {
   tstring tstrStr = widen(str);
   tstring tstrWindowCaption = widen(window_get_caption());
 
@@ -630,16 +600,14 @@ bool show_question(string str)
   return (result == IDYES);
 }
 
-string get_login(string username, string password, string cap)
-{
+string get_login(string username, string password, string cap) {
   gs_cap = cap; gs_username = username; gs_password = password;
   DialogBox(enigma::hInstance,"getlogindialog",enigma::hWnd,GetLoginProc);
 
   return gs_str_submitted;
 }
 
-string get_string(string str, string def, string title)
-{
+string get_string(string str, string def, string title) {
   tstring tstrStr = widen(str);
   tstring tstrDef = widen(def);
   if (title == "") title = window_get_caption();
@@ -656,8 +624,7 @@ string get_string(string str, string def, string title)
   return strResult;
 }
 
-string get_password(string str, string def, string title)
-{
+string get_password(string str, string def, string title) {
   tstring tstrStr = widen(str);
   tstring tstrDef = widen(def);
   if (title == "") title = window_get_caption();
@@ -674,8 +641,7 @@ string get_password(string str, string def, string title)
   return strResult;
 }
 
-double get_integer(string str, double def, string title)
-{
+double get_integer(string str, double def, string title) {
   std::ostringstream defInteger;
   defInteger << def;
   string strDef = defInteger.str();
@@ -698,8 +664,7 @@ double get_integer(string str, double def, string title)
   return cstrResult ? strtod(cstrResult, NULL) : 0;
 }
 
-double get_passcode(string str, double def, string title)
-{
+double get_passcode(string str, double def, string title) {
   std::ostringstream defInteger;
   defInteger << def;
   string strDef = defInteger.str();
@@ -726,8 +691,7 @@ bool get_string_canceled() {
   return gs_form_canceled;
 }
 
-string get_open_filename(string filter, string fname, string title)
-{
+string get_open_filename(string filter, string fname, string title) {
   OPENFILENAMEW ofn;
 
   string str_filter = filter.append("||");
@@ -754,8 +718,7 @@ string get_open_filename(string filter, string fname, string title)
   ofn.lpstrInitialDir = NULL;
   ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 
-  if (GetOpenFileNameW(&ofn) != 0)
-  {
+  if (GetOpenFileNameW(&ofn) != 0) {
     static string result;
     result = shorten(wstr_fname);
     return result;
@@ -764,8 +727,7 @@ string get_open_filename(string filter, string fname, string title)
   return "";
 }
 
-string get_save_filename(string filter, string fname, string title)
-{
+string get_save_filename(string filter, string fname, string title) {
   OPENFILENAMEW ofn;
 
   string str_filter = filter.append("||");
@@ -792,8 +754,7 @@ string get_save_filename(string filter, string fname, string title)
   ofn.lpstrInitialDir = NULL;
   ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 
-  if (GetSaveFileNameW(&ofn) != 0)
-  {
+  if (GetSaveFileNameW(&ofn) != 0) {
     static string result;
     result = shorten(wstr_fname);
     return result;
@@ -802,8 +763,7 @@ string get_save_filename(string filter, string fname, string title)
   return "";
 }
 
-string get_open_filename_ext(string filter, string fname, string dir, string title)
-{
+string get_open_filename_ext(string filter, string fname, string dir, string title) {
   OPENFILENAMEW ofn;
 
   string str_filter = filter.append("||");
@@ -830,8 +790,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   ofn.lpstrInitialDir = tstr_dir.c_str();
   ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 
-  if (GetOpenFileNameW(&ofn) != 0)
-  {
+  if (GetOpenFileNameW(&ofn) != 0) {
     static string result;
     result = shorten(wstr_fname);
     return result;
@@ -840,8 +799,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   return "";
 }
 
-string get_save_filename_ext(string filter, string fname, string dir, string title)
-{
+string get_save_filename_ext(string filter, string fname, string dir, string title) {
   OPENFILENAMEW ofn;
 
   string str_filter = filter.append("||");
@@ -868,8 +826,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   ofn.lpstrInitialDir = tstr_dir.c_str();
   ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 
-  if (GetSaveFileNameW(&ofn) != 0)
-  {
+  if (GetSaveFileNameW(&ofn) != 0) {
     static string result;
     result = shorten(wstr_fname);
     return result;
@@ -878,8 +835,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   return "";
 }
 
-double get_color(double defcol, bool advanced, string title)
-{
+double get_color(double defcol, bool advanced, string title) {
   CHOOSECOLOR cc;
 
   if (title == "") title = "Color";
@@ -903,8 +859,7 @@ double get_color(double defcol, bool advanced, string title)
   return -1;
 }
 
-string get_directory(string dname, string title)
-{
+string get_directory(string dname, string title) {
   OPENFILENAMEW ofn;
 
   tstring tstr_filter = widen("*.*|*.*|");
@@ -938,8 +893,7 @@ string get_directory(string dname, string title)
 
   DWORD attrib = GetFileAttributesW(wstr_dname);
 
-  if (attrib != INVALID_FILE_ATTRIBUTES && (attrib & FILE_ATTRIBUTE_DIRECTORY))
-  {
+  if (attrib != INVALID_FILE_ATTRIBUTES && (attrib & FILE_ATTRIBUTE_DIRECTORY)) {
     static string result;
     result = shorten(wstr_dname);
     return result;
@@ -948,8 +902,7 @@ string get_directory(string dname, string title)
   return "";
 }
 
-string get_directory_alt(string capt, string root, bool modern, string title) 
-{
+string get_directory_alt(string capt, string root, bool modern, string title) {
   BROWSEINFOW bi;
 
   tstring tstr_capt = widen(capt);
@@ -971,8 +924,7 @@ string get_directory_alt(string capt, string root, bool modern, string title)
   LPMALLOC pMalloc;
   gs_cap = title;
 
-  if (SUCCEEDED(SHGetMalloc(&pMalloc)))
-  {
+  if (SUCCEEDED(SHGetMalloc(&pMalloc))) {
     ZeroMemory(&bi, sizeof(bi));
     bi.hwndOwner = enigma::hWnd;
     bi.pidlRoot = pstr_root;
@@ -983,12 +935,10 @@ string get_directory_alt(string capt, string root, bool modern, string title)
     bi.lpfn = GetDirectoryAltProc;
 
     LPITEMIDLIST lpItem = SHBrowseForFolderW(&bi);
-    if (lpItem != NULL)
-    {
+    if (lpItem != NULL) {
       if (SHGetPathFromIDListW(lpItem, wstr_dir) == 0)
         return "";
-      else
-      {
+      else {
         static string result;
         result = string_replace_all(shorten(wstr_dir) + shorten(tstr_slash), "\\\\", "\\");
         return result;
