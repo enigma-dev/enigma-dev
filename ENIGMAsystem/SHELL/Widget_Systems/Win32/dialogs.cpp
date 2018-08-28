@@ -726,7 +726,6 @@ namespace {
 }
 
 string get_open_filename(string filter, string fname, string title) {
-
   string str_filter = filter.append("||");
 
   tstring tstr_filter = widen(str_filter);
@@ -743,8 +742,6 @@ string get_open_filename(string filter, string fname, string title) {
 }
 
 string get_save_filename(string filter, string fname, string title) {
-  OPENFILENAMEW ofn;
-
   string str_filter = filter.append("||");
 
   tstring tstr_filter = widen(str_filter);
@@ -761,8 +758,6 @@ string get_save_filename(string filter, string fname, string title) {
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) {
-  OPENFILENAMEW ofn;
-
   string str_filter = filter.append("||");
 
   tstring tstr_filter = widen(str_filter);
@@ -780,8 +775,6 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
-  OPENFILENAMEW ofn;
-
   string str_filter = filter.append("||");
 
   tstring tstr_filter = widen(str_filter);
