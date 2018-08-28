@@ -691,8 +691,41 @@ bool get_string_canceled() {
   return gs_form_canceled;
 }
 
+namespace {
+  string ofn_init(bool open, LPWSTR fname, LPCWSTR filter, LPCWSTR dir, LPCWSTR title, DWORD flags) {
+    OPENFILENAMEW ofn;
+    
+    ZeroMemory(&ofn, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = enigma::hWnd;
+    ofn.lpstrFile = fname;
+    ofn.nMaxFile = MAX_PATH + 1;
+    ofn.lpstrFilter = filter;
+    ofn.nFilterIndex = 0;
+    ofn.lpstrTitle = title;
+    if (title == "") ofn.lpstrTitle = NULL;
+    ofn.lpstrInitialDir = dir;
+    ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | flags;
+
+    if (open) {
+      if (GetOpenFileNameW(&ofn) != 0) {
+        static string result;
+        result = shorten(wstr_fname);
+        return result;
+      }
+    } else {
+      if (GetSaveFileNameW(&ofn) != 0) {
+        static string result;
+        result = shorten(wstr_fname);
+        return result;
+      }
+    }
+
+    return "";
+  }
+}
+
 string get_open_filename(string filter, string fname, string title) {
-  OPENFILENAMEW ofn;
 
   string str_filter = filter.append("||");
 
@@ -706,25 +739,7 @@ string get_open_filename(string filter, string fname, string title) {
   WCHAR wstr_fname[MAX_PATH + 1];
   wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH + 1);
 
-  ZeroMemory(&ofn, sizeof(ofn));
-  ofn.lStructSize = sizeof(ofn);
-  ofn.hwndOwner = enigma::hWnd;
-  ofn.lpstrFile = wstr_fname;
-  ofn.nMaxFile = MAX_PATH + 1;
-  ofn.lpstrFilter = tstr_filter.c_str();
-  ofn.nFilterIndex = 0;
-  ofn.lpstrTitle = tstr_title.c_str();
-  if (title == "") ofn.lpstrTitle = NULL;
-  ofn.lpstrInitialDir = NULL;
-  ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-
-  if (GetOpenFileNameW(&ofn) != 0) {
-    static string result;
-    result = shorten(wstr_fname);
-    return result;
-  }
-
-  return "";
+  return ofn_init(true, wstr_fname, tstr_filter.c_str(), NULL, tstr_title.c_str(), 0);
 }
 
 string get_save_filename(string filter, string fname, string title) {
@@ -742,25 +757,7 @@ string get_save_filename(string filter, string fname, string title) {
   WCHAR wstr_fname[MAX_PATH + 1];
   wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH + 1);
 
-  ZeroMemory(&ofn, sizeof(ofn));
-  ofn.lStructSize = sizeof(ofn);
-  ofn.hwndOwner = enigma::hWnd;
-  ofn.lpstrFile = wstr_fname;
-  ofn.nMaxFile = MAX_PATH + 1;
-  ofn.lpstrFilter = tstr_filter.c_str();
-  ofn.nFilterIndex = 0;
-  ofn.lpstrTitle = tstr_title.c_str();
-  if (title == "") ofn.lpstrTitle = NULL;
-  ofn.lpstrInitialDir = NULL;
-  ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-
-  if (GetSaveFileNameW(&ofn) != 0) {
-    static string result;
-    result = shorten(wstr_fname);
-    return result;
-  }
-
-  return "";
+  return ofn_init(false, wstr_fname, tstr_filter.c_str(), NULL, tstr_title.c_str(), OFN_OVERWRITEPROMPT);
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) {
@@ -779,24 +776,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   WCHAR wstr_fname[MAX_PATH + 1];
   wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH + 1);
 
-  ZeroMemory(&ofn, sizeof(ofn));
-  ofn.lStructSize = sizeof(ofn);
-  ofn.hwndOwner = enigma::hWnd;
-  ofn.lpstrFile = wstr_fname;
-  ofn.nMaxFile = MAX_PATH + 1;
-  ofn.lpstrFilter = tstr_filter.c_str();
-  ofn.nFilterIndex = 0;
-  ofn.lpstrTitle = tstr_title.c_str();
-  ofn.lpstrInitialDir = tstr_dir.c_str();
-  ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-
-  if (GetOpenFileNameW(&ofn) != 0) {
-    static string result;
-    result = shorten(wstr_fname);
-    return result;
-  }
-
-  return "";
+  return ofn_init(true, wstr_fname, tstr_filter.c_str(), tstr_dir.c_str(), tstr_title.c_str(), 0);
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
@@ -815,24 +795,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   WCHAR wstr_fname[MAX_PATH + 1];
   wcsncpy(wstr_fname, tstr_fname.c_str(), MAX_PATH + 1);
 
-  ZeroMemory(&ofn, sizeof(ofn));
-  ofn.lStructSize = sizeof(ofn);
-  ofn.hwndOwner = enigma::hWnd;
-  ofn.lpstrFile = wstr_fname;
-  ofn.nMaxFile = MAX_PATH + 1;
-  ofn.lpstrFilter = tstr_filter.c_str();
-  ofn.nFilterIndex = 0;
-  ofn.lpstrTitle = tstr_title.c_str();
-  ofn.lpstrInitialDir = tstr_dir.c_str();
-  ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-
-  if (GetSaveFileNameW(&ofn) != 0) {
-    static string result;
-    result = shorten(wstr_fname);
-    return result;
-  }
-
-  return "";
+  return ofn_init(false, wstr_fname, tstr_filter.c_str(), tstr_dir.c_str(), tstr_title.c_str(), OFN_OVERWRITEPROMPT);
 }
 
 double get_color(double defcol, bool advanced, string title) {
