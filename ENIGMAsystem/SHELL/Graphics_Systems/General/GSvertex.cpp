@@ -59,7 +59,13 @@ vector<IndexBuffer*> indexBuffers;
 namespace enigma_user {
 
 void vertex_format_begin() {
-  currentVertexFormat = enigma::VertexFormat();
+  // resetting the current vertex format this way is faster
+  // than simply calling the default constructor because we
+  // avoid reallocating the flags vector this way
+  currentVertexFormat.hash = 0;
+  currentVertexFormat.stride = 0;
+  currentVertexFormat.stride_size = 0;
+  currentVertexFormat.flags.clear();
 }
 
 unsigned vertex_format_get_hash() {
