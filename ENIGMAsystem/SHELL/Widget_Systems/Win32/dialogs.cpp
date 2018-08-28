@@ -710,13 +710,13 @@ namespace {
     if (open) {
       if (GetOpenFileNameW(&ofn) != 0) {
         static string result;
-        result = shorten(wstr_fname);
+        result = shorten(fname);
         return result;
       }
     } else {
       if (GetSaveFileNameW(&ofn) != 0) {
         static string result;
-        result = shorten(wstr_fname);
+        result = shorten(fname);
         return result;
       }
     }
