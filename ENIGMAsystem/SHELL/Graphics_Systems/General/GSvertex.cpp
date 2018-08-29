@@ -41,7 +41,7 @@ std::unordered_map<size_t, int> vertexFormatCache;
 
 // current vertex format being specified
 // NOTE: this is not reset until the next vertex_format_begin
-// NOTE: this uses the stack until vertex_format_end to speed up creation
+// NOTE: this has static storage duration to avoid reallocation overhead (e.g, new is slow)
 enigma::VertexFormat currentVertexFormat;
 
 #define RESOURCE_EXISTS(id, container) return (id >= 0 && (unsigned)id < enigma::container.size() && enigma::container[id] != nullptr);
@@ -59,7 +59,10 @@ vector<IndexBuffer*> indexBuffers;
 namespace enigma_user {
 
 void vertex_format_begin() {
-  currentVertexFormat = enigma::VertexFormat();
+  // resetting the current vertex format this way is faster
+  // than simply calling the default constructor because we
+  // avoid reallocating the flags vector this way
+  currentVertexFormat.Clear();
 }
 
 unsigned vertex_format_get_hash() {
