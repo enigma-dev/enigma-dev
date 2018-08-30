@@ -141,12 +141,6 @@ for console mode:
 
 static int gWarningDisplayed = 0 ;
 
-#ifdef _MSC_VER
-#pragma warning(disable:4996) /* allows usage of strncpy, strcpy, strcat, sprintf, fopen */
-#pragma warning(disable:4100) /* allows usage of strncpy, strcpy, strcat, sprintf, fopen */
-#pragma warning(disable:4706) /* allows usage of strncpy, strcpy, strcat, sprintf, fopen */
-#endif
-
 static char * getPathWithoutFinalSlash(
         char * const aoDestination, /* make sure it is allocated, use _MAX_PATH */
         char const * const aSource) /* aoDestination and aSource can be the same */
@@ -1447,18 +1441,9 @@ char const * tinyfd_colorChooser(
             lWasOsascript = 1 ;
             strcpy( lDialogString , "osascript");
             
-            if ( ! osx9orBetter() )
-            {
-                strcat( lDialogString , " -e \"tell application \\\"System Events\\\"\" -e \"Activate\"");
-                strcat( lDialogString , " -e \"try\" -e \"set mycolor to choose color default color {");
-            }
-            else
-            {
-                strcat( lDialogString ,
-                       " -e \"try\" -e \"tell app (path to frontmost application as Unicode text) \
-                       to set mycolor to choose color default color {");
-            }
-            
+            strcat( lDialogString , " -e \"tell application \\\"System Events\\\"\" -e \"Activate\"");
+            strcat( lDialogString , " -e \"try\" -e \"set mycolor to choose color default color {");
+
             sprintf(lTmp, "%d", 256 * lDefaultRGB[0] ) ;
             strcat(lDialogString, lTmp ) ;
             strcat(lDialogString, "," ) ;
@@ -1475,10 +1460,10 @@ char const * tinyfd_colorChooser(
             strcat( lDialogString ,
                    "-e \"set mystring to mystring & \\\" \\\" & ((item i of mycolor) div 256 as integer) as string\" " );
             strcat( lDialogString , "-e \"end repeat\" " );
-            strcat( lDialogString , "-e \"mystring\" ");
-            strcat(lDialogString, "-e \"on error number -128\" " ) ;
+            //strcat( lDialogString , "-e \"mystring\" ");
+            //strcat(lDialogString, "-e \"on error number -128\" " ) ;
             strcat(lDialogString, "-e \"end try\"") ;
-            if ( ! osx9orBetter() ) strcat( lDialogString, " -e \"end tell\"") ;
+            strcat( lDialogString, " -e \"end tell\"") ;
         }
         else if ( zenity3Present() )
         {
@@ -1560,174 +1545,3 @@ char const * tinyfd_colorChooser(
         /* printf( "lBuff: %s\n" , lBuff ) ; */
         return lBuff ;
 }
-
-
-/*
-int main( int argc , char * argv[] )
-{
-char const * lTmp;
-char const * lTheSaveFileName;
-char const * lTheOpenFileName;
-char const * lTheSelectFolderName;
-char const * lTheHexColor;
-char const * lWillBeGraphicMode;
-unsigned char lRgbColor[3];
-FILE * lIn;
-char lBuffer[1024];
-char lString[1024];
-char const * lFilterPatterns[2] = { "*.txt", "*.text" };
-
-tinyfd_verbose = argc - 1;
-
-lWillBeGraphicMode = tinyfd_inputBox("tinyfd_query", NULL, NULL);
-
-strcpy(lBuffer, "v");
-strcat(lBuffer, tinyfd_version);
-if (lWillBeGraphicMode)
-{
-    strcat(lBuffer, "\ngraphic mode: ");
-}
-else
-{
-    strcat(lBuffer, "\nconsole mode: ");
-}
-strcat(lBuffer, tinyfd_response);
-strcat(lBuffer, "\n");
-strcat(lBuffer, tinyfd_needs+78);
-strcpy(lString, "tinyfiledialogs");
-tinyfd_messageBox(lString, lBuffer, "ok", "info", 0);
-
-tinyfd_notifyPopup("the title", "the message\n\tfrom outer-space", "info");
-
-if (lWillBeGraphicMode && !tinyfd_forceConsole)
-{
-        tinyfd_forceConsole = ! tinyfd_messageBox("Hello World",
-                "graphic dialogs [yes] / console mode [no]?",
-                "yesno", "question", 1);
-}
-
-lTmp = tinyfd_inputBox(
-        "a password box", "your password will be revealed", NULL);
-
-if (!lTmp) return 1;
-
-strcpy(lString, lTmp);
-
-lTheSaveFileName = tinyfd_saveFileDialog(
-        "let us save this password",
-        "passwordFile.txt",
-        2,
-        lFilterPatterns,
-        NULL);
-
-if (!lTheSaveFileName)
-{
-        tinyfd_messageBox(
-                "Error",
-                "Save file name is NULL",
-                "ok",
-                "error",
-                1);
-        return 1;
-}
-
-lIn = fopen(lTheSaveFileName, "w");
-if (!lIn)
-{
-        tinyfd_messageBox(
-                "Error",
-                "Can not open this file in write mode",
-                "ok",
-                "error",
-                1);
-        return 1;
-}
-fputs(lString, lIn);
-fclose(lIn);
-
-lTheOpenFileName = tinyfd_openFileDialog(
-        "let us read the password back",
-        "",
-        2,
-        lFilterPatterns,
-        NULL,
-        0);
-
-if (!lTheOpenFileName)
-{
-        tinyfd_messageBox(
-                "Error",
-                "Open file name is NULL",
-                "ok",
-                "error",
-                1);
-        return 1;
-}
-
-lIn = fopen(lTheOpenFileName, "r");
-
-if (!lIn)
-{
-        tinyfd_messageBox(
-                "Error",
-                "Can not open this file in read mode",
-                "ok",
-                "error",
-                1);
-        return(1);
-}
-lBuffer[0] = '\0';
-fgets(lBuffer, sizeof(lBuffer), lIn);
-fclose(lIn);
-
-tinyfd_messageBox("your password is",
-        lBuffer, "ok", "info", 1);
-
-lTheSelectFolderName = tinyfd_selectFolderDialog(
-        "let us just select a directory", NULL);
-
-if (!lTheSelectFolderName)
-{
-        tinyfd_messageBox(
-                "Error",
-                "Select folder name is NULL",
-                "ok",
-                "error",
-                1);
-        return 1;
-}
-
-tinyfd_messageBox("The selected folder is",
-        lTheSelectFolderName, "ok", "info", 1);
-
-lTheHexColor = tinyfd_colorChooser(
-        "choose a nice color",
-        "#FF0077",
-        lRgbColor,
-        lRgbColor);
-
-if (!lTheHexColor)
-{
-        tinyfd_messageBox(
-                "Error",
-                "hexcolor is NULL",
-                "ok",
-                "error",
-                1);
-        return 1;
-}
-
-tinyfd_messageBox("The selected hexcolor is",
-        lTheHexColor, "ok", "info", 1);
-
-        tinyfd_beep();
-
-        return 0;
-}
-*/
-
-#ifdef _MSC_VER
-#pragma warning(default:4996)
-#pragma warning(default:4100)
-#pragma warning(default:4706)
-#endif
