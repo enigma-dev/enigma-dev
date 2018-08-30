@@ -7,12 +7,32 @@ else
 	EXT := .dll
 endif
 
+GCCVER := $(shell gcc -dumpversion | cut -c 1)
 SHARED_SOURCES := ../../shared
 LIBRARY   := ../../libEGM$(EXT)
 PROTO_DIR := ../protos
-CXXFLAGS  := $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SOURCES)/lodepng -std=c++14 -Wall -Wextra -Wpedantic -g -fPIC
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
+
+CXXFLAGS  := -I$(SRC_DIR) $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SOURCES)/lodepng -Wall -Wextra -Wpedantic -g -fPIC
+LDFLAGS   := -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -lstdc++fs -L$(SHARED_SOURCES)/lodepng -llodepng
+
+#if gcc >= 8 use std::filesystem instead of boost
+ifeq ($(shell expr $(GCCVER) \>= 8), 1)
+	override CXXFLAGS += -std=c++17
+	FS_LIBS=-lstdc++fs
+else
+	override CXXFLAGS += -std=c++14 -DUSE_BOOST_FS
+	ifeq ($(OS), Linux)
+		FS_LIBS=-lboost_system -lboost_filesystem
+	else ifeq ($(OS), Darwin)
+		FS_LIBS=-lboost_system -lboost_filesystem
+	else
+		FS_LIBS=-lboost_system-mt -lboost_filesystem-mt
+	endif
+endif
+
+LDFLAGS += $(FS_LIBS)
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 
@@ -34,7 +54,7 @@ clean:
 # --libs-only-L is specified because the Trusty Tahr package for pugixml does not have a proper pkg-config
 # hence we only use pkg-config for the lib dirs and just always link pugixml whether in travis, on ubuntu, or in msys2
 $(LIBRARY): $(OBJECTS)
-	$(CXX) -shared -o $@ $^ -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -L$(SHARED_SOURCES)/lodepng -llodepng
+	$(CXX) $(CXXFLAGS) -shared -o $@ $^ $(LDFLAGS)
 
 # Create the object directories
 $(OBJDIRS):

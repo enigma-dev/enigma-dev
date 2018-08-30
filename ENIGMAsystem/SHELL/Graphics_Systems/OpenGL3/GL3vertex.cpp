@@ -21,12 +21,12 @@
 #include "GL3shader.h"
 #include "GLSLshader.h"
 
+#include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSmath.h"
-
-#include "Graphics_Systems/General/OpenGLHeaders.h"
 
 #include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
 
@@ -40,7 +40,7 @@ GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES
 map<int, GLuint> vertexBufferPeers;
 map<int, GLuint> indexBufferPeers;
 
-}
+} // anonymous namespace
 
 namespace enigma {
 
@@ -63,10 +63,10 @@ void graphics_delete_index_buffer_peer(int buffer) {
 static inline int graphics_find_attribute_location(std::string name, int usageIndex) {
   int location = -1;
   if (usageIndex == 0) {
-    location = glGetAttribLocation(enigma::shaderprograms[enigma::bound_shader]->shaderprogram, name.c_str());
+    location = enigma_user::glsl_get_attribute_location(enigma::bound_shader, name);
   }
   if (usageIndex > 0 || location == -1) {
-    location = glGetAttribLocation(enigma::shaderprograms[enigma::bound_shader]->shaderprogram, (name + std::to_string(usageIndex)).c_str());
+    location = enigma_user::glsl_get_attribute_location(enigma::bound_shader, name + std::to_string(usageIndex));
   }
   return location;
 }
@@ -74,6 +74,7 @@ static inline int graphics_find_attribute_location(std::string name, int usageIn
 void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
   const bool frozen = isIndex ? indexBuffers[buffer]->frozen : vertexBuffers[buffer]->frozen;
+  const bool dynamic = isIndex ? indexBuffers[buffer]->dynamic : vertexBuffers[buffer]->dynamic;
   GLuint bufferPeer;
   auto it = isIndex ? indexBufferPeers.find(buffer) : vertexBufferPeers.find(buffer);
   const GLenum target = isIndex ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER;
@@ -81,7 +82,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   // if the contents of the buffer are dirty then we need to update
   // our native buffer object "peer"
   if (dirty) {
-    size_t size = isIndex ? enigma_user::index_get_size(buffer) : enigma_user::vertex_get_size(buffer);
+    size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
 
     // if we haven't created a native "peer" for this buffer yet,
     // then we need to do so now
@@ -101,26 +102,15 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     } else {
       bind_array_buffer(bufferPeer);
     }
-    GLint pSize;
-    glGetBufferParameteriv(target, GL_BUFFER_SIZE, &pSize);
 
-    // if the size of the peer isn't big enough to hold the new contents
-    // or freeze was called, then we need to make a call to glBufferData
-    // to allocate a bigger peer or remove the GL_DYNAMIC_DRAW usage
     const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
-    if (size > (size_t)pSize || frozen) {
-      GLenum usage = frozen ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
-      glBufferData(target, size, data, usage);
-    } else {
-      glBufferSubData(target, 0, size, data);
-    }
+    GLenum usage = frozen ? (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW) : GL_STREAM_DRAW;
+    glBufferData(target, size, data, usage);
 
     if (isIndex) {
-      indexBuffers[buffer]->indices.clear();
-      indexBuffers[buffer]->dirty = false;
+      indexBuffers[buffer]->clearData();
     } else {
-      vertexBuffers[buffer]->vertices.clear();
-      vertexBuffers[buffer]->dirty = false;
+      vertexBuffers[buffer]->clearData();
     }
   } else {
     if (isIndex) {
@@ -131,7 +121,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   }
 }
 
-void graphics_apply_vertex_format(int format) {
+void graphics_apply_vertex_format(int format, size_t offset) {
   using namespace enigma_user;
 
   const VertexFormat* vertexFormat = vertexFormats[format];
@@ -154,9 +144,8 @@ void graphics_apply_vertex_format(int format) {
   glsl_attribute_enable_all_internal(false); //Disable all attributes
 
   bool useTextCoords = false, useColors = false;
-  size_t offset = 0;
   map<int,int> useCount;
-  const size_t stride = vertexFormat->stride * sizeof(float);
+  const size_t stride = enigma_user::vertex_format_get_stride_size(format);
   for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
     const pair<int, int> flag = vertexFormat->flags[i];
 
@@ -200,7 +189,7 @@ void graphics_apply_vertex_format(int format) {
       }
     }
 
-    offset += size;
+    offset += size * sizeof(enigma::VertexElement);
   }
 
   glsl_uniformf_internal(shaderprograms[bound_shader]->uni_color,
@@ -221,7 +210,7 @@ void graphics_apply_vertex_format(int format) {
   glsl_uniformi_internal(shaderprograms[bound_shader]->uni_colorEnable, useColors);
 }
 
-}
+} // namespace enigma
 
 namespace enigma_user {
 
@@ -235,7 +224,9 @@ void vertex_color(int buffer, int color, double alpha) {
   enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 
-void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
+void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   #ifdef DEBUG_MODE
@@ -244,12 +235,14 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   #endif
 
   enigma::graphics_prepare_buffer(buffer, false);
-  enigma::graphics_apply_vertex_format(vertexBuffer->format);
+  enigma::graphics_apply_vertex_format(vertexBuffer->format, offset);
 
 	glDrawArrays(primitive_types[primitive], start, count);
 }
 
-void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 
@@ -260,7 +253,7 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
 
   enigma::graphics_prepare_buffer(vertex, false);
   enigma::graphics_prepare_buffer(buffer, true);
-  enigma::graphics_apply_vertex_format(vertexBuffer->format);
+  enigma::graphics_apply_vertex_format(vertexBuffer->format, 0);
 
   GLenum indexType = GL_UNSIGNED_SHORT;
   if (indexBuffer->type == index_type_uint) {
@@ -273,4 +266,4 @@ void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigne
   glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)(intptr_t)start);
 }
 
-}
+} // namespace enigma_user

@@ -22,11 +22,10 @@ function imgur_upload {
 }
 
 function enigmabot_post_comment {
-  echo $(curl -u $bot_user':'$bot_password \
-              --header "Content-Type: application/json" \
+  echo $(curl --header "Content-Type: application/json" \
               --request POST \
               --data '{"body":"'"$1"'"}' \
-              $pullrequest)
+              "$pullrequest?access_token=$bot_comment_token")
 }
 
 gh_comment_header="Regression tests have indicated that graphical changes have been introduced. \
@@ -57,7 +56,6 @@ if [[ ! -z "${com_master_pr}" ]]; then
   if [[ "$TRAVIS" -eq "true" ]]; then
     enigmabot_post_comment "${deleted_images_comment}"
   fi
-  exit 1
 else
   if [[ ! -z "${com_pr_master}" ]]; then
     new_images_comment="Warning: The following images are found in the pull request but not master (new tests?):"
@@ -112,7 +110,5 @@ else
 
   if [[ "$TRAVIS" -eq "true" ]] && [[ ! -z "${gh_comment_images}" ]]; then
     enigmabot_post_comment "${gh_comment_header}${gh_comment_images}"
-
-    exit 1
   fi
 fi

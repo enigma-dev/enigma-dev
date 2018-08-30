@@ -15,8 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSblend.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSblend.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+
 namespace enigma
 {
   extern int currentblendmode[2];
@@ -28,6 +30,7 @@ namespace enigma_user
 
 int draw_set_blend_mode(int mode){
     if (enigma::currentblendmode[0] == mode && enigma::currentblendtype == 0) return 0;
+    draw_batch_flush(batch_flush_deferred);
     enigma::currentblendmode[0] = mode;
     enigma::currentblendtype = 0;
 	switch (mode)
@@ -49,6 +52,7 @@ int draw_set_blend_mode(int mode){
 
 int draw_set_blend_mode_ext(int src,int dest){
     if (enigma::currentblendmode[0] == src && enigma::currentblendmode[1] == dest && enigma::currentblendtype == 1) return 0;
+    draw_batch_flush(batch_flush_deferred);
 	const static GLenum blendequivs[11] = {
 	  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,
 	  GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR,
@@ -74,4 +78,3 @@ int draw_get_blend_mode_type(){
 }
 
 }
-

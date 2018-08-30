@@ -31,7 +31,22 @@
 
 #include "Widget_Systems/widgets_mandatory.h"
 
+#include <unordered_map>
+
+namespace {
+
+// cache of all vertex formats that are logically unique
+// key is the hash and value is an index into enigma::vertexFormats
+std::unordered_map<size_t, int> vertexFormatCache;
+
+// current vertex format being specified
+// NOTE: this is not reset until the next vertex_format_begin
+// NOTE: this has static storage duration to avoid reallocation overhead (e.g, new is slow)
+enigma::VertexFormat currentVertexFormat;
+
 #define RESOURCE_EXISTS(id, container) return (id >= 0 && (unsigned)id < enigma::container.size() && enigma::container[id] != nullptr);
+
+} // anonymous namespace
 
 namespace enigma {
 
@@ -39,43 +54,63 @@ vector<VertexFormat*> vertexFormats;
 vector<VertexBuffer*> vertexBuffers;
 vector<IndexBuffer*> indexBuffers;
 
-VertexFormat* vertexFormat = 0;
-
-}
+} // namespace enigma
 
 namespace enigma_user {
 
 void vertex_format_begin() {
-  enigma::vertexFormat = new enigma::VertexFormat();
+  // resetting the current vertex format this way is faster
+  // than simply calling the default constructor because we
+  // avoid reallocating the flags vector this way
+  currentVertexFormat.Clear();
+}
+
+unsigned vertex_format_get_hash() {
+  return currentVertexFormat.hash;
+}
+
+unsigned vertex_format_get_stride() {
+  return currentVertexFormat.stride;
+}
+
+unsigned vertex_format_get_stride_size() {
+  return currentVertexFormat.stride_size;
 }
 
 void vertex_format_add_color() {
-  enigma::vertexFormat->AddAttribute(vertex_type_color, vertex_usage_color);
+  currentVertexFormat.AddAttribute(vertex_type_color, vertex_usage_color);
 }
 
 void vertex_format_add_position() {
-  enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_position);
+  currentVertexFormat.AddAttribute(vertex_type_float2, vertex_usage_position);
 }
 
 void vertex_format_add_position_3d() {
-  enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_position);
+  currentVertexFormat.AddAttribute(vertex_type_float3, vertex_usage_position);
 }
 
 void vertex_format_add_textcoord() {
-  enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_textcoord);
+  currentVertexFormat.AddAttribute(vertex_type_float2, vertex_usage_textcoord);
 }
 
 void vertex_format_add_normal() {
-  enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_normal);
+  currentVertexFormat.AddAttribute(vertex_type_float3, vertex_usage_normal);
 }
 
 void vertex_format_add_custom(int type, int usage) {
-  enigma::vertexFormat->AddAttribute(type, usage);
+  currentVertexFormat.AddAttribute(type, usage);
 }
 
 int vertex_format_end() {
-  int id = enigma::vertexFormats.size();
-  enigma::vertexFormats.push_back(enigma::vertexFormat);
+  int id = -1;
+  auto search = vertexFormatCache.find(currentVertexFormat.hash);
+  if (search != vertexFormatCache.end()) {
+    id = search->second;
+  } else {
+    id = enigma::vertexFormats.size();
+    enigma::vertexFormats.emplace_back(new enigma::VertexFormat(currentVertexFormat));
+    vertexFormatCache[currentVertexFormat.hash] = id;
+  }
   return id;
 }
 
@@ -83,9 +118,16 @@ bool vertex_format_exists(int id) {
   RESOURCE_EXISTS(id, vertexFormats);
 }
 
-void vertex_format_delete(int id) {
-  delete enigma::vertexFormats[id];
-  enigma::vertexFormats[id] = nullptr;
+unsigned vertex_format_get_stride(int id) {
+  return enigma::vertexFormats[id]->stride;
+}
+
+unsigned vertex_format_get_stride_size(int id) {
+  return enigma::vertexFormats[id]->stride_size;
+}
+
+unsigned vertex_format_get_hash(int id) {
+  return enigma::vertexFormats[id]->hash;
 }
 
 int vertex_create_buffer() {
@@ -110,24 +152,35 @@ bool vertex_exists(int buffer) {
   RESOURCE_EXISTS(buffer, vertexBuffers);
 }
 
-unsigned vertex_get_size(int buffer) {
-  return enigma::vertexBuffers[buffer]->number * sizeof(gs_scalar);
+void vertex_set_format(int buffer, int format) {
+  enigma::vertexBuffers[buffer]->format = format;
+}
+
+unsigned vertex_get_buffer_size(int buffer) {
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+
+  return vertexBuffer->getNumber() * sizeof(enigma::VertexElement);
 }
 
 unsigned vertex_get_number(int buffer) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
+  if (vertex_format_exists(vertexBuffer->format)) {
+    const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
-  return vertexBuffer->number / vertexFormat->stride;
+    return vertexBuffer->getNumber() / vertexFormat->stride;
+  }
+
+  return 0;
 }
 
-void vertex_freeze(int buffer) {
+void vertex_freeze(int buffer, bool dynamic) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   // we can freeze the vertex buffer only if it isn't already frozen
   // if it's not frozen, then we'll freeze it when we do a dirty update
   if (vertexBuffer->frozen) return;
   vertexBuffer->frozen = true;
+  vertexBuffer->dynamic = dynamic;
   vertexBuffer->dirty = true;
 }
 
@@ -142,26 +195,38 @@ void vertex_clear(int buffer) {
   // we can clear a.k.a. "unfreeze" the vertex buffer only if it is actually frozen
   if (!vertexBuffer->frozen) return;
   vertexBuffer->frozen = false;
+  vertexBuffer->dynamic = false;
   vertexBuffer->dirty = true;
 }
 
 void vertex_begin(int buffer, int format) {
-  enigma::vertexBuffers[buffer]->vertices.clear();
-  enigma::vertexBuffers[buffer]->format = format;
-}
-
-void vertex_end(int buffer) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+
+  vertexBuffer->vertices.clear();
+  vertexBuffer->format = format;
 
   // we can only flag the vertex buffer contents as dirty and needing an update
   // if the vertex buffer hasn't been frozen, otherwise we just ignore it
   if (vertexBuffer->frozen) return;
   vertexBuffer->dirty = true;
+}
+
+void vertex_end(int buffer) {
+  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+
+  if (vertexBuffer->frozen) return;
   vertexBuffer->number = vertexBuffer->vertices.size();
 }
 
 void vertex_data(int buffer, const enigma::varargs& data) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  #ifdef DEBUG_MODE
+  if (!vertex_format_exists(vertexBuffer->format)) {
+    show_error("Vertex format " + enigma_user::toString(vertexBuffer->format) +
+               " does not exist and is required for vertex_data to decode varargs", false);
+    return;
+  }
+  #endif
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
   int attrIndex = 0;
   for (int i = 0; i < data.argc;) {
@@ -248,7 +313,11 @@ void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char
 }
 
 void vertex_submit(int buffer, int primitive) {
-  vertex_submit(buffer, primitive, 0, vertex_get_number(buffer));
+  vertex_submit_offset(buffer, primitive, 0, 0, vertex_get_number(buffer));
+}
+
+void vertex_submit_range(int buffer, int primitive, unsigned start, unsigned count) {
+  vertex_submit_offset(buffer, primitive, 0, start, count);
 }
 
 void vertex_submit(int buffer, int primitive, int texture) {
@@ -256,9 +325,13 @@ void vertex_submit(int buffer, int primitive, int texture) {
   vertex_submit(buffer, primitive);
 }
 
-void vertex_submit(int buffer, int primitive, int texture, unsigned start, unsigned count) {
+void vertex_submit_range(int buffer, int primitive, int texture, unsigned start, unsigned count) {
+  vertex_submit_offset(buffer, primitive, texture, 0, start, count);
+}
+
+void vertex_submit_offset(int buffer, int primitive, int texture, unsigned offset, unsigned start, unsigned count) {
   texture_set(texture);
-  vertex_submit(buffer, primitive, start, count);
+  vertex_submit_offset(buffer, primitive, offset, start, count);
 }
 
 int index_create_buffer() {
@@ -283,21 +356,22 @@ bool index_exists(int buffer) {
   RESOURCE_EXISTS(buffer, indexBuffers);
 }
 
-unsigned index_get_size(int buffer) {
-  return enigma::indexBuffers[buffer]->indices.size() * sizeof(uint16_t);
+unsigned index_get_buffer_size(int buffer) {
+  return enigma::indexBuffers[buffer]->getNumber() * sizeof(uint16_t);
 }
 
 unsigned index_get_number(int buffer) {
-  return enigma::indexBuffers[buffer]->number;
+  return enigma::indexBuffers[buffer]->getNumber();
 }
 
-void index_freeze(int buffer) {
+void index_freeze(int buffer, bool dynamic) {
   enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 
   // we can freeze the index buffer only if it isn't already frozen
   // if it's not frozen, then we'll freeze it when we do a dirty update
   if (indexBuffer->frozen) return;
   indexBuffer->frozen = true;
+  indexBuffer->dynamic = dynamic;
   indexBuffer->dirty = true;
 }
 
@@ -312,21 +386,26 @@ void index_clear(int buffer) {
   // we can clear a.k.a. "unfreeze" the index buffer only if it is actually frozen
   if (!indexBuffer->frozen) return;
   indexBuffer->frozen = false;
+  indexBuffer->dynamic = false;
   indexBuffer->dirty = true;
 }
 
 void index_begin(int buffer, int type) {
-  enigma::indexBuffers[buffer]->indices.clear();
-  enigma::indexBuffers[buffer]->type = type;
-}
-
-void index_end(int buffer) {
   enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+
+  indexBuffer->indices.clear();
+  indexBuffer->type = type;
 
   // we can only flag the index buffer contents as dirty and needing an update
   // if the index buffer hasn't been frozen, otherwise we just ignore it
   if (indexBuffer->frozen) return;
   indexBuffer->dirty = true;
+}
+
+void index_end(int buffer) {
+  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+
+  if (indexBuffer->frozen) return;
   indexBuffer->number = indexBuffer->indices.size();
   if (indexBuffer->type == index_type_uint)
     indexBuffer->number /= 2;
@@ -346,7 +425,7 @@ void index_data(int buffer, const enigma::varargs& data) {
 }
 
 void index_submit(int buffer, int vertex, int primitive) {
-  index_submit(buffer, vertex, primitive, 0, index_get_number(buffer));
+  index_submit_range(buffer, vertex, primitive, 0, index_get_number(buffer));
 }
 
 void index_submit(int buffer, int vertex, int primitive, int texture) {
@@ -354,9 +433,9 @@ void index_submit(int buffer, int vertex, int primitive, int texture) {
   index_submit(buffer, vertex, primitive);
 }
 
-void index_submit(int buffer, int vertex, int primitive, int texture, unsigned start, unsigned count) {
+void index_submit_range(int buffer, int vertex, int primitive, int texture, unsigned start, unsigned count) {
   texture_set(texture);
-  index_submit(buffer, vertex, primitive, start, count);
+  index_submit_range(buffer, vertex, primitive, start, count);
 }
 
-}
+} // namespace enigma_user

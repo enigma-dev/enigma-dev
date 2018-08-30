@@ -18,6 +18,7 @@
 #include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolors.h"
 
@@ -33,7 +34,6 @@ namespace enigma
 {
 
 void scene_begin() {
-  //d3dmgr->EndShapesBatching(); //If called inside bound surface we need to finish drawing
   d3dmgr->BeginScene();
 }
 
@@ -88,9 +88,10 @@ void screen_init()
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
+  draw_batch_flush(batch_flush_deferred);
+
 	string ext = enigma::image_get_format(filename);
 
-	d3dmgr->EndShapesBatching();
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
 	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
@@ -117,9 +118,10 @@ int screen_save(string filename) //Assumes native integers are little endian
 
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
+  draw_batch_flush(batch_flush_deferred);
+
 	string ext = enigma::image_get_format(filename);
 
-	d3dmgr->EndShapesBatching();
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
 	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
@@ -144,6 +146,8 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
+  draw_batch_flush(batch_flush_deferred);
+
   x = (x / window_get_region_width()) * window_get_region_width_scaled();
   y = (y / window_get_region_height()) * window_get_region_height_scaled();
   width = (width / window_get_region_width()) * window_get_region_width_scaled();

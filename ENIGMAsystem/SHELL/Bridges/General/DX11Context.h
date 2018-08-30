@@ -61,7 +61,6 @@ extern ID3D11RasterizerState* m_rasterState;
 class ContextManager {
 
 float last_depth;
-int last_stride;
 bool hasdrawn;
 int shapes_d3d_model;
 int shapes_d3d_texture;
@@ -74,7 +73,6 @@ ContextManager() {
 	hasdrawn = false;
 	shapes_d3d_model = -1;
 	shapes_d3d_texture = -1;
-	last_stride = -1;
 	last_depth = 0.0f;
 }
 
@@ -108,33 +106,6 @@ void RestoreState() {
 
 int GetShapesModel() {
 	return shapes_d3d_model;
-}
-
-void BeginShapesBatching(int texId) {
-	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(true);
-		last_stride = -1;
-	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
-		last_stride = -1;
-		if (!hasdrawn) {
-			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-			d3d_model_clear(shapes_d3d_model);
-		}
-	} else {
-		last_stride = d3d_model_get_stride(shapes_d3d_model);
-	}
-	hasdrawn = false;
-	shapes_d3d_texture = texId;
-}
-
-void EndShapesBatching() {
-	last_depth -= 1;
-	if (hasdrawn || shapes_d3d_model == -1) { return; }
-	hasdrawn = true;
-	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-	d3d_model_clear(shapes_d3d_model);
-	shapes_d3d_texture = -1;
-	last_stride = -1;
 }
 
 };

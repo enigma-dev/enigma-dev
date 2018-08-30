@@ -15,10 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/General/GSvertex_impl.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-
 #include "Bridges/General/DX11Context.h"
+
+#include "Graphics_Systems/General/GSvertex_impl.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #include <D3Dcompiler.h>
 
@@ -109,7 +110,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   if (dirty) {
     ID3D11Buffer* bufferPeer = NULL;
     auto it = bufferPeers.find(buffer);
-    size_t size = isIndex ? enigma_user::index_get_size(buffer) : enigma_user::vertex_get_size(buffer);
+    size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
 
     // if we have already created a native "peer" for this user buffer,
     // then we have to release it if it isn't big enough to hold the new contents
@@ -148,11 +149,9 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     }
 
     if (isIndex) {
-      indexBuffers[buffer]->indices.clear();
-      indexBuffers[buffer]->dirty = false;
+      indexBuffers[buffer]->clearData();
     } else {
-      vertexBuffers[buffer]->vertices.clear();
-      vertexBuffers[buffer]->dirty = false;
+      vertexBuffers[buffer]->clearData();
     }
   }
 }
@@ -249,7 +248,9 @@ void vertex_color(int buffer, int color, double alpha) {
   enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 
-void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
+void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
@@ -260,7 +261,6 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   ID3D11InputLayout* vertexLayout = vertex_format_layout(vertexFormat, stride);
   m_deviceContext->IASetInputLayout(vertexLayout);
 
-  UINT offset = 0;
   ID3D11Buffer* vertexBufferPeer = vertexBufferPeers[buffer];
   m_deviceContext->IASetVertexBuffers(0, 1, &vertexBufferPeer, &stride, &offset);
 
@@ -270,7 +270,9 @@ void vertex_submit(int buffer, int primitive, unsigned start, unsigned count) {
   vertexLayout->Release();
 }
 
-void index_submit(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
+  draw_batch_flush(batch_flush_deferred);
+
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];

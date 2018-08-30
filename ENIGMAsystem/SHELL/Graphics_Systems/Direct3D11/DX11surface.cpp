@@ -16,38 +16,30 @@
 **/
 
 #include "Bridges/General/DX11Context.h"
-#include "Direct3D11Headers.h"
-
 #include "DX11SurfaceStruct.h"
 #include "DX11TextureStruct.h"
+#include "Direct3D11Headers.h"
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
-#include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/GSsurface.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
 
-#include <stdio.h> //for file writing (surface_save)
-#include <cstddef>
 #include <iostream>
+#include <cstddef>
 #include <math.h>
+#include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
 
+namespace enigma {
+vector<Surface*> Surfaces(0);
+}
+
 namespace enigma_user {
-extern int room_width, room_height/*, sprite_idmax*/;
-}
-
-namespace enigma
-{
-  vector<Surface*> Surfaces(0);
-}
-
-
-namespace enigma_user
-{
 
 bool surface_is_supported()
 {
@@ -131,12 +123,16 @@ int surface_create_msaa(int width, int height, int levels)
 
 void surface_set_target(int id)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surface(surface,id);
   m_deviceContext->OMSetRenderTargets(1, &surface->renderTargetView, NULL);
 }
 
 void surface_reset_target()
 {
+  draw_batch_flush(batch_flush_deferred);
+
   m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, NULL);
 }
 
