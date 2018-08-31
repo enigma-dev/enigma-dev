@@ -15,13 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "Bridges/General/DX11Context.h"
-#include "Graphics_Systems/General/GSd3d.h"
 #include "Direct3D11Headers.h"
-#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSmatrix.h"
 
-#include "../General/GSmodel.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
+
+namespace enigma {
+    glm::mat4 world, view, projection;
+}
 
 namespace enigma_user
 {
@@ -33,7 +35,7 @@ void d3d_set_perspective(bool enable)
 
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
-
+    enigma::projection = glm::lookAt(glm::vec3(xfrom, yfrom, zfrom), glm::vec3(xto, yto, zto), glm::vec3(xup, yup, zup));
 }
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
@@ -43,7 +45,8 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-	
+    enigma::projection = glm::ortho(x, x + width, y + height, y, 0.1f, 32000.0f);
+    enigma::projection = glm::rotate(enigma::projection, angle, glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
@@ -60,7 +63,7 @@ void d3d_transform_set_identity()
 
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
-	
+
 }
 
 void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
@@ -121,8 +124,14 @@ void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 }
 
 #include <stack>
+
+namespace {
+
 stack<bool> trans_stack;
 int trans_stack_size = 0;
+
+}
+
 
 namespace enigma_user
 {
@@ -152,11 +161,9 @@ bool d3d_transform_stack_top()
 
 }
 
-bool d3d_transform_stack_disgard()
+bool d3d_transform_stack_discard()
 {
-    if (trans_stack_size == 0) return false;
     trans_stack.push(0);
-    trans_stack_size--;
     return true;
 }
 

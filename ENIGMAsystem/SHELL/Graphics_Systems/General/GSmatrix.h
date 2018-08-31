@@ -24,6 +24,7 @@
 #include "Universal_System/var4.h"
 #include <string>
 
+/*
 namespace enigma
 {
   //Forward declare
@@ -35,7 +36,7 @@ namespace enigma
   extern Matrix3 normal_matrix;
   extern bool transform_needs_update;
   extern void transformation_update();
-}
+}*/
 
 namespace enigma_user
 {
