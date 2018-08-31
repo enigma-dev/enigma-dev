@@ -230,15 +230,18 @@ class Decoder {
   }
 
   int read2() {
-    return (read() | (read() << 8));
+    int one = read(); int two = read();
+    return (one | (two << 8));
   }
 
   int read3() {
-    return (read() | (read() << 8) | (read() << 16));
+    int one = read(); int two = read(); int three = read();
+    return (one | (two << 8) | (three << 16));
   }
 
   int read4() {
-    return (read() | (read() << 8) | (read() << 16) | (read() << 24));
+    int one = read(); int two = read(); int three = read(); int four = read();
+    return (one | (two << 8) | (three << 16) | (four << 24));
   }
 
   bool readBool() {
