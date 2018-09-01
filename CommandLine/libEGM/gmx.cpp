@@ -16,6 +16,7 @@
 **/
 
 #include "gmx.h"
+#include "action.h"
 #include "Util.h"
 
 #include <pugixml.hpp>
@@ -322,6 +323,10 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
                   google::protobuf::Message *msg = refl->AddMessage(m, field);
                   PackRes(dir, cid++, n, msg, depth + 1);
                 }
+              }
+              if (gmxName == "action") {
+                auto *event = (buffers::resources::Event*) m;
+                event->set_code(Actions2Code(event->actions()));
               }
               break;
             }
