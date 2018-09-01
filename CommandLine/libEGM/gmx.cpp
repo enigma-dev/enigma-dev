@@ -16,6 +16,7 @@
 **/
 
 #include "gmx.h"
+#include "Util.h"
 
 #include <pugixml.hpp>
 
@@ -39,15 +40,6 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
 void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::Message *m, int depth);
 
 namespace {
-
-inline std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
-  size_t pos = 0;
-  while ((pos = str.find(substr, pos)) != std::string::npos) {
-    str.replace(pos, substr.length(), nstr);
-    pos += nstr.length();
-  }
-  return str;
-}
 
 inline std::string GMXPath2FilePath(std::string dir, std::string value) {
   value = string_replace_all(value, "\\", "/");
