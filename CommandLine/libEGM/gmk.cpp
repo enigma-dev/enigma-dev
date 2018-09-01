@@ -17,6 +17,7 @@
 
 #include "gmk.h"
 #include "filesystem.h"
+#include "action.h"
 
 #include "lodepng.h"
 #include <zlib.h>
@@ -818,7 +819,7 @@ int LoadActions(Decoder &dec, Event *event) {
         action->set_who_name("other");
         break;
       default:
-        dec.postponeName(action->mutable_who_name(), applies_to, TypeCase::kObject);
+        action->set_who_name(std::to_string(applies_to));
     }
     action->set_relative(dec.readBool());
 
@@ -857,6 +858,8 @@ int LoadActions(Decoder &dec, Event *event) {
 
     action->set_is_not(dec.readBool());
   }
+
+  event->set_code(Actions2Code(event->actions()));
 
   return 1;
 }
