@@ -2,7 +2,6 @@ syntax = "proto2";
 package buffers.resources;
 
 import "options.proto";
-import "Event.proto";
 
 message Object {
   optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
@@ -15,6 +14,15 @@ message Object {
   optional bool solid = 7;
   optional bool visible = 8;
   optional bool persistent = 9;
+
+  message Event {
+    optional int32 type = 1 [(gmx) = "eventtype"];
+    oneof reference {
+      int32 number = 2 [(gmx) = "enumb"];
+      string name = 3 [(gmx) = "ename", (yyp_id) = "collisionObjectId"];
+    }
+    optional string code = 5 [(gmx) = "action"];
+  }
 
   repeated Event events = 10 [(gmx) = "events/event", (yyp) = "eventList"];
 

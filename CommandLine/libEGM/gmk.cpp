@@ -782,27 +782,29 @@ std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/) {
   return font;
 }
 
-int LoadActions(Decoder &dec, Event *event) {
+int LoadActions(Decoder &dec, std::string* code, int evtype, int evnumber) {
   int ver = dec.read4();
   if (ver != 400) {
-    err << "Unsupported GMK actions version '" << ver << "' for event type '" << event->type()
-        << "' and number '" << event->number() << "'" << std::endl;
+    err << "Unsupported GMK actions version '" << ver << "' for event type '" << evtype
+        << "' and number '" << evnumber << "'" << std::endl;
     return 0;
   }
 
   int noacts = dec.read4();
+  std::vector<Action> actions;
+  actions.reserve(noacts);
   for (int k = 0; k < noacts; k++) {
-    auto action = event->add_actions();
+    Action action;
     dec.skip(4);
-    action->set_libid(dec.read4());
-    action->set_id(dec.read4());
-    action->set_kind(static_cast<ActionKind>(dec.read4()));
-    action->set_use_relative(dec.readBool());
-    action->set_is_question(dec.readBool());
-    action->set_use_apply_to(dec.readBool());
-    action->set_exe_type(static_cast<ActionExecution>(dec.read4()));
-    action->set_function_name(dec.readStr());
-    action->set_code_string(dec.readStr());
+    action.set_libid(dec.read4());
+    action.set_id(dec.read4());
+    action.set_kind(static_cast<ActionKind>(dec.read4()));
+    action.set_use_relative(dec.readBool());
+    action.set_is_question(dec.readBool());
+    action.set_use_apply_to(dec.readBool());
+    action.set_exe_type(static_cast<ActionExecution>(dec.read4()));
+    action.set_function_name(dec.readStr());
+    action.set_code_string(dec.readStr());
 
     int numofargs = dec.read4(); // number of library action's arguments
     int numofargkinds = dec.read4(); // number of library action's argument kinds
@@ -813,15 +815,15 @@ int LoadActions(Decoder &dec, Event *event) {
     int applies_to = dec.read4();
     switch (applies_to) {
       case -1:
-        action->set_who_name("self");
+        action.set_who_name("self");
         break;
       case -2:
-        action->set_who_name("other");
+        action.set_who_name("other");
         break;
       default:
-        action->set_who_name(std::to_string(applies_to));
+        action.set_who_name(std::to_string(applies_to));
     }
-    action->set_relative(dec.readBool());
+    action.set_relative(dec.readBool());
 
     int actualnoargs = dec.read4();
     for (int l = 0; l < actualnoargs; l++) {
@@ -829,7 +831,7 @@ int LoadActions(Decoder &dec, Event *event) {
         dec.skip(dec.read4());
         continue;
       }
-      auto argument = action->add_arguments();
+      auto argument = action.add_arguments();
       argument->set_kind(static_cast<ArgumentKind>(argkinds[l]));
       std::string strval = dec.readStr();
 
@@ -856,10 +858,11 @@ int LoadActions(Decoder &dec, Event *event) {
       }
     }
 
-    action->set_is_not(dec.readBool());
+    action.set_is_not(dec.readBool());
+    actions.emplace_back(action);
   }
 
-  event->set_code(Actions2Code(event->actions()));
+  code->append(Actions2Code(actions));
 
   return 1;
 }
@@ -871,7 +874,7 @@ std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/) {
   for (int i = 0; i < nomoms; i++) {
     auto moment = timeline->add_moments();
     moment->set_step(dec.read4());
-    if (!LoadActions(dec, moment->mutable_event())) return nullptr;
+    if (!LoadActions(dec, moment->mutable_code(), 0, moment->step())) return nullptr;
   }
 
   return timeline;
@@ -898,7 +901,7 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
       event->set_type(i);
       event->set_number(second);
 
-      if (!LoadActions(dec, event)) return nullptr;
+      if (!LoadActions(dec, event->mutable_code(), event->type(), event->number())) return nullptr;
     }
   }
 
