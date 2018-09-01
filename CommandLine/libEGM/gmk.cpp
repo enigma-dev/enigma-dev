@@ -229,18 +229,21 @@ class Decoder {
     return byte;
   }
 
+  // NOTE: for read[2-4] the order of initialization is
+  // guaranteed, but order of evaluation is not
+
   int read2() {
-    int one = read(); int two = read();
+    int one = read(), two = read();
     return (one | (two << 8));
   }
 
   int read3() {
-    int one = read(); int two = read(); int three = read();
+    int one = read(), two = read(), three = read();
     return (one | (two << 8) | (three << 16));
   }
 
   int read4() {
-    int one = read(); int two = read(); int three = read(); int four = read();
+    int one = read(), two = read(), three = read(), four = read();
     return (one | (two << 8) | (three << 16) | (four << 24));
   }
 
