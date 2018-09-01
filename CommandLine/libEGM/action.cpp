@@ -64,7 +64,7 @@ std::string Argument2Code(const buffers::resources::Argument& arg) {
   return val;
 }
 
-std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::resources::Action >& actions) {
+std::string Actions2Code(const std::vector< buffers::resources::Action >& actions) {
   using buffers::resources::ActionKind;
   using buffers::resources::ActionExecution;
   std::string code = "";
