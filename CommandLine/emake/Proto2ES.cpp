@@ -16,7 +16,6 @@
 **/
 
 #include "Proto2ES.h"
-#include "action.h"
 
 #include <unordered_map>
 #include <vector>
@@ -397,8 +396,6 @@ void AddTimeline(const char* name, buffers::resources::Timeline* tml) {
       buffers::resources::Timeline::Moment* mmt = tml->mutable_moments(i);
       buffers::resources::Event* evt = mmt->mutable_event();
       t.moments[i].stepNo = mmt->step();
-      if (evt->actions_size() > 0)
-        evt->set_code(Actions2Code(evt->actions()));
       t.moments[i].code = evt->code().c_str();
     }
   }
@@ -425,8 +422,6 @@ void AddObject(const char* name, buffers::resources::Object* obj) {
     std::vector<Event>& events = mainEventMap[evt->type()];
     Event e;
     e.id = evt->has_name() ? Name2Id(evt->name()) : evt->number();
-    if (evt->actions_size() > 0)
-      evt->set_code(Actions2Code(evt->actions()));
     e.code = evt->code().c_str();
     events.push_back(e);
   }
