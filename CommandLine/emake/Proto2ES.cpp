@@ -394,9 +394,8 @@ void AddTimeline(const char* name, buffers::resources::Timeline* tml) {
     t.moments = new Moment[t.momentCount];
     for (int i = 0; i < t.momentCount; ++i) {
       buffers::resources::Timeline::Moment* mmt = tml->mutable_moments(i);
-      buffers::resources::Event* evt = mmt->mutable_event();
       t.moments[i].stepNo = mmt->step();
-      t.moments[i].code = evt->code().c_str();
+      t.moments[i].code = mmt->code().c_str();
     }
   }
 }
