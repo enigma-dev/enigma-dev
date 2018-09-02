@@ -26,6 +26,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
 
+#include <map>
+using std::map;
+
 namespace enigma {
   extern glm::mat4 world, view, projection;
 }
@@ -37,7 +40,6 @@ struct MatrixBufferType
   glm::mat4 view;
   glm::mat4 projection;
 };
-ID3D11Buffer* m_matrixBuffer;
 
 const char* g_strVS = R"(
 cbuffer MatrixBuffer
@@ -110,6 +112,8 @@ size_t dxgi_format_sizes[] = {
 
 map<int, ID3D11Buffer*> vertexBufferPeers;
 map<int, ID3D11Buffer*> indexBufferPeers;
+map<int, std::pair<ID3D11InputLayout*, size_t> > vertexFormatPeers;
+
 }
 
 namespace enigma {
@@ -168,7 +172,11 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
       bufferPeers[buffer] = bufferPeer;
     } else {
       // update the contents of the native peer on the GPU
-      m_deviceContext->UpdateSubresource(bufferPeer, 0, NULL, data, 0, 0);
+      D3D11_MAPPED_SUBRESOURCE mappedResource;
+      m_deviceContext->Map(bufferPeer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+      memcpy(mappedResource.pData, data, size);
+      m_deviceContext->Unmap(bufferPeer, 0);
+      //m_deviceContext->UpdateSubresource(bufferPeer, 0, NULL, data, size, 1);
     }
 
     if (isIndex) {
@@ -179,7 +187,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   }
 }
 
-inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* vertexFormat, UINT &stride) {
+inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* vertexFormat, size_t &stride) {
   vector<D3D11_INPUT_ELEMENT_DESC> vertexLayoutElements(vertexFormat->flags.size());
 
   size_t offset = 0;
@@ -208,6 +216,22 @@ inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* verte
   return vertexLayout;
 }
 
+inline void graphics_apply_vertex_format(int format, size_t &stride) {
+  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
+
+  auto search = vertexFormatPeers.find(format);
+  ID3D11InputLayout* vertexLayout = NULL;
+  if (search == vertexFormatPeers.end()) {
+     vertexLayout = vertex_format_layout(vertexFormat, stride);
+     vertexFormatPeers[format] = std::make_pair(vertexLayout, stride);
+  } else {
+    vertexLayout = search->second.first;
+    stride = search->second.second;
+  }
+
+  m_deviceContext->IASetInputLayout(vertexLayout);
+}
+
 void graphics_compile_shader(const char* src, ID3D10Blob** pBlob, const char* name, const char* entryPoint, const char* target) {
   DWORD dwShaderFlags = D3D10_SHADER_ENABLE_STRICTNESS;
 #ifdef DEBUG_MODE
@@ -229,6 +253,7 @@ void graphics_compile_shader(const char* src, ID3D10Blob** pBlob, const char* na
 void graphics_prepare_default_shader() {
   static ID3D11VertexShader* g_pVertexShader = NULL;
   static ID3D11PixelShader* g_pPixelShader = NULL;
+  static ID3D11Buffer* m_matrixBuffer = NULL;
 
   if (g_pVertexShader == NULL) {
     D3D11_BUFFER_DESC matrixBufferDesc;
@@ -255,24 +280,16 @@ void graphics_prepare_default_shader() {
 
   D3D11_MAPPED_SUBRESOURCE mappedResource;
   MatrixBufferType* dataPtr;
-  unsigned int bufferNumber;
   m_deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-  // Get a pointer to the data in the constant buffer.
   dataPtr = (MatrixBufferType*)mappedResource.pData;
-
   // Copy the matrices into the constant buffer.
   dataPtr->world = glm::transpose(world);
   dataPtr->view = glm::transpose(view);
   dataPtr->projection = glm::transpose(projection);
-
-  // Unlock the constant buffer.
   m_deviceContext->Unmap(m_matrixBuffer, 0);
 
-  // Set the position of the constant buffer in the vertex shader.
-  bufferNumber = 0;
-
-  // Finanly set the constant buffer in the vertex shader with the updated values.
-  m_deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+  // Finally set the constant buffer in the vertex shader with the updated values.
+  m_deviceContext->VSSetConstantBuffers(0, 1, &m_matrixBuffer);
 
   m_deviceContext->VSSetShader(g_pVertexShader, NULL, 0);
   m_deviceContext->PSSetShader(g_pPixelShader, NULL, 0);
@@ -307,42 +324,36 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
   draw_batch_flush(batch_flush_deferred);
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
   enigma::graphics_prepare_default_shader();
   enigma::graphics_prepare_buffer(buffer, false);
 
-  UINT stride = 0;
-  ID3D11InputLayout* vertexLayout = vertex_format_layout(vertexFormat, stride);
-  m_deviceContext->IASetInputLayout(vertexLayout);
+  size_t stride = 0;
+  enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   ID3D11Buffer* vertexBufferPeer = vertexBufferPeers[buffer];
-  m_deviceContext->IASetVertexBuffers(0, 1, &vertexBufferPeer, &stride, &offset);
+  m_deviceContext->IASetVertexBuffers(0, 1, &vertexBufferPeer, (UINT*)&stride, &offset);
 
   set_primitive_mode(primitive);
   m_deviceContext->Draw(count, start);
-
-  vertexLayout->Release();
 }
 
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   draw_batch_flush(batch_flush_deferred);
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 
   enigma::graphics_prepare_default_shader();
   enigma::graphics_prepare_buffer(buffer, true);
   enigma::graphics_prepare_buffer(vertex, false);
 
-  UINT stride = 0;
-  ID3D11InputLayout* vertexLayout = vertex_format_layout(vertexFormat, stride);
-  m_deviceContext->IASetInputLayout(vertexLayout);
+  size_t stride = 0;
+  enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   UINT offset = 0;
   ID3D11Buffer* vertexBufferPeer = vertexBufferPeers[vertex];
-  m_deviceContext->IASetVertexBuffers(0, 1, &vertexBufferPeer, &stride, &offset);
+  m_deviceContext->IASetVertexBuffers(0, 1, &vertexBufferPeer, (UINT*)&stride, &offset);
 
   ID3D11Buffer* indexBufferPeer = indexBufferPeers[buffer];
   m_deviceContext->IASetIndexBuffer(
@@ -353,8 +364,6 @@ void index_submit_range(int buffer, int vertex, int primitive, unsigned start, u
 
   set_primitive_mode(primitive);
   m_deviceContext->DrawIndexed(count, start, 0);
-
-  vertexLayout->Release();
 }
 
 }
