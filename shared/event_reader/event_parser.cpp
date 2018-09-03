@@ -391,6 +391,10 @@ string event_get_function_name(int mid, int id)
   return buf;
 }
 
+evpair event_get_function_id(string name) {
+
+}
+
 string event_stacked_get_root_name(int mid) {
   main_event_info &mei = main_event_infos[mid];
   return autoparam(mei.specs[0]->name,"stackroot");
