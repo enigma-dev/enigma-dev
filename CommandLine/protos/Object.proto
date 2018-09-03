@@ -16,11 +16,7 @@ message Object {
   optional bool persistent = 9;
 
   message Event {
-    optional int32 type = 1 [(gmx) = "eventtype"];
-    oneof reference {
-      int32 number = 2 [(gmx) = "enumb"];
-      string name = 3 [(gmx) = "ename", (yyp_id) = "collisionObjectId"];
-    }
+    optional string name = 1 [(gmx) = "eventtype"];
     optional string code = 5 [(gmx) = "action"];
   }
 

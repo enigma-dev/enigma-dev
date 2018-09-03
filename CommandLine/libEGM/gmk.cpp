@@ -19,6 +19,8 @@
 #include "filesystem.h"
 #include "action.h"
 
+#include "event_reader/event_parser.h"
+
 #include "lodepng.h"
 #include <zlib.h>
 
@@ -811,11 +813,11 @@ std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/) {
   return font;
 }
 
-int LoadActions(Decoder &dec, std::string* code, int evtype, int evnumber) {
+int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
   int ver = dec.read4();
   if (ver != 400) {
-    err << "Unsupported GMK actions version '" << ver << "' for event type '" << evtype
-        << "' and number '" << evnumber << "'" << std::endl;
+    err << "Unsupported GMK actions version '" << ver <<
+      "' for event '" << eventName << "'" << std::endl;
     return 0;
   }
 
@@ -903,7 +905,7 @@ std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/) {
   for (int i = 0; i < nomoms; i++) {
     auto moment = timeline->add_moments();
     moment->set_step(dec.read4());
-    if (!LoadActions(dec, moment->mutable_code(), 0, moment->step())) return nullptr;
+    if (!LoadActions(dec, moment->mutable_code(), "step_" + std::to_string(moment->step()))) return nullptr;
   }
 
   return timeline;
@@ -927,10 +929,9 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
       if (second == -1) break;
 
       auto event = object->add_events();
-      event->set_type(i);
-      event->set_number(second);
+      event->set_name(event_get_function_name(i, second));
 
-      if (!LoadActions(dec, event->mutable_code(), event->type(), event->number())) return nullptr;
+      if (!LoadActions(dec, event->mutable_code(), event->name())) return nullptr;
     }
   }
 
@@ -1221,6 +1222,8 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
 }
 
 buffers::Project *LoadGMK(std::string fName) {
+  event_parse_resourcefile();
+
   static const vector<GroupFactory> groupFactories({
     { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, LoadSound      },
     { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     },

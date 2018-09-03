@@ -17,6 +17,8 @@
 
 #include "Proto2ES.h"
 
+#include "event_reader/event_parser.h"
+
 #include <unordered_map>
 #include <vector>
 
@@ -38,6 +40,26 @@ View AddView(const buffers::resources::Room::View& view);
 BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg);
 void AddInclude(const char* name, const buffers::resources::Include& inc);
 void WriteSettings(GameSettings &gs, const buffers::resources::Settings& set);
+
+static map<string, evpair> event_names;
+
+void build_event_map() {
+  if (!event_names.empty()) return;
+  event_parse_resourcefile();
+
+  for (evpair e : event_sequence) {
+    event_names[event_get_function_name(e.first, e.second)] = e;
+    if (!e.second && event_is_instance(e.first, e.second)) {
+      // For stacked events, allow more than just the 0th instance.
+      // Needs to be big enough to accommodate the largest vk_ constant and also
+      // provide a reasonable number of alarm events, user events, etc.
+      // Using BYTE_MAX gives us both, and plenty of wiggle room.
+      for (int i = 1; i < 255; ++i) {
+        event_names[event_get_function_name(e.first, i)] = evpair(e.first, i);
+      }
+    }
+  }
+}
 
 static std::unordered_map<int, int> countMap;
 static std::unordered_map<std::string, int> idMap;
@@ -185,6 +207,7 @@ EnigmaStruct* Proto2ES(buffers::Game* protobuf) {
   idMap.clear();
   countMap.clear();
   sprite = 0, sound = 0, background = 0, path = 0, script = 0, shader = 0, font = 0, timeline = 0, object = 0, room = 0, include = 0;
+  build_event_map();
 
   EnigmaStruct *es = new EnigmaStruct();
 
@@ -418,9 +441,10 @@ void AddObject(const char* name, buffers::resources::Object* obj) {
 
   for (int i = 0; i < obj->events_size(); ++i) {
     auto *evt = obj->mutable_events(i);
-    std::vector<Event>& events = mainEventMap[evt->type()];
+    evpair id = event_names[evt->name()];
+    std::vector<Event>& events = mainEventMap[id.first];
     Event e;
-    e.id = evt->has_name() ? Name2Id(evt->name()) : evt->number();
+    e.id = id.second;
     e.code = evt->code().c_str();
     events.push_back(e);
   }
