@@ -1,4 +1,4 @@
-/** Copyright (C) 2008 Josh Ventura
+/** Copyright (C) 2008-2018 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -179,7 +179,8 @@ int event_parse_resourcefile()
     {
       char *begin = line + pos;
       while (line[pos] and line[pos] != '#') pos++;
-      while (is_useless(line[--pos])); pos++;
+      while (is_useless(line[--pos]));
+      pos++;
 
       string v(begin,line+pos-begin > 0 ? line+pos-begin : 0);
 
@@ -373,6 +374,154 @@ inline string autoparam(string x,string y)
   return x;
 }
 
+EventNameMapping
+::EventNameMapping(const string &name_prefix,  const string &name_suffix,
+                   const string &index_prefix, const string &index_suffix,
+                   const map<p_type, map<int, string>> &resource_ids) {
+  event_parse_resourcefile();
+  for (evpair e : event_sequence) {
+    // Verifies that we're a stacked event and not a specialization of it
+    if (!e.second && event_is_instance(e.first, e.second)) {
+      // For stacked events, allow more than just the 0th instance.
+      // Needs to be big enough to accommodate the largest vk_ constant and also
+      // provide a reasonable number of alarm events, user events, etc.
+      // Using BYTE_MAX gives us both, and plenty of wiggle room.
+      const string base_name = event_get_base_function_name(e.first);
+      auto compose_name = [&](const string &index) {
+        return name_prefix
+                   + base_name
+                   + index_prefix
+                       + index
+                   + index_suffix
+             + name_suffix;
+      };
+      // Check if we know resource names for this parameter type.
+      p_type pt = event_get_parameter_type(e.first);
+      if (resource_ids.find(pt) != resource_ids.end()) {
+        // Include only the resource names in our map.
+        // The onus is on the caller to handle an unknown input name
+        // or a missing output name (which ideally shouldn't happen).
+        for (const auto &resource : resource_ids.at(pt)) {
+          const string ev_name = compose_name(resource.second);
+          evpair evp(e.first, resource.first);
+          events_by_name[ev_name] = evp;
+          event_names[evp] = ev_name;
+        }
+      } else if (pt == p2t_key) {
+        for (const auto &keyname : event_keyboard_key_names) {
+          const string ev_name = compose_name(keyname.second);
+          evpair evp(e.first, keyname.first);
+          events_by_name[ev_name] = evp;
+          event_names[evp] = ev_name;
+        }
+      } else {
+        for (int i = 0; i < 256; ++i) {
+          const string ev_name = compose_name(tostring(i));
+          evpair evp(e.first, i);
+          events_by_name[ev_name] = evp;
+          event_names[evp] = ev_name;
+        }
+      }
+    } else {
+      const string ev_name =
+          name_prefix
+              + event_get_function_name(e.first, e.second)
+        + name_suffix;
+      events_by_name[ev_name] = e;
+      event_names[e] = ev_name;
+    }
+  }
+}
+
+
+map<int, string> event_keyboard_key_names = {
+  {  1, "anykey" },
+  {  0, "nokey" },
+
+  {  37, "left" },
+  {  39, "right" },
+  {  38, "up" },
+  {  40, "down" },
+
+  {  9, "tab" },
+  {  13, "enter" },
+  {  16, "shift" },
+  {  17, "control" },
+  {  18, "alt" },
+  {  32, "space" },
+
+  {  96, "numpad0" },
+  {  97, "numpad1" },
+  {  98, "numpad2" },
+  {  99, "numpad3" },
+  {  100, "numpad4" },
+  {  101, "numpad5" },
+  {  102, "numpad6" },
+  {  103, "numpad7" },
+  {  104, "numpad8" },
+  {  105, "numpad9" },
+
+  {  106, "multiply" },
+  {  107, "add" },
+  {  109, "subtract" },
+  {  110, "decimal" },
+  {  111, "divide" },
+
+  {  112, "f1" },
+  {  113, "f2" },
+  {  114, "f3" },
+  {  115, "f4" },
+  {  116, "f5" },
+  {  117, "f6" },
+  {  118, "f7" },
+  {  119, "f8" },
+  {  120, "f9" },
+  {  121, "f10" },
+  {  122, "f11" },
+  {  123, "f12" },
+
+  {  8, "backspace" },
+  {  27, "escape" },
+  {  33, "pageup" },
+  {  34, "pagedown" },
+  {  35, "end" },
+  {  36, "home" },
+  {  45, "insert" },
+  {  46, "delete" },
+
+  // These are for check_direct only
+  {  160, "lshift" },
+  {  161, "rshift" },
+  {  162, "lcontrol" },
+  {  163, "rcontrol" },
+  {  164, "lalt" },
+  {  165, "ralt" },
+
+  // This one's Windows-only
+  {  42, "printscreen" },
+
+  //These are ENIGMA-only
+  {  20, "caps" },
+  {  145, "scroll" },
+  {  19, "pause" },
+  {  91, "lsuper" },
+  {  92, "rsuper" },
+};
+
+// Get the parameter type of a stacked event.
+p_type event_get_parameter_type(int mid) {
+  main_event_info &mei = main_event_infos[mid];
+  return mei.specs[0]->par2type;
+}
+
+// Get the base function name of any event.
+string event_get_base_function_name(int mid) {
+  main_event_info &mei = main_event_infos[mid];
+  if (mei.specs.find(0) == mei.specs.end())
+    return "Critical Error: No default stacked event spec.";
+  return mei.specs[0]->name;
+}
+
 // Query for a name suitable for use as
 // an identifier. No spaces or specials.
 string event_get_function_name(int mid, int id)
@@ -391,10 +540,6 @@ string event_get_function_name(int mid, int id)
   return buf;
 }
 
-evpair event_get_function_id(string name) {
-
-}
-
 string event_stacked_get_root_name(int mid) {
   main_event_info &mei = main_event_infos[mid];
   return autoparam(mei.specs[0]->name,"stackroot");
@@ -408,7 +553,9 @@ string event_get_human_name(int mid, int id)
   if (mei.is_group) {
     char buf[64];
     main_event_info::iter i = main_event_infos[mid].specs.find(id);
-    return i != main_event_infos[mid].specs.end() ? i->second->humanname : (sprintf(buf,"Undefined or Unsupported (%d,%d)",mid,id),buf);
+    return i != main_event_infos[mid].specs.end()
+        ? i->second->humanname
+        : (sprintf(buf, "Undefined or Unsupported (%d,%d)", mid, id), buf);
   }
   string buf = mei.specs[0]->humanname;
   size_t pp = buf.find("%1");

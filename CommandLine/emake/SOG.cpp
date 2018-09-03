@@ -8,28 +8,14 @@
 #include <iostream>
 
 bool ReadSOG(const std::string &input_file, Game *game) {
-  event_parse_resourcefile();
-  map<string, evpair> event_filenames;
-  for (evpair e : event_sequence) {
-    event_filenames[event_get_function_name(e.first, e.second) + ".edl"] = e;
-    if (!e.second && event_is_instance(e.first, e.second)) {
-      // For stacked events, allow more than just the 0th instance.
-      // Needs to be big enough to accommodate the largest vk_ constant and also
-      // provide a reasonable number of alarm events, user events, etc.
-      // Using BYTE_MAX gives us both, and plenty of wiggle room.
-      for (int i = 1; i < 255; ++i) {
-        event_filenames[event_get_function_name(e.first, i) + ".edl"] = evpair(e.first, i);
-      }
-    }
-  }
-
   map<evpair, string> events;
+  EventNameMapping event_filenames("", ".edl", "_", "", {});
   boost::filesystem::path targetDir(input_file);
   boost::filesystem::recursive_directory_iterator iter(targetDir), eod;
   BOOST_FOREACH(boost::filesystem::path const& i, std::make_pair(iter, eod)) {
     if (is_regular_file(i)) {
-      auto find = event_filenames.find(i.filename().string());
-      if (find == event_filenames.end())  {
+      auto find = event_filenames.events_by_name.find(i.filename().string());
+      if (find == event_filenames.events_by_name.end())  {
         errorStream << "Error: unrecognized event file " << i << '.' << std::endl;
         errorStream << "Supported events:" << std::endl;
         for (auto st : event_sequence) {

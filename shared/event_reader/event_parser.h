@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008-2018 Josh Ventura                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -99,6 +99,19 @@ void event_info_clear();
 typedef pair<int, int> evpair;
 extern  vector<evpair> event_sequence;
 
+class EventNameMapping {
+ public:
+  map<string, evpair> events_by_name;
+  map<evpair, string> event_names;
+
+  EventNameMapping(const string &name_prefix,  const string &name_suffix,
+                   const string &index_prefix, const string &index_suffix,
+                   const map<p_type, map<int, string>> &resource_ids);
+};
+extern map<int, string> event_keyboard_key_names;
+
+extern p_type event_get_parameter_type(int mid);
+extern string event_get_base_function_name(int mid);
 extern string event_get_function_name(int mid, int id);
 extern evpair event_get_function_id(string name);
 extern string event_get_human_name(int mid, int id);
