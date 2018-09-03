@@ -19,6 +19,8 @@
 #include "action.h"
 #include "Util.h"
 
+#include "event_reader/event_parser.h"
+
 #include <pugixml.hpp>
 
 #include <functional>
@@ -281,6 +283,24 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
       if (gmxName == "GMX_DEPRECATED")
         continue;
 
+      if (gmxName == "eventtype") {
+        int mid = child.attribute("eventtype").as_int();
+        auto enumb = child.attribute("enumb");
+        int sid = 0;
+        if (enumb) {
+          sid = enumb.as_int();
+        } else {
+          auto ename = child.attribute("ename");
+          if (ename) {
+
+          } else {
+            errorStream << "Error: event '" << mid << "' with no secondary id or name" << std::endl;
+          }
+        }
+        refl->SetString(m, field, event_get_function_name(mid, sid));
+        continue;
+      }
+
       if (gmxName == "action") {
         std::vector<Action> actions;
         int cid = 0;
@@ -489,6 +509,8 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
 }
 
 buffers::Project *LoadGMX(std::string fName) {
+  event_parse_resourcefile();
+
   pugi::xml_document doc;
   if (!doc.load_file(fName.c_str())) return nullptr;
 
