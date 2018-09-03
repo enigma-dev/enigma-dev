@@ -18,7 +18,7 @@ bool ReadSOG(const std::string &input_file, Game *game) {
       // provide a reasonable number of alarm events, user events, etc.
       // Using BYTE_MAX gives us both, and plenty of wiggle room.
       for (int i = 1; i < 255; ++i) {
-        event_filenames[event_get_function_name(e.first, i) + ".edl"] = e;
+        event_filenames[event_get_function_name(e.first, i) + ".edl"] = evpair(e.first, i);
       }
     }
   }

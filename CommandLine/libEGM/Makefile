@@ -8,14 +8,19 @@ else
 endif
 
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
-SHARED_SOURCES := ../../shared
+
+SHARED_SRC_DIR := ../../shared
+include $(SHARED_SRC_DIR)/Makefile
+include $(SHARED_SRC_DIR)/eyaml/Makefile
+include $(SHARED_SRC_DIR)/event_reader/Makefile
+
 LIBRARY   := ../../libEGM$(EXT)
 PROTO_DIR := ../protos
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
 
-CXXFLAGS  := -I$(SRC_DIR) -I../ $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SOURCES)/lodepng -Wall -Wextra -Wpedantic -g -fPIC
-LDFLAGS   := -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -lstdc++fs -L$(SHARED_SOURCES)/lodepng -llodepng
+CXXFLAGS  := -I$(SRC_DIR) -I../  -I../../CompilerSource -I$(SHARED_SRC_DIR) $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SRC_DIR)/lodepng -Wall -Wextra -Wpedantic -g -fPIC
+LDFLAGS   := -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -lstdc++fs -L$(SHARED_SRC_DIR)/lodepng -llodepng
 
 #if gcc >= 8 use std::filesystem instead of boost
 ifeq ($(shell expr $(GCCVER) \>= 8), 1)
@@ -39,6 +44,11 @@ rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2)
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURCES)))
 
+CXXFLAGS += -I$(SHARED_SRC_DIR) $(addprefix -I$(SHARED_SRC_DIR)/, $(SHARED_INCLUDES))
+SOURCES += $(addprefix $(SHARED_SRC_DIR),$(SHARED_SOURCES))
+OBJECTS += $(addprefix $(OBJ_DIR)/shared/,$(SHARED_SOURCES:.cpp=.o))
+DEPENDS += $(addprefix $(OBJ_DIR)/shared/,$(SHARED_SOURCES:.cpp=.d))
+
 OBJDIRS = $(sort $(OBJ_DIR) $(dir $(OBJECTS)))
 DEPENDS = $(OBJECTS:.o=.d)
 
@@ -60,7 +70,10 @@ $(LIBRARY): $(OBJECTS)
 $(OBJDIRS):
 	mkdir -p $@
 
+# Generate rules for new (unbuilt) files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | obj_dirs
+	$(CXX) $(CXXFLAGS) -MMD -c -o $@ $<
+$(OBJ_DIR)/shared/%.o: $(SHARED_SRC_DIR)/%.cpp | obj_dirs
 	$(CXX) $(CXXFLAGS) -MMD -c -o $@ $<
 
 .PHONY: lib clean obj_dirs
