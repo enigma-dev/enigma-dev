@@ -415,7 +415,6 @@ class Decoder {
       auto event_pair = evpair(postponed.second.first, postponed.second.second);
       auto name = event_names.find(event_pair);
       if (name == event_names.end()) continue;
-      std::cerr << "ding " << (*name).second << std::endl;
       mutableName->append((*name).second);
     }
   }

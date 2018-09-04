@@ -26,7 +26,6 @@ extern std::ostream out;
 extern std::ostream err;
 
 inline void bind_output_streams(std::ostream &out, std::ostream &err) {
-  return;
   gmk::out.rdbuf(out.rdbuf());
   gmk::err.rdbuf(err.rdbuf());
 }
