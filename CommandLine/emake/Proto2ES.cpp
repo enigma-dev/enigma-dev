@@ -19,7 +19,7 @@
 
 #include "event_reader/event_parser.h"
 
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 void AddSprite(const char* name, const buffers::resources::Sprite& spr);
@@ -32,7 +32,7 @@ void AddScript(const char* name, const buffers::resources::Script& scr);
 void AddShader(const char* name, const buffers::resources::Shader& shr);
 void AddFont(const char* name, const buffers::resources::Font& fnt);
 void AddTimeline(const char* name, buffers::resources::Timeline* tml);
-void AddObject(const char* name, buffers::resources::Object* obj);
+void AddObject(const char* name, buffers::resources::Object* obj, const EventNameMapping &event_name_map);
 void AddRoom(const char* name, const buffers::resources::Room& rmn);
 Instance AddInstance(const buffers::resources::Room::Instance& inst);
 Tile AddTile(const buffers::resources::Room::Tile& tile);
@@ -41,17 +41,18 @@ BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg)
 void AddInclude(const char* name, const buffers::resources::Include& inc);
 void WriteSettings(GameSettings &gs, const buffers::resources::Settings& set);
 
-// TODO(Robert): This cannot actually be initialized statically.
-// The {} represents an empty map of resource types to map<res_id, res_name>.
-// You need to instantiate this where you plan to use it and supply the actual
-// resource names for it to substitute.
-EventNameMapping event_name_map("", "", "[", "]", {});
-
-static std::unordered_map<int, int> countMap;
-static std::unordered_map<std::string, int> idMap;
+static std::map<int, int> countMap;
+static std::map<std::string, int> idMap;
+static map<p_type, map<int, string>> nameMap;
 
 static void CacheNames(const buffers::TreeNode& root) {
   using TypeCase = buffers::TreeNode::TypeCase;
+
+  static const map<TypeCase, p_type> event_type_map = {
+    {TypeCase::kSprite, p2t_sprite},     {TypeCase::kSound, p2t_sound},   {TypeCase::kBackground, p2t_background},
+    {TypeCase::kPath, p2t_path},         {TypeCase::kScript, p2t_script}, {TypeCase::kFont, p2t_font},
+    {TypeCase::kTimeline, p2t_timeline}, {TypeCase::kObject, p2t_object}, {TypeCase::kRoom, p2t_room},
+  };
 
   for (auto& message : root.child()) {
     if (message.type_case() == TypeCase::kFolder) {
@@ -69,7 +70,12 @@ static void CacheNames(const buffers::TreeNode& root) {
     const google::protobuf::Message &typeMessage = refl->GetMessage(message, typeField);
     const google::protobuf::FieldDescriptor *idField = typeMessage.GetDescriptor()->FindFieldByName("id");
     if (!idField) continue; // might not have an id field on this type
-    idMap[message.name()] = typeMessage.GetReflection()->GetInt32(typeMessage, idField);
+    int id = typeMessage.GetReflection()->GetInt32(typeMessage, idField);
+
+    idMap[message.name()] = id;
+    auto event_type = event_type_map.find(message.type_case());
+    if (event_type == event_type_map.end()) continue;
+    nameMap[(*event_type).second][id] = message.name();
   }
 }
 
@@ -136,12 +142,12 @@ Image AddImage(const std::string fname) {
   return i;
 }
 
-void AddResource(buffers::Game* protobuf, buffers::TreeNode* node) {
+void AddResource(buffers::Game* protobuf, buffers::TreeNode* node, const EventNameMapping &event_name_map) {
   for (int i = 0; i < node->child_size(); i++) {
     buffers::TreeNode* child = node->mutable_child(i);
     const char* name = child->name().c_str();
     if (child->has_folder())
-      AddResource(protobuf, child);
+      AddResource(protobuf, child, event_name_map);
     if (child->has_sprite())
       AddSprite(name, child->sprite());
     if (child->has_sound())
@@ -159,7 +165,7 @@ void AddResource(buffers::Game* protobuf, buffers::TreeNode* node) {
     if (child->has_timeline())
       AddTimeline(name, child->mutable_timeline());
     if (child->has_object())
-      AddObject(name, child->mutable_object());
+      AddObject(name, child->mutable_object(), event_name_map);
     if (child->has_room())
       AddRoom(name, child->room());
     if (child->has_include())
@@ -214,6 +220,12 @@ EnigmaStruct* Proto2ES(buffers::Game* protobuf) {
   auto root = protobuf->mutable_root();
   CacheNames(*root);
 
+  // NOTE: This cannot actually be initialized statically.
+  // The {} represents a map of resource types to map<res_id, res_name>.
+  // You need to instantiate this where you plan to use it and supply the actual
+  // resource names for it to substitute.
+  EventNameMapping event_name_map("", "", "[", "]", nameMap);
+
   es->sprites = AllocateGroup(&sprites, es->spriteCount, TypeCase::kSprite);
   es->sounds = AllocateGroup(&sounds, es->soundCount, TypeCase::kSound);
   es->backgrounds = AllocateGroup(&backgrounds, es->backgroundCount, TypeCase::kBackground);
@@ -226,7 +238,7 @@ EnigmaStruct* Proto2ES(buffers::Game* protobuf) {
   es->rooms = AllocateGroup(&rooms, es->roomCount, TypeCase::kRoom);
   es->includes = AllocateGroup(&includes, es->includeCount, TypeCase::kInclude);
 
-  AddResource(protobuf, root);
+  AddResource(protobuf, root, event_name_map);
 
   return es;
 }
@@ -408,7 +420,8 @@ void AddTimeline(const char* name, buffers::resources::Timeline* tml) {
   }
 }
 
-void AddObject(const char* name, buffers::resources::Object* obj) {
+void AddObject(const char* name, buffers::resources::Object* obj, const EventNameMapping &event_name_map) {
+  static size_t object = 0;
   GmObject& o = objects[object++];
 
   o.name = name;
@@ -422,11 +435,13 @@ void AddObject(const char* name, buffers::resources::Object* obj) {
   o.parentId = Name2Id(obj->parent_name());
   o.maskId = Name2Id(obj->mask_name());
 
-  std::unordered_map<int,std::vector<Event> > mainEventMap;
+  std::map<int,std::vector<Event> > mainEventMap;
 
   for (int i = 0; i < obj->events_size(); ++i) {
     auto *evt = obj->mutable_events(i);
-    evpair id = event_name_map.events_by_name[evt->name()];
+    auto eit = event_name_map.events_by_name.find(evt->name());
+    if (eit == event_name_map.events_by_name.end()) continue;
+    evpair id = (*eit).second;
     std::vector<Event>& events = mainEventMap[id.first];
     Event e;
     e.id = id.second;
