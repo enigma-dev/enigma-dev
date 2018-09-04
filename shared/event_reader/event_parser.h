@@ -113,7 +113,6 @@ extern map<int, string> event_keyboard_key_names;
 extern p_type event_get_parameter_type(int mid);
 extern string event_get_base_function_name(int mid);
 extern string event_get_function_name(int mid, int id);
-extern evpair event_get_function_id(string name);
 extern string event_get_human_name(int mid, int id);
 extern bool   event_has_default_code(int mid, int id);
 extern string event_get_default_code(int mid, int id);
