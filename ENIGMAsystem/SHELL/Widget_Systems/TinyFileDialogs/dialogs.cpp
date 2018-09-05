@@ -4,10 +4,10 @@
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include <tinyfiledialogs/tinyfiledialogs.h>
-#include <sys/stat.h>
 #include <limits.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <libgen.h>
 #include <string.h>
 #include <sstream>
 #include <vector>
@@ -297,15 +297,18 @@ namespace enigma_user
   {
     string fname_or_dir;
 
-    if (access(fname.c_str(), F_OK) != -1)
-      fname_or_dir = fname;
+    string str_fname = fname;
+    string str_dir;
+    
+    if (fname == "")
+      str_dir = dir;
     else
-      fname_or_dir = dir;
-
-    struct stat sb;
-
-    if ((stat(dir.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) == 0)
-      fname_or_dir = "";
+      str_dir = dir + string("/") + string(basename((char *)str_fname.c_str()));
+    
+    if(access((char *)str_dir.c_str(), F_OK) != -1)
+      fname_or_dir = str_dir;
+    else
+      fname_or_dir = fname;
 
     string titlebar;
 
@@ -328,16 +331,19 @@ namespace enigma_user
   string get_save_filename_ext(string filter, string fname, string dir, string title)
   {
     string fname_or_dir;
-
-    if (access(fname.c_str(), F_OK) != -1)
-      fname_or_dir = fname;
+    
+    string str_fname = fname;
+    string str_dir;
+    
+    if (fname == "")
+      str_dir = dir;
     else
-      fname_or_dir = dir;
-
-    struct stat sb;
-
-    if ((stat(dir.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) == 0)
-      fname_or_dir = "";
+      str_dir = dir + string("/") + string(basename((char *)str_fname.c_str()));
+    
+    if(access((char *)str_dir.c_str(), F_OK) != -1)
+      fname_or_dir = str_dir;
+    else
+      fname_or_dir = fname;
 
     string titlebar;
 
