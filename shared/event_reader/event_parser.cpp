@@ -395,6 +395,14 @@ EventNameMapping
                    + index_suffix
              + name_suffix;
       };
+      auto map_range = [&](size_t min, size_t max) {
+        for (size_t i = min; i <= max; ++i) {
+          const string ev_name = compose_name(tostring(i));
+          evpair evp(e.first, i);
+          events_by_name[ev_name] = evp;
+          event_names[evp] = ev_name;
+        }
+      };
       // Check if we know resource names for this parameter type.
       p_type pt = event_get_parameter_type(e.first);
       if (resource_ids.find(pt) != resource_ids.end()) {
@@ -408,6 +416,9 @@ EventNameMapping
           event_names[evp] = ev_name;
         }
       } else if (pt == p2t_key) {
+        map_range('A', 'z');
+        map_range('0', '9');
+
         for (const auto &keyname : event_keyboard_key_names) {
           const string ev_name = compose_name(keyname.second);
           evpair evp(e.first, keyname.first);
@@ -415,12 +426,7 @@ EventNameMapping
           event_names[evp] = ev_name;
         }
       } else {
-        for (int i = 0; i < 256; ++i) {
-          const string ev_name = compose_name(tostring(i));
-          evpair evp(e.first, i);
-          events_by_name[ev_name] = evp;
-          event_names[evp] = ev_name;
-        }
+        map_range(0, 256);
       }
     } else {
       const string ev_name =
@@ -432,7 +438,6 @@ EventNameMapping
     }
   }
 }
-
 
 map<int, string> event_keyboard_key_names = {
   {  1, "anykey" },
