@@ -300,10 +300,12 @@ namespace enigma_user
     string str_fname = fname;
     string str_dir;
     
+    char *bname = (char *)str_fname.c_str();
+    
     if (fname == "")
       str_dir = dir;
     else
-      str_dir = dir + string("/") + string(basename((char *)str_fname.c_str()));
+      str_dir = dir + string("/") + string(basename(bname));
     
     if(access((char *)str_dir.c_str(), F_OK) != -1)
       fname_or_dir = str_dir;
@@ -335,10 +337,12 @@ namespace enigma_user
     string str_fname = fname;
     string str_dir;
     
+    char *bname = (char *)str_fname.c_str();
+    
     if (fname == "")
       str_dir = dir;
     else
-      str_dir = dir + string("/") + string(basename((char *)str_fname.c_str()));
+      str_dir = dir + string("/") + string(basename(bname));
     
     if(access((char *)str_dir.c_str(), F_OK) != -1)
       fname_or_dir = str_dir;
