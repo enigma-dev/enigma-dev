@@ -146,7 +146,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir, proto::Message *m)
 }
 
 bool WriteScript(string fName, const buffers::resources::Script &scr) {
-  
+
   if (std::ofstream fout{fName}) {
     fout << scr.code();
     return true;
@@ -156,7 +156,7 @@ bool WriteScript(string fName, const buffers::resources::Script &scr) {
 }
 
 bool WriteShader(string fName, const buffers::resources::Shader &shdr) {
-      
+
   if (std::ofstream vout{fName + ".vert"}) {
     vout << shdr.vertex_code();
 
@@ -223,7 +223,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
     }
     *room = cleaned;  // Propagate the subroutine's changes...
   }
-  
+
   // Write the code to edl
   if (std::ofstream fout{dir/"create[room].edl"}) {
     fout << room->code();
@@ -234,12 +234,12 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
 	  string name = inst.name();
 	  if (name.empty()) name = std::to_string(inst.id());
 	  string edlFile = dir.string() + "/create[" + name + "].edl";
-	  
+
 	  if (std::ofstream fout{edlFile}) {
         fout << inst.code();
       } else return false;
     }
-  }	  
+  }
 
   // Build and append instance layers.
   auto inst_layers = egm::util::BuildInstanceLayers(*room);
@@ -280,13 +280,13 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
 bool WriteTimeline(const fs::path &egm_root, const fs::path &dir, const buffers::resources::Timeline& timeline) {
   if (!CreateDirectory(dir))
     return false;
-  
+
   for (auto &m : timeline.moments()) {
 	  string edlFile = dir.string() + "/step_" + std::to_string(m.step()) + ".edl";
     std::ofstream fout{edlFile};
 	  fout << m.code();
   }
-  
+
   return true;
 }
 
@@ -294,16 +294,16 @@ bool WriteObject(const fs::path &egm_root, const fs::path &dir, const buffers::r
   buffers::resources::Object cleaned = object;
   auto events = object.events();
   cleaned.clear_events();
-  
+
   if (!WriteYaml(egm_root, dir, &cleaned))
     return false;
-  
+
   for (auto &e : events) {
 	string edlFile = dir.string() + "/" + e.name() + ".edl";
     std::ofstream fout{edlFile};
 	fout << e.code();
   }
-    
+
   return true;
 }
 
@@ -334,7 +334,7 @@ bool WriteRes(buffers::TreeNode* res, const fs::path &dir, const fs::path &egm_r
    default:
     std::cerr << "Error: Unsupported Resource Type" << std::endl;
   }
-  
+
   return true;
 }
 
@@ -370,25 +370,22 @@ inline const std::string type2name(int type) {
 }
 
 bool WriteNode(buffers::TreeNode* folder, string dir, const fs::path &egm_root, YAML::Emitter& tree) {
-  
+  tree << YAML::BeginMap << YAML::Key << "folder" << YAML::Value << folder->name();
+
   if (folder->child_size() > 0) {
-    tree << YAML::BeginMap << "contents" << YAML::BeginSeq;
+    tree << YAML::Key << "contents" << YAML::Value << YAML::BeginSeq;
     for (int i = 0; i < folder->child_size(); i++) {
       auto child = folder->mutable_child(i);
-      
+
       std::string type = type2name(child->type_case());
-      
-      if (type == "folder") {
-        tree << YAML::Key << "folder" << child->name() << YAML::BeginMap;
-      }
-      
+
       if (type != "folder") {
         tree << YAML::BeginMap;
         tree << YAML::Key << "name" << child->name();
         tree << YAML::Key << "type" << type;
         tree << YAML::EndMap;
       }
-      
+
       if (child->has_folder()) {
         if (!CreateDirectory(dir + "/" + child->name()))
           return false;
@@ -401,16 +398,13 @@ bool WriteNode(buffers::TreeNode* folder, string dir, const fs::path &egm_root, 
       }
       else if (!WriteRes(child, dir, egm_root))
         return false;
-    
-        if (type == "folder") {
-      tree << YAML::EndMap;
     }
-    
-    }
-    
-    tree << YAML::EndSeq << YAML::EndMap;
+
+    tree << YAML::EndSeq;
   }
-  
+
+  tree << YAML::EndMap;
+
   return true;
 }
 
@@ -425,17 +419,17 @@ bool WriteEGM(string fName, buffers::Project* project) {
 
   if (!CreateDirectory(fName))
     return false;
-    
+
   std::fstream bin(fName + "/protobuf.bin", std::ios::out | std::ios::trunc | std::ios::binary);
   project->SerializeToOstream(&bin);
 
   YAML::Emitter tree;
-  
+
   fs::path abs_root = fs::canonical(fs::absolute(fName));
   bool success = WriteNode(project->mutable_game()->mutable_root(), fName, abs_root, tree);
 
   if (!success) return false;
-  
+
   if (std::ofstream out{(abs_root/"tree.yaml").string()}) {
     out << tree.c_str();
   } else {
@@ -443,7 +437,7 @@ bool WriteEGM(string fName, buffers::Project* project) {
               << abs_root/"tree.yaml" << " for write!" << std::endl;
     return false;
   }
-  
+
   return true;
 }
 
