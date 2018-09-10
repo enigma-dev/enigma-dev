@@ -29,3 +29,6 @@ bool CreateDirectory(const fs::path &directory);
 fs::path InternalizeFile(const fs::path &file,
                          const fs::path &directory, const fs::path &egm_root);
 void DeleteFile(const string &fName);
+void DeleteFolder(const string &fName);
+bool FolderExists(const string &folder);
+bool FileExists(const string &fName);

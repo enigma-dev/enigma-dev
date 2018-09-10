@@ -21,4 +21,5 @@
 
 namespace egm {
   bool WriteEGM(std::string fName, buffers::Project* project);
+  buffers::Project* LoadEGM(std::string fName);
 } //namespace egm
