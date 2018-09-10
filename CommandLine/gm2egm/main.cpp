@@ -2,6 +2,7 @@
 #include "gmk.h"
 #include "yyp.h"
 #include "egm.h"
+#include "filesystem.h"
 
 #include <iostream>
 #include <string>
@@ -19,6 +20,19 @@ int main(int argc, char *argv[])
   if (argc != 3) {
     std::cerr << "Usage: gm2egm <input> <output>" << std::endl;
     return -1;
+  }
+  
+  const std::string outDir = argv[2];
+  if (FolderExists(outDir)) {
+    std::cerr << '"' << outDir << '"' << " already exists would you like to overwrite it? (Y/N)" << std::endl;
+    char c;
+    std::cin >> c;
+    if (c == 'y' || c == 'Y')
+      DeleteFolder(outDir);
+    else {
+      std::cerr << "Aborting." << std::endl;
+      return -5;
+    }
   }
 
   std::string input_file = argv[1];
@@ -44,10 +58,13 @@ int main(int argc, char *argv[])
     return -3;
   }
 
-  if (!egm::WriteEGM(argv[2], project)) {
+  if (!egm::WriteEGM(outDir, project)) {
     std::cerr << "Error: Failure writting \"" << argv[2] << std::endl;
     return -4;
   }
 
   return 0;
+  
+  //egm::LoadEGM(argv[1]);
+  //return 1;
 }

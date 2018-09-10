@@ -20,7 +20,7 @@ SRC_DIR   := .
 OBJ_DIR   := .eobjs
 
 CXXFLAGS  := -I$(SRC_DIR) -I../  -I../../CompilerSource -I$(SHARED_SRC_DIR) $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SRC_DIR)/lodepng -Wall -Wextra -Wpedantic -g -fPIC
-LDFLAGS   := -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -lstdc++fs -L$(SHARED_SRC_DIR)/lodepng -llodepng
+LDFLAGS   := -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -L$(SHARED_SRC_DIR)/lodepng -llodepng -lpthread
 
 #if gcc >= 8 use std::filesystem instead of boost
 ifeq ($(shell expr $(GCCVER) \>= 8), 1)

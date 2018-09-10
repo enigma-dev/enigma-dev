@@ -43,7 +43,7 @@ emake: $(EMAKE_TARGETS)
 	$(MAKE) -C CommandLine/emake/
 
 gm2egm: libEGM .FORCE
-	$(CXX) -ICommandLine/libEGM/ -ICommandLine/protos/ -ICommandLine/protos/codegen CommandLine/gm2egm/main.cpp -Wl,-rpath=. -L. -lEGM -lProtocols -o gm2egm
+	$(CXX) -std=c++17 -g -ICommandLine/libEGM/ -ICommandLine/protos/ -ICommandLine/protos/codegen CommandLine/gm2egm/main.cpp -Wl,-rpath=. -L. -lEGM -lProtocols -o gm2egm
 
 test-runner: emake .FORCE
 	$(MAKE) -C CommandLine/testing/

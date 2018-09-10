@@ -628,7 +628,7 @@ Room::Instance StripForLump(const Room::Instance &inst) {
           Room::Instance::EditorSettings::default_instance())) {
     res.clear_editor_settings();
   }
-  if (res.code().empty()) res.clear_code();
+  res.clear_code();
 
   // DO NOT SUBMIT: this should be an option or otherwise not exist
   res.clear_id();
