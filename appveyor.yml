@@ -2,6 +2,9 @@
 shallow_clone: true
 # disable automatic tests
 test: off
+# only increment the build number when building master
+pull_requests:
+  do_not_increment_build_number: true
 # don't build "feature" branches
 skip_branch_with_pr: true
 branches:
