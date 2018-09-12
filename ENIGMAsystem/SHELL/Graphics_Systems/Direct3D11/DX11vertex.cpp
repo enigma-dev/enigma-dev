@@ -31,7 +31,7 @@ using std::map;
 
 namespace enigma {
   extern glm::mat4 world, view, projection;
-}
+} // namespace enigma
 
 namespace {
 struct MatrixBufferType
@@ -60,8 +60,8 @@ struct PixelInputType {
 };
 PixelInputType VS(VertexInputType input) {
   PixelInputType output;
-  output.position = mul(input.position, worldMatrix);
-  output.position = mul(output.position, viewMatrix);
+  //output.position = mul(input.position, worldMatrix);
+  //output.position = mul(output.position, viewMatrix);
   output.position = mul(input.position, projectionMatrix);
   output.color = input.color;
   output.tex = input.tex;
@@ -70,13 +70,17 @@ PixelInputType VS(VertexInputType input) {
 )";
 
 const char* g_strPS = R"(
+Texture2D gm_BaseTexture;
+SamplerState SampleType;
+
 struct PixelInputType {
   float4 position : SV_POSITION;
   float2 tex : TEXCOORD0;
   float4 color : COLOR;
 };
 float4 PS(PixelInputType input) : SV_TARGET {
-  return input.color;
+  float4 textureColor = gm_BaseTexture.Sample(SampleType, input.tex);
+  return input.color * textureColor;
 }
 )";
 
@@ -118,7 +122,7 @@ map<int, ID3D11Buffer*> vertexBufferPeers;
 map<int, ID3D11Buffer*> indexBufferPeers;
 map<int, std::pair<ID3D11InputLayout*, size_t> > vertexFormatPeers;
 
-}
+} // namespace anonymous
 
 namespace enigma {
 
@@ -219,6 +223,8 @@ inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* verte
     elementDesc.AlignedByteOffset = offset;
     elementDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
     elementDesc.InstanceDataStepRate = 0;
+    // unused shader inputs will produce warnings in the debug layer
+    // about being reinterpreted, but they can be safely ignored
     elementDesc.Format = DXGI_FORMAT_R8_UINT;
     // look for any matching element present in the vertex format
     // to link with the shader input in the actual input layout
@@ -303,6 +309,28 @@ void graphics_prepare_default_shader() {
     graphics_compile_shader(g_strPS, &pBlobPS, "PS", "PS", "ps_4_0");
     m_device->CreatePixelShader(pBlobPS->GetBufferPointer(), pBlobPS->GetBufferSize(),
                                 NULL, &g_pPixelShader);
+
+    D3D11_SAMPLER_DESC samplerDesc;
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.MipLODBias = 0.0f;
+    samplerDesc.MaxAnisotropy = 1;
+    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    samplerDesc.BorderColor[0] = 0;
+    samplerDesc.BorderColor[1] = 0;
+    samplerDesc.BorderColor[2] = 0;
+    samplerDesc.BorderColor[3] = 0;
+    samplerDesc.MinLOD = 0;
+    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    ID3D11SamplerState *samplerState;
+    m_device->CreateSamplerState(
+      &samplerDesc,
+      &samplerState
+    );
+    m_deviceContext->PSSetSamplers(0, 1, &samplerState);
   }
 
   D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -333,7 +361,7 @@ void graphics_prepare_default_shader() {
 #define set_primitive_mode(primitive) m_deviceContext->IASetPrimitiveTopology(primitive_types[primitive]);
 #endif
 
-}
+} // namespace enigma
 
 namespace enigma_user {
 
@@ -392,4 +420,4 @@ void index_submit_range(int buffer, int vertex, int primitive, unsigned start, u
   m_deviceContext->DrawIndexed(count, start, 0);
 }
 
-}
+} // namespace enigma_user
