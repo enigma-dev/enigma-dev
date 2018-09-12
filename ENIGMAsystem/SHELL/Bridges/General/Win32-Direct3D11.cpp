@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2013, 2018 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -41,11 +41,95 @@ ID3D11RasterizerState* m_rasterState;
 // global declarations
 ContextManager* d3dmgr;    // the pointer to the device class
 
+namespace {
+int swap_interval = 0;
+
+void initialize_render_targets() {
+  HRESULT result;
+
+  // Get the pointer to the back buffer.
+  ID3D11Texture2D* backBufferPtr;
+  result = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBufferPtr);
+  if (FAILED(result)) {
+    show_error("Failed to obtain pointer to Direct3D11 back buffer.", true);
+  }
+
+  // Create the render target view with the back buffer pointer.
+  result = m_device->CreateRenderTargetView(backBufferPtr, NULL, &m_renderTargetView);
+  if (FAILED(result)) {
+    show_error("Failed to create Direct3D11 render target view.", true);
+  }
+
+  // Release pointer to the back buffer as we no longer need it.
+  backBufferPtr->Release();
+  backBufferPtr = 0;
+
+  int screenWidth = window_get_width(),
+      screenHeight = window_get_height();
+
+  // Set up the depth buffer description
+  D3D11_TEXTURE2D_DESC depthBufferDesc = { };
+  depthBufferDesc.Width = screenWidth;
+  depthBufferDesc.Height = screenHeight;
+  depthBufferDesc.MipLevels = 1;
+  depthBufferDesc.ArraySize = 1;
+  depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+  depthBufferDesc.SampleDesc.Count = 1;
+  depthBufferDesc.SampleDesc.Quality = 0;
+  depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+  depthBufferDesc.CPUAccessFlags = 0;
+  depthBufferDesc.MiscFlags = 0;
+
+  result = m_device->CreateTexture2D(&depthBufferDesc, NULL, &m_depthStencilBuffer);
+  if (FAILED(result)) {
+    show_error("Failed to create Direct3D11 Texture2D for depth stencil buffer.", true);
+  }
+
+  // Set up the depth stencil view description.
+  D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = { };
+  depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+  depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+  depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+  result = m_device->CreateDepthStencilView(m_depthStencilBuffer, &depthStencilViewDesc, &m_depthStencilView);
+  if (FAILED(result)) {
+    show_error("Failed to create Direct3D11 depth stencil view.", true);
+  }
+
+  m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
+
+  // Setup the viewport for rendering.
+  D3D11_VIEWPORT viewport = { };
+  viewport.TopLeftX = 0.0f;
+  viewport.TopLeftY = 0.0f;
+  viewport.Width = (float)screenWidth;
+  viewport.Height = (float)screenHeight;
+  viewport.MinDepth = 0.0f;
+  viewport.MaxDepth = 1.0f;
+
+  m_deviceContext->RSSetViewports(1, &viewport);
+}
+
+} // namespace anonymous
+
 namespace enigma
 {
-
   extern void (*WindowResizedCallback)();
   void WindowResized() {
+
+    // release all the old references first
+    m_deviceContext->OMSetRenderTargets(0, 0, 0);
+    m_renderTargetView->Release();
+    m_depthStencilBuffer->Release();
+    m_depthStencilView->Release();
+
+    m_swapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+
+    // recreate the render target and depth stencil buffers
+    // and their related views with the new window size
+    initialize_render_targets();
+
     // clear the window color, viewport does not need set because backbuffer was just recreated
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
@@ -88,41 +172,7 @@ namespace enigma
       show_error("Failed to create Direct3D11 device and swap chain.", true);
     }
 
-    // Get the pointer to the back buffer.
-    ID3D11Texture2D* backBufferPtr;
-    result = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBufferPtr);
-    if (FAILED(result)) {
-      show_error("Failed to obtain pointer to Direct3D11 back buffer.", true);
-    }
-
-    // Create the render target view with the back buffer pointer.
-    result = m_device->CreateRenderTargetView(backBufferPtr, NULL, &m_renderTargetView);
-    if (FAILED(result)) {
-      show_error("Failed to create Direct3D11 render target view.", true);
-    }
-
-    // Release pointer to the back buffer as we no longer need it.
-    backBufferPtr->Release();
-    backBufferPtr = 0;
-
-    // Set up the depth buffer description
-    D3D11_TEXTURE2D_DESC depthBufferDesc = { };
-    depthBufferDesc.Width = screenWidth;
-    depthBufferDesc.Height = screenHeight;
-    depthBufferDesc.MipLevels = 1;
-    depthBufferDesc.ArraySize = 1;
-    depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthBufferDesc.SampleDesc.Count = 1;
-    depthBufferDesc.SampleDesc.Quality = 0;
-    depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-    depthBufferDesc.CPUAccessFlags = 0;
-    depthBufferDesc.MiscFlags = 0;
-
-    result = m_device->CreateTexture2D(&depthBufferDesc, NULL, &m_depthStencilBuffer);
-    if (FAILED(result)) {
-      show_error("Failed to create Direct3D11 Texture2D for depth stencil buffer.", true);
-    }
+    initialize_render_targets();
 
     // Set up the description of the stencil state.
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
@@ -153,19 +203,6 @@ namespace enigma
 
     m_deviceContext->OMSetDepthStencilState(m_depthStencilState, 1);
 
-    // Set up the depth stencil view description.
-    D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = { };
-    depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-    depthStencilViewDesc.Texture2D.MipSlice = 0;
-
-    result = m_device->CreateDepthStencilView(m_depthStencilBuffer, &depthStencilViewDesc, &m_depthStencilView);
-    if (FAILED(result)) {
-      show_error("Failed to create Direct3D11 depth stencil view.", true);
-    }
-
-    m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
-
     // Setup the raster description which will determine how and what polygons will be drawn.
     D3D11_RASTERIZER_DESC rasterDesc = { };
     rasterDesc.AntialiasedLineEnable = false;
@@ -185,21 +222,9 @@ namespace enigma
     }
 
     m_deviceContext->RSSetState(m_rasterState);
-
-    // Setup the viewport for rendering.
-    D3D11_VIEWPORT viewport = { };
-    viewport.TopLeftX = 0.0f;
-    viewport.TopLeftY = 0.0f;
-    viewport.Width = (float)screenWidth;
-    viewport.Height = (float)screenHeight;
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
-
-    m_deviceContext->RSSetViewports(1, &viewport);
   }
 
   void DisableDrawing(void* handle) {}
-
 }
 
 namespace enigma_user
@@ -207,16 +232,16 @@ namespace enigma_user
   int display_aa = 0;
 
   void display_reset(int samples, bool vsync) {
-
+    swap_interval = vsync ? 1 : 0;
   }
 
   void screen_refresh() {
-    m_swapChain->Present(0, 0);
+    m_swapChain->Present(swap_interval, 0);
   }
 
-  void set_synchronization(bool enable) //TODO: Needs to be rewritten
+  void set_synchronization(bool enable)
   {
-
+    swap_interval = enable ? 1 : 0;
   }
 
 }

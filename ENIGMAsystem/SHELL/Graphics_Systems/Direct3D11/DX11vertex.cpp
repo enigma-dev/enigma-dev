@@ -60,11 +60,11 @@ struct PixelInputType {
 };
 PixelInputType VS(VertexInputType input) {
   PixelInputType output;
-  //output.position = mul(input.position, worldMatrix);
-  //output.position = mul(output.position, viewMatrix);
-  output.position = mul(input.position, projectionMatrix);
-  output.color = input.color;
+  output.position = mul(input.position, worldMatrix);
+  output.position = mul(output.position, viewMatrix);
+  output.position = mul(output.position, projectionMatrix);
   output.tex = input.tex;
+  output.color = input.color;
   return output;
 }
 )";
@@ -195,7 +195,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   }
 }
 
-inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* vertexFormat, size_t &stride) {
+inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* vertexFormat) {
   ID3D11ShaderReflection* pVertexShaderReflection = NULL;
   // because the vertex format describes the contents of the vertex buffer
   // in the GM/ENIGMA API, we need to reflect over the current shader to
@@ -209,7 +209,6 @@ inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* verte
 
   vector<D3D11_INPUT_ELEMENT_DESC> vertexLayoutElements(shaderDesc.InputParameters);
 
-  size_t offset = 0;
   for (UINT i = 0; i < shaderDesc.InputParameters; i++) {
     D3D11_SIGNATURE_PARAMETER_DESC paramDesc;
     pVertexShaderReflection->GetInputParameterDesc(i, &paramDesc);
@@ -220,7 +219,7 @@ inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* verte
     elementDesc.SemanticName = paramDesc.SemanticName;
     elementDesc.SemanticIndex = paramDesc.SemanticIndex;
     elementDesc.InputSlot = 0;
-    elementDesc.AlignedByteOffset = offset;
+    elementDesc.AlignedByteOffset = 0;
     elementDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
     elementDesc.InstanceDataStepRate = 0;
     // unused shader inputs will produce warnings in the debug layer
@@ -229,18 +228,21 @@ inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* verte
     // look for any matching element present in the vertex format
     // to link with the shader input in the actual input layout
     UINT semanticIndex = 0;
+    size_t offset = 0;
     for (auto flag : vertexFormat->flags) {
       if (strcmp(semantic_names[flag.second], paramDesc.SemanticName) == 0) {
         if (semanticIndex == paramDesc.SemanticIndex) {
           elementDesc.Format = dxgi_formats[flag.first];
+          elementDesc.AlignedByteOffset = offset;
           offset += dxgi_format_sizes[flag.first];
           break;
+        } else {
+          semanticIndex++;
         }
-        semanticIndex++;
       }
+      offset += dxgi_format_sizes[flag.first];
     }
   }
-  stride = offset;
 
   ID3D11InputLayout* vertexLayout;
   m_device->CreateInputLayout(vertexLayoutElements.data(), vertexLayoutElements.size(), pBlobVS->GetBufferPointer(),
@@ -255,8 +257,9 @@ inline void graphics_apply_vertex_format(int format, size_t &stride) {
   auto search = vertexFormatPeers.find(format);
   ID3D11InputLayout* vertexLayout = NULL;
   if (search == vertexFormatPeers.end()) {
-     vertexLayout = vertex_format_layout(vertexFormat, stride);
-     vertexFormatPeers[format] = std::make_pair(vertexLayout, stride);
+    stride = vertexFormat->stride_size;
+    vertexLayout = vertex_format_layout(vertexFormat);
+    vertexFormatPeers[format] = std::make_pair(vertexLayout, stride);
   } else {
     vertexLayout = search->second.first;
     stride = search->second.second;
