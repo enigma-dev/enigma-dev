@@ -50,10 +50,12 @@ cbuffer MatrixBuffer
 };
 struct VertexInputType {
   float4 position : POSITION;
+  float2 tex : TEXCOORD0;
   float4 color : COLOR;
 };
 struct PixelInputType {
   float4 position : SV_POSITION;
+  float2 tex : TEXCOORD0;
   float4 color : COLOR;
 };
 PixelInputType VS(VertexInputType input) {
@@ -62,6 +64,7 @@ PixelInputType VS(VertexInputType input) {
   output.position = mul(output.position, viewMatrix);
   output.position = mul(input.position, projectionMatrix);
   output.color = input.color;
+  output.tex = input.tex;
   return output;
 }
 )";
@@ -69,6 +72,7 @@ PixelInputType VS(VertexInputType input) {
 const char* g_strPS = R"(
 struct PixelInputType {
   float4 position : SV_POSITION;
+  float2 tex : TEXCOORD0;
   float4 color : COLOR;
 };
 float4 PS(PixelInputType input) : SV_TARGET {
@@ -188,24 +192,47 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
 }
 
 inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* vertexFormat, size_t &stride) {
-  vector<D3D11_INPUT_ELEMENT_DESC> vertexLayoutElements(vertexFormat->flags.size());
+  ID3D11ShaderReflection* pVertexShaderReflection = NULL;
+  // because the vertex format describes the contents of the vertex buffer
+  // in the GM/ENIGMA API, we need to reflect over the current shader to
+  // match its inputs with those specified in the vertex format so that
+  // input layout validation will succeed
+  if (FAILED(D3DReflect(pBlobVS->GetBufferPointer(), pBlobVS->GetBufferSize(), IID_ID3D11ShaderReflection, (void**) &pVertexShaderReflection)))
+    return nullptr;
+
+  D3D11_SHADER_DESC shaderDesc;
+  pVertexShaderReflection->GetDesc(&shaderDesc);
+
+  vector<D3D11_INPUT_ELEMENT_DESC> vertexLayoutElements(shaderDesc.InputParameters);
 
   size_t offset = 0;
-  map<int,int> useCount;
-  for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
-    const pair<int, int> flag = vertexFormat->flags[i];
-    D3D11_INPUT_ELEMENT_DESC *vertexLayoutElement = &vertexLayoutElements[i];
-    *vertexLayoutElement = { };
+  for (UINT i = 0; i < shaderDesc.InputParameters; i++) {
+    D3D11_SIGNATURE_PARAMETER_DESC paramDesc;
+    pVertexShaderReflection->GetInputParameterDesc(i, &paramDesc);
 
-    vertexLayoutElement->SemanticName = semantic_names[flag.second];
-    vertexLayoutElement->SemanticIndex = useCount[flag.second]++;
-    vertexLayoutElement->Format = dxgi_formats[flag.first];
-    vertexLayoutElement->InputSlot = 0;
-    vertexLayoutElement->AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-    vertexLayoutElement->InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-    vertexLayoutElement->InstanceDataStepRate = 0;
-
-    offset += dxgi_format_sizes[flag.first];
+    // fill out input element desc
+    D3D11_INPUT_ELEMENT_DESC &elementDesc = vertexLayoutElements[i];
+    elementDesc = { };
+    elementDesc.SemanticName = paramDesc.SemanticName;
+    elementDesc.SemanticIndex = paramDesc.SemanticIndex;
+    elementDesc.InputSlot = 0;
+    elementDesc.AlignedByteOffset = offset;
+    elementDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+    elementDesc.InstanceDataStepRate = 0;
+    elementDesc.Format = DXGI_FORMAT_R8_UINT;
+    // look for any matching element present in the vertex format
+    // to link with the shader input in the actual input layout
+    UINT semanticIndex = 0;
+    for (auto flag : vertexFormat->flags) {
+      if (strcmp(semantic_names[flag.second], paramDesc.SemanticName) == 0) {
+        if (semanticIndex == paramDesc.SemanticIndex) {
+          elementDesc.Format = dxgi_formats[flag.first];
+          offset += dxgi_format_sizes[flag.first];
+          break;
+        }
+        semanticIndex++;
+      }
+    }
   }
   stride = offset;
 
@@ -299,7 +326,6 @@ void graphics_prepare_default_shader() {
 #define set_primitive_mode(primitive)                                                            \
   if (primitive < 0 || primitive >= (int)primitive_types_size) {                                 \
     show_error("Primitive type " + enigma_user::toString(primitive) + " does not exist", false); \
-    vertexLayout->Release();                                                                     \
     return;                                                                                      \
   }                                                                                              \
   m_deviceContext->IASetPrimitiveTopology(primitive_types[primitive]);
