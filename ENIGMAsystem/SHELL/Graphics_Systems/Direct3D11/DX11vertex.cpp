@@ -70,8 +70,8 @@ PixelInputType VS(VertexInputType input) {
 )";
 
 const char* g_strPS = R"(
-Texture2D gm_BaseTexture;
-SamplerState SampleType;
+Texture2D gm_BaseTextureObject : register(t0);
+SamplerState gm_BaseTexture : register(S0);
 
 struct PixelInputType {
   float4 position : SV_POSITION;
@@ -79,7 +79,7 @@ struct PixelInputType {
   float4 color : COLOR;
 };
 float4 PS(PixelInputType input) : SV_TARGET {
-  float4 textureColor = gm_BaseTexture.Sample(SampleType, input.tex);
+  float4 textureColor = gm_BaseTextureObject.Sample(gm_BaseTexture, input.tex);
   return input.color * textureColor;
 }
 )";
