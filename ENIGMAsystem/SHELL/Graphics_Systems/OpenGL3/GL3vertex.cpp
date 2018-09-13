@@ -20,6 +20,7 @@
 #include "GL3profiler.h"
 #include "GL3shader.h"
 #include "GLSLshader.h"
+#include "GL3matrix.h"
 
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
