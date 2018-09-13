@@ -184,7 +184,6 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
       m_deviceContext->Map(bufferPeer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
       memcpy(mappedResource.pData, data, size);
       m_deviceContext->Unmap(bufferPeer, 0);
-      //m_deviceContext->UpdateSubresource(bufferPeer, 0, NULL, data, size, 1);
     }
 
     if (isIndex) {
