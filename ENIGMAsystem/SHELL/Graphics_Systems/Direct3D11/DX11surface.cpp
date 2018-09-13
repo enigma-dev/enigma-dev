@@ -107,7 +107,7 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
   }
 
   enigma::Surface* surface = new enigma::Surface();
-  TextureStruct* gmTexture = new TextureStruct(renderTargetTexture);
+  TextureStruct* gmTexture = new TextureStruct(renderTargetTexture, shaderResourceView);
   textureStructs.push_back(gmTexture);
   surface->renderTargetView = renderTargetView;
   surface->tex = textureStructs.size() - 1;
