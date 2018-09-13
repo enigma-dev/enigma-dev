@@ -25,10 +25,11 @@ using std::vector;
 
 struct TextureStruct {
   ID3D11Texture2D *texture;
+  ID3D11ShaderResourceView *view;
   unsigned width,height;
 	unsigned fullwidth,fullheight;
 
-  TextureStruct(ID3D11Texture2D *ntexture): texture(ntexture) {
+  TextureStruct(ID3D11Texture2D *ntexture, ID3D11ShaderResourceView *view): texture(ntexture), view(view) {
 
   }
 

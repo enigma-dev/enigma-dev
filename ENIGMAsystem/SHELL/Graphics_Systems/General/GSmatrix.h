@@ -1,5 +1,5 @@
 /** Copyright (C) 2008-2012 Josh Ventura
-*** Copyright (C) 2013-2014 Robert B. Colton, Harijs Grinbergs
+*** Copyright (C) 2013-2014 Robert Colton, Harijs Grinbergs
 *** Copyright (C) 2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
@@ -23,19 +23,6 @@
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
 #include <string>
-
-namespace enigma
-{
-  //Forward declare
-  struct Matrix3;
-  struct Matrix4;
-
-  extern Matrix4 projection_matrix, view_matrix, model_matrix;
-  extern Matrix4 mv_matrix, mvp_matrix;
-  extern Matrix3 normal_matrix;
-  extern bool transform_needs_update;
-  extern void transformation_update();
-}
 
 namespace enigma_user
 {
