@@ -30,28 +30,51 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Compile, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+
     # Platforms
-    - {COMPILER: gcc, PLATFORM: SDL, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - {COMPILER: gcc, PLATFORM: SDL, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
+       PACKAGES: mingw-w64-x86_64-SDL2}
+
     # Graphics
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D11, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D11, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
+       PACKAGES: mingw-w64-x86_64-glm}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: OpenGL1, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
+       PACKAGES: mingw-w64-x86_64-glew}
+
     # Audio
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: DirectSound, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    #TODO: Fix SFML on Windows
+    #- {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: SFML, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
+    #   PACKAGES: mingw-w64-x86_64-sfml}
+    #TODO: Fix OpenAL on Windows
+    #- {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: OpenAL, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
+    #   PACKAGES: mingw-w64-x86_64-openal mingw-w64-x86_64-dumb mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123
+    #             mingw-w64-x86_64-libsndfile mingw-w64-x86_64-libgme}
+
     # Widgets
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: Win32, EXTENSIONS: "None"}
+    #TODO: Fix GTK+ on Windows
+    #- {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: GTK+, EXTENSIONS: "None",
+    #   PACKAGES: mingw-w64-x86_64-gtk2}
+
     # Extensions
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "DirectShow"}
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "WindowsTouch"}
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "XInput"}
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "Box2DPhysics",
+       PACKAGES: mingw-w64-x86_64-box2d}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "StudioPhysics",
+       PACKAGES: mingw-w64-x86_64-box2d}
+    #TODO: Fix Bullet Physics on Windows
+    #- {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "BulletDynamics",
+    #   PACKAGES: mingw-w64-x86_64-bullet}
   #END WINDOWS
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\local\bin;c:\msys64\usr\bin;%PATH%
-  - >
-    pacman --noconfirm -S mingw-w64-x86_64-boost mingw-w64-x86_64-glm mingw-w64-x86_64-openal mingw-w64-x86_64-dumb
-    mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123
-    mingw-w64-x86_64-libsndfile mingw-w64-x86_64-libgme mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2
-    mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet mingw-w64-x86_64-glew mingw-w64-x86_64-protobuf mingw-w64-x86_64-grpc
-    mingw-w64-x86_64-pugixml mingw-w64-x86_64-rapidjson mingw-w64-x86_64-yaml-cpp mingw-w64-x86_64-SDL2
+  - > # Install packages common to all builds
+    pacman --noconfirm -S mingw-w64-x86_64-boost mingw-w64-x86_64-pugixml mingw-w64-x86_64-rapidjson
+    mingw-w64-x86_64-yaml-cpp mingw-w64-x86_64-grpc mingw-w64-x86_64-protobuf %PACKAGES%
   - gcc -v
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
