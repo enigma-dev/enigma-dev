@@ -70,7 +70,7 @@ environment:
     #   PACKAGES: "bullet:x"}
   #END WINDOWS
 install:
-  - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\local\bin;c:\msys64\usr\bin;%PATH%
+  - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
   - > # Install packages common to all builds
     pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x %PACKAGES%
   - gcc -v
