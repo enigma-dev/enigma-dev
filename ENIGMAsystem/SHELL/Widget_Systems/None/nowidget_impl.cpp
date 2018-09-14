@@ -149,11 +149,11 @@ double get_integer_helper(string message, double def, string cap, bool hidden) {
 }
 
 string get_string(string message, string def, string cap="") {
-  get_string_helper(message, def, cap, false);
+  return get_string_helper(message, def, cap, false);
 }
 
 string get_password(string message, string def, string cap="") {
-  get_string_helper(message, def, cap, true);
+  return get_string_helper(message, def, cap, true);
 }
 
 double get_integer(string message, double def, string cap="") {
