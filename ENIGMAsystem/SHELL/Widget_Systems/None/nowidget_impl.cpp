@@ -133,7 +133,7 @@ string get_login(string username, string password, string cap="") {
   return input;
 }
 
-string get_strinng_helper(string message, string def, string cap, bool hidden) {
+string get_string_helper(string message, string def, string cap, bool hidden) {
   //TODO: Add boolean support for hidden input.
   printf("%s\n%s\n", cap.c_str(), message.c_str());
   string input;
