@@ -143,7 +143,8 @@ string get_string_helper(string message, string def, string cap, bool hidden) {
 
 double get_integer_helper(string message, double def, string cap, bool hidden) {
   //TODO: Add boolean support for hidden input.
-  input = get_string_helper(message, def, cap, hidden);
+  string str_def = to_string(def);
+  input = get_string_helper(message, str_def, cap, hidden);
   string::size_type sz;
   return (input.empty()) ? def : stod(input, &sz);
 }
