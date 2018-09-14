@@ -133,36 +133,35 @@ string get_login(string username, string password, string cap="") {
   return input;
 }
 
-string get_string(string message, string def, string cap="") {
+string get_strinng_helper(string message, string def, string cap, bool hidden) {
+  //TODO: Add boolean support for hidden input.
   printf("%s\n%s\n", cap.c_str(), message.c_str());
   string input;
   cin >> input;
   return (input.empty()) ? def : input;
+}
+
+double get_integer_helper(string message, double def, string cap, bool hidden) {
+  //TODO: Add boolean support for hidden input.
+  input = get_string_helper(message, def, cap, hidden);
+  string::size_type sz;
+  return (input.empty()) ? def : stod(input, &sz);
+}
+
+string get_string(string message, string def, string cap="") {
+  get_string_helper(message, def, cap, false);
 }
 
 string get_password(string message, string def, string cap="") {
-  //TODO: Add support for hidden input.
-  printf("%s\n%s\n", cap.c_str(), message.c_str());
-  string input;
-  cin >> input;
-  return (input.empty()) ? def : input;
+  get_string_helper(message, def, cap, true);
 }
 
 double get_integer(string message, double def, string cap="") {
-  printf("%s\n%s\n", cap.c_str(), message.c_str());
-  string input;
-  cin >> input;
-  string::size_type sz;
-  return (input.empty()) ? def : stod(input, &sz);
+  return get_integer_helper(message, def, cap, false);
 }
 
 double get_passcode(string message, double def, string cap="") {
-  //TODO: Add support for hidden input.
-  printf("%s\n%s\n", cap.c_str(), message.c_str());
-  string input;
-  cin >> input;
-  string::size_type sz;
-  return (input.empty()) ? def : stod(input, &sz);
+  return get_integer_helper(message, def, cap, true);
 }
 
 }
