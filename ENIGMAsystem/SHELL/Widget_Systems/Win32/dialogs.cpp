@@ -85,9 +85,9 @@ void show_error(string errortext, const bool fatal) {
 
   double result;
 
-DWORD flags = MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL;
-result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), flags | (fatal ? MB_OK : MB_YESNO));
-printf(fatal ? "FATAL ERROR: %s\n" : "ERROR: %s\n", errortext.c_str());
+  DWORD flags = MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL;
+  result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), flags | (fatal ? MB_OK : MB_YESNO));
+  printf(fatal ? "FATAL ERROR: %s\n" : "ERROR: %s\n", errortext.c_str());
 
   if (result == IDOK || result == IDYES)
     exit(0);
