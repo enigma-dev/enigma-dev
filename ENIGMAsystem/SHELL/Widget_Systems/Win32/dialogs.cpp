@@ -122,40 +122,40 @@ static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 
 void CenterRectToMonitor(LPRECT prc, UINT flags)
 {
-	HMONITOR hMonitor;
-	MONITORINFO mi;
-	RECT        rc;
-	int         w = prc->right - prc->left;
-	int         h = prc->bottom - prc->top;
+  HMONITOR hMonitor;
+  MONITORINFO mi;
+  RECT        rc;
+  int         w = prc->right - prc->left;
+  int         h = prc->bottom - prc->top;
 
-	hMonitor = MonitorFromRect(prc, MONITOR_DEFAULTTONEAREST);
+  hMonitor = MonitorFromRect(prc, MONITOR_DEFAULTTONEAREST);
 
-	mi.cbSize = sizeof(mi);
-	GetMonitorInfo(hMonitor, &mi);
-	rc = mi.rcMonitor;
+  mi.cbSize = sizeof(mi);
+  GetMonitorInfo(hMonitor, &mi);
+  rc = mi.rcMonitor;
 
-	if (flags & MONITOR_CENTER)
-	{
-		prc->left = rc.left + (rc.right - rc.left - w) / 2;
-		prc->top = rc.top + (rc.bottom - rc.top - h) / 2;
-		prc->right = prc->left + w;
-		prc->bottom = prc->top + h;
-	}
-	else
-	{
-		prc->left = rc.left + (rc.right - rc.left - w) / 2;
-		prc->top = rc.top + (rc.bottom - rc.top - h) / 3;
-		prc->right = prc->left + w;
-		prc->bottom = prc->top + h;
-	}
+  if (flags & MONITOR_CENTER)
+  {
+    prc->left = rc.left + (rc.right - rc.left - w) / 2;
+    prc->top = rc.top + (rc.bottom - rc.top - h) / 2;
+    prc->right = prc->left + w;
+    prc->bottom = prc->top + h;
+  }
+  else
+  {
+    prc->left = rc.left + (rc.right - rc.left - w) / 2;
+    prc->top = rc.top + (rc.bottom - rc.top - h) / 3;
+    prc->right = prc->left + w;
+    prc->bottom = prc->top + h;
+  }
 }
 
 void CenterWindowToMonitor(HWND hwnd, UINT flags)
 {
-	RECT rc;
-	GetWindowRect(hwnd, &rc);
-	CenterRectToMonitor(&rc, flags);
-	SetWindowPos(hwnd, NULL, rc.left, rc.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+  RECT rc;
+  GetWindowRect(hwnd, &rc);
+  CenterRectToMonitor(&rc, flags);
+  SetWindowPos(hwnd, NULL, rc.left, rc.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 /* < / Used by GetDirectoryProc, InputBoxProc, and GetColorProc > */
 
