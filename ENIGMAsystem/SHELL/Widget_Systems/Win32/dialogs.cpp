@@ -117,6 +117,48 @@ static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
   return DefWindowProc(hwndDlg, uMsg, wParam, lParam);
 }
 
+/* < Used by GetDirectoryProc, InputBoxProc, and GetColorProc > */
+#define MONITOR_CENTER     0x0001
+
+void CenterRectToMonitor(LPRECT prc, UINT flags)
+{
+	HMONITOR hMonitor;
+	MONITORINFO mi;
+	RECT        rc;
+	int         w = prc->right - prc->left;
+	int         h = prc->bottom - prc->top;
+
+	hMonitor = MonitorFromRect(prc, MONITOR_DEFAULTTONEAREST);
+
+	mi.cbSize = sizeof(mi);
+	GetMonitorInfo(hMonitor, &mi);
+	rc = mi.rcMonitor;
+
+	if (flags & MONITOR_CENTER)
+	{
+		prc->left = rc.left + (rc.right - rc.left - w) / 2;
+		prc->top = rc.top + (rc.bottom - rc.top - h) / 2;
+		prc->right = prc->left + w;
+		prc->bottom = prc->top + h;
+	}
+	else
+	{
+		prc->left = rc.left + (rc.right - rc.left - w) / 2;
+		prc->top = rc.top + (rc.bottom - rc.top - h) / 3;
+		prc->right = prc->left + w;
+		prc->bottom = prc->top + h;
+	}
+}
+
+void CenterWindowToMonitor(HWND hwnd, UINT flags)
+{
+	RECT rc;
+	GetWindowRect(hwnd, &rc);
+	CenterRectToMonitor(&rc, flags);
+	SetWindowPos(hwnd, NULL, rc.left, rc.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+}
+/* < / Used by GetDirectoryProc, InputBoxProc, and GetColorProc > */
+
 /* < Used by InputBoxProc > */
 void ClientResize(HWND hWnd, int nWidth, int nHeight) {
   RECT rcClient, rcWind;
@@ -137,19 +179,17 @@ bool HideInput = 0;
 LRESULT CALLBACK InputBoxProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam) {
   switch (Msg) {
   case WM_INITDIALOG: {
+      SetWindowLongPtr(hWndDlg, GWL_EXSTYLE, GetWindowLongPtr(hWndDlg, GWL_EXSTYLE) | WS_EX_DLGMODALFRAME);
+      SetWindowPos(hWndDlg, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
       ClientResize(hWndDlg, 357, 128);
       RECT rect;
-      GetWindowRect(hWndDlg, &rect);
-      MoveWindow(hWndDlg,
-        (GetSystemMetrics(SM_CXSCREEN) / 2) - ((rect.right - rect.left) / 2),
-        (GetSystemMetrics(SM_CYSCREEN) / 3) - ((rect.bottom - rect.top) / 3),
-        rect.right - rect.left, rect.bottom - rect.top, TRUE);
+			GetWindowRect(hWndDlg, &rect);
+			MoveWindow(hWndDlg, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+			CenterWindowToMonitor(hWndDlg, 0);
       MoveWindow(GetDlgItem(hWndDlg, IDOK), 272, 10, 75, 23, TRUE);
       MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), 272, 39, 75, 23, TRUE);
       MoveWindow(GetDlgItem(hWndDlg, IDC_EDIT), 11, 94, 336, 23, TRUE);
       MoveWindow(GetDlgItem(hWndDlg, IDC_PROMPT), 11, 11, 252, 66, TRUE);
-      SetWindowLongPtr(hWndDlg, GWL_EXSTYLE, GetWindowLongPtr(hWndDlg, GWL_EXSTYLE) | WS_EX_DLGMODALFRAME);
-      SetWindowPos(hWndDlg, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
       SetDlgItemTextW(hWndDlg, IDC_PROMPT, wstrPromptStr);
       SetDlgItemTextW(hWndDlg, IDC_EDIT, wstrTextEntry);
       WCHAR wstrWindowCaption[MAX_PATH + 1];
@@ -274,11 +314,9 @@ UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
   case WM_INITDIALOG: {
       ClientResize(hWnd, 424, 255);
       RECT rect;
-      GetWindowRect(hWnd, &rect);
-      MoveWindow(hWnd,
-        (GetSystemMetrics(SM_CXSCREEN) / 2) - ((rect.right - rect.left) / 2),
-        (GetSystemMetrics(SM_CYSCREEN) / 2) - ((rect.bottom - rect.top) / 2),
-        rect.right - rect.left, rect.bottom - rect.top, TRUE);
+		  GetWindowRect(hWnd, &rect);
+		  MoveWindow(hWnd, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+      CenterWindowToMonitor(hWnd, MONITOR_CENTER);
       MoveWindow(GetDlgItem(hWnd, IDOK), 256, 224, 77, 27, TRUE);
       MoveWindow(GetDlgItem(hWnd, IDCANCEL), 340, 224, 77, 27, TRUE);
       MoveWindow(GetDlgItem(hWnd, stc3), 232, 56, 72, 16, TRUE);
@@ -355,11 +393,9 @@ static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM 
 UINT_PTR CALLBACK GetColorProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) {
   if (uiMsg == WM_INITDIALOG) {
     RECT rect;
-    GetWindowRect(hdlg, &rect);
-    MoveWindow(hdlg,
-      (GetSystemMetrics(SM_CXSCREEN) / 2) - ((rect.right - rect.left) / 2),
-      (GetSystemMetrics(SM_CYSCREEN) / 3) - ((rect.bottom - rect.top) / 3),
-      rect.right - rect.left, rect.bottom - rect.top, TRUE);
+		GetWindowRect(hdlg, &rect);
+		MoveWindow(hdlg, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+		CenterWindowToMonitor(hdlg, 0);
     tstring tstr_cap = widen(gs_cap);
     SetWindowTextW(hdlg, tstr_cap.c_str());
     PostMessageW(hdlg, WM_SETFOCUS, 0, 0);
