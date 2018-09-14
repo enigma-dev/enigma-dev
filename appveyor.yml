@@ -72,7 +72,7 @@ environment:
 install:
   - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
   - > # Install packages common to all builds
-    C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x %PACKAGES%"
+    "C:\msys64\usr\bin\pacboy" --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x %PACKAGES%
   - gcc -v
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
