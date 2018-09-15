@@ -282,7 +282,7 @@ bool WriteTimeline(const fs::path &egm_root, const fs::path &dir, const buffers:
     return false;
 
   for (auto &m : timeline.moments()) {
-	  string edlFile = dir.string() + "/step_" + std::to_string(m.step()) + ".edl";
+	  string edlFile = dir.string() + "/step[" + std::to_string(m.step()) + "].edl";
     std::ofstream fout{edlFile};
 	  fout << m.code();
   }

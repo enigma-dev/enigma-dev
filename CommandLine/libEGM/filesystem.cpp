@@ -1,6 +1,7 @@
 #include "filesystem.h"
 
 #include <iostream>
+#include <fstream>
 
 bool StartsWith(const string &str, const string &prefix) {
   if (prefix.length() > str.length()) return false;
@@ -83,4 +84,11 @@ bool FolderExists(const string &folder) {
 bool FileExists(const string &fName) {
   const fs::path f = fName;
   return (fs::exists(f) && fs::is_regular_file(f));
+}
+
+std::string FileToString(const std::string &fName) {
+  std::ifstream t(fName.c_str());
+  std::stringstream buffer;
+  buffer << t.rdbuf();
+  return buffer.str();
 }
