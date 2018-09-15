@@ -24,50 +24,55 @@ init:
 environment:
   OUTPUT: /tmp/test.exe
   MSYS2_FC_CACHE_SKIP: yes
+
+  # These variables apply to all jobs in the matrix
+  # Each job overrides a subet of them to test
+  COMPILER: gcc
+  PLATFORM: Win32
+  MODE: Debug
+  GRAPHICS: Direct3D9
+  AUDIO: None
+  COLLISION: None
+  NETWORK: None
+  WIDGETS: None
+  EXTENSIONS: "None"
+  PACKAGES: ""
+
   matrix:
   #BEGIN WINDOWS
     # Game Modes
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Compile, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - {MODE: Run}
+    - {MODE: Debug}
+    - {MODE: Compile}
 
     # Platforms
-    - {COMPILER: gcc, PLATFORM: SDL, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
-       PACKAGES: "SDL2:x"}
+    - {PLATFORM: SDL, PACKAGES: "SDL2:x"}
 
     # Graphics
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D11, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
-       PACKAGES: "glm:x"}
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: OpenGL1, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
-       PACKAGES: "glew:x"}
+    - {GRAPHICS: Direct3D11, PACKAGES: "glm:x"}
+    - {GRAPHICS: OpenGL1, PACKAGES: "glew:x"}
 
     # Audio
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: DirectSound, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - {AUDIO: DirectSound}
     #TODO: Fix SFML on Windows
-    #- {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: SFML, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
-    #   PACKAGES: "sfml:x"}
+    #- {AUDIO: SFML, PACKAGES: "sfml:x"}
     #TODO: Fix OpenAL on Windows
-    #- {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: OpenAL, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
-    #   PACKAGES: "openal:x dum:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
+    #- {AUDIO: OpenAL, PACKAGES: "openal:x dum:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
 
     # Widgets
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: Win32, EXTENSIONS: "None"}
+    - {WIDGETS: Win32}
     #TODO: Fix GTK+ on Windows
-    #- {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: GTK+, EXTENSIONS: "None",
-    #   PACKAGES: "gtk2:x"}
+    #- {WIDGETS: GTK+, PACKAGES: "gtk2:x"}
 
     # Extensions
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "DirectShow"}
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "WindowsTouch"}
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "XInput"}
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "Box2DPhysics",
-       PACKAGES: "box2d:x"}
-    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "StudioPhysics",
-       PACKAGES: "box2d:x"}
+    - {EXTENSIONS: "DirectShow"}
+    - {EXTENSIONS: "WindowsTouch"}
+    - {EXTENSIONS: "XInput"}
+    - {EXTENSIONS: "MediaControlInterface"}
+    - {EXTENSIONS: "Box2DPhysics", PACKAGES: "box2d:x"}
+    - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
     #TODO: Fix Bullet Physics on Windows
-    #- {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "BulletDynamics",
-    #   PACKAGES: "bullet:x"}
+    #- {EXTENSIONS: "BulletDynamics", PACKAGES: "bullet:x"}
   #END WINDOWS
 install:
   - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
