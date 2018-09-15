@@ -39,7 +39,6 @@ environment:
   PACKAGES: ""
 
   matrix:
-  #BEGIN WINDOWS
     # Game Modes
     - {MODE: Run}
     - {MODE: Debug}
@@ -73,7 +72,6 @@ environment:
     - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
     #TODO: Fix Bullet Physics on Windows
     #- {EXTENSIONS: "BulletDynamics", PACKAGES: "bullet:x"}
-  #END WINDOWS
 install:
   - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
   - > # Install packages common to all builds
