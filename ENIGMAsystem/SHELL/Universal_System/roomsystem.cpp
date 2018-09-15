@@ -234,8 +234,6 @@ namespace enigma
     //if the window size changes.
     enigma_user::window_default(true);
     enigma_user::io_clear();
-    screen_init();
-    screen_refresh();
 
     //Load tiles
     delete_tiles();

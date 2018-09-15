@@ -28,6 +28,7 @@
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GSscreen.h"
 
 #include <time.h>
 #include <stdio.h>
@@ -39,7 +40,7 @@ namespace enigma_user
   extern int mtrandom_seed(int x);
 } //namespace enigma_user
 
-namespace enigma 
+namespace enigma
 {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
   extern void timeline_system_initialize();
@@ -56,6 +57,7 @@ namespace enigma
     enigma::game_settings_initialize();
 
     graphicssystem_initialize();
+    enigma_user::screen_init();
     audiosystem_initialize();
 
     #if defined(BUILDMODE) && BUILDMODE
