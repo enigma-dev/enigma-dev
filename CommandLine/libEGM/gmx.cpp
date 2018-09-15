@@ -18,6 +18,7 @@
 #include "gmx.h"
 #include "action.h"
 #include "Util.h"
+#include "filesystem.h"
 
 #include "event_reader/event_parser.h"
 
@@ -199,13 +200,6 @@ class gmx_root_walker {
     return true;
   }
 };
-
-std::string FileToString(const std::string &fName) {
-  std::ifstream t(fName.c_str());
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-  return buffer.str();
-}
 
 std::vector<std::string> SplitString(const std::string &str, char delimiter) {
   std::vector<std::string> vec;

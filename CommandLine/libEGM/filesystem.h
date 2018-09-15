@@ -32,3 +32,4 @@ void DeleteFile(const string &fName);
 void DeleteFolder(const string &fName);
 bool FolderExists(const string &folder);
 bool FileExists(const string &fName);
+std::string FileToString(const std::string &fName);
