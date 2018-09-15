@@ -259,7 +259,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   for (const auto &layer : tile_layers.layers) {
     yaml << YAML::BeginMap;
     yaml << YAML::Key << "Format" << layer.format;
-    yaml << YAML::Key << "Data" << layer.data;
+    yaml << YAML::Key << "Data" << YAML::Literal << layer.data;
     yaml << YAML::EndMap;
   }
   WriteRoomSnowflakes(egm_root, dir, yaml, &tile_layers);
