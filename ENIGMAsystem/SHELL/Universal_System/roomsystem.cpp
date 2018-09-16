@@ -236,8 +236,10 @@ namespace enigma
     enigma_user::io_clear();
     // we only initialize the screen and clear the window color during game start
     // NOTE: no version of GM has EVER reset the drawing color or alpha during room transition
-    if (gamestart)
+    if (gamestart) {
       enigma_user::screen_init();
+      enigma_user::screen_refresh();
+    }
 
     //Load tiles
     delete_tiles();
