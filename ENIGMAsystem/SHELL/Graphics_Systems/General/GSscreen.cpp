@@ -153,7 +153,10 @@ static inline int draw_tiles()
 
 void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
 {
-  d3d_set_projection_ortho(x, y, w, h, angle);
+  if (enigma::d3dMode && enigma::d3dPerspective)
+    d3d_set_projection_perspective(x, y, w, h, angle);
+  else
+    d3d_set_projection_ortho(x, y, w, h, angle);
 
   if (showcolor)
     enigma_user::draw_clear(background_color);
