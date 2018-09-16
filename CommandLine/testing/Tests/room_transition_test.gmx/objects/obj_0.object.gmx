@@ -4,9 +4,9 @@
   <solid>0</solid>
   <visible>-1</visible>
   <depth>0</depth>
-  <persistent>0</persistent>
-  <maskName>&lt;undefined&gt;</maskName>
+  <persistent>-1</persistent>
   <parentName>&lt;undefined&gt;</parentName>
+  <maskName>&lt;undefined&gt;</maskName>
   <events>
     <event enumb="0" eventtype="0">
       <action>
@@ -14,8 +14,8 @@
         <id>603</id>
         <kind>7</kind>
         <userelative>0</userelative>
-        <useapplyto>-1</useapplyto>
         <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
         <exetype>2</exetype>
         <functionname/>
         <codestring/>
@@ -25,7 +25,39 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>room_goto(rm_1);</string>
+            <string>draw_set_color(c_red);
+draw_set_alpha(0.5);
+room_goto(rm_1);
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="4" eventtype="7">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>if (room == rm_0) {
+    gtest_assert_eq(draw_get_color(), c_white);
+    gtest_assert_eq(draw_get_alpha(), 1.0);
+} else if (room == rm_1) {
+    gtest_assert_eq(draw_get_color(), c_red);
+    gtest_assert_eq(draw_get_alpha(), 0.5);
+}
+</string>
           </argument>
         </arguments>
       </action>
