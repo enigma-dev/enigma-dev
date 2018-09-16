@@ -25,6 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include <functional>
+#include <map>
 
 namespace proto = google::protobuf;
 using CppType = proto::FieldDescriptor::CppType;
@@ -57,9 +58,7 @@ static const FactoryMap factoryMap({
 
 buffers::resources::Script* LoadScript(const fs::path& fPath) {
   buffers::resources::Script* scr = new buffers::resources::Script();
-  
   scr->set_code(FileToString(fPath));
-  
   return scr;
 }
 
@@ -84,6 +83,29 @@ inline void invalidEDLNaming(const fs::path& res, const fs::path& fName) {
     
   else if (res.extension() == ".rm")
     std::cerr << "Supported naming for rooms is create[instance].edl" << std::endl;
+}
+
+inline void invalidYAMLType(const YAML::Node& yaml, const fs::path& fPath, const google::protobuf::FieldDescriptor *field) {
+  const std::map<int, std::string> yamlTypes {
+    {YAML::NodeType::Sequence, "sequence"},
+    {YAML::NodeType::Scalar, "scalar"},
+    {YAML::NodeType::Map, "map"},
+    {YAML::NodeType::Undefined, "undefined"},
+    {YAML::NodeType::Null, "null"}
+  };
+  
+  std::string expectedType;
+  if (field->is_repeated()) expectedType = "sequence";
+  else if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) expectedType = "map";
+  else expectedType = "scalar";
+  
+  YAML::Mark errPos = yaml.Mark();
+  
+  std::cerr << "Yaml parsing error" << std::endl;
+  std::cerr << "Expected a " << expectedType << " but got " << yamlTypes.at(yaml.Type()) << std::endl;
+  std::cerr << "File path: " << fPath << std::endl;
+  std::cerr << "Protobuf field: " << field->name();
+  std::cerr << "Yaml position: line: " << errPos.line << " column: " << errPos.column;
 }
 
 buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
@@ -121,15 +143,7 @@ buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
   return tln;
 }
 
-const std::map<YAML::NodeType, std::string> yamlTypes {
-  {YAML::NodeType::Sequence, "sequence"},
-  {YAML::NodeType::Scalar, "scalar"},
-  {YAML::NodeType::Map, "map"},
-  {YAML::NodeType::Undefined, "undefined"},
-  {YAML::NodeType::Null, "null"}
-};
-
-void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node yaml, const fs::path& fPath, int depth) {
+void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const fs::path& fPath, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   
@@ -139,27 +153,31 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node yaml, const fs
     if (oneof && refl->HasOneof(*m, oneof)) continue;
     const google::protobuf::FieldOptions opts = field->options();
     
+    if (!yaml[field->name()]) {
+      std::cerr << "Error cannot locate yaml field " << field->name() << " in " << fPath;
+      continue; 
+    }
+    
     if (field->is_repeated()) {
       
-      if (!node.IsSequence()) {
-        std::cerr << "Expected a sequence for node but got a " << yamlTypes[yaml.Type()] << std::endl;
-        std::cerr << "File path: " << fPath << std::endl;
-        std::cerr << "Protobuf field: " << field->name();
-        std::cerr << "Yaml field: " << ... ;
-        break;
+      if (!yaml.IsSequence()) {
+        invalidYAMLType(yaml, fPath, field);
+        continue;
       }
 
       switch (field->cpp_type()) {
         case CppType::CPPTYPE_MESSAGE: {
-          forloop yaml;
-          google::protobuf::Message *msg = refl->AddMessage(m, field);
-          RecursivePackBuffer(msg, ..., fPath, depth + 1);
+          for (auto n : yaml[field->name()]) {
+            google::protobuf::Message *msg = refl->AddMessage(m, field);
+            RecursivePackBuffer(msg, n, fPath, depth + 1);
+          }
           break;
         }
 
         case CppType::CPPTYPE_STRING: {
-          forloopyaml
-          refl->AddString(m, field, value);
+          for (auto n : yaml[field->name()]) {
+            refl->AddString(m, field, n.as<std::string>());
+          }
           break;
         }
 
@@ -171,48 +189,54 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node yaml, const fs
       }
     
     } else {  // Now we parse individual proto fields
+      YAML::Node n = yaml[field->name()];
+      
+      if ((!n.IsScalar() && field->cpp_type() != CppType::CPPTYPE_MESSAGE) || (!n.IsMap() && field->cpp_type() == CppType::CPPTYPE_MESSAGE)) {
+        invalidYAMLType(yaml, fPath, field);
+        continue;
+      }
+      
       switch (field->cpp_type()) {
         // If field is a singular message we need to recurse into this method again
         case CppType::CPPTYPE_MESSAGE: {
           google::protobuf::Message *msg = refl->MutableMessage(m, field);
-          //PackRes(dir, 0, child, msg, depth + 1);
-          RecursivePackBuffer(msg, ..., fPath, depth + 1);
+          RecursivePackBuffer(msg, n, fPath, depth + 1);
           break;
         }
         case CppType::CPPTYPE_INT32: {
-          refl->SetInt32(m, field,);
+          refl->SetInt32(m, field, n.as<int>());
           break;
         }
         case CppType::CPPTYPE_INT64: {
-          refl->SetInt64(m, field,);
+          refl->SetInt64(m, field, n.as<int>());
           break;
         }
         case CppType::CPPTYPE_UINT32: {
-          refl->SetUInt32(m, field, );
+          refl->SetUInt32(m, field, n.as<unsigned>());
           break;
         }
         case CppType::CPPTYPE_UINT64: {
-          refl->SetUInt64(m, field, );
+          refl->SetUInt64(m, field, n.as<unsigned>());
           break;
         }
         case CppType::CPPTYPE_DOUBLE: {
-          refl->SetDouble(m, field,);
+          refl->SetDouble(m, field, n.as<double>());
           break;
         }
         case CppType::CPPTYPE_FLOAT: {
-          refl->SetFloat(m, field,);
+          refl->SetFloat(m, field, n.as<float>());
           break;
         }
         case CppType::CPPTYPE_BOOL: {
-          refl->SetBool(m, field,);
+          refl->SetBool(m, field, n.as<bool>());
           break;
         }
         case CppType::CPPTYPE_ENUM: {
-          refl->SetEnum(m, field, field->enum_type()->FindValueByNumber());
+          refl->SetEnum(m, field, field->enum_type()->FindValueByNumber(n.as<int>()));
           break;
         }
         case CppType::CPPTYPE_STRING: {
-          refl->SetString(m, field, value);
+          refl->SetString(m, field, n.as<std::string>());
           break;
         }
       }
@@ -247,6 +271,8 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m) {
   if (!FileExists(yamlFile)) {
     std::cerr << "Error: missing the resource yaml " << yamlFile << std::endl;
   }
+  
+  return true;
 }
 
 bool RecursiveLoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode* buffer) {
