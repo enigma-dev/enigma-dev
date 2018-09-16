@@ -5,7 +5,7 @@
 TEST(Regression, room_transition_test) {
   if (!TestHarness::windowing_supported()) return;
   TestConfig tc;
-  tc.extensions = "GTest";
+  tc.extensions = "Paths,GTest";
   auto test_harness = LAUNCH_HARNESS_FOR_GAME(tc, "gmx");
   if (!test_harness) FAIL() << "Game could not be run.";
 
