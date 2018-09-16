@@ -39,7 +39,7 @@ namespace enigma_user
   extern int mtrandom_seed(int x);
 } //namespace enigma_user
 
-namespace enigma
+namespace enigma 
 {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
   extern void timeline_system_initialize();
@@ -117,7 +117,7 @@ namespace enigma
     if (enigma_user::room_count)
       enigma::game_start();
     else
-      enigma_user::window_default();
+        enigma_user::window_default();
 
     return 0;
   }
