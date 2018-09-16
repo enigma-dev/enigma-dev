@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "GSmatrix.h"
+#include "GSd3d.h"
+
 namespace enigma {
   bool d3dPerspective;
 }
