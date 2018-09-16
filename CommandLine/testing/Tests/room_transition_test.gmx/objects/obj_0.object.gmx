@@ -30,13 +30,13 @@
     gtest_assert_eq_eps(draw_get_alpha(), 1.0);
 
     draw_set_color(c_red);
-    draw_set_alpha(0.5);
+    draw_set_alpha(0.2);
     room_goto(rm_1);
 } else if (room == rm_1) {
     // ensure that room transition did NOT reset color/alpha
     // GM does not reset ANY render state when changing rooms
     gtest_assert_eq(draw_get_color(), c_red);
-    gtest_assert_eq_eps(draw_get_alpha(), 0.5);
+    gtest_assert_eq_eps(draw_get_alpha(), 0.2);
 }
 </string>
           </argument>
