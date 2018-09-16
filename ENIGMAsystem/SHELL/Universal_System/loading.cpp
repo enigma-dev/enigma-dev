@@ -28,7 +28,6 @@
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/General/GSscreen.h"
 
 #include <time.h>
 #include <stdio.h>
@@ -57,7 +56,6 @@ namespace enigma
     enigma::game_settings_initialize();
 
     graphicssystem_initialize();
-    enigma_user::screen_init();
     audiosystem_initialize();
 
     #if defined(BUILDMODE) && BUILDMODE
@@ -119,7 +117,7 @@ namespace enigma
     if (enigma_user::room_count)
       enigma::game_start();
     else
-        enigma_user::window_default();
+      enigma_user::window_default();
 
     return 0;
   }
