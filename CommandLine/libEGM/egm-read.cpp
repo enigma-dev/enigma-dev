@@ -18,6 +18,7 @@
 #include "egm.h"
 #include "egm-rooms.h"
 #include "filesystem.h"
+#include "Util.h"
 
 #include <yaml-cpp/yaml.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -26,6 +27,7 @@
 #include <fstream>
 #include <functional>
 #include <map>
+#include <ctype.h>
 
 namespace proto = google::protobuf;
 using CppType = proto::FieldDescriptor::CppType;
@@ -73,7 +75,7 @@ buffers::resources::Shader* LoadShader(const fs::path& fPath) {
 }
 
 inline void invalidEDLNaming(const fs::path& res, const fs::path& fName) {
-  std::cerr << "Ignoring improperly named file " << fName << " in " << res.stem() << std::endl;
+  std::cerr << "Warning: Ignoring improperly named file " << fName << " in " << res.stem() << std::endl;
   
   if (res.extension() == ".tln")
     std::cerr << "Supported naming for timelines is step[moment].edl" << std::endl;
@@ -83,6 +85,10 @@ inline void invalidEDLNaming(const fs::path& res, const fs::path& fName) {
     
   else if (res.extension() == ".rm")
     std::cerr << "Supported naming for rooms is create[instance].edl" << std::endl;
+}
+
+inline void yamlErrorPosition(const YAML::Mark errPos) {
+  std::cerr << "YAML position: line: " << errPos.line << " column: " << errPos.column << std::endl << std::endl;
 }
 
 inline void invalidYAMLType(const YAML::Node& yaml, const fs::path& fPath, const google::protobuf::FieldDescriptor *field) {
@@ -99,13 +105,11 @@ inline void invalidYAMLType(const YAML::Node& yaml, const fs::path& fPath, const
   else if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) expectedType = "map";
   else expectedType = "scalar";
   
-  YAML::Mark errPos = yaml.Mark();
-  
-  std::cerr << "Yaml parsing error" << std::endl;
+  std::cerr << "YAML parsing error" << std::endl;
   std::cerr << "Expected a " << expectedType << " but got " << yamlTypes.at(yaml.Type()) << std::endl;
   std::cerr << "File path: " << fPath << std::endl;
-  std::cerr << "Protobuf field: " << field->name();
-  std::cerr << "Yaml position: line: " << errPos.line << " column: " << errPos.column;
+  std::cerr << "Protobuf field: " << field->name() << std::endl;
+  yamlErrorPosition(yaml[field->name()].Mark());
 }
 
 buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
@@ -143,9 +147,246 @@ buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
   return tln;
 }
 
+std::vector<std::string> Tokenize(const std::string& str, const std::string& delimiters) {
+    std::vector<std::string> tokens;
+    std::size_t lastPos = str.find_first_not_of(delimiters, 0);
+    std::size_t pos = str.find_first_of(delimiters, lastPos);
+
+    while (pos != std::string::npos || lastPos != std::string::npos) {
+        tokens.push_back(str.substr(lastPos, pos - lastPos));
+        lastPos = str.find_first_not_of(delimiters, pos);
+        pos = str.find_first_of(delimiters, lastPos);
+    }
+    
+    return tokens;
+}
+
+inline bool isCommandToken(const std::string& token) {
+  return (token.length() == 1 && isalpha(token[0]));
+}
+
+inline void tooManyArgsGiven(char cmd, YAML::Mark errPos, const fs::path& fPath) {
+  std::cerr << "Error: too many args given to the \"" << cmd << "\" command in " 
+  << fPath << " at line: " << errPos.line << " column: " << errPos.column << std::endl;
+}
+
+inline unsigned hex2int(const std::string& hex) {
+  unsigned i;
+  std::stringstream sstream;
+  sstream << std::hex << hex;
+  sstream >> i;
+  return i;
+}
+
+void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, const fs::path& fPath) {
+  std::cout << fPath << std::endl;
+  
+  // split at spaces or comma etc
+  std::vector<std::string> tokens = Tokenize(yaml.as<std::string>(), " ,\n\t");
+  
+  std::vector<buffers::resources::Room_Instance*> instances;
+  buffers::resources::Room_Instance* currInstance = nullptr;
+  
+  char currentCmd = tokens[0][0];
+  for (unsigned i = 1; i < tokens.size();) {
+    
+    std::cout << "token: " << tokens[i] << std::endl;
+    
+    unsigned argCount = 0;
+    while (!isCommandToken(tokens[i])) {
+      /*switch (currentCmd) {
+        case 'I':  // new instance (clear attributes)
+        case 'i': { // new instance (keep attributes)
+          if (argCount == 0) {
+            currInstance = new buffers::resources::Room_Instance();
+            
+            if (currentCmd == 'i') {
+              if (instances.size() > 0) 
+                currInstance->CopyFrom(*instances.back());
+              else {
+                std::cerr << "Error: the \"i\" command requires at least one instance is created using the \"I\" prior to calling it the first time" << std::endl;
+                break;
+              }
+            }
+            
+            instances.push_back(currInstance);
+          } else if (argCount == 1) { // first arg is id
+            currInstance->set_id(std::stoi(tokens[i]));
+          } else {
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          }
+          break;
+        }
+        
+        case 'n': { // instance name
+          if (argCount == 1)
+            currInstance->set_name(tokens[i]);
+          else if (argCount > 1)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'o': { // object type
+          if (argCount == 1)
+            currInstance->set_object_type(tokens[i]);
+          else if (argCount > 1)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'P': // absolute instance position
+        case 'p': { // relative instance position
+          if (argCount == 1)
+            currInstance->set_x(currInstance->x() + std::stod(tokens[i]));
+          else if (argCount == 2)
+            currInstance->set_y(currInstance->y() + std::stod(tokens[i]));
+          else if (argCount == 3)
+            currInstance->set_z(currInstance->z() + std::stod(tokens[i]));
+          else if (argCount > 3)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'X': // absolute x
+        case 'x': { // relative x
+          if (argCount == 1)
+            currInstance->set_x(currInstance->x() + std::stod(tokens[i]));
+          else if (argCount > 1)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'Y': // absolute y
+        case 'y': { // relative y
+          if (argCount == 1)
+            currInstance->set_y(currInstance->y() + std::stod(tokens[i]));
+          else if (argCount > 1)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'Z': // absolute z
+        case 'z': { // relative z
+          if (argCount == 1)
+            currInstance->set_z(currInstance->z() + std::stod(tokens[i]));
+          else if (argCount > 1)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'S': { // scaling
+          if (argCount == 1)
+            currInstance->set_xscale(std::stod(tokens[i]));
+          else if (argCount == 2)
+            currInstance->set_yscale(std::stod(tokens[i]));
+          else if (argCount == 3)
+            currInstance->set_zscale(std::stod(tokens[i]));
+          else if (argCount > 3)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'W': { // x scale
+          if (argCount == 1)
+            currInstance->set_xscale(std::stod(tokens[i]));
+          else if (argCount > 1)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'H': { // y scale
+          if (argCount == 1)
+            currInstance->set_yscale(std::stod(tokens[i]));
+          else if (argCount > 1)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'D': { // z scale
+          if (argCount == 1)
+            currInstance->set_zscale(std::stod(tokens[i]));
+          else if (argCount > 1)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'R': { // rotation
+          if (argCount == 1)
+            currInstance->set_rotation(std::stod(tokens[i]));
+          else if (argCount > 1)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'C': { // color
+          if (argCount == 1)
+            currInstance->set_color(hex2int(tokens[i]));
+          else if (argCount > 1)
+            tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+          
+          break;
+        }
+        
+        case 'L':
+        case 'F':
+        case 'g': {
+          if (argCount == 0)
+            std::cerr << "Error: the \"" << currentCmd << "\" has not been implemented yet" << std::endl;
+            
+          break;
+        }
+        
+        default: {
+          if (argCount == 0)
+            std::cerr << "Error: unsupported command \"" << currentCmd << "\"" << std::endl;
+          
+          break;
+        }
+        
+      }*/
+      argCount++;
+      i++;
+    }
+    currentCmd = tokens[i][0];
+  }
+}
+
+void RepackInstanceLayers(google::protobuf::Message *m, YAML::Node& yaml, const fs::path& fPath) {
+  
+  YAML::Node format = yaml["Format"];
+  if (!format) {
+    std::cerr << "Error: missing \"Format\" key in " << fPath << std::endl;
+    yamlErrorPosition(yaml.Mark());
+    return;
+  }
+
+  YAML::Node data = yaml["Data"];
+  if (!data) {
+    std::cerr << "Error: missing \"Data\" key in " << fPath << std::endl;
+    yamlErrorPosition(yaml.Mark());
+    return;
+  }
+
+  const std::string formatStr = format.as<std::string>();
+  if (formatStr == "svg-d") RepackSVGDInstanceLayer(m, data, fPath);
+  else std::cerr << "Error: unsupported instance layer format \"" << formatStr << "\" in " << fPath << std::endl;
+}
+
 void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const fs::path& fPath, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
+  const std::string ext = fPath.extension();
   
   for (int i = 0; i < desc->field_count(); i++) {
     const google::protobuf::FieldDescriptor *field = desc->field(i);
@@ -153,30 +394,46 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
     if (oneof && refl->HasOneof(*m, oneof)) continue;
     const google::protobuf::FieldOptions opts = field->options();
     
-    if (!yaml[field->name()]) {
-      std::cerr << "Error cannot locate yaml field " << field->name() << " in " << fPath;
+    std::string key = field->name();
+
+    if (ext == ".rm" && depth == 0) {
+      if (key == "instances") key = "instance-layers";
+      if (key == "tiles") continue;//key = "tile-layers";
+      if (key == "code") continue;
+    }
+    
+    YAML::Node node = yaml[key];
+    
+    // YAML field not in properties.yaml 
+    if (!node) {
+      std::cerr << "Warning: could not locate YAML field " << field->name() << " in " << fPath << std::endl;
       continue; 
     }
     
+    const bool isFilePath = opts.GetExtension(buffers::file_path);
+    
     if (field->is_repeated()) {
       
-      if (!yaml.IsSequence()) {
+      if (!node.IsSequence()) {
         invalidYAMLType(yaml, fPath, field);
         continue;
       }
 
       switch (field->cpp_type()) {
         case CppType::CPPTYPE_MESSAGE: {
-          for (auto n : yaml[field->name()]) {
+          for (auto n : node) {
             google::protobuf::Message *msg = refl->AddMessage(m, field);
-            RecursivePackBuffer(msg, n, fPath, depth + 1);
+            if (key == "instance-layers")
+              RepackInstanceLayers(msg, n, fPath);
+            else
+              RecursivePackBuffer(msg, n, fPath, depth + 1);
           }
           break;
         }
 
         case CppType::CPPTYPE_STRING: {
-          for (auto n : yaml[field->name()]) {
-            refl->AddString(m, field, n.as<std::string>());
+          for (auto n : node) {
+            refl->AddString(m, field, (isFilePath) ? fPath.string() + "/" + n.as<std::string>() : n.as<std::string>());
           }
           break;
         }
@@ -189,7 +446,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
       }
     
     } else {  // Now we parse individual proto fields
-      YAML::Node n = yaml[field->name()];
+      YAML::Node n = node;
       
       if ((!n.IsScalar() && field->cpp_type() != CppType::CPPTYPE_MESSAGE) || (!n.IsMap() && field->cpp_type() == CppType::CPPTYPE_MESSAGE)) {
         invalidYAMLType(yaml, fPath, field);
@@ -228,7 +485,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
           break;
         }
         case CppType::CPPTYPE_BOOL: {
-          refl->SetBool(m, field, n.as<bool>());
+          refl->SetBool(m, field, n.as<int>()); // as<bool> throws exception 
           break;
         }
         case CppType::CPPTYPE_ENUM: {
@@ -236,7 +493,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
           break;
         }
         case CppType::CPPTYPE_STRING: {
-          refl->SetString(m, field, n.as<std::string>());
+          refl->SetString(m, field, (isFilePath) ? fPath.string() + "/" + n.as<std::string>() : n.as<std::string>());
           break;
         }
       }
@@ -246,13 +503,15 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
 
 bool LoadResource(const fs::path& fPath, google::protobuf::Message *m) {
   
+  std::string ext = fPath.extension();
+  
   // Scripts and shaders are not folders so we exit here
-  if (fPath.extension() == ".edl") {
+  if (ext == ".edl") {
     m->CopyFrom(*static_cast<google::protobuf::Message*>(LoadScript(fPath)));
     return true;
   }
   
-  if (fPath.extension() == ".shdr") {
+  if (ext == ".shdr") {
     m->CopyFrom(*static_cast<google::protobuf::Message*>(LoadShader(fPath)));
     return true;
   }
@@ -262,14 +521,20 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m) {
   }
   
   // Timelines are folders but do not have a properties.yaml so we exit here
-  if (fPath.extension() == ".tln") {
+  if (ext == ".tln") {
     m->CopyFrom(*static_cast<google::protobuf::Message*>(LoadTimeLine(fPath)));
     return true;
   }
   
   const fs::path yamlFile = fPath.string() + "/properties.yaml";
   if (!FileExists(yamlFile)) {
-    std::cerr << "Error: missing the resource yaml " << yamlFile << std::endl;
+    std::cerr << "Error: missing the resource YAML " << yamlFile << std::endl;
+  }
+  
+  YAML::Node yaml = YAML::LoadFile(yamlFile);
+  
+  if (ext == ".rm") {
+    RecursivePackBuffer(m, yaml, fPath, 0);
   }
   
   return true;
@@ -298,7 +563,7 @@ bool RecursiveLoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode
         LoadResource(fPath.string() + "/" + name + factory->second.ext, factory->second.func(b));
       }
       else 
-        std::cerr << "Unsupported resource type: " << n["type"] << std::endl;
+        std::cerr << "Warning: Unsupported resource type: " << n["type"] << std::endl;
     }
   }
   
