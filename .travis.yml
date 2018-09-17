@@ -149,25 +149,25 @@ matrix:
     - env: PLATFORM=SDL
       before_script: sudo apt-get -y install libsdl2-dev libegl1-mesa-dev libgles2-mesa-dev
     # Widgets
-    - env: PLATFORM=xlib WIDGETS=GTK+
+    - env: WIDGETS=GTK+
       before_script: sudo apt-get -y install libgtk2.0-dev
-    - env: PLATFORM=xlib WIDGETS=TinyFileDialogs
+    - env: WIDGETS=TinyFileDialogs
       before_script: sudo apt-get -y install zenity
     # GME (Note: requires an Audio system)
-    - env: PLATFORM=xlib AUDIO=OpenAL EXTENSIONS="GME"
+    - env: AUDIO=OpenAL EXTENSIONS="GME"
       before_script: sudo apt-get -y install libgme-dev
-    - env: PLATFORM=xlib AUDIO=SFML EXTENSIONS="GME"
+    - env: AUDIO=SFML EXTENSIONS="GME"
       before_script: sudo apt-get -y install libgme-dev
     # Box2D
-    - env: PLATFORM=xlib EXTENSIONS="Box2DPhysics"
+    - env: EXTENSIONS="Box2DPhysics"
       before_script: sudo apt-get -y install libbox2d-dev
-    - env: PLATFORM=xlib EXTENSIONS="StudioPhysics"
+    - env: EXTENSIONS="StudioPhysics"
       before_script: sudo apt-get -y install libbox2d-dev
     # Bullet Physics
-    - env: PLATFORM=xlib EXTENSIONS="BulletDynamics"
+    - env: EXTENSIONS="BulletDynamics"
       before_script: sudo apt-get -y install libbullet-dev
     #FreeType
-    - env: PLATFORM=xlib EXTENSIONS="ttf"
+    - env: EXTENSIONS="ttf"
       before_script: sudo apt-get -y install libfreetype6-dev
     # OSX
     - { os: osx, osx_image: xcode9.2,
