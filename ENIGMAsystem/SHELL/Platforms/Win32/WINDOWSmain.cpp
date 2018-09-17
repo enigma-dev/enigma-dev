@@ -273,13 +273,13 @@ int handleEvents() {
   if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
     if (msg.message == WM_QUIT) {
       enigma::game_return = msg.wParam;
-      return 1;
+      enigma::game_isending = true;
     } else {
       TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
 
-    return 0;
+    return 1;
   }
 
   return 0;
