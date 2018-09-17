@@ -76,7 +76,7 @@ int enigma_main(int argc, char** argv) {
     update_mouse_variables();
 
     if (updateTimer() != 0) continue;
-    if (handleEvents() != 0) continue;
+    if (handleEvents() != 0) break;
     if (gameWait() != 0) continue;
 
     // if any extensions need updated, update them now
