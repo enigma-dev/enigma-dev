@@ -187,25 +187,28 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
   std::vector<buffers::resources::Room_Instance*> instances;
   buffers::resources::Room_Instance* currInstance = nullptr;
 
+  std::vector<std::pair<char, std::vector<std::string> > > arguments;
+
   char currentCmd = '\0';
-  for (unsigned i = 0; i < tokens.size();) {
-    currentCmd = tokens[i][0];
-    std::string commandToken = std::string(tokens[i]);
-    std::cout << "command token: " << commandToken << std::endl;
-    if (!isCommandToken(commandToken)) {
-      i++; continue; // can't do anything with arguments by themselves
-    }
-    i++;
+  auto cmdIt = arguments.end();
+  for (unsigned i = 0; i < tokens.size(); ++i) {
     std::string token = std::string(tokens[i]);
+    std::cout << "token: " << token << std::endl;
     if (isCommandToken(token)) {
-      continue; // the command must not have any arguments
+      currentCmd = tokens[i][0];
+      arguments.emplace_back(currentCmd, std::vector<std::string>());
+      cmdIt = arguments.end() - 1;
+    } else if (cmdIt != arguments.end()) {
+      (*cmdIt).second.emplace_back(token);
     }
-    std::vector<std::string> arguments;
-    while (!isCommandToken(token)) {
-      std::cout << "argument token: " << token << std::endl;
-      arguments.emplace_back(token);
-      i++;
-      token = std::string(tokens[i]);
+  }
+
+  for (auto cmd : arguments) {
+    //cmd.first is the currentCmd
+    //cmd.second is a vector<string> for the arguments of each command
+    std::cout << "command: " << cmd.first << std::endl;
+    for (size_t i = 0; i < cmd.second.size(); ++i) {
+      std::cout << "argument " << i << ": " << cmd.second[i] << std::endl;
     }
 
     /*switch (currentCmd) {
