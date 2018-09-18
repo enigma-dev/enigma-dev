@@ -196,6 +196,10 @@ inline unsigned hex2int(const std::string& hex) {
   return i;
 }
 
+inline std::string escape_hex(const std::string &hex) {
+  return string_replace_all(hex, "#", "0x");
+}
+
 struct Command {
   size_t minArgs = 0;
   std::vector<std::string> field_names;
@@ -226,8 +230,7 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
   }
 
   std::map<char, Command> parameters = {
-    { 'I', { 0, {}                             } },
-    { 'i', { 1, {"id"}                         } },
+    { 'i', { 0, {"id"}                         } },
     { 'n', { 1, {"name"}                       } },
     { 'o', { 1, {"object_type"}                } },
     { 'p', { 1, {"x", "y", "z"}                } },
@@ -246,7 +249,7 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
     char cmd = cmdPair.first;
     std::vector<std::string> args = cmdPair.second;
 
-    auto pit = parameters.find(cmd);
+    auto pit = parameters.find(tolower(cmd));
     if (pit == parameters.end()) {
       std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
       continue;
@@ -286,6 +289,18 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
         const google::protobuf::Descriptor *desc = currInstance->GetDescriptor();
         const google::protobuf::Reflection *refl = currInstance->GetReflection();
         const google::protobuf::FieldDescriptor *field = desc->FindFieldByName(field_name);
+
+        // allow all integer parameters to have hexadecimal formatted arguments
+        switch (field->cpp_type()) {
+          case CppType::CPPTYPE_INT32:
+          case CppType::CPPTYPE_INT64:
+          case CppType::CPPTYPE_UINT32:
+          case CppType::CPPTYPE_UINT64:
+            arg = escape_hex(arg);
+            break;
+          default:
+            break;
+        };
 
         switch (field->cpp_type()) {
           case CppType::CPPTYPE_INT32: {
