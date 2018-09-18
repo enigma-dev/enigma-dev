@@ -159,6 +159,28 @@ void CenterWindowToMonitor(HWND hwnd, UINT flags)
 }
 /* < / Used by GetDirectoryProc, InputBoxProc, and GetColorProc > */
 
+/* < Used by GetDirectoryProc and InputBoxProc > */
+int ScaleToDpiPercentX(double PixelX)
+{
+  HDC screen = GetDC(NULL);
+  double hPixelsPerInch = GetDeviceCaps(screen, LOGPIXELSX);
+  double result = PixelX * (hPixelsPerInch / 96);
+  ReleaseDC(NULL, screen);
+
+  return (int)result;
+}
+
+int ScaleToDpiPercentY(double PixelY)
+{
+  HDC screen = GetDC(NULL);
+  double vPixelsPerInch = GetDeviceCaps(screen, LOGPIXELSY);
+  double result = PixelY * (vPixelsPerInch / 96);
+  ReleaseDC(NULL, screen);
+
+  return (int)result;
+}
+/* < / Used by GetDirectoryProc and InputBoxProc > */
+
 /* < Used by InputBoxProc > */
 void ClientResize(HWND hWnd, int nWidth, int nHeight) {
   RECT rcClient, rcWind;
@@ -181,15 +203,15 @@ LRESULT CALLBACK InputBoxProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
   case WM_INITDIALOG: {
       SetWindowLongPtr(hWndDlg, GWL_EXSTYLE, GetWindowLongPtr(hWndDlg, GWL_EXSTYLE) | WS_EX_DLGMODALFRAME);
       SetWindowPos(hWndDlg, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
-      ClientResize(hWndDlg, 357, 128);
+      ClientResize(hWndDlg, ScaleToDpiPercentX(357), ScaleToDpiPercentY(128));
       RECT rect;
-			GetWindowRect(hWndDlg, &rect);
-			MoveWindow(hWndDlg, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
-			CenterWindowToMonitor(hWndDlg, 0);
-      MoveWindow(GetDlgItem(hWndDlg, IDOK), 272, 10, 75, 23, TRUE);
-      MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), 272, 39, 75, 23, TRUE);
-      MoveWindow(GetDlgItem(hWndDlg, IDC_EDIT), 11, 94, 336, 23, TRUE);
-      MoveWindow(GetDlgItem(hWndDlg, IDC_PROMPT), 11, 11, 252, 66, TRUE);
+      GetWindowRect(hWndDlg, &rect);
+      MoveWindow(hWndDlg, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+      CenterWindowToMonitor(hWndDlg, 0);
+      MoveWindow(GetDlgItem(hWndDlg, IDOK), ScaleToDpiPercentX(272), ScaleToDpiPercentY(10), ScaleToDpiPercentX(75), ScaleToDpiPercentY(23), TRUE);
+      MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), ScaleToDpiPercentX(272), ScaleToDpiPercentY(39), ScaleToDpiPercentX(75), ScaleToDpiPercentY(23), TRUE);
+      MoveWindow(GetDlgItem(hWndDlg, IDC_EDIT), ScaleToDpiPercentX(11), ScaleToDpiPercentY(94), ScaleToDpiPercentX(336), ScaleToDpiPercentY(23), TRUE);
+      MoveWindow(GetDlgItem(hWndDlg, IDC_PROMPT), ScaleToDpiPercentX(11), ScaleToDpiPercentY(11), ScaleToDpiPercentX(252), ScaleToDpiPercentY(66), TRUE);
       SetDlgItemTextW(hWndDlg, IDC_PROMPT, wstrPromptStr);
       SetDlgItemTextW(hWndDlg, IDC_EDIT, wstrTextEntry);
       WCHAR wstrWindowCaption[MAX_PATH + 1];
@@ -203,6 +225,17 @@ LRESULT CALLBACK InputBoxProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
       return TRUE;
     }
   break;
+
+  case WM_DPICHANGED: {
+    ClientResize(hWndDlg, ScaleToDpiPercentX(357), ScaleToDpiPercentY(128));
+    RECT rect;
+    GetWindowRect(hWndDlg, &rect);
+    MoveWindow(hWndDlg, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+    MoveWindow(GetDlgItem(hWndDlg, IDOK), ScaleToDpiPercentX(272), ScaleToDpiPercentY(10), ScaleToDpiPercentX(75), ScaleToDpiPercentY(23), TRUE);
+    MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), ScaleToDpiPercentX(272), ScaleToDpiPercentY(39), ScaleToDpiPercentX(75), ScaleToDpiPercentY(23), TRUE);
+    MoveWindow(GetDlgItem(hWndDlg, IDC_EDIT), ScaleToDpiPercentX(11), ScaleToDpiPercentY(94), ScaleToDpiPercentX(336), ScaleToDpiPercentY(23), TRUE);
+    MoveWindow(GetDlgItem(hWndDlg, IDC_PROMPT), ScaleToDpiPercentX(11), ScaleToDpiPercentY(11), ScaleToDpiPercentX(252), ScaleToDpiPercentY(66), TRUE);
+  }
 
   case WM_COMMAND:
     switch (wParam) {
@@ -312,22 +345,22 @@ tstring ActualPath;
 UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {
   case WM_INITDIALOG: {
-      ClientResize(hWnd, 424, 255);
+      ClientResize(hWnd, ScaleToDpiPercentX(424), ScaleToDpiPercentY(255));
       RECT rect;
-		  GetWindowRect(hWnd, &rect);
-		  MoveWindow(hWnd, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+      GetWindowRect(hWnd, &rect);
+      MoveWindow(hWnd, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
       CenterWindowToMonitor(hWnd, MONITOR_CENTER);
-      MoveWindow(GetDlgItem(hWnd, IDOK), 256, 224, 77, 27, TRUE);
-      MoveWindow(GetDlgItem(hWnd, IDCANCEL), 340, 224, 77, 27, TRUE);
-      MoveWindow(GetDlgItem(hWnd, stc3), 232, 56, 72, 16, TRUE);
-      MoveWindow(GetDlgItem(hWnd, IDC_LABEL), 8, 56, 72, 16, TRUE);
-      MoveWindow(GetDlgItem(hWnd, stc2), 8, 8, 93, 16, TRUE);
-      MoveWindow(GetDlgItem(hWnd, stc4), 232, 176, 50, 16, TRUE);
-      MoveWindow(GetDlgItem(hWnd, stc1), 8, 24, 409 * 100, 16, TRUE);
-      MoveWindow(GetDlgItem(hWnd, IDC_DNAME), 8, 24, 409, 16, TRUE);
-      MoveWindow(GetDlgItem(hWnd, lst1), 232, 72, 185, 93, TRUE);
-      MoveWindow(GetDlgItem(hWnd, lst2), 8, 72, 213, 123, TRUE);
-      MoveWindow(GetDlgItem(hWnd, cmb2), 232, 192, 185, 19, TRUE);
+      MoveWindow(GetDlgItem(hWnd, IDOK), ScaleToDpiPercentX(256), ScaleToDpiPercentY(224), ScaleToDpiPercentX(77), ScaleToDpiPercentY(27), TRUE);
+      MoveWindow(GetDlgItem(hWnd, IDCANCEL), ScaleToDpiPercentX(340), ScaleToDpiPercentY(224), ScaleToDpiPercentX(77), ScaleToDpiPercentY(27), TRUE);
+      MoveWindow(GetDlgItem(hWnd, stc3), ScaleToDpiPercentX(232), ScaleToDpiPercentY(56), ScaleToDpiPercentX(72), ScaleToDpiPercentY(16), TRUE);
+      MoveWindow(GetDlgItem(hWnd, IDC_LABEL), ScaleToDpiPercentX(8), ScaleToDpiPercentY(56), ScaleToDpiPercentX(72), ScaleToDpiPercentY(16), TRUE);
+      MoveWindow(GetDlgItem(hWnd, stc2), ScaleToDpiPercentX(8), ScaleToDpiPercentY(8), ScaleToDpiPercentX(93), ScaleToDpiPercentY(16), TRUE);
+      MoveWindow(GetDlgItem(hWnd, stc4), ScaleToDpiPercentX(232), ScaleToDpiPercentY(176), ScaleToDpiPercentX(50), ScaleToDpiPercentY(16), TRUE);
+      MoveWindow(GetDlgItem(hWnd, stc1), ScaleToDpiPercentX(8), ScaleToDpiPercentY(24), ScaleToDpiPercentX(409 * 100), ScaleToDpiPercentY(16), TRUE);
+      MoveWindow(GetDlgItem(hWnd, IDC_DNAME), ScaleToDpiPercentX(8), ScaleToDpiPercentY(24), ScaleToDpiPercentX(409), ScaleToDpiPercentY(16), TRUE);
+      MoveWindow(GetDlgItem(hWnd, lst1), ScaleToDpiPercentX(232), ScaleToDpiPercentY(72), ScaleToDpiPercentX(185), ScaleToDpiPercentY(93), TRUE);
+      MoveWindow(GetDlgItem(hWnd, lst2), ScaleToDpiPercentX(8), ScaleToDpiPercentY(72), ScaleToDpiPercentX(213), ScaleToDpiPercentY(123), TRUE);
+      MoveWindow(GetDlgItem(hWnd, cmb2), ScaleToDpiPercentX(232), ScaleToDpiPercentY(192), ScaleToDpiPercentX(185), ScaleToDpiPercentY(332), TRUE);
       ShowWindow(GetDlgItem(hWnd, stc1), SW_HIDE);
       DlgDirListW(hWnd, wstr_dname, lst1, stc1, DDL_ARCHIVE | DDL_READWRITE | DDL_READONLY);
       GetDlgItemTextW(hWnd, stc1, wstr_stc1, MAX_PATH + 1);
@@ -338,6 +371,24 @@ UINT APIENTRY GetDirectoryProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       PostMessageW(hWnd, WM_SETFOCUS, 0, 0);
     }
   break;
+
+  case WM_DPICHANGED: {
+    ClientResize(hWnd, ScaleToDpiPercentX(424), ScaleToDpiPercentY(255));
+    RECT rect;
+    GetWindowRect(hWnd, &rect);
+    MoveWindow(hWnd, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+    MoveWindow(GetDlgItem(hWnd, IDOK), ScaleToDpiPercentX(256), ScaleToDpiPercentY(224), ScaleToDpiPercentX(77), ScaleToDpiPercentY(27), TRUE);
+    MoveWindow(GetDlgItem(hWnd, IDCANCEL), ScaleToDpiPercentX(340), ScaleToDpiPercentY(224), ScaleToDpiPercentX(77), ScaleToDpiPercentY(27), TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc3), ScaleToDpiPercentX(232), ScaleToDpiPercentY(56), ScaleToDpiPercentX(72), ScaleToDpiPercentY(16), TRUE);
+    MoveWindow(GetDlgItem(hWnd, IDC_LABEL), ScaleToDpiPercentX(8), ScaleToDpiPercentY(56), ScaleToDpiPercentX(72), ScaleToDpiPercentY(16), TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc2), ScaleToDpiPercentX(8), ScaleToDpiPercentY(8), ScaleToDpiPercentX(93), ScaleToDpiPercentY(16), TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc4), ScaleToDpiPercentX(232), ScaleToDpiPercentY(176), ScaleToDpiPercentX(50), ScaleToDpiPercentY(16), TRUE);
+    MoveWindow(GetDlgItem(hWnd, stc1), ScaleToDpiPercentX(8), ScaleToDpiPercentY(24), ScaleToDpiPercentX(409 * 100), ScaleToDpiPercentY(16), TRUE);
+    MoveWindow(GetDlgItem(hWnd, IDC_DNAME), ScaleToDpiPercentX(8), ScaleToDpiPercentY(24), ScaleToDpiPercentX(409), ScaleToDpiPercentY(16), TRUE);
+    MoveWindow(GetDlgItem(hWnd, lst1), ScaleToDpiPercentX(232), ScaleToDpiPercentY(72), ScaleToDpiPercentX(185), ScaleToDpiPercentY(93), TRUE);
+    MoveWindow(GetDlgItem(hWnd, lst2), ScaleToDpiPercentX(8), ScaleToDpiPercentY(72), ScaleToDpiPercentX(213), ScaleToDpiPercentY(123), TRUE);
+    MoveWindow(GetDlgItem(hWnd, cmb2), ScaleToDpiPercentX(232), ScaleToDpiPercentY(192), ScaleToDpiPercentX(185), ScaleToDpiPercentY(332), TRUE);
+  }
 
   case WM_CREATE: {
       SetWindowLongPtr(hWnd, GWL_STYLE, GetWindowLongPtr(hWnd, GWL_STYLE) | DS_FIXEDSYS);
@@ -392,10 +443,7 @@ static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM 
 
 UINT_PTR CALLBACK GetColorProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) {
   if (uiMsg == WM_INITDIALOG) {
-    RECT rect;
-		GetWindowRect(hdlg, &rect);
-		MoveWindow(hdlg, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
-		CenterWindowToMonitor(hdlg, 0);
+    CenterWindowToMonitor(hdlg, 0);
     tstring tstr_cap = widen(gs_cap);
     SetWindowTextW(hdlg, tstr_cap.c_str());
     PostMessageW(hdlg, WM_SETFOCUS, 0, 0);
