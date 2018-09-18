@@ -260,9 +260,12 @@ LRESULT CALLBACK InputBoxProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 
 static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   if (uMsg == WM_INITDIALOG) {
-    SetWindowText(hwndDlg, gs_cap.c_str());
-    SetDlgItemText(hwndDlg, 14, gs_username.c_str());
-    SetDlgItemText(hwndDlg, 15, gs_password.c_str());
+    tstring tstr_cap = widen(gs_cap);
+    tstring tstr_usr = widen(gs_username);
+    tstring tstr_pwd = widen(gs_password);
+    SetWindowTextW(hwndDlg, tstr_cap.c_str());
+    SetDlgItemTextW(hwndDlg, 14, tstr_usr.c_str());
+    SetDlgItemTextW(hwndDlg, 15, tstr_pwd.c_str());
   }
 
   if (uMsg == WM_COMMAND) {
@@ -272,10 +275,14 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
       EndDialog(hwndDlg, 1);
     } else if (wParam == 10) {
       char strget[1024];
-      GetDlgItemText(hwndDlg, 14, strget, 1024);
-      gs_str_submitted = strget;
-      GetDlgItemText(hwndDlg, 15, strget, 1024);
-      gs_str_submitted += string(1, 0) + string(strget);
+      tstring tstr_strget = widen(strget);
+      GetDlgItemTextW(hwndDlg, 14, tstr_strget, 1024);
+      static string str_strget;
+      str_strget = shorten(tstr_strget.c_str());
+      gs_str_submitted = str_strget;
+      GetDlgItemTextW(hwndDlg, 15, tstr_strget, 1024);
+      str_strget = shorten(tstr_strget.c_str());
+      gs_str_submitted += string(1, 0) + string(str_strget);
       gs_form_canceled = 0;
       EndDialog(hwndDlg, 2);
     }
