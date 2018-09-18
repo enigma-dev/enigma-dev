@@ -239,6 +239,7 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
     { 'h', { 1, {"yscale"}                     } },
     { 'd', { 1, {"zscale"}                     } },
     { 'r', { 1, {"rotation"}                   } },
+    { 'c', { 1, {"color"}                      } },
   };
 
   for (auto cmdPair : arguments) {
@@ -273,25 +274,6 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
 
         break;
       }
-      /*
-
-      case 'C': { // color
-        if (argCount == 1)
-          NOTE: stoi already handles hexadecimal strings of various bases
-          we don't actually need hex2int
-          currInstance->set_color(hex2int(tokens[i]));
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
-
-        break;
-      }
-
-      case 'L':
-      case 'F':
-      case 'g': {
-        std::cerr << "Error: the \"" << currentCmd << "\" has not been implemented yet" << std::endl;
-        break;
-      }*/
     }
 
     cmd = tolower(cmd); // NOTE: for now, all cmds are relative
