@@ -349,13 +349,16 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
             break;
           }
           case CppType::CPPTYPE_BOOL: {
-
+            refl->SetBool(currInstance, field, (std::stof(arg) != 0));
+            break;
           }
           case CppType::CPPTYPE_ENUM: {
             refl->SetEnum(currInstance, field, field->enum_type()->FindValueByNumber(std::stol(arg)));
             break;
           }
           case CppType::CPPTYPE_STRING: {
+            refl->SetString(currInstance, field, arg);
+            break;
           }
           default:
             std::cerr << "Error: unsupported instance field type " << field->cpp_type() << std::endl;
