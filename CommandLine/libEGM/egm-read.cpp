@@ -183,17 +183,27 @@ inline std::string unquote(const std::string& quotedStr) {
   std::string str = quotedStr;
   if (str.length() >= 2 && str.front() == '"' && str.back() == '"')
     str = str.substr(1, str.length()-2);
-    
+
   return str;
 }
 
 inline unsigned hex2int(const std::string& hex) {
+  //TODO: this probably isn't needed because stoi parsers different bases just fine for us
   unsigned i;
   std::stringstream sstream;
   sstream << std::hex << hex;
   sstream >> i;
   return i;
 }
+
+inline std::string escape_hex(const std::string &hex) {
+  return string_replace_all(hex, "#", "0x");
+}
+
+struct Command {
+  size_t minArgs = 0;
+  std::vector<std::string> field_names;
+};
 
 void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, const fs::path& fPath) {
   std::cout << fPath << std::endl;
@@ -218,219 +228,84 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
       (*cmdIt).second.emplace_back(token);
     }
   }
-  
+
+  std::map<char, Command> parameters = {
+    { 'i', { 0, {"id"}                         } },
+    { 'n', { 1, {"name"}                       } },
+    { 'o', { 1, {"object_type"}                } },
+    { 'p', { 1, {"x", "y", "z"}                } },
+    { 'x', { 1, {"x"}                          } },
+    { 'y', { 1, {"y"}                          } },
+    { 'z', { 1, {"z"}                          } },
+    { 's', { 1, {"xscale", "yscale", "zscale"} } },
+    { 'w', { 1, {"xscale"}                     } },
+    { 'h', { 1, {"yscale"}                     } },
+    { 'd', { 1, {"zscale"}                     } },
+    { 'r', { 1, {"rotation"}                   } },
+    { 'c', { 1, {"color"}                      } },
+  };
+
   for (auto cmdPair : arguments) {
     char cmd = cmdPair.first;
     std::vector<std::string> args = cmdPair.second;
-    
+
+    auto pit = parameters.find(tolower(cmd));
+    if (pit == parameters.end()) {
+      std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
+      continue;
+    }
+    auto sig = (*pit).second;
+    auto pars = sig.field_names;
+
+    if (args.size() < sig.minArgs) {
+      tooFewArgsGiven(cmd, sig.minArgs, yaml.Mark(), fPath);
+      continue;
+    }
+
     switch (cmd) {
       case 'I':  // new instance (clear attributes)
       case 'i': { // new instance (keep attributes)
-        
         currInstance = new buffers::resources::Room_Instance();
         instances.push_back(currInstance);
-        
+
         if (cmd == 'i') {
           if (instances.size() > 0)
             currInstance->CopyFrom(*instances.back());
-          else {
+          else
             std::cerr << "Error: \"i\" called but there exists no previous instance to copy the attributes from" << std::endl;
-          }
-        }
-        
-        unsigned maxArgs = 1;
-        for (unsigned argNum=0; argNum < args.size(); argNum++) {
-          if (argNum == 0) currInstance->set_id(std::stoi(args[argNum]));
-          else tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
-        } 
-        
-        break;
-      }
-
-      case 'n': { // instance name
-        unsigned minArgs = 1;
-        unsigned maxArgs = 1; 
-        if (args.size() < minArgs) {
-          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
-          break;
-        }
-        
-        currInstance->set_name(unquote(args[0]));
-        
-        for (unsigned argNum=minArgs; argNum < args.size(); argNum++)
-          tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
-
-        break;
-      }
-
-      case 'o': { // object type
-        unsigned minArgs = 1;
-        unsigned maxArgs = 1; 
-        if (args.size() < minArgs) {
-          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
-          break;
-        }
-        
-        currInstance->set_object_type(unquote(args[0]));
-        
-        for (unsigned argNum=minArgs; argNum < args.size(); argNum++)
-          tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
-
-        break;
-      }
-
-      case 'P': // absolute instance position
-      case 'p': { // relative instance position
-        unsigned minArgs = 1;
-        unsigned maxArgs = 3; 
-        if (args.size() < minArgs) {
-          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
-          break;
-        }
-        
-        for (unsigned argNum=0; argNum < args.size(); argNum++) {
-          if (argNum == 0)
-            currInstance->set_x(currInstance->x() + std::stod(args[argNum]));
-          else if (argNum == 1)
-            currInstance->set_y(currInstance->y() + std::stod(args[argNum]));
-          else if (argNum == 2)
-            currInstance->set_z(currInstance->z() + std::stod(args[argNum]));
-          else
-            tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
         }
 
         break;
       }
+    }
 
-      case 'X': // absolute x
-      case 'x': { // relative x
-        unsigned minArgs = 1;
-        unsigned maxArgs = 1; 
-        if (args.size() < minArgs) {
-          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
-          break;
-        }
-        
-        currInstance->set_x(currInstance->x() + std::stod(args[0]));
-        
-        for (unsigned argNum=minArgs; argNum < args.size(); argNum++)
-          tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
+    cmd = tolower(cmd); // NOTE: for now, all cmds are relative
 
-        break;
+    for (size_t i = 0; i < args.size(); ++i) {
+      if (i < pars.size()) {
+        std::string field_name = pars[i];
+        std::string arg = args[i];
+
+        const google::protobuf::Descriptor *desc = currInstance->GetDescriptor();
+        const google::protobuf::Reflection *refl = currInstance->GetReflection();
+        const google::protobuf::FieldDescriptor *field = desc->FindFieldByName(field_name);
+
+        // allow all integer parameters to have hexadecimal formatted arguments
+        switch (field->cpp_type()) {
+          case CppType::CPPTYPE_INT32:
+          case CppType::CPPTYPE_INT64:
+          case CppType::CPPTYPE_UINT32:
+          case CppType::CPPTYPE_UINT64:
+            arg = escape_hex(arg);
+            break;
+          default:
+            break;
+        };
+
+        SetProtoField(refl, currInstance, field, arg, true);
+      } else {
+        tooManyArgsGiven(cmd, pars.size(), args, i, yaml.Mark(), fPath);
       }
-
-      case 'Y': // absolute y
-      case 'y': { // relative y
-        unsigned minArgs = 1;
-        unsigned maxArgs = 1; 
-        if (args.size() < minArgs) {
-          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
-          break;
-        }
-        
-        currInstance->set_y(currInstance->y() + std::stod(args[0]));
-        
-        for (unsigned argNum=minArgs; argNum < args.size(); argNum++)
-          tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
-
-        break;
-      }
-
-      case 'Z': // absolute z
-      case 'z': { // relative z
-        unsigned minArgs = 1;
-        unsigned maxArgs = 1; 
-        if (args.size() < minArgs) {
-          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
-          break;
-        }
-        
-        currInstance->set_z(currInstance->z() + std::stod(args[0]));
-        
-        for (unsigned argNum=minArgs; argNum < args.size(); argNum++)
-          tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
-
-        break;
-      }
-
-      case 'S': { // scaling
-        unsigned minArgs = 1;
-        unsigned maxArgs = 3; 
-        if (args.size() < minArgs) {
-          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
-          break;
-        }
-        
-        for (unsigned argNum=0; argNum < args.size(); argNum++) {
-          if (argNum == 0)
-            currInstance->set_xscale(std::stod(args[argNum]));
-          else if (argNum == 1)
-            currInstance->set_yscale(std::stod(args[argNum]));
-          else if (argNum == 2)
-            currInstance->set_xscale(std::stod(args[argNum]));
-          else
-            tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
-        }
-
-        break;
-      }
-
-      /*case 'W': { // x scale
-        if (argCount == 1)
-          currInstance->set_xscale(std::stod(tokens[i]));
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
-
-        break;
-      }
-
-      case 'H': { // y scale
-        if (argCount == 1)
-          currInstance->set_yscale(std::stod(tokens[i]));
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
-
-        break;
-      }
-
-      case 'D': { // z scale
-        if (argCount == 1)
-          currInstance->set_zscale(std::stod(tokens[i]));
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
-
-        break;
-      }
-
-      case 'R': { // rotation
-        if (argCount == 1)
-          currInstance->set_rotation(std::stod(tokens[i]));
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
-
-        break;
-      }
-
-      case 'C': { // color
-        if (argCount == 1)
-          currInstance->set_color(hex2int(tokens[i]));
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
-
-        break;
-      }
-
-      case 'L':
-      case 'F':
-      case 'g': {
-        std::cerr << "Error: the \"" << currentCmd << "\" has not been implemented yet" << std::endl;
-        break;
-      }
-
-      default: {
-        std::cerr << "Error: unsupported command \"" << currentCmd << "\"" << std::endl;
-        break;
-      }*/
     }
   }
 }
@@ -533,40 +408,8 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
           RecursivePackBuffer(msg, n, fPath.string(), depth + 1);
           break;
         }
-        case CppType::CPPTYPE_INT32: {
-          refl->SetInt32(m, field, n.as<int>());
-          break;
-        }
-        case CppType::CPPTYPE_INT64: {
-          refl->SetInt64(m, field, n.as<int>());
-          break;
-        }
-        case CppType::CPPTYPE_UINT32: {
-          refl->SetUInt32(m, field, n.as<unsigned>());
-          break;
-        }
-        case CppType::CPPTYPE_UINT64: {
-          refl->SetUInt64(m, field, n.as<unsigned>());
-          break;
-        }
-        case CppType::CPPTYPE_DOUBLE: {
-          refl->SetDouble(m, field, n.as<double>());
-          break;
-        }
-        case CppType::CPPTYPE_FLOAT: {
-          refl->SetFloat(m, field, n.as<float>());
-          break;
-        }
-        case CppType::CPPTYPE_BOOL: {
-          refl->SetBool(m, field, n.as<int>()); // as<bool> throws exception
-          break;
-        }
-        case CppType::CPPTYPE_ENUM: {
-          refl->SetEnum(m, field, field->enum_type()->FindValueByNumber(n.as<int>()));
-          break;
-        }
-        case CppType::CPPTYPE_STRING: {
-          refl->SetString(m, field, (isFilePath) ? fPath.string() + "/" + n.as<std::string>() : n.as<std::string>());
+        default: {
+          SetProtoField(refl, m, field, (isFilePath) ? fPath.string() + "/" + n.as<std::string>() : n.as<std::string>());
           break;
         }
       }
