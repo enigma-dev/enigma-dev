@@ -286,11 +286,16 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 
 static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   if (uMsg == WM_INITDIALOG) {
-    SetWindowText(hwndDlg,gs_cap.c_str());
-    SetDlgItemText(hwndDlg, 10, gs_message.c_str());
-    SetDlgItemText(hwndDlg, 11, gs_but1.c_str());
-    SetDlgItemText(hwndDlg, 12, gs_but2.c_str());
-    SetDlgItemText(hwndDlg, 13, gs_but3.c_str());
+    tstring tstr_cap = widen(gs_cap);
+    tstring tstr_msg = widen(gs_message);
+    tstring tstr_but1 = widen(gs_but1);
+    tstring tstr_but2 = widen(gs_but2);
+    tstring tstr_but3 = widen(gs_but1);
+    SetWindowTextW(hwndDlg, tstr_cap.c_str());
+    SetDlgItemTextW(hwndDlg, 10, tstr_msg.c_str());
+    SetDlgItemTextW(hwndDlg, 11, tstr_but1.c_str());
+    SetDlgItemTextW(hwndDlg, 12, tstr_but2.c_str());
+    SetDlgItemTextW(hwndDlg, 13, tstr_but3.c_str());
   }
 
   if (uMsg == WM_COMMAND) {
