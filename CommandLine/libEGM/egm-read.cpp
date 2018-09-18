@@ -165,9 +165,26 @@ inline bool isCommandToken(const std::string& token) {
   return (token.length() == 1 && isalpha(token[0]));
 }
 
-inline void tooManyArgsGiven(char cmd, YAML::Mark errPos, const fs::path& fPath) {
-  std::cerr << "Error: too many args given to the \"" << cmd << "\" command in "
-  << fPath << " at line: " << errPos.line << " column: " << errPos.column << std::endl;
+inline void tooManyArgsGiven(char cmd, unsigned maxArgs, const std::vector<std::string>& args, unsigned argNum, const YAML::Mark& errPos, const fs::path& fPath) {
+  std::cerr << std::endl << "Error: too many arguments given to the \"" << cmd << "\" command" << std::endl;
+  std::cerr << "maximum supported arguments is: " << maxArgs << std::endl;
+  std::cerr << "argument " << argNum << ": " << args[argNum] << " will be ignored" << std::endl;
+  std::cerr << fPath << " line: " << errPos.line << " column: " << errPos.column << std::endl << std::endl;
+}
+
+inline void tooFewArgsGiven(char cmd, unsigned minArgs, const YAML::Mark& errPos, const fs::path& fPath) {
+  std::cerr << std::endl << "Error: too few arguments given to the \"" << cmd << "\" command" << std::endl;
+  std::cerr << "minimum required arguments is: " << minArgs << std::endl;
+  std::cerr << "the command will be ignored" << std::endl;
+  std::cerr << fPath << " line: " << errPos.line << " column: " << errPos.column << std::endl << std::endl;
+}
+
+inline std::string unquote(const std::string& quotedStr) {
+  std::string str = quotedStr;
+  if (str.length() >= 2 && str.front() == '"' && str.back() == '"')
+    str = str.substr(1, str.length()-2);
+    
+  return str;
 }
 
 inline unsigned hex2int(const std::string& hex) {
@@ -193,124 +210,172 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
   auto cmdIt = arguments.end();
   for (unsigned i = 0; i < tokens.size(); ++i) {
     std::string token = std::string(tokens[i]);
-    std::cout << "token: " << token << std::endl;
     if (isCommandToken(token)) {
-      currentCmd = tokens[i][0];
+      currentCmd = token[0];
       arguments.emplace_back(currentCmd, std::vector<std::string>());
       cmdIt = arguments.end() - 1;
     } else if (cmdIt != arguments.end()) {
       (*cmdIt).second.emplace_back(token);
     }
   }
-
-  for (auto cmd : arguments) {
-    //cmd.first is the currentCmd
-    //cmd.second is a vector<string> for the arguments of each command
-    std::cout << "command: " << cmd.first << std::endl;
-    for (size_t i = 0; i < cmd.second.size(); ++i) {
-      std::cout << "argument " << i << ": " << cmd.second[i] << std::endl;
-    }
-
-    /*switch (currentCmd) {
+  
+  for (auto cmdPair : arguments) {
+    char cmd = cmdPair.first;
+    std::vector<std::string> args = cmdPair.second;
+    
+    switch (cmd) {
       case 'I':  // new instance (clear attributes)
       case 'i': { // new instance (keep attributes)
-        if (argCount == 0) {
-          currInstance = new buffers::resources::Room_Instance();
-
-          if (currentCmd == 'i') {
-            if (instances.size() > 0)
-              currInstance->CopyFrom(*instances.back());
-            else {
-              std::cerr << "Error: the \"i\" command requires at least one instance is created using the \"I\" prior to calling it the first time" << std::endl;
-              break;
-            }
+        
+        currInstance = new buffers::resources::Room_Instance();
+        instances.push_back(currInstance);
+        
+        if (cmd == 'i') {
+          if (instances.size() > 0)
+            currInstance->CopyFrom(*instances.back());
+          else {
+            std::cerr << "Error: \"i\" called but there exists no previous instance to copy the attributes from" << std::endl;
           }
-
-          instances.push_back(currInstance);
-        } else if (argCount == 1) { // first arg is id
-          currInstance->set_id(std::stoi(tokens[i]));
-        } else {
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
         }
+        
+        unsigned maxArgs = 1;
+        for (unsigned argNum=0; argNum < args.size(); argNum++) {
+          if (argNum == 0) currInstance->set_id(std::stoi(args[argNum]));
+          else tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
+        } 
+        
         break;
       }
 
       case 'n': { // instance name
-        if (argCount == 1)
-          currInstance->set_name(tokens[i]);
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+        unsigned minArgs = 1;
+        unsigned maxArgs = 1; 
+        if (args.size() < minArgs) {
+          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
+          break;
+        }
+        
+        currInstance->set_name(unquote(args[0]));
+        
+        for (unsigned argNum=minArgs; argNum < args.size(); argNum++)
+          tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
 
         break;
       }
 
       case 'o': { // object type
-        if (argCount == 1)
-          currInstance->set_object_type(tokens[i]);
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+        unsigned minArgs = 1;
+        unsigned maxArgs = 1; 
+        if (args.size() < minArgs) {
+          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
+          break;
+        }
+        
+        currInstance->set_object_type(unquote(args[0]));
+        
+        for (unsigned argNum=minArgs; argNum < args.size(); argNum++)
+          tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
 
         break;
       }
 
       case 'P': // absolute instance position
       case 'p': { // relative instance position
-        if (argCount == 1)
-          currInstance->set_x(currInstance->x() + std::stod(tokens[i]));
-        else if (argCount == 2)
-          currInstance->set_y(currInstance->y() + std::stod(tokens[i]));
-        else if (argCount == 3)
-          currInstance->set_z(currInstance->z() + std::stod(tokens[i]));
-        else if (argCount > 3)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+        unsigned minArgs = 1;
+        unsigned maxArgs = 3; 
+        if (args.size() < minArgs) {
+          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
+          break;
+        }
+        
+        for (unsigned argNum=0; argNum < args.size(); argNum++) {
+          if (argNum == 0)
+            currInstance->set_x(currInstance->x() + std::stod(args[argNum]));
+          else if (argNum == 1)
+            currInstance->set_y(currInstance->y() + std::stod(args[argNum]));
+          else if (argNum == 2)
+            currInstance->set_z(currInstance->z() + std::stod(args[argNum]));
+          else
+            tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
+        }
 
         break;
       }
 
       case 'X': // absolute x
       case 'x': { // relative x
-        if (argCount == 1)
-          currInstance->set_x(currInstance->x() + std::stod(tokens[i]));
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+        unsigned minArgs = 1;
+        unsigned maxArgs = 1; 
+        if (args.size() < minArgs) {
+          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
+          break;
+        }
+        
+        currInstance->set_x(currInstance->x() + std::stod(args[0]));
+        
+        for (unsigned argNum=minArgs; argNum < args.size(); argNum++)
+          tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
 
         break;
       }
 
       case 'Y': // absolute y
       case 'y': { // relative y
-        if (argCount == 1)
-          currInstance->set_y(currInstance->y() + std::stod(tokens[i]));
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+        unsigned minArgs = 1;
+        unsigned maxArgs = 1; 
+        if (args.size() < minArgs) {
+          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
+          break;
+        }
+        
+        currInstance->set_y(currInstance->y() + std::stod(args[0]));
+        
+        for (unsigned argNum=minArgs; argNum < args.size(); argNum++)
+          tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
 
         break;
       }
 
       case 'Z': // absolute z
       case 'z': { // relative z
-        if (argCount == 1)
-          currInstance->set_z(currInstance->z() + std::stod(tokens[i]));
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+        unsigned minArgs = 1;
+        unsigned maxArgs = 1; 
+        if (args.size() < minArgs) {
+          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
+          break;
+        }
+        
+        currInstance->set_z(currInstance->z() + std::stod(args[0]));
+        
+        for (unsigned argNum=minArgs; argNum < args.size(); argNum++)
+          tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
 
         break;
       }
 
       case 'S': { // scaling
-        if (argCount == 1)
-          currInstance->set_xscale(std::stod(tokens[i]));
-        else if (argCount == 2)
-          currInstance->set_yscale(std::stod(tokens[i]));
-        else if (argCount == 3)
-          currInstance->set_zscale(std::stod(tokens[i]));
-        else if (argCount > 3)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
+        unsigned minArgs = 1;
+        unsigned maxArgs = 3; 
+        if (args.size() < minArgs) {
+          tooFewArgsGiven(cmd, minArgs, yaml.Mark(), fPath);
+          break;
+        }
+        
+        for (unsigned argNum=0; argNum < args.size(); argNum++) {
+          if (argNum == 0)
+            currInstance->set_xscale(std::stod(args[argNum]));
+          else if (argNum == 1)
+            currInstance->set_yscale(std::stod(args[argNum]));
+          else if (argNum == 2)
+            currInstance->set_xscale(std::stod(args[argNum]));
+          else
+            tooManyArgsGiven(cmd, maxArgs, args, argNum, yaml.Mark(), fPath);
+        }
 
         break;
       }
 
-      case 'W': { // x scale
+      /*case 'W': { // x scale
         if (argCount == 1)
           currInstance->set_xscale(std::stod(tokens[i]));
         else if (argCount > 1)
@@ -358,20 +423,15 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
       case 'L':
       case 'F':
       case 'g': {
-        if (argCount == 0)
-          std::cerr << "Error: the \"" << currentCmd << "\" has not been implemented yet" << std::endl;
-
+        std::cerr << "Error: the \"" << currentCmd << "\" has not been implemented yet" << std::endl;
         break;
       }
 
       default: {
-        if (argCount == 0)
-          std::cerr << "Error: unsupported command \"" << currentCmd << "\"" << std::endl;
-
+        std::cerr << "Error: unsupported command \"" << currentCmd << "\"" << std::endl;
         break;
-      }
-
-    }*/
+      }*/
+    }
   }
 }
 
