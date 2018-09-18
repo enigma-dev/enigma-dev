@@ -246,8 +246,10 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
     std::vector<std::string> args = cmdPair.second;
 
     auto pit = parameters.find(cmd);
-    if (pit == parameters.end())
+    if (pit == parameters.end()) {
+      std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
       continue;
+    }
     auto sig = (*pit).second;
     auto pars = sig.field_names;
 
@@ -273,15 +275,6 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
       }
       /*
 
-      case 'R': { // rotation
-        if (argCount == 1)
-          currInstance->set_rotation(std::stod(tokens[i]));
-        else if (argCount > 1)
-          tooManyArgsGiven(currentCmd, yaml.Mark(), fPath);
-
-        break;
-      }
-
       case 'C': { // color
         if (argCount == 1)
           NOTE: stoi already handles hexadecimal strings of various bases
@@ -297,11 +290,6 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
       case 'F':
       case 'g': {
         std::cerr << "Error: the \"" << currentCmd << "\" has not been implemented yet" << std::endl;
-        break;
-      }
-
-      default: {
-        std::cerr << "Error: unsupported command \"" << currentCmd << "\"" << std::endl;
         break;
       }*/
     }
