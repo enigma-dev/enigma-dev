@@ -270,7 +270,7 @@ int updateTimer() {
 int handleEvents() {
   if (enigma::game_isending) PostQuitMessage(enigma::game_return);
 
-  if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+  while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
     if (msg.message == WM_QUIT) {
       enigma::game_return = msg.wParam;
       return 1;
@@ -278,8 +278,6 @@ int handleEvents() {
       TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
-
-    return 0;
   }
 
   return 0;
