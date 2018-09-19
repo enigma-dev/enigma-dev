@@ -302,52 +302,7 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
             break;
         };
 
-        switch (field->cpp_type()) {
-          case CppType::CPPTYPE_INT32: {
-            auto old = refl->GetInt32(*currInstance, field);
-            refl->SetInt32(currInstance, field, old + std::stol(arg));
-            break;
-          }
-          case CppType::CPPTYPE_INT64: {
-            auto old = refl->GetInt64(*currInstance, field);
-            refl->SetInt64(currInstance, field, old + std::stoll(arg));
-            break;
-          }
-          case CppType::CPPTYPE_UINT32: {
-            auto old = refl->GetUInt32(*currInstance, field);
-            refl->SetUInt32(currInstance, field, old + std::stoul(arg));
-            break;
-          }
-          case CppType::CPPTYPE_UINT64: {
-            auto old = refl->GetUInt32(*currInstance, field);
-            refl->SetUInt32(currInstance, field, old + std::stoull(arg));
-            break;
-          }
-          case CppType::CPPTYPE_DOUBLE: {
-            auto old = refl->GetDouble(*currInstance, field);
-            refl->SetDouble(currInstance, field, old + std::stod(arg));
-            break;
-          }
-          case CppType::CPPTYPE_FLOAT: {
-            auto old = refl->GetFloat(*currInstance, field);
-            refl->SetFloat(currInstance, field, old + std::stof(arg));
-            break;
-          }
-          case CppType::CPPTYPE_BOOL: {
-            refl->SetBool(currInstance, field, (std::stof(arg) != 0));
-            break;
-          }
-          case CppType::CPPTYPE_ENUM: {
-            refl->SetEnum(currInstance, field, field->enum_type()->FindValueByNumber(std::stol(arg)));
-            break;
-          }
-          case CppType::CPPTYPE_STRING: {
-            refl->SetString(currInstance, field, arg);
-            break;
-          }
-          default:
-            std::cerr << "Error: unsupported instance field type " << field->cpp_type() << std::endl;
-        }
+        SetProtoField(refl, currInstance, field, arg, true);
       } else {
         tooManyArgsGiven(cmd, pars.size(), args, i, yaml.Mark(), fPath);
       }
@@ -453,40 +408,8 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
           RecursivePackBuffer(msg, n, fPath.string(), depth + 1);
           break;
         }
-        case CppType::CPPTYPE_INT32: {
-          refl->SetInt32(m, field, n.as<int>());
-          break;
-        }
-        case CppType::CPPTYPE_INT64: {
-          refl->SetInt64(m, field, n.as<int>());
-          break;
-        }
-        case CppType::CPPTYPE_UINT32: {
-          refl->SetUInt32(m, field, n.as<unsigned>());
-          break;
-        }
-        case CppType::CPPTYPE_UINT64: {
-          refl->SetUInt64(m, field, n.as<unsigned>());
-          break;
-        }
-        case CppType::CPPTYPE_DOUBLE: {
-          refl->SetDouble(m, field, n.as<double>());
-          break;
-        }
-        case CppType::CPPTYPE_FLOAT: {
-          refl->SetFloat(m, field, n.as<float>());
-          break;
-        }
-        case CppType::CPPTYPE_BOOL: {
-          refl->SetBool(m, field, n.as<int>()); // as<bool> throws exception
-          break;
-        }
-        case CppType::CPPTYPE_ENUM: {
-          refl->SetEnum(m, field, field->enum_type()->FindValueByNumber(n.as<int>()));
-          break;
-        }
-        case CppType::CPPTYPE_STRING: {
-          refl->SetString(m, field, (isFilePath) ? fPath.string() + "/" + n.as<std::string>() : n.as<std::string>());
+        default: {
+          SetProtoField(refl, m, field, (isFilePath) ? fPath.string() + "/" + n.as<std::string>() : n.as<std::string>());
           break;
         }
       }

@@ -16,6 +16,7 @@
 **/
 
 #include "yyp.h"
+#include "Util.h"
 
 #define RAPIDJSON_HAS_STDSTRING 1
 
@@ -175,47 +176,12 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
             PackRes(dir, 0, *child, msg, depth + 1);
             break;
           }
-          case CppType::CPPTYPE_INT32: {
-            refl->SetInt32(m, field, (isSplit) ? std::stoi(splitValue) : child->GetInt());
-            break;
-          }
-          case CppType::CPPTYPE_INT64: {
-            refl->SetInt64(m, field, (isSplit) ? std::stoi(splitValue) : child->GetInt64());
-            break;
-          }
-          case CppType::CPPTYPE_UINT32: {
-            refl->SetUInt32(m, field, (isSplit) ? std::stoi(splitValue) : child->GetUint());
-            break;
-          }
-          case CppType::CPPTYPE_UINT64: {
-            refl->SetUInt64(m, field, (isSplit) ? std::stoi(splitValue) : child->GetUint64());
-            break;
-          }
-          case CppType::CPPTYPE_DOUBLE: {
-            refl->SetDouble(m, field, (isSplit) ? std::stod(splitValue) : child->GetDouble());
-            break;
-          }
-          case CppType::CPPTYPE_FLOAT: {
-            refl->SetFloat(m, field, (isSplit) ? std::stof(splitValue) : child->GetFloat());
-            break;
-          }
-          case CppType::CPPTYPE_BOOL: {
-            refl->SetBool(m, field, (isSplit) ? (std::stof(splitValue) != 0) : (child->GetBool()));
-            break;
-          }
-          case CppType::CPPTYPE_ENUM: {
-            refl->SetEnum(
-              m, field,
-              field->enum_type()->FindValueByNumber(
-                (isSplit) ? std::stoi(splitValue) : child->GetInt()));
-            break;
-          }
-          case CppType::CPPTYPE_STRING: {
+          default: {
             std::string value = (isSplit) ? splitValue : child->GetString();
             if (isFilePath) {  // again gotta prepend the yyp's path & fix the string to be posix compatible
               //value = YYPPath2FilePath(dir, value);
             }
-            refl->SetString(m, field, value);
+            SetProtoField(refl, m, field, value);
             break;
           }
         }

@@ -391,57 +391,12 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
               PackRes(dir, 0, child, msg, depth + 1);
               break;
             }
-            case CppType::CPPTYPE_INT32: {
-              refl->SetInt32(m, field,
-                              (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
-              break;
-            }
-            case CppType::CPPTYPE_INT64: {
-              refl->SetInt64(m, field,
-                              (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : std::stoll(xmlValue.as_string()));
-              break;
-            }
-            case CppType::CPPTYPE_UINT32: {
-              refl->SetUInt32(
-                  m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
-              break;
-            }
-            case CppType::CPPTYPE_UINT64: {
-              refl->SetUInt64(
-                  m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : std::stoull(xmlValue.as_string()));
-              break;
-            }
-            case CppType::CPPTYPE_DOUBLE: {
-              refl->SetDouble(
-                  m, field,
-                  (isAttribute) ? attr.as_double() : (isSplit) ? std::stod(splitValue) : xmlValue.as_double());
-              break;
-            }
-            case CppType::CPPTYPE_FLOAT: {
-              refl->SetFloat(
-                  m, field,
-                  (isAttribute) ? attr.as_float() : (isSplit) ? std::stof(splitValue) : xmlValue.as_float());
-              break;
-            }
-            case CppType::CPPTYPE_BOOL: {
-              refl->SetBool(m, field,
-                            (isAttribute) ? (attr.as_int() != 0)
-                                          : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
-              break;
-            }
-            case CppType::CPPTYPE_ENUM: {
-              refl->SetEnum(
-                  m, field,
-                  field->enum_type()->FindValueByNumber(
-                      (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int()));
-              break;
-            }
-            case CppType::CPPTYPE_STRING: {
+            default: {
               std::string value = (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string();
               if (isFilePath) {  // again gotta prepend the gmx's path & fix the string to be posix compatible
                 value = GMXPath2FilePath(dir, value);
               }
-              refl->SetString(m, field, value);
+              SetProtoField(refl, m, field, value);
               break;
             }
           }

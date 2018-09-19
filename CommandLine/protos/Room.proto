@@ -14,7 +14,7 @@ message Room {
   optional bool isometric = 6;
   optional uint32 speed = 27;
   optional bool persistent = 7 [(yyp) = "roomSettings/persistent"];
-  optional int32 color = 8 [(gmx) = "colour"];
+  optional uint32 color = 8 [(gmx) = "colour"];
   optional bool show_color = 9 [(gmx) = "showcolour"];
   optional string code = 10;
   optional bool enable_views = 11 [(gmx) = "enableViews", (yyp) = "viewSettings/enableViews"];
@@ -68,12 +68,12 @@ message Room {
     optional double zscale = 10 [default = 1, (gmx) = "scaleY"];
     optional double rotation  = 11;
     optional double zrotation = 12;
-    optional int32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
-    
+    optional uint32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
+
     message EditorSettings {
       optional bool locked = 1;
     }
-    
+
     optional EditorSettings editor_settings = 31;
   }
 
@@ -92,12 +92,12 @@ message Room {
     optional int32 depth = 10;
     optional double xscale = 11 [(gmx) = "scaleX"];
     optional double yscale = 12 [(gmx) = "scaleY"];
-    optional int32 color = 13 [(gmx) = "colour"];
-    
+    optional uint32 color = 13 [(gmx) = "colour"];
+
     message EditorSettings {
       optional bool locked = 1;
     }
-    
+
     optional EditorSettings editor_settings = 31;
   }
 
