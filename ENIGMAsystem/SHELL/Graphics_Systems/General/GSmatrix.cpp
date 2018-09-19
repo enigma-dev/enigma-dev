@@ -19,7 +19,7 @@
 #include "GSd3d.h"
 
 namespace enigma {
-  bool d3dPerspective;
+  bool d3dPerspective = false;
 }
 
 namespace enigma_user {
