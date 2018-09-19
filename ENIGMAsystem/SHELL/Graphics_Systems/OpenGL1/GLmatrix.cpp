@@ -58,21 +58,6 @@ namespace enigma
 namespace enigma_user
 {
 
-void d3d_set_perspective(bool enable)
-{
-    if (enable) {
-      enigma::projection_matrix.init_perspective_proj_transform(45, -view_wview[view_current] / (gs_scalar)view_hview[view_current], 1, 32000);
-    } else {
-      //projection_matrix.init_perspective_proj_transform(0, 1, 0, 1); //they cannot be zeroes!
-    }
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrix(enigma::projection_matrix);
-    glMatrixMode(GL_MODELVIEW);
-  // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
-  // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
-  // See also OpenGL3/GL3d3d.cpp Direct3D9/DX9d3d.cpp OpenGL1/GLd3d.cpp
-}
-
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
     (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);

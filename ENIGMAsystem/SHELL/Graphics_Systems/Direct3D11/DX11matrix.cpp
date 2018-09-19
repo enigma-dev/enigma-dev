@@ -38,11 +38,6 @@ namespace enigma {
 namespace enigma_user
 {
 
-void d3d_set_perspective(bool enable)
-{
-
-}
-
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,
                         gs_scalar xto, gs_scalar yto, gs_scalar zto,
                         gs_scalar xup, gs_scalar yup, gs_scalar zup)

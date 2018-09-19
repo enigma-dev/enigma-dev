@@ -41,6 +41,7 @@ void d3d_start()
 {
     draw_batch_flush(batch_flush_deferred);
 	enigma::d3dMode = true;
+    enigma::d3dPerspective = true;
 	enigma::d3dCulling =  rs_none;
 	d3d_set_hidden(false);
 }
@@ -49,6 +50,7 @@ void d3d_end()
 {
     draw_batch_flush(batch_flush_deferred);
 	enigma::d3dMode = false;
+    enigma::d3dPerspective = false;
 	enigma::d3dCulling = rs_none;
 	d3d_set_hidden(false);
 }

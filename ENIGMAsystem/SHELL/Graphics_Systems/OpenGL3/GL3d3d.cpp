@@ -91,6 +91,7 @@ void d3d_start()
 
   // Enable depth buffering
   enigma::d3dMode = true;
+  enigma::d3dPerspective = true;
   enigma::d3dHidden = true;
   enigma::d3dZWriteEnable = true;
   enigma::d3dCulling = rs_none;
@@ -112,6 +113,7 @@ void d3d_end()
   draw_batch_flush(batch_flush_deferred);
 
   enigma::d3dMode = false;
+  enigma::d3dPerspective = false;
   enigma::d3dHidden = false;
   enigma::d3dZWriteEnable = false;
   enigma::d3dCulling = rs_none;
