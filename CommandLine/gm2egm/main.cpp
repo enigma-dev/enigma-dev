@@ -17,7 +17,7 @@ static std::string tolower(const std::string &str) {
 
 int main(int argc, char *argv[])
 {
-  /*if (argc != 3) {
+  if (argc != 3) {
     std::cerr << "Usage: gm2egm <input> <output>" << std::endl;
     return -1;
   }
@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
     return -4;
   }
 
-  return 0;*/
+  return 0;
   
-  egm::LoadEGM(argv[1]);
-  return 1;
+  //egm::LoadEGM(argv[1]);
+  //return 1;
 }

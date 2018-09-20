@@ -187,15 +187,6 @@ inline std::string unquote(const std::string& quotedStr) {
   return str;
 }
 
-inline unsigned hex2int(const std::string& hex) {
-  //TODO: this probably isn't needed because stoi parsers different bases just fine for us
-  unsigned i;
-  std::stringstream sstream;
-  sstream << std::hex << hex;
-  sstream >> i;
-  return i;
-}
-
 inline std::string escape_hex(const std::string &hex) {
   return string_replace_all(hex, "#", "0x");
 }
@@ -205,18 +196,54 @@ struct Command {
   std::vector<std::string> field_names;
 };
 
-void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, const fs::path& fPath) {
-  std::cout << fPath << std::endl;
+const std::map<char, Command> instanceParameters = {
+  { 'i', { 0, {"id"}                         } },
+  { 'n', { 1, {"name"}                       } },
+  { 'o', { 1, {"object_type"}                } },
+  { 'p', { 1, {"x", "y", "z"}                } },
+  { 'x', { 1, {"x"}                          } },
+  { 'y', { 1, {"y"}                          } },
+  { 'z', { 1, {"z"}                          } },
+  { 's', { 1, {"xscale", "yscale", "zscale"} } },
+  { 'w', { 1, {"xscale"}                     } },
+  { 'h', { 1, {"yscale"}                     } },
+  { 'd', { 1, {"zscale"}                     } },
+  { 'r', { 1, {"rotation"}                   } },
+  { 'c', { 1, {"color"}                      } },
+};
 
+const std::map<char, Command> tileParameters = {
+  { 't', { 0, {"id"}                 } },
+  { 'n', { 1, {"name"}               } },
+  { 'b', { 1, {"background_name"}    } },
+  { 'd', { 1, {"depth"}              } },
+  { 'p', { 1, {"x", "y"}             } },
+  { 'x', { 1, {"x"}                  } },
+  { 'y', { 1, {"y"}                  } },
+  { 'o', { 1, {"xoffset", "yoffset"} } },
+  { 'u', { 1, {"xoffset"}            } },
+  { 'v', { 1, {"yoffset"}            } },
+  { 'd', { 1, {"width", "height"}    } },
+  { 's', { 1, {"xscale", "yscale"}   } },
+  { 'c', { 1, {"color"}              } },
+};
+
+void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD, 
+  const std::map<char, Command>& parameters, YAML::Node& yaml, const fs::path& fPath) {
+  
+  std::cout << fPath << std::endl;
+  const google::protobuf::Reflection *refl = m->GetReflection();
+  
   // split at spaces or comma etc
   std::vector<std::string> tokens = Tokenize(yaml.as<std::string>(), " ,\n\t");
-
-  std::vector<buffers::resources::Room_Instance*> instances;
-  buffers::resources::Room_Instance* currInstance = nullptr;
-
-  std::vector<std::pair<char, std::vector<std::string> > > arguments;
+  
+  google::protobuf::Message* currInstance = nullptr;
+  std::vector<google::protobuf::Message*> instances;
 
   char currentCmd = '\0';
+  std::vector<std::pair<char, std::vector<std::string> > > arguments;
+  
+  // Group all our commands into <char, vector<string>> (cmd, args)
   auto cmdIt = arguments.end();
   for (unsigned i = 0; i < tokens.size(); ++i) {
     std::string token = std::string(tokens[i]);
@@ -229,22 +256,7 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
     }
   }
 
-  std::map<char, Command> parameters = {
-    { 'i', { 0, {"id"}                         } },
-    { 'n', { 1, {"name"}                       } },
-    { 'o', { 1, {"object_type"}                } },
-    { 'p', { 1, {"x", "y", "z"}                } },
-    { 'x', { 1, {"x"}                          } },
-    { 'y', { 1, {"y"}                          } },
-    { 'z', { 1, {"z"}                          } },
-    { 's', { 1, {"xscale", "yscale", "zscale"} } },
-    { 'w', { 1, {"xscale"}                     } },
-    { 'h', { 1, {"yscale"}                     } },
-    { 'd', { 1, {"zscale"}                     } },
-    { 'r', { 1, {"rotation"}                   } },
-    { 'c', { 1, {"color"}                      } },
-  };
-
+  // Proccess commands here
   for (auto cmdPair : arguments) {
     char cmd = cmdPair.first;
     std::vector<std::string> args = cmdPair.second;
@@ -257,30 +269,38 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
     auto sig = (*pit).second;
     auto pars = sig.field_names;
 
+    // Too few args, exit here
     if (args.size() < sig.minArgs) {
       tooFewArgsGiven(cmd, sig.minArgs, yaml.Mark(), fPath);
       continue;
     }
-
-    switch (cmd) {
-      case 'I':  // new instance (clear attributes)
-      case 'i': { // new instance (keep attributes)
-        currInstance = new buffers::resources::Room_Instance();
+    
+    // Special case for create cmds
+    if (tolower(cmd) == tolower(createCMD)) {
+        currInstance = refl->AddMessage(m, f);
         instances.push_back(currInstance);
-
-        if (cmd == 'i') {
-          if (instances.size() > 0)
+        
+        if (cmd == tolower(createCMD)) {
+          if (!instances.empty()) {
             currInstance->CopyFrom(*instances.back());
+            const google::protobuf::Descriptor *instDesc = currInstance->GetDescriptor();
+            const google::protobuf::Reflection *instRefl = currInstance->GetReflection();
+            
+            // Don't copy this crap
+            for (const std::string& field_name : {"id", "name", "code"}) {
+              const google::protobuf::FieldDescriptor *instField = instDesc->FindFieldByName(field_name);
+              if (instField != nullptr)
+                instRefl->ClearField(currInstance, instField); 
+            }
+          }
           else
-            std::cerr << "Error: \"i\" called but there exists no previous instance to copy the attributes from" << std::endl;
+            std::cerr << "Error: \"" << cmd << "\" called but there exists no previous instance to copy the attributes from" << std::endl;
         }
-
-        break;
-      }
     }
 
     cmd = tolower(cmd); // NOTE: for now, all cmds are relative
 
+    // General case for rest of command args
     for (size_t i = 0; i < args.size(); ++i) {
       if (i < pars.size()) {
         std::string field_name = pars[i];
@@ -310,8 +330,10 @@ void RepackSVGDInstanceLayer(google::protobuf::Message *m, YAML::Node& yaml, con
   }
 }
 
-void RepackInstanceLayers(google::protobuf::Message *m, YAML::Node& yaml, const fs::path& fPath) {
-
+void RepackInstanceLayers(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD, 
+  const std::map<char, Command>& parameters, YAML::Node& yaml, const fs::path& fPath) {
+    
+  // All layers require a "format" and a "data" key in the YAML
   YAML::Node format = yaml["Format"];
   if (!format) {
     std::cerr << "Error: missing \"Format\" key in " << fPath.string() << std::endl;
@@ -325,10 +347,17 @@ void RepackInstanceLayers(google::protobuf::Message *m, YAML::Node& yaml, const 
     yamlErrorPosition(yaml.Mark());
     return;
   }
-
+  
+  // Send our data to the appropriate handler (if one exists)
   const std::string formatStr = format.as<std::string>();
-  if (formatStr == "svg-d") RepackSVGDInstanceLayer(m, data, fPath.string());
+  if (formatStr == "svg-d") RepackSVGDLayer(m, f, createCMD, parameters, data, fPath.string());
   else std::cerr << "Error: unsupported instance layer format \"" << formatStr << "\" in " << fPath.string() << std::endl;
+}
+
+inline void loadObjectEvents(const fs::path& fPath) {
+  for(auto& f : fs::directory_iterator(fPath)) {
+    
+  }
 }
 
 void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const fs::path& fPath, int depth) {
@@ -347,7 +376,16 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
     if (ext == ".rm" && depth == 0) {
       if (key == "instances") key = "instance-layers";
       if (key == "tiles") continue;//key = "tile-layers";
-      if (key == "code") continue;
+      if (key == "code") {
+        const fs::path edlFile = fPath.string() + "/create[room].edl";
+        if (FileExists(edlFile))
+          SetProtoField(refl, m, field, FileToString(edlFile));
+        continue;
+      }
+    }
+    
+    if (ext == ".obj" && depth == 0) {
+      if (key == "events") continue; // code is loaded from edl files
     }
 
     YAML::Node node = yaml[key];
@@ -370,11 +408,12 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
       switch (field->cpp_type()) {
         case CppType::CPPTYPE_MESSAGE: {
           for (auto n : node) {
-            google::protobuf::Message *msg = refl->AddMessage(m, field);
             if (key == "instance-layers")
-              RepackInstanceLayers(msg, n, fPath.string());
-            else
+              RepackInstanceLayers(m, field, 'I', instanceParameters, n, fPath.string());
+            else {
+              google::protobuf::Message* msg = refl->AddMessage(m, field);
               RecursivePackBuffer(msg, n, fPath.string(), depth + 1);
+            }
           }
           break;
         }
@@ -449,8 +488,9 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m) {
 
   YAML::Node yaml = YAML::LoadFile(yamlFile.string());
 
+  RecursivePackBuffer(m, yaml, fPath.string(), 0);
+  
   if (ext == ".rm") {
-    RecursivePackBuffer(m, yaml, fPath.string(), 0);
   }
 
   return true;
