@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef ENIGMA_EVENT_PARSER_H
+#define ENIGMA_EVENT_PARSER_H
+
 enum e_type {
   et_inline,
   et_stacked,
@@ -145,3 +148,5 @@ string event_get_iterator_unlink_code(int mid, int id);
 string event_get_iterator_delete_code(int mid, int id);
 
 string event_get_locals(int mid, int id);
+
+#endif // ENIGMA_EVENT_PARSER_H

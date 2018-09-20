@@ -18,6 +18,7 @@
 #include "gmk.h"
 #include "filesystem.h"
 #include "action.h"
+#include "event.h"
 
 #include "libpng-util.h"
 
