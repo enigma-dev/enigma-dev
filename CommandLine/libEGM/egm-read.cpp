@@ -106,11 +106,11 @@ inline void yamlErrorPosition(const YAML::Mark errPos) {
 
 inline void invalidYAMLType(const YAML::Node& yaml, const fs::path& fPath, const google::protobuf::FieldDescriptor *field) {
   const std::map<int, std::string> yamlTypes {
-    { YAML::NodeType::Sequence,  "sequence"  },
-    { YAML::NodeType::Scalar,    "scalar"    },
-    { YAML::NodeType::Map,       "map"       },
-    { YAML::NodeType::Undefined, "undefined" },
-    { YAML::NodeType::Null,      "null"      }
+    {YAML::NodeType::Sequence, "sequence"},
+    {YAML::NodeType::Scalar, "scalar"},
+    {YAML::NodeType::Map, "map"},
+    {YAML::NodeType::Undefined, "undefined"},
+    {YAML::NodeType::Null, "null"}
   };
 
   std::string expectedType;
@@ -278,10 +278,16 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
     char cmd = cmdPair.first;
     std::vector<std::string> args = cmdPair.second;
 
-    auto pit = parameters.find(tolower(cmd));
+    auto pit = parameters.find(cmd);
     if (pit == parameters.end()) {
+      // if this command does not have uppercase equivalent
+      // we can still allow a lowercase version for relative
+      pit = parameters.find(cmd = tolower(cmd));
+      if (pit == parameters.end()) {
+        // no upper or lowercase version seems to be supported...
       std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
       continue;
+    }
     }
     auto sig = (*pit).second;
     auto pars = sig.field_names;
@@ -315,8 +321,6 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
         }
     }
 
-    cmd = tolower(cmd); // NOTE: for now, all cmds are relative
-
     // General case for rest of command args
     for (size_t i = 0; i < args.size(); ++i) {
       if (i < pars.size()) {
@@ -339,7 +343,7 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
             break;
         };
 
-        SetProtoField(refl, currInstance, field, arg, true);
+        SetProtoField(refl, currInstance, field, unquote(arg), true);
       } else {
         tooManyArgsGiven(cmd, pars.size(), args, i, yaml.Mark(), fPath);
       }
@@ -404,7 +408,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
     if (ext == ".obj" && depth == 0) {
       if (key == "events") continue; // code is loaded from edl files
     }
-    
+
     if (key == "id" && depth == 0) {
       if (id >= 0)
         SetProtoField(refl, m, field, std::to_string(id));
