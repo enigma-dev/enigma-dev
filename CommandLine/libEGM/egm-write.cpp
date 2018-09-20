@@ -230,12 +230,12 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   } else return false;
 
   for (auto &inst : room->instances()) {
-	if (!inst.code().empty()) {
-	  string name = inst.name();
-	  if (name.empty()) name = std::to_string(inst.id());
-	  string edlFile = dir.string() + "/create[" + name + "].edl";
+  if (!inst.code().empty()) {
+    string name = inst.name();
+    if (name.empty()) name = std::to_string(inst.id());
+    string edlFile = dir.string() + "/create[" + name + "].edl";
 
-	  if (std::ofstream fout{edlFile}) {
+    if (std::ofstream fout{edlFile}) {
         fout << inst.code();
       } else return false;
     }
@@ -282,9 +282,9 @@ bool WriteTimeline(const fs::path &egm_root, const fs::path &dir, const buffers:
     return false;
 
   for (auto &m : timeline.moments()) {
-	  string edlFile = dir.string() + "/step[" + std::to_string(m.step()) + "].edl";
+    string edlFile = dir.string() + "/step[" + std::to_string(m.step()) + "].edl";
     std::ofstream fout{edlFile};
-	  fout << m.code();
+    fout << m.code();
   }
 
   return true;
@@ -299,9 +299,9 @@ bool WriteObject(const fs::path &egm_root, const fs::path &dir, const buffers::r
     return false;
 
   for (auto &e : events) {
-	string edlFile = dir.string() + "/" + e.name() + ".edl";
+  string edlFile = dir.string() + "/" + e.name() + ".edl";
     std::ofstream fout{edlFile};
-	fout << e.code();
+  fout << e.code();
   }
 
   return true;
