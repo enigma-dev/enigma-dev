@@ -17,6 +17,7 @@
 
 #include "gmx.h"
 #include "action.h"
+#include "event.h"
 #include "Util.h"
 
 #include "event_reader/event_parser.h"
@@ -61,6 +62,9 @@ class visited_walker : public pugi::xml_tree_walker {
 
 class gmx_root_walker {
  public:
+  std::map<p_type, map<int, string>> evIdMap;
+  std::map<p_type, map<string, int>> evNameMap;
+
   gmx_root_walker(buffers::TreeNode *root, std::string &gmxPath) : gmxPath(gmxPath) {
     root->set_name("/");  // root node is called assets in GM but we'll use /
     nodes.push_back(root);
@@ -108,6 +112,19 @@ class gmx_root_walker {
     auto createFunc = factoryMap.find(resType);
     if (createFunc != factoryMap.end()) {
         auto *res = createFunc->second(node);
+
+        const int id = idMap[resType];
+        std::string name = node->name();
+
+        auto etypeit = event_type_map.find(node->type_case());
+        if (etypeit != event_type_map.end()) {
+          auto etype = (*etypeit).second;
+          evIdMap[etype][id] = name;
+          evNameMap[etype][name] = id;
+        } else {
+          // error/warning
+        }
+
         if (resType == "datafile") {
           std::string groupPath = gmxPath;
           for (auto parent = std::next(nodes.begin()); parent != nodes.end(); ++parent) {
@@ -257,6 +274,54 @@ void PackShader(std::string fName, int id, buffers::resources::Shader *shader) {
   }
 }
 
+struct PostponedEventName {
+  google::protobuf::Message *m;
+  const google::protobuf::FieldDescriptor *field;
+  int mid, sid;
+  std::string name;
+};
+std::vector<PostponedEventName> postponedEventNames;
+
+void postponeEventName(google::protobuf::Message *m,
+                       const google::protobuf::FieldDescriptor *field,
+                       int mid, int sid,
+                       std::string name) {
+  postponedEventNames.push_back({m,field,mid,sid,name});
+}
+
+void processPostponedEventNames(const map<p_type, map<string, int>> &evNameMap,
+                                const map<p_type, map<int, string>> &evIdMap) {
+  EventNameMapping event_name_map("", "", "[", "]", evIdMap);
+  const auto event_names = event_name_map.event_names;
+
+  // convert the string names of collision objects into integer ids and shitz
+  for (auto &postponed : postponedEventNames) {
+    if (!postponed.name.empty()) {
+      auto mit = evNameMap.find(event_get_parameter_type(postponed.mid));
+      if (mit == evNameMap.end()) {
+        // error
+        continue;
+      }
+      auto idit = (*mit).second.find(postponed.name);
+      if (idit == (*mit).second.end()) {
+        // error
+        continue;
+      }
+      postponed.sid = (*idit).second;
+    }
+  }
+
+  for (auto postponed : postponedEventNames) {
+    const google::protobuf::Reflection *refl = postponed.m->GetReflection();
+
+    auto event_pair = evpair(postponed.mid, postponed.sid);
+    auto name = event_names.find(event_pair);
+
+    if (name == event_names.end()) continue;
+    refl->SetString(postponed.m, postponed.field, (*name).second);
+  }
+}
+
 void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
@@ -297,15 +362,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
             errorStream << "Error: event '" << mid << "' with no secondary id or name" << std::endl;
           }
         }
-        map<p_type, map<int, string>> resource_ids = { { p2t_object, { { 0, name } } } };
-        EventNameMapping event_name_map("", "", "[", "]", resource_ids);
-
-        auto event_names = event_name_map.event_names;
-        auto event_pair = evpair(mid, sid);
-        auto evname = event_names.find(event_pair);
-
-        std::cerr << "bing bing bing " << (*evname).second << " nam: " << name << " " << mid << " " << sid << std::endl;
-        refl->SetString(m, field, (*evname).second);
+        postponeEventName(m, field, mid, sid, name);
         continue;
       }
 
@@ -527,6 +584,7 @@ buffers::Project *LoadGMX(std::string fName) {
   // we use our own traverse(...) instead of the pugixml one
   // so that we can skip subtrees for datafiles and such
   walker.traverse(doc);
+  processPostponedEventNames(walker.evNameMap, walker.evIdMap);
 
   return proj;
 }
