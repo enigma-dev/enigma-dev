@@ -18,6 +18,7 @@
 #include "gmk.h"
 #include "filesystem.h"
 #include "action.h"
+#include "event.h"
 
 #include "event_reader/event_parser.h"
 
@@ -1225,12 +1226,6 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root, map<p_type, map<in
     static const TypeCase RESOURCE_KIND[] = { TypeCase::TYPE_NOT_SET,TypeCase::kObject,TypeCase::kSprite,TypeCase::kSound,
       TypeCase::kRoom,TypeCase::TYPE_NOT_SET,TypeCase::kBackground,TypeCase::kScript,TypeCase::kPath,TypeCase::kFont,TypeCase::TYPE_NOT_SET,
       TypeCase::TYPE_NOT_SET,TypeCase::kTimeline,TypeCase::TYPE_NOT_SET,TypeCase::kShader };
-
-    static const map<TypeCase, p_type> event_type_map = {
-      {TypeCase::kSprite, p2t_sprite},     {TypeCase::kSound, p2t_sound},   {TypeCase::kBackground, p2t_background},
-      {TypeCase::kPath, p2t_path},         {TypeCase::kScript, p2t_script}, {TypeCase::kFont, p2t_font},
-      {TypeCase::kTimeline, p2t_timeline}, {TypeCase::kObject, p2t_object}, {TypeCase::kRoom, p2t_room},
-    };
 
     const TypeCase type = RESOURCE_KIND[kind];
 

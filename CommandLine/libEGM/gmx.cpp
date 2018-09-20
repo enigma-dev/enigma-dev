@@ -286,17 +286,26 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
         int mid = child.attribute("eventtype").as_int();
         auto enumb = child.attribute("enumb");
         int sid = 0;
+        std::string name = "";
         if (enumb) {
           sid = enumb.as_int();
         } else {
           auto ename = child.attribute("ename");
           if (ename) {
-
+            name = ename.as_string();
           } else {
             errorStream << "Error: event '" << mid << "' with no secondary id or name" << std::endl;
           }
         }
-        refl->SetString(m, field, event_get_function_name(mid, sid));
+        map<p_type, map<int, string>> resource_ids = { { p2t_object, { { 0, name } } } };
+        EventNameMapping event_name_map("", "", "[", "]", resource_ids);
+
+        auto event_names = event_name_map.event_names;
+        auto event_pair = evpair(mid, sid);
+        auto evname = event_names.find(event_pair);
+
+        std::cerr << "bing bing bing " << (*evname).second << " nam: " << name << " " << mid << " " << sid << std::endl;
+        refl->SetString(m, field, (*evname).second);
         continue;
       }
 
@@ -506,8 +515,6 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
 }
 
 buffers::Project *LoadGMX(std::string fName) {
-  event_parse_resourcefile();
-
   pugi::xml_document doc;
   if (!doc.load_file(fName.c_str())) return nullptr;
 
