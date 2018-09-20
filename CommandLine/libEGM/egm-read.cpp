@@ -228,21 +228,21 @@ const std::map<char, Command> tileParameters = {
   { 'c', { 1, {"color"}              } },
 };
 
-void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD, 
+void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD,
   const std::map<char, Command>& parameters, YAML::Node& yaml, const fs::path& fPath) {
-  
+
   std::cout << fPath << std::endl;
   const google::protobuf::Reflection *refl = m->GetReflection();
-  
+
   // split at spaces or comma etc
   std::vector<std::string> tokens = Tokenize(yaml.as<std::string>(), " ,\n\t");
-  
+
   google::protobuf::Message* currInstance = nullptr;
   std::vector<google::protobuf::Message*> instances;
 
   char currentCmd = '\0';
   std::vector<std::pair<char, std::vector<std::string> > > arguments;
-  
+
   // Group all our commands into <char, vector<string>> (cmd, args)
   auto cmdIt = arguments.end();
   for (unsigned i = 0; i < tokens.size(); ++i) {
@@ -261,10 +261,16 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
     char cmd = cmdPair.first;
     std::vector<std::string> args = cmdPair.second;
 
-    auto pit = parameters.find(tolower(cmd));
+    auto pit = parameters.find(cmd);
     if (pit == parameters.end()) {
-      std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
-      continue;
+      // if this command does not have uppercase equivalent
+      // we can still allow a lowercase version for relative
+      pit = parameters.find(cmd = tolower(cmd));
+      if (pit == parameters.end()) {
+        // no upper or lowercase version seems to be supported...
+        std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
+        continue;
+      }
     }
     auto sig = (*pit).second;
     auto pars = sig.field_names;
@@ -274,31 +280,29 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
       tooFewArgsGiven(cmd, sig.minArgs, yaml.Mark(), fPath);
       continue;
     }
-    
+
     // Special case for create cmds
     if (tolower(cmd) == tolower(createCMD)) {
         currInstance = refl->AddMessage(m, f);
         instances.push_back(currInstance);
-        
+
         if (cmd == tolower(createCMD)) {
           if (!instances.empty()) {
             currInstance->CopyFrom(*instances.back());
             const google::protobuf::Descriptor *instDesc = currInstance->GetDescriptor();
             const google::protobuf::Reflection *instRefl = currInstance->GetReflection();
-            
+
             // Don't copy this crap
             for (const std::string& field_name : {"id", "name", "code"}) {
               const google::protobuf::FieldDescriptor *instField = instDesc->FindFieldByName(field_name);
               if (instField != nullptr)
-                instRefl->ClearField(currInstance, instField); 
+                instRefl->ClearField(currInstance, instField);
             }
           }
           else
             std::cerr << "Error: \"" << cmd << "\" called but there exists no previous instance to copy the attributes from" << std::endl;
         }
     }
-
-    cmd = tolower(cmd); // NOTE: for now, all cmds are relative
 
     // General case for rest of command args
     for (size_t i = 0; i < args.size(); ++i) {
@@ -330,9 +334,9 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
   }
 }
 
-void RepackInstanceLayers(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD, 
+void RepackInstanceLayers(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD,
   const std::map<char, Command>& parameters, YAML::Node& yaml, const fs::path& fPath) {
-    
+
   // All layers require a "format" and a "data" key in the YAML
   YAML::Node format = yaml["Format"];
   if (!format) {
@@ -347,7 +351,7 @@ void RepackInstanceLayers(google::protobuf::Message *m, const google::protobuf::
     yamlErrorPosition(yaml.Mark());
     return;
   }
-  
+
   // Send our data to the appropriate handler (if one exists)
   const std::string formatStr = format.as<std::string>();
   if (formatStr == "svg-d") RepackSVGDLayer(m, f, createCMD, parameters, data, fPath.string());
@@ -356,7 +360,7 @@ void RepackInstanceLayers(google::protobuf::Message *m, const google::protobuf::
 
 inline void loadObjectEvents(const fs::path& fPath) {
   for(auto& f : fs::directory_iterator(fPath)) {
-    
+
   }
 }
 
@@ -383,7 +387,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
         continue;
       }
     }
-    
+
     if (ext == ".obj" && depth == 0) {
       if (key == "events") continue; // code is loaded from edl files
     }
@@ -489,7 +493,7 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m) {
   YAML::Node yaml = YAML::LoadFile(yamlFile.string());
 
   RecursivePackBuffer(m, yaml, fPath.string(), 0);
-  
+
   if (ext == ".rm") {
   }
 
