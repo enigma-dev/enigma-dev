@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "GSmatrix.h"
+#include "GSd3d.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/glm.hpp>
@@ -28,6 +29,7 @@ std::stack<glm::mat4> trans_stack;
 } // namespace anonymous
 
 namespace enigma {
+  bool d3dPerspective = false;
   glm::mat4 world = glm::mat4(1.0f),
             view  = glm::mat4(1.0f),
             projection = glm::mat4(1.0f);
@@ -36,9 +38,14 @@ namespace enigma {
 namespace enigma_user
 {
 
-void d3d_set_perspective(bool enable)
-{
+void d3d_set_perspective(bool enable) {
+  // in GM8.1 and GMS v1.4 this does not take effect
+  // until the next frame in screen_redraw
+  enigma::d3dPerspective = enable;
+}
 
+bool d3d_get_perspective() {
+  return enigma::d3dPerspective;
 }
 
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,

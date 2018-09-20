@@ -205,7 +205,6 @@ namespace enigma_user
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 	void display_set_gui_size(unsigned int width, unsigned int height){}
 
-	void d3d_set_perspective(bool enable){}
 	void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup){}
 	void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar){}
 	void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle){}
