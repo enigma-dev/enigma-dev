@@ -26,6 +26,7 @@
 #include <fstream>
 
 namespace proto = google::protobuf;
+using Type = buffers::TreeNode::TypeCase;
 using CppType = proto::FieldDescriptor::CppType;
 using std::string;
 
@@ -66,7 +67,7 @@ bool FieldIsPresent(proto::Message *m,
 }
 
 bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
-               YAML::Emitter &yaml, proto::Message *m) {
+               YAML::Emitter &yaml, proto::Message *m, int depth) {
   const proto::Descriptor *desc = m->GetDescriptor();
   const proto::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
@@ -75,6 +76,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
     const proto::OneofDescriptor *oneof = field->containing_oneof();
     if (oneof && refl->HasOneof(*m, oneof)) continue;
     if (!FieldIsPresent(m, refl, field)) continue;
+    if (depth == 0 && field->name() == "id") continue; 
     const proto::FieldOptions opts = field->options();
     const bool isFilePath = opts.GetExtension(buffers::file_path);
 
@@ -85,7 +87,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
         for (int i = 0; i < refl->FieldSize(*m, field); i++) {
           yaml << YAML::BeginMap;
           WriteYaml(egm_root, dir, yaml,
-                    refl->MutableRepeatedMessage(m, field, i));
+                    refl->MutableRepeatedMessage(m, field, i), depth+1);
           yaml << YAML::EndMap;
         }
         yaml << YAML::EndSeq;
@@ -106,7 +108,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
     } else {
       if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
         yaml << YAML::BeginMap;
-        WriteYaml(egm_root, dir, yaml, refl->MutableMessage(m, field));
+        WriteYaml(egm_root, dir, yaml, refl->MutableMessage(m, field), depth+1);
         yaml << YAML::EndMap;
       } else {
         if (isFilePath) {
@@ -130,7 +132,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir, proto::Message *m)
   YAML::Emitter yaml;
   yaml << YAML::BeginMap;
 
-  if (!WriteYaml(egm_root, dir, yaml, m))
+  if (!WriteYaml(egm_root, dir, yaml, m, 0))
     return false;
 
   yaml << YAML::EndMap;
@@ -179,7 +181,7 @@ bool WriteRoomSnowflakes(const fs::path &egm_root, const fs::path &dir,
     yaml << YAML::Key << "Data";
     yaml << YAML::BeginSeq;
     for (auto &inst : layers->snowflakes) {
-      if (!WriteYaml(egm_root, dir, yaml, &inst)) return false;
+      if (!WriteYaml(egm_root, dir, yaml, &inst, 0)) return false;
     }
     yaml << YAML::EndSeq;
     yaml << YAML::EndMap;
@@ -203,7 +205,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   YAML::Emitter yaml;
   yaml << YAML::BeginMap;
 
-  if (!WriteYaml(egm_root, dir, yaml, &cleaned))
+  if (!WriteYaml(egm_root, dir, yaml, &cleaned, 0))
     return false;
 
   *cleaned.mutable_instances() = room->instances();
@@ -301,7 +303,7 @@ bool WriteObject(const fs::path &egm_root, const fs::path &dir, const buffers::r
   for (auto &e : events) {
   string edlFile = dir.string() + "/" + e.name() + ".edl";
     std::ofstream fout{edlFile};
-  fout << e.code();
+    fout << e.code();
   }
 
   return true;
@@ -309,7 +311,6 @@ bool WriteObject(const fs::path &egm_root, const fs::path &dir, const buffers::r
 
 bool WriteRes(buffers::TreeNode* res, const fs::path &dir, const fs::path &egm_root) {
   string newDir = (dir/res->name()).string();
-  using Type = buffers::TreeNode::TypeCase;
   switch (res->type_case()) {
    case Type::kBackground:
     return WriteYaml(egm_root, newDir + ".bkg", res->mutable_background());
@@ -332,15 +333,13 @@ bool WriteRes(buffers::TreeNode* res, const fs::path &dir, const fs::path &egm_r
    case Type::kTimeline:
     return WriteTimeline(egm_root, newDir + ".tln", res->timeline());
    default:
-    std::cerr << "Error: Unsupported Resource Type" << std::endl;
+    std::cerr << "Error: Unsupported Resource Type: " << dir << std::endl;
   }
 
   return true;
 }
-
+  
 inline const std::string type2name(int type) {
-
-  using Type = buffers::TreeNode::TypeCase;
   switch (type) {
    case Type::kFolder:
      return "folder";
@@ -369,6 +368,33 @@ inline const std::string type2name(int type) {
   }
 }
 
+inline int getResID(buffers::TreeNode* res) {
+  switch (res->type_case()) {
+   case Type::kBackground:
+    return res->background().id();
+   case Type::kFont:
+    return res->font().id();
+   case Type::kObject:
+    return res->object().id();
+   case Type::kPath:
+    return res->path().id();
+   case Type::kRoom:
+    return res->room().id();
+   case Type::kScript:
+    return res->script().id();
+   case Type::kShader:
+    return res->shader().id();
+   case Type::kSound:
+    return res->sound().id();
+   case Type::kSprite:
+    return res->sprite().id();
+   case Type::kTimeline:
+    return res->timeline().id();
+   default:
+    return -1;
+  }
+}
+
 bool WriteNode(buffers::TreeNode* folder, string dir, const fs::path &egm_root, YAML::Emitter& tree) {
   tree << YAML::BeginMap << YAML::Key << "folder" << YAML::Value << folder->name();
 
@@ -383,6 +409,7 @@ bool WriteNode(buffers::TreeNode* folder, string dir, const fs::path &egm_root, 
         tree << YAML::BeginMap;
         tree << YAML::Key << "name" << child->name();
         tree << YAML::Key << "type" << type;
+        tree << YAML::Key << "id" << getResID(child);
         tree << YAML::EndMap;
       }
 

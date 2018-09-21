@@ -41,22 +41,35 @@ using FactoryFunction = std::function<google::protobuf::Message *(TreeNode*)>;
 struct ResourceFactory {
   FactoryFunction func;
   std::string ext;
+  Type type;
 };
 using FactoryMap = std::unordered_map<std::string, ResourceFactory>;
 
 static const FactoryMap factoryMap({
-  { "sprite", {&TreeNode::mutable_sprite, ".spr" } },
-  { "sound", {&TreeNode::mutable_sound, ".snd" } },
-  { "background", {&TreeNode::mutable_background, ".bkg" } },
-  { "path", {&TreeNode::mutable_path, ".pth" } },
-  { "script", {&TreeNode::mutable_script, ".edl" } },
-  { "shader", {&TreeNode::mutable_shader, ".shdr" } },
-  { "font", {&TreeNode::mutable_font, ".fnt" } },
-  { "timeline", {&TreeNode::mutable_timeline, ".tln" } },
-  { "object", {&TreeNode::mutable_object, ".obj" } },
-  { "room", {&TreeNode::mutable_room, ".rm" } },
-  { "datafile", {&TreeNode::mutable_include, ".dat" } }
+  { "sprite",     { &TreeNode::mutable_sprite,     ".spr",  Type::kSprite     } },
+  { "sound",      { &TreeNode::mutable_sound,      ".snd",  Type::kSound      } },
+  { "background", { &TreeNode::mutable_background, ".bkg",  Type::kBackground } },
+  { "path",       { &TreeNode::mutable_path,       ".pth",  Type::kPath       } },
+  { "script",     { &TreeNode::mutable_script,     ".edl",  Type::kScript     } },
+  { "shader",     { &TreeNode::mutable_shader,     ".shdr", Type::kShader     } },
+  { "font",       { &TreeNode::mutable_font,       ".fnt",  Type::kFont       } },
+  { "timeline",   { &TreeNode::mutable_timeline,   ".tln",  Type::kTimeline   } },
+  { "object",     { &TreeNode::mutable_object,     ".obj",  Type::kObject     } },
+  { "room",       { &TreeNode::mutable_room,       ".rm",   Type::kRoom       } }
 });
+
+std::map<Type, int> maxID = {
+  { Type::kBackground, 0 },
+  { Type::kFont,       0 },
+  { Type::kObject,     0 },
+  { Type::kPath,       0 },
+  { Type::kRoom,       0 },
+  { Type::kScript,     0 },
+  { Type::kShader,     0 },
+  { Type::kSound,      0 },
+  { Type::kSprite,     0 },
+  { Type::kTimeline,   0 }
+};
 
 buffers::resources::Script* LoadScript(const fs::path& fPath) {
   buffers::resources::Script* scr = new buffers::resources::Script();
@@ -93,11 +106,11 @@ inline void yamlErrorPosition(const YAML::Mark errPos) {
 
 inline void invalidYAMLType(const YAML::Node& yaml, const fs::path& fPath, const google::protobuf::FieldDescriptor *field) {
   const std::map<int, std::string> yamlTypes {
-    {YAML::NodeType::Sequence, "sequence"},
-    {YAML::NodeType::Scalar, "scalar"},
-    {YAML::NodeType::Map, "map"},
-    {YAML::NodeType::Undefined, "undefined"},
-    {YAML::NodeType::Null, "null"}
+    { YAML::NodeType::Sequence,  "sequence"  },
+    { YAML::NodeType::Scalar,    "scalar"    },
+    { YAML::NodeType::Map,       "map"       },
+    { YAML::NodeType::Undefined, "undefined" },
+    { YAML::NodeType::Null,      "null"      }
   };
 
   std::string expectedType;
@@ -216,15 +229,19 @@ const std::map<char, Command> tileParameters = {
   { 't', { 0, {"id"}                 } },
   { 'n', { 1, {"name"}               } },
   { 'b', { 1, {"background_name"}    } },
-  { 'd', { 1, {"depth"}              } },
+  //{ 'd', { 1, {"depth"}              } },
   { 'p', { 1, {"x", "y"}             } },
   { 'x', { 1, {"x"}                  } },
   { 'y', { 1, {"y"}                  } },
   { 'o', { 1, {"xoffset", "yoffset"} } },
   { 'u', { 1, {"xoffset"}            } },
   { 'v', { 1, {"yoffset"}            } },
-  { 'd', { 1, {"width", "height"}    } },
+  { 'D', { 1, {"width", "height"}    } },
+  { 'w', { 1, {"width"}              } },
+  { 'h', { 1, {"height"}             } },
   { 's', { 1, {"xscale", "yscale"}   } },
+  { 'W', { 1, {"xscale"}             } },
+  { 'H', { 1, {"yscale"}             } },
   { 'c', { 1, {"color"}              } },
 };
 
@@ -330,7 +347,7 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
   }
 }
 
-void RepackInstanceLayers(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD, 
+void RepackLayers(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD, 
   const std::map<char, Command>& parameters, YAML::Node& yaml, const fs::path& fPath) {
     
   // All layers require a "format" and a "data" key in the YAML
@@ -360,7 +377,7 @@ inline void loadObjectEvents(const fs::path& fPath) {
   }
 }
 
-void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const fs::path& fPath, int depth) {
+void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml, const fs::path& fPath, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   const std::string ext = fPath.extension().string();
@@ -375,7 +392,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
 
     if (ext == ".rm" && depth == 0) {
       if (key == "instances") key = "instance-layers";
-      if (key == "tiles") continue;//key = "tile-layers";
+      if (key == "tiles") key = "tile-layers";
       if (key == "code") {
         const fs::path edlFile = fPath.string() + "/create[room].edl";
         if (FileExists(edlFile))
@@ -386,6 +403,12 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
     
     if (ext == ".obj" && depth == 0) {
       if (key == "events") continue; // code is loaded from edl files
+    }
+    
+    if (key == "id" && depth == 0) {
+      if (id >= 0)
+        SetProtoField(refl, m, field, std::to_string(id));
+      continue;
     }
 
     YAML::Node node = yaml[key];
@@ -409,10 +432,12 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
         case CppType::CPPTYPE_MESSAGE: {
           for (auto n : node) {
             if (key == "instance-layers")
-              RepackInstanceLayers(m, field, 'I', instanceParameters, n, fPath.string());
+              RepackLayers(m, field, 'I', instanceParameters, n, fPath.string());
+            else if (key == "tile-layers")
+              RepackLayers(m, field, 'T', tileParameters, n, fPath.string());
             else {
               google::protobuf::Message* msg = refl->AddMessage(m, field);
-              RecursivePackBuffer(msg, n, fPath.string(), depth + 1);
+              RecursivePackBuffer(msg, id, n, fPath.string(), depth + 1);
             }
           }
           break;
@@ -444,7 +469,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
         // If field is a singular message we need to recurse into this method again
         case CppType::CPPTYPE_MESSAGE: {
           google::protobuf::Message *msg = refl->MutableMessage(m, field);
-          RecursivePackBuffer(msg, n, fPath.string(), depth + 1);
+          RecursivePackBuffer(msg, id, n, fPath.string(), depth + 1);
           break;
         }
         default: {
@@ -456,18 +481,22 @@ void RecursivePackBuffer(google::protobuf::Message *m, YAML::Node& yaml, const f
   }
 }
 
-bool LoadResource(const fs::path& fPath, google::protobuf::Message *m) {
+bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
 
   std::string ext = fPath.extension().string();
 
   // Scripts and shaders are not folders so we exit here
   if (ext == ".edl") {
-    m->CopyFrom(*static_cast<google::protobuf::Message*>(LoadScript(fPath.string())));
+    buffers::resources::Script* scr = LoadScript(fPath);
+    scr->set_id(id);
+    m->CopyFrom(*static_cast<google::protobuf::Message*>(scr));
     return true;
   }
 
   if (ext == ".shdr") {
-    m->CopyFrom(*static_cast<google::protobuf::Message*>(LoadShader(fPath)));
+    buffers::resources::Shader* shdr = LoadShader(fPath);
+    shdr->set_id(id);
+    m->CopyFrom(*static_cast<google::protobuf::Message*>(shdr));
     return true;
   }
 
@@ -477,7 +506,9 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m) {
 
   // Timelines are folders but do not have a properties.yaml so we exit here
   if (ext == ".tln") {
-    m->CopyFrom(*static_cast<google::protobuf::Message*>(LoadTimeLine(fPath.string())));
+    buffers::resources::Timeline* tln = LoadTimeLine(fPath);
+    tln->set_id(id);
+    m->CopyFrom(*static_cast<google::protobuf::Message*>(tln));
     return true;
   }
 
@@ -488,7 +519,7 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m) {
 
   YAML::Node yaml = YAML::LoadFile(yamlFile.string());
 
-  RecursivePackBuffer(m, yaml, fPath.string(), 0);
+  RecursivePackBuffer(m, id, yaml, fPath.string(), 0);
   
   if (ext == ".rm") {
   }
@@ -512,11 +543,21 @@ bool RecursiveLoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode
       RecursiveLoadTree(fPath.string() + "/" + name, n["contents"], b);
     } else {
       const std::string name = n["name"].as<std::string>();
-      const std::string type = n["type"].as<std::string>();
       b->set_name(name);
+      
+      const std::string type = n["type"].as<std::string>();
+      
+      int id = -1;
+      if (n["id"]) id = n["id"].as<int>();
+      
       auto factory = factoryMap.find(type);
       if (factory != factoryMap.end()) {
-        LoadResource(fPath.string() + "/" + name + factory->second.ext, factory->second.func(b));
+        
+        // Update our max id per res
+        if (maxID[factory->second.type] < id)
+          maxID[factory->second.type] = id;
+        
+        LoadResource(fPath.string() + "/" + name + factory->second.ext, factory->second.func(b), id);
       }
       else
         std::cerr << "Warning: Unsupported resource type: " << n["type"] << std::endl;
@@ -534,6 +575,94 @@ bool LoadTree(const std::string& yaml, buffers::Game* game) {
   return RecursiveLoadTree(egm_root, tree["contents"], game_root);
 }
 
+void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<int, std::string>>& IDmap) {
+  
+  for (int i = 0; i < n->child_size(); ++i) {
+    buffers::TreeNode* c = n->mutable_child(i);
+    RecursiveResourceSanityCheck(c, IDmap);
+  
+    google::protobuf::Message* m = nullptr;
+    std::string type;
+    
+    switch(c->type_case()) {
+     case Type::kBackground:
+      m = c->mutable_background(); 
+      type = "background";
+      break;
+     case Type::kFont:
+      m = c->mutable_font(); 
+      type = "font";
+      break;
+     case Type::kObject:
+      m = c->mutable_object(); 
+      type = "object";
+      break;
+     case Type::kPath:
+      m = c->mutable_path();
+      type = "path";
+      break;
+     case Type::kRoom:
+      m = c->mutable_room();
+      type = "room";
+      break;
+     case Type::kScript:
+      m = c->mutable_script();
+      type = "script";
+      break;
+     case Type::kShader:
+      m = c->mutable_shader(); 
+      type = "shader";
+      break;
+     case Type::kSound:
+      m = c->mutable_sound(); 
+      type = "sound";
+      break;
+     case Type::kSprite:
+      m = c->mutable_sprite();
+      type = "sprite";
+      break;
+     case Type::kTimeline:
+      m = c->mutable_timeline(); 
+      type = "timeline";
+      break;
+     default:
+      break;
+    }
+
+    if (m == nullptr) continue;
+
+    const google::protobuf::Descriptor* desc = m->GetDescriptor();
+    const google::protobuf::Reflection* refl = m->GetReflection();
+    const google::protobuf::FieldDescriptor* field = desc->FindFieldByName("id");
+    
+    int id = -1;
+    if (refl->HasField(*m, field))
+      id = refl->GetInt32(*m, field);
+    else if (id == -1) {
+      id = ++maxID.at(c->type_case());
+      std::cerr << "Warning: the " << type << " \"" << c->name() << "\" has no ID set assigning new ID: " << id << std::endl;
+      refl->SetInt32(m, field, id);
+      continue;
+    }
+    
+    auto it = IDmap[c->type_case()].find(id);
+    if (it != IDmap[c->type_case()].end()) {
+      id = ++maxID.at(c->type_case());
+      std::string dupName = (*it).second;
+      std::cerr << "Warning: the " << type << "s \"" << dupName << "\" and \"" << c->name() << "\" have the same ID reassigning " << c->name() << "\'s ID to: " << id << std::endl; 
+      refl->SetInt32(m, field, id);
+    } else IDmap[c->type_case()].emplace(id, c->name());
+  
+  }
+}
+
+// Every resource needs unique id so the engine don't assplode
+void ResourceSanityCheck(buffers::TreeNode* n) {
+  std::map<Type, std::map<int, std::string>> IDmap;
+  RecursiveResourceSanityCheck(n, IDmap);
+}
+
+
 buffers::Project* LoadEGM(std::string fName) {
   buffers::Project* proj = new buffers::Project();
 
@@ -542,6 +671,7 @@ buffers::Project* LoadEGM(std::string fName) {
   }
 
   LoadTree(fName, proj->mutable_game());
+  ResourceSanityCheck(proj->mutable_game()->mutable_root()); 
 
   return proj;
 }
