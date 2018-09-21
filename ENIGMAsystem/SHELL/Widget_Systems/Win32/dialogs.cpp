@@ -160,6 +160,8 @@ void CenterWindowToMonitor(HWND hwnd, UINT flags)
 /* < / Used by GetDirectoryProc, InputBoxProc, and GetColorProc > */
 
 /* < Used by GetDirectoryProc and InputBoxProc > */
+#define WM_DPICHANGED      0x02E0
+
 int ScaleToDpiPercentX(double PixelX)
 {
   HDC screen = GetDC(NULL);
@@ -275,13 +277,13 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
       EndDialog(hwndDlg, 1);
     } else if (wParam == 10) {
       char strget[1024];
-      tstring tstr_strget = widen(strget);
-      GetDlgItemTextW(hwndDlg, 14, tstr_strget, 1024);
+      WCHAR wstr_strget[1024];
+      GetDlgItemTextW(hwndDlg, 14, wstr_strget, 1024);
       static string str_strget;
-      str_strget = shorten(tstr_strget.c_str());
+      str_strget = shorten(wstr_strget);
       gs_str_submitted = str_strget;
-      GetDlgItemTextW(hwndDlg, 15, tstr_strget, 1024);
-      str_strget = shorten(tstr_strget.c_str());
+      GetDlgItemTextW(hwndDlg, 15, wstr_strget, 1024);
+      str_strget = shorten(wstr_strget);
       gs_str_submitted += string(1, 0) + string(str_strget);
       gs_form_canceled = 0;
       EndDialog(hwndDlg, 2);
