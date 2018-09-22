@@ -171,8 +171,8 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
 
   PngEncodeState enc = PngEncodeStart(w, h);
 
-  for (size_t y=0 ; y<h; y++) {
-    for (size_t x=0 ; x<w; x++) {
+  for (size_t y=0; y<h; y++) {
+    for (size_t x=0; x<w; x++) {
       //pixel start byte position in the BMP
       unsigned bmpos = pixeloffset + (h - y - 1) * scanlineBytes + numChannels * x;
       //pixel start byte position in the new raw image
