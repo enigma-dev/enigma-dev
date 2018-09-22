@@ -18,7 +18,7 @@
 #include "gmk.h"
 #include "filesystem.h"
 
-#include "lodepng.h"
+#include <png.h>
 #include <zlib.h>
 
 #include <fstream>
@@ -65,9 +65,75 @@ std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {
   return writeTempDataFile(bytes.get(), length);
 }
 
-std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool transparent=false) {
+/* structure to store PNG image bytes */
+struct PngEncodeState
+{
+  char *buffer;
+  size_t size;
+  png_bytep row;
+  png_structp png;
+  png_infop info;
+};
+
+void PngWriteCallback(png_structp png_ptr, png_bytep data, png_size_t length) {
+  /* with libpng15 next line causes pointer deference error; use libpng12 */
+  PngEncodeState* p = (PngEncodeState*)png_get_io_ptr(png_ptr); /* was png_ptr->io_ptr */
+  size_t nsize = p->size + length;
+
+  /* allocate or grow buffer */
+  if (p->buffer)
+    p->buffer = (char*)realloc(p->buffer, nsize);
+  else
+    p->buffer = (char*)malloc(nsize);
+
+  if (!p->buffer)
+    png_error(png_ptr, "png write error: could not malloc or realloc output buffer");
+
+  /* copy new bytes to end of buffer */
+  memcpy(p->buffer + p->size, data, length);
+  p->size += length;
+}
+
+PngEncodeState PngEncodeStart(size_t w, size_t h) {
+  PngEncodeState enc;
+  enc.buffer = NULL;
+  enc.size = 0;
+  enc.row = (png_bytep) malloc(4 * w * sizeof(png_byte));
+
+  enc.png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if (!enc.png) {
+    printf("png write error: failed to create png write struct");
+    return enc;
+  }
+  enc.info = png_create_info_struct(enc.png);
+  if (!enc.info) {
+    printf("png write error: failed to create png info struct");
+    png_destroy_write_struct(&enc.png, NULL);
+    return enc;
+  }
+
+  png_set_IHDR(enc.png, enc.info, w, h, 8,
+               PNG_COLOR_TYPE_RGBA,
+               PNG_INTERLACE_NONE,
+               PNG_COMPRESSION_TYPE_DEFAULT,
+               PNG_FILTER_TYPE_DEFAULT);
+  png_set_write_fn(enc.png, &enc, PngWriteCallback, NULL);
+  png_write_info(enc.png, enc.info);
+
+  return enc;
+}
+
+void PngEncodeEnd(PngEncodeState enc) {
+  png_destroy_write_struct(&enc.png, &enc.info);
+  // explicitly free because we allocated it with malloc
+  free(enc.row);
+  if (enc.buffer)
+    free(enc.buffer);
+}
+
+std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
   static const unsigned MINHEADER = 54; //minimum BMP header size
-  auto bmp = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
+  auto bmp = reinterpret_cast<unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
   if (length < MINHEADER) {
     err << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
@@ -103,37 +169,24 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
     return "";
   }
 
-  std::vector<unsigned char> rgba(w * h * 4);
+  PngEncodeState enc = PngEncodeStart(w, h);
 
-  // get the bottom left pixel for transparency
-  // NOTE: bmp is obviously upside down, so it's just the first pixel
-  unsigned char t_pixel_r = bmp[pixeloffset+0],
-                t_pixel_g = bmp[pixeloffset+1],
-                t_pixel_b = bmp[pixeloffset+2];
-
-  /*
-  There are 3 differences between BMP and the raw image buffer for LodePNG:
-  -it's upside down
-  -it's in BGR instead of RGB format (or BRGA instead of RGBA)
-  -each scanline has padding bytes to make it a multiple of 4 if needed
-  The 2D for loop below does all these 3 conversions at once.
-  */
-  for (unsigned y = 0; y < h; y++) {
-    for (unsigned x = 0; x < w; x++) {
+  for (size_t y=0 ; y<h; y++) {
+    for (size_t x=0 ; x<w; x++) {
       //pixel start byte position in the BMP
       unsigned bmpos = pixeloffset + (h - y - 1) * scanlineBytes + numChannels * x;
       //pixel start byte position in the new raw image
-      unsigned newpos = 4 * y * w + 4 * x;
+      unsigned newpos = 4 * x;
       if (numChannels == 3) {
-        rgba[newpos + 0] = bmp[bmpos + 2]; //R<-B
-        rgba[newpos + 1] = bmp[bmpos + 1]; //G<-G
-        rgba[newpos + 2] = bmp[bmpos + 0]; //B<-R
-        rgba[newpos + 3] = 255;            //A<-A
+        enc.row[newpos + 0] = bmp[bmpos + 2]; //R<-B
+        enc.row[newpos + 1] = bmp[bmpos + 1]; //G<-G
+        enc.row[newpos + 2] = bmp[bmpos + 0]; //B<-R
+        enc.row[newpos + 3] = 255;            //A<-A
       } else {
-        rgba[newpos + 0] = bmp[bmpos + 3]; //R<-A
-        rgba[newpos + 1] = bmp[bmpos + 2]; //G<-B
-        rgba[newpos + 2] = bmp[bmpos + 1]; //B<-G
-        rgba[newpos + 3] = bmp[bmpos + 0]; //A<-R
+        enc.row[newpos + 0] = bmp[bmpos + 3]; //R<-A
+        enc.row[newpos + 1] = bmp[bmpos + 2]; //G<-B
+        enc.row[newpos + 2] = bmp[bmpos + 1]; //B<-G
+        enc.row[newpos + 3] = bmp[bmpos + 0]; //A<-R
       }
 
       if (transparent &&
@@ -143,42 +196,32 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
         rgba[newpos + 3] = 0; //A<-A
       }
     }
+    png_write_row(enc.png, enc.row);
   }
 
-  unsigned char *buffer = nullptr;
-  size_t buffer_length;
-  lodepng_encode32(&buffer, &buffer_length, rgba.data(), w, h);
-
-  char *buffer_signed = reinterpret_cast<char*>(buffer);
-  std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
-  // explicitly free because lodepng allocated it with malloc
-  free(buffer);
+  std::string temp_file_path = writeTempDataFile(enc.buffer, enc.size);
+  PngEncodeEnd(enc);
   return temp_file_path;
 }
 
 std::string writeTempBGRAFile(std::unique_ptr<char[]> bytes, size_t width, size_t height) {
   auto bgra = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
-  std::vector<unsigned char> rgba;
-  rgba.resize(width * height * 4);
+  PngEncodeState enc = PngEncodeStart(width, height);
 
   for (unsigned y = 0; y < height; y++) {
     for (unsigned x = 0; x < width; x++) {
-      unsigned pos = width * 4 * y + 4 * x;
-      rgba[pos + 0] = bgra[pos + 2]; //R<-B
-      rgba[pos + 1] = bgra[pos + 1]; //G<-G
-      rgba[pos + 2] = bgra[pos + 0]; //B<-R
-      rgba[pos + 3] = bgra[pos + 3]; //A<-A
+      unsigned pos = 4 * x;
+      unsigned bpos = width * 4 * y + pos;
+      enc.row[pos + 0] = bgra[bpos + 2]; //R<-B
+      enc.row[pos + 1] = bgra[bpos + 1]; //G<-G
+      enc.row[pos + 2] = bgra[bpos + 0]; //B<-R
+      enc.row[pos + 3] = bgra[bpos + 3]; //A<-A
     }
+    png_write_row(enc.png, enc.row);
   }
 
-  unsigned char *buffer = nullptr;
-  size_t buffer_length;
-  lodepng_encode32(&buffer, &buffer_length, rgba.data(), width, height);
-
-  char *buffer_signed = reinterpret_cast<char*>(buffer);
-  std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
-  // explicitly free because lodepng allocated it with malloc
-  free(buffer);
+  std::string temp_file_path = writeTempDataFile(enc.buffer, enc.size);
+  PngEncodeEnd(enc);
   return temp_file_path;
 }
 
