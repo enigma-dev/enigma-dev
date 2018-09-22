@@ -344,7 +344,7 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
             break;
         };
 
-        SetProtoField(refl, currInstance, field, arg, true);
+        SetProtoField(refl, currInstance, field, unquote(arg), true);
       } else {
         tooManyArgsGiven(cmd, pars.size(), args, i, yaml.Mark(), fPath);
       }
