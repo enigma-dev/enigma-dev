@@ -227,7 +227,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   }
 
   // Write the code to edl
-  if (std::ofstream fout{dir/"create[room].edl"}) {
+  if (std::ofstream fout{dir/"create.edl"}) {
     fout << room->code();
   } else return false;
 
@@ -279,7 +279,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   return true;
 }
 
-bool WriteTimeline(const fs::path &egm_root, const fs::path &dir, const buffers::resources::Timeline& timeline) {
+bool WriteTimeline(const fs::path &dir, const buffers::resources::Timeline& timeline) {
   if (!CreateDirectory(dir))
     return false;
 
@@ -331,7 +331,7 @@ bool WriteRes(buffers::TreeNode* res, const fs::path &dir, const fs::path &egm_r
    case Type::kSprite:
     return WriteYaml(egm_root, newDir + ".spr", res->mutable_sprite());
    case Type::kTimeline:
-    return WriteTimeline(egm_root, newDir + ".tln", res->timeline());
+    return WriteTimeline(newDir + ".tln", res->timeline());
    default:
     std::cerr << "Error: Unsupported Resource Type: " << dir << std::endl;
   }

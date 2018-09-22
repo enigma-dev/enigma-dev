@@ -23,6 +23,7 @@
 #include <yaml-cpp/yaml.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/util/message_differencer.h>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <functional>
@@ -73,7 +74,7 @@ std::map<Type, int> maxID = {
 
 buffers::resources::Script* LoadScript(const fs::path& fPath) {
   buffers::resources::Script* scr = new buffers::resources::Script();
-  scr->set_code(FileToString(fPath.string()));
+  scr->set_code(FileToString(fPath));
   return scr;
 }
 
@@ -131,12 +132,12 @@ buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
   const std::string delim = "step[";
   for(auto& f : fs::directory_iterator(fPath)) {
 
-    const std::string stem = f.path().stem().string(); // base filename
+    const std::string stem = f.path().stem(); // base filename
 
     // If its not an edl file, the filename is too short to fit the naming scheme or the filename doesn't end with ]
     // exit here before doing any string cutting to prevent segfaults
-    if (f.path().extension().string() != ".edl" || stem.length() < std::string("step[0]").length() || stem.back() != ']') {
-      invalidEDLNaming(stem, fPath.string());
+    if (f.path().extension() != ".edl" || stem.length() < std::string("step[0]").length() || stem.back() != ']') {
+      invalidEDLNaming(stem, fPath);
       continue;
     }
 
@@ -146,14 +147,14 @@ buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
     const int step = std::stoi(stepStr, &idx);
     // Check the string to int succeeded and the begining of the string is correct.
     if (idx != stepStr.length()-1 || substr1 != delim) {
-      invalidEDLNaming(stem, fPath.string());
+      invalidEDLNaming(stem, fPath);
       continue;
     }
 
     // If we made it this far we can add event to timeline
     buffers::resources::Timeline_Moment* m = tln->add_moments();
     m->set_step(step);
-    m->set_code(FileToString(f.path().string()));
+    m->set_code(FileToString(f.path()));
 
   }
 
@@ -229,7 +230,7 @@ const std::map<char, Command> tileParameters = {
   { 't', { 0, {"id"}                 } },
   { 'n', { 1, {"name"}               } },
   { 'b', { 1, {"background_name"}    } },
-  //{ 'd', { 1, {"depth"}              } },
+  { 'd', { 1, {"depth"}              } },
   { 'p', { 1, {"x", "y"}             } },
   { 'x', { 1, {"x"}                  } },
   { 'y', { 1, {"y"}                  } },
@@ -245,21 +246,20 @@ const std::map<char, Command> tileParameters = {
   { 'c', { 1, {"color"}              } },
 };
 
-void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD, 
+void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD,
   const std::map<char, Command>& parameters, YAML::Node& yaml, const fs::path& fPath) {
-  
-  std::cout << fPath << std::endl;
+
   const google::protobuf::Reflection *refl = m->GetReflection();
-  
+
   // split at spaces or comma etc
   std::vector<std::string> tokens = Tokenize(yaml.as<std::string>(), " ,\n\t");
-  
+
   google::protobuf::Message* currInstance = nullptr;
   std::vector<google::protobuf::Message*> instances;
 
   char currentCmd = '\0';
   std::vector<std::pair<char, std::vector<std::string> > > arguments;
-  
+
   // Group all our commands into <char, vector<string>> (cmd, args)
   auto cmdIt = arguments.end();
   for (unsigned i = 0; i < tokens.size(); ++i) {
@@ -278,10 +278,17 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
     char cmd = cmdPair.first;
     std::vector<std::string> args = cmdPair.second;
 
-    auto pit = parameters.find(tolower(cmd));
+    auto pit = parameters.find(cmd);
     if (pit == parameters.end()) {
-      std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
-      continue;
+      // if this command does not have uppercase equivalent
+      // we can still allow a lowercase version for relative
+      pit = parameters.find(cmd = tolower(cmd));
+      if (pit == parameters.end()) {
+        // no upper or lowercase version seems to be supported...
+        std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
+        yamlErrorPosition(yaml.Mark());
+        continue;
+      }
     }
     auto sig = (*pit).second;
     auto pars = sig.field_names;
@@ -291,31 +298,29 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
       tooFewArgsGiven(cmd, sig.minArgs, yaml.Mark(), fPath);
       continue;
     }
-    
+
     // Special case for create cmds
     if (tolower(cmd) == tolower(createCMD)) {
         currInstance = refl->AddMessage(m, f);
         instances.push_back(currInstance);
-        
+
         if (cmd == tolower(createCMD)) {
           if (!instances.empty()) {
             currInstance->CopyFrom(*instances.back());
             const google::protobuf::Descriptor *instDesc = currInstance->GetDescriptor();
             const google::protobuf::Reflection *instRefl = currInstance->GetReflection();
-            
+
             // Don't copy this crap
             for (const std::string& field_name : {"id", "name", "code"}) {
               const google::protobuf::FieldDescriptor *instField = instDesc->FindFieldByName(field_name);
               if (instField != nullptr)
-                instRefl->ClearField(currInstance, instField); 
+                instRefl->ClearField(currInstance, instField);
             }
           }
           else
             std::cerr << "Error: \"" << cmd << "\" called but there exists no previous instance to copy the attributes from" << std::endl;
         }
     }
-
-    cmd = tolower(cmd); // NOTE: for now, all cmds are relative
 
     // General case for rest of command args
     for (size_t i = 0; i < args.size(); ++i) {
@@ -347,40 +352,51 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
   }
 }
 
-void RepackLayers(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD, 
+void RepackLayers(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD,
   const std::map<char, Command>& parameters, YAML::Node& yaml, const fs::path& fPath) {
-    
+
   // All layers require a "format" and a "data" key in the YAML
   YAML::Node format = yaml["Format"];
   if (!format) {
-    std::cerr << "Error: missing \"Format\" key in " << fPath.string() << std::endl;
+    std::cerr << "Error: missing \"Format\" key in " << fPath << std::endl;
     yamlErrorPosition(yaml.Mark());
     return;
   }
 
   YAML::Node data = yaml["Data"];
   if (!data) {
-    std::cerr << "Error: missing \"Data\" key in " << fPath.string() << std::endl;
+    std::cerr << "Error: missing \"Data\" key in " << fPath << std::endl;
     yamlErrorPosition(yaml.Mark());
     return;
   }
-  
+
   // Send our data to the appropriate handler (if one exists)
   const std::string formatStr = format.as<std::string>();
-  if (formatStr == "svg-d") RepackSVGDLayer(m, f, createCMD, parameters, data, fPath.string());
-  else std::cerr << "Error: unsupported instance layer format \"" << formatStr << "\" in " << fPath.string() << std::endl;
+  if (formatStr == "svg-d") RepackSVGDLayer(m, f, createCMD, parameters, data, fPath);
+  else std::cerr << "Error: unsupported instance layer format \"" << formatStr << "\" in " << fPath << std::endl;
 }
 
-inline void loadObjectEvents(const fs::path& fPath) {
+// Load all edl files in our object dir
+inline void loadObjectEvents(const fs::path& fPath, google::protobuf::Message *m, const google::protobuf::FieldDescriptor *field) {
   for(auto& f : fs::directory_iterator(fPath)) {
-    
+    if (f.path().extension() == ".edl") {
+      const std::string eventName = f.path().stem();
+      buffers::resources::Object_Event event;
+      event.set_name(eventName);
+      event.set_code(FileToString(f.path()));
+      
+      const google::protobuf::Reflection *refl = m->GetReflection();
+      
+      google::protobuf::Message* msg = refl->AddMessage(m, field);
+      msg->CopyFrom(event);
+    }
   }
 }
 
 void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml, const fs::path& fPath, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
-  const std::string ext = fPath.extension().string();
+  const std::string ext = fPath.extension();
 
   for (int i = 0; i < desc->field_count(); i++) {
     const google::protobuf::FieldDescriptor *field = desc->field(i);
@@ -393,16 +409,15 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
     if (ext == ".rm" && depth == 0) {
       if (key == "instances") key = "instance-layers";
       if (key == "tiles") key = "tile-layers";
-      if (key == "code") {
-        const fs::path edlFile = fPath.string() + "/create[room].edl";
-        if (FileExists(edlFile))
-          SetProtoField(refl, m, field, FileToString(edlFile));
+      if (key == "code") continue;
+    }
+
+    if (ext == ".obj" && depth == 0) {
+       // code is loaded from edl files
+      if (key == "events") {
+        loadObjectEvents(fPath, m, field);
         continue;
       }
-    }
-    
-    if (ext == ".obj" && depth == 0) {
-      if (key == "events") continue; // code is loaded from edl files
     }
     
     if (key == "id" && depth == 0) {
@@ -415,7 +430,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
 
     // YAML field not in properties.yaml
     if (!node) {
-      std::cerr << "Warning: could not locate YAML field " << field->name() << " in " << fPath.string() << std::endl;
+      std::cerr << "Warning: could not locate YAML field " << field->name() << " in " << fPath << std::endl;
       continue;
     }
 
@@ -424,7 +439,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
     if (field->is_repeated()) {
 
       if (!node.IsSequence()) {
-        invalidYAMLType(yaml, fPath.string(), field);
+        invalidYAMLType(yaml, fPath, field);
         continue;
       }
 
@@ -432,12 +447,12 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
         case CppType::CPPTYPE_MESSAGE: {
           for (auto n : node) {
             if (key == "instance-layers")
-              RepackLayers(m, field, 'I', instanceParameters, n, fPath.string());
+              RepackLayers(m, field, 'I', instanceParameters, n, fPath);
             else if (key == "tile-layers")
-              RepackLayers(m, field, 'T', tileParameters, n, fPath.string());
+              RepackLayers(m, field, 'T', tileParameters, n, fPath);
             else {
               google::protobuf::Message* msg = refl->AddMessage(m, field);
-              RecursivePackBuffer(msg, id, n, fPath.string(), depth + 1);
+              RecursivePackBuffer(msg, id, n, fPath, depth + 1);
             }
           }
           break;
@@ -461,7 +476,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
       YAML::Node n = node;
 
       if ((!n.IsScalar() && field->cpp_type() != CppType::CPPTYPE_MESSAGE) || (!n.IsMap() && field->cpp_type() == CppType::CPPTYPE_MESSAGE)) {
-        invalidYAMLType(yaml, fPath.string(), field);
+        invalidYAMLType(yaml, fPath, field);
         continue;
       }
 
@@ -469,7 +484,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
         // If field is a singular message we need to recurse into this method again
         case CppType::CPPTYPE_MESSAGE: {
           google::protobuf::Message *msg = refl->MutableMessage(m, field);
-          RecursivePackBuffer(msg, id, n, fPath.string(), depth + 1);
+          RecursivePackBuffer(msg, id, n, fPath, depth + 1);
           break;
         }
         default: {
@@ -481,9 +496,67 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
   }
 }
 
+inline bool isNumber(const std::string& s) {
+  return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+}
+
+inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm) {
+  for(auto& f : fs::directory_iterator(fPath)) {
+    if (f.path().extension() == ".edl") {
+      const std::string edlFile = f.path().stem();
+
+      if (edlFile == "create") {
+        rm->set_code(FileToString(f.path()));
+        continue;
+      }
+
+      const std::string delim = "[";
+      size_t pos = edlFile.find_first_of(delim);
+      if (pos == std::string::npos || edlFile.back() != ']') {
+        invalidEDLNaming(fPath, edlFile);
+        continue;
+      }
+
+      const std::string instName = edlFile.substr(pos+1, edlFile.length()-pos-2);
+
+      if (instName.empty()) continue;
+
+      // See if we have an instance with matching a name
+      auto instances = rm->instances();
+      auto instItr = std::find_if(instances.begin(), instances.end(), 
+        [&instName](const buffers::resources::Room_Instance inst) {
+          return (inst.name() == instName);
+        });
+
+      if (instItr != instances.end()) {
+        instItr->set_code(FileToString(f.path()));
+        continue;
+      }
+
+      if (!isNumber(instName)) {
+        std::cerr << "Error: Failed to set instance code. Could not find instance named: " << instName << " in " << fPath << std::endl;
+        continue;
+      }
+
+      // If its a number check if we have a matching id
+      int id = std::stoi(instName);
+      instItr = std::find_if(instances.begin(), instances.end(), 
+        [&id](const buffers::resources::Room_Instance inst) {
+          return (inst.id() == id);
+        });
+      
+      if (instItr != instances.end()) {
+        instItr->set_code(FileToString(f.path()));
+      } else {
+        std::cerr << "Error: Failed to set instance code. Could not find instance with the ID: " << id << " in " << fPath << std::endl;
+      }
+    }
+  }
+}
+
 bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
 
-  std::string ext = fPath.extension().string();
+  std::string ext = fPath.extension();
 
   // Scripts and shaders are not folders so we exit here
   if (ext == ".edl") {
@@ -500,7 +573,7 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
     return true;
   }
 
-  if (!FolderExists(fPath.string())) {
+  if (!FolderExists(fPath)) {
     std::cerr << "Error: the resource folder " << fPath << " referenced in the project tree does not exist" << std::endl;
   }
 
@@ -513,15 +586,16 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
   }
 
   const fs::path yamlFile = fPath.string() + "/properties.yaml";
-  if (!FileExists(yamlFile.string())) {
+  if (!FileExists(yamlFile)) {
     std::cerr << "Error: missing the resource YAML " << yamlFile << std::endl;
   }
 
-  YAML::Node yaml = YAML::LoadFile(yamlFile.string());
-
-  RecursivePackBuffer(m, id, yaml, fPath.string(), 0);
+  YAML::Node yaml = YAML::LoadFile(yamlFile);
+  
+  RecursivePackBuffer(m, id, yaml, fPath, 0);
   
   if (ext == ".rm") {
+    LoadInstanceEDL(fPath, static_cast<buffers::resources::Room*>(m));
   }
 
   return true;
@@ -529,7 +603,7 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
 
 bool RecursiveLoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode* buffer) {
 
-  if (!FolderExists(fPath.string())) {
+  if (!FolderExists(fPath)) {
     std::cerr << "Error: the folder " << fPath << " referenced in the project tree does not exist" << std::endl;
   }
 
@@ -668,6 +742,7 @@ buffers::Project* LoadEGM(std::string fName) {
 
   if (!FileExists(fName)) {
     std::cerr << "Error: " << fName << " does not exist" << std::endl;
+    return proj;
   }
 
   LoadTree(fName, proj->mutable_game());
