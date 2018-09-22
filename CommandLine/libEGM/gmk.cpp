@@ -76,8 +76,7 @@ struct PngEncodeState
 };
 
 void PngWriteCallback(png_structp png_ptr, png_bytep data, png_size_t length) {
-  /* with libpng15 next line causes pointer deference error; use libpng12 */
-  PngEncodeState* p = (PngEncodeState*)png_get_io_ptr(png_ptr); /* was png_ptr->io_ptr */
+  PngEncodeState* p = (PngEncodeState*)png_get_io_ptr(png_ptr);
   size_t nsize = p->size + length;
 
   /* allocate or grow buffer */
