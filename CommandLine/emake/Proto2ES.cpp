@@ -258,18 +258,18 @@ Image AddImage(const std::string fname) {
   FILE *fp = fopen(fname.c_str(), "rb");
 
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if (!png) printf("error: failed to create png read struct");
+  if (!png) printf("png read error: failed to create png read struct");
   png_infop info = png_create_info_struct(png);
-  if (!info) printf("error: failed to create png info struct");
+  if (!info) printf("png read error: failed to create png info struct");
+  if (setjmp(png_jmpbuf(png))) printf("png read error: failed to save current execution context");
 
-  if (setjmp(png_jmpbuf(png))) printf("png error: failed to save current execution context");
   png_init_io(png, fp);
   png_read_info(png, info);
 
   size_t pngwidth, pngheight;
   png_byte color_type, bit_depth;
-  pngwidth      = png_get_image_width(png, info);
-  pngheight     = png_get_image_height(png, info);
+  pngwidth   = png_get_image_width(png, info);
+  pngheight  = png_get_image_height(png, info);
   color_type = png_get_color_type(png, info);
   bit_depth  = png_get_bit_depth(png, info);
 
@@ -309,6 +309,7 @@ Image AddImage(const std::string fname) {
 
   png_read_image(png, image);
 
+  png_destroy_read_struct(&png, &info, NULL);
   fclose(fp);
 
   size_t ih,iw;
