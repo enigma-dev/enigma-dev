@@ -28,6 +28,7 @@
 #include <functional>
 #include <map>
 #include <ctype.h>
+#include <set>
 
 namespace proto = google::protobuf;
 using CppType = proto::FieldDescriptor::CppType;
@@ -40,22 +41,35 @@ using Type = buffers::TreeNode::TypeCase;
 using FactoryFunction = std::function<google::protobuf::Message *(TreeNode*)>;
 struct ResourceFactory {
   FactoryFunction func;
-  std::string ext;
   Type type;
+  std::string ext = "";
 };
 using FactoryMap = std::unordered_map<std::string, ResourceFactory>;
 
 static const FactoryMap factoryMap({
-  { "sprite",     { &TreeNode::mutable_sprite,     ".spr",  Type::kSprite     } },
-  { "sound",      { &TreeNode::mutable_sound,      ".snd",  Type::kSound      } },
-  { "background", { &TreeNode::mutable_background, ".bkg",  Type::kBackground } },
-  { "path",       { &TreeNode::mutable_path,       ".pth",  Type::kPath       } },
-  { "script",     { &TreeNode::mutable_script,     ".edl",  Type::kScript     } },
-  { "shader",     { &TreeNode::mutable_shader,     ".shdr", Type::kShader     } },
-  { "font",       { &TreeNode::mutable_font,       ".fnt",  Type::kFont       } },
-  { "timeline",   { &TreeNode::mutable_timeline,   ".tln",  Type::kTimeline   } },
-  { "object",     { &TreeNode::mutable_object,     ".obj",  Type::kObject     } },
-  { "room",       { &TreeNode::mutable_room,       ".rm",   Type::kRoom       } }
+  { "sprite",     { &TreeNode::mutable_sprite,     Type::kSprite,     ".spr"  } },
+  { "sound",      { &TreeNode::mutable_sound,      Type::kSound,      ".snd"  } },
+  { "background", { &TreeNode::mutable_background, Type::kBackground, ".bkg"  } },
+  { "path",       { &TreeNode::mutable_path,       Type::kPath,       ".pth"  } },
+  { "script",     { &TreeNode::mutable_script,     Type::kScript,     ".edl"  } },
+  { "shader",     { &TreeNode::mutable_shader,     Type::kShader,     ".shdr" } },
+  { "font",       { &TreeNode::mutable_font,       Type::kFont,       ".fnt"  } },
+  { "timeline",   { &TreeNode::mutable_timeline,   Type::kTimeline,   ".tln", } },
+  { "object",     { &TreeNode::mutable_object,     Type::kObject,     ".obj", } },
+  { "room",       { &TreeNode::mutable_room,       Type::kRoom,       ".rm",  } }
+});
+
+static const FactoryMap extFactoryMap({
+  { ".spr",  { &TreeNode::mutable_sprite,     Type::kSprite     } },
+  { ".snd",  { &TreeNode::mutable_sound,      Type::kSound      } },
+  { ".bkg",  { &TreeNode::mutable_background, Type::kBackground } },
+  { ".pth",  { &TreeNode::mutable_path,       Type::kPath,      } },
+  { ".edl",  { &TreeNode::mutable_script,     Type::kScript     } },
+  { ".shdr", { &TreeNode::mutable_shader,     Type::kShader     } },
+  { ".fnt",  { &TreeNode::mutable_font,       Type::kFont       } },
+  { ".tln",  { &TreeNode::mutable_timeline,   Type::kTimeline   } },
+  { ".obj",  { &TreeNode::mutable_object,     Type::kObject     } },
+  { ".rm",   { &TreeNode::mutable_room,       Type::kRoom       } }
 });
 
 std::map<Type, int> maxID = {
@@ -531,7 +545,8 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
   return true;
 }
 
-bool RecursiveLoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode* buffer) {
+// Load EGM using tree file
+bool LoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode* buffer) {
 
   if (!FolderExists(fPath.string())) {
     std::cerr << "Error: the folder " << fPath << " referenced in the project tree does not exist" << std::endl;
@@ -544,7 +559,7 @@ bool RecursiveLoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode
       const std::string name = n["folder"].as<std::string>();
       b->set_name(name);
       b->set_folder(true);
-      RecursiveLoadTree(fPath.string() + "/" + name, n["contents"], b);
+      LoadTree(fPath.string() + "/" + name, n["contents"], b);
     } else {
       const std::string name = n["name"].as<std::string>();
       b->set_name(name);
@@ -571,12 +586,65 @@ bool RecursiveLoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode
   return true;
 }
 
-bool LoadTree(const std::string& yaml, buffers::Game* game) {
-  YAML::Node tree = YAML::LoadFile(yaml);
+auto fsCompare = [](const fs::directory_entry& a, const fs::directory_entry& b) { return a.path().stem().string() < b.path().stem().string(); };
+
+// Load EGM without a tree file
+bool LoadDirectory(const fs::path& fPath, buffers::TreeNode* n, int depth) {
+  
+  // Sort dirs alphabetical
+  std::set<fs::directory_entry, decltype(fsCompare)> files(fsCompare);
+  for(auto& p: fs::directory_iterator(fPath)) {
+    files.insert(p);
+  }
+
+  for(auto& p: files) {
+    const std::string ext = p.path().extension();
+    if (p.is_directory()) {
+      
+      buffers::TreeNode* c = n->add_child();
+      
+      c->set_name(p.path().stem());
+      
+      // If directory is resource
+      auto factory = extFactoryMap.find(ext);
+      if (factory != extFactoryMap.end()) {
+        LoadResource(p.path(), factory->second.func(c), maxID.at(factory->second.type)++);
+        continue;
+      }
+      
+      // If directory is just a folder
+      c->set_folder(true);
+      LoadDirectory(p, c, depth + 1);
+    } else { // is a file
+      
+      buffers::TreeNode* c = n->add_child();
+      c->set_name(p.path().stem());
+      if (ext == ".edl") { // script
+        LoadResource(p.path(), extFactoryMap.at(".edl").func(c), maxID.at(Type::kScript)++);
+      } else if (ext == ".vert") { // shader
+        LoadResource(p.path().parent_path().string() + ".shdr", extFactoryMap.at(".shdr").func(c), maxID.at(Type::kShader)++);
+      }
+    }
+  }
+  
+  return true;
+}
+
+bool LoadEGM(const std::string& yaml, buffers::Game* game) {
+  YAML::Node project = YAML::LoadFile(yaml);
+  
   const fs::path egm_root = fs::path(yaml).parent_path();
   buffers::TreeNode* game_root = game->mutable_root();
   game_root->set_name("/");
-  return RecursiveLoadTree(egm_root, tree["contents"], game_root);
+  
+  // Load EGM without a tree file
+  if (!project["tree"] || project["tree"].as<std::string>() == "autogen") {
+    return LoadDirectory(egm_root, game_root, 0);
+  // Load EGM with a tree file
+  } else {
+    YAML::Node tree = YAML::LoadFile(egm_root.string() + "/tree.yaml");
+    return LoadTree(egm_root, tree["contents"], game_root);
+  }
 }
 
 void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<int, std::string>>& IDmap) {
@@ -666,7 +734,6 @@ void ResourceSanityCheck(buffers::TreeNode* n) {
   RecursiveResourceSanityCheck(n, IDmap);
 }
 
-
 buffers::Project* LoadEGM(std::string fName) {
   buffers::Project* proj = new buffers::Project();
 
@@ -674,7 +741,7 @@ buffers::Project* LoadEGM(std::string fName) {
     std::cerr << "Error: " << fName << " does not exist" << std::endl;
   }
 
-  LoadTree(fName, proj->mutable_game());
+  LoadEGM(fName, proj->mutable_game());
   ResourceSanityCheck(proj->mutable_game()->mutable_root()); 
 
   return proj;

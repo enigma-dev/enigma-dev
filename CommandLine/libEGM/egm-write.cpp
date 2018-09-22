@@ -439,6 +439,8 @@ bool WriteNode(buffers::TreeNode* folder, string dir, const fs::path &egm_root, 
 
 namespace egm {
 
+static const std::string EGM_VERSION = "2.0.0";
+
 bool WriteEGM(string fName, buffers::Project* project) {
 
   if (fName.back() != '/')
@@ -446,6 +448,23 @@ bool WriteEGM(string fName, buffers::Project* project) {
 
   if (!CreateDirectory(fName))
     return false;
+    
+  // need to remove the '/' here
+  const fs::path projectFile = fName + "/" + fs::path(fName.substr(0, fName.length()-2)).filename().string();
+  
+  if (std::ofstream out{projectFile.string()}) { // egm settings
+    YAML::Emitter projYAML;
+    projYAML << YAML::BeginMap;
+    projYAML << YAML::Key << "version" << EGM_VERSION;
+    projYAML << YAML::Key << "tree" << "tree.yaml";
+    projYAML << YAML::Key << "backup" << "protobuf.bin";
+    projYAML << YAML::EndMap;
+    out << projYAML.c_str();
+  } else {
+    std::cerr << "Failed to open project file "
+              << projectFile << " for write!" << std::endl;
+    return false;
+  }
 
   std::fstream bin(fName + "/protobuf.bin", std::ios::out | std::ios::trunc | std::ios::binary);
   project->SerializeToOstream(&bin);
