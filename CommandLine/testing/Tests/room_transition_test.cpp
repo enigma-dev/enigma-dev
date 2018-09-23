@@ -2,16 +2,18 @@
 
 #include <gtest/gtest.h>
 
-TEST(Regression, tiles_room_transition_test) {
+TEST(Regression, room_transition_test) {
   if (!TestHarness::windowing_supported()) return;
-  auto test_harness = LAUNCH_HARNESS_FOR_GAME(TestConfig(), "gmx");
+  TestConfig tc;
+  tc.extensions = "Paths,GTest";
+  auto test_harness = LAUNCH_HARNESS_FOR_GAME(tc, "gmx");
   if (!test_harness) FAIL() << "Game could not be run.";
 
   test_harness->wait();  // Let the game render a frame first.
   ASSERT_TRUE(test_harness->game_is_running())
       << "Game stopped running unexpectedly";
 
-  test_harness->screen_save("./test-harness-out/enigma_tiles_room_transition_test.png");
+  test_harness->screen_save("./test-harness-out/enigma_room_transition_test.png");
 
   test_harness->close_window();
   bool game_running = test_harness->game_is_running();
