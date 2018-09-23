@@ -170,6 +170,13 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
 
   PngEncodeState enc = PngEncodeStart(w, h);
 
+  /*
+  There are 3 differences between BMP and raw image data used by libpng:
+  -it's upside down
+  -it's in BGR instead of RGB format (or BRGA instead of RGBA)
+  -each scanline has padding bytes to make it a multiple of 4 if needed
+  The 2D for loop below does all these 3 conversions at once.
+  */
   for (size_t y=0; y<h; y++) {
     for (size_t x=0; x<w; x++) {
       //pixel start byte position in the BMP
