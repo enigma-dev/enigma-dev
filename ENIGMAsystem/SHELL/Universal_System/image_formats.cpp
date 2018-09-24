@@ -20,7 +20,6 @@
 #include "Universal_System/estring.h"
 #include "gif_format.h"
 #include "image_formats.h"
-#include "lodepng.h"
 
 #include <fstream>      // std::ofstream
 #include <algorithm>
@@ -199,10 +198,16 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
   FILE *fp = fopen(filename.c_str(), "rb");
 
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if (!png) printf("png read error: failed to create png read struct");
+  if (!png) return 0;
   png_infop info = png_create_info_struct(png);
-  if (!info) printf("png read error: failed to create png info struct");
-  if (setjmp(png_jmpbuf(png))) printf("png read error: failed to save current execution context");
+  if (!info) {
+    png_destroy_write_struct(&png, NULL);
+    return 0;
+  }
+  if (setjmp(png_jmpbuf(png))) {
+    png_destroy_write_struct(&png, &info);
+    return 0;
+  }
 
   png_init_io(png, fp);
   png_read_info(png, info);
@@ -342,44 +347,63 @@ int image_save_bmp(string filename, const unsigned char* data, unsigned width, u
 
 int image_save_png(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped)
 {
-  //TODO: Use width/height instead of full size, unfortunately lodepng don't support this apparently
-  //TODO: Faggot ass lodepng also doesn't let us specify if our image data is flipped
-  //TODO: Faggot ass lodepng also doesn't support BGRA
-  unsigned bytes = 4;
+  FILE *fp = fopen(filename.c_str(), "wb");
+  if (!fp) return -1;
 
-  unsigned char* bitmap = new unsigned char[width*height*bytes]();
+  png_structp png;
+  png_infop info;
 
-  for (unsigned i = 0; i < height; i++) {
-    unsigned tmp = i;
-    unsigned bmp = i;
-    if (!flipped) {
+  png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if (!png) {
+    return -1;
+  }
+  info = png_create_info_struct(png);
+  if (!info) {
+    png_destroy_write_struct(&png, NULL);
+    return -1;
+  }
+
+  png_init_io(png, fp);
+  png_set_IHDR(png, info, width, height, 8,
+               PNG_COLOR_TYPE_RGBA,
+               PNG_INTERLACE_NONE,
+               PNG_COMPRESSION_TYPE_DEFAULT,
+               PNG_FILTER_TYPE_DEFAULT);
+
+  png_write_info(png, info);
+
+  size_t bytes = 4, row_size = width * bytes, full_row_size = fullwidth * bytes;
+
+  png_bytep* rows, row;
+  rows = (png_bytep*)malloc(sizeof(png_bytep) * height);
+  for (size_t y = 0; y < height; ++y) {
+    row = rows[y] = (png_byte*)malloc(row_size);
+
+    size_t tmp = y;
+    if (flipped) {
       tmp = height - 1 - tmp;
-      bmp = height - 1 - bmp;
     }
-    tmp *= bytes * fullwidth;
-    bmp *= bytes * width;
-    for (unsigned ii = 0; ii < width*bytes; ii += bytes) {
-      bitmap[bmp + ii + 2] = data[tmp + ii + 0];
-      bitmap[bmp + ii + 1] = data[tmp + ii + 1];
-      bitmap[bmp + ii + 0] = data[tmp + ii + 2];
-      bitmap[bmp + ii + 3] = data[tmp + ii + 3];
+    tmp *= full_row_size;
+    for (size_t x = 0; x < width; ++x) {
+      size_t bmp = x * bytes;
+      row[bmp + 2] = data[tmp + bmp + 0];
+      row[bmp + 1] = data[tmp + bmp + 1];
+      row[bmp + 0] = data[tmp + bmp + 2];
+      row[bmp + 3] = data[tmp + bmp + 3];
     }
   }
 
-  unsigned char* buffer = nullptr;
-  size_t buffersize;
+  png_write_image(png, rows);
+  png_write_end(png, NULL);
 
-  unsigned error = lodepng_encode_memory(&buffer, &buffersize, bitmap, width, height, LCT_RGBA, 8);
-  if (!error) {
-    std::ofstream file(filename.c_str(), std::ios::out|std::ios::binary);
-    file.write(reinterpret_cast<const char*>(buffer), std::streamsize(buffersize));
-    file.close();
-  }
+  png_destroy_write_struct(&png, &info);
+  /* cleanup heap allocation */
+  for (size_t y=0; y<height; ++y)
+    free(rows[y]);
+  free(rows);
 
-  free(buffer);
-  delete[] bitmap;
-
-  if (error) return -1; else return 1;
+  fclose(fp);
+  return 0;
 }
 
 }
