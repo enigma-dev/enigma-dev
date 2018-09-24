@@ -227,7 +227,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   }
 
   // Write the code to edl
-  if (std::ofstream fout{dir/"create.edl"}) {
+  if (std::ofstream fout{MINGWISATWAT(dir/"create.edl")}) {
     fout << room->code();
   } else return false;
 

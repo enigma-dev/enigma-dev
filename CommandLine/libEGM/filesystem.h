@@ -13,11 +13,12 @@
   #include <filesystem>
   namespace fs = std::filesystem;
   using errc = std::error_code;
-  #ifdef __MINGW32__
-  #define MINGWISATWAT(x) x.string()
-  #else
-  #define MINGWISATWAT(x) x
-  #endif
+#endif
+
+#ifdef __MINGW32__
+#define MINGWISATWAT(x) (x).string()
+#else
+#define MINGWISATWAT(x) (x)
 #endif
 
 using std::string;

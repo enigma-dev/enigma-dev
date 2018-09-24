@@ -669,7 +669,7 @@ bool LoadDirectory(const fs::path& fPath, buffers::TreeNode* n, int depth) {
 
   for(auto& p: files) {
     const std::string ext = MINGWISATWAT(p.path().extension());
-    if (p.is_directory()) {
+    if (is_directory(p)) {
 
       buffers::TreeNode* c = n->add_child();
 
