@@ -126,6 +126,11 @@ int main(int argc, char* argv[])
       return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
 #ifdef CLI_ENABLE_EGM
     } else if (ext == "egm") {
+      boost::filesystem::path p = input_file;
+      if (boost::filesystem::is_directory(p)) {
+        input_file += "/" + p.filename().stem().string() + ".egm";
+      }
+
       buffers::Project* project;
       if (!(project = egm::LoadEGM(input_file))) return 1;
       return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
