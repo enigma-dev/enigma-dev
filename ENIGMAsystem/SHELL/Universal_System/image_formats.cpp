@@ -204,10 +204,6 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
     png_destroy_write_struct(&png, NULL);
     return 0;
   }
-  if (setjmp(png_jmpbuf(png))) {
-    png_destroy_write_struct(&png, &info);
-    return 0;
-  }
 
   png_init_io(png, fp);
   png_read_info(png, info);

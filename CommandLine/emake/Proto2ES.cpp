@@ -261,7 +261,6 @@ Image AddImage(const std::string fname) {
   if (!png) printf("png read error: failed to create png read struct");
   png_infop info = png_create_info_struct(png);
   if (!info) printf("png read error: failed to create png info struct");
-  if (setjmp(png_jmpbuf(png))) printf("png read error: failed to save current execution context");
 
   png_init_io(png, fp);
   png_read_info(png, info);
