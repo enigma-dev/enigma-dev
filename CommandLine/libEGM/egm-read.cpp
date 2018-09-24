@@ -293,6 +293,7 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
     std::vector<std::string> args = cmdPair.second;
 
     auto pit = parameters.find(cmd);
+    bool relative = islower(cmd); //TODO: fix color
     if (pit == parameters.end()) {
       // if this command does not have uppercase equivalent
       // we can still allow a lowercase version for relative
@@ -316,7 +317,6 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
     // Special case for create cmds
     if (tolower(cmd) == tolower(createCMD)) {
         currInstance = refl->AddMessage(m, f);
-        instances.push_back(currInstance);
 
         if (cmd == tolower(createCMD)) {
           if (!instances.empty()) {
@@ -334,6 +334,8 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
           else
             std::cerr << "Error: \"" << cmd << "\" called but there exists no previous instance to copy the attributes from" << std::endl;
         }
+
+        instances.push_back(currInstance);
     }
 
     // General case for rest of command args
@@ -358,7 +360,7 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
             break;
         };
 
-        SetProtoField(refl, currInstance, field, unquote(arg), true);
+        SetProtoField(refl, currInstance, field, unquote(arg), relative);
       } else {
         tooManyArgsGiven(cmd, pars.size(), args, i, yaml.Mark(), fPath);
       }
