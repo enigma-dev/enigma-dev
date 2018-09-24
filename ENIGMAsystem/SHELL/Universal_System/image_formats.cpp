@@ -1,6 +1,6 @@
 /** Copyright (C) 2008-2011 Josh Ventura
 *** Copyright (C) 2013 Ssss
-*** Copyright (C) 2013-2014 Robert B. Colton
+*** Copyright (C) 2013-2014, 2018 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -18,15 +18,17 @@
 **/
 
 #include "Universal_System/estring.h"
+#include "gif_format.h"
+#include "image_formats.h"
+#include "lodepng.h"
+
 #include <fstream>      // std::ofstream
 #include <algorithm>
 #include <string>
 #include <cstring>
-#include "lodepng.h"
-#include "gif_format.h"
+
+#include <png.h>
 #include <stdlib.h>
-using namespace std;
-#include "image_formats.h"
 
 #include "nlpo2.h"
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -37,6 +39,8 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
   x += x >> 8;
   return (x + (x >> 16)) & 63;
 }
+
+using namespace std;
 
 namespace enigma
 {
@@ -192,45 +196,97 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
 }
 
 unsigned char* image_load_png(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
-  unsigned error;
-  unsigned char* image = nullptr;
-  unsigned pngwidth, pngheight;
+  FILE *fp = fopen(filename.c_str(), "rb");
 
-  error = lodepng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str());
-  if (error)
-  {
-    printf("error %u: %s\n", error, lodepng_error_text(error));
-    return NULL;
+  png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if (!png) printf("png read error: failed to create png read struct");
+  png_infop info = png_create_info_struct(png);
+  if (!info) printf("png read error: failed to create png info struct");
+  if (setjmp(png_jmpbuf(png))) printf("png read error: failed to save current execution context");
+
+  png_init_io(png, fp);
+  png_read_info(png, info);
+
+  size_t pngwidth, pngheight;
+  png_byte color_type, bit_depth;
+  pngwidth   = png_get_image_width(png, info);
+  pngheight  = png_get_image_height(png, info);
+  color_type = png_get_color_type(png, info);
+  bit_depth  = png_get_bit_depth(png, info);
+
+  // Read any color_type into 8bit depth, RGBA format.
+  // See http://www.libpng.org/pub/png/libpng-manual.txt
+
+  if (bit_depth == 16)
+    png_set_strip_16(png);
+
+  if (color_type == PNG_COLOR_TYPE_PALETTE)
+    png_set_palette_to_rgb(png);
+
+  // PNG_COLOR_TYPE_GRAY_ALPHA is always 8 or 16bit depth.
+  if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+    png_set_expand_gray_1_2_4_to_8(png);
+
+  if (png_get_valid(png, info, PNG_INFO_tRNS))
+    png_set_tRNS_to_alpha(png);
+
+  // These color_type don't have an alpha channel then fill it with 0xff.
+  if (color_type == PNG_COLOR_TYPE_RGB ||
+      color_type == PNG_COLOR_TYPE_GRAY ||
+      color_type == PNG_COLOR_TYPE_PALETTE)
+    png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
+
+  if (color_type == PNG_COLOR_TYPE_GRAY ||
+      color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+    png_set_gray_to_rgb(png);
+
+  png_read_update_info(png, info);
+
+  png_bytep *image;
+  image = (png_bytep*)malloc(sizeof(png_bytep) * pngheight);
+  for (size_t y = 0; y < pngheight; y++) {
+    image[y] = (png_byte*)malloc(png_get_rowbytes(png,info));
   }
 
-  unsigned
+  png_read_image(png, image);
+
+  png_destroy_read_struct(&png, &info, NULL);
+  fclose(fp);
+
+  size_t ih,iw,
     widfull = nlpo2dc(pngwidth) + 1,
-    hgtfull = nlpo2dc(pngheight) + 1,
-    ih,iw;
-  const int bitmap_size = widfull*hgtfull*4;
+    hgtfull = nlpo2dc(pngheight) + 1;
+  const size_t bitmap_size = widfull*hgtfull*4;
   unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
 
   for (ih = 0; ih < pngheight; ih++) {
-    unsigned tmp = 0;
+    png_byte* row = image[ih];
+    size_t tmp = 0;
     if (!flipped) {
       tmp = ih*widfull*4;
     } else {
       tmp = (pngheight - 1 - ih)*widfull*4;
     }
     for (iw = 0; iw < pngwidth; iw++) {
-      bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
-      bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
-      bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
-      bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+      png_byte* ptr = &(row[iw*4]);
+      bitmap[tmp+0] = ptr[2];
+      bitmap[tmp+1] = ptr[1];
+      bitmap[tmp+2] = ptr[0];
+      bitmap[tmp+3] = ptr[3];
       tmp+=4;
     }
   }
 
+  /* cleanup heap allocation */
+  for (size_t y=0; y<pngheight; y++)
+    free(image[y]);
   free(image);
+
   *width  = pngwidth;
   *height = pngheight;
   *fullwidth  = widfull;
   *fullheight = hgtfull;
+
   return bitmap;
 }
 
@@ -319,7 +375,7 @@ int image_save_png(string filename, const unsigned char* data, unsigned width, u
     file.write(reinterpret_cast<const char*>(buffer), std::streamsize(buffersize));
     file.close();
   }
-  
+
   free(buffer);
   delete[] bitmap;
 
