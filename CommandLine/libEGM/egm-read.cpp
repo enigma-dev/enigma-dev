@@ -146,7 +146,7 @@ buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
   const std::string delim = "step[";
   for(auto& f : fs::directory_iterator(fPath)) {
 
-    const std::string stem = f.path().stem(); // base filename
+    const std::string stem = MINGWISATWAT(f.path().stem()); // base filename
 
     // If its not an edl file, the filename is too short to fit the naming scheme or the filename doesn't end with ]
     // exit here before doing any string cutting to prevent segfaults
@@ -394,13 +394,13 @@ void RepackLayers(google::protobuf::Message *m, const google::protobuf::FieldDes
 inline void loadObjectEvents(const fs::path& fPath, google::protobuf::Message *m, const google::protobuf::FieldDescriptor *field) {
   for(auto& f : fs::directory_iterator(fPath)) {
     if (f.path().extension() == ".edl") {
-      const std::string eventName = f.path().stem();
+      const std::string eventName = MINGWISATWAT(f.path().stem());
       buffers::resources::Object_Event event;
       event.set_name(eventName);
       event.set_code(FileToString(f.path()));
-      
+
       const google::protobuf::Reflection *refl = m->GetReflection();
-      
+
       google::protobuf::Message* msg = refl->AddMessage(m, field);
       msg->CopyFrom(event);
     }
@@ -410,7 +410,7 @@ inline void loadObjectEvents(const fs::path& fPath, google::protobuf::Message *m
 void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml, const fs::path& fPath, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
-  const std::string ext = fPath.extension();
+  const std::string ext = MINGWISATWAT(fPath.extension());
 
   for (int i = 0; i < desc->field_count(); i++) {
     const google::protobuf::FieldDescriptor *field = desc->field(i);
@@ -433,7 +433,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
         continue;
       }
     }
-    
+
     if (key == "id" && depth == 0) {
       if (id >= 0)
         SetProtoField(refl, m, field, std::to_string(id));
@@ -517,7 +517,7 @@ inline bool isNumber(const std::string& s) {
 inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm) {
   for(auto& f : fs::directory_iterator(fPath)) {
     if (f.path().extension() == ".edl") {
-      const std::string edlFile = f.path().stem();
+      const std::string edlFile = MINGWISATWAT(f.path().stem());
 
       if (edlFile == "create") {
         rm->set_code(FileToString(f.path()));
@@ -537,7 +537,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
 
       // See if we have an instance with matching a name
       auto instances = rm->instances();
-      auto instItr = std::find_if(instances.begin(), instances.end(), 
+      auto instItr = std::find_if(instances.begin(), instances.end(),
         [&instName](const buffers::resources::Room_Instance inst) {
           return (inst.name() == instName);
         });
@@ -554,11 +554,11 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
 
       // If its a number check if we have a matching id
       int id = std::stoi(instName);
-      instItr = std::find_if(instances.begin(), instances.end(), 
+      instItr = std::find_if(instances.begin(), instances.end(),
         [&id](const buffers::resources::Room_Instance inst) {
           return (inst.id() == id);
         });
-      
+
       if (instItr != instances.end()) {
         instItr->set_code(FileToString(f.path()));
       } else {
@@ -570,7 +570,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
 
 bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
 
-  std::string ext = fPath.extension();
+  std::string ext = MINGWISATWAT(fPath.extension());
 
   // Scripts and shaders are not folders so we exit here
   if (ext == ".edl") {
@@ -604,10 +604,10 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
     std::cerr << "Error: missing the resource YAML " << yamlFile << std::endl;
   }
 
-  YAML::Node yaml = YAML::LoadFile(yamlFile);
-  
+  YAML::Node yaml = YAML::LoadFile(MINGWISATWAT(yamlFile));
+
   RecursivePackBuffer(m, id, yaml, fPath, 0);
-  
+
   if (ext == ".rm") {
     LoadInstanceEDL(fPath, static_cast<buffers::resources::Room*>(m));
   }
@@ -633,19 +633,19 @@ bool LoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode* buffer)
     } else {
       const std::string name = n["name"].as<std::string>();
       b->set_name(name);
-      
+
       const std::string type = n["type"].as<std::string>();
-      
+
       int id = -1;
       if (n["id"]) id = n["id"].as<int>();
-      
+
       auto factory = factoryMap.find(type);
       if (factory != factoryMap.end()) {
-        
+
         // Update our max id per res
         if (maxID[factory->second.type] < id)
           maxID[factory->second.type] = id;
-        
+
         LoadResource(fPath.string() + "/" + name + factory->second.ext, factory->second.func(b), id);
       }
       else
@@ -660,7 +660,7 @@ auto fsCompare = [](const fs::directory_entry& a, const fs::directory_entry& b) 
 
 // Load EGM without a tree file
 bool LoadDirectory(const fs::path& fPath, buffers::TreeNode* n, int depth) {
-  
+
   // Sort dirs alphabetical
   std::set<fs::directory_entry, decltype(fsCompare)> files(fsCompare);
   for(auto& p: fs::directory_iterator(fPath)) {
@@ -668,27 +668,27 @@ bool LoadDirectory(const fs::path& fPath, buffers::TreeNode* n, int depth) {
   }
 
   for(auto& p: files) {
-    const std::string ext = p.path().extension();
+    const std::string ext = MINGWISATWAT(p.path().extension());
     if (p.is_directory()) {
-      
+
       buffers::TreeNode* c = n->add_child();
-      
-      c->set_name(p.path().stem());
-      
+
+      c->set_name(MINGWISATWAT(p.path().stem()));
+
       // If directory is resource
       auto factory = extFactoryMap.find(ext);
       if (factory != extFactoryMap.end()) {
         LoadResource(p.path(), factory->second.func(c), maxID.at(factory->second.type)++);
         continue;
       }
-      
+
       // If directory is just a folder
       c->set_folder(true);
       LoadDirectory(p, c, depth + 1);
     } else { // is a file
-      
+
       buffers::TreeNode* c = n->add_child();
-      c->set_name(p.path().stem());
+      c->set_name(MINGWISATWAT(p.path().stem()));
       if (ext == ".edl") { // script
         LoadResource(p.path(), extFactoryMap.at(".edl").func(c), maxID.at(Type::kScript)++);
       } else if (ext == ".vert") { // shader
@@ -696,17 +696,17 @@ bool LoadDirectory(const fs::path& fPath, buffers::TreeNode* n, int depth) {
       }
     }
   }
-  
+
   return true;
 }
 
 bool LoadEGM(const std::string& yaml, buffers::Game* game) {
   YAML::Node project = YAML::LoadFile(yaml);
-  
+
   const fs::path egm_root = fs::path(yaml).parent_path();
   buffers::TreeNode* game_root = game->mutable_root();
   game_root->set_name("/");
-  
+
   // Load EGM without a tree file
   if (!project["tree"] || project["tree"].as<std::string>() == "autogen") {
     return LoadDirectory(egm_root, game_root, 0);
@@ -718,25 +718,25 @@ bool LoadEGM(const std::string& yaml, buffers::Game* game) {
 }
 
 void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<int, std::string>>& IDmap) {
-  
+
   for (int i = 0; i < n->child_size(); ++i) {
     buffers::TreeNode* c = n->mutable_child(i);
     RecursiveResourceSanityCheck(c, IDmap);
-  
+
     google::protobuf::Message* m = nullptr;
     std::string type;
-    
+
     switch(c->type_case()) {
      case Type::kBackground:
-      m = c->mutable_background(); 
+      m = c->mutable_background();
       type = "background";
       break;
      case Type::kFont:
-      m = c->mutable_font(); 
+      m = c->mutable_font();
       type = "font";
       break;
      case Type::kObject:
-      m = c->mutable_object(); 
+      m = c->mutable_object();
       type = "object";
       break;
      case Type::kPath:
@@ -752,11 +752,11 @@ void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<
       type = "script";
       break;
      case Type::kShader:
-      m = c->mutable_shader(); 
+      m = c->mutable_shader();
       type = "shader";
       break;
      case Type::kSound:
-      m = c->mutable_sound(); 
+      m = c->mutable_sound();
       type = "sound";
       break;
      case Type::kSprite:
@@ -764,7 +764,7 @@ void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<
       type = "sprite";
       break;
      case Type::kTimeline:
-      m = c->mutable_timeline(); 
+      m = c->mutable_timeline();
       type = "timeline";
       break;
      default:
@@ -776,7 +776,7 @@ void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<
     const google::protobuf::Descriptor* desc = m->GetDescriptor();
     const google::protobuf::Reflection* refl = m->GetReflection();
     const google::protobuf::FieldDescriptor* field = desc->FindFieldByName("id");
-    
+
     int id = -1;
     if (refl->HasField(*m, field))
       id = refl->GetInt32(*m, field);
@@ -786,15 +786,15 @@ void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<
       refl->SetInt32(m, field, id);
       continue;
     }
-    
+
     auto it = IDmap[c->type_case()].find(id);
     if (it != IDmap[c->type_case()].end()) {
       id = ++maxID.at(c->type_case());
       std::string dupName = (*it).second;
-      std::cerr << "Warning: the " << type << "s \"" << dupName << "\" and \"" << c->name() << "\" have the same ID reassigning " << c->name() << "\'s ID to: " << id << std::endl; 
+      std::cerr << "Warning: the " << type << "s \"" << dupName << "\" and \"" << c->name() << "\" have the same ID reassigning " << c->name() << "\'s ID to: " << id << std::endl;
       refl->SetInt32(m, field, id);
     } else IDmap[c->type_case()].emplace(id, c->name());
-  
+
   }
 }
 
@@ -813,7 +813,7 @@ buffers::Project* LoadEGM(std::string fName) {
   }
 
   LoadEGM(fName, proj->mutable_game());
-  ResourceSanityCheck(proj->mutable_game()->mutable_root()); 
+  ResourceSanityCheck(proj->mutable_game()->mutable_root());
 
   return proj;
 }
