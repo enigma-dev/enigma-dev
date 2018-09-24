@@ -20,6 +20,12 @@
   using errc = std::error_code;
 #endif
 
+#ifdef __MINGW32__
+#define MINGWISATWAT(x) (x).string()
+#else
+#define MINGWISATWAT(x) (x)
+#endif
+
 using std::string;
 
 bool StartsWith(const string &str, const string &prefix);
@@ -31,6 +37,9 @@ fs::path InternalizeFile(const fs::path &file,
 void DeleteFile(const string &fName);
 void DeleteFolder(const string &fName);
 bool FolderExists(const string &folder);
+inline bool FolderExists(const fs::path &path) {
+  return FolderExists(path.string());
+}
 bool FileExists(const string &fName);
 inline bool FileExists(const fs::path &path) {
   return FileExists(path.string());

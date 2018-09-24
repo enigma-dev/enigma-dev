@@ -10,6 +10,7 @@
 #include "SOG.hpp"
 
 #ifdef CLI_ENABLE_EGM
+#include "egm.h"
 #include "gmk.h"
 #include "gmx.h"
 #include "yyp.h"
@@ -123,6 +124,15 @@ int main(int argc, char* argv[])
       if (!ReadSOG(input_file, &game)) return 1;
       return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
 #ifdef CLI_ENABLE_EGM
+    } else if (ext == "egm") {
+      boost::filesystem::path p = input_file;
+      if (boost::filesystem::is_directory(p)) {
+        input_file += "/" + p.filename().stem().string() + ".egm";
+      }
+
+      buffers::Project* project;
+      if (!(project = egm::LoadEGM(input_file))) return 1;
+      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
     } else if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
       buffers::Project* project;
       if (!(project = gmk::LoadGMK(input_file))) return 1;
@@ -142,10 +152,7 @@ int main(int argc, char* argv[])
       return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
 #endif
     } else {
-      if (ext == "egm") {
-        errorStream << "EGM format not yet supported. "
-                       "Please use LateralGM for the time being." << std::endl;
-      } else if (ext.empty()) {
+      if (ext.empty()) {
         errorStream << "Error: Unknown filetype: cannot determine type of file "
                     << '"' << input_file << "\"." << std::endl;
       } else {

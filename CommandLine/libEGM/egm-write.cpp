@@ -76,7 +76,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
     const proto::OneofDescriptor *oneof = field->containing_oneof();
     if (oneof && refl->HasOneof(*m, oneof)) continue;
     if (!FieldIsPresent(m, refl, field)) continue;
-    if (depth == 0 && field->name() == "id") continue; 
+    if (depth == 0 && field->name() == "id") continue;
     const proto::FieldOptions opts = field->options();
     const bool isFilePath = opts.GetExtension(buffers::file_path);
 
@@ -227,7 +227,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   }
 
   // Write the code to edl
-  if (std::ofstream fout{dir/"create[room].edl"}) {
+  if (std::ofstream fout{(dir/"create[room].edl").string()}) {
     fout << room->code();
   } else return false;
 
@@ -338,7 +338,7 @@ bool WriteRes(buffers::TreeNode* res, const fs::path &dir, const fs::path &egm_r
 
   return true;
 }
-  
+
 inline const std::string type2name(int type) {
   switch (type) {
    case Type::kFolder:
@@ -448,10 +448,10 @@ bool WriteEGM(string fName, buffers::Project* project) {
 
   if (!CreateDirectory(fName))
     return false;
-    
+
   // need to remove the '/' here
-  const fs::path projectFile = fName + "/" + fs::path(fName.substr(0, fName.length()-2)).filename().string();
-  
+  const fs::path projectFile = fName + "/" + fs::path(fName.substr(0, fName.length()-1)).filename().string();
+
   if (std::ofstream out{projectFile.string()}) { // egm settings
     YAML::Emitter projYAML;
     projYAML << YAML::BeginMap;

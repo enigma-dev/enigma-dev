@@ -23,6 +23,7 @@
 #include <yaml-cpp/yaml.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/util/message_differencer.h>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <functional>
@@ -87,7 +88,7 @@ std::map<Type, int> maxID = {
 
 buffers::resources::Script* LoadScript(const fs::path& fPath) {
   buffers::resources::Script* scr = new buffers::resources::Script();
-  scr->set_code(FileToString(fPath.string()));
+  scr->set_code(FileToString(fPath));
   return scr;
 }
 
@@ -120,11 +121,11 @@ inline void yamlErrorPosition(const YAML::Mark errPos) {
 
 inline void invalidYAMLType(const YAML::Node& yaml, const fs::path& fPath, const google::protobuf::FieldDescriptor *field) {
   const std::map<int, std::string> yamlTypes {
-    {YAML::NodeType::Sequence, "sequence"},
-    {YAML::NodeType::Scalar, "scalar"},
-    {YAML::NodeType::Map, "map"},
-    {YAML::NodeType::Undefined, "undefined"},
-    {YAML::NodeType::Null, "null"}
+    { YAML::NodeType::Sequence,  "sequence"  },
+    { YAML::NodeType::Scalar,    "scalar"    },
+    { YAML::NodeType::Map,       "map"       },
+    { YAML::NodeType::Undefined, "undefined" },
+    { YAML::NodeType::Null,      "null"      }
   };
 
   std::string expectedType;
@@ -149,8 +150,8 @@ buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
 
     // If its not an edl file, the filename is too short to fit the naming scheme or the filename doesn't end with ]
     // exit here before doing any string cutting to prevent segfaults
-    if (f.path().extension().string() != ".edl" || stem.length() < std::string("step[0]").length() || stem.back() != ']') {
-      invalidEDLNaming(stem, fPath.string());
+    if (f.path().extension() != ".edl" || stem.length() < std::string("step[0]").length() || stem.back() != ']') {
+      invalidEDLNaming(stem, fPath);
       continue;
     }
 
@@ -160,14 +161,14 @@ buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
     const int step = std::stoi(stepStr, &idx);
     // Check the string to int succeeded and the begining of the string is correct.
     if (idx != stepStr.length()-1 || substr1 != delim) {
-      invalidEDLNaming(stem, fPath.string());
+      invalidEDLNaming(stem, fPath);
       continue;
     }
 
     // If we made it this far we can add event to timeline
     buffers::resources::Timeline_Moment* m = tln->add_moments();
     m->set_step(step);
-    m->set_code(FileToString(f.path().string()));
+    m->set_code(FileToString(f.path()));
 
   }
 
@@ -237,13 +238,16 @@ const std::map<char, Command> instanceParameters = {
   { 'd', { 1, {"zscale"}                     } },
   { 'r', { 1, {"rotation"}                   } },
   { 'c', { 1, {"color"}                      } },
+  { 'l', { 1, {}                             } },
+  { 'f', { 4, {}                             } },
+  { 'g', { 1, {}                             } },
 };
 
 const std::map<char, Command> tileParameters = {
   { 't', { 0, {"id"}                 } },
   { 'n', { 1, {"name"}               } },
   { 'b', { 1, {"background_name"}    } },
-  //{ 'd', { 1, {"depth"}              } },
+  { 'd', { 1, {"depth"}              } },
   { 'p', { 1, {"x", "y"}             } },
   { 'x', { 1, {"x"}                  } },
   { 'y', { 1, {"y"}                  } },
@@ -257,23 +261,25 @@ const std::map<char, Command> tileParameters = {
   { 'W', { 1, {"xscale"}             } },
   { 'H', { 1, {"yscale"}             } },
   { 'c', { 1, {"color"}              } },
+  { 'l', { 1, {}                     } },
+  { 'f', { 4, {}                     } },
+  { 'g', { 1, {}                     } },
 };
 
-void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD, 
+void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD,
   const std::map<char, Command>& parameters, YAML::Node& yaml, const fs::path& fPath) {
-  
-  std::cout << fPath << std::endl;
+
   const google::protobuf::Reflection *refl = m->GetReflection();
-  
+
   // split at spaces or comma etc
   std::vector<std::string> tokens = Tokenize(yaml.as<std::string>(), " ,\n\t");
-  
+
   google::protobuf::Message* currInstance = nullptr;
   std::vector<google::protobuf::Message*> instances;
 
   char currentCmd = '\0';
   std::vector<std::pair<char, std::vector<std::string> > > arguments;
-  
+
   // Group all our commands into <char, vector<string>> (cmd, args)
   auto cmdIt = arguments.end();
   for (unsigned i = 0; i < tokens.size(); ++i) {
@@ -293,46 +299,62 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
     std::vector<std::string> args = cmdPair.second;
 
     auto pit = parameters.find(cmd);
+    bool relative = islower(cmd); //TODO: fix color
     if (pit == parameters.end()) {
       // if this command does not have uppercase equivalent
       // we can still allow a lowercase version for relative
       pit = parameters.find(cmd = tolower(cmd));
       if (pit == parameters.end()) {
         // no upper or lowercase version seems to be supported...
-      std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
-      continue;
-    }
+        std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
+        yamlErrorPosition(yaml.Mark());
+        continue;
+      }
     }
     auto sig = (*pit).second;
     auto pars = sig.field_names;
 
-    // Too few args, exit here
+    // Too few args, continue here
     if (args.size() < sig.minArgs) {
       tooFewArgsGiven(cmd, sig.minArgs, yaml.Mark(), fPath);
       continue;
     }
-    
+
     // Special case for create cmds
     if (tolower(cmd) == tolower(createCMD)) {
         currInstance = refl->AddMessage(m, f);
-        instances.push_back(currInstance);
-        
+
         if (cmd == tolower(createCMD)) {
           if (!instances.empty()) {
             currInstance->CopyFrom(*instances.back());
             const google::protobuf::Descriptor *instDesc = currInstance->GetDescriptor();
             const google::protobuf::Reflection *instRefl = currInstance->GetReflection();
-            
+
             // Don't copy this crap
             for (const std::string& field_name : {"id", "name", "code"}) {
               const google::protobuf::FieldDescriptor *instField = instDesc->FindFieldByName(field_name);
               if (instField != nullptr)
-                instRefl->ClearField(currInstance, instField); 
+                instRefl->ClearField(currInstance, instField);
             }
           }
           else
             std::cerr << "Error: \"" << cmd << "\" called but there exists no previous instance to copy the attributes from" << std::endl;
         }
+
+        instances.push_back(currInstance);
+    }
+
+    // Other special cases
+    switch(cmd) {
+      case 'l':
+        int xfrom = currInstance->
+            xto = stoi(args[0]),
+            yto = stoi(args[1]);
+        break;
+      case 'f':
+        break;
+      case 'g':
+        break;
     }
 
     // General case for rest of command args
@@ -357,7 +379,7 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
             break;
         };
 
-        SetProtoField(refl, currInstance, field, unquote(arg), true);
+        SetProtoField(refl, currInstance, field, unquote(arg), relative);
       } else {
         tooManyArgsGiven(cmd, pars.size(), args, i, yaml.Mark(), fPath);
       }
@@ -365,33 +387,44 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
   }
 }
 
-void RepackLayers(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD, 
+void RepackLayers(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD,
   const std::map<char, Command>& parameters, YAML::Node& yaml, const fs::path& fPath) {
-    
+
   // All layers require a "format" and a "data" key in the YAML
   YAML::Node format = yaml["Format"];
   if (!format) {
-    std::cerr << "Error: missing \"Format\" key in " << fPath.string() << std::endl;
+    std::cerr << "Error: missing \"Format\" key in " << fPath << std::endl;
     yamlErrorPosition(yaml.Mark());
     return;
   }
 
   YAML::Node data = yaml["Data"];
   if (!data) {
-    std::cerr << "Error: missing \"Data\" key in " << fPath.string() << std::endl;
+    std::cerr << "Error: missing \"Data\" key in " << fPath << std::endl;
     yamlErrorPosition(yaml.Mark());
     return;
   }
-  
+
   // Send our data to the appropriate handler (if one exists)
   const std::string formatStr = format.as<std::string>();
-  if (formatStr == "svg-d") RepackSVGDLayer(m, f, createCMD, parameters, data, fPath.string());
-  else std::cerr << "Error: unsupported instance layer format \"" << formatStr << "\" in " << fPath.string() << std::endl;
+  if (formatStr == "svg-d") RepackSVGDLayer(m, f, createCMD, parameters, data, fPath);
+  else std::cerr << "Error: unsupported instance layer format \"" << formatStr << "\" in " << fPath << std::endl;
 }
 
-inline void loadObjectEvents(const fs::path& fPath) {
+// Load all edl files in our object dir
+inline void loadObjectEvents(const fs::path& fPath, google::protobuf::Message *m, const google::protobuf::FieldDescriptor *field) {
   for(auto& f : fs::directory_iterator(fPath)) {
-    
+    if (f.path().extension() == ".edl") {
+      const std::string eventName = MINGWISATWAT(f.path().stem());
+      buffers::resources::Object_Event event;
+      event.set_name(eventName);
+      event.set_code(FileToString(f.path()));
+
+      const google::protobuf::Reflection *refl = m->GetReflection();
+
+      google::protobuf::Message* msg = refl->AddMessage(m, field);
+      msg->CopyFrom(event);
+    }
   }
 }
 
@@ -411,16 +444,15 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
     if (ext == ".rm" && depth == 0) {
       if (key == "instances") key = "instance-layers";
       if (key == "tiles") key = "tile-layers";
-      if (key == "code") {
-        const fs::path edlFile = fPath.string() + "/create[room].edl";
-        if (FileExists(edlFile))
-          SetProtoField(refl, m, field, FileToString(edlFile));
+      if (key == "code") continue;
+    }
+
+    if (ext == ".obj" && depth == 0) {
+       // code is loaded from edl files
+      if (key == "events") {
+        loadObjectEvents(fPath, m, field);
         continue;
       }
-    }
-    
-    if (ext == ".obj" && depth == 0) {
-      if (key == "events") continue; // code is loaded from edl files
     }
 
     if (key == "id" && depth == 0) {
@@ -433,7 +465,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
 
     // YAML field not in properties.yaml
     if (!node) {
-      std::cerr << "Warning: could not locate YAML field " << field->name() << " in " << fPath.string() << std::endl;
+      std::cerr << "Warning: could not locate YAML field " << field->name() << " in " << fPath << std::endl;
       continue;
     }
 
@@ -442,7 +474,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
     if (field->is_repeated()) {
 
       if (!node.IsSequence()) {
-        invalidYAMLType(yaml, fPath.string(), field);
+        invalidYAMLType(yaml, fPath, field);
         continue;
       }
 
@@ -450,12 +482,12 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
         case CppType::CPPTYPE_MESSAGE: {
           for (auto n : node) {
             if (key == "instance-layers")
-              RepackLayers(m, field, 'I', instanceParameters, n, fPath.string());
+              RepackLayers(m, field, 'I', instanceParameters, n, fPath);
             else if (key == "tile-layers")
-              RepackLayers(m, field, 'T', tileParameters, n, fPath.string());
+              RepackLayers(m, field, 'T', tileParameters, n, fPath);
             else {
               google::protobuf::Message* msg = refl->AddMessage(m, field);
-              RecursivePackBuffer(msg, id, n, fPath.string(), depth + 1);
+              RecursivePackBuffer(msg, id, n, fPath, depth + 1);
             }
           }
           break;
@@ -479,7 +511,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
       YAML::Node n = node;
 
       if ((!n.IsScalar() && field->cpp_type() != CppType::CPPTYPE_MESSAGE) || (!n.IsMap() && field->cpp_type() == CppType::CPPTYPE_MESSAGE)) {
-        invalidYAMLType(yaml, fPath.string(), field);
+        invalidYAMLType(yaml, fPath, field);
         continue;
       }
 
@@ -487,13 +519,71 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
         // If field is a singular message we need to recurse into this method again
         case CppType::CPPTYPE_MESSAGE: {
           google::protobuf::Message *msg = refl->MutableMessage(m, field);
-          RecursivePackBuffer(msg, id, n, fPath.string(), depth + 1);
+          RecursivePackBuffer(msg, id, n, fPath, depth + 1);
           break;
         }
         default: {
           SetProtoField(refl, m, field, (isFilePath) ? fPath.string() + "/" + n.as<std::string>() : n.as<std::string>());
           break;
         }
+      }
+    }
+  }
+}
+
+inline bool isNumber(const std::string& s) {
+  return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+}
+
+inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm) {
+  for(auto& f : fs::directory_iterator(fPath)) {
+    if (f.path().extension() == ".edl") {
+      const std::string edlFile = f.path().stem().string();
+
+      if (edlFile == "create") {
+        rm->set_code(FileToString(f.path()));
+        continue;
+      }
+
+      const std::string delim = "[";
+      size_t pos = edlFile.find_first_of(delim);
+      if (pos == std::string::npos || edlFile.back() != ']') {
+        invalidEDLNaming(fPath, edlFile);
+        continue;
+      }
+
+      const std::string instName = edlFile.substr(pos+1, edlFile.length()-pos-2);
+
+      if (instName.empty()) continue;
+
+      // See if we have an instance with matching a name
+      auto instances = rm->instances();
+      auto instItr = std::find_if(instances.begin(), instances.end(),
+        [&instName](const buffers::resources::Room_Instance inst) {
+          return (inst.name() == instName);
+        });
+
+      if (instItr != instances.end()) {
+        instItr->set_code(FileToString(f.path()));
+        continue;
+      }
+
+      if (!isNumber(instName)) {
+        std::cerr << "Error: Failed to set instance code. Could not find instance named: " << instName << " in " << fPath << std::endl;
+        continue;
+      }
+
+      // If its a number check if we have a matching id
+      int id = std::stoi(instName);
+      instItr = std::find_if(instances.begin(), instances.end(),
+        [&id](const buffers::resources::Room_Instance inst) {
+          return (inst.id() == id);
+        });
+
+      if (instItr != instances.end()) {
+        instItr->set_code(FileToString(f.path()));
+      } else {
+        std::cerr << "Error: Failed to set instance code. Could not find instance with the ID: " << id << " in " << fPath << std::endl;
       }
     }
   }
@@ -518,7 +608,7 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
     return true;
   }
 
-  if (!FolderExists(fPath.string())) {
+  if (!FolderExists(fPath)) {
     std::cerr << "Error: the resource folder " << fPath << " referenced in the project tree does not exist" << std::endl;
   }
 
@@ -531,15 +621,16 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
   }
 
   const fs::path yamlFile = fPath.string() + "/properties.yaml";
-  if (!FileExists(yamlFile.string())) {
+  if (!FileExists(yamlFile)) {
     std::cerr << "Error: missing the resource YAML " << yamlFile << std::endl;
   }
 
   YAML::Node yaml = YAML::LoadFile(yamlFile.string());
 
-  RecursivePackBuffer(m, id, yaml, fPath.string(), 0);
-  
+  RecursivePackBuffer(m, id, yaml, fPath, 0);
+
   if (ext == ".rm") {
+    LoadInstanceEDL(fPath, static_cast<buffers::resources::Room*>(m));
   }
 
   return true;
@@ -548,7 +639,7 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
 // Load EGM using tree file
 bool LoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode* buffer) {
 
-  if (!FolderExists(fPath.string())) {
+  if (!FolderExists(fPath)) {
     std::cerr << "Error: the folder " << fPath << " referenced in the project tree does not exist" << std::endl;
   }
 
@@ -563,19 +654,19 @@ bool LoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode* buffer)
     } else {
       const std::string name = n["name"].as<std::string>();
       b->set_name(name);
-      
+
       const std::string type = n["type"].as<std::string>();
-      
+
       int id = -1;
       if (n["id"]) id = n["id"].as<int>();
-      
+
       auto factory = factoryMap.find(type);
       if (factory != factoryMap.end()) {
-        
+
         // Update our max id per res
         if (maxID[factory->second.type] < id)
           maxID[factory->second.type] = id;
-        
+
         LoadResource(fPath.string() + "/" + name + factory->second.ext, factory->second.func(b), id);
       }
       else
@@ -590,7 +681,7 @@ auto fsCompare = [](const fs::directory_entry& a, const fs::directory_entry& b) 
 
 // Load EGM without a tree file
 bool LoadDirectory(const fs::path& fPath, buffers::TreeNode* n, int depth) {
-  
+
   // Sort dirs alphabetical
   std::set<fs::directory_entry, decltype(fsCompare)> files(fsCompare);
   for(auto& p: fs::directory_iterator(fPath)) {
@@ -598,27 +689,27 @@ bool LoadDirectory(const fs::path& fPath, buffers::TreeNode* n, int depth) {
   }
 
   for(auto& p: files) {
-    const std::string ext = p.path().extension();
+    const std::string ext = p.path().extension().string();
     if (p.is_directory()) {
-      
+
       buffers::TreeNode* c = n->add_child();
-      
-      c->set_name(p.path().stem());
-      
+
+      c->set_name(p.path().stem().string());
+
       // If directory is resource
       auto factory = extFactoryMap.find(ext);
       if (factory != extFactoryMap.end()) {
         LoadResource(p.path(), factory->second.func(c), maxID.at(factory->second.type)++);
         continue;
       }
-      
+
       // If directory is just a folder
       c->set_folder(true);
       LoadDirectory(p, c, depth + 1);
     } else { // is a file
-      
+
       buffers::TreeNode* c = n->add_child();
-      c->set_name(p.path().stem());
+      c->set_name(p.path().stem().string());
       if (ext == ".edl") { // script
         LoadResource(p.path(), extFactoryMap.at(".edl").func(c), maxID.at(Type::kScript)++);
       } else if (ext == ".vert") { // shader
@@ -626,17 +717,17 @@ bool LoadDirectory(const fs::path& fPath, buffers::TreeNode* n, int depth) {
       }
     }
   }
-  
+
   return true;
 }
 
 bool LoadEGM(const std::string& yaml, buffers::Game* game) {
   YAML::Node project = YAML::LoadFile(yaml);
-  
+
   const fs::path egm_root = fs::path(yaml).parent_path();
   buffers::TreeNode* game_root = game->mutable_root();
   game_root->set_name("/");
-  
+
   // Load EGM without a tree file
   if (!project["tree"] || project["tree"].as<std::string>() == "autogen") {
     return LoadDirectory(egm_root, game_root, 0);
@@ -648,25 +739,25 @@ bool LoadEGM(const std::string& yaml, buffers::Game* game) {
 }
 
 void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<int, std::string>>& IDmap) {
-  
+
   for (int i = 0; i < n->child_size(); ++i) {
     buffers::TreeNode* c = n->mutable_child(i);
     RecursiveResourceSanityCheck(c, IDmap);
-  
+
     google::protobuf::Message* m = nullptr;
     std::string type;
-    
+
     switch(c->type_case()) {
      case Type::kBackground:
-      m = c->mutable_background(); 
+      m = c->mutable_background();
       type = "background";
       break;
      case Type::kFont:
-      m = c->mutable_font(); 
+      m = c->mutable_font();
       type = "font";
       break;
      case Type::kObject:
-      m = c->mutable_object(); 
+      m = c->mutable_object();
       type = "object";
       break;
      case Type::kPath:
@@ -682,11 +773,11 @@ void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<
       type = "script";
       break;
      case Type::kShader:
-      m = c->mutable_shader(); 
+      m = c->mutable_shader();
       type = "shader";
       break;
      case Type::kSound:
-      m = c->mutable_sound(); 
+      m = c->mutable_sound();
       type = "sound";
       break;
      case Type::kSprite:
@@ -694,7 +785,7 @@ void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<
       type = "sprite";
       break;
      case Type::kTimeline:
-      m = c->mutable_timeline(); 
+      m = c->mutable_timeline();
       type = "timeline";
       break;
      default:
@@ -706,7 +797,7 @@ void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<
     const google::protobuf::Descriptor* desc = m->GetDescriptor();
     const google::protobuf::Reflection* refl = m->GetReflection();
     const google::protobuf::FieldDescriptor* field = desc->FindFieldByName("id");
-    
+
     int id = -1;
     if (refl->HasField(*m, field))
       id = refl->GetInt32(*m, field);
@@ -716,15 +807,15 @@ void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<
       refl->SetInt32(m, field, id);
       continue;
     }
-    
+
     auto it = IDmap[c->type_case()].find(id);
     if (it != IDmap[c->type_case()].end()) {
       id = ++maxID.at(c->type_case());
       std::string dupName = (*it).second;
-      std::cerr << "Warning: the " << type << "s \"" << dupName << "\" and \"" << c->name() << "\" have the same ID reassigning " << c->name() << "\'s ID to: " << id << std::endl; 
+      std::cerr << "Warning: the " << type << "s \"" << dupName << "\" and \"" << c->name() << "\" have the same ID reassigning " << c->name() << "\'s ID to: " << id << std::endl;
       refl->SetInt32(m, field, id);
     } else IDmap[c->type_case()].emplace(id, c->name());
-  
+
   }
 }
 
@@ -739,10 +830,11 @@ buffers::Project* LoadEGM(std::string fName) {
 
   if (!FileExists(fName)) {
     std::cerr << "Error: " << fName << " does not exist" << std::endl;
+    return proj;
   }
 
   LoadEGM(fName, proj->mutable_game());
-  ResourceSanityCheck(proj->mutable_game()->mutable_root()); 
+  ResourceSanityCheck(proj->mutable_game()->mutable_root());
 
   return proj;
 }
