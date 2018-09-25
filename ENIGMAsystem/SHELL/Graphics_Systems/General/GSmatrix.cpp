@@ -18,6 +18,8 @@
 #include "GSmatrix.h"
 #include "GSd3d.h"
 
+#include "Universal_System/scalar.h"
+
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <stack>
@@ -61,19 +63,19 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,
                             gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
   enigma::view = glm::lookAt(glm::vec3(xfrom, yfrom, zfrom), glm::vec3(xto, yto, zto), glm::vec3(xup, yup, zup));
-  enigma::projection = glm::perspective(angle, aspect, znear, zfar);
+  enigma::projection = glm::perspective((float)gs_angle_to_radians(angle), (float)(aspect), znear, zfar);
 }
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-  enigma::view = glm::ortho(x, x + width, y + height, y, 0.1f, 32000.0f);
+  enigma::view = glm::ortho(x, x + width, y + height, y, 1.0f, 16000.0f);
   enigma::projection = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-  enigma::view = glm::ortho(x, x + width, y + height, y, 0.1f, 32000.0f);
-  enigma::projection = glm::perspective(angle, width/height, 0.1f, 32000.0f);
+  enigma::view = glm::ortho(x, x + width, y + height, y, 1.0f, 16000.0f);
+  enigma::projection = glm::perspective((float)gs_angle_to_radians(angle), width/height, 1.0f, 16000.0f);
 }
 
 void d3d_transform_set_identity()
@@ -93,22 +95,22 @@ void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 
 void d3d_transform_add_rotation_x(gs_scalar angle)
 {
-  enigma::world *= glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1.0f, 0.0f, 0.0f));
+  enigma::world *= glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
 void d3d_transform_add_rotation_y(gs_scalar angle)
 {
-  enigma::world *= glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
+  enigma::world *= glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 void d3d_transform_add_rotation_z(gs_scalar angle)
 {
-  enigma::world *= glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f));
+  enigma::world *= glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
-  enigma::world *= glm::rotate(glm::mat4(1.0f), angle, glm::vec3(x, y, z));
+  enigma::world *= glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(x, y, z));
 }
 
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
@@ -123,22 +125,22 @@ void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 
 void d3d_transform_set_rotation_x(gs_scalar angle)
 {
-  enigma::world = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1.0f, 0.0f, 0.0f));
+  enigma::world = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
 void d3d_transform_set_rotation_y(gs_scalar angle)
 {
-  enigma::world = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
+  enigma::world = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 void d3d_transform_set_rotation_z(gs_scalar angle)
 {
-  enigma::world = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f));
+  enigma::world = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
-  enigma::world = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(x, y, z));
+  enigma::world = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(x, y, z));
 }
 
 void d3d_transform_stack_clear()

@@ -24,6 +24,8 @@
 #ifndef ENIGMA_GSMATRIX_IMPL_H
 #define ENIGMA_GSMATRIX_IMPL_H
 
+#define GLM_FORCE_RADIANS
+
 #include <glm/glm.hpp>
 
 namespace enigma {
