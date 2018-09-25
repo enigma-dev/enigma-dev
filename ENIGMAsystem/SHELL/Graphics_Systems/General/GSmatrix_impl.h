@@ -24,6 +24,9 @@
 #ifndef ENIGMA_GSMATRIX_IMPL_H
 #define ENIGMA_GSMATRIX_IMPL_H
 
+// this is for GLM's transition to radians only
+// let's define it just in case some enigma
+// user's package manager happens to be old
 #define GLM_FORCE_RADIANS
 
 #include <glm/glm.hpp>
