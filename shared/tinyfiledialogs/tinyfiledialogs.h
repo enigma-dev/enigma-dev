@@ -134,19 +134,22 @@ int tinyfd_messageBox(
 	char const * const aMessage , /* NULL or "" may contain \n \t */
 	char const * const aDialogType , /* "ok" "okcancel" "yesno" "yesnocancel" */
 	char const * const aIconType , /* "info" "warning" "error" "question" */
-	int const aDefaultButton ) ;
+	int const aDefaultButton , /* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
+	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 		/* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
 
 char const * tinyfd_inputBox(
 	char const * const aTitle , /* NULL or "" */
 	char const * const aMessage , /* NULL or "" may NOT contain \n \t on windows */
-	char const * const aDefaultInput ) ;  /* NULL or "" */
+	char const * const aDefaultInput ,  /* NULL or "" */
+	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 		/* returns NULL on cancel */
 
 char const * tinyfd_passwordBox(
-    char const * const aTitle , /* NULL or "" */
-    char const * const aMessage , /* NULL or "" may NOT contain \n nor \t */
-    char const * const aDefaultInput ) ; /* NULL or "" */
+	char const * const aTitle , /* NULL or "" */
+	char const * const aMessage , /* NULL or "" may NOT contain \n nor \t */
+	char const * const aDefaultInput , /* NULL or "" */
+	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
         /* returns NULL on cancel */
 
 char const * tinyfd_saveFileDialog(
@@ -154,7 +157,8 @@ char const * tinyfd_saveFileDialog(
 	char const * const aDefaultPathAndFile , /* NULL or "" */
 	int const aNumOfFilterPatterns , /* 0 */
 	char const * const * const aFilterPatterns , /* NULL | {"*.jpg","*.png"} */
-	char const * const aSingleFilterDescription ) ; /* NULL | "text files" */
+	char const * const aSingleFilterDescription , /* NULL | "text files" */
+	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 		/* returns NULL on cancel */
 
 char const * tinyfd_openFileDialog(
@@ -163,20 +167,23 @@ char const * tinyfd_openFileDialog(
 	int const aNumOfFilterPatterns , /* 0 */
 	char const * const * const aFilterPatterns , /* NULL {"*.jpg","*.png"} */
 	char const * const aSingleFilterDescription , /* NULL | "image files" */
-	int const aAllowMultipleSelects ) ; /* 0 or 1 */
+	int const aAllowMultipleSelects , /* 0 or 1 */
+	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 		/* in case of multiple files, the separator is | */
 		/* returns NULL on cancel */
 
 char const * tinyfd_selectFolderDialog(
 	char const * const aTitle , /* NULL or "" */
-	char const * const aDefaultPath ) ; /* NULL or "" */
+	char const * const aDefaultPath , /* NULL or "" */
+	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 		/* returns NULL on cancel */
 
 char const * tinyfd_colorChooser(
 	char const * const aTitle , /* NULL or "" */
 	char const * const aDefaultHexRGB , /* NULL or "#FF0000" */
 	unsigned char const aDefaultRGB[3] , /* { 0 , 255 , 255 } */
-	unsigned char aoResultRGB[3] ) ; /* { 0 , 0 , 0 } */
+	unsigned char aoResultRGB[3] , /* { 0 , 0 , 0 } */
+	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 		/* returns the hexcolor as a string "#FF0000" */
 		/* aoResultRGB also contains the result */
 		/* aDefaultRGB is used only if aDefaultHexRGB is NULL */
