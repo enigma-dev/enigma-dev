@@ -22,11 +22,17 @@
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 namespace enigma {
-  bool d3dMode = false;
-  bool d3dHidden = false;
-  bool d3dZWriteEnable = true;
-  int d3dCulling = 0;
+
+bool d3dMode = false;
+bool d3dHidden = false;
+bool d3dZWriteEnable = true;
+int d3dCulling = 0;
+
+void graphics_set_matrix(int type) {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
 }
+
+} // namespace enigma
 
 namespace enigma_user
 {

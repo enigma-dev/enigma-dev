@@ -19,14 +19,46 @@
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace enigma {
-  bool d3dMode = false;
-  bool d3dHidden = false;
-  bool d3dZWriteEnable = true;
-  int d3dCulling = 0;
+bool d3dMode = false;
+bool d3dHidden = false;
+bool d3dZWriteEnable = true;
+int d3dCulling = 0;
+
+void graphics_set_matrix(int type) {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  D3DTRANSFORMSTATETYPE state;
+  glm::mat4 matrix;
+  switch(type) {
+    case enigma_user::matrix_world:
+      state = D3DTS_WORLD;
+      matrix = enigma::world;
+      break;
+    case enigma_user::matrix_view:
+      state = D3DTS_VIEW;
+      matrix = enigma::view;
+      break;
+    case enigma_user::matrix_projection:
+      state = D3DTS_PROJECTION;
+      matrix = enigma::projection;
+      break;
+    default:
+      #ifdef DEBUG_MODE
+      show_error("Unknown matrix type " + std::to_string(type), false);
+      #endif
+      return;
+  }
+  d3dmgr->SetTransform(state, (D3DMATRIX*)glm::value_ptr(matrix));
+  enigma::d3d_light_update_positions();
 }
+
+} // namespace enigma
 
 D3DCULL cullingstates[3] = {
   D3DCULL_NONE, D3DCULL_CCW, D3DCULL_CW

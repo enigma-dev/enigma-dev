@@ -18,9 +18,13 @@
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Universal_System/roomsystem.h" // for view variables
+
+#include <glm/gtc/type_ptr.hpp>
 
 #include <math.h>
 #include <floatcomp.h>
@@ -28,11 +32,36 @@
 using namespace std;
 
 namespace enigma {
-  bool d3dMode = false;
-  bool d3dHidden = false;
-  bool d3dZWriteEnable = true;
-  int d3dCulling = 0;
+
+bool d3dMode = false;
+bool d3dHidden = false;
+bool d3dZWriteEnable = true;
+int d3dCulling = 0;
+
+void graphics_set_matrix(int type) {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  glm::mat4 matrix;
+  switch(type) {
+    case enigma_user::matrix_world:
+    case enigma_user::matrix_view:
+      matrix = enigma::view * enigma::world;
+      glMatrixMode(GL_MODELVIEW);
+      break;
+    case enigma_user::matrix_projection:
+      matrix = enigma::projection;
+      glMatrixMode(GL_PROJECTION);
+      break;
+    default:
+      #ifdef DEBUG_MODE
+      show_error("Unknown matrix type " + std::to_string(type), false);
+      #endif
+      return;
+  }
+  glLoadMatrixf(glm::value_ptr(matrix));
+  enigma::d3d_light_update_positions();
 }
+
+} // namespace enigma
 
 GLenum renderstates[3] = {
   GL_NICEST, GL_FASTEST, GL_DONT_CARE
