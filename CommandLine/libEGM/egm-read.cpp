@@ -238,6 +238,9 @@ const std::map<char, Command> instanceParameters = {
   { 'd', { 1, {"zscale"}                     } },
   { 'r', { 1, {"rotation"}                   } },
   { 'c', { 1, {"color"}                      } },
+  { 'l', { 1, {}                             } },
+  { 'f', { 4, {}                             } },
+  { 'g', { 1, {}                             } },
 };
 
 const std::map<char, Command> tileParameters = {
@@ -258,6 +261,9 @@ const std::map<char, Command> tileParameters = {
   { 'W', { 1, {"xscale"}             } },
   { 'H', { 1, {"yscale"}             } },
   { 'c', { 1, {"color"}              } },
+  { 'l', { 1, {}                     } },
+  { 'f', { 4, {}                     } },
+  { 'g', { 1, {}                     } },
 };
 
 void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD,
@@ -308,7 +314,7 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
     auto sig = (*pit).second;
     auto pars = sig.field_names;
 
-    // Too few args, exit here
+    // Too few args, continue here
     if (args.size() < sig.minArgs) {
       tooFewArgsGiven(cmd, sig.minArgs, yaml.Mark(), fPath);
       continue;
@@ -336,6 +342,19 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
         }
 
         instances.push_back(currInstance);
+    }
+
+    // Other special cases
+    switch(cmd) {
+      case 'l':
+        int xfrom = currInstance->
+            xto = stoi(args[0]),
+            yto = stoi(args[1]);
+        break;
+      case 'f':
+        break;
+      case 'g':
+        break;
     }
 
     // General case for rest of command args
