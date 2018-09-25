@@ -14,11 +14,11 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#include "GSmatrix_impl.h"
 #include "GSmatrix.h"
 #include "GSd3d.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/glm.hpp>
 
 #include <stack>
 
