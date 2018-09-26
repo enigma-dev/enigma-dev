@@ -23,6 +23,8 @@
 #include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
+#include "Platforms/platforms_mandatory.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
 namespace enigma {

@@ -21,6 +21,8 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
+#include "Platforms/platforms_mandatory.h"
+
 namespace enigma {
 
 bool d3dMode = false;
