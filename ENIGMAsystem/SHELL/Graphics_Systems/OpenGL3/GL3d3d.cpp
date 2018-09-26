@@ -18,12 +18,11 @@
 #include "Bridges/General/GL3Context.h"
 #include "GLSLshader.h"
 #include "GL3shader.h"
-#include "GL3matrix.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GSmath.h"
+#include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Universal_System/roomsystem.h" // for view variables
@@ -34,12 +33,18 @@
 using namespace std;
 
 namespace enigma {
-  bool d3dMode = false;
-  bool d3dHidden = false;
-  bool d3dZWriteEnable = true;
-  int d3dCulling = 0;
-  extern unsigned bound_shader;
-  extern vector<enigma::ShaderProgram*> shaderprograms;
+bool d3dMode = false;
+bool d3dHidden = false;
+bool d3dZWriteEnable = true;
+int d3dCulling = 0;
+extern unsigned bound_shader;
+extern vector<enigma::ShaderProgram*> shaderprograms;
+
+void graphics_set_matrix(int type) {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  enigma::d3d_light_update_positions();
+}
+
 }
 
 GLenum renderstates[3] = {
@@ -100,7 +105,6 @@ void d3d_start()
 
   // Set up projection matrix
   d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
-  //enigma::projection_matrix.InitPersProjTransform(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
 
   // Set up modelview matrix
   d3d_transform_set_identity();
@@ -375,16 +379,13 @@ class d3d_lights
 
   void light_update_positions()
   {
-    enigma::transformation_update();
     unsigned int al = 0; //Active lights
     for (unsigned int i=0; i<lights.size(); ++i){
       if (lights[i].type == 0){ //Directional light
-        enigma::Vector3 lpos_eyespace;
-        lpos_eyespace = enigma::normal_matrix * enigma::Vector3(lights[i].position[0],lights[i].position[1],lights[i].position[2]);
+        glm::vec3 lpos_eyespace = glm::vec3(lights[i].position[0],lights[i].position[1],lights[i].position[2]);
         lights[i].transformed_position[0] = lpos_eyespace.x, lights[i].transformed_position[1] = lpos_eyespace.y, lights[i].transformed_position[2] = lpos_eyespace.z, lights[i].transformed_position[3] = lights[i].position[3];
       }else{ //Point lights
-        enigma::Vector4 lpos_eyespace;
-        lpos_eyespace = enigma::mv_matrix  * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
+        glm::vec4 lpos_eyespace = glm::vec4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
         lights[i].transformed_position[0] = lpos_eyespace.x, lights[i].transformed_position[1] = lpos_eyespace.y, lights[i].transformed_position[2] = lpos_eyespace.z, lights[i].transformed_position[3] = lights[i].position[3];
       }
       if (lights[i].enabled == true){
