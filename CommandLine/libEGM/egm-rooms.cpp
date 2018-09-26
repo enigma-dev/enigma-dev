@@ -290,9 +290,10 @@ string SVGDTileDescriptors(char ich, const TileSimple &tile, const TileSimple &p
     str << " b \"" << EscapeString(tile.bg_name) << "\"";
   if (tile.xoffset != prev.xoffset && tile.yoffset != prev.yoffset) {
     std::stringstream abs, rel;
-    SVGDWriteHVComponents(abs, 'O', 'U', 'V', tile.width, tile.height,
+    //TODO: ask josh about abs which used to be in place of str for these two
+    SVGDWriteHVComponents(str, 'O', 'U', 'V', tile.width, tile.height,
                           TileSimple::DEFAULTS.width, TileSimple::DEFAULTS.height);
-    SVGDWriteHVComponents(abs, 'o', 'u', 'v', tile.width, tile.height,
+    SVGDWriteHVComponents(str, 'o', 'u', 'v', tile.width, tile.height,
                           prev.width, prev.height);
   }
   SVGDWriteHVComponents(str, 'D', 'w', 'h', tile.width, tile.height,

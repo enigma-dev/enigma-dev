@@ -225,6 +225,7 @@ struct Command {
 };
 
 const std::map<char, Command> instanceParameters = {
+  { 'I', { 0, {"id"}                         } },
   { 'i', { 0, {"id"}                         } },
   { 'n', { 1, {"name"}                       } },
   { 'o', { 1, {"object_type"}                } },
@@ -244,6 +245,7 @@ const std::map<char, Command> instanceParameters = {
 };
 
 const std::map<char, Command> tileParameters = {
+  { 'T', { 0, {"id"}                 } },
   { 't', { 0, {"id"}                 } },
   { 'n', { 1, {"name"}               } },
   { 'b', { 1, {"background_name"}    } },
@@ -346,15 +348,45 @@ void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::Field
 
     // Other special cases
     switch(cmd) {
-      case 'l':
-        int xfrom = currInstance->
-            xto = stoi(args[0]),
-            yto = stoi(args[1]);
-        break;
+      case 'l': {
+        const google::protobuf::Descriptor *instDesc = currInstance->GetDescriptor();
+        const google::protobuf::Reflection *instRefl = currInstance->GetReflection();
+        const google::protobuf::FieldDescriptor *xField = instDesc->FindFieldByName("x"),
+                                                *yField = instDesc->FindFieldByName("y"),
+                                                *xScaleField = instDesc->FindFieldByName("xscale"),
+                                                *yScaleField = instDesc->FindFieldByName("yscale"),
+                                                *widthField = instDesc->FindFieldByName("width"),
+                                                *heightField = instDesc->FindFieldByName("height");
+        double xfrom = instRefl->GetDouble(*currInstance, xField),
+               yfrom = instRefl->GetDouble(*currInstance, yField),
+               //TODO: xscale and yscale need defaults of 1 not 0
+               width = instRefl->GetUInt32(*currInstance, widthField),// * instRefl->GetDouble(*currInstance, xScaleField),
+               height = instRefl->GetUInt32(*currInstance, heightField),// * instRefl->GetDouble(*currInstance, yScaleField),
+               xto = stoi(args[0]),
+               yto = (args.size() > 1) ? stoi(args[1]) : yfrom,
+               dx = xto - xfrom,
+               dy = yto - yfrom;
+
+        // start at plus width because the first tile is already there
+        // we're just copying from it to complete the rest of the line
+        for (double x = xfrom + width; x <= xto; x += width) {
+          double y = yfrom + dy * (x - xfrom) / dx;
+          std::cerr << "bing " << x << " " << y << std::endl;
+
+          currInstance = refl->AddMessage(m, f);
+          currInstance->CopyFrom(*instances.back());
+          instances.push_back(currInstance);
+
+          instRefl = currInstance->GetReflection();
+          instRefl->SetDouble(currInstance, xField, x);
+          instRefl->SetDouble(currInstance, yField, y);
+        }
+        continue;
+      }
       case 'f':
-        break;
+        continue;
       case 'g':
-        break;
+        continue;
     }
 
     // General case for rest of command args
