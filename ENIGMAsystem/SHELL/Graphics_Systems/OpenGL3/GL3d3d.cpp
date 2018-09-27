@@ -27,6 +27,8 @@
 
 #include "Universal_System/roomsystem.h" // for view variables
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include <math.h>
 #include <floatcomp.h>
 
@@ -42,6 +44,36 @@ extern vector<enigma::ShaderProgram*> shaderprograms;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  //Send transposed (done by GL because of "true" in the function below) matrices to shader
+  switch(type) {
+    case enigma_user::matrix_world:
+      glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_modelMatrix,  1, glm::value_ptr(glm::transpose(world)));
+      break;
+    case enigma_user::matrix_view:
+      glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_viewMatrix,  1, glm::value_ptr(glm::transpose(view)));
+      break;
+    case enigma_user::matrix_projection:
+      glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_projectionMatrix,  1, glm::value_ptr(glm::transpose(projection)));
+      break;
+    default:
+      #ifdef DEBUG_MODE
+      show_error("Unknown matrix type " + std::to_string(type), false);
+      #endif
+      return;
+  }
+
+  glm::mat4 mv_matrix = view * world;
+  switch (type) {
+    case enigma_user::matrix_world:
+    case enigma_user::matrix_view:
+    glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_mvMatrix,  1, glm::value_ptr(glm::transpose(mv_matrix)));
+    break;
+  }
+
+  glm::mat4 mvp_matrix = projection * mv_matrix;
+  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_mvpMatrix,  1, glm::value_ptr(glm::transpose(mvp_matrix)));
+  glsl_uniform_matrix3fv_internal(shaderprograms[bound_shader]->uni_normalMatrix,  1, glm::value_ptr(glm::mat3(1.0f)));
+
   enigma::d3d_light_update_positions();
 }
 

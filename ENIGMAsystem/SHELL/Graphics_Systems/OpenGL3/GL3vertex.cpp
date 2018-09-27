@@ -25,12 +25,8 @@
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-#include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GSmatrix_impl.h"
 
 #include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
-
-#include <glm/gtc/type_ptr.hpp>
 
 #define bind_array_buffer(vbo) if (enigma::bound_vbo != vbo) glBindBuffer( GL_ARRAY_BUFFER, enigma::bound_vbo = vbo );
 #define bind_element_buffer(vboi) if (enigma::bound_vboi != vboi) glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, enigma::bound_vboi = vboi );
@@ -45,12 +41,6 @@ map<int, GLuint> indexBufferPeers;
 } // anonymous namespace
 
 namespace enigma {
-
-extern unsigned char currentcolor[4];
-extern unsigned bound_vbo;
-extern unsigned bound_vboi;
-extern unsigned bound_shader;
-extern vector<enigma::ShaderProgram*> shaderprograms;
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
   glDeleteBuffers(1, &vertexBufferPeers[buffer]);
@@ -127,20 +117,6 @@ void graphics_apply_vertex_format(int format, size_t offset) {
   using namespace enigma_user;
 
   const VertexFormat* vertexFormat = vertexFormats[format];
-
-  //if (transform_needs_update == true){
-    //transformation_update();
-  //}
-
-  //Send transposed (done by GL because of "true" in the function below) matrices to shader
-  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_viewMatrix,  1, glm::value_ptr(glm::transpose(view)));
-  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_projectionMatrix,  1, glm::value_ptr(glm::transpose(projection)));
-  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_modelMatrix,  1, glm::value_ptr(glm::transpose(world)));
-  glm::mat4 mv_matrix = view * world,
-            mvp_matrix = projection * view * world;
-  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_mvMatrix,  1, glm::value_ptr(glm::transpose(mv_matrix)));
-  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_mvpMatrix,  1, glm::value_ptr(glm::transpose(mvp_matrix)));
-  glsl_uniform_matrix3fv_internal(shaderprograms[bound_shader]->uni_normalMatrix,  1, glm::value_ptr(glm::mat3(1.0f)));
 
   //Bind texture
   glsl_uniformi_internal(shaderprograms[bound_shader]->uni_texSampler, 0);
