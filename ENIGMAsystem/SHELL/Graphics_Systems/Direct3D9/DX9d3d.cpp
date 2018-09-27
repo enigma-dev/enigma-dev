@@ -90,17 +90,17 @@ void d3d_clear_depth(double value) {
 
 void d3d_start()
 {
-    draw_batch_flush(batch_flush_deferred);
-	enigma::d3dMode = true;
-    enigma::d3dPerspective = true;
-	enigma::d3dCulling =  rs_none;
-	d3dmgr->device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	d3d_set_hidden(false);
+  draw_batch_flush(batch_flush_deferred);
+  enigma::d3dMode = true;
+  enigma::d3dPerspective = true;
+  enigma::d3dCulling = rs_none;
+  d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+  d3dmgr->SetRenderState(D3DRS_ZENABLE, enigma::d3dHidden = true);
 
-	// Enable texture repetition by default
-	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
-	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
-	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
+  // Enable texture repetition by default
+  d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
+  d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
+  d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
 }
 
 void d3d_end()
@@ -119,7 +119,6 @@ void d3d_set_software_vertex_processing(bool software) {
 void d3d_set_hidden(bool enable)
 {
     draw_batch_flush(batch_flush_deferred);
-	//d3d_set_zwriteenable(enable);
 	d3dmgr->SetRenderState(D3DRS_ZENABLE, enable); // enable/disable the z-buffer
     enigma::d3dHidden = enable;
 }
