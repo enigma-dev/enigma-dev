@@ -25,6 +25,7 @@
 #include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h" // for view variables
 
 #include <glm/gtc/type_ptr.hpp>
