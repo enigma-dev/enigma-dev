@@ -135,7 +135,7 @@ void d3d_set_fog_color(int color)
 {
     draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FOGCOLOR,
-                    D3DCOLOR_COLORVALUE(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), 1.0f)); // Highest 8 bits are not used.
+                    D3DCOLOR_RGBA(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), 255)); // Highest 8 bits are not used.
 }
 
 void d3d_set_fog_start(double start)
@@ -276,21 +276,12 @@ class d3d_lights
             ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
         }
 
-		D3DLIGHT9 light;    // create the light struct
-
-		ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
-		light.Type = D3DLIGHT_DIRECTIONAL;    // make the light type 'directional light'
-		light.Diffuse = D3DXCOLOR(COL_GET_R(col), COL_GET_R(col), COL_GET_B(col), 1.0f);    // set the light's color
-		light.Direction = D3DXVECTOR3(dx, dy, dz);
+		D3DLIGHT9 light = { };
+		light.Type = D3DLIGHT_DIRECTIONAL;
+		light.Diffuse = { COL_GET_Rf(col), COL_GET_Gf(col), COL_GET_Bf(col), 1.0f };
+		light.Direction = { dx, dy, dz };
 
 		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light
-
-		D3DMATERIAL9 material;
-		ZeroMemory(&material, sizeof(D3DMATERIAL9));
-		material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-
-		d3dmgr->SetMaterial(&material);
 
 		light_update_positions();
         return true;
@@ -321,12 +312,10 @@ class d3d_lights
             light_ind.insert(pair<int,int>(id, ms));
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
-		D3DLIGHT9 light;    // create the light struct
-
-		ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
-		light.Type = D3DLIGHT_POINT;    // make the light type 'directional light'
-		light.Diffuse = D3DXCOLOR(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), 1.0f);    // set the light's color
-		light.Position = D3DXVECTOR3(x, y, z);
+		D3DLIGHT9 light = { };
+		light.Type = D3DLIGHT_POINT;
+		light.Diffuse = { COL_GET_Rf(col), COL_GET_Gf(col), COL_GET_Bf(col), 1.0f };
+		light.Position = { x, y, z };
 		light.Range = range;
 		light.Attenuation0 = 1.0f;    // no constant inverse attenuation
 		light.Attenuation1 = 0.0f;    // only .125 inverse attenuation
@@ -336,13 +325,6 @@ class d3d_lights
 		light.Falloff = 1.0f;    // use the typical falloff
 
 		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light
-
-		D3DMATERIAL9 material;
-		ZeroMemory(&material, sizeof(D3DMATERIAL9));
-		material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-
-		d3dmgr->SetMaterial(&material);
 
 		return true;
     }
@@ -431,7 +413,7 @@ void d3d_light_shininess(int facemode, int shine)
 void d3d_light_define_ambient(int col)
 {
     draw_batch_flush(batch_flush_deferred);
-    d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), 1));
+    d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), 255));
 }
 
 bool d3d_light_enable(int id, bool enable)
