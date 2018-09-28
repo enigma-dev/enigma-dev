@@ -66,7 +66,6 @@ void d3d_transform_set_array(const gs_scalar *matrix);
 void d3d_transform_add_array(const gs_scalar *matrix);
 gs_scalar * d3d_transform_get_array_pointer();
 var d3d_transform_get_array();
-void d3d_transform_force_update();
 
 bool d3d_transform_stack_push();
 bool d3d_transform_stack_pop();
