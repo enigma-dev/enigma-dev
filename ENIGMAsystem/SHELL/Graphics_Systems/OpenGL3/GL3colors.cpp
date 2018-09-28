@@ -34,13 +34,13 @@ void draw_clear_alpha(int col,float alpha)
 {
 	draw_batch_flush(batch_flush_deferred);
   //Unfortunately, we lack a 255-based method for setting ClearColor.
-	glClearColor(COL_GET_R(col)/255.0,COL_GET_G(col)/255.0,COL_GET_B(col)/255.0,alpha);
+	glClearColor(COL_GET_Rf(col),COL_GET_Gf(col),COL_GET_Bf(col),alpha);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 void draw_clear(int col)
 {
 	draw_batch_flush(batch_flush_deferred);
-	glClearColor(COL_GET_R(col)/255.0,COL_GET_G(col)/255.0,COL_GET_B(col)/255.0,1);
+	glClearColor(COL_GET_Rf(col),COL_GET_Gf(col),COL_GET_Bf(col),1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
