@@ -10,6 +10,11 @@
 #define COL_GET_B(x) ((x & 0x00FF0000)>>16)
 #define COL_GET_A(x) ((x & 0xFF000000)>>24)
 
+#define COL_GET_Rf(x) (COL_GET_R(x)/255.0f)
+#define COL_GET_Gf(x) (COL_GET_G(x)/255.0f)
+#define COL_GET_Bf(x) (COL_GET_B(x)/255.0f)
+#define COL_GET_Af(x) (COL_GET_A(x)/255.0f)
+
 // clamps a floating-point alpha (from 0 to 1) between 0 and 255
 #define CLAMP_ALPHA(alpha) (alpha>1?255:(alpha<0?0:(unsigned char)(alpha*255)))
 // clamps a floating-point alpha (from 0 to 1) between 0 and 1

@@ -182,9 +182,9 @@ void d3d_set_fog_color(int color)
 {
   draw_batch_flush(batch_flush_deferred);
   GLfloat fog_color[3];
-  fog_color[0] = COL_GET_R(color);
-  fog_color[1] = COL_GET_G(color);
-  fog_color[2] = COL_GET_B(color);
+  fog_color[0] = COL_GET_Rf(color);
+  fog_color[1] = COL_GET_Gf(color);
+  fog_color[2] = COL_GET_Bf(color);
   glFogfv(GL_FOG_COLOR, fog_color);
 }
 
@@ -324,7 +324,7 @@ class d3d_lights
             ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
         }
 
-        const float dir[4] = {float(-dx), float(-dy), float(-dz), 0.0f}, color[4] = {float(COL_GET_R(col)), float(COL_GET_G(col)), float(COL_GET_B(col)), 1.0f};
+        const float dir[4] = {float(-dx), float(-dy), float(-dz), 0.0f}, color[4] = {float(COL_GET_Rf(col)), float(COL_GET_Gf(col)), float(COL_GET_Bf(col)), 1.0f};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, dir);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         light_update_positions();
@@ -356,7 +356,7 @@ class d3d_lights
             light_ind.insert(pair<int,int>(id, ms));
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
-        const float pos[4] = {(float)x, (float)y, (float)z, 1.0f}, color[4] = {float(COL_GET_R(col)), float(COL_GET_G(col)), float(COL_GET_B(col)), 1.0f},
+        const float pos[4] = {(float)x, (float)y, (float)z, 1.0f}, color[4] = {float(COL_GET_Rf(col)), float(COL_GET_Gf(col)), float(COL_GET_Bf(col)), 1.0f},
             specular[4] = {0.0f, 0.0f, 0.0f, 0.0f}, ambient[4] = {0.0f, 0.0f, 0.0f, 0.0f};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
@@ -515,7 +515,7 @@ void d3d_light_shininess(int facemode, int shine)
 void d3d_light_define_ambient(int col)
 {
   draw_batch_flush(batch_flush_deferred);
-  float color[4] = {float(COL_GET_R(col)), float(COL_GET_G(col)), float(COL_GET_B(col)), 1.0f};
+  float color[4] = {float(COL_GET_Rf(col)), float(COL_GET_Gf(col)), float(COL_GET_Bf(col)), 1.0f};
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
 }
 

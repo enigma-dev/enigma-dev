@@ -402,9 +402,9 @@ class d3d_lights
       lights[id].position[1] = -dy;
       lights[id].position[2] = -dz;
       lights[id].position[3] = 0.0;
-      lights[id].diffuse[0] = COL_GET_R(col);
-      lights[id].diffuse[1] = COL_GET_G(col);
-      lights[id].diffuse[2] = COL_GET_B(col);
+      lights[id].diffuse[0] = COL_GET_Rf(col);
+      lights[id].diffuse[1] = COL_GET_Gf(col);
+      lights[id].diffuse[2] = COL_GET_Bf(col);
       lights[id].diffuse[3] = 1.0f;
       lights[id].update = true;
       lightsource_update();
@@ -425,9 +425,9 @@ class d3d_lights
       lights[id].position[1] = y;
       lights[id].position[2] = z;
       lights[id].position[3] = range;
-      lights[id].diffuse[0] = COL_GET_R(col);
-      lights[id].diffuse[1] = COL_GET_G(col);
-      lights[id].diffuse[2] = COL_GET_B(col);
+      lights[id].diffuse[0] = COL_GET_Rf(col);
+      lights[id].diffuse[1] = COL_GET_Gf(col);
+      lights[id].diffuse[2] = COL_GET_Bf(col);
       lights[id].diffuse[3] = 1.0f;
       lights[id].specular[0] = 0.0f;
       lights[id].specular[1] = 0.0f;
@@ -531,9 +531,9 @@ bool d3d_light_set_ambient(int id, int r, int g, int b, double a)
 void d3d_light_define_ambient(int col)
 {
   draw_batch_flush(batch_flush_deferred);
-  enigma::d3d_lighting.global_ambient_color[0] = COL_GET_R(col);
-  enigma::d3d_lighting.global_ambient_color[1] = COL_GET_G(col);
-  enigma::d3d_lighting.global_ambient_color[2] = COL_GET_B(col);
+  enigma::d3d_lighting.global_ambient_color[0] = COL_GET_Rf(col);
+  enigma::d3d_lighting.global_ambient_color[1] = COL_GET_Gf(col);
+  enigma::d3d_lighting.global_ambient_color[2] = COL_GET_Bf(col);
   enigma::d3d_lighting.light_update();
 }
 

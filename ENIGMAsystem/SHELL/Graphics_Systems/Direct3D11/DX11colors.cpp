@@ -35,9 +35,9 @@ void draw_clear_alpha(int col, float alpha)
 	float color[4];
 
 	// Setup the color to clear the buffer to.
-	color[0] = COL_GET_R(col)/255.0;
-	color[1] = COL_GET_G(col)/255.0;
-	color[2] = COL_GET_B(col)/255.0;
+	color[0] = COL_GET_Rf(col);
+	color[1] = COL_GET_Gf(col);
+	color[2] = COL_GET_Bf(col);
 	color[3] = alpha;
 
 	// Clear the back buffer.
@@ -50,9 +50,9 @@ void draw_clear(int col)
 	float color[4];
 
 	// Setup the color to clear the buffer to.
-	color[0] = COL_GET_R(col)/255.0;
-	color[1] = COL_GET_G(col)/255.0;
-	color[2] = COL_GET_B(col)/255.0;
+	color[0] = COL_GET_Rf(col);
+	color[1] = COL_GET_Gf(col);
+	color[2] = COL_GET_Bf(col);
 	color[3] = 1;
 
 	// Clear the back buffer.
