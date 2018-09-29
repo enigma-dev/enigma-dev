@@ -49,10 +49,12 @@ inline var matrix_vararray(const glm::mat4 &mat) {
 } // namespace anonymous
 
 namespace enigma {
-  bool d3dPerspective = false;
-  glm::mat4 world = glm::mat4(1.0f),
-            view  = glm::mat4(1.0f),
-            projection = glm::mat4(1.0f);
+
+bool d3dPerspective = false;
+glm::mat4 world = glm::mat4(1.0f),
+          view  = glm::mat4(1.0f),
+          projection = glm::mat4(1.0f);
+
 } // namespace enigma
 
 namespace enigma_user
