@@ -168,10 +168,10 @@ var d3d_transform_vertex(gs_scalar x, gs_scalar y, gs_scalar z) {
   glm::vec4 vertex(x, y, z, 0);
   vertex = enigma::world * vertex;
   var vert;
-  vert(3, 1) = 0;
-  vert(0, 0) = vertex.x;
-  vert(1, 0) = vertex.y;
-  vert(2, 0) = vertex.z;
+  vert(3) = 0;
+  vert(0) = vertex.x;
+  vert(1) = vertex.y;
+  vert(2) = vertex.z;
   return vert;
 }
 
