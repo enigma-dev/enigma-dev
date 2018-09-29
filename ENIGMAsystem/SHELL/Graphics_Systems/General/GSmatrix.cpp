@@ -38,11 +38,11 @@ inline glm::mat4 matrix_rotation(gs_scalar x, gs_scalar y, gs_scalar z) {
 
 inline var matrix_vararray(const glm::mat4 &mat) {
   var pm;
-  pm(4,4) = 0;
-  pm(0,0) = mat[0][0], pm(0,1) = mat[0][1], pm(0,2) = mat[0][2], pm(0,3) = mat[0][3],
-  pm(1,0) = mat[1][0], pm(1,1) = mat[1][1], pm(1,2) = mat[1][2], pm(1,3) = mat[1][3],
-  pm(2,0) = mat[2][0], pm(2,1) = mat[2][1], pm(2,2) = mat[2][2], pm(2,3) = mat[2][3],
-  pm(3,0) = mat[3][0], pm(3,1) = mat[3][1], pm(3,2) = mat[3][2], pm(3,3) = mat[3][3];
+  pm(16) = 0;
+  pm(0) = mat[0][0], pm(4) = mat[0][1], pm(8)  = mat[0][2], pm(12) = mat[0][3],
+  pm(1) = mat[1][0], pm(5) = mat[1][1], pm(9)  = mat[1][2], pm(13) = mat[1][3],
+  pm(2) = mat[2][0], pm(6) = mat[2][1], pm(10) = mat[2][2], pm(14) = mat[2][3],
+  pm(3) = mat[3][0], pm(7) = mat[3][1], pm(11) = mat[3][2], pm(15) = mat[3][3];
   return pm;
 }
 
