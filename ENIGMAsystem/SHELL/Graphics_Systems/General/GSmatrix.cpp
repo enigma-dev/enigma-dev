@@ -35,6 +35,16 @@ inline glm::mat4 matrix_rotation(gs_scalar x, gs_scalar y, gs_scalar z) {
   return rotation;
 }
 
+inline var matrix_vararray(const glm::mat4 &mat) {
+  var pm;
+  pm(4,4) = 0;
+  pm(0,0) = mat[0][0], pm(0,1) = mat[0][1], pm(0,2) = mat[0][2], pm(0,3) = mat[0][3],
+  pm(1,0) = mat[1][0], pm(1,1) = mat[1][1], pm(1,2) = mat[1][2], pm(1,3) = mat[1][3],
+  pm(2,0) = mat[2][0], pm(2,1) = mat[2][1], pm(2,2) = mat[2][2], pm(2,3) = mat[2][3],
+  pm(3,0) = mat[3][0], pm(3,1) = mat[3][1], pm(3,2) = mat[3][2], pm(3,3) = mat[3][3];
+  return pm;
+}
+
 } // namespace anonymous
 
 namespace enigma {
@@ -46,6 +56,54 @@ namespace enigma {
 
 namespace enigma_user
 {
+
+var matrix_get(int type) {
+  switch (type) {
+    case matrix_world:
+      return matrix_vararray(enigma::world);
+    case matrix_view:
+      return matrix_vararray(enigma::view);
+    case matrix_projection:
+      return matrix_vararray(enigma::projection);
+    default:
+      #ifdef DEBUG_MODE
+      show_error("Unknown matrix type: " + std::to_string(type), false);
+      #endif
+      break;
+  }
+  return matrix_vararray(glm::mat4(1.0f));
+}
+
+var matrix_build(gs_scalar x, gs_scalar y, gs_scalar z,
+                 gs_scalar xrotation, gs_scalar yrotation, gs_scalar zrotation,
+                 gs_scalar xscale, gs_scalar yscale, gs_scalar zscale) {
+  glm::mat4 matrix = matrix_rotation(xrotation, yrotation, zrotation);
+  matrix = glm::scale(matrix, glm::vec3(xscale, yscale, zscale));
+  matrix = glm::translate(matrix, glm::vec3(x, y, z));
+  return matrix_vararray(matrix);
+}
+
+var matrix_build_identity() {
+  return matrix_vararray(glm::mat4(1.0f));
+}
+
+var matrix_build_lookat(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,
+                        gs_scalar xto, gs_scalar yto, gs_scalar zto,
+                        gs_scalar xup, gs_scalar yup, gs_scalar zup) {
+  return matrix_vararray(glm::lookAt(glm::vec3(xfrom, yfrom, zfrom), glm::vec3(xto, yto, zto), glm::vec3(xup, yup, zup)));
+}
+
+var matrix_build_projection_ortho(gs_scalar width, gs_scalar height, gs_scalar znear, gs_scalar zfar) {
+  return matrix_vararray(glm::ortho(0.0f, width, height, 0.0f, znear, zfar));
+}
+
+var matrix_build_projection_perspective(gs_scalar width, gs_scalar height, gs_scalar znear, gs_scalar zfar) {
+  return matrix_vararray(glm::perspective((float)gs_angle_to_radians(40), width/height, znear, zfar));
+}
+
+var matrix_build_projection_perspective_fov(gs_scalar fov_y, gs_scalar aspect, gs_scalar znear, gs_scalar zfar) {
+  return matrix_vararray(glm::perspective((float)gs_angle_to_radians(fov_y), aspect, znear, zfar));
+}
 
 void d3d_set_perspective(bool enable) {
   // in GM8.1 and GMS v1.4 this does not take effect
@@ -101,6 +159,17 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
   enigma::projection = glm::perspective((float)gs_angle_to_radians(angle), width/height, 1.0f, 32000.0f);
   enigma::graphics_set_matrix(matrix_view);
   enigma::graphics_set_matrix(matrix_projection);
+}
+
+var d3d_transform_vertex(gs_scalar x, gs_scalar y, gs_scalar z) {
+  glm::vec4 vertex(x, y, z, 0);
+  vertex = enigma::world * vertex;
+  var vert;
+  vert(3, 1) = 0;
+  vert(0, 0) = vertex.x;
+  vert(1, 0) = vertex.y;
+  vert(2, 0) = vertex.z;
+  return vert;
 }
 
 void d3d_transform_set_identity()
