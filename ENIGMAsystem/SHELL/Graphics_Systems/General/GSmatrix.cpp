@@ -18,6 +18,7 @@
 #include "GSmatrix.h"
 #include "GSd3d.h"
 
+#include "Widget_Systems/widgets_mandatory.h" // for show_error
 #include "Universal_System/scalar.h"
 
 #include <glm/gtc/matrix_transform.hpp>
