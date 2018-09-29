@@ -28,6 +28,13 @@ namespace {
 
 std::stack<glm::mat4> trans_stack;
 
+inline glm::mat4 matrix_rotation(gs_scalar x, gs_scalar y, gs_scalar z) {
+  glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(-x), glm::vec3(1.0f, 0.0f, 0.0f));
+  rotation = glm::rotate(rotation, (float)gs_angle_to_radians(-y), glm::vec3(0.0f, 1.0f, 0.0f));
+  rotation = glm::rotate(rotation, (float)gs_angle_to_radians(-z), glm::vec3(0.0f, 0.0f, 1.0f));
+  return rotation;
+}
+
 } // namespace anonymous
 
 namespace enigma {
@@ -138,6 +145,13 @@ void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
   enigma::graphics_set_matrix(matrix_world);
 }
 
+void d3d_transform_add_rotation(gs_scalar x, gs_scalar y, gs_scalar z)
+{
+  glm::mat4 rotation = matrix_rotation(x, y, z);
+  enigma::world = rotation * enigma::world;
+  enigma::graphics_set_matrix(matrix_world);
+}
+
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
   enigma::world = glm::translate(glm::mat4(1.0f), glm::vec3(xt, yt, zt));
@@ -171,6 +185,12 @@ void d3d_transform_set_rotation_z(gs_scalar angle)
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
   enigma::world = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(-angle), glm::vec3(x, y, z));
+  enigma::graphics_set_matrix(matrix_world);
+}
+
+void d3d_transform_set_rotation(gs_scalar x, gs_scalar y, gs_scalar z)
+{
+  enigma::world = matrix_rotation(x, y, z);
   enigma::graphics_set_matrix(matrix_world);
 }
 
