@@ -28,7 +28,8 @@
 
 namespace {
 
-std::stack<glm::mat4> trans_stack;
+std::stack<glm::mat4> trans_stack; // used for classic transform stack
+std::stack<glm::mat4> matrix_stack; // used for newer matrix functions
 
 inline glm::mat4 matrix_rotation(gs_scalar x, gs_scalar y, gs_scalar z) {
   glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(-x), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -160,6 +161,35 @@ var matrix_build_projection_perspective(gs_scalar width, gs_scalar height, gs_sc
 
 var matrix_build_projection_perspective_fov(gs_scalar fov_y, gs_scalar aspect, gs_scalar znear, gs_scalar zfar) {
   return matrix_vararray(glm::perspective((float)gs_angle_to_radians(fov_y), aspect, znear, zfar));
+}
+
+bool matrix_stack_is_empty() {
+  return matrix_stack.empty();
+}
+
+void matrix_stack_clear() {
+  while (!matrix_stack.empty()) {
+    matrix_stack.pop();
+  }
+}
+
+void matrix_stack_set(const var& matrix) {
+  matrix_stack.pop();
+  glm::mat4 glm_matrix = glm::make_mat4((gs_scalar*)matrix.values);
+  matrix_stack.emplace(glm_matrix);
+}
+
+void matrix_stack_push(const var& matrix) {
+  glm::mat4 glm_matrix = glm::make_mat4((gs_scalar*)matrix.values);
+  matrix_stack.emplace(glm_matrix);
+}
+
+void matrix_stack_pop() {
+  matrix_stack.pop();
+}
+
+var matrix_stack_top() {
+  return matrix_vararray(matrix_stack.top());
 }
 
 void d3d_set_perspective(bool enable) {
