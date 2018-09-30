@@ -28,8 +28,13 @@
 
 namespace {
 
-std::stack<glm::mat4> trans_stack; // used for classic transform stack
-std::stack<glm::mat4> matrix_stack; // used for newer matrix functions
+// used for classic transform stack
+std::stack<glm::mat4> trans_stack;
+// used for ENIGMA projection stack
+// first is view matrix second is projection matrix
+std::stack<std::pair<glm::mat4, glm::mat4> > proj_stack;
+// used for newer matrix stack functions
+std::stack<glm::mat4> matrix_stack;
 
 inline glm::mat4 matrix_rotation(gs_scalar x, gs_scalar y, gs_scalar z) {
   glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(-x), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -53,6 +58,13 @@ inline var vec3_vararray(const glm::vec3 &vector) {
   pm(3) = 0;
   pm(0) = vector.x, pm(1) = vector.y, pm(2) = vector.z;
   return pm;
+}
+
+template<typename T>
+inline void stack_clear(std::stack<T> &stack) {
+  while (!stack.empty()) {
+    stack.pop();
+  }
 }
 
 } // namespace anonymous
@@ -168,9 +180,7 @@ bool matrix_stack_is_empty() {
 }
 
 void matrix_stack_clear() {
-  while (!matrix_stack.empty()) {
-    matrix_stack.pop();
-  }
+  stack_clear(matrix_stack);
 }
 
 void matrix_stack_set(const var& matrix) {
@@ -347,9 +357,7 @@ void d3d_transform_set_rotation(gs_scalar x, gs_scalar y, gs_scalar z)
 
 void d3d_transform_stack_clear()
 {
-  while (!trans_stack.empty()) {
-    trans_stack.pop();
-  }
+  stack_clear(trans_stack);
 }
 
 bool d3d_transform_stack_empty()
@@ -386,5 +394,44 @@ bool d3d_transform_stack_discard()
   trans_stack.pop();
   return true;
 }
+
+bool d3d_projection_stack_push() {
+  proj_stack.emplace(enigma::view, enigma::projection);
+  return true;
+}
+
+bool d3d_projection_stack_pop() {
+  if (proj_stack.empty()) return false;
+  enigma::view = proj_stack.top().first;
+  enigma::projection = proj_stack.top().second;
+  enigma::graphics_set_matrix(matrix_view);
+  enigma::graphics_set_matrix(matrix_projection);
+  proj_stack.pop();
+  return true;
+}
+
+void d3d_projection_stack_clear() {
+  stack_clear(proj_stack);
+}
+
+bool d3d_projection_stack_empty() {
+  return proj_stack.empty();
+}
+
+bool d3d_projection_stack_top() {
+  if (proj_stack.empty()) return false;
+  enigma::view = proj_stack.top().first;
+  enigma::projection = proj_stack.top().second;
+  enigma::graphics_set_matrix(matrix_view);
+  enigma::graphics_set_matrix(matrix_projection);
+  return true;
+}
+
+bool d3d_projection_stack_discard() {
+  if (proj_stack.empty()) return false;
+  proj_stack.pop();
+  return true;
+}
+
 
 } // namespace enigma_user
