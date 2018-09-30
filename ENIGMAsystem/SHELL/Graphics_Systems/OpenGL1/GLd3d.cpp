@@ -45,6 +45,8 @@ void graphics_set_matrix(int type) {
   switch(type) {
     case enigma_user::matrix_world:
     case enigma_user::matrix_view:
+      if (type == enigma_user::matrix_view)
+        enigma::d3d_light_update_positions();
       matrix = enigma::view * enigma::world;
       glMatrixMode(GL_MODELVIEW);
       break;
@@ -59,7 +61,6 @@ void graphics_set_matrix(int type) {
       return;
   }
   glLoadMatrixf(glm::value_ptr(matrix));
-  enigma::d3d_light_update_positions();
 }
 
 } // namespace enigma
@@ -321,14 +322,36 @@ class d3d_lights
     d3d_lights() {}
     ~d3d_lights() {}
 
+    void light_set_position(int id, const float* pos) {
+      // this is done for compatibility with D3D/GM
+      // make sure to call this anywhere you set a light's position
+      // instead of calling glLightfv directly
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix(); // save present matrix
+      // define lights with respect to view matrix but not world
+      glLoadMatrixf(glm::value_ptr(enigma::view));
+      glLightfv(GL_LIGHT0+id, GL_POSITION, pos);
+      glPopMatrix(); // restore original matrix
+    }
+
     void light_update_positions()
     {
+        // this logic is repeated from light_set_position for efficiency
+        // so that we don't keep pushing/popping for all 8 hardware
+        // lights that are supported by GM
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix(); // save present matrix
+        // define lights with respect to view matrix but not world
+        glLoadMatrixf(glm::value_ptr(enigma::view));
+
         map<int, posi>::iterator end = ind_pos.end();
         for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
             const posi pos1 = (*it).second;
             const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
             glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
         }
+
+        glPopMatrix(); // restore original matrix
     }
 
     bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
@@ -355,9 +378,9 @@ class d3d_lights
         }
 
         const float dir[4] = {float(-dx), float(-dy), float(-dz), 0.0f}, color[4] = {float(COL_GET_Rf(col)), float(COL_GET_Gf(col)), float(COL_GET_Bf(col)), 1.0f};
-        glLightfv(GL_LIGHT0+ms, GL_POSITION, dir);
+        light_set_position(ms, dir);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
-        light_update_positions();
+
         return true;
     }
 
@@ -388,7 +411,7 @@ class d3d_lights
         }
         const float pos[4] = {(float)x, (float)y, (float)z, 1.0f}, color[4] = {float(COL_GET_Rf(col)), float(COL_GET_Gf(col)), float(COL_GET_Bf(col)), 1.0f},
             specular[4] = {0.0f, 0.0f, 0.0f, 0.0f}, ambient[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-        glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
+        light_set_position(ms, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
         glLightfv(GL_LIGHT0+ms, GL_AMBIENT, ambient);
@@ -398,6 +421,7 @@ class d3d_lights
         // 48 is a number gotten through manual calibration. Make it lower to increase the light power.
         const float attenuation_calibration = 8.0;
         glLightf(GL_LIGHT0+ms, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(range*range));
+
         return true;
     }
 
@@ -418,6 +442,7 @@ class d3d_lights
         }
         float specular[4] = {(float)r, (float)g, (float)b, (float)a};
         glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
+
         return true;
     }
 
@@ -438,6 +463,7 @@ class d3d_lights
         }
         float specular[4] = {(float)r, (float)g, (float)b, (float)a};
         glLightfv(GL_LIGHT0+ms, GL_AMBIENT, specular);
+
         return true;
     }
 
@@ -458,6 +484,7 @@ class d3d_lights
         }
         float specular[4] = {(float)r, (float)g, (float)b, (float)a};
         glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
+
         return true;
     }
 
@@ -478,6 +505,7 @@ class d3d_lights
         {
             glEnable(GL_LIGHT0+(*it).second);
         }
+
         return true;
     }
 
