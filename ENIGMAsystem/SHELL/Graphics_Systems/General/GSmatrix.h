@@ -34,9 +34,9 @@ enum {
 };
 
 var matrix_get(int type);
-void matrix_set(int type, var matrix);
-void matrix_multiply(var matrix1, var matrix2);
-var matrix_transform_vertex(var matrix, gs_scalar x, gs_scalar y, gs_scalar z);
+void matrix_set(int type, const var& matrix);
+var matrix_multiply(const var& matrix1, const var& matrix2);
+var matrix_transform_vertex(const var& matrix, gs_scalar x, gs_scalar y, gs_scalar z);
 
 var matrix_build(gs_scalar x, gs_scalar y, gs_scalar z,
                  gs_scalar xrotation, gs_scalar yrotation, gs_scalar zrotation,
@@ -51,10 +51,14 @@ var matrix_build_projection_perspective_fov(gs_scalar fov_y, gs_scalar aspect, g
 
 bool matrix_stack_is_empty();
 void matrix_stack_clear();
-void matrix_stack_set(var matrix);
-void matrix_stack_push(var matrix);
+void matrix_stack_set(const var& matrix);
+void matrix_stack_push(const var& matrix);
 void matrix_stack_pop();
 var matrix_stack_top();
+
+bool is_matrix(const var& value);
+bool is_vec3(const var& value);
+bool is_vec4(const var& value);
 
 //TODO: Transformation functions should probably not use gs_scalar as the angular type but implement their own scalar to avoid
 //losing precision with math functions.

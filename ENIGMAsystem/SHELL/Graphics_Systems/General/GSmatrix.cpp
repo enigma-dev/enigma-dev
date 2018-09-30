@@ -22,6 +22,7 @@
 #include "Universal_System/scalar.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <stack>
 
@@ -46,6 +47,13 @@ inline var matrix_vararray(const glm::mat4 &mat) {
   return pm;
 }
 
+inline var vec3_vararray(const glm::vec3 &vector) {
+  var pm;
+  pm(3) = 0;
+  pm(0) = vector.x, pm(1) = vector.y, pm(2) = vector.z;
+  return pm;
+}
+
 } // namespace anonymous
 
 namespace enigma {
@@ -59,6 +67,18 @@ glm::mat4 world = glm::mat4(1.0f),
 
 namespace enigma_user
 {
+
+bool is_matrix(const var& value) {
+  return (value.array_len() == 16);
+}
+
+bool is_vec3(const var& value) {
+  return (value.array_len() == 3);
+}
+
+bool is_vec4(const var& value) {
+  return (value.array_len() == 4);
+}
 
 var matrix_get(int type) {
   switch (type) {
@@ -75,6 +95,40 @@ var matrix_get(int type) {
       break;
   }
   return matrix_vararray(glm::mat4(1.0f));
+}
+
+void matrix_set(int type, const var& matrix) {
+  glm::mat4 glm_matrix = glm::make_mat4((gs_scalar*)matrix.values);
+  switch (type) {
+    case matrix_world:
+      enigma::world = glm_matrix;
+      break;
+    case matrix_view:
+      enigma::view = glm_matrix;
+      break;
+    case matrix_projection:
+      enigma::projection = glm_matrix;
+      break;
+    default:
+      #ifdef DEBUG_MODE
+      show_error("Unknown matrix type: " + std::to_string(type), false);
+      #endif
+      break;
+  }
+  enigma::graphics_set_matrix(type);
+}
+
+var matrix_multiply(const var& matrix1, const var& matrix2) {
+  glm::mat4 glm_matrix1 = glm::make_mat4((gs_scalar*)matrix1.values),
+            glm_matrix2 = glm::make_mat4((gs_scalar*)matrix2.values);
+  return matrix_vararray(glm_matrix1 * glm_matrix2);
+}
+
+var matrix_transform_vertex(const var& matrix, gs_scalar x, gs_scalar y, gs_scalar z) {
+  glm::mat4 glm_matrix = glm::make_mat4((gs_scalar*)matrix.values);
+  glm::vec4 vertex(x, y, z, 0);
+  vertex = glm_matrix * vertex;
+  return vec3_vararray(glm::vec3(vertex));
 }
 
 var matrix_build(gs_scalar x, gs_scalar y, gs_scalar z,
@@ -167,12 +221,7 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 var d3d_transform_vertex(gs_scalar x, gs_scalar y, gs_scalar z) {
   glm::vec4 vertex(x, y, z, 0);
   vertex = enigma::world * vertex;
-  var vert;
-  vert(3) = 0;
-  vert(0) = vertex.x;
-  vert(1) = vertex.y;
-  vert(2) = vertex.z;
-  return vert;
+  return vec3_vararray(glm::vec3(vertex));
 }
 
 void d3d_transform_set_identity()
