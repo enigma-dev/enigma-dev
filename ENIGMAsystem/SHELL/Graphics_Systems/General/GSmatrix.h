@@ -24,6 +24,9 @@
 #include "Universal_System/var4.h"
 #include <string>
 
+//TODO: Transformation functions should probably not use gs_scalar as the angular type but implement their own scalar to avoid
+//losing precision with math functions.
+
 namespace enigma_user
 {
 
@@ -60,8 +63,6 @@ bool is_matrix(const var& value);
 bool is_vec3(const var& value);
 bool is_vec4(const var& value);
 
-//TODO: Transformation functions should probably not use gs_scalar as the angular type but implement their own scalar to avoid
-//losing precision with math functions.
 void d3d_set_perspective(bool enable);
 bool d3d_get_perspective();
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,
