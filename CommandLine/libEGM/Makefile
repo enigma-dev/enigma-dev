@@ -18,7 +18,7 @@ CXXFLAGS  := -I$(SRC_DIR) $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I
 LDFLAGS   := -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -lstdc++fs -L$(SHARED_SOURCES)/libpng-util -lpng-util -lpng
 
 #if gcc >= 8 use std::filesystem instead of boost
-ifeq ($(shell expr $(GCCVER) \>= 9), 1)
+ifeq ($(shell expr $(GCCVER) \>= 8), 1)
 	override CXXFLAGS += -std=c++17
 	FS_LIBS=-lstdc++fs
 else
