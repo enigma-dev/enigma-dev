@@ -214,7 +214,7 @@ EnigmaStruct* Proto2ES(buffers::Game* protobuf) {
   CacheNames(*root);
 
   // NOTE: This cannot actually be initialized statically.
-  // The {} represents a map of resource types to map<res_id, res_name>.
+  // The nameMap represents a map of resource types to map<res_id, res_name>.
   // You need to instantiate this where you plan to use it and supply the actual
   // resource names for it to substitute.
   EventNameMapping event_name_map("", "", "[", "]", nameMap);
