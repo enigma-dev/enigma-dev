@@ -165,15 +165,6 @@ namespace enigma_user
 	void d3d_set_fog_end(double end);
 	void d3d_set_fog_density(double density);
 
-	void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup);
-	void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar);
-	void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle);
-	void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle);
-
-	void d3d_transform_force_update();
-
-
-
 	void d3d_set_fill_mode(int fill);
 	void d3d_set_line_width(float value);
 	void d3d_set_point_size(float value);

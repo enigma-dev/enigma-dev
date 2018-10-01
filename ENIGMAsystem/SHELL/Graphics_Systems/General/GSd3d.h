@@ -28,7 +28,6 @@ namespace enigma {
   extern bool d3dZWriteEnable;
   extern bool d3dPerspective;
   extern int d3dCulling;
-  void d3d_light_update_positions();
 }
 
 // ***** RENDER STATE CONSTANTS *****

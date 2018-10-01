@@ -19,12 +19,19 @@
 #ifndef GL_SHADER_H
 #define GL_SHADER_H
 
-#include "../General/OpenGLHeaders.h"
+#include "GLSLshader.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
 #include <string>
 using std::string;
 
 namespace enigma
 {
+  extern unsigned char currentcolor[4];
+  extern unsigned bound_vbo;
+  extern unsigned bound_vboi;
+  extern unsigned bound_shader;
+  extern vector<enigma::ShaderProgram*> shaderprograms;
+
   string getVertexShaderPrefix();
   string getFragmentShaderPrefix();
   string getDefaultFragmentShader();

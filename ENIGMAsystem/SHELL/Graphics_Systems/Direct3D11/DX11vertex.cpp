@@ -18,6 +18,7 @@
 #include "Bridges/General/DX11Context.h"
 
 #include "Graphics_Systems/General/GSvertex_impl.h"
+#include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
@@ -28,10 +29,6 @@
 
 #include <map>
 using std::map;
-
-namespace enigma {
-  extern glm::mat4 world, view, projection;
-} // namespace enigma
 
 namespace {
 struct MatrixBufferType

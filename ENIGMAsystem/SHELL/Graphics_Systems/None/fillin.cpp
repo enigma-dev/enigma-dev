@@ -41,7 +41,6 @@ using namespace std;
 #include <algorithm>
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 #include "Graphics_Systems/General/GSprimitives.h"
-#include "../General/GSmath.h"
 #include "../General/GSbackground.h"
 #include "../General/GStextures.h"
 #include "../General/GStiles.h"
@@ -71,7 +70,6 @@ using namespace std;
 //the GPU (such as surfaces) and as such have no business in a headless mode
 namespace enigma
 {
-	void d3d_light_update_positions(){}
 
 	void graphicssystem_initialize(){}
 
@@ -82,6 +80,8 @@ namespace enigma
 	void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex){}
 	void graphics_delete_texture(int texid){}
 	unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight){return NULL;}
+
+	void graphics_set_matrix(int type) {}
 
 	void graphics_delete_vertex_buffer_peer(int buffer) {}
 	void graphics_delete_index_buffer_peer(int buffer) {}
@@ -205,12 +205,6 @@ namespace enigma_user
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 	void display_set_gui_size(unsigned int width, unsigned int height){}
 
-	void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup){}
-	void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar){}
-	void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle){}
-	void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle){}
-
-	void d3d_transform_force_update(){}
 	void d3d_set_lighting(bool enable){}
 
 	void d3d_set_fog(bool enable, int color, double start, double end){}
