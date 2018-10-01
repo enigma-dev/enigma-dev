@@ -76,7 +76,7 @@ void graphics_set_matrix(int type) {
 
   glm::mat4 mvp_matrix = projection * mv_matrix;
   glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_mvpMatrix,  1, glm::value_ptr(glm::transpose(mvp_matrix)));
-  glsl_uniform_matrix3fv_internal(shaderprograms[bound_shader]->uni_normalMatrix,  1, glm::value_ptr(glm::mat3(1.0f)));
+  glsl_uniform_matrix3fv_internal(shaderprograms[bound_shader]->uni_normalMatrix,  1, glm::value_ptr(glm::mat3(glm::inverse(mv_matrix))));
 
   enigma::d3d_light_update_positions();
 }
