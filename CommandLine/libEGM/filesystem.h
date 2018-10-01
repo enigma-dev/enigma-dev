@@ -9,17 +9,18 @@
         ForwardIt it,
         typename std::iterator_traits<ForwardIt>::difference_type n = 1);
   }  // namespace boost
+#define MINGWISATWAT(x) (x).string()
 #else
   #include <filesystem>
   namespace fs = std::filesystem;
   using errc = std::error_code;
+  #ifdef __MINGW32__
+    #define MINGWISATWAT(x) (x).string()
+  #else
+    #define MINGWISATWAT(x) (x)
+  #endif
 #endif
 
-#ifdef __MINGW32__
-#define MINGWISATWAT(x) (x).string()
-#else
-#define MINGWISATWAT(x) (x)
-#endif
 
 using std::string;
 
