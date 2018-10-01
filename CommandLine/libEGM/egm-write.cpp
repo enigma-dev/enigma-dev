@@ -174,13 +174,13 @@ bool WriteShader(string fName, const buffers::resources::Shader &shdr) {
 
 template<typename T>
 bool WriteRoomSnowflakes(const fs::path &egm_root, const fs::path &dir,
-                         YAML::Emitter &yaml, T *layers) {
-  if (layers->snowflakes.size()) {
+                         YAML::Emitter &yaml, T *layer) {
+  if (layer->snowflakes.size()) {
     yaml << YAML::BeginMap;
     yaml << YAML::Key << "Format" << "yaml-proto";
     yaml << YAML::Key << "Data";
     yaml << YAML::BeginSeq;
-    for (auto &inst : layers->snowflakes) {
+    for (auto &inst : layer->snowflakes) {
       if (!WriteYaml(egm_root, dir, yaml, &inst, 0)) return false;
     }
     yaml << YAML::EndSeq;
@@ -247,24 +247,24 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   auto inst_layers = egm::util::BuildInstanceLayers(*room);
   yaml << YAML::Key << "instance-layers";
   yaml << YAML::BeginSeq;
-  for (const auto &layer : inst_layers.layers) {
+  for (auto &layer : inst_layers) {
     yaml << YAML::BeginMap;
     yaml << YAML::Key << "Format" << layer.format;
     yaml << YAML::Key << "Data" << YAML::Literal << layer.data;
     yaml << YAML::EndMap;
+    WriteRoomSnowflakes(egm_root, dir, yaml, &layer);
   }
-  WriteRoomSnowflakes(egm_root, dir, yaml, &inst_layers);
   yaml << YAML::EndSeq;
 
   // Append tile layers.
   yaml << YAML::Key << "tile-layers" << YAML::BeginSeq;
-  for (const auto &layer : tile_layers.layers) {
+  for (auto &layer : tile_layers) {
     yaml << YAML::BeginMap;
     yaml << YAML::Key << "Format" << layer.format;
     yaml << YAML::Key << "Data" << YAML::Literal << layer.data;
     yaml << YAML::EndMap;
+    WriteRoomSnowflakes(egm_root, dir, yaml, &layer);
   }
-  WriteRoomSnowflakes(egm_root, dir, yaml, &tile_layers);
   yaml << YAML::EndSeq;
 
   yaml << YAML::EndMap;

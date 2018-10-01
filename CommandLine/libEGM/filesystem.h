@@ -20,12 +20,6 @@
   using errc = std::error_code;
 #endif
 
-#ifdef __MINGW32__
-#define MINGWISATWAT(x) (x).string()
-#else
-#define MINGWISATWAT(x) (x)
-#endif
-
 using std::string;
 
 bool StartsWith(const string &str, const string &prefix);

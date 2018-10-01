@@ -18,6 +18,7 @@
 #include "egm.h"
 #include "egm-rooms.h"
 #include "filesystem.h"
+#include "svg-d.h"
 #include "Util.h"
 
 #include <yaml-cpp/yaml.h>
@@ -175,252 +176,8 @@ buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
   return tln;
 }
 
-std::vector<std::string> Tokenize(const std::string& str, const std::string& delimiters) {
-    std::vector<std::string> tokens;
-    std::size_t lastPos = str.find_first_not_of(delimiters, 0);
-    std::size_t pos = str.find_first_of(delimiters, lastPos);
-
-    while (pos != std::string::npos || lastPos != std::string::npos) {
-        tokens.push_back(str.substr(lastPos, pos - lastPos));
-        lastPos = str.find_first_not_of(delimiters, pos);
-        pos = str.find_first_of(delimiters, lastPos);
-    }
-
-    return tokens;
-}
-
-inline bool isCommandToken(const std::string& token) {
-  return (token.length() == 1 && isalpha(token[0]));
-}
-
-inline void tooManyArgsGiven(char cmd, unsigned maxArgs, const std::vector<std::string>& args, unsigned argNum, const YAML::Mark& errPos, const fs::path& fPath) {
-  std::cerr << std::endl << "Error: too many arguments given to the \"" << cmd << "\" command" << std::endl;
-  std::cerr << "maximum supported arguments is: " << maxArgs << std::endl;
-  std::cerr << "argument " << argNum << ": " << args[argNum] << " will be ignored" << std::endl;
-  std::cerr << fPath << " line: " << errPos.line << " column: " << errPos.column << std::endl << std::endl;
-}
-
-inline void tooFewArgsGiven(char cmd, unsigned minArgs, const YAML::Mark& errPos, const fs::path& fPath) {
-  std::cerr << std::endl << "Error: too few arguments given to the \"" << cmd << "\" command" << std::endl;
-  std::cerr << "minimum required arguments is: " << minArgs << std::endl;
-  std::cerr << "the command will be ignored" << std::endl;
-  std::cerr << fPath << " line: " << errPos.line << " column: " << errPos.column << std::endl << std::endl;
-}
-
-inline std::string unquote(const std::string& quotedStr) {
-  std::string str = quotedStr;
-  if (str.length() >= 2 && str.front() == '"' && str.back() == '"')
-    str = str.substr(1, str.length()-2);
-
-  return str;
-}
-
-inline std::string escape_hex(const std::string &hex) {
-  return string_replace_all(hex, "#", "0x");
-}
-
-struct Command {
-  size_t minArgs = 0;
-  std::vector<std::string> field_names;
-};
-
-const std::map<char, Command> instanceParameters = {
-  { 'I', { 0, {"id"}                         } },
-  { 'i', { 0, {"id"}                         } },
-  { 'n', { 1, {"name"}                       } },
-  { 'o', { 1, {"object_type"}                } },
-  { 'p', { 1, {"x", "y", "z"}                } },
-  { 'x', { 1, {"x"}                          } },
-  { 'y', { 1, {"y"}                          } },
-  { 'z', { 1, {"z"}                          } },
-  { 's', { 1, {"xscale", "yscale", "zscale"} } },
-  { 'w', { 1, {"xscale"}                     } },
-  { 'h', { 1, {"yscale"}                     } },
-  { 'd', { 1, {"zscale"}                     } },
-  { 'r', { 1, {"rotation"}                   } },
-  { 'c', { 1, {"color"}                      } },
-  { 'l', { 1, {}                             } },
-  { 'f', { 4, {}                             } },
-  { 'g', { 1, {}                             } },
-};
-
-const std::map<char, Command> tileParameters = {
-  { 'T', { 0, {"id"}                 } },
-  { 't', { 0, {"id"}                 } },
-  { 'n', { 1, {"name"}               } },
-  { 'b', { 1, {"background_name"}    } },
-  { 'd', { 1, {"depth"}              } },
-  { 'p', { 1, {"x", "y"}             } },
-  { 'x', { 1, {"x"}                  } },
-  { 'y', { 1, {"y"}                  } },
-  { 'o', { 1, {"xoffset", "yoffset"} } },
-  { 'u', { 1, {"xoffset"}            } },
-  { 'v', { 1, {"yoffset"}            } },
-  { 'D', { 1, {"width", "height"}    } },
-  { 'w', { 1, {"width"}              } },
-  { 'h', { 1, {"height"}             } },
-  { 's', { 1, {"xscale", "yscale"}   } },
-  { 'W', { 1, {"xscale"}             } },
-  { 'H', { 1, {"yscale"}             } },
-  { 'c', { 1, {"color"}              } },
-  { 'l', { 1, {}                     } },
-  { 'f', { 4, {}                     } },
-  { 'g', { 1, {}                     } },
-};
-
-void RepackSVGDLayer(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD,
-  const std::map<char, Command>& parameters, YAML::Node& yaml, const fs::path& fPath) {
-
-  const google::protobuf::Reflection *refl = m->GetReflection();
-
-  // split at spaces or comma etc
-  std::vector<std::string> tokens = Tokenize(yaml.as<std::string>(), " ,\n\t");
-
-  google::protobuf::Message* currInstance = nullptr;
-  std::vector<google::protobuf::Message*> instances;
-
-  char currentCmd = '\0';
-  std::vector<std::pair<char, std::vector<std::string> > > arguments;
-
-  // Group all our commands into <char, vector<string>> (cmd, args)
-  auto cmdIt = arguments.end();
-  for (unsigned i = 0; i < tokens.size(); ++i) {
-    std::string token = std::string(tokens[i]);
-    if (isCommandToken(token)) {
-      currentCmd = token[0];
-      arguments.emplace_back(currentCmd, std::vector<std::string>());
-      cmdIt = arguments.end() - 1;
-    } else if (cmdIt != arguments.end()) {
-      (*cmdIt).second.emplace_back(token);
-    }
-  }
-
-  // Proccess commands here
-  for (auto cmdPair : arguments) {
-    char cmd = cmdPair.first;
-    std::vector<std::string> args = cmdPair.second;
-
-    auto pit = parameters.find(cmd);
-    bool relative = islower(cmd); //TODO: fix color
-    if (pit == parameters.end()) {
-      // if this command does not have uppercase equivalent
-      // we can still allow a lowercase version for relative
-      pit = parameters.find(cmd = tolower(cmd));
-      if (pit == parameters.end()) {
-        // no upper or lowercase version seems to be supported...
-        std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
-        yamlErrorPosition(yaml.Mark());
-        continue;
-      }
-    }
-    auto sig = (*pit).second;
-    auto pars = sig.field_names;
-
-    // Too few args, continue here
-    if (args.size() < sig.minArgs) {
-      tooFewArgsGiven(cmd, sig.minArgs, yaml.Mark(), fPath);
-      continue;
-    }
-
-    // Special case for create cmds
-    if (tolower(cmd) == tolower(createCMD)) {
-        currInstance = refl->AddMessage(m, f);
-
-        if (cmd == tolower(createCMD)) {
-          if (!instances.empty()) {
-            currInstance->CopyFrom(*instances.back());
-            const google::protobuf::Descriptor *instDesc = currInstance->GetDescriptor();
-            const google::protobuf::Reflection *instRefl = currInstance->GetReflection();
-
-            // Don't copy this crap
-            for (const std::string& field_name : {"id", "name", "code"}) {
-              const google::protobuf::FieldDescriptor *instField = instDesc->FindFieldByName(field_name);
-              if (instField != nullptr)
-                instRefl->ClearField(currInstance, instField);
-            }
-          }
-          else
-            std::cerr << "Error: \"" << cmd << "\" called but there exists no previous instance to copy the attributes from" << std::endl;
-        }
-
-        instances.push_back(currInstance);
-    }
-
-    // Other special cases
-    switch(cmd) {
-      case 'l': {
-        const google::protobuf::Descriptor *instDesc = currInstance->GetDescriptor();
-        const google::protobuf::Reflection *instRefl = currInstance->GetReflection();
-        const google::protobuf::FieldDescriptor *xField = instDesc->FindFieldByName("x"),
-                                                *yField = instDesc->FindFieldByName("y"),
-                                                *xScaleField = instDesc->FindFieldByName("xscale"),
-                                                *yScaleField = instDesc->FindFieldByName("yscale"),
-                                                *widthField = instDesc->FindFieldByName("width"),
-                                                *heightField = instDesc->FindFieldByName("height");
-        double xfrom = instRefl->GetDouble(*currInstance, xField),
-               yfrom = instRefl->GetDouble(*currInstance, yField),
-               //TODO: xscale and yscale need defaults of 1 not 0
-               width = instRefl->GetUInt32(*currInstance, widthField),// * instRefl->GetDouble(*currInstance, xScaleField),
-               height = instRefl->GetUInt32(*currInstance, heightField),// * instRefl->GetDouble(*currInstance, yScaleField),
-               xto = stoi(args[0]),
-               yto = (args.size() > 1) ? stoi(args[1]) : yfrom,
-               dx = xto - xfrom,
-               dy = yto - yfrom;
-
-        // start at plus width because the first tile is already there
-        // we're just copying from it to complete the rest of the line
-        for (double x = xfrom + width; x <= xto; x += width) {
-          double y = yfrom + dy * (x - xfrom) / dx;
-          std::cerr << "bing " << x << " " << y << std::endl;
-
-          currInstance = refl->AddMessage(m, f);
-          currInstance->CopyFrom(*instances.back());
-          instances.push_back(currInstance);
-
-          instRefl = currInstance->GetReflection();
-          instRefl->SetDouble(currInstance, xField, x);
-          instRefl->SetDouble(currInstance, yField, y);
-        }
-        continue;
-      }
-      case 'f':
-        continue;
-      case 'g':
-        continue;
-    }
-
-    // General case for rest of command args
-    for (size_t i = 0; i < args.size(); ++i) {
-      if (i < pars.size()) {
-        std::string field_name = pars[i];
-        std::string arg = args[i];
-
-        const google::protobuf::Descriptor *desc = currInstance->GetDescriptor();
-        const google::protobuf::Reflection *refl = currInstance->GetReflection();
-        const google::protobuf::FieldDescriptor *field = desc->FindFieldByName(field_name);
-
-        // allow all integer parameters to have hexadecimal formatted arguments
-        switch (field->cpp_type()) {
-          case CppType::CPPTYPE_INT32:
-          case CppType::CPPTYPE_INT64:
-          case CppType::CPPTYPE_UINT32:
-          case CppType::CPPTYPE_UINT64:
-            arg = escape_hex(arg);
-            break;
-          default:
-            break;
-        };
-
-        SetProtoField(refl, currInstance, field, unquote(arg), relative);
-      } else {
-        tooManyArgsGiven(cmd, pars.size(), args, i, yaml.Mark(), fPath);
-      }
-    }
-  }
-}
-
-void RepackLayers(google::protobuf::Message *m, const google::protobuf::FieldDescriptor *f, char createCMD,
-  const std::map<char, Command>& parameters, YAML::Node& yaml, const fs::path& fPath) {
+void RepackLayers(buffers::resources::Room *m, bool tiles, YAML::Node& yaml,
+                  const fs::path& fPath) {
 
   // All layers require a "format" and a "data" key in the YAML
   YAML::Node format = yaml["Format"];
@@ -439,15 +196,22 @@ void RepackLayers(google::protobuf::Message *m, const google::protobuf::FieldDes
 
   // Send our data to the appropriate handler (if one exists)
   const std::string formatStr = format.as<std::string>();
-  if (formatStr == "svg-d") RepackSVGDLayer(m, f, createCMD, parameters, data, fPath);
-  else std::cerr << "Error: unsupported instance layer format \"" << formatStr << "\" in " << fPath << std::endl;
+  if (formatStr == "svg-d") {
+    std::stringstream details;
+    details << fPath.string() << ":" << yaml.Mark().line
+                              << ":" << yaml.Mark().column;
+    svg_d::ParseInstances(yaml.as<std::string>(), m, details.str());
+  } else {
+    std::cerr << "Error: unsupported instance layer format \"" << formatStr
+              << "\" in " << fPath << std::endl;
+  }
 }
 
 // Load all edl files in our object dir
 inline void loadObjectEvents(const fs::path& fPath, google::protobuf::Message *m, const google::protobuf::FieldDescriptor *field) {
   for(auto& f : fs::directory_iterator(fPath)) {
     if (f.path().extension() == ".edl") {
-      const std::string eventName = MINGWISATWAT(f.path().stem());
+      const std::string eventName = f.path().stem().string();
       buffers::resources::Object_Event event;
       event.set_name(eventName);
       event.set_code(FileToString(f.path()));
@@ -460,7 +224,8 @@ inline void loadObjectEvents(const fs::path& fPath, google::protobuf::Message *m
   }
 }
 
-void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml, const fs::path& fPath, int depth) {
+void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
+                         const fs::path& fPath, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   const std::string ext = fPath.extension().string();
@@ -514,9 +279,9 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
         case CppType::CPPTYPE_MESSAGE: {
           for (auto n : node) {
             if (key == "instance-layers")
-              RepackLayers(m, field, 'I', instanceParameters, n, fPath);
+              RepackLayers((buffers::resources::Room*) m, false, n, fPath);
             else if (key == "tile-layers")
-              RepackLayers(m, field, 'T', tileParameters, n, fPath);
+              RepackLayers((buffers::resources::Room*) m, true, n, fPath);
             else {
               google::protobuf::Message* msg = refl->AddMessage(m, field);
               RecursivePackBuffer(msg, id, n, fPath, depth + 1);
