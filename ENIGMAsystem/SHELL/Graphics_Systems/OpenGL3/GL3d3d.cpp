@@ -18,15 +18,17 @@
 #include "Bridges/General/GL3Context.h"
 #include "GLSLshader.h"
 #include "GL3shader.h"
-#include "GL3matrix.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GSmath.h"
+#include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h" // for view variables
+
+#include <glm/gtc/type_ptr.hpp>
 
 #include <math.h>
 #include <floatcomp.h>
@@ -34,12 +36,51 @@
 using namespace std;
 
 namespace enigma {
-  bool d3dMode = false;
-  bool d3dHidden = false;
-  bool d3dZWriteEnable = true;
-  int d3dCulling = 0;
-  extern unsigned bound_shader;
-  extern vector<enigma::ShaderProgram*> shaderprograms;
+
+void d3d_light_update_positions(); // forward declare
+
+bool d3dMode = false;
+bool d3dHidden = false;
+bool d3dZWriteEnable = true;
+int d3dCulling = 0;
+extern unsigned bound_shader;
+extern vector<enigma::ShaderProgram*> shaderprograms;
+
+void graphics_set_matrix(int type) {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  //Send transposed (done by GL because of "true" in the function below) matrices to shader
+  switch(type) {
+    case enigma_user::matrix_world:
+      glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_modelMatrix,  1, glm::value_ptr(glm::transpose(world)));
+      break;
+    case enigma_user::matrix_view:
+      glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_viewMatrix,  1, glm::value_ptr(glm::transpose(view)));
+      break;
+    case enigma_user::matrix_projection:
+      glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_projectionMatrix,  1, glm::value_ptr(glm::transpose(projection)));
+      break;
+    default:
+      #ifdef DEBUG_MODE
+      show_error("Unknown matrix type " + std::to_string(type), false);
+      #endif
+      return;
+  }
+
+  glm::mat4 mv_matrix = view * world;
+  switch (type) {
+    case enigma_user::matrix_world:
+    case enigma_user::matrix_view:
+    glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_mvMatrix,  1, glm::value_ptr(glm::transpose(mv_matrix)));
+    break;
+  }
+
+  glm::mat4 mvp_matrix = projection * mv_matrix;
+  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_mvpMatrix,  1, glm::value_ptr(glm::transpose(mvp_matrix)));
+  glsl_uniform_matrix3fv_internal(shaderprograms[bound_shader]->uni_normalMatrix,  1, glm::value_ptr(glm::mat3(glm::inverse(mv_matrix))));
+
+  enigma::d3d_light_update_positions();
+}
+
 }
 
 GLenum renderstates[3] = {
@@ -100,7 +141,6 @@ void d3d_start()
 
   // Set up projection matrix
   d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
-  //enigma::projection_matrix.InitPersProjTransform(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
 
   // Set up modelview matrix
   d3d_transform_set_identity();
@@ -375,16 +415,13 @@ class d3d_lights
 
   void light_update_positions()
   {
-    enigma::transformation_update();
     unsigned int al = 0; //Active lights
     for (unsigned int i=0; i<lights.size(); ++i){
       if (lights[i].type == 0){ //Directional light
-        enigma::Vector3 lpos_eyespace;
-        lpos_eyespace = enigma::normal_matrix * enigma::Vector3(lights[i].position[0],lights[i].position[1],lights[i].position[2]);
+        glm::vec3 lpos_eyespace = glm::vec3(lights[i].position[0],lights[i].position[1],lights[i].position[2]);
         lights[i].transformed_position[0] = lpos_eyespace.x, lights[i].transformed_position[1] = lpos_eyespace.y, lights[i].transformed_position[2] = lpos_eyespace.z, lights[i].transformed_position[3] = lights[i].position[3];
       }else{ //Point lights
-        enigma::Vector4 lpos_eyespace;
-        lpos_eyespace = enigma::mv_matrix  * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
+        glm::vec4 lpos_eyespace = glm::vec4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
         lights[i].transformed_position[0] = lpos_eyespace.x, lights[i].transformed_position[1] = lpos_eyespace.y, lights[i].transformed_position[2] = lpos_eyespace.z, lights[i].transformed_position[3] = lights[i].position[3];
       }
       if (lights[i].enabled == true){

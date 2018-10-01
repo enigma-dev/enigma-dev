@@ -20,14 +20,11 @@
 #include "GL3profiler.h"
 #include "GL3shader.h"
 #include "GLSLshader.h"
-#include "GL3matrix.h"
 
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-#include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GSmath.h"
 
 #include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
 
@@ -44,12 +41,6 @@ map<int, GLuint> indexBufferPeers;
 } // anonymous namespace
 
 namespace enigma {
-
-extern unsigned char currentcolor[4];
-extern unsigned bound_vbo;
-extern unsigned bound_vboi;
-extern unsigned bound_shader;
-extern vector<enigma::ShaderProgram*> shaderprograms;
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
   glDeleteBuffers(1, &vertexBufferPeers[buffer]);
@@ -126,18 +117,6 @@ void graphics_apply_vertex_format(int format, size_t offset) {
   using namespace enigma_user;
 
   const VertexFormat* vertexFormat = vertexFormats[format];
-
-  if (transform_needs_update == true){
-    transformation_update();
-  }
-
-  //Send transposed (done by GL because of "true" in the function below) matrices to shader
-  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_viewMatrix,  1, view_matrix);
-  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_projectionMatrix,  1, projection_matrix);
-  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_modelMatrix,  1, model_matrix);
-  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_mvMatrix,  1, mv_matrix);
-  glsl_uniform_matrix4fv_internal(shaderprograms[bound_shader]->uni_mvpMatrix,  1, mvp_matrix);
-  glsl_uniform_matrix3fv_internal(shaderprograms[bound_shader]->uni_normalMatrix,  1, normal_matrix);
 
   //Bind texture
   glsl_uniformi_internal(shaderprograms[bound_shader]->uni_texSampler, 0);
