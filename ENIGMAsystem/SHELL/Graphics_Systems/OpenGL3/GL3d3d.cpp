@@ -36,6 +36,9 @@
 using namespace std;
 
 namespace enigma {
+
+void d3d_light_update_positions(); // forward declare
+
 bool d3dMode = false;
 bool d3dHidden = false;
 bool d3dZWriteEnable = true;

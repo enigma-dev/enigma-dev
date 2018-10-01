@@ -70,7 +70,6 @@ using namespace std;
 //the GPU (such as surfaces) and as such have no business in a headless mode
 namespace enigma
 {
-	void d3d_light_update_positions(){}
 
 	void graphicssystem_initialize(){}
 

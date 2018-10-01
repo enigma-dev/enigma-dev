@@ -200,11 +200,6 @@ class d3d_lights
     d3d_lights() {}
     ~d3d_lights() {}
 
-    void light_update_positions()
-    {
-
-    }
-
     bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
     {
 
@@ -270,13 +265,6 @@ bool d3d_light_enable(int id, bool enable)
     return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
 }
 
-}
-
-namespace enigma {
-    void d3d_light_update_positions()
-    {
-        d3d_lighting.light_update_positions();
-    }
 }
 
 // ***** LIGHTS END *****

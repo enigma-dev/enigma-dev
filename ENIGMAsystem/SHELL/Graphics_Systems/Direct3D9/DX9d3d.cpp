@@ -57,7 +57,6 @@ void graphics_set_matrix(int type) {
       return;
   }
   d3dmgr->SetTransform(state, (D3DMATRIX*)glm::value_ptr(matrix));
-  enigma::d3d_light_update_positions();
 }
 
 } // namespace enigma
@@ -276,16 +275,6 @@ class d3d_lights
     d3d_lights() {}
     ~d3d_lights() {}
 
-    void light_update_positions()
-    {
-        map<int, posi>::iterator end = ind_pos.end();
-        for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
-            const posi pos1 = (*it).second;
-            const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
-            //glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
-        }
-    }
-
     bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
     {
 	    int ms;
@@ -316,7 +305,6 @@ class d3d_lights
 
 		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light
 
-		light_update_positions();
         return true;
     }
 
@@ -487,13 +475,6 @@ void d3d_stencil_end_mask(){
   d3dmgr->SetRenderState(D3DRS_STENCILENABLE, false);
 }
 
-}
-
-namespace enigma {
-    void d3d_light_update_positions()
-    {
-        d3d_lighting.light_update_positions();
-    }
 }
 
 // ***** LIGHTS END *****
