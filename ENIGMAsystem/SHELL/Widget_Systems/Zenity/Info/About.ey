@@ -1,0 +1,9 @@
+%e-yaml
+---
+
+Name: Zenity
+Identifier: Zenity
+Build-Platforms: Linux, SDL
+Represents: 
+Description: Create GTK+ style widgets with Zenity on Linux.
+Author: Samuel Venable
