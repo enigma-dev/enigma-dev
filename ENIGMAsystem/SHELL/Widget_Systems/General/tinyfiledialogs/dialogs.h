@@ -1,6 +1,15 @@
 #include <tinyfiledialogs/tinyfiledialogs.h>
 #include <string>
 
+namespace enigma
+{
+  int const tfd_OsaScript = 0;
+  int const tfd_Zenity    = 1;
+  int const tfd_KDialog   = 2;
+
+  int tfd_DialogEngine();
+}
+
 //void show_error(std::string errortext, const bool fatal);
 
 namespace enigma_user

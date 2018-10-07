@@ -149,8 +149,10 @@ matrix:
     # Widgets
     - env: WIDGETS=GTK+
       before_script: sudo apt-get -y install libgtk2.0-dev
-    - env: WIDGETS=TinyFileDialogs
+    - env: WIDGETS=Zenity
       before_script: sudo apt-get -y install zenity
+    - env: WIDGETS=KDialog
+      before_script: sudo apt-get -y install kdebase-bin
     # GME (Note: requires an Audio system)
     - env: AUDIO=OpenAL EXTENSIONS="GME"
       before_script: sudo apt-get -y install libgme-dev
