@@ -1,0 +1,9 @@
+%e-yaml
+---
+
+Name: KDialog
+Identifier: KDialog
+Build-Platforms: Linux, SDL
+Represents: 
+Description: Create KDE style widgets with KDialog on Linux.
+Author: Samuel Venable
