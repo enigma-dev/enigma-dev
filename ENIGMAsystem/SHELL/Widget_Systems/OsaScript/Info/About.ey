@@ -1,0 +1,9 @@
+%e-yaml
+---
+
+Name: OsaScript
+Identifier: OsaScript
+Build-Platforms: MacOSX,  SDL
+Represents: 
+Description: Create widgets with OsaScript on Mac OS X.
+Author: Samuel Venable

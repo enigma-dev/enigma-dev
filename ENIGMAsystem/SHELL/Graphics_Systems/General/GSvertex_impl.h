@@ -55,6 +55,11 @@ struct VertexFormat {
 
   VertexFormat(): stride(0), stride_size(0), hash(0) {}
 
+  void Clear() {
+    hash = stride = stride_size = 0;
+    flags.clear();
+  }
+
   void AddAttribute(int type, int attribute) {
     using namespace enigma_user;
 

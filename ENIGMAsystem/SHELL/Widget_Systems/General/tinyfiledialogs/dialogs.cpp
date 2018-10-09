@@ -1,13 +1,12 @@
 #include "dialogs.h"
-#include "unix.h"
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include <tinyfiledialogs/tinyfiledialogs.h>
-#include <sys/stat.h>
 #include <limits.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <libgen.h>
 #include <string.h>
 #include <sstream>
 #include <vector>
@@ -16,7 +15,12 @@
 using std::string;
 
 using enigma_user::string_replace_all;
-using enigma::tfd_add_escaping;
+
+using enigma::tfd_OsaScript;
+using enigma::tfd_Zenity;
+using enigma::tfd_KDialog;
+
+using enigma::tfd_DialogEngine;
 
 namespace enigma
 {
@@ -87,6 +91,21 @@ class FileFilter
   const int* pattern_counts() { return pattern_counts_.data(); }
 };
 
+string tfd_add_escaping(string str)
+{
+  string result;
+
+  if (tfd_DialogEngine() == tfd_OsaScript)
+    result = string_replace_all(str, "\"", "\\\\\\\"");
+  else
+    result = string_replace_all(str, "\"", "\\\"");
+
+  if (tfd_DialogEngine() == tfd_Zenity)
+    result = string_replace_all(str, "_", "__");
+
+  return result;
+}
+
 void show_error(string errortext, const bool fatal)
 {
   string msg;
@@ -105,7 +124,7 @@ void show_error(string errortext, const bool fatal)
   {
     msg = msg + "Do you want to abort the application?";
 
-    double input = tinyfd_messageBox("Error", msg.c_str(), "yesno", "error", 1);
+    double input = tinyfd_messageBox("Error", msg.c_str(), "yesno", "error", 1, tfd_DialogEngine());
 
     if (input == 1)
       exit(0);
@@ -114,7 +133,7 @@ void show_error(string errortext, const bool fatal)
   {
     msg = msg + "Click 'OK' to abort the application.";
 
-    tinyfd_messageBox("Error", msg.c_str(), "ok", "error", 1);
+    tinyfd_messageBox("Error", msg.c_str(), "ok", "error", 1, tfd_DialogEngine());
 
     exit(0);
   }
@@ -133,8 +152,10 @@ namespace enigma_user
   {
     string caption = window_get_caption();
 
-    if (caption == "")
+    if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
       caption = " ";
+    else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
+      caption = "KDialog";
 
     string msg;
 
@@ -146,7 +167,7 @@ namespace enigma_user
     msg = tfd_add_escaping(msg);
     caption = tfd_add_escaping(caption);
 
-    tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1);
+    tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1, tfd_DialogEngine());
 
     return 1;
   }
@@ -155,8 +176,10 @@ namespace enigma_user
   {
     string caption = window_get_caption();
 
-    if (caption == "")
+    if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
       caption = " ";
+    else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
+      caption = "KDialog";
 
       string msg;
 
@@ -168,15 +191,17 @@ namespace enigma_user
     msg = tfd_add_escaping(msg);
     caption = tfd_add_escaping(caption);
 
-    return tinyfd_messageBox(caption.c_str(), msg.c_str(), "yesno", "question", 1);
+    return tinyfd_messageBox(caption.c_str(), msg.c_str(), "yesno", "question", 1, tfd_DialogEngine());
   }
 
   string get_string(string str, string def)
   {
     string caption = window_get_caption();
 
-    if (caption == "")
+    if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
       caption = " ";
+    else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
+      caption = "KDialog";
 
     string msg;
 
@@ -189,7 +214,7 @@ namespace enigma_user
     def = tfd_add_escaping(def);
     caption = tfd_add_escaping(caption);
 
-    const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), def.c_str());
+    const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), def.c_str(), tfd_DialogEngine());
 
     return input ? : "";
   }
@@ -198,8 +223,10 @@ namespace enigma_user
   {
     string caption = window_get_caption();
 
-    if (caption == "")
+    if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
       caption = " ";
+    else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
+      caption = "KDialog";
 
     string msg;
 
@@ -212,7 +239,7 @@ namespace enigma_user
     def = tfd_add_escaping(def);
     caption = tfd_add_escaping(caption);
 
-    const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), def.c_str());
+    const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), def.c_str(), tfd_DialogEngine());
 
     return input ? : "";
   }
@@ -221,8 +248,10 @@ namespace enigma_user
   {
     string caption = window_get_caption();
 
-    if (caption == "")
+    if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
       caption = " ";
+    else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
+      caption = "KDialog";
 
     std::ostringstream def_integer;
     def_integer << def;
@@ -238,7 +267,7 @@ namespace enigma_user
     msg = tfd_add_escaping(msg);
     caption = tfd_add_escaping(caption);
 
-    const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str());
+    const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
 
     return input ? strtod(input, NULL) : 0;
   }
@@ -247,8 +276,10 @@ namespace enigma_user
   {
     string caption = window_get_caption();
 
-    if (caption == "")
+    if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
       caption = " ";
+    else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
+      caption = "KDialog";
 
     std::ostringstream def_integer;
     def_integer << def;
@@ -264,7 +295,7 @@ namespace enigma_user
     msg = tfd_add_escaping(msg);
     caption = tfd_add_escaping(caption);
 
-    const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str());
+    const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
 
     return input ? strtod(input, NULL) : 0;
   }
@@ -276,7 +307,7 @@ namespace enigma_user
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_openFileDialog("Open", fname.c_str(),
-      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0);
+      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0, tfd_DialogEngine());
 
     return path ? : "";
   }
@@ -288,7 +319,7 @@ namespace enigma_user
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_saveFileDialog("Save As", fname.c_str(),
-      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str());
+      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), tfd_DialogEngine());
 
     return path ? : "";
   }
@@ -297,15 +328,20 @@ namespace enigma_user
   {
     string fname_or_dir;
 
-    if (access(fname.c_str(), F_OK) != -1)
-      fname_or_dir = fname;
+    string str_fname = fname;
+    string str_dir;
+    
+    char *bname = (char *)str_fname.c_str();
+    
+    if (fname == "")
+      str_dir = dir;
     else
-      fname_or_dir = dir;
-
-    struct stat sb;
-
-    if ((stat(dir.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) == 0)
-      fname_or_dir = "";
+      str_dir = dir + string("/") + string(basename(bname));
+    
+    if(access((char *)str_dir.c_str(), F_OK) != -1)
+      fname_or_dir = str_dir;
+    else
+      fname_or_dir = fname;
 
     string titlebar;
 
@@ -320,7 +356,7 @@ namespace enigma_user
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
-      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0);
+      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0, tfd_DialogEngine());
 
     return path ? : "";
   }
@@ -328,16 +364,21 @@ namespace enigma_user
   string get_save_filename_ext(string filter, string fname, string dir, string title)
   {
     string fname_or_dir;
-
-    if (access(fname.c_str(), F_OK) != -1)
-      fname_or_dir = fname;
+    
+    string str_fname = fname;
+    string str_dir;
+    
+    char *bname = (char *)str_fname.c_str();
+    
+    if (fname == "")
+      str_dir = dir;
     else
-      fname_or_dir = dir;
-
-    struct stat sb;
-
-    if ((stat(dir.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) == 0)
-      fname_or_dir = "";
+      str_dir = dir + string("/") + string(basename(bname));
+    
+    if(access((char *)str_dir.c_str(), F_OK) != -1)
+      fname_or_dir = str_dir;
+    else
+      fname_or_dir = fname;
 
     string titlebar;
 
@@ -352,7 +393,7 @@ namespace enigma_user
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_saveFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
-      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str());
+      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), tfd_DialogEngine());
 
     return path ? : "";
   }
@@ -361,7 +402,7 @@ namespace enigma_user
   {
     dname = tfd_add_escaping(dname);
 
-    const char *path = tinyfd_selectFolderDialog("Select Directory", dname.c_str());
+    const char *path = tinyfd_selectFolderDialog("Select Directory", dname.c_str(), tfd_DialogEngine());
 
     return path ? string_replace_all(string(path) + "/", "//", "/") : "";
   }
@@ -378,7 +419,7 @@ namespace enigma_user
     root = tfd_add_escaping(root);
     titlebar = tfd_add_escaping(titlebar);
 
-    const char *path = tinyfd_selectFolderDialog(titlebar.c_str(), root.c_str());
+    const char *path = tinyfd_selectFolderDialog(titlebar.c_str(), root.c_str(), tfd_DialogEngine());
 
     return path ? string_replace_all(string(path) + "/", "//", "/") : "";
   }
@@ -391,7 +432,7 @@ namespace enigma_user
     rescol[1] = ((int)defcol >> 8) & 0xFF;
     rescol[2] = ((int)defcol >> 16) & 0xFF;
 
-    if (tinyfd_colorChooser("Color", NULL, rescol, rescol) == NULL)
+    if (tinyfd_colorChooser("Color", NULL, rescol, rescol, tfd_DialogEngine()) == NULL)
       return -1;
 
     return (int)((rescol[0] & 0xff) + ((rescol[1] & 0xff) << 8) + ((rescol[2] & 0xff) << 16));

@@ -56,7 +56,7 @@ int handleEvents() {
     switch (e.type) {
       case KeyPress: {
         gk = XLookupKeysym(&e.xkey, 0);
-        if (gk == NoSymbol) return 0;
+        if (gk == NoSymbol) continue;
 
         if (!(gk & 0xFF00))
           actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
@@ -79,16 +79,16 @@ int handleEvents() {
         enigma_user::keyboard_key = actualKey;
         if (enigma::last_keybdstatus[actualKey] == 1 && enigma::keybdstatus[actualKey] == 0) {
           enigma::keybdstatus[actualKey] = 1;
-          return 0;
+          continue;
         }
         enigma::last_keybdstatus[actualKey] = enigma::keybdstatus[actualKey];
         enigma::keybdstatus[actualKey] = 1;
-        return 0;
+        continue;
       }
       case KeyRelease: {
         enigma_user::keyboard_key = 0;
         gk = XLookupKeysym(&e.xkey, 0);
-        if (gk == NoSymbol) return 0;
+        if (gk == NoSymbol) continue;
 
         if (!(gk & 0xFF00))
           actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
@@ -97,7 +97,7 @@ int handleEvents() {
 
         enigma::last_keybdstatus[actualKey] = enigma::keybdstatus[actualKey];
         enigma::keybdstatus[actualKey] = 0;
-        return 0;
+        continue;
       }
       case ButtonPress: {
         if (e.xbutton.button < 4)
@@ -118,7 +118,7 @@ int handleEvents() {
               break;
             default:;
           }
-        return 0;
+        continue;
       }
       case ButtonRelease: {
         if (e.xbutton.button < 4)
@@ -139,7 +139,7 @@ int handleEvents() {
               break;
             default:;
           }
-        return 0;
+        continue;
       }
       case ConfigureNotify: {
         enigma::windowWidth = e.xconfigure.width;
@@ -148,17 +148,17 @@ int handleEvents() {
         if (WindowResizedCallback != NULL) {
           WindowResizedCallback();
         }
-        return 0;
+        continue;
       }
       case FocusIn:
         input_initialize();
         init_joysticks();
         game_window_focused = true;
         pausedSteps = 0;
-        return 0;
+        continue;
       case FocusOut:
         game_window_focused = false;
-        return 0;
+        continue;
       case ClientMessage:
         if ((Atom)e.xclient.data.l[0] ==
             wm_delwin)  //For some reason, this line warns whether we cast to unsigned or not.
@@ -168,7 +168,7 @@ int handleEvents() {
 #ifdef DEBUG_MODE
         printf("Unhandled xlib event: %d\n", e.type);
 #endif
-        return 0;
+        continue;
     }
     //Move/Resize = ConfigureNotify
     //Min = UnmapNotify

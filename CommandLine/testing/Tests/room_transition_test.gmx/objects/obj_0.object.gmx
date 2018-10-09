@@ -4,18 +4,18 @@
   <solid>0</solid>
   <visible>-1</visible>
   <depth>0</depth>
-  <persistent>0</persistent>
-  <maskName>&lt;undefined&gt;</maskName>
+  <persistent>-1</persistent>
   <parentName>&lt;undefined&gt;</parentName>
+  <maskName>&lt;undefined&gt;</maskName>
   <events>
-    <event enumb="0" eventtype="0">
+    <event enumb="4" eventtype="7">
       <action>
         <libid>1</libid>
         <id>603</id>
         <kind>7</kind>
         <userelative>0</userelative>
-        <useapplyto>-1</useapplyto>
         <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
         <exetype>2</exetype>
         <functionname/>
         <codestring/>
@@ -25,7 +25,20 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>room_goto(rm_1);</string>
+            <string>if (room == rm_0) {
+    gtest_assert_eq(draw_get_color(), c_white);
+    gtest_assert_eq_eps(draw_get_alpha(), 1.0);
+
+    draw_set_color(c_red);
+    draw_set_alpha(0.2);
+    room_goto(rm_1);
+} else if (room == rm_1) {
+    // ensure that room transition did NOT reset color/alpha
+    // GM does not reset ANY render state when changing rooms
+    gtest_assert_eq(draw_get_color(), c_red);
+    gtest_assert_eq_eps(draw_get_alpha(), 0.2);
+}
+</string>
           </argument>
         </arguments>
       </action>
