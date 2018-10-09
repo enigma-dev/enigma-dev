@@ -31,6 +31,8 @@
 #include <floatcomp.h>
 #include <cmath>
 
+#include "Graphics_Systems/General/GScurves.h" // for draw_path
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Universal_System/math_consts.h"
 
 #ifdef DEBUG_MODE
@@ -450,19 +452,6 @@ void path_reverse(unsigned pathid)
     enigma::path_recalculate(pathid);
 }
 
-//Declare drawing functions here, so it works no matter if GL, GLES or D3D is used
-void draw_spline_begin(int mode);
-int draw_spline_vertex(gs_scalar x, gs_scalar y);
-void draw_bezier_quadratic_spline_end();
-/*void glBegin(GLenum mode);
-void glEnd(void);
-void glVertex2f(GLfloat  x,  GLfloat  y);
-void glPushAttrib(GLbitfield mask);
-void glPopAttrib(void);*/
-int draw_primitive_begin(int kind);
-int draw_vertex(gs_scalar x, gs_scalar y);
-int draw_primitive_end();
-
 void draw_path(unsigned pathid, gs_scalar x, gs_scalar y, bool absolute)
 {
     enigma::path *path = enigma::pathstructarray[pathid];
@@ -507,4 +496,3 @@ void draw_path(unsigned pathid, gs_scalar x, gs_scalar y, bool absolute)
 }
 
 }
-
