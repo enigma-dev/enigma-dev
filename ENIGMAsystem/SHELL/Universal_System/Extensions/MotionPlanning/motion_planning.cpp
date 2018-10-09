@@ -250,19 +250,14 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
 
 }
 
+#include "Graphics_Systems/General/GSfont.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolors.h"
+
 #include "Universal_System/var4.h"
 
 namespace enigma_user
 {
-
-void draw_text(gs_scalar x,gs_scalar y,variant str);
-int merge_color(int c1,int c2,double amount);
-int draw_primitive_begin(int kind);
-int draw_vertex_color(gs_scalar x, gs_scalar y, int color, float alpha);
-int draw_primitive_end();
-int draw_set_color_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha);
-int draw_get_color();
-int draw_set_color(int col);
 
 void mp_grid_draw_neighbours(unsigned int id, unsigned int h, unsigned int v, unsigned int mode)
 {
