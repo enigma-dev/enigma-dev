@@ -117,7 +117,7 @@ string tfd_add_escaping(string str)
 void show_error(string errortext, const bool fatal)
 {
   #ifdef DEBUG_MODE
-  for (vector<string>::reverse_iterator it = enigma::scope_stack.rbegin(); it != enigma::scope_stack.rend(); it++) 
+  for (std::vector<string>::reverse_iterator it = enigma::scope_stack.rbegin(); it != enigma::scope_stack.rend(); it++) 
   {
     errortext += "\n\n" + *it;
   }
