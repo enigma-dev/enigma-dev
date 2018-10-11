@@ -27,7 +27,9 @@ namespace enigma_user {
   int show_message_async(string str);
   int show_question_async(string str);
   int get_string_async(string message, string def, string cap="");
-  int get_integer_async(string message, string def, string cap="");
+  int get_password_async(string message, string def, string cap="");
+  int get_integer_async(string message, double def, string cap="");
+  int get_passcode_async(string message, double def, string cap="");
   int get_login_async(string username, string password, string cap="");
 }
 

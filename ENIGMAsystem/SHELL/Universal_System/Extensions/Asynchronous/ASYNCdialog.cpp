@@ -131,9 +131,27 @@ namespace enigma_user {
     return queue_async_job(fnc);
   }
 
-  int get_integer_async(string message, string def, string cap) {
+  int get_password_async(string message, string def, string cap) {
     auto fnc = [=] {
-      int result = get_integer(message, def, cap);
+      string result = get_password(message, def, cap);
+      ds_map_replaceanyway(async_load, "status", true);
+      ds_map_replaceanyway(async_load, "result", result);
+    };
+    return queue_async_job(fnc);
+  }
+
+  int get_integer_async(string message, double def, string cap) {
+    auto fnc = [=] {
+      double result = get_integer(message, def, cap);
+      ds_map_replaceanyway(async_load, "status", true);
+      ds_map_replaceanyway(async_load, "result", result);
+    };
+    return queue_async_job(fnc);
+  }
+
+  int get_passcode_async(string message, double def, string cap) {
+    auto fnc = [=] {
+      double result = get_passcode(message, def, cap);
       ds_map_replaceanyway(async_load, "status", true);
       ds_map_replaceanyway(async_load, "result", result);
     };

@@ -133,19 +133,36 @@ string get_login(string username, string password, string cap="") {
   return input;
 }
 
-string get_string(string message, string def, string cap="") {
+string get_string_helper(string message, string def, string cap, bool hidden) {
+  //TODO: Add boolean support for hidden input.
   printf("%s\n%s\n", cap.c_str(), message.c_str());
   string input;
   cin >> input;
   return (input.empty()) ? def : input;
 }
 
-int get_integer(string message, string def, string cap="") {
-  printf("%s\n%s\n", cap.c_str(), message.c_str());
-  string input;
-  cin >> input;
-  if (input.empty()) input = def;
-  return stoi(input);
+double get_integer_helper(string message, double def, string cap, bool hidden) {
+  //TODO: Add boolean support for hidden input.
+  string str_def = to_string(def);
+  string input = get_string_helper(message, str_def, cap, hidden);
+  string::size_type sz;
+  return (input.empty()) ? def : stod(input, &sz);
+}
+
+string get_string(string message, string def, string cap="") {
+  return get_string_helper(message, def, cap, false);
+}
+
+string get_password(string message, string def, string cap="") {
+  return get_string_helper(message, def, cap, true);
+}
+
+double get_integer(string message, double def, string cap="") {
+  return get_integer_helper(message, def, cap, false);
+}
+
+double get_passcode(string message, double def, string cap="") {
+  return get_integer_helper(message, def, cap, true);
 }
 
 }
