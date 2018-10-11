@@ -21,12 +21,12 @@
 #include <vector>
 #include <string>
 
-using::enigma_user::external_define;
-using::enigma_user::external_call;
-using::enigma_user::external_free;
-using::enigma_user::window_handle;
+using enigma_user::external_define;
+using enigma_user::external_call;
+using enigma_user::external_free;
+using enigma_user::window_handle;
 
-using::enigma::scope_stack;
+using enigma::scope_stack;
 
 using std::string;
 
