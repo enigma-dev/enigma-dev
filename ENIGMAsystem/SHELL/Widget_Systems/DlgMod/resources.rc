@@ -1,3 +1,3 @@
 #include <windows.h>
 
-1 RT_MANIFEST "Widget_Systems/Win32/manifest.xml"
+1 RT_MANIFEST "Widget_Systems/DlgMod/manifest.xml"
