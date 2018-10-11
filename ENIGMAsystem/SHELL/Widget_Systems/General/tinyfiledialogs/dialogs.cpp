@@ -28,7 +28,9 @@ using enigma::tfd_KDialog;
 
 using enigma::tfd_DialogEngine;
 
+#ifdef DEBUG_MODE
 using enigma::scope_stack;
+#endif
 
 using std::string;
 
