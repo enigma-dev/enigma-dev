@@ -26,6 +26,8 @@ using::enigma_user::external_call;
 using::enigma_user::external_free;
 using::enigma_user::window_handle;
 
+using::enigma::scope_stack;
+
 using std::string;
 
 #ifdef DEBUG_MODE
