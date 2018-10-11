@@ -31,6 +31,7 @@
 using enigma_user::external_define;
 using enigma_user::external_call;
 using enigma_user::external_free;
+
 using enigma_user::window_handle;
 
 #ifdef DEBUG_MODE
