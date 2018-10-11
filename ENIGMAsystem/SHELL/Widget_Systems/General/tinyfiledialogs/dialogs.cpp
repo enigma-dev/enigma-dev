@@ -28,7 +28,7 @@ using enigma::tfd_KDialog;
 
 using enigma::tfd_DialogEngine;
 
-using::enigma::scope_stack;
+using enigma::scope_stack;
 
 using std::string;
 
