@@ -9,7 +9,6 @@
 #include <libgen.h>
 #include <string.h>
 #include <sstream>
-#include <iterator>
 #include <vector>
 #include <string>
 
@@ -27,10 +26,6 @@ using enigma::tfd_Zenity;
 using enigma::tfd_KDialog;
 
 using enigma::tfd_DialogEngine;
-
-#ifdef DEBUG_MODE
-using enigma::scope_stack;
-#endif
 
 using std::string;
 
@@ -121,10 +116,7 @@ string tfd_add_escaping(string str)
 void show_error(string errortext, const bool fatal)
 {
   #ifdef DEBUG_MODE
-  for (std::vector<string>::reverse_iterator it = enigma::scope_stack.rbegin(); it != enigma::scope_stack.rend(); it++) 
-  {
-    errortext += "\n\n" + *it;
-  }
+  errortext = enigma::debug_scope::GetErrors() + "\n\n" + errortext;
   #else
   errortext = "Error in some event or another for some object: \r\n\r\n" + errortext;
   #endif
