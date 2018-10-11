@@ -20,8 +20,6 @@
 #include "Universal_System/debugscope.h"
 #endif
 
-using std::string;
-
 using enigma_user::string_replace_all;
 
 using enigma::tfd_OsaScript;
@@ -29,6 +27,10 @@ using enigma::tfd_Zenity;
 using enigma::tfd_KDialog;
 
 using enigma::tfd_DialogEngine;
+
+using::enigma::scope_stack;
+
+using std::string;
 
 namespace enigma
 {
