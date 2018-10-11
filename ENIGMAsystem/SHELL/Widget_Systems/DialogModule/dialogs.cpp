@@ -17,6 +17,8 @@
 
 #include "Platforms/General/PFexternals.h"
 #include "Platforms/Win32/WINDOWSmain.h"
+#include <iterator>
+#include <vector>
 #include <string>
 
 using::enigma_user::external_define;
@@ -24,6 +26,7 @@ using::enigma_user::external_call;
 using::enigma_user::external_free;
 using::enigma_user::window_handle;
 
+using std::vector;
 using std::string;
 
 #ifdef DEBUG_MODE
