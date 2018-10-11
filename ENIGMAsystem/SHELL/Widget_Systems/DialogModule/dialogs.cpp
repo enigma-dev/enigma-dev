@@ -26,7 +26,6 @@ using::enigma_user::external_call;
 using::enigma_user::external_free;
 using::enigma_user::window_handle;
 
-using std::vector;
 using std::string;
 
 #ifdef DEBUG_MODE
@@ -47,7 +46,7 @@ namespace enigma
 void show_error(string errortext, const bool fatal)
 {
   #ifdef DEBUG_MODE
-  for (vector<string>::reverse_iterator it = enigma::scope_stack.rbegin(); it != enigma::scope_stack.rend(); it++) 
+  for (std::vector<string>::reverse_iterator it = enigma::scope_stack.rbegin(); it != enigma::scope_stack.rend(); it++) 
   {
     errortext += "\n\n" + *it;
   }
