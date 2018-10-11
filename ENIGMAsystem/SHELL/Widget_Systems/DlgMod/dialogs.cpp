@@ -17,8 +17,6 @@
 
 #include "Platforms/General/PFexternals.h"
 #include "Platforms/Win32/WINDOWSmain.h"
-#include <iterator>
-#include <vector>
 #include <string>
 
 #ifdef DEBUG_MODE
@@ -34,10 +32,6 @@ using enigma_user::external_free;
 
 using enigma_user::window_handle;
 
-#ifdef DEBUG_MODE
-using enigma::scope_stack;
-#endif
-
 using std::string;
 
 namespace enigma
@@ -51,10 +45,7 @@ namespace enigma
 void show_error(string errortext, const bool fatal)
 {
   #ifdef DEBUG_MODE
-  for (std::vector<string>::reverse_iterator it = enigma::scope_stack.rbegin(); it != enigma::scope_stack.rend(); it++) 
-  {
-    errortext += "\n\n" + *it;
-  }
+  errortext = enigma::debug_scope::GetErrors() + "\n\n" + errortext;
   #else
   errortext = "Error in some event or another for some object: \r\n\r\n" + errortext;
   #endif
