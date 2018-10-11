@@ -12,6 +12,13 @@
 #include <vector>
 #include <string>
 
+#ifdef DEBUG_MODE
+#include "Universal_System/var4.h"
+#include "Universal_System/resource_data.h"
+#include "Universal_System/object.h"
+#include "Universal_System/debugscope.h"
+#endif
+
 using std::string;
 
 using enigma_user::string_replace_all;
@@ -108,6 +115,15 @@ string tfd_add_escaping(string str)
 
 void show_error(string errortext, const bool fatal)
 {
+  #ifdef DEBUG_MODE
+  for (vector<string>::reverse_iterator it = enigma::scope_stack.rbegin(); it != enigma::scope_stack.rend(); it++) 
+  {
+    errortext += "\n" + *it;
+  }
+  #else
+  errortext = "Error in some event or another for some object: \r\n\r\n" + errortext;
+  #endif
+  
   string msg;
 
   if (errortext == "")
