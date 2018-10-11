@@ -21,6 +21,13 @@
 #include <vector>
 #include <string>
 
+#ifdef DEBUG_MODE
+#include "Universal_System/var4.h"
+#include "Universal_System/resource_data.h"
+#include "Universal_System/object.h"
+#include "Universal_System/debugscope.h"
+#endif
+
 using enigma_user::external_define;
 using enigma_user::external_call;
 using enigma_user::external_free;
@@ -31,13 +38,6 @@ using enigma::scope_stack;
 #endif
 
 using std::string;
-
-#ifdef DEBUG_MODE
-#include "Universal_System/var4.h"
-#include "Universal_System/resource_data.h"
-#include "Universal_System/object.h"
-#include "Universal_System/debugscope.h"
-#endif
 
 namespace enigma
 {
