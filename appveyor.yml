@@ -50,6 +50,7 @@ environment:
 
     # Widgets
     - {WIDGETS: Win32}
+    - {WIDGETS: DlgMod}
     #TODO: Fix GTK+ on Windows
     #- {WIDGETS: GTK+, PACKAGES: "gtk2:x"}
 

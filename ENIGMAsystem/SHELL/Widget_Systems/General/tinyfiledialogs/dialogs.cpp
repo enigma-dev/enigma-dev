@@ -12,7 +12,12 @@
 #include <vector>
 #include <string>
 
-using std::string;
+#ifdef DEBUG_MODE
+#include "Universal_System/var4.h"
+#include "Universal_System/resource_data.h"
+#include "Universal_System/object.h"
+#include "Universal_System/debugscope.h"
+#endif
 
 using enigma_user::string_replace_all;
 
@@ -21,6 +26,8 @@ using enigma::tfd_Zenity;
 using enigma::tfd_KDialog;
 
 using enigma::tfd_DialogEngine;
+
+using std::string;
 
 namespace enigma
 {
@@ -108,6 +115,12 @@ string tfd_add_escaping(string str)
 
 void show_error(string errortext, const bool fatal)
 {
+  #ifdef DEBUG_MODE
+  errortext = enigma::debug_scope::GetErrors() + "\n\n" + errortext;
+  #else
+  errortext = "Error in some event or another for some object: \r\n\r\n" + errortext;
+  #endif
+  
   string msg;
 
   if (errortext == "")
