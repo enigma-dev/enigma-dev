@@ -31,7 +31,7 @@ class CompilerServiceImpl final : public Compiler::Service {
 
   Status GetResources(ServerContext* /*context*/, const Empty* /*request*/, ServerWriter<Resource>* writer) override {
     const char* raw = plugin.FirstResource();
-    while (raw != nullptr) {
+    while (!plugin.ResourcesAtEnd()) {
       Resource resource;
 
       resource.set_name(raw);
