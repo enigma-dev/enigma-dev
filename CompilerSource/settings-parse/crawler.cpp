@@ -147,26 +147,25 @@ namespace extensions
     cout << "\n\n\n\nStarting platform inspection\n";
     for (string ef = file_find_first("ENIGMAsystem/SHELL/Platforms/*",fa_sysfile | fa_readonly | fa_directory | fa_nofiles); ef != ""; ef = file_find_next())
     {
-      cout << " - ENIGMAsystem/SHELL/Platforms/" + ef + "/Info/About.ey: ";
-      ifstream ext(("ENIGMAsystem/SHELL/Platforms/" + ef + "/Info/About.ey").c_str(), ios_base::in);
-      if (ext.is_open())
-      {
-        cout << "Opened.\n";
-        ey_data dat = parse_eyaml(ext,ef);
-        eyit hasname = dat.values.find("represents");
-        if (hasname == dat.values.end()) {
-          cout << "Skipping invalid platform API under `" << ef << "': File does not specify an OS it represents.";
-          continue;
-        }
-        
-        sdk_descriptor& sdk = all_platforms[toUpper(ef)];
-        sdk.name   = dat.get("name");
-        sdk.author = dat.get("author");
-        sdk.build_platforms = dat.get("build-platforms");
-        sdk.description = dat.get("description");
-        sdk.identifier  = dat.get("identifier");
-        sdk.represents  = dat.get("represents");
-      } else cout << "Failed!\n";
+      const string ef_path = "ENIGMAsystem/SHELL/Platforms/" + ef + "/Info/About.ey";
+      ifstream ext(ef_path.c_str(), ios_base::in);
+      if (!ext.is_open()) continue;
+
+      cout << " - " << ef_path << ": Opened.\n";
+      ey_data dat = parse_eyaml(ext,ef);
+      eyit hasname = dat.values.find("represents");
+      if (hasname == dat.values.end()) {
+        cout << "Skipping invalid platform API under `" << ef << "': File does not specify an OS it represents.";
+        continue;
+      }
+      
+      sdk_descriptor& sdk = all_platforms[toUpper(ef)];
+      sdk.name   = dat.get("name");
+      sdk.author = dat.get("author");
+      sdk.build_platforms = dat.get("build-platforms");
+      sdk.description = dat.get("description");
+      sdk.identifier  = dat.get("identifier");
+      sdk.represents  = dat.get("represents");
     }
     file_find_close();
     
