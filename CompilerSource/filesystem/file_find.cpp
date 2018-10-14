@@ -74,6 +74,10 @@ using namespace std;
     FindClose(current_find);
     current_find = INVALID_HANDLE_VALUE;
   }
+
+  bool file_exists(const string& name) {
+    return (GetFileAttributes(name.c_str()) != INVALID_FILE_ATTRIBUTES);
+  }
 #else
   #include <sys/types.h>
   #include <sys/stat.h>
@@ -152,5 +156,10 @@ using namespace std;
     if (fff_dir_open != NULL)
       closedir(fff_dir_open);
     fff_dir_open = NULL;
+  }
+
+  bool file_exists(const string& name) {
+    struct stat st;
+    return (stat(name.c_str(), &st) == 0) and !(S_ISDIR(st.st_mode));
   }
 #endif

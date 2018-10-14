@@ -147,8 +147,10 @@ namespace extensions
     cout << "\n\n\n\nStarting platform inspection\n";
     for (string ef = file_find_first("ENIGMAsystem/SHELL/Platforms/*",fa_sysfile | fa_readonly | fa_directory | fa_nofiles); ef != ""; ef = file_find_next())
     {
-      cout << " - ENIGMAsystem/SHELL/Platforms/" + ef + "/Info/About.ey: ";
-      ifstream ext(("ENIGMAsystem/SHELL/Platforms/" + ef + "/Info/About.ey").c_str(), ios_base::in);
+      const string ef_path = "ENIGMAsystem/SHELL/Platforms/" + ef + "/Info/About.ey";
+      if (!file_exists(ef_path)) continue;
+      cout << " - " << ef_path << ": ";
+      ifstream ext(ef_path.c_str(), ios_base::in);
       if (ext.is_open())
       {
         cout << "Opened.\n";

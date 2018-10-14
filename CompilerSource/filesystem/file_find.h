@@ -24,7 +24,7 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-  
+
 const int fa_archive   = 0x000020;
 const int fa_directory = 0x000010;
 const int fa_hidden    = 0x000002;
@@ -36,3 +36,4 @@ const int fa_nofiles   = 0x800000;
 string file_find_next();
 string file_find_first(string name,int attrib);
 void file_find_close();
+bool file_exists(const string& name);
