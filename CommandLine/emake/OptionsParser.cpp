@@ -279,6 +279,11 @@ int OptionsParser::find_ey(const char* dir)
   return OPTIONS_SUCCESS;
 }
 
+const APIMap& OptionsParser::GetAPI() const
+{
+  return _api;
+}
+
 int OptionsParser::printInfo(const std::string &api)
 {
   auto it = _api.find(api);
