@@ -3,6 +3,7 @@
 #endif
 
 #include "Server.hpp"
+#include "eyaml/eyaml.h"
 
 #include "server.grpc.pb.h"
 
@@ -67,9 +68,23 @@ class CompilerServiceImpl final : public Compiler::Service {
 
       system.set_name(systems.first);
 
-      for (auto subsystem : systems.second) {
+      for (auto&& subsystem : systems.second) {
         SystemInfo* subInfo = system.add_subsystems();
-        //subInfo->set_name(subsystem);
+
+        std::ifstream ifabout(subsystem, std::ios_base::in);
+        if (!ifabout.is_open()) continue;
+
+        ey_data about = parse_eyaml(ifabout, subsystem);
+
+        std::string name = about.get("name");
+        std::string id = about.get("identifier");
+        std::string desc = about.get("description");
+        std::string target = about.get("target-platform");
+
+        subInfo->set_name(name);
+        subInfo->set_id(id);
+        subInfo->set_description(desc);
+        subInfo->set_target(target);
       }
 
       writer->Write(system);
