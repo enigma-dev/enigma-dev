@@ -6,6 +6,7 @@ import "game.proto";
 service Compiler {
   rpc CompileBuffer (CompileRequest) returns (stream CompileReply);
   rpc GetResources (Empty) returns (stream Resource);
+  rpc GetSystems (Empty) returns (stream SystemType);
 
   rpc SyntaxCheck(SyntaxCheckRequest) returns (SyntaxError);
   rpc SetDefinitions(SetDefinitionsRequest) returns (SyntaxError);
@@ -64,4 +65,16 @@ message SyntaxCheckRequest {
   optional string code = 1;
   optional int32 script_count = 2;
   repeated string script_names = 3;
+}
+
+message SystemType {
+  optional string name = 1; ///< e.g, ("Graphics", "Platform", or "Extensions")
+  repeated SystemInfo subsystems = 2; ///< All of the systems found that are of this type.
+}
+
+message SystemInfo {
+  optional string name = 1; ///< The human-readable name of the system. e.g, ("Direct3D 9.0", "DirectSound", or "Windows")
+  optional string id = 2; ///< The internal identifier used by the buildsystems. e.g, ("Direct3D9", "DirectSound", or "Win32")
+  optional string description = 3; ///< A friendly description of the system and what it does.
+  optional string target = 4; ///< The target-platform of the system. Only used by compiler descriptions presently.
 }

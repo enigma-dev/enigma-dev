@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   if (server) {
     int port = options.GetOption("port").as<int>();
     string ip = options.GetOption("ip").as<std::string>();
-    return RunServer(ip + ":" + std::to_string(port), plugin);
+    return RunServer(ip + ":" + std::to_string(port), plugin, options);
   }
 #endif
 
