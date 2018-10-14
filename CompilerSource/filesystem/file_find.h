@@ -36,4 +36,3 @@ const int fa_nofiles   = 0x800000;
 string file_find_next();
 string file_find_first(string name,int attrib);
 void file_find_close();
-bool file_exists(const string& name);
