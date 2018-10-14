@@ -18,7 +18,7 @@ using namespace buffers;
 
 class CompilerServiceImpl final : public Compiler::Service {
   public:
-  explicit CompilerServiceImpl(EnigmaPlugin& plugin): plugin(plugin) {}
+  explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options): plugin(plugin), options(options) {}
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
     plugin.BuildGame(const_cast<buffers::Game*>(&request->game()), emode_run, request->name().c_str());
@@ -59,6 +59,25 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
+  Status GetSystems(ServerContext* /*context*/, const Empty* /*request*/, ServerWriter<System>* writer) override {
+    auto _api = this->options.GetAPI();
+
+    for (auto systems : _api) {
+      System system;
+
+      system.set_name(systems.first);
+
+      for (auto subsystem : systems.second) {
+        SystemInfo* subInfo = system.add_subsystems();
+        //subInfo->set_name(subsystem);
+      }
+
+      writer->Write(system);
+    }
+
+    return Status::OK;
+  }
+
   SyntaxError GetSyntaxError(syntax_error* err) {
     SyntaxError error;
     error.set_message(err->err_str);
@@ -85,10 +104,11 @@ class CompilerServiceImpl final : public Compiler::Service {
 
   private:
   EnigmaPlugin& plugin;
+  OptionsParser& options;
 };
 
-int RunServer(const std::string& address, EnigmaPlugin& plugin) {
-  CompilerServiceImpl service(plugin);
+int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &options) {
+  CompilerServiceImpl service(plugin, options);
 
   ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
