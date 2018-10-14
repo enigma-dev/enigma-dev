@@ -24,7 +24,7 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-  
+
 const int fa_archive   = 0x000020;
 const int fa_directory = 0x000010;
 const int fa_hidden    = 0x000002;
