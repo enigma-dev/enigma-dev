@@ -9,6 +9,8 @@ namespace opt = boost::program_options;
 using func_t = std::function<int(const std::string&)>;
 using list_t = std::vector<std::string>;
 
+using APIMap = std::map<std::string, list_t>;
+
 typedef enum
 {
   OPTIONS_HELP = 2,
@@ -25,6 +27,7 @@ public:
   std::string APIyaml();
   opt::variable_value GetOption(std::string option);
   bool HasOption(std::string option);
+  const APIMap& GetAPI() const;
 
 private:
   int find_ey(const char* dir);
@@ -54,7 +57,7 @@ private:
   opt::options_description _desc;
   opt::positional_options_description _positional;
   std::map<std::string, func_t> _handler;
-  std::map<std::string, list_t> _api;
+  APIMap _api;
 };
 
 #endif

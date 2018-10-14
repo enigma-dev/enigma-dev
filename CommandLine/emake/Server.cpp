@@ -3,6 +3,7 @@
 #endif
 
 #include "Server.hpp"
+#include "eyaml/eyaml.h"
 
 #include "server.grpc.pb.h"
 
@@ -18,7 +19,7 @@ using namespace buffers;
 
 class CompilerServiceImpl final : public Compiler::Service {
   public:
-  explicit CompilerServiceImpl(EnigmaPlugin& plugin): plugin(plugin) {}
+  explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options): plugin(plugin), options(options) {}
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
     plugin.BuildGame(const_cast<buffers::Game*>(&request->game()), emode_run, request->name().c_str());
@@ -59,6 +60,39 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
+  Status GetSystems(ServerContext* /*context*/, const Empty* /*request*/, ServerWriter<SystemType>* writer) override {
+    auto _api = this->options.GetAPI();
+
+    for (auto systems : _api) {
+      SystemType system;
+
+      system.set_name(systems.first);
+
+      for (auto&& subsystem : systems.second) {
+        SystemInfo* subInfo = system.add_subsystems();
+
+        std::ifstream ifabout(subsystem, std::ios_base::in);
+        if (!ifabout.is_open()) continue;
+
+        ey_data about = parse_eyaml(ifabout, subsystem);
+
+        std::string name = about.get("name");
+        std::string id = about.get("identifier");
+        std::string desc = about.get("description");
+        std::string target = about.get("target-platform");
+
+        subInfo->set_name(name);
+        subInfo->set_id(id);
+        subInfo->set_description(desc);
+        subInfo->set_target(target);
+      }
+
+      writer->Write(system);
+    }
+
+    return Status::OK;
+  }
+
   SyntaxError GetSyntaxError(syntax_error* err) {
     SyntaxError error;
     error.set_message(err->err_str);
@@ -85,10 +119,11 @@ class CompilerServiceImpl final : public Compiler::Service {
 
   private:
   EnigmaPlugin& plugin;
+  OptionsParser& options;
 };
 
-int RunServer(const std::string& address, EnigmaPlugin& plugin) {
-  CompilerServiceImpl service(plugin);
+int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &options) {
+  CompilerServiceImpl service(plugin, options);
 
   ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
