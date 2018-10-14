@@ -60,11 +60,11 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
-  Status GetSystems(ServerContext* /*context*/, const Empty* /*request*/, ServerWriter<System>* writer) override {
+  Status GetSystems(ServerContext* /*context*/, const Empty* /*request*/, ServerWriter<SystemType>* writer) override {
     auto _api = this->options.GetAPI();
 
     for (auto systems : _api) {
-      System system;
+      SystemType system;
 
       system.set_name(systems.first);
 
