@@ -24,9 +24,6 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include "Universal_System/collisions_object.h"
-//#include "Universal_System/instance_system.h"
-#include <cmath>
 
 namespace enigma_user
 {
@@ -57,4 +54,3 @@ inline bool mp_linear_path(int path, const double x, const double y, const doubl
 }
 
 }
-
