@@ -21,7 +21,6 @@
 #include "GScolors.h"
 
 #include "Universal_System/scalar.h"
-#include "Universal_System/sprites_internal.h"
 
 #if GM_COMPATIBILITY_VERSION <= 81
 #  define DEFAULT_ALPHA 1
