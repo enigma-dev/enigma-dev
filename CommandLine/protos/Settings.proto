@@ -1,0 +1,19 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+message Settings {
+  optional API api = 1;
+}
+
+message API {
+  optional string target_audio = 1;
+  optional string target_windowing = 2;
+  optional string target_compiler = 3;
+  optional string target_graphics = 4;
+  optional string target_widget = 5;
+  optional string target_collision = 6;
+  optional string target_networking = 7;
+  repeated string extensions = 8;
+}
