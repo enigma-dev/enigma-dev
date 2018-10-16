@@ -115,7 +115,7 @@ string tfd_add_escaping(string str)
 
 string detect_all_files_filter(string filter)
 {
-  if (tfd_DialogEngine == tfd_OsaScript)
+  if (tfd_DialogEngine() == tfd_OsaScript)
   {
     string str_filter = string_replace_all(filter, "*.", "");
     size_t first_line_pos = str_filter.find("|");
