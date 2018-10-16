@@ -212,8 +212,24 @@ int OptionsParser::HandleArgs()
   return OPTIONS_SUCCESS;
 }
 
-std::string OptionsParser::APIyaml()
+std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentConfig)
 {
+  std::string audio = _rawArgs["audio"].as<std::string>();
+  std::string platform = _rawArgs["platform"].as<std::string>();
+  std::string compiler = _rawArgs["compiler"].as<std::string>() + "\n";
+  std::string graphics = _rawArgs["graphics"].as<std::string>() + "\n";
+  std::string widgets = _rawArgs["widgets"].as<std::string>() + "\n";
+  std::string collision = _rawArgs["collision"].as<std::string>() + "\n";
+  std::string network = _rawArgs["network"].as<std::string>() + "\n";
+  if (currentConfig != nullptr) {
+    audio = currentConfig->api().target_audio();
+    platform = currentConfig->api().target_platform();
+    compiler = currentConfig->api().target_compiler();
+    graphics = currentConfig->api().target_graphics();
+    widgets = currentConfig->api().target_widgets();
+    collision = currentConfig->api().target_collision();
+    network = currentConfig->api().target_network();
+  }
   std::string yaml;
   yaml += "%e-yaml\n";
   yaml += "---\n";
@@ -231,13 +247,13 @@ std::string OptionsParser::APIyaml()
   yaml += "inherit-objects: true \n";
   yaml += "inherit-increment-from: 0\n";
   yaml += " \n";
-  yaml += "target-audio: " + _rawArgs["audio"].as<std::string>() + "\n";
-  yaml += "target-windowing: " + _rawArgs["platform"].as<std::string>() + "\n";
-  yaml += "target-compiler: " + _rawArgs["compiler"].as<std::string>() + "\n";
-  yaml += "target-graphics: " + _rawArgs["graphics"].as<std::string>() + "\n";
-  yaml += "target-widget: " + _rawArgs["widgets"].as<std::string>() + "\n";
-  yaml += "target-collision: " + _rawArgs["collision"].as<std::string>() + "\n";
-  yaml += "target-networking: " + _rawArgs["network"].as<std::string>() + "\n";
+  yaml += "target-audio: " + audio + "\n";
+  yaml += "target-windowing: " + platform + "\n";
+  yaml += "target-compiler: " + compiler + "\n";
+  yaml += "target-graphics: " + graphics + "\n";
+  yaml += "target-widget: " + widgets + "\n";
+  yaml += "target-collision: " + collision + "\n";
+  yaml += "target-networking: " + network + "\n";
   yaml += "extensions: " + _extensions + "\n";
 
   return yaml;
