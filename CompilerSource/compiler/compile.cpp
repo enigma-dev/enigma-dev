@@ -160,14 +160,27 @@ dllexport void ide_handles_game_launch() { run_game = false; }
 static bool redirect_make = true;
 dllexport void log_make_to_console() { redirect_make = false; }
 
+bool ends_with(std::string const &fullString, std::string const &ending) {
+    if (fullString.length() < ending.length())
+      return false;
+
+    return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+}
+
 int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
+  std::string exename = std::string(exe_filename);
+  const std::string buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
+  if (!ends_with(exename, buildext)) {
+    exename += buildext;
+    exe_filename = exename.c_str();
+  }
 
   cout << "Initializing dialog boxes" << endl;
   ide_dia_clear();
   ide_dia_open();
   cout << "Initialized." << endl;
-  
+
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
   string compilepath = CURRENT_PLATFORM_NAME "/" + compilerInfo.target_platform + "/" + name;
@@ -618,7 +631,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
   make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
   make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
-  
+
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")
       make += key.first + "=\"" + key.second + "\" ";
