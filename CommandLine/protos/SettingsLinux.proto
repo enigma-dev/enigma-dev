@@ -1,0 +1,34 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+message Linux {
+  optional LinuxGeneral general = 1;
+  optional LinuxGraphics graphics = 2;
+}
+
+message LinuxGeneral {
+  optional string display_name = 1;
+  optional uint32 version_major = 2;
+  optional uint32 version_minor = 3;
+  optional uint32 version_build = 4;
+  optional string maintainer_email = 5;
+  optional string homepage = 6;
+  optional string short_description = 7;
+  optional string long_description = 8;
+  optional string splash_screen  = 9;
+  optional string game_icon = 10;
+}
+
+message LinuxGraphics {
+  optional bool start_in_fullscreen = 1;
+  optional bool allow_fullscreen_change = 2;
+  optional bool smooth_colors = 3;
+  optional bool use_synchronization = 4;
+  optional bool window_sizeable = 5;
+  optional double window_scale = 6;
+
+  optional uint32 texture_page_width = 7;
+  optional uint32 texture_page_height = 8;
+}

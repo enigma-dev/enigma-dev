@@ -1,0 +1,48 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+message MacOSX {
+  optional MacOSXGeneral general = 1;
+  optional MacOSXGraphics graphics = 2;
+  optional MacOSXAppStore appstore = 3;
+}
+
+message MacOSXGeneral {
+  optional string display_name = 1;
+  optional uint32 version_major = 2;
+  optional uint32 version_minor = 3;
+  optional uint32 version_build = 4;
+  optional string copyright = 5;
+  optional string bundle_id = 6;
+  optional string app_output = 7;
+  optional bool allow_menu_and_dock_in_fullscreen = 8;
+  optional bool show_cursor = 9;
+  optional string team_identifier = 10;
+  optional string splash_screen  = 11;
+  optional string game_icon = 12;
+}
+
+message MacOSXGraphics {
+  optional bool start_in_fullscreen = 1;
+  optional bool allow_fullscreen_change = 2;
+  optional bool smooth_colors = 3;
+  optional bool use_synchronization = 4;
+  optional bool window_sizeable = 5;
+  optional double window_scale = 6;
+
+  optional uint32 texture_page_width = 7;
+  optional uint32 texture_page_height = 8;
+
+  optional bool enable_retina = 9;
+}
+
+message MacOSXAppStore {
+  optional bool enable_appstore_build = 1;
+  optional bool allow_incoming_connections = 2;
+  optional bool allow_outgoing_connections = 3;
+  optional string app_category = 4;
+
+  optional string signing_identity = 5;
+}

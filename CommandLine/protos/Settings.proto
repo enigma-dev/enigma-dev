@@ -3,8 +3,18 @@ package buffers.resources;
 
 import "options.proto";
 
+import "SettingsWindows.proto";
+import "SettingsMacOSX.proto";
+import "SettingsLinux.proto";
+
 message Settings {
   optional API api = 1;
+  optional Compiler compiler = 2;
+  optional General general = 3;
+  optional ProjectInfo project_info = 4;
+  optional Windows windows = 5;
+  optional MacOSX macosx = 6;
+  optional Linux linux = 7;
 }
 
 message API {
@@ -16,4 +26,42 @@ message API {
   optional string target_collision = 6;
   optional string target_network = 7;
   repeated string extensions = 8;
+}
+
+message Compiler {
+  optional uint32 inherit_strings = 1;
+  optional uint32 inherit_escapes = 2;
+  optional uint32 inherit_increment = 3;
+  optional uint32 inherit_equivalence = 4;
+  optional uint32 inherit_literals = 5;
+  optional uint32 inherit_negatives = 6;
+  optional uint32 compliance_mode = 7;
+  repeated string keyword_blacklist = 8;
+
+  optional string eobjs_directory = 9;
+  optional string codegen_directory = 10;
+  optional bool object_inheritance = 11;
+  optional bool automatic_semicolons = 12;
+
+  optional uint32 graphics_angular_unit = 13;
+  optional uint32 graphics_scalar_precision = 14;
+
+  optional uint32 collision_angular_unit = 15;
+  optional uint32 collision_scalar_precision = 16;
+
+  optional uint32 audio_angular_unit = 17;
+  optional uint32 audio_scalar_precision = 18;
+}
+
+message General {
+  optional uint64 game_identifier = 1;
+  optional string game_guid = 2;
+  optional int32 color_outside_room_region = 3;
+}
+
+message ProjectInfo {
+  optional string author = 1;
+  optional string version = 2;
+  optional uint32 last_changed = 3;
+  optional string information = 4;
 }

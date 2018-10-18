@@ -1,0 +1,57 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+message Windows {
+  optional WindowsGeneral general = 1;
+  optional WindowsGraphics graphics = 2;
+  optional WindowsInstaller installer = 3;
+}
+
+message WindowsGeneral {
+  optional string display_name = 1;
+  optional uint32 version_major = 2;
+  optional uint32 version_minor = 3;
+  optional uint32 version_build = 4;
+  optional uint32 version_revision = 5;
+  optional string company = 6;
+  optional string product = 7;
+  optional string copyright = 8;
+  optional string description = 9;
+  optional bool show_cursor = 10;
+  optional string game_icon = 11;
+  optional string splash_screen = 12;
+  optional bool show_splash_screen = 13;
+  optional uint32 sleep_margin = 14;
+  optional string save_data_location = 15;
+}
+
+message WindowsGraphics {
+  optional bool start_in_fullscreen = 1;
+  optional bool allow_fullscreen_change = 2;
+  optional bool smooth_colors = 3;
+  optional bool force_software_vertex_processing = 4;
+  optional bool freeze_on_lose_focus = 5;
+  optional bool use_synchronization = 6;
+  optional bool window_sizeable = 7;
+  optional bool window_showborder = 8;
+  optional bool window_showicons = 9;
+  optional bool window_stayontop = 10;
+  optional double window_scale = 11;
+  optional bool create_textures_on_demand = 12;
+  optional bool alternate_synchronization_method = 13;
+
+  enum VertexBufferMethod { FAST = 0; COMPATIBLE = 1; MOST_COMPATIBLE = 2; }
+  optional VertexBufferMethod vertex_buffer_method = 14;
+
+  optional uint32 texture_page_width = 15;
+  optional uint32 texture_page_height = 16;
+}
+
+message WindowsInstaller {
+  optional string finished_image = 1;
+  optional string header_image = 2;
+  optional string nsi_script = 3;
+  optional string license_agreement = 4;
+}
