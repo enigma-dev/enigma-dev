@@ -214,13 +214,25 @@ int OptionsParser::HandleArgs()
 
 std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentConfig)
 {
-  std::string audio = _rawArgs["audio"].as<std::string>();
-  std::string platform = _rawArgs["platform"].as<std::string>();
-  std::string compiler = _rawArgs["compiler"].as<std::string>() + "\n";
-  std::string graphics = _rawArgs["graphics"].as<std::string>() + "\n";
-  std::string widgets = _rawArgs["widgets"].as<std::string>() + "\n";
-  std::string collision = _rawArgs["collision"].as<std::string>() + "\n";
-  std::string network = _rawArgs["network"].as<std::string>() + "\n";
+  std::string audio = _rawArgs["audio"].as<std::string>(),
+              platform = _rawArgs["platform"].as<std::string>(),
+              compiler = _rawArgs["compiler"].as<std::string>(),
+              graphics = _rawArgs["graphics"].as<std::string>(),
+              widgets = _rawArgs["widgets"].as<std::string>(),
+              collision = _rawArgs["collision"].as<std::string>(),
+              network = _rawArgs["network"].as<std::string>(),
+              eobjs_directory = boost::filesystem::absolute(_rawArgs["workdir"].as<std::string>()).string(),
+              codegen_directory = boost::filesystem::absolute(_rawArgs["codegen"].as<std::string>()).string();
+
+  int inherit_strings = 0,
+      inherit_escapes = 0,
+      inherit_increment = 0,
+      inherit_equivalence = 0,
+      inherit_literals = 0,
+      inherit_negatives = 0;
+  bool inherit_objects = true,
+       automatic_semicolons = true;
+
   if (currentConfig != nullptr) {
     audio = currentConfig->api().target_audio();
     platform = currentConfig->api().target_platform();
@@ -230,22 +242,24 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
     collision = currentConfig->api().target_collision();
     network = currentConfig->api().target_network();
   }
+
   std::string yaml;
   yaml += "%e-yaml\n";
   yaml += "---\n";
-  yaml += "treat-literals-as: 0\n";
+  yaml += "treat-literals-as: " + std::to_string(inherit_literals) + "\n";
   yaml += "sample-lots-of-radios: 0\n";
-  yaml += "inherit-equivalence-from: 0\n";
-  yaml += "eobjs-directory: " + boost::filesystem::absolute(_rawArgs["workdir"].as<std::string>()).string() + "\n";
-  yaml += "codegen-directory: " + boost::filesystem::absolute(_rawArgs["codegen"].as<std::string>()).string() + "\n";
+  yaml += "inherit-equivalence-from: " + std::to_string(inherit_equivalence) + "\n";
+  yaml += "eobjs-directory: " + eobjs_directory + "\n";
+  yaml += "codegen-directory: " + codegen_directory + "\n";
   yaml += "sample-checkbox: on\n";
   yaml += "sample-edit: DEADBEEF\n";
   yaml += "sample-combobox: 0\n";
-  yaml += "inherit-strings-from: 0\n";
-  yaml += "inherit-negatives-as: 0\n";
-  yaml += "inherit-escapes-from: 0\n";
-  yaml += "inherit-objects: true \n";
-  yaml += "inherit-increment-from: 0\n";
+  yaml += "inherit-strings-from: " + std::to_string(inherit_strings) + "\n";
+  yaml += "inherit-negatives-as: " + std::to_string(inherit_negatives) + "\n";
+  yaml += "inherit-escapes-from: " + std::to_string(inherit_escapes) + "\n";
+  yaml += "inherit-increment-from: " + std::to_string(inherit_increment) + "\n";
+  yaml += "inherit-objects: " + std::string(inherit_objects ? "true" : "false") + "\n";
+  yaml += "automatic-semicolons: " + std::string(automatic_semicolons ? "true" : "false") + "\n";
   yaml += " \n";
   yaml += "target-audio: " + audio + "\n";
   yaml += "target-windowing: " + platform + "\n";
