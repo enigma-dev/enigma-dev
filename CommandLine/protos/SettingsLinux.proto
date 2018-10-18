@@ -28,7 +28,5 @@ message LinuxGraphics {
   optional bool use_synchronization = 4;
   optional bool window_sizeable = 5;
   optional double window_scale = 6;
-
-  optional uint32 texture_page_width = 7;
-  optional uint32 texture_page_height = 8;
+  optional uint32 texture_page_size = 7;
 }

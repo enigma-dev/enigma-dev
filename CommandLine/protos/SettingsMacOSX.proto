@@ -31,10 +31,7 @@ message MacOSXGraphics {
   optional bool use_synchronization = 4;
   optional bool window_sizeable = 5;
   optional double window_scale = 6;
-
-  optional uint32 texture_page_width = 7;
-  optional uint32 texture_page_height = 8;
-
+  optional uint32 texture_page_size = 7;
   optional bool enable_retina = 9;
 }
 
@@ -43,6 +40,5 @@ message MacOSXAppStore {
   optional bool allow_incoming_connections = 2;
   optional bool allow_outgoing_connections = 3;
   optional string app_category = 4;
-
   optional string signing_identity = 5;
 }
