@@ -54,14 +54,14 @@ message Compiler {
 }
 
 message General {
-  optional uint64 game_identifier = 1;
-  optional string game_guid = 2;
-  optional int32 color_outside_room_region = 3;
+  optional uint64 game_id = 1 [(gmx) = "option_gameid"];
+  optional string game_guid = 2 [(gmx) = "option_gameguid"];
+  optional int32 color_outside_room_region = 3 [(gmx) = "option_windowcolor"];
 }
 
 message ProjectInfo {
-  optional string author = 1;
-  optional string version = 2;
-  optional uint32 last_changed = 3;
-  optional string information = 4;
+  optional string author = 1 [(gmx) = "option_author"];
+  optional string version = 2 [(gmx) = "option_version"];
+  optional uint32 last_changed = 3 [(gmx) = "option_lastchanged"];
+  optional string information = 4 [(gmx) = "option_information"];
 }
