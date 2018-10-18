@@ -40,7 +40,7 @@ message Compiler {
 
   optional string eobjs_directory = 9;
   optional string codegen_directory = 10;
-  optional bool object_inheritance = 11;
+  optional bool inherit_objects = 11;
   optional bool automatic_semicolons = 12;
 
   optional uint32 graphics_angular_unit = 13;

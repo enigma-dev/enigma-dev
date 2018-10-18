@@ -234,13 +234,24 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
        automatic_semicolons = true;
 
   if (currentConfig != nullptr) {
-    audio = currentConfig->api().target_audio();
-    platform = currentConfig->api().target_platform();
-    compiler = currentConfig->api().target_compiler();
-    graphics = currentConfig->api().target_graphics();
-    widgets = currentConfig->api().target_widgets();
-    collision = currentConfig->api().target_collision();
-    network = currentConfig->api().target_network();
+    const auto &api = currentConfig->api();
+    if (api.has_target_audio()) audio = api.target_audio();
+    if (api.has_target_platform()) platform = api.target_platform();
+    if (api.has_target_compiler()) compiler = api.target_compiler();
+    if (api.has_target_graphics()) graphics = api.target_graphics();
+    if (api.has_target_widgets()) widgets = api.target_widgets();
+    if (api.has_target_collision()) collision = api.target_collision();
+    if (api.has_target_network()) network = api.target_network();
+
+    const auto &compiler = currentConfig->compiler();
+    if (compiler.has_inherit_strings()) inherit_strings = compiler.inherit_strings();
+    if (compiler.has_inherit_escapes()) inherit_escapes = compiler.inherit_escapes();
+    if (compiler.has_inherit_increment()) inherit_increment = compiler.inherit_increment();
+    if (compiler.has_inherit_equivalence()) inherit_equivalence = compiler.inherit_equivalence();
+    if (compiler.has_inherit_literals()) inherit_literals = compiler.inherit_literals();
+    if (compiler.has_inherit_negatives()) inherit_negatives = compiler.inherit_negatives();
+    if (compiler.has_inherit_objects()) inherit_objects = compiler.inherit_objects();
+    if (compiler.has_automatic_semicolons()) automatic_semicolons = compiler.automatic_semicolons();
   }
 
   std::string yaml;
