@@ -345,9 +345,10 @@ int OptionsParser::printInfo(const std::string &api)
         std::string id = about.get("identifier");
         std::string target = about.get("target-platform");
 
-        // Why is this different in extensions?
         if (id.empty())
-          id = about.get("id");
+          id = about.get("id"); // allow alias
+        if (id.empty())
+          id = p; // compiler descriptors use filename as id
 
         if (!target.empty() && !name.empty())
         {
@@ -474,9 +475,10 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
     std::ifstream ifabout(a, std::ios_base::in);
     ey_data about = parse_eyaml(ifabout, a);
     std::string id = about.get("identifier");
-    // Why is this different in extensions?
     if (id.empty())
-      id = about.get("id");
+      id = about.get("id"); // allow alias
+    if (id.empty())
+      id = a; // compiler descriptors use filename as id
     return (id == target);
   });
 

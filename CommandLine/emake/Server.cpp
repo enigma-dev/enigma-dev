@@ -82,6 +82,16 @@ class CompilerServiceImpl final : public Compiler::Service {
         std::string id = about.get("identifier");
         std::string desc = about.get("description");
         std::string target = about.get("target-platform");
+        std::string author = about.get("author");
+
+        if (id.empty())
+          id = about.get("id"); // allow alias
+        if (id.empty())
+          id = subsystem; // compiler descriptors use filename as id
+
+        // allow author alias used by compiler descriptors
+        if (author.empty())
+          author = about.get("maintainer");
 
         subInfo->set_name(name);
         subInfo->set_id(id);
