@@ -106,7 +106,8 @@ class gmx_root_walker {
       { "timeline", &TreeNode::mutable_timeline },
       { "object", &TreeNode::mutable_object },
       { "room", &TreeNode::mutable_room },
-      { "datafile", &TreeNode::mutable_include }
+      { "datafile", &TreeNode::mutable_include },
+      { "Config", &TreeNode::mutable_settings },
     });
 
     auto createFunc = factoryMap.find(resType);
