@@ -37,9 +37,11 @@ class CompilerServiceImpl final : public Compiler::Service {
 
       resource.set_name(raw);
       resource.set_is_function(plugin.ResourceIsFunction());
-      resource.set_arg_count_min(plugin.ResourceArgCountMin());
-      resource.set_arg_count_max(plugin.ResourceArgCountMax());
-      resource.set_overload_count(plugin.ResourceOverloadCount());
+      if (resource.is_function()) {
+        resource.set_arg_count_min(plugin.ResourceArgCountMin());
+        resource.set_arg_count_max(plugin.ResourceArgCountMax());
+        resource.set_overload_count(plugin.ResourceOverloadCount());
+      }
       resource.set_is_type_name(plugin.ResourceIsTypeName());
       resource.set_is_global(plugin.ResourceIsGlobal());
 
