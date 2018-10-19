@@ -110,6 +110,13 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
+  Status SetCurrentConfig(ServerContext* /*context*/, const SetCurrentConfigRequest* request, Empty* reply) override {
+    std::string yaml = this->options.APIyaml(&request->settings());
+    syntax_error* err = plugin.SetDefinitions("", yaml.c_str());
+    reply = new Empty();
+    return Status::OK;
+  }
+
   Status SyntaxCheck(ServerContext* /*context*/, const SyntaxCheckRequest* request, SyntaxError* reply) override {
     vector<const char*> script_names;
     script_names.reserve(request->script_names().size());
