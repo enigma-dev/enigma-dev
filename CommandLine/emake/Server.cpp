@@ -12,6 +12,8 @@
 #include <grpc++/server_builder.h>
 #include <grpc++/server_context.h>
 
+#include <boost/filesystem.hpp>
+
 #include <memory>
 
 using namespace grpc;
@@ -81,13 +83,16 @@ class CompilerServiceImpl final : public Compiler::Service {
         std::string name = about.get("name");
         std::string id = about.get("identifier");
         std::string desc = about.get("description");
-        std::string target = about.get("target-platform");
         std::string author = about.get("author");
+        std::string target = about.get("target-platform");
 
         if (id.empty())
           id = about.get("id"); // allow alias
-        if (id.empty())
-          id = subsystem; // compiler descriptors use filename as id
+        if (id.empty()) {
+          // compilers use filename minus ext as id
+          boost::filesystem::path ey(subsystem);
+          id = ey.stem().string();
+        }
 
         // allow author alias used by compiler descriptors
         if (author.empty())
@@ -96,6 +101,7 @@ class CompilerServiceImpl final : public Compiler::Service {
         subInfo->set_name(name);
         subInfo->set_id(id);
         subInfo->set_description(desc);
+        subInfo->set_author(author);
         subInfo->set_target(target);
       }
 

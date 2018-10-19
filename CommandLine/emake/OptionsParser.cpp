@@ -348,22 +348,18 @@ int OptionsParser::printInfo(const std::string &api)
         if (id.empty())
           id = about.get("id"); // allow alias
         if (id.empty()) {
-          // compiler descriptors use filename as id
+          // compilers use filename minus ext as id
           boost::filesystem::path ey(p);
           id = ey.stem().string();
         }
 
-        if (!target.empty() && !name.empty())
-        {
-          boost::filesystem::path ey(p);
-          outputStream << '\t' << name << " (" << ey.stem().string() << "):" << std::endl;
-          outputStream << "\t\t Target: " << target << std::endl << std::endl;
-        }
-        else if (!name.empty() && !desc.empty() && !id.empty())
-        {
+        if (!name.empty() && !id.empty())
           outputStream << '\t' << name << " (" << id << "):" << std::endl;
+
+        if (!target.empty())
+          outputStream << "\t\t Target: " << target << std::endl << std::endl;
+        else if (!desc.empty())
           outputStream << "\t\t" << word_wrap(desc, 80) << std::endl << std::endl;
-        }
       }
     }
   }
