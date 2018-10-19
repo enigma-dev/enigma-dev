@@ -212,32 +212,73 @@ int OptionsParser::HandleArgs()
   return OPTIONS_SUCCESS;
 }
 
-std::string OptionsParser::APIyaml()
+std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentConfig)
 {
+  std::string audio = _rawArgs["audio"].as<std::string>(),
+              platform = _rawArgs["platform"].as<std::string>(),
+              compiler = _rawArgs["compiler"].as<std::string>(),
+              graphics = _rawArgs["graphics"].as<std::string>(),
+              widgets = _rawArgs["widgets"].as<std::string>(),
+              collision = _rawArgs["collision"].as<std::string>(),
+              network = _rawArgs["network"].as<std::string>(),
+              eobjs_directory = boost::filesystem::absolute(_rawArgs["workdir"].as<std::string>()).string(),
+              codegen_directory = boost::filesystem::absolute(_rawArgs["codegen"].as<std::string>()).string();
+
+  int inherit_strings = 0,
+      inherit_escapes = 0,
+      inherit_increment = 0,
+      inherit_equivalence = 0,
+      inherit_literals = 0,
+      inherit_negatives = 0;
+  bool inherit_objects = true,
+       automatic_semicolons = true;
+
+  if (currentConfig != nullptr) {
+    const auto &api = currentConfig->api();
+    if (api.has_target_audio()) audio = api.target_audio();
+    if (api.has_target_platform()) platform = api.target_platform();
+    if (api.has_target_compiler()) compiler = api.target_compiler();
+    if (api.has_target_graphics()) graphics = api.target_graphics();
+    if (api.has_target_widgets()) widgets = api.target_widgets();
+    if (api.has_target_collision()) collision = api.target_collision();
+    if (api.has_target_network()) network = api.target_network();
+
+    const auto &compiler = currentConfig->compiler();
+    if (compiler.has_inherit_strings()) inherit_strings = compiler.inherit_strings();
+    if (compiler.has_inherit_escapes()) inherit_escapes = compiler.inherit_escapes();
+    if (compiler.has_inherit_increment()) inherit_increment = compiler.inherit_increment();
+    if (compiler.has_inherit_equivalence()) inherit_equivalence = compiler.inherit_equivalence();
+    if (compiler.has_inherit_literals()) inherit_literals = compiler.inherit_literals();
+    if (compiler.has_inherit_negatives()) inherit_negatives = compiler.inherit_negatives();
+    if (compiler.has_inherit_objects()) inherit_objects = compiler.inherit_objects();
+    if (compiler.has_automatic_semicolons()) automatic_semicolons = compiler.automatic_semicolons();
+  }
+
   std::string yaml;
   yaml += "%e-yaml\n";
   yaml += "---\n";
-  yaml += "treat-literals-as: 0\n";
+  yaml += "treat-literals-as: " + std::to_string(inherit_literals) + "\n";
   yaml += "sample-lots-of-radios: 0\n";
-  yaml += "inherit-equivalence-from: 0\n";
-  yaml += "eobjs-directory: " + boost::filesystem::absolute(_rawArgs["workdir"].as<std::string>()).string() + "\n";
-  yaml += "codegen-directory: " + boost::filesystem::absolute(_rawArgs["codegen"].as<std::string>()).string() + "\n";
+  yaml += "inherit-equivalence-from: " + std::to_string(inherit_equivalence) + "\n";
+  yaml += "eobjs-directory: " + eobjs_directory + "\n";
+  yaml += "codegen-directory: " + codegen_directory + "\n";
   yaml += "sample-checkbox: on\n";
   yaml += "sample-edit: DEADBEEF\n";
   yaml += "sample-combobox: 0\n";
-  yaml += "inherit-strings-from: 0\n";
-  yaml += "inherit-negatives-as: 0\n";
-  yaml += "inherit-escapes-from: 0\n";
-  yaml += "inherit-objects: true \n";
-  yaml += "inherit-increment-from: 0\n";
+  yaml += "inherit-strings-from: " + std::to_string(inherit_strings) + "\n";
+  yaml += "inherit-negatives-as: " + std::to_string(inherit_negatives) + "\n";
+  yaml += "inherit-escapes-from: " + std::to_string(inherit_escapes) + "\n";
+  yaml += "inherit-increment-from: " + std::to_string(inherit_increment) + "\n";
+  yaml += "inherit-objects: " + std::string(inherit_objects ? "true" : "false") + "\n";
+  yaml += "automatic-semicolons: " + std::string(automatic_semicolons ? "true" : "false") + "\n";
   yaml += " \n";
-  yaml += "target-audio: " + _rawArgs["audio"].as<std::string>() + "\n";
-  yaml += "target-windowing: " + _rawArgs["platform"].as<std::string>() + "\n";
-  yaml += "target-compiler: " + _rawArgs["compiler"].as<std::string>() + "\n";
-  yaml += "target-graphics: " + _rawArgs["graphics"].as<std::string>() + "\n";
-  yaml += "target-widget: " + _rawArgs["widgets"].as<std::string>() + "\n";
-  yaml += "target-collision: " + _rawArgs["collision"].as<std::string>() + "\n";
-  yaml += "target-networking: " + _rawArgs["network"].as<std::string>() + "\n";
+  yaml += "target-audio: " + audio + "\n";
+  yaml += "target-windowing: " + platform + "\n";
+  yaml += "target-compiler: " + compiler + "\n";
+  yaml += "target-graphics: " + graphics + "\n";
+  yaml += "target-widget: " + widgets + "\n";
+  yaml += "target-collision: " + collision + "\n";
+  yaml += "target-networking: " + network + "\n";
   yaml += "extensions: " + _extensions + "\n";
 
   return yaml;

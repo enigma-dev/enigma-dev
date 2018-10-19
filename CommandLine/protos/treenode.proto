@@ -12,6 +12,7 @@ import "Font.proto";
 import "Timeline.proto";
 import "Room.proto";
 import "Include.proto";
+import "Settings.proto";
 
 message TreeNode {
   oneof type {
@@ -27,9 +28,9 @@ message TreeNode {
     resources.Object object = 10;
     resources.Room room = 11;
     resources.Include include = 12;
-    //resources.Help help = 13;
-    //resources.Settings settings = 14;
-    //resources.Macros macros = 15;
+    resources.Settings settings = 13;
+    //resources.Macros macros = 14;
+    //resources.Help help = 15;
   }
 
   optional string name = 16;

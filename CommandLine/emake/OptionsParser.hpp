@@ -1,6 +1,8 @@
 #ifndef EMAKE_OPTIONSPARSER_HPP
 #define EMAKE_OPTIONSPARSER_HPP
 
+#include "codegen/Settings.pb.h"
+
 #include <boost/program_options.hpp>
 #include <functional>
 
@@ -24,7 +26,7 @@ public:
   OptionsParser();
   int ReadArgs(int argc, char* argv[]);
   int HandleArgs();
-  std::string APIyaml();
+  std::string APIyaml(const buffers::resources::Settings* currentConfig = nullptr);
   opt::variable_value GetOption(std::string option);
   bool HasOption(std::string option);
   const APIMap& GetAPI() const;

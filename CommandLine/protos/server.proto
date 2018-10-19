@@ -2,6 +2,7 @@ syntax = "proto2";
 package buffers;
 
 import "game.proto";
+import "Settings.proto";
 
 service Compiler {
   rpc CompileBuffer (CompileRequest) returns (stream CompileReply);
@@ -10,6 +11,7 @@ service Compiler {
 
   rpc SyntaxCheck(SyntaxCheckRequest) returns (SyntaxError);
   rpc SetDefinitions(SetDefinitionsRequest) returns (SyntaxError);
+  rpc SetCurrentConfig(SetCurrentConfigRequest) returns (Empty);
 
   rpc Teardown (Empty) returns (Empty);
 }
@@ -59,6 +61,11 @@ message SyntaxError {
 message SetDefinitionsRequest {
   optional string code = 1;
   optional string yaml = 2;
+}
+
+//NOTE: This request may change available keywords which should be reobtained with GetResources().
+message SetCurrentConfigRequest {
+  optional resources.Settings settings = 1; ///< The settings that you want to apply including API (e.g, "Direct3D9" for the graphics system).
 }
 
 message SyntaxCheckRequest {
