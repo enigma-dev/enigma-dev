@@ -347,8 +347,11 @@ int OptionsParser::printInfo(const std::string &api)
 
         if (id.empty())
           id = about.get("id"); // allow alias
-        if (id.empty())
-          id = p; // compiler descriptors use filename as id
+        if (id.empty()) {
+          // compiler descriptors use filename as id
+          boost::filesystem::path ey(p);
+          id = ey.stem().string();
+        }
 
         if (!target.empty() && !name.empty())
         {
@@ -477,8 +480,6 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
     std::string id = about.get("identifier");
     if (id.empty())
       id = about.get("id"); // allow alias
-    if (id.empty())
-      id = a; // compiler descriptors use filename as id
     return (id == target);
   });
 
