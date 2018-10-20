@@ -106,10 +106,10 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
   std::vector<unsigned char> rgba(w * h * 4);
 
   // get the bottom left pixel for transparency
-  unsigned t_pos = pixeloffset + (h-1)*w*numChannels;
-  unsigned char t_pixel_r = bmp[t_pos+0];
-  unsigned char t_pixel_g = bmp[t_pos+1];
-  unsigned char t_pixel_b = bmp[t_pos+2];
+  // NOTE: bmp is obviously upside down, so it's just the first pixel
+  unsigned char t_pixel_r = bmp[pixeloffset+0],
+                t_pixel_g = bmp[pixeloffset+1],
+                t_pixel_b = bmp[pixeloffset+2];
 
   /*
   There are 3 differences between BMP and the raw image buffer for LodePNG:
@@ -128,7 +128,7 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
         rgba[newpos + 0] = bmp[bmpos + 2]; //R<-B
         rgba[newpos + 1] = bmp[bmpos + 1]; //G<-G
         rgba[newpos + 2] = bmp[bmpos + 0]; //B<-R
-        rgba[newpos + 3] = 255; //A<-A
+        rgba[newpos + 3] = 255;            //A<-A
       } else {
         rgba[newpos + 0] = bmp[bmpos + 3]; //R<-A
         rgba[newpos + 1] = bmp[bmpos + 2]; //G<-B
