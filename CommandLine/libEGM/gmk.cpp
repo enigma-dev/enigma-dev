@@ -65,7 +65,7 @@ std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {
   return writeTempDataFile(bytes.get(), length);
 }
 
-std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
+std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool transparent=false) {
   static const unsigned MINHEADER = 54; //minimum BMP header size
   auto bmp = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
@@ -105,6 +105,12 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
 
   std::vector<unsigned char> rgba(w * h * 4);
 
+  // get the bottom left pixel for transparency
+  unsigned t_pos = pixeloffset + (h-1)*w*numChannels;
+  unsigned char t_pixel_r = bmp[t_pos+0];
+  unsigned char t_pixel_g = bmp[t_pos+1];
+  unsigned char t_pixel_b = bmp[t_pos+2];
+
   /*
   There are 3 differences between BMP and the raw image buffer for LodePNG:
   -it's upside down
@@ -122,12 +128,19 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
         rgba[newpos + 0] = bmp[bmpos + 2]; //R<-B
         rgba[newpos + 1] = bmp[bmpos + 1]; //G<-G
         rgba[newpos + 2] = bmp[bmpos + 0]; //B<-R
-        rgba[newpos + 3] = 255;            //A<-A
+        rgba[newpos + 3] = 255; //A<-A
       } else {
         rgba[newpos + 0] = bmp[bmpos + 3]; //R<-A
         rgba[newpos + 1] = bmp[bmpos + 2]; //G<-B
         rgba[newpos + 2] = bmp[bmpos + 1]; //B<-G
         rgba[newpos + 3] = bmp[bmpos + 0]; //A<-R
+      }
+
+      if (transparent &&
+        bmp[bmpos + 0] == t_pixel_r &&
+        bmp[bmpos + 1] == t_pixel_g &&
+        bmp[bmpos + 2] == t_pixel_b) {
+        rgba[newpos + 3] = 0; //A<-A
       }
     }
   }
@@ -344,10 +357,14 @@ class Decoder {
     readData(data_file_path, false);
   }
 
-  void readZlibImage(std::string *data_file_path=nullptr) {
+  void readZlibImage(std::string *data_file_path, bool transparent) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = decompress(length);
-    if (data_file_path && bytes) threadTempFileWrite(writeTempBMPFile, data_file_path, std::move(bytes), length);
+    if (data_file_path && bytes) threadTempFileWrite(writeTempBMPFile, data_file_path, std::move(bytes), length, transparent);
+  }
+
+  void readZlibImage(bool transparent=false) {
+    readZlibImage(nullptr, transparent);
   }
 
   void readBGRAImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
@@ -621,6 +638,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
   auto sprite = std::make_unique<Sprite>();
 
   int w = 0, h = 0;
+  bool transparent = false;
   if (ver < 800) {
     w = dec.read4();
     h = dec.read4();
@@ -628,7 +646,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
     sprite->set_bbox_right(dec.read4());
     sprite->set_bbox_bottom(dec.read4());
     sprite->set_bbox_top(dec.read4());
-    sprite->set_transparent(dec.readBool());
+    transparent = dec.readBool();
     if (ver > 400) {
       sprite->set_smooth_edges(dec.readBool());
       sprite->set_preload(dec.readBool());
@@ -641,7 +659,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
       sprite->set_preload(!dec.readBool());
     }
   } else {
-    sprite->set_transparent(false);
+    transparent = false;
   }
   sprite->set_origin_x(dec.read4());
   sprite->set_origin_y(dec.read4());
@@ -661,7 +679,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
         dec.readBGRAImage(sprite->add_subimages(), w, h);
     } else {
       if (dec.read4() == -1) continue;
-      dec.readZlibImage(sprite->add_subimages());
+      dec.readZlibImage(sprite->add_subimages(), transparent);
     }
   }
   sprite->set_width(w);
@@ -685,10 +703,11 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   auto background = std::make_unique<Background>();
 
   int w = 0, h = 0;
+  bool transparent = false;
   if (ver < 710) {
     w = dec.read4();
     h = dec.read4();
-    background->set_transparent(dec.readBool());
+    transparent = dec.readBool();
     if (ver > 400) {
       background->set_smooth_edges(dec.readBool());
       background->set_preload(dec.readBool());
@@ -711,7 +730,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   if (ver < 710) {
     if (dec.readBool()) {
       if (dec.read4() != -1)
-        dec.readZlibImage(background->mutable_image());
+        dec.readZlibImage(background->mutable_image(), transparent);
     }
   } else { // >= 710
     int dataver = dec.read4();
