@@ -113,6 +113,38 @@ string tfd_add_escaping(string str)
   return result;
 }
 
+string detect_all_files_filter(string filter)
+{
+  if (tfd_DialogEngine() == tfd_OsaScript)
+  {
+    string str_filter = string_replace_all(filter, "*.", "");
+    size_t first_line_pos = str_filter.find("|");
+
+    if (first_line_pos != string::npos)
+    {
+      size_t first_star_pos = str_filter.find("*", first_line_pos + 1);
+            
+      if (first_star_pos != string::npos)
+      {
+        size_t second_line_pos = str_filter.find("|", first_line_pos + 1);
+                
+        if (second_line_pos != string::npos)
+        {
+          if (first_line_pos < first_star_pos && first_star_pos < second_line_pos)
+            filter = "";
+        }
+        else
+        {
+          if (first_line_pos < first_star_pos)
+            filter = "";
+        }
+      }
+    }
+  }
+
+  return filter;
+}
+
 void show_error(string errortext, const bool fatal)
 {
   #ifdef DEBUG_MODE
@@ -317,6 +349,7 @@ namespace enigma_user
   {
     fname = tfd_add_escaping(fname);
     filter = tfd_add_escaping(filter);
+    filter = detect_all_files_filter(filter);
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_openFileDialog("Open", fname.c_str(),
@@ -329,6 +362,7 @@ namespace enigma_user
   {
     fname = tfd_add_escaping(fname);
     filter = tfd_add_escaping(filter);
+    filter = detect_all_files_filter(filter);
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_saveFileDialog("Save As", fname.c_str(),
@@ -366,6 +400,7 @@ namespace enigma_user
     fname_or_dir = tfd_add_escaping(fname_or_dir);
     titlebar = tfd_add_escaping(titlebar);
     filter = tfd_add_escaping(filter);
+    filter = detect_all_files_filter(filter);
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
@@ -403,6 +438,7 @@ namespace enigma_user
     fname_or_dir = tfd_add_escaping(fname_or_dir);
     titlebar = tfd_add_escaping(titlebar);
     filter = tfd_add_escaping(filter);
+    filter = detect_all_files_filter(filter);
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_saveFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
