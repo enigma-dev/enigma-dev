@@ -37,6 +37,7 @@ Tile AddTile(const buffers::resources::Room::Tile& tile);
 View AddView(const buffers::resources::Room::View& view);
 BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg);
 void AddInclude(const char* name, const buffers::resources::Include& inc);
+void WriteSettings(GameSettings &gs, const buffers::resources::Settings& set);
 
 static std::unordered_map<int, int> countMap;
 static std::unordered_map<std::string, int> idMap;
@@ -737,4 +738,47 @@ void AddInclude(const char* /*name*/, const buffers::resources::Include& inc) {
   Include& i = includes[include++];
 
   i.filepath = inc.file_name().c_str();
+}
+
+void WriteSettings(GameSettings &gs, const buffers::resources::Settings& set) {
+  // General
+  const buffers::resources::General &gen = set.general();
+  gs.gameId = gen.game_id();
+  gs.colorOutsideRoom = gen.color_outside_room_region();
+  gs.versionMajor = gen.version_major();
+  gs.versionMinor = gen.version_minor();
+  gs.versionRelease = gen.version_release();
+  gs.versionBuild = gen.version_build();
+  gs.company = gen.company().c_str();
+  gs.product = gen.product().c_str();
+  gs.copyright = gen.copyright().c_str();
+  gs.description = gen.description().c_str();
+  gs.displayCursor = gen.show_cursor();
+  gs.gameIcon = gen.game_icon().c_str();
+
+  // Graphics
+  const buffers::resources::Graphics &gfx = set.graphics();
+  gs.startFullscreen = gfx.start_in_fullscreen();
+  gs.letF4SwitchFullscreen = gfx.allow_fullscreen_change();
+  gs.interpolate = gfx.smooth_colors();
+  gs.forceSoftwareVertexProcessing = gfx.force_software_vertex_processing();
+  gs.freezeOnLoseFocus = gfx.freeze_on_lose_focus();
+  gs.useSynchronization = gfx.use_synchronization();
+  gs.allowWindowResize = gfx.window_sizeable();
+  gs.dontDrawBorder = !gfx.window_showborder();
+  gs.dontShowButtons = !gfx.window_showicons();
+  gs.alwaysOnTop = gfx.window_stayontop();
+  gs.scaling = gfx.window_scale();
+
+  // Project Info
+  const buffers::resources::Info &inf = set.info();
+  gs.author = inf.author_name().c_str();
+  gs.version = inf.version().c_str();
+  gs.lastChanged = inf.last_changed();
+  gs.information = inf.information().c_str();
+
+
+  //TODO: do something, anything
+  gs.letEscEndGame = true;
+  gs.treatCloseAsEscape = true;
 }
