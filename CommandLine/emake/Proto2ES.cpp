@@ -765,8 +765,8 @@ void WriteSettings(GameSettings &gs, const buffers::resources::Settings& set) {
   gs.freezeOnLoseFocus = gfx.freeze_on_lose_focus();
   gs.useSynchronization = gfx.use_synchronization();
   gs.allowWindowResize = gfx.window_sizeable();
-  gs.dontDrawBorder = gfx.window_showborder();
-  gs.dontShowButtons = gfx.window_showicons();
+  gs.dontDrawBorder = !gfx.window_showborder();
+  gs.dontShowButtons = !gfx.window_showicons();
   gs.alwaysOnTop = gfx.window_stayontop();
   gs.scaling = gfx.window_scale();
 
