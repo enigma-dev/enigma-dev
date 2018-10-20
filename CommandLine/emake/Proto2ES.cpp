@@ -386,7 +386,7 @@ void AddSprite(const char* name, const buffers::resources::Sprite& spr) {
   s.name = name;
   s.id = spr.id();
 
-  s.transparent = spr.transparent();
+  s.transparent = false;
   s.shape = spr.shape();
   s.alphaTolerance = spr.alpha_tolerance();
   s.separateMask = spr.separate_mask();
@@ -452,7 +452,7 @@ void AddBackground(const char* name, const buffers::resources::Background& bkg) 
   b.name = name;
   b.id = bkg.id();
 
-  b.transparent = bkg.transparent();
+  b.transparent = false;
   b.smoothEdges = bkg.smooth_edges();
   b.preload = bkg.preload();
   b.useAsTileset = bkg.use_as_tileset();
