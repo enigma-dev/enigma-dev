@@ -56,8 +56,8 @@ message General {
   optional string display_name = 4 [(gmx) = "option_display_name"];
   optional uint32 version_major = 5 [(gmx) = "option_version_major"];
   optional uint32 version_minor = 6 [(gmx) = "option_version_minor"];
-  optional uint32 version_build = 7 [(gmx) = "option_version_build"];
-  optional uint32 version_release = 8 [(gmx) = "option_version_release"];
+  optional uint32 version_release = 7 [(gmx) = "option_version_release"];
+  optional uint32 version_build = 8 [(gmx) = "option_version_build"];
   optional string company = 9 [(gmx) = "option_version_company"];
   optional string product = 10 [(gmx) = "option_version_product"];
   optional string copyright = 11 [(gmx) = "option_version_copyright"];
