@@ -747,8 +747,8 @@ void WriteSettings(GameSettings &gs, const buffers::resources::Settings& set) {
   gs.colorOutsideRoom = gen.color_outside_room_region();
   gs.versionMajor = gen.version_major();
   gs.versionMinor = gen.version_minor();
-  gs.versionBuild = gen.version_build();
   gs.versionRelease = gen.version_release();
+  gs.versionBuild = gen.version_build();
   gs.company = gen.company().c_str();
   gs.product = gen.product().c_str();
   gs.copyright = gen.copyright().c_str();
