@@ -429,27 +429,31 @@ void LoadSettingsIncludes(Decoder &dec) {
   dec.readBool(); dec.readBool();
 }
 
-int LoadSettings(Decoder &dec) {
+int LoadSettings(Decoder &dec, Settings& set) {
   int ver = dec.read4();
   if (ver != 530 && ver != 542 && ver != 600 && ver != 702 && ver != 800 && ver != 810) {
     err << "Unsupported GMK Settings version: " << ver << std::endl;
     return 0;
   }
 
+  General* gen = set.mutable_general();
+  Graphics* gfx = set.mutable_graphics();
+  Info* inf = set.mutable_info();
+
   if (ver >= 800) dec.beginInflate();
-  dec.readBool(); // start_fullscreen
+  gfx->set_start_in_fullscreen(dec.readBool());
   if (ver >= 600) {
-    dec.readBool(); // interpolate
+    gfx->set_smooth_colors(dec.readBool());
   }
-  dec.readBool(); // dont_draw_border
-  dec.readBool(); // display_cursor
-  dec.read4(); // scaling
+  gfx->set_window_showborder(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
+  gen->set_show_cursor(dec.readBool());
+  gfx->set_window_scale(dec.read4());
   if (ver == 530) {
     dec.skip(8); // "fullscreen scale" & "only scale w/ hardware support"
   } else {
-    dec.readBool(); // allow_window_resize
-    dec.readBool(); // always_on_top
-    dec.read4(); // color_outside_room
+    gfx->set_window_sizeable(dec.readBool());
+    gfx->set_window_stayontop(dec.readBool());
+    gen->set_color_outside_room_region(dec.read4());
   }
   dec.readBool(); // set_resolution
 
@@ -465,18 +469,19 @@ int LoadSettings(Decoder &dec) {
     dec.read4(); // frequency
   }
 
-  dec.readBool(); // DONT_SHOW_BUTTONS
-  if (ver > 530) dec.readBool(); // USE_SYNCHRONIZATION
+  gfx->set_window_showicons(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
+  if (ver > 530) gfx->set_use_synchronization(dec.readBool());
   if (ver >= 800) dec.readBool(); // DISABLE_SCREENSAVERS
-  // LET_F4_SWITCH_FULLSCREEN, LET_F1_SHOW_GAME_INFO, LET_ESC_END_GAME, LET_F5_SAVE_F6_LOAD
-  dec.readBool(); dec.readBool(); dec.readBool(); dec.readBool();
+  gfx->set_allow_fullscreen_change(dec.readBool());
+  // LET_F1_SHOW_GAME_INFO, LET_ESC_END_GAME, LET_F5_SAVE_F6_LOAD
+  dec.readBool(); dec.readBool(); dec.readBool();
   if (ver == 530) dec.skip(8); //unknown bytes, both 0
   if (ver > 600) {
     // LET_F9_SCREENSHOT, TREAT_CLOSE_AS_ESCAPE
     dec.readBool(); dec.readBool();
   }
   dec.read4(); // GAME_PRIORITY
-  dec.readBool(); // FREEZE_ON_LOSE_FOCUS
+  gfx->set_freeze_on_lose_focus(dec.readBool());
   int load_bar_mode = dec.read4(); // LOAD_BAR_MODE
   if (load_bar_mode == 2) { // 0=NONE 1=DEFAULT 2=CUSTOM
     if (ver < 800) {
@@ -506,13 +511,13 @@ int LoadSettings(Decoder &dec) {
   dec.read4(); // errors
   // TREAT_UNINIT_AS_0 = ((errors & 0x01) != 0)
   // ERROR_ON_ARGS = ((errors & 0x02) != 0)
-  dec.readStr(); // AUTHOR
+  inf->set_author_name(dec.readStr());
   if (ver > 600)
-    dec.readStr(); // VERSION
+    inf->set_version(dec.readStr());
   else
-    dec.read4(); // VERSION std::to_string
-  dec.readD(); // LAST_CHANGED
-  dec.readStr(); // INFORMATION
+    inf->set_version(std::to_string(dec.read4()));
+  inf->set_last_changed(dec.readD());
+  inf->set_information(dec.readStr());
   if (ver < 800) {
     int no = dec.read4(); // number of constants
     for (int i = 0; i < no; i++) {
@@ -521,10 +526,15 @@ int LoadSettings(Decoder &dec) {
     }
   }
   if (ver > 600) {
-    // VERSION_MAJOR, VERSION_MINOR, VERSION_RELEASE, VERSION_BUILD
-    dec.read4(); dec.read4(); dec.read4(); dec.read4();
-    // COMPANY, PRODUCT, COPYRIGHT, DESCRIPTION
-    dec.readStr(); dec.readStr(); dec.readStr(); dec.readStr();
+    gen->set_version_major(dec.read4());
+    gen->set_version_minor(dec.read4());
+    gen->set_version_release(dec.read4());
+    gen->set_version_build(dec.read4());
+
+    gen->set_company(dec.readStr());
+    gen->set_product(dec.readStr());
+    gen->set_copyright(dec.readStr());
+    gen->set_description(dec.readStr());
 
     if (ver >= 800) dec.skip(8); //last changed
   } else if (ver > 530) {
@@ -1238,7 +1248,8 @@ buffers::Project *LoadGMK(std::string fName) {
   out << "game id: " << game_id << std::endl;
   dec.skip(16); //16 bytes GAME_GUID
 
-  if (!LoadSettings(dec)) return nullptr;
+  Settings settings;
+  if (!LoadSettings(dec, settings)) return nullptr;
 
   if (ver >= 800) {
     if (!LoadTriggers(dec)) return nullptr;
