@@ -345,21 +345,21 @@ int OptionsParser::printInfo(const std::string &api)
         std::string id = about.get("identifier");
         std::string target = about.get("target-platform");
 
-        // Why is this different in extensions?
         if (id.empty())
-          id = about.get("id");
-
-        if (!target.empty() && !name.empty())
-        {
+          id = about.get("id"); // allow alias
+        if (id.empty()) {
+          // compilers use filename minus ext as id
           boost::filesystem::path ey(p);
-          outputStream << '\t' << name << " (" << ey.stem().string() << "):" << std::endl;
-          outputStream << "\t\t Target: " << target << std::endl << std::endl;
+          id = ey.stem().string();
         }
-        else if (!name.empty() && !desc.empty() && !id.empty())
-        {
+
+        if (!name.empty() && !id.empty())
           outputStream << '\t' << name << " (" << id << "):" << std::endl;
+
+        if (!target.empty())
+          outputStream << "\t\t Target: " << target << std::endl << std::endl;
+        else if (!desc.empty())
           outputStream << "\t\t" << word_wrap(desc, 80) << std::endl << std::endl;
-        }
       }
     }
   }
@@ -474,9 +474,8 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
     std::ifstream ifabout(a, std::ios_base::in);
     ey_data about = parse_eyaml(ifabout, a);
     std::string id = about.get("identifier");
-    // Why is this different in extensions?
     if (id.empty())
-      id = about.get("id");
+      id = about.get("id"); // allow alias
     return (id == target);
   });
 
