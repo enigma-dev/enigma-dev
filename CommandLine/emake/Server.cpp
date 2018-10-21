@@ -15,20 +15,45 @@
 #include <boost/filesystem.hpp>
 
 #include <memory>
+#include <future>
+#include <sstream>
 
 using namespace grpc;
 using namespace buffers;
 
 class CompilerServiceImpl final : public Compiler::Service {
   public:
-  explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options): plugin(plugin), options(options) {}
+  explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options):
+    plugin(plugin), options(options) {
+      // create output streams and redirect standard output to them
+      // this way we can read from the stream and forward to the client
+      std::cout.rdbuf(outstm.rdbuf());
+      std::cerr.rdbuf(errstm.rdbuf());
+    }
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
-    plugin.BuildGame(const_cast<buffers::Game*>(&request->game()), emode_run, request->name().c_str());
+    CompileBufferFuture.get(); // block until the last CompileBuffer rpc finishes
+    auto fnc = [=] {
+      plugin.BuildGame(const_cast<buffers::Game*>(&request->game()), emode_run, request->name().c_str());
+    };
+    CompileBufferFuture = std::async(fnc);
+
     CompileReply reply;
     reply.set_message("hello");
     reply.set_progress(0);
     writer->Write(reply);
+    return Status::OK;
+  }
+
+  Status GetOutput(ServerContext* /*context*/, const Empty* /*request*/, ServerWriter<OutputReply>* writer) override {
+    OutputReply reply;
+    // forward all output to the client
+    reply.set_out(outstm.str());
+    reply.set_err(errstm.str());
+    writer->Write(reply);
+    // clear the output buffers now that we've forwarded them to the client
+    outstm.str(std::string());
+    errstm.str(std::string());
     return Status::OK;
   }
 
@@ -145,6 +170,9 @@ class CompilerServiceImpl final : public Compiler::Service {
   private:
   EnigmaPlugin& plugin;
   OptionsParser& options;
+
+  std::stringstream outstm, errstm;
+  std::future<void> CompileBufferFuture;
 };
 
 int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &options) {
