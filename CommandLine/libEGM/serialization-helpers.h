@@ -1,5 +1,7 @@
 #include <string>
 #include <vector>
+#include <sstream>
+#include <iostream>
 
 namespace egm {
 namespace serialization {
@@ -12,21 +14,16 @@ std::string ColorToStr(int color);
 /// Returns the integer value of the given color, or -1 on failure.
 int32_t ColorFromStr(std::string color);
 
-std::vector<std::string> Tokenize(
-    const std::string& str, const std::string& delimiters);
-
-inline std::string unquote(const std::string& quotedStr) {
-  std::string str = quotedStr;
-  if (str.length() >= 2 && str.front() == '"' && str.back() == '"')
-    str = str.substr(1, str.length()-2);
-
-  return str;
+inline bool IsHex(char c) {
+  return (c >= '0' && c <= '9')
+      || (c >= 'a' && c <= 'f')
+      || (c >= 'A' && c <= 'F');
 }
 
-inline std::string escape_hex(const std::string &hex) {
-  if (hex[0] == '#') return "0x" + hex.substr(1);
-  return hex;
-}
+int ParseHex(const std::string &hex);
+
+std::pair<std::string, size_t>
+ReadQuotedString(const std::string &data, size_t i);
 
 }  // namespace serialization
 }  // namespace egm

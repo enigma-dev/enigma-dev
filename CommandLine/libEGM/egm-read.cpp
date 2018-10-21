@@ -176,9 +176,8 @@ buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
   return tln;
 }
 
-void RepackLayers(buffers::resources::Room *m, bool tiles, YAML::Node& yaml,
+void RepackLayers(buffers::resources::Room *room, bool tiles, YAML::Node& yaml,
                   const fs::path& fPath) {
-
   // All layers require a "format" and a "data" key in the YAML
   YAML::Node format = yaml["Format"];
   if (!format) {
@@ -200,7 +199,10 @@ void RepackLayers(buffers::resources::Room *m, bool tiles, YAML::Node& yaml,
     std::stringstream details;
     details << fPath.string() << ":" << yaml.Mark().line
                               << ":" << yaml.Mark().column;
-    svg_d::ParseInstances(yaml.as<std::string>(), m, details.str());
+    if (tiles)
+      svg_d::ParseTiles(data.as<std::string>(), room, details.str());
+    else
+      svg_d::ParseInstances(data.as<std::string>(), room, details.str());
   } else {
     std::cerr << "Error: unsupported instance layer format \"" << formatStr
               << "\" in " << fPath << std::endl;
@@ -254,7 +256,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
 
     if (key == "id" && depth == 0) {
       if (id >= 0)
-        SetProtoField(refl, m, field, std::to_string(id));
+        SetProtoField(m, field, std::to_string(id));
       continue;
     }
 
@@ -320,7 +322,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
           break;
         }
         default: {
-          SetProtoField(refl, m, field, (isFilePath) ? fPath.string() + "/" + n.as<std::string>() : n.as<std::string>());
+          SetProtoField(m, field, (isFilePath) ? fPath.string() + "/" + n.as<std::string>() : n.as<std::string>());
           break;
         }
       }

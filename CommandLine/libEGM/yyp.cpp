@@ -181,7 +181,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
             if (isFilePath) {  // again gotta prepend the yyp's path & fix the string to be posix compatible
               //value = YYPPath2FilePath(dir, value);
             }
-            SetProtoField(refl, m, field, value);
+            SetProtoField(m, field, value);
             break;
           }
         }
