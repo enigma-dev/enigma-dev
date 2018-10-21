@@ -32,10 +32,13 @@ class CompilerServiceImpl final : public Compiler::Service {
     }
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
-    CompileBufferFuture.get(); // block until the last CompileBuffer rpc finishes
+    // block until the last CompileBuffer rpc finishes
+    if (CompileBufferFuture.valid()) CompileBufferFuture.get();
+    // use lambda capture to contain compile logic
     auto fnc = [=] {
       plugin.BuildGame(const_cast<buffers::Game*>(&request->game()), emode_run, request->name().c_str());
     };
+    // asynchronously launch the compile request
     CompileBufferFuture = std::async(fnc);
 
     CompileReply reply;
