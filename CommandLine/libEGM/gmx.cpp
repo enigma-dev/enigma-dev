@@ -462,7 +462,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
               if (isFilePath) {  // again gotta prepend the gmx's path & fix the string to be posix compatible
                 value = GMXPath2FilePath(dir, value);
               }
-              SetProtoField(refl, m, field, value);
+              SetProtoField(m, field, value);
               break;
             }
           }

@@ -25,67 +25,149 @@ inline std::vector<std::string> SplitString(const std::string &str, char delimit
 
 #include <google/protobuf/descriptor.h>
 
-inline void SetProtoField(const google::protobuf::Reflection* refl, google::protobuf::Message* msg, const google::protobuf::FieldDescriptor* field, std::string v, bool relative = false) {
+inline std::string strtolower(std::string r) {
+  for (size_t i = 0; i < r.length(); ++i)
+    if (r[i] >= 'A' && r[i] <= 'Z') r[i] += 'a' - 'A';
+  return r;
+}
+
+inline bool ParseBool(const std::string &b) {
+  const std::string bl = strtolower(b);
+  if (bl == "yes" || bl == "true" || bl == "y") return true;
+  return std::stod(bl);
+}
+
+inline void SetProtoField(google::protobuf::Message* msg,
+                          const google::protobuf::FieldDescriptor* field,
+                          std::string value) {
+  const google::protobuf::Reflection* refl = msg->GetReflection();
   using CppType = google::protobuf::FieldDescriptor::CppType;
 
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_INT32: {
-      auto val = std::stol(v);
-      if (relative)
-        val += refl->GetInt32(*msg, field);
-      refl->SetInt32(msg, field, val);
+      refl->SetInt32(msg, field, std::stol(value));
       break;
     }
     case CppType::CPPTYPE_INT64: {
-      auto val = std::stoll(v);
-      if (relative)
-        val += refl->GetInt64(*msg, field);
-      refl->SetInt64(msg, field, val);
+      refl->SetInt64(msg, field, std::stoll(value));
       break;
     }
     case CppType::CPPTYPE_UINT32: {
-      auto val = std::stoul(v);
-      if (relative)
-        val += refl->GetUInt32(*msg, field);
-      refl->SetUInt32(msg, field, val);
+      refl->SetUInt32(msg, field, std::stoul(value));
       break;
     }
     case CppType::CPPTYPE_UINT64: {
-      auto val = std::stoull(v);
-      if (relative)
-        val += refl->GetUInt32(*msg, field);
-      refl->SetUInt32(msg, field, val);
+      refl->SetUInt32(msg, field, std::stoull(value));
       break;
     }
     case CppType::CPPTYPE_DOUBLE: {
-      auto val = std::stod(v);
-      if (relative)
-        val += refl->GetDouble(*msg, field);
-      refl->SetDouble(msg, field, val);
+      refl->SetDouble(msg, field, std::stod(value));
       break;
     }
     case CppType::CPPTYPE_FLOAT: {
-      auto val = std::stof(v);
-      if (relative)
-        val += refl->GetFloat(*msg, field);
-      refl->SetFloat(msg, field, val);
+      refl->SetFloat(msg, field, std::stof(value));
       break;
     }
     case CppType::CPPTYPE_BOOL: {
-      refl->SetBool(msg, field, (std::stof(v) != 0));
+      refl->SetBool(msg, field, ParseBool(value));
       break;
     }
     case CppType::CPPTYPE_ENUM: {
-      auto val = field->enum_type()->FindValueByName(v);
-      refl->SetEnum(msg, field, val == NULL ? field->enum_type()->FindValueByNumber(std::stol(v)) : val);
+      auto val = field->enum_type()->FindValueByName(value);
+      if (val == NULL)
+        val = field->enum_type()->FindValueByNumber(std::stol(value));
+      if (val != NULL)
+        refl->SetEnum(msg, field, val);
       break;
     }
     case CppType::CPPTYPE_STRING: {
-      refl->SetString(msg, field, v);
+      refl->SetString(msg, field, value);
       break;
     }
     default:
       // error
       break;
   };
+}
+
+inline void SetProtoField(google::protobuf::Message* msg,
+                          const google::protobuf::FieldDescriptor* field,
+                          double value) {
+  const google::protobuf::Reflection* refl = msg->GetReflection();
+  using CppType = google::protobuf::FieldDescriptor::CppType;
+
+  switch (field->cpp_type()) {
+    case CppType::CPPTYPE_INT32: {
+      refl->SetInt32(msg, field, (int) value);
+      break;
+    }
+    case CppType::CPPTYPE_INT64: {
+      refl->SetInt64(msg, field, (long) value);
+      break;
+    }
+    case CppType::CPPTYPE_UINT32: {
+      refl->SetUInt32(msg, field, (unsigned int) value);
+      break;
+    }
+    case CppType::CPPTYPE_UINT64: {
+      refl->SetUInt32(msg, field, (unsigned long) value);
+      break;
+    }
+    case CppType::CPPTYPE_DOUBLE: {
+      refl->SetDouble(msg, field, value);
+      break;
+    }
+    case CppType::CPPTYPE_FLOAT: {
+      refl->SetFloat(msg, field, (float) value);
+      break;
+    }
+    case CppType::CPPTYPE_BOOL: {
+      refl->SetBool(msg, field, (bool) value);
+      break;
+    }
+    case CppType::CPPTYPE_ENUM: {
+      auto val = field->enum_type()->FindValueByNumber((int) value);
+      if (val != NULL)
+        refl->SetEnum(msg, field, val);
+      break;
+    }
+    case CppType::CPPTYPE_STRING: {
+      refl->SetString(msg, field, std::to_string(value));
+      break;
+    }
+    default:
+      // error
+      break;
+  };
+}
+
+inline void SetProtoField(google::protobuf::Message* msg, int field, std::string value) {
+  return SetProtoField(msg, msg->GetDescriptor()->FindFieldByNumber(field), value);
+}
+inline void SetProtoField(google::protobuf::Message* msg, int field, double value) {
+  return SetProtoField(msg, msg->GetDescriptor()->FindFieldByNumber(field), value);
+}
+
+inline double GetNumericProtoField(
+    const google::protobuf::Message &msg,
+    const google::protobuf::FieldDescriptor* field) {
+  using CppType = google::protobuf::FieldDescriptor::CppType;
+  const google::protobuf::Reflection* refl = msg.GetReflection();
+
+  switch (field->cpp_type()) {
+    case CppType::CPPTYPE_INT32:  return refl->GetInt32 (msg, field);
+    case CppType::CPPTYPE_INT64:  return refl->GetInt64 (msg, field);
+    case CppType::CPPTYPE_UINT32: return refl->GetUInt32(msg, field);
+    case CppType::CPPTYPE_UINT64: return refl->GetUInt32(msg, field);
+    case CppType::CPPTYPE_DOUBLE: return refl->GetDouble(msg, field);
+    case CppType::CPPTYPE_FLOAT:  return refl->GetFloat (msg, field);
+    case CppType::CPPTYPE_BOOL:   return refl->GetBool  (msg, field);
+    case CppType::CPPTYPE_ENUM:   return refl->GetEnum(msg, field)->number();
+    case CppType::CPPTYPE_STRING: return std::stod(refl->GetString(msg, field));
+    default: return 0;
+  };
+}
+
+inline double GetNumericProtoField(const google::protobuf::Message &msg, int field) {
+  return GetNumericProtoField(msg, msg.GetDescriptor()->FindFieldByNumber(field));
 }

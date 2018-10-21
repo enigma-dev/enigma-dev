@@ -42,6 +42,7 @@ struct InstSimple {
   string object_name;
   double xscale, yscale, zscale;
   double rotation, zrotation;
+  bool has_zscale, has_zrotation;
   int32_t color;
   string  name;
   int32_t id;
@@ -50,6 +51,7 @@ struct InstSimple {
       object_name(inst.object_type()),
       xscale(inst.xscale()), yscale(inst.yscale()), zscale(inst.zscale()),
       rotation(inst.rotation()), zrotation(inst.zrotation()),
+      has_zscale(inst.has_zscale()), has_zrotation(inst.has_zrotation()),
       color(inst.color()),
       name(inst.name()),
       id(inst.id()) {}
@@ -137,7 +139,8 @@ struct TileSimple {
 const InstSimple InstSimple::DEFAULTS {Room::Instance::default_instance()};
 const TileSimple TileSimple::DEFAULTS {Room::Tile::default_instance()};
 
-string SVGDInstanceDescriptors(char ich, const InstSimple &inst, const InstSimple &prev) {
+string SVGDInstanceDescriptors(
+    char ich, const InstSimple &inst, const InstSimple &prev) {
   std::stringstream str;
   str << ich;
   if (inst.id) str << ' ' << inst.id;
@@ -149,8 +152,13 @@ string SVGDInstanceDescriptors(char ich, const InstSimple &inst, const InstSimpl
              + (inst.zscale != prev.zscale);
   if (scales) {
     if (scales > 1) {
-      str << " S " << inst.xscale << ", " << inst.yscale;
-      if (inst.zscale != 1)   str << ", " << inst.zscale;
+      str << " S " << inst.xscale;
+      if (inst.yscale != inst.xscale) {
+        str << ", " << inst.yscale;
+        if (inst.zscale != prev.zscale) str << ", " << inst.zscale;
+      } else if (inst.zscale != inst.xscale && prev.has_zscale) {
+        str << ", " << inst.yscale << ", " << inst.zscale;
+      }
     } else {
       if (inst.xscale != prev.xscale) str << " W " << inst.xscale;
       if (inst.yscale != prev.yscale) str << " H " << inst.yscale;
@@ -183,7 +191,8 @@ void SVGDWriteHVComponents(std::stringstream &str,
   }
 }
 
-string SVGDTileDescriptors(char ich, const TileSimple &tile, const TileSimple &prev) {
+string SVGDTileDescriptors(
+    char ich, const TileSimple &tile, const TileSimple &prev) {
   std::stringstream str;
   str << ich;
   if (tile.id) str << ' ' << tile.id;
@@ -194,11 +203,12 @@ string SVGDTileDescriptors(char ich, const TileSimple &tile, const TileSimple &p
     str << " b \"" << EscapeString(tile.bg_name) << "\"";
   if (tile.xoffset != prev.xoffset && tile.yoffset != prev.yoffset) {
     std::stringstream abs, rel;
-    //TODO: ask josh about abs which used to be in place of str for these two
-    SVGDWriteHVComponents(str, 'O', 'U', 'V', tile.width, tile.height,
+    SVGDWriteHVComponents(abs, 'O', 'U', 'V', tile.width, tile.height,
                           TileSimple::DEFAULTS.width, TileSimple::DEFAULTS.height);
-    SVGDWriteHVComponents(str, 'o', 'u', 'v', tile.width, tile.height,
+    SVGDWriteHVComponents(rel, 'o', 'u', 'v', tile.width, tile.height,
                           prev.width, prev.height);
+    string abss = abs.str(), rels = rel.str();
+    str << (abss.length() < rels.length() ? abss : rels);
   }
   SVGDWriteHVComponents(str, 'D', 'w', 'h', tile.width, tile.height,
                         TileSimple::DEFAULTS.width,  TileSimple::DEFAULTS.height);
@@ -312,57 +322,6 @@ std::vector<Line> ExtractLines(std::multiset<Coords> *point_cloud) {
   return res;
 }
 
-
-struct Command {
-  size_t minArgs = 0;
-  std::vector<std::string> field_names;
-};
-
-const std::map<char, Command> kInstanceParameters = {
-  { 'I', { 0, {"id"}                         } },
-  { 'i', { 0, {"id"}                         } },
-  { 'n', { 1, {"name"}                       } },
-  { 'o', { 1, {"object_type"}                } },
-  { 'p', { 1, {"x", "y", "z"}                } },
-  { 'x', { 1, {"x"}                          } },
-  { 'y', { 1, {"y"}                          } },
-  { 'z', { 1, {"z"}                          } },
-  { 's', { 1, {"xscale", "yscale", "zscale"} } },
-  { 'w', { 1, {"xscale"}                     } },
-  { 'h', { 1, {"yscale"}                     } },
-  { 'd', { 1, {"zscale"}                     } },
-  { 'r', { 1, {"rotation"}                   } },
-  { 'c', { 1, {"color"}                      } },
-  { 'l', { 1, {}                             } },
-  { 'f', { 4, {}                             } },
-  { 'g', { 1, {}                             } },
-};
-
-const std::map<char, Command> kTileParameters = {
-  { 'T', { 0, {"id"}                 } },
-  { 't', { 0, {"id"}                 } },
-  { 'n', { 1, {"name"}               } },
-  { 'b', { 1, {"background_name"}    } },
-  { 'd', { 1, {"depth"}              } },
-  { 'p', { 1, {"x", "y"}             } },
-  { 'x', { 1, {"x"}                  } },
-  { 'y', { 1, {"y"}                  } },
-  { 'o', { 1, {"xoffset", "yoffset"} } },
-  { 'u', { 1, {"xoffset"}            } },
-  { 'v', { 1, {"yoffset"}            } },
-  { 'D', { 1, {"width", "height"}    } },
-  { 'w', { 1, {"width"}              } },
-  { 'h', { 1, {"height"}             } },
-  { 's', { 1, {"xscale", "yscale"}   } },
-  { 'W', { 1, {"xscale"}             } },
-  { 'H', { 1, {"yscale"}             } },
-  { 'c', { 1, {"color"}              } },
-  { 'l', { 1, {}                     } },
-  { 'f', { 4, {}                     } },
-  { 'g', { 1, {}                     } },
-};
-
-
 template<typename T> struct Simplifier {};
 template<> struct Simplifier<Room::Instance> { typedef InstSimple T; };
 template<> struct Simplifier<Room::Tile> { typedef TileSimple T; };
@@ -374,40 +333,293 @@ template<> struct LayerT<Room::Tile> { using T = egm::TileLayer; };
 template<typename T> using Layer = typename LayerT<T>::T;
 
 
-inline bool isCommandToken(const std::string& token) {
-  return (token.length() == 1 && isalpha(token[0]));
+using std::vector;
+std::pair<double, bool> strintodou(const std::string &strin) {
+  const char *end = strin.c_str();
+  double res = strtod(end, (char**) &end);
+  return std::pair<double, bool>(res, end != strin.c_str());
 }
 
-inline void tooManyArgsGiven(char cmd, unsigned maxArgs,
-    const std::vector<std::string>& args, unsigned argNum,
-    const string& error_details) {
-  std::cerr << std::endl << "Error: too many arguments given to the \""
-            << cmd << "\" command" << std::endl;
-  std::cerr << "maximum supported arguments: " << maxArgs << std::endl;
-  std::cerr << "argument " << argNum
-            << " (" << args[argNum] << ") will be ignored" << std::endl;
-  if (!error_details.empty()) std::cerr << error_details << std::endl;
-  std::cerr << std::endl;
+class Command {
+ public:
+  string name;
+  Command(string name): name(name) {}
+  virtual int handle(
+      const vector<string> &data, size_t pos, protobuf::Message *out) const = 0;
+  virtual ~Command() {}
+};
+
+class StringAttributeCommand : public Command {
+ public:
+  int field;
+
+  StringAttributeCommand(string name_, int field_):
+      Command(name_), field(field_) {}
+
+  int handle(const vector<string> &data, size_t pos, protobuf::Message *out)
+  const final {
+    if (pos + 1 >= data.size()) {
+      std::cerr << "Expected value for '" << name << "' command "
+                   "before end of input" << std::endl;
+      return 0;
+    }
+    SetProtoField(out, field, data[pos + 1]);
+    return 1;
+  }
+
+  ~StringAttributeCommand() final {}
+};
+
+std::vector<double> ReadValues(string command_name, const vector<string> &data,
+                               size_t pos, int countMin, int countMax) {
+  std::vector<double> res;
+  std::pair<double, bool> val;
+  for (int i = 0; i < countMax; ++i) {
+    if (pos + i >= data.size() || !(val = strintodou(data[pos + i])).second) {
+      if (i < countMin) {
+        std::cerr << "Expected " << countMin << " values for '" << command_name
+                  << "' command; found " << i << std::endl;
+      }
+      return res;
+    }
+    res.push_back(val.first);
+  }
+  return res;
 }
 
-inline void tooFewArgsGiven(char cmd, unsigned minArgs,
-    const string& error_details) {
-  std::cerr << std::endl << "Error: too few arguments given to the \""
-            << cmd << "\" command" << std::endl;
-  std::cerr << "minimum required arguments: " << minArgs << std::endl;
-  std::cerr << "the command will be ignored" << std::endl;
-  if (!error_details.empty()) std::cerr << error_details << std::endl;
-  std::cerr << std::endl;
+class SingleAttributeCommand : public Command {
+ public:
+  int field;
+  bool relative;
+
+  SingleAttributeCommand(string name_, int field_, bool relative_):
+      Command(name_), field(field_), relative(relative_) {}
+
+  int handle(const vector<string> &data, size_t pos, protobuf::Message *out)
+  const final {
+    std::pair<double, bool> val;
+    if (pos + 1 >= data.size() || !(val = strintodou(data[pos + 1])).second) {
+      std::cerr << "Expected value for '" << name << "' command" << std::endl;
+      return 0;
+    }
+    if (relative) val.first += GetNumericProtoField(*out, field);
+    SetProtoField(out, field, val.first);
+    return 1;
+  }
+
+  ~SingleAttributeCommand() final {}
+};
+
+class CoordinateAttributeCommand : public Command {
+ public:
+  int field1, field2, field3;
+  bool relative;
+
+  CoordinateAttributeCommand(string name_,
+                             int field_1, int field_2, int field_3, bool rel_):
+      Command(name_),
+      field1(field_1), field2(field_2), field3(field_3), relative(rel_) {}
+
+  int handle(const vector<string> &data, size_t pos, protobuf::Message *out)
+  const final {
+    auto args = ReadValues(name, data , pos+ 1, 2, 3);
+    if (!args.size()) return 0;
+    if (relative) args[0] += GetNumericProtoField(*out, field1);
+    SetProtoField(out, field1, args[0]);
+
+    if (args.size() == 1) return 1;
+    if (relative) args[1] += GetNumericProtoField(*out, field2);
+    SetProtoField(out, field2, args[1]);
+
+    if (args.size() == 2) return 2;
+    if (relative) args[2] += GetNumericProtoField(*out, field3);
+    SetProtoField(out, field3, args[2]);
+    return 3;
+  }
+  ~CoordinateAttributeCommand() final {}
+};
+
+class RotationCommand : public Command {
+ public:
+  RotationCommand(): Command("Rotation") {}
+
+  int handle(const vector<string> &data, size_t pos, protobuf::Message *out)
+  const final {
+    if (pos + 1 >= data.size()) {
+      std::cerr << "Expected value for '" << name << "' command "
+                   "before end of input" << std::endl;
+      return 0;
+    }
+    SetProtoField(out, Room::Instance::kRotationFieldNumber, data[pos + 1]);
+    return 1;
+  }
+
+  ~RotationCommand() final {}
+};
+
+class ColorCommand : public Command {
+ public:
+  int field;
+
+  ColorCommand(int field_): Command("color"), field(field_) {}
+
+  int handle(const vector<string> &data, size_t pos, protobuf::Message *out)
+  const final {
+    if (pos + 1 >= data.size()) {
+      std::cerr << "Expected value for '" << name << "' command "
+                   "before end of input" << std::endl;
+      return 0;
+    }
+    SetProtoField(out, field, data[pos + 1]);
+    return 1;
+  }
+
+  ~ColorCommand() final {}
+};
+
+const std::map<char, Command*> kInstanceParameters = {
+  { 'n', new StringAttributeCommand{
+      "name", Room::Instance::kNameFieldNumber                 }},
+  { 'o', new StringAttributeCommand{
+      "object-type", Room::Instance::kObjectTypeFieldNumber    }},
+  { 'P', new CoordinateAttributeCommand{
+      "Position", Room::Instance::kXFieldNumber,
+                  Room::Instance::kYFieldNumber,
+                  Room::Instance::kZFieldNumber, false         }},
+  { 'X', new SingleAttributeCommand{
+      "X", Room::Instance::kXFieldNumber, false                }},
+  { 'Y', new SingleAttributeCommand{
+      "Y", Room::Instance::kYFieldNumber, false                }},
+  { 'Z', new SingleAttributeCommand{
+      "Z", Room::Instance::kZFieldNumber, false                }},
+  { 'p', new CoordinateAttributeCommand{
+      "position", Room::Instance::kXFieldNumber,
+                  Room::Instance::kYFieldNumber,
+                  Room::Instance::kZFieldNumber, true          }},
+  { 'x', new SingleAttributeCommand{
+      "x", Room::Instance::kXFieldNumber, true                 }},
+  { 'y', new SingleAttributeCommand{
+      "y", Room::Instance::kYFieldNumber, true                 }},
+  { 'z', new SingleAttributeCommand{
+      "z", Room::Instance::kZFieldNumber, true                 }},
+  { 'S', new CoordinateAttributeCommand{
+      "Scale", Room::Instance::kXscaleFieldNumber,
+               Room::Instance::kYscaleFieldNumber,
+               Room::Instance::kZscaleFieldNumber, false       }},
+  { 'W', new SingleAttributeCommand{
+      "x-scale (W)", Room::Instance::kXscaleFieldNumber, false }},
+  { 'H', new SingleAttributeCommand{
+      "y-scale (H)", Room::Instance::kYscaleFieldNumber, false }},
+  { 'D', new SingleAttributeCommand{
+      "z-scale (D)", Room::Instance::kZscaleFieldNumber, false }},
+  { 'R', new RotationCommand{                                  }},
+  { 'c', new ColorCommand{ Room::Instance::kColorFieldNumber   }},
+};
+
+const std::map<char, Command*> kTileParameters = {
+  { 'n', new StringAttributeCommand{
+      "name", Room::Tile::kNameFieldNumber                     }},
+  { 'b', new StringAttributeCommand{
+      "background", Room::Tile::kBackgroundNameFieldNumber     }},
+  { 'P', new CoordinateAttributeCommand{
+      "Position", Room::Tile::kXFieldNumber,
+                  Room::Tile::kYFieldNumber, 0, false          }},
+  { 'X', new SingleAttributeCommand{
+      "X",        Room::Tile::kXFieldNumber, false             }},
+  { 'Y', new SingleAttributeCommand{
+      "Y",        Room::Tile::kYFieldNumber, false             }},
+  { 'p', new CoordinateAttributeCommand{
+      "position", Room::Tile::kXFieldNumber,
+                  Room::Tile::kYFieldNumber, 0, true           }},
+  { 'x', new SingleAttributeCommand{
+      "x",        Room::Tile::kXFieldNumber, true              }},
+  { 'y', new SingleAttributeCommand{
+      "y",        Room::Tile::kYFieldNumber, true              }},
+  { 'O', new CoordinateAttributeCommand{
+      "Offset",   Room::Tile::kXoffsetFieldNumber,
+                  Room::Tile::kYoffsetFieldNumber, 0, false    }},
+  { 'U', new SingleAttributeCommand{
+      "U-coord",  Room::Tile::kXoffsetFieldNumber, false       }},
+  { 'V', new SingleAttributeCommand{
+      "V-coord",  Room::Tile::kYoffsetFieldNumber, false       }},
+  { 'o', new CoordinateAttributeCommand{
+      "offset",   Room::Tile::kXoffsetFieldNumber,
+                  Room::Tile::kYoffsetFieldNumber, 0, true     }},
+  { 'u', new SingleAttributeCommand{
+      "u-coord",  Room::Tile::kXoffsetFieldNumber, true        }},
+  { 'v', new SingleAttributeCommand{
+      "v-coord",  Room::Tile::kYoffsetFieldNumber, true        }},
+  { 'D', new CoordinateAttributeCommand{
+      "Dimensions", Room::Tile::kWidthFieldNumber,
+                    Room::Tile::kHeightFieldNumber, 0, false   }},
+  { 'w', new SingleAttributeCommand{
+      "width",      Room::Tile::kWidthFieldNumber,  false      }},
+  { 'h', new SingleAttributeCommand{
+      "height",     Room::Tile::kHeightFieldNumber, false      }},
+  { 'S', new CoordinateAttributeCommand{
+      "Scale",       Room::Tile::kWidthFieldNumber,
+                     Room::Tile::kHeightFieldNumber, 0, false  }},
+  { 'W', new SingleAttributeCommand{
+      "x-scale (W)", Room::Tile::kXscaleFieldNumber, false     }},
+  { 'H', new SingleAttributeCommand{
+      "y-scale (H)", Room::Tile::kYscaleFieldNumber, false     }},
+  { 'c', new ColorCommand{ Room::Tile::kColorFieldNumber       }},
+};
+
+vector<string> TokenizeSVGD(const string &data) {
+  vector<string> res;
+  for (size_t i = 0; i < data.length();) {
+    const auto io = i++;
+    const char c = data[io];
+    if (isspace(c) || c == ',' || c == ';') {
+      continue;
+    }
+    if (isdigit(c)) {
+      while (i < data.length() && isdigit(data[i])) ++i;
+      if (i < data.length() && data[i] == '.') {
+        while (++i < data.length() && isdigit(data[i]));
+      }
+      res.push_back(data.substr(io, i - io));
+      continue;
+    }
+    if (isalpha(c)) {
+      res.push_back(string(1, c));
+      continue;
+    }
+    if (c == '+' || c == '-') {
+      const string sign(1, c);
+      while (i < data.length() && isspace(data[i])) ++i;
+      const auto io = i;
+      if (i >= data.length() || !isdigit(data[i])) {
+        std::cerr << "Expected numeric literal in SVG-d input (at position "
+                  << i << ')' << std::endl;
+      }
+      while (i < data.length() && isdigit(data[i])) ++i;
+      if (i < data.length() && data[i] == '.') {
+        while (++i < data.length() && isdigit(data[i]));
+      }
+      res.push_back(sign + data.substr(io, i - io));
+      continue;
+    }
+    if (c == '"' || c == '\'') {
+      auto str_i = ReadQuotedString(data, io);
+      res.push_back(str_i.first);
+      i = str_i.second + 1;
+      continue;
+    }
+    std::cerr << "Unexpected character '" << c << "' in SVG-d data" << std::endl;
+  }
+  return res;
 }
 
 // =============================================================================
 // == Construction Logic =======================================================
 // =============================================================================
 
-
 template<typename Entity, typename Simple = Simplify<Entity>>
 Layer<Entity> BuildSVGDLayer(const RepeatedPtrField<Entity> &entities) {
   Layer<Entity> res;
+  res.format = "svg-d";
 
   // Instances which have no uniquely-identifying characteristics and therefore
   // can be lumped into various RLE schemes. Right now, those schemes consist
@@ -440,6 +652,8 @@ Layer<Entity> BuildSVGDLayer(const RepeatedPtrField<Entity> &entities) {
     }
 
     std::vector<Line> lines = ExtractLines(&point_cloud);
+    if (kIncrediblyVerboseDebugOutput)
+      std::cout << "Extracted " << lines.size() << " lines." << std::endl;
     for (const Line &line : lines) {
       layer << separator; separator = "\n";
       layer << SVGDBegin(attribs, *last_attribs);
@@ -468,156 +682,130 @@ Layer<Entity> BuildSVGDLayer(const RepeatedPtrField<Entity> &entities) {
 // =============================================================================
 
 void RepackLayer(string layer_data,
-    protobuf::Message *dest_message, const protobuf::FieldDescriptor *dest_field,
-    char createCMD, const std::map<char, Command>& parameters,
-    const string &error_details) {
+                 protobuf::Message *dest_message,
+                 const protobuf::FieldDescriptor *dest_field,
+                 const protobuf::Message &default_inst,
+                 char create_cmd, const std::map<char, Command*> &commands,
+                 const string &error_details) {
+  // General setup. Used to add repeated fields when encountering create_cmd.
+  const auto *const refl = dest_message->GetReflection();
+  char clone_cmd = create_cmd + 'a' - 'A';
 
-  const google::protobuf::Reflection *refl = dest_message->GetReflection();
+  // This makes it valid to assign stuff before instantiating anything
+  std::unique_ptr<protobuf::Message> sentinel(default_inst.New());
+  protobuf::Message *cur_inst = sentinel.get();
+  const protobuf::Message *prev_inst = cur_inst;
+  
+  // Reflection methods
+  const protobuf::FieldDescriptor
+      *id_field = sentinel->GetDescriptor()->FindFieldByName("id"),
+      *name_field = sentinel->GetDescriptor()->FindFieldByName("name"),
+      *x_field = sentinel->GetDescriptor()->FindFieldByName("x"),
+      *y_field = sentinel->GetDescriptor()->FindFieldByName("y"),
+      *z_field = sentinel->GetDescriptor()->FindFieldByName("z");
+  
+  auto CopyFields = [id_field, name_field](
+      const protobuf::Message *from, protobuf::Message *to) {
+    to->MergeFrom(*from);
+    to->GetReflection()->ClearField(to, id_field);
+    to->GetReflection()->ClearField(to, name_field);
+  };
+  auto CloneInstance = [&](const protobuf::Message *inst, int x, int y, int z) {
+    auto *n = refl->AddMessage(dest_message, dest_field);
+    CopyFields(inst, n);
+    SetProtoField(n, x_field, x);
+    SetProtoField(n, y_field, y);
+    if (z_field) SetProtoField(n, z_field, z);
+  };
 
-  // split at spaces or comma etc
-  std::vector<std::string> tokens = Tokenize(layer_data, " ,\n\t");
+  // Other parse state: Granularity.
+  int gran_x = 1, gran_y = 1, gran_z = 1;
 
-  google::protobuf::Message* currInstance = nullptr;
-  std::vector<google::protobuf::Message*> instances;
-
-  char currentCmd = '\0';
-  std::vector<std::pair<char, std::vector<std::string> > > arguments;
-
-  // Group all our commands into <char, vector<string>> (cmd, args)
-  auto cmdIt = arguments.end();
-  for (unsigned i = 0; i < tokens.size(); ++i) {
-    std::string token = std::string(tokens[i]);
-    if (isCommandToken(token)) {
-      currentCmd = token[0];
-      arguments.emplace_back(currentCmd, std::vector<std::string>());
-      cmdIt = arguments.end() - 1;
-    } else if (cmdIt != arguments.end()) {
-      (*cmdIt).second.emplace_back(token);
-    }
-  }
-
-  // Proccess commands here
-  for (auto cmdPair : arguments) {
-    char cmd = cmdPair.first;
-    std::vector<std::string> args = cmdPair.second;
-
-    auto pit = parameters.find(cmd);
-    bool relative = islower(cmd); //TODO: fix color
-    if (pit == parameters.end()) {
-      // if this command does not have uppercase equivalent
-      // we can still allow a lowercase version for relative
-      pit = parameters.find(cmd = tolower(cmd));
-      if (pit == parameters.end()) {
-        // no upper or lowercase version seems to be supported...
-        std::cerr << "Error: unsupported command \"" << cmd << "\"" << std::endl;
-        if (!error_details.empty()) std::cerr << error_details << std::endl;
-        continue;
-      }
-    }
-    auto sig = (*pit).second;
-    auto pars = sig.field_names;
-
-    // Too few args, continue here
-    if (args.size() < sig.minArgs) {
-      tooFewArgsGiven(cmd, sig.minArgs, error_details);
+  // Tokenize and iterate.
+  auto data = TokenizeSVGD(layer_data);
+  for (size_t i = 0; i < data.size(); ++i) {
+    const string &tk = data[i];
+    if (tk.length() != 1 || !isalpha(tk[0])) {
+      std::cerr << "Unexpected token \"" << tk << "\" (token " << i << ")"
+                << std::endl;
+      if (!error_details.empty()) std::cerr << error_details << std::endl;
       continue;
     }
 
-    // Special case for create cmds
-    if (tolower(cmd) == tolower(createCMD)) {
-        currInstance = refl->AddMessage(dest_message, dest_field);
-
-        if (cmd == tolower(createCMD)) {
-          if (!instances.empty()) {
-            currInstance->CopyFrom(*instances.back());
-            const google::protobuf::Descriptor *instDesc = currInstance->GetDescriptor();
-            const google::protobuf::Reflection *instRefl = currInstance->GetReflection();
-
-            // Don't copy this crap
-            for (const std::string& field_name : {"id", "name", "code"}) {
-              const google::protobuf::FieldDescriptor *instField = instDesc->FindFieldByName(field_name);
-              if (instField != nullptr)
-                instRefl->ClearField(currInstance, instField);
-            }
-          }
-          else
-            std::cerr << "Error: \"" << cmd << "\" called but there exists no previous instance to copy the attributes from" << std::endl;
-        }
-
-        instances.push_back(currInstance);
+    const char cmdch = tk[0];
+    auto fnd = commands.find(cmdch);
+    if (fnd != commands.end()) {
+      const Command *cmd = fnd->second;
+      i += cmd->handle(data, i, cur_inst);
+      continue;
+    }
+    
+    if (cmdch == create_cmd || cmdch == clone_cmd) {
+      prev_inst = cur_inst;
+      cur_inst = refl->AddMessage(dest_message, dest_field);
+      if (cmdch == clone_cmd) CopyFields(prev_inst, cur_inst);
+      if (i + 1 < data.size() && isdigit(*data[i + 1].c_str())) {
+        int id = atoi(data[i + 1].c_str());
+        cur_inst->GetReflection()->SetInt32(cur_inst, id_field, id);
+        ++i;
+      }
+      continue;
     }
 
     // Other special cases
-    switch(cmd) {
-      case 'l': {
-        const protobuf::Descriptor *instDesc = currInstance->GetDescriptor();
-        const protobuf::Reflection *instRefl = currInstance->GetReflection();
-        const protobuf::FieldDescriptor
-            *xField = instDesc->FindFieldByName("x"),
-            *yField = instDesc->FindFieldByName("y"),
-            *xScaleField = instDesc->FindFieldByName("xscale"),
-            *yScaleField = instDesc->FindFieldByName("yscale"),
-            *widthField = instDesc->FindFieldByName("width"),
-            *heightField = instDesc->FindFieldByName("height");
-        double xfrom = instRefl->GetDouble(*currInstance, xField),
-               yfrom = instRefl->GetDouble(*currInstance, yField),
-               // TODO: xscale and yscale need defaults of 1 not 0
-               width = instRefl->GetUInt32(*currInstance, widthField),   // * instRefl->GetDouble(*currInstance, xScaleField),
-               height = instRefl->GetUInt32(*currInstance, heightField), // * instRefl->GetDouble(*currInstance, yScaleField),
-               xto = stoi(args[0]),
-               yto = (args.size() > 1) ? stoi(args[1]) : yfrom,
-               dx = xto - xfrom,
-               dy = yto - yfrom;
-
-        // start at plus width because the first tile is already there
-        // we're just copying from it to complete the rest of the line
-        for (double x = xfrom + width; x <= xto; x += width) {
-          double y = yfrom + dy * (x - xfrom) / dx;
-          std::cerr << "bing " << x << " " << y << std::endl;
-
-          currInstance = refl->AddMessage(dest_message, dest_field);
-          currInstance->CopyFrom(*instances.back());
-          instances.push_back(currInstance);
-
-          instRefl = currInstance->GetReflection();
-          instRefl->SetDouble(currInstance, xField, x);
-          instRefl->SetDouble(currInstance, yField, y);
+    switch(cmdch) {
+      case 'l': case 'f': {
+        auto coords = ReadValues("line", data, i + 1, 2, z_field ? 3 : 2);
+        if (coords.size() < 2) continue;
+        double x = GetNumericProtoField(*cur_inst, x_field);
+        double y = GetNumericProtoField(*cur_inst, y_field);
+        double z = z_field ? GetNumericProtoField(*cur_inst, y_field) : 0;
+        double xto = coords[0];
+        double yto = coords[1];
+        double zto = coords.size() > 2 ? coords[2] : z;
+        if (x > xto) std::swap(x, xto);
+        if (y > yto) std::swap(y, yto);
+        if (z > zto) std::swap(z, zto);
+        if (cmdch == 'l') {
+          while ((gran_x && (x += gran_x) <= xto)
+              || (gran_y && (y += gran_y) <= yto)
+              || (gran_z && (z += gran_z) <= zto)) {
+            CloneInstance(cur_inst, x, y, z);
+          }
+        } else {
+          for (double xi = x; xi <= xto; xi += gran_x) {
+            for (double yi = y; yi <= yto; yi += gran_y) {
+              for (double zi = z; zi <= zto; zi += gran_z) {
+                CloneInstance(cur_inst, xi, yi, zi);
+                if (!gran_z) break;
+              }
+              if (!gran_y) break;
+            }
+            if (!gran_x) break;
+          }
         }
         continue;
       }
-      case 'f':
+      case 'g': {
+        auto grans = ReadValues("granularity", data, i + 1, 2, z_field ? 3 : 2);
+        if (grans.size()) {
+          gran_x = grans[0];
+          if (gran_x < 0) gran_x = -gran_x;
+          if (grans.size() > 1) {
+            gran_y = grans[1];
+            if (gran_y < 0) gran_x = -gran_y;
+            if (grans.size() > 2) {
+              gran_y = grans[2];
+              if (gran_z < 0) gran_z = -gran_z;
+            }
+          }
+        }
         continue;
-      case 'g':
-        continue;
-    }
-
-    // General case for rest of command args
-    for (size_t i = 0; i < args.size(); ++i) {
-      if (i < pars.size()) {
-        std::string field_name = pars[i];
-        std::string arg = args[i];
-
-        const google::protobuf::Descriptor *desc = currInstance->GetDescriptor();
-        const google::protobuf::Reflection *refl = currInstance->GetReflection();
-        const google::protobuf::FieldDescriptor *field = desc->FindFieldByName(field_name);
-
-        // allow all integer parameters to have hexadecimal formatted arguments
-        switch (field->cpp_type()) {
-          case CppType::CPPTYPE_INT32:
-          case CppType::CPPTYPE_INT64:
-          case CppType::CPPTYPE_UINT32:
-          case CppType::CPPTYPE_UINT64:
-            arg = escape_hex(arg);
-            break;
-          default:
-            break;
-        };
-
-        SetProtoField(refl, currInstance, field, unquote(arg), relative);
-      } else {
-        tooManyArgsGiven(cmd, pars.size(), args, i, error_details);
       }
+      default: ;
     }
+    std::cerr << "Error: unsupported command \"" << cmdch << "\"" << std::endl;
+    if (!error_details.empty()) std::cerr << error_details << std::endl;
   }
 }
 
@@ -642,7 +830,8 @@ void ParseInstances(
     return;
   }
   return RepackLayer(layer_data, dest_message,
-                     instances, 'I', kInstanceParameters, error_details);
+                     instances, Room::Instance::default_instance(),
+                     'I', kInstanceParameters, error_details);
 }
 
 void ParseTiles(
@@ -654,7 +843,8 @@ void ParseTiles(
     return;
   }
   return RepackLayer(layer_data, dest_message,
-                     tiles, 'T', kTileParameters, error_details);
+                     tiles, Room::Tile::default_instance(),
+                     'T', kTileParameters, error_details);
 }
 
 

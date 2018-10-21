@@ -147,19 +147,71 @@ int32_t ColorFromStr(string color) {
   return -1;
 }
 
-std::vector<std::string> Tokenize(
-    const std::string& str, const std::string& delimiters) {
-  std::vector<std::string> tokens;
-  std::size_t lastPos = str.find_first_not_of(delimiters, 0);
-  std::size_t pos = str.find_first_of(delimiters, lastPos);
+int ParseHex(const std::string &hex) {
+  int res;
+  std::stringstream ss;
+  ss << std::hex << hex;
+  ss >> res;
+  return res;
+}
 
-  while (pos != std::string::npos || lastPos != std::string::npos) {
-      tokens.push_back(str.substr(lastPos, pos - lastPos));
-      lastPos = str.find_first_not_of(delimiters, pos);
-      pos = str.find_first_of(delimiters, lastPos);
+std::pair<string, size_t> ReadQuotedString(const string &data, size_t i) {
+  std::string str;
+  const char quote_c = data[i++];
+  while (i < data.length() && data[i] != quote_c) {
+    if (data[i] != '\\') {
+      str.append(1, data[i++]);
+      continue;
+    }
+    
+    switch (const char e = data[++i]) {
+      case 'b':  str.append(1, '\b'); ++i; continue;
+      case 'f':  str.append(1, '\f'); ++i; continue;
+      case 'n':  str.append(1, '\n'); ++i; continue;
+      case 'r':  str.append(1, '\r'); ++i; continue;
+      case 't':  str.append(1, '\t'); ++i; continue;
+      case 'v':  str.append(1, '\v'); ++i; continue;
+      case '\"': str.append(1, '\"'); ++i; continue;
+      case '\'': str.append(1, '\''); ++i; continue;
+      case '\\': str.append(1, '\\'); ++i; continue;
+      
+      case '0': case '1': case '2': case '3':
+      case '4': case '5': case '6': case '7': {
+        int oct = e - '0';
+        if (++i < data.length() && data[i] >= '0' && data[i] <= '7') {
+          oct = oct * 8 + data[i] - '0';
+          if (++i < data.length() && data[i] >= '0' && data[i] <= '7'
+              && oct * 8 < 256) {
+            oct = oct * 8 + data[i] - '0';
+            ++i;
+          }
+        }
+        str.append(1, char(oct));
+        continue;
+      }
+      
+      case 'x': {
+        if (++i >= data.length() || !IsHex(data[i])) {
+          std::cerr << "Expected hex data following \\x escape" << std::endl;
+          str += "\\x";
+          continue;
+        }
+        char n[3] = {0, 0, 0};
+        n[0] = data[i];
+        if (++i < data.length() && IsHex(data[i])) n[1] = data[i++];
+        str.append(1, ParseHex(n));
+        continue;
+      }
+      
+      // TODO: Handle '\u123ABC'
+      default: {
+        std::cerr << "Unknown escape sequence '\\" << e << '\'' << std::endl;
+        str.append(1, '\\');
+        str.append(1, e);
+      }
+    }
   }
-
-  return tokens;
+  return std::make_pair(str, i);
 }
 
 }  // namespace serialization
