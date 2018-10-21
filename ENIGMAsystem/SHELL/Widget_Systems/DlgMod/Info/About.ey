@@ -7,6 +7,6 @@ Build-Platforms: Windows, SDL
 Represents:
 Description: Create native widgets using "DialogModule.dll" on Windows, which can be downloaded separately from the official repository for "Dialog Module". Use the DLL in the GitHub folder whose named after the target architecture of your executable, as the DLL is built for both x86 and x64. You will need to copy this DLL manually to the same directory as your game's included files, and will also need to distribute it likewise with your game executable, preferably in a ZIP archive.
 
-Official repository: 
+Official Repository: 
 https://github.com/time-killer-games/DialogModule
 Author: Samuel Venable
