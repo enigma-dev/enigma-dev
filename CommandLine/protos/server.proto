@@ -83,5 +83,6 @@ message SystemInfo {
   optional string name = 1; ///< The human-readable name of the system. e.g, ("Direct3D 9.0", "DirectSound", or "Windows")
   optional string id = 2; ///< The internal identifier used by the buildsystems. e.g, ("Direct3D9", "DirectSound", or "Win32")
   optional string description = 3; ///< A friendly description of the system and what it does.
-  optional string target = 4; ///< The target-platform of the system. Only used by compiler descriptions presently.
+  optional string author = 4; ///< Name of the system author or maintainer (e.g, "John Doe")
+  optional string target = 5; ///< The target-platform of the system. Only used by compiler descriptions presently.
 }
