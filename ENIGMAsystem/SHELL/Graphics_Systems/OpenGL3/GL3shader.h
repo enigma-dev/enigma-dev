@@ -19,12 +19,19 @@
 #ifndef GL_SHADER_H
 #define GL_SHADER_H
 
-#include "../General/OpenGLHeaders.h"
+#include "GLSLshader.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
 #include <string>
 using std::string;
 
 namespace enigma
 {
+  extern unsigned char currentcolor[4];
+  extern unsigned bound_vbo;
+  extern unsigned bound_vboi;
+  extern unsigned bound_shader;
+  extern vector<enigma::ShaderProgram*> shaderprograms;
+
   string getVertexShaderPrefix();
   string getFragmentShaderPrefix();
   string getDefaultFragmentShader();
@@ -42,7 +49,7 @@ namespace enigma
 
   void glsl_attribute_enable_all_internal(bool enable);
   void glsl_attribute_enable_internal(int location, bool enable);
-  void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, int offset);
+  void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, unsigned offset);
 }
 
 namespace enigma_user
@@ -119,7 +126,7 @@ void glsl_uniform_matrix4fv(int location, int size, const float *matrix);
 
 void glsl_attribute_enable_all(bool enable);
 void glsl_attribute_enable(int location, bool enable);
-void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset);
+void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, unsigned offset);
 
 // Wrap our abstracted version to the GameMaker version
 #define shader_set            glsl_program_set

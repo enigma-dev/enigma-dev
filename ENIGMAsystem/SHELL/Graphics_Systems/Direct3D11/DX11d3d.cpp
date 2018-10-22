@@ -14,60 +14,65 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
 #include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
-#include "Graphics_Systems/General/GSmodel.h"
-#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Platforms/platforms_mandatory.h"
 
 namespace enigma {
-  bool d3dMode = false;
-  bool d3dHidden = false;
-  bool d3dZWriteEnable = true;
-  int d3dCulling = 0;
+
+bool d3dMode = false;
+bool d3dHidden = false;
+bool d3dZWriteEnable = true;
+int d3dCulling = 0;
+
+void graphics_set_matrix(int type) {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
 }
+
+} // namespace enigma
 
 namespace enigma_user
 {
 
-void d3d_depth_clear() {
-	// Clear the depth buffer.
-	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-}
-
-void d3d_depth_clear_value(float value) {
+void d3d_clear_depth(double value) {
+    draw_batch_flush(batch_flush_deferred);
 	// Clear the depth buffer.
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, value, 0);
 }
 
 void d3d_start()
 {
+    draw_batch_flush(batch_flush_deferred);
 	enigma::d3dMode = true;
+    enigma::d3dPerspective = true;
 	enigma::d3dCulling =  rs_none;
 	d3d_set_hidden(false);
 }
 
 void d3d_end()
 {
+    draw_batch_flush(batch_flush_deferred);
 	enigma::d3dMode = false;
+    enigma::d3dPerspective = false;
 	enigma::d3dCulling = rs_none;
 	d3d_set_hidden(false);
 }
 
 void d3d_set_hidden(bool enable)
 {
-
+    draw_batch_flush(batch_flush_deferred);
     enigma::d3dHidden = enable;
 }
 
 void d3d_set_zwriteenable(bool enable)
 {
+    draw_batch_flush(batch_flush_deferred);
 	enigma::d3dZWriteEnable = enable;
-
 }
 
 void d3d_set_lighting(bool enable)
@@ -195,11 +200,6 @@ class d3d_lights
     d3d_lights() {}
     ~d3d_lights() {}
 
-    void light_update_positions()
-    {
-
-    }
-
     bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
     {
 
@@ -265,13 +265,6 @@ bool d3d_light_enable(int id, bool enable)
     return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
 }
 
-}
-
-namespace enigma {
-    void d3d_light_update_positions()
-    {
-        d3d_lighting.light_update_positions();
-    }
 }
 
 // ***** LIGHTS END *****

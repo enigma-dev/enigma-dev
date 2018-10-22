@@ -17,8 +17,13 @@
 
 #ifndef ENIGMA_GSSURFACE_H
 #define ENIGMA_GSSURFACE_H
-#include "Universal_System/scalar.h"
+
 #include "GScolors.h"
+
+#include "Universal_System/scalar.h"
+
+#include <string>
+using std::string;
 
 namespace enigma_user
 {

@@ -16,40 +16,33 @@
 **/
 
 #include "Bridges/General/DX9Context.h"
+#include "DX9SurfaceStruct.h"
+#include "DX9TextureStruct.h"
 #include "Direct3D9Headers.h"
-using namespace std;
-#include <cstddef>
-#include <iostream>
-#include <math.h>
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
-
-#include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
-#include "Graphics_Systems/General/GScolor_macros.h"
+#include <iostream>
+#include <cstddef>
+#include <math.h>
+#include <stdio.h> //for file writing (surface_save)
+
+using namespace std;
+
+namespace enigma {
+
+vector<Surface*> Surfaces(0);
+D3DCOLOR get_currentcolor();
+
+} // namespace enigma
 
 namespace enigma_user {
-extern int room_width, room_height/*, sprite_idmax*/;
-}
-
-#include "../General/GSprimitives.h"
-#include "../General/GSsurface.h"
-#include "DX9SurfaceStruct.h"
-#include "DX9TextureStruct.h"
-
-namespace enigma
-{
-  vector<Surface*> Surfaces(0);
-
-  D3DCOLOR get_currentcolor();
-}
-
-
-namespace enigma_user
-{
 
 bool surface_is_supported()
 {
@@ -57,7 +50,7 @@ bool surface_is_supported()
   return true;
 }
 
-int surface_create(int width, int height, bool depthbuffer)
+int surface_create(int width, int height, bool depthbuffer, bool, bool)
 {
   LPDIRECT3DTEXTURE9 texture = NULL;
   d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
@@ -90,6 +83,8 @@ LPDIRECT3DSURFACE9 pBackBuffer;
 
 void surface_set_target(int id)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surface(surface,id);
   d3dmgr->device->GetRenderTarget(0, &pBackBuffer);
   d3dmgr->device->SetRenderTarget(0, surface->surf);
@@ -102,8 +97,9 @@ void surface_set_target(int id)
 
 void surface_reset_target()
 {
+  draw_batch_flush(batch_flush_deferred);
+
   //d3dmgr->ResetRenderTarget();
-  d3dmgr->EndShapesBatching();
   d3dmgr->device->SetRenderTarget(0, pBackBuffer);
   pBackBuffer->Release();
   pBackBuffer = NULL;
@@ -149,8 +145,8 @@ int surface_getpixel(int id, int x, int y)
   if (x < 0) x = 0;
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
+  draw_batch_flush(batch_flush_deferred);
 
-  d3dmgr->EndShapesBatching();
   LPDIRECT3DSURFACE9 pBuffer = surface->surf;
   d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
   D3DSURFACE_DESC desc;
@@ -174,8 +170,8 @@ int surface_getpixel_ext(int id, int x, int y)
   if (x < 0) x = 0;
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
+  draw_batch_flush(batch_flush_deferred);
 
-  d3dmgr->EndShapesBatching();
   LPDIRECT3DSURFACE9 pBuffer = surface->surf;
   d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
   D3DSURFACE_DESC desc;
@@ -199,8 +195,8 @@ int surface_getpixel_alpha(int id, int x, int y)
   if (x < 0) x = 0;
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
+  draw_batch_flush(batch_flush_deferred);
 
-  d3dmgr->EndShapesBatching();
   LPDIRECT3DSURFACE9 pBuffer = surface->surf;
   d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
   D3DSURFACE_DESC desc;
@@ -234,10 +230,11 @@ namespace enigma_user
 
 int surface_save(int id, string filename)
 {
+  draw_batch_flush(batch_flush_deferred);
+
   get_surfacev(surface,id,-1);
   string ext = enigma::image_get_format(filename);
 
-  d3dmgr->EndShapesBatching();
   LPDIRECT3DSURFACE9 pDestBuffer;
   D3DSURFACE_DESC desc;
   surface->surf->GetDesc(&desc);

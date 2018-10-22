@@ -1,0 +1,2 @@
+override CXXFLAGS += -DENIGMA_GL_MAJOR_VERSION=1 -DENIGMA_GL_MINOR_VERSION=1
+SOURCES += $(wildcard Bridges/SDL-OpenGL/*.cpp)

@@ -19,6 +19,7 @@
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include <math.h>
 
 namespace enigma {
@@ -30,12 +31,13 @@ namespace enigma_user
 
 void draw_clear_alpha(int col, float alpha)
 {
+	draw_batch_flush(batch_flush_deferred);
 	float color[4];
 
 	// Setup the color to clear the buffer to.
-	color[0] = COL_GET_R(col)/255.0;
-	color[1] = COL_GET_G(col)/255.0;
-	color[2] = COL_GET_B(col)/255.0;
+	color[0] = COL_GET_Rf(col);
+	color[1] = COL_GET_Gf(col);
+	color[2] = COL_GET_Bf(col);
 	color[3] = alpha;
 
 	// Clear the back buffer.
@@ -44,12 +46,13 @@ void draw_clear_alpha(int col, float alpha)
 
 void draw_clear(int col)
 {
+	draw_batch_flush(batch_flush_deferred);
 	float color[4];
 
 	// Setup the color to clear the buffer to.
-	color[0] = COL_GET_R(col)/255.0;
-	color[1] = COL_GET_G(col)/255.0;
-	color[2] = COL_GET_B(col)/255.0;
+	color[0] = COL_GET_Rf(col);
+	color[1] = COL_GET_Gf(col);
+	color[2] = COL_GET_Bf(col);
 	color[3] = 1;
 
 	// Clear the back buffer.
@@ -85,6 +88,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
 {
-
+	draw_batch_flush(batch_flush_deferred);
 }
+
 }

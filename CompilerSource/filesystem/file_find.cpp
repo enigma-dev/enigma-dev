@@ -40,7 +40,7 @@ using namespace std;
 
   static bool ff_matches() {
     return found.dwFileAttributes == FILE_ATTRIBUTE_NORMAL
-        || (ff_attribs ^ found.dwFileAttributes);
+        || (ff_attribs & found.dwFileAttributes);
   }
 
   string file_find_first(string name,int attributes) 

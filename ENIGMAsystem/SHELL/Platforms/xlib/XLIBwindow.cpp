@@ -53,7 +53,6 @@ Display* disp;
 Screen* screen;
 Window win;
 Atom wm_delwin;
-bool game_window_focused = true;
 
 void set_net_wm_pid(Window window) {
   pid_t pid = getpid();
@@ -155,7 +154,7 @@ int window_get_visible() {
   return wa.map_state != IsUnmapped;
 }
 
-void window_set_caption(string caption) { XStoreName(disp, win, caption.c_str()); }
+void window_set_caption(const string &caption) { XStoreName(disp, win, caption.c_str()); }
 
 string window_get_caption() {
   char* caption;

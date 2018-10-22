@@ -26,6 +26,8 @@
  **                                                                              **
  \********************************************************************************/
 
+#include "Universal_System/random.h"
+
 #include <float.h>
 #include <algorithm>
 #include <map>
@@ -51,6 +53,12 @@ static inline int minv(int a, int b) { return (a < b) ? a : b; }
 template<typename t> bool tequal(t v1, t v2) { return v1 == v2; }
 template<> bool tequal(float v1, float v2)   { return fequal(v1, v2); }
 template<> bool tequal(double v1, double v2) { return fequal(v1, v2); }
+
+namespace enigma {
+  static inline int random_integer(int x) {
+    return int(enigma_user::random(x));
+  }
+}
 
 template <typename t>
 class grid
@@ -466,7 +474,7 @@ class grid
     }
     void shuffle()
     {
-        random_shuffle(grid_array, grid_array + (xgrid*ygrid - 1));
+        random_shuffle(grid_array, grid_array + (xgrid*ygrid - 1), enigma::random_integer);
     }
 };
 
@@ -1277,7 +1285,7 @@ void ds_list_sort(const unsigned int id, const bool ascend)
 void ds_list_shuffle(const unsigned int id)
 {
   //shuffles the values in the list into a random order
-  random_shuffle(ds_lists[id].begin(), ds_lists[id].end());
+  random_shuffle(ds_lists[id].begin(), ds_lists[id].end(), enigma::random_integer);
 }
 
 bool ds_list_exists(const unsigned int id)

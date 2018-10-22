@@ -35,16 +35,6 @@ namespace enigma
 
   void graphicssystem_initialize()
   {
-    #ifdef DEBUG_MODE
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
-    {
-      std::cout<<"GLEW ERROR!"<<std::endl;
-    }
-    #else
-    glewInit();
-    #endif
-
     //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
     glMatrixMode(GL_PROJECTION);
     glClearColor(0,0,0,0);

@@ -26,8 +26,8 @@ namespace enigma {
   extern bool d3dMode;
   extern bool d3dHidden;
   extern bool d3dZWriteEnable;
+  extern bool d3dPerspective;
   extern int d3dCulling;
-  void d3d_light_update_positions();
 }
 
 // ***** RENDER STATE CONSTANTS *****
@@ -91,8 +91,7 @@ namespace enigma_user {
   namespace enigma_user
   {
 
-  void d3d_clear_depth();
-  void d3d_depth_clear_value(float value);
+  void d3d_clear_depth(double value=1.0L);
   void d3d_start();
   void d3d_end();
   void d3d_set_hidden(bool enable);

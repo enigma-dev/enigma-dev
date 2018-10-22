@@ -18,26 +18,31 @@
 #ifndef DIRECTX11CONTEXTMANAGER
 #define DIRECTX11CONTEXTMANAGER
 
+#include "Graphics_Systems/Direct3D11/Direct3D11Headers.h"
+#include "Graphics_Systems/General/GSmodel.h"
+#include "Widget_Systems/widgets_mandatory.h"
+
 #include <windows.h>
 #include <windowsx.h>
 #include <dxgi.h>
 #include <d3dcommon.h>
 #include <d3d11.h>
-#include "Graphics_Systems/Direct3D11/Direct3D11Headers.h"
-#include "Graphics_Systems/General/GSmodel.h"
-#include "Platforms/Win32/WINDOWSmain.h"
-using namespace enigma_user;
 
+#include <sstream>
+#include <string.h>
 #include <vector>
 #include <map>
+
+using namespace enigma_user;
+
+using std::string;
+using std::stringstream;
 using std::vector;
 using std::map;
 
-#include "Widget_Systems/widgets_mandatory.h"
-#include <sstream>
-#include <string.h>
-using std::string;
-using std::stringstream;
+namespace enigma {
+	extern HWND hWnd;
+}
 
 extern bool m_vsync_enabled;
 extern int m_videoCardMemory;
@@ -56,7 +61,6 @@ extern ID3D11RasterizerState* m_rasterState;
 class ContextManager {
 
 float last_depth;
-int last_stride;
 bool hasdrawn;
 int shapes_d3d_model;
 int shapes_d3d_texture;
@@ -69,7 +73,6 @@ ContextManager() {
 	hasdrawn = false;
 	shapes_d3d_model = -1;
 	shapes_d3d_texture = -1;
-	last_stride = -1;
 	last_depth = 0.0f;
 }
 
@@ -103,33 +106,6 @@ void RestoreState() {
 
 int GetShapesModel() {
 	return shapes_d3d_model;
-}
-
-void BeginShapesBatching(int texId) {
-	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(true);
-		last_stride = -1;
-	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
-		last_stride = -1;
-		if (!hasdrawn) {
-			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-			d3d_model_clear(shapes_d3d_model);
-		}
-	} else {
-		last_stride = d3d_model_get_stride(shapes_d3d_model);
-	}
-	hasdrawn = false;
-	shapes_d3d_texture = texId;
-}
-
-void EndShapesBatching() {
-	last_depth -= 1;
-	if (hasdrawn || shapes_d3d_model == -1) { return; }
-	hasdrawn = true;
-	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-	d3d_model_clear(shapes_d3d_model);
-	shapes_d3d_texture = -1;
-	last_stride = -1;
 }
 
 };

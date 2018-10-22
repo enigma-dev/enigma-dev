@@ -19,6 +19,8 @@
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+
 #include <math.h>
 
 namespace enigma {
@@ -33,11 +35,13 @@ namespace enigma_user
 
 void draw_clear_alpha(int col, float alpha)
 {
-	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_COLORVALUE(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), alpha), 1.0f, 0);
+	draw_batch_flush(batch_flush_deferred);
+	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), CLAMP_ALPHA(alpha)), 1.0f, 0);
 }
 
 void draw_clear(int col)
 {
+	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col)), 1.0f, 0);
 }
 
@@ -70,6 +74,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
 {
+	draw_batch_flush(batch_flush_deferred);
 	DWORD flags = NULL;
 	if (red) { flags |= D3DCOLORWRITEENABLE_RED; }
 	if (green) { flags |= D3DCOLORWRITEENABLE_GREEN; }

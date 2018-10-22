@@ -41,7 +41,6 @@ using namespace std;
 #include <algorithm>
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 #include "Graphics_Systems/General/GSprimitives.h"
-#include "../General/GSmath.h"
 #include "../General/GSbackground.h"
 #include "../General/GStextures.h"
 #include "../General/GStiles.h"
@@ -71,12 +70,8 @@ using namespace std;
 //the GPU (such as surfaces) and as such have no business in a headless mode
 namespace enigma
 {
-	void d3d_light_update_positions(){}
 
 	void graphicssystem_initialize(){}
-	void load_tiles(){}
-	void delete_tiles(){}
-	void rebuild_tile_layer(int layer_depth){}
 
 	int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap){return -1;}
 	int graphics_duplicate_texture(int tex, bool mipmap){return -1;}
@@ -86,9 +81,15 @@ namespace enigma
 	void graphics_delete_texture(int texid){}
 	unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight){return NULL;}
 
+	void graphics_set_matrix(int type) {}
+
 	void graphics_delete_vertex_buffer_peer(int buffer) {}
+	void graphics_delete_index_buffer_peer(int buffer) {}
 
 	bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles){return false;}
+
+	void scene_begin() {}
+	void scene_end() {}
 }
 
 namespace enigma_user
@@ -97,7 +98,8 @@ namespace enigma_user
 
 	void vertex_argb(int buffer, unsigned argb) {}
 	void vertex_color(int buffer, int color, double alpha) {}
-	void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {}
+	void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned vertex_start, unsigned vertex_count) {}
+	void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {}
 
 	int texture_add(string filename, bool mipmap){return -1;}
 	void texture_save(int texid, string fname){}
@@ -125,7 +127,7 @@ namespace enigma_user
 	void texture_anisotropy_filter(int sampler, gs_scalar levels){}
 
 	bool surface_is_supported(){return false;}
-	int surface_create(int width, int height, bool depthbuffer){return -1;}
+	int surface_create(int width, int height, bool depthbuffer, bool, bool){return -1;}
 	int surface_create_msaa(int width, int height, int samples){return -1;}
 	void surface_set_target(int id){}
 	void surface_reset_target(void){}
@@ -197,60 +199,12 @@ namespace enigma_user
 	extern int window_get_region_width();
 	extern int window_get_region_height();
 
-	void screen_redraw(){}
 	void screen_init(){}
 	int screen_save(string filename){return -1;}
 	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h){return -1;}
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 	void display_set_gui_size(unsigned int width, unsigned int height){}
-	unsigned int display_get_gui_width(){return 0;}
-	unsigned int display_get_gui_height(){return 0;}
 
-	void draw_primitive_begin(int kind){}
-	void draw_primitive_begin_texture(int kind, int tex){}
-	void draw_primitive_end(){}
-	void draw_vertex(gs_scalar x, gs_scalar y){}
-	void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha){}
-	void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty){}
-	void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha){}
-
-	void d3d_primitive_begin(int kind){}
-	void d3d_primitive_begin_texture(int kind, int texId){}
-	void d3d_primitive_end(){}
-	void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z){}
-	void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha){}
-	void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty){}
-	void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha){}
-	void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz){}
-	void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int color, double alpha){}
-	void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty){}
-	void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha){}
-	void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed){}
-	void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep){}
-	void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep){}
-	void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps){}
-	void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps){}
-	void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps){}
-	void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps){}
-	void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius){}
-
-
-	void d3d_model_part_draw(int id, int vertex_start, int vertex_count){}
-	void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vertex_start, int vertex_count){}
-	void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count){}
-	void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_start, int vertex_count){}
-	void d3d_model_draw(int id){}
-	void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z){}
-	void d3d_model_draw(int id, int texId){}
-	void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId){}
-
-	void d3d_set_perspective(bool enable){}
-	void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup){}
-	void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar){}
-	void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle){}
-	void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle){}
-
-	void d3d_transform_force_update(){}
 	void d3d_set_lighting(bool enable){}
 
 	void d3d_set_fog(bool enable, int color, double start, double end){}
@@ -267,7 +221,6 @@ namespace enigma_user
 	void d3d_set_point_size(float value){}
 	void d3d_set_depth_operator(int mode){}
 	void d3d_set_depth(double dep){}
-	void d3d_clear_depth(){}
 	void d3d_set_shading(bool smooth){}
 	void d3d_set_clip_plane(bool enable){}
 

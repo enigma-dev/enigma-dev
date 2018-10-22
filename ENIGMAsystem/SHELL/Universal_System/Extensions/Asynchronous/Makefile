@@ -1,1 +1,1 @@
-SOURCES += $(wildcard Universal_System/Extensions/Asynchronous/*.cpp)
+SOURCES += Universal_System/Extensions/Asynchronous/ASYNCdialog.cpp

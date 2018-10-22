@@ -3,6 +3,7 @@
 #endif
 
 #include "Server.hpp"
+#include "eyaml/eyaml.h"
 
 #include "server.grpc.pb.h"
 
@@ -11,6 +12,8 @@
 #include <grpc++/server_builder.h>
 #include <grpc++/server_context.h>
 
+#include <boost/filesystem.hpp>
+
 #include <memory>
 
 using namespace grpc;
@@ -18,7 +21,7 @@ using namespace buffers;
 
 class CompilerServiceImpl final : public Compiler::Service {
   public:
-  explicit CompilerServiceImpl(EnigmaPlugin& plugin): plugin(plugin) {}
+  explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options): plugin(plugin), options(options) {}
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
     plugin.BuildGame(const_cast<buffers::Game*>(&request->game()), emode_run, request->name().c_str());
@@ -31,14 +34,16 @@ class CompilerServiceImpl final : public Compiler::Service {
 
   Status GetResources(ServerContext* /*context*/, const Empty* /*request*/, ServerWriter<Resource>* writer) override {
     const char* raw = plugin.FirstResource();
-    while (raw != nullptr) {
+    while (!plugin.ResourcesAtEnd()) {
       Resource resource;
 
       resource.set_name(raw);
       resource.set_is_function(plugin.ResourceIsFunction());
-      resource.set_arg_count_min(plugin.ResourceArgCountMin());
-      resource.set_arg_count_max(plugin.ResourceArgCountMax());
-      resource.set_overload_count(plugin.ResourceOverloadCount());
+      if (resource.is_function()) {
+        resource.set_arg_count_min(plugin.ResourceArgCountMin());
+        resource.set_arg_count_max(plugin.ResourceArgCountMax());
+        resource.set_overload_count(plugin.ResourceOverloadCount());
+      }
       resource.set_is_type_name(plugin.ResourceIsTypeName());
       resource.set_is_global(plugin.ResourceIsGlobal());
 
@@ -59,6 +64,53 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
+  Status GetSystems(ServerContext* /*context*/, const Empty* /*request*/, ServerWriter<SystemType>* writer) override {
+    auto _api = this->options.GetAPI();
+
+    for (auto systems : _api) {
+      SystemType system;
+
+      system.set_name(systems.first);
+
+      for (auto&& subsystem : systems.second) {
+        SystemInfo* subInfo = system.add_subsystems();
+
+        std::ifstream ifabout(subsystem, std::ios_base::in);
+        if (!ifabout.is_open()) continue;
+
+        ey_data about = parse_eyaml(ifabout, subsystem);
+
+        std::string name = about.get("name");
+        std::string id = about.get("identifier");
+        std::string desc = about.get("description");
+        std::string author = about.get("author");
+        std::string target = about.get("target-platform");
+
+        if (id.empty())
+          id = about.get("id"); // allow alias
+        if (id.empty()) {
+          // compilers use filename minus ext as id
+          boost::filesystem::path ey(subsystem);
+          id = ey.stem().string();
+        }
+
+        // allow author alias used by compiler descriptors
+        if (author.empty())
+          author = about.get("maintainer");
+
+        subInfo->set_name(name);
+        subInfo->set_id(id);
+        subInfo->set_description(desc);
+        subInfo->set_author(author);
+        subInfo->set_target(target);
+      }
+
+      writer->Write(system);
+    }
+
+    return Status::OK;
+  }
+
   SyntaxError GetSyntaxError(syntax_error* err) {
     SyntaxError error;
     error.set_message(err->err_str);
@@ -74,6 +126,13 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
+  Status SetCurrentConfig(ServerContext* /*context*/, const SetCurrentConfigRequest* request, Empty* reply) override {
+    std::string yaml = this->options.APIyaml(&request->settings());
+    syntax_error* err = plugin.SetDefinitions("", yaml.c_str());
+    reply = new Empty();
+    return Status::OK;
+  }
+
   Status SyntaxCheck(ServerContext* /*context*/, const SyntaxCheckRequest* request, SyntaxError* reply) override {
     vector<const char*> script_names;
     script_names.reserve(request->script_names().size());
@@ -85,10 +144,11 @@ class CompilerServiceImpl final : public Compiler::Service {
 
   private:
   EnigmaPlugin& plugin;
+  OptionsParser& options;
 };
 
-int RunServer(const std::string& address, EnigmaPlugin& plugin) {
-  CompilerServiceImpl service(plugin);
+int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &options) {
+  CompilerServiceImpl service(plugin, options);
 
   ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());

@@ -43,13 +43,13 @@ namespace enigma {
 
 namespace enigma_user
 {
-	void d3d_depth_clear(){}
-	void d3d_depth_clear_value(float value){}
+	void d3d_clear_depth(double value){}
 	void d3d_set_software_vertex_processing(bool software){}
 
 	void d3d_start()
 	{
 		enigma::d3dMode = true;
+		enigma::d3dPerspective = true;
 		enigma::d3dHidden = true;
 		enigma::d3dZWriteEnable = true;
 		enigma::d3dCulling = rs_none;
@@ -58,6 +58,7 @@ namespace enigma_user
 	void d3d_end()
 	{
 		enigma::d3dMode = false;
+		enigma::d3dPerspective = false;
 		enigma::d3dHidden = false;
 		enigma::d3dZWriteEnable = false;
 		enigma::d3dCulling = rs_none;

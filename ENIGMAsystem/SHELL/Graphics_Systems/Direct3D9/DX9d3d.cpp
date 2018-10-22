@@ -16,22 +16,50 @@
 **/
 
 #include "Bridges/General/DX9Context.h"
-#include "Graphics_Systems/General/GSd3d.h"
 #include "Direct3D9Headers.h"
-#include "Graphics_Systems/General/GStextures.h"
-
-#include "../General/GSmodel.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
-
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
+#include "Widget_Systems/widgets_mandatory.h"
+
+#include <glm/gtc/type_ptr.hpp>
+
 namespace enigma {
-  bool d3dMode = false;
-  bool d3dHidden = false;
-  bool d3dZWriteEnable = true;
-  int d3dCulling = 0;
+bool d3dMode = false;
+bool d3dHidden = false;
+bool d3dZWriteEnable = true;
+int d3dCulling = 0;
+
+void graphics_set_matrix(int type) {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  D3DTRANSFORMSTATETYPE state;
+  glm::mat4 matrix;
+  switch(type) {
+    case enigma_user::matrix_world:
+      state = D3DTS_WORLD;
+      matrix = enigma::world;
+      break;
+    case enigma_user::matrix_view:
+      state = D3DTS_VIEW;
+      matrix = enigma::view;
+      break;
+    case enigma_user::matrix_projection:
+      state = D3DTS_PROJECTION;
+      matrix = enigma::projection;
+      break;
+    default:
+      #ifdef DEBUG_MODE
+      show_error("Unknown matrix type " + std::to_string(type), false);
+      #endif
+      return;
+  }
+  d3dmgr->SetTransform(state, (D3DMATRIX*)glm::value_ptr(matrix));
 }
+
+} // namespace enigma
 
 D3DCULL cullingstates[3] = {
   D3DCULL_NONE, D3DCULL_CCW, D3DCULL_CW
@@ -54,30 +82,31 @@ D3DFOGMODE fogmodes[3] = {
 namespace enigma_user
 {
 
-void d3d_depth_clear() {
-  d3d_depth_clear_value(1.0f);
-}
-
-void d3d_depth_clear_value(float value) {
-	d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
+void d3d_clear_depth(double value) {
+  draw_batch_flush(batch_flush_deferred);
+  d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
 }
 
 void d3d_start()
 {
-	enigma::d3dMode = true;
-	enigma::d3dCulling =  rs_none;
-	d3dmgr->device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	d3d_set_hidden(false);
+  draw_batch_flush(batch_flush_deferred);
+  enigma::d3dMode = true;
+  enigma::d3dPerspective = true;
+  enigma::d3dCulling = rs_none;
+  d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+  d3dmgr->SetRenderState(D3DRS_ZENABLE, enigma::d3dHidden = true);
 
-	// Enable texture repetition by default
-	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
-	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
-	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
+  // Enable texture repetition by default
+  d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
+  d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
+  d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
 }
 
 void d3d_end()
 {
+    draw_batch_flush(batch_flush_deferred);
 	enigma::d3dMode = false;
+    enigma::d3dPerspective = false;
 	enigma::d3dCulling = rs_none;
 	d3d_set_hidden(false);
 }
@@ -88,19 +117,21 @@ void d3d_set_software_vertex_processing(bool software) {
 
 void d3d_set_hidden(bool enable)
 {
-	//d3d_set_zwriteenable(enable);
+    draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_ZENABLE, enable); // enable/disable the z-buffer
     enigma::d3dHidden = enable;
 }
 
 void d3d_set_zwriteenable(bool enable)
 {
+    draw_batch_flush(batch_flush_deferred);
 	enigma::d3dZWriteEnable = enable;
 	d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, enable);    // enable/disable z-writing
 }
 
 void d3d_set_lighting(bool enable)
 {
+    draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_LIGHTING, enable);    // enable/disable the 3D lighting
 }
 
@@ -116,12 +147,14 @@ void d3d_set_fog(bool enable, int color, double start, double end)
 
 void d3d_set_fog_enabled(bool enable)
 {
+    draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FOGENABLE, enable);
 	d3dmgr->SetRenderState(D3DRS_RANGEFOGENABLE, enable);
 }
 
 void d3d_set_fog_mode(int mode)
 {
+    draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[mode]);
 	d3dmgr->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[mode]);
 }
@@ -132,29 +165,34 @@ void d3d_set_fog_hint(int mode) {
 
 void d3d_set_fog_color(int color)
 {
+    draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FOGCOLOR,
-                    D3DCOLOR_COLORVALUE(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), 1.0f)); // Highest 8 bits are not used.
+                    D3DCOLOR_RGBA(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), 255)); // Highest 8 bits are not used.
 }
 
 void d3d_set_fog_start(double start)
 {
+    draw_batch_flush(batch_flush_deferred);
 	float fFogStart = start;
 	d3dmgr->SetRenderState(D3DRS_FOGSTART,*(DWORD*)(&fFogStart));
 }
 
 void d3d_set_fog_end(double end)
 {
+  draw_batch_flush(batch_flush_deferred);
   float fFogEnd = end;
   d3dmgr->SetRenderState(D3DRS_FOGEND,*(DWORD*)(&fFogEnd));
 }
 
 void d3d_set_fog_density(double density)
 {
+	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FOGDENSITY, *(DWORD *)(&density));
 }
 
 void d3d_set_culling(int mode)
 {
+	draw_batch_flush(batch_flush_deferred);
 	enigma::d3dCulling = mode;
 	d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[mode]);
 }
@@ -175,6 +213,7 @@ int d3d_get_culling() {
 
 void d3d_set_fill_mode(int fill)
 {
+	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FILLMODE, fillmodes[fill]);
 }
 
@@ -183,10 +222,12 @@ void d3d_set_line_width(float value) {
 }
 
 void d3d_set_point_size(float value) {
+	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_POINTSIZE, value);
 }
 
 void d3d_set_depth_operator(int mode) {
+	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_ZFUNC, depthoperators[mode]);
 }
 
@@ -197,6 +238,7 @@ void d3d_set_depth(double dep)
 
 void d3d_set_shading(bool smooth)
 {
+	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_SHADEMODE, smooth?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
 }
 
@@ -233,16 +275,6 @@ class d3d_lights
     d3d_lights() {}
     ~d3d_lights() {}
 
-    void light_update_positions()
-    {
-        map<int, posi>::iterator end = ind_pos.end();
-        for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
-            const posi pos1 = (*it).second;
-            const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
-            //glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
-        }
-    }
-
     bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
     {
 	    int ms;
@@ -266,23 +298,13 @@ class d3d_lights
             ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
         }
 
-		D3DLIGHT9 light;    // create the light struct
-
-		ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
-		light.Type = D3DLIGHT_DIRECTIONAL;    // make the light type 'directional light'
-		light.Diffuse = D3DXCOLOR(COL_GET_R(col), COL_GET_R(col), COL_GET_B(col), 1.0f);    // set the light's color
-		light.Direction = D3DXVECTOR3(dx, dy, dz);
+		D3DLIGHT9 light = { };
+		light.Type = D3DLIGHT_DIRECTIONAL;
+		light.Diffuse = { COL_GET_Rf(col), COL_GET_Gf(col), COL_GET_Bf(col), 1.0f };
+		light.Direction = { dx, dy, dz };
 
 		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light
 
-		D3DMATERIAL9 material;
-		ZeroMemory(&material, sizeof(D3DMATERIAL9));
-		material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-
-		d3dmgr->SetMaterial(&material);
-
-		light_update_positions();
         return true;
     }
 
@@ -311,12 +333,10 @@ class d3d_lights
             light_ind.insert(pair<int,int>(id, ms));
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
-		D3DLIGHT9 light;    // create the light struct
-
-		ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
-		light.Type = D3DLIGHT_POINT;    // make the light type 'directional light'
-		light.Diffuse = D3DXCOLOR(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), 1.0f);    // set the light's color
-		light.Position = D3DXVECTOR3(x, y, z);
+		D3DLIGHT9 light = { };
+		light.Type = D3DLIGHT_POINT;
+		light.Diffuse = { COL_GET_Rf(col), COL_GET_Gf(col), COL_GET_Bf(col), 1.0f };
+		light.Position = { x, y, z };
 		light.Range = range;
 		light.Attenuation0 = 1.0f;    // no constant inverse attenuation
 		light.Attenuation1 = 0.0f;    // only .125 inverse attenuation
@@ -326,13 +346,6 @@ class d3d_lights
 		light.Falloff = 1.0f;    // use the typical falloff
 
 		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light
-
-		D3DMATERIAL9 material;
-		ZeroMemory(&material, sizeof(D3DMATERIAL9));
-		material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-
-		d3dmgr->SetMaterial(&material);
 
 		return true;
     }
@@ -391,43 +404,49 @@ namespace enigma_user
 
 bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
 {
+    draw_batch_flush(batch_flush_deferred);
     return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
 }
 
 bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
 {
+    draw_batch_flush(batch_flush_deferred);
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
 bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 {
+    draw_batch_flush(batch_flush_deferred);
     return d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
-  float specular[4] = {r, g, b, a};
-
+    draw_batch_flush(batch_flush_deferred);
+    float specular[4] = {r, g, b, a};
 }
 
 void d3d_light_shininess(int facemode, int shine)
 {
-
+    draw_batch_flush(batch_flush_deferred);
 }
 
 void d3d_light_define_ambient(int col)
 {
-	d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), 1));
+    draw_batch_flush(batch_flush_deferred);
+    d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), 255));
 }
 
 bool d3d_light_enable(int id, bool enable)
 {
+    draw_batch_flush(batch_flush_deferred);
     return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
 }
 
 
 //TODO(harijs) - This seems to be broken like this. Almost works, but stencilmask needs some different value
 void d3d_stencil_start_mask(){
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->SetRenderState(D3DRS_STENCILENABLE, true);
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, false);
   d3dmgr->SetRenderState(D3DRS_COLORWRITEENABLE, false);
@@ -443,6 +462,7 @@ void d3d_stencil_start_mask(){
 }
 
 void d3d_stencil_use_mask(){
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, true);
   d3dmgr->SetRenderState(D3DRS_COLORWRITEENABLE, true);
 
@@ -451,16 +471,10 @@ void d3d_stencil_use_mask(){
 }
 
 void d3d_stencil_end_mask(){
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->SetRenderState(D3DRS_STENCILENABLE, false);
 }
 
-}
-
-namespace enigma {
-    void d3d_light_update_positions()
-    {
-        d3d_lighting.light_update_positions();
-    }
 }
 
 // ***** LIGHTS END *****

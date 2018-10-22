@@ -16,6 +16,7 @@
 **/
 
 #include "gmk.h"
+#include "filesystem.h"
 
 #include "lodepng.h"
 #include <zlib.h>
@@ -28,6 +29,9 @@
 #include <unordered_map>
 #include <vector>
 #include <set>
+
+#include <cstdlib>     /* srand, rand */
+#include <ctime>       /* time */
 
 using namespace buffers;
 using namespace buffers::resources;
@@ -44,25 +48,24 @@ ostream err(nullptr);
 static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
 static void atexit_tempdata_cleanup() {
-  for (std::string &tempFile : tempFilesCreated)
-    unlink(tempFile.c_str());
+  for (const std::string &tempFile : tempFilesCreated)
+    DeleteFile(tempFile);
 }
 
 std::string writeTempDataFile(char *bytes, size_t length) {
-  char temp[] = "gmk_data.XXXXXX";
-  int fd = mkstemp(temp);
-  if (fd == -1) return "";
-  tempFilesCreated.push_back(temp);
-  write(fd, bytes, length);
-  close(fd);
-  return temp;
+  std::string name = TempFileName("gmk_data");
+  std::fstream fs(name, std::fstream::out | std::fstream::binary);
+  if (!fs.is_open()) return "";
+  fs.write(bytes, length);
+  fs.close();
+  return name;
 }
 
 std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {
   return writeTempDataFile(bytes.get(), length);
 }
 
-std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
+std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool transparent=false) {
   static const unsigned MINHEADER = 54; //minimum BMP header size
   auto bmp = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
@@ -102,6 +105,12 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
 
   std::vector<unsigned char> rgba(w * h * 4);
 
+  // get the bottom left pixel for transparency
+  // NOTE: bmp is obviously upside down, so it's just the first pixel
+  unsigned char t_pixel_r = bmp[pixeloffset+0],
+                t_pixel_g = bmp[pixeloffset+1],
+                t_pixel_b = bmp[pixeloffset+2];
+
   /*
   There are 3 differences between BMP and the raw image buffer for LodePNG:
   -it's upside down
@@ -125,6 +134,13 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
         rgba[newpos + 1] = bmp[bmpos + 2]; //G<-B
         rgba[newpos + 2] = bmp[bmpos + 1]; //B<-G
         rgba[newpos + 3] = bmp[bmpos + 0]; //A<-R
+      }
+
+      if (transparent &&
+        bmp[bmpos + 0] == t_pixel_r &&
+        bmp[bmpos + 1] == t_pixel_g &&
+        bmp[bmpos + 2] == t_pixel_b) {
+        rgba[newpos + 3] = 0; //A<-A
       }
     }
   }
@@ -186,7 +202,9 @@ class Decoder {
 
   void processTempFileFutures() {
     for (auto &tempFilePair : tempFileFuturesCreated) {
-      tempFilePair.second->append(tempFilePair.first.get());
+      std::string temp_file_path = tempFilePair.first.get();
+      tempFilePair.second->append(temp_file_path);
+      tempFilesCreated.push_back(temp_file_path);
     }
   }
 
@@ -224,16 +242,22 @@ class Decoder {
     return byte;
   }
 
+  // NOTE: for read[2-4] the order of initialization is
+  // guaranteed, but order of evaluation is not
+
   int read2() {
-    return (read() | (read() << 8));
+    int one = read(), two = read();
+    return (one | (two << 8));
   }
 
   int read3() {
-    return (read() | (read() << 8) | (read() << 16));
+    int one = read(), two = read(), three = read();
+    return (one | (two << 8) | (three << 16));
   }
 
   int read4() {
-    return (read() | (read() << 8) | (read() << 16) | (read() << 24));
+    int one = read(), two = read(), three = read(), four = read();
+    return (one | (two << 8) | (three << 16) | (four << 24));
   }
 
   bool readBool() {
@@ -333,10 +357,14 @@ class Decoder {
     readData(data_file_path, false);
   }
 
-  void readZlibImage(std::string *data_file_path=nullptr) {
+  void readZlibImage(std::string *data_file_path, bool transparent) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = decompress(length);
-    if (data_file_path && bytes) threadTempFileWrite(writeTempBMPFile, data_file_path, std::move(bytes), length);
+    if (data_file_path && bytes) threadTempFileWrite(writeTempBMPFile, data_file_path, std::move(bytes), length, transparent);
+  }
+
+  void readZlibImage(bool transparent=false) {
+    readZlibImage(nullptr, transparent);
   }
 
   void readBGRAImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
@@ -418,27 +446,31 @@ void LoadSettingsIncludes(Decoder &dec) {
   dec.readBool(); dec.readBool();
 }
 
-int LoadSettings(Decoder &dec) {
+int LoadSettings(Decoder &dec, Settings& set) {
   int ver = dec.read4();
   if (ver != 530 && ver != 542 && ver != 600 && ver != 702 && ver != 800 && ver != 810) {
     err << "Unsupported GMK Settings version: " << ver << std::endl;
     return 0;
   }
 
+  General* gen = set.mutable_general();
+  Graphics* gfx = set.mutable_graphics();
+  Info* inf = set.mutable_info();
+
   if (ver >= 800) dec.beginInflate();
-  dec.readBool(); // start_fullscreen
+  gfx->set_start_in_fullscreen(dec.readBool());
   if (ver >= 600) {
-    dec.readBool(); // interpolate
+    gfx->set_smooth_colors(dec.readBool());
   }
-  dec.readBool(); // dont_draw_border
-  dec.readBool(); // display_cursor
-  dec.read4(); // scaling
+  gfx->set_window_showborder(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
+  gen->set_show_cursor(dec.readBool());
+  gfx->set_window_scale(dec.read4());
   if (ver == 530) {
     dec.skip(8); // "fullscreen scale" & "only scale w/ hardware support"
   } else {
-    dec.readBool(); // allow_window_resize
-    dec.readBool(); // always_on_top
-    dec.read4(); // color_outside_room
+    gfx->set_window_sizeable(dec.readBool());
+    gfx->set_window_stayontop(dec.readBool());
+    gen->set_color_outside_room_region(dec.read4());
   }
   dec.readBool(); // set_resolution
 
@@ -454,18 +486,19 @@ int LoadSettings(Decoder &dec) {
     dec.read4(); // frequency
   }
 
-  dec.readBool(); // DONT_SHOW_BUTTONS
-  if (ver > 530) dec.readBool(); // USE_SYNCHRONIZATION
+  gfx->set_window_showicons(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
+  if (ver > 530) gfx->set_use_synchronization(dec.readBool());
   if (ver >= 800) dec.readBool(); // DISABLE_SCREENSAVERS
-  // LET_F4_SWITCH_FULLSCREEN, LET_F1_SHOW_GAME_INFO, LET_ESC_END_GAME, LET_F5_SAVE_F6_LOAD
-  dec.readBool(); dec.readBool(); dec.readBool(); dec.readBool();
+  gfx->set_allow_fullscreen_change(dec.readBool());
+  // LET_F1_SHOW_GAME_INFO, LET_ESC_END_GAME, LET_F5_SAVE_F6_LOAD
+  dec.readBool(); dec.readBool(); dec.readBool();
   if (ver == 530) dec.skip(8); //unknown bytes, both 0
   if (ver > 600) {
     // LET_F9_SCREENSHOT, TREAT_CLOSE_AS_ESCAPE
     dec.readBool(); dec.readBool();
   }
   dec.read4(); // GAME_PRIORITY
-  dec.readBool(); // FREEZE_ON_LOSE_FOCUS
+  gfx->set_freeze_on_lose_focus(dec.readBool());
   int load_bar_mode = dec.read4(); // LOAD_BAR_MODE
   if (load_bar_mode == 2) { // 0=NONE 1=DEFAULT 2=CUSTOM
     if (ver < 800) {
@@ -495,13 +528,13 @@ int LoadSettings(Decoder &dec) {
   dec.read4(); // errors
   // TREAT_UNINIT_AS_0 = ((errors & 0x01) != 0)
   // ERROR_ON_ARGS = ((errors & 0x02) != 0)
-  dec.readStr(); // AUTHOR
+  inf->set_author_name(dec.readStr());
   if (ver > 600)
-    dec.readStr(); // VERSION
+    inf->set_version(dec.readStr());
   else
-    dec.read4(); // VERSION std::to_string
-  dec.readD(); // LAST_CHANGED
-  dec.readStr(); // INFORMATION
+    inf->set_version(std::to_string(dec.read4()));
+  inf->set_last_changed(dec.readD());
+  inf->set_information(dec.readStr());
   if (ver < 800) {
     int no = dec.read4(); // number of constants
     for (int i = 0; i < no; i++) {
@@ -510,10 +543,15 @@ int LoadSettings(Decoder &dec) {
     }
   }
   if (ver > 600) {
-    // VERSION_MAJOR, VERSION_MINOR, VERSION_RELEASE, VERSION_BUILD
-    dec.read4(); dec.read4(); dec.read4(); dec.read4();
-    // COMPANY, PRODUCT, COPYRIGHT, DESCRIPTION
-    dec.readStr(); dec.readStr(); dec.readStr(); dec.readStr();
+    gen->set_version_major(dec.read4());
+    gen->set_version_minor(dec.read4());
+    gen->set_version_release(dec.read4());
+    gen->set_version_build(dec.read4());
+
+    gen->set_company(dec.readStr());
+    gen->set_product(dec.readStr());
+    gen->set_copyright(dec.readStr());
+    gen->set_description(dec.readStr());
 
     if (ver >= 800) dec.skip(8); //last changed
   } else if (ver > 530) {
@@ -610,6 +648,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
   auto sprite = std::make_unique<Sprite>();
 
   int w = 0, h = 0;
+  bool transparent = false;
   if (ver < 800) {
     w = dec.read4();
     h = dec.read4();
@@ -617,7 +656,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
     sprite->set_bbox_right(dec.read4());
     sprite->set_bbox_bottom(dec.read4());
     sprite->set_bbox_top(dec.read4());
-    sprite->set_transparent(dec.readBool());
+    transparent = dec.readBool();
     if (ver > 400) {
       sprite->set_smooth_edges(dec.readBool());
       sprite->set_preload(dec.readBool());
@@ -630,7 +669,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
       sprite->set_preload(!dec.readBool());
     }
   } else {
-    sprite->set_transparent(false);
+    transparent = false;
   }
   sprite->set_origin_x(dec.read4());
   sprite->set_origin_y(dec.read4());
@@ -650,7 +689,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
         dec.readBGRAImage(sprite->add_subimages(), w, h);
     } else {
       if (dec.read4() == -1) continue;
-      dec.readZlibImage(sprite->add_subimages());
+      dec.readZlibImage(sprite->add_subimages(), transparent);
     }
   }
   sprite->set_width(w);
@@ -674,10 +713,11 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   auto background = std::make_unique<Background>();
 
   int w = 0, h = 0;
+  bool transparent = false;
   if (ver < 710) {
     w = dec.read4();
     h = dec.read4();
-    background->set_transparent(dec.readBool());
+    transparent = dec.readBool();
     if (ver > 400) {
       background->set_smooth_edges(dec.readBool());
       background->set_preload(dec.readBool());
@@ -700,7 +740,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   if (ver < 710) {
     if (dec.readBool()) {
       if (dec.read4() != -1)
-        dec.readZlibImage(background->mutable_image());
+        dec.readZlibImage(background->mutable_image(), transparent);
     }
   } else { // >= 710
     int dataver = dec.read4();
@@ -955,7 +995,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
     dec.postponeName(instance->mutable_object_type(), dec.read4(), TypeCase::kObject);
     instance->set_id(dec.read4());
     instance->set_code(dec.readStr());
-    instance->set_locked(dec.readBool());
+    instance->mutable_editor_settings()->set_locked(dec.readBool());
   }
 
   int notiles = dec.read4();
@@ -970,7 +1010,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
     tile->set_height(dec.read4());
     tile->set_depth(dec.read4());
     tile->set_id(dec.read4());
-    tile->set_locked(dec.readBool());
+    tile->mutable_editor_settings()->set_locked(dec.readBool());
   }
 
   dec.readBool(); // REMEMBER_WINDOW_SIZE
@@ -1227,7 +1267,8 @@ buffers::Project *LoadGMK(std::string fName) {
   out << "game id: " << game_id << std::endl;
   dec.skip(16); //16 bytes GAME_GUID
 
-  if (!LoadSettings(dec)) return nullptr;
+  Settings settings;
+  if (!LoadSettings(dec, settings)) return nullptr;
 
   if (ver >= 800) {
     if (!LoadTriggers(dec)) return nullptr;

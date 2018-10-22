@@ -5,7 +5,7 @@ TESTCASES_DIR := $(SRC_DIR)/Tests
 
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
-	OS_SRCS=./Platform/TestHarness-X11.cpp
+	OS_SRCS=$(wildcard ./Platform/*-X11.cpp)
 	OS_LIBS=-lX11 -lboost_filesystem -lboost_system
 else ifeq ($(OS), Darwin)
 	OS_SRCS=./Platform/TestHarness-Cocoa.cpp
@@ -16,17 +16,19 @@ else
 endif
 
 CXXFLAGS  := -I$(SRC_DIR) -Wall -Wextra -Wpedantic -g -std=c++11
-LDFLAGS   := $(OS_LIBS) -lgtest_main -lgtest -lpthread
+LDFLAGS   := $(OS_LIBS) -lgtest -lpthread -lgtest_main
 
 SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(TESTCASES_DIR)/*.cpp) $(OS_SRCS)
 OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURCES)))
 OBJDIRS := $(sort $(OBJ_DIR) $(dir $(OBJECTS)))
 DEPENDS := $(OBJECTS:.o=.d)
 
-$(BINARY): $(OBJECTS)
-	g++ $^ -o $@ $(LDFLAGS)
+$(BINARY): $(OBJECTS) .FORCE
+	g++ $(filter-out .FORCE, $^) -o $@ $(LDFLAGS)
 
-.PHONY: all clean obj_dirs
+.PHONY: all clean obj_dirs .FORCE
+
+.FORCE:
 
 all: $(BINARY)
 clean:

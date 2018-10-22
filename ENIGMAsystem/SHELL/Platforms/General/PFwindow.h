@@ -18,6 +18,7 @@
 #ifndef ENIGMA_PLATFORM_WINDOW_H
 #define ENIGMA_PLATFORM_WINDOW_H
 
+#include "libEGMstd.h"
 #include "Platforms/platforms_mandatory.h"
 
 #include <string>
@@ -69,7 +70,7 @@ enum {
   mb_none   =  0,
   mb_left   =  1,
   mb_right  =  2,
-  mb_middle =  3,
+  mb_middle =  3
 };
 
 enum {
@@ -143,7 +144,7 @@ enum {
   vk_scroll = 145,
   vk_pause  = 19,
   vk_lsuper = 91,
-  vk_rsuper = 92,
+  vk_rsuper = 92
 };
 
 extern double mouse_x, mouse_y;
@@ -209,7 +210,8 @@ int window_get_y();
 int window_get_width();
 int window_get_height();
 
-void window_set_caption(std::string caption);
+void window_set_caption(const std::string &caption);
+template<typename T> void window_set_caption(T caption) { return window_set_caption(enigma_user::toString(caption)); }
 std::string window_get_caption();
 void window_set_color(int color);
 int window_get_color();

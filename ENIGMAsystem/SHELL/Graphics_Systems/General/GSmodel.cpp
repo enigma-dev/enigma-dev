@@ -1,4 +1,6 @@
-/** Copyright (C) 2017 Robert Colton
+/** Copyright (C) 2013 Robert Colton, Adriano Tumminelli
+*** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2017, 2018 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,14 +17,690 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "GSmodel_impl.h"
 #include "GSmodel.h"
+#include "GSvertex.h"
+#include "GSvertex_impl.h"
 #include "GSprimitives.h"
+#include "GScolors.h"
+#include "GSmatrix.h"
+#include "GStextures.h"
+
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Universal_System/fileio.h"
 
 #include <math.h>
 
 using namespace std;
 
+namespace enigma {
+
+vector<Model*> models;
+extern unsigned char currentcolor[4];
+
+unsigned int split(const std::string &txt, std::vector<std::string> &strs, char ch)
+{
+	size_t pos = txt.find( ch );
+	size_t initialPos = 0;
+	strs.clear();
+
+	// Decompose statement
+	while( pos != std::string::npos ) {
+		strs.push_back( txt.substr( initialPos, pos - initialPos + 1 ) );
+		initialPos = pos + 1;
+
+		pos = txt.find( ch, initialPos );
+	}
+
+	// Add the last one
+	strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
+
+	return strs.size();
+}
+
+//split a string and convert to float
+vector<float> float_split(const string& str, const char& ch) {
+  string next;
+  vector<float> result;
+
+  for (string::const_iterator it = str.begin(); it != str.end(); it++)
+  {
+    if (*it == ch) {
+      if (!next.empty()) {
+        result.push_back(atof(next.c_str()));
+        next.clear();
+      }
+    } else {
+      next += *it;
+    }
+  }
+  if (!next.empty())
+    result.push_back(atof(next.c_str()));
+  return result;
+}
+
+//obj model parsing functions
+void string_parse(string *s) {
+  size_t spaces = 0;
+  bool trimmed = false;
+  bool checknormal = false;
+  for (unsigned int i = 0; i < s->size() ; i++)
+  {
+    //comment
+    if ((*s)[i] == '#')
+    {
+      s->erase(i, s->length() - i);
+      break;
+    }
+    else if((*s)[i] == ' ')
+    {
+      if (!trimmed)
+      {
+        s->erase(i,1);
+        i--;
+      }
+      else
+      {
+        if (spaces >= 1)
+        {
+          s->erase(i,1);
+          i--;
+        }
+        spaces++;
+      }
+    }
+    else
+    {
+      if((*s)[i] == '/')
+      {
+        (*s)[i] = ' ';
+        if(checknormal)
+        {
+          s->erase(i, 1);
+          checknormal = false;
+        }
+        else
+          checknormal = true;
+      }
+      else
+        checknormal = false;
+      spaces = 0;
+      trimmed = true;
+    }
+  }
+  //end trim
+  if (s->size() > 0) {
+    if ((*s)[s->size()-1] == ' ')
+    {
+      s->erase(s->size()-1, 1);
+    }
+  }
+}
+
+} // namespace enigma
+
 namespace enigma_user {
+
+int d3d_model_create(int type, bool use_draw_color) {
+  int id = enigma::models.size();
+  enigma::Model* model = new enigma::Model(type, use_draw_color);
+  model->vertex_buffer = vertex_create_buffer();
+  enigma::models.push_back(model);
+  return id;
+}
+
+void d3d_model_destroy(int id) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_delete_buffer(model->vertex_buffer);
+
+  delete enigma::models[id];
+  enigma::models[id] = nullptr;
+}
+
+bool d3d_model_exists(int id) {
+  return (id >= 0 && (unsigned)id < enigma::models.size() && enigma::models[id] != nullptr);
+}
+
+void d3d_model_clear(int id) {
+  enigma::Model* model = enigma::models[id];
+  vertex_clear(model->vertex_buffer);
+  model->primitives.clear();
+  model->vertex_started = false;
+  model->vertex_colored = true;
+}
+
+void d3d_model_draw(int id) {
+  enigma::Model* model = enigma::models[id];
+  if (model->vertex_started) {
+    model->vertex_started = false;
+    vertex_end(model->vertex_buffer);
+
+    // freeze the model if it's static to indicate to the driver that
+    // we don't intend on updating this sucker so it will draw faster
+    if (model->type == model_static) {
+      vertex_freeze(model->vertex_buffer, false);
+    } else if (model->type == model_dynamic) {
+      vertex_freeze(model->vertex_buffer, true);
+    }
+    // model_stream type is never frozen because it means the user
+    // will be updating and specifying new primitives every frame
+  }
+  for (auto primitive : model->primitives) {
+    vertex_set_format(model->vertex_buffer, primitive.format);
+    vertex_submit_offset(
+      model->vertex_buffer, primitive.type,
+      primitive.vertex_offset, 0, primitive.vertex_count
+    );
+  }
+}
+
+void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
+  d3d_transform_add_translation(x, y, z);
+  d3d_model_draw(id);
+  d3d_transform_add_translation(-x, -y, -z);
+}
+
+void d3d_model_draw(int id, int texId) {
+  texture_set(texId);
+  d3d_model_draw(id);
+}
+
+void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId) {
+  d3d_transform_add_translation(x, y, z);
+  d3d_model_draw(id, texId);
+  d3d_transform_add_translation(-x, -y, -z);
+}
+
+void d3d_model_primitive_begin(int id, int kind, int format) {
+  enigma::Model* model = enigma::models[id];
+  if (!model->vertex_started) {
+    model->vertex_started = true;
+    vertex_begin(model->vertex_buffer);
+  }
+  model->vertex_colored = true;
+  model->current_primitive = enigma::Primitive(
+    kind,
+    format,
+    vertex_format_exists(format),
+    vertex_get_buffer_size(model->vertex_buffer)
+  );
+}
+
+void d3d_model_primitive_end(int id) {
+  enigma::Model* model = enigma::models[id];
+  enigma::Primitive& primitive = model->current_primitive;
+
+  // if the primitive doesn't have a valid vertex format
+  // and one does exist that we were guessing, then end
+  // that vertex format now
+  if (!primitive.format_defined) {
+    if (primitive.format_started && model->use_draw_color && !model->vertex_colored) {
+      vertex_format_add_color();
+    }
+    primitive.format = vertex_format_end();
+    primitive.format_defined = true;
+  }
+
+  // if the last vertex didn't specify a color then we have to do so now
+  if (model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+    model->vertex_colored = true;
+  }
+
+  size_t vertex_size = vertex_get_buffer_size(model->vertex_buffer) - primitive.vertex_offset;
+  #ifdef DEBUG_MODE
+  // there's ZERO reason to keep an empty primitive
+  if (!vertex_size) {
+    show_error("A primitive was ended that had 0 size on model: " + std::to_string(id), false);
+    return;
+  }
+  #endif
+  primitive.vertex_count = vertex_size / vertex_format_get_stride_size(primitive.format);
+
+  // combine adjacent primitives that are list types with logically the same format
+  if (!model->primitives.empty()) {
+    enigma::Primitive& prev = model->primitives.back();
+
+    if (vertex_format_get_hash(prev.format) == vertex_format_get_hash(primitive.format)) {
+      if ((prev.type == pr_pointlist && primitive.type == pr_pointlist) ||
+          (prev.type == pr_linelist && primitive.type == pr_linelist) ||
+          (prev.type == pr_trianglelist && primitive.type == pr_trianglelist)) {
+        prev.vertex_count += primitive.vertex_count;
+        return;
+      } else if (prev.type == pr_trianglestrip && primitive.type == pr_trianglestrip) {
+        // use a degenerate triangle to combine the adjacent strips
+        enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[model->vertex_buffer];
+        std::vector<enigma::VertexElement>& vertices = vertexBuffer->vertices;
+        const size_t stride = vertex_format_get_stride(prev.format);
+        const size_t vertex_start = primitive.vertex_offset / sizeof(enigma::VertexElement);
+
+        auto degenerates = std::vector<enigma::VertexElement>(
+          vertices.begin() + (vertex_start - stride), // last vertex of the first strip
+          vertices.begin() + (vertex_start + stride)  // first vertex of the second strip
+        );
+
+        vertices.insert(
+          vertices.begin() + vertex_start,
+          degenerates.begin(),
+          degenerates.end()
+        );
+
+        prev.vertex_count += primitive.vertex_count + 2;
+        return;
+      }
+    }
+    // not mergeable with the previous primitive so looks like we have to keep it...
+  }
+
+  model->primitives.emplace_back(primitive);
+}
+
+void d3d_model_float1(int id, float f1) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_float1(model->vertex_buffer, f1);
+}
+
+void d3d_model_float2(int id, float f1, float f2) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_float2(model->vertex_buffer, f1, f2);
+}
+
+void d3d_model_float3(int id, float f1, float f2, float f3) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_float3(model->vertex_buffer, f1, f2, f3);
+}
+
+void d3d_model_float4(int id, float f1, float f2, float f3, float f4) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_float4(model->vertex_buffer, f1, f2, f3, f4);
+}
+
+void d3d_model_ubyte4(int id, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_ubyte4(model->vertex_buffer, u1, u2, u3, u4);
+}
+
+void d3d_model_vertex(int id, gs_scalar x, gs_scalar y) {
+  enigma::Model* model = enigma::models[id];
+  enigma::Primitive& primitive = model->current_primitive;
+  if (primitive.format_started && model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+  }
+  if (!primitive.format_defined) {
+    if (primitive.format_started) {
+      if (model->use_draw_color && !model->vertex_colored) {
+        vertex_format_add_color();
+      }
+      primitive.format = vertex_format_end();
+      primitive.format_defined = true;
+    } else {
+      vertex_format_begin();
+      vertex_format_add_position();
+      primitive.format_started = true;
+    }
+  }
+  vertex_position(model->vertex_buffer, x, y);
+  model->vertex_colored = false;
+  model->vertex_color = draw_get_color();
+  model->vertex_alpha = draw_get_alpha();
+}
+
+void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
+  enigma::Model* model = enigma::models[id];
+  enigma::Primitive& primitive = model->current_primitive;
+  if (primitive.format_started && model->use_draw_color && !model->vertex_colored) {
+    vertex_color(model->vertex_buffer, model->vertex_color, model->vertex_alpha);
+  }
+  if (!primitive.format_defined) {
+    if (primitive.format_started) {
+      if (model->use_draw_color && !model->vertex_colored) {
+        vertex_format_add_color();
+      }
+      primitive.format = vertex_format_end();
+      primitive.format_defined = true;
+    } else {
+      vertex_format_begin();
+      vertex_format_add_position_3d();
+      primitive.format_started = true;
+    }
+  }
+  vertex_position_3d(model->vertex_buffer, x, y, z);
+  model->vertex_colored = false;
+  model->vertex_color = draw_get_color();
+  model->vertex_alpha = draw_get_alpha();
+}
+
+void d3d_model_color(int id, int col, double alpha) {
+  enigma::Model* model = enigma::models[id];
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
+    vertex_format_add_color();
+  vertex_color(model->vertex_buffer, col, alpha);
+  model->vertex_colored = true;
+}
+
+void d3d_model_argb(int id, unsigned argb) {
+  enigma::Model* model = enigma::models[id];
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
+    vertex_format_add_color();
+  vertex_argb(model->vertex_buffer, argb);
+  model->vertex_colored = true;
+}
+
+void d3d_model_texture(int id, gs_scalar tx, gs_scalar ty) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
+    vertex_format_add_textcoord();
+  vertex_texcoord(model->vertex_buffer, tx, ty);
+}
+
+void d3d_model_normal(int id, gs_scalar nx, gs_scalar ny, gs_scalar nz) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
+    vertex_format_add_normal();
+  vertex_normal(model->vertex_buffer, nx, ny, nz);
+}
+
+void d3d_model_float1(int id, int usage, float f1) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
+    vertex_format_add_custom(vertex_type_float1, usage);
+  vertex_float1(model->vertex_buffer, f1);
+}
+
+void d3d_model_float2(int id, int usage, float f1, float f2) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
+    vertex_format_add_custom(vertex_type_float2, usage);
+  vertex_float2(model->vertex_buffer, f1, f2);
+}
+
+void d3d_model_float3(int id, int usage, float f1, float f2, float f3) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
+    vertex_format_add_custom(vertex_type_float3, usage);
+  vertex_float3(model->vertex_buffer, f1, f2, f3);
+}
+
+void d3d_model_float4(int id, int usage, float f1, float f2, float f3, float f4) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
+    vertex_format_add_custom(vertex_type_float4, usage);
+  vertex_float4(model->vertex_buffer, f1, f2, f3, f4);
+}
+
+void d3d_model_ubyte4(int id, int usage, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4) {
+  const enigma::Model* model = enigma::models[id];
+  const enigma::Primitive& primitive = model->current_primitive;
+  if (!primitive.format_defined)
+    vertex_format_add_custom(vertex_type_ubyte4, usage);
+  vertex_ubyte4(model->vertex_buffer, u1, u2, u3, u4);
+}
+
+void d3d_model_vertex_data(int id, const enigma::varargs& data) {
+  const enigma::Model* model = enigma::models[id];
+  vertex_data(model->vertex_buffer, data);
+}
+
+void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, int col, double alpha) {
+  d3d_model_vertex(id, x, y);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty) {
+  d3d_model_vertex(id, x, y);
+  d3d_model_texture(id, tx, ty);
+}
+
+void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_texture(id, tx, ty);
+}
+
+void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, double alpha) {
+  d3d_model_vertex(id, x, y);
+  d3d_model_texture(id, tx, ty);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_texture(id, tx, ty);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_vertex_normal(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_normal(id, nx, ny, nz);
+}
+
+void d3d_model_vertex_normal_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int col, double alpha) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_normal(id, nx, ny, nz);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_vertex_normal_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_normal(id, nx, ny, nz);
+  d3d_model_texture(id, tx, ty);
+}
+
+void d3d_model_vertex_normal_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int col, double alpha) {
+  d3d_model_vertex(id, x, y, z);
+  d3d_model_normal(id, nx, ny, nz);
+  d3d_model_texture(id, tx, ty);
+  d3d_model_color(id, col, alpha);
+}
+
+void d3d_model_save(int id, string fname) {
+  //TODO: Write save code that has never been done before yet
+}
+
+bool d3d_model_load(int id, string fname) {
+  //TODO: this needs to be rewritten properly not using the file_text functions
+  using namespace enigma_user;
+
+  // clear the old contents first since we are loading a new model
+  // this is dictated by the GMS manual
+  d3d_model_clear(id);
+
+  int file = file_text_open_read(fname);
+
+  if (file == -1) {
+    return false;
+  }
+
+  string fileExt = fname.substr(fname.find_last_of(".") + 1) ;
+  if (fileExt == "obj") {
+    vector< float > vertices;
+    vector< float > uvs;
+    vector< float > normals;
+
+    int faceCount = 0;
+    bool hasTexture = false;
+    bool hasNormals = false;
+    d3d_model_primitive_begin(id, pr_trianglelist);
+
+    while (!file_text_eof(file)) {
+      string line = file_text_read_string(file);
+      file_text_readln(file);
+      enigma::string_parse(&line);
+      if (line.length() > 0) {
+        if(line[0] == 'v') {
+          vector<float> floats = enigma::float_split(line, ' ');
+          floats.erase(floats.begin());
+
+          int n = 0;
+          switch(line[1]) {
+          case ' ':
+            n = 0;
+            for (vector<float>::const_iterator i = floats.begin(); i != floats.end(); ++i) {
+              if(n < 3) vertices.push_back(*i);
+              n++;
+            }
+            break;
+          case 't':
+            n = 0;
+            for (vector<float>::const_iterator i = floats.begin(); i != floats.end(); ++i) {
+              if(n < 2) uvs.push_back(*i);
+              n++;
+            }
+            hasTexture = true;
+            break;
+          case 'n':
+            n = 0;
+            for (vector<float>::const_iterator i = floats.begin(); i != floats.end(); ++i) {
+              if(n < 3) normals.push_back(*i);
+              n++;
+            }
+            hasNormals = true;
+            break;
+          default:
+            break;
+          }
+        } else if (line[0] == 'f') {
+          faceCount++;
+          vector<float> f = enigma::float_split(line, ' ');
+          f.erase(f.begin());
+          int faceVertices = f.size() / (1 + hasTexture + hasNormals);
+          int of = 1 + hasTexture + hasNormals;
+          int nof = 1 + hasTexture;
+
+          d3d_model_vertex(id, vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
+          if (hasTexture) d3d_model_texture(id, uvs[(f[1]-1)*2], 1 - uvs[(f[1]-1)*2 +1]);
+          if (hasNormals) d3d_model_normal(id, normals[(f[nof]-1)*3], normals[(f[nof]-1)*3 +1], normals[(f[nof]-1)*3 +2]);
+
+          d3d_model_vertex(id, vertices[(f[1*of]-1)*3],  vertices[(f[1*of]-1)*3 +1] , vertices[(f[1*of]-1)*3 +2]);
+          if (hasTexture) d3d_model_texture(id, uvs[(f[1*of + 1]-1)*2], 1 - uvs[(f[1*of + 1]-1)*2 +1]);
+          if (hasNormals) d3d_model_normal(id, normals[(f[of + nof]-1)*3], normals[(f[of  + nof]-1)*3 +1], normals[(f[of  + nof]-1)*3 +2]);
+
+          d3d_model_vertex(id, vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
+          if (hasTexture) d3d_model_texture(id, uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
+          if (hasNormals) d3d_model_normal(id, normals[(f[2*of +nof]-1)*3], normals[(f[2*of  + nof]-1)*3 +1], normals[(f[2*of  + nof]-1)*3 +2]);
+
+          //is a quad
+          if (faceVertices == 4) {
+            d3d_model_vertex(id, vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
+            if (hasTexture) d3d_model_texture(id, uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
+            if (hasNormals) d3d_model_normal(id, normals[(f[2*of + nof]-1)*3], normals[(f[2*of  + nof]-1)*3 +1], normals[(f[2*of  + nof]-1)*3 +2]);
+
+            d3d_model_vertex(id, vertices[(f[3*of]-1)*3],  vertices[(f[3*of]-1)*3 +1] , vertices[(f[3*of]-1)*3 +2]);
+            if (hasTexture) d3d_model_texture(id, uvs[(f[3*of + 1]-1)*2], 1 - uvs[(f[3*of + 1]-1)*2 +1]);
+            if (hasNormals) d3d_model_normal(id, normals[(f[3*of + nof]-1)*3], normals[(f[3*of  + nof]-1)*3 +1], normals[(f[3*of  + nof]-1)*3 +2]);
+
+            d3d_model_vertex(id, vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
+            if (hasTexture) d3d_model_texture(id, uvs[(f[0 + 1]-1)*2], 1 - uvs[(f[0 + 1]-1)*2 +1]);
+            if (hasNormals) d3d_model_normal(id, normals[(f[nof]-1)*3], normals[(f[nof]-1)*3 +1], normals[(f[nof]-1)*3 +2]);
+          }
+        }
+      }
+    }
+    d3d_model_primitive_end(id);
+  } else {
+    int something = file_text_read_real(file);
+    if (something != 100) {
+      return false;
+    }
+    file_text_readln(file);
+    unsigned count = file_text_read_real(file);
+    file_text_readln(file);
+    int kind;
+    float v[3], n[3], t[2];
+    double col, alpha;
+    for (unsigned i = 0; i < count; i++) {
+      string str = file_text_read_string(file);
+      std::vector<std::string> dat;
+      enigma::split(str, dat, ' ');
+      switch (atoi(dat[0].c_str())) {
+      case  0:
+        kind = atoi(dat[1].c_str());
+        d3d_model_primitive_begin(id, kind);
+        break;
+      case  1:
+        d3d_model_primitive_end(id);
+        break;
+      case  2:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        d3d_model_vertex(id, v[0],v[1],v[2]);
+        break;
+      case  3:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        col = atoi(dat[4].c_str()); alpha = atof(dat[5].c_str());
+        d3d_model_vertex_color(id, v[0],v[1],v[2],col,alpha);
+        break;
+      case  4:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        t[0] = atof(dat[4].c_str()); t[1] = atof(dat[5].c_str());
+        d3d_model_vertex_texture(id, v[0],v[1],v[2],t[0],t[1]);
+        break;
+      case  5:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        t[0] = atof(dat[4].c_str()); t[1] = atof(dat[5].c_str());
+        col = atoi(dat[6].c_str()); alpha = atof(dat[7].c_str());
+        d3d_model_vertex_texture_color(id, v[0],v[1],v[2],t[0],t[1],col,alpha);
+        break;
+      case  6:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
+        d3d_model_vertex_normal(id, v[0],v[1],v[2],n[0],n[1],n[2]);
+        break;
+      case  7:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
+        col = atoi(dat[7].c_str()); alpha = atof(dat[8].c_str());
+        d3d_model_vertex_normal_color(id, v[0],v[1],v[2],n[0],n[1],n[2],col,alpha);
+        break;
+      case  8:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
+        t[0] = atof(dat[7].c_str()); t[1] = atof(dat[8].c_str());
+        d3d_model_vertex_normal_texture(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1]);
+        break;
+      case  9:
+        v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+        n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
+        t[0] = atof(dat[7].c_str()); t[1] = atof(dat[8].c_str());
+        col = atoi(dat[9].c_str()); alpha = atof(dat[10].c_str());
+        d3d_model_vertex_normal_texture_color(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1],col,alpha);
+        break;
+      case  10:
+        d3d_model_block(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), true);
+        break;
+      case  11:
+        d3d_model_cylinder(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), atoi(dat[10].c_str()), atoi(dat[11].c_str()));
+        break;
+      case  12:
+        d3d_model_cone(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), atoi(dat[10].c_str()), atoi(dat[11].c_str()));
+        break;
+      case  13:
+        d3d_model_ellipsoid(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), atoi(dat[10].c_str()));
+        break;
+      case  14:
+        d3d_model_wall(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()));
+        break;
+      case  15:
+        d3d_model_floor(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()));
+        break;
+      }
+      file_text_readln(file);
+    }
+  }
+  file_text_close(file);
+  return true;
+}
 
 void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep) {
   // Setup U and V vectors
@@ -75,10 +753,11 @@ void d3d_model_wall(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar 
 
 void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
-  //NOTE: This is the fastest way to batch cubes with uninterpolated normals thanks to my model batching, still slower than a triangle strip with interpolated normals
-  //however.
+  // GM's block model function requires uninterpolated "flat" normals if we want to be visually authentic
+  // This is slightly slower because it requires more vertices to make the normals flat but we have to...
+
   // Negative X
-  d3d_model_primitive_begin( id, pr_trianglefan );
+  d3d_model_primitive_begin(id, pr_trianglefan);
   d3d_model_vertex_normal_texture( id, x1,y1,z1, -1,0,0, 0,1 );
   d3d_model_vertex_normal_texture( id, x1,y1,z2, -1,0,0, 0,0 );
   d3d_model_vertex_normal_texture( id, x1,y2,z2, -1,0,0, 1,0 );
@@ -86,45 +765,45 @@ void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
   d3d_model_primitive_end(id);
 
   // Positive X
-  d3d_model_primitive_begin( id, pr_trianglefan );
+  d3d_model_primitive_begin(id, pr_trianglefan);
   d3d_model_vertex_normal_texture( id, x2,y1,z1, 1,0,0, 1,1 );
   d3d_model_vertex_normal_texture( id, x2,y2,z1, 1,0,0, 0,1 );
   d3d_model_vertex_normal_texture( id, x2,y2,z2, 1,0,0, 0,0 );
   d3d_model_vertex_normal_texture( id, x2,y1,z2, 1,0,0, 1,0 );
-  d3d_model_primitive_end( id );
+  d3d_model_primitive_end(id);
 
   // Negative Y
-  d3d_model_primitive_begin( id, pr_trianglefan );
+  d3d_model_primitive_begin(id, pr_trianglefan);
   d3d_model_vertex_normal_texture( id, x1,y1,z1, 0,-1,0, 0,1 );
   d3d_model_vertex_normal_texture( id, x2,y1,z1, 0,-1,0, 1,1 );
   d3d_model_vertex_normal_texture( id, x2,y1,z2, 0,-1,0, 1,0 );
   d3d_model_vertex_normal_texture( id, x1,y1,z2, 0,-1,0, 0,0 );
-  d3d_model_primitive_end( id );
+  d3d_model_primitive_end(id);
 
   // Positive Y
-  d3d_model_primitive_begin( id, pr_trianglefan );
+  d3d_model_primitive_begin(id, pr_trianglefan);
   d3d_model_vertex_normal_texture( id, x1,y2,z1, 0,1,0, 1,1 );
   d3d_model_vertex_normal_texture( id, x1,y2,z2, 0,1,0, 1,0 );
   d3d_model_vertex_normal_texture( id, x2,y2,z2, 0,1,0, 0,0 );
   d3d_model_vertex_normal_texture( id, x2,y2,z1, 0,1,0, 0,1 );
-  d3d_model_primitive_end( id );
+  d3d_model_primitive_end(id);
 
   if (closed) {
     // Negative Z
-    d3d_model_primitive_begin( id, pr_trianglefan );
+    d3d_model_primitive_begin(id, pr_trianglefan);
     d3d_model_vertex_normal_texture( id, x1,y1,z1, 0,0,-1, 0,0 );
     d3d_model_vertex_normal_texture( id, x1,y2,z1, 0,0,-1, 0,1 );
     d3d_model_vertex_normal_texture( id, x2,y2,z1, 0,0,-1, 1,1 );
     d3d_model_vertex_normal_texture( id, x2,y1,z1, 0,0,-1, 1,0 );
-    d3d_model_primitive_end( id );
+    d3d_model_primitive_end(id);
 
     // Positive Z
-    d3d_model_primitive_begin( id, pr_trianglefan );
+    d3d_model_primitive_begin(id, pr_trianglefan);
     d3d_model_vertex_normal_texture( id, x1,y1,z2, 0,0,1, 0,0 );
     d3d_model_vertex_normal_texture( id, x2,y1,z2, 0,0,1, 1,0 );
     d3d_model_vertex_normal_texture( id, x2,y2,z2, 0,0,1, 1,1 );
     d3d_model_vertex_normal_texture( id, x1,y2,z2, 0,0,1, 0,1 );
-    d3d_model_primitive_end( id );
+    d3d_model_primitive_end(id);
   }
 }
 
@@ -327,4 +1006,4 @@ void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
   }
 }
 
-}
+} // namespace enigma_user
