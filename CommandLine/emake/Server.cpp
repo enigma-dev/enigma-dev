@@ -24,39 +24,41 @@ using namespace buffers;
 class CompilerServiceImpl final : public Compiler::Service {
   public:
   explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options):
-    plugin(plugin), options(options) {
-      // create output streams and redirect standard output to them
-      // this way we can read from the stream and forward to the client
-      std::cout.rdbuf(outstm.rdbuf());
-      std::cerr.rdbuf(errstm.rdbuf());
-    }
+    plugin(plugin), options(options) {}
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
-    // block until the last CompileBuffer rpc finishes
-    if (CompileBufferFuture.valid()) CompileBufferFuture.get();
+    // create output streams and redirect standard output to them
+    // this way we can read from the stream and forward to the client
+    std::stringstream outstm, errstm;
+    std::cout.rdbuf(outstm.rdbuf());
+    std::cerr.rdbuf(errstm.rdbuf());
+
     // use lambda capture to contain compile logic
     auto fnc = [=] {
-      plugin.BuildGame(const_cast<buffers::Game*>(&request->game()), emode_run, request->name().c_str());
+      const CompileRequest req = *request;
+      plugin.BuildGame(const_cast<buffers::Game*>(&req.game()), emode_run, req.name().c_str());
     };
     // asynchronously launch the compile request
-    CompileBufferFuture = std::async(fnc);
+    std::future<void> future = std::async(fnc);
 
-    CompileReply reply;
-    reply.set_message("hello");
-    reply.set_progress(0);
-    writer->Write(reply);
-    return Status::OK;
-  }
+    // provide compile feedback to the client
+    while (future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
+      std::string outstr = "";
+      char buffer[4096];
+      outstm.read(buffer, 4096);
+      if (outstm.fail()) outstm.clear();
+      outstr += buffer;
+      buffer[0] = '\0';
+      if (outstr.empty()) continue;
+      CompileReply reply;
 
-  Status GetOutput(ServerContext* /*context*/, const Empty* /*request*/, ServerWriter<OutputReply>* writer) override {
-    OutputReply reply;
-    // forward all output to the client
-    reply.set_out(outstm.str());
-    reply.set_err(errstm.str());
-    writer->Write(reply);
-    // clear the output buffers now that we've forwarded them to the client
-    outstm.str(std::string());
-    errstm.str(std::string());
+      LogMessage* msg = reply.add_message();
+      msg->set_severity(LogMessage_Severity_FINE);
+      msg->set_message(outstr);
+
+      writer->Write(reply);
+    }
+
     return Status::OK;
   }
 
@@ -173,9 +175,6 @@ class CompilerServiceImpl final : public Compiler::Service {
   private:
   EnigmaPlugin& plugin;
   OptionsParser& options;
-
-  std::stringstream outstm, errstm;
-  std::future<void> CompileBufferFuture;
 };
 
 int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &options) {
