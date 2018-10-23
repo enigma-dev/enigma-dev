@@ -31,15 +31,15 @@ const LogMessage& CallBack::GetFirstLogMessage(bool &end) const {
 }
 
 const LogMessage& CallBack::GetNextLogMessage(bool &end) const {
+  ++logIt;
   if (logIt == logMessages.end()) {
     end = true;
-    // grab the reference value before unlocking
-    const LogMessage& ret = *logIt;
     logMutex.unlock();
-    return ret;
+    return LogMessage();
   } else {
     end = false;
-    return *(++logIt);
+    const LogMessage& ret = *logIt;
+    return ret;
   }
 }
 

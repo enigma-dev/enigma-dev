@@ -42,13 +42,13 @@ class CompilerServiceImpl final : public Compiler::Service {
       reply.mutable_progress()->CopyFrom(ecb.GetProgress());
 
       bool end = false;
-      LogMessage msg = ecb.GetFirstLogMessage(end);
+      const LogMessage& msg = ecb.GetFirstLogMessage(end);
       if (end) continue;
       reply.add_message()->CopyFrom(msg);
       while (true) {
-        msg = ecb.GetNextLogMessage(end);
+        const LogMessage& nxt = ecb.GetNextLogMessage(end);
         if (end) break;
-        reply.add_message()->CopyFrom(msg);
+        reply.add_message()->CopyFrom(nxt);
       }
 
       ecb.ClearLogMessages();
