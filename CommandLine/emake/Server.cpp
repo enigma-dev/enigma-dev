@@ -23,16 +23,10 @@ using namespace buffers;
 
 class CompilerServiceImpl final : public Compiler::Service {
   public:
-  explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options):
-    plugin(plugin), options(options) {}
+  explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options, CallBack &ecb):
+    plugin(plugin), options(options), ecb(ecb) {}
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
-    // create output streams and redirect standard output to them
-    // this way we can read from the stream and forward to the client
-    std::stringstream outstm, errstm;
-    std::cout.rdbuf(outstm.rdbuf());
-    std::cerr.rdbuf(errstm.rdbuf());
-
     // use lambda capture to contain compile logic
     auto fnc = [=] {
       const CompileRequest req = *request;
@@ -43,19 +37,21 @@ class CompilerServiceImpl final : public Compiler::Service {
 
     // provide compile feedback to the client
     while (future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-      std::string outstr = "";
-      char buffer[4096];
-      outstm.read(buffer, 4096);
-      if (outstm.fail()) outstm.clear();
-      outstr += buffer;
-      buffer[0] = '\0';
-      if (outstr.empty()) continue;
       CompileReply reply;
 
-      LogMessage* msg = reply.add_message();
-      msg->set_severity(LogMessage_Severity_FINE);
-      msg->set_message(outstr);
+      reply.mutable_progress()->CopyFrom(ecb.GetProgress());
 
+      bool end = false;
+      LogMessage msg = ecb.GetFirstLogMessage(end);
+      if (end) continue;
+      reply.add_message()->CopyFrom(msg);
+      while (true) {
+        msg = ecb.GetNextLogMessage(end);
+        if (end) break;
+        reply.add_message()->CopyFrom(msg);
+      }
+
+      ecb.ClearLogMessages();
       writer->Write(reply);
     }
 
@@ -175,10 +171,11 @@ class CompilerServiceImpl final : public Compiler::Service {
   private:
   EnigmaPlugin& plugin;
   OptionsParser& options;
+  CallBack &ecb;
 };
 
-int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &options) {
-  CompilerServiceImpl service(plugin, options);
+int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &options, CallBack &ecb) {
+  CompilerServiceImpl service(plugin, options, ecb);
 
   ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());

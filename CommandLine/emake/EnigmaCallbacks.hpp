@@ -6,12 +6,30 @@
 //Should be:
 //#include "backend/EnigmaCallbacks.h"
 
+#include "codegen/server.pb.h"
+
 #include <fstream>
+#include <string>
+#include <vector>
+#include <mutex>
+
+using ProgressMessage = buffers::ProgressMessage;
+using LogMessage = buffers::LogMessage;
 
 class CallBack : public EnigmaCallbacks
 {
 public:
   CallBack();
+  const ProgressMessage& GetProgress() const;
+  const LogMessage& GetFirstLogMessage(bool &end) const;
+  const LogMessage& GetNextLogMessage(bool &end) const;
+  void ClearLogMessages();
+
+private:
+  static ProgressMessage progressMessage;
+  static std::vector<LogMessage> logMessages;
+  static std::vector<LogMessage>::iterator logIt;
+  static std::mutex logMutex;
 
   static void FrameOpen();
   static void AppendFrame(const char*);
