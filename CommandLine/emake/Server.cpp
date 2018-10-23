@@ -16,7 +16,6 @@
 
 #include <memory>
 #include <future>
-#include <sstream>
 
 using namespace grpc;
 using namespace buffers;
