@@ -38,6 +38,8 @@ class CompilerServiceImpl final : public Compiler::Service {
     while (future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
       CompileReply reply;
 
+      ecb.ProcessOutput();
+
       reply.mutable_progress()->CopyFrom(ecb.GetProgress());
 
       bool end = false;

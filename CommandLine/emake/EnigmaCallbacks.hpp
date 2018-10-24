@@ -24,12 +24,14 @@ public:
   const LogMessage& GetFirstLogMessage(bool &end) const;
   const LogMessage& GetNextLogMessage(bool &end) const;
   void ClearLogMessages();
+  void ProcessOutput();
 
 private:
   static ProgressMessage progressMessage;
   static std::vector<LogMessage> logMessages;
   static std::vector<LogMessage>::iterator logIt;
   static std::mutex logMutex;
+  static std::ifstream outFile;
 
   static void FrameOpen();
   static void AppendFrame(const char*);
@@ -40,8 +42,6 @@ private:
   static void ResetRedirect();
   static int Execute(const char*, const char**, bool);
   static Image* CompressImage(char *, int);
-  static void* OutputThread(void*);
-  static std::ifstream _outFile;
 };
 
 #endif

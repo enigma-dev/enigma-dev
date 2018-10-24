@@ -1,9 +1,13 @@
 #include "EnigmaCallbacks.hpp"
 
+#include <sstream>
+#include <iostream>
+
 ProgressMessage CallBack::progressMessage;
 std::vector<LogMessage> CallBack::logMessages;
 std::vector<LogMessage>::iterator CallBack::logIt;
 std::mutex CallBack::logMutex;
+std::ifstream CallBack::outFile;
 
 CallBack::CallBack()
 {
@@ -47,16 +51,43 @@ void CallBack::ClearLogMessages() {
   logMutex.unlock();
 }
 
+void CallBack::ProcessOutput() {
+  if (!outFile.is_open()) return;
+
+  std::string line;
+  std::getline(outFile, line);
+  outFile.clear();
+  if (line.empty()) return;
+
+  LogMessage msg;
+
+  msg.set_severity(LogMessage::FINE);
+  msg.set_message(line);
+
+  logMutex.lock();
+  logMessages.emplace_back(msg);
+  logMutex.unlock();
+}
+
 void CallBack::FrameOpen()
 {
 }
 
 void CallBack::AppendFrame(const char* text)
 {
+  static std::stringstream linestm;
+  std::string line = text;
+  if (line.back() != '\n') {
+    linestm << line;
+    return;
+  }
+  linestm << line.substr(0, line.length() - 1);
+
   LogMessage msg;
 
   msg.set_severity(LogMessage::FINE);
-  msg.set_message(text);
+  msg.set_message(linestm.str());
+  linestm.str("");
 
   logMutex.lock();
   logMessages.emplace_back(msg);
@@ -77,12 +108,14 @@ void CallBack::SetProgressText(const char* text)
   progressMessage.set_message(text);
 }
 
-void CallBack::SetOutFile(const char* /*file*/)
+void CallBack::SetOutFile(const char* file)
 {
+  outFile.open(file);
 }
 
 void CallBack::ResetRedirect()
 {
+  outFile.close();
 }
 
 int CallBack::Execute(const char*, const char**, bool)
