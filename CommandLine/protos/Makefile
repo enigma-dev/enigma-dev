@@ -18,11 +18,9 @@ OBJ_DIR := .eobjs
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 PROTOS := $(call rwildcard,$(SRC_DIR),*.proto)
-PROTOS := $(filter-out ./server.proto, $(PROTOS))
 PROTO_OUT := $(patsubst $(SRC_DIR)/%, $(PROTO_DIR)/%, $(patsubst %.proto, %.pb.cc, $(PROTOS)))
 
 ifeq ($(CLI_ENABLE_SERVER), TRUE)
-	PROTOS += $(SRC_DIR)/server.proto
 	PROTO_OUT += $(PROTO_DIR)/server.grpc.pb.cc
 	PROTO_OBJECTS += $(OBJ_DIR)/codegen/server.o
 	LIBLDFLAGS := -lgrpc++
