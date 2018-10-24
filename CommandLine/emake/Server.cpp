@@ -46,11 +46,10 @@ class CompilerServiceImpl final : public Compiler::Service {
       reply.add_message()->CopyFrom(msg);
       while (true) {
         const LogMessage& nxt = ecb.GetNextLogMessage(end);
-        if (end) break;
+        if (end) { ecb.ClearLogMessages(); break; }
         reply.add_message()->CopyFrom(nxt);
       }
 
-      ecb.ClearLogMessages();
       writer->Write(reply);
     }
 
