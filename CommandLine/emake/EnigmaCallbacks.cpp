@@ -34,7 +34,6 @@ const LogMessage& CallBack::GetNextLogMessage(bool &end) const {
   ++logIt;
   if (logIt == logMessages.end()) {
     end = true;
-    logMutex.unlock();
     return LogMessage();
   } else {
     end = false;
@@ -44,7 +43,6 @@ const LogMessage& CallBack::GetNextLogMessage(bool &end) const {
 }
 
 void CallBack::ClearLogMessages() {
-  logMutex.lock();
   logMessages.clear();
   logMutex.unlock();
 }
