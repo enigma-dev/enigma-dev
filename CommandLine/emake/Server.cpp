@@ -15,20 +15,46 @@
 #include <boost/filesystem.hpp>
 
 #include <memory>
+#include <future>
 
 using namespace grpc;
 using namespace buffers;
 
 class CompilerServiceImpl final : public Compiler::Service {
   public:
-  explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options): plugin(plugin), options(options) {}
+  explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options, CallBack &ecb):
+    plugin(plugin), options(options), ecb(ecb) {}
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
-    plugin.BuildGame(const_cast<buffers::Game*>(&request->game()), emode_run, request->name().c_str());
-    CompileReply reply;
-    reply.set_message("hello");
-    reply.set_progress(0);
-    writer->Write(reply);
+    // use lambda capture to contain compile logic
+    auto fnc = [=] {
+      const CompileRequest req = *request;
+      plugin.BuildGame(const_cast<buffers::Game*>(&req.game()), emode_run, req.name().c_str());
+    };
+    // asynchronously launch the compile request
+    std::future<void> future = std::async(fnc);
+
+    // provide compile feedback to the client
+    while (future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
+      CompileReply reply;
+
+      ecb.ProcessOutput();
+
+      reply.mutable_progress()->CopyFrom(ecb.GetProgress());
+
+      bool end = false;
+      const LogMessage msg = ecb.GetFirstLogMessage(end);
+      if (end) continue;
+      reply.add_message()->CopyFrom(msg);
+      while (true) {
+        const LogMessage nxt = ecb.GetNextLogMessage(end);
+        if (end) { ecb.ClearLogMessages(); break; }
+        reply.add_message()->CopyFrom(nxt);
+      }
+
+      writer->Write(reply);
+    }
+
     return Status::OK;
   }
 
@@ -126,10 +152,9 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
-  Status SetCurrentConfig(ServerContext* /*context*/, const SetCurrentConfigRequest* request, Empty* reply) override {
+  Status SetCurrentConfig(ServerContext* /*context*/, const SetCurrentConfigRequest* request, Empty* /*reply*/) override {
     std::string yaml = this->options.APIyaml(&request->settings());
-    syntax_error* err = plugin.SetDefinitions("", yaml.c_str());
-    reply = new Empty();
+    /*syntax_error* err = */plugin.SetDefinitions("", yaml.c_str());
     return Status::OK;
   }
 
@@ -145,10 +170,11 @@ class CompilerServiceImpl final : public Compiler::Service {
   private:
   EnigmaPlugin& plugin;
   OptionsParser& options;
+  CallBack &ecb;
 };
 
-int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &options) {
-  CompilerServiceImpl service(plugin, options);
+int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &options, CallBack &ecb) {
+  CompilerServiceImpl service(plugin, options, ecb);
 
   ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
