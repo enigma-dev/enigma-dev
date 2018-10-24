@@ -27,7 +27,7 @@ const ProgressMessage& CallBack::GetProgress() const {
 }
 
 const LogMessage& CallBack::GetFirstLogMessage(bool &end) const {
-  if (logMessages.empty()) { end = true; return LogMessage(); }
+  if (logMessages.empty()) { end = true; return std::move(LogMessage()); }
   end = false;
   logMutex.lock();
   logIt = logMessages.begin();
@@ -38,7 +38,7 @@ const LogMessage& CallBack::GetNextLogMessage(bool &end) const {
   ++logIt;
   if (logIt == logMessages.end()) {
     end = true;
-    return LogMessage();
+    return std::move(LogMessage());
   } else {
     end = false;
     const LogMessage& ret = *logIt;
