@@ -57,8 +57,8 @@ int EnigmaPlugin::Load()
 
   // Bind Functions
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-                        // LOL fucking Winblows
-#	define BindFunc(x, y) reinterpret_cast<void*>(GetProcAddress(static_cast<HMODULE>(x), y))
+                        // LOL fucking Winblows warnings
+#	define BindFunc(x, y) reinterpret_cast<void(*)()>(GetProcAddress(static_cast<HMODULE>(x), y))
 #else
 #	define BindFunc(x, y) dlsym(x, y)
 #endif
