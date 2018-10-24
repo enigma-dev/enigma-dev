@@ -154,7 +154,7 @@ class CompilerServiceImpl final : public Compiler::Service {
 
   Status SetCurrentConfig(ServerContext* /*context*/, const SetCurrentConfigRequest* request, Empty* /*reply*/) override {
     std::string yaml = this->options.APIyaml(&request->settings());
-    syntax_error* err = plugin.SetDefinitions("", yaml.c_str());
+    /*syntax_error* err = */plugin.SetDefinitions("", yaml.c_str());
     return Status::OK;
   }
 
