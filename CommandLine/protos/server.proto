@@ -31,24 +31,41 @@ message Resource {
   repeated string parameters = 9;
 }
 
-enum CompileMode {
-  RUN = 1;
-  DEBUG = 2;
-  DESIGN = 3;
-  COMPILE = 4;
-  REBUILD = 5;
-  INVALID = 6;
-}
-
 message CompileRequest {
+  enum CompileMode {
+    UNKNOWN = 0;
+    RUN = 1;
+    DEBUG = 2;
+    DESIGN = 3;
+    COMPILE = 4;
+    REBUILD = 5;
+  }
+
   optional Game game = 1;
   optional string name = 2;
   optional CompileMode mode = 3;
 }
 
+message LogMessage {
+  enum Severity {
+    UNKNOWN = 0;
+    FINE = 1;
+    INFO = 2;
+    WARNING = 3;
+    ERROR = 4;
+  }
+  optional Severity severity = 1; ///< The severity and nature of the message.
+  optional string message = 2; ///< The message to display to the user in the output.
+}
+
+message ProgressMessage {
+  optional float progress = 1; ///< In range 1-100 (you can use 0-1, but take a stance, here)
+  optional string message = 2; ///< The message to display inside of or after the progress bar.
+}
+
 message CompileReply {
-  optional string message = 1;
-  optional int32 progress = 2;
+  repeated LogMessage message = 1; ///< Compilation messages logged since the last update.
+  optional ProgressMessage progress = 2; ///< Current compilation progress.
 }
 
 message SyntaxError {

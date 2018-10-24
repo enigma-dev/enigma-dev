@@ -3,4 +3,4 @@
 
 #include <string>
 
-int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser& options);
+int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser& options, CallBack &ecb);

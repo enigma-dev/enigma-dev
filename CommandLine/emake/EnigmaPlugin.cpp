@@ -45,7 +45,7 @@ int EnigmaPlugin::Load()
 #endif
 
   std::string pluginName = "./" + prefix + "compileEGMf" + extension;
-  
+
   _handle = dlopen(pluginName.c_str(), RTLD_LAZY);
 
   if (!_handle)
@@ -57,7 +57,8 @@ int EnigmaPlugin::Load()
 
   // Bind Functions
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-#	define BindFunc(x, y) GetProcAddress(static_cast<HMODULE>(x), y)
+                        // LOL fucking Winblows warnings
+#	define BindFunc(x, y) reinterpret_cast<void(*)()>(GetProcAddress(static_cast<HMODULE>(x), y))
 #else
 #	define BindFunc(x, y) dlsym(x, y)
 #endif
@@ -83,10 +84,9 @@ int EnigmaPlugin::Load()
   return PLUGIN_SUCCESS;
 }
 
-const char* EnigmaPlugin::Init()
+const char* EnigmaPlugin::Init(CallBack *ecb)
 {
-  CallBack ecb;
-  return plugin_Init(&ecb);
+  return plugin_Init(ecb);
 }
 
 syntax_error* EnigmaPlugin::SetDefinitions(const char* def, const char* yaml)
@@ -171,29 +171,29 @@ void EnigmaPlugin::PrintBuiltins(std::string& fName)
   std::vector<std::string> types;
   std::vector<std::string> globals;
   std::map<std::string, std::string> functions;
-  
+
   const char* currentResource = plugin_FirstResource();
   while (!plugin_ResourcesAtEnd()) {
-    
+
     if (plugin_ResourceIsFunction()) {
       //for (int i = 0; i < plugin_ResourceOverloadCount(); i++) // FIXME: JDI can't print overloads
         functions[currentResource] = plugin_ResourceParameters(0);
     }
-    
+
     if (plugin_ResourceIsGlobal())
       globals.push_back(currentResource);
-      
+
     if (plugin_ResourceIsTypeName())
       types.push_back(currentResource);
-    
+
     currentResource = plugin_NextResource();
   }
 
   std::sort(types.begin(), types.end());
-  
+
   std::ostream out(std::cout.rdbuf());
   std::filebuf fb;
-  
+
   if (!fName.empty()) {
     std::cout << "Writing builtins..." << std::endl;
     fb.open(fName.c_str(), std::ios::out);
@@ -203,20 +203,19 @@ void EnigmaPlugin::PrintBuiltins(std::string& fName)
   out << "[Types]" << std::endl;
   for (const std::string& t : types)
     out << t << std::endl;
-  
+
   std::sort(globals.begin(), globals.end());
-  
+
   out << "[Globals]" << std::endl;
   for (const std::string& g : globals)
     out << g << std::endl;
-  
+
   out << "[Functions]" << std::endl;
   for (const auto& f : functions)
     out << f.second << std::endl;
-    
+
   if (!fName.empty()) {
     fb.close();
     std::cout << "Done writing builtins" << std::endl;
   }
 }
-
