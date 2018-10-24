@@ -26,23 +26,22 @@ const ProgressMessage& CallBack::GetProgress() const {
   return progressMessage;
 }
 
-const LogMessage& CallBack::GetFirstLogMessage(bool &end) const {
-  if (logMessages.empty()) { end = true; return std::move(LogMessage()); }
+const LogMessage CallBack::GetFirstLogMessage(bool &end) const {
+  if (logMessages.empty()) { end = true; return LogMessage(); }
   end = false;
   logMutex.lock();
   logIt = logMessages.begin();
   return *logIt;
 }
 
-const LogMessage& CallBack::GetNextLogMessage(bool &end) const {
+const LogMessage CallBack::GetNextLogMessage(bool &end) const {
   ++logIt;
   if (logIt == logMessages.end()) {
     end = true;
-    return std::move(LogMessage());
+    return LogMessage();
   } else {
     end = false;
-    const LogMessage& ret = *logIt;
-    return ret;
+    return *logIt;
   }
 }
 

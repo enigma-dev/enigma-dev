@@ -21,8 +21,8 @@ class CallBack : public EnigmaCallbacks
 public:
   CallBack();
   const ProgressMessage& GetProgress() const;
-  const LogMessage& GetFirstLogMessage(bool &end) const;
-  const LogMessage& GetNextLogMessage(bool &end) const;
+  const LogMessage GetFirstLogMessage(bool &end) const;
+  const LogMessage GetNextLogMessage(bool &end) const;
   void ClearLogMessages();
   void ProcessOutput();
 
