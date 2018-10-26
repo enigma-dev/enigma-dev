@@ -3,7 +3,13 @@
 
 Name: DlgMod
 Identifier: DlgMod
-Build-Platforms: Windows
+Build-Platforms: Windows, SDL
 Represents:
-Description: Create native widgets using "DialogModule.dll" on Windows, found under "[YourEnigmaFolder]\enigma-dev\ENIGMAsystem\SHELL\Widget_Systems\DialogModule\". In that folder, there are two subfolders. Use the DLL in the folder whose named after the target architecture of your executable, as the DLL is built for both x86 and x64. You will need to copy this DLL manually to the same directory as your game and will also need to distribute it likewise with your game, preferably in a ZIP archive. Official repository: https://github.com/time-killer-games/DialogModule
+Description: Create native widgets using "DialogModule.dll" on Windows. 
+
+License, documentation, and install instructions: 
+https://enigma-dev.org/docs/Wiki/Dialogs#DlgMod
+
+
+
 Author: Samuel Venable
