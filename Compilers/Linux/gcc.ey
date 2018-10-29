@@ -14,7 +14,7 @@ Make-Vars:
   cppflags:
   cxxflags: -std=c++11
   cflags:
-  ldflags:
+  ldflags: -no-pie
   links:
 
 Parser-Vars:
