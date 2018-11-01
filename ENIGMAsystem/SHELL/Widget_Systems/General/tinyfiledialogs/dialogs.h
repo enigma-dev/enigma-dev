@@ -1,4 +1,3 @@
-#include <tinyfiledialogs/tinyfiledialogs.h>
 #include <string>
 
 namespace enigma
