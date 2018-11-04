@@ -150,14 +150,14 @@ inline void write_exe_info(const std::string codegen_directory, const EnigmaStru
 
 #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
 
-inline int compile_append_resources(std::string gameFname, EnigmaStruct *es) {
+inline int compile_append_resources(const char* gameFname, EnigmaStruct *es) {
   FILE *gameModule;
   int resourceblock_start = 0;
   std::string resfile = compilerInfo.exe_vars["RESOURCES"];
   cout << "`" << resfile << "` == '$exe': " << (resfile == "$exe"?"true":"FALSE") << endl;
   if (resfile == "$exe")
   {
-    gameModule = fopen(gameFname.c_str(),"ab");
+    gameModule = fopen(gameFname,"ab");
     if (!gameModule) {
       user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
       idpr("Failed to add resources.",-1); return 12;
@@ -214,6 +214,43 @@ inline int compile_append_resources(std::string gameFname, EnigmaStruct *es) {
   return 0;
 }
 
+inline void compile_run_game(const char* gameFname, EnigmaStruct *es, const char* exe_filename, int mode) {
+  // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
+  // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
+  // The working_directory global is set in the main() of each platform using the platform specific function.
+  // This the exact behaviour of GM8.1
+  std::vector<char> prevdir(size_t(4096));
+  string newdir = (es->filename != NULL && strlen(es->filename) > 0) ? string(es->filename) : string( exe_filename );
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    if (newdir[0] == '/' || newdir[0] == '\\') {
+      newdir = newdir.substr(1, newdir.size());
+    }
+  #endif
+  newdir = newdir.substr( 0, newdir.find_last_of( "\\/" ));
+
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+  GetCurrentDirectory( 4096, prevdir.data() );
+  SetCurrentDirectory(newdir.c_str());
+  #else
+  getcwd (prevdir.data(), 4096);
+  chdir(newdir.c_str());
+  #endif
+
+  string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
+  rprog = string_replace_all(rprog,"$game",gameFname);
+  rparam = string_replace_all(rparam,"$game",gameFname);
+  user << "Running \"" << rprog << "\" " << rparam << flushl;
+  int gameres = e_execs(rprog, rparam);
+  user << "\n\nGame returned " << gameres << "\n";
+
+  // Restore the compilers original working directory.
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+  SetCurrentDirectory(prevdir.data());
+  #else
+  chdir(prevdir.data());
+  #endif
+}
+
 #include "System/builtins.h"
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
@@ -228,7 +265,6 @@ dllexport void log_make_to_console() { redirect_make = false; }
 
 int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
-
   cout << "Initializing dialog boxes" << endl;
   ide_dia_clear();
   ide_dia_open();
@@ -749,46 +785,13 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     "Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
   #endif
 
-  int ret = compile_append_resources(gameFname, es);
+  int ret = compile_append_resources(gameFname.c_str(), es);
   if (ret) return ret;
 
   // Run the game if requested
   if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
   {
-    // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
-    // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
-    // The working_directory global is set in the main() of each platform using the platform specific function.
-    // This the exact behaviour of GM8.1
-    std::vector<char> prevdir(size_t(4096));
-    string newdir = (es->filename != NULL && strlen(es->filename) > 0) ? string(es->filename) : string( exe_filename );
-    #if CURRENT_PLATFORM_ID == OS_WINDOWS
-      if (newdir[0] == '/' || newdir[0] == '\\') {
-        newdir = newdir.substr(1, newdir.size());
-      }
-    #endif
-    newdir = newdir.substr( 0, newdir.find_last_of( "\\/" ));
-
-    #if CURRENT_PLATFORM_ID == OS_WINDOWS
-    GetCurrentDirectory( 4096, prevdir.data() );
-    SetCurrentDirectory(newdir.c_str());
-    #else
-    getcwd (prevdir.data(), 4096);
-    chdir(newdir.c_str());
-    #endif
-
-    string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
-    rprog = string_replace_all(rprog,"$game",gameFname);
-    rparam = string_replace_all(rparam,"$game",gameFname);
-    user << "Running \"" << rprog << "\" " << rparam << flushl;
-    int gameres = e_execs(rprog, rparam);
-    user << "\n\nGame returned " << gameres << "\n";
-
-    // Restore the compilers original working directory.
-    #if CURRENT_PLATFORM_ID == OS_WINDOWS
-    SetCurrentDirectory(prevdir.data());
-    #else
-    chdir(prevdir.data());
-    #endif
+    compile_run_game(gameFname.c_str(), es, exe_filename, mode);
   }
 
   idpr("Done.", 100);
