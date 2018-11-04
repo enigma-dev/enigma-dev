@@ -227,10 +227,8 @@ void screen_redraw()
   }
   else
   {
-    //TODO: Possibly implement view option from Stupido to control which view clears the background
-    // Only clear the background on the first visible view by checking if it hasn't been cleared yet
-    bool draw_backs = true;
-    bool background_allviews = true; // FIXME: Create a setting for this.
+    // update object following first in case the user accesses
+    // a view other than the current one in the draw event
     for (view_current = 0; view_current < 8; view_current++)
     {
       int vc = (int)view_current;
@@ -240,6 +238,17 @@ void screen_redraw()
       int vob = (int)view_object[vc];
       if (vob != -1)
         follow_object(vob, vc);
+    }
+
+    //TODO: Possibly implement view option from Stupido to control which view clears the background
+    // Only clear the background on the first visible view by checking if it hasn't been cleared yet
+    bool draw_backs = true;
+    bool background_allviews = true; // FIXME: Create a setting for this.
+    for (view_current = 0; view_current < 8; view_current++)
+    {
+      int vc = (int)view_current;
+      if (!view_visible[vc])
+        continue;
 
       screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
 
