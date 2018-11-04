@@ -333,6 +333,8 @@ static GmObject* objects;
 static Room* rooms;
 static Include* includes;
 
+static size_t sprite, sound, background, path, script, shader, font, timeline, object, room, include;
+
 template<typename T>
 T* AllocateGroup(T** group, int &count, buffers::TreeNode::TypeCase typeCase) {
   count = countMap[typeCase];
@@ -341,6 +343,10 @@ T* AllocateGroup(T** group, int &count, buffers::TreeNode::TypeCase typeCase) {
 
 EnigmaStruct* Proto2ES(buffers::Game* protobuf) {
   using TypeCase = buffers::TreeNode::TypeCase;
+
+  idMap.clear();
+  countMap.clear();
+  sprite = 0, sound = 0, background = 0, path = 0, script = 0, shader = 0, font = 0, timeline = 0, object = 0, room = 0, include = 0;
 
   EnigmaStruct *es = new EnigmaStruct();
 
@@ -380,7 +386,6 @@ EnigmaStruct* Proto2ES(buffers::Game* protobuf) {
 }
 
 void AddSprite(const char* name, const buffers::resources::Sprite& spr) {
-  static size_t sprite = 0;
   Sprite& s = sprites[sprite++];
 
   s.name = name;
@@ -414,7 +419,6 @@ void AddSprite(const char* name, const buffers::resources::Sprite& spr) {
 }
 
 void AddSound(const char* name, const buffers::resources::Sound& snd) {
-  static size_t sound = 0;
   Sound& s = sounds[sound++];
 
   s.name = name;
@@ -446,7 +450,6 @@ void AddSound(const char* name, const buffers::resources::Sound& snd) {
 }
 
 void AddBackground(const char* name, const buffers::resources::Background& bkg) {
-  static size_t background = 0;
   Background& b = backgrounds[background++];
 
   b.name = name;
@@ -468,7 +471,6 @@ void AddBackground(const char* name, const buffers::resources::Background& bkg) 
 }
 
 void AddPath(const char* name, const buffers::resources::Path& pth) {
-  static size_t path = 0;
   Path& p = paths[path++];
 
   p.name = name;
@@ -501,7 +503,6 @@ PathPoint AddPathPoint(const buffers::resources::Path::Point& pnt) {
 }
 
 void AddScript(const char* name, const buffers::resources::Script& scr) {
-  static size_t script = 0;
   Script& s = scripts[script++];
 
   s.name = name;
@@ -511,7 +512,6 @@ void AddScript(const char* name, const buffers::resources::Script& scr) {
 }
 
 void AddShader(const char* name, const buffers::resources::Shader& shr) {
-  static size_t shader = 0;
   Shader& s = shaders[shader++];
 
   s.name = name;
@@ -524,7 +524,6 @@ void AddShader(const char* name, const buffers::resources::Shader& shr) {
 }
 
 void AddFont(const char* name, const buffers::resources::Font& fnt) {
-  static size_t font = 0;
   Font& f = fonts[font++];
 
   f.name = name;
@@ -547,7 +546,6 @@ void AddFont(const char* name, const buffers::resources::Font& fnt) {
 }
 
 void AddTimeline(const char* name, buffers::resources::Timeline* tml) {
-  static size_t timeline = 0;
   Timeline& t = timelines[timeline++];
 
   t.name = name;
@@ -568,7 +566,6 @@ void AddTimeline(const char* name, buffers::resources::Timeline* tml) {
 }
 
 void AddObject(const char* name, buffers::resources::Object* obj) {
-  static size_t object = 0;
   GmObject& o = objects[object++];
 
   o.name = name;
@@ -615,7 +612,6 @@ void AddObject(const char* name, buffers::resources::Object* obj) {
 }
 
 void AddRoom(const char* name, const buffers::resources::Room& rm) {
-  static size_t room = 0;
   Room& r = rooms[room++];
 
   r.name = name;
@@ -734,7 +730,6 @@ BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg)
 }
 
 void AddInclude(const char* /*name*/, const buffers::resources::Include& inc) {
-  static size_t include = 0;
   Include& i = includes[include++];
 
   i.filepath = inc.file_name().c_str();
