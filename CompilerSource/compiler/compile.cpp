@@ -148,6 +148,72 @@ inline void write_exe_info(const std::string codegen_directory, const EnigmaStru
   wto.close();
 }
 
+#define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
+
+inline int compile_append_resources(std::string gameFname, EnigmaStruct *es) {
+  FILE *gameModule;
+  int resourceblock_start = 0;
+  std::string resfile = compilerInfo.exe_vars["RESOURCES"];
+  cout << "`" << resfile << "` == '$exe': " << (resfile == "$exe"?"true":"FALSE") << endl;
+  if (resfile == "$exe")
+  {
+    gameModule = fopen(gameFname.c_str(),"ab");
+    if (!gameModule) {
+      user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
+      idpr("Failed to add resources.",-1); return 12;
+    }
+
+    fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
+    resourceblock_start = ftell(gameModule);
+
+    if (resourceblock_start < 128) {
+      user << "Compiled game is clearly not a working module; cannot continue" << flushl;
+      idpr("Failed to add resources.",-1); return 13;
+    }
+  }
+  else
+  {
+    string resname = resfile;
+    for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
+      resname.replace(p,4,gameFname);
+    gameModule = fopen(resname.c_str(),"wb");
+    if (!gameModule) {
+      user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
+      idpr("Failed to write resources.",-1); return 12;
+    }
+  }
+
+  // Start by setting off our location with a DWord of NULLs
+  fwrite("\0\0\0",1,4,gameModule);
+
+  idpr("Adding Sprites",90);
+
+  int res = current_language->module_write_sprites(es, gameModule);
+  irrr();
+
+  edbg << "Finalized sprites." << flushl;
+  idpr("Adding Sounds",93);
+
+  current_language->module_write_sounds(es,gameModule);
+
+  current_language->module_write_backgrounds(es,gameModule);
+
+  current_language->module_write_fonts(es,gameModule);
+
+  current_language->module_write_paths(es,gameModule);
+
+  // Tell where the resources start
+  fwrite("\0\0\0\0res0",8,1,gameModule);
+  fwrite(&resourceblock_start,4,1,gameModule);
+
+  // Close the game module; we're done adding resources
+  idpr("Closing game module and running if requested.",99);
+  edbg << "Closing game module and running if requested." << flushl;
+  fclose(gameModule);
+
+  return 0;
+}
+
 #include "System/builtins.h"
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
@@ -167,7 +233,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   ide_dia_clear();
   ide_dia_open();
   cout << "Initialized." << endl;
-  
+
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
   string compilepath = CURRENT_PLATFORM_NAME "/" + compilerInfo.target_platform + "/" + name;
@@ -310,7 +376,6 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   used_funcs::zero();
 
   int res;
-  #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
 
   //The parser (and, to some extent, the compiler) needs knowledge of script names for various optimizations.
   std::set<std::string> script_names;
@@ -618,7 +683,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
   make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
   make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
-  
+
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")
       make += key.first + "=\"" + key.second + "\" ";
@@ -684,65 +749,8 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     "Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
   #endif
 
-  FILE *gameModule;
-  int resourceblock_start = 0;
-  std::string resfile = compilerInfo.exe_vars["RESOURCES"];
-  cout << "`" << resfile << "` == '$exe': " << (resfile == "$exe"?"true":"FALSE") << endl;
-  if (resfile == "$exe")
-  {
-    gameModule = fopen(gameFname.c_str(),"ab");
-    if (!gameModule) {
-      user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
-      idpr("Failed to add resources.",-1); return 12;
-    }
-
-    fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
-    resourceblock_start = ftell(gameModule);
-
-    if (resourceblock_start < 128) {
-      user << "Compiled game is clearly not a working module; cannot continue" << flushl;
-      idpr("Failed to add resources.",-1); return 13;
-    }
-  }
-  else
-  {
-    string resname = resfile;
-    for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
-      resname.replace(p,4,gameFname);
-    gameModule = fopen(resname.c_str(),"wb");
-    if (!gameModule) {
-      user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
-      idpr("Failed to write resources.",-1); return 12;
-    }
-  }
-
-  // Start by setting off our location with a DWord of NULLs
-  fwrite("\0\0\0",1,4,gameModule);
-
-  idpr("Adding Sprites",90);
-
-  res = current_language->module_write_sprites(es, gameModule);
-  irrr();
-
-  edbg << "Finalized sprites." << flushl;
-  idpr("Adding Sounds",93);
-
-  current_language->module_write_sounds(es,gameModule);
-
-  current_language->module_write_backgrounds(es,gameModule);
-
-  current_language->module_write_fonts(es,gameModule);
-
-  current_language->module_write_paths(es,gameModule);
-
-  // Tell where the resources start
-  fwrite("\0\0\0\0res0",8,1,gameModule);
-  fwrite(&resourceblock_start,4,1,gameModule);
-
-  // Close the game module; we're done adding resources
-  idpr("Closing game module and running if requested.",99);
-  edbg << "Closing game module and running if requested." << flushl;
-  fclose(gameModule);
+  int ret = compile_append_resources(gameFname, es);
+  if (ret) return ret;
 
   // Run the game if requested
   if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
