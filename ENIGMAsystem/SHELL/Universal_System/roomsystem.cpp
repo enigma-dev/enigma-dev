@@ -82,20 +82,20 @@ namespace enigma
   {
     using namespace enigma_user;
     object_basic *instanceexists = fetch_instance_by_int(vob);
-  
+
     if (instanceexists)
     {
       object_planar* vobr = (object_planar*)instanceexists;
-  
+
       double vobx = vobr->x, voby = vobr->y;
-  
+
       //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
       //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
-  
+
       double vbc_h, vbc_v;
       (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
       (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
-  
+
       if (view_hspeed[vc] == -1)
       {
         if (vobx < view_xview[vc] + vbc_h)
@@ -118,7 +118,7 @@ namespace enigma
             view_xview[vc] = vobx + vbc_h - view_wview[vc];
         }
       }
-  
+
       if (view_vspeed[vc] == -1)
       {
         if (voby < view_yview[vc] + vbc_v)
@@ -141,19 +141,19 @@ namespace enigma
             view_yview[vc] = voby + vbc_v - view_hview[vc];
         }
       }
-  
+
       if (view_xview[vc] < 0)
         view_xview[vc] = 0;
       else if (view_xview[vc] > room_width - view_wview[vc])
         view_xview[vc] = room_width - view_wview[vc];
-  
+
       if (view_yview[vc] < 0)
         view_yview[vc] = 0;
       else if (view_yview[vc] > room_height - view_hview[vc])
         view_yview[vc] = room_height - view_hview[vc];
     }
   }
-  
+
 
   void roomstruct::end() {
     // Fire the Room End event.
@@ -218,29 +218,6 @@ namespace enigma
     }
     //Backgrounds end
 
-    view_enabled = views_enabled;
-
-    // Initialize view variants so they do not throw uninitialized variable access errors.
-    for (unsigned i=0;i<8;i++) {
-      view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
-      view_xport[i] = views[i].port_x; view_yport[i] = views[i].port_y; view_wport[i] = views[i].port_w; view_hport[i] = views[i].port_h;
-      view_object[i] = views[i].object2follow;
-      view_hborder[i] = views[i].hborder; view_vborder[i] = views[i].vborder; view_hspeed[i] = views[i].hspd; view_vspeed[i] = views[i].vspd;
-      view_visible[i] = (bool)views[i].start_vis;
-      view_angle[i] = 0;
-    }
-
-    //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
-    //if the window size changes.
-    enigma_user::window_default(true);
-    enigma_user::io_clear();
-    // we only initialize the screen and clear the window color during game start
-    // NOTE: no version of GM has EVER reset the drawing color or alpha during room transition
-    if (gamestart) {
-      enigma_user::screen_init();
-      enigma_user::screen_refresh();
-    }
-
     //Load tiles
     delete_tiles();
     for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
@@ -267,6 +244,32 @@ namespace enigma
     }
 
     instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+
+    // Initialize view variants so they do not throw uninitialized variable access errors.
+    view_enabled = views_enabled;
+    for (unsigned i=0;i<8;i++) {
+      view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
+      view_xport[i] = views[i].port_x; view_yport[i] = views[i].port_y; view_wport[i] = views[i].port_w; view_hport[i] = views[i].port_h;
+      view_object[i] = views[i].object2follow;
+      view_hborder[i] = views[i].hborder; view_vborder[i] = views[i].vborder; view_hspeed[i] = views[i].hspd; view_vspeed[i] = views[i].vspd;
+      view_visible[i] = (bool)views[i].start_vis;
+      view_angle[i] = 0;
+      // do the object follow once to initialize the view correctly
+      int vob = (int)view_object[i];
+      if (vob != -1)
+        follow_object(vob, i);
+    }
+
+    //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
+    //if the window size changes.
+    enigma_user::window_default(true);
+    enigma_user::io_clear();
+    // we only initialize the screen and clear the window color during game start
+    // NOTE: no version of GM has EVER reset the drawing color or alpha during room transition
+    if (gamestart) {
+      enigma_user::screen_init();
+      enigma_user::screen_refresh();
+    }
 
     // Fire the rooms preCreation code. This code includes instance sprite transformations added in the room editor.
     // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
