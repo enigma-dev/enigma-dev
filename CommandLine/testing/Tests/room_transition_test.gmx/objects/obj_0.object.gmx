@@ -31,12 +31,41 @@
 
     draw_set_color(c_red);
     draw_set_alpha(0.2);
-    room_goto(rm_1);
 } else if (room == rm_1) {
     // ensure that room transition did NOT reset color/alpha
     // GM does not reset ANY render state when changing rooms
     gtest_assert_eq(draw_get_color(), c_red);
     gtest_assert_eq_eps(draw_get_alpha(), 0.2);
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="0" eventtype="8">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>if (room == rm_0 && view_current == 0) {
+	// ensure that the object following of
+	// all views is updated prior to draw events
+	gtest_assert_eq(view_yview[0], 7);
+	gtest_assert_eq(view_yview[1], 7);
+
+	room_goto(rm_1);
 }
 </string>
           </argument>
