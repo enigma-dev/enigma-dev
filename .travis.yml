@@ -15,7 +15,6 @@ before_install:
     set -eo pipefail
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
       sudo add-apt-repository -y ppa:mhier/libboost-latest;
       sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
       sudo apt-get -y install build-essential zlib1g-dev libboost1.67-dev \
@@ -31,7 +30,6 @@ before_install:
           sudo apt-get -y install gcc-multilib g++-multilib;
         fi
 
-        sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include;
       elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
         sudo apt-get -y install mingw-w64 wine;
         curl -L https://github.com/enigma-dev/enigma-dev/files/2431000/enigma-libs.zip > enigma-libs.zip;
@@ -89,7 +87,8 @@ install:
 
 # by default most of our jobs will be run on a linux instance
 os: linux
-group: travis_latest
+dist: xenial
+group: edge
 compiler: gcc
 language: cpp
 
