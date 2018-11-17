@@ -11,7 +11,7 @@ else
 endif
 
 LIBRARY := ../../libProtocols$(EXT)
-PROTO_DIR := codegen/
+PROTO_DIR := codegen
 CXXFLAGS := -I$(PROTO_DIR) -std=c++11 -Wall -Wextra -Wpedantic -g -fPIC
 SRC_DIR := .
 OBJ_DIR := .eobjs
