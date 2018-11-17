@@ -160,7 +160,7 @@ dllexport void ide_handles_game_launch() { run_game = false; }
 static bool redirect_make = true;
 dllexport void log_make_to_console() { redirect_make = false; }
 
-bool ends_with(std::string const &fullString, std::string const &ending) {
+static bool ends_with(std::string const &fullString, std::string const &ending) {
     if (fullString.length() < ending.length())
       return false;
 
