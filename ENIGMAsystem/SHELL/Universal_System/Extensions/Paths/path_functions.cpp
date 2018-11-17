@@ -31,6 +31,7 @@
 #include <floatcomp.h>
 #include <cmath>
 
+#include "Graphics_Systems/General/GScurves.h" // for draw_path
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Universal_System/math_consts.h"
 
