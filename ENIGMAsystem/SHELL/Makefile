@@ -72,14 +72,14 @@ else ifeq ($(GMODE), Compile)
 
 	# Disable PIE when possible
 	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
-		CFLAGS += -fno-pie
-		LINKFLAGS += -no-pie
-		LDFLAGS += -no-pie
+		override CFLAGS += -fno-pie
+		override LDLIBS += -no-pie
+		override LDFLAGS += -no-pie
 	endif
 	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
-		CFLAGS += -fno-pie
-		LINKFLAGS += -nopie
-		LDFLAGS += -nopie
+		override CFLAGS += -fno-pie
+		override LDLIBS += -nopie
+		override LDFLAGS += -nopie
 	endif
 else
 	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
