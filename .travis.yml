@@ -19,7 +19,7 @@ before_install:
       sudo add-apt-repository -y ppa:mhier/libboost-latest;
       sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
       sudo apt-get -y install build-essential zlib1g-dev libboost1.67-dev \
-        libprotobuf-dev protobuf-compiler libglm-dev libpng-dev;
+        libprotobuf-dev protobuf-compiler libglm-dev;
 
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
@@ -38,7 +38,7 @@ before_install:
         unzip enigma-libs.zip -d ENIGMAsystem/;
         mv ENIGMAsystem/Install ENIGMAsystem/Additional;
       else
-        sudo apt-get -y install libc++-dev libglew-dev libglu1-mesa-dev;
+        sudo apt-get -y install libc++-dev libglew-dev libpng-dev libglu1-mesa-dev;
       fi
 
       if [ "$AUDIO" == "OpenAL" ]; then
