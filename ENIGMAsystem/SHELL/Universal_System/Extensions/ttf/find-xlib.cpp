@@ -3,6 +3,7 @@
 #include <X11/Xlib.h>
 
 #include <climits>
+#include <cstring>
 
 namespace enigma {
 
