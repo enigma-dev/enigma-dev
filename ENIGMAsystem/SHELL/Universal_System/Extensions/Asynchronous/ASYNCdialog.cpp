@@ -43,7 +43,7 @@ namespace enigma {
 namespace {
 
 static void fireAsyncDialogEvent() {
-  enigma::instance_event_iterator = new enigma::inst_iter(NULL,NULL,NULL);
+  enigma::instance_event_iterator = &enigma::dummy_event_iterator;
   for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
   {
     enigma::object_basic* const inst = ((enigma::object_basic*)*it);

@@ -156,7 +156,7 @@ namespace enigma
 
   void roomstruct::end() {
     // Fire the Room End event.
-    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+    instance_event_iterator = &dummy_event_iterator;
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
       it->myevent_roomend();
     }
@@ -265,7 +265,7 @@ namespace enigma
       }
     }
 
-    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+    instance_event_iterator = &dummy_event_iterator;
 
     // Fire the rooms preCreation code. This code includes instance sprite transformations added in the room editor.
     // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).

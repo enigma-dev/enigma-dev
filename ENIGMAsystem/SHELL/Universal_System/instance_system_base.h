@@ -74,6 +74,7 @@ namespace enigma
   extern event_iter *events;
   extern objectid_base *objects;
   extern object_basic *ENIGMA_global_instance;
+  extern inst_iter dummy_event_iterator;
   extern inst_iter *instance_event_iterator;
   extern object_basic *instance_other;
 
