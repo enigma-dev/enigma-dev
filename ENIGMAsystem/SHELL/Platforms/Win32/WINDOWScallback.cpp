@@ -72,7 +72,7 @@ namespace enigma
       case WM_CREATE:
         return 0;
       case WM_CLOSE:
-        instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+        instance_event_iterator = &dummy_event_iterator;
         for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
         {
           it->myevent_closebutton();
@@ -114,7 +114,7 @@ namespace enigma
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
           }
-          instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+          instance_event_iterator = &dummy_event_iterator;
           for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
           {
             ((object_graphics*)*it)->myevent_drawresize();
