@@ -26,10 +26,9 @@
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 
-#include <windows.h>
-#include <wchar.h>
+#include <cwchar>
 
-typedef std::basic_string<WCHAR> tstring;
+typedef std::basic_string<wchar_t> tstring;
 tstring widen(const std::string &str);
 std::string shorten(tstring str);
 

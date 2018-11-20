@@ -22,12 +22,7 @@
 #include "Platforms/General/PFmain.h"
 
 #include <windows.h>
-#include <wchar.h>
 #include <string>
-
-typedef std::basic_string<WCHAR> tstring;
-tstring widen(const std::string &str);
-std::string shorten(tstring str);
 
 namespace enigma //TODO: Find where this belongs
 {
