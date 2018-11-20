@@ -7,7 +7,9 @@
     <background>background\bkg_0</background>
   </backgrounds>
   <paths name="paths"/>
-  <scripts name="scripts"/>
+  <scripts name="scripts">
+    <script>scripts\time.gml</script>
+  </scripts>
   <shaders name="shaders"/>
   <fonts name="fonts"/>
   <timelines name="timelines"/>
