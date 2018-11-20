@@ -22,7 +22,6 @@
 #include "Platforms/General/PFmain.h"
 
 #include <windows.h>
-#include <string>
 
 namespace enigma //TODO: Find where this belongs
 {
