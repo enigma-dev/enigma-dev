@@ -62,7 +62,7 @@ static const char ldgrs[256] = {
   1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0
 };
 
-static const std::string base64_chars =
+static const std::string base64_chars = 
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
@@ -81,7 +81,7 @@ string base64_encode(string const& str) {
   int in_ = 0;
   unsigned char char_array_3[3];
   unsigned char char_array_4[4];
-
+  
   while (in_len--) {
     char_array_3[i++] = str[in_]; in_++;
     if (i == 3) {
@@ -168,20 +168,20 @@ int ord(string str)  { return str[0]; }
 size_t string_length(string str) { return str.length(); }
 size_t string_length(const char* str) { return strlen(str); }
 
-size_t string_length_utf8(string str) {
-  size_t res = 0;
-  for (size_t i = 0; i < str.length(); ++i)
-    if ((str[i] & 0xC0) != 0x80)
-      ++res;
-  return res;
+size_t string_length_utf8(string str) { 
+  size_t res = 0; 
+  for (size_t i = 0; i < str.length(); ++i) 
+    if ((str[i] & 0xC0) != 0x80) 
+      ++res; 
+  return res; 
 }
 
-size_t string_length_utf8(const char* str) {
-  size_t res = 0;
-  for (size_t i = 0; str[i]; ++i)
-    if ((str[i] & 0xC0) != 0x80)
-      ++res;
-  return res;
+size_t string_length_utf8(const char* str) { 
+  size_t res = 0; 
+  for (size_t i = 0; str[i]; ++i) 
+    if ((str[i] & 0xC0) != 0x80) 
+      ++res; 
+  return res; 
 }
 
 size_t string_pos(string substr,string str) {
