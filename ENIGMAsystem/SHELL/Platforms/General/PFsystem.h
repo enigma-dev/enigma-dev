@@ -50,7 +50,7 @@ enum {
   browser_windows_store = 7,
 };
 
-extern int os_browser;
+extern const int os_browser;
 
 string os_get_config();
 int os_get_info();

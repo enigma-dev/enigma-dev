@@ -99,7 +99,7 @@ int enigma_main(int argc, char** argv) {
 
 namespace enigma_user {
 
-int os_browser = browser_not_a_browser;
+const int os_browser = browser_not_a_browser;
 std::string working_directory = "";
 std::string program_directory = "";
 std::string keyboard_string = "";
