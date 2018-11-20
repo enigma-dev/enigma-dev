@@ -231,6 +231,11 @@ y0 = 2;
 y1 = 3;
 yn = 4;
 
+// This one conflicts with the Linux time() function
+timer = 0
+time = 1
+gtest_assert_lt(time, timer);
+
 cons_show_message("Test end!");
 
 game_end();
