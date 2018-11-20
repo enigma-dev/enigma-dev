@@ -18,7 +18,6 @@
 #ifndef ENIGMA_XLIB_WINDOW_H
 #define ENIGMA_XLIB_WINDOW_H
 
-#include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
 
 #include <X11/Xlib.h>
