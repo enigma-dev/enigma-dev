@@ -31,22 +31,6 @@ namespace enigma //TODO: Find where this belongs
   extern HANDLE mainthread;
 }
 
-namespace enigma_user
-{
-
-//NOTE: window_handle() should never be used by the engine, other systems, such as bridges, can make direct use of the HWND
-#if GM_COMPATIBILITY_VERSION <= 81
-static inline unsigned long long window_handle() {
-  return (unsigned long long)enigma::hWnd;
-}
-#else
-static inline HWND window_handle() {
-  return enigma::hWnd;
-}
-#endif
-
-}
-
 void enigma_catchmouse_backend(bool x);
 #define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
 
