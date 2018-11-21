@@ -204,6 +204,13 @@ bool display_set_all(int w, int h, int freq, int bitdepth);
 bool display_test_all(int w, int h, int freq, int bitdepth);
 void set_synchronization(bool enable);
 
+//NOTE: window_handle() should never be used by the engine, other systems, such as bridges, can make direct use of the HWND
+#if GM_COMPATIBILITY_VERSION <= 81
+unsigned long long window_handle();
+#else
+void* window_handle();
+#endif
+
 int window_get_x();
 int window_get_y();
 

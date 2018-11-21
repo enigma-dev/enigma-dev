@@ -17,16 +17,16 @@
 **/
 
 #include "Platforms/General/PFthreads.h"
+#include "Platforms/General/PFthreads_impl.h"
 
 using enigma::ethread;
 using enigma::threads;
-using enigma::thread_script_func;
 
 namespace enigma_user {
 
 int thread_start(int thread) {
   if (threads[thread]->active) { return -1; }
-  if (pthread_create(&threads[thread]->handle, NULL, thread_script_func, threads[thread]->sd)) {
+  if (pthread_create(&threads[thread]->handle, NULL, enigma::thread_script_func, threads[thread]->sd)) {
     return -2;
   }
   threads[thread]->active = true;
