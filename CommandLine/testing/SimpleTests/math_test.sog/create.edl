@@ -231,6 +231,9 @@ y0 = 2;
 y1 = 3;
 yn = 4;
 
+// This one conflicts with the Win32 CreateFont macro
+CreateFont = 5;
+
 cons_show_message("Test end!");
 
 game_end();

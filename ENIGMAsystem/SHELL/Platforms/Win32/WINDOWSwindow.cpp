@@ -17,22 +17,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <windows.h>
-using namespace std;
+#include "Platforms/platforms_mandatory.h"
+#include "Platforms/General/PFmain.h" // For those damn vk_ constants.
+#include "Platforms/General/PFwindow.h"
+
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include "Universal_System/estring.h" // For string_replace_all
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // room_caption
-#include "Platforms/General/PFmain.h" // For those damn vk_ constants.
-
-#include "Platforms/platforms_mandatory.h"
-#include "Widget_Systems/widgets_mandatory.h"
-#include "../General/PFwindow.h"
-
 #include "Universal_System/globalupdate.h"
 
+#include <windows.h>
 #include <stdio.h>
+#include <string>
+using namespace std;
 
 namespace enigma
 {
@@ -65,6 +64,16 @@ void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
 }
 
 namespace enigma_user {
+
+#if GM_COMPATIBILITY_VERSION <= 81
+unsigned long long window_handle() {
+  return (unsigned long long)enigma::hWnd;
+}
+#else
+void* window_handle() {
+  return enigma::hWnd;
+}
+#endif
 
 // GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
 // Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,

@@ -33,7 +33,6 @@ using std::string;
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 
 #include <windows.h>
-#include <wchar.h>
 #include <vector>
 using std::vector;
 
