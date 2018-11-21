@@ -20,7 +20,7 @@
 
 #include "scalar.h"
 
-#include <cstdlib> // random()
+//#include <cstdlib> // random()
 
 namespace enigma_user {
   // Delphi-esque Random
