@@ -20,49 +20,6 @@
 
 #include "Universal_System/var4.h"
 
-#ifdef ENIGMA_PLATFORM_SDL
-  #include <SDL2/SDL.h>
-  using pltfrm_thread_t = SDL_Thread*;
-#elif ENIGMA_PLATFORM_WINDOWS 
-  #include <windows.h>
-  using pltfrm_thread_t = HANDLE;
-#else
-  #include <pthread.h> // use POSIX threads
-  using pltfrm_thread_t = pthread_t;
-#endif
-
-#include <deque>
-
-namespace enigma {
-
-struct ethread;
-
-struct scrtdata {
-  int scr;
-  variant args[8];
-  ethread* mt;
-  scrtdata(int s, variant nargs[8], ethread* mythread): scr(s), mt(mythread) { for (int i = 0; i < 8; i++) args[i] = nargs[i]; }
-};
-
-struct ethread {
-  pltfrm_thread_t handle;
-  scrtdata *sd;
-  bool active;
-  variant ret;
-  ethread(): handle(0), sd(NULL), active(false), ret(0) {};
-  ~ethread() {
-    if (sd != NULL) {
-      delete sd;
-    }
-  }
-};
-
-extern std::deque<ethread*> threads;
-
-void* thread_script_func(void* data);
-
-}
-
 namespace enigma_user {
   int script_thread(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0);
   int thread_create_script(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0);

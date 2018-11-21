@@ -16,7 +16,7 @@
 **/
 
 #include "Platforms/General/PFexternals.h"
-#include "Platforms/Win32/WINDOWSmain.h"
+#include "Platforms/General/PFwindow.h"
 #include <string>
 
 #ifdef DEBUG_MODE
@@ -61,11 +61,11 @@ namespace enigma_user
 {
   void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption)
   {
-    
+
   }
 
   int show_message(string str)
-  {    
+  {
     int DialogModule_result;
     external_call(external_define("DialogModule.dll", "window_get_caption", enigma_user::dll_cdecl, enigma_user::ty_string, 1, enigma_user::ty_string), window_handle());
     DialogModule_result = (int)external_call(external_define("DialogModule.dll", "show_message", enigma_user::dll_cdecl, enigma_user::ty_real, 1, enigma_user::ty_string), str);
@@ -74,7 +74,7 @@ namespace enigma_user
   }
 
   double show_question(string str)
-  {    
+  {
     double DialogModule_result;
     external_call(external_define("DialogModule.dll", "window_get_caption", enigma_user::dll_cdecl, enigma_user::ty_string, 1, enigma_user::ty_string), window_handle());
     DialogModule_result = external_call(external_define("DialogModule.dll", "show_question", enigma_user::dll_cdecl, enigma_user::ty_real, 1, enigma_user::ty_string), str);
