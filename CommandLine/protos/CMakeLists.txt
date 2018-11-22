@@ -39,6 +39,7 @@ else()
 endif(NOT MSVC)
 
 file(GLOB PROTO_FILES *.proto)
+include(FindProtobuf)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 add_custom_command(
@@ -72,7 +73,6 @@ find_library(LIB_GPR NAMES gpr)
 target_link_libraries(${LIB} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
 
 # Find Protobuf
-include(FindProtobuf)
 include_directories(${Protobuf_INCLUDE_DIRS})
 target_link_libraries(${LIB} PRIVATE ${Protobuf_LIBRARIES})
 
