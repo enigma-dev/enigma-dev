@@ -55,8 +55,8 @@ target_link_libraries(${LIB} PRIVATE yaml-cpp)
 
 include_directories(. "${ENIGMA_DIR}/CommandLine/protos/" "${ENIGMA_DIR}/shared/lodepng")
 
-find_library(LIB_PROTOCOLS NAMES Protocols PATHS ${ENIGMA_DIR})
-target_link_libraries(${LIB} PRIVATE ${LIB_PROTOCOLS})
+include(FindProtobuf)
+target_link_libraries(${LIB} PRIVATE ${Protobuf_LIBRARY})
 
 #Linux is a turd
 if(NOT MSVC)
