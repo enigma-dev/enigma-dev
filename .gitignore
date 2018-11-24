@@ -7,7 +7,12 @@
 /MacOS/build/Release/EnigmaXcode.app/Contents/Resources/*
 /definitions.h
 /coverage_*.info
+/libEGM.*
+/libProtocols.*
 
+
+/CommandLine/libEGM/build/
+/CommandLine/protos/build/
 /CommandLine/protos/codegen
 
 /ENIGMAsystem/SHELL/API_Switchboard.h
