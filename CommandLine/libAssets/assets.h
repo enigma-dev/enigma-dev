@@ -17,4 +17,6 @@
 
 #include "codegen/project.pb.h"
 
-void game_zip_assets(const buffers::resources::Game& game);
+#include <string>
+
+int game_write_assets(const buffers::Game& game, bool exe, const std::string& gameFname);
