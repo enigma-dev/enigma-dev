@@ -33,8 +33,78 @@ using TypeMap = std::map<TypeCase, ResourceMap>;
 
 #define irrr(res) if (res) { /*idpr("Error occurred; see scrollback for details.",-1);*/ return res; }
 
-static int module_write_sprites(const ResourceMap& map, FILE *gameModule) {
+inline void writei(int x, FILE *f) {
+  fwrite(&x,4,1,f);
+}
 
+static int module_write_sprites(const ResourceMap& map, FILE *gameModule) {
+  // Now we're going to add sprites
+  //edbg << es->spriteCount << " Adding Sprites to Game Module: " << flushl;
+
+  //Magic Number
+  fwrite("SPR ",4,1,gameModule);
+
+  //Indicate how many
+  int sprite_count = map.size();
+  fwrite(&sprite_count,4,1,gameModule);
+
+  int sprite_maxid = 0;
+  for (auto msg : map) {
+    auto spr = static_cast<const Sprite*>(msg);
+    if (spr->id() > sprite_maxid)
+      sprite_maxid = spr->id();
+  }
+  fwrite(&sprite_maxid,4,1,gameModule);
+
+  for (auto msg : map) {
+    auto spr = static_cast<const Sprite*>(msg);
+    writei(spr->id(),gameModule); //id
+
+    // Track how many subimages we're copying
+    int subCount = spr->subimages_size();
+
+    int swidth = 0, sheight = 0;
+    for (int ii = 0; ii < subCount; ii++)
+    {
+      if (!swidth and !sheight) {
+        swidth =  spr->width();
+        sheight = spr->height();
+      }
+      else if (swidth != spr->width() or sheight != spr->height()) {
+        //user << "Subimages of sprite `" << es->sprites[i].name << "' vary in dimensions; do not want." << flushl;
+        return 14;
+      }
+    }
+    if (!(swidth and sheight and subCount)) {
+      //user << "Subimages of sprite `" << es->sprites[i].name << "' have zero size." << flushl;
+      return 14;
+    }
+
+    writei(swidth,gameModule);            // width
+    writei(sheight,gameModule);           // height
+    writei(spr->origin_x(),gameModule);    // xorig
+    writei(spr->origin_y(),gameModule);    // yorig
+    writei(spr->bbox_top(),gameModule);    // BBox Top
+    writei(spr->bbox_bottom(),gameModule); // BBox Bottom
+    writei(spr->bbox_left(),gameModule);   // BBox Left
+    writei(spr->bbox_right(),gameModule);  // BBox Right
+    writei(spr->bbox_mode(),gameModule);   // BBox Mode
+    writei(spr->shape(),gameModule);       // Mask shape
+
+    writei(subCount,gameModule); //subimages
+
+    for (int ii = 0; ii < subCount; ii++)
+    {
+      //strans = es->sprites[i].subImages[ii].transColor, fwrite(&idttrans,4,1,exe); //Transparent color
+      writei(swidth * sheight * 4,gameModule); //size when unpacked
+      //writei(es->sprites[i].subImages[ii].image.dataSize,gameModule); //size when unpacked
+      //fwrite(es->sprites[i].subImages[ii].image.data, 1, es->sprites[i].subImages[ii].image.dataSize, gameModule); //sprite data
+      writei(0,gameModule);
+    }
+  }
+
+  //edbg << "Done writing sprites." << flushl;
+  return 0;
 }
 
 static int module_write_sounds(const ResourceMap& map, FILE *gameModule) {
