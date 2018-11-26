@@ -13,8 +13,10 @@ PROTO_DIR := ../protos
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
 
-CXXFLAGS  := -I$(SRC_DIR) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -Wall -Wextra -Wpedantic -g -fPIC
-LDFLAGS   := -lzip -L../../ -lProtocols -lprotobuf -lstdc++fs
+SHARED_SRC_DIR := ../../shared
+
+CXXFLAGS  := -I$(SRC_DIR) -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/lodepng -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -Wall -Wextra -Wpedantic -g -fPIC
+LDFLAGS   := -lz -L$(SHARED_SRC_DIR)/lodepng -llodepng -L../../ -lProtocols -lprotobuf -lstdc++fs
 
 #if gcc >= 8 use std::filesystem instead of boost
 ifeq ($(shell expr $(GCCVER) \>= 8), 1)

@@ -16,8 +16,9 @@
 **/
 
 #include "assets.h"
+#include "lodepng.h"
 
-#include <zip.h>
+#include <zlib.h>
 
 #include <map>
 #include <vector>
@@ -35,6 +36,55 @@ using TypeMap = std::map<TypeCase, ResourceMap>;
 
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
+}
+
+static unsigned char* zlib_compress(unsigned char* inbuffer,size_t &actualsize)
+{
+  uLongf outsize=(int)(actualsize*1.1)+12;
+  Bytef* outbytef=new Bytef[outsize];
+
+  compress(outbytef,&outsize,(Bytef*)inbuffer,actualsize);
+
+  actualsize = outsize;
+
+  return (unsigned char*)outbytef;
+}
+
+static void write_image(const string& fname, FILE *gameModule) {
+
+  unsigned error;
+  unsigned char* image;
+  unsigned pngwidth, pngheight;
+
+  error = lodepng_decode32_file(&image, &pngwidth, &pngheight, fname.c_str());
+  if (error)
+  {
+    printf("error %u: %s\n", error, lodepng_error_text(error));
+    return;
+  }
+
+  unsigned ih,iw;
+  const int bitmap_size = pngwidth*pngheight*4;
+  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
+
+  for (ih = 0; ih < pngheight; ih++) {
+    unsigned tmp = ih*pngwidth*4;
+    for (iw = 0; iw < pngwidth; iw++) {
+      bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
+      bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
+      bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
+      bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+      tmp+=4;
+    }
+  }
+
+  free(image);
+
+  size_t sz = 0;
+  auto* data = reinterpret_cast<char*>(zlib_compress(bitmap, sz));
+
+  writei(sz, gameModule); // size
+  fwrite(data, 1, sz, gameModule); // data
 }
 
 static int module_write_sprites(const ResourceMap& map, FILE *gameModule) {
@@ -64,7 +114,7 @@ static int module_write_sprites(const ResourceMap& map, FILE *gameModule) {
     int subCount = spr->subimages_size();
 
     int swidth = 0, sheight = 0;
-    for (int ii = 0; ii < subCount; ii++)
+    for (int i = 0; i < subCount; i++)
     {
       if (!swidth and !sheight) {
         swidth =  spr->width();
@@ -93,12 +143,10 @@ static int module_write_sprites(const ResourceMap& map, FILE *gameModule) {
 
     writei(subCount,gameModule); //subimages
 
-    for (int ii = 0; ii < subCount; ii++)
-    {
-      //strans = es->sprites[i].subImages[ii].transColor, fwrite(&idttrans,4,1,exe); //Transparent color
+    for (int i = 0; i < subCount; i++) {
+      const auto& sub = spr->subimages(i);
       writei(swidth * sheight * 4,gameModule); //size when unpacked
-      //writei(es->sprites[i].subImages[ii].image.dataSize,gameModule); //size when unpacked
-      //fwrite(es->sprites[i].subImages[ii].image.data, 1, es->sprites[i].subImages[ii].image.dataSize, gameModule); //sprite data
+      write_image(sub,gameModule);
       writei(0,gameModule);
     }
   }
@@ -198,9 +246,7 @@ static int module_write_backgrounds(const ResourceMap& map, FILE *gameModule) {
     writei(bkg->horizontal_spacing(),gameModule);
     writei(bkg->vertical_spacing(),gameModule);
 
-    //const int sz = es->backgrounds[i].backgroundImage.dataSize;
-    //writei(sz, gameModule); // size
-    //fwrite(es->backgrounds[i].backgroundImage.data, 1, sz, gameModule); // data
+    write_image(bkg->image(),gameModule);
   }
 
   //edbg << "Done writing backgrounds." << flushl;
@@ -260,8 +306,7 @@ static int module_write_paths(const ResourceMap& map, FILE *gameModule) {
     int pointCount = pth->points_size();
     writei(pointCount,gameModule);
 
-    for (int i = 0; i < pointCount; i++)
-    {
+    for (int i = 0; i < pointCount; i++) {
       const auto& pnt = pth->points(i);
       writei(pnt.x(),gameModule);
       writei(pnt.y(),gameModule);
