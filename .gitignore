@@ -9,7 +9,7 @@
 /coverage_*.info
 /libEGM.*
 /libProtocols.*
-
+/libcompileEGMf.*
 
 /CommandLine/libEGM/build/
 /CommandLine/protos/build/
