@@ -80,8 +80,8 @@ static int module_write_sprites(const ResourceMap& map, FILE *gameModule) {
       return 14;
     }
 
-    writei(swidth,gameModule);            // width
-    writei(sheight,gameModule);           // height
+    writei(swidth,gameModule);             // width
+    writei(sheight,gameModule);            // height
     writei(spr->origin_x(),gameModule);    // xorig
     writei(spr->origin_y(),gameModule);    // yorig
     writei(spr->bbox_top(),gameModule);    // BBox Top
@@ -108,19 +108,169 @@ static int module_write_sprites(const ResourceMap& map, FILE *gameModule) {
 }
 
 static int module_write_sounds(const ResourceMap& map, FILE *gameModule) {
+  // Now we're going to add sounds
+  //edbg << es->soundCount << " Sounds:" << flushl;
+  for (size_t i = 0; i < map.size(); i++) {
+    //edbg << " " << es->sounds[i].name << flushl;
+    fflush(stdout);
+  }
 
+  //Magic number
+  fwrite("SND ",4,1,gameModule);
+
+  //Indicate how many
+  int sound_count = map.size();
+  fwrite(&sound_count,4,1,gameModule);
+
+  int sound_maxid = 0;
+  for (auto msg : map) {
+    auto snd = static_cast<const Sound*>(msg);
+    if (snd->id() > sound_maxid)
+      sound_maxid = snd->id();
+  }
+  fwrite(&sound_maxid,4,1,gameModule);
+
+  for (auto msg : map) {
+    auto snd = static_cast<const Sound*>(msg);
+
+    // Open sound
+    FILE *afile = fopen(snd->data().c_str(),"rb");
+    if (!afile)
+      continue; // no exist/no size/ommitted
+
+    // Buffer sound
+    fseek(afile,0,SEEK_END);
+    const size_t flen = ftell(afile);
+    unsigned char *fdata = new unsigned char[flen];
+    fseek(afile,0,SEEK_SET);
+    if (fread(fdata,1,flen,afile) != flen)
+      puts("WARNING: Resource stream cut short while loading sound data");
+    fclose(afile);
+
+    if (!flen) {
+      //user << "Sound `" << es->sounds[i].name << "' has no size. It will be omitted from the game." << flushl;
+      continue;
+    }
+
+    writei(snd->id(), gameModule);      // id
+    writei(flen, gameModule);           // Size
+    fwrite(fdata, 1, flen, gameModule); // Sound data
+  }
+
+  //edbg << "Done writing sounds." << flushl;
+  return 0;
 }
 
 static int module_write_backgrounds(const ResourceMap& map, FILE *gameModule) {
+  // Now we're going to add backgrounds
+  //edbg << es->backgroundCount << " Adding Backgrounds to Game Module: " << flushl;
 
+  //Magic Number
+  fwrite("BKG ",4,1,gameModule);
+
+  //Indicate how many
+  int back_count = map.size();
+  fwrite(&back_count,4,1,gameModule);
+
+  int back_maxid = 0;
+  for (auto msg : map) {
+    auto bkg = static_cast<const Background*>(msg);
+    if (bkg->id() > back_maxid)
+      back_maxid = bkg->id();
+  }
+  fwrite(&back_maxid,4,1,gameModule);
+
+  for (auto msg : map) {
+    auto bkg = static_cast<const Background*>(msg);
+
+    writei(bkg->id(),gameModule); //id
+    writei(bkg->width(),gameModule); // width
+    writei(bkg->height(),gameModule); // height
+
+    writei(false,gameModule); // transparent is deprecated
+    writei(bkg->smooth_edges(),gameModule);
+    writei(bkg->preload(),gameModule);
+    writei(bkg->use_as_tileset(),gameModule);
+    writei(bkg->tile_width(),gameModule);
+    writei(bkg->tile_height(),gameModule);
+    writei(bkg->horizontal_offset(),gameModule);
+    writei(bkg->vertical_offset(),gameModule);
+    writei(bkg->horizontal_spacing(),gameModule);
+    writei(bkg->vertical_spacing(),gameModule);
+
+    //const int sz = es->backgrounds[i].backgroundImage.dataSize;
+    //writei(sz, gameModule); // size
+    //fwrite(es->backgrounds[i].backgroundImage.data, 1, sz, gameModule); // data
+  }
+
+  //edbg << "Done writing backgrounds." << flushl;
+  return 0;
 }
 
-static int module_write_fonts(const ResourceMap& map, FILE *gameModule) {
+static int module_write_fonts(const ResourceMap& /*map*/, FILE *gameModule) {
+  //TODO: Add fonts
 
+  // Now we're going to add fonts
+  //edbg << es->fontCount << " Adding Fonts to Game Module: " << flushl;
+
+  //Magic Number
+  fwrite("FNT ",4,1,gameModule);
+
+  //Indicate how many
+  int font_count = 0;
+  writei(font_count,gameModule);
+
+  // For each included font
+  //for (int i = 0; i < font_count; i++) {}
+
+  //edbg << "Done writing fonts." << flushl;
+  return 0;
 }
 
 static int module_write_paths(const ResourceMap& map, FILE *gameModule) {
+  // Now we're going to add paths
+  //edbg << es->pathCount << " Adding Paths to Game Module: " << flushl;
 
+  //Magic Number
+  fwrite("PTH ",4,1,gameModule);
+
+  //Indicate how many
+  int path_count = map.size();
+  fwrite(&path_count,4,1,gameModule);
+
+  int path_maxid = 0;
+  for (auto msg : map) {
+    auto pth = static_cast<const Path*>(msg);
+    if (pth->id() > path_maxid)
+      path_maxid = pth->id();
+  }
+  fwrite(&path_maxid,4,1,gameModule);
+
+  for (auto msg : map) {
+    auto pth = static_cast<const Path*>(msg);
+
+    writei(pth->id(),gameModule); //id
+
+    writei(pth->smooth(),gameModule);
+    writei(pth->closed(),gameModule);
+    writei(pth->precision(),gameModule);
+    // possibly snapX/Y?
+
+    // Track how many path points we're copying
+    int pointCount = pth->points_size();
+    writei(pointCount,gameModule);
+
+    for (int i = 0; i < pointCount; i++)
+    {
+      const auto& pnt = pth->points(i);
+      writei(pnt.x(),gameModule);
+      writei(pnt.y(),gameModule);
+      writei(pnt.speed(),gameModule);
+    }
+  }
+
+  //edbg << "Done writing paths." << flushl;
+  return 0;
 }
 
 static void flatten_resources(TypeMap& typeMap, TreeNode* root) {
