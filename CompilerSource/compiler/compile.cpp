@@ -260,6 +260,9 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
 static bool run_game = true;
 dllexport void ide_handles_game_launch() { run_game = false; }
 
+static bool append_resources = true;
+dllexport void ide_handles_game_append() { append_resources = false; }
+
 static bool redirect_make = true;
 dllexport void log_make_to_console() { redirect_make = false; }
 
@@ -785,13 +788,14 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     "Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
   #endif
 
-  int ret = compile_append_resources(gameFname.c_str(), es);
-  if (ret) return ret;
+  if (append_resources) {
+    int ret = compile_append_resources(gameFname.c_str(), es);
+    if (ret) return ret;
 
-  // Run the game if requested
-  if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
-  {
-    compile_run_game(gameFname.c_str(), es, exe_filename, mode);
+    // Run the game if requested
+    if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design)) {
+      compile_run_game(gameFname.c_str(), es, exe_filename, mode);
+    }
   }
 
   idpr("Done.", 100);

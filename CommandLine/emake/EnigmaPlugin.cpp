@@ -1,6 +1,7 @@
 #include "EnigmaPlugin.hpp"
 #include "Main.hpp"
 #include "Proto2ES.h"
+#include "assets.h"
 
 #include "OS_Switchboard.h"
 
@@ -79,6 +80,7 @@ int EnigmaPlugin::Load()
   plugin_DefinitionsModified = reinterpret_cast<syntax_error* (*)(const char*, const char*)>(BindFunc(_handle, "definitionsModified"));
   plugin_SyntaxCheck = reinterpret_cast<syntax_error* (*)(int, const char**, const char*)>(BindFunc(_handle, "syntaxCheck"));
   plugin_HandleGameLaunch = reinterpret_cast<void (*)()>(BindFunc(_handle, "ide_handles_game_launch"));
+  plugin_HandleGameAppend = reinterpret_cast<void (*)()>(BindFunc(_handle, "ide_handles_game_append"));
   plugin_LogMakeToConsole = reinterpret_cast<void (*)()>(BindFunc(_handle, "log_make_to_console"));
 
   return PLUGIN_SUCCESS;
@@ -109,6 +111,11 @@ void EnigmaPlugin::HandleGameLaunch()
   plugin_HandleGameLaunch();
 }
 
+void EnigmaPlugin::HandleGameAppend()
+{
+  plugin_HandleGameAppend();
+}
+
 void EnigmaPlugin::LogMakeToConsole()
 {
   plugin_LogMakeToConsole();
@@ -119,11 +126,18 @@ int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath
   return plugin_CompileEGM(data, fpath, mode);
 }
 
-int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* fpath)
+int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* fpath, bool append_resources)
 {
   EnigmaStruct *es = Proto2ES(data);
   es->filename = fpath;
-  return plugin_CompileEGM(es, fpath, mode);
+  if (!append_resources) {
+    return plugin_CompileEGM(es, fpath, mode);
+  }
+  int ret = plugin_CompileEGM(es, fpath, mode);
+  if (!ret) return ret;
+  ret = game_write_assets(*data, true, fpath);
+  if (!ret) return ret;
+  return 0;
 }
 
 const char* EnigmaPlugin::NextResource() {
