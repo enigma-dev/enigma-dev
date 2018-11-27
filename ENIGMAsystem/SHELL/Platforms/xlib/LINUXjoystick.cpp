@@ -33,6 +33,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -75,8 +76,7 @@ namespace enigma
   
   static vector<std::unique_ptr<e_joystick>> joysticks;
   
-  void init_joysticks()
-  {
+  void init_joysticks() {
     enigma_user::joystick_load(0);
     enigma_user::joystick_load(1);
   }
@@ -124,7 +124,15 @@ namespace enigma
       if (joysticks[i])
         handle_joystick(joysticks[i].get());
   }
-}
+}  // namespace enigma
+
+namespace {
+  string device_name(int js_id) {
+    char sps[32];
+    sprintf(sps, "/dev/input/js%d", js_id);
+    return sps;
+  }
+}  // namespace
 
 namespace enigma_user
 {
@@ -141,8 +149,7 @@ namespace enigma_user
   {
     checkPositiveId(false);
     
-    char sps[32]; sprintf(sps,"/dev/input/js%d",id);
-    string devn(sps);
+    string devn = device_name(id);
     int device = open(devn.c_str(), O_RDONLY|O_NONBLOCK);
     if (device == -1)
       return false;
@@ -159,6 +166,8 @@ namespace enigma_user
     printf("Joystick name: %s\n",name);
     #endif
 
+    // There is no guarantee that because /dev/js5 exists, /dev/js0 exists
+    if (enigma::joysticks.size() <= id) enigma::joysticks.resize(id);
     enigma::joysticks.emplace(enigma::joysticks.begin() + id, make_unique<enigma::e_joystick>(device, devn, ac, bc));
     enigma::handle_joystick(enigma::joysticks[id].get());
     return true;
@@ -197,10 +206,13 @@ namespace enigma_user
   }
 
   bool joystick_exists(int id) {
-    if (size_t(id) >= enigma::joysticks.size())
-      return false;
-    const enigma::e_joystick * const js = enigma::joysticks[id].get();
-    return js && js->device != -1;
+    checkPositiveId(false);
+    if (size_t(id) < enigma::joysticks.size()) {
+      const enigma::e_joystick * const js = enigma::joysticks[id].get();
+      if (js && js->device != -1) return true;
+    }
+    struct stat ignore;
+    return (stat(device_name(id).c_str(), &ignore) == 0);
   }
 
   string joystick_name(int id) {
