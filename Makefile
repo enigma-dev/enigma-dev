@@ -38,12 +38,10 @@ libAssets: .FORCE libProtocols
 EMAKE_TARGETS = .FORCE liblodepng
 
 ifneq ($(CLI_ENABLE_EGM), FALSE)
-	EMAKE_TARGETS += libEGM libAssets
-else
-	EMAKE_TARGETS += libProtocols
+	EMAKE_TARGETS += libEGM
 endif
 
-emake: $(EMAKE_TARGETS)
+emake: $(EMAKE_TARGETS) libAssets
 	$(MAKE) -C CommandLine/emake/
 
 gm2egm: libEGM .FORCE
