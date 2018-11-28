@@ -134,9 +134,9 @@ int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* fpat
     return plugin_CompileEGM(es, fpath, mode);
   }
   int ret = plugin_CompileEGM(es, fpath, mode);
-  if (!ret) return ret;
+  if (ret) return ret;
   ret = game_write_assets(*data, true, fpath);
-  if (!ret) return ret;
+  if (ret) return ret;
   game_launch(fpath, fpath, mode);
   return 0;
 }

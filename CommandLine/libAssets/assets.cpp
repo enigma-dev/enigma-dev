@@ -330,10 +330,19 @@ static int module_write_paths(const ResourceMap& map, FILE *gameModule) {
 static void flatten_resources(TypeMap& typeMap, TreeNode* root) {
   for (int i = 0; i < root->child_size(); i++) {
     buffers::TreeNode* child = root->mutable_child(i);
-    if (child->has_folder())
+    if (child->has_folder()) {
       flatten_resources(typeMap, child);
-    else
-      typeMap[child->type_case()].push_back(child);
+    } else {
+      const Descriptor *desc = child->GetDescriptor();
+      const Reflection *refl = child->GetReflection();
+
+      const OneofDescriptor *typeOneof =  desc->FindOneofByName("type");
+      const FieldDescriptor *typeField = refl->GetOneofFieldDescriptor(*child, typeOneof);
+      if (!typeField) continue; // might not be set
+      const Message *typeMessage = refl->MutableMessage(child, typeField);
+
+      typeMap[child->type_case()].push_back(typeMessage);
+    }
   }
 }
 
