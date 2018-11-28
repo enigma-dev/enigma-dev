@@ -201,10 +201,10 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         for (const char** i = Cenviron; *i; i++)
           Cenviron_flat.append(*i),
           Cenviron_flat.append(1,0);
-        
+
         Cenviron_flat.append("LC_ALL=C");
-        Cenviron_flat.append(1,0); 
-        
+        Cenviron_flat.append(1,0);
+
         Cenviron_flat.append(1,0);
         Cenviron_use = (void*)Cenviron_flat.c_str();
       }
@@ -414,4 +414,3 @@ int e_execsp(string cmd, string path)                                        { r
 int e_execsp(string cmd, string cat1, string path)                           { return e_execp((cmd + " " + cat1).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string path)              { return e_execp((cmd + " " + cat1 + " " + cat2).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string cat3, string path) { return e_execp((cmd + " " + cat1 + " " + cat2 + " " + cat3).c_str(), path); }
-

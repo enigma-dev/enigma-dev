@@ -63,7 +63,7 @@ using namespace std;
 
 #include "components/components.h"
 
-#include "general/bettersystem.h"
+#include "bettersystem/bettersystem.h"
 #include "event_reader/event_parser.h"
 
 #include "languages/lang_CPP.h"

@@ -16,12 +16,20 @@
 **/
 
 #include "assets.h"
+#include "bettersystem/bettersystem.h"
 #include "lodepng.h"
 
 #include <zlib.h>
 
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+ #include <windows.h>
+#else
+ #include <unistd.h>
+#endif
+
 #include <map>
 #include <vector>
+#include <string>
 
 using namespace buffers;
 using namespace buffers::resources;
@@ -36,6 +44,17 @@ using TypeMap = std::map<TypeCase, ResourceMap>;
 
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
+}
+
+inline std::string string_replace_all(std::string str, std::string substr, std::string nstr)
+{
+  size_t pos = 0;
+  while ((pos = str.find(substr, pos)) != std::string::npos)
+  {
+    str.replace(pos, substr.length(), nstr);
+    pos += nstr.length();
+  }
+  return str;
 }
 
 static unsigned char* zlib_compress(unsigned char* inbuffer,size_t &actualsize)
@@ -384,4 +403,41 @@ int game_write_assets(const Game& game, bool exe, const string& gameFname) {
   //edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
   return 0;
+}
+
+void game_launch(const char* gameFname, const char* proj_filename, const char* exe_filename, int mode) {
+  // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
+  // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
+  // The working_directory global is set in the main() of each platform using the platform specific function.
+  // This the exact behaviour of GM8.1
+  std::vector<char> prevdir(size_t(4096));
+  string newdir = (proj_filename != NULL && strlen(proj_filename) > 0) ? string(proj_filename) : string( exe_filename );
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    if (newdir[0] == '/' || newdir[0] == '\\') {
+      newdir = newdir.substr(1, newdir.size());
+    }
+  #endif
+  newdir = newdir.substr( 0, newdir.find_last_of( "\\/" ));
+
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+  GetCurrentDirectory( 4096, prevdir.data() );
+  SetCurrentDirectory(newdir.c_str());
+  #else
+  getcwd (prevdir.data(), 4096);
+  chdir(newdir.c_str());
+  #endif
+
+  string rprog = "$game"/*compilerInfo.exe_vars["RUN-PROGRAM"]*/, rparam = "";//compilerInfo.exe_vars["RUN-PARAMS"];
+  rprog = string_replace_all(rprog,"$game",gameFname);
+  rparam = string_replace_all(rparam,"$game",gameFname);
+  //user << "Running \"" << rprog << "\" " << rparam << flushl;
+  int gameres = e_execs(rprog, rparam);
+  //user << "\n\nGame returned " << gameres << "\n";
+
+  // Restore the compilers original working directory.
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+  SetCurrentDirectory(prevdir.data());
+  #else
+  chdir(prevdir.data());
+  #endif
 }

@@ -2,6 +2,7 @@
 include ../shared/Makefile
 include ../shared/eyaml/Makefile
 include ../shared/event_reader/Makefile
+include ../shared/bettersystem/Makefile
 
 #################
 # configuration #

@@ -32,7 +32,7 @@ libProtocols: .FORCE
 libEGM: .FORCE liblodepng libProtocols
 	$(MAKE) -C CommandLine/libEGM/
 
-libAssets: .FORCE libProtocols
+libAssets: .FORCE liblodepng libProtocols
 	$(MAKE) -C CommandLine/libAssets/
 
 EMAKE_TARGETS = .FORCE liblodepng

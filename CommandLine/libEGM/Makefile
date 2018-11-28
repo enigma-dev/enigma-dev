@@ -8,14 +8,14 @@ else
 endif
 
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
-SHARED_SOURCES := ../../shared
+SHARED_SRC_DIR := ../../shared
 LIBRARY   := ../../libEGM$(EXT)
 PROTO_DIR := ../protos
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
 
-CXXFLAGS  := -I$(SRC_DIR) $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SOURCES)/lodepng -Wall -Wextra -Wpedantic -g -fPIC
-LDFLAGS   := -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -lstdc++fs -L$(SHARED_SOURCES)/lodepng -llodepng
+CXXFLAGS  := -I$(SRC_DIR) $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SRC_DIR)/lodepng -Wall -Wextra -Wpedantic -g -fPIC
+LDFLAGS   := -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -lstdc++fs -L$(SHARED_SRC_DIR)/lodepng -llodepng
 
 #if gcc >= 8 use std::filesystem instead of boost
 ifeq ($(shell expr $(GCCVER) \>= 8), 1)

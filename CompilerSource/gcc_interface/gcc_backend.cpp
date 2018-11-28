@@ -22,7 +22,7 @@
 #include "settings.h"
 
 #include "general/parse_basics_old.h"
-#include "general/bettersystem.h"
+#include "bettersystem/bettersystem.h"
 
 #include "languages/lang_CPP.h"
 
@@ -59,7 +59,7 @@ static string lastcodegen_directory;
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
 static bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
-{ 
+{
   pt pos = 0, spos;
 
   /* Isolate the executable path and filename
@@ -118,10 +118,10 @@ const char* establish_bearings(const char *compiler)
 
   if (!load_compiler_ey(compiler))
     return (sprintf(errbuf, "Could not open compiler descriptor `%s`.", compiler), errbuf);
-  
+
   lastbearings = compiler;
   lastcodegen_directory = codegen_directory;
-  
+
   string GCC_location;
 
   bool got_success = false;
@@ -131,7 +131,7 @@ const char* establish_bearings(const char *compiler)
   bool redir; // Whether or not to redirect the output manually
 
   std::string MAKE_paths = compilerInfo.make_vars["PATH"];
-  
+
   std::string dirs = "CODEGEN=" + codegen_directory + " ";
   dirs += "WORKDIR=" + eobjs_directory + " ";
   e_execs("make", dirs, "required-directories");

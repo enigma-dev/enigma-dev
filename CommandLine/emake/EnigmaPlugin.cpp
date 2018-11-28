@@ -137,6 +137,7 @@ int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* fpat
   if (!ret) return ret;
   ret = game_write_assets(*data, true, fpath);
   if (!ret) return ret;
+  game_launch(fpath, fpath, fpath, mode);
   return 0;
 }
 
