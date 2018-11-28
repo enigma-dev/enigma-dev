@@ -16,22 +16,7 @@ OBJ_DIR   := .eobjs
 SHARED_SRC_DIR := ../../shared
 
 CXXFLAGS  := -I$(SRC_DIR) -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/lodepng -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -Wall -Wextra -Wpedantic -g -fPIC
-LDFLAGS   := -lz -L$(SHARED_SRC_DIR)/lodepng -llodepng -L../../ -lProtocols -lprotobuf -lstdc++fs
-
-#if gcc >= 8 use std::filesystem instead of boost
-ifeq ($(shell expr $(GCCVER) \>= 8), 1)
-	override CXXFLAGS += -std=c++17
-	FS_LIBS=-lstdc++fs
-else
-	override CXXFLAGS += -std=c++14 -DUSE_BOOST_FS
-	ifeq ($(OS), Linux)
-		FS_LIBS=-lboost_system -lboost_filesystem
-	else ifeq ($(OS), Darwin)
-		FS_LIBS=-lboost_system -lboost_filesystem
-	else
-		FS_LIBS=-lboost_system-mt -lboost_filesystem-mt
-	endif
-endif
+LDFLAGS   := -lz -L$(SHARED_SRC_DIR)/lodepng -llodepng -L../../ -lProtocols -lprotobuf
 
 LDFLAGS += $(FS_LIBS)
 
