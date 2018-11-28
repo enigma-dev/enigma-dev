@@ -89,16 +89,6 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
   return ret;
 }
 
-void myReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
-{
-  size_t pos = 0;
-  while((pos = str.find(oldStr, pos)) != std::string::npos)
-  {
-     str.replace(pos, oldStr.length(), newStr);
-     pos += newStr.length();
-  }
-}
-
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
     #include <windows.h>
 
@@ -141,8 +131,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           parameters += " " + pcur;
         }
       }
-    myReplace(redirout, "\"", "");
-    myReplace(redirerr, "\"", "");
+    redirout = string_replace_all(redirout, "\"", "");
+    redirerr = string_replace_all(redirerr, "\"", "");
 
 
       STARTUPINFO StartupInfo;

@@ -81,17 +81,6 @@ inline void writef(float x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-inline string string_replace_all(string str,string substr,string nstr)
-{
-  pt pos=0;
-  while ((pos=str.find(substr,pos)) != string::npos)
-  {
-    str.replace(pos,substr.length(),nstr);
-    pos+=nstr.length();
-  }
-  return str;
-}
-
 inline void write_desktop_entry(const std::string fPath, const GameSettings& gameSet) {
   std::ofstream wto;
   std::string fName = fPath.substr(fPath.find_last_of("/\\") + 1);

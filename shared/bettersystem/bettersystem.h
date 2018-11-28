@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef ENIGMA_BETTERSYSTEM_H
+#define ENIGMA_BETTERSYSTEM_H
+
 #include <string>
 
 int e_exec(const char* fcmd, const char* *Cenviron = NULL);
@@ -39,3 +42,16 @@ int e_execsp(std::string cmd, std::string cat1, std::string cat2, std::string pa
 int e_execsp(std::string cmd, std::string cat1, std::string cat2, std::string cat3, std::string path);
 
 //int better_system(std::string,std::string,std::string="",const char* = NULL);
+
+inline std::string string_replace_all(std::string str, std::string substr, std::string nstr)
+{
+  size_t pos = 0;
+  while ((pos = str.find(substr, pos)) != std::string::npos)
+  {
+    str.replace(pos, substr.length(), nstr);
+    pos += nstr.length();
+  }
+  return str;
+}
+
+#endif // ENIGMA_BETTERSYSTEM_H
