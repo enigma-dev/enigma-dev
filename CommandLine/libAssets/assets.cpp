@@ -395,13 +395,13 @@ int game_write_assets(const Game& game, bool exe, const string& gameFname) {
   return 0;
 }
 
-void game_launch(const char* gameFname, const char* proj_filename, const char* exe_filename, int mode) {
+void game_launch(const char* exe_filename, const char* proj_filename, int mode) {
   // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
   // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
   // The working_directory global is set in the main() of each platform using the platform specific function.
   // This the exact behaviour of GM8.1
   std::vector<char> prevdir(size_t(4096));
-  string newdir = (proj_filename != NULL && strlen(proj_filename) > 0) ? string(proj_filename) : string( exe_filename );
+  string newdir = (proj_filename != NULL && strlen(proj_filename) > 0) ? string(proj_filename) : string(exe_filename);
   #if CURRENT_PLATFORM_ID == OS_WINDOWS
     if (newdir[0] == '/' || newdir[0] == '\\') {
       newdir = newdir.substr(1, newdir.size());
@@ -418,8 +418,8 @@ void game_launch(const char* gameFname, const char* proj_filename, const char* e
   #endif
 
   string rprog = "$game"/*compilerInfo.exe_vars["RUN-PROGRAM"]*/, rparam = "";//compilerInfo.exe_vars["RUN-PARAMS"];
-  rprog = string_replace_all(rprog,"$game",gameFname);
-  rparam = string_replace_all(rparam,"$game",gameFname);
+  rprog = string_replace_all(rprog,"$game",exe_filename);
+  rparam = string_replace_all(rparam,"$game",exe_filename);
   //user << "Running \"" << rprog << "\" " << rparam << flushl;
   int gameres = e_execs(rprog, rparam);
   //user << "\n\nGame returned " << gameres << "\n";

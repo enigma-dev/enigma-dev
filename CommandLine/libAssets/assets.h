@@ -20,4 +20,4 @@
 #include <string>
 
 int game_write_assets(const buffers::Game& game, bool exe, const std::string& gameFname);
-void game_launch(const char* gameFname, const char* proj_filename, const char* exe_filename, int mode);
+void game_launch(const char* exe_filename, const char* proj_filename, int mode);

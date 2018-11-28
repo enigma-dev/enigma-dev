@@ -203,13 +203,13 @@ inline int compile_append_resources(const char* gameFname, EnigmaStruct *es) {
   return 0;
 }
 
-inline void compile_run_game(const char* gameFname, EnigmaStruct *es, const char* exe_filename, int mode) {
+inline void compile_run_game(const char* exe_filename, EnigmaStruct *es, int mode) {
   // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
   // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
   // The working_directory global is set in the main() of each platform using the platform specific function.
   // This the exact behaviour of GM8.1
   std::vector<char> prevdir(size_t(4096));
-  string newdir = (es->filename != NULL && strlen(es->filename) > 0) ? string(es->filename) : string( exe_filename );
+  string newdir = (es->filename != NULL && strlen(es->filename) > 0) ? string(es->filename) : string(exe_filename);
   #if CURRENT_PLATFORM_ID == OS_WINDOWS
     if (newdir[0] == '/' || newdir[0] == '\\') {
       newdir = newdir.substr(1, newdir.size());
@@ -226,8 +226,8 @@ inline void compile_run_game(const char* gameFname, EnigmaStruct *es, const char
   #endif
 
   string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
-  rprog = string_replace_all(rprog,"$game",gameFname);
-  rparam = string_replace_all(rparam,"$game",gameFname);
+  rprog = string_replace_all(rprog,"$game",exe_filename);
+  rparam = string_replace_all(rparam,"$game",exe_filename);
   user << "Running \"" << rprog << "\" " << rparam << flushl;
   int gameres = e_execs(rprog, rparam);
   user << "\n\nGame returned " << gameres << "\n";
@@ -783,7 +783,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
     // Run the game if requested
     if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design)) {
-      compile_run_game(gameFname.c_str(), es, exe_filename, mode);
+      compile_run_game(gameFname.c_str(), es, mode);
     }
   }
 
