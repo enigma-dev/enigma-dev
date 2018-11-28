@@ -17,6 +17,7 @@
 
 #include "assets.h"
 #include "bettersystem/bettersystem.h"
+#include "OS_Switchboard.h"
 #include "lodepng.h"
 
 #include <zlib.h>
