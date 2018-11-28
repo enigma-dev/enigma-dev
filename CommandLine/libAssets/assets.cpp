@@ -89,7 +89,7 @@ static void write_image(const string& fname, FILE *gameModule) {
 
   free(image);
 
-  size_t sz = 0;
+  size_t sz = bitmap_size;
   auto* data = reinterpret_cast<char*>(zlib_compress(bitmap, sz));
 
   writei(sz, gameModule); // size
