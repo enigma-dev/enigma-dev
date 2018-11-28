@@ -242,15 +242,20 @@ inline void compile_run_game(const char* exe_filename, EnigmaStruct *es, int mod
 
 #include "System/builtins.h"
 
+static bool append_resources = true;
+
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
+  append_resources = true;
+  return current_language->compile(es, exe_filename, mode);
+}
+
+dllexport int compileEGMfRaw(EnigmaStruct *es, const char* exe_filename, int mode) {
+  append_resources = false;
   return current_language->compile(es, exe_filename, mode);
 }
 
 static bool run_game = true;
 dllexport void ide_handles_game_launch() { run_game = false; }
-
-static bool append_resources = true;
-dllexport void ide_handles_game_append() { append_resources = false; }
 
 static bool redirect_make = true;
 dllexport void log_make_to_console() { redirect_make = false; }

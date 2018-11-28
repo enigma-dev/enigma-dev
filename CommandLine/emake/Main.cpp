@@ -45,7 +45,6 @@ int main(int argc, char* argv[])
 
   EnigmaPlugin plugin;
   plugin.Load();
-  plugin.HandleGameAppend();
   bool quiet = options.GetOption("quiet").as<bool>();
   if (!quiet) {
     plugin.LogMakeToConsole();

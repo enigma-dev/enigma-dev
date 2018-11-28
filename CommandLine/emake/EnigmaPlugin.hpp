@@ -35,7 +35,6 @@ public:
   syntax_error* SetDefinitions(const char* yaml);
   syntax_error* SyntaxCheck(int count, const char** names, const char* code);
   void HandleGameLaunch();
-  void HandleGameAppend();
   void LogMakeToConsole();
   int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
   int BuildGame(buffers::Game* data, GameMode mode, const char* fpath, bool append_resources=true);
@@ -54,6 +53,7 @@ public:
 private:
   std::function<const char*(EnigmaCallbacks*)> plugin_Init = nullptr;
   std::function<int(EnigmaStruct*, const char*, int)> plugin_CompileEGM = nullptr;
+  std::function<int(EnigmaStruct*, const char*, int)> plugin_CompileEGMRaw = nullptr;
   std::function<int(buffers::Game *project, const char*, int)> plugin_CompileBuffer = nullptr;
   std::function<const char*()> plugin_NextResource = nullptr;
   std::function<const char*()> plugin_FirstResource = nullptr;
@@ -69,7 +69,6 @@ private:
   std::function<syntax_error*(const char*, const char*)> plugin_DefinitionsModified = nullptr;
   std::function<syntax_error*(int, const char**, const char*)> plugin_SyntaxCheck = nullptr;
   std::function<void()> plugin_HandleGameLaunch = nullptr;
-  std::function<void()> plugin_HandleGameAppend = nullptr;
   std::function<void()> plugin_LogMakeToConsole = nullptr;
 
   void* _handle;

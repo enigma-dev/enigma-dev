@@ -66,6 +66,7 @@ int EnigmaPlugin::Load()
 
   plugin_Init = reinterpret_cast<const char*(*)(EnigmaCallbacks*)>(BindFunc(_handle, "libInit"));
   plugin_CompileEGM = reinterpret_cast<int (*)(EnigmaStruct *es, const char* exe_filename, int mode)>(BindFunc(_handle, "compileEGMf"));
+  plugin_CompileEGMRaw = reinterpret_cast<int (*)(EnigmaStruct *es, const char* exe_filename, int mode)>(BindFunc(_handle, "compileEGMfRaw"));
   plugin_NextResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "next_available_resource"));
   plugin_FirstResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "first_available_resource"));
   plugin_ResourceIsFunction = reinterpret_cast<bool (*)()>(BindFunc(_handle, "resource_isFunction"));
@@ -80,7 +81,6 @@ int EnigmaPlugin::Load()
   plugin_DefinitionsModified = reinterpret_cast<syntax_error* (*)(const char*, const char*)>(BindFunc(_handle, "definitionsModified"));
   plugin_SyntaxCheck = reinterpret_cast<syntax_error* (*)(int, const char**, const char*)>(BindFunc(_handle, "syntaxCheck"));
   plugin_HandleGameLaunch = reinterpret_cast<void (*)()>(BindFunc(_handle, "ide_handles_game_launch"));
-  plugin_HandleGameAppend = reinterpret_cast<void (*)()>(BindFunc(_handle, "ide_handles_game_append"));
   plugin_LogMakeToConsole = reinterpret_cast<void (*)()>(BindFunc(_handle, "log_make_to_console"));
 
   return PLUGIN_SUCCESS;
@@ -111,11 +111,6 @@ void EnigmaPlugin::HandleGameLaunch()
   plugin_HandleGameLaunch();
 }
 
-void EnigmaPlugin::HandleGameAppend()
-{
-  plugin_HandleGameAppend();
-}
-
 void EnigmaPlugin::LogMakeToConsole()
 {
   plugin_LogMakeToConsole();
@@ -131,9 +126,9 @@ int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* fpat
   EnigmaStruct *es = Proto2ES(data);
   es->filename = fpath;
   if (!append_resources) {
-    return plugin_CompileEGM(es, fpath, mode);
+    return plugin_CompileEGMRaw(es, fpath, mode);
   }
-  int ret = plugin_CompileEGM(es, fpath, mode);
+  int ret = plugin_CompileEGMRaw(es, fpath, mode);
   if (ret) return ret;
   ret = game_write_assets(*data, true, fpath);
   if (ret) return ret;

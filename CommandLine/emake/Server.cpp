@@ -29,7 +29,7 @@ class CompilerServiceImpl final : public Compiler::Service {
     // use lambda capture to contain compile logic
     auto fnc = [=] {
       const CompileRequest req = *request;
-      plugin.BuildGame(const_cast<buffers::Game*>(&req.game()), emode_run, req.name().c_str());
+      plugin.BuildGame(const_cast<buffers::Game*>(&req.game()), emode_run, req.name().c_str(), false);
     };
     // asynchronously launch the compile request
     std::future<void> future = std::async(fnc);
