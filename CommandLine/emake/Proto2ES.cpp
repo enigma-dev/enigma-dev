@@ -410,7 +410,8 @@ void AddSprite(const char* name, const buffers::resources::Sprite& spr) {
   if (s.subImageCount > 0) {
     s.subImages = new SubImage[s.subImageCount];
     for (int i = 0; i < s.subImageCount; ++i) {
-      s.subImages[i].image = AddImage(spr.subimages(i));
+      // not needed now with libassets
+      //s.subImages[i].image = AddImage(spr.subimages(i));
     }
   }
 
@@ -430,6 +431,8 @@ void AddSound(const char* name, const buffers::resources::Sound& snd) {
   s.volume = snd.volume();
   s.pan = snd.pan();
   s.preload = snd.preload();
+
+  return; // not needed now with libassets
 
   // Open sound
   FILE *afile = fopen(snd.data().c_str(),"rb");
@@ -467,7 +470,8 @@ void AddBackground(const char* name, const buffers::resources::Background& bkg) 
   b.hSep = bkg.horizontal_spacing();
   b.vSep = bkg.vertical_spacing();
 
-  b.backgroundImage = AddImage(bkg.image());
+  // not needed now with libassets
+  //b.backgroundImage = AddImage(bkg.image());
 }
 
 void AddPath(const char* name, const buffers::resources::Path& pth) {
