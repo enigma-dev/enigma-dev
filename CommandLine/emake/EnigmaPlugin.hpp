@@ -37,9 +37,9 @@ public:
   void HandleGameLaunch();
   void LogMakeToConsole();
   int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
-  int BuildGame(buffers::Game* data, GameMode mode, const char* exe_path, const char* proj_path, bool append_resources=true);
-  inline int BuildGame(buffers::Game* data, GameMode mode, const char* fpath, bool append_resources=true) {
-    return BuildGame(data, mode, fpath, fpath, append_resources);
+  int BuildGame(buffers::Game* data, GameMode mode, const char* exe_path, const char* proj_path, bool write_assets=true);
+  inline int BuildGame(buffers::Game* data, GameMode mode, const char* fpath, bool write_assets=true) {
+    return BuildGame(data, mode, fpath, fpath, write_assets);
   }
   const char* NextResource();
   const char* FirstResource();

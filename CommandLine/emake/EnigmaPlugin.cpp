@@ -121,11 +121,11 @@ int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath
   return plugin_CompileEGM(data, fpath, mode);
 }
 
-int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode,  const char* exe_path, const char* proj_path, bool append_resources)
+int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode,  const char* exe_path, const char* proj_path, bool write_assets)
 {
   EnigmaStruct *es = Proto2ES(data);
   es->filename = proj_path;
-  if (!append_resources) {
+  if (!write_assets) {
     return plugin_CompileEGMRaw(es, exe_path, mode);
   }
   int ret = plugin_CompileEGMRaw(es, exe_path, mode);

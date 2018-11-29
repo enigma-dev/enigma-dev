@@ -346,7 +346,7 @@ static void flatten_resources(TypeMap& typeMap, TreeNode* root) {
   }
 }
 
-int game_write_assets(const Game& game, bool exe, const string& gameFname) {
+int game_write_assets(const Game& game, bool append, const string& gameFname) {
   TypeMap typeMap;
 
   // because we still need to write something even when they're empty
@@ -361,7 +361,7 @@ int game_write_assets(const Game& game, bool exe, const string& gameFname) {
 
   FILE *gameModule;
   int resourceblock_start = 0;
-  if (exe) {
+  if (append) {
     gameModule = fopen(gameFname.c_str(),"ab");
     if (!gameModule) {
       //user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;

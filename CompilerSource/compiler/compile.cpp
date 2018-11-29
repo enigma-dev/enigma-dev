@@ -139,7 +139,7 @@ inline void write_exe_info(const std::string codegen_directory, const EnigmaStru
 
 #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
 
-inline int compile_append_resources(const char* gameFname, EnigmaStruct *es) {
+inline int compile_write_assets(const char* gameFname, EnigmaStruct *es) {
   FILE *gameModule;
   int resourceblock_start = 0;
   std::string resfile = compilerInfo.exe_vars["RESOURCES"];
@@ -242,15 +242,15 @@ inline void compile_run_game(const char* exe_filename, EnigmaStruct *es, int mod
 
 #include "System/builtins.h"
 
-static bool append_resources = true;
+static bool write_assets = true;
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
-  append_resources = true;
+  write_assets = true;
   return current_language->compile(es, exe_filename, mode);
 }
 
 dllexport int compileEGMfRaw(EnigmaStruct *es, const char* exe_filename, int mode) {
-  append_resources = false;
+  write_assets = false;
   return current_language->compile(es, exe_filename, mode);
 }
 
@@ -782,8 +782,8 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     "Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
   #endif
 
-  if (append_resources) {
-    int ret = compile_append_resources(gameFname.c_str(), es);
+  if (write_assets) {
+    int ret = compile_write_assets(gameFname.c_str(), es);
     if (ret) return ret;
 
     // Run the game if requested

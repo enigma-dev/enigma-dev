@@ -19,5 +19,5 @@
 
 #include <string>
 
-int game_write_assets(const buffers::Game& game, bool exe, const std::string& gameFname);
+int game_write_assets(const buffers::Game& game, bool append, const std::string& gameFname);
 void game_launch(const char* exe_filename, const char* proj_filename, int mode);
