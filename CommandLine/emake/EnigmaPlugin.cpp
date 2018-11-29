@@ -121,7 +121,7 @@ int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath
   return plugin_CompileEGM(data, fpath, mode);
 }
 
-int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode,  const char* exe_path, const char* proj_path, bool write_assets)
+int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* exe_path, const char* proj_path, bool write_assets)
 {
   EnigmaStruct *es = Proto2ES(data);
   es->filename = proj_path;
@@ -131,7 +131,8 @@ int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode,  const char* exe
   int ret = plugin_CompileEGMRaw(es, exe_path, mode);
   if (ret) return ret;
   ret = game_write_assets(*data, true, exe_path);
-  if (ret) return ret;
+  bool run = options.GetOption("run").as<bool>();
+  if (ret || !run) return ret;
   game_launch(exe_path, proj_path, mode);
   return 0;
 }

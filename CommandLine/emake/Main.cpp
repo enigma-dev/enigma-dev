@@ -1,5 +1,4 @@
 #include "Main.hpp"
-#include "OptionsParser.hpp"
 #include "EnigmaPlugin.hpp"
 #include "Game.hpp"
 
@@ -34,9 +33,10 @@ static std::string tolower(const std::string &str) {
   return res;
 }
 
+OptionsParser options;
+
 int main(int argc, char* argv[])
 {
-  OptionsParser options;
   options.ReadArgs(argc, argv);
   int result = options.HandleArgs();
 
