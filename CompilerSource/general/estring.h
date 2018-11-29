@@ -32,4 +32,4 @@ std::string tostringd(double val);
 std::string tostringv(void* val);
 int string_count(char c, char* str);
 std::string arraybounds_as_str(std::string str);
-std::string string_replace_all(std::string str, std::string substr, std::string nstr);
+std::string string_replace_all(std::string str, const std::string& substr, const std::string& nstr);
