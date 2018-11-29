@@ -39,7 +39,7 @@ using namespace google::protobuf;
 using std::string;
 using TypeCase = TreeNode::TypeCase;
 using ResourceMap = std::vector<const Message*>;
-using TypeMap = std::map<TypeCase, ResourceMap>;
+using TypeMap = std::map<TypeCase, std::pair<ResourceMap, int>>;
 
 #define irrr(res) if (res) { /*idpr("Error occurred; see scrollback for details.",-1);*/ return res; }
 
@@ -96,7 +96,7 @@ static void write_image(const string& fname, FILE *gameModule) {
   fwrite(data, 1, sz, gameModule); // data
 }
 
-static int module_write_sprites(const ResourceMap& map, FILE *gameModule) {
+static int module_write_sprites(const ResourceMap& map, int sprite_maxid, FILE *gameModule) {
   // Now we're going to add sprites
   //edbg << es->spriteCount << " Adding Sprites to Game Module: " << flushl;
 
@@ -106,13 +106,6 @@ static int module_write_sprites(const ResourceMap& map, FILE *gameModule) {
   //Indicate how many
   int sprite_count = map.size();
   fwrite(&sprite_count,4,1,gameModule);
-
-  int sprite_maxid = 0;
-  for (auto msg : map) {
-    auto spr = static_cast<const Sprite*>(msg);
-    if (spr->id() > sprite_maxid)
-      sprite_maxid = spr->id();
-  }
   fwrite(&sprite_maxid,4,1,gameModule);
 
   for (auto msg : map) {
@@ -164,7 +157,7 @@ static int module_write_sprites(const ResourceMap& map, FILE *gameModule) {
   return 0;
 }
 
-static int module_write_sounds(const ResourceMap& map, FILE *gameModule) {
+static int module_write_sounds(const ResourceMap& map, int sound_maxid, FILE *gameModule) {
   // Now we're going to add sounds
   //edbg << es->soundCount << " Sounds:" << flushl;
   for (size_t i = 0; i < map.size(); i++) {
@@ -178,13 +171,6 @@ static int module_write_sounds(const ResourceMap& map, FILE *gameModule) {
   //Indicate how many
   int sound_count = map.size();
   fwrite(&sound_count,4,1,gameModule);
-
-  int sound_maxid = 0;
-  for (auto msg : map) {
-    auto snd = static_cast<const Sound*>(msg);
-    if (snd->id() > sound_maxid)
-      sound_maxid = snd->id();
-  }
   fwrite(&sound_maxid,4,1,gameModule);
 
   for (auto msg : map) {
@@ -218,7 +204,7 @@ static int module_write_sounds(const ResourceMap& map, FILE *gameModule) {
   return 0;
 }
 
-static int module_write_backgrounds(const ResourceMap& map, FILE *gameModule) {
+static int module_write_backgrounds(const ResourceMap& map, int back_maxid, FILE *gameModule) {
   // Now we're going to add backgrounds
   //edbg << es->backgroundCount << " Adding Backgrounds to Game Module: " << flushl;
 
@@ -228,13 +214,6 @@ static int module_write_backgrounds(const ResourceMap& map, FILE *gameModule) {
   //Indicate how many
   int back_count = map.size();
   fwrite(&back_count,4,1,gameModule);
-
-  int back_maxid = 0;
-  for (auto msg : map) {
-    auto bkg = static_cast<const Background*>(msg);
-    if (bkg->id() > back_maxid)
-      back_maxid = bkg->id();
-  }
   fwrite(&back_maxid,4,1,gameModule);
 
   for (auto msg : map) {
@@ -262,7 +241,7 @@ static int module_write_backgrounds(const ResourceMap& map, FILE *gameModule) {
   return 0;
 }
 
-static int module_write_fonts(const ResourceMap& /*map*/, FILE *gameModule) {
+static int module_write_fonts(const ResourceMap& /*map*/, int /*font_maxid*/, FILE *gameModule) {
   //TODO: Add fonts
 
   // Now we're going to add fonts
@@ -282,7 +261,7 @@ static int module_write_fonts(const ResourceMap& /*map*/, FILE *gameModule) {
   return 0;
 }
 
-static int module_write_paths(const ResourceMap& map, FILE *gameModule) {
+static int module_write_paths(const ResourceMap& map, int path_maxid, FILE *gameModule) {
   // Now we're going to add paths
   //edbg << es->pathCount << " Adding Paths to Game Module: " << flushl;
 
@@ -292,13 +271,6 @@ static int module_write_paths(const ResourceMap& map, FILE *gameModule) {
   //Indicate how many
   int path_count = map.size();
   fwrite(&path_count,4,1,gameModule);
-
-  int path_maxid = 0;
-  for (auto msg : map) {
-    auto pth = static_cast<const Path*>(msg);
-    if (pth->id() > path_maxid)
-      path_maxid = pth->id();
-  }
   fwrite(&path_maxid,4,1,gameModule);
 
   for (auto msg : map) {
@@ -340,8 +312,13 @@ static void flatten_resources(TypeMap& typeMap, TreeNode* root) {
       const FieldDescriptor *typeField = refl->GetOneofFieldDescriptor(*child, typeOneof);
       if (!typeField) continue; // might not be set
       const Message *typeMessage = refl->MutableMessage(child, typeField);
+      const google::protobuf::FieldDescriptor *idField = typeMessage->GetDescriptor()->FindFieldByName("id");
+      if (!idField) continue; // might not have an id field on this type
+      int id = typeMessage->GetReflection()->GetInt32(*typeMessage, idField);
 
-      typeMap[child->type_case()].push_back(typeMessage);
+      auto& mapPair = typeMap[child->type_case()];
+      mapPair.first.push_back(typeMessage);
+      if (id > mapPair.second) mapPair.second = id;
     }
   }
 }
@@ -354,7 +331,7 @@ int game_write_assets(const Game& game, bool append, const string& gameFname) {
   std::vector<TypeCase> requiredTypes = { TypeCase::kSprite, TypeCase::kSound, TypeCase::kBackground, TypeCase::kFont, TypeCase::kPath };
   for (auto& type : requiredTypes) {
     // insert it
-    typeMap[type];
+    typeMap[type].second = 0;
   }
 
   flatten_resources(typeMap, const_cast<TreeNode*>(&game.root()));
@@ -387,13 +364,13 @@ int game_write_assets(const Game& game, bool append, const string& gameFname) {
   // Start by setting off our location with a DWord of NULLs
   fwrite("\0\0\0",1,4,gameModule);
   //idpr("Adding Sprites",90);
-  irrr(module_write_sprites(typeMap[TypeCase::kSprite], gameModule));
+  irrr(module_write_sprites(typeMap[TypeCase::kSprite].first, typeMap[TypeCase::kSprite].second, gameModule));
   //edbg << "Finalized sprites." << flushl;
   //idpr("Adding Sounds",93);
-  irrr(module_write_sounds(typeMap[TypeCase::kSound], gameModule));
-  irrr(module_write_backgrounds(typeMap[TypeCase::kBackground], gameModule));
-  irrr(module_write_fonts(typeMap[TypeCase::kFont], gameModule));
-  irrr(module_write_paths(typeMap[TypeCase::kPath], gameModule));
+  irrr(module_write_sounds(typeMap[TypeCase::kSound].first, typeMap[TypeCase::kSound].second, gameModule));
+  irrr(module_write_backgrounds(typeMap[TypeCase::kBackground].first, typeMap[TypeCase::kBackground].second, gameModule));
+  irrr(module_write_fonts(typeMap[TypeCase::kFont].first, typeMap[TypeCase::kFont].second, gameModule));
+  irrr(module_write_paths(typeMap[TypeCase::kPath].first, typeMap[TypeCase::kPath].second, gameModule));
   // Tell where the resources start
   fwrite("\0\0\0\0res0",8,1,gameModule);
   fwrite(&resourceblock_start,4,1,gameModule);
