@@ -241,7 +241,7 @@ static int module_write_backgrounds(const ResourceMap& map, int back_maxid, FILE
   return 0;
 }
 
-static int module_write_fonts(const ResourceMap& /*map*/, int /*font_maxid*/, FILE *gameModule) {
+static int module_write_fonts(const ResourceMap& map, int /*font_maxid*/, FILE *gameModule) {
   //TODO: Add fonts
 
   // Now we're going to add fonts
@@ -251,11 +251,25 @@ static int module_write_fonts(const ResourceMap& /*map*/, int /*font_maxid*/, FI
   fwrite("FNT ",4,1,gameModule);
 
   //Indicate how many
-  int font_count = 0;
+  int font_count = map.size();
   writei(font_count,gameModule);
 
   // For each included font
-  //for (int i = 0; i < font_count; i++) {}
+  for (auto msg : map) {
+    auto fnt = static_cast<const Font*>(msg);
+
+    int w = 64, h = 64;
+    unsigned char *bigtex = new unsigned char[w * h];
+
+    writei(fnt->id(),gameModule);
+    writei(w,gameModule), writei(h,gameModule);
+    fwrite(bigtex,1,w*h,gameModule);
+    fwrite("done",1,4,gameModule);
+
+    delete[] bigtex;
+
+    fwrite("endf",1,4,gameModule);
+  }
 
   //edbg << "Done writing fonts." << flushl;
   return 0;
