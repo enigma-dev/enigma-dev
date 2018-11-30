@@ -132,7 +132,7 @@ int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* exe_
   if (ret) return ret;
   ret = game_write_assets(*data, true, exe_path);
   bool run = options.GetOption("run").as<bool>();
-  if (ret || !run) return ret;
+  if (ret || !run || (mode != emode_run && mode != emode_debug && mode != emode_design)) return ret;
   game_launch(exe_path, proj_path, mode);
   return 0;
 }
