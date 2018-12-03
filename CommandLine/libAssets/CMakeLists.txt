@@ -8,7 +8,9 @@ set(CMAKE_DEBUG_POSTFIX d)
 
 project(${LIB} VERSION ${LIB_VERSION} DESCRIPTION ${LIB_DESCRIPTION})
 
-target_compile_options(${LIB} PRIVATE "/Za")
+if(MSVC)
+  target_compile_options(${LIB} PRIVATE "/Za")
+endif(MSVC)
 
 file(GLOB SRC_FILES *.cpp)
 get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
