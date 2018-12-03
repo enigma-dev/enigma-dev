@@ -29,6 +29,15 @@
 #include "OS_Switchboard.h"
 #include "general/parse_basics_old.h"
 
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+  #include <windows.h>
+#else
+  #include <fcntl.h>
+  #include <unistd.h>
+  #include <sys/wait.h>
+  #include <sys/stat.h>
+#endif
+
 #include <string>
 #include <cstdlib>
 #include <cstring>
@@ -89,8 +98,6 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
 }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-    #include <windows.h>
-
     int e_exec(const char* fcmd, const char* *Cenviron)
     {
       while (is_useless(*fcmd))
@@ -229,11 +236,6 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
       return e_exec(cmd, eCenviron);
     }
 #else
-    #include <fcntl.h>
-    #include <unistd.h>
-    #include <sys/wait.h>
-    #include <sys/stat.h>
-
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
 #if CURRENT_PLATFORM_ID ==  OS_MACOSX
