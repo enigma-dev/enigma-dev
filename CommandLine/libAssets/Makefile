@@ -17,7 +17,7 @@ SHARED_SRC_DIR := ../../shared
 include $(SHARED_SRC_DIR)/Makefile
 include $(SHARED_SRC_DIR)/bettersystem/Makefile
 
-CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/lodepng -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g -fPIC
+CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/lodepng -I$(SHARED_SRC_DIR)/bettersystem -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g -fPIC
 LDFLAGS   := -lz -L$(SHARED_SRC_DIR)/lodepng -llodepng -L../../ -lProtocols -lprotobuf
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
