@@ -8,14 +8,13 @@ set(CMAKE_DEBUG_POSTFIX d)
 
 project(${LIB} VERSION ${LIB_VERSION} DESCRIPTION ${LIB_DESCRIPTION})
 
-if(MSVC)
-  target_compile_options(${LIB} PRIVATE "/Za")
-endif(MSVC)
-
 file(GLOB SRC_FILES *.cpp)
 get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
 get_filename_component(ENIGMA_DIR "${ENIGMA_DIR}" PATH)
 add_library(${LIB} STATIC ${SRC_FILES} "${ENIGMA_DIR}/shared/lodepng/lodepng.cpp" "${ENIGMA_DIR}/shared/bettersystem/bettersystem.cpp")
+if(MSVC)
+  target_compile_options(${LIB} PRIVATE "/Za")
+endif(MSVC)
 set_property(TARGET ${LIB} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${LIB} PROPERTY CXX_STANDARD_REQUIRED ON)
 
