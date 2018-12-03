@@ -11,7 +11,7 @@
   <colour>16764006</colour>
   <showcolour>-1</showcolour>
   <code/>
-  <enableViews>0</enableViews>
+  <enableViews>-1</enableViews>
   <clearViewBackground>-1</clearViewBackground>
   <makerSettings>
     <isSet>-1</isSet>
@@ -40,8 +40,8 @@
     <background foreground="0" hspeed="0" htiled="-1" name="" stretch="0" visible="0" vspeed="0" vtiled="-1" x="0" y="0"/>
   </backgrounds>
   <views>
-    <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
-    <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
+    <view hborder="32" hport="480" hspeed="7" hview="100" objName="obj_0" vborder="32" visible="-1" vspeed="7" wport="640" wview="100" xport="0" xview="0" yport="0" yview="0"/>
+    <view hborder="32" hport="480" hspeed="7" hview="100" objName="obj_0" vborder="32" visible="-1" vspeed="7" wport="640" wview="100" xport="0" xview="0" yport="0" yview="0"/>
     <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
     <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
     <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
@@ -50,7 +50,7 @@
     <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
   </views>
   <instances>
-    <instance code="" colour="4294967295" id="100001" locked="0" name="inst_9886EF9A" objName="obj_0" rotation="0.0" scaleX="1.0" scaleY="1.0" x="0" y="0"/>
+    <instance code="" colour="4294967295" id="100001" locked="0" name="inst_9886EF9A" objName="obj_0" rotation="0.0" scaleX="1.0" scaleY="1.0" x="0" y="464"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>

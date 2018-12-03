@@ -24,19 +24,33 @@ using std::string;
 namespace enigma_user {
 
 enum {
-	os_unknown = -1,
-	os_windows = 0,
-	os_win32 = 0,
-	os_macosx = 1,
-	os_psp = 2,
-	os_ios = 3,
-	os_android = 4,
-	os_symbian = 5,
-	os_linux = 6,
-	os_winphone = 7,
-	os_tizen = 8,
-	os_win8native = 9,
+  os_unknown = -1,
+  os_windows = 0,
+  os_win32 = 0,
+  os_macosx = 1,
+  os_psp = 2,
+  os_ios = 3,
+  os_android = 4,
+  os_symbian = 5,
+  os_linux = 6,
+  os_winphone = 7,
+  os_tizen = 8,
+  os_win8native = 9,
 };
+
+enum {
+  browser_not_a_browser = -1,
+  browser_unknown = 0,
+  browser_ie = 1,
+  browser_firefox = 2,
+  browser_chrome = 3,
+  browser_safari = 4,
+  browser_opera = 5,
+  browser_safari_mobile = 6,
+  browser_windows_store = 7,
+};
+
+extern const int os_browser;
 
 string os_get_config();
 int os_get_info();

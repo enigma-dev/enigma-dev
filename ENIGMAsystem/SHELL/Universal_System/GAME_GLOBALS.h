@@ -33,6 +33,9 @@ GM Global variables
 #define ENIGMA_GAME_GLOBALS_H
 
 #include <string>
+#ifndef JUST_DEFINE_IT_RUN
+#include <deque>
+#endif
 
 namespace enigma_user {
 std::string caption_score = "Score:", caption_lives = "Lives:", caption_health = "Health:";
@@ -41,7 +44,6 @@ double health = 100;
 
 // TODO: MOVEME: Who put this here?
 #ifndef JUST_DEFINE_IT_RUN
-#include <deque>
 std::deque<int> instance_id;
 #else
 int *instance_id;

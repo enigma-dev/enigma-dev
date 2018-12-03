@@ -16,24 +16,24 @@
 **/
 
 #include "Platforms/General/PFthreads.h"
+#include "Platforms/General/PFthreads_impl.h"
 
 #include <functional>
 
 using enigma::ethread;
 using enigma::threads;
-using enigma::thread_script_func;
 
-namespace enigma_user {
-
-int _thread_script_func(void* data) {
-  thread_script_func(data);
+static int _thread_script_func(void* data) {
+  enigma::thread_script_func(data);
   return 0;
 }
+
+namespace enigma_user {
 
 int thread_start(int thread) {
   if (threads[thread]->active) return -1;
   threads[thread]->handle = SDL_CreateThread(_thread_script_func, NULL, (void *)threads[thread]->sd);
-  
+
   if (threads[thread]->handle == NULL)
     return -2;
 

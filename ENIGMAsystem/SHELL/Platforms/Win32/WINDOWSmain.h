@@ -22,12 +22,6 @@
 #include "Platforms/General/PFmain.h"
 
 #include <windows.h>
-#include <wchar.h>
-#include <string>
-
-typedef std::basic_string<WCHAR> tstring;
-tstring widen(const std::string &str);
-std::string shorten(tstring str);
 
 namespace enigma //TODO: Find where this belongs
 {
@@ -35,22 +29,6 @@ namespace enigma //TODO: Find where this belongs
   extern HWND hWnd;
   extern HDC window_hDC;
   extern HANDLE mainthread;
-}
-
-namespace enigma_user
-{
-
-//NOTE: window_handle() should never be used by the engine, other systems, such as bridges, can make direct use of the HWND
-#if GM_COMPATIBILITY_VERSION <= 81
-static inline unsigned long long window_handle() {
-  return (unsigned long long)enigma::hWnd;
-}
-#else
-static inline HWND window_handle() {
-  return enigma::hWnd;
-}
-#endif
-
 }
 
 void enigma_catchmouse_backend(bool x);

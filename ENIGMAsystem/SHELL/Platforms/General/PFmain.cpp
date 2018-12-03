@@ -1,7 +1,8 @@
 #include "PFmain.h"
 
+#include "PFwindow.h"
+#include "PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Platforms/General/PFwindow.h"
 #include "Universal_System/roomsystem.h"
 
 #include <unistd.h>  //getcwd, usleep
@@ -98,6 +99,7 @@ int enigma_main(int argc, char** argv) {
 
 namespace enigma_user {
 
+const int os_browser = browser_not_a_browser;
 std::string working_directory = "";
 std::string program_directory = "";
 std::string keyboard_string = "";
