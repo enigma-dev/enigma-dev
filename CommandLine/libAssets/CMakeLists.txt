@@ -35,6 +35,10 @@ foreach(CompilerFlag ${CompilerFlags})
 endforeach()
 
 include_directories(. "${ENIGMA_DIR}/CommandLine/protos/" "${ENIGMA_DIR}/shared/lodepng" "${ENIGMA_DIR}/shared/bettersystem" "${ENIGMA_DIR}/CompilerSource")
+
+include(FindProtobuf)
+target_link_libraries(${LIB} PRIVATE ${Protobuf_LIBRARY})
+
 link_directories(${ENIGMA_DIR})
 target_link_libraries(${LIB} PRIVATE Protocols)
 
