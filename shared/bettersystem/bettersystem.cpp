@@ -25,17 +25,16 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "bettersystem.h"
+#include "OS_Switchboard.h"
+#include "general/parse_basics_old.h"
+
 #include <string>
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
 
 using namespace std;
-
-#include "bettersystem.h"
-#include "OS_Switchboard.h"
-#include "general/parse_basics_old.h"
-
 
 inline char* scopy(string& str)
 {
