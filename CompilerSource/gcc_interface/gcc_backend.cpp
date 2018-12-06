@@ -58,8 +58,7 @@ static string lastcodegen_directory;
 
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
-static bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
-{
+static bool toolchain_parseout(string line, string &exename, string &command, string ofile = "") {
   pt pos = 0, spos;
 
   /* Isolate the executable path and filename
