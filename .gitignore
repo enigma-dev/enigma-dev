@@ -11,9 +11,9 @@
 /libProtocols.*
 
 
+/shared/protos/build/
+/shared/protos/codegen
 /CommandLine/libEGM/build/
-/CommandLine/protos/build/
-/CommandLine/protos/codegen
 
 /ENIGMAsystem/SHELL/API_Switchboard.h
 /ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/

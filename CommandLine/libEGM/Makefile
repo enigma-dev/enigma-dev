@@ -10,7 +10,7 @@ endif
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 SHARED_SOURCES := ../../shared
 LIBRARY   := ../../libEGM$(EXT)
-PROTO_DIR := ../protos
+PROTO_DIR := ../../shared/protos
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
 
