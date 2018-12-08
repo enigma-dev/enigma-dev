@@ -16,7 +16,7 @@ else
 	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options-mt -lboost_iostreams-mt -lboost_filesystem-mt -lboost_system-mt -lpthread
 endif
 
-PROTO_DIR := ../protos
+PROTO_DIR := ../../shared/protos
 CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I../../shared -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SRC_DIR)/lodepng -std=c++11 -Wall -Wextra -Wpedantic -g
 LDFLAGS   := $(OS_LIBS) -L../../ -lz -L$(SHARED_SRC_DIR)/lodepng -llodepng -lProtocols -lprotobuf
 
