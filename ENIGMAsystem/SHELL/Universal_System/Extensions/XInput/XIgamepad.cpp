@@ -70,12 +70,53 @@ int gamepad_get_device_count() {
   return XUSER_MAX_COUNT;
 }
 
-std::string gamepad_get_description(int device) {
-	if (gamepad_is_connected(device)) {
-		return "Xbox 360 Controller (XInput STANDARD GAMEPAD)";
-	} else {
-		return "No device connected";
-	}
+string gamepad_get_description(int device) {
+  XINPUT_CAPABILITIES capabilities = {};
+
+  DWORD dwResult = XInputGetCapabilities(device, 0, &capabilities);
+
+  if (dwResult == ERROR_SUCCESS) {
+    if (capabilities.Type == XINPUT_DEVTYPE_GAMEPAD) {
+      switch (capabilities.SubType) {
+        default:
+#ifdef XINPUT_DEVSUBTYPE_UNKNOWN
+        case XINPUT_DEVSUBTYPE_UNKNOWN:
+          return "Xbox 360 Controller (XInput UNKNOWN)";
+#endif
+        case XINPUT_DEVSUBTYPE_GAMEPAD:
+          return "Xbox 360 Controller (XInput STANDARD GAMEPAD)";
+        case XINPUT_DEVSUBTYPE_WHEEL:
+          return "Xbox 360 Controller (XInput WHEEL)";
+        case XINPUT_DEVSUBTYPE_ARCADE_STICK:
+          return "Xbox 360 Controller (XInput ARCADE STICK)";
+#ifdef XINPUT_DEVSUBTYPE_FLIGHT_STICK
+        case XINPUT_DEVSUBTYPE_FLIGHT_STICK:
+          return "Xbox 360 Controller (XInput FLIGHT STICK)";
+#endif
+        case XINPUT_DEVSUBTYPE_DANCE_PAD:
+          return "Xbox 360 Controller (XInput DANCE PAD)";
+        case XINPUT_DEVSUBTYPE_GUITAR:
+          return "Xbox 360 Controller (XInput GUITAR)";
+#ifdef XINPUT_DEVSUBTYPE_GUITAR_ALTERNATE
+        case XINPUT_DEVSUBTYPE_GUITAR_ALTERNATE:
+          return "Xbox 360 Controller (XInput GUITAR ALTERNATE)";
+#endif
+#ifdef XINPUT_DEVSUBTYPE_GUITAR_BASS
+        case XINPUT_DEVSUBTYPE_GUITAR_BASS:
+          return "Xbox 360 Controller (XInput GUITAR BASS)";
+#endif
+        case XINPUT_DEVSUBTYPE_DRUM_KIT:
+          return "Xbox 360 Controller (XInput DRUM KIT)";
+#ifdef XINPUT_DEVSUBTYPE_ARCADE_PAD
+        case XINPUT_DEVSUBTYPE_ARCADE_PAD:
+          return "Xbox 360 Controller (XInput ARCADE PAD)";
+#endif
+      }
+    }
+    return "Unknown Controller";
+  }
+
+  return "";
 }
 
 int gamepad_get_battery_type(int device) {
