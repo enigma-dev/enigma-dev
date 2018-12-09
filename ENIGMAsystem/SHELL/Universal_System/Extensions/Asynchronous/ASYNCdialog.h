@@ -21,6 +21,12 @@
 #include <string>
 using std::string;
 
+namespace enigma {
+
+void extension_async_init();
+
+} // namespace enigma
+
 namespace enigma_user {
   extern unsigned async_load;
 

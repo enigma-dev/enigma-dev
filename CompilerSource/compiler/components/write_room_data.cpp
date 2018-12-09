@@ -243,11 +243,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
     }
 
     wto << "namespace enigma {\n\n";
-    for (const auto &ext : parsed_extensions) {
-      if (ext.init.empty()) continue;
-      wto << "void " << ext.init << "();\n";
-    }
-    wto << "\nvoid extensions_initialize() {\n";
+    wto << "void extensions_initialize() {\n";
     for (const auto &ext : parsed_extensions) {
       if (ext.init.empty()) continue;
       wto << "  " << ext.init << "();\n";
