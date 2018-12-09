@@ -12,3 +12,4 @@ Depends:
 	Extensions: DataStructures
 Dependencies: None
 Implement: extension_async
+Init: extension_async_init
