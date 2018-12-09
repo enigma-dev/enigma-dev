@@ -242,6 +242,18 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
       wto << "  return 0;\n}\n\n";
     }
 
+    wto << "namespace enigma {\n\n";
+    for (const auto &ext : parsed_extensions) {
+      if (ext.init.empty()) continue;
+      wto << "void " << ext.init << "();\n";
+    }
+    wto << "\nvoid extensions_initialize() {\n";
+    for (const auto &ext : parsed_extensions) {
+      if (ext.init.empty()) continue;
+      wto << "  " << ext.init << "();\n";
+    }
+    wto << "}\n\n} // namespace enigma\n\n";
+
     wto << "variant roomprecreate" << es->rooms[i].id << "()\n{\n";
     if (mode == emode_debug) {
       wto << "  enigma::debug_scope $current_scope(\"'room preCreation' for room '" << es->rooms[i].name << "'\");\n";
