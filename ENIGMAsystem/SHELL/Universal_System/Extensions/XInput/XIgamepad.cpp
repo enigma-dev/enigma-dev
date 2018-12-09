@@ -76,7 +76,7 @@ string gamepad_get_description(int device) {
   DWORD dwResult = XInputGetCapabilities(device, 0, &capabilities);
 
   if (dwResult == ERROR_SUCCESS) {
-    if (capabilities.Type == XINPUT_DEVTYPE_GAMEPAD) {
+    //if (capabilities.Type == XINPUT_DEVTYPE_GAMEPAD) {
       switch (capabilities.SubType) {
         default:
 #ifdef XINPUT_DEVSUBTYPE_UNKNOWN
@@ -112,8 +112,8 @@ string gamepad_get_description(int device) {
           return "Xbox 360 Controller (XInput ARCADE PAD)";
 #endif
       }
-    }
-    return "Unknown Controller";
+    //}
+    //return "Unknown Controller";
   }
 
   return "";
