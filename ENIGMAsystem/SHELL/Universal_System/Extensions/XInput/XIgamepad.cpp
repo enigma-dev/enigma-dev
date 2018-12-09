@@ -1,4 +1,5 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2013 Robert Colton
+*** Copyright (C) 2018 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -21,37 +22,41 @@
 #include <windows.h>
 #include <XInput.h>
 
+namespace {
+
+struct Gamepad {
+  XINPUT_STATE state;
+  DWORD state_result;
+};
+
+Gamepad gamepads[XUSER_MAX_COUNT];
+
+void process_gamepads() {
+
+}
+
+} // anonymous namespace
+
+namespace enigma {
+  extension_xinput::extension_xinput() {
+    extension_update_hooks.push_back(process_gamepads);
+  }
+} // namespace enigma
+
 namespace enigma_user {
 
 bool gamepad_is_supported() {
-	return true;
-}
-	
-bool gamepad_is_connected(int num) {
-	XINPUT_STATE controllerState;
-    // Zeroise the state
-    ZeroMemory(&controllerState, sizeof(XINPUT_STATE));
-    // Get the state
-    DWORD Result = XInputGetState(num, &controllerState);
-    if (Result == ERROR_SUCCESS) {
-        return true;
-    } else {
-        return false;
-    }
-}
-	
-int gamepad_get_device_count() {
-	int count;
-	for (int i = 0; i < gamepad_get_max_device_count(); i++) {
-		count += gamepad_is_connected(i);
-	}
-	return count;
+  return true;
 }
 
-int gamepad_get_max_device_count() {
-	return XUSER_MAX_COUNT;
+bool gamepad_is_connected(int num) {
+  return (gamepads[num].state_result == ERROR_SUCCESS);
 }
-	
+
+int gamepad_get_device_count() {
+  return XUSER_MAX_COUNT;
+}
+
 std::string gamepad_get_description(int device) {
 	if (gamepad_is_connected(device)) {
 		return "Xbox 360 Controller (XInput STANDARD GAMEPAD)";
@@ -90,7 +95,7 @@ int gamepad_get_battery_type(int device) {
         return -1;
     }
 }
-	
+
 int gamepad_get_battery_charge(int device) {
 	XINPUT_BATTERY_INFORMATION batteryInformation;
     // Zeroise the state
@@ -120,13 +125,13 @@ int gamepad_get_battery_charge(int device) {
 }
 
 float gamepad_get_button_threshold(int device) {
-	
+
 }
-	
+
 void gamepad_set_button_threshold(int device, float threshold) {
 
 }
-	
+
 void gamepad_set_vibration(int device, float left, float right) {
 	XINPUT_STATE controllerState;
     // Create a Vibraton State
@@ -142,11 +147,11 @@ void gamepad_set_vibration(int device, float left, float right) {
     // Vibrate the controller
     XInputSetState(device, &vibration);
 }
-	
+
 int gamepad_axis_count(int device) {
 	return 2;
 }
-	
+
 float gamepad_axis_value(int device, int axis) {
 	XINPUT_STATE controllerState;
     // Zeroise the state
@@ -178,10 +183,10 @@ float gamepad_axis_value(int device, int axis) {
 	}
 }
 
-WORD digitalButtons[20] = { XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_X, XINPUT_GAMEPAD_B, XINPUT_GAMEPAD_Y, XINPUT_GAMEPAD_LEFT_SHOULDER, 
-	XINPUT_GAMEPAD_RIGHT_SHOULDER, 0, 0, XINPUT_GAMEPAD_BACK, XINPUT_GAMEPAD_START, XINPUT_GAMEPAD_LEFT_THUMB, XINPUT_GAMEPAD_RIGHT_THUMB, 
+WORD digitalButtons[20] = { XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_X, XINPUT_GAMEPAD_B, XINPUT_GAMEPAD_Y, XINPUT_GAMEPAD_LEFT_SHOULDER,
+	XINPUT_GAMEPAD_RIGHT_SHOULDER, 0, 0, XINPUT_GAMEPAD_BACK, XINPUT_GAMEPAD_START, XINPUT_GAMEPAD_LEFT_THUMB, XINPUT_GAMEPAD_RIGHT_THUMB,
 	XINPUT_GAMEPAD_DPAD_UP, XINPUT_GAMEPAD_DPAD_DOWN, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, 0, 0, 0, 0 };
-	
+
 bool gamepad_button_check(int device, int button) {
 	XINPUT_STATE controllerState;
     // Zeroise the state
@@ -189,14 +194,14 @@ bool gamepad_button_check(int device, int button) {
 
     // Get the state
     XInputGetState(device, &controllerState);
-	
+
 	if (controllerState.Gamepad.wButtons & digitalButtons[button]) {
 		return true;
 	} else {
 		return false;
 	}
 }
-	
+
 bool gamepad_button_check_pressed(int device, int button) {
 	XINPUT_STATE controllerState;
     // Zeroise the state
@@ -204,14 +209,14 @@ bool gamepad_button_check_pressed(int device, int button) {
 
     // Get the state
     XInputGetState(device, &controllerState);
-	
+
 	if (controllerState.Gamepad.wButtons & digitalButtons[button]) {
 		return true;
 	} else {
 		return false;
 	}
 }
-	
+
 bool gamepad_button_check_released(int device, int button) {
 	XINPUT_STATE controllerState;
     // Zeroise the state
@@ -219,18 +224,18 @@ bool gamepad_button_check_released(int device, int button) {
 
     // Get the state
     XInputGetState(device, &controllerState);
-	
+
 	if (controllerState.Gamepad.wButtons & digitalButtons[button]) {
 		return false;
 	} else {
 		return true;
 	}
 }
-	
+
 int gamepad_button_count(int device) {
 	return 14; // 14 is counts both joysticks on xbox controller as 1 button and also counts for the guide button in the middle
 }
-	
+
 float gamepad_button_value(int device, int button) {
 	XINPUT_STATE controllerState;
     // Zeroise the state
@@ -238,7 +243,7 @@ float gamepad_button_value(int device, int button) {
 
     // Get the state
     XInputGetState(device, &controllerState);
-	
+
 	switch (button) {
 		case gp_shoulderl:
 			return controllerState.Gamepad.bLeftTrigger / 255;

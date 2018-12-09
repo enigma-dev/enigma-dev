@@ -60,7 +60,6 @@ enum {
 bool gamepad_is_supported();
 bool gamepad_is_connected(int num);
 int gamepad_get_device_count();
-int gamepad_get_max_device_count();
 std::string gamepad_get_description(int device);
 int gamepad_get_battery_type(int device);
 int gamepad_get_battery_charge(int device);
