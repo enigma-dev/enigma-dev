@@ -191,6 +191,15 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
 
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
   wto << license;
+
+  wto << "namespace enigma {\n\n";
+  wto << "void extensions_initialize() {\n";
+  for (const auto &ext : parsed_extensions) {
+    if (ext.init.empty()) continue;
+    wto << "  " << ext.init << "();\n";
+  }
+  wto << "}\n\n} // namespace enigma\n\n";
+
   for (int i = 0; i < es->roomCount; i++)
   {
     parsed_room *pr = parsed_rooms[es->rooms[i].id];
@@ -241,14 +250,6 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
       );
       wto << "  return 0;\n}\n\n";
     }
-
-    wto << "namespace enigma {\n\n";
-    wto << "void extensions_initialize() {\n";
-    for (const auto &ext : parsed_extensions) {
-      if (ext.init.empty()) continue;
-      wto << "  " << ext.init << "();\n";
-    }
-    wto << "}\n\n} // namespace enigma\n\n";
 
     wto << "variant roomprecreate" << es->rooms[i].id << "()\n{\n";
     if (mode == emode_debug) {
