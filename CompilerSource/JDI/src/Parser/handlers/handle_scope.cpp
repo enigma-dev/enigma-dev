@@ -29,6 +29,8 @@
 #include <Parser/handlers/handle_function_impl.h>
 #include <cstdio>
 
+using jdi::definition_scope;
+
 int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, unsigned inherited_flags)
 {
   definition* decl;

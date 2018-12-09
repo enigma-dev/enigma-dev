@@ -35,8 +35,6 @@ using namespace std;
 
 int m_prog_loop_cfp();
 
-#include <sys/time.h>
-
 #ifdef _WIN32
  #include <windows.h>
  #define dllexport extern "C" __declspec(dllexport)

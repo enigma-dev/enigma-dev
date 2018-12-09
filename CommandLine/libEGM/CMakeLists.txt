@@ -4,8 +4,6 @@ set(LIB "EGM")
 set(LIB_VERSION "0.1")
 set(LIB_DESCRIPTION "Interface for reading and writing ENIGMA and GameMaker files")
 
-set(CMAKE_DEBUG_POSTFIX d)
-
 project(${LIB} VERSION ${LIB_VERSION} DESCRIPTION ${LIB_DESCRIPTION})
 
 file(GLOB SRC_FILES *.cpp)

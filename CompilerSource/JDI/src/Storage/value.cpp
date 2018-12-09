@@ -82,6 +82,7 @@ namespace jdi {
   value::operator long()   const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return (long)val.d; return 0; }
   value::operator double() const { if (type == VT_DOUBLE) return val.d; if (type == VT_INTEGER) return val.i; return 0; }
   value::operator bool()   const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return fabs(val.d) < DBL_EPSILON; return 0; }
+  value::operator int()    const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return fabs(val.d) < DBL_EPSILON; return 0; }
   //value::operator const char*() const { if (type == VT_STRING) return val.s; return nullptr; }
   value::operator std::string() { if (type == VT_STRING) return this->toString(); return ""; }
 }

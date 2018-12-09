@@ -301,7 +301,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "SYNTAX CHECKING AND PRIMARY PARSING:" << flushl;
 
   edbg << es->scriptCount << " Scripts:" << flushl;
-  parsed_script *parsed_scripts[es->scriptCount];
+  vector<parsed_script*> parsed_scripts(es->scriptCount);
 
   //parsed timelines involve N timelines with M moments each. So we just store them in a large vector rather than a messy 2-D array of pointers.
   vector<parsed_script*> parsed_tlines;
@@ -545,7 +545,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   irrr();
 
   edbg << "Running Secondary Parse Passes" << flushl;
-  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount, parsed_tlines, parsed_rooms,&EGMglobal, script_names);
+  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts, parsed_tlines, parsed_rooms,&EGMglobal, script_names);
 
   edbg << "Writing events" << flushl;
   res = current_language->compile_writeDefraggedEvents(es);

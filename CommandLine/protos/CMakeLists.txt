@@ -4,8 +4,6 @@ set(LIB "Protocols")
 set(LIB_VERSION "0.1")
 set(LIB_DESCRIPTION "Protobuf interface for ENIGMA and GameMaker files")
 
-set(CMAKE_DEBUG_POSTFIX d)
-
 if(WIN32)
   add_definitions(-D_WIN32_WINNT=0x0600)
 endif(WIN32)

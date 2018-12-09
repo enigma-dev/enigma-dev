@@ -7,9 +7,9 @@
 /MacOS/build/Release/EnigmaXcode.app/Contents/Resources/*
 /definitions.h
 /coverage_*.info
-/libEGM.*
-/libProtocols.*
-/libcompileEGMf.*
+/*EGM.*
+/*Protocols.*
+/*compileEGMf.*
 
 /CommandLine/libEGM/build/
 /CommandLine/protos/build/

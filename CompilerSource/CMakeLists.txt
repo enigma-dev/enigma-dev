@@ -4,8 +4,6 @@ set(LIB "compileEGMf")
 set(LIB_VERSION "0.1")
 set(LIB_DESCRIPTION "enigma compiler")
 
-set(CMAKE_DEBUG_POSTFIX d)
-
 project(${LIB} VERSION ${LIB_VERSION} DESCRIPTION ${LIB_DESCRIPTION})
 
 set(COMPILER_SOURCES
@@ -19,7 +17,6 @@ set(COMPILER_SOURCES
     parser/object_storage.cpp
     parser/parser_components.cpp
     parser/parser.cpp
-    standalone_main.cpp
     filesystem/file_find.cpp
     backend/JavaCallbacks.cpp
     backend/ideprint.cpp
@@ -107,6 +104,26 @@ include_directories(${LIB} PRIVATE "${ENIGMA_DIR}/shared" "${CMAKE_CURRENT_SOURC
 set_target_properties(${LIB} PROPERTIES VERSION ${LIB_VERSION})
 set_property(TARGET ${LIB} PROPERTY CXX_STANDARD 11)
 set_property(TARGET ${LIB} PROPERTY CXX_STANDARD_REQUIRED ON)
+
+if(MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
+  set_target_properties(${LIB} PROPERTIES PREFIX "lib")
+endif(MSVC)
+
+message(STATUS "Initial build flags:")
+set(CompilerFlags
+	  CMAKE_C_FLAGS_DEBUG
+	  CMAKE_C_FLAGS_MINSIZEREL
+	  CMAKE_C_FLAGS_RELEASE
+	  CMAKE_C_FLAGS_RELWITHDEBINFO
+	  CMAKE_CXX_FLAGS_DEBUG
+	  CMAKE_CXX_FLAGS_MINSIZEREL
+	  CMAKE_CXX_FLAGS_RELEASE
+	  CMAKE_CXX_FLAGS_RELWITHDEBINFO
+        )
+foreach(CompilerFlag ${CompilerFlags})
+  message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
+endforeach()
 
 if(MINGW)
   set(CMAKE_EXE_LINKER_FLAGS " -static")

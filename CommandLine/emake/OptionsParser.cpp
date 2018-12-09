@@ -11,6 +11,7 @@
 #include <boost/exception/diagnostic_information.hpp>
 
 #include <iostream>
+#include <locale>
 
 namespace fs = boost::filesystem;
 
@@ -25,7 +26,7 @@ inline std::string word_wrap(std::string text, unsigned per_line)
 
     if (line_end == text.size() - 1)
       ++line_end;
-    else if (std::isspace(text[line_end]))
+    else if (std::isspace(text[line_end], std::locale("C")))
     {
       text[line_end] = '\n';
       ++line_end;
@@ -33,7 +34,7 @@ inline std::string word_wrap(std::string text, unsigned per_line)
     else
     {
       unsigned end = line_end;
-      while ( end > line_begin && !std::isspace(text[end]))
+      while ( end > line_begin && !std::isspace(text[end], std::locale("C")))
         --end;
 
       if (end != line_begin)

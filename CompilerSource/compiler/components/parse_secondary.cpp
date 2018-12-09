@@ -41,7 +41,7 @@ using namespace std;
 #include "event_reader/event_parser.h"
 
 #include "languages/lang_CPP.h"
-int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, parsed_script* scripts[], int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*> &parsed_rooms, parsed_object* EGMglobal, const std::set<std::string>& script_names)
+int lang_CPP::compile_parseSecondary(map<int,parsed_object*>& parsed_objects, vector<parsed_script*>& scripts, vector<parsed_script*>& tlines, map<int,parsed_room*>& parsed_rooms, parsed_object* EGMglobal, const std::set<std::string>& script_names)
 {
   // Dump our list of dot-accessed locals
   dot_accessed_locals.clear();
@@ -65,7 +65,7 @@ int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, pa
   }
 
   // Give all scripts a second pass
-  for (int i = 0; i < scrcount; i++) {
+  for (int i = 0; i < scripts.size(); i++) {
     parser_secondary(scripts[i]->pev.code,scripts[i]->pev.synt,EGMglobal,&scripts[i]->obj,&scripts[i]->pev, script_names);
     if (scripts[i]->pev_global)
       parser_secondary(scripts[i]->pev_global->code,scripts[i]->pev_global->synt,EGMglobal,&scripts[i]->obj,scripts[i]->pev_global, script_names);

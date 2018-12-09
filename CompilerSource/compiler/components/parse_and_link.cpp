@@ -50,7 +50,7 @@ using namespace std;
 
 extern string tostring(int);
 
-int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], vector<parsed_script*>& tlines, const std::set<std::string>& script_names)
+int lang_CPP::compile_parseAndLink(EnigmaStruct *es, vector<parsed_script*>& scripts, vector<parsed_script*>& tlines, const std::set<std::string>& script_names)
 {
   //First we just parse the scripts to add semicolons and collect variable names
   for (int i = 0; i < es->scriptCount; i++)
@@ -404,7 +404,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
 }
 
 
-int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es,parsed_script *scripts[], vector<parsed_script*>& tlines)
+int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es, vector<parsed_script*>& scripts, vector<parsed_script*>& tlines)
 {
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
@@ -420,7 +420,7 @@ int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es,parsed_script
 }
 
 //Converts ambiguous types to locals if the globalvar does not exist
-int lang_CPP::link_ambiguous(parsed_object *global, EnigmaStruct *es,parsed_script *scripts[], vector<parsed_script*>& tlines)
+int lang_CPP::link_ambiguous(parsed_object *global, EnigmaStruct *es, vector<parsed_script*>& scripts, vector<parsed_script*>& tlines)
 {
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
   {
