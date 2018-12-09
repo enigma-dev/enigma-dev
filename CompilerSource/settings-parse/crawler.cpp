@@ -41,7 +41,7 @@ using namespace std;
 namespace settings
 {
   list<string> systems;
-
+  
   int scour_settings()
   {
     string bdir = "ENIGMAsystem/SHELL/";
@@ -50,7 +50,7 @@ namespace settings
       FILE *module_descriptor = fopen((bdir+mdir).c_str(),"rt");
       if (module_descriptor)
       {
-
+        
       }
     }
     return 0;
@@ -64,7 +64,7 @@ namespace settings
 namespace extensions
 {
   map<string, string> locals;
-  static inline string unmangled_type_pre(string str) {
+  static inline string unmangled_type_pre(string str) { 
     size_t pm = str.find_first_of(")[");
     return pm == string::npos ? str : str.substr(0,pm);
   }
@@ -87,7 +87,7 @@ namespace extensions
   void parse_extensions(vector<string> exts)
   {
     parsed_extensions.clear();
-
+    
     for (unsigned i = 0; i < exts.size(); i++)
     {
       parsed_extension pe;
@@ -98,7 +98,7 @@ namespace extensions
       for (pos = 0; pos < pe.path.length(); pos++)
         if (pe.path[pos] == '\\')
           pe.path[i] = '/';
-
+      
       ifstream iey(("ENIGMAsystem/SHELL/" + exts[i]+"/About.ey").c_str());
       if (!iey.is_open())
         cout << "ERROR! Failed to open extension descriptor for " << exts[i] << endl;
@@ -109,23 +109,23 @@ namespace extensions
       parsed_extensions.push_back(pe);
     }
   }
-
+  
   void crawl_for_locals()
   {
     locals.clear();
-
+    
     jdi::definition *denigma = main_context->get_global()->look_up("enigma");
     if (!denigma or not(denigma->flags & jdi::DEF_SCOPE))
       return (cout << "ERROR! ENIGMA NAMESPACE NOT FOUND. THIS SHOULD NEVER HAPPEN." << endl, void());
     jdi::definition_scope *namespace_enigma = (jdi::definition_scope*)denigma;
-
+    
     for (unsigned i = 0; i < parsed_extensions.size(); i++)
     {
       if (parsed_extensions[i].implements == "")
         continue;
-
+      
       jdi::definition* implements = namespace_enigma->look_up(parsed_extensions[i].implements);
-
+      
       if (!implements or not(implements->flags & jdi::DEF_SCOPE))
         cout << "ERROR! Extension implements " << parsed_extensions[i].implements << " without defining it!" << endl;
       else
@@ -136,12 +136,12 @@ namespace extensions
       }
     }
   }
-
+  
   map<string, sdk_descriptor> all_platforms;
   typedef map<string, sdk_descriptor>::iterator platIter;
-
+  
   string uname_s = CURRENT_PLATFORM_NAME;
-
+  
   void determine_target()
   {
     all_platforms.clear();
@@ -159,7 +159,7 @@ namespace extensions
         cout << "Skipping invalid platform API under `" << ef << "': File does not specify an OS it represents.";
         continue;
       }
-
+      
       sdk_descriptor& sdk = all_platforms[toUpper(ef)];
       sdk.name   = dat.get("name");
       sdk.author = dat.get("author");
@@ -169,7 +169,7 @@ namespace extensions
       sdk.represents  = dat.get("represents");
     }
     file_find_close();
-
+    
     if (targetAPI.windowSys != "")
       targetSDK = all_platforms[toUpper(targetAPI.windowSys)];
     else
