@@ -25,6 +25,7 @@ namespace {
 
 struct Gamepad {
   XINPUT_STATE state, last_state;
+  XINPUT_CAPABILITIES caps;
   DWORD state_result;
   float axis_deadzone = 0.05f, button_threshold = 0.5f;
 };
@@ -36,6 +37,7 @@ void process_gamepads() {
     auto& gamepad = gamepads[i];
     gamepad.last_state = gamepad.state;
     gamepad.state_result = XInputGetState(i, &gamepad.state);
+    XInputGetCapabilities(i, 0, &gamepad.caps);
   }
 }
 
@@ -69,13 +71,11 @@ int gamepad_get_device_count() {
 }
 
 string gamepad_get_description(int device) {
-  XINPUT_CAPABILITIES capabilities = {};
+  const auto& caps = gamepads[device].caps;
 
-  DWORD dwResult = XInputGetCapabilities(device, 0, &capabilities);
-
-  if (dwResult == ERROR_SUCCESS) {
-    //if (capabilities.Type == XINPUT_DEVTYPE_GAMEPAD) {
-      switch (capabilities.SubType) {
+  if (gamepads[device].state_result == ERROR_SUCCESS) {
+    //if (caps.Type == XINPUT_DEVTYPE_GAMEPAD) {
+      switch (caps.SubType) {
         default:
 #ifdef XINPUT_DEVSUBTYPE_UNKNOWN
         case XINPUT_DEVSUBTYPE_UNKNOWN:
@@ -198,7 +198,14 @@ void gamepad_set_vibration(int device, float left, float right) {
 }
 
 int gamepad_axis_count(int device) {
-  return 2;
+  if (gamepads[device].state_result != ERROR_SUCCESS) return 0;
+  const auto& caps = gamepads[device].caps;
+  int axes = 0;
+  if (caps.Gamepad.sThumbLX)
+    ++axes;
+  if (caps.Gamepad.sThumbRX)
+    ++axes;
+  return axes;
 }
 
 float gamepad_axis_value(int device, int axis) {
@@ -252,7 +259,18 @@ bool gamepad_button_check_released(int device, int button) {
 }
 
 int gamepad_button_count(int device) {
-	return 14; // 14 is counts both joysticks on xbox controller as 1 button and also counts for the guide button in the middle
+  if (gamepads[device].state_result != ERROR_SUCCESS) return 0;
+  const auto& caps = gamepads[device].caps;
+  int buttons = 0;
+  for (size_t i = 0; i < 20; ++i) {
+    if (caps.Gamepad.wButtons & digitalButtons[i])
+      ++buttons;
+  }
+  if (caps.Gamepad.bLeftTrigger)
+    ++buttons;
+  if (caps.Gamepad.bRightTrigger)
+    ++buttons;
+	return buttons;
 }
 
 float gamepad_button_value(int device, int button) {
