@@ -284,18 +284,23 @@ int gamepad_button_count(int device) {
 }
 
 float gamepad_button_value(int device, int button) {
+  if (gamepads[device].state_result != ERROR_SUCCESS) return 0;
 	const auto& state = gamepads[device].state;
 
+  float value = 0;
 	switch (button) {
 		case gp_shoulderlb:
-			return state.Gamepad.bLeftTrigger / 255;
+			value = state.Gamepad.bLeftTrigger / 255;
 			break;
 		case gp_shoulderrb:
-			return state.Gamepad.bRightTrigger / 255;
+			value = state.Gamepad.bRightTrigger / 255;
 			break;
 		default:
-			return 0;
+			value = state.Gamepad.wButtons & digitalButtons[button] ? 1 : 0;
+      break;
 	}
+
+  return value;
 }
 
 void gamepad_set_color(int device, int color) {
