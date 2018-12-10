@@ -259,14 +259,14 @@ float gamepad_button_value(int device, int button) {
 	const auto& state = gamepads[device].state;
 
 	switch (button) {
-		case gp_shoulderl:
+		case gp_shoulderlb:
 			return state.Gamepad.bLeftTrigger / 255;
 			break;
-		case gp_shoulderr:
+		case gp_shoulderrb:
 			return state.Gamepad.bRightTrigger / 255;
 			break;
 		default:
-			return -1;
+			return 0;
 	}
 }
 
