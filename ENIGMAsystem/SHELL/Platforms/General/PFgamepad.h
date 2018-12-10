@@ -21,6 +21,7 @@
 #include <string>
 
 namespace enigma_user {
+
 enum {
   gp_any = -1,
   gp_none = -2,
@@ -73,6 +74,9 @@ bool gamepad_button_check_pressed(int device, int button);
 bool gamepad_button_check_released(int device, int button);
 int gamepad_button_count(int device);
 float gamepad_button_value(int device, int button);
+void gamepad_set_color(int device, int color);
+#define gamepad_set_colour(device, colour) gamepad_set_color(device, colour);
+
 }  // namespace enigma_user
 
 #endif

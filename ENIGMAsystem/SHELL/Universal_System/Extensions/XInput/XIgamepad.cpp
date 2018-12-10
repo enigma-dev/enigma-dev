@@ -18,6 +18,10 @@
 #include "Platforms/General/PFgamepad.h"
 #include "Platforms/platforms_mandatory.h"
 
+#ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h" // for show_error
+#endif
+
 #include <windows.h>
 #include <XInput.h>
 
@@ -292,4 +296,10 @@ float gamepad_button_value(int device, int button) {
 	}
 }
 
+void gamepad_set_color(int device, int color) {
+  #ifdef DEBUG_MODE
+  show_error("gamepad_set_color is not supported by XInput devices", false);
+  #endif
 }
+
+} // namespace enigma_user
