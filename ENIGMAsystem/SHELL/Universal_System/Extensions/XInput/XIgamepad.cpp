@@ -72,7 +72,7 @@ bool gamepad_is_supported() {
 }
 
 bool gamepad_is_connected(int num) {
-  return (gamepads[num].state_result == ERROR_SUCCESS);
+  return (num >= 0 && num < XUSER_MAX_COUNT && gamepads[num].state_result == ERROR_SUCCESS);
 }
 
 int gamepad_get_device_count() {
@@ -80,57 +80,56 @@ int gamepad_get_device_count() {
 }
 
 string gamepad_get_description(int device) {
+  if (!gamepad_is_connected(device)) return "";
   const auto& caps = gamepads[device].caps;
 
-  if (gamepads[device].state_result == ERROR_SUCCESS) {
-    //if (caps.Type == XINPUT_DEVTYPE_GAMEPAD) {
-      switch (caps.SubType) {
-        default:
+  //if (caps.Type == XINPUT_DEVTYPE_GAMEPAD) {
+    switch (caps.SubType) {
 #ifdef XINPUT_DEVSUBTYPE_UNKNOWN
-        case XINPUT_DEVSUBTYPE_UNKNOWN:
-          return "Xbox 360 Controller (XInput UNKNOWN)";
+      case XINPUT_DEVSUBTYPE_UNKNOWN:
+        break; // unknown
 #endif
-        case XINPUT_DEVSUBTYPE_GAMEPAD:
-          return "Xbox 360 Controller (XInput STANDARD GAMEPAD)";
-        case XINPUT_DEVSUBTYPE_WHEEL:
-          return "Xbox 360 Controller (XInput WHEEL)";
-        case XINPUT_DEVSUBTYPE_ARCADE_STICK:
-          return "Xbox 360 Controller (XInput ARCADE STICK)";
+      case XINPUT_DEVSUBTYPE_GAMEPAD:
+        return "Xbox 360 Controller (XInput STANDARD GAMEPAD)";
+      case XINPUT_DEVSUBTYPE_WHEEL:
+        return "Xbox 360 Controller (XInput WHEEL)";
+      case XINPUT_DEVSUBTYPE_ARCADE_STICK:
+        return "Xbox 360 Controller (XInput ARCADE STICK)";
 #ifdef XINPUT_DEVSUBTYPE_FLIGHT_STICK
-        case XINPUT_DEVSUBTYPE_FLIGHT_STICK:
-          return "Xbox 360 Controller (XInput FLIGHT STICK)";
+      case XINPUT_DEVSUBTYPE_FLIGHT_STICK:
+        return "Xbox 360 Controller (XInput FLIGHT STICK)";
 #endif
-        case XINPUT_DEVSUBTYPE_DANCE_PAD:
-          return "Xbox 360 Controller (XInput DANCE PAD)";
-        case XINPUT_DEVSUBTYPE_GUITAR:
-          return "Xbox 360 Controller (XInput GUITAR)";
+      case XINPUT_DEVSUBTYPE_DANCE_PAD:
+        return "Xbox 360 Controller (XInput DANCE PAD)";
+      case XINPUT_DEVSUBTYPE_GUITAR:
+        return "Xbox 360 Controller (XInput GUITAR)";
 #ifdef XINPUT_DEVSUBTYPE_GUITAR_ALTERNATE
-        case XINPUT_DEVSUBTYPE_GUITAR_ALTERNATE:
-          return "Xbox 360 Controller (XInput GUITAR ALTERNATE)";
+      case XINPUT_DEVSUBTYPE_GUITAR_ALTERNATE:
+        return "Xbox 360 Controller (XInput GUITAR ALTERNATE)";
 #endif
 #ifdef XINPUT_DEVSUBTYPE_GUITAR_BASS
-        case XINPUT_DEVSUBTYPE_GUITAR_BASS:
-          return "Xbox 360 Controller (XInput GUITAR BASS)";
+      case XINPUT_DEVSUBTYPE_GUITAR_BASS:
+        return "Xbox 360 Controller (XInput GUITAR BASS)";
 #endif
-        case XINPUT_DEVSUBTYPE_DRUM_KIT:
-          return "Xbox 360 Controller (XInput DRUM KIT)";
+      case XINPUT_DEVSUBTYPE_DRUM_KIT:
+        return "Xbox 360 Controller (XInput DRUM KIT)";
 #ifdef XINPUT_DEVSUBTYPE_ARCADE_PAD
-        case XINPUT_DEVSUBTYPE_ARCADE_PAD:
-          return "Xbox 360 Controller (XInput ARCADE PAD)";
+      case XINPUT_DEVSUBTYPE_ARCADE_PAD:
+        return "Xbox 360 Controller (XInput ARCADE PAD)";
 #endif
-      }
-    //}
-    //return "Unknown Controller";
-  }
-
-  return "";
+    }
+    return "Xbox 360 Controller (XInput UNKNOWN)";
+  //}
+  //return "Unknown Controller";
 }
 
 int gamepad_get_battery_type(int device) {
-  if (gamepads[device].state_result != ERROR_SUCCESS) return gp_unknown;
+  if (!gamepad_is_connected(device)) return gp_unknown;
   const auto& gamepad_battery = gamepads[device].gamepad_battery;
 
   switch (gamepad_battery.BatteryType) {
+    case BATTERY_TYPE_UNKNOWN:
+      break; // unknown
     case BATTERY_TYPE_DISCONNECTED:
       return gp_disconnected;
     case BATTERY_TYPE_WIRED:
@@ -139,17 +138,14 @@ int gamepad_get_battery_type(int device) {
       return gp_alkaline;
     case BATTERY_TYPE_NIMH:
       return gp_nimh;
-    case BATTERY_TYPE_UNKNOWN:
-      return gp_unknown;
   }
 
   return gp_unknown;
 }
 
 int gamepad_get_battery_charge(int device) {
-  if (gamepads[device].state_result != ERROR_SUCCESS) return gp_empty;
+  if (!gamepad_is_connected(device)) return gp_empty;
   const auto& gamepad_battery = gamepads[device].gamepad_battery;
-
 
   switch (gamepad_battery.BatteryLevel) {
     case BATTERY_LEVEL_EMPTY:
@@ -166,18 +162,22 @@ int gamepad_get_battery_charge(int device) {
 }
 
 float gamepad_get_button_threshold(int device) {
+  if (!gamepad_is_connected(device)) return 0;
   return gamepads[device].button_threshold;
 }
 
 void gamepad_set_button_threshold(int device, float threshold) {
+  if (!gamepad_is_connected(device)) return;
   gamepads[device].button_threshold = threshold;
 }
 
 void gamepad_set_axis_deadzone(int device, float deadzone) {
+  if (!gamepad_is_connected(device)) return;
   gamepads[device].axis_deadzone = deadzone;
 }
 
 void gamepad_set_vibration(int device, float left, float right) {
+  if (!gamepad_is_connected(device)) return;
   XINPUT_VIBRATION vibration = {};
 
   // Set the Vibration Values
@@ -189,8 +189,9 @@ void gamepad_set_vibration(int device, float left, float right) {
 }
 
 int gamepad_axis_count(int device) {
-  if (gamepads[device].state_result != ERROR_SUCCESS) return 0;
+  if (!gamepad_is_connected(device)) return 0;
   const auto& caps = gamepads[device].caps;
+
   int axes = 0;
   if (caps.Gamepad.sThumbLX)
     ++axes;
@@ -204,6 +205,7 @@ int gamepad_axis_count(int device) {
 }
 
 float gamepad_axis_value(int device, int axis) {
+  if (!gamepad_is_connected(device)) return 0;
   const auto& state = gamepads[device].state;
 
   float ret;
@@ -237,25 +239,29 @@ WORD digitalButtons[20] = {
 };
 
 bool gamepad_button_check(int device, int button) {
+  if (!gamepad_is_connected(device)) return false;
   const bool is_down = (gamepads[device].state.Gamepad.wButtons & digitalButtons[button]);
   return is_down;
 }
 
 bool gamepad_button_check_pressed(int device, int button) {
+  if (!gamepad_is_connected(device)) return false;
   const bool is_down = (gamepads[device].state.Gamepad.wButtons & digitalButtons[button]);
   const bool was_down = (gamepads[device].last_state.Gamepad.wButtons & digitalButtons[button]);
   return is_down && !was_down;
 }
 
 bool gamepad_button_check_released(int device, int button) {
+  if (!gamepad_is_connected(device)) return false;
   const bool is_down = (gamepads[device].state.Gamepad.wButtons & digitalButtons[button]);
   const bool was_down = (gamepads[device].last_state.Gamepad.wButtons & digitalButtons[button]);
   return !is_down && was_down;
 }
 
 int gamepad_button_count(int device) {
-  if (gamepads[device].state_result != ERROR_SUCCESS) return 0;
+  if (!gamepad_is_connected(device)) return 0;
   const auto& caps = gamepads[device].caps;
+
   int buttons = 0;
   for (size_t i = 0; i < 20; ++i) {
     if (caps.Gamepad.wButtons & digitalButtons[i])
@@ -269,7 +275,7 @@ int gamepad_button_count(int device) {
 }
 
 float gamepad_button_value(int device, int button) {
-  if (gamepads[device].state_result != ERROR_SUCCESS) return 0;
+  if (!gamepad_is_connected(device)) return 0;
   const auto& state = gamepads[device].state;
 
   float value = 0;
@@ -289,6 +295,7 @@ float gamepad_button_value(int device, int button) {
 }
 
 void gamepad_set_color(int device, int color) {
+  if (!gamepad_is_connected(device)) return;
   #ifdef DEBUG_MODE
   show_error("gamepad_set_color is not supported by XInput devices", false);
   #endif
