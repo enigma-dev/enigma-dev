@@ -50,9 +50,11 @@ void process_gamepads() {
 namespace enigma {
 
 void extension_xinput_init() {
+  // Zero-initialize the gamepads array
   for (size_t i = 0; i < XUSER_MAX_COUNT; ++i) {
     auto& gamepad = gamepads[i];
     gamepad.state = {};
+    gamepad.caps = {};
   }
   process_gamepads(); // update once for create/game start events
   extension_update_hooks.push_back(process_gamepads);
