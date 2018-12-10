@@ -274,6 +274,14 @@ float gamepad_axis_value(int device, int axis) {
   } else {
     ret /= 32768;
   }
+  const float deadzone = gamepads[device].axis_deadzone;
+  if (ret >= deadzone) {
+    ret = (ret - deadzone) / (1.0f - deadzone);
+  } else if (ret <= -deadzone) {
+    ret = (ret + deadzone) / (1.0f - deadzone);
+  } else {
+    return 0;
+  }
   return (vertical ? -ret : ret);
 }
 
