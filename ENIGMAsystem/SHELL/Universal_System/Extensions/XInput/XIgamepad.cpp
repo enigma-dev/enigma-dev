@@ -208,7 +208,7 @@ float gamepad_axis_value(int device, int axis) {
   if (!gamepad_is_connected(device)) return 0;
   const auto& state = gamepads[device].state;
 
-  float ret;
+  float ret = 0;
   switch (axis) {
     case gp_axislh:
       ret = state.Gamepad.sThumbLX;
