@@ -66,6 +66,7 @@ int gamepad_get_battery_type(int device);
 int gamepad_get_battery_charge(int device);
 float gamepad_get_button_threshold(int device);
 void gamepad_set_button_threshold(int device, float threshold);
+void gamepad_set_axis_deadzone(int device, float deadzone);
 void gamepad_set_vibration(int device, float left, float right);
 int gamepad_axis_count(int device);
 float gamepad_axis_value(int device, int axis);

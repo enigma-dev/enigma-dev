@@ -250,27 +250,31 @@ float gamepad_axis_value(int device, int axis) {
   const auto& state = gamepads[device].state;
 
   float ret = 0;
+  bool vertical = false;
   switch (axis) {
     case gp_axislh:
       ret = state.Gamepad.sThumbLX;
       break;
     case gp_axislv:
       ret = state.Gamepad.sThumbLY;
+      vertical = true;
       break;
     case gp_axisrh:
       ret = state.Gamepad.sThumbRX;
       break;
     case gp_axisrv:
       ret = state.Gamepad.sThumbRY;
+      vertical = true;
       break;
     default:
       return 0;
   }
   if (ret > 0) {
-    return ret / 32767;
+    ret /= 32767;
   } else {
-    return ret / 32768;
+    ret /= 32768;
   }
+  return (vertical ? -ret : ret);
 }
 
 bool gamepad_button_check(int device, int button) {
