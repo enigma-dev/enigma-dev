@@ -204,30 +204,30 @@ int gamepad_axis_count(int device) {
 }
 
 float gamepad_axis_value(int device, int axis) {
-	const auto& state = gamepads[device].state;
+  const auto& state = gamepads[device].state;
 
-	float ret;
-	switch (axis) {
-		case gp_axislh:
-			ret = state.Gamepad.sThumbLX;
-			break;
-		case gp_axislv:
-			ret = state.Gamepad.sThumbLY;
-			break;
-		case gp_axisrh:
-			ret = state.Gamepad.sThumbRX;
-			break;
-		case gp_axisrv:
-			ret = state.Gamepad.sThumbRY;
-			break;
-		default:
-			return -1;
-	}
-	if (ret > 0) {
-		return ret / 32767;
-	} else {
-		return ret / 32768;
-	}
+  float ret;
+  switch (axis) {
+    case gp_axislh:
+      ret = state.Gamepad.sThumbLX;
+      break;
+    case gp_axislv:
+      ret = state.Gamepad.sThumbLY;
+      break;
+    case gp_axisrh:
+      ret = state.Gamepad.sThumbRX;
+      break;
+    case gp_axisrv:
+      ret = state.Gamepad.sThumbRY;
+      break;
+    default:
+      return -1;
+  }
+  if (ret > 0) {
+    return ret / 32767;
+  } else {
+    return ret / 32768;
+  }
 }
 
 WORD digitalButtons[20] = {
@@ -265,25 +265,25 @@ int gamepad_button_count(int device) {
     ++buttons;
   if (caps.Gamepad.bRightTrigger)
     ++buttons;
-	return buttons;
+  return buttons;
 }
 
 float gamepad_button_value(int device, int button) {
   if (gamepads[device].state_result != ERROR_SUCCESS) return 0;
-	const auto& state = gamepads[device].state;
+  const auto& state = gamepads[device].state;
 
   float value = 0;
-	switch (button) {
-		case gp_shoulderlb:
-			value = state.Gamepad.bLeftTrigger / 255;
-			break;
-		case gp_shoulderrb:
-			value = state.Gamepad.bRightTrigger / 255;
-			break;
-		default:
-			value = state.Gamepad.wButtons & digitalButtons[button] ? 1 : 0;
+  switch (button) {
+    case gp_shoulderlb:
+      value = state.Gamepad.bLeftTrigger / 255;
       break;
-	}
+    case gp_shoulderrb:
+      value = state.Gamepad.bRightTrigger / 255;
+      break;
+    default:
+      value = state.Gamepad.wButtons & digitalButtons[button] ? 1 : 0;
+      break;
+  }
 
   return value;
 }
