@@ -27,12 +27,53 @@
 
 namespace {
 
+WORD digitalButtons[20] = {
+  XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_B, XINPUT_GAMEPAD_X, XINPUT_GAMEPAD_Y, XINPUT_GAMEPAD_LEFT_SHOULDER,
+  XINPUT_GAMEPAD_RIGHT_SHOULDER, 0, 0, XINPUT_GAMEPAD_BACK, XINPUT_GAMEPAD_START, XINPUT_GAMEPAD_LEFT_THUMB, XINPUT_GAMEPAD_RIGHT_THUMB,
+  XINPUT_GAMEPAD_DPAD_UP, XINPUT_GAMEPAD_DPAD_DOWN, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, 0, 0, 0, 0
+};
+
+float button_value(const XINPUT_STATE& state, int button) {
+  using namespace enigma_user;
+
+  float value = 0;
+  switch (button) {
+    case gp_shoulderlb:
+      value = state.Gamepad.bLeftTrigger / 255.0f;
+      break;
+    case gp_shoulderrb:
+      value = state.Gamepad.bRightTrigger / 255.0f;
+      break;
+    default:
+      value = state.Gamepad.wButtons & digitalButtons[button] ? 1 : 0;
+      break;
+  }
+
+  return value;
+}
+
 struct Gamepad {
   XINPUT_STATE state, last_state;
   XINPUT_CAPABILITIES caps;
   XINPUT_BATTERY_INFORMATION gamepad_battery;
   DWORD state_result;
   float axis_deadzone = 0.05f, button_threshold = 0.5f;
+
+  float ButtonValue(int button) {
+    return button_value(state, button);
+  }
+
+  float ButtonLastValue(int button) {
+    return button_value(last_state, button);
+  }
+
+  bool ButtonDown(int button) {
+    return ButtonValue(button) > button_threshold;
+  }
+
+  bool ButtonLastDown(int button) {
+    return ButtonLastValue(button) > button_threshold;
+  }
 };
 
 Gamepad gamepads[XUSER_MAX_COUNT];
@@ -232,29 +273,23 @@ float gamepad_axis_value(int device, int axis) {
   }
 }
 
-WORD digitalButtons[20] = {
-  XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_B, XINPUT_GAMEPAD_X, XINPUT_GAMEPAD_Y, XINPUT_GAMEPAD_LEFT_SHOULDER,
-  XINPUT_GAMEPAD_RIGHT_SHOULDER, 0, 0, XINPUT_GAMEPAD_BACK, XINPUT_GAMEPAD_START, XINPUT_GAMEPAD_LEFT_THUMB, XINPUT_GAMEPAD_RIGHT_THUMB,
-  XINPUT_GAMEPAD_DPAD_UP, XINPUT_GAMEPAD_DPAD_DOWN, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, 0, 0, 0, 0
-};
-
 bool gamepad_button_check(int device, int button) {
   if (!gamepad_is_connected(device)) return false;
-  const bool is_down = (gamepads[device].state.Gamepad.wButtons & digitalButtons[button]);
+  const bool is_down = gamepads[device].ButtonDown(button);
   return is_down;
 }
 
 bool gamepad_button_check_pressed(int device, int button) {
   if (!gamepad_is_connected(device)) return false;
-  const bool is_down = (gamepads[device].state.Gamepad.wButtons & digitalButtons[button]);
-  const bool was_down = (gamepads[device].last_state.Gamepad.wButtons & digitalButtons[button]);
+  const bool is_down = gamepads[device].ButtonDown(button);
+  const bool was_down = gamepads[device].ButtonLastDown(button);
   return is_down && !was_down;
 }
 
 bool gamepad_button_check_released(int device, int button) {
   if (!gamepad_is_connected(device)) return false;
-  const bool is_down = (gamepads[device].state.Gamepad.wButtons & digitalButtons[button]);
-  const bool was_down = (gamepads[device].last_state.Gamepad.wButtons & digitalButtons[button]);
+  const bool is_down = gamepads[device].ButtonDown(button);
+  const bool was_down = gamepads[device].ButtonLastDown(button);
   return !is_down && was_down;
 }
 
@@ -276,22 +311,7 @@ int gamepad_button_count(int device) {
 
 float gamepad_button_value(int device, int button) {
   if (!gamepad_is_connected(device)) return 0;
-  const auto& state = gamepads[device].state;
-
-  float value = 0;
-  switch (button) {
-    case gp_shoulderlb:
-      value = state.Gamepad.bLeftTrigger / 255;
-      break;
-    case gp_shoulderrb:
-      value = state.Gamepad.bRightTrigger / 255;
-      break;
-    default:
-      value = state.Gamepad.wButtons & digitalButtons[button] ? 1 : 0;
-      break;
-  }
-
-  return value;
+  return gamepads[device].ButtonValue(button);
 }
 
 void gamepad_set_color(int device, int color) {
