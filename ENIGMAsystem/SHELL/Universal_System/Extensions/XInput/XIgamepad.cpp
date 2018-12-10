@@ -221,7 +221,7 @@ float gamepad_axis_value(int device, int axis) {
       ret = state.Gamepad.sThumbRY;
       break;
     default:
-      return -1;
+      return 0;
   }
   if (ret > 0) {
     return ret / 32767;
