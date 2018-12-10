@@ -30,6 +30,7 @@ namespace {
 struct Gamepad {
   XINPUT_STATE state, last_state;
   XINPUT_CAPABILITIES caps;
+  XINPUT_BATTERY_INFORMATION gamepad_battery;
   DWORD state_result;
   float axis_deadzone = 0.05f, button_threshold = 0.5f;
 };
@@ -42,6 +43,7 @@ void process_gamepads() {
     gamepad.last_state = gamepad.state;
     gamepad.state_result = XInputGetState(i, &gamepad.state);
     XInputGetCapabilities(i, 0, &gamepad.caps);
+    XInputGetBatteryInformation(i, XINPUT_DEVTYPE_GAMEPAD, &gamepad.gamepad_battery);
   }
 }
 
@@ -55,6 +57,7 @@ void extension_xinput_init() {
     auto& gamepad = gamepads[i];
     gamepad.state = {};
     gamepad.caps = {};
+    gamepad.gamepad_battery = {};
   }
   process_gamepads(); // update once for create/game start events
   extension_update_hooks.push_back(process_gamepads);
@@ -124,60 +127,42 @@ string gamepad_get_description(int device) {
 }
 
 int gamepad_get_battery_type(int device) {
-	XINPUT_BATTERY_INFORMATION batteryInformation = {};
+  if (gamepads[device].state_result != ERROR_SUCCESS) return gp_unknown;
+  const auto& gamepad_battery = gamepads[device].gamepad_battery;
 
-    // Get the state
-    DWORD Result = XInputGetBatteryInformation(device, XINPUT_DEVTYPE_GAMEPAD, &batteryInformation);
-	if (Result == ERROR_SUCCESS) {
-        switch (batteryInformation.BatteryType) {
-			case BATTERY_TYPE_DISCONNECTED:
-				return gp_disconnected;
-				break;
-			case BATTERY_TYPE_WIRED:
-				return gp_wired;
-				break;
-			case BATTERY_TYPE_ALKALINE:
-				return gp_alkaline;
-				break;
-			case BATTERY_TYPE_NIMH:
-				return gp_nimh;
-				break;
-			case BATTERY_TYPE_UNKNOWN:
-				return gp_unknown;
-				break;
-			default:
-				return -2;
-		}
-    } else {
-        return -1;
-    }
+  switch (gamepad_battery.BatteryType) {
+    case BATTERY_TYPE_DISCONNECTED:
+      return gp_disconnected;
+    case BATTERY_TYPE_WIRED:
+      return gp_wired;
+    case BATTERY_TYPE_ALKALINE:
+      return gp_alkaline;
+    case BATTERY_TYPE_NIMH:
+      return gp_nimh;
+    case BATTERY_TYPE_UNKNOWN:
+      return gp_unknown;
+  }
+
+  return gp_unknown;
 }
 
 int gamepad_get_battery_charge(int device) {
-	XINPUT_BATTERY_INFORMATION batteryInformation = {};
+  if (gamepads[device].state_result != ERROR_SUCCESS) return gp_empty;
+  const auto& gamepad_battery = gamepads[device].gamepad_battery;
 
-    // Get the state
-    DWORD Result = XInputGetBatteryInformation(device, XINPUT_DEVTYPE_GAMEPAD, &batteryInformation);
-	if (Result == ERROR_SUCCESS) {
-        switch (batteryInformation.BatteryLevel) {
-			case BATTERY_LEVEL_EMPTY:
-				return gp_empty;
-				break;
-			case BATTERY_LEVEL_LOW:
-				return gp_low;
-				break;
-			case BATTERY_LEVEL_MEDIUM:
-				return gp_medium;
-				break;
-			case BATTERY_LEVEL_FULL:
-				return gp_full;
-				break;
-			default:
-				return -2;
-		}
-    } else {
-        return -1;
-    }
+
+  switch (gamepad_battery.BatteryLevel) {
+    case BATTERY_LEVEL_EMPTY:
+      return gp_empty;
+    case BATTERY_LEVEL_LOW:
+      return gp_low;
+    case BATTERY_LEVEL_MEDIUM:
+      return gp_medium;
+    case BATTERY_LEVEL_FULL:
+      return gp_full;
+  }
+
+  return gp_empty;
 }
 
 float gamepad_get_button_threshold(int device) {
