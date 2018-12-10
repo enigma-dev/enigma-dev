@@ -205,6 +205,10 @@ int gamepad_axis_count(int device) {
     ++axes;
   if (caps.Gamepad.sThumbRX)
     ++axes;
+  if (caps.Gamepad.sThumbLY)
+    ++axes;
+  if (caps.Gamepad.sThumbRY)
+    ++axes;
   return axes;
 }
 
