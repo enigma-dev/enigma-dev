@@ -39,40 +39,38 @@ using std::string;
 
 namespace enigma {
   void SetResizeFptr();
+  
+  void set_working_directory() {
+    // Set the working_directory
+    char buffer[PATH_MAX + 1];
+    if (getcwd(buffer, PATH_MAX + 1) != NULL)
+      working_directory = buffer;
+
+    // Set the program_directory
+    buffer[0] = 0;
+    char real_executable[PATH_MAX + 1];
+    char *bundle_id;
+
+    uint32_t bufsize = sizeof(buffer);
+    if (_NSGetExecutablePath(buffer, &bufsize) == 0) {
+      bundle_id = dirname(buffer);
+      strcpy(real_executable, bundle_id);
+      strcat(real_executable, "/");
+
+      program_directory = real_executable;
+    }
+
+    // Set the temp_directory
+    char const *env = getenv("TMPDIR");
+
+    if (env == 0)
+      env = "/tmp/";
+
+    temp_directory = env; 
+  }
 }
 
 namespace enigma_user {
-  // Set the working_directory
-  char buffer[PATH_MAX + 1];
-  if (getcwd(buffer, PATH_MAX + 1) != NULL)
-    working_directory = buffer;
-  else
-    working_directory = "";
-
-  // Set the program_directory
-  buffer[0] = 0;
-  char real_executable[PATH_MAX + 1];
-  char *bundle_id;
-
-  uint32_t bufsize = sizeof(buffer);
-  if (_NSGetExecutablePath(buffer, &bufsize) == 0) {
-    bundle_id = dirname(buffer);
-    strcpy(real_executable, bundle_id);
-    strcat(real_executable, "/");
-
-    program_directory = real_executable;
-  }
-  else
-    program_directory = "";
-
-  // Set the temp_directory
-  char const *env = getenv("TMPDIR");
-
-  if (env == 0)
-    env = "/tmp/";
-
-  temp_directory = env;
-
   double set_working_directory(string dname) {
     if (!dname.empty()) {
       while (*dname.rbegin() == '/') {
@@ -88,17 +86,8 @@ namespace enigma_user {
   }
 }
 
-extern "C" void copy_bundle_cwd(char* res);
-
 int main(int argc,char** argv) {
-  // Set the working_directory (from the bundle's location; using cwd won't work right on OS-X).
-  char buffer[1024] = {0};
-  copy_bundle_cwd(&buffer[0]);
-  if (buffer[0])
-    fprintf(stdout, "Current working dir: %s\n", buffer);
-  else
-    perror("copy_bundle_cwd() error");
-  enigma_user::working_directory = string( buffer );
+  enigma::set_working_directory();
   
   enigma::parameters=new char* [argc];
   for (int i=0; i<argc; i++)
