@@ -33,7 +33,7 @@ namespace enigma //TODO: Find where this belongs
 
 namespace enigma_user
 {
-  double set_working_directory(string dname);
+  double set_working_directory(std::string dname);
   string temp_directory;
 }
 
