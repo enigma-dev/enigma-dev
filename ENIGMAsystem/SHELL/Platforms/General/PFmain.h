@@ -49,6 +49,7 @@ namespace enigma_user {
 
 extern std::string working_directory;
 extern std::string program_directory;
+extern std::string temp_directory;
 extern std::string keyboard_string;
 extern int keyboard_key;
 extern double fps;
@@ -80,6 +81,7 @@ void execute_program(std::string fname, std::string args, bool wait);
 void execute_program(std::string operation, std::string fname, std::string args, bool wait);
 
 std::string environment_get_variable(std::string name);
+double set_working_directory(std::string dname);
 }
 
 #endif //ENIGMA_PLATFORM_MAIN
