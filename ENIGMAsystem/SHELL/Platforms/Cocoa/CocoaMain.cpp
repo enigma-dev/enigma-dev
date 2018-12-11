@@ -34,12 +34,15 @@
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/roomsystem.h"
 
+using std::string;
+
 namespace enigma {
   void SetResizeFptr();
 }
 
 namespace enigma_user {
   // Set the working_directory
+  string working_directory = "";
   char buffer[PATH_MAX + 1];
   if (getcwd(buffer, PATH_MAX + 1) != NULL)
     working_directory = buffer;
@@ -47,6 +50,7 @@ namespace enigma_user {
     working_directory = "";
 
   // Set the program_directory
+  string program_directory = "";
   buffer[0] = 0;
   char real_executable[PATH_MAX + 1];
   char *bundle_id;
@@ -63,7 +67,7 @@ namespace enigma_user {
     program_directory = "";
 
   // Set the temp_directory
-  std::string temp_directory = "";
+  string temp_directory = "";
   char const *env = getenv("TMPDIR");
 
   if (env == 0)
