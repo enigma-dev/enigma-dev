@@ -21,6 +21,7 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <mach-o/dyld.h>
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
 #include <cstdlib>
