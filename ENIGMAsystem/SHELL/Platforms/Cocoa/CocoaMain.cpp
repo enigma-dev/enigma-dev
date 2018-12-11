@@ -45,7 +45,7 @@ namespace enigma_user {
     working_directory = "";
 
   // Set the program_directory
-  memset(&buffer[0], 0, MAX_PATH + 1);
+  buffer[0] = 0;
   char real_executable[PATH_MAX + 1];
   char *bundle_id;
 
