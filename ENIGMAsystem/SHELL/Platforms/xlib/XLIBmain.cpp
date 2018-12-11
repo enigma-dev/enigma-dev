@@ -37,6 +37,7 @@
 #include <sys/stat.h>
 #include <limits.h>
 #include <unistd.h>
+#include <libgen.h>
 #include <cstdlib>
 #include <string>
 
