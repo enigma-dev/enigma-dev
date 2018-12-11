@@ -36,7 +36,54 @@ namespace enigma {
 }
 
 namespace enigma_user {
-  std::string working_directory = "";
+  // Set the working_directory
+  char buffer[PATH_MAX + 1];
+  if (getcwd(buffer, PATH_MAX + 1) != NULL)
+    working_directory = buffer;
+  else
+    working_directory = "";
+
+  // Set the program_directory
+  memset(&buffer[0], 0, MAX_PATH + 1);
+  char real_executable[PATH_MAX + 1];
+  char *bundle_id;
+
+  uint32_t bufsize = sizeof(buffer);
+  if (_NSGetExecutablePath(buffer, &bufsize) == 0)
+  {
+    bundle_id = dirname(buffer);
+    strcpy(real_executable, bundle_id);
+    strcat(real_executable, "/");
+
+    program_directory = real_executable;
+  }
+  else
+    program_directory = "";
+
+  // Set the temp_directory
+  char const *env = getenv("TMPDIR");
+
+  if (env == 0)
+    env = "/tmp/";
+
+  temp_directory = env;
+
+  double set_working_directory(string dname)
+  {
+    if (!dname.empty())
+    {
+      while (*dname.rbegin() == '/')
+      {
+        dname.erase(dname.size() - 1);
+      }
+    }
+
+    struct stat sb;
+    if (stat((char *)dname.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+      return (chdir((char *)dname.c_str()) == 0);
+
+    return 0;
+  }
 }
 
 extern "C" void copy_bundle_cwd(char* res);
