@@ -64,12 +64,9 @@ namespace enigma_user {
 
   temp_directory = env;
 
-  double set_working_directory(string dname)
-  {
-    if (!dname.empty())
-    {
-      while (*dname.rbegin() == '/')
-      {
+  double set_working_directory(string dname) {
+    if (!dname.empty()) {
+      while (*dname.rbegin() == '/') {
         dname.erase(dname.size() - 1);
       }
     }
