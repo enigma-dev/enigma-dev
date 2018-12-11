@@ -26,6 +26,7 @@
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
 #include <cstdlib>
+#include <string>
 
 #include "../General/PFwindow.h"
 #include "../General/PFfilemanip.h"
@@ -62,6 +63,7 @@ namespace enigma_user {
     program_directory = "";
 
   // Set the temp_directory
+  std::string temp_directory = "";
   char const *env = getenv("TMPDIR");
 
   if (env == 0)
