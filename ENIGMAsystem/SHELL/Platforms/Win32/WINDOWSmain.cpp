@@ -36,7 +36,8 @@
 using std::string;
 using std::vector;
 
-namespace enigma_user {
+namespace enigma_user 
+{
 
 const int os_type = os_windows;
 }  // namespace enigma_user
@@ -57,13 +58,15 @@ void Sleep(int ms) { ::Sleep(ms); }
 
 void initInput(){};
 
-HWND get_window_handle() {
+HWND get_window_handle() 
+{
   return hWnd;
 }
 
 }  // namespace enigma
 
-namespace enigma_user {
+namespace enigma_user 
+{
   double set_working_directory(string dname)
   {
     replace(dname.begin(), dname.end(), '/', '\\');
@@ -79,7 +82,8 @@ namespace enigma_user {
     tstring tstr_dname = widen(dname);
     DWORD attr = GetFileAttributesW(tstr_dname.c_str());
 
-    if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) {
+    if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) 
+    {
       return (SetCurrentDirectoryW(tstr_dname.c_str()) != 0);
     }
     
@@ -87,7 +91,8 @@ namespace enigma_user {
   }
 } // enigma_user
 
-namespace enigma {
+namespace enigma 
+{
 bool use_pc;
 // Filetime.
 ULARGE_INTEGER time_offset_ft;
@@ -100,12 +105,16 @@ LARGE_INTEGER time_current_pc;
 LARGE_INTEGER frequency_pc;
 // Timing functions.
 
-void initialize_timing() {
+void initialize_timing() 
+{
   use_pc = QueryPerformanceFrequency(&frequency_pc);
-  if (use_pc) {
+  if (use_pc) 
+  {
     QueryPerformanceCounter(&time_offset_pc);
     time_offset_slowing_pc.QuadPart = time_offset_pc.QuadPart;
-  } else {
+  } 
+  else 
+  {
     FILETIME time_values;
     GetSystemTimeAsFileTime(&time_values);
     time_offset_ft.LowPart = time_values.dwLowDateTime;
@@ -113,58 +122,81 @@ void initialize_timing() {
     time_offset_slowing_ft.QuadPart = time_offset_ft.QuadPart;
   }
 }
-void update_current_time() {
-  if (use_pc) {
+void update_current_time() 
+{
+  if (use_pc) 
+  {
     QueryPerformanceCounter(&time_current_pc);
-  } else {
+  } 
+  else 
+  {
     FILETIME time_values;
     GetSystemTimeAsFileTime(&time_values);
     time_current_ft.LowPart = time_values.dwLowDateTime;
     time_current_ft.HighPart = time_values.dwHighDateTime;
   }
 }
-long get_current_offset_difference_mcs() {
-  if (use_pc) {
+long get_current_offset_difference_mcs() 
+{
+  if (use_pc) 
+  {
     return clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0, 1000000);
-  } else {
+  } 
+  else 
+  {
     return clamp((time_current_ft.QuadPart - time_offset_ft.QuadPart) / 10, 0, 1000000);
   }
 }
-long get_current_offset_slowing_difference_mcs() {
-  if (use_pc) {
+long get_current_offset_slowing_difference_mcs() 
+{
+  if (use_pc) 
+  {
     return clamp((time_current_pc.QuadPart - time_offset_slowing_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0,
                  1000000);
-  } else {
+  }
+  else 
+  {
     return clamp((time_current_ft.QuadPart - time_offset_slowing_ft.QuadPart) / 10, 0, 1000000);
   }
 }
-void increase_offset_slowing(long increase_mcs) {
+void increase_offset_slowing(long increase_mcs) 
+{
   if (use_pc) {
     time_offset_slowing_pc.QuadPart += frequency_pc.QuadPart * increase_mcs / 1000000;
-  } else {
+  } 
+  else 
+  {
     time_offset_slowing_ft.QuadPart += 10 * increase_mcs;
   }
 }
-void offset_modulus_one_second() {
-  if (use_pc) {
+void offset_modulus_one_second() 
+{
+  if (use_pc) 
+  {
     long passed_mcs = get_current_offset_difference_mcs();
     time_offset_pc.QuadPart += (passed_mcs / 1000000) * frequency_pc.QuadPart;
     time_offset_slowing_pc.QuadPart = time_offset_pc.QuadPart;
-  } else {
+  } 
+  else 
+  {
     long passed_mcs = get_current_offset_difference_mcs();
     time_offset_ft.QuadPart += (passed_mcs / 1000000) * 10000000;
     time_offset_slowing_ft.QuadPart = time_offset_ft.QuadPart;
   }
 }
 
-static LONG_PTR ComputeInitialWindowStyle() {
+static LONG_PTR ComputeInitialWindowStyle() 
+{
   LONG_PTR newlong = 0;
 
   if (showIcons) newlong |= WS_SYSMENU;
 
-  if (isFullScreen) {
+  if (isFullScreen) 
+  {
     newlong |= WS_POPUP;
-  } else if (enigma::showBorder) {
+  } 
+  else if (enigma::showBorder) 
+  {
     newlong |= WS_CAPTION | WS_MINIMIZEBOX;
     if (isSizeable) newlong |= WS_SIZEBOX | WS_MAXIMIZEBOX;
   }
@@ -177,7 +209,8 @@ WNDCLASS wcontainer;
 HGLRC hRC;
 MSG msg;
 
-bool initGameWindow() {
+bool initGameWindow() 
+{
   int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
   if (!wid || !hgt) wid = 640, hgt = 480;
   enigma::mainthread = GetCurrentThread();
@@ -211,7 +244,8 @@ bool initGameWindow() {
   enigma::hWnd = CreateWindow("EnigmaDevGameMainWindow", "", ComputeInitialWindowStyle(), (screen_width - wid) / 2,
                               (screen_height - hgt) / 2, wid, hgt, NULL, NULL, hInstance, NULL);
 
-  if (enigma::touch_extension_register != NULL) {
+  if (enigma::touch_extension_register != NULL) 
+  {
     enigma::touch_extension_register(enigma::hWnd);
   }
 
@@ -226,21 +260,24 @@ long needed_mcs = 0;
 void initTimer() {
   UINT minimum_resolution = 1;
   TIMECAPS timer_resolution_info;
-  if (timeGetDevCaps(&timer_resolution_info, sizeof(timer_resolution_info)) == MMSYSERR_NOERROR) {
+  if (timeGetDevCaps(&timer_resolution_info, sizeof(timer_resolution_info)) == MMSYSERR_NOERROR) 
+  {
     minimum_resolution = timer_resolution_info.wPeriodMin;
   }
   timeBeginPeriod(minimum_resolution);
   enigma::initialize_timing();
 }
 
-int updateTimer() {
+int updateTimer() 
+{
   // Update current time.
   update_current_time();
   {
     // Find diff between current and offset.
 
     long passed_mcs = enigma::get_current_offset_difference_mcs();
-    if (passed_mcs >= 1000000) {  // Handle resetting.
+    if (passed_mcs >= 1000000) 
+    {  // Handle resetting.
       // If more than one second has passed, update fps variable, reset frames count,
       // and advance offset by difference in seconds, rounded down.
 
@@ -250,13 +287,15 @@ int updateTimer() {
     }
   }
 
-  if (current_room_speed > 0) {
+  if (current_room_speed > 0) 
+  {
     spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
 
     remaining_mcs = 1000000 - spent_mcs;
     needed_mcs = long((1.0 - 1.0 * frames_count / current_room_speed) * 1e6);
     const int catchup_limit_ms = 50;
-    if (needed_mcs > remaining_mcs + catchup_limit_ms * 1000) {
+    if (needed_mcs > remaining_mcs + catchup_limit_ms * 1000) 
+    {
       // If more than catchup_limit ms is needed than is remaining, we risk running too fast to catch up.
       // In order to avoid running too fast, we advance the offset, such that we are only at most catchup_limit ms behind.
       // Thus, if the load is consistently making the game slow, the game is still allowed to run as fast as possible
@@ -268,7 +307,8 @@ int updateTimer() {
       remaining_mcs = 1000000 - spent_mcs;
       needed_mcs = long((1.0 - 1.0 * frames_count / current_room_speed) * 1e6);
     }
-    if (remaining_mcs > needed_mcs) {
+    if (remaining_mcs > needed_mcs) 
+    {
       const long sleeping_time = std::min((remaining_mcs - needed_mcs) / 5, long(999999));
       usleep(std::max(long(1), sleeping_time));
       return -1;
@@ -277,9 +317,12 @@ int updateTimer() {
 
   //TODO: The placement of this code is inconsistent with XLIB because events are handled before, ask Josh.
   unsigned long dt = 0;
-  if (spent_mcs > last_mcs) {
+  if (spent_mcs > last_mcs) 
+  {
     dt = (spent_mcs - last_mcs);
-  } else {
+  } 
+  else 
+  {
     //TODO: figure out what to do here this happens when the fps is reached and the timers start over
     dt = enigma_user::delta_time;
   }
@@ -291,14 +334,19 @@ int updateTimer() {
   return 0;
 }
 
-int handleEvents() {
+int handleEvents() 
+{
   if (enigma::game_isending) PostQuitMessage(enigma::game_return);
 
-  while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-    if (msg.message == WM_QUIT) {
+  while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) 
+  {
+    if (msg.message == WM_QUIT) 
+    {
       enigma::game_return = msg.wParam;
       return 1;
-    } else {
+    } 
+    else 
+    {
       TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
@@ -313,7 +361,8 @@ void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
 void showWindow() { ShowWindow(enigma::hWnd, 1); }
 
-void set_working_directory() {
+void set_working_directory() 
+{
   // Set the working_directory
   WCHAR buffer[MAX_PATH + 1];
   GetCurrentDirectoryW(MAX_PATH + 1, buffer);
@@ -334,22 +383,28 @@ void set_working_directory() {
 
 }  // namespace enigma
 
-namespace enigma_user {
+namespace enigma_user 
+{
 
-unsigned long get_timer() {  // microseconds since the start of the game
+unsigned long get_timer() 
+{  // microseconds since the start of the game
   enigma::update_current_time();
 
   LARGE_INTEGER time;
-  if (enigma::use_pc) {
+  if (enigma::use_pc) 
+  {
     time.QuadPart = enigma::time_current_pc.QuadPart * 1000000 / enigma::frequency_pc.QuadPart;
-  } else {
+  } 
+  else 
+  {
     time.QuadPart = enigma::time_current_ft.QuadPart / 10;
   }
 
   return time.QuadPart;
 }
 
-unsigned long long disk_size(std::string drive) {
+unsigned long long disk_size(std::string drive)
+{
   DWORD sectorsPerCluster, bytesPerSector, totalClusters, freeClusters;
 
   tstring tstr_drive = widen(drive);
@@ -365,7 +420,8 @@ unsigned long long disk_size(std::string drive) {
   return (unsigned long long)(totalClusters * sectorsPerCluster) * (unsigned long long)bytesPerSector;
 }
 
-unsigned long long disk_free(std::string drive) {
+unsigned long long disk_free(std::string drive) 
+{
   DWORD sectorsPerCluster, bytesPerSector, totalClusters, freeClusters;
 
   tstring tstr_drive = widen(drive);
@@ -382,7 +438,8 @@ unsigned long long disk_free(std::string drive) {
          ((unsigned long long)(freeClusters * sectorsPerCluster) * (unsigned long long)bytesPerSector);
 }
 
-void set_program_priority(int value) {
+void set_program_priority(int value) 
+{
   // Need to add PROCESS_SET_INFORMATION permission to thread's access rights, not sure how
 
   DWORD priorityValue = NORMAL_PRIORITY_CLASS;
@@ -400,7 +457,8 @@ void set_program_priority(int value) {
   SetPriorityClass(GetCurrentThread(), priorityValue);
 }
 
-void execute_shell(std::string fname, std::string args) {
+void execute_shell(std::string fname, std::string args) 
+{
   WCHAR cDir[MAX_PATH];
   GetCurrentDirectoryW(MAX_PATH, cDir);
   tstring tstr_fname = widen(fname);
@@ -408,7 +466,8 @@ void execute_shell(std::string fname, std::string args) {
   ShellExecuteW(enigma::hWnd, NULL, tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
 }
 
-void execute_shell(std::string operation, std::string fname, std::string args) {
+void execute_shell(std::string operation, std::string fname, std::string args) 
+{
   WCHAR cDir[MAX_PATH];
   GetCurrentDirectoryW(MAX_PATH, cDir);
   tstring tstr_operation = widen(operation);
@@ -417,7 +476,8 @@ void execute_shell(std::string operation, std::string fname, std::string args) {
   ShellExecuteW(enigma::hWnd, tstr_operation.c_str(), tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
 }
 
-void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
+void execute_program(std::string operation, std::string fname, std::string args, bool wait) 
+{
   SHELLEXECUTEINFOW lpExecInfo;
   tstring tstr_operation = widen(operation);
   tstring tstr_fname = widen(fname);
@@ -436,7 +496,8 @@ void execute_program(std::string operation, std::string fname, std::string args,
   ShellExecuteExW(&lpExecInfo);
 
   //wait until a file is finished printing
-  if (wait && lpExecInfo.hProcess != NULL) {
+  if (wait && lpExecInfo.hProcess != NULL) 
+  {
     ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
     ::CloseHandle(lpExecInfo.hProcess);
   }
@@ -444,7 +505,8 @@ void execute_program(std::string operation, std::string fname, std::string args,
 
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
 
-std::string environment_get_variable(std::string name) {
+std::string environment_get_variable(std::string name) 
+{
   WCHAR buffer[1024];
   tstring tstr_name = widen(name);
   GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
@@ -452,7 +514,8 @@ std::string environment_get_variable(std::string name) {
   return shorten(buffer);
 }
 
-void action_webpage(const std::string &url) {
+void action_webpage(const std::string &url) 
+{
   tstring tstr_url = widen(url);
   tstring tstr_open = widen("open");
   ShellExecuteW(NULL, tstr_open.c_str(), tstr_url.c_str(), NULL, NULL, SW_SHOWNORMAL);
@@ -460,7 +523,8 @@ void action_webpage(const std::string &url) {
 
 }  // namespace enigma_user
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow) {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow) 
+{
   // DO NOT move this out of WinMain like a fucking idiot
   // we are setting the hInstance in the enigma namespace
   // to the local one passed as a parameter here so that
@@ -470,7 +534,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   int argc = 0;
   std::vector<const char*> argv;
   std::vector<string> shortened;
-  if (LPWSTR *_argv = CommandLineToArgvW(GetCommandLineW(), &argc)) {
+  if (LPWSTR *_argv = CommandLineToArgvW(GetCommandLineW(), &argc)) 
+  {
     for (int i = 0; i < argc; ++i) {
       shortened.push_back(shorten(_argv[i]));
       argv.push_back(shortened[i].c_str());
