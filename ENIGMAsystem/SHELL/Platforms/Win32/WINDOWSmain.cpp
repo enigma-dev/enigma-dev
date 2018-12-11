@@ -63,6 +63,30 @@ HWND get_window_handle() {
 
 }  // namespace enigma
 
+namespace enigma_user {
+  double set_working_directory(string dname)
+  {
+    replace(dname.begin(), dname.end(), '/', '\\');
+
+    if (!dname.empty())
+    {
+      while (*dname.rbegin() == '\\')
+      {
+        dname.erase(dname.size() - 1);
+      }
+    }
+    
+    tstring wstr_dname = widen(dname);
+    DWORD attr = GetFileAttributesW(wstr_dname.c_str());
+
+    if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) {
+      return (SetCurrentDirectoryW(wstr_dname.c_str()) != 0);
+    }
+
+	  return 0;
+  }
+} // enigma_user
+
 namespace enigma {
 bool use_pc;
 // Filetime.
@@ -290,17 +314,22 @@ void destroyWindow() { DestroyWindow(enigma::hWnd); }
 void showWindow() { ShowWindow(enigma::hWnd, 1); }
 
 void set_working_directory() {
-    // Set the working_directory
-  WCHAR buffer[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, buffer);
+  // Set the working_directory
+  WCHAR buffer[MAX_PATH + 1];
+  GetCurrentDirectoryW(MAX_PATH + 1, buffer);
   enigma_user::working_directory = shorten(buffer);
 
   // Set the program_directory
-  memset(&buffer[0], 0, MAX_PATH);
-  GetModuleFileNameW(NULL, buffer, MAX_PATH);
+  memset(&buffer[0], 0, MAX_PATH + 1);
+  GetModuleFileNameW(NULL, buffer, MAX_PATH + 1);
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
       enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
+  
+  // Set the temp_directory
+  memset(&buffer[0], 0, MAX_PATH + 1);
+	GetTempPathW(MAX_PATH + 1, buffer);
+  enigma_user::temp_directory = shorten(buffer);
 }
 
 }  // namespace enigma
