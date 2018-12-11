@@ -4,7 +4,6 @@
 #include <string>
 
 namespace enigma_user {
-  std::string working_directory = "";
   working_directory = SDL_GetBasePath();
 }
 
