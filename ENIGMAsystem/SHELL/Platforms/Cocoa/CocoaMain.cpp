@@ -44,7 +44,7 @@ namespace enigma {
     // Set the working_directory
     char buffer[PATH_MAX + 1];
     if (getcwd(buffer, PATH_MAX + 1) != NULL)
-      working_directory = buffer;
+      enigma_user::working_directory = buffer;
 
     // Set the program_directory
     buffer[0] = 0;
@@ -57,7 +57,7 @@ namespace enigma {
       strcpy(real_executable, bundle_id);
       strcat(real_executable, "/");
 
-      program_directory = real_executable;
+      enigma_user::program_directory = real_executable;
     }
 
     // Set the temp_directory
@@ -66,7 +66,7 @@ namespace enigma {
     if (env == 0)
       env = "/tmp/";
 
-    temp_directory = env; 
+    enigma_user::temp_directory = env; 
   }
 }
 
