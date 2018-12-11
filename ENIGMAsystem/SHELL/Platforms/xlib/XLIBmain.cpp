@@ -49,10 +49,10 @@ namespace enigma_user {
     working_directory = "";
 
   // Set the program_directory
-  char pdir[PATH_MAX + 1];
-  ssize_t count = readlink("/proc/self/exe", pdir, PATH_MAX + 1);
+  buffer[0] = 0;
+  ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX + 1);
   if (count !=  -1)
-    program_directory = dirname(pdir) + string("/");
+    program_directory = dirname(buffer) + string("/");
   else
     program_directory = "";
 
