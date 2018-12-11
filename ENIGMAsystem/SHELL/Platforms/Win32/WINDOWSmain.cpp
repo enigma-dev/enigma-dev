@@ -76,14 +76,14 @@ namespace enigma_user {
       }
     }
     
-    tstring wstr_dname = widen(dname);
-    DWORD attr = GetFileAttributesW(wstr_dname.c_str());
+    tstring tstr_dname = widen(dname);
+    DWORD attr = GetFileAttributesW(tstr_dname.c_str());
 
     if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) {
-      return (SetCurrentDirectoryW(wstr_dname.c_str()) != 0);
+      return (SetCurrentDirectoryW(tstr_dname.c_str()) != 0);
     }
-
-	  return 0;
+    
+    return 0;
   }
 } // enigma_user
 
