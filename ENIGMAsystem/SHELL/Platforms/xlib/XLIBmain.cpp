@@ -38,7 +38,7 @@
 #include <limits.h>
 #include <unistd.h>
 #include <cstdlib>
-#inlcude <string>
+#include <string>
 
 using std::string;
 
