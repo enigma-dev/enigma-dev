@@ -32,13 +32,11 @@
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/roomsystem.h"
 
-namespace enigma 
-{
+namespace enigma {
   void SetResizeFptr();
 }
 
-namespace enigma_user 
-{
+namespace enigma_user {
   // Set the working_directory
   char buffer[PATH_MAX + 1];
   if (getcwd(buffer, PATH_MAX + 1) != NULL)
@@ -52,8 +50,7 @@ namespace enigma_user
   char *bundle_id;
 
   uint32_t bufsize = sizeof(buffer);
-  if (_NSGetExecutablePath(buffer, &bufsize) == 0)
-  {
+  if (_NSGetExecutablePath(buffer, &bufsize) == 0) {
     bundle_id = dirname(buffer);
     strcpy(real_executable, bundle_id);
     strcat(real_executable, "/");
@@ -71,12 +68,9 @@ namespace enigma_user
 
   temp_directory = env;
 
-  double set_working_directory(string dname) 
-  {
-    if (!dname.empty())
-    {
-      while (*dname.rbegin() == '/')
-      {
+  double set_working_directory(string dname) {
+    if (!dname.empty()) {
+      while (*dname.rbegin() == '/') {
         dname.erase(dname.size() - 1);
       }
     }
@@ -91,8 +85,7 @@ namespace enigma_user
 
 extern "C" void copy_bundle_cwd(char* res);
 
-int main(int argc,char** argv)
-{
+int main(int argc,char** argv) {
   // Set the working_directory (from the bundle's location; using cwd won't work right on OS-X).
   char buffer[1024] = {0};
   copy_bundle_cwd(&buffer[0]);
@@ -111,29 +104,24 @@ int main(int argc,char** argv)
   return mainO(argc, argv);
 }
 
-namespace enigma_user 
-{
+namespace enigma_user {
 
-  void sleep(int ms) 
-  {
+  void sleep(int ms) {
     if (ms > 1000) ::sleep(ms/1000);
     usleep((ms % 1000) *1000);
   };
   
-  int parameter_count()
-  {
+  int parameter_count() {
   // TODO
   return 0;
   }
 
-  string parameter_string(int n) 
-  {
+  string parameter_string(int n) {
     // TODO
     return string("");
   }
 
-  string environment_get_variable(string name) 
-  {
+  string environment_get_variable(string name) {
     // TODO
     return string("");
   }
