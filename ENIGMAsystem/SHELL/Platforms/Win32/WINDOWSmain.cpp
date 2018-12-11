@@ -18,6 +18,7 @@
 
 #include "WINDOWSmain.h"
 
+#include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 
