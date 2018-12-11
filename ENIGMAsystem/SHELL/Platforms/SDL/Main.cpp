@@ -1,9 +1,11 @@
 #include "Platforms/General/PFmain.h"
 
 #include <SDL2/SDL.h> //sdl does a #define main SDL_main...
+#include <string>
 
 namespace enigma_user {
-  enigma_user::working_directory = SDL_GetBasePath();
+  std::string working_directory = "";
+  working_directory = SDL_GetBasePath();
 }
 
 int main(int argc, char** argv) {
