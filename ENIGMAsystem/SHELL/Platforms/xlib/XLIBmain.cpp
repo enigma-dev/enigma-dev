@@ -34,7 +34,9 @@
 #include <X11/Xutil.h>
 
 #include <sys/types.h>  //getpid
+#include <sys/stat.h>
 #include <unistd.h>
+#include <cstdlib>
 
 using namespace enigma::x11;
 
