@@ -317,14 +317,14 @@ void set_working_directory() {
   enigma_user::working_directory = shorten(buffer);
 
   // Set the program_directory
-  memset(&buffer[0], 0, MAX_PATH + 1);
+  buffer[0] = 0;
   GetModuleFileNameW(NULL, buffer, MAX_PATH + 1);
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
       enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
   
   // Set the temp_directory
-  memset(&buffer[0], 0, MAX_PATH + 1);
+  buffer[0] = 0;
   GetTempPathW(MAX_PATH + 1, buffer);
   enigma_user::temp_directory = shorten(buffer);
 }
