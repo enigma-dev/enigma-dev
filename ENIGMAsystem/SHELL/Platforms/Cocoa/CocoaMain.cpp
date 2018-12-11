@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <mach-o/dyld.h>
 #include <sys/stat.h>
+#include <limits.h>
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
 #include <cstdlib>
