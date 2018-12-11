@@ -34,6 +34,9 @@ environment:
     - {MODE: Debug}
     - {MODE: Compile}
 
+    # Build System Alternatives
+    - {CMAKE_TEST: True}
+
     # Platforms
     - {PLATFORM: SDL, PACKAGES: "SDL2:x"}
 
@@ -101,10 +104,16 @@ install:
           Write-Host ($result | Out-String) -foregroundcolor "Gray"
         }
       } Else {
-        # simply restore JDI and the CLI from the archive artifact of this same build using REST API
-        $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
-        appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
-        7z e -mmt blobs.zip
+        If ($env:CMAKE_TEST -eq True) {
+          mkdir build && cd build
+          cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+          cmake --build . --target install --config "%BUILD_TYPE%"
+        } Else {
+          # simply restore JDI and the CLI from the archive artifact of this same build using REST API
+          $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
+          appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
+          7z e -mmt blobs.zip
+        }
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
