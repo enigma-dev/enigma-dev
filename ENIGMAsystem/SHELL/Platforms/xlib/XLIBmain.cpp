@@ -47,29 +47,6 @@ using namespace enigma::x11;
 namespace enigma_user {
   const int os_type = os_linux;
 
-  // Set the working_directory
-  char buffer[PATH_MAX + 1];
-  if (getcwd(buffer, PATH_MAX + 1) != NULL)
-    working_directory = buffer;
-  else
-    working_directory = "";
-
-  // Set the program_directory
-  buffer[0] = 0;
-  ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX + 1);
-  if (count !=  -1)
-    program_directory = dirname(buffer) + string("/");
-  else
-    program_directory = "";
-
-  // Set the temp_directory
-  char const *env = getenv("TMPDIR");
-
-  if (env == 0)
-    env = "/tmp/";
-
-  temp_directory = env;
-
   double set_working_directory(string dname) {
     if (!dname.empty()) {
       while (*dname.rbegin() == '/') {
@@ -89,6 +66,27 @@ namespace enigma {
 
 void (*WindowResizedCallback)();
 void WindowResized();
+  
+void set_working_directory() {
+  // Set the working_directory
+  char buffer[PATH_MAX + 1];
+  if (getcwd(buffer, PATH_MAX + 1) != NULL)
+    working_directory = buffer;
+
+  // Set the program_directory
+  buffer[0] = 0;
+  ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX + 1);
+  if (count !=  -1)
+    program_directory = dirname(buffer) + string("/");
+
+  // Set the temp_directory
+  char const *env = getenv("TMPDIR");
+
+  if (env == 0)
+    env = "/tmp/";
+
+  temp_directory = env; 
+}
 
 int handleEvents() {
   while (XQLength(enigma::x11::disp) || XPending(enigma::x11::disp)) {
