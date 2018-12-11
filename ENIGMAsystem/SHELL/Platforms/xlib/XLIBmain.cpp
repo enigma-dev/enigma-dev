@@ -35,6 +35,7 @@
 
 #include <sys/types.h>  //getpid
 #include <sys/stat.h>
+#include <limits.h>
 #include <unistd.h>
 #include <cstdlib>
 #inlcude <string>
