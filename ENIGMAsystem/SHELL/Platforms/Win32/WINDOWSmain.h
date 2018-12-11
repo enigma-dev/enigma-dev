@@ -31,12 +31,6 @@ namespace enigma //TODO: Find where this belongs
   extern HANDLE mainthread;
 }
 
-namespace enigma_user
-{
-  double set_working_directory(std::string dname);
-  string temp_directory;
-}
-
 void enigma_catchmouse_backend(bool x);
 #define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
 
