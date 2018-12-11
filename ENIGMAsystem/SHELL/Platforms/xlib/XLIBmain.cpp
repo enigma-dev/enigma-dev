@@ -39,7 +39,47 @@
 using namespace enigma::x11;
 
 namespace enigma_user {
-const int os_type = os_linux;
+  const int os_type = os_linux;
+
+  // Set the working_directory
+  char buffer[PATH_MAX + 1];
+  if (getcwd(buffer, PATH_MAX + 1) != NULL)
+    working_directory = buffer;
+  else
+    working_directory = "";
+
+  // Set the program_directory
+  char pdir[PATH_MAX + 1];
+  ssize_t count = readlink("/proc/self/exe", pdir, PATH_MAX + 1);
+  if (count !=  -1)
+    program_directory = dirname(pdir) + string("/");
+  else
+    program_directory = "";
+
+  // Set the temp_directory
+  char const *env = getenv("TMPDIR");
+
+  if (env == 0)
+    env = "/tmp/";
+
+  temp_directory = env;
+
+  double set_working_directory(string dname)
+  {
+    if (!dname.empty())
+    {
+      while (*dname.rbegin() == '/')
+      {
+        dname.erase(dname.size() - 1);
+      }
+    }
+
+    struct stat sb;
+    if (stat((char *)dname.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+      return (chdir((char *)dname.c_str()) == 0);
+
+    return 0;
+  }
 }  // namespace enigma_user
 
 namespace enigma {
