@@ -328,7 +328,7 @@ void set_working_directory() {
   
   // Set the temp_directory
   memset(&buffer[0], 0, MAX_PATH + 1);
-	GetTempPathW(MAX_PATH + 1, buffer);
+  GetTempPathW(MAX_PATH + 1, buffer);
   enigma_user::temp_directory = shorten(buffer);
 }
 
