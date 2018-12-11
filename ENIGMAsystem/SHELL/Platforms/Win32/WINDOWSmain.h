@@ -34,6 +34,7 @@ namespace enigma //TODO: Find where this belongs
 namespace enigma_user
 {
   double set_working_directory(string dname);
+  string temp_directory;
 }
 
 void enigma_catchmouse_backend(bool x);
