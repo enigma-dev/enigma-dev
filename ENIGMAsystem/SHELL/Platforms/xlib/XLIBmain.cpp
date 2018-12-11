@@ -71,13 +71,13 @@ void set_working_directory() {
   // Set the working_directory
   char buffer[PATH_MAX + 1];
   if (getcwd(buffer, PATH_MAX + 1) != NULL)
-    working_directory = buffer;
+    enigma_user::working_directory = buffer;
 
   // Set the program_directory
   buffer[0] = 0;
   ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX + 1);
   if (count !=  -1)
-    program_directory = dirname(buffer) + string("/");
+    enigma_user::program_directory = dirname(buffer) + string("/");
 
   // Set the temp_directory
   char const *env = getenv("TMPDIR");
@@ -85,7 +85,7 @@ void set_working_directory() {
   if (env == 0)
     env = "/tmp/";
 
-  temp_directory = env; 
+  enigma_user::temp_directory = env; 
 }
 
 int handleEvents() {
