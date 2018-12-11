@@ -47,7 +47,6 @@ namespace enigma_user {
   const int os_type = os_linux;
 
   // Set the working_directory
-  string working_directory = "";
   char buffer[PATH_MAX + 1];
   if (getcwd(buffer, PATH_MAX + 1) != NULL)
     working_directory = buffer;
@@ -55,7 +54,6 @@ namespace enigma_user {
     working_directory = "";
 
   // Set the program_directory
-  string program_directory = "";
   buffer[0] = 0;
   ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX + 1);
   if (count !=  -1)
@@ -64,7 +62,6 @@ namespace enigma_user {
     program_directory = "";
 
   // Set the temp_directory
-  string temp_directory = "";
   char const *env = getenv("TMPDIR");
 
   if (env == 0)
