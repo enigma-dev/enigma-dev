@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/SDL/Window.h"
 
@@ -67,6 +68,7 @@ namespace enigma_user {
   }
 
   void screen_refresh() {
+    draw_batch_flush(batch_flush_deferred);
     SDL_GL_SwapWindow(enigma::windowHandle);
   }
 

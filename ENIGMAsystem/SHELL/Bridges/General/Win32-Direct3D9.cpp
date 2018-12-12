@@ -23,6 +23,7 @@
 #include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
 #include "Bridges/General/DX9Context.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 #include <windows.h>
 #include <windowsx.h>
@@ -163,6 +164,7 @@ void display_reset(int samples, bool vsync) {
 }
 
 void screen_refresh() {
+  draw_batch_flush(batch_flush_deferred);
   d3dmgr->Present(NULL, NULL, NULL, NULL);
 }
 

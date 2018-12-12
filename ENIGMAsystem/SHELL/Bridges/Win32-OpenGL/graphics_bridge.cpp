@@ -18,6 +18,7 @@
 
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 #include <string>
 #include <GL/glew.h>
@@ -103,6 +104,7 @@ void display_reset(int samples, bool vsync) {
 }
 
 void screen_refresh() {
+  draw_batch_flush(batch_flush_deferred);
   SwapBuffers(enigma::window_hDC);
 }
 

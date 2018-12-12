@@ -16,6 +16,7 @@
 **/
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/xlib/XLIBwindow.h"
@@ -148,6 +149,7 @@ namespace enigma_user {
   }
 
   void screen_refresh() {
+    draw_batch_flush(batch_flush_deferred);
     glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
   }
 
