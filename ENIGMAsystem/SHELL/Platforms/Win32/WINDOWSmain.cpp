@@ -311,7 +311,7 @@ void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
 void showWindow() { ShowWindow(enigma::hWnd, 1); }
 
-void set_working_directory() {
+void initialize_directory_globals() {
   // Set the working_directory
   WCHAR buffer[MAX_PATH + 1];
   GetCurrentDirectoryW(MAX_PATH + 1, buffer);
