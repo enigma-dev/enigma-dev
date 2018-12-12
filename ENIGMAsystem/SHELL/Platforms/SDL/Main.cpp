@@ -1,7 +1,6 @@
 #include "Platforms/General/PFmain.h"
 
 #include <SDL2/SDL.h> //sdl does a #define main SDL_main...
-#include <string>
 
 namespace enigma {
     void set_working_directory() {
