@@ -214,8 +214,6 @@ void screen_redraw()
 {
   enigma::scene_begin();
 
-  // Clean up any textures that ENIGMA may still think are binded but actually are not
-  d3d_set_zwriteenable(true);
   if (!view_enabled)
   {
     screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
