@@ -9,7 +9,7 @@
 using std::string;
 
 namespace enigma {
-void set_working_directory() {
+void initialize_directory_globals() {
   // Set the working_directory
   char buffer[PATH_MAX + 1];
   if (getcwd(buffer, PATH_MAX + 1) != NULL)
@@ -32,6 +32,6 @@ void set_working_directory() {
 }
 
 int main(int argc, char** argv) {
-  enigma::set_working_directory();
+  enigma::initialize_directory_globals();
   return enigma::enigma_main(argc, argv);
 }
