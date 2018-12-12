@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/General/GSprimitives.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/SDL/Window.h"
 
@@ -53,6 +52,10 @@ void DisableDrawing(void*) {
   SDL_DestroyRenderer(renderer);
 }
 
+void ScreenRefresh() {
+  SDL_GL_SwapWindow(windowHandle);
+}
+
 }
 
 namespace enigma_user {
@@ -66,10 +69,4 @@ namespace enigma_user {
   void display_reset(int samples, bool vsync) {
     set_synchronization(vsync);
   }
-
-  void screen_refresh() {
-    draw_batch_flush(batch_flush_deferred);
-    SDL_GL_SwapWindow(enigma::windowHandle);
-  }
-
 }

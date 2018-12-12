@@ -29,6 +29,8 @@ namespace enigma {
 
   void scene_begin();
   void scene_end();
+
+  void ScreenRefresh(); // implemented by bridges
 }
 
 namespace enigma_user {

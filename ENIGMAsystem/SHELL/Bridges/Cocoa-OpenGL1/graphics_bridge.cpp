@@ -19,7 +19,6 @@
 #include "Platforms/Cocoa/CocoaMain.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/General/GSprimitives.h"
 
 #include <iostream>
 #include <cstring>
@@ -45,6 +44,11 @@ namespace enigma {
   void SetResizeFptr() {
     WindowResizedCallback = &WindowResized;
   }
+
+  void ScreenRefresh() {
+    cocoa_screen_refresh();
+    cocoa_flush_opengl();
+  }
 }
 
 namespace enigma_user {
@@ -59,11 +63,4 @@ namespace enigma_user {
     set_synchronization(vsync);
     //TODO: Copy over from the Win32 bridge
   }
-
-  void screen_refresh() {
-    draw_batch_flush(batch_flush_deferred);
-    cocoa_screen_refresh();
-    cocoa_flush_opengl();
-  }
-
 }

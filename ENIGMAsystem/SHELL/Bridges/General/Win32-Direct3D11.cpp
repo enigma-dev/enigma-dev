@@ -22,7 +22,6 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Bridges/General/DX11Context.h"
 #include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/General/GSprimitives.h"
 
 #include <windows.h>
 #include <windowsx.h>
@@ -226,6 +225,10 @@ namespace enigma
   }
 
   void DisableDrawing(void* handle) {}
+
+  void ScreenRefresh() {
+    m_swapChain->Present(swap_interval, 0);
+  }
 }
 
 namespace enigma_user
@@ -234,11 +237,6 @@ namespace enigma_user
 
   void display_reset(int samples, bool vsync) {
     swap_interval = vsync ? 1 : 0;
-  }
-
-  void screen_refresh() {
-    draw_batch_flush(batch_flush_deferred);
-    m_swapChain->Present(swap_interval, 0);
   }
 
   void set_synchronization(bool enable)

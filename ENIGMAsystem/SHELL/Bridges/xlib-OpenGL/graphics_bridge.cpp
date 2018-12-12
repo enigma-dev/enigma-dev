@@ -16,7 +16,6 @@
 **/
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/General/GSprimitives.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/xlib/XLIBwindow.h"
@@ -107,6 +106,10 @@ namespace enigma {
     swaphandling::investigate_swapcontrol_support();
     return swaphandling::mesa_swapcontrol_supported;
   }
+
+  void ScreenRefresh() {
+    glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
+  }
 }
 
 namespace enigma_user {
@@ -147,10 +150,4 @@ namespace enigma_user {
     set_synchronization(vsync);
     //TODO: Copy over from the Win32 bridge
   }
-
-  void screen_refresh() {
-    draw_batch_flush(batch_flush_deferred);
-    glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
-  }
-
 }

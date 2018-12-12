@@ -210,6 +210,11 @@ unsigned int display_get_gui_height(){
   return enigma::gui_height;
 }
 
+void screen_refresh() {
+  draw_batch_flush(batch_flush_deferred);
+  enigma::ScreenRefresh();
+}
+
 void screen_redraw()
 {
   enigma::scene_begin();

@@ -18,7 +18,6 @@
 
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
-#include "Graphics_Systems/General/GSprimitives.h"
 
 #include <string>
 #include <GL/glew.h>
@@ -54,6 +53,10 @@ namespace swaphandling {
 bool is_ext_swapcontrol_supported() {
   swaphandling::investigate_swapcontrol_support();
   return swaphandling::ext_swapcontrol_supported;
+}
+
+void ScreenRefresh() {
+  SwapBuffers(enigma::window_hDC);
 }
 
 }
@@ -101,11 +104,6 @@ void display_reset(int samples, bool vsync) {
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, ColorBufferID);
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, DepthBufferID);
 
-}
-
-void screen_refresh() {
-  draw_batch_flush(batch_flush_deferred);
-  SwapBuffers(enigma::window_hDC);
 }
 
 void set_synchronization(bool enable) {
