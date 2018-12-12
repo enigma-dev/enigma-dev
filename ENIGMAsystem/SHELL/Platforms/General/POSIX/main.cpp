@@ -49,5 +49,6 @@ void set_working_directory() {
 
 
 int main(int argc, char** argv) {
+  enigma::set_working_directory();
   return enigma::enigma_main(argc, argv);
 }
