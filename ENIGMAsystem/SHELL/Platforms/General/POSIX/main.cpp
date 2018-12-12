@@ -46,7 +46,7 @@ void set_working_directory() {
 
   enigma_user::temp_directory = env; 
 }
-
+}
 
 int main(int argc, char** argv) {
   enigma::set_working_directory();
