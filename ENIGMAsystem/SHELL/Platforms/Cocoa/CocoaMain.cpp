@@ -22,7 +22,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <mach-o/dyld.h>
-#include <sys/stat.h>
 #include <limits.h>
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
@@ -67,22 +66,6 @@ namespace enigma {
       env = "/tmp/";
 
     enigma_user::temp_directory = env; 
-  }
-}
-
-namespace enigma_user {
-  double set_working_directory(string dname) {
-    if (!dname.empty()) {
-      while (*dname.rbegin() == '/') {
-        dname.erase(dname.size() - 1);
-      }
-    }
-
-    struct stat sb;
-    if (stat((char *)dname.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
-      return (chdir((char *)dname.c_str()) == 0);
-
-    return 0;
   }
 }
 
