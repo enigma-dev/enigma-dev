@@ -34,6 +34,7 @@
 #include <X11/Xutil.h>
 
 #include <sys/types.h>  //getpid
+#include <unistd.h>
 #include <string>
 
 using std::string;
@@ -41,7 +42,7 @@ using std::string;
 using namespace enigma::x11;
 
 namespace enigma_user {
-  const int os_type = os_linux;
+const int os_type = os_linux;
 }  // namespace enigma_user
 
 namespace enigma {
