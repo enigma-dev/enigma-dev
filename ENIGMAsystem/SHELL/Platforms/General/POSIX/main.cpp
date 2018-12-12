@@ -32,6 +32,5 @@ void initialize_directory_globals() {
 }
 
 int main(int argc, char** argv) {
-  enigma::initialize_directory_globals();
   return enigma::enigma_main(argc, argv);
 }
