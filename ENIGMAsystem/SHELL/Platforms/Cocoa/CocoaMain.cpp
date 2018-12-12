@@ -39,7 +39,7 @@ using std::string;
 namespace enigma {
   void SetResizeFptr();
   
-  void set_working_directory() {
+  void initialize_directory_globals() {
     // Set the working_directory
     char buffer[PATH_MAX + 1];
     if (getcwd(buffer, PATH_MAX + 1) != NULL)
@@ -70,7 +70,7 @@ namespace enigma {
 }
 
 int main(int argc,char** argv) {
-  enigma::set_working_directory();
+  enigma::initialize_directory_globals();
   
   enigma::parameters=new char* [argc];
   for (int i=0; i<argc; i++)
