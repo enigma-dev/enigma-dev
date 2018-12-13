@@ -65,7 +65,7 @@ HWND get_window_handle() {
 }  // namespace enigma
 
 namespace enigma_user {
-  double set_working_directory(string dname) {
+  bool set_working_directory(string dname) {
     replace(dname.begin(), dname.end(), '/', '\\');
 
     if (!dname.empty()) {
