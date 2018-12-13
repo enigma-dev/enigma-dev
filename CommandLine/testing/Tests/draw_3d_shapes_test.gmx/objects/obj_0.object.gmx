@@ -51,23 +51,35 @@ size = 20;</string>
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>d3d_set_projection_ortho(0, 0, room_width, room_height, 0);&#13;
-&#13;
-for (var y = 0; y &lt; 6; y += 1) {&#13;
-	var yy = 25 + y * 45;&#13;
-&#13;
-	for (var i = 0; i &lt; 4; i += 1) {&#13;
-		// Show all sides around the x-axis&#13;
-		d3d_transform_set_rotation_x(i * 90);&#13;
-		d3d_transform_add_translation(25 + i * 45, yy, 0);&#13;
-		d3d_draw_shape(y, size, test_texture);&#13;
-		// Show all sides around the y-axis&#13;
-		d3d_transform_set_rotation_y(i * 90);&#13;
-		d3d_transform_add_translation(30 + (i + 4) * 45, yy, 0);&#13;
-		d3d_draw_shape(y, size, test_texture);&#13;
-	}&#13;
-}&#13;
-&#13;
+            <string>d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
+
+for (var y = 0; y &lt; 6; y += 1) {
+	var yy = 25 + y * 45;
+
+	for (var i = 0; i &lt; 4; i += 1) {
+		// Show all sides around the x-axis
+		d3d_transform_set_rotation_x(i * 90);
+		d3d_transform_add_translation(25 + i * 45, yy, 0);
+		d3d_draw_shape(y, size, test_texture);
+		// Show all sides around the y-axis
+		d3d_transform_set_rotation_y(i * 90);
+		d3d_transform_add_translation(30 + (i + 4) * 45, yy, 0);
+		d3d_draw_shape(y, size, test_texture);
+	}
+}
+d3d_transform_set_identity();
+
+// test depth comparison function to ensure less than or equal
+d3d_transform_set_translation(0, room_height - 70, 0);
+draw_set_color(c_blue);
+d3d_draw_floor(10, 10, 1, 60, 60, 1, -1, 1, 1);
+draw_set_color(c_red);
+d3d_draw_floor(20, 20, 0, 50, 50, 0, -1, 1, 1);
+draw_set_color(c_green);
+d3d_draw_floor(30, 30, 0, 40, 40, 0, -1, 1, 1);
+draw_set_color(c_black);
+d3d_draw_floor(0, 0, 2, 70, 70, 2, -1, 1, 1);
+draw_set_color(c_white);
 d3d_transform_set_identity();</string>
           </argument>
         </arguments>
