@@ -81,7 +81,7 @@ void execute_program(std::string fname, std::string args, bool wait);
 void execute_program(std::string operation, std::string fname, std::string args, bool wait);
 
 std::string environment_get_variable(std::string name);
-double set_working_directory(std::string dname);
+bool set_working_directory(std::string dname);
 }
 
 #endif //ENIGMA_PLATFORM_MAIN
