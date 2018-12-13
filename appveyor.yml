@@ -35,7 +35,7 @@ environment:
     - {MODE: Compile}
 
     # Build System Alternatives
-    - {CMAKE_TEST: True}
+    - {CMAKE_TEST: True, VCPKG_DIR: C:\tools\vcpkg, TRIPLET_NAME: x64-windows-static, BUILD_TYPE: Debug, GENERATOR: "Visual Studio 15 2017 Win64"}
 
     # Platforms
     - {PLATFORM: SDL, PACKAGES: "SDL2:x"}
@@ -103,17 +103,34 @@ install:
           Write-Host ('Artifact daemon has completed.') -foregroundcolor "Magenta"
           Write-Host ($result | Out-String) -foregroundcolor "Gray"
         }
-      } Else {
-        If ($env:CMAKE_TEST -eq $true) {
-          (mkdir build) -and (cd build)
-          cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
-          cmake --build . --target install --config "%BUILD_TYPE%"
-        } Else {
-          # simply restore JDI and the CLI from the archive artifact of this same build using REST API
-          $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
-          appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
-          7z e -mmt blobs.zip
+      } ElseIf ($env:CMAKE_TEST -eq $true) {
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+
+        # this gets the latest release of RadialGM-deps using GitHub API
+        $apiURL = "https://api.github.com/repos/enigma-dev/radialgm-deps/releases/latest"
+        $latest = Invoke-RestMethod -Method Get -Uri $apiURL
+        # find the asset whose name matches the architecture of this build
+        $depsName = "rgmdeps-x64.zip"
+        foreach ($asset in $latest.assets) {
+          Write-Host $asset.name
+          if ($asset.name -eq $depsName) {
+            $depsURL = $asset.browser_download_url
+            break
+          }
         }
+        Write-Host $depsURL
+        # download and extract the deps matching this job's architecture
+        appveyor DownloadFile $depsURL -FileName $depsName
+        7z x -mmt $depsName -oC:\tools\vcpkg
+
+        (mkdir build) -and (cd build)
+        cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+        cmake --build . --target install --config "%BUILD_TYPE%"
+      } Else {
+        # simply restore JDI and the CLI from the archive artifact of this same build using REST API
+        $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
+        appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
+        7z e -mmt blobs.zip
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
