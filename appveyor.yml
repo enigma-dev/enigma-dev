@@ -35,7 +35,7 @@ environment:
     - {MODE: Compile}
 
     # Build System Alternatives
-    - {CMAKE_TEST: True, VCPKG_DIR: C:\tools\vcpkg, TRIPLET_NAME: x64-windows-static, BUILD_TYPE: Debug, GENERATOR: "Visual Studio 15 2017 Win64"}
+    - {CMAKE_TEST: True, VCPKG_DIR: "C:\tools\vcpkg", TRIPLET_NAME: x64-windows-static, BUILD_TYPE: Debug, GENERATOR: "Visual Studio 15 2017 Win64"}
 
     # Platforms
     - {PLATFORM: SDL, PACKAGES: "SDL2:x"}
