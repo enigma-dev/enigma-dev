@@ -105,7 +105,7 @@ install:
         }
       } Else {
         If ($env:CMAKE_TEST -eq $true) {
-          mkdir build && cd build
+          (mkdir build) -and (cd build)
           cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
           cmake --build . --target install --config "%BUILD_TYPE%"
         } Else {
