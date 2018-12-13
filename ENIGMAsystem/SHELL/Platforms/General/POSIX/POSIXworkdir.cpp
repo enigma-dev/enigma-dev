@@ -7,7 +7,7 @@
 using std::string;
 
 namespace enigma_user {
-  double set_working_directory(string dname) {
+  bool set_working_directory(string dname) {
     if (!dname.empty()) {
       while (*dname.rbegin() == '/') {
         dname.erase(dname.size() - 1);
