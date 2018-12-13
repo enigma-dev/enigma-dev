@@ -18,6 +18,6 @@ namespace enigma_user {
     if (stat((char *)dname.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
       return (chdir((char *)dname.c_str()) == 0);
 
-    return 0;
+    return false;
   }
 }
