@@ -81,7 +81,7 @@ namespace enigma_user {
       return (SetCurrentDirectoryW(tstr_dname.c_str()) != 0);
     }
     
-    return 0;
+    return false;
   }
 } // enigma_user
 
