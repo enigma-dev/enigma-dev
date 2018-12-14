@@ -186,6 +186,7 @@ before_script:
       export DISPLAY=:1
       Xvfb :1 -screen 0 1024x768x24 &
       xfwm4 &
+      sleep 3
     fi
 
 script:

@@ -106,6 +106,10 @@ namespace enigma {
     swaphandling::investigate_swapcontrol_support();
     return swaphandling::mesa_swapcontrol_supported;
   }
+
+  void ScreenRefresh() {
+    glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
+  }
 }
 
 namespace enigma_user {
@@ -146,9 +150,4 @@ namespace enigma_user {
     set_synchronization(vsync);
     //TODO: Copy over from the Win32 bridge
   }
-
-  void screen_refresh() {
-    glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
-  }
-
 }

@@ -61,7 +61,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
   wto << license << "namespace enigma {\n"
   << "  int room_loadtimecount = " << game.rooms.size() << ";\n";
-  int room_highid = 0, room_highinstid = 100000, room_hightileid = 10000000;
+  int room_highid = 0, room_highinstid = 100000,room_hightileid=10000000;
 
   for (const auto &room : game.rooms) {
     wto << "  tile tiles_" << room.id() << "[] = {\n";
@@ -192,10 +192,19 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
   wto << license;
+
+  wto << "namespace enigma {\n\n";
+  wto << "void extensions_initialize() {\n";
+  for (const auto &ext : parsed_extensions) {
+    if (ext.init.empty()) continue;
+    wto << "  " << ext.init << "();\n";
+  }
+  wto << "}\n\n} // namespace enigma\n\n";
+
   for (const auto &room : game.rooms) {
     parsed_room *pr = parsed_rooms[room.id()];
     for (const auto &int_ev_pair : pr->instance_create_codes)
-    {
+  {
       wto << "variant room_" << room.id()
           << "_instancecreate_" << int_ev_pair.first << "()\n{\n  ";
       if (mode == emode_debug) {
