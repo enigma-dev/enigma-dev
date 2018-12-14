@@ -35,65 +35,64 @@ using namespace std;
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
 #include "event_reader/event_parser.h"
 
 #include "languages/lang_CPP.h"
-int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, parsed_script* scripts[], int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*> &parsed_rooms, parsed_object* EGMglobal, const std::set<std::string>& script_names)
-{
-  // Dump our list of dot-accessed locals
-  dot_accessed_locals.clear();
+int lang_CPP::compile_parseSecondary(CompileState &state) {
+  // Index things
+  const auto &scripts = state.parsed_scripts;
+  const auto &tlines = state.parsed_tlines;
+  map<string, parsed_object*> po_by_name;
+  for (parsed_object* po : state.parsed_objects) po_by_name[po->name] = po;
 
   // Give all objects and events a second pass
-  for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
-  {
-    parsed_object *oto = it->second;
+  for (parsed_object *oto : state.parsed_objects) {
     for (unsigned iit = 0; iit < oto->events.size; iit++)
-      parser_secondary(oto->events[iit].code,oto->events[iit].synt,EGMglobal,oto,&oto->events[iit], script_names);
+      parser_secondary(state, oto->events[iit].code, oto->events[iit].synt, oto, &oto->events[iit]);
   }
 
   // Build an inheritance tree
-  for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) {
-    po_i parent_it = parsed_objects.find(it->second->parent_index);
-    if (parent_it != parsed_objects.end()) {
-      it->second->parent = parent_it->second;
-      parent_it->second->children.push_back(it->second);
-      printf("Object %s (%d) is a child of %s (%d)\n", it->second->name.c_str(), it->second->id, it->second->parent->name.c_str(), it->second->parent->id);
+  for (parsed_object *obj : state.parsed_objects) {
+    auto parent_it = po_by_name.find(obj->parent_name);
+    if (parent_it != po_by_name.end()) {
+      obj->parent = parent_it->second;
+      parent_it->second->children.push_back(obj);
+      printf("Object %s (%d) is a child of %s (%d)\n", obj->name.c_str(), obj->id, obj->parent->name.c_str(), obj->parent->id);
     }
   }
 
   // Give all scripts a second pass
-  for (int i = 0; i < scrcount; i++) {
-    parser_secondary(scripts[i]->pev.code,scripts[i]->pev.synt,EGMglobal,&scripts[i]->obj,&scripts[i]->pev, script_names);
+  for (size_t i = 0; i < scripts.size(); i++) {
+    parser_secondary(state, scripts[i]->pev.code,scripts[i]->pev.synt,&scripts[i]->obj,&scripts[i]->pev);
     if (scripts[i]->pev_global)
-      parser_secondary(scripts[i]->pev_global->code,scripts[i]->pev_global->synt,EGMglobal,&scripts[i]->obj,scripts[i]->pev_global, script_names);
+      parser_secondary(state, scripts[i]->pev_global->code,scripts[i]->pev_global->synt,&scripts[i]->obj,scripts[i]->pev_global);
   }
 
   //Give all timelines a second pass
-  for (int i=0; i<int(tlines.size()); i++) {
-    parser_secondary(tlines[i]->pev.code,tlines[i]->pev.synt,EGMglobal,&tlines[i]->obj,&tlines[i]->pev, script_names);
+  for (size_t i=0; i < tlines.size(); i++) {
+    parser_secondary(state, tlines[i]->pev.code,tlines[i]->pev.synt,&tlines[i]->obj,&tlines[i]->pev);
     if (tlines[i]->pev_global)
-      parser_secondary(tlines[i]->pev_global->code,tlines[i]->pev_global->synt,EGMglobal,&tlines[i]->obj,tlines[i]->pev_global, script_names);
+      parser_secondary(state, tlines[i]->pev_global->code,tlines[i]->pev_global->synt,&tlines[i]->obj,tlines[i]->pev_global);
   }
 
   // Give all room creation codes a second pass
-  for (pr_i it = parsed_rooms.begin(); it != parsed_rooms.end(); it++)
-  {
+  for (auto room : state.parsed_rooms){
     parsed_object *oto; // The object into which we will dump locals
-    oto = it->second; // Start by dumping into this room
-    if (it->second->events.size)
-      parser_secondary(oto->events[0].code,oto->events[0].synt,EGMglobal,oto,&oto->events[0], script_names);
-    for (map<int,parsed_room::parsed_icreatecode>::iterator ici = it->second->instance_create_codes.begin(); ici != it->second->instance_create_codes.end(); ici++)
+    oto = room; // Start by dumping into this room; rooms are treated like objects, here
+    if (room->events.size)
+      parser_secondary(state, oto->events[0].code,oto->events[0].synt,oto,&oto->events[0]);
+    for (map<int,parsed_room::parsed_icreatecode>::iterator ici = room->instance_create_codes.begin(); ici != room->instance_create_codes.end(); ici++)
     {
-      oto = parsed_objects[ici->second.object_index];
-      parser_secondary(ici->second.pe->code,ici->second.pe->synt,EGMglobal,oto,ici->second.pe, script_names);
+      oto = po_by_name[ici->second.object_name];
+      parser_secondary(state, ici->second.pe->code,ici->second.pe->synt,oto,ici->second.pe);
     }
-    for (map<int,parsed_room::parsed_icreatecode>::iterator ici = it->second->instance_precreate_codes.begin(); ici != it->second->instance_precreate_codes.end(); ici++)
+    for (map<int,parsed_room::parsed_icreatecode>::iterator ici = room->instance_precreate_codes.begin(); ici != room->instance_precreate_codes.end(); ici++)
     {
-      oto = parsed_objects[ici->second.object_index];
-      parser_secondary(ici->second.pe->code,ici->second.pe->synt,EGMglobal,oto,ici->second.pe, script_names);
+      oto = po_by_name[ici->second.object_name];
+      parser_secondary(state, ici->second.pe->code,ici->second.pe->synt,oto,ici->second.pe);
     }
   }
 

@@ -5,13 +5,18 @@ import "options.proto";
 
 message Font {
   message Glyph {
-    optional uint32 character = 1; 
+    optional uint32 character = 1;
+    
+    // Rectangle in the sprite font texture given by `image`.
     optional uint32 x = 2;
     optional uint32 y = 3; 
     optional uint32 width = 4 [(gmx) = "w"];
-    optional uint32 height = 5 [(gmx) = "h"]; 
-    optional int32 shift = 6; 
-    optional int32 offset = 7;
+    optional uint32 height = 5 [(gmx) = "h"];
+    
+    // Kerning offsets. Round on .5 after summing.
+    optional double origin = 6 [(gmx) = "offset"]; 
+    optional double baseline = 7;
+    optional double advance = 8 [(gmx) = "shift"];
   }
 
   message Range {

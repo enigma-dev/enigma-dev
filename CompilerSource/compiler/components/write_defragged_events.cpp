@@ -1,4 +1,4 @@
-/** Copyright (C) 2008 Josh Ventura
+/** Copyright (C) 2008, 2018 Josh Ventura
 *** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
@@ -37,10 +37,23 @@ using namespace std;
 #include "event_reader/event_parser.h"
 #include "languages/lang_CPP.h"
 
-struct foundevent { int mid, id, count; foundevent(): mid(0),id(0),count(0) {} void f2(int m,int i) { id = i, mid = m; } void inc(int m,int i) { mid=m,id=i,count++; } void operator++(int) { count++; } };
+struct foundevent {
+  int mid, id, count;
+  foundevent(): mid(0),id(0),count(0) {}
+  void f2(int m, int i)  { id = i, mid = m; }
+  void inc(int m, int i) { mid = m, id = i, count++; }
+  void operator++(int) { count++; }
+};
 typedef map<string,foundevent>::iterator evfit;
 
-int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
+static inline int event_get_number(const buffers::resources::Event &event) {
+  if (event.has_name()) {
+    std::cerr << "ERROR! IMPLEMENT ME: Event names not supported in compiler.\n";
+  }
+  return event.number();
+}
+
+int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObjectVec &parsed_objects)
 {
   ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
   wto << license;
@@ -60,15 +73,14 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 
   // Defragged events must be written before object data, or object data cannot determine which events were used.
   used_events.clear();
-  for (int i = 0; i < es->gmObjectCount; i++) {
-    for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++) {
-      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++) {
-        const int mid = es->gmObjects[i].mainEvents[ii].id, id = es->gmObjects[i].mainEvents[ii].events[iii].id;
-        if (event_is_instance(mid,id)) {
-          used_events[event_stacked_get_root_name(mid)].inc(mid,id);
-        } else {
-          used_events[event_get_function_name(mid,id)].inc(mid,id);
-        }
+  for (size_t i = 0; i < game.objects.size(); i++) {
+    for (int ii = 0; ii < game.objects[i].events().size(); ii++) {
+      const int mid = game.objects[i].events(ii).type();
+      const int  id = event_get_number(game.objects[i].events(ii));
+      if (event_is_instance(mid, id)) {
+        used_events[event_stacked_get_root_name(mid)].inc(mid,id);
+      } else {
+        used_events[event_get_function_name(mid,id)].inc(mid,id);
       }
     }
   }
@@ -77,9 +89,10 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   wto << license;
 
   //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
-  for (int i=0; i<es->timelineCount; i++) {
-    for (int j=0; j<es->timelines[i].momentCount; j++) {
-      wto << "void TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
+  for (size_t i = 0; i < game.timelines.size(); i++) {
+    for (int j = 0; j < game.timelines[i].moments().size(); j++) {
+      wto << "void TLINE_" << game.timelines[i].name << "_MOMENT_"
+          << game.timelines[i].moments(j).step() <<"();\n";
     }
   }
   wto <<"\n";
@@ -94,14 +107,13 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     {
       used_events[event_get_function_name(mid,id)].f2(mid,id); // ...Reserve it anyway.
 
-      for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) // Then shell it out into the other objects.
-      {
+      for (parsed_object *obj : parsed_objects) { // Then shell it out into the other objects.
         bool exists = false;
-        for (unsigned j = 0; j < it->second->events.size; j++)
-          if (it->second->events[j].mainId == mid and it->second->events[j].id == id)
+        for (unsigned j = 0; j < obj->events.size; j++)
+          if (obj->events[j].mainId == mid and obj->events[j].id == id)
             { exists = true; break; }
         if (!exists)
-          it->second->events[it->second->events.size] = parsed_event(mid, id, it->second);
+          obj->events[obj->events.size] = parsed_event(mid, id, obj);
       }
     }
   }
@@ -128,12 +140,13 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   //The event_parent also contains the definitive lookup table for all timelines, as a fail-safe in case localized instances can't find their own timelines.
   wto << "    virtual void timeline_call_moment_script(int timeline_index, int moment_index) {\n";
   wto << "      switch (timeline_index) {\n";
-  for (int i=0; i<es->timelineCount; i++) {
-    wto << "        case " <<es->timelines[i].id <<": {\n";
+  for (size_t i = 0; i < game.timelines.size(); i++) {
+    wto << "        case " << game.timelines[i].id() <<": {\n";
     wto << "          switch (moment_index) {\n";
-    for (int j=0; j<es->timelines[i].momentCount; j++) {
+    for (int j = 0; j < game.timelines[i].moments().size(); j++) {
       wto << "            case " <<j <<": {\n";
-      wto << "              ::TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
+      wto << "              ::TLINE_" << game.timelines[i].name << "_MOMENT_"
+                                      << game.timelines[i].moments(j).step() << "();\n";
       wto << "              break;\n";
       wto << "            }\n";
     }
@@ -167,7 +180,11 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
   wto << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
-  int obj_high_id = parsed_objects.rbegin() != parsed_objects.rend() ? parsed_objects.rbegin()->first : 0;
+  
+  int obj_high_id = 0;
+  for (parsed_object *obj : parsed_objects) {
+    if (obj->id > obj_high_id) obj_high_id = obj->id;
+  }
   wto << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
 
   int ind = 0;
@@ -179,10 +196,10 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     // Game setting initaliser
   wto << "  int game_settings_initialize()" << endl << "  {" << endl;
   // This should only effect texture interpolation if it has not already been enabled
-  if (!es->gameSettings.displayCursor)
+  if (!game.settings.general().show_cursor())
     wto << "    window_set_cursor(cr_none);" << endl;
 
-  if (es->gameSettings.alwaysOnTop)
+  if (game.settings.windowing().stay_on_top())
     wto << "    window_set_stayontop(true);" << endl;
 
   wto << "    return 0;" << endl;
@@ -220,18 +237,18 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
       wto << "    " << endl;
   }
   wto << "    after_events:" << endl;
-  if (es->gameSettings.letEscEndGame)
+  if (game.settings.shortcuts().let_escape_end_game())
     wto << "    if (keyboard_check_pressed(vk_escape)) game_end();" << endl;
-  if (es->gameSettings.letF4SwitchFullscreen)
+  if (game.settings.shortcuts().let_f4_switch_fullscreen())
     wto << "    if (keyboard_check_pressed(vk_f4)) window_set_fullscreen(!window_get_fullscreen());" << endl;
-  if (es->gameSettings.letF1ShowGameInfo)
+  if (game.settings.shortcuts().let_f1_show_game_info())
     wto << "    if (keyboard_check_pressed(vk_f1)) show_info();" << endl;
-  if (es->gameSettings.letF9Screenshot)
+  if (game.settings.shortcuts().let_f9_screenshot())
     wto << "    if (keyboard_check_pressed(vk_f9)) {}" << endl;   //TODO: Screenshot function
-  if (es->gameSettings.letF5SaveF6Load)  //TODO: uncomment after game save and load fucntions implemented
+  if (game.settings.shortcuts().let_f5_save_f6_load())  //TODO: uncomment after game save and load fucntions implemented
   {
-    wto << "    //if (keyboard_check_pressed(vk_f5)) game_save('_save" << es->gameSettings.gameId << ".sav');" << endl;
-    wto << "    //if (keyboard_check_pressed(vk_f6)) game_load('_save" << es->gameSettings.gameId << ".sav');" << endl;
+    wto << "    //if (keyboard_check_pressed(vk_f5)) game_save('_save" << game.settings.general().game_id() << ".sav');" << endl;
+    wto << "    //if (keyboard_check_pressed(vk_f6)) game_load('_save" << game.settings.general().game_id() << ".sav');" << endl;
   }
   // Handle room switching/game restart.
   wto << "    enigma::dispose_destroyed_instances();" << endl;

@@ -45,44 +45,44 @@ inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-int lang_CPP::module_write_backgrounds(EnigmaStruct *es, FILE *gameModule)
+int lang_CPP::module_write_backgrounds(const GameData &game, FILE *gameModule)
 {
   // Now we're going to add backgrounds
-  edbg << es->backgroundCount << " Adding Backgrounds to Game Module: " << flushl;
+  edbg << game.backgrounds.size() << " Adding Backgrounds to Game Module: " << flushl;
 
   //Magic Number
   fwrite("BKG ",4,1,gameModule);
 
   //Indicate how many
-  int back_count = es->backgroundCount;
+  int back_count = game.backgrounds.size();
   fwrite(&back_count,4,1,gameModule);
 
   int back_maxid = 0;
   for (int i = 0; i < back_count; i++)
-    if (es->backgrounds[i].id > back_maxid)
-      back_maxid = es->backgrounds[i].id;
+    if (game.backgrounds[i].id() > back_maxid)
+      back_maxid = game.backgrounds[i].id();
   fwrite(&back_maxid,4,1,gameModule);
 
   for (int i = 0; i < back_count; i++)
   {
-    writei(es->backgrounds[i].id,gameModule); //id
-    writei(es->backgrounds[i].backgroundImage.width, gameModule); // width
-    writei(es->backgrounds[i].backgroundImage.height, gameModule); // height
+    writei(game.backgrounds[i].id(), gameModule);  // id
+    writei(game.backgrounds[i].image_data.width, gameModule);   // width
+    writei(game.backgrounds[i].image_data.height, gameModule);  // height
 
-    writei(es->backgrounds[i].transparent,gameModule);
-    writei(es->backgrounds[i].smoothEdges,gameModule);
-    writei(es->backgrounds[i].preload,gameModule);
-    writei(es->backgrounds[i].useAsTileset,gameModule);
-    writei(es->backgrounds[i].tileWidth,gameModule);
-    writei(es->backgrounds[i].tileHeight,gameModule);
-    writei(es->backgrounds[i].hOffset,gameModule);
-    writei(es->backgrounds[i].vOffset,gameModule);
-    writei(es->backgrounds[i].hSep,gameModule);
-    writei(es->backgrounds[i].vSep,gameModule);
+    writei(game.backgrounds[i].legacy_transparency, gameModule);
+    writei(game.backgrounds[i].smooth_edges(), gameModule);
+    writei(game.backgrounds[i].preload(), gameModule);
+    writei(game.backgrounds[i].use_as_tileset(), gameModule);
+    writei(game.backgrounds[i].tile_width(), gameModule);
+    writei(game.backgrounds[i].tile_height(), gameModule);
+    writei(game.backgrounds[i].horizontal_offset(), gameModule);
+    writei(game.backgrounds[i].vertical_offset(), gameModule);
+    writei(game.backgrounds[i].horizontal_spacing(), gameModule);
+    writei(game.backgrounds[i].vertical_spacing(), gameModule);
 
-    const int sz = es->backgrounds[i].backgroundImage.dataSize;
+    const int sz = game.backgrounds[i].image_data.pixels.size();
     writei(sz, gameModule); // size
-    fwrite(es->backgrounds[i].backgroundImage.data, 1, sz, gameModule); // data
+    fwrite(game.backgrounds[i].image_data.pixels.data(), 1, sz, gameModule); // data
   }
 
   edbg << "Done writing backgrounds." << flushl;

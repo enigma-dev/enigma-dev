@@ -49,19 +49,18 @@ struct GlyphTextureRect {
   float x, y, x2, y2;
 };
 
-static inline void populate_texture(const Font& font, pvrect* boxes, GlyphTextureRect *glyphtexc, unsigned char* bigtex, int w, int h) {
+static inline void populate_texture(const FontData& font, pvrect* boxes,
+    GlyphTextureRect *glyphtexc, unsigned char* bigtex, int w, int h) {
   for (int ii = 0; ii < w * h; ii++)
     bigtex[ii] = 0;
 
   size_t igt = 0;
-  for (int ii = 0; ii < font.glyphRangeCount; ii++) {
-    GlyphRange &glyphRange = font.glyphRanges[ii];
-    for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin + 1; ig++) {
-      Glyph &glyph = font.glyphRanges[ii].glyphs[ig];
-
+  for (const auto &range : font.normalized_ranges) {
+    for (const auto &glyph : range.glyphs) {
       for (int yy = 0; yy < glyph.height; yy++)
         for (int xx = 0; xx < glyph.width; xx++)
-          bigtex[w * (boxes[igt].y + yy) + boxes[igt].x + xx] = glyph.data[yy * glyph.width + xx];
+          bigtex[w * (boxes[igt].y + yy) + boxes[igt].x + xx] =
+              glyph.pixels[yy * glyph.width + xx];
 
       glyphtexc[igt].x  = boxes[igt].x / double(w);
       glyphtexc[igt].y  = boxes[igt].y / double(h);
@@ -83,28 +82,23 @@ static inline void populate_texture(const Font& font, pvrect* boxes, GlyphTextur
   fclose(sex);*/
 }
 
-int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
+int lang_CPP::module_write_fonts(const GameData &game, FILE *gameModule)
 {
   // Now we're going to add backgrounds
-  edbg << es->fontCount << " Adding Fonts to Game Module: " << flushl;
+  edbg << game.fonts.size() << " Adding Fonts to Game Module: " << flushl;
 
   //Magic Number
   fwrite("FNT ",4,1,gameModule);
 
   //Indicate how many
-  int font_count = es->fontCount;
+  int font_count = game.fonts.size();
   writei(font_count,gameModule);
 
   // For each included font
-  for (int i = 0; i < font_count; i++)
-  {
+  for (const auto &font : game.fonts) {
     cout << "Iterating included fonts..." << endl;
     // Simple allocations and initializations
-    size_t gc = 0;
-    for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
-      GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
-      gc += glyphRange.rangeMax - glyphRange.rangeMin + 1 + 1;
-    }
+    int gc = font.glyphs().size();
 
     pvrect* boxes = new pvrect[gc];
 
@@ -114,25 +108,17 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
 
     // Copy our glyph metrics into it
     size_t ib = 0;
-    for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
-      GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
-      for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin + 1; ig++) {
-        Glyph &glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
-        boxes[ib].w = glyph.width,
-        boxes[ib].h = glyph.height;
-        ib++;
-      }
+    for (const auto &glyph : font.glyphs()) {
+      boxes[ib].w = glyph.width(),
+      boxes[ib].h = glyph.height();
+      ib++;
     }
     cout << "Copied metrics" << endl;
 
     // Sort our boxes from largest to smallest in area.
     size_t glyphno = 0;
-    for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
-      GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
-      for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin + 1; ig++) {
-        Glyph &glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
-        box_order.push_back(sizepair(glyph.width * glyph.height, glyphno++));
-      }
+    for (const auto &glyph : font.glyphs()) {
+      box_order.push_back(sizepair(glyph.width() * glyph.height(), glyphno++));
     }
     box_order.sort();
     cout << "Sorted out some font stuff" << endl;
@@ -163,29 +149,27 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
       unsigned char *bigtex = new unsigned char[w * h];
 
       cout << "Allocated a big texture. Moving font into it..." << endl;
-      populate_texture(es->fonts[i], boxes, glyphtexc, bigtex, w, h);
+      populate_texture(font, boxes, glyphtexc, bigtex, w, h);
 
-      writei(es->fonts[i].id,gameModule);
-      writei(w,gameModule), writei(h,gameModule);
-      fwrite(bigtex,1,w*h,gameModule);
-      fwrite("done",1,4,gameModule);
+      writei(font.id(), gameModule);
+      writei(w,gameModule), writei(h, gameModule);
+      fwrite(bigtex, 1, w * h, gameModule);
+      fwrite("done", 1, 4, gameModule);
 
       delete[] bigtex;
     }
 
     size_t igt = 0;
-    for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
-      GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
-      writei(glyphRange.rangeMin, gameModule);
-      unsigned rangeSize = glyphRange.rangeMax - glyphRange.rangeMin + 1;
+    for (const auto &range : font.normalized_ranges) {
+      writei(range.min, gameModule);
+      unsigned rangeSize = range.max - range.min + 1;
       writei(rangeSize, gameModule);
-      for (unsigned ig = 0; ig < rangeSize; ig++) {
-        Glyph &glyph = glyphRange.glyphs[ig];
-        writef(glyph.advance, gameModule);
-        writef(glyph.baseline,gameModule);
-        writef(glyph.origin, gameModule);
-        writei(glyph.width,  gameModule);
-        writei(glyph.height, gameModule);
+      for (const auto &glyph : range.glyphs) {
+        writef(glyph.metrics.advance(),  gameModule);
+        writef(glyph.metrics.baseline(), gameModule);
+        writef(glyph.metrics.origin(),   gameModule);
+        writei(glyph.metrics.width(),    gameModule);
+        writei(glyph.metrics.height(),   gameModule);
 
         writef(glyphtexc[igt].x,  gameModule),
         writef(glyphtexc[igt].y,  gameModule),
@@ -197,7 +181,7 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
 
 
     fwrite("endf",1,4,gameModule);
-    cout << "Wrote all data for font " << i << endl;
+    cout << "Wrote all data for font " << font.id() << endl;
     delete[] glyphtexc;
     delete[] boxes;
   }

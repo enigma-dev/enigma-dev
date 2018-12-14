@@ -46,7 +46,7 @@ using namespace std;
 #include "makedir.h"
 
 inline string fc(const char* fn);
-static void clear_ide_editables()
+static void reset_ide_editables()
 {
   ofstream wto;
   string f2comp = fc((codegen_directory + "API_Switchboard.h").c_str());
@@ -61,13 +61,12 @@ static void clear_ide_editables()
 
     const string incg = "#include \"", impl = "/implement.h\"\n";
     f2write += "\n// Extensions selected by user\n";
-    for (unsigned i = 0; i < parsed_extensions.size(); i++)
-    {
-      ifstream ifabout((parsed_extensions[i].pathname + "/About.ey").c_str());
-      ey_data about = parse_eyaml(ifabout,parsed_extensions[i].path + parsed_extensions[i].name + "/About.ey");
-      f2write += incg + parsed_extensions[i].pathname + inc;
-      if (parsed_extensions[i].implements != "")
-        f2write += incg + parsed_extensions[i].pathname + impl;
+    for (const auto &ext : parsed_extensions) {
+      ifstream ifabout((ext.pathname + "/About.ey").c_str());
+      ey_data about = parse_eyaml(ifabout, ext.path + ext.name + "/About.ey");
+      f2write += incg + ext.pathname + inc;
+      if (ext.implements != "")
+        f2write += incg + ext.pathname + impl;
     }
 
   if (f2comp != f2write)
@@ -231,8 +230,8 @@ void parse_ide_settings(const char* eyaml)
   if (a) cout << "Parse fail: " << a << endl;
 
   cout << "Setting up IDE editables... " << endl;
-  requested_extensions.clear();
-  requested_extensions = explode((string)settree.get("extensions"));
-  extensions::parse_extensions(requested_extensions);
-  clear_ide_editables();
+  requested_extensions_last_parse.clear();
+  requested_extensions_last_parse = explode((string)settree.get("extensions"));
+  extensions::parse_extensions(requested_extensions_last_parse);
+  reset_ide_editables();
 }

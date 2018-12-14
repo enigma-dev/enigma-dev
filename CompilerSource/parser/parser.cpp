@@ -329,8 +329,8 @@ bool skip_paren(string& res, pt& pos, const string& code, const string& synt, ch
 } 
 
 
-int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_object* obj,parsed_event* pev, const std::set<std::string>& script_names)
-{
+int parser_secondary(CompileState &state, string& code, string& synt,
+                     parsed_object* obj, parsed_event* pev) {
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
   int slev = 0;
@@ -383,7 +383,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         string repsyn;
         if (synt[ebp] == 'a') //Access type is "ambi"
         {
-          if(glob->globals.find(member) != glob->globals.end())
+          if (state.global_object.globals.find(member) != state.global_object.globals.end())
           {
             code.erase(ebp, 5);
             synt.erase(ebp, 5);
@@ -420,7 +420,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           repstr += "))";
           repsyn += "))";
 
-          add_dot_accessed_local(member);
+          state.add_dot_accessed_local(member);
         }
         code.replace(ebp, exp.length() + 1 + member.length(), repstr);
         synt.replace(ebp, exp.length() + 1 + member.length(), repsyn);
@@ -527,7 +527,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
               //Are we calling a function?
               if (synt[pos]=='(') {
                 //Are we calling a valid script?
-                if (script_names.find(funcName)!=script_names.end()) {
+                if (state.script_lookup.find(funcName) != state.script_lookup.end()) {
                   //This needs to be globally scoped, unless we've done this already (with inside with)
                   if (code[oldPos-1] != ':') { //TODO: We could presumably fix nested "with (x) { with(self) {}}" here, if it occurs often in practice.
                     code.insert(oldPos, "::");
@@ -572,7 +572,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
                     //Are we calling a function?
                     if (synt[p]=='(') {
                       //Are we calling a valid script?
-                      if (script_names.find(funcName)!=script_names.end()) {
+                      if (state.script_lookup.find(funcName) != state.script_lookup.end()) {
                         //This needs to be globally scoped, unless we've done this already (with inside with)
                         if (code[oldPos-1] != ':') { //TODO: We could presumably fix nested "with (x) { with(self) {}}" here, if it occurs often in practice.
                           code.insert(oldPos, "::");

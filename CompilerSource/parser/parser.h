@@ -32,5 +32,5 @@
 void parser_init();
 string file_parse(string filename,string outname);
 string parser_main(string code,parsed_event* x = NULL, const std::set<std::string>& script_names=std::set<std::string>(), bool isObject=false);
-int parser_secondary(string& code, string& synt, parsed_object *glob = NULL, parsed_object *thisobj = NULL, parsed_event *pev = NULL, const std::set<std::string>& script_names=std::set<std::string>());
+int parser_secondary(CompileState &state, string& code, string& synt, parsed_object *thisobj = NULL, parsed_event *pev = NULL);
 void print_to_file(string,string,const unsigned int,const varray<string>&,int,ofstream&);

@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008, 2018 Josh Ventura                                       **
 **  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -37,7 +38,7 @@ using namespace std;
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
 
@@ -48,125 +49,125 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
-int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, int mode)
+inline std::string format_color(uint32_t color) { 
+  std::stringstream ss;
+  ss << "0x" << std::hex << color;
+  return ss.str();
+}
+
+int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, parsed_object *EGMglobal, int mode)
 {
   ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
 
   wto << license << "namespace enigma {\n"
-  << "  int room_loadtimecount = " << es->roomCount << ";\n";
-  int room_highid = 0, room_highinstid = 100000,room_hightileid=10000000;
+  << "  int room_loadtimecount = " << game.rooms.size() << ";\n";
+  int room_highid = 0, room_highinstid = 100000, room_hightileid = 10000000;
 
-  for (int i = 0; i < es->roomCount; i++)
-  {
-    wto << "  tile tiles_" << es->rooms[i].id << "[] = {\n";
-    for (int ii = 0, modme = 0; ii < es->rooms[i].tileCount; ii++)
-    {
-      wto << "{" <<
-        es->rooms[i].tiles[ii].id << "," <<
-        es->rooms[i].tiles[ii].backgroundId << "," <<
-        es->rooms[i].tiles[ii].bgX << "," <<
-        es->rooms[i].tiles[ii].bgY << "," <<
-        es->rooms[i].tiles[ii].depth << "," <<
-        es->rooms[i].tiles[ii].height << "," <<
-        es->rooms[i].tiles[ii].width << "," <<
-        es->rooms[i].tiles[ii].roomX << "," <<
-        es->rooms[i].tiles[ii].roomY << "," <<
-        /*es->rooms[i].tiles[ii].xscale*/1 << "," <<
-        /*es->rooms[i].tiles[ii].yscale*/1 << "," <<
-        /*es->rooms[i].tiles[ii].alpha*/"1.0" << "," <<
-        /*es->rooms[i].tiles[ii].color*/0xFFFFFF << "},";
+  for (const auto &room : game.rooms) {
+    wto << "  tile tiles_" << room.id() << "[] = {\n";
+    for (int ii = 0, modme = 0; ii < room.tiles().size(); ii++) {
+      wto << "{"
+          << room.tiles(ii).id() << ","
+          << room.tiles(ii).background_name() << ","
+          << room.tiles(ii).xoffset()    << ","
+          << room.tiles(ii).yoffset()    << ","
+          << room.tiles(ii).depth()  << ","
+          << room.tiles(ii).height() << ","
+          << room.tiles(ii).width()  << ","
+          << room.tiles(ii).x()  << ","
+          << room.tiles(ii).y()  << ","
+          << room.tiles(ii).xscale() << ","
+          << room.tiles(ii).yscale() << ","
+          << room.tiles(ii).alpha()  << ","
+          << room.tiles(ii).color()  << "},";
         if (++modme % 16 == 0) wto << "\n        ";
-      if (es->rooms[i].tiles[ii].id > room_hightileid)
-        room_hightileid = es->rooms[i].tiles[ii].id;
+      if (room.tiles(ii).id() > room_hightileid)
+        room_hightileid = room.tiles(ii).id();
     }
     wto << "  };\n";
   }
 
-  for (int i = 0; i < es->roomCount; i++)
-  {
-    wto << "  inst insts_" << es->rooms[i].id << "[] = {\n";
-    for (int ii = 0, modme = 0; ii < es->rooms[i].instanceCount; ii++)
-    {
+  for (const auto &room : game.rooms) {
+    wto << "  inst insts_" << room.id() << "[] = {\n";
+    int modme = 0;
+    for (const auto &instance : room.instances()) {
       wto << "{" <<
-        es->rooms[i].instances[ii].id << "," <<
-        es->rooms[i].instances[ii].objectId << "," <<
-        es->rooms[i].instances[ii].x << "," <<
-        es->rooms[i].instances[ii].y << "},";
+        instance.id() << "," <<
+        instance.object_type() << "," <<
+        instance.x() << "," <<
+        instance.y() << "},";
         if (++modme % 16 == 0) wto << "\n        ";
-      if (es->rooms[i].instances[ii].id > room_highinstid)
-        room_highinstid = es->rooms[i].instances[ii].id;
+      if (instance.id() > room_highinstid)
+        room_highinstid = instance.id();
     }
     wto << "  };\n";
   }
 
-  wto << "  roomstruct grd_rooms[" << es->roomCount << "] = {\n";
-  for (int i = 0; i < es->roomCount; i++)
-  {
-    wto << "    //Room " << es->rooms[i].id << "\n" <<
+  wto << "  roomstruct grd_rooms[" << game.rooms.size() << "] = {\n";
+  for (size_t room_index = 0; room_index < game.rooms.size(); ++room_index) {
+    const auto &room = game.rooms[room_index];
+    wto << "    //Room " << room.id() << "\n" <<
     "    { "
-    << es->rooms[i].id << ", " // The ID of this room
-    << i << ", \"" // The tree order index of this room
-    << es->rooms[i].name << "\",  \""  // The name of this room
-    << es->rooms[i].caption << "\",\n      " // The caption of this room
+    << room.id() << ", "  // The ID of this room
+    << room_index << ", \""  // The tree order index of this room
+    << room.name << "\",  \""  // The name of this room
+    << room.caption() << "\",\n      "  // The caption of this room
 
-    << javaColor(es->rooms[i].backgroundColor) << ", "//Background color
-    << (es->rooms[i].drawBackgroundColor ? "true" : "false")
-    << ", roomcreate" << es->rooms[i].id << ",\n      " // Creation code
-    << "roomprecreate" << es->rooms[i].id << ",\n      " // PreCreation code
+    << format_color(room.color()) << ", "  // Background color
+    << (room.show_color() ? "true" : "false")  // Draw background color
+    << ", roomcreate" << room.id() << ",\n      "  // Creation code
+    << "roomprecreate" << room.id() << ",\n      "  // PreCreation code
 
-    << es->rooms[i].width << ", " << es->rooms[i].height << ", " // Width and Height
-    << es->rooms[i].speed << ",  "  // Speed
-    << (es->rooms[i].persistent ? "true" : "false") << ",  "  // Persistent
+    << room.width() << ", " << room.height() << ", " // Width and Height
+    << room.speed() << ",  "  // Speed
+    << (room.persistent() ? "true" : "false") << ",  "  // Persistent
 
-    << (es->rooms[i].enableViews ? "true" : "false") << ", {\n"; // Views Enabled
+    << (room.enable_views() ? "true" : "false") << ", {\n"; // Views Enabled
 
-    for (int ii = 0; ii < es->rooms[i].viewCount; ii++) // For each view
-    {
+    for (const auto &view : room.views()) {
       wto << "      { "
-      << (es->rooms[i].views[ii].visible ? "true" : "false") << ",   " // Visible
+          << (view.visible() ? "true" : "false") << ",   " // Visible
 
-      << es->rooms[i].views[ii].viewX << ", " << es->rooms[i].views[ii].viewY << ", "   // Xview and Yview
-      << es->rooms[i].views[ii].viewW << ", " << es->rooms[i].views[ii].viewH << ",   " // Wview and Hview
+          << view.xview() << ", "   // Xview 
+          << view.yview() << ",  "  // Yview
+          << view.wview() << ", "    // Wview
+          << view.hview() << ",   "  // Hview
 
-      << es->rooms[i].views[ii].portX << ", " << es->rooms[i].views[ii].portY << ", "   // Xport and Yport
-      << es->rooms[i].views[ii].portW << ", " << es->rooms[i].views[ii].portH << ",   " // Wport and Hport
+          << view.xport() << ", " << view.yport() << ",  "   // Xport and Yport
+          << view.wport() << ", " << view.hport() << ",   "  // Wport and Hport
 
-      << es->rooms[i].views[ii].objectId << ",   " // Object2Follow
+          << view.object_following() << ",  " // Object2Follow
 
-      << es->rooms[i].views[ii].borderH << ", " << es->rooms[i].views[ii].borderV << ",   " //Hborder and Vborder
-      << es->rooms[i].views[ii].speedH<< ", " << es->rooms[i].views[ii].speedV //Hspeed and Vspeed
+          << view.hborder() << ", " << view.vborder() << ",  "  // Hborder and Vborder
+          << view.hspeed()<< ", " << view.vspeed()  // Hspeed and Vspeed
 
       << " },\n";
     }
     //Start of Backgrounds
     wto << "}, {";
-     for (int ii = 0; ii < es->rooms[i].backgroundDefCount; ii++) // For each background
-     {
-        wto << "      { "
-        << (es->rooms[i].backgroundDefs[ii].visible ? "true" : "false") << ",   " // Visible
-        << (es->rooms[i].backgroundDefs[ii].foreground ? "true" : "false") << ",   " // Foreground
-        << es->rooms[i].backgroundDefs[ii].backgroundId << ",   " // Background
-        << es->rooms[i].backgroundDefs[ii].x << ",   " // X
-        << es->rooms[i].backgroundDefs[ii].y << ",   " // Y
-        << es->rooms[i].backgroundDefs[ii].hSpeed << ",   " // HSpeed
-        << es->rooms[i].backgroundDefs[ii].vSpeed << ",   " // VSpeed
-        << (es->rooms[i].backgroundDefs[ii].tileHoriz ? "true" : "false") << ",   " // tileHor
-        << (es->rooms[i].backgroundDefs[ii].tileVert ? "true" : "false") << ",   " // tileVert
-        << (es->rooms[i].backgroundDefs[ii].stretch ? "true" : "false") << ",   " // Stretch
-        << /*es->rooms[i].backgroundDefs[ii].alpha*/1 << ",   " // Alpha
-        << /*es->rooms[i].backgroundDefs[ii].color*/0xFFFFFF << " },\n";  // Color
+     for (const auto &background : room.backgrounds()) {
+        wto << "\n      { "
+        << (background.visible() ? "true" : "false")    << ",   "  // Visible
+        << (background.foreground() ? "true" : "false") << ",   "  // Foreground
+        << background.background_name()                 << ",   "  // Background
+        << background.x()                               << ",   "  // X
+        << background.y()                               << ",   "  // Y
+        << background.hspeed()                          << ",   "  // HSpeed
+        << background.vspeed()                          << ",   "  // VSpeed
+        << (background.htiled()  ? "true" : "false")    << ",   "  // tileHor
+        << (background.vtiled()  ? "true" : "false")    << ",   "  // tileVert
+        << (background.stretch() ? "true" : "false")    << ",   "  // Stretch
+        << background.alpha() << ",   "    // Alpha
+        << background.color() << " },";  // Color
      }
     wto <<
-    "      }," //End of Backgrounds
+    " },\n" //End of Backgrounds
+    "      " << room.instances().size() << ", insts_" << room.id() << ",\n"
+    "      " << room.tiles().size() << ", tiles_" << room.id() << "\n"
+    "    },\n";
 
-    << "      " << es->rooms[i].instanceCount << ", insts_" << es->rooms[i].id
-    << "      ," << es->rooms[i].tileCount << ", tiles_" << es->rooms[i].id;
-
-    // End of this room
-    wto << "    },\n";
-
-    if (es->rooms[i].id > room_highid)
-      room_highid = es->rooms[i].id;
+    if (room.id() > room_highid)
+      room_highid = room.id();
 
     (void)EGMglobal; // No need to know globals, here.
   }
@@ -176,60 +177,51 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
 
   wto << "} // Namespace enigma\n";
 
-  if (es->roomCount == 0)
+  if (game.rooms.size() == 0)
   {
     wto << "int room_first = 0;\n";
     wto << "int room_last = 0;\n";
   }
   else
   {
-    wto << "int room_first = " << es->rooms[0].id << ";\n";
-    wto << "int room_last = " << es->rooms[es->roomCount-1].id << ";\n";
+    wto << "int room_first = " << game.rooms[0].id() << ";\n";
+    wto << "int room_last = " << game.rooms[game.rooms.size()-1].id() << ";\n";
   }
   wto.close();
 
 
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
   wto << license;
-
-  wto << "namespace enigma {\n\n";
-  wto << "void extensions_initialize() {\n";
-  for (const auto &ext : parsed_extensions) {
-    if (ext.init.empty()) continue;
-    wto << "  " << ext.init << "();\n";
-  }
-  wto << "}\n\n} // namespace enigma\n\n";
-
-  for (int i = 0; i < es->roomCount; i++)
-  {
-    parsed_room *pr = parsed_rooms[es->rooms[i].id];
-    for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
+  for (const auto &room : game.rooms) {
+    parsed_room *pr = parsed_rooms[room.id()];
+    for (const auto &int_ev_pair : pr->instance_create_codes)
     {
-      wto << "variant room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "()\n{\n  ";
+      wto << "variant room_" << room.id()
+          << "_instancecreate_" << int_ev_pair.first << "()\n{\n  ";
       if (mode == emode_debug) {
-        wto << "enigma::debug_scope $current_scope(\"'instance creation' for instance '" << it->first << "'\");\n  ";
+        wto << "enigma::debug_scope $current_scope(\"'instance creation' for instance '" << int_ev_pair.first << "'\");\n  ";
       }
 
       std::string codeOvr;
       std::string syntOvr;
-      if (it->second.pe->code.find("with((")==0) {
+      if (int_ev_pair.second.pe->code.find("with((")==0) {
         //We're basically replacing "with((100002)){" with "with_room_inst((100002)){" (synt: "ssss((000000)){")
         //This is because room-instance-creation code might need a deactivated instance, which "with" cannot find.
-        codeOvr = "with_room_inst(" + it->second.pe->code.substr(5);
-        syntOvr = "ssssssssssssss(" + it->second.pe->synt.substr(5);
+        codeOvr = "with_room_inst(" + int_ev_pair.second.pe->code.substr(5);
+        syntOvr = "ssssssssssssss(" + int_ev_pair.second.pe->synt.substr(5);
       }
 
       print_to_file(
-        codeOvr.empty() ? it->second.pe->code : codeOvr,
-        syntOvr.empty() ? it->second.pe->synt : syntOvr,
-        it->second.pe->strc, it->second.pe->strs, 2, wto
+        codeOvr.empty() ? int_ev_pair.second.pe->code : codeOvr,
+        syntOvr.empty() ? int_ev_pair.second.pe->synt : syntOvr,
+        int_ev_pair.second.pe->strc, int_ev_pair.second.pe->strs, 2, wto
       );
       wto << "  return 0;\n}\n\n";
     }
 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_precreate_codes.begin(); it != pr->instance_precreate_codes.end(); it++)
     {
-      wto << "variant room_"<< es->rooms[i].id <<"_instanceprecreate_" << it->first << "()\n{\n  ";
+      wto << "variant room_"<< room.id() <<"_instanceprecreate_" << it->first << "()\n{\n  ";
       if (mode == emode_debug) {
         wto << "enigma::debug_scope $current_scope(\"'instance preCreation' for instance '" << it->first << "'\");\n  ";
       }
@@ -251,9 +243,9 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
       wto << "  return 0;\n}\n\n";
     }
 
-    wto << "variant roomprecreate" << es->rooms[i].id << "()\n{\n";
+    wto << "variant roomprecreate" << room.id() << "()\n{\n";
     if (mode == emode_debug) {
-      wto << "  enigma::debug_scope $current_scope(\"'room preCreation' for room '" << es->rooms[i].name << "'\");\n";
+      wto << "  enigma::debug_scope $current_scope(\"'room preCreation' for room '" << room.name << "'\");\n";
     }
     wto << "  ";
 
@@ -262,19 +254,19 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
     //print_to_file(ev.code, ev.synt, ev.strc, ev.strs, 2, wto);
 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_precreate_codes.begin(); it != pr->instance_precreate_codes.end(); it++)
-      wto << "\n  room_"<< es->rooms[i].id <<"_instanceprecreate_" << it->first << "();";
+      wto << "\n  room_"<< room.id() <<"_instanceprecreate_" << it->first << "();";
 
     wto << "\n  return 0;\n}\n\n";
 
-    wto << "variant roomcreate" << es->rooms[i].id << "()\n{\n";
+    wto << "variant roomcreate" << room.id() << "()\n{\n";
     if (mode == emode_debug) {
-      wto << "  enigma::debug_scope $current_scope(\"'room creation' for room '" << es->rooms[i].name << "'\");\n";
+      wto << "  enigma::debug_scope $current_scope(\"'room creation' for room '" << room.name << "'\");\n";
     }
     parsed_event& ev = pr->events[0];
     print_to_file(ev.code, ev.synt, ev.strc, ev.strs, 2, wto);
 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
-      wto << "\n  room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "();";
+      wto << "\n  room_"<< room.id() <<"_instancecreate_" << it->first << "();";
 
     wto << "\n  return 0;\n}\n";
   }

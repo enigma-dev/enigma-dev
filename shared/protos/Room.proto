@@ -16,7 +16,7 @@ message Room {
   optional bool persistent = 7 [(yyp) = "roomSettings/persistent"];
   optional int32 color = 8 [(gmx) = "colour"];
   optional bool show_color = 9 [(gmx) = "showcolour"];
-  optional string code = 10;
+  optional string creation_code = 10;
   optional bool enable_views = 11 [(gmx) = "enableViews", (yyp) = "viewSettings/enableViews"];
   optional bool clear_view_background = 12 [(gmx) = "clearViewBackground", (yyp) = "viewSettings/clearViewBackground"];
   optional bool clear_display_buffer = 13 [(gmx) = "clearDisplayBuffer", (yyp) = "viewSettings/clearDisplayBuffer"];
@@ -32,6 +32,8 @@ message Room {
     optional double hspeed = 8;
     optional double vspeed = 9;
     optional bool stretch = 10;
+    optional int32 color = 11;
+    optional double alpha = 12;
   }
 
   repeated Background backgrounds = 15 [(gmx) = "backgrounds/background"];
@@ -62,7 +64,8 @@ message Room {
     optional double x = 4;
     optional double y = 5;
     optional double z = 6;
-    optional string code = 7;
+    optional string creation_code = 7;
+    optional string initialization_code = 14;
     optional double xscale = 8 [default = 1, (gmx) = "scaleX"];
     optional double yscale = 9 [default = 1, (gmx) = "scaleY"];
     optional double zscale = 10 [default = 1, (gmx) = "scaleY"];
@@ -93,6 +96,7 @@ message Room {
     optional double xscale = 11 [(gmx) = "scaleX"];
     optional double yscale = 12 [(gmx) = "scaleY"];
     optional int32 color = 13 [(gmx) = "colour"];
+    optional double alpha = 14;
     
     message EditorSettings {
       optional bool locked = 1;

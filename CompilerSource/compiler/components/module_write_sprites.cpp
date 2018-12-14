@@ -35,7 +35,7 @@ using namespace std;
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
 
@@ -46,67 +46,69 @@ inline void writei(int x, FILE *f) {
 }
 
 #include "languages/lang_CPP.h"
-int lang_CPP::module_write_sprites(EnigmaStruct *es, FILE *gameModule)
+int lang_CPP::module_write_sprites(const GameData &game, FILE *gameModule)
 {
   // Now we're going to add sprites
-  edbg << es->spriteCount << " Adding Sprites to Game Module: " << flushl;
+  edbg << game.sprites.size() << " Adding Sprites to Game Module: " << flushl;
 
   //Magic Number
   fwrite("SPR ",4,1,gameModule);
 
   //Indicate how many
-  int sprite_count = es->spriteCount;
+  int sprite_count = game.sprites.size();
   fwrite(&sprite_count,4,1,gameModule);
 
   int sprite_maxid = 0;
   for (int i = 0; i < sprite_count; i++)
-    if (es->sprites[i].id > sprite_maxid)
-      sprite_maxid = es->sprites[i].id;
+    if (game.sprites[i].id() > sprite_maxid)
+      sprite_maxid = game.sprites[i].id();
   fwrite(&sprite_maxid,4,1,gameModule);
 
   for (int i = 0; i < sprite_count; i++)
   {
-    writei(es->sprites[i].id,gameModule); //id
+    writei(game.sprites[i].id(), gameModule); //id
 
     // Track how many subImages we're copying
-    int subCount = es->sprites[i].subImageCount;
+    int subCount = game.sprites[i].image_data.size();
 
     int swidth = 0, sheight = 0;
     for (int ii = 0; ii < subCount; ii++)
     {
       if (!swidth and !sheight) {
-        swidth =  es->sprites[i].subImages[ii].image.width;
-        sheight = es->sprites[i].subImages[ii].image.height;
+        swidth =  game.sprites[i].image_data[ii].width;
+        sheight = game.sprites[i].image_data[ii].height;
       }
-      else if (swidth != es->sprites[i].subImages[ii].image.width or sheight != es->sprites[i].subImages[ii].image.height) {
-        user << "Subimages of sprite `" << es->sprites[i].name << "' vary in dimensions; do not want." << flushl;
+      else if (swidth != game.sprites[i].image_data[ii].width
+           || sheight != game.sprites[i].image_data[ii].height) {
+        user << "Subimages of sprite `" << game.sprites[i].name << "' vary in dimensions; do not want." << flushl;
         return 14;
       }
     }
     if (!(swidth and sheight and subCount)) {
-      user << "Subimages of sprite `" << es->sprites[i].name << "' have zero size." << flushl;
+      user << "Subimages of sprite `" << game.sprites[i].name << "' have zero size." << flushl;
       return 14;
     }
 
     writei(swidth, gameModule); //width
     writei(sheight,gameModule); //height
-    writei(es->sprites[i].originX,gameModule); //xorig
-    writei(es->sprites[i].originY,gameModule); //yorig
-    writei(es->sprites[i].bbTop,gameModule);    //BBox Top
-    writei(es->sprites[i].bbBottom,gameModule); //BBox Bottom
-    writei(es->sprites[i].bbLeft,gameModule);   //BBox Left
-    writei(es->sprites[i].bbRight,gameModule);  //BBox Right
-    writei(es->sprites[i].bbMode,gameModule);  //BBox Mode
-    writei(es->sprites[i].shape,gameModule);  //Mask shape
+    writei(game.sprites[i].origin_x(),  gameModule); // xorig
+    writei(game.sprites[i].origin_x(),  gameModule); // yorig
+    writei(game.sprites[i].bbox_top(),    gameModule); // BBox Top
+    writei(game.sprites[i].bbox_bottom(), gameModule); // BBox Bottom
+    writei(game.sprites[i].bbox_left(),   gameModule); // BBox Left
+    writei(game.sprites[i].bbox_right(),  gameModule); // BBox Right
+    writei(game.sprites[i].bbox_mode(),   gameModule); // BBox Mode
+    writei(game.sprites[i].shape(),    gameModule); // Mask shape
 
     writei(subCount,gameModule); //subimages
 
     for (int ii = 0;ii < subCount; ii++)
     {
-      //strans = es->sprites[i].subImages[ii].transColor, fwrite(&idttrans,4,1,exe); //Transparent color
-      writei(swidth * sheight * 4,gameModule); //size when unpacked
-      writei(es->sprites[i].subImages[ii].image.dataSize,gameModule); //size when unpacked
-      fwrite(es->sprites[i].subImages[ii].image.data, 1, es->sprites[i].subImages[ii].image.dataSize, gameModule); //sprite data
+      //strans = game.sprites[i].image_data[ii].transColor, fwrite(&idttrans,4,1,exe); //Transparent color
+      writei(swidth * sheight * 4, gameModule); // size when unpacked
+      writei(game.sprites[i].image_data[ii].pixels.size(), gameModule);  // size
+      fwrite(game.sprites[i].image_data[ii].pixels.data(), 1,
+             game.sprites[i].image_data[ii].pixels.size(), gameModule);  // data
       writei(0,gameModule);
     }
   }

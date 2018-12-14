@@ -2,7 +2,7 @@ PATH := $(eTCpath)$(PATH)
 
 .PHONY: ENIGMA all clean Game clean-game liblodepng libProtocols libEGM required-directories .FORCE
 
-ENIGMA: .FORCE
+ENIGMA: .FORCE libProtocols
 	$(MAKE) -C CompilerSource
 
 clean: .FORCE

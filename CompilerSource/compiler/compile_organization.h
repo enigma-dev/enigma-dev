@@ -30,12 +30,13 @@
 
 //Error codes
 enum {
-  E_ERROR_NO_ERROR_LOL,
-  E_ERROR_PLUGIN_FUCKED_UP,
-  E_ERROR_SYNTAX,
-  E_ERROR_BUILD,
-  E_ERROR_LOAD_LOCALS,
-  E_ERROR_WUT
+  E_ERROR_NO_ERROR_LOL,      // The classic "no error" constant. (zero)
+  E_ERROR_PLUGIN_FUCKED_UP,  // The plugin is full of shit
+  E_ERROR_SYNTAX,            // The game contains a syntax error.
+  E_ERROR_BUILD,             // The build failed.
+  E_ERROR_LOAD_LOCALS,       // Failed to load locals from the engine.
+  E_ERROR_COMPILER_LOGIC,    // The compiler is full of shit.
+  E_ERROR_WUT                // Unknown error. IDE isn't handling it.
 };
 
 //Mode codes

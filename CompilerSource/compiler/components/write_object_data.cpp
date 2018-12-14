@@ -1,4 +1,4 @@
-/** Copyright (C) 2008, 2014 Josh Ventura
+/** Copyright (C) 2008, 2014, 2018 Josh Ventura
 *** Copyright (C) 2013, 2014, Robert B. Colton
 *** Copyright (C) 2014 Seth N. Hetu
 ***
@@ -28,7 +28,7 @@ using namespace std;
 
 #include "parser/parser.h"
 
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "backend/GameData.h"
 #include "compiler/compile_common.h"
 #include "event_reader/event_parser.h"
 #include "general/parse_basics_old.h"
@@ -57,17 +57,16 @@ inline string event_forge_group_code(int mainId, int id) {
   return ret;
 }
 
-static inline void declare_scripts(std::ostream &wto, EnigmaStruct* es) {
+static inline void declare_scripts(std::ostream &wto, const GameData &game, const CompileState &state) {
   wto << "// Script identifiers\n";
-  for (int i = 0; i < es->scriptCount; i++)
-    wto << "#define " << es->scripts[i].name << "(arguments...) _SCR_" << es->scripts[i].name << "(arguments)\n";
+  for (size_t i = 0; i < game.scripts.size(); i++)
+    wto << "#define " << game.scripts[i].name << "(arguments...) _SCR_" << game.scripts[i].name << "(arguments)\n";
   wto << "\n\n";
 
-  for (int i = 0; i < es->scriptCount; i++)
-  {
-    parsed_script* scr = scr_lookup[es->scripts[i].name];
+  for (size_t i = 0; i < game.scripts.size(); i++) {
+    parsed_script* scr = state.parsed_scripts[i];
     const char* comma = "";
-    wto << "variant _SCR_" << es->scripts[i].name << "(";
+    wto << "variant _SCR_" << game.scripts[i].name << "(";
     scr->globargs = 16; //Fixes too many arguments error (scripts can be called dynamically with any number of arguments)
     for (int argn = 0; argn < scr->globargs; argn++) {
       wto << comma << "variant argument" << argn << "=0";
@@ -78,17 +77,8 @@ static inline void declare_scripts(std::ostream &wto, EnigmaStruct* es) {
   wto << "\n\n";
 }
 
-static inline void declare_timelines(std::ostream &wto, EnigmaStruct* es, map<string, int> &revTlineLookup) {
-  //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
-  for (int i=0; i<es->timelineCount; i++) {
-    revTlineLookup[es->timelines[i].name] = es->timelines[i].id;
-    for (int j=0; j<es->timelines[i].momentCount; j++) {
-      wto << "void TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
-    }
-  }
-}
-
-static inline void declare_extension_casts(std::ostream &wto) {
+static inline void declare_extension_casts(std::ostream &wto,
+    const ParsedExtensionVec &parsed_extensions) {
   // Write extension cast methods; these are a temporary fix until the new instance system is in place.
   wto << "  namespace extension_cast {\n";
   for (unsigned i = 0; i < parsed_extensions.size(); i++) {
@@ -101,11 +91,10 @@ static inline void declare_extension_casts(std::ostream &wto) {
   wto << "  }\n";
 }
 
-    //Build a reverse lookup for timeline names.
-    map<string, int> revTlineLookup;
-    for (int i=0; i<es->timelineCount; i++) {
-      revTlineLookup[es->timelines[i].name] = es->timelines[i].id;
-    }
+static inline void declare_object_locals_class(std::ostream &wto,
+    const ParsedExtensionVec &parsed_extensions) {
+  wto << "  extern std::map<int,object_basic*> instance_deactivated_list;\n";
+  wto << "  extern objectstruct** objectdata;\n\n";
 
     wto << "\n";
     wto << "namespace enigma\n{\n\n";
@@ -144,7 +133,8 @@ static inline void declare_extension_casts(std::ostream &wto) {
 }
 
 // TODO(JoshDreamland): MOVEME: group with extension code; call remains in this file
-static inline void write_extension_casts(std::ostream &wto) {
+static inline void write_extension_casts(std::ostream &wto,
+    const ParsedExtensionVec &parsed_extensions) {
   // Write extension cast methods; these are a temporary fix until the new instance system is in place.
   wto << "namespace enigma {\n";
   wto << "  namespace extension_cast {\n";
@@ -260,7 +250,7 @@ static inline bool parent_declares_groupedevent(parsed_object *parent, int mid) 
   return false;
 }
 
-static inline void write_object_locals(lang_CPP *lcpp, std::ostream &wto, parsed_object* global, parsed_object* object) {
+static inline void write_object_locals(lang_CPP *lcpp, std::ostream &wto, const parsed_object* global, parsed_object* object) {
   wto << "    // Local variables\n    ";
   for (unsigned ii = 0; ii < object->events.size; ii++) {
     string addls = event_get_locals(object->events[ii].mainId, object->events[ii].id);
@@ -277,7 +267,7 @@ static inline void write_object_locals(lang_CPP *lcpp, std::ostream &wto, parsed
 
     // If it's not explicitely defined, we must question whether it should be given a unique presence in this scope
     if (!ii->second.defined()) {
-      parsed_object::globit ve = global->globals.find(ii->first); // So, we look for a global by this name
+      parsed_object::cglobit ve = global->globals.find(ii->first); // So, we look for a global by this name
       if (ve != global->globals.end()) {  // If a global by this name is indeed found,
         if (ve->second.defined()) // And this global is explicitely defined, not just accessed with a dot,
           writeit = false; // We assume that its definition will cover us, and we do not redeclare it as a local.
@@ -291,15 +281,14 @@ static inline void write_object_locals(lang_CPP *lcpp, std::ostream &wto, parsed
   }
 }
 
-static inline void write_object_scripts(std::ostream &wto, parsed_object *object) {
+static inline void write_object_scripts(std::ostream &wto, parsed_object *object, const CompileState &state) {
   // Next, we write the list of all the scripts this object will hoard a copy of for itself.
   wto << "\n    //Scripts called by this object\n    ";
   for (parsed_object::funcit it = object->funcs.begin(); it != object->funcs.end(); it++) //For each function called by this object
   {
-    map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-    if (subscr != scr_lookup.end() // If we've got ourselves a script
-    and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally)
-    {
+    auto subscr = state.script_lookup.find(it->first); //Check if it's a script
+    if (subscr != state.script_lookup.end() // If we've got ourselves a script
+    and subscr->second->pev_global) { // And it has distinct code for use at the global scope (meaning it's more efficient locally)
       const char* comma = "";
       wto << "\n    variant _SCR_" << it->first << "(";
       for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
@@ -312,7 +301,7 @@ static inline void write_object_scripts(std::ostream &wto, parsed_object *object
   } wto << "\n    ";
 }
 
-static inline void write_object_timelines(std::ostream &wto, EnigmaStruct* es, parsed_object *object, map<string, int> &revTlineLookup) {
+static inline void write_object_timelines(std::ostream &wto, const GameData &game, parsed_object *object, const TimelineLookupMap &timeline_lookup) {
   // Next, we write the list of all the timelines this object will hoard a copy of for itself.
   // NOTE: See below; we actually need to assume this object has the potential to call any timeline.
   //       BUT we only locally-copy the ones we know about for sure here.
@@ -321,13 +310,13 @@ static inline void write_object_timelines(std::ostream &wto, EnigmaStruct* es, p
   wto << "\n    //Timelines called by this object\n";
   for (parsed_object::tlineit it = object->tlines.begin(); it != object->tlines.end(); it++) //For each timeline potentially set by this object.
   {
-    map<string, int>::iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
-    if (timit != revTlineLookup.end()) // If we've got ourselves a script
+    auto timit = timeline_lookup.find(it->first); //Check if it's a timeline
+    if (timit != timeline_lookup.end()) // If we've got ourselves a script
     //and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally) //NOTE: It seems all timeline MUST be copied locally.
     {
       hasKnownTlines = true;
-      for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
-        wto << "    void TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"();\n";
+      for (const auto &moment : timit->second.moments) {
+        wto << "    void TLINE_" << timit->first <<"_MOMENT_" << moment.step <<"();\n";
       }
     }
   } wto << "\n";
@@ -618,7 +607,7 @@ static inline void write_object_destructor(std::ostream &wto, parsed_object *obj
   wto << "    virtual bool can_cast(int obj) const;\n";
 }
 
-static inline void write_object_class_body(parsed_object* object, lang_CPP *lcpp, std::ostream &wto, EnigmaStruct *es, parsed_object* global, robertmap &parent_undefinitions, map<string, int> &revTlineLookup, evpairmap &evmap) {
+static inline void write_object_class_body(parsed_object* object, lang_CPP *lcpp, std::ostream &wto, const GameData &game, const CompileState &state, robertmap &parent_undefinitions, evpairmap &evmap) {
   wto << "  \n  struct OBJ_" << object->name;
   if (object->parent) {
       wto << ": OBJ_" << object->parent->name;
@@ -630,9 +619,9 @@ static inline void write_object_class_body(parsed_object* object, lang_CPP *lcpp
   robertvec parent_undefined; // Robert probably knew what this was when he wrote it. Probably.
   event_map evgroup; // Josh knew what this was when he wrote it.
 
-  write_object_locals(lcpp, wto, global, object);
-  write_object_scripts(wto, object);
-  write_object_timelines(wto, es, object, revTlineLookup);
+  write_object_locals(lcpp, wto, &state.global_object, object);
+  write_object_scripts(wto, object, state);
+  write_object_timelines(wto, game, object, state.timeline_lookup);
   write_object_events(wto, object, parent_undefined, evgroup);
 
   parent_undefinitions[object->id] = parent_undefined;
@@ -647,38 +636,38 @@ static inline void write_object_class_body(parsed_object* object, lang_CPP *lcpp
   wto << "  };\n";
 }
 
-static inline void write_object_family(parsed_object* object, lang_CPP *lcpp, std::ostream &wto, EnigmaStruct *es, parsed_object* global, robertmap &parent_undefinitions, map<string, int> &revTlineLookup, evpairmap &evmap) {
-  write_object_class_body(object, lcpp, wto, es, global, parent_undefinitions, revTlineLookup, evmap);
-  for (vector<parsed_object*>::iterator child_it = object->children.begin(); child_it != object->children.end(); ++child_it) {
-    write_object_family(*child_it, lcpp, wto, es, global, parent_undefinitions, revTlineLookup, evmap);
+static inline void write_object_family(parsed_object* object, lang_CPP *lcpp, std::ostream &wto, const GameData &game, const CompileState &state, robertmap &parent_undefinitions, evpairmap &evmap) {
+  write_object_class_body(object, lcpp, wto, game, state, parent_undefinitions, evmap);
+  for (ParsedObjectVec::iterator child_it = object->children.begin(); child_it != object->children.end(); ++child_it) {
+    write_object_family(*child_it, lcpp, wto, game, state, parent_undefinitions, evmap);
   }
 }
 
-static inline void write_object_class_bodies(lang_CPP *lcpp, std::ostream &wto, EnigmaStruct *es, parsed_object* global, robertmap &parent_undefinitions, map<string, int> &revTlineLookup) {
+static inline void write_object_class_bodies(lang_CPP *lcpp, std::ostream &wto, const GameData &game, const CompileState &state, robertmap &parent_undefinitions) {
   // Hold an iterator for our parent for later usage
   evpairmap evmap; // Keep track of events that need added to honor et_stacked
 
-  for (po_i object_iter = parsed_objects.begin(); object_iter != parsed_objects.end(); ++object_iter) {
-    if (object_iter->second->parent) {
+  for (parsed_object *object : state.parsed_objects) {
+    if (object->parent) {
       continue; // Do not write out objects before we've written their parent
     }
 
-    write_object_family(object_iter->second, lcpp, wto, es, global, parent_undefinitions, revTlineLookup, evmap);
+    write_object_family(object, lcpp, wto, game, state, parent_undefinitions, evmap);
   }
 }
 
-static inline void write_object_data_structs(std::ostream &wto) {
+static inline void write_object_data_structs(std::ostream &wto,
+      const ParsedObjectVec &parsed_objects) {
   wto << "  objectstruct objs[] = {\n" <<std::fixed;
   int objcount = 0, obmx = 0;
-  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++, objcount++)
-  {
+  for (parsed_object *object : parsed_objects) {
     wto << "    {"
-        << i->second->sprite_index << "," << i->second->solid << ","
-        << i->second->visible << "," << i->second->depth << ","
-        << i->second->persistent << "," << i->second->mask_index
-        << "," << i->second->parent_index << "," << i->second->id
+        << object->sprite_name << "," << object->solid << ","
+        << object->visible << "," << object->depth << ","
+        << object->persistent << "," << object->mask_name
+        << "," << object->parent_name << "," << object->id
         << "},\n";
-    if (i->second->id >= obmx) obmx = i->second->id;
+    if (object->id >= obmx) obmx = object->id;
   }
   wto.unsetf(ios_base::floatfield);
   wto << "  };\n";
@@ -686,7 +675,7 @@ static inline void write_object_data_structs(std::ostream &wto) {
   wto << "  int obj_idmax = " << obmx+1 << ";\n";
 }
 
-static inline void write_object_declarations(lang_CPP* lcpp, EnigmaStruct* es, parsed_object* global, robertmap &parent_undefinitions, map<string, int>& revTlineLookup) {
+static inline void write_object_declarations(lang_CPP* lcpp, const GameData &game, const CompileState &state, robertmap &parent_undefinitions) {
   //NEXT FILE ----------------------------------------
   //Object declarations: object classes/names and locals.
   ofstream wto;
@@ -696,32 +685,32 @@ static inline void write_object_declarations(lang_CPP* lcpp, EnigmaStruct* es, p
   wto << "#include \"Universal_System/object.h\"\n\n";
   wto << "#include <map>";
 
-  declare_scripts(wto, es);
+  declare_scripts(wto, game, state);
 
   wto << "namespace enigma\n{\n";
-  declare_object_locals_class(wto);
+  declare_object_locals_class(wto, parsed_extensions);
   wto << "\n";
-  declare_extension_casts(wto);
+  declare_extension_casts(wto, parsed_extensions);
   wto << "}\n\n";
 
   // TODO(JoshDreamland): Replace with enigma_user:
   wto << "namespace enigma // TODO: Replace with enigma_user\n{\n";
-  write_object_class_bodies(lcpp, wto, es, global, parent_undefinitions, revTlineLookup);
+  write_object_class_bodies(lcpp, wto, game, state, parent_undefinitions);
   wto << "}\n\n";
 
   wto << "namespace enigma {\n";
-  write_object_data_structs(wto);
+  write_object_data_structs(wto, state.parsed_objects);
   wto << "}\n";
   wto.close();
 }
 
-static inline void write_script_implementations(ofstream& wto, EnigmaStruct *es, int mode);
-static inline void write_timeline_implementations(ofstream& wto, EnigmaStruct *es);
-static inline void write_event_bodies(ofstream& wto, EnigmaStruct *es, int mode, robertmap &parent_undefinitions, const map<string, int>& revTlineLookup);
-static inline void write_global_script_array(ofstream &wto, EnigmaStruct *es);
+static inline void write_script_implementations(ofstream& wto, const GameData &game, const CompileState &state, int mode);
+static inline void write_timeline_implementations(ofstream& wto, const GameData &game, const CompileState &state);
+static inline void write_event_bodies(ofstream& wto, const GameData &game, int mode, const ParsedObjectVec &parsed_objects, robertmap &parent_undefinitions, const ScriptLookupMap &script_lookup, const TimelineLookupMap &timeline_lookup);
+static inline void write_global_script_array(ofstream &wto, const GameData &game, const CompileState &state);
 static inline void write_basic_constructor(ofstream &wto);
 
-static inline void write_object_functionality(EnigmaStruct *es, int mode, robertmap &parent_undefinitions, const map<string, int>& revTlineLookup) {
+static inline void write_object_functionality(const GameData &game, const CompileState &state, int mode, robertmap &parent_undefinitions) {
   vector<unsigned> parent_undefined;
   ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").c_str(),ios_base::out);
 
@@ -731,28 +720,28 @@ static inline void write_object_functionality(EnigmaStruct *es, int mode, robert
   wto << "template<typename LEFT> log_xor_helper operator ||(const LEFT &left, const log_xor_helper &xorh) { log_xor_helper nxor; nxor.value = (bool)left; return nxor; }" << endl;
   wto << "template<typename RIGHT> bool operator ||(const log_xor_helper &xorh, const RIGHT &right) { return xorh.value ^ (bool)right; }" << endl << endl;
 
-  write_script_implementations(wto, es, mode);
-  write_timeline_implementations(wto, es);
-  write_event_bodies(wto, es, mode, parent_undefinitions, revTlineLookup);
-  write_global_script_array(wto, es);
+  write_script_implementations(wto, game, state, mode);
+  write_timeline_implementations(wto, game, state);
+  write_event_bodies(wto, game, mode, state.parsed_objects, parent_undefinitions, state.script_lookup, state.timeline_lookup);
+  write_global_script_array(wto, game, state);
   write_basic_constructor(wto);
 
   wto.close();
 }
 
-static inline void write_script_implementations(ofstream& wto, EnigmaStruct *es, int mode) {
+static inline void write_script_implementations(ofstream& wto, const GameData &game, const CompileState &state, int mode) {
   // Export globalized scripts
-  for (int i = 0; i < es->scriptCount; i++) {
-    parsed_script* scr = scr_lookup[es->scripts[i].name];
+  for (size_t i = 0; i < game.scripts.size(); i++) {
+    parsed_script* scr = state.script_lookup.at(game.scripts[i].name);
     const char* comma = "";
-    wto << "variant _SCR_" << es->scripts[i].name << "(";
+    wto << "variant _SCR_" << game.scripts[i].name << "(";
     for (int argn = 0; argn < scr->globargs; argn++) { //it->second gives max argument count used
       wto << comma << "variant argument" << argn;
       comma = ", ";
     }
     wto << ")\n{\n";
     if (mode == emode_debug) {
-      wto << "  enigma::debug_scope $current_scope(\"script '" << es->scripts[i].name << "'\");\n";
+      wto << "  enigma::debug_scope $current_scope(\"script '" << game.scripts[i].name << "'\");\n";
     }
     wto << "  ";
     parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
@@ -774,14 +763,14 @@ static inline void write_script_implementations(ofstream& wto, EnigmaStruct *es,
   }
 }
 
-static inline void write_timeline_implementations(ofstream& wto, EnigmaStruct *es) {
+static inline void write_timeline_implementations(ofstream& wto, const GameData &game, const CompileState &state) {
   // Export globalized timelines.event_has_default_code
   // TODO: Is there such a thing as a localized timeline?
-  for (int i=0; i<es->timelineCount; i++) {
-    for (int j=0; j<es->timelines[i].momentCount; j++) {
-      parsed_script* scr = tline_lookup[es->timelines[i].name][j];
-      wto << "void TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"()\n{\n";
-      parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
+  for (const auto &tline : state.timeline_lookup) {
+    for (const auto &moment : tline.second.moments) {
+      wto << "void TLINE_" <<tline.first << "_MOMENT_" << moment.step << "() {\n";
+      parsed_event& upev = moment.script->pev_global
+          ? *moment.script->pev_global : moment.script->pev;
 
       string override_code, override_synt;
       if (upev.code.compare(0, 12, "with((self))") == 0) {
@@ -799,24 +788,24 @@ static inline void write_timeline_implementations(ofstream& wto, EnigmaStruct *e
   }
 }
 
-static inline void write_object_script_funcs(ofstream& wto, const parsed_object *const t);
-static inline void write_object_timeline_funcs(ofstream& wto, EnigmaStruct *es, const parsed_object *const t, const map<string, int>& revTlineLookup);
+static inline void write_object_script_funcs(ofstream& wto, const parsed_object *const t, const ScriptLookupMap &script_lookup);
+static inline void write_object_timeline_funcs(ofstream& wto, const GameData &game, const parsed_object *const t, const TimelineLookupMap &timeline_lookup);
 static inline void write_object_event_funcs(ofstream& wto, const parsed_object *const object, int mode, const robertmap &parent_undefinitions);
 static inline void write_can_cast_func(ofstream& wto, const parsed_object *const pobj);
 
-static inline void write_event_bodies(ofstream& wto, EnigmaStruct *es, int mode, robertmap &parent_undefinitions, const map<string, int>& revTlineLookup) {
+static inline void write_event_bodies(ofstream& wto, const GameData &game, int mode, const ParsedObjectVec &parsed_objects, robertmap &parent_undefinitions, const ScriptLookupMap &script_lookup, const TimelineLookupMap &timeline_lookup) {
   // Export everything else
-  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++) {
-    write_object_event_funcs(wto, i->second, mode, parent_undefinitions);
+  for (const auto *obj : parsed_objects) {
+    write_object_event_funcs(wto, obj, mode, parent_undefinitions);
 
     //Write local object copies of scripts
-    write_object_script_funcs(wto, i->second);
+    write_object_script_funcs(wto, obj, script_lookup);
 
     // Write local object copies of timelines
-    write_object_timeline_funcs(wto, es, i->second, revTlineLookup);
+    write_object_timeline_funcs(wto, game, obj, timeline_lookup);
 
     //Write the required "can_cast()" function.
-    write_can_cast_func(wto, i->second);
+    write_can_cast_func(wto, obj);
   }
 }
 
@@ -877,10 +866,10 @@ static inline void write_event_func(ofstream& wto, const parsed_event &event, st
   wto << "\n  return 0;\n}\n\n";
 }
 
-static inline void write_object_script_funcs(ofstream& wto, const parsed_object *const t) {
+static inline void write_object_script_funcs(ofstream& wto, const parsed_object *const t, const ScriptLookupMap &script_lookup) {
   for (parsed_object::const_funcit it = t->funcs.begin(); it != t->funcs.end(); ++it) { // For each function called by this object
-    map<string, parsed_script*>::iterator subscr = scr_lookup.find(it->first); // Check if it's a script
-    if (subscr != scr_lookup.end() // If we've got ourselves a script
+    auto subscr = script_lookup.find(it->first); // Check if it's a script
+    if (subscr != script_lookup.end() // If we've got ourselves a script
         and subscr->second->pev_global) { // And it has distinct code for use at the global scope (meaning it's more efficient locally)
       const char* comma = "";
       wto << "variant enigma::OBJ_" << t->name << "::_SCR_" << it->first << "(";
@@ -897,18 +886,17 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
   }
 }
 
-static inline void write_known_timelines(ofstream& wto, EnigmaStruct *es, const parsed_object *const t, const map<string, int>& revTlineLookup);
-static inline void write_object_timeline_funcs(ofstream& wto, EnigmaStruct *es, const parsed_object *const t, const map<string, int>& revTlineLookup) {
+static inline void write_known_timelines(ofstream& wto, const GameData &game, const parsed_object *const t, const TimelineLookupMap &timeline_lookup);
+static inline void write_object_timeline_funcs(ofstream& wto, const GameData &game, const parsed_object *const t, const TimelineLookupMap &timeline_lookup) {
   bool hasKnownTlines = false;
   for (parsed_object::const_tlineit it = t->tlines.begin(); it != t->tlines.end(); ++it) { //For each timeline potentially set by this object
-    map<string, int>::const_iterator timit = revTlineLookup.find(it->first); // Check if it's a timeline
-    if (timit != revTlineLookup.end()) { // If we've got ourselves a script
-      hasKnownTlines = true;
-      for (int j = 0; j < es->timelines[timit->second].momentCount; j++) {
-        parsed_script* scr = tline_lookup[timit->first][j];
-        wto << "void enigma::OBJ_" << t->name << "::TLINE_"
-            << es->timelines[timit->second].name << "_MOMENT_"
-            << es->timelines[timit->second].moments[j].stepNo << "() {\n";
+    auto timit = timeline_lookup.find(it->first); //Check if it's a timeline
+    if (timit != timeline_lookup.end()) {  // If we've got ourselves a script
+      hasKnownTlines = true;  // Apparently we're always writing all timelines to all objects
+      for (const auto &moment : timit->second.moments) {
+        parsed_script* scr = moment.script;
+        wto << "void enigma::OBJ_" << t->name << "::TLINE_" << timit->first
+            << "_MOMENT_" << moment.step << "() {\n";
         print_to_file(scr->pev.code, scr->pev.synt, scr->pev.strc, scr->pev.strs, 2, wto);
         wto <<"}\n";
       }
@@ -919,21 +907,22 @@ static inline void write_object_timeline_funcs(ofstream& wto, EnigmaStruct *es, 
   // If no timelines are ever used by this script, it can rely on the default lookup table.
   // NOTE: We have to allow it to fall through to the default in cases where instances (by id) are given a timeline.
   if (hasKnownTlines) {
-    write_known_timelines(wto, es, t, revTlineLookup);
+    write_known_timelines(wto, game, t, timeline_lookup);
   }
 }
 
-static inline void write_known_timelines(ofstream& wto, EnigmaStruct *es, const parsed_object *const t, const map<string, int>& revTlineLookup) {
+static inline void write_known_timelines(ofstream& wto, const GameData &game, const parsed_object *const t, const TimelineLookupMap &timeline_lookup) {
   wto <<"void enigma::OBJ_" << t->name <<"::timeline_call_moment_script(int timeline_index, int moment_index) {\n";
   wto <<"  switch (timeline_index) {\n";
   for (parsed_object::const_tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) {
-    map<string, int>::const_iterator timit = revTlineLookup.find(it->first);
-    if (timit != revTlineLookup.end()) {
-      wto <<"    case " <<es->timelines[timit->second].id <<": {\n";
+    auto timit = timeline_lookup.find(it->first); //Check if it's a timeline
+    if (timit != timeline_lookup.end()) { // If we've got ourselves a script
+      wto <<"    case " << timit->second.id << ": {\n";
       wto <<"      switch (moment_index) {\n";
-      for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
-        wto <<"        case " <<j <<": {\n";
-        wto <<"          TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"();\n";
+      for (size_t j = 0; j < timit->second.moments.size(); ++j) {
+        const auto &moment = timit->second.moments[j];
+        wto <<"        case " << j <<": {\n";
+        wto <<"          TLINE_" << timit->first << "_MOMENT_" << moment.step << "();\n";
         wto <<"          break;\n";
         wto <<"        }\n";
       }
@@ -957,19 +946,20 @@ static inline void write_can_cast_func(ofstream& wto, const parsed_object *const
   wto << ";\n" <<"}\n\n";
 }
 
-static inline void write_global_script_array(ofstream &wto, EnigmaStruct *es) {
+static inline void write_global_script_array(ofstream &wto, const GameData &game, const CompileState &state) {
   wto << "namespace enigma\n{\n"
   "  callable_script callable_scripts[] = {\n";
   int scr_count = 0;
-  for (int i = 0; i < es->scriptCount; i++)
+  for (size_t i = 0; i < game.scripts.size(); i++)
   {
-    while (es->scripts[i].id > scr_count)
+    while (game.scripts[i].id() > scr_count)
     {
         wto << "    { NULL, -1 },\n";
         scr_count++;
     }
     scr_count++;
-    wto << "    { (variant(*)())_SCR_" << es->scripts[i].name << ", " << scr_lookup[es->scripts[i].name]->globargs << " },\n";
+    wto << "    { (variant(*)())_SCR_" << game.scripts[i].name << ", "
+        << state.script_lookup.at(game.scripts[i].name)->globargs << " },\n";
   }
   wto << "  };\n  \n";
 }
@@ -1009,16 +999,9 @@ static inline void write_basic_constructor(ofstream &wto) {
       "}\n";
 }
 
-int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, int mode) {
-  // TODO(JoshDreamland): Move the generation of these into the second parse phase.
-  // Build a reverse lookup for timeline names.
-  map<string, int> revTlineLookup;
-  for (int i=0; i<es->timelineCount; i++) {
-    revTlineLookup[es->timelines[i].name] = es->timelines[i].id;
-  }
+int lang_CPP::compile_writeObjectData(const GameData &game, const CompileState &state, int mode) {
   robertmap parent_undefinitions;
-
-  write_object_declarations(this, es, global, parent_undefinitions, revTlineLookup);
-  write_object_functionality(es, mode, parent_undefinitions, revTlineLookup);
+  write_object_declarations(this, game, state, parent_undefinitions);
+  write_object_functionality(game, state, mode, parent_undefinitions);
   return 0;
 }

@@ -99,7 +99,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
   { if (pos >= code.length()) {
       if (mymacroind)
         mymacrostack[--mymacroind].release(code,pos);
-      else break; continue;
+      else break;
+      continue;
     }
     
     //cout << synt.substr(0,bpos) << endl;

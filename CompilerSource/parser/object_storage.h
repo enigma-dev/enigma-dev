@@ -30,19 +30,12 @@
 #define ENIGMA_OBJECT_STORAGE_H
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 #include "general/darray.h"
 
 using namespace std;
-
-//Locals that are inherited by all instances of all objects from the core system.
-extern map<string,int> shared_object_locals;
-extern map<string,struct dectrip> dot_accessed_locals;
-extern int shared_locals_load(vector<string> exts);
-extern int shared_locals_clear();
-
-void add_dot_accessed_local(string name);
 
 //Represent an initializer (name(value) in constructor)
 typedef pair<string,string> initpair;
@@ -69,8 +62,8 @@ struct dectrip {
   dectrip(string t);
   dectrip(string t,string p, string s);
 
-  bool defined();
-  bool operator!= (const dectrip&);
+  bool defined() const;
+  bool operator!= (const dectrip&) const;
 };
 struct decquad {
   string type, prefix, suffix, value;
@@ -78,15 +71,17 @@ struct decquad {
   decquad(string t);
   decquad(string t,string p, string s, string v);
 
-  bool defined();
-  bool operator!= (const decquad&);
+  bool defined() const;
+  bool operator!= (const decquad&) const;
 };
+
 struct parsed_object
 {
   varray<parsed_event> events;
 
   string name;
-  int id, sprite_index, mask_index, parent_index;
+  int id;
+  string sprite_name, mask_name, parent_name;
   bool visible, solid, persistent;
   double depth;
 
@@ -107,6 +102,7 @@ struct parsed_object
   typedef map<string,dectrip>::iterator locit;
   typedef map<string,dectrip>::iterator ambit;
   typedef map<string,dectrip>::iterator globit;
+  typedef map<string,dectrip>::const_iterator cglobit;
   typedef map<string,decquad>::iterator constit;
   typedef map<string,int>::iterator funcit;
   typedef map<string,int>::const_iterator const_funcit;
@@ -119,32 +115,35 @@ struct parsed_object
   void copy_tlines_from(parsed_object&);
 
   parsed_object();
-  parsed_object(string,int,int,int,int,bool,bool,double,bool);
+  parsed_object(string,int,string,string,string,bool,bool,double,bool);
 };
 
-extern map<int,parsed_object*> parsed_objects;
-
-struct parsed_script
-{
+struct parsed_script {
   parsed_object obj; //Script will pretend to be an object, having locals and globals inherited by all who call it.
   parsed_event pev, *pev_global; // The former is this scripts code, as an "event". The latter is a global scope version; see documentation
   int globargs; // The maximum number of arguments with which this was invoked from all contexts.
   parsed_script(): obj(), pev(&obj), pev_global(NULL), globargs(0) {}; //automatically link our even to our object.
 };
 
+struct parsed_moment {
+  int step;
+  parsed_script *script;
+};
+
+struct parsed_timeline {
+  int id;
+  vector<parsed_moment> moments;
+};
 
 struct parsed_room: parsed_object {
-  struct parsed_icreatecode { parsed_event* pe; int object_index; };
+  struct parsed_icreatecode { parsed_event* pe; string object_name; };
   map<int,parsed_icreatecode> instance_create_codes;
   //PreCreate code uses the same struct, as nothing is really different
   map<int,parsed_icreatecode> instance_precreate_codes;
 };
-extern map<int,parsed_room*> parsed_rooms;
-typedef map<int,parsed_object*> :: iterator po_i;
-typedef map<int,parsed_event*>  :: iterator pe_i;
-typedef map<int,parsed_room*>   :: iterator pr_i;
 
 typedef map<string,dectrip>::iterator deciter;
+typedef map<string,dectrip>::const_iterator decciter;
 
 struct parsed_extension {
   string name, path;
@@ -152,7 +151,41 @@ struct parsed_extension {
   string implements, init;
 };
 
-extern vector<parsed_extension> parsed_extensions;
-extern vector<string> requested_extensions;
+typedef set<string> NameSet;
+typedef set<string> SharedLocalSet;
+typedef map<string, dectrip> DotLocalMap;
+typedef vector<parsed_object*> ParsedObjectVec;
+typedef vector<parsed_script*> ParsedScriptVec;
+typedef vector<parsed_room*> ParsedRoomVec;
+typedef vector<parsed_extension> ParsedExtensionVec;
+
+typedef map<string,parsed_script*> ScriptLookupMap;
+typedef map<string, parsed_timeline> TimelineLookupMap;
+
+typedef ParsedObjectVec::iterator po_i;
+typedef map<int,parsed_event*>  :: iterator pe_i;
+typedef map<int,parsed_room*>   :: iterator pr_i;
+
+// Global because seriously everything uses it; will need to be moved in a new PR
+extern SharedLocalSet shared_object_locals;
+// This is global because it's cached between builds
+extern vector<string> requested_extensions_last_parse;
+extern ParsedExtensionVec parsed_extensions;
+
+struct CompileState {
+  //Locals that are inherited by all instances of all objects from the core system.
+  DotLocalMap dot_accessed_locals;
+  ParsedObjectVec parsed_objects;
+  ParsedScriptVec parsed_scripts;
+  ParsedScriptVec parsed_tlines;
+  ParsedRoomVec parsed_rooms;
+  
+  ScriptLookupMap script_lookup;
+  TimelineLookupMap timeline_lookup;
+  
+  parsed_object global_object;
+
+  void add_dot_accessed_local(string name);
+};
 
 #endif
