@@ -40,12 +40,14 @@ namespace enigma
   extern bool forceSoftwareVertexProcessing;
 
   void OnDeviceLost() {
+    d3dmgr->EndScene();
     for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
       (*it)->OnDeviceLost();
     }
   }
 
   void OnDeviceReset() {
+    d3dmgr->BeginScene();
     for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
       (*it)->OnDeviceReset();
     }
@@ -125,6 +127,8 @@ namespace enigma
         enigma_user::display_aa += i;
       }
     }
+
+    d3dmgr->BeginScene();
   }
     
   void OnDeviceLost() {
@@ -159,12 +163,15 @@ namespace enigma
 	}
 
   void DisableDrawing(void* handle) {
+    d3dmgr->EndScene();
     d3dmgr->Release(); // close and release the 3D device
     d3dobj->Release(); // close and release Direct3D
   }
 
   void ScreenRefresh() {
+    d3dmgr->EndScene();
     d3dmgr->Present(NULL, NULL, NULL, NULL);
+    d3dmgr->BeginScene();
   }
 }
 
