@@ -38,7 +38,15 @@ namespace enigma {
     // clear the window color, viewport does not need set because backbuffer was just recreated
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
-    
+
+  void SetResizeFptr() {
+    WindowResizedCallback = &WindowResized;
+  }
+
+  void ScreenRefresh() {
+    cocoa_screen_refresh();
+    cocoa_flush_opengl();
+  }
 }
 
 namespace enigma_user {
@@ -53,10 +61,4 @@ namespace enigma_user {
     set_synchronization(vsync);
     //TODO: Copy over from the Win32 bridge
   }
-
-  void screen_refresh() {
-    cocoa_screen_refresh();
-    cocoa_flush_opengl();
-  }
-
 }
