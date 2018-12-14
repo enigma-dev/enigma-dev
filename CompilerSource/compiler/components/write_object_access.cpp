@@ -36,7 +36,7 @@ using namespace std;
 
 #include "parser/parser.h"
 
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "backend/GameData.h"
 #include "compiler/compile_common.h"
 #include "event_reader/event_parser.h"
 #include "parser/object_storage.h"
@@ -66,7 +66,7 @@ string REFERENCE_POSTFIX(string ref) {
 #include "languages/lang_CPP.h"
 
 struct usedtype { int uc; dectrip original; usedtype(): uc(0) {} }; // uc is the use count, then after polling, the dummy number.
-int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_object* global, bool treatUninitAs0)
+int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const parsed_object *global, bool treatUninitAs0)
 {
   ofstream wto;
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h").c_str(),ios_base::out);
@@ -91,7 +91,7 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
 
 
   map<string,usedtype> usedtypes;
-  for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
+  for (auto dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
     usedtype &ut = usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix];
     if (!ut.uc) ut.original = dait->second;
     ut.uc++;
@@ -104,8 +104,7 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
     wto << "  " << i->second.original.type << " " << i->second.original.prefix << "dummy_" << i->second.uc << i->second.original.suffix << "; // Referenced by " << uc << " accessors" << endl;
   }
 
-  for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++)
-  {
+  for (auto dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
     const string& pmember = dait->first;
     wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
     wto << "  {" << endl;
@@ -113,9 +112,7 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
     wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
     wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
 
-    for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
-    {
-      parsed_object *parent = it->second;
+    for (parsed_object *parent : parsed_objects) {
       while (parent) {
         map<string,dectrip>::iterator x = parent->locals.find(pmember);
         if (x != parent->locals.end())
@@ -123,7 +120,7 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
           string tot = x->second.type != "" ? x->second.type : "var";
           if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
           {
-            wto << "      case " << it->second->name << ": return ((OBJ_" << it->second->name << "*)inst)->" << pmember << ";" << endl;
+            wto << "      case " << parent->name << ": return ((OBJ_" << parent->name << "*)inst)->" << pmember << ";" << endl;
             break;
           }
         }

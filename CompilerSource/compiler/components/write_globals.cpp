@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008, 2018 Josh Ventura                                       **
 **  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
@@ -37,14 +37,14 @@ using namespace std;
 #include "general/estring.h"
 #include "parser/parser.h"
 
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "backend/GameData.h"
 #include "compiler/compile_common.h"
 
 #include "languages/lang_CPP.h"
 
 int global_script_argument_count = 0;
 
-static string esc(string str) {
+static string esc(const string &str) {
   string res;
   res.reserve(str.length());
   for (size_t i = 0; i < str.length(); ++i) {
@@ -58,8 +58,9 @@ static string esc(string str) {
   return res;
 }
 
-int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
-{
+int lang_CPP::compile_writeGlobals(const GameData &game,
+                                   const parsed_object* global,
+                                   const DotLocalMap &dot_accessed_locals) {
   ofstream wto;
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_globals.h").c_str(),ios_base::out);
   wto << license;
@@ -75,46 +76,55 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
 
   wto << "namespace enigma_user { " << endl;
   //wto << "  string working_directory = \"\";" << endl; // moved over to PFmain.h
-  wto << "  unsigned int game_id = " << es->gameSettings.gameId << ";" << endl;
+  wto << "  unsigned int game_id = " << game.settings.general().game_id() << ";"
+      << endl;
   wto << "}" << endl <<endl;
 
   wto << "namespace enigma_user {" << endl;
-  for (int i=0; i<es->constantCount; i++) {
-    const Constant& con = es->constants[i];
+  for (size_t i = 0; i < game.constants.size(); i++) {
+    const GameData::Constant &con = game.constants[i];
     wto << "  #define " << con.name << " (" << con.value <<")" << endl;
   }
   wto << "}" << endl;
 
-  wto << "//Default variable type: \"undefined\" or \"real\"" <<endl;
-  wto << "const int variant::default_type = " <<(es->gameSettings.treatUninitializedAs0 ? "ty_real" : "ty_undefined") <<";" <<endl <<endl;
+  const auto &csets = game.settings.compiler();
+  const auto &gsets = game.settings.graphics();
+  const auto &wsets = game.settings.windowing();
+  const auto &gameInfo = game.gameInfo;
+
+  wto << "//Default variable type: \"undefined\" or \"real\"" << endl;
+  wto << "const int variant::default_type = "
+      << (csets.treat_uninitialized_vars_as_zero()
+              ? "ty_real" : "ty_undefined") << ";"
+      << endl << endl;
 
   wto << "namespace enigma {" << endl;
-  wto << "  bool interpolate_textures = " << es->gameSettings.interpolate << ";" << endl;
-  wto << "  bool forceSoftwareVertexProcessing = " << es->gameSettings.forceSoftwareVertexProcessing << ";" << endl;
-  wto << "  bool isSizeable = " << es->gameSettings.allowWindowResize << ";" << endl;
-  wto << "  bool showBorder = " << !es->gameSettings.dontDrawBorder << ";" << endl;
-  wto << "  bool showIcons = " << !es->gameSettings.dontShowButtons << ";" << endl;
-  wto << "  bool freezeOnLoseFocus = " << es->gameSettings.freezeOnLoseFocus << ";" << endl;
-  wto << "  bool treatCloseAsEscape = " << es->gameSettings.treatCloseAsEscape << ";" << endl;
-  wto << "  bool isFullScreen = " << es->gameSettings.startFullscreen << ";" << endl;
-  wto << "  int viewScale = " << es->gameSettings.scaling << ";" << endl;
-  wto << "  int windowColor = " << javaColor(es->gameSettings.colorOutsideRoom) << ";" << endl;
+  wto << "  bool interpolate_textures = " << gsets.interpolate_textures() << ";" << endl;
+  wto << "  bool forceSoftwareVertexProcessing = " << gsets.force_software_vertex_processing() << ";" << endl;
+  wto << "  bool isSizeable = "         << wsets.is_sizeable() << ";" << endl;
+  wto << "  bool showBorder = "         << wsets.show_border() << ";" << endl;
+  wto << "  bool showIcons = "          << wsets.show_icons() << ";" << endl;
+  wto << "  bool freezeOnLoseFocus = "  << wsets.freeze_on_lose_focus() << ";" << endl;
+  wto << "  bool treatCloseAsEscape = " << wsets.treat_close_as_escape() << ";" << endl;
+  wto << "  bool isFullScreen = " << wsets.start_in_fullscreen() << ";" << endl;
+  wto << "  int viewScale = " << gsets.view_scale() << ";" << endl;
+  wto << "  int windowColor = " << gsets.color_outside_room_region() << ";" << endl;
 
-  wto << "  string gameInfoText = \"" << esc(es->gameInfo.gameInfoStr) << "\";" << endl;
-  wto << "  string gameInfoCaption = \"" << es->gameInfo.formCaption << "\";" << endl;
-  wto << "  int gameInfoBackgroundColor = " << javaColor(es->gameInfo.backgroundColor) << ";" << endl;
-  wto << "  int gameInfoLeft = " << es->gameInfo.left << ";" << endl;
-  wto << "  int gameInfoTop = " << es->gameInfo.top << ";" << endl;
-  wto << "  int gameInfoWidth = " << es->gameInfo.width << ";" << endl;
-  wto << "  int gameInfoHeight = " << es->gameInfo.height << ";" << endl;
-  wto << "  bool gameInfoEmbedGameWindow = " << es->gameInfo.embedGameWindow << ";" << endl;
-  wto << "  bool gameInfoShowBorder = " << es->gameInfo.showBorder << ";" << endl;
-  wto << "  bool gameInfoAllowResize = " << es->gameInfo.allowResize << ";" << endl;
-  wto << "  bool gameInfoStayOnTop = " << es->gameInfo.stayOnTop << ";" << endl;
-  wto << "  bool gameInfoPauseGame = " << es->gameInfo.pauseGame << ";" << endl;
+  wto << "  string gameInfoText = \"" << esc(gameInfo.text()) << "\";" << endl;
+  wto << "  string gameInfoCaption = \"" << gameInfo.form_caption() << "\";" << endl;
+  wto << "  int gameInfoBackgroundColor = " << javaColor(gameInfo.background_color()) << ";" << endl;
+  wto << "  int gameInfoLeft = " << gameInfo.left() << ";" << endl;
+  wto << "  int gameInfoTop = " << gameInfo.top() << ";" << endl;
+  wto << "  int gameInfoWidth = " << gameInfo.right() - gameInfo.left() << ";" << endl;
+  wto << "  int gameInfoHeight = " << gameInfo.bottom() - gameInfo.top() << ";" << endl;
+  wto << "  bool gameInfoEmbedGameWindow = " << gameInfo.embed_game_window() << ";" << endl;
+  wto << "  bool gameInfoShowBorder = " << gameInfo.show_border() << ";" << endl;
+  wto << "  bool gameInfoAllowResize = " << gameInfo.allow_resize() << ";" << endl;
+  wto << "  bool gameInfoStayOnTop = " << gameInfo.stay_on_top() << ";" << endl;
+  wto << "  bool gameInfoPauseGame = " << gameInfo.pause_game() << ";" << endl;
   wto << "}" << endl;
 
-  for (parsed_object::globit i = global->globals.begin(); i != global->globals.end(); i++)
+  for (parsed_object::cglobit i = global->globals.begin(); i != global->globals.end(); i++)
     wto << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;
   //This part needs written into a global object_parent class instance elsewhere.
   //for (globit i = global->dots.begin(); i != global->globals.end(); i++)
@@ -122,7 +132,7 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
   wto << endl;
 
   wto << "namespace enigma" << endl << "{" << endl << "  struct ENIGMA_global_structure: object_locals" << endl << "  {" << endl;
-  for (deciter i = dot_accessed_locals.begin(); i != dot_accessed_locals.end(); i++) // Dots are vars that are accessed as something.varname.
+  for (decciter i = dot_accessed_locals.begin(); i != dot_accessed_locals.end(); i++) // Dots are vars that are accessed as something.varname.
     wto << "    " << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;
 
   wto << "    ENIGMA_global_structure(const int _x, const int _y): object_locals(_x,_y) {}" << endl << "  };" << endl << "  object_basic *ENIGMA_global_instance = new ENIGMA_global_structure(global,global);" << endl << "}";
