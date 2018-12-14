@@ -148,7 +148,7 @@ typedef map<string,dectrip>::const_iterator decciter;
 struct parsed_extension {
   string name, path;
   string pathname;
-  string implements;
+  string implements, init;
 };
 
 typedef set<string> NameSet;
