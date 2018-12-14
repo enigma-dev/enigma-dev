@@ -33,13 +33,9 @@ using namespace std;
 namespace enigma
 {
 
-void scene_begin() {
-  d3dmgr->BeginScene();
-}
+void scene_begin() {}
 
-void scene_end() {
-  d3dmgr->EndScene();
-}
+void scene_end() {}
 
 }
 
