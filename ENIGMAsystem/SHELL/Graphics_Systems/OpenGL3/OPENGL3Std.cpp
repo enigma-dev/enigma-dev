@@ -60,6 +60,7 @@ namespace enigma
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthFunc(GL_LEQUAL); // to match GM8's D3D8 default
 
     glBindTexture(GL_TEXTURE_2D,0);
 

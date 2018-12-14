@@ -131,7 +131,7 @@ class X11_TestHarness final: public TestHarness {
   }
 
   void wait() final {
-    usleep(250000);
+    usleep(1000000);
   }
   X11_TestHarness(Display *disp, pid_t game_pid, Window game_window,
                   const TestConfig &tc):
