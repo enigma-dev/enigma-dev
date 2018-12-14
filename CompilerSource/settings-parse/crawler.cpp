@@ -63,7 +63,6 @@ namespace settings
 
 namespace extensions
 {
-  map<string, string> locals;
   static inline string unmangled_type_pre(string str) { 
     size_t pm = str.find_first_of(")[");
     return pm == string::npos ? str : str.substr(0,pm);
@@ -72,20 +71,7 @@ namespace extensions
     size_t pm = str.find_first_of(")[");
     return pm == string::npos ? "" : str.substr(pm);
   }
-  string compile_local_string()
-  {
-    string res;
-    for (map<string, string>::iterator it = locals.begin(); it != locals.end(); it++)
-      res += unmangled_type_pre(it->second) + " " + it->first + unmangled_type_suf(it->second) + ";\n";
-    return res;
-  }
-  void dump_read_locals(map<string,int> &lmap)
-  {
-    for (map<string,string>::iterator it = locals.begin(); it != locals.end(); it++)
-      lmap[it->first]++;
-  }
-  void parse_extensions(vector<string> exts)
-  {
+  void parse_extensions(vector<string> exts) {
     parsed_extensions.clear();
     
     for (unsigned i = 0; i < exts.size(); i++)
@@ -107,33 +93,6 @@ namespace extensions
       pe.init = about.get("init");
 
       parsed_extensions.push_back(pe);
-    }
-  }
-  
-  void crawl_for_locals()
-  {
-    locals.clear();
-    
-    jdi::definition *denigma = main_context->get_global()->look_up("enigma");
-    if (!denigma or not(denigma->flags & jdi::DEF_SCOPE))
-      return (cout << "ERROR! ENIGMA NAMESPACE NOT FOUND. THIS SHOULD NEVER HAPPEN." << endl, void());
-    jdi::definition_scope *namespace_enigma = (jdi::definition_scope*)denigma;
-    
-    for (unsigned i = 0; i < parsed_extensions.size(); i++)
-    {
-      if (parsed_extensions[i].implements == "")
-        continue;
-      
-      jdi::definition* implements = namespace_enigma->look_up(parsed_extensions[i].implements);
-      
-      if (!implements or not(implements->flags & jdi::DEF_SCOPE))
-        cout << "ERROR! Extension implements " << parsed_extensions[i].implements << " without defining it!" << endl;
-      else
-      {
-        jdi::definition_scope *const iscope = (jdi::definition_scope*)implements;
-        for (jdi::definition_scope::defiter it = iscope->members.begin(); it != iscope->members.end(); ++it)
-          locals[it->second->name] = (it->second->flags & jdi::DEF_TYPED) ? ((jdi::definition_typed*)it->second)->type->name : "var";
-      }
     }
   }
   

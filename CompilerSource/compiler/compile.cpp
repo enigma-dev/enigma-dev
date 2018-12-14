@@ -92,16 +92,21 @@ inline string string_replace_all(string str,string substr,string nstr)
   return str;
 }
 
-inline void write_desktop_entry(const std::string fPath, const GameSettings& gameSet) {
+inline void write_desktop_entry(const std::string fPath, const GameData& game) {
   std::ofstream wto;
   std::string fName = fPath.substr(fPath.find_last_of("/\\") + 1);
+  const buffers::resources::General &gameSet = game.settings.general();
 
   wto.open(fPath + ".desktop");
   wto << "[Desktop Entry]\n";
   wto << "Type=Application\n";
-  wto << "Version=" << gameSet.versionMajor << "." << gameSet.versionMinor << "." << gameSet.versionRelease << "." << gameSet.versionBuild << "\n";
+  wto << "Version="
+        << gameSet.version_major()   << "."
+        << gameSet.version_minor()   << "."
+        << gameSet.version_release() << "."
+        << gameSet.version_build()   << "\n";
   wto << "Name=" << fName << "\n";
-  wto << "Comment=" << gameSet.description << "\n";
+  wto << "Comment=" << gameSet.description() << "\n";
   wto << "Path=.\n";
   wto << "Exec=./" << fName << "\n";
   //NOTE: Due to security concerns linux doesn't allow releative paths for icons
@@ -117,28 +122,36 @@ inline void write_desktop_entry(const std::string fPath, const GameSettings& gam
   #endif
 }
 
-inline void write_exe_info(const std::string codegen_directory, const EnigmaStruct *es) {
+inline void write_exe_info(const std::string codegen_directory, const GameData &game) {
   std::ofstream wto;
-  GameSettings gameSet = es->gameSettings;
+  const buffers::resources::General &gameSet = game.settings.general();
+  const string &gloss_version = game.settings.info().version();
 
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
   wto << license;
   wto << "#include <windows.h>\n";
-  if (gameSet.gameIcon != NULL && strlen(gameSet.gameIcon) > 0) {
-    wto << "IDI_MAIN_ICON ICON          \"" << string_replace_all(gameSet.gameIcon,"\\","/")  << "\"\n";
+  if (!gameSet.game_icon().empty()) {
+    wto << "IDI_MAIN_ICON ICON          \""
+        << string_replace_all(gameSet.game_icon(),"\\","/")  << "\"\n";
   }
   wto << "VS_VERSION_INFO VERSIONINFO\n";
-  wto << "FILEVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
-  wto << "PRODUCTVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
-  wto << "BEGIN\n" << "BLOCK \"StringFileInfo\"\n" << "BEGIN\n" << "BLOCK \"040904E4\"\n" << "BEGIN\n";
-  wto << "VALUE \"CompanyName\",         \"" << gameSet.company << "\"\n";
-  wto << "VALUE \"FileDescription\",     \"" << gameSet.description << "\"\n";
-  wto << "VALUE \"FileVersion\",         \"" << gameSet.version << "\\0\"\n";
-  wto << "VALUE \"ProductName\",         \"" << gameSet.product << "\"\n";
-  wto << "VALUE \"ProductVersion\",      \"" << gameSet.version << "\\0\"\n";
-  wto << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright << "\"\n";
-  if (es->filename != NULL && strlen(es->filename) > 0) {
-    wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(es->filename,"\\","/") << "\"\n";
+  for (const char *v : vector<const char*>{"FILEVERSION ", "PRODUCTVERSION "}) {
+    wto << v
+        << gameSet.version_major() << ","
+        << gameSet.version_minor() << ","
+        << gameSet.version_release() << ","
+        << gameSet.version_build() << "\n";
+  }
+  wto << "BEGIN\n" << "BLOCK \"StringFileInfo\"\n"
+      << "BEGIN\n" << "BLOCK \"040904E4\"\n" << "BEGIN\n"
+      << "VALUE \"CompanyName\",         \"" << gameSet.company() << "\"\n"
+      << "VALUE \"FileDescription\",     \"" << gameSet.description() << "\"\n"
+      << "VALUE \"FileVersion\",         \"" << gloss_version << "\\0\"\n"
+      << "VALUE \"ProductName\",         \"" << gameSet.product() << "\"\n"
+      << "VALUE \"ProductVersion\",      \"" << gloss_version << "\\0\"\n"
+      << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright() << "\"\n";
+  if (!game.filename.empty()) {
+    wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(game.filename,"\\","/") << "\"\n";
   } else {
     wto << "VALUE \"OriginalFilename\",         \"\"\n";
   }
@@ -151,7 +164,7 @@ inline void write_exe_info(const std::string codegen_directory, const EnigmaStru
 #include "System/builtins.h"
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
-  return current_language->compile(es, exe_filename, mode);
+  return current_language->compile(GameData(es), exe_filename, mode);
 }
 
 static bool run_game = true;
@@ -160,13 +173,34 @@ dllexport void ide_handles_game_launch() { run_game = false; }
 static bool redirect_make = true;
 dllexport void log_make_to_console() { redirect_make = false; }
 
-int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
-{
+template<typename T> void write_resource_meta(ofstream &wto, const char *kind, vector<T> resources) {
+  int max = 0;
+  stringstream swb;  // switch body
+  wto << "namespace enigma_user {\n"
+         "  enum {  // " << kind << " names\n\n";
+  for (const T &res : resources) {
+    if (res.id() >= max) max = res.id() + 1;
+    wto << "    " << res.name << " = " << res.id() << ",\n";
+    swb << "      case " << res.id() << ": return \""  << res.name << "\";\n";
+  }
+  wto << "  };\n\n";
+  wto << "  string " << kind << "_get_name(int i) {\n"
+         "    switch (i) {\n";
+  wto << swb.str() << "      default: return \"<undefined>\";\n";
+  wto << "    }\n"
+         "  }\n"
+         "}\n";
+  wto << "namespace enigma { size_t " << kind << "_idmax = " << max << "; }\n\n";
+}
+
+int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
 
   cout << "Initializing dialog boxes" << endl;
   ide_dia_clear();
   ide_dia_open();
   cout << "Initialized." << endl;
+  
+  CompileState state;
   
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
@@ -193,26 +227,23 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   // Clean up from any previous executions.
   edbg << "Cleaning up from previous executions" << flushl;
-  parsed_objects.clear(); //Make sure we don't dump in any old object code...
-  edbg << " - Cleared parsed objects" << flushl;
-  parsed_rooms.clear();   //Or that we dump any room code, for that matter...
-  edbg << " - Cleared room entries" << flushl;
-  shared_locals_clear();  //Forget inherited locals, we'll reparse them
-  edbg << " - Cleared shared locals list" << flushl;
   event_info_clear();     //Forget event definitions, we'll re-get them
-  edbg << " - Cleared event info" << flushl;
+  edbg << " - Cleared event info." << flushl;
 
   // Re-establish ourself
   // Read the global locals: locals that will be included with each instance
   {
-    vector<string> extnp;
-    for (int i = 0; i < es->extensionCount; i++) {
-      cout << "Adding extension " << flushl << "extension " << flushl << es->extensions[i].path << flushl << ":" << endl << es->extensions[i].name << flushl;
-      extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
+    set<string> extnp, extlp;
+    for (const auto &ext : game.extensions) {
+      extnp.insert(ext.path + ext.name);
+    }
+    for (const string &ext : requested_extensions_last_parse) {
+      extlp.insert(ext);
     }
     edbg << "Loading shared locals from extensions list" << flushl;
-    if (shared_locals_load(extnp) != 0) {
-      user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
+    if (extnp != extnp) {
+      user << "The IDE didn't tell ENIGMA what extensions "
+              "were selected before requesting a build.";
       idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
     }
   }
@@ -220,22 +251,15 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   //Read the types of events
   event_parse_resourcefile();
 
-  // Pick apart the sent resources
-  edbg << "Location in memory of structure: " << (void*)es << flushl;
-  if (es == NULL) {
-    idpr("Java ENIGMA plugin dropped its ass.",-1);
-    return E_ERROR_PLUGIN_FUCKED_UP;
-  }
-
-
   /**** Segment One: This segment of the compile process is responsible for
   * @ * translating the code into C++. Basically, anything essential to the
   *//// compilation of said code is dealt with during this segment.
 
-  ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.
+  // The segment begins by adding resource names to the collection of variables
+  // that should not be automatically re-scoped.
 
 
-  //First, we make a space to put our globals.
+  // First, we make a space to put our globals.
   jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
 
   idpr("Copying resources",1);
@@ -243,55 +267,55 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   //Next, add the resource names to that list
   edbg << "Copying resources:" << flushl;
 
-  edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
-  for (int i = 0; i < es->spriteCount; i++) {
+  edbg << "Copying sprite names [" << game.sprites.size() << "]" << flushl;
+  for (size_t i = 0; i < game.sprites.size(); i++) {
     cout << "Name on this side: " << globals_scope.name << endl;
     cout << "Name on this side2: " << ((jdi::definition_scope*)&globals_scope)->name << endl;
     cout << "Pointer on this side: " << (&globals_scope) << endl;
     cout << "Address on this side: " << ((jdi::definition_scope*)&globals_scope) << endl;
 
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sprites[i].name);
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.sprites[i].name);
   }
 
-  edbg << "Copying sound names [" << es->soundCount << "]" << flushl;
-  for (int i = 0; i < es->soundCount; i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sounds[i].name);
+  edbg << "Copying sound names [" << game.sounds.size() << "]" << flushl;
+  for (size_t i = 0; i < game.sounds.size(); i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.sounds[i].name);
 
-  edbg << "Copying background names [" << es->backgroundCount << "]" << flushl;
-  for (int i = 0; i < es->backgroundCount; i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->backgrounds[i].name);
+  edbg << "Copying background names [" << game.backgrounds.size() << "]" << flushl;
+  for (size_t i = 0; i < game.backgrounds.size(); i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.backgrounds[i].name);
 
-  edbg << "Copying path names [" << es->pathCount << "]" << flushl;
-  for (int i = 0; i < es->pathCount; i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->paths[i].name);
+  edbg << "Copying path names [" << game.paths.size() << "]" << flushl;
+  for (size_t i = 0; i < game.paths.size(); i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.paths[i].name);
 
-  edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
-  for (int i = 0; i < es->scriptCount; i++)
-    quickmember_script(&globals_scope,es->scripts[i].name);
+  edbg << "Copying script names [" << game.scripts.size() << "]" << flushl;
+  for (size_t i = 0; i < game.scripts.size(); i++)
+    quickmember_script(&globals_scope,game.scripts[i].name);
 
-  edbg << "Copying shader names [" << es->shaderCount << "]" << flushl;
-  for (int i = 0; i < es->shaderCount; i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->shaders[i].name);
+  edbg << "Copying shader names [" << game.shaders.size() << "]" << flushl;
+  for (size_t i = 0; i < game.shaders.size(); i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.shaders[i].name);
 
-  edbg << "Copying font names [" << es->fontCount << "]" << flushl;
-  for (int i = 0; i < es->fontCount; i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->fonts[i].name);
+  edbg << "Copying font names [" << game.fonts.size() << "]" << flushl;
+  for (size_t i = 0; i < game.fonts.size(); i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.fonts[i].name);
 
-  edbg << "Copying timeline names [" << es->timelineCount << "]" << flushl;
-  for (int i = 0; i < es->timelineCount; i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->timelines[i].name);
+  edbg << "Copying timeline names [" << game.timelines.size() << "]" << flushl;
+  for (size_t i = 0; i < game.timelines.size(); i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.timelines[i].name);
 
-  edbg << "Copying object names [" << es->gmObjectCount << "]" << flushl;
-  for (int i = 0; i < es->gmObjectCount; i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->gmObjects[i].name);
+  edbg << "Copying object names [" << game.objects.size() << "]" << flushl;
+  for (size_t i = 0; i < game.objects.size(); i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.objects[i].name);
 
-  edbg << "Copying room names [" << es->roomCount << "]" << flushl;
-  for (int i = 0; i < es->roomCount; i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->rooms[i].name);
+  edbg << "Copying room names [" << game.rooms.size() << "]" << flushl;
+  for (size_t i = 0; i < game.rooms.size(); i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.rooms[i].name);
 
-  edbg << "Copying constant names [" << es->constantCount << "]" << flushl;
-  for (int i = 0; i < es->constantCount; i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->constants[i].name);
+  edbg << "Copying constant names [" << game.constants.size() << "]" << flushl;
+  for (size_t i = 0; i < game.constants.size(); i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.constants[i].name);
 
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
@@ -300,13 +324,8 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   edbg << "SYNTAX CHECKING AND PRIMARY PARSING:" << flushl;
 
-  edbg << es->scriptCount << " Scripts:" << flushl;
-  parsed_script *parsed_scripts[es->scriptCount];
+  edbg << game.scripts.size() << " Scripts:" << flushl;
 
-  //parsed timelines involve N timelines with M moments each. So we just store them in a large vector rather than a messy 2-D array of pointers.
-  vector<parsed_script*> parsed_tlines;
-
-  scr_lookup.clear();
   used_funcs::zero();
 
   int res;
@@ -314,10 +333,10 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   //The parser (and, to some extent, the compiler) needs knowledge of script names for various optimizations.
   std::set<std::string> script_names;
-  for (int i = 0; i < es->scriptCount; i++)
-    script_names.insert(es->scripts[i].name);
+  for (size_t i = 0; i < game.scripts.size(); i++)
+    script_names.insert(game.scripts[i].name);
 
-  res = current_language->compile_parseAndLink(es,parsed_scripts, parsed_tlines, script_names);
+  res = current_language->compile_parseAndLink(game, state);
   irrr();
 
 
@@ -335,9 +354,9 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   edbg << "Writing executable information and resources." << flushl;
   if (compilerInfo.target_platform == "Windows")
-    write_exe_info(codegen_directory, es);
+    write_exe_info(codegen_directory, game);
   else if (compilerInfo.target_platform == "Linux" && mode == emode_compile)
-    write_desktop_entry(gameFname, es->gameSettings);
+    write_desktop_entry(gameFname, game);
 
   edbg << "Writing modes and settings" << flushl;
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
@@ -368,10 +387,9 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
     wto << license;
     wto << "#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n";
-    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
-    {
-      wto << "case " << i->second->id << ":\n";
-      wto << "    NEW_OBJ_PREFIX new enigma::OBJ_" << i->second->name <<"(x,y,idn);\n";
+    for (auto *obj : state.parsed_objects) {
+      wto << "case " << obj->id << ":\n";
+      wto << "    NEW_OBJ_PREFIX new enigma::OBJ_" << obj->name <<"(x,y,idn);\n";
       wto << "  break;\n";
     }
     wto << "\n\n#undef NEW_OBJ_PREFIX\n";
@@ -380,129 +398,20 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   //NEXT FILE ----------------------------------------
   //Resource names: Defines integer constants for all resources.
-  int max;
   edbg << "Writing resource names and maxima" << flushl;
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
   wto << license;
 
-
-  stringstream ss;
-
-    max = 0;
-    wto << "namespace enigma_user {\nenum //object names\n{\n";
-    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++) {
-      if (i->first >= max) max = i->first + 1;
-      wto << "  " << i->second->name << " = " << i->first << ",\n";
-      ss << "    case " << i->first << ": return \"" << i->second->name << "\"; break;\n";
-    } wto << "};\n}\nnamespace enigma { size_t object_idmax = " << max << "; }\n\n";
-
-    wto << "namespace enigma_user {\nstring object_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "namespace enigma_user {\nenum //sprite names\n{\n";
-    for (int i = 0; i < es->spriteCount; i++) {
-      if (es->sprites[i].id >= max) max = es->sprites[i].id + 1;
-      wto << "  " << es->sprites[i].name << " = " << es->sprites[i].id << ",\n";
-      ss << "    case " << es->sprites[i].id << ": return \"" << es->sprites[i].name << "\"; break;\n";
-    } wto << "};}\nnamespace enigma { size_t sprite_idmax = " << max << "; }\n\n";
-
-     wto << "namespace enigma_user {\nstring sprite_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "namespace enigma_user {\nenum //background names\n{\n";
-    for (int i = 0; i < es->backgroundCount; i++) {
-      if (es->backgrounds[i].id >= max) max = es->backgrounds[i].id + 1;
-      wto << "  " << es->backgrounds[i].name << " = " << es->backgrounds[i].id << ",\n";
-      ss << "    case " << es->backgrounds[i].id << ": return \"" << es->backgrounds[i].name << "\"; break;\n";
-    } wto << "};}\nnamespace enigma { size_t background_idmax = " << max << "; }\n\n";
-
-     wto << "namespace enigma_user {\nstring background_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "namespace enigma_user {\nenum //font names\n{\n";
-    for (int i = 0; i < es->fontCount; i++) {
-      if (es->fonts[i].id >= max) max = es->fonts[i].id + 1;
-      wto << "  " << es->fonts[i].name << " = " << es->fonts[i].id << ",\n";
-      ss << "    case " << es->fonts[i].id << ": return \"" << es->fonts[i].name << "\"; break;\n";
-    } wto << "};}\nnamespace enigma { size_t font_idmax = " << max << "; }\n\n";
-
-     wto << "namespace enigma_user {\nstring font_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
-     ss.str( "" );
-
-    max = 0;
-	wto << "namespace enigma_user {\nenum //timeline names\n{\n";
-	for (int i = 0; i < es->timelineCount; i++) {
-	    if (es->timelines[i].id >= max) max = es->timelines[i].id + 1;
-        wto << "  " << es->timelines[i].name << " = " << es->timelines[i].id << ",\n";
-        ss << "    case " << es->timelines[i].id << ": return \"" << es->timelines[i].name << "\"; break;\n";
-	} wto << "};}\nnamespace enigma { size_t timeline_idmax = " << max << "; }\n\n";
-
-wto << "namespace enigma_user {\nstring timeline_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
-     ss.str( "" );
-
-    max = 0;
-	wto << "namespace enigma_user {\nenum //path names\n{\n";
-	for (int i = 0; i < es->pathCount; i++) {
-	    if (es->paths[i].id >= max) max = es->paths[i].id + 1;
-        wto << "  " << es->paths[i].name << " = " << es->paths[i].id << ",\n";
-        ss << "    case " << es->paths[i].id << ": return \"" << es->paths[i].name << "\"; break;\n";
-	} wto << "};}\nnamespace enigma { size_t path_idmax = " << max << "; }\n\n";
-
-wto << "namespace enigma_user {\nstring path_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "namespace enigma_user {\nenum //sound names\n{\n";
-    for (int i = 0; i < es->soundCount; i++) {
-      if (es->sounds[i].id >= max) max = es->sounds[i].id + 1;
-      wto << "  " << es->sounds[i].name << " = " << es->sounds[i].id << ",\n";
-      ss << "    case " << es->sounds[i].id << ": return \"" << es->sounds[i].name << "\"; break;\n";
-    } wto << "};}\nnamespace enigma { size_t sound_idmax = " <<max << "; }\n\n";
-
-wto << "namespace enigma_user {\nstring sound_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "namespace enigma_user {\nenum //script names\n{\n";
-    for (int i = 0; i < es->scriptCount; i++) {
-      if (es->scripts[i].id >= max) max = es->scripts[i].id + 1;
-      wto << "  " << es->scripts[i].name << " = " << es->scripts[i].id << ",\n";
-      ss << "    case " << es->scripts[i].id << ": return \"" << es->scripts[i].name << "\"; break;\n";
-    } wto << "};}\nnamespace enigma { size_t script_idmax = " <<max << "; }\n\n";
-
-wto << "namespace enigma_user {\nstring script_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "namespace enigma_user {\nenum //shader names\n{\n";
-    for (int i = 0; i < es->shaderCount; i++) {
-      if (es->shaders[i].id >= max) max = es->shaders[i].id + 1;
-      wto << "  " << es->shaders[i].name << " = " << es->shaders[i].id << ",\n";
-      ss << "    case " << es->shaders[i].id << ": return \"" << es->shaders[i].name << "\"; break;\n";
-    } wto << "};}\nnamespace enigma { size_t shader_idmax = " <<max << "; }\n\n";
-
-wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "namespace enigma_user {\nenum //room names\n{\n";
-    for (int i = 0; i < es->roomCount; i++) {
-      if (es->rooms[i].id >= max) max = es->rooms[i].id + 1;
-      wto << "  " << es->rooms[i].name << " = " << es->rooms[i].id << ",\n";
-    }
-    wto << "};}\nnamespace enigma { size_t room_idmax = " <<max << "; }\n\n";
+  write_resource_meta(wto,     "object", game.objects);
+  write_resource_meta(wto,     "sprite", game.sprites);
+  write_resource_meta(wto, "background", game.backgrounds);
+  write_resource_meta(wto,       "font", game.fonts);
+  write_resource_meta(wto,   "timeline", game.timelines);
+  write_resource_meta(wto,       "path", game.paths);
+  write_resource_meta(wto,      "sound", game.sounds);
+  write_resource_meta(wto,     "script", game.scripts);
+  write_resource_meta(wto,     "shader", game.shaders);
+  write_resource_meta(wto,       "room", game.rooms);
   wto.close();
 
 
@@ -519,12 +428,13 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     // construction techniques, but none come to mind.
     wto <<"void timeline_system_initialize() {\n";
     wto <<"  std::vector< std::map<int, int> >& res = object_timelines::timeline_moments_maps;\n";
-    wto <<"  res.reserve(" <<es->timelineCount <<");\n";
+    wto <<"  res.reserve(" <<game.timelines.size() <<");\n";
     wto <<"  std::map<int, int> curr;\n\n";
-    for (int i=0; i<es->timelineCount; i++) {
+    for (size_t i=0; i<game.timelines.size(); i++) {
       wto <<"  curr.clear();\n";
-      for (int j=0; j<es->timelines[i].momentCount; j++) {
-        wto <<"  curr[" <<es->timelines[i].moments[j].stepNo <<"] = " <<j <<";\n";
+      for (int j = 0; j < game.timelines[i].moments().size(); j++) {
+        wto << "  curr[" << game.timelines[i].moments()[j].step()
+                         << "] = " << j <<";\n";
       }
       wto <<"  res.push_back(curr);\n\n";
     }
@@ -537,48 +447,44 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   idpr("Performing Secondary Parsing and Writing Globals",25);
 
-  parsed_object EGMglobal;
-
   edbg << "Linking globals and ambiguous variables" << flushl;
-  res = current_language->link_globals(&EGMglobal,es,parsed_scripts, parsed_tlines);
-  res = current_language->link_ambiguous(&EGMglobal,es,parsed_scripts, parsed_tlines);
+  res = current_language->link_globals(game, state);
+  res = current_language->link_ambiguous(game, state);
   irrr();
 
   edbg << "Running Secondary Parse Passes" << flushl;
-  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount, parsed_tlines, parsed_rooms,&EGMglobal, script_names);
+  res = current_language->compile_parseSecondary(state);
 
   edbg << "Writing events" << flushl;
-  res = current_language->compile_writeDefraggedEvents(es);
+  res = current_language->compile_writeDefraggedEvents(game, state.parsed_objects);
   irrr();
 
   edbg << "Writing object data" << flushl;
-  res = current_language->compile_writeObjectData(es,&EGMglobal,mode);
+  res = current_language->compile_writeObjectData(game, state, mode);
   irrr();
 
   edbg << "Writing local accessors" << flushl;
-  res = current_language->compile_writeObjAccess(parsed_objects, &EGMglobal, es->gameSettings.treatUninitializedAs0);
+  res = current_language->compile_writeObjAccess(
+            state.parsed_objects, state.dot_accessed_locals, &state.global_object,
+            game.settings.compiler().treat_uninitialized_vars_as_zero());
   irrr();
 
   edbg << "Writing font data" << flushl;
-  res = current_language->compile_writeFontInfo(es);
+  res = current_language->compile_writeFontInfo(game);
   irrr();
 
   edbg << "Writing room data" << flushl;
-  res = current_language->compile_writeRoomData(es,&EGMglobal,mode);
+  res = current_language->compile_writeRoomData(game, state.parsed_rooms, &state.global_object, mode);
   irrr();
 
   edbg << "Writing shader data" << flushl;
-  res = current_language->compile_writeShaderData(es,&EGMglobal);
+  res = current_language->compile_writeShaderData(game, &state.global_object);
   irrr();
 
 
   // Write the global variables to their own file to be included before any of the objects
-  res = current_language->compile_writeGlobals(es,&EGMglobal);
+  res = current_language->compile_writeGlobals(game, &state.global_object, state.dot_accessed_locals);
   irrr();
-
-
-  // Now we write any additional templates requested by the window system.
-  // compile_handle_templates(es);
 
 #ifdef WRITE_UNIMPLEMENTED_TXT
     printf("write unimplemented functions %d",0);
@@ -721,19 +627,19 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   idpr("Adding Sprites",90);
 
-  res = current_language->module_write_sprites(es, gameModule);
+  res = current_language->module_write_sprites(game, gameModule);
   irrr();
 
   edbg << "Finalized sprites." << flushl;
   idpr("Adding Sounds",93);
 
-  current_language->module_write_sounds(es,gameModule);
+  current_language->module_write_sounds(game, gameModule);
 
-  current_language->module_write_backgrounds(es,gameModule);
+  current_language->module_write_backgrounds(game, gameModule);
 
-  current_language->module_write_fonts(es,gameModule);
+  current_language->module_write_fonts(game, gameModule);
 
-  current_language->module_write_paths(es,gameModule);
+  current_language->module_write_paths(game, gameModule);
 
   // Tell where the resources start
   fwrite("\0\0\0\0res0",8,1,gameModule);
@@ -752,7 +658,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     // The working_directory global is set in the main() of each platform using the platform specific function.
     // This the exact behaviour of GM8.1
     std::vector<char> prevdir(size_t(4096));
-    string newdir = (es->filename != NULL && strlen(es->filename) > 0) ? string(es->filename) : string( exe_filename );
+    string newdir = game.filename.empty() ? exe_filename : game.filename;
     #if CURRENT_PLATFORM_ID == OS_WINDOWS
       if (newdir[0] == '/' || newdir[0] == '\\') {
         newdir = newdir.substr(1, newdir.size());
