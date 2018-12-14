@@ -169,8 +169,12 @@ void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
 
 static inline void draw_gui()
 {
+  // turn some state off automatically for the user to draw the GUI
+  // this is exactly what GMSv1.4 does
   int culling = d3d_get_culling();
   bool hidden = d3d_get_hidden();
+  bool zwrite = enigma::d3dZWriteEnable;
+  d3d_set_zwriteenable(false);
   d3d_set_culling(rs_none);
   d3d_set_hidden(false);
 
@@ -192,12 +196,10 @@ static inline void draw_gui()
     if (stop_loop) break;
   }
 
-  // reset the culling
+  // reset the state to what the user had
   d3d_set_culling(culling);
-  // only restore hidden if the user didn't change it
-  if (!d3d_get_hidden()) {
-    d3d_set_hidden(hidden);
-  }
+  d3d_set_hidden(hidden);
+  d3d_set_zwriteenable(zwrite);
 }
 
 namespace enigma_user {
@@ -210,12 +212,15 @@ unsigned int display_get_gui_height(){
   return enigma::gui_height;
 }
 
+void screen_refresh() {
+  draw_batch_flush(batch_flush_deferred);
+  enigma::ScreenRefresh();
+}
+
 void screen_redraw()
 {
   enigma::scene_begin();
 
-  // Clean up any textures that ENIGMA may still think are binded but actually are not
-  d3d_set_zwriteenable(true);
   if (!view_enabled)
   {
     screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());

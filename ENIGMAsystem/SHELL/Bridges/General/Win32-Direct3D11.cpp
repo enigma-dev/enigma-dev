@@ -225,6 +225,10 @@ namespace enigma
   }
 
   void DisableDrawing(void* handle) {}
+
+  void ScreenRefresh() {
+    m_swapChain->Present(swap_interval, 0);
+  }
 }
 
 namespace enigma_user
@@ -233,10 +237,6 @@ namespace enigma_user
 
   void display_reset(int samples, bool vsync) {
     swap_interval = vsync ? 1 : 0;
-  }
-
-  void screen_refresh() {
-    m_swapChain->Present(swap_interval, 0);
   }
 
   void set_synchronization(bool enable)

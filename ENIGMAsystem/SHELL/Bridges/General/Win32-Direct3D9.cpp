@@ -131,6 +131,10 @@ namespace enigma
     d3dmgr->Release(); // close and release the 3D device
     d3dobj->Release(); // close and release Direct3D
   }
+
+  void ScreenRefresh() {
+    d3dmgr->Present(NULL, NULL, NULL, NULL);
+  }
 }
 
 namespace enigma_user
@@ -160,10 +164,6 @@ void display_reset(int samples, bool vsync) {
   enigma::OnDeviceLost();
   d3dmgr->Reset(&d3dpp);
   enigma::OnDeviceReset();
-}
-
-void screen_refresh() {
-  d3dmgr->Present(NULL, NULL, NULL, NULL);
 }
 
 void set_synchronization(bool enable)
