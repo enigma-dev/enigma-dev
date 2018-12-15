@@ -18,6 +18,12 @@
 
 #include <string>
 
+namespace enigma {
+
+  int joysick_decrease_id(int id);
+  
+}
+
 namespace enigma_user {
 
 bool joystick_load(int id);
