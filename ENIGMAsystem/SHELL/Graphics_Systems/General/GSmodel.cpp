@@ -198,14 +198,18 @@ void d3d_model_draw(int id) {
 }
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
-  glm::mat4 backup = enigma::world;
+  // backup the current world matrix
+  d3d_transform_stack_push();
+
+  // we have to create a special translation here so that it occurs
+  // before any of the user's transformations took place
   enigma::world = glm::translate(enigma::world, glm::vec3(x, y, z));
   enigma::graphics_set_matrix(matrix_world);
 
   d3d_model_draw(id);
 
-  enigma::world = backup;
-  enigma::graphics_set_matrix(matrix_world);
+  // restore the world matrix the user had before this call
+  d3d_transform_stack_pop();
 }
 
 void d3d_model_draw(int id, int texId) {
