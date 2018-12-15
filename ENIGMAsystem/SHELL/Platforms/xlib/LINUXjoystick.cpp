@@ -144,7 +144,7 @@ namespace enigma_user {
   #endif
 
   bool joystick_load(int id) {
-    id = enigma::enigma::joystick_decrease_id(id);
+    id = enigma::joystick_decrease_id(id);
     checkPositiveId(false);
 
     string devn = device_name(id);
