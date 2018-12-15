@@ -177,7 +177,7 @@ double joystick_pov(int id) {
 }
 
 double joystick_pov(int id, int axis1, int axis2) {
-  id = enigma::enigma::joystick_decrease_id(id);
+  id = enigma::joystick_decrease_id(id);
   double a1, a2;
   a1 = joystick_axis(id, axis1);
   a2 = joystick_axis(id, axis2);
