@@ -112,7 +112,7 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
 
   wto << "  string gameInfoText = \"" << esc(gameInfo.text()) << "\";" << endl;
   wto << "  string gameInfoCaption = \"" << gameInfo.form_caption() << "\";" << endl;
-  wto << "  int gameInfoBackgroundColor = " << javaColor(gameInfo.background_color()) << ";" << endl;
+  wto << "  int gameInfoBackgroundColor = " << gameInfo.background_color() << ";" << endl;
   wto << "  int gameInfoLeft = " << gameInfo.left() << ";" << endl;
   wto << "  int gameInfoTop = " << gameInfo.top() << ";" << endl;
   wto << "  int gameInfoWidth = " << gameInfo.right() - gameInfo.left() << ";" << endl;

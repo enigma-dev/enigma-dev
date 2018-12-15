@@ -55,11 +55,6 @@ extern const char* license;
 inline string tdefault(string t) {
   return (t != "" ? t : "var");
 }
-inline uint32_t javaColor(int c) {
-  return (c & 0xFF)
-      ? (((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24))
-      : 0xFFFFFFFF;
-}
 
 inline string system_get_uppermost_tier() {
   return "object_collisions";
