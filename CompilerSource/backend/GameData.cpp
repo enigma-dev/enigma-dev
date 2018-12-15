@@ -29,13 +29,13 @@ struct ESLookup {
       for (int i = 0; i < sz; ++i) names[d[i].id] = d[i].name;
     }
     std::string operator[](int x) const {
-      if (x == -1) return "cr_none";
-      cout << ">> Look up " << kind << ' ' << x << endl;
-      const std::string &res = names.at(x);
-      if (res.empty())
+      auto res = names.find(x);
+      if (res == names.end()) {
         cerr << "ERROR: " << kind << ' ' << x << " has no name; "
                 "this will almost certainly result in compile errors!" << endl;
-      return res;
+        return "ERROR_RESOURCE_NOT_FOUND";
+      }
+      return res->second;
     }
   };
   Lookup sprite, background, script, object;
@@ -136,7 +136,8 @@ FontData::NormalizedRange::NormalizedRange(const ::GlyphRange &range):
 }
 
 FontData::GlyphData::GlyphData(const ::Glyph &glyph):
-    ImageData(glyph.width, glyph.height, glyph.data) {
+    ImageData(glyph.width, glyph.height, glyph.data,
+              glyph.width * glyph.height) { // Glyph images are alpha-only.
   metrics.set_origin(glyph.origin);
   metrics.set_baseline(glyph.baseline);
   metrics.set_advance(glyph.advance);
@@ -194,13 +195,16 @@ ObjectData::ObjectData(const ::GmObject &object, const ESLookup &lookup):
   name(object.name) {
   set_id(object.id);
 
-  set_sprite_name(lookup.sprite[object.spriteId]);
+  if (object.spriteId >= 0)
+    set_sprite_name(lookup.sprite[object.spriteId]);
   set_solid(object.solid);
   set_visible(object.visible);
   set_depth(object.depth);
   set_persistent(object.persistent);
-  set_parent_name(lookup.object[object.parentId]);
-  set_mask_name(lookup.sprite[object.maskId]);
+  if (object.parentId >= 0)
+    set_parent_name(lookup.object[object.parentId]);
+  if (object.maskId >= 0)
+    set_mask_name(lookup.sprite[object.maskId]);
 
   for (int i = 0; i < object.mainEventCount; ++i) {
     for (int j = 0; j < object.mainEvents[i].eventCount; ++j) {
@@ -213,9 +217,11 @@ ObjectData::ObjectData(const ::GmObject &object, const ESLookup &lookup):
 }
 RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
   name(room.name) {
+  cout << "Import room." << endl;
   set_id(room.id);
 
-  set_caption(room.caption);
+  if (room.caption)
+    set_caption(room.caption);
   set_width(room.width);
   set_height(room.height);
 
@@ -225,9 +231,10 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
 
   set_speed(room.speed);
   set_persistent(room.persistent);
-  set_color(room.backgroundColor);  // RGBA
+  set_color(javaColor(room.backgroundColor));  // RGBA
   set_show_color(room.drawBackgroundColor);
-  set_creation_code(room.creationCode);
+  if (room.creationCode)
+    set_creation_code(room.creationCode);
 
   set_enable_views(room.enableViews);
 
@@ -244,7 +251,8 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
     background->set_hspeed(es_background.hSpeed);
     background->set_vspeed(es_background.vSpeed);
     background->set_stretch(es_background.stretch);
-    background->set_background_name(lookup.background[es_background.backgroundId]);
+    if (es_background.backgroundId >= 0)
+      background->set_background_name(lookup.background[es_background.backgroundId]);
   }
 
   for (int i = 0; i < room.viewCount; ++i) {
@@ -264,7 +272,8 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
     view->set_vborder(es_view.borderV);
     view->set_hspeed (es_view.speedH);
     view->set_vspeed (es_view.speedV);
-	  view->set_object_following(lookup.object[es_view.objectId]);
+    if (es_view.objectId >= 0)
+      view->set_object_following(lookup.object[es_view.objectId]);
   }
 
   for (int i = 0; i < room.instanceCount; ++i) {
@@ -276,8 +285,10 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
     instance->set_object_type(lookup.object[es_instance.objectId]);
     instance->set_x(es_instance.x);
     instance->set_y(es_instance.y);
-    instance->set_creation_code(es_instance.creationCode);
-    instance->set_initialization_code(es_instance.preCreationCode);
+    if (es_instance.creationCode)
+      instance->set_creation_code(es_instance.creationCode);
+    if (es_instance.preCreationCode)
+      instance->set_initialization_code(es_instance.preCreationCode);
   }
 
   for (int i = 0; i < room.tileCount; ++i) {
@@ -298,9 +309,10 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
 }
 
 ImageData::ImageData(const Image &img):
-    ImageData(img.width, img.height, (uint8_t*) img.data) {}
-ImageData::ImageData(int w, int h, const uint8_t *data):
-    width(w), height(h), pixels(data, data + w * h) {}
+    width(img.width), height(img.height),
+    pixels(img.data, img.data + img.dataSize){}
+ImageData::ImageData(int w, int h, const uint8_t *data, size_t size):
+    width(w), height(h), pixels(data, data + size) {}
 
 GameData::GameData(EnigmaStruct *es) {
   cout << "Translating EnigmaStruct" << endl;

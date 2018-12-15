@@ -55,6 +55,10 @@ inline std::string format_color(uint32_t color) {
   return ss.str();
 }
 
+inline string resname(string name) {
+  return name.empty() ? "-1" : name;
+}
+
 int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, parsed_object *EGMglobal, int mode)
 {
   ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
@@ -67,19 +71,19 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     wto << "  tile tiles_" << room.id() << "[] = {\n";
     for (int ii = 0, modme = 0; ii < room.tiles().size(); ii++) {
       wto << "{"
-          << room.tiles(ii).id() << ","
-          << room.tiles(ii).background_name() << ","
-          << room.tiles(ii).xoffset()    << ","
-          << room.tiles(ii).yoffset()    << ","
-          << room.tiles(ii).depth()  << ","
-          << room.tiles(ii).height() << ","
-          << room.tiles(ii).width()  << ","
-          << room.tiles(ii).x()  << ","
-          << room.tiles(ii).y()  << ","
-          << room.tiles(ii).xscale() << ","
-          << room.tiles(ii).yscale() << ","
-          << room.tiles(ii).alpha()  << ","
-          << room.tiles(ii).color()  << "},";
+          << room.tiles(ii).id()      << ","
+          << resname(room.tiles(ii).background_name()) << ","
+          << room.tiles(ii).xoffset() << ","
+          << room.tiles(ii).yoffset() << ","
+          << room.tiles(ii).depth()   << ","
+          << room.tiles(ii).height()  << ","
+          << room.tiles(ii).width()   << ","
+          << room.tiles(ii).x()       << ","
+          << room.tiles(ii).y()       << ","
+          << room.tiles(ii).xscale()  << ","
+          << room.tiles(ii).yscale()  << ","
+          << room.tiles(ii).alpha()   << ","
+          << room.tiles(ii).color()   << "},";
         if (++modme % 16 == 0) wto << "\n        ";
       if (room.tiles(ii).id() > room_hightileid)
         room_hightileid = room.tiles(ii).id();
@@ -125,7 +129,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     << (room.enable_views() ? "true" : "false") << ", {\n"; // Views Enabled
 
     for (const auto &view : room.views()) {
-      wto << "      { "
+      wto << "        { "
           << (view.visible() ? "true" : "false") << ",   " // Visible
 
           << view.xview() << ", "   // Xview 
@@ -136,7 +140,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
           << view.xport() << ", " << view.yport() << ",  "   // Xport and Yport
           << view.wport() << ", " << view.hport() << ",   "  // Wport and Hport
 
-          << view.object_following() << ",  " // Object2Follow
+          << resname(view.object_following()) << ",  " // Object2Follow
 
           << view.hborder() << ", " << view.vborder() << ",  "  // Hborder and Vborder
           << view.hspeed()<< ", " << view.vspeed()  // Hspeed and Vspeed
@@ -144,21 +148,21 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
       << " },\n";
     }
     //Start of Backgrounds
-    wto << "}, {";
+    wto << "      }, {\n      ";
      for (const auto &background : room.backgrounds()) {
-        wto << "\n      { "
-        << (background.visible() ? "true" : "false")    << ",   "  // Visible
-        << (background.foreground() ? "true" : "false") << ",   "  // Foreground
-        << background.background_name()                 << ",   "  // Background
-        << background.x()                               << ",   "  // X
+        wto << "  { "
+        << (background.visible() ? "true" : "false")    << ", "    // Visible
+        << (background.foreground() ? "true" : "false") << ", "    // Foreground
+        << resname(background.background_name())        << ",  "   // Background
+        << background.x()                               << ", "    // X
         << background.y()                               << ",   "  // Y
-        << background.hspeed()                          << ",   "  // HSpeed
+        << background.hspeed()                          << ", "    // HSpeed
         << background.vspeed()                          << ",   "  // VSpeed
-        << (background.htiled()  ? "true" : "false")    << ",   "  // tileHor
+        << (background.htiled()  ? "true" : "false")    << ", "    // tileHor
         << (background.vtiled()  ? "true" : "false")    << ",   "  // tileVert
         << (background.stretch() ? "true" : "false")    << ",   "  // Stretch
         << background.alpha() << ",   "    // Alpha
-        << background.color() << " },";  // Color
+        << background.color() << " },\n      ";  // Color
      }
     wto <<
     " },\n" //End of Backgrounds
@@ -192,10 +196,19 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
   wto << license;
-  for (const auto &room : game.rooms) {
-    parsed_room *pr = parsed_rooms[room.id()];
-    for (const auto &int_ev_pair : pr->instance_create_codes)
-    {
+
+  wto << "namespace enigma {\n\n";
+  wto << "void extensions_initialize() {\n";
+  for (const auto &ext : parsed_extensions) {
+    if (ext.init.empty()) continue;
+    wto << "  " << ext.init << "();\n";
+  }
+  wto << "}\n\n} // namespace enigma\n\n";
+
+  for (size_t room_index = 0; room_index < game.rooms.size(); ++room_index) {
+    const auto &room = game.rooms[room_index];
+    parsed_room *pr = parsed_rooms[room_index];
+    for (const auto &int_ev_pair : pr->instance_create_codes) {
       wto << "variant room_" << room.id()
           << "_instancecreate_" << int_ev_pair.first << "()\n{\n  ";
       if (mode == emode_debug) {

@@ -556,11 +556,10 @@ void AddTimeline(const char* name, buffers::resources::Timeline* tml) {
     t.moments = new Moment[t.momentCount];
     for (int i = 0; i < t.momentCount; ++i) {
       buffers::resources::Timeline::Moment* mmt = tml->mutable_moments(i);
-      buffers::resources::Event* evt = mmt->mutable_event();
       t.moments[i].stepNo = mmt->step();
-      if (evt->actions_size() > 0)
-        evt->set_code(Actions2Code(evt->actions()));
-      t.moments[i].code = evt->code().c_str();
+      if (mmt->actions_size() > 0)
+        mmt->set_code(Actions2Code(mmt->actions()));
+      t.moments[i].code = mmt->code().c_str();
     }
   }
 }
@@ -624,7 +623,7 @@ void AddRoom(const char* name, const buffers::resources::Room& rm) {
   r.persistent = rm.persistent();
   r.backgroundColor = BGR2RGBA(rm.color());
   r.drawBackgroundColor = rm.show_color();
-  r.creationCode = rm.code().c_str();
+  r.creationCode = rm.creation_code().c_str();
   r.enableViews = rm.enable_views();
 
   r.backgroundDefCount = rm.backgrounds_size();
@@ -668,7 +667,7 @@ Instance AddInstance(const buffers::resources::Room::Instance& inst) {
   i.x = inst.x();
   i.y = inst.y();
   i.locked = inst.editor_settings().locked();
-  i.creationCode = inst.code().c_str();
+  i.creationCode = inst.creation_code().c_str();
   i.preCreationCode = "";
 
   return i;
@@ -739,7 +738,6 @@ void WriteSettings(GameSettings &gs, const buffers::resources::Settings& set) {
   // General
   const buffers::resources::General &gen = set.general();
   gs.gameId = gen.game_id();
-  gs.colorOutsideRoom = gen.color_outside_room_region();
   gs.versionMajor = gen.version_major();
   gs.versionMinor = gen.version_minor();
   gs.versionRelease = gen.version_release();
@@ -753,17 +751,21 @@ void WriteSettings(GameSettings &gs, const buffers::resources::Settings& set) {
 
   // Graphics
   const buffers::resources::Graphics &gfx = set.graphics();
-  gs.startFullscreen = gfx.start_in_fullscreen();
+  gs.colorOutsideRoom = gfx.color_outside_room_region();
   gs.letF4SwitchFullscreen = gfx.allow_fullscreen_change();
-  gs.interpolate = gfx.smooth_colors();
+  gs.interpolate = gfx.interpolate_textures();
   gs.forceSoftwareVertexProcessing = gfx.force_software_vertex_processing();
-  gs.freezeOnLoseFocus = gfx.freeze_on_lose_focus();
   gs.useSynchronization = gfx.use_synchronization();
-  gs.allowWindowResize = gfx.window_sizeable();
-  gs.dontDrawBorder = !gfx.window_showborder();
-  gs.dontShowButtons = !gfx.window_showicons();
-  gs.alwaysOnTop = gfx.window_stayontop();
-  gs.scaling = gfx.window_scale();
+  gs.scaling = gfx.view_scale();
+
+  // Windowing
+  const buffers::resources::Windowing &win = set.windowing();
+  gs.startFullscreen = win.start_in_fullscreen();
+  gs.freezeOnLoseFocus = win.freeze_on_lose_focus();
+  gs.allowWindowResize = win.is_sizeable();
+  gs.dontDrawBorder = !win.show_border();
+  gs.dontShowButtons = !win.show_icons();
+  gs.alwaysOnTop = win.stay_on_top();
 
   // Project Info
   const buffers::resources::Info &inf = set.info();

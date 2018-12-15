@@ -173,7 +173,7 @@ dllexport void ide_handles_game_launch() { run_game = false; }
 static bool redirect_make = true;
 dllexport void log_make_to_console() { redirect_make = false; }
 
-template<typename T> void write_resource_meta(ofstream &wto, const char *kind, vector<T> resources) {
+template<typename T> void write_resource_meta(ofstream &wto, const char *kind, vector<T> resources, bool gen_names = true) {
   int max = 0;
   stringstream swb;  // switch body
   wto << "namespace enigma_user {\n"
@@ -184,12 +184,14 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
     swb << "      case " << res.id() << ": return \""  << res.name << "\";\n";
   }
   wto << "  };\n\n";
-  wto << "  string " << kind << "_get_name(int i) {\n"
-         "    switch (i) {\n";
-  wto << swb.str() << "      default: return \"<undefined>\";\n";
-  wto << "    }\n"
-         "  }\n"
-         "}\n";
+  if (gen_names) {
+    wto << "  string " << kind << "_get_name(int i) {\n"
+           "    switch (i) {\n";
+    wto << swb.str() << "      default: return \"<undefined>\";\n";
+    wto << "    }\n"
+           "  }\n";
+  }
+  wto << "}\n";
   wto << "namespace enigma { size_t " << kind << "_idmax = " << max << "; }\n\n";
 }
 
@@ -411,7 +413,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   write_resource_meta(wto,      "sound", game.sounds);
   write_resource_meta(wto,     "script", game.scripts);
   write_resource_meta(wto,     "shader", game.shaders);
-  write_resource_meta(wto,       "room", game.rooms);
+  write_resource_meta(wto,       "room", game.rooms, false);
   wto.close();
 
 

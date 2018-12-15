@@ -27,7 +27,7 @@ struct ImageData {
   BinaryData pixels;
 
   ImageData(const ::Image &image);
-  ImageData(int w, int h, const uint8_t *data);
+  ImageData(int w, int h, const uint8_t *data, size_t size);
 };
 
 struct SpriteData : buffers::resources::Sprite {
