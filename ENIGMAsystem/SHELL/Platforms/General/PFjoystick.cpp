@@ -2,7 +2,7 @@
 
 namespace enigma {
 
-  int decrease_id(int id) {
+  int joystick_decrease_id(int id) {
     id -= 1;
     if (id < 0)
       id = 0;
