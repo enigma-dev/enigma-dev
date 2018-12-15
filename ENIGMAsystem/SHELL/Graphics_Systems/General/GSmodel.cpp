@@ -21,10 +21,10 @@
 #include "GSmodel.h"
 #include "GSvertex.h"
 #include "GSvertex_impl.h"
-#include "GSmatrix_impl.h"
 #include "GSprimitives.h"
 #include "GScolors.h"
 #include "GSmatrix.h"
+#include "GSmatrix_impl.h"
 #include "GStextures.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
