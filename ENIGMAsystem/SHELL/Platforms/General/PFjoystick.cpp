@@ -1,4 +1,4 @@
-#include "Platforms/General/PFjoystick.h"
+#include "PFjoystick.h"
 
 namespace enigma {
 
