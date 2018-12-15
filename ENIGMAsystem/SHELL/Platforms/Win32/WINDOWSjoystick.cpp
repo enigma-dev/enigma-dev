@@ -30,7 +30,7 @@ namespace enigma_user {
 
 bool joystick_load(int id)
 {
-  id = joystick_decrease_id(id);
+  id = enigma::joystick_decrease_id(id);
   JOYINFO joyinfo;
   UINT wNumDevs;
   BOOL bDevAttached;
@@ -53,7 +53,7 @@ bool joystick_load(int id)
 }
 
 double joystick_axis(int id, int axisnum) {
-  id = joystick_decrease_id(id);
+  id = enigma::joystick_decrease_id(id);
   JOYINFOEX joyinfo;
   JOYCAPS joycaps;
   joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
@@ -94,7 +94,7 @@ double joystick_axis(int id, int axisnum) {
 }
 
 bool joystick_button(int id, int buttonnum) {
-  id = joystick_decrease_id(id);
+  id = enigma::joystick_decrease_id(id);
   JOYINFOEX joyinfo;
   joyinfo.dwFlags = JOY_RETURNBUTTONS;
   joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
@@ -102,7 +102,7 @@ bool joystick_button(int id, int buttonnum) {
 }
 
 bool joystick_exists(int id) {
-  id = joystick_decrease_id(id);
+  id = enigma::joystick_decrease_id(id);
   JOYINFO joyinfo;
   UINT wNumDevs;
   BOOL bDevAttached;
@@ -115,35 +115,35 @@ bool joystick_exists(int id) {
 }
 
 string joystick_name(int id) {
-  id = joystick_decrease_id(id);
+  id = enigma::joystick_decrease_id(id);
   JOYCAPS joycaps;
   joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
   return joycaps.szPname;
 }
 
 int joystick_axes(int id) {
-  id = joystick_decrease_id(id);
+  id = enigma::joystick_decrease_id(id);
   JOYCAPS joycaps;
   joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
   return joycaps.wNumAxes;
 }
 
 int joystick_buttons(int id) {
-  id = joystick_decrease_id(id);
+  id = enigma::joystick_decrease_id(id);
   JOYCAPS joycaps;
   joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
   return joycaps.wNumButtons;
 }
 
 bool joystick_has_pov(int id) {
-  id = joystick_decrease_id(id);
+  id = enigma::joystick_decrease_id(id);
   JOYCAPS joycaps;
   joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
   return (joycaps.wCaps & JOYCAPS_HASPOV);
 }
 
 int joystick_direction(int id, int axis1, int axis2) {
-  id = joystick_decrease_id(id);
+  id = enigma::joystick_decrease_id(id);
   JOYINFOEX joyinfo;
   joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
   double a1, a2;
@@ -155,7 +155,7 @@ int joystick_direction(int id, int axis1, int axis2) {
 }
 
 double joystick_pov(int id) {
-  id = joystick_decrease_id(id);
+  id = enigma::joystick_decrease_id(id);
   JOYINFOEX joyinfo;
   joyinfo.dwFlags = JOY_RETURNPOV;
   joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
@@ -166,7 +166,7 @@ double joystick_pov(int id) {
 }
 
 double joystick_pov(int id, int axis1, int axis2) {
-  id = joystick_decrease_id(id);
+  id = enigma::enigma::joystick_decrease_id(id);
   double a1, a2;
   a1 = joystick_axis(id, axis1);
   a2 = joystick_axis(id, axis2);
@@ -178,4 +178,3 @@ double joystick_pov(int id, int axis1, int axis2) {
 }
 
 }
-
