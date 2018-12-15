@@ -21,6 +21,7 @@
 #include "GSmodel.h"
 #include "GSvertex.h"
 #include "GSvertex_impl.h"
+#include "GSmatrix_impl.h"
 #include "GSprimitives.h"
 #include "GScolors.h"
 #include "GSmatrix.h"
@@ -28,6 +29,8 @@
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/fileio.h"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <math.h>
 
@@ -195,9 +198,14 @@ void d3d_model_draw(int id) {
 }
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
-  d3d_transform_add_translation(x, y, z);
+  glm::mat4 backup = enigma::world;
+  enigma::world = glm::translate(enigma::world, glm::vec3(x, y, z));
+  enigma::graphics_set_matrix(matrix_world);
+
   d3d_model_draw(id);
-  d3d_transform_add_translation(-x, -y, -z);
+
+  enigma::world = backup;
+  enigma::graphics_set_matrix(matrix_world);
 }
 
 void d3d_model_draw(int id, int texId) {
@@ -206,9 +214,8 @@ void d3d_model_draw(int id, int texId) {
 }
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId) {
-  d3d_transform_add_translation(x, y, z);
-  d3d_model_draw(id, texId);
-  d3d_transform_add_translation(-x, -y, -z);
+  texture_set(texId);
+  d3d_model_draw(id, x, y, z);
 }
 
 void d3d_model_primitive_begin(int id, int kind, int format) {
