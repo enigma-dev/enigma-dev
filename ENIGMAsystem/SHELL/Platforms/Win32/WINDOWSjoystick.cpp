@@ -26,117 +26,124 @@ using std::string;
 #include "Universal_System/scalar.h"
 #include "Universal_System/math_consts.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 bool joystick_load(int id)
 {
-	JOYINFO joyinfo;
-	UINT wNumDevs;
-	BOOL bDevAttached;
+  id = decrease_id(id);
+  JOYINFO joyinfo;
+  UINT wNumDevs;
+  BOOL bDevAttached;
 
-    if((wNumDevs = joyGetNumDevs()) == 0)
-        return false;
+  if((wNumDevs = joyGetNumDevs()) == 0)
+    return false;
 
-    if (joySetCapture(enigma::hWnd, JOYSTICKID1 + id, 0, FALSE))
-    {
-        MessageBeep(MB_ICONEXCLAMATION);
-        MessageBox(enigma::hWnd, "Couldn't capture the joystick.", NULL,
-            MB_OK | MB_ICONEXCLAMATION);
-        return false;
-    }
+  if (joySetCapture(enigma::hWnd, JOYSTICKID1 + id, 0, FALSE)) {
+    MessageBeep(MB_ICONEXCLAMATION);
+    MessageBox(enigma::hWnd, "Couldn't capture the joystick.", NULL,
+      MB_OK | MB_ICONEXCLAMATION);
+    return false;
+  }
 
-	bDevAttached = joyGetPos(JOYSTICKID1 + id, &joyinfo) != JOYERR_UNPLUGGED;
-    if (!bDevAttached)
-        return false;
+  bDevAttached = joyGetPos(JOYSTICKID1 + id, &joyinfo) != JOYERR_UNPLUGGED;
+  if (!bDevAttached)
+    return false;
 
-	return true;
+    return true;
 }
 
 double joystick_axis(int id, int axisnum) {
-	JOYINFOEX joyinfo;
-	JOYCAPS joycaps;
-    joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
-	switch (axisnum) {
-		case 1:
-			joyinfo.dwFlags = JOY_RETURNX | JOY_RETURNCENTERED;
-			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
-			return (joyinfo.dwXpos - (joycaps.wXmax + joycaps.wXmin) / 2.f) / ((joycaps.wXmax - joycaps.wXmin)/ 2.f);
-			break;
-		case 2:
-			joyinfo.dwFlags = JOY_RETURNY | JOY_RETURNCENTERED;
-			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
-			return (joyinfo.dwYpos - (joycaps.wYmax + joycaps.wYmin) / 2.f) / ((joycaps.wYmax - joycaps.wYmin)/ 2.f);
-			break;
-		case 3:
-			joyinfo.dwFlags = JOY_RETURNZ | JOY_RETURNCENTERED;
-			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
-			return (joyinfo.dwZpos - (joycaps.wZmax + joycaps.wZmin) / 2.f) / ((joycaps.wZmax - joycaps.wZmin)/ 2.f);
-			break;
-		case 4:
-			joyinfo.dwFlags = JOY_RETURNR | JOY_RETURNCENTERED;
-			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
-			return (joyinfo.dwRpos - (joycaps.wRmax + joycaps.wRmin) / 2.f) / ((joycaps.wRmax - joycaps.wRmin)/ 2.f);
-			break;
-		case 5:
-			joyinfo.dwFlags = JOY_RETURNU | JOY_RETURNCENTERED;
-			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
-			return (joyinfo.dwUpos - (joycaps.wUmax + joycaps.wUmin) / 2.f) / ((joycaps.wUmax - joycaps.wUmin)/ 2.f);
-			break;
-		case 6:
-			joyinfo.dwFlags = JOY_RETURNV | JOY_RETURNCENTERED;
-			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
-			return (joyinfo.dwVpos - (joycaps.wVmax + joycaps.wVmin) / 2.f) / ((joycaps.wVmax - joycaps.wVmin)/ 2.f);
-			break;
-		default:
-			return 0;
-	}
+  id = decrease_id(id);
+  JOYINFOEX joyinfo;
+  JOYCAPS joycaps;
+  joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
+  switch (axisnum) {
+    case 1:
+      joyinfo.dwFlags = JOY_RETURNX | JOY_RETURNCENTERED;
+      joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+      return (joyinfo.dwXpos - (joycaps.wXmax + joycaps.wXmin) / 2.f) / ((joycaps.wXmax - joycaps.wXmin)/ 2.f);
+      break;
+    case 2:
+      joyinfo.dwFlags = JOY_RETURNY | JOY_RETURNCENTERED;
+      joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+      return (joyinfo.dwYpos - (joycaps.wYmax + joycaps.wYmin) / 2.f) / ((joycaps.wYmax - joycaps.wYmin)/ 2.f);
+      break;
+    case 3:
+      joyinfo.dwFlags = JOY_RETURNZ | JOY_RETURNCENTERED;
+      joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+      return (joyinfo.dwZpos - (joycaps.wZmax + joycaps.wZmin) / 2.f) / ((joycaps.wZmax - joycaps.wZmin)/ 2.f);
+      break;
+    case 4:
+      joyinfo.dwFlags = JOY_RETURNR | JOY_RETURNCENTERED;
+      joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+      return (joyinfo.dwRpos - (joycaps.wRmax + joycaps.wRmin) / 2.f) / ((joycaps.wRmax - joycaps.wRmin)/ 2.f);
+      break;
+    case 5:
+      joyinfo.dwFlags = JOY_RETURNU | JOY_RETURNCENTERED;
+      joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+      return (joyinfo.dwUpos - (joycaps.wUmax + joycaps.wUmin) / 2.f) / ((joycaps.wUmax - joycaps.wUmin)/ 2.f);
+      break;
+    case 6:
+      joyinfo.dwFlags = JOY_RETURNV | JOY_RETURNCENTERED;
+      joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+      return (joyinfo.dwVpos - (joycaps.wVmax + joycaps.wVmin) / 2.f) / ((joycaps.wVmax - joycaps.wVmin)/ 2.f);
+      break;
+    default:
+      return 0;
+ }
 }
 
 bool joystick_button(int id, int buttonnum) {
-	JOYINFOEX joyinfo;
-	joyinfo.dwFlags = JOY_RETURNBUTTONS;
-    joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
-	return (joyinfo.dwButtons & (JOY_BUTTON1 << buttonnum));
+  id = decrease_id(id);
+  JOYINFOEX joyinfo;
+  joyinfo.dwFlags = JOY_RETURNBUTTONS;
+  joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+  return (joyinfo.dwButtons & (JOY_BUTTON1 << buttonnum));
 }
 
 bool joystick_exists(int id) {
-	JOYINFO joyinfo;
-	UINT wNumDevs;
-	BOOL bDevAttached;
+  id = decrease_id(id);
+  JOYINFO joyinfo;
+  UINT wNumDevs;
+  BOOL bDevAttached;
 
-    if((wNumDevs = joyGetNumDevs()) == 0)
-        return false;
-    bDevAttached = joyGetPos(JOYSTICKID1 + id, &joyinfo) == JOYERR_NOERROR;
-	return bDevAttached;
+  if((wNumDevs = joyGetNumDevs()) == 0)
+    return false;
+
+  bDevAttached = joyGetPos(JOYSTICKID1 + id, &joyinfo) == JOYERR_NOERROR;
+  return bDevAttached;
 }
 
 string joystick_name(int id) {
-	JOYCAPS joycaps;
-    joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
-	return joycaps.szPname;
+  id = decrease_id(id);
+  JOYCAPS joycaps;
+  joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
+  return joycaps.szPname;
 }
 
 int joystick_axes(int id) {
-	JOYCAPS joycaps;
-    joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
-	return joycaps.wNumAxes;
+  id = decrease_id(id);
+  JOYCAPS joycaps;
+  joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
+  return joycaps.wNumAxes;
 }
 
 int joystick_buttons(int id) {
-	JOYCAPS joycaps;
-    joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
-	return joycaps.wNumButtons;
+  id = decrease_id(id);
+  JOYCAPS joycaps;
+  joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
+  return joycaps.wNumButtons;
 }
 
 bool joystick_has_pov(int id) {
-	JOYCAPS joycaps;
-    joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
-	return (joycaps.wCaps & JOYCAPS_HASPOV);
+  id = decrease_id(id);
+  JOYCAPS joycaps;
+  joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps));
+  return (joycaps.wCaps & JOYCAPS_HASPOV);
 }
 
-int joystick_direction(int id, int axis1, int axis2)
-{
+int joystick_direction(int id, int axis1, int axis2) {
+  id = decrease_id(id);
   JOYINFOEX joyinfo;
   joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
   double a1, a2;
@@ -148,24 +155,26 @@ int joystick_direction(int id, int axis1, int axis2)
 }
 
 double joystick_pov(int id) {
-	JOYINFOEX joyinfo;
-	joyinfo.dwFlags = JOY_RETURNPOV;
-    joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
-	if (joyinfo.dwPOV != 0xFFFF)
-		return joyinfo.dwPOV / 100.f;
-	else
-		return -1.f;
+  id = decrease_id(id);
+  JOYINFOEX joyinfo;
+  joyinfo.dwFlags = JOY_RETURNPOV;
+  joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+  if (joyinfo.dwPOV != 0xFFFF)
+    return joyinfo.dwPOV / 100.f;
+  else
+    return -1.f;
 }
 
 double joystick_pov(int id, int axis1, int axis2) {
-	double a1, a2;
-	a1 = joystick_axis(id, axis1);
-	a2 = joystick_axis(id, axis2);
-	if (a1 == 0 && a2 == 0) {
-		return -1.f;
-	}
-	// in C, atan2 is y,x not x,y
-	return ma_angle_from_radians((atan2(-a1, a2) + M_PI));
+  id = decrease_id(id);
+  double a1, a2;
+  a1 = joystick_axis(id, axis1);
+  a2 = joystick_axis(id, axis2);
+  if (a1 == 0 && a2 == 0) {
+    return -1.f;
+  }
+  // in C, atan2 is y,x not x,y
+  return ma_angle_from_radians((atan2(-a1, a2) + M_PI));
 }
 
 }
