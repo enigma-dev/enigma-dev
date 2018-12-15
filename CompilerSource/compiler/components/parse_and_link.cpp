@@ -85,8 +85,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     fflush(stdout);
   }
 
-  //Next we just parse the timeline scripts to add semicolons and collect variable names
-  tline_lookup.clear();
+  // Next we just parse the timeline scripts to add semicolons and collect variable names
   for (const auto &timeline : game.timelines)
   {
     for (const auto &moment : timeline.moments())
@@ -227,13 +226,14 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   for (const auto &object : game.objects) {
     //For every object in Ism's struct, make our own
     unsigned ev_count = 0;
-    parsed_object* pob = state.parsed_objects[object.id()] =
+    state.parsed_objects.push_back(
       new parsed_object(
         object.name, object.id(), object.sprite_name(), object.mask_name(),
         object.parent_name(),
         object.visible(), object.solid(),
         object.depth(), object.persistent()
-      );
+      ));
+    parsed_object* pob = state.parsed_objects.back();
 
     edbg << " " << object.name << ": " << object.events().size() << " events: " << flushl;
 
