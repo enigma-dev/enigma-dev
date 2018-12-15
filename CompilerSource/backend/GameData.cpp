@@ -16,7 +16,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-uint32_t javaColor(int c) {
+static inline uint32_t javaColor(int c) {
   if (!(c & 0xFF)) return 0xFFFFFFFF;
   return ((c & 0xFF0000) >> 8) | ((c & 0xFF00) << 8) | ((c & 0xFF000000) >> 24);
 }
