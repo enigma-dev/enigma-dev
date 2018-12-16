@@ -70,6 +70,7 @@ namespace enigma {
 }
 
 int main(int argc,char** argv) {
+  enigma::initialize_directory_globals();
   enigma::parameters=new char* [argc];
   for (int i=0; i<argc; i++)
     enigma::parameters[i]=argv[i];
