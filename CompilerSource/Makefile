@@ -30,7 +30,8 @@ endif
 
 CXX := g++
 CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src
-LDFLAGS += -shared -O3 -g -L../ -lProtocols -lprotobuf
+LDFLAGS += -shared -O3 -g -L../ -Wl,-rpath=./
+LDLIBS += -lProtocols -lprotobuf
 
 # This implements a recursive wildcard allowing us to iterate in subdirs
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
@@ -48,7 +49,6 @@ DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))
 # sort has the nice side effect of removing duplicates. this may or may not be faster.
 OBJDIRS := $(sort $(dir $(OBJECTS)))
 override CPPFLAGS += -I.
-override LDFLAGS += -Wl,-rpath=./
 
 ############
 # building #
