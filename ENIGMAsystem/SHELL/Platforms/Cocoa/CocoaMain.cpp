@@ -47,16 +47,10 @@ namespace enigma {
 
     // Set the program_directory
     buffer[0] = 0;
-    char real_executable[PATH_MAX + 1];
-    char *bundle_id;
 
     uint32_t bufsize = sizeof(buffer);
     if (_NSGetExecutablePath(buffer, &bufsize) == 0) {
-      bundle_id = dirname(buffer);
-      strcpy(real_executable, bundle_id);
-      strcat(real_executable, "/");
-
-      enigma_user::program_directory = real_executable;
+      enigma_user::program_directory = dirname(buffer) + string("/");
     }
 
     // Set the temp_directory
