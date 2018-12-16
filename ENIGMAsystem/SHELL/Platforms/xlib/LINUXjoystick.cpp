@@ -38,13 +38,6 @@
 using namespace std;
 
 namespace enigma {
-    
-  int joystick_decrease_id(int id) {
-    id -= 1;
-    if (id < 0)
-      id = 0;
-    return id;
-  }
   
   struct e_joystick {
     int device;
@@ -144,7 +137,6 @@ namespace enigma_user {
   #endif
 
   bool joystick_load(int id) {
-    id = enigma::joystick_decrease_id(id);
     checkPositiveId(false);
 
     string devn = device_name(id);
@@ -172,7 +164,6 @@ namespace enigma_user {
   }
 
   void joystick_map_button(int id, int butnum, char key) {
-    id = enigma::joystick_decrease_id(id);
     checkId(void());
     if ((unsigned)id >= enigma::joysticks.size())
       return;
@@ -182,7 +173,6 @@ namespace enigma_user {
   }
 
   void joystick_map_axis(int id, int axisnum, char keyneg, char keypos) {
-    id = enigma::joystick_decrease_id(id);
     checkId(void());
     if ((unsigned)id >= enigma::joysticks.size())
       return;
@@ -193,20 +183,17 @@ namespace enigma_user {
   }
 
   double joystick_axis(int id, int axisnum) {
-    id = enigma::joystick_decrease_id(id);
     checkId(0);
     const enigma::e_joystick * const js = enigma::joysticks[id].get();
     return js->axis[axisnum];
   }
   bool joystick_button(int id, int buttonnum) {
-    id = enigma::joystick_decrease_id(id);
     checkId(0);
     const enigma::e_joystick * const js = enigma::joysticks[id].get();
     return js->button[buttonnum];
   }
 
   bool joystick_exists(int id) {
-    id = enigma::joystick_decrease_id(id);
     checkPositiveId(false);
     if (size_t(id) < enigma::joysticks.size()) {
       const enigma::e_joystick * const js = enigma::joysticks[id].get();
@@ -217,34 +204,29 @@ namespace enigma_user {
   }
 
   string joystick_name(int id) {
-    id = enigma::joystick_decrease_id(id);
     checkId("");
     enigma::e_joystick * const js = enigma::joysticks[id].get();
     return js->name;
   }
 
   int joystick_axes(int id) {
-    id = enigma::joystick_decrease_id(id);
     checkId(0);
     enigma::e_joystick * const js = enigma::joysticks[id].get();
     return js->axiscount;
   }
 
   int joystick_buttons(int id) {
-    id = enigma::joystick_decrease_id(id);
     checkId(0);
     enigma::e_joystick * const js = enigma::joysticks[id].get();
     return js->buttoncount;
   }
 
   bool joystick_has_pov(int id) {
-    id = enigma::joystick_decrease_id(id);
     checkId(false);
     return false;
   }
 
   int joystick_direction(int id, int axis1, int axis2) {
-    id = enigma::joystick_decrease_id(id);
     checkId(0);
     enigma::e_joystick * const js = enigma::joysticks[id].get();
     if (js->axiscount < 2) return 0;
@@ -254,7 +236,6 @@ namespace enigma_user {
   }
 
   double joystick_pov(int id, int axis1, int axis2) {
-    id = enigma::joystick_decrease_id(id);
     checkId(0);
     double a1, a2;
     a1 = joystick_axis(id, axis1);
@@ -267,7 +248,6 @@ namespace enigma_user {
   }
 
   double joystick_pov(int id) {
-    id = enigma::joystick_decrease_id(id);
     checkId(0);
     return joystick_pov(id, 0, 1);
   }
