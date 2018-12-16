@@ -75,8 +75,8 @@ namespace enigma {
   static vector<std::unique_ptr<e_joystick>> joysticks;
 
   void init_joysticks() {
+    enigma_user::joystick_load(0);
     enigma_user::joystick_load(1);
-    enigma_user::joystick_load(2);
   }
 
   static void handle_joystick(e_joystick *my_joystick) {
