@@ -78,9 +78,12 @@ void graphics_prepare_vertex_buffer(const int buffer) {
     // create either a static or dynamic vbo peer depending on if the user called
     // vertex_freeze on the buffer
     if (!vertexBufferPeer) {
+      DWORD usage = vertexBuffer->frozen ? D3DUSAGE_WRITEONLY : 0;
+      if (!vertexBuffer->frozen && !Direct3D9Managed) usage |= D3DUSAGE_DYNAMIC;
+      D3DPOOL managed_pool = vertexBuffer->frozen ? D3DPOOL_MANAGED : D3DPOOL_SYSTEMMEM;
+
       d3dmgr->CreateVertexBuffer(
-        size, vertexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
-        0, D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
+        size, usage, 0, Direct3D9Managed ? managed_pool : D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
       );
       vertexBufferPeers[buffer] = vertexBufferPeer;
     }
@@ -123,9 +126,14 @@ void graphics_prepare_index_buffer(const int buffer) {
     // create either a static or dynamic ibo peer depending on if the user called
     // index_freeze on the buffer
     if (!indexBufferPeer) {
+      DWORD usage = indexBuffer->frozen ? D3DUSAGE_WRITEONLY : 0;
+      if (!indexBuffer->frozen && !Direct3D9Managed) usage |= D3DUSAGE_DYNAMIC;
+      D3DPOOL managed_pool = indexBuffer->frozen ? D3DPOOL_MANAGED : D3DPOOL_SYSTEMMEM;
+
       d3dmgr->CreateIndexBuffer(
-        size, indexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
-        (indexBuffer->type == index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &indexBufferPeer, NULL
+        size, usage,
+        (indexBuffer->type == index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16,
+        Direct3D9Managed ? managed_pool : D3DPOOL_DEFAULT, &indexBufferPeer, NULL
       );
       indexBufferPeers[buffer] = indexBufferPeer;
     }

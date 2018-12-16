@@ -46,16 +46,17 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
-
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
   {
     LPDIRECT3DTEXTURE9 texture = NULL;
 
-    d3dmgr->CreateTexture(fullwidth, fullheight, 1, mipmap ? D3DUSAGE_AUTOGENMIPMAP : 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, 0);
+    DWORD usage = Direct3D9Managed ? 0 : D3DUSAGE_DYNAMIC;
+    if (mipmap) usage |= D3DUSAGE_AUTOGENMIPMAP;
+    d3dmgr->CreateTexture(fullwidth, fullheight, 1, usage, D3DFMT_A8R8G8B8, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &texture, 0);
     D3DLOCKED_RECT rect;
 
     if (pxdata != nullptr){
-      texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+      texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE);
       memcpy(rect.pBits, pxdata, fullwidth * fullheight * 4);
       texture->UnlockRect(0);
     }
