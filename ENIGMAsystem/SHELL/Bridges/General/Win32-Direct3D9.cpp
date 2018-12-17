@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2013, 2018 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -38,9 +38,11 @@ ContextManager* d3dmgr; // the pointer to the device class
 namespace enigma
 {
   extern bool forceSoftwareVertexProcessing;
+  bool Direct3D9Managed = true;
 
   void OnDeviceLost() {
     d3dmgr->EndScene();
+    if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
     for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
       (*it)->OnDeviceLost();
     }
@@ -48,9 +50,16 @@ namespace enigma
 
   void OnDeviceReset() {
     d3dmgr->BeginScene();
+    if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
     for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
       (*it)->OnDeviceReset();
     }
+  }
+
+  void Reset(D3DPRESENT_PARAMETERS *d3dpp) {
+    OnDeviceLost();
+    d3dmgr->Reset(d3dpp);
+    OnDeviceReset();
   }
 
   extern void (*WindowResizedCallback)();
@@ -65,9 +74,7 @@ namespace enigma
     d3dpp.BackBufferWidth = ww <= 0 ? 1 : ww;
     d3dpp.BackBufferHeight = wh <= 0 ? 1 : wh;
     sc->Release();
-    OnDeviceLost();
-    d3dmgr->Reset(&d3dpp);
-    OnDeviceReset();
+    Reset(&d3dpp);
 
     // clear the window color, viewport does not need set because backbuffer was just recreated
     enigma_user::draw_clear(enigma_user::window_get_color());
@@ -80,7 +87,6 @@ namespace enigma
     HRESULT hr;
 
     D3DPRESENT_PARAMETERS d3dpp; // create a struct to hold various device information
-    d3dobj = Direct3DCreate9(D3D_SDK_VERSION); // create the Direct3D interface
     D3DFORMAT format = D3DFMT_A8R8G8B8;
 
     ZeroMemory(&d3dpp, sizeof(d3dpp)); // clear out the struct for use
@@ -105,18 +111,67 @@ namespace enigma
     if (forceSoftwareVertexProcessing) {
       behaviors = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
     }
-    hr = d3dobj->CreateDevice(D3DADAPTER_DEFAULT,
-                              D3DDEVTYPE_HAL,
-                              hWnd,
-                              behaviors,
-                              &d3dpp,
-                              &d3dmgr->device);
-    if (FAILED(hr)) {
-      MessageBox(hWnd,
-                 "Failed to create Direct3D 9.0 Device",
-                 DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-                 MB_ICONERROR | MB_OK);
-      return; // should probably force the game closed
+
+    // Manually load the d3d9.dll library to check for D3D9Ex
+    HMODULE libHandle = NULL;
+    libHandle = LoadLibrary("d3d9.dll");
+
+    if (libHandle != NULL) {
+      // Define a function pointer to the Direct3DCreate9Ex function.
+      typedef HRESULT (WINAPI *LPDIRECT3DCREATE9EX)( UINT, void **);
+
+      // Obtain the address of the Direct3DCreate9Ex function.
+      LPDIRECT3DCREATE9EX Direct3DCreate9ExPtr = NULL;
+
+      Direct3DCreate9ExPtr = (LPDIRECT3DCREATE9EX)GetProcAddress(libHandle, "Direct3DCreate9Ex");
+
+      if (Direct3DCreate9ExPtr != NULL) {
+        // create Direct3D 9 Ex interface
+        IDirect3D9Ex* d3dexobj = NULL;
+        hr = Direct3DCreate9Ex(D3D_SDK_VERSION, &d3dexobj);
+
+        if (d3dexobj != NULL) {
+          IDirect3DDevice9Ex* d3dexdev = NULL;
+
+          hr = d3dexobj->CreateDeviceEx(D3DADAPTER_DEFAULT,
+                                        D3DDEVTYPE_HAL,
+                                        hWnd,
+                                        behaviors,
+                                        &d3dpp,
+                                        NULL,
+                                        &d3dexdev);
+
+          if (FAILED(hr)) {
+            // release the d3d9 ex object and fall through to
+            // try creating a regular d3d9 object instead
+            // (might be Windows Vista with non-WDDM drivers)
+            d3dexobj->Release();
+          } else {
+            d3dobj = d3dexobj;
+            d3dmgr->device = d3dexdev;
+            Direct3D9Managed = false;
+          }
+        }
+      }
+
+      // Free the library.
+      FreeLibrary(libHandle);
+    }
+
+    if (Direct3D9Managed) {
+      // try creating legacy Direct3D 9 interface
+      d3dobj = Direct3DCreate9(D3D_SDK_VERSION);
+
+      hr = d3dobj->CreateDevice(D3DADAPTER_DEFAULT,
+                                D3DDEVTYPE_HAL,
+                                hWnd,
+                                behaviors,
+                                &d3dpp,
+                                &d3dmgr->device);
+
+      if (FAILED(hr)) {
+        show_error("Failed to create Direct3D 9.0 Device", true);
+      }
     }
 
     d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
@@ -168,9 +223,7 @@ void display_reset(int samples, bool vsync) {
   }
   sc->Release();
 
-  enigma::OnDeviceLost();
-  d3dmgr->Reset(&d3dpp);
-  enigma::OnDeviceReset();
+  enigma::Reset(&d3dpp);
 }
 
 void set_synchronization(bool enable)
@@ -187,7 +240,7 @@ void set_synchronization(bool enable)
   }
   sc->Release();
 
-  d3dmgr->Reset(&d3dpp);
+  enigma::Reset(&d3dpp);
 }
 
 }
