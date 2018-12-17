@@ -13,7 +13,7 @@ void initialize_directory_globals() {
   // Set the working_directory
   char buffer[PATH_MAX + 1];
   if (getcwd(buffer, PATH_MAX + 1) != NULL)
-    enigma_user::working_directory = buffer;
+    enigma_user::working_directory = buffer + string("/");
 
   // Set the program_directory
   buffer[0] = 0;
@@ -25,9 +25,9 @@ void initialize_directory_globals() {
   char const *env = getenv("TMPDIR");
 
   if (env == 0)
-    env = "/tmp/";
+    env = "/tmp";
 
-  enigma_user::temp_directory = env; 
+  enigma_user::temp_directory = env + string("/");
 }
 }
 
