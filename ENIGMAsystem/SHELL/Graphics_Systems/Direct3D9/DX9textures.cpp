@@ -62,7 +62,7 @@ namespace enigma
       // (e.g, 8x8 and 16x16 texture both have 64 pitch when created in the default pool)
       // NOTE: sometime soon we must finally do texture paging...
       for (size_t i = 0; i < height; ++i) {
-        memcpy(rect.pBits + i * rect.Pitch, pxdata + i * fullwidth * 4, width * 4);
+        memcpy((void*)((intptr_t)rect.pBits + i * rect.Pitch), (void*)((intptr_t)pxdata + i * fullwidth * 4), width * 4);
       }
       texture->UnlockRect(0);
     }
