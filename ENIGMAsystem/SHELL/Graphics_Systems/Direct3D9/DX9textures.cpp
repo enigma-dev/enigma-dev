@@ -53,10 +53,10 @@ namespace enigma
     DWORD usage = Direct3D9Managed ? 0 : D3DUSAGE_DYNAMIC;
     if (mipmap) usage |= D3DUSAGE_AUTOGENMIPMAP;
     d3dmgr->CreateTexture(fullwidth, fullheight, 1, usage, D3DFMT_A8R8G8B8, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &texture, 0);
-    D3DLOCKED_RECT rect;
 
-    if (pxdata != nullptr){
-      texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE);
+    if (pxdata != nullptr) {
+      D3DLOCKED_RECT rect;
+      texture->LockRect(0, &rect, NULL, D3DLOCK_DISCARD);
       memcpy(rect.pBits, pxdata, fullwidth * fullheight * 4);
       texture->UnlockRect(0);
     }
