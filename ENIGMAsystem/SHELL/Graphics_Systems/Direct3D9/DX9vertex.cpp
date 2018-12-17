@@ -75,11 +75,13 @@ void graphics_prepare_vertex_buffer(const int buffer) {
       }
     }
 
+    bool dynamic = (!vertexBuffer->frozen && !Direct3D9Managed);
+
     // create either a static or dynamic vbo peer depending on if the user called
     // vertex_freeze on the buffer
     if (!vertexBufferPeer) {
       DWORD usage = vertexBuffer->frozen ? D3DUSAGE_WRITEONLY : 0;
-      if (!vertexBuffer->frozen && !Direct3D9Managed) usage |= D3DUSAGE_DYNAMIC;
+      if (dynamic) usage |= D3DUSAGE_DYNAMIC;
       D3DPOOL managed_pool = vertexBuffer->frozen ? D3DPOOL_MANAGED : D3DPOOL_SYSTEMMEM;
 
       d3dmgr->CreateVertexBuffer(
@@ -90,7 +92,7 @@ void graphics_prepare_vertex_buffer(const int buffer) {
 
     // copy the vertex buffer contents over to the native peer vbo on the GPU
     VOID* pVoid;
-    vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, vertexBuffer->frozen ? 0 : D3DLOCK_DISCARD);
+    vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, dynamic ? D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE : 0);
     memcpy(pVoid, vertexBuffer->vertices.data(), size);
     vertexBufferPeer->Unlock();
 
@@ -123,11 +125,13 @@ void graphics_prepare_index_buffer(const int buffer) {
       }
     }
 
+    bool dynamic = (!indexBuffer->frozen && !Direct3D9Managed);
+
     // create either a static or dynamic ibo peer depending on if the user called
     // index_freeze on the buffer
     if (!indexBufferPeer) {
       DWORD usage = indexBuffer->frozen ? D3DUSAGE_WRITEONLY : 0;
-      if (!indexBuffer->frozen && !Direct3D9Managed) usage |= D3DUSAGE_DYNAMIC;
+      if (dynamic) usage |= D3DUSAGE_DYNAMIC;
       D3DPOOL managed_pool = indexBuffer->frozen ? D3DPOOL_MANAGED : D3DPOOL_SYSTEMMEM;
 
       d3dmgr->CreateIndexBuffer(
@@ -140,7 +144,7 @@ void graphics_prepare_index_buffer(const int buffer) {
 
     // copy the index buffer contents over to the native peer ibo on the GPU
     VOID* pVoid;
-    indexBufferPeer->Lock(0, 0, (VOID**)&pVoid, D3DLOCK_DISCARD);
+    indexBufferPeer->Lock(0, 0, (VOID**)&pVoid, dynamic ? D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE : 0);
     memcpy(pVoid, indexBuffer->indices.data(), size);
     indexBufferPeer->Unlock();
 
