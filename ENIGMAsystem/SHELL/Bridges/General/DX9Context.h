@@ -40,7 +40,8 @@ using std::vector;
 using std::map;
 
 namespace enigma {
-	extern HWND hWnd;
+  extern HWND hWnd;
+  extern bool Direct3D9Managed;
 }
 
 extern LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
