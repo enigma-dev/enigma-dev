@@ -21,9 +21,12 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <mach-o/dyld.h>
+#include <limits.h>
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
 #include <cstdlib>
+#include <string>
 
 #include "../General/PFwindow.h"
 #include "../General/PFfilemanip.h"
@@ -31,27 +34,37 @@
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/roomsystem.h"
 
+using std::string;
+
 namespace enigma {
   void SetResizeFptr();
-}
-
-namespace enigma_user {
-  std::string working_directory = "";
-}
-
-extern "C" void copy_bundle_cwd(char* res);
-
-int main(int argc,char** argv)
-{
-  // Set the working_directory (from the bundle's location; using cwd won't work right on OS-X).
-  char buffer[1024] = {0};
-  copy_bundle_cwd(&buffer[0]);
-  if (buffer[0])
-    fprintf(stdout, "Current working dir: %s\n", buffer);
-  else
-    perror("copy_bundle_cwd() error");
-  enigma_user::working_directory = string( buffer );
   
+  void initialize_directory_globals() {
+    // Set the working_directory
+    char buffer[PATH_MAX + 1];
+    if (getcwd(buffer, PATH_MAX + 1) != NULL)
+      enigma_user::working_directory = buffer;
+
+    // Set the program_directory
+    buffer[0] = 0;
+
+    uint32_t bufsize = sizeof(buffer);
+    if (_NSGetExecutablePath(buffer, &bufsize) == 0) {
+      enigma_user::program_directory = dirname(buffer) + string("/");
+    }
+
+    // Set the temp_directory
+    char const *env = getenv("TMPDIR");
+
+    if (env == 0)
+      env = "/tmp/";
+
+    enigma_user::temp_directory = env; 
+  }
+}
+
+int main(int argc,char** argv) {
+  enigma::initialize_directory_globals();
   enigma::parameters=new char* [argc];
   for (int i=0; i<argc; i++)
     enigma::parameters[i]=argv[i];
@@ -68,7 +81,7 @@ namespace enigma_user {
     usleep((ms % 1000) *1000);
   };
   
-  int parameter_count(){
+  int parameter_count() {
   // TODO
   return 0;
   }
