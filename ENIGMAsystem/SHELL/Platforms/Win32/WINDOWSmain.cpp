@@ -315,14 +315,14 @@ void initialize_directory_globals() {
   // Set the working_directory
   WCHAR buffer[MAX_PATH + 1];
   GetCurrentDirectoryW(MAX_PATH + 1, buffer);
-  enigma_user::working_directory = shorten(buffer);
+  enigma_user::working_directory = shorten(buffer) + string("\\");
 
   // Set the program_directory
   buffer[0] = 0;
   GetModuleFileNameW(NULL, buffer, MAX_PATH + 1);
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
-      enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
+      enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/") + 1);
   
   // Set the temp_directory
   buffer[0] = 0;
