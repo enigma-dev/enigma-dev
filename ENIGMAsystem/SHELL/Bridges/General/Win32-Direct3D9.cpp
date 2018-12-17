@@ -170,11 +170,7 @@ namespace enigma
                                 &d3dmgr->device);
 
       if (FAILED(hr)) {
-        MessageBox(hWnd,
-                  "Failed to create Direct3D 9.0 Device",
-                  DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-                  MB_ICONERROR | MB_OK);
-        return; // should probably force the game closed
+        show_error("Failed to create Direct3D 9.0 Device", true);
       }
     }
 
