@@ -18,6 +18,7 @@
 
 #include "WINDOWSmain.h"
 
+#include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 
@@ -62,6 +63,27 @@ HWND get_window_handle() {
 }
 
 }  // namespace enigma
+
+namespace enigma_user {
+  bool set_working_directory(string dname) {
+    replace(dname.begin(), dname.end(), '/', '\\');
+
+    if (!dname.empty()) {
+      while (*dname.rbegin() == '\\') {
+        dname.erase(dname.size() - 1);
+      }
+    }
+    
+    tstring tstr_dname = widen(dname);
+    DWORD attr = GetFileAttributesW(tstr_dname.c_str());
+
+    if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) {
+      return (SetCurrentDirectoryW(tstr_dname.c_str()) != 0);
+    }
+    
+    return false;
+  }
+} // enigma_user
 
 namespace enigma {
 bool use_pc;
@@ -289,18 +311,23 @@ void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
 void showWindow() { ShowWindow(enigma::hWnd, 1); }
 
-void set_working_directory() {
-    // Set the working_directory
-  WCHAR buffer[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, buffer);
+void initialize_directory_globals() {
+  // Set the working_directory
+  WCHAR buffer[MAX_PATH + 1];
+  GetCurrentDirectoryW(MAX_PATH + 1, buffer);
   enigma_user::working_directory = shorten(buffer);
 
   // Set the program_directory
-  memset(&buffer[0], 0, MAX_PATH);
-  GetModuleFileNameW(NULL, buffer, MAX_PATH);
+  buffer[0] = 0;
+  GetModuleFileNameW(NULL, buffer, MAX_PATH + 1);
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
       enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
+  
+  // Set the temp_directory
+  buffer[0] = 0;
+  GetTempPathW(MAX_PATH + 1, buffer);
+  enigma_user::temp_directory = shorten(buffer);
 }
 
 }  // namespace enigma
