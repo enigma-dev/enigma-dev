@@ -57,7 +57,13 @@ namespace enigma
     if (pxdata != nullptr) {
       D3DLOCKED_RECT rect;
       texture->LockRect(0, &rect, NULL, D3DLOCK_DISCARD);
-      memcpy(rect.pBits, pxdata, fullwidth * fullheight * 4);
+      // we have to respect the pitch returned by the lock because some GPU's
+      // have exhibited a minimum pitch size for small textures
+      // (e.g, 8x8 and 16x16 texture both have 64 pitch when created in the default pool)
+      // NOTE: sometime soon we must finally do texture paging...
+      for (size_t i = 0; i < height; ++i) {
+        memcpy(rect.pBits + i * rect.Pitch, pxdata + i * fullwidth * 4, width * 4);
+      }
       texture->UnlockRect(0);
     }
 
