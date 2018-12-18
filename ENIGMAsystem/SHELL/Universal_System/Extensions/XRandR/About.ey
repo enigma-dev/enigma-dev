@@ -1,0 +1,13 @@
+%E-YAML
+---
+
+Name: XRandR
+Identifier: XRandR
+Author: Robert Colton
+Description: Adds Xlib display functions using the X Resize and Rotate extension.
+Default: false
+Icon: xrandr.png
+
+Depends:
+	Build-Platforms: Linux
+Dependencies: None
