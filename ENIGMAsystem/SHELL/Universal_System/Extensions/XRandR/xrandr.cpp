@@ -28,7 +28,7 @@ bool test_size_id(int &w, int &h, SizeID &compatible_size_id, SizeID original_si
     if (h == -1) {
       h = XHeightOfScreen(enigma::x11::screen);
     }
-    enigma::query_size_id(w, h, compatible_size_id);
+    query_size_id(w, h, compatible_size_id);
     if (compatible_size_id == -1)
       return false;
   }
@@ -50,7 +50,7 @@ bool display_set_size(int w, int h) {
   SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
   SizeID compatible_size_id = -1;
 
-  enigma::query_size_id(w, h, compatible_size_id);
+  query_size_id(w, h, compatible_size_id);
   if (compatible_size_id == -1)
     return false;
 
@@ -71,7 +71,7 @@ bool display_set_all(int w, int h, int freq, int bitdepth) {
   SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
   SizeID compatible_size_id = -1;
 
-  if (!enigma::test_size_id(w, h, compatible_size_id, original_size_id)) return false;
+  if (!test_size_id(w, h, compatible_size_id, original_size_id)) return false;
 
   if (freq != -1) {
     return XRRSetScreenConfigAndRate(enigma::x11::disp, conf, enigma::x11::win, compatible_size_id, original_rotation, freq, CurrentTime);
@@ -86,7 +86,7 @@ bool display_test_all(int w, int h, int freq, int bitdepth) {
   SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
   SizeID compatible_size_id = -1;
 
-  if (!enigma::test_size_id(w, h, compatible_size_id, original_size_id)) return false;
+  if (!test_size_id(w, h, compatible_size_id, original_size_id)) return false;
 
   if (freq != -1) {
     int num_rates;
