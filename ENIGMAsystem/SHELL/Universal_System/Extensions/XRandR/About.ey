@@ -4,7 +4,7 @@
 Name: XRandR
 Identifier: XRandR
 Author: Robert Colton
-Description: Adds Xlib display functions using the X Resize and Rotate extension.
+Description: Adds Xlib display functions using the X Resize and Rotate extension. This extension is considered antiquated and should not be used in new games. It is provided only for backwards compatibility.
 Default: false
 Icon: xrandr.png
 
