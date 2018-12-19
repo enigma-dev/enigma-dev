@@ -15,8 +15,9 @@ Make-Vars:
   cxxflags: -std=c++11 -I/mingw64/lib/libffi-3.2.1/include -I../Additional/i686-w64-mingw32/include
   cflags:
   ldflags: -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++ -static
-  rcflags: 
+  rcflags:
   links:
+  compile-target-platform: Win32
 
 Parser-Vars:
   defines: cpp -dM -x c++ --std=c++03 -E $blank
