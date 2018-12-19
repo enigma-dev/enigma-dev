@@ -134,7 +134,6 @@ env:
     - EXTENSIONS="GM5Compat"
     - EXTENSIONS="IniFilesystem"
     - EXTENSIONS="DataStructures,Json"
-    - EXTENSIONS="MatrixMath"
     - COLLISION=BBox EXTENSIONS="Paths"
     - COLLISION=BBox EXTENSIONS="Paths,MotionPlanning"
     - COLLISION=Precise EXTENSIONS="Paths,MotionPlanning"
