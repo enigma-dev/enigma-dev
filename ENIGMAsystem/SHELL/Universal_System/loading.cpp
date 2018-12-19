@@ -24,6 +24,7 @@
 #include "libEGMstd.h"
 //#include "mathnc.h"
 
+#include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -120,8 +121,10 @@ namespace enigma
     //Go to the first room
     if (enigma_user::room_count)
       enigma::game_start();
-    else
+    else {
       enigma_user::window_default();
+      enigma_user::window_set_visible(true);
+    }
 
     return 0;
   }
