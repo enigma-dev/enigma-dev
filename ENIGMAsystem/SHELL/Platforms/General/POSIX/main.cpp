@@ -22,12 +22,14 @@ void initialize_directory_globals() {
     enigma_user::program_directory = dirname(buffer) + string("/");
 
   // Set the temp_directory
-  char const *env = getenv("TMPDIR");
+  string env = getenv("TMPDIR");
 
-  if (env == 0)
-    env = "/tmp";
+  if (env == NULL)
+    env = "/tmp/";
+  else if (env.back() != '/')
+    env += string("/");
 
-  enigma_user::temp_directory = env + string("/");
+  enigma_user::temp_directory = env;
 }
 }
 
