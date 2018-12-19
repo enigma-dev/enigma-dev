@@ -73,7 +73,6 @@ void show_error(string errortext, const bool fatal)
 }
 
 namespace enigma {
-  extern HINSTANCE hInstance;
   extern HWND hWnd;
   HWND infore;
 }
@@ -267,7 +266,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
   if (embedGameWindow) {
     parent = enigma::hWnd;
   } else {
-    WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)ShowInfoProc,0,0,enigma::hInstance,0,
+    WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)ShowInfoProc,0,0,NULL,0,
       0,GetSysColorBrush(COLOR_WINDOW),0,"infodialog"};
     RegisterClass(&wc);
 
@@ -283,11 +282,11 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
     }
 
     parent = CreateWindow("infodialog", TEXT(caption.c_str()),
-      flags, left, top, width, height, enigma::hWnd, 0, enigma::hInstance, 0);
+      flags, left, top, width, height, enigma::hWnd, 0, NULL, 0);
 
     if (showBorder) {
       // Set Window Information Icon
-      HICON hIcon = LoadIcon(enigma::hInstance, "infoicon");
+      HICON hIcon = LoadIcon(NULL, "infoicon");
       if (hIcon) {
         SendMessage(parent, WM_SETICON, ICON_SMALL,(LPARAM)hIcon);
         SendMessage(parent, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
@@ -297,7 +296,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 
   enigma::infore=CreateWindowEx(WS_EX_TOPMOST,"RICHEDIT",TEXT("information text"),
     ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,
-    0, 0, width, height, parent, 0, enigma::hInstance, 0);
+    0, 0, width, height, parent, 0, NULL, 0);
 
   // Size the RTF Component to the Window
   RECT rectParent;
@@ -419,7 +418,7 @@ int show_message_ext(string msg, string but1, string but2, string but3)
   gs_message = msg;
   gs_but1 = but1; gs_but2 = but2; gs_but3 = but3;
 
-  return DialogBox(enigma::hInstance,"showmessageext",enigma::hWnd,ShowMessageExtProc);
+  return DialogBox(NULL,"showmessageext",enigma::hWnd,ShowMessageExtProc);
 }
 
 bool show_question(string str)
@@ -430,7 +429,7 @@ bool show_question(string str)
 string get_login(string username, string password, string cap)
 {
   gs_cap = cap; gs_username = username; gs_password = password;
-  DialogBox(enigma::hInstance,"getlogindialog",enigma::hWnd,GetLoginProc);
+  DialogBox(NULL,"getlogindialog",enigma::hWnd,GetLoginProc);
 
   return gs_str_submitted;
 }
@@ -438,7 +437,7 @@ string get_login(string username, string password, string cap)
 string get_string(string message,string def,string cap)
 {
   gs_cap = cap; gs_message = message; gs_def = def;
-  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
+  DialogBox(NULL,"getstringdialog",enigma::hWnd,GetStrProc);
 
   return gs_str_submitted;
 }
@@ -446,7 +445,7 @@ string get_string(string message,string def,string cap)
 int get_integer(string message,string def,string cap)
 {
   gs_cap = cap; gs_message = message; gs_def = def;
-  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
+  DialogBox(NULL,"getstringdialog",enigma::hWnd,GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
 
@@ -456,7 +455,7 @@ int get_integer(string message,string def,string cap)
 double get_number(string message,string def,string cap)
 {
   gs_cap = cap; gs_message = message; gs_def = def;
-  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
+  DialogBox(NULL,"getstringdialog",enigma::hWnd,GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
 

@@ -51,7 +51,6 @@ static INT_PTR widget_idmax = 0;
 
 namespace enigma {
   extern HWND hWnd;
-  extern HINSTANCE hInstance;
   bool widget_system_initialize()
   {
     INITCOMMONCONTROLSEX iccex;
@@ -143,7 +142,7 @@ struct Sgeneric_window
   Sgeneric_window()
   {
     /* The Window structure */
-    wincl.hInstance = enigma::hInstance;
+    wincl.hInstance = NULL;//enigma::hInstance;
     wincl.lpszClassName = enigma_window_generic_class;
     wincl.lpfnWndProc = GenWindowProcedure;      /* This function is called by windows */
     wincl.style = CS_DBLCLKS;                 /* Catch double-clicks */
@@ -169,7 +168,7 @@ struct Sgeneric_window
 
 int wgt_window_create(int w, int h)
 {
-  HWND win = CreateWindowEx(0, enigma_window_generic_class, "caption", WS_POPUP | WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, w, h, enigma::hWnd, (HMENU)(ptrdiff_t)widget_idmax, enigma::hInstance, (LPVOID)(ptrdiff_t)widget_idmax);
+  HWND win = CreateWindowEx(0, enigma_window_generic_class, "caption", WS_POPUP | WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, w, h, enigma::hWnd, (HMENU)(ptrdiff_t)widget_idmax, NULL/*enigma::hInstance*/, (LPVOID)(ptrdiff_t)widget_idmax);
   if (!win)
     return -1;
   setID(win,widget_idmax); fixFont(win);
