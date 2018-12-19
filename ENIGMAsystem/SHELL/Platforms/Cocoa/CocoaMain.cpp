@@ -58,10 +58,11 @@ namespace enigma {
 
     if (env == NULL)
       enigma_user::temp_directory = "/tmp/";
-    else if (env.back() != '/')
-      enigma_user::temp_directory = env + string("/");
-    else
+    else 
       enigma_user::temp_directory = env;
+    
+    if (enigma_user::temp_directory.back() != '/')
+      enigma_user::temp_directory += string("/");
   }
 }
 
