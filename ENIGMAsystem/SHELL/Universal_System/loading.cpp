@@ -126,6 +126,9 @@ namespace enigma
       enigma_user::window_set_visible(true);
     }
 
+    // fire draw events before step (GM5/GM8)
+    enigma_user::screen_redraw();
+
     return 0;
   }
 } //namespace enigma
