@@ -37,7 +37,7 @@ WIDGETS ?= None
 NETWORKING ?= None
 
 # RESOURCE FILE WITH ICON AND VERSION INFO
-ifeq ($(PLATFORM), Win32)
+ifeq ($(TARGET-PLATFORM), Windows)
 RESOURCES += Preprocessor_Environment_Editable/Resources.rc
 endif
 

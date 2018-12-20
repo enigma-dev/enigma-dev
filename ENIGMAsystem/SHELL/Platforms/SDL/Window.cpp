@@ -65,8 +65,6 @@ void handleInput() {
   pushGamepads();
 }
 
-void showWindow() { SDL_ShowWindow(windowHandle); }
-
 void initCursors() {
   // cursors are negative ids 0 to -22
   cursors[-enigma_user::cr_arrow] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
