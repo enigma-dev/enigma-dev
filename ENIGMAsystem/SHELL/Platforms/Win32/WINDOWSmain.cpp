@@ -73,14 +73,14 @@ namespace enigma_user {
         dname.erase(dname.size() - 1);
       }
     }
-    
+
     tstring tstr_dname = widen(dname);
     DWORD attr = GetFileAttributesW(tstr_dname.c_str());
 
     if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) {
       return (SetCurrentDirectoryW(tstr_dname.c_str()) != 0);
     }
-    
+
     return false;
   }
 } // enigma_user
@@ -309,8 +309,6 @@ void handleInput() { input_push(); }
 
 void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
-void showWindow() { ShowWindow(enigma::hWnd, 1); }
-
 void initialize_directory_globals() {
   // Set the working_directory
   WCHAR buffer[MAX_PATH + 1];
@@ -323,7 +321,7 @@ void initialize_directory_globals() {
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
       enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
-  
+
   // Set the temp_directory
   buffer[0] = 0;
   GetTempPathW(MAX_PATH + 1, buffer);
