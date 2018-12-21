@@ -30,7 +30,7 @@ environment:
 
   matrix:
     #TODO: Fix OpenAL on Windows
-    - {AUDIO: OpenAL, PACKAGES: "openal:x dumb:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
+    - {AUDIO: OpenAL, PACKAGES: "openal:x dumb:x alure:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
     # Game Modes
     - {MODE: Run}
     - {MODE: Debug}
