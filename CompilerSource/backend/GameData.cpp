@@ -215,6 +215,7 @@ ObjectData::ObjectData(const ::GmObject &object, const ESLookup &lookup):
     }
   }
 }
+
 RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
   name(room.name) {
   cout << "Import room." << endl;
@@ -308,6 +309,51 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
   }
 }
 
+SettingsData::SettingsData(const ::GameSettings &settings, const ESLookup &lookup):
+  name("game_settings") {
+  cout << "Import game settings." << endl;
+
+  buffers::resources::General *gen = mutable_general();
+  gen->set_game_id(settings.gameId);
+  gen->set_version_major(settings.versionMajor);
+  gen->set_version_minor(settings.versionMinor);
+  gen->set_version_release(settings.versionRelease);
+  gen->set_version_build(settings.versionBuild);
+  gen->set_company(settings.company);
+  gen->set_product(settings.product);
+  gen->set_copyright(settings.copyright);
+  gen->set_description(settings.description);
+  gen->set_show_cursor(settings.displayCursor);
+  gen->set_game_icon(settings.gameIcon);
+
+  buffers::resources::Graphics *gfx = mutable_graphics();
+  gfx->set_color_outside_room_region(settings.colorOutsideRoom);
+  gfx->set_allow_fullscreen_change(settings.letF4SwitchFullscreen);
+  gfx->set_interpolate_textures(settings.interpolate);
+  gfx->set_force_software_vertex_processing(settings.forceSoftwareVertexProcessing);
+  gfx->set_use_synchronization(settings.useSynchronization);
+  gfx->set_view_scale(settings.scaling);
+
+  buffers::resources::Windowing *win = mutable_windowing();
+  win->set_start_in_fullscreen(settings.startFullscreen);
+  win->set_freeze_on_lose_focus(settings.freezeOnLoseFocus);
+  win->set_is_sizeable(settings.allowWindowResize);
+  win->set_show_border(!settings.dontDrawBorder);
+  win->set_show_icons(!settings.dontShowButtons);
+  win->set_stay_on_top(settings.alwaysOnTop);
+  win->set_treat_close_as_escape(settings.treatCloseAsEscape);
+
+  buffers::resources::Info *inf = mutable_info();
+  inf->set_author_name(settings.author);
+  inf->set_version(settings.version);
+  inf->set_last_changed(settings.lastChanged);
+  inf->set_information(settings.information);
+
+  //TODO: do keyboard mapping
+  buffers::resources::Shortcuts *sht = mutable_shortcuts();
+  sht->set_let_escape_end_game(settings.letEscEndGame);
+}
+
 ImageData::ImageData(const Image &img):
     width(img.width), height(img.height),
     pixels(img.data, img.data + img.dataSize){}
@@ -358,9 +404,9 @@ GameData::GameData(EnigmaStruct *es) {
   for (int i = 0; i < es->packageCount; ++i)
     packages.push_back(es->packages[i]);
 
-  cout << "- Not transferring game info / settings" << endl;
+  cout << "- Not transferring game info" << endl;
   buffers::resources::GameInformation gameInfo;
-  buffers::resources::Settings settings;
+  settings = SettingsData(es->gameSettings, lookup);
 
   cout << "Transfer complete." << endl << endl;
 }
