@@ -33,7 +33,7 @@ struct ImageData {
 struct SpriteData : buffers::resources::Sprite {
   std::string name;
   std::vector<ImageData> image_data;
-  
+
   SpriteData(const buffers::resources::Sprite &sprite);
   SpriteData(const ::Sprite &sprite);
 };
@@ -41,7 +41,7 @@ struct SpriteData : buffers::resources::Sprite {
 struct SoundData : buffers::resources::Sound {
   std::string name;
   BinaryData audio;
-  
+
   SoundData(const buffers::resources::Sound &sound);
   SoundData(const ::Sound &sound);
 };
@@ -50,7 +50,7 @@ struct BackgroundData : buffers::resources::Background {
   std::string name;
   ImageData image_data;
   bool legacy_transparency;
-  
+
   BackgroundData(const buffers::resources::Background &background);
   BackgroundData(const ::Background &background);
 };
@@ -59,7 +59,7 @@ struct FontData : buffers::resources::Font {
   std::string name;
   struct GlyphData : ImageData {
     buffers::resources::Font::Glyph metrics;
-    
+
     // TODO: Need to move the font packing logic to allow pre-packed sprite
     // fonts; cannot construct image here in the meantime
     GlyphData(const ::Glyph &glyph);
@@ -73,7 +73,7 @@ struct FontData : buffers::resources::Font {
     NormalizedRange(const ::GlyphRange &range);
   };
   std::vector<NormalizedRange> normalized_ranges;
-  
+
   FontData(const buffers::resources::Font &font);
   FontData(const ::Font &font);
 };
@@ -107,6 +107,11 @@ struct RoomData : buffers::resources::Room {
   std::string name;
   RoomData(const buffers::resources::Room &q);
   RoomData(const ::Room &room, const ESLookup &lookup);
+};
+struct SettingsData : buffers::resources::Settings {
+  std::string name;
+  SettingsData(const buffers::resources::Settings &q);
+  SettingsData(const ::GameSettings &settings, const ESLookup &lookup);
 };
 
 /// Flat view of a buffers::Project.
