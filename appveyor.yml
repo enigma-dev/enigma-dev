@@ -29,8 +29,6 @@ environment:
   PACKAGES: ""
 
   matrix:
-    #TODO: Fix OpenAL on Windows
-    - {AUDIO: OpenAL, PACKAGES: "openal:x dumb:x alure:x libmodplug:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
     # Game Modes
     - {MODE: Run}
     - {MODE: Debug}
@@ -45,6 +43,7 @@ environment:
 
     # Audio
     - {AUDIO: DirectSound}
+    - {AUDIO: OpenAL, PACKAGES: "openal:x dumb:x alure:x libmodplug:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
     #TODO: Fix SFML on Windows
     #- {AUDIO: SFML, PACKAGES: "sfml:x"}
 
