@@ -108,11 +108,6 @@ struct RoomData : buffers::resources::Room {
   RoomData(const buffers::resources::Room &q);
   RoomData(const ::Room &room, const ESLookup &lookup);
 };
-struct SettingsData : buffers::resources::Settings {
-  std::string name;
-  SettingsData(const buffers::resources::Settings &q);
-  SettingsData(const ::GameSettings &settings, const ESLookup &lookup);
-};
 
 /// Flat view of a buffers::Project.
 struct GameData {
