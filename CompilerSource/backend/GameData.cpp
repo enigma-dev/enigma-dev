@@ -309,11 +309,10 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
   }
 }
 
-SettingsData::SettingsData(const ::GameSettings &settings, const ESLookup &lookup):
-  name("game_settings") {
+static void ImportSettings(const ::GameSettings &settings, const ESLookup &lookup, buffers::resources::Settings& set) {
   cout << "Import game settings." << endl;
 
-  buffers::resources::General *gen = mutable_general();
+  buffers::resources::General *gen = set.mutable_general();
   gen->set_game_id(settings.gameId);
   gen->set_version_major(settings.versionMajor);
   gen->set_version_minor(settings.versionMinor);
@@ -326,7 +325,7 @@ SettingsData::SettingsData(const ::GameSettings &settings, const ESLookup &looku
   gen->set_show_cursor(settings.displayCursor);
   gen->set_game_icon(settings.gameIcon);
 
-  buffers::resources::Graphics *gfx = mutable_graphics();
+  buffers::resources::Graphics *gfx = set.mutable_graphics();
   gfx->set_color_outside_room_region(settings.colorOutsideRoom);
   gfx->set_allow_fullscreen_change(settings.letF4SwitchFullscreen);
   gfx->set_interpolate_textures(settings.interpolate);
@@ -334,7 +333,7 @@ SettingsData::SettingsData(const ::GameSettings &settings, const ESLookup &looku
   gfx->set_use_synchronization(settings.useSynchronization);
   gfx->set_view_scale(settings.scaling);
 
-  buffers::resources::Windowing *win = mutable_windowing();
+  buffers::resources::Windowing *win = set.mutable_windowing();
   win->set_start_in_fullscreen(settings.startFullscreen);
   win->set_freeze_on_lose_focus(settings.freezeOnLoseFocus);
   win->set_is_sizeable(settings.allowWindowResize);
@@ -343,14 +342,14 @@ SettingsData::SettingsData(const ::GameSettings &settings, const ESLookup &looku
   win->set_stay_on_top(settings.alwaysOnTop);
   win->set_treat_close_as_escape(settings.treatCloseAsEscape);
 
-  buffers::resources::Info *inf = mutable_info();
+  buffers::resources::Info *inf = set.mutable_info();
   inf->set_author_name(settings.author);
   inf->set_version(settings.version);
   inf->set_last_changed(settings.lastChanged);
   inf->set_information(settings.information);
 
   //TODO: do keyboard mapping
-  buffers::resources::Shortcuts *sht = mutable_shortcuts();
+  buffers::resources::Shortcuts *sht = set.mutable_shortcuts();
   sht->set_let_escape_end_game(settings.letEscEndGame);
 }
 
@@ -406,7 +405,7 @@ GameData::GameData(EnigmaStruct *es) {
 
   cout << "- Not transferring game info" << endl;
   buffers::resources::GameInformation gameInfo;
-  settings = SettingsData(es->gameSettings, lookup);
+  ImportSettings(es->gameSettings, lookup, settings);
 
   cout << "Transfer complete." << endl << endl;
 }
