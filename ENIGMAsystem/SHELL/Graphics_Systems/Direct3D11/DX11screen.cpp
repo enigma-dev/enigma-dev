@@ -63,9 +63,8 @@ void screen_init()
       if (view_visible[(int)view_current]) {
         int vc = (int)view_current;
 
-        screen_set_viewport(view_xport[vc], view_yport[vc],
-          (window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
-        d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], view_angle[vc]);
+        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
+        d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
         break;
       }
     }

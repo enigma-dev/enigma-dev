@@ -73,7 +73,7 @@ namespace enigma_user {
         dname.erase(dname.size() - 1);
       }
     }
-    
+
     tstring tstr_dname = widen(dname);
     DWORD attr = GetFileAttributesW(tstr_dname.c_str());
 
@@ -83,7 +83,7 @@ namespace enigma_user {
         return true;
       }
     }
-    
+
     return false;
   }
 } // enigma_user
@@ -311,8 +311,6 @@ int handleEvents() {
 void handleInput() { input_push(); }
 
 void destroyWindow() { DestroyWindow(enigma::hWnd); }
-
-void showWindow() { ShowWindow(enigma::hWnd, 1); }
 
 void initialize_directory_globals() {
   // Set the working_directory
