@@ -78,7 +78,10 @@ namespace enigma_user {
     DWORD attr = GetFileAttributesW(tstr_dname.c_str());
 
     if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) {
-      return (SetCurrentDirectoryW(tstr_dname.c_str()) != 0);
+      if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
+        working_directory = shorten(tstr_dname);
+        return true;
+      }
     }
     
     return false;
