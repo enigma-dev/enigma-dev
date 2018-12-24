@@ -15,8 +15,12 @@ namespace enigma_user {
     }
 
     struct stat sb;
-    if (stat((char *)dname.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
-      return (chdir((char *)dname.c_str()) == 0);
+    if (stat((char *)dname.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) {
+      if (chdir((char *)dname.c_str()) == 0) {
+        enigma_user::working_directory = dname;
+        return true;
+      }
+    }
 
     return false;
   }
