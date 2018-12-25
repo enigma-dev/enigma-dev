@@ -79,7 +79,7 @@ namespace enigma_user {
 
     if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) {
       if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
-        working_directory = shorten(tstr_dname);
+        working_directory = shorten(tstr_dname) + string("\\");
         return true;
       }
     }
