@@ -17,7 +17,7 @@ namespace enigma_user {
     struct stat sb;
     if (stat((char *)dname.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) {
       if (chdir((char *)dname.c_str()) == 0) {
-        working_directory = dname;
+        working_directory = dname + string("/");
         return true;
       }
     }
