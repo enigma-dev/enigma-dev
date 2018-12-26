@@ -1,4 +1,4 @@
-#include "SDL2/SDL_joystick.h"
+#include "SDL2/SDL.h"
 #include "Platforms/General/PFjoystick.h"
 
 SDL_Joystick *joystick1;
