@@ -1,5 +1,6 @@
 #include "SDL2/SDL.h"
 #include "Platforms/General/PFjoystick.h"
+#include <string>
 
 SDL_Joystick *joystick1;
 SDL_Joystick *joystick2;
@@ -21,7 +22,7 @@ namespace enigma_user {
 
   }
 
-  char *joystick_name(int id) {
+  std::string joystick_name(int id) {
 
     const char *name;
 
@@ -30,7 +31,7 @@ namespace enigma_user {
     else
       name = SDL_JoystickName(joystick2);
 
-    return (char *)name;
+    return name;
 
   }
 
