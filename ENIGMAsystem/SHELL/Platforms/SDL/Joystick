@@ -36,7 +36,7 @@ namespace enigma_user {
 
   int joystick_axes(int id) {
 
-    int axes = -1;
+    int axes = 0;
 
     if (id - 1 < 0.5) {
 
@@ -56,7 +56,7 @@ namespace enigma_user {
 
   int joystick_buttons(int id) {
 
-    int buttons = -1;
+    int buttons = 0;
 
     if (id - 1 < 0.5) {
 
@@ -97,10 +97,12 @@ namespace enigma_user {
     else
       axis = SDL_JoystickGetAxis(joystick2, axis - 1);
 
-    if (axis != -256 && axis != 0)
+    if (axis != -256 && axis != 0) // don't ask why this shit is necessary; it just is...
       return (axis / 32768);
+    else if (joystick_exists(id))
+      return -0.01
     else
-      return -0.01;
+      return 0;
 
   }
 
