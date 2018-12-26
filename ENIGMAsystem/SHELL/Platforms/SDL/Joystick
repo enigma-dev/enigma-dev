@@ -91,6 +91,7 @@ namespace enigma_user {
   double joystick_axes(int id, int numb) {
 
     double axis;
+    double pos = 0;
 
     if (id - 1 < 0.5)
       axis = SDL_JoystickGetAxis(joystick1, axis - 1);
@@ -98,11 +99,11 @@ namespace enigma_user {
       axis = SDL_JoystickGetAxis(joystick2, axis - 1);
 
     if (axis != -256 && axis != 0) // don't ask why this shit is necessary; it just is...
-      return (axis / 32768);
+      pos = (axis / 32768);
     else if (joystick_exists(id))
-      return -0.01
-    else
-      return 0;
+      pos = -0.01
+
+    return pos;
 
   }
 
