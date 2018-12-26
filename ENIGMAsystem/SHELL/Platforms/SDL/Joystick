@@ -101,7 +101,7 @@ namespace enigma_user {
     if (axis != -256 && axis != 0) // don't ask why this shit is necessary; it just is...
       pos = (axis / 32768);
     else if (joystick_exists(id))
-      pos = -0.01
+      pos = -0.01;
 
     return pos;
 
