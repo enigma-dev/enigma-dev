@@ -107,6 +107,8 @@ namespace enigma_user {
 
   }
 
+}
+
 namespace enigma {
 
   bool joystick_init() {
@@ -142,9 +144,9 @@ namespace enigma {
         
     if (!enigma_user::joystick_exists(1) && !enigma_user::joystick_exists(2) && update) {
 
-      enigma_user::joystick_uninit();
+      joystick_uninit();
     
-      if (enigma_user::joystick_init())
+      if (joystick_init())
         update = false;
     
     }
