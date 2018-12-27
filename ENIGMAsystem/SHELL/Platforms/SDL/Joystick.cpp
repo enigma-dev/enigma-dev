@@ -120,8 +120,6 @@ namespace enigma {
     joystick1 = SDL_JoystickOpen(0);
     joystick2 = SDL_JoystickOpen(1);
 
-    init *= (joystick1 || joystick2);
-
     return init;
 
   }
