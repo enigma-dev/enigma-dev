@@ -5,7 +5,7 @@
 SDL_Joystick *joystick1;
 SDL_Joystick *joystick2;
 
-bool update = false;
+bool update = true;
 
 namespace enigma_user {
 
