@@ -1,4 +1,7 @@
-/** Copyright (C) 2013-2014, 2018 Robert Colton
+/** Copyright (C) 2008-2012 Josh Ventura
+*** Copyright (C) 2013-2014 Robert Colton, Harijs Grinbergs
+*** Copyright (C) 2015 Harijs Grinbergs
+*** Copyright (C) 2018 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
