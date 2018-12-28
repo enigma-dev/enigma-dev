@@ -62,6 +62,7 @@ static std::array<SDL_Cursor*, -enigma_user::cr_size_all> cursors;
 
 void handleInput() {
   input_push();
+  joystick_update();
   pushGamepads();
 }
 
