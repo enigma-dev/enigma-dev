@@ -1,4 +1,5 @@
 #include "SDL2/SDL.h"
+#include "Joystick.h"
 #include "Platforms/General/PFjoystick.h"
 #include <string>
 
