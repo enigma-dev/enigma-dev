@@ -182,7 +182,7 @@ namespace enigma {
     
     joystick_update();
 
-    if (init && update) {
+    if (init) {
     
       joystick1 = SDL_JoystickOpen(0);
       joystick2 = SDL_JoystickOpen(1);
@@ -195,20 +195,17 @@ namespace enigma {
 
   void joystick_uninit() {
     
-    joystick_update();
-    
     if (init) {
-
-      if (update) {
       
-        SDL_JoystickClose(joystick1);
-        SDL_JoystickClose(joystick2);
-        
-      }
-    
-      SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+      SDL_JoystickClose(joystick1);
+      SDL_JoystickClose(joystick2);
       
     }
+      
+    joystick_update();
+    
+    if (init)
+      SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 
   }
   
