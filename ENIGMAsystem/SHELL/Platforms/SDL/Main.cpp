@@ -9,5 +9,6 @@ namespace enigma {
 }
 
 int main(int argc, char** argv) {
+  joystick_init();
   return enigma::enigma_main(argc, argv);
 }
