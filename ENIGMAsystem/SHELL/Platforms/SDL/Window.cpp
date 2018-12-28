@@ -97,6 +97,7 @@ void initInput() {
 
   keyboard::inverse_keymap = inverse_map(keyboard::keymap);
   initCursors();
+  joystick_init();
   initGamepads();
 }
 
