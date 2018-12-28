@@ -31,9 +31,9 @@ namespace enigma_user {
 
   std::string joystick_name(int id) {
     
-    if (init) {
+    enigma::joystick_update();
     
-      enigma::joystick_update();
+    if (init) {
 
       const char *name;
 
@@ -52,9 +52,9 @@ namespace enigma_user {
 
   int joystick_axes(int id) {
     
-    if (init) {
+    enigma::joystick_update();
     
-      enigma::joystick_update();
+    if (init) {
 
       int axes = 0;
 
@@ -80,9 +80,9 @@ namespace enigma_user {
 
   int joystick_buttons(int id) {
     
-    if (init) {
+    enigma::joystick_update();
     
-      enigma::joystick_update();
+    if (init) {
 
       int buttons = 0;
 
@@ -108,9 +108,9 @@ namespace enigma_user {
 
   bool joystick_button(int id, int numb) {
     
-    if (init) {
+    enigma::joystick_update();
     
-      enigma::joystick_update();
+    if (init) {
 
       bool button;
 
@@ -129,9 +129,9 @@ namespace enigma_user {
 
   double joystick_axes(int id, int numb) {
     
-    if (init) {
+    enigma::joystick_update();
     
-      enigma::joystick_update();
+    if (init) {
 
       double axis;
       double pos = 0;
