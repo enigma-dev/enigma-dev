@@ -193,9 +193,8 @@ namespace enigma {
     else if (update) {
 
       joystick_uninit();
-      init = joystick_init();
       
-      if (init)
+      if (joystick_init())
         update = false;
    
     }
