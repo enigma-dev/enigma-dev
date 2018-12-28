@@ -23,6 +23,8 @@ namespace enigma_user {
   }
 
   std::string joystick_name(int id) {
+    
+    enigma::joystick_update();
 
     const char *name;
 
@@ -36,6 +38,8 @@ namespace enigma_user {
   }
 
   int joystick_axes(int id) {
+    
+    enigma::joystick_update();
 
     int axes = 0;
 
@@ -56,6 +60,8 @@ namespace enigma_user {
   }
 
   int joystick_buttons(int id) {
+    
+    enigma::joystick_update();
 
     int buttons = 0;
 
@@ -76,6 +82,8 @@ namespace enigma_user {
   }
 
   bool joystick_button(int id, int numb) {
+    
+    enigma::joystick_update();
 
     bool button;
 
@@ -84,12 +92,13 @@ namespace enigma_user {
     else
       button = SDL_JoystickGetButton(joystick2, numb - 1);
 
-
     return button;
 
   }
 
   double joystick_axes(int id, int numb) {
+    
+    enigma::joystick_update();
 
     double axis;
     double pos = 0;
@@ -133,23 +142,17 @@ namespace enigma {
   
   void joystick_update() {
 
-    if (enigma_user::joystick_exists(1))
+    if (enigma_user::joystick_exists(1) || enigma_user::joystick_exists(2))
       update = true;
-       
-    
-    if (enigma_user::joystick_exists(2))
-      update = true;
-
-        
-    if (!enigma_user::joystick_exists(1) && !enigma_user::joystick_exists(2) && update) {
+    else if (update) {
 
       joystick_uninit();
-    
+   
       if (joystick_init())
         update = false;
-    
+   
     }
-
+ 
     if (update)
       SDL_JoystickUpdate();
 
