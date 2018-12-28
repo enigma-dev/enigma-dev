@@ -137,7 +137,7 @@ namespace enigma {
         
     if (enigma_user::joystick_exists(1) || enigma_user::joystick_exists(2))
       update = true;
-        else if (update)
+    else if (update)
       update = false;
 
     if (update)
