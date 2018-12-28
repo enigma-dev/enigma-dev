@@ -137,6 +137,8 @@ namespace enigma {
 
     SDL_JoystickClose(joystick1);
     SDL_JoystickClose(joystick2);
+    
+    SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 
   }
   
