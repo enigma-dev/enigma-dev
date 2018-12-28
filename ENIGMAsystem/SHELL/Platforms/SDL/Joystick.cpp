@@ -123,7 +123,7 @@ namespace enigma_user {
       
     }
     
-    return 0;
+    return false;
 
   }
 
