@@ -136,12 +136,12 @@ namespace enigma {
   void joystick_update() {
         
     if (enigma_user::joystick_exists(1) || enigma_user::joystick_exists(2))
-			update = true;
-		else if (update)
-			update = false;
-	
-		if (update)
-			SDL_JoystickUpdate();
+      update = true;
+        else if (update)
+      update = false;
+
+    if (update)
+      SDL_JoystickUpdate();
 
   }
   
