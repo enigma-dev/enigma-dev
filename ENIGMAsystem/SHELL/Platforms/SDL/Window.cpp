@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "Event.h"
+#include "Joystick.h"
 #include "Gamepad.h"
 
 #include "Platforms/General/PFwindow.h"
