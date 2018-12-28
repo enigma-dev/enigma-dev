@@ -15,15 +15,19 @@ namespace enigma_user {
     if (init) {
       
       SDL_JoystickUpdate();
+      
+      if (update) {
     
-      bool exists;
+        bool exists;
 
-      if (id - 1 < 0.5)
-        exists = (SDL_JoystickGetAttached(joystick1) == SDL_TRUE);
-      else
-        exists = (SDL_JoystickGetAttached(joystick2) == SDL_TRUE);
+        if (id - 1 < 0.5)
+          exists = (SDL_JoystickGetAttached(joystick1) == SDL_TRUE);
+        else
+          exists = (SDL_JoystickGetAttached(joystick2) == SDL_TRUE);
 
-      return exists;
+        return exists;
+      
+      }
       
     }
     
@@ -35,7 +39,7 @@ namespace enigma_user {
     
     enigma::joystick_update();
     
-    if (init) {
+    if (init && update) {
 
       const char *name;
 
@@ -56,7 +60,7 @@ namespace enigma_user {
     
     enigma::joystick_update();
     
-    if (init) {
+    if (init && update) {
 
       int axes = 0;
 
@@ -84,7 +88,7 @@ namespace enigma_user {
     
     enigma::joystick_update();
     
-    if (init) {
+    if (init && update) {
 
       int buttons = 0;
 
@@ -112,7 +116,7 @@ namespace enigma_user {
     
     enigma::joystick_update();
     
-    if (init) {
+    if (init && update) {
 
       bool button;
 
@@ -133,7 +137,7 @@ namespace enigma_user {
     
     enigma::joystick_update();
     
-    if (init) {
+    if (init && update) {
 
       double axis;
       double pos = 0;
@@ -159,12 +163,26 @@ namespace enigma_user {
 }
 
 namespace enigma {
+  
+  void joystick_update() {
+
+    if (enigma_user::joystick_exists(1) || enigma_user::joystick_exists(2))
+      update = true;
+    else if (update)
+      update = false;
+    
+    if (init && update)
+      SDL_JoystickUpdate();
+
+  }
 
   bool joystick_init() {
 
     init = (SDL_InitSubSystem(SDL_INIT_JOYSTICK) > 0);
+    
+    joystick_update();
 
-    if (init) {
+    if (init && update) {
     
       joystick1 = SDL_JoystickOpen(0);
       joystick2 = SDL_JoystickOpen(1);
@@ -177,26 +195,20 @@ namespace enigma {
 
   void joystick_uninit() {
     
+    joystick_update();
+    
     if (init) {
 
-      SDL_JoystickClose(joystick1);
-      SDL_JoystickClose(joystick2);
+      if (update) {
+      
+        SDL_JoystickClose(joystick1);
+        SDL_JoystickClose(joystick2);
+        
+      }
     
       SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
       
     }
-
-  }
-  
-  void joystick_update() {
-
-    if (enigma_user::joystick_exists(1) || enigma_user::joystick_exists(2))
-      update = true;
-    else if (update)
-      update = false;
-    
-    if (init && update)
-      SDL_JoystickUpdate();
 
   }
   
