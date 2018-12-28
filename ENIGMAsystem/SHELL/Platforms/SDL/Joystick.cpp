@@ -123,8 +123,8 @@ namespace enigma {
 
   bool joystick_init() {
 
-    double init;
-    init = (SDL_Init(SDL_INIT_JOYSTICK) > 0);
+    int init;
+    init = (SDL_InitSubSystem(SDL_INIT_JOYSTICK) > 0);
 
     joystick1 = SDL_JoystickOpen(0);
     joystick2 = SDL_JoystickOpen(1);
