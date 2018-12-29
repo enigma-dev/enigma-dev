@@ -10,146 +10,117 @@ bool update = true;
 
 namespace enigma_user {
 
-  bool joystick_exists(int id) {
+bool joystick_exists(int id) {
+  bool exists;
 
-    bool exists;
+  if (id - 1 < 0.5)
+    exists = (SDL_JoystickGetAttached(joystick1) == SDL_TRUE);
+  else
+    exists = (SDL_JoystickGetAttached(joystick2) == SDL_TRUE);
 
-    if (id - 1 < 0.5)
-      exists = (SDL_JoystickGetAttached(joystick1) == SDL_TRUE);
-    else
-      exists = (SDL_JoystickGetAttached(joystick2) == SDL_TRUE);
+  return exists;
+}
 
-    return exists;
+std::string joystick_name(int id) {
+  const char *name;
 
+  if (id - 1 < 0.5)
+    name = SDL_JoystickName(joystick1);
+  else
+    name = SDL_JoystickName(joystick2);
+
+  return name;
+}
+
+int joystick_axes(int id) {
+  int axes = 0;
+
+  if (id - 1 < 0.5) {
+    if (SDL_JoystickNumAxes(joystick1) >= 0)
+      axes = SDL_JoystickNumAxes(joystick1);
+  } else {
+    if (SDL_JoystickNumAxes(joystick2) >= 0)
+      axes = SDL_JoystickNumAxes(joystick2);
   }
 
-  std::string joystick_name(int id) {
+  return axes;
+}
 
-    const char *name;
+int joystick_buttons(int id) {
+  int buttons = 0;
 
-    if (id - 1 < 0.5)
-      name = SDL_JoystickName(joystick1);
-    else
-      name = SDL_JoystickName(joystick2);
-
-    return name;
-
+  if (id - 1 < 0.5) {
+    if (SDL_JoystickNumButtons(joystick1) >= 0)
+      buttons = SDL_JoystickNumButtons(joystick1);
+  } else {
+    if (SDL_JoystickNumButtons(joystick2) >= 0)
+      buttons = SDL_JoystickNumButtons(joystick2);
   }
 
-  int joystick_axes(int id) {
+  return buttons;
+}
 
-    int axes = 0;
+bool joystick_button(int id, int numb) {
+  bool button;
 
-    if (id - 1 < 0.5) {
+  if (id - 1 < 0.5)
+    button = SDL_JoystickGetButton(joystick1, numb - 1);
+  else
+    button = SDL_JoystickGetButton(joystick2, numb - 1);
 
-      if (SDL_JoystickNumAxes(joystick1) >= 0)
-        axes = SDL_JoystickNumAxes(joystick1);
+  return button;
+}
 
-    } else {
+double joystick_axis(int id, int numb) {
+  double axis;
+  double pos = 0;
 
-      if (SDL_JoystickNumAxes(joystick2) >= 0)
-        axes = SDL_JoystickNumAxes(joystick2);
+  if (id - 1 < 0.5)
+    axis = SDL_JoystickGetAxis(joystick1, axis - 1);
+  else
+    axis = SDL_JoystickGetAxis(joystick2, axis - 1);
 
-    }
+  if (axis != -256 && axis != 0) // don't ask why this shit is necessary; it just is...
+    pos = (axis / 32768);
+  else if (joystick_exists(id))
+    pos = -0.01;
 
-    return axes;
-
-  }
-
-  int joystick_buttons(int id) {
-
-    int buttons = 0;
-
-    if (id - 1 < 0.5) {
-
-      if (SDL_JoystickNumButtons(joystick1) >= 0)
-        buttons = SDL_JoystickNumButtons(joystick1);
-
-    } else {
-
-      if (SDL_JoystickNumButtons(joystick2) >= 0)
-        buttons = SDL_JoystickNumButtons(joystick2);
-
-    }
-
-    return buttons;
-
-  }
-
-  bool joystick_button(int id, int numb) {
-
-    bool button;
-
-    if (id - 1 < 0.5)
-      button = SDL_JoystickGetButton(joystick1, numb - 1);
-    else
-      button = SDL_JoystickGetButton(joystick2, numb - 1);
-
-
-    return button;
-
-  }
-
-  double joystick_axes(int id, int numb) {
-
-    double axis;
-    double pos = 0;
-
-    if (id - 1 < 0.5)
-      axis = SDL_JoystickGetAxis(joystick1, axis - 1);
-    else
-      axis = SDL_JoystickGetAxis(joystick2, axis - 1);
-
-    if (axis != -256 && axis != 0) // don't ask why this shit is necessary; it just is...
-      pos = (axis / 32768);
-    else if (joystick_exists(id))
-      pos = -0.01;
-
-    return pos;
-
-  }
+  return pos;
+}
 
 }
 
 namespace enigma {
 
-  bool joystick_init() {
+bool joystick_init() {
+  double init;
+  init = (SDL_InitSubSystem(SDL_INIT_JOYSTICK) > 0);
 
-    double init;
-    init = (SDL_InitSubSystem(SDL_INIT_JOYSTICK) > 0);
+  joystick1 = SDL_JoystickOpen(0);
+  joystick2 = SDL_JoystickOpen(1);
 
-    joystick1 = SDL_JoystickOpen(0);
-    joystick2 = SDL_JoystickOpen(1);
+  return init;
+}
 
-    return init;
-
-  }
-
-  void joystick_uninit() {
-
-    SDL_JoystickClose(joystick1);
-    SDL_JoystickClose(joystick2);
+void joystick_uninit() {
+  SDL_JoystickClose(joystick1);
+  SDL_JoystickClose(joystick2);
     
-    SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
-
-  }
+  SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+}
   
-  void joystick_update() {
-        
-    if (enigma_user::joystick_exists(1) || enigma_user::joystick_exists(2))
-      update = true;
-    else if (update) {
+void joystick_update() {     
+  if (enigma_user::joystick_exists(1) || enigma_user::joystick_exists(2))
+    update = true;
+  else if (update) {
+    joystick_uninit();
 
-      joystick_uninit();
-
-      if (joystick_init())
-        update = false;
-
-    }
-
-    if (update)
-      SDL_JoystickUpdate();
-
+    if (joystick_init())
+      update = false;
   }
+
+  if (update)
+    SDL_JoystickUpdate();
+}
   
 }
