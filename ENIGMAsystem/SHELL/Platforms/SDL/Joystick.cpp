@@ -88,7 +88,7 @@ double joystick_axis(int id, int numb) {
   return pos;
 }
 
-}
+} // namespace enigma_user
 
 namespace enigma {
 
@@ -123,4 +123,4 @@ void joystick_update() {
     SDL_JoystickUpdate();
 }
   
-}
+} // namespace enigma
