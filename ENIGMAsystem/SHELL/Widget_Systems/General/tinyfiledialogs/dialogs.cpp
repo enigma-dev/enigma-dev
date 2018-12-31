@@ -47,10 +47,12 @@ using enigma::tfd_DialogEngine;
 using std::string;
 
 namespace enigma {
-  bool widget_system_initialize() {
-    return true;
-  }
+  
+bool widget_system_initialize() {
+  return true;
 }
+  
+} // namespave enigma
 
 class FileFilter {
   std::string filter_buf;
