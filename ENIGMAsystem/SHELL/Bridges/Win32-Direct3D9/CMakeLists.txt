@@ -1,5 +1,5 @@
 set(GRAPHICS_BRIDGE_SOURCES
-   Win32-Direct3D9.cpp
+   graphics_bridge.cpp
 )
 
 add_library("Win32-Direct3D9-Bridge" "${GRAPHICS_BRIDGE_SOURCES}")

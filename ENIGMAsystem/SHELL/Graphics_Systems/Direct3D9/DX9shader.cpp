@@ -16,7 +16,7 @@
 **/
 
 #include "Universal_System/scalar.h"
-#include "Bridges/General/DX9Context.h"
+#include "Bridges/Win32-Direct3D9/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "DX9shader.h"
 #include <math.h>
@@ -34,21 +34,21 @@ using namespace std;
 struct Shader {
   int type;
   LPD3DXCONSTANTTABLE       constants;
-  
-  Shader() 
+
+  Shader()
   {
 	type = enigma_user::sh_unknown;
   }
- 
+
   ~Shader()
   {
 
   }
-  
+
   virtual int Load(string fname) = 0;
   virtual void Use() = 0;
   virtual void SetConstantF(unsigned start, const float* data, unsigned count) = 0;
-  
+
   void SetVector(string name, const D3DXVECTOR4 *vec) {
     D3DXHANDLE handle;
     handle = constants->GetConstantByName(NULL, name.c_str());
@@ -69,9 +69,9 @@ struct VertexShader : public Shader {
   {
 
   }
-  
+
   int Load(string fname) {
-    DWORD dwFlags = 0; 
+    DWORD dwFlags = 0;
     //dwFlags |= D3DXSHADER_DEBUG;
     LPD3DXBUFFER pCode   = NULL;
     LPD3DXBUFFER pErrors = NULL;
@@ -81,23 +81,23 @@ struct VertexShader : public Shader {
       char* szErrors = (char*)pErrors->GetBufferPointer();
       pErrors->Release();
     }
-    if(FAILED(hrErr)) 
+    if(FAILED(hrErr))
     {
       MessageBox(NULL, "vertex shader creation failed", "CRendererDX9::Create", MB_OK|MB_ICONEXCLAMATION);
 	  return 1;
     }
-  
+
     char* szCode = (char*)pCode->GetBufferPointer();
     d3dmgr->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &shader);
     pCode->Release();
 	return 3;
   }
-  
+
   void Use() {
 	d3dmgr->SetVertexDeclaration(declaration);
 	d3dmgr->SetVertexShader(shader);
   }
-  
+
   void SetConstantF(unsigned start, const float* data, unsigned count) {
     d3dmgr->SetVertexShaderConstantF(start, data, count);
   }
@@ -105,7 +105,7 @@ struct VertexShader : public Shader {
 
 struct PixelShader : public Shader {
   LPDIRECT3DPIXELSHADER9    shader;
-	
+
   PixelShader()
   {
 	type = enigma_user::sh_pixel;
@@ -115,9 +115,9 @@ struct PixelShader : public Shader {
   {
 
   }
-  
+
   int Load(string fname) {
-    DWORD dwFlags = 0; 
+    DWORD dwFlags = 0;
 	//dwFlags |= D3DXSHADER_DEBUG;
     LPD3DXBUFFER pCode   = NULL;
     LPD3DXBUFFER pErrors = NULL;
@@ -127,7 +127,7 @@ struct PixelShader : public Shader {
       char* szErrors = (char*)pErrors->GetBufferPointer();
       pErrors->Release();
     }
-    if(FAILED(hrErr)) 
+    if(FAILED(hrErr))
     {
       MessageBox(NULL, "pixel shader creation failed", "CRendererDX9::Create", MB_OK|MB_ICONEXCLAMATION);
       return false;
@@ -137,11 +137,11 @@ struct PixelShader : public Shader {
     d3dmgr->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &shader);
     pCode->Release();
   }
-  
+
   void Use() {
 	d3dmgr->SetPixelShader(shader);
   }
-  
+
   void SetConstantF(unsigned start, const float* data, unsigned count) {
     d3dmgr->SetPixelShaderConstantF(start, data, count);
   }
@@ -206,4 +206,3 @@ void hlsl_shader_free(int id)
 }
 
 }
-

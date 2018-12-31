@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
+#include "Bridges/Win32-Direct3D11/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSblend.h"
 

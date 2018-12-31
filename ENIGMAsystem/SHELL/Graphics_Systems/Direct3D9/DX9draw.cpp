@@ -17,7 +17,7 @@
 **/
 
 #include "Direct3D9Headers.h"
-#include "Bridges/General/DX9Context.h"
+#include "Bridges/Win32-Direct3D9/DX9Context.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolors.h"

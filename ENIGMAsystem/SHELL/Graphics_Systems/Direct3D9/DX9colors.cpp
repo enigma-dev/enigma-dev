@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
+#include "Bridges/Win32-Direct3D9/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
