@@ -105,3 +105,8 @@ target_link_libraries("${EXE}" "lodepng")
 # zlib
 find_package(ZLIB REQUIRED)
 target_link_libraries("${EXE}" "${ZLIB_LIBRARIES}")
+
+foreach(EXT ${EXTENSIONS})
+  add_subdirectory("Universal_System/Extensions/${EXT}/")
+  target_link_libraries("${EXE}" "EXTENSION_${EXT}")
+endforeach()
