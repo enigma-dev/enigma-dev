@@ -35,9 +35,11 @@ using enigma_user::window_handle;
 using std::string;
 
 namespace enigma {
-  bool widget_system_initialize() {
-    return true;
-  }
+  
+bool widget_system_initialize() {
+  return true;
+}
+  
 } // namespace enigma
 
 void show_error(string errortext, const bool fatal) {
