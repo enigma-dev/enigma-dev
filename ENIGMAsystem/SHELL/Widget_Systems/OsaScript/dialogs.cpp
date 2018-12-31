@@ -15,10 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-namespace enigma
-{
-  int tfd_DialogEngine()
-  {
+namespace enigma {
+  int tfd_DialogEngine() {
     return 0;
   }
 }
