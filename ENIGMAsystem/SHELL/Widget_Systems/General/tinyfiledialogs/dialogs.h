@@ -17,19 +17,16 @@
 
 #include <string>
 
-namespace enigma
-{
+namespace enigma {
   int const tfd_OsaScript = 0;
   int const tfd_Zenity    = 1;
   int const tfd_KDialog   = 2;
-
   int tfd_DialogEngine();
 }
 
 //void show_error(std::string errortext, const bool fatal);
 
-namespace enigma_user
-{
+namespace enigma_user {
   //int show_message(std::string str);
   double show_question(std::string str);
   std::string get_string(std::string str, std::string def);
