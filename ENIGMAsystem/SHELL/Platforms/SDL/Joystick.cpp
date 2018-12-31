@@ -45,17 +45,17 @@ std::string joystick_name(int id) {
 }
 
 int joystick_axes(int id) {
-  int axes = 0;
-  if (SDL_JoystickNumAxes(joystick_get_handle(id)) >= 0)
-    axes = SDL_JoystickNumAxes(joystick_get_handle(id));
-  return axes;
+  int axes;
+  SDL_Joystick *joystick = joystick_get_handle(id);
+  axes = SDL_JoystickNumAxes(joystick);
+  return (axes > 0 ? axes : 0);
 }
 
 int joystick_buttons(int id) {
-  int buttons = 0;
-  if (SDL_JoystickNumButtons(joystick_get_handle(id)) >= 0)
-    buttons = SDL_JoystickNumButtons(joystick_get_handle(id));
-  return buttons;
+  int buttons;
+  SDL_Joystick *joystick = joystick_get_handle(id);
+  buttons = SDL_JoystickNumButtons(joystick);
+  return (buttons > 0 ? buttons : 0);
 }
 
 bool joystick_button(int id, int numb) {
