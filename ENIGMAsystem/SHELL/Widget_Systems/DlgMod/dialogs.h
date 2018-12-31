@@ -17,11 +17,11 @@
 
 #include <string>
 
-//void show_error(std::string errortext, const bool fatal);
+// void show_error(std::string errortext, const bool fatal);
 
 namespace enigma_user {
   
-//int show_message(std::string str);
+// int show_message(std::string str);
 bool show_question(std::string str);
 std::string get_string(std::string str, std::string def);
 std::string get_password(std::string str, std::string def);
