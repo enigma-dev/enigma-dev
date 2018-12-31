@@ -28,7 +28,7 @@ namespace enigma {
 
 namespace enigma_user {
   //int show_message(std::string str);
-  double show_question(std::string str);
+  bool show_question(std::string str);
   std::string get_string(std::string str, std::string def);
   std::string get_password(std::string str, std::string def);
   double get_integer(std::string str, double def);
@@ -39,5 +39,5 @@ namespace enigma_user {
   std::string get_save_filename_ext(std::string filter, std::string fname, std::string dir, std::string title);
   std::string get_directory(std::string dname);
   std::string get_directory_alt(std::string capt, std::string root);
-  double get_color(double defcol);
+  int get_color(int defcol);
 }
