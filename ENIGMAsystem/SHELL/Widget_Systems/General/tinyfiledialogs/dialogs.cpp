@@ -207,7 +207,7 @@ int show_message(const string &str) {
   return 1;
 }
 
-double show_question(string str) {
+bool show_question(string str) {
   string caption = window_get_caption();
 
   if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
