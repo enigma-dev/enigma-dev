@@ -180,6 +180,7 @@ void show_error(string errortext, const bool fatal) {
 }
 
 namespace enigma_user {
+  
 void show_info(string text, int bgcolor, int left, int top, int width, int height,
   bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop,
   bool pauseGame, string caption) {
@@ -466,4 +467,5 @@ int get_color(int defcol) {
 
   return (int)((rescol[0] & 0xff) + ((rescol[1] & 0xff) << 8) + ((rescol[2] & 0xff) << 16));
 }
+  
 } // namespace enigma_user
