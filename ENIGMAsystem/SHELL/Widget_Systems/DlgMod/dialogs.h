@@ -20,6 +20,7 @@
 //void show_error(std::string errortext, const bool fatal);
 
 namespace enigma_user {
+  
   //int show_message(std::string str);
   double show_question(std::string str);
   std::string get_string(std::string str, std::string def);
@@ -33,4 +34,5 @@ namespace enigma_user {
   std::string get_directory(std::string dname);
   std::string get_directory_alt(std::string capt, std::string root);
   double get_color(double defcol);
-}
+  
+} // namespave enigma_user
