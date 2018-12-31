@@ -17,7 +17,7 @@
 **/
 
 #include "Direct3D11Headers.h"
-#include "Bridges/General/DX11Context.h"
+#include "Bridges/Win32-Direct3D11/DX11Context.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolors.h"

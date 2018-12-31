@@ -20,7 +20,7 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Bridges/General/DX11Context.h"
+#include "Bridges/Win32-Direct3D11/DX11Context.h"
 #include "Graphics_Systems/General/GScolors.h"
 
 #include <windows.h>

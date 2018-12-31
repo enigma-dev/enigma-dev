@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
+#include "Bridges/Win32-Direct3D9/DX9Context.h"
 
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h" // for enigma_user::draw_primitive_count

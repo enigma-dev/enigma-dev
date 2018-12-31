@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 
-#include "Bridges/General/DX9Context.h"
+#include "Bridges/Win32-Direct3D9/DX9Context.h"
 #include "Direct3D9Headers.h"
 using namespace std;
 #include "DIRECTX9Std.h"

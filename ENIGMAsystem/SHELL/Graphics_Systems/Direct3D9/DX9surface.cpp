@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
+#include "Bridges/Win32-Direct3D9/DX9Context.h"
 #include "DX9SurfaceStruct.h"
 #include "DX9TextureStruct.h"
 #include "Direct3D9Headers.h"

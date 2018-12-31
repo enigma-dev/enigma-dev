@@ -18,7 +18,7 @@
 #ifndef DX9_TEXTURESTRUCT_H
 #define DX9_TEXTURESTRUCT_H
 
-#include "Bridges/General/DX9Context.h"
+#include "Bridges/Win32-Direct3D9/DX9Context.h"
 #include "Direct3D9Headers.h"
 
 #include <vector>

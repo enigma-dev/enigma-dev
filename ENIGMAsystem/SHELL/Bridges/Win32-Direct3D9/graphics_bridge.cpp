@@ -21,7 +21,7 @@
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
-#include "Bridges/General/DX9Context.h"
+#include "Bridges/Win32-Direct3D9/DX9Context.h"
 #include "Graphics_Systems/General/GScolors.h"
 
 #include <windows.h>
