@@ -1,9 +1,25 @@
+/** Copyright (C) 2018 Samuel Venable
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
 #include <string>
 
 //void show_error(std::string errortext, const bool fatal);
 
-namespace enigma_user
-{
+namespace enigma_user {
   //int show_message(std::string str);
   double show_question(std::string str);
   std::string get_string(std::string str, std::string def);
