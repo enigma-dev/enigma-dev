@@ -15,6 +15,10 @@ set(GRAPHICS_SOURCES
 
 add_library("GRAPHICS_${GRAPHICS}" "${GRAPHICS_SOURCES}")
 
-find_package(DirectX11 REQUIRED)
-target_include_directories("GRAPHICS_${GRAPHICS}" PRIVATE "${DirectX11_INCLUDE_DIRS}")
-target_link_libraries("GRAPHICS_${GRAPHICS}" "${DirectX11_LIBRARIES}")
+if(MSVC)
+    find_package(DirectX11 REQUIRED)
+    target_include_directories("GRAPHICS_${GRAPHICS}" PRIVATE "${DirectX11_INCLUDE_DIRS}")
+    target_link_libraries("GRAPHICS_${GRAPHICS}" "${DirectX11_LIBRARIES}")
+else()
+    target_link_libraries("GRAPHICS_${GRAPHICS}" dxgi dxguid d3d11 D3DCompiler)
+endif(MSVC)
