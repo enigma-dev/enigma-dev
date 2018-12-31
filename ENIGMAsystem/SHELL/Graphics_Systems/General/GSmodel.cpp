@@ -1,5 +1,6 @@
 /** Copyright (C) 2013 Robert Colton, Adriano Tumminelli
-*** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2014 Josh Ventura, Harijs Grinbergs, Seth N. Hetu
+*** Copyright (C) 2015 Harijs Grinbergs
 *** Copyright (C) 2017, 2018 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
