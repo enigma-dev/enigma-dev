@@ -5,3 +5,5 @@
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFexternals.h"
 #include "Platforms/General/PFsystem.h"
+#include "Platforms/General/PFjoystick.h"
+#include "Platforms/General/PFgamepad.h"

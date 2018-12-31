@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "Event.h"
+#include "Joystick.h"
 #include "Gamepad.h"
 
 #include "Platforms/General/PFwindow.h"
@@ -62,6 +63,7 @@ static std::array<SDL_Cursor*, -enigma_user::cr_size_all> cursors;
 
 void handleInput() {
   input_push();
+  joystick_update();
   pushGamepads();
 }
 
@@ -97,6 +99,7 @@ void initInput() {
 
   keyboard::inverse_keymap = inverse_map(keyboard::keymap);
   initCursors();
+  joystick_init();
   initGamepads();
 }
 
