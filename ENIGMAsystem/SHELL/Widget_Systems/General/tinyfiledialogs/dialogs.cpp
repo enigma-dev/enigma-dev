@@ -452,12 +452,12 @@ string get_directory_alt(string capt, string root) {
   return path ? string_replace_all(string(path) + "/", "//", "/") : "";
 }
 
-double get_color(double defcol) {
+int get_color(int defcol) {
   unsigned char rescol[3];
 
-  rescol[0] = (int)defcol & 0xFF;
-  rescol[1] = ((int)defcol >> 8) & 0xFF;
-  rescol[2] = ((int)defcol >> 16) & 0xFF;
+  rescol[0] = defcol & 0xFF;
+  rescol[1] = (defcol >> 8) & 0xFF;
+  rescol[2] = (defcol >> 16) & 0xFF;
 
   if (tinyfd_colorChooser("Color", NULL, rescol, rescol, tfd_DialogEngine()) == NULL)
     return -1;
