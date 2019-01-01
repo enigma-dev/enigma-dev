@@ -62,30 +62,37 @@ HWND get_window_handle() {
   return hWnd;
 }
 
-}  // namespace enigma
+static inline string add_slash(const string& dir) {
+  if (dir.empty() || *dir.rbegin() != '\\') return dir + '\\';
+  return dir;
+}
+
+} // namespace enigma
 
 namespace enigma_user {
-  bool set_working_directory(string dname) {
-    replace(dname.begin(), dname.end(), '/', '\\');
+  
+bool set_working_directory(string dname) {
+  replace(dname.begin(), dname.end(), '/', '\\');
 
-    if (!dname.empty()) {
-      while (*dname.rbegin() == '\\') {
-        dname.erase(dname.size() - 1);
-      }
+  if (!dname.empty()) {
+    while (*dname.rbegin() == '\\') {
+      dname.erase(dname.size() - 1);
     }
-
-    tstring tstr_dname = widen(dname);
-    DWORD attr = GetFileAttributesW(tstr_dname.c_str());
-
-    if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) {
-      if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
-        working_directory = shorten(tstr_dname) + string("\\");
-        return true;
-      }
-    }
-
-    return false;
   }
+
+  tstring tstr_dname = widen(dname);
+  DWORD attr = GetFileAttributesW(tstr_dname.c_str());
+
+  if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) {
+    if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
+      working_directory = add_slash(shorten(tstr_dname));
+      return true;
+    }
+  }
+
+  return false;
+}
+  
 } // enigma_user
 
 namespace enigma {
@@ -316,19 +323,19 @@ void initialize_directory_globals() {
   // Set the working_directory
   WCHAR buffer[MAX_PATH + 1];
   GetCurrentDirectoryW(MAX_PATH + 1, buffer);
-  enigma_user::working_directory = shorten(buffer) + string("\\");
+  enigma_user::working_directory = add_slash(shorten(buffer));
 
   // Set the program_directory
   buffer[0] = 0;
   GetModuleFileNameW(NULL, buffer, MAX_PATH + 1);
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
-      enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/") + 1);
+      add_slash(enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/")));
   
   // Set the temp_directory
   buffer[0] = 0;
   GetTempPathW(MAX_PATH + 1, buffer);
-  enigma_user::temp_directory = shorten(buffer);
+  enigma_user::temp_directory = add_slash(shorten(buffer));
 }
 
 }  // namespace enigma
