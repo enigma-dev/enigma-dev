@@ -43,14 +43,14 @@ namespace enigma {
     // Set the working_directory
     char buffer[PATH_MAX + 1];
     if (getcwd(buffer, PATH_MAX + 1) != NULL)
-      enigma_user::working_directory = buffer + string("/");
+      enigma_user::working_directory = enigma::add_slash(buffer);
 
     // Set the program_directory
     buffer[0] = 0;
 
     uint32_t bufsize = sizeof(buffer);
     if (_NSGetExecutablePath(buffer, &bufsize) == 0) {
-      enigma_user::program_directory = dirname(buffer) + string("/");
+      enigma_user::program_directory = enigma::add_slash(dirname(buffer));
     }
 
     // Set the temp_directory
@@ -61,8 +61,7 @@ namespace enigma {
     else 
       enigma_user::temp_directory = env;
     
-    if (enigma_user::temp_directory.back() != '/')
-      enigma_user::temp_directory += string("/");
+    enigma_user::temp_directory = enigma::add_slash(enigma_user::temp_directory);
   }
 }
 
