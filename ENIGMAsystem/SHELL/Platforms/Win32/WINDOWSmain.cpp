@@ -447,7 +447,7 @@ std::string environment_get_variable(std::string name) {
   tstring tstr_name = widen(name);
   GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
 
-  return shorten(buffer);
+  return enigma::add_slash(shorten(buffer));
 }
 
 void action_webpage(const std::string &url) {
