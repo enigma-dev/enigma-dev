@@ -34,7 +34,7 @@ string environment_get_variable(string name) {
   if (env != NULL) 
     return enigma::add_slash(env);
 
-  return ""; 
+  return string(""); 
 }
 
 } // namespace enigma_user
