@@ -72,22 +72,14 @@ static inline string add_slash(const string& dir) {
 namespace enigma_user {
   
 bool set_working_directory(string dname) {
-  replace(dname.begin(), dname.end(), '/', '\\');
-
-  if (!dname.empty()) {
-    while (*dname.rbegin() == '\\') {
-      dname.erase(dname.size() - 1);
-    }
-  }
-
   tstring tstr_dname = widen(dname);
-  DWORD attr = GetFileAttributesW(tstr_dname.c_str());
-
-  if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) {
-    if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
-      working_directory = enigma::add_slash(shorten(tstr_dname));
-      return true;
-    }
+  replace(tstr_dname.begin(), tstr_dname.end(), '/', '\\');
+  if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
+    WCHAR wstr_buffer[MAX_PATH + 1];
+    if GetCurrentDirectoryW(MAX_PATH + 1, wstr_buffer) != 0)
+      working_directory = enigma::add_slash(shorten(wstr_buffer));
+    
+    return true;
   }
 
   return false;
