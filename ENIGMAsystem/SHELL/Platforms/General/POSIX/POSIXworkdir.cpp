@@ -6,15 +6,6 @@
 
 using std::string;
 
-namespace enigma {
-
-static inline string add_slash(const string& dir) {
-  if (dir.empty() || *dir.rbegin() != '/') return dir + '/';
-  return dir;
-}
-  
-} // namespace enigma
-
 namespace enigma_user {
 
 bool set_working_directory(string dname) {
