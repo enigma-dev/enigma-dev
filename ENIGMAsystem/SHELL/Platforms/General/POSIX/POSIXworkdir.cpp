@@ -1,5 +1,6 @@
 #include "Platforms/General/PFmain.h"
 
+#include <limits.h>
 #include <unistd.h>
 #include <string>
 
