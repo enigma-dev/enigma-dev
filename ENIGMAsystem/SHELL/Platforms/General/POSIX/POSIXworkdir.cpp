@@ -27,7 +27,7 @@ bool set_working_directory(string dname) {
   struct stat sb;
   if (stat((char *)dname.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) {
     if (chdir((char *)dname.c_str()) == 0) {
-      working_directory = dname + string("/");
+      working_directory = enigma::add_slash(dname);
       return true;
     }
   }
