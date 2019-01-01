@@ -76,7 +76,7 @@ bool set_working_directory(string dname) {
   replace(tstr_dname.begin(), tstr_dname.end(), '/', '\\');
   if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
     WCHAR wstr_buffer[MAX_PATH + 1];
-    if GetCurrentDirectoryW(MAX_PATH + 1, wstr_buffer) != 0) {
+    if (GetCurrentDirectoryW(MAX_PATH + 1, wstr_buffer) != 0) {
       working_directory = enigma::add_slash(shorten(wstr_buffer));
       return true;
     }
