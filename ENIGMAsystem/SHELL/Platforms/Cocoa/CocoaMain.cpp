@@ -83,24 +83,19 @@ int main(int argc,char** argv) {
 
 namespace enigma_user {
 
-  void sleep(int ms) {
-    if (ms > 1000) ::sleep(ms/1000);
-    usleep((ms % 1000) *1000);
-  };
+void sleep(int ms) {
+  if (ms > 1000) ::sleep(ms/1000);
+  usleep((ms % 1000) *1000);
+};
   
-  int parameter_count() {
+int parameter_count() {
   // TODO
   return 0;
-  }
+}
 
-  string parameter_string(int n) {
-    // TODO
-    return string("");
-  }
-
-  string environment_get_variable(string name) {
-    // TODO
-    return string("");
-  }
+string parameter_string(int n) {
+  // TODO
+  return string("");
+}
 
 }
