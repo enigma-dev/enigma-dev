@@ -135,9 +135,4 @@ void url_open_full(std::string url, std::string target, std::string options) { u
 
 void action_webpage(const std::string& url) { url_open(url); }
 
-std::string environment_get_variable(std::string name) {
-  char* ev = getenv(name.c_str());
-  return ev ? ev : "";
-}
-
 }  //namespace enigma_user
