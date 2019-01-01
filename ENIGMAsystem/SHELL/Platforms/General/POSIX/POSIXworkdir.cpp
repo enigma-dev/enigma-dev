@@ -29,4 +29,12 @@ bool set_working_directory(string dname) {
   return false;
 }
 
+string environment_get_variable(string name) {
+  char *env = getenv((char *)name.c_str()); 
+  if (env != NULL) 
+    return enigma::add_slash(env);
+
+  return ""; 
+}
+
 } // namespace enigma_user
