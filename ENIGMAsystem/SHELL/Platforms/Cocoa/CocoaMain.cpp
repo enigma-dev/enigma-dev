@@ -62,12 +62,10 @@ void initialize_directory_globals() {
   // Set the temp_directory
   char *env = getenv("TMPDIR");
 
-  if (env == NULL)
+  if (env != NULL)
+    enigma_user::temp_directory = add_slash(env);
+  else
     enigma_user::temp_directory = "/tmp/";
-  else 
-    enigma_user::temp_directory = env;
-    
-  enigma_user::temp_directory = add_slash(enigma_user::temp_directory);
 }
   
 } // namespace enigma
