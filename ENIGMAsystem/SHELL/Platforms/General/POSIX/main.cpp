@@ -29,8 +29,7 @@ namespace enigma {
     else 
       enigma_user::temp_directory = env;
     
-    if (enigma_user::temp_directory.back() != '/')
-      enigma_user::temp_directory = enigma::add_slash(enigma_user::temp_directory);
+    enigma_user::temp_directory = enigma::add_slash(enigma_user::temp_directory);
   }
 }
 
