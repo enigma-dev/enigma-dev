@@ -20,11 +20,10 @@ namespace enigma_user {
 bool set_working_directory(string dname) {
   if (chdir((char *)dname.c_str()) == 0) {
     char buffer[PATH_MAX + 1]; 
-    if (getcwd(buffer, PATH_MAX + 1) != NULL)
+    if (getcwd(buffer, PATH_MAX + 1) != NULL) {
       working_directory = enigma::add_slash();
-    else
-      working_directory = "/";
-    return true;
+      return true;
+    }
   }
 
   return false;
