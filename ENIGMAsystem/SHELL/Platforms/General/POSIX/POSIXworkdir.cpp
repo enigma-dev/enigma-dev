@@ -18,18 +18,14 @@ static inline string add_slash(const string& dir) {
 namespace enigma_user {
 
 bool set_working_directory(string dname) {
-  if (!dname.empty()) {
-    while (*dname.rbegin() == '/') {
-      dname.erase(dname.size() - 1);
-    }
-  }
-
-  struct stat sb;
-  if (stat((char *)dname.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) {
-    if (chdir((char *)dname.c_str()) == 0) {
-      working_directory = enigma::add_slash(dname);
-      return true;
-    }
+  if (chdir((char *)dname.c_str()) == 0) {
+    char buffer[PATH_MAX + 1]; 
+    getcwd(buffer, PATH_MAX + 1);
+    if (buffer != NULL)
+      working_directory = enigma::add_slash();
+    else
+      working_directory = "/";
+    return true;
   }
 
   return false;
