@@ -93,8 +93,8 @@ message Room {
     optional uint32 width = 8 [(gmx) = "w"];
     optional uint32 height = 9 [(gmx) = "h"];
     optional int32 depth = 10;
-    optional double xscale = 11 [(gmx) = "scaleX"];
-    optional double yscale = 12 [(gmx) = "scaleY"];
+    optional double xscale = 11 [default = 1.0, (gmx) = "scaleX"];
+    optional double yscale = 12 [default = 1.0, (gmx) = "scaleY"];
     optional int32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
     optional double alpha = 14 [default = 1.0];
 
