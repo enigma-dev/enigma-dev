@@ -32,8 +32,8 @@ message Room {
     optional double hspeed = 8;
     optional double vspeed = 9;
     optional bool stretch = 10;
-    optional int32 color = 11;
-    optional double alpha = 12;
+    optional int32 color = 11 [default = 0xFFFFFF];
+    optional double alpha = 12 [default = 1.0];
   }
 
   repeated Background backgrounds = 15 [(gmx) = "backgrounds/background"];
@@ -72,11 +72,11 @@ message Room {
     optional double rotation  = 11;
     optional double zrotation = 12;
     optional int32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
-    
+
     message EditorSettings {
       optional bool locked = 1;
     }
-    
+
     optional EditorSettings editor_settings = 31;
   }
 
@@ -95,13 +95,13 @@ message Room {
     optional int32 depth = 10;
     optional double xscale = 11 [(gmx) = "scaleX"];
     optional double yscale = 12 [(gmx) = "scaleY"];
-    optional int32 color = 13 [(gmx) = "colour"];
-    optional double alpha = 14;
-    
+    optional int32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
+    optional double alpha = 14 [default = 1.0];
+
     message EditorSettings {
       optional bool locked = 1;
     }
-    
+
     optional EditorSettings editor_settings = 31;
   }
 
