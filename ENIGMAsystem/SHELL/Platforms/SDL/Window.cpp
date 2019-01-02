@@ -298,4 +298,20 @@ bool keyboard_check_direct(int key) {
   return state[enigma::keyboard::inverse_keymap[key]];
 }
 
+void keyboard_key_press(int key) {
+  SDL_Event sdlevent = { };
+  sdlevent.type = SDL_KEYDOWN;
+  sdlevent.key.keysym.sym = enigma::keyboard::inverse_keymap[key];
+
+  SDL_PushEvent(&sdlevent);
+}
+
+void keyboard_key_release(int key) {
+  SDL_Event sdlevent = { };
+  sdlevent.type = SDL_KEYUP;
+  sdlevent.key.keysym.sym = enigma::keyboard::inverse_keymap[key];
+
+  SDL_PushEvent(&sdlevent);
+}
+
 }  // namespace enigma_user
