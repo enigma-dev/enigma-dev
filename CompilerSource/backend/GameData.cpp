@@ -326,7 +326,7 @@ static void ImportSettings(const ::GameSettings &settings, const ESLookup &looku
   gen->set_game_icon(settings.gameIcon);
 
   buffers::resources::Graphics *gfx = set.mutable_graphics();
-  gfx->set_color_outside_room_region(settings.colorOutsideRoom);
+  gfx->set_color_outside_room_region(javaColor(settings.colorOutsideRoom));
   gfx->set_allow_fullscreen_change(settings.letF4SwitchFullscreen);
   gfx->set_interpolate_textures(settings.interpolate);
   gfx->set_force_software_vertex_processing(settings.forceSoftwareVertexProcessing);
