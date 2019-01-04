@@ -91,35 +91,35 @@ void joystick_uninit() {
 }
   
 void joystick_update() {     
-	if (SDL_NumJoysticks() == 0) {
-		if (joystick1 != NULL) {
-			SDL_JoystickClose(joystick1);
-			joystick1 = NULL;
-		}
+  if (SDL_NumJoysticks() == 0) {
+    if (joystick1 != NULL) {
+      SDL_JoystickClose(joystick1);
+      joystick1 = NULL;
+    }
 
-		if (joystick2 != NULL) {
-			SDL_JoystickClose(joystick2);
-			joystick2 = NULL;
-		}
-	}
+    if (joystick2 != NULL) {
+      SDL_JoystickClose(joystick2);
+      joystick2 = NULL;
+    }
+  }
 
-	if (SDL_NumJoysticks() == 1) {
-		if (joystick1 == NULL)
-			joystick1 = SDL_JoystickOpen(0);
-		if (joystick2 != NULL) {
-			SDL_JoystickClose(joystick2);
-			joystick2 = NULL;
-		}
-	}
+  if (SDL_NumJoysticks() == 1) {
+    if (joystick1 == NULL)
+      joystick1 = SDL_JoystickOpen(0);
+    if (joystick2 != NULL) {
+      SDL_JoystickClose(joystick2);
+      joystick2 = NULL;
+    }
+  }
 
-	if (SDL_NumJoysticks() == 2) {
-		if (joystick1 == NULL)
-			joystick1 = SDL_JoystickOpen(0);
-		if (joystick2 == NULL)
-			joystick1 = SDL_JoystickOpen(1);
-	}
+  if (SDL_NumJoysticks() == 2) {
+    if (joystick1 == NULL)
+      joystick1 = SDL_JoystickOpen(0);
+    if (joystick2 == NULL)
+      joystick1 = SDL_JoystickOpen(1);
+  }
 
-	SDL_JoystickUpdate();
+  SDL_JoystickUpdate();
 }
   
 } // namespace enigma
