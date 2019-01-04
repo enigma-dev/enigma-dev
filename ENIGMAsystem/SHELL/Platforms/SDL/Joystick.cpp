@@ -24,7 +24,6 @@ namespace {
 
 SDL_Joystick *joystick1;
 SDL_Joystick *joystick2;
-bool update = true;
 
 static inline SDL_Joystick* joystick_get_handle(int id) {
   return (id - 1 < 0.5) ? joystick1 : joystick2;
@@ -92,15 +91,35 @@ void joystick_uninit() {
 }
   
 void joystick_update() {     
-  if (enigma_user::joystick_exists(1) || enigma_user::joystick_exists(2))
-    update = true;
-  else if (update) {
-    joystick_uninit();
-    if (joystick_init())
-      update = false;
-  }
-  if (update)
-    SDL_JoystickUpdate();
+	if (SDL_NumJoysticks() == 0) {
+		if (joystick1 != NULL) {
+			SDL_JoystickClose(joystick1);
+			joystick1 = NULL;
+		}
+
+		if (joystick2 != NULL) {
+			SDL_JoystickClose(joystick2);
+			joystick2 = NULL;
+		}
+	}
+
+	if (SDL_NumJoysticks() == 1) {
+		if (joystick1 == NULL)
+			joystick1 = SDL_JoystickOpen(0);
+		if (joystick2 != NULL) {
+			SDL_JoystickClose(joystick2);
+			joystick2 = NULL;
+		}
+	}
+
+	if (SDL_NumJoysticks() == 2) {
+		if (joystick1 == NULL)
+			joystick1 = SDL_JoystickOpen(0);
+		if (joystick2 == NULL)
+			joystick1 = SDL_JoystickOpen(1);
+	}
+
+	SDL_JoystickUpdate();
 }
   
 } // namespace enigma
