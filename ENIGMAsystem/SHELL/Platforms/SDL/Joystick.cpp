@@ -116,7 +116,7 @@ void joystick_update() {
     if (joystick1 == NULL)
       joystick1 = SDL_JoystickOpen(0);
     if (joystick2 == NULL)
-      joystick1 = SDL_JoystickOpen(1);
+      joystick2 = SDL_JoystickOpen(1);
   }
 
   SDL_JoystickUpdate();
