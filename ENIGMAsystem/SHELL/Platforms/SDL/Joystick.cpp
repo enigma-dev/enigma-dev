@@ -101,7 +101,7 @@ void joystick_update() {
     }
 
     if (joystick2 != NULL) {
-      joystick_state_changed = true;
+      joystick_state_change = true;
       SDL_JoystickClose(joystick2);
       joystick2 = NULL;
     }
@@ -112,14 +112,14 @@ void joystick_update() {
     joystick2 = SDL_JoystickOpen(1);
     if (joystick1 == NULL && joystick2 != NULL) {
       if (joystick_exists(1)) {
-        joystick_state_changed = false;
+        joystick_state_change = false;
         SDL_JoystickClose(joystick2);
       }
     }
     
     if (joystick2 == NULL && joystick1 != NULL) {
       if (joystick_exists(2)) {
-        joystick_state_changed = false;
+        joystick_state_change = false;
         SDL_JoystickClose(joystick1);
       }
     }
