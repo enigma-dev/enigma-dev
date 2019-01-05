@@ -22,8 +22,8 @@
 
 namespace {
 
-SDL_Joystick *joystick1;
-SDL_Joystick *joystick2;
+SDL_Joystick *joystick1 = NULL;
+SDL_Joystick *joystick2 = NULL;
 
 static inline SDL_Joystick* joystick_get_handle(int id) {
   return (id - 1 < 0.5) ? joystick1 : joystick2;
@@ -79,14 +79,22 @@ namespace enigma {
 bool joystick_init() {
   double init;
   init = (SDL_InitSubSystem(SDL_INIT_JOYSTICK) > 0);
-  joystick1 = SDL_JoystickOpen(0);
-  joystick2 = SDL_JoystickOpen(1);
+  if (joystick1 == NULL)
+    joystick1 = SDL_JoystickOpen(0);
+  
+  if (joystick2 == NULL)
+    joystick2 = SDL_JoystickOpen(1);
+  
   return init;
 }
 
 void joystick_uninit() {
-  SDL_JoystickClose(joystick1);
-  SDL_JoystickClose(joystick2);
+  if (joystick1 != NULL)
+    SDL_JoystickClose(joystick1);
+  
+  if (joystick2 != NULL)
+    SDL_JoystickClose(joystick2);
+  
   SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
   
