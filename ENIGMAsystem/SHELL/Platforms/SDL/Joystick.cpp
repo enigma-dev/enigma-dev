@@ -91,51 +91,27 @@ void joystick_uninit() {
 }
   
 void joystick_update() {  
-  int joystick_count = SDL_NumJoysticks();
-  bool joystick_state_change; // change state?
-  if (joystick_count <= 0) {
-    if (joystick1 != NULL) {
-      joystick_state_change = true;
-      SDL_JoystickClose(joystick1);
-      joystick1 = NULL;
-    }
+	int joystick_count = SDL_NumJoysticks();
+	if (joystick_count <= 0) {
+		if (joystick1 != NULL) {
+			SDL_JoystickClose(joystick1);
+			joystick1 = NULL;
+		}
 
-    if (joystick2 != NULL) {
-      joystick_state_change = true;
-      SDL_JoystickClose(joystick2);
-      joystick2 = NULL;
-    }
-  }
+		if (joystick2 != NULL) {
+			SDL_JoystickClose(joystick2);
+			joystick2 = NULL;
+		}
+	}
 
-  if (joystick_count == 1 && joystick_state_change) {
-    joystick1 = SDL_JoystickOpen(0);
-    joystick2 = SDL_JoystickOpen(1);
-    if (joystick1 == NULL && joystick2 != NULL) {
-      if (joystick_exists(1)) {
-        joystick_state_change = false;
-        SDL_JoystickClose(joystick2);
-      }
-    }
-    
-    if (joystick2 == NULL && joystick1 != NULL) {
-      if (joystick_exists(2)) {
-        joystick_state_change = false;
-        SDL_JoystickClose(joystick1);
-      }
-    }
-  }
+	if (joystick_count > 0) {
+		if (joystick1 == NULL)
+			joystick1 = SDL_JoystickOpen(0);
+		if (joystick2 == NULL)
+			joystick2 = SDL_JoystickOpen(1);
+	}
 
-  if (joystick_count >= 2) {
-    if (joystick1 == NULL) {
-      joystick_state_change = true;
-      joystick1 = SDL_JoystickOpen(0);
-    }
-    if (joystick2 == NULL)
-      joystick_state_change = true;
-      joystick2 = SDL_JoystickOpen(1);
-  }
-
-  SDL_JoystickUpdate();
+	SDL_JoystickUpdate();
 }
   
 } // namespace enigma
