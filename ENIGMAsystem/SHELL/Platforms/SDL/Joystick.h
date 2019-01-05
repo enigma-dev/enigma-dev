@@ -16,9 +16,9 @@
 **/
 
 namespace enigma {
-  
-int tfd_DialogEngine() {
-  return 0;
+
+bool joystick_init();
+void joystick_uninit();
+void joystick_update();
+
 }
-  
-} // namespave enigma

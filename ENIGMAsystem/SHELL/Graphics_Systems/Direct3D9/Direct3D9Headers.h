@@ -21,6 +21,4 @@
 #include <cmath>
 #include <string>
 using namespace std;
-
-#include <d3dx9.h>
 #endif
