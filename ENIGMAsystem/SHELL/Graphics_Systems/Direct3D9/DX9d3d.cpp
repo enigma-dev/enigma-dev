@@ -25,6 +25,8 @@
 
 #include "Widget_Systems/widgets_mandatory.h"
 
+#include "Universal_System/scalar.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
 namespace enigma {
@@ -341,8 +343,8 @@ class d3d_lights
 		light.Attenuation0 = 1.0f;    // no constant inverse attenuation
 		light.Attenuation1 = 0.0f;    // only .125 inverse attenuation
 		light.Attenuation2 = 0.0f;    // no square inverse attenuation
-	    //light.Phi = D3DXToRadian(360.0f);    // set the outer cone to 360 degrees
-		//light.Theta = D3DXToRadian(360.0f);    // set the inner cone to 360 degrees
+		//light.Phi = gs_angle_to_radians(360.0f);    // set the outer cone to 360 degrees
+		//light.Theta = gs_angle_to_radians(360.0f);    // set the inner cone to 360 degrees
 		light.Falloff = 1.0f;    // use the typical falloff
 
 		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light
