@@ -25,7 +25,6 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <d3d9.h>
-#include <dxerr9.h>
 
 #include <sstream>
 #include <string.h>
@@ -226,8 +225,7 @@ void Reset(D3DPRESENT_PARAMETERS *pPresentationParameters) {
 	if (FAILED(hr)) {
 		MessageBox(
 			enigma::hWnd,
-			"Failed to reset Direct3D 9.0 Device",
-			DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
+			TEXT("Device Reset Failed"), TEXT("Error"),
 			MB_ICONERROR | MB_OK
 		);
 		return;  // should probably force the game closed
@@ -259,7 +257,7 @@ HRESULT CreateIndexBuffer(UINT Length, DWORD Usage,  D3DFORMAT Format,  D3DPOOL 
 void CreateTexture(UINT Width, UINT Height, UINT Levels, DWORD Usage, D3DFORMAT Format, D3DPOOL Pool, IDirect3DTexture9 **ppTexture, HANDLE *pSharedHandle) {
 	HRESULT hr = device->CreateTexture(Width, Height, Levels, Usage, Format, Pool, ppTexture, pSharedHandle);
   	if (FAILED(hr)) {
-      MessageBox(NULL, DXGetErrorDescription9(hr), DXGetErrorString9(hr), MB_OK|MB_ICONEXCLAMATION);
+      MessageBox(NULL, TEXT("CreateTexture Failed"), TEXT("Error"), MB_OK|MB_ICONEXCLAMATION);
 	  return;
     }
 }
@@ -276,7 +274,7 @@ void CreateVertexDeclaration(const D3DVERTEXELEMENT9 *pVertexElements, IDirect3D
 void CreatePixelShader(const DWORD *pFunction, IDirect3DPixelShader9 **ppShader) {
 	HRESULT hr = device->CreatePixelShader(pFunction, ppShader);
 	if (FAILED(hr)) {
-      MessageBox(NULL, "CreatePixelShader failed", "CRendererDX9::Create", MB_OK|MB_ICONEXCLAMATION);
+      MessageBox(NULL, TEXT("CreatePixelShader Failed"), TEXT("Error"), MB_OK|MB_ICONEXCLAMATION);
       return;
     }
 }
@@ -284,7 +282,7 @@ void CreatePixelShader(const DWORD *pFunction, IDirect3DPixelShader9 **ppShader)
 void CreateVertexShader(const DWORD *pFunction, IDirect3DVertexShader9 **ppShader) {
 	HRESULT hr = device->CreateVertexShader(pFunction, ppShader);
 	if (FAILED(hr)) {
-      MessageBox(NULL, "CreateVertexShader failed", "CRendererDX9::Create", MB_OK|MB_ICONEXCLAMATION);
+      MessageBox(NULL, TEXT("CreateVertexShader Failed"), TEXT("Error"), MB_OK|MB_ICONEXCLAMATION);
 	  return;
     }
 }
@@ -293,8 +291,7 @@ void GetSwapChain(UINT  iSwapChain, IDirect3DSwapChain9 **ppSwapChain) {
 	HRESULT hr = device->GetSwapChain(iSwapChain, ppSwapChain);
 		if(FAILED(hr)){
 			MessageBox(enigma::hWnd,
-               "Failed to retrieve the Direct3D 9.0 Swap Chain",
-			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
+			   TEXT("GetSwapChain Failed"), TEXT("Error"),
                MB_ICONERROR | MB_OK);
 			return;  // should probably force the game closed
 		}

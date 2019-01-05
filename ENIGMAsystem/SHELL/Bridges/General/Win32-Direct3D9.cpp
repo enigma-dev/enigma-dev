@@ -27,7 +27,6 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <d3d9.h>
-#include <dxerr9.h>
 #include <string>
 using namespace std;
 
