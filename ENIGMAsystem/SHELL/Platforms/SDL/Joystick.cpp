@@ -107,7 +107,7 @@ void joystick_update() {
     }
   }
 
-  if (joystick_count == 1) {
+  if (joystick_count == 1 && joystick_state_change) {
     joystick1 = SDL_JoystickOpen(0);
     joystick2 = SDL_JoystickOpen(1);
     if (joystick1 == NULL && joystick2 != NULL) {
