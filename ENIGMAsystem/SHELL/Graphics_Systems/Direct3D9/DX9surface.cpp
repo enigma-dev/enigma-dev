@@ -21,6 +21,7 @@
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Universal_System/nlpo2.h"
@@ -89,10 +90,7 @@ void surface_set_target(int id)
   d3dmgr->device->GetRenderTarget(0, &pBackBuffer);
 	d3dmgr->device->SetRenderTarget(0, surface->surf);
 
-	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH(&matProjection,D3DX_PI / 4.0f,1,1,100);
-	//set projection matrix
-	d3dmgr->SetTransform(D3DTS_PROJECTION,&matProjection);
+  d3d_set_projection_ortho(0, 0, surface->width, surface->height, 0);
 }
 
 void surface_reset_target()
