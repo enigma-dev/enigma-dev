@@ -80,6 +80,10 @@ namespace enigma {
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+  if (uMsg == WM_INITDIALOG) {
+    return true;
+  }
+
   if (uMsg == WM_KEYUP) {
     switch (wParam) {
       case VK_ESCAPE:
@@ -103,6 +107,7 @@ static INT_PTR CALLBACK GetStrProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
     SetWindowText(hwndDlg, gs_cap.c_str());
     SetDlgItemText(hwndDlg, 12, gs_def.c_str());
     SetDlgItemText(hwndDlg, 13, gs_message.c_str());
+    return true;
   }
 
   if (uMsg == WM_COMMAND) {
@@ -128,6 +133,7 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
     SetWindowText(hwndDlg, gs_cap.c_str());
     SetDlgItemText(hwndDlg, 14, gs_username.c_str());
     SetDlgItemText(hwndDlg, 15, gs_password.c_str());
+    return true;
   }
 
   if (uMsg == WM_COMMAND) {
