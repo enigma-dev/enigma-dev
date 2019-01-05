@@ -90,8 +90,9 @@ void joystick_uninit() {
   SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
   
-void joystick_update() {     
-  if (SDL_NumJoysticks() == 0) {
+void joystick_update() {  
+  int joystick_count = SDL_NumJoysticks();
+  if (joystick_count == 0) {
     if (joystick1 != NULL) {
       SDL_JoystickClose(joystick1);
       joystick1 = NULL;
@@ -103,16 +104,20 @@ void joystick_update() {
     }
   }
 
-  if (SDL_NumJoysticks() == 1) {
+  if (joystick_count == 1) {
     if (joystick1 == NULL)
       joystick1 = SDL_JoystickOpen(0);
+    if (joystick1 != NULL) {
+      SDL_JoystickClose(joystick1);
+      joystick1 = NULL;
+    }
     if (joystick2 != NULL) {
       SDL_JoystickClose(joystick2);
       joystick2 = NULL;
     }
   }
 
-  if (SDL_NumJoysticks() == 2) {
+  if (joystick_count == 2) {
     if (joystick1 == NULL)
       joystick1 = SDL_JoystickOpen(0);
     if (joystick2 == NULL)
