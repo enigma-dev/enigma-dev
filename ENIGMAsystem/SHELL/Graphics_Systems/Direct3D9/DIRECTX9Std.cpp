@@ -38,6 +38,6 @@ namespace enigma_user {
 // Stolen entirely from the documentation and thrown into a switch() structure.
 string draw_get_graphics_error()
 {
-
+  return "";
 }
 }

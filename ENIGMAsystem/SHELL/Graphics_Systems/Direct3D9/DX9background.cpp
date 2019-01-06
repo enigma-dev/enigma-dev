@@ -70,7 +70,7 @@ namespace enigma_user
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
 {
-
+  return -1;
 }
 
 }
