@@ -87,15 +87,6 @@ if (NOT ${containsGL} EQUAL -1)
   endif()
 endif()
 
-# zlib
-find_package(ZLIB REQUIRED)
-include_directories("${ZLIB_INCLUDE_DIRS}")
-target_link_libraries("${EXE}" "${ZLIB_LIBRARIES}")
-
-# Shared Sources
-add_subdirectory("${ENIGMA_DIR}/shared/lodepng" lodepng)
-target_link_libraries("${EXE}" "lodepng")
-
 # Universal System //FIXME: circular dependency between graphics system and universal
 add_subdirectory("Universal_System/")
 target_link_libraries("${EXE}" "UNIVERSAL_SYSTEM")
