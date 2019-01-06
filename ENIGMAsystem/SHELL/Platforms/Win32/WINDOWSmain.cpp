@@ -27,7 +27,6 @@
 #include "Universal_System/var4.h"
 
 #include <climits>
-#include <shlwapi.h>
 #include <mmsystem.h>
 #include <time.h>
 #include <unistd.h>
