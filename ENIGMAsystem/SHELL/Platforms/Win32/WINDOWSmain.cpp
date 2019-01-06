@@ -439,11 +439,11 @@ void execute_program(std::string operation, std::string fname, std::string args,
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
 
 std::string environment_get_variable(std::string name) {
-  WCHAR buffer[MAX_PATH];
+  WCHAR buffer[1024];
   tstring tstr_name = widen(name);
-  GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, MAX_PATH);
+  GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
 
-  return shorten(PathAddBackslashW(buffer));
+  return shorten(buffer);
 }
 
 void action_webpage(const std::string &url) {
