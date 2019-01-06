@@ -26,6 +26,7 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
+#include <climits>
 #include <shlwapi.h>
 #include <mmsystem.h>
 #include <time.h>
@@ -439,9 +440,9 @@ void execute_program(std::string operation, std::string fname, std::string args,
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
 
 std::string environment_get_variable(std::string name) {
-  WCHAR buffer[1024];
+  WCHAR buffer[INT_MAX];
   tstring tstr_name = widen(name);
-  GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
+  GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, INT_MAX);
 
   return shorten(buffer);
 }
