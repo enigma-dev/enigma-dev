@@ -26,7 +26,6 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
-#include <climits>
 #include <mmsystem.h>
 #include <time.h>
 #include <unistd.h>
@@ -62,7 +61,7 @@ void initInput(){};
 HWND get_window_handle() {
   return hWnd;
 }
-  
+
 static inline string add_slash(const string& dir) {
   if (dir.empty() || *dir.rbegin() != '\\') return dir + '\\';
   return dir;
@@ -314,21 +313,21 @@ void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
 void initialize_directory_globals() {
   // Set the working_directory
-  WCHAR buffer[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, buffer);
-  enigma_user::working_directory = enigma::add_slash(shorten(buffer));
+  WCHAR buffer[MAX_PATH + 1];
+  GetCurrentDirectoryW(MAX_PATH + 1, buffer);
+  enigma_user::working_directory = add_slash(shorten(buffer));
 
   // Set the program_directory
   buffer[0] = 0;
-  GetModuleFileNameW(NULL, buffer, MAX_PATH);
+  GetModuleFileNameW(NULL, buffer, MAX_PATH + 1);
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
     enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
   
   // Set the temp_directory
   buffer[0] = 0;
-  GetTempPathW(MAX_PATH, buffer);
-  enigma_user::temp_directory = enigma::add_slash(shorten(buffer));
+  GetTempPathW(MAX_PATH + 1, buffer);
+  enigma_user::temp_directory = add_slash(shorten(buffer));
 }
 
 }  // namespace enigma
@@ -448,7 +447,7 @@ std::string environment_get_variable(std::string name) {
   tstring tstr_name = widen(name);
   GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, SHRT_MAX);
 
-  return shorten(buffer);
+  return enigma::add_slash(shorten(buffer));
 }
 
 void action_webpage(const std::string &url) {
