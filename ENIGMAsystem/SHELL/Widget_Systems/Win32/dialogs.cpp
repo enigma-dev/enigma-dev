@@ -72,17 +72,23 @@ void show_error(string errortext, const bool fatal)
   //ABORT_ON_ALL_ERRORS();
 }
 
-namespace {
+namespace enigma {
 
 extern HINSTANCE hInstance;
 extern HWND hWnd;
 HWND infore;
+
+}
+
+namespace {
   
 static inline string remove_slash(const string& dir) {
   if (dir.empty() || *dir.rbegin() == '\\') {
     dir.pop_back();
     return dir;
   }
+}
+  
 }
 
 }
