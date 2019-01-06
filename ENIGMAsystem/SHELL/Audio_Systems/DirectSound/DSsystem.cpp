@@ -171,7 +171,7 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
 
   DSBUFFERDESC bufferDesc = {};
   bufferDesc.dwSize = sizeof(DSBUFFERDESC);
-  bufferDesc.dwFlags = DSBCAPS_CTRLDEFAULT | DSBCAPS_CTRLFX;
+  bufferDesc.dwFlags = DSBCAPS_CTRLPAN | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY | DSBCAPS_CTRLFX;
   bufferDesc.dwBufferBytes = waveHeader->dataSize;
   bufferDesc.dwReserved = 0;
   bufferDesc.lpwfxFormat = &waveFormat;
