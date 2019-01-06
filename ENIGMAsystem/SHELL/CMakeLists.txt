@@ -24,6 +24,21 @@ else()
 endif(WIN32)
 
 # Platform
+if("${PLATFORM}" STREQUAL "Win32")
+  add_definitions(-DENIGMA_PLATFORM_WINDOWS)
+elseif("${PLATFORM}" STREQUAL "SDL")
+  add_definitions(-DENIGMA_PLATFORM_SDL)
+else()
+  add_definitions(-DENIGMA_PLATFORM_UNKNOWN)
+endif()
+add_subdirectory("Platforms/${PLATFORM}/")
+target_link_libraries("${EXE}" "PLATFORM_${PLATFORM}")
+
+if (("${PLATFORM}" STREQUAL "SDL") AND ("${TARGET-PLATFORM}" STREQUAL "Windows"))
+  add_subdirectory("Bridges/SDL-Win32/")
+  target_link_libraries("${EXE}" "SDL-WIN32-Bridge")
+endif()
+
 add_subdirectory("Platforms/General/")
 target_link_libraries("${EXE}" "PLATFORM_GENERAL")
 
@@ -31,14 +46,6 @@ if (NOT "${PLATFORM}" STREQUAL "Win32")
   add_subdirectory("Platforms/General/POSIX")
   target_link_libraries("${EXE}" "PLATFORM_POSIX")
 endif()
-
-if (("${PLATFORM}" STREQUAL "SDL") AND ("${TARGET-PLATFORM}" STREQUAL "Windows"))
-  add_subdirectory("Bridges/SDL-Win32/")
-  target_link_libraries("${EXE}" "SDL-WIN32-Bridge")
-endif()
-
-add_subdirectory("Platforms/${PLATFORM}/")
-target_link_libraries("${EXE}" "PLATFORM_${PLATFORM}")
 
 # Graphics
 add_subdirectory("Graphics_Systems/General/")
@@ -80,6 +87,15 @@ if (NOT ${containsGL} EQUAL -1)
   endif()
 endif()
 
+# zlib
+find_package(ZLIB REQUIRED)
+include_directories("${ZLIB_INCLUDE_DIRS}")
+target_link_libraries("${EXE}" "${ZLIB_LIBRARIES}")
+
+# Shared Sources
+add_subdirectory("${ENIGMA_DIR}/shared/lodepng" lodepng)
+target_link_libraries("${EXE}" "lodepng")
+
 # Universal System //FIXME: circular dependency between graphics system and universal
 add_subdirectory("Universal_System/")
 target_link_libraries("${EXE}" "UNIVERSAL_SYSTEM")
@@ -100,14 +116,6 @@ target_link_libraries("${EXE}" "COLLISION_${COLLISION}")
 # Widgets
 add_subdirectory("Widget_Systems/${WIDGETS}/")
 target_link_libraries("${EXE}" "WIDGETS_${WIDGETS}")
-
-# Shared Sources
-add_subdirectory("${ENIGMA_DIR}/shared/lodepng" lodepng)
-target_link_libraries("${EXE}" "lodepng")
-
-# zlib
-find_package(ZLIB REQUIRED)
-target_link_libraries("${EXE}" "${ZLIB_LIBRARIES}")
 
 string(REPLACE "," ";" EXTENSIONS_LIST ${EXTENSIONS})
 foreach(EXT ${EXTENSIONS_LIST})
