@@ -441,7 +441,7 @@ void execute_program(std::string fname, std::string args, bool wait) { execute_p
 std::string environment_get_variable(std::string name) {
   WCHAR buffer[MAX_PATH];
   tstring tstr_name = widen(name);
-  GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
+  GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, MAX_PATH);
 
   return shorten(PathAddBackslashW(buffer));
 }
