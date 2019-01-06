@@ -42,15 +42,15 @@ namespace enigma
   bool fontglyph::empty() {
     return !(std::abs(x2-x) > 0 && std::abs(y2-y) > 0);
   }
-  
+
   int font_new(uint32_t gs, uint32_t gc) // Creates a new font, allocating 'gc' glyphs
   {
     font *ret = new font;
-    
+
     fontglyphrange fgr;
     fgr.glyphstart = gs;
     fgr.glyphcount = gc;
-    
+
     ret->glyphRangeCount = 1;
     ret->glyphRanges.push_back(fgr);
     ret->height = 0;
@@ -74,9 +74,9 @@ namespace enigma
       // a square space based on the max height of the font.
 
       sprite *sspr = spritestructarray[spr];
-      unsigned char* glyphdata[gcount]; // Raw font image data
+      std::vector<unsigned char*> glyphdata(gcount); // Raw font image data
       std::vector<rect_packer::pvrect> glyphmetrics(gcount);
-      int glyphx[gcount], glyphy[gcount];
+      std::vector<int> glyphx(gcount), glyphy(gcount);
 
       int gwm = sspr->width, // Glyph width max: sprite width
           ghm = sspr->height, // Glyph height max: sprite height
@@ -158,7 +158,7 @@ namespace enigma
         }
       }
 
-      int bigtex[w*h];
+      std::vector<int> bigtex(w*h);
       for (unsigned i = 0; i < gcount; i++)
       {
         fontglyph& fg = fgr.glyphs[i];
@@ -176,7 +176,7 @@ namespace enigma
         fg.ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
       }
 
-      font->texture = graphics_create_texture(w,h,w,h,bigtex,false);
+      font->texture = graphics_create_texture(w,h,w,h,bigtex.data(),false);
       font->twid = w;
       font->thgt = h;
       font->yoffset = 0;
@@ -252,13 +252,13 @@ bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32
   fnt->bold = bold;
   fnt->italic = italic;
   fnt->glyphRangeCount = 1;
-  
+
   enigma::fontglyphrange fgr;
   fgr.glyphstart = first;
   fgr.glyphcount = last-first;
-  
+
   fnt->glyphRanges.push_back(fgr);
-  
+
   return true;
 }
 
@@ -271,12 +271,12 @@ bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep)
   enigma::font *fnt = enigma::fontstructarray[ind];
   fnt->glyphRanges.clear(); //TODO: Delete glyphs for each range or add it to the destructor?
   fnt->glyphRangeCount = 1;
-  
+
   enigma::fontglyphrange fgr;
   fgr.glyphstart = first;
   fgr.glyphcount = gcount;
   fnt->glyphRanges.push_back(fgr);
-  
+
   return enigma::font_pack(fnt, spr, gcount, prop, sep);
 }
 
@@ -333,4 +333,3 @@ float font_get_glyph_bottom(int fnt, uint32_t character) {
 }
 
 }
-
