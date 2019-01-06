@@ -62,11 +62,6 @@ HWND get_window_handle() {
   return hWnd;
 }
 
-static inline string add_slash(const string& dir) {
-  if (dir.empty() || *dir.rbegin() != '\\') return dir + '\\';
-  return dir;
-}
-
 } // namespace enigma
 
 namespace enigma_user {
