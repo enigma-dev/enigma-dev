@@ -23,6 +23,8 @@
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
+#include "Platforms/General/PFwindow.h"
+
 #include "Universal_System/roomsystem.h"
 
 #include <vector>
@@ -39,12 +41,12 @@ namespace enigma_user
 
 int draw_get_msaa_maxlevel()
 {
-
+  return display_aa;
 }
 
 bool draw_get_msaa_supported()
 {
-
+  return display_aa > 0;
 }
 
 void draw_set_msaa_enabled(bool enable)

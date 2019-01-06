@@ -105,7 +105,7 @@ void surface_reset_target()
 
 int surface_get_target()
 {
-
+  return -1;
 }
 
 void surface_free(int id)
@@ -255,17 +255,17 @@ int surface_save(int id, string filename)
 
 int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
 {
-
+  return -1;
 }
 
 int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
 {
-
+  return -1;
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
 {
-
+  return -1;
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
