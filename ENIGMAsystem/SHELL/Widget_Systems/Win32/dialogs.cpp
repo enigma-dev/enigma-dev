@@ -72,7 +72,7 @@ void show_error(string errortext, const bool fatal)
   //ABORT_ON_ALL_ERRORS();
 }
 
-namespace enigma {
+namespace {
 
 extern HINSTANCE hInstance;
 extern HWND hWnd;
