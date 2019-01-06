@@ -74,6 +74,7 @@ struct gtkl_container: gtkl_placer
 };
 
 
+#include <vector>
 #include <map>
 #include <algorithm> //std::min
 
@@ -116,11 +117,14 @@ struct gtkl_table: gtkl_container
     int cw = dwid / gsx, ch = dhgt / gsy;
     if (ch<gsy) ch=gsy; if (cw<gsx) cw=gsx;
 
-    int givex[gsx][gsy], givey[gsx][gsy];
+    std::vector<std::vector<int>> givex(gsx), givey(gsx);
     // Make all occupied cells yield max give
-    for (int i = 0; i < gsx; i++)
+    for (int i = 0; i < gsx; i++) {
+      givex[i].resize(gsy);
+      givey[i].resize(gsy);
       for (int ii = 0; ii < gsy; ii++)
         givex[i][ii] = cw, givey[i][ii] = ch;
+    }
     for (atti mi = atts.begin(); mi != atts.end(); mi++)
     {
       // Make all allocated cells not give at all
@@ -148,7 +152,7 @@ struct gtkl_table: gtkl_container
       mi->second.d.x = mi->second.x*cw, mi->second.d.y = mi->second.y*ch, mi->second.d.w = (mi->second.child->srw+8), mi->second.d.h = (mi->second.child->srh+8);
 
     // Expand grid where absolutely necessary
-    int maxgx[gsx], maxgy[gsy]; //Compute resize allotment
+    std::vector<int> maxgx(gsx), maxgy(gsy); //Compute resize allotment
     for (int xx = 0; xx < gsx; xx++)
       maxgx[xx] = cw;
     for (int yy = 0; yy < gsy; yy++)

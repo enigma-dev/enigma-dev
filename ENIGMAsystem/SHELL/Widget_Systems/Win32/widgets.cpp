@@ -25,6 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+#define NOMINMAX // before all windows.h includes since we use std::min/max
+
 #include "Widget_Systems/General/WSwidgets.h"
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
 #include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
@@ -171,7 +173,7 @@ struct Sgeneric_window
 } generic_window;
 
 
-
+/*
 // Windows
 
 int wgt_window_create(int w, int h)
@@ -381,7 +383,7 @@ string wgt_textline_get_text(int tline)
   char str[bl];
   return string(str,Edit_GetText(ent,str,bl));
 }
-
+*/
 
 /*/ Radio buttons
 int wgt_radio_create(string text)
