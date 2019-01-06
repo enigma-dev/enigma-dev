@@ -315,7 +315,7 @@ void initialize_directory_globals() {
   // Set the working_directory
   WCHAR buffer[MAX_PATH + 1];
   GetCurrentDirectoryW(MAX_PATH + 1, buffer);
-  enigma_user::working_directory = add_slash(shorten(buffer));
+  enigma_user::working_directory = shorten(PathAddBackslashW(buffer));
 
   // Set the program_directory
   buffer[0] = 0;
@@ -327,7 +327,7 @@ void initialize_directory_globals() {
   // Set the temp_directory
   buffer[0] = 0;
   GetTempPathW(MAX_PATH + 1, buffer);
-  enigma_user::temp_directory = add_slash(shorten(buffer));
+  enigma_user::temp_directory = shorten(PathAddBackslashW(buffer));
 }
 
 }  // namespace enigma
