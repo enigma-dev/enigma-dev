@@ -440,9 +440,9 @@ void execute_program(std::string operation, std::string fname, std::string args,
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
 
 std::string environment_get_variable(std::string name) {
-  WCHAR buffer[INT_MAX];
+  WCHAR buffer[SHRT_MAX];
   tstring tstr_name = widen(name);
-  GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, INT_MAX);
+  GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, SHRT_MAX);
 
   return shorten(buffer);
 }
