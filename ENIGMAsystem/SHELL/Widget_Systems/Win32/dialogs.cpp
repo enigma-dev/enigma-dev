@@ -73,9 +73,18 @@ void show_error(string errortext, const bool fatal)
 }
 
 namespace enigma {
-  extern HINSTANCE hInstance;
-  extern HWND hWnd;
-  HWND infore;
+
+extern HINSTANCE hInstance;
+extern HWND hWnd;
+HWND infore;
+  
+static inline string remove_slash(const string& dir) {
+  if (dir.empty() || *dir.rbegin() == '\\') {
+    dir.pop_back();
+    return dir;
+  }
+}
+
 }
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -487,7 +496,7 @@ string get_open_filename(string filter,string filename,string caption)
   ofn.lStructSize = sizeof(ofn); ofn.hwndOwner = enigma::hWnd; ofn.hInstance = NULL;
   ofn.lpstrFilter = filter.c_str(); ofn.lpstrCustomFilter = NULL;
   ofn.nMaxCustFilter = 0; ofn.nFilterIndex = 0;
-  ofn.lpstrFile = PathRemoveBackslash(fn); ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrFile = (char *)enigma::remove_slash(fn).c_str(); ofn.nMaxFile = MAX_PATH;
   ofn.lpstrFileTitle = NULL; ofn.nMaxFileTitle = 0;
   ofn.lpstrInitialDir = NULL; ofn.lpstrTitle = caption.length() ? caption.c_str() : NULL;
   ofn.Flags=OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
@@ -514,7 +523,7 @@ string get_save_filename(string filter, string filename, string caption)
   ofn.lStructSize = sizeof(ofn); ofn.hwndOwner = enigma::hWnd; ofn.hInstance = NULL;
   ofn.lpstrFilter = filter.c_str(); ofn.lpstrCustomFilter = NULL;
   ofn.nMaxCustFilter = 0; ofn.nFilterIndex = 0;
-  ofn.lpstrFile = PathRemoveBackslash(fn); ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrFile = (char *)enigma::remove_slash(fn).c_str(); ofn.nMaxFile = MAX_PATH;
   ofn.lpstrFileTitle = NULL; ofn.nMaxFileTitle = 0;
   ofn.lpstrInitialDir = NULL; ofn.lpstrTitle = caption.length() ? caption.c_str() : NULL;
   ofn.Flags = OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
