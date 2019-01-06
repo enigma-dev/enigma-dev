@@ -28,7 +28,8 @@
 
 #include <mmsystem.h>
 #include <time.h>
-#include <unistd.h>
+#include <chrono>
+#include <thread>
 #include <algorithm>
 #include <cstdio>
 #include <sstream>
@@ -70,7 +71,7 @@ static inline string add_slash(const string& dir) {
 }
 
 namespace enigma_user {
-  
+
 bool set_working_directory(string dname) {
   tstring tstr_dname = widen(dname);
   replace(tstr_dname.begin(), tstr_dname.end(), '/', '\\');
@@ -84,7 +85,7 @@ bool set_working_directory(string dname) {
 
   return false;
 }
-  
+
 } // enigma_user
 
 namespace enigma {
@@ -270,7 +271,7 @@ int updateTimer() {
     }
     if (remaining_mcs > needed_mcs) {
       const long sleeping_time = std::min((remaining_mcs - needed_mcs) / 5, long(999999));
-      usleep(std::max(long(1), sleeping_time));
+      std::this_thread::sleep_for(std::chrono::microseconds(std::max(long(1), sleeping_time)));
       return -1;
     }
   }
@@ -323,7 +324,7 @@ void initialize_directory_globals() {
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
     enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
-  
+
   // Set the temp_directory
   buffer[0] = 0;
   GetTempPathW(MAX_PATH + 1, buffer);
