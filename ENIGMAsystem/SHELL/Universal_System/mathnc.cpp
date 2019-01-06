@@ -21,8 +21,9 @@
 #include "generic_args.h"
 
 #include <limits>
-#include <stdlib.h>
 #include <cmath>
+#include <algorithm> // msvc min/max
+#include <stdlib.h>
 
 // Note: This hack is justifiable in that it was put here to prevent
 // around contributors' bad habits, not because of developers' bad habits.
