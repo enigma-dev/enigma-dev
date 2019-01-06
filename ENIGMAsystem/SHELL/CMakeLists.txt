@@ -48,6 +48,9 @@ if (NOT "${PLATFORM}" STREQUAL "Win32")
 endif()
 
 # Graphics
+find_package(GLM REQUIRED)
+include_directories("${GLM_INCLUDE_DIRS}")
+
 add_subdirectory("Graphics_Systems/General/")
 target_link_libraries("${EXE}" "GRAPHICS_GENERAL")
 
