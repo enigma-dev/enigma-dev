@@ -16,6 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#define NOMINMAX // for windows.h because we use std::min/max
 #include "WINDOWSmain.h"
 
 #include "Platforms/General/PFmain.h"
