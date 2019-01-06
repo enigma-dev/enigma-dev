@@ -6,7 +6,7 @@
 
 using std::string;
 
-namespace enigma {
+namespace {
 
 static inline string add_slash(const string& dir) {
   if (dir.empty() || *dir.rbegin() != '/') return dir + '/';
@@ -21,7 +21,7 @@ bool set_working_directory(string dname) {
   if (chdir((char *)dname.c_str()) == 0) {
     char buffer[PATH_MAX + 1]; 
     if (getcwd(buffer, PATH_MAX + 1) != NULL) {
-      working_directory = enigma::add_slash(buffer);
+      working_directory = add_slash(buffer);
       return true;
     }
   }
