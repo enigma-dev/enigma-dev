@@ -62,12 +62,16 @@ HWND get_window_handle() {
   return hWnd;
 }
 
+} // namespace enigma
+
+namespace {
+  
 static inline string add_slash(const string& dir) {
   if (dir.empty() || *dir.rbegin() != '\\') return dir + '\\';
   return dir;
 }
-
-} // namespace enigma
+  
+} // anonymous namespace
 
 namespace enigma_user {
   
