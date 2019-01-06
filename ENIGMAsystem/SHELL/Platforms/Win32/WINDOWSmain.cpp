@@ -63,6 +63,11 @@ void initInput(){};
 HWND get_window_handle() {
   return hWnd;
 }
+  
+static inline string add_slash(const string& dir) {
+  if (dir.empty() || *dir.rbegin() != '\\') return dir + '\\';
+  return dir;
+}
 
 } // namespace enigma
 
@@ -74,7 +79,7 @@ bool set_working_directory(string dname) {
   if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
     WCHAR wstr_buffer[MAX_PATH + 1];
     if (GetCurrentDirectoryW(MAX_PATH + 1, wstr_buffer) != 0) {
-      working_directory = shorten(PathAddBackslashW(wstr_buffer));
+      working_directory = enigma::add_slash(shorten(wstr_buffer));
       return true;
     }
   }
@@ -312,7 +317,7 @@ void initialize_directory_globals() {
   // Set the working_directory
   WCHAR buffer[MAX_PATH];
   GetCurrentDirectoryW(MAX_PATH, buffer);
-  enigma_user::working_directory = shorten(PathAddBackslashW(buffer));
+  enigma_user::working_directory = enigma::add_slash(shorten(buffer));
 
   // Set the program_directory
   buffer[0] = 0;
@@ -324,7 +329,7 @@ void initialize_directory_globals() {
   // Set the temp_directory
   buffer[0] = 0;
   GetTempPathW(MAX_PATH, buffer);
-  enigma_user::temp_directory = shorten(PathAddBackslashW(buffer));
+  enigma_user::temp_directory = enigma::add_slash(shorten(buffer));
 }
 
 }  // namespace enigma
