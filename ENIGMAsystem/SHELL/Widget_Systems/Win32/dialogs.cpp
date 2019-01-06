@@ -490,7 +490,6 @@ string get_open_filename(string filter,string filename,string caption)
     if (filter[i] == '|') filter[i] = 0;
 
   char fn[MAX_PATH];
-  strcpy(fn, filename.c_str());
   strcpy(fn, remove_slash(filename).c_str());
 
   OPENFILENAME ofn;
@@ -518,7 +517,6 @@ string get_save_filename(string filter, string filename, string caption)
       filter[i] = 0;
 
   char fn[MAX_PATH];
-  strcpy(fn, filename.c_str());
   strcpy(fn, remove_slash(filename).c_str());
 
   OPENFILENAME ofn;
