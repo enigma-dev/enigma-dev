@@ -481,13 +481,13 @@ string get_open_filename(string filter,string filename,string caption)
     if (filter[i] == '|') filter[i] = 0;
 
   char fn[MAX_PATH];
-  strcpy(fn, PathRemoveBackslash((char *)filename.c_str()));
+  strcpy(fn, filename.c_str());
 
   OPENFILENAME ofn;
   ofn.lStructSize = sizeof(ofn); ofn.hwndOwner = enigma::hWnd; ofn.hInstance = NULL;
   ofn.lpstrFilter = filter.c_str(); ofn.lpstrCustomFilter = NULL;
   ofn.nMaxCustFilter = 0; ofn.nFilterIndex = 0;
-  ofn.lpstrFile = fn; ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrFile = PathRemoveBackslash(fn); ofn.nMaxFile = MAX_PATH;
   ofn.lpstrFileTitle = NULL; ofn.nMaxFileTitle = 0;
   ofn.lpstrInitialDir = NULL; ofn.lpstrTitle = caption.length() ? caption.c_str() : NULL;
   ofn.Flags=OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
@@ -508,13 +508,13 @@ string get_save_filename(string filter, string filename, string caption)
       filter[i] = 0;
 
   char fn[MAX_PATH];
-  strcpy(fn, PathRemoveBackslash((char *)filename.c_str()));
+  strcpy(fn, filename.c_str());
 
   OPENFILENAME ofn;
   ofn.lStructSize = sizeof(ofn); ofn.hwndOwner = enigma::hWnd; ofn.hInstance = NULL;
   ofn.lpstrFilter = filter.c_str(); ofn.lpstrCustomFilter = NULL;
   ofn.nMaxCustFilter = 0; ofn.nFilterIndex = 0;
-  ofn.lpstrFile = fn; ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrFile = PathRemoveBackslash(fn); ofn.nMaxFile = MAX_PATH;
   ofn.lpstrFileTitle = NULL; ofn.nMaxFileTitle = 0;
   ofn.lpstrInitialDir = NULL; ofn.lpstrTitle = caption.length() ? caption.c_str() : NULL;
   ofn.Flags = OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
