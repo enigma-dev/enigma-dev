@@ -13,7 +13,7 @@ static inline string add_slash(const string& dir) {
   return dir;
 }
 
-} // namespace enigma
+} // anonymous namespace
 
 namespace enigma_user {
 
