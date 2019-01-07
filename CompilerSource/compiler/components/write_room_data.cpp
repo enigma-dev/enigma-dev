@@ -107,10 +107,10 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     wto << "  };\n";
   }
 
-  wto << "  roomstruct grd_rooms[" << game.rooms.size() << "] = {\n";
-  for (size_t room_index = 0; room_index < game.rooms.size(); ++room_index) {
-    const auto &room = game.rooms[room_index];
-    wto << "    //Room " << room.id() << "\n" <<
+  wto << "  std::vector<roomstruct> grd_rooms = {\n";
+  for (int i = 0; i < es->roomCount; i++)
+  {
+    wto << "    //Room " << es->rooms[i].id << "\n" <<
     "    { "
     << room.id() << ", "  // The ID of this room
     << room_index << ", \""  // The tree order index of this room

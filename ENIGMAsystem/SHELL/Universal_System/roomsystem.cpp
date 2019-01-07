@@ -306,7 +306,7 @@ namespace enigma
   }
 
   extern int room_loadtimecount;
-  extern roomstruct grd_rooms[];
+  extern std::vector<roomstruct> grd_rooms;
   extern size_t room_idmax;
   int room_switching_id = -1;
   int room_switching_restartgame = false;
