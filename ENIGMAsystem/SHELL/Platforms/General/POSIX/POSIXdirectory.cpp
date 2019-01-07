@@ -7,7 +7,7 @@
 using std::string;
 
 static inline string add_slash(const string& dir) {
-  if (dir.empty() || *dir.rbegin() != '/') return dir + '/';
+  if (!dir.empty() && *dir.rbegin() != '/') return dir + '/';
   return dir;
 }
 
