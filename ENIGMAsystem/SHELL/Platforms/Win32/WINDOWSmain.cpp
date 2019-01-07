@@ -63,15 +63,11 @@ HWND get_window_handle() {
 }
 
 } // namespace enigma
-
-namespace {
   
 static inline string add_slash(const string& dir) {
   if (dir.empty() || *dir.rbegin() != '\\') return dir + '\\';
   return dir;
 }
-  
-} // anonymous namespace
 
 namespace enigma_user {
   
@@ -81,7 +77,7 @@ bool set_working_directory(string dname) {
   if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
     WCHAR wstr_buffer[MAX_PATH + 1];
     if (GetCurrentDirectoryW(MAX_PATH + 1, wstr_buffer) != 0) {
-      working_directory = enigma::add_slash(shorten(wstr_buffer));
+      working_directory = add_slash(shorten(wstr_buffer));
       return true;
     }
   }
