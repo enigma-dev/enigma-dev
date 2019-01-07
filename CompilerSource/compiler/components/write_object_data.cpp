@@ -638,7 +638,7 @@ static inline void write_object_class_bodies(lang_CPP *lcpp, std::ostream &wto, 
 }
 
 static inline void write_object_data_structs(std::ostream &wto) {
-  wto << "  objectstruct objs[] = {\n" <<std::fixed;
+  wto << "  std::vector<objectstruct> objs = {\n" <<std::fixed;
   int objcount = 0, obmx = 0;
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++, objcount++)
   {
@@ -929,7 +929,7 @@ static inline void write_can_cast_func(ofstream& wto, const parsed_object *const
 
 static inline void write_global_script_array(ofstream &wto, EnigmaStruct *es) {
   wto << "namespace enigma\n{\n"
-  "  callable_script callable_scripts[] = {\n";
+  "  std::vector<callable_script> callable_scripts = {\n";
   int scr_count = 0;
   for (int i = 0; i < es->scriptCount; i++)
   {

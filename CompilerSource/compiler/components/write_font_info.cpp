@@ -44,7 +44,7 @@ int lang_CPP::compile_writeFontInfo(EnigmaStruct* es)
 
   int maxid = -1, rawfontcount = 0;
   wto << "namespace enigma {" << endl;
-  wto << "  rawfont rawfontdata[] = {" << endl;
+  wto << "  std::vector<rawfont> rawfontdata = {" << endl;
   for (int i = 0; i < es->fontCount; i++)
   {
     wto << "    {\"" <<

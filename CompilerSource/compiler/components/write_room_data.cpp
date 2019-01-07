@@ -99,7 +99,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
     wto << "  };\n";
   }
 
-  wto << "  roomstruct grd_rooms[" << es->roomCount << "] = {\n";
+  wto << "  std::vector<roomstruct> grd_rooms = {\n";
   for (int i = 0; i < es->roomCount; i++)
   {
     wto << "    //Room " << es->rooms[i].id << "\n" <<
