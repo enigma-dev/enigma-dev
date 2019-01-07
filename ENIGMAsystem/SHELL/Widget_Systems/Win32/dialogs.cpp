@@ -80,17 +80,11 @@ HWND infore;
 
 }
 
-namespace {
-  
 static inline string remove_slash(const string& dir) {
-  if (dir.empty() || *dir.rbegin() == '\\') {
+  if (!dir.empty() && *dir.rbegin() == '\\') {
     dir.pop_back();
     return dir;
   }
-}
-  
-}
-
 }
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
