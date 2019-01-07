@@ -6,14 +6,10 @@
 
 using std::string;
 
-namespace {
-
 static inline string add_slash(const string& dir) {
   if (dir.empty() || *dir.rbegin() != '/') return dir + '/';
   return dir;
 }
-
-} // anonymous namespace
 
 namespace enigma_user {
 
