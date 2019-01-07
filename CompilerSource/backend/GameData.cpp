@@ -141,6 +141,8 @@ FontData::GlyphData::GlyphData(const ::Glyph &glyph):
   metrics.set_origin(glyph.origin);
   metrics.set_baseline(glyph.baseline);
   metrics.set_advance(glyph.advance);
+  metrics.set_width(glyph.width);
+  metrics.set_height(glyph.height);
 }
 
 PathData::PathData(const ::Path &path):
