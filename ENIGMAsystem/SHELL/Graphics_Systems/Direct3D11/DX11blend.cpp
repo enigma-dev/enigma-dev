@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2013, 2018 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -18,34 +18,81 @@
 #include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSblend.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+
+namespace {
+
+D3D11_BLEND_DESC blendStateDesc = { };
+
+void update_blend_state() {
+  static ID3D11BlendState* pBlendState = NULL;
+  if (pBlendState) { pBlendState->Release(); pBlendState = NULL; }
+  m_device->CreateBlendState(&blendStateDesc, &pBlendState);
+  draw_batch_flush(batch_flush_deferred);
+  m_deviceContext->OMSetBlendState(pBlendState, NULL, 0xffffffff);
+}
+
+} // namespace anonymous
 
 namespace enigma
 {
-  extern int currentblendmode[2];
-  extern int currentblendtype;
+
+extern int currentblendmode[2];
+extern int currentblendtype;
+
+void init_blend_state() {
+  blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+  blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+  blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+  blendStateDesc.RenderTarget[0].BlendOpAlpha = blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+  blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+  update_blend_state();
 }
+
+} // namespace enigma
+
+using namespace enigma;
 
 namespace enigma_user
 {
 
-int draw_set_blend_mode(int mode){
+int draw_set_blend_mode(int mode) {
+  const static D3D11_BLEND dest_modes[] = {D3D11_BLEND_INV_SRC_ALPHA,D3D11_BLEND_ONE,D3D11_BLEND_INV_SRC_COLOR,D3D11_BLEND_INV_SRC_COLOR};
+  const static D3D11_BLEND_OP blend_ops[] = {D3D11_BLEND_OP_ADD,D3D11_BLEND_OP_ADD,D3D11_BLEND_OP_SUBTRACT,D3D11_BLEND_OP_MAX};
 
+  blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = (mode == bm_subtract) ? D3D11_BLEND_ZERO : D3D11_BLEND_SRC_ALPHA;
+  blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = dest_modes[mode % 4];
+  blendStateDesc.RenderTarget[0].BlendOpAlpha = blendStateDesc.RenderTarget[0].BlendOp = blend_ops[mode % 4];
+
+  update_blend_state();
+  return 0;
 }
 
-int draw_set_blend_mode_ext(int src, int dest){
+int draw_set_blend_mode_ext(int src, int dest) {
+  const static D3D11_BLEND blend_equivs[] = {
+    D3D11_BLEND_ZERO, D3D11_BLEND_ONE, D3D11_BLEND_SRC_COLOR, D3D11_BLEND_INV_SRC_COLOR, D3D11_BLEND_SRC_ALPHA,
+    D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_DEST_ALPHA, D3D11_BLEND_INV_DEST_ALPHA, D3D11_BLEND_DEST_COLOR,
+    D3D11_BLEND_INV_DEST_COLOR, D3D11_BLEND_SRC_ALPHA_SAT
+  };
 
+  blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = blend_equivs[(src-1)%11];
+  blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = blend_equivs[(src-1)%11];
+  blendStateDesc.RenderTarget[0].BlendOpAlpha = blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+
+  update_blend_state();
+  return 0;
 }
 
 int draw_get_blend_mode(){
-    return enigma::currentblendmode[0];
+  return enigma::currentblendmode[0];
 }
 
 int draw_get_blend_mode_ext(bool src){
-    return enigma::currentblendmode[(src==true?0:1)];
+  return enigma::currentblendmode[(src==true?0:1)];
 }
 
 int draw_get_blend_mode_type(){
-    return enigma::currentblendtype;
+  return enigma::currentblendtype;
 }
 
 }
