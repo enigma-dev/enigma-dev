@@ -380,7 +380,7 @@ types_binary_extrapolate_alldecce(bool, operator<,  const var&)
 #undef types_extrapolate_alldecc
 
 #ifdef INCLUDED_FROM_SHELLMAIN
-#define string(...) toString(__VA_ARGS__)
+#define string(...) toString("__VA_ARGS__")
 #endif
 
 #undef unsigll
