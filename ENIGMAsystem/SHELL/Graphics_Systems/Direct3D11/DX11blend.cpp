@@ -20,16 +20,6 @@
 #include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
-namespace enigma
-{
-
-extern int currentblendmode[2];
-extern int currentblendtype;
-
-} // namespace enigma
-
-using namespace enigma;
-
 namespace {
 
 D3D11_BLEND_DESC blendStateDesc = { };
@@ -44,17 +34,36 @@ void update_blend_state() {
 
 } // namespace anonymous
 
+namespace enigma
+{
+
+extern int currentblendmode[2];
+extern int currentblendtype;
+
+void init_blend_state() {
+  blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+  blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+  blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+  blendStateDesc.RenderTarget[0].BlendOpAlpha = blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+  blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+  update_blend_state();
+}
+
+} // namespace enigma
+
+using namespace enigma;
+
 namespace enigma_user
 {
 
 int draw_set_blend_mode(int mode) {
   const static D3D11_BLEND dest_modes[] = {D3D11_BLEND_INV_SRC_ALPHA,D3D11_BLEND_ONE,D3D11_BLEND_INV_SRC_COLOR,D3D11_BLEND_INV_SRC_COLOR};
   const static D3D11_BLEND_OP blend_ops[] = {D3D11_BLEND_OP_ADD,D3D11_BLEND_OP_ADD,D3D11_BLEND_OP_SUBTRACT,D3D11_BLEND_OP_MAX};
-  blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+
   blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = (mode == bm_subtract) ? D3D11_BLEND_ZERO : D3D11_BLEND_SRC_ALPHA;
   blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = dest_modes[mode % 4];
   blendStateDesc.RenderTarget[0].BlendOpAlpha = blendStateDesc.RenderTarget[0].BlendOp = blend_ops[mode % 4];
-  blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
   update_blend_state();
   return 0;
 }
@@ -65,11 +74,11 @@ int draw_set_blend_mode_ext(int src, int dest) {
     D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_DEST_ALPHA, D3D11_BLEND_INV_DEST_ALPHA, D3D11_BLEND_DEST_COLOR,
     D3D11_BLEND_INV_DEST_COLOR, D3D11_BLEND_SRC_ALPHA_SAT
   };
-  blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+
   blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = blend_equivs[(src-1)%11];
   blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = blend_equivs[(src-1)%11];
   blendStateDesc.RenderTarget[0].BlendOpAlpha = blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-  blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
   update_blend_state();
   return 0;
 }
