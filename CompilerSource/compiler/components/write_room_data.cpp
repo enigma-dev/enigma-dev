@@ -68,7 +68,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   int room_highid = 0, room_highinstid = 100000, room_hightileid = 10000000;
 
   for (const auto &room : game.rooms) {
-    wto << "  tile tiles_" << room.id() << "[] = {\n";
+    wto << "  std::vector<tile> tiles_" << room.id() << "[] = {\n";
     for (int ii = 0, modme = 0; ii < room.tiles().size(); ii++) {
       wto << "{"
           << room.tiles(ii).id()      << ","
@@ -84,6 +84,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
           << room.tiles(ii).yscale()  << ","
           << room.tiles(ii).alpha()   << ","
           << room.tiles(ii).color()   << "},";
+          
         if (++modme % 16 == 0) wto << "\n        ";
       if (room.tiles(ii).id() > room_hightileid)
         room_hightileid = room.tiles(ii).id();
@@ -92,7 +93,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   }
 
   for (const auto &room : game.rooms) {
-    wto << "  inst insts_" << room.id() << "[] = {\n";
+    wto << "  std::vector<inst> insts_" << room.id() << "[] = {\n";
     int modme = 0;
     for (const auto &instance : room.instances()) {
       wto << "{" <<
