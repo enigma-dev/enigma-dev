@@ -383,28 +383,29 @@ void ResetRenderTarget() {
 }
 
 void SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value) {
-	// Update the render state cache
-    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
-	typedef map<D3DSAMPLERSTATETYPE, DWORD> innerType;
-	map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD >  >::iterator it = cacheSamplerStates.find( Sampler );
-    if ( it == cacheSamplerStates.end() ) {
-		map<DWORD, innerType> outer;
-		innerType inner;
-		inner.insert(pair<D3DSAMPLERSTATETYPE, DWORD>(Type, Value));
-        cacheSamplerStates.insert( pair<DWORD, innerType>(Sampler, inner) );
-        device->SetSamplerState( Sampler, Type, Value );
+  // Update the render state cache
+  // If the return value is 'true', the command must be forwarded to the D3D Runtime.
+  typedef map<D3DSAMPLERSTATETYPE, DWORD> innerType;
+  map<DWORD, map<D3DSAMPLERSTATETYPE, DWORD> >::iterator it = cacheSamplerStates.find(Sampler);
+  if (it == cacheSamplerStates.end()) {
+    map<DWORD, innerType> outer;
+    innerType inner;
+    inner.insert(pair<D3DSAMPLERSTATETYPE, DWORD>(Type, Value));
+    cacheSamplerStates.insert(pair<DWORD, innerType>(Sampler, inner));
+    device->SetSamplerState(Sampler, Type, Value);
+  } else {
+    map<D3DSAMPLERSTATETYPE, DWORD>::iterator sit = it->second.find(Type);
+    if (sit != it->second.end()) {
+      if (sit->second == Value) {
+        return;
+      }
+      sit->second = Value;
+      device->SetSamplerState(Sampler, Type, Value);
+    } else {
+      it->second.insert(map< D3DSAMPLERSTATETYPE, DWORD >::value_type(Type, Value));
+      device->SetSamplerState(Sampler, Type, Value);
     }
-	map< D3DSAMPLERSTATETYPE, DWORD >::iterator sit = it->second.find( Type );
-    if ( sit != it->second.end() ) {
-		if (sit->second == Value) {
-			return;
-		}
-		sit->second = Value;
-		device->SetSamplerState( Sampler, Type, Value );
-	} else {
-		it->second.insert(map< D3DSAMPLERSTATETYPE, DWORD >::value_type(Type, Value));
-		device->SetSamplerState( Sampler, Type, Value );
-	}
+  }
 }
 
 void SetTexture(DWORD Sampler, LPDIRECT3DTEXTURE9 pTexture) {
