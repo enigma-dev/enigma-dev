@@ -60,7 +60,7 @@ inline string event_forge_group_code(int mainId, int id) {
 static inline void declare_scripts(std::ostream &wto, EnigmaStruct* es) {
   wto << "// Script identifiers\n";
   for (int i = 0; i < es->scriptCount; i++)
-    wto << "#define " << es->scripts[i].name << "(arguments...) _SCR_" << es->scripts[i].name << "(arguments)\n";
+    wto << "#define " << es->scripts[i].name << "(...) _SCR_" << es->scripts[i].name << "(__VA_ARGS__)\n";
   wto << "\n\n";
 
   for (int i = 0; i < es->scriptCount; i++)
