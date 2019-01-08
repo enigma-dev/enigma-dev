@@ -351,17 +351,18 @@ void SetTransform(D3DTRANSFORMSTATETYPE State, const D3DMATRIX *pMatrix) {
 }
 
 void SetRenderState(D3DRENDERSTATETYPE State, DWORD Value) {
-	// Update the render state cache
-    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
-	map< D3DRENDERSTATETYPE, DWORD >::iterator it = cacheRenderStates.find( State );
-    if ( cacheRenderStates.end() == it ) {
-        cacheRenderStates.insert( map< D3DRENDERSTATETYPE, DWORD >::value_type(State, Value) );
-        device->SetRenderState( State, Value );
-    }
-    if( it->second == Value )
-        return;
+  // Update the render state cache
+  // If the return value is 'true', the command must be forwarded to the D3D Runtime.
+  map<D3DRENDERSTATETYPE, DWORD>::iterator it = cacheRenderStates.find(State);
+  if (cacheRenderStates.end() == it) {
+    cacheRenderStates.insert(map<D3DRENDERSTATETYPE, DWORD>::value_type(State, Value));
+    device->SetRenderState(State, Value);
+  } else {
+    if (it->second == Value)
+      return;
     it->second = Value;
-    device->SetRenderState( State, Value );
+    device->SetRenderState(State, Value);
+  }
 }
 
 void GetBackBuffer(UINT  iSwapChain, UINT BackBuffer, D3DBACKBUFFER_TYPE Type, IDirect3DSurface9 **ppBackBuffer) {
