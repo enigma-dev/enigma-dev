@@ -21,6 +21,7 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSblend.h"
 
 #include "Universal_System/roomsystem.h"
 #include "Platforms/General/PFwindow.h"
@@ -69,6 +70,8 @@ void screen_init()
       }
     }
   }
+
+  draw_set_blend_mode(bm_normal);
 }
 
 int screen_save(string filename) //Assumes native integers are little endian
