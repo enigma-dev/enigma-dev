@@ -58,7 +58,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
 
   for (int i = 0; i < es->roomCount; i++)
   {
-    wto << "  tile tiles_" << es->rooms[i].id << "[] = {\n";
+    wto << "  std::vector<tile> tiles_" << es->rooms[i].id << " = {\n";
     for (int ii = 0, modme = 0; ii < es->rooms[i].tileCount; ii++)
     {
       wto << "{" <<
@@ -84,7 +84,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
 
   for (int i = 0; i < es->roomCount; i++)
   {
-    wto << "  inst insts_" << es->rooms[i].id << "[] = {\n";
+    wto << "  std::vector<inst> insts_" << es->rooms[i].id << " = {\n";
     for (int ii = 0, modme = 0; ii < es->rooms[i].instanceCount; ii++)
     {
       wto << "{" <<
@@ -159,8 +159,8 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
     wto <<
     "      }," //End of Backgrounds
 
-    << "      " << es->rooms[i].instanceCount << ", insts_" << es->rooms[i].id
-    << "      ," << es->rooms[i].tileCount << ", tiles_" << es->rooms[i].id;
+    << "      " << es->rooms[i].instanceCount << ", insts_" << es->rooms[i].id << ".data()"
+    << "      ," << es->rooms[i].tileCount << ", tiles_" << es->rooms[i].id << ".data()";
 
     // End of this room
     wto << "    },\n";
