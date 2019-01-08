@@ -26,13 +26,13 @@ namespace enigma
 extern int currentblendmode[2];
 extern int currentblendtype;
 
-D3D11_BLEND_DESC blendStateDesc = { };
-
 } // namespace enigma
 
 using namespace enigma;
 
 namespace {
+
+D3D11_BLEND_DESC blendStateDesc = { };
 
 void update_blend_state() {
   static ID3D11BlendState* pBlendState = NULL;
