@@ -81,7 +81,7 @@ HWND infore;
 }
 
 static inline string remove_slash(string dir) {
-  if (!dir.empty() && *dir.rbegin() == '\\') {
+  if (!dir.empty() && (dir.back() == '\\' || dir.back() == '/')) {
     dir.pop_back();
     return dir;
   }
