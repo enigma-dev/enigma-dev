@@ -112,15 +112,15 @@ int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, cons
     wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
     wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
 
-    for (parsed_object *parent : parsed_objects) {
-      while (parent) {
+    for (parsed_object *const obj : parsed_objects) {
+      for (parsed_object *parent = obj; parent;) {
         map<string,dectrip>::iterator x = parent->locals.find(pmember);
         if (x != parent->locals.end())
         {
           string tot = x->second.type != "" ? x->second.type : "var";
           if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
           {
-            wto << "      case " << parent->name << ": return ((OBJ_" << parent->name << "*)inst)->" << pmember << ";" << endl;
+            wto << "      case " << obj->name << ": return ((OBJ_" << obj->name << "*)inst)->" << pmember << ";" << endl;
             break;
           }
         }
