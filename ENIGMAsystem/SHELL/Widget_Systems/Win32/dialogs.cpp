@@ -81,9 +81,8 @@ HWND infore;
 }
 
 static inline string remove_slash(const string& dir) {
-  if (!dir.empty() && (dir.back() == '\\' || dir.back() == '/')) {
+  if (!dir.empty() && (dir.back() == '\\' || dir.back() == '/'))
     return dir.substr(0, dir.length() - 1);
-  }
 }
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
