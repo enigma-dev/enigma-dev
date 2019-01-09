@@ -23,6 +23,20 @@
 
 #include "Platforms/platforms_mandatory.h"
 
+namespace {
+
+D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
+
+void update_depth_stencil_state() {
+  static ID3D11DepthStencilState* pDepthStencilState = NULL;
+  if (pDepthStencilState) { pDepthStencilState->Release(); pDepthStencilState = NULL; }
+  m_device->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState);
+  draw_batch_flush(batch_flush_deferred);
+  m_deviceContext->OMSetDepthStencilState(pDepthStencilState, 1);
+}
+
+} // namespace anonymous
+
 namespace enigma {
 
 bool d3dMode = false;
@@ -32,6 +46,30 @@ int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+}
+
+void init_depth_stencil_state() {
+  depthStencilDesc.DepthEnable = false;
+  depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+  depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+  depthStencilDesc.StencilEnable = false;
+  depthStencilDesc.StencilReadMask = 0xFF;
+  depthStencilDesc.StencilWriteMask = 0xFF;
+
+  // Stencil operations if pixel is front-facing.
+  depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+  depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+  depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+  depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+  // Stencil operations if pixel is back-facing.
+  depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+  depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+  depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+  depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+  update_depth_stencil_state();
 }
 
 } // namespace enigma
@@ -67,6 +105,8 @@ void d3d_set_hidden(bool enable)
 {
     draw_batch_flush(batch_flush_deferred);
     enigma::d3dHidden = enable;
+    depthStencilDesc.DepthEnable = enable;
+    update_depth_stencil_state();
 }
 
 void d3d_set_zwriteenable(bool enable)

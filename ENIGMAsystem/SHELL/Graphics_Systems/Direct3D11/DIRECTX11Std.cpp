@@ -32,9 +32,11 @@ unsigned bound_texture=0;
 bool pbo_isgo;
 
 void init_blend_state();
+void init_depth_stencil_state();
 
 void graphicssystem_initialize() {
   init_blend_state();
+  init_depth_stencil_state();
 }
 
 } // namespace enigma
