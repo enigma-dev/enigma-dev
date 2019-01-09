@@ -320,12 +320,17 @@ static void ImportSettings(const ::GameSettings &settings, const ESLookup &looku
   gen->set_version_minor(settings.versionMinor);
   gen->set_version_release(settings.versionRelease);
   gen->set_version_build(settings.versionBuild);
-  gen->set_company(settings.company);
-  gen->set_product(settings.product);
-  gen->set_copyright(settings.copyright);
-  gen->set_description(settings.description);
+  if (settings.company)
+    gen->set_company(settings.company);
+  if (settings.product)
+    gen->set_product(settings.product);
+  if (settings.copyright)
+    gen->set_copyright(settings.copyright);
+  if (settings.description)
+    gen->set_description(settings.description);
+  if (settings.gameIcon)
+    gen->set_game_icon(settings.gameIcon);
   gen->set_show_cursor(settings.displayCursor);
-  gen->set_game_icon(settings.gameIcon);
 
   buffers::resources::Graphics *gfx = set.mutable_graphics();
   gfx->set_color_outside_room_region(javaColor(settings.colorOutsideRoom));
@@ -345,10 +350,14 @@ static void ImportSettings(const ::GameSettings &settings, const ESLookup &looku
   win->set_treat_close_as_escape(settings.treatCloseAsEscape);
 
   buffers::resources::Info *inf = set.mutable_info();
-  inf->set_author_name(settings.author);
-  inf->set_version(settings.version);
-  inf->set_last_changed(settings.lastChanged);
-  inf->set_information(settings.information);
+  if (settings.author)
+    inf->set_author_name(settings.author);
+  if (settings.version)
+    inf->set_version(settings.version);
+  if (settings.lastChanged)
+    inf->set_last_changed(settings.lastChanged);
+  if (settings.information)
+    inf->set_information(settings.information);
 
   //TODO: do keyboard mapping
   buffers::resources::Shortcuts *sht = set.mutable_shortcuts();
