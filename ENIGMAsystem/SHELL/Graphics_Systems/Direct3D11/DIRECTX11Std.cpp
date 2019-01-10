@@ -33,10 +33,12 @@ bool pbo_isgo;
 
 void init_blend_state();
 void init_depth_stencil_state();
+void init_sampler_state();
 
 void graphicssystem_initialize() {
   init_blend_state();
   init_depth_stencil_state();
+  init_sampler_state();
 }
 
 } // namespace enigma
