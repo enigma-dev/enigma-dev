@@ -69,7 +69,7 @@ static void iterate_overloads(definition_function* d, unsigned &min, unsigned &m
 }
 
 void definition_parameter_bounds(definition *d, unsigned &min, unsigned &max) {
-  min = SIZE_MAX;
+  min = (unsigned) SIZE_MAX;
   max = 0;
   
   if (!(d->flags & DEF_FUNCTION)) {

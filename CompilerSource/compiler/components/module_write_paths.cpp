@@ -1,7 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>                          **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008, 2018 Josh Ventura                                       **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -48,42 +48,42 @@ inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-int lang_CPP::module_write_paths(EnigmaStruct *es, FILE *gameModule)
+int lang_CPP::module_write_paths(const GameData &game, FILE *gameModule)
 {
   // Now we're going to add paths
-  edbg << es->pathCount << " Adding Paths to Game Module: " << flushl;
+  edbg << "Adding " << game.paths.size() << " Paths to Game Module: " << flushl;
 
   //Magic Number
   fwrite("PTH ",4,1,gameModule);
 
   //Indicate how many
-  int path_count = es->pathCount;
+  int path_count = game.paths.size();
   fwrite(&path_count,4,1,gameModule);
 
   int path_maxid = 0;
   for (int i = 0; i < path_count; i++)
-    if (es->paths[i].id > path_maxid)
-      path_maxid = es->paths[i].id;
+    if (game.paths[i].id() > path_maxid)
+      path_maxid = game.paths[i].id();
   fwrite(&path_maxid,4,1,gameModule);
 
   for (int i = 0; i < path_count; i++)
   {
-    writei(es->paths[i].id,gameModule); //id
+    writei(game.paths[i].id(), gameModule); //id
 
-    writei(es->paths[i].smooth,gameModule);
-    writei(es->paths[i].closed,gameModule);
-    writei(es->paths[i].precision,gameModule);
+    writei(game.paths[i].smooth(), gameModule);
+    writei(game.paths[i].closed(), gameModule);
+    writei(game.paths[i].precision(), gameModule);
     // possibly snapX/Y?
 
     // Track how many path points we're copying
-    int pointCount = es->paths[i].pointCount;
+    int pointCount = game.paths[i].points().size();
     writei(pointCount,gameModule);
 
     for (int ii = 0; ii < pointCount; ii++)
     {
-      writei(es->paths[i].points[ii].x,gameModule);
-      writei(es->paths[i].points[ii].y,gameModule);
-      writei(es->paths[i].points[ii].speed,gameModule);
+      writei(game.paths[i].points(ii).x(), gameModule);
+      writei(game.paths[i].points(ii).y(), gameModule);
+      writei(game.paths[i].points(ii).speed(), gameModule);
     }
   }
 

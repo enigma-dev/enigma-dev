@@ -30,7 +30,8 @@ endif
 
 CXX := g++
 CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src
-LDFLAGS += -shared -O3 -g
+LDFLAGS += -shared -O3 -g -L../ -Wl,-rpath=./
+LDLIBS += -lProtocols -lprotobuf
 
 # This implements a recursive wildcard allowing us to iterate in subdirs
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
@@ -38,8 +39,9 @@ rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 SOURCES := $(filter-out ./standalone_main.cpp, $(call rwildcard,./,*.cpp))
 OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 DEPENDS := $(OBJECTS:.o=.d)
+PROTO_DIR := ../shared/protos
 
-CXXFLAGS += -I../shared $(addprefix -I../shared/, $(SHARED_INCLUDES))
+CXXFLAGS += -I../shared -I$(PROTO_DIR)/codegen $(addprefix -I../shared/, $(SHARED_INCLUDES))
 SOURCES += $(addprefix $(SHARED_SRC_DIR),$(SHARED_SOURCES))
 OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.o))
 DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))
