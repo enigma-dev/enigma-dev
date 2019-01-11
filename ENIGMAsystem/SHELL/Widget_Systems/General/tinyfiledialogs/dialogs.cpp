@@ -48,7 +48,7 @@ using std::string;
 
 static inline string remove_trailing_zeros(string strnumb) {
   if (strnumb.find('.') != string::npos) {
-    while (!strnumb.empty() && (strnumb.back() == '0' || strnumb.back() == '.'))
+    while (!strnumb.empty() && strnumb != '0' && (strnumb.back() == '0' || strnumb.back() == '.'))
       strnumb.pop_back();
   }
   return strnumb;
