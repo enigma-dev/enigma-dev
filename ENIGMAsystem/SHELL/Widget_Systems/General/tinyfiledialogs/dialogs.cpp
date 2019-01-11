@@ -311,8 +311,10 @@ double get_integer(string str, double def) {
 
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
 
-  if (strtod(input, NULL) > 999999999999999)
-    return 999999999999999;
+  if (input != NULL) {
+    if (strtod(input, NULL) > 999999999999999)
+      return 999999999999999;
+  }
 
   return input ? strtod(input, NULL) : 0;
 }
@@ -342,8 +344,10 @@ double get_passcode(string str, double def) {
 
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
 
-  if (strtod(input, NULL) > 999999999999999)
-    return 999999999999999;
+  if (input != NULL) {
+    if (strtod(input, NULL) > 999999999999999)
+      return 999999999999999;
+  }
 
   return input ? strtod(input, NULL) : 0;
 }
