@@ -46,6 +46,14 @@ using enigma::tfd_DialogEngine;
 
 using std::string;
 
+static inline string remove_trailing_zeros(string strnumb) {
+  if (strnumb.find('.') != std::string::npos) {
+    while (!strnumb.empty() && (strnumb.back() == '0' || strnumb.back() == '.'))
+      strnumb.pop_back();
+  }
+  return strnumb;
+}
+
 namespace enigma {
   
 bool widget_system_initialize() {
@@ -290,7 +298,7 @@ double get_integer(string str, double def) {
   if (def > 999999999999999) 
     def = 999999999999999;
 
-  string integer = std::to_string(def);
+  string integer = remove_trailing_zeros(std::to_string(def));
 
   string msg;
 
@@ -304,7 +312,7 @@ double get_integer(string str, double def) {
 
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
 
-  if (strtod(result, NULL) > 999999999999999)
+  if (strtod(input, NULL) > 999999999999999)
     return 999999999999999;
 
   return input ? strtod(input, NULL) : 0;
@@ -321,7 +329,7 @@ double get_passcode(string str, double def) {
   if (def > 999999999999999) 
     def = 999999999999999;
 
-  string integer = std::to_string(def);
+  string integer = remove_trailing_zeros(std::to_string(def));
 
   string msg;
 
@@ -335,7 +343,7 @@ double get_passcode(string str, double def) {
 
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
 
-  if (strtod(result, NULL) > 999999999999999)
+  if (strtod(input, NULL) > 999999999999999)
     return 999999999999999;
 
   return input ? strtod(input, NULL) : 0;
