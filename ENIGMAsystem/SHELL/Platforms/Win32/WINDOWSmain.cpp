@@ -62,12 +62,12 @@ HWND get_window_handle() {
   return hWnd;
 }
 
+} // namespace enigma
+  
 static inline string add_slash(const string& dir) {
-  if (dir.empty() || *dir.rbegin() != '\\') return dir + '\\';
+  if (dir.empty() || dir.back() != '\\') return dir + '\\';
   return dir;
 }
-
-} // namespace enigma
 
 namespace enigma_user {
   
@@ -77,7 +77,7 @@ bool set_working_directory(string dname) {
   if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
     WCHAR wstr_buffer[MAX_PATH + 1];
     if (GetCurrentDirectoryW(MAX_PATH + 1, wstr_buffer) != 0) {
-      working_directory = enigma::add_slash(shorten(wstr_buffer));
+      working_directory = add_slash(shorten(wstr_buffer));
       return true;
     }
   }
@@ -447,7 +447,7 @@ std::string environment_get_variable(std::string name) {
   tstring tstr_name = widen(name);
   GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
 
-  return enigma::add_slash(shorten(buffer));
+  return shorten(buffer);
 }
 
 void action_webpage(const std::string &url) {
