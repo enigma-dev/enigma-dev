@@ -47,7 +47,7 @@ using enigma::tfd_DialogEngine;
 using std::string;
 
 static inline string remove_trailing_zeros(string strnumb) {
-  if (strnumb.find('.') != std::string::npos) {
+  if (strnumb.find('.') != string::npos) {
     while (!strnumb.empty() && (strnumb.back() == '0' || strnumb.back() == '.'))
       strnumb.pop_back();
   }
