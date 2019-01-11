@@ -27,6 +27,7 @@
 #include <string.h>
 #include <vector>
 #include <string>
+#include <limits>
 
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
@@ -294,8 +295,8 @@ double get_integer(string str, double def) {
   else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
     caption = "KDialog";
 
-  if (def > (2 << 56 - 1)) 
-    def = (2 << 56 - 1);
+  if (def > std::numeric_limits<double>::max()) 
+    def = std::numeric_limits<double>::max();
 
   string integer = remove_trailing_zeros(std::to_string(def));
 
@@ -312,8 +313,8 @@ double get_integer(string str, double def) {
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
 
   if (input != NULL) {
-    if (strtod(input, NULL) > (2 << 56 - 1))
-      return (2 << 56 - 1);
+    if (strtod(input, NULL) > std::numeric_limits<double>::max())
+      return std::numeric_limits<double>::max();
   }
 
   return input ? strtod(input, NULL) : 0;
@@ -327,8 +328,8 @@ double get_passcode(string str, double def) {
   else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
     caption = "KDialog";
 
-  if (def > (2 << 56 - 1)) 
-    def = (2 << 56 - 1);
+  if (def > std::numeric_limits<double>::max()) 
+    def = std::numeric_limits<double>::max();
 
   string integer = remove_trailing_zeros(std::to_string(def));
 
@@ -345,8 +346,8 @@ double get_passcode(string str, double def) {
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
 
   if (input != NULL) {
-    if (strtod(input, NULL) > (2 << 56 - 1))
-      return (2 << 56 - 1);
+    if (strtod(input, NULL) > std::numeric_limits<double>::max())
+      return std::numeric_limits<double>::max();
   }
 
   return input ? strtod(input, NULL) : 0;
