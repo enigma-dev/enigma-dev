@@ -314,7 +314,7 @@ double get_integer(string str, double def) {
 
   if (input != NULL) {
     if (strtod(input, NULL) > std::numeric_limits<double>::max())
-      return std::numeric_limits<double>::max();
+      return std::numeric_limits<double>::max(); 
   }
 
   return input ? strtod(input, NULL) : 0;
