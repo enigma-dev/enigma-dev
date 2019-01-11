@@ -287,9 +287,10 @@ double get_integer(string str, double def) {
   else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
     caption = "KDialog";
 
-  std::ostringstream def_integer;
-  def_integer << def;
-  string integer = def_integer.str();
+  if (def > 999999999999999) 
+    def = 999999999999999;
+
+  string integer = std::to_string(def);
 
   string msg;
 
@@ -303,6 +304,9 @@ double get_integer(string str, double def) {
 
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
 
+  if (strtod(result, NULL) > 999999999999999)
+    return 999999999999999;
+
   return input ? strtod(input, NULL) : 0;
 }
 
@@ -314,9 +318,10 @@ double get_passcode(string str, double def) {
   else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
     caption = "KDialog";
 
-  std::ostringstream def_integer;
-  def_integer << def;
-  string integer = def_integer.str();
+  if (def > 999999999999999) 
+    def = 999999999999999;
+
+  string integer = std::to_string(def);
 
   string msg;
 
@@ -329,6 +334,9 @@ double get_passcode(string str, double def) {
   caption = tfd_add_escaping(caption);
 
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
+
+  if (strtod(result, NULL) > 999999999999999)
+    return 999999999999999;
 
   return input ? strtod(input, NULL) : 0;
 }
