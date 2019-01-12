@@ -70,6 +70,8 @@ using namespace std;
 
 #include "compiler/jdi_utility.h"
 
+#include <enigma_strings.h>
+
 #ifdef WRITE_UNIMPLEMENTED_TXT
 std::map <string, char> unimplemented_function_list;
 #endif
@@ -79,17 +81,6 @@ inline void writei(int x, FILE *f) {
 }
 inline void writef(float x, FILE *f) {
   fwrite(&x,4,1,f);
-}
-
-inline string string_replace_all(string str,string substr,string nstr)
-{
-  pt pos=0;
-  while ((pos=str.find(substr,pos)) != string::npos)
-  {
-    str.replace(pos,substr.length(),nstr);
-    pos+=nstr.length();
-  }
-  return str;
 }
 
 inline string GetWorkingDir() {
@@ -545,10 +536,12 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   compilerInfo.make_vars["CMAKEFLAGS"] = "";
   if (!cmakeFlags.empty()) cmakeFlags += " ";
   
+  std::string envVars;
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")
-      make += key.first + "=\"" + key.second + "\" ";
+      envVars += "\"" + key.first + "=" + key.second + "\"";
   }
+  if (envVars.back() == ',') envVars.pop_back();
  
   make += (cmake) ? compilerInfo.make_vars["CMAKE"] : compilerInfo.make_vars["MAKEFLAGS"];
   
@@ -593,7 +586,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
     std::string dirs = wantsTheD(cmake, "CODEGEN=") + codegen_directory + " ";
     dirs += wantsTheD(cmake, "WORKDIR=") + eobjs_directory + " ";
-    const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -B \"" + eobjs_directory + "FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\"" + dirs);
+    const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -G " + compilerInfo.make_vars["CMAKEGENERATOR"] + "\"" + fullCompilePath + "FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\"" + dirs);
     if (cmake) e_execs(cmd);
     else e_execs("make", dirs, "required-directories");
 
@@ -609,7 +602,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   int makeres; 
   if (cmake) {
-    makeres = system(make.c_str());
+    makeres = e_execs(make.c_str(), "");
     string cmakeBuildMode = (mode == emode_debug) ? "Debug" : "Release";
     makeres = e_execs(compilerInfo.make_vars["CMAKE"] + " --build " + fullCompilePath + " --target install --config " + cmakeBuildMode);
   } else makeres = e_execs(compilerInfo.MAKE_location, make, flags);

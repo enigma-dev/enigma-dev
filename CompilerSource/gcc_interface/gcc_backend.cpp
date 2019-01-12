@@ -45,6 +45,8 @@
  #include <cstdio>
 #endif
 
+#include <enigma_strings.h>
+
 using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
@@ -137,7 +139,10 @@ const char* establish_bearings(const char *compiler)
   dirs += "WORKDIR=" + eobjs_directory + " ";
   
   if (cmake) {
-    const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -B \"" + eobjs_directory + 
+    const std::string compilerName = string_replace_all(compilerInfo.name, " ", "_");
+    const std::string relCompilePath = CURRENT_PLATFORM_NAME "/" + compilerInfo.target_platform + "/" + compilerName;
+    const std::string fullCompilePath = eobjs_directory + "/" + relCompilePath + "/Debug";
+    const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -G \"" + compilerInfo.make_vars["CMAKEGENERATOR"] + "\" -B \"" + fullCompilePath + 
       "FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\" -DCODEGEN=\"" + codegen_directory + "\" -DWORKDIR=\"" + eobjs_directory + "\"");
     e_execs(cmd);
   } else e_execs("make", dirs, "required-directories");
