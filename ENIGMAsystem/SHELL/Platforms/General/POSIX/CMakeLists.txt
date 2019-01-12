@@ -1,7 +1,7 @@
 set(PLATFORM_POSIX_SOURCES
    main.cpp
    POSIXthreads.cpp
-   POSIXworkdir.cpp
+   POSIXdirectory.cpp
    POSIXproccess.cpp
    Utility.cpp
    POSIXfilemanip.cpp

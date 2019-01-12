@@ -92,6 +92,24 @@ inline string string_replace_all(string str,string substr,string nstr)
   return str;
 }
 
+inline string GetWorkingDir() {
+  std::vector<char> dir(size_t(4096));
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+  GetCurrentDirectory( 4096, dir.data() );
+  #else
+  getcwd (dir.data(), 4096);
+  #endif
+  return string(dir.begin(), dir.end());
+}
+
+inline void SetWorkingDir(const string& dir) {
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+  SetCurrentDirectory(dir.c_str());
+  #else
+  chdir(dir.c_str());
+  #endif
+}
+
 inline void write_desktop_entry(const std::string fPath, const GameData& game) {
   std::ofstream wto;
   std::string fName = fPath.substr(fPath.find_last_of("/\\") + 1);
@@ -193,6 +211,10 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
   }
   wto << "}\n";
   wto << "namespace enigma { size_t " << kind << "_idmax = " << max << "; }\n\n";
+}
+
+static inline std::string wantsTheD(bool cmake, const std::string& input) {
+  if (cmake) return "-D" + input; else return input;
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
@@ -505,59 +527,75 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
 
 
-  /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     Segment two: Now that the game has been exported as C++ and raw
-    resources, our task is to compile the game itself via GNU Make.
-  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
+    resources, our task is to compile the game itself via GNU Make or CMake.
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  
+  static bool cmake = (!compilerInfo.make_vars["CMAKE"].empty());
 
   idpr("Starting compile (This may take a while...)", 30);
-
-  string make = compilerInfo.make_vars["MAKEFLAGS"];
-
-  make += "Game ";
-  make += "WORKDIR=\"" + eobjs_directory + "\" ";
-  make += "CODEGEN=\"" + codegen_directory + "\" ";
-  make += mode == emode_debug? "GMODE=\"Debug\"" : mode == emode_design? "GMODE=\"Design\"" : mode == emode_compile?"GMODE=\"Compile\"" : "GMODE=\"Run\"";
-  make += " ";
-  make += "GRAPHICS=\"" + extensions::targetAPI.graphicsSys + "\" ";
-  make += "AUDIO=\"" + extensions::targetAPI.audioSys + "\" ";
-  make += "COLLISION=\"" + extensions::targetAPI.collisionSys + "\" ";
-  make += "WIDGETS=\""  + extensions::targetAPI.widgetSys + "\" ";
-  make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
-  make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
-  make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
+  
+  string make;
+  const std::string modeStr = ((mode == emode_debug) ? "Debug" : (mode == emode_design) ? "Design" : (mode == emode_compile) ? "Compile" : "Run");
+  const std::string fullCompilePath = eobjs_directory + "/" + compilepath + "/" + modeStr; 
+  
+  // Don't want cmakeflags printed before cmake like rest of makevars
+  std::string cmakeFlags = compilerInfo.make_vars["CMAKEFLAGS"];
+  compilerInfo.make_vars["CMAKEFLAGS"] = "";
+  if (!cmakeFlags.empty()) cmakeFlags += " ";
   
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")
       make += key.first + "=\"" + key.second + "\" ";
   }
+ 
+  make += (cmake) ? compilerInfo.make_vars["CMAKE"] : compilerInfo.make_vars["MAKEFLAGS"];
+  
+  if (cmake) {
+    make += " -G \"" + compilerInfo.make_vars["CMAKEGENERATOR"] + "\" ";
+    make += "-B \"" + fullCompilePath + "\" ";
+    make += "\"ENIGMAsystem/SHELL/\" ";
+    make += "-DCMAKE_BUILD_TYPE=";
+    make += (mode == emode_debug) ? "\"Debug\" " : "\"Release\" ";
+    make += cmakeFlags;
+  } else make += "Game ";
+  
+  make += wantsTheD(cmake, "GMODE=\"");
+  make += ((mode == emode_debug) ? "Debug" : (mode == emode_design) ? "Design" : (mode == emode_compile) ? "Compile" : "Run ") + string("\" ");
+  make += wantsTheD(cmake, "WORKDIR=\"" + eobjs_directory + "\" ");
+  make += wantsTheD(cmake, "CODEGEN=\"" + codegen_directory + "\" ");
+  make += wantsTheD(cmake, "GRAPHICS=\"" + extensions::targetAPI.graphicsSys + "\" ");
+  make += wantsTheD(cmake, "AUDIO=\"" + extensions::targetAPI.audioSys + "\" ");
+  make += wantsTheD(cmake, "COLLISION=\"" + extensions::targetAPI.collisionSys + "\" ");
+  make += wantsTheD(cmake, "WIDGETS=\""  + extensions::targetAPI.widgetSys + "\" ");
+  make += wantsTheD(cmake, "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ");
+  make += wantsTheD(cmake, "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ");
+  make += wantsTheD(cmake, "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ");
 
-  make += "COMPILEPATH=\"" + compilepath + "\" ";
+  make += wantsTheD(cmake, "COMPILEPATH=\"" + compilepath + "\" ");
 
   string extstr = "EXTENSIONS=\"";
   for (unsigned i = 0; i < parsed_extensions.size(); i++)
   	extstr += " " + parsed_extensions[i].pathname;
-  make += extstr + "\"";
+  make += wantsTheD(cmake, extstr + "\" ");
 
   string mfgfn = gameFname;
   for (size_t i = 0; i < mfgfn.length(); i++)
     if (mfgfn[i] == '\\') mfgfn[i] = '/';
-  make += string(" OUTPUTNAME=\"") + mfgfn + "\" ";
+  make += wantsTheD(cmake, string("OUTPUTNAME=\"") + mfgfn + "\" ");
 
-  edbg << "Running make from `" << compilerInfo.MAKE_location << "'" << flushl;
-  edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
-
-//  #if CURRENT_PLATFORM_ID == OS_MACOSX
-//  int makeres = better_system("cd ","/MacOS/");
-//  int makeres = better_system(MAKE_location,"MacOS");
-
+  edbg << "Full command line: " << make << flushl;
+  
   string flags = "";
 
   if (redirect_make) {
 
-    std::string dirs = "CODEGEN=" + codegen_directory + " ";
-    dirs += "WORKDIR=" + eobjs_directory + " ";
-    e_execs("make", dirs, "required-directories");
+    std::string dirs = wantsTheD(cmake, "CODEGEN=") + codegen_directory + " ";
+    dirs += wantsTheD(cmake, "WORKDIR=") + eobjs_directory + " ";
+    const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -B \"" + eobjs_directory + "FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\"" + dirs);
+    if (cmake) e_execs(cmd);
+    else e_execs("make", dirs, "required-directories");
 
     // Pick a file and flush it
     const string redirfile = (eobjs_directory + "enigma_compile.log");
@@ -569,7 +607,12 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     flags += "&> \"" + redirfile + "\"";
   }
 
-  int makeres = e_execs(compilerInfo.MAKE_location, make, flags);
+  int makeres; 
+  if (cmake) {
+    makeres = system(make.c_str());
+    string cmakeBuildMode = (mode == emode_debug) ? "Debug" : "Release";
+    makeres = e_execs(compilerInfo.make_vars["CMAKE"] + " --build " + fullCompilePath + " --target install --config " + cmakeBuildMode);
+  } else makeres = e_execs(compilerInfo.MAKE_location, make, flags);
 
   // Stop redirecting GCC output
   if (redirect_make)
@@ -659,7 +702,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
     // The working_directory global is set in the main() of each platform using the platform specific function.
     // This the exact behaviour of GM8.1
-    std::vector<char> prevdir(size_t(4096));
     string newdir = game.filename.empty() ? exe_filename : game.filename;
     #if CURRENT_PLATFORM_ID == OS_WINDOWS
       if (newdir[0] == '/' || newdir[0] == '\\') {
@@ -668,13 +710,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     #endif
     newdir = newdir.substr( 0, newdir.find_last_of( "\\/" ));
 
-    #if CURRENT_PLATFORM_ID == OS_WINDOWS
-    GetCurrentDirectory( 4096, prevdir.data() );
-    SetCurrentDirectory(newdir.c_str());
-    #else
-    getcwd (prevdir.data(), 4096);
-    chdir(newdir.c_str());
-    #endif
+    string prevdir = GetWorkingDir();
+    SetWorkingDir(newdir.c_str());
 
     string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
     rprog = string_replace_all(rprog,"$game",gameFname);
@@ -684,11 +721,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     user << "\n\nGame returned " << gameres << "\n";
 
     // Restore the compilers original working directory.
-    #if CURRENT_PLATFORM_ID == OS_WINDOWS
-    SetCurrentDirectory(prevdir.data());
-    #else
-    chdir(prevdir.data());
-    #endif
+    SetWorkingDir(prevdir);
+    
   }
 
   idpr("Done.", 100);

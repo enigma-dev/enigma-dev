@@ -6,6 +6,9 @@ set(EXE_DESCRIPTION "ENIGMA Game")
 
 project("${EXE}")
 
+# Make codegen dir
+file(MAKE_DIRECTORY "${CODEGEN}/Preprocessor_Environment_Editable/")
+
 # Extra library searches
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmakemodules")
 
@@ -13,6 +16,10 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmakemodules")
 set(ENIGMA_DIR "../..")
 
 include_directories(. "${CODEGEN}" "${ENIGMA_DIR}/shared/lodepng/")
+
+if ("${GMODE}" STREQUAL "Debug")
+  add_definitions(-DDEBUG_MODE)
+endif()
 
 if(WIN32)
   add_executable("${EXE}" WIN32 SHELLmain.cpp)
@@ -111,8 +118,20 @@ target_link_libraries("${EXE}" "COLLISION_${COLLISION}")
 add_subdirectory("Widget_Systems/${WIDGETS}/")
 target_link_libraries("${EXE}" "WIDGETS_${WIDGETS}")
 
-string(REPLACE "," ";" EXTENSIONS_LIST ${EXTENSIONS})
-foreach(EXT ${EXTENSIONS_LIST})
-  add_subdirectory("Universal_System/Extensions/${EXT}/")
-  target_link_libraries("${EXE}" "EXTENSION_${EXT}")
-endforeach()
+# Networking
+if (NOT "${NETWORKING}" STREQUAL "None")
+  add_subdirectory("Networking_Systems/${NETWORKING}/")
+  target_link_libraries("${EXE}" "NETWORKING_${NETWORKING}")
+endif()
+
+if (${EXTENSIONS})
+  string(REPLACE "," ";" EXTENSIONS_LIST ${EXTENSIONS})
+  foreach(EXT ${EXTENSIONS_LIST})
+    add_subdirectory("Universal_System/Extensions/${EXT}/")
+    target_link_libraries("${EXE}" "EXTENSION_${EXT}")
+  endforeach()
+endif()
+
+get_filename_component(OUTPUT_PATH "${OUTPUTNAME}" PATH)
+get_filename_component(OUTPUT_NAME "${OUTPUTNAME}" NAME)
+install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${EXE}" DESTINATION "${OUTPUT_PATH}" RENAME "${OUTPUT_NAME}")

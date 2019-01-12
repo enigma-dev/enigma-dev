@@ -60,7 +60,7 @@ inline string event_forge_group_code(int mainId, int id) {
 static inline void declare_scripts(std::ostream &wto, const GameData &game, const CompileState &state) {
   wto << "// Script identifiers\n";
   for (size_t i = 0; i < game.scripts.size(); i++)
-    wto << "#define " << game.scripts[i].name << "(arguments...) _SCR_" << game.scripts[i].name << "(arguments)\n";
+    wto << "#define " << game.scripts[i].name << "(...) _SCR_" << game.scripts[i].name << "(__VA_ARGS__)\n";
   wto << "\n\n";
 
   for (size_t i = 0; i < game.scripts.size(); i++) {
@@ -644,7 +644,7 @@ static inline string resname(string name) {
 
 static inline void write_object_data_structs(std::ostream &wto,
       const ParsedObjectVec &parsed_objects) {
-  wto << "  objectstruct objs[] = {\n" <<std::fixed;
+  wto << "  std::vector<objectstruct> objs = {\n" <<std::fixed;
   int obmx = 0;
   for (parsed_object *object : parsed_objects) {
     wto << "    { "
