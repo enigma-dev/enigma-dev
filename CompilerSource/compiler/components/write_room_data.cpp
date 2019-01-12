@@ -68,7 +68,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   int room_highid = 0, room_highinstid = 100000, room_hightileid = 10000000;
 
   for (const auto &room : game.rooms) {
-    wto << "  std::vector<tile> tiles_" << room.id() << "[] = {\n";
+    wto << "  std::vector<tile> tiles_" << room.id() << " = {\n";
     for (int ii = 0, modme = 0; ii < room.tiles().size(); ii++) {
       wto << "{"
           << room.tiles(ii).id()      << ","
@@ -93,7 +93,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   }
 
   for (const auto &room : game.rooms) {
-    wto << "  std::vector<inst> insts_" << room.id() << "[] = {\n";
+    wto << "  std::vector<inst> insts_" << room.id() << " = {\n";
     int modme = 0;
     for (const auto &instance : room.instances()) {
       wto << "{" <<
@@ -109,9 +109,9 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   }
 
   wto << "  std::vector<roomstruct> grd_rooms = {\n";
-  for (int i = 0; i < es->roomCount; i++)
-  {
-    wto << "    //Room " << es->rooms[i].id << "\n" <<
+  for (size_t room_index = 0; room_index < game.rooms.size(); ++room_index) {
+    const auto &room = game.rooms[room_index];
+    wto << "    //Room " << room.id() << "\n" <<
     "    { "
     << room.id() << ", "  // The ID of this room
     << room_index << ", \""  // The tree order index of this room

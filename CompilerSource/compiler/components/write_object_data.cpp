@@ -638,18 +638,22 @@ static inline void write_object_class_bodies(lang_CPP *lcpp, std::ostream &wto, 
   }
 }
 
-static inline void write_object_data_structs(std::ostream &wto) {
+static inline void write_object_data_structs(std::ostream &wto,
+      const ParsedObjectVec &parsed_objects) {
   wto << "  std::vector<objectstruct> objs = {\n" <<std::fixed;
-  int objcount = 0, obmx = 0;
-  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++, objcount++)
-  {
-    wto << "    {"
-        << i->second->sprite_index << "," << i->second->solid << ","
-        << i->second->visible << "," << i->second->depth << ","
-        << i->second->persistent << "," << i->second->mask_index
-        << "," << i->second->parent_index << "," << i->second->id
-        << "},\n";
-    if (i->second->id >= obmx) obmx = i->second->id;
+  int obmx = 0;
+  for (parsed_object *object : parsed_objects) {
+    wto << "    { "
+        << resname(object->sprite_name)  << ", "
+        << object->solid                 << ", "
+        << object->visible               << ", "
+        << object->depth                 << ", "
+        << object->persistent            << ", "
+        << resname(object->mask_name)    << ", "
+        << resname(object->parent_name)  << ", "
+        << object->id
+        << " },\n";
+    if (object->id >= obmx) obmx = object->id;
   }
   wto.unsetf(ios_base::floatfield);
   wto << "  };\n";

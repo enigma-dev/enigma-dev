@@ -131,10 +131,17 @@ const char* establish_bearings(const char *compiler)
   bool redir; // Whether or not to redirect the output manually
 
   std::string MAKE_paths = compilerInfo.make_vars["PATH"];
+  static bool cmake = (!compilerInfo.make_vars["CMAKE"].empty());
   
   std::string dirs = "CODEGEN=" + codegen_directory + " ";
   dirs += "WORKDIR=" + eobjs_directory + " ";
-  e_execs("make", dirs, "required-directories");
+  
+  if (cmake) {
+    const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -B \"" + eobjs_directory + 
+      "FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\" -DCODEGEN=\"" + codegen_directory + "\" -DWORKDIR=\"" + eobjs_directory + "\"");
+    e_execs(cmd);
+  } else e_execs("make", dirs, "required-directories");
+
 
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.
