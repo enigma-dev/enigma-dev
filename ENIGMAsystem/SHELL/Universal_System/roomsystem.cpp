@@ -233,6 +233,8 @@ namespace enigma
     //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
     //if the window size changes.
     enigma_user::window_default(true);
+    // window sized by first room, can make visible now
+    enigma_user::window_set_visible(true);
     enigma_user::io_clear();
     // we only initialize the screen and clear the window color during game start
     // NOTE: no version of GM has EVER reset the drawing color or alpha during room transition

@@ -47,7 +47,6 @@ namespace enigma
 
   void EnableDrawing(void* handle = nullptr);
   void DisableDrawing(void* handle = nullptr);
-  void showWindow();
 
   // System / Window events
   int handleEvents();

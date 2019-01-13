@@ -40,3 +40,7 @@ draw_set_color(c_white);
 // flush immediately to ensure that a 2D and 3D primitive
 // render correctly when flushed from the same batch
 draw_batch_flush();
+
+// stretched sprite should ignore origin
+draw_sprite_stretched(spr,0,0,0,25,25);
+draw_sprite_stretched_ext(spr,0,25,0,25,25,c_red,0.5);

@@ -37,7 +37,7 @@ WIDGETS ?= None
 NETWORKING ?= None
 
 # RESOURCE FILE WITH ICON AND VERSION INFO
-ifeq ($(PLATFORM), Win32)
+ifeq ($(TARGET-PLATFORM), Windows)
 RESOURCES += Preprocessor_Environment_Editable/Resources.rc
 endif
 
@@ -69,6 +69,20 @@ else ifeq ($(GMODE), Compile)
 	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
 	override CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
 	override LDFLAGS += -flto -s -O3
+
+	# Disable PIE when possible
+	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
+		override CXXFLAGS += -fno-pie
+		override CFLAGS += -fno-pie
+		override LDLIBS += -no-pie
+		override LDFLAGS += -no-pie
+	endif
+	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
+		override CXXFLAGS += -fno-pie
+		override CFLAGS += -fno-pie
+		override LDLIBS += -nopie
+		override LDFLAGS += -nopie
+	endif
 else
 	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
 	override CFLAGS += -Wall -s -O3 -fno-exceptions
@@ -132,7 +146,7 @@ compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 # -MP gives phony rules for non-target files, avoiding problems with missing files
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
-	
+
 $(OBJDIR)/shared/%.o $(OBJDIR)/%.d: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/shared/$*.o $<
 

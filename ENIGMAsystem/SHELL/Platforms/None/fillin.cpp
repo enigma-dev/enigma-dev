@@ -48,7 +48,6 @@ namespace enigma {
   void EnableDrawing(void* handle) {};
   void DisableDrawing(void* handle) {};
   int handleEvents() { return 0; }
-  void showWindow() {}
 }
 
 namespace enigma_user {

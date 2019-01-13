@@ -127,10 +127,6 @@ bool initGameWindow()
   return true;
 }
 
-void showWindow() {
-  XMapRaised(disp, win);
-}
-
 void destroyWindow() {
   XCloseDisplay(enigma::x11::disp);
 }

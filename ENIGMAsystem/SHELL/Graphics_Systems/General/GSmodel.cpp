@@ -1,5 +1,6 @@
 /** Copyright (C) 2013 Robert Colton, Adriano Tumminelli
-*** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2014 Josh Ventura, Harijs Grinbergs, Seth N. Hetu
+*** Copyright (C) 2015 Harijs Grinbergs
 *** Copyright (C) 2017, 2018 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
@@ -24,10 +25,13 @@
 #include "GSprimitives.h"
 #include "GScolors.h"
 #include "GSmatrix.h"
+#include "GSmatrix_impl.h"
 #include "GStextures.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/fileio.h"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <math.h>
 
@@ -195,9 +199,18 @@ void d3d_model_draw(int id) {
 }
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
-  d3d_transform_add_translation(x, y, z);
+  // backup the current world matrix
+  d3d_transform_stack_push();
+
+  // we have to create a special translation here so that it occurs
+  // before any of the user's transformations took place
+  enigma::world = glm::translate(enigma::world, glm::vec3(x, y, z));
+  enigma::graphics_set_matrix(matrix_world);
+
   d3d_model_draw(id);
-  d3d_transform_add_translation(-x, -y, -z);
+
+  // restore the world matrix the user had before this call
+  d3d_transform_stack_pop();
 }
 
 void d3d_model_draw(int id, int texId) {
@@ -206,9 +219,8 @@ void d3d_model_draw(int id, int texId) {
 }
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId) {
-  d3d_transform_add_translation(x, y, z);
-  d3d_model_draw(id, texId);
-  d3d_transform_add_translation(-x, -y, -z);
+  texture_set(texId);
+  d3d_model_draw(id, x, y, z);
 }
 
 void d3d_model_primitive_begin(int id, int kind, int format) {

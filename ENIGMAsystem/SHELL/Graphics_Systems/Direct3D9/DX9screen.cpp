@@ -33,13 +33,9 @@ using namespace std;
 namespace enigma
 {
 
-void scene_begin() {
-  d3dmgr->BeginScene();
-}
+void scene_begin() {}
 
-void scene_end() {
-  d3dmgr->EndScene();
-}
+void scene_end() {}
 
 }
 
@@ -63,9 +59,8 @@ void screen_init()
       if (view_visible[(int)view_current]) {
         int vc = (int)view_current;
 
-        screen_set_viewport(view_xport[vc], view_yport[vc],
-          (window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
-        d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], view_angle[vc]);
+        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
+        d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
         break;
       }
     }
@@ -75,7 +70,7 @@ void screen_init()
   d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
   // make the same default as GL, keep in mind GM uses reverse depth ordering for ortho projections, where the higher the z value the further into the screen you are
   // but that is currently taken care of by using 32000/-32000 for znear/zfar respectively
-  d3dmgr->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESS);
+  d3dmgr->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
   d3dmgr->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
   d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
   d3dmgr->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);

@@ -73,13 +73,25 @@ void show_error(string errortext, const bool fatal)
 }
 
 namespace enigma {
-  extern HINSTANCE hInstance;
-  extern HWND hWnd;
-  HWND infore;
+
+extern HINSTANCE hInstance;
+extern HWND hWnd;
+HWND infore;
+
+}
+
+static inline string remove_slash(const string& dir) {
+  if (!dir.empty() && (dir.back() == '\\' || dir.back() == '/'))
+    return dir.substr(0, dir.length() - 1);
+  return dir;
 }
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+  if (uMsg == WM_INITDIALOG) {
+    return true;
+  }
+
   if (uMsg == WM_KEYUP) {
     switch (wParam) {
       case VK_ESCAPE:
@@ -103,6 +115,7 @@ static INT_PTR CALLBACK GetStrProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
     SetWindowText(hwndDlg, gs_cap.c_str());
     SetDlgItemText(hwndDlg, 12, gs_def.c_str());
     SetDlgItemText(hwndDlg, 13, gs_message.c_str());
+    return true;
   }
 
   if (uMsg == WM_COMMAND) {
@@ -128,6 +141,7 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
     SetWindowText(hwndDlg, gs_cap.c_str());
     SetDlgItemText(hwndDlg, 14, gs_username.c_str());
     SetDlgItemText(hwndDlg, 15, gs_password.c_str());
+    return true;
   }
 
   if (uMsg == WM_COMMAND) {
@@ -475,7 +489,7 @@ string get_open_filename(string filter,string filename,string caption)
     if (filter[i] == '|') filter[i] = 0;
 
   char fn[MAX_PATH];
-  strcpy(fn, filename.c_str());
+  strcpy(fn, remove_slash(filename).c_str());
 
   OPENFILENAME ofn;
   ofn.lStructSize = sizeof(ofn); ofn.hwndOwner = enigma::hWnd; ofn.hInstance = NULL;
@@ -502,7 +516,7 @@ string get_save_filename(string filter, string filename, string caption)
       filter[i] = 0;
 
   char fn[MAX_PATH];
-  strcpy(fn, filename.c_str());
+  strcpy(fn, remove_slash(filename).c_str());
 
   OPENFILENAME ofn;
   ofn.lStructSize = sizeof(ofn); ofn.hwndOwner = enigma::hWnd; ofn.hInstance = NULL;

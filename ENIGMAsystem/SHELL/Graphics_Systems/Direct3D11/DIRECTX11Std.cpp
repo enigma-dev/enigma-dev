@@ -24,21 +24,30 @@ using namespace std;
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
+
 namespace enigma
 {
-  unsigned bound_texture=0;
-  bool pbo_isgo;
 
-  void graphicssystem_initialize()
-  {
+unsigned bound_texture=0;
+bool pbo_isgo;
 
-  }
+void init_blend_state();
+void init_depth_stencil_state();
+void init_sampler_state();
+
+void graphicssystem_initialize() {
+  init_blend_state();
+  init_depth_stencil_state();
+  init_sampler_state();
 }
+
+} // namespace enigma
 
 namespace enigma_user {
+
 // Stolen entirely from the documentation and thrown into a switch() structure.
-string draw_get_graphics_error()
-{
+string draw_get_graphics_error() {
 
 }
-}
+
+} // namespace enigma_user

@@ -149,7 +149,7 @@ typedef map<string,dectrip>::iterator deciter;
 struct parsed_extension {
   string name, path;
   string pathname;
-  string implements;
+  string implements, init;
 };
 
 extern vector<parsed_extension> parsed_extensions;

@@ -233,6 +233,8 @@ yn = 4;
 
 // This one conflicts with the Linux time() function
 time = 5;
+// This one conflicts with the Win32 CreateFont macro
+CreateFont = 5;
 
 cons_show_message("Test end!");
 
