@@ -1,0 +1,13 @@
+%E-YAML
+---
+
+Name: XRandR
+Identifier: XRandR
+Author: Robert Colton
+Description: Adds Xlib display functions using the X Resize and Rotate extension. Note that changing another person's resolution is considered an act of aggression and may lead to your death and/or dismemberment. Use with caution, or ideally, not at all.
+Default: false
+Icon: xrandr.png
+
+Depends:
+	Build-Platforms: Linux
+Dependencies: None
