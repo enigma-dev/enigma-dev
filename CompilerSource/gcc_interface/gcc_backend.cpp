@@ -143,7 +143,7 @@ const char* establish_bearings(const char *compiler)
     const std::string relCompilePath = CURRENT_PLATFORM_NAME "/" + compilerInfo.target_platform + "/" + compilerName;
     const std::string fullCompilePath = eobjs_directory + "/" + relCompilePath + "/Debug";
     const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -G \"" + compilerInfo.make_vars["CMAKEGENERATOR"] + "\" -B \"" + fullCompilePath + 
-      "FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\" -DCODEGEN=\"" + codegen_directory + "\" -DWORKDIR=\"" + eobjs_directory + "\"");
+      "/FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\" -DCODEGEN=\"" + codegen_directory + "\" -DWORKDIR=\"" + eobjs_directory + "\"");
     e_execs(cmd);
   } else e_execs("make", dirs, "required-directories");
 

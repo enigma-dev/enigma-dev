@@ -586,7 +586,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
     std::string dirs = wantsTheD(cmake, "CODEGEN=") + codegen_directory + " ";
     dirs += wantsTheD(cmake, "WORKDIR=") + eobjs_directory + " ";
-    const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -G " + compilerInfo.make_vars["CMAKEGENERATOR"] + "\"" + fullCompilePath + "FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\"" + dirs);
+    const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -G " + compilerInfo.make_vars["CMAKEGENERATOR"] + "\"" + fullCompilePath + "/FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\"" + dirs);
     if (cmake) e_execs(cmd);
     else e_execs("make", dirs, "required-directories");
 

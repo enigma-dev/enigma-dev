@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(EXE "game")
+get_filename_component(EXE "${OUTPUTNAME}" NAME)
+
 set(EXE_VERSION "0.1")
 set(EXE_DESCRIPTION "ENIGMA Game")
 
@@ -133,5 +134,4 @@ if (${EXTENSIONS})
 endif()
 
 get_filename_component(OUTPUT_PATH "${OUTPUTNAME}" PATH)
-get_filename_component(OUTPUT_NAME "${OUTPUTNAME}" NAME)
-install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${EXE}" DESTINATION "${OUTPUT_PATH}" RENAME "${OUTPUT_NAME}")
+install(TARGETS "${EXE}" DESTINATION "${OUTPUT_PATH}")
