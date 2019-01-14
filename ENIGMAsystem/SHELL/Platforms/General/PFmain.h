@@ -48,6 +48,7 @@ namespace enigma {
 namespace enigma_user {
 
 extern std::string working_directory;
+extern std::string game_save_id;
 extern std::string program_directory;
 extern std::string temp_directory;
 extern std::string keyboard_string;
