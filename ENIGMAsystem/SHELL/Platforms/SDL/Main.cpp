@@ -4,7 +4,11 @@
 
 namespace enigma {
     void initialize_directory_globals() {
-      enigma_user::working_directory = SDL_GetBasePath(); 
+      // Set the working_directory
+      enigma_user::working_directory = SDL_GetBasePath();
+      
+      // Set the game_save_id
+      enigma_user::game_save_id = enigma_user::working_directory;
     }
 }
 
