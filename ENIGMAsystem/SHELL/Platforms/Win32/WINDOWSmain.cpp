@@ -78,6 +78,7 @@ bool set_working_directory(string dname) {
     WCHAR wstr_buffer[MAX_PATH + 1];
     if (GetCurrentDirectoryW(MAX_PATH + 1, wstr_buffer) != 0) {
       working_directory = add_slash(shorten(wstr_buffer));
+      game_save_id = working_directory;
       return true;
     }
   }
@@ -316,6 +317,9 @@ void initialize_directory_globals() {
   WCHAR buffer[MAX_PATH + 1];
   GetCurrentDirectoryW(MAX_PATH + 1, buffer);
   enigma_user::working_directory = add_slash(shorten(buffer));
+  
+  // Set the game_save_id
+  enigma_user::game_save_id = enigma_user::working_directory;
 
   // Set the program_directory
   buffer[0] = 0;
