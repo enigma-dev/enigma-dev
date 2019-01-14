@@ -20,6 +20,9 @@ void initialize_directory_globals() {
   char buffer[PATH_MAX + 1];
   if (getcwd(buffer, PATH_MAX + 1) != NULL)
     enigma_user::working_directory = add_slash(buffer);
+  
+  // Set the game_save_id
+  enigma_user::game_save_id = enigma_user::working_directory;
 
   // Set the program_directory
   buffer[0] = 0;
