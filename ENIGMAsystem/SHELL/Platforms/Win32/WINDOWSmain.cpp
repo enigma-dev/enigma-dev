@@ -78,7 +78,6 @@ bool set_working_directory(string dname) {
     WCHAR wstr_buffer[MAX_PATH + 1];
     if (GetCurrentDirectoryW(MAX_PATH + 1, wstr_buffer) != 0) {
       working_directory = add_slash(shorten(wstr_buffer));
-      game_save_id = working_directory;
       return true;
     }
   }
