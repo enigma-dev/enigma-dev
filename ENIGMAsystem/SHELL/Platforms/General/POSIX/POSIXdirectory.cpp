@@ -18,7 +18,6 @@ bool set_working_directory(string dname) {
     char buffer[PATH_MAX + 1]; 
     if (getcwd(buffer, PATH_MAX + 1) != NULL) {
       working_directory = add_slash(buffer);
-      game_save_id = working_directory;
       return true;
     }
   }
