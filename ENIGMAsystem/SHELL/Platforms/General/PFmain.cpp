@@ -100,6 +100,7 @@ namespace enigma_user {
 
 const int os_browser = browser_not_a_browser;
 std::string working_directory = "";
+std::string game_save_id = "";
 std::string program_directory = "";
 std::string temp_directory = "";
 std::string keyboard_string = "";
