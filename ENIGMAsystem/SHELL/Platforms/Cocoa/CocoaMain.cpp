@@ -62,8 +62,8 @@ void initialize_directory_globals() {
   
   // Set the game_save_id
   buffer[0] = 0;
-  env = getenv("HOME");
-  uint32_t bufsize = sizeof(buffer);
+  char *env = getenv("HOME");
+  bufsize = sizeof(buffer);
   // we need to do this again because dirname modifies its argument
   bool exe = (_NSGetExecutablePath(buffer, &bufsize) == 0);
   
@@ -75,7 +75,7 @@ void initialize_directory_globals() {
   }
 
   // Set the temp_directory
-  char *env = getenv("TMPDIR");
+  env = getenv("TMPDIR");
 
   if (env != NULL)
     enigma_user::temp_directory = add_slash(env);
