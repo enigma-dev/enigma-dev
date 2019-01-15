@@ -1,5 +1,6 @@
 #include "Platforms/General/PFmain.h"
 
+#include <sys/stat.h>
 #include <limits.h>
 #include <unistd.h>
 #include <libgen.h>
