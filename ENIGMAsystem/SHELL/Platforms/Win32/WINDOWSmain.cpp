@@ -326,14 +326,14 @@ void initialize_directory_globals() {
   
   // Set the game_save_id
   enigma_user::game_save_id = shorten(buffer);
-  size_t pos = enigma_user::game_save_id.find_last_of("\\/");
+  size_t pos = enigma_user::game_save_id.find_last_of("\\/") + 1;
   size_t len = enigma_user::game_save_id.find_last_of(".") - pos;
   enigma_user::game_save_id = enigma_user::game_save_id.substr(pos, len);
   
   buffer[0] = 0;
   tstring env = widen("LOCALAPPDATA");
   GetEnvironmentVariableW(env.c_str(), buffer, MAX_PATH + 1);
-  enigma_user::game_save_id = add_slash(shorten(buffer) + enigma_user::game_save_id);
+  enigma_user::game_save_id = add_slash(shorten(buffer)) + add_slash(enigma_user::game_save_id);
   tstring tstr_game_save_id =  widen(enigma_user::game_save_id);
   CreateDirectoryW(tstr_game_save_id.c_str(), NULL);
   
