@@ -32,7 +32,7 @@ void initialize_directory_globals() {
   buffer[0] = 0;
   char *env = getenv("HOME");
   // we need to do this again because dirname modifies its argument
-  ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX + 1);
+  count = readlink("/proc/self/exe", buffer, PATH_MAX + 1);
   
   if (count != -1 && env != NULL) {
     enigma_user::game_save_id = add_slash(string(env)) + string(".config/");
