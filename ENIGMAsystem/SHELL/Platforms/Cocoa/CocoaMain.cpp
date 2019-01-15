@@ -21,6 +21,7 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <sys/stat.h>
 #include <mach-o/dyld.h>
 #include <limits.h>
 #include "CocoaMain.h"
