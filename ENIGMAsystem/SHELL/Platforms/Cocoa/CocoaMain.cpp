@@ -68,7 +68,9 @@ void initialize_directory_globals() {
   
   if (exe && env != NULL) {
     enigma_user::game_save_id = add_slash(string(env)) + string(".config/");
+    mkdir(enigma_user::game_save_id.c_str(), 777);
     enigma_user::game_save_id += add_slash(basename(buffer));
+    mkdir(enigma_user::game_save_id.c_str(), 777);
   }
 
   // Set the temp_directory
