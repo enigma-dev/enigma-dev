@@ -65,7 +65,9 @@ void initialize_directory_globals() {
   uint32_t bufsize = sizeof(buffer);
   
   // we need to do this again because dirname modifies its argument
-  if (_NSGetExecutablePath(buffer, &bufsize) == 0 && env != NULL) {
+  bool exe = (_NSGetExecutablePath(buffer, &bufsize) == 0);
+  
+  if (exe && env != NULL) {
     enigma_user::game_save_id = add_slash(string(env)) + string(".config/");
     enigma_user::game_save_id += add_slash(basename(buffer));
   }
