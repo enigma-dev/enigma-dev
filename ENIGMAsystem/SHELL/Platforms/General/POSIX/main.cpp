@@ -42,7 +42,7 @@ void initialize_directory_globals() {
   }
 
   // Set the temp_directory
-  char *env = getenv("TMPDIR");
+  env = getenv("TMPDIR");
 
   if (env != NULL)
     enigma_user::temp_directory = add_slash(env);
