@@ -82,20 +82,20 @@ namespace enigma
   {
     using namespace enigma_user;
     object_basic *instanceexists = fetch_instance_by_int(vob);
-
+  
     if (instanceexists)
     {
       object_planar* vobr = (object_planar*)instanceexists;
-
+  
       double vobx = vobr->x, voby = vobr->y;
-
+  
       //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
       //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
-
+  
       double vbc_h, vbc_v;
       (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
       (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
-
+  
       if (view_hspeed[vc] == -1)
       {
         if (vobx < view_xview[vc] + vbc_h)
@@ -118,7 +118,7 @@ namespace enigma
             view_xview[vc] = vobx + vbc_h - view_wview[vc];
         }
       }
-
+  
       if (view_vspeed[vc] == -1)
       {
         if (voby < view_yview[vc] + vbc_v)
@@ -141,19 +141,19 @@ namespace enigma
             view_yview[vc] = voby + vbc_v - view_hview[vc];
         }
       }
-
+  
       if (view_xview[vc] < 0)
         view_xview[vc] = 0;
       else if (view_xview[vc] > room_width - view_wview[vc])
         view_xview[vc] = room_width - view_wview[vc];
-
+  
       if (view_yview[vc] < 0)
         view_yview[vc] = 0;
       else if (view_yview[vc] > room_height - view_hview[vc])
         view_yview[vc] = room_height - view_hview[vc];
     }
   }
-
+  
 
   void roomstruct::end() {
     // Fire the Room End event.
@@ -257,7 +257,7 @@ namespace enigma
     load_tiles();
     //Tiles end
 
-    std::vector<object_basic*> is(instancecount);
+    object_basic* is[instancecount];
     for (int i = 0; i < instancecount; i++) {
       inst *obj = &instances[i];
       object_basic *existing;
@@ -306,7 +306,7 @@ namespace enigma
   }
 
   extern int room_loadtimecount;
-  extern std::vector<roomstruct> grd_rooms;
+  extern roomstruct grd_rooms[];
   extern size_t room_idmax;
   int room_switching_id = -1;
   int room_switching_restartgame = false;
