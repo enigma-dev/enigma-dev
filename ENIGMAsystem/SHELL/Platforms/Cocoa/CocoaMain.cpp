@@ -50,16 +50,24 @@ void initialize_directory_globals() {
   char buffer[PATH_MAX + 1];
   if (getcwd(buffer, PATH_MAX + 1) != NULL)
     enigma_user::working_directory = add_slash(buffer);
-  
-  // Set the game_save_id
-  enigma_user::game_save_id = enigma_user::working_directory;
 
   // Set the program_directory
   buffer[0] = 0;
-
   uint32_t bufsize = sizeof(buffer);
+  
   if (_NSGetExecutablePath(buffer, &bufsize) == 0) {
     enigma_user::program_directory = add_slash(dirname(buffer));
+  }
+  
+  // Set the game_save_id
+  buffer[0] = 0;
+  char *env = getenv("HOME");
+  uint32_t bufsize = sizeof(buffer);
+  
+  // we need to do this again because dirname modifies its argument
+  if (_NSGetExecutablePath(buffer, &bufsize) == 0 && env != NULL) {
+    enigma_user::game_save_id = add_slash(string(env)) + string(".config/");
+    enigma_user::game_save_id += add_slash(basename(buffer));
   }
 
   // Set the temp_directory
