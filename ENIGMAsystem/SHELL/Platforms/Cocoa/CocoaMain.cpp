@@ -62,8 +62,8 @@ void initialize_directory_globals() {
   
   // Set the game_save_id
   buffer[0] = 0;
-  char *env = getenv("HOME");
   bufsize = sizeof(buffer);
+  char *env = getenv("HOME");
   // we need to do this again because dirname modifies its argument
   bool exe = (_NSGetExecutablePath(buffer, &bufsize) == 0);
   
