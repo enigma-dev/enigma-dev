@@ -328,7 +328,11 @@ void initialize_directory_globals() {
   enigma_user::game_save_id = shorten(buffer);
   size_t pos = enigma_user::game_save_id.find_last_of("\\/");
   size_t len = enigma_user::game_save_id.find_last_of(".") - pos;
-  enigma_user::game_save_id = enigma_user::game_save_id.substr(pos, len);
+  if (enigma_user::game_save_id.find(".tmp", 
+    enigma_user::game_save_id.find_last_of(".")) != std::string::npos)
+    enigma_user::game_save_id = enigma_user::game_save_id.substr(pos, len);
+  else
+    enigma_user::game_save_id = enigma_user::game_save_id.substr(pos);
   
   buffer[0] = 0;
   tstring env = widen("LOCALAPPDATA");
