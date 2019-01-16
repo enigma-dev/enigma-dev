@@ -1,0 +1,6 @@
+#ifndef JDI_MOCK_CSTDLIB_HEADER
+#define JDI_MOCK_CSTDLIB_HEADER
+
+typedef unsigned size_t;
+
+#endif

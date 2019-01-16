@@ -70,7 +70,11 @@ struct variant
   operator double();
   operator float();
 
+  #ifdef JUST_DEFINE_IT_RUN
+  operator string();
+  #else
   operator std::string();
+  #endif
 
   operator int() const;
   operator bool() const;
@@ -86,10 +90,16 @@ struct variant
   operator double() const;
   operator float() const;
 
+  #ifdef JUST_DEFINE_IT_RUN
+  operator string() const;
+  #else
   operator std::string() const;
+  #endif
 
   variant();
   variant(const void *p);
+  
+  #ifndef JUST_DEFINE_IT_RUN
   types_extrapolate_alldecc(variant)
 
   types_extrapolate_alldec(variant& operator=)
@@ -151,18 +161,20 @@ struct variant
   double    operator+() EVCONST;
   #undef EVCONST
   #define EVCONST
+  #endif
 
   ~variant();
 };
 
 
-
+#ifndef JUST_DEFINE_IT_RUN
 #undef types_extrapolate_alldec
 #define types_extrapolate_alldec(prefix)\
  types_extrapolate_real_p  (prefix,;)\
  types_extrapolate_string_p(prefix,;)\
  prefix (variant x);
-
+#endif
+ 
 struct var
 {
   void* values;
@@ -189,7 +201,11 @@ struct var
   operator double();
   operator float();
 
+  #ifdef JUST_DEFINE_IT_RUN
+  operator string();
+  #else
   operator std::string();
+  #endif
 
   operator int() const;
   operator bool() const;
@@ -205,11 +221,17 @@ struct var
   operator double() const;
   operator float() const;
 
+  #ifdef JUST_DEFINE_IT_RUN
+  operator string() const;
+  #else
   operator std::string() const;
+  #endif
 
   var();
   var(const var&);
   var(variant value, size_t length, size_t height = 1);
+  
+  #ifndef JUST_DEFINE_IT_RUN
   types_extrapolate_alldec(var)
 
   types_extrapolate_alldec(variant& operator=)
@@ -263,6 +285,7 @@ struct var
   types_extrapolate_alldec(bool operator<)
   #undef EVCONST
   #define EVCONST
+  #endif
 
   variant&  operator++();
   double    operator++(int);
@@ -298,6 +321,7 @@ struct var
   ~var();
 };
 
+#ifndef JUST_DEFINE_IT_RUN
 
 #undef EVCONST
 #define EVCONST
@@ -384,6 +408,8 @@ types_binary_extrapolate_alldecce(bool, operator<,  const var&)
 #endif
 
 #undef unsigll
+
+#endif
 
 namespace enigma_user {
   enum {

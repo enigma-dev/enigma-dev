@@ -1,4 +1,5 @@
 #ifndef JDI_MOCK_STRING_HEADER
+#define JDI_MOCK_STRING_HEADER
 
 #include <cstdlib>
 

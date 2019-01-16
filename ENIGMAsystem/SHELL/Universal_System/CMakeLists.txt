@@ -53,7 +53,7 @@ add_library("UNIVERSAL_SYSTEM" "${UNIVERSAL_SOURCES}")
 # zlib
 find_package(ZLIB REQUIRED)
 include_directories("${ZLIB_INCLUDE_DIRS}")
-target_link_libraries("UNIVERSAL_SYSTEM" "${ZLIB_LIBRARY_RELEASE}")
+target_link_libraries("UNIVERSAL_SYSTEM" ${ZLIB_LIBRARIES})
 
 # Shared Sources
 add_subdirectory("../${ENIGMA_DIR}/shared/lodepng" lodepng)

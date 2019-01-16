@@ -257,7 +257,8 @@ namespace enigma
     load_tiles();
     //Tiles end
 
-    object_basic* is[instancecount];
+    //object_basic* is[instancecount];
+	std::vector<object_basic*> is(instancecount);
     for (int i = 0; i < instancecount; i++) {
       inst *obj = &instances[i];
       object_basic *existing;

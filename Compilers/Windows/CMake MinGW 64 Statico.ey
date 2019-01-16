@@ -6,8 +6,7 @@ Maintainer: fundies
 Target-platform: Windows
 
 Make-Vars:
-  path:
-  cmake: x86_64-w64-mingw32-cmake
+  cmake: ${MINGW_PREFIX}/bin/cmake
   cmakegenerator: MSYS Makefiles
   cmakeflags:
   cc: cl

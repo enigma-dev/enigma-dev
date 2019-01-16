@@ -68,7 +68,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   int room_highid = 0, room_highinstid = 100000, room_hightileid = 10000000;
 
   for (const auto &room : game.rooms) {
-    wto << "  tile tiles_" << room.id() << "[]" << " = {\n";
+    wto << "  tile tiles_" << room.id() << "[" << std::max(1, room.tiles_size()) << "]" << " = {\n";
     for (int ii = 0, modme = 0; ii < room.tiles().size(); ii++) {
       wto << "{"
           << room.tiles(ii).id()      << ","
@@ -93,7 +93,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   }
 
   for (const auto &room : game.rooms) {
-    wto << "  inst insts_" << room.id() << "[]" << " = {\n";
+    wto << "  inst insts_" << room.id() << "[" << std::max(1, room.instances_size()) << "]" << " = {\n";
     int modme = 0;
     for (const auto &instance : room.instances()) {
       wto << "{" <<
@@ -108,7 +108,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     wto << "  };\n";
   }
 
-  wto << "  roomstruct grd_rooms[" << game.rooms.size() << "] = {\n";
+  wto << "  roomstruct grd_rooms[" << std::max(static_cast<size_t>(1), game.rooms.size()) << "] = {\n";
   for (size_t room_index = 0; room_index < game.rooms.size(); ++room_index) {
     const auto &room = game.rooms[room_index];
     wto << "    //Room " << room.id() << "\n" <<

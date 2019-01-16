@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-get_filename_component(EXE "${OUTPUTNAME}" NAME)
+get_filename_component(EXE "${OUTPUTNAME}" NAME_WE)
 
 set(EXE_VERSION "0.1")
 set(EXE_DESCRIPTION "ENIGMA Game")
@@ -16,11 +16,34 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmakemodules")
 # ENIGMA's root
 set(ENIGMA_DIR "../..")
 
-include_directories(. "${CODEGEN}" "${ENIGMA_DIR}/shared/lodepng/")
+include_directories(. "${CMAKE_CURRENT_BINARY_DIR}" "${ENIGMA_DIR}/shared/lodepng/")
 
 if ("${GMODE}" STREQUAL "Debug")
   add_definitions(-DDEBUG_MODE)
 endif()
+
+set(PREPROS "${CODEGEN}/Preprocessor_Environment_Editable")
+configure_file("${CODEGEN}/API_SWITCHBOARD.h" "API_SWITCHBOARD.h" COPYONLY)
+configure_file("${PREPROS}/GAME_SETTINGS.h" "Preprocessor_Environment_Editable/GAME_SETTINGS.h" COPYONLY)
+configure_file("${PREPROS}/LIBINCLUDE.h" "Preprocessor_Environment_Editable/LIBINCLUDE.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_objectfunctionality.h" "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_events.h" "Preprocessor_Environment_Editable/IDE_EDIT_events.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_resourcenames.h" "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_evparent.h" "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_evparent.h" "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_roomarrays.h" "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_fontinfo.h" "Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_roomcreates.h" "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_globals.h" "Preprocessor_Environment_Editable/IDE_EDIT_globals.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_shaderarrays.h" "Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_inherited_locals.h" "Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_timelines.h" "Preprocessor_Environment_Editable/IDE_EDIT_timelines.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_modesenabled.h" "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_whitespace.h" "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_whitespace.h" "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_object_switch.h" "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_objectaccess.h" "Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h" COPYONLY)
+configure_file("${PREPROS}/IDE_EDIT_objectdeclarations.h" "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h" COPYONLY)
 
 if(WIN32)
   add_executable("${EXE}" WIN32 SHELLmain.cpp)
