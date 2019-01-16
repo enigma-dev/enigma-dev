@@ -5,5 +5,5 @@ set(EXTENSION_SOURCES
   B3Dworlds.cpp
 )
 
-add_library("EXTENSION_${EXT}" "${EXTENSION_SOURCES}")
-target_link_libraries("EXTENSION_${EXT}" BulletSoftBody BulletDynamics BulletCollision LinearMath)
+add_library("EXTENSION_${EXTNAME}" "${EXTENSION_SOURCES}")
+target_link_libraries("EXTENSION_${EXTNAME}" BulletSoftBody BulletDynamics BulletCollision LinearMath)

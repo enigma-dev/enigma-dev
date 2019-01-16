@@ -5,4 +5,4 @@ set(EXTENSION_SOURCES
 )
 
 add_compile_definitions(PATH_EXT_SET)
-add_library("EXTENSION_${EXT}" "${EXTENSION_SOURCES}")
+add_library("EXTENSION_${EXTNAME}" "${EXTENSION_SOURCES}")

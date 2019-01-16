@@ -2,4 +2,4 @@ set(EXTENSION_SOURCES
   WINDOWStouch.cpp
 )
 
-add_library("EXTENSION_${EXT}" "${EXTENSION_SOURCES}")
+add_library("EXTENSION_${EXTNAME}" "${EXTENSION_SOURCES}")

@@ -4,4 +4,4 @@ set(EXTENSION_SOURCES
   mp_movement.cpp
 )
 
-add_library("EXTENSION_${EXT}" "${EXTENSION_SOURCES}")
+add_library("EXTENSION_${EXTNAME}" "${EXTENSION_SOURCES}")

@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.13)
 
-get_filename_component(EXE "${OUTPUTNAME}" NAME_WE)
+# Remove this "if" when windows less buggy
+if (WIN32)
+  get_filename_component(EXE "${OUTPUTNAME}" NAME_WE)
+else()
+  get_filename_component(EXE "${OUTPUTNAME}" NAME)
+endif (WIN32)
 
 set(EXE_VERSION "0.1")
 set(EXE_DESCRIPTION "ENIGMA Game")
@@ -23,7 +28,7 @@ if ("${GMODE}" STREQUAL "Debug")
 endif()
 
 set(PREPROS "${CODEGEN}/Preprocessor_Environment_Editable")
-configure_file("${CODEGEN}/API_SWITCHBOARD.h" "API_SWITCHBOARD.h" COPYONLY)
+configure_file("${CODEGEN}/API_Switchboard.h" "API_Switchboard.h" COPYONLY)
 configure_file("${PREPROS}/GAME_SETTINGS.h" "Preprocessor_Environment_Editable/GAME_SETTINGS.h" COPYONLY)
 configure_file("${PREPROS}/LIBINCLUDE.h" "Preprocessor_Environment_Editable/LIBINCLUDE.h" COPYONLY)
 configure_file("${PREPROS}/IDE_EDIT_objectfunctionality.h" "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h" COPYONLY)
@@ -148,11 +153,15 @@ if (NOT "${NETWORKING}" STREQUAL "None")
   target_link_libraries("${EXE}" "NETWORKING_${NETWORKING}")
 endif()
 
-if (${EXTENSIONS})
-  string(REPLACE "," ";" EXTENSIONS_LIST ${EXTENSIONS})
+if (NOT "${EXTENSIONS}" STREQUAL "")
+  string(LENGTH "${EXTENSIONS}" STRLEN)
+  string(SUBSTRING ${EXTENSIONS} 1 ${STRLEN} EXTENSIONS)
+  string(REPLACE " " ";" EXTENSIONS_LIST ${EXTENSIONS})
+  
   foreach(EXT ${EXTENSIONS_LIST})
-    add_subdirectory("Universal_System/Extensions/${EXT}/")
-    target_link_libraries("${EXE}" "EXTENSION_${EXT}")
+    get_filename_component(EXTNAME "${EXT}" NAME)
+    add_subdirectory("${EXT}/")
+    target_link_libraries("${EXE}" "EXTENSION_${EXTNAME}")
   endforeach()
 endif()
 

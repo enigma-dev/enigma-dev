@@ -6,4 +6,4 @@ set(EXTENSION_SOURCES
   GM5Views.cpp
 )
 
-add_library("EXTENSION_${EXT}" "${EXTENSION_SOURCES}")
+add_library("EXTENSION_${EXTNAME}" "${EXTENSION_SOURCES}")
