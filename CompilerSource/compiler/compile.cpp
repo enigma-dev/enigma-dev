@@ -544,7 +544,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   if (envVars.back() == ',') envVars.pop_back();
   
   if (cmake) {
-    make += compilerInfo.make_vars["CMAKE"]
+    make += compilerInfo.make_vars["CMAKE"];
     make += " -G \"" + compilerInfo.make_vars["CMAKEGENERATOR"] + "\" ";
     make += "-B \"" + fullCompilePath + "\" ";
     make += "\"ENIGMAsystem/SHELL/\" ";
