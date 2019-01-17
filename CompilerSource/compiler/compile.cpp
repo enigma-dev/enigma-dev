@@ -558,7 +558,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
   
   make += wantsTheD(cmake, "GMODE=\"");
-  make += ((mode == emode_debug) ? "Debug" : (mode == emode_design) ? "Design" : (mode == emode_compile) ? "Compile" : "Run ") + string("\" ");
+  make += ((mode == emode_debug) ? "Debug" : (mode == emode_design) ? "Design" : (mode == emode_compile) ? "Compile" : "Run") + string("\" ");
   make += wantsTheD(cmake, "WORKDIR=\"" + eobjs_directory + "\" ");
   make += wantsTheD(cmake, "CODEGEN=\"" + codegen_directory + "\" ");
   make += wantsTheD(cmake, "GRAPHICS=\"" + extensions::targetAPI.graphicsSys + "\" ");
