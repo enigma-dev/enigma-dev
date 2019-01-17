@@ -531,7 +531,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   const std::string modeStr = ((mode == emode_debug) ? "Debug" : (mode == emode_design) ? "Design" : (mode == emode_compile) ? "Compile" : "Run");
   const std::string fullCompilePath = eobjs_directory + "/" + compilepath + "/" + modeStr; 
   
-  // Don't want cmakeflags printed before cmake like rest of makevars
+  // Don't want cmakeflags in with the rest of makevars
   std::string cmakeFlags = compilerInfo.make_vars["CMAKEFLAGS"];
   compilerInfo.make_vars["CMAKEFLAGS"] = "";
   if (!cmakeFlags.empty()) cmakeFlags += " ";
@@ -542,17 +542,20 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       envVars += "\"" + key.first + "=" + key.second + "\"";
   }
   if (envVars.back() == ',') envVars.pop_back();
- 
-  make += (cmake) ? compilerInfo.make_vars["CMAKE"] : compilerInfo.make_vars["MAKEFLAGS"];
   
   if (cmake) {
+    make += compilerInfo.make_vars["CMAKE"]
     make += " -G \"" + compilerInfo.make_vars["CMAKEGENERATOR"] + "\" ";
     make += "-B \"" + fullCompilePath + "\" ";
     make += "\"ENIGMAsystem/SHELL/\" ";
     make += "-DCMAKE_BUILD_TYPE=";
     make += (mode == emode_debug) ? "\"Debug\" " : "\"Release\" ";
     make += cmakeFlags;
-  } else make += "Game ";
+  } else {
+    make += compilerInfo.MAKE_location;
+    make += (compilerInfo.make_vars["MAKEFLAGS"].empty()) ? " " : " " + compilerInfo.make_vars["MAKEFLAGS"] + " ";
+    make += "Game ";
+  }
   
   make += wantsTheD(cmake, "GMODE=\"");
   make += ((mode == emode_debug) ? "Debug" : (mode == emode_design) ? "Design" : (mode == emode_compile) ? "Compile" : "Run ") + string("\" ");
@@ -565,7 +568,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   make += wantsTheD(cmake, "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ");
   make += wantsTheD(cmake, "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ");
   make += wantsTheD(cmake, "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ");
-
   make += wantsTheD(cmake, "COMPILEPATH=\"" + compilepath + "\" ");
 
   string extstr = "EXTENSIONS=\"";
@@ -588,7 +590,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     dirs += wantsTheD(cmake, "WORKDIR=") + eobjs_directory + " ";
     const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -G " + compilerInfo.make_vars["CMAKEGENERATOR"] + "\"" + fullCompilePath + "/FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\"" + dirs);
     if (cmake) e_execs(cmd);
-    else e_execs("make", dirs, "required-directories");
+    else e_execs(compilerInfo.MAKE_location, dirs, "required-directories");
 
     // Pick a file and flush it
     const string redirfile = (eobjs_directory + "enigma_compile.log");
@@ -605,7 +607,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     makeres = e_execs(make.c_str(), "");
     string cmakeBuildMode = (mode == emode_debug) ? "Debug" : "Release";
     makeres = e_execs(compilerInfo.make_vars["CMAKE"] + " --build " + fullCompilePath + " --target install --config " + cmakeBuildMode);
-  } else makeres = e_execs(compilerInfo.MAKE_location, make, flags);
+  } else makeres = e_execs(make, flags, envVars.c_str());
 
   // Stop redirecting GCC output
   if (redirect_make)
