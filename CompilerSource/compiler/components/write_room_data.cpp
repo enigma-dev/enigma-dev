@@ -51,7 +51,7 @@ using namespace std;
 
 // GCC Bug on travis
 #if defined(__GNUC__) && (__GNUC__ < 5) && !defined(__clang__)
- #define vla(x, y)
+ #define vla(x, y) ""
 #else
  #define vla(x, y) std::max(x, y)
 #endif
