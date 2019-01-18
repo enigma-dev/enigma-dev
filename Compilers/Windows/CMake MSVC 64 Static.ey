@@ -1,6 +1,6 @@
 %e-yaml
 ---
-Name: CMake Visual Stupido 64 Statico
+Name: CMake MSVC 64 Static
 Native: No
 Maintainer: fundies
 Target-platform: Windows
@@ -14,7 +14,7 @@ Make-Vars:
   cxx: cl
 
 Parser-Vars:
-  defines: ""
+  defines: JDI CANNOT PARSE STL
   searchdirs: ""
   searchdirs-start: ""
   searchdirs-end: ""

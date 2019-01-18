@@ -1,6 +1,6 @@
 %e-yaml
 ---
-Name: CMake MinGW 64 Statico
+Name: CMake MinGW 64 Static
 Native: No
 Maintainer: fundies
 Target-platform: Windows

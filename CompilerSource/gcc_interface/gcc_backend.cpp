@@ -147,26 +147,26 @@ const char* establish_bearings(const char *compiler)
     e_execs(cmd);
   } else e_execs("make", dirs, "required-directories");
 
-  if (!cmake) {
-	  /* Get a list of all macros defined by our compiler.
-	  ** These will help us through parsing available libraries.
-	  ***********************************************************/
-	  cmd = compilerInfo.defines_cmd;
-	  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_defines.txt\""));
-	  cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-	  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + codegen_directory + "enigma_defines.txt\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
-	  if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
-	  else cout << "Call succeeded" << endl;
+  if (compilerInfo.defines_cmd != "JDI CANNOT PARSE STL") {
+    /* Get a list of all macros defined by our compiler.
+    ** These will help us through parsing available libraries.
+    ***********************************************************/
+    cmd = compilerInfo.defines_cmd;
+    redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_defines.txt\""));
+    cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
+    got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + codegen_directory + "enigma_defines.txt\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+    if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
+    else cout << "Call succeeded" << endl;
 
-	  /* Get a list of all available search directories.
-	  ** These are where we'll look for headers to parse.
-	  ****************************************************/
-	  cmd = compilerInfo.searchdirs_cmd;
-	  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_searchdirs.txt\""));
-	  cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-	  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + codegen_directory + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
-	  if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
-	  else cout << "Call succeeded" << endl;
+    /* Get a list of all available search directories.
+    ** These are where we'll look for headers to parse.
+    ****************************************************/
+    cmd = compilerInfo.searchdirs_cmd;
+    redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_searchdirs.txt\""));
+    cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
+    got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + codegen_directory + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+    if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
+    else cout << "Call succeeded" << endl;
 
   /* Parse include directories
   ****************************************/
@@ -217,9 +217,10 @@ const char* establish_bearings(const char *compiler)
     int res = jdi::builtin->parse_C_stream(macro_reader, (codegen_directory + "enigma_defines.txt").c_str());
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
-  } else {
-	jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/");
+  } else { // Skip all that stl parsing crap and just point to fake stl
+    jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/");
     jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/Mock_JDI_Headers/");
+    jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/Mock_JDI_Headers/more");
     jdi::builtin->add_search_directory(codegen_directory.c_str());
   }
 

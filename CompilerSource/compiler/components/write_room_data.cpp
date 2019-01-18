@@ -297,3 +297,5 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
   return 0;
 }
+
+#undef vla(x, y)
