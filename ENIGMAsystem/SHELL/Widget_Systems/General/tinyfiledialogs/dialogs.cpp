@@ -105,7 +105,7 @@ class FileFilter {
   const int* pattern_counts() { return pattern_counts_.data(); }
 };
 
-string tfd_add_escaping(string str) {
+static inline string tfd_add_escaping(string str) {
   string result;
 
   if (tfd_DialogEngine() == tfd_OsaScript)
@@ -119,7 +119,7 @@ string tfd_add_escaping(string str) {
   return result;
 }
 
-string detect_all_files_filter(string filter) {
+static inline string detect_all_files_filter(string filter) {
   if (tfd_DialogEngine() == tfd_OsaScript) {
     string str_filter = string_replace_all(filter, "*.", "");
     size_t first_line_pos = str_filter.find("|");
@@ -200,10 +200,10 @@ static inline get_color_helper(int defcol, string title) {
   rescol[1] = (defcol >> 8) & 0xFF;
   rescol[2] = (defcol >> 16) & 0xFF;
 
-  title = tfd_add_escaping(title);
-
   if (title == "")
     title = "Color";
+
+  title = tfd_add_escaping(title);
 
   if (tinyfd_colorChooser(title.c_str(), NULL, rescol, rescol, tfd_DialogEngine()) == NULL)
     return -1;
