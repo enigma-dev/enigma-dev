@@ -316,15 +316,15 @@ static inline void write_object_timelines(std::ostream &wto, const GameData &gam
     {
       hasKnownTlines = true;
       for (const auto &moment : timit->second.moments) {
-        wto << "    void TLINE_" << timit->first <<"_MOMENT_" << moment.step <<"();\n";
+        wto << "    void TLINE_" << timit->first << "_MOMENT_" << moment.step << "();\n";
       }
     }
   } wto << "\n";
 
   //If at least one timeline is called by this object, override timeline_call_moment_script() to properly dispatch it to the local instance.
   if (hasKnownTlines) {
-    wto <<"    // Dispatch timelines properly for this object..\n";
-    wto <<"    virtual void timeline_call_moment_script(int timeline_index, int moment_index);\n\n";
+    wto << "    // Dispatch timelines properly for this object..\n";
+    wto << "    virtual void timeline_call_moment_script(int timeline_index, int moment_index);\n\n";
   }
 }
 
@@ -662,7 +662,7 @@ static inline string resname(string name) {
 
 static inline void write_object_data_structs(std::ostream &wto,
       const ParsedObjectVec &parsed_objects) {
-  wto << "  objectstruct objs[] = {\n" <<std::fixed;
+  wto << "  objectstruct objs[] = {\n" << std::fixed;
   int obmx = 0;
   for (parsed_object *object : parsed_objects) {
     wto << "    { "
@@ -772,11 +772,11 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
 }
 
 static inline void write_timeline_implementations(ofstream& wto, const GameData &game, const CompileState &state) {
-  // Export globalized timelines.event_has_default_code
+  // Export globalized timelines.
   // TODO: Is there such a thing as a localized timeline?
-  for (const auto &tline : state.timeline_lookup) {
+  for (const auto &tline : state.timeline_lookup) {\
     for (const auto &moment : tline.second.moments) {
-      wto << "void TLINE_" <<tline.first << "_MOMENT_" << moment.step << "() {\n";
+      wto << "void TLINE_" << tline.first << "_MOMENT_" << moment.step << "() {\n";
       parsed_event& upev = moment.script->pev_global
           ? *moment.script->pev_global : moment.script->pev;
 
@@ -899,14 +899,14 @@ static inline void write_object_timeline_funcs(ofstream& wto, const GameData &ga
   bool hasKnownTlines = false;
   for (parsed_object::const_tlineit it = t->tlines.begin(); it != t->tlines.end(); ++it) { //For each timeline potentially set by this object
     auto timit = timeline_lookup.find(it->first); //Check if it's a timeline
-    if (timit != timeline_lookup.end()) {  // If we've got ourselves a script
+    if (timit != timeline_lookup.end()) {  // If we've got ourselves a timeline
       hasKnownTlines = true;  // Apparently we're always writing all timelines to all objects
       for (const auto &moment : timit->second.moments) {
         parsed_script* scr = moment.script;
         wto << "void enigma::OBJ_" << t->name << "::TLINE_" << timit->first
             << "_MOMENT_" << moment.step << "() {\n";
         print_to_file(scr->pev.code, scr->pev.synt, scr->pev.strc, scr->pev.strs, 2, wto);
-        wto <<"}\n";
+        wto << "}\n";
       }
       wto << "\n";
     }
@@ -920,38 +920,38 @@ static inline void write_object_timeline_funcs(ofstream& wto, const GameData &ga
 }
 
 static inline void write_known_timelines(ofstream& wto, const GameData &game, const parsed_object *const t, const TimelineLookupMap &timeline_lookup) {
-  wto <<"void enigma::OBJ_" << t->name <<"::timeline_call_moment_script(int timeline_index, int moment_index) {\n";
-  wto <<"  switch (timeline_index) {\n";
+  wto << "void enigma::OBJ_" << t->name << "::timeline_call_moment_script(int timeline_index, int moment_index) {\n";
+  wto << "  switch (timeline_index) {\n";
   for (parsed_object::const_tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) {
     auto timit = timeline_lookup.find(it->first); //Check if it's a timeline
-    if (timit != timeline_lookup.end()) { // If we've got ourselves a script
-      wto <<"    case " << timit->second.id << ": {\n";
-      wto <<"      switch (moment_index) {\n";
+    if (timit != timeline_lookup.end()) { // If we've got ourselves a timeline
+      wto << "    case " << timit->second.id << ": {\n";
+      wto << "      switch (moment_index) {\n";
       for (size_t j = 0; j < timit->second.moments.size(); ++j) {
         const auto &moment = timit->second.moments[j];
-        wto <<"        case " << j <<": {\n";
-        wto <<"          TLINE_" << timit->first << "_MOMENT_" << moment.step << "();\n";
-        wto <<"          break;\n";
-        wto <<"        }\n";
+        wto << "        case " << j << ": {\n";
+        wto << "          TLINE_" << timit->first << "_MOMENT_" << moment.step << "();\n";
+        wto << "          break;\n";
+        wto << "        }\n";
       }
-      wto <<"      }\n";
-      wto <<"      break;\n";
-      wto <<"    }\n";
+      wto << "      }\n";
+      wto << "      break;\n";
+      wto << "    }\n";
     }
   }
   // Fall through to the default case.
-  wto <<"    default: event_parent::timeline_call_moment_script(timeline_index, moment_index);\n";
-  wto <<"  }\n";
-  wto <<"}\n\n";
+  wto << "    default: event_parent::timeline_call_moment_script(timeline_index, moment_index);\n";
+  wto << "  }\n";
+  wto << "}\n\n";
 }
 
 static inline void write_can_cast_func(ofstream& wto, const parsed_object *const pobj) {
-  wto <<"bool enigma::OBJ_" << pobj->name <<"::can_cast(int obj) const {\n";
-  wto <<"  return false";
+  wto << "bool enigma::OBJ_" << pobj->name << "::can_cast(int obj) const {\n";
+  wto << "  return false";
   for (parsed_object* curr=pobj->parent; curr; curr=curr->parent) {
-    wto <<" || (obj==" <<curr->id <<")";
+    wto << " || (obj==" << curr->id << ")";
   }
-  wto << ";\n" <<"}\n\n";
+  wto << ";\n" << "}\n\n";
 }
 
 static inline void write_global_script_array(ofstream &wto, const GameData &game, const CompileState &state) {
@@ -988,7 +988,7 @@ static inline void write_basic_constructor(ofstream &wto) {
       "    instance->friction=0;\n    \n"
       "    \n"
       "    instance->timeline_index = -1;\n"
-      "    instance->timeline_running = " << (setting::compliance_mode <= setting::COMPL_GM7? "true" : "false") <<";\n"
+      "    instance->timeline_running = " << (setting::compliance_mode <= setting::COMPL_GM7? "true" : "false") << ";\n"
       "    instance->timeline_speed = 1;\n"
       "    instance->timeline_position = 0;\n"
       "    instance->timeline_loop = false;\n"

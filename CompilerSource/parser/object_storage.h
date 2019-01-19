@@ -128,6 +128,7 @@ struct parsed_script {
 struct parsed_moment {
   int step;
   parsed_script *script;
+  parsed_moment(int s, parsed_script *scr): step(s), script(scr) {}
 };
 
 struct parsed_timeline {
