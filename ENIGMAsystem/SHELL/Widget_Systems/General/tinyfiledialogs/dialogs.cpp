@@ -144,7 +144,7 @@ string detect_all_files_filter(string filter) {
   return filter;
 }
 
-string get_open_filename_helper(string filter, string fname, int const mselect) {
+static inline string get_open_filename_helper(string filter, string fname, int const mselect) {
   fname = tfd_add_escaping(fname);
   filter = tfd_add_escaping(filter);
   filter = detect_all_files_filter(filter);
@@ -156,7 +156,7 @@ string get_open_filename_helper(string filter, string fname, int const mselect) 
   return path ? : "";
 }
 
-string get_open_filename_ext_helper(string filter, string fname, string dir, string title, int const mselect) {
+static inline string get_open_filename_ext_helper(string filter, string fname, string dir, string title, int const mselect) {
   string fname_or_dir;
 
   string str_fname = fname;
@@ -191,6 +191,24 @@ string get_open_filename_ext_helper(string filter, string fname, string dir, str
     ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), mselect, tfd_DialogEngine());
 
   return path ? : "";
+}
+
+static inline get_color_helper(int defcol, string title) {
+  unsigned char rescol[3];
+
+  rescol[0] = defcol & 0xFF;
+  rescol[1] = (defcol >> 8) & 0xFF;
+  rescol[2] = (defcol >> 16) & 0xFF;
+
+  title = tfd_add_escaping(title);
+
+  if (title == "")
+    title = "Color";
+
+  if (tinyfd_colorChooser(title.c_str(), NULL, rescol, rescol, tfd_DialogEngine()) == NULL)
+    return -1;
+
+  return (int)((rescol[0] & 0xff) + ((rescol[1] & 0xff) << 8) + ((rescol[2] & 0xff) << 16));
 }
 
 void show_error(string errortext, const bool fatal) {
@@ -472,16 +490,11 @@ string get_directory_alt(string capt, string root) {
 }
 
 int get_color(int defcol) {
-  unsigned char rescol[3];
-
-  rescol[0] = defcol & 0xFF;
-  rescol[1] = (defcol >> 8) & 0xFF;
-  rescol[2] = (defcol >> 16) & 0xFF;
-
-  if (tinyfd_colorChooser("Color", NULL, rescol, rescol, tfd_DialogEngine()) == NULL)
-    return -1;
-
-  return (int)((rescol[0] & 0xff) + ((rescol[1] & 0xff) << 8) + ((rescol[2] & 0xff) << 16));
+  get_color_helper(defcol, "Color");
 }
-  
+
+int get_color_ext(int defcol, string title) {
+  get_color_helper(defcol, title);
+} 
+
 } // namespace enigma_user
