@@ -117,6 +117,13 @@ string get_open_filename(string filter, string fname) {
   return DialogModule_result;
 }
 
+string get_open_filenames(string filter, string fname) {
+  string DialogModule_result;
+  DialogModule_result = string(external_call(external_define("DialogModule.dll", "get_open_filenames", enigma_user::dll_cdecl, enigma_user::ty_string, 2, enigma_user::ty_string, enigma_user::ty_string), (char *)filter.c_str(), (char *)fname.c_str()));
+  external_free("DialogModule.dll");
+  return DialogModule_result;
+}
+
 string get_save_filename(string filter, string fname) {
   string DialogModule_result;
   DialogModule_result = string(external_call(external_define("DialogModule.dll", "get_save_filename", enigma_user::dll_cdecl, enigma_user::ty_string, 2, enigma_user::ty_string, enigma_user::ty_string), (char *)filter.c_str(), (char *)fname.c_str()));
@@ -127,6 +134,13 @@ string get_save_filename(string filter, string fname) {
 string get_open_filename_ext(string filter, string fname, string dir, string title) {
   string DialogModule_result;
   DialogModule_result = string(external_call(external_define("DialogModule.dll", "get_open_filename_ext", enigma_user::dll_cdecl, enigma_user::ty_string, 4, enigma_user::ty_string, enigma_user::ty_string, enigma_user::ty_string, enigma_user::ty_string), (char *)filter.c_str(), (char *)fname.c_str(), (char *)dir.c_str(), (char *)title.c_str()));
+  external_free("DialogModule.dll");
+  return DialogModule_result;
+}
+
+string get_open_filenames_ext(string filter, string fname, string dir, string title) {
+  string DialogModule_result;
+  DialogModule_result = string(external_call(external_define("DialogModule.dll", "get_open_filenames_ext", enigma_user::dll_cdecl, enigma_user::ty_string, 4, enigma_user::ty_string, enigma_user::ty_string, enigma_user::ty_string, enigma_user::ty_string), (char *)filter.c_str(), (char *)fname.c_str(), (char *)dir.c_str(), (char *)title.c_str()));
   external_free("DialogModule.dll");
   return DialogModule_result;
 }
@@ -155,6 +169,13 @@ string get_directory_alt(string capt, string root) {
 int get_color(int defcol) {
   int DialogModule_result;
   DialogModule_result = (int)external_call(external_define("DialogModule.dll", "get_color", enigma_user::dll_cdecl, enigma_user::ty_real, 1, enigma_user::ty_real), (double)defcol);
+  external_free("DialogModule.dll");
+  return DialogModule_result;
+}
+  
+int get_color_ext(int defcol, string title) {
+  int DialogModule_result;
+  DialogModule_result = (int)external_call(external_define("DialogModule.dll", "get_color_ext", enigma_user::dll_cdecl, enigma_user::ty_real, 2, enigma_user::ty_real, enigma_user::ty_string), (double)defcol, (char *)title.c_str());
   external_free("DialogModule.dll");
   return DialogModule_result;
 }
