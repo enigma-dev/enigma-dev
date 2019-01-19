@@ -144,25 +144,13 @@ static inline string detect_all_files_filter(string filter) {
   return filter;
 }
 
-static inline string get_open_filename_helper(string filter, string fname, int const mselect) {
-  fname = tfd_add_escaping(fname);
-  filter = tfd_add_escaping(filter);
-  filter = detect_all_files_filter(filter);
-  FileFilter ff(filter.c_str());
-
-  const char *path = tinyfd_openFileDialog("Open", fname.c_str(),
-    ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), mselect, tfd_DialogEngine());
-
-  return path ? : "";
-}
-
-static inline string get_open_filename_ext_helper(string filter, string fname, string dir, string title, int const mselect) {
+static inline string get_open_filename_helper(string filter, string fname, string dir, string title, int const mselect) {
   string fname_or_dir;
 
   string str_fname = fname;
   string str_dir;
     
-  char *bname = (char *)str_fname.c_str();
+  inline char *bname = (char *)str_fname.c_str();
     
   if (fname == "")
     str_dir = dir;
@@ -401,11 +389,11 @@ double get_passcode(string str, double def) {
 }
 
 string get_open_filename(string filter, string fname) {
-  return get_open_filename_helper(filter, fname, 0);
+  return get_open_filename_helper(filter, fname, "", "", 0);
 }
 
 string get_open_filenames(string filter, string fname) {
-  return get_open_filename_helper(filter, fname, 1);
+  return get_open_filename_helper(filter, fname, "", "", 1);
 }
 
 string get_save_filename(string filter, string fname) {
@@ -421,11 +409,11 @@ string get_save_filename(string filter, string fname) {
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) {
-  return get_open_filename_ext_helper(filter, fname, dir, title, 0);
+  return get_open_filename_helper(filter, fname, dir, title, 0);
 }
 
 string get_open_filenames_ext(string filter, string fname, string dir, string title) {
-  return get_open_filename_ext_helper(filter, fname, dir, title, 1);
+  return get_open_filename_helper(filter, fname, dir, title, 1);
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
@@ -490,7 +478,7 @@ string get_directory_alt(string capt, string root) {
 }
 
 int get_color(int defcol) {
-  return get_color_helper(defcol, "Color");
+  return get_color_helper(defcol, "");
 }
 
 int get_color_ext(int defcol, string title) {
