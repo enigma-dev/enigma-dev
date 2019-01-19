@@ -8,9 +8,11 @@ message Settings {
   optional Compiler compiler = 2;
   optional General general = 3;
   optional Graphics graphics = 4;
+  optional Windowing windowing = 8;
   optional Info info = 5;
   optional Installer installer = 6;
   optional Deployment deployment = 7;
+  optional Shortcuts shortcuts = 9;
 }
 
 message API {
@@ -47,12 +49,13 @@ message Compiler {
 
   optional uint32 audio_angular_unit = 17;
   optional uint32 audio_scalar_precision = 18;
+  
+  optional bool treat_uninitialized_vars_as_zero = 19;
 }
 
 message General {
   optional uint64 game_id = 1 [(gmx) = "option_gameid"];
   optional string game_guid = 2 [(gmx) = "option_gameguid"];
-  optional int32 color_outside_room_region = 3 [(gmx) = "option_windowcolor"];
   optional string display_name = 4 [(gmx) = "option_display_name"];
   optional uint32 version_major = 5 [(gmx) = "option_version_major"];
   optional uint32 version_minor = 6 [(gmx) = "option_version_minor"];
@@ -72,17 +75,12 @@ message General {
 }
 
 message Graphics {
-  optional bool start_in_fullscreen = 1 [(gmx) = "option_fullscreen"];
+  optional int32 color_outside_room_region = 1 [(gmx) = "option_windowcolor"];
   optional bool allow_fullscreen_change = 2 [(gmx) = "option_screenkey"];
-  optional bool smooth_colors = 3 [(gmx) = "option_interpolate"];
+  optional bool interpolate_textures = 3 [(gmx) = "option_interpolate"];
   optional bool force_software_vertex_processing = 4 [(gmx) = ""];
-  optional bool freeze_on_lose_focus = 5 [(gmx) = "option_freeze"];
   optional bool use_synchronization = 6 [(gmx) = ""];
-  optional bool window_sizeable = 7 [(gmx) = "option_sizeable"];
-  optional bool window_showborder = 8 [(gmx) = "option_noborder"];
-  optional bool window_showicons = 9 [(gmx) = "option_nobuttons"];
-  optional bool window_stayontop = 10 [(gmx) = "option_stayontop"];
-  optional double window_scale = 11 [(gmx) = "option_scale"];
+  optional double view_scale = 11 [(gmx) = "option_scale"];
   optional bool create_textures_on_demand = 12 [(gmx) = "option_windows_create_textures_on_demand"];
   optional bool alternate_synchronization_method = 13 [(gmx) = "option_windows_alternate_sync_method"];
 
@@ -91,6 +89,16 @@ message Graphics {
 
   optional uint32 texture_page_size = 15 [(gmx) = "option_windows_texture_page"];
   optional bool enable_hidpi = 16 [(gmx) = "option_mac_enable_retina"];
+}
+
+message Windowing {
+  optional bool is_sizeable = 1 [(gmx) = "option_sizeable"];
+  optional bool start_in_fullscreen = 2 [(gmx) = "option_fullscreen"];
+  optional bool show_border = 3 [(gmx) = "option_noborder"];
+  optional bool show_icons = 4 [(gmx) = "option_nobuttons"];
+  optional bool stay_on_top = 5 [(gmx) = "option_stayontop"];
+  optional bool freeze_on_lose_focus = 6 [(gmx) = "option_freeze"];
+  optional bool treat_close_as_escape = 7;
 }
 
 message Info {
@@ -118,4 +126,12 @@ message Deployment {
   optional bool allow_outgoing_connections = 6 [(gmx) = "option_mac_appstore_outgoing_allow"];
   optional string app_category = 7 [(gmx) = "option_mac_app_category"];
   optional string signing_identity = 8 [(gmx) = "option_mac_signing_identity"];
+}
+
+message Shortcuts {
+  optional bool let_escape_end_game = 1;
+  optional bool let_f4_switch_fullscreen = 2;
+  optional bool let_f1_show_game_info = 3;
+  optional bool let_f9_screenshot = 4;
+  optional bool let_f5_save_f6_load = 5;
 }

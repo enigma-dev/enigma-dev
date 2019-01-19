@@ -26,9 +26,6 @@
 #include <API/context.h>
 
 struct lang_CPP: language_adapter {
-  /// A map of all global local variables.
-  map<string,dectrip> locals;
-
   /// The context of all parsed definitions.
   jdi::context definitions;
 
@@ -36,38 +33,36 @@ struct lang_CPP: language_adapter {
   jdi::definition_scope *namespace_enigma;
 
   // Utility
-  string get_name();
-
-  // Sizable utilities
-  int link_globals(parsed_object*, EnigmaStruct*,parsed_script*[], vector<parsed_script*>& tlines);
-  int link_ambiguous(parsed_object*, EnigmaStruct*, parsed_script*[], vector<parsed_script*>& tlines);
+  string get_name() final;
 
   // IDE_EDITABLEs added before compile
-  int compile_parseAndLink(EnigmaStruct*,parsed_script*[], vector<parsed_script*>& tlines, const std::set<std::string>& script_names);
-  int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*>&,parsed_object*, const std::set<std::string>&);
-  int compile_writeGlobals(EnigmaStruct*,parsed_object*);
-  int compile_writeObjectData(EnigmaStruct*,parsed_object*,int mode);
-  int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*, bool treatUninitAs0);
-  int compile_writeFontInfo(EnigmaStruct* es);
-  int compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal,int mode);
-  int compile_writeShaderData(EnigmaStruct* es, parsed_object *EGMglobal);
-  int compile_writeDefraggedEvents(EnigmaStruct* es);
-  int compile_handle_templates(EnigmaStruct* es);
+  int compile_parseAndLink(const GameData &game, CompileState &state) final;
+  int link_globals(const GameData &game, CompileState &state) final;
+  int link_ambiguous(const GameData &game, CompileState &state) final;
+  int compile_parseSecondary(CompileState &state) final;
+
+  int compile_writeGlobals(const GameData &game, const parsed_object* global, const DotLocalMap &dot_accessed_locals) final;
+  int compile_writeObjectData(const GameData &game, const CompileState &state, int mode) final;
+  int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const parsed_object* global, bool treatUninitAs0) final;
+  int compile_writeFontInfo(const GameData &game) final;
+  int compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, parsed_object *EGMglobal, int mode) final;
+  int compile_writeShaderData(const GameData &game, parsed_object *EGMglobal) final;
+  int compile_writeDefraggedEvents(const GameData &game, const ParsedObjectVec &parsed_objects) final;
 
   // Resources added to module
-  int module_write_sprites(EnigmaStruct *es, FILE *gameModule);
-  int module_write_sounds(EnigmaStruct *es, FILE *gameModule);
-  int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule);
-  int module_write_paths(EnigmaStruct *es, FILE *gameModule);
-  int module_write_fonts(EnigmaStruct *es, FILE *gameModule);
+  int module_write_sprites(const GameData &game, FILE *gameModule) final;
+  int module_write_sounds(const GameData &game, FILE *gameModule) final;
+  int module_write_backgrounds(const GameData &game, FILE *gameModule) final;
+  int module_write_paths(const GameData &game, FILE *gameModule) final;
+  int module_write_fonts(const GameData &game, FILE *gameModule) final;
 
-  int  load_shared_locals();
-  void load_extension_locals();
+  int  load_shared_locals() final;
+  void load_extension_locals() final;
+  bool global_exists(string name) final;
 
-  virtual syntax_error* definitionsModified(const char*, const char*);
-  virtual int compile(EnigmaStruct *es, const char* exe_filename, int mode);
+  virtual syntax_error* definitionsModified(const char*, const char*) final;
+  virtual int compile(const GameData &game, const char* exe_filename, int mode) final;
 
-  bool global_exists(string name);
   jdi::definition* find_typename(string name);
 
   virtual ~lang_CPP();
