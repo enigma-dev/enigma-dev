@@ -150,7 +150,7 @@ static inline string get_open_filename_helper(string filter, string fname, strin
   string str_fname = fname;
   string str_dir;
     
-  inline char *bname = (char *)str_fname.c_str();
+  char *bname = (char *)str_fname.c_str();
     
   if (fname == "")
     str_dir = dir;
