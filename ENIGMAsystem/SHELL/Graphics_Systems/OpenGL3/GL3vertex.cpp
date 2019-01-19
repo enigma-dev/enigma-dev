@@ -136,7 +136,7 @@ void graphics_apply_vertex_format(int format, size_t offset) {
       case vertex_type_float2: elements = 2; size = 2; break;
       case vertex_type_float3: elements = 3; size = 3; break;
       case vertex_type_float4: elements = 4; size = 4; break;
-      case vertex_type_color: elements = 4; size = 1; type = GL_UNSIGNED_BYTE; break;
+      case vertex_type_color: elements = GL_BGRA; size = 1; type = GL_UNSIGNED_BYTE; break;
       case vertex_type_ubyte4: elements = 4; size = 1; type = GL_UNSIGNED_BYTE; break;
     }
 
@@ -195,12 +195,11 @@ void graphics_apply_vertex_format(int format, size_t offset) {
 namespace enigma_user {
 
 void vertex_argb(int buffer, unsigned argb) {
-  enigma::color_t finalcol = (COL_GET_A(argb) << 24) | (COL_GET_R(argb) << 16) | (COL_GET_G(argb) << 8) | COL_GET_B(argb);
-  enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
+  enigma::vertexBuffers[buffer]->vertices.push_back(argb);
 }
 
 void vertex_color(int buffer, int color, double alpha) {
-  enigma::color_t finalcol = color + (CLAMP_ALPHA(alpha) << 24);
+  enigma::color_t finalcol = (CLAMP_ALPHA(alpha) << 24) | (COL_GET_R(color) << 16) | (COL_GET_G(color) << 8) | COL_GET_B(color);
   enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 
