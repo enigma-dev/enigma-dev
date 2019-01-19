@@ -181,7 +181,7 @@ static inline string get_open_filename_helper(string filter, string fname, strin
   return path ? : "";
 }
 
-static inline get_color_helper(int defcol, string title) {
+static inline int get_color_helper(int defcol, string title) {
   unsigned char rescol[3];
 
   rescol[0] = defcol & 0xFF;
