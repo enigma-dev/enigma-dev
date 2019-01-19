@@ -490,11 +490,11 @@ string get_directory_alt(string capt, string root) {
 }
 
 int get_color(int defcol) {
-  get_color_helper(defcol, "Color");
+  return get_color_helper(defcol, "Color");
 }
 
 int get_color_ext(int defcol, string title) {
-  get_color_helper(defcol, title);
+  return get_color_helper(defcol, title);
 } 
 
 } // namespace enigma_user
