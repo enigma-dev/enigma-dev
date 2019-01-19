@@ -54,7 +54,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   auto &scripts = state.parsed_scripts;
   auto &tlines = state.parsed_tlines;
   auto &scr_lookup = state.script_lookup;
-  std::map<string, std::vector<parsed_script*> > tline_lookup;
+  auto &tline_lookup = state.timeline_lookup;
   
   set<string> script_names;
   for (const auto &script : game.scripts)
@@ -88,6 +88,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   // Next we just parse the timeline scripts to add semicolons and collect variable names
   for (const auto &timeline : game.timelines)
   {
+    tline_lookup[timeline.name].id = timeline.id();
     for (const auto &moment : timeline.moments())
     {
       std::string newcode;
@@ -99,23 +100,26 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         return E_ERROR_SYNTAX;
       }
 
-      //Add a parsed_script record. We can retrieve this later; its order is well-defined (timeline i, moment j) and can be calculated with a global counter.
-      tlines.push_back(new parsed_script());
+      // Add a parsed_script record. We can retrieve this later; its order is well-defined (timeline i, moment j) and can be calculated with a global counter.
+      // Note from 2019: yeah, we're not relying on that ordering anymore. Or at least, we're really gonna try not to.
+      parsed_script *tline = new parsed_script();
 
-      // Keep a parsed record of this timeline
-      tline_lookup[timeline.name].push_back(tlines.back());
-      parser_main(newcode, &tlines.back()->pev, script_names);
+      // Two places to log this.
+      tlines.push_back(tline);
+      tline_lookup[timeline.name].moments.emplace_back(moment.step(), tline);
+
+      parser_main(newcode, &tline->pev, script_names);
       edbg << "Parsed `" << timeline.name << ", moment: "
            << moment.step() << "': "
-           << tlines.back()->obj.locals.size() << " locals, "
-           << tlines.back()->obj.globals.size() << " globals" << flushl;
+           << tline->obj.locals.size() << " locals, "
+           << tline->obj.globals.size() << " globals" << flushl;
 
       // If the timeline accesses variables from outside its scope implicitly
-      if (tlines.back()->obj.locals.size() or tlines.back()->obj.globallocals.size() or tlines.back()->obj.ambiguous.size()) {
-        parsed_object temporary_object = *tlines.back()->pev.myObj;
-        tlines.back()->pev_global = new parsed_event(&temporary_object);
-        parser_main(string("with (self) {\n") + newcode + "\n/* */}",tlines.back()->pev_global, script_names);
-        tlines.back()->pev_global->myObj = NULL;
+      if (tline->obj.locals.size() or tline->obj.globallocals.size() or tline->obj.ambiguous.size()) {
+        parsed_object temporary_object = *tline->pev.myObj;
+        tline->pev_global = new parsed_event(&temporary_object);
+        parser_main(string("with (self) {\n") + newcode + "\n/* */}",tline->pev_global, script_names);
+        tline->pev_global->myObj = NULL;
       }
       fflush(stdout);
     }
@@ -143,11 +147,11 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       }
 
       for (parsed_object::tlineit it = curscript->obj.tlines.begin(); it != curscript->obj.tlines.end(); it++) { //For each tline called by each script
-        map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+        auto timit = tline_lookup.find(it->first); //Check if it's a timeline.
         if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
-          for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
-            curscript->obj.copy_calls_from((*momit)->obj);
-            curscript->obj.copy_tlines_from((*momit)->obj);
+          for (const auto &moment : timit->second.moments) {
+            curscript->obj.copy_calls_from(moment.script->obj);
+            curscript->obj.copy_tlines_from(moment.script->obj);
           }
         }
       }
@@ -162,11 +166,11 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       }
 
       for (parsed_object::tlineit it = curscript->obj.tlines.begin(); it != curscript->obj.tlines.end(); it++) {  // For each tline called by each tline
-        map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
-        if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
-          for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
-            curscript->obj.copy_calls_from((*momit)->obj);
-            curscript->obj.copy_tlines_from((*momit)->obj);
+        auto timit = tline_lookup.find(it->first); // Check if it's a timeline.
+        if (timit != tline_lookup.end()) { // If we've got ourselves a timeline
+          for (const auto &moment : timit->second.moments) {
+            curscript->obj.copy_calls_from(moment.script->obj);
+            curscript->obj.copy_tlines_from(moment.script->obj);
           }
         }
       }
@@ -359,8 +363,8 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     parsed_object* t = i->second;
     for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
     {
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) { //If we've got ourselves a script
+      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first);  // Check if it's a script
+      if (subscr != scr_lookup.end()) {  // If we've got ourselves a script
         t->copy_calls_from(subscr->second->obj);
         t->copy_tlines_from(subscr->second->obj);
       }
@@ -375,28 +379,27 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     }
   }
 
-  //Next we link the timelines into the objects that might call them.
+  // Next we link the timelines into the objects that might call them.
   edbg << "\"Linking\" timelines into the objects..." << flushl;
   for (auto i = parsed_objects.begin(); i != parsed_objects.end(); i++) {
     parsed_object* t = i->second;
     for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each function called by each timeline
     {
-      map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
-      if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
-        //Iterate through its moments:
-        for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
-          t->copy_calls_from((*momit)->obj);
-          t->copy_tlines_from((*momit)->obj);
+      auto timit = tline_lookup.find(it->first); //Check if it's a timeline.
+      if (timit != tline_lookup.end()) { // If we've got ourselves a timeline
+        for (const auto &moment : timit->second.moments) {
+          t->copy_calls_from(moment.script->obj);
+          t->copy_tlines_from(moment.script->obj);
         }
       }
     }
     for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each function called by each timeline
     {
-      map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+      auto timit = tline_lookup.find(it->first); //Check if it's a timeline.
       if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
         //Iterate through its moments:
-        for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
-          t->copy_from((*momit)->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
+        for (const auto &moment : timit->second.moments) {
+          t->copy_from(moment.script->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
         }
       }
     }
