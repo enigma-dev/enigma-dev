@@ -9,7 +9,7 @@ Make-Vars:
   path:
   cmake: cmake
   cmakegenerator: Visual Studio 15 2017 Win64
-  cmakeflags: -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake"
+  cmakeflags: -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake"
   cc: cl
   cxx: cl
 
