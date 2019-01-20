@@ -72,6 +72,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
   wto << license << "namespace enigma {\n"
   << "  int room_loadtimecount = " << game.rooms.size() << ";\n";
+  
   int room_highid = 0, room_highinstid = 100000, room_hightileid = 10000000;
 
   for (const auto &room : game.rooms) {
@@ -91,7 +92,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
           << room.tiles(ii).yscale()  << ","
           << room.tiles(ii).alpha()   << ","
           << room.tiles(ii).color()   << "},";
-          
+
         if (++modme % 16 == 0) wto << "\n        ";
       if (room.tiles(ii).id() > room_hightileid)
         room_hightileid = room.tiles(ii).id();
@@ -114,8 +115,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     }
     wto << "  };\n";
   }
-  
-  
+
   wto << "  roomstruct grd_rooms[" << vla(static_cast<size_t>(1), game.rooms.size()) << "] = {\n";
   for (size_t room_index = 0; room_index < game.rooms.size(); ++room_index) {
     const auto &room = game.rooms[room_index];

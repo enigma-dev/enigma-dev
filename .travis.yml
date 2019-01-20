@@ -25,7 +25,7 @@ before_install:
         sudo dpkg --add-architecture i386;
         sudo apt-get -y install libc6:i386 libc++-dev:i386 libstdc++6:i386\
           libncurses5:i386 lib32z1-dev libx11-6:i386 libglew-dev:i386\
-          libglu1-mesa-dev:i386 libgl1-mesa-dev:i386;
+          libglu1-mesa-dev:i386 libgl1-mesa-dev:i386 libxrandr-dev:i386;
 
         if [ "$COMPILER" == "gcc32" ]; then
           sudo apt-get -y install gcc-multilib g++-multilib;
@@ -38,7 +38,7 @@ before_install:
         unzip enigma-libs.zip -d ENIGMAsystem/;
         mv ENIGMAsystem/Install ENIGMAsystem/Additional;
       else
-        sudo apt-get -y install libc++-dev libglew-dev libglu1-mesa-dev;
+        sudo apt-get -y install libc++-dev libglew-dev libglu1-mesa-dev libxrandr-dev;
       fi
 
       if [ "$AUDIO" == "OpenAL" ]; then
@@ -134,6 +134,7 @@ env:
     - EXTENSIONS="GM5Compat"
     - EXTENSIONS="IniFilesystem"
     - EXTENSIONS="DataStructures,Json"
+    - EXTENSIONS="XRandR"
     - COLLISION=BBox EXTENSIONS="Paths"
     - COLLISION=BBox EXTENSIONS="Paths,MotionPlanning"
     - COLLISION=Precise EXTENSIONS="Paths,MotionPlanning"
