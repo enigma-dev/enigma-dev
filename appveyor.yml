@@ -31,7 +31,7 @@ environment:
 
   matrix:
     # CMake
-    - {COMPILER: "CMake MSVC 64 Static", AUDIO: "DirectSound", VCPKG: 1, PACKAGES: "zlib libffi libglm" }
+    - {COMPILER: "CMake MSVC 64 Static", AUDIO: "DirectSound", VCPKG: 1, PACKAGES: "zlib libffi glm" }
         
     # Game Modes
     - {MODE: Run}

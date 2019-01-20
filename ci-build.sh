@@ -1,6 +1,6 @@
 #!/bin/bash +x
 
-./emake --compiler "\"${COMPILER}"\" \
+./emake --compiler "${COMPILER}" \
         --mode ${MODE} \
         --platform ${PLATFORM} \
         --graphics ${GRAPHICS} \
