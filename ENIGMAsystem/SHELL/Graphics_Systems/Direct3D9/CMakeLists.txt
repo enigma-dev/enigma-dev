@@ -15,10 +15,7 @@ set(GRAPHICS_SOURCES
 add_library("GRAPHICS_${GRAPHICS}" "${GRAPHICS_SOURCES}")
 
 if(MSVC)
-    find_package(DirectX REQUIRED)
-    target_include_directories("GRAPHICS_${GRAPHICS}" PRIVATE "${DirectX9_INCLUDE_DIR}")
-    message("${DirectX9_LIBRARIES}")
-    target_link_libraries("GRAPHICS_${GRAPHICS}" "${DirectX9_LIBRARY}")
+    target_link_libraries("GRAPHICS_${GRAPHICS}" d3d9)
 else()
     target_link_libraries("GRAPHICS_${GRAPHICS}" d3d9 dxerr9 d3dx9)
 endif(MSVC)
