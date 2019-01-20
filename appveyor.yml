@@ -88,7 +88,7 @@ install:
         bash -lc "pacboy --noconfirm -S %PACKAGES%"
       }
       
-      bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x
+      bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x"
       
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         # use our first job to build JDI and the CLI
