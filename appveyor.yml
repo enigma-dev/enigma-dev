@@ -30,8 +30,10 @@ environment:
   VCPKG: 0
 
   matrix:
+    # CMake
+    - {COMPILER: "CMake MSVC 64 Static", AUDIO: "DirectSound", VCPKG: 1, PACKAGES: "zlib libffi libglm" }
+        
     # Game Modes
-    - {COMPILER: "CMake MSVC 64 Static", AUDIO: "DirectSound", VCPKG: 1, PACKAGES: "zlib:x64-windows-static libffi:x64-windows-static libglm:x64-windows-static" }
     - {MODE: Run}
     - {MODE: Debug}
     - {MODE: Compile}
@@ -64,8 +66,6 @@ environment:
     - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
     #TODO: Fix Bullet Physics on Windows
     #- {EXTENSIONS: "BulletDynamics", PACKAGES: "bullet:x"}
-    
-    # CMake
 
 init:
   - echo "%APPVEYOR_JOB_ID%"
@@ -83,7 +83,7 @@ install:
   - gcc -v
   - ps: |
       If ($env:VCPKG -eq 1) {
-        vcpkg install $env:PACKAGES
+        vcpkg install $env:PACKAGES --triplet x64-windows-static
       } Else {
         bash -lc "pacboy --noconfirm -S %PACKAGES%"
       }
