@@ -79,10 +79,12 @@ init:
   - cd %APPVEYOR_BUILD_FOLDER%
 
 install:
-  - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
+  - set PATH=%CD%\cmake-3.13.3-win64-x64\bin\;C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
   - gcc -v
   - ps: |
       If ($env:VCPKG -eq 1) {
+        curl -O https://github.com/Kitware/CMake/releases/download/v3.13.3/cmake-3.13.3-win64-x64.zip
+        7z x -mmt cmake-3.13.3-win64-x64.zip
         vcpkg install $env:PACKAGES --triplet x64-windows-static
       } Else {
         bash -lc "pacboy --noconfirm -S %PACKAGES%"
@@ -117,4 +119,5 @@ install:
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
+  - cmake --version
   - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh"
