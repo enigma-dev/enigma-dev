@@ -79,7 +79,7 @@ init:
   - cd %APPVEYOR_BUILD_FOLDER%
 
 install:
-  - set PATH=%CD%\cmake-3.13.3-win64-x64\bin\;C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
+  - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%;%CD%\cmake-3.13.3-win64-x64\bin\
   - gcc -v
   - ps: |
       If ($env:VCPKG -eq 1) {
