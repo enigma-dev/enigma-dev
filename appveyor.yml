@@ -120,5 +120,5 @@ install:
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
   - echo %PATH%
-  - %CD%\cmake-3.13.3-win64-x64\bin\cmake --version
+  - "%CD%\cmake-3.13.3-win64-x64\bin\cmake" --version
   - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh"
