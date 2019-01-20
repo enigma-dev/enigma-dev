@@ -83,7 +83,7 @@ install:
   - gcc -v
   - ps: |
       If ($env:VCPKG -eq 1) {
-        curl -O "https://github.com/Kitware/CMake/releases/download/v3.13.3/cmake-3.13.3-win64-x64.zip"
+        curl -L -O "https://github.com/Kitware/CMake/releases/download/v3.13.3/cmake-3.13.3-win64-x64.zip"
         7z x -mmt cmake-3.13.3-win64-x64.zip
         vcpkg install "$env:PACKAGES" --triplet x64-windows-static
       } Else {
