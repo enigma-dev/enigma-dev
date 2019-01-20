@@ -1,5 +1,4 @@
 set(GRAPHICS_SOURCES
-    DX9shader.cpp
     DX9d3d.cpp
     DX9sprite.cpp
     DX9blend.cpp
