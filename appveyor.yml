@@ -80,14 +80,13 @@ init:
 
 install:
   - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
-  - > # Install packages common to all builds
-    If ($env:VCPKG -eq 1) {
-      vcpkg install %PACKAGES%
-    } Else {
-      bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x %PACKAGES%"
-    }
   - gcc -v
   - ps: |
+      If ($env:VCPKG -eq 1) {
+        vcpkg install %PACKAGES%
+      } Else {
+        bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x %PACKAGES%"
+      }
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         # use our first job to build JDI and the CLI
         C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "make -j 4; CLI_ENABLE_EGM=FALSE make -j 4 emake"
