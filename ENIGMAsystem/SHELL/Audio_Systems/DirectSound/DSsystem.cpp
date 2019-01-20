@@ -172,7 +172,8 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   DSBUFFERDESC bufferDesc = {};
   bufferDesc.dwSize = sizeof(DSBUFFERDESC);
   bufferDesc.dwFlags = DSBCAPS_CTRLDEFAULT | DSBCAPS_CTRLFX;
-  bufferDesc.dwBufferBytes = waveHeader->dataSize;
+  unsigned long minFXBufSize = DSBSIZE_FX_MIN * waveHeader->numChannels * (waveHeader->sampleRate + 1000 - 1) / 1000 * waveHeader->bitsPerSample / 8;
+  bufferDesc.dwBufferBytes = std::max(waveHeader->dataSize, minFXBufSize);
   bufferDesc.dwReserved = 0;
   bufferDesc.lpwfxFormat = &waveFormat;
   bufferDesc.guid3DAlgorithm = GUID_NULL;
