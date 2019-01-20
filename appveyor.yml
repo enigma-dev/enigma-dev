@@ -83,7 +83,7 @@ install:
   - gcc -v
   - ps: |
       If ($env:VCPKG -eq 1) {
-        vcpkg install %PACKAGES%
+        vcpkg install $env:PACKAGES
       } Else {
         bash -lc "pacboy --noconfirm -S %PACKAGES%"
       }
