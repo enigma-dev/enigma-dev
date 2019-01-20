@@ -85,8 +85,11 @@ install:
       If ($env:VCPKG -eq 1) {
         vcpkg install %PACKAGES%
       } Else {
-        bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x %PACKAGES%"
+        bash -lc "pacboy --noconfirm -S %PACKAGES%"
       }
+      
+      bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x
+      
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         # use our first job to build JDI and the CLI
         C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "make -j 4; CLI_ENABLE_EGM=FALSE make -j 4 emake"
