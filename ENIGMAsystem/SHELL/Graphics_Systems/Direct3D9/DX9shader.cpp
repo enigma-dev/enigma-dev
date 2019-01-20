@@ -30,8 +30,6 @@ using std::vector;
 #include <iostream>
 #include <fstream>
 using namespace std;
-<<<<<<< HEAD
-=======
 
 struct Shader {
   int type;
