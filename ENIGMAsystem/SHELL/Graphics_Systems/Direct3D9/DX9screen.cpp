@@ -74,7 +74,6 @@ void screen_init()
   d3dmgr->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
   d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
   d3dmgr->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
-  d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
   d3dmgr->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
   d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
   d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
