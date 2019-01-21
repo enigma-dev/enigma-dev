@@ -105,7 +105,7 @@ class FileFilter {
   const int* pattern_counts() { return pattern_counts_.data(); }
 };
 
-string tfd_add_escaping(string str) {
+static inline string tfd_add_escaping(string str) {
   string result;
 
   if (tfd_DialogEngine() == tfd_OsaScript)
@@ -119,7 +119,7 @@ string tfd_add_escaping(string str) {
   return result;
 }
 
-string detect_all_files_filter(string filter) {
+static inline string detect_all_files_filter(string filter) {
   if (tfd_DialogEngine() == tfd_OsaScript) {
     string str_filter = string_replace_all(filter, "*.", "");
     size_t first_line_pos = str_filter.find("|");
@@ -142,6 +142,61 @@ string detect_all_files_filter(string filter) {
   }
 
   return filter;
+}
+
+static inline string get_open_filename_helper(string filter, string fname, string dir, string title, int const mselect) {
+  string fname_or_dir;
+
+  string str_fname = fname;
+  string str_dir;
+    
+  char *bname = (char *)str_fname.c_str();
+    
+  if (fname == "")
+    str_dir = dir;
+  else
+    str_dir = dir + string("/") + string(basename(bname));
+    
+  if(access((char *)str_dir.c_str(), F_OK) != -1)
+    fname_or_dir = str_dir;
+  else
+    fname_or_dir = fname;
+
+  string titlebar;
+
+  if (title == "")
+    titlebar = "Open";
+  else
+    titlebar = title;
+
+  fname_or_dir = tfd_add_escaping(fname_or_dir);
+  titlebar = tfd_add_escaping(titlebar);
+  filter = tfd_add_escaping(filter);
+  filter = detect_all_files_filter(filter);
+  FileFilter ff(filter.c_str());
+
+  const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
+    ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), mselect, tfd_DialogEngine());
+
+  return path ? : "";
+}
+
+static inline int get_color_helper(int defcol, string title) {
+  unsigned char rescol[3];
+
+  rescol[0] = defcol & 0xFF;
+  rescol[1] = (defcol >> 8) & 0xFF;
+  rescol[2] = (defcol >> 16) & 0xFF;
+
+  if (title == "")
+    title = "Color";
+
+  title = tfd_add_escaping(title);
+
+  if (tinyfd_colorChooser(title.c_str(), NULL, rescol, rescol, tfd_DialogEngine()) == NULL)
+    return -1;
+
+  return (int)((rescol[0] & 0xff) + ((rescol[1] & 0xff) << 8) + ((rescol[2] & 0xff) << 16));
 }
 
 void show_error(string errortext, const bool fatal) {
@@ -334,15 +389,11 @@ double get_passcode(string str, double def) {
 }
 
 string get_open_filename(string filter, string fname) {
-  fname = tfd_add_escaping(fname);
-  filter = tfd_add_escaping(filter);
-  filter = detect_all_files_filter(filter);
-  FileFilter ff(filter.c_str());
+  return get_open_filename_helper(filter, fname, "", "", 0);
+}
 
-  const char *path = tinyfd_openFileDialog("Open", fname.c_str(),
-    ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0, tfd_DialogEngine());
-
-  return path ? : "";
+string get_open_filenames(string filter, string fname) {
+  return get_open_filename_helper(filter, fname, "", "", 1);
 }
 
 string get_save_filename(string filter, string fname) {
@@ -358,40 +409,11 @@ string get_save_filename(string filter, string fname) {
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) {
-  string fname_or_dir;
+  return get_open_filename_helper(filter, fname, dir, title, 0);
+}
 
-  string str_fname = fname;
-  string str_dir;
-    
-  char *bname = (char *)str_fname.c_str();
-    
-  if (fname == "")
-    str_dir = dir;
-  else
-    str_dir = dir + string("/") + string(basename(bname));
-    
-  if(access((char *)str_dir.c_str(), F_OK) != -1)
-    fname_or_dir = str_dir;
-  else
-    fname_or_dir = fname;
-
-  string titlebar;
-
-  if (title == "")
-    titlebar = "Open";
-  else
-    titlebar = title;
-
-  fname_or_dir = tfd_add_escaping(fname_or_dir);
-  titlebar = tfd_add_escaping(titlebar);
-  filter = tfd_add_escaping(filter);
-  filter = detect_all_files_filter(filter);
-  FileFilter ff(filter.c_str());
-
-  const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
-    ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0, tfd_DialogEngine());
-
-  return path ? : "";
+string get_open_filenames_ext(string filter, string fname, string dir, string title) {
+  return get_open_filename_helper(filter, fname, dir, title, 1);
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
@@ -456,16 +478,11 @@ string get_directory_alt(string capt, string root) {
 }
 
 int get_color(int defcol) {
-  unsigned char rescol[3];
-
-  rescol[0] = defcol & 0xFF;
-  rescol[1] = (defcol >> 8) & 0xFF;
-  rescol[2] = (defcol >> 16) & 0xFF;
-
-  if (tinyfd_colorChooser("Color", NULL, rescol, rescol, tfd_DialogEngine()) == NULL)
-    return -1;
-
-  return (int)((rescol[0] & 0xff) + ((rescol[1] & 0xff) << 8) + ((rescol[2] & 0xff) << 16));
+  return get_color_helper(defcol, "");
 }
-  
+
+int get_color_ext(int defcol, string title) {
+  return get_color_helper(defcol, title);
+} 
+
 } // namespace enigma_user

@@ -37,11 +37,14 @@ std::string get_password(std::string str, std::string def);
 double get_integer(std::string str, double def);
 double get_passcode(std::string str, double def);
 std::string get_open_filename(std::string filter, std::string fname);
+std::string get_open_filenames(std::string filter, std::string fname);
 std::string get_save_filename(std::string filter, std::string fname);
 std::string get_open_filename_ext(std::string filter, std::string fname, std::string dir, std::string title);
+std::string get_open_filenames_ext(std::string filter, std::string fname, std::string dir, std::string title);
 std::string get_save_filename_ext(std::string filter, std::string fname, std::string dir, std::string title);
 std::string get_directory(std::string dname);
 std::string get_directory_alt(std::string capt, std::string root);
 int get_color(int defcol);
+int get_color_ext(int defcol, std::string title);
   
 } // namespave enigma_user
