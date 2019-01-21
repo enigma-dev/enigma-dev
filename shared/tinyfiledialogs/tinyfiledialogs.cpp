@@ -1477,7 +1477,7 @@ char const * tinyfd_openFileDialog(
                                         "-e \"set mystring to POSIX path of item 1 of mylist\" " );
                         strcat( lDialogString ,
                                         "-e \"repeat with  i from 2 to the count of mylist\" " );
-                        strcat( lDialogString , "-e \"set mystring to mystring & \\\"|\\\"\" " );
+                        strcat( lDialogString , "-e \"set mystring to mystring & \\\"\n\\\"\" " );
                         strcat( lDialogString ,
                         "-e \"set mystring to mystring & POSIX path of item i of mylist\" " );
                         strcat( lDialogString , "-e \"end repeat\" " );
@@ -1507,7 +1507,7 @@ char const * tinyfd_openFileDialog(
 
                 if ( aAllowMultipleSelects )
                 {
-                        strcat( lDialogString , " --multiple" ) ;
+                        strcat( lDialogString , " --multiple --separator='\n'" ) ;
                 }
                 if ( aTitle && strlen(aTitle) )
                 {
@@ -1589,15 +1589,15 @@ char const * tinyfd_openFileDialog(
         if ( lWasKdialog && aAllowMultipleSelects )
         {
                 p = lBuff ;
-                while ( ( p = strchr( p , '\n' ) ) )
-                        * p = '|' ;
+                //while ( ( p = strchr( p , '\n' ) ) )
+                //        * p = '|' ;
         }
         /* printf( "lBuff2: %s\n" , lBuff ) ; */
         if ( ! strlen( lBuff )  )
         {
                 return NULL;
         }
-        if ( aAllowMultipleSelects && strchr(lBuff, '|') )
+        if ( aAllowMultipleSelects && strchr(lBuff, '\n') )
         {
                 p2 = ensureFilesExist( lBuff , lBuff ) ;
         }
