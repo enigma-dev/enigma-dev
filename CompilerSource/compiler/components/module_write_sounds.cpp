@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008, 2018 Josh Ventura                                       **
+**  Copyright (C) 2008 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -45,12 +45,12 @@ inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-int lang_CPP::module_write_sounds(const GameData &game, FILE *gameModule)
+int lang_CPP::module_write_sounds(EnigmaStruct *es, FILE *gameModule)
 {
   // Now we're going to add sounds
-  edbg << game.sounds.size() << " Sounds:" << flushl;
-  for (size_t i = 0; i < game.sounds.size(); i++) {
-    edbg << " " << game.sounds[i].name << flushl;
+  edbg << es->soundCount << " Sounds:" << flushl;
+  for (int i = 0; i < es->soundCount; i++) {
+    edbg << " " << es->sounds[i].name << flushl;
     fflush(stdout);
   }
 
@@ -58,26 +58,26 @@ int lang_CPP::module_write_sounds(const GameData &game, FILE *gameModule)
   fwrite("SND ",4,1,gameModule);
 
   //Indicate how many
-  size_t sound_count = game.sounds.size();
+  int sound_count = es->soundCount;
   fwrite(&sound_count,4,1,gameModule);
 
   int sound_maxid = 0;
-  for (size_t i = 0; i < sound_count; i++)
-    if (game.sounds[i].id() > sound_maxid)
-      sound_maxid = game.sounds[i].id();
+  for (int i = 0; i < sound_count; i++)
+    if (es->sounds[i].id > sound_maxid)
+      sound_maxid = es->sounds[i].id;
   fwrite(&sound_maxid,4,1,gameModule);
 
-  for (size_t i = 0; i < sound_count; i++) {
-    const size_t sndsz = game.sounds[i].audio.size();
+  for (int i = 0; i < sound_count; i++)
+  {
+    unsigned sndsz = es->sounds[i].size;
     if (!sndsz) {
-      user << "Sound `" << game.sounds[i].name << "' has no size. "
-              "It will be omitted from the game." << flushl;
+      user << "Sound `" << es->sounds[i].name << "' has no size. It will be omitted from the game." << flushl;
       continue;
     }
 
-    writei(game.sounds[i].id(), gameModule); // ID
+    writei(es->sounds[i].id, gameModule); // id
     writei(sndsz, gameModule); // Size
-    fwrite(game.sounds[i].audio.data(), 1, sndsz, gameModule); // Data
+    fwrite(es->sounds[i].data, 1, sndsz, gameModule); // Sound data
   }
 
   edbg << "Done writing sounds." << flushl;

@@ -25,31 +25,38 @@
 
 string lang_CPP::get_name() { return "C++"; }
 
-void lang_CPP::load_extension_locals() {
+void lang_CPP::load_extension_locals()
+{
+  locals.clear();
+  
   if (!namespace_enigma)
     return (cout << "ERROR! ENIGMA NAMESPACE NOT FOUND. THIS SHOULD NOT HAPPEN IF PARSE SUCCEEDED." << endl, void());
-
+  
   for (unsigned i = 0; i < parsed_extensions.size(); i++)
   {
     if (parsed_extensions[i].implements == "")
       continue;
     
-    jdi::definition* implements = namespace_enigma->look_up(parsed_extensions[i].implements);
+    jdi::definition* found = namespace_enigma->look_up(parsed_extensions[i].implements);
     
-    if (!implements or !(implements->flags & jdi::DEF_SCOPE)) {
+    if (!found) {
       cout << "ERROR! Extension implements " << parsed_extensions[i].implements << " without defining it!" << endl;
-      continue;
+      return;
     }
-    if (!(implements->flags & jdi::DEF_CLASS)) {
-      cout << "WARNING! Extension implements non-class " << parsed_extensions[i].implements << "!" << endl;
+    if (~found->flags & jdi::DEF_CLASS) {
+      cout << "ERROR! Extension implements non-class " << parsed_extensions[i].implements << "!" << endl;
+      return;
     }
-    jdi::definition_scope *const iscope = (jdi::definition_scope*) implements;
-    for (jdi::definition_scope::defiter it = iscope->members.begin(); it != iscope->members.end(); ++it) {
+    
+    jdi::definition_class *cadd = (jdi::definition_class*)found;
+    for (jdi::definition_scope::defiter it = cadd->members.begin(); it != cadd->members.end(); it++) {
       if ((!it->second->flags) & jdi::DEF_TYPED) { cout << "WARNING: Non-scalar `" << it->first << "' ignored." << endl; continue; }
-        shared_object_locals.insert(it->second->name);
+      jdi::definition_typed *t = (jdi::definition_typed*)it->second;
+      locals[t->name] = t->type ? t->type->name : "var";
     }
   }
 }
+
 
 const char* heaping_pile_of_dog_shit = "ERROR: Unknown";
 
@@ -154,7 +161,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   
   cout << "Grabbing locals...\n";
   
-  load_shared_locals();  // Extensions were separated above
+  shared_locals_load(requested_extensions);
   
   cout << "Determining build target...\n";
   
@@ -167,42 +174,35 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
 
 #include "compiler/compile_common.h"
 
-int lang_CPP::load_shared_locals() {
-  cout << "Finding parent..."; fflush(stdout);
-
-  // Find namespace enigma
-  jdi::definition* pscope = main_context->get_global()->look_up("enigma");
-  if (!pscope or !(pscope->flags & jdi::DEF_SCOPE)) {
-    cerr << "ERROR! Can't find namespace enigma!" << endl;
-    return 1;
-  }
-  jdi::definition_scope* ns_enigma = (jdi::definition_scope*)pscope;
-  jdi::definition* parent = ns_enigma->look_up(system_get_uppermost_tier());
-    if (!parent) {
-      cerr << "ERROR! Failed to find parent scope `" << system_get_uppermost_tier() << endl;
-      return 2;
-    }
-  if (not(parent->flags & jdi::DEF_CLASS)) {
-    cerr << "PARSE ERROR! Parent class is not a class?" << endl;
-    cout << parent->parent->name << "::" << parent->name << ":  " << parent->toString() << endl;
-    return 3;
-  }
-  jdi::definition_class *pclass = (jdi::definition_class*)parent;
-
+int lang_CPP::load_shared_locals()
+{
+  cout << "Finding parent..." << endl;
+  
+  jdi::definition_class *parent_class;
+  
   // Find the parent object
-  cout << "Found parent scope" << endl;
-
+  jdi::definition_scope::defiter parent = namespace_enigma->members.find(system_get_uppermost_tier());
+  if (parent != namespace_enigma->members.end())
+    { cout << "ERROR! Failed to find parent class!" << endl; return -1; }
+  if (~parent->second->flags & jdi::DEF_CLASS)
+    { cout << "ERROR! Parent class is not a class after all..." << endl; return -1; }
+  
+  parent_class = (jdi::definition_class*)parent->second;
   shared_object_locals.clear();
 
   //Iterate the tiers of the parent object
-  for (jdi::definition_class *cs = pclass; cs; cs = (cs->ancestors.size() ? cs->ancestors[0].def : NULL) )
+  for (jdi::definition_class *cs = parent_class; cs; cs = (cs->ancestors.empty() ? NULL : cs->ancestors[0].def) )
   {
     cout << " >> Checking ancestor " << cs->name << endl;
-    for (jdi::definition_scope::defiter mem = cs->members.begin(); mem != cs->members.end(); ++mem)
-      shared_object_locals.insert(mem->first);
+    for (jdi::definition_scope::defiter mem = cs->members.begin(); mem != cs->members.end(); ++mem) {
+      shared_object_locals[mem->first] = 0;
+      cout << "  - Found `" << mem->first << "'" << endl;
+    }
+    cout << endl;
   }
 
   load_extension_locals();
+  //dump_read_locals(shared_object_locals);
   return 0;
 }
 

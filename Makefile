@@ -2,16 +2,16 @@ PATH := $(eTCpath)$(PATH)
 
 .PHONY: ENIGMA all clean Game clean-game liblodepng libProtocols libEGM required-directories .FORCE
 
-ENIGMA: .FORCE libProtocols
+ENIGMA: .FORCE
 	$(MAKE) -C CompilerSource
 
 clean: .FORCE
 	$(MAKE) -C CompilerSource/ clean
 	$(MAKE) -C CommandLine/emake/ clean
 	$(MAKE) -C CommandLine/libEGM/ clean
+	$(MAKE) -C CommandLine/protos/ clean
 	$(MAKE) -C CommandLine/testing/ clean
 	$(MAKE) -C shared/lodepng/ clean
-	$(MAKE) -C shared/protos/ clean
 	rm -f ./gm2egm
 
 all: liblodepng libProtocols libEGM ENIGMA emake test-runner .FORCE
@@ -26,7 +26,7 @@ liblodepng: .FORCE
 	$(MAKE) -C shared/lodepng/
 
 libProtocols: .FORCE
-	$(MAKE) -C shared/protos/
+	$(MAKE) -C CommandLine/protos/
 
 libEGM: .FORCE liblodepng libProtocols
 	$(MAKE) -C CommandLine/libEGM/
@@ -43,7 +43,7 @@ emake: $(EMAKE_TARGETS)
 	$(MAKE) -C CommandLine/emake/
 
 gm2egm: libEGM .FORCE
-	$(CXX) -Ishared/protos/ -Ishared/protos/codegen -ICommandLine/libEGM/ CommandLine/gm2egm/main.cpp -Wl,-rpath=. -L. -lEGM -lProtocols -o gm2egm
+	$(CXX) -ICommandLine/libEGM/ -ICommandLine/protos/ -ICommandLine/protos/codegen CommandLine/gm2egm/main.cpp -Wl,-rpath=. -L. -lEGM -lProtocols -o gm2egm
 
 test-runner: emake .FORCE
 	$(MAKE) -C CommandLine/testing/

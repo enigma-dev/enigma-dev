@@ -25,7 +25,7 @@ using namespace std;
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
-#include "backend/GameData.h"
+#include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
 
@@ -57,7 +57,7 @@ static string esc(string str) {
   return res;
 }
 
-int lang_CPP::compile_writeShaderData(const GameData &game, parsed_object *EGMglobal)
+int lang_CPP::compile_writeShaderData(EnigmaStruct* es, parsed_object *EGMglobal)
 {
   ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h").c_str(),ios_base::out);
 
@@ -65,18 +65,19 @@ int lang_CPP::compile_writeShaderData(const GameData &game, parsed_object *EGMgl
   wto << "  ShaderStruct shaderstructarray[] = {\n";
 
   int idmax = 0;
-  for (const auto &shader : game.shaders) {
-    while (idmax < shader.id()) {
+  for (int i = 0; i < es->shaderCount; i++)
+  {
+    while (idmax < es->shaders[i].id) {
       ++idmax, wto << "ShaderStruct(),\n";
     }
-    string vertexcode  =  shader.vertex_code();
-    string fragmentcode = shader.fragment_code();
+    string vertexcode = es->shaders[i].vertex;
+    string fragmentcode = es->shaders[i].fragment;
     //TODO: Replace quotations with escape sequences.
     wto << "    { "
         << '"' << esc(vertexcode)   << "\", "
         << '"' << esc(fragmentcode) << "\", "
-        << '"' << shader.type() << "\", "
-        << (shader.precompile()? "true" : "false")
+        << '"' << es->shaders[i].type << "\", "
+        << (es->shaders[i].precompile? "true" : "false")
         << " },\n";
     idmax += 1;
   }

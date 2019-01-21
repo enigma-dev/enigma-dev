@@ -250,8 +250,7 @@ namespace syncheck
       if (pos >= code.length()) {
         if (mymacroind)
           mymacrostack[--mymacroind].release(code,pos);
-        else break;
-        continue;
+        else break; continue;
       }
 
       if (is_useless(code[pos])) {

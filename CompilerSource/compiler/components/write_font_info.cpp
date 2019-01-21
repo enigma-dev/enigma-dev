@@ -28,7 +28,7 @@
 #include "makedir.h"
 #include <cstdio>
 #include <fstream>
-#include "backend/GameData.h"
+#include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "compiler/reshandlers/refont.h"
 #include <string>
 using namespace std;
@@ -36,7 +36,7 @@ using namespace std;
 
 
 #include "languages/lang_CPP.h"
-int lang_CPP::compile_writeFontInfo(const GameData &game)
+int lang_CPP::compile_writeFontInfo(EnigmaStruct* es)
 {
   ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h").c_str(),ios_base::out);
   wto << license << "#include \"Universal_System/fonts_internal.h\"" << endl
@@ -45,19 +45,21 @@ int lang_CPP::compile_writeFontInfo(const GameData &game)
   int maxid = -1, rawfontcount = 0;
   wto << "namespace enigma {" << endl;
   wto << "  rawfont rawfontdata[] = {" << endl;
-  for (const auto &font : game.fonts) {
-    wto << "    {\""
-        << font.name        << "\", "     // string name;
-        << font.id()        << ", \""     // int id;
-        << font.font_name() << "\", "     // string fontName;
-        << font.size()      << ", "       // int size;
-        << font.bold()      << ", "       // bool bold;
-        << font.italic()    << ", "       // bool italic;
-        << font.normalized_ranges.size()  // int glyphRangeCount;
-        << "}," << endl;
+  for (int i = 0; i < es->fontCount; i++)
+  {
+    wto << "    {\"" <<
+    es->fonts[i].name   << "\", " <<   // string name;
+    es->fonts[i].id     << ", \"" <<   // int id;
 
-    if (font.id() > maxid)
-      maxid = font.id();
+    es->fonts[i].fontName << "\", " << // string fontName;
+    es->fonts[i].size     <<   ", " << // int size;
+    bool(es->fonts[i].bold)     <<   ", " << // bool bold;
+    bool(es->fonts[i].italic)   <<   ", " << // bool italic;
+    es->fonts[i].glyphRangeCount // int glyphRangeCount;
+    << "}," << endl;
+
+    if (es->fonts[i].id > maxid)
+      maxid = es->fonts[i].id;
     rawfontcount++;
   }
   wto << "  };" << endl;
