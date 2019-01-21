@@ -123,7 +123,7 @@ void d3d_start()
   glDepthMask(true);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_NOTEQUAL, 0);
+  glAlphaFunc(GL_GREATER, 0);
   glEnable(GL_NORMALIZE);
   glEnable(GL_COLOR_MATERIAL);
 

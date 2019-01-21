@@ -96,6 +96,7 @@ void d3d_start()
   enigma::d3dPerspective = true;
   enigma::d3dCulling = rs_none;
   d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+  d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
   d3dmgr->SetRenderState(D3DRS_ZENABLE, enigma::d3dHidden = true);
 
   // Enable texture repetition by default
