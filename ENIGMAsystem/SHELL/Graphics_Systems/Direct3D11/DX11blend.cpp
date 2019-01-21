@@ -74,7 +74,7 @@ int draw_set_blend_mode_ext(int src, int dest) {
   };
 
   blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = blend_equivs[(src-1)%11];
-  blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = blend_equivs[(src-1)%11];
+  blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = blend_equivs[(dest-1)%11];
 
   update_blend_state();
   return 0;
