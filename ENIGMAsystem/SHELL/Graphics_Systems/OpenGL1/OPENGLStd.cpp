@@ -54,7 +54,7 @@ namespace enigma
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glAlphaFunc(GL_ALWAYS,0);
+    glAlphaFunc(GL_GREATER,0);
     glDepthFunc(GL_LEQUAL); // to match GM8's D3D8 default
 
     glColor4f(0,0,0,1);
