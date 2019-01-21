@@ -172,6 +172,7 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   DSBUFFERDESC bufferDesc = {};
   bufferDesc.dwSize = sizeof(DSBUFFERDESC);
   bufferDesc.dwFlags = DSBCAPS_CTRLDEFAULT | DSBCAPS_CTRLFX;
+  // DSBCAPS_CTRLFX requires sound buffers at least DSBSIZE_FX_MIN (150ms) in length
   unsigned long minFXBufSize = DSBSIZE_FX_MIN * waveHeader->numChannels * (waveHeader->sampleRate + 1000 - 1) / 1000 * waveHeader->bitsPerSample / 8;
   bufferDesc.dwBufferBytes = std::max(waveHeader->dataSize, minFXBufSize);
   bufferDesc.dwReserved = 0;
@@ -185,14 +186,17 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   IDirectSoundBuffer* sndBuf = snd->soundBuffer;
 
   if (DS_OK == sndBuf->Lock(0,                     // Offset at which to start lock.
-                            waveHeader->dataSize,  // Size of lock; ignored because of flag.
+                            0,                     // Size of lock; ignored because of flag.
                             &lpvWrite,             // Gets address of first part of lock.
                             &dwLength,             // Gets size of first part of lock.
                             NULL,                  // Address of wraparound not needed.
                             NULL,                  // Size of wraparound not needed.
-                            0))                    // Flag.
+                            DSBLOCK_ENTIREBUFFER)) // Flag.
   {
     memcpy(lpvWrite, (char*)buffer + waveHeader->dataOffset, waveHeader->dataSize);
+    // fill with silence
+    if (waveHeader->dataSize < minFXBufSize)
+      memset(lpvWrite + waveHeader->dataSize, 1<<(waveHeader->bitsPerSample - 1), dwLength - waveHeader->dataSize);
     sndBuf->Unlock(lpvWrite,  // Address of lock start.
                    dwLength,  // Size of lock.
                    NULL,      // No wraparound portion.
