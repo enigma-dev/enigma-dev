@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 polygone
+*** Copyright (C) 2018, 2019 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -122,6 +123,7 @@ namespace enigma
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++) {
             if (dit->second.tiles.size())
             {
+                const auto layer_depth = dit->first;
                 for (std::vector<tile>::size_type i = 0; i != dit->second.tiles.size(); ++i)
                 {
                     tile t = dit->second.tiles[i];
@@ -132,13 +134,14 @@ namespace enigma
                     if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1) { //Texture switch has happened. Create new batch
                         get_background(bck2d,prev_bkid);
 
-                        tile_layer_metadata[dit->second.tiles[0].depth].push_back( std::vector< int >(3) );
-                        tile_layer_metadata[dit->second.tiles[0].depth].back()[0] = bck2d->texture;
-                        tile_layer_metadata[dit->second.tiles[0].depth].back()[1] = index_start;
-                        tile_layer_metadata[dit->second.tiles[0].depth].back()[2] = index_count;
+                        tile_layer_metadata[layer_depth].push_back( std::vector< int >(3) );
+                        auto& metadata = tile_layer_metadata[layer_depth].back();
+                        metadata[0] = bck2d->texture;
+                        metadata[1] = index_start;
+                        metadata[2] = index_count;
 
                         index_start += index_count;
-                        index_count = 6;
+                        index_count = (i == dit->second.tiles.size()-1) ? 0 : 6;
 
                         prev_bkid = t.bckid;
                     }
