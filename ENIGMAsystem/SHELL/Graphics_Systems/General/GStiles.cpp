@@ -116,10 +116,7 @@ namespace enigma
         enigma_user::vertex_begin(tile_vertex_buffer, vertexFormat);
         enigma_user::index_begin(tile_index_buffer, enigma_user::index_type_ushort);
 
-        int prev_bkid;
-        int index_start = 0;
-        int index_count = 0;
-        int vertex_ind = 0;
+        int prev_bkid = -1, index_start = 0, index_count = 0, vertex_ind = 0;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++) {
             if (dit->second.tiles.size())
             {
