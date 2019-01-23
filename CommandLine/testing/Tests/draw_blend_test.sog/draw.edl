@@ -1,0 +1,16 @@
+draw_rectangle_color(0, 0, 352, 352, c_red, c_green, c_blue, c_yellow, 0);
+
+yy = 0;
+repeat 11
+begin
+    yy += 1;
+    xx = 0;
+    repeat 11
+    begin
+        xx += 1;
+
+        draw_set_blend_mode_ext(yy, xx); /* The blend mode constants are basically numbers. bm_zero is 1, bm_one is 2, bm_scr_color is 3, bm_inv_scr_color is 4, etc...*/
+        draw_sprite(spr_hugar, 0, xx*32-32, yy*32-32);
+        draw_set_blend_mode(bm_normal);
+    end;
+end;
