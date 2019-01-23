@@ -134,11 +134,7 @@ namespace enigma
                     if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1) { //Texture switch has happened. Create new batch
                         get_background(bck2d,prev_bkid);
 
-                        tile_layer_metadata[layer_depth].push_back( std::vector< int >(3) );
-                        auto& metadata = tile_layer_metadata[layer_depth].back();
-                        metadata[0] = bck2d->texture;
-                        metadata[1] = index_start;
-                        metadata[2] = index_count;
+                        tile_layer_metadata[layer_depth].push_back( { bck2d->texture, index_start, index_count } );
 
                         index_start += index_count;
                         index_count = (i == dit->second.tiles.size()-1) ? 0 : 6;
