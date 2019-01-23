@@ -91,6 +91,7 @@ namespace enigma
     {
         if (!tiles_are_dirty) return;
         tiles_are_dirty = false;
+        tile_layer_metadata.clear();
 
         static int vertexFormat = -1;
         if (!enigma_user::vertex_format_exists(vertexFormat)) {
