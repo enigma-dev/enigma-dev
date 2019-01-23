@@ -91,6 +91,7 @@ namespace enigma
     {
         if (!tiles_are_dirty) return;
         tiles_are_dirty = false;
+        tile_layer_metadata.clear();
 
         static int vertexFormat = -1;
         if (!enigma_user::vertex_format_exists(vertexFormat)) {
@@ -118,26 +119,28 @@ namespace enigma
         int index_start = 0;
         int index_count = 0;
         int vertex_ind = 0;
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++) {
             if (dit->second.tiles.size())
             {
                 //TODO: Should they really be sorted by background? This may help batching, but breaks compatiblity. Nothing texture atlas wouldn't solve.
                 sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
-                for(std::vector<tile>::size_type i = 0; i != dit->second.tiles.size(); ++i)
+                for (std::vector<tile>::size_type i = 0; i != dit->second.tiles.size(); ++i)
                 {
                     tile t = dit->second.tiles[i];
-                    if (i==0){ prev_bkid = t.bckid; }
+                    if (i==0) { prev_bkid = t.bckid; }
                     draw_tile(vertex_ind, tile_index_buffer, tile_vertex_buffer, t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
-                    index_count += 6;
-                    if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1){ //Texture switch has happened. Create new batch
+                    if (prev_bkid == t.bckid || i == dit->second.tiles.size()-1)
+                        index_count += 6;
+                    if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1) { //Texture switch has happened. Create new batch
                         get_background(bck2d,prev_bkid);
+
                         tile_layer_metadata[dit->second.tiles[0].depth].push_back( std::vector< int >(3) );
                         tile_layer_metadata[dit->second.tiles[0].depth].back()[0] = bck2d->texture;
                         tile_layer_metadata[dit->second.tiles[0].depth].back()[1] = index_start;
                         tile_layer_metadata[dit->second.tiles[0].depth].back()[2] = index_count;
 
                         index_start += index_count;
-                        index_count = 0;
+                        index_count = 6;
 
                         prev_bkid = t.bckid;
                     }
