@@ -268,7 +268,7 @@ inline void action_sprite_transform(gs_scalar xscale, gs_scalar yscale, double a
     inst->image_angle = angle;
 }
 
-inline void action_sprite_color(int color, int alpha)
+inline void action_sprite_color(int color, double alpha)
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     inst->image_blend = color;
