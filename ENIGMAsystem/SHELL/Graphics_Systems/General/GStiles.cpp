@@ -129,14 +129,19 @@ namespace enigma
                     tile t = dit->second.tiles[i];
                     if (i==0) { prev_bkid = t.bckid; }
                     draw_tile(vertex_ind, tile_index_buffer, tile_vertex_buffer, t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    // current batch only keeps last tile if the texture hasn't changed or if it's the
+                    // last possible tile for this depth (in which case it's forced to keep it)
                     if (prev_bkid == t.bckid || i == dit->second.tiles.size()-1)
                         index_count += 6;
-                    if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1) { //Texture switch has happened. Create new batch
+                    // if last tile required a different background texture or we are the last tile of
+                    // this depth layer, we have to start a new batch
+                    if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1) {
                         get_background(bck2d,prev_bkid);
 
                         tile_layer_metadata[layer_depth].push_back( { bck2d->texture, index_start, index_count } );
 
                         index_start += index_count;
+                        // next batch must include the last tile when we are not the last tile for this depth
                         index_count = (i == dit->second.tiles.size()-1) ? 0 : 6;
 
                         prev_bkid = t.bckid;
