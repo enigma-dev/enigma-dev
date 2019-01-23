@@ -122,8 +122,6 @@ namespace enigma
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++) {
             if (dit->second.tiles.size())
             {
-                //TODO: Should they really be sorted by background? This may help batching, but breaks compatiblity. Nothing texture atlas wouldn't solve.
-                sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
                 for (std::vector<tile>::size_type i = 0; i != dit->second.tiles.size(); ++i)
                 {
                     tile t = dit->second.tiles[i];
