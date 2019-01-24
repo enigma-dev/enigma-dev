@@ -823,11 +823,11 @@ void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool up
 //Mind that health is 1-100
 void draw_healthbar(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float amount, int backcol, int mincol, int maxcol, int dir, bool showback, bool showborder)
 {
-  if (x1>x2) { // Swap them
+  if (x2>x1) { // Swap them
     gs_scalar t = x2;
     x2 = x1, x1 = t;
   }
-  if (y1>y2) { // Swap them
+  if (y2>y1) { // Swap them
     gs_scalar t = y2;
     y2 = y1, y1 = t;
   }
