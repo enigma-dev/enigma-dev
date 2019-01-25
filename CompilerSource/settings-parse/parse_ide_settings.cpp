@@ -232,6 +232,15 @@ void parse_ide_settings(const char* eyaml)
   cout << "Setting up IDE editables... " << endl;
   requested_extensions_last_parse.clear();
   requested_extensions_last_parse = explode((string)settree.get("extensions"));
+  
+  string sep = ": ";
+  cout << "Loading extensions" << flush;
+  for (const string &e : requested_extensions_last_parse) {
+    cout << sep << e << flush;
+    sep = ", ";
+  }
+  cout << endl;
+  
   extensions::parse_extensions(requested_extensions_last_parse);
   reset_ide_editables();
 }

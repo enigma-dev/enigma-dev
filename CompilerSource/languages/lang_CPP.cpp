@@ -51,8 +51,6 @@ void lang_CPP::load_extension_locals() {
   }
 }
 
-const char* heaping_pile_of_dog_shit = "ERROR: Unknown";
-
 #ifdef _WIN32
  #include <windows.h>
  #define dllexport extern "C" __declspec(dllexport)
@@ -74,7 +72,6 @@ const char* heaping_pile_of_dog_shit = "ERROR: Unknown";
 
 #include <System/builtins.h>
 
-extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
 void parser_init();
 
 syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targetYaml)
@@ -120,7 +117,8 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   } else cerr << "ERROR! No var type found!" << endl;
   if ((d = main_context->get_global()->look_up("enigma"))) {
     if (d->flags & jdi::DEF_NAMESPACE) {
-      if ((d = ((jdi::definition_scope*)d)->look_up("varargs"))) {
+      namespace_enigma = (jdi::definition_scope*) d;
+      if ((d = namespace_enigma->look_up("varargs"))) {
         enigma_type__varargs = d;
         if (!(d->flags & jdi::DEF_TYPENAME))
           cerr << "ERROR! ENIGMA's varargs is not a type!" << endl;
@@ -132,7 +130,6 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   
   if (res) {
     cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never happy.\n";
-    cout << heaping_pile_of_dog_shit;
     
     ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
     cout << "Continuing anyway." << endl;

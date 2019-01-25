@@ -26,10 +26,6 @@
 
 #include <JDI/src/Storage/definition.h>
 
-extern jdi::definition *enigma_type__var;
-extern jdi::definition *enigma_type__variant;
-extern jdi::definition *enigma_type__varargs;
-
 extern string tostring(int val);
 
 inline string format_error(string code,string err,int pos)

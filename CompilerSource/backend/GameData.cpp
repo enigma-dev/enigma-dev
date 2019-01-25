@@ -370,7 +370,7 @@ ImageData::ImageData(const Image &img):
 ImageData::ImageData(int w, int h, const uint8_t *data, size_t size):
     width(w), height(h), pixels(data, data + size) {}
 
-GameData::GameData(EnigmaStruct *es) {
+GameData::GameData(EnigmaStruct *es): filename(es->filename ?: "") {
   cout << "Translating EnigmaStruct" << endl;
   cout << "- Indexing names" << endl;
   ESLookup lookup(es);
@@ -406,11 +406,13 @@ GameData::GameData(EnigmaStruct *es) {
   for (int i = 0; i < es->roomCount; ++i)
     rooms.emplace_back(es->rooms[i], lookup);
 
-  cout << "- Transferring other stuff" << endl;
+  cout << "- Transferring " << es->constantCount <<  " constants" << endl;
   for (int i = 0; i < es->constantCount; ++i)
-    constants.push_back({es->constants[i].name, es->constants[i].value});
+    constants.emplace_back(es->constants[i].name, es->constants[i].value);
+  cout << "- Transferring " << es->extensionCount <<  " extensions" << endl;
   for (int i = 0; i < es->extensionCount; ++i)
-    extensions.push_back({es->extensions[i].name, es->extensions[i].path});
+    extensions.emplace_back(es->extensions[i].name, es->extensions[i].path);
+  cout << "- Transferring " << es->packageCount <<  " packages" << endl;
   for (int i = 0; i < es->packageCount; ++i)
     packages.push_back(es->packages[i]);
 

@@ -34,7 +34,6 @@ using namespace std;
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
 

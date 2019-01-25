@@ -23,6 +23,7 @@
 #define ENIGMA_LANG_CPP_H
 #include "language_adapter.h"
 #include <Storage/definition.h>
+#include <System/builtins.h>
 #include <API/context.h>
 
 struct lang_CPP: language_adapter {
@@ -31,6 +32,7 @@ struct lang_CPP: language_adapter {
 
   /// The ENIGMA namespace.
   jdi::definition_scope *namespace_enigma;
+  jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
 
   // Utility
   string get_name() final;
@@ -63,9 +65,39 @@ struct lang_CPP: language_adapter {
   virtual syntax_error* definitionsModified(const char*, const char*) final;
   virtual int compile(const GameData &game, const char* exe_filename, int mode) final;
 
+
+  // ===============================================================================================
+  // == The following methods are implemented in jdi_utility.cpp ===================================
+  // ===============================================================================================
+
+  /// Look up a type by its name.
   jdi::definition* find_typename(string name);
 
+  // Returns the index at which a function parameters ref_stack is variadic;
+  // that is, at which position it accepts `enigma::varargs`.
+  int referencers_varargs_at(jdi::ref_stack &refs);
+  bool referencers_varargs(jdi::ref_stack &refs) {
+    return referencers_varargs_at(refs) != -1;
+  }
+
+  /// Check whether the given definition is callable as a function.
+  bool definition_is_function(jdi::definition *d);
+  /// Assuming this definition is a function, retrieve the number of overloads it has.
+  size_t definition_overload_count(jdi::definition *d);
+  /// Read parameter bounds from the current definition into args min and max. For variadics, max = unsigned(-1).
+  void definition_parameter_bounds(jdi::definition *d, unsigned &min, unsigned &max);
+  /// Create a script with the given name (and an assumed 16 parameters, all defaulted) to the given scope.
+  void quickmember_script(jdi::definition_scope* scope, string name);
+  /// Create a standard integer variable member in the given scope.
+  void quickmember_integer(jdi::definition_scope* scope, string name) {
+    return quickmember_variable(scope, jdi::builtin_type__int, name);
+  }
+
   virtual ~lang_CPP();
+
+ private:
+  /// Create a standard variable member in the given scope.
+  void quickmember_variable(jdi::definition_scope* scope, jdi::definition* type, string name);
 };
 
 #endif

@@ -126,8 +126,14 @@ struct GameData {
   std::vector<RoomData>       rooms;
 
   // TODO(Robert): Why do none of these have Proto equivalents?
-  struct Extension { std::string name, path; };
-  struct Constant { std::string name, value; };
+  struct Extension {
+    std::string name, path;
+    Extension(std::string n, std::string p): name(n), path(p) {}
+  };
+  struct Constant {
+    std::string name, value;
+    Constant(std::string n, std::string v): name(n), value(v) {}
+  };
 
   // std::vector<Trigger> triggers;
   std::vector<Constant> constants;

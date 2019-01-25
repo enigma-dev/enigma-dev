@@ -29,7 +29,6 @@
 #include <cstdio>
 #include <fstream>
 #include "backend/GameData.h"
-#include "compiler/reshandlers/refont.h"
 #include <string>
 using namespace std;
 #include "compiler/compile_common.h"

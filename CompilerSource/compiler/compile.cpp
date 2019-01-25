@@ -18,7 +18,7 @@
 
 #include "makedir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "backend/GameData.h"
 #include "settings.h"
 
 #include "general/darray.h"
@@ -67,8 +67,6 @@ using namespace std;
 #include "event_reader/event_parser.h"
 
 #include "languages/lang_CPP.h"
-
-#include "compiler/jdi_utility.h"
 
 #ifdef WRITE_UNIMPLEMENTED_TXT
 std::map <string, char> unimplemented_function_list;
@@ -149,15 +147,11 @@ inline void write_exe_info(const std::string codegen_directory, const GameData &
       << "VALUE \"FileVersion\",         \"" << gloss_version << "\\0\"\n"
       << "VALUE \"ProductName\",         \"" << gameSet.product() << "\"\n"
       << "VALUE \"ProductVersion\",      \"" << gloss_version << "\\0\"\n"
-      << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright() << "\"\n";
-  if (!game.filename.empty()) {
-    wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(game.filename,"\\","/") << "\"\n";
-  } else {
-    wto << "VALUE \"OriginalFilename\",         \"\"\n";
-  }
-  wto << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n";
-  wto << "VALUE \"Translation\", 0x409, 1252\n";
-  wto << "END\nEND";
+      << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright() << "\"\n"
+      << "VALUE \"OriginalFilename\",    \"" << string_replace_all(game.filename,"\\","/") << "\"\n"
+      << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n"
+      << "VALUE \"Translation\", 0x409, 1252\n"
+      << "END\nEND";
   wto.close();
 }
 
@@ -235,18 +229,25 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   // Re-establish ourself
   // Read the global locals: locals that will be included with each instance
   {
-    set<string> extnp, extlp;
+    set<string> exts_new_parse, exts_last_parse;
     for (const auto &ext : game.extensions) {
-      extnp.insert(ext.path + ext.name);
+      exts_new_parse.insert(ext.path + "/" + ext.name);
     }
     for (const string &ext : requested_extensions_last_parse) {
-      extlp.insert(ext);
+      exts_last_parse.insert(ext);
     }
     edbg << "Loading shared locals from extensions list" << flushl;
-    if (extnp != extnp) {
+    if (exts_new_parse != exts_last_parse) {
       user << "The IDE didn't tell ENIGMA what extensions "
               "were selected before requesting a build.";
-      idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
+      
+      cout << "Extensions I have loaded:" << endl;
+      for (const string &e : exts_last_parse) cout << "- " << e << endl;
+      cout << "Extensions I should have loaded:" << endl;
+      for (const string &e : exts_new_parse) cout << "- " << e << endl;
+      
+      //idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
+      user << "...Continuing anyway..." << flushl;
     }
   }
 
@@ -270,54 +271,48 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Copying resources:" << flushl;
 
   edbg << "Copying sprite names [" << game.sprites.size() << "]" << flushl;
-  for (size_t i = 0; i < game.sprites.size(); i++) {
-    cout << "Name on this side: " << globals_scope.name << endl;
-    cout << "Name on this side2: " << ((jdi::definition_scope*)&globals_scope)->name << endl;
-    cout << "Pointer on this side: " << (&globals_scope) << endl;
-    cout << "Address on this side: " << ((jdi::definition_scope*)&globals_scope) << endl;
-
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.sprites[i].name);
-  }
+  for (size_t i = 0; i < game.sprites.size(); i++)
+    current_language->quickmember_integer(&globals_scope, game.sprites[i].name);
 
   edbg << "Copying sound names [" << game.sounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.sounds.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.sounds[i].name);
+    current_language->quickmember_integer(&globals_scope, game.sounds[i].name);
 
   edbg << "Copying background names [" << game.backgrounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.backgrounds.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.backgrounds[i].name);
+    current_language->quickmember_integer(&globals_scope, game.backgrounds[i].name);
 
   edbg << "Copying path names [" << game.paths.size() << "]" << flushl;
   for (size_t i = 0; i < game.paths.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.paths[i].name);
+    current_language->quickmember_integer(&globals_scope, game.paths[i].name);
 
   edbg << "Copying script names [" << game.scripts.size() << "]" << flushl;
   for (size_t i = 0; i < game.scripts.size(); i++)
-    quickmember_script(&globals_scope,game.scripts[i].name);
+    current_language->quickmember_script(&globals_scope,game.scripts[i].name);
 
   edbg << "Copying shader names [" << game.shaders.size() << "]" << flushl;
   for (size_t i = 0; i < game.shaders.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.shaders[i].name);
+    current_language->quickmember_integer(&globals_scope, game.shaders[i].name);
 
   edbg << "Copying font names [" << game.fonts.size() << "]" << flushl;
   for (size_t i = 0; i < game.fonts.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.fonts[i].name);
+    current_language->quickmember_integer(&globals_scope, game.fonts[i].name);
 
   edbg << "Copying timeline names [" << game.timelines.size() << "]" << flushl;
   for (size_t i = 0; i < game.timelines.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.timelines[i].name);
+    current_language->quickmember_integer(&globals_scope, game.timelines[i].name);
 
   edbg << "Copying object names [" << game.objects.size() << "]" << flushl;
   for (size_t i = 0; i < game.objects.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.objects[i].name);
+    current_language->quickmember_integer(&globals_scope, game.objects[i].name);
 
   edbg << "Copying room names [" << game.rooms.size() << "]" << flushl;
   for (size_t i = 0; i < game.rooms.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.rooms[i].name);
+    current_language->quickmember_integer(&globals_scope, game.rooms[i].name);
 
   edbg << "Copying constant names [" << game.constants.size() << "]" << flushl;
   for (size_t i = 0; i < game.constants.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.constants[i].name);
+    current_language->quickmember_integer(&globals_scope, game.constants[i].name);
 
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
