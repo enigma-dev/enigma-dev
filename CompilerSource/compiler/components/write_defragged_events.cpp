@@ -31,7 +31,7 @@ using namespace std;
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "backend/GameData.h"
 #include "compiler/compile_common.h"
 
 #include "event_reader/event_parser.h"
