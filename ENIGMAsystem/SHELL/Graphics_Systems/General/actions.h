@@ -174,10 +174,10 @@ void action_draw_health(const gs_scalar x1, const gs_scalar y1, const gs_scalar 
   }
 	if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
-        draw_healthbar(x1+inst->x, y1+inst->y, x2+inst->x, y2+inst->y, health, backColor, realbar2, realbar1, 1, 1, 1);
+        draw_healthbar(x1+inst->x, y1+inst->y, x2+inst->x, y2+inst->y, health, backColor, realbar2, realbar1, 0, 1, 1);
 	}
 	else
-        draw_healthbar(x1, y1, x2, y2, health, backColor, realbar2, realbar1, 1, 1, 1);
+        draw_healthbar(x1, y1, x2, y2, health, backColor, realbar2, realbar1, 0, 1, 1);
 }
 
 inline void action_draw_life(const gs_scalar x, const gs_scalar y, const string caption)
