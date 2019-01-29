@@ -54,33 +54,33 @@ namespace enigma
     //batch info - 0 = texture to use, 1 = vertices to render,
     std::map<int,std::vector<std::vector<int> > > tile_layer_metadata;
 
-    static void draw_tile(int &ind, int index, int vertex, int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+    static void draw_tile(int &ind, int index, int vertex, const tile& t)
     {
-      if (!enigma_user::background_exists(back)) return;
-      get_background(bck2d,back);
+      if (!enigma_user::background_exists(t.bckid)) return;
+      get_background(bck2d,t.bckid);
 
       const gs_scalar tbx = bck2d->texturex, tby = bck2d->texturey,
                       tbw = bck2d->width/(gs_scalar)bck2d->texturew, tbh = bck2d->height/(gs_scalar)bck2d->textureh,
-                      xvert1 = x, xvert2 = xvert1 + width*xscale,
-                      yvert1 = y, yvert2 = yvert1 + height*yscale,
-                      tbx1 = tbx+left/tbw, tbx2 = tbx1 + width/tbw,
-                      tby1 = tby+top/tbh, tby2 = tby1 + height/tbh;
+                      xvert1 = t.roomX, xvert2 = xvert1 + t.width*t.xscale,
+                      yvert1 = t.roomY, yvert2 = yvert1 + t.height*t.yscale,
+                      tbx1 = tbx+t.bgx/tbw, tbx2 = tbx1 + t.width/tbw,
+                      tby1 = tby+t.bgy/tbh, tby2 = tby1 + t.height/tbh;
 
       enigma_user::vertex_position(vertex, xvert1, yvert1);
       enigma_user::vertex_texcoord(vertex, tbx1, tby1);
-      enigma_user::vertex_color(vertex, color, alpha);
+      enigma_user::vertex_color(vertex, t.color, t.alpha);
 
       enigma_user::vertex_position(vertex, xvert2, yvert1);
       enigma_user::vertex_texcoord(vertex, tbx2, tby1);
-      enigma_user::vertex_color(vertex, color, alpha);
+      enigma_user::vertex_color(vertex, t.color, t.alpha);
 
       enigma_user::vertex_position(vertex, xvert1, yvert2);
       enigma_user::vertex_texcoord(vertex, tbx1, tby2);
-      enigma_user::vertex_color(vertex, color, alpha);
+      enigma_user::vertex_color(vertex, t.color, t.alpha);
 
       enigma_user::vertex_position(vertex, xvert2, yvert2);
       enigma_user::vertex_texcoord(vertex, tbx2, tby2);
-      enigma_user::vertex_color(vertex, color, alpha);
+      enigma_user::vertex_color(vertex, t.color, t.alpha);
 
       IndexBuffer* indexBuffer = indexBuffers[index];
       int indices[] = {ind + 0, ind + 1, ind + 2, ind + 2, ind + 1, ind + 3};
@@ -118,28 +118,29 @@ namespace enigma
 
         int prev_bkid = -1, index_start = 0, index_count = 0, vertex_ind = 0;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++) {
-            if (dit->second.tiles.size())
+            auto& dtiles = dit->second.tiles;
+            if (dtiles.size())
             {
                 const auto layer_depth = dit->first;
-                for (std::vector<tile>::size_type i = 0; i != dit->second.tiles.size(); ++i)
+                for (std::vector<tile>::size_type i = 0; i != dtiles.size(); ++i)
                 {
-                    tile t = dit->second.tiles[i];
+                    const tile& t = dtiles[i];
                     if (i==0) { prev_bkid = t.bckid; }
-                    draw_tile(vertex_ind, tile_index_buffer, tile_vertex_buffer, t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    draw_tile(vertex_ind, tile_index_buffer, tile_vertex_buffer, t);
                     // current batch only keeps last tile if the texture hasn't changed or if it's the
                     // last possible tile for this depth (in which case it's forced to keep it)
-                    if (prev_bkid == t.bckid || i == dit->second.tiles.size()-1)
+                    if (prev_bkid == t.bckid || i == dtiles.size()-1)
                         index_count += 6;
                     // if last tile required a different background texture or we are the last tile of
                     // this depth layer, we have to start a new batch
-                    if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1) {
+                    if (prev_bkid != t.bckid || i == dtiles.size()-1) {
                         get_background(bck2d,prev_bkid);
 
                         tile_layer_metadata[layer_depth].push_back( { bck2d->texture, index_start, index_count } );
 
                         index_start += index_count;
                         // next batch must include the last tile when we are not the last tile for this depth
-                        index_count = (i == dit->second.tiles.size()-1) ? 0 : 6;
+                        index_count = (i == dtiles.size()-1) ? 0 : 6;
 
                         prev_bkid = t.bckid;
                     }
