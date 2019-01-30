@@ -39,6 +39,11 @@ namespace {
 
 bool tiles_are_dirty = true;
 
+struct bkinxop
+{
+  bool operator() (const enigma::tile& a, const enigma::tile& b) {return (a.bckid < b.bckid);}
+} bkinxcomp;
+
 } // anonymous namespace
 
 namespace enigma
@@ -116,6 +121,7 @@ namespace enigma
             auto& dtiles = dit->second.tiles;
             if (dtiles.size())
             {
+                stable_sort(dtiles.begin(), dtiles.end(), bkinxcomp);
                 const auto layer_depth = dit->first;
                 for (std::vector<tile>::size_type i = 0; i != dtiles.size(); ++i)
                 {
