@@ -116,7 +116,7 @@ namespace enigma
         enigma_user::vertex_begin(tile_vertex_buffer, vertexFormat);
         enigma_user::index_begin(tile_index_buffer, enigma_user::index_type_ushort);
 
-        int prev_bkid = -1, index_start = 0, index_count = 0, vertex_ind = 0;
+        int vertex_ind = 0, index_start = 0;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++) {
             auto& dtiles = dit->second.tiles;
             if (dtiles.size())
@@ -125,25 +125,21 @@ namespace enigma
                 for (std::vector<tile>::size_type i = 0; i != dtiles.size(); ++i)
                 {
                     const tile& t = dtiles[i];
-                    if (i==0) { prev_bkid = t.bckid; }
+                    get_background(bck2d,t.bckid);
+
+                    // if this is the first tile, go ahead and start a batch
+                    if (i == 0)
+                        tile_layer_metadata[layer_depth].push_back({bck2d->texture, index_start, 0});
+                    std::vector<int>& batch = tile_layer_metadata[layer_depth].back();
                     draw_tile(vertex_ind, tile_index_buffer, tile_vertex_buffer, t);
-                    // current batch only keeps last tile if the texture hasn't changed or if it's the
-                    // last possible tile for this depth (in which case it's forced to keep it)
-                    if (prev_bkid == t.bckid || i == dtiles.size()-1)
-                        index_count += 6;
-                    // if last tile required a different background texture or we are the last tile of
-                    // this depth layer, we have to start a new batch
-                    if (prev_bkid != t.bckid || i == dtiles.size()-1) {
-                        get_background(bck2d,prev_bkid);
-
-                        tile_layer_metadata[layer_depth].push_back( { bck2d->texture, index_start, index_count } );
-
-                        index_start += index_count;
-                        // next batch must include the last tile when we are not the last tile for this depth
-                        index_count = (i == dtiles.size()-1) ? 0 : 6;
-
-                        prev_bkid = t.bckid;
+                    // if this tile has the same texture as the batch, then just increase
+                    // the index count, otherwise, start a new batch that includes this tile
+                    if (batch[0] == bck2d->texture) {
+                        batch[2] += 6;
+                    } else {
+                        tile_layer_metadata[layer_depth].push_back({bck2d->texture, index_start, 6});
                     }
+                    index_start += 6;
                 }
             }
         }
