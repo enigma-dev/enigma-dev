@@ -39,11 +39,6 @@ namespace {
 
 bool tiles_are_dirty = true;
 
-struct bkinxop
-{
-  bool operator() (const enigma::tile& a, const enigma::tile& b) {return (a.bckid < b.bckid);}
-} bkinxcomp;
-
 } // anonymous namespace
 
 namespace enigma
