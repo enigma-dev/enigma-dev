@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 polygone
+*** Copyright (C) 2018, 2019 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -38,11 +39,6 @@ namespace {
 
 bool tiles_are_dirty = true;
 
-struct bkinxop
-{
-  bool operator() (const enigma::tile& a, const enigma::tile& b) {return (a.bckid < b.bckid);}
-} bkinxcomp;
-
 } // anonymous namespace
 
 namespace enigma
@@ -53,33 +49,33 @@ namespace enigma
     //batch info - 0 = texture to use, 1 = vertices to render,
     std::map<int,std::vector<std::vector<int> > > tile_layer_metadata;
 
-    static void draw_tile(int &ind, int index, int vertex, int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+    static void draw_tile(int &ind, int index, int vertex, const tile& t)
     {
-      if (!enigma_user::background_exists(back)) return;
-      get_background(bck2d,back);
+      if (!enigma_user::background_exists(t.bckid)) return;
+      get_background(bck2d,t.bckid);
 
       const gs_scalar tbx = bck2d->texturex, tby = bck2d->texturey,
                       tbw = bck2d->width/(gs_scalar)bck2d->texturew, tbh = bck2d->height/(gs_scalar)bck2d->textureh,
-                      xvert1 = x, xvert2 = xvert1 + width*xscale,
-                      yvert1 = y, yvert2 = yvert1 + height*yscale,
-                      tbx1 = tbx+left/tbw, tbx2 = tbx1 + width/tbw,
-                      tby1 = tby+top/tbh, tby2 = tby1 + height/tbh;
+                      xvert1 = t.roomX, xvert2 = xvert1 + t.width*t.xscale,
+                      yvert1 = t.roomY, yvert2 = yvert1 + t.height*t.yscale,
+                      tbx1 = tbx+t.bgx/tbw, tbx2 = tbx1 + t.width/tbw,
+                      tby1 = tby+t.bgy/tbh, tby2 = tby1 + t.height/tbh;
 
       enigma_user::vertex_position(vertex, xvert1, yvert1);
       enigma_user::vertex_texcoord(vertex, tbx1, tby1);
-      enigma_user::vertex_color(vertex, color, alpha);
+      enigma_user::vertex_color(vertex, t.color, t.alpha);
 
       enigma_user::vertex_position(vertex, xvert2, yvert1);
       enigma_user::vertex_texcoord(vertex, tbx2, tby1);
-      enigma_user::vertex_color(vertex, color, alpha);
+      enigma_user::vertex_color(vertex, t.color, t.alpha);
 
       enigma_user::vertex_position(vertex, xvert1, yvert2);
       enigma_user::vertex_texcoord(vertex, tbx1, tby2);
-      enigma_user::vertex_color(vertex, color, alpha);
+      enigma_user::vertex_color(vertex, t.color, t.alpha);
 
       enigma_user::vertex_position(vertex, xvert2, yvert2);
       enigma_user::vertex_texcoord(vertex, tbx2, tby2);
-      enigma_user::vertex_color(vertex, color, alpha);
+      enigma_user::vertex_color(vertex, t.color, t.alpha);
 
       IndexBuffer* indexBuffer = indexBuffers[index];
       int indices[] = {ind + 0, ind + 1, ind + 2, ind + 2, ind + 1, ind + 3};
@@ -115,33 +111,30 @@ namespace enigma
         enigma_user::vertex_begin(tile_vertex_buffer, vertexFormat);
         enigma_user::index_begin(tile_index_buffer, enigma_user::index_type_ushort);
 
-        int prev_bkid;
-        int index_start = 0;
-        int index_count = 0;
-        int vertex_ind = 0;
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
-            if (dit->second.tiles.size())
+        int vertex_ind = 0, index_start = 0;
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++) {
+            auto& dtiles = dit->second.tiles;
+            if (dtiles.size())
             {
-                //TODO: Should they really be sorted by background? This may help batching, but breaks compatiblity. Nothing texture atlas wouldn't solve.
-                sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
-                for(std::vector<tile>::size_type i = 0; i != dit->second.tiles.size(); ++i)
+                const auto layer_depth = dit->first;
+                for (std::vector<tile>::size_type i = 0; i != dtiles.size(); ++i)
                 {
-                    tile t = dit->second.tiles[i];
-                    if (i==0){ prev_bkid = t.bckid; }
-                    draw_tile(vertex_ind, tile_index_buffer, tile_vertex_buffer, t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
-                    index_count += 6;
-                    if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1){ //Texture switch has happened. Create new batch
-                        get_background(bck2d,prev_bkid);
-                        tile_layer_metadata[dit->second.tiles[0].depth].push_back( std::vector< int >(3) );
-                        tile_layer_metadata[dit->second.tiles[0].depth].back()[0] = bck2d->texture;
-                        tile_layer_metadata[dit->second.tiles[0].depth].back()[1] = index_start;
-                        tile_layer_metadata[dit->second.tiles[0].depth].back()[2] = index_count;
+                    const tile& t = dtiles[i];
+                    get_background(bck2d,t.bckid);
 
-                        index_start += index_count;
-                        index_count = 0;
-
-                        prev_bkid = t.bckid;
+                    // if this is the first tile, go ahead and start a batch
+                    if (i == 0)
+                        tile_layer_metadata[layer_depth].push_back({bck2d->texture, index_start, 0});
+                    std::vector<int>& batch = tile_layer_metadata[layer_depth].back();
+                    draw_tile(vertex_ind, tile_index_buffer, tile_vertex_buffer, t);
+                    // if this tile has the same texture as the batch, then just increase
+                    // the index count, otherwise, start a new batch that includes this tile
+                    if (batch[0] == bck2d->texture) {
+                        batch[2] += 6;
+                    } else {
+                        tile_layer_metadata[layer_depth].push_back({bck2d->texture, index_start, 6});
                     }
+                    index_start += 6;
                 }
             }
         }
