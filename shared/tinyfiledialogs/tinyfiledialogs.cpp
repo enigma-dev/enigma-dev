@@ -1258,7 +1258,7 @@ char const * tinyfd_passwordBox(
 }
 
 
-std::vector<std::string> SplitString(const std::string &str, char delimiter)
+static std::vector<std::string> SplitString(const std::string &str, char delimiter)
 {
 	std::vector<std::string> vec;
 	std::stringstream sstr(str);
@@ -1271,10 +1271,10 @@ std::vector<std::string> SplitString(const std::string &str, char delimiter)
 }
 
 
-std::string zenityFilter(std::string input)
+static std::string zenityFilter(std::string input)
 {
+	std::replace(input.begin(), input.end(), ';', ' ');
 	std::vector<std::string> stringVec = SplitString(input, '|');
-
 	std::string outputString = "";
 
 	unsigned int index = 0;
@@ -1282,7 +1282,7 @@ std::string zenityFilter(std::string input)
 	{
 		if (index % 2 == 0) 
 		{
-			outputString += " --file-filter='" + str + " | ";
+			outputString += " --file-filter='" + str + "|";
 		} 
 		else 
 		{
@@ -1292,41 +1292,40 @@ std::string zenityFilter(std::string input)
 		index++;
 	}
 
-	std::replace(outputString.begin(), outputString.end(), ';', ' ');
-
 	return outputString;
 }
 
 
-std::string kdialogFilter(std::string input)
+static std::string kdialogFilter(std::string input)
 {
-	input.resize(input.find("|", input.find("|") + 1));
+	std::replace(input.begin(), input.end(), ';', ' ');
 	std::vector<std::string> stringVec = SplitString(input, '|');
+	std::string outputString = " \"";
 
-	std::string outputString = "";
+	std::string even = "";
+	std::string odd = "";
 
 	unsigned int index = 0;
 	for (const std::string &str : stringVec)
 	{
-		if (index % 2 == 0)
+		if (index % 2 != 0) 
 		{
-			outputString += str + "\"";
-        	}
-		else
+			if (index == 1)
+				odd = str;
+			else
+				odd = "\n" + str;
+
+			outputString += odd + even;
+		}
+		else 
 		{
-			outputString += " \"" + str + " | ";
+			even = "|" + str;
 		}
 
 		index++;
 	}
 
-	std::replace(outputString.begin(), outputString.end(), ';', ' ');
-
-	std::string part1 = outputString.substr(outputString.find("\"") + 1);
-	std::string part2 = outputString.substr(0, outputString.find("\"") + 1);
-
-	outputString = part1 + part2;
-
+	outputString += "\"";
 	return outputString;
 }
 
@@ -1419,12 +1418,11 @@ char const * tinyfd_saveFileDialog(
                         strcat(lDialogString, " --attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)"); /* contribution: Paul Rouget */
                 }
                 strcat( lDialogString , " --getsavefilename /" ) ;
-		/*
                 if ( aDefaultPathAndFile && strlen(aDefaultPathAndFile) )
                 {
                         if ( aDefaultPathAndFile[0] != '/' )
                         {
-                                strcat(lDialogString, "$PWD/") ;
+                                strcat(lDialogString, "\"$PWD/\"") ;
                         }
                         strcat(lDialogString, "\"") ;
                         strcat(lDialogString, aDefaultPathAndFile ) ;
@@ -1432,9 +1430,8 @@ char const * tinyfd_saveFileDialog(
                 }
                 else
                 {
-                        strcat(lDialogString, "$PWD/") ;
+                        strcat(lDialogString, "\"$PWD/\"") ;
                 }
-		*/
                 if ( aNumOfFilterPatterns > 0 )
                 {
                         strcat( lDialogString , (char *)kdialogFilter(aSingleFilterDescription).c_str() ) ;
@@ -1608,12 +1605,11 @@ char const * tinyfd_openFileDialog(
                         strcat(lDialogString, " --attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)"); /* contribution: Paul Rouget */
                 }
                 strcat( lDialogString , " --getopenfilename /" ) ;
-		/*
                 if ( aDefaultPathAndFile && strlen(aDefaultPathAndFile) )
                 {
                         if ( aDefaultPathAndFile[0] != '/' )
                         {
-                                strcat(lDialogString, "$PWD/") ;
+                                strcat(lDialogString, "\"$PWD/\"") ;
                         }
                         strcat(lDialogString, "\"") ;
                         strcat(lDialogString, aDefaultPathAndFile ) ;
@@ -1621,9 +1617,8 @@ char const * tinyfd_openFileDialog(
                 }
                 else
                 {
-                        strcat(lDialogString, "$PWD/") ;
+                        strcat(lDialogString, "\"$PWD/\"") ;
                 }
-		*/
                 if ( aNumOfFilterPatterns > 0 )
                 {
                         strcat( lDialogString , (char *)kdialogFilter(aSingleFilterDescription).c_str() ) ;
@@ -1755,12 +1750,11 @@ char const * tinyfd_selectFolderDialog(
                         strcat(lDialogString, " --attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)"); /* contribution: Paul Rouget */
                 }
                 strcat( lDialogString , " --getexistingdirectory /" ) ;
-		/*
                 if ( aDefaultPath && strlen(aDefaultPath) )
                 {
                         if ( aDefaultPath[0] != '/' )
                         {
-                                strcat(lDialogString, "$PWD/") ;
+                                strcat(lDialogString, "\"$PWD/\"") ;
                         }
                         strcat(lDialogString, "\"") ;
                         strcat(lDialogString, aDefaultPath ) ;
@@ -1768,9 +1762,8 @@ char const * tinyfd_selectFolderDialog(
                 }
                 else
                 {
-                        strcat(lDialogString, "$PWD/") ;
+                        strcat(lDialogString, "\"$PWD/\"") ;
                 }
-		*/
                 if ( aTitle && strlen(aTitle) )
                 {
                         strcat(lDialogString, " --title \"") ;
