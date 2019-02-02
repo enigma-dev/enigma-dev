@@ -535,6 +535,71 @@ static int osx9orBetter( )
 }
 
 
+static void AddAppBundleIcon(char * lDialogString)
+{
+	std::string cmd1 = "";
+	cmd1 += "osascript -e \"tell application \\\"Finder\\\"\" ";
+	cmd1 += "-e \"set appPath to POSIX path of (path to frontmost application)\" ";
+	cmd1 += "-e \"set resourcesPath to appPath & \\\"Contents/Info.plist\\\"\" ";
+	cmd1 += "-e \"end tell\" ";
+                    
+	FILE *file1 = popen(cmd1.c_str(), "r");
+	char plist[260];
+	fgets(plist, 260, file1);
+	pclose(file1);
+                    
+	if (plist[strlen(plist) - 1] == '\n')
+		plist[strlen(plist) - 1] = '\0';
+                    
+	std::string cmd2 = "";
+	cmd2 += "defaults read \"";
+	cmd2 += plist;
+	cmd2 += "\" CFBundleIconFile";
+                    
+	FILE *file2 = popen(cmd2.c_str(), "r");
+	char icon[260];
+	fgets(icon, 260, file2);
+	pclose(file2);
+                    
+	if (icon[strlen(icon) - 1] == '\n')
+		icon[strlen(icon) - 1] = '\0';
+                    
+	std::string cmd3 = "";
+	cmd3 += "osascript -e \"tell application \\\"Finder\\\"\" ";
+	cmd3 += "-e \"set appPath to POSIX path of (path to frontmost application)\" ";
+	cmd3 += "-e \"set resourcesPath to appPath & \\\"Contents/Resources/\\\"\" ";
+	cmd3 += "-e \"end tell\" ";
+                    
+	FILE *file3 = popen(cmd3.c_str(), "r");
+	char path[260];
+	fgets(path, 260, file3);
+	pclose(file3);
+                    
+	if (path[strlen(path) - 1] == '\n')
+		path[strlen(path) - 1] = '\0';
+                    
+	std::string iconpath = "";
+	iconpath += path;
+	iconpath += icon;
+                    
+	std::string ext = ".icns";
+	if (iconpath.length() >= ext.length())
+	{
+		if (0 != iconpath.compare(iconpath.length() - ext.length(), ext.length(), ext))
+			iconpath += ext;
+	}
+                    
+	if ( !fileExists(iconpath.c_str()) )
+		strcat(lDialogString, "with icon note " ) ;
+	else
+	{
+		strcat(lDialogString, "with icon POSIX file \\\"");
+		strcat(lDialogString, iconpath.c_str());
+		strcat(lDialogString, "\\\" ");
+	}
+}
+
+
 int tinyfd_messageBox(
         char const * const aTitle , /* NULL or "" */
         char const * const aMessage , /* NULL or ""  may contain \n and \t */
@@ -577,18 +642,17 @@ int tinyfd_messageBox(
                         strcat(lDialogString, aTitle) ;
                         strcat(lDialogString, "\\\" ") ;
                 }
-                strcat(lDialogString, "with icon ") ;
                 if ( aIconType && ! strcmp( "error" , aIconType ) )
                 {
-                        strcat(lDialogString, "stop " ) ;
+                        strcat(lDialogString, "with icon stop " ) ;
                 }
                 else if ( aIconType && ! strcmp( "warning" , aIconType ) )
                 {
-                        strcat(lDialogString, "caution " ) ;
+                        strcat(lDialogString, "with icon caution " ) ;
                 }
                 else /* question or info */
                 {
-                        strcat(lDialogString, "note " ) ;
+			AddAppBundleIcon(lDialogString);
                 }
                 if ( aDialogType && ! strcmp( "okcancel" , aDialogType ) )
                 {
@@ -867,7 +931,8 @@ char const * tinyfd_inputBox(
                         strcat(lDialogString, aTitle) ;
                         strcat(lDialogString, "\\\" ") ;
                 }
-                strcat(lDialogString, "with icon note\" ") ;
+		AddAppBundleIcon(lDialogString);
+		strcat(lDialogString, "\" ");            
                 strcat(lDialogString, "-e \"\\\"1\\\" & text returned of result\" " );
                 strcat(lDialogString, "-e \"on error number -128\" " ) ;
                 strcat(lDialogString, "-e \"0\" " );
@@ -1045,16 +1110,15 @@ char const * tinyfd_passwordBox(
                         strcat(lDialogString, aDefaultInput) ;
                 }
                 strcat(lDialogString, "\\\" ") ;
-
                 strcat(lDialogString, "hidden answer true ") ;
-
                 if ( aTitle && strlen(aTitle) )
                 {
                         strcat(lDialogString, "with title \\\"") ;
                         strcat(lDialogString, aTitle) ;
                         strcat(lDialogString, "\\\" ") ;
                 }
-                strcat(lDialogString, "with icon note\" ") ;
+		AddAppBundleIcon(lDialogString);
+		strcat(lDialogString, "\" ");            
                 strcat(lDialogString, "-e \"\\\"1\\\" & text returned of result\" " );
                 strcat(lDialogString, "-e \"on error number -128\" " ) ;
                 strcat(lDialogString, "-e \"0\" " );
@@ -1194,69 +1258,75 @@ char const * tinyfd_passwordBox(
 }
 
 
-std::vector<std::string> SplitString(const std::string &str, char delimiter) {
-    std::vector<std::string> vec;
-    std::stringstream sstr(str);
-    std::string tmp;
-    while (std::getline(sstr, tmp, delimiter)) vec.push_back(tmp);
+static std::vector<std::string> SplitString(const std::string &str, char delimiter)
+{
+	std::vector<std::string> vec;
+	std::stringstream sstr(str);
+	std::string tmp;
 
-    return vec;
+	while (std::getline(sstr, tmp, delimiter))
+		vec.push_back(tmp);
+
+	return vec;
 }
 
 
-std::string zenityFilter(std::string input) {
+static std::string zenityFilter(std::string input)
+{
+	std::replace(input.begin(), input.end(), ';', ' ');
+	std::vector<std::string> stringVec = SplitString(input, '|');
+	std::string outputString = "";
 
-    std::vector<std::string> stringVec = SplitString(input, '|'); //split at delimeter
+	unsigned int index = 0;
+	for (const std::string &str : stringVec)
+	{
+		if (index % 2 == 0) 
+		{
+			outputString += " --file-filter='" + str + "|";
+		} 
+		else 
+		{
+			outputString += str + "'";
+		}
 
-    std::string outputString = "";
+		index++;
+	}
 
-    unsigned int index = 0;
-    for (const std::string &str : stringVec) { //loops our array
-
-        if (index % 2 == 0) { //code for even |
-            outputString += " --file-filter='" + str + " | "; //concat string
-        } else { //code for odd |
-            outputString += str + "'"; //concat string
-        }
-
-        index++;
-    }
-
-    std::replace(outputString.begin(), outputString.end(), ';', ' ');
-
-    return outputString;
-
+	return outputString;
 }
 
 
-std::string kdialogFilter(std::string input) {
+static std::string kdialogFilter(std::string input)
+{
+	std::replace(input.begin(), input.end(), ';', ' ');
+	std::vector<std::string> stringVec = SplitString(input, '|');
+	std::string outputString = " \"";
 
-    input.resize(input.find("|", input.find("|") + 1));
-    std::vector<std::string> stringVec = SplitString(input, '|'); //split at delimeter
+	std::string even = "";
+	std::string odd = "";
 
-    std::string outputString = "";
+	unsigned int index = 0;
+	for (const std::string &str : stringVec)
+	{
+		if (index % 2 != 0) 
+		{
+			if (index == 1)
+				odd = str;
+			else
+				odd = "\n" + str;
 
-    unsigned int index = 0;
-    for (const std::string &str : stringVec) { //loops our array
+			outputString += odd + even;
+		}
+		else 
+		{
+			even = "|" + str;
+		}
 
-        if (index % 2 == 0) { //code for even |
-            outputString += str + "\""; //concat string
-        } else { //code for odd |
-            outputString += " \"" + str + " | "; //concat string
-        }
+		index++;
+	}
 
-        index++;
-    }
-
-    std::replace(outputString.begin(), outputString.end(), ';', ' ');
-
-    std::string part1 = outputString.substr(outputString.find("\"") + 1);
-    std::string part2 = outputString.substr(0, outputString.find("\"") + 1);
-
-    outputString = part1 + part2;
-
-    return outputString;
-
+	outputString += "\"";
+	return outputString;
 }
 
 
@@ -1348,12 +1418,11 @@ char const * tinyfd_saveFileDialog(
                         strcat(lDialogString, " --attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)"); /* contribution: Paul Rouget */
                 }
                 strcat( lDialogString , " --getsavefilename /" ) ;
-		/*
                 if ( aDefaultPathAndFile && strlen(aDefaultPathAndFile) )
                 {
                         if ( aDefaultPathAndFile[0] != '/' )
                         {
-                                strcat(lDialogString, "$PWD/") ;
+                                strcat(lDialogString, "\"$PWD/\"") ;
                         }
                         strcat(lDialogString, "\"") ;
                         strcat(lDialogString, aDefaultPathAndFile ) ;
@@ -1361,9 +1430,8 @@ char const * tinyfd_saveFileDialog(
                 }
                 else
                 {
-                        strcat(lDialogString, "$PWD/") ;
+                        strcat(lDialogString, "\"$PWD/\"") ;
                 }
-		*/
                 if ( aNumOfFilterPatterns > 0 )
                 {
                         strcat( lDialogString , (char *)kdialogFilter(aSingleFilterDescription).c_str() ) ;
@@ -1537,12 +1605,11 @@ char const * tinyfd_openFileDialog(
                         strcat(lDialogString, " --attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)"); /* contribution: Paul Rouget */
                 }
                 strcat( lDialogString , " --getopenfilename /" ) ;
-		/*
                 if ( aDefaultPathAndFile && strlen(aDefaultPathAndFile) )
                 {
                         if ( aDefaultPathAndFile[0] != '/' )
                         {
-                                strcat(lDialogString, "$PWD/") ;
+                                strcat(lDialogString, "\"$PWD/\"") ;
                         }
                         strcat(lDialogString, "\"") ;
                         strcat(lDialogString, aDefaultPathAndFile ) ;
@@ -1550,9 +1617,8 @@ char const * tinyfd_openFileDialog(
                 }
                 else
                 {
-                        strcat(lDialogString, "$PWD/") ;
+                        strcat(lDialogString, "\"$PWD/\"") ;
                 }
-		*/
                 if ( aNumOfFilterPatterns > 0 )
                 {
                         strcat( lDialogString , (char *)kdialogFilter(aSingleFilterDescription).c_str() ) ;
@@ -1684,12 +1750,11 @@ char const * tinyfd_selectFolderDialog(
                         strcat(lDialogString, " --attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)"); /* contribution: Paul Rouget */
                 }
                 strcat( lDialogString , " --getexistingdirectory /" ) ;
-		/*
                 if ( aDefaultPath && strlen(aDefaultPath) )
                 {
                         if ( aDefaultPath[0] != '/' )
                         {
-                                strcat(lDialogString, "$PWD/") ;
+                                strcat(lDialogString, "\"$PWD/\"") ;
                         }
                         strcat(lDialogString, "\"") ;
                         strcat(lDialogString, aDefaultPath ) ;
@@ -1697,9 +1762,8 @@ char const * tinyfd_selectFolderDialog(
                 }
                 else
                 {
-                        strcat(lDialogString, "$PWD/") ;
+                        strcat(lDialogString, "\"$PWD/\"") ;
                 }
-		*/
                 if ( aTitle && strlen(aTitle) )
                 {
                         strcat(lDialogString, " --title \"") ;
