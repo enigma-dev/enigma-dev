@@ -27,6 +27,7 @@
 #include <map>
 #include <set>
 
+#include <Storage/definition.h>
 #include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "frontend.h"
@@ -63,6 +64,38 @@ struct language_adapter {
   // Big things
   virtual syntax_error* definitionsModified(const char*, const char*) = 0;
   virtual int compile(const GameData &game, const char* exe_filename, int mode) = 0;
+  
+  // ===============================================================================================
+  // == Language Integration =======================================================================
+  // ===============================================================================================
+  
+  /// Look up a type by its name.
+  jdi::definition* find_typename(string name);
+
+  // Returns the index at which a function parameters ref_stack is variadic;
+  // that is, at which position it accepts `enigma::varargs`.
+  virtual int referencers_varargs_at(jdi::ref_stack &refs) = 0;
+  virtual bool referencers_varargs(jdi::ref_stack &refs) = 0;
+
+  //v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@
+  // FIXME: JDI has leaked into all languages. I've moved that leak here, into the light.  X
+  //^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@
+  
+  /// Check whether the given definition is callable as a function.
+  virtual bool definition_is_function(jdi::definition *d) = 0;
+  /// Assuming this definition is a function, retrieve the number of overloads it has.
+  virtual size_t definition_overload_count(jdi::definition *d) = 0;
+  /// Read parameter bounds from the current definition into args min and max. For variadics, max = unsigned(-1).
+  virtual void definition_parameter_bounds(jdi::definition *d, unsigned &min, unsigned &max) = 0;
+  /// Create a script with the given name (and an assumed 16 parameters, all defaulted) to the given scope.
+  virtual void quickmember_script(jdi::definition_scope* scope, string name) = 0;
+  /// Create a standard integer variable member in the given scope.
+  virtual void quickmember_integer(jdi::definition_scope* scope, string name) = 0;
+
+  bool is_variadic_function(jdi::definition *d) {
+    return definition_is_function(d)
+        && referencers_varargs(((jdi::definition_function*)d)->referencers);
+  }
 
   virtual ~language_adapter();
 };

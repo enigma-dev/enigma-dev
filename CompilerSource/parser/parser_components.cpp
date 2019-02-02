@@ -38,8 +38,6 @@ using namespace std;
 #include "compiler/output_locals.h"
 #include "languages/language_adapter.h"
 
-#include <compiler/jdi_utility.h>
-
 #include "settings.h"
 
 
@@ -163,7 +161,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       {
         if (d->flags & jdi::DEF_TYPENAME)
           c = 't';
-        else if (d->flags & jdi::DEF_FUNCTION and referencers_varargs(((jdi::definition_function*)d)->referencers))
+        else if (current_language->is_variadic_function(d))
           c = 'V', cprime = 'n';
       }
       else if (name == "then")
@@ -402,7 +400,7 @@ int parser_reinterpret(string &code,string &synt)
       while ((synt[pos] = 'n', synt[++pos] == 'V'));
       jdi::definition_function *d = (jdi::definition_function*)main_context->get_global()->look_up(code.substr(spos,pos-spos));
       const pt epos = pos;
-      int en = referencers_varargs_at(d->referencers);
+      int en = current_language->referencers_varargs_at(d->referencers);
       if (en == -1) continue;
       cout << "AND EN = " << en  << endl;
       ++pos; for (unsigned lvl = 1; en and lvl; pos++)
