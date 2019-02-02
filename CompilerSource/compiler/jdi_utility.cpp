@@ -58,7 +58,7 @@ static void iterate_overloads(
 }
 
 int lang_CPP::referencers_varargs_at(ref_stack &refs) {
-  if (refs.top().type != ref_stack::RT_FUNCTION)
+  if (refs.empty() || refs.top().type != ref_stack::RT_FUNCTION)
     return -1;
   ref_stack::parameter_ct &params = ((ref_stack::node_func*)&refs.top())->params;
   for (size_t i = 0; i < params.size(); ++i)
