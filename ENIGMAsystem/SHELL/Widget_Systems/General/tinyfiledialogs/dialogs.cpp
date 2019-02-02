@@ -144,6 +144,17 @@ static inline string detect_all_files_filter(string filter) {
   return filter;
 }
 
+/* I know you guys don't like using platform macros; I'm ok with alternative ways to do this
+just let me know what you would rather me do and I'll change it accordingly. Thank you!!! */
+static inline void window_activate() {
+  #ifdef __APPLE__
+  if (tfd_DialogEngine == tfd_OsaScript) {
+    void cocoa_window_activate();
+    cocoa_window_activate();
+  }
+  #endif
+}
+
 static inline string get_open_filename_helper(string filter, string fname, string dir, string title, int const mselect) {
   string fname_or_dir;
 
@@ -218,13 +229,15 @@ void show_error(string errortext, const bool fatal) {
 
   msg = tfd_add_escaping(msg);
 
+  window_activate();
+
   if (fatal == 0) {
     msg = msg + "Do you want to abort the application?";
 
-  double input = tinyfd_messageBox("Error", msg.c_str(), "yesno", "error", 1, tfd_DialogEngine());
+    double input = tinyfd_messageBox("Error", msg.c_str(), "yesno", "error", 1, tfd_DialogEngine());
 
-  if (input == 1)
-    exit(0);
+    if (input == 1)
+      exit(0);
   } else {
     msg = msg + "Click 'OK' to abort the application.";
 
@@ -260,6 +273,8 @@ int show_message(const string &str) {
   msg = tfd_add_escaping(msg);
   caption = tfd_add_escaping(caption);
 
+  window_activate();
+
   tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1, tfd_DialogEngine());
 
   return 1;
@@ -283,6 +298,8 @@ bool show_question(string str) {
   msg = tfd_add_escaping(msg);
   caption = tfd_add_escaping(caption);
 
+  window_activate();
+
   return tinyfd_messageBox(caption.c_str(), msg.c_str(), "yesno", "question", 1, tfd_DialogEngine());
 }
 
@@ -304,6 +321,8 @@ string get_string(string str, string def) {
   msg = tfd_add_escaping(msg);
   def = tfd_add_escaping(def);
   caption = tfd_add_escaping(caption);
+
+  window_activate();
 
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), def.c_str(), tfd_DialogEngine());
 
@@ -328,6 +347,8 @@ string get_password(string str, string def) {
   msg = tfd_add_escaping(msg);
   def = tfd_add_escaping(def);
   caption = tfd_add_escaping(caption);
+
+  window_activate();
 
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), def.c_str(), tfd_DialogEngine());
 
@@ -356,6 +377,8 @@ double get_integer(string str, double def) {
   msg = tfd_add_escaping(msg);
   caption = tfd_add_escaping(caption);
 
+  window_activate();
+
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
 
   return input ? strtod(input, NULL) : 0;
@@ -382,6 +405,8 @@ double get_passcode(string str, double def) {
 
   msg = tfd_add_escaping(msg);
   caption = tfd_add_escaping(caption);
+
+  window_activate();
 
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
 
