@@ -72,6 +72,20 @@ static inline void window_activate() {
   #endif
 }
 
+string tfd_add_escaping(string str) {
+  string result;
+
+  if (tfd_DialogEngine() == tfd_OsaScript)
+    result = string_replace_all(str, "\"", "\\\\\\\"");
+  else
+    result = string_replace_all(str, "\"", "\\\"");
+
+  if (tfd_DialogEngine() == tfd_Zenity)
+    result = string_replace_all(str, "_", "__");
+
+  return result;
+}
+
 static inline string message_helper(string str) {
   msg = tfd_add_escaping(msg);
   caption = tfd_add_escaping(caption);
@@ -137,20 +151,6 @@ class FileFilter {
   const char* const* const* patterns() { return cpatterns_.data(); }
   const int* pattern_counts() { return pattern_counts_.data(); }
 };
-
-static inline string tfd_add_escaping(string str) {
-  string result;
-
-  if (tfd_DialogEngine() == tfd_OsaScript)
-    result = string_replace_all(str, "\"", "\\\\\\\"");
-  else
-    result = string_replace_all(str, "\"", "\\\"");
-
-  if (tfd_DialogEngine() == tfd_Zenity)
-    result = string_replace_all(str, "_", "__");
-
-  return result;
-}
 
 static inline string detect_all_files_filter(string filter) {
   if (tfd_DialogEngine() == tfd_OsaScript) {
