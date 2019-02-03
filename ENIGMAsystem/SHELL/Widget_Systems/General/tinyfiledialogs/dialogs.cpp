@@ -94,10 +94,10 @@ static inline string message_helper(string str) {
 }
 
 static inline string caption_helper(string capt) {
-  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
-    caption = " ";
-  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
-    caption = "KDialog";
+  if (capt == "" && tfd_DialogEngine() == tfd_Zenity)
+    capt = " ";
+  else if (capt == "" && tfd_DialogEngine() == tfd_KDialog)
+    capt = "KDialog";
   
   window_activate();
   return capt;
