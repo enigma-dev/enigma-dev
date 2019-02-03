@@ -101,21 +101,6 @@ static inline string message_helper(string str) {
   return str;
 }
 
-static inline string message_helper_const(const string &str) {
-  msg = tfd_add_escaping(msg);
-  caption = tfd_add_escaping(caption);
-  
-  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
-    caption = " ";
-  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
-    caption = "KDialog";
-  
-  if (str == "") msg = " "; else msg = str;
-  window_activate();
-  
-  return str;
-}
-
 class FileFilter {
   std::string filter_buf;
   std::vector<const char*> descriptions_;
@@ -296,7 +281,16 @@ void show_info(string text, int bgcolor, int left, int top, int width, int heigh
 
 int show_message(const string &str) {
   caption = window_get_caption();
-  str = message_helper(str);
+  msg = tfd_add_escaping(msg);
+  caption = tfd_add_escaping(caption);
+  
+  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
+    caption = " ";
+  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
+    caption = "KDialog";
+  
+  if (str == "") msg = " "; else msg = str;
+  window_activate();
   tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1, tfd_DialogEngine());
   return 1;
 }
