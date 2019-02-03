@@ -108,12 +108,12 @@ void d3d_start()
 
 void d3d_end()
 {
-    draw_batch_flush(batch_flush_deferred);
-	enigma::d3dMode = false;
-    enigma::d3dPerspective = false;
-	enigma::d3dCulling = rs_none;
-    d3dmgr->SetRenderState(D3DRS_NORMALIZENORMALS, FALSE);
-	d3d_set_hidden(false);
+  draw_batch_flush(batch_flush_deferred);
+  enigma::d3dMode = false;
+  enigma::d3dPerspective = false;
+  enigma::d3dCulling = rs_none;
+  d3dmgr->SetRenderState(D3DRS_NORMALIZENORMALS, FALSE);
+  d3d_set_hidden(false);
 }
 
 void d3d_set_software_vertex_processing(bool software) {
