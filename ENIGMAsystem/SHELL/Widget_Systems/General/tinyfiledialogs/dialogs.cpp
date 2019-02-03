@@ -89,16 +89,18 @@ static inline string tfd_add_escaping(string str) {
 static inline string message_helper(string str) {
   msg = tfd_add_escaping(msg);
   caption = tfd_add_escaping(caption);
-  
+  if (str == "") msg = " "; else msg = str;
+  return str;
+}
+
+static inline string caption_helper(string capt) {
   if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
     caption = " ";
   else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
     caption = "KDialog";
   
-  if (str == "") msg = " "; else msg = str;
   window_activate();
-  
-  return str;
+  return capt;
 }
 
 class FileFilter {
@@ -283,14 +285,8 @@ int show_message(const string &str) {
   caption = window_get_caption();
   msg = tfd_add_escaping(msg);
   caption = tfd_add_escaping(caption);
-  
-  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
-    caption = " ";
-  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
-    caption = "KDialog";
-  
   if (str == "") msg = " "; else msg = str;
-  window_activate();
+  caption = caption_helper(caption);
   tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1, tfd_DialogEngine());
   return 1;
 }
@@ -298,12 +294,14 @@ int show_message(const string &str) {
 bool show_question(string str) {
   caption = window_get_caption();
   str = message_helper(str);
+  caption = caption_helper(caption);
   return tinyfd_messageBox(caption.c_str(), msg.c_str(), "yesno", "question", 1, tfd_DialogEngine());
 }
 
 string get_string(string str, string def) {
-  string caption = window_get_caption();
+  caption = window_get_caption();
   str = message_helper(str);
+  caption = caption_helper(caption);
   def = tfd_add_escaping(def);
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), def.c_str(), tfd_DialogEngine());
   return input ? : "";
@@ -312,22 +310,25 @@ string get_string(string str, string def) {
 string get_password(string str, string def) {
   caption = window_get_caption();
   str = message_helper(str);
+  caption = caption_helper(caption);
   def = tfd_add_escaping(def);
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), def.c_str(), tfd_DialogEngine());
   return input ? : "";
 }
 
 double get_integer(string str, double def) {
-  string caption = window_get_caption();
+  caption = window_get_caption();
   str = message_helper(str);
+  caption = caption_helper(caption);
   string integer = remove_trailing_zeros(def);
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
   return input ? strtod(input, NULL) : 0;
 }
 
 double get_passcode(string str, double def) {
-  string caption = window_get_caption();
+  caption = window_get_caption();
   str = message_helper(str);
+  caption = caption_helper(caption);
   string integer = remove_trailing_zeros(def);
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
   return input ? strtod(input, NULL) : 0;
