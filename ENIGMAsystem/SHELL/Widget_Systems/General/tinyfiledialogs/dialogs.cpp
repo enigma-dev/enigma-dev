@@ -54,6 +54,22 @@ bool widget_system_initialize() {
   
 } // namespave enigma
 
+static inline msg;
+static inline caption;
+
+static inline void message_helper() {
+  msg = tfd_add_escaping(msg);
+  caption = tfd_add_escaping(caption);
+  
+  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
+    caption = " ";
+  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
+    caption = "KDialog";
+  
+  if (str == "") msg = " "; else msg = str;
+  window_activate();
+}
+
 class FileFilter {
   std::string filter_buf;
   std::vector<const char*> descriptions_;
@@ -155,6 +171,17 @@ static inline void window_activate() {
   #endif
 }
 
+static inline string remove_trailing_zeros(double numb) {
+  string strnumb = std::to_string(numb);
+
+  if (numb >= -999999999999999 && numb <= 999999999999999) {
+    while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
+      strnumb.pop_back();
+  }
+
+  return strnumb;
+}
+
 static inline string get_open_filename_helper(string filter, string fname, string dir, string title, int const mselect) {
   string fname_or_dir;
 
@@ -175,11 +202,7 @@ static inline string get_open_filename_helper(string filter, string fname, strin
 
   string titlebar;
 
-  if (title == "")
-    titlebar = "Open";
-  else
-    titlebar = title;
-
+  if (title == "") titlebar = "Open"; else titlebar = title;
   fname_or_dir = tfd_add_escaping(fname_or_dir);
   titlebar = tfd_add_escaping(titlebar);
   filter = tfd_add_escaping(filter);
@@ -199,11 +222,9 @@ static inline int get_color_helper(int defcol, string title) {
   rescol[1] = (defcol >> 8) & 0xFF;
   rescol[2] = (defcol >> 16) & 0xFF;
 
-  if (title == "")
-    title = "Color";
-
+  if (title == "") title = "Color";
   title = tfd_add_escaping(title);
-
+  
   if (tinyfd_colorChooser(title.c_str(), NULL, rescol, rescol, tfd_DialogEngine()) == NULL)
     return -1;
 
@@ -233,16 +254,13 @@ void show_error(string errortext, const bool fatal) {
 
   if (fatal == 0) {
     msg = msg + "Do you want to abort the application?";
-
     double input = tinyfd_messageBox("Error", msg.c_str(), "yesno", "error", 1, tfd_DialogEngine());
 
     if (input == 1)
       exit(0);
   } else {
     msg = msg + "Click 'OK' to abort the application.";
-
     tinyfd_messageBox("Error", msg.c_str(), "ok", "error", 1, tfd_DialogEngine());
-
     exit(0);
   }
 }
@@ -256,160 +274,47 @@ void show_info(string text, int bgcolor, int left, int top, int width, int heigh
 }
 
 int show_message(const string &str) {
-  string caption = window_get_caption();
-
-  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
-    caption = " ";
-  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
-    caption = "KDialog";
-
-  string msg;
-
-  if (str == "")
-    msg = " ";
-  else
-    msg = str;
-
-  msg = tfd_add_escaping(msg);
-  caption = tfd_add_escaping(caption);
-
-  window_activate();
-
+  caption = window_get_caption();
+  message_helper();
   tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1, tfd_DialogEngine());
-
   return 1;
 }
 
 bool show_question(string str) {
-  string caption = window_get_caption();
-
-  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
-    caption = " ";
-  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
-    caption = "KDialog";
-
-    string msg;
-
-  if (str == "")
-    msg = " ";
-  else
-    msg = str;
-
-  msg = tfd_add_escaping(msg);
-  caption = tfd_add_escaping(caption);
-
-  window_activate();
-
+  caption = window_get_caption();
+  message_helper();
   return tinyfd_messageBox(caption.c_str(), msg.c_str(), "yesno", "question", 1, tfd_DialogEngine());
 }
 
 string get_string(string str, string def) {
   string caption = window_get_caption();
-
-  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
-    caption = " ";
-  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
-    caption = "KDialog";
-
-  string msg;
-
-  if (str == "")
-    msg = " ";
-  else
-    msg = str;
-
-  msg = tfd_add_escaping(msg);
+  message_helper();
   def = tfd_add_escaping(def);
-  caption = tfd_add_escaping(caption);
-
-  window_activate();
-
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), def.c_str(), tfd_DialogEngine());
-
   return input ? : "";
 }
 
 string get_password(string str, string def) {
-  string caption = window_get_caption();
-
-  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
-    caption = " ";
-  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
-    caption = "KDialog";
-
-  string msg;
-
-  if (str == "")
-    msg = " ";
-  else
-    msg = str;
-
-  msg = tfd_add_escaping(msg);
+  caption = window_get_caption();
+  message_helper();
   def = tfd_add_escaping(def);
-  caption = tfd_add_escaping(caption);
-
-  window_activate();
-
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), def.c_str(), tfd_DialogEngine());
-
   return input ? : "";
 }
 
 double get_integer(string str, double def) {
   string caption = window_get_caption();
-
-  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
-    caption = " ";
-  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
-    caption = "KDialog";
-
-  std::ostringstream def_integer;
-  def_integer << def;
-  string integer = def_integer.str();
-
-  string msg;
-
-  if (str == "")
-    msg = " ";
-  else
-    msg = str;
-
-  msg = tfd_add_escaping(msg);
-  caption = tfd_add_escaping(caption);
-
-  window_activate();
-
+  message_helper();
+  string integer = remove_trailing_zeros(def);
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
-
   return input ? strtod(input, NULL) : 0;
 }
 
 double get_passcode(string str, double def) {
   string caption = window_get_caption();
-
-  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
-    caption = " ";
-  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
-    caption = "KDialog";
-
-  std::ostringstream def_integer;
-  def_integer << def;
-  string integer = def_integer.str();
-
-  string msg;
-
-  if (str == "")
-    msg = " ";
-  else
-    msg = str;
-
-  msg = tfd_add_escaping(msg);
-  caption = tfd_add_escaping(caption);
-
-  window_activate();
-
+  message_helper();
+  string integer = remove_trailing_zeros(def);
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
-
   return input ? strtod(input, NULL) : 0;
 }
 
@@ -443,7 +348,6 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
   string fname_or_dir;
-    
   string str_fname = fname;
   string str_dir;
     
@@ -460,12 +364,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
     fname_or_dir = fname;
 
   string titlebar;
-
-  if (title == "")
-    titlebar = "Save As";
-  else
-    titlebar = title;
-
+  if (title == "") titlebar = "Save As"; else titlebar = title;
   fname_or_dir = tfd_add_escaping(fname_or_dir);
   titlebar = tfd_add_escaping(titlebar);
   filter = tfd_add_escaping(filter);
@@ -480,25 +379,16 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
 
 string get_directory(string dname) {
   dname = tfd_add_escaping(dname);
-  
   const char *path = tinyfd_selectFolderDialog("Select Directory", dname.c_str(), tfd_DialogEngine());
-  
   return path ? string_replace_all(string(path) + "/", "//", "/") : "";
 }
 
 string get_directory_alt(string capt, string root) {
   string titlebar;
-
-  if (capt == "")
-    titlebar = "Browse For Folder";
-  else
-    titlebar = capt;
-
   root = tfd_add_escaping(root);
   titlebar = tfd_add_escaping(titlebar);
-
+  if (capt == "") titlebar = "Browse For Folder"; else titlebar = capt;
   const char *path = tinyfd_selectFolderDialog(titlebar.c_str(), root.c_str(), tfd_DialogEngine());
-
   return path ? string_replace_all(string(path) + "/", "//", "/") : "";
 }
 
