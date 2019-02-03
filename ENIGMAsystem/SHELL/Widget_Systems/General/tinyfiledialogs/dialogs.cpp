@@ -54,8 +54,8 @@ bool widget_system_initialize() {
   
 } // namespave enigma
 
-static inline msg;
-static inline caption;
+static inline string msg;
+static inline string caption;
 
 static inline string message_helper(string str) {
   msg = tfd_add_escaping(msg);
