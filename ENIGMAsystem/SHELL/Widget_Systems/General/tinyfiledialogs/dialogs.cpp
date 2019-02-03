@@ -57,7 +57,7 @@ bool widget_system_initialize() {
 static inline msg;
 static inline caption;
 
-static inline void message_helper() {
+static inline string message_helper(string str) {
   msg = tfd_add_escaping(msg);
   caption = tfd_add_escaping(caption);
   
@@ -68,6 +68,8 @@ static inline void message_helper() {
   
   if (str == "") msg = " "; else msg = str;
   window_activate();
+  
+  return str;
 }
 
 class FileFilter {
@@ -275,20 +277,20 @@ void show_info(string text, int bgcolor, int left, int top, int width, int heigh
 
 int show_message(const string &str) {
   caption = window_get_caption();
-  message_helper();
+  str = message_helper(str);
   tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1, tfd_DialogEngine());
   return 1;
 }
 
 bool show_question(string str) {
   caption = window_get_caption();
-  message_helper();
+  str = message_helper(str);
   return tinyfd_messageBox(caption.c_str(), msg.c_str(), "yesno", "question", 1, tfd_DialogEngine());
 }
 
 string get_string(string str, string def) {
   string caption = window_get_caption();
-  message_helper();
+  str = message_helper(str);
   def = tfd_add_escaping(def);
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), def.c_str(), tfd_DialogEngine());
   return input ? : "";
@@ -296,7 +298,7 @@ string get_string(string str, string def) {
 
 string get_password(string str, string def) {
   caption = window_get_caption();
-  message_helper();
+  str = message_helper(str);
   def = tfd_add_escaping(def);
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), def.c_str(), tfd_DialogEngine());
   return input ? : "";
@@ -304,7 +306,7 @@ string get_password(string str, string def) {
 
 double get_integer(string str, double def) {
   string caption = window_get_caption();
-  message_helper();
+  str = message_helper(str);
   string integer = remove_trailing_zeros(def);
   const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
   return input ? strtod(input, NULL) : 0;
@@ -312,7 +314,7 @@ double get_integer(string str, double def) {
 
 double get_passcode(string str, double def) {
   string caption = window_get_caption();
-  message_helper();
+  str = message_helper(str);
   string integer = remove_trailing_zeros(def);
   const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str(), tfd_DialogEngine());
   return input ? strtod(input, NULL) : 0;
