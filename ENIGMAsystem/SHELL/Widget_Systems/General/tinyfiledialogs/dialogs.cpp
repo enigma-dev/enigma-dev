@@ -72,7 +72,7 @@ static inline void window_activate() {
   #endif
 }
 
-string tfd_add_escaping(string str) {
+static inline tring tfd_add_escaping(string str) {
   string result;
 
   if (tfd_DialogEngine() == tfd_OsaScript)
@@ -86,7 +86,22 @@ string tfd_add_escaping(string str) {
   return result;
 }
 
-static inline string message_helper(const string &str) {
+static inline string message_helper(string str) {
+  msg = tfd_add_escaping(msg);
+  caption = tfd_add_escaping(caption);
+  
+  if (caption == "" && tfd_DialogEngine() == tfd_Zenity)
+    caption = " ";
+  else if (caption == "" && tfd_DialogEngine() == tfd_KDialog)
+    caption = "KDialog";
+  
+  if (str == "") msg = " "; else msg = str;
+  window_activate();
+  
+  return str;
+}
+
+static inline string message_helper_const(const string &str) {
   msg = tfd_add_escaping(msg);
   caption = tfd_add_escaping(caption);
   
