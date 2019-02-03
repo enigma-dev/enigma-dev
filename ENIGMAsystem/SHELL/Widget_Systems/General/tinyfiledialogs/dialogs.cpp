@@ -72,7 +72,7 @@ static inline void window_activate() {
   #endif
 }
 
-static inline string message_helper(string str) {
+static inline string message_helper(const string &str) {
   msg = tfd_add_escaping(msg);
   caption = tfd_add_escaping(caption);
   
