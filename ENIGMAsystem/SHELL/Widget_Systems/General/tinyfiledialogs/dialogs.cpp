@@ -86,7 +86,7 @@ string tfd_add_escaping(string str) {
   return result;
 }
 
-static inline string message_helper(string str) {
+static inline string message_helper(const string &str) {
   msg = tfd_add_escaping(msg);
   caption = tfd_add_escaping(caption);
   
@@ -279,7 +279,7 @@ void show_info(string text, int bgcolor, int left, int top, int width, int heigh
 
 }
 
-int show_message(string str) {
+int show_message(const string &str) {
   caption = window_get_caption();
   str = message_helper(str);
   tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1, tfd_DialogEngine());
