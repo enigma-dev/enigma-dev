@@ -54,9 +54,6 @@ bool widget_system_initialize() {
   
 } // namespave enigma
 
-static string msg;
-static string caption;
-
 /* I know you guys don't like using platform macros; I'm ok with alternative ways to do this
 just let me know what you would rather me do and I'll change it accordingly. Thank you!!! */
 static inline void window_activate() {
