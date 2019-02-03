@@ -72,7 +72,7 @@ static inline void window_activate() {
   #endif
 }
 
-static inline tring tfd_add_escaping(string str) {
+static inline string tfd_add_escaping(string str) {
   string result;
 
   if (tfd_DialogEngine() == tfd_OsaScript)
