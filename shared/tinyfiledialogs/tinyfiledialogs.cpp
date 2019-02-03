@@ -201,7 +201,7 @@ static char * getLastName(
 }
 
 static void Hex2RGB( char const aHexRGB [8] ,
-                                         unsigned char aoResultRGB [3] )
+        unsigned char aoResultRGB [3] )
 {
         char lColorChannel [8] ;
         if ( aoResultRGB )
@@ -226,7 +226,7 @@ static void Hex2RGB( char const aHexRGB [8] ,
 }
 
 static void RGB2Hex( unsigned char const aRGB [3] ,
-                                         char aoResultHexRGB [8] )
+        char aoResultHexRGB [8] )
 {
         if ( aoResultHexRGB )
         {
@@ -424,7 +424,7 @@ static int zenityPresent( )
 }
 
 
-static int zenity3Present()
+static int zenity3Present( )
 {
         static int lZenity3Present = -1 ;
         char lBuff [MAX_PATH_OR_CMD] ;
