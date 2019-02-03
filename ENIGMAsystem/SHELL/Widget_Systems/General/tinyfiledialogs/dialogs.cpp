@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "dialogs.h" 
+#include "dialogs.h"
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
