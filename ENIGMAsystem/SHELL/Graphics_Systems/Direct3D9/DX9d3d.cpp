@@ -98,6 +98,7 @@ void d3d_start()
   d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
   d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
   d3dmgr->SetRenderState(D3DRS_ZENABLE, enigma::d3dHidden = true);
+  d3dmgr->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
 
   // Enable texture repetition by default
   d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
@@ -111,6 +112,7 @@ void d3d_end()
 	enigma::d3dMode = false;
     enigma::d3dPerspective = false;
 	enigma::d3dCulling = rs_none;
+    d3dmgr->SetRenderState(D3DRS_NORMALIZENORMALS, FALSE);
 	d3d_set_hidden(false);
 }
 
