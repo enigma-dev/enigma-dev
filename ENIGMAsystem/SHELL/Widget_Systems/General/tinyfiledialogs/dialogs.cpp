@@ -54,8 +54,19 @@ bool widget_system_initialize() {
   
 } // namespave enigma
 
-static inline string msg;
-static inline string caption;
+static string msg;
+static string caption;
+
+/* I know you guys don't like using platform macros; I'm ok with alternative ways to do this
+just let me know what you would rather me do and I'll change it accordingly. Thank you!!! */
+static inline void window_activate() {
+  #ifdef __APPLE__
+  if (tfd_DialogEngine == tfd_OsaScript) {
+    void cocoa_window_activate();
+    cocoa_window_activate();
+  }
+  #endif
+}
 
 static inline string message_helper(string str) {
   msg = tfd_add_escaping(msg);
@@ -160,17 +171,6 @@ static inline string detect_all_files_filter(string filter) {
   }
 
   return filter;
-}
-
-/* I know you guys don't like using platform macros; I'm ok with alternative ways to do this
-just let me know what you would rather me do and I'll change it accordingly. Thank you!!! */
-static inline void window_activate() {
-  #ifdef __APPLE__
-  if (tfd_DialogEngine == tfd_OsaScript) {
-    void cocoa_window_activate();
-    cocoa_window_activate();
-  }
-  #endif
 }
 
 static inline string remove_trailing_zeros(double numb) {
