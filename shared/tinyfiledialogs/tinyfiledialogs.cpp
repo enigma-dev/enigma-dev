@@ -315,7 +315,7 @@ static char const * ensureFilesExist(char * const aDestination,
         }
 
         p = aSourcePathsAndNames;
-        while ((p2 = strchr(p, '|')) != NULL)
+        while ((p2 = strchr(p, '\n')) != NULL)
         {
                 lLen = p2 - p;
                 memmove(lDestination, p, lLen);
@@ -323,7 +323,7 @@ static char const * ensureFilesExist(char * const aDestination,
                 if (fileExists(lDestination))
                 {
                         lDestination += lLen;
-                        *lDestination = '|';
+                        *lDestination = '\n';
                         lDestination++;
                 }
                 p = p2 + 1;
@@ -1652,8 +1652,6 @@ char const * tinyfd_openFileDialog(
         if ( lWasKdialog && aAllowMultipleSelects )
         {
                 p = lBuff ;
-                //while ( ( p = strchr( p , '\n' ) ) )
-                //        * p = '|' ;
         }
         /* printf( "lBuff2: %s\n" , lBuff ) ; */
         if ( ! strlen( lBuff )  )
