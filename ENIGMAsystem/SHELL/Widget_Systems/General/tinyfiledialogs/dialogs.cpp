@@ -182,10 +182,8 @@ static inline string detect_all_files_filter(string filter) {
 static inline string remove_trailing_zeros(double numb) {
   string strnumb = std::to_string(numb);
 
-  if (numb >= -999999999999999 && numb <= 999999999999999) {
-    while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-      strnumb.pop_back();
-  }
+  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
+    strnumb.pop_back();
 
   return strnumb;
 }
