@@ -99,13 +99,13 @@ misrepresented as being the original software.
 #include "tinyfiledialogs.h"
 /* #define TINYFD_NOLIB */
 
- #include <limits.h>
- #include <unistd.h>
- #include <dirent.h> /* on old systems try <sys/dir.h> instead */
- #include <termios.h>
- #include <sys/utsname.h>
- #include <signal.h> /* on old systems try <sys/signal.h> instead */
- #define SLASH "/"
+#include <limits.h>
+#include <unistd.h>
+#include <dirent.h> /* on old systems try <sys/dir.h> instead */
+#include <termios.h>
+#include <sys/utsname.h>
+#include <signal.h> /* on old systems try <sys/signal.h> instead */
+#define SLASH "/"
 
 #include <vector>
 #include <string>
@@ -201,7 +201,7 @@ static char * getLastName(
 }
 
 static void Hex2RGB( char const aHexRGB [8] ,
-                                         unsigned char aoResultRGB [3] )
+        unsigned char aoResultRGB [3] )
 {
         char lColorChannel [8] ;
         if ( aoResultRGB )
@@ -214,7 +214,7 @@ static void Hex2RGB( char const aHexRGB [8] ,
                         aoResultRGB[1] = (unsigned char)strtoul(lColorChannel+3,NULL,16);
                         lColorChannel[3] = '\0';
                         aoResultRGB[0] = (unsigned char)strtoul(lColorChannel+1,NULL,16);
-/* printf("%d %d %d\n", aoResultRGB[0], aoResultRGB[1], aoResultRGB[2]); */
+                        /* printf("%d %d %d\n", aoResultRGB[0], aoResultRGB[1], aoResultRGB[2]); */
                 }
                 else
                 {
@@ -226,7 +226,7 @@ static void Hex2RGB( char const aHexRGB [8] ,
 }
 
 static void RGB2Hex( unsigned char const aRGB [3] ,
-                                         char aoResultHexRGB [8] )
+        char aoResultHexRGB [8] )
 {
         if ( aoResultHexRGB )
         {
@@ -250,8 +250,8 @@ static void RGB2Hex( unsigned char const aRGB [3] ,
 static int filenameValid( char const * const aFileNameWithoutPath )
 {
         if ( ! aFileNameWithoutPath
-          || ! strlen(aFileNameWithoutPath)
-          || strpbrk(aFileNameWithoutPath , "\\/:*?\"<>|") )
+                || ! strlen(aFileNameWithoutPath)
+                || strpbrk(aFileNameWithoutPath , "\\/:*?\"<>|") )
         {
                 return 0 ;
         }
@@ -315,7 +315,7 @@ static char const * ensureFilesExist(char * const aDestination,
         }
 
         p = aSourcePathsAndNames;
-        while ((p2 = strchr(p, '|')) != NULL)
+        while ((p2 = strchr(p, '\n')) != NULL)
         {
                 lLen = p2 - p;
                 memmove(lDestination, p, lLen);
@@ -323,7 +323,7 @@ static char const * ensureFilesExist(char * const aDestination,
                 if (fileExists(lDestination))
                 {
                         lDestination += lLen;
-                        *lDestination = '|';
+                        *lDestination = '\n';
                         lDestination++;
                 }
                 p = p2 + 1;
@@ -374,41 +374,41 @@ static int detectPresence( char const * const aExecutable )
         char lTestedString [MAX_PATH_OR_CMD] = "which " ;
         FILE * lIn ;
 
-    strcat( lTestedString , aExecutable ) ;
+        strcat( lTestedString , aExecutable ) ;
         strcat( lTestedString, " 2>/dev/null ");
-    lIn = popen( lTestedString , "r" ) ;
-    if ( ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
+        lIn = popen( lTestedString , "r" ) ;
+        if ( ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
                 && ( ! strchr( lBuff , ':' ) )
                 && ( strncmp(lBuff, "no ", 3) ) )
-    {   /* present */
-        pclose( lIn ) ;
-        if (tinyfd_verbose) printf("detectPresence %s %d\n", aExecutable, 1);
-        return 1 ;
-    }
-    else
-    {
-        pclose( lIn ) ;
-        if (tinyfd_verbose) printf("detectPresence %s %d\n", aExecutable, 0);
-        return 0 ;
-    }
+        {   /* present */
+                pclose( lIn ) ;
+                if (tinyfd_verbose) printf("detectPresence %s %d\n", aExecutable, 1);
+                return 1 ;
+        }
+        else
+        {
+                pclose( lIn ) ;
+                if (tinyfd_verbose) printf("detectPresence %s %d\n", aExecutable, 0);
+                return 0 ;
+        }
 }
 
 
 static int graphicMode( )
 {
         return ( getenv("DISPLAY")
-            || (isDarwin() && (!getenv("SSH_TTY") || getenv("DISPLAY") ) ) ) ;
+                || (isDarwin() && (!getenv("SSH_TTY") || getenv("DISPLAY") ) ) ) ;
 }
 
 
 static int osascriptPresent( )
 {
-    static int lOsascriptPresent = -1 ;
-    if ( lOsascriptPresent < 0 )
-    {
+        static int lOsascriptPresent = -1 ;
+        if ( lOsascriptPresent < 0 )
+        {
                 gWarningDisplayed |= !!getenv("SSH_TTY");
                 lOsascriptPresent = detectPresence( "osascript" ) ;
-    }
+        }
         return lOsascriptPresent && graphicMode() && !getenv("SSH_TTY") ;
 }
 
@@ -424,12 +424,12 @@ static int zenityPresent( )
 }
 
 
-static int zenity3Present()
+static int zenity3Present( )
 {
         static int lZenity3Present = -1 ;
         char lBuff [MAX_PATH_OR_CMD] ;
         FILE * lIn ;
-		int lIntTmp ;
+        int lIntTmp ;
 
         if ( lZenity3Present < 0 )
         {
@@ -442,16 +442,16 @@ static int zenity3Present()
                                 if ( atoi(lBuff) >= 3 )
                                 {
                                         lZenity3Present = 3 ;
-										lIntTmp = atoi(strtok(lBuff,".")+2 ) ;
-										if ( lIntTmp >= 18 )
-										{
-											lZenity3Present = 5 ;
-										}
-										else if ( lIntTmp >= 10 )
-										{
-											lZenity3Present = 4 ;
-										}
-								}
+                                        lIntTmp = atoi(strtok(lBuff,".")+2 ) ;
+                                        if ( lIntTmp >= 18 )
+                                        {
+                                                lZenity3Present = 5 ;
+                                        }
+                                        else if ( lIntTmp >= 10 )
+                                        {
+                                                lZenity3Present = 4 ;
+                                        }
+                                }
                                 else if ( ( atoi(lBuff) == 2 ) && ( atoi(strtok(lBuff,".")+2 ) >= 32 ) )
                                 {
                                         lZenity3Present = 2 ;
@@ -467,44 +467,44 @@ static int zenity3Present()
 
 static int kdialogPresent( )
 {
-	static int lKdialogPresent = -1 ;
-	char lBuff [MAX_PATH_OR_CMD] ;
-	FILE * lIn ;
-	char * lDesktop;
+        static int lKdialogPresent = -1 ;
+        char lBuff [MAX_PATH_OR_CMD] ;
+        FILE * lIn ;
+        char * lDesktop;
 
-	if ( lKdialogPresent < 0 )
-	{
-		lKdialogPresent = detectPresence("kdialog") ;
-		if ( lKdialogPresent && !getenv("SSH_TTY") )
-		{
-			lIn = popen( "kdialog --attach 2>&1" , "r" ) ;
-			if ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
-			{
-				if ( ! strstr( "Unknown" , lBuff ) )
-				{
-					lKdialogPresent = 2 ;
-					if (tinyfd_verbose) printf("kdialog-attach %d\n", lKdialogPresent);
-				}
-			}
-			pclose( lIn ) ;
+        if ( lKdialogPresent < 0 )
+        {
+                lKdialogPresent = detectPresence("kdialog") ;
+                if ( lKdialogPresent && !getenv("SSH_TTY") )
+                {
+                        lIn = popen( "kdialog --attach 2>&1" , "r" ) ;
+                        if ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
+                        {
+                                if ( ! strstr( "Unknown" , lBuff ) )
+                                {
+                                        lKdialogPresent = 2 ;
+                                        if (tinyfd_verbose) printf("kdialog-attach %d\n", lKdialogPresent);
+                                }
+                        }
+                        pclose( lIn ) ;
 
-			if (lKdialogPresent == 2)
-			{
-				lKdialogPresent = 1 ;
-				lIn = popen( "kdialog --passivepopup 2>&1" , "r" ) ;
-				if ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
-				{
-					if ( ! strstr( "Unknown" , lBuff ) )
-					{
-						lKdialogPresent = 2 ;
-						if (tinyfd_verbose) printf("kdialog-popup %d\n", lKdialogPresent);
-					}
-				}
-				pclose( lIn ) ;
-			}
-		}
-	}
-	return graphicMode() ? lKdialogPresent : 0 ;
+                        if (lKdialogPresent == 2)
+                        {
+                                lKdialogPresent = 1 ;
+                                lIn = popen( "kdialog --passivepopup 2>&1" , "r" ) ;
+                                if ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
+                                {
+                                        if ( ! strstr( "Unknown" , lBuff ) )
+                                        {
+                                                lKdialogPresent = 2 ;
+                                                if (tinyfd_verbose) printf("kdialog-popup %d\n", lKdialogPresent);
+                                        }
+                                }
+                                pclose( lIn ) ;
+                        }
+                }
+        }
+        return graphicMode() ? lKdialogPresent : 0 ;
 }
 
 
@@ -537,66 +537,66 @@ static int osx9orBetter( )
 
 static void AddAppBundleIcon(char * lDialogString)
 {
-	std::string cmd1 = "";
-	cmd1 += "osascript -e \"tell application \\\"Finder\\\"\" ";
-	cmd1 += "-e \"set appPath to POSIX path of (path to frontmost application)\" ";
-	cmd1 += "-e \"set resourcesPath to appPath & \\\"Contents/Info.plist\\\"\" ";
-	cmd1 += "-e \"end tell\" ";
-                    
-	FILE *file1 = popen(cmd1.c_str(), "r");
-	char plist[260];
-	fgets(plist, 260, file1);
-	pclose(file1);
-                    
-	if (plist[strlen(plist) - 1] == '\n')
-		plist[strlen(plist) - 1] = '\0';
-                    
-	std::string cmd2 = "";
-	cmd2 += "defaults read \"";
-	cmd2 += plist;
-	cmd2 += "\" CFBundleIconFile";
-                    
-	FILE *file2 = popen(cmd2.c_str(), "r");
-	char icon[260];
-	fgets(icon, 260, file2);
-	pclose(file2);
-                    
-	if (icon[strlen(icon) - 1] == '\n')
-		icon[strlen(icon) - 1] = '\0';
-                    
-	std::string cmd3 = "";
-	cmd3 += "osascript -e \"tell application \\\"Finder\\\"\" ";
-	cmd3 += "-e \"set appPath to POSIX path of (path to frontmost application)\" ";
-	cmd3 += "-e \"set resourcesPath to appPath & \\\"Contents/Resources/\\\"\" ";
-	cmd3 += "-e \"end tell\" ";
-                    
-	FILE *file3 = popen(cmd3.c_str(), "r");
-	char path[260];
-	fgets(path, 260, file3);
-	pclose(file3);
-                    
-	if (path[strlen(path) - 1] == '\n')
-		path[strlen(path) - 1] = '\0';
-                    
-	std::string iconpath = "";
-	iconpath += path;
-	iconpath += icon;
-                    
-	std::string ext = ".icns";
-	if (iconpath.length() >= ext.length())
-	{
-		if (0 != iconpath.compare(iconpath.length() - ext.length(), ext.length(), ext))
-			iconpath += ext;
-	}
-                    
-	if ( !fileExists(iconpath.c_str()) )
-		strcat(lDialogString, "with icon note " ) ;
-	else
-	{
-		strcat(lDialogString, "with icon POSIX file \\\"");
-		strcat(lDialogString, iconpath.c_str());
-		strcat(lDialogString, "\\\" ");
-	}
+        std::string cmd1 = "";
+        cmd1 += "osascript -e \"tell application \\\"Finder\\\"\" ";
+        cmd1 += "-e \"set appPath to POSIX path of (path to frontmost application)\" ";
+        cmd1 += "-e \"set resourcesPath to appPath & \\\"Contents/Info.plist\\\"\" ";
+        cmd1 += "-e \"end tell\" ";
+
+        FILE *file1 = popen(cmd1.c_str(), "r");
+        char plist[260];
+        fgets(plist, 260, file1);
+        pclose(file1);
+
+        if (plist[strlen(plist) - 1] == '\n')
+                plist[strlen(plist) - 1] = '\0';
+
+        std::string cmd2 = "";
+        cmd2 += "defaults read \"";
+        cmd2 += plist;
+        cmd2 += "\" CFBundleIconFile";
+
+        FILE *file2 = popen(cmd2.c_str(), "r");
+        char icon[260];
+        fgets(icon, 260, file2);
+        pclose(file2);
+
+        if (icon[strlen(icon) - 1] == '\n')
+                icon[strlen(icon) - 1] = '\0';
+
+        std::string cmd3 = "";
+        cmd3 += "osascript -e \"tell application \\\"Finder\\\"\" ";
+        cmd3 += "-e \"set appPath to POSIX path of (path to frontmost application)\" ";
+        cmd3 += "-e \"set resourcesPath to appPath & \\\"Contents/Resources/\\\"\" ";
+        cmd3 += "-e \"end tell\" ";
+
+        FILE *file3 = popen(cmd3.c_str(), "r");
+        char path[260];
+        fgets(path, 260, file3);
+        pclose(file3);
+
+        if (path[strlen(path) - 1] == '\n')
+                path[strlen(path) - 1] = '\0';
+
+        std::string iconpath = "";
+        iconpath += path;
+        iconpath += icon;
+
+        std::string ext = ".icns";
+        if (iconpath.length() >= ext.length())
+        {
+                if (0 != iconpath.compare(iconpath.length() - ext.length(), ext.length(), ext))
+                        iconpath += ext;
+        }
+
+        if ( !fileExists(iconpath.c_str()) )
+                strcat(lDialogString, "with icon note " ) ;
+        else
+        {
+                strcat(lDialogString, "with icon POSIX file \\\"");
+                strcat(lDialogString, iconpath.c_str());
+                strcat(lDialogString, "\\\" ");
+        }
 }
 
 
@@ -606,7 +606,7 @@ int tinyfd_messageBox(
         char const * const aDialogType , /* "ok" "okcancel" "yesno" "yesnocancel" */
         char const * const aIconType , /* "info" "warning" "error" "question" */
         int const aDefaultButton , /* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
-	int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */ 
+        int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 {
         char lBuff [MAX_PATH_OR_CMD] ;
         char * lDialogString = NULL ;
@@ -652,7 +652,7 @@ int tinyfd_messageBox(
                 }
                 else /* question or info */
                 {
-			AddAppBundleIcon(lDialogString);
+                        AddAppBundleIcon(lDialogString);
                 }
                 if ( aDialogType && ! strcmp( "okcancel" , aDialogType ) )
                 {
@@ -692,11 +692,10 @@ int tinyfd_messageBox(
                 }
                 strcat( lDialogString, ")\" ") ;
 
-                strcat( lDialogString,
-"-e \"if vButton is \\\"Yes\\\" then\" -e \"return 1\"\
- -e \"else if vButton is \\\"OK\\\" then\" -e \"return 1\"\
- -e \"else if vButton is \\\"No\\\" then\" -e \"return 2\"\
- -e \"else\" -e \"return 0\" -e \"end if\" " );
+                strcat( lDialogString, "-e \"if vButton is \\\"Yes\\\" then\" -e \"return 1\" " );
+                strcat( lDialogString, "-e \"else if vButton is \\\"OK\\\" then\" -e \"return 1\" " );
+                strcat( lDialogString, "-e \"else if vButton is \\\"No\\\" then\" -e \"return 2\" " );
+                strcat( lDialogString, "-e \"else\" -e \"return 0\" -e \"end if\" " );
 
                 strcat( lDialogString, "-e \"on error number -128\" " ) ;
                 strcat( lDialogString, "-e \"0\" " );
@@ -704,7 +703,7 @@ int tinyfd_messageBox(
                 strcat( lDialogString, "-e \"end try\"") ;
                 if ( ! osx9orBetter() ) strcat( lDialogString, " -e \"end tell\"") ;
         }
-	else if ( aDialogEngine == 1 && zenityPresent() )
+        else if ( aDialogEngine == 1 && zenityPresent() )
         {
                 if ( zenityPresent() )
                 {
@@ -720,12 +719,12 @@ int tinyfd_messageBox(
 
                 if ( aDialogType && ! strcmp( "okcancel" , aDialogType ) )
                 {
-                                strcat( lDialogString ,
-                                                "question --ok-label=Ok --cancel-label=Cancel" ) ;
+                        strcat( lDialogString ,
+                                "question --ok-label=Ok --cancel-label=Cancel" ) ;
                 }
                 else if ( aDialogType && ! strcmp( "yesno" , aDialogType ) )
                 {
-                                strcat( lDialogString , "question" ) ;
+                        strcat( lDialogString , "question" ) ;
                 }
                 else if ( aDialogType && ! strcmp( "yesnocancel" , aDialogType ) )
                 {
@@ -733,15 +732,15 @@ int tinyfd_messageBox(
                 }
                 else if ( aIconType && ! strcmp( "error" , aIconType ) )
                 {
-                    strcat( lDialogString , "error" ) ;
+                        strcat( lDialogString , "error" ) ;
                 }
                 else if ( aIconType && ! strcmp( "warning" , aIconType ) )
                 {
-                    strcat( lDialogString , "warning" ) ;
+                        strcat( lDialogString , "warning" ) ;
                 }
                 else
                 {
-                    strcat( lDialogString , "info" ) ;
+                        strcat( lDialogString , "info" ) ;
                 }
                 if ( aTitle && strlen(aTitle) )
                 {
@@ -759,8 +758,8 @@ int tinyfd_messageBox(
                 {
                         strcat( lDialogString , " --icon-name=dialog-" ) ;
                         if ( aIconType && (! strcmp( "question" , aIconType )
-                          || ! strcmp( "error" , aIconType )
-                          || ! strcmp( "warning" , aIconType ) ) )
+                                || ! strcmp( "error" , aIconType )
+                                || ! strcmp( "warning" , aIconType ) ) )
                         {
                                 strcat( lDialogString , aIconType ) ;
                         }
@@ -773,14 +772,14 @@ int tinyfd_messageBox(
                 if ( ! strcmp( "yesnocancel" , aDialogType ) )
                 {
                         strcat( lDialogString ,
-");if [ $? = 1 ];then echo 0;elif [ $szAnswer = \"No\" ];then echo 2;else echo 1;fi");
+                                ");if [ $? = 1 ];then echo 0;elif [ $szAnswer = \"No\" ];then echo 2;else echo 1;fi");
                 }
                 else
                 {
                         strcat( lDialogString , ");if [ $? = 0 ];then echo 1;else echo 0;fi");
                 }
         }
-	else if ( aDialogEngine == 2 && kdialogPresent() )
+        else if ( aDialogEngine == 2 && kdialogPresent() )
         {
                 if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"kdialog");return 1;}
 
@@ -889,7 +888,7 @@ char const * tinyfd_inputBox(
         char const * const aTitle , /* NULL or "" */
         char const * const aMessage , /* NULL or "" may NOT contain \n nor \t */
         char const * const aDefaultInput , /* NULL or "" */
-	int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */ 
+        int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 {
         static char lBuff[MAX_PATH_OR_CMD];
         char * lDialogString = NULL;
@@ -931,8 +930,8 @@ char const * tinyfd_inputBox(
                         strcat(lDialogString, aTitle) ;
                         strcat(lDialogString, "\\\" ") ;
                 }
-		AddAppBundleIcon(lDialogString);
-		strcat(lDialogString, "\" ");            
+                AddAppBundleIcon(lDialogString);
+                strcat(lDialogString, "\" ");
                 strcat(lDialogString, "-e \"\\\"1\\\" & text returned of result\" " );
                 strcat(lDialogString, "-e \"on error number -128\" " ) ;
                 strcat(lDialogString, "-e \"0\" " );
@@ -1074,7 +1073,7 @@ char const * tinyfd_passwordBox(
         char const * const aTitle , /* NULL or "" */
         char const * const aMessage , /* NULL or "" may NOT contain \n nor \t */
         char const * const aDefaultInput , /* NULL or "" */
-	int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */ 
+        int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 {
         static char lBuff[MAX_PATH_OR_CMD];
         char * lDialogString = NULL;
@@ -1117,8 +1116,8 @@ char const * tinyfd_passwordBox(
                         strcat(lDialogString, aTitle) ;
                         strcat(lDialogString, "\\\" ") ;
                 }
-		AddAppBundleIcon(lDialogString);
-		strcat(lDialogString, "\" ");            
+                AddAppBundleIcon(lDialogString);
+                strcat(lDialogString, "\" ");
                 strcat(lDialogString, "-e \"\\\"1\\\" & text returned of result\" " );
                 strcat(lDialogString, "-e \"on error number -128\" " ) ;
                 strcat(lDialogString, "-e \"0\" " );
@@ -1158,7 +1157,7 @@ char const * tinyfd_passwordBox(
                         strcat(lDialogString, "\"") ;
                 }
 
-		strcat(lDialogString, " --hide-text") ;
+                strcat(lDialogString, " --hide-text") ;
 
                 strcat( lDialogString ,
                                 ");if [ $? = 0 ];then echo 1$szAnswer;else echo 0$szAnswer;fi");
@@ -1260,83 +1259,83 @@ char const * tinyfd_passwordBox(
 
 static std::vector<std::string> SplitString(const std::string &str, char delimiter)
 {
-	std::vector<std::string> vec;
-	std::stringstream sstr(str);
-	std::string tmp;
+        std::vector<std::string> vec;
+        std::stringstream sstr(str);
+        std::string tmp;
 
-	while (std::getline(sstr, tmp, delimiter))
-		vec.push_back(tmp);
+        while (std::getline(sstr, tmp, delimiter))
+                vec.push_back(tmp);
 
-	return vec;
+        return vec;
 }
 
 
 static std::string zenityFilter(std::string input)
 {
-	std::replace(input.begin(), input.end(), ';', ' ');
-	std::vector<std::string> stringVec = SplitString(input, '|');
-	std::string outputString = "";
+        std::replace(input.begin(), input.end(), ';', ' ');
+        std::vector<std::string> stringVec = SplitString(input, '|');
+        std::string outputString = "";
 
-	unsigned int index = 0;
-	for (const std::string &str : stringVec)
-	{
-		if (index % 2 == 0) 
-		{
-			outputString += " --file-filter='" + str + "|";
-		} 
-		else 
-		{
-			outputString += str + "'";
-		}
+        unsigned int index = 0;
+        for (const std::string &str : stringVec)
+        {
+                if (index % 2 == 0)
+                {
+                        outputString += " --file-filter='" + str + "|";
+                }
+                else
+                {
+                        outputString += str + "'";
+                }
 
-		index++;
-	}
+                index++;
+        }
 
-	return outputString;
+        return outputString;
 }
 
 
 static std::string kdialogFilter(std::string input)
 {
-	std::replace(input.begin(), input.end(), ';', ' ');
-	std::vector<std::string> stringVec = SplitString(input, '|');
-	std::string outputString = " \"";
+        std::replace(input.begin(), input.end(), ';', ' ');
+        std::vector<std::string> stringVec = SplitString(input, '|');
+        std::string outputString = " \"";
 
-	std::string even = "";
-	std::string odd = "";
+        std::string even = "";
+        std::string odd = "";
 
-	unsigned int index = 0;
-	for (const std::string &str : stringVec)
-	{
-		if (index % 2 != 0) 
-		{
-			if (index == 1)
-				odd = str;
-			else
-				odd = "\n" + str;
+        unsigned int index = 0;
+        for (const std::string &str : stringVec)
+        {
+                if (index % 2 != 0)
+                {
+                        if (index == 1)
+                                odd = str;
+                        else
+                                odd = "\n" + str;
 
-			outputString += odd + even;
-		}
-		else 
-		{
-			even = "|" + str;
-		}
+                        outputString += odd + even;
+                }
+                else
+                {
+                        even = "|" + str;
+                }
 
-		index++;
-	}
+                index++;
+        }
 
-	outputString += "\"";
-	return outputString;
+        outputString += "\"";
+        return outputString;
 }
 
 
 char const * tinyfd_saveFileDialog(
-	char const * const aTitle , /* NULL or "" */
-	char const * const aDefaultPathAndFile , /* NULL or "" */
-	int const aNumOfFilterPatterns , /* 0 */
-	char const * const * const aFilterPatterns , /* NULL or {"*.jpg","*.png"} */
-	char const * const aSingleFilterDescription , /* NULL or "image files" */
-	int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
+        char const * const aTitle , /* NULL or "" */
+        char const * const aDefaultPathAndFile , /* NULL or "" */
+        int const aNumOfFilterPatterns , /* 0 */
+        char const * const * const aFilterPatterns , /* NULL or {"*.jpg","*.png"} */
+        char const * const aSingleFilterDescription , /* NULL or "image files" */
+        int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 {
 
         static char lBuff [MAX_PATH_OR_CMD] ;
@@ -1445,27 +1444,27 @@ char const * tinyfd_saveFileDialog(
         }
 
         if (tinyfd_verbose) printf( "lDialogString: %s\n" , lDialogString ) ;
-    if ( ! ( lIn = popen( lDialogString , "r" ) ) )
-    {
-        return NULL ;
-    }
-    while ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
-    {}
-    pclose( lIn ) ;
-    if ( lBuff[strlen( lBuff ) -1] == '\n' )
-    {
-        lBuff[strlen( lBuff ) -1] = '\0' ;
-    }
+        if ( ! ( lIn = popen( lDialogString , "r" ) ) )
+        {
+                return NULL ;
+        }
+        while ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
+        {}
+        pclose( lIn ) ;
+        if ( lBuff[strlen( lBuff ) -1] == '\n' )
+        {
+                lBuff[strlen( lBuff ) -1] = '\0' ;
+        }
         /* printf( "lBuff: %s\n" , lBuff ) ; */
         if ( ! strlen(lBuff) )
         {
                 return NULL;
         }
-    getPathWithoutFinalSlash( lString , lBuff ) ;
-    if ( strlen( lString ) && ! dirExists( lString ) )
-    {
-        return NULL ;
-    }
+        getPathWithoutFinalSlash( lString , lBuff ) ;
+        if ( strlen( lString ) && ! dirExists( lString ) )
+        {
+                return NULL ;
+        }
         getLastName(lString,lBuff);
         if ( ! filenameValid(lString) )
         {
@@ -1477,13 +1476,13 @@ char const * tinyfd_saveFileDialog(
 
 /* in case of multiple files, the separator is | */
 char const * tinyfd_openFileDialog(
-	char const * const aTitle , /* NULL or "" */
-	char const * const aDefaultPathAndFile , /* NULL or "" */
-	int const aNumOfFilterPatterns , /* 0 */
-	char const * const * const aFilterPatterns , /* NULL or {"*.jpg","*.png"} */
-	char const * const aSingleFilterDescription , /* NULL or "image files" */
-	int const aAllowMultipleSelects , /* 0 or 1 */
-	int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
+        char const * const aTitle , /* NULL or "" */
+        char const * const aDefaultPathAndFile , /* NULL or "" */
+        int const aNumOfFilterPatterns , /* 0 */
+        char const * const * const aFilterPatterns , /* NULL or {"*.jpg","*.png"} */
+        char const * const aSingleFilterDescription , /* NULL or "image files" */
+        int const aAllowMultipleSelects , /* 0 or 1 */
+        int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 {
         static char lBuff [MAX_MULTIPLE_FILES*MAX_PATH_OR_CMD] ;
         char lDialogString [MAX_PATH_OR_CMD] ;
@@ -1492,7 +1491,7 @@ char const * tinyfd_openFileDialog(
         FILE * lIn ;
         char * p ;
         char const * p2 ;
-	int lWasKdialog = 0 ;
+        int lWasKdialog = 0 ;
         lBuff[0]='\0';
 
         if ( aDialogEngine == 0 && osascriptPresent() )
@@ -1501,10 +1500,8 @@ char const * tinyfd_openFileDialog(
                 strcpy( lDialogString , "osascript ");
                 if ( ! osx9orBetter() ) strcat( lDialogString , " -e \"tell application \\\"System Events\\\"\" -e \"Activate\"");
                 strcat( lDialogString , " -e \"try\" -e \"" );
-    if ( ! aAllowMultipleSelects )
-    {
-
-
+                if ( ! aAllowMultipleSelects )
+                {
                         strcat( lDialogString , "POSIX path of ( " );
                 }
                 else
@@ -1512,12 +1509,12 @@ char const * tinyfd_openFileDialog(
                         strcat( lDialogString , "set mylist to " );
                 }
                 strcat( lDialogString , "choose file " );
-            if ( aTitle && strlen(aTitle) )
-            {
+                if ( aTitle && strlen(aTitle) )
+                {
                         strcat(lDialogString, "with prompt \\\"") ;
                         strcat(lDialogString, aTitle) ;
                         strcat(lDialogString, "\\\" ") ;
-            }
+                }
                 getPathWithoutFinalSlash( lString , aDefaultPathAndFile ) ;
                 if ( strlen(lString) )
                 {
@@ -1542,12 +1539,12 @@ char const * tinyfd_openFileDialog(
                 {
                         strcat( lDialogString , "multiple selections allowed true \" " ) ;
                         strcat( lDialogString ,
-                                        "-e \"set mystring to POSIX path of item 1 of mylist\" " );
+                                "-e \"set mystring to POSIX path of item 1 of mylist\" " );
                         strcat( lDialogString ,
-                                        "-e \"repeat with  i from 2 to the count of mylist\" " );
+                                "-e \"repeat with  i from 2 to the count of mylist\" " );
                         strcat( lDialogString , "-e \"set mystring to mystring & \\\"\n\\\"\" " );
                         strcat( lDialogString ,
-                        "-e \"set mystring to mystring & POSIX path of item i of mylist\" " );
+                                "-e \"set mystring to mystring & POSIX path of item i of mylist\" " );
                         strcat( lDialogString , "-e \"end repeat\" " );
                         strcat( lDialogString , "-e \"mystring\" " );
                 }
@@ -1635,28 +1632,26 @@ char const * tinyfd_openFileDialog(
                 }
         }
 
-    if (tinyfd_verbose) printf( "lDialogString: %s\n" , lDialogString ) ;
-    if ( ! ( lIn = popen( lDialogString , "r" ) ) )
-    {
-        return NULL ;
-    }
+        if (tinyfd_verbose) printf( "lDialogString: %s\n" , lDialogString ) ;
+        if ( ! ( lIn = popen( lDialogString , "r" ) ) )
+        {
+                return NULL ;
+        }
         lBuff[0]='\0';
         p=lBuff;
         while ( fgets( p , sizeof( lBuff ) , lIn ) != NULL )
         {
                 p += strlen( p );
         }
-    pclose( lIn ) ;
-    if ( lBuff[strlen( lBuff ) -1] == '\n' )
-    {
-        lBuff[strlen( lBuff ) -1] = '\0' ;
-    }
-    /* printf( "lBuff: %s\n" , lBuff ) ; */
+        pclose( lIn ) ;
+        if ( lBuff[strlen( lBuff ) -1] == '\n' )
+        {
+                lBuff[strlen( lBuff ) -1] = '\0' ;
+        }
+        /* printf( "lBuff: %s\n" , lBuff ) ; */
         if ( lWasKdialog && aAllowMultipleSelects )
         {
                 p = lBuff ;
-                //while ( ( p = strchr( p , '\n' ) ) )
-                //        * p = '|' ;
         }
         /* printf( "lBuff2: %s\n" , lBuff ) ; */
         if ( ! strlen( lBuff )  )
@@ -1684,7 +1679,7 @@ char const * tinyfd_openFileDialog(
 char const * tinyfd_selectFolderDialog(
         char const * const aTitle , /* "" */
         char const * const aDefaultPath , /* "" */
-	int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
+        int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 {
         static char lBuff [MAX_PATH_OR_CMD] ;
         char lDialogString [MAX_PATH_OR_CMD] ;
@@ -1772,18 +1767,18 @@ char const * tinyfd_selectFolderDialog(
                 }
         }
 
-    if (tinyfd_verbose) printf( "lDialogString: %s\n" , lDialogString ) ;
-    if ( ! ( lIn = popen( lDialogString , "r" ) ) )
-    {
-        return NULL ;
-    }
+        if (tinyfd_verbose) printf( "lDialogString: %s\n" , lDialogString ) ;
+        if ( ! ( lIn = popen( lDialogString , "r" ) ) )
+        {
+                return NULL ;
+        }
         while ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
         {}
         pclose( lIn ) ;
-    if ( lBuff[strlen( lBuff ) -1] == '\n' )
-    {
-        lBuff[strlen( lBuff ) -1] = '\0' ;
-    }
+        if ( lBuff[strlen( lBuff ) -1] == '\n' )
+        {
+                lBuff[strlen( lBuff ) -1] = '\0' ;
+        }
         /* printf( "lBuff: %s\n" , lBuff ) ; */
         if ( ! strlen( lBuff ) || ! dirExists( lBuff ) )
         {
@@ -1802,7 +1797,7 @@ char const * tinyfd_colorChooser(
         char const * const aDefaultHexRGB , /* NULL or "#FF0000"*/
         unsigned char const aDefaultRGB[3] , /* { 0 , 255 , 255 } */
         unsigned char aoResultRGB[3] , /* { 0 , 0 , 0 } */
-	int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
+        int const aDialogEngine) /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
 {
         static char lBuff [128] ;
         char lTmp [128] ;
@@ -1831,33 +1826,33 @@ char const * tinyfd_colorChooser(
 
         if ( aDialogEngine == 0 && osascriptPresent() )
         {
-            if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"applescript");return (char const *)1;}
-            lWasOsascript = 1 ;
-            strcpy( lDialogString , "osascript");
-            
-            strcat( lDialogString , " -e \"tell application \\\"System Events\\\"\" -e \"Activate\"");
-            strcat( lDialogString , " -e \"try\" -e \"set mycolor to choose color default color {");
+                if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"applescript");return (char const *)1;}
+                lWasOsascript = 1 ;
+                strcpy( lDialogString , "osascript");
 
-            sprintf(lTmp, "%d", 256 * lDefaultRGB[0] ) ;
-            strcat(lDialogString, lTmp ) ;
-            strcat(lDialogString, "," ) ;
-            sprintf(lTmp, "%d", 256 * lDefaultRGB[1] ) ;
-            strcat(lDialogString, lTmp ) ;
-            strcat(lDialogString, "," ) ;
-            sprintf(lTmp, "%d", 256 * lDefaultRGB[2] ) ;
-            strcat(lDialogString, lTmp ) ;
-            strcat(lDialogString, "}\" " ) ;
-            strcat( lDialogString ,
-                   "-e \"set mystring to ((item 1 of mycolor) div 256 as integer) as string\" " );
-            strcat( lDialogString ,
-                   "-e \"repeat with i from 2 to the count of mycolor\" " );
-            strcat( lDialogString ,
-                   "-e \"set mystring to mystring & \\\" \\\" & ((item i of mycolor) div 256 as integer) as string\" " );
-            strcat( lDialogString , "-e \"end repeat\" " );
-            //strcat( lDialogString , "-e \"mystring\" ");
-            //strcat(lDialogString, "-e \"on error number -128\" " ) ;
-            strcat(lDialogString, "-e \"end try\"") ;
-            strcat( lDialogString, " -e \"end tell\"") ;
+                strcat( lDialogString , " -e \"tell application \\\"System Events\\\"\" -e \"Activate\"");
+                strcat( lDialogString , " -e \"try\" -e \"set mycolor to choose color default color {");
+
+                sprintf(lTmp, "%d", 256 * lDefaultRGB[0] ) ;
+                strcat(lDialogString, lTmp ) ;
+                strcat(lDialogString, "," ) ;
+                sprintf(lTmp, "%d", 256 * lDefaultRGB[1] ) ;
+                strcat(lDialogString, lTmp ) ;
+                strcat(lDialogString, "," ) ;
+                sprintf(lTmp, "%d", 256 * lDefaultRGB[2] ) ;
+                strcat(lDialogString, lTmp ) ;
+                strcat(lDialogString, "}\" " ) ;
+                strcat( lDialogString ,
+                        "-e \"set mystring to ((item 1 of mycolor) div 256 as integer) as string\" " );
+                strcat( lDialogString ,
+                        "-e \"repeat with i from 2 to the count of mycolor\" " );
+                strcat( lDialogString ,
+                        "-e \"set mystring to mystring & \\\" \\\" & ((item i of mycolor) div 256 as integer) as string\" " );
+                strcat( lDialogString , "-e \"end repeat\" " );
+                //strcat( lDialogString , "-e \"mystring\" ");
+                //strcat(lDialogString, "-e \"on error number -128\" " ) ;
+                strcat(lDialogString, "-e \"end try\"") ;
+                strcat( lDialogString, " -e \"end tell\"") ;
         }
         else if ( aDialogEngine == 1 && zenity3Present() )
         {
@@ -1904,24 +1899,25 @@ char const * tinyfd_colorChooser(
         if ( ! ( lIn = popen( lDialogString , "r" ) ) )
         {
                 return NULL ;
-    }
+
+        }
         while ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
         {
         }
         pclose( lIn ) ;
-    if ( ! strlen( lBuff ) )
-    {
-        return NULL ;
-    }
+        if ( ! strlen( lBuff ) )
+        {
+                return NULL ;
+        }
         /* printf( "len Buff: %lu\n" , strlen(lBuff) ) ; */
         /* printf( "lBuff0: %s\n" , lBuff ) ; */
-    if ( lBuff[strlen( lBuff ) -1] == '\n' )
-    {
-        lBuff[strlen( lBuff ) -1] = '\0' ;
-    }
+        if ( lBuff[strlen( lBuff ) -1] == '\n' )
+        {
+                lBuff[strlen( lBuff ) -1] = '\0' ;
+        }
 
-    if ( lWasZenity3 )
-    {
+        if ( lWasZenity3 )
+        {
                 if ( lBuff[0] == '#' )
                 {
                         if ( strlen(lBuff)>7 )
@@ -1932,7 +1928,7 @@ char const * tinyfd_colorChooser(
                                 lBuff[6]=lBuff[10];
                                 lBuff[7]='\0';
                         }
-                Hex2RGB(lBuff,aoResultRGB);
+                        Hex2RGB(lBuff,aoResultRGB);
                 }
                 else if ( lBuff[3] == '(' ) {
                         sscanf(lBuff,"rgb(%hhu,%hhu,%hhu",
@@ -1944,14 +1940,14 @@ char const * tinyfd_colorChooser(
                                         & aoResultRGB[0], & aoResultRGB[1],& aoResultRGB[2]);
                         RGB2Hex(aoResultRGB,lBuff);
                 }
-    }
-    else if ( lWasOsascript )
-    {
+        }
+        else if ( lWasOsascript )
+        {
                 /* printf( "lBuff: %s\n" , lBuff ) ; */
-        sscanf(lBuff,"%hhu %hhu %hhu",
-                           & aoResultRGB[0], & aoResultRGB[1],& aoResultRGB[2]);
-        RGB2Hex(aoResultRGB,lBuff);
-    }
+                sscanf(lBuff,"%hhu %hhu %hhu",
+                        & aoResultRGB[0], & aoResultRGB[1], & aoResultRGB[2]);
+                RGB2Hex(aoResultRGB,lBuff);
+        }
         /* printf("%d %d %d\n", aoResultRGB[0],aoResultRGB[1],aoResultRGB[2]); */
         /* printf( "lBuff: %s\n" , lBuff ) ; */
         return lBuff ;
