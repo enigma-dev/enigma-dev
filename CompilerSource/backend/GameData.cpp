@@ -8,9 +8,13 @@
 
 #include "GameData.h"
 
+#include "lodepng.h"
+
 #include <map>
 #include <string>
 #include <iostream>
+
+#include <zlib.h>
 
 using std::cout;
 using std::cerr;
@@ -21,6 +25,18 @@ using TypeCase = buffers::TreeNode::TypeCase;
 static inline uint32_t javaColor(int c) {
   if (!(c & 0xFF)) return 0xFFFFFFFF;
   return ((c & 0xFF0000) >> 8) | ((c & 0xFF00) << 8) | ((c & 0xFF000000) >> 24);
+}
+
+static unsigned char* zlib_compress(unsigned char* inbuffer, int &actualsize)
+{
+  uLongf outsize=(int)(actualsize*1.1)+12;
+  Bytef* outbytef=new Bytef[outsize];
+
+  compress(outbytef,&outsize,(Bytef*)inbuffer,actualsize);
+
+  actualsize = outsize;
+
+  return (unsigned char*)outbytef;
 }
 
 struct ESLookup {
@@ -79,7 +95,23 @@ SpriteData::SpriteData(const ::Sprite &sprite):
 }
 
 SoundData::SoundData(const buffers::resources::Sound &q, const std::string& name):
-  buffers::resources::Sound(q), name(name) {}
+  buffers::resources::Sound(q), name(name) {
+  // Open sound
+  FILE *afile = fopen(q.data().c_str(),"rb");
+  if (!afile)
+    return;
+
+  // Buffer sound
+  fseek(afile,0,SEEK_END);
+  const size_t flen = ftell(afile);
+  unsigned char *fdata = new unsigned char[flen];
+  fseek(afile,0,SEEK_SET);
+  if (fread(fdata,1,flen,afile) != flen)
+    puts("WARNING: Resource stream cut short while loading sound data");
+  fclose(afile);
+
+  audio = BinaryData(fdata, fdata + flen);
+}
 SoundData::SoundData(const ::Sound &sound):
   name(sound.name),
   audio(sound.data, sound.data + sound.size) {
@@ -395,7 +427,38 @@ ImageData::ImageData(const Image &img):
 ImageData::ImageData(int w, int h, const uint8_t *data, size_t size):
     width(w), height(h), pixels(data, data + size) {}
 ImageData::ImageData(const std::string& filePath) {
+  unsigned error;
+  unsigned char* image;
+  unsigned pngwidth, pngheight;
 
+  error = lodepng_decode32_file(&image, &pngwidth, &pngheight, filePath.c_str());
+  if (error)
+  {
+    printf("error %u: %s\n", error, lodepng_error_text(error));
+    return;
+  }
+
+  unsigned ih,iw;
+  const int bitmap_size = pngwidth*pngheight*4;
+  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
+
+  for (ih = 0; ih < pngheight; ih++) {
+    unsigned tmp = ih*pngwidth*4;
+    for (iw = 0; iw < pngwidth; iw++) {
+      bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
+      bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
+      bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
+      bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+      tmp+=4;
+    }
+  }
+
+  free(image);
+  width  = pngwidth;
+  height = pngheight;
+  int dataSize = bitmap_size;
+  const uint8_t* data = reinterpret_cast<const uint8_t*>(zlib_compress(bitmap, dataSize));
+  pixels = BinaryData(data, data + dataSize);
 }
 
 GameData::GameData(EnigmaStruct *es): filename(es->filename ?: "") {
