@@ -48,7 +48,10 @@ struct ESLookup {
     object(es->gmObjects, es->gmObjectCount, "object") {}
 };
 
-SpriteData::SpriteData(const buffers::resources::Sprite &q): buffers::resources::Sprite(q) {}
+SpriteData::SpriteData(const buffers::resources::Sprite &q): buffers::resources::Sprite(q) {
+  for (auto sub : q.subimages())
+    image_data.emplace_back(sub);
+}
 SpriteData::SpriteData(const ::Sprite &sprite):
   name(sprite.name) {
   set_id(sprite.id);
@@ -94,7 +97,7 @@ SoundData::SoundData(const ::Sound &sound):
   set_preload(sound.preload);
 }
 
-BackgroundData::BackgroundData(const buffers::resources::Background &q): buffers::resources::Background(q) {}
+BackgroundData::BackgroundData(const buffers::resources::Background &q): buffers::resources::Background(q), image_data(q.image()) {}
 BackgroundData::BackgroundData(const ::Background &background):
   name(background.name),
   image_data(background.backgroundImage) {
@@ -381,6 +384,9 @@ ImageData::ImageData(const Image &img):
     pixels(img.data, img.data + img.dataSize){}
 ImageData::ImageData(int w, int h, const uint8_t *data, size_t size):
     width(w), height(h), pixels(data, data + size) {}
+ImageData::ImageData(const std::string& filePath) {
+
+}
 
 GameData::GameData(EnigmaStruct *es): filename(es->filename ?: "") {
   cout << "Translating EnigmaStruct" << endl;

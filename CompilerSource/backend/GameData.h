@@ -28,6 +28,7 @@ struct ImageData {
 
   ImageData(const ::Image &image);
   ImageData(int w, int h, const uint8_t *data, size_t size);
+  ImageData(const std::string& filePath);
 };
 
 struct SpriteData : buffers::resources::Sprite {
