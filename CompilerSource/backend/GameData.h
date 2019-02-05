@@ -146,6 +146,9 @@ struct GameData {
 
   GameData(struct EnigmaStruct *es);
   GameData(const buffers::Project &proj);
+
+private:
+  void FlattenTree(const buffers::TreeNode &root);
 };
 
 #endif
