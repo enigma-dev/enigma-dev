@@ -48,7 +48,8 @@ struct ESLookup {
     object(es->gmObjects, es->gmObjectCount, "object") {}
 };
 
-SpriteData::SpriteData(const buffers::resources::Sprite &q): buffers::resources::Sprite(q) {
+SpriteData::SpriteData(const buffers::resources::Sprite &q, const std::string& name):
+  buffers::resources::Sprite(q), name(name) {
   for (auto sub : q.subimages())
     image_data.emplace_back(sub);
 }
@@ -77,7 +78,8 @@ SpriteData::SpriteData(const ::Sprite &sprite):
     image_data.emplace_back(sprite.subImages[i].image);
 }
 
-SoundData::SoundData(const buffers::resources::Sound &q): buffers::resources::Sound(q) {}
+SoundData::SoundData(const buffers::resources::Sound &q, const std::string& name):
+  buffers::resources::Sound(q), name(name) {}
 SoundData::SoundData(const ::Sound &sound):
   name(sound.name),
   audio(sound.data, sound.data + sound.size) {
@@ -97,7 +99,8 @@ SoundData::SoundData(const ::Sound &sound):
   set_preload(sound.preload);
 }
 
-BackgroundData::BackgroundData(const buffers::resources::Background &q): buffers::resources::Background(q), image_data(q.image()) {}
+BackgroundData::BackgroundData(const buffers::resources::Background &q, const std::string& name):
+  buffers::resources::Background(q), name(name), image_data(q.image()) {}
 BackgroundData::BackgroundData(const ::Background &background):
   name(background.name),
   image_data(background.backgroundImage) {
@@ -117,7 +120,8 @@ BackgroundData::BackgroundData(const ::Background &background):
   set_vertical_spacing(background.vSep);
 }
 
-FontData::FontData(const buffers::resources::Font &q): buffers::resources::Font(q) {}
+FontData::FontData(const buffers::resources::Font &q, const std::string& name):
+  buffers::resources::Font(q), name(name) {}
 FontData::FontData(const ::Font &font):
   name(font.name) {
   set_id(font.id);
@@ -154,7 +158,8 @@ FontData::GlyphData::GlyphData(const ::Glyph &glyph):
   metrics.set_height(glyph.height);
 }
 
-PathData::PathData(const buffers::resources::Path &q): buffers::resources::Path(q) {}
+PathData::PathData(const buffers::resources::Path &q, const std::string& name):
+  buffers::resources::Path(q), name(name) {}
 PathData::PathData(const ::Path &path):
   name(path.name) {
   set_id(path.id);
@@ -175,14 +180,16 @@ PathData::PathData(const ::Path &path):
   }
 }
 
-ScriptData::ScriptData(const buffers::resources::Script &q): buffers::resources::Script(q) {}
+ScriptData::ScriptData(const buffers::resources::Script &q, const std::string& name):
+  buffers::resources::Script(q), name(name) {}
 ScriptData::ScriptData(const ::Script &script):
   name(script.name) {
   set_id(script.id);
   set_code(script.code);
 }
 
-ShaderData::ShaderData(const buffers::resources::Shader &q): buffers::resources::Shader(q) {}
+ShaderData::ShaderData(const buffers::resources::Shader &q, const std::string& name):
+  buffers::resources::Shader(q), name(name) {}
 ShaderData::ShaderData(const ::Shader &shader):
   name(shader.name) {
   set_id(shader.id);
@@ -194,7 +201,8 @@ ShaderData::ShaderData(const ::Shader &shader):
 
 }
 
-TimelineData::TimelineData(const buffers::resources::Timeline &q): buffers::resources::Timeline(q) {}
+TimelineData::TimelineData(const buffers::resources::Timeline &q, const std::string& name):
+  buffers::resources::Timeline(q), name(name) {}
 TimelineData::TimelineData(const ::Timeline &timeline):
   name(timeline.name) {
   set_id(timeline.id);
@@ -206,7 +214,8 @@ TimelineData::TimelineData(const ::Timeline &timeline):
   }
 }
 
-ObjectData::ObjectData(const buffers::resources::Object &q): buffers::resources::Object(q) {}
+ObjectData::ObjectData(const buffers::resources::Object &q, const std::string& name):
+  buffers::resources::Object(q), name(name) {}
 ObjectData::ObjectData(const ::GmObject &object, const ESLookup &lookup):
   name(object.name) {
   set_id(object.id);
@@ -232,7 +241,8 @@ ObjectData::ObjectData(const ::GmObject &object, const ESLookup &lookup):
   }
 }
 
-RoomData::RoomData(const buffers::resources::Room &q): buffers::resources::Room(q) {}
+RoomData::RoomData(const buffers::resources::Room &q, const std::string& name):
+  buffers::resources::Room(q), name(name) {}
 RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
   name(room.name) {
   cout << "Import room." << endl;
@@ -452,16 +462,16 @@ GameData::GameData(const buffers::Project &proj): filename("") {
 void GameData::FlattenTree(const buffers::TreeNode &root) {
   switch (root.type_case()) {
     case TypeCase::kFolder: break;
-    case TypeCase::kSprite: sprites.emplace_back(root.sprite()); break;
-    case TypeCase::kSound: sounds.emplace_back(root.sound()); break;
-    case TypeCase::kBackground: backgrounds.emplace_back(root.background()); break;
-    case TypeCase::kPath: paths.emplace_back(root.path()); break;
-    case TypeCase::kScript: scripts.emplace_back(root.script()); break;
-    case TypeCase::kShader: shaders.emplace_back(root.shader()); break;
-    case TypeCase::kFont: fonts.emplace_back(root.font()); break;
-    case TypeCase::kTimeline: timelines.emplace_back(root.timeline()); break;
-    case TypeCase::kObject: objects.emplace_back(root.object()); break;
-    case TypeCase::kRoom: rooms.emplace_back(root.room()); break;
+    case TypeCase::kSprite: sprites.emplace_back(root.sprite(), root.name()); break;
+    case TypeCase::kSound: sounds.emplace_back(root.sound(), root.name()); break;
+    case TypeCase::kBackground: backgrounds.emplace_back(root.background(), root.name()); break;
+    case TypeCase::kPath: paths.emplace_back(root.path(), root.name()); break;
+    case TypeCase::kScript: scripts.emplace_back(root.script(), root.name()); break;
+    case TypeCase::kShader: shaders.emplace_back(root.shader(), root.name()); break;
+    case TypeCase::kFont: fonts.emplace_back(root.font(), root.name()); break;
+    case TypeCase::kTimeline: timelines.emplace_back(root.timeline(), root.name()); break;
+    case TypeCase::kObject: objects.emplace_back(root.object(), root.name()); break;
+    case TypeCase::kRoom: rooms.emplace_back(root.room(), root.name()); break;
     case TypeCase::kInclude: /*includes.emplace_back(root.include());*/ break;
     case TypeCase::kSettings: /*settings.emplace_back(root.settings());*/ break;
     default: cout << "- Not transferring " << root.name() << endl; break;
