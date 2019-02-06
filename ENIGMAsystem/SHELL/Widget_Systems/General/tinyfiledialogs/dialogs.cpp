@@ -70,7 +70,8 @@ extern "C" void cocoa_window_activate();
 
 static inline void window_activate() {
   #ifdef __APPLE__
-  cocoa_window_activate();
+  if (tfd_DialogEngine() == tfd_OsaScript)
+    cocoa_window_activate();
   #endif
 }
 
