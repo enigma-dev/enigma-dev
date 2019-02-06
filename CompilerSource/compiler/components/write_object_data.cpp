@@ -639,7 +639,7 @@ static inline void write_object_class_bodies(lang_CPP *lcpp, std::ostream &wto, 
 }
 
 static inline string resname(string name) {
-  return name.empty() ? "-1" : name;
+  return (name.empty() || (name == "<undefined>")) ? "-1" : name;
 }
 
 static inline void write_object_data_structs(std::ostream &wto,

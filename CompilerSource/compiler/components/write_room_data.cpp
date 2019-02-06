@@ -49,14 +49,14 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
-inline std::string format_color(uint32_t color) { 
+inline std::string format_color(uint32_t color) {
   std::stringstream ss;
   ss << "0x" << std::hex << color;
   return ss.str();
 }
 
 inline string resname(string name) {
-  return name.empty() ? "-1" : name;
+  return (name.empty() || (name == "<undefined>")) ? "-1" : name;
 }
 
 int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, parsed_object *EGMglobal, int mode)
@@ -132,7 +132,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
       wto << "        { "
           << (view.visible() ? "true" : "false") << ",   " // Visible
 
-          << view.xview() << ", "   // Xview 
+          << view.xview() << ", "   // Xview
           << view.yview() << ",  "  // Yview
           << view.wview() << ", "    // Wview
           << view.hview() << ",   "  // Hview
