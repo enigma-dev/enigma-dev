@@ -63,12 +63,15 @@ string caption;
 
 /* I know you guys don't like using platform macros; I'm ok with alternative ways to do this
 just let me know what you would rather me do and I'll change it accordingly. Thank you!!! */
+
+#ifdef __APPLE__
+extern "C" void cocoa_window_activate();
+#endif
+
 static inline void window_activate() {
   #ifdef __APPLE__
-  if (tfd_DialogEngine == tfd_OsaScript) {
-    void cocoa_window_activate();
+  if (tfd_DialogEngine() == tfd_OsaScript)
     cocoa_window_activate();
-  }
   #endif
 }
 
