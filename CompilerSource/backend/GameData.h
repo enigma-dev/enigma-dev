@@ -35,7 +35,7 @@ struct SpriteData : buffers::resources::Sprite {
   std::string name;
   std::vector<ImageData> image_data;
 
-  SpriteData(const buffers::resources::Sprite &sprite, const std::string& name);
+  SpriteData(const buffers::resources::Sprite &sprite, const std::string& name, const std::vector<ImageData>& subimages);
   SpriteData(const ::Sprite &sprite);
 };
 
@@ -43,7 +43,7 @@ struct SoundData : buffers::resources::Sound {
   std::string name;
   BinaryData audio;
 
-  SoundData(const buffers::resources::Sound &sound, const std::string& name);
+  SoundData(const buffers::resources::Sound &sound, const std::string& name, const BinaryData& data);
   SoundData(const ::Sound &sound);
 };
 
@@ -52,7 +52,7 @@ struct BackgroundData : buffers::resources::Background {
   ImageData image_data;
   bool legacy_transparency;
 
-  BackgroundData(const buffers::resources::Background &background, const std::string& name);
+  BackgroundData(const buffers::resources::Background &background, const std::string& name, const ImageData& image);
   BackgroundData(const ::Background &background);
 };
 

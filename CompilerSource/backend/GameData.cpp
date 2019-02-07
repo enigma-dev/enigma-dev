@@ -65,11 +65,8 @@ struct ESLookup {
     object(es->gmObjects, es->gmObjectCount, "object") {}
 };
 
-SpriteData::SpriteData(const buffers::resources::Sprite &q, const std::string& name):
-  buffers::resources::Sprite(q), name(name) {
-  for (auto sub : q.subimages())
-    image_data.emplace_back(sub);
-}
+SpriteData::SpriteData(const buffers::resources::Sprite &q, const std::string& name, const std::vector<ImageData>& subimages):
+  buffers::resources::Sprite(q), name(name), image_data(subimages) {}
 SpriteData::SpriteData(const ::Sprite &sprite):
   name(sprite.name) {
   set_id(sprite.id);
@@ -95,24 +92,8 @@ SpriteData::SpriteData(const ::Sprite &sprite):
     image_data.emplace_back(sprite.subImages[i].image);
 }
 
-SoundData::SoundData(const buffers::resources::Sound &q, const std::string& name):
-  buffers::resources::Sound(q), name(name) {
-  // Open sound
-  FILE *afile = fopen(q.data().c_str(),"rb");
-  if (!afile)
-    return;
-
-  // Buffer sound
-  fseek(afile,0,SEEK_END);
-  const size_t flen = ftell(afile);
-  unsigned char *fdata = new unsigned char[flen];
-  fseek(afile,0,SEEK_SET);
-  if (fread(fdata,1,flen,afile) != flen)
-    puts("WARNING: Resource stream cut short while loading sound data");
-  fclose(afile);
-
-  audio = BinaryData(fdata, fdata + flen);
-}
+SoundData::SoundData(const buffers::resources::Sound &q, const std::string& name, const BinaryData& data):
+  buffers::resources::Sound(q), name(name), audio(data) {}
 SoundData::SoundData(const ::Sound &sound):
   name(sound.name),
   audio(sound.data, sound.data + sound.size) {
@@ -132,8 +113,8 @@ SoundData::SoundData(const ::Sound &sound):
   set_preload(sound.preload);
 }
 
-BackgroundData::BackgroundData(const buffers::resources::Background &q, const std::string& name):
-  buffers::resources::Background(q), name(name), image_data(q.image()) {}
+BackgroundData::BackgroundData(const buffers::resources::Background &q, const std::string& name, const ImageData& image):
+  buffers::resources::Background(q), name(name), image_data(image) {}
 BackgroundData::BackgroundData(const ::Background &background):
   name(background.name),
   image_data(background.backgroundImage) {
@@ -536,9 +517,9 @@ GameData::GameData(const buffers::Project &proj): filename("") {
 void GameData::FlattenTree(const buffers::TreeNode &root) {
   switch (root.type_case()) {
     case TypeCase::kFolder: break;
-    case TypeCase::kSprite: sprites.emplace_back(root.sprite(), root.name()); break;
-    case TypeCase::kSound: sounds.emplace_back(root.sound(), root.name()); break;
-    case TypeCase::kBackground: backgrounds.emplace_back(root.background(), root.name()); break;
+    case TypeCase::kSprite: /*sprites.emplace_back(root.sprite(), root.name());*/ break;
+    case TypeCase::kSound: /*sounds.emplace_back(root.sound(), root.name());*/ break;
+    case TypeCase::kBackground: /*backgrounds.emplace_back(root.background(), root.name());*/ break;
     case TypeCase::kPath: paths.emplace_back(root.path(), root.name()); break;
     case TypeCase::kScript: scripts.emplace_back(root.script(), root.name()); break;
     case TypeCase::kShader: shaders.emplace_back(root.shader(), root.name()); break;
