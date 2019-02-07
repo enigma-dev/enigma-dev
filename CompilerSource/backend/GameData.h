@@ -34,7 +34,7 @@ struct SpriteData : buffers::resources::Sprite {
   std::string name;
   std::vector<ImageData> image_data;
 
-  SpriteData(const buffers::resources::Sprite &sprite);
+  SpriteData(const buffers::resources::Sprite &sprite, const std::string& name, const std::vector<ImageData>& subimages);
   SpriteData(const ::Sprite &sprite);
 };
 
@@ -42,7 +42,7 @@ struct SoundData : buffers::resources::Sound {
   std::string name;
   BinaryData audio;
 
-  SoundData(const buffers::resources::Sound &sound);
+  SoundData(const buffers::resources::Sound &sound, const std::string& name, const BinaryData& data);
   SoundData(const ::Sound &sound);
 };
 
@@ -51,7 +51,7 @@ struct BackgroundData : buffers::resources::Background {
   ImageData image_data;
   bool legacy_transparency;
 
-  BackgroundData(const buffers::resources::Background &background);
+  BackgroundData(const buffers::resources::Background &background, const std::string& name, const ImageData& image);
   BackgroundData(const ::Background &background);
 };
 
@@ -74,38 +74,38 @@ struct FontData : buffers::resources::Font {
   };
   std::vector<NormalizedRange> normalized_ranges;
 
-  FontData(const buffers::resources::Font &font);
+  FontData(const buffers::resources::Font &font, const std::string& name);
   FontData(const ::Font &font);
 };
 
 struct PathData : buffers::resources::Path {
   std::string name;
-  PathData(const buffers::resources::Path &q);
+  PathData(const buffers::resources::Path &q, const std::string& name);
   PathData(const ::Path &path);
 };
 struct ScriptData : buffers::resources::Script {
   std::string name;
-  ScriptData(const buffers::resources::Script &q);
+  ScriptData(const buffers::resources::Script &q, const std::string& name);
   ScriptData(const ::Script &script);
 };
 struct ShaderData : buffers::resources::Shader {
   std::string name;
-  ShaderData(const buffers::resources::Shader &q);
+  ShaderData(const buffers::resources::Shader &q, const std::string& name);
   ShaderData(const ::Shader &shader);
 };
 struct TimelineData : buffers::resources::Timeline {
   std::string name;
-  TimelineData(const buffers::resources::Timeline &q);
+  TimelineData(const buffers::resources::Timeline &q, const std::string& name);
   TimelineData(const ::Timeline &timeline);
 };
 struct ObjectData : buffers::resources::Object {
   std::string name;
-  ObjectData(const buffers::resources::Object &q);
+  ObjectData(const buffers::resources::Object &q, const std::string& name);
   ObjectData(const ::GmObject &object, const ESLookup &lookup);
 };
 struct RoomData : buffers::resources::Room {
   std::string name;
-  RoomData(const buffers::resources::Room &q);
+  RoomData(const buffers::resources::Room &q, const std::string& name);
   RoomData(const ::Room &room, const ESLookup &lookup);
 };
 
@@ -146,6 +146,9 @@ struct GameData {
 
   GameData(struct EnigmaStruct *es);
   GameData(const buffers::Project &proj);
+
+private:
+  void FlattenTree(const buffers::TreeNode &root);
 };
 
 #endif
