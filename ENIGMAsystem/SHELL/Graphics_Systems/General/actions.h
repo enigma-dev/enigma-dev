@@ -147,9 +147,14 @@ inline void action_draw_sprite(const int sprite, const gs_scalar x, const gs_sca
         draw_sprite(sprite,subimage,x,y);
 }
 
-void action_draw_health(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const double backColor, const int barColor);
-void action_draw_health(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const double backColor, const int barColor) {
-  double realbar1, realbar2;
+void action_draw_health(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const int backColor, const int barColor);
+void action_draw_health(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const int backColor, const int barColor) {
+  static const int back_colors[] = {
+    c_black, c_black, c_gray, c_silver, c_white, c_maroon,
+    c_green, c_olive, c_navy, c_purple, c_teal, c_red,
+    c_lime, c_yellow, c_blue, c_fuchsia, c_aqua
+  };
+  int realbar1, realbar2;
   switch (barColor)
   {
       case 0: realbar1=c_green; realbar2=c_red; break;
@@ -174,10 +179,10 @@ void action_draw_health(const gs_scalar x1, const gs_scalar y1, const gs_scalar 
   }
 	if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
-        draw_healthbar(x1+inst->x, y1+inst->y, x2+inst->x, y2+inst->y, health, backColor, realbar2, realbar1, 0, 1, 1);
+        draw_healthbar(x1+inst->x, y1+inst->y, x2+inst->x, y2+inst->y, health, back_colors[backColor], realbar2, realbar1, 0, backColor, 1);
 	}
 	else
-        draw_healthbar(x1, y1, x2, y2, health, backColor, realbar2, realbar1, 0, 1, 1);
+        draw_healthbar(x1, y1, x2, y2, health, back_colors[backColor], realbar2, realbar1, 0, backColor, 1);
 }
 
 inline void action_draw_life(const gs_scalar x, const gs_scalar y, const string caption)

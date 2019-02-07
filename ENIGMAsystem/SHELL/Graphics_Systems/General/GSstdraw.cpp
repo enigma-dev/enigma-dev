@@ -835,42 +835,52 @@ void draw_healthbar(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float
     gs_scalar t = y2;
     y2 = y1, y1 = t;
   }
-  amount = amount>=100 ? 1 : (amount<=0 ? 0 : amount/100);
-	gs_scalar alpha = draw_get_alpha();
+    amount = amount>=100 ? 1 : (amount<=0 ? 0 : amount/100);
+  gs_scalar alpha = draw_get_alpha();
 
-	if (showback) {
-		draw_primitive_begin(pr_trianglestrip);
-		draw_vertex_color(x1,y1,backcol,alpha);
-		draw_vertex_color(x2,y1,backcol,alpha);
-		draw_vertex_color(x1,y2,backcol,alpha);
-		draw_vertex_color(x2,y2,backcol,alpha);
-		draw_primitive_end();
-	}
+  if (showback) {
+    draw_primitive_begin(pr_trianglestrip);
+    draw_vertex_color(x1,y1,backcol,alpha);
+    draw_vertex_color(x2,y1,backcol,alpha);
+    draw_vertex_color(x1,y2,backcol,alpha);
+    draw_vertex_color(x2,y2,backcol,alpha);
+    draw_primitive_end();
 
-	switch (dir) {
-	  case 1:x1=x2-(x2-x1)*amount;break;
-	  case 2:y2=y1+(y2-y1)*amount;break;
-	  case 3:y1=y2-(y2-y1)*amount;break;
-	  default:x2=x1+(x2-x1)*amount;
-	}
+    if (showborder) {
+      draw_primitive_begin(pr_linestrip);
+      draw_vertex_color(x1,y1,0,alpha);
+      draw_vertex_color(x2,y1,0,alpha);
+      draw_vertex_color(x2,y2,0,alpha);
+      draw_vertex_color(x1,y2,0,alpha);
+      draw_vertex_color(x1,y1,0,alpha);
+      draw_primitive_end();
+    }
+  }
 
-	int col = merge_color(mincol, maxcol, amount);
-	draw_primitive_begin(pr_trianglestrip);
-	draw_vertex_color(x1,y1,col,alpha);
-	draw_vertex_color(x2,y1,col,alpha);
-	draw_vertex_color(x1,y2,col,alpha);
-	draw_vertex_color(x2,y2,col,alpha);
-	draw_primitive_end();
+  switch (dir) {
+    case 1:x1=x2-(x2-x1)*amount;break;
+    case 2:y2=y1+(y2-y1)*amount;break;
+    case 3:y1=y2-(y2-y1)*amount;break;
+    default:x2=x1+(x2-x1)*amount;
+  }
 
-	if (showborder) {
-		draw_primitive_begin(pr_linestrip);
-		draw_vertex_color(x1,y1,0,alpha);
-		draw_vertex_color(x2,y1,0,alpha);
-		draw_vertex_color(x2,y2,0,alpha);
-		draw_vertex_color(x1,y2,0,alpha);
-		draw_vertex_color(x1,y1,0,alpha);
-		draw_primitive_end();
-	}
+  int col = merge_color(mincol, maxcol, amount);
+  draw_primitive_begin(pr_trianglestrip);
+  draw_vertex_color(x1,y1,col,alpha);
+  draw_vertex_color(x2,y1,col,alpha);
+  draw_vertex_color(x1,y2,col,alpha);
+  draw_vertex_color(x2,y2,col,alpha);
+  draw_primitive_end();
+
+  if (showborder) {
+    draw_primitive_begin(pr_linestrip);
+    draw_vertex_color(x1,y1,0,alpha);
+    draw_vertex_color(x2,y1,0,alpha);
+    draw_vertex_color(x2,y2,0,alpha);
+    draw_vertex_color(x1,y2,0,alpha);
+    draw_vertex_color(x1,y1,0,alpha);
+    draw_primitive_end();
+  }
 }
 
 int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned iter)
