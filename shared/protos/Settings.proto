@@ -49,7 +49,7 @@ message Compiler {
 
   optional uint32 audio_angular_unit = 17;
   optional uint32 audio_scalar_precision = 18;
-  
+
   optional bool treat_uninitialized_vars_as_zero = 19;
 }
 
@@ -65,7 +65,7 @@ message General {
   optional string product = 10 [(gmx) = "option_version_product"];
   optional string copyright = 11 [(gmx) = "option_version_copyright"];
   optional string description = 12 [(gmx) = "option_version_description"];
-  optional bool show_cursor = 13 [(gmx) = "option_showcursor"];
+  optional bool show_cursor = 13 [default = true, (gmx) = "option_showcursor"];
   optional string game_icon = 14 [(gmx) = "option_windows_game_icon"];
   optional string splash_screen = 15 [(gmx) = "option_windows_splash_screen"];
   optional bool show_splash_screen = 16 [(gmx) = "option_windows_use_splash"];
@@ -94,11 +94,11 @@ message Graphics {
 message Windowing {
   optional bool is_sizeable = 1 [(gmx) = "option_sizeable"];
   optional bool start_in_fullscreen = 2 [(gmx) = "option_fullscreen"];
-  optional bool show_border = 3 [(gmx) = "option_noborder"];
-  optional bool show_icons = 4 [(gmx) = "option_nobuttons"];
+  optional bool show_border = 3 [default = true, (gmx) = "option_noborder"];
+  optional bool show_icons = 4 [default = true, (gmx) = "option_nobuttons"];
   optional bool stay_on_top = 5 [(gmx) = "option_stayontop"];
   optional bool freeze_on_lose_focus = 6 [(gmx) = "option_freeze"];
-  optional bool treat_close_as_escape = 7;
+  optional bool treat_close_as_escape = 7 [default = true];
 }
 
 message Info {
@@ -129,7 +129,7 @@ message Deployment {
 }
 
 message Shortcuts {
-  optional bool let_escape_end_game = 1;
+  optional bool let_escape_end_game = 1 [default = true];
   optional bool let_f4_switch_fullscreen = 2;
   optional bool let_f1_show_game_info = 3;
   optional bool let_f9_screenshot = 4;
