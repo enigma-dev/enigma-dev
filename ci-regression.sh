@@ -12,6 +12,11 @@ export TEST_HARNESS_MASTER_DIR="$1"
 if [ -z "$2" ]; then
   MAKE_JOBS=$2
   echo "MAKE_JOBS set to '$MAKE_JOBS'"
+else
+  echo "Guess what, Robert? We aren't actually setting a -j value."
+  echo "Do you know what happens if you say -j, and then don't set a value?"
+  echo "The fucking build breaks."
+  MAKE_JOBS=2
 fi
 
 GIT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
