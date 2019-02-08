@@ -8,7 +8,7 @@ if [ -z "$1" ]; then
 fi
 export TEST_HARNESS_MASTER_DIR="$1"
 
-if [ ! -z "$2" ]; then
+if [ -n "$2" ]; then
   MAKE_JOBS=-j$2
 fi
 
