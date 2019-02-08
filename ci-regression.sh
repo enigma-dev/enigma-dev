@@ -1,6 +1,5 @@
 #!/bin/bash +x
 set -e  # exit if any command fails
-set +x  # get Travis to actually fucking print the things it's doing
 
 if [ -z "$1" ]; then
   echo "No directory specified to check out master for regression tests."
@@ -9,14 +8,12 @@ if [ -z "$1" ]; then
 fi
 export TEST_HARNESS_MASTER_DIR="$1"
 
-if [ -z "$2" ]; then
+if [ -n "$2" ]; then
   MAKE_JOBS=$2
-  echo "MAKE_JOBS set to '$MAKE_JOBS'"
+  echo "Make parallelism set to '$MAKE_JOBS'"
 else
-  echo "Guess what, Robert? We aren't actually setting a -j value."
-  echo "Do you know what happens if you say -j, and then don't set a value?"
-  echo "The fucking build breaks."
-  MAKE_JOBS=2
+  MAKE_JOBS=2  # all machines are dual-core or better as of 2015, so sayeth the king
+  echo "Make parallelism defaulted to 2."
 fi
 
 GIT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
