@@ -41,7 +41,7 @@ namespace enigma {
 vector<Surface*> Surfaces(0);
 D3DCOLOR get_currentcolor();
 
-void surface_copy_to_systemmem(IDirect3DSurface9 **src, IDirect3DSurface9 **dest) {
+void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest) {
   D3DSURFACE_DESC desc;
   (*src)->GetDesc(&desc);
 
@@ -150,18 +150,18 @@ int surface_getpixel(int id, int x, int y)
   if (x > surface->width || y > surface->height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pSysBuffer;
-  enigma::surface_copy_to_systemmem(&pBuffer, &pSysBuffer);
+  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pRamBuffer;
+  enigma::surface_copy_to_ram(&pBuffer, &pRamBuffer);
 
   D3DLOCKED_RECT rect;
 
-  pSysBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+  pRamBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
   unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
   unsigned offset = y * rect.Pitch + x * 4;
   int ret = bitmap[offset + 2] | (bitmap[offset + 1] << 8) | (bitmap[offset + 0] << 16);
-  pSysBuffer->UnlockRect();
+  pRamBuffer->UnlockRect();
 
-  pSysBuffer->Release();
+  pRamBuffer->Release();
 
   return ret;
 }
@@ -174,18 +174,18 @@ int surface_getpixel_ext(int id, int x, int y)
   if (x > surface->width || y > surface->height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pSysBuffer;
-  enigma::surface_copy_to_systemmem(&pBuffer, &pSysBuffer);
+  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pRamBuffer;
+  enigma::surface_copy_to_ram(&pBuffer, &pRamBuffer);
 
   D3DLOCKED_RECT rect;
 
-  pSysBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+  pRamBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
   unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
   unsigned offset = y * rect.Pitch + x * 4;
   int ret = bitmap[offset + 2] | (bitmap[offset + 1] << 8) | (bitmap[offset + 0] << 16) | (bitmap[offset + 3] << 24);
-  pSysBuffer->UnlockRect();
+  pRamBuffer->UnlockRect();
 
-  pSysBuffer->Release();
+  pRamBuffer->Release();
 
   return ret;
 }
@@ -198,18 +198,18 @@ int surface_getpixel_alpha(int id, int x, int y)
   if (x > surface->width || y > surface->height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pSysBuffer;
-  enigma::surface_copy_to_systemmem(&pBuffer, &pSysBuffer);
+  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pRamBuffer;
+  enigma::surface_copy_to_ram(&pBuffer, &pRamBuffer);
 
   D3DLOCKED_RECT rect;
 
-  pSysBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+  pRamBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
   unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
   unsigned offset = y * rect.Pitch + x * 4;
   int ret = bitmap[offset + 3];
-  pSysBuffer->UnlockRect();
+  pRamBuffer->UnlockRect();
 
-  pSysBuffer->Release();
+  pRamBuffer->Release();
 
   return ret;
 }
