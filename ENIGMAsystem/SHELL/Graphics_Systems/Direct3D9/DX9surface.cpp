@@ -41,6 +41,8 @@ namespace enigma {
 vector<Surface*> Surfaces(0);
 D3DCOLOR get_currentcolor();
 
+//TODO Add caching of the surface's RAM copy to speed this shit up
+//Maybe also investigate the use of CreateRenderTarget
 void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest) {
   D3DSURFACE_DESC desc;
   (*src)->GetDesc(&desc);
