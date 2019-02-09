@@ -1,1 +1,1 @@
-spr = sprite_add("CommandLine/testing/data/sprite.png", 4, false, false, 16, 10);
+spr = sprite_add("../data/sprite.png", 4, false, false, 16, 10);
