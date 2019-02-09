@@ -41,6 +41,14 @@ namespace enigma {
 vector<Surface*> Surfaces(0);
 D3DCOLOR get_currentcolor();
 
+void surface_copy_to_systemmem(IDirect3DSurface9 **src, IDirect3DSurface9 **dest) {
+  D3DSURFACE_DESC desc;
+  (*src)->GetDesc(&desc);
+
+  d3dmgr->device->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, dest, NULL);
+  d3dmgr->device->GetRenderTargetData(*src, *dest);
+}
+
 } // namespace enigma
 
 namespace enigma_user {
@@ -143,11 +151,7 @@ int surface_getpixel(int id, int x, int y)
   draw_batch_flush(batch_flush_deferred);
 
   LPDIRECT3DSURFACE9 pBuffer = surface->surf, pSysBuffer;
-  D3DSURFACE_DESC desc;
-  pBuffer->GetDesc(&desc);
-
-  d3dmgr->device->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pSysBuffer, NULL);
-  d3dmgr->device->GetRenderTargetData(pBuffer, pSysBuffer);
+  enigma::surface_copy_to_systemmem(&pBuffer, &pSysBuffer);
 
   D3DLOCKED_RECT rect;
 
@@ -171,11 +175,7 @@ int surface_getpixel_ext(int id, int x, int y)
   draw_batch_flush(batch_flush_deferred);
 
   LPDIRECT3DSURFACE9 pBuffer = surface->surf, pSysBuffer;
-  D3DSURFACE_DESC desc;
-  pBuffer->GetDesc(&desc);
-
-  d3dmgr->device->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pSysBuffer, NULL);
-  d3dmgr->device->GetRenderTargetData(pBuffer, pSysBuffer);
+  enigma::surface_copy_to_systemmem(&pBuffer, &pSysBuffer);
 
   D3DLOCKED_RECT rect;
 
@@ -199,11 +199,7 @@ int surface_getpixel_alpha(int id, int x, int y)
   draw_batch_flush(batch_flush_deferred);
 
   LPDIRECT3DSURFACE9 pBuffer = surface->surf, pSysBuffer;
-  D3DSURFACE_DESC desc;
-  pBuffer->GetDesc(&desc);
-
-  d3dmgr->device->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pSysBuffer, NULL);
-  d3dmgr->device->GetRenderTargetData(pBuffer, pSysBuffer);
+  enigma::surface_copy_to_systemmem(&pBuffer, &pSysBuffer);
 
   D3DLOCKED_RECT rect;
 
