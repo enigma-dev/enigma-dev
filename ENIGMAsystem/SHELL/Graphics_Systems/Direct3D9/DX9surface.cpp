@@ -142,15 +142,22 @@ int surface_getpixel(int id, int x, int y)
   if (x > surface->width || y > surface->height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf;
+  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pSysBuffer;
+  D3DSURFACE_DESC desc;
+  pBuffer->GetDesc(&desc);
+
+  d3dmgr->device->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pSysBuffer, NULL);
+  d3dmgr->device->GetRenderTargetData(pBuffer, pSysBuffer);
+
   D3DLOCKED_RECT rect;
 
-  pBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+  pSysBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
   unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
   unsigned offset = y * rect.Pitch + x * 4;
-  int ret = bitmap[offset + 1] | (bitmap[offset + 2] << 8) | (bitmap[offset + 3] << 16);
-  pBuffer->UnlockRect();
-  delete[] bitmap;
+  int ret = bitmap[offset + 2] | (bitmap[offset + 1] << 8) | (bitmap[offset + 0] << 16);
+  pSysBuffer->UnlockRect();
+
+  pSysBuffer->Release();
 
   return ret;
 }
@@ -163,15 +170,22 @@ int surface_getpixel_ext(int id, int x, int y)
   if (x > surface->width || y > surface->height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf;
+  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pSysBuffer;
+  D3DSURFACE_DESC desc;
+  pBuffer->GetDesc(&desc);
+
+  d3dmgr->device->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pSysBuffer, NULL);
+  d3dmgr->device->GetRenderTargetData(pBuffer, pSysBuffer);
+
   D3DLOCKED_RECT rect;
 
-  pBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+  pSysBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
   unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
   unsigned offset = y * rect.Pitch + x * 4;
-  int ret = bitmap[offset + 0] | (bitmap[offset + 1] << 8) | (bitmap[offset + 2] << 16) | (bitmap[offset + 3] << 24);
-  pBuffer->UnlockRect();
-  delete[] bitmap;
+  int ret = bitmap[offset + 2] | (bitmap[offset + 1] << 8) | (bitmap[offset + 0] << 16) | (bitmap[offset + 3] << 24);
+  pSysBuffer->UnlockRect();
+
+  pSysBuffer->Release();
 
   return ret;
 }
@@ -184,15 +198,22 @@ int surface_getpixel_alpha(int id, int x, int y)
   if (x > surface->width || y > surface->height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf;
+  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pSysBuffer;
+  D3DSURFACE_DESC desc;
+  pBuffer->GetDesc(&desc);
+
+  d3dmgr->device->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pSysBuffer, NULL);
+  d3dmgr->device->GetRenderTargetData(pBuffer, pSysBuffer);
+
   D3DLOCKED_RECT rect;
 
-  pBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+  pSysBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
   unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
   unsigned offset = y * rect.Pitch + x * 4;
-  int ret = bitmap[offset];
-  pBuffer->UnlockRect();
-  delete[] bitmap;
+  int ret = bitmap[offset + 3];
+  pSysBuffer->UnlockRect();
+
+  pSysBuffer->Release();
 
   return ret;
 }
