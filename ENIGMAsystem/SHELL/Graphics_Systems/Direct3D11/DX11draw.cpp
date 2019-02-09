@@ -95,11 +95,13 @@ namespace enigma_user
 int draw_getpixel(int x, int y)
 {
   draw_batch_flush(batch_flush_deferred);
+  return 0;
 }
 
 int draw_getpixel_ext(int x, int y)
 {
   draw_batch_flush(batch_flush_deferred);
+  return 0;
 }
 
 } // namespace enigma_user
