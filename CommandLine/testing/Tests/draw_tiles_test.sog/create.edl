@@ -1,4 +1,4 @@
-var background0 = background_add("../data/hugar.png", false, false);
+var background0 = background_add("CommandLine/testing/data/hugar.png", false, false);
 
 var red_tid = tile_add(background0,0,0,32,32,0,0,0);
 tile_set_blend(red_tid, make_color_rgb(255, 0, 0));
