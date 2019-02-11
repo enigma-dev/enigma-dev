@@ -9,8 +9,8 @@ begin
     begin
         xx += 1;
 
-        draw_set_blend_mode_ext(yy, xx); /* The blend mode constants are basically numbers. bm_zero is 1, bm_one is 2, bm_scr_color is 3, bm_inv_scr_color is 4, etc...*/
+        //draw_set_blend_mode_ext(yy, xx); /* The blend mode constants are basically numbers. bm_zero is 1, bm_one is 2, bm_scr_color is 3, bm_inv_scr_color is 4, etc...*/
         draw_sprite(spr_hugar, 0, xx*32-32, yy*32-32);
-        draw_set_blend_mode(bm_normal);
+        //draw_set_blend_mode(bm_normal);
     end;
 end;
