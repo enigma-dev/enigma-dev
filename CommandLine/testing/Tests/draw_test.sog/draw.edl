@@ -1,16 +1,46 @@
-draw_rectangle_color(0, 0, 352, 352, c_red, c_green, c_blue, c_yellow, 0);
+draw_set_color(c_yellow);
+draw_rectangle(50, 50, 600, 400, true);
+draw_set_color(c_olive);
+draw_circle(275, 175, 200, false);
+draw_set_color(c_red);
+draw_ellipse(100, 100, 300, 200, false);
+draw_set_color(c_green);
+draw_ellipse(350, 100, 550, 200, false);
+draw_set_color(c_fuchsia);
+draw_triangle(300, 300, 500, 300, 400, 480, false);
 
-yy = 0;
-repeat 11
-begin
-    yy += 1;
-    xx = 0;
-    repeat 11
-    begin
-        xx += 1;
+// test using current color & alpha per-vertex on 2D primitive
+draw_set_color(c_yellow);
+draw_primitive_begin(pr_trianglelist);
+draw_set_color(c_red);
+draw_vertex(80, 80);
+draw_set_color(c_green);
+draw_vertex_color(320, 80, c_black, 0.5);
+draw_set_color(c_blue);
+draw_vertex(80, 220);
+draw_set_color(c_orange);
+draw_primitive_end();
+draw_set_color(c_white);
 
-        draw_set_blend_mode_ext(yy, xx); /* The blend mode constants are basically numbers. bm_zero is 1, bm_one is 2, bm_scr_color is 3, bm_inv_scr_color is 4, etc...*/
-        draw_sprite(spr_hugar, 0, xx*32-32, yy*32-32);
-        draw_set_blend_mode(bm_normal);
-    end;
-end;
+// test using current color & alpha per-vertex on 3D primitive
+draw_set_color(c_yellow);
+d3d_primitive_begin(pr_trianglelist);
+draw_set_color(c_black);
+draw_set_alpha(0.5);
+d3d_vertex(320, 80, 0);
+draw_set_alpha(1);
+draw_set_color(c_green);
+d3d_vertex_color(320, 220, 0, c_red, 1);
+draw_set_color(c_blue);
+d3d_vertex(80, 220, 0);
+draw_set_color(c_orange);
+d3d_primitive_end();
+draw_set_color(c_white);
+
+// flush immediately to ensure that a 2D and 3D primitive
+// render correctly when flushed from the same batch
+draw_batch_flush();
+
+// stretched sprite should ignore origin
+draw_sprite_stretched(spr,0,0,0,25,25);
+draw_sprite_stretched_ext(spr,0,25,0,25,25,c_red,0.5);
