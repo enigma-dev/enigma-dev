@@ -18,7 +18,10 @@
 #include "dialogs.h"
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include <stdlib.h>
 #include <string>
+
+using std::string;
 
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
