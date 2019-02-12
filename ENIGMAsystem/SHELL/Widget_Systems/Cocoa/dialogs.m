@@ -501,6 +501,7 @@ int cocoa_get_color(const char *title, int defcol)
     [myColorPanel setTitle:myColorTitle];
     [myColorPanel setColor:myDefCol];
     NSView *oldView = [myColorPanel contentView];
+    [oldView retain];
     [myColorPanel setContentView:0];
     NSView *colorView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, myColorSize.width, myColorSize.height)];
     NSView *parentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, myColorSize.width, myColorSize.height)];
@@ -565,10 +566,13 @@ int cocoa_get_color(const char *title, int defcol)
     [NSApp endModalSession:colorSession];
     [myColorPanel setContentView:oldView];
     
+    [oldView release];
+    [colorView release];
     [myOKButton release];
     [myCancelButton release];
     [myButtonView release];
     [myViewView release];
+    [parentView release];
     
     return rescol;;
 }
