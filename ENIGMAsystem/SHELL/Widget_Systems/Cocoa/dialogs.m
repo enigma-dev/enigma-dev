@@ -98,6 +98,8 @@ const char *cocoa_input_box(const char *title, const char *str, const char *def)
     [alert addButtonWithTitle:@"Cancel"];
     
     NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 300, 22)];
+    [[input cell] setWraps:NO];
+    [[input cell] setScrollable:YES];
     [input setMaximumNumberOfLines:1];
     [input setStringValue:myDef];
     [alert setAccessoryView:input];
@@ -132,6 +134,8 @@ const char *cocoa_password_box(const char *title, const char *str, const char *d
     [alert addButtonWithTitle:@"Cancel"];
     
     NSSecureTextField *input = [[NSSecureTextField alloc] initWithFrame:NSMakeRect(0, 0, 300, 22)];
+    [[input cell] setWraps:NO];
+    [[input cell] setScrollable:YES];
     [input setMaximumNumberOfLines:1];
     [input setStringValue:myDef];
     [alert setAccessoryView:input];
