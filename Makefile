@@ -31,7 +31,7 @@ libProtocols: .FORCE
 libEGM: .FORCE liblodepng libProtocols
 	$(MAKE) -C CommandLine/libEGM/
 
-EMAKE_TARGETS = .FORCE liblodepng
+EMAKE_TARGETS = .FORCE
 
 ifneq ($(CLI_ENABLE_EGM), FALSE)
 	EMAKE_TARGETS += libEGM
