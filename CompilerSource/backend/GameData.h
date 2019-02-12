@@ -28,7 +28,6 @@ struct ImageData {
 
   ImageData(const ::Image &image);
   ImageData(int w, int h, const uint8_t *data, size_t size);
-  ImageData(const std::string& filePath);
 };
 
 struct SpriteData : buffers::resources::Sprite {
@@ -147,9 +146,8 @@ struct GameData {
 
   GameData(struct EnigmaStruct *es);
   GameData(const buffers::Project &proj);
-
-private:
-  void FlattenTree(const buffers::TreeNode &root);
 };
 
-#endif
+int FlattenProto(const buffers::Project &proj, GameData *gameData);
+
+#endif // ENIGMA_GAMEDATA_H

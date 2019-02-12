@@ -162,7 +162,10 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
 }
 
 dllexport int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
-  return current_language->compile(GameData(*proj), exe_filename, mode);
+  GameData gameData(*proj);
+  int error = FlattenProto(*proj, &gameData);
+  if (error) return error;
+  return current_language->compile(gameData, exe_filename, mode);
 }
 
 static bool run_game = true;
