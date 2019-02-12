@@ -138,5 +138,4 @@ int get_color_ext(int defcol, string title) {
   return cocoa_get_color(title.c_str(), defcol);
 } 
 
-
 } // enigma_user
