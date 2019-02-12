@@ -574,6 +574,6 @@ int cocoa_get_color(const char *title, int defcol)
     [myViewView release];
     [parentView release];
     
-    return rescol;;
+    return rescol;
 }
 
