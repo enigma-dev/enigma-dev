@@ -21,14 +21,14 @@
 #include <stdlib.h>
 #include <string>
 
-using std::string;
-
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
 #include "Universal_System/object.h"
 #include "Universal_System/debugscope.h"
 #endif
+
+using std::string;
 
 namespace enigma {
   
