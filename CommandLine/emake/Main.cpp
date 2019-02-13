@@ -15,8 +15,6 @@
 #include "yyp.h"
 #endif
 
-#include "Proto2ES.h"
-
 #include <boost/filesystem.hpp>
 
 #include <fstream>

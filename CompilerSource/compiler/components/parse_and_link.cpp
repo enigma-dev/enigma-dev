@@ -55,11 +55,11 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   auto &tlines = state.parsed_tlines;
   auto &scr_lookup = state.script_lookup;
   auto &tline_lookup = state.timeline_lookup;
-  
+
   set<string> script_names;
   for (const auto &script : game.scripts)
     script_names.insert(script.name);
-  
+
   // First we just parse the scripts to add semicolons and collect variable names
   scripts.resize(game.scripts.size());
   for (size_t i = 0; i < game.scripts.size(); i++) {
@@ -224,7 +224,11 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
   //Done with scripts and timelines.
 
-
+  // Index object ids by name for lookup for collision event name->integer
+  //TODO: could be merged with parsed_objects lookup below
+  map<string, int> object_name_ids;
+  for (const auto &object : game.objects)
+    object_name_ids[object.name] = object.id();
 
   edbg << game.objects.size() << " Objects:\n";
   for (const auto &object : game.objects) {
@@ -245,18 +249,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       int ev_id;
         if (event.has_name()) {
           edbg << "  Event[" << event.type() << ", " << event.name() << "] ";
-          user << "FATAL: Unsupported: Event names. Translation required using "
-                  "events.res. Translation is present but there is no logic to "
-                  "use it.";
-
-          // TODO: Using the event type from events.res, translate the name
-          // string to a number and a valid identifier for use in this routine.
-          // It may be wise to store this information in a normalized table
-          // within GameData, similar to how fonts store glyph metrics.
-          // Also, remember to update calls to event_get_human_name.
-
-          // ev_id = translate_event_name(event.name());
-          return E_ERROR_COMPILER_LOGIC;
+          ev_id = object_name_ids[event.name()];
         } else {
           edbg << "  Event[" << event.type() << ", " << event.number() << "] ";
           ev_id = event.number();
@@ -264,7 +257,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
         //For each individual event (like begin_step) in the main event (Step), parse the code
         parsed_event &pev = pob->events[ev_count++]; //Make sure each sub event knows its main event's event ID.
-        pev.mainId = event.type(), pev.id = event.number();
+        pev.mainId = event.type(), pev.id = ev_id;
 
         //Copy the code into a string, and its attributes elsewhere
         string newcode = event.code();
@@ -292,7 +285,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         edbg << " Done." << flushl;
     }
   }
-  
+
   // Index parsed objects by name for lookup from instance object_types.
   map<string, parsed_object*> parsed_objects;
   for (parsed_object *obj : state.parsed_objects)
