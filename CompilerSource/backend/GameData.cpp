@@ -556,14 +556,14 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
       gameData->backgrounds.emplace_back(root.background(), root.name(), data);
       break;
     }
-    case TypeCase::kPath: gameData->paths.emplace_back(root.path(), root.name()); break;
-    case TypeCase::kScript: gameData->scripts.emplace_back(root.script(), root.name()); break;
-    case TypeCase::kShader: gameData->shaders.emplace_back(root.shader(), root.name()); break;
-    case TypeCase::kFont: gameData->fonts.emplace_back(root.font(), root.name()); break;
+    case TypeCase::kPath:     gameData->paths.emplace_back(root.path(), root.name()); break;
+    case TypeCase::kScript:   gameData->scripts.emplace_back(root.script(), root.name()); break;
+    case TypeCase::kShader:   gameData->shaders.emplace_back(root.shader(), root.name()); break;
+    case TypeCase::kFont:     gameData->fonts.emplace_back(root.font(), root.name()); break;
     case TypeCase::kTimeline: gameData->timelines.emplace_back(root.timeline(), root.name()); break;
-    case TypeCase::kObject: gameData->objects.emplace_back(root.object(), root.name()); break;
-    case TypeCase::kRoom: gameData->rooms.emplace_back(root.room(), root.name()); break;
-    case TypeCase::kInclude: /*gameData->includes.emplace_back(root.include());*/ break;
+    case TypeCase::kObject:   gameData->objects.emplace_back(root.object(), root.name()); break;
+    case TypeCase::kRoom:     gameData->rooms.emplace_back(root.room(), root.name()); break;
+    case TypeCase::kInclude:  /*gameData->includes.emplace_back(root.include());*/ break;
     case TypeCase::kSettings: /*gameData->settings.emplace_back(root.settings());*/ break;
     default: cout << "- Not transferring unknown " << root.name() << endl; break;
   }
