@@ -5,8 +5,9 @@ import "google/protobuf/descriptor.proto";
 extend google.protobuf.FieldOptions {
   optional int32 id_start = 50000;
   optional bool file_path = 50001;
-  optional string gmx = 50002;
-  optional string gmx_id = 50003;
-  optional string yyp = 50004;
-  optional string yyp_id = 50005;
+  optional string resource_ref = 50002;
+  optional string gmx = 50003;
+  optional string gmx_id = 50004;
+  optional string yyp = 50005;
+  optional string yyp_id = 50006;
 }
