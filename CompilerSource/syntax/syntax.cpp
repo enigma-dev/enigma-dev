@@ -48,7 +48,6 @@ extern std::map <string, char> unimplemented_function_list;
 #include <System/lex_cpp.h>
 #include <Storage/definition.h>
 #include "languages/language_adapter.h"
-#include <compiler/jdi_utility.h>
 
 using namespace std;
 
@@ -250,7 +249,8 @@ namespace syncheck
       if (pos >= code.length()) {
         if (mymacroind)
           mymacrostack[--mymacroind].release(code,pos);
-        else break; continue;
+        else break;
+        continue;
       }
 
       if (is_useless(code[pos])) {
@@ -333,7 +333,7 @@ namespace syncheck
               continue;
             }
 
-            if (definition_is_function(d)) {
+            if (current_language->definition_is_function(d)) {
               lex.push_back(token(TT_FUNCTION, d, name, superPos, name.length(), false, true, false, mymacroind));
               continue;
             }
@@ -636,7 +636,7 @@ namespace syncheck
           {
             bool contented = false;
             unsigned params = 0, exceeded_at = 0;
-            unsigned minarg, maxarg; definition_parameter_bounds(lex[i].ext, minarg, maxarg);
+            unsigned minarg, maxarg; current_language->definition_parameter_bounds(lex[i].ext, minarg, maxarg);
             const unsigned lm = lex[i+1].match;
             for (unsigned ii = i+2; ii < lm; ii++)
             {

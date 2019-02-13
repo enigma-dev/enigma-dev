@@ -26,36 +26,35 @@
 #include <vector>
 #include <map>
 #include <set>
-using namespace std;
+
+#include <Storage/definition.h>
+#include "backend/GameData.h"
 #include "parser/object_storage.h"
-#include "backend/EnigmaStruct.h"
 #include "frontend.h"
 
 struct language_adapter {
   virtual string get_name() = 0;
 
-  // Sizable utilities
-  virtual int link_globals(parsed_object*, EnigmaStruct*, parsed_script*[], vector<parsed_script*>& tlines) = 0;
-  virtual int link_ambiguous(parsed_object*, EnigmaStruct*, parsed_script*[], vector<parsed_script*>& tlines) = 0;
-
   // IDE_EDITABLEs added before compile
-  virtual int compile_parseAndLink(EnigmaStruct*,parsed_script*[], vector<parsed_script*>& tlines, const std::set<std::string>& script_names) = 0;
-  virtual int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*>&,parsed_object*, const std::set<std::string>&) = 0;
-  virtual int compile_writeGlobals(EnigmaStruct*,parsed_object*) = 0;
-  virtual int compile_writeObjectData(EnigmaStruct*,parsed_object*,int mode) = 0;
-  virtual int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*, bool treatUninitAs0) = 0;
-  virtual int compile_writeFontInfo(EnigmaStruct* es) = 0;
-  virtual int compile_writeRoomData(EnigmaStruct* es,parsed_object *EGMglobal,int mode) = 0;
-  virtual int compile_writeShaderData(EnigmaStruct* es,parsed_object *EGMglobal) = 0;
-  virtual int compile_writeDefraggedEvents(EnigmaStruct* es) = 0;
-  virtual int compile_handle_templates(EnigmaStruct* es) = 0;
+  virtual int compile_parseAndLink(const GameData &game, CompileState &state) = 0;
+  virtual int link_globals(const GameData &game, CompileState &state) = 0;
+  virtual int link_ambiguous(const GameData &game, CompileState &state) = 0;
+  virtual int compile_parseSecondary(CompileState &state) = 0;
+
+  virtual int compile_writeGlobals(const GameData &game, const parsed_object* global, const DotLocalMap &dot_accessed_locals) = 0;
+  virtual int compile_writeObjectData(const GameData &game, const CompileState &state, int mode) = 0;
+  virtual int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const parsed_object* global, bool treatUninitAs0) = 0;
+  virtual int compile_writeFontInfo(const GameData &game) = 0;
+  virtual int compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, parsed_object *EGMglobal, int mode) = 0;
+  virtual int compile_writeShaderData(const GameData &game, parsed_object *EGMglobal) = 0;
+  virtual int compile_writeDefraggedEvents(const GameData &game, const ParsedObjectVec &parsed_objects) = 0;
 
   // Resources added to module
-  virtual int module_write_sprites(EnigmaStruct *es, FILE *gameModule) = 0;
-  virtual int module_write_sounds(EnigmaStruct *es, FILE *gameModule) = 0;
-  virtual int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule) = 0;
-  virtual int module_write_paths(EnigmaStruct *es, FILE *gameModule) = 0;
-  virtual int module_write_fonts(EnigmaStruct *es, FILE *gameModule) = 0;
+  virtual int module_write_sprites(const GameData &game, FILE *gameModule) = 0;
+  virtual int module_write_sounds(const GameData &game, FILE *gameModule) = 0;
+  virtual int module_write_backgrounds(const GameData &game, FILE *gameModule) = 0;
+  virtual int module_write_paths(const GameData &game, FILE *gameModule) = 0;
+  virtual int module_write_fonts(const GameData &game, FILE *gameModule) = 0;
 
   // Globals and locals
   virtual int  load_shared_locals() = 0;
@@ -64,12 +63,44 @@ struct language_adapter {
 
   // Big things
   virtual syntax_error* definitionsModified(const char*, const char*) = 0;
-  virtual int compile(EnigmaStruct *es, const char* exe_filename, int mode) = 0;
+  virtual int compile(const GameData &game, const char* exe_filename, int mode) = 0;
+  
+  // ===============================================================================================
+  // == Language Integration =======================================================================
+  // ===============================================================================================
+  
+  /// Look up a type by its name.
+  jdi::definition* find_typename(string name);
+
+  // Returns the index at which a function parameters ref_stack is variadic;
+  // that is, at which position it accepts `enigma::varargs`.
+  virtual int referencers_varargs_at(jdi::ref_stack &refs) = 0;
+  virtual bool referencers_varargs(jdi::ref_stack &refs) = 0;
+
+  //v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@
+  // FIXME: JDI has leaked into all languages. I've moved that leak here, into the light.  X
+  //^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@
+  
+  /// Check whether the given definition is callable as a function.
+  virtual bool definition_is_function(jdi::definition *d) = 0;
+  /// Assuming this definition is a function, retrieve the number of overloads it has.
+  virtual size_t definition_overload_count(jdi::definition *d) = 0;
+  /// Read parameter bounds from the current definition into args min and max. For variadics, max = unsigned(-1).
+  virtual void definition_parameter_bounds(jdi::definition *d, unsigned &min, unsigned &max) = 0;
+  /// Create a script with the given name (and an assumed 16 parameters, all defaulted) to the given scope.
+  virtual void quickmember_script(jdi::definition_scope* scope, string name) = 0;
+  /// Create a standard integer variable member in the given scope.
+  virtual void quickmember_integer(jdi::definition_scope* scope, string name) = 0;
+
+  bool is_variadic_function(jdi::definition *d) {
+    return definition_is_function(d)
+        && referencers_varargs(((jdi::definition_function*)d)->referencers);
+  }
 
   virtual ~language_adapter();
 };
 
-extern map<string,language_adapter*> languages;
+extern map<string, language_adapter*> languages;
 extern language_adapter *current_language;
 extern string current_language_name;
 

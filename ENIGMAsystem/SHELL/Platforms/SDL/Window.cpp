@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "Event.h"
+#include "Joystick.h"
 #include "Gamepad.h"
 
 #include "Platforms/General/PFwindow.h"
@@ -62,10 +63,9 @@ static std::array<SDL_Cursor*, -enigma_user::cr_size_all> cursors;
 
 void handleInput() {
   input_push();
+  joystick_update();
   pushGamepads();
 }
-
-void showWindow() { SDL_ShowWindow(windowHandle); }
 
 void initCursors() {
   // cursors are negative ids 0 to -22
@@ -99,6 +99,7 @@ void initInput() {
 
   keyboard::inverse_keymap = inverse_map(keyboard::keymap);
   initCursors();
+  joystick_init();
   initGamepads();
 }
 
@@ -295,6 +296,22 @@ int display_get_height() {
 bool keyboard_check_direct(int key) {
   const Uint8* state = SDL_GetKeyboardState(nullptr);
   return state[enigma::keyboard::inverse_keymap[key]];
+}
+
+void keyboard_key_press(int key) {
+  SDL_Event sdlevent = { };
+  sdlevent.type = SDL_KEYDOWN;
+  sdlevent.key.keysym.sym = enigma::keyboard::inverse_keymap[key];
+
+  SDL_PushEvent(&sdlevent);
+}
+
+void keyboard_key_release(int key) {
+  SDL_Event sdlevent = { };
+  sdlevent.type = SDL_KEYUP;
+  sdlevent.key.keysym.sym = enigma::keyboard::inverse_keymap[key];
+
+  SDL_PushEvent(&sdlevent);
 }
 
 }  // namespace enigma_user

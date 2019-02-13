@@ -33,18 +33,14 @@
 
 namespace settings
 {
-  struct system_descriptor
-  {
+  struct system_descriptor {
     string name;
   };
   extern list<string> systems;
   int scour_settings();
 }
 
-namespace extensions
-{
-  string compile_local_string();
-  void dump_read_locals(map<string,int>&);
+namespace extensions {
   void parse_extensions(vector<string> exts);
   void crawl_for_locals();
   void determine_target();

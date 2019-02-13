@@ -33,7 +33,7 @@ namespace enigma
   unsigned char currentcolor[4] = {0,0,0,255};
   bool glew_isgo;
   bool pbo_isgo;
-  
+
   void graphicssystem_initialize()
   {
     #if GMSURFACE
@@ -49,29 +49,28 @@ namespace enigma
     glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
       glLoadIdentity();
-      
+
       glViewport(0,0,(int)room_width,(int)room_height);
 #if ENIGMA_WS_IPHONE !=0 || ENIGMA_WS_ANDROID !=0
 	  glOrthof(0,(int)room_width-1,(int)room_height-1,0,-1,1); //OPENGLES
 #else
 	  glOrtho(0,(int)room_width-1,(int)room_height-1,0,-1,1); //
-#endif 
+#endif
            glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      
+
       glDisable(GL_DEPTH_TEST);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #if ENIGMA_WS_IPHONE !=0 || ENIGMA_WS_ANDROID !=0
 	  glClearDepthf(1.0); //OPENGLES put f back in
 #else
-	  glClearDepth(1.0); 
-#endif 
-      
+	  glClearDepth(1.0);
+#endif
+
       glEnable(GL_BLEND);
-      glEnable(GL_ALPHA_TEST);
       glEnable(GL_TEXTURE_2D);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glAlphaFunc(GL_ALWAYS,0);
-      
+      glAlphaFunc(GL_GREATER,0);
+
       glColor4f(0,0,0,1);
       glBindTexture(GL_TEXTURE_2D,0);
   }

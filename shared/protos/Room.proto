@@ -16,7 +16,7 @@ message Room {
   optional bool persistent = 7 [(yyp) = "roomSettings/persistent"];
   optional int32 color = 8 [(gmx) = "colour"];
   optional bool show_color = 9 [(gmx) = "showcolour"];
-  optional string code = 10;
+  optional string creation_code = 10;
   optional bool enable_views = 11 [(gmx) = "enableViews", (yyp) = "viewSettings/enableViews"];
   optional bool clear_view_background = 12 [(gmx) = "clearViewBackground", (yyp) = "viewSettings/clearViewBackground"];
   optional bool clear_display_buffer = 13 [(gmx) = "clearDisplayBuffer", (yyp) = "viewSettings/clearDisplayBuffer"];
@@ -24,7 +24,7 @@ message Room {
   message Background {
     optional bool visible = 1;
     optional bool foreground = 2;
-    optional string background_name = 3 [(gmx) = "name"];
+    optional string background_name = 3 [(resource_ref)="background", (gmx) = "name"];
     optional int32 x = 4;
     optional int32 y = 5;
     optional bool htiled = 6;
@@ -32,6 +32,8 @@ message Room {
     optional double hspeed = 8;
     optional double vspeed = 9;
     optional bool stretch = 10;
+    optional int32 color = 11 [default = 0xFFFFFF];
+    optional double alpha = 12 [default = 1.0];
   }
 
   repeated Background backgrounds = 15 [(gmx) = "backgrounds/background"];
@@ -50,7 +52,7 @@ message Room {
     optional int32 vborder = 11;
     optional double hspeed = 12;
     optional double vspeed = 13;
-    optional string object_following = 14 [(gmx) = "objName"];
+    optional string object_following = 14 [(resource_ref)="object", (gmx) = "objName"];
   }
 
   repeated View views = 16 [(gmx) = "views/view", (yyp) = "views"];
@@ -58,22 +60,23 @@ message Room {
   message Instance {
     optional string name = 1;
     optional int32 id = 2 [(id_start) = 100000];
-    optional string object_type = 3 [(gmx) = "objName"];
+    optional string object_type = 3 [(resource_ref)="object", (gmx) = "objName"];
     optional double x = 4;
     optional double y = 5;
     optional double z = 6;
-    optional string code = 7;
+    optional string creation_code = 7;
+    optional string initialization_code = 14;
     optional double xscale = 8 [default = 1, (gmx) = "scaleX"];
     optional double yscale = 9 [default = 1, (gmx) = "scaleY"];
     optional double zscale = 10 [default = 1, (gmx) = "scaleY"];
     optional double rotation  = 11;
     optional double zrotation = 12;
     optional int32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
-    
+
     message EditorSettings {
       optional bool locked = 1;
     }
-    
+
     optional EditorSettings editor_settings = 31;
   }
 
@@ -82,7 +85,7 @@ message Room {
   message Tile {
     optional string name = 1;
     optional int32 id = 2 [(id_start) = 10000000];
-    optional string background_name = 3 [(gmx) = "bgName"];
+    optional string background_name = 3 [(resource_ref)="background", (gmx) = "bgName"];
     optional double x = 4;
     optional double y = 5;
     optional int32 xoffset = 6 [(gmx) = "xo"];
@@ -90,14 +93,15 @@ message Room {
     optional uint32 width = 8 [(gmx) = "w"];
     optional uint32 height = 9 [(gmx) = "h"];
     optional int32 depth = 10;
-    optional double xscale = 11 [(gmx) = "scaleX"];
-    optional double yscale = 12 [(gmx) = "scaleY"];
-    optional int32 color = 13 [(gmx) = "colour"];
-    
+    optional double xscale = 11 [default = 1.0, (gmx) = "scaleX"];
+    optional double yscale = 12 [default = 1.0, (gmx) = "scaleY"];
+    optional int32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
+    optional double alpha = 14 [default = 1.0];
+
     message EditorSettings {
       optional bool locked = 1;
     }
-    
+
     optional EditorSettings editor_settings = 31;
   }
 

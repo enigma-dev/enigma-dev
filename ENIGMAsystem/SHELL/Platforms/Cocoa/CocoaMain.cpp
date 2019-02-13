@@ -21,9 +21,12 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <mach-o/dyld.h>
+#include <limits.h>
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
 #include <cstdlib>
+#include <string>
 
 #include "../General/PFwindow.h"
 #include "../General/PFfilemanip.h"
@@ -31,27 +34,44 @@
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/roomsystem.h"
 
+using std::string;
+
 namespace enigma {
-  void SetResizeFptr();
+
+void SetResizeFptr();
+
+static inline string add_slash(const string& dir) {
+  if (dir.empty() || *dir.rbegin() != '/') return dir + '/';
+  return dir;
 }
 
-namespace enigma_user {
-  std::string working_directory = "";
-}
+void initialize_directory_globals() {
+  // Set the working_directory
+  char buffer[PATH_MAX + 1];
+  if (getcwd(buffer, PATH_MAX + 1) != NULL)
+    enigma_user::working_directory = add_slash(buffer);
 
-extern "C" void copy_bundle_cwd(char* res);
+  // Set the program_directory
+  buffer[0] = 0;
 
-int main(int argc,char** argv)
-{
-  // Set the working_directory (from the bundle's location; using cwd won't work right on OS-X).
-  char buffer[1024] = {0};
-  copy_bundle_cwd(&buffer[0]);
-  if (buffer[0])
-    fprintf(stdout, "Current working dir: %s\n", buffer);
+  uint32_t bufsize = sizeof(buffer);
+  if (_NSGetExecutablePath(buffer, &bufsize) == 0) {
+    enigma_user::program_directory = add_slash(dirname(buffer));
+  }
+
+  // Set the temp_directory
+  char *env = getenv("TMPDIR");
+
+  if (env != NULL)
+    enigma_user::temp_directory = add_slash(env);
   else
-    perror("copy_bundle_cwd() error");
-  enigma_user::working_directory = string( buffer );
+    enigma_user::temp_directory = "/tmp/";
+}
   
+} // namespace enigma
+
+int main(int argc,char** argv) {
+  enigma::initialize_directory_globals();
   enigma::parameters=new char* [argc];
   for (int i=0; i<argc; i++)
     enigma::parameters[i]=argv[i];
@@ -63,24 +83,19 @@ int main(int argc,char** argv)
 
 namespace enigma_user {
 
-  void sleep(int ms) {
-    if (ms > 1000) ::sleep(ms/1000);
-    usleep((ms % 1000) *1000);
-  };
+void sleep(int ms) {
+  if (ms > 1000) ::sleep(ms/1000);
+  usleep((ms % 1000) *1000);
+};
   
-  int parameter_count(){
+int parameter_count() {
   // TODO
   return 0;
-  }
+}
 
-  string parameter_string(int n) {
-    // TODO
-    return string("");
-  }
-
-  string environment_get_variable(string name) {
-    // TODO
-    return string("");
-  }
+string parameter_string(int n) {
+  // TODO
+  return string("");
+}
 
 }

@@ -74,4 +74,3 @@ namespace enigma_user
   void texture_set_interpolation_ext(int sampler, bool enable);
   #define texture_set_interpolation(enable) texture_set_interpolation_ext(0, enable)
 }
-

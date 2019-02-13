@@ -3,16 +3,14 @@ cmake_minimum_required(VERSION 3.11)
 set(LIB "Protocols")
 set(LIB_VERSION "0.1")
 set(LIB_DESCRIPTION "Protobuf interface for ENIGMA and GameMaker files")
-set(PROTO_OUT_DIR "codegen/")
 
 set(CMAKE_DEBUG_POSTFIX d)
 
-add_definitions(-D_WIN32_WINNT=0x0600)
+if(WIN32)
+  add_definitions(-D_WIN32_WINNT=0x0600)
+endif(WIN32)
 
 project(${LIB} VERSION ${LIB_VERSION} DESCRIPTION ${LIB_DESCRIPTION})
-file(GLOB PROTO_FILES *.proto)
-add_library(${LIB} STATIC ${PROTO_FILES} ${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc)
-set_target_properties(${LIB} PROPERTIES VERSION ${LIB_VERSION})
 
 message(STATUS "Initial build flags:")
 set(CompilerFlags
@@ -26,18 +24,23 @@ set(CompilerFlags
 	  CMAKE_CXX_FLAGS_RELWITHDEBINFO
         )
 foreach(CompilerFlag ${CompilerFlags})
-  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+  if(MSVC)
+	string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+  endif(MSVC)
   message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
 endforeach()
 
-find_package(protobuf CONFIG REQUIRED)
-include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-find_package(gRPC CONFIG REQUIRED)
-target_include_directories(${LIB} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/" "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
+if(NOT MSVC)
+  set(GRPC_EXE "/usr/bin/grpc_cpp_plugin")
+else()
+  set(GRPC_EXE "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/grpc/grpc_cpp_plugin.exe")
+endif(NOT MSVC)
 
-protobuf_generate(TARGET ${LIB})
+file(GLOB PROTO_FILES *.proto)
+include(FindProtobuf)
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc
@@ -45,7 +48,7 @@ add_custom_command(
   ARGS --cpp_out ${CMAKE_CURRENT_BINARY_DIR}
 	   --grpc_out=${CMAKE_CURRENT_BINARY_DIR}
 	   -I=${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include
-	   --plugin=protoc-gen-grpc=${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/grpc/grpc_cpp_plugin.exe
+	   --plugin=protoc-gen-grpc=${GRPC_EXE}
 	   --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
 	   server.proto
   DEPENDS protobuf::protoc
@@ -54,6 +57,15 @@ add_custom_command(
  
 add_custom_target(generate_grpc DEPENDS ${PROTO_FILES})
 
+if(MSVC)
+  add_library(${LIB} STATIC ${PROTO_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc)
+  target_include_directories(${LIB} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/" "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
+else()
+  add_library(${LIB} SHARED ${PROTO_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc)
+endif(MSVC)
+
+set_target_properties(${LIB} PROPERTIES VERSION ${LIB_VERSION})
+
 # Find GRPC
 find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
 find_library(LIB_GRPC NAMES grpc)
@@ -61,10 +73,8 @@ find_library(LIB_GPR NAMES gpr)
 target_link_libraries(${LIB} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
 
 # Find Protobuf
-find_library(LIB_PROTOBUF NAMES libprotobuf)
-find_library(LIB_PROTOC NAMES libprotoc)
-find_library(LIB_PROTOLITE NAMES libprotobuf-lite)
-target_link_libraries(${LIB} PRIVATE ${LIB_PROTOC} ${LIB_PROTOBUF} ${LIB_PROTOLITE})
+include_directories(${Protobuf_INCLUDE_DIRS})
+target_link_libraries(${LIB} PRIVATE ${Protobuf_LIBRARIES})
 
 foreach(_proto ${PROTO_FILES})
     get_filename_component(_basename ${_proto} NAME_WE)

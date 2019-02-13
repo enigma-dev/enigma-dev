@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Robert B. Colton
+/** Copyright (C) 2018 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,13 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_PROTO2ES_H
-#define ENIGMA_PROTO2ES_H
+namespace enigma {
 
-#include "game.pb.h"
+bool joystick_init();
+void joystick_uninit();
+void joystick_update();
 
-#include "backend/EnigmaStruct.h"
-
-EnigmaStruct* Proto2ES(buffers::Game* protobuf);
-
-#endif // ENIGMA_PROTO2ES_H
+}

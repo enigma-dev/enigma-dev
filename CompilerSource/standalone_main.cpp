@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
   printf("Line %d, position %d (absolute index %d): %s\r\n",a->line,a->position,a->absolute_index,a->err_str);
   {
     jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
-    quickmember_variable(&globals_scope, jdi::builtin_type__int, "sprite0");
+    current_language->quickmember_integer("sprite0");
   }
 
   EnigmaStruct es;

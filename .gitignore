@@ -7,8 +7,13 @@
 /MacOS/build/Release/EnigmaXcode.app/Contents/Resources/*
 /definitions.h
 /coverage_*.info
+/libEGM.*
+/libProtocols.*
 
-/CommandLine/protos/codegen
+
+/shared/protos/build/
+/shared/protos/codegen
+/CommandLine/libEGM/build/
 
 /ENIGMAsystem/SHELL/API_Switchboard.h
 /ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/

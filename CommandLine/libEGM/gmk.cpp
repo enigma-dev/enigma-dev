@@ -130,7 +130,7 @@ void PngEncodeEnd(PngEncodeState enc) {
     free(enc.buffer);
 }
 
-std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
+std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool transparent=false) {
   static const unsigned MINHEADER = 54; //minimum BMP header size
   auto bmp = reinterpret_cast<unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
@@ -170,6 +170,13 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
 
   PngEncodeState enc = PngEncodeStart(w, h);
 
+
+  // get the bottom left pixel for transparency
+  // NOTE: bmp is obviously upside down, so it's just the first pixel
+  unsigned char t_pixel_r = bmp[pixeloffset+0],
+                t_pixel_g = bmp[pixeloffset+1],
+                t_pixel_b = bmp[pixeloffset+2];
+
   /*
   There are 3 differences between BMP and raw image data used by libpng:
   -it's upside down
@@ -199,7 +206,7 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
         bmp[bmpos + 0] == t_pixel_r &&
         bmp[bmpos + 1] == t_pixel_g &&
         bmp[bmpos + 2] == t_pixel_b) {
-        rgba[newpos + 3] = 0; //A<-A
+        enc.row[newpos + 3] = 0; //A<-A
       }
     }
     png_write_row(enc.png, enc.row);
@@ -504,22 +511,23 @@ int LoadSettings(Decoder &dec, Settings& set) {
 
   General* gen = set.mutable_general();
   Graphics* gfx = set.mutable_graphics();
+  Windowing *win = set.mutable_windowing();
   Info* inf = set.mutable_info();
 
   if (ver >= 800) dec.beginInflate();
-  gfx->set_start_in_fullscreen(dec.readBool());
+  win->set_start_in_fullscreen(dec.readBool());
   if (ver >= 600) {
-    gfx->set_smooth_colors(dec.readBool());
+    gfx->set_interpolate_textures(dec.readBool());
   }
-  gfx->set_window_showborder(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
+  win->set_show_border(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
   gen->set_show_cursor(dec.readBool());
-  gfx->set_window_scale(dec.read4());
+  gfx->set_view_scale(dec.read4());
   if (ver == 530) {
     dec.skip(8); // "fullscreen scale" & "only scale w/ hardware support"
   } else {
-    gfx->set_window_sizeable(dec.readBool());
-    gfx->set_window_stayontop(dec.readBool());
-    gen->set_color_outside_room_region(dec.read4());
+    win->set_is_sizeable(dec.readBool());
+    win->set_stay_on_top(dec.readBool());
+    gfx->set_color_outside_room_region(dec.read4());
   }
   dec.readBool(); // set_resolution
 
@@ -535,7 +543,7 @@ int LoadSettings(Decoder &dec, Settings& set) {
     dec.read4(); // frequency
   }
 
-  gfx->set_window_showicons(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
+  win->set_show_icons(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
   if (ver > 530) gfx->set_use_synchronization(dec.readBool());
   if (ver >= 800) dec.readBool(); // DISABLE_SCREENSAVERS
   gfx->set_allow_fullscreen_change(dec.readBool());
@@ -547,7 +555,7 @@ int LoadSettings(Decoder &dec, Settings& set) {
     dec.readBool(); dec.readBool();
   }
   dec.read4(); // GAME_PRIORITY
-  gfx->set_freeze_on_lose_focus(dec.readBool());
+  win->set_freeze_on_lose_focus(dec.readBool());
   int load_bar_mode = dec.read4(); // LOAD_BAR_MODE
   if (load_bar_mode == 2) { // 0=NONE 1=DEFAULT 2=CUSTOM
     if (ver < 800) {
@@ -859,11 +867,22 @@ std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/) {
   return font;
 }
 
-int LoadActions(Decoder &dec, Event *event) {
+// TODO: Look up event name by type integer
+string Describe(const Event &ev) {
+  string res = "Event " + to_string(ev.type()) + ":";
+  if (ev.has_name()) return res + ev.name();
+  return res + to_string(ev.number());
+}
+
+string Describe(const Timeline_Moment &m) {
+  return "Timeline moment " + to_string(m.step());
+}
+
+template<class Event> int LoadActions(Decoder &dec, Event *event) {
   int ver = dec.read4();
   if (ver != 400) {
-    err << "Unsupported GMK actions version '" << ver << "' for event type '" << event->type()
-        << "' and number '" << event->number() << "'" << std::endl;
+    err << "Unsupported GMK actions version '" << ver << "' for "
+        << Describe(*event) << "'" << std::endl;
     return 0;
   }
 
@@ -946,7 +965,7 @@ std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/) {
   for (int i = 0; i < nomoms; i++) {
     auto moment = timeline->add_moments();
     moment->set_step(dec.read4());
-    if (!LoadActions(dec, moment->mutable_event())) return nullptr;
+    if (!LoadActions(dec, moment)) return nullptr;
   }
 
   return timeline;
@@ -993,7 +1012,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
   room->set_persistent(dec.readBool());
   room->set_color(dec.read4());
   room->set_show_color(dec.readBool());
-  room->set_code(dec.readStr());
+  room->set_creation_code(dec.readStr());
 
   int nobackgrounds = dec.read4();
   for (int j = 0; j < nobackgrounds; j++) {
@@ -1043,7 +1062,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
     instance->set_y(dec.read4());
     dec.postponeName(instance->mutable_object_type(), dec.read4(), TypeCase::kObject);
     instance->set_id(dec.read4());
-    instance->set_code(dec.readStr());
+    instance->set_creation_code(dec.readStr());
     instance->mutable_editor_settings()->set_locked(dec.readBool());
   }
 
