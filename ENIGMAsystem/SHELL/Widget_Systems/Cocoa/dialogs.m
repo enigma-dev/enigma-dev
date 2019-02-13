@@ -72,7 +72,7 @@ int cocoa_show_error(const char *str, bool abort)
         myMsg = @"\n\nClick 'OK' to abort the application.";
         myStr = [myStr stringByAppendingString:myMsg];
         const char *cstrStr = [myStr UTF8String];
-
+        
         return cocoa_show_message("Error", cstrStr, true);
     }
     else
@@ -81,7 +81,7 @@ int cocoa_show_error(const char *str, bool abort)
         myMsg = @"\n\nDo you want to abort the application?";
         myStr = [myStr  stringByAppendingString:myMsg];
         const char *cstrStr = [myStr UTF8String];
-
+        
         return cocoa_show_question("Error", cstrStr, true);
     }
 }
@@ -115,7 +115,7 @@ const char *cocoa_input_box(const char *title, const char *str, const char *def)
     }
     else
         result = "";
-        
+    
     [input release];
     [alert release];
     
@@ -165,6 +165,7 @@ const char *cocoa_get_open_filename(const char *title, const char *filter, const
     [oFilePanel setDirectoryURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:dir]]];
     [oFilePanel setCanChooseFiles:YES];
     [oFilePanel setCanChooseDirectories:NO];
+    [oFilePanel setCanCreateDirectories:NO];
     [oFilePanel setResolvesAliases:YES];
     
     if (mselect)
@@ -296,12 +297,12 @@ const char *cocoa_get_open_filename(const char *title, const char *filter, const
             {
                 selectedOpenPattern = [openPatternArray objectAtIndex:[openPop indexOfSelectedItem]];
                 openPatternItems = [selectedOpenPattern componentsSeparatedByString:@";"];
-            
+                
                 if ([openPatternItems containsObject:@"*"])
                     [oFilePanel setAllowedFileTypes:nil];
                 else
                     [oFilePanel setAllowedFileTypes:openPatternItems];
-            
+                
                 openPopIndex = [openPop indexOfSelectedItem];
             }
         }
@@ -325,10 +326,11 @@ const char *cocoa_get_save_filename(const char *title, const char *filter, const
     [sFilePanel setMessage:[NSString stringWithUTF8String:title]];
     [sFilePanel setDirectoryURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:dir]]];
     [sFilePanel setNameFieldStringValue:[[[NSString stringWithUTF8String:fname] lastPathComponent] stringByDeletingPathExtension]];
+    [sFilePanel setCanCreateDirectories:YES];
     
-    NSView *saveView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 431, 21)];
-    NSTextField *saveLabel = [[NSTextField alloc] initWithFrame:NSMakeRect(57, 0, 69, 22)];
-    NSPopUpButton *savePop = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(104, 0, 255, 22)];
+    NSView *saveView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 433, 21)];
+    NSTextField *saveLabel = [[NSTextField alloc] initWithFrame:NSMakeRect(56, 0, 69, 22)];
+    NSPopUpButton *savePop = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(105, 0, 255, 22)];
     NSString *saveFilter = [NSString stringWithUTF8String:filter];
     bool saveShowAccessory = true;
     bool saveAllowAllFiles = false;
@@ -386,11 +388,11 @@ const char *cocoa_get_save_filename(const char *title, const char *filter, const
     [sFilePanel setAllowedFileTypes:savePatternItems];
     
     [sFilePanel setAllowedFileTypes:savePatternItems];
-        
+    
     if ([savePatternItems containsObject:@"*"] || saveAllowAllFiles || !saveShowAccessory)
         [sFilePanel setAllowedFileTypes:nil];
-
-    [saveLabel setStringValue:@"Enable: "];
+    
+    [saveLabel setStringValue:@"Format: "];
     [saveLabel setBezeled:NO];
     [saveLabel setDrawsBackground:NO];
     [saveLabel setEditable:NO];
@@ -403,7 +405,7 @@ const char *cocoa_get_save_filename(const char *title, const char *filter, const
     
     if (!saveShowAccessory)
         [sFilePanel setAccessoryView:nil];
-
+    
     const char *theSaveResult = "";
     int savePopIndex = 0;
     
@@ -428,12 +430,12 @@ const char *cocoa_get_save_filename(const char *title, const char *filter, const
             {
                 selectedSavePattern = [savePatternArray objectAtIndex:[savePop indexOfSelectedItem]];
                 savePatternItems = [selectedSavePattern componentsSeparatedByString:@";"];
-            
+                
                 if ([savePatternItems containsObject:@"*"])
                     [sFilePanel setAllowedFileTypes:nil];
                 else
                     [sFilePanel setAllowedFileTypes:savePatternItems];
-            
+                
                 savePopIndex = [savePop indexOfSelectedItem];
             }
         }
@@ -459,6 +461,7 @@ const char *cocoa_get_directory(const char *title, const char *dname)
     [dirPanel setPrompt:@"Choose"];
     [dirPanel setCanChooseFiles:NO];
     [dirPanel setCanChooseDirectories:YES];
+    [dirPanel setCanCreateDirectories:YES];
     [dirPanel setAllowsMultipleSelection:NO];
     [dirPanel setResolvesAliases:YES];
     const char *theFolderResult = "";
@@ -561,11 +564,11 @@ int cocoa_get_color(const char *title, int defcol)
             redIntValue = (int)(r * 255);
             greenIntValue = (int)(g * 255);
             blueIntValue = (int)(b * 255);
-        
+            
             rescol = (int)(redIntValue & 0xff) + ((greenIntValue & 0xff) << 8) + ((blueIntValue & 0xff) << 16);
         }
     }
-
+    
     [myColorPanel close];
     [NSApp endModalSession:colorSession];
     [myColorPanel setContentView:oldView];
@@ -580,4 +583,3 @@ int cocoa_get_color(const char *title, int defcol)
     
     return rescol;
 }
-
