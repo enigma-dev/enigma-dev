@@ -56,7 +56,7 @@ inline std::string format_color(uint32_t color) {
 }
 
 inline string resname(string name) {
-  return (name.empty() || (name == "<undefined>")) ? "-1" : name;
+  return name.empty() ? "-1" : name;
 }
 
 int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, parsed_object *EGMglobal, int mode)
