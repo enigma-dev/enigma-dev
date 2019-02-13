@@ -7,10 +7,15 @@
  */
 
 #include "GameData.h"
+#include "Actions2Code.h"
+
+#include "lodepng.h"
 
 #include <map>
 #include <string>
 #include <iostream>
+
+#include <zlib.h>
 
 using std::cout;
 using std::cerr;
@@ -21,6 +26,73 @@ using TypeCase = buffers::TreeNode::TypeCase;
 static inline uint32_t javaColor(int c) {
   if (!(c & 0xFF)) return 0xFFFFFFFF;
   return ((c & 0xFF0000) >> 8) | ((c & 0xFF00) << 8) | ((c & 0xFF000000) >> 24);
+}
+
+static unsigned char* zlib_compress(unsigned char* inbuffer, int &actualsize)
+{
+  uLongf outsize=(int)(actualsize*1.1)+12;
+  Bytef* outbytef=new Bytef[outsize];
+
+  compress(outbytef,&outsize,(Bytef*)inbuffer,actualsize);
+
+  actualsize = outsize;
+
+  return (unsigned char*)outbytef;
+}
+
+BinaryData loadBinaryData(const std::string &filePath, int &errorc) {
+  FILE *afile = fopen(filePath.c_str(),"rb");
+  if (!afile) {
+    errorc = -1;
+    return BinaryData();
+  }
+
+  fseek(afile,0,SEEK_END);
+  const size_t flen = ftell(afile);
+  unsigned char *fdata = new unsigned char[flen];
+  fseek(afile,0,SEEK_SET);
+  if (fread(fdata,1,flen,afile) != flen)
+    puts("WARNING: Resource stream cut short while loading data");
+  fclose(afile);
+
+  errorc = 0;
+  return BinaryData(fdata, fdata + flen);
+}
+
+ImageData loadImageData(const std::string &filePath, int &errorc) {
+  unsigned error;
+  unsigned char* image;
+  unsigned pngwidth, pngheight;
+
+  error = lodepng_decode32_file(&image, &pngwidth, &pngheight, filePath.c_str());
+  if (error) {
+    errorc = -1;
+    printf("error %u: %s\n", error, lodepng_error_text(error));
+    return ImageData(0, 0, 0, 0);
+  }
+
+  unsigned ih,iw;
+  const int bitmap_size = pngwidth*pngheight*4;
+  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
+
+  for (ih = 0; ih < pngheight; ih++) {
+    unsigned tmp = ih*pngwidth*4;
+    for (iw = 0; iw < pngwidth; iw++) {
+      bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
+      bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
+      bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
+      bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+      tmp+=4;
+    }
+  }
+
+  free(image);
+
+  int dataSize = bitmap_size;
+  const unsigned char* data = zlib_compress(bitmap, dataSize);
+
+  errorc = 0;
+  return ImageData(pngwidth, pngheight, data, dataSize);;
 }
 
 struct ESLookup {
@@ -199,7 +271,12 @@ ShaderData::ShaderData(const ::Shader &shader):
 }
 
 TimelineData::TimelineData(const buffers::resources::Timeline &q, const std::string& name):
-  buffers::resources::Timeline(q), name(name) {}
+  buffers::resources::Timeline(q), name(name) {
+  for (int i = 0; i < moments_size(); ++i) {
+    auto* mmt = mutable_moments(i);
+    mmt->set_code(Actions2Code(mmt->actions()));
+  }
+}
 TimelineData::TimelineData(const ::Timeline &timeline):
   name(timeline.name) {
   set_id(timeline.id);
@@ -212,7 +289,12 @@ TimelineData::TimelineData(const ::Timeline &timeline):
 }
 
 ObjectData::ObjectData(const buffers::resources::Object &q, const std::string& name):
-  buffers::resources::Object(q), name(name) {}
+  buffers::resources::Object(q), name(name) {
+  for (int i = 0; i < events_size(); ++i) {
+    auto* evt = mutable_events(i);
+    evt->set_code(Actions2Code(evt->actions()));
+  }
+}
 ObjectData::ObjectData(const ::GmObject &object, const ESLookup &lookup):
   name(object.name) {
   set_id(object.id);
@@ -445,33 +527,64 @@ GameData::GameData(EnigmaStruct *es): filename(es->filename ?: "") {
   cout << "Transfer complete." << endl << endl;
 }
 
-GameData::GameData(const buffers::Project &proj): filename("") {
-  cout << "Flattening tree." << endl;
+GameData::GameData(const buffers::Project &proj): filename("") {}
 
-  FlattenTree(proj.game().root());
-
-  cout << "Transfer complete." << endl << endl;
-}
-
-void GameData::FlattenTree(const buffers::TreeNode &root) {
+int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
+  int error = 0;
   switch (root.type_case()) {
     case TypeCase::kFolder: break;
-    case TypeCase::kSprite: /*sprites.emplace_back(root.sprite(), root.name());*/ break;
-    case TypeCase::kSound: /*sounds.emplace_back(root.sound(), root.name());*/ break;
-    case TypeCase::kBackground: /*backgrounds.emplace_back(root.background(), root.name());*/ break;
-    case TypeCase::kPath: paths.emplace_back(root.path(), root.name()); break;
-    case TypeCase::kScript: scripts.emplace_back(root.script(), root.name()); break;
-    case TypeCase::kShader: shaders.emplace_back(root.shader(), root.name()); break;
-    case TypeCase::kFont: fonts.emplace_back(root.font(), root.name()); break;
-    case TypeCase::kTimeline: timelines.emplace_back(root.timeline(), root.name()); break;
-    case TypeCase::kObject: objects.emplace_back(root.object(), root.name()); break;
-    case TypeCase::kRoom: rooms.emplace_back(root.room(), root.name()); break;
-    case TypeCase::kInclude: /*includes.emplace_back(root.include());*/ break;
-    case TypeCase::kSettings: /*settings.emplace_back(root.settings());*/ break;
-    default: cout << "- Not transferring " << root.name() << endl; break;
+    case TypeCase::kSprite: {
+      std::vector<ImageData> subimages;
+      const buffers::resources::Sprite &sprite = root.sprite();
+      for (auto sub : sprite.subimages()) {
+        ImageData data = loadImageData(sub, error);
+        if (error) return -1; // sprite load error
+        subimages.emplace_back(data);
+      }
+      gameData->sprites.emplace_back(sprite, root.name(), subimages);
+      break;
+    }
+    case TypeCase::kSound: {
+      BinaryData data = loadBinaryData(root.sound().data(), error);
+      if (error) return -2; // sound load error
+      gameData->sounds.emplace_back(root.sound(), root.name(), data);
+      break;
+    }
+    case TypeCase::kBackground: {
+      ImageData data = loadImageData(root.background().image(), error);
+      if (error) return -3; // background load error
+      gameData->backgrounds.emplace_back(root.background(), root.name(), data);
+      break;
+    }
+    case TypeCase::kPath:     gameData->paths.emplace_back(root.path(), root.name()); break;
+    case TypeCase::kScript:   gameData->scripts.emplace_back(root.script(), root.name()); break;
+    case TypeCase::kShader:   gameData->shaders.emplace_back(root.shader(), root.name()); break;
+    case TypeCase::kFont:     gameData->fonts.emplace_back(root.font(), root.name()); break;
+    case TypeCase::kTimeline: gameData->timelines.emplace_back(root.timeline(), root.name()); break;
+    case TypeCase::kObject:   gameData->objects.emplace_back(root.object(), root.name()); break;
+    case TypeCase::kRoom:     gameData->rooms.emplace_back(root.room(), root.name()); break;
+    case TypeCase::kInclude:  /*gameData->includes.emplace_back(root.include());*/ break;
+    case TypeCase::kSettings: /*gameData->settings.emplace_back(root.settings());*/ break;
+    default: cout << "- Not transferring unknown " << root.name() << endl; break;
   }
 
   for (auto child : root.child()) {
-    FlattenTree(child);
+    int res = FlattenTree(child, gameData);
+    if (res) return res;
   }
+
+  return 0; // success
+}
+
+int FlattenProto(const buffers::Project &proj, GameData *gameData) {
+  cout << "Flattening tree." << endl;
+
+  int ret = FlattenTree(proj.game().root(), gameData);
+
+  if (ret)
+    cout << "Transfer error, see log for details." << endl << endl;
+  else
+    cout << "Transfer complete." << endl << endl;
+
+  return ret; // success
 }
