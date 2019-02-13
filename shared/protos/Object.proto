@@ -7,9 +7,9 @@ import "Event.proto";
 message Object {
   optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
 
-  optional string parent_name = 3 [(gmx) = "parentName", (yyp_id) = "parentObjectId"];
-  optional string sprite_name = 4 [(gmx) = "spriteName", (yyp_id) = "spriteId"];
-  optional string mask_name = 5 [(gmx) = "maskName", (yyp_id) = "maskSpriteId"];
+  optional string parent_name = 3 [(resource_ref)="object", (gmx) = "parentName", (yyp_id) = "parentObjectId"];
+  optional string sprite_name = 4 [(resource_ref)="sprite", (gmx) = "spriteName", (yyp_id) = "spriteId"];
+  optional string mask_name = 5 [(resource_ref)="sprite", (gmx) = "maskName", (yyp_id) = "maskSpriteId"];
 
   optional int32 depth = 6 [(yyp) = "YYP_DEPRECATED"];
   optional bool solid = 7;
