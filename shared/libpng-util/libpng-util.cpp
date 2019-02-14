@@ -139,19 +139,16 @@ unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, con
 
   png_read_update_info(png, info);
 
-  png_bytep *rowptrs, image;
+  png_bytep image;
   size_t pitch = sizeof(png_byte) * 4 * (*w); // number of bytes in a row
   image = (png_bytep)malloc(pitch * (*h));
-  rowptrs = (png_bytep*)malloc(sizeof(png_bytep) * (*h));
-  for (size_t y = 0; y < (*h); y++) {
-    rowptrs[y] = (png_bytep)&image[pitch * y];
-  }
 
-  png_read_image(png, rowptrs);
+  for (size_t y = 0; y < (*h); y++) {
+    png_read_row(png, (png_bytep)&image[pitch * y], NULL);
+  }
 
   png_destroy_read_struct(&png, &info, NULL);
   fclose(fp);
-  free(rowptrs);
 
   (*out) = image;
 
