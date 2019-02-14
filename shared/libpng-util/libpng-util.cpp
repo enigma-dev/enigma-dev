@@ -2,6 +2,65 @@
 
 #include <png.h>
 
+/* structure to store PNG image bytes */
+struct PngEncodeState
+{
+  png_bytep buffer;
+  size_t size;
+  png_structp png;
+  png_infop info;
+};
+
+void PngWriteCallback(png_structp png_ptr, png_bytep data, png_size_t length) {
+  PngEncodeState* p = (PngEncodeState*)png_get_io_ptr(png_ptr);
+  size_t nsize = p->size + length;
+
+  /* allocate or grow buffer */
+  if (p->buffer)
+    p->buffer = (png_bytep)realloc(p->buffer, nsize);
+  else
+    p->buffer = (png_bytep)malloc(nsize);
+
+  if (!p->buffer)
+    png_error(png_ptr, "png write error: could not malloc or realloc output buffer");
+
+  /* copy new bytes to end of buffer */
+  memcpy(p->buffer + p->size, data, length);
+  p->size += length;
+}
+
+PngEncodeState PngEncodeStart(size_t w, size_t h) {
+  PngEncodeState enc;
+  enc.buffer = NULL;
+  enc.size = 0;
+
+  enc.png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if (!enc.png) {
+    printf("png write error: failed to create png write struct");
+    return enc;
+  }
+  enc.info = png_create_info_struct(enc.png);
+  if (!enc.info) {
+    printf("png write error: failed to create png info struct");
+    png_destroy_write_struct(&enc.png, NULL);
+    return enc;
+  }
+
+  png_set_IHDR(enc.png, enc.info, w, h, 8,
+               PNG_COLOR_TYPE_RGBA,
+               PNG_INTERLACE_NONE,
+               PNG_COMPRESSION_TYPE_DEFAULT,
+               PNG_FILTER_TYPE_DEFAULT);
+  png_set_write_fn(enc.png, &enc, PngWriteCallback, NULL);
+  png_write_info(enc.png, enc.info);
+
+  return enc;
+}
+
+void PngEncodeEnd(PngEncodeState enc) {
+  png_destroy_write_struct(&enc.png, &enc.info);
+}
+
 unsigned libpng_encode_memory(unsigned char** out, size_t* outsize,
                                const unsigned char* image, unsigned w, unsigned h,
                                int colortype, unsigned bitdepth) {
@@ -9,7 +68,14 @@ unsigned libpng_encode_memory(unsigned char** out, size_t* outsize,
 }
 
 unsigned libpng_encode32(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h) {
-  return -1;
+  PngEncodeState enc = PngEncodeStart(w, h);
+  for (unsigned i = 0; i < h; ++i) {
+    png_write_row(enc.png, (png_bytep)&image[sizeof(png_byte) * 4 * w * i]);
+  }
+  PngEncodeEnd(enc);
+  (*out) = (unsigned char*)enc.buffer;
+  (*outsize) = enc.size;
+  return 0;
 }
 
 unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename) {

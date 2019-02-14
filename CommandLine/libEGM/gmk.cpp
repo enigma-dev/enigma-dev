@@ -18,8 +18,7 @@
 #include "gmk.h"
 #include "filesystem.h"
 
-#include "lodepng.h"
-#include <zlib.h>
+#include "libpng-util.h"
 
 #include <fstream>
 #include <utility>
@@ -32,6 +31,8 @@
 
 #include <cstdlib>     /* srand, rand */
 #include <ctime>       /* time */
+
+#include <zlib.h>
 
 using namespace buffers;
 using namespace buffers::resources;
@@ -147,7 +148,7 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
 
   unsigned char *buffer = nullptr;
   size_t buffer_length;
-  lodepng_encode32(&buffer, &buffer_length, rgba.data(), w, h);
+  libpng_encode32(&buffer, &buffer_length, rgba.data(), w, h);
 
   char *buffer_signed = reinterpret_cast<char*>(buffer);
   std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
@@ -173,7 +174,7 @@ std::string writeTempBGRAFile(std::unique_ptr<char[]> bytes, size_t width, size_
 
   unsigned char *buffer = nullptr;
   size_t buffer_length;
-  lodepng_encode32(&buffer, &buffer_length, rgba.data(), width, height);
+  libpng_encode32(&buffer, &buffer_length, rgba.data(), width, height);
 
   char *buffer_signed = reinterpret_cast<char*>(buffer);
   std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
