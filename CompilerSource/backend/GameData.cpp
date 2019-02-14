@@ -9,7 +9,7 @@
 #include "GameData.h"
 #include "Actions2Code.h"
 
-#include "lodepng.h"
+#include "libpng-util.h"
 
 #include <map>
 #include <string>
@@ -64,10 +64,10 @@ ImageData loadImageData(const std::string &filePath, int &errorc) {
   unsigned char* image;
   unsigned pngwidth, pngheight;
 
-  error = lodepng_decode32_file(&image, &pngwidth, &pngheight, filePath.c_str());
+  error = libpng_decode32_file(&image, &pngwidth, &pngheight, filePath.c_str());
   if (error) {
     errorc = -1;
-    printf("error %u: %s\n", error, lodepng_error_text(error));
+    printf("error %u: %s\n", error, libpng_error_text(error).c_str());
     return ImageData(0, 0, 0, 0);
   }
 
