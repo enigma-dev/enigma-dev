@@ -18,6 +18,7 @@
 #include <string>
 
 #include <png.h>
+#include <stdlib.h> // for malloc/free
 
 /* structure to store PNG image bytes */
 struct PngEncodeState
