@@ -20,73 +20,35 @@
 #include <png.h>
 #include <stdlib.h> // for malloc/free
 
-/* structure to store PNG image bytes */
-struct PngEncodeState
-{
-  png_bytep buffer;
-  size_t size;
-  png_structp png;
-  png_infop info;
-};
+unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename) {
+  FILE *fp = fopen(filename, "wb");
 
-void PngWriteCallback(png_structp png_ptr, png_bytep data, png_size_t length) {
-  PngEncodeState* p = (PngEncodeState*)png_get_io_ptr(png_ptr);
-  size_t nsize = p->size + length;
-
-  /* allocate or grow buffer */
-  if (p->buffer)
-    p->buffer = (png_bytep)realloc(p->buffer, nsize);
-  else
-    p->buffer = (png_bytep)malloc(nsize);
-
-  if (!p->buffer)
-    png_error(png_ptr, "png write error: could not malloc or realloc output buffer");
-
-  /* copy new bytes to end of buffer */
-  memcpy(p->buffer + p->size, data, length);
-  p->size += length;
-}
-
-PngEncodeState PngEncodeStart(size_t w, size_t h) {
-  PngEncodeState enc;
-  enc.buffer = NULL;
-  enc.size = 0;
-
-  enc.png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if (!enc.png) {
-    printf("png write error: failed to create png write struct");
-    return enc;
-  }
-  enc.info = png_create_info_struct(enc.png);
-  if (!enc.info) {
-    printf("png write error: failed to create png info struct");
-    png_destroy_write_struct(&enc.png, NULL);
-    return enc;
+  png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if (!png) return -1;
+  png_infop info = png_create_info_struct(png);
+  if (!info) {
+    png_destroy_write_struct(&png, NULL);
+    return -2;
   }
 
-  png_set_IHDR(enc.png, enc.info, w, h, 8,
-               PNG_COLOR_TYPE_RGBA,
-               PNG_INTERLACE_NONE,
-               PNG_COMPRESSION_TYPE_DEFAULT,
-               PNG_FILTER_TYPE_DEFAULT);
-  png_set_write_fn(enc.png, &enc, PngWriteCallback, NULL);
-  png_write_info(enc.png, enc.info);
+  png_init_io(png, fp);
 
-  return enc;
-}
+  // Write header (8 bit colour depth)
+  png_set_IHDR(png, info, w, h,
+               8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
+               PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
-void PngEncodeEnd(PngEncodeState enc) {
-  png_destroy_write_struct(&enc.png, &enc.info);
-}
+  png_write_info(png, info);
 
-unsigned libpng_encode32(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h) {
-  PngEncodeState enc = PngEncodeStart(w, h);
   for (unsigned i = 0; i < h; ++i) {
-    png_write_row(enc.png, (png_bytep)&image[sizeof(png_byte) * 4 * w * i]);
+    png_write_row(png, (png_bytep)&image[sizeof(png_byte) * 4 * w * i]);
   }
-  PngEncodeEnd(enc);
-  (*out) = (unsigned char*)enc.buffer;
-  (*outsize) = enc.size;
+  png_write_end(png, NULL);
+
+  fclose(fp);
+  png_free_data(png, info, PNG_FREE_ALL, -1);
+  png_destroy_write_struct(&png, (png_infopp)NULL);
+
   return 0;
 }
 

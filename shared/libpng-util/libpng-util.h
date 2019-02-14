@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-unsigned libpng_encode32(unsigned char** out, size_t* outsize, const unsigned char* image, unsigned w, unsigned h);
+unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename);
 unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename);
 
 std::string libpng_error_text(unsigned error);

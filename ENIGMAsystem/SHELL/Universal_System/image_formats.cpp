@@ -313,17 +313,8 @@ int image_save_png(string filename, const unsigned char* data, unsigned width, u
     }
   }
 
-  unsigned char* buffer = nullptr;
-  size_t buffersize;
+  unsigned error = libpng_encode32_file(bitmap, width, height, filename.c_str());
 
-  unsigned error = libpng_encode32(&buffer, &buffersize, bitmap, width, height);
-  if (!error) {
-    std::ofstream file(filename.c_str(), std::ios::out|std::ios::binary);
-    file.write(reinterpret_cast<const char*>(buffer), std::streamsize(buffersize));
-    file.close();
-  }
-
-  free(buffer);
   delete[] bitmap;
 
   if (error) return -1; else return 1;

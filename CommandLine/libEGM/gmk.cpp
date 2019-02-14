@@ -146,14 +146,9 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
     }
   }
 
-  unsigned char *buffer = nullptr;
-  size_t buffer_length;
-  libpng_encode32(&buffer, &buffer_length, rgba.data(), w, h);
+  std::string temp_file_path = TempFileName("gmk_data");
+  libpng_encode32_file(rgba.data(), w, h, temp_file_path.c_str());
 
-  char *buffer_signed = reinterpret_cast<char*>(buffer);
-  std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
-  // explicitly free because libpng allocated it with malloc
-  free(buffer);
   return temp_file_path;
 }
 
@@ -172,14 +167,9 @@ std::string writeTempBGRAFile(std::unique_ptr<char[]> bytes, size_t width, size_
     }
   }
 
-  unsigned char *buffer = nullptr;
-  size_t buffer_length;
-  libpng_encode32(&buffer, &buffer_length, rgba.data(), width, height);
+  std::string temp_file_path = TempFileName("gmk_data");
+  libpng_encode32_file(rgba.data(), width, height, temp_file_path.c_str());
 
-  char *buffer_signed = reinterpret_cast<char*>(buffer);
-  std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
-  // explicitly free because libpng allocated it with malloc
-  free(buffer);
   return temp_file_path;
 }
 
