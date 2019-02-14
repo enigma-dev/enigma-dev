@@ -17,16 +17,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "image_formats.h"
 #include "Universal_System/estring.h"
+
+#include "libpng-util.h"
+#include "gif_format.h"
+
 #include <fstream>      // std::ofstream
 #include <algorithm>
 #include <string>
 #include <cstring>
-#include "lodepng.h"
-#include "gif_format.h"
+
 #include <stdlib.h>
 using namespace std;
-#include "image_formats.h"
 
 #include "nlpo2.h"
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -196,10 +199,10 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
   unsigned char* image = nullptr;
   unsigned pngwidth, pngheight;
 
-  error = lodepng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str());
+  error = libpng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str());
   if (error)
   {
-    printf("error %u: %s\n", error, lodepng_error_text(error));
+    printf("error %u: %s\n", error, libpng_error_text(error).c_str());
     return NULL;
   }
 
@@ -313,13 +316,13 @@ int image_save_png(string filename, const unsigned char* data, unsigned width, u
   unsigned char* buffer = nullptr;
   size_t buffersize;
 
-  unsigned error = lodepng_encode_memory(&buffer, &buffersize, bitmap, width, height, LCT_RGBA, 8);
+  unsigned error = libpng_encode32(&buffer, &buffersize, bitmap, width, height);
   if (!error) {
     std::ofstream file(filename.c_str(), std::ios::out|std::ios::binary);
     file.write(reinterpret_cast<const char*>(buffer), std::streamsize(buffersize));
     file.close();
   }
-  
+
   free(buffer);
   delete[] bitmap;
 

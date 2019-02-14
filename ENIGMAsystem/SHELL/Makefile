@@ -96,10 +96,10 @@ endif
 
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
-override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)/lodepng -I$(SHARED_SRC_DIR)
+override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)/libpng-util -I$(SHARED_SRC_DIR)
 
 # Unconditional LDLIBS
-override LDLIBS += -L$(SHARED_SRC_DIR)/lodepng -llodepng
+override LDLIBS += -L$(SHARED_SRC_DIR)/libpng-util -lpng-util $(shell pkg-config --cflags --libs-only-l libpng)
 
 .PHONY: all clean
 
