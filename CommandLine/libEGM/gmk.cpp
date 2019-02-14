@@ -113,7 +113,7 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
                 t_pixel_b = bmp[pixeloffset+2];
 
   /*
-  There are 3 differences between BMP and the raw image buffer for LodePNG:
+  There are 3 differences between BMP and the raw image buffer for libpng:
   -it's upside down
   -it's in BGR instead of RGB format (or BRGA instead of RGBA)
   -each scanline has padding bytes to make it a multiple of 4 if needed
@@ -152,7 +152,7 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
 
   char *buffer_signed = reinterpret_cast<char*>(buffer);
   std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
-  // explicitly free because lodepng allocated it with malloc
+  // explicitly free because libpng allocated it with malloc
   free(buffer);
   return temp_file_path;
 }
@@ -178,7 +178,7 @@ std::string writeTempBGRAFile(std::unique_ptr<char[]> bytes, size_t width, size_
 
   char *buffer_signed = reinterpret_cast<char*>(buffer);
   std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
-  // explicitly free because lodepng allocated it with malloc
+  // explicitly free because libpng allocated it with malloc
   free(buffer);
   return temp_file_path;
 }

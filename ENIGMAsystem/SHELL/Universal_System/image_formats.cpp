@@ -289,9 +289,9 @@ int image_save_bmp(string filename, const unsigned char* data, unsigned width, u
 
 int image_save_png(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped)
 {
-  //TODO: Use width/height instead of full size, unfortunately lodepng don't support this apparently
-  //TODO: Faggot ass lodepng also doesn't let us specify if our image data is flipped
-  //TODO: Faggot ass lodepng also doesn't support BGRA
+  //TODO: Use width/height instead of full size, lodepng didn't support this apparently
+  //TODO: lodepng didn't let us specify if our image data is flipped
+  //TODO: lodepng didn't support BGRA
   unsigned bytes = 4;
 
   unsigned char* bitmap = new unsigned char[width*height*bytes]();
