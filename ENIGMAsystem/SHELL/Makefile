@@ -96,7 +96,7 @@ endif
 
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
-override CPPFLAGS += -I. -I$(CODEGEN)
+override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)
 
 .PHONY: all clean
 
