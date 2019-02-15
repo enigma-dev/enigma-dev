@@ -36,7 +36,7 @@ before_install:
         sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include;
       elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
         sudo apt-get -y install mingw-w64 wine;
-        curl -L https://github.com/enigma-dev/enigma-dev/files/2867798/enigma-libs.zip > enigma-libs.zip;
+        curl -L https://github.com/enigma-dev/enigma-dev/files/2431000/enigma-libs.zip > enigma-libs.zip;
         unzip enigma-libs.zip -d ENIGMAsystem/;
         mv ENIGMAsystem/Install ENIGMAsystem/Additional;
       else
