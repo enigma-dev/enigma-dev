@@ -90,7 +90,6 @@ install:
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         # frontend uses 64 bit libpng but game will use 32 bit libpng
         sudo apt-get -y install libpng-dev:i386;
-        export PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig; # fakin libpng-dev:i386
       fi
     fi
 
