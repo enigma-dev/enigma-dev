@@ -20,7 +20,6 @@
 #include "image_formats.h"
 #include "Universal_System/estring.h"
 
-#include "libpng-util.h"
 #include "gif_format.h"
 
 #include <fstream>      // std::ofstream
@@ -43,6 +42,9 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
+
+std::map<std::string, ImageLoadFunction> image_load_handlers;
+std::map<std::string, ImageSaveFunction> image_save_handlers;
 
 unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned height, unsigned bytes) {
   //flipped upside down
@@ -69,15 +71,16 @@ string image_get_format(string filename) {
 
 /// Generic all-purpose image loading call.
 unsigned char* image_load(string filename, string format, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped) {
-  if (format.compare(".png") == 0) {
-    return image_load_png(filename, width, height, fullwidth, fullheight, flipped);
-  } else if (format.compare(".bmp") == 0) {
+  if (format.compare(".bmp") == 0) {
     return image_load_bmp(filename, width, height, fullwidth, fullheight, flipped);
   } else if (format.compare(".gif") == 0) {
     return image_load_gif(filename, width, height, fullwidth, fullheight, imgnumb, flipped);
-  } else {
-    return image_load_bmp(filename, width, height, fullwidth, fullheight, flipped);
   }
+  auto handler = image_load_handlers.find(format);
+  if (handler != image_load_handlers.end()) {
+    return (*handler).second(filename, width, height, fullwidth, fullheight, flipped);
+  }
+  return image_load_bmp(filename, width, height, fullwidth, fullheight, flipped);
 }
 
 
@@ -92,13 +95,14 @@ unsigned char* image_load(string filename, unsigned int* width, unsigned int* he
 
 /// Generic all-purpose image saving call.
 int image_save(string filename, const unsigned char* data, string format, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
-  if (format.compare(".png") == 0) {
-    return image_save_png(filename, data, width, height, fullwidth, fullheight, flipped);
-  } else if (format.compare(".bmp") == 0) {
-    return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
-  } else {
+  if (format.compare(".bmp") == 0) {
     return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
   }
+  auto handler = image_save_handlers.find(format);
+  if (handler != image_save_handlers.end()) {
+    return (*handler).second(filename, data, width, height, fullwidth, fullheight, flipped);
+  }
+  return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
 }
 
 /// Generic all-purpose image saving call that will regexp the filename for the format and call the appropriate function.
@@ -119,7 +123,7 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
   if (fgetc(imgfile)!=0x42 && fgetc(imgfile)!=0x4D) // Not a BMP
   {
     fclose(imgfile);
-    return image_load_png(filename,width,height,fullwidth,fullheight,flipped);
+    return NULL;
   }
   fseek(imgfile,10,SEEK_SET);
   if (fread(&bmpstart,1,4,imgfile) != 4)
@@ -194,49 +198,6 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
   return bitmap;
 }
 
-unsigned char* image_load_png(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
-  unsigned error;
-  unsigned char* image = nullptr;
-  unsigned pngwidth, pngheight;
-
-  error = libpng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str());
-  if (error)
-  {
-    printf("error %u: %s\n", error, libpng_error_text(error).c_str());
-    return NULL;
-  }
-
-  unsigned
-    widfull = nlpo2dc(pngwidth) + 1,
-    hgtfull = nlpo2dc(pngheight) + 1,
-    ih,iw;
-  const int bitmap_size = widfull*hgtfull*4;
-  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
-
-  for (ih = 0; ih < pngheight; ih++) {
-    unsigned tmp = 0;
-    if (!flipped) {
-      tmp = ih*widfull*4;
-    } else {
-      tmp = (pngheight - 1 - ih)*widfull*4;
-    }
-    for (iw = 0; iw < pngwidth; iw++) {
-      bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
-      bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
-      bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
-      bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
-      tmp+=4;
-    }
-  }
-
-  free(image);
-  *width  = pngwidth;
-  *height = pngheight;
-  *fullwidth  = widfull;
-  *fullheight = hgtfull;
-  return bitmap;
-}
-
 unsigned char* image_load_gif(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped) {
   unsigned int error = 0;
   unsigned char* image = 0;
@@ -285,39 +246,6 @@ int image_save_bmp(string filename, const unsigned char* data, unsigned width, u
 
   fclose(bmp);
   return 0;
-}
-
-int image_save_png(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped)
-{
-  //TODO: Use width/height instead of full size, lodepng didn't support this apparently
-  //TODO: lodepng didn't let us specify if our image data is flipped
-  //TODO: lodepng didn't support BGRA
-  unsigned bytes = 4;
-
-  unsigned char* bitmap = new unsigned char[width*height*bytes]();
-
-  for (unsigned i = 0; i < height; i++) {
-    unsigned tmp = i;
-    unsigned bmp = i;
-    if (!flipped) {
-      tmp = height - 1 - tmp;
-      bmp = height - 1 - bmp;
-    }
-    tmp *= bytes * fullwidth;
-    bmp *= bytes * width;
-    for (unsigned ii = 0; ii < width*bytes; ii += bytes) {
-      bitmap[bmp + ii + 2] = data[tmp + ii + 0];
-      bitmap[bmp + ii + 1] = data[tmp + ii + 1];
-      bitmap[bmp + ii + 0] = data[tmp + ii + 2];
-      bitmap[bmp + ii + 3] = data[tmp + ii + 3];
-    }
-  }
-
-  unsigned error = libpng_encode32_file(bitmap, width, height, filename.c_str());
-
-  delete[] bitmap;
-
-  if (error) return -1; else return 1;
 }
 
 }

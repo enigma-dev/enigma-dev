@@ -16,7 +16,7 @@ clean: .FORCE
 
 all: libpng-util libProtocols libEGM ENIGMA emake test-runner .FORCE
 
-Game: libpng-util .FORCE
+Game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL
 
 clean-game: .FORCE

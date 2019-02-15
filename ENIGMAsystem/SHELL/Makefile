@@ -96,10 +96,7 @@ endif
 
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
-override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)/libpng-util -I$(SHARED_SRC_DIR)
-
-# Unconditional LDLIBS
-override LDLIBS += -L$(SHARED_SRC_DIR)/libpng-util -lpng-util -lpng
+override CPPFLAGS += -I. -I$(CODEGEN)
 
 .PHONY: all clean
 
