@@ -30,9 +30,9 @@ endif
 ###########
 
 CXX := g++
-CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src $(shell pkg-config --cflags libpng)
+CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src
 LDFLAGS += -shared -O3 -g -L../ -Wl,-rpath=./
-LDLIBS += -lProtocols -lprotobuf -lz -L$(SHARED_SRC_DIR)/libpng-util -lpng-util $(shell pkg-config --libs libpng)
+LDLIBS += -lProtocols -lprotobuf -lz -L$(SHARED_SRC_DIR)/libpng-util -lpng-util -lpng
 
 # This implements a recursive wildcard allowing us to iterate in subdirs
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
