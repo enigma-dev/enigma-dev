@@ -18,7 +18,6 @@
 #include <string>
 
 #include <png.h>
-#include <stdlib.h> // for malloc/free
 
 unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename) {
   FILE *fp = fopen(filename, "wb");
@@ -103,7 +102,7 @@ unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, con
 
   png_bytep image;
   size_t pitch = sizeof(png_byte) * 4 * (*w); // number of bytes in a row
-  image = (png_bytep)malloc(pitch * (*h));
+  image = new png_byte[pitch * (*h)];
 
   for (size_t y = 0; y < (*h); y++) {
     png_read_row(png, (png_bytep)&image[pitch * y], NULL);

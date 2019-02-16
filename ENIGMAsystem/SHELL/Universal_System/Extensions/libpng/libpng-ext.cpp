@@ -62,7 +62,7 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
     }
   }
 
-  free(image);
+  delete[] image;
   *width  = pngwidth;
   *height = pngheight;
   *fullwidth  = widfull;
