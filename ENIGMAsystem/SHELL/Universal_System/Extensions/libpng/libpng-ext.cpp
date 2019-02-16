@@ -104,8 +104,8 @@ int image_save_png(string filename, const unsigned char* data, unsigned width, u
 }
 
 void extension_libpng_init() {
-  image_load_handlers[".png"] = image_load_png;
-  image_save_handlers[".png"] = image_save_png;
+  image_add_loader(".png", image_load_png);
+  image_add_saver(".png", image_save_png);
 }
 
 } // namespace enigma

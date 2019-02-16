@@ -22,6 +22,7 @@
 
 #include "gif_format.h"
 
+#include <map>
 #include <fstream>      // std::ofstream
 #include <algorithm>
 #include <string>
@@ -45,6 +46,14 @@ namespace enigma
 
 std::map<std::string, ImageLoadFunction> image_load_handlers;
 std::map<std::string, ImageSaveFunction> image_save_handlers;
+
+void image_add_loader(std::string format, ImageLoadFunction fnc) {
+  image_load_handlers[format] = fnc;
+}
+
+void image_add_saver(std::string format, ImageSaveFunction fnc) {
+  image_save_handlers[format] = fnc;
+}
 
 unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned height, unsigned bytes) {
   //flipped upside down
