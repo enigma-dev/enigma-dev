@@ -33,9 +33,8 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
   unsigned pngwidth, pngheight;
 
   error = libpng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str());
-  if (error)
-  {
-    printf("error %u: %s\n", error, libpng_error_text(error).c_str());
+  if (error) {
+    printf("libpng-util error %u\n", error);
     return NULL;
   }
 

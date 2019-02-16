@@ -67,7 +67,7 @@ ImageData loadImageData(const std::string &filePath, int &errorc) {
   error = libpng_decode32_file(&image, &pngwidth, &pngheight, filePath.c_str());
   if (error) {
     errorc = -1;
-    printf("error %u: %s\n", error, libpng_error_text(error).c_str());
+    printf("libpng-util error %u\n", error);
     return ImageData(0, 0, 0, 0);
   }
 

@@ -17,5 +17,3 @@
 
 unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename);
 unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename);
-
-std::string libpng_error_text(unsigned error);

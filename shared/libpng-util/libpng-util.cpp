@@ -115,7 +115,3 @@ unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, con
 
   return 0;
 }
-
-std::string libpng_error_text(unsigned error) {
-  return "";
-}
