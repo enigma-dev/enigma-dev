@@ -9,7 +9,7 @@
 #include "GameData.h"
 #include "Actions2Code.h"
 
-#include "lodepng.h"
+#include "libpng-util.h"
 
 #include <map>
 #include <string>
@@ -64,32 +64,27 @@ ImageData loadImageData(const std::string &filePath, int &errorc) {
   unsigned char* image;
   unsigned pngwidth, pngheight;
 
-  error = lodepng_decode32_file(&image, &pngwidth, &pngheight, filePath.c_str());
+  error = libpng_decode32_file(&image, &pngwidth, &pngheight, filePath.c_str());
   if (error) {
     errorc = -1;
-    printf("error %u: %s\n", error, lodepng_error_text(error));
+    printf("libpng-util error %u\n", error);
     return ImageData(0, 0, 0, 0);
   }
 
-  unsigned ih,iw;
-  const int bitmap_size = pngwidth*pngheight*4;
-  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
-
-  for (ih = 0; ih < pngheight; ih++) {
-    unsigned tmp = ih*pngwidth*4;
-    for (iw = 0; iw < pngwidth; iw++) {
-      bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
-      bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
-      bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
-      bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
-      tmp+=4;
+  const unsigned pitch = pngwidth * 4;
+  for (unsigned i = 0; i < pngheight; i++) {
+    const unsigned row = i*pitch;
+    for (unsigned j = 0; j < pngwidth; j++) {
+      const unsigned px = row+j*4;
+      unsigned char temp = image[px+2];
+      image[px+2] = image[px+0];
+      image[px+0] = temp;
     }
   }
 
-  free(image);
-
-  int dataSize = bitmap_size;
-  const unsigned char* data = zlib_compress(bitmap, dataSize);
+  int dataSize = pngwidth*pngheight*4;
+  const unsigned char* data = zlib_compress(image, dataSize);
+  delete[] image;
 
   errorc = 0;
   return ImageData(pngwidth, pngheight, data, dataSize);;
