@@ -153,22 +153,19 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
 }
 
 std::string writeTempBGRAFile(std::unique_ptr<char[]> bytes, size_t width, size_t height) {
-  auto bgra = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
-  std::vector<unsigned char> rgba;
-  rgba.resize(width * height * 4);
+  auto bgra = reinterpret_cast<unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
   for (unsigned y = 0; y < height; y++) {
     for (unsigned x = 0; x < width; x++) {
       unsigned pos = width * 4 * y + 4 * x;
-      rgba[pos + 0] = bgra[pos + 2]; //R<-B
-      rgba[pos + 1] = bgra[pos + 1]; //G<-G
-      rgba[pos + 2] = bgra[pos + 0]; //B<-R
-      rgba[pos + 3] = bgra[pos + 3]; //A<-A
+      unsigned char temp = bgra[pos + 2];
+      bgra[pos + 2] = bgra[pos + 0];
+      bgra[pos + 0] = temp;
     }
   }
 
   std::string temp_file_path = TempFileName("gmk_data");
-  libpng_encode32_file(rgba.data(), width, height, temp_file_path.c_str());
+  libpng_encode32_file(bgra, width, height, temp_file_path.c_str());
 
   return temp_file_path;
 }
