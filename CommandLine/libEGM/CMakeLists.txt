@@ -13,9 +13,9 @@ get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
 get_filename_component(ENIGMA_DIR "${ENIGMA_DIR}" PATH)
 
 if(MSVC)
-  add_library(${LIB} STATIC ${SRC_FILES} "${ENIGMA_DIR}/shared/lodepng/lodepng.cpp")
+  add_library(${LIB} STATIC ${SRC_FILES} "${ENIGMA_DIR}/shared/libpng-util/libpng-util.cpp")
 else()
-  add_library(${LIB} SHARED ${SRC_FILES} "${ENIGMA_DIR}/shared/lodepng/lodepng.cpp")
+  add_library(${LIB} SHARED ${SRC_FILES} "${ENIGMA_DIR}/shared/libpng-util/libpng-util.cpp")
 endif(MSVC)
 
 set_target_properties(${LIB} PROPERTIES VERSION ${LIB_VERSION})
@@ -53,7 +53,7 @@ endif(MSVC)
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${LIB} PRIVATE yaml-cpp)
 
-include_directories(. "${ENIGMA_DIR}/shared/protos/" "${ENIGMA_DIR}/shared/lodepng")
+include_directories(. "${ENIGMA_DIR}/shared/protos/" "${ENIGMA_DIR}/shared/libpng-util")
 
 include(FindProtobuf)
 target_link_libraries(${LIB} PRIVATE ${Protobuf_LIBRARY})

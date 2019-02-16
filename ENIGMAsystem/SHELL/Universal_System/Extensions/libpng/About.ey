@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: libpng
+Identifier: libpng
+Author: Robert
+Description: Support for loading and saving png images using libpng.
+Icon: libpng.png
+
+Depends: None
+Dependencies: None
+Init: extension_libpng_init

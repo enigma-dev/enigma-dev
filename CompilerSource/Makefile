@@ -32,7 +32,7 @@ endif
 CXX := g++
 CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src
 LDFLAGS += -shared -O3 -g -L../ -Wl,-rpath=./
-LDLIBS += -lProtocols -lprotobuf -lz -L$(SHARED_SRC_DIR)/lodepng -llodepng
+LDLIBS += -lProtocols -lprotobuf -lz -L$(SHARED_SRC_DIR)/libpng-util -lpng-util -lpng
 
 # This implements a recursive wildcard allowing us to iterate in subdirs
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
@@ -42,7 +42,7 @@ OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 DEPENDS := $(OBJECTS:.o=.d)
 PROTO_DIR := $(SHARED_SRC_DIR)/protos
 
-CXXFLAGS += -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/lodepng -I$(PROTO_DIR)/codegen $(addprefix -I$(SHARED_SRC_DIR)/, $(SHARED_INCLUDES))
+CXXFLAGS += -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/libpng-util -I$(PROTO_DIR)/codegen $(addprefix -I$(SHARED_SRC_DIR)/, $(SHARED_INCLUDES))
 SOURCES += $(addprefix $(SHARED_SRC_DIR),$(SHARED_SOURCES))
 OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.o))
 DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))

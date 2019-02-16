@@ -19,12 +19,14 @@
 #ifndef ENIGMA_IMAGEFORMATS_H
 #define ENIGMA_IMAGEFORMATS_H
 
+#include <functional>
 #include <string>
 
 /// NOTE: These image formats expect the data to be un-aligned and always reads and writes with BGRA full color
 
-namespace enigma 
+namespace enigma
 {
+
 /// Color formats
 enum {
   color_fmt_rgba,
@@ -32,6 +34,12 @@ enum {
   color_fmt_bgra,
   color_fmt_bgr
 };
+
+using ImageLoadFunction = std::function<unsigned char*(std::string, unsigned int*, unsigned int*, unsigned int*, unsigned int*, bool)>;
+using ImageSaveFunction = std::function<int(std::string, const unsigned char*, unsigned, unsigned, unsigned, unsigned, bool)>;
+
+void image_add_loader(std::string format, ImageLoadFunction fnc);
+void image_add_saver(std::string format, ImageSaveFunction fnc);
 
 /// Gets the image format, eg. ".bmp", ".png", etc.
 std::string image_get_format(std::string filename);
@@ -48,10 +56,9 @@ int image_save(std::string filename, const unsigned char* data, std::string form
 int image_save(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 
 unsigned char* image_load_bmp(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped);
-unsigned char* image_load_png(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped);
 unsigned char* image_load_gif(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped);
 int image_save_bmp(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
-int image_save_png(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
+
 } //namespace enigma
 
 #endif //ENIGMA_IMAGEFORMATS_H

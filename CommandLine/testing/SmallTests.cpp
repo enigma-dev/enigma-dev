@@ -102,7 +102,7 @@ class SimpleTestHarness : public testing::TestWithParam<string> {};
 TEST_P(SimpleTestHarness, SimpleTestRunner) {
   string game = GetParam();
   TestConfig tc;
-  tc.extensions = "Paths,GTest";
+  tc.extensions = "Paths,GTest,libpng";
   int ret = TestHarness::run_to_completion(game, tc);
   if (!ret) return;
   switch (ret) {
