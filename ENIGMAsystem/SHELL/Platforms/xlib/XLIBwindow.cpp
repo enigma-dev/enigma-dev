@@ -441,6 +441,13 @@ void window_set_fullscreen(bool full) {
   XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
 
   enigma::compute_window_size();
+  
+  //Force the window to remap if we're trying to unfullscreen
+  if (!full)
+  {
+    window_set_visible(false);
+    window_set_visible(true);
+  }
 }
 
 bool window_get_fullscreen() {
