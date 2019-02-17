@@ -19,8 +19,8 @@
 
 namespace enigma {
 
-int const tfd_Zenity    = 0;
-int const tfd_KDialog   = 1;
+int const tfd_Zenity  = 0;
+int const tfd_KDialog = 1;
 int tfd_DialogEngine();
   
 } // namespave enigma
