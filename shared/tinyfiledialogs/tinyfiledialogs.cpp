@@ -1126,7 +1126,7 @@ char const * tinyfd_saveFileDialog(
 }
 
 
-/* in case of multiple files, the separator is | */
+/* in case of multiple files, the separator is \n */
 char const * tinyfd_openFileDialog(
         char const * const aTitle , /* NULL or "" */
         char const * const aDefaultPathAndFile , /* NULL or "" */
