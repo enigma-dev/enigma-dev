@@ -146,32 +146,27 @@ static inline string remove_trailing_zeros(double numb) {
 }
 
 static inline string get_open_filename_helper(string filter, string fname, string dir, string title, int const mselect) {
-  string fname_or_dir;
-
+  string str_fname_or_dir = "";
   string str_fname = fname;
-  string str_dir;
+  string str_dir = dir;
     
-  char *bname = (char *)str_fname.c_str();
-    
-  if (fname == "")
-    str_dir = dir;
-  else
-    str_dir = dir + string("/") + string(basename(bname));
-    
-  if(access((char *)str_dir.c_str(), F_OK) != -1)
-    fname_or_dir = str_dir;
-  else
-    fname_or_dir = fname;
+  char *cstr_fname = (char *)str_fname.c_str();
+
+  if (str_fname != "" && str_dir != "")
+    str_fname_or_dir = string(dir) + string("/") + string(basename(cstr_fname));
+  else if (str_fname != "" && str_dir == "")
+    str_fname_or_dir = string(basename(cstr_fname));
+  else if (str_fname == "" && str_dir != "")
+    str_fname_or_dir = dir;
 
   string titlebar;
-
   if (title == "") titlebar = "Open"; else titlebar = title;
-  fname_or_dir = tfd_add_escaping(fname_or_dir);
+  str_fname_or_dir = tfd_add_escaping(str_fname_or_dir);
   titlebar = tfd_add_escaping(titlebar);
   filter = tfd_add_escaping(filter);
   FileFilter ff(filter.c_str());
 
-  const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
+  const char *path = tinyfd_openFileDialog(titlebar.c_str(), str_fname_or_dir.c_str(),
     ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), mselect, tfd_DialogEngine());
 
   return path ? : "";
@@ -314,30 +309,27 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
-  string fname_or_dir;
+  string str_fname_or_dir = "";
   string str_fname = fname;
-  string str_dir;
+  string str_dir = dir;
     
-  char *bname = (char *)str_fname.c_str();
-    
-  if (fname == "")
-    str_dir = dir;
-  else
-    str_dir = dir + string("/") + string(basename(bname));
-    
-  if(access((char *)str_dir.c_str(), F_OK) != -1)
-    fname_or_dir = str_dir;
-  else
-    fname_or_dir = fname;
+  char *cstr_fname = (char *)str_fname.c_str();
+
+  if (str_fname != "" && str_dir != "")
+    str_fname_or_dir = string(dir) + string("/") + string(basename(cstr_fname));
+  else if (str_fname != "" && str_dir == "")
+    str_fname_or_dir = string(basename(cstr_fname));
+  else if (str_fname == "" && str_dir != "")
+    str_fname_or_dir = dir;
 
   string titlebar;
   if (title == "") titlebar = "Save As"; else titlebar = title;
-  fname_or_dir = tfd_add_escaping(fname_or_dir);
+  str_fname_or_dir = tfd_add_escaping(str_fname_or_dir);
   titlebar = tfd_add_escaping(titlebar);
   filter = tfd_add_escaping(filter);
   FileFilter ff(filter.c_str());
 
-  const char *path = tinyfd_saveFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
+  const char *path = tinyfd_saveFileDialog(titlebar.c_str(), str_fname_or_dir.c_str(),
     ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), tfd_DialogEngine());
 
   return path ? : "";
