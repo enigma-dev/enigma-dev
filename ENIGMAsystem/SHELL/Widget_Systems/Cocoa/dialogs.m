@@ -25,12 +25,8 @@ int cocoa_show_message(const char *title, const char *str, bool error)
     [[alert window] setTitle:myTitle];
     [alert setMessageText:myStr];
     [alert addButtonWithTitle:@"OK"];
-    
-    if (error)
-        alert.alertStyle = 2;
-    else
-        alert.alertStyle = 1;
-    
+    [alert setAlertStyle:1];
+    if (error) [alert setAlertStyle:2];
     [alert runModal];
     [alert release];
     
@@ -46,12 +42,8 @@ int cocoa_show_question(const char *title, const char *str, bool error)
     [alert setMessageText:myStr];
     [alert addButtonWithTitle:@"Yes"];
     [alert addButtonWithTitle:@"No"];
-    
-    if (error)
-        alert.alertStyle = 2;
-    else
-        alert.alertStyle = 1;
-    
+    [alert setAlertStyle:1];
+    if (error) [alert setAlertStyle:2];
     NSModalResponse responseTag = [alert runModal];
     [alert release];
     
@@ -488,6 +480,7 @@ int cocoa_get_color(const char *title, int defcol)
     NSColorPanel *myColorPanel = [NSColorPanel sharedColorPanel];
     
     [myColorPanel setFrame:NSMakeRect(0, 0, 229, 399) display:YES animate:NO];
+    if ([myColorTitle length] > 0) [myColorPanel setTitle:myColorTitle];
     NSSize myColorSize = [[myColorPanel contentView] frame].size;
     NSView *myViewView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, myColorSize.width, buttonHeight)];
     NSView *myButtonView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, myColorSize.width, buttonHeight)];
@@ -505,7 +498,6 @@ int cocoa_get_color(const char *title, int defcol)
     [myOKButton setKeyEquivalent:@"\r"];
     [myOKButton setNeedsDisplay:YES];
     [myViewView addSubview:myButtonView];
-    [myColorPanel setTitle:myColorTitle];
     [myColorPanel setColor:myDefCol];
     NSView *oldView = [myColorPanel contentView];
     [oldView retain];
