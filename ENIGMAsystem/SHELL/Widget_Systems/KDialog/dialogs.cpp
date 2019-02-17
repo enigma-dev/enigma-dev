@@ -18,7 +18,7 @@
 namespace enigma {
   
 int tfd_DialogEngine() {
-  return 2;
+  return 1;
 }
   
 } // namespave enigma
