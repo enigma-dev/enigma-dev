@@ -249,8 +249,8 @@ void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 
   const gs_scalar tbx = spr2d->texturexarray[usi], tby = spr2d->textureyarray[usi],
               tbw = spr2d->texturewarray[usi], tbh = spr2d->textureharray[usi],
-              xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
-              yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + height;
+              xvert1 = x, xvert2 = xvert1 + width,
+              yvert1 = y, yvert2 = yvert1 + height;
 
 	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
 	draw_vertex_texture_color(xvert1,yvert1,tbx,tby,color,alpha);

@@ -35,6 +35,9 @@
 
 #include <sys/types.h>  //getpid
 #include <unistd.h>
+#include <string>
+
+using std::string;
 
 using namespace enigma::x11;
 

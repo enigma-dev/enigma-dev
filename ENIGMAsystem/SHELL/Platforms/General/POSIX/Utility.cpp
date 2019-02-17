@@ -93,21 +93,6 @@ int updateTimer() {
 
   return 0;
 }
-
-void set_working_directory() {
-  char buffer[1024];
-#ifdef DEBUG_MODE
-  char* err = getcwd(buffer, sizeof(buffer));
-  if (err != NULL)
-    fprintf(stdout, "Current working dir: %s\n", buffer);
-  else
-    perror("getcwd() error");
-#else
-  getcwd(buffer, sizeof(buffer));
-#endif
-  enigma_user::working_directory = std::string(buffer);
-}
-
 }  //namespace enigma
 
 namespace enigma_user {
@@ -149,10 +134,5 @@ void url_open_ext(std::string url, std::string target) { url_open(url, target); 
 void url_open_full(std::string url, std::string target, std::string options) { url_open(url, target, options); }
 
 void action_webpage(const std::string& url) { url_open(url); }
-
-std::string environment_get_variable(std::string name) {
-  char* ev = getenv(name.c_str());
-  return ev ? ev : "";
-}
 
 }  //namespace enigma_user

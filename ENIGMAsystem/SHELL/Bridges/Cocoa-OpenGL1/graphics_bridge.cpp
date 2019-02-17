@@ -44,6 +44,11 @@ namespace enigma {
   void SetResizeFptr() {
     WindowResizedCallback = &WindowResized;
   }
+
+  void ScreenRefresh() {
+    cocoa_screen_refresh();
+    cocoa_flush_opengl();
+  }
 }
 
 namespace enigma_user {
@@ -58,10 +63,4 @@ namespace enigma_user {
     set_synchronization(vsync);
     //TODO: Copy over from the Win32 bridge
   }
-
-  void screen_refresh() {
-    cocoa_screen_refresh();
-    cocoa_flush_opengl();
-  }
-
 }
