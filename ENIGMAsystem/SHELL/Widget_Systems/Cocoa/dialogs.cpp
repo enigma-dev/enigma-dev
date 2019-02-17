@@ -114,47 +114,42 @@ double get_passcode(string str, double def) {
 }
 
 string get_open_filename(string filter, string fname) {
-  return cocoa_get_open_filename("Open", filter.c_str(), fname.c_str(), "", false);
+  return cocoa_get_open_filename("", filter.c_str(), fname.c_str(), "", false);
 }
 
 string get_open_filenames(string filter, string fname) {
-  return cocoa_get_open_filename("Open", filter.c_str(), fname.c_str(), "", true);
+  return cocoa_get_open_filename("", filter.c_str(), fname.c_str(), "", true);
 }
 
 string get_save_filename(string filter, string fname) {
-  return cocoa_get_save_filename("Save As", filter.c_str(), fname.c_str(), "");
+  return cocoa_get_save_filename("", filter.c_str(), fname.c_str(), "");
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) {
-  if (title == "") title = "Open";
   return cocoa_get_open_filename(title.c_str(), filter.c_str(), fname.c_str(), dir.c_str(), false);
 }
 
 string get_open_filenames_ext(string filter, string fname, string dir, string title) {
-  if (title == "") title = "Open";
   return cocoa_get_open_filename(title.c_str(), filter.c_str(), fname.c_str(), dir.c_str(), true);
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
-  if (title == "") title = "Save As";
   return cocoa_get_save_filename(title.c_str(), filter.c_str(), fname.c_str(), dir.c_str());
 }
 
 string get_directory(string dname) {
-  return cocoa_get_directory("Select Directory", dname.c_str());
+  return cocoa_get_directory("", dname.c_str());
 }
 
 string get_directory_alt(string capt, string root) {
-  if (capt == "") capt = "Browse For Folder";
   return cocoa_get_directory(capt.c_str(), root.c_str());
 }
 
 int get_color(int defcol) {
-  return cocoa_get_color("Color", defcol);
+  return cocoa_get_color("", defcol);
 }
 
 int get_color_ext(int defcol, string title) {
-  if (title == "") title = "Color";
   return cocoa_get_color(title.c_str(), defcol);
 } 
 
