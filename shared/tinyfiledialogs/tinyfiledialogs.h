@@ -111,14 +111,14 @@ int tinyfd_messageBox(
 	char const * const aIconType , /* "info" "warning" "error" "question" */
 	int const aDefaultButton , /* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
 	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
-		/* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
+	/* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
 
 char const * tinyfd_inputBox(
 	char const * const aTitle , /* NULL or "" */
 	char const * const aMessage , /* NULL or "" may NOT contain \n \t on windows */
 	char const * const aDefaultInput ,  /* NULL or "" */
 	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
-		/* returns NULL on cancel */
+	/* returns NULL on cancel */
 
 char const * tinyfd_passwordBox(
 	char const * const aTitle , /* NULL or "" */
@@ -134,7 +134,7 @@ char const * tinyfd_saveFileDialog(
 	char const * const * const aFilterPatterns , /* NULL | {"*.jpg","*.png"} */
 	char const * const aSingleFilterDescription , /* NULL | "text files" */
 	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
-		/* returns NULL on cancel */
+	/* returns NULL on cancel */
 
 char const * tinyfd_openFileDialog(
 	char const * const aTitle , /* NULL or "" */
@@ -144,14 +144,14 @@ char const * tinyfd_openFileDialog(
 	char const * const aSingleFilterDescription , /* NULL | "image files" */
 	int const aAllowMultipleSelects , /* 0 or 1 */
 	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
-		/* in case of multiple files, the separator is | */
-		/* returns NULL on cancel */
+	/* in case of multiple files, the separator is | */
+	/* returns NULL on cancel */
 
 char const * tinyfd_selectFolderDialog(
 	char const * const aTitle , /* NULL or "" */
 	char const * const aDefaultPath , /* NULL or "" */
 	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
-		/* returns NULL on cancel */
+	/* returns NULL on cancel */
 
 char const * tinyfd_colorChooser(
 	char const * const aTitle , /* NULL or "" */
@@ -159,11 +159,11 @@ char const * tinyfd_colorChooser(
 	unsigned char const aDefaultRGB[3] , /* { 0 , 255 , 255 } */
 	unsigned char aoResultRGB[3] , /* { 0 , 0 , 0 } */
 	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
-		/* returns the hexcolor as a string "#FF0000" */
-		/* aoResultRGB also contains the result */
-		/* aDefaultRGB is used only if aDefaultHexRGB is NULL */
-		/* aDefaultRGB and aoResultRGB can be the same array */
-		/* returns NULL on cancel */
+	/* returns the hexcolor as a string "#FF0000" */
+	/* aoResultRGB also contains the result */
+	/* aDefaultRGB is used only if aDefaultHexRGB is NULL */
+	/* aDefaultRGB and aoResultRGB can be the same array */
+	/* returns NULL on cancel */
 
 #ifdef	__cplusplus
 }
