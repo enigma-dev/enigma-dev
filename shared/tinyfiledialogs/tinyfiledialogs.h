@@ -144,7 +144,7 @@ char const * tinyfd_openFileDialog(
 	char const * const aSingleFilterDescription , /* NULL | "image files" */
 	int const aAllowMultipleSelects , /* 0 or 1 */
 	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
-	/* in case of multiple files, the separator is | */
+	/* in case of multiple files, the separator is \n */
 	/* returns NULL on cancel */
 
 char const * tinyfd_selectFolderDialog(
