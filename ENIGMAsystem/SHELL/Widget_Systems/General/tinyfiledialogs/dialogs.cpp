@@ -63,7 +63,7 @@ string caption;
 static inline string tfd_add_escaping(string str) {
   string result = string_replace_all(str, "\"", "\\\"");
 
-  if (dm_DialogEngine == dm_Zenity)
+  if (tfd_DialogEngine == tfd_Zenity)
     result = string_replace_all(result, "_", "__");
 
   return result;
