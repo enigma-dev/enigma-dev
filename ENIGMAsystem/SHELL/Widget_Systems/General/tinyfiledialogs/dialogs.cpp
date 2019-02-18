@@ -61,7 +61,7 @@ string caption;
 } // anonymous namespace
 
 static inline string tfd_add_escaping(string str) {
-  string result = string_replace_all(str, "\"", "\\\"");
+  string result = string_replace_all(str, "\"", "\\\\\"");
 
   if (tfd_DialogEngine() == tfd_Zenity)
     result = string_replace_all(str, "_", "__");
