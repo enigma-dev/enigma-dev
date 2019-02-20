@@ -34,6 +34,8 @@
 
 #include <API/compile_settings.h>
 
+#include <iostream>
+
 using namespace jdi;
 using namespace jdip;
 
@@ -1027,8 +1029,8 @@ void lexer_cpp::cleanup() {
 }
 
 openfile::openfile() {}
-openfile::openfile(const char* fname): filename(fname), line(0), lpos(0) {}
-openfile::openfile(const char* fname, size_t line_num, size_t line_pos, llreader &consume): filename(fname), line(line_num), lpos(line_pos) { file.consume(consume); }
+openfile::openfile(const char* fname): filename(fname), line(0), lpos(0) { std::cout << "ding bling: " << fname << std::endl; }
+openfile::openfile(const char* fname, size_t line_num, size_t line_pos, llreader &consume): filename(fname), line(line_num), lpos(line_pos) { std::cout << "ding bling: " << fname << std::endl; file.consume(consume); }
 void openfile::swap(openfile &f) {
   { register const char* tmpl = filename;
   filename = f.filename, f.filename = tmpl; }
