@@ -18,6 +18,7 @@
 **/
 
 #include "image_formats.h"
+#include "image_formats_exts.h"
 #include "Universal_System/estring.h"
 
 #include "gif_format.h"
