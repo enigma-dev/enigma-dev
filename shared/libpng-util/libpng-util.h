@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Robert B. Colton
+/** Copyright (C) 2018-2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,13 +15,5 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_PROTO2ES_H
-#define ENIGMA_PROTO2ES_H
-
-#include "game.pb.h"
-
-#include "backend/EnigmaStruct.h"
-
-EnigmaStruct* Proto2ES(buffers::Game* protobuf);
-
-#endif // ENIGMA_PROTO2ES_H
+unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename);
+unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename);

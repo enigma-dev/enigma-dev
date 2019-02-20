@@ -9,9 +9,14 @@
         ForwardIt it,
         typename std::iterator_traits<ForwardIt>::difference_type n = 1);
   }  // namespace boost
-#else
-  #include <filesystem>
-  namespace fs = std::filesystem;
+#else 
+  #ifdef __APPLE__
+    #include <experimental/filesystem>
+    namespace fs = std::experimental::filesystem;
+  #else
+    #include <filesystem>
+    namespace fs = std::filesystem;
+  #endif
   using errc = std::error_code;
 #endif
 

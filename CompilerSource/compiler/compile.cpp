@@ -161,6 +161,13 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
   return current_language->compile(GameData(es), exe_filename, mode);
 }
 
+dllexport int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
+  GameData gameData(*proj);
+  int error = FlattenProto(*proj, &gameData);
+  if (error) return error;
+  return current_language->compile(gameData, exe_filename, mode);
+}
+
 static bool run_game = true;
 dllexport void ide_handles_game_launch() { run_game = false; }
 
@@ -195,9 +202,9 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   ide_dia_clear();
   ide_dia_open();
   cout << "Initialized." << endl;
-  
+
   CompileState state;
-  
+
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
   string compilepath = CURRENT_PLATFORM_NAME "/" + compilerInfo.target_platform + "/" + name;
@@ -240,12 +247,12 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     if (exts_new_parse != exts_last_parse) {
       user << "The IDE didn't tell ENIGMA what extensions "
               "were selected before requesting a build.";
-      
+
       cout << "Extensions I have loaded:" << endl;
       for (const string &e : exts_last_parse) cout << "- " << e << endl;
       cout << "Extensions I should have loaded:" << endl;
       for (const string &e : exts_new_parse) cout << "- " << e << endl;
-      
+
       //idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
       user << "...Continuing anyway..." << flushl;
     }
@@ -521,7 +528,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
   make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
   make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
-  
+
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")
       make += key.first + "=\"" + key.second + "\" ";
