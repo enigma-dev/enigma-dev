@@ -33,11 +33,14 @@
 using namespace std;
 using namespace jdip;
 
+#include <iostream>
+
 /** @section Implementation
   This is the single most trivial function in the API. It makes a call to parse_stream, passing a
   new instance of the C++ lexer that ships with JDI, \c lex_cpp.
 **/
 int jdi::context::parse_C_stream(llreader &cfile, const char* fname, error_handler *errhandl) {
+  std::cout << "ok parsing: " << fname << std::endl;
   return parse_stream(fname? new lexer_cpp(cfile, macros, fname) : new lexer_cpp(cfile, macros), errhandl); // Invoke our common method with it
 }
 
