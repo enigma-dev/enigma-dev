@@ -95,9 +95,12 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   int res = 1;
   DECLARE_TIME_TYPE ts, te;
   if (f.is_open()) {
+    cout << "Welp, ENIGMA did open" << endl;
     CURRENT_TIME(ts);
     res = main_context->parse_C_stream(f, "SHELLmain.cpp");
     CURRENT_TIME(te);
+  } else {
+    cout << "ENIGMA won't open" << endl;
   }
   
   jdi::definition *d;
