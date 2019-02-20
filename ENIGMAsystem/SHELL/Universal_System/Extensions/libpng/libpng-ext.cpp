@@ -19,6 +19,7 @@
 
 #include "libpng-ext.h"
 #include "Universal_System/image_formats.h"
+#include "Universal_System/image_formats_exts.h"
 #include "Universal_System/nlpo2.h"
 
 #include "libpng-util.h"
