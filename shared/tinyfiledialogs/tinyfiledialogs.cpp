@@ -1468,6 +1468,10 @@ char const * tinyfd_colorChooser(
                         RGB2Hex(aoResultRGB,lBuff);
                 }
         }
+        else
+        {
+                Hex2RGB(lBuff,aoResultRGB);
+        }
         /* printf("%d %d %d\n", aoResultRGB[0],aoResultRGB[1],aoResultRGB[2]); */
         /* printf( "lBuff: %s\n" , lBuff ) ; */
         return lBuff ;
