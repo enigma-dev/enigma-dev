@@ -19,7 +19,6 @@
 #ifndef ENIGMA_IMAGEFORMATS_H
 #define ENIGMA_IMAGEFORMATS_H
 
-#include <functional>
 #include <string>
 
 /// NOTE: These image formats expect the data to be un-aligned and always reads and writes with BGRA full color
@@ -34,12 +33,6 @@ enum {
   color_fmt_bgra,
   color_fmt_bgr
 };
-
-using ImageLoadFunction = std::function<unsigned char*(std::string, unsigned int*, unsigned int*, unsigned int*, unsigned int*, bool)>;
-using ImageSaveFunction = std::function<int(std::string, const unsigned char*, unsigned, unsigned, unsigned, unsigned, bool)>;
-
-void image_add_loader(std::string format, ImageLoadFunction fnc);
-void image_add_saver(std::string format, ImageSaveFunction fnc);
 
 /// Gets the image format, eg. ".bmp", ".png", etc.
 std::string image_get_format(std::string filename);
