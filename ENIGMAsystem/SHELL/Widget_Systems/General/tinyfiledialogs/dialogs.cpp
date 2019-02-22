@@ -147,7 +147,7 @@ static inline string remove_trailing_zeros(double numb) {
 
 static inline string get_open_filename_helper(string filter, string fname, string dir, string title, int const mselect) {
   string str_fname_or_dir = ""; 
-  char *cstr_fname = (char *)str_fname.c_str();
+  char *cstr_fname = (char *)fname.c_str();
 
   if (fname != "" && dir != "")
     str_fname_or_dir = dir + string("/") + string(basename(cstr_fname));
