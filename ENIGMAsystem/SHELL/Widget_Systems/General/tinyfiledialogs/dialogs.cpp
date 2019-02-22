@@ -150,7 +150,7 @@ static inline string get_open_filename_helper(string filter, string fname, strin
   char *cstr_fname = (char *)str_fname.c_str();
 
   if (fname != "" && dir != "")
-    str_fname_or_dir = string(dir) + string("/") + string(basename(cstr_fname));
+    str_fname_or_dir = dir + string("/") + string(basename(cstr_fname));
   else if (fname != "" && dir == "")
     str_fname_or_dir = string(basename(cstr_fname));
   else if (fname == "" && dir != "")
@@ -310,7 +310,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   char *cstr_fname = (char *)fname.c_str();
 
   if (fname != "" && dir != "")
-    str_fname_or_dir = string(dir) + string("/") + string(basename(cstr_fname));
+    str_fname_or_dir = dir + string("/") + string(basename(cstr_fname));
   else if (fname != "" && dir == "")
     str_fname_or_dir = string(basename(cstr_fname));
   else if (fname == "" && dir != "")
