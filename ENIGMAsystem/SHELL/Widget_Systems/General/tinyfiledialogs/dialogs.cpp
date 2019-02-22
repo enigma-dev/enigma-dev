@@ -146,17 +146,14 @@ static inline string remove_trailing_zeros(double numb) {
 }
 
 static inline string get_open_filename_helper(string filter, string fname, string dir, string title, int const mselect) {
-  string str_fname_or_dir = "";
-  string str_fname = fname;
-  string str_dir = dir;
-    
+  string str_fname_or_dir = ""; 
   char *cstr_fname = (char *)str_fname.c_str();
 
-  if (str_fname != "" && str_dir != "")
+  if (fname != "" && dir != "")
     str_fname_or_dir = string(dir) + string("/") + string(basename(cstr_fname));
-  else if (str_fname != "" && str_dir == "")
+  else if (fname != "" && dir == "")
     str_fname_or_dir = string(basename(cstr_fname));
-  else if (str_fname == "" && str_dir != "")
+  else if (fname == "" && dir != "")
     str_fname_or_dir = dir;
 
   string titlebar;
@@ -310,16 +307,13 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
   string str_fname_or_dir = "";
-  string str_fname = fname;
-  string str_dir = dir;
-    
-  char *cstr_fname = (char *)str_fname.c_str();
+  char *cstr_fname = (char *)fname.c_str();
 
-  if (str_fname != "" && str_dir != "")
+  if (fname != "" && dir != "")
     str_fname_or_dir = string(dir) + string("/") + string(basename(cstr_fname));
-  else if (str_fname != "" && str_dir == "")
+  else if (fname != "" && dir == "")
     str_fname_or_dir = string(basename(cstr_fname));
-  else if (str_fname == "" && str_dir != "")
+  else if (fname == "" && dir != "")
     str_fname_or_dir = dir;
 
   string titlebar;
