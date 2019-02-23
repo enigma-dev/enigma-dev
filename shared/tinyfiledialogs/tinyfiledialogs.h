@@ -104,52 +104,27 @@ and the corresponding closing bracket near the end of this file:
 extern "C" {
 #endif
 
-extern char const tinyfd_version[8]; /* contains tinyfd current version number */
-extern char const tinyfd_needs[]; /* info about requirements */
-extern int tinyfd_verbose; /* 0 (default) or 1 : on unix, prints the command line calls */
-
-extern int tinyfd_forceConsole;  /* 0 (default) or 1 */
-/* for unix & windows: 0 (graphic mode) or 1 (console mode).
-0: try to use a graphic solution, if it fails then it uses console mode.
-1: forces all dialogs into console mode even when an X server is present,
-  if the package dialog (and a console is present) or dialog.exe is installed.
-  on windows it only make sense for console applications */
-
-extern char tinyfd_response[1024];
-/* if you pass "tinyfd_query" as aTitle,
-the functions will not display the dialogs
-but will return 0 for console mode, 1 for graphic mode.
-tinyfd_response is then filled with the retain solution.
-possible values for tinyfd_response are (all lowercase)
-for graphic mode:
-  windows_wchar windows
-  applescript kdialog zenity zenity3 matedialog qarma
-  python2-tkinter python3-tkinter python-dbus perl-dbus
-  gxmessage gmessage xmessage xdialog gdialog
-for console mode:
-  dialog whiptail basicinput no_solution */
-
 int tinyfd_messageBox(
 	char const * const aTitle , /* NULL or "" */
 	char const * const aMessage , /* NULL or "" may contain \n \t */
 	char const * const aDialogType , /* "ok" "okcancel" "yesno" "yesnocancel" */
 	char const * const aIconType , /* "info" "warning" "error" "question" */
 	int const aDefaultButton , /* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
-	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
-		/* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
+	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
+	/* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
 
 char const * tinyfd_inputBox(
 	char const * const aTitle , /* NULL or "" */
 	char const * const aMessage , /* NULL or "" may NOT contain \n \t on windows */
 	char const * const aDefaultInput ,  /* NULL or "" */
-	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
-		/* returns NULL on cancel */
+	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
+	/* returns NULL on cancel */
 
 char const * tinyfd_passwordBox(
 	char const * const aTitle , /* NULL or "" */
 	char const * const aMessage , /* NULL or "" may NOT contain \n nor \t */
 	char const * const aDefaultInput , /* NULL or "" */
-	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
+	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
         /* returns NULL on cancel */
 
 char const * tinyfd_saveFileDialog(
@@ -158,8 +133,8 @@ char const * tinyfd_saveFileDialog(
 	int const aNumOfFilterPatterns , /* 0 */
 	char const * const * const aFilterPatterns , /* NULL | {"*.jpg","*.png"} */
 	char const * const aSingleFilterDescription , /* NULL | "text files" */
-	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
-		/* returns NULL on cancel */
+	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
+	/* returns NULL on cancel */
 
 char const * tinyfd_openFileDialog(
 	char const * const aTitle , /* NULL or "" */
@@ -168,78 +143,30 @@ char const * tinyfd_openFileDialog(
 	char const * const * const aFilterPatterns , /* NULL {"*.jpg","*.png"} */
 	char const * const aSingleFilterDescription , /* NULL | "image files" */
 	int const aAllowMultipleSelects , /* 0 or 1 */
-	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
-		/* in case of multiple files, the separator is | */
-		/* returns NULL on cancel */
+	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
+	/* in case of multiple files, the separator is \n */
+	/* returns NULL on cancel */
 
 char const * tinyfd_selectFolderDialog(
 	char const * const aTitle , /* NULL or "" */
 	char const * const aDefaultPath , /* NULL or "" */
-	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
-		/* returns NULL on cancel */
+	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
+	/* returns NULL on cancel */
 
 char const * tinyfd_colorChooser(
 	char const * const aTitle , /* NULL or "" */
 	char const * const aDefaultHexRGB , /* NULL or "#FF0000" */
 	unsigned char const aDefaultRGB[3] , /* { 0 , 255 , 255 } */
 	unsigned char aoResultRGB[3] , /* { 0 , 0 , 0 } */
-	int const aDialogEngine ) ; /* 0 for OsaScript, 1 for Zenity, 2 for KDialog */
-		/* returns the hexcolor as a string "#FF0000" */
-		/* aoResultRGB also contains the result */
-		/* aDefaultRGB is used only if aDefaultHexRGB is NULL */
-		/* aDefaultRGB and aoResultRGB can be the same array */
-		/* returns NULL on cancel */
+	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
+	/* returns the hexcolor as a string "#FF0000" */
+	/* aoResultRGB also contains the result */
+	/* aDefaultRGB is used only if aDefaultHexRGB is NULL */
+	/* aDefaultRGB and aoResultRGB can be the same array */
+	/* returns NULL on cancel */
 
 #ifdef	__cplusplus
 }
 #endif
 
 #endif /* TINYFILEDIALOGS_H */
-
-/*
-- This is not for android nor ios.
-- The code is pure C, perfectly compatible with C++.
-- the windows only wchar_t (utf-16) prototypes are in the header file
-- windows is fully supported from XP to 10 (maybe even older versions)
-- C# & LUA via dll, see example files
-- OSX supported from 10.4 to latest (maybe even older versions)
-- Avoid using " and ' in titles and messages.
-- There's one file filter only, it may contain several patterns.
-- If no filter description is provided,
-  the list of patterns will become the description.
-- char const * filterPatterns[3] = { "*.obj" , "*.stl" , "*.dxf" } ;
-- On windows char defaults to MBCS, set tinyfd_winUtf8=1 to use UTF-8
-- On windows link against Comdlg32.lib and Ole32.lib
-  This linking is not compulsary for console mode (see above).
-- On unix: it tries command line calls, so no such need.
-- On unix you need one of the following:
-  applescript, kdialog, zenity, matedialog, shellementary, qarma,
-  python (2 or 3)/tkinter/python-dbus (optional), Xdialog
-  or dialog (opens terminal if running without console) or xterm.
-- One of those is already included on most (if not all) desktops.
-- In the absence of those it will use gdialog, gxmessage or whiptail
-  with a textinputbox.
-- If nothing is found, it switches to basic console input,
-  it opens a console if needed (requires xterm + bash).
-- Use windows separators on windows and unix separators on unix.
-- String memory is preallocated statically for all the returned values.
-- File and path names are tested before return, they are valid.
-- If you pass only a path instead of path + filename,
-  make sure it ends with a separator.
-- tinyfd_forceConsole=1; at run time, forces dialogs into console mode.
-- On windows, console mode only make sense for console applications.
-- On windows, Console mode is not implemented for wchar_T UTF-16.
-- Mutiple selects are not allowed in console mode.
-- The package dialog must be installed to run in enhanced console mode.
-  It is already installed on most unix systems.
-- On osx, the package dialog can be installed via
-  http://macappstore.org/dialog or http://macports.org
-- On windows, for enhanced console mode,
-  dialog.exe should be copied somewhere on your executable path.
-  It can be found at the bottom of the following page:
-  http://andrear.altervista.org/home/cdialog.php
-- If dialog is missing, it will switch to basic console input.
-- You can query the type of dialog that will be use.
-- MinGW needs gcc >= v4.9 otherwise some headers are incomplete.
-- The Hello World (and a bit more) is on the sourceforge site:
-*/
