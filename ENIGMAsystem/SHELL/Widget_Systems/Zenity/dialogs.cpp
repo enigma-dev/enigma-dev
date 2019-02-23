@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Samuel Venable
+/** Copyright (C) 2019 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -18,7 +18,7 @@
 namespace enigma {
   
 int tfd_DialogEngine() {
-  return 1;
+  return 0;
 }
   
 } // namespave enigma
