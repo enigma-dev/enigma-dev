@@ -1,17 +1,24 @@
-#include "Event.pb.h"
+/** Copyright (C) 2018 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
-static inline std::string string_replace_all(std::string str, std::string substr, std::string nstr)
-{
-  size_t pos = 0;
-  while ((pos = str.find(substr, pos)) != std::string::npos)
-  {
-    str.replace(pos, substr.length(), nstr);
-    pos += nstr.length();
-  }
-  return str;
-}
+#include "action.h"
+#include "Util.h"
 
-static std::string Argument2Code(const buffers::resources::Argument& arg) {
+std::string Argument2Code(const buffers::resources::Argument& arg) {
   using buffers::resources::ArgumentKind;
   std::string val = arg.string();
 
@@ -57,7 +64,7 @@ static std::string Argument2Code(const buffers::resources::Argument& arg) {
   return val;
 }
 
-static std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::resources::Action >& actions) {
+std::string Actions2Code(const std::vector< buffers::resources::Action >& actions) {
   using buffers::resources::ActionKind;
   using buffers::resources::ActionExecution;
   std::string code = "";
