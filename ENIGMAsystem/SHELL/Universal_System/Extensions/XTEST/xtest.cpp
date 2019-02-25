@@ -2,6 +2,8 @@
 
 #include "Platforms/xlib/XLIBwindow.h"
 
+#include <X11/extensions/XTest.h>
+
 namespace enigma {
   extern unsigned short keyrmap[256];
 }

@@ -42,7 +42,6 @@ using namespace std;
 
 #include <API/context.h>
 #include "languages/language_adapter.h"
-#include "compiler/jdi_utility.h"
 
 string fc(const char* fn);
 
@@ -77,23 +76,23 @@ dllexport const char* first_available_resource() {
 }
 /// Returns whether the resource can be called as a function
 dllexport bool resource_isFunction() {
-  return definition_is_function(current_resource);
+  return current_language->definition_is_function(current_resource);
 }
 /// Returns the minimum number of arguments to the function
 dllexport int resource_argCountMin() {
   unsigned min, max;
-  definition_parameter_bounds(current_resource, min, max);
+  current_language->definition_parameter_bounds(current_resource, min, max);
   return min;
 }
 /// Returns the maximum number of arguments to the function
 dllexport int resource_argCountMax() {
   unsigned min, max;
-  definition_parameter_bounds(current_resource, min, max);
+  current_language->definition_parameter_bounds(current_resource, min, max);
   return max;
 }
 /// Returns the number of times the function was declared in the parsed sources
 dllexport int resource_overloadCount() {
-  return definition_overload_count(current_resource);
+  return current_language->definition_overload_count(current_resource);
 }
 /// Returns a simple string of parameters and defaults that would serve as the prototype of this function
 /// The returned pointer to the string is INVALIDATED upon the next call to definitionsModified().

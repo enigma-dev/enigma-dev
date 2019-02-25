@@ -338,6 +338,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
     } else {
       const std::string gmxName = opts.GetExtension(buffers::gmx);
       const bool isFilePath = opts.GetExtension(buffers::file_path);
+      const std::string refType = opts.GetExtension(buffers::resource_ref);
       std::string alias = gmxName;
       bool isSplit = false;
       bool isAttribute = false;
@@ -435,6 +436,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
                   if (isFilePath) {  // gotta prepend the gmx's path & fix the string to be posix compatible
                     value = GMXPath2FilePath(dir, value);
                   }
+                  if (!refType.empty() && value == "<undefined>") break;
                   refl->AddString(m, field, value);
                 }
               }
@@ -524,6 +526,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
               if (isFilePath) {  // again gotta prepend the gmx's path & fix the string to be posix compatible
                 value = GMXPath2FilePath(dir, value);
               }
+              if (!refType.empty() && value == "<undefined>") break;
               refl->SetString(m, field, value);
               break;
             }

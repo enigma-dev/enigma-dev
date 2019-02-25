@@ -103,7 +103,7 @@ DXGI_FORMAT dxgi_formats[] = {
   DXGI_FORMAT_R32G32_FLOAT,
   DXGI_FORMAT_R32G32B32_FLOAT,
   DXGI_FORMAT_R32G32B32A32_FLOAT,
-  DXGI_FORMAT_R8G8B8A8_UNORM,
+  DXGI_FORMAT_B8G8R8A8_UNORM,
   DXGI_FORMAT_R8G8B8A8_UINT
 };
 size_t dxgi_format_sizes[] = {
@@ -308,28 +308,6 @@ void graphics_prepare_default_shader() {
     graphics_compile_shader(g_strPS, &pBlobPS, "PS", "PS", "ps_4_0");
     m_device->CreatePixelShader(pBlobPS->GetBufferPointer(), pBlobPS->GetBufferSize(),
                                 NULL, &g_pPixelShader);
-
-    D3D11_SAMPLER_DESC samplerDesc;
-    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.MipLODBias = 0.0f;
-    samplerDesc.MaxAnisotropy = 1;
-    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-    samplerDesc.BorderColor[0] = 0;
-    samplerDesc.BorderColor[1] = 0;
-    samplerDesc.BorderColor[2] = 0;
-    samplerDesc.BorderColor[3] = 0;
-    samplerDesc.MinLOD = 0;
-    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-    ID3D11SamplerState *samplerState;
-    m_device->CreateSamplerState(
-      &samplerDesc,
-      &samplerState
-    );
-    m_deviceContext->PSSetSamplers(0, 1, &samplerState);
   }
 
   D3D11_MAPPED_SUBRESOURCE mappedResource;

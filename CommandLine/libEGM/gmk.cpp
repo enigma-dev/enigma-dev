@@ -22,8 +22,7 @@
 
 #include "event_reader/event_parser.h"
 
-#include "lodepng.h"
-#include <zlib.h>
+#include "libpng-util.h"
 
 #include <fstream>
 #include <utility>
@@ -36,6 +35,8 @@
 
 #include <cstdlib>     /* srand, rand */
 #include <ctime>       /* time */
+
+#include <zlib.h>
 
 using namespace buffers;
 using namespace buffers::resources;
@@ -118,7 +119,7 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
                 t_pixel_b = bmp[pixeloffset+2];
 
   /*
-  There are 3 differences between BMP and the raw image buffer for LodePNG:
+  There are 3 differences between BMP and the raw image buffer for libpng:
   -it's upside down
   -it's in BGR instead of RGB format (or BRGA instead of RGBA)
   -each scanline has padding bytes to make it a multiple of 4 if needed
@@ -151,40 +152,27 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
     }
   }
 
-  unsigned char *buffer = nullptr;
-  size_t buffer_length;
-  lodepng_encode32(&buffer, &buffer_length, rgba.data(), w, h);
+  std::string temp_file_path = TempFileName("gmk_data");
+  libpng_encode32_file(rgba.data(), w, h, temp_file_path.c_str());
 
-  char *buffer_signed = reinterpret_cast<char*>(buffer);
-  std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
-  // explicitly free because lodepng allocated it with malloc
-  free(buffer);
   return temp_file_path;
 }
 
 std::string writeTempBGRAFile(std::unique_ptr<char[]> bytes, size_t width, size_t height) {
-  auto bgra = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
-  std::vector<unsigned char> rgba;
-  rgba.resize(width * height * 4);
+  auto bgra = reinterpret_cast<unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
   for (unsigned y = 0; y < height; y++) {
     for (unsigned x = 0; x < width; x++) {
       unsigned pos = width * 4 * y + 4 * x;
-      rgba[pos + 0] = bgra[pos + 2]; //R<-B
-      rgba[pos + 1] = bgra[pos + 1]; //G<-G
-      rgba[pos + 2] = bgra[pos + 0]; //B<-R
-      rgba[pos + 3] = bgra[pos + 3]; //A<-A
+      unsigned char temp = bgra[pos + 2];
+      bgra[pos + 2] = bgra[pos + 0];
+      bgra[pos + 0] = temp;
     }
   }
 
-  unsigned char *buffer = nullptr;
-  size_t buffer_length;
-  lodepng_encode32(&buffer, &buffer_length, rgba.data(), width, height);
+  std::string temp_file_path = TempFileName("gmk_data");
+  libpng_encode32_file(bgra, width, height, temp_file_path.c_str());
 
-  char *buffer_signed = reinterpret_cast<char*>(buffer);
-  std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
-  // explicitly free because lodepng allocated it with malloc
-  free(buffer);
   return temp_file_path;
 }
 
@@ -489,22 +477,23 @@ int LoadSettings(Decoder &dec, Settings& set) {
 
   General* gen = set.mutable_general();
   Graphics* gfx = set.mutable_graphics();
+  Windowing *win = set.mutable_windowing();
   Info* inf = set.mutable_info();
 
   if (ver >= 800) dec.beginInflate();
-  gfx->set_start_in_fullscreen(dec.readBool());
+  win->set_start_in_fullscreen(dec.readBool());
   if (ver >= 600) {
-    gfx->set_smooth_colors(dec.readBool());
+    gfx->set_interpolate_textures(dec.readBool());
   }
-  gfx->set_window_showborder(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
+  win->set_show_border(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
   gen->set_show_cursor(dec.readBool());
-  gfx->set_window_scale(dec.read4());
+  gfx->set_view_scale(dec.read4());
   if (ver == 530) {
     dec.skip(8); // "fullscreen scale" & "only scale w/ hardware support"
   } else {
-    gfx->set_window_sizeable(dec.readBool());
-    gfx->set_window_stayontop(dec.readBool());
-    gen->set_color_outside_room_region(dec.read4());
+    win->set_is_sizeable(dec.readBool());
+    win->set_stay_on_top(dec.readBool());
+    gfx->set_color_outside_room_region(dec.read4());
   }
   dec.readBool(); // set_resolution
 
@@ -520,7 +509,7 @@ int LoadSettings(Decoder &dec, Settings& set) {
     dec.read4(); // frequency
   }
 
-  gfx->set_window_showicons(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
+  win->set_show_icons(!dec.readBool()); // inverted because negative in GM (e.g, "don't")
   if (ver > 530) gfx->set_use_synchronization(dec.readBool());
   if (ver >= 800) dec.readBool(); // DISABLE_SCREENSAVERS
   gfx->set_allow_fullscreen_change(dec.readBool());
@@ -532,7 +521,7 @@ int LoadSettings(Decoder &dec, Settings& set) {
     dec.readBool(); dec.readBool();
   }
   dec.read4(); // GAME_PRIORITY
-  gfx->set_freeze_on_lose_focus(dec.readBool());
+  win->set_freeze_on_lose_focus(dec.readBool());
   int load_bar_mode = dec.read4(); // LOAD_BAR_MODE
   if (load_bar_mode == 2) { // 0=NONE 1=DEFAULT 2=CUSTOM
     if (ver < 800) {
@@ -982,7 +971,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
   room->set_persistent(dec.readBool());
   room->set_color(dec.read4());
   room->set_show_color(dec.readBool());
-  room->set_code(dec.readStr());
+  room->set_creation_code(dec.readStr());
 
   int nobackgrounds = dec.read4();
   for (int j = 0; j < nobackgrounds; j++) {
@@ -1032,7 +1021,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
     instance->set_y(dec.read4());
     dec.postponeName(instance->mutable_object_type(), dec.read4(), TypeCase::kObject);
     instance->set_id(dec.read4());
-    instance->set_code(dec.readStr());
+    instance->set_creation_code(dec.readStr());
     instance->mutable_editor_settings()->set_locked(dec.readBool());
   }
 

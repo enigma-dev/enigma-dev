@@ -15,12 +15,12 @@ include $(SHARED_SRC_DIR)/eyaml/Makefile
 include $(SHARED_SRC_DIR)/event_reader/Makefile
 
 LIBRARY   := ../../libEGM$(EXT)
-PROTO_DIR := ../protos
+PROTO_DIR := ../../shared/protos
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
 
-CXXFLAGS  := -I$(SRC_DIR) -I../  -I../../CompilerSource -I$(SHARED_SRC_DIR) $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SRC_DIR)/lodepng -Wall -Wextra -Wpedantic -g -fPIC
-LDFLAGS   := -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -lstdc++fs -L$(SHARED_SRC_DIR)/lodepng -llodepng
+CXXFLAGS  := -I$(SRC_DIR) $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SOURCES)/libpng-util -Wall -Wextra -Wpedantic -g -fPIC
+LDFLAGS   := -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -lstdc++fs -L$(SHARED_SOURCES)/libpng-util -lpng-util -lpng
 
 #if gcc >= 8 use std::filesystem instead of boost
 ifeq ($(shell expr $(GCCVER) \>= 8), 1)
