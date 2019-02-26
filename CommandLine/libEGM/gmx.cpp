@@ -332,6 +332,21 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
       if (gmxName == "GMX_DEPRECATED")
         continue;
 
+      if (gmxName == "action") {
+        std::vector<Action> actions;
+        int cid = 0;
+        for (pugi::xml_node n = child.child("action"); n != nullptr; n = n.next_sibling()) {
+          if (strcmp(n.name(), "action") == 0) {  // skip over any siblings that aren't twins <foo/><bar/><foo/> <- bar would be skipped
+            n.append_attribute("visited") = "true";
+            Action action;
+            PackRes(dir, cid++, n, &action, depth + 1);
+            actions.emplace_back(action);
+          }
+        }
+        refl->SetString(m, field, Actions2Code(actions));
+        continue;
+      }
+
       if (gmxName == "eventtype") {
         int mid = child.attribute("eventtype").as_int();
         auto enumb = child.attribute("enumb");
