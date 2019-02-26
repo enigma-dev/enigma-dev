@@ -15,9 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Action.pb.h"
+#include "codegen/Event.pb.h"
 
 #include <vector>
 
 std::string Argument2Code(const buffers::resources::Argument& arg);
-std::string Actions2Code(const std::vector< buffers::resources::Action >& actions);
+std::string Actions2Code(const std::vector<buffers::resources::Action >& actions);

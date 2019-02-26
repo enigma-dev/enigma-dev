@@ -214,7 +214,7 @@ inline void loadObjectEvents(const fs::path& fPath, google::protobuf::Message *m
   for(auto& f : fs::directory_iterator(fPath)) {
     if (f.path().extension() == ".edl") {
       const std::string eventName = f.path().stem().string();
-      buffers::resources::Object_Event event;
+      buffers::resources::Event event;
       event.set_name(eventName);
       event.set_code(FileToString(f.path()));
 
@@ -340,7 +340,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
       const std::string edlFile = f.path().stem().string();
 
       if (edlFile == "create") {
-        rm->set_code(FileToString(f.path()));
+        rm->set_creation_code(FileToString(f.path()));
         continue;
       }
 
@@ -363,7 +363,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
         });
 
       if (instItr != instances.end()) {
-        instItr->set_code(FileToString(f.path()));
+        instItr->set_creation_code(FileToString(f.path()));
         continue;
       }
 
@@ -380,7 +380,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
         });
 
       if (instItr != instances.end()) {
-        instItr->set_code(FileToString(f.path()));
+        instItr->set_creation_code(FileToString(f.path()));
       } else {
         std::cerr << "Error: Failed to set instance code. Could not find instance with the ID: " << id << " in " << fPath << std::endl;
       }

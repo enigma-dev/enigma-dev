@@ -17,8 +17,6 @@
 
 #include "gmk.h"
 #include "filesystem.h"
-#include "action.h"
-#include "event.h"
 
 #include "libpng-util.h"
 
@@ -849,7 +847,7 @@ template<class Event> int LoadActions(Decoder &dec, Event *event) {
         action->set_who_name("other");
         break;
       default:
-        action->set_who_name(std::to_string(applies_to));
+        dec.postponeName(action->mutable_who_name(), applies_to, TypeCase::kObject);
     }
     action->set_relative(dec.readBool());
 
@@ -888,8 +886,6 @@ template<class Event> int LoadActions(Decoder &dec, Event *event) {
 
     action->set_is_not(dec.readBool());
   }
-
-  event->set_code(Actions2Code(event->actions()));
 
   return 1;
 }

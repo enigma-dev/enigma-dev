@@ -197,7 +197,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   buffers::resources::Room cleaned = *room;
   cleaned.clear_instances();
   cleaned.clear_tiles();
-  cleaned.clear_code();
+  cleaned.clear_creation_code();
 
   // Build tile and instance layers.
   auto tile_layers = egm::util::BuildTileLayers(*room);
@@ -210,7 +210,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
 
   *cleaned.mutable_instances() = room->instances();
   *cleaned.mutable_tiles() = room->tiles();
-  *cleaned.mutable_code() = room->code();
+  cleaned.set_creation_code(room->creation_code());
 
   if (!proto::util::MessageDifferencer::Equivalent(*room, cleaned)) {
     std::cerr << "WARNING: Room " << dir << " contained external file "
@@ -228,17 +228,17 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
 
   // Write the code to edl
   if (std::ofstream fout{(dir/"create[room].edl").string()}) {
-    fout << room->code();
+    fout << room->creation_code();
   } else return false;
 
   for (auto &inst : room->instances()) {
-  if (!inst.code().empty()) {
+  if (!inst.creation_code().empty()) {
     string name = inst.name();
     if (name.empty()) name = std::to_string(inst.id());
     string edlFile = dir.string() + "/create[" + name + "].edl";
 
     if (std::ofstream fout{edlFile}) {
-        fout << inst.code();
+        fout << inst.creation_code();
       } else return false;
     }
   }
