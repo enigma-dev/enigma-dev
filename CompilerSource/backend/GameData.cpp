@@ -7,7 +7,6 @@
  */
 
 #include "GameData.h"
-#include "Actions2Code.h"
 
 #include "libpng-util.h"
 
@@ -266,12 +265,7 @@ ShaderData::ShaderData(const ::Shader &shader):
 }
 
 TimelineData::TimelineData(const buffers::resources::Timeline &q, const std::string& name):
-  buffers::resources::Timeline(q), name(name) {
-  for (int i = 0; i < moments_size(); ++i) {
-    auto* mmt = mutable_moments(i);
-    mmt->set_code(Actions2Code(mmt->actions()));
-  }
-}
+  buffers::resources::Timeline(q), name(name) {}
 TimelineData::TimelineData(const ::Timeline &timeline):
   name(timeline.name) {
   set_id(timeline.id);
@@ -284,12 +278,7 @@ TimelineData::TimelineData(const ::Timeline &timeline):
 }
 
 ObjectData::ObjectData(const buffers::resources::Object &q, const std::string& name):
-  buffers::resources::Object(q), name(name) {
-  for (int i = 0; i < events_size(); ++i) {
-    auto* evt = mutable_events(i);
-    evt->set_code(Actions2Code(evt->actions()));
-  }
-}
+  buffers::resources::Object(q), name(name) {}
 ObjectData::ObjectData(const ::GmObject &object, const ESLookup &lookup):
   name(object.name) {
   set_id(object.id);

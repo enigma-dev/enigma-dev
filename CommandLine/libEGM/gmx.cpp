@@ -16,6 +16,8 @@
 **/
 
 #include "gmx.h"
+#include "action.h"
+#include "Util.h"
 
 #include <pugixml.hpp>
 
@@ -39,15 +41,6 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
 void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::Message *m, int depth);
 
 namespace {
-
-inline std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
-  size_t pos = 0;
-  while ((pos = str.find(substr, pos)) != std::string::npos) {
-    str.replace(pos, substr.length(), nstr);
-    pos += nstr.length();
-  }
-  return str;
-}
 
 inline std::string GMXPath2FilePath(std::string dir, std::string value) {
   value = string_replace_all(value, "\\", "/");
@@ -287,6 +280,21 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
 
       if (gmxName == "GMX_DEPRECATED")
         continue;
+
+      if (gmxName == "action") {
+        std::vector<Action> actions;
+        int cid = 0;
+        for (pugi::xml_node n = child.child("action"); n != nullptr; n = n.next_sibling()) {
+          if (strcmp(n.name(), "action") == 0) {  // skip over any siblings that aren't twins <foo/><bar/><foo/> <- bar would be skipped
+            n.append_attribute("visited") = "true";
+            Action action;
+            PackRes(dir, cid++, n, &action, depth + 1);
+            actions.emplace_back(action);
+          }
+        }
+        refl->SetString(m, field, Actions2Code(actions));
+        continue;
+      }
 
       // use the name the protobuf field uses unless there a (gmx) attr
       if (alias.empty()) alias = field->name();
