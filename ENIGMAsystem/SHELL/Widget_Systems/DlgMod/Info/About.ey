@@ -5,7 +5,7 @@ Name: DlgMod
 Identifier: DlgMod
 Build-Platforms: Windows, SDL
 Represents:
-Description: Create native widgets using "DialogModule.dll" on Windows. 
+Description: Create native widgets using an alternative set of functions to the "Windows Widgets" system. Note that this is 100% compatible with the widget systems for Mac and Linux, unlike the default Windows system. Full UTF-8 support.
 
 License, documentation, and install instructions: 
 https://enigma-dev.org/docs/Wiki/Dialogs#DlgMod
