@@ -563,34 +563,32 @@ bool show_question(string str) {
 }
 
 string get_string(string str, string def) {
-  HideInput = 0;
+  HideInput = false;
   string window_caption = window_get_caption();
   char *result = InputBox(str, (char *)window_caption.c_str(), def);
   return result;
 }
 
 double get_integer(string str, double def) {
-  HideInput = 1;
-  string window_caption = window_get_caption();
-  char *result = InputBox(str, (char *)window_caption.c_str(), def);
-  return result;
-}
-
-string get_password(string str, string def) {
-  string strStr = str;
   string strDef = remove_trailing_zeros(def);
 
-  HideInput = 0;
+  HideInput = false;
   string window_caption = window_get_caption();
   char *result = InputBox(str, (char *)window_caption.c_str(), (char *)strDef.c_str());
   return strtod(result, NULL);
 }
 
+string get_password(string str, string def) {
+  HideInput = true;
+  string window_caption = window_get_caption();
+  char *result = InputBox(str, (char *)window_caption.c_str(), def);
+  return result; 
+}
+
 double get_passcode(string str, double def) {
-  string strStr = str;
   string strDef = remove_trailing_zeros(def);
 
-  HideInput = 1;
+  HideInput = true;
   string window_caption = window_get_caption();
   char *result = InputBox(str, (char *)window_caption.c_str(), (char *)strDef.c_str());
   return strtod(result, NULL);
