@@ -67,8 +67,7 @@ static bool HideInput = false;
 static string str_cctitle;
 static tstring tstr_cctitle;
 
-static inline tstring tstring_replace_all(tstring str, tstring substr, tstring newstr)
-{
+static inline tstring tstring_replace_all(tstring str, tstring substr, tstring newstr) {
   size_t pos = 0;
   const size_t sublen = substr.length(), newlen = newstr.length();
 
@@ -81,8 +80,7 @@ static inline tstring tstring_replace_all(tstring str, tstring substr, tstring n
   return str;
 }
 
-static inline string remove_trailing_zeros(double numb) 
-{
+static inline string remove_trailing_zeros(double numb) {
   string strnumb = std::to_string(numb);
 
   while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
@@ -91,8 +89,7 @@ static inline string remove_trailing_zeros(double numb)
   return strnumb;
 }
 
-static inline string CPPNewLineToVBSNewLine(string NewLine)
-{
+static inline string CPPNewLineToVBSNewLine(string NewLine) {
   size_t pos = 0;
 
   while (pos < NewLine.length())
@@ -106,8 +103,7 @@ static inline string CPPNewLineToVBSNewLine(string NewLine)
   return NewLine;
 }
 
-static inline void CenterRectToMonitor(LPRECT prc, UINT flags)
-{
+static inline void CenterRectToMonitor(LPRECT prc, UINT flags) {
   HMONITOR hMonitor;
   MONITORINFO mi;
   RECT        rc;
@@ -136,8 +132,7 @@ static inline void CenterRectToMonitor(LPRECT prc, UINT flags)
   }
 }
 
-static inline void CenterWindowToMonitor(HWND hwnd, UINT flags)
-{
+static inline void CenterWindowToMonitor(HWND hwnd, UINT flags) {
   RECT rc;
   GetWindowRect(hwnd, &rc);
   CenterRectToMonitor(&rc, flags);
@@ -146,8 +141,7 @@ static inline void CenterWindowToMonitor(HWND hwnd, UINT flags)
 
 class CSimpleScriptSite :
   public IActiveScriptSite,
-  public IActiveScriptSiteWindow
-{
+  public IActiveScriptSiteWindow {
 public:
   CSimpleScriptSite() : m_cRefCount(1), m_hWnd(NULL) { }
 
@@ -182,13 +176,11 @@ public:
   HWND m_hWnd;
 };
 
-STDMETHODIMP_(ULONG) CSimpleScriptSite::AddRef()
-{
+STDMETHODIMP_(ULONG) CSimpleScriptSite::AddRef() {
   return InterlockedIncrement(&m_cRefCount);
 }
 
-STDMETHODIMP_(ULONG) CSimpleScriptSite::Release()
-{
+STDMETHODIMP_(ULONG) CSimpleScriptSite::Release() {
   if (!InterlockedDecrement(&m_cRefCount))
   {
     delete this;
@@ -197,16 +189,13 @@ STDMETHODIMP_(ULONG) CSimpleScriptSite::Release()
   return m_cRefCount;
 }
 
-STDMETHODIMP CSimpleScriptSite::QueryInterface(REFIID riid, void **ppvObject)
-{
-  if (riid == IID_IUnknown || riid == IID_IActiveScriptSiteWindow)
-  {
+STDMETHODIMP CSimpleScriptSite::QueryInterface(REFIID riid, void **ppvObject) {
+  if (riid == IID_IUnknown || riid == IID_IActiveScriptSiteWindow) {
     *ppvObject = (IActiveScriptSiteWindow *)this;
     AddRef();
     return NOERROR;
   }
-  if (riid == IID_IActiveScriptSite)
-  {
+  if (riid == IID_IActiveScriptSite) {
     *ppvObject = (IActiveScriptSite *)this;
     AddRef();
     return NOERROR;
@@ -214,22 +203,18 @@ STDMETHODIMP CSimpleScriptSite::QueryInterface(REFIID riid, void **ppvObject)
   return E_NOINTERFACE;
 }
 
-static inline LRESULT CALLBACK InputBoxProc(int nCode, WPARAM wParam, LPARAM lParam)
-{
+static inline LRESULT CALLBACK InputBoxProc(int nCode, WPARAM wParam, LPARAM lParam) {
   if (nCode < HC_ACTION)
     return CallNextHookEx(hHook, nCode, wParam, lParam);
 
-  if (nCode = HCBT_ACTIVATE)
-  {
-    if (HideInput == true)
-    {
+  if (nCode = HCBT_ACTIVATE) {
+    if (HideInput == true) {
       HWND TextBox = FindWindowEx((HWND)wParam, NULL, "Edit", NULL);
       SendDlgItemMessage((HWND)wParam, GetDlgCtrlID(TextBox), EM_SETPASSWORDCHAR, '*', 0);
     }
   }
 
-  if (nCode = HCBT_CREATEWND)
-  {
+  if (nCode = HCBT_CREATEWND) {
     if (!(GetWindowLongPtr((HWND)wParam, GWL_STYLE) & WS_CHILD))
       SetWindowLongPtr((HWND)wParam, GWL_EXSTYLE, GetWindowLongPtr((HWND)wParam, GWL_EXSTYLE) | WS_EX_DLGMODALFRAME);
   }
@@ -237,8 +222,7 @@ static inline LRESULT CALLBACK InputBoxProc(int nCode, WPARAM wParam, LPARAM lPa
   return CallNextHookEx(hHook, nCode, wParam, lParam);
 }
 
-static inline char *InputBox(char *Prompt, char *Title, char *Default)
-{
+static inline char *InputBox(char *Prompt, char *Title, char *Default) {
   HRESULT hr = S_OK;
   hr = CoInitialize(NULL);
 
@@ -286,10 +270,8 @@ static inline char *InputBox(char *Prompt, char *Title, char *Default)
   return (char *)strResult.c_str();
 }
 
-static inline UINT_PTR CALLBACK CCHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
-{
-  if (uiMsg == WM_INITDIALOG)
-  {
+static inline UINT_PTR CALLBACK CCHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) {
+  if (uiMsg == WM_INITDIALOG) {
     CenterWindowToMonitor(hdlg, 0);
     if (str_cctitle != "") SetWindowTextW(hdlg, tstr_cctitle.c_str());
     PostMessageW(hdlg, WM_SETFOCUS, 0, 0);
@@ -447,12 +429,10 @@ static inline string get_directory_helper(string capt, string root) {
   IShellItem* pItem = nullptr;
   HRESULT hr = ::SHCreateItemFromParsingName(szFilePath, nullptr, IID_PPV_ARGS(&pItem));
 
-  if (SUCCEEDED(hr))
-  {
+  if (SUCCEEDED(hr)) {
     LPWSTR szName = nullptr;
     hr = pItem->GetDisplayName(SIGDN_NORMALDISPLAY, &szName);
-    if (SUCCEEDED(hr))
-    {
+    if (SUCCEEDED(hr)) {
       SelectDirectory->SetFolder(pItem);
       ::CoTaskMemFree(szName);
     }
