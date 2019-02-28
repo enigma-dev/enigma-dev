@@ -33,8 +33,13 @@ namespace enigma
   bool glew_isgo;
   bool pbo_isgo;
 
+  extern bool vbo_is_supported;
+
   void graphicssystem_initialize()
   {
+    // we don't check for extensions until GLEW has been initialized
+    vbo_is_supported = GLEW_ARB_vertex_buffer_object;
+
     //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
     glMatrixMode(GL_PROJECTION);
     glClearColor(0,0,0,0);
