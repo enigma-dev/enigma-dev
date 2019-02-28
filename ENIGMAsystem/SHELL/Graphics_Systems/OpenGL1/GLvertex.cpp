@@ -23,12 +23,6 @@
 #include <map>
 using std::map;
 
-namespace enigma {
-
-bool vbo_is_supported = false;
-
-} // namespace enigma
-
 namespace {
 
 GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN };
@@ -109,6 +103,8 @@ void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
 } // anonymous namespace
 
 namespace enigma {
+
+bool vbo_is_supported = false;
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
   if (vbo_is_supported) {
