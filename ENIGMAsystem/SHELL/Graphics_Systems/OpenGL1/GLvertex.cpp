@@ -23,11 +23,15 @@
 #include <map>
 using std::map;
 
+namespace enigma {
+
+bool vbo_is_supported = false;
+
+} // namespace enigma
+
 namespace {
 
 GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN };
-
-bool vbo_is_supported = GL_ARB_vertex_buffer_object;
 
 // for OpenGL1.1
 map<int, std::vector<enigma::VertexElement> > vertexBufferArrays;
