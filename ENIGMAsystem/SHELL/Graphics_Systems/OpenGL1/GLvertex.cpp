@@ -15,6 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+//NOTE: If this source is changed to utilize additional features of the GL_ARB_vertex_buffer_object
+//extension, then please be sure to update the graphics_init_vbo_method() helper below to ensure any
+//functions are properly aliased and will continue working on affected graphics cards.
+
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
@@ -105,6 +109,19 @@ void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
 namespace enigma {
 
 bool vbo_is_supported = false;
+
+void graphics_init_vbo_method() {
+  // we don't check for extensions until GLEW has been initialized
+  vbo_is_supported = GLEW_ARB_vertex_buffer_object;
+  // if the vbo extension is supported, but the GL version is old,
+  // we need to alias the buffer functions to the extension ones
+  if (GLEW_ARB_vertex_buffer_object == true && GLEW_VERSION_1_5 == false) {
+    glGenBuffers = glGenBuffersARB;
+    glBindBuffer = glBindBufferARB;
+    glBufferData = glBufferDataARB;
+    glDeleteBuffers = glDeleteBuffersARB;
+  }
+}
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
   if (vbo_is_supported) {
