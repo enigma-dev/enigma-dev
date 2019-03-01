@@ -246,7 +246,7 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
   void* base_pointer = enigma::graphics_prepare_buffer(buffer, false);
   enigma::ClientState state = enigma::graphics_apply_vertex_format(vertexBuffer->format, (GLvoid*)((intptr_t)base_pointer + offset));
 
-	glDrawArrays(primitive_types[primitive], start, count);
+  glDrawArrays(primitive_types[primitive], start, count);
 
   enigma::graphics_reset_client_state(state);
 }
@@ -272,7 +272,8 @@ void index_submit_range(int buffer, int vertex, int primitive, unsigned start, u
   glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)((intptr_t)base_index_pointer + start));
 
   enigma::graphics_reset_client_state(state);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  if (enigma::vbo_is_supported)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 } // namespace enigma_user
