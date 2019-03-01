@@ -39,6 +39,14 @@ namespace enigma
   {
     // we don't check for extensions until GLEW has been initialized
     vbo_is_supported = GLEW_ARB_vertex_buffer_object;
+    // if the vbo extension is supported, but the GL version is old,
+    // we need to alias the buffer functions to the extension ones
+    if (GLEW_ARB_vertex_buffer_object == true && GLEW_VERSION_1_5 == false) {
+      glGenBuffers = glGenBuffersARB;
+      glBindBuffer = glBindBufferARB;
+      glBufferData = glBufferDataARB;
+      glDeleteBuffers = glDeleteBuffersARB;
+    }
 
     //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
     glMatrixMode(GL_PROJECTION);
