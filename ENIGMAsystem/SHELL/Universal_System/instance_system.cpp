@@ -212,7 +212,7 @@ namespace enigma
   set<object_basic*> cleanups; // We'll use set, to prevent stupidity
 
   // It's a good idea to centralize an event iterator so error reporting can tell where it is.
-  static inst_iter dummy_event_iterator(NULL,NULL,NULL); // For create events and such
+  inst_iter dummy_event_iterator(NULL,NULL,NULL); // For create events and such
   inst_iter *instance_event_iterator = &dummy_event_iterator; // Not bad for efficiency, either.
   object_basic *instance_other = NULL;
 

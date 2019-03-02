@@ -157,7 +157,7 @@ namespace enigma
 
   void roomstruct::end() {
     // Fire the Room End event.
-    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+    instance_event_iterator = &dummy_event_iterator;
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
       it->myevent_roomend();
     }
@@ -233,6 +233,8 @@ namespace enigma
     //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
     //if the window size changes.
     enigma_user::window_default(true);
+    // window sized by first room, can make visible now
+    enigma_user::window_set_visible(true);
     enigma_user::io_clear();
     // we only initialize the screen and clear the window color during game start
     // NOTE: no version of GM has EVER reset the drawing color or alpha during room transition
@@ -266,7 +268,7 @@ namespace enigma
       }
     }
 
-    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+    instance_event_iterator = &dummy_event_iterator;
 
     // Fire the rooms preCreation code. This code includes instance sprite transformations added in the room editor.
     // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).

@@ -4,6 +4,7 @@
 #include "EnigmaCallbacks.hpp"
 #include "backend/EnigmaStruct.h"
 #include "frontend.h"
+#include "project.pb.h"
 #include "game.pb.h"
 
 #include <functional>
@@ -53,7 +54,7 @@ public:
 private:
   std::function<const char*(EnigmaCallbacks*)> plugin_Init = nullptr;
   std::function<int(EnigmaStruct*, const char*, int)> plugin_CompileEGM = nullptr;
-  std::function<int(buffers::Game *project, const char*, int)> plugin_CompileBuffer = nullptr;
+  std::function<int(const buffers::Project *proj, const char*, int)> plugin_CompileProto = nullptr;
   std::function<const char*()> plugin_NextResource = nullptr;
   std::function<const char*()> plugin_FirstResource = nullptr;
   std::function<bool()> plugin_ResourceIsFunction = nullptr;

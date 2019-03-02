@@ -34,7 +34,6 @@ ID3D11Device* m_device;
 ID3D11DeviceContext* m_deviceContext;
 ID3D11RenderTargetView* m_renderTargetView;
 ID3D11Texture2D* m_depthStencilBuffer;
-ID3D11DepthStencilState* m_depthStencilState;
 ID3D11DepthStencilView* m_depthStencilView;
 ID3D11RasterizerState* m_rasterState;
 
@@ -147,7 +146,7 @@ namespace enigma
     swapChainDesc.BufferCount = 1;
     swapChainDesc.BufferDesc.Width = screenWidth;
     swapChainDesc.BufferDesc.Height = screenHeight;
-    swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
     swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -174,35 +173,6 @@ namespace enigma
 
     initialize_render_targets();
 
-    // Set up the description of the stencil state.
-    D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
-    depthStencilDesc.DepthEnable = false;
-    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-
-    depthStencilDesc.StencilEnable = false;
-    depthStencilDesc.StencilReadMask = 0xFF;
-    depthStencilDesc.StencilWriteMask = 0xFF;
-
-    // Stencil operations if pixel is front-facing.
-    depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-    depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-    // Stencil operations if pixel is back-facing.
-    depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-    depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-    result = m_device->CreateDepthStencilState(&depthStencilDesc, &m_depthStencilState);
-    if (FAILED(result)) {
-      show_error("Failed to create Direct3D11 depth stencil state.", true);
-    }
-
-    m_deviceContext->OMSetDepthStencilState(m_depthStencilState, 1);
-
     // Setup the raster description which will determine how and what polygons will be drawn.
     D3D11_RASTERIZER_DESC rasterDesc = { };
     rasterDesc.AntialiasedLineEnable = false;
@@ -225,6 +195,10 @@ namespace enigma
   }
 
   void DisableDrawing(void* handle) {}
+
+  void ScreenRefresh() {
+    m_swapChain->Present(swap_interval, 0);
+  }
 }
 
 namespace enigma_user
@@ -233,10 +207,6 @@ namespace enigma_user
 
   void display_reset(int samples, bool vsync) {
     swap_interval = vsync ? 1 : 0;
-  }
-
-  void screen_refresh() {
-    m_swapChain->Present(swap_interval, 0);
   }
 
   void set_synchronization(bool enable)

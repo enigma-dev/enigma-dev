@@ -52,6 +52,10 @@ void DisableDrawing(void*) {
   SDL_DestroyRenderer(renderer);
 }
 
+void ScreenRefresh() {
+  SDL_GL_SwapWindow(windowHandle);
+}
+
 }
 
 namespace enigma_user {
@@ -65,9 +69,4 @@ namespace enigma_user {
   void display_reset(int samples, bool vsync) {
     set_synchronization(vsync);
   }
-
-  void screen_refresh() {
-    SDL_GL_SwapWindow(enigma::windowHandle);
-  }
-
 }

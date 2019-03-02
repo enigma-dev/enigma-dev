@@ -16,3 +16,9 @@
 **/
 
 #include "Platforms/General/PFgamepad.h"
+
+namespace enigma {
+
+void extension_xinput_init();
+
+} // namespace enigma

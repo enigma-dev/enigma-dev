@@ -75,19 +75,23 @@ void graphics_prepare_vertex_buffer(const int buffer) {
       }
     }
 
+    bool dynamic = (!vertexBuffer->frozen && !Direct3D9Managed);
+
     // create either a static or dynamic vbo peer depending on if the user called
     // vertex_freeze on the buffer
     if (!vertexBufferPeer) {
+      DWORD usage = D3DUSAGE_WRITEONLY;
+      if (dynamic) usage |= D3DUSAGE_DYNAMIC;
+
       d3dmgr->CreateVertexBuffer(
-        size, vertexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
-        0, D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
+        size, usage, 0, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
       );
       vertexBufferPeers[buffer] = vertexBufferPeer;
     }
 
     // copy the vertex buffer contents over to the native peer vbo on the GPU
     VOID* pVoid;
-    vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, vertexBuffer->frozen ? 0 : D3DLOCK_DISCARD);
+    vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, dynamic ? D3DLOCK_DISCARD : 0);
     memcpy(pVoid, vertexBuffer->vertices.data(), size);
     vertexBufferPeer->Unlock();
 
@@ -120,19 +124,25 @@ void graphics_prepare_index_buffer(const int buffer) {
       }
     }
 
+    bool dynamic = (!indexBuffer->frozen && !Direct3D9Managed);
+
     // create either a static or dynamic ibo peer depending on if the user called
     // index_freeze on the buffer
     if (!indexBufferPeer) {
+      DWORD usage = D3DUSAGE_WRITEONLY;
+      if (dynamic) usage |= D3DUSAGE_DYNAMIC;
+
       d3dmgr->CreateIndexBuffer(
-        size, indexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
-        (indexBuffer->type == index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &indexBufferPeer, NULL
+        size, usage,
+        (indexBuffer->type == index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16,
+        Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &indexBufferPeer, NULL
       );
       indexBufferPeers[buffer] = indexBufferPeer;
     }
 
     // copy the index buffer contents over to the native peer ibo on the GPU
     VOID* pVoid;
-    indexBufferPeer->Lock(0, 0, (VOID**)&pVoid, D3DLOCK_DISCARD);
+    indexBufferPeer->Lock(0, 0, (VOID**)&pVoid, dynamic ? D3DLOCK_DISCARD : 0);
     memcpy(pVoid, indexBuffer->indices.data(), size);
     indexBufferPeer->Unlock();
 

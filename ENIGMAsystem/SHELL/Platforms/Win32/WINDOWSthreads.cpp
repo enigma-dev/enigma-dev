@@ -19,18 +19,18 @@
 #include "WINDOWSmain.h"
 
 #include "Platforms/General/PFthreads.h"
+#include "Platforms/General/PFthreads_impl.h"
 
 using enigma::ethread;
 using enigma::threads;
-using enigma::thread_script_func;
 
 namespace enigma_user {
 
 int thread_start(int thread) {
   if (threads[thread]->active) { return -1; }
-  
+
   DWORD dwThreadId;
-  threads[thread]->handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&thread_script_func, (LPVOID)threads[thread]->sd, 0, &dwThreadId);
+  threads[thread]->handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&enigma::thread_script_func, (LPVOID)threads[thread]->sd, 0, &dwThreadId);
   //TODO: May need to check if ret is -1L, and yes it is quite obvious the return value is
   //an unsigned integer, but Microsoft says to for some reason. See their documentation here.
   //http://msdn.microsoft.com/en-us/library/kdzttdcb.aspx
@@ -46,10 +46,10 @@ void thread_join(int thread) {
   if (GetCurrentThread() == enigma::mainthread) {
     while (WaitForSingleObject(threads[thread]->handle, 10) == WAIT_TIMEOUT) {
       MSG msg;
-      while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) { 
+      while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) {
         TranslateMessage (&msg);
         DispatchMessage (&msg);
-      } 
+      }
     }
   } else {
     WaitForSingleObject(threads[thread]->handle, INFINITE);

@@ -122,7 +122,7 @@ namespace enigma
   {
     // Fire Room End then Game End events in that order.
     // NOTE: This must be two loops because room/game end event for some object may try accessing another instance.
-    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+    instance_event_iterator = &dummy_event_iterator;
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
       it->myevent_roomend();
       it->myevent_gameend();

@@ -33,8 +33,12 @@ namespace enigma
   bool glew_isgo;
   bool pbo_isgo;
 
+  void graphics_init_vbo_method();
+
   void graphicssystem_initialize()
   {
+    graphics_init_vbo_method();
+
     //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
     glMatrixMode(GL_PROJECTION);
     glClearColor(0,0,0,0);
@@ -51,10 +55,10 @@ namespace enigma
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_BLEND);
-    glEnable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glAlphaFunc(GL_ALWAYS,0);
+    glAlphaFunc(GL_GREATER,0);
+    glDepthFunc(GL_LEQUAL); // to match GM8's D3D8 default
 
     glColor4f(0,0,0,1);
     glBindTexture(GL_TEXTURE_2D,0);

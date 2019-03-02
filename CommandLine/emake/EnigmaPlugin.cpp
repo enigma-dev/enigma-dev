@@ -1,6 +1,5 @@
 #include "EnigmaPlugin.hpp"
 #include "Main.hpp"
-#include "Proto2ES.h"
 
 #include "OS_Switchboard.h"
 
@@ -65,6 +64,7 @@ int EnigmaPlugin::Load()
 
   plugin_Init = reinterpret_cast<const char*(*)(EnigmaCallbacks*)>(BindFunc(_handle, "libInit"));
   plugin_CompileEGM = reinterpret_cast<int (*)(EnigmaStruct *es, const char* exe_filename, int mode)>(BindFunc(_handle, "compileEGMf"));
+  plugin_CompileProto = reinterpret_cast<int (*)(const buffers::Project *proj, const char* exe_filename, int mode)>(BindFunc(_handle, "compileProto"));
   plugin_NextResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "next_available_resource"));
   plugin_FirstResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "first_available_resource"));
   plugin_ResourceIsFunction = reinterpret_cast<bool (*)()>(BindFunc(_handle, "resource_isFunction"));
@@ -121,9 +121,9 @@ int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath
 
 int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* fpath)
 {
-  EnigmaStruct *es = Proto2ES(data);
-  es->filename = fpath;
-  return plugin_CompileEGM(es, fpath, mode);
+  buffers::Project proj;
+  proj.set_allocated_game(data);
+  return plugin_CompileProto(&proj, fpath, mode);
 }
 
 const char* EnigmaPlugin::NextResource() {
