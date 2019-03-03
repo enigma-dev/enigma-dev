@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
+#include "Direct3D11Headers.h"
 
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSmatrix_impl.h"
@@ -29,6 +29,8 @@
 
 #include <map>
 using std::map;
+
+using namespace enigma::dx11;
 
 namespace {
 struct MatrixBufferType
