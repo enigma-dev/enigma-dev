@@ -210,7 +210,7 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   #ifdef DEBUG_MODE
-  enigma::GPUProfilerBatch& vbd = oglmgr->gpuprof.add_drawcall();
+  enigma::GPUProfilerBatch& vbd = enigma::gpuprof.add_drawcall();
   ++vbd.drawcalls;
   #endif
 
@@ -227,7 +227,7 @@ void index_submit_range(int buffer, int vertex, int primitive, unsigned start, u
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 
   #ifdef DEBUG_MODE
-  enigma::GPUProfilerBatch& vbd = oglmgr->gpuprof.add_drawcall();
+  enigma::GPUProfilerBatch& vbd = enigma::gpuprof.add_drawcall();
   ++vbd.drawcalls;
   #endif
 
