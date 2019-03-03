@@ -16,7 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL3Context.h"
 #include "GLSLshader.h"
 #include "GL3shader.h"
 
@@ -127,7 +126,6 @@ int draw_getpixel(int x,int y)
     }
 
     draw_batch_flush(batch_flush_deferred);
-    oglmgr->ReadPixels();
 
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
@@ -163,7 +161,6 @@ int draw_getpixel_ext(int x,int y)
     }
 
     draw_batch_flush(batch_flush_deferred);
-    oglmgr->ReadPixels();
 
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;

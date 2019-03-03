@@ -26,7 +26,9 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
-#include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
+#include <map>
+
+using std::map;
 
 #define bind_array_buffer(vbo) if (enigma::bound_vbo != vbo) glBindBuffer( GL_ARRAY_BUFFER, enigma::bound_vbo = vbo );
 #define bind_element_buffer(vboi) if (enigma::bound_vboi != vboi) glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, enigma::bound_vboi = vboi );
@@ -179,11 +181,7 @@ void graphics_apply_vertex_format(int format, size_t offset) {
                          (float)currentcolor[3]/255.0f);
 
   if (useTextCoords) {
-    if (oglmgr->GetBoundTexture() != 0){
-      glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 1);
-    } else {
-      glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 0);
-    }
+    glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 1);
   } else {
     glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 0);
   }
