@@ -22,6 +22,8 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
+#include "Widget_Systems/widgets_mandatory.h" // for show_error
+
 #include <D3Dcompiler.h>
 
 #include <glm/gtc/type_ptr.hpp>
