@@ -181,7 +181,9 @@ void graphics_apply_vertex_format(int format, size_t offset) {
                          (float)currentcolor[3]/255.0f);
 
   if (useTextCoords) {
-    glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 1);
+    GLint boundTex;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &boundTex);
+    glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, boundTex != 0);
   } else {
     glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 0);
   }
