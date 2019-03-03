@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
 #include "DX11SurfaceStruct.h"
 #include "DX11TextureStruct.h"
 #include "Direct3D11Headers.h"
@@ -34,6 +33,7 @@
 #include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
+using namespace enigma::dx11;
 
 namespace enigma {
 vector<Surface*> Surfaces(0);
