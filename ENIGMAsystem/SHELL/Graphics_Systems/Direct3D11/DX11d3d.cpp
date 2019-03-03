@@ -15,13 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Platforms/platforms_mandatory.h"
+
+using namespace enigma::dx11;
 
 namespace {
 
@@ -31,7 +32,7 @@ void update_depth_stencil_state() {
   static ID3D11DepthStencilState* pDepthStencilState = NULL;
   if (pDepthStencilState) { pDepthStencilState->Release(); pDepthStencilState = NULL; }
   m_device->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState);
-  draw_batch_flush(batch_flush_deferred);
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   m_deviceContext->OMSetDepthStencilState(pDepthStencilState, 1);
 }
 

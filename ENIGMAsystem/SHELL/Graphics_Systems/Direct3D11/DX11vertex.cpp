@@ -15,12 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
+#include "Direct3D11Headers.h"
 
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+
+#include "Widget_Systems/widgets_mandatory.h" // for show_error
 
 #include <D3Dcompiler.h>
 
@@ -29,6 +31,8 @@
 
 #include <map>
 using std::map;
+
+using namespace enigma::dx11;
 
 namespace {
 struct MatrixBufferType

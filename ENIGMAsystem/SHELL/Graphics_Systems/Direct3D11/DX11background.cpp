@@ -60,7 +60,6 @@ namespace enigma {
 
 #include <string.h> // needed for querying ARB extensions
 
-#include "Bridges/General/DX11Context.h"
 #include "DX11TextureStruct.h"
 
 namespace enigma_user

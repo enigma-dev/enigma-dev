@@ -15,10 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+
+using namespace enigma::dx11;
 
 namespace {
 
@@ -28,14 +29,13 @@ void update_blend_state() {
   static ID3D11BlendState* pBlendState = NULL;
   if (pBlendState) { pBlendState->Release(); pBlendState = NULL; }
   m_device->CreateBlendState(&blendStateDesc, &pBlendState);
-  draw_batch_flush(batch_flush_deferred);
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   m_deviceContext->OMSetBlendState(pBlendState, NULL, 0xffffffff);
 }
 
 } // namespace anonymous
 
-namespace enigma
-{
+namespace enigma {
 
 extern int currentblendmode[2];
 extern int currentblendtype;
