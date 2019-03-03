@@ -16,7 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL3Context.h"
 #include "GL3aux.h" //glExtension_supported
 #include "GL3TextureStruct.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
@@ -112,7 +111,7 @@ namespace enigma
   {
     GLuint texture;
     glGenTextures(1, &texture);
-    oglmgr->BindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, fullwidth, fullheight, 0, format, type, pxdata);
     if (mipmap) {
@@ -122,7 +121,7 @@ namespace enigma
       //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
       glGenerateMipmap(GL_TEXTURE_2D);
     }
-    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     TextureStruct* textureStruct = new TextureStruct(texture);
     textureStruct->width = width;
@@ -140,7 +139,7 @@ namespace enigma
   {
     GLuint texture;
     glGenTextures(1, &texture);
-    oglmgr->BindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
     if (mipmap) {
@@ -150,7 +149,7 @@ namespace enigma
       //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
       glGenerateMipmap(GL_TEXTURE_2D);
     }
-    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     TextureStruct* textureStruct = new TextureStruct(texture);
     textureStruct->width = width;
@@ -167,7 +166,7 @@ namespace enigma
   int graphics_duplicate_texture(int tex, bool mipmap)
   {
     GLuint texture = textureStructs[tex]->gltex;
-    oglmgr->BindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
     unsigned w, h, fw, fh;
     w = textureStructs[tex]->width;
     h = textureStructs[tex]->height;
@@ -189,7 +188,7 @@ namespace enigma
     sh = textureStructs[source]->height;
     sfw = textureStructs[source]->fullwidth;
     sfh = textureStructs[source]->fullheight;
-    oglmgr->BindTexture(GL_TEXTURE_2D, src);
+    glBindTexture(GL_TEXTURE_2D, src);
     //We could use glCopyImageSubData here, but it's GL4.3
     char* bitmap = new char[(sfh<<(lgpp2(sfw)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
@@ -199,13 +198,13 @@ namespace enigma
       memcpy(cropped_bitmap+sw*i*4, bitmap+sfw*i*4, sw*4);
     }
 
-    oglmgr->BindTexture(GL_TEXTURE_2D, dst);
+    glBindTexture(GL_TEXTURE_2D, dst);
     unsigned dw, dh;
     dw = textureStructs[destination]->width;
     dh = textureStructs[destination]->height;
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_BGRA, GL_UNSIGNED_BYTE, cropped_bitmap);
 
-    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     delete[] bitmap;
     delete[] cropped_bitmap;
@@ -220,7 +219,7 @@ namespace enigma
     sh = h;
     sfw = textureStructs[source]->fullwidth;
     sfh = textureStructs[source]->fullheight;
-    oglmgr->BindTexture(GL_TEXTURE_2D, src);
+    glBindTexture(GL_TEXTURE_2D, src);
     //We could use glCopyImageSubData here, but it's GL4.3
     char* bitmap = new char[(sfh<<(lgpp2(sfw)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
@@ -232,13 +231,13 @@ namespace enigma
       memcpy(cropped_bitmap+sw*i*4, bitmap+xoff*4+sfw*(i+yoff)*4, sw*4);
     }
 
-    oglmgr->BindTexture(GL_TEXTURE_2D, dst);
+    glBindTexture(GL_TEXTURE_2D, dst);
     unsigned dw, dh;
     dw = textureStructs[destination]->width;
     dh = textureStructs[destination]->height;
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_BGRA, GL_UNSIGNED_BYTE, cropped_bitmap);
 
-    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     delete[] bitmap;
     delete[] cropped_bitmap;
@@ -250,23 +249,23 @@ namespace enigma
     GLuint copy_texture = textureStructs[copy_tex]->gltex;
 
     unsigned int fw, fh, size;
-    oglmgr->BindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
     fw = textureStructs[tex]->fullwidth;
     fh = textureStructs[tex]->fullheight;
     size = (fh<<(lgpp2(fw)+2))|2;
     char* bitmap = new char[size];
     char* bitmap2 = new char[size];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
-    oglmgr->BindTexture(GL_TEXTURE_2D, copy_texture);
+    glBindTexture(GL_TEXTURE_2D, copy_texture);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap2);
 
     for (unsigned  int i = 3; i < size; i += 4)
         bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
 
-    oglmgr->BindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
 
-    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     delete[] bitmap;
     delete[] bitmap2;
@@ -362,7 +361,7 @@ void texture_set_priority(int texid, double prio)
 {
   draw_batch_flush(batch_flush_deferred);
   // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-  oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
+  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
 }
 
@@ -403,7 +402,7 @@ void texture_set_stage(int stage, int texid) {
   get_texture(gt,texid,);
   if (enigma::samplerstates[stage].bound_texture != gt) {
     if ((unsigned int)enigma::bound_texture_stage != GL_TEXTURE0 + stage) { glActiveTexture(enigma::bound_texture_stage = (GL_TEXTURE0 + stage)); }
-    oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
+    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
   }
 }
 
@@ -411,7 +410,7 @@ void texture_reset() {
   draw_batch_flush(batch_flush_deferred);
   if (enigma::samplerstates[0].bound_texture != 0){
   	if (enigma::bound_texture_stage != GL_TEXTURE0) { glActiveTexture(enigma::bound_texture_stage = GL_TEXTURE0); }
-  	oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
+  	glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
   }
 }
 
