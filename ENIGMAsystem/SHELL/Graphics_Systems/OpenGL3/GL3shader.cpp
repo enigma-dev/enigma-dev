@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL3Context.h"
 #include "GL3shader.h"
 #include "GLSLshader.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
