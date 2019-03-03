@@ -20,7 +20,7 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Bridges/General/DX11Context.h"
+#include "Graphics_Systems/Direct3D11/Direct3D11Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
 
 #include <windows.h>
@@ -28,6 +28,12 @@
 #include <d3d11.h>
 #include <string>
 using namespace std;
+
+namespace enigma {
+
+extern HWND hWnd;
+
+namespace dx11 {
 
 IDXGISwapChain* m_swapChain;
 ID3D11Device* m_device;
@@ -37,10 +43,14 @@ ID3D11Texture2D* m_depthStencilBuffer;
 ID3D11DepthStencilView* m_depthStencilView;
 ID3D11RasterizerState* m_rasterState;
 
-// global declarations
-ContextManager* d3dmgr;    // the pointer to the device class
+} // namespace dx11
+
+} // namespace enigma
 
 namespace {
+
+using namespace enigma::dx11;
+
 int swap_interval = 0;
 
 void initialize_render_targets() {
@@ -63,8 +73,8 @@ void initialize_render_targets() {
   backBufferPtr->Release();
   backBufferPtr = 0;
 
-  int screenWidth = window_get_width(),
-      screenHeight = window_get_height();
+  int screenWidth = enigma_user::window_get_width(),
+      screenHeight = enigma_user::window_get_height();
 
   // Set up the depth buffer description
   D3D11_TEXTURE2D_DESC depthBufferDesc = { };
@@ -136,9 +146,8 @@ namespace enigma
   void EnableDrawing(void* handle) {
     WindowResizedCallback = &WindowResized;
 
-    d3dmgr = new ContextManager();
-    int screenWidth = window_get_width(),
-        screenHeight = window_get_height();
+    int screenWidth = enigma_user::window_get_width(),
+        screenHeight = enigma_user::window_get_height();
 
     HRESULT result;
 

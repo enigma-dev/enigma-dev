@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
 #include "DX11TextureStruct.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -28,6 +27,8 @@
 #include <string.h>
 
 using std::string;
+
+using namespace enigma::dx11;
 
 vector<TextureStruct*> textureStructs(0);
 
@@ -57,7 +58,7 @@ void update_sampler_state() {
   static ID3D11SamplerState *pSamplerState = NULL;
   if (pSamplerState) { pSamplerState->Release(); pSamplerState = NULL; }
   m_device->CreateSamplerState(&samplerDesc, &pSamplerState);
-  draw_batch_flush(batch_flush_deferred);
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   m_deviceContext->PSSetSamplers(0, 1, &pSamplerState);
 }
 
