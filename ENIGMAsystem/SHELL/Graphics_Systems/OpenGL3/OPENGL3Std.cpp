@@ -19,7 +19,6 @@
 #include <string>
 #include <stdlib.h>     /* malloc, free, rand */
 
-#include "Bridges/General/GL3Context.h"
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSmatrix.h" //For d3d_set_projection_ortho
 using namespace std;
@@ -30,8 +29,6 @@ using namespace std;
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
-
-ContextManager* oglmgr = NULL;
 
 namespace enigma_user{
 	extern string shader_get_name(int i);
@@ -45,15 +42,11 @@ namespace enigma
   unsigned bound_vbo = -1; //This means it's max-1, just so it wouldn't randomly be 0 at first render call.
   unsigned bound_vboi = -1; //This means it's max-1
   int bound_texture_stage = -1;
-  bool glew_isgo;
-  bool pbo_isgo;
 
   void graphics_initialize_samplers();
 
   void graphicssystem_initialize()
   {
-    oglmgr = new ContextManager();
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glDisable(GL_DEPTH_TEST);

@@ -16,8 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL3Context.h"
-
 #include "GL3TextureStruct.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -244,7 +242,6 @@ void surface_set_target(int id)
   draw_batch_flush(batch_flush_deferred);
 
   get_surface(surf,id);
-  oglmgr->Bind();
   //This fixes several consecutive surface_set_target() calls without surface_reset_target.
   if (enigma::bound_framebuffer != 0) { d3d_transform_stack_pop(); d3d_projection_stack_pop();}
   enigma::bound_framebuffer = surf.fbo;
@@ -260,7 +257,6 @@ void surface_reset_target(void)
 {
   draw_batch_flush(batch_flush_deferred);
 
-  oglmgr->Bind();
   enigma::bound_framebuffer = 0;
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
   d3d_transform_stack_pop();

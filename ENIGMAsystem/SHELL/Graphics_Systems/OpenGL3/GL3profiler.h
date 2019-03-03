@@ -20,44 +20,44 @@
 
 #include <vector>
 
-namespace enigma{
+namespace enigma {
 
 	struct GPUProfilerBatch{
 		bool color_enabled;
 		bool texture_enabled;
 		bool normals_enabled;
-			
+
 		int triangles;
 		int triangles_indexed;
 		int lines;
 		int lines_indexed;
 		int points;
 		int points_indexed;
-		
+
 		int drawcalls;
 		int texture;
-    
+
     int vertices() { return triangles+lines+points; }
     int indecies() { return triangles_indexed+lines_indexed+points_indexed; }
 	};
 
 	class GPUProfiler {
 		std::vector<GPUProfilerBatch> BatchesRenders;
-		
+
 		public:
 			int drawn_vertex_number;
 			int drawn_drawcall_number;
 			int drawn_vbo_number;
-			
+
 			int texture_switches;
-			
-			void reset_frame() { 
+
+			void reset_frame() {
 				drawn_vertex_number = 0;
 				drawn_drawcall_number = 0;
 				drawn_vbo_number = 0;
         BatchesRenders.clear();
 			}
-      
+
       void end_frame() {
         reset_frame();
         for (unsigned int i=0; i<BatchesRenders.size(); ++i){
@@ -66,19 +66,20 @@ namespace enigma{
         }
         drawn_vbo_number = BatchesRenders.size();
       }
-			
+
 			GPUProfilerBatch& add_drawcall(){
 				BatchesRenders.push_back( GPUProfilerBatch() );
 				return BatchesRenders.back();
 			}
-			
+
 			GPUProfilerBatch& last_drawcall(){
 				return BatchesRenders.back();
 			}
-			
+
 			GPUProfiler() : drawn_vertex_number(0), drawn_drawcall_number(0), drawn_vbo_number(0){ }
 	};
 
+	extern GPUProfiler gpuprof;
 }
 
 namespace enigma_user{

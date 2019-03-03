@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL3Context.h"
+#include "GL3profiler.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GStextures.h"
@@ -36,19 +36,16 @@ using namespace std;
 using namespace enigma;
 using namespace enigma_user;
 
-namespace enigma
-{
+namespace enigma {
 
 extern GLuint msaa_fbo;
 unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
 int viewport_x, viewport_y, viewport_w, viewport_h; //These are used by surfaces, to set back the viewport
 
-void scene_begin() {
-  oglmgr->BeginScene();
-}
+void scene_begin() {}
 
 void scene_end() {
-  oglmgr->EndScene();
+  gpuprof.end_frame();
 
   if (enigma::msaa_fbo != 0) {
     GLint fbo;

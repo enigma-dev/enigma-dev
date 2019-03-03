@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL3Context.h"
 #include "GLSLshader.h"
 #include "GL3shader.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
@@ -166,7 +165,7 @@ void d3d_end()
 void d3d_set_hidden(bool enable)
 {
   draw_batch_flush(batch_flush_deferred);
-  oglmgr->SetEnabled(GL_DEPTH_TEST, enable);
+  (enable?glEnable:glDisable)(GL_DEPTH_TEST);
   enigma::d3dHidden = enable;
 	d3d_set_zwriteenable(enable);
 }
@@ -228,7 +227,7 @@ void d3d_set_culling(int mode)
 {
   draw_batch_flush(batch_flush_deferred);
 	enigma::d3dCulling = mode;
-	oglmgr->SetEnabled(GL_CULL_FACE, (mode>0));
+	(mode>0?glEnable:glDisable)(GL_CULL_FACE);
 	if (mode > 0){
 		glFrontFace(windingstates[mode-1]);
 	}
@@ -625,7 +624,7 @@ void d3d_stencil_end_mask(){
 
 void d3d_stencil_enable(bool enable){
   draw_batch_flush(batch_flush_deferred);
-  oglmgr->SetEnabled(GL_STENCIL_TEST, enable);
+  (enable?glEnable:glDisable)(GL_STENCIL_TEST);
 }
 
 void d3d_stencil_clear_value(int value){
