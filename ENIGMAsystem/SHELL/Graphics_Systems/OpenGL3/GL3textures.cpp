@@ -47,10 +47,10 @@ vector<TextureStruct*> textureStructs(0);
       show_error("Attempting to access non-existing texture " + toString(texid), false);\
       return v;\
     }\
-    const unsigned tex = (texid==-1?-1:textureStructs[texid]->gltex);
+    const unsigned tex = (texid==-1?0:textureStructs[texid]->gltex);
 #else
   #define get_texture(tex,texid,v)\
-    const unsigned tex = (texid==-1?-1:textureStructs[texid]->gltex);
+    const unsigned tex = (texid==-1?0:textureStructs[texid]->gltex);
 #endif
 
 /*enum {
