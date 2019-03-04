@@ -38,8 +38,8 @@ bool widget_system_initialize() {
   
 } // namespave enigma
 
-extern "C" int cocoa_show_message(const char *str, bool error);
-extern "C" int cocoa_show_question(const char *str, bool error);
+extern "C" int cocoa_show_message(const char *str);
+extern "C" int cocoa_show_question(const char *str);
 extern "C" int cocoa_show_error(const char *str, bool abort);
 extern "C" const char *cocoa_input_box(const char *str, const char *def);
 extern "C" const char *cocoa_password_box(const char *str, const char *def);
