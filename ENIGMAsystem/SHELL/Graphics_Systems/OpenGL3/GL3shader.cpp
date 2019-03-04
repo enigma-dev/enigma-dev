@@ -70,7 +70,7 @@
 
     #define get_program(ptiter,program,err)\
     if (program < 0) { printf("Program id [%i] < 0 given!\n", program); return err; }\
-    if (program >= enigma::shaderprograms.size()) { printf("Program id [%i] > size() [%i] given!\n", program, enigma::shaderprograms.size()); return err; }\
+    if (size_t(program) >= enigma::shaderprograms.size()) { printf("Program id [%i] > size() [%llu] given!\n", program, enigma::shaderprograms.size()); return err; }\
     if (enigma::shaderprograms[program] == nullptr) { printf("Program with id [%i] is deleted!\n", program); return err; }\
     enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
 #else
