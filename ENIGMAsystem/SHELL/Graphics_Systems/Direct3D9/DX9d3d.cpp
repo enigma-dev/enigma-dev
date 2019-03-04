@@ -33,20 +33,10 @@ using namespace enigma::dx9;
 namespace {
 
 template<typename T, typename F>
-struct alias_cast_t
-{
-  union
-  {
-    F raw;
-    T data;
-  };
-};
-
-template<typename T, typename F>
 T alias_cast(F raw_data) {
-  alias_cast_t<T, F> ac;
-  ac.raw = raw_data;
-  return ac.data;
+  T value;
+  memcpy(&value, &raw_data, sizeof(value));
+  return value;
 }
 
 D3DCULL cullingstates[3] = {
