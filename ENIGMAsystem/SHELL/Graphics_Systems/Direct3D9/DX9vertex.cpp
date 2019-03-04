@@ -15,14 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
-
+#include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h" // for enigma_user::draw_primitive_count
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include <map>
 using std::map;
+
+using namespace enigma::dx9;
 
 namespace {
 
@@ -83,7 +84,7 @@ void graphics_prepare_vertex_buffer(const int buffer) {
       DWORD usage = D3DUSAGE_WRITEONLY;
       if (dynamic) usage |= D3DUSAGE_DYNAMIC;
 
-      d3dmgr->CreateVertexBuffer(
+      d3dmgr->device->CreateVertexBuffer(
         size, usage, 0, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
       );
       vertexBufferPeers[buffer] = vertexBufferPeer;
@@ -132,9 +133,9 @@ void graphics_prepare_index_buffer(const int buffer) {
       DWORD usage = D3DUSAGE_WRITEONLY;
       if (dynamic) usage |= D3DUSAGE_DYNAMIC;
 
-      d3dmgr->CreateIndexBuffer(
+      d3dmgr->device->CreateIndexBuffer(
         size, usage,
-        (indexBuffer->type == index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16,
+        (indexBuffer->type == enigma_user::index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16,
         Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &indexBufferPeer, NULL
       );
       indexBufferPeers[buffer] = indexBufferPeer;
@@ -172,7 +173,7 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
   vertexDeclarationElements[vertexFormat->flags.size()] = D3DDECL_END();
 
   LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration;
-  d3dmgr->CreateVertexDeclaration(&vertexDeclarationElements[0], &vertexDeclaration);
+  d3dmgr->device->CreateVertexDeclaration(&vertexDeclarationElements[0], &vertexDeclaration);
 
   return vertexDeclaration;
 }
@@ -190,7 +191,7 @@ inline void graphics_apply_vertex_format(int format, size_t &stride) {
     stride = search->second.second;
   }
 
-  d3dmgr->SetVertexDeclaration(vertexDeclaration);
+  d3dmgr->device->SetVertexDeclaration(vertexDeclaration);
 }
 
 } // namespace enigma
@@ -217,11 +218,11 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
   enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[buffer];
-  d3dmgr->SetStreamSource(0, vertexBufferPeer, offset, stride);
+  d3dmgr->device->SetStreamSource(0, vertexBufferPeer, offset, stride);
 
   int primitive_count = enigma_user::draw_primitive_count(primitive, count);
 
-  d3dmgr->DrawPrimitive(primitive_types[primitive], start, primitive_count);
+  d3dmgr->device->DrawPrimitive(primitive_types[primitive], start, primitive_count);
 }
 
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
@@ -236,14 +237,14 @@ void index_submit_range(int buffer, int vertex, int primitive, unsigned start, u
   enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[vertex];
-  d3dmgr->SetStreamSource(0, vertexBufferPeer, 0, stride);
+  d3dmgr->device->SetStreamSource(0, vertexBufferPeer, 0, stride);
 
   LPDIRECT3DINDEXBUFFER9 indexBufferPeer = indexBufferPeers[buffer];
-  d3dmgr->SetIndices(indexBufferPeer);
+  d3dmgr->device->SetIndices(indexBufferPeer);
 
   int primitive_count = enigma_user::draw_primitive_count(primitive, count);
 
-  d3dmgr->DrawIndexedPrimitive(primitive_types[primitive], 0, 0, count, start, primitive_count);
+  d3dmgr->device->DrawIndexedPrimitive(primitive_types[primitive], 0, 0, count, start, primitive_count);
 }
 
 } // namespace enigma_user

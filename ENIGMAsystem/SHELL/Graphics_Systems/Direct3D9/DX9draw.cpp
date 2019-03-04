@@ -17,7 +17,6 @@
 **/
 
 #include "Direct3D9Headers.h"
-#include "Bridges/General/DX9Context.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -28,7 +27,10 @@
 #include <vector>
 #include <math.h>
 #include <stdio.h>
+
 using std::vector;
+
+using namespace enigma::dx9;
 
 namespace enigma {
 extern unsigned char currentcolor[4];
@@ -59,14 +61,14 @@ void draw_enable_alphablend(bool enable) {
 
 bool draw_get_alpha_test() {
 	DWORD* enabled;
-	d3dmgr->GetRenderState(D3DRS_ALPHATESTENABLE, enabled);
+	d3dmgr->device->GetRenderState(D3DRS_ALPHATESTENABLE, enabled);
 	return *enabled;
 }
 
 unsigned draw_get_alpha_test_ref_value()
 {
 	DWORD* val;
-	d3dmgr->GetRenderState(D3DRS_ALPHAREF, val);
+	d3dmgr->device->GetRenderState(D3DRS_ALPHAREF, val);
 	return *val;
 }
 
@@ -116,7 +118,7 @@ int draw_getpixel(int x, int y)
 
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
-	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	d3dmgr->device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
 	D3DSURFACE_DESC desc;
 	pBackBuffer->GetDesc(&desc);
 
@@ -156,7 +158,7 @@ int draw_getpixel_ext(int x, int y)
 
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
-	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	d3dmgr->device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
 	D3DSURFACE_DESC desc;
 	pBackBuffer->GetDesc(&desc);
 	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
