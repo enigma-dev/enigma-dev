@@ -319,7 +319,7 @@ class d3d_lights
             ms = light_ind.size();
             D3DCAPS9 caps;
 			d3dmgr->device->GetDeviceCaps(&caps);
-            if (ms >= caps.MaxActiveLights)
+            if (DWORD(ms) >= caps.MaxActiveLights)
                 return false;
 
             light_ind.insert(pair<int,int>(id, ms));
@@ -355,7 +355,7 @@ class d3d_lights
             ms = light_ind.size();
             D3DCAPS9 caps;
 			d3dmgr->device->GetDeviceCaps(&caps);
-            if (ms >= caps.MaxActiveLights)
+            if (DWORD(ms) >= caps.MaxActiveLights)
                 return false;
 
             light_ind.insert(pair<int,int>(id, ms));
@@ -390,7 +390,7 @@ class d3d_lights
             ms = light_ind.size();
             D3DCAPS9 caps;
 			d3dmgr->device->GetDeviceCaps(&caps);
-            if (ms >= caps.MaxActiveLights)
+            if (DWORD(ms) >= caps.MaxActiveLights)
                 return false;
         }
 
@@ -404,7 +404,7 @@ class d3d_lights
             const int ms = light_ind.size();
 			D3DCAPS9 caps;
 			d3dmgr->device->GetDeviceCaps(&caps);
-            if (ms >= caps.MaxActiveLights)
+            if (DWORD(ms) >= caps.MaxActiveLights)
                 return false;
             light_ind.insert(pair<int,int>(id, ms));
 			d3dmgr->LightEnable(ms, TRUE);
