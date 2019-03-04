@@ -451,7 +451,6 @@ bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
     draw_batch_flush(batch_flush_deferred);
-    float specular[4] = {r, g, b, a};
 }
 
 void d3d_light_shininess(int facemode, int shine)
