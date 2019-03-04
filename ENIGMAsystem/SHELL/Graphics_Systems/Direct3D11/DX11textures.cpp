@@ -115,7 +115,7 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
 
 int graphics_duplicate_texture(int tex, bool mipmap)
 {
-
+  return -1; //TODO: implement
 }
 
 void graphics_copy_texture(int source, int destination, int x, int y)
@@ -140,7 +140,7 @@ void graphics_delete_texture(int tex)
 
 unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
 {
-
+  return NULL; //TODO: implement
 }
 
 void init_sampler_state() {
@@ -177,7 +177,7 @@ int texture_add(string filename, bool mipmap) {
 }
 
 void texture_save(int texid, string fname) {
-	unsigned w, h;
+	unsigned w = 0, h = 0;
 	unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(texid, &w, &h);
 
   string ext = enigma::image_get_format(fname);
@@ -286,17 +286,17 @@ void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel
 
 bool texture_mipmapping_supported()
 {
-
+  return false; //TODO: implement
 }
 
 bool texture_anisotropy_supported()
 {
-
+  return false; //TODO: implement
 }
 
 float texture_anisotropy_maxlevel()
 {
-
+  return 0.0f; //TODO: implement
 }
 
 void texture_anisotropy_filter(int sampler, gs_scalar levels)
