@@ -41,12 +41,12 @@ namespace enigma_user
 
 int draw_get_msaa_maxlevel()
 {
-
+  return 0; //TODO: implement
 }
 
 bool draw_get_msaa_supported()
 {
-
+  return false; //TODO: implement
 }
 
 void draw_set_msaa_enabled(bool enable)
@@ -60,16 +60,16 @@ void draw_enable_alphablend(bool enable) {
 }
 
 bool draw_get_alpha_test() {
-	DWORD* enabled;
-	d3dmgr->device->GetRenderState(D3DRS_ALPHATESTENABLE, enabled);
-	return *enabled;
+	DWORD enabled = 0;
+	d3dmgr->device->GetRenderState(D3DRS_ALPHATESTENABLE, &enabled);
+	return enabled;
 }
 
 unsigned draw_get_alpha_test_ref_value()
 {
-	DWORD* val;
-	d3dmgr->device->GetRenderState(D3DRS_ALPHAREF, val);
-	return *val;
+	DWORD val = 0;
+	d3dmgr->device->GetRenderState(D3DRS_ALPHAREF, &val);
+	return val;
 }
 
 void draw_set_alpha_test(bool enable)
