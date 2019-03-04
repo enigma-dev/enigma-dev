@@ -15,13 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
 #include <math.h>
+
+using namespace enigma::dx9;
 
 namespace enigma {
   extern unsigned char currentcolor[4];
@@ -36,13 +37,13 @@ namespace enigma_user
 void draw_clear_alpha(int col, float alpha)
 {
 	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), CLAMP_ALPHA(alpha)), 1.0f, 0);
+	d3dmgr->device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), CLAMP_ALPHA(alpha)), 1.0f, 0);
 }
 
 void draw_clear(int col)
 {
 	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col)), 1.0f, 0);
+	d3dmgr->device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col)), 1.0f, 0);
 }
 
 void draw_set_color(int col)

@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSprimitives.h"
@@ -28,6 +27,7 @@
 #include "Platforms/General/PFwindow.h"
 
 using namespace enigma;
+using namespace enigma::dx9;
 using namespace std;
 
 namespace enigma
@@ -47,8 +47,8 @@ void screen_init()
   enigma::gui_width = window_get_region_width();
   enigma::gui_height = window_get_region_height();
 
-  d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-  d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+  d3dmgr->device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+  d3dmgr->device->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
   if (!view_enabled)
   {
@@ -93,7 +93,7 @@ int screen_save(string filename) //Assumes native integers are little endian
 
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
-	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	d3dmgr->device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
 	D3DSURFACE_DESC desc;
 	pBackBuffer->GetDesc(&desc);
 
@@ -123,7 +123,7 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
-	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	d3dmgr->device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
 	D3DSURFACE_DESC desc;
 	pBackBuffer->GetDesc(&desc);
 
@@ -155,7 +155,7 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   sx = (window_get_width() - window_get_region_width_scaled()) / 2;
   sy = (window_get_height() - window_get_region_height_scaled()) / 2;
 	D3DVIEWPORT9 pViewport = { sx + x, sy + y, width, height, 0, 1.0f };
-	d3dmgr->SetViewport(&pViewport);
+	d3dmgr->device->SetViewport(&pViewport);
 }
 
 //TODO: These need to be in some kind of General
