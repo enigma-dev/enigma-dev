@@ -118,7 +118,7 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
 
 int surface_create_msaa(int width, int height, int levels)
 {
-
+  return -1; //TODO: implement
 }
 
 void surface_set_target(int id)
@@ -138,7 +138,7 @@ void surface_reset_target()
 
 int surface_get_target()
 {
-
+  return -1; //TODO: implement
 }
 
 void surface_free(int id)
@@ -149,7 +149,7 @@ void surface_free(int id)
 
 bool surface_exists(int id)
 {
-  return !((id < 0) or (id > enigma::Surfaces.size()) or (enigma::Surfaces[id] == NULL));
+  return !((id < 0) or (size_t(id) > enigma::Surfaces.size()) or (enigma::Surfaces[id] == NULL));
 }
 
 int surface_get_texture(int id)
@@ -172,17 +172,17 @@ int surface_get_height(int id)
 
 int surface_getpixel(int id, int x, int y)
 {
-
+  return 0; //TODO: implement
 }
 
 int surface_getpixel_ext(int id, int x, int y)
 {
-
+  return 0; //TODO: implement
 }
 
 int surface_getpixel_alpha(int id, int x, int y)
 {
-
+  return 0; //TODO: implement
 }
 
 }
@@ -200,22 +200,22 @@ namespace enigma_user
 
 int surface_save(int id, string filename)
 {
-
+  return -1; //TODO: implement
 }
 
 int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
 {
-
+  return -1; //TODO: implement
 }
 
 int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
 {
-
+  return -1; //TODO: implement
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
 {
-
+  return -1; //TODO: implement
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
