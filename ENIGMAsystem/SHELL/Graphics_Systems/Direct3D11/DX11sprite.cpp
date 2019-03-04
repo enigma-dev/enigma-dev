@@ -17,22 +17,15 @@
 
 #include "Direct3D11Headers.h"
 #include "DX11TextureStruct.h"
-#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GStextures.h"
-#include "Graphics_Systems/General/GSprimitives.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
 
 #include <cmath>
 #include <cstdlib>
-#include <string>
-
-using std::string;
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"
@@ -61,11 +54,10 @@ using std::string;
     const enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
-
+  return -1; //TODO: implement
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
@@ -76,4 +68,4 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
 
 }
 
-}
+} // namespace enigma_user

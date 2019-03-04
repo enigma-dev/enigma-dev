@@ -52,7 +52,7 @@ namespace enigma
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_surface(surf,id)\
-    if (id < 0 or id >= enigma::Surfaces.size() or !enigma::Surfaces[id]) {\
+    if (id < 0 or size_t(id) >= enigma::Surfaces.size() or !enigma::Surfaces[id]) {\
       show_error("Attempting to use non-existing surface " + toString(id), false);\
       return;\
     }\
