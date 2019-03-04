@@ -16,7 +16,6 @@
 **/
 
 #include "Universal_System/scalar.h"
-#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "DX9shader.h"
 #include <math.h>

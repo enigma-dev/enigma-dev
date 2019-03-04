@@ -21,26 +21,35 @@
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
-#include "Bridges/General/DX9Context.h"
+#include "Graphics_Systems/Direct3D9/Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
 
 #include <windows.h>
 #include <windowsx.h>
 #include <d3d9.h>
 #include <string>
+
 using namespace std;
 
-// global declarations
+namespace {
+
 LPDIRECT3D9 d3dobj; // the pointer to our Direct3D interface
+
+} // namespace anonymous
+
+namespace enigma {
+
+namespace dx9 {
+
 ContextManager* d3dmgr; // the pointer to the device class
 
-namespace enigma
-{
+} // namespace dx9
+
   extern bool forceSoftwareVertexProcessing;
   bool Direct3D9Managed = true;
 
   void OnDeviceLost() {
-    d3dmgr->EndScene();
+    d3dmgr->device->EndScene();
     if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
     for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
       (*it)->OnDeviceLost();
@@ -48,7 +57,7 @@ namespace enigma
   }
 
   void OnDeviceReset() {
-    d3dmgr->BeginScene();
+    d3dmgr->device->BeginScene();
     if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
     for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
       (*it)->OnDeviceReset();
@@ -57,7 +66,17 @@ namespace enigma
 
   void Reset(D3DPRESENT_PARAMETERS *d3dpp) {
     OnDeviceLost();
-    d3dmgr->Reset(d3dpp);
+    HRESULT hr = d3dmgr->device->Reset(d3dpp);
+    if (FAILED(hr)) {
+      MessageBox(
+        enigma::hWnd,
+        TEXT("Device Reset Failed"), TEXT("Error"),
+        MB_ICONERROR | MB_OK
+      );
+      return;  // should probably force the game closed
+    }
+    // Reapply the stored render states and what not
+    d3dmgr->RestoreState();
     OnDeviceReset();
   }
 
@@ -65,11 +84,11 @@ namespace enigma
   void WindowResized() {
     if (d3dmgr == NULL) { return; }
     IDirect3DSwapChain9 *sc;
-    d3dmgr->GetSwapChain(0, &sc);
+    d3dmgr->device->GetSwapChain(0, &sc);
     D3DPRESENT_PARAMETERS d3dpp;
     sc->GetPresentParameters(&d3dpp);
-    int ww = window_get_width(),
-        wh = window_get_height();
+    int ww = enigma_user::window_get_width(),
+        wh = enigma_user::window_get_height();
     d3dpp.BackBufferWidth = ww <= 0 ? 1 : ww;
     d3dpp.BackBufferHeight = wh <= 0 ? 1 : wh;
     sc->Release();
@@ -90,8 +109,8 @@ namespace enigma
 
     ZeroMemory(&d3dpp, sizeof(d3dpp)); // clear out the struct for use
     d3dpp.Windowed = TRUE; // program windowed, not fullscreen
-    int ww = window_get_width(),
-        wh = window_get_height();
+    int ww = enigma_user::window_get_width(),
+        wh = enigma_user::window_get_height();
     d3dpp.BackBufferWidth = ww <= 0 ? 1 : ww;
     d3dpp.BackBufferHeight = wh <= 0 ? 1 : wh;
     d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE;                // 0 Levels of multi-sampling
@@ -182,7 +201,7 @@ namespace enigma
       }
     }
 
-    d3dmgr->BeginScene();
+    d3dmgr->device->BeginScene();
   }
     
   void OnDeviceLost() {
@@ -217,26 +236,26 @@ namespace enigma
 	}
 
   void DisableDrawing(void* handle) {
-    d3dmgr->EndScene();
+    d3dmgr->device->EndScene();
     d3dmgr->Release(); // close and release the 3D device
     d3dobj->Release(); // close and release Direct3D
   }
 
   void ScreenRefresh() {
-    d3dmgr->EndScene();
-    d3dmgr->Present(NULL, NULL, NULL, NULL);
-    d3dmgr->BeginScene();
+    d3dmgr->device->EndScene();
+    d3dmgr->device->Present(NULL, NULL, NULL, NULL);
+    d3dmgr->device->BeginScene();
   }
-}
+} // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
+
 int display_aa = 0;
 
 void display_reset(int samples, bool vsync) {
   if (d3dmgr == NULL) { return; }
   IDirect3DSwapChain9 *sc;
-  d3dmgr->GetSwapChain(0, &sc);
+  d3dmgr->device->GetSwapChain(0, &sc);
   D3DPRESENT_PARAMETERS d3dpp;
   sc->GetPresentParameters(&d3dpp);
   if (vsync) {
@@ -260,7 +279,7 @@ void set_synchronization(bool enable)
 {
   if (d3dmgr == NULL) { return; }
   IDirect3DSwapChain9 *sc;
-  d3dmgr->GetSwapChain(0, &sc);
+  d3dmgr->device->GetSwapChain(0, &sc);
   D3DPRESENT_PARAMETERS d3dpp;
   sc->GetPresentParameters(&d3dpp);
   if (enable) {

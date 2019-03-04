@@ -15,19 +15,20 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
-namespace enigma
-{
-  extern int currentblendmode[2];
-  extern int currentblendtype;
-}
+using namespace enigma::dx9;
 
-namespace enigma_user
-{
+namespace enigma {
+
+extern int currentblendmode[2];
+extern int currentblendtype;
+
+} // namespace enigma
+
+namespace enigma_user {
 
 int draw_set_blend_mode(int mode) {
   if (enigma::currentblendmode[0] == mode && enigma::currentblendtype == 0) return 0;

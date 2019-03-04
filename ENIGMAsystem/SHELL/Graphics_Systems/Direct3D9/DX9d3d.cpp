@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
@@ -29,7 +28,10 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+using namespace enigma::dx9;
+
 namespace enigma {
+
 bool d3dMode = false;
 bool d3dHidden = false;
 bool d3dZWriteEnable = true;
@@ -86,7 +88,7 @@ namespace enigma_user
 
 void d3d_clear_depth(double value) {
   draw_batch_flush(batch_flush_deferred);
-  d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
+  d3dmgr->device->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
 }
 
 void d3d_start()
@@ -117,7 +119,7 @@ void d3d_end()
 }
 
 void d3d_set_software_vertex_processing(bool software) {
-	d3dmgr->SetSoftwareVertexProcessing(software);
+	d3dmgr->device->SetSoftwareVertexProcessing(software);
 }
 
 void d3d_set_hidden(bool enable)
@@ -295,7 +297,7 @@ class d3d_lights
         {
             ms = light_ind.size();
             D3DCAPS9 caps;
-			d3dmgr->GetDeviceCaps(&caps);
+			d3dmgr->device->GetDeviceCaps(&caps);
             if (ms >= caps.MaxActiveLights)
                 return false;
 
@@ -331,7 +333,7 @@ class d3d_lights
         {
             ms = light_ind.size();
             D3DCAPS9 caps;
-			d3dmgr->GetDeviceCaps(&caps);
+			d3dmgr->device->GetDeviceCaps(&caps);
             if (ms >= caps.MaxActiveLights)
                 return false;
 
@@ -366,7 +368,7 @@ class d3d_lights
         {
             ms = light_ind.size();
             D3DCAPS9 caps;
-			d3dmgr->GetDeviceCaps(&caps);
+			d3dmgr->device->GetDeviceCaps(&caps);
             if (ms >= caps.MaxActiveLights)
                 return false;
         }
@@ -380,7 +382,7 @@ class d3d_lights
         if (it == light_ind.end()) {
             const int ms = light_ind.size();
 			D3DCAPS9 caps;
-			d3dmgr->GetDeviceCaps(&caps);
+			d3dmgr->device->GetDeviceCaps(&caps);
             if (ms >= caps.MaxActiveLights)
                 return false;
             light_ind.insert(pair<int,int>(id, ms));

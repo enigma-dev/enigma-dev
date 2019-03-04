@@ -18,11 +18,12 @@
 #ifndef DX9_TEXTURESTRUCT_H
 #define DX9_TEXTURESTRUCT_H
 
-#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 
 #include <vector>
 using std::vector;
+
+using namespace enigma::dx9;
 
 struct TextureStruct {
 	LPDIRECT3DTEXTURE9 gTexture;
@@ -64,7 +65,7 @@ struct TextureStruct {
 
   void OnDeviceReset() {
     // restore texture data
-    d3dmgr->CreateTexture(backupdesc.Width, backupdesc.Height, 1, D3DUSAGE_RENDERTARGET, backupdesc.Format, D3DPOOL_DEFAULT, &gTexture, NULL);
+    d3dmgr->device->CreateTexture(backupdesc.Width, backupdesc.Height, 1, D3DUSAGE_RENDERTARGET, backupdesc.Format, D3DPOOL_DEFAULT, &gTexture, NULL);
 
     LPDIRECT3DSURFACE9 pBackBuffer;
     gTexture->GetSurfaceLevel(0,&pBackBuffer);
