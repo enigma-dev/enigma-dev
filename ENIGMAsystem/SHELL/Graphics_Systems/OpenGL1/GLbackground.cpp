@@ -25,9 +25,6 @@
 
 #include "Platforms/General/PFwindow.h"
 
-#include <cstddef>
-#include <math.h>
-
 namespace enigma_user
 {
 
