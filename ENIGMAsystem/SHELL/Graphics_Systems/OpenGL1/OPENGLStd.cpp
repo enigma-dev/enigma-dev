@@ -30,8 +30,6 @@ using namespace std;
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 namespace enigma
 {
-  bool glew_isgo;
-  bool pbo_isgo;
 
   void graphics_init_vbo_method();
 
