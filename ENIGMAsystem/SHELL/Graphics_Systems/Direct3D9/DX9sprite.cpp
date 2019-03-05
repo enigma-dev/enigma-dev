@@ -68,7 +68,7 @@ namespace enigma_user
 {
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
-
+  return -1; //TODO: implement
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {

@@ -154,7 +154,7 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   gs_scalar sx, sy;
   sx = (window_get_width() - window_get_region_width_scaled()) / 2;
   sy = (window_get_height() - window_get_region_height_scaled()) / 2;
-	D3DVIEWPORT9 pViewport = { sx + x, sy + y, width, height, 0, 1.0f };
+	D3DVIEWPORT9 pViewport = { (DWORD)(sx + x), (DWORD)(sy + y), (DWORD)width, (DWORD)height, 0, 1.0f };
 	d3dmgr->device->SetViewport(&pViewport);
 }
 
