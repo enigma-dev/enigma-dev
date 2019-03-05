@@ -28,8 +28,7 @@
 // These two leave a bad taste in my mouth because they depend on views, which should be removable.
 // However, for now, they stay.
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
   draw_batch_flush(batch_flush_deferred);
@@ -77,4 +76,4 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
 	rgbdata.clear();
 }
 
-}
+} // namespace enigma_user

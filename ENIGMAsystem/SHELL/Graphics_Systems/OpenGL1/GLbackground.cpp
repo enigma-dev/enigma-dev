@@ -25,8 +25,7 @@
 
 #include "Platforms/General/PFwindow.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
 {
@@ -52,4 +51,4 @@ int background_create_from_screen(int x, int y, int w, int h, bool removeback, b
   return bckid;
 }
 
-}
+} // namespace enigma_user

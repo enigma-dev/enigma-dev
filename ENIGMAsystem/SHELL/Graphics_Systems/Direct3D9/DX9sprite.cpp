@@ -24,19 +24,18 @@
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
   return -1; //TODO: implement
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
-	return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
+  return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
 }
 
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
 
 }
 
-}
+} // namespace enigma_user
