@@ -76,7 +76,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
 {
 	draw_batch_flush(batch_flush_deferred);
-	DWORD flags = NULL;
+	DWORD flags = 0;
 	if (red) { flags |= D3DCOLORWRITEENABLE_RED; }
 	if (green) { flags |= D3DCOLORWRITEENABLE_GREEN; }
 	if (blue) { flags |= D3DCOLORWRITEENABLE_BLUE; }
