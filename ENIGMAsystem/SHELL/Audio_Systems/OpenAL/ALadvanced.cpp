@@ -153,7 +153,6 @@ int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, as_sca
 }
 
 int audio_play_sound_on(int emitter, int sound, bool loop, double priority) {
-  get_sound(snd, sound, 0);
   SoundEmitter *emit = sound_emitters[emitter];
   int src = audio_play_sound_at(sound, emit->emitPos[0], emit->emitPos[1], emit->emitPos[2], emit->falloff[0],
                                 emit->falloff[1], emit->falloff[2], loop, priority) -
