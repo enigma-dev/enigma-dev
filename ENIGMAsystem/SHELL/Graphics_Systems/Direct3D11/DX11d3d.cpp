@@ -15,13 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Platforms/platforms_mandatory.h"
+
+using namespace enigma::dx11;
 
 namespace {
 
@@ -31,7 +32,7 @@ void update_depth_stencil_state() {
   static ID3D11DepthStencilState* pDepthStencilState = NULL;
   if (pDepthStencilState) { pDepthStencilState->Release(); pDepthStencilState = NULL; }
   m_device->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState);
-  draw_batch_flush(batch_flush_deferred);
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   m_deviceContext->OMSetDepthStencilState(pDepthStencilState, 1);
 }
 
@@ -242,27 +243,27 @@ class d3d_lights
 
     bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_define_specularity(int id, int r, int g, int b, double a)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_enable(int id)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_disable(int id)
     {
-
+      return false; //TODO: implement
     }
 } d3d_lighting;
 
@@ -286,7 +287,6 @@ bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
-  float specular[4] = {r, g, b, a};
 
 }
 

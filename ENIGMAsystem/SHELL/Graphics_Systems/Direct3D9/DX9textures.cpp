@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
 #include "DX9TextureStruct.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -52,7 +51,7 @@ namespace enigma
 
     DWORD usage = Direct3D9Managed ? 0 : D3DUSAGE_DYNAMIC;
     if (mipmap) usage |= D3DUSAGE_AUTOGENMIPMAP;
-    d3dmgr->CreateTexture(fullwidth, fullheight, 1, usage, D3DFMT_A8R8G8B8, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &texture, 0);
+    d3dmgr->device->CreateTexture(fullwidth, fullheight, 1, usage, D3DFMT_A8R8G8B8, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &texture, 0);
 
     if (pxdata != nullptr) {
       D3DLOCKED_RECT rect;
@@ -343,21 +342,21 @@ void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel
 bool texture_mipmapping_supported()
 {
   D3DCAPS9 caps;
-  d3dmgr->GetDeviceCaps(&caps);
+  d3dmgr->device->GetDeviceCaps(&caps);
   return caps.TextureCaps & D3DPTEXTURECAPS_MIPMAP;
 }
 
 bool texture_anisotropy_supported()
 {
   D3DCAPS9 caps;
-  d3dmgr->GetDeviceCaps(&caps);
+  d3dmgr->device->GetDeviceCaps(&caps);
   return caps.RasterCaps & D3DPRASTERCAPS_ANISOTROPY;
 }
 
 float texture_anisotropy_maxlevel()
 {
   D3DCAPS9 caps;
-  d3dmgr->GetDeviceCaps(&caps);
+  d3dmgr->device->GetDeviceCaps(&caps);
   return caps.MaxAnisotropy;
 }
 

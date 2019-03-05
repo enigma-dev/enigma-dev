@@ -18,14 +18,16 @@ before_install:
       sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
       sudo add-apt-repository -y ppa:mhier/libboost-latest;
       sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
-      sudo apt-get -y install build-essential zlib1g-dev libboost1.67-dev \
-        libprotobuf-dev protobuf-compiler libglm-dev;
+      # we always build the frontend as 64 bit, even for 32 bit game jobs
+      # this is why we first install 64 bit png, then 32 bit png below
+      sudo apt-get -y install build-essential zlib1g-dev libboost1.67-dev\
+        libprotobuf-dev protobuf-compiler libglm-dev libpng-dev;
 
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
         sudo apt-get -y install libc6:i386 libc++-dev:i386 libstdc++6:i386\
-          libncurses5:i386 lib32z1-dev libx11-6:i386 libglew-dev:i386\
-          libglu1-mesa-dev:i386 libgl1-mesa-dev:i386 libxrandr-dev:i386;
+          libncurses5:i386 libx11-6:i386 libglew-dev:i386 libglu1-mesa-dev:i386\
+          libgl1-mesa-dev:i386 lib32z1-dev libxrandr-dev:i386;
 
         if [ "$COMPILER" == "gcc32" ]; then
           sudo apt-get -y install gcc-multilib g++-multilib;
@@ -85,6 +87,10 @@ install:
     if [ "$TEST_HARNESS" != true ]; then
       make -j4
       CLI_ENABLE_EGM=FALSE make -j4 emake
+      if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
+        # frontend uses 64 bit libpng but game will use 32 bit libpng
+        sudo apt-get -y install libpng-dev:i386;
+      fi
     fi
 
 # by default most of our jobs will be run on a linux instance

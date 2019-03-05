@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Samuel Venable
+/** Copyright (C) 2019 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -38,7 +38,6 @@
 
 using enigma_user::string_replace_all;
 
-using enigma::tfd_OsaScript;
 using enigma::tfd_Zenity;
 using enigma::tfd_KDialog;
 
@@ -61,30 +60,11 @@ string caption;
 
 } // anonymous namespace
 
-/* I know you guys don't like using platform macros; I'm ok with alternative ways to do this
-just let me know what you would rather me do and I'll change it accordingly. Thank you!!! */
-
-#ifdef __APPLE__
-extern "C" void cocoa_window_activate();
-#endif
-
-static inline void window_activate() {
-  #ifdef __APPLE__
-  if (tfd_DialogEngine() == tfd_OsaScript)
-    cocoa_window_activate();
-  #endif
-}
-
 static inline string tfd_add_escaping(string str) {
-  string result;
-
-  if (tfd_DialogEngine() == tfd_OsaScript)
-    result = string_replace_all(str, "\"", "\\\\\\\"");
-  else
-    result = string_replace_all(str, "\"", "\\\"");
+  string result = string_replace_all(str, "\"", "\\\"");
 
   if (tfd_DialogEngine() == tfd_Zenity)
-    result = string_replace_all(str, "_", "__");
+    result = string_replace_all(result, "_", "__");
 
   return result;
 }
@@ -101,8 +81,7 @@ static inline string caption_helper(string capt) {
     capt = " ";
   else if (capt == "" && tfd_DialogEngine() == tfd_KDialog)
     capt = "KDialog";
-  
-  window_activate();
+
   return capt;
 }
 
@@ -113,8 +92,8 @@ class FileFilter {
   std::vector<const char* const*> cpatterns_;
   std::vector<int> pattern_counts_;
 
-  public:
-    FileFilter(const std::string &filter): filter_buf(filter + "|") {
+public:
+  FileFilter(const std::string &filter): filter_buf(filter + "|") {
     if (!filter.empty()) {
       size_t start = 0;
       std::vector<const char*> *curfilter = nullptr;
@@ -157,31 +136,6 @@ class FileFilter {
   const int* pattern_counts() { return pattern_counts_.data(); }
 };
 
-static inline string detect_all_files_filter(string filter) {
-  if (tfd_DialogEngine() == tfd_OsaScript) {
-    string str_filter = string_replace_all(filter, "*.", "");
-    size_t first_line_pos = str_filter.find("|");
-
-    if (first_line_pos != string::npos) {
-      size_t first_star_pos = str_filter.find("*", first_line_pos + 1);
-            
-      if (first_star_pos != string::npos) {
-        size_t second_line_pos = str_filter.find("|", first_line_pos + 1);
-                
-        if (second_line_pos != string::npos) {
-          if (first_line_pos < first_star_pos && first_star_pos < second_line_pos)
-            filter = "";
-        } else {
-          if (first_line_pos < first_star_pos)
-            filter = "";
-        }
-      }
-    }
-  }
-
-  return filter;
-}
-
 static inline string remove_trailing_zeros(double numb) {
   string strnumb = std::to_string(numb);
 
@@ -192,33 +146,24 @@ static inline string remove_trailing_zeros(double numb) {
 }
 
 static inline string get_open_filename_helper(string filter, string fname, string dir, string title, int const mselect) {
-  string fname_or_dir;
+  string str_fname_or_dir = ""; 
+  char *cstr_fname = (char *)fname.c_str();
 
-  string str_fname = fname;
-  string str_dir;
-    
-  char *bname = (char *)str_fname.c_str();
-    
-  if (fname == "")
-    str_dir = dir;
-  else
-    str_dir = dir + string("/") + string(basename(bname));
-    
-  if(access((char *)str_dir.c_str(), F_OK) != -1)
-    fname_or_dir = str_dir;
-  else
-    fname_or_dir = fname;
+  if (fname != "" && dir != "")
+    str_fname_or_dir = dir + string("/") + string(basename(cstr_fname));
+  else if (fname != "" && dir == "")
+    str_fname_or_dir = string(basename(cstr_fname));
+  else if (fname == "" && dir != "")
+    str_fname_or_dir = dir;
 
   string titlebar;
-
   if (title == "") titlebar = "Open"; else titlebar = title;
-  fname_or_dir = tfd_add_escaping(fname_or_dir);
+  str_fname_or_dir = tfd_add_escaping(str_fname_or_dir);
   titlebar = tfd_add_escaping(titlebar);
   filter = tfd_add_escaping(filter);
-  filter = detect_all_files_filter(filter);
   FileFilter ff(filter.c_str());
 
-  const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
+  const char *path = tinyfd_openFileDialog(titlebar.c_str(), str_fname_or_dir.c_str(),
     ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), mselect, tfd_DialogEngine());
 
   return path ? : "";
@@ -258,8 +203,6 @@ void show_error(string errortext, const bool fatal) {
     msg = msg + "\n\n";
 
   msg = tfd_add_escaping(msg);
-
-  window_activate();
 
   if (fatal == 0) {
     msg = msg + "Do you want to abort the application?";
@@ -346,7 +289,6 @@ string get_open_filenames(string filter, string fname) {
 string get_save_filename(string filter, string fname) {
   fname = tfd_add_escaping(fname);
   filter = tfd_add_escaping(filter);
-  filter = detect_all_files_filter(filter);
   FileFilter ff(filter.c_str());
 
   const char *path = tinyfd_saveFileDialog("Save As", fname.c_str(),
@@ -364,31 +306,24 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
-  string fname_or_dir;
-  string str_fname = fname;
-  string str_dir;
-    
-  char *bname = (char *)str_fname.c_str();
-    
-  if (fname == "")
-    str_dir = dir;
-  else
-    str_dir = dir + string("/") + string(basename(bname));
-    
-  if(access((char *)str_dir.c_str(), F_OK) != -1)
-    fname_or_dir = str_dir;
-  else
-    fname_or_dir = fname;
+  string str_fname_or_dir = "";
+  char *cstr_fname = (char *)fname.c_str();
+
+  if (fname != "" && dir != "")
+    str_fname_or_dir = dir + string("/") + string(basename(cstr_fname));
+  else if (fname != "" && dir == "")
+    str_fname_or_dir = string(basename(cstr_fname));
+  else if (fname == "" && dir != "")
+    str_fname_or_dir = dir;
 
   string titlebar;
   if (title == "") titlebar = "Save As"; else titlebar = title;
-  fname_or_dir = tfd_add_escaping(fname_or_dir);
+  str_fname_or_dir = tfd_add_escaping(str_fname_or_dir);
   titlebar = tfd_add_escaping(titlebar);
   filter = tfd_add_escaping(filter);
-  filter = detect_all_files_filter(filter);
   FileFilter ff(filter.c_str());
 
-  const char *path = tinyfd_saveFileDialog(titlebar.c_str(), fname_or_dir.c_str(),
+  const char *path = tinyfd_saveFileDialog(titlebar.c_str(), str_fname_or_dir.c_str(),
     ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), tfd_DialogEngine());
 
   return path ? : "";

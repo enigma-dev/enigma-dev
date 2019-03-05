@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Samuel Venable
+/** Copyright (C) 2018-2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,10 +15,5 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-namespace enigma {
-  
-int tfd_DialogEngine() {
-  return 0;
-}
-  
-} // namespave enigma
+unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename);
+unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename);

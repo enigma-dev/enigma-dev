@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Samuel Venable
+/** Copyright (C) 2019 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -18,10 +18,9 @@
 #include <string>
 
 namespace enigma {
-  
-int const tfd_OsaScript = 0;
-int const tfd_Zenity    = 1;
-int const tfd_KDialog   = 2;
+
+int const tfd_Zenity  = 0;
+int const tfd_KDialog = 1;
 int tfd_DialogEngine();
   
 } // namespave enigma

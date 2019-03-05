@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Robert B. Colton
+/** Copyright (C) 2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,13 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_PROTO2ES_H
-#define ENIGMA_PROTO2ES_H
+#ifndef ENIGMA_IMAGEFORMATS_EXTS_H
+#define ENIGMA_IMAGEFORMATS_EXTS_H
 
-#include "game.pb.h"
+#include <functional>
+#include <string>
 
-#include "backend/EnigmaStruct.h"
+namespace enigma
+{
 
-EnigmaStruct* Proto2ES(buffers::Game* protobuf);
+using ImageLoadFunction = std::function<unsigned char*(std::string, unsigned int*, unsigned int*, unsigned int*, unsigned int*, bool)>;
+using ImageSaveFunction = std::function<int(std::string, const unsigned char*, unsigned, unsigned, unsigned, unsigned, bool)>;
 
-#endif // ENIGMA_PROTO2ES_H
+void image_add_loader(std::string format, ImageLoadFunction fnc);
+void image_add_saver(std::string format, ImageSaveFunction fnc);
+
+} //namespace enigma
+
+#endif //ENIGMA_IMAGEFORMATS_EXTS_H

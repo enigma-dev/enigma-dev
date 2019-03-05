@@ -17,7 +17,6 @@
 **/
 
 #include "Direct3D11Headers.h"
-#include "Bridges/General/DX11Context.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -39,12 +38,12 @@ namespace enigma_user
 
 int draw_get_msaa_maxlevel()
 {
-
+  return 0; //TODO: implement
 }
 
 bool draw_get_msaa_supported()
 {
-
+  return false; //TODO: implement
 }
 
 void draw_set_msaa_enabled(bool enable)
@@ -59,12 +58,12 @@ void draw_enable_alphablend(bool enable)
 
 bool draw_get_alpha_test()
 {
-
+  return false; //TODO: implement
 }
 
 unsigned draw_get_alpha_test_ref_value()
 {
-
+  return 0; //TODO: implement
 }
 
 void draw_set_alpha_test(bool enable)
@@ -95,13 +94,13 @@ namespace enigma_user
 int draw_getpixel(int x, int y)
 {
   draw_batch_flush(batch_flush_deferred);
-  return 0;
+  return 0; //TODO: implement
 }
 
 int draw_getpixel_ext(int x, int y)
 {
   draw_batch_flush(batch_flush_deferred);
-  return 0;
+  return 0; //TODO: implement
 }
 
 } // namespace enigma_user

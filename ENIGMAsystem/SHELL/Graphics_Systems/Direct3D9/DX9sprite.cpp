@@ -62,14 +62,13 @@ using std::string;
 #endif
 
 #include "Direct3D9Headers.h"
-#include "Bridges/General/DX9Context.h"
 #include "DX9TextureStruct.h"
 
 namespace enigma_user
 {
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
-
+  return -1; //TODO: implement
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
