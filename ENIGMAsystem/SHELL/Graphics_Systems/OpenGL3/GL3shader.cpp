@@ -70,7 +70,7 @@
 
     #define get_program(ptiter,program,err)\
     if (program < 0) { printf("Program id [%i] < 0 given!\n", program); return err; }\
-    if (program >= enigma::shaderprograms.size()) { printf("Program id [%i] > size() [%i] given!\n", program, enigma::shaderprograms.size()); return err; }\
+    if (size_t(program) >= enigma::shaderprograms.size()) { printf("Program id [%i] > size() [%llu] given!\n", program, enigma::shaderprograms.size()); return err; }\
     if (enigma::shaderprograms[program] == nullptr) { printf("Program with id [%i] is deleted!\n", program); return err; }\
     enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
 #else
@@ -90,12 +90,12 @@
 
     #define get_program(ptiter,program,err)\
     if (program < 0) { return err; }\
-    if (program >= enigma::shaderprograms.size()) { return err; }\
+    if (size_t(program) >= enigma::shaderprograms.size()) { return err; }\
     if (enigma::shaderprograms[program] == nullptr) { return err; }\
     enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
 #endif
 
-extern GLenum shadertypes[5] = {
+GLenum shadertypes[5] = {
   GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER
 };
 
@@ -640,7 +640,7 @@ void glsl_program_detach(int id, int sid)
 
 void glsl_program_set(int id)
 {
-  if (enigma::bound_shader != id) {
+  if (enigma::bound_shader != unsigned(id)) {
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     enigma::bound_shader = id;
     glUseProgram(enigma::shaderprograms[id]->shaderprogram);

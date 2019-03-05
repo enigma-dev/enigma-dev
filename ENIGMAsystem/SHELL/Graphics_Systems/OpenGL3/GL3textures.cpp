@@ -47,10 +47,10 @@ vector<TextureStruct*> textureStructs(0);
       show_error("Attempting to access non-existing texture " + toString(texid), false);\
       return v;\
     }\
-    const int tex = (texid==-1?-1:textureStructs[texid]->gltex);
+    const unsigned tex = (texid==-1?0:textureStructs[texid]->gltex);
 #else
   #define get_texture(tex,texid,v)\
-    const int tex = (texid==-1?-1:textureStructs[texid]->gltex);
+    const unsigned tex = (texid==-1?0:textureStructs[texid]->gltex);
 #endif
 
 /*enum {
@@ -401,7 +401,7 @@ void texture_set_stage(int stage, int texid) {
   //TODO(harijs): Check if stage <0
   get_texture(gt,texid,);
   if (enigma::samplerstates[stage].bound_texture != gt) {
-    if ((unsigned int)enigma::bound_texture_stage != GL_TEXTURE0 + stage) { glActiveTexture(enigma::bound_texture_stage = (GL_TEXTURE0 + stage)); }
+    if (enigma::bound_texture_stage != GL_TEXTURE0 + stage) { glActiveTexture(enigma::bound_texture_stage = (GL_TEXTURE0 + stage)); }
     glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
   }
 }
