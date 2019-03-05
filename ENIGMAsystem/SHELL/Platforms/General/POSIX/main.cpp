@@ -24,10 +24,10 @@ void initialize_directory_globals() {
 
   // Set the program_directory
   buffer[0] = 0;
-  char path[PATH_MAX + 1];
   memset(buffer, 0, sizeof(buffer));
-
-  if (readlink("/proc/self/exe", buffer, PATH_MAX + 1) != -1)
+  ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX + 1);
+  
+  if (count != -1)
     enigma_user::program_directory = add_slash(dirname(buffer));
 
   // Set the temp_directory
