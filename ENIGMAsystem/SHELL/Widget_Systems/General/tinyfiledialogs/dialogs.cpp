@@ -191,28 +191,15 @@ void show_error(string errortext, const bool fatal) {
   #else
   errortext = "Error in some event or another for some object: \r\n\r\n" + errortext;
   #endif
-  
-  string msg;
 
-  if (errortext == "")
-    msg = " ";
-  else
-    msg = errortext;
+  if (errortext == "") errortext = " ";
+  int input = 0;
 
-  if (msg != " ")
-    msg = msg + "\n\n";
-
-  msg = tfd_add_escaping(msg);
-
-  if (fatal == 0) {
-    msg = msg + "Do you want to abort the application?";
-    double input = tinyfd_messageBox("Error", msg.c_str(), "yesno", "error", 1, tfd_DialogEngine());
-
-    if (input == 1)
-      exit(0);
+  if (!fatal) {
+    input = tinyfd_errorMessageBox("Error", errortext.c_str(), 0, tfd_DialogEngine());
+    if (input == 2) exit(0);
   } else {
-    msg = msg + "Click 'OK' to abort the application.";
-    tinyfd_messageBox("Error", msg.c_str(), "ok", "error", 1, tfd_DialogEngine());
+    tinyfd_errorMessageBox("Error", errortext.c_str(), 1, tfd_DialogEngine());
     exit(0);
   }
 }
@@ -231,7 +218,7 @@ int show_message(const string &str) {
   caption = tfd_add_escaping(caption);
   if (str == "") msg = " "; else msg = str;
   caption = caption_helper(caption);
-  tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1, tfd_DialogEngine());
+  tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", tfd_DialogEngine());
   return 1;
 }
 
@@ -239,7 +226,7 @@ bool show_question(string str) {
   caption = window_get_caption();
   str = message_helper(str);
   caption = caption_helper(caption);
-  return tinyfd_messageBox(caption.c_str(), msg.c_str(), "yesno", "question", 1, tfd_DialogEngine());
+  return tinyfd_messageBox(caption.c_str(), msg.c_str(), "yesno", "question", tfd_DialogEngine());
 }
 
 string get_string(string str, string def) {

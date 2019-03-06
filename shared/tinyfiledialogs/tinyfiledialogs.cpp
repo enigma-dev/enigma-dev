@@ -542,10 +542,9 @@ static std::string kdialogFilter(std::string input)
 
 int tinyfd_messageBox(
         char const * const aTitle , /* NULL or "" */
-        char const * const aMessage , /* NULL or ""  may contain \n and \t */
+        char const * const aMessage , /* NULL or "" */
         char const * const aDialogType , /* "ok" "okcancel" "yesno" "yesnocancel" */
         char const * const aIconType , /* "info" "warning" "error" "question" */
-        int const aDefaultButton , /* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
         int const aDialogEngine) /* 0 for Zenity, 1 for KDialog */
 {
         char lBuff [MAX_PATH_OR_CMD] ;
@@ -736,10 +735,143 @@ int tinyfd_messageBox(
         return lResult ;
 }
 
+int tinyfd_errorMessageBox(
+	char const * const aTitle , /* NULL or "" */
+	char const * const aMessage , /* NULL or "" */
+	int const aFatalError , /* 0 for abort/retry/ignore , 1 for abort */
+	int const aDialogEngine ) /* 0 for Zenity, 1 for KDialog */
+{
+        char lBuff [MAX_PATH_OR_CMD] ;
+        char * lDialogString = NULL ;
+        FILE * lIn ;
+        int lResult ;
+        size_t lTitleLen ;
+        size_t lMessageLen ;
+
+        lBuff[0]='\0';
+
+        lTitleLen =  aTitle ? strlen(aTitle) : 0 ;
+        lMessageLen =  aMessage ? strlen(aMessage) : 0 ;
+        lDialogString = (char *) malloc( MAX_PATH_OR_CMD + lTitleLen + lMessageLen );
+
+        if ( aDialogEngine == 0 && zenityPresent() )
+        {
+                if ( zenityPresent() )
+                {
+                        strcpy( lDialogString , "szAnswer=$(zenity" ) ;
+                        if ( (zenity3Present() >= 4) && !getenv("SSH_TTY") )
+                        {
+                                strcat(lDialogString, " --attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)"); /* contribution: Paul Rouget */
+                        }
+                }
+
+                strcat(lDialogString, " --error");
+                if ( zenity3Present() )
+                {
+                        strcat( lDialogString , " --ok-label Abort" ) ;
+                        strcat( lDialogString , " --extra-button Retry" ) ;
+                        strcat( lDialogString , " --extra-button Ignore" ) ;
+                }
+                if ( aTitle && strlen(aTitle) )
+                {
+                        strcat(lDialogString, " --title=\"") ;
+                        strcat(lDialogString, aTitle) ;
+                        strcat(lDialogString, "\"") ;
+                }
+                if ( aMessage && strlen(aMessage) )
+                {
+                        strcat(lDialogString, " --no-wrap --text=\"") ;
+                        strcat(lDialogString, aMessage) ;
+                        strcat(lDialogString, "\"") ;
+                }
+                if ( (zenity3Present() >= 3) )
+                {
+                        strcat( lDialogString , " --icon-name=dialog-error" ) ;
+                }
+
+                if ( !aFatalError )
+                {
+                        strcat( lDialogString ,
+                                ");if [ $? = 0 ];then echo 2;elif [ $szAnswer = \"Retry\" ];then echo 1;elif [ $szAnswer = \"Ignore\" ];then echo 0;else echo 0;fi");
+                }
+                else
+                {
+                        strcat( lDialogString , ");if [ $? = 0 ];then echo 2;else echo 2;fi");
+                }
+        }
+        else if ( aDialogEngine == 1 && kdialogPresent() )
+        {
+                strcpy( lDialogString , "kdialog" ) ;
+                if ( kdialogPresent() == 2 )
+                {
+                        strcat(lDialogString, " --attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)"); /* contribution: Paul Rouget */
+                }
+
+                strcat( lDialogString , " --warningyesnocancel" ) ;
+                strcat( lDialogString , " \"" ) ;
+                if ( aMessage )
+                {
+                        strcat( lDialogString , aMessage ) ;
+                }
+                strcat( lDialogString , "\"" ) ;
+                if ( aTitle && strlen(aTitle) )
+                {
+                        strcat(lDialogString, " --title \"") ;
+                        strcat(lDialogString, aTitle) ;
+                        strcat(lDialogString, "\"") ;
+                }
+                strcat( lDialogString , " --yes-label Abort" ) ;
+                strcat( lDialogString , " --no-label Retry" ) ;
+                strcat( lDialogString , " --cancel-label Ignore" ) ;
+
+                if ( !aFatalError )
+                {
+                        strcat( lDialogString , "; x=$? ;if [ $x = 0 ] ;then echo 2;elif [ $x = 1 ] ;then echo 1;else echo 0;fi");
+                }
+                else
+                {
+                        strcat( lDialogString , ";if [ $? = 0 ];then echo 2;else echo 2;fi");
+                }
+        }
+
+        if ( ! ( lIn = popen( lDialogString , "r" ) ) )
+        {
+                free(lDialogString);
+                return 0 ;
+        }
+        while ( fgets( lBuff , sizeof( lBuff ) , lIn ) != NULL )
+        {}
+
+        pclose( lIn ) ;
+
+        /* printf( "lBuff: %s len: %lu \n" , lBuff , strlen(lBuff) ) ; */
+        if ( lBuff[strlen( lBuff ) -1] == '\n' )
+        {
+                lBuff[strlen( lBuff ) -1] = '\0' ;
+        }
+        /* printf( "lBuff1: %s len: %lu \n" , lBuff , strlen(lBuff) ) ; */
+
+        if ( !aFatalError )
+        {
+                if ( lBuff[0]=='1' )
+                {
+                        if ( !strcmp( lBuff+1 , "Abort" )) strcpy(lBuff,"2");
+                        else if ( !strcmp( lBuff+1 , "Retry" )) strcpy(lBuff,"1");
+                }
+        }
+        /* printf( "lBuff2: %s len: %lu \n" , lBuff , strlen(lBuff) ) ; */
+
+        lResult =  !strcmp( lBuff , "2" ) ? 2 : !strcmp( lBuff , "1" ) ? 1 : 0;
+
+        /* printf( "lResult: %d\n" , lResult ) ; */
+        free(lDialogString);
+        return lResult ;
+}
+
 /* returns NULL on cancel */
 char const * tinyfd_inputBox(
         char const * const aTitle , /* NULL or "" */
-        char const * const aMessage , /* NULL or "" may NOT contain \n nor \t */
+        char const * const aMessage , /* NULL or "" */
         char const * const aDefaultInput , /* NULL or "" */
         int const aDialogEngine) /* 0 for Zenity, 1 for KDialog */
 {
@@ -877,7 +1009,7 @@ char const * tinyfd_inputBox(
 /* returns NULL on cancel */
 char const * tinyfd_passwordBox(
         char const * const aTitle , /* NULL or "" */
-        char const * const aMessage , /* NULL or "" may NOT contain \n nor \t */
+        char const * const aMessage , /* NULL or "" */
         char const * const aDefaultInput , /* NULL or "" */
         int const aDialogEngine) /* 0 for Zenity, 1 for KDialog */
 {
@@ -1459,12 +1591,12 @@ char const * tinyfd_colorChooser(
                 }
                 else if ( lBuff[3] == '(' ) {
                         sscanf(lBuff,"rgb(%hhu,%hhu,%hhu",
-                                        & aoResultRGB[0], & aoResultRGB[1],& aoResultRGB[2]);
+                                & aoResultRGB[0], & aoResultRGB[1],& aoResultRGB[2]);
                         RGB2Hex(aoResultRGB,lBuff);
                 }
                 else if ( lBuff[4] == '(' ) {
                         sscanf(lBuff,"rgba(%hhu,%hhu,%hhu",
-                                        & aoResultRGB[0], & aoResultRGB[1],& aoResultRGB[2]);
+                                & aoResultRGB[0], & aoResultRGB[1],& aoResultRGB[2]);
                         RGB2Hex(aoResultRGB,lBuff);
                 }
         }

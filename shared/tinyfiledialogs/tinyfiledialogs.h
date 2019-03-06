@@ -106,26 +106,32 @@ extern "C" {
 
 int tinyfd_messageBox(
 	char const * const aTitle , /* NULL or "" */
-	char const * const aMessage , /* NULL or "" may contain \n \t */
+	char const * const aMessage , /* NULL or "" */
 	char const * const aDialogType , /* "ok" "okcancel" "yesno" "yesnocancel" */
 	char const * const aIconType , /* "info" "warning" "error" "question" */
-	int const aDefaultButton , /* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
 	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
 	/* 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel */
 
+int tinyfd_errorMessageBox(
+	char const * const aTitle , /* NULL or "" */
+	char const * const aMessage , /* NULL or "" */
+	int const aFatalError , /* 0 for abort/retry/ignore , 1 for abort */
+	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
+	/* 0 for ignore , 1 for retry , 2 for abort */
+
 char const * tinyfd_inputBox(
 	char const * const aTitle , /* NULL or "" */
-	char const * const aMessage , /* NULL or "" may NOT contain \n \t on windows */
+	char const * const aMessage , /* NULL or "" */
 	char const * const aDefaultInput ,  /* NULL or "" */
 	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
 	/* returns NULL on cancel */
 
 char const * tinyfd_passwordBox(
 	char const * const aTitle , /* NULL or "" */
-	char const * const aMessage , /* NULL or "" may NOT contain \n nor \t */
+	char const * const aMessage , /* NULL or "" */
 	char const * const aDefaultInput , /* NULL or "" */
 	int const aDialogEngine ) ; /* 0 for Zenity, 1 for KDialog */
-        /* returns NULL on cancel */
+	/* returns NULL on cancel */
 
 char const * tinyfd_saveFileDialog(
 	char const * const aTitle , /* NULL or "" */

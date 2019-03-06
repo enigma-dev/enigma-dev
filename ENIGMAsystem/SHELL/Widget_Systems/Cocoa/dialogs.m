@@ -17,8 +17,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-int cocoa_show_message(const char *title, const char *str, bool error)
+int cocoa_show_message(const char *str)
 {
+    const char *title = [[[[NSApplication sharedApplication] mainWindow] title] UTF8String];
     NSString *myTitle = [NSString stringWithUTF8String:title];
     NSString *myStr = [NSString stringWithUTF8String:str];
     NSAlert *alert = [[NSAlert alloc] init];
@@ -26,15 +27,15 @@ int cocoa_show_message(const char *title, const char *str, bool error)
     [alert setMessageText:myStr];
     [alert addButtonWithTitle:@"OK"];
     [alert setAlertStyle:1];
-    if (error) [alert setAlertStyle:2];
     [alert runModal];
     [alert release];
     
     return 1;
 }
 
-int cocoa_show_question(const char *title, const char *str, bool error)
+int cocoa_show_question(const char *str)
 {
+    const char *title = [[[[NSApplication sharedApplication] mainWindow] title] UTF8String];
     NSString *myTitle = [NSString stringWithUTF8String:title];
     NSString *myStr = [NSString stringWithUTF8String:str];
     NSAlert *alert = [[NSAlert alloc] init];
@@ -43,7 +44,6 @@ int cocoa_show_question(const char *title, const char *str, bool error)
     [alert addButtonWithTitle:@"Yes"];
     [alert addButtonWithTitle:@"No"];
     [alert setAlertStyle:1];
-    if (error) [alert setAlertStyle:2];
     NSModalResponse responseTag = [alert runModal];
     [alert release];
     
@@ -55,31 +55,29 @@ int cocoa_show_question(const char *title, const char *str, bool error)
 
 int cocoa_show_error(const char *str, bool abort)
 {
-    NSString *myStr;
-    NSString *myMsg;
+    NSString *myStr = [NSString stringWithUTF8String:str];
+    NSAlert *alert = [[NSAlert alloc] init];
+    [[alert window] setTitle:@"Error"];
+    [alert setMessageText:myStr];
+    [alert addButtonWithTitle:@"Abort"];
+    [alert addButtonWithTitle:@"Retry"];
+    [alert addButtonWithTitle:@"Ignore"];
+    [alert setAlertStyle:2];
+    NSModalResponse responseTag = [alert runModal];
+    [alert release];
     
-    if (abort)
-    {
-        myStr = [NSString stringWithUTF8String:str];
-        myMsg = @"\n\nClick 'OK' to abort the application.";
-        myStr = [myStr stringByAppendingString:myMsg];
-        const char *cstrStr = [myStr UTF8String];
-        
-        return cocoa_show_message("Error", cstrStr, true);
-    }
-    else
-    {
-        myStr = [NSString stringWithUTF8String:str];
-        myMsg = @"\n\nDo you want to abort the application?";
-        myStr = [myStr  stringByAppendingString:myMsg];
-        const char *cstrStr = [myStr UTF8String];
-        
-        return cocoa_show_question("Error", cstrStr, true);
-    }
+    if (responseTag == NSAlertFirstButtonReturn || abort)
+        return 2;
+    
+    if (responseTag == NSAlertSecondButtonReturn)
+        return 1;
+    
+    return 0;
 }
 
-const char *cocoa_input_box(const char *title, const char *str, const char *def)
+const char *cocoa_input_box(const char *str, const char *def)
 {
+    const char *title = [[[[NSApplication sharedApplication] mainWindow] title] UTF8String];
     NSString *myTitle = [NSString stringWithUTF8String:title];
     NSString *myStr = [NSString stringWithUTF8String:str];
     NSString *myDef = [NSString stringWithUTF8String:def];
@@ -114,8 +112,9 @@ const char *cocoa_input_box(const char *title, const char *str, const char *def)
     return result;
 }
 
-const char *cocoa_password_box(const char *title, const char *str, const char *def)
+const char *cocoa_password_box(const char *str, const char *def)
 {
+    const char *title = [[[[NSApplication sharedApplication] mainWindow] title] UTF8String];
     NSString *myTitle = [NSString stringWithUTF8String:title];
     NSString *myStr = [NSString stringWithUTF8String:str];
     NSString *myDef = [NSString stringWithUTF8String:def];
@@ -150,7 +149,7 @@ const char *cocoa_password_box(const char *title, const char *str, const char *d
     return result;
 }
 
-const char *cocoa_get_open_filename(const char *title, const char *filter, const char *fname, const char *dir, const bool mselect)
+const char *cocoa_get_open_filename(const char *filter, const char *fname, const char *dir, const char *title, const bool mselect)
 {
     NSOpenPanel *oFilePanel = [NSOpenPanel openPanel];
     [oFilePanel setMessage:[NSString stringWithUTF8String:title]];
@@ -312,7 +311,7 @@ const char *cocoa_get_open_filename(const char *title, const char *filter, const
     return theOpenResult;
 }
 
-const char *cocoa_get_save_filename(const char *title, const char *filter, const char *fname, const char *dir)
+const char *cocoa_get_save_filename(const char *filter, const char *fname, const char *dir, const char *title)
 {
     NSSavePanel *sFilePanel = [NSSavePanel savePanel];
     [sFilePanel setMessage:[NSString stringWithUTF8String:title]];
@@ -445,11 +444,11 @@ const char *cocoa_get_save_filename(const char *title, const char *filter, const
     return theSaveResult;
 }
 
-const char *cocoa_get_directory(const char *title, const char *dname)
+const char *cocoa_get_directory(const char *capt, const char *root)
 {
     NSOpenPanel* dirPanel = [NSOpenPanel openPanel];
-    [dirPanel setMessage:[NSString stringWithUTF8String:title]];
-    [dirPanel setDirectoryURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:dname]]];
+    [dirPanel setMessage:[NSString stringWithUTF8String:capt]];
+    [dirPanel setDirectoryURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:root]]];
     [dirPanel setPrompt:@"Choose"];
     [dirPanel setCanChooseFiles:NO];
     [dirPanel setCanChooseDirectories:YES];
@@ -468,7 +467,7 @@ const char *cocoa_get_directory(const char *title, const char *dname)
     return theFolderResult;
 }
 
-int cocoa_get_color(const char *title, int defcol)
+int cocoa_get_color(int defcol, const char *title)
 {
     int redValue = (int)defcol & 0xFF;
     int greenValue = ((int)defcol >> 8) & 0xFF;
