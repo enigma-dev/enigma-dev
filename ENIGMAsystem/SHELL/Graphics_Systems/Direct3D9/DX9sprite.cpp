@@ -15,68 +15,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cmath>
-#include <cstdlib>
-#include <string>
-using std::string;
-
 #include "Direct3D9Headers.h"
-#include "../General/GScolors.h"
-#include "../General/GSsprite.h"
-#include "../General/GStextures.h"
-#include "../General/GSprimitives.h"
 
+#include "Graphics_Systems/General/GSsprite.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+
+#include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
 
-#include "Graphics_Systems/General/GScolor_macros.h"
-
-
-#ifdef DEBUG_MODE
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_sprite(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev(spr,id) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_null(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-#else
-  #define get_sprite(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev(spr,id) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_null(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-#endif
-
-#include "Direct3D9Headers.h"
-#include "DX9TextureStruct.h"
-
-namespace enigma_user
-{
+namespace enigma_user {
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
   return -1; //TODO: implement
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
-	return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
+  return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
 }
 
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
 
 }
 
-}
+} // namespace enigma_user

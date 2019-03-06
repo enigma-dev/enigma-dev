@@ -16,18 +16,13 @@
 **/
 
 #include "Direct3D9Headers.h"
-#include "DX9TextureStruct.h"
 
-#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSbackground.h"
-#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
+#include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/background_internal.h"
-#include "Universal_System/sprites_internal.h"
-
-#include <cstddef>
-#include <math.h>
 
 namespace enigma_user {
 
