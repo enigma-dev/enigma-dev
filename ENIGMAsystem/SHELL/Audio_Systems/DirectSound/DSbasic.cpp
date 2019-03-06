@@ -78,7 +78,6 @@ void sound_stop_all() {
 }
 
 void sound_delete(int sound) {
-  get_soundv(snd, sound);
   sound_stop(sound);
   sound_resources.erase(sound_resources.begin() + sound);
 }
@@ -137,8 +136,8 @@ float sound_get_volume(int sound) {
 
 float sound_get_length(int sound) {  // Not for Streams
   get_sound(snd, sound, -1);
-  //snd->soundBuffer->GetLength();
-  return 0;
+
+  return snd->length;
 }
 
 float sound_get_position(int sound) {  // Not for Streams
@@ -190,7 +189,7 @@ int sound_add(string fname, int kind, bool preload)  //At the moment, the latter
 }
 
 bool sound_replace(int sound, string fname, int kind, bool preload) {
-  if (sound >= 0 && sound < sound_resources.size() && sound_resources[sound]) {
+  if (sound >= 0 && size_t(sound) < sound_resources.size() && sound_resources[sound]) {
     get_sound(snd, sound, false);
     delete snd;
   }
