@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Samuel Venable
+/** Copyright (C) 2018-2019 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -64,10 +64,9 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 
 }
 
-int show_message(string str) {
+int show_message(const string &str) {
   string str_str = str;
   int DialogModule_result;
-  external_call(external_define("DialogModule.dll", "window_get_caption", enigma_user::dll_cdecl, enigma_user::ty_string, 1, enigma_user::ty_string), window_handle());
   DialogModule_result = (int)external_call(external_define("DialogModule.dll", "show_message", enigma_user::dll_cdecl, enigma_user::ty_real, 1, enigma_user::ty_string), (char *)str_str.c_str());
   external_free("DialogModule.dll");
   return DialogModule_result;
@@ -76,7 +75,6 @@ int show_message(string str) {
 bool show_question(string str) {
   string str_str = str;
   bool DialogModule_result;
-  external_call(external_define("DialogModule.dll", "window_get_caption", enigma_user::dll_cdecl, enigma_user::ty_string, 1, enigma_user::ty_string), window_handle());
   DialogModule_result = (bool)external_call(external_define("DialogModule.dll", "show_question", enigma_user::dll_cdecl, enigma_user::ty_real, 1, enigma_user::ty_string), (char *)str_str.c_str());
   external_free("DialogModule.dll");
   return DialogModule_result;
@@ -86,7 +84,6 @@ string get_string(string str, string def) {
   string str_str = str;
   string str_def = def;
   static string DialogModule_result;
-  external_call(external_define("DialogModule.dll", "window_get_caption", enigma_user::dll_cdecl, enigma_user::ty_string, 1, enigma_user::ty_string), window_handle());
   DialogModule_result = string(external_call(external_define("DialogModule.dll", "get_string", enigma_user::dll_cdecl, enigma_user::ty_string, 2, enigma_user::ty_string, enigma_user::ty_string), (char *)str_str.c_str(), (char *)str_def.c_str()));
   external_free("DialogModule.dll");
   return DialogModule_result;
@@ -95,7 +92,6 @@ string get_string(string str, string def) {
 double get_integer(string str, double def) {
   string str_str = str;
   double DialogModule_result;
-  external_call(external_define("DialogModule.dll", "window_get_caption", enigma_user::dll_cdecl, enigma_user::ty_string, 1, enigma_user::ty_string), window_handle());
   DialogModule_result = external_call(external_define("DialogModule.dll", "get_integer", enigma_user::dll_cdecl, enigma_user::ty_real, 2, enigma_user::ty_string, enigma_user::ty_real), (char *)str_str.c_str(), def);
   external_free("DialogModule.dll");
   return DialogModule_result;
@@ -105,7 +101,6 @@ string get_password(string str, string def) {
   string str_str = str;
   string str_def = def;
   static string DialogModule_result;
-  external_call(external_define("DialogModule.dll", "window_get_caption", enigma_user::dll_cdecl, enigma_user::ty_string, 1, enigma_user::ty_string), window_handle());
   DialogModule_result = string(external_call(external_define("DialogModule.dll", "get_password", enigma_user::dll_cdecl, enigma_user::ty_string, 2, enigma_user::ty_string, enigma_user::ty_string), (char *)str_str.c_str(), (char *)str_def.c_str()));
   external_free("DialogModule.dll");
   return DialogModule_result;
@@ -114,7 +109,6 @@ string get_password(string str, string def) {
 double get_passcode(string str, double def) {
   string str_str = str;
   double DialogModule_result;
-  external_call(external_define("DialogModule.dll", "window_get_caption", enigma_user::dll_cdecl, enigma_user::ty_string, 1, enigma_user::ty_string), window_handle());
   DialogModule_result = external_call(external_define("DialogModule.dll", "get_passcode", enigma_user::dll_cdecl, enigma_user::ty_real, 2, enigma_user::ty_string, enigma_user::ty_real), (char *)str_str.c_str(), def);
   external_free("DialogModule.dll");
   return DialogModule_result;

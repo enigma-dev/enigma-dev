@@ -15,12 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include <math.h>
+
+using namespace enigma::dx11;
 
 namespace enigma {
   extern unsigned char currentcolor[4];

@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Samuel Venable
+/** Copyright (C) 2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,10 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-namespace enigma {
-  
-int tfd_DialogEngine() {
-  return 0;
-}
-  
-} // namespave enigma
+#ifndef ENIGMA_IMAGEFORMATS_EXTS_H
+#define ENIGMA_IMAGEFORMATS_EXTS_H
+
+#include <functional>
+#include <string>
+
+namespace enigma
+{
+
+using ImageLoadFunction = std::function<unsigned char*(std::string, unsigned int*, unsigned int*, unsigned int*, unsigned int*, bool)>;
+using ImageSaveFunction = std::function<int(std::string, const unsigned char*, unsigned, unsigned, unsigned, unsigned, bool)>;
+
+void image_add_loader(std::string format, ImageLoadFunction fnc);
+void image_add_saver(std::string format, ImageSaveFunction fnc);
+
+} //namespace enigma
+
+#endif //ENIGMA_IMAGEFORMATS_EXTS_H
