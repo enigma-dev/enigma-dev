@@ -22,48 +22,13 @@
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
 
 #include "Platforms/General/PFwindow.h"
-
-#include <cmath>
-#include <cstdlib>
-#include <string>
-using std::string;
-
-#ifdef DEBUG_MODE
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_sprite(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev(spr,id) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_null(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-#else
-  #define get_sprite(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev(spr,id) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_null(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-#endif
 
 // These two leave a bad taste in my mouth because they depend on views, which should be removable.
 // However, for now, they stay.
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
   draw_batch_flush(batch_flush_deferred);
@@ -111,4 +76,4 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
 	rgbdata.clear();
 }
 
-}
+} // namespace enigma_user
