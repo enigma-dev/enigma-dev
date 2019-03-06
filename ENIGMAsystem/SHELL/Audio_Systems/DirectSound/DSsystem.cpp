@@ -154,8 +154,8 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 
 int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   SoundResource* snd = new SoundResource();
-  if (id >= sound_resources.size()) {
-    sound_resources.resize(id + 1);
+  if (size_t(id) >= sound_resources.size()) {
+    sound_resources.resize(size_t(id) + 1);
   }
   sound_resources[id] = snd;
 
@@ -201,6 +201,13 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   } else {
     //ErrorHandler();  // Add error-handling here.
   }
+
+  float channels = waveHeader->numChannels,
+        freq = waveHeader->sampleRate,
+        bits = waveHeader->bitsPerSample,
+        size = waveHeader->dataSize;
+
+  snd->length = size / channels / (bits / 8) / freq;
 
   delete waveHeader;
 
