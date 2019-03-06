@@ -38,15 +38,15 @@ bool widget_system_initialize() {
   
 } // namespave enigma
 
-extern "C" int cocoa_show_message(const char *title, const char *str, bool error);
-extern "C" int cocoa_show_question(const char *title, const char *str, bool error);
+extern "C" int cocoa_show_message(const char *str);
+extern "C" int cocoa_show_question(const char *str);
 extern "C" int cocoa_show_error(const char *str, bool abort);
-extern "C" const char *cocoa_input_box(const char *title, const char *str, const char *def);
-extern "C" const char *cocoa_password_box(const char *title, const char *str, const char *def);
-extern "C" const char *cocoa_get_open_filename(const char *title, const char *filter, const char *fname, const char *dir, const bool mselect);
-extern "C" const char *cocoa_get_save_filename(const char *title, const char *filter, const char *fname, const char *dir);
-extern "C" const char *cocoa_get_directory(const char *title, const char *dname);
-extern "C" int cocoa_get_color(const char *title, int defcol);
+extern "C" const char *cocoa_input_box(const char *str, const char *def);
+extern "C" const char *cocoa_password_box(const char *str, const char *def);
+extern "C" const char *cocoa_get_open_filename(const char *filter, const char *fname, const char *dir, const char *title, const bool mselect);
+extern "C" const char *cocoa_get_save_filename(const char *filter, const char *fname, const char *dir, const char *title);
+extern "C" const char *cocoa_get_directory(const char *capt, const char *root);
+extern "C" int cocoa_get_color(int defcol, const char *title);
 
 static inline string remove_trailing_zeros(double numb) {
   string strnumb = std::to_string(numb);
@@ -76,65 +76,59 @@ void show_info(string text, int bgcolor, int left, int top, int width, int heigh
 }
 
 int show_message(const string &str) {
-  string title = window_get_caption();
-  cocoa_show_message(title.c_str(), str.c_str(), false);
+  cocoa_show_message(str.c_str());
   return 1;
 }
 
 bool show_question(string str) {
-  string title = window_get_caption();
-  bool result = (bool)cocoa_show_question(title.c_str(), str.c_str(), false);
+  bool result = (bool)cocoa_show_question(str.c_str());
   return result;
 }
 
 string get_string(string str, string def) {
-  string title = window_get_caption();
-  string result = cocoa_input_box(title.c_str(), str.c_str(), def.c_str());
+  string result = cocoa_input_box(str.c_str(), def.c_str());
   return result;
 }
 
 string get_password(string str, string def) {
-  string title = window_get_caption();
-  string result = cocoa_password_box(title.c_str(), str.c_str(), def.c_str());
+  string result = cocoa_password_box(str.c_str(), def.c_str());
   return result;
 }
 
 double get_integer(string str, double def) {
-  string title = window_get_caption();
   string integer = remove_trailing_zeros(def);
-  string result = cocoa_input_box(title.c_str(), str.c_str(), integer.c_str());
+  string result = cocoa_input_box(str.c_str(), integer.c_str());
   return result ? strtod(input, NULL) : 0;
 }
 
 double get_passcode(string str, double def) {
-  string title = window_get_caption();
   string integer = remove_trailing_zeros(def);
-  string result = cocoa_password_box(title.c_str(), str.c_str(), integer.c_str());
+  string result = cocoa_password_box(str.c_str(), integer.c_str());
   return result ? strtod(input, NULL) : 0;
 }
 
 string get_open_filename(string filter, string fname) {
-  return cocoa_get_open_filename("", filter.c_str(), fname.c_str(), "", false);
+  return cocoa_get_open_filename(filter.c_str(), fname.c_str(), "", "", false);
 }
 
 string get_open_filenames(string filter, string fname) {
-  return cocoa_get_open_filename("", filter.c_str(), fname.c_str(), "", true);
+  return cocoa_get_open_filename(filter.c_str(), fname.c_str(), "", "", true);
 }
 
 string get_save_filename(string filter, string fname) {
-  return cocoa_get_save_filename("", filter.c_str(), fname.c_str(), "");
+  return cocoa_get_save_filename(filter.c_str(), fname.c_str(), "", "");
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) {
-  return cocoa_get_open_filename(title.c_str(), filter.c_str(), fname.c_str(), dir.c_str(), false);
+  return cocoa_get_open_filename(filter.c_str(), fname.c_str(), dir.c_str(), title.c_str(), false);
 }
 
 string get_open_filenames_ext(string filter, string fname, string dir, string title) {
-  return cocoa_get_open_filename(title.c_str(), filter.c_str(), fname.c_str(), dir.c_str(), true);
+  return cocoa_get_open_filename(filter.c_str(), fname.c_str(), dir.c_str(), title.c_str(), true);
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
-  return cocoa_get_save_filename(title.c_str(), filter.c_str(), fname.c_str(), dir.c_str());
+  return cocoa_get_save_filename(filter.c_str(), fname.c_str(), dir.c_str(), title.c_str());
 }
 
 string get_directory(string dname) {
@@ -146,11 +140,11 @@ string get_directory_alt(string capt, string root) {
 }
 
 int get_color(int defcol) {
-  return cocoa_get_color("", defcol);
+  return cocoa_get_color(defcol, "");
 }
 
 int get_color_ext(int defcol, string title) {
-  return cocoa_get_color(title.c_str(), defcol);
+  return cocoa_get_color(defcol, title.c_str());
 } 
 
 } // enigma_user
