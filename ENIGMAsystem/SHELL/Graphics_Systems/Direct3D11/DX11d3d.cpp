@@ -104,16 +104,18 @@ void d3d_end()
 
 void d3d_set_hidden(bool enable)
 {
-    draw_batch_flush(batch_flush_deferred);
-    enigma::d3dHidden = enable;
-    depthStencilDesc.DepthEnable = enable;
-    update_depth_stencil_state();
+  draw_batch_flush(batch_flush_deferred);
+  enigma::d3dHidden = enable;
+  depthStencilDesc.DepthEnable = enable;
+  update_depth_stencil_state();
 }
 
 void d3d_set_zwriteenable(bool enable)
 {
-    draw_batch_flush(batch_flush_deferred);
-	enigma::d3dZWriteEnable = enable;
+  draw_batch_flush(batch_flush_deferred);
+  enigma::d3dZWriteEnable = enable;
+  depthStencilDesc.DepthWriteMask = enable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+  update_depth_stencil_state();
 }
 
 void d3d_set_lighting(bool enable)
