@@ -167,7 +167,6 @@ void d3d_set_hidden(bool enable)
   draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_DEPTH_TEST);
   enigma::d3dHidden = enable;
-	d3d_set_zwriteenable(enable);
 }
 
 // disabling zwriting can let you turn off testing for a single model, for instance
