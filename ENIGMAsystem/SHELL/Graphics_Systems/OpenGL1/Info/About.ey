@@ -3,7 +3,7 @@
 
 Name: OpenGL 1.1
 Identifier: OpenGL1
-Description: Rendering which targets OpenGL 1.1 capable graphics hardware, offering high portability but requiring specific graphics card features to run. May not work on newer graphics hardware.
+Description: Native, hardware-accelerated rendering on most graphics hardware using legacy OpenGL. Fallbacks are provided where necessary to lower the minimum required OpenGL to version 1.1 and maximize compatibility. Where fallbacks can not be provided (e.g, shaders), the minimum OpenGL version required is that of the features used.
 Author: Josh Ventura, serprex
 
 Depends:
