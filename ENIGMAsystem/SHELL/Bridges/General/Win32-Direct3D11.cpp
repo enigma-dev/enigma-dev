@@ -231,8 +231,6 @@ void ScreenRefresh() {
 
 namespace enigma_user {
 
-int display_aa = 0;
-
 void display_reset(int samples, bool vsync) {
   swap_interval = vsync ? 1 : 0;
 

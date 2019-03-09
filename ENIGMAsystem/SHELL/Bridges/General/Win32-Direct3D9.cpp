@@ -250,8 +250,6 @@ ContextManager* d3dmgr; // the pointer to the device class
 
 namespace enigma_user {
 
-int display_aa = 0;
-
 void display_reset(int samples, bool vsync) {
   if (d3dmgr == NULL) { return; }
   IDirect3DSwapChain9 *sc;

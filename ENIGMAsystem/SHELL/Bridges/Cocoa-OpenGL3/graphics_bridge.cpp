@@ -50,9 +50,6 @@ namespace enigma {
 }
 
 namespace enigma_user {
-  // Don't know where to query this on Cocoa, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
-  int display_aa = 14;
-
   void set_synchronization(bool enable) {
 
   }
