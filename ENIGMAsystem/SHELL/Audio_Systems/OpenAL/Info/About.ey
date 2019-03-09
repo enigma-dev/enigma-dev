@@ -3,11 +3,10 @@
 
 Name: OpenAL
 Identifier: OpenAL
-Description: Play sounds using OpenAL, which is standard on Mac OSX and Linux, but requires a DLL on Windows.
+Description: Audio playback support using OpenAL. A light compatibility layer is provided for GameMaker's classic sound API. Emphasis is placed on positional audio playback and audio processing features of more recent GameMaker versions.
 Author: Josh Ventura
 
 Depends:
 	Build-platforms: Windows, Linux, MacOSX, SDL
 Represents:
 	Build-platforms: Linux, MacOSX, SDL
-
