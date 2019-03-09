@@ -53,6 +53,13 @@ using namespace enigma::dx11;
 
 int swap_interval = 0;
 
+void release_render_targets() {
+  m_deviceContext->OMSetRenderTargets(0, 0, 0);
+  m_renderTargetView->Release();
+  m_depthStencilBuffer->Release();
+  m_depthStencilView->Release();
+}
+
 void initialize_render_targets(UINT samples=1) {
   HRESULT result;
 
@@ -127,10 +134,7 @@ namespace enigma {
 extern void (*WindowResizedCallback)();
 void WindowResized() {
   // release all the old references first
-  m_deviceContext->OMSetRenderTargets(0, 0, 0);
-  m_renderTargetView->Release();
-  m_depthStencilBuffer->Release();
-  m_depthStencilView->Release();
+  release_render_targets();
 
   // resize the buffers to match the screen
   m_swapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
@@ -230,18 +234,15 @@ void display_reset(int samples, bool vsync) {
   // when disabling msaa, we still need at least 1 samples
   if (samples < 1) samples = 1;
 
-  // get the old swap chain description and turn on msaa
+  // get the old swap chain description to reconfigure
   DXGI_SWAP_CHAIN_DESC swapChainDesc;
   m_swapChain->GetDesc(&swapChainDesc);
 
   // short-circuit if we already have a swap chain with this many samples
-  if (swapChainDesc.SampleDesc.Count == samples) return;
+  if (swapChainDesc.SampleDesc.Count == UINT(samples)) return;
 
   // release all the old references first
-  m_deviceContext->OMSetRenderTargets(0, 0, 0);
-  m_renderTargetView->Release();
-  m_depthStencilBuffer->Release();
-  m_depthStencilView->Release();
+  release_render_targets();
   m_swapChain->Release();
 
   // set the swap chain samples
