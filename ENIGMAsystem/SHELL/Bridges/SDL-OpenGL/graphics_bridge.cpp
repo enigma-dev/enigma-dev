@@ -27,10 +27,11 @@ int msaa_fbo = 0;
 
 SDL_GLContext context;
 
+void set_sdl_gl_context_version();
+
 bool initGameWindow() {
   SDL_Init(SDL_INIT_VIDEO);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, ENIGMA_GL_MAJOR_VERSION);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, ENIGMA_GL_MINOR_VERSION);
+  set_sdl_gl_context_version();
   SDL_GL_SetSwapInterval(0);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
