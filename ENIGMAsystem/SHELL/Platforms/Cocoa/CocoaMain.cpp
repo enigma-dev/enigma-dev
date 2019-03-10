@@ -20,7 +20,7 @@
  */
 
 #include <unistd.h>
-#include <stdio.h>
+#include <cstdio>
 #include <mach-o/dyld.h>
 #include <limits.h>
 #include "CocoaMain.h"
