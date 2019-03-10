@@ -25,6 +25,7 @@
 #include <limits.h>
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
+#include <string.h>
 #include <cstdlib>
 #include <string>
 
@@ -98,4 +99,19 @@ string parameter_string(int n) {
   return string("");
 }
 
+string shellscript_evaluate(string command, size_t buffer_size) {
+  char buffer[buffer_size];
+  FILE *file = popen(command.c_str(), "r");
+  while (fgets(buffer, buffer_size, file) != NULL) {}
+  pclose(file);
+
+  if (buffer[strlen(buffer) - 1] == '\n')
+    buffer[strlen(buffer) - 1] = '\0';
+
+  char *result = (char *)malloc(strlen(buffer) + 1);
+  strcpy(result, buffer);
+
+  return string(result);
 }
+
+} // namespace enigma_user
