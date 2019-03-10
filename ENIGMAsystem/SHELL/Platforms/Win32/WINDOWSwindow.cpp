@@ -157,7 +157,7 @@ void window_set_size(unsigned int width, unsigned int height)
 
 void window_set_rectangle(int x, int y, int width, int height) {
   RECT c;
-  c.left = (enigma::windowX = x); c.top = (enigma::windowY = y); c.right = enigma::windowX + (enigma::windowWidth = width); c.bottom = enigma::windowY + (enigma::windowHeight = height);
+  c.left = x; c.top = y; c.right = x + width; c.bottom = y + height;
   AdjustWindowRect(&c, GetWindowLongPtr(enigma::hWnd, GWL_STYLE), false);
   SetWindowPos(enigma::hWnd, HWND_TOP, c.left, c.top, c.right-c.left, c.bottom-c.top, SWP_NOZORDER|SWP_FRAMECHANGED);
 }

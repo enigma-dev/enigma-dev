@@ -71,15 +71,7 @@ void compute_window_size() {
     }
     enigma_user::window_set_rectangle(windowX, windowY, windowWidth, windowHeight);
   } else {
-    int oldX = windowX,
-        oldY = windowY,
-        oldWidth = windowWidth,
-        oldHeight = windowHeight;
     enigma_user::window_set_rectangle(0, 0, parWidth, parHeight);
-    windowX = oldX;
-    windowY = oldY;
-    windowWidth = oldWidth;
-    windowHeight = oldHeight;
   }
 }
 
