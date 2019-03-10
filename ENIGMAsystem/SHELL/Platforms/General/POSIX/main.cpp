@@ -53,10 +53,7 @@ string shellscript_evaluate(string command, size_t buffer_size) {
   if (buffer[strlen(buffer) - 1] == '\n')
     buffer[strlen(buffer) - 1] = '\0';
 
-  char *result = (char *)malloc(strlen(buffer) + 1);
-  strcpy(result, buffer);
-
-  return string(result);
+  return buffer;
 }
 
 } // namespace enigma_user
