@@ -28,6 +28,8 @@
 
 namespace enigma {
 
+void init_display_aa_levels();
+
 #ifdef DEBUG_MODE
 #include "Widget_Systems/widgets_mandatory.h"
 //Based on code from Cort Stratton (http://www.altdev.co/2011/06/23/improving-opengl-error-messages/)
@@ -153,8 +155,7 @@ void EnableDrawing(void*)
   //OpenGL: Program/shader state performance warning: Vertex shader in program 9 is being recompiled based on GL state. [source=API type=PERFORMANCE severity=MEDIUM id=131218] - This is NVidia only and doesn't tell much
   #endif
 
-  //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
-  glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
+  init_display_aa_levels();
 }
 
 }

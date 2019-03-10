@@ -55,6 +55,29 @@ bool is_ext_swapcontrol_supported() {
   return swaphandling::ext_swapcontrol_supported;
 }
 
+void init_display_aa_levels() {
+  if (!wglewIsSupported("WGL_ARB_create_context")) return;
+  if (!wglChoosePixelFormatARB) return;
+
+  int pixelFormat;
+  bool valid;
+  UINT numFormats;
+  float fAttributes[] = {0,0};
+  HDC hDC = enigma::window_hDC;
+
+  enigma_user::display_aa = 0;
+  for (int i = 32; i > 1; i/=2) {
+    int iAttributes[] = {
+      WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
+      WGL_SAMPLES_ARB, i,
+      0,0,
+    };
+    valid = wglChoosePixelFormatARB(hDC,iAttributes,fAttributes,1,&pixelFormat,&numFormats);
+    if (!valid || !numFormats) continue;
+    enigma_user::display_aa += i;
+  }
+}
+
 void ScreenRefresh() {
   SwapBuffers(enigma::window_hDC);
 }
@@ -70,38 +93,55 @@ void display_reset(int samples, bool vsync) {
     wglSwapIntervalEXT(interval);
   }
 
-  GLint fbo;
-  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
+  //wglGetPixelFormatAttribivARB(WGL_SAMPLES_ARB)
 
-  GLuint ColorBufferID, DepthBufferID;
+  int pixelFormat = GetPixelFormat(enigma::window_hDC);
+  PIXELFORMATDESCRIPTOR pfd;
+  ZeroMemory(&pfd, sizeof(pfd));
+  DescribePixelFormat(enigma::window_hDC, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 
-  // Cleanup the multi-sampler fbo if turning off multi-sampling
-  if (samples == 0) {
-    if (enigma::msaa_fbo != 0) {
-      glDeleteFramebuffers(1, &enigma::msaa_fbo);
-      enigma::msaa_fbo = 0;
-    }
-    return;
+  WINDOWINFO winInfo = {};
+  GetWindowInfo(enigma::hWnd, &winInfo);
+  DestroyWindow(enigma::hWnd);
+  const RECT& rcWindow = winInfo.rcWindow;
+  const HINSTANCE hInstance = GetModuleHandle(NULL);
+  enigma::hWnd = CreateWindow(
+    "EnigmaDevGameMainWindow", "", winInfo.dwStyle,
+    rcWindow.left, rcWindow.top, rcWindow.right-rcWindow.left, rcWindow.bottom-rcWindow.top,
+    NULL, NULL, hInstance, NULL
+  );
+  enigma::window_hDC = GetDC(enigma::hWnd);
+
+  bool valid;
+  UINT numFormats;
+  float fAttributes[] = {0,0};
+  HDC hDC = enigma::window_hDC;
+  int iAttributes[] = {
+    WGL_DRAW_TO_WINDOW_ARB,GL_TRUE,
+    WGL_SUPPORT_OPENGL_ARB,GL_TRUE,
+    WGL_DOUBLE_BUFFER_ARB,GL_TRUE,
+    WGL_ACCELERATION_ARB,WGL_FULL_ACCELERATION_ARB,
+    WGL_COLOR_BITS_ARB,24,
+    WGL_ALPHA_BITS_ARB,8,
+    WGL_DEPTH_BITS_ARB,24,
+    WGL_STENCIL_BITS_ARB,0,
+    WGL_DOUBLE_BUFFER_ARB,GL_TRUE,
+    WGL_SAMPLE_BUFFERS_ARB,GL_TRUE,
+    WGL_SAMPLES_ARB, samples,
+    0,0
+  };
+  valid = wglChoosePixelFormatARB(hDC,iAttributes,fAttributes,1,&pixelFormat,&numFormats);
+  if (!valid || !numFormats) return;
+
+  if (SetPixelFormat(hDC,pixelFormat,&pfd) == FALSE) {
+    MessageBox(NULL, "bling", "ding", MB_OK);
   }
 
-  //TODO: Change the code below to fix this to size properly to views
-  // If we don't already have a multi-sample fbo then create one
-  if (enigma::msaa_fbo == 0) {
-    glGenFramebuffersEXT(1, &enigma::msaa_fbo);
-  }
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, enigma::msaa_fbo);
-  // Now make a multi-sample color buffer
-  glGenRenderbuffersEXT(1, &ColorBufferID);
-  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, ColorBufferID);
-  glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_RGBA8, window_get_region_width(), window_get_region_height());
-  // We also need a depth buffer
-  glGenRenderbuffersEXT(1, &DepthBufferID);
-  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, DepthBufferID);
-  glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_DEPTH_COMPONENT24, window_get_region_width(), window_get_region_height());
-  // Attach the render buffers to the multi-sampler fbo
-  glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, ColorBufferID);
-  glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, DepthBufferID);
-
+  HGLRC newrc = wglCreateContextAttribsARB(hDC, enigma::hRC, nullptr);
+  wglCopyContext(enigma::hRC, newrc, GL_ALL_ATTRIB_BITS);
+  enigma::DisableDrawing(nullptr);
+  enigma::hRC = newrc;
+  wglMakeCurrent(hDC, enigma::hRC);
 }
 
 void set_synchronization(bool enable) {
@@ -123,4 +163,4 @@ void set_synchronization(bool enable) {
   }
 }
 
-}
+} // namespace enigma_user
