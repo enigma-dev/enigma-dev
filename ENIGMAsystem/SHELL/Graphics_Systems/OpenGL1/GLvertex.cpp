@@ -16,8 +16,8 @@
 **/
 
 //NOTE: If this source is changed to utilize additional features of the GL_ARB_vertex_buffer_object
-//extension, then please be sure to update the graphics_init_vbo_method() helper below to ensure any
-//functions are properly aliased and will continue working on affected graphics cards.
+//extension, then please be sure to use the ARB alias of any functions to ensure this will continue
+//working on graphics cards that support the extension but have an older OpenGL version.
 
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
@@ -78,7 +78,7 @@ void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
     // if we haven't created a native "peer" for this buffer yet,
     // then we need to do so now
     if (it == (isIndex ? indexBufferPeers.end() : vertexBufferPeers.end())) {
-      glGenBuffers(1, &bufferPeer);
+      glGenBuffersARB(1, &bufferPeer);
       if (isIndex) {
         indexBufferPeers[buffer] = bufferPeer;
       } else {
@@ -88,11 +88,11 @@ void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
       bufferPeer = it->second;
     }
 
-    glBindBuffer(target, bufferPeer);
+    glBindBufferARB(target, bufferPeer);
 
     const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
     GLenum usage = frozen ? (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW) : GL_STREAM_DRAW;
-    glBufferData(target, size, data, usage);
+    glBufferDataARB(target, size, data, usage);
 
     if (isIndex) {
       indexBuffers[buffer]->clearData();
@@ -100,7 +100,7 @@ void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
       vertexBuffers[buffer]->clearData();
     }
   } else {
-    glBindBuffer(target, it->second);
+    glBindBufferARB(target, it->second);
   }
 }
 
@@ -113,19 +113,11 @@ bool vbo_is_supported = false;
 void graphics_init_vbo_method() {
   // we don't check for extensions until GLEW has been initialized
   vbo_is_supported = GLEW_ARB_vertex_buffer_object;
-  // if the vbo extension is supported, but the GL version is old,
-  // we need to alias the buffer functions to the extension ones
-  if (GLEW_ARB_vertex_buffer_object == true && GLEW_VERSION_1_5 == false) {
-    glGenBuffers = glGenBuffersARB;
-    glBindBuffer = glBindBufferARB;
-    glBufferData = glBufferDataARB;
-    glDeleteBuffers = glDeleteBuffersARB;
-  }
 }
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
   if (vbo_is_supported) {
-    glDeleteBuffers(1, &vertexBufferPeers[buffer]);
+    glDeleteBuffersARB(1, &vertexBufferPeers[buffer]);
     vertexBufferPeers.erase(buffer);
   } else {
     vertexBufferArrays.erase(buffer);
@@ -134,7 +126,7 @@ void graphics_delete_vertex_buffer_peer(int buffer) {
 
 void graphics_delete_index_buffer_peer(int buffer) {
   if (vbo_is_supported) {
-    glDeleteBuffers(1, &indexBufferPeers[buffer]);
+    glDeleteBuffersARB(1, &indexBufferPeers[buffer]);
     indexBufferPeers.erase(buffer);
   } else {
     indexBufferArrays.erase(buffer);
@@ -237,7 +229,7 @@ void graphics_reset_client_state(const ClientState &state) {
     }
   }
   if (vbo_is_supported) {
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBufferARB(GL_ARRAY_BUFFER, 0);
   }
 }
 
@@ -290,7 +282,7 @@ void index_submit_range(int buffer, int vertex, int primitive, unsigned start, u
 
   enigma::graphics_reset_client_state(state);
   if (enigma::vbo_is_supported)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 } // namespace enigma_user
