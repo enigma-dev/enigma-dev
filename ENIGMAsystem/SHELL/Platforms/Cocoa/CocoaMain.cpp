@@ -25,7 +25,7 @@
 #include <limits.h>
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
-#include <string.h>
+#include <cstring>
 #include <cstdlib>
 #include <string>
 
