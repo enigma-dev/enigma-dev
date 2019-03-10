@@ -26,7 +26,6 @@ namespace enigma {
 int msaa_fbo = 0;
 
 SDL_GLContext context;
-SDL_Renderer *renderer;
 
 bool initGameWindow() {
   SDL_Init(SDL_INIT_VIDEO);
@@ -41,7 +40,6 @@ void EnableDrawing(void*) {
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
   context = SDL_GL_CreateContext(windowHandle);
-  renderer = SDL_CreateRenderer(windowHandle, -1, SDL_RENDERER_ACCELERATED);
 
   GLenum err = glewInit();
   if (GLEW_OK != err)
@@ -49,7 +47,7 @@ void EnableDrawing(void*) {
 }
 
 void DisableDrawing(void*) {
-  SDL_DestroyRenderer(renderer);
+  SDL_GL_DeleteContext(context);
 }
 
 void ScreenRefresh() {
