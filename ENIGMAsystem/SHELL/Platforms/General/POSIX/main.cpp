@@ -3,8 +3,8 @@
 #include <limits.h>
 #include <unistd.h>
 #include <libgen.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #include <cstdlib>
 #include <string>
 
