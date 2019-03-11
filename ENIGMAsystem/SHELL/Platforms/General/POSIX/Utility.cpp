@@ -10,7 +10,7 @@
 static inline ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
   char *bufptr = NULL;
   char *p = bufptr;
-  size_t size;
+  ssize_t size;
   int c;
 
   if (lineptr == NULL && n == 0) {
