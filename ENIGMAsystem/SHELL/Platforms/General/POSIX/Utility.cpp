@@ -159,7 +159,7 @@ unsigned long get_timer() {  // microseconds since the start of the game
   return (enigma::time_current.tv_sec) * 1000000 + (enigma::time_current.tv_nsec / 1000);
 }
 
-std::string shellscript_evaluate(std::string command) {
+std::string execute_shell_eval(std::string command) {
   char *buffer = NULL;
   size_t buffer_size = 0;
   std::string result;
