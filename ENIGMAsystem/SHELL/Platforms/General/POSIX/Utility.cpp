@@ -103,6 +103,24 @@ unsigned long get_timer() {  // microseconds since the start of the game
   return (enigma::time_current.tv_sec) * 1000000 + (enigma::time_current.tv_nsec / 1000);
 }
 
+std::string shellscript_evaluate(std::string command) {
+  char *buffer = NULL;
+  size_t buffer_size = 0;
+  std::string result = "";
+
+  FILE *file = popen(command.c_str(), "r");
+  while (getline(&buffer, &buffer_size, file) != -1)
+    result += buffer;
+
+  free(buffer);
+  pclose(file);
+
+  if (result.back() == '\n')
+    result.pop_back();
+
+  return result;
+}
+
 void execute_shell(std::string operation, std::string fname, std::string args) {
   if (system(NULL)) {
     system((fname + args + " &").c_str());
@@ -124,6 +142,7 @@ void execute_program(std::string operation, std::string fname, std::string args,
 }
 
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("", fname, args, wait); }
+
 
 void url_open(std::string url, std::string target, std::string options) {
   execute_program("xdg-open", url, false);
