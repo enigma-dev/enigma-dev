@@ -69,24 +69,25 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
   for (const auto &room : game.rooms) {
     wto << "  tile tiles_" << room.id() << "[] = {\n";
-    for (int ii = 0, modme = 0; ii < room->tiles().size(); ii++) {
+    int modme = 0;
+    for (const auto &tile : room->tiles()) {
       wto << "{"
-          << room->tiles(ii).id()      << ","
-          << resname(room->tiles(ii).background_name()) << ","
-          << room->tiles(ii).xoffset() << ","
-          << room->tiles(ii).yoffset() << ","
-          << room->tiles(ii).depth()   << ","
-          << room->tiles(ii).height()  << ","
-          << room->tiles(ii).width()   << ","
-          << room->tiles(ii).x()       << ","
-          << room->tiles(ii).y()       << ","
-          << room->tiles(ii).xscale()  << ","
-          << room->tiles(ii).yscale()  << ","
-          << room->tiles(ii).alpha()   << ","
-          << room->tiles(ii).color()   << "},";
+          << tile.id()      << ","
+          << resname(tile.background_name()) << ","
+          << tile.xoffset() << ","
+          << tile.yoffset() << ","
+          << tile.depth()   << ","
+          << tile.height()  << ","
+          << tile.width()   << ","
+          << tile.x()       << ","
+          << tile.y()       << ","
+          << tile.xscale()  << ","
+          << tile.yscale()  << ","
+          << tile.alpha()   << ","
+          << tile.color()   << "},";
         if (++modme % 16 == 0) wto << "\n        ";
-      if (room->tiles(ii).id() > room_hightileid)
-        room_hightileid = room->tiles(ii).id();
+      if (tile.id() > room_hightileid)
+        room_hightileid = tile.id();
     }
     wto << "  };\n";
   }
