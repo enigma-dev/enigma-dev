@@ -3,7 +3,7 @@
 #include <time.h> //CLOCK_MONOTONIC
 #include <sys/types.h>     //getpid
 #include <unistd.h>        //usleep
-#include <cstdio>          //popen,getline
+#include <cstdio>          //popen,getline,pclose
 #include <cstdlib>         //free
 
 namespace enigma {
