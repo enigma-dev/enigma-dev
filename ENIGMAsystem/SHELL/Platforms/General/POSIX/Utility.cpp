@@ -40,7 +40,7 @@ static inline ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
   while(c != EOF) {
     if ((p - bufptr) > (size - 1)) {
       size = size + 128;
-      bufptr = realloc(bufptr, size);
+      bufptr = realloc((void *)bufptr, size);
       if (bufptr == NULL) {
         return -1;
       }
