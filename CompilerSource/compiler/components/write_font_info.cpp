@@ -47,11 +47,11 @@ int lang_CPP::compile_writeFontInfo(const GameData &game)
   for (const auto &font : game.fonts) {
     wto << "    {\""
         << font.name        << "\", "     // string name;
-        << font.id()        << ", \""     // int id;
-        << font.font_name() << "\", "     // string fontName;
-        << font.size()      << ", "       // int size;
-        << font.bold()      << ", "       // bool bold;
-        << font.italic()    << ", "       // bool italic;
+        << font->id()        << ", \""    // int id;
+        << font->font_name() << "\", "    // string fontName;
+        << font->size()      << ", "      // int size;
+        << font->bold()      << ", "      // bool bold;
+        << font->italic()    << ", "      // bool italic;
         << font.normalized_ranges.size()  // int glyphRangeCount;
         << "}," << endl;
 

@@ -69,14 +69,14 @@ int lang_CPP::compile_writeShaderData(const GameData &game, parsed_object *EGMgl
     while (idmax < shader.id()) {
       ++idmax, wto << "ShaderStruct(),\n";
     }
-    string vertexcode  =  shader.vertex_code();
-    string fragmentcode = shader.fragment_code();
+    string vertexcode  =  shader->vertex_code();
+    string fragmentcode = shader->fragment_code();
     //TODO: Replace quotations with escape sequences.
     wto << "    { "
         << '"' << esc(vertexcode)   << "\", "
         << '"' << esc(fragmentcode) << "\", "
-        << '"' << shader.type() << "\", "
-        << (shader.precompile()? "true" : "false")
+        << '"' << shader->type() << "\", "
+        << (shader->precompile()? "true" : "false")
         << " },\n";
     idmax += 1;
   }

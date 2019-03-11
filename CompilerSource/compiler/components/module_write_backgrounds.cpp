@@ -65,19 +65,19 @@ int lang_CPP::module_write_backgrounds(const GameData &game, FILE *gameModule)
   for (int i = 0; i < back_count; i++)
   {
     writei(game.backgrounds[i].id(), gameModule);  // id
-    writei(game.backgrounds[i].image_data.width, gameModule);   // width
+    writei(game.backgrounds[i].image_data.width,  gameModule);  // width
     writei(game.backgrounds[i].image_data.height, gameModule);  // height
 
-    writei(game.backgrounds[i].legacy_transparency, gameModule);
-    writei(game.backgrounds[i].smooth_edges(), gameModule);
-    writei(game.backgrounds[i].preload(), gameModule);
-    writei(game.backgrounds[i].use_as_tileset(), gameModule);
-    writei(game.backgrounds[i].tile_width(), gameModule);
-    writei(game.backgrounds[i].tile_height(), gameModule);
-    writei(game.backgrounds[i].horizontal_offset(), gameModule);
-    writei(game.backgrounds[i].vertical_offset(), gameModule);
-    writei(game.backgrounds[i].horizontal_spacing(), gameModule);
-    writei(game.backgrounds[i].vertical_spacing(), gameModule);
+    writei(game.backgrounds[i].legacy_transparency,   gameModule);
+    writei(game.backgrounds[i]->smooth_edges(),       gameModule);
+    writei(game.backgrounds[i]->preload(),            gameModule);
+    writei(game.backgrounds[i]->use_as_tileset(),     gameModule);
+    writei(game.backgrounds[i]->tile_width(),         gameModule);
+    writei(game.backgrounds[i]->tile_height(),        gameModule);
+    writei(game.backgrounds[i]->horizontal_offset(),  gameModule);
+    writei(game.backgrounds[i]->vertical_offset(),    gameModule);
+    writei(game.backgrounds[i]->horizontal_spacing(), gameModule);
+    writei(game.backgrounds[i]->vertical_spacing(),   gameModule);
 
     const int sz = game.backgrounds[i].image_data.pixels.size();
     writei(sz, gameModule); // size
