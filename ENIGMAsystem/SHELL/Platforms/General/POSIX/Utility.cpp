@@ -7,7 +7,7 @@
 #include <cstdlib>         //free
 
 #ifdef _WIN32
-static inline size_t getline(char **lineptr, size_t *n, FILE *stream) {
+static inline ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
   char *bufptr = NULL;
   char *p = bufptr;
   size_t size;
