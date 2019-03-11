@@ -182,9 +182,6 @@ std::string execute_shell_eval(std::string command) {
   free(buffer);
   pclose(file);
 
-  if (result.back() == '\n')
-    result.pop_back();
-
   return result;
 }
 
