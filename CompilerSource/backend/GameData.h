@@ -20,6 +20,26 @@
 
 struct ESLookup;
 
+template<class Proto> struct ProtoMessageInheritor {
+  Proto data;
+  typedef Proto BaseProtoClass;
+  typedef ProtoMessageInheritor<Proto> BaseProtoWrapper;
+
+  decltype(((Proto*)nullptr)->id()) id() const {
+    return data.id();
+  }
+
+  Proto *operator->() {
+    return &data;
+  }
+  const Proto *operator->() const {
+    return &data;
+  }
+
+  ProtoMessageInheritor() {}
+  ProtoMessageInheritor(const Proto &p): data(p) {}
+};
+
 typedef std::vector<uint8_t> BinaryData;
 struct ImageData {
   int width, height;
@@ -30,32 +50,35 @@ struct ImageData {
   ImageData(int w, int h, const uint8_t *data, size_t size);
 };
 
-struct SpriteData : buffers::resources::Sprite {
+struct SpriteData : ProtoMessageInheritor<buffers::resources::Sprite> {
   std::string name;
   std::vector<ImageData> image_data;
 
-  SpriteData(const buffers::resources::Sprite &sprite, const std::string& name, const std::vector<ImageData>& subimages);
+  SpriteData(const BaseProtoClass &sprite,
+             const std::string& name, const std::vector<ImageData>& subimages);
   SpriteData(const ::Sprite &sprite);
 };
 
-struct SoundData : buffers::resources::Sound {
+struct SoundData : ProtoMessageInheritor<buffers::resources::Sound> {
   std::string name;
   BinaryData audio;
 
-  SoundData(const buffers::resources::Sound &sound, const std::string& name, const BinaryData& data);
+  SoundData(const BaseProtoClass &sound,
+            const std::string& name, const BinaryData& data);
   SoundData(const ::Sound &sound);
 };
 
-struct BackgroundData : buffers::resources::Background {
+struct BackgroundData : ProtoMessageInheritor<buffers::resources::Background> {
   std::string name;
   ImageData image_data;
   bool legacy_transparency;
 
-  BackgroundData(const buffers::resources::Background &background, const std::string& name, const ImageData& image);
+  BackgroundData(const BaseProtoClass &background,
+                 const std::string& name, const ImageData& image);
   BackgroundData(const ::Background &background);
 };
 
-struct FontData : buffers::resources::Font {
+struct FontData : ProtoMessageInheritor<buffers::resources::Font> {
   std::string name;
   struct GlyphData : ImageData {
     buffers::resources::Font::Glyph metrics;
@@ -74,38 +97,38 @@ struct FontData : buffers::resources::Font {
   };
   std::vector<NormalizedRange> normalized_ranges;
 
-  FontData(const buffers::resources::Font &font, const std::string& name);
+  FontData(const BaseProtoClass &font, const std::string& name);
   FontData(const ::Font &font);
 };
 
-struct PathData : buffers::resources::Path {
+struct PathData : ProtoMessageInheritor<buffers::resources::Path> {
   std::string name;
-  PathData(const buffers::resources::Path &q, const std::string& name);
+  PathData(const BaseProtoClass &q, const std::string& name);
   PathData(const ::Path &path);
 };
-struct ScriptData : buffers::resources::Script {
+struct ScriptData : ProtoMessageInheritor<buffers::resources::Script> {
   std::string name;
-  ScriptData(const buffers::resources::Script &q, const std::string& name);
+  ScriptData(const BaseProtoClass &q, const std::string& name);
   ScriptData(const ::Script &script);
 };
-struct ShaderData : buffers::resources::Shader {
+struct ShaderData : ProtoMessageInheritor<buffers::resources::Shader> {
   std::string name;
-  ShaderData(const buffers::resources::Shader &q, const std::string& name);
+  ShaderData(const BaseProtoClass &q, const std::string& name);
   ShaderData(const ::Shader &shader);
 };
-struct TimelineData : buffers::resources::Timeline {
+struct TimelineData : ProtoMessageInheritor<buffers::resources::Timeline> {
   std::string name;
-  TimelineData(const buffers::resources::Timeline &q, const std::string& name);
+  TimelineData(const BaseProtoClass &q, const std::string& name);
   TimelineData(const ::Timeline &timeline);
 };
-struct ObjectData : buffers::resources::Object {
+struct ObjectData : ProtoMessageInheritor<buffers::resources::Object> {
   std::string name;
-  ObjectData(const buffers::resources::Object &q, const std::string& name);
+  ObjectData(const BaseProtoClass &q, const std::string& name);
   ObjectData(const ::GmObject &object, const ESLookup &lookup);
 };
-struct RoomData : buffers::resources::Room {
+struct RoomData : ProtoMessageInheritor<buffers::resources::Room> {
   std::string name;
-  RoomData(const buffers::resources::Room &q, const std::string& name);
+  RoomData(const BaseProtoClass &q, const std::string& name);
   RoomData(const ::Room &room, const ESLookup &lookup);
 };
 

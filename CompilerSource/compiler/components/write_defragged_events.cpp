@@ -74,9 +74,9 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   // Defragged events must be written before object data, or object data cannot determine which events were used.
   used_events.clear();
   for (size_t i = 0; i < game.objects.size(); i++) {
-    for (int ii = 0; ii < game.objects[i].events().size(); ii++) {
-      const int mid = game.objects[i].events(ii).type();
-      const int  id = event_get_number(game.objects[i].events(ii));
+    for (int ii = 0; ii < game.objects[i]->events().size(); ii++) {
+      const int mid = game.objects[i]->events(ii).type();
+      const int  id = event_get_number(game.objects[i]->events(ii));
       if (event_is_instance(mid, id)) {
         used_events[event_stacked_get_root_name(mid)].inc(mid,id);
       } else {
@@ -90,9 +90,9 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
 
   //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
   for (size_t i = 0; i < game.timelines.size(); i++) {
-    for (int j = 0; j < game.timelines[i].moments().size(); j++) {
+    for (int j = 0; j < game.timelines[i]->moments().size(); j++) {
       wto << "void TLINE_" << game.timelines[i].name << "_MOMENT_"
-          << game.timelines[i].moments(j).step() <<"();\n";
+          << game.timelines[i]->moments(j).step() <<"();\n";
     }
   }
   wto <<"\n";
@@ -143,10 +143,10 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   for (size_t i = 0; i < game.timelines.size(); i++) {
     wto << "        case " << game.timelines[i].id() <<": {\n";
     wto << "          switch (moment_index) {\n";
-    for (int j = 0; j < game.timelines[i].moments().size(); j++) {
+    for (int j = 0; j < game.timelines[i]->moments().size(); j++) {
       wto << "            case " <<j <<": {\n";
       wto << "              ::TLINE_" << game.timelines[i].name << "_MOMENT_"
-                                      << game.timelines[i].moments(j).step() << "();\n";
+                                      << game.timelines[i]->moments(j).step() << "();\n";
       wto << "              break;\n";
       wto << "            }\n";
     }

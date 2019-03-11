@@ -98,7 +98,7 @@ int lang_CPP::module_write_fonts(const GameData &game, FILE *gameModule)
   for (const auto &font : game.fonts) {
     cout << "Iterating included fonts..." << endl;
     // Simple allocations and initializations
-    int gc = font.glyphs().size();
+    int gc = font->glyphs().size();
 
     pvrect* boxes = new pvrect[gc];
 
@@ -108,7 +108,7 @@ int lang_CPP::module_write_fonts(const GameData &game, FILE *gameModule)
 
     // Copy our glyph metrics into it
     size_t ib = 0;
-    for (const auto &glyph : font.glyphs()) {
+    for (const auto &glyph : font->glyphs()) {
       boxes[ib].w = glyph.width(),
       boxes[ib].h = glyph.height();
       ib++;
@@ -117,7 +117,7 @@ int lang_CPP::module_write_fonts(const GameData &game, FILE *gameModule)
 
     // Sort our boxes from largest to smallest in area.
     size_t glyphno = 0;
-    for (const auto &glyph : font.glyphs()) {
+    for (const auto &glyph : font->glyphs()) {
       box_order.push_back(sizepair(glyph.width() * glyph.height(), glyphno++));
     }
     box_order.sort();
