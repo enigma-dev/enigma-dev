@@ -3,8 +3,8 @@
 #include <time.h> //CLOCK_MONOTONIC
 #include <sys/types.h>     //getpid
 #include <unistd.h>        //usleep
-#include <cstdio>          //popen,getline,pclose
-#include <cstdlib>         //free
+#include <cstdio>          //popen,getline,fgetc,pclose
+#include <cstdlib>         //free,malloc,realloc
 
 #ifdef _WIN32
 static inline ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
@@ -170,10 +170,10 @@ void execute_shell(std::string operation, std::string fname, std::string args) {
 
 void execute_shell(std::string fname, std::string args) { execute_shell("", fname, args); }
 
-std::string execute_shell_eval(std::string command) {
+var execute_shell_eval(std::string command) {
   char *buffer = NULL;
   size_t buffer_size = 0;
-  std::string result;
+  var result;
 
   FILE *file = popen(command.c_str(), "r");
   while (getline(&buffer, &buffer_size, file) != -1)
