@@ -436,8 +436,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     wto <<"  std::map<int, int> curr;\n\n";
     for (size_t i=0; i<game.timelines.size(); i++) {
       wto <<"  curr.clear();\n";
-      for (int j = 0; j < game.timelines[i].moments().size(); j++) {
-        wto << "  curr[" << game.timelines[i].moments()[j].step()
+      for (int j = 0; j < game.timelines[i]->moments().size(); j++) {
+        wto << "  curr[" << game.timelines[i]->moments()[j].step()
                          << "] = " << j <<";\n";
       }
       wto <<"  res.push_back(curr);\n\n";

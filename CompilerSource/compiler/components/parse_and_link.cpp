@@ -64,10 +64,10 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   scripts.resize(game.scripts.size());
   for (size_t i = 0; i < game.scripts.size(); i++) {
     std::string newcode;
-    int a = syncheck::syntaxcheck(game.scripts[i].code(), newcode);
+    int a = syncheck::syntaxcheck(game.scripts[i]->code(), newcode);
     if (a != -1) {
       user << "Syntax error in script `" << game.scripts[i].name << "'\n"
-           << format_error(game.scripts[i].code(), syncheck::syerr, a) << flushl;
+           << format_error(game.scripts[i]->code(), syncheck::syerr, a) << flushl;
       return E_ERROR_SYNTAX;
     }
     // Keep a parsed record of this script
@@ -89,7 +89,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   for (const auto &timeline : game.timelines)
   {
     tline_lookup[timeline.name].id = timeline.id();
-    for (const auto &moment : timeline.moments())
+    for (const auto &moment : timeline->moments())
     {
       std::string newcode;
       int a = syncheck::syntaxcheck(moment.code(), newcode);
@@ -203,7 +203,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   //TODO: Linking timelines might not be strictly necessary, because scripts can now find their children through the timelines they call.
   int lookup_id = 0;
   for (const auto &timeline : game.timelines) {
-    for (const auto &moment : timeline.moments()) {
+    for (const auto &moment : timeline->moments()) {
       string curscrname = timeline.name;
       parsed_script* curscript = tlines[lookup_id++]; //At this point, what we have is this:     for each script as curscript
       edbg << "Linking `" << curscrname << " moment: " <<moment.step() << "':\n";
@@ -236,16 +236,20 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     unsigned ev_count = 0;
     state.parsed_objects.push_back(
       new parsed_object(
-        object.name, object.id(), object.sprite_name(), object.mask_name(),
-        object.parent_name(),
-        object.visible(), object.solid(),
-        object.depth(), object.persistent()
+        object.name, object.id(),
+        object->sprite_name(),
+        object->mask_name(),
+        object->parent_name(),
+        object->visible(),
+        object->solid(),
+        object->depth(),
+        object->persistent()
       ));
     parsed_object* pob = state.parsed_objects.back();
 
-    edbg << " " << object.name << ": " << object.events().size() << " events: " << flushl;
+    edbg << " " << object.name << ": " << object->events().size() << " events: " << flushl;
 
-    for (const auto& event : object.events()) {
+    for (const auto& event : object->events()) {
       int ev_id;
         if (event.has_name()) {
           edbg << "  Event[" << event.type() << ", " << event.name() << "] ";
@@ -300,16 +304,16 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     pev.mainId = 0, pev.id = 0, pev.myObj = pr;
 
     std::string newcode;
-    int sc = syncheck::syntaxcheck(room.creation_code(), newcode);
+    int sc = syncheck::syntaxcheck(room->creation_code(), newcode);
     if (sc != -1) {
       user << "Syntax error in room creation code for room " << room.id()
            << " (`" << room.name << "'):\n"
-           << format_error(room.creation_code(),syncheck::syerr,sc) << flushl;
+           << format_error(room->creation_code(),syncheck::syerr,sc) << flushl;
       return E_ERROR_SYNTAX;
     }
     parser_main(newcode,&pev,script_names);
 
-    for (const auto &instance : room.instances()) {
+    for (const auto &instance : room->instances()) {
       if (!instance.creation_code().empty()) {
         newcode = "";
         int a = syncheck::syntaxcheck(instance.creation_code(), newcode);
@@ -327,7 +331,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     }
 
     //PreCreate code
-    for (const auto &instance : room.instances()) {
+    for (const auto &instance : room->instances()) {
       if (!instance.initialization_code().empty()) {
         std::string newcode;
         int a = syncheck::syntaxcheck(instance.initialization_code(), newcode);
