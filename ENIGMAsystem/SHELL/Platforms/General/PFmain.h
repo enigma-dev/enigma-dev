@@ -20,6 +20,7 @@
 #define ENIGMA_PLATFORM_MAIN
 
 #include <string>
+#include "Universal_System/var4.h"
 
 namespace enigma {
   extern bool game_isending;
@@ -77,7 +78,7 @@ unsigned long long disk_free(std::string drive);
 void set_program_priority(int value);
 void execute_shell(std::string fname, std::string args);
 void execute_shell(std::string operation, std::string fname, std::string args);
-std::string execute_shell_eval(std::string command);
+var execute_shell_eval(std::string command);
 void execute_program(std::string fname, std::string args, bool wait);
 void execute_program(std::string operation, std::string fname, std::string args, bool wait);
 
