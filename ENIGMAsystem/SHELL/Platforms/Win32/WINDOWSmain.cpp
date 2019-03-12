@@ -63,14 +63,14 @@ HWND get_window_handle() {
 }
 
 } // namespace enigma
-  
+
 static inline string add_slash(const string& dir) {
   if (dir.empty() || dir.back() != '\\') return dir + '\\';
   return dir;
 }
 
 namespace enigma_user {
-  
+
 bool set_working_directory(string dname) {
   tstring tstr_dname = widen(dname);
   replace(tstr_dname.begin(), tstr_dname.end(), '/', '\\');
@@ -84,7 +84,7 @@ bool set_working_directory(string dname) {
 
   return false;
 }
-  
+
 } // enigma_user
 
 namespace enigma {
@@ -323,7 +323,7 @@ void initialize_directory_globals() {
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
     enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
-  
+
   // Set the temp_directory
   buffer[0] = 0;
   GetTempPathW(MAX_PATH + 1, buffer);
@@ -398,21 +398,23 @@ void set_program_priority(int value) {
   SetPriorityClass(GetCurrentThread(), priorityValue);
 }
 
-void execute_shell(std::string fname, std::string args) {
+int execute_shell(std::string fname, std::string args) {
   WCHAR cDir[MAX_PATH];
   GetCurrentDirectoryW(MAX_PATH, cDir);
   tstring tstr_fname = widen(fname);
   tstring tstr_args = widen(args);
   ShellExecuteW(enigma::hWnd, NULL, tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
+  return 0;
 }
 
-void execute_shell(std::string operation, std::string fname, std::string args) {
+int execute_shell(std::string operation, std::string fname, std::string args) {
   WCHAR cDir[MAX_PATH];
   GetCurrentDirectoryW(MAX_PATH, cDir);
   tstring tstr_operation = widen(operation);
   tstring tstr_fname = widen(fname);
   tstring tstr_args = widen(args);
   ShellExecuteW(enigma::hWnd, tstr_operation.c_str(), tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
+  return 0;
 }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {

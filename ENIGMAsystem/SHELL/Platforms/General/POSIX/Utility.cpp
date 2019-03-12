@@ -103,20 +103,20 @@ unsigned long get_timer() {  // microseconds since the start of the game
   return (enigma::time_current.tv_sec) * 1000000 + (enigma::time_current.tv_nsec / 1000);
 }
 
-void execute_shell(std::string operation, std::string fname, std::string args) {
+int execute_shell(std::string operation, std::string fname, std::string args) {
   if (system(NULL)) {
-    system((fname + args + " &").c_str());
-  } else {
-    printf("execute_shell cannot be used as there is no command processor!");
-    return;
+    return system((fname + args + " &").c_str());
   }
+
+  printf("execute_shell cannot be used as there is no command processor!");
+  return 0;
 }
 
-void execute_shell(std::string fname, std::string args) { execute_shell("", fname, args); }
+int execute_shell(std::string fname, std::string args) { execute_shell("", fname, args); }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
   if (system(NULL)) {
-    system((fname + args + (wait ? " &" : "")).c_str());
+    return system((fname + args + (wait ? " &" : "")).c_str());
   } else {
     printf("execute_program cannot be used as there is no command processor!");
     return;
