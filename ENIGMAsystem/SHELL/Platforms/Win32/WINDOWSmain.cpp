@@ -417,7 +417,7 @@ int execute_shell(std::string operation, std::string fname, std::string args) {
   return 0;
 }
 
-void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
+int execute_program(std::string operation, std::string fname, std::string args, bool wait) {
   SHELLEXECUTEINFOW lpExecInfo;
   tstring tstr_operation = widen(operation);
   tstring tstr_fname = widen(fname);
@@ -440,9 +440,11 @@ void execute_program(std::string operation, std::string fname, std::string args,
     ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
     ::CloseHandle(lpExecInfo.hProcess);
   }
+
+  return 0;
 }
 
-void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
+int execute_program(std::string fname, std::string args, bool wait) { return execute_program("open", fname, args, wait); }
 
 std::string environment_get_variable(std::string name) {
   WCHAR buffer[1024];

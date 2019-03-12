@@ -77,8 +77,8 @@ unsigned long long disk_free(std::string drive);
 void set_program_priority(int value);
 int execute_shell(std::string fname, std::string args);
 int execute_shell(std::string operation, std::string fname, std::string args);
-void execute_program(std::string fname, std::string args, bool wait);
-void execute_program(std::string operation, std::string fname, std::string args, bool wait);
+int execute_program(std::string fname, std::string args, bool wait);
+int execute_program(std::string operation, std::string fname, std::string args, bool wait);
 
 std::string environment_get_variable(std::string name);
 bool set_working_directory(std::string dname);

@@ -114,16 +114,16 @@ int execute_shell(std::string operation, std::string fname, std::string args) {
 
 int execute_shell(std::string fname, std::string args) { return execute_shell("", fname, args); }
 
-void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
+int execute_program(std::string operation, std::string fname, std::string args, bool wait) {
   if (system(NULL)) {
-    system((fname + args + (wait ? " &" : "")).c_str());
-  } else {
-    printf("execute_program cannot be used as there is no command processor!");
-    return;
+    return system((fname + args + (wait ? " &" : "")).c_str());
   }
+
+  printf("execute_program cannot be used as there is no command processor!");
+  return 0;
 }
 
-void execute_program(std::string fname, std::string args, bool wait) { execute_program("", fname, args, wait); }
+int execute_program(std::string fname, std::string args, bool wait) { return execute_program("", fname, args, wait); }
 
 void url_open(std::string url, std::string target, std::string options) {
   execute_program("xdg-open", url, false);
