@@ -112,7 +112,7 @@ int execute_shell(std::string operation, std::string fname, std::string args) {
   return 0;
 }
 
-int execute_shell(std::string fname, std::string args) { execute_shell("", fname, args); }
+int execute_shell(std::string fname, std::string args) { return execute_shell("", fname, args); }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
   if (system(NULL)) {
