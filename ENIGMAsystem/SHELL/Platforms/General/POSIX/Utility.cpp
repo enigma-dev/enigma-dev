@@ -7,8 +7,8 @@
 #include <cstdlib>         //free,malloc,realloc
 
 #ifdef _WIN32
-#include <errno.h>
-#include <stdint.h>
+#include <cerrno>
+#include <cstdint>
 
 static inline ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
   size_t pos;
