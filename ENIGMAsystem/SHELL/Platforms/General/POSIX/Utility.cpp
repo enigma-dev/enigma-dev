@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <stdint.h>
 
-ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
+static inline ssssize_t getline(char **lineptr, size_t *n, FILE *stream) {
   size_t pos;
   int c;
 
