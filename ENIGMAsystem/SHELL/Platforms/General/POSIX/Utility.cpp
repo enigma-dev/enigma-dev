@@ -116,7 +116,7 @@ int execute_shell(std::string fname, std::string args) { execute_shell("", fname
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
   if (system(NULL)) {
-    return system((fname + args + (wait ? " &" : "")).c_str());
+    system((fname + args + (wait ? " &" : "")).c_str());
   } else {
     printf("execute_program cannot be used as there is no command processor!");
     return;
