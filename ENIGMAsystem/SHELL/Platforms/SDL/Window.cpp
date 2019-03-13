@@ -33,14 +33,18 @@ void (*WindowResizedCallback)();
 SDL_Window* windowHandle = nullptr;
 unsigned sdl_window_flags = SDL_WINDOW_HIDDEN;
 
-void init_sdl_window_attributes();
+// this is to be implemented by an SDL bridge
+// it is for setting any attributes on the
+// window before it is created
+// (e.g, SDL's OpenGL context attributes)
+void init_sdl_window_bridge_attributes();
 
 bool initGameWindow() {
   SDL_Init(SDL_INIT_VIDEO);
   if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
   if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
   if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
-  init_sdl_window_attributes();
+  init_sdl_window_bridge_attributes();
   windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
   return (windowHandle != nullptr);
 }

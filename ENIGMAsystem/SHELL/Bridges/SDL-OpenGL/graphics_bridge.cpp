@@ -31,7 +31,7 @@ SDL_GLContext context;
 
 void set_sdl_gl_context_version();
 
-void init_sdl_window_attributes() {
+void init_sdl_window_bridge_attributes() {
   set_sdl_gl_context_version();
   SDL_GL_SetSwapInterval(0);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
