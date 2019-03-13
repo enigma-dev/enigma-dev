@@ -23,20 +23,20 @@
 
 namespace enigma {
 
+extern unsigned sdl_window_flags;
+
 int msaa_fbo = 0;
 
 SDL_GLContext context;
 
 void set_sdl_gl_context_version();
 
-bool initGameWindow() {
-  SDL_Init(SDL_INIT_VIDEO);
+void init_sdl_window_bridge_attributes() {
   set_sdl_gl_context_version();
   SDL_GL_SetSwapInterval(0);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-  windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-  return (windowHandle != nullptr);
+  sdl_window_flags |= SDL_WINDOW_OPENGL;
 }
 
 void EnableDrawing(void*) {
@@ -55,14 +55,16 @@ void ScreenRefresh() {
   SDL_GL_SwapWindow(windowHandle);
 }
 
-}
+} // namespace enigma
 
 namespace enigma_user {
-  void set_synchronization(bool enable) {
-    SDL_GL_SetSwapInterval(enable);
-  }
 
-  void display_reset(int samples, bool vsync) {
-    set_synchronization(vsync);
-  }
+void set_synchronization(bool enable) {
+  SDL_GL_SetSwapInterval(enable);
 }
+
+void display_reset(int samples, bool vsync) {
+  set_synchronization(vsync);
+}
+
+} // namespace enigma_user

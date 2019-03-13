@@ -22,6 +22,7 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/Direct3D11/Direct3D11Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 
 #include <windows.h>
 #include <windowsx.h>
@@ -148,6 +149,7 @@ void WindowResized() {
 }
 
 void EnableDrawing(void* handle) {
+  get_window_handle();
   WindowResizedCallback = &WindowResized;
 
   int screenWidth = enigma_user::window_get_width(),
