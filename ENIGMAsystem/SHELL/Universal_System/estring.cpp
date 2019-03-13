@@ -367,4 +367,22 @@ string filename_change_ext(string fname, string newext)
   return fname.replace(fp,fname.length(),newext);
 }
 
+var string_split(const std::string &str, const std::string &delim,
+                 bool skip_empty) {
+  var res;
+  if (delim.empty()) {
+    res[0] = str;
+    return res;
+  }
+  size_t last = 0, next, found = 0;
+  while ((next = str.find(delim, last)) != std::string::npos) {
+    if (!skip_empty || next > last)
+      res[found++] = str.substr(last, next - last);
+    last = next + delim.length();
+  }
+  if (!skip_empty || last + 1 < str.length())
+    res[found++] = str.substr(last);
+  return res;
+}
+
 }
