@@ -9,6 +9,7 @@
 #include "Universal_System/estring.h" // ord
 #include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
 
+#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 
 #include <array>
 #include <string>
@@ -32,6 +33,20 @@ namespace enigma {
 void (*WindowResizedCallback)();
 
 SDL_Window* windowHandle = nullptr;
+unsigned sdl_window_flags = SDL_WINDOW_HIDDEN;
+
+void init_sdl_window_attributes();
+
+bool initGameWindow() {
+  SDL_Init(SDL_INIT_VIDEO);
+  if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
+  if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
+  if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
+  init_sdl_window_attributes();
+  windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
+  get_window_handle();
+  return (windowHandle != nullptr);
+}
 
 namespace keyboard {
   using namespace enigma_user;
