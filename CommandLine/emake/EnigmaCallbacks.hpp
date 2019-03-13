@@ -1,12 +1,12 @@
 #ifndef EMAKE_ENIGMACALLBACKS_HPP
 #define EMAKE_ENIGMACALLBACKS_HPP
 
+#include "codegen/server.pb.h"
+
 //This
 #include "backend/JavaCallbacks.h"
 //Should be:
 //#include "backend/EnigmaCallbacks.h"
-
-#include "codegen/server.pb.h"
 
 #include <fstream>
 #include <string>
