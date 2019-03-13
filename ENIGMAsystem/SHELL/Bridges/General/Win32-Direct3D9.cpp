@@ -23,6 +23,7 @@
 #include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
 #include "Graphics_Systems/Direct3D9/Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 
 #include <windows.h>
 #include <windowsx.h>
@@ -99,6 +100,7 @@ ContextManager* d3dmgr; // the pointer to the device class
   }
 
   void EnableDrawing(void* handle) {
+    get_window_handle();
     WindowResizedCallback = &WindowResized;
 
     d3dmgr = new ContextManager();
