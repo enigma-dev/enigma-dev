@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "codegen/project.pb.h"
+#include "project.pb.h"
 
 #include <string>
 
