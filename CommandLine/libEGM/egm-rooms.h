@@ -1,7 +1,7 @@
 #ifndef EGM_ROOMS_UTIL_h
 #define EGM_ROOMS_UTIL_h
 
-#include "codegen/project.pb.h"
+#include "project.pb.h"
 
 #include <map>
 #include <vector>
@@ -18,7 +18,7 @@ struct InstanceLayers {
   std::vector<Layer> layers;
   // Any instances with noncompactable attributes.
   std::vector<buffers::resources::Room::Instance> snowflakes;
-  
+
 };
 
 struct TileLayers {
@@ -30,7 +30,7 @@ struct TileLayers {
   std::vector<Layer> layers;
   // Any tiles with noncompactable attributes.
   std::vector<buffers::resources::Room::Tile> snowflakes;
-  
+
 };
 
 InstanceLayers BuildInstanceLayers(const buffers::resources::Room &room);
