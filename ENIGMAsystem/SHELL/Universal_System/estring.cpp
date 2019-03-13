@@ -380,7 +380,7 @@ var string_split(const std::string &str, const std::string &delim,
       res[found++] = str.substr(last, next - last);
     last = next + delim.length();
   }
-  if (!skip_empty || last + 1 < str.length())
+  if (!skip_empty || last < str.length())
     res[found++] = str.substr(last);
   return res;
 }
