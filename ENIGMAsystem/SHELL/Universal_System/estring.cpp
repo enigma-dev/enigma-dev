@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <cstdlib>
+#include <vector>
 #include "var4.h"
 #include "estring.h"
 
@@ -33,7 +34,6 @@ using std::string;
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 
 #include <windows.h>
-#include <vector>
 using std::vector;
 
 tstring widen(const string &str) {
@@ -189,12 +189,11 @@ size_t string_pos(string substr,string str) {
   return res == string::npos ? 0 : (int)res;
 }
 
-string string_format(double val, unsigned tot, unsigned dec)
-{
-  char sbuf[19]; sbuf[0] = 0;
-  sprintf(sbuf,"%0*.*f",tot,dec,val);
-  const string fstr = sbuf;
-  return fstr.c_str();
+string string_format(double val, unsigned tot, unsigned dec) {
+  std::vector<char> sbuf(19 + tot + dec);
+  sbuf[0] = 0;
+  sprintf(sbuf.data(), "%0*.*f", tot, dec, val);
+  return sbuf.data();
 }
 
 string string_copy(string str, int index, int count) {
