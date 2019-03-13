@@ -13,8 +13,14 @@
 #include "backend/util/Image.h"
 #include "backend/util/Polygon.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct SubImage {
 	Image image;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

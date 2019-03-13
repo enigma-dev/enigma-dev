@@ -11,6 +11,9 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Shader
 {
 	String name;
@@ -21,5 +24,8 @@ struct Shader
 	String type;
 	boolean precompile;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

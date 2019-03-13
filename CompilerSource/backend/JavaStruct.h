@@ -5,14 +5,18 @@
  * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
  * See LICENSE for details.
  */
+ 
+#ifndef JAVASTRUCT_H
+#define JAVASTRUCT_H
+ 
+namespace deprecated {
+namespace JavaStruct {
 
-#ifdef JAVASTRUCT_H
-#  undef String
-#  undef boolean
-#  undef byte
-#else
-#  define JAVASTRUCT_H
-#endif
-#define String const char*
-#define boolean int
-#define byte unsigned char
+using String = const char*;
+using boolean = int;
+using byte = unsigned char;
+
+}  // namespace JavaStruct
+}  // namespace deprecated
+
+#endif  // JAVASTRUCT_H

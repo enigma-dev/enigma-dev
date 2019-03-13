@@ -11,6 +11,9 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Instance
 {
   int x;
@@ -21,5 +24,8 @@ struct Instance
   String preCreationCode;
   boolean locked;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

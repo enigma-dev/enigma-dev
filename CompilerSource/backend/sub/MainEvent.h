@@ -12,6 +12,9 @@
 #include "Event.h"
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct MainEvent
 {
 	int id;
@@ -19,5 +22,8 @@ struct MainEvent
 
 	int eventCount;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

@@ -107,7 +107,7 @@ struct ESLookup {
     }
   };
   Lookup sprite, background, script, object;
-  ESLookup(EnigmaStruct *es):
+  ESLookup(deprecated::JavaStruct::EnigmaStruct *es):
     sprite(es->sprites, es->spriteCount, "sprite"),
     background(es->backgrounds, es->backgroundCount, "background"),
     script(es->scripts, es->scriptCount, "script"),
@@ -116,7 +116,7 @@ struct ESLookup {
 
 SpriteData::SpriteData(const buffers::resources::Sprite &q, const std::string& name, const std::vector<ImageData>& subimages):
   BaseProtoWrapper(q), name(name), image_data(subimages) {}
-SpriteData::SpriteData(const ::Sprite &sprite):
+SpriteData::SpriteData(const deprecated::JavaStruct::Sprite &sprite):
   name(sprite.name) {
   data.set_id(sprite.id);
 
@@ -143,7 +143,7 @@ SpriteData::SpriteData(const ::Sprite &sprite):
 
 SoundData::SoundData(const buffers::resources::Sound &q, const std::string& name, const BinaryData& data):
   BaseProtoWrapper(q), name(name), audio(data) {}
-SoundData::SoundData(const ::Sound &sound):
+SoundData::SoundData(const deprecated::JavaStruct::Sound &sound):
   name(sound.name),
   audio(sound.data, sound.data + sound.size) {
   data.set_id(sound.id);
@@ -164,7 +164,7 @@ SoundData::SoundData(const ::Sound &sound):
 
 BackgroundData::BackgroundData(const buffers::resources::Background &q, const std::string& name, const ImageData& image):
   BaseProtoWrapper(q), name(name), image_data(image) {}
-BackgroundData::BackgroundData(const ::Background &background):
+BackgroundData::BackgroundData(const deprecated::JavaStruct::Background &background):
   name(background.name),
   image_data(background.backgroundImage) {
   data.set_id(background.id);
@@ -185,7 +185,7 @@ BackgroundData::BackgroundData(const ::Background &background):
 
 FontData::FontData(const buffers::resources::Font &q, const std::string& name):
   BaseProtoWrapper(q), name(name) {}
-FontData::FontData(const ::Font &font):
+FontData::FontData(const deprecated::JavaStruct::Font &font):
   name(font.name) {
   data.set_id(font.id);
 
@@ -202,7 +202,7 @@ FontData::FontData(const ::Font &font):
   }
 }
 
-FontData::NormalizedRange::NormalizedRange(const ::GlyphRange &range):
+FontData::NormalizedRange::NormalizedRange(const deprecated::JavaStruct::GlyphRange &range):
     min(range.rangeMin), max(range.rangeMax) {
   const int gcount = range.rangeMax - range.rangeMin + 1;
   glyphs.reserve(gcount);
@@ -211,7 +211,7 @@ FontData::NormalizedRange::NormalizedRange(const ::GlyphRange &range):
   }
 }
 
-FontData::GlyphData::GlyphData(const ::Glyph &glyph):
+FontData::GlyphData::GlyphData(const deprecated::JavaStruct::Glyph &glyph):
     ImageData(glyph.width, glyph.height, glyph.data,
               glyph.width * glyph.height) { // Glyph images are alpha-only.
   metrics.set_origin(glyph.origin);
@@ -223,7 +223,7 @@ FontData::GlyphData::GlyphData(const ::Glyph &glyph):
 
 PathData::PathData(const buffers::resources::Path &q, const std::string& name):
   BaseProtoWrapper(q), name(name) {}
-PathData::PathData(const ::Path &path):
+PathData::PathData(const deprecated::JavaStruct::Path &path):
   name(path.name) {
   data.set_id(path.id);
 
@@ -245,7 +245,7 @@ PathData::PathData(const ::Path &path):
 
 ScriptData::ScriptData(const buffers::resources::Script &q, const std::string& name):
   BaseProtoWrapper(q), name(name) {}
-ScriptData::ScriptData(const ::Script &script):
+ScriptData::ScriptData(const deprecated::JavaStruct::Script &script):
   name(script.name) {
   data.set_id(script.id);
   data.set_code(script.code);
@@ -253,7 +253,7 @@ ScriptData::ScriptData(const ::Script &script):
 
 ShaderData::ShaderData(const buffers::resources::Shader &q, const std::string& name):
   BaseProtoWrapper(q), name(name) {}
-ShaderData::ShaderData(const ::Shader &shader):
+ShaderData::ShaderData(const deprecated::JavaStruct::Shader &shader):
   name(shader.name) {
   data.set_id(shader.id);
 
@@ -266,7 +266,7 @@ ShaderData::ShaderData(const ::Shader &shader):
 
 TimelineData::TimelineData(const buffers::resources::Timeline &q, const std::string& name):
   BaseProtoWrapper(q), name(name) {}
-TimelineData::TimelineData(const ::Timeline &timeline):
+TimelineData::TimelineData(const deprecated::JavaStruct::Timeline &timeline):
   name(timeline.name) {
   data.set_id(timeline.id);
 
@@ -279,7 +279,7 @@ TimelineData::TimelineData(const ::Timeline &timeline):
 
 ObjectData::ObjectData(const buffers::resources::Object &q, const std::string& name):
   BaseProtoWrapper(q), name(name) {}
-ObjectData::ObjectData(const ::GmObject &object, const ESLookup &lookup):
+ObjectData::ObjectData(const deprecated::JavaStruct::GmObject &object, const ESLookup &lookup):
   name(object.name) {
   data.set_id(object.id);
 
@@ -306,7 +306,7 @@ ObjectData::ObjectData(const ::GmObject &object, const ESLookup &lookup):
 
 RoomData::RoomData(const buffers::resources::Room &q, const std::string& name):
   BaseProtoWrapper(q), name(name) {}
-RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
+RoomData::RoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup):
   name(room.name) {
   cout << "Import room." << endl;
   data.set_id(room.id);
@@ -399,7 +399,8 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
   }
 }
 
-static void ImportSettings(const ::GameSettings &settings, const ESLookup &lookup, buffers::resources::Settings& set) {
+static void ImportSettings(const deprecated::JavaStruct::GameSettings &settings,
+    const ESLookup &lookup, buffers::resources::Settings& set) {
   cout << "Import game settings." << endl;
 
   buffers::resources::General *gen = set.mutable_general();
@@ -458,7 +459,7 @@ ImageData::ImageData(const Image &img):
 ImageData::ImageData(int w, int h, const uint8_t *data, size_t size):
     width(w), height(h), pixels(data, data + size) {}
 
-GameData::GameData(EnigmaStruct *es): filename(es->filename ?: "") {
+GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es): filename(es->filename ?: "") {
   cout << "Translating EnigmaStruct" << endl;
   cout << "- Indexing names" << endl;
   ESLookup lookup(es);

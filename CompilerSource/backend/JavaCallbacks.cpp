@@ -23,7 +23,7 @@
 static void javano_signal() { puts(ER_NoIdeFunc); }
 static void javano_signal_i(int) { puts(ER_NoIdeFunc); }
 static void javano_signal_cstr(const char*) { puts(ER_NoIdeFunc); }
-static int javano_signal_exec(String, String *, boolean) { puts(ER_NoIdeFunc); return -1; }
+static int javano_signal_exec(const char*, const char**, int) { puts(ER_NoIdeFunc); return -1; }
 static Image *javano_signal_buffer(char *, int) { puts(ER_NoIdeFunc); return NULL; }
 
 //Opens the EnigmaFrame
@@ -43,6 +43,6 @@ void (*ide_output_redirect_file) (const char *) = javano_signal_cstr;
 void (*ide_output_redirect_reset) () = javano_signal;
 
 //Executes a given command, returns errors or ret val
-int (*ide_execute) (String, String *, boolean) = javano_signal_exec;
+int (*ide_execute) (const char*, const char**, int) = javano_signal_exec;
 //Compresses data. Note image width/height unused.
 Image* (*ide_compress_data) (char *, int) = javano_signal_buffer;

@@ -12,6 +12,9 @@
 #include "backend/sub/PathPoint.h"
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Path
 {
 	String name;
@@ -28,5 +31,8 @@ struct Path
 	PathPoint *points;
 	int pointCount;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

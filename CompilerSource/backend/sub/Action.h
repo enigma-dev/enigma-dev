@@ -11,6 +11,9 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Action
 {
 	//LibAction libAction;
@@ -20,5 +23,8 @@ struct Action
 
 	//Argument[] arguments;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

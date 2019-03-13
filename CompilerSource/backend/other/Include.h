@@ -11,6 +11,9 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Include
 {
 //  String filename;
@@ -24,5 +27,8 @@ struct Include
   boolean freeMemAfterExport;
   boolean removeAtGameEnd;*/
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

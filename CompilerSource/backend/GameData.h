@@ -56,7 +56,7 @@ struct SpriteData : ProtoMessageInheritor<buffers::resources::Sprite> {
 
   SpriteData(const BaseProtoClass &sprite,
              const std::string& name, const std::vector<ImageData>& subimages);
-  SpriteData(const ::Sprite &sprite);
+  SpriteData(const deprecated::JavaStruct::Sprite &sprite);
 };
 
 struct SoundData : ProtoMessageInheritor<buffers::resources::Sound> {
@@ -65,7 +65,7 @@ struct SoundData : ProtoMessageInheritor<buffers::resources::Sound> {
 
   SoundData(const BaseProtoClass &sound,
             const std::string& name, const BinaryData& data);
-  SoundData(const ::Sound &sound);
+  SoundData(const deprecated::JavaStruct::Sound &sound);
 };
 
 struct BackgroundData : ProtoMessageInheritor<buffers::resources::Background> {
@@ -75,7 +75,7 @@ struct BackgroundData : ProtoMessageInheritor<buffers::resources::Background> {
 
   BackgroundData(const BaseProtoClass &background,
                  const std::string& name, const ImageData& image);
-  BackgroundData(const ::Background &background);
+  BackgroundData(const deprecated::JavaStruct::Background &background);
 };
 
 struct FontData : ProtoMessageInheritor<buffers::resources::Font> {
@@ -85,7 +85,7 @@ struct FontData : ProtoMessageInheritor<buffers::resources::Font> {
 
     // TODO: Need to move the font packing logic to allow pre-packed sprite
     // fonts; cannot construct image here in the meantime
-    GlyphData(const ::Glyph &glyph);
+    GlyphData(const deprecated::JavaStruct::Glyph &glyph);
   };
   struct NormalizedRange {
     int min, max;
@@ -93,43 +93,43 @@ struct FontData : ProtoMessageInheritor<buffers::resources::Font> {
     NormalizedRange(int min_, int max_): min(min_), max(max_) {
       glyphs.reserve(max_ - min_ + 1);
     }
-    NormalizedRange(const ::GlyphRange &range);
+    NormalizedRange(const deprecated::JavaStruct::GlyphRange &range);
   };
   std::vector<NormalizedRange> normalized_ranges;
 
   FontData(const BaseProtoClass &font, const std::string& name);
-  FontData(const ::Font &font);
+  FontData(const deprecated::JavaStruct::Font &font);
 };
 
 struct PathData : ProtoMessageInheritor<buffers::resources::Path> {
   std::string name;
   PathData(const BaseProtoClass &q, const std::string& name);
-  PathData(const ::Path &path);
+  PathData(const deprecated::JavaStruct::Path &path);
 };
 struct ScriptData : ProtoMessageInheritor<buffers::resources::Script> {
   std::string name;
   ScriptData(const BaseProtoClass &q, const std::string& name);
-  ScriptData(const ::Script &script);
+  ScriptData(const deprecated::JavaStruct::Script &script);
 };
 struct ShaderData : ProtoMessageInheritor<buffers::resources::Shader> {
   std::string name;
   ShaderData(const BaseProtoClass &q, const std::string& name);
-  ShaderData(const ::Shader &shader);
+  ShaderData(const deprecated::JavaStruct::Shader &shader);
 };
 struct TimelineData : ProtoMessageInheritor<buffers::resources::Timeline> {
   std::string name;
   TimelineData(const BaseProtoClass &q, const std::string& name);
-  TimelineData(const ::Timeline &timeline);
+  TimelineData(const deprecated::JavaStruct::Timeline &timeline);
 };
 struct ObjectData : ProtoMessageInheritor<buffers::resources::Object> {
   std::string name;
   ObjectData(const BaseProtoClass &q, const std::string& name);
-  ObjectData(const ::GmObject &object, const ESLookup &lookup);
+  ObjectData(const deprecated::JavaStruct::GmObject &object, const ESLookup &lookup);
 };
 struct RoomData : ProtoMessageInheritor<buffers::resources::Room> {
   std::string name;
   RoomData(const BaseProtoClass &q, const std::string& name);
-  RoomData(const ::Room &room, const ESLookup &lookup);
+  RoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup);
 };
 
 /// Flat view of a buffers::Project.
@@ -167,7 +167,7 @@ struct GameData {
   buffers::resources::GameInformation gameInfo;
   buffers::resources::Settings settings;
 
-  GameData(struct EnigmaStruct *es);
+  GameData(struct deprecated::JavaStruct::EnigmaStruct *es);
   GameData(const buffers::Project &proj);
 };
 

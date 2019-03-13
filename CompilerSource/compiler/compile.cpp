@@ -157,7 +157,7 @@ inline void write_exe_info(const std::string codegen_directory, const GameData &
 
 #include "System/builtins.h"
 
-dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
+dllexport int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(GameData(es), exe_filename, mode);
 }
 

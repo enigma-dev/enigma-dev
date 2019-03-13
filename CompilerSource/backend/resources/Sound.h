@@ -11,6 +11,9 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Sound
 {
 	String name;
@@ -31,5 +34,8 @@ struct Sound
 	byte *data;
 	int size;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

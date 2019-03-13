@@ -9,6 +9,9 @@
 #ifndef ENIGMA_SUB_GLYPH_H
 #define ENIGMA_SUB_GLYPH_H
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Glyph
 {
 	double origin; //to convert to int, these should be rounded on .5
@@ -18,5 +21,8 @@ struct Glyph
 	int height;
 	byte *data; //size = width * height
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif
