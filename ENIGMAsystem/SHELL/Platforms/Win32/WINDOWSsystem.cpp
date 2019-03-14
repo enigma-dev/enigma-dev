@@ -30,7 +30,7 @@ void os_powersave_enable(bool enable) {}
 
 bool os_is_network_connected() {
 	DWORD dwFlags = 0;
-	return InternetGetConnectedState(&dwFlags, NULL);
+	return InternetGetConnectedState(&dwFlags, 0);
 }
 
 }  // namespace enigma_user
