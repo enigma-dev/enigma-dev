@@ -569,8 +569,7 @@ string get_directory(string dname, string caption)
   SelectDirectory->GetOptions(&options);
   SelectDirectory->SetOptions(options | FOS_PICKFOLDERS | FOS_NOCHANGEDIR | FOS_FORCEFILESYSTEM);
 
-  string str_dname = dname;
-  tstring tstr_dname = widen(str_dname);
+  tstring tstr_dname = widen(dname);
   LPWSTR szFilePath = (wchar_t *)tstr_dname.c_str();
 
   IShellItem *pItem = nullptr;
@@ -597,12 +596,12 @@ string get_directory(string dname, string caption)
     pItem->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &wstr_result);
     pItem->Release();
 
-    static string str_result;
+    string str_result;
     str_result = string_replace_all(shorten(wstr_result) + "\\", "\\\\", "\\");
-    return (char *)str_result.c_str();
+    return str_result;
   }
 
-  return (char *)"";
+  return "";
 }
 
 string get_directory_alt(string message, string root, bool modern, string caption) {
