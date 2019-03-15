@@ -41,7 +41,7 @@ namespace enigma
   inst_iter::inst_iter(object_basic* i,inst_iter *n = NULL,inst_iter *p = NULL):
       inst(i), next(n), prev(p) {}
   inst_iter::inst_iter() {}
-  
+
   objectid_base::objectid_base(): inst_iter(NULL,NULL,this), count(0) {}
   event_iter::event_iter(string n): inst_iter(NULL,NULL,this), name(n) {}
   event_iter::event_iter(): inst_iter(NULL,NULL,this) {}
@@ -59,7 +59,7 @@ namespace enigma
   void iterator::addme() {
     central_iterator_cache.insert(this);
   }
-  
+
   void iterator::copy(const iterator& other) {
     // If the other pointer indicates its own temporary object, copy
     // it into our temporary object and point to ours, instead.
@@ -73,7 +73,7 @@ namespace enigma
       it = other.it;
     }
   }
-  
+
   void iterator::handle_unlink(const inst_iter *dead) {
     if (it) {
       if (it->next == dead) {
@@ -118,7 +118,7 @@ namespace enigma
     it = &temp_iter;
     return *this;
   }
-  
+
   // Always add ourself to the central iterator cache, because future
   // assignment could cause us to point to something deleteable
   iterator::iterator(): it(NULL) {
@@ -253,7 +253,7 @@ namespace enigma
     }
 
     if (x < 100000)
-      return x < object_idmax ? objects[x].next ? objects[x].next->inst : NULL : NULL;
+      return size_t(x) < object_idmax ? objects[x].next ? objects[x].next->inst : NULL : NULL;
 
     iliter a = instance_list.find(x);
     return a != instance_list.end() ? a->second->inst : NULL;

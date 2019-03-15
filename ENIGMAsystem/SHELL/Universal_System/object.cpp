@@ -77,11 +77,11 @@ namespace enigma
     bool object_basic::can_cast(int obj) const { return false; }
 
     extern objectstruct objs[];
-    extern int obj_idmax;
+    extern size_t object_idmax;
 
     void objectdata_load()
     {
-        objectdata = new objectstruct*[obj_idmax];
+        objectdata = new objectstruct*[object_idmax];
         for (int i = 0; i < objectcount; i++)
             objectdata[objs[i].id] = &objs[i];
     }
@@ -89,10 +89,10 @@ namespace enigma
 
 #if defined(SHOW_ERRORS) && SHOW_ERRORS
   #define errcheck(objid,err) \
-  if (objid < 0 or objid >= enigma::objectcount or !enigma::objectdata[objid]) \
+  if (objid < 0 or size_t(objid) >= enigma::object_idmax or !enigma::objectdata[objid]) \
     return (show_error(err,0), 0)
   #define errcheck(objid,err) \
-  if (objid < 0 or objid >= enigma::objectcount or !enigma::objectdata[objid]) \
+  if (objid < 0 or size_t(objid) >= enigma::object_idmax or !enigma::objectdata[objid]) \
     show_error(err,0)
 #else
   #define errcheck(objid,err)
@@ -104,7 +104,7 @@ namespace enigma_user
 
 bool object_exists(int objid)
 {
-  return ((objid >= 0) && (unsigned(objid) < enigma::obj_idmax) && bool(enigma::objectdata[objid]));
+  return ((objid >= 0) && (size_t(objid) < enigma::object_idmax) && bool(enigma::objectdata[objid]));
 }
 
 void object_set_depth(int objid, int val)

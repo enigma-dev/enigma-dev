@@ -663,7 +663,6 @@ static inline string resname(string name) {
 static inline void write_object_data_structs(std::ostream &wto,
       const ParsedObjectVec &parsed_objects) {
   wto << "  objectstruct objs[] = {\n" << std::fixed;
-  int obmx = 0;
   for (parsed_object *object : parsed_objects) {
     wto << "    { "
         << resname(object->sprite_name)  << ", "
@@ -675,12 +674,10 @@ static inline void write_object_data_structs(std::ostream &wto,
         << resname(object->parent_name)  << ", "
         << object->id
         << " },\n";
-    if (object->id >= obmx) obmx = object->id;
   }
   wto.unsetf(ios_base::floatfield);
   wto << "  };\n";
   wto << "  int objectcount = " << parsed_objects.size() << ";\n";
-  wto << "  int obj_idmax = " << obmx+1 << ";\n";
 }
 
 static inline void write_object_declarations(lang_CPP* lcpp, const GameData &game, const CompileState &state, robertmap &parent_undefinitions) {
