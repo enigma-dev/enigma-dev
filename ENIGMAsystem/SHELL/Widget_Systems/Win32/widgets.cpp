@@ -25,13 +25,14 @@
 **                                                                              **
 \********************************************************************************/
 
+// As is typical of Win32 code, this code is fuck-ugly. Refer to the GTK version for
+// porting to competent widget systems. Use this only for low-level APIs.
+#define WINVER 9001
+
 #include "Widget_Systems/General/WSwidgets.h"
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
 #include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 
-// As is typical of Win32 code, this code is fuck-ugly. Refer to the GTK version for
-// porting to competent widget systems. Use this only for low-level APIs.
-#define WINVER 9001
 #include <windows.h>
 #include <commctrl.h>
 #include <windowsx.h>
