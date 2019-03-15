@@ -19,7 +19,7 @@
 #include "Platforms/SDL/Window.h"
 
 #include <SDL2/SDL.h>
-#include <GL/glew.h>
+#include <epoxy/gl.h>
 
 namespace enigma {
 
@@ -41,10 +41,6 @@ void init_sdl_window_bridge_attributes() {
 
 void EnableDrawing(void*) {
   context = SDL_GL_CreateContext(windowHandle);
-
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
-    show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
 }
 
 void DisableDrawing(void*) {
