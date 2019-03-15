@@ -26,7 +26,7 @@ before_install:
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
         sudo apt-get -y install libc6:i386 libc++-dev:i386 libstdc++6:i386\
-          libncurses5:i386 libx11-6:i386 libglew-dev:i386 libglu1-mesa-dev:i386\
+          libncurses5:i386 libx11-6:i386 libepoxy-dev:i386 libglu1-mesa-dev:i386\
           libgl1-mesa-dev:i386 lib32z1-dev libxrandr-dev:i386;
 
         if [ "$COMPILER" == "gcc32" ]; then
@@ -40,7 +40,7 @@ before_install:
         unzip enigma-libs.zip -d ENIGMAsystem/;
         mv ENIGMAsystem/Install ENIGMAsystem/Additional;
       else
-        sudo apt-get -y install libc++-dev libglew-dev libglu1-mesa-dev libxrandr-dev;
+        sudo apt-get -y install libc++-dev libepoxy-dev libglu1-mesa-dev libxrandr-dev;
       fi
 
       if [ "$AUDIO" == "OpenAL" ]; then
@@ -78,7 +78,7 @@ before_install:
       fi
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
-      brew install glew protobuf pugixml;
+      brew install libepoxy protobuf pugixml;
     fi
 
 # build JDI and the CLI
