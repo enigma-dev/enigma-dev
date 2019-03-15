@@ -22,9 +22,10 @@
 #include "Graphics_Systems/General/GScolors.h"
 
 #include <string>
+
+#include <epoxy/gl.h>
+#include <epoxy/wgl.h>
 #include <windows.h>
-#include <GL/glew.h>
-#include <GL/wglew.h>
 
 namespace enigma {
 
@@ -110,10 +111,6 @@ void EnableDrawing(void*)
   LegacyRC = wglCreateContext( enigma::window_hDC );
   wglMakeCurrent( enigma::window_hDC, LegacyRC );
 
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
-    show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
-
   // -- Define an array of Context Attributes
   int attribs[] =
   {
@@ -128,7 +125,7 @@ void EnableDrawing(void*)
     0
   };
 
-  if ( wglewIsSupported("WGL_ARB_create_context") )
+  if ( epoxy_has_wgl_extension(enigma::window_hDC, "WGL_ARB_create_context") )
   {
     hRC = wglCreateContextAttribsARB( enigma::window_hDC,0, attribs );
     wglMakeCurrent( NULL,NULL );

@@ -15,7 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef JUST_DEFINE_IT_RUN
+
 // TGMG: I've replaced your include of the switchboard with this hard-coded job until I find
 // something more elegant.          -Josh
 
 #include <epoxy/gl.h>
+
+#endif

@@ -111,7 +111,7 @@ namespace enigma {
 bool vbo_is_supported = false;
 
 void graphics_init_vbo_method() {
-  // we don't check for extensions until GLEW has been initialized
+  // we don't check for extensions until libepoxy is ready
   vbo_is_supported = GL_ARB_vertex_buffer_object;
   // if the vbo extension is supported, but the GL version is old,
   // we need to alias the buffer functions to the extension ones
