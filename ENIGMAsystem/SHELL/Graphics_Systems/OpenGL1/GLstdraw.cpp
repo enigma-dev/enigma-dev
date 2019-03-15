@@ -27,6 +27,8 @@
 #include <math.h>
 #include <stdio.h>
 
+#include <GL/glut.h>
+
 //Proper calling convention is needed on Windows to prevent random crashing.
 //However, we assume that if CALLBACK is already defined then it is defined correctly.
 #ifndef CALLBACK
@@ -55,7 +57,7 @@ int draw_get_msaa_maxlevel()
 
 bool draw_get_msaa_supported()
 {
-    return GLEW_EXT_multisample;
+    return GL_EXT_multisample;
 }
 
 void draw_set_msaa_enabled(bool enable)

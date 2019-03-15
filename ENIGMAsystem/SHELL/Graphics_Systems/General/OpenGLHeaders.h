@@ -18,4 +18,4 @@
 // TGMG: I've replaced your include of the switchboard with this hard-coded job until I find
 // something more elegant.          -Josh
 
-#include <GL/glew.h>
+#include <epoxy/gl.h>

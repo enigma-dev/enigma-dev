@@ -20,8 +20,9 @@
 #include "Platforms/General/PFwindow.h"
 
 #include <string>
-#include <GL/glew.h>
-#include <GL/wglew.h>
+
+#include <epoxy/gl.h>
+#include <epoxy/wgl.h>
 
 namespace enigma {
 

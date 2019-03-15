@@ -112,10 +112,10 @@ bool vbo_is_supported = false;
 
 void graphics_init_vbo_method() {
   // we don't check for extensions until GLEW has been initialized
-  vbo_is_supported = GLEW_ARB_vertex_buffer_object;
+  vbo_is_supported = GL_ARB_vertex_buffer_object;
   // if the vbo extension is supported, but the GL version is old,
   // we need to alias the buffer functions to the extension ones
-  if (GLEW_ARB_vertex_buffer_object == true && GLEW_VERSION_1_5 == false) {
+  if (GL_ARB_vertex_buffer_object == true && GL_VERSION_1_5 == false) {
     glGenBuffers = glGenBuffersARB;
     glBindBuffer = glBindBufferARB;
     glBufferData = glBufferDataARB;

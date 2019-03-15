@@ -78,12 +78,12 @@ namespace enigma_user
 
 bool surface_is_supported()
 {
-    return GLEW_EXT_framebuffer_object;
+    return GL_EXT_framebuffer_object;
 }
 
 int surface_create(int width, int height, bool depthbuffer, bool, bool)
 {
-    if (!GLEW_EXT_framebuffer_object) {
+    if (!GL_EXT_framebuffer_object) {
     return -1;
     }
 
@@ -133,7 +133,7 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
 
 int surface_create_msaa(int width, int height, int samples)
 {
-  if (!GLEW_EXT_framebuffer_object)
+  if (!GL_EXT_framebuffer_object)
   {
     return -1;
   }
