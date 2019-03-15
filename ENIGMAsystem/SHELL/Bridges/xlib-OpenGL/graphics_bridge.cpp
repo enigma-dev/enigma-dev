@@ -20,10 +20,10 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/xlib/XLIBwindow.h"
 
-#include <X11/Xlib.h>
-#include <GL/glxew.h>
-
 #include <cstring>
+
+#include <epoxy/glx.h>
+#include <X11/Xlib.h>
 
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
@@ -59,10 +59,6 @@ namespace enigma {
     //apply context
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
-
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
-      show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
   }
 
   void DisableDrawing(void* handle) {
