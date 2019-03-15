@@ -192,7 +192,7 @@ string lexer_cpp::_flatten(const string param, const macro_map& macros, const to
             char *buf=0, *bufe=0;
             mf->parse(arguments, buf, bufe, errep, herr);
             i = begin + p;
-            result.replace(s-begin+resOffset, i-s+resOffset, buf, bufe-buf);
+            result.replace(s-begin+resOffset, i-s, buf, bufe-buf);
             resOffset += (bufe-buf) - (i-s);
             delete[] buf;
           }
