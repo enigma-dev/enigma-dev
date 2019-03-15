@@ -16,6 +16,7 @@
 **/
 
 #include "yyp.h"
+#include "strings_util.h"
 
 #define RAPIDJSON_HAS_STDSTRING 1
 
@@ -28,7 +29,6 @@
 #include <functional>
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <unordered_map>
 #include <vector>
 
@@ -40,19 +40,6 @@ using namespace buffers::resources;
 namespace yyp {
 std::ostream out(nullptr);
 std::ostream err(nullptr);
-
-namespace {
-
-std::vector<std::string> SplitString(const std::string &str, char delimiter) {
-  std::vector<std::string> vec;
-  std::stringstream sstr(str);
-  std::string tmp;
-  while (std::getline(sstr, tmp, delimiter)) vec.push_back(tmp);
-
-  return vec;
-}
-
-} // Anonymous namespace
 
 void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, google::protobuf::Message *m, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
@@ -157,7 +144,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
         std::string splitValue;
 
         if (isSplit) { // if data use a comma delimiter eg. (0,7,9)
-          std::vector<std::string> split = SplitString(node.GetString(), ',');
+          std::vector<std::string> split = split_string(node.GetString(), ',');
           splitValue = split[static_cast<int>(alias.back()) - '0'];
         }
 

@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "strings_util.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <cstdlib>
@@ -241,13 +243,7 @@ string string_replace(string str,string substr,string newstr) {
 }
 
 string string_replace_all(string str,string substr,string newstr) {
-  size_t pos = 0;
-  const size_t sublen = substr.length(), newlen = newstr.length();
-  while ((pos = str.find(substr,pos)) != string::npos) {
-    str.replace(pos,sublen,newstr);
-    pos += newlen;
-  }
-  return str;
+  return ::string_replace_all(str, substr, newstr);
 }
 
 size_t string_count(string substr,string str) {
