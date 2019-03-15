@@ -109,33 +109,28 @@ void EnableDrawing(void*)
 
   SetPixelFormat ( enigma::window_hDC, iFormat, &pfd );
   LegacyRC = wglCreateContext( enigma::window_hDC );
-  wglMakeCurrent( enigma::window_hDC, LegacyRC );
 
-  // -- Define an array of Context Attributes
-  int attribs[] =
-  {
-    WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-    WGL_CONTEXT_MINOR_VERSION_ARB, 3,
-    //WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
-    #ifdef DEBUG_MODE
-      WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
-    #else
-      WGL_CONTEXT_FLAGS_ARB, 0,
-    #endif
-    0
-  };
+  if (epoxy_has_wgl_extension(enigma::window_hDC, "WGL_ARB_create_context")) {
+    // -- Define an array of Context Attributes
+    int attribs[] =
+    {
+      WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+      WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+      //WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+      #ifdef DEBUG_MODE
+        WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
+      #else
+        WGL_CONTEXT_FLAGS_ARB, 0,
+      #endif
+      0
+    };
 
-  if ( epoxy_has_wgl_extension(enigma::window_hDC, "WGL_ARB_create_context") )
-  {
-    hRC = wglCreateContextAttribsARB( enigma::window_hDC,0, attribs );
-    wglMakeCurrent( NULL,NULL );
-    wglDeleteContext( LegacyRC );
-    wglMakeCurrent(enigma::window_hDC, hRC );
-  }
-  else // Unable to get a 3.3 Core Context, use the Legacy 1.x context
-  {
+    hRC = wglCreateContextAttribsARB(enigma::window_hDC, 0, attribs);
+    wglDeleteContext(LegacyRC);
+  } else { // Unable to get a 3.3 Core Context, use the Legacy 1.x context
     hRC = LegacyRC;
   }
+  wglMakeCurrent(enigma::window_hDC, hRC);
 
   #ifdef DEBUG_MODE
   glDebugMessageCallbackARB((GLDEBUGPROCARB)&DebugCallbackARB, 0);
