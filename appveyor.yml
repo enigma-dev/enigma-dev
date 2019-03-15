@@ -39,7 +39,7 @@ environment:
 
     # Graphics
     - {GRAPHICS: Direct3D11, PACKAGES: "glm:x"}
-    - {GRAPHICS: OpenGL1, PACKAGES: "glew:x"}
+    - {GRAPHICS: OpenGL1, PACKAGES: "libepoxy:x"}
 
     # Audio
     - {AUDIO: DirectSound}
