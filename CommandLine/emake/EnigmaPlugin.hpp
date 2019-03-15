@@ -37,7 +37,7 @@ public:
   syntax_error* SyntaxCheck(int count, const char** names, const char* code);
   void HandleGameLaunch();
   void LogMakeToConsole();
-  int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
+  int BuildGame(deprecated::JavaStruct::EnigmaStruct* data, GameMode mode, const char* fpath);
   int BuildGame(buffers::Game* data, GameMode mode, const char* fpath);
   const char* NextResource();
   const char* FirstResource();
@@ -53,7 +53,7 @@ public:
 
 private:
   std::function<const char*(EnigmaCallbacks*)> plugin_Init = nullptr;
-  std::function<int(EnigmaStruct*, const char*, int)> plugin_CompileEGM = nullptr;
+  std::function<int(deprecated::JavaStruct::EnigmaStruct*, const char*, int)> plugin_CompileEGM = nullptr;
   std::function<int(const buffers::Project *proj, const char*, int)> plugin_CompileProto = nullptr;
   std::function<const char*()> plugin_NextResource = nullptr;
   std::function<const char*()> plugin_FirstResource = nullptr;

@@ -63,7 +63,7 @@ int EnigmaPlugin::Load()
 #endif
 
   plugin_Init = reinterpret_cast<const char*(*)(EnigmaCallbacks*)>(BindFunc(_handle, "libInit"));
-  plugin_CompileEGM = reinterpret_cast<int (*)(EnigmaStruct *es, const char* exe_filename, int mode)>(BindFunc(_handle, "compileEGMf"));
+  plugin_CompileEGM = reinterpret_cast<int (*)(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode)>(BindFunc(_handle, "compileEGMf"));
   plugin_CompileProto = reinterpret_cast<int (*)(const buffers::Project *proj, const char* exe_filename, int mode)>(BindFunc(_handle, "compileProto"));
   plugin_NextResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "next_available_resource"));
   plugin_FirstResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "first_available_resource"));
@@ -114,8 +114,8 @@ void EnigmaPlugin::LogMakeToConsole()
   plugin_LogMakeToConsole();
 }
 
-int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath)
-{
+int EnigmaPlugin::BuildGame(deprecated::JavaStruct::EnigmaStruct* data,
+                            GameMode mode, const char* fpath) {
   return plugin_CompileEGM(data, fpath, mode);
 }
 

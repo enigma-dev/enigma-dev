@@ -12,30 +12,30 @@ class Game
 public:
   void AddSimpleObject(const std::map<std::pair<int,int>, std::string> &events);
   void AddDefaultRoom();
-  EnigmaStruct* ConstructGame();
+  deprecated::JavaStruct::EnigmaStruct* ConstructGame();
   void SetOutputFile(std::string fName);
 
 protected:
-  EnigmaStruct _game;
+  deprecated::JavaStruct::EnigmaStruct _game;
   std::string _output_filename;
-  std::vector<Script> _scripts;
-  std::vector<Sprite> _sprites;
-  std::vector<Shader> _shaders;
-  std::vector<Sound> _sounds;
-  std::vector<Font> _fonts;
-  std::vector<Background> _backgrounds;
-  std::vector<Path> _paths;
-  std::vector<Timeline> _timelines;
-  std::vector<GmObject> _objects;
-  std::vector<Room> _rooms;
+  std::vector<deprecated::JavaStruct::Script> _scripts;
+  std::vector<deprecated::JavaStruct::Sprite> _sprites;
+  std::vector<deprecated::JavaStruct::Shader> _shaders;
+  std::vector<deprecated::JavaStruct::Sound> _sounds;
+  std::vector<deprecated::JavaStruct::Font> _fonts;
+  std::vector<deprecated::JavaStruct::Background> _backgrounds;
+  std::vector<deprecated::JavaStruct::Path> _paths;
+  std::vector<deprecated::JavaStruct::Timeline> _timelines;
+  std::vector<deprecated::JavaStruct::GmObject> _objects;
+  std::vector<deprecated::JavaStruct::Room> _rooms;
 
-  std::vector<std::vector<MainEvent>> _main_events;
-  std::vector<std::vector<Event>> _events;
-  std::vector<std::vector<Instance>> _instances;
+  std::vector<std::vector<deprecated::JavaStruct::MainEvent>> _main_events;
+  std::vector<std::vector<deprecated::JavaStruct::Event>> _events;
+  std::vector<std::vector<deprecated::JavaStruct::Instance>> _instances;
   std::vector<std::string> _strings;
 
   const char* SS(std::string str);
-  void AddSimpleEvent(std::vector<MainEvent>* main_events,
+  void AddSimpleEvent(std::vector<deprecated::JavaStruct::MainEvent>* main_events,
                       int main_id, int id, std::string code);
 };
 
