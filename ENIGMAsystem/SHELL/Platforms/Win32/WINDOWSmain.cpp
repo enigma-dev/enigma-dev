@@ -16,6 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#define NOMINMAX // for windows.h because we use std::min/max
 #include "WINDOWSmain.h"
 
 #include "Platforms/General/PFmain.h"
@@ -28,7 +29,8 @@
 
 #include <mmsystem.h>
 #include <time.h>
-#include <unistd.h>
+#include <chrono>
+#include <thread>
 #include <algorithm>
 #include <cstdio>
 #include <sstream>
@@ -270,7 +272,7 @@ int updateTimer() {
     }
     if (remaining_mcs > needed_mcs) {
       const long sleeping_time = std::min((remaining_mcs - needed_mcs) / 5, long(999999));
-      usleep(std::max(long(1), sleeping_time));
+      std::this_thread::sleep_for(std::chrono::microseconds(std::max(long(1), sleeping_time)));
       return -1;
     }
   }

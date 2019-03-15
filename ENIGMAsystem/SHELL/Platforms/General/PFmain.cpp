@@ -5,7 +5,8 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Universal_System/roomsystem.h"
 
-#include <unistd.h>  //getcwd, usleep
+#include <chrono> // std::chrono::microseconds
+#include <thread> // sleep_for
 
 namespace enigma {
 
@@ -32,7 +33,7 @@ int gameWait() {
     if (pausedSteps < 1) {
       pausedSteps += 1;
     } else {
-      usleep(100000);
+      std::this_thread::sleep_for(std::chrono::microseconds(100000));
       return -1;
     }
   }
