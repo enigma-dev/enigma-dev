@@ -24,10 +24,6 @@
 #include "Universal_System/roomsystem.h"
 
 #include <cstdlib>
-#include <math.h>
-#include <stdio.h>
-
-#include <GL/glut.h>
 
 //Proper calling convention is needed on Windows to prevent random crashing.
 //However, we assume that if CALLBACK is already defined then it is defined correctly.
@@ -40,6 +36,10 @@
 #    define CALLBACK
 #  endif
 #endif
+
+#include <GL/glu.h>
+#include <math.h>
+#include <stdio.h>
 
 namespace enigma {
 extern unsigned char currentcolor[4];
