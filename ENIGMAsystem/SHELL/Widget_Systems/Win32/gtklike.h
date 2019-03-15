@@ -75,7 +75,10 @@ struct gtkl_container: gtkl_placer
 
 
 #include <map>
-inline int min(int x, int y) { return x<y?x:y; }
+#include <algorithm> //std::min
+
+using std::min;
+
 // Above we have the basic class layout;
 // Now we provide some useful algorithms
 struct gtkl_table: gtkl_container

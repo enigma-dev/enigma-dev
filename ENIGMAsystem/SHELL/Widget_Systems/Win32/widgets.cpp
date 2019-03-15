@@ -25,6 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
+#define NOMINMAX // before all windows.h includes since we use std::min/max
 #include "Widget_Systems/General/WSwidgets.h"
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
 #include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
