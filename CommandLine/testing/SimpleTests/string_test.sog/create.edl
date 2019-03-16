@@ -1,0 +1,119 @@
+gtest_assert_eq(base64_encode("The cake is a lie."), "VGhlIGNha2UgaXMgYSBsaWUu");
+gtest_assert_eq(base64_decode("VGhlIGNha2UgaXMgYSBsaWUu"), "The cake is a lie.");
+
+gtest_assert_true(is_base64("a"[0]));
+gtest_assert_true(is_base64("z"[0]));
+gtest_assert_true(is_base64("A"[0]));
+gtest_assert_true(is_base64("Z"[0]));
+gtest_assert_true(is_base64("0"[0]));
+gtest_assert_true(is_base64("1"[0]));
+gtest_assert_true(is_base64("9"[0]));
+gtest_assert_true(is_base64("/"[0]));
+gtest_assert_true(is_base64("+"[0]));
+
+// False, even though this can occur at the end of a base64 string as padding.s
+gtest_assert_false(is_base64("="[0]));
+
+gtest_assert_false(is_base64("."[0]));
+gtest_assert_false(is_base64("-"[0]));
+gtest_assert_false(is_base64("*"[0]));
+gtest_assert_false(is_base64("("[0]));
+gtest_assert_false(is_base64(")"[0]));
+gtest_assert_false(is_base64("["[0]));
+gtest_assert_false(is_base64("]"[0]));
+gtest_assert_false(is_base64("{"[0]));
+gtest_assert_false(is_base64("}"[0]));
+
+// TODO: These are completely busted.
+// std::string ansi_char(char byte);
+// std::string chr(char val);
+// int ord(std::string str);
+
+gtest_assert_eq(real(15.5), 15.5);
+gtest_assert_eq(real((float) 15.5), 15.5);
+gtest_assert_eq(real("3.125"), 3.125);
+// Without making guarantees about the behavior of big numbers,
+// assert that they're covered.
+//gtest_assert_gt(real("1234567890123"), 1234567890000.);
+
+variant my_str = "hello, world";
+gtest_assert_eq(string_length("hello, world"), 12);
+gtest_assert_eq(string_length(my_str), 12);
+
+// String length operations use bytes unless otherwise directed.
+my_str = "hello, 🌎! 😀";
+gtest_assert_eq(string_length("hello, 🌎! 😀"), 17);
+gtest_assert_eq(string_length(my_str), 17);
+gtest_assert_eq(string_length_utf8("hello, 🌎! 😀"), 11);
+gtest_assert_eq(string_length_utf8(my_str), 11);
+
+
+// TODO: This may be inconsistent with the GM version.
+gtest_assert_eq(string_format(pi, 0, 2), "3.14");
+gtest_assert_eq(string_format(pi, 5, 2), "03.14");
+gtest_assert_eq(string_format(pi, 7, 2), "0003.14");
+gtest_assert_eq(string_format(pi, 7, 5), "3.14159");
+
+// String functions are one-based... it's sad.
+// Something we might consider doing in the future is changing the string_
+// spec to evaluate unicode characters, since we're already doing weird
+// arithmetic to translate these indices to bytes (namely, subtraction).
+gtest_assert_eq(string_copy("hello, world", 4, 6), "lo, wo");
+gtest_assert_eq(string_set_byte_at("hello", 2, "u"[0]), "hullo");
+gtest_assert_eq(string_byte_at("[✓] Same", 1), (char) 0x5B);
+gtest_assert_eq(string_byte_at("[✓] Same", 2), (char) 0xE2);
+gtest_assert_eq(string_char_at("pina colada", 3), "n");
+// TODO: This doesn't work right now because ñ is multi-byte.
+// gtest_assert_eq(string_char_at("piña colada", 3), "ñ");
+gtest_assert_eq(string_delete("fire truck", 2, 6), "fuck");
+gtest_assert_eq(string_insert("penis", "themightierthanthesword", 4),
+                "thepenismightierthanthesword");
+
+// Naive search is always safe in unicode.
+// We use byte offsets rather than char offsets here, too.
+gtest_assert_eq(string_pos("wood", "how much wood would a woodchuck chuck"), 10);
+
+
+// Back into the realm of sanity.
+gtest_assert_eq(string_replace_all("a::b::c::d", "::", "."), "a.b.c.d");
+gtest_assert_eq(string_replace_all("a::b::c::d", "::", "::::"), "a::::b::::c::::d");
+gtest_assert_eq(string_replace_all("poopoopoopoopoop", "poop", "boob"), "boobooboobooboob");
+gtest_assert_eq(string_replace("a::b::c::d", "::", "."), "a.b::c::d");
+gtest_assert_eq(string_replace("a::b::c::d", "::", "::::"), "a::::b::c::d");
+gtest_assert_eq(string_replace("poopoopoopoopoop", "poop", "boob"), "booboopoopoopoop");
+
+gtest_assert_eq(string_count("foo", "foo bar foo foo bar"), 3);
+gtest_assert_eq(string_count("bar", "foo bar foo foo bar"), 2);
+gtest_assert_eq(string_count("baz", "foo bar foo foo bar"), 0);
+gtest_assert_eq(string_count("poop", "poopoopoopoopoop"), 3);
+
+gtest_assert_eq(string_lower("hElLo, wOrLd"), "hello, world");
+gtest_assert_eq(string_upper("hElLo, wOrLd"), "HELLO, WORLD");
+
+gtest_assert_eq(string_repeat("poop", 3), "pooppooppoop");
+
+gtest_assert_eq(string_letters("F0r o1ste2 d0 B0ut5 t0! :s"), "FrostedButts");
+gtest_assert_eq(string_digits("d0 1 need 2? :3"), "0123");
+gtest_assert_eq(string_lettersdigits("~* (W33b L0rd) *~"), "W33bL0rd");
+
+gtest_assert_true(string_isletters("HelloWorld"));
+gtest_assert_false(string_isletters("Hello, world!"));
+gtest_assert_false(string_isletters("hello_world"));
+gtest_assert_true(string_isdigits("12345"));
+gtest_assert_false(string_isdigits("1,234,567"));
+gtest_assert_false(string_isdigits("1.234"));
+gtest_assert_false(string_isdigits("sum1"));
+gtest_assert_true(string_islettersdigits("sum1"));
+gtest_assert_false(string_islettersdigits("sum1 do it"));
+
+var array = string_split("zero,one,two,three", ",");
+gtest_assert_eq(array[0], "zero");
+gtest_assert_eq(array[1], "one");
+gtest_assert_eq(array[2], "two");
+gtest_assert_eq(array[3], "three");
+
+gtest_assert_eq(array_length_1d(string_split("zero,one,two,three", ",")), 4);
+gtest_assert_eq(array_length_1d(string_split("zero,one,two,three,", ",")), 5);
+gtest_assert_eq(array_length_1d(string_split("zero,,one,two,,,three,", ",", true)), 4);
+
+game_end();

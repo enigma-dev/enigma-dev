@@ -123,6 +123,17 @@ void execute_program(std::string operation, std::string fname, std::string args,
   }
 }
 
+std::string execute_shell_for_output(const std::string &command) {
+  std::string res;
+  char buffer[BUFSIZ];
+  FILE *pf = popen(command.c_str(), "r");
+  while (!feof(pf)) {
+    res.append(buffer, fread(&buffer, sizeof(char), BUFSIZ, pf));
+  }
+  pclose(pf);
+  return res;
+}
+
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("", fname, args, wait); }
 
 void url_open(std::string url, std::string target, std::string options) {
