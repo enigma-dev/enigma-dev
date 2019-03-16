@@ -308,13 +308,11 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
   binbuff->Seek(offset);
   if (type != buffer_string) {
     //unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
-    unsigned char data[buffer_sizeof(type)];
     //NOTE: These buffers most likely need a little more code added to take care of endianess on different architectures.
     //TODO: Fix floating point precision.
     long res = 0;
     for (unsigned i = 0; i < buffer_sizeof(type); i++) {
-      data[i] = binbuff->ReadByte();
-      res += data[i] << i * 8;
+      res += binbuff->ReadByte() << i * 8;
     }
     return res;
   } else {
