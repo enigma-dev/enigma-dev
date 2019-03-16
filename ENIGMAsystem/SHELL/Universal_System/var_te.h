@@ -37,35 +37,35 @@
  * / This stuff just takes up entirely too much space.
  */
 
-#define types_extrapolate_real_p(prefix,suffix...)\
- prefix (int x)       EVCONST suffix\
- prefix (long x)      EVCONST suffix\
- prefix (unsigl x)    EVCONST suffix\
- prefix (unsigned x)  EVCONST suffix\
- prefix (long long x) EVCONST suffix\
- prefix (unsigll x)   EVCONST suffix\
- prefix (float x)     EVCONST suffix\
- prefix (double x)    EVCONST suffix
+#define types_extrapolate_real_p(prefix,...)\
+ prefix (int x)       EVCONST __VA_ARGS__\
+ prefix (long x)      EVCONST __VA_ARGS__\
+ prefix (unsigl x)    EVCONST __VA_ARGS__\
+ prefix (unsigned x)  EVCONST __VA_ARGS__\
+ prefix (long long x) EVCONST __VA_ARGS__\
+ prefix (unsigll x)   EVCONST __VA_ARGS__\
+ prefix (float x)     EVCONST __VA_ARGS__\
+ prefix (double x)    EVCONST __VA_ARGS__
 
-#define types_binary_extrapolate_real_p(prefix,type2,suffix...)\
- prefix (int x,type2 y)       EVCONST suffix\
- prefix (long x,type2 y)      EVCONST suffix\
- prefix (unsigl x,type2 y)    EVCONST suffix\
- prefix (unsigned x,type2 y)  EVCONST suffix\
- prefix (long long x,type2 y) EVCONST suffix\
- prefix (unsigll x,type2 y)   EVCONST suffix\
- prefix (double x,type2 y)    EVCONST suffix\
- prefix (float x,type2 y)     EVCONST suffix
+#define types_binary_extrapolate_real_p(prefix,type2,...)\
+ prefix (int x,type2 y)       EVCONST __VA_ARGS__\
+ prefix (long x,type2 y)      EVCONST __VA_ARGS__\
+ prefix (unsigl x,type2 y)    EVCONST __VA_ARGS__\
+ prefix (unsigned x,type2 y)  EVCONST __VA_ARGS__\
+ prefix (long long x,type2 y) EVCONST __VA_ARGS__\
+ prefix (unsigll x,type2 y)   EVCONST __VA_ARGS__\
+ prefix (double x,type2 y)    EVCONST __VA_ARGS__\
+ prefix (float x,type2 y)     EVCONST __VA_ARGS__
 
-#define types_binary_bitwise_extrapolate_real_p(op,type2,sentiment...)\
- int       operator op(int x,type2 y)       EVCONST { sentiment; return x op int(y); }\
- long      operator op(long x,type2 y)      EVCONST { sentiment; return x op int(y); }\
- unsigned  operator op(unsigned x,type2 y)  EVCONST { sentiment; return x op int(y); }\
- unsigl    operator op(unsigl x,type2 y)    EVCONST { sentiment; return x op int(y); }\
- long long operator op(long long x,type2 y) EVCONST { sentiment; return x op (long long)(y); }\
- unsigll   operator op(unsigll x,type2 y)   EVCONST { sentiment; return x op (unsigll)(y); }\
- long      operator op(double x,type2 y)    EVCONST { sentiment; return long(x) op long(y); }\
- long      operator op(float x,type2 y)     EVCONST { sentiment; return long(x) op long(y); }
+#define types_binary_bitwise_extrapolate_real_p(op,type2,...)\
+ int       operator op(int x,type2 y)       EVCONST { __VA_ARGS__; return x op int(y); }\
+ long      operator op(long x,type2 y)      EVCONST { __VA_ARGS__; return x op int(y); }\
+ unsigned  operator op(unsigned x,type2 y)  EVCONST { __VA_ARGS__; return x op int(y); }\
+ unsigl    operator op(unsigl x,type2 y)    EVCONST { __VA_ARGS__; return x op int(y); }\
+ long long operator op(long long x,type2 y) EVCONST { __VA_ARGS__; return x op (long long)(y); }\
+ unsigll   operator op(unsigll x,type2 y)   EVCONST { __VA_ARGS__; return x op (unsigll)(y); }\
+ long      operator op(double x,type2 y)    EVCONST { __VA_ARGS__; return long(x) op long(y); }\
+ long      operator op(float x,type2 y)     EVCONST { __VA_ARGS__; return long(x) op long(y); }
 
 #define types_binary_bitwise_extrapolate_alldecc(func, type2)\
  int       func(int x,type2 y) EVCONST;\
@@ -87,37 +87,37 @@
  double&    operator op##= (double &x,type2 y) EVCONST;\
  float&     operator op##= (float &x,type2 y) EVCONST;
 
-#define types_binary_assign_extrapolate_implement(op,type2, sentiment...)\
- int&       operator op##= (int &x,type2 y)        EVCONST { sentiment; return x op##= (int)y; }\
- long&      operator op##= (long &x,type2 y)       EVCONST { sentiment; return x op##= (long)y; }\
- unsigl&    operator op##= (unsigl &x,type2 y)     EVCONST { sentiment; return x op##= (long)y; }\
- unsigned&  operator op##= (unsigned &x,type2 y)   EVCONST { sentiment; return x op##= (int)y; }\
- long long& operator op##= (long long &x,type2 y)  EVCONST { sentiment; return x op##= (long long)y; }\
- unsigll&   operator op##= (unsigll &x,type2 y)    EVCONST { sentiment; return x op##= (unsigll)y; }\
- double&    operator op##= (double &x,type2 y)     EVCONST { sentiment; return x op##= (double)y; }\
- float&     operator op##= (float &x,type2 y)      EVCONST { sentiment; return x op##= (float)y; }
+#define types_binary_assign_extrapolate_implement(op,type2, ...)\
+ int&       operator op##= (int &x,type2 y)        EVCONST { __VA_ARGS__; return x op##= (int)y; }\
+ long&      operator op##= (long &x,type2 y)       EVCONST { __VA_ARGS__; return x op##= (long)y; }\
+ unsigl&    operator op##= (unsigl &x,type2 y)     EVCONST { __VA_ARGS__; return x op##= (long)y; }\
+ unsigned&  operator op##= (unsigned &x,type2 y)   EVCONST { __VA_ARGS__; return x op##= (int)y; }\
+ long long& operator op##= (long long &x,type2 y)  EVCONST { __VA_ARGS__; return x op##= (long long)y; }\
+ unsigll&   operator op##= (unsigll &x,type2 y)    EVCONST { __VA_ARGS__; return x op##= (unsigll)y; }\
+ double&    operator op##= (double &x,type2 y)     EVCONST { __VA_ARGS__; return x op##= (double)y; }\
+ float&     operator op##= (float &x,type2 y)      EVCONST { __VA_ARGS__; return x op##= (float)y; }
 
-#define types_binary_bitwise_assign_extrapolate_implement(op,type2, sentiment...)\
- int&       operator op##= (int &x,type2 y)        EVCONST { sentiment; return x op##= (int)y; }\
- long&      operator op##= (long &x,type2 y)       EVCONST { sentiment; return x op##= (long)y; }\
- unsigl&    operator op##= (unsigl &x,type2 y)     EVCONST { sentiment; return x op##= (long)y; }\
- unsigned&  operator op##= (unsigned &x,type2 y)   EVCONST { sentiment; return x op##= (int)y; }\
- long long& operator op##= (long long &x,type2 y)  EVCONST { sentiment; return x op##= (long long)y; }\
- unsigll&   operator op##= (unsigll &x,type2 y)    EVCONST { sentiment; return x op##= (unsigll)y; }\
- double&    operator op##= (double &x,type2 y)     EVCONST { sentiment; return x = (long)x op (long)y; }\
- float&     operator op##= (float &x,type2 y)      EVCONST { sentiment; return x = (long)x op (long)y; }
+#define types_binary_bitwise_assign_extrapolate_implement(op,type2, ...)\
+ int&       operator op##= (int &x,type2 y)        EVCONST { __VA_ARGS__; return x op##= (int)y; }\
+ long&      operator op##= (long &x,type2 y)       EVCONST { __VA_ARGS__; return x op##= (long)y; }\
+ unsigl&    operator op##= (unsigl &x,type2 y)     EVCONST { __VA_ARGS__; return x op##= (long)y; }\
+ unsigned&  operator op##= (unsigned &x,type2 y)   EVCONST { __VA_ARGS__; return x op##= (int)y; }\
+ long long& operator op##= (long long &x,type2 y)  EVCONST { __VA_ARGS__; return x op##= (long long)y; }\
+ unsigll&   operator op##= (unsigll &x,type2 y)    EVCONST { __VA_ARGS__; return x op##= (unsigll)y; }\
+ double&    operator op##= (double &x,type2 y)     EVCONST { __VA_ARGS__; return x = (long)x op (long)y; }\
+ float&     operator op##= (float &x,type2 y)      EVCONST { __VA_ARGS__; return x = (long)x op (long)y; }
 
-#define types_extrapolate_string_p(prefix,suffix...)\
- prefix (const char *x) EVCONST suffix\
- prefix (std::string x)      EVCONST suffix
+#define types_extrapolate_string_p(prefix,...)\
+ prefix (const char *x) EVCONST __VA_ARGS__\
+ prefix (std::string x)      EVCONST __VA_ARGS__
 
-#define types_binary_extrapolate_string_p(prefix,type2,suffix...)\
- prefix (const char *x,type2 y) EVCONST suffix\
- prefix (std::string x,type2 y)      EVCONST suffix
+#define types_binary_extrapolate_string_p(prefix,type2,...)\
+ prefix (const char *x,type2 y) EVCONST __VA_ARGS__\
+ prefix (std::string x,type2 y)      EVCONST __VA_ARGS__
 
-#define types_extrapolate_mix_p(prefix,suffix...)\
- prefix (variant x) EVCONST suffix\
- prefix (var x)     EVCONST suffix
+#define types_extrapolate_mix_p(prefix,...)\
+ prefix (variant x) EVCONST __VA_ARGS__\
+ prefix (var x)     EVCONST __VA_ARGS__
 
 #define types_extrapolate_alldec(prefix)\
  types_extrapolate_real_p  (prefix,;)\
