@@ -16,6 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "strings_util.h"
+
 #include "makedir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/GameData.h"
@@ -77,17 +79,6 @@ inline void writei(int x, FILE *f) {
 }
 inline void writef(float x, FILE *f) {
   fwrite(&x,4,1,f);
-}
-
-inline string string_replace_all(string str,string substr,string nstr)
-{
-  pt pos=0;
-  while ((pos=str.find(substr,pos)) != string::npos)
-  {
-    str.replace(pos,substr.length(),nstr);
-    pos+=nstr.length();
-  }
-  return str;
 }
 
 inline void write_desktop_entry(const std::string fPath, const GameData& game) {
