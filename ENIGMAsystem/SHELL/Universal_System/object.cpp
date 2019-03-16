@@ -76,7 +76,7 @@ namespace enigma
     object_basic::~object_basic() {}
     bool object_basic::can_cast(int obj) const { return false; }
 
-    extern objectstruct objs[];
+    extern std::vector<objectstruct> objs;
     extern int obj_idmax;
 
     void objectdata_load()
