@@ -257,8 +257,8 @@ namespace enigma
     load_tiles();
     //Tiles end
 
-    object_basic* is[instancecount];
-    for (int i = 0; i < instancecount; i++) {
+    std::vector<object_basic*> is(instances.size());
+    for (size_t i = 0; i < instances.size(); i++) {
       inst *obj = &instances[i];
       object_basic *existing;
       if ((existing = enigma::fetch_instance_by_id(obj->id))) {
@@ -277,7 +277,7 @@ namespace enigma
     }
 
     // Fire the create event of all the new instances.
-    for (int i = 0; i < instancecount; i++) {
+    for (size_t i = 0; i < instances.size(); i++) {
       if (is[i]) {
         is[i]->myevent_create();
       }
@@ -286,7 +286,7 @@ namespace enigma
     // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
     // the game ran they won't even exist yet
     if (gamestart) {
-      for (int i = 0; i < instancecount; i++) {
+      for (size_t i = 0; i < instances.size(); i++) {
         if (is[i]) {
           is[i]->myevent_gamestart();
         }
