@@ -219,7 +219,7 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,
                         gs_scalar xto, gs_scalar yto, gs_scalar zto,
                         gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
-  enigma::view = glm::lookAt(glm::vec3(xfrom, yfrom, zfrom), glm::vec3(xto, yto, zto), glm::vec3(xup, yup, zup));
+  enigma::view = glm::lookAtLH(glm::vec3(xfrom, yfrom, zfrom), glm::vec3(xto, yto, zto), glm::vec3(xup, yup, zup));
   enigma::graphics_set_matrix(matrix_view);
 }
 
@@ -228,8 +228,8 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,
                             gs_scalar xup, gs_scalar yup, gs_scalar zup,
                             gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
-  enigma::view = glm::lookAt(glm::vec3(xfrom, yfrom, zfrom), glm::vec3(xto, yto, zto), glm::vec3(xup, yup, zup));
-  enigma::projection = glm::perspective((float)gs_angle_to_radians(angle), (float)(aspect), znear, zfar);
+  enigma::view = glm::lookAtLH(glm::vec3(xfrom, yfrom, zfrom), glm::vec3(xto, yto, zto), glm::vec3(xup, yup, zup));
+  enigma::projection = glm::perspectiveLH((float)gs_angle_to_radians(angle), (float)(aspect), znear, zfar);
   enigma::graphics_set_matrix(matrix_view);
   enigma::graphics_set_matrix(matrix_projection);
 }
@@ -257,7 +257,7 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 {
   enigma::view = glm::translate(glm::mat4(1.0f), glm::vec3(-(x + width/2), -(y + height/2), (width+height)/2));
   enigma::view = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(0.0f, 0.0f, 1.0f)) * enigma::view;
-  enigma::projection = glm::perspective((float)gs_angle_to_radians(40.0f), width/height, 1.0f, 32000.0f);
+  enigma::projection = glm::perspectiveLH((float)gs_angle_to_radians(40.0f), width/height, 1.0f, 32000.0f);
   enigma::graphics_set_matrix(matrix_view);
   enigma::graphics_set_matrix(matrix_projection);
 }
