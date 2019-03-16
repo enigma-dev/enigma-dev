@@ -182,7 +182,7 @@ int tile_add(int background, int left, int top, int width, int height, int x, in
       color
     );
     enigma::rebuild_tile_layer(depth);
-    return enigma::maxtileid-1;
+    return enigma::maxtileid;
 }
 
 bool tile_delete(int id)
