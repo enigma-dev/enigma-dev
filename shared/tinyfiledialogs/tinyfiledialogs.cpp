@@ -89,6 +89,8 @@ misrepresented as being the original software.
 
 // THIS IS NOT THE ORIGINAL SOFTWARE; UNUSED CODE HAS BEEN REMOVED AND THE CONTENTS REMAINING HAVE BEEN MODIFIED.
 
+#include "strings_util.h"
+
 #define _POSIX_C_SOURCE 2 /* to accept POSIX 2 in old ANSI C standards */
 #include <stdio.h>
 #include <stdlib.h>
@@ -452,39 +454,10 @@ static int kdialogPresent( )
         return graphicMode() ? lKdialogPresent : 0 ;
 }
 
-
-static std::vector<std::string> SplitString(const std::string &str, char delimiter)
-{
-        std::vector<std::string> vec;
-        std::stringstream sstr(str);
-        std::string tmp;
-
-        while (std::getline(sstr, tmp, delimiter))
-                vec.push_back(tmp);
-
-        return vec;
-}
-
-
-static std::string string_replace_all(std::string str, std::string substr, std::string newstr)
-{
-    size_t pos = 0;
-    const size_t sublen = substr.length(), newlen = newstr.length();
-
-    while ((pos = str.find(substr, pos)) != std::string::npos)
-    {
-        str.replace(pos, sublen, newstr);
-        pos += newlen;
-    }
-
-    return str;
-}
-
-
 static std::string zenityFilter(std::string input)
 {
         std::replace(input.begin(), input.end(), ';', ' ');
-        std::vector<std::string> stringVec = SplitString(input, '|');
+        std::vector<std::string> stringVec = split_string(input, '|');
         std::string outputString = "";
 
         unsigned int index = 0;
@@ -509,7 +482,7 @@ static std::string zenityFilter(std::string input)
 static std::string kdialogFilter(std::string input)
 {
         std::replace(input.begin(), input.end(), ';', ' ');
-        std::vector<std::string> stringVec = SplitString(input, '|');
+        std::vector<std::string> stringVec = split_string(input, '|');
         std::string outputString = " \"";
 
         std::string even = "";
