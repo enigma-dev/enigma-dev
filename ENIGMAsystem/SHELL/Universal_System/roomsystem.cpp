@@ -250,7 +250,7 @@ namespace enigma
         dit->second.tiles.clear();
       }
     }
-    for (int i = 0; i < tilecount; i++) {
+    for (size_t i = 0; i < tiles.size(); i++) {
       tile t = tiles[i];
       drawing_depths[t.depth].tiles.push_back(t);
     }
@@ -546,31 +546,29 @@ namespace enigma
 namespace enigma_user
 {
 
-int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color)
+int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, double xscale, double yscale, double alpha, int color)
 {
   errcheck(indx,"Nonexistent room", 0);
   enigma::roomstruct *rm = enigma::roomdata[indx];
-  const int tcount = rm->tilecount++;
-  enigma::tile *ti = rm->tiles;
-  enigma::tile *newtiles = new enigma::tile[tcount + 1];
-  for (int tilei = 0; tilei < tcount; tilei++)
-    newtiles[tilei] = ti[tilei];
+    
+  std::vector<enigma::tile> newtiles = rm->tiles;
+  
+  newtiles.emplace_back(
+    enigma::maxtileid++,
+    bck,
+    left,
+    top,
+    depth,
+    height,
+    width,
+    x,
+    y,
+    xscale,
+    yscale,
+    alpha,
+    color
+  );
 
-  newtiles[tcount].id = enigma::maxtileid++;
-  newtiles[tcount].bckid = bck;
-  newtiles[tcount].bgx = left;
-  newtiles[tcount].bgy = top;
-  newtiles[tcount].depth = depth;
-  newtiles[tcount].height = height;
-  newtiles[tcount].width = width;
-  newtiles[tcount].roomX = x;
-  newtiles[tcount].roomY = y;
-  newtiles[tcount].xscale = xscale;
-  newtiles[tcount].yscale = yscale;
-  newtiles[tcount].alpha = alpha;
-  newtiles[tcount].color = color;
-
-  if (enigma::tile_alter) delete[] rm->tiles;
   rm->tiles = newtiles;
   enigma::tile_alter = true;
   return 1;
@@ -580,45 +578,31 @@ int room_tile_clear(int indx)
 {
   errcheck(indx,"Nonexistent room", 0);
   enigma::roomstruct *rm = enigma::roomdata[indx];
-  enigma::tile *newtiles = new enigma::tile[1];
-  rm->tilecount = 0;
 
-  if (enigma::tile_alter) delete[] rm->tiles;
-  rm->tiles = newtiles;
+  rm->tiles.clear();
   enigma::tile_alter = true;
   return 1;
 }
 
 int room_instance_add(int indx, int x, int y, int obj)
-  {
+{
   errcheck(indx,"Nonexistent room", 0);
   enigma::roomstruct *rm = enigma::roomdata[indx];
-  const int icount = rm->instancecount++;
-  enigma::inst *in = rm->instances;
-  enigma::inst *newinst = new enigma::inst[icount + 1];
-  for (int insti = 0; insti < icount; insti++)
-    newinst[insti] = in[insti];
-
-  newinst[icount].id = enigma::maxid++;
-  newinst[icount].x = x;
-  newinst[icount].y = y;
-  newinst[icount].obj = obj;
-
-  if (enigma::instance_alter) delete[] rm->instances;
-    rm->instances = newinst;
-    enigma::instance_alter = true;
-    return 1;
-  }
+  rm->instances.emplace_back(
+    enigma::maxid++,
+    obj,
+    x,
+    y
+  );
+  enigma::instance_alter = true;
+  return 1;
+}
 
 int room_instance_clear(int indx)
 {
   errcheck(indx,"Nonexistent room", 0);
   enigma::roomstruct *rm = enigma::roomdata[indx];
-  enigma::inst *newinst = new enigma::inst[1];
-  rm->instancecount = 0;
-
-  if (enigma::instance_alter) delete[] rm->instances;
-  rm->instances = newinst;
+  rm->instances.clear();
   enigma::instance_alter = true;
   return 1;
 }
@@ -647,14 +631,6 @@ int room_add()
   rm->views_enabled = false;
   rm->createcode = NULL;
   rm->precreatecode = NULL;
-
-  enigma::inst *newinst = new enigma::inst[1];
-  rm->instances = newinst;
-  rm->instancecount = 0;
-
-  enigma::tile *newtiles = new enigma::tile[1];
-  rm->tiles = newtiles;
-  rm->tilecount = 0;
 
   enigma::viewstruct vw;
   for (int i = 0; i < 8; i++)
@@ -727,18 +703,7 @@ int room_duplicate(int indx, bool ass, int assroom)
   rm->views_enabled = copyrm->views_enabled;
   rm->createcode = copyrm->createcode;
   rm->precreatecode = copyrm->precreatecode;
-
-  enigma::inst *newinst = new enigma::inst[copyrm->instancecount];
-  rm->instances = newinst;
-  rm->instancecount = copyrm->instancecount;
-  for (int i = 0; i < rm->instancecount; i++)
-    rm->instances[i] = copyrm->instances[i];
-
-  enigma::tile *newtiles = new enigma::tile[copyrm->tilecount];
-  rm->tiles = newtiles;
-  rm->tilecount = copyrm->tilecount;
-  for (int i = 0; i < rm->tilecount; i++)
-    rm->tiles[i] = copyrm->tiles[i];
+  rm->tiles = copyrm->tiles;
 
   enigma::viewstruct vw, vc;
   for (int i = 0; i < 8; i++)
