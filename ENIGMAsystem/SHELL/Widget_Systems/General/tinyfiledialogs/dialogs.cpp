@@ -16,7 +16,7 @@
 **/
 
 #include "dialogs.h"
-#include "Universal_System/estring.h"
+#include "strings_util.h"
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include <tinyfiledialogs/tinyfiledialogs.h>
@@ -35,8 +35,6 @@
 #include "Universal_System/object.h"
 #include "Universal_System/debugscope.h"
 #endif
-
-using enigma_user::string_replace_all;
 
 using enigma::tfd_Zenity;
 using enigma::tfd_KDialog;
