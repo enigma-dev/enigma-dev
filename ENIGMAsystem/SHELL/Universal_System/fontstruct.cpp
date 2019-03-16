@@ -74,9 +74,9 @@ namespace enigma
       // a square space based on the max height of the font.
 
       sprite *sspr = spritestructarray[spr];
-      unsigned char* glyphdata[gcount]; // Raw font image data
+      std::vector<unsigned char*> glyphdata(gcount); // Raw font image data
       std::vector<rect_packer::pvrect> glyphmetrics(gcount);
-      int glyphx[gcount], glyphy[gcount];
+      std::vector<int> glyphx(gcount), glyphy(gcount);
 
       int gwm = sspr->width, // Glyph width max: sprite width
           ghm = sspr->height, // Glyph height max: sprite height
@@ -158,7 +158,7 @@ namespace enigma
         }
       }
 
-      int bigtex[w*h];
+      std::vector<int> bigtex(w*h);
       for (unsigned i = 0; i < gcount; i++)
       {
         fontglyph& fg = fgr.glyphs[i];
@@ -176,7 +176,7 @@ namespace enigma
         fg.ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
       }
 
-      font->texture = graphics_create_texture(w,h,w,h,bigtex,false);
+      font->texture = graphics_create_texture(w,h,w,h,bigtex.data(),false);
       font->twid = w;
       font->thgt = h;
       font->yoffset = 0;
