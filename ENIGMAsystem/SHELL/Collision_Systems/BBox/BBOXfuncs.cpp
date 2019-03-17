@@ -491,7 +491,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
         inst1->y = inst1->yprevious;
     }
 
-    const double angle = inst1->direction, radang = angle*(M_PI/180.0), DBL_EPSILON = 0.00001;
+    const double angle = inst1->direction, radang = angle*(M_PI/180.0), BBOX_EPSILON = 0.00001;
     double sin_angle = sin(radang), cos_angle = cos(radang), pc_corner, pc_dist, max_dist = 1000000;
     int side_type = 0;
     const int quad = int(2*radang/M_PI);
@@ -529,7 +529,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                 angle_difference(point_direction(left1, top1, right2, bottom2),angle) <= 0)
                 {
                     pc_corner = angle_difference(point_direction(right1, top1, left2, bottom2),angle);
-                    if (fabs(pc_corner) < DBL_EPSILON)
+                    if (fabs(pc_corner) < BBOX_EPSILON)
                     {
                         pc_dist = (left2 - right1)/cos_angle;
                         if (pc_dist < max_dist)
@@ -541,7 +541,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                     else if (pc_corner > 0)
                     {
                         pc_dist = (top1 - bottom2)/sin_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
+                        if (fabs(pc_dist - max_dist) < BBOX_EPSILON)
                         {
                             if (side_type == 2)
                                 side_type = 3;
@@ -557,7 +557,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                     else
                     {
                         pc_dist = (left2 - right1)/cos_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
+                        if (fabs(pc_dist - max_dist) < BBOX_EPSILON)
                         {
                             if (side_type == 1)
                                 side_type = 3;
@@ -579,7 +579,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                 {
                     pc_corner = angle_difference(point_direction(left1, top1, right2, bottom2),angle);
 
-                    if (fabs(pc_corner) < DBL_EPSILON)
+                    if (fabs(pc_corner) < BBOX_EPSILON)
                     {
                         pc_dist = (left2 - right1)/cos_angle;
                         if (pc_dist < max_dist)
@@ -591,7 +591,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                     else if (pc_corner > 0)
                     {
                         pc_dist = (right2 - left1)/cos_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
+                        if (fabs(pc_dist - max_dist) < BBOX_EPSILON)
                         {
                             if (side_type == 1)
                                 side_type = 3;
@@ -607,7 +607,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                     else
                     {
                         pc_dist = (top1 - bottom2)/sin_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
+                        if (fabs(pc_dist - max_dist) < BBOX_EPSILON)
                         {
                             if (side_type == 2)
                                 side_type = 3;
@@ -628,7 +628,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                 angle_difference(point_direction(left1, top1, right2, bottom2),angle) >= 0)
                 {
                     pc_corner = angle_difference(point_direction(left1, bottom1, right2, top2),angle);
-                    if (fabs(pc_corner) < DBL_EPSILON)
+                    if (fabs(pc_corner) < BBOX_EPSILON)
                     {
                         pc_dist = (right2 - left1)/cos_angle;
                         if (pc_dist < max_dist)
@@ -640,7 +640,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                     else if (pc_corner > 0)
                     {
                         pc_dist = (bottom1 - top2)/sin_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
+                        if (fabs(pc_dist - max_dist) < BBOX_EPSILON)
                         {
                             if (side_type == 2)
                                 side_type = 3;
@@ -656,7 +656,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                     else
                     {
                         pc_dist = (right2 - left1)/cos_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
+                        if (fabs(pc_dist - max_dist) < BBOX_EPSILON)
                         {
                             if (side_type == 1)
                                 side_type = 3;
@@ -677,7 +677,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                 angle_difference(point_direction(left1, bottom1, right2, top2),angle) >= 0)
                 {
                     pc_corner = angle_difference(point_direction(right1, bottom1, left2, top2),angle);
-                    if (fabs(pc_corner) < DBL_EPSILON)
+                    if (fabs(pc_corner) < BBOX_EPSILON)
                     {
                         pc_dist = (bottom1 - top2)/sin_angle;
                         if (pc_dist < max_dist)
@@ -689,7 +689,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                     else if (pc_corner > 0)
                     {
                         pc_dist = (left2 - right1)/cos_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
+                        if (fabs(pc_dist - max_dist) < BBOX_EPSILON)
                         {
                             if (side_type == 1)
                                 side_type = 3;
@@ -705,7 +705,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
                     else
                     {
                         pc_dist = (bottom1 - top2)/sin_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
+                        if (fabs(pc_dist - max_dist) < BBOX_EPSILON)
                         {
                             if (side_type == 2)
                                 side_type = 3;
