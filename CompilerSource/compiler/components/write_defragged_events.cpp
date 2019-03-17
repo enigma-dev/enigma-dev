@@ -46,7 +46,7 @@ struct foundevent {
 };
 typedef map<string,foundevent>::iterator evfit;
 
-static inline int event_get_number(const buffers::resources::Event &event) {
+static inline int event_get_number(const buffers::resources::Object::Event &event) {
   if (event.has_name()) {
     std::cerr << "ERROR! IMPLEMENT ME: Event names not supported in compiler.\n";
   }
@@ -180,7 +180,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
   wto << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
-  
+
   int obj_high_id = 0;
   for (parsed_object *obj : parsed_objects) {
     if (obj->id > obj_high_id) obj_high_id = obj->id;

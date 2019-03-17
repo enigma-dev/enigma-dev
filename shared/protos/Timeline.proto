@@ -2,7 +2,6 @@ syntax = "proto2";
 package buffers.resources;
 
 import "options.proto";
-import "Event.proto";
 
 message Timeline {
   message Moment {

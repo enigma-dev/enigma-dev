@@ -73,12 +73,3 @@ message Action {
   optional bool is_not = 12 [(gmx) = "isnot"];
   repeated Argument arguments = 13 [(gmx) = "arguments/argument"];
 }
-
-message Event {
-  optional int32 type = 1 [(gmx) = "eventtype"];
-  oneof reference {
-    int32 number = 2 [(gmx) = "enumb"];
-    string name = 3 [(gmx) = "ename", (yyp_id) = "collisionObjectId"];
-  }
-  optional string code = 4 [(gmx) = "action"];
-}
