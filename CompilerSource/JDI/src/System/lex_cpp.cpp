@@ -427,6 +427,7 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
           if (!is_letter(argstr[i])) {
             if (argstr[i] == '.' and argstr[i+1] == '.' and argstr[i+2] == '.') {
               variadic = true, i += 3;
+              paramlist.push_back("__VA_ARGS__");
               while (is_useless(argstr[i])) ++i;
               if (argstr[i] != ')')
                 herr->error("Expected end of parameters after variadic", filename, line, pos-lpos);
