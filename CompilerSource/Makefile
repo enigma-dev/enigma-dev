@@ -3,6 +3,7 @@ SHARED_SRC_DIR := ../shared
 include $(SHARED_SRC_DIR)/Makefile
 include $(SHARED_SRC_DIR)/eyaml/Makefile
 include $(SHARED_SRC_DIR)/event_reader/Makefile
+include $(SHARED_SRC_DIR)/rectpacker/Makefile
 
 #################
 # configuration #
