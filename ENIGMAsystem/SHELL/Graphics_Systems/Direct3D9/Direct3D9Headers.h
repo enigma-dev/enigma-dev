@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2013, 2018-2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,12 +19,9 @@
 #define ENIGMA_DIRECT3D9_HEADERS_H
 
 #include <map>
-#include <string>
-#include <cmath>
+#include <cstring> // std::memcmp
 
 #include <d3d9.h>
-#include <windows.h>
-#include <windowsx.h>
 
 using namespace std;
 
@@ -32,7 +29,6 @@ using std::map;
 
 namespace enigma {
 
-extern HWND hWnd;
 extern bool Direct3D9Managed;
 
 namespace dx9 {
@@ -41,14 +37,15 @@ class ContextManager {
 private:
 
 protected:
-map< D3DRENDERSTATETYPE, DWORD > cacheRenderStates;                  /// cached RenderStates
-map< DWORD, LPDIRECT3DTEXTURE9 > cacheTextureStates;                 /// cached Texture States
-map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD > > cacheSamplerStates;  /// cached Sampler States
-map< DWORD, D3DLIGHT9 > cacheLightStates;                            /// cached Light States
-map< DWORD, BOOL > cacheLightEnable;                                 /// cached Light States
+map< D3DRENDERSTATETYPE, DWORD > cacheRenderStates;                  /// cached render states
+map< DWORD, LPDIRECT3DTEXTURE9 > cacheTextureStates;                 /// cached texture states
+map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD > > cacheSamplerStates;  /// cached sampler states
+map< DWORD, D3DLIGHT9 > cacheLightStates;                            /// cached light states
+map< DWORD, BOOL > cacheLightEnable;                                 /// cached light enable states
+D3DMATERIAL9 cacheMaterial;                                          /// cached lighting material
 
 public:
-LPDIRECT3DDEVICE9 device;    // the pointer to the device class
+LPDIRECT3DDEVICE9 device; // pointer to the device
 
 ContextManager() {
 
@@ -61,143 +58,122 @@ ContextManager() {
 // Reapply the render states and other stuff to the device.
 void RestoreState() {
   // Cached Texture Stage States
-  map< DWORD, LPDIRECT3DTEXTURE9 >::iterator tit = cacheTextureStates.begin();
-  while (tit != cacheTextureStates.end()) {
-    device->SetTexture(tit->first, tit->second);
-    tit++;
+  for (auto state : cacheTextureStates) {
+    device->SetTexture(state.first, state.second);
   }
 
   // Cached Render States
-  map< D3DRENDERSTATETYPE, DWORD >::iterator it = cacheRenderStates.begin();
-  while (it != cacheRenderStates.end()) {
-    device->SetRenderState(it->first, it->second);
-    it++;
+  for (auto state : cacheRenderStates) {
+    device->SetRenderState(state.first, state.second);
   }
 
   // Cached Sampler States
-  map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD > >::iterator sit = cacheSamplerStates.begin();
-  while (sit != cacheSamplerStates.end()) {
-    map< D3DSAMPLERSTATETYPE, DWORD >::iterator secit = sit->second.begin();
-    while (secit != sit->second.end()) {
-      device->SetSamplerState(sit->first, secit->first, secit->second);
-      secit++;
+  for (auto sampler : cacheSamplerStates) {
+    for (auto state : sampler.second) {
+      device->SetSamplerState(sampler.first, state.first, state.second);
     }
-    sit++;
   }
 
   // Cached Lights
-  map< DWORD, BOOL >::iterator lite = cacheLightEnable.begin();
-  while (lite != cacheLightEnable.end()) {
-    device->LightEnable(lite->first, lite->second);
-    lite++;
+  device->SetMaterial(&cacheMaterial);
+  for (auto lite : cacheLightEnable) {
+    device->LightEnable(lite.first, lite.second);
   }
-  return;
-  map< DWORD, D3DLIGHT9 >::iterator lit = cacheLightStates.begin();
-  while (lit != cacheLightStates.end()) {
-    device->SetLight(lit->first, &lit->second);
-    lit++;
+  for (auto lite : cacheLightStates) {
+    device->SetLight(lite.first, &lite.second);
   }
-}
-
-void LightEnable(DWORD Index, BOOL bEnable) {
-  // Update the light state cache
-  // If the return value is 'true', the command must be forwarded to the D3D Runtime.
-  map< DWORD, BOOL >::iterator it = cacheLightEnable.find(Index);
-  if (cacheLightEnable.end() == it) {
-    cacheLightEnable.insert(map< DWORD, BOOL >::value_type(Index, bEnable));
-    device->LightEnable(Index, bEnable);
-    return;
-  }
-  if (it->second == bEnable)
-    return;
-  it->second = bEnable;
-  device->LightEnable(Index, bEnable);
 }
 
 void Release() {
   device->Release();
 }
 
-void SetMaterial(const D3DMATERIAL9 *pMaterial) {
-  device->SetMaterial(pMaterial);
+HRESULT SetMaterial(const D3DMATERIAL9 *pMaterial) {
+  cacheMaterial = *pMaterial;
+  return device->SetMaterial(pMaterial);
 }
 
-void SetLight(DWORD Index, const D3DLIGHT9 *pLight) {
-  device->SetLight(Index, pLight);
-  return;
+HRESULT SetLight(DWORD Index, const D3DLIGHT9 *pLight) {
+  //return device->SetLight(Index, pLight);
   // Update the light state cache
-  // If the return value is 'true', the command must be forwarded to the D3D Runtime.
   map< DWORD, D3DLIGHT9 >::iterator it = cacheLightStates.find(Index);
   if (cacheLightStates.end() == it) {
     cacheLightStates.insert(map< DWORD, D3DLIGHT9 >::value_type(Index, *pLight));
-    device->SetLight(Index, pLight);
-    return;
+  } else {
+    if (memcmp(&it->second, pLight, sizeof(D3DLIGHT9)) == 0)
+      return D3D_OK;
+    it->second = *pLight;
   }
-  //if( it->second == *pLight )
-    //return;
-  it->second = *pLight;
-  device->SetLight(Index, pLight);
+  return device->SetLight(Index, pLight);
 }
 
-void SetTransform(D3DTRANSFORMSTATETYPE State, const D3DMATRIX *pMatrix) {
-  device->SetTransform(State, pMatrix);
+HRESULT LightEnable(DWORD Index, BOOL bEnable) {
+  // Update the light state cache
+  map< DWORD, BOOL >::iterator it = cacheLightEnable.find(Index);
+  if (cacheLightEnable.end() == it) {
+    cacheLightEnable.insert(map< DWORD, BOOL >::value_type(Index, bEnable));
+  } else {
+    if (it->second == bEnable)
+      return D3D_OK;
+    it->second = bEnable;
+  }
+
+  return device->LightEnable(Index, bEnable);
 }
 
-void SetRenderState(D3DRENDERSTATETYPE State, DWORD Value) {
+HRESULT SetTransform(D3DTRANSFORMSTATETYPE State, const D3DMATRIX *pMatrix) {
+  return device->SetTransform(State, pMatrix);
+}
+
+HRESULT SetRenderState(D3DRENDERSTATETYPE State, DWORD Value) {
   // Update the render state cache
-  // If the return value is 'true', the command must be forwarded to the D3D Runtime.
   map< D3DRENDERSTATETYPE, DWORD >::iterator it = cacheRenderStates.find(State);
   if (cacheRenderStates.end() == it) {
     cacheRenderStates.insert(map< D3DRENDERSTATETYPE, DWORD >::value_type(State, Value));
-    device->SetRenderState(State, Value);
+  } else {
+    if (it->second == Value)
+      return D3D_OK;
+    it->second = Value;
   }
-  if (it->second == Value)
-    return;
-  it->second = Value;
-  device->SetRenderState(State, Value);
+
+  return device->SetRenderState(State, Value);
 }
 
-void SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value) {
-  // Update the render state cache
-  // If the return value is 'true', the command must be forwarded to the D3D Runtime.
+HRESULT SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value) {
+  // Update the sampler state cache
   typedef map<D3DSAMPLERSTATETYPE, DWORD> innerType;
   map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD >  >::iterator it = cacheSamplerStates.find(Sampler);
   if (it == cacheSamplerStates.end()) {
-    map<DWORD, innerType> outer;
-    innerType inner;
-    inner.insert(pair<D3DSAMPLERSTATETYPE, DWORD>(Type, Value));
-    cacheSamplerStates.insert(pair<DWORD, innerType>(Sampler, inner));
-    device->SetSamplerState( Sampler, Type, Value );
+    cacheSamplerStates.insert(pair<DWORD, innerType>(Sampler, {pair<D3DSAMPLERSTATETYPE, DWORD>(Type, Value)}));
+    return device->SetSamplerState( Sampler, Type, Value );
   }
   map< D3DSAMPLERSTATETYPE, DWORD >::iterator sit = it->second.find(Type);
-  if (sit != it->second.end()) {
+  if (sit == it->second.end()) {
+    it->second.insert(map< D3DSAMPLERSTATETYPE, DWORD >::value_type(Type, Value));
+  } else {
     if (sit->second == Value) {
-      return;
+      return D3D_OK;
     }
     sit->second = Value;
-    device->SetSamplerState(Sampler, Type, Value);
-  } else {
-    it->second.insert(map< D3DSAMPLERSTATETYPE, DWORD >::value_type(Type, Value));
-    device->SetSamplerState(Sampler, Type, Value);
   }
+  return device->SetSamplerState(Sampler, Type, Value);
 }
 
-void SetTexture(DWORD Sampler, LPDIRECT3DTEXTURE9 pTexture) {
-  // Update the render state cache
-  // If the return value is 'true', the command must be forwarded to the D3D Runtime.
+HRESULT SetTexture(DWORD Sampler, LPDIRECT3DTEXTURE9 pTexture) {
+  // Update the texture state cache
   map< DWORD, LPDIRECT3DTEXTURE9 >::iterator it = cacheTextureStates.find(Sampler);
   if (cacheTextureStates.end() == it) {
     cacheTextureStates.insert(map< DWORD, LPDIRECT3DTEXTURE9 >::value_type(Sampler, pTexture));
-    device->SetTexture(Sampler, pTexture);
+  } else {
+    if (it->second == pTexture)
+      return D3D_OK;
+    it->second = pTexture;
   }
-  if (it->second == pTexture)
-    return;
-  it->second = pTexture;
-  device->SetTexture(Sampler, pTexture);
+  return device->SetTexture(Sampler, pTexture);
 }
 
-void SetTextureStageState(DWORD Sampler, D3DTEXTURESTAGESTATETYPE Type, DWORD Value) {
-  device->SetTextureStageState(Sampler, Type, Value);
+HRESULT SetTextureStageState(DWORD Sampler, D3DTEXTURESTAGESTATETYPE Type, DWORD Value) {
+  return device->SetTextureStageState(Sampler, Type, Value);
 }
 
 };
