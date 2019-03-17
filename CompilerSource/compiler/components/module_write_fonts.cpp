@@ -33,7 +33,7 @@ using namespace std;
 
 #include "backend/ideprint.h"
 
-#include "compiler/reshandlers/rectpack.h"
+#include "rectpacker/rectpack.h"
 #include "languages/lang_CPP.h"
 
 inline void writei(int x, FILE *f) {

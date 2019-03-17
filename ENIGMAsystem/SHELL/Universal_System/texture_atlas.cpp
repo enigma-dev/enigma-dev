@@ -26,7 +26,7 @@
 
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/rectpack.h"
+#include "rectpacker/rectpack.h"
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"

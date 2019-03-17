@@ -2,7 +2,7 @@
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/sprites.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/rectpack.h"
+#include "rectpacker/rectpack.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
