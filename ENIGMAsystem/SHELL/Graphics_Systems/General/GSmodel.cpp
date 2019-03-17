@@ -33,6 +33,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <algorithm> // min/max
 #include <math.h>
 
 using namespace std;
