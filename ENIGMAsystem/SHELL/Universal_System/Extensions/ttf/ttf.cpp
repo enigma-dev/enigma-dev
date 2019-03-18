@@ -67,7 +67,8 @@ namespace enigma_user {
     if (error != 0)
       return -1;
     
-    error = FT_Set_Char_Size( face, size * 64, 0, 72, 0); // 72 dpi, 64 is 26.6 fixed point conversion
+    // GameMaker has always generated fonts at 96 dpi, default Windows dpi since 1980s
+    error = FT_Set_Char_Size( face, size * 64, 0, 96, 0); // 96 dpi, 64 is 26.6 fixed point conversion
     
     if (error != 0)
       return -1;
