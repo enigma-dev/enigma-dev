@@ -216,8 +216,6 @@ class gmx_root_walker {
   }
 };
 
-<<<<<<< HEAD
-=======
 std::string FileToString(const std::string &fName) {
   std::ifstream t(fName.c_str());
   std::stringstream buffer;
@@ -225,7 +223,6 @@ std::string FileToString(const std::string &fName) {
   return buffer.str();
 }
 
->>>>>>> master
 }  // Anonymous namespace
 
 void PackScript(std::string fName, int id, buffers::resources::Script *script) {
