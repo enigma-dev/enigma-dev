@@ -16,6 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "strings_util.h"
+
 #include "makedir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/GameData.h"
@@ -77,17 +79,6 @@ inline void writei(int x, FILE *f) {
 }
 inline void writef(float x, FILE *f) {
   fwrite(&x,4,1,f);
-}
-
-inline string string_replace_all(string str,string substr,string nstr)
-{
-  pt pos=0;
-  while ((pos=str.find(substr,pos)) != string::npos)
-  {
-    str.replace(pos,substr.length(),nstr);
-    pos+=nstr.length();
-  }
-  return str;
 }
 
 inline void write_desktop_entry(const std::string fPath, const GameData& game) {
@@ -157,7 +148,7 @@ inline void write_exe_info(const std::string codegen_directory, const GameData &
 
 #include "System/builtins.h"
 
-dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
+dllexport int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(GameData(es), exe_filename, mode);
 }
 
@@ -436,8 +427,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     wto <<"  std::map<int, int> curr;\n\n";
     for (size_t i=0; i<game.timelines.size(); i++) {
       wto <<"  curr.clear();\n";
-      for (int j = 0; j < game.timelines[i].moments().size(); j++) {
-        wto << "  curr[" << game.timelines[i].moments()[j].step()
+      for (int j = 0; j < game.timelines[i]->moments().size(); j++) {
+        wto << "  curr[" << game.timelines[i]->moments()[j].step()
                          << "] = " << j <<";\n";
       }
       wto <<"  res.push_back(curr);\n\n";

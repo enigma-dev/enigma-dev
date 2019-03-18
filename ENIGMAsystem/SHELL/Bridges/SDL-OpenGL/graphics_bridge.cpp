@@ -23,25 +23,24 @@
 
 namespace enigma {
 
+extern unsigned sdl_window_flags;
+
 int msaa_fbo = 0;
 
 SDL_GLContext context;
-SDL_Renderer *renderer;
 
-bool initGameWindow() {
-  SDL_Init(SDL_INIT_VIDEO);
-  windowHandle = SDL_CreateWindow("SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-  return (windowHandle != nullptr);
-}
+void set_sdl_gl_context_version();
 
-void EnableDrawing(void*) {
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, ENIGMA_GL_MAJOR_VERSION);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, ENIGMA_GL_MINOR_VERSION);
+void init_sdl_window_bridge_attributes() {
+  set_sdl_gl_context_version();
   SDL_GL_SetSwapInterval(0);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+  sdl_window_flags |= SDL_WINDOW_OPENGL;
+}
+
+void EnableDrawing(void*) {
   context = SDL_GL_CreateContext(windowHandle);
-  renderer = SDL_CreateRenderer(windowHandle, -1, SDL_RENDERER_ACCELERATED);
 
   GLenum err = glewInit();
   if (GLEW_OK != err)
@@ -49,24 +48,23 @@ void EnableDrawing(void*) {
 }
 
 void DisableDrawing(void*) {
-  SDL_DestroyRenderer(renderer);
+  SDL_GL_DeleteContext(context);
 }
 
 void ScreenRefresh() {
   SDL_GL_SwapWindow(windowHandle);
 }
 
-}
+} // namespace enigma
 
 namespace enigma_user {
-  // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
-  int display_aa = 14;
 
-  void set_synchronization(bool enable) {
-    SDL_GL_SetSwapInterval(enable);
-  }
-
-  void display_reset(int samples, bool vsync) {
-    set_synchronization(vsync);
-  }
+void set_synchronization(bool enable) {
+  SDL_GL_SetSwapInterval(enable);
 }
+
+void display_reset(int samples, bool vsync) {
+  set_synchronization(vsync);
+}
+
+} // namespace enigma_user

@@ -6,6 +6,7 @@ using std::string;
 
 namespace {
 
+using namespace deprecated::JavaStruct;
 constexpr int NO_SPRITE = -1;
 constexpr int NO_OBJECT = -1;
 constexpr int INSTANCE_ID_MIN = 100001;

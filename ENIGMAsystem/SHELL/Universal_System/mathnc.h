@@ -48,13 +48,13 @@
 #include <string>
 
 #ifdef JUST_DEFINE_IT_RUN
-#  define WITH_ARITHMETIC_TYPES(types...)
+#  define WITH_ARITHMETIC_TYPES(...)
 #  define WITH_RETURN_TYPE(type) type
-#  define ARITHMETIC_OPERATION(guess_type, expression...) guess_type
+#  define ARITHMETIC_OPERATION(guess_type, ...) guess_type
 #else
-#  define WITH_ARITHMETIC_TYPES(types...) typename enigma::ArithmeticTypes<types>
+#  define WITH_ARITHMETIC_TYPES(...) typename enigma::ArithmeticTypes<__VA_ARGS__>
 #  define WITH_RETURN_TYPE(type) ::template returns<type>::T
-#  define ARITHMETIC_OPERATION(guess_type, expression...) decltype(expression)
+#  define ARITHMETIC_OPERATION(guess_type, ...) decltype(__VA_ARGS__)
 #endif
 #define STL_ARITHMETIC(func)                                                  \
   using ::func;                                                               \

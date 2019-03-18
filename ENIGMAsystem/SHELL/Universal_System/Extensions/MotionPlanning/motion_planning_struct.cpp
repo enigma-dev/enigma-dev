@@ -92,7 +92,8 @@ namespace enigma
     {
         enigma::grid** gridold = gridstructarray;
         gridstructarray = new grid*[enigma::grid_idmax+2];
-        for (size_t i = 0; i < enigma::grid_idmax; i++) gridstructarray[i] = gridold[i]; delete[] gridold;
+        for (size_t i = 0; i < enigma::grid_idmax; i++) gridstructarray[i] = gridold[i];
+        delete[] gridold;
     }
 
     //Helper functions

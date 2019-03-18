@@ -22,11 +22,6 @@
 #include <string>
 #include <zlib.h>
 
-namespace {
-  int zlib_compressed_size=0;
-  int zlib_decompressed_size=0;
-}
-
 namespace enigma {
 
 unsigned char* zlib_compress(unsigned char* inbuffer,int actualsize)
@@ -46,7 +41,6 @@ unsigned char* zlib_compress(unsigned char* inbuffer,int actualsize)
      #endif
     }
 
-    zlib_compressed_size=outsize;
     return (unsigned char*)outbytef;
 }
 

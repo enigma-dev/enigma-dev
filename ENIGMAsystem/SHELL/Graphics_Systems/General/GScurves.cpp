@@ -20,6 +20,7 @@
 
 #include <stack>
 #include <vector>
+#include <algorithm> // min/max
 #include <math.h>
 
 namespace enigma{

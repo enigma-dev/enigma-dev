@@ -192,7 +192,7 @@ string lexer_cpp::_flatten(const string param, const macro_map& macros, const to
             char *buf=0, *bufe=0;
             mf->parse(arguments, buf, bufe, errep, herr);
             i = begin + p;
-            result.replace(s-begin+resOffset, i-s+resOffset, buf, bufe-buf);
+            result.replace(s-begin+resOffset, i-s, buf, bufe-buf);
             resOffset += (bufe-buf) - (i-s);
             delete[] buf;
           }
@@ -427,6 +427,7 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
           if (!is_letter(argstr[i])) {
             if (argstr[i] == '.' and argstr[i+1] == '.' and argstr[i+2] == '.') {
               variadic = true, i += 3;
+              paramlist.push_back("__VA_ARGS__");
               while (is_useless(argstr[i])) ++i;
               if (argstr[i] != ')')
                 herr->error("Expected end of parameters after variadic", filename, line, pos-lpos);

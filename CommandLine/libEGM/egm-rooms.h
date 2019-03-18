@@ -1,7 +1,7 @@
 #ifndef EGM_ROOMS_UTIL_h
 #define EGM_ROOMS_UTIL_h
 
-#include "codegen/project.pb.h"
+#include "project.pb.h"
 
 #include <map>
 #include <vector>
