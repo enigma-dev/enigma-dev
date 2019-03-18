@@ -34,23 +34,14 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <sstream> // std::stringstream
+#include <fstream> // std::ifstream
 
 inline std::string fc(const char* fn) {
-  FILE* pt = fopen(fn, "rb");
-  if (pt == NULL)
-    return "";
-  else {
-    fseek(pt, 0, SEEK_END);
-    size_t sz = ftell(pt);
-    fseek(pt, 0, SEEK_SET);
-
-    char a[sz + 1];
-    sz = fread(a, 1, sz, pt);
-    fclose(pt);
-
-    a[sz] = 0;
-    return a;
-  }
+  std::ifstream t(fn);
+  std::stringstream buffer;
+  buffer << t.rdbuf();
+  return buffer.str();
 }
 
 inline int rdir_system(std::string x, std::string y) { return system((x + " " + y).c_str()); }
