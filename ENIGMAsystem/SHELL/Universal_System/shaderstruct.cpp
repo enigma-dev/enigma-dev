@@ -17,9 +17,11 @@
 
 #include "shaderstruct.h"
 
+#include <vector>
+
 namespace enigma
 {
-	extern ShaderStruct shaderstructarray[];
+	extern std::vector<ShaderStruct> shaderstructarray;
 	ShaderStruct** shaderdata;
 	
 	void init_shaders() {

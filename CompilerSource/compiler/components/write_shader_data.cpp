@@ -16,25 +16,22 @@
 **/
 
 #include "makedir.h"
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-
-using namespace std;
-
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
-
 #include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
+#include "languages/lang_CPP.h"
 
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
 #include <math.h> //log2 to calculate passes.
+
+using namespace std;
 
 #define flushl '\n' << flush
 #define flushs flush
-
-#include "languages/lang_CPP.h"
 
 #define SHADERSTRUCT "struct ShaderStruct { \
     string fragment; \
@@ -62,7 +59,7 @@ int lang_CPP::compile_writeShaderData(const GameData &game, parsed_object *EGMgl
   ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h").c_str(),ios_base::out);
 
   wto << license << "#include \"Universal_System/shaderstruct.h\"\n" << "namespace enigma {\n";
-  wto << "  ShaderStruct shaderstructarray[] = {\n";
+  wto << "  std::vector<ShaderStruct> shaderstructarray = {\n";
 
   int idmax = 0;
   for (const auto &shader : game.shaders) {
