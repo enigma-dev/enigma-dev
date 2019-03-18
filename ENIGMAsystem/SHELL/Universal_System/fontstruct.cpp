@@ -19,7 +19,7 @@
 
 #include "sprites_internal.h"
 #include "fonts_internal.h"
-#include "rectpack.h"
+#include "rectpacker/rectpack.h"
 #include "image_formats.h"
 #include "libEGMstd.h"
 
