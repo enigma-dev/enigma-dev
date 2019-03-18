@@ -34,7 +34,7 @@ struct gtkl_object
   int srw, srh; // Size request dimensions
   virtual void resolve() {}
   virtual void reposition() {}
-  
+
   gtkl_object(): type(o_incomplete) {}
   gtkl_object(int t): type(t), srw(0), srh(0) { }
   gtkl_object(int w, int h, int t): type(t), srw(w), srh(h) { }
@@ -84,12 +84,12 @@ struct gtkl_table: gtkl_container
   struct attachment {
     int x,y,r,b;
     gtkl_placer* child;
-    
-    struct dc { 
+
+    struct dc {
       int x,y,w,h;
       dc(int x,int y,int w,int h): x(x), y(y), w(w), h(h) {}
     } d; // This represents draw coordinates
-    
+
     attachment(): x(0), y(0), r(1),b(1), child(NULL), d(0,0,0,0) {}
     attachment(int x, int y, int r, int b, gtkl_placer* ch): x(x), y(y), r(r), b(b), child(ch), d(2,2,4,4) {};
   };
@@ -97,7 +97,7 @@ struct gtkl_table: gtkl_container
   typedef std::map<char,attachment>::iterator atti; // Iterator
   typedef std::pair<char,attachment> attp; // Key-value pair
   typedef std::pair<atti,bool> attn; // Newly inserted item return pair (via insert())
-  
+
   bool reserved(char cid)
   {
     return atts.find(cid) != atts.end();
@@ -113,8 +113,9 @@ struct gtkl_table: gtkl_container
   {
     x=xnew, y=ynew, w=dwid, h=dhgt;
     int cw = dwid / gsx, ch = dhgt / gsy;
-    if (ch<gsy) ch=gsy; if (cw<gsx) cw=gsx;
-    
+    if (ch<gsy) ch=gsy;
+    if (cw<gsx) cw=gsx;
+
     int givex[gsx][gsy], givey[gsx][gsy];
     // Make all occupied cells yield max give
     for (int i = 0; i < gsx; i++)
@@ -141,11 +142,11 @@ struct gtkl_table: gtkl_container
         givey[xz][yz] = ch*(yz+1-mi->second.y) - (mi->second.child->srh+8);
       //cons_show_message("");
     }
-    
+
     // Lay everything out as-is first, ignoring overlap.
     for (atti mi = atts.begin(); mi != atts.end(); mi++)
       mi->second.d.x = mi->second.x*cw, mi->second.d.y = mi->second.y*ch, mi->second.d.w = (mi->second.child->srw+8), mi->second.d.h = (mi->second.child->srh+8);
-    
+
     // Expand grid where absolutely necessary
     int maxgx[gsx], maxgy[gsy]; //Compute resize allotment
     for (int xx = 0; xx < gsx; xx++)
@@ -160,7 +161,7 @@ struct gtkl_table: gtkl_container
         if (givey[xx][yy] < maxgy[xx])
           maxgy[xx] = givey[xx][yy];
       }
-    
+
     int losx = 0, losy = 0; // Total left-over space (always <= 0)
     for (int i = 0; i < gsx; i++)
       losx += maxgx[i];
@@ -168,7 +169,7 @@ struct gtkl_table: gtkl_container
       losy += maxgy[i];
     for (atti mi = atts.begin(); mi != atts.end(); mi++)
       mi->second.child->resize(x + mi->second.d.x, y + mi->second.d.y, mi->second.d.w, mi->second.d.h);
-    
+
     // Expand items to fill new bounds
     for (atti mi = atts.begin(); mi != atts.end(); mi++)
     {
@@ -183,10 +184,10 @@ struct gtkl_table: gtkl_container
   void resolve()
   {
     srw = 0; srh = 0;
-    
+
     for (atti mi = atts.begin(); mi != atts.end(); mi++)
       mi->second.child->resolve();
-    
+
     // Calculate minimal X size
     for (int xx = 0; xx < gsx; xx++)
     {
@@ -209,7 +210,7 @@ struct gtkl_table: gtkl_container
     }
     srw += 8, srh += 8;
   }
-  
+
   gtkl_table(int ch, int cw): gtkl_container(cw*4,ch*4,false), gsx(cw), gsy(ch) { }
   ~gtkl_table() {}
 } mytable(3,3);
@@ -227,7 +228,7 @@ void gtklstep()
 void gtkldraw()
 {
   mytable.resolve();
-  
+
   int dwid = (mouse_x - 64) - mytable.srw; dwid /= mytable.w;
   int dhgt = (mouse_y - 64) - mytable.srh; dhgt /= mytable.h;
   for (int x = 0, xx = 64; x < mytable.w; xx += mytable.cols[x++] + dwid)
@@ -245,4 +246,3 @@ void gtkldraw()
   draw_ellipse(0,0,mouse_x,mouse_y,1);
 }
 */
-

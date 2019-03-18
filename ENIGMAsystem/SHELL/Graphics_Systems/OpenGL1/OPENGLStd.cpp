@@ -30,11 +30,13 @@ using namespace std;
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 namespace enigma
 {
-  bool glew_isgo;
-  bool pbo_isgo;
+
+  void graphics_init_vbo_method();
 
   void graphicssystem_initialize()
   {
+    graphics_init_vbo_method();
+
     //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
     glMatrixMode(GL_PROJECTION);
     glClearColor(0,0,0,0);

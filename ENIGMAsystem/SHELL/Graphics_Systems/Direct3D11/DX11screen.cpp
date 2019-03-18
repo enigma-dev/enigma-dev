@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSprimitives.h"
@@ -28,8 +27,9 @@
 #include <string>
 #include <cstdio>
 
-using namespace enigma;
 using namespace std;
+using namespace enigma;
+using namespace enigma::dx11;
 
 namespace enigma
 {
@@ -71,14 +71,16 @@ void screen_init()
   }
 }
 
-int screen_save(string filename) //Assumes native integers are little endian
+int screen_save(string filename)
 {
   draw_batch_flush(batch_flush_deferred);
+  return -1; //TODO: implement
 }
 
-int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
+int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h)
 {
   draw_batch_flush(batch_flush_deferred);
+  return -1; //TODO: implement
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
