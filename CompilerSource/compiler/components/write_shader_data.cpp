@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <math.h> //log2 to calculate passes.
 
 using namespace std;
