@@ -16,21 +16,22 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <map>
-#include <math.h>
-#include <string>
+
 #include "var4.h"
 #include "reflexive_types.h"
-
 #include "object.h"
 #include "libEGMstd.h"
-
 
 #ifdef DEBUG_MODE
   #include "instance_system.h"
   #include "resource_data.h" // TODO: We don't guarantee these functions exist. But they're useful for debugging. We need a debug namespace that offers this, too.
   #include <Widget_Systems/widgets_mandatory.h> // show_error
 #endif
+
+#include <map>
+#include <math.h>
+#include <string>
+#include <vector>
 
 namespace enigma
 {
@@ -76,7 +77,7 @@ namespace enigma
     object_basic::~object_basic() {}
     bool object_basic::can_cast(int obj) const { return false; }
 
-    extern objectstruct objs[];
+    extern std::vector<objectstruct> objs;
     extern size_t object_idmax;
 
     void objectdata_load()

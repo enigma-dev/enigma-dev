@@ -29,6 +29,7 @@
 #define RESOURCE_DATA_H
 
 #include <string>
+#include <vector>
 
 namespace enigma {
   struct callable_script {
@@ -39,7 +40,7 @@ namespace enigma {
     std::string name; int id;
   };
   void map_resource_ids(nameid_pair* n);
-  extern callable_script callable_scripts[];
+  extern std::vector<callable_script> callable_scripts;
   extern nameid_pair resource_nameids[];
 }
 

@@ -18,23 +18,21 @@
 **/
 
 #include "makedir.h"
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-
-using namespace std;
-
-
 #include "parser/parser.h"
-
 #include "backend/GameData.h"
 #include "compiler/compile_common.h"
 #include "event_reader/event_parser.h"
 #include "general/parse_basics_old.h"
 #include "settings.h"
-
 #include "languages/lang_CPP.h"
+
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
 
 inline bool iscomment(const string &n) {
   if (n.length() < 2 or n[0] != '/') return false;
@@ -662,7 +660,7 @@ static inline string resname(string name) {
 
 static inline void write_object_data_structs(std::ostream &wto,
       const ParsedObjectVec &parsed_objects) {
-  wto << "  objectstruct objs[] = {\n" << std::fixed;
+  wto << "  std::vector<objectstruct> objs = {\n" << std::fixed;
   for (parsed_object *object : parsed_objects) {
     wto << "    { "
         << resname(object->sprite_name)  << ", "
@@ -953,7 +951,7 @@ static inline void write_can_cast_func(ofstream& wto, const parsed_object *const
 
 static inline void write_global_script_array(ofstream &wto, const GameData &game, const CompileState &state) {
   wto << "namespace enigma\n{\n"
-  "  callable_script callable_scripts[] = {\n";
+  "  std::vector<callable_script> callable_scripts = {\n";
   int scr_count = 0;
   for (size_t i = 0; i < game.scripts.size(); i++)
   {
