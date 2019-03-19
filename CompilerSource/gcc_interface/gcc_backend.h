@@ -36,9 +36,16 @@
 #include <map>
 #include <sstream> // std::stringstream
 #include <fstream> // std::ifstream
+#include <iostream> // std::cerr
 
 inline std::string fc(const char* fn) {
   std::ifstream t(fn);
+  
+  if (!t.is_open()) {
+    std::cerr << "Failed to open " << fn << std::endl;
+    return "";
+  }
+  
   std::stringstream buffer;
   buffer << t.rdbuf();
   return buffer.str();
