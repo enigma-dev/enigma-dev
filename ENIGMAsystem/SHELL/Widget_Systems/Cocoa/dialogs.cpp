@@ -86,7 +86,7 @@ int show_message(const string &str) {
   return cocoa_show_message(str.c_str(), false, dialog_caption.c_str());
 }
 
-int show_message_cancelable(const string &str) {
+int show_message_cancelable(string str) {
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
   return cocoa_show_message(str.c_str(), true, dialog_caption.c_str());
 }
