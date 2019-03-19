@@ -22,6 +22,8 @@
 #include "AST.h"
 #include <General/svg_simple.h>
 
+#include <algorithm> // std::max
+
 namespace jdi {
   string AST::toString() const {
     if (root) return root->toString();
