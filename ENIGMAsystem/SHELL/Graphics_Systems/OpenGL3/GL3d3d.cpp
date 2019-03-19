@@ -121,49 +121,6 @@ void d3d_set_software_vertex_processing(bool software) {
   //TODO: When we seperate platform specific things, then this shouldn't even exist
 }
 
-void d3d_set_fog(bool enable, int color, double start, double end)
-{
-  d3d_set_fog_enabled(enable);
-  d3d_set_fog_color(color);
-  d3d_set_fog_start(start);
-  d3d_set_fog_end(end);
-  d3d_set_fog_hint(rs_nicest);
-  d3d_set_fog_mode(rs_linear);
-}//NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
-
-void d3d_set_fog_enabled(bool enable)
-{
-
-}
-
-void d3d_set_fog_mode(int mode)
-{
-}
-
-void d3d_set_fog_hint(int mode) {
-
-}
-
-void d3d_set_fog_color(int color)
-{
-
-}
-
-void d3d_set_fog_start(double start)
-{
-
-}
-
-void d3d_set_fog_end(double end)
-{
-
-}
-
-void d3d_set_fog_density(double density)
-{
-
-}
-
 void d3d_set_color_mask(bool r, bool g, bool b, bool a){
   draw_batch_flush(batch_flush_deferred);
   glColorMask(r,g,b,a);

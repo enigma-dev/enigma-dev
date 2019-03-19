@@ -70,50 +70,6 @@ void d3d_clear_depth(double value) {
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, value, 0);
 }
 
-void d3d_set_fog(bool enable, int color, double start, double end)
-{
-  d3d_set_fog_enabled(enable);
-  d3d_set_fog_color(color);
-  d3d_set_fog_start(start);
-  d3d_set_fog_end(end);
-  d3d_set_fog_hint(rs_nicest);
-  d3d_set_fog_mode(rs_linear);
-}
-
-void d3d_set_fog_enabled(bool enable)
-{
-
-}
-
-void d3d_set_fog_mode(int mode)
-{
-
-}
-
-void d3d_set_fog_hint(int mode) {
-
-}
-
-void d3d_set_fog_color(int color)
-{
-
-}
-
-void d3d_set_fog_start(double start)
-{
-
-}
-
-void d3d_set_fog_end(double end)
-{
-
-}
-
-void d3d_set_fog_density(double density)
-{
-
-}
-
 void d3d_set_fill_mode(int fill)
 {
 

@@ -75,6 +75,19 @@ void d3d_state_flush() {
   d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, alphaBlend);
   d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, alphaTest);
   d3dmgr->SetRenderState(D3DRS_ALPHAREF, alphaTestRef);
+
+  d3dmgr->SetRenderState(D3DRS_FOGENABLE, d3dFogEnabled);
+  d3dmgr->SetRenderState(D3DRS_RANGEFOGENABLE, d3dFogEnabled);
+  d3dmgr->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[d3dFogMode]);
+  d3dmgr->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[d3dFogMode]);
+  d3dmgr->SetRenderState(D3DRS_FOGCOLOR, *enigma::d3dFogColor);
+
+  // NOTE: DWORD is 32 bits maximum meaning it can only hold single-precision
+  // floats, so yes, we must cast double to float first too.
+  // https://docs.microsoft.com/en-us/windows/desktop/direct3d9/d3drenderstatetype
+  d3dmgr->SetRenderState(D3DRS_FOGSTART, alias_cast<DWORD>((float)d3dFogStart));
+  d3dmgr->SetRenderState(D3DRS_FOGEND, alias_cast<DWORD>((float)d3dFogEnd));
+  d3dmgr->SetRenderState(D3DRS_FOGDENSITY, alias_cast<DWORD>((float)d3dFogDensity));
 }
 
 void graphics_set_matrix(int type) {
@@ -114,62 +127,6 @@ void d3d_clear_depth(double value) {
 
 void d3d_set_software_vertex_processing(bool software) {
 	d3dmgr->device->SetSoftwareVertexProcessing(software);
-}
-
-void d3d_set_fog(bool enable, int color, double start, double end)
-{
-  d3d_set_fog_enabled(enable);
-  d3d_set_fog_color(color);
-  d3d_set_fog_start(start);
-  d3d_set_fog_end(end);
-  d3d_set_fog_hint(rs_nicest);
-  d3d_set_fog_mode(rs_linear);
-}
-
-void d3d_set_fog_enabled(bool enable)
-{
-    draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_FOGENABLE, enable);
-	d3dmgr->SetRenderState(D3DRS_RANGEFOGENABLE, enable);
-}
-
-void d3d_set_fog_mode(int mode)
-{
-    draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[mode]);
-	d3dmgr->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[mode]);
-}
-
-void d3d_set_fog_hint(int mode) {
-
-}
-
-void d3d_set_fog_color(int color)
-{
-    draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_FOGCOLOR,
-                    D3DCOLOR_RGBA(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), 255)); // Highest 8 bits are not used.
-}
-
-// NOTE: DWORD is 32 bits maximum meaning it can only hold single-precision
-// floats, so yes, we must cast double to float first too.
-// https://docs.microsoft.com/en-us/windows/desktop/direct3d9/d3drenderstatetype
-void d3d_set_fog_start(double start)
-{
-  draw_batch_flush(batch_flush_deferred);
-  d3dmgr->SetRenderState(D3DRS_FOGSTART, alias_cast<DWORD>((float)start));
-}
-
-void d3d_set_fog_end(double end)
-{
-  draw_batch_flush(batch_flush_deferred);
-  d3dmgr->SetRenderState(D3DRS_FOGEND, alias_cast<DWORD>((float)end));
-}
-
-void d3d_set_fog_density(double density)
-{
-  draw_batch_flush(batch_flush_deferred);
-  d3dmgr->SetRenderState(D3DRS_FOGDENSITY, alias_cast<DWORD>((float)density));
 }
 
 void d3d_set_fill_mode(int fill)

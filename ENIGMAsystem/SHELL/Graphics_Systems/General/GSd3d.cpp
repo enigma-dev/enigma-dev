@@ -13,12 +13,16 @@ bool d3dMode = false, d3dHidden = false, d3dZWriteEnable = true, d3dPerspective 
 int d3dCulling = 0;
 float d3dLightingAmbient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
+bool d3dFogEnabled = false;
+int d3dFogMode = enigma_user::rs_linear, d3dFogHint = enigma_user::rs_nicest;
+float d3dFogStart = 0.0f, d3dFogEnd = 0.0f, d3dFogDensity = 0.0f;
+float d3dFogColor[3] = { 0.0f, 0.0f, 0.0f };
+
 } // namespace enigma
 
 namespace enigma_user {
 
-void d3d_start()
-{
+void d3d_start() {
   enigma::d3dMode = true;
   enigma::d3dPerspective = true;
   enigma::d3dHidden = true;
@@ -36,8 +40,7 @@ void d3d_start()
   d3d_clear_depth(0.0f);
 }
 
-void d3d_end()
-{
+void d3d_end() {
   enigma::d3dMode = false;
   enigma::d3dPerspective = false;
   enigma::d3dHidden = false;
@@ -102,8 +105,44 @@ bool d3d_get_shading() {
   return enigma::d3dShading;
 }
 
-void d3d_light_define_ambient(int col)
-{
+void d3d_set_fog(bool enable, int color, double start, double end) {
+  d3d_set_fog_enabled(enable);
+  d3d_set_fog_color(color);
+  d3d_set_fog_start(start);
+  d3d_set_fog_end(end);
+}
+
+void d3d_set_fog_enabled(bool enable) {
+  enigma::d3dFogEnabled = enable;
+}
+
+void d3d_set_fog_mode(int mode) {
+  enigma::d3dFogMode = mode;
+}
+
+void d3d_set_fog_hint(int mode) {
+  enigma::d3dFogHint = mode;
+}
+
+void d3d_set_fog_color(int color) {
+  enigma::d3dFogColor[0] = COL_GET_Rf(color);
+  enigma::d3dFogColor[1] = COL_GET_Gf(color);
+  enigma::d3dFogColor[2] = COL_GET_Bf(color);
+}
+
+void d3d_set_fog_start(double start) {
+  enigma::d3dFogStart = start;
+}
+
+void d3d_set_fog_end(double end) {
+  enigma::d3dFogEnd = end;
+}
+
+void d3d_set_fog_density(double density) {
+  enigma::d3dFogDensity = density;
+}
+
+void d3d_light_define_ambient(int col) {
   enigma::d3dLightingAmbient[0] = float(COL_GET_Rf(col));
   enigma::d3dLightingAmbient[1] = float(COL_GET_Gf(col));
   enigma::d3dLightingAmbient[2] = float(COL_GET_Bf(col));

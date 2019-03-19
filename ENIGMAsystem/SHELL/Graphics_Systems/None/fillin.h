@@ -152,15 +152,6 @@ namespace enigma_user
 	unsigned int display_get_gui_width();
 	unsigned int display_get_gui_height();
 
-	void d3d_set_fog(bool enable, int color, double start, double end);
-	void d3d_set_fog_enabled(bool enable);
-	void d3d_set_fog_mode(int mode);
-	void d3d_set_fog_hint(int mode);
-	void d3d_set_fog_color(int color);
-	void d3d_set_fog_start(double start);
-	void d3d_set_fog_end(double end);
-	void d3d_set_fog_density(double density);
-
 	void d3d_set_fill_mode(int fill);
 	void d3d_set_line_width(float value);
 	void d3d_set_point_size(float value);

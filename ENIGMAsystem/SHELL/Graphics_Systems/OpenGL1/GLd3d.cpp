@@ -80,6 +80,15 @@ void d3d_state_flush() {
   (alphaBlend?glEnable:glDisable)(GL_BLEND);
   (alphaTest?glEnable:glDisable)(GL_ALPHA_TEST);
   glAlphaFunc(GL_GREATER, alphaTestRef/255);
+
+  //NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
+  (d3dFogEnabled?glEnable:glDisable)(GL_FOG);
+  glFogi(GL_FOG_MODE, fogmodes[d3dFogMode]);
+  glHint(GL_FOG_HINT, d3dFogHint);
+  glFogfv(GL_FOG_COLOR, d3dFogColor);
+  glFogf(GL_FOG_START, d3dFogStart);
+  glFogf(GL_FOG_END, d3dFogEnd);
+  glFogf(GL_FOG_DENSITY, d3dFogDensity);
 }
 
 void d3d_light_update_positions(); // forward declare
@@ -122,61 +131,6 @@ void d3d_clear_depth(double value) {
 void d3d_set_software_vertex_processing(bool software) {
 	//Does nothing as GL doesn't have such an awful thing
   //TODO: When we seperate platform specific things, then this shouldn't even exist
-}
-
-void d3d_set_fog(bool enable, int color, double start, double end)
-{
-  d3d_set_fog_enabled(enable);
-  d3d_set_fog_color(color);
-  d3d_set_fog_start(start);
-  d3d_set_fog_end(end);
-  d3d_set_fog_hint(rs_nicest);
-  d3d_set_fog_mode(rs_linear);
-}//NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
-
-void d3d_set_fog_enabled(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  (enable?glEnable:glDisable)(GL_FOG);
-}
-
-void d3d_set_fog_mode(int mode)
-{
-  draw_batch_flush(batch_flush_deferred);
-  glFogi(GL_FOG_MODE, fogmodes[mode]);
-}
-
-void d3d_set_fog_hint(int mode) {
-  draw_batch_flush(batch_flush_deferred);
-  glHint(GL_FOG_HINT, mode);
-}
-
-void d3d_set_fog_color(int color)
-{
-  draw_batch_flush(batch_flush_deferred);
-  GLfloat fog_color[3];
-  fog_color[0] = COL_GET_Rf(color);
-  fog_color[1] = COL_GET_Gf(color);
-  fog_color[2] = COL_GET_Bf(color);
-  glFogfv(GL_FOG_COLOR, fog_color);
-}
-
-void d3d_set_fog_start(double start)
-{
-  draw_batch_flush(batch_flush_deferred);
-  glFogf(GL_FOG_START, start);
-}
-
-void d3d_set_fog_end(double end)
-{
-  draw_batch_flush(batch_flush_deferred);
-  glFogf(GL_FOG_END, end);
-}
-
-void d3d_set_fog_density(double density)
-{
-  draw_batch_flush(batch_flush_deferred);
-  glFogf(GL_FOG_DENSITY, density);
 }
 
 void d3d_set_fill_mode(int fill)

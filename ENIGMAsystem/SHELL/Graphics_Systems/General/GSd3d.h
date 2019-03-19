@@ -33,6 +33,11 @@ extern bool d3dShading;
 extern float d3dLightingAmbient[4];
 extern int d3dCulling;
 
+extern bool d3dFogEnabled;
+extern int d3dFogMode, d3dFogHint;
+extern float d3dFogStart, d3dFogEnd, d3dFogDensity;
+extern float d3dFogColor[3];
+
 void d3d_state_flush();
 
 } // namespace enigma
