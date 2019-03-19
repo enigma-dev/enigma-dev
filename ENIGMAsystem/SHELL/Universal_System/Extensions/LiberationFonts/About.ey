@@ -1,0 +1,14 @@
+%e-yaml
+---
+
+Name: Liberation Fonts
+Identifier: LiberationFonts
+Author: Robert Colton
+Description: Adds built-in Microsoft Windows font replacements using liberation fonts for the FreeType extension.
+Icon: liberation.png
+
+Default: false
+Depends:
+	Extensions: ttf
+Dependencies: None
+Init: extension_liberationfonts_init
