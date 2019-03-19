@@ -66,10 +66,10 @@ void d3d_state_flush() {
   d3dmgr->SetRenderState(D3DRS_ZENABLE, d3dHidden);
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
   d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);
+  d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[d3dCulling]);
 }
 
 bool d3dMode = false;
-int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
@@ -193,20 +193,9 @@ void d3d_set_fog_density(double density)
   d3dmgr->SetRenderState(D3DRS_FOGDENSITY, alias_cast<DWORD>((float)density));
 }
 
-void d3d_set_culling(int mode)
-{
-	draw_batch_flush(batch_flush_deferred);
-	enigma::d3dCulling = mode;
-	d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[mode]);
-}
-
 bool d3d_get_mode()
 {
     return enigma::d3dMode;
-}
-
-int d3d_get_culling() {
-	return enigma::d3dCulling;
 }
 
 void d3d_set_fill_mode(int fill)

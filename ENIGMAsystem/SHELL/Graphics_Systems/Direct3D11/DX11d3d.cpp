@@ -47,7 +47,6 @@ void d3d_state_flush() {
 }
 
 bool d3dMode = false;
-int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
@@ -150,19 +149,9 @@ void d3d_set_fog_density(double density)
 
 }
 
-void d3d_set_culling(int mode)
-{
-	enigma::d3dCulling = mode;
-
-}
-
 bool d3d_get_mode()
 {
-    return enigma::d3dMode;
-}
-
-int d3d_get_culling() {
-	return enigma::d3dCulling;
+  return enigma::d3dMode;
 }
 
 void d3d_set_fill_mode(int fill)

@@ -4,6 +4,7 @@
 namespace enigma {
 
 bool d3dHidden = false, d3dZWriteEnable = true, d3dPerspective = true, d3dLighting = false;
+int d3dCulling = 0;
 
 } // namespace enigma
 
@@ -23,6 +24,10 @@ void d3d_set_zwriteenable(bool enable) {
   enigma::d3dZWriteEnable = enable;
 }
 
+void d3d_set_culling(int mode) {
+  enigma::d3dCulling = mode;
+}
+
 void d3d_set_lighting(bool enable) {
   enigma::d3dLighting = enable;
 }
@@ -37,6 +42,10 @@ bool d3d_get_hidden() {
 
 bool d3d_get_zwriteenable() {
   return enigma::d3dZWriteEnable;
+}
+
+int d3d_get_culling() {
+  return enigma::d3dCulling;
 }
 
 bool d3d_get_lighting() {

@@ -39,7 +39,6 @@ namespace enigma {
 void d3d_light_update_positions(); // forward declare
 
 bool d3dMode = false;
-int d3dCulling = 0;
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 
@@ -201,16 +200,6 @@ void d3d_set_fog_density(double density)
 
 }
 
-void d3d_set_culling(int mode)
-{
-  draw_batch_flush(batch_flush_deferred);
-	enigma::d3dCulling = mode;
-	(mode>0?glEnable:glDisable)(GL_CULL_FACE);
-	if (mode > 0){
-		glFrontFace(windingstates[mode-1]);
-	}
-}
-
 void d3d_set_color_mask(bool r, bool g, bool b, bool a){
   draw_batch_flush(batch_flush_deferred);
   glColorMask(r,g,b,a);
@@ -219,10 +208,6 @@ void d3d_set_color_mask(bool r, bool g, bool b, bool a){
 bool d3d_get_mode()
 {
   return enigma::d3dMode;
-}
-
-int d3d_get_culling() {
-	return enigma::d3dCulling;
 }
 
 void d3d_set_fill_mode(int fill)
@@ -632,6 +617,10 @@ void d3d_state_flush() {
   enigma::d3d_lighting.light_update();
   if (d3dLighting) {
     enigma::d3d_lighting.lightsource_update();
+  }
+  (d3dCulling>0?glEnable:glDisable)(GL_CULL_FACE);
+  if (d3dCulling > 0){
+    glFrontFace(windingstates[d3dCulling-1]);
   }
 }
 

@@ -32,6 +32,35 @@
 
 using namespace std;
 
+namespace {
+
+GLenum renderstates[3] = {
+  GL_NICEST, GL_FASTEST, GL_DONT_CARE
+};
+
+GLenum fogmodes[3] = {
+  GL_EXP, GL_EXP2, GL_LINEAR
+};
+
+GLenum depthoperators[8] = {
+  GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL,
+  GL_GEQUAL, GL_ALWAYS
+};
+
+GLenum fillmodes[3] = {
+  GL_POINT, GL_LINE, GL_FILL
+};
+
+GLenum windingstates[2] = {
+  GL_CW, GL_CCW
+};
+
+GLenum cullingstates[3] = {
+  GL_BACK, GL_FRONT, GL_FRONT_AND_BACK
+};
+
+} // namespace anonymous
+
 namespace enigma {
 
 void d3d_state_flush() {
@@ -39,12 +68,15 @@ void d3d_state_flush() {
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   (d3dLighting?glEnable:glDisable)(GL_LIGHTING);
   glDepthMask(d3dZWriteEnable);
+  (d3dCulling>0?glEnable:glDisable)(GL_CULL_FACE);
+  if (d3dCulling > 0){
+    glFrontFace(windingstates[d3dCulling-1]);
+  }
 }
 
 void d3d_light_update_positions(); // forward declare
 
 bool d3dMode = false;
-int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
@@ -71,31 +103,6 @@ void graphics_set_matrix(int type) {
 }
 
 } // namespace enigma
-
-GLenum renderstates[3] = {
-  GL_NICEST, GL_FASTEST, GL_DONT_CARE
-};
-
-GLenum fogmodes[3] = {
-  GL_EXP, GL_EXP2, GL_LINEAR
-};
-
-GLenum depthoperators[8] = {
-  GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL,
-  GL_GEQUAL, GL_ALWAYS
-};
-
-GLenum fillmodes[3] = {
-  GL_POINT, GL_LINE, GL_FILL
-};
-
-GLenum windingstates[2] = {
-  GL_CW, GL_CCW
-};
-
-GLenum cullingstates[3] = {
-  GL_BACK, GL_FRONT, GL_FRONT_AND_BACK
-};
 
 namespace enigma_user
 {
@@ -217,20 +224,6 @@ void d3d_set_fog_density(double density)
 {
   draw_batch_flush(batch_flush_deferred);
   glFogf(GL_FOG_DENSITY, density);
-}
-
-void d3d_set_culling(int mode)
-{
-  draw_batch_flush(batch_flush_deferred);
-  enigma::d3dCulling = mode;
-  (mode>0?glEnable:glDisable)(GL_CULL_FACE);
-  if (mode > 0){
-    glFrontFace(windingstates[mode-1]);
-  }
-}
-
-int d3d_get_culling() {
-  return enigma::d3dCulling;
 }
 
 void d3d_set_fill_mode(int fill)
