@@ -32,7 +32,6 @@ void update_depth_stencil_state() {
   static ID3D11DepthStencilState* pDepthStencilState = NULL;
   if (pDepthStencilState) { pDepthStencilState->Release(); pDepthStencilState = NULL; }
   m_device->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState);
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   m_deviceContext->OMSetDepthStencilState(pDepthStencilState, 1);
 }
 
@@ -40,9 +39,14 @@ void update_depth_stencil_state() {
 
 namespace enigma {
 
+void d3d_state_flush() {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  depthStencilDesc.DepthEnable = d3dHidden;
+  depthStencilDesc.DepthWriteMask = d3dZWriteEnable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+  update_depth_stencil_state();
+}
+
 bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
 int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
@@ -102,27 +106,6 @@ void d3d_end()
 	d3d_set_hidden(false);
 }
 
-void d3d_set_hidden(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  enigma::d3dHidden = enable;
-  depthStencilDesc.DepthEnable = enable;
-  update_depth_stencil_state();
-}
-
-void d3d_set_zwriteenable(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  enigma::d3dZWriteEnable = enable;
-  depthStencilDesc.DepthWriteMask = enable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
-  update_depth_stencil_state();
-}
-
-void d3d_set_lighting(bool enable)
-{
-
-}
-
 void d3d_set_fog(bool enable, int color, double start, double end)
 {
   d3d_set_fog_enabled(enable);
@@ -176,11 +159,6 @@ void d3d_set_culling(int mode)
 bool d3d_get_mode()
 {
     return enigma::d3dMode;
-}
-
-bool d3d_get_hidden()
-{
-    return enigma::d3dHidden;
 }
 
 int d3d_get_culling() {

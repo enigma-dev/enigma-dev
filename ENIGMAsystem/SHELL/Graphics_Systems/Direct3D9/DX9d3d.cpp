@@ -61,9 +61,14 @@ D3DFOGMODE fogmodes[3] = {
 
 namespace enigma {
 
+void d3d_state_flush() {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  d3dmgr->SetRenderState(D3DRS_ZENABLE, d3dHidden);
+  d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
+  d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);
+}
+
 bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
 int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
@@ -132,26 +137,6 @@ void d3d_set_software_vertex_processing(bool software) {
 	d3dmgr->device->SetSoftwareVertexProcessing(software);
 }
 
-void d3d_set_hidden(bool enable)
-{
-    draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_ZENABLE, enable); // enable/disable the z-buffer
-    enigma::d3dHidden = enable;
-}
-
-void d3d_set_zwriteenable(bool enable)
-{
-    draw_batch_flush(batch_flush_deferred);
-	enigma::d3dZWriteEnable = enable;
-	d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, enable);    // enable/disable z-writing
-}
-
-void d3d_set_lighting(bool enable)
-{
-    draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_LIGHTING, enable);    // enable/disable the 3D lighting
-}
-
 void d3d_set_fog(bool enable, int color, double start, double end)
 {
   d3d_set_fog_enabled(enable);
@@ -218,11 +203,6 @@ void d3d_set_culling(int mode)
 bool d3d_get_mode()
 {
     return enigma::d3dMode;
-}
-
-bool d3d_get_hidden()
-{
-    return enigma::d3dHidden;
 }
 
 int d3d_get_culling() {

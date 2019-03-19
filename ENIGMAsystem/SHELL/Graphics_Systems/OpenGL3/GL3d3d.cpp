@@ -39,8 +39,6 @@ namespace enigma {
 void d3d_light_update_positions(); // forward declare
 
 bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
 int d3dCulling = 0;
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
@@ -80,7 +78,7 @@ void graphics_set_matrix(int type) {
   enigma::d3d_light_update_positions();
 }
 
-}
+} // namespace enigma
 
 GLenum renderstates[3] = {
   GL_NICEST, GL_FASTEST, GL_DONT_CARE
@@ -111,8 +109,7 @@ GLenum stenciloperators[8] = {
   GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT
 };
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 void d3d_clear_depth(double value) {
   draw_batch_flush(batch_flush_deferred);
@@ -159,24 +156,6 @@ void d3d_end()
   glDepthMask(false);
   glDisable(GL_DEPTH_TEST);
   d3d_set_projection_ortho(0, 0, view_wview[view_current], view_hview[view_current], 0); //This should probably be changed not to use views
-}
-
-// disabling hidden surface removal in means there is no depth buffer
-void d3d_set_hidden(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-  enigma::d3dHidden = enable;
-}
-
-// disabling zwriting can let you turn off testing for a single model, for instance
-// to fix cutout billboards such as trees the alpha pixels on their edges may not depth sort
-// properly particle effects are usually drawn with zwriting disabled because of this as well
-void d3d_set_zwriteenable(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-	glDepthMask(enable);
-	enigma::d3dZWriteEnable = enable;
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)
@@ -242,10 +221,6 @@ bool d3d_get_mode()
   return enigma::d3dMode;
 }
 
-bool d3d_get_hidden() {
-	return enigma::d3dHidden;
-}
-
 int d3d_get_culling() {
 	return enigma::d3dCulling;
 }
@@ -292,14 +267,13 @@ void d3d_set_clip_plane(bool enable)
   (enable?glEnable:glDisable)(GL_CLIP_DISTANCE0);
 }
 
-}
+} // namespace enigma_user
 
 #include <map>
 #include <list>
 #include "Universal_System/fileio.h"
 
-namespace enigma
-{
+namespace enigma {
 
 struct light3D {
   int type; //0 - directional, 1 - positional
@@ -534,10 +508,9 @@ class d3d_lights
   }
 } d3d_lighting;
 
-}
+} // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
 {
@@ -576,16 +549,6 @@ bool d3d_light_enable(int id, bool enable)
 {
   draw_batch_flush(batch_flush_deferred);
   return enable?enigma::d3d_lighting.light_enable(id):enigma::d3d_lighting.light_disable(id);
-}
-
-void d3d_set_lighting(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  enigma::d3d_lighting.lights_enable(enable);
-  enigma::d3d_lighting.light_update();
-  if (enable == true){
-    enigma::d3d_lighting.lightsource_update();
-  }
 }
 
 void d3d_stencil_start_mask(){
@@ -652,11 +615,24 @@ void d3d_stencil_operator(int sfail, int dpfail, int dppass){
   glStencilOp(stenciloperators[sfail], stenciloperators[dpfail], stenciloperators[dppass]);
 }
 
-}
+} // namespace enigma_user
 
 namespace enigma {
-  void d3d_light_update_positions()
-  {
-    enigma::d3d_lighting.light_update_positions();
+
+void d3d_light_update_positions()
+{
+  enigma::d3d_lighting.light_update_positions();
+}
+
+void d3d_state_flush() {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
+  glDepthMask(d3dZWriteEnable);
+  enigma::d3d_lighting.lights_enable(d3dLighting);
+  enigma::d3d_lighting.light_update();
+  if (d3dLighting) {
+    enigma::d3d_lighting.lightsource_update();
   }
 }
+
+} // namespace enigma

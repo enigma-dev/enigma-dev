@@ -34,11 +34,16 @@ using namespace std;
 
 namespace enigma {
 
+void d3d_state_flush() {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
+  (d3dLighting?glEnable:glDisable)(GL_LIGHTING);
+  glDepthMask(d3dZWriteEnable);
+}
+
 void d3d_light_update_positions(); // forward declare
 
 bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
 int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
@@ -159,30 +164,6 @@ void d3d_end()
   glMatrixMode(GL_MODELVIEW);
 }
 
-// disabling hidden surface removal in means there is no depth buffer
-void d3d_set_hidden(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-  enigma::d3dHidden = enable;
-}
-
-// disabling zwriting can let you turn off testing for a single model, for instance
-// to fix cutout billboards such as trees the alpha pixels on their edges may not depth sort
-// properly particle effects are usually drawn with zwriting disabled because of this as well
-void d3d_set_zwriteenable(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  glDepthMask(enable);
-  enigma::d3dZWriteEnable = enable;
-}
-
-void d3d_set_lighting(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  (enable?glEnable:glDisable)(GL_LIGHTING);
-}
-
 void d3d_set_fog(bool enable, int color, double start, double end)
 {
   d3d_set_fog_enabled(enable);
@@ -246,15 +227,6 @@ void d3d_set_culling(int mode)
   if (mode > 0){
     glFrontFace(windingstates[mode-1]);
   }
-}
-
-bool d3d_get_mode()
-{
-  return enigma::d3dMode;
-}
-
-bool d3d_get_hidden() {
-  return enigma::d3dHidden;
 }
 
 int d3d_get_culling() {
