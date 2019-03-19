@@ -30,6 +30,7 @@ extern bool d3dZWriteEnable;
 extern bool d3dPerspective;
 extern bool d3dLighting;
 extern bool d3dShading;
+extern float d3dLightingAmbient[4];
 extern int d3dCulling;
 
 void d3d_state_flush();

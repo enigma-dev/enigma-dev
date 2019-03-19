@@ -68,6 +68,7 @@ void d3d_state_flush() {
   d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);
   d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[d3dCulling]);
   d3dmgr->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
+  d3dmgr->SetRenderState(D3DRS_AMBIENT, *enigma::d3dLightingAmbient);
 }
 
 bool d3dMode = false;
@@ -410,12 +411,6 @@ void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 void d3d_light_shininess(int facemode, int shine)
 {
     draw_batch_flush(batch_flush_deferred);
-}
-
-void d3d_light_define_ambient(int col)
-{
-    draw_batch_flush(batch_flush_deferred);
-    d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), 255));
 }
 
 bool d3d_light_enable(int id, bool enable)

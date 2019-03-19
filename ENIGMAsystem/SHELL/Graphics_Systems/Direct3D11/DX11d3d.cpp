@@ -244,11 +244,6 @@ void d3d_light_shininess(int facemode, int shine)
 
 }
 
-void d3d_light_define_ambient(int col)
-{
-
-}
-
 bool d3d_light_enable(int id, bool enable)
 {
     return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);

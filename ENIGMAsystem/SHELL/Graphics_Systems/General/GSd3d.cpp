@@ -1,10 +1,12 @@
 #include "GSd3d.h"
 #include "GSprimitives.h"
+#include "GScolor_macros.h"
 
 namespace enigma {
 
 bool d3dHidden = false, d3dZWriteEnable = true, d3dPerspective = true, d3dLighting = false, d3dShading = true;
 int d3dCulling = 0;
+float d3dLightingAmbient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 } // namespace enigma
 
@@ -58,6 +60,13 @@ bool d3d_get_lighting() {
 
 bool d3d_get_shading() {
   return enigma::d3dShading;
+}
+
+void d3d_light_define_ambient(int col)
+{
+  enigma::d3dLightingAmbient[0] = float(COL_GET_Rf(col));
+  enigma::d3dLightingAmbient[1] = float(COL_GET_Gf(col));
+  enigma::d3dLightingAmbient[2] = float(COL_GET_Bf(col));
 }
 
 } // namespace enigma_user

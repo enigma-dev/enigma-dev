@@ -73,6 +73,7 @@ void d3d_state_flush() {
   }
   (d3dLighting?glEnable:glDisable)(GL_LIGHTING);
   glShadeModel(d3dShading?GL_SMOOTH:GL_FLAT);
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, d3dLightingAmbient);
 }
 
 void d3d_light_update_positions(); // forward declare
@@ -122,10 +123,6 @@ void d3d_set_software_vertex_processing(bool software) {
 void d3d_start()
 {
   draw_batch_flush(batch_flush_deferred);
-
-  // Set global ambient lighting to nothing.
-  float global_ambient[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
 
   // Enable depth buffering
   enigma::d3dMode = true;
@@ -529,13 +526,6 @@ void d3d_light_shininess(int facemode, int shine)
 {
   draw_batch_flush(batch_flush_deferred);
   glMateriali(renderstates[facemode], GL_SHININESS, shine);
-}
-
-void d3d_light_define_ambient(int col)
-{
-  draw_batch_flush(batch_flush_deferred);
-  float color[4] = {float(COL_GET_Rf(col)), float(COL_GET_Gf(col)), float(COL_GET_Bf(col)), 1.0f};
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
 }
 
 bool d3d_light_enable(int id, bool enable)

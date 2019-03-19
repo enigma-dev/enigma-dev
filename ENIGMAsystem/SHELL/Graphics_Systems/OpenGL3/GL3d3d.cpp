@@ -516,15 +516,6 @@ bool d3d_light_set_ambient(int id, int r, int g, int b, double a)
   return enigma::d3d_lighting.light_set_ambient(id, (gs_scalar)r/255.0, (gs_scalar)g/255.0, (gs_scalar)b/255.0, a);
 }
 
-void d3d_light_define_ambient(int col)
-{
-  draw_batch_flush(batch_flush_deferred);
-  enigma::d3d_lighting.global_ambient_color[0] = COL_GET_Rf(col);
-  enigma::d3d_lighting.global_ambient_color[1] = COL_GET_Gf(col);
-  enigma::d3d_lighting.global_ambient_color[2] = COL_GET_Bf(col);
-  enigma::d3d_lighting.light_update();
-}
-
 bool d3d_light_enable(int id, bool enable)
 {
   draw_batch_flush(batch_flush_deferred);
@@ -601,17 +592,20 @@ namespace enigma {
 
 void d3d_light_update_positions()
 {
-  enigma::d3d_lighting.light_update_positions();
+  d3d_lighting.light_update_positions();
 }
 
 void d3d_state_flush() {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glDepthMask(d3dZWriteEnable);
-  enigma::d3d_lighting.lights_enable(d3dLighting);
-  enigma::d3d_lighting.light_update();
+  d3d_lighting.lights_enable(d3dLighting);
+  d3d_lighting.global_ambient_color[0] = d3dLightingAmbient[0];
+  d3d_lighting.global_ambient_color[1] = d3dLightingAmbient[1];
+  d3d_lighting.global_ambient_color[2] = d3dLightingAmbient[2];
+  d3d_lighting.light_update();
   if (d3dLighting) {
-    enigma::d3d_lighting.lightsource_update();
+    d3d_lighting.lightsource_update();
   }
   (d3dCulling>0?glEnable:glDisable)(GL_CULL_FACE);
   if (d3dCulling > 0){
