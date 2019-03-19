@@ -11,6 +11,7 @@
 #include <boost/exception/diagnostic_information.hpp>
 
 #include <iostream>
+#include <cctype> // std::ispace
 
 namespace fs = boost::filesystem;
 
