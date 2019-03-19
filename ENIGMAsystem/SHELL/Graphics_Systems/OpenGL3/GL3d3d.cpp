@@ -241,11 +241,6 @@ void d3d_set_depth(double dep)
 
 }//TODO: Write function
 
-void d3d_set_shading(bool smooth)
-{
-
-}
-
 void d3d_set_clip_plane(bool enable)
 {
   draw_batch_flush(batch_flush_deferred);

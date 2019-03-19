@@ -64,8 +64,7 @@ void graphics_set_matrix(int type) {
 
 } // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 void d3d_clear_depth(double value) {
     draw_batch_flush(batch_flush_deferred);
@@ -158,11 +157,6 @@ void d3d_set_depth_operator(int mode) {
 }
 
 void d3d_set_depth(double dep)
-{
-
-}
-
-void d3d_set_shading(bool smooth)
 {
 
 }

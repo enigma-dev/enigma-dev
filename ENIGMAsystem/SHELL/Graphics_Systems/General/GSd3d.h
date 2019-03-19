@@ -29,6 +29,7 @@ extern bool d3dHidden;
 extern bool d3dZWriteEnable;
 extern bool d3dPerspective;
 extern bool d3dLighting;
+extern bool d3dShading;
 extern int d3dCulling;
 
 void d3d_state_flush();

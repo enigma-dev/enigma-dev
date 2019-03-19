@@ -66,12 +66,13 @@ namespace enigma {
 void d3d_state_flush() {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
-  (d3dLighting?glEnable:glDisable)(GL_LIGHTING);
   glDepthMask(d3dZWriteEnable);
   (d3dCulling>0?glEnable:glDisable)(GL_CULL_FACE);
   if (d3dCulling > 0){
     glFrontFace(windingstates[d3dCulling-1]);
   }
+  (d3dLighting?glEnable:glDisable)(GL_LIGHTING);
+  glShadeModel(d3dShading?GL_SMOOTH:GL_FLAT);
 }
 
 void d3d_light_update_positions(); // forward declare
@@ -250,12 +251,6 @@ void d3d_set_depth_operator(int mode) {
 void d3d_set_depth(double dep)
 {
   //TODO: Write function
-}
-
-void d3d_set_shading(bool smooth)
-{
-  draw_batch_flush(batch_flush_deferred);
-  glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
 }
 
 void d3d_set_clip_plane(bool enable)

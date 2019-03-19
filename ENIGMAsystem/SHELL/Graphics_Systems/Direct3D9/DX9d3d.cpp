@@ -67,6 +67,7 @@ void d3d_state_flush() {
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
   d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);
   d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[d3dCulling]);
+  d3dmgr->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
 }
 
 bool d3dMode = false;
@@ -221,12 +222,6 @@ void d3d_set_depth_operator(int mode) {
 void d3d_set_depth(double dep)
 {
 
-}
-
-void d3d_set_shading(bool smooth)
-{
-	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_SHADEMODE, smooth?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
 }
 
 void d3d_set_clip_plane(bool enable)
