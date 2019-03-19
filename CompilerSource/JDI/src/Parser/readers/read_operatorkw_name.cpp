@@ -1,6 +1,8 @@
 #include <Parser/bodies.h>
 #include <API/compile_settings.h>
 
+using namespace jdi;
+
 string jdip::read_operatorkw_name(lexer* lex, token_t &token, definition_scope *scope, error_handler *herr)
 {
   string res;

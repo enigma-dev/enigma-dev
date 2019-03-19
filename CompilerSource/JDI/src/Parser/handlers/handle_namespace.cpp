@@ -21,6 +21,8 @@
 
 #include <Parser/bodies.h>
 
+using jdi::definition_scope;
+
 int jdip::context_parser::handle_namespace(definition_scope *scope, token_t& token)
 {
   definition_scope *nscope;
