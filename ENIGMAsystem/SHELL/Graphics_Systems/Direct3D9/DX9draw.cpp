@@ -59,31 +59,6 @@ void draw_enable_alphablend(bool enable) {
 	d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, enable);
 }
 
-bool draw_get_alpha_test() {
-	DWORD enabled = 0;
-	d3dmgr->device->GetRenderState(D3DRS_ALPHATESTENABLE, &enabled);
-	return enabled;
-}
-
-unsigned draw_get_alpha_test_ref_value()
-{
-	DWORD val = 0;
-	d3dmgr->device->GetRenderState(D3DRS_ALPHAREF, &val);
-	return val;
-}
-
-void draw_set_alpha_test(bool enable)
-{
-	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, enable);
-}
-
-void draw_set_alpha_test_ref_value(unsigned val)
-{
-	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_ALPHAREF, val);
-}
-
 void draw_set_line_pattern(int pattern, int scale)
 {
 	draw_batch_flush(batch_flush_deferred);

@@ -19,6 +19,7 @@
 #include "GL3shader.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSmatrix_impl.h"
@@ -597,6 +598,7 @@ void d3d_light_update_positions()
 
 void d3d_state_flush() {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glDepthMask(d3dZWriteEnable);
   d3d_lighting.lights_enable(d3dLighting);
@@ -611,6 +613,9 @@ void d3d_state_flush() {
   if (d3dCulling > 0){
     glFrontFace(windingstates[d3dCulling-1]);
   }
+
+  enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTestEnable, alphaTest);
+  enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTest, (gs_scalar)alphaTestRef/255.0);
 }
 
 } // namespace enigma

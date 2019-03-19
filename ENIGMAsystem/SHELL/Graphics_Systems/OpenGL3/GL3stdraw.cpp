@@ -64,29 +64,6 @@ void draw_enable_alphablend(bool enable) {
 	(enable?glEnable:glDisable)(GL_BLEND);
 }
 
-bool draw_get_alpha_test() {
-  return false;//glIsEnabled(GL_ALPHA_TEST);
-}
-
-unsigned draw_get_alpha_test_ref_value()
-{
-  //float ref;
-  //glGetFloatv(GL_ALPHA_TEST_REF, &ref);
-  return 0;//ref*256;
-}
-
-void draw_set_alpha_test(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTestEnable, enable);
-}
-
-void draw_set_alpha_test_ref_value(unsigned val)
-{
-  draw_batch_flush(batch_flush_deferred);
-  enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTest, (gs_scalar)val/256.0);
-}
-
 void draw_set_line_pattern(int pattern, int scale)
 {
   draw_batch_flush(batch_flush_deferred);

@@ -69,29 +69,6 @@ void draw_enable_alphablend(bool enable) {
 	(enable?glEnable:glDisable)(GL_BLEND);
 }
 
-bool draw_get_alpha_test() {
-  return glIsEnabled(GL_ALPHA_TEST);
-}
-
-unsigned draw_get_alpha_test_ref_value()
-{
-  float ref;
-  glGetFloatv(GL_ALPHA_TEST_REF, &ref);
-  return ref*256;
-}
-
-void draw_set_alpha_test(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-	(enable?glEnable:glDisable)(GL_ALPHA_TEST);
-}
-
-void draw_set_alpha_test_ref_value(unsigned val)
-{
-  draw_batch_flush(batch_flush_deferred);
-	glAlphaFunc(GL_GREATER, val/256);
-}
-
 void draw_set_line_pattern(int pattern, int scale)
 {
   draw_batch_flush(batch_flush_deferred);

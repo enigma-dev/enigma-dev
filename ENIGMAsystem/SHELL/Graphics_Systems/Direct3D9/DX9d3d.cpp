@@ -17,6 +17,7 @@
 
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSmatrix_impl.h"
@@ -63,12 +64,16 @@ namespace enigma {
 
 void d3d_state_flush() {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+
   d3dmgr->SetRenderState(D3DRS_ZENABLE, d3dHidden);
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
   d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);
   d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[d3dCulling]);
   d3dmgr->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
   d3dmgr->SetRenderState(D3DRS_AMBIENT, *enigma::d3dLightingAmbient);
+
+  d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, alphaTest);
+  d3dmgr->SetRenderState(D3DRS_ALPHAREF, alphaTestRef);
 }
 
 bool d3dMode = false;

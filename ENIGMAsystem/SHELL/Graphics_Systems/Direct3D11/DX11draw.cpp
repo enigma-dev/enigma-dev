@@ -56,26 +56,6 @@ void draw_enable_alphablend(bool enable)
   draw_batch_flush(batch_flush_deferred);
 }
 
-bool draw_get_alpha_test()
-{
-  return false; //TODO: implement
-}
-
-unsigned draw_get_alpha_test_ref_value()
-{
-  return 0; //TODO: implement
-}
-
-void draw_set_alpha_test(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-}
-
-void draw_set_alpha_test_ref_value(unsigned val)
-{
-  draw_batch_flush(batch_flush_deferred);
-}
-
 void draw_set_line_pattern(int pattern, int scale)
 {
   draw_batch_flush(batch_flush_deferred);

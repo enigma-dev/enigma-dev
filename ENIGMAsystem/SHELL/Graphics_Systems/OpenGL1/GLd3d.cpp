@@ -17,6 +17,7 @@
 
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSmatrix_impl.h"
@@ -65,6 +66,8 @@ namespace enigma {
 
 void d3d_state_flush() {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+
+  (d3dLighting?glEnable:glDisable)(GL_ALPHA_TEST);
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glDepthMask(d3dZWriteEnable);
   (d3dCulling>0?glEnable:glDisable)(GL_CULL_FACE);
@@ -74,6 +77,9 @@ void d3d_state_flush() {
   (d3dLighting?glEnable:glDisable)(GL_LIGHTING);
   glShadeModel(d3dShading?GL_SMOOTH:GL_FLAT);
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, d3dLightingAmbient);
+
+  (alphaTest?glEnable:glDisable)(GL_ALPHA_TEST);
+  glAlphaFunc(GL_GREATER, alphaTestRef/255);
 }
 
 void d3d_light_update_positions(); // forward declare

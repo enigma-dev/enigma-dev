@@ -31,15 +31,36 @@
 using std::vector;
 
 namespace enigma {
-  float circleprecision=24;
-  extern unsigned char currentcolor[4];
 
-  //List of vertices we are buffering to draw.
-  std::list<PolyVertex> currComplexPoly;
+bool alphaTest = false;
+unsigned char alphaTestRef = 0;
+
+float circleprecision=24;
+extern unsigned char currentcolor[4];
+
+//List of vertices we are buffering to draw.
+std::list<PolyVertex> currComplexPoly;
+
+} // namespace enigma
+
+namespace enigma_user {
+
+void draw_set_alpha_test(bool enable) {
+  enigma::alphaTest = enable;
 }
 
-namespace enigma_user
+void draw_set_alpha_test_ref_value(unsigned val) {
+  enigma::alphaTestRef = val;
+}
+
+bool draw_get_alpha_test() {
+  return enigma::alphaTest;
+}
+
+unsigned draw_get_alpha_test_ref_value()
 {
+  return enigma::alphaTestRef;
+}
 
 void draw_set_circle_precision(float pr) {
   enigma::circleprecision = pr < 3 ? 3 : pr;

@@ -23,6 +23,13 @@
 
 #include <list>
 
+namespace enigma {
+
+extern bool alphaTest;
+extern unsigned char alphaTestRef;
+
+} // namespace enigma
+
 namespace enigma_user
 {
 
