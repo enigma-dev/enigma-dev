@@ -522,9 +522,7 @@ void d3d_light_update_positions()
   d3d_lighting.light_update_positions();
 }
 
-void d3d_state_flush() {
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-
+void graphics_state_flush() {
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glDepthMask(d3dZWriteEnable);
   d3d_lighting.lights_enable(d3dLighting);

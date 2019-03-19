@@ -25,14 +25,17 @@
 
 namespace enigma {
 
-extern bool alphaBlend, alphaTest;
+extern bool drawStateDirty, alphaBlend, alphaTest;
 extern unsigned char alphaTestRef;
+
+void graphics_state_flush();
 
 } // namespace enigma
 
 namespace enigma_user
 {
 
+  void draw_state_flush();
   int draw_get_msaa_maxlevel();
   bool draw_get_msaa_supported();
   void draw_set_msaa_enabled(bool enable);

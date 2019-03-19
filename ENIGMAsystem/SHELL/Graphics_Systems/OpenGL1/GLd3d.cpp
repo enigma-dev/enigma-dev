@@ -70,9 +70,7 @@ const GLenum blendequivs[11] = {
 
 namespace enigma {
 
-void d3d_state_flush() {
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-
+void graphics_state_flush() {
   (d3dLighting?glEnable:glDisable)(GL_ALPHA_TEST);
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glDepthMask(d3dZWriteEnable);

@@ -1,4 +1,5 @@
 #include "GSblend.h"
+#include "GSstdraw.h"
 
 namespace enigma {
 
@@ -9,6 +10,7 @@ int blendMode[2] = { enigma_user::bm_src_alpha, enigma_user::bm_inv_src_alpha };
 namespace enigma_user {
 
 void draw_set_blend_mode(int mode) {
+  enigma::drawStateDirty = true;
   const static int dest_modes[] = {bm_inv_src_alpha,bm_one,bm_inv_src_color,bm_inv_src_color};
 
   enigma::blendMode[0] = (mode == bm_subtract) ? bm_zero : bm_src_alpha;
@@ -16,6 +18,7 @@ void draw_set_blend_mode(int mode) {
 }
 
 void draw_set_blend_mode_ext(int src, int dest) {
+  enigma::drawStateDirty = true;
   enigma::blendMode[0] = src;
   enigma::blendMode[1] = dest;
 }

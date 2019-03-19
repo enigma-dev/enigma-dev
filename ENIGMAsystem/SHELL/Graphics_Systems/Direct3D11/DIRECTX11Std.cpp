@@ -18,7 +18,7 @@
 #include "DIRECTX11Std.h"
 #include "Direct3D11Headers.h"
 
-#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 
 #include "Universal_System/var4.h"
@@ -34,7 +34,7 @@ namespace enigma {
 void init_sampler_state();
 
 void graphicssystem_initialize() {
-  d3d_state_flush();
+  enigma_user::draw_state_flush();
   init_sampler_state();
 }
 

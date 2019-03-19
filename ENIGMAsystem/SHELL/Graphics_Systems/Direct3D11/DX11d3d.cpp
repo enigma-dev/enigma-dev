@@ -37,9 +37,7 @@ const D3D11_BLEND blend_equivs[11] = {
 
 namespace enigma {
 
-void d3d_state_flush() {
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-
+void graphics_state_flush() {
   D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
 
   depthStencilDesc.DepthEnable = d3dHidden;

@@ -23,6 +23,7 @@ float d3dFogColor[3] = { 0.0f, 0.0f, 0.0f };
 namespace enigma_user {
 
 void d3d_start() {
+  enigma::drawStateDirty = true;
   enigma::d3dMode = true;
   enigma::d3dPerspective = true;
   enigma::d3dHidden = true;
@@ -41,6 +42,7 @@ void d3d_start() {
 }
 
 void d3d_end() {
+  enigma::drawStateDirty = true;
   enigma::d3dMode = false;
   enigma::d3dPerspective = false;
   enigma::d3dHidden = false;
@@ -52,28 +54,34 @@ void d3d_end() {
 }
 
 void d3d_set_perspective(bool enable) {
+  enigma::drawStateDirty = true;
   // in GM8.1 and GMS v1.4 this does not take effect
   // until the next frame in screen_redraw
   enigma::d3dPerspective = enable;
 }
 
 void d3d_set_hidden(bool enable) {
+  enigma::drawStateDirty = true;
   enigma::d3dHidden = enable;
 }
 
 void d3d_set_zwriteenable(bool enable) {
+  enigma::drawStateDirty = true;
   enigma::d3dZWriteEnable = enable;
 }
 
 void d3d_set_culling(int mode) {
+  enigma::drawStateDirty = true;
   enigma::d3dCulling = mode;
 }
 
 void d3d_set_lighting(bool enable) {
+  enigma::drawStateDirty = true;
   enigma::d3dLighting = enable;
 }
 
 void d3d_set_shading(bool enable) {
+  enigma::drawStateDirty = true;
   enigma::d3dShading = enable;
 }
 
@@ -113,36 +121,44 @@ void d3d_set_fog(bool enable, int color, double start, double end) {
 }
 
 void d3d_set_fog_enabled(bool enable) {
+  enigma::drawStateDirty = true;
   enigma::d3dFogEnabled = enable;
 }
 
 void d3d_set_fog_mode(int mode) {
+  enigma::drawStateDirty = true;
   enigma::d3dFogMode = mode;
 }
 
 void d3d_set_fog_hint(int mode) {
+  enigma::drawStateDirty = true;
   enigma::d3dFogHint = mode;
 }
 
 void d3d_set_fog_color(int color) {
+  enigma::drawStateDirty = true;
   enigma::d3dFogColor[0] = COL_GET_Rf(color);
   enigma::d3dFogColor[1] = COL_GET_Gf(color);
   enigma::d3dFogColor[2] = COL_GET_Bf(color);
 }
 
 void d3d_set_fog_start(double start) {
+  enigma::drawStateDirty = true;
   enigma::d3dFogStart = start;
 }
 
 void d3d_set_fog_end(double end) {
+  enigma::drawStateDirty = true;
   enigma::d3dFogEnd = end;
 }
 
 void d3d_set_fog_density(double density) {
+  enigma::drawStateDirty = true;
   enigma::d3dFogDensity = density;
 }
 
 void d3d_light_define_ambient(int col) {
+  enigma::drawStateDirty = true;
   enigma::d3dLightingAmbient[0] = float(COL_GET_Rf(col));
   enigma::d3dLightingAmbient[1] = float(COL_GET_Gf(col));
   enigma::d3dLightingAmbient[2] = float(COL_GET_Bf(col));

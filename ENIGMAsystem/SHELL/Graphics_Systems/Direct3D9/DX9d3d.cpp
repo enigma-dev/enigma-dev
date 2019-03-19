@@ -69,9 +69,7 @@ const D3DBLEND blendequivs[11] = {
 
 namespace enigma {
 
-void d3d_state_flush() {
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-
+void graphics_state_flush() {
   d3dmgr->SetRenderState(D3DRS_ZENABLE, d3dHidden);
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
   d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);

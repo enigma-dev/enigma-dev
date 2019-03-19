@@ -32,7 +32,7 @@ using std::vector;
 
 namespace enigma {
 
-bool alphaBlend = true, alphaTest = false;
+bool drawStateDirty = false, alphaBlend = true, alphaTest = false;
 unsigned char alphaTestRef = 0;
 
 float circleprecision=24;
@@ -45,15 +45,38 @@ std::list<PolyVertex> currComplexPoly;
 
 namespace enigma_user {
 
+void draw_state_flush() {
+  // track whether we are already flushing the state
+  static bool flushing = false;
+
+  // if the state isn't dirty, we don't have to do anything
+  if (!enigma::drawStateDirty) return;
+
+  // prevent state flush triggered by batch flush of another state flush
+  if (flushing) return;
+
+  flushing = true; // we are now flushing the state
+
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  enigma::graphics_state_flush();
+
+  flushing = false; // done flushing state
+
+  enigma::drawStateDirty = false; // state is not dirty now
+}
+
 void draw_enable_alphablend(bool enable) {
+  enigma::drawStateDirty = true;
   enigma::alphaBlend = enable;
 }
 
 void draw_set_alpha_test(bool enable) {
+  enigma::drawStateDirty = true;
   enigma::alphaTest = enable;
 }
 
 void draw_set_alpha_test_ref_value(unsigned val) {
+  enigma::drawStateDirty = true;
   enigma::alphaTestRef = val;
 }
 
@@ -67,6 +90,7 @@ unsigned draw_get_alpha_test_ref_value()
 }
 
 void draw_set_circle_precision(float pr) {
+  enigma::drawStateDirty = true;
   enigma::circleprecision = pr < 3 ? 3 : pr;
 }
 

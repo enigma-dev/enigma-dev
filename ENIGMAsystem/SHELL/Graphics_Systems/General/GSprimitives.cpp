@@ -17,6 +17,7 @@
 **/
 
 #include "GSprimitives.h"
+#include "GSstdraw.h"
 #include "GSmodel.h"
 #include "GStextures.h"
 
@@ -41,6 +42,12 @@ int draw_get_batch_stream() {
 }
 // helper function for beginning a deferred batch to determine when texture swap occurs
 void draw_batch_begin_deferred(int texId) {
+  // if the draw state is dirty, flush the new state
+  if (enigma::drawStateDirty) {
+    enigma_user::draw_state_flush();
+  }
+  // if we want to use a different texture, draw any existing batch
+  // first with the old texture
   if (draw_batch_texture != texId) {
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     draw_batch_texture = texId;
