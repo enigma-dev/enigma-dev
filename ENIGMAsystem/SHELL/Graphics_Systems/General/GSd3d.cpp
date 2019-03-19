@@ -85,34 +85,6 @@ void d3d_set_shading(bool enable) {
   enigma::d3dShading = enable;
 }
 
-bool d3d_get_perspective() {
-  return enigma::d3dHidden;
-}
-
-bool d3d_get_mode() {
-  return enigma::d3dMode;
-}
-
-bool d3d_get_hidden() {
-  return enigma::d3dHidden;
-}
-
-bool d3d_get_zwriteenable() {
-  return enigma::d3dZWriteEnable;
-}
-
-int d3d_get_culling() {
-  return enigma::d3dCulling;
-}
-
-bool d3d_get_lighting() {
-  return enigma::d3dLighting;
-}
-
-bool d3d_get_shading() {
-  return enigma::d3dShading;
-}
-
 void d3d_set_fog(bool enable, int color, double start, double end) {
   d3d_set_fog_enabled(enable);
   d3d_set_fog_color(color);
@@ -163,5 +135,13 @@ void d3d_light_define_ambient(int col) {
   enigma::d3dLightingAmbient[1] = float(COL_GET_Gf(col));
   enigma::d3dLightingAmbient[2] = float(COL_GET_Bf(col));
 }
+
+bool d3d_get_mode() { return enigma::d3dMode; }
+bool d3d_get_perspective() { return enigma::d3dPerspective; }
+bool d3d_get_hidden() { return enigma::d3dHidden; }
+bool d3d_get_zwriteenable() { return enigma::d3dZWriteEnable; }
+int d3d_get_culling() { return enigma::d3dCulling; }
+bool d3d_get_lighting() { return enigma::d3dLighting; }
+bool d3d_get_shading() { return enigma::d3dShading; }
 
 } // namespace enigma_user

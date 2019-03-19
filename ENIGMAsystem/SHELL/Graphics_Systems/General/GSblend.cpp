@@ -23,12 +23,7 @@ void draw_set_blend_mode_ext(int src, int dest) {
   enigma::blendMode[1] = dest;
 }
 
-int draw_get_blend_mode_src() {
-  return enigma::blendMode[0];
-}
-
-int draw_get_blend_mode_dest() {
-  return enigma::blendMode[1];
-}
+int draw_get_blend_mode_src() { return enigma::blendMode[0]; }
+int draw_get_blend_mode_dest() { return enigma::blendMode[1]; }
 
 } // namespace enigma_user

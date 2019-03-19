@@ -80,23 +80,14 @@ void draw_set_alpha_test_ref_value(unsigned val) {
   enigma::alphaTestRef = val;
 }
 
-bool draw_get_alpha_test() {
-  return enigma::alphaTest;
-}
-
-unsigned draw_get_alpha_test_ref_value()
-{
-  return enigma::alphaTestRef;
-}
-
 void draw_set_circle_precision(float pr) {
   enigma::drawStateDirty = true;
   enigma::circleprecision = pr < 3 ? 3 : pr;
 }
 
-float draw_get_circle_precision() {
-  return enigma::circleprecision;
-}
+bool draw_get_alpha_test() { return enigma::alphaTest; }
+unsigned draw_get_alpha_test_ref_value() { return enigma::alphaTestRef; }
+float draw_get_circle_precision() { return enigma::circleprecision; }
 
 void draw_point(gs_scalar x, gs_scalar y)
 {
