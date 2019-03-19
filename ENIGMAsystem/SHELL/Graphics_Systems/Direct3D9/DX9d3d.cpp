@@ -17,6 +17,7 @@
 
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
@@ -40,22 +41,28 @@ T alias_cast(F raw_data) {
   return value;
 }
 
-D3DCULL cullingstates[3] = {
+const D3DCULL cullingstates[3] = {
   D3DCULL_NONE, D3DCULL_CCW, D3DCULL_CW
 };
 
-D3DFILLMODE fillmodes[3] = {
+const D3DFILLMODE fillmodes[3] = {
   D3DFILL_POINT, D3DFILL_WIREFRAME, D3DFILL_SOLID
 };
 
-D3DCMPFUNC depthoperators[8] = {
+const D3DCMPFUNC depthoperators[8] = {
   D3DCMP_NEVER, D3DCMP_LESS, D3DCMP_EQUAL,
   D3DCMP_LESSEQUAL, D3DCMP_GREATER, D3DCMP_NOTEQUAL,
   D3DCMP_GREATEREQUAL, D3DCMP_ALWAYS
 };
 
-D3DFOGMODE fogmodes[3] = {
+const D3DFOGMODE fogmodes[3] = {
     D3DFOG_EXP, D3DFOG_EXP2, D3DFOG_LINEAR
+};
+
+const D3DBLEND blendequivs[11] = {
+  D3DBLEND_ZERO, D3DBLEND_ONE, D3DBLEND_SRCCOLOR, D3DBLEND_INVSRCCOLOR, D3DBLEND_SRCALPHA,
+  D3DBLEND_INVSRCALPHA, D3DBLEND_DESTALPHA, D3DBLEND_INVDESTALPHA, D3DBLEND_DESTCOLOR,
+  D3DBLEND_INVDESTCOLOR, D3DBLEND_SRCALPHASAT
 };
 
 } // anonymous namespace
@@ -70,8 +77,10 @@ void d3d_state_flush() {
   d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);
   d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[d3dCulling]);
   d3dmgr->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
-  d3dmgr->SetRenderState(D3DRS_AMBIENT, *enigma::d3dLightingAmbient);
+  d3dmgr->SetRenderState(D3DRS_AMBIENT, *d3dLightingAmbient);
 
+  d3dmgr->SetRenderState(D3DRS_SRCBLEND, blendequivs[(blendMode[0]-1)%11]);
+  d3dmgr->SetRenderState(D3DRS_DESTBLEND, blendequivs[(blendMode[1]-1)%11]);
   d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, alphaBlend);
   d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, alphaTest);
   d3dmgr->SetRenderState(D3DRS_ALPHAREF, alphaTestRef);
@@ -80,7 +89,7 @@ void d3d_state_flush() {
   d3dmgr->SetRenderState(D3DRS_RANGEFOGENABLE, d3dFogEnabled);
   d3dmgr->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[d3dFogMode]);
   d3dmgr->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[d3dFogMode]);
-  d3dmgr->SetRenderState(D3DRS_FOGCOLOR, *enigma::d3dFogColor);
+  d3dmgr->SetRenderState(D3DRS_FOGCOLOR, *d3dFogColor);
 
   // NOTE: DWORD is 32 bits maximum meaning it can only hold single-precision
   // floats, so yes, we must cast double to float first too.

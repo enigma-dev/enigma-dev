@@ -19,6 +19,7 @@
 #include "GL3shader.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
@@ -34,6 +35,45 @@
 #include <floatcomp.h>
 
 using namespace std;
+
+namespace {
+
+const GLenum renderstates[3] = {
+  GL_NICEST, GL_FASTEST, GL_DONT_CARE
+};
+
+const GLenum fogmodes[3] = {
+  GL_EXP, GL_EXP2, GL_LINEAR
+};
+
+const GLenum depthoperators[8] = {
+  GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL,
+  GL_GEQUAL, GL_ALWAYS
+};
+
+const GLenum fillmodes[3] = {
+  GL_POINT, GL_LINE, GL_FILL
+};
+
+const GLenum windingstates[2] = {
+  GL_CW, GL_CCW
+};
+
+const GLenum cullingstates[3] = {
+  GL_BACK, GL_FRONT, GL_FRONT_AND_BACK
+};
+
+const GLenum stenciloperators[8] = {
+  GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT
+};
+
+const GLenum blendequivs[11] = {
+  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,
+  GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR,
+  GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA_SATURATE
+};
+
+} // namespace anonymous
 
 namespace enigma {
 
@@ -78,35 +118,6 @@ void graphics_set_matrix(int type) {
 }
 
 } // namespace enigma
-
-GLenum renderstates[3] = {
-  GL_NICEST, GL_FASTEST, GL_DONT_CARE
-};
-
-GLenum fogmodes[3] = {
-  GL_EXP, GL_EXP2, GL_LINEAR
-};
-
-GLenum depthoperators[8] = {
-  GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL,
-  GL_GEQUAL, GL_ALWAYS
-};
-
-GLenum fillmodes[3] = {
-  GL_POINT, GL_LINE, GL_FILL
-};
-
-GLenum windingstates[2] = {
-  GL_CW, GL_CCW
-};
-
-GLenum cullingstates[3] = {
-  GL_BACK, GL_FRONT, GL_FRONT_AND_BACK
-};
-
-GLenum stenciloperators[8] = {
-  GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT
-};
 
 namespace enigma_user {
 
@@ -529,6 +540,7 @@ void d3d_state_flush() {
     glFrontFace(windingstates[d3dCulling-1]);
   }
 
+  glBlendFunc(blendequivs[(blendMode[0]-1)%11],blendequivs[(blendMode[1]-1)%11]);
   enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTestEnable, alphaTest);
   enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTest, (gs_scalar)alphaTestRef/255.0);
 }

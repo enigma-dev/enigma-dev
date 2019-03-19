@@ -17,6 +17,7 @@
 
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
@@ -34,29 +35,35 @@ using namespace std;
 
 namespace {
 
-GLenum renderstates[3] = {
+const GLenum renderstates[3] = {
   GL_NICEST, GL_FASTEST, GL_DONT_CARE
 };
 
-GLenum fogmodes[3] = {
+const GLenum fogmodes[3] = {
   GL_EXP, GL_EXP2, GL_LINEAR
 };
 
-GLenum depthoperators[8] = {
+const GLenum depthoperators[8] = {
   GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL,
   GL_GEQUAL, GL_ALWAYS
 };
 
-GLenum fillmodes[3] = {
+const GLenum fillmodes[3] = {
   GL_POINT, GL_LINE, GL_FILL
 };
 
-GLenum windingstates[2] = {
+const GLenum windingstates[2] = {
   GL_CW, GL_CCW
 };
 
-GLenum cullingstates[3] = {
+const GLenum cullingstates[3] = {
   GL_BACK, GL_FRONT, GL_FRONT_AND_BACK
+};
+
+const GLenum blendequivs[11] = {
+  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,
+  GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR,
+  GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA_SATURATE
 };
 
 } // namespace anonymous
@@ -77,6 +84,7 @@ void d3d_state_flush() {
   glShadeModel(d3dShading?GL_SMOOTH:GL_FLAT);
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, d3dLightingAmbient);
 
+  glBlendFunc(blendequivs[(blendMode[0]-1)%11],blendequivs[(blendMode[1]-1)%11]);
   (alphaBlend?glEnable:glDisable)(GL_BLEND);
   (alphaTest?glEnable:glDisable)(GL_ALPHA_TEST);
   glAlphaFunc(GL_GREATER, alphaTestRef/255);

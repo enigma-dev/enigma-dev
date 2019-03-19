@@ -17,6 +17,7 @@
 
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
@@ -24,10 +25,21 @@
 
 using namespace enigma::dx11;
 
+namespace {
+
+const D3D11_BLEND blend_equivs[11] = {
+  D3D11_BLEND_ZERO, D3D11_BLEND_ONE, D3D11_BLEND_SRC_COLOR, D3D11_BLEND_INV_SRC_COLOR, D3D11_BLEND_SRC_ALPHA,
+  D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_DEST_ALPHA, D3D11_BLEND_INV_DEST_ALPHA, D3D11_BLEND_DEST_COLOR,
+  D3D11_BLEND_INV_DEST_COLOR, D3D11_BLEND_SRC_ALPHA_SAT
+};
+
+} // namespace anonymous
+
 namespace enigma {
 
 void d3d_state_flush() {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+
   D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
 
   depthStencilDesc.DepthEnable = d3dHidden;
@@ -54,6 +66,20 @@ void d3d_state_flush() {
   if (pDepthStencilState) { pDepthStencilState->Release(); pDepthStencilState = NULL; }
   m_device->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState);
   m_deviceContext->OMSetDepthStencilState(pDepthStencilState, 1);
+
+  D3D11_BLEND_DESC blendStateDesc = { };
+
+  blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+
+  blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = blend_equivs[(blendMode[0]-1)%11];
+  blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = blend_equivs[(blendMode[1]-1)%11];
+  blendStateDesc.RenderTarget[0].BlendOpAlpha = blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+  blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+  static ID3D11BlendState* pBlendState = NULL;
+  if (pBlendState) { pBlendState->Release(); pBlendState = NULL; }
+  m_device->CreateBlendState(&blendStateDesc, &pBlendState);
+  m_deviceContext->OMSetBlendState(pBlendState, NULL, 0xffffffff);
 }
 
 void graphics_set_matrix(int type) {

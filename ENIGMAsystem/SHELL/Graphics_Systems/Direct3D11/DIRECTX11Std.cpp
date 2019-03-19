@@ -31,12 +31,10 @@ using namespace std;
 
 namespace enigma {
 
-void init_blend_state();
 void init_sampler_state();
 
 void graphicssystem_initialize() {
   d3d_state_flush();
-  init_blend_state();
   init_sampler_state();
 }
 
