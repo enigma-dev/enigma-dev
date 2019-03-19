@@ -167,7 +167,6 @@ namespace enigma_user
 	bool d3d_light_set_ambient(int id, int r, int g, int b, double a);
 	bool d3d_light_set_specularity(int id, int r, int g, int b, double a);
 	void d3d_light_shininess(int facemode, int shine);
-	void d3d_light_define_ambient(int col);
 	bool d3d_light_enable(int id, bool enable);
 
 	void d3d_stencil_start_mask();
