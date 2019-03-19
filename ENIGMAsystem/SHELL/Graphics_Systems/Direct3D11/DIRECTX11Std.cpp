@@ -18,6 +18,7 @@
 #include "DIRECTX11Std.h"
 #include "Direct3D11Headers.h"
 
+#include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 
 #include "Universal_System/var4.h"
@@ -31,12 +32,11 @@ using namespace std;
 namespace enigma {
 
 void init_blend_state();
-void init_depth_stencil_state();
 void init_sampler_state();
 
 void graphicssystem_initialize() {
+  d3d_state_flush();
   init_blend_state();
-  init_depth_stencil_state();
   init_sampler_state();
 }
 
