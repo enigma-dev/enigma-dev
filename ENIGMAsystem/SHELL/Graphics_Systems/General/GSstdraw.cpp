@@ -32,7 +32,7 @@ using std::vector;
 
 namespace enigma {
 
-bool alphaTest = false;
+bool alphaBlend = true, alphaTest = false;
 unsigned char alphaTestRef = 0;
 
 float circleprecision=24;

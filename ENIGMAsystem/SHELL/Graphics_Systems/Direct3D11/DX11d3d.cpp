@@ -56,8 +56,6 @@ void d3d_state_flush() {
   m_deviceContext->OMSetDepthStencilState(pDepthStencilState, 1);
 }
 
-bool d3dMode = false;
-
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
 }
@@ -70,24 +68,6 @@ void d3d_clear_depth(double value) {
     draw_batch_flush(batch_flush_deferred);
 	// Clear the depth buffer.
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, value, 0);
-}
-
-void d3d_start()
-{
-    draw_batch_flush(batch_flush_deferred);
-	enigma::d3dMode = true;
-    enigma::d3dPerspective = true;
-	enigma::d3dCulling =  rs_none;
-	d3d_set_hidden(false);
-}
-
-void d3d_end()
-{
-    draw_batch_flush(batch_flush_deferred);
-	enigma::d3dMode = false;
-    enigma::d3dPerspective = false;
-	enigma::d3dCulling = rs_none;
-	d3d_set_hidden(false);
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)

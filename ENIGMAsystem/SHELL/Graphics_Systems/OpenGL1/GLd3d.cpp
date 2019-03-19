@@ -24,7 +24,6 @@
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
-#include "Universal_System/roomsystem.h" // for view variables
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -78,13 +77,12 @@ void d3d_state_flush() {
   glShadeModel(d3dShading?GL_SMOOTH:GL_FLAT);
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, d3dLightingAmbient);
 
+  (alphaBlend?glEnable:glDisable)(GL_BLEND);
   (alphaTest?glEnable:glDisable)(GL_ALPHA_TEST);
   glAlphaFunc(GL_GREATER, alphaTestRef/255);
 }
 
 void d3d_light_update_positions(); // forward declare
-
-bool d3dMode = false;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
@@ -124,55 +122,6 @@ void d3d_clear_depth(double value) {
 void d3d_set_software_vertex_processing(bool software) {
 	//Does nothing as GL doesn't have such an awful thing
   //TODO: When we seperate platform specific things, then this shouldn't even exist
-}
-
-void d3d_start()
-{
-  draw_batch_flush(batch_flush_deferred);
-
-  // Enable depth buffering
-  enigma::d3dMode = true;
-  enigma::d3dPerspective = true;
-  enigma::d3dHidden = true;
-  enigma::d3dZWriteEnable = true;
-  enigma::d3dCulling = rs_none;
-  glDepthMask(true);
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_GREATER, 0);
-  glEnable(GL_NORMALIZE);
-  glEnable(GL_COLOR_MATERIAL);
-
-  // Set up projection matrix
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
-
-  // Set up modelview matrix
-  glMatrixMode(GL_MODELVIEW);
-  glClearColor(0,0,0,1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity();
-}
-
-void d3d_end()
-{
-  draw_batch_flush(batch_flush_deferred);
-
-  enigma::d3dMode = false;
-  enigma::d3dPerspective = false;
-  enigma::d3dHidden = false;
-  enigma::d3dZWriteEnable = false;
-  enigma::d3dCulling = rs_none;
-  glDepthMask(false);
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_ALPHA_TEST);
-  glDisable(GL_NORMALIZE);
-  glDisable(GL_COLOR_MATERIAL);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(0, 1, 0, 1);
-  glMatrixMode(GL_MODELVIEW);
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)

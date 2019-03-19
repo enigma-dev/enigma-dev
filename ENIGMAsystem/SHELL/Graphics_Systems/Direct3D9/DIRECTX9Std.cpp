@@ -26,11 +26,13 @@
 #include <string>
 
 using namespace std;
+using namespace enigma::dx9;
 
-namespace enigma
-{
+namespace enigma {
 
-void graphicssystem_initialize() {}
+void graphicssystem_initialize() {
+  d3dmgr->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
+}
 
 } // namespace enigma
 

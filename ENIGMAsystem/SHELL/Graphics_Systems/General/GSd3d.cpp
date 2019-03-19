@@ -1,16 +1,52 @@
 #include "GSd3d.h"
+#include "GSstdraw.h"
+#include "GSmatrix.h"
 #include "GSprimitives.h"
+#include "GScolors.h"
 #include "GScolor_macros.h"
+
+#include "Universal_System/roomsystem.h" // for view variables
 
 namespace enigma {
 
-bool d3dHidden = false, d3dZWriteEnable = true, d3dPerspective = true, d3dLighting = false, d3dShading = true;
+bool d3dMode = false, d3dHidden = false, d3dZWriteEnable = true, d3dPerspective = true, d3dLighting = false, d3dShading = true;
 int d3dCulling = 0;
 float d3dLightingAmbient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 } // namespace enigma
 
 namespace enigma_user {
+
+void d3d_start()
+{
+  enigma::d3dMode = true;
+  enigma::d3dPerspective = true;
+  enigma::d3dHidden = true;
+  enigma::d3dZWriteEnable = true;
+  enigma::d3dCulling = rs_none;
+  enigma::alphaTest = true;
+
+  // Set up projection matrix
+  d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
+
+  // Set up modelview matrix
+  d3d_transform_set_identity();
+
+  draw_clear(enigma_user::c_black);
+  d3d_clear_depth(0.0f);
+}
+
+void d3d_end()
+{
+  enigma::d3dMode = false;
+  enigma::d3dPerspective = false;
+  enigma::d3dHidden = false;
+  enigma::d3dZWriteEnable = false;
+  enigma::d3dCulling = rs_none;
+  enigma::alphaTest = false;
+
+  d3d_set_projection_ortho(0, 0, view_wview[view_current], view_hview[view_current], 0); //This should probably be changed not to use views
+}
 
 void d3d_set_perspective(bool enable) {
   // in GM8.1 and GMS v1.4 this does not take effect

@@ -72,11 +72,10 @@ void d3d_state_flush() {
   d3dmgr->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
   d3dmgr->SetRenderState(D3DRS_AMBIENT, *enigma::d3dLightingAmbient);
 
+  d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, alphaBlend);
   d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, alphaTest);
   d3dmgr->SetRenderState(D3DRS_ALPHAREF, alphaTestRef);
 }
-
-bool d3dMode = false;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
@@ -111,33 +110,6 @@ namespace enigma_user {
 void d3d_clear_depth(double value) {
   draw_batch_flush(batch_flush_deferred);
   d3dmgr->device->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
-}
-
-void d3d_start()
-{
-  draw_batch_flush(batch_flush_deferred);
-  enigma::d3dMode = true;
-  enigma::d3dPerspective = true;
-  enigma::d3dCulling = rs_none;
-  d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-  d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-  d3dmgr->SetRenderState(D3DRS_ZENABLE, enigma::d3dHidden = true);
-  d3dmgr->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
-
-  // Enable texture repetition by default
-  d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
-  d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
-  d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
-}
-
-void d3d_end()
-{
-  draw_batch_flush(batch_flush_deferred);
-  enigma::d3dMode = false;
-  enigma::d3dPerspective = false;
-  enigma::d3dCulling = rs_none;
-  d3dmgr->SetRenderState(D3DRS_NORMALIZENORMALS, FALSE);
-  d3d_set_hidden(false);
 }
 
 void d3d_set_software_vertex_processing(bool software) {

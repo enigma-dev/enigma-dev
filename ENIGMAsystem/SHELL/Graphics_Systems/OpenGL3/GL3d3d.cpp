@@ -39,7 +39,6 @@ namespace enigma {
 
 void d3d_light_update_positions(); // forward declare
 
-bool d3dMode = false;
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 
@@ -120,42 +119,6 @@ void d3d_clear_depth(double value) {
 void d3d_set_software_vertex_processing(bool software) {
 	//Does nothing as GL doesn't have such an awful thing
   //TODO: When we seperate platform specific things, then this shouldn't even exist
-}
-
-void d3d_start()
-{
-  draw_batch_flush(batch_flush_deferred);
-
-  // Enable depth buffering
-  enigma::d3dMode = true;
-  enigma::d3dPerspective = true;
-  enigma::d3dHidden = true;
-  enigma::d3dZWriteEnable = true;
-  enigma::d3dCulling = rs_none;
-  glDepthMask(true);
-  glEnable(GL_DEPTH_TEST);
-
-  // Set up projection matrix
-  d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
-
-  // Set up modelview matrix
-  d3d_transform_set_identity();
-  glClearColor(0,0,0,1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void d3d_end()
-{
-  draw_batch_flush(batch_flush_deferred);
-
-  enigma::d3dMode = false;
-  enigma::d3dPerspective = false;
-  enigma::d3dHidden = false;
-  enigma::d3dZWriteEnable = false;
-  enigma::d3dCulling = rs_none;
-  glDepthMask(false);
-  glDisable(GL_DEPTH_TEST);
-  d3d_set_projection_ortho(0, 0, view_wview[view_current], view_hview[view_current], 0); //This should probably be changed not to use views
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)

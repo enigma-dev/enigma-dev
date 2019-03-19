@@ -64,11 +64,6 @@ void draw_set_msaa_enabled(bool enable)
   (enable?glEnable:glDisable)(GL_MULTISAMPLE);
 }
 
-void draw_enable_alphablend(bool enable) {
-  draw_batch_flush(batch_flush_deferred);
-	(enable?glEnable:glDisable)(GL_BLEND);
-}
-
 void draw_set_line_pattern(int pattern, int scale)
 {
   draw_batch_flush(batch_flush_deferred);

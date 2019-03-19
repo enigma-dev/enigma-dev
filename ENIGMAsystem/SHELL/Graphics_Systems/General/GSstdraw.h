@@ -25,7 +25,7 @@
 
 namespace enigma {
 
-extern bool alphaTest;
+extern bool alphaBlend, alphaTest;
 extern unsigned char alphaTestRef;
 
 } // namespace enigma
