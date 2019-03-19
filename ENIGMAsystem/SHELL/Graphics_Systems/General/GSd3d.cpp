@@ -78,6 +78,10 @@ bool d3d_get_perspective() {
   return enigma::d3dHidden;
 }
 
+bool d3d_get_mode() {
+  return enigma::d3dMode;
+}
+
 bool d3d_get_hidden() {
   return enigma::d3dHidden;
 }

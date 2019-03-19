@@ -34,66 +34,8 @@ struct posi { // Homogenous point.
     posi(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar w1) : x(x1), y(y1), z(z1), w(w1){}
 };
 
-namespace enigma {
-  bool d3dMode = false;
-  bool d3dHidden = false;
-  bool d3dZWriteEnable = true;
-  int d3dCulling = 0;
-}
-
 namespace enigma_user
 {
 	void d3d_clear_depth(double value){}
 	void d3d_set_software_vertex_processing(bool software){}
-
-	void d3d_start()
-	{
-		enigma::d3dMode = true;
-		enigma::d3dPerspective = true;
-		enigma::d3dHidden = true;
-		enigma::d3dZWriteEnable = true;
-		enigma::d3dCulling = rs_none;
-	}
-
-	void d3d_end()
-	{
-		enigma::d3dMode = false;
-		enigma::d3dPerspective = false;
-		enigma::d3dHidden = false;
-		enigma::d3dZWriteEnable = false;
-		enigma::d3dCulling = rs_none;
-	}
-
-
-	// disabling hidden surface removal in means there is no depth buffer
-	void d3d_set_hidden(bool enable)
-	{
-		enigma::d3dHidden = enable;
-	}
-
-	// disabling zwriting can let you turn off testing for a single model, for instance
-	// to fix cutout billboards such as trees the alpha pixels on their edges may not depth sort
-	// properly particle effects are usually drawn with zwriting disabled because of this as well
-	void d3d_set_zwriteenable(bool enable)
-	{
-		enigma::d3dZWriteEnable = enable;
-	}
-
-	void d3d_set_culling(int mode)
-	{
-		enigma::d3dCulling = mode;
-	}
-
-	bool d3d_get_mode()
-	{
-			return enigma::d3dMode;
-	}
-
-	bool d3d_get_hidden(){
-		return enigma::d3dHidden;
-	}
-
-	int d3d_get_culling(){
-		return enigma::d3dCulling;
-	}
 }

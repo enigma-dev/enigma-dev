@@ -45,6 +45,10 @@ std::list<PolyVertex> currComplexPoly;
 
 namespace enigma_user {
 
+void draw_enable_alphablend(bool enable) {
+  enigma::alphaBlend = enable;
+}
+
 void draw_set_alpha_test(bool enable) {
   enigma::alphaTest = enable;
 }

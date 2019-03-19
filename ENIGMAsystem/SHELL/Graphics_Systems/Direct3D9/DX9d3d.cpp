@@ -172,11 +172,6 @@ void d3d_set_fog_density(double density)
   d3dmgr->SetRenderState(D3DRS_FOGDENSITY, alias_cast<DWORD>((float)density));
 }
 
-bool d3d_get_mode()
-{
-    return enigma::d3dMode;
-}
-
 void d3d_set_fill_mode(int fill)
 {
 	draw_batch_flush(batch_flush_deferred);

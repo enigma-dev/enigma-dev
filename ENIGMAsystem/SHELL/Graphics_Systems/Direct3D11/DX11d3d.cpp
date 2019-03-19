@@ -114,11 +114,6 @@ void d3d_set_fog_density(double density)
 
 }
 
-bool d3d_get_mode()
-{
-  return enigma::d3dMode;
-}
-
 void d3d_set_fill_mode(int fill)
 {
 

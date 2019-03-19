@@ -51,11 +51,6 @@ void draw_set_msaa_enabled(bool enable)
   draw_batch_flush(batch_flush_deferred);
 }
 
-void draw_enable_alphablend(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-}
-
 void draw_set_line_pattern(int pattern, int scale)
 {
   draw_batch_flush(batch_flush_deferred);

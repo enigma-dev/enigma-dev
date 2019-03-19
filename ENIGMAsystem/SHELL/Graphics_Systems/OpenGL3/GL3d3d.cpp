@@ -169,11 +169,6 @@ void d3d_set_color_mask(bool r, bool g, bool b, bool a){
   glColorMask(r,g,b,a);
 }
 
-bool d3d_get_mode()
-{
-  return enigma::d3dMode;
-}
-
 void d3d_set_fill_mode(int fill)
 {
   draw_batch_flush(batch_flush_deferred);

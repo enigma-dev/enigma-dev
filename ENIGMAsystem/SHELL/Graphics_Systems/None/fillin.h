@@ -110,7 +110,6 @@ namespace enigma_user
 	int draw_get_msaa_maxlevel();
 	bool draw_get_msaa_supported();
 	void draw_set_msaa_enabled(bool enable);
-	void draw_enable_alphablend(bool enable);
 	bool draw_get_alpha_test();
 	unsigned draw_get_alpha_test_ref_value();
 	void draw_set_alpha_test(bool enable);
@@ -153,9 +152,6 @@ namespace enigma_user
 	unsigned int display_get_gui_width();
 	unsigned int display_get_gui_height();
 
-
-	void d3d_set_lighting(bool enable);
-
 	void d3d_set_fog(bool enable, int color, double start, double end);
 	void d3d_set_fog_enabled(bool enable);
 	void d3d_set_fog_mode(int mode);
@@ -171,7 +167,6 @@ namespace enigma_user
 	void d3d_set_depth_operator(int mode);
 	void d3d_set_depth(double dep);
 	void d3d_clear_depth();
-	void d3d_set_shading(bool smooth);
 	void d3d_set_clip_plane(bool enable);
 
 	bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
