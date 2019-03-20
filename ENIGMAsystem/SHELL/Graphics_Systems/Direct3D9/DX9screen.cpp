@@ -113,10 +113,4 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
 	d3dmgr->device->SetViewport(&pViewport);
 }
 
-//TODO: These need to be in some kind of General
-void display_set_gui_size(unsigned int width, unsigned int height) {
-	enigma::gui_width = width;
-	enigma::gui_height = height;
-}
-
 } // namespace enigma_user

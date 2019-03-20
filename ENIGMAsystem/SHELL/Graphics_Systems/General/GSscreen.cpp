@@ -206,6 +206,11 @@ static inline void draw_gui()
 
 namespace enigma_user {
 
+void display_set_gui_size(unsigned int width, unsigned int height) {
+  enigma::gui_width = width;
+  enigma::gui_height = height;
+}
+
 unsigned int display_get_gui_width(){
   return enigma::gui_width;
 }

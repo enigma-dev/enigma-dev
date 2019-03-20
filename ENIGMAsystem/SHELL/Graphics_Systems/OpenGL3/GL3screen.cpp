@@ -125,10 +125,4 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   glScissor(viewport_x, viewport_y, viewport_w, viewport_h);
 }
 
-//TODO: These need to be in some kind of General
-void display_set_gui_size(unsigned int width, unsigned int height) {
-  enigma::gui_width = width;
-  enigma::gui_height = height;
-}
-
 }
