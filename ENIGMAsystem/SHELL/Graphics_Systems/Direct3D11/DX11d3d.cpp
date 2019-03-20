@@ -29,6 +29,10 @@ using namespace enigma::dx11;
 
 namespace {
 
+const D3D11_FILL_MODE fillmodes[3] = {
+  D3D11_FILL_WIREFRAME, D3D11_FILL_WIREFRAME, D3D11_FILL_SOLID
+};
+
 const D3D11_BLEND blend_equivs[11] = {
   D3D11_BLEND_ZERO, D3D11_BLEND_ONE, D3D11_BLEND_SRC_COLOR, D3D11_BLEND_INV_SRC_COLOR, D3D11_BLEND_SRC_ALPHA,
   D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_DEST_ALPHA, D3D11_BLEND_INV_DEST_ALPHA, D3D11_BLEND_DEST_COLOR,
@@ -47,7 +51,7 @@ void graphics_state_flush() {
   rasterDesc.DepthBias = 0;
   rasterDesc.DepthBiasClamp = 0.0f;
   rasterDesc.DepthClipEnable = false;
-  rasterDesc.FillMode = D3D11_FILL_SOLID;
+  rasterDesc.FillMode = fillmodes[drawFillMode];
   rasterDesc.FrontCounterClockwise = false;
   rasterDesc.MultisampleEnable = msaaEnabled;
   rasterDesc.ScissorEnable = false;
