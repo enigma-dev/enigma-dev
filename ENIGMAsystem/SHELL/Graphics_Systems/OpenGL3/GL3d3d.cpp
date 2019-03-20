@@ -21,6 +21,7 @@
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSstdraw.h"
+#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSmatrix_impl.h"
@@ -538,9 +539,10 @@ void graphics_state_flush() {
   if (d3dCulling > 0){
     glFrontFace(windingstates[d3dCulling-1]);
   }
-  (alphaBlend?glEnable:glDisable)(GL_BLEND);
 
+  glColorMask(colorWriteEnable[0], colorWriteEnable[1], colorWriteEnable[2], colorWriteEnable[3]);
   glBlendFunc(blendequivs[(blendMode[0]-1)%11],blendequivs[(blendMode[1]-1)%11]);
+  (alphaBlend?glEnable:glDisable)(GL_BLEND);
   enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTestEnable, alphaTest);
   enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTest, (gs_scalar)alphaTestRef/255.0);
 }

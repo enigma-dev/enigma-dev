@@ -87,9 +87,4 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 }
 
-void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
-{
-	draw_batch_flush(batch_flush_deferred);
-}
-
 }

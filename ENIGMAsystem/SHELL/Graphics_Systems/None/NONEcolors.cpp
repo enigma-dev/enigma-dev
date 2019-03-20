@@ -54,6 +54,4 @@ namespace enigma_user
 		enigma::currentcolor[2] = blue;
 		enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 	}
-
-	void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha){}
 }

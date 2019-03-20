@@ -38,7 +38,6 @@ using namespace std;
 namespace enigma {
 
 vector<Surface*> Surfaces(0);
-D3DCOLOR get_currentcolor();
 
 //TODO Add caching of the surface's RAM copy to speed this shit up
 //Maybe also investigate the use of CreateRenderTarget

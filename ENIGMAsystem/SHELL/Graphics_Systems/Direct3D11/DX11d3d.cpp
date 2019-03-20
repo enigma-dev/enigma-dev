@@ -18,6 +18,7 @@
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSstdraw.h"
+#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
@@ -91,7 +92,12 @@ void graphics_state_flush() {
   blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = blend_equivs[(blendMode[0]-1)%11];
   blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = blend_equivs[(blendMode[1]-1)%11];
   blendStateDesc.RenderTarget[0].BlendOpAlpha = blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-  blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+  UINT8 colorWriteMask = 0;
+	if (enigma::colorWriteEnable[0]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_RED;
+	if (enigma::colorWriteEnable[1]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_GREEN;
+	if (enigma::colorWriteEnable[2]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_BLUE;
+	if (enigma::colorWriteEnable[3]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_ALPHA;
+  blendStateDesc.RenderTarget[0].RenderTargetWriteMask = colorWriteMask;
 
   static ID3D11BlendState* pBlendState = NULL;
   if (pBlendState) { pBlendState->Release(); pBlendState = NULL; }

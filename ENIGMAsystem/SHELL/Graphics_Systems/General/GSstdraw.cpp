@@ -34,9 +34,7 @@ namespace enigma {
 
 bool drawStateDirty = false, msaaEnabled = true, alphaBlend = true, alphaTest = false;
 unsigned char alphaTestRef = 0;
-
 float circleprecision=24;
-extern unsigned char currentcolor[4];
 
 //List of vertices we are buffering to draw.
 std::list<PolyVertex> currComplexPoly;

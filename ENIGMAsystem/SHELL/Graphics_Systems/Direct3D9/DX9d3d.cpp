@@ -19,6 +19,7 @@
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSstdraw.h"
+#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSmatrix_impl.h"
@@ -78,6 +79,12 @@ void graphics_state_flush() {
   d3dmgr->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
   d3dmgr->SetRenderState(D3DRS_AMBIENT, *d3dLightingAmbient);
 
+	DWORD colorWriteMask = 0;
+	if (enigma::colorWriteEnable[0]) colorWriteMask |= D3DCOLORWRITEENABLE_RED;
+	if (enigma::colorWriteEnable[1]) colorWriteMask |= D3DCOLORWRITEENABLE_GREEN;
+	if (enigma::colorWriteEnable[2]) colorWriteMask |= D3DCOLORWRITEENABLE_BLUE;
+	if (enigma::colorWriteEnable[3]) colorWriteMask |= D3DCOLORWRITEENABLE_ALPHA;
+	d3dmgr->SetRenderState(D3DRS_COLORWRITEENABLE, colorWriteMask);
   d3dmgr->SetRenderState(D3DRS_SRCBLEND, blendequivs[(blendMode[0]-1)%11]);
   d3dmgr->SetRenderState(D3DRS_DESTBLEND, blendequivs[(blendMode[1]-1)%11]);
   d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, alphaBlend);

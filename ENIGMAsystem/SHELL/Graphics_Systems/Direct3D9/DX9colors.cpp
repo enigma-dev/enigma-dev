@@ -25,14 +25,12 @@
 using namespace enigma::dx9;
 
 namespace enigma {
-  extern unsigned char currentcolor[4];
-  D3DCOLOR get_currentcolor() {
-	return D3DCOLOR_RGBA(currentcolor[0], currentcolor[1], currentcolor[2], currentcolor[3]);
-  }
-}
 
-namespace enigma_user
-{
+extern unsigned char currentcolor[4];
+
+} // namespace enigma
+
+namespace enigma_user {
 
 void draw_clear_alpha(int col, float alpha)
 {
@@ -73,14 +71,4 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 }
 
-void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
-{
-	draw_batch_flush(batch_flush_deferred);
-	DWORD flags = 0;
-	if (red) { flags |= D3DCOLORWRITEENABLE_RED; }
-	if (green) { flags |= D3DCOLORWRITEENABLE_GREEN; }
-	if (blue) { flags |= D3DCOLORWRITEENABLE_BLUE; }
-	if (alpha) { flags |= D3DCOLORWRITEENABLE_ALPHA; }
-	d3dmgr->SetRenderState(D3DRS_COLORWRITEENABLE, flags);
-}
-}
+} // namespace enigma_user

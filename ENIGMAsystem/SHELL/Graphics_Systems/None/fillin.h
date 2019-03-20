@@ -25,7 +25,6 @@
 #include <unordered_map>
 #include <math.h>
 
-using namespace std;
 #include <algorithm>
 #include <floatcomp.h>
 #include <vector>
@@ -34,6 +33,8 @@ using namespace std;
 #include <list>
 #include <stack>
 #include "Universal_System/estring.h"
+
+using namespace std;
 
 namespace enigma
 {

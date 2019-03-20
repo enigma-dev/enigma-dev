@@ -22,11 +22,12 @@
 #include <math.h>
 
 namespace enigma {
-  extern unsigned char currentcolor[4];
-}
 
-namespace enigma_user
-{
+extern unsigned char currentcolor[4];
+
+} // namespace enigma
+
+namespace enigma_user {
 
 void draw_clear_alpha(int col,float alpha)
 {
@@ -73,9 +74,4 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	glColor4ubv(enigma::currentcolor);
 }
 
-void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
-{
-	draw_batch_flush(batch_flush_deferred);
-	glColorMask(red, green, blue, alpha);
-}
-}
+} // namespace enigma_user
