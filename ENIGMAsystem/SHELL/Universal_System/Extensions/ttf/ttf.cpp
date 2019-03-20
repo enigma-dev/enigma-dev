@@ -56,7 +56,6 @@ static bool FreeTypeAlive = FontManager::Init();
 
 std::vector<std::string> fontSearchPaths;
 
-
 const std::map<std::string, std::string> fontFallbacks = {
   {"Arial", "LiberationSans"},
   {"Times New Roman", "LiberationSerif"},
@@ -166,6 +165,7 @@ namespace enigma_user {
     if (error != 0)
       return -1;
     
+    // GameMaker has always generated fonts at 96 dpi, default Windows dpi since 1980s
     error = FT_Set_Char_Size( face, size * 64, 0, 96, 0); // 96 dpi, 64 is 26.6 fixed point conversion
     
     if (error != 0)
