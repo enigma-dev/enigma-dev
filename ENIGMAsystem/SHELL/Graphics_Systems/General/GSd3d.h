@@ -92,17 +92,23 @@ namespace enigma_user {
   void d3d_clear_depth(double value=1.0L);
   void d3d_start();
   void d3d_end();
+  void d3d_set_software_vertex_processing(bool software);
   void d3d_set_perspective(bool enable);
   bool d3d_get_perspective();
   void d3d_set_hidden(bool enable);
-  void d3d_set_clip_plane(bool enable);
-  void d3d_set_zwriteenable(bool enable);
-  void d3d_set_lighting(bool enable);
-
-  void d3d_set_software_vertex_processing(bool software);
-  void d3d_set_culling(int mode);
-
+  void d3d_set_depth(double dep);
   void d3d_set_depth_operator(int mode);
+  void d3d_set_zwriteenable(bool enable);
+  void d3d_set_culling(int mode);
+  void d3d_set_clip_plane(bool enable);
+  void d3d_set_lighting(bool enable);
+  void d3d_set_shading(bool smooth);
+
+  bool d3d_get_mode();
+  int d3d_get_culling();
+  bool d3d_get_hidden();
+
+  // Fog
   void d3d_set_fog(bool enable, int color, double start, double end);
   void d3d_set_fog_enabled(bool enable);
   void d3d_set_fog_hint(int mode);
@@ -111,14 +117,8 @@ namespace enigma_user {
   void d3d_set_fog_start(double start);
   void d3d_set_fog_end(double end);
   void d3d_set_fog_density(double density);
-  void d3d_set_depth(double dep);
-  void d3d_set_shading(bool smooth);
 
-  bool d3d_get_mode();
-  int d3d_get_culling();
-  bool d3d_get_hidden();
-
-  // ***** LIGHTS BEGIN *****
+  // Lighting
   bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
   bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col);
   void d3d_light_specularity(int facemode, int r, int g, int b, double a);
@@ -127,9 +127,8 @@ namespace enigma_user {
   void d3d_light_shininess(int facemode, int shine);
   void d3d_light_define_ambient(int col);
   bool d3d_light_enable(int id, bool enable);
-  // ***** LIGHTS END *****
 
-  //Stencil stuff
+  // Stencil stuff
   void d3d_stencil_start_mask();
   void d3d_stencil_continue_mask();
   void d3d_stencil_use_mask();
