@@ -35,6 +35,7 @@ namespace enigma {
 bool drawStateDirty=false, msaaEnabled=true, alphaBlend=true, alphaTest=false;
 unsigned char alphaTestRef=0;
 float circleprecision=24, drawPointSize=1.0f, drawLineWidth=1.0f;
+int drawFillMode=enigma_user::rs_solid;
 
 //List of vertices we are buffering to draw.
 std::list<PolyVertex> currComplexPoly;
@@ -86,6 +87,11 @@ void draw_set_alpha_test_ref_value(unsigned val) {
 void draw_set_point_size(float value) {
 	enigma::drawStateDirty = true;
   enigma::drawPointSize = value;
+}
+
+void draw_set_fill_mode(int fill) {
+  enigma::drawStateDirty = true;
+	enigma::drawFillMode = fill;
 }
 
 void draw_set_line_width(float value) {

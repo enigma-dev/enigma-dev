@@ -198,11 +198,6 @@ namespace enigma_user
 	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h){return -1;}
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 
-	void d3d_set_fill_mode(int fill){}
-	void d3d_set_depth_operator(int mode){}
-	void d3d_set_depth(double dep){}
-	void d3d_set_clip_plane(bool enable){}
-
 	bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col){return false;}
 	bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col){return false;}
 	bool d3d_light_define_specularity(int id, int r, int g, int b, double a){return false;}

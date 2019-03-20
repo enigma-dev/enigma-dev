@@ -25,13 +25,12 @@
 namespace enigma {
 
 extern bool d3dMode;
-extern bool d3dHidden;
-extern bool d3dZWriteEnable;
+extern bool d3dHidden, d3dClipPlane, d3dZWriteEnable;
 extern bool d3dPerspective;
 extern bool d3dLighting;
 extern bool d3dShading;
 extern float d3dLightingAmbient[4];
-extern int d3dCulling;
+extern int d3dCulling, d3dDepthOperator;
 
 extern bool d3dFogEnabled;
 extern int d3dFogMode, d3dFogHint;
@@ -90,17 +89,6 @@ namespace enigma_user {
     rs_front_back
   };
 
-  enum {
-    rs_point, // Render vertices as points
-    rs_line,  // Render in wireframe mode
-    rs_solid  // Normal render mode
-  };
-
-  }
-
-  namespace enigma_user
-  {
-
   void d3d_clear_depth(double value=1.0L);
   void d3d_start();
   void d3d_end();
@@ -114,9 +102,6 @@ namespace enigma_user {
   void d3d_set_software_vertex_processing(bool software);
   void d3d_set_culling(int mode);
 
-  void d3d_set_fill_mode(int fill);
-  void draw_set_line_width(float value);
-  void draw_set_point_size(float value);
   void d3d_set_depth_operator(int mode);
   void d3d_set_fog(bool enable, int color, double start, double end);
   void d3d_set_fog_enabled(bool enable);

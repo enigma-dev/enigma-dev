@@ -28,6 +28,7 @@ namespace enigma {
 extern bool drawStateDirty, msaaEnabled, alphaBlend, alphaTest;
 extern unsigned char alphaTestRef;
 extern float drawPointSize, drawLineWidth;
+extern int drawFillMode;
 
 void graphics_state_flush();
 
@@ -35,8 +36,16 @@ void graphics_state_flush();
 
 namespace enigma_user
 {
+  enum {
+    rs_point, // Render vertices as points
+    rs_line,  // Render in wireframe mode
+    rs_solid  // Normal render mode
+  };
 
   void draw_state_flush();
+  void draw_set_fill_mode(int fill);
+  void draw_set_line_width(float value);
+  void draw_set_point_size(float value);
   int draw_get_msaa_maxlevel();
   bool draw_get_msaa_supported();
   void draw_set_msaa_enabled(bool enable);

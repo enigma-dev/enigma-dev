@@ -57,7 +57,7 @@ const D3DCMPFUNC depthoperators[8] = {
 };
 
 const D3DFOGMODE fogmodes[3] = {
-    D3DFOG_EXP, D3DFOG_EXP2, D3DFOG_LINEAR
+  D3DFOG_EXP, D3DFOG_EXP2, D3DFOG_LINEAR
 };
 
 const D3DBLEND blendequivs[11] = {
@@ -72,9 +72,11 @@ namespace enigma {
 
 void graphics_state_flush() {
   d3dmgr->SetRenderState(D3DRS_POINTSIZE, drawPointSize);
+	d3dmgr->SetRenderState(D3DRS_FILLMODE, fillmodes[drawFillMode]);
 
   d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, msaaEnabled);
   d3dmgr->SetRenderState(D3DRS_ZENABLE, d3dHidden);
+  d3dmgr->SetRenderState(D3DRS_ZFUNC, depthoperators[d3dDepthOperator]);
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
   d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);
   d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[d3dCulling]);
@@ -144,27 +146,6 @@ void d3d_clear_depth(double value) {
 
 void d3d_set_software_vertex_processing(bool software) {
 	d3dmgr->device->SetSoftwareVertexProcessing(software);
-}
-
-void d3d_set_fill_mode(int fill)
-{
-	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_FILLMODE, fillmodes[fill]);
-}
-
-void d3d_set_depth_operator(int mode) {
-	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_ZFUNC, depthoperators[mode]);
-}
-
-void d3d_set_depth(double dep)
-{
-
-}
-
-void d3d_set_clip_plane(bool enable)
-{
-   ///TODO: Code this
 }
 
 }

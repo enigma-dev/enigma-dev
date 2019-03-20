@@ -119,25 +119,6 @@ void d3d_clear_depth(double value) {
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, value, 0);
 }
 
-void d3d_set_fill_mode(int fill)
-{
-
-}
-
-void d3d_set_depth_operator(int mode) {
-
-}
-
-void d3d_set_depth(double dep)
-{
-
-}
-
-void d3d_set_clip_plane(bool enable)
-{
-   ///TODO: Code this
-}
-
 }
 
 // ***** LIGHTS BEGIN *****

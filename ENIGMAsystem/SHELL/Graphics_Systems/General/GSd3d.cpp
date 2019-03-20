@@ -9,8 +9,9 @@
 
 namespace enigma {
 
-bool d3dMode=false, d3dHidden=false, d3dZWriteEnable=true, d3dPerspective=true, d3dLighting=false, d3dShading=true;
-int d3dCulling=0;
+bool d3dMode=false, d3dHidden=false, d3dClipPlane=false, d3dZWriteEnable=true,
+     d3dPerspective=true, d3dLighting=false, d3dShading=true;
+int d3dCulling=0, d3dDepthOperator=enigma_user::rs_lequal;
 float d3dLightingAmbient[4]={0.0f,0.0f,0.0f,1.0f};
 
 bool d3dFogEnabled=false;
@@ -83,6 +84,21 @@ void d3d_set_lighting(bool enable) {
 void d3d_set_shading(bool enable) {
   enigma::drawStateDirty = true;
   enigma::d3dShading = enable;
+}
+
+void d3d_set_depth_operator(int mode) {
+  enigma::drawStateDirty = true;
+	enigma::d3dDepthOperator = mode;
+}
+
+void d3d_set_depth(double dep) {
+  enigma::drawStateDirty = true;
+  //TODO: lmao we still haven't figured out what this is
+}
+
+void d3d_set_clip_plane(bool enable) {
+  enigma::drawStateDirty = true;
+  enigma::d3dClipPlane = enable;
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end) {
