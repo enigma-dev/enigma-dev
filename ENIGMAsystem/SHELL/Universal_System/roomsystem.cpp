@@ -82,20 +82,20 @@ namespace enigma
   {
     using namespace enigma_user;
     object_basic *instanceexists = fetch_instance_by_int(vob);
-  
+
     if (instanceexists)
     {
       object_planar* vobr = (object_planar*)instanceexists;
-  
+
       double vobx = vobr->x, voby = vobr->y;
-  
+
       //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
       //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
-  
+
       double vbc_h, vbc_v;
       (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
       (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
-  
+
       if (view_hspeed[vc] == -1)
       {
         if (vobx < view_xview[vc] + vbc_h)
@@ -118,7 +118,7 @@ namespace enigma
             view_xview[vc] = vobx + vbc_h - view_wview[vc];
         }
       }
-  
+
       if (view_vspeed[vc] == -1)
       {
         if (voby < view_yview[vc] + vbc_v)
@@ -141,23 +141,23 @@ namespace enigma
             view_yview[vc] = voby + vbc_v - view_hview[vc];
         }
       }
-  
+
       if (view_xview[vc] < 0)
         view_xview[vc] = 0;
       else if (view_xview[vc] > room_width - view_wview[vc])
         view_xview[vc] = room_width - view_wview[vc];
-  
+
       if (view_yview[vc] < 0)
         view_yview[vc] = 0;
       else if (view_yview[vc] > room_height - view_hview[vc])
         view_yview[vc] = room_height - view_hview[vc];
     }
   }
-  
+
 
   void roomstruct::end() {
     // Fire the Room End event.
-    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+    instance_event_iterator = &dummy_event_iterator;
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
       it->myevent_roomend();
     }
@@ -233,6 +233,8 @@ namespace enigma
     //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
     //if the window size changes.
     enigma_user::window_default(true);
+    // window sized by first room, can make visible now
+    enigma_user::window_set_visible(true);
     enigma_user::io_clear();
     // we only initialize the screen and clear the window color during game start
     // NOTE: no version of GM has EVER reset the drawing color or alpha during room transition
@@ -266,7 +268,7 @@ namespace enigma
       }
     }
 
-    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+    instance_event_iterator = &dummy_event_iterator;
 
     // Fire the rooms preCreation code. This code includes instance sprite transformations added in the room editor.
     // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
@@ -429,7 +431,7 @@ int room_goto_previous()
 
 int room_next(int num)
 {
-  if (num < 0 or num >= enigma::room_idmax)
+  if (num < 0 or size_t(num) >= enigma::room_idmax)
     return -1;
   enigma::roomstruct *rit = enigma::roomdata[num];
   if (!rit or rit->order+1 >= enigma::room_loadtimecount)
@@ -438,7 +440,7 @@ int room_next(int num)
 }
 int room_previous(int num)
 {
-  if (num < 0 or num >= enigma::room_idmax)
+  if (num < 0 or size_t(num) >= enigma::room_idmax)
     return -1;
   enigma::roomstruct *rit = enigma::roomdata[num];
   if (!rit or rit->order-1 < 0)
@@ -448,7 +450,7 @@ int room_previous(int num)
 
 bool room_exists(int roomid)
 {
-  return roomid >= 0 and roomid < enigma::room_idmax and enigma::roomdata[roomid];
+  return roomid >= 0 and size_t(roomid) < enigma::room_idmax and enigma::roomdata[roomid];
 }
 
 int room_set_width(int indx, int wid)

@@ -93,21 +93,6 @@ int updateTimer() {
 
   return 0;
 }
-
-void set_working_directory() {
-  char buffer[1024];
-#ifdef DEBUG_MODE
-  char* err = getcwd(buffer, sizeof(buffer));
-  if (err != NULL)
-    fprintf(stdout, "Current working dir: %s\n", buffer);
-  else
-    perror("getcwd() error");
-#else
-  getcwd(buffer, sizeof(buffer));
-#endif
-  enigma_user::working_directory = std::string(buffer);
-}
-
 }  //namespace enigma
 
 namespace enigma_user {
@@ -138,6 +123,17 @@ void execute_program(std::string operation, std::string fname, std::string args,
   }
 }
 
+std::string execute_shell_for_output(const std::string &command) {
+  std::string res;
+  char buffer[BUFSIZ];
+  FILE *pf = popen(command.c_str(), "r");
+  while (!feof(pf)) {
+    res.append(buffer, fread(&buffer, sizeof(char), BUFSIZ, pf));
+  }
+  pclose(pf);
+  return res;
+}
+
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("", fname, args, wait); }
 
 void url_open(std::string url, std::string target, std::string options) {
@@ -149,10 +145,5 @@ void url_open_ext(std::string url, std::string target) { url_open(url, target); 
 void url_open_full(std::string url, std::string target, std::string options) { url_open(url, target, options); }
 
 void action_webpage(const std::string& url) { url_open(url); }
-
-std::string environment_get_variable(std::string name) {
-  char* ev = getenv(name.c_str());
-  return ev ? ev : "";
-}
 
 }  //namespace enigma_user

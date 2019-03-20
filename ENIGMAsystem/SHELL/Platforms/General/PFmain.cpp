@@ -1,10 +1,12 @@
 #include "PFmain.h"
 
+#include "PFwindow.h"
+#include "PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Platforms/General/PFwindow.h"
 #include "Universal_System/roomsystem.h"
 
-#include <unistd.h>  //getcwd, usleep
+#include <chrono> // std::chrono::microseconds
+#include <thread> // sleep_for
 
 namespace enigma {
 
@@ -31,7 +33,7 @@ int gameWait() {
     if (pausedSteps < 1) {
       pausedSteps += 1;
     } else {
-      usleep(100000);
+      std::this_thread::sleep_for(std::chrono::microseconds(100000));
       return -1;
     }
   }
@@ -50,8 +52,8 @@ void set_program_args(int argc, char** argv) {
 }
 
 int enigma_main(int argc, char** argv) {
-  // Set the working_directory
-  set_working_directory();
+  // Initialize directory globals
+  initialize_directory_globals();
 
   // Copy our parameters
   set_program_args(argc, argv);
@@ -68,7 +70,6 @@ int enigma_main(int argc, char** argv) {
 
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
-  showWindow();
 
   while (!game_isending) {
     if (!((std::string)enigma_user::room_caption).empty())
@@ -98,8 +99,10 @@ int enigma_main(int argc, char** argv) {
 
 namespace enigma_user {
 
+const int os_browser = browser_not_a_browser;
 std::string working_directory = "";
 std::string program_directory = "";
+std::string temp_directory = "";
 std::string keyboard_string = "";
 int keyboard_key = 0;
 double fps = 0;

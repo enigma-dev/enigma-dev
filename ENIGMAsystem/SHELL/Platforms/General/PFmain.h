@@ -37,7 +37,7 @@ namespace enigma {
   long clamp(long value, long min, long max);
   void Sleep(int ms);
   void compute_window_size();
-  void set_working_directory();
+  void initialize_directory_globals();
   void set_program_args(int argc, char** argv);
   void initTimer();
   int updateTimer();
@@ -49,6 +49,7 @@ namespace enigma_user {
 
 extern std::string working_directory;
 extern std::string program_directory;
+extern std::string temp_directory;
 extern std::string keyboard_string;
 extern int keyboard_key;
 extern double fps;
@@ -76,10 +77,12 @@ unsigned long long disk_free(std::string drive);
 void set_program_priority(int value);
 void execute_shell(std::string fname, std::string args);
 void execute_shell(std::string operation, std::string fname, std::string args);
+std::string execute_shell_for_output(const std::string &command);
 void execute_program(std::string fname, std::string args, bool wait);
 void execute_program(std::string operation, std::string fname, std::string args, bool wait);
 
 std::string environment_get_variable(std::string name);
+bool set_working_directory(std::string dname);
 }
 
 #endif //ENIGMA_PLATFORM_MAIN

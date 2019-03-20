@@ -55,11 +55,13 @@ bool is_ext_swapcontrol_supported() {
   return swaphandling::ext_swapcontrol_supported;
 }
 
+void ScreenRefresh() {
+  SwapBuffers(enigma::window_hDC);
+}
+
 }
 
 namespace enigma_user {
-
-int display_aa = 0;
 
 void display_reset(int samples, bool vsync) {
   int interval = vsync ? 1 : 0;
@@ -100,10 +102,6 @@ void display_reset(int samples, bool vsync) {
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, ColorBufferID);
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, DepthBufferID);
 
-}
-
-void screen_refresh() {
-  SwapBuffers(enigma::window_hDC);
 }
 
 void set_synchronization(bool enable) {

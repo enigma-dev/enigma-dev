@@ -44,12 +44,14 @@ namespace enigma {
   void SetResizeFptr() {
     WindowResizedCallback = &WindowResized;
   }
+
+  void ScreenRefresh() {
+    cocoa_screen_refresh();
+    cocoa_flush_opengl();
+  }
 }
 
 namespace enigma_user {
-  // Don't know where to query this on Cocoa, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
-  int display_aa = 14;
-
   void set_synchronization(bool enable) {
 
   }
@@ -58,10 +60,4 @@ namespace enigma_user {
     set_synchronization(vsync);
     //TODO: Copy over from the Win32 bridge
   }
-
-  void screen_refresh() {
-    cocoa_screen_refresh();
-    cocoa_flush_opengl();
-  }
-
 }

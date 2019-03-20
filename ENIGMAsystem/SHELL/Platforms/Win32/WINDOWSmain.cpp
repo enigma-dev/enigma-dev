@@ -16,8 +16,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#define NOMINMAX // for windows.h because we use std::min/max
 #include "WINDOWSmain.h"
 
+#include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 
@@ -27,7 +29,8 @@
 
 #include <mmsystem.h>
 #include <time.h>
-#include <unistd.h>
+#include <chrono>
+#include <thread>
 #include <algorithm>
 #include <cstdio>
 #include <sstream>
@@ -61,7 +64,30 @@ HWND get_window_handle() {
   return hWnd;
 }
 
-}  // namespace enigma
+} // namespace enigma
+  
+static inline string add_slash(const string& dir) {
+  if (dir.empty() || dir.back() != '\\') return dir + '\\';
+  return dir;
+}
+
+namespace enigma_user {
+  
+bool set_working_directory(string dname) {
+  tstring tstr_dname = widen(dname);
+  replace(tstr_dname.begin(), tstr_dname.end(), '/', '\\');
+  if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
+    WCHAR wstr_buffer[MAX_PATH + 1];
+    if (GetCurrentDirectoryW(MAX_PATH + 1, wstr_buffer) != 0) {
+      working_directory = add_slash(shorten(wstr_buffer));
+      return true;
+    }
+  }
+
+  return false;
+}
+  
+} // enigma_user
 
 namespace enigma {
 bool use_pc;
@@ -246,7 +272,7 @@ int updateTimer() {
     }
     if (remaining_mcs > needed_mcs) {
       const long sleeping_time = std::min((remaining_mcs - needed_mcs) / 5, long(999999));
-      usleep(std::max(long(1), sleeping_time));
+      std::this_thread::sleep_for(std::chrono::microseconds(std::max(long(1), sleeping_time)));
       return -1;
     }
   }
@@ -287,20 +313,23 @@ void handleInput() { input_push(); }
 
 void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
-void showWindow() { ShowWindow(enigma::hWnd, 1); }
-
-void set_working_directory() {
-    // Set the working_directory
-  WCHAR buffer[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, buffer);
-  enigma_user::working_directory = shorten(buffer);
+void initialize_directory_globals() {
+  // Set the working_directory
+  WCHAR buffer[MAX_PATH + 1];
+  GetCurrentDirectoryW(MAX_PATH + 1, buffer);
+  enigma_user::working_directory = add_slash(shorten(buffer));
 
   // Set the program_directory
-  memset(&buffer[0], 0, MAX_PATH);
-  GetModuleFileNameW(NULL, buffer, MAX_PATH);
+  buffer[0] = 0;
+  GetModuleFileNameW(NULL, buffer, MAX_PATH + 1);
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
-      enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
+    enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
+  
+  // Set the temp_directory
+  buffer[0] = 0;
+  GetTempPathW(MAX_PATH + 1, buffer);
+  enigma_user::temp_directory = add_slash(shorten(buffer));
 }
 
 }  // namespace enigma

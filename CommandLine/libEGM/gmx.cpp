@@ -16,6 +16,8 @@
 **/
 
 #include "gmx.h"
+#include "action.h"
+#include "strings_util.h"
 
 #include <pugixml.hpp>
 
@@ -23,7 +25,6 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <unordered_map>
 #include <vector>
 
@@ -39,15 +40,6 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
 void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::Message *m, int depth);
 
 namespace {
-
-inline std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
-  size_t pos = 0;
-  while ((pos = str.find(substr, pos)) != std::string::npos) {
-    str.replace(pos, substr.length(), nstr);
-    pos += nstr.length();
-  }
-  return str;
-}
 
 inline std::string GMXPath2FilePath(std::string dir, std::string value) {
   value = string_replace_all(value, "\\", "/");
@@ -212,15 +204,6 @@ std::string FileToString(const std::string &fName) {
   return buffer.str();
 }
 
-std::vector<std::string> SplitString(const std::string &str, char delimiter) {
-  std::vector<std::string> vec;
-  std::stringstream sstr(str);
-  std::string tmp;
-  while (std::getline(sstr, tmp, delimiter)) vec.push_back(tmp);
-
-  return vec;
-}
-
 }  // Anonymous namespace
 
 void PackScript(std::string fName, int id, buffers::resources::Script *script) {
@@ -278,6 +261,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
     } else {
       const std::string gmxName = opts.GetExtension(buffers::gmx);
       const bool isFilePath = opts.GetExtension(buffers::file_path);
+      const std::string refType = opts.GetExtension(buffers::resource_ref);
       std::string alias = gmxName;
       bool isSplit = false;
       bool isAttribute = false;
@@ -286,6 +270,21 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
 
       if (gmxName == "GMX_DEPRECATED")
         continue;
+
+      if (gmxName == "action") {
+        std::vector<Action> actions;
+        int cid = 0;
+        for (pugi::xml_node n = child.child("action"); n != nullptr; n = n.next_sibling()) {
+          if (strcmp(n.name(), "action") == 0) {  // skip over any siblings that aren't twins <foo/><bar/><foo/> <- bar would be skipped
+            n.append_attribute("visited") = "true";
+            Action action;
+            PackRes(dir, cid++, n, &action, depth + 1);
+            actions.emplace_back(action);
+          }
+        }
+        refl->SetString(m, field, Actions2Code(actions));
+        continue;
+      }
 
       // use the name the protobuf field uses unless there a (gmx) attr
       if (alias.empty()) alias = field->name();
@@ -297,7 +296,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
 
       // if it's not a split then we deal with yoyo's useless nesting
       if (!isSplit && alias != "EGM_NESTED") {  // and our useless nesting
-        std::vector<std::string> nodes = SplitString(alias, '/');
+        std::vector<std::string> nodes = split_string(alias, '/');
 
         for (auto n : nodes) {
           child = child.child(n.c_str());
@@ -341,6 +340,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
                   if (isFilePath) {  // gotta prepend the gmx's path & fix the string to be posix compatible
                     value = GMXPath2FilePath(dir, value);
                   }
+                  if (!refType.empty() && value == "<undefined>") break;
                   refl->AddString(m, field, value);
                 }
               }
@@ -361,7 +361,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
 
           if (!isAttribute) {  // if data we want is not in an attribute (eg <bar x="9001">)
             if (isSplit) {     // if data use a comma delimiter (eg (<foo>0,7,9</foo>)
-              std::vector<std::string> split = SplitString(node.text().as_string(), ',');
+              std::vector<std::string> split = split_string(node.text().as_string(), ',');
               splitValue = split[static_cast<int>(gmxName.back()) - '0'];
             } else  // else data is just in an xml tag (eg <foo>Josh can't read code</foo>)
               xmlValue = child.text();
@@ -430,6 +430,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
               if (isFilePath) {  // again gotta prepend the gmx's path & fix the string to be posix compatible
                 value = GMXPath2FilePath(dir, value);
               }
+              if (!refType.empty() && value == "<undefined>") break;
               refl->SetString(m, field, value);
               break;
             }

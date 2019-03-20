@@ -106,12 +106,13 @@ namespace enigma {
     swaphandling::investigate_swapcontrol_support();
     return swaphandling::mesa_swapcontrol_supported;
   }
+
+  void ScreenRefresh() {
+    glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
+  }
 }
 
 namespace enigma_user {
-  // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
-  int display_aa = 14;
-
   void set_synchronization(bool enable) {
     // General notes:
     // Setting swapping on and off is platform-dependent and requires platform-specific extensions.
@@ -146,9 +147,4 @@ namespace enigma_user {
     set_synchronization(vsync);
     //TODO: Copy over from the Win32 bridge
   }
-
-  void screen_refresh() {
-    glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
-  }
-
 }

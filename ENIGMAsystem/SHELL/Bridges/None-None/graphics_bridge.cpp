@@ -21,12 +21,12 @@
 #include <cstring>
 #include <stdio.h>
 
-namespace enigma_user {
-  int display_aa = 14;
+namespace enigma {
+  void ScreenRefresh(){}
+}
 
+namespace enigma_user {
   void set_synchronization(bool enable){}
 
   void display_reset(int samples, bool vsync){}
-
-  void screen_refresh(){}
 }

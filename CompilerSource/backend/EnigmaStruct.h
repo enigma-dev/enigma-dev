@@ -28,6 +28,11 @@
 #include "other/Include.h"
 #include "other/Extension.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
+/// Structure once used for communicating game information between an IDE via
+/// a shared-memory model. @deprecated Use `GameData` instead.
 struct EnigmaStruct
 {
   int fileVersion;
@@ -74,8 +79,7 @@ struct EnigmaStruct
 	int lastTileId;
 };
 
-#undef String
-#undef boolean
-#undef byte
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

@@ -25,11 +25,7 @@
 
 #include "Platforms/General/PFwindow.h"
 
-#include <cstddef>
-#include <math.h>
-
-namespace enigma_user
-{
+namespace enigma_user {
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
 {
@@ -41,7 +37,7 @@ int background_create_from_screen(int x, int y, int w, int h, bool removeback, b
  	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	int patchSize = full_width*full_height;
 	std::vector<unsigned char> rgbdata(4*patchSize);
-	glReadPixels(x, enigma_user::window_get_region_height_scaled()-h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
+	glReadPixels(x, enigma_user::window_get_region_height_scaled()-h-y,w,h,GL_BGRA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
 
 	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
@@ -55,4 +51,4 @@ int background_create_from_screen(int x, int y, int w, int h, bool removeback, b
   return bckid;
 }
 
-}
+} // namespace enigma_user

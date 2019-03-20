@@ -123,7 +123,7 @@ void d3d_start()
   glDepthMask(true);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_NOTEQUAL, 0);
+  glAlphaFunc(GL_GREATER, 0);
   glEnable(GL_NORMALIZE);
   glEnable(GL_COLOR_MATERIAL);
 
@@ -165,7 +165,6 @@ void d3d_set_hidden(bool enable)
   draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_DEPTH_TEST);
   enigma::d3dHidden = enable;
-  //d3d_set_zwriteenable(enable);
 }
 
 // disabling zwriting can let you turn off testing for a single model, for instance

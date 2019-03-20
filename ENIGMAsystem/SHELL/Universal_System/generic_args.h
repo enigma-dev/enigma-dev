@@ -111,7 +111,7 @@ template<> class numeric_limits<const variant&>: numeric_limits<double> {};
 
 }
 
-#define TEMPLATE_FN(args...) template<args>
+#define TEMPLATE_FN(...) template<__VA_ARGS__>
 
 #else  // JUST_DEFINE_IT_RUN
 
@@ -137,7 +137,7 @@ class ArithmeticTypes { typedef double T; };
 
 }  // namespace enigma
 
-#define TEMPLATE_FN(args...)
+#define TEMPLATE_FN(...)
 
 #endif  // JUST_DEFINE_IT_RUN
 

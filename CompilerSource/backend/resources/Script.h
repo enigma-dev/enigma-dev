@@ -11,6 +11,9 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Script
 {
 	String name;
@@ -18,5 +21,8 @@ struct Script
 
 	String code;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

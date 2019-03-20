@@ -15,8 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
-
+#include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h" // for enigma_user::draw_primitive_count
 #include "Graphics_Systems/General/GScolor_macros.h"
@@ -24,11 +23,13 @@
 #include <map>
 using std::map;
 
+using namespace enigma::dx9;
+
 namespace {
 
 D3DPRIMITIVETYPE primitive_types[] = { static_cast<D3DPRIMITIVETYPE>(0), D3DPT_POINTLIST, D3DPT_LINELIST, D3DPT_LINESTRIP, D3DPT_TRIANGLELIST, D3DPT_TRIANGLESTRIP, D3DPT_TRIANGLEFAN };
 D3DDECLTYPE declaration_types[] = { D3DDECLTYPE_FLOAT1, D3DDECLTYPE_FLOAT2, D3DDECLTYPE_FLOAT3, D3DDECLTYPE_FLOAT4, D3DDECLTYPE_D3DCOLOR, D3DDECLTYPE_UBYTE4 };
-size_t declaration_type_sizes[] = { sizeof(float) * 1, sizeof(float) * 2, sizeof(float) * 3, sizeof(float) * 4, sizeof(unsigned byte) * 4, sizeof(unsigned byte) * 4 };
+size_t declaration_type_sizes[] = { sizeof(float) * 1, sizeof(float) * 2, sizeof(float) * 3, sizeof(float) * 4, sizeof(unsigned char) * 4, sizeof(unsigned char) * 4 };
 D3DDECLUSAGE usage_types[] = { D3DDECLUSAGE_POSITION, D3DDECLUSAGE_COLOR, D3DDECLUSAGE_NORMAL, D3DDECLUSAGE_TEXCOORD, D3DDECLUSAGE_BLENDWEIGHT,
   D3DDECLUSAGE_BLENDINDICES, D3DDECLUSAGE_DEPTH, D3DDECLUSAGE_TANGENT, D3DDECLUSAGE_BINORMAL, D3DDECLUSAGE_FOG, D3DDECLUSAGE_SAMPLE };
 
@@ -75,19 +76,23 @@ void graphics_prepare_vertex_buffer(const int buffer) {
       }
     }
 
+    bool dynamic = (!vertexBuffer->frozen && !Direct3D9Managed);
+
     // create either a static or dynamic vbo peer depending on if the user called
     // vertex_freeze on the buffer
     if (!vertexBufferPeer) {
-      d3dmgr->CreateVertexBuffer(
-        size, vertexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
-        0, D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
+      DWORD usage = D3DUSAGE_WRITEONLY;
+      if (dynamic) usage |= D3DUSAGE_DYNAMIC;
+
+      d3dmgr->device->CreateVertexBuffer(
+        size, usage, 0, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
       );
       vertexBufferPeers[buffer] = vertexBufferPeer;
     }
 
     // copy the vertex buffer contents over to the native peer vbo on the GPU
     VOID* pVoid;
-    vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, vertexBuffer->frozen ? 0 : D3DLOCK_DISCARD);
+    vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, dynamic ? D3DLOCK_DISCARD : 0);
     memcpy(pVoid, vertexBuffer->vertices.data(), size);
     vertexBufferPeer->Unlock();
 
@@ -120,19 +125,25 @@ void graphics_prepare_index_buffer(const int buffer) {
       }
     }
 
+    bool dynamic = (!indexBuffer->frozen && !Direct3D9Managed);
+
     // create either a static or dynamic ibo peer depending on if the user called
     // index_freeze on the buffer
     if (!indexBufferPeer) {
-      d3dmgr->CreateIndexBuffer(
-        size, indexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
-        (indexBuffer->type == index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &indexBufferPeer, NULL
+      DWORD usage = D3DUSAGE_WRITEONLY;
+      if (dynamic) usage |= D3DUSAGE_DYNAMIC;
+
+      d3dmgr->device->CreateIndexBuffer(
+        size, usage,
+        (indexBuffer->type == enigma_user::index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16,
+        Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &indexBufferPeer, NULL
       );
       indexBufferPeers[buffer] = indexBufferPeer;
     }
 
     // copy the index buffer contents over to the native peer ibo on the GPU
     VOID* pVoid;
-    indexBufferPeer->Lock(0, 0, (VOID**)&pVoid, D3DLOCK_DISCARD);
+    indexBufferPeer->Lock(0, 0, (VOID**)&pVoid, dynamic ? D3DLOCK_DISCARD : 0);
     memcpy(pVoid, indexBuffer->indices.data(), size);
     indexBufferPeer->Unlock();
 
@@ -162,7 +173,7 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
   vertexDeclarationElements[vertexFormat->flags.size()] = D3DDECL_END();
 
   LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration;
-  d3dmgr->CreateVertexDeclaration(&vertexDeclarationElements[0], &vertexDeclaration);
+  d3dmgr->device->CreateVertexDeclaration(&vertexDeclarationElements[0], &vertexDeclaration);
 
   return vertexDeclaration;
 }
@@ -180,7 +191,7 @@ inline void graphics_apply_vertex_format(int format, size_t &stride) {
     stride = search->second.second;
   }
 
-  d3dmgr->SetVertexDeclaration(vertexDeclaration);
+  d3dmgr->device->SetVertexDeclaration(vertexDeclaration);
 }
 
 } // namespace enigma
@@ -207,11 +218,11 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
   enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[buffer];
-  d3dmgr->SetStreamSource(0, vertexBufferPeer, offset, stride);
+  d3dmgr->device->SetStreamSource(0, vertexBufferPeer, offset, stride);
 
   int primitive_count = enigma_user::draw_primitive_count(primitive, count);
 
-  d3dmgr->DrawPrimitive(primitive_types[primitive], start, primitive_count);
+  d3dmgr->device->DrawPrimitive(primitive_types[primitive], start, primitive_count);
 }
 
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
@@ -226,14 +237,14 @@ void index_submit_range(int buffer, int vertex, int primitive, unsigned start, u
   enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[vertex];
-  d3dmgr->SetStreamSource(0, vertexBufferPeer, 0, stride);
+  d3dmgr->device->SetStreamSource(0, vertexBufferPeer, 0, stride);
 
   LPDIRECT3DINDEXBUFFER9 indexBufferPeer = indexBufferPeers[buffer];
-  d3dmgr->SetIndices(indexBufferPeer);
+  d3dmgr->device->SetIndices(indexBufferPeer);
 
   int primitive_count = enigma_user::draw_primitive_count(primitive, count);
 
-  d3dmgr->DrawIndexedPrimitive(primitive_types[primitive], 0, 0, count, start, primitive_count);
+  d3dmgr->device->DrawIndexedPrimitive(primitive_types[primitive], 0, 0, count, start, primitive_count);
 }
 
 } // namespace enigma_user

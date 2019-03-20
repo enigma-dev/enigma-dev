@@ -27,6 +27,8 @@
 #include <cstdio>
 #include <System/builtins.h>
 #include <Parser/handlers/handle_function_impl.h>
+#include <algorithm> // std::max
+
 using namespace std;
 
 namespace jdi {

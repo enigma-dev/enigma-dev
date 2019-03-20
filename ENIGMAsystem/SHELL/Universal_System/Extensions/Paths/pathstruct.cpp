@@ -157,7 +157,8 @@ namespace enigma
     {
         enigma::path** pathold = pathstructarray;
         pathstructarray = new path*[enigma::path_idmax+2];
-        for (size_t i = 0; i < enigma::path_idmax; i++) pathstructarray[i] = pathold[i]; delete[] pathold;
+        for (size_t i = 0; i < enigma::path_idmax; i++) pathstructarray[i] = pathold[i];
+        delete[] pathold;
     }
 
     /// Returns an iterator to the point in @param path whose segment covers @param position.
@@ -214,7 +215,7 @@ namespace enigma
         y = y1 + (y2-y1) * t;
       }
     }
-    
+
     void path_getXY_scaled(path *pth, cs_scalar &x, cs_scalar &y, cs_scalar position, cs_scalar scale)
     {
       path_getXY(pth, x, y, position);

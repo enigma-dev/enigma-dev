@@ -15,13 +15,28 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Platforms/platforms_mandatory.h"
+
+using namespace enigma::dx11;
+
+namespace {
+
+D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
+
+void update_depth_stencil_state() {
+  static ID3D11DepthStencilState* pDepthStencilState = NULL;
+  if (pDepthStencilState) { pDepthStencilState->Release(); pDepthStencilState = NULL; }
+  m_device->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState);
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  m_deviceContext->OMSetDepthStencilState(pDepthStencilState, 1);
+}
+
+} // namespace anonymous
 
 namespace enigma {
 
@@ -32,6 +47,30 @@ int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+}
+
+void init_depth_stencil_state() {
+  depthStencilDesc.DepthEnable = false;
+  depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+  depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+  depthStencilDesc.StencilEnable = false;
+  depthStencilDesc.StencilReadMask = 0xFF;
+  depthStencilDesc.StencilWriteMask = 0xFF;
+
+  // Stencil operations if pixel is front-facing.
+  depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+  depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+  depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+  depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+  // Stencil operations if pixel is back-facing.
+  depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+  depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+  depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+  depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+  update_depth_stencil_state();
 }
 
 } // namespace enigma
@@ -65,14 +104,18 @@ void d3d_end()
 
 void d3d_set_hidden(bool enable)
 {
-    draw_batch_flush(batch_flush_deferred);
-    enigma::d3dHidden = enable;
+  draw_batch_flush(batch_flush_deferred);
+  enigma::d3dHidden = enable;
+  depthStencilDesc.DepthEnable = enable;
+  update_depth_stencil_state();
 }
 
 void d3d_set_zwriteenable(bool enable)
 {
-    draw_batch_flush(batch_flush_deferred);
-	enigma::d3dZWriteEnable = enable;
+  draw_batch_flush(batch_flush_deferred);
+  enigma::d3dZWriteEnable = enable;
+  depthStencilDesc.DepthWriteMask = enable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+  update_depth_stencil_state();
 }
 
 void d3d_set_lighting(bool enable)
@@ -202,27 +245,27 @@ class d3d_lights
 
     bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_define_specularity(int id, int r, int g, int b, double a)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_enable(int id)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_disable(int id)
     {
-
+      return false; //TODO: implement
     }
 } d3d_lighting;
 
@@ -246,7 +289,6 @@ bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
-  float specular[4] = {r, g, b, a};
 
 }
 

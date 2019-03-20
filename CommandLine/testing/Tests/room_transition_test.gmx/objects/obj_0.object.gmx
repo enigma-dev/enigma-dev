@@ -5,8 +5,8 @@
   <visible>-1</visible>
   <depth>0</depth>
   <persistent>-1</persistent>
-  <parentName>&lt;undefined&gt;</parentName>
   <maskName>&lt;undefined&gt;</maskName>
+  <parentName>&lt;undefined&gt;</parentName>
   <events>
     <event enumb="4" eventtype="7">
       <action>
@@ -14,8 +14,8 @@
         <id>603</id>
         <kind>7</kind>
         <userelative>0</userelative>
-        <isquestion>0</isquestion>
         <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
         <exetype>2</exetype>
         <functionname/>
         <codestring/>
@@ -25,20 +25,47 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (room == rm_0) {
-    gtest_assert_eq(draw_get_color(), c_white);
-    gtest_assert_eq_eps(draw_get_alpha(), 1.0);
-
-    draw_set_color(c_red);
-    draw_set_alpha(0.2);
-    room_goto(rm_1);
-} else if (room == rm_1) {
-    // ensure that room transition did NOT reset color/alpha
-    // GM does not reset ANY render state when changing rooms
-    gtest_assert_eq(draw_get_color(), c_red);
-    gtest_assert_eq_eps(draw_get_alpha(), 0.2);
-}
-</string>
+            <string>if (room == rm_0) {&#13;
+    gtest_assert_eq(draw_get_color(), c_white);&#13;
+    gtest_assert_eq_eps(draw_get_alpha(), 1.0);&#13;
+&#13;
+    draw_set_color(c_red);&#13;
+    draw_set_alpha(0.2);&#13;
+} else if (room == rm_1) {&#13;
+    // ensure that room transition did NOT reset color/alpha&#13;
+    // GM does not reset ANY render state when changing rooms&#13;
+    gtest_assert_eq(draw_get_color(), c_red);&#13;
+    gtest_assert_eq_eps(draw_get_alpha(), 0.2);&#13;
+}</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="0" eventtype="8">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>if (room == rm_0 &amp;&amp; view_current == 0) {&#13;
+	// ensure that the object following of&#13;
+	// all views is updated prior to draw events&#13;
+	gtest_assert_eq(view_yview[0], 7);&#13;
+	gtest_assert_eq(view_yview[1], 7);&#13;
+	&#13;
+	room_goto(rm_1);&#13;
+}</string>
           </argument>
         </arguments>
       </action>

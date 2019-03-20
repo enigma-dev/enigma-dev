@@ -43,7 +43,7 @@ namespace enigma {
 namespace {
 
 static void fireAsyncDialogEvent() {
-  enigma::instance_event_iterator = new enigma::inst_iter(NULL,NULL,NULL);
+  enigma::instance_event_iterator = &enigma::dummy_event_iterator;
   for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
   {
     enigma::object_basic* const inst = ((enigma::object_basic*)*it);
@@ -97,10 +97,12 @@ int queue_async_job(std::function<void()> job) {
 }
 
 namespace enigma {
-  extension_async::extension_async() {
-    extension_update_hooks.push_back(process_async_jobs);
-  }
+
+void extension_async_init() {
+  extension_update_hooks.push_back(process_async_jobs);
 }
+
+} // namespace enigma
 
 namespace enigma_user {
   unsigned async_load = -1;
