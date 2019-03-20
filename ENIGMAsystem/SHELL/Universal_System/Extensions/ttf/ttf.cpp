@@ -3,19 +3,27 @@
 #include "Universal_System/sprites.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "rectpacker/rectpack.h"
+#include "search.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 #include <iostream>
 #include <algorithm>
+#include <vector>
+#include <string>
+#include <fstream>
 
 
 namespace enigma {
 
+extern void init_font_search_dirs();
+
 class FontManager {
 public:
   static bool Init() {
+    
+    init_font_search_dirs();
     
     FT_Error error = FT_Init_FreeType(&library);
     if (error != 0)
@@ -37,23 +45,107 @@ private:
   static FT_Library library;
 };
 
+struct GlyphPair {
+  GlyphPair(unsigned index = 0, unsigned area = 0) : index(index), area(area) {}
+  unsigned index;
+  unsigned area;
+};
+
 FT_Library FontManager::library;
 static bool FreeTypeAlive = FontManager::Init();
 
+std::vector<std::string> fontSearchPaths;
+
+
+const std::map<std::string, std::string> fontFallbacks = {
+  {"Arial", "LiberationSans"},
+  {"Times New Roman", "LiberationSerif"},
+  {"Courier New", "LiberationMono"} 
+};
+
 }
+
 
 namespace enigma_user {
   
   using enigma::rect_packer::pvrect;
   using enigma::rect_packer::rectpnode;
+  using enigma::GlyphPair;
+  using enigma::fontSearchPaths;
+  using enigma::fontFallbacks;
   
-  struct GlyphPair {
-    GlyphPair(unsigned index = 0, unsigned area = 0) : index(index), area(area) {}
-    unsigned index;
-    unsigned area;
-  };
+  void font_add_search_path(std::string path) {
+    fontSearchPaths.push_back(path);
+  }
+  
+  std::string font_find(std::string name, bool bold, bool italic, bool fallback) {
+    
+    // Unix Style naming Font-[Bold][Italic][BoldItalic][Regular].ttf
+    // Windows Style namings font[b or bd or B][i or it or I][bi or z or S].ttf (often all lowercase)
+    std::vector<std::string> possibleNames;
+    std::string suffix;
+    
+    // Unix Best Match
+    if (bold) suffix = "Bold";
+    if (italic) suffix += "Italic";
+    if (suffix.empty()) suffix = "Regular";
+    possibleNames.push_back(name + "-" + suffix + ".ttf");
+    
+    auto addWinNames = [&](std::string s1, std::string s2, std::string s3) {
+      std::string n = name + "-" + s1 + ".ttf";
+      possibleNames.push_back(n);
+      std::transform(n.begin(), n.end(), n.begin(), ::tolower);
+      possibleNames.push_back(n);
+      
+      n = name + "-" + s2 + ".ttf";
+      possibleNames.push_back(n);
+      std::transform(n.begin(), n.end(), n.begin(), ::tolower);
+      possibleNames.push_back(n);
+      
+      n = name + "-" + s3 + ".ttf";
+      possibleNames.push_back(n);
+    };
+    
+    // Win32 Best Match
+    if (bold && italic) {
+      addWinNames("bi", "z", "S");
+    } else if (bold) {
+      addWinNames("bd", "b", "B");
+    } else if (italic) {
+      addWinNames("it", "i", "I");
+    }
+    
+    // Core name
+    if (fallback || (!bold && !italic)) {
+      std::string n = name + ".ttf";
+      possibleNames.push_back(n);
+      std::transform(n.begin(), n.end(), n.begin(), ::tolower);
+      possibleNames.push_back(n);
+    }
+    
+    // Check for fallback equiv of msfonts if none use sans
+    if (fallback) {
+      std::string backup;
+      if (auto fnt = fontFallbacks.find(name) != fontFallbacks.end()) backup = fnt;
+      else backup = "LiberationSans";
+      suffix = "";
+      if (bold) suffix = "Bold";
+      if (italic) suffix += "Italic";
+      if (suffix.empty()) suffix = "Regular";
+      possibleNames.push_back(backup + "-" + suffix + ".ttf");
+    }
+    
+    for (const std::string& n : possibleNames) {
+      for (const std::string& d : fontSearchPaths) {
+        std::ifstream f(d + "/" + n, std::ifstream::in);
+        if (f.good()) return d + "/" + n;
+      }
+    }
+    
+    return "";
+  }
    
-  int font_add(std::string name, int size, bool bold, bool italic, unsigned first, unsigned last) {
+  int font_add(std::string name, unsigned size, bool bold, bool italic, unsigned first, unsigned last, bool fallback) {
     
     if (!enigma::FreeTypeAlive)
       return -1;
@@ -61,13 +153,20 @@ namespace enigma_user {
     FT_Face face;
     FT_GlyphSlot slot;
     FT_Error error;
+    
+    std::string file;
+    std::string ext = ".ttf";
+    if (name.length() >= ext.length() && name.compare(name.length() - ext.length(), ext.length(), ext))
+      file = font_find(name, bold, italic, fallback);
+    else
+      file = name;
 
-    error = FT_New_Face(enigma::FontManager::GetLibrary(), name.c_str(), 0, &face );
+    error = FT_New_Face(enigma::FontManager::GetLibrary(), file.c_str(), 0, &face);
     
     if (error != 0)
       return -1;
     
-    error = FT_Set_Char_Size( face, size * 64, 0, 72, 0); // 72 dpi, 64 is 26.6 fixed point conversion
+    error = FT_Set_Char_Size( face, size * 64, 0, 96, 0); // 96 dpi, 64 is 26.6 fixed point conversion
     
     if (error != 0)
       return -1;
