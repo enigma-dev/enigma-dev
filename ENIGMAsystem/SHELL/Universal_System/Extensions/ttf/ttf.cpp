@@ -56,6 +56,14 @@ static bool FreeTypeAlive = FontManager::Init();
 
 std::vector<std::string> fontSearchPaths;
 
+// TODO: Fill in this map in
+// https://docs.microsoft.com/en-us/typography/fonts/windows_10_font_list
+const std::map<std::string, std::string> msFontsNames = {
+  {"Comic Sans MS", "comic"},
+  {"Courier New", "cour"}
+};
+
+// OSS equivs of most popular fonts
 const std::map<std::string, std::string> fontFallbacks = {
   {"Arial", "LiberationSans"},
   {"Times New Roman", "LiberationSerif"},
@@ -91,17 +99,21 @@ namespace enigma_user {
     possibleNames.push_back(name + "-" + suffix + ".ttf");
     
     auto addWinNames = [&](std::string s1, std::string s2, std::string s3) {
-      std::string n = name + "-" + s1 + ".ttf";
+      std::string msName;
+      if (auto fnt = msFontsNames.find(name) != msFontsNames.end()) msName = fnt;
+      else msName = name;
+      
+      std::string n = msName + s1 + ".ttf";
       possibleNames.push_back(n);
       std::transform(n.begin(), n.end(), n.begin(), ::tolower);
       possibleNames.push_back(n);
       
-      n = name + "-" + s2 + ".ttf";
+      n = msName + s2 + ".ttf";
       possibleNames.push_back(n);
       std::transform(n.begin(), n.end(), n.begin(), ::tolower);
       possibleNames.push_back(n);
       
-      n = name + "-" + s3 + ".ttf";
+      n = msName + s3 + ".ttf";
       possibleNames.push_back(n);
     };
     
