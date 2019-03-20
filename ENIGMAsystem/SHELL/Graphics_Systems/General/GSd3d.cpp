@@ -19,6 +19,9 @@ int d3dFogMode=enigma_user::rs_linear, d3dFogHint=enigma_user::rs_nicest;
 float d3dFogStart=0.0f, d3dFogEnd=0.0f, d3dFogDensity=0.0f;
 float d3dFogColor[3]={0.0f,0.0f,0.0f};
 
+Light d3dLights[8];
+bool d3dLightEnabled[8]={false};
+
 } // namespace enigma
 
 namespace enigma_user {
@@ -150,6 +153,46 @@ void d3d_light_define_ambient(int col) {
   enigma::d3dLightingAmbient[0] = float(COL_GET_Rf(col));
   enigma::d3dLightingAmbient[1] = float(COL_GET_Gf(col));
   enigma::d3dLightingAmbient[2] = float(COL_GET_Bf(col));
+}
+
+void d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col) {
+  enigma::drawStateDirty = true;
+  enigma::d3dLights[id].x = dx;
+  enigma::d3dLights[id].y = dy;
+  enigma::d3dLights[id].z = dz;
+  enigma::d3dLights[id].color = col;
+  enigma::d3dLights[id].directional = true;
+}
+
+void d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col) {
+  enigma::drawStateDirty = true;
+  enigma::d3dLights[id].x = x;
+  enigma::d3dLights[id].y = y;
+  enigma::d3dLights[id].z = z;
+  enigma::d3dLights[id].range = range;
+  enigma::d3dLights[id].color = col;
+  enigma::d3dLights[id].directional = false;
+}
+
+void d3d_light_specularity(int facemode, int r, int g, int b, double a) {
+  enigma::drawStateDirty = true;
+}
+
+void d3d_light_set_ambient(int id, int r, int g, int b, double a) {
+  enigma::drawStateDirty = true;
+}
+
+void d3d_light_set_specularity(int id, int r, int g, int b, double a) {
+  enigma::drawStateDirty = true;
+}
+
+void d3d_light_shininess(int facemode, int shine) {
+  enigma::drawStateDirty = true;
+}
+
+void d3d_light_enable(int id, bool enable) {
+  enigma::drawStateDirty = true;
+  enigma::d3dLightEnabled[id] = enable;
 }
 
 bool d3d_get_mode() { return enigma::d3dMode; }

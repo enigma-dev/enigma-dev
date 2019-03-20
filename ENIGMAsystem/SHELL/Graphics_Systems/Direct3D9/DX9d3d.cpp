@@ -70,6 +70,46 @@ const D3DBLEND blendequivs[11] = {
 
 namespace enigma {
 
+void graphics_state_flush_fog() {
+  d3dmgr->SetRenderState(D3DRS_RANGEFOGENABLE, d3dFogEnabled);
+  d3dmgr->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[d3dFogMode]);
+  d3dmgr->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[d3dFogMode]);
+  d3dmgr->SetRenderState(D3DRS_FOGCOLOR, *d3dFogColor);
+
+  // NOTE: DWORD is 32 bits maximum meaning it can only hold single-precision
+  // floats, so yes, we must cast double to float first too.
+  // https://docs.microsoft.com/en-us/windows/desktop/direct3d9/d3drenderstatetype
+  d3dmgr->SetRenderState(D3DRS_FOGSTART, alias_cast<DWORD>((float)d3dFogStart));
+  d3dmgr->SetRenderState(D3DRS_FOGEND, alias_cast<DWORD>((float)d3dFogEnd));
+  d3dmgr->SetRenderState(D3DRS_FOGDENSITY, alias_cast<DWORD>((float)d3dFogDensity));
+}
+
+void graphics_state_flush_lighting() {
+  d3dmgr->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
+  d3dmgr->SetRenderState(D3DRS_AMBIENT, *d3dLightingAmbient);
+
+  for (int i = 0; i < 8; ++i) {
+    d3dmgr->LightEnable(i, d3dLightEnabled[i]);
+    if (!d3dLightEnabled[i]) continue; // don't bother updating disabled lights
+
+    const Light& light = d3dLights[i];
+
+		D3DLIGHT9 d3dLight = { };
+		d3dLight.Type = light.directional ? D3DLIGHT_DIRECTIONAL : D3DLIGHT_POINT;
+		d3dLight.Diffuse = {float(COL_GET_Rf(light.color)), float(COL_GET_Gf(light.color)), float(COL_GET_Bf(light.color)), 1.0f};
+		d3dLight.Position = d3dLight.Direction = {(float)light.x, (float)light.y, (float)light.z};
+		d3dLight.Range = light.range;
+		d3dLight.Attenuation0 = 1.0f;    // no constant inverse attenuation
+		d3dLight.Attenuation1 = 0.0f;    // only .125 inverse attenuation
+		d3dLight.Attenuation2 = 0.0f;    // no square inverse attenuation
+		//d3dLight.Phi = gs_angle_to_radians(360.0f);    // set the outer cone to 360 degrees
+		//d3dLight.Theta = gs_angle_to_radians(360.0f);    // set the inner cone to 360 degrees
+		d3dLight.Falloff = 1.0f;    // use the typical falloff
+
+    d3dmgr->SetLight(i, &d3dLight); // send the light off to d3d
+  }
+}
+
 void graphics_state_flush() {
   d3dmgr->SetRenderState(D3DRS_POINTSIZE, drawPointSize);
 	d3dmgr->SetRenderState(D3DRS_FILLMODE, fillmodes[drawFillMode]);
@@ -78,10 +118,7 @@ void graphics_state_flush() {
   d3dmgr->SetRenderState(D3DRS_ZENABLE, d3dHidden);
   d3dmgr->SetRenderState(D3DRS_ZFUNC, depthoperators[d3dDepthOperator]);
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
-  d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);
   d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[d3dCulling]);
-  d3dmgr->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
-  d3dmgr->SetRenderState(D3DRS_AMBIENT, *d3dLightingAmbient);
 
 	DWORD colorWriteMask = 0;
 	if (enigma::colorWriteEnable[0]) colorWriteMask |= D3DCOLORWRITEENABLE_RED;
@@ -96,17 +133,10 @@ void graphics_state_flush() {
   d3dmgr->SetRenderState(D3DRS_ALPHAREF, alphaTestRef);
 
   d3dmgr->SetRenderState(D3DRS_FOGENABLE, d3dFogEnabled);
-  d3dmgr->SetRenderState(D3DRS_RANGEFOGENABLE, d3dFogEnabled);
-  d3dmgr->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[d3dFogMode]);
-  d3dmgr->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[d3dFogMode]);
-  d3dmgr->SetRenderState(D3DRS_FOGCOLOR, *d3dFogColor);
+  if (d3dFogEnabled) graphics_state_flush_fog();
 
-  // NOTE: DWORD is 32 bits maximum meaning it can only hold single-precision
-  // floats, so yes, we must cast double to float first too.
-  // https://docs.microsoft.com/en-us/windows/desktop/direct3d9/d3drenderstatetype
-  d3dmgr->SetRenderState(D3DRS_FOGSTART, alias_cast<DWORD>((float)d3dFogStart));
-  d3dmgr->SetRenderState(D3DRS_FOGEND, alias_cast<DWORD>((float)d3dFogEnd));
-  d3dmgr->SetRenderState(D3DRS_FOGDENSITY, alias_cast<DWORD>((float)d3dFogDensity));
+  d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);
+  if (d3dLighting) graphics_state_flush_lighting();
 }
 
 void graphics_set_matrix(int type) {
@@ -148,196 +178,6 @@ void d3d_set_software_vertex_processing(bool software) {
 	d3dmgr->device->SetSoftwareVertexProcessing(software);
 }
 
-}
-
-namespace enigma {
-  extern unsigned char currentcolor[4];
-}
-
-// ***** LIGHTS BEGIN *****
-#include <map>
-#include <list>
-#include "Universal_System/fileio.h"
-
-struct posi { // Homogenous point.
-    gs_scalar x;
-    gs_scalar y;
-    gs_scalar z;
-    gs_scalar w;
-    posi(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar w1) : x(x1), y(y1), z(z1), w(w1){}
-};
-
-class d3d_lights
-{
-    map<int,int> light_ind;
-    map<int,posi> ind_pos; // Internal index to position.
-
-    public:
-    d3d_lights() {}
-    ~d3d_lights() {}
-
-    bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
-    {
-	    int ms;
-        if (light_ind.find(id) != light_ind.end())
-        {
-            ms = (*light_ind.find(id)).second;
-            multimap<int,posi>::iterator it = ind_pos.find(ms);
-            if (it != ind_pos.end())
-                ind_pos.erase(it);
-            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
-        }
-        else
-        {
-            ms = light_ind.size();
-            D3DCAPS9 caps;
-			d3dmgr->device->GetDeviceCaps(&caps);
-            if (DWORD(ms) >= caps.MaxActiveLights)
-                return false;
-
-            light_ind.insert(pair<int,int>(id, ms));
-            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
-        }
-
-		D3DLIGHT9 light = { };
-		light.Type = D3DLIGHT_DIRECTIONAL;
-		light.Diffuse = { COL_GET_Rf(col), COL_GET_Gf(col), COL_GET_Bf(col), 1.0f };
-		light.Direction = { dx, dy, dz };
-
-		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light
-
-        return true;
-    }
-
-    bool light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
-    {
-	    if (range <= 0.0) {
-            return false;
-        }
-        int ms;
-        if (light_ind.find(id) != light_ind.end())
-        {
-            ms = (*light_ind.find(id)).second;
-            multimap<int,posi>::iterator it = ind_pos.find(ms);
-            if (it != ind_pos.end())
-                ind_pos.erase(it);
-            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
-        }
-        else
-        {
-            ms = light_ind.size();
-            D3DCAPS9 caps;
-			d3dmgr->device->GetDeviceCaps(&caps);
-            if (DWORD(ms) >= caps.MaxActiveLights)
-                return false;
-
-            light_ind.insert(pair<int,int>(id, ms));
-            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
-        }
-		D3DLIGHT9 light = { };
-		light.Type = D3DLIGHT_POINT;
-		light.Diffuse = { COL_GET_Rf(col), COL_GET_Gf(col), COL_GET_Bf(col), 1.0f };
-		light.Position = { x, y, z };
-		light.Range = range;
-		light.Attenuation0 = 1.0f;    // no constant inverse attenuation
-		light.Attenuation1 = 0.0f;    // only .125 inverse attenuation
-		light.Attenuation2 = 0.0f;    // no square inverse attenuation
-		//light.Phi = gs_angle_to_radians(360.0f);    // set the outer cone to 360 degrees
-		//light.Theta = gs_angle_to_radians(360.0f);    // set the inner cone to 360 degrees
-		light.Falloff = 1.0f;    // use the typical falloff
-
-		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light
-
-		return true;
-    }
-
-    bool light_define_specularity(int id, int r, int g, int b, double a)
-    {
-        int ms;
-        if (light_ind.find(id) != light_ind.end())
-        {
-            ms = (*light_ind.find(id)).second;
-        }
-        else
-        {
-            ms = light_ind.size();
-            D3DCAPS9 caps;
-			d3dmgr->device->GetDeviceCaps(&caps);
-            if (DWORD(ms) >= caps.MaxActiveLights)
-                return false;
-        }
-
-		return true;
-    }
-
-    bool light_enable(int id)
-    {
-	    map<int, int>::iterator it = light_ind.find(id);
-        if (it == light_ind.end()) {
-            const int ms = light_ind.size();
-			D3DCAPS9 caps;
-			d3dmgr->device->GetDeviceCaps(&caps);
-            if (DWORD(ms) >= caps.MaxActiveLights)
-                return false;
-            light_ind.insert(pair<int,int>(id, ms));
-			d3dmgr->LightEnable(ms, TRUE);
-        } else {
-			d3dmgr->LightEnable((*it).second, TRUE);
-        }
-        return true;
-    }
-
-    bool light_disable(int id)
-    {
-	    map<int, int>::iterator it = light_ind.find(id);
-        if (it == light_ind.end()) {
-            return false;
-        } else {
-			d3dmgr->LightEnable((*it).second, FALSE);
-        }
-        return true;
-
-    }
-} d3d_lighting;
-
-namespace enigma_user
-{
-
-bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
-{
-    draw_batch_flush(batch_flush_deferred);
-    return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
-}
-
-bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
-{
-    draw_batch_flush(batch_flush_deferred);
-    return d3d_lighting.light_define_point(id, x, y, z, range, col);
-}
-
-bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
-{
-    draw_batch_flush(batch_flush_deferred);
-    return d3d_lighting.light_define_specularity(id, r, g, b, a);
-}
-
-void d3d_light_specularity(int facemode, int r, int g, int b, double a)
-{
-    draw_batch_flush(batch_flush_deferred);
-}
-
-void d3d_light_shininess(int facemode, int shine)
-{
-    draw_batch_flush(batch_flush_deferred);
-}
-
-bool d3d_light_enable(int id, bool enable)
-{
-    draw_batch_flush(batch_flush_deferred);
-    return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
-}
-
-
 //TODO(harijs) - This seems to be broken like this. Almost works, but stencilmask needs some different value
 void d3d_stencil_start_mask(){
   draw_batch_flush(batch_flush_deferred);
@@ -369,6 +209,4 @@ void d3d_stencil_end_mask(){
   d3dmgr->SetRenderState(D3DRS_STENCILENABLE, false);
 }
 
-}
-
-// ***** LIGHTS END *****
+} // namespace enigma_user

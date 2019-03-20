@@ -118,94 +118,9 @@ void graphics_set_matrix(int type) {
 namespace enigma_user {
 
 void d3d_clear_depth(double value) {
-    draw_batch_flush(batch_flush_deferred);
+  draw_batch_flush(batch_flush_deferred);
 	// Clear the depth buffer.
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, value, 0);
 }
 
-}
-
-// ***** LIGHTS BEGIN *****
-#include <map>
-#include <list>
-#include "Universal_System/fileio.h"
-
-struct posi { // Homogenous point.
-    gs_scalar x;
-    gs_scalar y;
-    gs_scalar z;
-    gs_scalar w;
-    posi(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar w1) : x(x1), y(y1), z(z1), w(w1){}
-};
-
-class d3d_lights
-{
-    map<int,int> light_ind;
-    map<int,posi> ind_pos; // Internal index to position.
-
-    public:
-    d3d_lights() {}
-    ~d3d_lights() {}
-
-    bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
-    {
-      return false; //TODO: implement
-    }
-
-    bool light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
-    {
-      return false; //TODO: implement
-    }
-
-    bool light_define_specularity(int id, int r, int g, int b, double a)
-    {
-      return false; //TODO: implement
-    }
-
-    bool light_enable(int id)
-    {
-      return false; //TODO: implement
-    }
-
-    bool light_disable(int id)
-    {
-      return false; //TODO: implement
-    }
-} d3d_lighting;
-
-namespace enigma_user
-{
-
-bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
-{
-    return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
-}
-
-bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
-{
-    return d3d_lighting.light_define_point(id, x, y, z, range, col);
-}
-
-bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
-{
-    return d3d_lighting.light_define_specularity(id, r, g, b, a);
-}
-
-void d3d_light_specularity(int facemode, int r, int g, int b, double a)
-{
-
-}
-
-void d3d_light_shininess(int facemode, int shine)
-{
-
-}
-
-bool d3d_light_enable(int id, bool enable)
-{
-    return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
-}
-
-}
-
-// ***** LIGHTS END *****
+} // namespace enigma_user

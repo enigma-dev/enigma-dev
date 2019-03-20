@@ -21,6 +21,7 @@
 
 #include "Universal_System/scalar.h"
 #include <string>
+#include <unordered_map>
 
 namespace enigma {
 
@@ -36,6 +37,15 @@ extern bool d3dFogEnabled;
 extern int d3dFogMode, d3dFogHint;
 extern float d3dFogStart, d3dFogEnd, d3dFogDensity;
 extern float d3dFogColor[3];
+
+struct Light {
+  gs_scalar x=0, y=0, z=0, range=0;
+  bool directional=false;
+  int color=0;
+};
+
+extern Light d3dLights[8];
+extern bool d3dLightEnabled[8];
 
 } // namespace enigma
 
@@ -119,14 +129,14 @@ namespace enigma_user {
   void d3d_set_fog_density(double density);
 
   // Lighting
-  bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
-  bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col);
+  void d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
+  void d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col);
   void d3d_light_specularity(int facemode, int r, int g, int b, double a);
-  bool d3d_light_set_ambient(int id, int r, int g, int b, double a);
-  bool d3d_light_set_specularity(int id, int r, int g, int b, double a);
+  void d3d_light_set_ambient(int id, int r, int g, int b, double a);
+  void d3d_light_set_specularity(int id, int r, int g, int b, double a);
   void d3d_light_shininess(int facemode, int shine);
   void d3d_light_define_ambient(int col);
-  bool d3d_light_enable(int id, bool enable);
+  void d3d_light_enable(int id, bool enable);
 
   // Stencil stuff
   void d3d_stencil_start_mask();
