@@ -62,13 +62,13 @@ std::vector<std::string> fontSearchPaths;
 const std::map<std::string, std::string> msFontsNames = {
   {"Arial Black", "ariblk"},
   {"Consolas", "Consola"},
-  {"Constantia", "Constan"
+  {"Constantia", "Constan"},
   {"Comic Sans MS", "comic"},
   {"Courier New", "cour"},
   {"Franklin Gothic Medium", "framd"},
   {"Ink Free", "Inkfree"},
   {"Javanese Text", "javatex"},
-  {"Lucida Console", "lucon" },
+  {"Lucida Console", "lucon"},
   {"Lucida Sans Unicode", "l_10646"},
   {"Malgun Gothic", "malgun"},
   {"Microsoft Sans Serif", "micross"},
@@ -77,8 +77,8 @@ const std::map<std::string, std::string> msFontsNames = {
   {"Segoe Print", "segoepr"},
   {"Segoe Script", "segoesc"},
   {"Segoe UI Historic", "seguihis"},
-  {"Segoe UI Emoji", "seguiemj"}
-  {"Segoe UI Symbol", "seguisym"}
+  {"Segoe UI Emoji", "seguiemj"},
+  {"Segoe UI Symbol", "seguisym"},
   {"Times New Roman", "times"},
   {"Trebuchet MS", "trebuc"}
 };
@@ -149,7 +149,7 @@ namespace enigma_user {
       addWinNames("li");
     } else if (bold && italic) {
       addWinNames("bi", "z", "S");
-    } else if light {
+    } else if (light) {
        addWinNames("l");
     } else if (bold) {
       addWinNames("bd", "b", "B");
@@ -159,9 +159,9 @@ namespace enigma_user {
     
     // Core name
     if (fallback || (!bold && !italic)) {
-      possibleNames.push_back(msname + ".ttf");
+      possibleNames.push_back(msName + ".ttf");
       
-      if (name != msname) {
+      if (name != msName) {
         std::string n = name + ".ttf";
         possibleNames.push_back(n);
         std::transform(n.begin(), n.end(), n.begin(), ::tolower);
@@ -203,7 +203,7 @@ namespace enigma_user {
     std::string file;
     std::string ext = ".ttf";
     if (name.length() >= ext.length() && name.compare(name.length() - ext.length(), ext.length(), ext))
-      file = font_find(name, bold, italic, fallback);
+      file = font_find(name, bold, italic, light, fallback);
     else
       file = name;
 
