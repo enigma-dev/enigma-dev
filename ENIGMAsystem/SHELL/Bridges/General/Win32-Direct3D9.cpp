@@ -234,11 +234,6 @@ void display_reset(int samples, bool vsync) {
   }
   d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + samples); // Levels of multi-sampling
   d3dpp.MultiSampleQuality = 0; // No multi-sampling
-  if (samples) {
-    d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
-  } else {
-    d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
-  }
   sc->Release();
 
   enigma::Reset(&d3dpp);

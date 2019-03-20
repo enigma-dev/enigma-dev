@@ -32,7 +32,7 @@ using std::vector;
 
 namespace enigma {
 
-bool drawStateDirty = false, alphaBlend = true, alphaTest = false;
+bool drawStateDirty = false, msaaEnabled = true, alphaBlend = true, alphaTest = false;
 unsigned char alphaTestRef = 0;
 
 float circleprecision=24;
@@ -63,6 +63,11 @@ void draw_state_flush() {
   flushing = false; // done flushing state
 
   enigma::drawStateDirty = false; // state is not dirty now
+}
+
+void draw_set_msaa_enabled(bool enable) {
+  enigma::drawStateDirty = true;
+  enigma::msaaEnabled = enable;
 }
 
 void draw_enable_alphablend(bool enable) {

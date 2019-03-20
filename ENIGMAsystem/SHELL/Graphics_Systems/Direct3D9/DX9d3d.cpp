@@ -70,6 +70,7 @@ const D3DBLEND blendequivs[11] = {
 namespace enigma {
 
 void graphics_state_flush() {
+  d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, msaaEnabled);
   d3dmgr->SetRenderState(D3DRS_ZENABLE, d3dHidden);
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
   d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);

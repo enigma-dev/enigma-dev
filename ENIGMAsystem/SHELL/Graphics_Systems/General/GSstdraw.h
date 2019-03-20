@@ -25,7 +25,7 @@
 
 namespace enigma {
 
-extern bool drawStateDirty, alphaBlend, alphaTest;
+extern bool drawStateDirty, msaaEnabled, alphaBlend, alphaTest;
 extern unsigned char alphaTestRef;
 
 void graphics_state_flush();

@@ -17,6 +17,7 @@
 
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
@@ -38,6 +39,24 @@ const D3D11_BLEND blend_equivs[11] = {
 namespace enigma {
 
 void graphics_state_flush() {
+  // Setup the raster description which will determine how and what polygons will be drawn.
+  D3D11_RASTERIZER_DESC rasterDesc = { };
+  rasterDesc.AntialiasedLineEnable = false;
+  rasterDesc.CullMode = D3D11_CULL_NONE;
+  rasterDesc.DepthBias = 0;
+  rasterDesc.DepthBiasClamp = 0.0f;
+  rasterDesc.DepthClipEnable = false;
+  rasterDesc.FillMode = D3D11_FILL_SOLID;
+  rasterDesc.FrontCounterClockwise = false;
+  rasterDesc.MultisampleEnable = msaaEnabled;
+  rasterDesc.ScissorEnable = false;
+  rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+  static ID3D11RasterizerState* pRasterState = NULL;
+  if (pRasterState) { pRasterState->Release(); pRasterState = NULL; }
+  m_device->CreateRasterizerState(&rasterDesc, &pRasterState);
+  m_deviceContext->RSSetState(pRasterState);
+
   D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
 
   depthStencilDesc.DepthEnable = d3dHidden;

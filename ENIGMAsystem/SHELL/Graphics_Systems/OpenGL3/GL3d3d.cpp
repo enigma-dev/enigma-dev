@@ -523,6 +523,7 @@ void d3d_light_update_positions()
 }
 
 void graphics_state_flush() {
+  (msaaEnabled?glEnable:glDisable)(GL_MULTISAMPLE);
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glDepthMask(d3dZWriteEnable);
   d3d_lighting.lights_enable(d3dLighting);

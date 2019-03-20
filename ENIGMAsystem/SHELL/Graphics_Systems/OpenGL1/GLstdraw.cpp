@@ -55,13 +55,7 @@ int draw_get_msaa_maxlevel()
 
 bool draw_get_msaa_supported()
 {
-    return GLEW_EXT_multisample;
-}
-
-void draw_set_msaa_enabled(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  (enable?glEnable:glDisable)(GL_MULTISAMPLE);
+  return GLEW_EXT_multisample;
 }
 
 void draw_set_line_pattern(int pattern, int scale)

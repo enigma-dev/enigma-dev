@@ -42,7 +42,6 @@ ID3D11DeviceContext* m_deviceContext;
 ID3D11RenderTargetView* m_renderTargetView;
 ID3D11Texture2D* m_depthStencilBuffer;
 ID3D11DepthStencilView* m_depthStencilView;
-ID3D11RasterizerState* m_rasterState;
 
 } // namespace dx11
 
@@ -187,26 +186,6 @@ void EnableDrawing(void* handle) {
   }
 
   initialize_render_targets();
-
-  // Setup the raster description which will determine how and what polygons will be drawn.
-  D3D11_RASTERIZER_DESC rasterDesc = { };
-  rasterDesc.AntialiasedLineEnable = false;
-  rasterDesc.CullMode = D3D11_CULL_NONE;
-  rasterDesc.DepthBias = 0;
-  rasterDesc.DepthBiasClamp = 0.0f;
-  rasterDesc.DepthClipEnable = false;
-  rasterDesc.FillMode = D3D11_FILL_SOLID;
-  rasterDesc.FrontCounterClockwise = false;
-  rasterDesc.MultisampleEnable = false;
-  rasterDesc.ScissorEnable = false;
-  rasterDesc.SlopeScaledDepthBias = 0.0f;
-
-  result = m_device->CreateRasterizerState(&rasterDesc, &m_rasterState);
-  if (FAILED(result)) {
-    show_error("Failed to create Direct3D11 rasterizer state.", true);
-  }
-
-  m_deviceContext->RSSetState(m_rasterState);
 
   enigma_user::display_aa = 0;
   UINT quality_levels = 0;
