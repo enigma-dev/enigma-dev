@@ -30,9 +30,15 @@
 #include <string>
 using std::string;
 
-namespace enigma
-{
-  extern bool interpolate_textures;
+namespace enigma {
+
+struct Sampler {
+  int texture=0; // GML texture id, NOT GL texture id!
+  bool wrapu=false, wrapv=false, wrapw=false;
+};
+
+extern Sampler samplers[8];
+
 }
 
 namespace enigma_user {

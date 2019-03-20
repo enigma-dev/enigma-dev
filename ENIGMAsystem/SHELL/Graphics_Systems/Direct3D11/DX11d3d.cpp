@@ -15,13 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "DX11TextureStruct.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 #include "Platforms/platforms_mandatory.h"
 
@@ -39,9 +42,54 @@ const D3D11_BLEND blend_equivs[11] = {
   D3D11_BLEND_INV_DEST_COLOR, D3D11_BLEND_SRC_ALPHA_SAT
 };
 
+ID3D11ShaderResourceView *getDefaultWhiteTexture() {
+    static int texid = -1;
+    if (texid == -1) {
+      unsigned data[1] = {0xFFFFFFFF};
+      texid = enigma::graphics_create_texture(1, 1, 1, 1, (void*)data, false);
+    }
+    return textureStructs[texid]->view;
+}
+
 } // namespace anonymous
 
 namespace enigma {
+
+void graphics_state_flush_samplers() {
+  static ID3D11ShaderResourceView *nullTextureView = getDefaultWhiteTexture();
+  static ID3D11SamplerState *pSamplerStates[8];
+
+  for (int i = 0; i < 8; ++i) {
+    const auto sampler = samplers[i];
+    if (sampler.texture == -1) {
+      m_deviceContext->PSSetShaderResources(i, 1, &nullTextureView);
+      continue; // texture doesn't exist skip updating the sampler
+    }
+    m_deviceContext->PSSetShaderResources(i, 1, &textureStructs[sampler.texture]->view);
+
+    D3D11_SAMPLER_DESC samplerDesc = { };
+
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samplerDesc.AddressU = sampler.wrapu ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressV = sampler.wrapv ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressW = sampler.wrapw ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.MipLODBias = 0.0f;
+    samplerDesc.MaxAnisotropy = 1;
+    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    samplerDesc.BorderColor[0] = 0;
+    samplerDesc.BorderColor[1] = 0;
+    samplerDesc.BorderColor[2] = 0;
+    samplerDesc.BorderColor[3] = 0;
+    samplerDesc.MinLOD = 0;
+    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    ID3D11SamplerState *pSamplerState = pSamplerStates[i];
+    if (pSamplerState) { pSamplerState->Release(); pSamplerState = NULL; }
+    m_device->CreateSamplerState(&samplerDesc, &pSamplerState);
+    m_deviceContext->PSSetSamplers(i, 1, &pSamplerState);
+    pSamplerStates[i] = pSamplerState; // copy the sampler state ptr back to our cache
+  }
+}
 
 void graphics_state_flush() {
   // Setup the raster description which will determine how and what polygons will be drawn.
@@ -107,6 +155,8 @@ void graphics_state_flush() {
   if (pBlendState) { pBlendState->Release(); pBlendState = NULL; }
   m_device->CreateBlendState(&blendStateDesc, &pBlendState);
   m_deviceContext->OMSetBlendState(pBlendState, NULL, 0xffffffff);
+
+  graphics_state_flush_samplers();
 }
 
 } // namespace enigma

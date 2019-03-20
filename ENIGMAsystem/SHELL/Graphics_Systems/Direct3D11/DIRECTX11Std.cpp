@@ -31,11 +31,7 @@ using namespace std;
 
 namespace enigma {
 
-void init_sampler_state();
-
-void graphicssystem_initialize() {
-  init_sampler_state();
-}
+void graphicssystem_initialize() {}
 
 } // namespace enigma
 

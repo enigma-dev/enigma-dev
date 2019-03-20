@@ -17,8 +17,10 @@
 
 #include "GLSLshader.h"
 #include "GL3shader.h"
+#include "GL3TextureStruct.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -81,6 +83,33 @@ namespace enigma {
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 
+void graphics_state_flush_samplers() {
+  static bool samplers_generated = false;
+  static GLuint sampler_ids[8];
+  if (!samplers_generated) {
+    glGenSamplers(8, sampler_ids);
+    samplers_generated = true;
+  }
+
+  for (size_t i = 0; i < 8; i++) {
+    const auto sampler = samplers[i];
+    const GLuint sampler_id = sampler_ids[i];
+    glBindSampler(i, sampler_id);
+
+    get_texture(gt,sampler.texture,);
+    glActiveTexture(GL_TEXTURE0 + i);
+    glBindTexture(GL_TEXTURE_2D, gt);
+    if (gt == 0) continue; // texture doesn't exist skip updating the sampler
+
+    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_R, sampler.wrapu?GL_REPEAT:GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, sampler.wrapv?GL_REPEAT:GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_T, sampler.wrapw?GL_REPEAT:GL_CLAMP_TO_EDGE);
+    // Default to interpolation disabled, for some reason textures do that by default but not samplers.
+    glSamplerParameteri(sampler_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glSamplerParameteri(sampler_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  }
+}
+
 void graphics_state_flush_lighting() {
   const auto current_shader = enigma::shaderprograms[enigma::bound_shader];
 
@@ -95,6 +124,8 @@ void graphics_state_flush_lighting() {
   enigma_user::glsl_uniform4fv(current_shader->uni_material_diffuse, 1, material_diffuse);
   enigma_user::glsl_uniform4fv(current_shader->uni_material_specular, 1, material_specular);
   enigma_user::glsl_uniformf(current_shader->uni_material_shininess, material_shininess);
+
+  graphics_state_flush_samplers();
 
   int activeLights = 0;
   for (int i = 0; i < 8; ++i) {

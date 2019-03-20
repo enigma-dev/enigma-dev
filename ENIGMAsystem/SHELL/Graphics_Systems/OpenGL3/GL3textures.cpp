@@ -36,21 +36,6 @@ using std::vector;
 
 vector<TextureStruct*> textureStructs(0);
 
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_texture(tex,texid,v)\
-    if ((texid < -1 || size_t(texid) >= textureStructs.size()) && texid!=-1) {\
-      show_error("Attempting to access non-existing texture " + toString(texid), false);\
-      return v;\
-    }\
-    const unsigned tex = (texid==-1?0:textureStructs[texid]->gltex);
-#else
-  #define get_texture(tex,texid,v)\
-    const unsigned tex = (texid==-1?0:textureStructs[texid]->gltex);
-#endif
-
 /*enum {
   //Formats and internal formats
   tx_rgba = GL_RGBA,
@@ -90,7 +75,7 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 	return (x + (x >> 16)) & 63;
 }
 
-TextureStruct::TextureStruct(unsigned gtex)
+TextureStruct::TextureStruct(GLuint gtex)
 {
 	gltex = gtex;
 }
@@ -287,33 +272,6 @@ namespace enigma
 
     return ret;
   }
-
-  struct SamplerState {
-    GLuint sampler_index;
-    unsigned bound_texture;
-
-    SamplerState(): sampler_index(0) {
-    }
-
-    ~SamplerState() {
-      glDeleteSamplers(1, &sampler_index);
-    }
-
-  };
-
-  SamplerState samplerstates[8];
-
-  void graphics_initialize_samplers() {
-    GLuint sampler_ids[8];
-    glGenSamplers(8, sampler_ids);
-    for (size_t i = 0; i < 8; i++) {
-      samplerstates[i].sampler_index = sampler_ids[i];
-      glBindSampler(i, samplerstates[i].sampler_index);
-      // Default to interpolation disabled, for some reason textures do that by default but not samplers.
-      glSamplerParameteri(samplerstates[i].sampler_index, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glSamplerParameteri(samplerstates[i].sampler_index, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    }
-  }
 }
 
 namespace enigma_user {
@@ -370,87 +328,6 @@ gs_scalar texture_get_texel_height(int texid)
 	return 1.0/textureStructs[texid]->fullheight;
 }
 
-void texture_set_stage(int stage, int texid) {
-  draw_batch_flush(batch_flush_deferred);
-  //TODO(harijs): Check if stage <0
-  get_texture(gt,texid,);
-  if (enigma::samplerstates[stage].bound_texture != gt) {
-    if (enigma::bound_texture_stage != GL_TEXTURE0 + stage) { glActiveTexture(enigma::bound_texture_stage = (GL_TEXTURE0 + stage)); }
-    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
-  }
-}
-
-void texture_reset() {
-  draw_batch_flush(batch_flush_deferred);
-  if (enigma::samplerstates[0].bound_texture != 0){
-  	if (enigma::bound_texture_stage != GL_TEXTURE0) { glActiveTexture(enigma::bound_texture_stage = GL_TEXTURE0); }
-  	glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
-  }
-}
-
-void texture_set_interpolation_ext(int sampler, bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  //TODO(harijs): Check if sampler <0
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MIN_FILTER, enable?GL_LINEAR:GL_NEAREST);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAG_FILTER, enable?GL_LINEAR:GL_NEAREST);
-}
-
-void texture_set_repeat_ext(int sampler, bool repeat)
-{
-  draw_batch_flush(batch_flush_deferred);
-  //TODO(harijs): Check if sampler <0
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP_TO_EDGE);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP_TO_EDGE);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP_TO_EDGE);
-}
-
-void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
-{
-  draw_batch_flush(batch_flush_deferred);
-  //TODO(harijs): Check if sampler <0
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP_TO_EDGE);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP_TO_EDGE);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP_TO_EDGE);
-}
-
-void texture_set_border_ext(int sampler, int r, int g, int b, double a)
-{
-  draw_batch_flush(batch_flush_deferred);
-  //TODO(harijs): Check if sampler <0
-  GLint bordercolor[4] = { r, g, b, int(a * 255) };
-  glSamplerParameteriv(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_BORDER_COLOR, bordercolor);
-}
-
-void texture_set_filter_ext(int sampler, int filter)
-{
-  draw_batch_flush(batch_flush_deferred);
-  GLint min, mag;
-  if (filter == tx_trilinear) {
-    min = GL_LINEAR_MIPMAP_LINEAR;
-    mag = GL_LINEAR;
-  } else if (filter == tx_bilinear) {
-    min = GL_LINEAR_MIPMAP_NEAREST;
-    mag = GL_LINEAR;
-  } else if (filter == tx_nearest) {
-    min = GL_NEAREST_MIPMAP_NEAREST;
-    mag = GL_NEAREST;
-  } else {
-    min = GL_NEAREST;
-    mag = GL_NEAREST;
-  }
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MIN_FILTER, min);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAG_FILTER, mag);
-}
-
-void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel)
-{
-  draw_batch_flush(batch_flush_deferred);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MIN_LOD, minlod);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAX_LOD, maxlod);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAX_LEVEL, maxlevel);
-}
-
 bool texture_mipmapping_supported()
 {
   return enigma::gl_extension_supported("glGenerateMipmap");
@@ -466,12 +343,6 @@ float texture_anisotropy_maxlevel()
   float maximumAnisotropy;
   glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maximumAnisotropy);
   return maximumAnisotropy;
-}
-
-void texture_anisotropy_filter(int sampler, gs_scalar levels)
-{
-  draw_batch_flush(batch_flush_deferred);
-  glSamplerParameterf(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
 }
 
 }

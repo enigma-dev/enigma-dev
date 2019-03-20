@@ -44,8 +44,6 @@ namespace enigma {
   unsigned bound_vboi = -1; //This means it's max-1
   int bound_texture_stage = -1;
 
-  void graphics_initialize_samplers();
-
   void graphicssystem_initialize()
   {
     glDepthFunc(GL_LEQUAL); // to match GM8's D3D8 default
@@ -97,8 +95,6 @@ namespace enigma {
 
     enigma_user::glsl_program_reset(); //Set the default program
     //END DEFAULT SHADER
-
-    graphics_initialize_samplers();
 
     //In GL3.3 Core VAO is mandatory. So we create one and never change it
     GLuint vertexArrayObject;

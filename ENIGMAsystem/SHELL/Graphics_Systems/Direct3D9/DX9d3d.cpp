@@ -16,7 +16,9 @@
 **/
 
 #include "Direct3D9Headers.h"
+#include "DX9TextureStruct.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -69,6 +71,18 @@ const D3DBLEND blendequivs[11] = {
 } // anonymous namespace
 
 namespace enigma {
+
+void graphics_state_flush_samplers() {
+  for (int i = 0; i < 8; ++i) {
+    const Sampler& sampler = samplers[i];
+    const auto tex = get_texture(sampler.texture);
+    d3dmgr->SetTexture(i, tex);
+    if (tex) continue; // texture doesn't exist skip updating the sampler
+    d3dmgr->SetSamplerState(i, D3DSAMP_ADDRESSU, sampler.wrapu?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
+    d3dmgr->SetSamplerState(i, D3DSAMP_ADDRESSV, sampler.wrapv?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
+    d3dmgr->SetSamplerState(i, D3DSAMP_ADDRESSW, sampler.wrapw?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
+  }
+}
 
 void graphics_state_flush_fog() {
   d3dmgr->SetRenderState(D3DRS_RANGEFOGENABLE, d3dFogEnabled);
@@ -131,6 +145,8 @@ void graphics_state_flush() {
   d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, alphaBlend);
   d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, alphaTest);
   d3dmgr->SetRenderState(D3DRS_ALPHAREF, alphaTestRef);
+
+  graphics_state_flush_samplers();
 
   d3dmgr->SetRenderState(D3DRS_FOGENABLE, d3dFogEnabled);
   if (d3dFogEnabled) graphics_state_flush_fog();

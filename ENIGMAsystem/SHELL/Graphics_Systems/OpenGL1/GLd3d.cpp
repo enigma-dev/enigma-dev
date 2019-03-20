@@ -15,8 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "GLTextureStruct.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -70,6 +72,19 @@ const GLenum blendequivs[11] = {
 } // namespace anonymous
 
 namespace enigma {
+
+void graphics_state_flush_samplers() {
+  for (int i = 0; i < 8; ++i) {
+    const Sampler& sampler = samplers[i];
+    const auto tex = get_texture(sampler.texture);
+    glActiveTexture(GL_TEXTURE0 + i);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    if (tex == 0) continue; // texture doesn't exist skip updating the sampler
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, sampler.wrapu?GL_REPEAT:GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, sampler.wrapv?GL_REPEAT:GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, sampler.wrapw?GL_REPEAT:GL_CLAMP);
+  }
+}
 
 void graphics_state_flush_fog() {
   glFogi(GL_FOG_MODE, fogmodes[d3dFogMode]);
@@ -133,6 +148,8 @@ void graphics_state_flush() {
   (alphaBlend?glEnable:glDisable)(GL_BLEND);
   (alphaTest?glEnable:glDisable)(GL_ALPHA_TEST);
   glAlphaFunc(GL_GREATER, alphaTestRef/255);
+
+  graphics_state_flush_samplers();
 
   //NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
   (d3dFogEnabled?glEnable:glDisable)(GL_FOG);
