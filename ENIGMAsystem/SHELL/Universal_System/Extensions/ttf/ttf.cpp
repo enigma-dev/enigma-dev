@@ -56,14 +56,34 @@ static bool FreeTypeAlive = FontManager::Init();
 
 std::vector<std::string> fontSearchPaths;
 
-// TODO: Fill in this map in
+// TODO: Generate this map automatically once we can use std::filesystem in engine
 // https://docs.microsoft.com/en-us/typography/fonts/windows_10_font_list
+// List of MS Fonts in which their names don't match their filenames
 const std::map<std::string, std::string> msFontsNames = {
+  {"Arial Black", "ariblk"},
+  {"Consolas", "Consola"},
+  {"Constantia", "Constan"
   {"Comic Sans MS", "comic"},
-  {"Courier New", "cour"}
+  {"Courier New", "cour"},
+  {"Franklin Gothic Medium", "framd"},
+  {"Ink Free", "Inkfree"},
+  {"Javanese Text", "javatex"},
+  {"Lucida Console", "lucon" },
+  {"Lucida Sans Unicode", "l_10646"},
+  {"Malgun Gothic", "malgun"},
+  {"Microsoft Sans Serif", "micross"},
+  {"Myanmar Text", "mmrtext"},
+  {"Palatino Linotype", "pala"},
+  {"Segoe Print", "segoepr"},
+  {"Segoe Script", "segoesc"},
+  {"Segoe UI Historic", "seguihis"},
+  {"Segoe UI Emoji", "seguiemj"}
+  {"Segoe UI Symbol", "seguisym"}
+  {"Times New Roman", "times"},
+  {"Trebuchet MS", "trebuc"}
 };
 
-// OSS equivs of most popular fonts
+// OSS equivs of MS' most common fonts
 const std::map<std::string, std::string> fontFallbacks = {
   {"Arial", "LiberationSans"},
   {"Times New Roman", "LiberationSerif"},
@@ -80,46 +100,57 @@ namespace enigma_user {
   using enigma::GlyphPair;
   using enigma::fontSearchPaths;
   using enigma::fontFallbacks;
+  using enigma::msFontsNames;
   
   void font_add_search_path(std::string path) {
     fontSearchPaths.push_back(path);
   }
   
-  std::string font_find(std::string name, bool bold, bool italic, bool fallback) {
+  std::string font_find(std::string name, bool bold, bool italic, bool light, bool fallback) {
     
     // Unix Style naming Font-[Bold][Italic][BoldItalic][Regular].ttf
-    // Windows Style namings font[b or bd or B][i or it or I][bi or z or S].ttf (often all lowercase)
+    // Windows Style namings font[b or bd or B][l][i or it or I][z or S][.ttf or .TTF or .ttc] (often all lowercase)
     std::vector<std::string> possibleNames;
     std::string suffix;
     
     // Unix Best Match
     if (bold) suffix = "Bold";
+    if (light) suffix = "Light";
     if (italic) suffix += "Italic";
     if (suffix.empty()) suffix = "Regular";
     possibleNames.push_back(name + "-" + suffix + ".ttf");
     
-    auto addWinNames = [&](std::string s1, std::string s2, std::string s3) {
-      std::string msName;
-      if (auto fnt = msFontsNames.find(name) != msFontsNames.end()) msName = fnt;
-      else msName = name;
+    std::string msName;
+    if (auto fnt = msFontsNames.find(name) != msFontsNames.end()) msName = fnt;
+    else msName = name;
+    
+    auto addWinNames = [&](std::string s1, std::string s2 = "", std::string s3 = "") {
       
       std::string n = msName + s1 + ".ttf";
       possibleNames.push_back(n);
       std::transform(n.begin(), n.end(), n.begin(), ::tolower);
       possibleNames.push_back(n);
       
-      n = msName + s2 + ".ttf";
-      possibleNames.push_back(n);
-      std::transform(n.begin(), n.end(), n.begin(), ::tolower);
-      possibleNames.push_back(n);
+      if (!s2.empty()) {
+        n = msName + s2 + ".ttf";
+        possibleNames.push_back(n);
+        std::transform(n.begin(), n.end(), n.begin(), ::tolower);
+        possibleNames.push_back(n);
+      }
       
-      n = msName + s3 + ".ttf";
-      possibleNames.push_back(n);
+      if (!s3.empty()) {
+        n = msName + s3 + ".ttf";
+        possibleNames.push_back(n);
+      }
     };
     
     // Win32 Best Match
-    if (bold && italic) {
+    if (light && italic) {
+      addWinNames("li");
+    } else if (bold && italic) {
       addWinNames("bi", "z", "S");
+    } else if light {
+       addWinNames("l");
     } else if (bold) {
       addWinNames("bd", "b", "B");
     } else if (italic) {
@@ -128,10 +159,14 @@ namespace enigma_user {
     
     // Core name
     if (fallback || (!bold && !italic)) {
-      std::string n = name + ".ttf";
-      possibleNames.push_back(n);
-      std::transform(n.begin(), n.end(), n.begin(), ::tolower);
-      possibleNames.push_back(n);
+      possibleNames.push_back(msname + ".ttf");
+      
+      if (name != msname) {
+        std::string n = name + ".ttf";
+        possibleNames.push_back(n);
+        std::transform(n.begin(), n.end(), n.begin(), ::tolower);
+        possibleNames.push_back(n);
+      }
     }
     
     // Check for fallback equiv of msfonts if none use sans
@@ -156,7 +191,7 @@ namespace enigma_user {
     return "";
   }
    
-  int font_add(std::string name, unsigned size, bool bold, bool italic, unsigned first, unsigned last, bool fallback) {
+  int font_add(std::string name, unsigned size, bool bold, bool italic, unsigned first, unsigned last, bool light, bool fallback) {
     
     if (!enigma::FreeTypeAlive)
       return -1;
