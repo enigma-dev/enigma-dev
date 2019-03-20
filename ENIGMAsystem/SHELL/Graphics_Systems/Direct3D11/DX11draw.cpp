@@ -27,14 +27,42 @@
 #include <vector>
 #include <math.h>
 #include <stdio.h>
+
 using std::vector;
 
-namespace enigma {
-extern unsigned char currentcolor[4];
+using namespace enigma::dx11;
+
+namespace enigma_user {
+
+void draw_clear_alpha(int col, float alpha)
+{
+	draw_batch_flush(batch_flush_deferred);
+	float color[4];
+
+	// Setup the color to clear the buffer to.
+	color[0] = COL_GET_Rf(col);
+	color[1] = COL_GET_Gf(col);
+	color[2] = COL_GET_Bf(col);
+	color[3] = alpha;
+
+	// Clear the back buffer.
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView, color);
 }
 
-namespace enigma_user
+void draw_clear(int col)
 {
+	draw_batch_flush(batch_flush_deferred);
+	float color[4];
+
+	// Setup the color to clear the buffer to.
+	color[0] = COL_GET_Rf(col);
+	color[1] = COL_GET_Gf(col);
+	color[2] = COL_GET_Bf(col);
+	color[3] = 1;
+
+	// Clear the back buffer.
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView, color);
+}
 
 int draw_get_msaa_maxlevel()
 {

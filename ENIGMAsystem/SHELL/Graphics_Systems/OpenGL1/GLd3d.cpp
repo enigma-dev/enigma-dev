@@ -113,6 +113,7 @@ void graphics_state_flush_lighting() {
 }
 
 void graphics_state_flush() {
+  glColor4ubv(enigma::currentcolor);
   glPolygonMode(GL_FRONT_AND_BACK, fillmodes[drawFillMode]);
   glPointSize(drawPointSize);
   glLineWidth(drawLineWidth);

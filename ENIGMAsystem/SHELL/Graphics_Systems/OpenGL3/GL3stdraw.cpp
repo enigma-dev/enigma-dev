@@ -32,14 +32,26 @@
 
 namespace enigma {
 
-extern unsigned char currentcolor[4];
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 
 } // namespace enigma
 
-namespace enigma_user
+namespace enigma_user {
+
+void draw_clear_alpha(int col,float alpha)
 {
+	draw_batch_flush(batch_flush_deferred);
+  //Unfortunately, we lack a 255-based method for setting ClearColor.
+	glClearColor(COL_GET_Rf(col),COL_GET_Gf(col),COL_GET_Bf(col),alpha);
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+void draw_clear(int col)
+{
+	draw_batch_flush(batch_flush_deferred);
+	glClearColor(COL_GET_Rf(col),COL_GET_Gf(col),COL_GET_Bf(col),1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+}
 
 int draw_get_msaa_maxlevel()
 {

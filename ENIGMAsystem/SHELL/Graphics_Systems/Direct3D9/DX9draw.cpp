@@ -32,12 +32,19 @@ using std::vector;
 
 using namespace enigma::dx9;
 
-namespace enigma {
-extern unsigned char currentcolor[4];
+namespace enigma_user {
+
+void draw_clear_alpha(int col, float alpha)
+{
+	draw_batch_flush(batch_flush_deferred);
+	d3dmgr->device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), CLAMP_ALPHA(alpha)), 1.0f, 0);
 }
 
-namespace enigma_user
+void draw_clear(int col)
 {
+	draw_batch_flush(batch_flush_deferred);
+	d3dmgr->device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col)), 1.0f, 0);
+}
 
 int draw_get_msaa_maxlevel()
 {
