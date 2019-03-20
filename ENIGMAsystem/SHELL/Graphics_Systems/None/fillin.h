@@ -142,8 +142,6 @@ namespace enigma_user
 	extern int window_get_region_width();
 	extern int window_get_region_height();
 
-	void screen_redraw();
-	void screen_init();
 	int screen_save(string filename);
 	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h);
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);

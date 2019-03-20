@@ -34,7 +34,6 @@ namespace enigma {
 void init_sampler_state();
 
 void graphicssystem_initialize() {
-  enigma_user::draw_state_flush();
   init_sampler_state();
 }
 

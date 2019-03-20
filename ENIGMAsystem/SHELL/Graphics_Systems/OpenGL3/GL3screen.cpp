@@ -61,47 +61,7 @@ void scene_end() {
 
 }
 
-namespace enigma_user
-{
-
-void screen_init()
-{
-  enigma::gui_width = window_get_region_width();
-  enigma::gui_height = window_get_region_height();
-
-  glClearColor(0,0,0,0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  if (!view_enabled)
-  {
-    glClearColor(0,0,0,0);
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
-  } else {
-    for (view_current = 0; view_current < 7; view_current++)
-    {
-      if (view_visible[(int)view_current])
-      {
-        int vc = (int)view_current;
-
-        glClearColor(0,0,0,0);
-
-        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
-        d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
-        break;
-      }
-    }
-  }
-
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_CULL_FACE);
-  glEnable(GL_BLEND);
-  glEnable(GL_SCISSOR_TEST);
-
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  texture_reset();
-  draw_set_color(c_white);
-}
+namespace enigma_user {
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
