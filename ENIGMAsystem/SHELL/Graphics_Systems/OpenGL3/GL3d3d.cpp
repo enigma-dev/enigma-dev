@@ -93,13 +93,15 @@ void graphics_state_flush_samplers() {
 
   for (size_t i = 0; i < 8; i++) {
     const auto sampler = samplers[i];
-    const GLuint sampler_id = sampler_ids[i];
-    glBindSampler(i, sampler_id);
 
     get_texture(gt,sampler.texture,);
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, gt);
+
     if (gt == 0) continue; // texture doesn't exist skip updating the sampler
+
+    const GLuint sampler_id = sampler_ids[i];
+    glBindSampler(i, sampler_id);
 
     glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_R, sampler.wrapu?GL_REPEAT:GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, sampler.wrapv?GL_REPEAT:GL_CLAMP_TO_EDGE);
@@ -124,8 +126,6 @@ void graphics_state_flush_lighting() {
   enigma_user::glsl_uniform4fv(current_shader->uni_material_diffuse, 1, material_diffuse);
   enigma_user::glsl_uniform4fv(current_shader->uni_material_specular, 1, material_specular);
   enigma_user::glsl_uniformf(current_shader->uni_material_shininess, material_shininess);
-
-  graphics_state_flush_samplers();
 
   int activeLights = 0;
   for (int i = 0; i < 8; ++i) {
@@ -174,6 +174,8 @@ void graphics_state_flush() {
   (alphaBlend?glEnable:glDisable)(GL_BLEND);
   enigma_user::glsl_uniformi(current_shader->uni_alphaTestEnable, alphaTest);
   enigma_user::glsl_uniformf(current_shader->uni_alphaTest, (gs_scalar)alphaTestRef/255.0);
+
+  graphics_state_flush_samplers();
 
   enigma_user::glsl_uniformi(current_shader->uni_lightEnable, d3dLighting);
   if (d3dLighting) graphics_state_flush_lighting();

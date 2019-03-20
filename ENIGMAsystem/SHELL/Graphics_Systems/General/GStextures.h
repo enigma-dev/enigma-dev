@@ -33,7 +33,7 @@ using std::string;
 namespace enigma {
 
 struct Sampler {
-  int texture=0; // GML texture id, NOT GL texture id!
+  int texture=-1; // GML texture id, NOT GL texture id!
   bool wrapu=false, wrapv=false, wrapw=false;
 };
 

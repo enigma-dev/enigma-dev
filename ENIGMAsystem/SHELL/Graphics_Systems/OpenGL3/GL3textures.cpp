@@ -87,8 +87,6 @@ TextureStruct::~TextureStruct()
 
 namespace enigma
 {
-  extern int bound_texture_stage;
-
   //This allows GL3 surfaces to bind and hold many different types of data
   int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, int internalFormat, unsigned format, unsigned type)
   {
