@@ -3,7 +3,7 @@
 
 namespace enigma {
 
-int blendMode[2] = { enigma_user::bm_src_alpha, enigma_user::bm_inv_src_alpha };
+int blendMode[2]={enigma_user::bm_src_alpha,enigma_user::bm_inv_src_alpha};
 
 } // namespace enigma
 

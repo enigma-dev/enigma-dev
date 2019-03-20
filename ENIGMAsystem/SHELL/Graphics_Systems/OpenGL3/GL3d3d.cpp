@@ -133,25 +133,10 @@ void d3d_set_software_vertex_processing(bool software) {
   //TODO: When we seperate platform specific things, then this shouldn't even exist
 }
 
-void d3d_set_color_mask(bool r, bool g, bool b, bool a){
-  draw_batch_flush(batch_flush_deferred);
-  glColorMask(r,g,b,a);
-}
-
 void d3d_set_fill_mode(int fill)
 {
   draw_batch_flush(batch_flush_deferred);
   glPolygonMode(GL_FRONT_AND_BACK, fillmodes[fill]);
-}
-
-void d3d_set_line_width(float value) {
-  draw_batch_flush(batch_flush_deferred);
-  glLineWidth(value);
-}
-
-void d3d_set_point_size(float value) {
-  draw_batch_flush(batch_flush_deferred);
-  glPointSize(value);
 }
 
 void d3d_set_depth_operator(int mode) {
@@ -524,6 +509,9 @@ void d3d_light_update_positions()
 }
 
 void graphics_state_flush() {
+  glPointSize(drawPointSize);
+  glLineWidth(drawLineWidth);
+
   (msaaEnabled?glEnable:glDisable)(GL_MULTISAMPLE);
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glDepthMask(d3dZWriteEnable);

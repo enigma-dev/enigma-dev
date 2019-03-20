@@ -124,14 +124,6 @@ void d3d_set_fill_mode(int fill)
 
 }
 
-void d3d_set_line_width(float value) {
-
-}
-
-void d3d_set_point_size(float value) {
-
-}
-
 void d3d_set_depth_operator(int mode) {
 
 }

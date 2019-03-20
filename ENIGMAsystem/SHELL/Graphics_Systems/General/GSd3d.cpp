@@ -9,14 +9,14 @@
 
 namespace enigma {
 
-bool d3dMode = false, d3dHidden = false, d3dZWriteEnable = true, d3dPerspective = true, d3dLighting = false, d3dShading = true;
-int d3dCulling = 0;
-float d3dLightingAmbient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+bool d3dMode=false, d3dHidden=false, d3dZWriteEnable=true, d3dPerspective=true, d3dLighting=false, d3dShading=true;
+int d3dCulling=0;
+float d3dLightingAmbient[4]={0.0f,0.0f,0.0f,1.0f};
 
-bool d3dFogEnabled = false;
-int d3dFogMode = enigma_user::rs_linear, d3dFogHint = enigma_user::rs_nicest;
-float d3dFogStart = 0.0f, d3dFogEnd = 0.0f, d3dFogDensity = 0.0f;
-float d3dFogColor[3] = { 0.0f, 0.0f, 0.0f };
+bool d3dFogEnabled=false;
+int d3dFogMode=enigma_user::rs_linear, d3dFogHint=enigma_user::rs_nicest;
+float d3dFogStart=0.0f, d3dFogEnd=0.0f, d3dFogDensity=0.0f;
+float d3dFogColor[3]={0.0f,0.0f,0.0f};
 
 } // namespace enigma
 

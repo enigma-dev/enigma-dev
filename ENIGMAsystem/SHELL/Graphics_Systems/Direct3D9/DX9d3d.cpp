@@ -71,6 +71,8 @@ const D3DBLEND blendequivs[11] = {
 namespace enigma {
 
 void graphics_state_flush() {
+  d3dmgr->SetRenderState(D3DRS_POINTSIZE, drawPointSize);
+
   d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, msaaEnabled);
   d3dmgr->SetRenderState(D3DRS_ZENABLE, d3dHidden);
   d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
@@ -148,15 +150,6 @@ void d3d_set_fill_mode(int fill)
 {
 	draw_batch_flush(batch_flush_deferred);
 	d3dmgr->SetRenderState(D3DRS_FILLMODE, fillmodes[fill]);
-}
-
-void d3d_set_line_width(float value) {
-
-}
-
-void d3d_set_point_size(float value) {
-	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_POINTSIZE, value);
 }
 
 void d3d_set_depth_operator(int mode) {

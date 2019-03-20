@@ -32,9 +32,9 @@ using std::vector;
 
 namespace enigma {
 
-bool drawStateDirty = false, msaaEnabled = true, alphaBlend = true, alphaTest = false;
-unsigned char alphaTestRef = 0;
-float circleprecision=24;
+bool drawStateDirty=false, msaaEnabled=true, alphaBlend=true, alphaTest=false;
+unsigned char alphaTestRef=0;
+float circleprecision=24, drawPointSize=1.0f, drawLineWidth=1.0f;
 
 //List of vertices we are buffering to draw.
 std::list<PolyVertex> currComplexPoly;
@@ -81,6 +81,16 @@ void draw_set_alpha_test(bool enable) {
 void draw_set_alpha_test_ref_value(unsigned val) {
   enigma::drawStateDirty = true;
   enigma::alphaTestRef = val;
+}
+
+void draw_set_point_size(float value) {
+	enigma::drawStateDirty = true;
+  enigma::drawPointSize = value;
+}
+
+void draw_set_line_width(float value) {
+  enigma::drawStateDirty = true;
+  enigma::drawLineWidth = value;
 }
 
 void draw_set_circle_precision(float pr) {

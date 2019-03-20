@@ -199,8 +199,6 @@ namespace enigma_user
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 
 	void d3d_set_fill_mode(int fill){}
-	void d3d_set_line_width(float value){}
-	void d3d_set_point_size(float value){}
 	void d3d_set_depth_operator(int mode){}
 	void d3d_set_depth(double dep){}
 	void d3d_set_clip_plane(bool enable){}

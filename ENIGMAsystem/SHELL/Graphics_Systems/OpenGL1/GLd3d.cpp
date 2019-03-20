@@ -72,6 +72,9 @@ const GLenum blendequivs[11] = {
 namespace enigma {
 
 void graphics_state_flush() {
+  glPointSize(drawPointSize);
+  glLineWidth(drawLineWidth);
+
   (msaaEnabled?glEnable:glDisable)(GL_MULTISAMPLE);
   (d3dLighting?glEnable:glDisable)(GL_ALPHA_TEST);
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
@@ -146,16 +149,6 @@ void d3d_set_fill_mode(int fill)
 {
   draw_batch_flush(batch_flush_deferred);
   glPolygonMode(GL_FRONT_AND_BACK, fillmodes[fill]);
-}
-
-void d3d_set_line_width(float value) {
-  draw_batch_flush(batch_flush_deferred);
-  glLineWidth(value);
-}
-
-void d3d_set_point_size(float value) {
-  draw_batch_flush(batch_flush_deferred);
-  glPointSize(value);
 }
 
 void d3d_set_depth_operator(int mode) {

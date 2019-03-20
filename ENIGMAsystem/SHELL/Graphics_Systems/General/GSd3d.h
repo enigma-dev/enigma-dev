@@ -115,8 +115,8 @@ namespace enigma_user {
   void d3d_set_culling(int mode);
 
   void d3d_set_fill_mode(int fill);
-  void d3d_set_line_width(float value);
-  void d3d_set_point_size(float value);
+  void draw_set_line_width(float value);
+  void draw_set_point_size(float value);
   void d3d_set_depth_operator(int mode);
   void d3d_set_fog(bool enable, int color, double start, double end);
   void d3d_set_fog_enabled(bool enable);
@@ -128,7 +128,6 @@ namespace enigma_user {
   void d3d_set_fog_density(double density);
   void d3d_set_depth(double dep);
   void d3d_set_shading(bool smooth);
-  void d3d_set_color_mask(bool r, bool g, bool b, bool a);
 
   bool d3d_get_mode();
   int d3d_get_culling();

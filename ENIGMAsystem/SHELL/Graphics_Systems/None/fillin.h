@@ -149,8 +149,6 @@ namespace enigma_user
 	unsigned int display_get_gui_height();
 
 	void d3d_set_fill_mode(int fill);
-	void d3d_set_line_width(float value);
-	void d3d_set_point_size(float value);
 	void d3d_set_depth_operator(int mode);
 	void d3d_set_depth(double dep);
 	void d3d_clear_depth();
