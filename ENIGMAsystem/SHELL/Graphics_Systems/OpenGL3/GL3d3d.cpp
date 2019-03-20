@@ -538,6 +538,7 @@ void graphics_state_flush() {
   if (d3dCulling > 0){
     glFrontFace(windingstates[d3dCulling-1]);
   }
+  (alphaBlend?glEnable:glDisable)(GL_BLEND);
 
   glBlendFunc(blendequivs[(blendMode[0]-1)%11],blendequivs[(blendMode[1]-1)%11]);
   enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTestEnable, alphaTest);
