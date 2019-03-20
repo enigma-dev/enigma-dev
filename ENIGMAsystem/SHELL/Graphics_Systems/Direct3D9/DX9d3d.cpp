@@ -137,32 +137,10 @@ void graphics_state_flush() {
 
   d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);
   if (d3dLighting) graphics_state_flush_lighting();
-}
 
-void graphics_set_matrix(int type) {
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-  D3DTRANSFORMSTATETYPE state;
-  glm::mat4 matrix;
-  switch(type) {
-    case enigma_user::matrix_world:
-      state = D3DTS_WORLD;
-      matrix = enigma::world;
-      break;
-    case enigma_user::matrix_view:
-      state = D3DTS_VIEW;
-      matrix = enigma::view;
-      break;
-    case enigma_user::matrix_projection:
-      state = D3DTS_PROJECTION;
-      matrix = enigma::projection;
-      break;
-    default:
-      #ifdef DEBUG_MODE
-      show_error("Unknown matrix type " + std::to_string(type), false);
-      #endif
-      return;
-  }
-  d3dmgr->SetTransform(state, (D3DMATRIX*)glm::value_ptr(matrix));
+  d3dmgr->SetTransform(D3DTS_WORLD, (D3DMATRIX*)glm::value_ptr(world));
+  d3dmgr->SetTransform(D3DTS_VIEW, (D3DMATRIX*)glm::value_ptr(view));
+  d3dmgr->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)glm::value_ptr(projection));
 }
 
 } // namespace enigma

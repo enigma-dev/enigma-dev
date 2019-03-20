@@ -86,7 +86,6 @@ void graphics_state_flush_lighting() {
 
   // this is done for compatibility with D3D/GM
   glMatrixMode(GL_MODELVIEW);
-  glPushMatrix(); // save present matrix
   // define lights with respect to view matrix but not world
   glLoadMatrixf(glm::value_ptr(enigma::view));
   for (int i = 0; i < 8; ++i) {
@@ -111,7 +110,6 @@ void graphics_state_flush_lighting() {
     const float attenuation_calibration = 8.0;
     glLightf(GL_LIGHT0+i, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(light.range*light.range));
   }
-  glPopMatrix(); // restore original matrix
 }
 
 void graphics_state_flush() {
@@ -139,30 +137,16 @@ void graphics_state_flush() {
   (d3dFogEnabled?glEnable:glDisable)(GL_FOG);
   if (d3dFogEnabled) graphics_state_flush_fog();
 
+  // flush lighting before matrix so GL1 ffp can compute lights with respect to view only
   (d3dLighting?glEnable:glDisable)(GL_LIGHTING);
   if (d3dLighting) graphics_state_flush_lighting();
-}
 
-void graphics_set_matrix(int type) {
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-  glm::mat4 matrix;
-  switch(type) {
-    case enigma_user::matrix_world:
-    case enigma_user::matrix_view:
-      matrix = enigma::view * enigma::world;
-      glMatrixMode(GL_MODELVIEW);
-      break;
-    case enigma_user::matrix_projection:
-      matrix = enigma::projection;
-      glMatrixMode(GL_PROJECTION);
-      break;
-    default:
-      #ifdef DEBUG_MODE
-      show_error("Unknown matrix type " + std::to_string(type), false);
-      #endif
-      return;
-  }
-  glLoadMatrixf(glm::value_ptr(matrix));
+  glm::mat4 modelview = view * world;
+  glMatrixMode(GL_MODELVIEW);
+  glLoadMatrixf(glm::value_ptr(modelview));
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadMatrixf(glm::value_ptr(projection));
 }
 
 } // namespace enigma

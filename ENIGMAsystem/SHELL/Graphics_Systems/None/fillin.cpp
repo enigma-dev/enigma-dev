@@ -82,7 +82,6 @@ namespace enigma
 	unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight){return NULL;}
 
 	void graphics_state_flush() {}
-	void graphics_set_matrix(int type) {}
 
 	void graphics_delete_vertex_buffer_peer(int buffer) {}
 	void graphics_delete_index_buffer_peer(int buffer) {}

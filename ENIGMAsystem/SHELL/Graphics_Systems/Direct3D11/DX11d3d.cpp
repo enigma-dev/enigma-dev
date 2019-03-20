@@ -109,10 +109,6 @@ void graphics_state_flush() {
   m_deviceContext->OMSetBlendState(pBlendState, NULL, 0xffffffff);
 }
 
-void graphics_set_matrix(int type) {
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-}
-
 } // namespace enigma
 
 namespace enigma_user {
