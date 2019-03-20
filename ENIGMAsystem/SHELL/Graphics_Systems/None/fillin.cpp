@@ -197,15 +197,6 @@ namespace enigma_user
 	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h){return -1;}
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 
-	bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col){return false;}
-	bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col){return false;}
-	bool d3d_light_define_specularity(int id, int r, int g, int b, double a){return false;}
-	void d3d_light_specularity(int facemode, int r, int g, int b, double a){}
-	bool d3d_light_set_ambient(int id, int r, int g, int b, double a){return false;}
-	bool d3d_light_set_specularity(int id, int r, int g, int b, double a){return false;}
-	void d3d_light_shininess(int facemode, int shine){}
-	bool d3d_light_enable(int id, bool enable){return false;}
-
 	void d3d_stencil_start_mask(){}
 	void d3d_stencil_continue_mask(){}
 	void d3d_stencil_use_mask(){}

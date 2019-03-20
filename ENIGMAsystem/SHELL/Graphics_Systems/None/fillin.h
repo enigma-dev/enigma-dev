@@ -148,15 +148,6 @@ namespace enigma_user
 	unsigned int display_get_gui_width();
 	unsigned int display_get_gui_height();
 
-	bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
-	bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col);
-	bool d3d_light_define_specularity(int id, int r, int g, int b, double a);
-	void d3d_light_specularity(int facemode, int r, int g, int b, double a);
-	bool d3d_light_set_ambient(int id, int r, int g, int b, double a);
-	bool d3d_light_set_specularity(int id, int r, int g, int b, double a);
-	void d3d_light_shininess(int facemode, int shine);
-	bool d3d_light_enable(int id, bool enable);
-
 	void d3d_stencil_start_mask();
 	void d3d_stencil_continue_mask();
 	void d3d_stencil_use_mask();
