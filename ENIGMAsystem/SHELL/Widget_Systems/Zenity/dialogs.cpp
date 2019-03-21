@@ -69,7 +69,7 @@ static string zenity_filter(string input) {
   return string_output;
 }
 
-static double show_message_helperfunc(char *str) {
+static int show_message_helperfunc(const string &str) {
   if (dialog_caption.empty())
     dialog_caption = message_caption();
 
@@ -93,12 +93,12 @@ static double show_message_helperfunc(char *str) {
   add_escaping(str, false, "") + string("\" --icon-name=dialog-information);") + str_echo;
 
   string str_result = shellscript_evaluate((char *)str_command.c_str());
-  double result = strtod(str_result.c_str(), NULL);
+  int result = (int)strtod(str_result.c_str(), NULL);
 
   return result;
 }
 
-static double show_question_helperfunc(char *str) {
+static int show_question_helperfunc(string str) {
   if (dialog_caption.empty())
     dialog_caption = message_caption();
 
@@ -117,27 +117,27 @@ static double show_question_helperfunc(char *str) {
   string("\" --icon-name=dialog-question);if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Cancel\" ] ;then echo -1;else echo 0;fi");
 
   string str_result = shellscript_evaluate((char *)str_command.c_str());
-  double result = strtod(str_result.c_str(), NULL);
+  int result = (int)strtod(str_result.c_str(), NULL);
 
   return result;
 }
 
-double show_message(char *str) {
+int show_message(const string &str) {
   message_cancel = false;
   return show_message_helperfunc(str);
 }
 
-double show_message_cancelable(char *str) {
+int show_message_cancelable(const string &str) {
   message_cancel = true;
   return show_message_helperfunc(str);
 }
 
-double show_question(char *str) {
+bool show_question(string str) {
   question_cancel = false;
-  return show_question_helperfunc(str);
+  return (bool)show_question_helperfunc(str);
 }
 
-double show_question_cancelable(char *str) {
+int show_question_cancelable(string str) {
   question_cancel = true;
   return show_question_helperfunc(str);
 }
