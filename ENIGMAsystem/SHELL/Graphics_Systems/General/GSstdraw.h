@@ -25,10 +25,11 @@
 
 namespace enigma {
 
-extern bool drawStateDirty, msaaEnabled, alphaBlend, alphaTest;
+extern bool drawStateDirty, lineStippleEnable, msaaEnabled, alphaBlend, alphaTest;
+extern unsigned short lineStipplePattern;
 extern unsigned char alphaTestRef;
 extern float drawPointSize, drawLineWidth;
-extern int drawFillMode;
+extern int drawFillMode, lineStippleScale;
 
 void graphics_state_flush();
 
@@ -54,7 +55,8 @@ namespace enigma_user
   void draw_set_alpha_test(bool enable);
   void draw_set_alpha_test_ref_value(unsigned val);
   void draw_enable_alphablend(bool enable);
-  void draw_set_line_pattern(int pattern, int scale);
+  void draw_set_line_stipple(bool enable);
+  void draw_set_line_pattern(int scale, unsigned short pattern);
   void draw_point(gs_scalar x, gs_scalar y);
   void draw_point_color(gs_scalar x, gs_scalar y, int color);
   void draw_line(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2);

@@ -99,11 +99,6 @@ namespace enigma_user
 
 	int draw_get_msaa_maxlevel();
 	bool draw_get_msaa_supported();
-	bool draw_get_alpha_test();
-	unsigned draw_get_alpha_test_ref_value();
-	void draw_set_alpha_test(bool enable);
-	void draw_set_alpha_test_ref_value(unsigned val);
-	void draw_set_line_pattern(int pattern, int scale);
 
 	int draw_getpixel(int x,int y);
 	int draw_getpixel_ext(int x,int y);

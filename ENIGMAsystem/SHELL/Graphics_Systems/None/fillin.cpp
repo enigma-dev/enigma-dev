@@ -142,7 +142,6 @@ namespace enigma_user
 
 	int draw_get_msaa_maxlevel(){return 0;}
 	bool draw_get_msaa_supported(){return false;}
-	void draw_set_line_pattern(int pattern, int scale){}
 
 	int draw_getpixel(int x,int y){return -1;}
 	int draw_getpixel_ext(int x,int y){return -1;}

@@ -135,6 +135,9 @@ void graphics_state_flush() {
   glPointSize(drawPointSize);
   glLineWidth(drawLineWidth);
 
+  (lineStippleEnable?glEnable:glDisable)(GL_LINE_STIPPLE);
+  glLineStipple(lineStippleScale,lineStipplePattern);
+
   (msaaEnabled?glEnable:glDisable)(GL_MULTISAMPLE);
   (d3dLighting?glEnable:glDisable)(GL_ALPHA_TEST);
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);

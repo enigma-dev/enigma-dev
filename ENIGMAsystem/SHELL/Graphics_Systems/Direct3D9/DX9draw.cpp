@@ -56,20 +56,14 @@ bool draw_get_msaa_supported()
   return false; //TODO: implement
 }
 
-void draw_set_line_pattern(int pattern, int scale)
-{
-	draw_batch_flush(batch_flush_deferred);
-}
-
-}
+} // namespace enigma_user
 
 //#include <endian.h>
 //TODO: Though serprex, the author of the function below, never included endian.h,
 //   // Doing so is necessary for the function to work at its peak.
 //   // When ENIGMA generates configuration files, one should be included here.
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 int draw_getpixel(int x, int y)
 {

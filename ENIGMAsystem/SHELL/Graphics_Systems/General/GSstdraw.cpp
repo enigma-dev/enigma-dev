@@ -32,10 +32,11 @@ using std::vector;
 
 namespace enigma {
 
-bool drawStateDirty=false, msaaEnabled=true, alphaBlend=true, alphaTest=false;
+bool drawStateDirty=false, lineStippleEnable=false, msaaEnabled=true, alphaBlend=true, alphaTest=false;
+unsigned short lineStipplePattern=0xFFFF;
 unsigned char alphaTestRef=0;
 float circleprecision=24, drawPointSize=1.0f, drawLineWidth=1.0f;
-int drawFillMode=enigma_user::rs_solid;
+int drawFillMode=enigma_user::rs_solid, lineStippleScale=1;
 
 //List of vertices we are buffering to draw.
 std::list<PolyVertex> currComplexPoly;
@@ -97,6 +98,17 @@ void draw_set_fill_mode(int fill) {
 void draw_set_line_width(float value) {
   enigma::drawStateDirty = true;
   enigma::drawLineWidth = value;
+}
+
+void draw_set_line_stipple(bool enable) {
+  enigma::drawStateDirty = true;
+  enigma::lineStippleEnable = enable;
+}
+
+void draw_set_line_pattern(int scale, unsigned short pattern) {
+  enigma::drawStateDirty = true;
+  enigma::lineStippleScale = scale;
+  enigma::lineStipplePattern = pattern;
 }
 
 void draw_set_circle_precision(float pr) {

@@ -68,17 +68,7 @@ bool draw_get_msaa_supported()
   return GLEW_EXT_multisample;
 }
 
-void draw_set_line_pattern(int pattern, int scale)
-{
-  draw_batch_flush(batch_flush_deferred);
-  if (pattern == -1)
-    glDisable(GL_LINE_STIPPLE);
-  else
-    glEnable(GL_LINE_STIPPLE),
-    glLineStipple(scale,(short)pattern);
-}
-
-} // namespace enigma
+} // namespace enigma_user
 
 //#include <endian.h>
 //TODO: Though serprex, the author of the function below, never included endian.h,
