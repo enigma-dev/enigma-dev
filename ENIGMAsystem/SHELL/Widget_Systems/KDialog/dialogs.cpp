@@ -41,8 +41,6 @@ static string error_caption;
 static bool message_cancel  = false;
 static bool question_cancel = false;
 
-using std::string;
-
 namespace enigma {
   
 bool widget_system_initialize() {
