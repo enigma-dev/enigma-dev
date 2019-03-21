@@ -60,8 +60,10 @@ bool widget_system_initialize() {
 
 static string shellscript_evaluate(string command) {
   string result = execute_shell_for_output(command);
+  
   if (result.back() == '\n')
     result.pop_back();
+  
   return result;
 }
 
