@@ -28,6 +28,12 @@
 #include <iostream>
 using std::string;
 
+#include "Universal_System/estring.h"
+using enigma_user::string_replace_all;
+using enigma_user::filename_name;
+using enigma_user::filename_path;
+using enigma_user::string_split;
+
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
