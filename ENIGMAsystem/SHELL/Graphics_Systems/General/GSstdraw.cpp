@@ -104,13 +104,13 @@ void draw_set_alpha_test_ref_value(unsigned val) {
 }
 
 void draw_set_point_size(float value) {
-	enigma::draw_set_state_dirty();
+  enigma::draw_set_state_dirty();
   enigma::drawPointSize = value;
 }
 
 void draw_set_fill_mode(int fill) {
   enigma::draw_set_state_dirty();
-	enigma::drawFillMode = fill;
+  enigma::drawFillMode = fill;
 }
 
 void draw_set_line_width(float value) {
