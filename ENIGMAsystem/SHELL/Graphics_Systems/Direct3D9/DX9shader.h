@@ -36,6 +36,6 @@ void hlsl_shader_use(int id);
 void hlsl_shader_reset();
 void hlsl_shader_free(int id);
 
-}
+} // namespace enigma_user
 
 #endif

@@ -19,8 +19,6 @@
 #define ENIGMA_DIRECT3D9_HEADERS_H
 
 #include <d3d9.h>
-#include <windows.h>
-#include <windowsx.h>
 
 namespace enigma {
 
