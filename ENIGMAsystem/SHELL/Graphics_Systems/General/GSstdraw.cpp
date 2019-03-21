@@ -32,6 +32,7 @@ using std::vector;
 
 namespace {
 
+// please keep drawStateDirty private to this translation unit!
 bool drawStateDirty=false;
 
 } // namespace anonymous
@@ -47,17 +48,9 @@ int drawFillMode=enigma_user::rs_solid, lineStippleScale=1;
 //List of vertices we are buffering to draw.
 std::list<PolyVertex> currComplexPoly;
 
-// helper for not only marking the draw state dirty but
-// also to flush the batch whenever a render state changes
-void draw_set_state_dirty() {
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-  drawStateDirty = true;
-}
-
-// please keep drawStateDirty private to this translation unit!
-bool draw_get_state_dirty() {
-  return drawStateDirty;
-}
+// handler for when a generic rendering state has changed
+void draw_set_state_dirty(bool dirty) { drawStateDirty = dirty; }
+bool draw_get_state_dirty() { return drawStateDirty; }
 
 } // namespace enigma
 

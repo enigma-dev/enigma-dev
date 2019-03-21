@@ -66,7 +66,10 @@ namespace enigma_user
   void texture_set_priority(int texid, double prio);
   void texture_set(int texid);
   void texture_set_stage(int stage, int texid);
+  int texture_get();
+  int texture_get_stage(int stage);
   #define texture_set(texid) texture_set_stage(0, texid)
+  #define texture_get(texid) texture_get_stage(0)
   void texture_reset();
   void texture_set_blending(bool enable);
 

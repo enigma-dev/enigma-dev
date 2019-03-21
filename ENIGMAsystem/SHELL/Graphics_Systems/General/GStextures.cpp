@@ -58,6 +58,10 @@ void texture_set_stage(int stage, int texid) {
   enigma::samplers[stage].texture = texid;
 }
 
+int texture_get_stage(int stage) {
+  return enigma::samplers[stage].texture;
+}
+
 void texture_reset() {
   enigma::draw_set_state_dirty();
   enigma::samplers[0].texture = -1;

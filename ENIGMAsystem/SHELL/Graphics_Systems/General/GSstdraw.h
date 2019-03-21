@@ -31,7 +31,7 @@ extern unsigned char alphaTestRef;
 extern float drawPointSize, drawLineWidth;
 extern int drawFillMode, lineStippleScale;
 
-void draw_set_state_dirty();
+void draw_set_state_dirty(bool dirty=true);
 bool draw_get_state_dirty();
 
 void graphics_state_flush();

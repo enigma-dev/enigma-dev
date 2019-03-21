@@ -29,8 +29,6 @@ namespace {
 
 // the batching mode is initialized to the default here
 int draw_batch_mode = enigma_user::batch_flush_deferred;
-// the texture that was specified when the current primitive batch began
-int draw_batch_texture = -1;
 // whether a batch has been started but not flushed yet
 bool draw_batch_dirty = false;
 // lazy create the batch stream that we use for combining primitives
@@ -41,16 +39,18 @@ int draw_get_batch_stream() {
   return draw_batch_stream;
 }
 // helper function for beginning a deferred batch to determine when texture swap occurs
+// one goal of the function is to ensure the render states are current when a batch begins
 void draw_batch_begin_deferred(int texId) {
+  // if we want to use a different texture, set it now
+  // this marks the state as dirty only if the texture is different
+  if (enigma_user::texture_get() != texId) {
+    enigma_user::texture_set(texId);
+  }
   // if the draw state is dirty, flush the new state
+  // this will flush any previous batch first before
+  // actually flushing our texture set to the device
   if (enigma::draw_get_state_dirty()) {
     enigma_user::draw_state_flush();
-  }
-  // if we want to use a different texture, draw any existing batch
-  // first with the old texture
-  if (draw_batch_texture != texId) {
-    enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    draw_batch_texture = texId;
   }
   draw_batch_dirty = true;
 }
@@ -90,7 +90,16 @@ void draw_batch_flush(int kind) {
   // the never flush mode means the batch isn't drawn
   // we must still clear it from memory to avoid leaks
   if (draw_batch_mode != batch_flush_never) {
-    d3d_model_draw(draw_get_batch_stream(), draw_batch_texture);
+    // when we start a batch using draw_batch_begin_deferred
+    // the render state is actually made current immediately
+    // along with the texture that the batch uses so we don't
+    // actually want any state flush to occur while we draw
+    // this batch and then we can restore the dirty state for
+    // the next batch or vertex submit to flush the new state
+    bool wasStateDirty = enigma::draw_get_state_dirty();
+    enigma::draw_set_state_dirty(false);
+    d3d_model_draw(draw_get_batch_stream());
+    enigma::draw_set_state_dirty(wasStateDirty);
   }
   d3d_model_clear(draw_get_batch_stream());
 
