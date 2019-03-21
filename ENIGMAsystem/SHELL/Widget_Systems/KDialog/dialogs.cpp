@@ -78,7 +78,7 @@ static string kdialog_filter(string input) {
   return string_output;
 }
 
-static int show_message_helperfunc(const string &str) {
+static int show_message_helperfunc(string str) {
   if (dialog_caption.empty())
     dialog_caption = message_caption();
 
@@ -135,7 +135,7 @@ int show_message(const string &str) {
   return show_message_helperfunc(str);
 }
 
-int show_message_cancelable(const string &str) {
+int show_message_cancelable(string str) {
   message_cancel = true;
   return show_message_helperfunc(str);
 }
