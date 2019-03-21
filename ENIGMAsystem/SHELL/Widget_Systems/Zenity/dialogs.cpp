@@ -362,7 +362,7 @@ string get_directory(string dname) {
   string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_dname, false, "") + str_end;
 
-  return shellscript_evaluate((char *)str_command.c_str());
+  return shellscript_evaluate(str_command);
 }
 
 string get_directory_alt(string capt, string root) {
