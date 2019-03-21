@@ -211,10 +211,7 @@ string get_string(string str, string def) {
   add_escaping(str, false, "") + string("\" --entry-text=\"") +
   add_escaping(def, false, "") + string("\");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  return (char *)result.c_str();
+  return shellscript_evaluate((char *)str_command.c_str());
 }
 
 string get_password(string str, string def) {
@@ -231,10 +228,7 @@ string get_password(string str, string def) {
   add_escaping(str, false, "") + string("\" --hide-text --entry-text=\"") +
   add_escaping(def, false, "") + string("\");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  return (char *)result.c_str();
+  return shellscript_evaluate((char *)str_command.c_str());
 }
 
 double get_integer(string str, double def) {
@@ -261,13 +255,8 @@ string get_open_filename(string filter, string fname) {
   string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  if (file_exists(result))
-    return (char *)result.c_str();
-
-  return (char *)"";
+  string result = shellscript_evaluate((char *)str_command.c_str());
+  return file_exists(result) ? result : "";
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) {
@@ -287,11 +276,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
 
   static string result;
   result = shellscript_evaluate((char *)str_command.c_str());
-
-  if (file_exists(result))
-    return (char *)result.c_str();
-
-  return (char *)"";
+  return file_exists(result) ? result : "";
 }
 
 string get_open_filenames(string filter, string fname) {
@@ -314,10 +299,7 @@ string get_open_filenames(string filter, string fname) {
       success = false;
   }
 
-  if (success)
-    return (char *)result.c_str();
-
-  return (char *)"";
+  return success ? result : "";
 }
 
 string get_open_filenames_ext(string filter, string fname, string dir, string title) {
@@ -345,10 +327,7 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
       success = false;
   }
 
-  if (success)
-    return (char *)result.c_str();
-
-  return (char *)"";
+  return success ? result : "";
 }
 
 string get_save_filename(string filter, string fname) {
@@ -361,10 +340,7 @@ string get_save_filename(string filter, string fname) {
   string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  return (char *)result.c_str();
+  return shellscript_evaluate((char *)str_command.c_str());
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
@@ -382,10 +358,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  return (char *)result.c_str();
+  return shellscript_evaluate((char *)str_command.c_str());
 }
 
 string get_directory(string dname) {
@@ -399,10 +372,7 @@ string get_directory(string dname) {
   string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_dname, false, "") + str_end;
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  return (char *)result.c_str();
+  return shellscript_evaluate((char *)str_command.c_str());
 }
 
 string get_directory_alt(string capt, string root) {
@@ -416,10 +386,7 @@ string get_directory_alt(string capt, string root) {
   string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_dname, false, "") + str_end;
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  return (char *)result.c_str();
+  return shellscript_evaluate((char *)str_command.c_str());
 }
 
 int get_color(int defcol) {
