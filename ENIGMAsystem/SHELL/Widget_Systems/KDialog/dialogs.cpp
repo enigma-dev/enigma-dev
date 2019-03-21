@@ -34,6 +34,9 @@ using enigma_user::filename_name;
 using enigma_user::filename_path;
 using enigma_user::string_split;
 
+#include "Platforms/General/PFmain.h"
+using enigma_user::execute_shell_for_output;
+
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
