@@ -177,6 +177,10 @@ void show_error(string errortext, const bool fatal) {
 
 namespace enigma_user {
 
+void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
+
+}
+
 int show_message(const string &str) {
   message_cancel = false;
   return show_message_helperfunc(str);
