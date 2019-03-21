@@ -181,9 +181,7 @@ int show_attempt(string str) {
   string("x=$? ;if [ $x = 0 ] ;then echo 0;else echo -1;fi");
 
   string str_result = shellscript_evaluate(str_command);
-  int result = (int)strtod(str_result.c_str(), NULL);
-
-  return result;
+  return (int)strtod(str_result.c_str(), NULL);
 }
 
 void show_error(string str, const bool abort) {
@@ -202,11 +200,10 @@ void show_error(string str, const bool abort) {
   string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
 
   string str_result = shellscript_evaluate(str_command);
-  double result = strtod(str_result.c_str(), NULL);
-  if (result == 1) exit(0);
+  if (strtod(str_result.c_str(), NULL) == 1) exit(0);
 }
 
-char *get_string(char *str, char *def) {
+string get_string(string str, string def) {
   if (dialog_caption.empty())
     dialog_caption = message_caption();
 
@@ -223,7 +220,7 @@ char *get_string(char *str, char *def) {
   return shellscript_evaluate(str_command);
 }
 
-char *get_password(char *str, char *def) {
+string get_password(string str, string def) {
   if (dialog_caption.empty())
     dialog_caption = message_caption();
 
@@ -237,24 +234,19 @@ char *get_password(char *str, char *def) {
   add_escaping(def, false, "") + string("\" --title \"") +
   str_title + string("\");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  return (char *)result.c_str();
+  return shellscript_evaluate(str_command);
 }
 
-double get_integer(char *str, double def) {
+double get_integer(string str, double def) {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_string(str, (char *)str_def.c_str());
-  double result = strtod(str_result.c_str(), NULL);
-  return result;
+  return strtod(str_result.c_str(), NULL);
 }
 
-double get_passcode(char *str, double def) {
+double get_passcode(string str, double def) {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_password(str, (char *)str_def.c_str());
-  double result = strtod(str_result.c_str(), NULL);
-  return result;
+  return strtod(str_result.c_str(), NULL);
 }
 
 char *get_open_filename(char *filter, char *fname) {
