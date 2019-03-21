@@ -452,7 +452,7 @@ int get_color_ext(int defcol, string title) {
 }
 
 string message_get_caption() {
-  if (dialog_caption.empty()) dialog_caption = message_caption();
+  if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
   if (dialog_caption == message_caption() && error_caption == "Error")
     return ""; else return dialog_caption;
@@ -460,6 +460,6 @@ string message_get_caption() {
 
 void message_set_caption(string caption) {
   dialog_caption = caption; error_caption = caption;
-  if (dialog_caption.empty()) dialog_caption = message_caption();
+  if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
 }
