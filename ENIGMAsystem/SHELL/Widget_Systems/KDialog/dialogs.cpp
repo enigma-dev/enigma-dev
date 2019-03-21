@@ -239,20 +239,20 @@ string get_password(string str, string def) {
 
 double get_integer(string str, double def) {
   string str_def = remove_trailing_zeros(def);
-  string str_result = get_string(str, (char *)str_def.c_str());
+  string str_result = get_string(str, str_def);
   return strtod(str_result.c_str(), NULL);
 }
 
 double get_passcode(string str, double def) {
   string str_def = remove_trailing_zeros(def);
-  string str_result = get_password(str, (char *)str_def.c_str());
+  string str_result = get_password(str, str_def);
   return strtod(str_result.c_str(), NULL);
 }
 
-char *get_open_filename(char *filter, char *fname) {
+string get_open_filename(string filter, string fname) {
   string str_command; string pwd;
   string str_title = "Open";
-  string str_fname = basename(fname);
+  string str_fname = filename_name(fname);
 
   pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
     string("\"") + add_escaping(str_fname, false, "") + string("\""); else pwd = "\"$PWD/\"";
@@ -262,23 +262,18 @@ char *get_open_filename(char *filter, char *fname) {
   string("--getopenfilename /") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  if (file_exists(result))
-    return (char *)result.c_str();
-
-  return (char *)"";
+  string result = shellscript_evaluate(str_command);
+  return file_exists(result) ? result : "";
 }
 
-char *get_open_filename_ext(char *filter, char *fname, char *dir, char *title) {
+string get_open_filename_ext(string filter, string fname, string dir, string title) {
   string str_command; string pwd;
   string str_title = add_escaping(title, true, "Open");
-  string str_fname = basename(fname);
-  string str_dir = dirname(dir);
+  string str_fname = filename_name(fname);
+  string str_dir = filename_path(dir);
 
   string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + string("/") + str_fname;
+  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
   str_fname = (char *)str_path.c_str();
 
   pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
@@ -289,19 +284,14 @@ char *get_open_filename_ext(char *filter, char *fname, char *dir, char *title) {
   string("--getopenfilename /") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  if (file_exists(result))
-    return (char *)result.c_str();
-
-  return (char *)"";
+  string result = shellscript_evaluate(str_command);
+  return file_exists(result) ? result : "";
 }
 
-char *get_open_filenames(char *filter, char *fname) {
+string get_open_filenames(string filter, string fname) {
   string str_command; string pwd;
   string str_title = "Open";
-  string str_fname = basename(fname);
+  string str_fname = filename_name(fname);
 
   pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
     string("\"") + add_escaping(str_fname, false, "") + string("\""); else pwd = "\"$PWD/\"";
@@ -312,7 +302,7 @@ char *get_open_filenames(char *filter, char *fname) {
   string(" --multiple --separate-output --title \"") + str_title + string("\"");
 
   static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
+  result = shellscript_evaluate(str_command);
   std::vector<string> stringVec = string_split(result, '\n');
 
   bool success = true;
@@ -321,20 +311,17 @@ char *get_open_filenames(char *filter, char *fname) {
       success = false;
   }
 
-  if (success)
-    return (char *)result.c_str();
-
-  return (char *)"";
+  return success ? result : "";
 }
 
-char *get_open_filenames_ext(char *filter, char *fname, char *dir, char *title) {
+string get_open_filenames_ext(string filter,string fname, string dir, string title) {
   string str_command; string pwd;
   string str_title = add_escaping(title, true, "Open");
-  string str_fname = basename(fname);
-  string str_dir = dirname(dir);
+  string str_fname = filename_name(fname);
+  string str_dir = filename_path(dir);
 
   string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + string("/") + str_fname;
+  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
   str_fname = (char *)str_path.c_str();
 
   pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
@@ -346,7 +333,7 @@ char *get_open_filenames_ext(char *filter, char *fname, char *dir, char *title) 
   string(" --multiple --separate-output --title \"") + str_title + string("\"");
 
   static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
+  result = shellscript_evaluate(str_command);
   std::vector<string> stringVec = string_split(result, '\n');
 
   bool success = true;
@@ -355,16 +342,13 @@ char *get_open_filenames_ext(char *filter, char *fname, char *dir, char *title) 
       success = false;
   }
 
-  if (success)
-    return (char *)result.c_str();
-
-  return (char *)"";
+  return success ? result : "";
 }
 
-char *get_save_filename(char *filter, char *fname) {
+string get_save_filename(string filter, string fname) {
   string str_command; string pwd;
   string str_title = "Save As";
-  string str_fname = basename(fname);
+  string str_fname = filename_name(fname);
 
   pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
     string("\"") + add_escaping(str_fname, false, "") + string("\""); else pwd = "\"$PWD/\"";
@@ -375,19 +359,19 @@ char *get_save_filename(char *filter, char *fname) {
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
   static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
+  result = shellscript_evaluate(str_command);
 
   return (char *)result.c_str();
 }
 
-char *get_save_filename_ext(char *filter, char *fname, char *dir, char *title) {
+string get_save_filename_ext(string filter, string fname, string dir, string title) {
   string str_command; string pwd;
   string str_title = add_escaping(title, true, "Save As");
-  string str_fname = basename(fname);
-  string str_dir = dirname(dir);
+  string str_fname = filename_name(fname);
+  string str_dir = filename_path(dir);
 
   string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + string("/") + str_fname;
+  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
   str_fname = (char *)str_path.c_str();
 
   pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
@@ -404,7 +388,7 @@ char *get_save_filename_ext(char *filter, char *fname, char *dir, char *title) {
   return (char *)result.c_str();
 }
 
-char *get_directory(char *dname) {
+string get_directory(string dname) {
   string str_command; string pwd;
   string str_title = "Select Directory";
   string str_dname = dname;
@@ -417,13 +401,10 @@ char *get_directory(char *dname) {
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
   string("--getexistingdirectory /") + pwd + string(" --title \"") + str_title + str_end;
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  return (char *)result.c_str();
+  return shellscript_evaluate(str_command);
 }
 
-char *get_directory_alt(char *capt, char *root) {
+string get_directory_alt(string capt, string root) {
   string str_command; string pwd;
   string str_title = add_escaping(capt, true, "Select Directory");
   string str_dname = root;
@@ -436,13 +417,10 @@ char *get_directory_alt(char *capt, char *root) {
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
   string("--getexistingdirectory /") + pwd + string(" --title \"") + str_title + str_end;
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  return (char *)result.c_str();
+  return shellscript_evaluate(str_command);
 }
 
-double get_color(double defcol) {
+int get_color(int defcol) {
   string str_command;
   string str_title = "Color";
   string str_defcol;
@@ -464,7 +442,7 @@ double get_color(double defcol) {
   string("--getcolor --default '") + str_defcol + string("' --title \"") + str_title +
   string("\");if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
-  str_result = shellscript_evaluate((char *)str_command.c_str());
+  str_result = shellscript_evaluate(str_command);
   if (str_result == "-1") return strtod(str_result.c_str(), NULL);
   str_result = str_result.substr(1, str_result.length() - 1);
 
@@ -480,7 +458,7 @@ double get_color(double defcol) {
   return make_color_rgb(red, green, blue);
 }
 
-double get_color_ext(double defcol, char *title) {
+int get_color_ext(int defcol, string title) {
   string str_command;
   string str_title = add_escaping(title, true, "Color");
   string str_defcol;
@@ -502,7 +480,7 @@ double get_color_ext(double defcol, char *title) {
   string("--getcolor --default '") + str_defcol + string("' --title \"") + str_title +
   string("\");if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
-  str_result = shellscript_evaluate((char *)str_command.c_str());
+  str_result = shellscript_evaluate(str_command);
   if (str_result == "-1") return strtod(str_result.c_str(), NULL);
   str_result = str_result.substr(1, str_result.length() - 1);
 
