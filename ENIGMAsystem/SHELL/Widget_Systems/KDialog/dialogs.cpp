@@ -155,6 +155,31 @@ static int show_question_helperfunc(string str) {
   return result;
 }
 
+void show_error(string str, const bool abort) {
+  if (error_caption.empty()) error_caption = "Error";
+  string str_command;
+  string str_title;
+  string str_echo;
+  
+  #ifdef DEBUG_MODE
+  errortext = enigma::debug_scope::GetErrors() + "\n\n" + errortext;
+  #else
+  errortext = "Error in some event or another for some object: \r\n\r\n" + errortext;
+  #endif
+
+  str_echo = abort ? "echo 1" :
+    "x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi";
+
+  str_command = string("kdialog ") +
+  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--warningyesnocancel \"") + add_escaping(str, false, "") + string("\" ") +
+  string("--yes-label Abort --no-label Retry --cancel-label Ignore ") +
+  string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
+
+  string str_result = shellscript_evaluate(str_command);
+  if (strtod(str_result.c_str(), NULL) == 1) exit(0);
+}
+
 int show_message(const string &str) {
   message_cancel = false;
   return show_message_helperfunc(str);
@@ -189,25 +214,6 @@ int show_attempt(string str) {
 
   string str_result = shellscript_evaluate(str_command);
   return (int)strtod(str_result.c_str(), NULL);
-}
-
-void show_error(string str, const bool abort) {
-  if (error_caption.empty()) error_caption = "Error";
-  string str_command;
-  string str_title;
-  string str_echo;
-
-  str_echo = abort ? "echo 1" :
-    "x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi";
-
-  str_command = string("kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--warningyesnocancel \"") + add_escaping(str, false, "") + string("\" ") +
-  string("--yes-label Abort --no-label Retry --cancel-label Ignore ") +
-  string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
-
-  string str_result = shellscript_evaluate(str_command);
-  if (strtod(str_result.c_str(), NULL) == 1) exit(0);
 }
 
 string get_string(string str, string def) {
