@@ -183,6 +183,12 @@ void show_error(string errortext, const bool fatal) {
   string str_command;
   string str_title;
   string str_echo;
+  
+  #ifdef DEBUG_MODE
+  errortext = enigma::debug_scope::GetErrors() + "\n\n" + errortext;
+  #else
+  errortext = "Error in some event or another for some object: \r\n\r\n" + errortext;
+  #endif
 
   str_echo = fatal ? "echo 1" :
     "if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Ignore\" ] ;then echo -1;elif [ $? = 2 ] ;then echo 0;fi";
