@@ -35,8 +35,6 @@
 #include <fstream>
 #include <cstdlib>
 
-#include <sys/time.h>
-
 #ifdef _WIN32
  #include <windows.h>
  #define dllexport extern "C" __declspec(dllexport)
