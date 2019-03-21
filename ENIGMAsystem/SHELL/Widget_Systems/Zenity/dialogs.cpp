@@ -20,11 +20,10 @@
 #include <cstring>
 #include <libgen.h>
 #include <unistd.h>
-#include <limits.h>
+#include <climits>
 #include <sstream>
 #include <vector>
 #include <string>
-#include <sys/stat.h>
 #include <algorithm>
 #include <iostream>
 using std::string;
