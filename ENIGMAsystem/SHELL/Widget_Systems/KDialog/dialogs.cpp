@@ -24,7 +24,6 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include <sys/stat.h>
 #include <algorithm>
 #include <iostream>
 using std::string;
@@ -80,7 +79,7 @@ static string kdialog_filter(string input) {
 }
 
 static double show_message_helperfunc(char *str) {
-  if (dialog_caption == "")
+  if (dialog_caption.empty())
     dialog_caption = message_caption();
 
   string str_command;
@@ -108,7 +107,7 @@ static double show_message_helperfunc(char *str) {
 }
 
 static double show_question_helperfunc(char *str) {
-  if (dialog_caption == "")
+  if (dialog_caption.empty())
     dialog_caption = message_caption();
 
   string str_command;
@@ -152,7 +151,7 @@ double show_question_cancelable(char *str) {
 }
 
 double show_attempt(char *str) {
-  if (error_caption == "") error_caption = "Error";
+  if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
 
@@ -170,7 +169,7 @@ double show_attempt(char *str) {
 }
 
 double show_error(char *str, double abort) {
-  if (error_caption == "") error_caption = "Error";
+  if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
   string str_echo;
@@ -192,7 +191,7 @@ double show_error(char *str, double abort) {
 }
 
 char *get_string(char *str, char *def) {
-  if (dialog_caption == "")
+  if (dialog_caption.empty())
     dialog_caption = message_caption();
 
   string str_command;
@@ -212,7 +211,7 @@ char *get_string(char *str, char *def) {
 }
 
 char *get_password(char *str, char *def) {
-  if (dialog_caption == "")
+  if (dialog_caption.empty())
     dialog_caption = message_caption();
 
   string str_command;
