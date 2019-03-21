@@ -186,11 +186,6 @@ namespace enigma_user
 	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h){return -1;}
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 
-	void d3d_stencil_start_mask(){}
-	void d3d_stencil_continue_mask(){}
-	void d3d_stencil_use_mask(){}
-	void d3d_stencil_end_mask(){}
-
 	void draw_clear_alpha(int col,float alpha){}
 	void draw_clear(int col){}
 

@@ -47,6 +47,9 @@ struct Light {
 extern Light d3dLights[8];
 extern bool d3dLightEnabled[8];
 
+extern bool d3dStencilTest;
+extern unsigned d3dStencilMask;
+
 } // namespace enigma
 
 // ***** RENDER STATE CONSTANTS *****

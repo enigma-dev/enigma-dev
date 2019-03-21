@@ -202,7 +202,7 @@ void d3d_clear_depth(double value) {
   glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void d3d_clear_depth(){
+void d3d_clear_depth() {
   draw_batch_flush(batch_flush_deferred);
   glClear(GL_DEPTH_BUFFER_BIT);
 }
@@ -210,70 +210,6 @@ void d3d_clear_depth(){
 void d3d_set_software_vertex_processing(bool software) {
 	//Does nothing as GL doesn't have such an awful thing
   //TODO: When we seperate platform specific things, then this shouldn't even exist
-}
-
-void d3d_stencil_start_mask(){
-  draw_batch_flush(batch_flush_deferred);
-  glEnable(GL_STENCIL_TEST);
-  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-  glDepthMask(GL_FALSE);
-  glStencilMask(0x1);
-  glStencilFunc(GL_ALWAYS, 0x1, 0x1);
-  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-  glClear(GL_STENCIL_BUFFER_BIT);
-}
-
-void d3d_stencil_continue_mask(){
-  draw_batch_flush(batch_flush_deferred);
-  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-  glDepthMask(GL_FALSE);
-  glStencilMask(0x1);
-  glStencilFunc(GL_ALWAYS, 0x1, 0x1);
-  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-}
-
-void d3d_stencil_use_mask(){
-  draw_batch_flush(batch_flush_deferred);
-  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-  glDepthMask(GL_TRUE);
-  glStencilMask(0x0);
-  glStencilFunc(GL_EQUAL, 0x1, 0x1);
-}
-
-void d3d_stencil_end_mask(){
-  draw_batch_flush(batch_flush_deferred);
-  glDisable(GL_STENCIL_TEST);
-}
-
-void d3d_stencil_enable(bool enable){
-  draw_batch_flush(batch_flush_deferred);
-  (enable?glEnable:glDisable)(GL_STENCIL_TEST);
-}
-
-void d3d_stencil_clear_value(int value){
-  draw_batch_flush(batch_flush_deferred);
-  glClearStencil(value);
-  glClear(GL_STENCIL_BUFFER_BIT);
-}
-
-void d3d_stencil_mask(unsigned int mask){
-  draw_batch_flush(batch_flush_deferred);
-  glStencilMask(mask);
-}
-
-void d3d_stencil_clear(){
-  draw_batch_flush(batch_flush_deferred);
-  glClear(GL_STENCIL_BUFFER_BIT);
-}
-
-void d3d_stencil_function(int func, int ref, unsigned int mask){
-  draw_batch_flush(batch_flush_deferred);
-  glStencilFunc(depthoperators[func], ref, mask);
-}
-
-void d3d_stencil_operator(int sfail, int dpfail, int dppass){
-  draw_batch_flush(batch_flush_deferred);
-  glStencilOp(stenciloperators[sfail], stenciloperators[dpfail], stenciloperators[dppass]);
 }
 
 } // namespace enigma_user

@@ -137,11 +137,6 @@ namespace enigma_user
 	unsigned int display_get_gui_width();
 	unsigned int display_get_gui_height();
 
-	void d3d_stencil_start_mask();
-	void d3d_stencil_continue_mask();
-	void d3d_stencil_use_mask();
-	void d3d_stencil_end_mask();
-
 	void draw_clear_alpha(int col,float alpha);
 	void draw_clear(int col);
 

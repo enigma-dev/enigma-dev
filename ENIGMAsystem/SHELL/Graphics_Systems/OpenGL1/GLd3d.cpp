@@ -171,8 +171,7 @@ void graphics_state_flush() {
 
 } // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 void d3d_clear_depth(double value) {
   draw_batch_flush(batch_flush_deferred);
@@ -180,38 +179,15 @@ void d3d_clear_depth(double value) {
   glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void d3d_set_software_vertex_processing(bool software) {
-	//Does nothing as GL doesn't have such an awful thing
-  //TODO: When we seperate platform specific things, then this shouldn't even exist
-}
-
-void d3d_stencil_start_mask(){
-  glEnable(GL_STENCIL_TEST);
-  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-  glDepthMask(GL_FALSE);
-  glStencilMask(0x1);
-  glStencilFunc(GL_ALWAYS, 0x1, 0x1);
-  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+void d3d_clear_stencil(int value) {
+  draw_batch_flush(batch_flush_deferred);
+  glClearStencil(value);
   glClear(GL_STENCIL_BUFFER_BIT);
 }
 
-void d3d_stencil_continue_mask(){
-  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-  glDepthMask(GL_FALSE);
-  glStencilMask(0x1);
-  glStencilFunc(GL_ALWAYS, 0x1, 0x1);
-  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-}
-
-void d3d_stencil_use_mask(){
-  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-  glDepthMask(GL_TRUE);
-  glStencilMask(0x0);
-  glStencilFunc(GL_EQUAL, 0x1, 0x1);
-}
-
-void d3d_stencil_end_mask(){
-  glDisable(GL_STENCIL_TEST);
+void d3d_set_software_vertex_processing(bool software) {
+	//Does nothing as GL doesn't have such an awful thing
+  //TODO: When we seperate platform specific things, then this shouldn't even exist
 }
 
 } // namespace enigma_user

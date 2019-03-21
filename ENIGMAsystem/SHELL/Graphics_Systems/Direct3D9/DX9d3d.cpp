@@ -172,35 +172,4 @@ void d3d_set_software_vertex_processing(bool software) {
 	d3ddev->SetSoftwareVertexProcessing(software);
 }
 
-//TODO(harijs) - This seems to be broken like this. Almost works, but stencilmask needs some different value
-void d3d_stencil_start_mask(){
-  draw_batch_flush(batch_flush_deferred);
-  d3ddev->SetRenderState(D3DRS_STENCILENABLE, true);
-  d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, false);
-  d3ddev->SetRenderState(D3DRS_COLORWRITEENABLE, false);
-
-  d3ddev->SetRenderState(D3DRS_STENCILREF, 0x1);
-  d3ddev->SetRenderState(D3DRS_STENCILMASK, 0x1);
-
-  d3ddev->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
-
-  d3ddev->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
-  d3ddev->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
-  d3ddev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
-}
-
-void d3d_stencil_use_mask(){
-  draw_batch_flush(batch_flush_deferred);
-  d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, true);
-  d3ddev->SetRenderState(D3DRS_COLORWRITEENABLE, true);
-
-  d3ddev->SetRenderState(D3DRS_STENCILMASK, 0x0);
-  d3ddev->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL);
-}
-
-void d3d_stencil_end_mask(){
-  draw_batch_flush(batch_flush_deferred);
-  d3ddev->SetRenderState(D3DRS_STENCILENABLE, false);
-}
-
 } // namespace enigma_user
