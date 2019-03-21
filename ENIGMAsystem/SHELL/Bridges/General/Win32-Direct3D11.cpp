@@ -15,20 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h"
+#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/Direct3D11/Direct3D11Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
-#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
+#include "Widget_Systems/widgets_mandatory.h" // for show_error()
 
 #include <windows.h>
-#include <windowsx.h>
 #include <d3d11.h>
-#include <string>
-using namespace std;
 
 namespace enigma {
 
