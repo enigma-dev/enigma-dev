@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2014 Josh Ventura, Robert B. Colton, DatZach, Polygone, Harijs Grinbergs
+/** Copyright (C) 2008-2014 Josh Ventura, DatZach, Polygone, Harijs Grinbergs
+*** Copyright (C) 2013-2014, 2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
