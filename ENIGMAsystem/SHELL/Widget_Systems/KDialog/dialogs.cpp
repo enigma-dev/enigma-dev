@@ -118,7 +118,7 @@ static int show_message_helperfunc(string str) {
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") + str_cancel +
   string("--title \"") + str_title + string("\";") + str_echo;
 
-  string str_result = shellscript_evaluate((char *)str_command.c_str());
+  string str_result = shellscript_evaluate(str_command);
   int result = (int)strtod(str_result.c_str(), NULL);
 
   return result;
@@ -142,7 +142,7 @@ static int show_question_helperfunc(string str) {
   string("--yes-label Yes --no-label No ") + string("--title \"") + str_title + string("\";") +
   string("x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi");
 
-  string str_result = shellscript_evaluate((char *)str_command.c_str());
+  string str_result = shellscript_evaluate(str_command);
   int result = (int)strtod(str_result.c_str(), NULL);
 
   return result;
@@ -168,7 +168,7 @@ int show_question_cancelable(string str) {
   return show_question_helperfunc(str);
 }
 
-double show_attempt(char *str) {
+int show_attempt(string str) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -180,13 +180,13 @@ double show_attempt(char *str) {
   add_escaping(error_caption, true, "Error") + string("\";") +
   string("x=$? ;if [ $x = 0 ] ;then echo 0;else echo -1;fi");
 
-  string str_result = shellscript_evaluate((char *)str_command.c_str());
-  double result = strtod(str_result.c_str(), NULL);
+  string str_result = shellscript_evaluate(str_command);
+  int result = (int)strtod(str_result.c_str(), NULL);
 
   return result;
 }
 
-double show_error(char *str, double abort) {
+void show_error(string str, const bool abort) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -201,11 +201,9 @@ double show_error(char *str, double abort) {
   string("--yes-label Abort --no-label Retry --cancel-label Ignore ") +
   string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
 
-  string str_result = shellscript_evaluate((char *)str_command.c_str());
+  string str_result = shellscript_evaluate(str_command);
   double result = strtod(str_result.c_str(), NULL);
   if (result == 1) exit(0);
-
-  return result;
 }
 
 char *get_string(char *str, char *def) {
@@ -222,10 +220,7 @@ char *get_string(char *str, char *def) {
   add_escaping(def, false, "") + string("\" --title \"") +
   str_title + string("\");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  return (char *)result.c_str();
+  return shellscript_evaluate(str_command);
 }
 
 char *get_password(char *str, char *def) {
