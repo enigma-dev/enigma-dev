@@ -35,6 +35,7 @@ namespace enigma {
 struct Sampler {
   int texture=-1; // GML texture id, NOT GL texture id!
   bool wrapu=false, wrapv=false, wrapw=false;
+  bool interpolate=false;
 };
 
 extern Sampler samplers[8];

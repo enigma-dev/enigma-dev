@@ -81,6 +81,8 @@ void graphics_state_flush_samplers() {
     d3ddev->SetSamplerState(i, D3DSAMP_ADDRESSU, sampler.wrapu?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
     d3ddev->SetSamplerState(i, D3DSAMP_ADDRESSV, sampler.wrapv?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
     d3ddev->SetSamplerState(i, D3DSAMP_ADDRESSW, sampler.wrapw?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
+    d3ddev->SetSamplerState(i, D3DSAMP_MINFILTER, sampler.interpolate?D3DTEXF_LINEAR:D3DTEXF_POINT);
+    d3ddev->SetSamplerState(i, D3DSAMP_MAGFILTER, sampler.interpolate?D3DTEXF_LINEAR:D3DTEXF_POINT);
   }
 }
 

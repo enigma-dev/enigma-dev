@@ -48,6 +48,7 @@ void texture_reset() {
 
 void texture_set_interpolation_ext(int sampler, bool enable) {
   enigma::drawStateDirty = true;
+  enigma::samplers[sampler].interpolate = enable;
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat) {

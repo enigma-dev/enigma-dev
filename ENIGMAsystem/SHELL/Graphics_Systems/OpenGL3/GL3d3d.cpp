@@ -107,8 +107,8 @@ void graphics_state_flush_samplers() {
     glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, sampler.wrapv?GL_REPEAT:GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_T, sampler.wrapw?GL_REPEAT:GL_CLAMP_TO_EDGE);
     // Default to interpolation disabled, for some reason textures do that by default but not samplers.
-    glSamplerParameteri(sampler_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glSamplerParameteri(sampler_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glSamplerParameteri(sampler_id, GL_TEXTURE_MIN_FILTER, sampler.interpolate?GL_LINEAR:GL_NEAREST);
+    glSamplerParameteri(sampler_id, GL_TEXTURE_MAG_FILTER, sampler.interpolate?GL_LINEAR:GL_NEAREST);
   }
 }
 

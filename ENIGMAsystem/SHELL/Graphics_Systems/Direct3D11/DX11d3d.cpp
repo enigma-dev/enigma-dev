@@ -69,10 +69,10 @@ void graphics_state_flush_samplers() {
 
     D3D11_SAMPLER_DESC samplerDesc = { };
 
-    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    samplerDesc.AddressU = sampler.wrapu ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.AddressV = sampler.wrapv ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.AddressW = sampler.wrapw ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.Filter = sampler.interpolate?D3D11_FILTER_MIN_MAG_MIP_LINEAR:D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samplerDesc.AddressU = sampler.wrapu?D3D11_TEXTURE_ADDRESS_WRAP:D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressV = sampler.wrapv?D3D11_TEXTURE_ADDRESS_WRAP:D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressW = sampler.wrapw?D3D11_TEXTURE_ADDRESS_WRAP:D3D11_TEXTURE_ADDRESS_CLAMP;
     samplerDesc.MipLODBias = 0.0f;
     samplerDesc.MaxAnisotropy = 1;
     samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
