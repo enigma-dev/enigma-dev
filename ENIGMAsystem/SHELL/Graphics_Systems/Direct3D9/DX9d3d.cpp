@@ -78,6 +78,7 @@ void graphics_state_flush_samplers() {
     const auto tex = get_texture(sampler.texture);
     d3ddev->SetTexture(i, tex);
     if (tex == NULL) continue; // texture doesn't exist skip updating the sampler
+    d3ddev->SetTextureStageState(i, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
     d3ddev->SetSamplerState(i, D3DSAMP_ADDRESSU, sampler.wrapu?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
     d3ddev->SetSamplerState(i, D3DSAMP_ADDRESSV, sampler.wrapv?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
     d3ddev->SetSamplerState(i, D3DSAMP_ADDRESSW, sampler.wrapw?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
