@@ -30,9 +30,15 @@
 
 using std::vector;
 
+namespace {
+
+bool drawStateDirty=false;
+
+} // namespace anonymous
+
 namespace enigma {
 
-bool drawStateDirty=false, lineStippleEnable=false, msaaEnabled=true, alphaBlend=true, alphaTest=false;
+bool lineStippleEnable=false, msaaEnabled=true, alphaBlend=true, alphaTest=false;
 unsigned short lineStipplePattern=0xFFFF;
 unsigned char alphaTestRef=0;
 float circleprecision=24, drawPointSize=1.0f, drawLineWidth=1.0f;
@@ -40,6 +46,18 @@ int drawFillMode=enigma_user::rs_solid, lineStippleScale=1;
 
 //List of vertices we are buffering to draw.
 std::list<PolyVertex> currComplexPoly;
+
+// helper for not only marking the draw state dirty but
+// also to flush the batch whenever a render state changes
+void draw_set_state_dirty() {
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  drawStateDirty = true;
+}
+
+// please keep drawStateDirty private to this translation unit!
+bool draw_get_state_dirty() {
+  return drawStateDirty;
+}
 
 } // namespace enigma
 
@@ -50,7 +68,7 @@ void draw_state_flush() {
   static bool flushing = false;
 
   // if the state isn't dirty, we don't have to do anything
-  if (!enigma::drawStateDirty) return;
+  if (!drawStateDirty) return;
 
   // prevent state flush triggered by batch flush of another state flush
   if (flushing) return;
@@ -62,57 +80,57 @@ void draw_state_flush() {
 
   flushing = false; // done flushing state
 
-  enigma::drawStateDirty = false; // state is not dirty now
+  drawStateDirty = false; // state is not dirty now
 }
 
 void draw_set_msaa_enabled(bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::msaaEnabled = enable;
 }
 
 void draw_enable_alphablend(bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::alphaBlend = enable;
 }
 
 void draw_set_alpha_test(bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::alphaTest = enable;
 }
 
 void draw_set_alpha_test_ref_value(unsigned val) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::alphaTestRef = val;
 }
 
 void draw_set_point_size(float value) {
-	enigma::drawStateDirty = true;
+	enigma::draw_set_state_dirty();
   enigma::drawPointSize = value;
 }
 
 void draw_set_fill_mode(int fill) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
 	enigma::drawFillMode = fill;
 }
 
 void draw_set_line_width(float value) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::drawLineWidth = value;
 }
 
 void draw_set_line_stipple(bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::lineStippleEnable = enable;
 }
 
 void draw_set_line_pattern(int scale, unsigned short pattern) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::lineStippleScale = scale;
   enigma::lineStipplePattern = pattern;
 }
 
 void draw_set_circle_precision(float pr) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::circleprecision = pr < 3 ? 3 : pr;
 }
 

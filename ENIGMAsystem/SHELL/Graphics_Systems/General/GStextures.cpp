@@ -54,48 +54,48 @@ void texture_save(int texid, string fname) {
 }
 
 void texture_set_stage(int stage, int texid) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::samplers[stage].texture = texid;
 }
 
 void texture_reset() {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::samplers[0].texture = -1;
 }
 
 void texture_set_interpolation_ext(int sampler, bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::samplers[sampler].interpolate = enable;
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::samplers[sampler].wrapu = repeat;
   enigma::samplers[sampler].wrapv = repeat;
   enigma::samplers[sampler].wrapw = repeat;
 }
 
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::samplers[sampler].wrapu = wrapu;
   enigma::samplers[sampler].wrapv = wrapv;
   enigma::samplers[sampler].wrapw = wrapw;
 }
 
 void texture_set_border_ext(int sampler, int r, int g, int b, double a) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
 }
 
 void texture_set_filter_ext(int sampler, int filter) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
 }
 
 void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
 }
 
 void texture_anisotropy_filter(int sampler, gs_scalar levels) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
 }
 
 } // namespace enigma_user

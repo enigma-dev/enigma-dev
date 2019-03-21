@@ -43,7 +43,7 @@ int draw_get_batch_stream() {
 // helper function for beginning a deferred batch to determine when texture swap occurs
 void draw_batch_begin_deferred(int texId) {
   // if the draw state is dirty, flush the new state
-  if (enigma::drawStateDirty) {
+  if (enigma::draw_get_state_dirty()) {
     enigma_user::draw_state_flush();
   }
   // if we want to use a different texture, draw any existing batch

@@ -45,7 +45,7 @@ bool d3dLightEnabled[8]={false};
 namespace enigma_user {
 
 void d3d_start() {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dMode = true;
   enigma::d3dPerspective = true;
   enigma::d3dHidden = true;
@@ -64,7 +64,7 @@ void d3d_start() {
 }
 
 void d3d_end() {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dMode = false;
   enigma::d3dPerspective = false;
   enigma::d3dHidden = false;
@@ -76,49 +76,49 @@ void d3d_end() {
 }
 
 void d3d_set_perspective(bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   // in GM8.1 and GMS v1.4 this does not take effect
   // until the next frame in screen_redraw
   enigma::d3dPerspective = enable;
 }
 
 void d3d_set_hidden(bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dHidden = enable;
 }
 
 void d3d_set_zwriteenable(bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dZWriteEnable = enable;
 }
 
 void d3d_set_culling(int mode) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dCulling = mode;
 }
 
 void d3d_set_lighting(bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dLighting = enable;
 }
 
 void d3d_set_shading(bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dShading = enable;
 }
 
 void d3d_set_depth_operator(int mode) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dDepthOperator = mode;
 }
 
 void d3d_set_depth(double dep) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   //TODO: lmao we still haven't figured out what this is
 }
 
 void d3d_set_clip_plane(bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dClipPlane = enable;
 }
 
@@ -130,51 +130,51 @@ void d3d_set_fog(bool enable, int color, double start, double end) {
 }
 
 void d3d_set_fog_enabled(bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dFogEnabled = enable;
 }
 
 void d3d_set_fog_mode(int mode) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dFogMode = mode;
 }
 
 void d3d_set_fog_hint(int mode) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dFogHint = mode;
 }
 
 void d3d_set_fog_color(int color) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dFogColor[0] = COL_GET_Rf(color);
   enigma::d3dFogColor[1] = COL_GET_Gf(color);
   enigma::d3dFogColor[2] = COL_GET_Bf(color);
 }
 
 void d3d_set_fog_start(double start) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dFogStart = start;
 }
 
 void d3d_set_fog_end(double end) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dFogEnd = end;
 }
 
 void d3d_set_fog_density(double density) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dFogDensity = density;
 }
 
 void d3d_light_define_ambient(int col) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dLightingAmbient[0] = float(COL_GET_Rf(col));
   enigma::d3dLightingAmbient[1] = float(COL_GET_Gf(col));
   enigma::d3dLightingAmbient[2] = float(COL_GET_Bf(col));
 }
 
 void d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dLights[id].x = dx;
   enigma::d3dLights[id].y = dy;
   enigma::d3dLights[id].z = dz;
@@ -183,7 +183,7 @@ void d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz
 }
 
 void d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dLights[id].x = x;
   enigma::d3dLights[id].y = y;
   enigma::d3dLights[id].z = z;
@@ -193,23 +193,23 @@ void d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, doubl
 }
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
 }
 
 void d3d_light_set_ambient(int id, int r, int g, int b, double a) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
 }
 
 void d3d_light_set_specularity(int id, int r, int g, int b, double a) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
 }
 
 void d3d_light_shininess(int facemode, int shine) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
 }
 
 void d3d_light_enable(int id, bool enable) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::d3dLightEnabled[id] = enable;
 }
 

@@ -25,11 +25,14 @@
 
 namespace enigma {
 
-extern bool drawStateDirty, lineStippleEnable, msaaEnabled, alphaBlend, alphaTest;
+extern bool lineStippleEnable, msaaEnabled, alphaBlend, alphaTest;
 extern unsigned short lineStipplePattern;
 extern unsigned char alphaTestRef;
 extern float drawPointSize, drawLineWidth;
 extern int drawFillMode, lineStippleScale;
+
+void draw_set_state_dirty();
+bool draw_get_state_dirty();
 
 void graphics_state_flush();
 

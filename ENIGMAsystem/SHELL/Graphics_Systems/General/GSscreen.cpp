@@ -253,7 +253,7 @@ void screen_init() {
 
   // make sure all of the default state values are
   // synchronzied at least once with the device/context
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   draw_state_flush();
 }
 

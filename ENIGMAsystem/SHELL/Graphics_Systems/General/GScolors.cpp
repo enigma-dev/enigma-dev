@@ -38,7 +38,7 @@ namespace enigma_user {
 
 void draw_set_color(int color)
 {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::currentcolor[0] = COL_GET_R(color);
   enigma::currentcolor[1] = COL_GET_G(color);
   enigma::currentcolor[2] = COL_GET_B(color);
@@ -46,7 +46,7 @@ void draw_set_color(int color)
 
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
 {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::currentcolor[0] = red;
   enigma::currentcolor[1] = green;
   enigma::currentcolor[2] = blue;
@@ -54,13 +54,13 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 
 void draw_set_alpha(float alpha)
 {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 }
 
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
 {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::currentcolor[0] = red;
   enigma::currentcolor[1] = green;
   enigma::currentcolor[2] = blue;
@@ -68,7 +68,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 }
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha) {
-  enigma::drawStateDirty = true;
+  enigma::draw_set_state_dirty();
   enigma::colorWriteEnable[0] = red;
   enigma::colorWriteEnable[1] = green;
   enigma::colorWriteEnable[2] = blue;
