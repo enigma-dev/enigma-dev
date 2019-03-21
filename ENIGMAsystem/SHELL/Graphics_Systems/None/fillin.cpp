@@ -101,8 +101,6 @@ namespace enigma_user
 	void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned vertex_start, unsigned vertex_count) {}
 	void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {}
 
-	int texture_add(string filename, bool mipmap){return -1;}
-	void texture_save(int texid, string fname){}
 	void texture_delete(int texid){}
 	bool texture_exists(int texid){return false;}
 	void texture_preload(int texid){}
@@ -113,18 +111,9 @@ namespace enigma_user
 	gs_scalar texture_get_height(int texid){return -1;}
 	gs_scalar texture_get_texel_width(int texid){return -1;}
 	gs_scalar texture_get_texel_height(int texid){return -1;}
-	void texture_set_stage(int stage, int texid){}
-	void texture_reset(){}
-	void texture_set_interpolation_ext(int sampler, bool enable){}
-	void texture_set_repeat_ext(int sampler, bool repeat){}
-	void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw){}
-	void texture_set_border_ext(int sampler, int r, int g, int b, double a){}
-	void texture_set_filter_ext(int sampler, int filter){}
-	void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel){}
 	bool texture_mipmapping_supported(){return false;}
 	bool texture_anisotropy_supported(){return false;}
 	float texture_anisotropy_maxlevel(){return 0;}
-	void texture_anisotropy_filter(int sampler, gs_scalar levels){}
 
 	bool surface_is_supported(){return false;}
 	int surface_create(int width, int height, bool depthbuffer, bool, bool){return -1;}

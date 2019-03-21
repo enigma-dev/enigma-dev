@@ -58,8 +58,6 @@ namespace enigma_user
 {
 	string draw_get_graphics_error();
 
-	int texture_add(string filename, bool mipmap);
-	void texture_save(int texid, string fname);
 	void texture_delete(int texid);
 	bool texture_exists(int texid);
 	void texture_preload(int texid);
@@ -70,18 +68,9 @@ namespace enigma_user
 	gs_scalar texture_get_height(int texid);
 	gs_scalar texture_get_texel_width(int texid);
 	gs_scalar texture_get_texel_height(int texid);
-	void texture_set_stage(int stage, int texid);
-	void texture_reset();
-	void texture_set_interpolation_ext(int sampler, bool enable);
-	void texture_set_repeat_ext(int sampler, bool repeat);
-	void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw);
-	void texture_set_border_ext(int sampler, int r, int g, int b, double a);
-	void texture_set_filter_ext(int sampler, int filter);
-	void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel);
 	bool texture_mipmapping_supported();
 	bool texture_anisotropy_supported();
 	float texture_anisotropy_maxlevel();
-	void texture_anisotropy_filter(int sampler, gs_scalar levels);
 
 	bool surface_is_supported();
 	int surface_create(int width, int height, bool depthbuffer);
