@@ -59,21 +59,12 @@ bool widget_system_initialize() {
 } // namespace enigma
 
 static string shellscript_evaluate(string command) {
-  char *buffer = NULL;
-  size_t buffer_size = 0;
-  string str_buffer;
-
-  FILE *file = popen(command.c_str(), "r");
-  while (getline(&buffer, &buffer_size, file) != -1)
-    str_buffer += buffer;
-
-  free(buffer);
-  pclose(file);
-
-  if (str_buffer.back() == '\n')
-    str_buffer.pop_back();
-
-  return str_buffer;
+  string result = execute_shell_for_output(command);
+  
+  if (result.back() == '\n')
+    result.pop_back();
+  
+  return result;
 }
 
 static string add_escaping(string str, bool is_caption, string new_caption) {
