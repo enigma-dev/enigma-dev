@@ -1,4 +1,6 @@
-/** Copyright (C) 2008-2014 Josh Ventura, Harijs Grinbergs, Robert B. Colton
+/** Copyright (C) 2008-2014 Josh Ventura, Harijs Grinbergs
+*** Copyright (C) 2010-2013 Alasdair Morrison
+*** Copyright (C) 2013-2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
