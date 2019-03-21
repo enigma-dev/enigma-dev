@@ -41,6 +41,14 @@ static string error_caption;
 static bool message_cancel  = false;
 static bool question_cancel = false;
 
+namespace enigma {
+  
+bool widget_system_initialize() {
+  return true;
+}
+  
+} // namespace enigma
+
 static string shellscript_evaluate(string command) {
   char *buffer = NULL;
   size_t buffer_size = 0;
