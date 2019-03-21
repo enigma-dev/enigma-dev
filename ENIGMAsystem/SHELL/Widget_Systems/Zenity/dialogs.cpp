@@ -141,7 +141,7 @@ int show_question_cancelable(string str) {
   return show_question_helperfunc(str);
 }
 
-double show_attempt(char *str) {
+int show_attempt(string str) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -154,34 +154,32 @@ double show_attempt(char *str) {
   string("\" --icon-name=dialog-error);if [ $? = 0 ] ;then echo 0;else echo -1;fi");
 
   string str_result = shellscript_evaluate((char *)str_command.c_str());
-  double result = strtod(str_result.c_str(), NULL);
+  int result = (int)strtod(str_result.c_str(), NULL);
 
   return result;
 }
 
-double show_error(char *str, double abort) {
+void show_error(string errortext, const bool fatal) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
   string str_echo;
 
-  str_echo = abort ? "echo 1" :
+  str_echo = fatal ? "echo 1" :
     "if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Ignore\" ] ;then echo -1;elif [ $? = 2 ] ;then echo 0;fi";
 
   str_command = string("ans=$(zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
   string("--question --ok-label=Abort --cancel-label=Retry --extra-button=Ignore ") +
   string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
-  add_escaping(str, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
+  add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
 
   string str_result = shellscript_evaluate((char *)str_command.c_str());
-  double result = strtod(str_result.c_str(), NULL);
+  int result = (int)strtod(str_result.c_str(), NULL);
   if (result == 1) exit(0);
-
-  return result;
 }
 
-char *get_string(char *str, char *def) {
+string get_string(string str, string def) {
   if (dialog_caption.empty())
     dialog_caption = message_caption();
 
@@ -201,7 +199,7 @@ char *get_string(char *str, char *def) {
   return (char *)result.c_str();
 }
 
-char *get_password(char *str, char *def) {
+string get_password(string str, string def) {
   if (dialog_caption.empty())
     dialog_caption = message_caption();
 
@@ -221,24 +219,24 @@ char *get_password(char *str, char *def) {
   return (char *)result.c_str();
 }
 
-double get_integer(char *str, double def) {
+double get_integer(string str, double def) {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_string(str, (char *)str_def.c_str());
   double result = strtod(str_result.c_str(), NULL);
   return result;
 }
 
-double get_passcode(char *str, double def) {
+double get_passcode(string str, double def) {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_password(str, (char *)str_def.c_str());
   double result = strtod(str_result.c_str(), NULL);
   return result;
 }
 
-char *get_open_filename(char *filter, char *fname) {
+string get_open_filename(string filter, string fname) {
   string str_command; string pwd;
   string str_title = "Open";
-  string str_fname = basename(fname);
+  string str_fname = filename_name(fname);
 
   str_command = string("ans=$(zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
@@ -254,14 +252,14 @@ char *get_open_filename(char *filter, char *fname) {
   return (char *)"";
 }
 
-char *get_open_filename_ext(char *filter, char *fname, char *dir, char *title) {
+string get_open_filename_ext(string filter, string fname, string dir, string title) {
   string str_command; string pwd;
   string str_title = add_escaping(title, true, "Open");
-  string str_fname = basename(fname);
-  string str_dir = dirname(dir);
+  string str_fname = filename_name(fname);
+  string str_dir = filename_path(dir);
 
   string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + string("/") + str_fname;
+  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
   str_fname = (char *)str_path.c_str();
 
   str_command = string("ans=$(zenity ") +
@@ -278,10 +276,10 @@ char *get_open_filename_ext(char *filter, char *fname, char *dir, char *title) {
   return (char *)"";
 }
 
-char *get_open_filenames(char *filter, char *fname) {
+string get_open_filenames(string filter, string fname) {
   string str_command; string pwd;
   string str_title = "Open";
-  string str_fname = basename(fname);
+  string str_fname = filename_name(fname);
 
   str_command = string("zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
@@ -304,14 +302,14 @@ char *get_open_filenames(char *filter, char *fname) {
   return (char *)"";
 }
 
-char *get_open_filenames_ext(char *filter, char *fname, char *dir, char *title) {
+string get_open_filenames_ext(string filter, string fname, string dir, string title) {
   string str_command; string pwd;
   string str_title = add_escaping(title, true, "Open");
-  string str_fname = basename(fname);
-  string str_dir = dirname(dir);
+  string str_fname = filename_name(fname);
+  string str_dir = filename_path(dir);
 
   string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + string("/") + str_fname;
+  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
   str_fname = (char *)str_path.c_str();
 
   str_command = string("zenity ") +
@@ -335,10 +333,10 @@ char *get_open_filenames_ext(char *filter, char *fname, char *dir, char *title) 
   return (char *)"";
 }
 
-char *get_save_filename(char *filter, char *fname) {
+string get_save_filename(string filter, string fname) {
   string str_command; string pwd;
   string str_title = "Save As";
-  string str_fname = basename(fname);
+  string str_fname = filename_name(fname);
 
   str_command = string("ans=$(zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
@@ -351,14 +349,14 @@ char *get_save_filename(char *filter, char *fname) {
   return (char *)result.c_str();
 }
 
-char *get_save_filename_ext(char *filter, char *fname, char *dir, char *title) {
+string get_save_filename_ext(string filter, string fname, string dir, string title) {
   string str_command; string pwd;
   string str_title = add_escaping(title, true, "Save As");
-  string str_fname = basename(fname);
-  string str_dir = dirname(dir);
+  string str_fname = filename_name(fname);
+  string str_dir = filename_path(dir);
 
   string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + string("/") + str_fname;
+  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
   str_fname = (char *)str_path.c_str();
 
   str_command = string("ans=$(zenity ") +
@@ -372,7 +370,7 @@ char *get_save_filename_ext(char *filter, char *fname, char *dir, char *title) {
   return (char *)result.c_str();
 }
 
-char *get_directory(char *dname) {
+string get_directory(string dname) {
   string str_command; string pwd;
   string str_title = "Select Directory";
   string str_dname = dname;
@@ -389,7 +387,7 @@ char *get_directory(char *dname) {
   return (char *)result.c_str();
 }
 
-char *get_directory_alt(char *capt, char *root) {
+string get_directory_alt(string capt, string root) {
   string str_command; string pwd;
   string str_title = add_escaping(capt, true, "Select Directory");
   string str_dname = root;
@@ -406,7 +404,7 @@ char *get_directory_alt(char *capt, char *root) {
   return (char *)result.c_str();
 }
 
-double get_color(double defcol) {
+int get_color(int defcol) {
   string str_command;
   string str_title = "Color";
   string str_defcol;
@@ -442,7 +440,7 @@ double get_color(double defcol) {
   return make_color_rgb(red, green, blue);
 }
 
-double get_color_ext(double defcol, char *title) {
+int get_color_ext(int defcol, string title) {
   string str_command;
   string str_title = add_escaping(title, true, "Color");
   string str_defcol;
@@ -478,17 +476,15 @@ double get_color_ext(double defcol, char *title) {
   return make_color_rgb(red, green, blue);
 }
 
-char *message_get_caption() {
-  if (dialog_caption == "") dialog_caption = message_caption();
-  if (error_caption == "") error_caption = "Error";
+string message_get_caption() {
+  if (dialog_caption.empty()) dialog_caption = message_caption();
+  if (error_caption.empty()) error_caption = "Error";
   if (dialog_caption == message_caption() && error_caption == "Error")
-    return (char *)""; else return (char *)dialog_caption.c_str();
+    return ""; else return dialog_caption;
 }
 
-char *message_set_caption(char *caption) {
+void message_set_caption(string caption) {
   dialog_caption = caption; error_caption = caption;
-  if (dialog_caption == "") dialog_caption = message_caption();
-  if (error_caption == "") error_caption = "Error";
-  if (dialog_caption == message_caption() && error_caption == "Error")
-    return (char *)""; else return (char *)dialog_caption.c_str();
+  if (dialog_caption.empty()) dialog_caption = message_caption();
+  if (error_caption.empty()) error_caption = "Error";
 }
