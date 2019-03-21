@@ -226,16 +226,14 @@ string get_password(string str, string def) {
 
 double get_integer(string str, double def) {
   string str_def = remove_trailing_zeros(def);
-  string str_result = get_string(str, (char *)str_def.c_str());
-  double result = strtod(str_result.c_str(), NULL);
-  return result;
+  string str_result = get_string(str, str_def);
+  return strtod(str_result.c_str(), NULL);
 }
 
 double get_passcode(string str, double def) {
   string str_def = remove_trailing_zeros(def);
-  string str_result = get_password(str, (char *)str_def.c_str());
-  double result = strtod(str_result.c_str(), NULL);
-  return result;
+  string str_result = get_password(str, str_def);
+  return strtod(str_result.c_str(), NULL);
 }
 
 string get_open_filename(string filter, string fname) {
