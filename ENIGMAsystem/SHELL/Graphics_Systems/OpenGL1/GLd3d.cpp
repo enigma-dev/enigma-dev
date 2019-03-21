@@ -189,7 +189,7 @@ void d3d_clear_stencil(int value) {
 }
 
 void d3d_set_software_vertex_processing(bool software) {
-	//Does nothing as GL doesn't have such an awful thing
+  //Does nothing as GL doesn't have such an awful thing
   //TODO: When we seperate platform specific things, then this shouldn't even exist
 }
 

@@ -110,17 +110,17 @@ void graphics_state_flush_lighting() {
 
     const Light& light = d3dLights[i];
 
-		D3DLIGHT9 d3dLight = { };
-		d3dLight.Type = light.directional ? D3DLIGHT_DIRECTIONAL : D3DLIGHT_POINT;
-		d3dLight.Diffuse = {float(COL_GET_Rf(light.color)), float(COL_GET_Gf(light.color)), float(COL_GET_Bf(light.color)), 1.0f};
-		d3dLight.Position = d3dLight.Direction = {(float)light.x, (float)light.y, (float)light.z};
-		d3dLight.Range = light.range;
-		d3dLight.Attenuation0 = 1.0f;    // no constant inverse attenuation
-		d3dLight.Attenuation1 = 0.0f;    // only .125 inverse attenuation
-		d3dLight.Attenuation2 = 0.0f;    // no square inverse attenuation
-		//d3dLight.Phi = gs_angle_to_radians(360.0f);    // set the outer cone to 360 degrees
-		//d3dLight.Theta = gs_angle_to_radians(360.0f);    // set the inner cone to 360 degrees
-		d3dLight.Falloff = 1.0f;    // use the typical falloff
+    D3DLIGHT9 d3dLight = { };
+    d3dLight.Type = light.directional ? D3DLIGHT_DIRECTIONAL : D3DLIGHT_POINT;
+    d3dLight.Diffuse = {float(COL_GET_Rf(light.color)), float(COL_GET_Gf(light.color)), float(COL_GET_Bf(light.color)), 1.0f};
+    d3dLight.Position = d3dLight.Direction = {(float)light.x, (float)light.y, (float)light.z};
+    d3dLight.Range = light.range;
+    d3dLight.Attenuation0 = 1.0f;    // no constant inverse attenuation
+    d3dLight.Attenuation1 = 0.0f;    // only .125 inverse attenuation
+    d3dLight.Attenuation2 = 0.0f;    // no square inverse attenuation
+    //d3dLight.Phi = gs_angle_to_radians(360.0f);    // set the outer cone to 360 degrees
+    //d3dLight.Theta = gs_angle_to_radians(360.0f);    // set the inner cone to 360 degrees
+    d3dLight.Falloff = 1.0f;    // use the typical falloff
 
     d3ddev->SetLight(i, &d3dLight); // send the light off to d3d
   }
@@ -128,7 +128,7 @@ void graphics_state_flush_lighting() {
 
 void graphics_state_flush() {
   d3ddev->SetRenderState(D3DRS_POINTSIZE, drawPointSize);
-	d3ddev->SetRenderState(D3DRS_FILLMODE, fillmodes[drawFillMode]);
+  d3ddev->SetRenderState(D3DRS_FILLMODE, fillmodes[drawFillMode]);
 
   d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, msaaEnabled);
   d3ddev->SetRenderState(D3DRS_ZENABLE, d3dHidden);
@@ -136,12 +136,12 @@ void graphics_state_flush() {
   d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
   d3ddev->SetRenderState(D3DRS_CULLMODE, cullingstates[d3dCulling]);
 
-	DWORD colorWriteMask = 0;
-	if (enigma::colorWriteEnable[0]) colorWriteMask |= D3DCOLORWRITEENABLE_RED;
-	if (enigma::colorWriteEnable[1]) colorWriteMask |= D3DCOLORWRITEENABLE_GREEN;
-	if (enigma::colorWriteEnable[2]) colorWriteMask |= D3DCOLORWRITEENABLE_BLUE;
-	if (enigma::colorWriteEnable[3]) colorWriteMask |= D3DCOLORWRITEENABLE_ALPHA;
-	d3ddev->SetRenderState(D3DRS_COLORWRITEENABLE, colorWriteMask);
+  DWORD colorWriteMask = 0;
+  if (enigma::colorWriteEnable[0]) colorWriteMask |= D3DCOLORWRITEENABLE_RED;
+  if (enigma::colorWriteEnable[1]) colorWriteMask |= D3DCOLORWRITEENABLE_GREEN;
+  if (enigma::colorWriteEnable[2]) colorWriteMask |= D3DCOLORWRITEENABLE_BLUE;
+  if (enigma::colorWriteEnable[3]) colorWriteMask |= D3DCOLORWRITEENABLE_ALPHA;
+  d3ddev->SetRenderState(D3DRS_COLORWRITEENABLE, colorWriteMask);
   d3ddev->SetRenderState(D3DRS_SRCBLEND, blendequivs[(blendMode[0]-1)%11]);
   d3ddev->SetRenderState(D3DRS_DESTBLEND, blendequivs[(blendMode[1]-1)%11]);
   d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, alphaBlend);
@@ -171,7 +171,7 @@ void d3d_clear_depth(double value) {
 }
 
 void d3d_set_software_vertex_processing(bool software) {
-	d3ddev->SetSoftwareVertexProcessing(software);
+  d3ddev->SetSoftwareVertexProcessing(software);
 }
 
 } // namespace enigma_user

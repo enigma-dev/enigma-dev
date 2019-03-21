@@ -145,10 +145,10 @@ void graphics_state_flush() {
   blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = blend_equivs[(blendMode[1]-1)%11];
   blendStateDesc.RenderTarget[0].BlendOpAlpha = blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
   UINT8 colorWriteMask = 0;
-	if (enigma::colorWriteEnable[0]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_RED;
-	if (enigma::colorWriteEnable[1]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_GREEN;
-	if (enigma::colorWriteEnable[2]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_BLUE;
-	if (enigma::colorWriteEnable[3]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_ALPHA;
+  if (enigma::colorWriteEnable[0]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_RED;
+  if (enigma::colorWriteEnable[1]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_GREEN;
+  if (enigma::colorWriteEnable[2]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_BLUE;
+  if (enigma::colorWriteEnable[3]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_ALPHA;
   blendStateDesc.RenderTarget[0].RenderTargetWriteMask = colorWriteMask;
 
   static ID3D11BlendState* pBlendState = NULL;
@@ -165,8 +165,8 @@ namespace enigma_user {
 
 void d3d_clear_depth(double value) {
   draw_batch_flush(batch_flush_deferred);
-	// Clear the depth buffer.
-	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, value, 0);
+  // Clear the depth buffer.
+  m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, value, 0);
 }
 
 } // namespace enigma_user

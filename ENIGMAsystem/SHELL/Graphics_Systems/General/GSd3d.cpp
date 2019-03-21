@@ -91,7 +91,7 @@ void d3d_set_shading(bool enable) {
 
 void d3d_set_depth_operator(int mode) {
   enigma::drawStateDirty = true;
-	enigma::d3dDepthOperator = mode;
+  enigma::d3dDepthOperator = mode;
 }
 
 void d3d_set_depth(double dep) {
