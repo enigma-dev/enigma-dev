@@ -167,6 +167,8 @@ void show_error(string errortext, const bool fatal) {
   if (strtod(str_result.c_str(), NULL) == 1) exit(0);
 }
 
+namespace enigma_user {
+
 int show_message(const string &str) {
   message_cancel = false;
   return show_message_helperfunc(str);
@@ -474,3 +476,5 @@ void message_set_caption(string caption) {
   if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
 }
+
+} // namespace enigma_user
