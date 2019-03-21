@@ -76,34 +76,34 @@ void graphics_state_flush_samplers() {
   for (int i = 0; i < 8; ++i) {
     const Sampler& sampler = samplers[i];
     const auto tex = get_texture(sampler.texture);
-    d3dmgr->SetTexture(i, tex);
+    d3ddev->SetTexture(i, tex);
     if (tex) continue; // texture doesn't exist skip updating the sampler
-    d3dmgr->SetSamplerState(i, D3DSAMP_ADDRESSU, sampler.wrapu?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
-    d3dmgr->SetSamplerState(i, D3DSAMP_ADDRESSV, sampler.wrapv?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
-    d3dmgr->SetSamplerState(i, D3DSAMP_ADDRESSW, sampler.wrapw?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
+    d3ddev->SetSamplerState(i, D3DSAMP_ADDRESSU, sampler.wrapu?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
+    d3ddev->SetSamplerState(i, D3DSAMP_ADDRESSV, sampler.wrapv?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
+    d3ddev->SetSamplerState(i, D3DSAMP_ADDRESSW, sampler.wrapw?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP);
   }
 }
 
 void graphics_state_flush_fog() {
-  d3dmgr->SetRenderState(D3DRS_RANGEFOGENABLE, d3dFogEnabled);
-  d3dmgr->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[d3dFogMode]);
-  d3dmgr->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[d3dFogMode]);
-  d3dmgr->SetRenderState(D3DRS_FOGCOLOR, *d3dFogColor);
+  d3ddev->SetRenderState(D3DRS_RANGEFOGENABLE, d3dFogEnabled);
+  d3ddev->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[d3dFogMode]);
+  d3ddev->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[d3dFogMode]);
+  d3ddev->SetRenderState(D3DRS_FOGCOLOR, *d3dFogColor);
 
   // NOTE: DWORD is 32 bits maximum meaning it can only hold single-precision
   // floats, so yes, we must cast double to float first too.
   // https://docs.microsoft.com/en-us/windows/desktop/direct3d9/d3drenderstatetype
-  d3dmgr->SetRenderState(D3DRS_FOGSTART, alias_cast<DWORD>((float)d3dFogStart));
-  d3dmgr->SetRenderState(D3DRS_FOGEND, alias_cast<DWORD>((float)d3dFogEnd));
-  d3dmgr->SetRenderState(D3DRS_FOGDENSITY, alias_cast<DWORD>((float)d3dFogDensity));
+  d3ddev->SetRenderState(D3DRS_FOGSTART, alias_cast<DWORD>((float)d3dFogStart));
+  d3ddev->SetRenderState(D3DRS_FOGEND, alias_cast<DWORD>((float)d3dFogEnd));
+  d3ddev->SetRenderState(D3DRS_FOGDENSITY, alias_cast<DWORD>((float)d3dFogDensity));
 }
 
 void graphics_state_flush_lighting() {
-  d3dmgr->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
-  d3dmgr->SetRenderState(D3DRS_AMBIENT, *d3dLightingAmbient);
+  d3ddev->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
+  d3ddev->SetRenderState(D3DRS_AMBIENT, *d3dLightingAmbient);
 
   for (int i = 0; i < 8; ++i) {
-    d3dmgr->LightEnable(i, d3dLightEnabled[i]);
+    d3ddev->LightEnable(i, d3dLightEnabled[i]);
     if (!d3dLightEnabled[i]) continue; // don't bother updating disabled lights
 
     const Light& light = d3dLights[i];
@@ -120,43 +120,43 @@ void graphics_state_flush_lighting() {
 		//d3dLight.Theta = gs_angle_to_radians(360.0f);    // set the inner cone to 360 degrees
 		d3dLight.Falloff = 1.0f;    // use the typical falloff
 
-    d3dmgr->SetLight(i, &d3dLight); // send the light off to d3d
+    d3ddev->SetLight(i, &d3dLight); // send the light off to d3d
   }
 }
 
 void graphics_state_flush() {
-  d3dmgr->SetRenderState(D3DRS_POINTSIZE, drawPointSize);
-	d3dmgr->SetRenderState(D3DRS_FILLMODE, fillmodes[drawFillMode]);
+  d3ddev->SetRenderState(D3DRS_POINTSIZE, drawPointSize);
+	d3ddev->SetRenderState(D3DRS_FILLMODE, fillmodes[drawFillMode]);
 
-  d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, msaaEnabled);
-  d3dmgr->SetRenderState(D3DRS_ZENABLE, d3dHidden);
-  d3dmgr->SetRenderState(D3DRS_ZFUNC, depthoperators[d3dDepthOperator]);
-  d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
-  d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[d3dCulling]);
+  d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, msaaEnabled);
+  d3ddev->SetRenderState(D3DRS_ZENABLE, d3dHidden);
+  d3ddev->SetRenderState(D3DRS_ZFUNC, depthoperators[d3dDepthOperator]);
+  d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
+  d3ddev->SetRenderState(D3DRS_CULLMODE, cullingstates[d3dCulling]);
 
 	DWORD colorWriteMask = 0;
 	if (enigma::colorWriteEnable[0]) colorWriteMask |= D3DCOLORWRITEENABLE_RED;
 	if (enigma::colorWriteEnable[1]) colorWriteMask |= D3DCOLORWRITEENABLE_GREEN;
 	if (enigma::colorWriteEnable[2]) colorWriteMask |= D3DCOLORWRITEENABLE_BLUE;
 	if (enigma::colorWriteEnable[3]) colorWriteMask |= D3DCOLORWRITEENABLE_ALPHA;
-	d3dmgr->SetRenderState(D3DRS_COLORWRITEENABLE, colorWriteMask);
-  d3dmgr->SetRenderState(D3DRS_SRCBLEND, blendequivs[(blendMode[0]-1)%11]);
-  d3dmgr->SetRenderState(D3DRS_DESTBLEND, blendequivs[(blendMode[1]-1)%11]);
-  d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, alphaBlend);
-  d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, alphaTest);
-  d3dmgr->SetRenderState(D3DRS_ALPHAREF, alphaTestRef);
+	d3ddev->SetRenderState(D3DRS_COLORWRITEENABLE, colorWriteMask);
+  d3ddev->SetRenderState(D3DRS_SRCBLEND, blendequivs[(blendMode[0]-1)%11]);
+  d3ddev->SetRenderState(D3DRS_DESTBLEND, blendequivs[(blendMode[1]-1)%11]);
+  d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, alphaBlend);
+  d3ddev->SetRenderState(D3DRS_ALPHATESTENABLE, alphaTest);
+  d3ddev->SetRenderState(D3DRS_ALPHAREF, alphaTestRef);
 
   graphics_state_flush_samplers();
 
-  d3dmgr->SetRenderState(D3DRS_FOGENABLE, d3dFogEnabled);
+  d3ddev->SetRenderState(D3DRS_FOGENABLE, d3dFogEnabled);
   if (d3dFogEnabled) graphics_state_flush_fog();
 
-  d3dmgr->SetRenderState(D3DRS_LIGHTING, d3dLighting);
+  d3ddev->SetRenderState(D3DRS_LIGHTING, d3dLighting);
   if (d3dLighting) graphics_state_flush_lighting();
 
-  d3dmgr->SetTransform(D3DTS_WORLD, (D3DMATRIX*)glm::value_ptr(world));
-  d3dmgr->SetTransform(D3DTS_VIEW, (D3DMATRIX*)glm::value_ptr(view));
-  d3dmgr->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)glm::value_ptr(projection));
+  d3ddev->SetTransform(D3DTS_WORLD, (D3DMATRIX*)glm::value_ptr(world));
+  d3ddev->SetTransform(D3DTS_VIEW, (D3DMATRIX*)glm::value_ptr(view));
+  d3ddev->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)glm::value_ptr(projection));
 }
 
 } // namespace enigma
@@ -165,42 +165,42 @@ namespace enigma_user {
 
 void d3d_clear_depth(double value) {
   draw_batch_flush(batch_flush_deferred);
-  d3dmgr->device->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
+  d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
 }
 
 void d3d_set_software_vertex_processing(bool software) {
-	d3dmgr->device->SetSoftwareVertexProcessing(software);
+	d3ddev->SetSoftwareVertexProcessing(software);
 }
 
 //TODO(harijs) - This seems to be broken like this. Almost works, but stencilmask needs some different value
 void d3d_stencil_start_mask(){
   draw_batch_flush(batch_flush_deferred);
-  d3dmgr->SetRenderState(D3DRS_STENCILENABLE, true);
-  d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, false);
-  d3dmgr->SetRenderState(D3DRS_COLORWRITEENABLE, false);
+  d3ddev->SetRenderState(D3DRS_STENCILENABLE, true);
+  d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, false);
+  d3ddev->SetRenderState(D3DRS_COLORWRITEENABLE, false);
 
-  d3dmgr->SetRenderState(D3DRS_STENCILREF, 0x1);
-  d3dmgr->SetRenderState(D3DRS_STENCILMASK, 0x1);
+  d3ddev->SetRenderState(D3DRS_STENCILREF, 0x1);
+  d3ddev->SetRenderState(D3DRS_STENCILMASK, 0x1);
 
-  d3dmgr->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+  d3ddev->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
 
-  d3dmgr->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
-  d3dmgr->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
-  d3dmgr->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
+  d3ddev->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
+  d3ddev->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
+  d3ddev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
 }
 
 void d3d_stencil_use_mask(){
   draw_batch_flush(batch_flush_deferred);
-  d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, true);
-  d3dmgr->SetRenderState(D3DRS_COLORWRITEENABLE, true);
+  d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, true);
+  d3ddev->SetRenderState(D3DRS_COLORWRITEENABLE, true);
 
-  d3dmgr->SetRenderState(D3DRS_STENCILMASK, 0x0);
-  d3dmgr->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL);
+  d3ddev->SetRenderState(D3DRS_STENCILMASK, 0x0);
+  d3ddev->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL);
 }
 
 void d3d_stencil_end_mask(){
   draw_batch_flush(batch_flush_deferred);
-  d3dmgr->SetRenderState(D3DRS_STENCILENABLE, false);
+  d3ddev->SetRenderState(D3DRS_STENCILENABLE, false);
 }
 
 } // namespace enigma_user

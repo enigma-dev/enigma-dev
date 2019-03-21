@@ -37,13 +37,13 @@ namespace enigma_user {
 void draw_clear_alpha(int col, float alpha)
 {
 	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), CLAMP_ALPHA(alpha)), 1.0f, 0);
+	d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), CLAMP_ALPHA(alpha)), 1.0f, 0);
 }
 
 void draw_clear(int col)
 {
 	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col)), 1.0f, 0);
+	d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col)), 1.0f, 0);
 }
 
 int draw_get_msaa_maxlevel()
@@ -90,12 +90,12 @@ int draw_getpixel(int x, int y)
 
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
-	d3dmgr->device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
 	D3DSURFACE_DESC desc;
 	pBackBuffer->GetDesc(&desc);
 
-	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
-	d3dmgr->device->GetRenderTargetData(pBackBuffer, pDestBuffer);
+	d3ddev->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+	d3ddev->GetRenderTargetData(pBackBuffer, pDestBuffer);
 
 	D3DLOCKED_RECT rect;
 
@@ -130,11 +130,11 @@ int draw_getpixel_ext(int x, int y)
 
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
-	d3dmgr->device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
 	D3DSURFACE_DESC desc;
 	pBackBuffer->GetDesc(&desc);
-	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
-	d3dmgr->device->GetRenderTargetData(pBackBuffer, pDestBuffer);
+	d3ddev->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+	d3ddev->GetRenderTargetData(pBackBuffer, pDestBuffer);
 
 	D3DLOCKED_RECT rect;
 

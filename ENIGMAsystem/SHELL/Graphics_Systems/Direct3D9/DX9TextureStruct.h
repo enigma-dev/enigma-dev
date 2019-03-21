@@ -55,8 +55,8 @@ struct TextureStruct {
 
     LPDIRECT3DSURFACE9 pBackBuffer;
     gTexture->GetSurfaceLevel(0,&pBackBuffer);
-    d3dmgr->device->CreateOffscreenPlainSurface( backupdesc.Width, backupdesc.Height, backupdesc.Format, D3DPOOL_SYSTEMMEM, &pCopy, NULL );
-    d3dmgr->device->GetRenderTargetData(pBackBuffer, pCopy);
+    d3ddev->CreateOffscreenPlainSurface( backupdesc.Width, backupdesc.Height, backupdesc.Format, D3DPOOL_SYSTEMMEM, &pCopy, NULL );
+    d3ddev->GetRenderTargetData(pBackBuffer, pCopy);
 
     pBackBuffer->Release();
 
@@ -65,11 +65,11 @@ struct TextureStruct {
 
   void OnDeviceReset() {
     // restore texture data
-    d3dmgr->device->CreateTexture(backupdesc.Width, backupdesc.Height, 1, D3DUSAGE_RENDERTARGET, backupdesc.Format, D3DPOOL_DEFAULT, &gTexture, NULL);
+    d3ddev->CreateTexture(backupdesc.Width, backupdesc.Height, 1, D3DUSAGE_RENDERTARGET, backupdesc.Format, D3DPOOL_DEFAULT, &gTexture, NULL);
 
     LPDIRECT3DSURFACE9 pBackBuffer;
     gTexture->GetSurfaceLevel(0,&pBackBuffer);
-    d3dmgr->device->UpdateSurface(pCopy, NULL, pBackBuffer, NULL);
+    d3ddev->UpdateSurface(pCopy, NULL, pBackBuffer, NULL);
     pCopy->Release();
     pBackBuffer->Release();
 

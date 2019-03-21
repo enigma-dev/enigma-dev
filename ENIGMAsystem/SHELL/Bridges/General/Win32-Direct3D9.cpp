@@ -35,7 +35,7 @@ using namespace std;
 
 namespace {
 
-LPDIRECT3D9 d3dobj; // the pointer to our Direct3D interface
+LPDIRECT3D9 d3dobj = NULL; // the pointer to our Direct3D interface
 
 } // namespace anonymous
 
@@ -43,7 +43,7 @@ namespace enigma {
 
 namespace dx9 {
 
-ContextManager* d3dmgr; // the pointer to the device class
+LPDIRECT3DDEVICE9 d3ddev = NULL; // the pointer to the device class
 
 } // namespace dx9
 
@@ -51,7 +51,7 @@ ContextManager* d3dmgr; // the pointer to the device class
   bool Direct3D9Managed = true;
 
   void OnDeviceLost() {
-    d3dmgr->device->EndScene();
+    d3ddev->EndScene();
     if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
     for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
       (*it)->OnDeviceLost();
@@ -59,7 +59,7 @@ ContextManager* d3dmgr; // the pointer to the device class
   }
 
   void OnDeviceReset() {
-    d3dmgr->device->BeginScene();
+    d3ddev->BeginScene();
     if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
     for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
       (*it)->OnDeviceReset();
@@ -68,7 +68,7 @@ ContextManager* d3dmgr; // the pointer to the device class
 
   void Reset(D3DPRESENT_PARAMETERS *d3dpp) {
     OnDeviceLost();
-    HRESULT hr = d3dmgr->device->Reset(d3dpp);
+    HRESULT hr = d3ddev->Reset(d3dpp);
     if (FAILED(hr)) {
       MessageBox(
         enigma::hWnd,
@@ -84,9 +84,9 @@ ContextManager* d3dmgr; // the pointer to the device class
 
   extern void (*WindowResizedCallback)();
   void WindowResized() {
-    if (d3dmgr == NULL) { return; }
+    if (d3ddev == NULL) { return; }
     IDirect3DSwapChain9 *sc;
-    d3dmgr->device->GetSwapChain(0, &sc);
+    d3ddev->GetSwapChain(0, &sc);
     D3DPRESENT_PARAMETERS d3dpp;
     sc->GetPresentParameters(&d3dpp);
     int ww = enigma_user::window_get_width(),
@@ -104,7 +104,6 @@ ContextManager* d3dmgr; // the pointer to the device class
     get_window_handle();
     WindowResizedCallback = &WindowResized;
 
-    d3dmgr = new ContextManager();
     HRESULT hr;
 
     D3DPRESENT_PARAMETERS d3dpp; // create a struct to hold various device information
@@ -169,7 +168,7 @@ ContextManager* d3dmgr; // the pointer to the device class
             d3dexobj->Release();
           } else {
             d3dobj = d3dexobj;
-            d3dmgr->device = d3dexdev;
+            d3ddev = d3dexdev;
             Direct3D9Managed = false;
           }
         }
@@ -188,14 +187,14 @@ ContextManager* d3dmgr; // the pointer to the device class
                                 hWnd,
                                 behaviors,
                                 &d3dpp,
-                                &d3dmgr->device);
+                                &d3ddev);
 
       if (FAILED(hr)) {
         show_error("Failed to create Direct3D 9.0 Device", true);
       }
     }
 
-    d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+    d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
 
     enigma_user::display_aa = 0;
     for (int i = 16; i > 1; i--) {
@@ -204,28 +203,28 @@ ContextManager* d3dmgr; // the pointer to the device class
       }
     }
 
-    d3dmgr->device->BeginScene();
+    d3ddev->BeginScene();
   }
 
   void DisableDrawing(void* handle) {
-    d3dmgr->device->EndScene();
-    d3dmgr->Release(); // close and release the 3D device
+    d3ddev->EndScene();
+    d3ddev->Release(); // close and release the 3D device
     d3dobj->Release(); // close and release Direct3D
   }
 
   void ScreenRefresh() {
-    d3dmgr->device->EndScene();
-    d3dmgr->device->Present(NULL, NULL, NULL, NULL);
-    d3dmgr->device->BeginScene();
+    d3ddev->EndScene();
+    d3ddev->Present(NULL, NULL, NULL, NULL);
+    d3ddev->BeginScene();
   }
 } // namespace enigma
 
 namespace enigma_user {
 
 void display_reset(int samples, bool vsync) {
-  if (d3dmgr == NULL) { return; }
+  if (d3ddev == NULL) { return; }
   IDirect3DSwapChain9 *sc;
-  d3dmgr->device->GetSwapChain(0, &sc);
+  d3ddev->GetSwapChain(0, &sc);
   D3DPRESENT_PARAMETERS d3dpp;
   sc->GetPresentParameters(&d3dpp);
   if (vsync) {
@@ -242,9 +241,9 @@ void display_reset(int samples, bool vsync) {
 
 void set_synchronization(bool enable)
 {
-  if (d3dmgr == NULL) { return; }
+  if (d3ddev == NULL) { return; }
   IDirect3DSwapChain9 *sc;
-  d3dmgr->device->GetSwapChain(0, &sc);
+  d3ddev->GetSwapChain(0, &sc);
   D3DPRESENT_PARAMETERS d3dpp;
   sc->GetPresentParameters(&d3dpp);
   if (enable) {

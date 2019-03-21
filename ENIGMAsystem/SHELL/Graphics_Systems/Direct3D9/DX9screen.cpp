@@ -55,7 +55,7 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   sx = (window_get_width() - window_get_region_width_scaled()) / 2;
   sy = (window_get_height() - window_get_region_height_scaled()) / 2;
 	D3DVIEWPORT9 pViewport = { (DWORD)(sx + x), (DWORD)(sy + y), (DWORD)width, (DWORD)height, 0, 1.0f };
-	d3dmgr->device->SetViewport(&pViewport);
+	d3ddev->SetViewport(&pViewport);
 }
 
 int screen_save(string filename) //Assumes native integers are little endian
@@ -66,12 +66,12 @@ int screen_save(string filename) //Assumes native integers are little endian
 
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
-	d3dmgr->device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
 	D3DSURFACE_DESC desc;
 	pBackBuffer->GetDesc(&desc);
 
-	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
-	d3dmgr->device->GetRenderTargetData(pBackBuffer, pDestBuffer);
+	d3ddev->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+	d3ddev->GetRenderTargetData(pBackBuffer, pDestBuffer);
 
 	D3DLOCKED_RECT rect;
 
@@ -96,12 +96,12 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 
 	LPDIRECT3DSURFACE9 pBackBuffer;
 	LPDIRECT3DSURFACE9 pDestBuffer;
-	d3dmgr->device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
 	D3DSURFACE_DESC desc;
 	pBackBuffer->GetDesc(&desc);
 
-	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
-	d3dmgr->device->GetRenderTargetData(pBackBuffer, pDestBuffer);
+	d3ddev->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+	d3ddev->GetRenderTargetData(pBackBuffer, pDestBuffer);
 
 	D3DLOCKED_RECT rect;
 

@@ -37,57 +37,7 @@ extern bool Direct3D9Managed;
 
 namespace dx9 {
 
-class ContextManager {
-public:
-LPDIRECT3DDEVICE9 device;    // the pointer to the device class
-
-ContextManager() {
-
-}
-
-~ContextManager() {
-
-}
-
-void LightEnable(DWORD Index, BOOL bEnable) {
-  device->LightEnable(Index, bEnable);
-}
-
-void Release() {
-  device->Release();
-}
-
-void SetMaterial(const D3DMATERIAL9 *pMaterial) {
-  device->SetMaterial(pMaterial);
-}
-
-void SetLight(DWORD Index, const D3DLIGHT9 *pLight) {
-  device->SetLight(Index, pLight);
-}
-
-void SetTransform(D3DTRANSFORMSTATETYPE State, const D3DMATRIX *pMatrix) {
-  device->SetTransform(State, pMatrix);
-}
-
-void SetRenderState(D3DRENDERSTATETYPE State, DWORD Value) {
-  device->SetRenderState(State, Value);
-}
-
-void SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value) {
-  device->SetSamplerState(Sampler, Type, Value);
-}
-
-void SetTexture(DWORD Sampler, LPDIRECT3DTEXTURE9 pTexture) {
-  device->SetTexture(Sampler, pTexture);
-}
-
-void SetTextureStageState(DWORD Sampler, D3DTEXTURESTAGESTATETYPE Type, DWORD Value) {
-  device->SetTextureStageState(Sampler, Type, Value);
-}
-
-};
-
-extern ContextManager* d3dmgr; // point to our device manager
+extern LPDIRECT3DDEVICE9 d3ddev; // the pointer to the device class
 
 } // namespace dx9
 

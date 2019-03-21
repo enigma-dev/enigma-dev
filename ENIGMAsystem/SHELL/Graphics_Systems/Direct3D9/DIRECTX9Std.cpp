@@ -31,13 +31,13 @@ using namespace enigma::dx9;
 namespace enigma {
 
 void graphicssystem_initialize() {
-  d3dmgr->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
+  d3ddev->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
   // just in case the user does turn on lighting, we need to set a material
   // that works for lighting vertices that have no color data
   D3DMATERIAL9 mtrl = {};
   mtrl.Ambient.r = mtrl.Ambient.g = mtrl.Ambient.b = mtrl.Ambient.a = 1.0;
   mtrl.Diffuse.r = mtrl.Diffuse.g = mtrl.Diffuse.b = mtrl.Diffuse.a = 1.0;
-  d3dmgr->SetMaterial(&mtrl);
+  d3ddev->SetMaterial(&mtrl);
 }
 
 } // namespace enigma
