@@ -109,10 +109,8 @@ static int show_message_helperfunc(string str) {
   str_cancel + string("--title=\"") + str_title + string("\" --no-wrap --text=\"") +
   add_escaping(str, false, "") + string("\" --icon-name=dialog-information);") + str_echo;
 
-  string str_result = shellscript_evaluate((char *)str_command.c_str());
-  int result = (int)strtod(str_result.c_str(), NULL);
-
-  return result;
+  string str_result = shellscript_evaluate(str_command);
+  return (int)strtod(str_result.c_str(), NULL);
 }
 
 static int show_question_helperfunc(string str) {
@@ -133,10 +131,8 @@ static int show_question_helperfunc(string str) {
   str_title + string("\" --no-wrap --text=\"") + add_escaping(str, false, "") +
   string("\" --icon-name=dialog-question);if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Cancel\" ] ;then echo -1;else echo 0;fi");
 
-  string str_result = shellscript_evaluate((char *)str_command.c_str());
-  int result = (int)strtod(str_result.c_str(), NULL);
-
-  return result;
+  string str_result = shellscript_evaluate(str_command);
+  return (int)strtod(str_result.c_str(), NULL);
 }
 
 int show_message(const string &str) {
@@ -171,10 +167,8 @@ int show_attempt(string str) {
   add_escaping(str, false, "") +
   string("\" --icon-name=dialog-error);if [ $? = 0 ] ;then echo 0;else echo -1;fi");
 
-  string str_result = shellscript_evaluate((char *)str_command.c_str());
-  int result = (int)strtod(str_result.c_str(), NULL);
-
-  return result;
+  string str_result = shellscript_evaluate(str_command);
+  return (int)strtod(str_result.c_str(), NULL);
 }
 
 void show_error(string errortext, const bool fatal) {
@@ -192,9 +186,8 @@ void show_error(string errortext, const bool fatal) {
   string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
   add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
 
-  string str_result = shellscript_evaluate((char *)str_command.c_str());
-  int result = (int)strtod(str_result.c_str(), NULL);
-  if (result == 1) exit(0);
+  string str_result = shellscript_evaluate(str_command);
+  if (strtod(str_result.c_str(), NULL) == 1) exit(0);
 }
 
 string get_string(string str, string def) {
@@ -211,7 +204,7 @@ string get_string(string str, string def) {
   add_escaping(str, false, "") + string("\" --entry-text=\"") +
   add_escaping(def, false, "") + string("\");echo $ans");
 
-  return shellscript_evaluate((char *)str_command.c_str());
+  return shellscript_evaluate(str_command);
 }
 
 string get_password(string str, string def) {
@@ -228,7 +221,7 @@ string get_password(string str, string def) {
   add_escaping(str, false, "") + string("\" --hide-text --entry-text=\"") +
   add_escaping(def, false, "") + string("\");echo $ans");
 
-  return shellscript_evaluate((char *)str_command.c_str());
+  return shellscript_evaluate(str_command);
 }
 
 double get_integer(string str, double def) {
@@ -255,7 +248,7 @@ string get_open_filename(string filter, string fname) {
   string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
-  string result = shellscript_evaluate((char *)str_command.c_str());
+  string result = shellscript_evaluate(str_command);
   return file_exists(result) ? result : "";
 }
 
@@ -274,8 +267,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
+  string result = shellscript_evaluate(str_command);
   return file_exists(result) ? result : "";
 }
 
@@ -289,8 +281,7 @@ string get_open_filenames(string filter, string fname) {
   string("--file-selection --multiple --separator='\n' --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
+  string result = shellscript_evaluate(str_command);
   std::vector<string> stringVec = string_split(result, '\n');
 
   bool success = true;
@@ -317,8 +308,7 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
   string("--file-selection --multiple --separator='\n' --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
+  string result = shellscript_evaluate(str_command);
   std::vector<string> stringVec = string_split(result, '\n');
 
   bool success = true;
@@ -358,7 +348,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
-  return shellscript_evaluate((char *)str_command.c_str());
+  return shellscript_evaluate(str_command);
 }
 
 string get_directory(string dname) {
@@ -386,7 +376,7 @@ string get_directory_alt(string capt, string root) {
   string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_dname, false, "") + str_end;
 
-  return shellscript_evaluate((char *)str_command.c_str());
+  return shellscript_evaluate(str_command);
 }
 
 int get_color(int defcol) {
@@ -407,7 +397,7 @@ int get_color(int defcol) {
   string("--color-selection --show-palette --title=\"") + str_title + string("\"  --color='") +
   str_defcol + string("');if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
-  str_result = shellscript_evaluate((char *)str_command.c_str());
+  str_result = shellscript_evaluate(str_command);
   if (str_result == "-1") return strtod(str_result.c_str(), NULL);
   str_result = string_replace_all(str_result, "rgba(", "");
   str_result = string_replace_all(str_result, "rgb(", "");
@@ -443,7 +433,7 @@ int get_color_ext(int defcol, string title) {
   string("--color-selection --show-palette --title=\"") + str_title + string("\" --color='") +
   str_defcol + string("');if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
-  str_result = shellscript_evaluate((char *)str_command.c_str());
+  str_result = shellscript_evaluate(str_command);
   if (str_result == "-1") return strtod(str_result.c_str(), NULL);
   str_result = string_replace_all(str_result, "rgba(", "");
   str_result = string_replace_all(str_result, "rgb(", "");
