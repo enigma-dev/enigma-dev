@@ -36,7 +36,7 @@ static bool message_cancel  = false;
 static bool question_cancel = false;
 
 static string add_escaping(string str, bool is_caption, string new_caption) {
-  string result; if (is_caption && str == "") result = new_caption;
+  string result; if (is_caption && str.empty()) result = new_caption;
   result = string_replace_all(str, "\"", "\\\"");
   result = string_replace_all(result, "_", "__");
   return result;
@@ -70,7 +70,7 @@ static string zenity_filter(string input) {
 }
 
 static double show_message_helperfunc(char *str) {
-  if (dialog_caption == "")
+  if (dialog_caption.empty())
     dialog_caption = message_caption();
 
   string str_command;
@@ -99,7 +99,7 @@ static double show_message_helperfunc(char *str) {
 }
 
 static double show_question_helperfunc(char *str) {
-  if (dialog_caption == "")
+  if (dialog_caption.empty())
     dialog_caption = message_caption();
 
   string str_command;
@@ -143,7 +143,7 @@ double show_question_cancelable(char *str) {
 }
 
 double show_attempt(char *str) {
-  if (error_caption == "") error_caption = "Error";
+  if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
 
@@ -161,7 +161,7 @@ double show_attempt(char *str) {
 }
 
 double show_error(char *str, double abort) {
-  if (error_caption == "") error_caption = "Error";
+  if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
   string str_echo;
@@ -183,7 +183,7 @@ double show_error(char *str, double abort) {
 }
 
 char *get_string(char *str, char *def) {
-  if (dialog_caption == "")
+  if (dialog_caption.empty())
     dialog_caption = message_caption();
 
   string str_command;
@@ -203,7 +203,7 @@ char *get_string(char *str, char *def) {
 }
 
 char *get_password(char *str, char *def) {
-  if (dialog_caption == "")
+  if (dialog_caption.empty())
     dialog_caption = message_caption();
 
   string str_command;
