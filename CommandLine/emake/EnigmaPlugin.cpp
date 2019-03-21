@@ -45,7 +45,7 @@ int EnigmaPlugin::Load()
 
   std::string pluginName = "./" + prefix + "compileEGMf" + extension;
 
-  _handle = dlopen(pluginName.c_str(), RTLD_LAZY);
+  _handle = dlopen(pluginName.c_str(), RTLD_GLOBAL | RTLD_LAZY);
 
   if (!_handle)
   {
