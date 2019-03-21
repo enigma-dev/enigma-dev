@@ -20,7 +20,7 @@
 #include <cstring>
 #include <libgen.h>
 #include <unistd.h>
-#include <limits.h>
+#include <climits>
 #include <sstream>
 #include <vector>
 #include <string>
