@@ -526,17 +526,15 @@ double get_color_ext(double defcol, char *title) {
   return make_color_rgb(red, green, blue);
 }
 
-char *message_get_caption() {
-  if (dialog_caption == "") dialog_caption = message_caption();
-  if (error_caption == "") error_caption = "Error";
-  if (dialog_caption == message_caption() && error_caption == "Error")
-    return (char *)""; else return (char *)dialog_caption.c_str();
+string message_get_caption() {
+  if (dialog_caption.empty()) dialog_caption = window_get_caption();
+  if (error_caption.empty()) error_caption = "Error";
+  if (dialog_caption == window_get_caption() && error_caption == "Error")
+    return ""; else return dialog_caption;
 }
 
-char *message_set_caption(char *caption) {
+void message_set_caption(string caption) {
   dialog_caption = caption; error_caption = caption;
-  if (dialog_caption == "") dialog_caption = message_caption();
-  if (error_caption == "") error_caption = "Error";
-  if (dialog_caption == message_caption() && error_caption == "Error")
-    return (char *)""; else return (char *)dialog_caption.c_str();
+  if (dialog_caption.empty()) dialog_caption = window_get_caption();
+  if (error_caption.empty()) error_caption = "Error";
 }
