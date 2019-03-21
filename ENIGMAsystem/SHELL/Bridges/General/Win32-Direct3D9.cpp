@@ -23,6 +23,7 @@
 #include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
 #include "Graphics_Systems/Direct3D9/Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 #include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 
 #include <windows.h>
@@ -77,7 +78,7 @@ ContextManager* d3dmgr; // the pointer to the device class
       return;  // should probably force the game closed
     }
     // Reapply the stored render states and what not
-    d3dmgr->RestoreState();
+    graphics_state_flush();
     OnDeviceReset();
   }
 
