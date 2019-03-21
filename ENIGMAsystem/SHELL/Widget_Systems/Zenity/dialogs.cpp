@@ -38,10 +38,7 @@ static bool question_cancel = false;
 static string add_escaping(string str, bool is_caption, string new_caption) {
   string result; if (is_caption && str == "") result = new_caption;
   result = string_replace_all(str, "\"", "\\\"");
-
-  if (dm_dialogengine == dm_zenity)
-    result = string_replace_all(result, "_", "__");
-
+  result = string_replace_all(result, "_", "__");
   return result;
 }
 
