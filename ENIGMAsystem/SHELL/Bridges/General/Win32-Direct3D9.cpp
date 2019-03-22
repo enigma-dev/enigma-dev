@@ -230,11 +230,10 @@ void display_reset(int samples, bool vsync) {
   enigma::Reset(&d3dpp);
 }
 
-void set_synchronization(bool enable)
-{
+void set_synchronization(bool enable) {
   D3DPRESENT_PARAMETERS d3dpp;
   get_d3d_present_params(&d3dpp);
-  d3dpp.PresentationInterval = enable ? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_IMMEDIATE;
+  d3dpp.PresentationInterval = enable?D3DPRESENT_INTERVAL_DEFAULT:D3DPRESENT_INTERVAL_IMMEDIATE;
 
   enigma::Reset(&d3dpp);
 }
