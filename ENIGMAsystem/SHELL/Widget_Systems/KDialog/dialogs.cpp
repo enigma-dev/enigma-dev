@@ -143,9 +143,7 @@ static int show_message_helperfunc(string str) {
   string("--title \"") + str_title + string("\";") + str_echo;
 
   string str_result = shellscript_evaluate(str_command);
-  int result = (int)strtod(str_result.c_str(), NULL);
-
-  return result;
+  return (int)strtod(str_result.c_str(), NULL);
 }
 
 static int show_question_helperfunc(string str) {
@@ -167,9 +165,7 @@ static int show_question_helperfunc(string str) {
   string("x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi");
 
   string str_result = shellscript_evaluate(str_command);
-  int result = (int)strtod(str_result.c_str(), NULL);
-
-  return result;
+  return (int)strtod(str_result.c_str(), NULL);
 }
 
 void show_error(string str, const bool abort) {
