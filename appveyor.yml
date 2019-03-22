@@ -104,7 +104,7 @@ install:
         (mkdir build) -and (cd build)
         cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DVCPKG_DIR="%VCPKG_DIR%" ..
         cmake --build . --config "%BUILD_TYPE%"
-     } ElseIf ($env:APPVEYOR_JOB_NUMBER -eq 2) {
+      } ElseIf ($env:APPVEYOR_JOB_NUMBER -eq 2) {
         # use our first job to build JDI and the CLI
         C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "make -j 4; CLI_ENABLE_EGM=FALSE make -j 4 emake"
 
