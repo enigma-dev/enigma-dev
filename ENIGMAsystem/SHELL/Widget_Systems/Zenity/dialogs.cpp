@@ -28,11 +28,11 @@
 #include <iostream>
 using std::string;
 
+#include "strings_util.h"
 #include "Universal_System/estring.h"
 using enigma_user::string_replace_all;
 using enigma_user::filename_name;
 using enigma_user::filename_path;
-using enigma_user::string_split;
 
 #include "Platforms/General/PFmain.h"
 using enigma_user::execute_shell_for_output;
@@ -91,7 +91,7 @@ static string remove_trailing_zeros(double numb) {
 
 static string zenity_filter(string input) {
   std::replace(input.begin(), input.end(), ';', ' ');
-  std::vector<string> stringVec = string_split(input, '|');
+  std::vector<string> stringVec = split_string(input, '|');
   string string_output = "";
 
   unsigned int index = 0;
@@ -433,7 +433,7 @@ int get_color(int defcol) {
   str_result = string_replace_all(str_result, "rgba(", "");
   str_result = string_replace_all(str_result, "rgb(", "");
   str_result = string_replace_all(str_result, ")", "");
-  std::vector<string> stringVec = string_split(str_result, ',');
+  std::vector<string> stringVec = split_string(str_result, ',');
 
   unsigned int index = 0;
   for (const string &str : stringVec) {
@@ -469,7 +469,7 @@ int get_color_ext(int defcol, string title) {
   str_result = string_replace_all(str_result, "rgba(", "");
   str_result = string_replace_all(str_result, "rgb(", "");
   str_result = string_replace_all(str_result, ")", "");
-  std::vector<string> stringVec = string_split(str_result, ',');
+  std::vector<string> stringVec = split_string(str_result, ',');
 
   unsigned int index = 0;
   for (const string &str : stringVec) {
