@@ -36,6 +36,13 @@ namespace {
 
 LPDIRECT3D9 d3dobj; // the pointer to our Direct3D interface
 
+inline void get_d3d_present_params(D3DPRESENT_PARAMETERS* d3dpp) {
+  IDirect3DSwapChain9 *sc;
+  d3dmgr->device->GetSwapChain(0, &sc);
+  sc->GetPresentParameters(d3dpp);
+  sc->Release();
+}
+
 } // namespace anonymous
 
 namespace enigma {
@@ -84,15 +91,12 @@ ContextManager* d3dmgr; // the pointer to the device class
   extern void (*WindowResizedCallback)();
   void WindowResized() {
     if (d3dmgr == NULL) { return; }
-    IDirect3DSwapChain9 *sc;
-    d3dmgr->device->GetSwapChain(0, &sc);
     D3DPRESENT_PARAMETERS d3dpp;
-    sc->GetPresentParameters(&d3dpp);
+    get_d3d_present_params(&d3dpp);
     int ww = enigma_user::window_get_width(),
         wh = enigma_user::window_get_height();
     d3dpp.BackBufferWidth = ww <= 0 ? 1 : ww;
     d3dpp.BackBufferHeight = wh <= 0 ? 1 : wh;
-    sc->Release();
     Reset(&d3dpp);
 
     // clear the window color, viewport does not need set because backbuffer was just recreated
@@ -254,23 +258,12 @@ namespace enigma_user {
 
 void display_reset(int samples, bool vsync) {
   if (d3dmgr == NULL) { return; }
-  IDirect3DSwapChain9 *sc;
-  d3dmgr->device->GetSwapChain(0, &sc);
   D3DPRESENT_PARAMETERS d3dpp;
-  sc->GetPresentParameters(&d3dpp);
-  if (vsync) {
-    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT; // Present the frame immediately
-  } else {
-    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE; // Present the frame immediately
-  }
-  d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + samples); // Levels of multi-sampling
-  d3dpp.MultiSampleQuality = 0; // No multi-sampling
-  if (samples) {
-    d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
-  } else {
-    d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
-  }
-  sc->Release();
+  get_d3d_present_params(&d3dpp);
+  d3dpp.PresentationInterval = vsync?D3DPRESENT_INTERVAL_DEFAULT:D3DPRESENT_INTERVAL_IMMEDIATE;
+  d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + samples);
+  d3dpp.MultiSampleQuality = 0;
+  d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, samples > 0);
 
   enigma::Reset(&d3dpp);
 }
@@ -278,16 +271,9 @@ void display_reset(int samples, bool vsync) {
 void set_synchronization(bool enable)
 {
   if (d3dmgr == NULL) { return; }
-  IDirect3DSwapChain9 *sc;
-  d3dmgr->device->GetSwapChain(0, &sc);
   D3DPRESENT_PARAMETERS d3dpp;
-  sc->GetPresentParameters(&d3dpp);
-  if (enable) {
-    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT; // Present the frame immediately
-  } else {
-    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE; // Present the frame immediately
-  }
-  sc->Release();
+  get_d3d_present_params(&d3dpp);
+  d3dpp.PresentationInterval = enable?D3DPRESENT_INTERVAL_DEFAULT:D3DPRESENT_INTERVAL_IMMEDIATE;
 
   enigma::Reset(&d3dpp);
 }
