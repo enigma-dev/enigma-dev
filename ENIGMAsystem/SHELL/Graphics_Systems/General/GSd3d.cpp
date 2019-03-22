@@ -33,22 +33,4 @@ void d3d_set_perspective(bool enable) {
   enigma::d3dPerspective = enable;
 }
 
-bool d3d_get_perspective() {
-  return enigma::d3dPerspective;
-}
-
-bool d3d_get_mode()
-{
-  return enigma::d3dMode;
-}
-
-bool d3d_get_hidden()
-{
-  return enigma::d3dHidden;
-}
-
-int d3d_get_culling() {
-  return enigma::d3dCulling;
-}
-
 } // namespace enigma_user

@@ -118,11 +118,6 @@ namespace enigma_user {
   void d3d_set_shading(bool smooth);
   void d3d_set_color_mask(bool r, bool g, bool b, bool a);
 
-  bool d3d_get_mode();
-  bool d3d_get_perspective();
-  int d3d_get_culling();
-  bool d3d_get_hidden();
-
   // ***** LIGHTS BEGIN *****
   bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
   bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col);
