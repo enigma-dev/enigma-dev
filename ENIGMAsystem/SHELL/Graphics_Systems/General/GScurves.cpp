@@ -23,10 +23,6 @@
 #include <algorithm> // min/max
 #include <math.h>
 
-namespace enigma{
-    extern unsigned char currentcolor[4];
-}
-
 int pr_curve_detail = 20;
 int pr_curve_mode = enigma_user::pr_linestrip;
 int pr_spline_points = 0;
