@@ -28,11 +28,11 @@
 #include <iostream>
 using std::string;
 
+#include "strings_util.h"
 #include "Universal_System/estring.h"
 using enigma_user::string_replace_all;
 using enigma_user::filename_name;
 using enigma_user::filename_path;
-using enigma_user::string_split;
 
 #include "Platforms/General/PFmain.h"
 using enigma_user::execute_shell_for_output;
@@ -90,7 +90,7 @@ static string remove_trailing_zeros(double numb) {
 
 static string kdialog_filter(string input) {
   std::replace(input.begin(), input.end(), ';', ' ');
-  std::vector<string> stringVec = string_split(input, '|');
+  std::vector<string> stringVec = split_string(input, '|');
   string string_output = " '";
 
   string even = "";
@@ -336,7 +336,7 @@ string get_open_filenames(string filter, string fname) {
 
   static string result;
   result = shellscript_evaluate(str_command);
-  std::vector<string> stringVec = string_split(result, '\n');
+  std::vector<string> stringVec = split_string(result, '\n');
 
   bool success = true;
   for (const string &str : stringVec) {
@@ -367,7 +367,7 @@ string get_open_filenames_ext(string filter,string fname, string dir, string tit
 
   static string result;
   result = shellscript_evaluate(str_command);
-  std::vector<string> stringVec = string_split(result, '\n');
+  std::vector<string> stringVec = split_string(result, '\n');
 
   bool success = true;
   for (const string &str : stringVec) {
