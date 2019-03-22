@@ -122,7 +122,7 @@ static string kdialog_filter(string input) {
 
 static int show_message_helperfunc(string str) {
   if (dialog_caption.empty())
-    dialog_caption = message_caption();
+    dialog_caption = window_get_caption();
 
   string str_command;
   string str_title;
@@ -150,7 +150,7 @@ static int show_message_helperfunc(string str) {
 
 static int show_question_helperfunc(string str) {
   if (dialog_caption.empty())
-    dialog_caption = message_caption();
+    dialog_caption = window_get_caption();
 
   string str_command;
   string str_title;
@@ -241,7 +241,7 @@ int show_attempt(string str) {
 
 string get_string(string str, string def) {
   if (dialog_caption.empty())
-    dialog_caption = message_caption();
+    dialog_caption = window_get_caption();
 
   string str_command;
   string str_title;
@@ -258,7 +258,7 @@ string get_string(string str, string def) {
 
 string get_password(string str, string def) {
   if (dialog_caption.empty())
-    dialog_caption = message_caption();
+    dialog_caption = window_get_caption();
 
   string str_command;
   string str_title;
