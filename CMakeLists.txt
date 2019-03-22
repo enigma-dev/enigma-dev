@@ -5,7 +5,6 @@ project(SuperBuild)
 include(ExternalProject)
 
 set(CL_ARGS "")
-set(PB_ARGS "")
 set(VS_ARGS "")
 
 if (MSVC)
@@ -36,17 +35,6 @@ if(USE_STATIC_LIBS)
        "-DBUILD_STATIC_LIBS=ON"
        "-DBUILD_SHARED_LIBS=OFF" 
   )
-  
-################ /!\ Google Big Gay /!\ ######################
-# Protobuf blocks linking to emake and compiler at same time #
-##############################################################
-
-  list(APPEND PB_ARGS
-       ${VS_ARGS}
-       "-DUSE_STATIC_LIBS=ON"
-       "-DBUILD_STATIC_LIBS=ON"
-       "-DBUILD_SHARED_LIBS=ON" 
-  )
 endif()
 
 message("CMake args: ${CL_ARGS}")
@@ -56,7 +44,7 @@ ExternalProject_Add(
   DOWNLOAD_COMMAND ""
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/shared/protos"
   BINARY_DIR "${CMAKE_SOURCE_DIR}/build/libProtocols"
-  CMAKE_ARGS  ${PB_ARGS}
+  CMAKE_ARGS  ${CL_ARGS}
 )
 
 ExternalProject_Add(

@@ -1,17 +1,10 @@
-################ /!\ Google Big Gay /!\ ######################
-# Protobuf blocks linking to emake and compiler at same time #
-##############################################################
-if(USE_STATIC_LIBS)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES .so .lib .dylib)
-endif()
-
 # Find libProtocols
-find_library(LIB_PROTO NAMES Protocols PATHS ${ENIGMA_DIR})
-target_link_libraries(${TARGET} PRIVATE ${LIB_PROTO})
-
 if(USE_STATIC_LIBS)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES .a .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+  find_library(LIB_PROTO NAMES Protocols-static PATHS ${ENIGMA_DIR})
+else()
+  find_library(LIB_PROTO NAMES Protocols PATHS ${ENIGMA_DIR})
 endif()
+target_link_libraries(${TARGET} PRIVATE ${LIB_PROTO})
 
 # Find Protobuf
 include(FindProtobuf)

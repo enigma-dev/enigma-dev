@@ -1,9 +1,9 @@
-if(USE_STATIC_LIBS)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES .a .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
-endif()
-
 # Find libEGM
-find_library(LIB_EGM NAMES EGM PATHS ${ENIGMA_DIR})
+if(USE_STATIC_LIBS)
+  find_library(LIB_EGM NAMES EGM-static PATHS ${ENIGMA_DIR})
+else()
+  find_library(LIB_EGM NAMES EGM PATHS ${ENIGMA_DIR})
+endif()
 target_link_libraries(${TARGET} PRIVATE ${LIB_EGM})
 
 # Find PugiXML
