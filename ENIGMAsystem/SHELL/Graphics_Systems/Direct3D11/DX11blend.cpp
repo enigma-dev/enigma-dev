@@ -17,6 +17,7 @@
 
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSblend.h"
+#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
 using namespace enigma::dx11;
@@ -36,9 +37,6 @@ void update_blend_state() {
 } // namespace anonymous
 
 namespace enigma {
-
-extern int currentblendmode[2];
-extern int currentblendtype;
 
 void init_blend_state() {
   blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
@@ -78,18 +76,6 @@ int draw_set_blend_mode_ext(int src, int dest) {
 
   update_blend_state();
   return 0;
-}
-
-int draw_get_blend_mode(){
-  return enigma::currentblendmode[0];
-}
-
-int draw_get_blend_mode_ext(bool src){
-  return enigma::currentblendmode[(src==true?0:1)];
-}
-
-int draw_get_blend_mode_type(){
-  return enigma::currentblendtype;
 }
 
 }

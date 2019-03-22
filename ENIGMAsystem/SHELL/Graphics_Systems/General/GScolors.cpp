@@ -34,6 +34,19 @@ namespace enigma
 
 namespace enigma_user
 {
+
+int draw_get_blend_mode() {
+  return enigma::currentblendmode[0];
+}
+
+int draw_get_blend_mode_ext(bool src) {
+  return enigma::currentblendmode[(src==true?0:1)];
+}
+
+int draw_get_blend_mode_type() {
+  return enigma::currentblendtype;
+}
+
 	int merge_color(int c1,int c2,double amount)
 	{
 		amount = amount > 1 ? 1 : (amount < 0 ? 0 : amount);

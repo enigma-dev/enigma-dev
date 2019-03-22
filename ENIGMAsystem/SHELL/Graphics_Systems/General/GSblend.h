@@ -60,4 +60,3 @@ namespace enigma_user
 }
 
 #endif // ENIGMA_GSBLEND_H
-
