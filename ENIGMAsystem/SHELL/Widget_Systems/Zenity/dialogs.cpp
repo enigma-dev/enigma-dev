@@ -316,7 +316,7 @@ string get_open_filenames(string filter, string fname) {
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
 
   string result = shellscript_evaluate(str_command);
-  std::vector<string> stringVec = string_split(result, '\n');
+  std::vector<string> stringVec = split_string(result, '\n');
 
   bool success = true;
   for (const string &str : stringVec) {
@@ -343,7 +343,7 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
 
   string result = shellscript_evaluate(str_command);
-  std::vector<string> stringVec = string_split(result, '\n');
+  std::vector<string> stringVec = split_string(result, '\n');
 
   bool success = true;
   for (const string &str : stringVec) {
