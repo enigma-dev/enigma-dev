@@ -15,26 +15,23 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX9TextureStruct.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
 #include "Universal_System/image_formats.h"
-#include "Universal_System/background_internal.h"
-#include "Universal_System/sprites_internal.h"
 
+#include <vector>
 #include <stdio.h>
 #include <string.h>
 
-vector<TextureStruct*> textureStructs(0);
+using namespace enigma::dx9;
 
-LPDIRECT3DTEXTURE9 get_texture(int texid) {
-  return (size_t(texid) >= textureStructs.size() || texid < 0) ? NULL : textureStructs[texid]->gTexture;
-}
+namespace {
 
-inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
+inline unsigned int lgpp2(unsigned int x) {//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
 	x -= ((x >> 1) & 0x55555555);
 	x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
@@ -43,8 +40,16 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 	return (x + (x >> 16)) & 63;
 }
 
-namespace enigma
-{
+} // namespace anonymous
+
+namespace enigma {
+
+std::vector<LPDIRECT3DTEXTURE9> texture_peers;
+
+LPDIRECT3DTEXTURE9 get_texture(int texid) {
+  return (size_t(texid) >= texture_peers.size() || texid < 0) ? NULL : texture_peers[texid];
+}
+
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
   {
     LPDIRECT3DTEXTURE9 texture = NULL;
@@ -70,28 +75,31 @@ namespace enigma
       texture->GenerateMipSubLevels();
     }
 
-    TextureStruct* textureStruct = new TextureStruct(texture);
+    Texture* textureStruct = new Texture();
     textureStruct->width = width;
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
-    textureStructs.push_back(textureStruct);
-    return textureStructs.size()-1;
+    const int id = textures.size();
+    textures.push_back(textureStruct);
+    texture_peers.resize(textures.size());
+    texture_peers[id] = texture;
+    return id;
   }
 
   int graphics_duplicate_texture(int tex, bool mipmap)
   {
     unsigned w, h, fw, fh;
-    w = textureStructs[tex]->width;
-    h = textureStructs[tex]->height;
-    fw = textureStructs[tex]->fullwidth;
-    fh = textureStructs[tex]->fullheight;
+    w = textures[tex]->width;
+    h = textures[tex]->height;
+    fw = textures[tex]->fullwidth;
+    fh = textures[tex]->fullheight;
 
     D3DLOCKED_RECT rect;
 
-    textureStructs[tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    texture_peers[tex]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
-    textureStructs[tex]->gTexture->UnlockRect(0);
+    texture_peers[tex]->UnlockRect(0);
 
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
     delete[] bitmap;
@@ -101,25 +109,25 @@ namespace enigma
   void graphics_copy_texture(int source, int destination, int x, int y)
   {
     unsigned int sw, sh, sfw;
-    sw = textureStructs[source]->width;
-    sh = textureStructs[source]->height;
-    sfw = textureStructs[source]->fullwidth;
+    sw = textures[source]->width;
+    sh = textures[source]->height;
+    sfw = textures[source]->fullwidth;
 
     D3DLOCKED_RECT rect;
-    textureStructs[source]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    texture_peers[source]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
-    textureStructs[source]->gTexture->UnlockRect(0);
+    texture_peers[source]->UnlockRect(0);
 
     unsigned dw, dh, w, h;
-    dw = textureStructs[destination]->width;
-    dh = textureStructs[destination]->height;
+    dw = textures[destination]->width;
+    dh = textures[destination]->height;
     w = (x+sw<=dw?sw:dw-x);
     h = (y+sh<=dh?sh:dh-y);
-    textureStructs[destination]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    texture_peers[destination]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     for (unsigned int i=0; i<h; ++i){
       memcpy(static_cast<unsigned char*>(rect.pBits)+(dw*(i+y)+x)*4, bitmap+sfw*i*4, w*4);
     }
-    textureStructs[destination]->gTexture->UnlockRect(0);
+    texture_peers[destination]->UnlockRect(0);
 
     delete[] bitmap;
   }
@@ -129,26 +137,26 @@ namespace enigma
     unsigned int sw, sh, sfw, sfh;
     sw = w;
     sh = h;
-    sfw = textureStructs[source]->fullwidth;
-    sfh = textureStructs[source]->fullheight;
+    sfw = textures[source]->fullwidth;
+    sfh = textures[source]->fullheight;
 
     D3DLOCKED_RECT rect;
-    textureStructs[source]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    texture_peers[source]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
-    textureStructs[source]->gTexture->UnlockRect(0);
+    texture_peers[source]->UnlockRect(0);
 
     if (xoff+sw>sfw) sw = sfw-xoff;
     if (yoff+sh>sfh) sh = sfh-yoff;
     unsigned dw, dh, wi, hi;
-    dw = textureStructs[destination]->width;
-    dh = textureStructs[destination]->height;
+    dw = textures[destination]->width;
+    dh = textures[destination]->height;
     wi = (x+sw<=dw?sw:dw-x);
     hi = (y+sh<=dh?sh:dh-y);
-    textureStructs[destination]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    texture_peers[destination]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     for (unsigned int i=0; i<hi; ++i){
       memcpy(static_cast<unsigned char*>(rect.pBits)+(dw*(i+y)+x)*4, bitmap+xoff*4+sfw*(i+yoff)*4, wi*4);
     }
-    textureStructs[destination]->gTexture->UnlockRect(0);
+    texture_peers[destination]->UnlockRect(0);
 
     delete[] bitmap;
   }
@@ -156,113 +164,58 @@ namespace enigma
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
     unsigned fw, fh, size;
-    fw = textureStructs[tex]->fullwidth;
-    fh = textureStructs[tex]->fullheight;
+    fw = textures[tex]->fullwidth;
+    fh = textures[tex]->fullheight;
     size = (fh<<(lgpp2(fw)+2))|2;
 
     D3DLOCKED_RECT rect;
 
-    textureStructs[copy_tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    texture_peers[copy_tex]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     unsigned char* bitmap_copy = static_cast<unsigned char*>(rect.pBits);
-    textureStructs[copy_tex]->gTexture->UnlockRect(0);
+    texture_peers[copy_tex]->UnlockRect(0);
 
-    textureStructs[tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    texture_peers[tex]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     for (unsigned int i = 3; i < size; i += 4)
         ((unsigned char*)rect.pBits)[i] = (bitmap_copy[i-3] + bitmap_copy[i-2] + bitmap_copy[i-1])/3;
-    textureStructs[tex]->gTexture->UnlockRect(0);
+    texture_peers[tex]->UnlockRect(0);
 
     delete[] bitmap_copy;
   }
 
   void graphics_delete_texture(int texid)
   {
-	 delete textureStructs[texid];
+    texture_peers[texid]->Release();
+    texture_peers[texid] = NULL;
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
-    *fullwidth = textureStructs[texture]->fullwidth;
-    *fullheight = textureStructs[texture]->fullheight;
+    *fullwidth = textures[texture]->fullwidth;
+    *fullheight = textures[texture]->fullheight;
 
     D3DLOCKED_RECT rect;
 
-    textureStructs[texture]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_READONLY);
+    texture_peers[texture]->LockRect( 0, &rect, NULL, D3DLOCK_READONLY);
     unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
-    textureStructs[texture]->gTexture->UnlockRect(0);
+    texture_peers[texture]->UnlockRect(0);
 
     return bitmap;
   }
-}
+} // namespace enigma
 
-namespace enigma_user
-{
-
-int texture_add(string filename, bool mipmap) {
-  unsigned int w, h, fullwidth, fullheight;
-  int img_num;
-
-  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,&img_num,false);
-  if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
-  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
-  delete[] pxdata;
-
-  return texture;
-}
-
-void texture_save(int texid, string fname) {
-	unsigned w, h;
-	unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(texid, &w, &h);
-
-  string ext = enigma::image_get_format(fname);
-
-	enigma::image_save(fname, rgbdata, w, h, w, h, false);
-
-	delete[] rgbdata;
-}
-
-void texture_delete(int texid) {
-  delete textureStructs[texid];
-}
-
-bool texture_exists(int texid) {
-  return textureStructs[texid] != NULL;
-}
-
-void texture_preload(int texid)
-{
-  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-}
+namespace enigma_user {
 
 void texture_set_priority(int texid, double prio)
 {
   draw_batch_flush(batch_flush_deferred);
   // Deprecated in ENIGMA and GM: Studio
-  textureStructs[texid]->gTexture->SetPriority(prio);
-}
-
-gs_scalar texture_get_width(int texid) {
-	return textureStructs[texid]->width / textureStructs[texid]->fullwidth;
-}
-
-gs_scalar texture_get_height(int texid)
-{
-	return textureStructs[texid]->height / textureStructs[texid]->fullheight;
-}
-
-gs_scalar texture_get_texel_width(int texid)
-{
-	return 1.0/textureStructs[texid]->width;
-}
-
-gs_scalar texture_get_texel_height(int texid)
-{
-	return 1.0/textureStructs[texid]->height;
+  enigma::texture_peers[texid]->SetPriority(prio);
 }
 
 void texture_set_stage(int stage, int texid) {
   draw_batch_flush(batch_flush_deferred);
   if (texid == -1) { d3dmgr->SetTexture(0, NULL); return; }
-	d3dmgr->SetTexture(stage, get_texture(texid));
+	d3dmgr->SetTexture(stage, enigma::get_texture(texid));
 	d3dmgr->SetTextureStageState(stage,D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 }
 
@@ -366,4 +319,4 @@ void texture_anisotropy_filter(int sampler, gs_scalar level)
   d3dmgr->SetSamplerState( sampler, D3DSAMP_MAXANISOTROPY, level );
 }
 
-}
+} // namespace enigma_user

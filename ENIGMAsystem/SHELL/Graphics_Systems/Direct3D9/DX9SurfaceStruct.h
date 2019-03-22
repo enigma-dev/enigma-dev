@@ -20,7 +20,6 @@
 #include <windows.h>
 #include <string>
 #include "Direct3D9Headers.h"
-#include "DX9TextureStruct.h"
 using std::string;
 
 #include <vector>
@@ -50,12 +49,12 @@ namespace enigma
 
     void OnDeviceLost() {
       Release();
-      textureStructs[tex]->OnDeviceLost();
+      //textureStructs[tex]->OnDeviceLost();
     }
 
     void OnDeviceReset() {
-      textureStructs[tex]->OnDeviceReset();
-      textureStructs[tex]->gTexture->GetSurfaceLevel(0,&surf);
+      //textureStructs[tex]->OnDeviceReset();
+      //textureStructs[tex]->gTexture->GetSurfaceLevel(0,&surf);
     }
   };
 
