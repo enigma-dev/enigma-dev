@@ -100,7 +100,7 @@ install:
         appveyor DownloadFile $depsURL -FileName $depsName
         7z x -mmt $depsName -oC:\tools\vcpkg
         (mkdir build) -and (cd build)
-        cmake -G "$env:GENERATOR" -DCMAKE_BUILD_TYPE="$env:BUILD_TYPE" -DVCPKG_DIR="$env:VCPKG_DIR%" ..
+        cmake -G "$env:GENERATOR" -DCMAKE_BUILD_TYPE="$env:BUILD_TYPE" -DVCPKG_DIR="$env:VCPKG_DIR" ..
         cmake --build . --config "$env:BUILD_TYPE"
       } ElseIf ($env:APPVEYOR_JOB_NUMBER -eq 2) {
         set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
