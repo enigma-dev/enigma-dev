@@ -394,10 +394,7 @@ string get_save_filename(string filter, string fname) {
   string("--getsavefilename /") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate(str_command);
-
-  return (char *)result.c_str();
+  return shellscript_evaluate(str_command);
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
@@ -418,10 +415,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   string("--getsavefilename /") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
-  static string result;
-  result = shellscript_evaluate((char *)str_command.c_str());
-
-  return (char *)result.c_str();
+  return shellscript_evaluate(str_command);
 }
 
 string get_directory(string dname) {
