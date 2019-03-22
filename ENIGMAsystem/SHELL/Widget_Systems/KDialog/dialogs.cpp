@@ -30,7 +30,6 @@ using std::string;
 
 #include "strings_util.h"
 #include "Universal_System/estring.h"
-using enigma_user::string_replace_all;
 using enigma_user::filename_name;
 using enigma_user::filename_path;
 
@@ -168,24 +167,24 @@ static int show_question_helperfunc(string str) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-void show_error(string str, const bool abort) {
+void show_error(string errortexy, const bool fatal) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
   string str_echo;
   
   #ifdef DEBUG_MODE
-  errortext = enigma::debug_scope::GetErrors() + "\n\n" + errortext;
+  errortext = enigma::debug_scope::GetErrors() + "\r\n\r\n" + errortext;
   #else
-  errortext = "Error in some event or another for some object: \r\n\r\n" + errortext;
+  errortext = "Error in some event or another for some object:\r\n\r\n" + errortext;
   #endif
 
-  str_echo = abort ? "echo 1" :
+  str_echo = fatal ? "echo 1" :
     "x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi";
 
   str_command = string("kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--warningyesnocancel \"") + add_escaping(str, false, "") + string("\" ") +
+  string("--warningyesnocancel \"") + add_escaping(errortext, false, "") + string("\" ") +
   string("--yes-label Abort --no-label Retry --cancel-label Ignore ") +
   string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
 
