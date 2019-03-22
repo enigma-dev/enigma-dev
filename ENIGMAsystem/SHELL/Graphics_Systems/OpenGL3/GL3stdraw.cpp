@@ -32,7 +32,6 @@
 
 namespace enigma {
 
-extern unsigned char currentcolor[4];
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 

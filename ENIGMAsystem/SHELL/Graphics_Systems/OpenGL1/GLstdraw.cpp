@@ -39,10 +39,6 @@
 #  endif
 #endif
 
-namespace enigma {
-extern unsigned char currentcolor[4];
-}
-
 namespace enigma_user
 {
 

@@ -29,10 +29,6 @@
 #include <stdio.h>
 using std::vector;
 
-namespace enigma {
-extern unsigned char currentcolor[4];
-}
-
 namespace enigma_user
 {
 

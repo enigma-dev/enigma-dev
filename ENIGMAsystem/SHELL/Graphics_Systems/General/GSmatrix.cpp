@@ -74,7 +74,6 @@ inline void stack_clear(std::stack<T> &stack) {
 
 namespace enigma {
 
-bool d3dPerspective = false;
 glm::mat4 world = glm::mat4(1.0f),
           view  = glm::mat4(1.0f),
           projection = glm::mat4(1.0f);
@@ -203,16 +202,6 @@ void matrix_stack_pop() {
 
 var matrix_stack_top() {
   return matrix_vararray(matrix_stack.top());
-}
-
-void d3d_set_perspective(bool enable) {
-  // in GM8.1 and GMS v1.4 this does not take effect
-  // until the next frame in screen_redraw
-  enigma::d3dPerspective = enable;
-}
-
-bool d3d_get_perspective() {
-  return enigma::d3dPerspective;
 }
 
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,

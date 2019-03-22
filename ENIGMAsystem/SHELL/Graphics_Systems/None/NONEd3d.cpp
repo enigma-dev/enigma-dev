@@ -34,13 +34,6 @@ struct posi { // Homogenous point.
     posi(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar w1) : x(x1), y(y1), z(z1), w(w1){}
 };
 
-namespace enigma {
-  bool d3dMode = false;
-  bool d3dHidden = false;
-  bool d3dZWriteEnable = true;
-  int d3dCulling = 0;
-}
-
 namespace enigma_user
 {
 	void d3d_clear_depth(double value){}
@@ -82,18 +75,5 @@ namespace enigma_user
 	void d3d_set_culling(int mode)
 	{
 		enigma::d3dCulling = mode;
-	}
-
-	bool d3d_get_mode()
-	{
-			return enigma::d3dMode;
-	}
-
-	bool d3d_get_hidden(){
-		return enigma::d3dHidden;
-	}
-
-	int d3d_get_culling(){
-		return enigma::d3dCulling;
 	}
 }

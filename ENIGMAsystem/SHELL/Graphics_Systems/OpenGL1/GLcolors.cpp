@@ -21,10 +21,6 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 #include <math.h>
 
-namespace enigma {
-  extern unsigned char currentcolor[4];
-}
-
 namespace enigma_user
 {
 

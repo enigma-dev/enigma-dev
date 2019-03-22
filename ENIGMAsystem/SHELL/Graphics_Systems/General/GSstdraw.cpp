@@ -36,7 +36,6 @@ using std::vector;
 
 namespace enigma {
   float circleprecision=24;
-  extern unsigned char currentcolor[4];
 
   //List of vertices we are buffering to draw.
   std::list<PolyVertex> currComplexPoly;

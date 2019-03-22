@@ -171,8 +171,8 @@ static inline void draw_gui()
 {
   // turn some state off automatically for the user to draw the GUI
   // this is exactly what GMSv1.4 does
-  int culling = d3d_get_culling();
-  bool hidden = d3d_get_hidden();
+  int culling = enigma::d3dCulling;
+  bool hidden = enigma::d3dHidden;
   bool zwrite = enigma::d3dZWriteEnable;
   d3d_set_zwriteenable(false);
   d3d_set_culling(rs_none);
