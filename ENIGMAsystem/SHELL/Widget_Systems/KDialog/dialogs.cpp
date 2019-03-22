@@ -37,6 +37,15 @@ using enigma_user::string_split;
 #include "Platforms/General/PFmain.h"
 using enigma_user::execute_shell_for_output;
 
+#include "Platforms/General/PFwindow.h"
+using enigma_user::window_get_caption;
+
+#include "Graphics_Systems/General/GScolors.h"
+using enigma_user::color_get_red;
+using enigma_user::color_get_green;
+using enigma_user::color_get_blue;
+using enigma_user::make_color_rgb;
+
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
