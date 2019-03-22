@@ -37,9 +37,6 @@ void update_blend_state() {
 
 namespace enigma {
 
-extern int currentblendmode[2];
-extern int currentblendtype;
-
 void init_blend_state() {
   blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
   blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
@@ -78,18 +75,6 @@ int draw_set_blend_mode_ext(int src, int dest) {
 
   update_blend_state();
   return 0;
-}
-
-int draw_get_blend_mode(){
-  return enigma::currentblendmode[0];
-}
-
-int draw_get_blend_mode_ext(bool src){
-  return enigma::currentblendmode[(src==true?0:1)];
-}
-
-int draw_get_blend_mode_type(){
-  return enigma::currentblendtype;
 }
 
 }

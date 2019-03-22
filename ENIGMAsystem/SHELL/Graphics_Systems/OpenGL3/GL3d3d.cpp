@@ -38,10 +38,6 @@ namespace enigma {
 
 void d3d_light_update_positions(); // forward declare
 
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
-int d3dCulling = 0;
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 
@@ -237,19 +233,6 @@ void d3d_set_color_mask(bool r, bool g, bool b, bool a){
   glColorMask(r,g,b,a);
 }
 
-bool d3d_get_mode()
-{
-  return enigma::d3dMode;
-}
-
-bool d3d_get_hidden() {
-	return enigma::d3dHidden;
-}
-
-int d3d_get_culling() {
-	return enigma::d3dCulling;
-}
-
 void d3d_set_fill_mode(int fill)
 {
   draw_batch_flush(batch_flush_deferred);
@@ -292,11 +275,9 @@ void d3d_set_clip_plane(bool enable)
   (enable?glEnable:glDisable)(GL_CLIP_DISTANCE0);
 }
 
-}
+} // namespace enigma_user
 
 #include <map>
-#include <list>
-#include "Universal_System/fileio.h"
 
 namespace enigma
 {

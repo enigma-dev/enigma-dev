@@ -23,10 +23,6 @@
 
 using namespace enigma::dx11;
 
-namespace enigma {
-  extern unsigned char currentcolor[4];
-}
-
 namespace enigma_user
 {
 

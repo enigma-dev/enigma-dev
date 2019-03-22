@@ -32,10 +32,6 @@ using std::vector;
 
 using namespace enigma::dx9;
 
-namespace enigma {
-extern unsigned char currentcolor[4];
-}
-
 namespace enigma_user
 {
 
