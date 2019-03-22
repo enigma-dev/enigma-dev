@@ -167,7 +167,7 @@ static int show_question_helperfunc(string str) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-void show_error(string errortexy, const bool fatal) {
+void show_error(string errortext, const bool fatal) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
