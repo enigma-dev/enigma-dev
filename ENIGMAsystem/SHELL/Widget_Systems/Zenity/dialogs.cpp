@@ -364,7 +364,7 @@ string get_save_filename(string filter, string fname) {
   string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
-  return shellscript_evaluate((char *)str_command.c_str());
+  return shellscript_evaluate(str_command);
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
