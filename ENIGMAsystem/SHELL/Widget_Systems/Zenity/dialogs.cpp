@@ -40,6 +40,9 @@ using enigma_user::execute_shell_for_output;
 #include "Platforms/General/PFwindow.h"
 using enigma_user::window_get_caption;
 
+#include "Platforms/General/PFfilemanip.h"
+using enigma_user::file_exists;
+
 #include "Graphics_Systems/General/GScolors.h"
 using enigma_user::color_get_red;
 using enigma_user::color_get_green;
