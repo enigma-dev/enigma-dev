@@ -107,7 +107,6 @@ namespace enigma_user {
   void d3d_end();
   void d3d_set_software_vertex_processing(bool software);
   void d3d_set_perspective(bool enable);
-  bool d3d_get_perspective();
   void d3d_set_hidden(bool enable);
   void d3d_set_depth(double dep);
   void d3d_set_depth_operator(int mode);
@@ -118,6 +117,7 @@ namespace enigma_user {
   void d3d_set_shading(bool smooth);
 
   bool d3d_get_mode();
+  bool d3d_get_perspective();
   int d3d_get_culling();
   bool d3d_get_hidden();
 
