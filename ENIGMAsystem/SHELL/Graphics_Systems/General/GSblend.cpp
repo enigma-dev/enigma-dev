@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura
+*** Copyright (C) 2013, 2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,20 +16,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
+#include "GSblend.h"
 
-//#include "OpenGLHeaders.h"
+namespace enigma {
 
-#include "../General/GScolors.h"
-#include "../General/GSprimitives.h"
-#include "../General/GSd3d.h"
-#include "../General/GSstdraw.h"
-#include "../General/GSblend.h"
-#include "../General/GSsurface.h"
-#include "../General/GSscreen.h"
-#include "../General/GSvertex.h"
+int currentblendmode[2] = {0,0};
+int currentblendtype = 0;
+
+} // namespace enigma
+
+namespace enigma_user {
+
+int draw_get_blend_mode() {
+  return enigma::currentblendmode[0];
+}
+
+int draw_get_blend_mode_ext(bool src) {
+  return enigma::currentblendmode[(src==true?0:1)];
+}
+
+int draw_get_blend_mode_type() {
+  return enigma::currentblendtype;
+}
+
+} // namespace enigma_user

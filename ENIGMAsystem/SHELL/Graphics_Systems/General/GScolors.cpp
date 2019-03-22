@@ -16,6 +16,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
 #include "GScolors.h"
 #include "GScolor_macros.h"
 
@@ -25,15 +26,14 @@ static inline int min(int x,int y){return x<y ? x:y;}
 static inline int max(int x,int y){return x>y ? x:y;}
 static inline int bclamp(int x){return x > 255 ? 255 : x < 0 ? 0 : x;}
 
-namespace enigma
-{
-	unsigned char currentcolor[4] = {0,0,0,255};
-	int currentblendmode[2] = {0,0};
-	int currentblendtype = 0;
-}
+namespace enigma {
 
-namespace enigma_user
-{
+unsigned char currentcolor[4] = {0,0,0,255};
+
+} // namespace enigma
+
+namespace enigma_user {
+
 	int merge_color(int c1,int c2,double amount)
 	{
 		amount = amount > 1 ? 1 : (amount < 0 ? 0 : amount);
