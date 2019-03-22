@@ -246,16 +246,10 @@ void d3d_set_clip_plane(bool enable)
    ///TODO: Code this
 }
 
-}
-
-namespace enigma {
-  extern unsigned char currentcolor[4];
-}
+} // namespace enigma_user
 
 // ***** LIGHTS BEGIN *****
 #include <map>
-#include <list>
-#include "Universal_System/fileio.h"
 
 struct posi { // Homogenous point.
     gs_scalar x;

@@ -275,11 +275,9 @@ void d3d_set_clip_plane(bool enable)
   (enable?glEnable:glDisable)(GL_CLIP_DISTANCE0);
 }
 
-}
+} // namespace enigma_user
 
 #include <map>
-#include <list>
-#include "Universal_System/fileio.h"
 
 namespace enigma
 {

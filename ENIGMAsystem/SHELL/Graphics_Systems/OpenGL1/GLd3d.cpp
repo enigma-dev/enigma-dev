@@ -282,11 +282,9 @@ void d3d_set_clip_plane(bool enable)
   //printf("warning: d3d_set_clip_plane(bool enable) called even though GL1 doesn't support this!\n");
 }
 
-}
+} // namespace enigma_user
 
 #include <map>
-#include <list>
-#include "Universal_System/fileio.h"
 
 struct posi { // Homogenous point.
     gs_scalar x;
