@@ -78,12 +78,8 @@ init:
   - cd %APPVEYOR_BUILD_FOLDER%
 
 install:
-  - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
-  - > # Install packages common to all builds
-    bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x %PACKAGES%"
-  - gcc -v
   - ps: |
-      If (env:APPVEYOR_JOB_NUMBER -eq 1) {
+      If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
         # this gets the latest release of RadialGM-deps using GitHub API
         $apiURL = "https://api.github.com/repos/enigma-dev/radialgm-deps/releases/latest"
@@ -105,6 +101,8 @@ install:
         cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DVCPKG_DIR="%VCPKG_DIR%" ..
         cmake --build . --config "%BUILD_TYPE%"
       } ElseIf ($env:APPVEYOR_JOB_NUMBER -eq 2) {
+        set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
+        bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x %PACKAGES%"
         # use our first job to build JDI and the CLI
         C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "make -j 4; CLI_ENABLE_EGM=FALSE make -j 4 emake"
 
@@ -124,6 +122,8 @@ install:
           Write-Host ($result | Out-String) -foregroundcolor "Gray"
         }
       } Else {
+        set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
+        bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x %PACKAGES%"
         # simply restore JDI and the CLI from the archive artifact of this same build using REST API
         $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
         appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
