@@ -38,10 +38,6 @@ namespace enigma {
 
 void d3d_light_update_positions(); // forward declare
 
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
-int d3dCulling = 0;
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 
@@ -235,19 +231,6 @@ void d3d_set_culling(int mode)
 void d3d_set_color_mask(bool r, bool g, bool b, bool a){
   draw_batch_flush(batch_flush_deferred);
   glColorMask(r,g,b,a);
-}
-
-bool d3d_get_mode()
-{
-  return enigma::d3dMode;
-}
-
-bool d3d_get_hidden() {
-	return enigma::d3dHidden;
-}
-
-int d3d_get_culling() {
-	return enigma::d3dCulling;
 }
 
 void d3d_set_fill_mode(int fill)

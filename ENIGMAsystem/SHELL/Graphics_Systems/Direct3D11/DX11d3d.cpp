@@ -40,11 +40,6 @@ void update_depth_stencil_state() {
 
 namespace enigma {
 
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
-int d3dCulling = 0;
-
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
 }
@@ -171,20 +166,6 @@ void d3d_set_culling(int mode)
 {
 	enigma::d3dCulling = mode;
 
-}
-
-bool d3d_get_mode()
-{
-    return enigma::d3dMode;
-}
-
-bool d3d_get_hidden()
-{
-    return enigma::d3dHidden;
-}
-
-int d3d_get_culling() {
-	return enigma::d3dCulling;
 }
 
 void d3d_set_fill_mode(int fill)
