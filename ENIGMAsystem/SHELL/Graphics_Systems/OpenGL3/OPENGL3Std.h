@@ -24,11 +24,6 @@
 
 //#include "OpenGLHeaders.h"
 
-namespace enigma
-{
-  extern unsigned char currentcolor[4];
-}
-
 #include "../General/GScolors.h"
 #include "../General/GSprimitives.h"
 #include "../General/GSd3d.h"

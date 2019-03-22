@@ -25,7 +25,6 @@
 using namespace enigma::dx9;
 
 namespace enigma {
-  extern unsigned char currentcolor[4];
   D3DCOLOR get_currentcolor() {
 	return D3DCOLOR_RGBA(currentcolor[0], currentcolor[1], currentcolor[2], currentcolor[3]);
   }

@@ -30,8 +30,6 @@
 
 namespace enigma
 {
-  extern unsigned char currentcolor[4];
-
 	unsigned get_texture(int texid);
 }
 
