@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.11)
 
-set(LIB "compileEGMf")
-set(LIB_DESCRIPTION "Enigma Compiler")
+set(TARGET "compileEGMf")
+set(TARGET_DESCRIPTION "Enigma Compiler")
 
-project(${LIB} DESCRIPTION ${LIB_DESCRIPTION})
+project(${TARGET} DESCRIPTION ${TARGET_DESCRIPTION})
+
+add_definitions(-DNOMINMAX)
 
 file(GLOB_RECURSE COMPILER_SOURCES *.cpp)
 list(REMOVE_ITEM COMPILER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/standalone_main.cpp")
@@ -19,9 +21,14 @@ set(SHARED_SOURCES
    "${ENIGMA_DIR}/shared/libpng-util/libpng-util.cpp"
 )
 
-add_library(${LIB} SHARED ${COMPILER_SOURCES} ${SHARED_SOURCES})
+set(CMAKE_SHARED_LIBRARY_PREFIX lib)
 
-include_directories(${LIB} PRIVATE 
+add_library(${TARGET} SHARED ${COMPILER_SOURCES} ${SHARED_SOURCES})
+
+set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 11)
+set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD_REQUIRED ON)
+
+include_directories(${TARGET} PRIVATE 
                    "${ENIGMA_DIR}/shared"
                    "${ENIGMA_DIR}/shared/libpng-util/"
                    "${CMAKE_CURRENT_SOURCE_DIR}" 
@@ -30,8 +37,7 @@ include_directories(${LIB} PRIVATE
                    "${ENIGMA_DIR}/shared/protos/codegen/"
 )
 
-set_property(TARGET ${LIB} PROPERTY CXX_STANDARD 11)
-set_property(TARGET ${LIB} PROPERTY CXX_STANDARD_REQUIRED ON)
+include("${ENIGMA_DIR}/shared/FindProtobufDeps.cmake")
 
-install(TARGETS ${LIB} DESTINATION "${ENIGMA_DIR}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB}.dir/Debug/${LIB}.pdb" DESTINATION "${ENIGMA_DIR}" OPTIONAL)
+install(TARGETS ${TARGET} DESTINATION "${ENIGMA_DIR}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.dir/Debug/${TARGET}.pdb" DESTINATION "${ENIGMA_DIR}" OPTIONAL)

@@ -21,8 +21,9 @@ set(CompilerFlags
     )
 
 foreach(CompilerFlag ${CompilerFlags})
-  if(MSVC)
+  if(MSVC AND USE_STATIC_LIBS)
+    # Force static linking of msvc runtime
     string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-  endif(MSVC)
+  endif()
   message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
 endforeach()

@@ -5,9 +5,33 @@ project(SuperBuild)
 include(ExternalProject)
 
 set(CL_ARGS "")
-set(PB_ARGS "") 
+set(PB_ARGS "")
+set(VS_ARGS "")
+
+if (MSVC)
+  if (NOT VCPKG_DIR)
+    message(FATAL_ERROR "VCPKG_DIR NOT SET")
+  endif()
+
+  if (NOT TARGET_TRIPLET)
+    set(TARGET_TRIPLET "x64-windows-static")
+  endif()
+
+  string(FIND "${TARGET_TRIPLET}" "static" STATIC_TARGET)
+  if (STATIC_TARGET)
+    set(USE_STATIC_LIBS ON)
+  endif()
+
+  list(APPEND VS_ARGS
+       "-DCMAKE_TOOLCHAIN_FILE=${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake"
+       "-DVCPKG_TARGET_TRIPLET=${TARGET_TRIPLET}"
+       "-DProtobuf_IMPORT_DIRS=${VCPKG_DIR}/installed/${TARGET_TRIPLET}/include"
+  )
+endif()
+
 if(USE_STATIC_LIBS)
-  list(APPEND CL_ARGS 
+  list(APPEND CL_ARGS
+       ${VS_ARGS}
        "-DUSE_STATIC_LIBS=ON"
        "-DBUILD_STATIC_LIBS=ON"
        "-DBUILD_SHARED_LIBS=OFF" 
@@ -17,7 +41,9 @@ if(USE_STATIC_LIBS)
 # Protobuf blocks linking to emake and compiler at same time #
 ##############################################################
 
-  list(APPEND PB_ARGS 
+  list(APPEND PB_ARGS
+       ${VS_ARGS}
+       "-DUSE_STATIC_LIBS=ON"
        "-DBUILD_STATIC_LIBS=ON"
        "-DBUILD_SHARED_LIBS=ON" 
   )
