@@ -30,7 +30,6 @@ using std::string;
 
 #include "strings_util.h"
 #include "Universal_System/estring.h"
-using enigma_user::string_replace_all;
 using enigma_user::filename_name;
 using enigma_user::filename_path;
 
@@ -166,9 +165,9 @@ void show_error(string errortext, const bool fatal) {
   string str_echo;
   
   #ifdef DEBUG_MODE
-  errortext = enigma::debug_scope::GetErrors() + "\n\n" + errortext;
+  errortext = enigma::debug_scope::GetErrors() + "\r\n\r\n" + errortext;
   #else
-  errortext = "Error in some event or another for some object: \r\n\r\n" + errortext;
+  errortext = "Error in some event or another for some object:\r\n\r\n" + errortext;
   #endif
 
   str_echo = fatal ? "echo 1" :
