@@ -56,19 +56,27 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 if(MSVC)
-  target_include_directories(${TARGET} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/" "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
+  include_directories("${CMAKE_CURRENT_BINARY_DIR}/" "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
 endif()
 
 # Find GRPC
-find_library(TARGET_GRPC_UNSECURE NAMES grpc++_unsecure)
-find_library(TARGET_GRPC NAMES grpc)
-find_library(TARGET_GPR NAMES gpr)
-target_link_libraries(${TARGET} PRIVATE ${TARGET_GRPC_UNSECURE} ${TARGET_GRPC} ${TARGET_GPR})
+find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
+find_library(LIB_GRPC NAMES grpc)
+find_library(LIB_GPR NAMES gpr)
+if(BUILD_STATIC_LIBS)
+  target_link_libraries(${TARGET}-static PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
+else()
+  target_link_libraries(${TARGET} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
+endif()
 
 # Find Protobuf
 include(FindProtobuf)
 include_directories(${Protobuf_INCLUDE_DIRS})
-target_link_libraries(${TARGET} PRIVATE ${Protobuf_LIBRARIES})
+if(BUILD_STATIC_LIBS)
+  target_link_libraries(${TARGET}-static PRIVATE ${Protobuf_LIBRARIES})
+else()
+  target_link_libraries(${TARGET} PRIVATE ${Protobuf_LIBRARIES})
+endif()
 
 foreach(_proto ${PROTO_FILES})
   get_filename_component(_basename ${_proto} NAME_WE)
