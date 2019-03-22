@@ -229,10 +229,10 @@ void display_reset(int samples, bool vsync) {
   if (d3dmgr == NULL) { return; }
   D3DPRESENT_PARAMETERS d3dpp;
   get_d3d_present_params(&d3dpp);
-  d3dpp.PresentationInterval = vsync ? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_IMMEDIATE;
+  d3dpp.PresentationInterval = vsync?D3DPRESENT_INTERVAL_DEFAULT:D3DPRESENT_INTERVAL_IMMEDIATE;
   d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + samples);
   d3dpp.MultiSampleQuality = 0;
-  d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, samples > 0 ? TRUE : FALSE);
+  d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, samples > 0);
 
   enigma::Reset(&d3dpp);
 }
@@ -242,7 +242,7 @@ void set_synchronization(bool enable)
   if (d3dmgr == NULL) { return; }
   D3DPRESENT_PARAMETERS d3dpp;
   get_d3d_present_params(&d3dpp);
-  d3dpp.PresentationInterval = enable ? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_IMMEDIATE;
+  d3dpp.PresentationInterval = enable?D3DPRESENT_INTERVAL_DEFAULT:D3DPRESENT_INTERVAL_IMMEDIATE;
 
   enigma::Reset(&d3dpp);
 }

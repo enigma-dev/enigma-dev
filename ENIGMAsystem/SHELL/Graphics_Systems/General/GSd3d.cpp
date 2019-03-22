@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Polygone
+*** Copyright (C) 2013,2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,20 +16,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
+#include "GSd3d.h"
 
-//#include "OpenGLHeaders.h"
+namespace enigma {
 
-#include "../General/GScolors.h"
-#include "../General/GSprimitives.h"
-#include "../General/GSd3d.h"
-#include "../General/GSstdraw.h"
-#include "../General/GSblend.h"
-#include "../General/GSsurface.h"
-#include "../General/GSscreen.h"
-#include "../General/GSvertex.h"
+bool d3dMode=false, d3dPerspective=false, d3dHidden=false, d3dZWriteEnable=true;
+int d3dCulling = enigma_user::rs_none;
+
+} // namespace enigma
+
+namespace enigma_user {
+
+void d3d_set_perspective(bool enable) {
+  // in GM8.1 and GMS v1.4 this does not take effect
+  // until the next frame in screen_redraw
+  enigma::d3dPerspective = enable;
+}
+
+} // namespace enigma_user

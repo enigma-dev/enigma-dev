@@ -61,11 +61,6 @@ D3DFOGMODE fogmodes[3] = {
 
 namespace enigma {
 
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
-int d3dCulling = 0;
-
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   D3DTRANSFORMSTATETYPE state;
@@ -213,20 +208,6 @@ void d3d_set_culling(int mode)
 	draw_batch_flush(batch_flush_deferred);
 	enigma::d3dCulling = mode;
 	d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[mode]);
-}
-
-bool d3d_get_mode()
-{
-    return enigma::d3dMode;
-}
-
-bool d3d_get_hidden()
-{
-    return enigma::d3dHidden;
-}
-
-int d3d_get_culling() {
-	return enigma::d3dCulling;
 }
 
 void d3d_set_fill_mode(int fill)
