@@ -17,7 +17,6 @@
 
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSblend.h"
-#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
 namespace enigma_user

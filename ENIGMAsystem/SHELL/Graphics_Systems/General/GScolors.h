@@ -21,8 +21,6 @@
 namespace enigma {
 
 extern unsigned char currentcolor[4];
-extern int currentblendmode[2];
-extern int currentblendtype;
 
 } // namespace enigma
 

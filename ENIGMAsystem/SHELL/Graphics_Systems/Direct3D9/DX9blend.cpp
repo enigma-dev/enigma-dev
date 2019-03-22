@@ -17,7 +17,6 @@
 
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSblend.h"
-#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
 using namespace enigma::dx9;
