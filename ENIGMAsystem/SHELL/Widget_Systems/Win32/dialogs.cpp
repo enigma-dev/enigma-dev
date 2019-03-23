@@ -562,12 +562,12 @@ string get_directory(string dname, string caption)
   //because I could not find out which one it uses, since IFileDialog is used by both wxWidgets and QtFramework
   //and there doesn't appear to be a standard file picker for XP or lower in the Windows API except SHBrowseForFolder that is
   //used by Game Maker for get_directory_alt
-  IFileDialog *SelectDirectory;
-  CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&SelectDirectory));
+  IFileDialog *selectDirectory;
+  CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&selectDirectory));
 
   DWORD options;
-  SelectDirectory->GetOptions(&options);
-  SelectDirectory->SetOptions(options | FOS_PICKFOLDERS | FOS_NOCHANGEDIR | FOS_FORCEFILESYSTEM);
+  selectDirectory->GetOptions(&options);
+  selectDirectory->SetOptions(options | FOS_PICKFOLDERS | FOS_NOCHANGEDIR | FOS_FORCEFILESYSTEM);
 
   tstring tstr_dname = widen(dname);
   LPWSTR szFilePath = (wchar_t *)tstr_dname.c_str();
@@ -579,18 +579,18 @@ string get_directory(string dname, string caption)
     LPWSTR szName = nullptr;
     hr = pItem->GetDisplayName(SIGDN_NORMALDISPLAY, &szName);
     if (SUCCEEDED(hr)) {
-      SelectDirectory->SetFolder(pItem);
+      selectDirectory->SetFolder(pItem);
       ::CoTaskMemFree(szName);
     }
     pItem->Release();
   }
 
-  if (caption.empty()) SelectDirectory->SetTitle(L"Select Directory");
-  else SelectDirectory->SetTitle(std::wstring(caption.begin(), caption.end()).c_str());
-  SelectDirectory->Show(enigma::hWnd);
+  if (caption.empty()) selectDirectory->SetTitle(L"Select Directory");
+  else selectDirectory->SetTitle(std::wstring(caption.begin(), caption.end()).c_str());
+  selectDirectory->Show(enigma::hWnd);
 
   pItem = nullptr;
-  hr = SelectDirectory->GetResult(&pItem);
+  hr = selectDirectory->GetResult(&pItem);
 
   if (SUCCEEDED(hr)) {
     LPWSTR wstr_result;
