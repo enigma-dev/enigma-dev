@@ -52,6 +52,11 @@ static string gs_but1, gs_but2, gs_but3;
 #include "Universal_System/debugscope.h"
 #endif
 
+static inline string add_slash(const string& dir) {
+  if (dir.empty() || *dir.rbegin() != '\\') return dir + '\\';
+  return dir;
+}
+
 void show_error(string errortext, const bool fatal)
 {
   #ifdef DEBUG_MODE
@@ -556,8 +561,7 @@ int get_color(int defcolor, bool advanced)
     else return defc;
 }
 
-string get_directory(string dname, string caption)
-{
+string get_directory(string dname, string caption) {
   //NOTE: This uses the Windows Vista or later file chooser, which is different than the one used by GM8 and lower
   //because I could not find out which one it uses, since IFileDialog is used by both wxWidgets and QtFramework
   //and there doesn't appear to be a standard file picker for XP or lower in the Windows API except SHBrowseForFolder that is
@@ -597,7 +601,7 @@ string get_directory(string dname, string caption)
     pItem->Release();
 
     string str_result;
-    str_result = string_replace_all(shorten(wstr_result) + "\\", "\\\\", "\\");
+    str_result = add_slash(shorten(wstr_result));
     return str_result;
   }
 
