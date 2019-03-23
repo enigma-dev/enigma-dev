@@ -585,8 +585,7 @@ string get_directory(string dname, string caption)
     pItem->Release();
   }
 
-  if (caption.empty()) selectDirectory->SetTitle(L"Select Directory");
-  else selectDirectory->SetTitle(std::wstring(caption.begin(), caption.end()).c_str());
+  selectDirectory->SetTitle(std::wstring(caption.begin(), caption.end()).c_str());
   selectDirectory->Show(enigma::hWnd);
 
   pItem = nullptr;
