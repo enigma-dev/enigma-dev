@@ -17,10 +17,10 @@
 **/
 
 #include "GL3aux.h" //glExtension_supported
-#include "GL3TextureStruct.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
 #include "Universal_System/image_formats.h"
@@ -35,23 +35,6 @@ using std::vector;
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
-
-vector<TextureStruct*> textureStructs(0);
-
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_texture(tex,texid,v)\
-    if ((texid < -1 || size_t(texid) >= textureStructs.size()) && texid!=-1) {\
-      show_error("Attempting to access non-existing texture " + toString(texid), false);\
-      return v;\
-    }\
-    const unsigned tex = (texid==-1?0:textureStructs[texid]->gltex);
-#else
-  #define get_texture(tex,texid,v)\
-    const unsigned tex = (texid==-1?0:textureStructs[texid]->gltex);
-#endif
 
 /*enum {
   //Formats and internal formats
@@ -83,6 +66,29 @@ enum {
   tx_float = GL_FLOAT;
 };*/
 
+namespace enigma {
+
+std::vector<GLuint> texture_peers;
+
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_texture(tex,texid,v)\
+    if ((texid < -1 || size_t(texid) >= enigma::texture_peers.size()) && texid!=-1) {\
+      show_error("Attempting to access non-existing texture " + toString(texid), false);\
+      return v;\
+    }\
+    const unsigned tex = (texid==-1?0:enigma::texture_peers[texid]);
+#else
+  #define get_texture(tex,texid,v)\
+    const unsigned tex = (texid==-1?0:enigma::texture_peers[texid]);
+#endif
+
+} // namespace enigma
+
+namespace {
+
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
 	x -= ((x >> 1) & 0x55555555);
@@ -92,15 +98,7 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 	return (x + (x >> 16)) & 63;
 }
 
-TextureStruct::TextureStruct(unsigned gtex)
-{
-	gltex = gtex;
-}
-
-TextureStruct::~TextureStruct()
-{
-	glDeleteTextures(1, &gltex);
-}
+} // namespace anonymous
 
 namespace enigma
 {
@@ -123,16 +121,16 @@ namespace enigma
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    TextureStruct* textureStruct = new TextureStruct(texture);
+    Texture* textureStruct = new Texture();
     textureStruct->width = width;
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
-    textureStruct->internalFormat = internalFormat;
-    textureStruct->format = format;
-    textureStruct->type = type;
-    textureStructs.push_back(textureStruct);
-    return textureStructs.size()-1;
+    const int id = textures.size();
+    textures.push_back(textureStruct);
+    texture_peers.resize(textures.size());
+    texture_peers[id] = texture;
+    return id;
   }
 
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
@@ -151,27 +149,27 @@ namespace enigma
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    TextureStruct* textureStruct = new TextureStruct(texture);
+    Texture* textureStruct = new Texture();
     textureStruct->width = width;
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
-    textureStruct->internalFormat = GL_RGBA;
-    textureStruct->format = GL_BGRA;
-    textureStruct->type = GL_UNSIGNED_BYTE;
-    textureStructs.push_back(textureStruct);
-    return textureStructs.size()-1;
+    const int id = textures.size();
+    textures.push_back(textureStruct);
+    texture_peers.resize(textures.size());
+    texture_peers[id] = texture;
+    return id;
   }
 
   int graphics_duplicate_texture(int tex, bool mipmap)
   {
-    GLuint texture = textureStructs[tex]->gltex;
+    GLuint texture = texture_peers[tex];
     glBindTexture(GL_TEXTURE_2D, texture);
     unsigned w, h, fw, fh;
-    w = textureStructs[tex]->width;
-    h = textureStructs[tex]->height;
-    fw = textureStructs[tex]->fullwidth;
-    fh = textureStructs[tex]->fullheight;
+    w = textures[tex]->width;
+    h = textures[tex]->height;
+    fw = textures[tex]->fullwidth;
+    fh = textures[tex]->fullheight;
     char* bitmap = new char[(fh<<(lgpp2(fw)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
@@ -181,13 +179,13 @@ namespace enigma
 
   void graphics_copy_texture(int source, int destination, int x, int y)
   {
-    GLuint src = textureStructs[source]->gltex;
-    GLuint dst = textureStructs[destination]->gltex;
+    GLuint src = texture_peers[source];
+    GLuint dst = texture_peers[destination];
     unsigned int sw, sh, sfw, sfh;
-    sw = textureStructs[source]->width;
-    sh = textureStructs[source]->height;
-    sfw = textureStructs[source]->fullwidth;
-    sfh = textureStructs[source]->fullheight;
+    sw = textures[source]->width;
+    sh = textures[source]->height;
+    sfw = textures[source]->fullwidth;
+    sfh = textures[source]->fullheight;
     glBindTexture(GL_TEXTURE_2D, src);
     //We could use glCopyImageSubData here, but it's GL4.3
     char* bitmap = new char[(sfh<<(lgpp2(sfw)+2))|2];
@@ -200,8 +198,8 @@ namespace enigma
 
     glBindTexture(GL_TEXTURE_2D, dst);
     unsigned dw, dh;
-    dw = textureStructs[destination]->width;
-    dh = textureStructs[destination]->height;
+    dw = textures[destination]->width;
+    dh = textures[destination]->height;
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_BGRA, GL_UNSIGNED_BYTE, cropped_bitmap);
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -212,13 +210,13 @@ namespace enigma
 
   void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y)
   {
-    GLuint src = textureStructs[source]->gltex;
-    GLuint dst = textureStructs[destination]->gltex;
+    GLuint src = texture_peers[source];
+    GLuint dst = texture_peers[destination];
     unsigned int sw, sh, sfw, sfh;
     sw = w;
     sh = h;
-    sfw = textureStructs[source]->fullwidth;
-    sfh = textureStructs[source]->fullheight;
+    sfw = textures[source]->fullwidth;
+    sfh = textures[source]->fullheight;
     glBindTexture(GL_TEXTURE_2D, src);
     //We could use glCopyImageSubData here, but it's GL4.3
     char* bitmap = new char[(sfh<<(lgpp2(sfw)+2))|2];
@@ -233,8 +231,8 @@ namespace enigma
 
     glBindTexture(GL_TEXTURE_2D, dst);
     unsigned dw, dh;
-    dw = textureStructs[destination]->width;
-    dh = textureStructs[destination]->height;
+    dw = textures[destination]->width;
+    dh = textures[destination]->height;
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_BGRA, GL_UNSIGNED_BYTE, cropped_bitmap);
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -245,13 +243,13 @@ namespace enigma
 
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
-    GLuint texture = textureStructs[tex]->gltex;
-    GLuint copy_texture = textureStructs[copy_tex]->gltex;
+    GLuint texture = texture_peers[tex];
+    GLuint copy_texture = texture_peers[copy_tex];
 
     unsigned int fw, fh, size;
     glBindTexture(GL_TEXTURE_2D, texture);
-    fw = textureStructs[tex]->fullwidth;
-    fh = textureStructs[tex]->fullheight;
+    fw = textures[tex]->fullwidth;
+    fh = textures[tex]->fullheight;
     size = (fh<<(lgpp2(fw)+2))|2;
     char* bitmap = new char[size];
     char* bitmap2 = new char[size];
@@ -273,15 +271,16 @@ namespace enigma
 
   void graphics_delete_texture(int texid)
   {
-    delete textureStructs[texid];
+    glDeleteTextures(1, &texture_peers[texid]);
+    texture_peers[texid] = 0;
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
     enigma_user::texture_set(texture);
 
-    *fullwidth = textureStructs[texture]->fullwidth;
-    *fullheight = textureStructs[texture]->fullheight;
+    *fullwidth = textures[texture]->fullwidth;
+    *fullheight = textures[texture]->fullheight;
 
     unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -316,52 +315,15 @@ namespace enigma
       glSamplerParameteri(samplerstates[i].sampler_index, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
   }
-}
+} // namespace enigma
 
-namespace enigma_user
-{
-
-int texture_add(string filename, bool mipmap) {
-  unsigned int w, h, fullwidth, fullheight;
-  int img_num;
-
-  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,&img_num,false);
-  if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
-  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
-  delete[] pxdata;
-
-  return texture;
-}
-
-void texture_save(int texid, string fname) {
-	unsigned w, h;
-	unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(texid, &w, &h);
-
-  string ext = enigma::image_get_format(fname);
-
-	enigma::image_save(fname, rgbdata, w, h, w, h, false);
-
-	delete[] rgbdata;
-}
-
-void texture_delete(int texid) {
-  delete textureStructs[texid];
-}
-
-bool texture_exists(int texid) {
-  return textureStructs[texid] != NULL;
-}
-
-void texture_preload(int texid)
-{
-  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-}
+namespace enigma_user {
 
 void texture_set_priority(int texid, double prio)
 {
   draw_batch_flush(batch_flush_deferred);
   // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
+  glBindTexture(GL_TEXTURE_2D, enigma::texture_peers[texid]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
 }
 
@@ -375,25 +337,6 @@ void texture_set_blending(bool enable)
 {
   draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_BLEND);
-}
-
-gs_scalar texture_get_width(int texid) {
-	return textureStructs[texid]->width / textureStructs[texid]->fullwidth;
-}
-
-gs_scalar texture_get_height(int texid)
-{
-	return textureStructs[texid]->height / textureStructs[texid]->fullheight;
-}
-
-gs_scalar texture_get_texel_width(int texid)
-{
-	return 1.0/textureStructs[texid]->fullwidth;
-}
-
-gs_scalar texture_get_texel_height(int texid)
-{
-	return 1.0/textureStructs[texid]->fullheight;
 }
 
 void texture_set_stage(int stage, int texid) {
@@ -500,4 +443,4 @@ void texture_anisotropy_filter(int sampler, gs_scalar levels)
   glSamplerParameterf(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
 }
 
-}
+} // namespace enigma_user
