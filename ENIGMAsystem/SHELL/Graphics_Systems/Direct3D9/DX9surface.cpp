@@ -71,13 +71,13 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
   d3dmgr->device->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
   enigma::Texture* gmTexture = new enigma::Texture();
-  const int id = enigma::textures.size();
+  const int texid = enigma::textures.size();
   enigma::textures.push_back(gmTexture);
   enigma::texture_peers.resize(enigma::textures.size());
-  enigma::texture_peers[id] = texture;
+  enigma::texture_peers[texid] = texture;
   //d3dmgr->device->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
   texture->GetSurfaceLevel(0,&surface->surf);
-  surface->tex = id; surface->width = width; surface->height = height;
+  surface->tex = texid; surface->width = width; surface->height = height;
   enigma::Surfaces.push_back(surface);
   return enigma::Surfaces.size() - 1;
 }
@@ -88,12 +88,12 @@ int surface_create_msaa(int width, int height, int levels)
   d3dmgr->device->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
   enigma::Texture* gmTexture = new enigma::Texture();
-  const int id = enigma::textures.size();
+  const int texid = enigma::textures.size();
   enigma::textures.push_back(gmTexture);
   enigma::texture_peers.resize(enigma::textures.size());
-  enigma::texture_peers[id] = texture;
+  enigma::texture_peers[texid] = texture;
   d3dmgr->device->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
-  surface->tex = id; surface->width = width; surface->height = height;
+  surface->tex = texid; surface->width = width; surface->height = height;
   enigma::Surfaces.push_back(surface);
   return enigma::Surfaces.size() - 1;
 }

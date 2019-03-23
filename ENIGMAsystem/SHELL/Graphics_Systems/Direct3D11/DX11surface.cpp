@@ -16,9 +16,9 @@
 **/
 
 #include "DX11SurfaceStruct.h"
-#include "DX11TextureStruct.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
@@ -27,6 +27,8 @@
 #include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
+#include <vector>
+#include <utility> // for std::pair
 #include <iostream>
 #include <cstddef>
 #include <math.h>
@@ -36,7 +38,12 @@ using namespace std;
 using namespace enigma::dx11;
 
 namespace enigma {
+
 vector<Surface*> Surfaces(0);
+
+// really tacky but i'll remove this in the next pr when i generalize surface struct
+extern vector<pair<ID3D11Texture2D*, ID3D11ShaderResourceView*>> texture_peers;
+
 }
 
 namespace enigma_user {
@@ -107,10 +114,13 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
   }
 
   enigma::Surface* surface = new enigma::Surface();
-  TextureStruct* gmTexture = new TextureStruct(renderTargetTexture, shaderResourceView);
-  textureStructs.push_back(gmTexture);
+  enigma::Texture* gmTexture = new enigma::Texture();
+  const int texid = enigma::textures.size();
+  enigma::textures.push_back(gmTexture);
+  enigma::texture_peers.resize(enigma::textures.size());
+  enigma::texture_peers[texid] = {renderTargetTexture,shaderResourceView};
   surface->renderTargetView = renderTargetView;
-  surface->tex = textureStructs.size() - 1;
+  surface->tex = texid;
   surface->width = width; surface->height = height;
   enigma::Surfaces.push_back(surface);
   return enigma::Surfaces.size() - 1;

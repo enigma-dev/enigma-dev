@@ -21,8 +21,6 @@
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
-#include "Universal_System/image_formats.h"
-
 #include <vector>
 #include <stdio.h>
 #include <string.h>
