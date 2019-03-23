@@ -141,7 +141,9 @@ void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
 
 void graphics_delete_texture(int tex)
 {
-
+  texture_peers[tex].second->Release();
+  texture_peers[tex].first->Release();
+  texture_peers[tex] = {NULL,NULL}; // null the pointers
 }
 
 unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
