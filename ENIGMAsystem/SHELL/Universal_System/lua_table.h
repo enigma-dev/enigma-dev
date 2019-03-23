@@ -124,11 +124,9 @@ private:
 
 
 public:
-  T& operator[] (size_t ind)
-  {
+  T& operator[] (size_t ind) {
     mx_size = my_max(ind+1, mx_size);
-    if (ind >= dn_reserve)
-    {
+    if (ind >= dn_reserve) {
       // Calculate tolerable size increase
       const size_t c = (dn_reserve < 4) ? 4 : dn_reserve << 1;
 
@@ -140,6 +138,15 @@ public:
       upsize(c);
     }
 
+    return dense[ind];
+  }
+  
+  const T& operator[] (size_t ind) const {
+    static const T sentinel;
+    if (ind >= dn_reserve) {
+      auto f = sparse.find(ind);
+      return f == sparse.end()? sentinel : f->second;
+    }
     return dense[ind];
   }
 

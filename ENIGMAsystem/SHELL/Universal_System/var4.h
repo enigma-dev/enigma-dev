@@ -31,6 +31,7 @@
 
 // We want var and variant to support a lot of assignment types.
 #include "var_te.h"
+#include "lua_table.h"
 
 #include <string>
 
@@ -163,139 +164,54 @@ struct variant
  types_extrapolate_string_p(prefix,;)\
  prefix (variant x);
 
-struct var
-{
-  void* values;
+struct var : variant {
+  lua_table<variant> array1d;
+  lua_table<lua_table<variant>> array2d;
   
-  private:
-    void initialize();
-    void cleanup();
-  public:
-  
-  operator variant&();
-  operator const variant&() const;
-  
-  operator int();
-  operator bool();
-  operator char();
-  operator long();
-  operator short();
-  operator unsigned();
-  operator unsigned char();
-  operator unsigned long();
-  operator unsigned short();
-  operator unsigned long long();
-  operator long long();
-  operator double();
-  operator float();
-  
-  operator std::string();
-  
-  operator int() const;
-  operator bool() const;
-  operator char() const;
-  operator long() const;
-  operator short() const;
-  operator unsigned() const;
-  operator unsigned char() const;
-  operator unsigned long() const;
-  operator unsigned short() const;
-  operator unsigned long long() const;
-  operator long long() const;
-  operator double() const;
-  operator float() const;
-  
-  operator std::string() const;
-  
-  var();
+  var() {}
   var(const var&);
-  var(variant value, size_t length, size_t height = 1);
-  types_extrapolate_alldec(var)
-  
-  types_extrapolate_alldec(variant& operator=)
-  var& operator= (const var&);
-  
-  #undef types_extrapolate_alldec
-  #define types_extrapolate_alldec(prefix)\
-   types_extrapolate_real_p  (prefix,;)\
-   types_extrapolate_string_p(prefix,;)\
-   prefix (const var& x) EVCONST;\
-   prefix (variant x) EVCONST;
-  
-  types_extrapolate_alldec(variant& operator+=)
-  types_extrapolate_alldec(variant& operator-=)
-  types_extrapolate_alldec(variant& operator*=)
-  types_extrapolate_alldec(variant& operator/=)
-  types_extrapolate_alldec(variant& operator%=)
-  
-  types_extrapolate_alldec(variant& operator<<=)
-  types_extrapolate_alldec(variant& operator>>=)
-  types_extrapolate_alldec(variant& operator&=)
-  types_extrapolate_alldec(variant& operator|=)
-  types_extrapolate_alldec(variant& operator^=)
-  
-  #undef EVCONST
-  #define EVCONST const
-  types_extrapolate_alldec(variant operator+)
-  types_extrapolate_alldec(double  operator-)
-  types_extrapolate_alldec(double  operator*)
-  types_extrapolate_alldec(double  operator/)
-  types_extrapolate_alldec(double  operator%)
-  
-  types_extrapolate_alldec(long operator<<)
-  types_extrapolate_alldec(long operator>>)
-  types_extrapolate_alldec(long operator&)
-  types_extrapolate_alldec(long operator|)
-  types_extrapolate_alldec(long operator^)
-  
-  #undef types_extrapolate_alldec
-  #define types_extrapolate_alldec(prefix)\
-   types_extrapolate_real_p  (prefix,;)\
-   types_extrapolate_string_p(prefix,;)\
-   prefix (const variant &x) EVCONST;\
-   prefix (const var& x) EVCONST;
-  
-  types_extrapolate_alldec(bool operator==)
-  types_extrapolate_alldec(bool operator!=)
-  types_extrapolate_alldec(bool operator>=)
-  types_extrapolate_alldec(bool operator<=)
-  types_extrapolate_alldec(bool operator>)
-  types_extrapolate_alldec(bool operator<)
-  #undef EVCONST
-  #define EVCONST
-  
-  variant&  operator++();
-  double    operator++(int);
-  variant&  operator--();
-  double    operator--(int);
-  
-  #undef EVCONST
-  #define EVCONST const
-  bool      operator!() EVCONST;
-  long      operator~() EVCONST;
-  double    operator-() EVCONST;
-  double    operator+() EVCONST;
-  #undef EVCONST
-  #define EVCONST
-  
-  variant& operator*  ();
-  variant& operator[] (int);
-  variant& operator() ();
-  variant& operator() (int);
-  variant& operator() (int,int);
-  
-  const variant& operator*  () const;
-  const variant& operator() () const;
-  const variant& operator[] (int) const;
-  const variant& operator() (int) const;
-  const variant& operator() (int,int) const;
+  var(variant value, size_t length, size_t height = 1) {
+    
+  }
+  template<typename T> var(const T &v): variant(v) {}
+
+  variant& operator*  () { return *this; }
+  variant& operator() () { return *this; }
+  variant& operator() (int ind) { return (*this)[ind]; }
+
+  variant& operator[] (int ind) {
+    if (!ind) return *this;
+    return array1d[ind];
+  }
+  variant& operator() (int ind_2d,int ind_1d) {
+    if (ind_2d) return array2d[ind_2d][ind_1d];
+    if (ind_1d) return array1d[ind_1d];
+    return *this;
+  }
+
+  const variant& operator*  () const { return *this; }
+  const variant& operator() () const { return *this; }
+  const variant& operator() (int ind) const { return (*this)[ind]; }
+
+  const variant& operator[] (int ind) const {
+    if (!ind) return *this;
+    return array1d[ind];
+  }
+  const variant& operator() (int ind_2d,int ind_1d) const {
+    if (ind_2d) return array2d[ind_2d][ind_1d];
+    if (ind_1d) return array1d[ind_1d];
+    return *this;
+  }
 
   //Calculate array lengths.
-  int array_len() const;
-  int array_height() const;
-  int array_len(int row) const;
+  int array_len() const { return array1d.max_index(); }
+  int array_height() const { return array2d.max_index(); }
+  int array_len(int row) const {
+    if (row) return array2d[row].max_index();
+    return array1d.max_index();
+  }
   
-  ~var();
+  ~var() {}
 };
 
 
