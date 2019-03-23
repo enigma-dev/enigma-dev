@@ -10,8 +10,6 @@ skip_branch_with_pr: true
 branches:
   only:
     - master
-    
-image: Visual Studio 2017
 
 environment:
   OUTPUT: /tmp/test.exe
@@ -32,7 +30,7 @@ environment:
 
   matrix:
     # MSVC
-    - {VCPKG_DIR: "C:/tools/vcpkg", TRIPLET_NAME: x64-windows-static, BUILD_TYPE: Debug, GENERATOR: "Visual Studio 15 2017 Win64"}
+    - {VCPKG_DIR: "C:/tools/vcpkg", APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017", TRIPLET_NAME: x64-windows-static, BUILD_TYPE: Debug, GENERATOR: "Visual Studio 15 2017 Win64"}
     
     # Game Modes
     - {MODE: Run}
