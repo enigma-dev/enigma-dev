@@ -95,7 +95,7 @@ install:
         }
         Write-Host $depsURL
         # download and extract the deps matching this job's architecture
-        appveyor DownloadFile $depsURL -FileName $depsName
+        appveyor DownloadFile https://ci.appveyor.com/api/buildjobs/dsnklgpjdp05732h/artifacts/rgmdeps-x64.zip -FileName $depsName
         7z x -mmt $depsName -oC:\tools\vcpkg
         (mkdir build) -and (cd build)
         cmake -G "$env:GENERATOR" -DCMAKE_BUILD_TYPE="$env:BUILD_TYPE" -DVCPKG_DIR="$env:VCPKG_DIR" ..
@@ -125,9 +125,8 @@ install:
         $env:PATH="C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;$env:PATH"
         bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x $env:PACKAGES"
         # simply restore JDI and the CLI from the archive artifact of this same build using REST API
-        $artifactsURL = "https://ci.appveyor.com/api/buildjobs/dsnklgpjdp05732h/artifacts/rgmdeps-x64.zip"
-        appveyor DownloadFile ($artifactsURL) -FileName blobs.zip
-        7z e -mmt blobs.zip
+        $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
+        appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
