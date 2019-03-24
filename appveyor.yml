@@ -98,7 +98,7 @@ install:
         7z x -mmt $depsName -oC:\tools\vcpkg
         # download and extract the deps matching this job's architecture
         appveyor DownloadFile https://ci.appveyor.com/api/buildjobs/23ytdkq0wcverhj0/artifacts/rgmdeps-x64.zip -FileName $depsName
-        7z x -mmt $depsName -oC:\tools\vcpkg
+        7z x -mmt $depsName -oC:\tools\vcpkg -aoa
         (mkdir build) -and (cd build)
         cmake -G "$env:GENERATOR" -DCMAKE_BUILD_TYPE="$env:BUILD_TYPE" -DVCPKG_DIR="$env:VCPKG_DIR" ..
         cmake --build . --config "$env:BUILD_TYPE"
