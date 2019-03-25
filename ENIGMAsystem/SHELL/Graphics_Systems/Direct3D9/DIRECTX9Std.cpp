@@ -30,6 +30,8 @@ using namespace enigma::dx9;
 
 namespace enigma {
 
+bool Direct3D9Managed = true;
+
 void graphicssystem_initialize() {
   d3ddev->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
   // just in case the user does turn on lighting, we need to set a material

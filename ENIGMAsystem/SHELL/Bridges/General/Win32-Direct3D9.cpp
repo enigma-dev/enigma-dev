@@ -53,7 +53,6 @@ LPDIRECT3DDEVICE9 d3ddev = NULL; // the pointer to the device class
 
 extern HWND hWnd;
 extern bool forceSoftwareVertexProcessing;
-bool Direct3D9Managed = true;
 
 void OnDeviceLost() {
   d3ddev->EndScene();
