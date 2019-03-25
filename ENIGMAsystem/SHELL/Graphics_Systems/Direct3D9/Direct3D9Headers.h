@@ -19,12 +19,8 @@
 #define ENIGMA_DIRECT3D9_HEADERS_H
 
 #include <map>
-#include <string>
-#include <cmath>
 
 #include <d3d9.h>
-#include <windows.h>
-#include <windowsx.h>
 
 using namespace std;
 
@@ -32,7 +28,6 @@ using std::map;
 
 namespace enigma {
 
-extern HWND hWnd;
 extern bool Direct3D9Managed;
 
 namespace dx9 {

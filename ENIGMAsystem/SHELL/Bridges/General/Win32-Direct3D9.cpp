@@ -51,8 +51,8 @@ ContextManager* d3dmgr; // the pointer to the device class
 
 } // namespace dx9
 
-  extern bool forceSoftwareVertexProcessing;
-  bool Direct3D9Managed = true;
+extern HWND hWnd;
+extern bool forceSoftwareVertexProcessing;
 
   void OnDeviceLost() {
     d3dmgr->device->EndScene();

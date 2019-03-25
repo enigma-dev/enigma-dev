@@ -25,9 +25,8 @@
 #include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 
 #include <windows.h>
-#include <windowsx.h>
 #include <d3d11.h>
-#include <string>
+
 using namespace std;
 
 namespace enigma {

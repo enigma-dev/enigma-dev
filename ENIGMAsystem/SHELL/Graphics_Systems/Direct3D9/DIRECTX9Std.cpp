@@ -30,6 +30,7 @@ using namespace std;
 namespace enigma
 {
 
+bool Direct3D9Managed = true;
 void graphicssystem_initialize() {}
 
 } // namespace enigma
