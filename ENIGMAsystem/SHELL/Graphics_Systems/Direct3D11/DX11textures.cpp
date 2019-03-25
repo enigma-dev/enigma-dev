@@ -129,8 +129,8 @@ void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
 void graphics_delete_texture(int tex)
 {
   auto texture = (DX11Texture*)textures[tex];
-  texture->peer->Release(); texture->peer = NULL;
-  texture->view->Release(); texture->view = NULL;
+  texture->peer->Release(), texture->peer = NULL;
+  texture->view->Release(), texture->view = NULL;
 }
 
 unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
