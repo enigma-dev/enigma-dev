@@ -16,6 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "GLtextures_impl.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GLSurfaceStruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -71,7 +72,6 @@ namespace enigma
   unordered_map<unsigned int, surface> surface_array;
   size_t surface_max=0;
   extern int viewport_x, viewport_y, viewport_w, viewport_h;
-  GLuint get_texture(int texid);
 }
 
 namespace enigma_user
@@ -107,7 +107,7 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, enigma::get_texture(texture), 0);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, enigma::get_texture_peer(texture), 0);
     glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glClearColor(1,1,1,0);
@@ -152,7 +152,7 @@ int surface_create_msaa(int width, int height, int samples)
   int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
   glGenFramebuffers(1, &fbo);
   glPushAttrib(GL_TEXTURE_BIT);
-  glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, enigma::get_texture(texture));
+  glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, enigma::get_texture_peer(texture));
 
   glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_BGRA, w, h, false);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -160,7 +160,7 @@ int surface_create_msaa(int width, int height, int samples)
 
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D_MULTISAMPLE, enigma::get_texture(texture), 0);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D_MULTISAMPLE, enigma::get_texture_peer(texture), 0);
   glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
   glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
   glClearColor(1,1,1,0);

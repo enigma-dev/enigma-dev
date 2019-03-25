@@ -16,6 +16,7 @@
 **/
 
 #include "DX9SurfaceStruct.h"
+#include "DX9textures_impl.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
@@ -38,9 +39,6 @@ using namespace std;
 using namespace enigma::dx9;
 
 namespace enigma {
-
-// really tacky but i'll remove this in the next pr when i generalize surface struct
-extern std::vector<LPDIRECT3DTEXTURE9> texture_peers;
 
 vector<Surface*> Surfaces(0);
 D3DCOLOR get_currentcolor();
@@ -70,11 +68,9 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
   LPDIRECT3DTEXTURE9 texture = NULL;
   d3dmgr->device->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
-  enigma::Texture* gmTexture = new enigma::Texture();
+  enigma::DX9Texture* gmTexture = new enigma::DX9Texture(texture);
   const int texid = enigma::textures.size();
   enigma::textures.push_back(gmTexture);
-  enigma::texture_peers.resize(enigma::textures.size());
-  enigma::texture_peers[texid] = texture;
   //d3dmgr->device->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
   texture->GetSurfaceLevel(0,&surface->surf);
   surface->tex = texid; surface->width = width; surface->height = height;
@@ -87,11 +83,9 @@ int surface_create_msaa(int width, int height, int levels)
   LPDIRECT3DTEXTURE9 texture = NULL;
   d3dmgr->device->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
-  enigma::Texture* gmTexture = new enigma::Texture();
+  enigma::DX9Texture* gmTexture = new enigma::DX9Texture(texture);
   const int texid = enigma::textures.size();
   enigma::textures.push_back(gmTexture);
-  enigma::texture_peers.resize(enigma::textures.size());
-  enigma::texture_peers[texid] = texture;
   d3dmgr->device->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
   surface->tex = texid; surface->width = width; surface->height = height;
   enigma::Surfaces.push_back(surface);

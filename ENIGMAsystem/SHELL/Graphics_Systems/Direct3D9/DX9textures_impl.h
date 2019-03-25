@@ -20,29 +20,21 @@
 #  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
 #endif
 
-#ifndef ENIGMA_GSTEXTURES_IMPL_H
-#define ENIGMA_GSTEXTURES_IMPL_H
+#ifndef ENIGMA_DX9_TEXTURES_IMPL_H
+#define ENIGMA_DX9_TEXTURES_IMPL_H
 
-#include "GStextures.h"
-
-#include <vector>
-using std::vector;
+#include "Direct3D9Headers.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 
 namespace enigma {
 
-struct Texture {
-  unsigned width,height;
-  unsigned fullwidth,fullheight;
-protected:
-  // we want Texture abstract/non-instantiable
-  // each backend assumes it can safely cast
-  // to get the peer type, we don't want any
-  // kind of generic texture in the vector
-  Texture() {}
+struct DX9Texture : Texture {
+  LPDIRECT3DTEXTURE9 peer;
+  DX9Texture(LPDIRECT3DTEXTURE9 peer): peer(peer) {}
 };
 
-extern vector<Texture*> textures;
+LPDIRECT3DTEXTURE9 get_texture_peer(int texid);
 
 } // namespace enigma
 
-#endif // ENIGMA_GSTEXTURES_IMPL_H
+#endif // ENIGMA_DX9_TEXTURES_IMPL_H

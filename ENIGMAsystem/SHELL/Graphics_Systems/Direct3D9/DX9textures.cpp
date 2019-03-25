@@ -15,13 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "DX9textures_impl.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
-#include <vector>
 #include <stdio.h>
 #include <string.h>
 
@@ -42,10 +42,8 @@ inline unsigned int lgpp2(unsigned int x) {//Trailing zero count. lg for perfect
 
 namespace enigma {
 
-std::vector<LPDIRECT3DTEXTURE9> texture_peers;
-
-LPDIRECT3DTEXTURE9 get_texture(int texid) {
-  return (size_t(texid) >= texture_peers.size() || texid < 0) ? NULL : texture_peers[texid];
+LPDIRECT3DTEXTURE9 get_texture_peer(int texid) {
+  return (size_t(texid) >= textures.size() || texid < 0) ? NULL : ((DX9Texture*)textures[texid])->peer;
 }
 
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
@@ -73,15 +71,13 @@ LPDIRECT3DTEXTURE9 get_texture(int texid) {
       texture->GenerateMipSubLevels();
     }
 
-    Texture* textureStruct = new Texture();
+    DX9Texture* textureStruct = new DX9Texture(texture);
     textureStruct->width = width;
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
     const int id = textures.size();
     textures.push_back(textureStruct);
-    texture_peers.resize(textures.size());
-    texture_peers[id] = texture;
     return id;
   }
 
@@ -95,9 +91,10 @@ LPDIRECT3DTEXTURE9 get_texture(int texid) {
 
     D3DLOCKED_RECT rect;
 
-    texture_peers[tex]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    auto peer = get_texture_peer(tex);
+    peer->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
-    texture_peers[tex]->UnlockRect(0);
+    peer->UnlockRect(0);
 
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
     delete[] bitmap;
@@ -106,32 +103,36 @@ LPDIRECT3DTEXTURE9 get_texture(int texid) {
 
   void graphics_copy_texture(int source, int destination, int x, int y)
   {
+    auto sourcePeer = get_texture_peer(source);
+    auto destPeer = get_texture_peer(destination);
     unsigned int sw, sh, sfw;
     sw = textures[source]->width;
     sh = textures[source]->height;
     sfw = textures[source]->fullwidth;
 
     D3DLOCKED_RECT rect;
-    texture_peers[source]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    sourcePeer->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
-    texture_peers[source]->UnlockRect(0);
+    sourcePeer->UnlockRect(0);
 
     unsigned dw, dh, w, h;
     dw = textures[destination]->width;
     dh = textures[destination]->height;
     w = (x+sw<=dw?sw:dw-x);
     h = (y+sh<=dh?sh:dh-y);
-    texture_peers[destination]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    destPeer->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     for (unsigned int i=0; i<h; ++i){
       memcpy(static_cast<unsigned char*>(rect.pBits)+(dw*(i+y)+x)*4, bitmap+sfw*i*4, w*4);
     }
-    texture_peers[destination]->UnlockRect(0);
+    destPeer->UnlockRect(0);
 
     delete[] bitmap;
   }
 
   void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y)
   {
+    auto sourcePeer = get_texture_peer(source);
+    auto destPeer = get_texture_peer(destination);
     unsigned int sw, sh, sfw, sfh;
     sw = w;
     sh = h;
@@ -139,9 +140,9 @@ LPDIRECT3DTEXTURE9 get_texture(int texid) {
     sfh = textures[source]->fullheight;
 
     D3DLOCKED_RECT rect;
-    texture_peers[source]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    sourcePeer->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
-    texture_peers[source]->UnlockRect(0);
+    sourcePeer->UnlockRect(0);
 
     if (xoff+sw>sfw) sw = sfw-xoff;
     if (yoff+sh>sfh) sh = sfh-yoff;
@@ -150,17 +151,19 @@ LPDIRECT3DTEXTURE9 get_texture(int texid) {
     dh = textures[destination]->height;
     wi = (x+sw<=dw?sw:dw-x);
     hi = (y+sh<=dh?sh:dh-y);
-    texture_peers[destination]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    destPeer->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     for (unsigned int i=0; i<hi; ++i){
       memcpy(static_cast<unsigned char*>(rect.pBits)+(dw*(i+y)+x)*4, bitmap+xoff*4+sfw*(i+yoff)*4, wi*4);
     }
-    texture_peers[destination]->UnlockRect(0);
+    destPeer->UnlockRect(0);
 
     delete[] bitmap;
   }
 
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
+    auto texPeer = get_texture_peer(tex);
+    auto copyPeer = get_texture_peer(copy_tex);
     unsigned fw, fh, size;
     fw = textures[tex]->fullwidth;
     fh = textures[tex]->fullheight;
@@ -168,34 +171,36 @@ LPDIRECT3DTEXTURE9 get_texture(int texid) {
 
     D3DLOCKED_RECT rect;
 
-    texture_peers[copy_tex]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    copyPeer->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     unsigned char* bitmap_copy = static_cast<unsigned char*>(rect.pBits);
-    texture_peers[copy_tex]->UnlockRect(0);
+    copyPeer->UnlockRect(0);
 
-    texture_peers[tex]->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    texPeer->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     for (unsigned int i = 3; i < size; i += 4)
         ((unsigned char*)rect.pBits)[i] = (bitmap_copy[i-3] + bitmap_copy[i-2] + bitmap_copy[i-1])/3;
-    texture_peers[tex]->UnlockRect(0);
+    texPeer->UnlockRect(0);
 
     delete[] bitmap_copy;
   }
 
   void graphics_delete_texture(int texid)
   {
-    texture_peers[texid]->Release();
-    texture_peers[texid] = NULL;
+    const auto texture = (DX9Texture*)textures[texid];
+    texture->peer->Release();
+    texture->peer = NULL;
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
+    auto peer = get_texture_peer(texture);
     *fullwidth = textures[texture]->fullwidth;
     *fullheight = textures[texture]->fullheight;
 
     D3DLOCKED_RECT rect;
 
-    texture_peers[texture]->LockRect( 0, &rect, NULL, D3DLOCK_READONLY);
+    peer->LockRect( 0, &rect, NULL, D3DLOCK_READONLY);
     unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
-    texture_peers[texture]->UnlockRect(0);
+    peer->UnlockRect(0);
 
     return bitmap;
   }
@@ -207,13 +212,13 @@ void texture_set_priority(int texid, double prio)
 {
   draw_batch_flush(batch_flush_deferred);
   // Deprecated in ENIGMA and GM: Studio
-  enigma::texture_peers[texid]->SetPriority(prio);
+  enigma::get_texture_peer(texid)->SetPriority(prio);
 }
 
 void texture_set_stage(int stage, int texid) {
   draw_batch_flush(batch_flush_deferred);
   if (texid == -1) { d3dmgr->SetTexture(0, NULL); return; }
-	d3dmgr->SetTexture(stage, enigma::get_texture(texid));
+	d3dmgr->SetTexture(stage, enigma::get_texture_peer(texid));
 	d3dmgr->SetTextureStageState(stage,D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 }
 

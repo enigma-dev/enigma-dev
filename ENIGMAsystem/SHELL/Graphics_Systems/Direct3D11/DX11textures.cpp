@@ -15,25 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "DX11textures_impl.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
-#include <vector>
-#include <utility> // std::pair
-
-using std::vector;
-using std::pair;
-
 using namespace enigma::dx11;
-
-namespace enigma {
-
-vector<pair<ID3D11Texture2D*, ID3D11ShaderResourceView*>> texture_peers;
-
-} // namespace enigma
 
 namespace {
 
@@ -52,7 +41,7 @@ ID3D11ShaderResourceView *getDefaultWhiteTexture() {
       unsigned data[1] = {0xFFFFFFFF};
       texid = enigma::graphics_create_texture(1, 1, 1, 1, (void*)data, false);
     }
-    return enigma::texture_peers[texid].second;
+    return ((enigma::DX11Texture*)enigma::textures[texid])->view;
 }
 
 D3D11_SAMPLER_DESC samplerDesc = { };
@@ -107,15 +96,13 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   ID3D11ShaderResourceView *view;
   m_device->CreateShaderResourceView(tex, &vdesc, &view);
 
-  Texture* textureStruct = new Texture();
+  DX11Texture* textureStruct = new DX11Texture(tex, view);
   textureStruct->width = width;
   textureStruct->height = height;
   textureStruct->fullwidth = fullwidth;
   textureStruct->fullheight = fullheight;
   const int id = textures.size();
   textures.push_back(textureStruct);
-  texture_peers.resize(textures.size());
-  texture_peers[id] = {tex,view};
   return id;
 }
 
@@ -141,9 +128,9 @@ void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
 
 void graphics_delete_texture(int tex)
 {
-  texture_peers[tex].second->Release();
-  texture_peers[tex].first->Release();
-  texture_peers[tex] = {NULL,NULL}; // null the pointers
+  auto texture = (DX11Texture*)textures[tex];
+  texture->peer->Release(); texture->peer = NULL;
+  texture->view->Release(); texture->view = NULL;
 }
 
 unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
@@ -189,12 +176,10 @@ void texture_set_blending(bool enable)
 
 void texture_set_stage(int stage, int texid) {
   draw_batch_flush(batch_flush_deferred);
-  if (texid == -1) {
-    ID3D11ShaderResourceView *nullView = getDefaultWhiteTexture();
-    m_deviceContext->PSSetShaderResources(stage, 1, &nullView);
-    return;
-  }
-  m_deviceContext->PSSetShaderResources(stage, 1, &enigma::texture_peers[texid].second);
+  ID3D11ShaderResourceView *view = (texid == -1)?
+    getDefaultWhiteTexture():((enigma::DX11Texture*)enigma::textures[texid])->view;
+
+  m_deviceContext->PSSetShaderResources(stage, 1, &view);
 }
 
 void texture_reset() {
