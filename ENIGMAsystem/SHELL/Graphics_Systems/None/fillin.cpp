@@ -47,7 +47,6 @@ using namespace std;
 #include "../General/GSsurface.h"
 #include "../General/GSstdraw.h"
 #include "../General/GSsprite.h"
-#include "../General/GLSurfaceStruct.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
 #include "../General/GSblend.h"
