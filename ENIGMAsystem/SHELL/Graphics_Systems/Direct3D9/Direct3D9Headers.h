@@ -19,7 +19,6 @@
 #define ENIGMA_DIRECT3D9_HEADERS_H
 
 #include <map>
-#include <cstring> // std::memcmp
 
 #include <d3d9.h>
 
