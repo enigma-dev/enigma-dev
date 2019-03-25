@@ -23,14 +23,14 @@
 #ifndef ENIGMA_GL_TEXTURES_IMPL_H
 #define ENIGMA_GL_TEXTURES_IMPL_H
 
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
 
 namespace enigma {
 
-struct GL1Texture : Texture {
+struct GLTexture : Texture {
   GLuint peer;
-  GL1Texture(GLuint peer): peer(peer) {}
+  GLTexture(GLuint peer): peer(peer) {}
 };
 
 GLuint get_texture_peer(int texid);

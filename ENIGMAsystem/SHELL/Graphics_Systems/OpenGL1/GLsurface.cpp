@@ -16,9 +16,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GLtextures_impl.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
-#include "Graphics_Systems/General/GLSurfaceStruct.h"
+#include "Graphics_Systems/OpenGL/GLSurfaceStruct.h"
+#include "Graphics_Systems/OpenGL/GLtextures_impl.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GSprimitives.h"

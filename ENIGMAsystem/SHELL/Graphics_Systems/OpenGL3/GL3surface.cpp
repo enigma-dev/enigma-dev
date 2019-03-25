@@ -16,17 +16,17 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GL3textures_impl.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/OpenGL/GLSurfaceStruct.h"
+#include "Graphics_Systems/OpenGL/GLtextures_impl.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-#include "Graphics_Systems/General/GLSurfaceStruct.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"

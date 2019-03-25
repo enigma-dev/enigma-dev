@@ -18,8 +18,9 @@
 #ifndef ENIGMA_GLSURFACESTRUCT_H
 #define ENIGMA_GLSURFACESTRUCT_H
 
-#include <string>
 #include "OpenGLHeaders.h"
+
+#include <string>
 using std::string;
 
 namespace enigma

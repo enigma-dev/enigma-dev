@@ -18,7 +18,7 @@
 #ifndef ENIGMA_GL_SAMPLERSTATE_H
 #define ENIGMA_GL_SAMPLERSTATE_H
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 
 namespace enigma {
   //NOTE: OpenGL 1 hardware does not support sampler objects, some versions of 2 and usually over 3 do. We use this class

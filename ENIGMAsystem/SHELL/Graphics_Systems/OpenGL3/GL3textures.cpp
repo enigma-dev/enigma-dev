@@ -16,13 +16,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GL3textures_impl.h"
 #include "GL3aux.h" //glExtension_supported
-#include "Graphics_Systems/General/OpenGLHeaders.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/OpenGL/GLtextures_impl.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background_internal.h"
@@ -75,15 +75,15 @@ namespace enigma {
       show_error("Attempting to access non-existing texture " + toString(texid), false);\
       return v;\
     }\
-    const GLuint tex = (texid==-1?0:((enigma::GL3Texture*)enigma::textures[texid])->peer);
+    const GLuint tex = (texid==-1?0:((enigma::GLTexture*)enigma::textures[texid])->peer);
 #else
   #define get_texture(tex,texid,v)\
-    const GLuint tex = (texid==-1?0:((enigma::GL3Texture*)enigma::textures[texid])->peer);
+    const GLuint tex = (texid==-1?0:((enigma::GLTexture*)enigma::textures[texid])->peer);
 #endif
 
 GLuint get_texture_peer(int texid) {
   return (size_t(texid) >= textures.size() || texid < 0)
-      ? 0 : ((GL3Texture*)textures[texid])->peer;
+      ? 0 : ((GLTexture*)textures[texid])->peer;
 }
 
 } // namespace enigma
@@ -122,7 +122,7 @@ namespace enigma
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    GL3Texture* textureStruct = new GL3Texture(texture);
+    GLTexture* textureStruct = new GLTexture(texture);
     textureStruct->width = width;
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
@@ -148,7 +148,7 @@ namespace enigma
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    GL3Texture* textureStruct = new GL3Texture(texture);
+    GLTexture* textureStruct = new GLTexture(texture);
     textureStruct->width = width;
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;

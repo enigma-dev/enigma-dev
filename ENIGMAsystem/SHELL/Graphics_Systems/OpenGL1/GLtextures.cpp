@@ -17,12 +17,12 @@
 **/
 
 #include "GLSamplerState.h"
-#include "GLtextures_impl.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/OpenGL/GLtextures_impl.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background_internal.h"
@@ -61,7 +61,7 @@ namespace enigma {
 
 GLuint get_texture_peer(int texid) {
   return (size_t(texid) >= textures.size() || texid < 0)
-      ? 0 : ((GL1Texture*)textures[texid])->peer;
+      ? 0 : ((GLTexture*)textures[texid])->peer;
 }
 
   int graphics_create_texture(unsigned width, unsigned height,
@@ -79,7 +79,7 @@ GLuint get_texture_peer(int texid) {
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    GL1Texture* textureStruct = new GL1Texture(texture);
+    GLTexture* textureStruct = new GLTexture(texture);
     textureStruct->width = width;
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
