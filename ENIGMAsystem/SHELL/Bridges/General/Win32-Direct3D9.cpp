@@ -16,7 +16,7 @@
 **/
 
 #include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h" // for show_error()
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -26,11 +26,8 @@
 #include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 
 #include <windows.h>
-#include <windowsx.h>
 #include <d3d9.h>
-#include <string>
 
-using namespace std;
 using namespace enigma::dx9;
 
 namespace {
@@ -77,12 +74,7 @@ ContextManager* d3dmgr; // the pointer to the device class
     OnDeviceLost();
     HRESULT hr = d3dmgr->device->Reset(d3dpp);
     if (FAILED(hr)) {
-      MessageBox(
-        enigma::hWnd,
-        TEXT("Device Reset Failed"), TEXT("Error"),
-        MB_ICONERROR | MB_OK
-      );
-      return;  // should probably force the game closed
+      show_error("Direct3D 9 Device Reset Failed", true);
     }
     // Reapply the stored render states and what not
     d3dmgr->RestoreState();
