@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include <cstring>
-#include "../General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "GL3aux.h"
 
 namespace enigma {

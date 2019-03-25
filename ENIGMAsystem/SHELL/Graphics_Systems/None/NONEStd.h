@@ -28,11 +28,6 @@
 #include "../General/GSscreen.h"
 #include "Universal_System/scalar.h"
 
-namespace enigma
-{
-	unsigned get_texture(int texid);
-}
-
 namespace enigma_user
 {
 enum {

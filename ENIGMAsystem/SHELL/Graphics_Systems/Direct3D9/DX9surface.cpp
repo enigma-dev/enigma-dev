@@ -16,9 +16,10 @@
 **/
 
 #include "DX9SurfaceStruct.h"
-#include "DX9TextureStruct.h"
+#include "DX9textures_impl.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
@@ -28,12 +29,14 @@
 #include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
+#include <vector>
 #include <iostream>
 #include <cstddef>
 #include <math.h>
 #include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
+using namespace enigma::dx9;
 
 namespace enigma {
 
@@ -65,12 +68,12 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
   LPDIRECT3DTEXTURE9 texture = NULL;
   d3dmgr->device->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
-  TextureStruct* gmTexture = new TextureStruct(texture);
-  textureStructs.push_back(gmTexture);
+  enigma::DX9Texture* gmTexture = new enigma::DX9Texture(texture);
+  const int texid = enigma::textures.size();
+  enigma::textures.push_back(gmTexture);
   //d3dmgr->device->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
   texture->GetSurfaceLevel(0,&surface->surf);
-  surface->tex = textureStructs.size() - 1;
-  surface->width = width; surface->height = height;
+  surface->tex = texid; surface->width = width; surface->height = height;
   enigma::Surfaces.push_back(surface);
   return enigma::Surfaces.size() - 1;
 }
@@ -80,11 +83,11 @@ int surface_create_msaa(int width, int height, int levels)
   LPDIRECT3DTEXTURE9 texture = NULL;
   d3dmgr->device->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
-  TextureStruct* gmTexture = new TextureStruct(texture);
-  textureStructs.push_back(gmTexture);
+  enigma::DX9Texture* gmTexture = new enigma::DX9Texture(texture);
+  const int texid = enigma::textures.size();
+  enigma::textures.push_back(gmTexture);
   d3dmgr->device->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
-  surface->tex = textureStructs.size() - 1;
-  surface->width = width; surface->height = height;
+  surface->tex = texid; surface->width = width; surface->height = height;
   enigma::Surfaces.push_back(surface);
   return enigma::Surfaces.size() - 1;
 }

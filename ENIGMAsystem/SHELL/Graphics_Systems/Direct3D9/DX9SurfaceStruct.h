@@ -17,14 +17,17 @@
 
 #ifndef DX9_SURFSTRUCT_H
 #define DX9_SURFSTRUCT_H
-#include <windows.h>
-#include <string>
+
+#include "DX9textures_impl.h"
 #include "Direct3D9Headers.h"
-#include "DX9TextureStruct.h"
+
+#include <string>
+#include <vector>
+
+using std::vector;
 using std::string;
 
-#include <vector>
-using std::vector;
+using namespace enigma::dx9;
 
 namespace enigma
 {
@@ -33,14 +36,18 @@ namespace enigma
     LPDIRECT3DSURFACE9 surf;
     int tex, width, height;
 
-    Surface(): surf(NULL), tex(0), width(0), height(0) {
+    // for the purpose of restoring the texture,
+    // not all lost devices will have lost the data,
+    // e.g. when we are about to manually display reset
+    LPDIRECT3DSURFACE9 pCopy;
+
+    Surface(): surf(NULL), tex(0), width(0), height(0), pCopy(NULL) {
 
     };
 
     void Release() {
       if (surf != NULL) {
-        surf->Release();
-        surf = NULL;
+        surf->Release(), surf = NULL;
       }
     }
 
@@ -49,13 +56,29 @@ namespace enigma
     };
 
     void OnDeviceLost() {
+      D3DSURFACE_DESC backupdesc;
+      surf->GetDesc(&backupdesc);
+
+      d3dmgr->device->CreateOffscreenPlainSurface(backupdesc.Width, backupdesc.Height, backupdesc.Format, D3DPOOL_SYSTEMMEM, &pCopy, NULL);
+      d3dmgr->device->GetRenderTargetData(surf, pCopy);
+
       Release();
-      textureStructs[tex]->OnDeviceLost();
+      auto texture = (DX9Texture*)enigma::textures[tex];
+      texture->peer->Release(), texture->peer = NULL;
     }
 
     void OnDeviceReset() {
-      textureStructs[tex]->OnDeviceReset();
-      textureStructs[tex]->gTexture->GetSurfaceLevel(0,&surf);
+      D3DSURFACE_DESC backupdesc;
+      pCopy->GetDesc(&backupdesc);
+
+      // recreate the texture peer
+      auto texture = (DX9Texture*)enigma::textures[tex];
+      d3dmgr->device->CreateTexture(backupdesc.Width, backupdesc.Height, 1, D3DUSAGE_RENDERTARGET, backupdesc.Format, D3DPOOL_DEFAULT, &texture->peer, NULL);
+      texture->peer->GetSurfaceLevel(0,&surf);
+
+      // reupload the texture data
+      d3dmgr->device->UpdateSurface(pCopy, NULL, surf, NULL);
+      pCopy->Release();
     }
   };
 

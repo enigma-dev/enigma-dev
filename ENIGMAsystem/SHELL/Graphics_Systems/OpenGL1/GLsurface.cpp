@@ -16,15 +16,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GLTextureStruct.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
-#include "Graphics_Systems/General/GLSurfaceStruct.h"
+#include "Graphics_Systems/OpenGL/GLSurfaceStruct.h"
+#include "Graphics_Systems/OpenGL/GLtextures_impl.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Universal_System/image_formats.h"
@@ -116,7 +117,7 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, textureStructs[texture]->gltex, 0);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, enigma::get_texture_peer(texture), 0);
     glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glClearColor(1,1,1,0);
@@ -168,7 +169,7 @@ int surface_create_msaa(int width, int height, int samples)
   int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
   glGenFramebuffers(1, &fbo);
   glPushAttrib(GL_TEXTURE_BIT);
-  glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureStructs[texture]->gltex);
+  glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, enigma::get_texture_peer(texture));
 
   glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_BGRA, w, h, false);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -176,7 +177,7 @@ int surface_create_msaa(int width, int height, int samples)
 
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D_MULTISAMPLE, textureStructs[texture]->gltex, 0);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D_MULTISAMPLE, enigma::get_texture_peer(texture), 0);
   glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
   glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
   glClearColor(1,1,1,0);

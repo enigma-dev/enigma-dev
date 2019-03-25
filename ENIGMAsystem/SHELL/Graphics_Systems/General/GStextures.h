@@ -51,12 +51,12 @@ namespace enigma_user
   void texture_delete(int texid);
   bool texture_exists(int texid);
   void texture_preload(int texid);
-  void texture_set_enabled(bool enable);
   gs_scalar texture_get_width(int texid);
   gs_scalar texture_get_height(int texid);
   gs_scalar texture_get_texel_width(int texid);
   gs_scalar texture_get_texel_height(int texid);
   void texture_set_priority(int texid, double prio);
+  void texture_set_enabled(bool enable);
   void texture_set(int texid);
   void texture_set_stage(int stage, int texid);
   #define texture_set(texid) texture_set_stage(0, texid)

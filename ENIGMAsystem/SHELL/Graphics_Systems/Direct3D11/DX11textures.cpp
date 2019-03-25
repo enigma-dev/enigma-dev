@@ -15,22 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX11TextureStruct.h"
+#include "DX11textures_impl.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
-
-#include "Universal_System/image_formats.h"
-
-#include <stdio.h>
-#include <string.h>
-
-using std::string;
 
 using namespace enigma::dx11;
 
-vector<TextureStruct*> textureStructs(0);
+namespace {
 
 inline unsigned int lgpp2(unsigned int x) {//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
@@ -41,15 +35,13 @@ inline unsigned int lgpp2(unsigned int x) {//Trailing zero count. lg for perfect
 	return (x + (x >> 16)) & 63;
 }
 
-namespace {
-
 ID3D11ShaderResourceView *getDefaultWhiteTexture() {
     static int texid = -1;
     if (texid == -1) {
       unsigned data[1] = {0xFFFFFFFF};
       texid = enigma::graphics_create_texture(1, 1, 1, 1, (void*)data, false);
     }
-    return textureStructs[texid]->view;
+    return ((enigma::DX11Texture*)enigma::textures[texid])->view;
 }
 
 D3D11_SAMPLER_DESC samplerDesc = { };
@@ -104,13 +96,14 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   ID3D11ShaderResourceView *view;
   m_device->CreateShaderResourceView(tex, &vdesc, &view);
 
-  TextureStruct* textureStruct = new TextureStruct(tex, view);
+  DX11Texture* textureStruct = new DX11Texture(tex, view);
   textureStruct->width = width;
   textureStruct->height = height;
   textureStruct->fullwidth = fullwidth;
   textureStruct->fullheight = fullheight;
-  textureStructs.push_back(textureStruct);
-  return textureStructs.size()-1;
+  const int id = textures.size();
+  textures.push_back(textureStruct);
+  return id;
 }
 
 int graphics_duplicate_texture(int tex, bool mipmap)
@@ -135,7 +128,9 @@ void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
 
 void graphics_delete_texture(int tex)
 {
-
+  auto texture = (DX11Texture*)textures[tex];
+  texture->peer->Release(), texture->peer = NULL;
+  texture->view->Release(), texture->view = NULL;
 }
 
 unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
@@ -164,64 +159,9 @@ void init_sampler_state() {
 
 namespace enigma_user {
 
-int texture_add(string filename, bool mipmap) {
-  unsigned int w, h, fullwidth, fullheight;
-  int img_num;
-
-  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,&img_num,false);
-  if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
-  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
-  delete[] pxdata;
-
-  return texture;
-}
-
-void texture_save(int texid, string fname) {
-	unsigned w = 0, h = 0;
-	unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(texid, &w, &h);
-
-  string ext = enigma::image_get_format(fname);
-
-	enigma::image_save(fname, rgbdata, w, h, w, h, false);
-
-	delete[] rgbdata;
-}
-
-void texture_delete(int texid) {
-  delete textureStructs[texid];
-}
-
-bool texture_exists(int texid) {
-  return textureStructs[texid] != NULL;
-}
-
-void texture_preload(int texid)
-{
-  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-}
-
 void texture_set_priority(int texid, double prio)
 {
   // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-}
-
-gs_scalar texture_get_width(int texid) {
-	return textureStructs[texid]->width / textureStructs[texid]->fullwidth;
-}
-
-gs_scalar texture_get_height(int texid)
-{
-	return textureStructs[texid]->height / textureStructs[texid]->fullheight;
-}
-
-gs_scalar texture_get_texel_width(int texid)
-{
-	return 1.0/textureStructs[texid]->width;
-}
-
-gs_scalar texture_get_texel_height(int texid)
-{
-	return 1.0/textureStructs[texid]->height;
 }
 
 void texture_set_enabled(bool enable)
@@ -236,12 +176,10 @@ void texture_set_blending(bool enable)
 
 void texture_set_stage(int stage, int texid) {
   draw_batch_flush(batch_flush_deferred);
-  if (texid == -1) {
-    ID3D11ShaderResourceView *nullView = getDefaultWhiteTexture();
-    m_deviceContext->PSSetShaderResources(stage, 1, &nullView);
-    return;
-  }
-  m_deviceContext->PSSetShaderResources(stage, 1, &textureStructs[texid]->view);
+  ID3D11ShaderResourceView *view = (texid == -1)?
+    getDefaultWhiteTexture():((enigma::DX11Texture*)enigma::textures[texid])->view;
+
+  m_deviceContext->PSSetShaderResources(stage, 1, &view);
 }
 
 void texture_reset() {

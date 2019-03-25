@@ -18,25 +18,25 @@
 #ifndef ENIGMA_GL_SAMPLERSTATE_H
 #define ENIGMA_GL_SAMPLERSTATE_H
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 
 namespace enigma {
   //NOTE: OpenGL 1 hardware does not support sampler objects, some versions of 2 and usually over 3 do. We use this class
   //to emulate the Direct3D behavior.
-  struct SamplerState {
+  struct Sampler {
     int bound_texture;
     bool wrapu, wrapv, wrapw;
     GLint bordercolor[4], min, mag, maxlevel;
     GLfloat anisotropy, minlod, maxlod;
 
-    SamplerState(): bound_texture(-1), wrapu(true), wrapv(true), wrapw(true), min(GL_NEAREST), mag(GL_NEAREST), maxlevel(1000), anisotropy(1), minlod(-1000), maxlod(1000) {
+    Sampler(): bound_texture(-1), wrapu(true), wrapv(true), wrapw(true), min(GL_NEAREST), mag(GL_NEAREST), maxlevel(1000), anisotropy(1), minlod(-1000), maxlod(1000) {
       bordercolor[0] = 0;
       bordercolor[1] = 0;
       bordercolor[2] = 0;
       bordercolor[3] = 0;
     }
 
-    ~SamplerState() {
+    ~Sampler() {
 
     }
 
@@ -55,7 +55,7 @@ namespace enigma {
       glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
     }
 
-    void CompareAndApply(SamplerState* sampler) {
+    void CompareAndApply(Sampler* sampler) {
       if (sampler->wrapu != wrapu) {
         sampler->wrapu = wrapu;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
@@ -107,7 +107,7 @@ namespace enigma {
     }
   };
 
-  extern SamplerState samplerstates[8];
+  extern Sampler samplers[8];
 }
 
 #endif // ENIGMA_GL_SAMPLERSTATE_H

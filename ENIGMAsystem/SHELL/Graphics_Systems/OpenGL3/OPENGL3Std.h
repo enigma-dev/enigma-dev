@@ -22,7 +22,7 @@
 #  include <additional/glee/GLee.h>
 #endif*/
 
-//#include "OpenGLHeaders.h"
+//#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 
 #include "../General/GScolors.h"
 #include "../General/GSprimitives.h"

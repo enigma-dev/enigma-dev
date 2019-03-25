@@ -23,7 +23,7 @@
 using std::string;
 using std::vector;
 
-#include "../General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 
 extern GLenum shadertypes[];
 
