@@ -186,8 +186,7 @@ LPDIRECT3DTEXTURE9 get_texture_peer(int texid) {
   void graphics_delete_texture(int texid)
   {
     const auto texture = (DX9Texture*)textures[texid];
-    texture->peer->Release();
-    texture->peer = NULL;
+    texture->peer->Release(), texture->peer = NULL;
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
