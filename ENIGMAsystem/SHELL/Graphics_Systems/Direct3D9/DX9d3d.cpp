@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "DX9textures_impl.h"
 #include "Direct3D9Headers.h"
-#include "DX9TextureStruct.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSblend.h"
@@ -75,7 +75,7 @@ namespace enigma {
 void graphics_state_flush_samplers() {
   for (int i = 0; i < 8; ++i) {
     const Sampler& sampler = samplers[i];
-    const auto tex = get_texture(sampler.texture);
+    const auto tex = get_texture_peer(sampler.texture);
     d3ddev->SetTexture(i, tex);
     if (tex == NULL) continue; // texture doesn't exist skip updating the sampler
     d3ddev->SetTextureStageState(i, D3DTSS_ALPHAOP, D3DTOP_MODULATE);

@@ -28,7 +28,7 @@
 #include <windows.h>
 #include <d3d9.h>
 
-using namespace std;
+using namespace enigma::dx9;
 
 namespace {
 
@@ -75,7 +75,7 @@ void Reset(D3DPRESENT_PARAMETERS *d3dpp) {
   OnDeviceLost();
   HRESULT hr = d3ddev->Reset(d3dpp);
   if (FAILED(hr)) {
-    show_error("Device Reset Failed", true);
+    show_error("Direct3D 9 Device Reset Failed", true);
   }
   // regular old managed d3d9 purges render states
   if (Direct3D9Managed) graphics_state_flush();

@@ -26,9 +26,6 @@
 #include "../General/GSscreen.h"
 #include "Universal_System/scalar.h"
 
-#include <string>
-#include <vector>
-
 namespace enigma_user {
 
 enum {

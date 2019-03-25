@@ -19,7 +19,7 @@
 #include "GLshader.h"
 #include "GLSLshader.h"
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 
 #include "Universal_System/shaderstruct.h"
 #include "Universal_System/var4.h"

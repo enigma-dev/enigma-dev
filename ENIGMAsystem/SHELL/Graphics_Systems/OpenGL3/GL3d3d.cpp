@@ -18,8 +18,8 @@
 
 #include "GLSLshader.h"
 #include "GL3shader.h"
-#include "GL3TextureStruct.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/GLtextures_impl.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSblend.h"
@@ -95,7 +95,7 @@ void graphics_state_flush_samplers() {
   for (size_t i = 0; i < 8; i++) {
     const auto sampler = samplers[i];
 
-    get_texture(gt,sampler.texture,);
+    const GLuint gt = get_texture_peer(sampler.texture);
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, gt);
 

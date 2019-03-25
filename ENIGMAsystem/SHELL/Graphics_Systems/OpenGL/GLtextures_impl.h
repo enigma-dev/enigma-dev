@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura
+*** Copyright (C) 2013,2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,26 +16,25 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_GL_TEXTURESTRUCT_H
-#define ENIGMA_GL_TEXTURESTRUCT_H
+#ifdef INCLUDED_FROM_SHELLMAIN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
-#include "Universal_System/scalar.h"
+#ifndef ENIGMA_GL_TEXTURES_IMPL_H
+#define ENIGMA_GL_TEXTURES_IMPL_H
 
-#include <vector>
-using std::vector;
-
-struct TextureStruct {
-	GLuint gltex;
-	unsigned width,height;
-	unsigned fullwidth,fullheight;
-	TextureStruct(GLuint gtex);
-	~TextureStruct();
-};
-extern vector<TextureStruct*> textureStructs;
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 
 namespace enigma {
-GLuint get_texture(int texid);
-}
 
-#endif // ENIGMA_GL_TEXTURESTRUCT_H
+struct GLTexture : Texture {
+  GLuint peer;
+  GLTexture(GLuint peer): peer(peer) {}
+};
+
+GLuint get_texture_peer(int texid);
+
+} // namespace enigma
+
+#endif // ENIGMA_GL_TEXTURES_IMPL_H

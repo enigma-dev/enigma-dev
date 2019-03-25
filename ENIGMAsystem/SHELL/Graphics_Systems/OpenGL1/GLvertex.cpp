@@ -19,7 +19,7 @@
 //extension, then please be sure to update the graphics_init_vbo_method() helper below to ensure any
 //functions are properly aliased and will continue working on affected graphics cards.
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"

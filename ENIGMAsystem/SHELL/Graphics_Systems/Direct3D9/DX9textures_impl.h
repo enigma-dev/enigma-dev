@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Dave "biggoron", Harijs Grinbergs
+/** Copyright (C) 2008-2013 Josh Ventura
+*** Copyright (C) 2013,2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,26 +16,25 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_GLSURFACESTRUCT_H
-#define ENIGMA_GLSURFACESTRUCT_H
+#ifdef INCLUDED_FROM_SHELLMAIN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
 
-#include <string>
-#include "OpenGLHeaders.h"
-using std::string;
+#ifndef ENIGMA_DX9_TEXTURES_IMPL_H
+#define ENIGMA_DX9_TEXTURES_IMPL_H
 
-namespace enigma
-{
-  struct surface
-  {
-    GLuint fbo;
-    int tex;
-    int width, height;
-    GLuint depth_buffer;
-    GLuint stencil_buffer;
-    bool has_depth_buffer = false;
-    bool has_stencil_buffer = false;
-    bool write_only = true;
-  };
-}
+#include "Direct3D9Headers.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 
-#endif //ENIGMA_GLSURFACESTRUCT_H
+namespace enigma {
+
+struct DX9Texture : Texture {
+  LPDIRECT3DTEXTURE9 peer;
+  DX9Texture(LPDIRECT3DTEXTURE9 peer): peer(peer) {}
+};
+
+LPDIRECT3DTEXTURE9 get_texture_peer(int texid);
+
+} // namespace enigma
+
+#endif // ENIGMA_DX9_TEXTURES_IMPL_H

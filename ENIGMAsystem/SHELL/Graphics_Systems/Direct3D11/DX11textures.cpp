@@ -15,22 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX11TextureStruct.h"
+#include "DX11textures_impl.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
-
-#include "Universal_System/image_formats.h"
-
-#include <stdio.h>
-#include <string.h>
-
-using std::string;
 
 using namespace enigma::dx11;
 
-vector<TextureStruct*> textureStructs(0);
+namespace {
 
 inline unsigned int lgpp2(unsigned int x) {//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
@@ -40,6 +34,8 @@ inline unsigned int lgpp2(unsigned int x) {//Trailing zero count. lg for perfect
 	x += x >> 8;
 	return (x + (x >> 16)) & 63;
 }
+
+} // namespace anonymous
 
 namespace enigma {
 
@@ -81,13 +77,14 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   ID3D11ShaderResourceView *view;
   m_device->CreateShaderResourceView(tex, &vdesc, &view);
 
-  TextureStruct* textureStruct = new TextureStruct(tex, view);
+  DX11Texture* textureStruct = new DX11Texture(tex, view);
   textureStruct->width = width;
   textureStruct->height = height;
   textureStruct->fullwidth = fullwidth;
   textureStruct->fullheight = fullheight;
-  textureStructs.push_back(textureStruct);
-  return textureStructs.size()-1;
+  const int id = textures.size();
+  textures.push_back(textureStruct);
+  return id;
 }
 
 int graphics_duplicate_texture(int tex, bool mipmap)
@@ -112,7 +109,9 @@ void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
 
 void graphics_delete_texture(int tex)
 {
-
+  auto texture = (DX11Texture*)textures[tex];
+  texture->peer->Release(), texture->peer = NULL;
+  texture->view->Release(), texture->view = NULL;
 }
 
 unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
@@ -124,41 +123,9 @@ unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwi
 
 namespace enigma_user {
 
-void texture_delete(int texid) {
-  delete textureStructs[texid];
-}
-
-bool texture_exists(int texid) {
-  return textureStructs[texid] != NULL;
-}
-
-void texture_preload(int texid)
-{
-  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-}
-
 void texture_set_priority(int texid, double prio)
 {
   // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-}
-
-gs_scalar texture_get_width(int texid) {
-	return textureStructs[texid]->width / textureStructs[texid]->fullwidth;
-}
-
-gs_scalar texture_get_height(int texid)
-{
-	return textureStructs[texid]->height / textureStructs[texid]->fullheight;
-}
-
-gs_scalar texture_get_texel_width(int texid)
-{
-	return 1.0/textureStructs[texid]->width;
-}
-
-gs_scalar texture_get_texel_height(int texid)
-{
-	return 1.0/textureStructs[texid]->height;
 }
 
 void texture_set_enabled(bool enable)

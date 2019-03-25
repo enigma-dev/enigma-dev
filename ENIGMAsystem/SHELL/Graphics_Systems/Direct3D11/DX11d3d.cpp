@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX11TextureStruct.h"
+#include "DX11textures_impl.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GStextures.h"
@@ -48,7 +48,7 @@ ID3D11ShaderResourceView *getDefaultWhiteTexture() {
       unsigned data[1] = {0xFFFFFFFF};
       texid = enigma::graphics_create_texture(1, 1, 1, 1, (void*)data, false);
     }
-    return textureStructs[texid]->view;
+    return ((enigma::DX11Texture*)enigma::textures[texid])->view;
 }
 
 } // namespace anonymous
@@ -61,11 +61,10 @@ void graphics_state_flush_samplers() {
 
   for (int i = 0; i < 8; ++i) {
     const auto sampler = samplers[i];
-    if (sampler.texture == -1) {
-      m_deviceContext->PSSetShaderResources(i, 1, &nullTextureView);
-      continue; // texture doesn't exist skip updating the sampler
-    }
-    m_deviceContext->PSSetShaderResources(i, 1, &textureStructs[sampler.texture]->view);
+
+    ID3D11ShaderResourceView *view = (sampler.texture == -1)?
+      nullTextureView:((enigma::DX11Texture*)enigma::textures[sampler.texture])->view;
+    m_deviceContext->PSSetShaderResources(i, 1, &view);
 
     D3D11_SAMPLER_DESC samplerDesc = { };
 

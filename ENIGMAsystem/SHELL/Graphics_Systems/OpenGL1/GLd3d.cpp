@@ -16,8 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GLTextureStruct.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/GLtextures_impl.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSblend.h"
@@ -77,7 +77,7 @@ namespace enigma {
 void graphics_state_flush_samplers() {
   for (int i = 0; i < 8; ++i) {
     const Sampler& sampler = samplers[i];
-    const auto tex = get_texture(sampler.texture);
+    const auto tex = get_texture_peer(sampler.texture);
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, tex);
     if (tex == 0) continue; // texture doesn't exist skip updating the sampler

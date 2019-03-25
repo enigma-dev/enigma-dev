@@ -1,5 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura
-*** Copyright (C) 2013-2014, 2019 Robert B. Colton
+/** Copyright (C) 2008-2013, Josh Ventura
+*** Copyright (C) 2013-2014,2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -18,12 +18,14 @@
 
 #include "GStextures.h"
 #include "GSstdraw.h"
+#include "GStextures_impl.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
 #include "Universal_System/image_formats.h"
 
 namespace enigma {
 
+vector<Texture*> textures;
 Sampler samplers[8];
 
 } // namespace enigma
@@ -51,6 +53,40 @@ void texture_save(int texid, string fname) {
   enigma::image_save(fname, rgbdata, w, h, w, h, false);
 
   delete[] rgbdata;
+}
+
+void texture_delete(int texid) {
+  enigma::graphics_delete_texture(texid); // delete the peer
+  delete enigma::textures[texid];         // now delete the user object
+  enigma::textures[texid] = NULL;         // GM ids are forever!
+}
+
+bool texture_exists(int texid) {
+  return (texid >= 0 && size_t(texid) < enigma::textures.size() && enigma::textures[texid] != nullptr);
+}
+
+void texture_preload(int texid)
+{
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
+}
+
+gs_scalar texture_get_width(int texid) {
+  return enigma::textures[texid]->width / enigma::textures[texid]->fullwidth;
+}
+
+gs_scalar texture_get_height(int texid)
+{
+  return enigma::textures[texid]->height / enigma::textures[texid]->fullheight;
+}
+
+gs_scalar texture_get_texel_width(int texid)
+{
+  return 1.0/enigma::textures[texid]->width;
+}
+
+gs_scalar texture_get_texel_height(int texid)
+{
+  return 1.0/enigma::textures[texid]->height;
 }
 
 void texture_set_stage(int stage, int texid) {
