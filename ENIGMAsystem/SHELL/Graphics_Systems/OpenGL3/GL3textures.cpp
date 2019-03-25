@@ -99,8 +99,8 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 } // namespace anonymous
 
-namespace enigma
-{
+namespace enigma {
+
   //This allows GL3 surfaces to bind and hold many different types of data
   int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, int internalFormat, unsigned format, unsigned type)
   {

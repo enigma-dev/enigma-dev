@@ -40,7 +40,7 @@ struct Sampler {
 
 extern Sampler samplers[8];
 
-}
+} // namespace enigma
 
 namespace enigma_user {
   enum {
