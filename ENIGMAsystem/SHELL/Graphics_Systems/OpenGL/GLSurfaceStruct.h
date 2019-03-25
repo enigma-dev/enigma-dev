@@ -20,9 +20,6 @@
 
 #include "OpenGLHeaders.h"
 
-#include <string>
-using std::string;
-
 namespace enigma
 {
   struct surface
