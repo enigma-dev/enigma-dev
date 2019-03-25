@@ -29,7 +29,6 @@ using namespace std;
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Universal_System/depth_draw.h"
 #include "Universal_System/background_internal.h"
-#include "Universal_System/image_formats.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
@@ -45,13 +44,9 @@ using namespace std;
 #include "../General/GStextures.h"
 #include "../General/GStiles.h"
 #include "../General/GSvertex.h"
-#include "../General/GStextures.h"
 #include "../General/GSsurface.h"
 #include "../General/GSstdraw.h"
 #include "../General/GSsprite.h"
-#include "../General/GStextures.h"
-#include "../General/GLSurfaceStruct.h"
-#include "../General/GStextures.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
 #include "../General/GSblend.h"
@@ -101,18 +96,9 @@ namespace enigma_user
 	void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned vertex_start, unsigned vertex_count) {}
 	void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {}
 
-	int texture_add(string filename, bool mipmap){return -1;}
-	void texture_save(int texid, string fname){}
-	void texture_delete(int texid){}
-	bool texture_exists(int texid){return false;}
-	void texture_preload(int texid){}
 	void texture_set_priority(int texid, double prio){}
 	void texture_set_enabled(bool enable){}
 	void texture_set_blending(bool enable){}
-	gs_scalar texture_get_width(int texid){return -1;}
-	gs_scalar texture_get_height(int texid){return -1;}
-	gs_scalar texture_get_texel_width(int texid){return -1;}
-	gs_scalar texture_get_texel_height(int texid){return -1;}
 	void texture_set_stage(int stage, int texid){}
 	void texture_reset(){}
 	void texture_set_interpolation_ext(int sampler, bool enable){}
