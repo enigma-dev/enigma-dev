@@ -104,11 +104,18 @@ void graphics_delete_texture(int tex) {
 }
 
 unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight) {
-  return NULL;
+  *fullwidth = textures[texture]->fullwidth;
+  *fullheight = textures[texture]->fullheight;
+
+  unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
+
+  return ret;
 }
 
 unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height) {
-  return NULL;
+  unsigned fw, fh;
+  unsigned char* pxdata = graphics_copy_texture_pxdata(texture, &fw, &fh);
+  return pxdata;
 }
 
 void graphics_push_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height, unsigned char* pxdata) {}
