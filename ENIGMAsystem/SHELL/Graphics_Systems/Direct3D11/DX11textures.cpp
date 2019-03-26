@@ -103,7 +103,7 @@ void graphics_delete_texture(int tex) {
   texture->view->Release(), texture->view = NULL;
 }
 
-unsigned char* graphics_copy_texture_pxdata(int texture, unsigned* fullwidth, unsigned* fullheight) {
+unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {
   *fullwidth = textures[texture]->fullwidth;
   *fullheight = textures[texture]->fullheight;
 
@@ -112,15 +112,15 @@ unsigned char* graphics_copy_texture_pxdata(int texture, unsigned* fullwidth, un
   return ret;
 }
 
-unsigned char* graphics_copy_texture_pxdata(int texture, int x, int y, int width, int height) {
+unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {
   unsigned fw, fh;
-  unsigned char* pxdata = graphics_copy_texture_pxdata(texture, &fw, &fh);
+  unsigned char* pxdata = graphics_copy_texture_pixels(texture, &fw, &fh);
   return pxdata;
 }
 
-void graphics_push_texture_pxdata(int texture, int x, int y, int width, int height, unsigned char* pxdata) {}
+void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {}
 
-void graphics_push_texture_pxdata(int texture, int width, int height, unsigned char* pxdata) {}
+void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {}
 
 void init_sampler_state() {
   samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;

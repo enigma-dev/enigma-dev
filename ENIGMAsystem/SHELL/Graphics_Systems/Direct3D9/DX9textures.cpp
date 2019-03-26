@@ -72,7 +72,7 @@ void graphics_delete_texture(int texid) {
   texture->peer->Release(), texture->peer = NULL;
 }
 
-unsigned char* graphics_copy_texture_pxdata(int texture, unsigned* fullwidth, unsigned* fullheight) {
+unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {
   auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
   auto peer = d3dtex->peer;
 
@@ -91,7 +91,7 @@ unsigned char* graphics_copy_texture_pxdata(int texture, unsigned* fullwidth, un
   return ret;
 }
 
-unsigned char* graphics_copy_texture_pxdata(int texture, int x, int y, int width, int height) {
+unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {
   auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
   auto peer = d3dtex->peer;
   unsigned fullwidth = d3dtex->fullwidth, fullheight = d3dtex->fullheight;
@@ -109,7 +109,7 @@ unsigned char* graphics_copy_texture_pxdata(int texture, int x, int y, int width
   return ret;
 }
 
-void graphics_push_texture_pxdata(int texture, int x, int y, int width, int height, unsigned char* pxdata) {
+void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {
   auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
   auto peer = d3dtex->peer;
   unsigned fullwidth = d3dtex->fullwidth;
@@ -123,8 +123,8 @@ void graphics_push_texture_pxdata(int texture, int x, int y, int width, int heig
   peer->UnlockRect(0);
 }
 
-void graphics_push_texture_pxdata(int texture, int width, int height, unsigned char* pxdata) {
-  graphics_push_texture_pxdata(texture, 0, 0, width, height, pxdata);
+void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {
+  graphics_push_texture_pixels(texture, 0, 0, width, height, pxdata);
 }
 
 } // namespace enigma

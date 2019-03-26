@@ -70,10 +70,10 @@ namespace enigma
 
 	int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap){return -1;}
 	void graphics_delete_texture(int texid){}
-	unsigned char* graphics_copy_texture_pxdata(int texture, unsigned* fullwidth, unsigned* fullheight) {return NULL;}
-	unsigned char* graphics_copy_texture_pxdata(int texture, int x, int y, int width, int height) {return NULL;}
-	void graphics_push_texture_pxdata(int texture, int x, int y, int width, int height, unsigned char* pxdata) {}
-	void graphics_push_texture_pxdata(int texture, int width, int height, unsigned char* pxdata) {}
+	unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {return NULL;}
+	unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {return NULL;}
+	void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {}
+	void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {}
 
 	void graphics_set_matrix(int type) {}
 

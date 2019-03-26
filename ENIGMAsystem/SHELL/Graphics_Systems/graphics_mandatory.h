@@ -36,11 +36,11 @@ namespace enigma
   /// Retrieve image data from a texture, in unsigned char, BGRA format.
   /// This data will be allocated afresh; the pointer and data are yours to manipulate
   /// and must be freed once you are done.
-  unsigned char* graphics_copy_texture_pxdata(int texture, unsigned* fullwidth, unsigned* fullheight);
-  unsigned char* graphics_copy_texture_pxdata(int texture, int x, int y, int width, int height);
+  unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight);
+  unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height);
   /// Push image data to a texture on the GPU, in unsigned char, BGRA format.
-  void graphics_push_texture_pxdata(int texture, int x, int y, int width, int height, unsigned char* pxdata);
-  void graphics_push_texture_pxdata(int texture, int width, int height, unsigned char* pxdata);
+  void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata);
+  void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata);
 
   /// NOTE: The following texture functions are implemented generically from the ones above!
 
