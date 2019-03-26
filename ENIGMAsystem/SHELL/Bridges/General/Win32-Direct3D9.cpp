@@ -45,8 +45,6 @@ inline void get_d3d_present_params(D3DPRESENT_PARAMETERS* d3dpp) {
 
 namespace enigma {
 
-extern HWND hWnd;
-
 namespace dx9 {
 
 ContextManager* d3dmgr; // the pointer to the device class
