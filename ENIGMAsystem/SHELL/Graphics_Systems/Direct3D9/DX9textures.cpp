@@ -71,23 +71,69 @@ void graphics_delete_texture(int texid) {
 }
 
 unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight) {
-  *fullwidth = textures[texture]->fullwidth;
-  *fullheight = textures[texture]->fullheight;
+  auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
+  auto peer = d3dtex->peer;
+
+  *fullwidth = d3dtex->fullwidth;
+  *fullheight = d3dtex->fullheight;
 
   unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
+
+  D3DLOCKED_RECT lock;
+  peer->LockRect(0, &lock, NULL, D3DLOCK_READONLY);
+  for (size_t i = 0; i < (*fullheight); ++i) {
+    memcpy((void*)((intptr_t)ret + i * (*fullwidth) * 4), (void*)((intptr_t)lock.pBits + i * lock.Pitch), (*fullwidth) * 4);
+  }
+  peer->UnlockRect(0);
 
   return ret;
 }
 
 unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height) {
-  unsigned fw, fh;
-  unsigned char* pxdata = graphics_copy_texture_pxdata(texture, &fw, &fh);
-  return pxdata;
+  auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
+  auto peer = d3dtex->peer;
+  unsigned fullwidth = d3dtex->fullwidth, fullheight = d3dtex->fullheight;
+
+  unsigned char* ret = new unsigned char[fullwidth*fullheight*4];
+
+  RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
+  D3DLOCKED_RECT lock;
+  peer->LockRect(0, &lock, &rect, D3DLOCK_READONLY);
+  for (size_t i = 0; i < height; ++i) {
+    memcpy((void*)((intptr_t)ret + i * fullwidth * 4), (void*)((intptr_t)lock.pBits + i * lock.Pitch), width * 4);
+  }
+  peer->UnlockRect(0);
+
+  return ret;
 }
 
-void graphics_push_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height, unsigned char* pxdata) {}
+void graphics_push_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height, unsigned char* pxdata) {
+  auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
+  auto peer = d3dtex->peer;
+  unsigned fullwidth = d3dtex->fullwidth;
 
-void graphics_push_texture_pxdata(unsigned texture, unsigned width, unsigned height, unsigned char* pxdata) {}
+  RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
+  D3DLOCKED_RECT lock;
+  peer->LockRect(0, &lock, &rect, 0);
+  for (size_t i = 0; i < height; ++i) {
+    memcpy((void*)((intptr_t)lock.pBits + i * lock.Pitch), (void*)((intptr_t)pxdata + i * fullwidth * 4), width * 4);
+  }
+  peer->UnlockRect(0);
+}
+
+void graphics_push_texture_pxdata(unsigned texture, unsigned width, unsigned height, unsigned char* pxdata) {
+  auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
+  auto peer = d3dtex->peer;
+  unsigned fullwidth = d3dtex->fullwidth;
+
+  RECT rect = {0, 0, (LONG)width, (LONG)height};
+  D3DLOCKED_RECT lock;
+  peer->LockRect(0, &lock, &rect, 0);
+  for (size_t i = 0; i < height; ++i) {
+    memcpy((void*)((intptr_t)lock.pBits + i * lock.Pitch), (void*)((intptr_t)pxdata + i * fullwidth * 4), width * 4);
+  }
+  peer->UnlockRect(0);
+}
 
 } // namespace enigma
 
