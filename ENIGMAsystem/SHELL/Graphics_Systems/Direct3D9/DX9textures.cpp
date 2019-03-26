@@ -22,6 +22,8 @@
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
+#include <string.h> // for memcpy
+
 using namespace enigma::dx9;
 
 namespace enigma {

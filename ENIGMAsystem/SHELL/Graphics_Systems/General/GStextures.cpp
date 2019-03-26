@@ -22,6 +22,8 @@
 
 #include "Universal_System/image_formats.h"
 
+#include <string.h> // for memcpy
+
 namespace {
 
 inline unsigned int lgpp2(unsigned int x) { // Trailing zero count. lg for perfect powers of two

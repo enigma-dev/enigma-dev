@@ -25,7 +25,6 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 
 #include <stdio.h>
-#include <string.h>
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
