@@ -79,7 +79,7 @@ void Reset(D3DPRESENT_PARAMETERS *d3dpp) {
   if (FAILED(hr)) {
     show_error("Direct3D 9 Device Reset Failed", true);
   }
-  // regular old managed d3d9 purges render states
+  // the normal, managed d3d 9.0 does not automatically restore render state
   if (Direct3D9Managed) d3dmgr->RestoreState();
 
   OnDeviceReset();
@@ -245,4 +245,4 @@ void set_synchronization(bool enable)
   enigma::Reset(&d3dpp);
 }
 
-}
+} // namespace enigma_user
