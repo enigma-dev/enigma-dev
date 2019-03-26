@@ -98,7 +98,7 @@ unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned x, unsign
   unsigned fw, fh;
   //We could use glCopyImageSubData here, but it's GL4.3
   unsigned char* pxdata = graphics_copy_texture_pxdata(texture, &fw, &fh);
-  return pxdata;
+  return pxdata + (x*4) + (y*fw*4);
 }
 
 void graphics_push_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height, unsigned char* pxdata) {
