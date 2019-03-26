@@ -39,7 +39,10 @@ namespace enigma
   /// Retrieve image data from a texture, in unsigned char, BGRA format.
   /// This data will be allocated afresh; the pointer and data are yours to manipulate
   /// and must be freed once you are done.
-  unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight);
+  unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight);
+  unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height);
+  void graphics_push_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height, unsigned char* pxdata);
+  void graphics_push_texture_pxdata(unsigned texture, unsigned width, unsigned height, unsigned char* pxdata);
 
   struct particles_implementation
   {

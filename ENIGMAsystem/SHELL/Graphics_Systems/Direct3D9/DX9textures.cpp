@@ -189,7 +189,7 @@ LPDIRECT3DTEXTURE9 get_texture_peer(int texid) {
     texture->peer->Release(), texture->peer = NULL;
   }
 
-  unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
+  unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
     auto peer = get_texture_peer(texture);
     *fullwidth = textures[texture]->fullwidth;

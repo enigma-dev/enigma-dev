@@ -133,7 +133,7 @@ void graphics_delete_texture(int tex)
   texture->view->Release(), texture->view = NULL;
 }
 
-unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
+unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
 {
   return NULL; //TODO: implement
 }

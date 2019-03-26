@@ -207,7 +207,7 @@ bool background_replace(int back, std::string filename, bool transparent, bool s
 void background_save(int back, std::string fname) {
   get_background(bck, back);
   unsigned w, h;
-  unsigned char *rgbdata = enigma::graphics_get_texture_pixeldata(bck->texture, &w, &h);
+  unsigned char *rgbdata = enigma::graphics_copy_texture_pxdata(bck->texture, &w, &h);
 
   std::string ext = enigma::image_get_format(fname);
 

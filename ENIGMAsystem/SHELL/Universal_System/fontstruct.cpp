@@ -42,15 +42,15 @@ namespace enigma
   bool fontglyph::empty() {
     return !(std::abs(x2-x) > 0 && std::abs(y2-y) > 0);
   }
-  
+
   int font_new(uint32_t gs, uint32_t gc) // Creates a new font, allocating 'gc' glyphs
   {
     font *ret = new font;
-    
+
     fontglyphrange fgr;
     fgr.glyphstart = gs;
     fgr.glyphcount = gc;
-    
+
     ret->glyphRangeCount = 1;
     ret->glyphRanges.push_back(fgr);
     ret->height = 0;
@@ -90,7 +90,7 @@ namespace enigma
       {
         fontglyph fg;
         unsigned fw, fh;
-        unsigned char* data = graphics_get_texture_pixeldata(sspr->texturearray[i], &fw, &fh);
+        unsigned char* data = graphics_copy_texture_pxdata(sspr->texturearray[i], &fw, &fh);
         //NOTE: Following line replaced gtw = int((double)sspr->width / sspr->texturewarray[i]);
         //this was to fix non-power of two subimages
         //NTOE2: The commented out code was actually wrong - the width was divided by y instead of x. That is why it only worked with power of two.
@@ -252,13 +252,13 @@ bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32
   fnt->bold = bold;
   fnt->italic = italic;
   fnt->glyphRangeCount = 1;
-  
+
   enigma::fontglyphrange fgr;
   fgr.glyphstart = first;
   fgr.glyphcount = last-first;
-  
+
   fnt->glyphRanges.push_back(fgr);
-  
+
   return true;
 }
 
@@ -271,12 +271,12 @@ bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep)
   enigma::font *fnt = enigma::fontstructarray[ind];
   fnt->glyphRanges.clear(); //TODO: Delete glyphs for each range or add it to the destructor?
   fnt->glyphRangeCount = 1;
-  
+
   enigma::fontglyphrange fgr;
   fgr.glyphstart = first;
   fgr.glyphcount = gcount;
   fnt->glyphRanges.push_back(fgr);
-  
+
   return enigma::font_pack(fnt, spr, gcount, prop, sep);
 }
 
@@ -333,4 +333,3 @@ float font_get_glyph_bottom(int fnt, uint32_t character) {
 }
 
 }
-
