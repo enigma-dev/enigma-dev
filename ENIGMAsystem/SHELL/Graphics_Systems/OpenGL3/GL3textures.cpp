@@ -32,6 +32,21 @@
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_texture(tex,texid,v)\
+    if ((texid < -1 || size_t(texid) >= enigma::textures.size()) && texid!=-1) {\
+      show_error("Attempting to access non-existing texture " + toString(texid), false);\
+      return v;\
+    }\
+    const GLuint tex = (texid==-1?0:((enigma::GLTexture*)enigma::textures[texid])->peer);
+#else
+  #define get_texture(tex,texid,v)\
+    const GLuint tex = (texid==-1?0:((enigma::GLTexture*)enigma::textures[texid])->peer);
+#endif
+
 /*enum {
   //Formats and internal formats
   tx_rgba = GL_RGBA,
@@ -62,30 +77,6 @@ enum {
   tx_float = GL_FLOAT;
 };*/
 
-namespace enigma {
-
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_texture(tex,texid,v)\
-    if ((texid < -1 || size_t(texid) >= enigma::textures.size()) && texid!=-1) {\
-      show_error("Attempting to access non-existing texture " + toString(texid), false);\
-      return v;\
-    }\
-    const GLuint tex = (texid==-1?0:((enigma::GLTexture*)enigma::textures[texid])->peer);
-#else
-  #define get_texture(tex,texid,v)\
-    const GLuint tex = (texid==-1?0:((enigma::GLTexture*)enigma::textures[texid])->peer);
-#endif
-
-GLuint get_texture_peer(int texid) {
-  return (size_t(texid) >= textures.size() || texid < 0)
-      ? 0 : ((GLTexture*)textures[texid])->peer;
-}
-
-} // namespace enigma
-
 namespace {
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -100,6 +91,11 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 } // namespace anonymous
 
 namespace enigma {
+
+GLuint get_texture_peer(int texid) {
+  return (size_t(texid) >= textures.size() || texid < 0)
+      ? 0 : ((GLTexture*)textures[texid])->peer;
+}
 
   //This allows GL3 surfaces to bind and hold many different types of data
   int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, int internalFormat, unsigned format, unsigned type)
