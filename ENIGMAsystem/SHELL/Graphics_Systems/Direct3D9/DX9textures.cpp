@@ -124,17 +124,7 @@ void graphics_push_texture_pxdata(int texture, int x, int y, int width, int heig
 }
 
 void graphics_push_texture_pxdata(int texture, int width, int height, unsigned char* pxdata) {
-  auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
-  auto peer = d3dtex->peer;
-  unsigned fullwidth = d3dtex->fullwidth;
-
-  RECT rect = {0, 0, (LONG)width, (LONG)height};
-  D3DLOCKED_RECT lock;
-  peer->LockRect(0, &lock, &rect, 0);
-  for (int i = 0; i < height; ++i) {
-    memcpy((void*)((intptr_t)lock.pBits + i * lock.Pitch), (void*)((intptr_t)pxdata + i * fullwidth * 4), width * 4);
-  }
-  peer->UnlockRect(0);
+  graphics_push_texture_pxdata(texture, 0, 0, width, height, pxdata);
 }
 
 } // namespace enigma
