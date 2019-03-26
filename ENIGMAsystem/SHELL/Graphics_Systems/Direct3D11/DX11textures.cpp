@@ -97,6 +97,12 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   return id;
 }
 
+void graphics_delete_texture(int tex) {
+  auto texture = (DX11Texture*)textures[tex];
+  texture->peer->Release(), texture->peer = NULL;
+  texture->view->Release(), texture->view = NULL;
+}
+
 unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight) {
   return NULL;
 }
@@ -108,13 +114,6 @@ unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned x, unsign
 void graphics_push_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height, unsigned char* pxdata) {}
 
 void graphics_push_texture_pxdata(unsigned texture, unsigned width, unsigned height, unsigned char* pxdata) {}
-
-void graphics_delete_texture(int tex)
-{
-  auto texture = (DX11Texture*)textures[tex];
-  texture->peer->Release(), texture->peer = NULL;
-  texture->view->Release(), texture->view = NULL;
-}
 
 void init_sampler_state() {
   samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;

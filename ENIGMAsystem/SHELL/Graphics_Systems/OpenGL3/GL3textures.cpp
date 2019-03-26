@@ -141,8 +141,7 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   return id;
 }
 
-void graphics_delete_texture(int texid)
-{
+void graphics_delete_texture(int texid) {
   const GLuint peer = get_texture_peer(texid);
   glDeleteTextures(1, &peer);
 }

@@ -65,6 +65,11 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   return id;
 }
 
+void graphics_delete_texture(int texid) {
+  const auto texture = (DX9Texture*)textures[texid];
+  texture->peer->Release(), texture->peer = NULL;
+}
+
 unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight) {
   return NULL;
 }
@@ -76,12 +81,6 @@ unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned x, unsign
 void graphics_push_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height, unsigned char* pxdata) {}
 
 void graphics_push_texture_pxdata(unsigned texture, unsigned width, unsigned height, unsigned char* pxdata) {}
-
-void graphics_delete_texture(int texid)
-{
-  const auto texture = (DX9Texture*)textures[texid];
-  texture->peer->Release(), texture->peer = NULL;
-}
 
 } // namespace enigma
 

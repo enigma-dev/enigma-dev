@@ -76,6 +76,11 @@ int graphics_create_texture(unsigned width, unsigned height,
   return id;
 }
 
+void graphics_delete_texture(int texid) {
+  const GLuint peer = get_texture_peer(texid);
+  glDeleteTextures(1, &peer);
+}
+
 unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight) {
   enigma_user::texture_set(texture);
 
@@ -106,12 +111,6 @@ void graphics_push_texture_pxdata(unsigned texture, unsigned width, unsigned hei
   enigma_user::texture_set(texture);
 
   glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
-}
-
-void graphics_delete_texture(int texid)
-{
-  const GLuint peer = get_texture_peer(texid);
-  glDeleteTextures(1, &peer);
 }
 
 } // namespace enigma
