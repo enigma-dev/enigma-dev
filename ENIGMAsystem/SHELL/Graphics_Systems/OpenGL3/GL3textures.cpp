@@ -174,7 +174,7 @@ void graphics_push_texture_pxdata(int texture, int x, int y, int width, int heig
 void graphics_push_texture_pxdata(int texture, int width, int height, unsigned char* pxdata) {
   enigma_user::texture_set(texture);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
 }
 
 struct Sampler {
