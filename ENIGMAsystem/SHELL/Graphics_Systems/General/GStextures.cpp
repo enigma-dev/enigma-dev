@@ -24,7 +24,7 @@
 
 namespace {
 
-inline unsigned int lgpp2(unsigned int x) {//Trailing zero count. lg for perfect powers of two
+inline unsigned int lgpp2(unsigned int x) { // Trailing zero count. lg for perfect powers of two
   x =  (x & -x) - 1;
   x -= ((x >> 1) & 0x55555555);
   x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);

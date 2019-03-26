@@ -254,4 +254,4 @@ void texture_anisotropy_filter(int sampler, gs_scalar levels)
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
 }
 
-}
+} // namespace enigma_user
