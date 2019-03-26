@@ -76,8 +76,7 @@ int graphics_create_texture(unsigned width, unsigned height,
   return id;
 }
 
-unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
-{
+unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight) {
   enigma_user::texture_set(texture);
 
   *fullwidth = textures[texture]->fullwidth;

@@ -22,9 +22,6 @@
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
-#include <stdio.h>
-#include <string.h>
-
 using namespace enigma::dx9;
 
 namespace enigma {
