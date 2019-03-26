@@ -537,12 +537,6 @@ int room_set_view_enabled(int indx, int val)
 
 }
 
-namespace enigma
-{
-  bool tile_alter = false;
-  bool instance_alter = false;
-}
-
 namespace enigma_user
 {
 
@@ -570,7 +564,6 @@ int room_tile_add_ext(int indx, int bck, int left, int top, int width, int heigh
   );
 
   rm->tiles = newtiles;
-  enigma::tile_alter = true;
   return 1;
 }
 
@@ -580,7 +573,7 @@ int room_tile_clear(int indx)
   enigma::roomstruct *rm = enigma::roomdata[indx];
 
   rm->tiles.clear();
-  enigma::tile_alter = true;
+
   return 1;
 }
 
@@ -594,7 +587,6 @@ int room_instance_add(int indx, int x, int y, int obj)
     x,
     y
   );
-  enigma::instance_alter = true;
   return 1;
 }
 
@@ -603,7 +595,6 @@ int room_instance_clear(int indx)
   errcheck(indx,"Nonexistent room", 0);
   enigma::roomstruct *rm = enigma::roomdata[indx];
   rm->instances.clear();
-  enigma::instance_alter = true;
   return 1;
 }
 
