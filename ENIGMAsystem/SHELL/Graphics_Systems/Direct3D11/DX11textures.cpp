@@ -26,15 +26,6 @@ using namespace enigma::dx11;
 
 namespace {
 
-inline unsigned int lgpp2(unsigned int x) {//Trailing zero count. lg for perfect powers of two
-	x =  (x & -x) - 1;
-	x -= ((x >> 1) & 0x55555555);
-	x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
-	x =  ((x >> 4) + x) & 0x0f0f0f0f;
-	x += x >> 8;
-	return (x + (x >> 16)) & 63;
-}
-
 ID3D11ShaderResourceView *getDefaultWhiteTexture() {
     static int texid = -1;
     if (texid == -1) {
@@ -106,36 +97,23 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   return id;
 }
 
-int graphics_duplicate_texture(int tex, bool mipmap)
-{
-  return -1; //TODO: implement
+unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight) {
+  return NULL;
 }
 
-void graphics_copy_texture(int source, int destination, int x, int y)
-{
-
+unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height) {
+  return NULL;
 }
 
-void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y)
-{
+void graphics_push_texture_pxdata(unsigned texture, unsigned x, unsigned y, unsigned width, unsigned height, unsigned char* pxdata) {}
 
-}
-
-void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
-{
-
-}
+void graphics_push_texture_pxdata(unsigned texture, unsigned width, unsigned height, unsigned char* pxdata) {}
 
 void graphics_delete_texture(int tex)
 {
   auto texture = (DX11Texture*)textures[tex];
   texture->peer->Release(), texture->peer = NULL;
   texture->view->Release(), texture->view = NULL;
-}
-
-unsigned char* graphics_copy_texture_pxdata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
-{
-  return NULL; //TODO: implement
 }
 
 void init_sampler_state() {
