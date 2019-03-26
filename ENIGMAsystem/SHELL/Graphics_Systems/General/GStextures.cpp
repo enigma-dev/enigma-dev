@@ -42,11 +42,9 @@ namespace enigma {
 vector<Texture*> textures;
 
 int graphics_duplicate_texture(int tex, bool mipmap) {
-  unsigned w, h, fw, fh;
-  w = textures[tex]->width;
-  h = textures[tex]->height;
-  fw = textures[tex]->fullwidth;
-  fh = textures[tex]->fullheight;
+  unsigned w = textures[tex]->width, h = textures[tex]->height,
+           fw = textures[tex]->fullwidth, fh = textures[tex]->fullheight;
+
   unsigned char* bitmap = graphics_copy_texture_pxdata(tex, &fw, &fh);
   unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
   delete[] bitmap;
@@ -55,11 +53,8 @@ int graphics_duplicate_texture(int tex, bool mipmap) {
 }
 
 void graphics_copy_texture(int source, int destination, int x, int y) {
-  unsigned int sw, sh, sfw, sfh;
-  sw = textures[source]->width;
-  sh = textures[source]->height;
-  sfw = textures[source]->fullwidth;
-  sfh = textures[source]->fullheight;
+  unsigned sw = textures[source]->width, sh = textures[source]->height,
+           sfw = textures[source]->fullwidth, sfh = textures[source]->fullheight;
   unsigned char* bitmap = graphics_copy_texture_pxdata(source, &sfw, &sfh);
 
   unsigned char* cropped_bitmap = new unsigned char[sw*sh*4];
@@ -67,9 +62,7 @@ void graphics_copy_texture(int source, int destination, int x, int y) {
     memcpy(cropped_bitmap+sw*i*4, bitmap+sfw*i*4, sw*4);
   }
 
-  unsigned dw, dh;
-  dw = textures[destination]->width;
-  dh = textures[destination]->height;
+  unsigned dw = textures[destination]->width, dh = textures[destination]->height;
   graphics_push_texture_pxdata(destination, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), cropped_bitmap);
 
   delete[] bitmap;
@@ -77,11 +70,8 @@ void graphics_copy_texture(int source, int destination, int x, int y) {
 }
 
 void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y) {
-  unsigned int sw, sh, sfw, sfh;
-  sw = textures[source]->width;
-  sh = textures[source]->height;
-  sfw = textures[source]->fullwidth;
-  sfh = textures[source]->fullheight;
+  unsigned sw = textures[source]->width, sh = textures[source]->height,
+           sfw = textures[source]->fullwidth, sfh = textures[source]->fullheight;
   unsigned char* bitmap = graphics_copy_texture_pxdata(source, &sfw, &sfh);
 
   if (xoff+sw>sfw) sw = sfw-xoff;
@@ -91,9 +81,7 @@ void graphics_copy_texture_part(int source, int destination, int xoff, int yoff,
     memcpy(cropped_bitmap+sw*i*4, bitmap+xoff*4+sfw*(i+yoff)*4, sw*4);
   }
 
-  unsigned dw, dh;
-  dw = textures[destination]->width;
-  dh = textures[destination]->height;
+  unsigned dw = textures[destination]->width, dh = textures[destination]->height;
   graphics_push_texture_pxdata(destination, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), cropped_bitmap);
 
   delete[] bitmap;
@@ -101,10 +89,8 @@ void graphics_copy_texture_part(int source, int destination, int xoff, int yoff,
 }
 
 void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex) {
-  unsigned fw, fh, size;
-  fw = textures[tex]->fullwidth;
-  fh = textures[tex]->fullheight;
-  size = (fh<<(lgpp2(fw)+2))|2;
+  unsigned fw = textures[tex]->fullwidth, fh = textures[tex]->fullheight;
+  unsigned size = (fh<<(lgpp2(fw)+2))|2;
   unsigned char* bitmap = graphics_copy_texture_pxdata(tex, &fw, &fh);
   unsigned char* bitmap2 = graphics_copy_texture_pxdata(copy_tex, &fw, &fh);
 
