@@ -76,8 +76,8 @@ extern bool forceSoftwareVertexProcessing;
     if (FAILED(hr)) {
       show_error("Direct3D 9 Device Reset Failed", true);
     }
-    // Reapply the stored render states and what not
-    d3dmgr->RestoreState();
+    // the normal, managed d3d 9.0 does not automatically restore render state
+    if (Direct3D9Managed) d3dmgr->RestoreState();
     OnDeviceReset();
   }
 
