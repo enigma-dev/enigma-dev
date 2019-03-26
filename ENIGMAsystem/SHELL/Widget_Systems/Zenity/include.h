@@ -1,1 +1,1 @@
-#include "Widget_Systems/General/tinyfiledialogs/dialogs.h"
+#include "dialogs.h"

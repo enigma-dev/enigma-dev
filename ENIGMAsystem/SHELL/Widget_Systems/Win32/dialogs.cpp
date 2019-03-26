@@ -55,9 +55,9 @@ static string gs_but1, gs_but2, gs_but3;
 void show_error(string errortext, const bool fatal)
 {
   #ifdef DEBUG_MODE
-    errortext += enigma::debug_scope::GetErrors();
+  errortext = enigma::debug_scope::GetErrors() + "\r\n\r\n" + errortext;
   #else
-  errortext = "Error in some event or another for some object: \r\n" + errortext;
+  errortext = "Error in some event or another for some object:\r\n\r\n" + errortext;
   #endif
 
   if (MessageBox(NULL,errortext.c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)

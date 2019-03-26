@@ -17,20 +17,15 @@
 
 #include <string>
 
-namespace enigma {
-
-int const tfd_Zenity  = 0;
-int const tfd_KDialog = 1;
-int tfd_DialogEngine();
-  
-} // namespave enigma
-
 //  void show_error(std::string errortext, const bool fatal);
 
 namespace enigma_user {
   
-//  int show_message(std::string str);
+//  int show_message(const std::string &str);
+int show_message_cancelable(std::string str);
 bool show_question(std::string str);
+int show_question_cancelable(std::string str);
+int show_attempt(std::string str);
 std::string get_string(std::string str, std::string def);
 std::string get_password(std::string str, std::string def);
 double get_integer(std::string str, double def);
@@ -45,5 +40,7 @@ std::string get_directory(std::string dname);
 std::string get_directory_alt(std::string capt, std::string root);
 int get_color(int defcol);
 int get_color_ext(int defcol, std::string title);
+std::string message_get_caption();
+void message_set_caption(std::string str);
   
 } // namespave enigma_user
