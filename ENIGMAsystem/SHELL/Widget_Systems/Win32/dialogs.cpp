@@ -60,7 +60,7 @@ static inline string add_slash(const string& dir) {
 void show_error(string errortext, const bool fatal)
 {
   #ifdef DEBUG_MODE
-  errortext += "\r\n\r\n" + enigma::debug_scope::GetErrors();
+  errortext += enigma::debug_scope::GetErrors();
   #endif
 
   if (MessageBox(NULL,errortext.c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
