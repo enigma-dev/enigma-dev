@@ -2,21 +2,16 @@ syntax = "proto2";
 package buffers.resources;
 
 import "options.proto";
-import "Event.proto";
 
 message Object {
-  optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
-
-  optional string parent_name = 3 [(resource_ref)="object", (gmx) = "parentName", (yyp_id) = "parentObjectId"];
-  optional string sprite_name = 4 [(resource_ref)="sprite", (gmx) = "spriteName", (yyp_id) = "spriteId"];
-  optional string mask_name = 5 [(resource_ref)="sprite", (gmx) = "maskName", (yyp_id) = "maskSpriteId"];
-
-  optional int32 depth = 6 [(yyp) = "YYP_DEPRECATED"];
-  optional bool solid = 7;
-  optional bool visible = 8;
-  optional bool persistent = 9;
-
-  repeated Event events = 10 [(gmx) = "events/event", (yyp) = "eventList"];
+  message Event {
+    optional int32 type = 1 [(gmx) = "eventtype"];
+    oneof reference {
+      int32 number = 2 [(gmx) = "enumb"];
+      string name = 3 [(gmx) = "ename", (yyp_id) = "collisionObjectId"];
+    }
+    optional string code = 4 [(gmx) = "action"];
+  }
 
   enum PhysicsShape { CIRCLE = 0; BOX = 1; SHAPE = 2; }
 
@@ -39,6 +34,19 @@ message Object {
     optional bool phy_kinematic = 11 [(gmx) = "PhysicsObjectKinematic", (yyp) = "physicsKinematic"];
     repeated PhysicsShapePoint phy_shape = 12 [(gmx) = "PhysicsShapePoints/point", (yyp) = "physicsShapePoints"];
   }
+
+  optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
+
+  optional string parent_name = 3 [(resource_ref)="object", (gmx) = "parentName", (yyp_id) = "parentObjectId"];
+  optional string sprite_name = 4 [(resource_ref)="sprite", (gmx) = "spriteName", (yyp_id) = "spriteId"];
+  optional string mask_name = 5 [(resource_ref)="sprite", (gmx) = "maskName", (yyp_id) = "maskSpriteId"];
+
+  optional int32 depth = 6 [(yyp) = "YYP_DEPRECATED"];
+  optional bool solid = 7;
+  optional bool visible = 8;
+  optional bool persistent = 9;
+
+  repeated Event events = 10 [(gmx) = "events/event", (yyp) = "eventList"];
 
   optional ObjectPhysicsSettings physics_settings = 11 [(gmx) = "EGM_NESTED"];
 }

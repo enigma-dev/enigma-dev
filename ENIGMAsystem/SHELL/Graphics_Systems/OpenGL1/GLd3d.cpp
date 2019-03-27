@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
@@ -35,11 +35,6 @@ using namespace std;
 namespace enigma {
 
 void d3d_light_update_positions(); // forward declare
-
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
-int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
@@ -248,19 +243,6 @@ void d3d_set_culling(int mode)
   }
 }
 
-bool d3d_get_mode()
-{
-  return enigma::d3dMode;
-}
-
-bool d3d_get_hidden() {
-  return enigma::d3dHidden;
-}
-
-int d3d_get_culling() {
-  return enigma::d3dCulling;
-}
-
 void d3d_set_fill_mode(int fill)
 {
   draw_batch_flush(batch_flush_deferred);
@@ -300,11 +282,9 @@ void d3d_set_clip_plane(bool enable)
   //printf("warning: d3d_set_clip_plane(bool enable) called even though GL1 doesn't support this!\n");
 }
 
-}
+} // namespace enigma_user
 
 #include <map>
-#include <list>
-#include "Universal_System/fileio.h"
 
 struct posi { // Homogenous point.
     gs_scalar x;

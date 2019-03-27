@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Polygone
+*** Copyright (C) 2013,2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,28 +16,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_GL_TEXTURESTRUCT_H
-#define ENIGMA_GL_TEXTURESTRUCT_H
-
-#include "Universal_System/scalar.h"
-#include "GLSamplerState.h"
-
-#include <vector>
-using std::vector;
-
-struct TextureStruct {
-  enigma::SamplerState* sampler;
-	unsigned gltex;
-	unsigned width,height;
-	unsigned fullwidth,fullheight;
-	TextureStruct(unsigned gtex);
-	~TextureStruct();
-};
-extern vector<TextureStruct*> textureStructs;
+#include "GSd3d.h"
 
 namespace enigma {
-unsigned get_texture(int texid);
-void graphics_samplers_apply();
+
+bool d3dMode=false, d3dPerspective=false, d3dHidden=false, d3dZWriteEnable=true;
+int d3dCulling = enigma_user::rs_none;
+
+} // namespace enigma
+
+namespace enigma_user {
+
+void d3d_set_perspective(bool enable) {
+  // in GM8.1 and GMS v1.4 this does not take effect
+  // until the next frame in screen_redraw
+  enigma::d3dPerspective = enable;
 }
 
-#endif // ENIGMA_GL_TEXTURESTRUCT_H
+} // namespace enigma_user

@@ -20,11 +20,6 @@
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include <math.h>
 
-namespace enigma
-{
-	extern unsigned char currentcolor[4];
-}
-
 namespace enigma_user
 {
 	void draw_set_color(int color)

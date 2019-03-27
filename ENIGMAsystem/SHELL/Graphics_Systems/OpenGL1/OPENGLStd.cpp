@@ -19,7 +19,7 @@
 #include <string>
 #include <stdlib.h>     /* malloc, free, rand */
 
-#include "../General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 using namespace std;
 #include "OPENGLStd.h"
 #include "GLshader.h"

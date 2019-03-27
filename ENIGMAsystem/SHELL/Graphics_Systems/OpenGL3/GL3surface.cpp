@@ -16,16 +16,17 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GL3TextureStruct.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/OpenGL/GLSurfaceStruct.h"
+#include "Graphics_Systems/OpenGL/GLtextures_impl.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-#include "Graphics_Systems/General/GLSurfaceStruct.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
@@ -114,7 +115,7 @@ int surface_create(int width, int height, bool depthbuffer, bool stencilbuffer, 
     int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureStructs[texture]->gltex, 0);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, enigma::get_texture_peer(texture), 0);
 
     GLbitfield flags = GL_COLOR_BUFFER_BIT;
 
@@ -147,12 +148,12 @@ int surface_create(int width, int height, bool depthbuffer, bool stencilbuffer, 
     }else{ //These use Framebuffers which a slower, but can be sampled
       if (stencilbuffer == true){ //If you use stencilbuffer you MUST also use depth buffer, as a free standing stencil buffer is seldom supported in FBO (GL spec even encourages against it)
         enigma::surface_array[id].depth_buffer = enigma::graphics_create_texture_custom(w,h,w,h,0,false, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, textureStructs[enigma::surface_array[id].depth_buffer]->gltex, 0);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, enigma::get_texture_peer(enigma::surface_array[id].depth_buffer), 0);
         flags = flags | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
         enigma::surface_array[id].has_depth_buffer = true;
       }else if (depthbuffer == true){
         enigma::surface_array[id].depth_buffer = enigma::graphics_create_texture_custom(w,h,w,h,0,false, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textureStructs[enigma::surface_array[id].depth_buffer]->gltex, 0);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, enigma::get_texture_peer(enigma::surface_array[id].depth_buffer), 0);
         flags = flags | GL_DEPTH_BUFFER_BIT;
         enigma::surface_array[id].has_depth_buffer = true;
       }
@@ -201,14 +202,14 @@ int surface_create_msaa(int width, int height, int samples)
 
   int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
   glGenFramebuffers(1, &fbo);
-  glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureStructs[texture]->gltex);
+  glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, enigma::get_texture_peer(texture));
 
   glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_BGRA, w, h, false);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, textureStructs[texture]->gltex, 0);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, enigma::get_texture_peer(texture), 0);
   glDrawBuffer(GL_COLOR_ATTACHMENT0);
   glReadBuffer(GL_COLOR_ATTACHMENT0);
   glClearColor(1,1,1,0);
@@ -225,7 +226,7 @@ void surface_add_colorbuffer(int id, int index, int internalFormat, unsigned for
   get_surface(surf,id);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, surf.fbo);
   int texture = enigma::graphics_create_texture_custom(surf.width, surf.height, surf.width, surf.height, 0, false, internalFormat, format, type);
-  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+index, GL_TEXTURE_2D, textureStructs[texture]->gltex, 0);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+index, GL_TEXTURE_2D, enigma::get_texture_peer(texture), 0);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
 }
 
@@ -233,7 +234,7 @@ void surface_add_depthbuffer(int id, int internalFormat, unsigned format, unsign
   get_surface(surf,id);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, surf.fbo);
   int texture = enigma::graphics_create_texture_custom(surf.width, surf.height, surf.width, surf.height, 0, false, internalFormat, format, type);
-  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureStructs[texture]->gltex, 0);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, enigma::get_texture_peer(texture), 0);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
 }
 
