@@ -19,6 +19,7 @@
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include <stdlib.h>
+#include <cstdio>
 #include <string>
 
 #ifdef DEBUG_MODE
@@ -68,7 +69,8 @@ void show_error(string errortext, const bool fatal) {
   #endif
   
   if (error_caption == "") error_caption = "Error";
-  cocoa_show_error(errortext.c_str(), (const bool)fatal, error_caption.c_str());
+  int result = cocoa_show_error(errortext.c_str(), (const bool)fatal, error_caption.c_str());
+  if (result == 1) exit(0);
 }
 
 namespace enigma_user {
