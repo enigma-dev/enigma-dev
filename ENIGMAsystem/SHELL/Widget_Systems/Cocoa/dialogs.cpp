@@ -118,14 +118,14 @@ double get_integer(string str, double def) {
   string integer = remove_trailing_zeros(def);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
   string result = cocoa_input_box(str.c_str(), integer.c_str(), dialog_caption.c_str());
-  return result ? strtod(input, NULL) : 0;
+  return !result.empty() ? strtod(result.c_str(), NULL) : 0;
 }
 
 double get_passcode(string str, double def) {
   string integer = remove_trailing_zeros(def);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
   string result = cocoa_password_box(str.c_str(), integer.c_str(), dialog_caption.c_str());
-  return result ? strtod(input, NULL) : 0;
+  return !result.empty() ? strtod(result.c_str(), NULL) : 0;
 }
 
 string get_open_filename(string filter, string fname) {
