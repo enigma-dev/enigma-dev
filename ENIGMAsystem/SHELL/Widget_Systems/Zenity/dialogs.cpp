@@ -165,9 +165,7 @@ void show_error(string errortext, const bool fatal) {
   string str_echo;
   
   #ifdef DEBUG_MODE
-  errortext = enigma::debug_scope::GetErrors() + "\r\n\r\n" + errortext;
-  #else
-  errortext = "Error in some event or another for some object:\r\n\r\n" + errortext;
+  errortext += enigma::debug_scope::GetErrors();
   #endif
 
   str_echo = fatal ? "echo 1" :
@@ -272,7 +270,7 @@ double get_passcode(string str, double def) {
 }
 
 string get_open_filename(string filter, string fname) {
-  string str_command; string pwd;
+  string str_command;
   string str_title = "Open";
   string str_fname = filename_name(fname);
 
@@ -286,7 +284,7 @@ string get_open_filename(string filter, string fname) {
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) {
-  string str_command; string pwd;
+  string str_command;
   string str_title = add_escaping(title, true, "Open");
   string str_fname = filename_name(fname);
   string str_dir = filename_path(dir);
@@ -305,7 +303,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
 }
 
 string get_open_filenames(string filter, string fname) {
-  string str_command; string pwd;
+  string str_command;
   string str_title = "Open";
   string str_fname = filename_name(fname);
 
@@ -327,7 +325,7 @@ string get_open_filenames(string filter, string fname) {
 }
 
 string get_open_filenames_ext(string filter, string fname, string dir, string title) {
-  string str_command; string pwd;
+  string str_command;
   string str_title = add_escaping(title, true, "Open");
   string str_fname = filename_name(fname);
   string str_dir = filename_path(dir);
@@ -354,7 +352,7 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
 }
 
 string get_save_filename(string filter, string fname) {
-  string str_command; string pwd;
+  string str_command;
   string str_title = "Save As";
   string str_fname = filename_name(fname);
 
@@ -367,7 +365,7 @@ string get_save_filename(string filter, string fname) {
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
-  string str_command; string pwd;
+  string str_command;
   string str_title = add_escaping(title, true, "Save As");
   string str_fname = filename_name(fname);
   string str_dir = filename_path(dir);
@@ -385,7 +383,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
 }
 
 string get_directory(string dname) {
-  string str_command; string pwd;
+  string str_command;
   string str_title = "Select Directory";
   string str_dname = dname;
   string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
@@ -399,7 +397,7 @@ string get_directory(string dname) {
 }
 
 string get_directory_alt(string capt, string root) {
-  string str_command; string pwd;
+  string str_command;
   string str_title = add_escaping(capt, true, "Select Directory");
   string str_dname = root;
   string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
