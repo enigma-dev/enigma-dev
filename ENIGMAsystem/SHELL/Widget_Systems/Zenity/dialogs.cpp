@@ -165,9 +165,7 @@ void show_error(string errortext, const bool fatal) {
   string str_echo;
   
   #ifdef DEBUG_MODE
-  errortext = enigma::debug_scope::GetErrors() + "\r\n\r\n" + errortext;
-  #else
-  errortext = "Error in some event or another for some object:\r\n\r\n" + errortext;
+  errortext += enigma::debug_scope::GetErrors();
   #endif
 
   str_echo = fatal ? "echo 1" :
