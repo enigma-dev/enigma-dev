@@ -174,9 +174,7 @@ void show_error(string errortext, const bool fatal) {
   string str_echo;
   
   #ifdef DEBUG_MODE
-  errortext = enigma::debug_scope::GetErrors() + "\r\n\r\n" + errortext;
-  #else
-  errortext = "Error in some event or another for some object:\r\n\r\n" + errortext;
+  errortext += enigma::debug_scope::GetErrors();
   #endif
 
   str_echo = fatal ? "echo 1" :
@@ -285,8 +283,8 @@ string get_open_filename(string filter, string fname) {
   string str_title = "Open";
   string str_fname = filename_name(fname);
 
-  pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
-    string("\"") + add_escaping(str_fname, false, "") + string("\""); else pwd = "\"$PWD/\"";
+  if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = "\"$PWD/\"\"" +
+    add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
@@ -307,8 +305,8 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   if (str_dir[0] != '\0') str_path = str_dir + str_fname;
   str_fname = (char *)str_path.c_str();
 
-  pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
-    string("\"") + add_escaping(str_fname, false, "") + string("\""); else pwd = "\"$PWD/\"";
+  if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = "\"$PWD/\"\"" +
+    add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
@@ -324,8 +322,8 @@ string get_open_filenames(string filter, string fname) {
   string str_title = "Open";
   string str_fname = filename_name(fname);
 
-  pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
-    string("\"") + add_escaping(str_fname, false, "") + string("\""); else pwd = "\"$PWD/\"";
+  if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = "\"$PWD/\"\"" +
+    add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
@@ -355,8 +353,8 @@ string get_open_filenames_ext(string filter,string fname, string dir, string tit
   if (str_dir[0] != '\0') str_path = str_dir + str_fname;
   str_fname = (char *)str_path.c_str();
 
-  pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
-    string("\"") + add_escaping(str_fname, false, "") + string("\""); else pwd = "\"$PWD/\"";
+  if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = "\"$PWD/\"\"" +
+    add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
@@ -381,8 +379,8 @@ string get_save_filename(string filter, string fname) {
   string str_title = "Save As";
   string str_fname = filename_name(fname);
 
-  pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
-    string("\"") + add_escaping(str_fname, false, "") + string("\""); else pwd = "\"$PWD/\"";
+  if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = "\"$PWD/\"\"" +
+    add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
@@ -402,8 +400,8 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   if (str_dir[0] != '\0') str_path = str_dir + str_fname;
   str_fname = (char *)str_path.c_str();
 
-  pwd = ""; if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = string("\"$PWD/\"") +
-    string("\"") + add_escaping(str_fname, false, "") + string("\""); else pwd = "\"$PWD/\"";
+  if (str_fname.c_str() && str_fname[0] != '/' && str_fname.length()) pwd = "\"$PWD/\"\"" +
+    add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
@@ -419,8 +417,8 @@ string get_directory(string dname) {
   string str_dname = dname;
   string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
 
-  pwd = ""; if (str_dname.c_str() && str_dname[0] != '/' && str_dname.length()) pwd = string("\"$PWD/\"") +
-    string("\"") + add_escaping(str_dname, false, "") + string("\""); else pwd = "\"$PWD/\"";
+  if (str_dname.c_str() && str_dname[0] != '/' && str_dname.length()) pwd = "\"$PWD/\"\"" +
+    add_escaping(str_dname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
@@ -435,8 +433,8 @@ string get_directory_alt(string capt, string root) {
   string str_dname = root;
   string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
 
-  pwd = ""; if (str_dname.c_str() && str_dname[0] != '/' && str_dname.length()) pwd = string("\"$PWD/\"") +
-    string("\"") + add_escaping(str_dname, false, "") + string("\""); else pwd = "\"$PWD/\"";
+  if (str_dname.c_str() && str_dname[0] != '/' && str_dname.length()) pwd = "\"$PWD/\"\"" +
+    add_escaping(str_dname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +

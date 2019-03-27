@@ -52,12 +52,15 @@ static string gs_but1, gs_but2, gs_but3;
 #include "Universal_System/debugscope.h"
 #endif
 
+static inline string add_slash(const string& dir) {
+  if (dir.empty() || *dir.rbegin() != '\\') return dir + '\\';
+  return dir;
+}
+
 void show_error(string errortext, const bool fatal)
 {
   #ifdef DEBUG_MODE
-  errortext = enigma::debug_scope::GetErrors() + "\r\n\r\n" + errortext;
-  #else
-  errortext = "Error in some event or another for some object:\r\n\r\n" + errortext;
+  errortext += enigma::debug_scope::GetErrors();
   #endif
 
   if (MessageBox(NULL,errortext.c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
@@ -554,39 +557,51 @@ int get_color(int defcolor, bool advanced)
   else return defc;
 }
 
-string get_directory(string dname, string caption)
-{
+string get_directory(string dname, string caption) {
   //NOTE: This uses the Windows Vista or later file chooser, which is different than the one used by GM8 and lower
   //because I could not find out which one it uses, since IFileDialog is used by both wxWidgets and QtFramework
   //and there doesn't appear to be a standard file picker for XP or lower in the Windows API except SHBrowseForFolder that is
   //used by Game Maker for get_directory_alt
-  IFileDialog* fileDialog;
-  CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog));
+  IFileDialog *selectDirectory;
+  CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&selectDirectory));
 
   DWORD options;
-  fileDialog->GetOptions(&options);
-  options &= ~FOS_FILEMUSTEXIST;
-  options &= ~FOS_PATHMUSTEXIST;
-  fileDialog->SetOptions(options | FOS_PICKFOLDERS);
-  //TODO: Set default directory to dname
-  //fileDialog->SetDefaultFolder(std::wstring(dname.begin(), dname.end()).c_str());
-  fileDialog->SetTitle(std::wstring(caption.begin(), caption.end()).c_str());
+  selectDirectory->GetOptions(&options);
+  selectDirectory->SetOptions(options | FOS_PICKFOLDERS | FOS_NOCHANGEDIR | FOS_FORCEFILESYSTEM);
 
-  fileDialog->Show(enigma::hWnd);
+  tstring tstr_dname = widen(dname);
+  LPWSTR szFilePath = (wchar_t *)tstr_dname.c_str();
 
-  string res = "";
-  IShellItem *psi;
+  IShellItem *pItem = nullptr;
+  HRESULT hr = ::SHCreateItemFromParsingName(szFilePath, nullptr, IID_PPV_ARGS(&pItem));
 
-  if (SUCCEEDED(fileDialog->GetResult(&psi))) {
-    LPWSTR wideres;
-    psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &wideres);
-    psi->Release();
-
-    std::wstring wstr = wideres;
-    res = string(wstr.begin(), wstr.end());
+  if (SUCCEEDED(hr)) {
+    LPWSTR szName = nullptr;
+    hr = pItem->GetDisplayName(SIGDN_NORMALDISPLAY, &szName);
+    if (SUCCEEDED(hr)) {
+      selectDirectory->SetFolder(pItem);
+      ::CoTaskMemFree(szName);
+    }
+    pItem->Release();
   }
 
-  return res;
+  selectDirectory->SetTitle(std::wstring(caption.begin(), caption.end()).c_str());
+  selectDirectory->Show(enigma::hWnd);
+
+  pItem = nullptr;
+  hr = selectDirectory->GetResult(&pItem);
+
+  if (SUCCEEDED(hr)) {
+    LPWSTR wstr_result;
+    pItem->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &wstr_result);
+    pItem->Release();
+
+    string str_result;
+    str_result = add_slash(shorten(wstr_result));
+    return str_result;
+  }
+
+  return "";
 }
 
 string get_directory_alt(string message, string root, bool modern, string caption) {
