@@ -544,9 +544,9 @@ int room_tile_add_ext(int indx, int bck, int left, int top, int width, int heigh
     width,
     x,
     y,
+    alpha,
     xscale,
     yscale,
-    alpha,
     color
   );
 
