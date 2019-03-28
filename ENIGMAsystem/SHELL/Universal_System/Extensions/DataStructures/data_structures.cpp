@@ -1278,7 +1278,7 @@ void ds_list_sort(const unsigned int id, const bool ascend)
   }
   else
   {
-    sort(ds_lists[id].begin(), ds_lists[id].end(), greater<int>());
+    sort(ds_lists[id].rbegin(), ds_lists[id].rend());
   }
 }
 
