@@ -257,16 +257,11 @@ namespace enigma
     load_tiles();
     //Tiles end
 
-    std::vector<object_basic*> is(instances.size());
-    for (size_t i = 0; i < instances.size(); i++) {
-      inst *obj = &instances[i];
-      object_basic *existing;
-      if ((existing = enigma::fetch_instance_by_id(obj->id))) {
-        is[i] = NULL;
-      } else {
-        is[i] = instance_create_id(obj->x,obj->y,obj->obj,obj->id);
-      }
-    }
+    std::vector<object_basic*> created;
+    created.reserve(instances.size());
+    for (const inst &obj : instances)
+      if (!enigma::fetch_instance_by_id(obj.id))
+        created.emplace_back(instance_create_id(obj.x,obj.y,obj.obj,obj.id));
 
     instance_event_iterator = &dummy_event_iterator;
 
@@ -277,20 +272,14 @@ namespace enigma
     }
 
     // Fire the create event of all the new instances.
-    for (size_t i = 0; i < instances.size(); i++) {
-      if (is[i]) {
-        is[i]->myevent_create();
-      }
-    }
+    for (object_basic *i : created)
+      i->myevent_create();
 
     // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
     // the game ran they won't even exist yet
     if (gamestart) {
-      for (size_t i = 0; i < instances.size(); i++) {
-        if (is[i]) {
-          is[i]->myevent_gamestart();
-        }
-      }
+      for (object_basic *i : created)
+          i->myevent_gamestart();
     }
 
     // Fire the rooms creation code. This includes instance creation code.
@@ -544,9 +533,9 @@ int room_tile_add_ext(int indx, int bck, int left, int top, int width, int heigh
 {
   errcheck(indx,"Nonexistent room", 0);
   enigma::roomstruct *rm = enigma::roomdata[indx];
-    
+
   std::vector<enigma::tile> newtiles = rm->tiles;
-  
+
   newtiles.emplace_back(
     enigma::maxtileid++,
     bck,
