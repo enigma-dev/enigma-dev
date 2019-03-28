@@ -996,7 +996,6 @@ static inline void write_basic_constructor(ofstream &wto) {
       "    instance->image_xscale = 1;\n"
       "    instance->image_yscale = 1;\n"
       "    \n"
-      "    instancecount++;\n"
       "    instance_count++;\n"
       "  }\n"
       "}\n";

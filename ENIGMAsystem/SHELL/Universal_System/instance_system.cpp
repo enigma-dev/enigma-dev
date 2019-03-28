@@ -356,7 +356,6 @@ namespace enigma
   void instance_iter_queue_for_destroy(object_basic* inst)
   {
     enigma::cleanups.insert(inst);
-    enigma::instancecount--;
     enigma_user::instance_count--;
   }
   void dispose_destroyed_instances()
