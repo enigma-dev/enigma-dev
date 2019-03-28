@@ -534,9 +534,7 @@ int room_tile_add_ext(int indx, int bck, int left, int top, int width, int heigh
   errcheck(indx,"Nonexistent room", 0);
   enigma::roomstruct *rm = enigma::roomdata[indx];
 
-  std::vector<enigma::tile> newtiles = rm->tiles;
-
-  newtiles.emplace_back(
+  rm->tiles.emplace_back(
     enigma::maxtileid++,
     bck,
     left,
@@ -552,7 +550,6 @@ int room_tile_add_ext(int indx, int bck, int left, int top, int width, int heigh
     color
   );
 
-  rm->tiles = newtiles;
   return 1;
 }
 
@@ -683,6 +680,7 @@ int room_duplicate(int indx, bool ass, int assroom)
   rm->views_enabled = copyrm->views_enabled;
   rm->createcode = copyrm->createcode;
   rm->precreatecode = copyrm->precreatecode;
+  rm->instances = copyrm->instances;
   rm->tiles = copyrm->tiles;
 
   enigma::viewstruct vw, vc;
