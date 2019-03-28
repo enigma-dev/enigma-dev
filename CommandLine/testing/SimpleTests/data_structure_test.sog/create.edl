@@ -1,0 +1,65 @@
+list_str = ds_list_create();
+list_num = ds_list_create();
+gtest_assert_true(ds_list_exists(list_str));
+gtest_assert_true(ds_list_exists(list_num));
+gtest_assert_true(ds_list_empty(list_str));
+gtest_assert_true(ds_list_empty(list_num));
+
+ds_list_add(list_str, "alarm");
+ds_list_add(list_str, "bank");
+ds_list_add(list_str, "cash");
+gtest_assert_eq(ds_list_size(list_str), 3);
+gtest_assert_false(ds_list_empty(list_str));
+
+ds_list_sort(list_str, false);
+gtest_assert_eq(ds_list_find_value(list_str, 0), "cash");
+gtest_assert_eq(ds_list_find_value(list_str, 1), "bank");
+gtest_assert_eq(ds_list_find_value(list_str, 2), "alarm");
+
+ds_list_sort(list_str, true);
+gtest_assert_eq(ds_list_find_value(list_str, 0), "alarm");
+gtest_assert_eq(ds_list_find_value(list_str, 1), "bank");
+gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
+
+ds_list_add(list_num, 5);
+ds_list_add(list_num, 2);
+ds_list_add(list_num, 98);
+gtest_assert_eq(ds_list_size(list_num), 3);
+gtest_assert_false(ds_list_empty(list_num));
+
+ds_list_sort(list_num, false);
+gtest_assert_eq(ds_list_find_value(list_num, 0), 98);
+gtest_assert_eq(ds_list_find_value(list_num, 1), 5);
+gtest_assert_eq(ds_list_find_value(list_num, 2), 2);
+
+ds_list_sort(list_num, true);
+gtest_assert_eq(ds_list_find_value(list_num, 0), 2);
+gtest_assert_eq(ds_list_find_value(list_num, 1), 5);
+gtest_assert_eq(ds_list_find_value(list_num, 2), 98);
+
+ds_list_replace(list_num, 2, 88);
+gtest_assert_eq(ds_list_find_value(list_num, 2), 88);
+gtest_assert_eq(ds_list_size(list_num), 3);
+
+ds_list_insert(list_num, 0, 45);
+gtest_assert_eq(ds_list_size(list_num), 4);
+gtest_assert_eq(ds_list_find_value(list_num, 0), 45);
+gtest_assert_eq(ds_list_find_value(list_num, 1), 2);
+gtest_assert_eq(ds_list_find_value(list_num, 2), 5);
+gtest_assert_eq(ds_list_find_value(list_num, 3), 88);
+
+ds_list_delete(list_num, 0);
+gtest_assert_eq(ds_list_size(list_num), 3);
+gtest_assert_eq(ds_list_find_value(list_num, 0), 2);
+gtest_assert_eq(ds_list_find_value(list_num, 1), 5);
+gtest_assert_eq(ds_list_find_value(list_num, 2), 88);
+
+ds_list_clear(list_num);
+gtest_assert_true(ds_list_empty(list_num));
+gtest_assert_eq(ds_list_size(list_num), 0);
+gtest_assert_true(ds_list_exists(list_num));
+
+ds_list_destroy(list_num);
+gtest_assert_false(ds_list_exists(list_num));
+
+game_end();
