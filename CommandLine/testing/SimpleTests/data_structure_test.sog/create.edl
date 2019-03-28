@@ -21,6 +21,12 @@ gtest_assert_eq(ds_list_find_value(list_str, 0), "alarm");
 gtest_assert_eq(ds_list_find_value(list_str, 1), "bank");
 gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
 
+random_set_seed(65079);
+ds_list_shuffle(list_str);
+gtest_assert_eq(ds_list_find_value(list_str, 0), "bank");
+gtest_assert_eq(ds_list_find_value(list_str, 1), "alarm");
+gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
+
 ds_list_add(list_num, 5);
 ds_list_add(list_num, 2);
 ds_list_add(list_num, 98);
