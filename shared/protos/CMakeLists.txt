@@ -59,7 +59,9 @@ find_library(LIB_GRPC NAMES grpc)
 find_library(LIB_GPR NAMES gpr)
 if(BUILD_STATIC_LIBS)
   target_link_libraries(${TARGET}-static PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
-else()
+endif()
+
+if(BUILD_SHARED_LIBS)
   target_link_libraries(${TARGET} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
 endif()
 
@@ -68,7 +70,9 @@ include(FindProtobuf)
 include_directories(${Protobuf_INCLUDE_DIRS})
 if(BUILD_STATIC_LIBS)
   target_link_libraries(${TARGET}-static PRIVATE ${Protobuf_LIBRARIES})
-else()
+endif()
+
+if(BUILD_SHARED_LIBS)
   target_link_libraries(${TARGET} PRIVATE ${Protobuf_LIBRARIES})
 endif()
 

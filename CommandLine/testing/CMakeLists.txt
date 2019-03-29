@@ -5,9 +5,6 @@ set(TARGET_DESCRIPTION "ENIGMA Testing Apparatus")
 
 project(${TARGET})
 
-get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
-get_filename_component(ENIGMA_DIR "${ENIGMA_DIR}" PATH)
-
 file(GLOB HARNESS_SOURCES *.cpp)
 file(GLOB TEST_SOURCES Tests/*.cpp)
 
