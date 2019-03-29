@@ -1,10 +1,9 @@
 # Find libEGM
 if(USE_STATIC_LIBS)
-  find_library(LIB_EGM NAMES EGM-static PATHS ${ENIGMA_DIR})
+  target_link_libraries(${TARGET} PRIVATE EGM-static)
 else()
-  find_library(LIB_EGM NAMES EGM PATHS ${ENIGMA_DIR})
+  target_link_libraries(${TARGET} PRIVATE EGM)
 endif()
-target_link_libraries(${TARGET} PRIVATE ${LIB_EGM})
 
 # Find PugiXML
 find_library(LIB_PUGIXML NAMES pugixml)

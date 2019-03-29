@@ -1,10 +1,9 @@
 # Find libProtocols
 if(USE_STATIC_LIBS)
-  find_library(LIB_PROTO NAMES Protocols-static PATHS ${ENIGMA_DIR})
+  target_link_libraries(${TARGET} PRIVATE Protocols-static)
 else()
-  find_library(LIB_PROTO NAMES Protocols PATHS ${ENIGMA_DIR})
+  target_link_libraries(${TARGET} PRIVATE Protocols)
 endif()
-target_link_libraries(${TARGET} PRIVATE ${LIB_PROTO})
 
 # Find Protobuf
 include(FindProtobuf)

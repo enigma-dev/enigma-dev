@@ -5,9 +5,6 @@ set(TARGET_DESCRIPTION "GM to EGM converter")
 
 project(${TARGET})
 
-get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
-get_filename_component(ENIGMA_DIR "${ENIGMA_DIR}" PATH)
-
 include("${ENIGMA_DIR}/shared/BuildFlags.cmake")
 
 if(WIN32)

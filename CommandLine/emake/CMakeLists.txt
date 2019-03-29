@@ -7,16 +7,11 @@ project(${TARGET})
 
 file(GLOB EMAKE_SOURCES *.cpp)
 
-get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
-get_filename_component(ENIGMA_DIR "${ENIGMA_DIR}" PATH)
-
 set(SHARED_SOURCES
    "${ENIGMA_DIR}/shared/eyaml/eyaml.cpp"
    "${ENIGMA_DIR}/shared/event_reader/event_parser.cpp"
    "${ENIGMA_DIR}/shared/libpng-util/libpng-util.cpp"
 )
-
-option(USE_STATIC_LIBS "Link Static Libraries" OFF)
 
 include("${ENIGMA_DIR}/shared/BuildFlags.cmake")
 

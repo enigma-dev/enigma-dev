@@ -5,12 +5,9 @@ set(TARGET_DESCRIPTION "Interface for reading and writing ENIGMA and GameMaker f
 
 project(${TARGET} DESCRIPTION ${TARGET_DESCRIPTION})
 
-file(GLOB SRC_FILES *.cpp)
-get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
-get_filename_component(ENIGMA_DIR "${ENIGMA_DIR}" PATH)
+add_subdirectory("${ENIGMA_DIR}/shared/protos" Protocols)
 
-option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-option(BUILD_STATIC_LIBS "Build Static Libraries" OFF)
+file(GLOB SRC_FILES *.cpp)
 
 include("${ENIGMA_DIR}/shared/BuildFlags.cmake")
 
@@ -18,6 +15,7 @@ if(BUILD_STATIC_LIBS)
   add_library(${TARGET}-static STATIC ${SRC_FILES} "${ENIGMA_DIR}/shared/libpng-util/libpng-util.cpp")
   set_property(TARGET ${TARGET}-static PROPERTY CXX_STANDARD 17)
   set_property(TARGET ${TARGET}-static PROPERTY CXX_STANDARD_REQUIRED ON)
+  add_dependencies(${TARGET}-static Protocols-static CopyProtos)
   install(TARGETS ${TARGET}-static DESTINATION "${ENIGMA_DIR}")
 endif()
 
@@ -25,6 +23,7 @@ if(BUILD_SHARED_LIBS)
   add_library(${TARGET} SHARED ${SRC_FILES} "${ENIGMA_DIR}/shared/libpng-util/libpng-util.cpp")
   set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 17)
   set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD_REQUIRED ON)
+  add_dependencies(${TARGET} CopyProtos)
   install(TARGETS ${TARGET} DESTINATION "${ENIGMA_DIR}")
 endif()
 

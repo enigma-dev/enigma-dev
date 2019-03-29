@@ -9,12 +9,6 @@ endif(WIN32)
 
 project(${TARGET} DESCRIPTION ${TARGET_DESCRIPTION})
 
-option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-option(BUILD_STATIC_LIBS "Build Static Libraries" OFF)
-
-get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
-get_filename_component(ENIGMA_DIR "${ENIGMA_DIR}" PATH)
-
 include("${ENIGMA_DIR}/shared/BuildFlags.cmake")
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -78,11 +72,31 @@ else()
   target_link_libraries(${TARGET} PRIVATE ${Protobuf_LIBRARIES})
 endif()
 
+set(PROTO_HEADERS "")
+
 foreach(_proto ${PROTO_FILES})
   get_filename_component(_basename ${_proto} NAME_WE)
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.pb.h" DESTINATION "${ENIGMA_DIR}/shared/protos/codegen")
+  list(APPEND PROTO_HEADERS "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.pb.h")
 endforeach()
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.h" DESTINATION "${ENIGMA_DIR}/shared/protos/codegen")
+list(APPEND PROTO_HEADERS "${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.h")
+
+add_custom_target(CopyProtos)
+foreach(file ${PROTO_HEADERS})
+  get_filename_component(_basename ${file} NAME)
+  add_custom_command(TARGET CopyProtos PRE_BUILD
+                     COMMAND ${CMAKE_COMMAND} -E copy ${file} "${ENIGMA_DIR}/shared/protos/codegen/${_basename}"
+                     COMMENT "Installing generated protobuf headers ${file} to ${ENIGMA_DIR}/shared/protos/codegen"
+                    )
+endforeach()
+
+if(BUILD_STATIC_LIBS)
+  add_dependencies(CopyProtos ${TARGET}-static)
+endif()
+
+if(BUILD_SHARED_LIBS)
+  add_dependencies(CopyProtos ${TARGET})
+endif()
+
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.dir/Debug/${TARGET}.pdb" DESTINATION "${ENIGMA_DIR}" OPTIONAL)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}-static.dir/Debug/${TARGET}-static.pdb" DESTINATION "${ENIGMA_DIR}" OPTIONAL)
