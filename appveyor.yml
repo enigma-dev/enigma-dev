@@ -134,4 +134,5 @@ install:
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
-  - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh"
+  - setx path "C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%path%"
+  - bash -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh"
