@@ -102,6 +102,7 @@ install:
         (mkdir build) -and (cd build)
         cmake -G "$env:GENERATOR" -DCMAKE_BUILD_TYPE="$env:BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_DIR/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET="$env:TRIPLET_NAME" ..
         cmake --build . --config "$env:BUILD_TYPE" --target install
+        cd ..
       } ElseIf ($env:APPVEYOR_JOB_NUMBER -eq 2) {
         $env:PATH="C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;$env:PATH"
         bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x $env:PACKAGES"
