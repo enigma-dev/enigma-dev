@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Dave "biggoron", Harijs Grinbergs
+/** Copyright (C) 2008-2013 Josh Ventura, Dave "biggoron", Harijs Grinbergs
+*** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,24 +16,24 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_GLSURFACESTRUCT_H
-#define ENIGMA_GLSURFACESTRUCT_H
+#ifndef ENIGMA_GLSURFACE_IMPL_H
+#define ENIGMA_GLSURFACE_IMPL_H
 
 #include "OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSsurface_impl.h"
 
-namespace enigma
+namespace enigma {
+
+struct Surface : BaseSurface
 {
-  struct surface
-  {
-    GLuint fbo;
-    int tex;
-    int width, height;
-    GLuint depth_buffer;
-    GLuint stencil_buffer;
-    bool has_depth_buffer = false;
-    bool has_stencil_buffer = false;
-    bool write_only = true;
-  };
-}
+  GLuint fbo;
+  GLuint depth_buffer;
+  GLuint stencil_buffer;
+  bool has_depth_buffer = false;
+  bool has_stencil_buffer = false;
+  bool write_only = true;
+};
+
+} // namespace enigma
 
 #endif //ENIGMA_GLSURFACESTRUCT_H

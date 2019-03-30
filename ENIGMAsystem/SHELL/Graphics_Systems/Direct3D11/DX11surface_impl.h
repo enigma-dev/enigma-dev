@@ -16,8 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_DX11_SURFACES_IMPL_H
-#define ENIGMA_DX11_SURFACES_IMPL_H
+#ifndef ENIGMA_DX11_SURFACE_IMPL_H
+#define ENIGMA_DX11_SURFACE_IMPL_H
 
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSsurface_impl.h"
@@ -39,4 +39,4 @@ struct Surface : BaseSurface
 
 } // namespace enigma
 
-#endif // ENIGMA_DX11_SURFACES_IMPL_H
+#endif // ENIGMA_DX11_SURFACE_IMPL_H

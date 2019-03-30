@@ -20,8 +20,8 @@
 #  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
 #endif
 
-#ifndef ENIGMA_GSSURFACES_IMPL_H
-#define ENIGMA_GSSURFACES_IMPL_H
+#ifndef ENIGMA_GSSURFACE_IMPL_H
+#define ENIGMA_GSSURFACE_IMPL_H
 
 #include <vector>
 using std::vector;
@@ -67,4 +67,4 @@ struct Surface; // forward-declaration for get_surface
     enigma::Surface* surf = (enigma::Surface*)enigma::surfaces[id];
 #endif
 
-#endif // ENIGMA_GSSURFACES_IMPL_H
+#endif // ENIGMA_GSSURFACE_IMPL_H

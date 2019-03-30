@@ -16,8 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef DX9_SURFACES_IMPL_H
-#define DX9_SURFACES_IMPL_H
+#ifndef DX9_SURFACE_IMPL_H
+#define DX9_SURFACE_IMPL_H
 
 #include "DX9textures_impl.h"
 #include "Direct3D9Headers.h"
@@ -79,4 +79,4 @@ namespace enigma {
 
 } // namespace enigma
 
-#endif // DX9_SURFACES_IMPL_H
+#endif // DX9_SURFACE_IMPL_H
