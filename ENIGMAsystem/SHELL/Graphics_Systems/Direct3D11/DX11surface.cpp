@@ -28,7 +28,6 @@
 #include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
-#include <vector>
 #include <iostream>
 #include <cstddef>
 #include <math.h>
