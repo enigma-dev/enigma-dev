@@ -45,7 +45,6 @@ using namespace std;
 
 namespace enigma {
 
-size_t surface_max=0;
 extern int viewport_x, viewport_y, viewport_w, viewport_h;
 
 } // namespace enigma
