@@ -134,5 +134,4 @@ install:
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
-  - setx path "C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%path%"
-  - bash -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh"
+  - emake.exe --help
