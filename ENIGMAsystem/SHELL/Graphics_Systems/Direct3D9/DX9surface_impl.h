@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Dave "biggoron", Harijs Grinbergs
+/** Copyright (C) 2008-2013 Josh Ventura, Harijs Grinbergs
+*** Copyright (C) 2013 Robert B. Colton, Dave "biggoron"
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
