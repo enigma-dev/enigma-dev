@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX9SurfaceStruct.h"
+#include "DX9surface_impl.h"
 #include "DX9textures_impl.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSsurface.h"
@@ -29,7 +29,6 @@
 #include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
-#include <vector>
 #include <iostream>
 #include <cstddef>
 #include <math.h>
@@ -39,9 +38,6 @@ using namespace std;
 using namespace enigma::dx9;
 
 namespace enigma {
-
-vector<Surface*> Surfaces(0);
-D3DCOLOR get_currentcolor();
 
 //TODO Add caching of the surface's RAM copy to speed this shit up
 //Maybe also investigate the use of CreateRenderTarget
@@ -73,9 +69,9 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
   enigma::textures.push_back(gmTexture);
   //d3dmgr->device->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
   texture->GetSurfaceLevel(0,&surface->surf);
-  surface->tex = texid; surface->width = width; surface->height = height;
-  enigma::Surfaces.push_back(surface);
-  return enigma::Surfaces.size() - 1;
+  surface->texture = texid; surface->width = width; surface->height = height;
+  enigma::surfaces.push_back(surface);
+  return enigma::surfaces.size() - 1;
 }
 
 int surface_create_msaa(int width, int height, int levels)
@@ -87,9 +83,9 @@ int surface_create_msaa(int width, int height, int levels)
   const int texid = enigma::textures.size();
   enigma::textures.push_back(gmTexture);
   d3dmgr->device->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
-  surface->tex = texid; surface->width = width; surface->height = height;
-  enigma::Surfaces.push_back(surface);
-  return enigma::Surfaces.size() - 1;
+  surface->texture = texid; surface->width = width; surface->height = height;
+  enigma::surfaces.push_back(surface);
+  return enigma::surfaces.size() - 1;
 }
 
 void surface_set_target(int id)
@@ -121,29 +117,6 @@ void surface_free(int id)
 {
   get_surface(surf, id);
   delete surf;
-}
-
-bool surface_exists(int id)
-{
-  return !((id < 0) or (size_t(id) > enigma::Surfaces.size()) or (enigma::Surfaces[id] == NULL));
-}
-
-int surface_get_texture(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->tex);
-}
-
-int surface_get_width(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->width);
-}
-
-int surface_get_height(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->height);
 }
 
 int surface_getpixel(int id, int x, int y)
