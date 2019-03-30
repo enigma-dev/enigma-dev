@@ -134,4 +134,5 @@ install:
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
-  - emake.exe --help
+  - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
+  - emake.exe --compiler "%COMPILER%" --mode "%MODE%" --platform "%PLATFORM%" --graphics "%GRAPHICS%" --audio "%AUDIO%" --collision "%COLLISION%" --network "%NETWORK%" --widgets "%WIDGETS%" --extensions "%EXTENSIONS%" -o "%OUTPUT%"
