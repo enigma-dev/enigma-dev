@@ -251,6 +251,7 @@ namespace jdi {
     A structure detailing an alternate overload of a function without using too much memory.
   **/
   struct function_overload {
+    string name; ///< A reference to the name
     full_type type; ///< The non-null return type of this overload.
     string declaration; ///< The full prototype for the function.
     function_overload *duplicate(); ///< Make a copy

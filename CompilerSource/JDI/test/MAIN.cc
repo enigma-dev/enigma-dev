@@ -93,15 +93,15 @@ int main() {
       
       llreader macro_reader("test/defines_mingw.txt");
     #else
-      builtin->add_search_directory("/home/josh/Projects/ENIGMA/ENIGMAsystem/SHELL");
-      builtin->add_search_directory("/usr/include/c++/4.6");
-      builtin->add_search_directory("/usr/include/c++/4.6/x86_64-linux-gnu");
-      builtin->add_search_directory("/usr/include/c++/4.6/backward");
-      builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include");
+      builtin->add_search_directory("/usr/include/c++/4.7");
+      builtin->add_search_directory("/usr/include/x86_64-linux-gnu/c++/4.7");
+      builtin->add_search_directory("/usr/include/c++/4.7/backward");
+      builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.7/include");
       builtin->add_search_directory("/usr/local/include");
-      builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include-fixed");
+      builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed");
       builtin->add_search_directory("/usr/include/x86_64-linux-gnu");
       builtin->add_search_directory("/usr/include");
+      builtin->add_search_directory("/home/josh/Projects/ENIGMA/ENIGMAsystem/SHELL");
       
       llreader macro_reader("test/defines_linux.txt");
     #endif

@@ -106,6 +106,7 @@ jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scop
           else {
             token.report_error(herr, "Attempt to redeclare `" + classname + "' as class in this scope");
             FATAL_RETURN(NULL);
+            nclass = NULL;
           }
         }
       }

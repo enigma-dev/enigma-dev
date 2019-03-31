@@ -85,13 +85,28 @@ jdi::definition_union* jdip::context_parser::handle_union(definition_scope *scop
     classname = token.content.toString();
     token = read_next_token(scope);
   }
-  else if (token.type == TT_DECLARATOR) {
+  else if (token.type == TT_DECLARATOR)
+  {
     nclass = (jdi::definition_union*)token.def;
     classname = nclass->name;
-    if (not(nclass->flags & DEF_UNION)) {
-      if (nclass->parent == scope)
-        token.report_error(herr, "Attempt to redeclare `" + classname + "' as union in this scope");
-      nclass = NULL;
+    if (not(nclass->flags & DEF_UNION))
+    {
+      if (nclass->parent == scope) {
+        pair<definition_scope::defiter, bool> dins = c_structs.insert(pair<string,definition*>(classname, NULL));
+        if (dins.second)
+          dins.first->second = nclass = new definition_union(classname, scope, DEF_INCOMPLETE);
+        else {
+          if (dins.first->second->flags & DEF_UNION)
+            nclass = (definition_union*)dins.first->second;
+          else {
+            token.report_error(herr, "Attempt to redeclare `" + classname + "' as union in this scope");
+            FATAL_RETURN(NULL);
+            nclass = NULL;
+          }
+        }
+      }
+      else
+        nclass = NULL;
     }
     else {
       will_redeclare = nclass->parent != scope;

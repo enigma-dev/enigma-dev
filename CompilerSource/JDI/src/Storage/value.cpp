@@ -22,7 +22,6 @@
 #include "value.h"
 #include <cstdio>
 #include <cstring>
-#include <string>
 #include <cfloat>
 #include <cmath>
 
@@ -47,10 +46,11 @@ namespace jdi {
   value::~value() { if (type == VT_STRING) delete[] val.s; }
   
   std::string value::toString() {
+    char buf[128];
     switch (type) {
-      case VT_DOUBLE:  return std::to_string(val.d);
-      case VT_INTEGER: return std::to_string(val.i);
-      case VT_STRING:  return (val.s != nullptr ? val.s : "");
+      case VT_DOUBLE:  sprintf(buf, "%.32g", val.d); return buf;
+      case VT_INTEGER: sprintf(buf, "%ld", val.i); return buf;
+      case VT_STRING:  return val.s;
       case VT_NONE:    return "<nothing>";
       default:         return "<ERROR!>";
     }
@@ -75,14 +75,9 @@ namespace jdi {
     switch (type) { case VT_DOUBLE: return val.d <= other.val.d; case VT_INTEGER: return val.i <= other.val.i; case VT_STRING: return strcmp(val.s, other.val.s) <= 0; case VT_NONE: default: return true; }
   }
   
-#if __cplusplus >= 201100
-  value::operator long long unsigned()   const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return (long long unsigned)val.d; return 0; }
-  value::operator long long int()   const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return (long long int)val.d; return 0; }
-#endif
+  value::operator int()    const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return (int)val.d; return 0; }
   value::operator long()   const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return (long)val.d; return 0; }
   value::operator double() const { if (type == VT_DOUBLE) return val.d; if (type == VT_INTEGER) return val.i; return 0; }
   value::operator bool()   const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return fabs(val.d) < DBL_EPSILON; return 0; }
-  value::operator int()    const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return fabs(val.d) < DBL_EPSILON; return 0; }
-  //value::operator const char*() const { if (type == VT_STRING) return val.s; return nullptr; }
-  value::operator std::string() { if (type == VT_STRING) return this->toString(); return ""; }
+  value::operator const char*() const { if (type == VT_STRING) return val.s; return NULL; }
 }

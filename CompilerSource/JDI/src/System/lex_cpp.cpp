@@ -31,6 +31,7 @@
 #include <System/builtins.h>
 #include <API/context.h>
 #include <API/AST.h>
+#include <cstring>
 
 #include <API/compile_settings.h>
 
@@ -160,7 +161,7 @@ static inline void skip_whitespace(const char* cfile, size_t &pos, size_t length
 void lexer_cpp::enter_macro(macro_scalar* ms)
 {
   if (ms->value.empty()) return;
-  openfile of(filename, line, lpos, *this);
+  openfile of(filename, sdir, line, lpos, *this);
   files.enswap(of);
   filename = ms->name.c_str();
   this->encapsulate(ms->value);
@@ -173,7 +174,6 @@ string lexer_cpp::_flatten(const string param, const macro_map& macros, const to
   const char* s;
   string result = param;
   const char* begin = param.c_str();
-  int resOffset = 0;
   for (const char* i = begin; *i; ) {
     bool id = is_letterd(*i);
     s = i; while (is_letterd(*i)) ++i;
@@ -189,11 +189,10 @@ string lexer_cpp::_flatten(const string param, const macro_map& macros, const to
             size_t p = i - begin;
             const macro_function* mf = (macro_function*)mac->second;
             parse_macro_params(mf, macros, begin, p, param.length(), arguments, errep, herr);
-            char *buf=0, *bufe=0;
+            char *buf, *bufe;
             mf->parse(arguments, buf, bufe, errep, herr);
             i = begin + p;
-            result.replace(s-begin+resOffset, i-s, buf, bufe-buf);
-            resOffset += (bufe-buf) - (i-s);
+            result.replace(s-begin, i-s, buf, bufe-buf);
             delete[] buf;
           }
         }
@@ -219,8 +218,8 @@ bool lexer_cpp::parse_macro_params(const macro_function* mf, const macro_map &ma
       pspos = ++pos;
       _skip_noncode(continue);
       continue;
-    } else if (cfile[pos] == ')' || cfile[pos] == ']') { if (--nestcnt) ++pos; continue; }
-      else if (cfile[pos] == '(' || cfile[pos] == '[') ++nestcnt;
+    } else if (cfile[pos] == ')') { if (--nestcnt) ++pos; continue; }
+      else if (cfile[pos] == '(') ++nestcnt;
       else if (cfile[pos] == '"' or cfile[pos] == '\'') 
         ::skip_string(cfile, pos, length);
     ++pos; _skip_noncode(continue);
@@ -251,8 +250,8 @@ bool lexer_cpp::parse_macro_params(const macro_function* mf, vector<string>& des
       pspos = ++pos;
       skip_noncode(continue);
       continue;
-    } else if (cfile[pos] == ')' || cfile[pos] == ']') { if (--nestcnt) ++pos; continue; }
-      else if (cfile[pos] == '(' || cfile[pos] == '[') ++nestcnt;
+    } else if (cfile[pos] == ')') { if (--nestcnt) ++pos; continue; }
+      else if (cfile[pos] == '(') ++nestcnt;
       else if (cfile[pos] == '"' or cfile[pos] == '\'') 
         skip_string(herr);
     ++pos; skip_noncode(continue);
@@ -278,10 +277,10 @@ bool lexer_cpp::parse_macro_function(const macro_function* mf, error_handler *he
   parse_macro_params(mf, params, herr);
   
   // Enter the macro
-  openfile of(filename, line, lpos, *this);
+  openfile of(filename, sdir, line, lpos, *this);
   files.enswap(of);
   alias(files.top().file);
-  char *buf=0, *bufe=0;
+  char *buf, *bufe;
   if (!mf->parse(params, buf, bufe, token_t(token_basics(TT_INVALID,filename,line,lpos-pos)), herr)) {
     this->consume(files.top().file);
     files.pop();
@@ -427,7 +426,6 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
           if (!is_letter(argstr[i])) {
             if (argstr[i] == '.' and argstr[i+1] == '.' and argstr[i+2] == '.') {
               variadic = true, i += 3;
-              paramlist.push_back("__VA_ARGS__");
               while (is_useless(argstr[i])) ++i;
               if (argstr[i] != ')')
                 herr->error("Expected end of parameters after variadic", filename, line, pos-lpos);
@@ -620,18 +618,21 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
         for (size_t i = 0; i < fnfind.length(); ++i)
           if (fnfind[i] == match) { fnfind.erase(i); break; }
         
-        string incfn;
+        if (files.size() > 9000) {
+          herr->error("Nested include count is OVER NINE THOUSAAAAAAAAND. Not including another.");
+          break;
+        }
+        
+        string incfn, fdir = sdir;
         llreader incfile;
         if (chklocal)
           incfile.open((incfn = path + fnfind).c_str());
         for (size_t i = 0; i < builtin->search_dir_count(); ++i) {
-          if (incfile.is_open()) {
-            if (incnext) {
-              incnext = incfn != filename;
-              incfile.close();
-            } else break;
-          }
-          incfile.open((incfn = builtin->search_dir(i) + fnfind).c_str());
+          if (incfile.is_open()) break;
+          if (!incnext)
+            incfile.open((incfn = (fdir = builtin->search_dir(i)) + fnfind).c_str());
+          else
+            incnext = sdir != builtin->search_dir(i);
         }
         if (!incfile.is_open()) {
           herr->error("Could not find " + fnfind.substr(1), filename, line, pos-lpos);
@@ -641,7 +642,7 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
           break;
         }
         
-        openfile of(filename, line, lpos, *this);
+        openfile of(filename, sdir = fdir, line, lpos, *this);
         files.enswap(of);
         pair<set<string>::iterator, bool> fi = visited_files.insert(incfn);
         filename = fi.first->c_str();
@@ -1029,10 +1030,11 @@ void lexer_cpp::cleanup() {
 
 openfile::openfile() {}
 openfile::openfile(const char* fname): filename(fname), line(0), lpos(0) {}
-openfile::openfile(const char* fname, size_t line_num, size_t line_pos, llreader &consume): filename(fname), line(line_num), lpos(line_pos) { file.consume(consume); }
+openfile::openfile(const char* fname, string sdir, size_t line_num, size_t line_pos, llreader &consume): filename(fname), searchdir(sdir), line(line_num), lpos(line_pos) { file.consume(consume); }
 void openfile::swap(openfile &f) {
   { register const char* tmpl = filename;
   filename = f.filename, f.filename = tmpl; }
+  searchdir.swap(f.searchdir);
   register size_t tmpl = line;
   line = f.line, f.line = tmpl;
   tmpl = lpos, lpos = f.lpos, f.lpos = tmpl;

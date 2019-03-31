@@ -22,8 +22,6 @@
 #include "AST.h"
 #include <General/svg_simple.h>
 
-#include <algorithm> // std::max
-
 namespace jdi {
   string AST::toString() const {
     if (root) return root->toString();
@@ -152,6 +150,22 @@ namespace jdi {
     svg->draw_circle(nid,x,y,r,0xFFFFFFFF,svg->cur == this ? 0xFF00C000 : 0xFF000000,2);
     svg->draw_text(nid,x,y+4,"()");
   }
+  void AST::AST_Node_Array::toSVG(int x, int y, SVGrenderInfo *svg)
+  {
+    const int nid = svg->nodes_written++;
+    int r = own_width()/2;
+    int tw = width();
+    int xx = x - tw/2, yy = y+r+16;
+    for (size_t i = 0; i < elements.size(); ) {
+      int w = elements[i]->width(), r_2 = elements[i]->own_width()/2;
+      xx += w/2;
+      svg->draw_line(nid,'a' + i,x,y,xx,yy+r_2);
+      elements[i]->toSVG(xx,yy+r_2,svg);
+      xx += w/2 + 24;
+    }
+    svg->draw_circle(nid,x,y,r,0xFFFFFFFF,svg->cur == this ? 0xFF00C000 : 0xFF000000,2);
+    svg->draw_text(nid,x,y+4,"{}");
+  }
   void AST::AST_Node_new::toSVG(int x, int y, SVGrenderInfo *svg)
   {
     const int nid = svg->nodes_written++;
@@ -177,6 +191,22 @@ namespace jdi {
     svg->draw_text(nid,x,y+4,content);
     if (operand)
       operand->toSVG(xx,yy,svg);
+  }
+  void AST::AST_Node_Subscript::toSVG(int x, int y, SVGrenderInfo *svg)
+  {
+    const int nid = svg->nodes_written++;
+    int lw = (left?left->width():0), rw = (index?index->width():0), shift = (lw - rw) / 2;
+    int lx = x - lw/2 + shift - 12, rx = x + rw/2 + shift + 12,
+         y2l = y+own_height()/2 + 16 + (left?left->own_height()/2:0),
+         y2r = y+own_height()/2 + 16 + (index?index->own_height()/2:0);
+    svg->draw_line(nid,'l',x,y,lx,y2l);
+    svg->draw_line(nid,'r',x,y,rx,y2r);
+    svg->draw_circle(nid,x,y,own_width()/2,0xFFFFFFFF,svg->cur == this ? 0xFF00C000 : 0xFF000000,2);
+    svg->draw_text(nid,x,y+4,"[]");
+    if (left)
+      left->toSVG(lx,y2l,svg);
+    if (index)
+      index->toSVG(rx,y2r,svg);
   }
   
   
@@ -222,12 +252,16 @@ namespace jdi {
   int AST::AST_Node_Unary::width() { return operand?max(operand->width(),own_width()):own_width(); }
   int AST::AST_Node_Ternary::width() { return 24 + ((exp?exp->width():0) + (left?left->width():0) + (right? 24 + right->width():0)); }
   int AST::AST_Node_Parameters::width() { int res = -24; for (size_t i = 0; i < params.size(); i++) res += 24 + params[i]->width(); return max(own_width(), res); }
+  int AST::AST_Node_Array::width() { int res = -24; for (size_t i = 0; i < elements.size(); i++) res += 24 + elements[i]->width(); return max(own_width(), res); }
+  int AST::AST_Node_Subscript::width() { return 24 + (left?left->width():0) + (index?index->width():0); }
   int AST::AST_Node::height() { return own_height(); }
   int AST::AST_Node_Binary::height() { return max((left?left->height():0), (right?right->height():0)) + 16 + own_height(); }
   int AST::AST_Node_Unary::height() { return own_height() + (operand? 16 + operand->height():0); }
   int AST::AST_Node_Cast::height() { return 24 + (operand? 16 + operand->height():0); }
   int AST::AST_Node_Ternary::height() { return own_height() + 16 + max(max((exp?exp->height():0), (left?left->height():0)), (right?right->height():0)); }
   int AST::AST_Node_Parameters::height() { int mh = 0; for (size_t i = 0; i < params.size(); i++) mh = max(mh,params[i]->height()); return own_width() + 16 + mh; }
+  int AST::AST_Node_Array::height() { int mh = 0; for (size_t i = 0; i < elements.size(); i++) mh = max(mh,elements[i]->height()); return own_width() + 16 + mh; }
+  int AST::AST_Node_Subscript::height() { return max((left?left->height():0), (index?index->height():0)) + 16 + own_height(); }
   
   
   //===========================================================================================================================

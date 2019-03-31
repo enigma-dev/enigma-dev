@@ -29,8 +29,6 @@
 #include <Parser/handlers/handle_function_impl.h>
 #include <cstdio>
 
-using jdi::definition_scope;
-
 int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, unsigned inherited_flags)
 {
   definition* decl;
@@ -174,23 +172,30 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
       case TT_USING:
           token = read_next_token(scope);
           if (token.type == TT_NAMESPACE) {
-            token = lex->get_token(herr);
-            if (token.type == TT_IDENTIFIER) {
-              definition* d = scope->look_up(token.content.toString());
+            token = lex->get_token_in_scope(scope, herr);
+            if (token.type == TT_DEFINITION) {
+              definition *d = read_qualified_definition(lex, scope, token, this, herr);
               if (!d) {
-                token.report_errorf(herr, "Expected id to use before %s");
+                token.report_errorf(herr, "Expected namespace-name following `namespace' token");
                 FATAL_RETURN(1);
               }
               else {
                 if (d->flags & DEF_NAMESPACE)
                   scope->use_namespace((definition_scope*)d);
                 else
-                  token.report_error(herr, "Expected namespace name following `namespace' token");
+                  token.report_error(herr, "Expected namespace-name following `namespace' token");
               }
-              token = read_next_token(scope);
+              if (token.type == TT_SEMICOLON)
+                token = read_next_token(scope);
+              else {
+                token.report_errorf(herr, "Expected semicolon before %s");
+                FATAL_RETURN(1);
+              }
             }
-            else
-              token.report_error(herr, "Expected namespace name following `namespace' token");
+            else {
+              token.report_errorf(herr, "Expected namespace to use before %s");
+              FATAL_RETURN(1);
+            }
           }
           else {
             definition *usedef = read_qualified_definition(lex, scope, token, this, herr);
@@ -205,7 +210,7 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
               FATAL_RETURN(1);
             }
           }
-        break;
+        continue;
       
       case TT_SCOPE:
           token = read_next_token(global);

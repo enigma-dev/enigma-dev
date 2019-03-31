@@ -46,6 +46,8 @@ using namespace jdip;
 #define track(ct)
 #endif
 
+#include "AST_operator.h"
+
 namespace jdi
 {
   AST::AST_Node* AST::parse_expression(token_t &token, int prec_min) {
@@ -206,6 +208,7 @@ namespace jdi
           }
           array->elements.push_back(n);
           if (token.type != TT_COMMA) {
+            if (token.type == TT_RIGHTBRACE) break;
             token.report_errorf(herr, "Expected comma to separate array elements before %s");
             FATAL_RETURN(array); break;
           }
@@ -459,6 +462,7 @@ namespace jdi
       
       case TT_LEFTPARENTH:
           if (left_node->type == AT_DEFINITION or left_node->type == AT_TYPE) {
+            track(string("("));
             token = get_next_token();
             bool gtio = tt_greater_is_op; tt_greater_is_op = true;
             AST_Node *params = parse_expression(token, precedence::all);
@@ -471,7 +475,9 @@ namespace jdi
               token.report_errorf(herr, "Expected closing parenthesis here before %s");
               FATAL_RETURN(left_node);
             }
-            left_node = new AST_Node_Binary(left_node,params,"(");
+            left_node = new AST_Node_Binary(left_node,params,"");
+            token = get_next_token(); // Skip that closing paren
+            track(string(")"));
             break;
           }
         return left_node;
@@ -483,13 +489,30 @@ namespace jdi
           string op(","); track(op);
           AST_Node *right = parse_expression(token, precedence::comma);
           if (!right) {
-            token.report_error(herr, "Expected secondary expression after binary operator");
+            token.report_error(herr, "Expected secondary expression after comma");
             return left_node;
           }
           left_node = new AST_Node_Binary(left_node,right,op);
         } break;
       
-      case TT_LEFTBRACKET:
+      case TT_LEFTBRACKET: {
+          if (precedence::unary_post < prec_min)
+            return left_node;
+          token = get_next_token();
+          string op("["); track(op);
+          AST_Node *indx = parse_expression(token, precedence::comma);
+          if (!indx) {
+            token.report_error(herr, "Expected index for array subscript");
+            return left_node;
+          }
+          left_node = new AST_Node_Subscript(left_node, indx);
+          if (token.type != TT_RIGHTBRACKET) {
+            token.report_errorf(herr, "Expected closing bracket to array subscript before %s");
+            return left_node;
+          } track(string("]"));
+          token = get_next_token();
+        } break;
+      
       case TT_LEFTBRACE:
       case TT_SEMICOLON:
       case TT_STRINGLITERAL:
@@ -535,23 +558,18 @@ namespace jdi
   int AST::parse_expression(lexer *ulex, token_t &token, int precedence, error_handler *uherr) {
     lex = ulex, herr = uherr;
     token = get_next_token();
-    if ((root = parse_expression(token, precedence)))
-      return 0;
-    return 1;
+    return !((root = parse_expression(token, precedence)));
   }
   
   int AST::parse_expression(token_t &token, lexer *ulex, int precedence, error_handler *uherr) {
     lex = ulex, herr = uherr;
-    if ((root = parse_expression(token, precedence)))
-      return 0;
-    return 1;
+    return !(root = parse_expression(token, precedence));
   }
   
   int AST::parse_expression(token_t &token, lexer *ulex, definition_scope *scope, int precedence, error_handler *uherr) {
     search_scope = scope;
     lex = ulex, herr = uherr;
-    root = parse_expression(token, precedence);
-    return 0;
+    return !(root = parse_expression(token, precedence));
   }
   
   //===========================================================================================================================
@@ -568,20 +586,21 @@ namespace jdi
       dec_literal:
       if (is_letter(content[content.length() - 1])) {
         bool is_float = false;
-        size_t i = content.length() - 1;
+        char *number = (char*)alloca(content.length());
+        memcpy(number, content.c_str(), content.length() * sizeof(char));
         // This block will fail if the number is all letters--but we know it isn't.
-        for (; is_letter(content[i]); --i) {
-          if (content[i] == 'f' or content[i] == 'd' or  content[i] == 'F' or content[i] == 'D')
+        for (char *i = number + content.length() - 1; is_letter(*i); --i) {
+          if (*i == 'f' or *i == 'd' or  *i == 'F' or *i == 'D')
             is_float = true;
+          *i = 0;
         }
-        std::string number = content.substr(0, i + 1);
         if (!is_float)
           for (size_t i = 0; i < content.length(); i++)
             if (content[i] == '.' or  content[i] == 'E' or content[i] == 'e')
               is_float = true;
         if (is_float)
-          return value(atof(number.c_str()));
-        return value(atol(number.c_str()));
+          return value(atof(number));
+        return value(atol(number));
       }
       return value(atol(content.c_str()));
     }
@@ -707,6 +726,35 @@ namespace jdi
   }
   value AST::AST_Node_delete::eval() const {
     return value();
+  }
+  value AST::AST_Node_Subscript::eval() const
+  {
+    value iv = index->eval();
+    if (iv.type != VT_INTEGER)
+      return value();
+    size_t ivl = (size_t)(long)iv;
+      
+    if (left->type == AT_ARRAY)
+    {
+      AST_Node_Array* la = (AST_Node_Array*)left;
+      if (ivl >= la->elements.size())
+        return value();
+      return la->elements[ivl]->eval();
+    }
+    else
+    {
+      value av = left->eval();
+      if (av.type == VT_NONE)
+        return av;
+      if (av.type != VT_STRING)
+        return value();
+      string str = (string)av;
+      if (ivl > str.length())
+        return value();
+      if (ivl >= str.length())
+        return value(0L);
+      return value(long(str[ivl]));
+    }
   }
   
   //===========================================================================================================================
@@ -842,6 +890,15 @@ namespace jdi
     return builtin_type__void;
   }
   
+  full_type AST::AST_Node_Subscript::coerce() const {
+    full_type res = left->coerce();
+    if (!res.refs.size()) {
+      return full_type(); // FIXME: Look up operator type
+    }
+    res.refs.pop(); // Dereference that bitch
+    return res;
+  }
+  
   //===========================================================================================================================
   //=: Constructors :==========================================================================================================
   //===========================================================================================================================
@@ -867,6 +924,8 @@ namespace jdi
   AST::AST_Node_Parameters::AST_Node_Parameters(): func(NULL) {}
   AST::AST_Node_new::AST_Node_new(): type(), position(NULL), bound(NULL) {}
   AST::AST_Node_delete::AST_Node_delete(AST_Node* param, bool arr): AST_Node_Unary(param), array(arr) {}
+  AST::AST_Node_Subscript::AST_Node_Subscript(AST_Node* l, AST_Node *ind): left(l), index(ind) {}
+  AST::AST_Node_Subscript::AST_Node_Subscript(): left(NULL), index(NULL) {}
   
   
   //===========================================================================================================================
@@ -879,7 +938,42 @@ namespace jdi
   AST::AST_Node_Ternary::~AST_Node_Ternary() { delete exp; delete left; delete right; }
   AST::AST_Node_Parameters::~AST_Node_Parameters() { for (size_t i = 0; i < params.size(); i++) delete params[i]; }
   AST::AST_Node_Array::~AST_Node_Array() { for (vector<AST_Node*>::iterator it = elements.begin(); it != elements.end(); ++it) delete *it; }
+  AST::AST_Node_Subscript::~AST_Node_Subscript() { delete left; delete index; }
   
+  
+  //===========================================================================================================================
+  //=: ASTOperator Class :=====================================================================================================
+  //===========================================================================================================================
+  
+  void AST::AST_Node::operate(ASTOperator *aop, void *param) { aop->operate(this, param); }
+  void AST::AST_Node_Definition::operate(ASTOperator *aop, void *param) { aop->operate_Definition(this, param); }
+  void AST::AST_Node_Scope::operate(ASTOperator *aop, void *param) { aop->operate_Scope(this, param); }
+  void AST::AST_Node_Type::operate(ASTOperator *aop, void *param) { aop->operate_Type(this, param); }
+  void AST::AST_Node_Unary::operate(ASTOperator *aop, void *param) { aop->operate_Unary(this, param); }
+  void AST::AST_Node_sizeof::operate(ASTOperator *aop, void *param) { aop->operate_sizeof(this, param); }
+  void AST::AST_Node_Cast::operate(ASTOperator *aop, void *param) { aop->operate_Cast(this, param); }
+  void AST::AST_Node_Binary::operate(ASTOperator *aop, void *param) { aop->operate_Binary(this, param); }
+  void AST::AST_Node_Ternary::operate(ASTOperator *aop, void *param) { aop->operate_Ternary(this, param); }
+  void AST::AST_Node_Parameters::operate(ASTOperator *aop, void *param) { aop->operate_Parameters(this, param); }
+  void AST::AST_Node_Array::operate(ASTOperator *aop, void *param) { aop->operate_Array(this, param); }
+  void AST::AST_Node_new::operate(ASTOperator *aop, void *param) { aop->operate_new(this, param); }
+  void AST::AST_Node_delete::operate(ASTOperator *aop, void *param) { aop->operate_delete(this, param); }
+  void AST::AST_Node_Subscript::operate(ASTOperator *aop, void *param) { aop->operate_Subscript(this, param); }
+  
+  void AST::AST_Node::operate(ConstASTOperator *aop, void *param) const { aop->operate(this, param); }
+  void AST::AST_Node_Definition::operate(ConstASTOperator *aop, void *param) const { aop->operate_Definition(this, param); }
+  void AST::AST_Node_Scope::operate(ConstASTOperator *aop, void *param) const { aop->operate_Scope(this, param); }
+  void AST::AST_Node_Type::operate(ConstASTOperator *aop, void *param) const { aop->operate_Type(this, param); }
+  void AST::AST_Node_Unary::operate(ConstASTOperator *aop, void *param) const { aop->operate_Unary(this, param); }
+  void AST::AST_Node_sizeof::operate(ConstASTOperator *aop, void *param) const { aop->operate_sizeof(this, param); }
+  void AST::AST_Node_Cast::operate(ConstASTOperator *aop, void *param) const { aop->operate_Cast(this, param); }
+  void AST::AST_Node_Binary::operate(ConstASTOperator *aop, void *param) const { aop->operate_Binary(this, param); }
+  void AST::AST_Node_Ternary::operate(ConstASTOperator *aop, void *param) const { aop->operate_Ternary(this, param); }
+  void AST::AST_Node_Parameters::operate(ConstASTOperator *aop, void *param) const { aop->operate_Parameters(this, param); }
+  void AST::AST_Node_Array::operate(ConstASTOperator *aop, void *param) const { aop->operate_Array(this, param); }
+  void AST::AST_Node_new::operate(ConstASTOperator *aop, void *param) const { aop->operate_new(this, param); }
+  void AST::AST_Node_delete::operate(ConstASTOperator *aop, void *param) const { aop->operate_delete(this, param); }
+  void AST::AST_Node_Subscript::operate(ConstASTOperator *aop, void *param) const { aop->operate_Subscript(this, param); }
   
   //===========================================================================================================================
   //=: Everything else :=======================================================================================================
@@ -892,7 +986,9 @@ namespace jdi
     #endif
     root = NULL;
   }
-
+  bool AST::empty() {
+    return !root;
+  }
   
   AST::AST(): root(NULL), search_scope(NULL), tt_greater_is_op(true) {}
   AST::AST(definition* d): root(new AST_Node_Definition(d)), search_scope(NULL), tt_greater_is_op(true) {}

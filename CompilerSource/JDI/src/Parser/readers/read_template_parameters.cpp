@@ -23,8 +23,6 @@
 #include <Parser/bodies.h>
 #include <API/compile_settings.h>
 
-using namespace jdi;
-
 int jdip::read_template_parameters(arg_key &argk, definition_template *temp, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr)
 {
   argk.mirror(temp);

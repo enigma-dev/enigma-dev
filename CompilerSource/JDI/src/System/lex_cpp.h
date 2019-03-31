@@ -47,6 +47,7 @@ namespace jdip {
   **/
   struct openfile {
     const char* filename; ///< The name of the open file.
+    string searchdir; ///< The search directory from which this file was included, or the empty string.
     size_t line; ///< The index of the current line.
     size_t lpos; ///< The position of the most recent line break.
     llreader file; ///< The llreader of this file.
@@ -54,10 +55,11 @@ namespace jdip {
     openfile(const char* fname); ///< Construct a new openfile at position 0 with the given filename.
     /// Construct a new openfile with the works.
     /// @param fname     The name of the file in use
+    /// @param sdir      The search directory from which this file was included, or the empty string
     /// @param line_num  The number of the line, to store
     /// @param line_pos  The position of the last newline, to store
     /// @param consume   The llreader to consume for storage
-    openfile(const char* fname, size_t line_num, size_t line_pos, llreader &consume);
+    openfile(const char* fname, string sdir, size_t line_num, size_t line_pos, llreader &consume);
     void swap(openfile&); ///< Swap with another openfile.
   };
   
@@ -71,6 +73,7 @@ namespace jdip {
     macro_map &macros; ///< Reference to the \c jdi::macro_map which will be used to store and retrieve macros.
     
     const char* filename; ///< The name of the open file.
+    string sdir; ///< The last loaded search directory.
     size_t line; ///< The current line number in the file
     size_t lpos; ///< The index in the file of the most recent line break.
     
@@ -106,11 +109,11 @@ namespace jdip {
     void handle_preprocessor(error_handler *herr);
     
     /// Utility function to skip a single-line comment; invoke with pos indicating one of the slashes.
-    inline void skip_comment();
+    void skip_comment();
     /// Utility function to skip a multi-line comment; invoke with pos indicating the starting slash.
-    inline void skip_multiline_comment();
+    void skip_multiline_comment();
     /// Utility function to skip a string; invoke with pos indicating the quotation mark. Terminates indicating match.
-    inline void skip_string(error_handler *herr);
+    void skip_string(error_handler *herr);
     /// Skip anything that cannot be interpreted as code in any way.
     inline void skip_whitespace();
     /// Function used by the preprocessor to read in macro parameters in compliance with ISO.
