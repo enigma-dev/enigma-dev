@@ -21,8 +21,6 @@ set(SHARED_SOURCES
    "${ENIGMA_DIR}/shared/libpng-util/libpng-util.cpp"
 )
 
-set(CMAKE_SHARED_LIBRARY_PREFIX lib)
-
 add_library(${TARGET} SHARED ${COMPILER_SOURCES} ${SHARED_SOURCES})
 
 set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 11)
