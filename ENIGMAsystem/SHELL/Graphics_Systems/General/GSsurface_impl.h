@@ -45,26 +45,27 @@ struct Surface; // forward-declaration for get_surface
 } // namespace enigma
 
 #ifdef DEBUG_MODE
-  #include <string>
+  #include "GSsurface.h"
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
+  #include <string>
   #define get_surface(surf,id)\
-    if (id < 0 or size_t(id) >= enigma::surfaces.size() or !enigma::surfaces[id]) {\
+    if (surface_exists(id) == false) {\
       show_error("Attempting to use non-existing surface " + toString(id), false);\
       return;\
     }\
-    enigma::Surface* surf = (enigma::Surface*)enigma::surfaces[id];
+    enigma::Surface &surf = *((enigma::Surface*)enigma::surfaces[id]);
   #define get_surfacev(surf,id,r)\
-    if (id < 0 or size_t(id) >= enigma::surfaces.size() or !enigma::surfaces[id]) {\
+    if (surface_exists(id) == false) {\
       show_error("Attempting to use non-existing surface " + toString(id), false);\
       return r;\
     }\
-    enigma::Surface* surf = (enigma::Surface*)enigma::surfaces[id];
+    enigma::Surface &surf = *((enigma::Surface*)enigma::surfaces[id]);
 #else
   #define get_surface(surf,id)\
-    enigma::Surface* surf = (enigma::Surface*)enigma::surfaces[id];
+    enigma::Surface &surf = *((enigma::Surface*)enigma::surfaces[id]);
   #define get_surfacev(surf,id,r)\
-    enigma::Surface* surf = (enigma::Surface*)enigma::surfaces[id];
+    enigma::Surface &surf = *((enigma::Surface*)enigma::surfaces[id]);
 #endif
 
 #endif // ENIGMA_GS_SURFACE_IMPL_H

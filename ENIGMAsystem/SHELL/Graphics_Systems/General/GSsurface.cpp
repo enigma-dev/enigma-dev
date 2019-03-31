@@ -52,19 +52,19 @@ bool surface_exists(int id)
 int surface_get_texture(int id)
 {
   get_surfacev(surf,id,-1);
-  return ((enigma::BaseSurface*)surf)->texture;
+  return ((enigma::BaseSurface&)surf).texture;
 }
 
 int surface_get_width(int id)
 {
   get_surfacev(surf,id,-1);
-  return ((enigma::BaseSurface*)surf)->width;
+  return ((enigma::BaseSurface&)surf).width;
 }
 
 int surface_get_height(int id)
 {
   get_surfacev(surf,id,-1);
-  return ((enigma::BaseSurface*)surf)->height;
+  return ((enigma::BaseSurface&)surf).height;
 }
 
 void draw_surface(int id, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)

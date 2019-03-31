@@ -124,7 +124,7 @@ void surface_set_target(int id)
   draw_batch_flush(batch_flush_deferred);
 
   get_surface(surface,id);
-  m_deviceContext->OMSetRenderTargets(1, &surface->renderTargetView, NULL);
+  m_deviceContext->OMSetRenderTargets(1, &surface.renderTargetView, NULL);
 }
 
 void surface_reset_target()
@@ -141,8 +141,7 @@ int surface_get_target()
 
 void surface_free(int id)
 {
-  get_surface(surf, id);
-  delete surf;
+  delete enigma::surfaces[id];
 }
 
 int surface_getpixel(int id, int x, int y)

@@ -93,9 +93,9 @@ void surface_set_target(int id)
   draw_batch_flush(batch_flush_deferred);
 
   get_surface(surface,id);
-  d3dmgr->device->SetRenderTarget(0, surface->surf);
+  d3dmgr->device->SetRenderTarget(0, surface.surf);
 
-  d3d_set_projection_ortho(0, 0, surface->width, surface->height, 0);
+  d3d_set_projection_ortho(0, 0, surface.width, surface.height, 0);
 }
 
 void surface_reset_target()
@@ -115,8 +115,7 @@ int surface_get_target()
 
 void surface_free(int id)
 {
-  get_surface(surf, id);
-  delete surf;
+  delete enigma::surfaces[id];
 }
 
 int surface_getpixel(int id, int x, int y)
@@ -124,10 +123,10 @@ int surface_getpixel(int id, int x, int y)
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
-  if (x > surface->width || y > surface->height) return 0;
+  if (x > surface.width || y > surface.height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pRamBuffer;
+  LPDIRECT3DSURFACE9 pBuffer = surface.surf, pRamBuffer;
   enigma::surface_copy_to_ram(&pBuffer, &pRamBuffer);
 
   D3DLOCKED_RECT rect;
@@ -148,10 +147,10 @@ int surface_getpixel_ext(int id, int x, int y)
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
-  if (x > surface->width || y > surface->height) return 0;
+  if (x > surface.width || y > surface.height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pRamBuffer;
+  LPDIRECT3DSURFACE9 pBuffer = surface.surf, pRamBuffer;
   enigma::surface_copy_to_ram(&pBuffer, &pRamBuffer);
 
   D3DLOCKED_RECT rect;
@@ -172,10 +171,10 @@ int surface_getpixel_alpha(int id, int x, int y)
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
-  if (x > surface->width || y > surface->height) return 0;
+  if (x > surface.width || y > surface.height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf, pRamBuffer;
+  LPDIRECT3DSURFACE9 pBuffer = surface.surf, pRamBuffer;
   enigma::surface_copy_to_ram(&pBuffer, &pRamBuffer);
 
   D3DLOCKED_RECT rect;
@@ -214,10 +213,10 @@ int surface_save(int id, string filename)
 
   LPDIRECT3DSURFACE9 pDestBuffer;
   D3DSURFACE_DESC desc;
-  surface->surf->GetDesc(&desc);
+  surface.surf->GetDesc(&desc);
 
   d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
-  d3dmgr->device->GetRenderTargetData(surface->surf, pDestBuffer);
+  d3dmgr->device->GetRenderTargetData(surface.surf, pDestBuffer);
 
   D3DLOCKED_RECT rect;
 

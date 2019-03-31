@@ -154,13 +154,13 @@ void surface_set_target(int id)
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
   if (prevFbo != 0) { glPopAttrib(); glPopMatrix(); d3d_projection_stack_pop(); }
   get_surface(surf,id);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo); //bind it
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf.fbo); //bind it
   glPushMatrix(); //So you can pop it in the reset
   d3d_projection_stack_push();
   glPushAttrib(GL_VIEWPORT_BIT); //same
-  glViewport(0, 0, surf->width, surf->height);
-  glScissor(0, 0, surf->width, surf->height);
-  d3d_set_projection_ortho(0, surf->height, surf->width, -surf->height, 0);
+  glViewport(0, 0, surf.width, surf.height);
+  glScissor(0, 0, surf.width, surf.height);
+  d3d_set_projection_ortho(0, surf.height, surf.width, -surf.height, 0);
 }
 
 void surface_reset_target(void)
@@ -187,12 +187,12 @@ void surface_free(int id)
   get_surface(surf,id);
   GLint prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  if ((GLuint) prevFbo == surf->fbo) {
+  if ((GLuint) prevFbo == surf.fbo) {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   }
-  enigma::graphics_delete_texture(surf->texture);
-  glDeleteFramebuffers(1, &surf->fbo);
-  delete surf;
+  enigma::graphics_delete_texture(surf.texture);
+  glDeleteFramebuffers(1, &surf.fbo);
+  delete enigma::surfaces[id];
 }
 
 int surface_getpixel(int id, int x, int y)
@@ -203,7 +203,7 @@ int surface_getpixel(int id, int x, int y)
   unsigned char *pixelbuf=new unsigned char[3];
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf.fbo);
   glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,pixelbuf);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
   return pixelbuf[0] + (pixelbuf[1] << 8) + (pixelbuf[2] << 16);
@@ -217,7 +217,7 @@ int surface_getpixel_ext(int id, int x, int y)
   unsigned char *pixelbuf=new unsigned char[3];
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf.fbo);
   glReadPixels(x,y,1,1,GL_BGRA,GL_UNSIGNED_BYTE,pixelbuf);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
   return pixelbuf[0] + (pixelbuf[1] << 8) + (pixelbuf[2] << 16) + (pixelbuf[3] << 24);
@@ -231,7 +231,7 @@ int surface_getpixel_alpha(int id, int x, int y)
   unsigned char *pixelbuf=new unsigned char[1];
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf.fbo);
   glReadPixels(x,y,1,1,GL_ALPHA,GL_UNSIGNED_BYTE,pixelbuf);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
   return pixelbuf[0];
@@ -255,7 +255,7 @@ int surface_save(int id, string filename)
   draw_batch_flush(batch_flush_deferred);
 
   get_surfacev(surf,id,-1);
-  unsigned int w=surf->width,h=surf->height,sz=w*h;
+  unsigned int w=surf.width,h=surf.height,sz=w*h;
 
   string ext = enigma::image_get_format(filename);
 
@@ -263,7 +263,7 @@ int surface_save(int id, string filename)
 
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, surf->fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER_EXT, surf.fbo);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
   glReadPixels(0,0,w,h,GL_BGRA,GL_UNSIGNED_BYTE,rgbdata);
   glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
@@ -287,7 +287,7 @@ int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned 
 
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, surf->fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER_EXT, surf.fbo);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
   glReadPixels(x,y,w,h,GL_BGRA,GL_UNSIGNED_BYTE,rgbdata);
   glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
@@ -309,7 +309,7 @@ int background_create_from_surface(int id, int x, int y, int w, int h, bool remo
   unsigned char *surfbuf=new unsigned char[sz*4];
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf.fbo);
   glReadPixels(x,y,w,h,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
   enigma::backgroundstructarray_reallocate();
@@ -334,7 +334,7 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
   unsigned char *surfbuf=new unsigned char[sz*4];
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf.fbo);
   glReadPixels(x,y,w,h,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
   enigma::sprite_set_subimage(sprid, 0, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
@@ -359,7 +359,7 @@ void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool r
   unsigned char *surfbuf=new unsigned char[sz*4];
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf.fbo);
   glReadPixels(x,y,w,h,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
   enigma::sprite_add_subimage(ind, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
@@ -375,13 +375,13 @@ void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, in
   unsigned char *surfbuf=new unsigned char[ws*hs*4];
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, ssurf->fbo);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, ssurf.fbo);
   glReadPixels(xs,ys,ws,hs,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, dsurf->fbo);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, dsurf.fbo);
   glPushMatrix();
   glPushAttrib(GL_VIEWPORT_BIT);
-  screen_set_viewport(0, 0, dsurf->width, dsurf->height);
-  d3d_set_projection_ortho(0, 0, dsurf->width, dsurf->height, 0);
+  screen_set_viewport(0, 0, dsurf.width, dsurf.height);
+  d3d_set_projection_ortho(0, 0, dsurf.width, dsurf.height, 0);
   glRasterPos2d(x, y);
   glDrawPixels(ws,hs,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
@@ -397,18 +397,18 @@ void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
 
   get_surface(ssurf,source);
   get_surface(dsurf,destination);
-  unsigned char *surfbuf=new unsigned char[dsurf->width*dsurf->height*4];
+  unsigned char *surfbuf=new unsigned char[dsurf.width*dsurf.height*4];
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, ssurf->fbo);
-  glReadPixels(0,0,dsurf->width,dsurf->height,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, dsurf->fbo);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, ssurf.fbo);
+  glReadPixels(0,0,dsurf.width,dsurf.height,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, dsurf.fbo);
   glPushMatrix();
   glPushAttrib(GL_VIEWPORT_BIT);
-  screen_set_viewport(0, 0, dsurf->width, dsurf->height);
-  d3d_set_projection_ortho(0, 0, dsurf->width, dsurf->height, 0);
+  screen_set_viewport(0, 0, dsurf.width, dsurf.height);
+  d3d_set_projection_ortho(0, 0, dsurf.width, dsurf.height, 0);
   glRasterPos2d(x, y);
-  glDrawPixels(dsurf->width,dsurf->height,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
+  glDrawPixels(dsurf.width,dsurf.height,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
   glPopAttrib();
   glPopMatrix();
