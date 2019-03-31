@@ -80,10 +80,6 @@ namespace enigma_user
 	void surface_reset_target(void);
 	int surface_get_target();
 	void surface_free(int id);
-	bool surface_exists(int id);
-	int surface_get_texture(int id);
-	int surface_get_width(int id);
-	int surface_get_height(int id);
 	int surface_getpixel(int id, int x, int y);
 	int surface_getpixel_ext(int id, int x, int y);
 	int surface_getpixel_alpha(int id, int x, int y);
