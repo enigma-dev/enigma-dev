@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.11)
 project(ENIGMA)
 
 if (MSVC)
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
   string(FIND "${VCPKG_TARGET_TRIPLET}" "static" STATIC_TARGET)
   if (STATIC_TARGET)
     set(USE_STATIC_LIBS ON)
