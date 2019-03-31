@@ -1,5 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Dave "biggoron", Harijs Grinbergs
-*** Copyright (C) 2014 Robert B. Colton, Harijs Grinbergs
+/** Copyright (C) 2008-2013 Josh Ventura, Dave "biggoron", Harijs Grinbergs
+*** Copyright (C) 2013-2014 Robert B. Colton, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,7 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/OpenGL/GLSurfaceStruct.h"
+#include "Graphics_Systems/OpenGL/GLsurface_impl.h"
 #include "Graphics_Systems/OpenGL/GLtextures_impl.h"
 #include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSsurface.h"
@@ -28,6 +28,10 @@
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
+#ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h" // for show_error
+#endif
+
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/background_internal.h"
@@ -36,80 +40,42 @@
 #include <cstddef>
 #include <iostream>
 #include <cmath>
-#include <unordered_map>
 #include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
 
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_surface(surf,id)\
-    if (surface_exists(id) == false) {\
-      show_error("Attempting to use non-existing surface " + toString(id), false);\
-      return;\
-    }\
-    enigma::surface &surf = enigma::surface_array[id];
-  #define get_surfacev(surf,id,r)\
-    if (surface_exists(id) == false) {\
-      show_error("Attempting to use non-existing surface " + toString(id), false);\
-      return r;\
-    }\
-    enigma::surface &surf = enigma::surface_array[id];
-  #define showerror(error, ...) show_error(error, false);
-#else
-  #define get_surface(surf,id)\
-    enigma::surface &surf = enigma::surface_array[id];
-  #define get_surfacev(surf,id,r)\
-    enigma::surface &surf = enigma::surface_array[id];
-  #define showerror(fmt, ...) printf(fmt, __VA_ARGS__);
-#endif
+namespace enigma {
 
-namespace enigma
-{
-  unordered_map<unsigned int, surface> surface_array;
-  size_t surface_max=0;
-  extern unsigned int bound_framebuffer;
-  extern int viewport_x, viewport_y, viewport_w, viewport_h;
+extern unsigned int bound_framebuffer;
+extern int viewport_x, viewport_y, viewport_w, viewport_h;
 
-  //WHERE TO PUT THIS!!!!!????
-  //This is GL3 only, because I need formats and types that might not be compatible between graphics systems
-  int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, int internalFormat, unsigned format, unsigned type);
-}
+//WHERE TO PUT THIS!!!!!????
+//This is GL3 only, because I need formats and types that might not be compatible between graphics systems
+int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, int internalFormat, unsigned format, unsigned type);
 
-namespace enigma_user
-{
+} // namespace enigma
+
+namespace enigma_user {
 
 bool surface_is_supported()
 {
-    return GLEW_ARB_framebuffer_object;
+  return GLEW_ARB_framebuffer_object;
 }
 
 int surface_create(int width, int height, bool depthbuffer, bool stencilbuffer, bool writeonly)
 {
-  if (GLEW_ARB_framebuffer_object)
-  {
-    GLuint fbo;
+  if (!GLEW_ARB_framebuffer_object) return -1;
 
-    size_t id = enigma::surface_max,
-      w=(int)width,
-      h=(int)height; //get the integer width and height, and prepare to search for an id
+  GLuint fbo;
 
-    bool found_empty = false;
-    for (unsigned int i=0; i<enigma::surface_max; ++i){ //Find first empty slot
-      if (enigma::surface_array.find(i) == enigma::surface_array.end()){
-        id = i;
-        found_empty = true;
-        break;
-      }
-    }
+  const size_t id = enigma::surfaces.size(),
+                w = (int)width, h = (int)height;
 
-    enigma::surface_array.emplace(id,enigma::surface());
-    if (found_empty == false){ enigma::surface_max++; }
+  enigma::Surface* surf = new enigma::Surface();
+  enigma::surfaces.emplace_back(surf);
 
-    enigma::surface_array[id].width = w;
-    enigma::surface_array[id].height = h;
+  surf->width = w;
+  surf->height = h;
 
     glGenFramebuffers(1, &fbo);
     int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
@@ -121,84 +87,71 @@ int surface_create(int width, int height, bool depthbuffer, bool stencilbuffer, 
 
     if (writeonly == true){ //These use RenderBuffers which are faster, but cannot be sampled in GLSL
       if (depthbuffer == true && stencilbuffer == true){
-          glGenRenderbuffers(1, &enigma::surface_array[id].depth_buffer);
-          glBindRenderbuffer(GL_RENDERBUFFER, enigma::surface_array[id].depth_buffer);
+          glGenRenderbuffers(1, &surf->depth_buffer);
+          glBindRenderbuffer(GL_RENDERBUFFER, surf->depth_buffer);
           glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, w, h);
-          glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, enigma::surface_array[id].depth_buffer);
+          glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, surf->depth_buffer);
           flags = flags | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
-          enigma::surface_array[id].has_depth_buffer = true;
+          surf->has_depth_buffer = true;
       }else{
         if (depthbuffer == true){
-          glGenRenderbuffers(1, &enigma::surface_array[id].depth_buffer);
-          glBindRenderbuffer(GL_RENDERBUFFER, enigma::surface_array[id].depth_buffer);
+          glGenRenderbuffers(1, &surf->depth_buffer);
+          glBindRenderbuffer(GL_RENDERBUFFER, surf->depth_buffer);
           glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
-          glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, enigma::surface_array[id].depth_buffer);
+          glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, surf->depth_buffer);
           flags = flags | GL_DEPTH_BUFFER_BIT;
-          enigma::surface_array[id].has_depth_buffer = true;
+          surf->has_depth_buffer = true;
         }else if (stencilbuffer == true){  //NOTE(harijs) : Maybe we need to combine the stencil buffer with the depth here, because stencil alone might not be supported
-          glGenRenderbuffers(1, &enigma::surface_array[id].stencil_buffer);
-          glBindRenderbuffer(GL_RENDERBUFFER, enigma::surface_array[id].stencil_buffer);
+          glGenRenderbuffers(1, &surf->stencil_buffer);
+          glBindRenderbuffer(GL_RENDERBUFFER, surf->stencil_buffer);
           glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX, w, h);
-          glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, enigma::surface_array[id].stencil_buffer);
+          glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, surf->stencil_buffer);
           flags = flags | GL_STENCIL_BUFFER_BIT;
-          enigma::surface_array[id].has_stencil_buffer = true;
+          surf->has_stencil_buffer = true;
         }
       }
-      enigma::surface_array[id].write_only = true;
+      surf->write_only = true;
     }else{ //These use Framebuffers which a slower, but can be sampled
       if (stencilbuffer == true){ //If you use stencilbuffer you MUST also use depth buffer, as a free standing stencil buffer is seldom supported in FBO (GL spec even encourages against it)
-        enigma::surface_array[id].depth_buffer = enigma::graphics_create_texture_custom(w,h,w,h,0,false, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, enigma::get_texture_peer(enigma::surface_array[id].depth_buffer), 0);
+        surf->depth_buffer = enigma::graphics_create_texture_custom(w,h,w,h,0,false, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, enigma::get_texture_peer(surf->depth_buffer), 0);
         flags = flags | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
-        enigma::surface_array[id].has_depth_buffer = true;
+        surf->has_depth_buffer = true;
       }else if (depthbuffer == true){
-        enigma::surface_array[id].depth_buffer = enigma::graphics_create_texture_custom(w,h,w,h,0,false, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, enigma::get_texture_peer(enigma::surface_array[id].depth_buffer), 0);
+        surf->depth_buffer = enigma::graphics_create_texture_custom(w,h,w,h,0,false, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, enigma::get_texture_peer(surf->depth_buffer), 0);
         flags = flags | GL_DEPTH_BUFFER_BIT;
-        enigma::surface_array[id].has_depth_buffer = true;
+        surf->has_depth_buffer = true;
       }
-      enigma::surface_array[id].write_only = false;
+      surf->write_only = false;
     }
 
     glClear(flags);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
 
-    enigma::surface_array[id].tex = texture;
-    enigma::surface_array[id].fbo = fbo;
+    surf->texture = texture;
+    surf->fbo = fbo;
 
     texture_reset();
 
     return id;
-  }
-  return -1;
 }
 
 int surface_create_msaa(int width, int height, int samples)
 {
-  if (!GLEW_ARB_framebuffer_object)
-  {
-    return -1;
-  }
+  if (!GLEW_ARB_framebuffer_object) return -1;
 
   GLuint fbo;
 
-  size_t id = enigma::surface_max,
-  w = (int)width,
-  h = (int)height; //get the integer width and height, and prepare to search for an id
+  const size_t id = enigma::surfaces.size(),
+                w = (int)width, h = (int)height;
 
-  for (unsigned int i=0; i<enigma::surface_max; ++i){ //Find first empty slot
-    if (enigma::surface_array.find(i) == enigma::surface_array.end()){
-      id = i;
-      break;
-    }
-  }
+  enigma::Surface* surf = new enigma::Surface();
+  enigma::surfaces.emplace_back(surf);
 
-  enigma::surface_array.emplace(id,enigma::surface());
-  enigma::surface_max++;
-
-  enigma::surface_array[id].width = w;
-  enigma::surface_array[id].height = h;
+  surf->width = w;
+  surf->height = h;
 
   int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
   glGenFramebuffers(1, &fbo);
@@ -216,8 +169,8 @@ int surface_create_msaa(int width, int height, int samples)
   glClear(GL_COLOR_BUFFER_BIT);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
 
-  enigma::surface_array[id].tex = texture;
-  enigma::surface_array[id].fbo = fbo;
+  surf->texture = texture;
+  surf->fbo = fbo;
 
   return id;
 }
@@ -275,7 +228,7 @@ void surface_free(int id)
 {
   get_surface(surf,id);
   if (enigma::bound_framebuffer == surf.fbo) glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer=0);
-  enigma::graphics_delete_texture(surf.tex);
+  enigma::graphics_delete_texture(surf.texture);
   if (surf.write_only == true){
     if (surf.has_depth_buffer == true) { glDeleteRenderbuffers(1, &surf.depth_buffer); }
     if (surf.has_stencil_buffer == true) { glDeleteRenderbuffers(1, &surf.stencil_buffer); }
@@ -283,43 +236,22 @@ void surface_free(int id)
     enigma::graphics_delete_texture(surf.depth_buffer);
   }
   glDeleteFramebuffers(1, &surf.fbo);
-  enigma::surface_array.erase(id);
-}
-
-bool surface_exists(int id)
-{
-  return size_t(id) < enigma::surface_max && (enigma::surface_array.find(id) != enigma::surface_array.end());
-}
-
-int surface_get_texture(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf.tex);
+  delete enigma::surfaces[id];
 }
 
 int surface_get_depth_texture(int id)
 {
   get_surfacev(surf,id,-1);
+  #ifdef DEBUG_MODE
   if (surf.write_only == true){
-    showerror("Cannot get depth texture from write only surface with ID = %i\n",id);
+    show_error("Cannot get depth texture from write only surface with ID = " + std::to_string(id), false);
     return -1;
   }else if (surf.has_depth_buffer == false){
-    showerror("Cannot get depth texture from a surface without a depth buffer. Surface ID = %i\n",id);
+    show_error("Cannot get depth texture from a surface without a depth buffer. Surface ID = " + std::to_string(id), false);
     return -1;
   }
+  #endif
   return (surf.depth_buffer);
-}
-
-int surface_get_width(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf.width);
-}
-
-int surface_get_height(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf.height);
 }
 
 int surface_getpixel(int id, int x, int y)

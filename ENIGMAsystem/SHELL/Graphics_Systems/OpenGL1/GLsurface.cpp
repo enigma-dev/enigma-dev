@@ -1,5 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Dave "biggoron", Harijs Grinbergs
-*** Copyright (C) 2014 Robert B. Colton, Harijs Grinbergs
+/** Copyright (C) 2008-2013 Josh Ventura, Dave "biggoron", Harijs Grinbergs
+*** Copyright (C) 2013-2014 Robert B. Colton, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,7 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/OpenGL/GLSurfaceStruct.h"
+#include "Graphics_Systems/OpenGL/GLsurface_impl.h"
 #include "Graphics_Systems/OpenGL/GLtextures_impl.h"
 #include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -34,7 +34,6 @@
 #include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
-#include <unordered_map>
 #include <cstddef>
 #include <iostream>
 
@@ -44,71 +43,34 @@
 
 using namespace std;
 
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_surface(surf,id)\
-    if (surface_exists(id)) {\
-      show_error("Attempting to use non-existing surface " + toString(id), false);\
-      return;\
-    }\
-    enigma::surface &surf = enigma::surface_array[id];
-  #define get_surfacev(surf,id,r)\
-    if (surface_exists(id)) {\
-      show_error("Attempting to use non-existing surface " + toString(id), false);\
-      return r;\
-    }\
-    enigma::surface &surf = enigma::surface_array[id];
-#else
-  #define get_surface(surf,id)\
-    enigma::surface &surf = enigma::surface_array[id];
-  #define get_surfacev(surf,id,r)\
-    enigma::surface &surf = enigma::surface_array[id];
-#endif
+namespace enigma {
 
-namespace enigma
-{
-  unordered_map<unsigned int, surface> surface_array;
-  size_t surface_max=0;
-  extern int viewport_x, viewport_y, viewport_w, viewport_h;
-}
+extern int viewport_x, viewport_y, viewport_w, viewport_h;
 
-namespace enigma_user
-{
+} // namespace enigma
+
+namespace enigma_user {
 
 bool surface_is_supported()
 {
-    return GLEW_EXT_framebuffer_object;
+  return GLEW_EXT_framebuffer_object;
 }
 
 int surface_create(int width, int height, bool depthbuffer, bool, bool)
 {
-    if (!GLEW_EXT_framebuffer_object) {
-      return -1;
-    }
+    if (!GLEW_EXT_framebuffer_object) return -1;
 
     GLuint fbo;
     int prevFbo;
 
-    size_t id = enigma::surface_max,
-    w = (int)width,
-    h = (int)height; //get the integer width and height, and prepare to search for an id
+    const size_t id = enigma::surfaces.size(),
+                 w = (int)width, h = (int)height;
 
-    bool found_empty = false;
-    for (unsigned int i=0; i<enigma::surface_max; ++i){ //Find first empty slot
-      if (enigma::surface_array.find(i) == enigma::surface_array.end()){
-        id = i;
-        found_empty = true;
-        break;
-      }
-    }
+    enigma::Surface* surf = new enigma::Surface();
+    enigma::surfaces.emplace_back(surf);
 
-    enigma::surface_array.emplace(id,enigma::surface());
-    if (found_empty == false){ enigma::surface_max++; }
-
-    enigma::surface_array[id].width = w;
-    enigma::surface_array[id].height = h;
+    surf->width = w;
+    surf->height = h;
 
     glGenFramebuffers(1, &fbo);
     int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
@@ -136,35 +98,27 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
     glPopAttrib();
 
-    enigma::surface_array[id].tex = texture;
-    enigma::surface_array[id].fbo = fbo;
+    surf->texture = texture;
+    surf->fbo = fbo;
 
     return id;
 }
 
 int surface_create_msaa(int width, int height, int samples)
 {
-  if (!GLEW_EXT_framebuffer_object)
-  {
-    return -1;
-  }
+  if (!GLEW_EXT_framebuffer_object) return -1;
 
   GLuint fbo;
   int prevFbo;
 
-  size_t id = enigma::surface_max,
-  w = (int)width,
-  h = (int)height; //get the integer width and height, and prepare to search for an id
+  const size_t id = enigma::surfaces.size(),
+                w = (int)width, h = (int)height;
 
-  for (unsigned int i=0; i<enigma::surface_max; ++i){ //Find first empty slot
-    if (enigma::surface_array.find(i) == enigma::surface_array.end()){
-      id = i;
-      break;
-    }
-  }
+  enigma::Surface* surf = new enigma::Surface();
+  enigma::surfaces.emplace_back(surf);
 
-  enigma::surface_array[id].width = w;
-  enigma::surface_array[id].height = h;
+  surf->width = w;
+  surf->height = h;
 
   int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
   glGenFramebuffers(1, &fbo);
@@ -185,8 +139,8 @@ int surface_create_msaa(int width, int height, int samples)
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
   glPopAttrib();
 
-  enigma::surface_array[id].tex = texture;
-  enigma::surface_array[id].fbo = fbo;
+  surf->texture = texture;
+  surf->fbo = fbo;
 
   return id;
 }
@@ -231,34 +185,14 @@ int surface_get_target()
 void surface_free(int id)
 {
   get_surface(surf,id);
-  GLint prevFbo; glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  if (prevFbo == surf.fbo) { glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); }
-  enigma::graphics_delete_texture(surf.tex);
+  GLint prevFbo;
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+  if ((GLuint) prevFbo == surf.fbo) {
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  }
+  enigma::graphics_delete_texture(surf.texture);
   glDeleteFramebuffers(1, &surf.fbo);
-  enigma::surface_array.erase(id);
-}
-
-bool surface_exists(int id)
-{
-  return size_t(id) < enigma::surface_max && (enigma::surface_array.find(id) != enigma::surface_array.end());
-}
-
-int surface_get_texture(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf.tex);
-}
-
-int surface_get_width(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf.width);
-}
-
-int surface_get_height(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf.height);
+  delete enigma::surfaces[id];
 }
 
 int surface_getpixel(int id, int x, int y)

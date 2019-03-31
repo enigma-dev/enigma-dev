@@ -23,8 +23,6 @@
 #ifndef ENIGMA_GSTEXTURES_IMPL_H
 #define ENIGMA_GSTEXTURES_IMPL_H
 
-#include "GStextures.h"
-
 #include <vector>
 using std::vector;
 

@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX11SurfaceStruct.h"
+#include "DX11surface_impl.h"
 #include "DX11textures_impl.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSsurface.h"
@@ -28,7 +28,6 @@
 #include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
-#include <vector>
 #include <iostream>
 #include <cstddef>
 #include <math.h>
@@ -36,12 +35,6 @@
 
 using namespace std;
 using namespace enigma::dx11;
-
-namespace enigma {
-
-vector<Surface*> Surfaces(0);
-
-}
 
 namespace enigma_user {
 
@@ -115,10 +108,10 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
   const int texid = enigma::textures.size();
   enigma::textures.push_back(gmTexture);
   surface->renderTargetView = renderTargetView;
-  surface->tex = texid;
+  surface->texture = texid;
   surface->width = width; surface->height = height;
-  enigma::Surfaces.push_back(surface);
-  return enigma::Surfaces.size() - 1;
+  enigma::surfaces.push_back(surface);
+  return enigma::surfaces.size() - 1;
 }
 
 int surface_create_msaa(int width, int height, int levels)
@@ -131,7 +124,7 @@ void surface_set_target(int id)
   draw_batch_flush(batch_flush_deferred);
 
   get_surface(surface,id);
-  m_deviceContext->OMSetRenderTargets(1, &surface->renderTargetView, NULL);
+  m_deviceContext->OMSetRenderTargets(1, &surface.renderTargetView, NULL);
 }
 
 void surface_reset_target()
@@ -148,31 +141,7 @@ int surface_get_target()
 
 void surface_free(int id)
 {
-  get_surface(surf, id);
-  delete surf;
-}
-
-bool surface_exists(int id)
-{
-  return !((id < 0) or (size_t(id) > enigma::Surfaces.size()) or (enigma::Surfaces[id] == NULL));
-}
-
-int surface_get_texture(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->tex);
-}
-
-int surface_get_width(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->width);
-}
-
-int surface_get_height(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->height);
+  delete enigma::surfaces[id];
 }
 
 int surface_getpixel(int id, int x, int y)
