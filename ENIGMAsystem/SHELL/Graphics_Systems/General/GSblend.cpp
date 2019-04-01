@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura
+*** Copyright (C) 2013, 2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,23 +16,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Universal_System/scalar.h"
+#include "GSblend.h"
 
-#ifndef ENIGMA_GL3_TEXTURESTRUCT_H
-#define ENIGMA_GL3_TEXTURESTRUCT_H
+namespace enigma {
 
-#include <vector>
-using std::vector;
+int currentblendmode[2] = {0,0};
+int currentblendtype = 0;
 
-struct TextureStruct {
-	unsigned gltex;
-	unsigned width,height;
-	unsigned fullwidth,fullheight;
-	int internalFormat; //GLint
-	unsigned format, type; //GLenum
-	TextureStruct(unsigned gtex);
-	~TextureStruct();
-};
-extern vector<TextureStruct*> textureStructs;
+} // namespace enigma
 
-#endif // ENIGMA_GL3_TEXTURESTRUCT_H
+namespace enigma_user {
+
+int draw_get_blend_mode() {
+  return enigma::currentblendmode[0];
+}
+
+int draw_get_blend_mode_ext(bool src) {
+  return enigma::currentblendmode[(src==true?0:1)];
+}
+
+int draw_get_blend_mode_type() {
+  return enigma::currentblendtype;
+}
+
+} // namespace enigma_user

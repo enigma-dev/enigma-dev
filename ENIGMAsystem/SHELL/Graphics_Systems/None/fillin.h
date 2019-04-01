@@ -57,18 +57,9 @@ namespace enigma_user
 {
 	string draw_get_graphics_error();
 
-	int texture_add(string filename, bool mipmap);
-	void texture_save(int texid, string fname);
-	void texture_delete(int texid);
-	bool texture_exists(int texid);
-	void texture_preload(int texid);
 	void texture_set_priority(int texid, double prio);
 	void texture_set_enabled(bool enable);
 	void texture_set_blending(bool enable);
-	gs_scalar texture_get_width(int texid);
-	gs_scalar texture_get_height(int texid);
-	gs_scalar texture_get_texel_width(int texid);
-	gs_scalar texture_get_texel_height(int texid);
 	void texture_set_stage(int stage, int texid);
 	void texture_reset();
 	void texture_set_interpolation_ext(int sampler, bool enable);
@@ -89,10 +80,6 @@ namespace enigma_user
 	void surface_reset_target(void);
 	int surface_get_target();
 	void surface_free(int id);
-	bool surface_exists(int id);
-	int surface_get_texture(int id);
-	int surface_get_width(int id);
-	int surface_get_height(int id);
 	int surface_getpixel(int id, int x, int y);
 	int surface_getpixel_ext(int id, int x, int y);
 	int surface_getpixel_alpha(int id, int x, int y);

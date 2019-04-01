@@ -22,14 +22,7 @@
 #  include <additional/glee/GLee.h>
 #endif*/
 
-//#include "OpenGLHeaders.h"
-
-namespace enigma
-{
-  extern unsigned char currentcolor[4];
-  extern int currentblendmode[2];
-  extern int currentblendtype;
-}
+//#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 
 #include "../General/GScolors.h"
 #include "../General/GSprimitives.h"

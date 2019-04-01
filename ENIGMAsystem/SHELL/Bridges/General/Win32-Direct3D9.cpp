@@ -16,24 +16,30 @@
 **/
 
 #include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h" // for show_error()
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
+#include "Graphics_Systems/Direct3D9/DX9surface_impl.h"
 #include "Graphics_Systems/Direct3D9/Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 
 #include <windows.h>
-#include <windowsx.h>
 #include <d3d9.h>
-#include <string>
 
-using namespace std;
+using namespace enigma::dx9;
 
 namespace {
 
 LPDIRECT3D9 d3dobj; // the pointer to our Direct3D interface
+
+inline void get_d3d_present_params(D3DPRESENT_PARAMETERS* d3dpp) {
+  IDirect3DSwapChain9 *sc;
+  d3dmgr->device->GetSwapChain(0, &sc);
+  sc->GetPresentParameters(d3dpp);
+  sc->Release();
+}
 
 } // namespace anonymous
 
@@ -45,22 +51,24 @@ ContextManager* d3dmgr; // the pointer to the device class
 
 } // namespace dx9
 
-  extern bool forceSoftwareVertexProcessing;
-  bool Direct3D9Managed = true;
+extern HWND hWnd;
+extern bool forceSoftwareVertexProcessing;
 
   void OnDeviceLost() {
     d3dmgr->device->EndScene();
     if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
-    for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
-      (*it)->OnDeviceLost();
+    for (BaseSurface* surf : surfaces) {
+      if (!surf) continue;
+      ((Surface*)surf)->OnDeviceLost();
     }
   }
 
   void OnDeviceReset() {
     d3dmgr->device->BeginScene();
     if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
-    for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
-      (*it)->OnDeviceReset();
+    for (BaseSurface* surf : surfaces) {
+      if (!surf) continue;
+      ((Surface*)surf)->OnDeviceReset();
     }
   }
 
@@ -68,30 +76,22 @@ ContextManager* d3dmgr; // the pointer to the device class
     OnDeviceLost();
     HRESULT hr = d3dmgr->device->Reset(d3dpp);
     if (FAILED(hr)) {
-      MessageBox(
-        enigma::hWnd,
-        TEXT("Device Reset Failed"), TEXT("Error"),
-        MB_ICONERROR | MB_OK
-      );
-      return;  // should probably force the game closed
+      show_error("Direct3D 9 Device Reset Failed", true);
     }
-    // Reapply the stored render states and what not
-    d3dmgr->RestoreState();
+    // the normal, managed d3d 9.0 does not automatically restore render state
+    if (Direct3D9Managed) d3dmgr->RestoreState();
     OnDeviceReset();
   }
 
   extern void (*WindowResizedCallback)();
   void WindowResized() {
     if (d3dmgr == NULL) { return; }
-    IDirect3DSwapChain9 *sc;
-    d3dmgr->device->GetSwapChain(0, &sc);
     D3DPRESENT_PARAMETERS d3dpp;
-    sc->GetPresentParameters(&d3dpp);
+    get_d3d_present_params(&d3dpp);
     int ww = enigma_user::window_get_width(),
         wh = enigma_user::window_get_height();
     d3dpp.BackBufferWidth = ww <= 0 ? 1 : ww;
     d3dpp.BackBufferHeight = wh <= 0 ? 1 : wh;
-    sc->Release();
     Reset(&d3dpp);
 
     // clear the window color, viewport does not need set because backbuffer was just recreated
@@ -99,6 +99,7 @@ ContextManager* d3dmgr; // the pointer to the device class
   }
 
   void EnableDrawing(void* handle) {
+    get_window_handle();
     WindowResizedCallback = &WindowResized;
 
     d3dmgr = new ContextManager();
@@ -221,23 +222,12 @@ namespace enigma_user {
 
 void display_reset(int samples, bool vsync) {
   if (d3dmgr == NULL) { return; }
-  IDirect3DSwapChain9 *sc;
-  d3dmgr->device->GetSwapChain(0, &sc);
   D3DPRESENT_PARAMETERS d3dpp;
-  sc->GetPresentParameters(&d3dpp);
-  if (vsync) {
-    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT; // Present the frame immediately
-  } else {
-    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE; // Present the frame immediately
-  }
-  d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + samples); // Levels of multi-sampling
-  d3dpp.MultiSampleQuality = 0; // No multi-sampling
-  if (samples) {
-    d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
-  } else {
-    d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
-  }
-  sc->Release();
+  get_d3d_present_params(&d3dpp);
+  d3dpp.PresentationInterval = vsync?D3DPRESENT_INTERVAL_DEFAULT:D3DPRESENT_INTERVAL_IMMEDIATE;
+  d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + samples);
+  d3dpp.MultiSampleQuality = 0;
+  d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, samples > 0);
 
   enigma::Reset(&d3dpp);
 }
@@ -245,16 +235,9 @@ void display_reset(int samples, bool vsync) {
 void set_synchronization(bool enable)
 {
   if (d3dmgr == NULL) { return; }
-  IDirect3DSwapChain9 *sc;
-  d3dmgr->device->GetSwapChain(0, &sc);
   D3DPRESENT_PARAMETERS d3dpp;
-  sc->GetPresentParameters(&d3dpp);
-  if (enable) {
-    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT; // Present the frame immediately
-  } else {
-    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE; // Present the frame immediately
-  }
-  sc->Release();
+  get_d3d_present_params(&d3dpp);
+  d3dpp.PresentationInterval = enable?D3DPRESENT_INTERVAL_DEFAULT:D3DPRESENT_INTERVAL_IMMEDIATE;
 
   enigma::Reset(&d3dpp);
 }

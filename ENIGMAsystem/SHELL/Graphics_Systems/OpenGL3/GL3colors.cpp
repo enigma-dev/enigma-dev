@@ -15,16 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
 #include <math.h>
-
-namespace enigma {
-  extern unsigned char currentcolor[4];
-}
 
 namespace enigma_user
 {

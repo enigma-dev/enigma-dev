@@ -21,9 +21,10 @@
 #include "GL3shader.h"
 #include "GLSLshader.h"
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include <map>

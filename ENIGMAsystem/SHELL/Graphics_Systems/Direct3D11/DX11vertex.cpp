@@ -115,8 +115,8 @@ size_t dxgi_format_sizes[] = {
   sizeof(float) * 2,
   sizeof(float) * 3,
   sizeof(float) * 4,
-  sizeof(unsigned byte) * 4,
-  sizeof(unsigned byte) * 4
+  sizeof(unsigned char) * 4,
+  sizeof(unsigned char) * 4
 };
 
 map<int, ID3D11Buffer*> vertexBufferPeers;
