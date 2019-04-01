@@ -19,7 +19,7 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
+#include "Graphics_Systems/Direct3D9/DX9surface_impl.h"
 #include "Graphics_Systems/Direct3D9/Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GSstdraw.h"
@@ -57,16 +57,18 @@ extern bool forceSoftwareVertexProcessing;
 void OnDeviceLost() {
   d3ddev->EndScene();
   if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
-  for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
-    (*it)->OnDeviceLost();
+  for (BaseSurface* surf : surfaces) {
+    if (!surf) continue;
+    ((Surface*)surf)->OnDeviceLost();
   }
 }
 
 void OnDeviceReset() {
   d3ddev->BeginScene();
   if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
-  for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
-    (*it)->OnDeviceReset();
+  for (BaseSurface* surf : surfaces) {
+    if (!surf) continue;
+    ((Surface*)surf)->OnDeviceReset();
   }
 }
 

@@ -37,7 +37,6 @@ namespace enigma
 {
     extern int maxid;
     objectstruct** objectdata;
-    int instancecount = 0;
     int id_current =0;
 
     #ifdef DEBUG_MODE
