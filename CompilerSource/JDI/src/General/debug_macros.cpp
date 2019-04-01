@@ -27,22 +27,27 @@
 #include <API/AST.h>
 #include "debug_macros.h"
 
-#ifdef RENDER_ASTS
-  #include <sys/stat.h>
-  static unsigned ast_rn = 0;
-  void render_ast(jdi::AST& ast, std::string cat)
-  {
-    string fullp = DEBUG_OUTPUT_PATH "/AST_Renders/" + cat; // The full path to which this AST will be rendered.
-    
-    if (!ast_rn) {
-      mkdir(DEBUG_OUTPUT_PATH "/AST_Renders", 0777);
-      mkdir(fullp.c_str(),0777);
-    }
-    char fn[32]; sprintf(fn,"/ast_%08u.svg",ast_rn++);
-    fullp += fn;
-    
-    ast.writeSVG(fullp.c_str());
+using std::string;
+
+#include <sys/stat.h>
+static unsigned ast_rn = 0;
+void render_ast_nd(jdi::AST& ast, std::string cat)
+{
+  string fullp = DEBUG_OUTPUT_PATH "/AST_Renders/" + cat; // The full path to which this AST will be rendered.
+  
+  if (!ast_rn) {
+    mkdir(DEBUG_OUTPUT_PATH "/AST_Renders", 0777);
+    mkdir(fullp.c_str(),0777);
   }
+  char fn[32]; sprintf(fn,"/ast_%08u.svg",ast_rn++);
+  fullp += fn;
+  
+  ast.writeSVG(fullp.c_str());
+}
+
+#ifdef RENDER_ASTS
+  void render_ast(jdi::AST& ast, std::string cat)
+  { render_ast_nd(ast, cat); }
 #endif
 
 #endif

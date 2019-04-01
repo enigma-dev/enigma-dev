@@ -8,7 +8,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -23,11 +23,10 @@
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <Parser/bodies.h>
+#include <Parser/context_parser.h>
 #include <API/context.h>
 #include <General/parse_basics.h>
 #include <General/debug_macros.h>
-#include <Parser/parse_context.h>
 #include <System/builtins.h>
 #include <API/compile_settings.h>
 #include <API/AST.h>
@@ -46,7 +45,7 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
   // Outsource to read_fulltype, which will take care of the hard work for us.
   // When this function finishes, per its specification, our token will be set to the next relevant, non-referencer symbol.
   // This means an identifier if the syntax is correct.
-  full_type tp = read_fulltype(lex, token, scope, this, herr);
+  full_type tp = read_fulltype(token, scope);
   if (dtor) {
     if (tp.refs.name.empty() and tp.def == scope and !tp.flags and tp.refs.size() == 1 and tp.refs.top().type == ref_stack::RT_FUNCTION) {
         tp.refs.name = "~" + scope->name;
@@ -62,7 +61,7 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
   if (!tp.def) {
     if (token.type == TT_TILDE) {
       token = read_next_token(scope);
-      full_type tp2 = read_fulltype(lex, token, scope, this, herr);
+      full_type tp2 = read_fulltype(token, scope);
       if (!tp2.refs.name.empty() or tp2.def != scope or tp2.flags or tp2.refs.size() != 1 or tp2.refs.top().type != ref_stack::RT_FUNCTION) {
         token.report_error(herr, "Junk destructor; remove tilde?");
         FATAL_RETURN(1);
@@ -71,6 +70,13 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
       tp2.flags |= tp.flags;
       tp2.def = builtin_type__void;
       tp.swap(tp2);
+    }
+    else if (token.type == TT_OPERATORKW) {
+      full_type ft = read_operatorkw_cast_type(token, scope);
+      if (!ft.def)
+        return 1;
+      res = scope->overload_function("(cast)", ft, inherited_flags, token, herr);
+      return !res;
     }
     else {
       token.report_error(herr, "Declaration does not give a valid type");
@@ -81,30 +87,19 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
   return handle_declarators(scope, token, tp, inherited_flags, res);
 }
 
+#include <Parser/is_potential_constructor.h>
+#include "handle_function_impl.h"
+
 int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& token, full_type &tp, unsigned inherited_flags, definition* &res)
 {
   // Make sure we do indeed find ourselves at an identifier to declare.
   if (tp.refs.name.empty()) {
-    const bool potentialc = (
-      (tp.def == scope) or
-      (scope->flags & DEF_TEMPSCOPE and tp.def == scope->parent) or
-      ((tp.def->flags & DEF_TEMPLATE) and ((definition_template*)tp.def)->def == scope)
-    );
-    
-    #define invalid_ctor_flags ~(builtin_flag__explicit | builtin_flag__virtual) // Virtual's a bit of a longshot, but we'll take it.
-    
-    // Handle constructors; this might need moved to a handle_constructors method.
+    const bool potentialc = is_potential_constructor(scope, tp);
     if (potentialc and !(tp.flags & invalid_ctor_flags) and tp.refs.size() == 1 and tp.refs.top().type == ref_stack::RT_FUNCTION) {
-      tp.refs.name = "<construct>";
+      tp.refs.name = constructor_name;
       if (token.type == TT_COLON) {
         // TODO: When you have a place to store constructor data, 
-        do {
-          token = read_next_token(scope);
-          if (token.type == TT_SEMICOLON) {
-            token.report_error(herr, "Expected constructor body here after initializers.");
-            return FATAL_TERNARY(1,0);
-          }
-        } while (token.type != TT_LEFTBRACE);
+        handle_constructor_initializers(lex, token, scope, herr);
       }
     }
     else if (token.type == TT_COLON) {
@@ -139,53 +134,67 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
         if (token.type == TT_LESSTHAN and d->flags & DEF_TEMPLATE) {
           definition_template* temp = (definition_template*)d;
           arg_key k(temp->params.size());
-          if (read_template_parameters(k, temp, lex, token, scope, this, herr))
+          if (read_template_parameters(k, temp,token, scope))
             return 1;
-          d = temp->instantiate(k);
+          d = temp->instantiate(k, error_context(herr, token));
           if (!d) return 1;
           token = read_next_token(scope);
           goto rescope;
         }
       }
-      if (d and (d->flags & DEF_FUNCTION)) {
-        if (scope->flags & DEF_TEMPSCOPE) {
-          scope->use_namespace(d->parent);
-          read_referencers_post(tp.refs, lex, token, scope, this, herr);
-        }
-        else
-          read_referencers_post(tp.refs, lex, token, d->parent, this, herr);
-      }
+      if (d and (d->flags & DEF_FUNCTION))
+        read_referencers_post(tp.refs, token, d->parent);
       else
-        read_referencers_post(tp.refs, lex, token, scope, this, herr);
+        read_referencers_post(tp.refs, token, scope);
       res = d; goto extra_loop;
+    }
+    else if (token.type == TT_COMMA) {
+      if (tp.refs.name.empty()) {
+        if (~scope->flags & DEF_CLASS)
+          token.report_warning(herr, "Declaration without name is meaningless outside of a class");
+        else
+          token.report_warning(herr, "Declaration in class scope doesn't have a name");
+        char buf[64];
+        sprintf(buf, "<unnamed%08d>", anon_count++);
+        tp.refs.name = buf;
+      }
     }
     else
       return 0;
   }
   
+  if (!tp.refs.ndef)
   {
     // Add it to our definitions map, without overwriting the existing member.
     decpair ins = ((definition_scope*)scope)->declare(tp.refs.name);
     if (ins.inserted) { // If we successfully inserted,
       insert_anyway:
-      res = ins.def = (!tp.refs.empty() && tp.refs.top().type == ref_stack::RT_FUNCTION)?
-        new definition_function(tp.refs.name,scope,tp.def,tp.refs,tp.flags,DEF_TYPED | inherited_flags):
-        new definition_typed(tp.refs.name,scope,tp.def,tp.refs,tp.flags,DEF_TYPED | inherited_flags);
+      res = (!tp.refs.empty() && tp.refs.top().type == ref_stack::RT_FUNCTION)?
+        (((definition_function*)(ins.def = new definition_function(tp.refs.name,scope,inherited_flags)))->overload(tp, inherited_flags, herr)):
+        ((ins.def = new definition_typed(tp.refs.name,scope,tp.def,&tp.refs,tp.flags,DEF_TYPED | inherited_flags)));
     }
     else // Well, uh-oh. We didn't insert anything. This is non-fatal, and will not leak, so no harm done.
     {
       if (ins.def->flags & (DEF_CLASS | DEF_UNION | DEF_ENUM)) { // If the original definition is a class
-        decpair cins = declare_c_struct(tp.refs.name, ins.def); // Move that definition to the C structs list, so we can insert our definition in its place.
+        decpair cins = scope->declare_c_struct(tp.refs.name, ins.def); // Move that definition to the C structs list, so we can insert our definition in its place.
         if (!cins.inserted and cins.def != ins.def) {
-          token.report_error(herr, "Attempt to redeclare `" + tp.refs.name + "' failed due to conflicts");
+          token.report_error(herr, "Attempt to redeclare `" + tp.refs.name + "' failed due to name conflicts");
           FATAL_RETURN(1);
         }
         else goto insert_anyway;
       }
+      else if (ins.def->flags & DEF_FUNCTION) { // Handle function overloading
+        if (tp.refs.empty() or tp.refs.top().type != ref_stack::RT_FUNCTION) {
+          token.report_error(herr, "Cannot declare `" + tp.refs.name + "' over existing function");
+          return 4;
+        }
+        definition_function* func = (definition_function*)ins.def;
+        res = func->overload(tp, inherited_flags, herr);
+      }
       else if (not(ins.def->flags & DEF_TYPED)) {
         if (ins.def->flags & DEF_TEMPLATE and !tp.refs.empty() and tp.refs.top().type == ref_stack::RT_FUNCTION) {
           definition_function* func = new definition_function(tp.refs.name,scope,tp.def,tp.refs,tp.flags,DEF_TYPED | inherited_flags);
-          func->overload((definition_template*)ins.def);
+          func->overload((definition_template*)ins.def, herr);
           res = ins.def = func;
         }
         else {
@@ -195,18 +204,21 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
           return 3;
         }
       }
-      else if (ins.def->flags & DEF_FUNCTION) { // Handle function overloading
-        if (tp.refs.empty() or tp.refs.top().type != ref_stack::RT_FUNCTION) {
-          token.report_error(herr, "Cannot declare `" + tp.refs.name + "' over existing function");
-          return 4;
-        }
-        definition_function* func = (definition_function*)ins.def;
-        arg_key k(func->referencers);
-        res = func->overload(k, new definition_function(tp.refs.name,scope,tp.def,tp.refs,tp.flags,DEF_TYPED | inherited_flags), herr);
-      }
       else
         res = ins.def;
     }
+  }
+  else {
+    res = tp.refs.ndef;
+    if (res->flags & DEF_FUNCTION) {
+      if (tp.refs.empty() or tp.refs.top().type != ref_stack::RT_FUNCTION) {
+        token.report_error(herr, "Cannot declare `" + tp.refs.name + "' over existing function");
+        return 4;
+      }
+      definition_function* func = (definition_function*)res;
+      res = func->overload(tp, inherited_flags, herr);
+    }
+    // cout << "Implementing " << res->name << std::endl;
   }
   
   extra_loop:
@@ -222,7 +234,7 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
           else {
             AST ast;
             token = read_next_token(scope);
-            ast.parse_expression(token, lex, scope, precedence::comma, herr);
+            astbuilder->parse_expression(&ast, token, scope, precedence::comma);
             // TODO: Store AST
           }
         break;
@@ -231,7 +243,7 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
           token = read_next_token(scope);
           
           // Read a new type
-          read_referencers(tp.refs, tp, lex, token, scope, this, herr);
+          read_referencers(tp.refs, tp, token, scope);
           
           // Just hop into the error checking above and pass through the definition addition again.
         return handle_declarators(scope, token, tp, inherited_flags, res);
@@ -244,8 +256,8 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
             FATAL_RETURN(1);
           }
           AST bitcountexp;
-          bitcountexp.parse_expression(token = read_next_token(scope), lex, scope, precedence::comma+1, herr);
-          value bc = bitcountexp.eval();
+          astbuilder->parse_expression(&bitcountexp, token = read_next_token(scope), scope, precedence::comma+1);
+          value bc = bitcountexp.eval(error_context(herr, token));
           if (bc.type != VT_INTEGER) {
             token.report_error(herr,"Bit count is not an integer");
             FATAL_RETURN(1);
@@ -257,14 +269,29 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
           token.report_error(herr, "Expected initializer `=' here before literal.");
         return 5;
       
+      case TT_MEMBEROF:
+          token.report_error(herr, "Unhandled (class::*) pointer");
+        return 1;
+      
+      case TT_ALIGNAS:
+          token.report_error(herr, "Not implemented: `alignas'");
+        return 1;
+      
+      case TT_NOEXCEPT:
+          token.report_error(herr, "Not implemented: `noexcept'");
+        return 1;
+      
       case TT_ELLIPSIS:
       case TT_SEMICOLON:
       
       case TT_DECLARATOR: case TT_DECFLAG: case TT_CLASS: case TT_STRUCT: case TT_ENUM: case TT_UNION: case TT_NAMESPACE: case TT_EXTERN: case TT_IDENTIFIER:
-      case TT_DEFINITION: case TT_TEMPLATE: case TT_TYPENAME: case TT_TYPEDEF: case TT_USING: case TT_PUBLIC: case TT_PRIVATE: case TT_PROTECTED:
+      case TT_DEFINITION: case TT_TEMPLATE: case TT_TYPENAME: case TT_TYPEDEF: case TT_USING: case TT_PUBLIC: case TT_PRIVATE: case TT_PROTECTED: case TT_FRIEND:
       case TT_SCOPE: case TT_LEFTPARENTH: case TT_RIGHTPARENTH: case TT_LEFTBRACKET: case TT_RIGHTBRACKET: case TT_LEFTBRACE: case TT_RIGHTBRACE:
-      case TT_ASM: case TT_TILDE: case TTM_CONCAT: case TTM_TOSTRING: case TT_ENDOFCODE: case TT_SIZEOF: case TT_ISEMPTY: case TT_OPERATORKW:
-      case TT_NEW: case TT_DELETE: case TT_DECLTYPE: case TT_INVALID: default:
+      case TT_ASM: case TT_TILDE: case TTM_CONCAT: case TTM_TOSTRING: case TT_ENDOFCODE: case TT_SIZEOF: case TT_ISEMPTY: case TT_ALIGNOF: case TT_OPERATORKW:
+      case TT_NEW: case TT_DELETE: case TT_DECLTYPE: case TT_TYPEID: case TT_INVALID:
+      case TT_CONST_CAST: case TT_STATIC_CAST: case TT_DYNAMIC_CAST: case TT_REINTERPRET_CAST:
+      case TT_AUTO: case TT_CONSTEXPR: case TT_STATIC_ASSERT:
+      default:
       #include <User/token_cases.h>
         return 0;
     }
