@@ -19,6 +19,7 @@
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include <stdlib.h>
+#include <cstdio>
 #include <string>
 
 #ifdef DEBUG_MODE
@@ -53,24 +54,14 @@ extern "C" int cocoa_get_color(int defcol, const char *title);
 static string dialog_caption;
 static string error_caption;
 
-static inline string remove_trailing_zeros(double numb) {
-  string strnumb = std::to_string(numb);
-
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-    strnumb.pop_back();
-
-  return strnumb;
-}
-
 void show_error(string errortext, const bool fatal) {
   #ifdef DEBUG_MODE
-  errortext = enigma::debug_scope::GetErrors() + "\n\n" + errortext;
-  #else
-  errortext = "Error in some event or another for some object: \r\n\r\n" + errortext;
+  errortext += enigma::debug_scope::GetErrors();
   #endif
   
   if (error_caption == "") error_caption = "Error";
-  cocoa_show_error(errortext.c_str(), (const bool)fatal, error_caption.c_str());
+  int result = cocoa_show_error(errortext.c_str(), (const bool)fatal, error_caption.c_str());
+  if (result == 1) exit(0);
 }
 
 namespace enigma_user {
@@ -120,14 +111,14 @@ double get_integer(string str, double def) {
   string integer = remove_trailing_zeros(def);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
   string result = cocoa_input_box(str.c_str(), integer.c_str(), dialog_caption.c_str());
-  return result ? strtod(input, NULL) : 0;
+  return !result.empty() ? strtod(result.c_str(), NULL) : 0;
 }
 
 double get_passcode(string str, double def) {
   string integer = remove_trailing_zeros(def);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
   string result = cocoa_password_box(str.c_str(), integer.c_str(), dialog_caption.c_str());
-  return result ? strtod(input, NULL) : 0;
+  return !result.empty() ? strtod(result.c_str(), NULL) : 0;
 }
 
 string get_open_filename(string filter, string fname) {
