@@ -202,9 +202,9 @@ static parenth_type parenths_type(lexer *lex, definition_scope *scope, lex_buffe
       }
       else if (token.type == TT_DEFINITION) {
         definition* bd = cp->read_qualified_definition(token, scope);
-        if (bd and (backt->def = bd)->flags & DEF_TYPENAME)
+        if (bd && ((backt->def = bd)->flags & DEF_TYPENAME))
           seen_type = true;
-        else if (bd->flags & DEF_TEMPLATE && bd->name == scope->name)
+        else if (bd && (bd->flags & DEF_TEMPLATE) && bd->name == scope->name)
           seen_type = true;
         else if (!seen_type)
           return seen_comma? PT_INITIALIZERS : PT_GROUPORINIT;
@@ -336,7 +336,7 @@ int jdip::context_parser::read_referencers(ref_stack &refs, const full_type& ft,
         if (!d) return 1;
         
         if (token.type == TT_MEMBEROF) {
-          if (!d->flags & DEF_CLASS) {
+          if (!(d->flags & DEF_CLASS)) {
             token.report_error(herr, "Member pointer to non-class `" + d->name + "'");
             return 1;
           }

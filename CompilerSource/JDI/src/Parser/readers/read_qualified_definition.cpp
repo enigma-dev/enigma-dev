@@ -46,6 +46,10 @@ definition* jdip::context_parser::read_qualified_definition(token_t &token, defi
     }
     else return res;
   }
+  else if (token.type == TT_CLASS || token.type == TT_STRUCT || token.type == TT_UNION || token.type == TT_ENUM) {
+    token = lex->get_token_in_scope(scope, herr);
+    return read_qualified_definition(token, scope);
+  }
   else {
     if (token.type == TT_IDENTIFIER) {
       token.report_error(herr, "Expeceted qualified-id here; `" + token.content.toString() + "' is not declared");

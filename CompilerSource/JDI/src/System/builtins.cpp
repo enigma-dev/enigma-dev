@@ -163,8 +163,9 @@ namespace jdi {
     builtin_type__float  = add_declarator("float",   UF_PRIMITIVE, 4).def;
     builtin_type__double = add_declarator("double",  UF_PRIMITIVE, 8).def;
     
-    builtin_type__wchar_t = add_declarator("wchar_t",   UF_PRIMITIVE, 2).def;
-    builtin_type__va_list = add_declarator("__int128",  UF_PRIMITIVE, 8).def; // GCC extension
+    builtin_type__wchar_t = add_declarator("wchar_t",     UF_PRIMITIVE, 2).def;
+    builtin_type__va_list = add_declarator("__int128",    UF_PRIMITIVE, 8).def; // GCC extension
+    builtin_type__va_list = add_declarator("__float128",  UF_PRIMITIVE, 8).def; // GCC extension
     builtin_type__va_list = add_declarator("__builtin_va_list",   UF_PRIMITIVE, 8).def;
     
     builtin_flag__virtual = add_declarator("virtual", UF_FLAG).flag;
