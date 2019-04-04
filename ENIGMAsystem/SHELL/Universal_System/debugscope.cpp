@@ -37,13 +37,13 @@ namespace enigma {
   std::string debug_scope::GetErrors()
   {
     if (scope_stack.empty())
-      return "Debug error stack is empty. Error may stem from engine internals.";
+      return "\n\nDebug error stack is empty. Error may stem from engine internals.";
 
     std::string str = "Stack trace (most recent frame first):\n";
     for (std::vector<std::string>::reverse_iterator it = scope_stack.rbegin(); it != scope_stack.rend(); it++)
       str += "  " + *it + "\n";
 
-    return str;
+    return "\n\n" + str;
   }
 
 }
