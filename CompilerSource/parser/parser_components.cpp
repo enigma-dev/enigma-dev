@@ -400,7 +400,7 @@ int parser_reinterpret(string &code,string &synt)
       while ((synt[pos] = 'n', synt[++pos] == 'V'));
       jdi::definition_function *d = (jdi::definition_function*)main_context->get_global()->look_up(code.substr(spos,pos-spos));
       const pt epos = pos;
-      int en = current_language->referencers_varargs_at(d->referencers);
+      int en = current_language->function_variadic_after(d);
       if (en == -1) continue;
       cout << "AND EN = " << en  << endl;
       ++pos; for (unsigned lvl = 1; en and lvl; pos++)
@@ -944,7 +944,7 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
     jdi::definition_template *tmp = (jdi::definition_template*)a;
     int tmc = tmp->params.size() - 1;
     for (int i = tmc; i >= 0; i--)
-      if (tmp->params[i]->flags & jdi::DEF_DEFAULTED) tmc = i;
+      if (tmp->params[i]->default_assignment) tmc = i;
     a2i = tmc - a2i;
     string iseg;
     for (int i = 0; i < a2i;)
