@@ -4,7 +4,7 @@
 Name: DlgMod
 Identifier: DlgMod
 Build-Platforms: Windows, SDL
-Represents:
+Represents: none
 Description: Create native widgets using "DialogModule.dll" on Windows. 
 
 License, documentation, and install instructions: 
