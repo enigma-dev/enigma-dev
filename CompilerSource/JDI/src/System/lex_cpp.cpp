@@ -39,6 +39,7 @@
 using namespace jdi;
 using namespace jdip;
 using namespace std;
+using namespace parse_bacics::visible;
 
 #define cfile data //I'm sorry, but I can't spend the whole function calling the file buffer "data."
 

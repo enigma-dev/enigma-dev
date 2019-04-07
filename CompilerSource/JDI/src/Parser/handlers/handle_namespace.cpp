@@ -21,6 +21,8 @@
 
 #include <Parser/context_parser.h>
 
+using namespace jdi;
+
 int jdip::context_parser::handle_namespace(definition_scope *scope, token_t& token)
 {
   definition_scope *nscope;
