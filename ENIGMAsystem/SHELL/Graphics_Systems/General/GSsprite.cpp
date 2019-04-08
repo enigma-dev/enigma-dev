@@ -65,10 +65,10 @@ using std::string;
 #define rotx(qx, qy) ((qx) * rx - (qy) * ry)
 #define roty(qx, qy) ((qx) * ry + (qy) * rx)
 
-namespace enigma_user
+// implementation:
+namespace enigma
 {
 
-// implementation:
 void draw_sprite_pos_raw(const enigma::sprite* spr2d, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar color, gs_scalar alpha)
 {
   alpha = CLAMP_ALPHAF(alpha);
@@ -107,12 +107,17 @@ void draw_sprite_pos_part_raw(const enigma::sprite* spr2d, int subimg,
   draw_primitive_end();
 }
 
+}
+
+namespace enigma_user
+{
+
 // standard (see GSsprite.h for default parameter rvalues):
 void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar alpha)
 {
   // VD: points are ordered TL, TR, BR, BL
   get_spritev(spr2d,spr);
-  draw_sprite_pos_raw(spr2d, subimg, x1, y1, x2, y2, x3, y3, x4, y4, 0xFFFFFF, alpha);
+  enigma::draw_sprite_pos_raw(spr2d, subimg, x1, y1, x2, y2, x3, y3, x4, y4, 0xFFFFFF, alpha);
 }
 
 void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
@@ -121,7 +126,7 @@ void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, int color, gs_sca
   gs_scalar
     x1 = x - spr2d->xoffset, x2 = x1 + spr2d->width,
     y1 = y - spr2d->yoffset, y2 = y1 + spr2d->height;
-  draw_sprite_pos_raw(spr2d,subimg, x1,y1, x2,y1, x2,y2, x1,y2, color, alpha);
+  enigma::draw_sprite_pos_raw(spr2d,subimg, x1,y1, x2,y1, x2,y2, x1,y2, color, alpha);
 }
 
 void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
@@ -132,7 +137,7 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
     rx = cos(rot), ry = sin(rot),
     x1 = -xscale * spr2d->xoffset, x2 = x1 + xscale * spr2d->width,
     y1 = -yscale * spr2d->yoffset, y2 = y1 + yscale * spr2d->height;
-  draw_sprite_pos_raw(spr2d,subimg,
+  enigma::draw_sprite_pos_raw(spr2d,subimg,
     x + rotx(x1, y1), y + roty(x1, y1),
     x + rotx(x2, y1), y + roty(x2, y1),
     x + rotx(x2, y2), y + roty(x2, y2),
@@ -144,14 +149,14 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
   get_spritev(spr2d,spr);
-  draw_sprite_pos_part_raw(spr2d,subimg, left,top,width,height, x,y, x+width,y, x+width,y+height, x,y+height, color,alpha);
+  enigma::draw_sprite_pos_part_raw(spr2d,subimg, left,top,width,height, x,y, x+width,y, x+width,y+height, x,y+height, color,alpha);
 }
 
 void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_spritev(spr2d, spr);
   gs_scalar x2 = x + xscale * width, y2 = y + yscale * height;
-  draw_sprite_pos_part_raw(spr2d,subimg, left,top,width,height, x,y, x2,y, x2,y2, x,y2, color,alpha);
+  enigma::draw_sprite_pos_part_raw(spr2d,subimg, left,top,width,height, x,y, x2,y, x2,y2, x,y2, color,alpha);
 }
 
 void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar alpha)
@@ -181,7 +186,7 @@ void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 {
   get_spritev(spr2d, spr);
   gs_scalar x2 = x + width, y2 = y + height;
-  draw_sprite_pos_raw(spr2d,subimg, x,y, x2,y, x2,y2, x,y2, color, alpha);
+  enigma::draw_sprite_pos_raw(spr2d,subimg, x,y, x2,y, x2,y2, x,y2, color, alpha);
 }
 
 void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
