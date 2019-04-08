@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <string>
 using std::string;
+using namespace enigma_user;
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"
