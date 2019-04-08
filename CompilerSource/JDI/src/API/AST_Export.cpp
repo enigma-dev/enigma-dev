@@ -21,6 +21,9 @@
 
 #include "AST.h"
 #include <General/svg_simple.h>
+
+#include <algorithm>
+
 using std::max;
 
 namespace jdi {

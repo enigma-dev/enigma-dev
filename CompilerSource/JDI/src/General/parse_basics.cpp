@@ -52,16 +52,4 @@ namespace parse_bacics {
   }
 
   is_ is;
-  namespace visible {
-    string toString(int n) { char buf[12]; return string(buf,sprintf(buf,"%d", n)); }
-    string toString(long n) { char buf[12]; return string(buf,sprintf(buf,"%ld", n)); }
-    string toString(short n) { char buf[12]; return string(buf,sprintf(buf,"%d", n)); }
-    string toString(unsigned n) { char buf[12]; return string(buf,sprintf(buf,"%u", n)); }
-    string toString(unsigned long n) { char buf[12]; return string(buf,sprintf(buf,"%lu", n)); }
-    string toString(unsigned short n) { char buf[12]; return string(buf,sprintf(buf,"%u", n)); }
-    string toString(char n) { char buf[8]; return string(buf,sprintf(buf,"%d", n)); }
-    string toString(char* n) { return string(n); }
-    string toString(float n) { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
-    string toString(double n) { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
-  }
 }

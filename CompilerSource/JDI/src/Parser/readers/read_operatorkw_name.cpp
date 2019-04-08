@@ -24,6 +24,7 @@
 #include <API/compile_settings.h>
 
 using std::string;
+using namespace jdi;
 
 string jdip::context_parser::read_operatorkw_name(token_t &token, definition_scope *scope)
 {

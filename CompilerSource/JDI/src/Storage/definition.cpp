@@ -26,6 +26,7 @@
 #include <iostream>
 #include <cstdio>
 #include <typeinfo>
+#include <algorithm>
 #include <System/builtins.h>
 #include <Parser/handlers/handle_function_impl.h>
 #include <API/compile_settings.h>
@@ -664,7 +665,7 @@ namespace jdi {
       else {
         res += (d->integer_type.def? d->integer_type.toString() : "<ERROR>");
         if (d->flags & DEF_VALUED)
-          res += " = " + ((definition_valued*)d)->value_of;
+          res += " = " + ((definition_valued*)d)->value_of.toString();
       }
       first = false;
     }

@@ -40,6 +40,7 @@
 
 using namespace std;
 using namespace jdip;
+using namespace parse_bacics::visible;
 
 #ifdef DEBUG_MODE
 #define track(ct) ast->expression += ct + " "
