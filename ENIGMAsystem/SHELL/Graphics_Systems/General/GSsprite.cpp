@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <string>
 using std::string;
+using namespace enigma_user;
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"
@@ -59,99 +60,147 @@ using std::string;
   #define get_sprite_null(spr,id,r) \
     const enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
+#define get_subimg(outv, spr2d, subimg) \
+  const int outv = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+// VD: see https://yal.cc/2d-pivot-points/ for math
+#define rotx(qx, qy) ((qx) * rx - (qy) * ry)
+#define roty(qx, qy) ((qx) * ry + (qy) * rx)
+
+// implementation:
+namespace enigma
+{
+
+void draw_sprite_pos_raw(const enigma::sprite* spr2d, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar color, gs_scalar alpha)
+{
+  alpha = CLAMP_ALPHAF(alpha);
+  get_subimg(usi, spr2d, subimg);
+  
+  gs_scalar
+    tx = spr2d->texturexarray[usi], tw = spr2d->texturewarray[usi],
+    ty = spr2d->textureyarray[usi], th = spr2d->textureharray[usi];
+  
+  draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
+  draw_vertex_texture_color(x1,y1, tx,    ty,    color,alpha);
+  draw_vertex_texture_color(x2,y2, tx+tw, ty,    color,alpha);
+  draw_vertex_texture_color(x4,y4, tx,    ty+th, color,alpha);
+  draw_vertex_texture_color(x3,y3, tx+tw, ty+th, color,alpha);
+  draw_primitive_end();
+}
+void draw_sprite_pos_part_raw(const enigma::sprite* spr2d, int subimg,
+  gs_scalar px, gs_scalar py, gs_scalar pw, gs_scalar ph,
+  gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4,
+  gs_scalar color, gs_scalar alpha
+) {
+  alpha = CLAMP_ALPHAF(alpha);
+  get_subimg(usi, spr2d, subimg);
+  
+  gs_scalar
+    tbx = spr2d->texturexarray[usi], tbw = (gs_scalar)spr2d->width  / (gs_scalar)spr2d->texturewarray[usi],
+    tby = spr2d->textureyarray[usi], tbh = (gs_scalar)spr2d->height / (gs_scalar)spr2d->textureharray[usi],
+    tx1 = tbx + px / tbw, tx2 = tx1 + pw / tbw,
+    ty1 = tby + py / tbh, ty2 = ty1 + ph / tbh;
+  
+  draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
+  draw_vertex_texture_color(x1,y1, tx1,ty1, color,alpha);
+  draw_vertex_texture_color(x2,y2, tx2,ty1, color,alpha);
+  draw_vertex_texture_color(x4,y4, tx1,ty2, color,alpha);
+  draw_vertex_texture_color(x3,y3, tx2,ty2, color,alpha);
+  draw_primitive_end();
+}
+
+}
 
 namespace enigma_user
 {
 
+// standard (see GSsprite.h for default parameter rvalues):
+void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar alpha)
+{
+  // VD: points are ordered TL, TR, BR, BL
+  get_spritev(spr2d,spr);
+  enigma::draw_sprite_pos_raw(spr2d, subimg, x1, y1, x2, y2, x3, y3, x4, y4, 0xFFFFFF, alpha);
+}
+
 void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-    alpha=CLAMP_ALPHAF(alpha);
-    get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-
-  const gs_scalar tbx = spr2d->texturexarray[usi], tby = spr2d->textureyarray[usi],
-    tbw = spr2d->texturewarray[usi], tbh = spr2d->textureharray[usi],
-    xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
-    yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height;
-
-  draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-  draw_vertex_texture_color(xvert1,yvert1,tbx,tby,color,alpha);
-  draw_vertex_texture_color(xvert2,yvert1,tbx+tbw,tby,color,alpha);
-  draw_vertex_texture_color(xvert1,yvert2,tbx,tby+tbh,color,alpha);
-  draw_vertex_texture_color(xvert2,yvert2,tbx+tbw,tby+tbh,color,alpha);
-  draw_primitive_end();
+  get_spritev(spr2d, spr);
+  gs_scalar
+    x1 = x - spr2d->xoffset, x2 = x1 + spr2d->width,
+    y1 = y - spr2d->yoffset, y2 = y1 + spr2d->height;
+  enigma::draw_sprite_pos_raw(spr2d,subimg, x1,y1, x2,y1, x2,y2, x1,y2, color, alpha);
 }
 
 void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
 {
-    alpha=CLAMP_ALPHAF(alpha);
-    get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-
-  rot *= M_PI/180.0;
-
-  const gs_scalar
-  w = spr2d->width*xscale, h = spr2d->height*yscale,
-  tbx = spr2d->texturexarray[usi], tby = spr2d->textureyarray[usi],
-  tbw = spr2d->texturewarray[usi], tbh = spr2d->textureharray[usi],
-  wsinrot = w*sin(rot), wcosrot = w*cos(rot);
-
-  draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
+  get_spritev(spr2d, spr);
+  rot *= M_PI / -180.0;
   gs_scalar
-    ulcx = x - xscale * spr2d->xoffset * cos(rot) + yscale * spr2d->yoffset * cos(M_PI/2+rot),
-    ulcy = y + xscale * spr2d->xoffset * sin(rot) - yscale * spr2d->yoffset * sin(M_PI/2+rot);
-  draw_vertex_texture_color(ulcx,ulcy, tbx,tby, color, alpha);
-  draw_vertex_texture_color(ulcx + wcosrot, ulcy - wsinrot, tbx+tbw, tby, color, alpha);
-  const double mpr = 3*M_PI/2 + rot;
-    ulcx += h * cos(mpr);
-    ulcy -= h * sin(mpr);
-  draw_vertex_texture_color(ulcx,ulcy, tbx,tby+tbh, color, alpha);
-  draw_vertex_texture_color(ulcx + wcosrot, ulcy - wsinrot, tbx+tbw,tby+tbh, color, alpha);
-  draw_primitive_end();
-}
-
-///NOTE(harijs) - This function fits in as a priest in candy shop. It's the only sprite drawing function that uses bound draw color and we cannot add a color argument before the alpha, because YYG had it this way
-///Maybe we should forget about GM compatibility once again and just modify this so it fits the others
-void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar alpha)
-{
-    alpha=CLAMP_ALPHAF(alpha);
-    get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-
-  const gs_scalar tbx = spr2d->texturexarray[usi], tby = spr2d->textureyarray[usi],
-  tbw = spr2d->texturewarray[usi], tbh = spr2d->textureharray[usi];
-
-  draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-  draw_vertex_texture_color(x1,y1,tbx,tby,draw_get_color(),alpha);
-  draw_vertex_texture_color(x2,y1,tbx+tbw,tby,draw_get_color(),alpha);
-  draw_vertex_texture_color(x1,y2,tbx,tby+tbh,draw_get_color(),alpha);
-  draw_vertex_texture_color(x2,y2,tbx+tbw,tby+tbh,draw_get_color(),alpha);
-  draw_primitive_end();
+    rx = cos(rot), ry = sin(rot),
+    x1 = -xscale * spr2d->xoffset, x2 = x1 + xscale * spr2d->width,
+    y1 = -yscale * spr2d->yoffset, y2 = y1 + yscale * spr2d->height;
+  enigma::draw_sprite_pos_raw(spr2d,subimg,
+    x + rotx(x1, y1), y + roty(x1, y1),
+    x + rotx(x2, y1), y + roty(x2, y1),
+    x + rotx(x2, y2), y + roty(x2, y2),
+    x + rotx(x1, y2), y + roty(x1, y2),
+    color, alpha
+  );
 }
 
 void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-    alpha=CLAMP_ALPHAF(alpha);
-    get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+  get_spritev(spr2d,spr);
+  enigma::draw_sprite_pos_part_raw(spr2d,subimg, left,top,width,height, x,y, x+width,y, x+width,y+height, x,y+height, color,alpha);
+}
 
-  const gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texturewarray[usi], tbh = spr2d->height/(gs_scalar)spr2d->textureharray[usi],
-    tbx1 = spr2d->texturexarray[usi]+left/tbw, tbx2 = spr2d->texturexarray[usi]+tbx1 + width/tbw,
-    tby1 = spr2d->textureyarray[usi]+top/tbh, tby2 = spr2d->textureyarray[usi]+tby1 + height/tbh;
+void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
+{
+  get_spritev(spr2d, spr);
+  gs_scalar x2 = x + xscale * width, y2 = y + yscale * height;
+  enigma::draw_sprite_pos_part_raw(spr2d,subimg, left,top,width,height, x,y, x2,y, x2,y2, x,y2, color,alpha);
+}
 
+void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar alpha)
+{
+  get_spritev(spr2d,spr);
+  alpha = CLAMP_ALPHAF(alpha);
+  get_subimg(usi, spr2d, subimg);
+  rot *= M_PI / -180.0;
+  gs_scalar
+    rx = cos(rot), ry = sin(rot),
+    x1 = 0, x2 = x1 + xscale * width,
+    y1 = 0, y2 = y1 + yscale * height,
+    tbx = spr2d->texturexarray[usi], tbw = (gs_scalar)spr2d->width  / (gs_scalar)spr2d->texturewarray[usi],
+    tby = spr2d->textureyarray[usi], tbh = (gs_scalar)spr2d->height / (gs_scalar)spr2d->textureharray[usi],
+    tx1 = tbx + left / tbw, tx2 = tx1 + width / tbw,
+    ty1 = tby + top / tbh, ty2 = ty1 + height / tbh;
+  // VD: EGM's color blending is for some reason softer and I can't figure out why
   draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-  draw_vertex_texture_color(x,y,tbx1,tby1,color,alpha);
-  draw_vertex_texture_color(x+width,y,tbx2,tby1,color,alpha);
-  draw_vertex_texture_color(x,y+height,tbx1,tby2,color,alpha);
-  draw_vertex_texture_color(x+width,y+height,tbx2,tby2,color,alpha);
+  draw_vertex_texture_color(x + rotx(x1, y1), y + roty(x1, y1), tx1,ty1, c1,alpha);
+  draw_vertex_texture_color(x + rotx(x2, y1), y + roty(x2, y1), tx2,ty1, c2,alpha);
+  draw_vertex_texture_color(x + rotx(x1, y2), y + roty(x1, y2), tx1,ty2, c4,alpha);
+  draw_vertex_texture_color(x + rotx(x2, y2), y + roty(x2, y2), tx2,ty2, c3,alpha);
   draw_primitive_end();
 }
 
+void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
+{
+  get_spritev(spr2d, spr);
+  gs_scalar x2 = x + width, y2 = y + height;
+  enigma::draw_sprite_pos_raw(spr2d,subimg, x,y, x2,y, x2,y2, x,y2, color, alpha);
+}
+
+void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
+{
+  draw_sprite_stretched(spr, subimg, x, y, width, height, color, alpha);
+}
+
+// non-standard:
 void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-    alpha=CLAMP_ALPHAF(alpha);
-    get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+  alpha=CLAMP_ALPHAF(alpha);
+  get_spritev(spr2d,spr);
+  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
   const gs_scalar tbw = spr2d->width/spr2d->texturewarray[usi], tbh = spr2d->height/spr2d->textureharray[usi],
     xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
@@ -165,82 +214,6 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
   draw_vertex_texture_color(xvert1,yvert2,tbx1,tby2,color,alpha);
   draw_vertex_texture_color(xvert2,yvert2,tbx2,tby2,color,alpha);
   draw_primitive_end();
-}
-
-void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
-{
-    alpha=CLAMP_ALPHAF(alpha);
-    get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-
-  const gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texturewarray[usi], tbh = spr2d->height/(gs_scalar)spr2d->textureharray[usi],
-    xvert1 = x, xvert2 = xvert1 + width*xscale,
-    yvert1 = y, yvert2 = yvert1 + height*yscale,
-    tbx1 = spr2d->texturexarray[usi]+left/tbw, tbx2 = spr2d->texturexarray[usi]+tbx1 + width/tbw,
-    tby1 = spr2d->textureyarray[usi]+top/tbh, tby2 = spr2d->textureyarray[usi]+tby1 + height/tbh;
-
-  draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-  draw_vertex_texture_color(xvert1,yvert1,tbx1,tby1,color,alpha);
-  draw_vertex_texture_color(xvert2,yvert1,tbx2,tby1,color,alpha);
-  draw_vertex_texture_color(xvert1,yvert2,tbx1,tby2,color,alpha);
-  draw_vertex_texture_color(xvert2,yvert2,tbx2,tby2,color,alpha);
-  draw_primitive_end();
-}
-
-void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar alpha)
-{
-    alpha=CLAMP_ALPHAF(alpha);
-    get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-
-  const gs_scalar
-    tbx = spr2d->texturexarray[usi],  tby = spr2d->textureyarray[usi],
-    tbw = spr2d->width/spr2d->texturewarray[usi], tbh = spr2d->height/spr2d->textureharray[usi],
-    w = width*xscale, h = height*yscale;
-
-  rot *= M_PI/180;
-  const gs_scalar wcosrot = w*cos(rot), wsinrot = w*sin(rot);
-
-  draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-
-  gs_scalar
-    ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
-    ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
-
-  draw_vertex_texture_color(ulcx, ulcy, tbx+left/tbw, tby+top/tbh, c1, alpha);
-  draw_vertex_texture_color((ulcx + wcosrot), (ulcy - wsinrot), tbx+(left+width)/tbw, tby+top/tbh, c2, alpha);
-
-  ulcx += h * cos(3*M_PI/2 + rot);
-  ulcy -= h * sin(3*M_PI/2 + rot);
-
-  draw_vertex_texture_color((ulcx + wcosrot), (ulcy - wsinrot), tbx+(left+width)/tbw, tby+(top+height)/tbh, c4, alpha);
-  draw_vertex_texture_color(ulcx, ulcy, tbx+left/tbw, tby+(top+height)/tbh, c3, alpha);
-
-  draw_primitive_end();
-}
-
-void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
-{
-    alpha=CLAMP_ALPHAF(alpha);
-    get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-
-  const gs_scalar tbx = spr2d->texturexarray[usi], tby = spr2d->textureyarray[usi],
-              tbw = spr2d->texturewarray[usi], tbh = spr2d->textureharray[usi],
-              xvert1 = x, xvert2 = xvert1 + width,
-              yvert1 = y, yvert2 = yvert1 + height;
-
-  draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-  draw_vertex_texture_color(xvert1,yvert1,tbx,tby,color,alpha);
-  draw_vertex_texture_color(xvert2,yvert1,tbx+tbw,tby,color,alpha);
-  draw_vertex_texture_color(xvert1,yvert2,tbx,tby+tbh,color,alpha);
-  draw_vertex_texture_color(xvert2,yvert2,tbx+tbw,tby+tbh,color,alpha);
-  draw_primitive_end();
-}
-
-void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
-{
-  draw_sprite_stretched(spr, subimg, x, y, width, height, color, alpha);
 }
 
 void d3d_draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, gs_scalar z)
@@ -459,3 +432,9 @@ void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 }
 
 }
+#undef get_sprite
+#undef get_sprite_v
+#undef get_sprite_null
+#undef get_subimg
+#undef rotx
+#undef roty
