@@ -86,6 +86,7 @@ template <class T> struct lua_table {
   void upsize(const size_t c)
   {
     dense.resize(c);
+    mx_size = c;
     //Copy sparse array values that are now within this reserve space.
     for (typename sparse_type::iterator it=sparse.begin(); it!=sparse.end();) {
       if (it->first >= c) {
