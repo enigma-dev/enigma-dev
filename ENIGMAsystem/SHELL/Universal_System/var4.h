@@ -56,7 +56,7 @@ struct variant
   enigma::rvt rval;
   std::string sval;
   int type;
-  
+
   operator int();
   operator bool();
   operator char();
@@ -70,9 +70,9 @@ struct variant
   operator long long();
   operator double();
   operator float();
-  
+
   operator std::string();
-  
+
   operator int() const;
   operator bool() const;
   operator char() const;
@@ -86,13 +86,13 @@ struct variant
   operator long long() const;
   operator double() const;
   operator float() const;
-  
+
   operator std::string() const;
-  
+
   variant();
   variant(const void *p);
   types_extrapolate_alldecc(variant)
-  
+
   types_extrapolate_alldec(variant& operator=)
   variant& operator=(const void* p);
   types_extrapolate_alldec(variant& operator+=)
@@ -100,13 +100,13 @@ struct variant
   types_extrapolate_alldec(variant& operator*=)
   types_extrapolate_alldec(variant& operator/=)
   types_extrapolate_alldec(variant& operator%=)
-  
+
   types_extrapolate_alldec(variant& operator<<=)
   types_extrapolate_alldec(variant& operator>>=)
   types_extrapolate_alldec(variant& operator&=)
   types_extrapolate_alldec(variant& operator|=)
   types_extrapolate_alldec(variant& operator^=)
-  
+
   #undef EVCONST
   #define EVCONST const
   types_extrapolate_alldec(variant operator+)
@@ -114,20 +114,20 @@ struct variant
   types_extrapolate_alldec(double  operator*)
   types_extrapolate_alldec(double  operator/)
   types_extrapolate_alldec(double  operator%)
-  
+
   types_extrapolate_alldec(long operator<<)
   types_extrapolate_alldec(long operator>>)
   types_extrapolate_alldec(long operator&)
   types_extrapolate_alldec(long operator|)
   types_extrapolate_alldec(long operator^)
-  
+
   #undef types_extrapolate_alldec
   #define types_extrapolate_alldec(prefix)\
    types_extrapolate_real_p  (prefix,;)\
    types_extrapolate_string_p(prefix,;)\
    prefix (const variant &x) const;\
    prefix (const var &x) const;
-  
+
   types_extrapolate_alldec(bool operator==)
   types_extrapolate_alldec(bool operator!=)
   types_extrapolate_alldec(bool operator>=)
@@ -136,14 +136,14 @@ struct variant
   types_extrapolate_alldec(bool operator<)
   #undef EVCONST
   #define EVCONST
-  
+
   char&     operator[] (int);
   variant&  operator++();
   double    operator++(int);
   variant&  operator--();
   double    operator--(int);
   variant&  operator*();
-  
+
   #undef EVCONST
   #define EVCONST const
   bool      operator!() EVCONST;
@@ -152,7 +152,7 @@ struct variant
   double    operator+() EVCONST;
   #undef EVCONST
   #define EVCONST
-  
+
   ~variant();
 };
 
@@ -165,9 +165,36 @@ struct variant
  prefix (variant x);
 
 struct var : variant {
+  using variant::operator+;
+  using variant::operator-;
+  using variant::operator*;
+  using variant::operator/;
+  using variant::operator%;
+  using variant::operator<;
+  using variant::operator>;
+  using variant::operator<<;
+  using variant::operator>>;
+  using variant::operator|;
+  using variant::operator^;
+  using variant::operator!;
+  using variant::operator~;
+
+  using variant::operator+=;
+  using variant::operator-=;
+  using variant::operator*=;
+  using variant::operator/=;
+  using variant::operator%=;
+  using variant::operator<=;
+  using variant::operator>=;
+  using variant::operator<<=;
+  using variant::operator>>=;
+  using variant::operator|=;
+  using variant::operator^=;
+  using variant::operator!=;
+
   lua_table<variant> array1d;
   lua_table<lua_table<variant>> array2d;
-  
+
   var() {}
   var(const var&) = default;
   var(variant value, size_t length, size_t height = 1):
@@ -240,10 +267,10 @@ types_binary_assign_extrapolate_declare(*, const variant&)
 types_binary_assign_extrapolate_declare(/, const variant&)
 types_binary_assign_extrapolate_declare(%, const variant&)
 
-types_binary_assign_extrapolate_declare(<<, const variant&) 
-types_binary_assign_extrapolate_declare(>>, const variant&) 
-types_binary_assign_extrapolate_declare(&,  const variant&) 
-types_binary_assign_extrapolate_declare(|,  const variant&) 
+types_binary_assign_extrapolate_declare(<<, const variant&)
+types_binary_assign_extrapolate_declare(>>, const variant&)
+types_binary_assign_extrapolate_declare(&,  const variant&)
+types_binary_assign_extrapolate_declare(|,  const variant&)
 types_binary_assign_extrapolate_declare(^,  const variant&)
 
 
