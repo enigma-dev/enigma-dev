@@ -55,6 +55,11 @@ static void iterate_overloads(
        iter != d->overloads.end(); iter++) {
     visit_overload(iter->second, min, max, varargs_t);
   }
+
+  for (definition_template* templateOverload : d->template_overloads) {
+    if (min > templateOverload->params.size()) min = templateOverload->params.size();
+    if (max < templateOverload->params.size()) max = templateOverload->params.size();
+  }
 }
 
 static int referencers_varargs_at(ref_stack &refs, jdi::definition *varargs_t) {
