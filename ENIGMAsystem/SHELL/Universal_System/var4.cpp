@@ -319,56 +319,6 @@ types_binary_extrapolate_real_p  (bool operator<,  const variant&, { return y > 
 types_binary_extrapolate_string_p(bool operator<,  const variant&, { return y > x;  })
 
 
-
-
-types_binary_assign_extrapolate_implement(+, const var&, )
-types_binary_assign_extrapolate_implement(-, const var&, )
-types_binary_assign_extrapolate_implement(*, const var&, )
-types_binary_assign_extrapolate_implement(/, const var&, )
-
-types_binary_bitwise_assign_extrapolate_implement(<<, const var&, )
-types_binary_bitwise_assign_extrapolate_implement(>>, const var&, )
-types_binary_bitwise_assign_extrapolate_implement(&,  const var&, )
-types_binary_bitwise_assign_extrapolate_implement(|,  const var&, )
-types_binary_bitwise_assign_extrapolate_implement(^,  const var&, )
-
-types_binary_extrapolate_real_p  (double operator+, const var&, {  return x + (*y).rval.d; })
-types_binary_extrapolate_string_p(string operator+, const var&, { terror(tstr); return x + (*y).sval; })
-types_binary_extrapolate_real_p  (double operator-, const var&, {  return x - (*y).rval.d; })
-types_binary_extrapolate_string_p(string operator-, const var&, { terrortrue(); return 0; })
-types_binary_extrapolate_real_p  (double operator*, const var&, {  return x * (*y).rval.d; })
-types_binary_extrapolate_string_p(string operator*, const var&, { terrortrue(); return 0; })
-types_binary_extrapolate_real_p  (double operator/, const var&, { div0c((*y).rval.d); return x / (*y).rval.d; })
-types_binary_extrapolate_string_p(string operator/, const var&, { terrortrue(); return 0; })
-types_binary_extrapolate_real_p  (double operator%, const var&, { div0c((*y).rval.d); return fmod(x, (*y).rval.d); })
-types_binary_extrapolate_string_p(string operator%, const var&, { terrortrue(); return 0; })
-
-types_binary_bitwise_extrapolate_real_p(<<, const var&,  )
-//types_binary_extrapolate_string_p      (string operator<<, const var&, { terrortrue(); return 0; })
-types_binary_bitwise_extrapolate_real_p(>>, const var&,  )
-//types_binary_extrapolate_string_p      (string operator>>, const var&, { terrortrue(); return 0; })
-types_binary_bitwise_extrapolate_real_p(&,  const var&,  )
-//types_binary_extrapolate_string_p      (string operator&,  const var&, { terrortrue(); return 0; })
-types_binary_bitwise_extrapolate_real_p(|,  const var&,  )
-//types_binary_extrapolate_string_p      (string operator|,  const var&, { terrortrue(); return 0; })
-types_binary_bitwise_extrapolate_real_p(^,  const var&,  )
-//types_binary_extrapolate_string_p      (string operator^,  const var&, { terrortrue(); return 0; })
-
-// I have no fucking idea why C++0x can't do this for me.
-types_binary_extrapolate_real_p  (bool operator==, const var&, { return y == x; })
-types_binary_extrapolate_string_p(bool operator==, const var&, { return y == x; })
-types_binary_extrapolate_real_p  (bool operator!=, const var&, { return y != x; })
-types_binary_extrapolate_string_p(bool operator!=, const var&, { return y != x; })
-types_binary_extrapolate_real_p  (bool operator>=, const var&, { return y <= x; })
-types_binary_extrapolate_string_p(bool operator>=, const var&, { return y <= x; })
-types_binary_extrapolate_real_p  (bool operator<=, const var&, { return y >= x; })
-types_binary_extrapolate_string_p(bool operator<=, const var&, { return y >= x; })
-types_binary_extrapolate_real_p  (bool operator>,  const var&, { return y < x;  })
-types_binary_extrapolate_string_p(bool operator>,  const var&, { return y < x;  })
-types_binary_extrapolate_real_p  (bool operator<,  const var&, { return y > x;  })
-types_binary_extrapolate_string_p(bool operator<,  const var&, { return y > x;  })
-
-
 /*
    Unary nonsense for either party
 */

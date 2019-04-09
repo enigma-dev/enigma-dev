@@ -169,9 +169,10 @@ struct var : variant {
   lua_table<lua_table<variant>> array2d;
   
   var() {}
-  var(const var&);
-  var(variant value, size_t length, size_t height = 1) {
-    
+  var(const var&) = default;
+  var(variant value, size_t length, size_t height = 1):
+      variant(value), array1d(value, length) {
+    for (size_t i = 1; i < height; ++i) array2d[i].fill(value, length);
   }
   template<typename T> var(const T &v): variant(v) {}
 
@@ -210,7 +211,22 @@ struct var : variant {
     if (row) return array2d[row].max_index();
     return array1d.max_index();
   }
-  
+
+  size_t dense_length() {
+    return array1d.dense_length();
+  }
+
+  const std::vector<variant> &dense_array_1d() {
+    *array1d = *this;
+    return array1d.dense_part();
+  }
+
+  template<typename T>
+  std::vector<T> to_vector() const {
+    return {array1d.dense_part().begin(),
+            array1d.dense_part().end()};
+  }
+
   ~var() {}
 };
 
@@ -249,42 +265,6 @@ types_binary_extrapolate_alldecce(bool, operator>=, const variant&)
 types_binary_extrapolate_alldecce(bool, operator<=, const variant&)
 types_binary_extrapolate_alldecce(bool, operator>,  const variant&)
 types_binary_extrapolate_alldecce(bool, operator<,  const variant&)
-
-
-/* Do the same for var
- *************************/
-
-types_binary_assign_extrapolate_declare(+, const var&)
-types_binary_assign_extrapolate_declare(-, const var&)
-types_binary_assign_extrapolate_declare(*, const var&)
-types_binary_assign_extrapolate_declare(/, const var&)
-types_binary_assign_extrapolate_declare(%, const var&)
-
-types_binary_assign_extrapolate_declare(<<, const var&) 
-types_binary_assign_extrapolate_declare(>>, const var&) 
-types_binary_assign_extrapolate_declare(&,  const var&) 
-types_binary_assign_extrapolate_declare(|,  const var&) 
-types_binary_assign_extrapolate_declare(^,  const var&)
-
-
-types_binary_extrapolate_alldecc(double, operator+, const var&)
-types_binary_extrapolate_alldecc(double, operator-, const var&)
-types_binary_extrapolate_alldecc(double, operator*, const var&)
-types_binary_extrapolate_alldecc(double, operator/, const var&)
-types_binary_extrapolate_alldecc(double, operator%, const var&)
-
-types_binary_bitwise_extrapolate_alldecc(operator<<, const var&)
-types_binary_bitwise_extrapolate_alldecc(operator>>, const var&)
-types_binary_bitwise_extrapolate_alldecc(operator&,  const var&)
-types_binary_bitwise_extrapolate_alldecc(operator|,  const var&)
-types_binary_bitwise_extrapolate_alldecc(operator^,  const var&)
-
-types_binary_extrapolate_alldecce(bool, operator==, const var&)
-types_binary_extrapolate_alldecce(bool, operator!=, const var&)
-types_binary_extrapolate_alldecce(bool, operator>=, const var&)
-types_binary_extrapolate_alldecce(bool, operator<=, const var&)
-types_binary_extrapolate_alldecce(bool, operator>,  const var&)
-types_binary_extrapolate_alldecce(bool, operator<,  const var&)
 
 #undef EVCONST
 #define EVCONST
