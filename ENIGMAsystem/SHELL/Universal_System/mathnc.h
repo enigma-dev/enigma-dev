@@ -106,7 +106,7 @@ namespace enigma_user
   inline int64_t int64(const var& x) { return int64(*x); }
 
   template<typename T>
-  inline ARITHMETIC_OPERATION(T, T() * T()) sqr(T x) { return x * x; }
+  inline T sqr(T x) { return x * x; }
   inline double logn(double n, double x) { return ::log(x)/::log(n); }
 
   inline double sind(double x)    { return ::sin(x   * M_PI / 180.0); }
