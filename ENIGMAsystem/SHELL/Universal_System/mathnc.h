@@ -106,7 +106,7 @@ namespace enigma_user
   inline int64_t int64(const var& x) { return int64(*x); }
 
   template<typename T>
-  inline T sqr(T x) { return x * x; }
+  inline ARITHMETIC_OPERATION(T, T() * T()) sqr(T x) { return x * x; }
   inline double logn(double n, double x) { return ::log(x)/::log(n); }
 
   inline double sind(double x)    { return ::sin(x   * M_PI / 180.0); }
@@ -122,10 +122,10 @@ namespace enigma_user
   inline double arctand2(double y, double x) { return ::atan2(y,x) * 180.0 / M_PI; }
 
   // Non-variadic (two-item) min/max
-  template<typename T, typename U> inline decltype(T() + U()) min(T x, U y) {
+  template<typename T, typename U> inline ARITHMETIC_OPERATION(T, T() + U()) min(T x, U y) {
     return y < x ? y : x;
   }
-  template<typename T, typename U> inline decltype(T() + U()) max(T x, U y) {
+  template<typename T, typename U> inline ARITHMETIC_OPERATION(T, T() + U()) max(T x, U y) {
     return y > x ? y : x;
   }
 
