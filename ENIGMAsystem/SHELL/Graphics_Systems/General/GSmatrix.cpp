@@ -102,8 +102,7 @@ bool is_vec4(const var& value) {
 }
 
 bool is_matrix(const var& value) {
-  return (value.array_len() == 16)
-      || (value.array_len() == 4 && value.array_height() == 4);
+  return (value.array_len() == 16);
 }
 
 var matrix_get(int type) {
