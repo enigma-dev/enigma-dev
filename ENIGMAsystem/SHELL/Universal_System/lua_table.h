@@ -151,7 +151,7 @@ template <class T> struct lua_table {
   }
 
   lua_table<T>(): mx_size(0) {}
-  lua_table<T>(const T &v, size_t len): dense(v, len), mx_size(len) {}
+  lua_table<T>(const T &v, size_t len): dense(len, v), mx_size(len) {}
   lua_table<T>(const lua_table<T> &x) {
     pick_up(x);
   }
