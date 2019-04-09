@@ -19,7 +19,6 @@ before_install:
     }
     trap finish EXIT
 
-
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
       sudo add-apt-repository -y ppa:mhier/libboost-latest;
