@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Dave "biggoron", Harijs Grinbergs
+*** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,15 +16,28 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#include "../General/OpenGLHeaders.h"
-#include "GLTextureStruct.h"
+#ifdef INCLUDED_FROM_SHELLMAIN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
 
-TextureStruct::TextureStruct(unsigned gtex): gltex(gtex) {
+#ifndef ENIGMA_GL_SURFACE_IMPL_H
+#define ENIGMA_GL_SURFACE_IMPL_H
 
-}
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSsurface_impl.h"
 
-TextureStruct::~TextureStruct() {
-  glDeleteTextures(1, &gltex);
-}
-*/
+namespace enigma {
+
+struct Surface : BaseSurface
+{
+  GLuint fbo;
+  GLuint depth_buffer;
+  GLuint stencil_buffer;
+  bool has_depth_buffer = false;
+  bool has_stencil_buffer = false;
+  bool write_only = true;
+};
+
+} // namespace enigma
+
+#endif //ENIGMA_GL_SURFACE_IMPL_H

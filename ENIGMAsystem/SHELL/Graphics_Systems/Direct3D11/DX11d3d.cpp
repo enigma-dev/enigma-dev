@@ -205,6 +205,8 @@ void d3d_set_clip_plane(bool enable)
 // ***** LIGHTS BEGIN *****
 #include <map>
 
+using std::map;
+
 struct posi { // Homogenous point.
     gs_scalar x;
     gs_scalar y;

@@ -51,7 +51,6 @@ namespace enigma_user {
 namespace enigma
 {
     extern int maxid;
-    extern int instancecount;
     extern int id_current;
     extern int objectcount;
 

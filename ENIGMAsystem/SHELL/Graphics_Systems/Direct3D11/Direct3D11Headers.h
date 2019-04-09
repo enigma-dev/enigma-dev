@@ -19,9 +19,6 @@
 #define ENIGMA_DIRECT3D11_HEADERS_H
 
 #include <d3d11.h>
-#include <cmath>
-#include <string>
-using namespace std;
 
 namespace enigma {
 

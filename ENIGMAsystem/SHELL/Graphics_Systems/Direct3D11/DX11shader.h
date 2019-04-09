@@ -18,6 +18,9 @@
 #ifndef ENIGMA_DX11SHADER_H
 #define ENIGMA_DX11SHADER_H
 
+#include <string>
+using std::string;
+
 namespace enigma_user
 {
 

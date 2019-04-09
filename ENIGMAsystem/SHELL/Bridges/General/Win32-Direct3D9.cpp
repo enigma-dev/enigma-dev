@@ -16,21 +16,19 @@
 **/
 
 #include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h" // for show_error()
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
+#include "Graphics_Systems/Direct3D9/DX9surface_impl.h"
 #include "Graphics_Systems/Direct3D9/Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 
 #include <windows.h>
-#include <windowsx.h>
 #include <d3d9.h>
-#include <string>
 
-using namespace std;
+using namespace enigma::dx9;
 
 namespace {
 
@@ -53,22 +51,24 @@ ContextManager* d3dmgr; // the pointer to the device class
 
 } // namespace dx9
 
-  extern bool forceSoftwareVertexProcessing;
-  bool Direct3D9Managed = true;
+extern HWND hWnd;
+extern bool forceSoftwareVertexProcessing;
 
   void OnDeviceLost() {
     d3dmgr->device->EndScene();
     if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
-    for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
-      (*it)->OnDeviceLost();
+    for (BaseSurface* surf : surfaces) {
+      if (!surf) continue;
+      ((Surface*)surf)->OnDeviceLost();
     }
   }
 
   void OnDeviceReset() {
     d3dmgr->device->BeginScene();
     if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
-    for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
-      (*it)->OnDeviceReset();
+    for (BaseSurface* surf : surfaces) {
+      if (!surf) continue;
+      ((Surface*)surf)->OnDeviceReset();
     }
   }
 
@@ -76,15 +76,10 @@ ContextManager* d3dmgr; // the pointer to the device class
     OnDeviceLost();
     HRESULT hr = d3dmgr->device->Reset(d3dpp);
     if (FAILED(hr)) {
-      MessageBox(
-        enigma::hWnd,
-        TEXT("Device Reset Failed"), TEXT("Error"),
-        MB_ICONERROR | MB_OK
-      );
-      return;  // should probably force the game closed
+      show_error("Direct3D 9 Device Reset Failed", true);
     }
-    // Reapply the stored render states and what not
-    d3dmgr->RestoreState();
+    // the normal, managed d3d 9.0 does not automatically restore render state
+    if (Direct3D9Managed) d3dmgr->RestoreState();
     OnDeviceReset();
   }
 
