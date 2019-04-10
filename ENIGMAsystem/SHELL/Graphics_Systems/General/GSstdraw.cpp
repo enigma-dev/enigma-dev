@@ -937,23 +937,21 @@ void draw_polygon_end(bool outline, bool allowHoles)
     }
   } else {
     if (currPoly.size() >= 3) {
-      //Self-intersecting polygons makes this much harder than "outline" mode; we need to make a call
-      //   to the platform-specific Graphics backend.
-      if (!enigma::fill_complex_polygon(currPoly, draw_get_color(), allowHoles)) {
-        //If drawing failed, try using a triangle fan as a backup. This will work for concave polygons only.
-        int color = draw_get_color();
-        gs_scalar alpha = draw_get_alpha();
+      //Self-intersecting polygons makes this much harder than "outline" mode
+      //Use a triangle fan as a backup for now. This will work for concave polygons only.
 
-        //Draw it.
-        draw_primitive_begin(pr_trianglefan);
-        for (std::list<enigma::PolyVertex>::const_iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
-          color = (it->color!=-1 ? it->color : color);
-          draw_vertex_color(it->x, it->y, color, alpha);
-        }
+      int color = draw_get_color();
+      gs_scalar alpha = draw_get_alpha();
 
-        //Close it.
-        draw_primitive_end();
+      //Draw it.
+      draw_primitive_begin(pr_trianglefan);
+      for (std::list<enigma::PolyVertex>::const_iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
+        color = (it->color!=-1 ? it->color : color);
+        draw_vertex_color(it->x, it->y, color, alpha);
       }
+
+      //Close it.
+      draw_primitive_end();
     }
   }
 
