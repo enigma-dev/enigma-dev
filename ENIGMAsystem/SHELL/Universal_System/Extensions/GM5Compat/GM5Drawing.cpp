@@ -22,6 +22,7 @@
 #include <vector>
 #include <list>
 #include <algorithm>
+#include <utility>
 #include <cstdio>
 
 #include "Graphics_Systems/General/GSstdraw.h"
@@ -30,17 +31,7 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 
 using std::vector;
-
-namespace {
-
-template <typename T>
-void swap(T& val1, T& val2){
-  T temp = val1;
-  val1 = val2;
-  val2 = temp;
-}
-
-} // namespace anonymous
+using std::swap;
 
 namespace enigma {
 
@@ -273,9 +264,9 @@ void draw_polygon_end(bool outline, bool allowHoles)
 
       //Draw it.
       draw_primitive_begin(pr_linestrip);
-      for (std::list<enigma::PolyVertex>::const_iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
-        color = (it->color!=-1 ? it->color : color);
-        draw_vertex_color(it->x, it->y, color, alpha);
+      for (auto v : currPoly) {
+        color = (v.color!=-1 ? v.color : color);
+        draw_vertex_color(v.x, v.y, color, alpha);
       }
 
       //Close it.
@@ -291,9 +282,9 @@ void draw_polygon_end(bool outline, bool allowHoles)
 
       //Draw it.
       draw_primitive_begin(pr_trianglefan);
-      for (std::list<enigma::PolyVertex>::const_iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
-        color = (it->color!=-1 ? it->color : color);
-        draw_vertex_color(it->x, it->y, color, alpha);
+      for (auto v : currPoly) {
+        color = (v.color!=-1 ? v.color : color);
+        draw_vertex_color(v.x, v.y, color, alpha);
       }
 
       //Close it.
@@ -324,10 +315,9 @@ void draw_polygon_end()
   int old_color = draw_get_color();
   draw_set_color(pen_color);
   enigma::PolyVertex lastPt = *(--cachedPoly.end());
-  for (std::list<enigma::PolyVertex>::iterator it = cachedPoly.begin(); it!=cachedPoly.end(); it++) {
-    enigma::PolyVertex currPt = *it;
-    draw_line_width(lastPt.x,lastPt.y, currPt.x,currPt.y , lwid);
-    lastPt = currPt;
+  for (auto v : cachedPoly) {
+    draw_line_width(lastPt.x,lastPt.y, v.x,v.y , lwid);
+    lastPt = v;
   }
   draw_set_color(old_color);
 }
