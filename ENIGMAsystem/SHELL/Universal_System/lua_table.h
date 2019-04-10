@@ -110,7 +110,6 @@ template <class T> struct lua_table {
       if (ind >= nsize) {
         return sparse[ind];
       }
-      dense.resize(ind + 1);
       upsize(ind + 1);
     }
     return dense[ind];
