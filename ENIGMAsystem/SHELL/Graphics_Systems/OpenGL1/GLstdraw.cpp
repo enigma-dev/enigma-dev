@@ -27,18 +27,6 @@
 #include <math.h>
 #include <stdio.h>
 
-//Proper calling convention is needed on Windows to prevent random crashing.
-//However, we assume that if CALLBACK is already defined then it is defined correctly.
-#ifndef CALLBACK
-#  if defined(__MINGW32__) || defined(__CYGWIN__)
-#    define CALLBACK __attribute__ ((__stdcall__))
-#  elif (defined(_M_MRX000) || defined(_M_IX86) || defined(_M_ALPHA) || defined(_M_PPC)) && !defined(MIDL_PASS)
-#    define CALLBACK __stdcall
-#  else
-#    define CALLBACK
-#  endif
-#endif
-
 namespace enigma_user
 {
 
