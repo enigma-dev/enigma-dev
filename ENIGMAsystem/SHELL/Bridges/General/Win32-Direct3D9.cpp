@@ -124,7 +124,6 @@ void EnableDrawing(void* handle) {
   d3dpp.BackBufferFormat = format;                            // Display format
   d3dpp.EnableAutoDepthStencil = TRUE;                        // Automatic depth stencil buffer
   d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;                // 32-bit zbuffer 24bits for depth 8 for stencil buffer
-
   // create a device class using this information and information from the d3dpp stuct
   DWORD behaviors = D3DCREATE_MIXED_VERTEXPROCESSING;
   if (forceSoftwareVertexProcessing) {
