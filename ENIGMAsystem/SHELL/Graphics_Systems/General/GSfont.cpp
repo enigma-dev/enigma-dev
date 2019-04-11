@@ -31,7 +31,7 @@
 
 #include <cmath>
 #include <string>
-#include <cstdint>
+#include <stdint.h>
 
 using namespace std;
 

@@ -30,7 +30,9 @@ using namespace std;
 #include "macros.h"
 #include <General/parse_basics.h>
 #include <General/debug_macros.h>
+
 using namespace jdip;
+using namespace parse_bacics::visible;
 
 macro_type::macro_type(string n, int ac): argc(ac), refc(1), name(n) {}
 macro_type::~macro_type() {}

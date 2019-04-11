@@ -7,7 +7,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -26,64 +26,22 @@
 #define _DEFINITION__H
 
 #include <General/quickreference.h>
-
-namespace jdi {
-  /** Flags given to a definition to describe its type simply and quickly. **/
-  enum DEF_FLAGS
-  {
-    DEF_TYPENAME =     1 <<  0, ///< This definition has template parameters attached.
-    DEF_NAMESPACE =    1 <<  1, ///< This definition can be used as a typename. This does not imply that it has a valid type; see DEF_TYPED.
-    DEF_CLASS =        1 <<  2, ///< This definition is a namespace.
-    DEF_ENUM =         1 <<  3, ///< This definition is a class or structure. 
-    DEF_UNION =        1 <<  4, ///< This definition is an enumeration of valued constants.
-    DEF_SCOPE =        1 <<  5, ///< This definition is an enumeration of valued constants.
-    DEF_TYPED =        1 <<  6, ///< This definition is a scope of some sort.
-    DEF_FUNCTION =     1 <<  7, ///< This definition contains a type and referencer list. Used with DEF_TYPENAME to mean TYPEDEF.
-    DEF_VALUED =       1 <<  8, ///< This definition is a function containing a list of zero or more overloads.
-    DEF_DEFAULTED =    1 <<  9, ///< This definition has a default expression attached.
-    DEF_EXTERN =       1 << 10, ///< This definition is a parameter of a template.
-    DEF_TEMPLATE =     1 << 11, ///< This definition was declared with the "extern" flag.
-    DEF_TEMPPARAM =    1 << 12, ///< This definition belongs to a list of template parameters, and is therefore abstract.
-    DEF_HYPOTHETICAL = 1 << 13, ///< This definition is a purely hypothetical template type, eg, template_param::typename type;
-    DEF_TEMPSCOPE =    1 << 14, ///< This definition is filling in for a scope; it contains a source definition which is not really a scope.
-    DEF_PRIVATE =      1 << 15, ///< This definition was declared as a private member.
-    DEF_PROTECTED =    1 << 16, ///< This definition was declared as a protected member.
-    DEF_INCOMPLETE =   1 << 17, ///< This definition was declared but not implemented.
-    DEF_ATOMIC =       1 << 18  ///< This is a global definition for objects of a fixed size, such as primitives.
-  };
-  
-  struct definition;
-  struct definition_typed;
-  struct function_overload;
-  struct definition_function;
-  struct definition_valued;
-  struct definition_scope;
-  struct definition_class;
-  struct definition_enum;
-  struct definition_template;
-  struct definition_atomic;
-  struct definition_tempscope;
-  struct definition_hypothetical;
-  
-  /// Structure for inserting declarations into a scope.
-  struct decpair {
-    quick::double_pointer<definition> def; ///< The definition that was there previously, or that was inserted if it did not exist.
-    bool inserted; ///< True if the given definition was inserted, false otherwise.
-    /** Construct with data.
-      @param def        A pointer to the pointer to the definition that exists under the previously given key.
-      @param inserted   True if a new entry was created under the given key, false if the key-value was left unchanged.
-    */
-    decpair(definition* *def, bool inserted);
-  };
-}
-
+#include "definition_forward.h"
 
 #include <map>
+#include <set>
 #include <string>
+#include <cstddef>
 #include <vector>
-#include <iostream>
-using namespace std;
-typedef size_t pt;
+#include <deque>
+using std::map;
+using std::set;
+using std::vector;
+using std::deque;
+using std::pair;
+
+#include <Storage/arg_key.h>
+#include <API/error_context.h>
 
 namespace jdi {
   /**
@@ -99,13 +57,14 @@ namespace jdi {
     definition_scope* parent; ///< The definition of the scope in which this definition is declared.
                         ///< Except for the global scope of the context, this must be non-NULL.
     
-    /// Map type to contain definitions to remap along with the definition with which it will be replaced
-    typedef map<definition*, definition*> remap_set;
+    virtual string kind() const; ///< Return the kind of this definition; an identifier for the class.
     
     /** Duplicate this definition, whatever it may contain.
         The duplicated version must be freed separately.
+        @param n A remap_set containing any definitions to replace in this duplication.
+                 This map will grow as more definitions are spawned recursively.
         @return A pointer to a newly-allocated copy of this definition. **/
-    virtual definition* duplicate(remap_set &n);
+    virtual definition* duplicate(remap_set &n) const;
     
     /** Re-map all uses of each definition used as a key in the remap_set to the
         corresponding definition used as the value. For example, if the given map
@@ -113,10 +72,10 @@ namespace jdi {
         contained in this definition or its descendents will be replaced with a
         double. This can be used to eliminate references to a particular definition
         before free, or to instantiate templates without hassle. **/
-    virtual void remap(const remap_set& n);
+    virtual void remap(remap_set &n, const error_context &errc);
     
     /** Return the size of this definition. **/
-    virtual size_t size_of();
+    virtual value size_of(const error_context &errc);
     
     /** Compare two definitions, returning a comparison sign.
         @param d1  The first definition to compare.
@@ -131,7 +90,10 @@ namespace jdi {
         @param indent  The indent, in spaces, to place before each line printed.
         @return Returns a string representation of everything in this definition.
     **/
-    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
+    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
+    
+    /// Return the qualified ID of this definition, eg, ::std::string.
+    string qualified_id() const;
     
     #ifdef CUSTOM_MEMORY_MANAGEMENT
     void *operator new(size_t sz);
@@ -155,7 +117,9 @@ namespace jdi {
 #include <Storage/value.h>
 #include <Storage/full_type.h>
 #include <Storage/references.h>
+#include <Parser/context_parser.h>
 #include <API/error_reporting.h>
+#include <API/error_context.h>
 #include <API/AST.h>
 
 namespace jdi {
@@ -170,90 +134,81 @@ namespace jdi {
     ref_stack referencers; ///< Any referencers modifying the type, such as *, &, [], or (*)().
     unsigned int modifiers; ///< Flags such as long, const, unsigned, etc, as a bitmask. These can be looked up in \c builtin_decls_byflag.
     
-    virtual definition* duplicate(remap_set &n);
-    virtual void remap(const remap_set &n);
-    virtual size_t size_of();
-    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
+    virtual string kind() const;
+    virtual definition* duplicate(remap_set &n) const;
+    virtual void remap(remap_set &n, const error_context &errc);
+    virtual value size_of(const error_context &errc);
+    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
     
-    /// Construct with all information. Consumes the given \c ref_stack.
     definition_typed(string name, definition* p, definition* tp, unsigned int typeflags, int flags = DEF_TYPED);
-    definition_typed(string name, definition* p, definition* tp, ref_stack &rf, unsigned int typeflags, int flags = DEF_TYPED);
+    /// Construct with all information. Consumes the given \c ref_stack.
+    definition_typed(string name, definition* p, definition* tp, ref_stack *rf, unsigned int typeflags, int flags = DEF_TYPED);
+    /// Construct without consuming a ref_stack.
+    definition_typed(string name, definition* p, definition* tp, const ref_stack &rf, unsigned int typeflags, int flags = DEF_TYPED);
+    /// Convenience ctor
+    definition_typed(string name, definition* p, const full_type &tp, int flags = DEF_TYPED);
     
     virtual ~definition_typed();
   };
   
-  /** Structure containing template arguments; can be used as the key in an std::map. **/
-  class arg_key {
-  public:
-    enum ak_type { AKT_NONE, AKT_FULLTYPE, AKT_VALUE };
-    /** Improvised C++ Union of full_type and value. */
-    struct node {
-      struct antialias {
-        char data[
-          (((sizeof(full_type) > sizeof(value))? sizeof(full_type) : sizeof(value)) + sizeof(char) - 1)
-          /sizeof(char)
-        ];
-      } data;
-      ak_type type;
-      
-      inline const full_type& ft() const { return *(full_type*)&data; }
-      inline const value& val() const { return *(value*)&data; }
-      inline full_type& ft() { return *(full_type*)&data; }
-      inline value& val() { return *(value*)&data; }
-      node &operator= (const node& other);
-      
-      inline node(): type(AKT_NONE) {}
-      ~node();
-    };
+  /// Structure to augment an arg_key when choosing the correct specialization
+  struct spec_key {
+    /** This is an array of counts of uses of arguments in an arg_key in a template specialization.
+        Each count is followed in memory by the indices of the parameters the argument was used in.
+        For instance, this code:
+        
+           template<int a, int b, int c> struct x<a, a, b, c, b, b> { .. } 
+        
+        Produces this arg_inds:
+        
+           { {2, 0,1}, {1, 3}, {3, 2,4,5} }
+        
+        The argument `a' occurs two times: parameters 0 and 1.
+        The argument `b' occurs one time: parameter 3.
+        The argument `c' occurs three times: parameters 2, 4, and 5.
+    */
+    unsigned **arg_inds;
+    /// The length of the arg_inds array.
+    unsigned ind_count;
+    /// The maximum number of parameters passed the same argument
+    unsigned max_param;
     
-    private:
-      /// An array of all our values
-      node *values;
-      /// A pointer past our value array
-      node *endv;
-      
-    public:
-      static definition abstract; ///< A sentinel pointer marking that this parameter is still abstract.
-      /// A comparator to allow storage in a map.
-      bool operator<(const arg_key& other) const;
-      /// A method to prepare this instance for storage of parameter values for the given template.
-      void mirror(definition_template* temp);
-      /// A fast function to assign to our list at a given index, consuming the given type.
-      void swap_final_type(size_t argnum, full_type &type);
-      /// A less fast function to assign to our list at a given index, copying the given type.
-      void put_final_type(size_t argnum, const full_type &type);
-      /// A slower function to put the most basic type representation down, consuming the given type
-      void swap_type(size_t argnum, full_type &type);
-      /// An even slower function to put the most basic type representation down, copying the given starting type
-      void put_type(size_t argnum, const full_type &type);
-      /// A quick function to put a value at a given index
-      void put_value(size_t argnum, const value& val);
-      /// A quick function to grab the type at a position
-      node &operator[](int i) const { return values[i]; }
-      /// A quick function to return an immutable pointer to the first parameter
-      inline node* begin() { return values; }
-      /// A quick function to return a pointer past the end of our list
-      inline node* end() { return endv; }
-      /// Default constructor; mark values NULL.
-      arg_key();
-      /// Construct with a size, reserving sufficient memory.
-       arg_key(size_t n);
-      /// Construct a copy.
-      arg_key(const arg_key& other);
-      /// Construct from a ref_stack.
-      arg_key(const ref_stack& refs);
-      /// Destruct, freeing items.
-      ~arg_key();
+    /** Calculates the merit of an arg_key to this spec_key; that is, returns how well it matches,
+        which is based on the greatest number of parameter matches for one argument.
+      @return Returns the calculated merit; 0 marks incompatibility. */
+    int merit(const arg_key &k);
+    /** Construct from a parameter count of a particular specialization, and the parameter count of the original.
+        @param big_count    The parameter count of the specialization.
+        @param small_count  The parameter count of the specialization.
+    */
+    spec_key(size_t big_count, size_t small_count);
+    /* *
+      Construct from a template's parameter list and an arg_key containing the specialization.
+      @param special_template    The template whose parameters are used in the given key.
+      @param specialization_key  The arg_key read in from the specialization's parameters.
+                                 template<not this one> class my_specialized_class<this one> {};
+    * /
+    spec_key(const definition_template *special_template, const arg_key& specialization_key);*/
+    /** Construct a new argument key from which to instantiate this specialization. */
+    arg_key get_key(const arg_key &source_key);
+    /// Compare to another key to check if they mean the same thing.
+    bool same_as(const spec_key &other);
+    /// Destruct, freeing array.
+    ~spec_key();
+    
+    spec_key(const spec_key&, bool);
+    private: spec_key(const spec_key&);
   };
   
-  /**
-    @struct jdi::function_overload
-    A structure detailing an alternate overload of a function without using too much memory.
-  **/
-  struct function_overload {
-    full_type type; ///< The non-null return type of this overload.
-    string declaration; ///< The full prototype for the function.
-    function_overload *duplicate(); ///< Make a copy
+  struct definition_overload: definition_typed {
+    void *implementation; ///< The implementation of this function as harvested by an external system.
+    
+    virtual string kind() const;
+    virtual definition* duplicate(remap_set &n) const;
+    virtual void remap(remap_set &n, const error_context &errc);
+    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
+    
+    definition_overload(string name, definition* p, definition* tp, const ref_stack &rf, unsigned int typeflags, int flags = DEF_FUNCTION);
   };
   
   /**
@@ -261,38 +216,40 @@ namespace jdi {
     A piece of a definition specifically for functions.
     The class is based on implements a method of storing overload information.
   **/
-  struct definition_function: definition_typed {
-    virtual definition* duplicate(remap_set &n);
-    virtual void remap(const remap_set &n);
-    virtual size_t size_of();
-    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
-    
-    typedef map<arg_key, definition_function*> overload_map;
-    typedef overload_map::iterator overload_iter;
+  struct definition_function: definition {
+    typedef map<arg_key, definition_overload*> overload_map; ///< The map type used for storing overloads.
+    typedef overload_map::iterator overload_iter; ///< An iterator type for \c overload_map.
+    typedef overload_map::const_iterator overload_citer; ///< An iterator type for \c overload_map.
     
     overload_map overloads; ///< Standard overloads, checked before template overloads.
     vector<definition_template*> template_overloads; ///< Array of reference stacks for each overload of this function.
-    void *implementation; ///< The implementation of this function as harvested by an external system.
+    
+    virtual string kind() const;
+    virtual definition* duplicate(remap_set &n) const;
+    virtual void remap(remap_set &n, const error_context &errc);
+    virtual value size_of(const error_context &errc);
+    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
     
     /** Function to add the given definition as an overload if no such overload
         exists, or to merge it in (handling any errors) otherwise.
-        @param key    The arg_key structure to consume, representing the parameter combination.
-        @param ovrl   The definition representing the new overload; this definition will
-                      belong to the system after you pass it.
-        @param errtok Token to facilitate error reporting.
-        @param herr   Error handler to report problems to.
+        @param tp        The full_type giving the return type and parameters.
+        @param addflags  Any additional flags to be assigned to the overload.
+        @param herr      Error handler to report problems to.
         @return Returns the final definition for the requested overload.
     */
-    definition *overload(arg_key &key, definition_function* ovrl, error_handler *herr);
+    definition_overload *overload(const full_type &tp, unsigned addflags, error_handler *herr);
+    definition_overload *overload(definition* tp, const ref_stack &rf, unsigned int typeflags, unsigned addflags, void *implementation, error_handler *herr);
     
     /** Function to add the given definition as a template overload
         exists, or to merge it in (handling any errors) otherwise.
         @param ovrl  The template definition representing the new overload; this definition
                      will belong to the system after you pass it.
+        @param herr  An error handler to which errors will be reported.
     */
-    void overload(definition_template* ovrl);
+    void overload(definition_template* ovrl, error_handler *herr);
     
-    definition_function(string name, definition* p, definition* tp, ref_stack &rf, unsigned int typeflags, int flags = DEF_FUNCTION);
+    definition_function(string name, definition* p, definition* tp, const ref_stack &rf, unsigned int typeflags, int flags = DEF_FUNCTION); ///< Create a function with one overload, created from the given ref_stack.
+    definition_function(string name, definition* p, int flags = DEF_FUNCTION); ///< Create a function which has no prototypes/overloads; it is impossible to call this function.
     virtual ~definition_function();
   };
   
@@ -305,10 +262,11 @@ namespace jdi {
     value value_of; ///< The constant value of this definition.
     definition_valued(); ///< Default constructor; invalidates value.
     
-    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
+    virtual string kind() const;
+    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
+    virtual definition* duplicate(remap_set &n) const;
     
-    //definition_valued(string vname, definition *parnt, definition* type, unsigned int flags, value &val); ///< Construct with a value and type.
-    definition_valued(string vname, definition *parnt, definition* type, unsigned int modifiers, unsigned int flags, value &val); ///< Construct with a value and type.
+    definition_valued(string vname, definition *parnt, definition* type, unsigned int modifiers, unsigned int flags, const value &val); ///< Construct with a value and type.
   };
   
   /**
@@ -338,6 +296,34 @@ namespace jdi {
     };
     /** Add a namespace to the using list. This can technically be used on any scope. **/
     using_node *use_namespace(definition_scope* scope);
+    
+    /// This is a map of structures declared in this scope, which is needed to emulate C's ability
+    /// to have an object and structure by the same name. C++ extends this ability by allowing the
+    /// behavior in any scope.
+    map<string, definition*> c_structs;
+    /** Function to insert into c_structs by the rules of definition_scope::declare.
+        @param name  The name of the definition to declare.
+        @param def   Pointer to the definition being declared, if one is presently available.
+    */
+    decpair declare_c_struct(string name, definition* def = NULL);
+    
+    /// A structure for keeping a pointer to a declaration.
+    struct dec_order_g { virtual definition *def() = 0; virtual ~dec_order_g() {} };
+    struct dec_order_defiter: dec_order_g {
+      defiter it;
+      dec_order_defiter(defiter i): it(i) {}
+      virtual definition *def() { return it->second; }
+      ~dec_order_defiter() {}
+    };
+    
+    typedef deque<dec_order_g*> ordeque;
+    typedef ordeque::iterator orditer;
+    typedef ordeque::const_iterator orditer_c;
+    
+    /// A deque listing all declaraions (and dependent object references) in this scope, in order.
+    /// May contain duplicates.
+    ordeque dec_order;
+    
     /** Remove a previously added namespace from our using list. **/
     void unuse_namespace(using_node *ns);
     /** Add a namespace to the using list. This can technically be used on any scope. **/
@@ -348,12 +334,12 @@ namespace jdi {
     /** Relinquish all content to another definition. **/
     void dump(definition_scope* to);
     /** Copy content from another definition. **/
-    void copy(const definition_scope* from);
+    void copy(const definition_scope* from, remap_set &n);
     /** Swap content with another definition. **/
     void swap(definition_scope* with);
     
     /** Look up a \c definition* given its identifier.
-        @param name  The identifier by which the definition can be referenced. This is NOT qualified!
+        @param name  The identifier by which the definition can be referenced. This is NOT qualified! If you have a qualified ID, break it into tokens and ask read_qualified_id, or parse it yourself.
         @return  If found, a pointer to the definition with the given name is returned. Otherwise, NULL is returned.
     **/
     virtual definition* look_up(string name);
@@ -369,12 +355,43 @@ namespace jdi {
         @param name  The identifier by which the definition can be referenced. This is NOT qualified!
         @return  If found, a pointer to the definition with the given name is returned. Otherwise, NULL is returned.
     **/
-    definition* find_local(string name);
+    virtual definition* find_local(string name);
+    /** Same as find_local, except called when failure to retrieve a local will result in an error.
+        This call may still fail; the system will just "try harder."
+        Used so definition_hypothetical can return another definition_hypothetical.
+        @param name  The identifier by which the definition can be referenced. This is NOT qualified!
+        @return  If found, a pointer to the definition with the given name is returned. Otherwise, NULL is returned.
+    **/
+    virtual definition* get_local(string name);
     
-    virtual definition* duplicate(remap_set &n);
-    virtual void remap(const remap_set &n);
-    virtual size_t size_of();
-    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
+    /** Wrapper around `declare()` which overloads a function, creating it if it does not exist.
+        If the function already exists, an overload will be created for it.
+        If the overload already exists, its pointer is returned.
+        @param name   The function name.
+        @param tp     The return type and parameters of the overload to add.
+        @param flags  Flags to assign to this overload, such as DEF_PRIVATE or DEF_VIRTUAL.
+        @param errtok A token referenced for error reporting purposes.
+        @param herr   An error handler to receieve errors.
+        @return Returns the definition_overload corresponding to the overload with the given parameters, or NULL if an error occurred.
+    */
+    definition_overload *overload_function(string name, full_type &tp, unsigned flags, const jdip::token_t& errtok, error_handler *herr);
+    /** Function to add the given definition as a template overload
+        exists, or to merge it in (handling any errors) otherwise.
+        @param name   The function name.
+        @param ovrl   The template definition representing the new overload; this definition
+                      will belong to the system after you pass it.
+        @param flags  Flags to assign to this overload, such as DEF_PRIVATE or DEF_VIRTUAL.
+        @param errtok A token referenced for error reporting purposes.
+        @param herr   An error handler to which errors will be reported.
+        @return Returns the definition_function to which the overload was added, or NULL if an error occurred.
+    */
+    definition_function *overload_function(string name, definition_template* ovrl, unsigned flags, const jdip::token_t& errtok, error_handler *herr);
+    
+    virtual string kind() const;
+    virtual definition* duplicate(remap_set &n) const;
+    virtual void remap(remap_set &n, const error_context &errc);
+    virtual value size_of(const error_context &errc);
+    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
     
     /** Default constructor. Only to be used for global! **/
     definition_scope();
@@ -404,11 +421,6 @@ namespace jdi {
     An extension of \c jdi::definition_scope for classes and structures, which can have ancestors.
   **/
   struct definition_class: definition_scope {
-    virtual definition* duplicate(remap_set &n);
-    virtual void remap(const remap_set &n);
-    virtual size_t size_of();
-    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
-    
     /// Simple structure for storing an inheritance type and the \c definition* of an ancestor.
     struct ancestor {
       unsigned protection; ///< The protection level of this inheritance, as one of the DEF_ constants, or 0 for public.
@@ -417,9 +429,32 @@ namespace jdi {
       ancestor(); ///< Default constructor for vector.
     };
     
+    /// Ancestors of this structure or class
+    vector<ancestor> ancestors;
+    /// This tells us if we're an instance or specialization of some template.
+    definition_template *instance_of;
+    
+    /// A collection of all our friends.
+    set<definition*> friends;
+    
+    virtual string kind() const;
+    virtual definition* duplicate(remap_set &n) const;
+    virtual void remap(remap_set &n, const error_context &errc);
+    virtual value size_of(const error_context &errc);
+    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
+    
     virtual definition* look_up(string name); ///< Look up a definition in this class (including its ancestors).
+    virtual definition* find_local(string name);
+    /** Same as find_local, except called when failure to retrieve a local will result in an error.
+        This call may still fail; the system will just "try harder." In this case, that means returning
+        the constructor definition, named @c constructor_name, when asked for an identifier by the same name.
+        Used so definition_hypothetical can return another definition_hypothetical.
+        @param name  The identifier by which the definition can be referenced. This is NOT qualified!
+        @return  If found, a pointer to the definition with the given name is returned. Otherwise, NULL is returned.
+    **/
+    virtual definition* get_local(string name);
     virtual decpair declare(string name, definition* def = NULL); ///< Declare a definition by the given name in this scope.
-    vector<ancestor> ancestors; ///< Ancestors of this structure or class
+    
     definition_class(string classname, definition_scope* parent, unsigned flags = DEF_CLASS | DEF_TYPENAME);
   };
   
@@ -428,10 +463,11 @@ namespace jdi {
     An extension of \c jdi::definition_scope for unions, which have a unified tyoe and unique sizeof() operator.
   **/
   struct definition_union: definition_scope {
-    virtual definition* duplicate(remap_set &n);
-    virtual void remap(const remap_set &n);
-    virtual size_t size_of();
-    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
+    virtual string kind() const;
+    virtual definition* duplicate(remap_set &n) const;
+    virtual void remap(remap_set &n, const error_context &errc);
+    virtual value size_of(const error_context &errc);
+    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
     
     definition_union(string classname, definition_scope* parent, unsigned flags = DEF_CLASS | DEF_UNION | DEF_TYPENAME);
   };
@@ -440,14 +476,29 @@ namespace jdi {
     @struct jdi::definition_enum
     An extension of \c jdi::definition for enums, which contain mirrors of members in the parent scope.
   **/
-  struct definition_enum: definition_typed {
-    virtual definition* duplicate(remap_set &n);
-    virtual void remap(const remap_set &n);
-    virtual size_t size_of();
-    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
+  struct definition_enum: definition_class {
+    /// A small structure for storing definition_value definitions for each constant, plus an AST if the constant
+    /// could not be evaluated at its occurrence (sometimes the case with templates).
+    struct const_pair {
+      definition_valued* def; ///< The definition generated for the constant.
+      AST* ast; ///< If needed, an AST to allow re-evaluating the value expression later.
+      const_pair(definition_valued *d, AST *a): def(d), ast(a) {} ///< Full constructor.
+    };
     
-    definition_scope::defmap constants;
+    /// The constants contained in this enum, in order.
+    vector<const_pair> constants;
+    
+    virtual string kind() const;
+    virtual definition* duplicate(remap_set &n) const;
+    virtual void remap(remap_set &n, const error_context &errc);
+    virtual value size_of(const error_context &errc);
+    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
+    
+    definition *type; ///< The type of the constants in this enum; a cast to this type is valid but not favored (in overload resolution).
+    unsigned modifiers; ///< Modifiers to our type, namely, unsigned.
+    
     definition_enum(string classname, definition_scope* parent, unsigned flags = DEF_ENUM | DEF_TYPENAME);
+    ~definition_enum();
   };
   
   /**
@@ -455,37 +506,61 @@ namespace jdi {
     A piece of a definition for anything with template parameters.
     This class can be used alongside structs, classes, and functions.
   **/
-  struct definition_template: definition {
+  struct definition_template: definition_scope {
     /** The definition to which template parameters here contained are applied. **/
     definition* def;
-    /** A list of template parameters or arguments, as typedefs.
-        The definition pointed to by this vector must be a typedef.
-        
-        If the typedef is to NULL, the type is completely abstract. Otherwise,
-        if the \c DEF_DEFAULTED flag is set, the type being pointed to is the
-        default for this template parameter. If the type is non-null and this
-        flag is not set, then this parameter has been specified in a (partial)
-        instantiation of the parent function/class (the definition containing
-        the vector).
-    **/
-    vector<definition*> params;
     
-    virtual definition* duplicate(remap_set &n);
-    virtual void remap(const remap_set &n);
-    virtual size_t size_of();
-    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
+    typedef vector<definition_tempparam*> pvector;
+    typedef pvector::iterator piterator;
+    typedef pvector::const_iterator pciterator;
+    pvector params;
     
-    typedef map<arg_key,definition_template*> specmap; ///< Map type for specializations
-    typedef specmap::iterator speciter; ///< Map iterator type for specializations
+    /// Class representing a single template specialization. Stored in a list of
+    /// specializations which is mapped by arg_key fitting.
+    struct specialization {
+      spec_key key;
+      arg_key filter;
+      definition_template *spec_temp;
+      //specialization(definition_template *stemp, const arg_key &specialization_key):
+      //  key(stemp, specialization_key), spec_temp(stemp) {}
+      specialization(size_t big_count, size_t small_count, definition_template* spect):
+        key(big_count, small_count), filter(), spec_temp(spect) {}
+      specialization(const specialization&);
+      ~specialization();
+    };
     
-    typedef map<arg_key,definition*> instmap; ///< Map type for instantiations
+    /// Look up a specialization fitting an arg_key.
+    /// @param key  The key to find a specialization for.
+    /// @return  The best-fit specialization, or NULL if none was found.
+    specialization *find_specialization(const arg_key &key) const;
+    
+    typedef vector<specialization*> speclist; ///< List of specializations fitting a certain abstracted arg_key
+    typedef speclist::iterator speciter; ///< Map iterator type for specializations
+    typedef speclist::const_iterator speciter_c; ///< Constant map iterator type for specializations
+    
+    struct instantiation {
+      definition* def;
+      vector<definition*> parameter_defs;
+      instantiation(): def(NULL), parameter_defs() {}
+      ~instantiation();
+      private: instantiation(const instantiation&);
+    };
+    
+    typedef map<arg_key, instantiation*> instmap; ///< Map type for instantiations
     typedef instmap::iterator institer; ///< Map iterator type for instantiations
     
     typedef vector<definition_hypothetical*> deplist; ///< Dependent member liat
     typedef deplist::iterator depiter; ///< Dependent member iterator
     
+    struct dec_order_hypothetical: dec_order_g {
+      definition_hypothetical *hyp;
+      dec_order_hypothetical(definition_hypothetical *h): hyp(h) {}
+      virtual definition *def();
+      ~dec_order_hypothetical() {}
+    };
+    
     /** A map of all specializations **/
-    specmap specializations;
+    speclist specializations;
     /** A map of all existing instantiations **/
     instmap instantiations;
     /** A map of all dependent members of our template parameters */
@@ -493,14 +568,15 @@ namespace jdi {
     
     /** Instantiate this template with the values given in the passed key.
         If this template has been instantiated previously, that instantiation is given.
-        @param key  The \c arg_key structure containing the template parameter values to use. **/
-    definition *instantiate(arg_key& key);
-    /** Specialize this template with the values given in the passed key.
-        If the specialization exists, it is returned. Otherwise, a new specialization
-        is created with the flag DEF_INCOMPLETE to signify that it contains no unique definition.
-        @param key  The \c arg_key structure containing the template parameter values to use.
-        @param ts   The temporary scope allocated to store the template. **/
-    definition_template *specialize(arg_key& key, definition_tempscope* ts);
+        @param key   The \c arg_key structure containing the template parameter values to use.
+        @param errc  The \c error_context to which any problems will be reported. **/
+    definition *instantiate(const arg_key& key, const error_context &errc);
+    
+    virtual string kind() const;
+    virtual definition* duplicate(remap_set &n) const;
+    virtual void remap(remap_set &n, const error_context &errc);
+    virtual value size_of(const error_context &errc);
+    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
     
     /** Construct with name, parent, and flags **/
     definition_template(string name, definition *parent, unsigned flags);
@@ -509,37 +585,58 @@ namespace jdi {
   };
   
   /**
+    @struct jdi::definition_tempparam
+    A definition inheriting from definition_class, which is meant to represent a template parameter. Definitions in this
+    class are considered hypothetical; they must exist in the type 
+  */
+  struct definition_tempparam: definition_class {
+    AST *default_assignment;
+    full_type integer_type;
+    bool must_be_class; ///< Denotes to the compiler that this template parameter was used in a way only a class can be used (such as inheritance or member access).
+    
+    /** Construct with default information.
+      @param name   Some unique key name for this scope.
+      @param parent The scope above this one.
+      @param flags  The additional flag data about this scope. */
+    definition_tempparam(string name, definition_scope* parent, unsigned flags = DEF_TEMPPARAM | DEF_DEPENDENT);
+    /** Construct with default information.
+      @param name   Some unique key name for this scope.
+      @param parent The scope above this one.
+      @param defval The default value given to this parameter, read in as an AST to enable it to depend on other parameters.
+      @param flags  The additional flag data about this scope. */
+    definition_tempparam(string name, definition_scope* parent, AST* defval, unsigned flags = DEF_TEMPPARAM | DEF_DEPENDENT);
+    /** Construct with default information.
+      @param name    Some unique key name for this scope.
+      @param parent  The scope above this one.
+      @param inttype The integer type used if this template parameter is instead a numeric constant.
+      @param defval  The default value given to this parameter, read in as an AST to enable it to depend on other parameters.
+      @param flags   The additional flag data about this scope. */
+    definition_tempparam(string name, definition_scope* parent, full_type &inttype, AST* defval = NULL, unsigned flags = DEF_TEMPPARAM | DEF_DEPENDENT);
+    
+    virtual string kind() const;
+    virtual definition* duplicate(remap_set &n) const;
+    virtual void remap(remap_set &n, const error_context &errc);
+    
+    virtual definition* look_up(string name); ///< Look up a definition in the parent of this scope (skip this scope). This function will never be used by the system.
+    virtual decpair declare(string name, definition* def = NULL); ///< Declare a definition by the given name in this scope. The definition will be marked HYPOTHETICAL, and the \c must_be_class flag will be set.
+    virtual definition* get_local(string name); ///< Behaves identically to declare if the given name does not exist, or else returns it. In either case, the returned definition will be HYPOTHETICAL.
+    
+    ~definition_tempparam();
+  };
+  
+  /**
     @struct jdi::definition_atomic
     A definition for atomic types.
   */
   struct definition_atomic: definition_scope {
     definition* duplicate(remap_set &n);
-    void remap(const remap_set &n);
-    size_t size_of();
-    string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
+    
+    string kind() const;
+    void remap(remap_set &n, const error_context &errc);
+    value size_of(const error_context &errc);
+    string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
     size_t sz;
     definition_atomic(string n,definition* p,unsigned int f, size_t size);
-  };
-  
-  /**
-    @struct jdi::definition_tempscope
-    A class which can be used as a temporary scope with a definition attached.
-  */
-  struct definition_tempscope: definition_scope {
-    definition *source; ///< The definition for which this subscope was created.
-    bool referenced; ///< Whether this->source has been consumed by another object.
-    /** Construct with default information.
-      @param name   Some unique key name for this scope.
-      @param parent The scope above this one.
-      @param flags  The additional flag data about this scope.
-      @param source The definition with which this scope is affiliated, however loosely. */
-    definition_tempscope(string name, definition* parent, unsigned flags, definition *source);
-    
-    virtual definition* duplicate(remap_set &n);
-    virtual void remap(const remap_set &n);
-    
-    virtual definition* look_up(string name); ///< Look up a definition in the parent of this scope (skip this temp scope).
-    virtual decpair declare(string name, definition* def = NULL); ///< Declare a definition by the given name in this scope.
   };
   
   /**
@@ -548,11 +645,17 @@ namespace jdi {
     depends on an abstract parent or scope.
   */
   struct definition_hypothetical: definition_class {
-    AST *def;
-    virtual definition* duplicate(remap_set &n);
-    virtual void remap(const remap_set &n);
-    virtual size_t size_of();
-    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
+    AST *def; ///< The expression this definition represents.
+    jdip::context_parser *context_p; ///< A context/parser in which this definition exists, and will exist.
+    unsigned int required_flags; ///< Set of flags required of any type provided to this template parameter
+    
+    virtual string kind() const;
+    virtual definition* duplicate(remap_set &n) const;
+    virtual void remap(remap_set &n, const error_context &errc);
+    virtual value size_of(const error_context &errc);
+    virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0) const;
+    virtual definition* get_local(string name);
+    
     /// Construct with basic definition info.
     definition_hypothetical(string name, definition_scope *parent, unsigned flags, AST* def);
     definition_hypothetical(string name, definition_scope *parent, AST* def);

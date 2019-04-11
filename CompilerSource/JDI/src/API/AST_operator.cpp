@@ -1,10 +1,10 @@
 /**
- * @file  parse_context.cpp
- * @brief A very small source to implement the parse_context constructor.
+ * @file  AST_operator.h
+ * @brief Source implementing a pitiful, tiny amount of code for class ASTOperator.
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2012-2013 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -17,10 +17,12 @@
  * 
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
+ * 
 **/
 
-#include "parse_context.h"
+#include "AST_operator.h"
 
 namespace jdip {
-  parse_context::parse_context(error_handler *h_err): active(true), herr(h_err) {}
+  ASTOperator::~ASTOperator() {}
+  ConstASTOperator::~ConstASTOperator() {}
 }

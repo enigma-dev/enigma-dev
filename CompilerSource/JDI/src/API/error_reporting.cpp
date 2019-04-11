@@ -32,6 +32,7 @@ namespace jdi {
       fprintf(stderr, "ERROR(%s:%d): %s\n", filename.c_str(), line, err.c_str());
     else
       fprintf(stderr, "ERROR(%s,%d,%d): %s\n", filename.c_str(), line, pos, err.c_str());
+    ++error_count;
   }
   void default_error_handler::warning(std::string err, std::string filename, int line, int pos) {
     if (!filename.length())
@@ -42,7 +43,10 @@ namespace jdi {
       fprintf(stderr, "Warning(%s:%d): %s\n", filename.c_str(), line, err.c_str());
     else
       fprintf(stderr, "Warning(%s,%d,%d): %s\n", filename.c_str(), line, pos, err.c_str());
+    ++warning_count;
   }
+  
+  default_error_handler::default_error_handler(): error_count(0), warning_count(0) {}
 
   /// The instance of \c default_error_handler to which \c def_error_handler will point.
   static default_error_handler deh_instance;

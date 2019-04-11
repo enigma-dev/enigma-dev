@@ -17,7 +17,6 @@
 **/
 
 #include "strings_util.h"
-
 #include "makedir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/GameData.h"

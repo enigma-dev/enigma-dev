@@ -73,12 +73,11 @@ struct lang_CPP: language_adapter {
   /// Look up a type by its name.
   jdi::definition* find_typename(string name);
 
+  // Returns whether the given definition is a function accepting `enigma::varargs`.
+  virtual bool is_variadic_function(jdi::definition *d);
   // Returns the index at which a function parameters ref_stack is variadic;
-  // that is, at which position it accepts `enigma::varargs`.
-  int referencers_varargs_at(jdi::ref_stack &refs);
-  bool referencers_varargs(jdi::ref_stack &refs) {
-    return referencers_varargs_at(refs) != -1;
-  }
+  // that is, at which argument position it accepts `enigma::varargs`.
+  virtual int function_variadic_after(jdi::definition_function *func);
 
   /// Check whether the given definition is callable as a function.
   bool definition_is_function(jdi::definition *d);

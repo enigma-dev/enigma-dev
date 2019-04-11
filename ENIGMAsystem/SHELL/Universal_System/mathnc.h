@@ -122,10 +122,10 @@ namespace enigma_user
   inline double arctand2(double y, double x) { return ::atan2(y,x) * 180.0 / M_PI; }
 
   // Non-variadic (two-item) min/max
-  template<typename T, typename U> inline decltype(T() + U()) min(T x, U y) {
+  template<typename T, typename U> inline ARITHMETIC_OPERATION(T, T() + U()) min(T x, U y) {
     return y < x ? y : x;
   }
-  template<typename T, typename U> inline decltype(T() + U()) max(T x, U y) {
+  template<typename T, typename U> inline ARITHMETIC_OPERATION(T, T() + U()) max(T x, U y) {
     return y > x ? y : x;
   }
 

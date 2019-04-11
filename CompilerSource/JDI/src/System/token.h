@@ -6,7 +6,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -42,6 +42,14 @@ namespace jdip {
     TT_SIZEOF,     ///< The `sizeof' keyword.
     TT_ISEMPTY,    ///< The `is_empty' keyword.
     TT_DECLTYPE,   ///< The `decltype' keyword.
+    TT_TYPEID,     ///< The `typeid' keyword.
+    
+    TT_ALIGNAS,       ///< The `alignas' specifier.      (C++11)
+    TT_ALIGNOF,       ///< The `alignof' operator.       (C++11)
+    TT_AUTO,          ///< The `auto' type resolver.     (C++11)
+    TT_CONSTEXPR,     ///< The `constexpr' specifier.    (C++11)
+    TT_NOEXCEPT,      ///< The `noexcept' specifier.     (C++11)
+    TT_STATIC_ASSERT, ///< The `static_assert' operator. (C++11)
     
     TT_IDENTIFIER, ///< A standard identifier.
     TT_DEFINITION, ///< Something previously declared that is not immediately useful, like a field or function.
@@ -55,9 +63,11 @@ namespace jdip {
     TT_PUBLIC,     ///< The `public' keyword.
     TT_PRIVATE,    ///< The `private' keyword.
     TT_PROTECTED,  ///< The `protected' keyword.
+    TT_FRIEND,     ///< The `friend' keyword.
     
     TT_COLON,      ///< A simple colon, which should always mark a label.
     TT_SCOPE,      ///< The scope accessor `::' symbol.
+    TT_MEMBEROF,   ///< A pseudo-token representing ::*. Will be returned instead of * when reading passes the ::.
     
     TT_LEFTPARENTH,   ///< A left parenthesis, `('.
     TT_RIGHTPARENTH,  ///< A right parenthesis, `)'.
@@ -87,6 +97,11 @@ namespace jdip {
     TT_NEW,           ///< The `new' keyword.
     TT_DELETE,        ///< The `delete' keyword.
     
+    TT_CONST_CAST,       ///< The `const_cast' operator
+    TT_STATIC_CAST,      ///< The `static_cast' operator
+    TT_DYNAMIC_CAST,     ///< The `dynamic_cast' operator
+    TT_REINTERPRET_CAST, ///< The `reinterpret_cast' operator
+    
     TT_ENDOFCODE,     ///< This token signifies that the code has reached its end.
     #include <User/token_types.h>
     TT_INVALID        ///< Invalid token; read failed.
@@ -106,10 +121,11 @@ namespace jdip {
 //===: Implementation carries extended dependencies:=======================================================
 //=========================================================================================================
 
-#include <Storage/definition.h>
-#include <API/context.h>
+#include <API/error_reporting.h>
+#include <Storage/definition_forward.h>
 
 namespace jdip {
+  using std::string;
   using namespace jdi; // If you are in the private namespace, you probably intend access to the regular namespace as well.
   
   /**

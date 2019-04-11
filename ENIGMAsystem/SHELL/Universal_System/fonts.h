@@ -21,6 +21,7 @@
 #define ENIGMA_FONTS_H
 
 #include <string>
+#include <stdint.h>
 
 namespace enigma_user 
 {
