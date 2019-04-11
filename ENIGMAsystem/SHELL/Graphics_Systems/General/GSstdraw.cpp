@@ -24,21 +24,11 @@
 #include "Universal_System/math_consts.h"
 
 #include <list>
-#include <vector>
 #include <math.h>
 #include <stdio.h>
 
-using std::vector;
-
-#define M_PI		  3.14159265358979323846
-#define M_SQRT1_2	0.70710678118654752440
-#define M_PI_2    1.57079632679489661923
-
 namespace enigma {
   float circleprecision=24;
-
-  //List of vertices we are buffering to draw.
-  std::list<PolyVertex> currComplexPoly;
 }
 
 namespace enigma_user
@@ -901,67 +891,6 @@ int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned i
       }
     draw_primitive_end();
     return c;
-}
-
-
-void draw_polygon_begin()
-{
-  enigma::currComplexPoly.clear();
-}
-
-void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color)
-{
-  //-1 means "the color of the previous vertex.
-  //The default color (first vertex) is the current draw color.
-  //This conforms to GM5's treatment of draw colors.
-  enigma::currComplexPoly.push_back(enigma::PolyVertex(x, y, color));
-}
-
-void draw_polygon_end(bool outline, bool allowHoles)
-{
-  std::list<enigma::PolyVertex>& currPoly = enigma::currComplexPoly;
-  if (outline) {
-    if (currPoly.size() >= 2) {
-      int color = draw_get_color();
-      gs_scalar alpha = draw_get_alpha();
-
-      //Close it, ensure the correct color.
-      currPoly.push_back(currPoly.front());
-      if (currPoly.back().color==-1) { currPoly.back().color = color; }
-
-      //Draw it.
-      draw_primitive_begin(pr_linestrip);
-      for (std::list<enigma::PolyVertex>::const_iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
-        color = (it->color!=-1 ? it->color : color);
-        draw_vertex_color(it->x, it->y, color, alpha);
-      }
-
-      //Close it.
-      draw_primitive_end();
-    }
-  } else {
-    if (currPoly.size() >= 3) {
-      //Self-intersecting polygons makes this much harder than "outline" mode; we need to make a call
-      //   to the platform-specific Graphics backend.
-      if (!enigma::fill_complex_polygon(currPoly, draw_get_color(), allowHoles)) {
-        //If drawing failed, try using a triangle fan as a backup. This will work for concave polygons only.
-        int color = draw_get_color();
-        gs_scalar alpha = draw_get_alpha();
-
-        //Draw it.
-        draw_primitive_begin(pr_trianglefan);
-        for (std::list<enigma::PolyVertex>::const_iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
-          color = (it->color!=-1 ? it->color : color);
-          draw_vertex_color(it->x, it->y, color, alpha);
-        }
-
-        //Close it.
-        draw_primitive_end();
-      }
-    }
-  }
-
-  currPoly.clear();
 }
 
 }

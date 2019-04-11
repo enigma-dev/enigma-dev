@@ -123,15 +123,13 @@ void d3d_start()
   glEnable(GL_COLOR_MATERIAL);
 
   // Set up projection matrix
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+  d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
 
   // Set up modelview matrix
-  glMatrixMode(GL_MODELVIEW);
+  d3d_transform_set_identity();
+
   glClearColor(0,0,0,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity();
 }
 
 void d3d_end()
@@ -148,10 +146,8 @@ void d3d_end()
   glDisable(GL_ALPHA_TEST);
   glDisable(GL_NORMALIZE);
   glDisable(GL_COLOR_MATERIAL);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(0, 1, 0, 1);
-  glMatrixMode(GL_MODELVIEW);
+
+  d3d_set_projection_ortho(0, 0, view_wview[view_current], view_hview[view_current], 0); //This should probably be changed not to use views
 }
 
 // disabling hidden surface removal in means there is no depth buffer

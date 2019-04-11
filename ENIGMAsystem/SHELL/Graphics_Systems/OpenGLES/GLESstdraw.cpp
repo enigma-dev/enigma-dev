@@ -725,14 +725,3 @@ int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsi
 	return c;
 }
 }
-
-namespace enigma{
-
-bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
-{
-  //TODO: Complex polygon supported only in OpenGL1 at the moment. By returning false here, we fall back
-  //      on a convex-only polygon drawing routine that works on any platform.
-  return false;
-}
-
-}

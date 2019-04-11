@@ -88,32 +88,8 @@ namespace enigma_user
   int draw_getpixel(int,int);
   int draw_getpixel_ext(int, int);
 
-  void draw_polygon_begin();
-  void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color=-1);
-  void draw_polygon_end(bool outline, bool allowHoles=true);
-
   #define draw_get_pixel draw_getpixel
   #define draw_get_pixel_ext draw_getpixel_ext
-}
-
-namespace enigma
-{
-  ///Simple container class for a Vertex in a Polygon.
-  ///A color of -1 means "the color of the previous vertex", and defaults to the current draw_color.
-  struct PolyVertex {
-    PolyVertex(gs_scalar x, gs_scalar y, int color) : x(x),y(y),color(color) {}
-    gs_scalar x;
-    gs_scalar y;
-    int color;
-  };
-
-  extern std::list<PolyVertex> currComplexPoly;
-
-
-  ///The draw_polygon functions use this to fill in convex/self-intersecting polygons.
-  ///The return value indicates success; if false, a "backup" convex-only polygon drawing routine will be used.
-  ///Its implementation is platform-specific.
-  bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles);
 }
 
 #endif //ENIGMA_GSSTDRAW_H

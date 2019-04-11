@@ -40,7 +40,7 @@ before_install:
         unzip enigma-libs.zip -d ENIGMAsystem/;
         mv ENIGMAsystem/Install ENIGMAsystem/Additional;
       else
-        sudo apt-get -y install libc++-dev libglew-dev libglu1-mesa-dev libxrandr-dev;
+        sudo apt-get -y install libc++-dev libglew-dev libxrandr-dev;
       fi
 
       if [ "$AUDIO" == "OpenAL" ]; then
