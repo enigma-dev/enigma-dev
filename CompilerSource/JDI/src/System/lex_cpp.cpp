@@ -39,6 +39,7 @@
 using namespace jdi;
 using namespace jdip;
 using namespace std;
+using namespace parse_bacics::visible;
 
 #define cfile data //I'm sorry, but I can't spend the whole function calling the file buffer "data."
 
@@ -437,6 +438,7 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
           if (!is_letter(argstr[i])) {
             if (argstr[i] == '.' and argstr[i+1] == '.' and argstr[i+2] == '.') {
               variadic = true, i += 3;
+              paramlist.push_back("__VA_ARGS__");
               while (is_useless(argstr[i])) ++i;
               if (argstr[i] != ')')
                 herr->error("Expected end of parameters after variadic", filename, line, pos-lpos);

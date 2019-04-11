@@ -81,8 +81,6 @@ namespace enigma
 	void graphics_delete_vertex_buffer_peer(int buffer) {}
 	void graphics_delete_index_buffer_peer(int buffer) {}
 
-	bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles){return false;}
-
 	void scene_begin() {}
 	void scene_end() {}
 }

@@ -55,6 +55,13 @@ static void iterate_overloads(
        iter != d->overloads.end(); iter++) {
     visit_overload(iter->second, min, max, varargs_t);
   }
+
+  for (definition_template* templateOverload : d->template_overloads) {
+    definition* def = templateOverload->def;
+    if (def->flags & DEF_OVERLOAD) {
+     visit_overload(static_cast<definition_overload*>(def), min, max, varargs_t);
+    }
+  }
 }
 
 static int referencers_varargs_at(ref_stack &refs, jdi::definition *varargs_t) {

@@ -25,6 +25,8 @@
 #include <Parser/context_parser.h>
 #include <API/compile_settings.h>
 
+using namespace jdi;
+
 int jdip::context_parser::handle_friend(definition_scope *scope, token_t& token, definition_class *recipient) {
   token = read_next_token(scope);
   bool friendclass = token.type == TT_CLASS || token.type == TT_STRUCT;

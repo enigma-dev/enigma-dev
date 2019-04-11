@@ -28,6 +28,8 @@
 #include <cstdio>
 
 using namespace jdip;
+using namespace jdi;
+
 #if FATAL_ERRORS
 #define ERROR_CODE 1
 #else
@@ -163,6 +165,7 @@ int context_parser::handle_template(definition_scope *scope, token_t& token, uns
       definition_template *basetemp = (definition_template*)token.def;
       
       token = read_next_token(temp);
+      
       if (token.type != TT_LESSTHAN) {
         if (basetemp->def && (basetemp->def->flags & (DEF_CLASS | DEF_INCOMPLETE)) == (DEF_CLASS | DEF_INCOMPLETE)) {
           if (basetemp->params.size() != temp->params.size()) {
@@ -233,7 +236,7 @@ int context_parser::handle_template(definition_scope *scope, token_t& token, uns
               goto handled_argk; // break 2;
             }
             else
-              token.report_error(herr, "Type mismatch in passing parameter " + toString(args_given) + " to template specialization: real-valued parameter expected");
+              token.report_error(herr, "Type mismatch in passing parameter " + parse_bacics::visible::toString(args_given) + " to template specialization: real-valued parameter expected");
           }
         }
         

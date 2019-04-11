@@ -21,6 +21,10 @@
 #include <iostream>
 #include <streambuf>
 
+#if defined(_MSC_VER) && defined(_DEBUG)
+#include <crtdbg.h>
+#endif
+
 std::ostream outputStream(std::cout.rdbuf());
 std::ostream errorStream(std::cerr.rdbuf());
 
@@ -34,6 +38,10 @@ static std::string tolower(const std::string &str) {
 
 int main(int argc, char* argv[])
 {
+  #if defined(_MSC_VER) && defined(_DEBUG)
+  //_CrtSetReportMode(_CRT_WARN | _CRT_ERROR | _CRT_ASSERT, _CRTDBG_MODE_DEBUG);
+  #endif
+
   OptionsParser options;
   options.ReadArgs(argc, argv);
   int result = options.HandleArgs();
@@ -104,7 +112,7 @@ int main(int argc, char* argv[])
 
   Game game;
   std::string input_file = options.GetOption("input").as<std::string>();
-  if (input_file.back() == '/') input_file.pop_back();
+  if (!input_file.empty() && input_file.back() == '/') input_file.pop_back();
 
   // Working directory hacks
   if (mode != emode_compile)

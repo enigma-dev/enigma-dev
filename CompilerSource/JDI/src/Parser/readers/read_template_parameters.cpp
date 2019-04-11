@@ -24,6 +24,8 @@
 #include <API/compile_settings.h>
 #include <cstdio>
 
+using namespace jdi;
+
 int jdip::context_parser::read_template_parameter(arg_key &argk, size_t argnum, definition_template *temp, token_t &token, definition_scope *scope) {
   if (argnum < temp->params.size() and temp->params[argnum]->flags & DEF_TYPENAME) {
     full_type ft = read_fulltype(token, scope);

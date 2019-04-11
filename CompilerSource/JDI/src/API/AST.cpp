@@ -40,6 +40,7 @@
 
 using namespace std;
 using namespace jdip;
+using namespace parse_bacics::visible;
 
 #ifdef DEBUG_MODE
 #define track(ct) ast->expression += ct + " "
@@ -360,7 +361,8 @@ namespace jdip
           return NULL;
         }
         token = get_next_token();
-        full_type casttype = cparse->read_type(token, search_scope);
+        full_type casttype = cparse->read_fulltype(token, search_scope);
+        
         if (!casttype.def) return NULL;
         if (token.type != TT_GREATERTHAN){
           token.report_errorf(cparse->herr, "Expected closing triangle bracket to cast type before %s");
