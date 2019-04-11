@@ -4,7 +4,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -28,7 +28,7 @@ namespace jdip {
 
   symbol::symbol() {}
   symbol::symbol(unsigned char t, unsigned char p):
-    type(t), prec_binary(t&ST_BINARY? p:0), prec_unary_pre(t&ST_UNARY_PRE? p:0), prec_unary_post(t&ST_UNARY_POST? p:0),
+    type(t), prec_binary(t&(ST_BINARY|ST_TERNARY)? p:0), prec_unary_pre(t&ST_UNARY_PRE? p:0), prec_unary_post(t&ST_UNARY_POST? p:0),
     operate(NULL), operate_unary_pre(NULL), operate_unary_post(NULL) {}
   symbol::symbol(unsigned char t, unsigned char p, value(*o)(const value&, const value&)):
     type(t), prec_binary(p), prec_unary_pre(0), prec_unary_post(0),
