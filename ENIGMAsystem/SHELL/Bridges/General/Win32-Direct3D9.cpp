@@ -74,14 +74,12 @@ void OnDeviceReset() {
 
 void Reset(D3DPRESENT_PARAMETERS *d3dpp) {
   OnDeviceLost();
-
   HRESULT hr = d3dmgr->device->Reset(d3dpp);
   if (FAILED(hr)) {
     show_error("Direct3D 9 Device Reset Failed", true);
   }
   // the normal, managed d3d 9.0 does not automatically restore render state
   if (Direct3D9Managed) d3dmgr->RestoreState();
-
   OnDeviceReset();
 }
 
