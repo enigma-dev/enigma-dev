@@ -105,7 +105,7 @@ install:
         cd ..
         $env:PATH="C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;$env:PATH"
         C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "pacboy --noconfirm -S glm:x libpng:x $env:PACKAGES"
-        exit 0
+        Exit
       } ElseIf ($env:APPVEYOR_JOB_NUMBER -eq 3) {
         $env:PATH="C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;$env:PATH"
         bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x $env:PACKAGES"
