@@ -26,6 +26,7 @@ include_directories(${TARGET} PRIVATE
                     "${ENIGMA_DIR}/shared"
                     "${ENIGMA_DIR}/shared/libpng-util/"
                     "${ENIGMA_DIR}/CompilerSource"
+                    "${ENIGMA_DIR}/CommandLine/libEGM"
                     "${ENIGMA_DIR}/shared/protos/"
                     "${ENIGMA_DIR}/shared/protos/codegen/"
 )

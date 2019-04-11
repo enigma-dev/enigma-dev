@@ -76,7 +76,7 @@ void CallBack::AppendFrame(const char* text)
 {
   static std::stringstream linestm;
   std::string line = text;
-  if (line.back() != '\n') {
+  if (!line.empty() && line.back() != '\n') {
     linestm << line;
     return;
   }

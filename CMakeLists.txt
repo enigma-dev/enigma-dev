@@ -14,6 +14,8 @@ if (MSVC)
 
 endif()
 
+add_definitions(-DCLI_ENABLE_EGM)
+
 if(USE_STATIC_LIBS)
   set(USE_STATIC_LIBS ON)
   set(BUILD_STATIC_LIBS ON)
