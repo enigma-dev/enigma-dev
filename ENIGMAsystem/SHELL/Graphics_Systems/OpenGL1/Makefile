@@ -2,9 +2,9 @@ SOURCES += $(wildcard Graphics_Systems/OpenGL1/*.cpp) $(wildcard Graphics_System
 
 ifeq ($(TARGET-PLATFORM), Windows)
 	override CXXFLAGS += -DGLEW_STATIC
-	override LDLIBS += -lglew32 -lopengl32 -lglu32
+	override LDLIBS += -lglew32 -lopengl32
 else ifeq ($(TARGET-PLATFORM), Linux)
-	override LDLIBS += -lGL -lGLU -lGLEW
+	override LDLIBS += -lGL -lGLEW
 else ifeq ($(TARGET-PLATFORM), MacOSX)
 	override LDLIBS += -framework OpenGL -lGLEW
 endif
