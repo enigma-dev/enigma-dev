@@ -57,8 +57,10 @@ static void iterate_overloads(
   }
 
   for (definition_template* templateOverload : d->template_overloads) {
-    if (min > templateOverload->params.size()) min = templateOverload->params.size();
-    if (max < templateOverload->params.size()) max = templateOverload->params.size();
+    definition* def = templateOverload->def;
+    if (def->flags & DEF_OVERLOAD) {
+     visit_overload(static_cast<definition_overload*>(def), min, max, varargs_t);
+    }
   }
 }
 
