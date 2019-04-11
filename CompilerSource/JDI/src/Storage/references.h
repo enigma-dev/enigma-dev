@@ -8,7 +8,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -27,9 +27,10 @@
 #define _REFERENCES__H
 
 #include <string>
-using std::string;
+#include "definition_forward.h"
 
 namespace jdi {
+  using std::string;
   /**
     @struct jdi::ref_stack
     @brief  A stack-like structure representing C referencers.
@@ -60,7 +61,8 @@ namespace jdi {
       RT_POINTERTO, ///< This referencer is a pointer-to asterisk, (*).
       RT_REFERENCE, ///< This referencer is a reference ampersand (&).
       RT_ARRAYBOUND, ///< This referencer is an array boundary subscript, [].
-      RT_FUNCTION ///< This referencer is a set of function parameters.
+      RT_FUNCTION,   ///< This referencer is a set of function parameters.
+      RT_MEMBER_POINTER ///< This referencer is a pointer to a member function
     };
     
     struct parameter;
@@ -74,16 +76,21 @@ namespace jdi {
       friend struct ref_stack;
       friend struct ref_stack::iterator;
       node* duplicate(); ///< Actually duplicate this node
+      ~node(); ///< Non-virtual destructor; node freeing is handled by ref_stack.
       public:
         ref_type type; ///< The type of this node.
-        size_t arraysize(); ///< Return the size of this array if and only if type == RT_ARRAYBOUND. Undefined behavior otherwise.
+        size_t arraysize() const; ///< Return the size of this array if and only if type == RT_ARRAYBOUND. Undefined behavior otherwise.
+        size_t paramcount() const; ///< Return the number of parameters if and only if type == RT_FUNCTION. Undefined behavior otherwise.
         node(node* p, ref_type rt); ///< Allow constructing a new node easily.
-        ~node(); ///< Virtual destructor so \c node_func can be complicated.
+        bool operator==(const node &other) const; ///< Test for equality.
+        bool operator!=(const node &other) const; ///< Test for inequality.push_memptr
     };
     /// Node containing an array boundary.
     struct node_array;
     /// Node containing function parameters.
     struct node_func;
+    /// Node containing a pointer to a class member function.
+    struct node_memptr;
     
     /// Push a node onto this stack by a given type.
     /// @param reference_type The type of this reference; should be either \c RT_REFERENCE or \c RT_POINTERTO.
@@ -91,9 +98,12 @@ namespace jdi {
     /// Push an array node onto the bottom of this stack with the given boundary size.
     /// @param array_size  The number of elements in this array, or node_array::nbound for unspecified.
     void push_array(size_t array_size);
-    /// Push a funciton node onto the bottom of this stack with the given parameter descriptors, consuming them.
+    /// Push a function node onto the bottom of this stack with the given parameter descriptors, consuming them.
     /// @param parameters  A \c parameter_ct to consume containing details about the parameters of this function.
     void push_func(parameter_ct &parameters);
+    /// Push a class member pointer onto the bottom of this stack, from the given class definition.
+    /// @param member_of  The \c definition_class to which this member pointer belongs.
+    void push_memptr(definition_class *member_of);
     /// Append a stack to the top of this stack, consuming it.
     void append_c(ref_stack &rf);
     /// Similar to append_c, but for reference stacks composed in a nest. This method copies the name member as well.
@@ -116,6 +126,8 @@ namespace jdi {
     
     /// Return whether this stack is empty.
     bool empty() const;
+    /// Returns whether this stack ends with the elements in another stack.
+    bool ends_with(const ref_stack& rf) const;
     
     /// Constructor wrapper to the copy() method so copying doesn't bite someone in the ass.
     ref_stack(const ref_stack&);
@@ -138,6 +150,8 @@ namespace jdi {
     string toStringLHS() const;
     /// Represent the right-hand side of this set of referencers as a string (the part after the name).
     string toStringRHS() const;
+    /// Represent this set of referencers as a string in plain English.
+    string toEnglish() const;
     
     /// Get the top node.
     node &top();
@@ -147,6 +161,9 @@ namespace jdi {
     const node &top() const;
     /// Get the bottom node without allowing modification.
     const node &bottom() const;
+    
+    /// Free a node* pointer.
+    static void free(node *n);
     
     /// Return the number of nodes contained.
     size_t size() const;
@@ -176,10 +193,12 @@ namespace jdi {
     };
     
     string name; ///< The name of the object with the contained referencers.
+    definition *ndef; ///< Any definition from which the name was derived.
+    
     private:
-      node *ntop; ///< The topmost node on the list, for everything else.
+      node *ntop;     ///< The topmost node on the list, for everything else.
       node *nbottom; ///< The bottommost node on the list; used in the prepend method.
-      size_t sz; ///< The number of nodes on the list
+      size_t sz;    ///< The number of nodes on the list
   };
 }
 
@@ -188,9 +207,9 @@ namespace jdi {
 //=========================================================================================================
 
 #include <Storage/full_type.h>
-#include <Storage/definition.h>
+#include <Storage/definition_forward.h>
 #include <General/quickvector.h>
-#include <API/AST.h>
+#include <API/AST_forward.h>
 
 namespace jdi {
   /// Parameter storage type; contains type info and other important parameter info.
@@ -199,6 +218,7 @@ namespace jdi {
     AST *default_value; ///< An AST if a default value was given. NULL otherwise.
     
     parameter(); ///< Default constructor.
+    parameter(const full_type& ft, AST *default_value); ///< Construct by copying a full_type and accepting an optional default value AST.
     ~parameter(); ///< Destructor; frees the default value AST.
     void swap_in(full_type& param); ///< Swap contents with another parameter class.
     void swap(parameter& param); ///< Swap contents with another parameter class.
@@ -240,6 +260,15 @@ namespace jdi {
     /// @param ps  The parameter container to consume.
     node_func(node* p, parameter_ct &ps);
     ~node_func();
+  };
+  /// A special ref_stack node with a list of function parameters.
+  struct ref_stack::node_memptr: ref_stack::node {
+    definition_class* member_of;
+    /// Construct new function node with previous node and a parameter container, consuming the parameter container.
+    /// @param p      The previous node.
+    /// @param memof  The parameter container to consume.
+    node_memptr(node* p, definition_class *memof);
+    ~node_memptr();
   };
 }
 

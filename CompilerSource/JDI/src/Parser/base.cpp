@@ -28,8 +28,7 @@
 #include <System/lex_cpp.h>
 #include <System/token.h>
 #include <General/debug_macros.h>
-#include "parse_context.h"
-#include "bodies.h"
+#include "context_parser.h"
 using namespace std;
 using namespace jdip;
 
@@ -37,8 +36,9 @@ using namespace jdip;
   This is the single most trivial function in the API. It makes a call to parse_stream, passing a
   new instance of the C++ lexer that ships with JDI, \c lex_cpp.
 **/
-int jdi::context::parse_C_stream(llreader &cfile, const char* fname, error_handler *errhandl) {
-  return parse_stream(fname? new lexer_cpp(cfile, macros, fname) : new lexer_cpp(cfile, macros), errhandl); // Invoke our common method with it
+int jdi::context::parse_C_stream(llreader &cfile, const char* fname, error_handler *herr) {
+  lexer_cpp lex_cpp(cfile, macros, fname);
+  return parse_stream(&lex_cpp, herr); // Invoke our common method with it
 }
 
 /** @section Implementation
@@ -47,48 +47,45 @@ int jdi::context::parse_C_stream(llreader &cfile, const char* fname, error_handl
   call, \c handle_scope(), and then the other members of the derived \c context_parser
   class in \c jdip, which will be called from handle_scope.
 */
-int jdi::context::parse_stream(lexer *lang_lexer, error_handler *errhandl)
+int jdi::context::parse_stream(lexer *lex, error_handler *herr)
 {
-  if (errhandl)
-    herr = errhandl;
-  
   if (parse_open) { // Make sure we're not still parsing anything
     herr->error("Attempted to invoke parser while parse is in progress in another thread");
-    delete lang_lexer;
-    errhandl->error("STILL PARSING");
     return -1;
   }
   
-  if (lang_lexer) { delete lex; lex = lang_lexer; }
-  else if (!lex) { // Make sure we're not still parsing anything
+  if (!lex) {
     herr->error("Attempted to invoke parser without a lexer");
-    errhandl->error("NO LEXER");
     return -1;
   }
   
-  parse_open = true;
+  if (!herr)
+    herr = def_error_handler;
   
-  token_t eoc; // An invalid token to appease the parameter chain.
-  int res = ((context_parser*)this)->handle_scope(global, eoc);
-  while (eoc.type != TT_ENDOFCODE) {
-    #ifdef FATAL_ERRORS
-      eoc.report_errorf(herr, "Premature abort caused by %s here; aborting.");
-    #else
-      eoc.report_errorf(herr, "Premature abort caused by %s here; relaunching");
-      while (eoc.type != TT_SEMICOLON && eoc.type != TT_LEFTBRACE && eoc.type != TT_RIGHTBRACE && eoc.type != TT_ENDOFCODE)
-        eoc = lex->get_token_in_scope(global, herr);
-      if (eoc.type == TT_LEFTBRACE) {
-        size_t depth = 1;
-        while (eoc.type != TT_ENDOFCODE) {
+  int res;
+  {
+    context_parser cp(this, lex, herr);
+    token_t eoc; // An invalid token to appease the parameter chain.
+    res = cp.handle_scope(global, eoc);
+    while (eoc.type != TT_ENDOFCODE) {
+      #ifdef FATAL_ERRORS
+        eoc.report_errorf(herr, "Premature abort caused by %s here; aborting.");
+      #else
+        eoc.report_errorf(herr, "Premature abort caused by %s here; relaunching");
+        while (eoc.type != TT_SEMICOLON && eoc.type != TT_LEFTBRACE && eoc.type != TT_RIGHTBRACE && eoc.type != TT_ENDOFCODE)
           eoc = lex->get_token_in_scope(global, herr);
-          if (eoc.type == TT_LEFTBRACE) ++depth;
-          else if (eoc.type == TT_RIGHTBRACE) if (!--depth) break;
+        if (eoc.type == TT_LEFTBRACE) {
+          size_t depth = 1;
+          while (eoc.type != TT_ENDOFCODE) {
+            eoc = lex->get_token_in_scope(global, herr);
+            if (eoc.type == TT_LEFTBRACE) ++depth;
+            else if (eoc.type == TT_RIGHTBRACE) if (!--depth) break;
+          }
         }
-      }
-    ((context_parser*)this)->handle_scope(global, eoc);
-    #endif
+        cp.handle_scope(global, eoc);
+      #endif
+    }
   }
   
-  parse_open = false; // Now a parse can be called in this context again
   return res;
 }
