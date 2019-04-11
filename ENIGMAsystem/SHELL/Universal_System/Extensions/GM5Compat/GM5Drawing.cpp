@@ -264,7 +264,7 @@ void draw_polygon_end(bool outline, bool allowHoles)
 
       //Draw it.
       draw_primitive_begin(pr_linestrip);
-      for (auto v : currPoly) {
+      for (const auto& v : currPoly) {
         color = (v.color!=-1 ? v.color : color);
         draw_vertex_color(v.x, v.y, color, alpha);
       }
@@ -282,7 +282,7 @@ void draw_polygon_end(bool outline, bool allowHoles)
 
       //Draw it.
       draw_primitive_begin(pr_trianglefan);
-      for (auto v : currPoly) {
+      for (const auto& v : currPoly) {
         color = (v.color!=-1 ? v.color : color);
         draw_vertex_color(v.x, v.y, color, alpha);
       }
@@ -315,7 +315,7 @@ void draw_polygon_end()
   int old_color = draw_get_color();
   draw_set_color(pen_color);
   enigma::PolyVertex lastPt = *(--cachedPoly.end());
-  for (auto v : cachedPoly) {
+  for (const auto& v : cachedPoly) {
     draw_line_width(lastPt.x,lastPt.y, v.x,v.y , lwid);
     lastPt = v;
   }
