@@ -16,7 +16,7 @@
 **/
 
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSd3d.h"

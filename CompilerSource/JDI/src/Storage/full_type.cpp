@@ -4,7 +4,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2013 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -29,7 +29,7 @@ namespace jdi {
   full_type::full_type(): def(NULL), flags(0) {}
   full_type::full_type(jdi::definition* d): def(d), flags(0) {}
   full_type::full_type(jdi::definition* d, int f): def(d), refs(), flags(f) {}
-  full_type::full_type(jdi::definition* d, jdi::ref_stack r, int f): def(d), refs(r), flags(f) {}
+  full_type::full_type(jdi::definition* d, const jdi::ref_stack &r, int f): def(d), refs(r), flags(f) {}
   full_type::full_type(const full_type& ft): def(ft.def), refs(ft.refs), flags(ft.flags) { /* cerr << "DUPLICATED FULLTYPE" << endl; */ }
   
   void full_type::swap(full_type& ft) { 
@@ -52,13 +52,19 @@ namespace jdi {
     return def != other.def || refs != other.refs || flags != other.flags;
   }
   bool full_type::operator< (const full_type& other) const {
-    if (definition::defcmp(other.def, def) < 0) return false;
-    if (other.refs < refs) return false;
+    ptrdiff_t nd = definition::defcmp(def, other.def);
+    if (nd < 0) return true;
+    if (nd > 0) return false;
+    if (refs < other.refs) return true;
+    if (refs > other.refs) return false;
     return flags < other.flags; 
   }
   bool full_type::operator> (const full_type& other) const {
-    if (definition::defcmp(other.def, def) > 0) return false;
-    if (other.refs > refs) return false;
+    ptrdiff_t nd = definition::defcmp(def, other.def);
+    if (nd > 0) return true;
+    if (nd < 0) return false;
+    if (refs > other.refs) return true;
+    if (refs < other.refs) return false;
     return flags > other.flags; 
   }
   bool full_type::operator<= (const full_type& other) const {
@@ -77,5 +83,29 @@ namespace jdi {
     string app = refs.toString();
     if (app.length()) res += " " + app;
     return res;
+  }
+  
+  string full_type::toEnglish() const {
+    return refs.toEnglish() + typeflags_string(def, flags);
+  }
+  
+  full_type &full_type::reduce() {
+    definition *type = def; definition_typed *typed;
+    if (!type)
+      return *this;
+    while ((type->flags & (DEF_TYPED | DEF_TYPENAME)) == (DEF_TYPED | DEF_TYPENAME) and ((definition_typed*)type)->type) {
+      typed = (definition_typed*)type;
+      type = typed->type;
+      ref_stack app = typed->referencers;
+      refs.append_c(app);
+      flags |= typed->modifiers;
+    }
+    def = type;
+    return *this;
+  }
+  
+  bool full_type::synonymous_with(const full_type& x) const {
+    full_type a = *this, b = x;
+    return a.reduce() == b.reduce();
   }
 }

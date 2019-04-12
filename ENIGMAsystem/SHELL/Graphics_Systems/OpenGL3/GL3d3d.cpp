@@ -17,7 +17,7 @@
 
 #include "GLSLshader.h"
 #include "GL3shader.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
@@ -38,10 +38,6 @@ namespace enigma {
 
 void d3d_light_update_positions(); // forward declare
 
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
-int d3dCulling = 0;
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 
@@ -143,6 +139,7 @@ void d3d_start()
 
   // Set up modelview matrix
   d3d_transform_set_identity();
+
   glClearColor(0,0,0,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -158,6 +155,7 @@ void d3d_end()
   enigma::d3dCulling = rs_none;
   glDepthMask(false);
   glDisable(GL_DEPTH_TEST);
+
   d3d_set_projection_ortho(0, 0, view_wview[view_current], view_hview[view_current], 0); //This should probably be changed not to use views
 }
 
@@ -237,19 +235,6 @@ void d3d_set_color_mask(bool r, bool g, bool b, bool a){
   glColorMask(r,g,b,a);
 }
 
-bool d3d_get_mode()
-{
-  return enigma::d3dMode;
-}
-
-bool d3d_get_hidden() {
-	return enigma::d3dHidden;
-}
-
-int d3d_get_culling() {
-	return enigma::d3dCulling;
-}
-
 void d3d_set_fill_mode(int fill)
 {
   draw_batch_flush(batch_flush_deferred);
@@ -292,11 +277,9 @@ void d3d_set_clip_plane(bool enable)
   (enable?glEnable:glDisable)(GL_CLIP_DISTANCE0);
 }
 
-}
+} // namespace enigma_user
 
 #include <map>
-#include <list>
-#include "Universal_System/fileio.h"
 
 namespace enigma
 {

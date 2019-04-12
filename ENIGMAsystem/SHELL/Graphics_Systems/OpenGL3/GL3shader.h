@@ -20,13 +20,12 @@
 #define GL_SHADER_H
 
 #include "GLSLshader.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include <string>
 using std::string;
 
 namespace enigma
 {
-  extern unsigned char currentcolor[4];
   extern unsigned bound_vbo;
   extern unsigned bound_vboi;
   extern unsigned bound_shader;

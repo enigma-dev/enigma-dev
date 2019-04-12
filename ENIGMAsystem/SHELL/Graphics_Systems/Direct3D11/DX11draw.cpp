@@ -29,10 +29,6 @@
 #include <stdio.h>
 using std::vector;
 
-namespace enigma {
-extern unsigned char currentcolor[4];
-}
-
 namespace enigma_user
 {
 
@@ -104,15 +100,3 @@ int draw_getpixel_ext(int x, int y)
 }
 
 } // namespace enigma_user
-
-namespace enigma {
-
-bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
-{
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-  //TODO: Complex polygon supported only in OpenGL1 at the moment. By returning false here, we fall back
-  //      on a convex-only polygon drawing routine that works on any platform.
-  return false;
-}
-
-} // namespace enigma

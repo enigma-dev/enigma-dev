@@ -19,6 +19,7 @@
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include <stdlib.h>
+#include <cstdio>
 #include <string>
 
 #ifdef DEBUG_MODE
@@ -38,33 +39,29 @@ bool widget_system_initialize() {
   
 } // namespave enigma
 
-extern "C" int cocoa_show_message(const char *str);
-extern "C" int cocoa_show_question(const char *str);
-extern "C" int cocoa_show_error(const char *str, bool abort);
-extern "C" const char *cocoa_input_box(const char *str, const char *def);
-extern "C" const char *cocoa_password_box(const char *str, const char *def);
+extern "C" const char *cocoa_dialog_caption();
+extern "C" int cocoa_show_message(const char *str, bool has_cancel, const char *title);
+extern "C" int cocoa_show_question(const char *str, bool has_cancel, const char *title);
+extern "C" int cocoa_show_attempt(const char *str, const char *title);
+extern "C" int cocoa_show_error(const char *str, bool abort, const char *title);
+extern "C" const char *cocoa_input_box(const char *str, const char *def, const char *title);
+extern "C" const char *cocoa_password_box(const char *str, const char *def, const char *title);
 extern "C" const char *cocoa_get_open_filename(const char *filter, const char *fname, const char *dir, const char *title, const bool mselect);
 extern "C" const char *cocoa_get_save_filename(const char *filter, const char *fname, const char *dir, const char *title);
 extern "C" const char *cocoa_get_directory(const char *capt, const char *root);
 extern "C" int cocoa_get_color(int defcol, const char *title);
 
-static inline string remove_trailing_zeros(double numb) {
-  string strnumb = std::to_string(numb);
-
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-    strnumb.pop_back();
-
-  return strnumb;
-}
+static string dialog_caption;
+static string error_caption;
 
 void show_error(string errortext, const bool fatal) {
   #ifdef DEBUG_MODE
-  errortext = enigma::debug_scope::GetErrors() + "\n\n" + errortext;
-  #else
-  errortext = "Error in some event or another for some object: \r\n\r\n" + errortext;
+  errortext += enigma::debug_scope::GetErrors();
   #endif
   
-  cocoa_show_error(errortext.c_str(), (const bool)fatal);
+  if (error_caption == "") error_caption = "Error";
+  int result = cocoa_show_error(errortext.c_str(), (const bool)fatal, error_caption.c_str());
+  if (result == 1) exit(0);
 }
 
 namespace enigma_user {
@@ -76,35 +73,52 @@ void show_info(string text, int bgcolor, int left, int top, int width, int heigh
 }
 
 int show_message(const string &str) {
-  cocoa_show_message(str.c_str());
-  return 1;
+  if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
+  return cocoa_show_message(str.c_str(), false, dialog_caption.c_str());
+}
+
+int show_message_cancelable(string str) {
+  if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
+  return cocoa_show_message(str.c_str(), true, dialog_caption.c_str());
 }
 
 bool show_question(string str) {
-  bool result = (bool)cocoa_show_question(str.c_str());
-  return result;
+  if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
+  return (bool)cocoa_show_question(str.c_str(), false, dialog_caption.c_str());
+}
+
+int show_question_cancelable(string str) {
+  if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
+  return cocoa_show_question(str.c_str(), true, dialog_caption.c_str());
+}
+
+int show_attempt(string str) {
+  if (error_caption == "") error_caption = "Error";
+  return cocoa_show_attempt(str.c_str(), error_caption.c_str());
 }
 
 string get_string(string str, string def) {
-  string result = cocoa_input_box(str.c_str(), def.c_str());
-  return result;
+  if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
+  return cocoa_input_box(str.c_str(), def.c_str(), dialog_caption.c_str());
 }
 
 string get_password(string str, string def) {
-  string result = cocoa_password_box(str.c_str(), def.c_str());
-  return result;
+  if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
+  return cocoa_password_box(str.c_str(), def.c_str(), dialog_caption.c_str());
 }
 
 double get_integer(string str, double def) {
   string integer = remove_trailing_zeros(def);
-  string result = cocoa_input_box(str.c_str(), integer.c_str());
-  return result ? strtod(input, NULL) : 0;
+  if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
+  string result = cocoa_input_box(str.c_str(), integer.c_str(), dialog_caption.c_str());
+  return !result.empty() ? strtod(result.c_str(), NULL) : 0;
 }
 
 double get_passcode(string str, double def) {
   string integer = remove_trailing_zeros(def);
-  string result = cocoa_password_box(str.c_str(), integer.c_str());
-  return result ? strtod(input, NULL) : 0;
+  if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
+  string result = cocoa_password_box(str.c_str(), integer.c_str(), dialog_caption.c_str());
+  return !result.empty() ? strtod(result.c_str(), NULL) : 0;
 }
 
 string get_open_filename(string filter, string fname) {
@@ -145,6 +159,22 @@ int get_color(int defcol) {
 
 int get_color_ext(int defcol, string title) {
   return cocoa_get_color(defcol, title.c_str());
-} 
+}
+
+string message_get_caption() {
+  if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
+  if (error_caption == "") error_caption = "Error";
+
+  if (dialog_caption == cocoa_dialog_caption() && error_caption == "Error")
+    return "";
+
+  return dialog_caption;
+}
+
+void message_set_caption(string str) {
+  dialog_caption = str; error_caption = str;
+  if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
+  if (error_caption == "") error_caption = "Error";
+}
 
 } // enigma_user
