@@ -19,9 +19,9 @@
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <Parser/bodies.h>
+#include <Parser/context_parser.h>
 
-using jdi::definition_scope;
+using namespace jdi;
 
 int jdip::context_parser::handle_namespace(definition_scope *scope, token_t& token)
 {
@@ -54,12 +54,12 @@ int jdip::context_parser::handle_namespace(definition_scope *scope, token_t& tok
   
   token = read_next_token(scope);
   if (token.type != TT_LEFTBRACE) {
-    token.report_error(herr, "Expected opening brace for namespace definition.");
+    token.report_errorf(herr, "Expected opening brace for namespace definition before %s");
     return 1;
   }
   if (handle_scope(nscope, token)) return 1;
   if (token.type != TT_RIGHTBRACE) {
-    token.report_error(herr, "Expected closing brace to namespace `" + nscope->name + "'");
+    token.report_errorf(herr, "Expected closing brace to namespace `" + nscope->name + "' before %s");
     return 1;
   }
   return 0;

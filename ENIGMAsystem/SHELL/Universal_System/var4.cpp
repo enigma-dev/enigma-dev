@@ -257,119 +257,6 @@ variant::~variant() { }
 #define EVCONST
 
 /*
- * Var implementation
- */
-
-var::operator variant&() { return **this; }
-var::operator const variant&() const { return **this; }
-
-var::var() : values(NULL) { initialize(); }
-var::var(variant x) : values(NULL) { initialize(); **this = x; }
-var::var(variant x, size_t length, size_t height) : values(NULL) {
-  initialize();
-  for (size_t j = 0; j < height; ++j) {
-    for (size_t i = 0; i < length; ++i) {
-      (*this)(j, i) = x; 
-    }
-  }
-}
-types_extrapolate_real_p  (var::var,  : values(NULL) { initialize(); **this = x; })
-types_extrapolate_string_p(var::var,  : values(NULL) { initialize(); **this = x; })
-
-
-
-var::operator int()       { return int  (**this); }
-var::operator bool()      { return bool (**this); }
-var::operator char()      { return char (**this); }
-var::operator long()      { return long (**this); }
-var::operator short()     { return short(**this); }
-var::operator unsigned()           { return (unsigned int)       (**this); }
-var::operator unsigned char()      { return (unsigned char)      (**this); }
-var::operator unsigned short()     { return (unsigned short)     (**this); }
-var::operator unsigned long()      { return (unsigned long) (**this); }
-var::operator unsigned long long() { return (unsigned long long) (**this); }
-var::operator long long() { return (long long)(**this); }
-var::operator double()    { return double     (**this); }
-var::operator float()     { return float      (**this); }
-
-var::operator string() { return string(**this); }
-
-
-var::operator int()       const { return int  (**this); }
-var::operator bool()      const { return bool (**this); }
-var::operator char()      const { return char (**this); }
-var::operator long()      const { return long (**this); }
-var::operator short()     const { return short(**this); }
-var::operator unsigned()           const { return (unsigned int)       (**this); }
-var::operator unsigned char()      const { return (unsigned char)      (**this); }
-var::operator unsigned short()     const { return (unsigned short)     (**this); }
-var::operator unsigned long()      const { return (unsigned long) (**this); }
-var::operator unsigned long long() const { return (unsigned long long) (**this); }
-var::operator long long() const { return (long long)(**this); }
-var::operator double()    const { return double     (**this); }
-var::operator float()     const { return float      (**this); }
-
-var::operator string() const { return string(**this); }
-
-
-
- types_extrapolate_real_p  (variant& var::operator=,  { return **this = x; })
- types_extrapolate_string_p(variant& var::operator=,  { return **this = x; })
- variant& var::operator=   (const variant x)          { return **this = x; }
-
-#define types_extrapolate_all_fromvariant(type, op)\
- types_extrapolate_real_p  (type var::operator op, { return **this op x; })\
- types_extrapolate_string_p(type var::operator op, { return **this op x; })\
- type var::operator op(const variant x)    EVCONST { return **this op x; }\
- type var::operator op(const var &x)       EVCONST { return **this op *x; }
-
-types_extrapolate_all_fromvariant(variant& , +=)
-types_extrapolate_all_fromvariant(variant& , -=)
-types_extrapolate_all_fromvariant(variant& , *=)
-types_extrapolate_all_fromvariant(variant& , /=)
-types_extrapolate_all_fromvariant(variant& , %=)
-
-types_extrapolate_all_fromvariant(variant& , <<=)
-types_extrapolate_all_fromvariant(variant& , >>=)
-types_extrapolate_all_fromvariant(variant& , &=)
-types_extrapolate_all_fromvariant(variant& , |=)
-types_extrapolate_all_fromvariant(variant& , ^=)
-
-#undef EVCONST
-#define EVCONST const
-types_extrapolate_all_fromvariant(variant , +)
-types_extrapolate_all_fromvariant(double  , -)
-types_extrapolate_all_fromvariant(double  , *)
-types_extrapolate_all_fromvariant(double  , /)
-types_extrapolate_all_fromvariant(double  , %)
-
-types_extrapolate_all_fromvariant(long , <<)
-types_extrapolate_all_fromvariant(long , >>)
-types_extrapolate_all_fromvariant(long , &)
-types_extrapolate_all_fromvariant(long , |)
-types_extrapolate_all_fromvariant(long , ^)
-
-#undef types_extrapolate_all_fromvariant
-#define types_extrapolate_all_fromvariant(type, op)\
- types_extrapolate_real_p  (type var::operator op, { return **this op x; })\
- types_extrapolate_string_p(type var::operator op, { return **this op x; })\
- type var::operator op(const variant &x) const     { return **this op x; }\
- type var::operator op(const var &x) const         { return **this op *x; }
-
-types_extrapolate_all_fromvariant(bool , ==)
-types_extrapolate_all_fromvariant(bool , !=)
-types_extrapolate_all_fromvariant(bool , >=)
-types_extrapolate_all_fromvariant(bool , <=)
-types_extrapolate_all_fromvariant(bool , >)
-types_extrapolate_all_fromvariant(bool , <)
-
-#undef EVCONST
-#define EVCONST
-
-var::~var() { cleanup(); }
-
-
-/*
    This part is about ass-backwards. But we'll go along with it. For science. You monster.
 */
 #ifdef DEBUG_MODE
@@ -432,56 +319,6 @@ types_binary_extrapolate_real_p  (bool operator<,  const variant&, { return y > 
 types_binary_extrapolate_string_p(bool operator<,  const variant&, { return y > x;  })
 
 
-
-
-types_binary_assign_extrapolate_implement(+, const var&, )
-types_binary_assign_extrapolate_implement(-, const var&, )
-types_binary_assign_extrapolate_implement(*, const var&, )
-types_binary_assign_extrapolate_implement(/, const var&, )
-
-types_binary_bitwise_assign_extrapolate_implement(<<, const var&, )
-types_binary_bitwise_assign_extrapolate_implement(>>, const var&, )
-types_binary_bitwise_assign_extrapolate_implement(&,  const var&, )
-types_binary_bitwise_assign_extrapolate_implement(|,  const var&, )
-types_binary_bitwise_assign_extrapolate_implement(^,  const var&, )
-
-types_binary_extrapolate_real_p  (double operator+, const var&, {  return x + (*y).rval.d; })
-types_binary_extrapolate_string_p(string operator+, const var&, { terror(tstr); return x + (*y).sval; })
-types_binary_extrapolate_real_p  (double operator-, const var&, {  return x - (*y).rval.d; })
-types_binary_extrapolate_string_p(string operator-, const var&, { terrortrue(); return 0; })
-types_binary_extrapolate_real_p  (double operator*, const var&, {  return x * (*y).rval.d; })
-types_binary_extrapolate_string_p(string operator*, const var&, { terrortrue(); return 0; })
-types_binary_extrapolate_real_p  (double operator/, const var&, { div0c((*y).rval.d); return x / (*y).rval.d; })
-types_binary_extrapolate_string_p(string operator/, const var&, { terrortrue(); return 0; })
-types_binary_extrapolate_real_p  (double operator%, const var&, { div0c((*y).rval.d); return fmod(x, (*y).rval.d); })
-types_binary_extrapolate_string_p(string operator%, const var&, { terrortrue(); return 0; })
-
-types_binary_bitwise_extrapolate_real_p(<<, const var&,  )
-//types_binary_extrapolate_string_p      (string operator<<, const var&, { terrortrue(); return 0; })
-types_binary_bitwise_extrapolate_real_p(>>, const var&,  )
-//types_binary_extrapolate_string_p      (string operator>>, const var&, { terrortrue(); return 0; })
-types_binary_bitwise_extrapolate_real_p(&,  const var&,  )
-//types_binary_extrapolate_string_p      (string operator&,  const var&, { terrortrue(); return 0; })
-types_binary_bitwise_extrapolate_real_p(|,  const var&,  )
-//types_binary_extrapolate_string_p      (string operator|,  const var&, { terrortrue(); return 0; })
-types_binary_bitwise_extrapolate_real_p(^,  const var&,  )
-//types_binary_extrapolate_string_p      (string operator^,  const var&, { terrortrue(); return 0; })
-
-// I have no fucking idea why C++0x can't do this for me.
-types_binary_extrapolate_real_p  (bool operator==, const var&, { return y == x; })
-types_binary_extrapolate_string_p(bool operator==, const var&, { return y == x; })
-types_binary_extrapolate_real_p  (bool operator!=, const var&, { return y != x; })
-types_binary_extrapolate_string_p(bool operator!=, const var&, { return y != x; })
-types_binary_extrapolate_real_p  (bool operator>=, const var&, { return y <= x; })
-types_binary_extrapolate_string_p(bool operator>=, const var&, { return y <= x; })
-types_binary_extrapolate_real_p  (bool operator<=, const var&, { return y >= x; })
-types_binary_extrapolate_string_p(bool operator<=, const var&, { return y >= x; })
-types_binary_extrapolate_real_p  (bool operator>,  const var&, { return y < x;  })
-types_binary_extrapolate_string_p(bool operator>,  const var&, { return y < x;  })
-types_binary_extrapolate_real_p  (bool operator<,  const var&, { return y > x;  })
-types_binary_extrapolate_string_p(bool operator<,  const var&, { return y > x;  })
-
-
 /*
    Unary nonsense for either party
 */
@@ -501,20 +338,6 @@ double    variant::operator-  () EVCONST { return -rval.d; }
 double    variant::operator+  () EVCONST { return  rval.d; }
 #undef EVCONST
 #define EVCONST
-
-// Same thing for var, other than dereference ops such as * and []: those are implementation specific.
-// See var_lua.cpp for default sample.
-
-variant&  var::operator++ ()      { return ++(**this); }
-double    var::operator++ (int)   { return (**this)++; }
-variant&  var::operator-- ()      { return --(**this); }
-double    var::operator-- (int)   { return (**this)--; }
-
-bool      var::operator! () const { return !bool(**this); }
-long      var::operator~ () const { return ~long(**this); }
-double    var::operator- () const { return -(double)(**this); }
-double    var::operator+ () const { return +(double)(**this); }
-
 
 namespace enigma_user {
   bool is_undefined(variant val)   { return val.type == ty_undefined; }

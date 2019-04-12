@@ -31,6 +31,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 using namespace std;
 
@@ -68,7 +69,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   int room_highid = 0, room_highinstid = 100000,room_hightileid=10000000;
 
   for (const auto &room : game.rooms) {
-    wto << "  tile tiles_" << room.id() << "[] = {\n";
+    wto << "  std::vector<tile> tiles_" << room.id() << " = {\n";
     int modme = 0;
     for (const auto &tile : room->tiles()) {
       wto << "{"
@@ -93,7 +94,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   }
 
   for (const auto &room : game.rooms) {
-    wto << "  inst insts_" << room.id() << "[] = {\n";
+    wto << "  std::vector<inst> insts_" << room.id() << " = {\n";
     int modme = 0;
     for (const auto &instance : room->instances()) {
       wto << "{" <<
@@ -167,8 +168,8 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
      }
     wto <<
     " },\n" //End of Backgrounds
-    "      " << room->instances().size() << ", insts_" << room.id() << ",\n"
-    "      " << room->tiles().size() << ", tiles_" << room.id() << "\n"
+    "      " << "insts_" << room.id() << ",\n"
+    "      " << "tiles_" << room.id() << "\n"
     "    },\n";
 
     if (room.id() > room_highid)
