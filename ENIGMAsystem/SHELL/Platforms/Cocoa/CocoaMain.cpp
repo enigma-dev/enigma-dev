@@ -35,7 +35,8 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/estring.h"
 
-// Uncomment line below for testing generate_working_directory()
+// Uncomment the 2 lines below for testing generate_working_directory()
+// #include "Widget_Systems/widgets_mandatory.h"
 // #include "Widget_Systems/Cocoa/dialogs.h"
 
 using std::string;
