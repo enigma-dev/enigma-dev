@@ -422,7 +422,7 @@ string execute_shell_for_output(const string &command) {
   tstring res;
   wchar_t buffer[BUFSIZ];
   tstring tstr_command = widen(command);
-  FILE *pf = _wpopen(tstr_command.c_str(), "r");
+  FILE *pf = _wpopen(tstr_command.c_str(), L"r");
   while (!feof(pf)) {
     res.append(buffer, fread(&buffer, sizeof(wchar_t), BUFSIZ, pf));
   }
