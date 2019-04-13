@@ -32,6 +32,7 @@
 #include "../General/PFfilemanip.h"
 
 #include "Platforms/General/PFmain.h"
+#include "Platforms/General/PFfilemanip.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/estring.h"
 
@@ -42,6 +43,7 @@
 using std::string;
 
 using enigma_user::set_working_directory;
+using enigma_user::directory_exists;
 using enigma_user::filename_name;
 using enigma_user::filename_dir;
 using enigma_user::filename_path;
