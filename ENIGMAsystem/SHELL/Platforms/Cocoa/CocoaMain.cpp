@@ -36,7 +36,7 @@
 #include "Universal_System/estring.h"
 
 // Uncomment line below for testing generate_working_directory()
-// $include "Widget_Systems/Cocoa/dialogs.h"
+// #include "Widget_Systems/Cocoa/dialogs.h"
 
 using std::string;
 
