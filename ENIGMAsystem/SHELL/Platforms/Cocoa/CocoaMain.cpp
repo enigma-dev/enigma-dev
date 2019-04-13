@@ -46,7 +46,7 @@ namespace enigma {
 
 void SetResizeFptr();
 
-static inline string generate_working_directory() {
+static inline void generate_working_directory() {
   /* This function will set the working directory to the app bundle's Resources folder 
   like GM4Mac 7.5, GMStudio 1.4, GMS 2.x and most Mac apps do, if the executable is in
   an app bundle. If the executable is not in an app bundle, use the executable path */
@@ -62,7 +62,6 @@ static inline string generate_working_directory() {
   /* if (success) enigma_user::show_message("Success!"); else enigma_user::show_message("Failure!");
   enigma_user::get_string("The current value of working_directory equals:", enigma_user::working_directory); */
   /* ONLY use working_directory for loading read-only included files! When SAVING, use game_save_id */
-  return 
 }
 
 static inline string add_slash(const string& dir) {
