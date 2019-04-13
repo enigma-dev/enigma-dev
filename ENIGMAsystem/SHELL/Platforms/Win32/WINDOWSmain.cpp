@@ -427,9 +427,7 @@ string execute_shell_for_output(const string &command) {
     res.append(buffer, fread(&buffer, sizeof(wchar_t), BUFSIZ, pf));
   }
   pclose(pf);
-  static string str_res;
-  str_res = shorten(res);
-  return ;
+  return shorten(res);
 }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
