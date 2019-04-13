@@ -75,8 +75,7 @@ void initialize_directory_globals() {
   *required* sandbox directory for Mac apps)... */
   
   // Set the program_directory
-  buffer[0] = 0;
-
+  char buffer[PATH_MAX + 1];
   uint32_t bufsize = sizeof(buffer);
   if (_NSGetExecutablePath(buffer, &bufsize) == 0) {
     enigma_user::program_directory = add_slash(dirname(buffer));
