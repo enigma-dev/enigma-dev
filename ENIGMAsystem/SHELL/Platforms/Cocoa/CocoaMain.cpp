@@ -35,6 +35,9 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/estring.h"
 
+// Uncomment line below for testing generate_working_directory()
+// $include "Widget_Systems/Cocoa/dialogs.h"
+
 using std::string;
 
 using enigma_user::set_working_directory;
