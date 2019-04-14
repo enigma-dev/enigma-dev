@@ -57,12 +57,11 @@ static inline void generate_working_directory() {
   /* This function will set the working directory to the app bundle's Resources folder 
   like GM4Mac 7.5, GMStudio 1.4, GMS 2.x and most Mac apps do, if the executable is in
   an app bundle. If the executable is not in an app bundle, use the getcwd function */
-  bool success; string macos_bname; string contents_bname; string resources_path; string app_ext;
-  success = false; macos_bname = filename_name(filename_dir(enigma_user::program_directory));
-  contents_bname = filename_name(filename_dir(filename_dir(enigma_user::program_directory)));
-  resources_path = filename_path(filename_dir(enigma_user::program_directory)) + "Resources/";
-  app_ext = filename_ext(filename_dir(filename_dir(filename_dir(enigma_user::program_directory))));
-  if (directory_exists(resources_path) && macos_bname == "MacOS" && contents_bname == "Contents" && app_ext == ".app")
+  bool success = false; string macos_bname = filename_name(filename_dir(enigma_user::program_directory));
+  string contents_bname = filename_name(filename_dir(filename_dir(enigma_user::program_directory)));
+  string app_ext = filename_ext(filename_dir(filename_dir(filename_dir(enigma_user::program_directory))));
+  string resources_path = filename_path(filename_dir(enigma_user::program_directory)) + "Resources/";
+  if (macos_bname == "MacOS" && contents_bname == "Contents" && app_ext == ".app" && directory_exists(resources_path))
   { success = set_working_directory(resources_path); enigma_user::working_directory = resources_path; }
   if (!success) { char buffer[PATH_MAX]; success = (getcwd(buffer, PATH_MAX) != NULL);
   enigma_user::working_directory = add_slash(buffer); } if (!success) 
