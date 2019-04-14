@@ -62,7 +62,7 @@ static inline void generate_working_directory() {
   resources_path = filename_path(filename_dir(enigma_user::program_directory)) + "Resources/";
   if (directory_exists(resources_path) && macos_bname == "MacOS" && contents_bname == "Contents")
   { success = set_working_directory(resources_path); enigma_user::working_directory = resources_path; }
-  if (!success) { char buffer[PATH_MAX + 1]; success = (getcwd(buffer, PATH_MAX + 1) != NULL);
+  if (!success) { char buffer[PATH_MAX]; success = (getcwd(buffer, PATH_MAX) != NULL);
   enigma_user::working_directory = add_slash(buffer); } if (!success) 
   { set_working_directory(""); enigma_user::working_directory = ""; }
   /* if (success) enigma_user::show_message("Success!"); else enigma_user::show_message("Failure!");
