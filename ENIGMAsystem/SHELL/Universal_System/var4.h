@@ -1,197 +1,507 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**  Copyright (C) 2014 Seth N. Hetu                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2019 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #ifndef ENIGMA_VAR4_H
 #define ENIGMA_VAR4_H
 
-// We want var and variant to support a lot of assignment types.
-#include "var_te.h"
 #include "lua_table.h"
 
+#include <cmath>
+#include <limits>
 #include <string>
 
 namespace enigma {
-  union rvt {
-    double d;
-    const void * p;
-    rvt(double x): d(x) {}
-    rvt(const void * x): p(x) {}
-    #define var_e 1e-12
+
+template<typename E> struct EnabledType {
+  typedef E T;
+  static constexpr bool V = true;
+  template<typename R> struct returns {
+    typedef R T;
   };
-}
+};
+
+template<typename E, bool Enable> struct MaybeEnabled {};
+template<typename E> struct MaybeEnabled<E, true>: EnabledType<E> {};
+
+#ifndef JUST_DEFINE_IT_RUN
+
+// Tests whether one type can be cast explicitly to another.
+// Note that this excludes explicit construction; this is for a direct cast.
+template<typename T, typename U> class CanCast {
+  template<typename I, typename O = U> struct Kernel {
+    static constexpr bool V = false;
+  };
+  template<typename I> struct Kernel<I, decltype((U) *(I*)nullptr)> {
+    static constexpr bool V = true;
+  };
+
+ public:
+  static constexpr bool V = Kernel<T>::V;
+};
+
+template<typename T> struct SIntTypeEnabler {};
+template<> struct SIntTypeEnabler<int8_t>  : EnabledType<int8_t>  {};
+template<> struct SIntTypeEnabler<int16_t> : EnabledType<int16_t> {};
+template<> struct SIntTypeEnabler<int32_t> : EnabledType<int32_t> {};
+template<> struct SIntTypeEnabler<int64_t> : EnabledType<int64_t> {};
+template<typename T> using SIntType = typename SIntTypeEnabler<T>::T;
+
+template<typename T> struct UIntTypeEnabler {};
+template<> struct UIntTypeEnabler<uint8_t>  : EnabledType<uint8_t>  {};
+template<> struct UIntTypeEnabler<uint16_t> : EnabledType<uint16_t> {};
+template<> struct UIntTypeEnabler<uint32_t> : EnabledType<uint32_t> {};
+template<> struct UIntTypeEnabler<uint64_t> : EnabledType<uint64_t> {};
+template<typename T> using UIntType = typename UIntTypeEnabler<T>::T;
+
+template<typename T> struct IntTypeEnabler {};
+template<> struct IntTypeEnabler<int8_t>   : EnabledType<int8_t>   {};
+template<> struct IntTypeEnabler<int16_t>  : EnabledType<int16_t>  {};
+template<> struct IntTypeEnabler<int32_t>  : EnabledType<int32_t>  {};
+template<> struct IntTypeEnabler<int64_t>  : EnabledType<int64_t>  {};
+template<> struct IntTypeEnabler<uint8_t>  : EnabledType<uint8_t>  {};
+template<> struct IntTypeEnabler<uint16_t> : EnabledType<uint16_t> {};
+template<> struct IntTypeEnabler<uint32_t> : EnabledType<uint32_t> {};
+template<> struct IntTypeEnabler<uint64_t> : EnabledType<uint64_t> {};
+template<typename T> using IntType = typename IntTypeEnabler<T>::T;
+
+template<typename T> struct FloatTypeEnabler {};
+template<> struct FloatTypeEnabler<float>       : EnabledType<float>  {};
+template<> struct FloatTypeEnabler<double>      : EnabledType<double> {};
+template<> struct FloatTypeEnabler<long double> : EnabledType<long double> {};
+template<typename T> using FloatType = typename FloatTypeEnabler<T>::T;
+
+// Any explicitly numeric type. Note that this does NOT include bool and enum!
+template<typename T> struct NumericTypeEnabler {};
+template<> struct NumericTypeEnabler<int8_t>      : EnabledType<int8_t>      {};
+template<> struct NumericTypeEnabler<int16_t>     : EnabledType<int16_t>     {};
+template<> struct NumericTypeEnabler<int32_t>     : EnabledType<int32_t>     {};
+template<> struct NumericTypeEnabler<int64_t>     : EnabledType<int64_t>     {};
+template<> struct NumericTypeEnabler<uint8_t>     : EnabledType<uint8_t>     {};
+template<> struct NumericTypeEnabler<uint16_t>    : EnabledType<uint16_t>    {};
+template<> struct NumericTypeEnabler<uint32_t>    : EnabledType<uint32_t>    {};
+template<> struct NumericTypeEnabler<uint64_t>    : EnabledType<uint64_t>    {};
+template<> struct NumericTypeEnabler<float>       : EnabledType<float>       {};
+template<> struct NumericTypeEnabler<double>      : EnabledType<double>      {};
+template<> struct NumericTypeEnabler<long double> : EnabledType<long double> {};
+template<typename T> using NumericType = typename NumericTypeEnabler<T>::T;
+template<typename T, typename U> using NumericFunc =
+    typename NumericTypeEnabler<T>::template returns<U>::T;
+
+// More lax than NumericType, but does not permit any type that can also be cast
+// to a string. Allows booleans and enum constants, but not vars or variants.
+template<typename T> struct NonStringNumberTypeEnabler
+    : MaybeEnabled<T, CanCast<T, double>::V && !CanCast<T, std::string>::V> {};
+template<typename T> using NonStringNumber =
+    typename NonStringNumberTypeEnabler<T>::T;
+
+template<typename T> struct ArithmeticTypeEnabler {};
+template<> struct ArithmeticTypeEnabler<int8_t>   : EnabledType<int8_t> {};
+template<> struct ArithmeticTypeEnabler<int16_t>  : EnabledType<int16_t> {};
+template<> struct ArithmeticTypeEnabler<int32_t>  : EnabledType<int32_t> {};
+template<> struct ArithmeticTypeEnabler<int64_t>  : EnabledType<int64_t> {};
+template<> struct ArithmeticTypeEnabler<uint8_t>  : EnabledType<uint8_t> {};
+template<> struct ArithmeticTypeEnabler<uint16_t> : EnabledType<uint16_t> {};
+template<> struct ArithmeticTypeEnabler<uint32_t> : EnabledType<uint32_t> {};
+template<> struct ArithmeticTypeEnabler<uint64_t> : EnabledType<uint64_t> {};
+template<> struct ArithmeticTypeEnabler<float>    : EnabledType<float> {};
+template<> struct ArithmeticTypeEnabler<double>   : EnabledType<double> {};
+template<> struct ArithmeticTypeEnabler<long double>    : EnabledType<long double>    {};
+template<typename T> using ArithmeticType = typename ArithmeticTypeEnabler<T>::T;
+
+template<typename X, typename Y = X, typename Z = Y,
+         typename W = Z, typename P = W, typename R = P,
+         typename EN = decltype(X() - Y() - Z() - W() - P() - R())>
+struct ArithmeticTypes: EnabledType<EN> {};
+
+template<typename T> struct StringTypeEnabler {};
+template<> struct StringTypeEnabler<std::string> : EnabledType<std::string> {};
+template<> struct StringTypeEnabler<const char*> : EnabledType<const char*> {};
+template<typename T> using StringType = typename StringTypeEnabler<T>::T;
+template<typename T, typename U> using StringFunc =
+    typename StringTypeEnabler<T>::template returns<U>::T;
+// TODO: support string_view
+
+
+union rvt {
+  double d;
+  const void * p;
+  rvt(double x): d(x) {}
+  rvt(const void * x): p(x) {}
+};
+
+#define RLY_INLINE __attribute__((always_inline))
+
+#else  // JUST_DEFINE_IT_RUN
+/**/  namespace enigma {
+/**/
+/**/  // These mock definitions avoid JDI problems and make syntax highlighting
+/**/  // work properly in simple text editors like Geany.
+/**/  template<typename X> class SIntType        : EnabledType<int> {};
+/**/  template<typename X> class UIntType        : EnabledType<unsigned> {};
+/**/  template<typename X> class IntType         : EnabledType<int> {};
+/**/  template<typename X> class FloatType       : EnabledType<double> {};
+/**/  template<typename X> class NumericType     : EnabledType<double> {};
+/**/  template<typename X> class NonStringNumber : EnabledType<double> {};
+/**/  template<typename X> class ArithmeticType  : EnabledType<double> {};
+/**/
+/**/  template<typename X, typename Y=int, typename Z = int,
+/**/           typename W = int, typename P = int, typename R = int>
+/**/  class ArithmeticTypes { typedef double T; };
+/**/
+/**/  }  // namespace enigma
+#define RLY_INLINE
+#endif  // JUST_DEFINE_IT_RUN
+
+}  // namespace enigma
+
+namespace enigma_user {
+
+enum {
+  ty_undefined = -1,
+  ty_real = 0,
+  ty_string = 1,
+  ty_pointer = 2
+};
+
+}  // namespace enigma_user
 
 struct var;
+struct variant;
 
-struct variant
-{
-  //Default type (-1 or real), changes based on "assume_uninitialized_is_zero" flag.
-  //This variable is defined in a compiler-generated class.
+namespace enigma_user {
+
+std::string toString(const void*);
+std::string toString(double);
+
+#ifdef INCLUDED_FROM_SHELLMAIN
+#define string(...) toString(__VA_ARGS__)
+#endif
+
+}
+
+
+//▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚
+//██▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜██████████████████████████████
+//██▌ variant: a smart pair of string and double ▐██████████████████████████████
+//██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟██████████████████████████████
+//▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
+
+struct variant {
+  // Default type (-1 or real), changes based on "assume_uninitialized_is_zero."
+  // (This variable is defined in a compiler-generated class.)
   static const int default_type;
 
   enigma::rvt rval;
   std::string sval;
   int type;
 
-  operator int();
-  operator bool();
-  operator char();
-  operator long();
-  operator short();
-  operator unsigned();
-  operator unsigned char();
-  operator unsigned long();
-  operator unsigned short();
-  operator unsigned long long();
-  operator long long();
-  operator double();
-  operator float();
+  static constexpr double epsilon = 1e-12;
+  static constexpr int ty_real =  enigma_user::ty_real;
+  static constexpr int ty_string =  enigma_user::ty_string;
 
-  operator std::string();
+  // Real-valued casts.
+  template<typename T, bool enabled = enigma::NonStringNumberTypeEnabler<T>::V>
+  operator T() const {
+    return (T) rval.d;
+  }
+  // String cast.
+  operator const std::string&() const {
+    return sval;
+  }
 
-  operator int() const;
-  operator bool() const;
-  operator char() const;
-  operator long() const;
-  operator short() const;
-  operator unsigned() const;
-  operator unsigned char() const;
-  operator unsigned long() const;
-  operator unsigned short() const;
-  operator unsigned long long() const;
-  operator long long() const;
-  operator double() const;
-  operator float() const;
+  std::string to_string() const {
+    if (type == ty_string)  return sval;
+    if (type == enigma_user::ty_pointer) return enigma_user::toString(rval.p);
+    if (type == ty_real) return enigma_user::toString(rval.d);
+    return "<undefined>";
+  }
 
-  operator std::string() const;
+  // Our bool cast is special... thanks, Delphi
+  operator bool() const {
+    // TODO: Enable turning this off...
+    return lrint(rval.d) > 0;
+  }
 
-  variant();
-  variant(const void *p);
-  types_extrapolate_alldecc(variant)
+  // How to construct a variant: the basics
+  variant():
+      rval(0.0), sval(), type(default_type) {}
+  variant(const void *p):
+      rval(p), type(enigma_user::ty_pointer) {}
+  variant(const variant &x):
+      rval(x.rval.d), sval(x.sval), type(x.type) {}
+  variant(variant &&x):
+      rval(x.rval.d), sval(std::move(x.sval)), type(x.type) {}
+  variant(const var& x);
 
-  types_extrapolate_alldec(variant& operator=)
-  variant& operator=(const void* p);
-  types_extrapolate_alldec(variant& operator+=)
-  types_extrapolate_alldec(variant& operator-=)
-  types_extrapolate_alldec(variant& operator*=)
-  types_extrapolate_alldec(variant& operator/=)
-  types_extrapolate_alldec(variant& operator%=)
+  // Construct a variant from numeric types
+  template<typename T, bool enabled = enigma::NonStringNumberTypeEnabler<T>::V>
+  variant(T number): rval((double) number), type(ty_real) {}
 
-  types_extrapolate_alldec(variant& operator<<=)
-  types_extrapolate_alldec(variant& operator>>=)
-  types_extrapolate_alldec(variant& operator&=)
-  types_extrapolate_alldec(variant& operator|=)
-  types_extrapolate_alldec(variant& operator^=)
+  variant(const std::string &str): rval(0.), sval(str), type(ty_string) {}
+  variant(std::string &&str): rval(0.), sval(str), type(ty_string) {}
 
-  #undef EVCONST
-  #define EVCONST const
-  types_extrapolate_alldec(variant operator+)
-  types_extrapolate_alldec(double  operator-)
-  types_extrapolate_alldec(double  operator*)
-  types_extrapolate_alldec(double  operator/)
-  types_extrapolate_alldec(double  operator%)
+  // Assignment operators
+  // ===========================================================================
 
-  types_extrapolate_alldec(long operator<<)
-  types_extrapolate_alldec(long operator>>)
-  types_extrapolate_alldec(long operator&)
-  types_extrapolate_alldec(long operator|)
-  types_extrapolate_alldec(long operator^)
+  variant& operator=(const variant &v) {
+    rval = v.rval;
+    if ((type = v.type) == ty_string) sval = v.sval;
+    return *this;
+  }
 
-  #undef types_extrapolate_alldec
-  #define types_extrapolate_alldec(prefix)\
-   types_extrapolate_real_p  (prefix,;)\
-   types_extrapolate_string_p(prefix,;)\
-   prefix (const variant &x) const;\
-   prefix (const var &x) const;
+  // Assignment to a numeric type
+  template<typename T, bool enabled = enigma::NonStringNumberTypeEnabler<T>::V>
+  variant& operator=(T number) {
+    rval.d = (double) number;
+    type = ty_real;
+    return *this;
+  }
 
-  types_extrapolate_alldec(bool operator==)
-  types_extrapolate_alldec(bool operator!=)
-  types_extrapolate_alldec(bool operator>=)
-  types_extrapolate_alldec(bool operator<=)
-  types_extrapolate_alldec(bool operator>)
-  types_extrapolate_alldec(bool operator<)
-  #undef EVCONST
-  #define EVCONST
+  // Assignment to a string type
+  variant& operator=(const std::string &str) {
+    sval = str;
+    type = ty_string;
+    return *this;
+  }
+  variant& operator=(std::string &&str) {
+    sval = std::move(str);
+    type = ty_string;
+    return *this;
+  }
 
-  char&     operator[] (int);
-  variant&  operator++();
-  double    operator++(int);
-  variant&  operator--();
-  double    operator--(int);
-  variant&  operator*();
+  // The plus operator is actually really special.
+  template<typename T, bool enable = enigma::NonStringNumberTypeEnabler<T>::V>
+  variant& operator+=(T number) {
+    rval.d += number;
+    return *this;
+  }
+  variant& operator+=(const std::string &str) {
+    sval += str;
+    return *this;
+  }
+  variant& operator+=(const variant &other) RLY_INLINE {
+    if (type == ty_string) sval += other.sval;
+    else rval.d += other.rval.d;
+    return *this;
+  }
 
-  #undef EVCONST
-  #define EVCONST const
-  bool      operator!() EVCONST;
-  long      operator~() EVCONST;
-  double    operator-() EVCONST;
-  double    operator+() EVCONST;
-  #undef EVCONST
-  #define EVCONST
+  variant operator+(const variant &other) const RLY_INLINE {
+    if (type == ty_string) return sval + other.sval;
+    return rval.d + other.rval.d;
+  }
 
-  ~variant();
+  // Arithmetic operators.
+  // ===========================================================================
+
+  // Basic arithmetic operators.
+  template<typename T> decltype(rval.d + T()) operator+(T x) const {
+    return rval.d + x;
+  }
+  template<typename T> decltype(rval.d - T()) operator-(T x) const {
+    return rval.d - x;
+  }
+  template<typename T> decltype(rval.d * T()) operator*(T x) const {
+    return rval.d * x;
+  }
+  template<typename T> decltype(rval.d / T()) operator/(T x) const {
+    return rval.d / x;
+  }
+  template<typename T> decltype(fmod(rval.d, T())) operator%(T x) const {
+    return fmod(rval.d, x);
+  }
+
+  // Same as the above, but for another variant.
+  double operator-(const variant &x) const { return rval.d - x.rval.d; }
+  double operator*(const variant &x) const { return rval.d * x.rval.d; }
+  double operator/(const variant &x) const { return rval.d / x.rval.d; }
+  double operator%(const variant &x) const { return fmod(rval.d, x.rval.d); }
+
+  // This is just fucking stupid.
+  template<class T> variant &operator-=(const T &v)  { return *this = *this - v;  }
+  template<class T> variant &operator*=(const T &v)  { return *this = *this * v;  }
+  template<class T> variant &operator/=(const T &v)  { return *this = *this / v;  }
+  template<class T> variant &operator%=(const T &v)  { return *this = *this % v;  }
+
+  template<class T> variant &operator&=( const T &v) { return *this = *this & v;  }
+  template<class T> variant &operator|=( const T &v) { return *this = *this | v;  }
+  template<class T> variant &operator^=( const T &v) { return *this = *this ^ v;  }
+  template<class T> variant &operator<<=(const T &v) { return *this = *this << v; }
+  template<class T> variant &operator>>=(const T &v) { return *this = *this >> v; }
+
+  // Comparison helpers.
+  template<typename T> bool epsilon_eq(T x) const {
+    return rval.d <= x + epsilon && rval.d >= x - epsilon;
+  }
+  template<typename T> bool epsilon_neq(T x) const {
+    return rval.d < x - epsilon || rval.d > x + epsilon;
+  }
+  template<typename T> bool epsilon_leq(T x) const {
+    return rval.d <= x + epsilon;
+  }
+  template<typename T> bool epsilon_geq(T x) const {
+    return rval.d >= x - epsilon;
+  }
+  template<typename T> bool epsilon_lt(T x) const {
+    return rval.d < x - epsilon;
+  }
+  template<typename T> bool epsilon_gt(T x) const {
+    return rval.d > x + epsilon;
+  }
+
+  // Comparison operators:  <  >  <=  >=  !=  ==
+  // ===========================================================================
+
+  // Block one: Type-aware comparison with other variant.
+  bool operator==(const variant &x) const RLY_INLINE {
+    if (type != x.type) return false;
+    if (type == ty_string) return sval == x.sval;
+    return epsilon_eq(x.rval.d);
+  }
+  bool operator!=(const variant &x) const RLY_INLINE {
+    if (type != x.type) return true;
+    if (type == ty_string) return sval != x.sval;
+    return epsilon_neq(x.rval.d);
+  }
+  bool operator<=(const variant &x) const RLY_INLINE {
+    if (type == ty_string) {
+      if (x.type != ty_string) return false;  // As a string, we are larger.
+      return sval <= x.sval;
+    }
+    return epsilon_leq(x.rval.d);
+  }
+  bool operator>=(const variant &x) const RLY_INLINE {
+    if (type == ty_string) {
+      if (x.type != ty_string) return true;  // As a string, we are larger.
+      return sval >= x.sval;
+    }
+    return epsilon_geq(x.rval.d);
+  }
+  bool operator<(const variant &x) const RLY_INLINE {
+    if (type == ty_string) {
+      if (x.type != ty_string) return false;  // As a string, we are larger.
+      return sval < x.sval;
+    }
+    return epsilon_lt(x.rval.d);
+  }
+  bool operator>(const variant &x) const RLY_INLINE {
+    if (type == ty_string) {
+      if (x.type != ty_string) return true;  // As a string, we are larger.
+      return sval > x.sval;
+    }
+    return epsilon_gt(x.rval.d);
+  }
+
+  // Block two: strictly numeric comparisons.
+  // Note: Strings are always larger than reals.
+  template<typename T> enigma::NumericFunc<T, bool> operator==(T x) const {
+    return type == ty_real && epsilon_eq(x);
+  }
+  template<typename T> enigma::NumericFunc<T, bool> operator!=(T x) const {
+    return type != ty_real || epsilon_neq(x);
+  }
+  template<typename T> enigma::NumericFunc<T, bool> operator<=(T x) const {
+    return type == ty_real && epsilon_leq(x);
+  }
+  template<typename T> enigma::NumericFunc<T, bool> operator>=(T x) const {
+    return type != ty_real || epsilon_geq(x);
+  }
+  template<typename T> enigma::NumericFunc<T, bool> operator<(T x) const {
+    return type == ty_real && epsilon_lt(x);
+  }
+  template<typename T> enigma::NumericFunc<T, bool> operator>(T x) const {
+    return type != ty_real || epsilon_gt(x);
+  }
+
+  // Block three: string comparisons.
+  // As before, Strings are always larger than reals.
+  template<typename T> enigma::StringFunc<T, bool> operator==(T x) const {
+    return type == ty_string && sval == x;
+  }
+  template<typename T> enigma::StringFunc<T, bool> operator!=(T x) const {
+    return type != ty_string || sval != x;
+  }
+  template<typename T> enigma::StringFunc<T, bool> operator<=(T x) const {
+    return type != ty_string || sval <= x;
+  }
+  template<typename T> enigma::StringFunc<T, bool> operator>=(T x) const {
+    return type == ty_string && sval >= x;
+  }
+  template<typename T> enigma::StringFunc<T, bool> operator<(T x) const {
+    return type != ty_string || sval < x;
+  }
+  template<typename T> enigma::StringFunc<T, bool> operator>(T x) const {
+    return type == ty_string && sval > x;
+  }
+
+  // Bitwise operators:  <<  >>  &  |  ^
+  // ===========================================================================
+
+  template<typename T>
+  decltype(0LL << (int)*(T*)nullptr) operator<<(T x) const {
+    return (long long) rval.d << (int) x;
+  }
+  template<typename T>
+  decltype(0LL >> (int)*(T*)nullptr) operator>>(T x) const {
+    return (long long) rval.d >> (int) x;
+  }
+  template<typename T>
+  decltype(0LL & (long long)*(T*)nullptr) operator&(T x) const {
+    return (long long) rval.d & (long long) x;
+  }
+  template<typename T>
+  decltype(0LL | (long long)*(T*)nullptr) operator|(T x) const {
+    return (long long) rval.d | (long long) x;
+  }
+  template<typename T>
+  decltype(0LL | (long long)*(T*)nullptr) operator^(T x) const {
+    return (long long) rval.d ^ (long long) x;
+  }
+
+  // Miscellanea
+  // ===========================================================================
+
+  // Array accessors.
+  char &operator[](int ind)       { return sval[ind]; }
+  char  operator[](int ind) const { return sval[ind]; }
+
+  // Increment operators.
+  variant&  operator++()    { return ++rval.d, *this; }
+  double    operator++(int) { return rval.d++; }
+  variant&  operator--()    { return --rval.d, *this; }
+  double    operator--(int) { return rval.d--; }
+  variant&  operator*()     { return *this; }
+
+  // Other unary operators.
+  bool   operator!() const { return !bool(*this); }
+  long   operator~() const { return ~long(*this); }
+  double operator-() const { return -rval.d; }
+  double operator+() const { return  rval.d; }
+
+  ~variant() {}
 };
 
 
-
-#undef types_extrapolate_alldec
-#define types_extrapolate_alldec(prefix)\
- types_extrapolate_real_p  (prefix,;)\
- types_extrapolate_string_p(prefix,;)\
- prefix (variant x);
+//▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚
+//██▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜█████████████████████████████████████████
+//██▌ var: a sparse matrix of variant ▐█████████████████████████████████████████
+//██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟█████████████████████████████████████████
+//▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
 
 struct var : variant {
-  using variant::operator+;
-  using variant::operator-;
-  using variant::operator*;
-  using variant::operator/;
-  using variant::operator%;
-  using variant::operator<;
-  using variant::operator>;
-  using variant::operator<<;
-  using variant::operator>>;
-  using variant::operator|;
-  using variant::operator^;
-  using variant::operator!;
-  using variant::operator~;
-
-  using variant::operator+=;
-  using variant::operator-=;
-  using variant::operator*=;
-  using variant::operator/=;
-  using variant::operator%=;
-  using variant::operator<=;
-  using variant::operator>=;
-  using variant::operator<<=;
-  using variant::operator>>=;
-  using variant::operator|=;
-  using variant::operator^=;
-  using variant::operator!=;
-
   lua_table<variant> array1d;
   lua_table<lua_table<variant>> array2d;
 
@@ -202,6 +512,9 @@ struct var : variant {
     for (size_t i = 1; i < height; ++i) array2d[i].fill(value, length);
   }
   template<typename T> var(const T &v): variant(v) {}
+
+  // Non-variant operators (matrix-related)
+  // ===========================================================================
 
   variant& operator*  () { return *this; }
   variant& operator() () { return *this; }
@@ -231,7 +544,10 @@ struct var : variant {
     return *this;
   }
 
-  //Calculate array lengths.
+  // Other array functions
+  // ===========================================================================
+
+  // Calculate array lengths.
   int array_len() const { return array1d.max_index(); }
   int array_height() const { return array2d.max_index(); }
   int array_len(int row) const {
@@ -254,72 +570,140 @@ struct var : variant {
             array1d.dense_part().end()};
   }
 
+  // Annoying overhead and var extensions of variant operators
+  // ===========================================================================
+
+  // Inherit 75 operators from variant like it's 1982
+  using variant::operator=;
+  using variant::operator+;   using variant::operator+=;
+  using variant::operator-;   using variant::operator-=;
+  using variant::operator*;   using variant::operator*=;
+  using variant::operator/;   using variant::operator/=;
+  using variant::operator%;   using variant::operator%=;
+  using variant::operator<;   using variant::operator<=;
+  using variant::operator>;   using variant::operator>=;
+  using variant::operator<<;  using variant::operator<<=;
+  using variant::operator>>;  using variant::operator>>=;
+  using variant::operator|;   using variant::operator|=;
+  using variant::operator^;   using variant::operator^=;
+  using variant::operator!;   using variant::operator!=;
+  using variant::operator~;
+
+  var &operator=(const var &v) {
+    *(variant*) this = v;
+    return *this;
+  }
+
+  variant operator+(const var &v) {
+    return *(variant *) this - v;
+  }
+  // auto operator-(const var &v)  { return *(variant *) this -  v; }
+  // auto operator*(const var &v)  { return *(variant *) this *  v; }
+  // auto operator/(const var &v)  { return *(variant *) this /  v; }
+  // auto operator%(const var &v)  { return *(variant *) this %  v; }
+  // auto operator<(const var &v)  { return *(variant *) this <  v; }
+  // auto operator>(const var &v)  { return *(variant *) this >  v; }
+  // auto operator<<(const var &v) { return *(variant *) this << v; }
+  // auto operator>>(const var &v) { return *(variant *) this >> v; }
+  // auto operator|(const var &v)  { return *(variant *) this |  v; }
+  // auto operator^(const var &v)  { return *(variant *) this ^  v; }
+
   ~var() {}
 };
 
 
-#undef EVCONST
-#define EVCONST
+//▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚
+//██▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜████████████████████████████████████
+//██▌ Reverse-direction operator overloads ▐████████████████████████████████████
+//██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟████████████████████████████████████
+//▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
 
-types_binary_assign_extrapolate_declare(+, const variant&)
-types_binary_assign_extrapolate_declare(-, const variant&)
-types_binary_assign_extrapolate_declare(*, const variant&)
-types_binary_assign_extrapolate_declare(/, const variant&)
-types_binary_assign_extrapolate_declare(%, const variant&)
+template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+static inline decltype(T() + double()) operator+(T a, const variant &b) {
+  return a + b.rval.d;
+}
+template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+static inline decltype(T() - double()) operator-(T a, const variant &b) {
+  return a - b.rval.d;
+}
+template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+static inline decltype(T() * double()) operator*(T a, const variant &b) {
+  return a * b.rval.d;
+}
+template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+static inline decltype(T() / double()) operator/(T a, const variant &b) {
+  return a / b.rval.d;
+}
+template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+double operator%(T a, const variant &b) {
+  return fmod(a, b.rval.d);
+}
 
-types_binary_assign_extrapolate_declare(<<, const variant&)
-types_binary_assign_extrapolate_declare(>>, const variant&)
-types_binary_assign_extrapolate_declare(&,  const variant&)
-types_binary_assign_extrapolate_declare(|,  const variant&)
-types_binary_assign_extrapolate_declare(^,  const variant&)
+template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+static inline long long operator<<(T a, const variant &b) {
+  return (long long) a << (long long) b.rval.d;
+}
+template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+static inline long long operator>>(T a, const variant &b) {
+  return (long long) a >> (long long) b.rval.d;
+}
+template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+static inline long long operator&(T a, const variant &b) {
+  return (long long) a & (long long) b.rval.d;
+}
+template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+static inline long long operator|(T a, const variant &b) {
+  return (long long) a | (long long) b.rval.d;
+}
+template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+static inline long long operator^(T a, const variant &b) {
+  return (long long) a ^ (long long) b.rval.d;
+}
 
-
-types_binary_extrapolate_alldecc(double, operator+, const variant&)
-types_binary_extrapolate_alldecc(double, operator-, const variant&)
-types_binary_extrapolate_alldecc(double, operator*, const variant&)
-types_binary_extrapolate_alldecc(double, operator/, const variant&)
-types_binary_extrapolate_alldecc(double, operator%, const variant&)
-
-types_binary_bitwise_extrapolate_alldecc(operator<<, const variant&)
-types_binary_bitwise_extrapolate_alldecc(operator>>, const variant&)
-types_binary_bitwise_extrapolate_alldecc(operator&,  const variant&)
-types_binary_bitwise_extrapolate_alldecc(operator|,  const variant&)
-types_binary_bitwise_extrapolate_alldecc(operator^,  const variant&)
-
-types_binary_extrapolate_alldecce(bool, operator==, const variant&)
-types_binary_extrapolate_alldecce(bool, operator!=, const variant&)
-types_binary_extrapolate_alldecce(bool, operator>=, const variant&)
-types_binary_extrapolate_alldecce(bool, operator<=, const variant&)
-types_binary_extrapolate_alldecce(bool, operator>,  const variant&)
-types_binary_extrapolate_alldecce(bool, operator<,  const variant&)
-
-#undef EVCONST
-#define EVCONST
-
-#undef types_extrapolate_real_p
-#undef types_extrapolate_string_p
-#undef types_extrapolate_mix_p
-#undef types_extrapolate_alldec
-#undef types_extrapolate_alldecc
-
-#ifdef INCLUDED_FROM_SHELLMAIN
-#define string(...) toString(__VA_ARGS__)
-#endif
-
-#undef unsigll
+// String + variant operator we missed above
+static inline std::string operator+(const std::string &str, const variant &v) {
+  return str + v.to_string();
+}
 
 namespace enigma_user {
-  enum {
-    ty_undefined = -1,
-    ty_real = 0,
-    ty_string = 1,
-    ty_pointer = 2
-  };
 
-  bool is_undefined(variant var);
-  bool is_real(variant val);
-  bool is_string(variant val);
-  bool is_ptr(variant var);
+static inline bool is_undefined(const variant &val) {
+  return val.type == enigma_user::ty_undefined;
 }
+static inline bool is_real     (const variant &val) {
+  return val.type == enigma_user::ty_real;
+}
+static inline bool is_string   (const variant &val) {
+  return val.type == enigma_user::ty_string;
+}
+static inline bool is_ptr      (const variant &val) {
+  return val.type == enigma_user::ty_pointer;
+}
+
+}  // namespace enigma_user
+
+
+namespace std {
+
+template<> class numeric_limits<var>: numeric_limits<double> {};
+template<> class numeric_limits<variant>: numeric_limits<double> {};
+template<> class numeric_limits<const var&>: numeric_limits<double> {};
+template<> class numeric_limits<const variant&>: numeric_limits<double> {};
+
+}  // namespace std
+
+
+namespace enigma {
+
+// Define var and variant as arithmetic types.
+// Note: This isn't some profound or magical truth; it's just the distinction
+//       between ArithmeticType and NumericType, as we've defined them.
+template<> struct ArithmeticTypeEnabler<const var&>
+    : EnabledType<const var&>     {};
+template<> struct ArithmeticTypeEnabler<const variant&>
+    : EnabledType<const variant&> {};
+
+}  // namespace enigma
+
 
 #endif //ENIGMA_VAR4_H

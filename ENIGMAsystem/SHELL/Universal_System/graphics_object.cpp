@@ -45,8 +45,7 @@ namespace enigma
   bool object_graphics::myevent_drawgui_subcheck() { return 0; }
   variant object_graphics::myevent_drawresize()   { return 0; }
 
-  INTERCEPT_DEFAULT_COPY(enigma::depthv)
-  void depthv::function(variant oldval) {
+  void depthv::function(const variant &oldval) {
     if (!myiter) { return; }
 
     rval.d = floor(rval.d);
@@ -77,7 +76,7 @@ namespace enigma
   depthv::depthv() : myiter(0) {}
   depthv::~depthv() {}
 
-  void image_singlev::function(variant) {
+  void image_singlev::function(const variant&) {
     if (rval.d == -1) {
       *image_speed = 1;
     } else {

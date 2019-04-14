@@ -21,28 +21,28 @@
 #include "multifunction_variant.h"
 
 namespace enigma {
-  struct directionv: multifunction_variant {
+  struct directionv: multifunction_variant<directionv> {
     INHERIT_OPERATORS(directionv)
     double *spd, *hspd, *vspd;
-    void function(variant oldval);
+    void function(const variant &oldval);
   };
 
-  struct speedv: multifunction_variant {
+  struct speedv: multifunction_variant<speedv> {
     INHERIT_OPERATORS(speedv)
     double *dir, *hspd, *vspd;
-    void function(variant oldval);
+    void function(const variant &oldval);
   };
 
-  struct hspeedv: multifunction_variant {
+  struct hspeedv: multifunction_variant<hspeedv> {
     INHERIT_OPERATORS(hspeedv)
     double *vspd, *dir, *spd;
-    void function(variant oldval);
+    void function(const variant &oldval);
   };
 
-  struct vspeedv: multifunction_variant {
+  struct vspeedv: multifunction_variant<vspeedv> {
     INHERIT_OPERATORS(vspeedv)
     double *hspd, *dir, *spd;
-    void function(variant oldval);
+    void function(const variant &oldval);
   };
 }
 

@@ -86,14 +86,14 @@ inline bool action_if_variable(const variant& variable, const variant& value, in
 }
 
 inline void action_move_to(const double xx, const double yy) {
-    if (argument_relative) {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+=xx;
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+=yy;
-    }
-    else {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x=xx;
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y=yy;
-	}
+  if (argument_relative) {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+=xx;
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+=yy;
+  }
+  else {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x=xx;
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y=yy;
+  }
 }
 
 inline void action_set_score(double newscore) {
@@ -130,35 +130,37 @@ inline bool action_if_number(const int object, const double number, const int op
 inline void action_kill_object() { instance_destroy(); }
 
 inline void action_set_vspeed(const double newvspeed) {
-    if (argument_relative) {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed+=newvspeed;
-    } else
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed=newvspeed;
+  if (argument_relative) {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed+=newvspeed;
+  } else {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed=newvspeed;
+  }
 }
 
 inline void action_set_hspeed(const double newhspeed) {
-	if (argument_relative) {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed+=newhspeed;
-    } else
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed=newhspeed;
+  if (argument_relative) {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed+=newhspeed;
+  } else {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed=newhspeed;
+  }
 }
 
 inline void action_set_gravity(const double direction, const double newgravity) {
-    if (argument_relative) {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction+=direction;
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity+=newgravity;
-    } else {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction=direction;
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity=newgravity;
-    }
+  if (argument_relative) {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction+=direction;
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity+=newgravity;
+  } else {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction=direction;
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity=newgravity;
+  }
 }
 
 inline void action_set_friction(const double newfriction) {
-	if (argument_relative) {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction+=newfriction;
-    } else {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction=newfriction;
-    }
+  if (argument_relative) {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction+=newfriction;
+  } else {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction=newfriction;
+  }
 }
 
 inline bool action_if_dice(double sides) {
