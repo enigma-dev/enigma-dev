@@ -36,7 +36,7 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/estring.h"
 
-// Uncomment the 2 lines below for testing generate_working_directory() success/failure
+/* Uncomment the 2 lines below for testing generate_working_directory() success/failure */
 // #include "Widget_Systems/widgets_mandatory.h"
 // #include "Widget_Systems/Cocoa/dialogs.h"
 
@@ -55,16 +55,16 @@ void SetResizeFptr();
 static inline void generate_working_directory() {
   /* This function will set the working directory to the app bundle's Resources folder 
   like GM4Mac 7.5, GMStudio 1.4, GMS 2.x and most Mac apps do, if the executable is in
-  an app bundle. If the executable is not in an app bundle, use the executable path */
-  bool success = false; string macos_bname; string contents_bname; string resources_path;
-  macos_bname = filename_name(filename_dir(get_program_directory()));
+  an app bundle. If the executable is not in an app bundle, use the getcwd function */
+  bool success; string macos_bname; string contents_bname; string resources_path;
+  success = false; macos_bname = filename_name(filename_dir(get_program_directory()));
   contents_bname = filename_name(filename_dir(filename_dir(enigma_user::program_directory)));
   resources_path = filename_path(filename_dir(enigma_user::program_directory)) + "Resources/";
   if (directory_exists(resources_path) && macos_bname == "MacOS" && contents_bname == "Contents")
   { success = set_working_directory(resources_path); enigma_user::working_directory = resources_path; }
-  if (!success) { success = set_working_directory(enigma_user::program_directory);
-  enigma_user::working_directory = enigma_user::program_directory; }
-  if (!success) { success = set_working_directory(""); enigma_user::working_directory = ""; }
+  if (!success) { char buffer[PATH_MAX + 1]; success = (getcwd(buffer, PATH_MAX + 1) != NULL);
+  enigma_user::working_directory = add_slash(buffer); } if (!success) 
+  { set_working_directory(""); enigma_user::working_directory = ""; }
   /* if (success) enigma_user::show_message("Success!"); else enigma_user::show_message("Failure!");
   enigma_user::get_string("The current value of working_directory equals:", enigma_user::working_directory); */
   /* ONLY use working_directory for loading read-only included files! When SAVING, use game_save_id */
@@ -80,10 +80,10 @@ void initialize_directory_globals() {
   *required* sandbox directory for Mac apps)... */
   
   // Set the program_directory
-  char buffer[PATH_MAX + 1];
+  char buffer[PATH_MAX];
   uint32_t bufsize = sizeof(buffer);
   if (_NSGetExecutablePath(buffer, &bufsize) == 0) {
-    enigma_user::program_directory = add_slash(dirname(buffer));
+    enigma_user::program_directory = filename_path(buffer);
   }
   
   // Set the working_directory
