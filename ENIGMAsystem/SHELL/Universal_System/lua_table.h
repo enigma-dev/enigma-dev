@@ -19,12 +19,10 @@
 #ifndef ENIGMA_H_LUA_TABLE
 #define ENIGMA_H_LUA_TABLE
 
-#ifndef JUST_DEFINE_IT_RUN
 #include <map>     // Sparse part
 #include <vector>  // Dense part
 #include <cstring> // Memcpy
-#include <cstdlib> // Malloc, Realloc, Free
-#endif
+#include <cstddef>
 
 /**
   This file implements a Lua-table-like structure. It borrows ideas not only from
@@ -52,13 +50,8 @@ T my_max(const T& lhs, const T& rhs) {
 
 
 template <class T> struct lua_table {
-# ifndef JUST_DEFINE_IT_RUN
   typedef std::vector<T> dense_type;
   typedef std::map<size_t,T> sparse_type;
-# else
-  typedef T dense_type[1];
-  typedef T sparse_type[1];
-# endif
 
  private:
   dense_type dense;

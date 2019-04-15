@@ -24,8 +24,17 @@
 #include <limits>
 #include <string>
 
+#ifdef JUST_DEFINE_IT_RUN
+#  include <stdint.h>
+#  define constexpr const
+#  define decltype(x) double
+#else
+#  include <cstdint>
+#endif
+
 namespace enigma {
 
+// Some syntactic sugar for declaring things 
 template<typename E> struct EnabledType {
   typedef E T;
   static constexpr bool V = true;
@@ -34,10 +43,9 @@ template<typename E> struct EnabledType {
   };
 };
 
+// Like enable_if, but invented here
 template<typename E, bool Enable> struct MaybeEnabled {};
 template<typename E> struct MaybeEnabled<E, true>: EnabledType<E> {};
-
-#ifndef JUST_DEFINE_IT_RUN
 
 // Tests whether one type can be cast explicitly to another.
 // Note that this excludes explicit construction; this is for a direct cast.
@@ -58,14 +66,12 @@ template<> struct SIntTypeEnabler<int8_t>  : EnabledType<int8_t>  {};
 template<> struct SIntTypeEnabler<int16_t> : EnabledType<int16_t> {};
 template<> struct SIntTypeEnabler<int32_t> : EnabledType<int32_t> {};
 template<> struct SIntTypeEnabler<int64_t> : EnabledType<int64_t> {};
-template<typename T> using SIntType = typename SIntTypeEnabler<T>::T;
 
 template<typename T> struct UIntTypeEnabler {};
 template<> struct UIntTypeEnabler<uint8_t>  : EnabledType<uint8_t>  {};
 template<> struct UIntTypeEnabler<uint16_t> : EnabledType<uint16_t> {};
 template<> struct UIntTypeEnabler<uint32_t> : EnabledType<uint32_t> {};
 template<> struct UIntTypeEnabler<uint64_t> : EnabledType<uint64_t> {};
-template<typename T> using UIntType = typename UIntTypeEnabler<T>::T;
 
 template<typename T> struct IntTypeEnabler {};
 template<> struct IntTypeEnabler<int8_t>   : EnabledType<int8_t>   {};
@@ -76,13 +82,11 @@ template<> struct IntTypeEnabler<uint8_t>  : EnabledType<uint8_t>  {};
 template<> struct IntTypeEnabler<uint16_t> : EnabledType<uint16_t> {};
 template<> struct IntTypeEnabler<uint32_t> : EnabledType<uint32_t> {};
 template<> struct IntTypeEnabler<uint64_t> : EnabledType<uint64_t> {};
-template<typename T> using IntType = typename IntTypeEnabler<T>::T;
 
 template<typename T> struct FloatTypeEnabler {};
 template<> struct FloatTypeEnabler<float>       : EnabledType<float>  {};
 template<> struct FloatTypeEnabler<double>      : EnabledType<double> {};
 template<> struct FloatTypeEnabler<long double> : EnabledType<long double> {};
-template<typename T> using FloatType = typename FloatTypeEnabler<T>::T;
 
 // Any explicitly numeric type. Note that this does NOT include bool and enum!
 template<typename T> struct NumericTypeEnabler {};
@@ -97,16 +101,11 @@ template<> struct NumericTypeEnabler<uint64_t>    : EnabledType<uint64_t>    {};
 template<> struct NumericTypeEnabler<float>       : EnabledType<float>       {};
 template<> struct NumericTypeEnabler<double>      : EnabledType<double>      {};
 template<> struct NumericTypeEnabler<long double> : EnabledType<long double> {};
-template<typename T> using NumericType = typename NumericTypeEnabler<T>::T;
-template<typename T, typename U> using NumericFunc =
-    typename NumericTypeEnabler<T>::template returns<U>::T;
 
 // More lax than NumericType, but does not permit any type that can also be cast
 // to a string. Allows booleans and enum constants, but not vars or variants.
 template<typename T> struct NonStringNumberTypeEnabler
     : MaybeEnabled<T, CanCast<T, double>::V && !CanCast<T, std::string>::V> {};
-template<typename T> using NonStringNumber =
-    typename NonStringNumberTypeEnabler<T>::T;
 
 template<typename T> struct ArithmeticTypeEnabler {};
 template<> struct ArithmeticTypeEnabler<int8_t>   : EnabledType<int8_t> {};
@@ -120,7 +119,6 @@ template<> struct ArithmeticTypeEnabler<uint64_t> : EnabledType<uint64_t> {};
 template<> struct ArithmeticTypeEnabler<float>    : EnabledType<float> {};
 template<> struct ArithmeticTypeEnabler<double>   : EnabledType<double> {};
 template<> struct ArithmeticTypeEnabler<long double>    : EnabledType<long double>    {};
-template<typename T> using ArithmeticType = typename ArithmeticTypeEnabler<T>::T;
 
 template<typename X, typename Y = X, typename Z = Y,
          typename W = Z, typename P = W, typename R = P,
@@ -130,11 +128,33 @@ struct ArithmeticTypes: EnabledType<EN> {};
 template<typename T> struct StringTypeEnabler {};
 template<> struct StringTypeEnabler<std::string> : EnabledType<std::string> {};
 template<> struct StringTypeEnabler<const char*> : EnabledType<const char*> {};
-template<typename T> using StringType = typename StringTypeEnabler<T>::T;
-template<typename T, typename U> using StringFunc =
-    typename StringTypeEnabler<T>::template returns<U>::T;
 // TODO: support string_view
 
+#ifndef JUST_DEFINE_IT_RUN
+
+#define RLY_INLINE __attribute__((always_inline))
+
+template<typename T> using SIntType = typename SIntTypeEnabler<T>::T;
+template<typename T> using UIntType = typename UIntTypeEnabler<T>::T;
+template<typename T> using IntType = typename IntTypeEnabler<T>::T;
+template<typename T> using FloatType = typename FloatTypeEnabler<T>::T;
+template<typename T> using NumericType = typename NumericTypeEnabler<T>::T;
+template<typename T> using ArithmeticType = typename ArithmeticTypeEnabler<T>::T;
+template<typename T> using StringType = typename StringTypeEnabler<T>::T;
+
+template<typename T, typename U> using NumericFunc =
+    typename NumericTypeEnabler<T>::template returns<U>::T;
+template<typename T, typename U> using NSNumberFunc =
+    typename NonStringNumberTypeEnabler<T>::template returns<U>::T;
+template<typename T, typename U> using StringFunc =
+    typename StringTypeEnabler<T>::template returns<U>::T;
+template<typename T> using NonStringNumber =
+    typename NonStringNumberTypeEnabler<T>::T;
+
+#else
+
+#define RLY_INLINE
+#endif  // JUST_DEFINE_IT_RUN
 
 union rvt {
   double d;
@@ -142,29 +162,6 @@ union rvt {
   rvt(double x): d(x) {}
   rvt(const void * x): p(x) {}
 };
-
-#define RLY_INLINE __attribute__((always_inline))
-
-#else  // JUST_DEFINE_IT_RUN
-/**/  namespace enigma {
-/**/
-/**/  // These mock definitions avoid JDI problems and make syntax highlighting
-/**/  // work properly in simple text editors like Geany.
-/**/  template<typename X> class SIntType        : EnabledType<int> {};
-/**/  template<typename X> class UIntType        : EnabledType<unsigned> {};
-/**/  template<typename X> class IntType         : EnabledType<int> {};
-/**/  template<typename X> class FloatType       : EnabledType<double> {};
-/**/  template<typename X> class NumericType     : EnabledType<double> {};
-/**/  template<typename X> class NonStringNumber : EnabledType<double> {};
-/**/  template<typename X> class ArithmeticType  : EnabledType<double> {};
-/**/
-/**/  template<typename X, typename Y=int, typename Z = int,
-/**/           typename W = int, typename P = int, typename R = int>
-/**/  class ArithmeticTypes { typedef double T; };
-/**/
-/**/  }  // namespace enigma
-#define RLY_INLINE
-#endif  // JUST_DEFINE_IT_RUN
 
 }  // namespace enigma
 
@@ -245,7 +242,6 @@ struct variant {
       rval(x.rval.d), sval(x.sval), type(x.type) {}
   variant(variant &&x):
       rval(x.rval.d), sval(std::move(x.sval)), type(x.type) {}
-  variant(const var& x);
 
   // Construct a variant from numeric types
   template<typename T, bool enabled = enigma::NonStringNumberTypeEnabler<T>::V>
@@ -407,22 +403,22 @@ struct variant {
 
   // Block two: strictly numeric comparisons.
   // Note: Strings are always larger than reals.
-  template<typename T> enigma::NumericFunc<T, bool> operator==(T x) const {
+  template<typename T> enigma::NSNumberFunc<T, bool> operator==(T x) const {
     return type == ty_real && epsilon_eq(x);
   }
-  template<typename T> enigma::NumericFunc<T, bool> operator!=(T x) const {
+  template<typename T> enigma::NSNumberFunc<T, bool> operator!=(T x) const {
     return type != ty_real || epsilon_neq(x);
   }
-  template<typename T> enigma::NumericFunc<T, bool> operator<=(T x) const {
+  template<typename T> enigma::NSNumberFunc<T, bool> operator<=(T x) const {
     return type == ty_real && epsilon_leq(x);
   }
-  template<typename T> enigma::NumericFunc<T, bool> operator>=(T x) const {
+  template<typename T> enigma::NSNumberFunc<T, bool> operator>=(T x) const {
     return type != ty_real || epsilon_geq(x);
   }
-  template<typename T> enigma::NumericFunc<T, bool> operator<(T x) const {
+  template<typename T> enigma::NSNumberFunc<T, bool> operator<(T x) const {
     return type == ty_real && epsilon_lt(x);
   }
-  template<typename T> enigma::NumericFunc<T, bool> operator>(T x) const {
+  template<typename T> enigma::NSNumberFunc<T, bool> operator>(T x) const {
     return type != ty_real || epsilon_gt(x);
   }
 
@@ -618,44 +614,44 @@ struct var : variant {
 //██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟████████████████████████████████████
 //▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
 
-template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+template<typename T, bool consider = enigma::NumericTypeEnabler<T>::V>
 static inline decltype(T() + double()) operator+(T a, const variant &b) {
   return a + b.rval.d;
 }
-template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+template<typename T, bool consider = enigma::NumericTypeEnabler<T>::V>
 static inline decltype(T() - double()) operator-(T a, const variant &b) {
   return a - b.rval.d;
 }
-template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+template<typename T, bool consider = enigma::NumericTypeEnabler<T>::V>
 static inline decltype(T() * double()) operator*(T a, const variant &b) {
   return a * b.rval.d;
 }
-template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+template<typename T, bool consider = enigma::NumericTypeEnabler<T>::V>
 static inline decltype(T() / double()) operator/(T a, const variant &b) {
   return a / b.rval.d;
 }
-template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+template<typename T, bool consider = enigma::NumericTypeEnabler<T>::V>
 double operator%(T a, const variant &b) {
   return fmod(a, b.rval.d);
 }
 
-template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+template<typename T, bool consider = enigma::NumericTypeEnabler<T>::V>
 static inline long long operator<<(T a, const variant &b) {
   return (long long) a << (long long) b.rval.d;
 }
-template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+template<typename T, bool consider = enigma::NumericTypeEnabler<T>::V>
 static inline long long operator>>(T a, const variant &b) {
   return (long long) a >> (long long) b.rval.d;
 }
-template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+template<typename T, bool consider = enigma::NumericTypeEnabler<T>::V>
 static inline long long operator&(T a, const variant &b) {
   return (long long) a & (long long) b.rval.d;
 }
-template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+template<typename T, bool consider = enigma::NumericTypeEnabler<T>::V>
 static inline long long operator|(T a, const variant &b) {
   return (long long) a | (long long) b.rval.d;
 }
-template<typename T, bool consider = enigma::NonStringNumberTypeEnabler<T>::V>
+template<typename T, bool consider = enigma::NumericTypeEnabler<T>::V>
 static inline long long operator^(T a, const variant &b) {
   return (long long) a ^ (long long) b.rval.d;
 }
@@ -666,6 +662,9 @@ static inline std::string operator+(const std::string &str, const variant &v) {
 }
 
 namespace enigma_user {
+
+using ::var;
+using ::variant;
 
 static inline bool is_undefined(const variant &val) {
   return val.type == enigma_user::ty_undefined;
