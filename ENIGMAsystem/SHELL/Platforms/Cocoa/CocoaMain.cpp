@@ -90,7 +90,9 @@ static inline void generate_working_directory() {
     enigma_user::working_directory = add_slash(buffer);
   }
   
-  if (!success) set_working_directory(""); // should getcwd() fail, set the working directory to an empty string
+  /* should getcwd() fail,
+  set the working directory to an empty string */
+  if (!success) set_working_directory("");
   
   /* if (success) enigma_user::show_message("Success!"); else enigma_user::show_message("Failure!");
   enigma_user::get_string("The current value of working_directory equals:", enigma_user::working_directory); */
