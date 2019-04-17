@@ -54,21 +54,47 @@ namespace enigma {
 void SetResizeFptr();
 
 static inline void generate_working_directory() {
-  /* This function will set the working directory to the app bundle's Resources folder 
-  like GM4Mac 7.5, GMStudio 1.4, GMS 2.x and most Mac apps do, if the executable is in
-  an app bundle. If the executable is not in an app bundle, use the getcwd function */
-  bool success = false; string macos_bname = filename_name(filename_dir(enigma_user::program_directory));
-  string contents_bname = filename_name(filename_dir(filename_dir(enigma_user::program_directory)));
-  string app_ext = filename_ext(filename_dir(filename_dir(filename_dir(enigma_user::program_directory))));
-  string resources_path = filename_path(filename_dir(enigma_user::program_directory)) + "Resources/";
-  if (macos_bname == "MacOS" && contents_bname == "Contents" && app_ext == ".app" && directory_exists(resources_path))
-  { success = set_working_directory(resources_path); enigma_user::working_directory = resources_path; }
-  if (!success) { char buffer[PATH_MAX]; success = (getcwd(buffer, PATH_MAX) != NULL);
-  enigma_user::working_directory = add_slash(buffer); } if (!success) 
-  { set_working_directory(""); enigma_user::working_directory = ""; }
+  /*
+    This function will set the working directory to the app bundle's Resources folder 
+    like GM4Mac 7.5, GMStudio 1.4, GMS 2.x and most Mac apps do, if the executable is in
+    an app bundle. If the executable is not in an app bundle, use the getcwd function
+    
+    ONLY use working_directory for loading read-only included files! When SAVING, use game_save_id
+    
+    *_bname = base name - removes the full path from the string leaving just the file or folder name
+    *_dname = directory name - removes final slash and base name from full path to file or folder name
+    *_pname = path name - removes the base name from a full path while keeping the dir and final slash
+    *_ename = extension name - includes everything in bname at and following the period if one exists
+  */
+  
+  bool success = false; 
+  string exe_pname = enigma_user::program_directory;      // = "/Path/To/YourAppBundle.app/Contents/MacOS/";
+  string macos_dname = filename_dir(exe_pname);           // = "/Path/To/YourAppBundle.app/Contents/MacOS";
+  string macos_bname = filename_name(macos_dname);        // = "MacOS";
+  string contents_dname = filename_dir(macos_dname);      // = "/Path/To/YourAppBundle.app/Contents";
+  string contents_bname = filename_name(contents_dname);  // = "Contents";
+  string app_dname = filename_dir(contents_dname);        // = "/Path/To/YourAppBundle.app";
+  string app_ename = filename_ext(app_dname);               // = ".app";
+  string contents_pname = filename_path(macos_dname);     // = "/Path/To/YourAppBundle.app/Contents/";
+  string resources_pname = contents_pname + "Resources/"; // = "/Path/To/YourAppBundle.app/Contents/Resources/";
+  
+  // if "/Path/To/YourAppBundle.app/Contents/MacOS/YourExe" and "/Path/To/YourAppBundle.app/Contents/Resources/" exists
+  if (macos_bname == "MacOS" && contents_bname == "Contents" && app_ename == ".app" && directory_exists(resources_pname)) {
+    // set working directory to "/Path/To/YourAppBundle.app/Contents/Resources/" and allow loading normal included files
+    success = set_working_directory(resources_pname); enigma_user::working_directory = resources_pname;
+  }
+  
+  if (!success) { // if the app bundle is not structured correctly
+    // then assume set working directory to the Unix working directory
+    char buffer[PATH_MAX]; success = (getcwd(buffer, PATH_MAX) != NULL);
+    enigma_user::working_directory = add_slash(buffer);
+  }
+  
+  // should getcwd() fail, set the working directory to an empty string:
+  if (!success) set_working_directory(""); enigma_user::working_directory = "";
+  
   /* if (success) enigma_user::show_message("Success!"); else enigma_user::show_message("Failure!");
   enigma_user::get_string("The current value of working_directory equals:", enigma_user::working_directory); */
-  /* ONLY use working_directory for loading read-only included files! When SAVING, use game_save_id */
 }
 
 static inline string add_slash(const string& dir) {
