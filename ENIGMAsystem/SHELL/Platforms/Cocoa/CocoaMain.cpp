@@ -74,7 +74,7 @@ static inline void generate_working_directory() {
   string contents_dname = filename_dir(macos_dname);      // = "/Path/To/YourAppBundle.app/Contents";
   string contents_bname = filename_name(contents_dname);  // = "Contents";
   string app_dname = filename_dir(contents_dname);        // = "/Path/To/YourAppBundle.app";
-  string app_ename = filename_ext(app_dname);               // = ".app";
+  string app_ename = filename_ext(app_dname);             // = ".app";
   string contents_pname = filename_path(macos_dname);     // = "/Path/To/YourAppBundle.app/Contents/";
   string resources_pname = contents_pname + "Resources/"; // = "/Path/To/YourAppBundle.app/Contents/Resources/";
   
