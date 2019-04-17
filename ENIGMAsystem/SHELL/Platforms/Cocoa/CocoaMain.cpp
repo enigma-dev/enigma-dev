@@ -95,8 +95,10 @@ static inline void generate_working_directory() {
   // set working directory to empty string:
   if (!success) set_working_directory("");
   
-  /* if (success) enigma_user::show_message("Success!"); else enigma_user::show_message("Failure!");
-  enigma_user::get_string("The current value of working_directory equals:", enigma_user::working_directory); */
+  /* 
+    if (success) enigma_user::show_message("Success!"); else enigma_user::show_message("Failure!");
+    enigma_user::get_string("The current value of working_directory equals:", enigma_user::working_directory); 
+  */
 }
 
 static inline string add_slash(const string& dir) {
