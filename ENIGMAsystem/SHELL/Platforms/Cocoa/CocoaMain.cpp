@@ -86,12 +86,13 @@ static inline void generate_working_directory() {
   
   if (!success) { // if the app bundle is not structured correctly
     // then assume set working directory to the Unix working directory
-    char buffer[PATH_MAX]; success = (getcwd(buffer, PATH_MAX) != NULL);
-    enigma_user::working_directory = add_slash(buffer);
+    char buffer[PATH_MAX];
+    if (getcwd(buffer, PATH_MAX) != NULL)
+      success = set_working_directory(buffer);
   }
   
-  /* should getcwd() fail,
-  set the working directory to an empty string */
+  /* should getcwd() and chdir() fail, then:
+  set working directory to an empty string */
   if (!success) set_working_directory("");
   
   /* if (success) enigma_user::show_message("Success!"); else enigma_user::show_message("Failure!");
