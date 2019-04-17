@@ -91,8 +91,8 @@ static inline void generate_working_directory() {
       success = set_working_directory(buffer);
   }
   
-  /* should getcwd() and chdir() fail, then:
-  set working directory to an empty string */
+  // should getcwd() and chdir() fail, then
+  // set working directory to empty string:
   if (!success) set_working_directory("");
   
   /* if (success) enigma_user::show_message("Success!"); else enigma_user::show_message("Failure!");
