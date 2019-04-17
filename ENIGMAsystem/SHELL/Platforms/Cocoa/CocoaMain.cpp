@@ -81,7 +81,7 @@ static inline void generate_working_directory() {
   // if "/Path/To/YourAppBundle.app/Contents/MacOS/YourExe" and "/Path/To/YourAppBundle.app/Contents/Resources/" exists
   if (macos_bname == "MacOS" && contents_bname == "Contents" && app_ename == ".app" && directory_exists(resources_pname)) {
     // set working directory to "/Path/To/YourAppBundle.app/Contents/Resources/" and allow loading normal included files
-    success = set_working_directory(resources_pname); enigma_user::working_directory = resources_pname;
+    success = set_working_directory(resources_pname);
   }
   
   if (!success) { // if the app bundle is not structured correctly
@@ -90,8 +90,7 @@ static inline void generate_working_directory() {
     enigma_user::working_directory = add_slash(buffer);
   }
   
-  // should getcwd() fail, set the working directory to an empty string:
-  if (!success) set_working_directory(""); enigma_user::working_directory = "";
+  if (!success) set_working_directory(""); // should getcwd() fail, set the working directory to an empty string
   
   /* if (success) enigma_user::show_message("Success!"); else enigma_user::show_message("Failure!");
   enigma_user::get_string("The current value of working_directory equals:", enigma_user::working_directory); */
