@@ -87,7 +87,9 @@ template<> struct IntTypeEnabler<uint8_t>   : EnabledType<uint8_t>   {};
 template<> struct IntTypeEnabler<uint16_t>  : EnabledType<uint16_t>  {};
 template<> struct IntTypeEnabler<uint32_t>  : EnabledType<uint32_t>  {};
 template<> struct IntTypeEnabler<uint64_t>  : EnabledType<uint64_t>  {};
+#ifndef _GLIBCXX_HAVE_INT64_T_LONG_LONG
 template<> struct IntTypeEnabler<long long> : EnabledType<long long> {};
+#endif
 
 template<typename T> struct FloatTypeEnabler {};
 template<> struct FloatTypeEnabler<float>       : EnabledType<float>  {};
@@ -105,7 +107,9 @@ template<> struct NumericTypeEnabler<uint8_t>     : EnabledType<uint8_t>     {};
 template<> struct NumericTypeEnabler<uint16_t>    : EnabledType<uint16_t>    {};
 template<> struct NumericTypeEnabler<uint32_t>    : EnabledType<uint32_t>    {};
 template<> struct NumericTypeEnabler<uint64_t>    : EnabledType<uint64_t>    {};
+#ifndef _GLIBCXX_HAVE_INT64_T_LONG_LONG
 template<> struct NumericTypeEnabler<long long>   : EnabledType<long long>   {};
+#endif
 template<> struct NumericTypeEnabler<float>       : EnabledType<float>       {};
 template<> struct NumericTypeEnabler<double>      : EnabledType<double>      {};
 template<> struct NumericTypeEnabler<long double> : EnabledType<long double> {};
@@ -127,7 +131,9 @@ template<> struct ArithmeticTypeEnabler<uint8_t>   : EnabledType<uint8_t> {};
 template<> struct ArithmeticTypeEnabler<uint16_t>  : EnabledType<uint16_t> {};
 template<> struct ArithmeticTypeEnabler<uint32_t>  : EnabledType<uint32_t> {};
 template<> struct ArithmeticTypeEnabler<uint64_t>  : EnabledType<uint64_t> {};
+#ifndef _GLIBCXX_HAVE_INT64_T_LONG_LONG
 template<> struct ArithmeticTypeEnabler<long long> : EnabledType<long long> {};
+#endif
 template<> struct ArithmeticTypeEnabler<float>     : EnabledType<float> {};
 template<> struct ArithmeticTypeEnabler<double>    : EnabledType<double> {};
 template<> struct ArithmeticTypeEnabler<long double> : EnabledType<long double> {};
