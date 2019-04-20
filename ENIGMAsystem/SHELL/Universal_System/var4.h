@@ -28,9 +28,11 @@
 #  include <stdint.h>
 #  define constexpr const
 #  define decltype(x) double
+#  define rvalue_ref &
 #else
 #  include <cstdint>
 #  include <type_traits>
+#  define rvalue_ref &&
 #endif
 
 namespace enigma {
@@ -116,10 +118,6 @@ template<typename T> struct NonStringNumberTypeEnabler
 template<typename T> struct NonVariantTypeEnabler
     : MaybeEnabled<T, CanCast<T, double>::V != CanCast<T, std::string>::V> {};
 
-template<typename T, typename U, typename V = decltype(-*(T*)0 | -*(U*)0)>
-struct EnumAndNumericBinaryFuncEnabler
-    : MaybeEnabled<V, std::is_enum<T>::value || std::is_enum<U>::value> {};
-
 template<typename T> struct ArithmeticTypeEnabler {};
 template<> struct ArithmeticTypeEnabler<int8_t>    : EnabledType<int8_t> {};
 template<> struct ArithmeticTypeEnabler<int16_t>   : EnabledType<int16_t> {};
@@ -139,7 +137,7 @@ template<typename T> struct NeqEnabler<T, T> {};
 
 template<typename X, typename Y = X, typename Z = Y,
          typename W = Z, typename P = W, typename R = P,
-         typename EN = decltype(X() - Y() - Z() - W() - P() - R())>
+         typename EN = decltype(+X() - +Y() - +Z() - +W() - +P() - +R())>
 struct ArithmeticTypes: EnabledType<EN> {};
 
 template<typename T> struct StringTypeEnabler {};
@@ -151,6 +149,10 @@ template<> struct StringTypeEnabler<const char*> : EnabledType<const char*> {};
 #ifndef JUST_DEFINE_IT_RUN
 
 #define RLY_INLINE __attribute__((always_inline))
+
+template<typename T, typename U, typename V = decltype(+*(T*)0 | +*(U*)0)>
+struct EnumAndNumericBinaryFuncEnabler
+    : MaybeEnabled<V, std::is_enum<T>::value || std::is_enum<U>::value> {};
 
 template<typename T> using SIntType = typename SIntTypeEnabler<T>::T;
 template<typename T> using UIntType = typename UIntTypeEnabler<T>::T;
@@ -169,7 +171,29 @@ template<typename T, typename U> using StringFunc =
 template<typename T> using NonStringNumber =
     typename NonStringNumberTypeEnabler<T>::T;
 
+#define REQUIRE_NON_STRING_NUMBER(T) \
+    typename enigma::NonStringNumberTypeEnabler<T>::EN = 0
+#define REQUIRE_STRING_TYPE(T) typename enigma::StringTypeEnabler<T>::EN = 0
+
 #else
+
+template<typename T> struct SIntType {};
+template<typename T> struct UIntType {};
+template<typename T> struct IntType  {};
+template<typename T> struct FloatType   {};
+template<typename T> struct NumericType {};
+template<typename T> struct ArithmeticType {};
+template<typename T> struct StringType  {};
+
+#define REQUIRE_NON_STRING_NUMBER(T) bool non_string_number = true
+#define REQUIRE_STRING_TYPE(T)       bool is_string_type = true
+
+template<typename T, typename U, typename V = decltype(+*(T*)0 | +*(U*)0)>
+struct EnumAndNumericBinaryFuncEnabler {};
+
+template<typename T, typename U> struct NumericFunc {};
+template<typename T, typename U> struct NSNumberFunc {};
+template<typename T, typename U> struct StringFunc {};
 
 #define RLY_INLINE
 #endif  // JUST_DEFINE_IT_RUN
@@ -190,9 +214,11 @@ struct variant_string_wrapper : std::string {
   std::string &sval() { return *this; }
   const std::string &sval() const { return *this; }
   variant_string_wrapper() {}
-  variant_string_wrapper(std::string const &x): std::string(x) {}
-  variant_string_wrapper(std::string      &&x): std::string(x) {}
-  std::string &&release_sval() { return std::move(*(std::string*) this); }
+  variant_string_wrapper(std::string const      &x): std::string(x) {}
+  variant_string_wrapper(std::string rvalue_ref  x): std::string(x) {}
+  std::string rvalue_ref release_sval() {
+    return std::move(*(std::string*) this);
+  }
 };
 
 }  // namespace enigma
@@ -237,11 +263,10 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   static constexpr int ty_string = enigma_user::ty_string;
 
   // Real-valued casts.
-  // template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0,
-  //                      typename enigma::NeqEnabler<T, char>::EN = 0>
-  // operator T() const {
-  //   return (T) rval.d;
-  // }
+  template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
+  operator T() const {
+    return (T) rval.d;
+  }
   // String cast.
   operator const std::string&() const {
     return sval();
@@ -279,20 +304,20 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
       enigma::variant_real_union(x.rval.d),
       enigma::variant_string_wrapper(x.sval()),
       type(x.type) {}
-  variant(variant &&x):
+  variant(variant rvalue_ref x):
       enigma::variant_real_union(x.rval.d),
       enigma::variant_string_wrapper(x.release_sval()),
       type(x.type) {}
 
   // Construct a variant from numeric types
-  template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
+  template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
   variant(T number): enigma::variant_real_union((double) number), type(ty_real) {}
 
   variant(const std::string &str):
       enigma::variant_real_union(0.),
       enigma::variant_string_wrapper(str),
       type(ty_string) {}
-  variant(std::string &&str):
+  variant(std::string rvalue_ref str):
       enigma::variant_real_union(0.),
       enigma::variant_string_wrapper(str),
       type(ty_string) {}
@@ -307,7 +332,7 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   }
 
   // Assignment to a numeric type
-  template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
+  template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
   variant& operator=(T number) {
     rval.d = (double) number;
     type = ty_real;
@@ -320,7 +345,7 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
     type = ty_string;
     return *this;
   }
-  variant& operator=(std::string &&str) {
+  variant& operator=(std::string rvalue_ref str) {
     sval() = std::move(str);
     type = ty_string;
     return *this;
@@ -335,12 +360,12 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
 
 
   // The plus operator is actually really special.
-  template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
+  template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
   variant& operator+=(T number) {
     rval.d += number;
     return *this;
   }
-  template<typename T, typename enigma::StringTypeEnabler<T>::EN = 0>
+  template<typename T, REQUIRE_STRING_TYPE(T)>
   variant& operator+=(const T &str) {
     sval() += str;
     return *this;
@@ -355,7 +380,7 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
     if (type == ty_string) return sval() + other.sval();
     return rval.d + other.rval.d;
   }
-  template<typename T, typename enigma::StringTypeEnabler<T>::EN = 0>
+  template<typename T, REQUIRE_STRING_TYPE(T)>
   RLY_INLINE std::string operator+(const T &str) const {
     return to_string() + str;
   }
@@ -364,7 +389,7 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   // ===========================================================================
 
   // Basic arithmetic operators.
-  template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
+  template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
   decltype(rval.d + T()) operator+(T x) const {
     return rval.d + x;
   }
@@ -401,22 +426,22 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
 
   // Comparison helpers.
   template<typename T> bool epsilon_eq(T x) const {
-    return rval.d <= x + epsilon && rval.d >= x - epsilon;
+    return rval.d - epsilon <= x && rval.d + epsilon >= x;
   }
   template<typename T> bool epsilon_neq(T x) const {
-    return rval.d < x - epsilon || rval.d > x + epsilon;
+    return rval.d + epsilon < x || rval.d - epsilon > x;
   }
   template<typename T> bool epsilon_leq(T x) const {
-    return rval.d <= x + epsilon;
+    return rval.d - epsilon <= x;
   }
   template<typename T> bool epsilon_geq(T x) const {
-    return rval.d >= x - epsilon;
+    return rval.d + epsilon >= x;
   }
   template<typename T> bool epsilon_lt(T x) const {
-    return rval.d < x - epsilon;
+    return rval.d + epsilon < x;
   }
   template<typename T> bool epsilon_gt(T x) const {
-    return rval.d > x + epsilon;
+    return rval.d - epsilon > x;
   }
 
   // Comparison operators:  <  >  <=  >=  !=  ==
@@ -646,6 +671,7 @@ struct var : variant {
   using variant::operator!;   using variant::operator!=;
   using variant::operator~;
 
+  #ifndef JUST_DEFINE_IT_RUN // These confuse JDI for some reason
   var &operator=(const var &v) {
     *(variant*) this = v;
     return *this;
@@ -657,6 +683,7 @@ struct var : variant {
   variant operator+(const var &v) {
     return *(variant*) this + v;
   }
+  #endif
 
   // auto operator-(const var &v)  { return *(variant *) this -  v; }
   // auto operator*(const var &v)  { return *(variant *) this *  v; }
@@ -679,44 +706,44 @@ struct var : variant {
 //██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟████████████████████████████████████
 //▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
 
-template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
-static inline decltype(T() + double()) operator+(T a, const variant &b) {
+template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
+static inline decltype(+T() + double()) operator+(T a, const variant &b) {
   return a + b.rval.d;
 }
-template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
-static inline decltype(T() - double()) operator-(T a, const variant &b) {
+template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
+static inline decltype(+T() - double()) operator-(T a, const variant &b) {
   return a - b.rval.d;
 }
-template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
-static inline decltype(T() * double()) operator*(T a, const variant &b) {
+template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
+static inline decltype(+T() * double()) operator*(T a, const variant &b) {
   return a * b.rval.d;
 }
-template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
-static inline decltype(T() / double()) operator/(T a, const variant &b) {
+template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
+static inline decltype(+T() / double()) operator/(T a, const variant &b) {
   return a / b.rval.d;
 }
-template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
+template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
 double operator%(T a, const variant &b) {
   return fmod(a, b.rval.d);
 }
 
-template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
+template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
 static inline long long operator<<(T a, const variant &b) {
   return (long long) a << (long long) b.rval.d;
 }
-template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
+template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
 static inline long long operator>>(T a, const variant &b) {
   return (long long) a >> (long long) b.rval.d;
 }
-template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
+template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
 static inline long long operator&(T a, const variant &b) {
   return (long long) a & (long long) b.rval.d;
 }
-template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
+template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
 static inline long long operator|(T a, const variant &b) {
   return (long long) a | (long long) b.rval.d;
 }
-template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
+template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
 static inline long long operator^(T a, const variant &b) {
   return (long long) a ^ (long long) b.rval.d;
 }
@@ -724,9 +751,13 @@ static inline long long operator^(T a, const variant &b) {
 // We need to disallow these operators for variants or Clang will decide
 // that the global version is equally preferable with the FULLY-SPECIFIED
 // match in the actual variant class.
+#ifndef JUST_DEFINE_IT_RUN
 #define PRIMITIVE_OP \
 template<class T, typename enigma::NonVariantTypeEnabler<T>::EN = 0> \
 static inline
+#else
+#define PRIMITIVE_OP template<typename T>
+#endif
 
 PRIMITIVE_OP bool operator==(const T &a, const variant &b) { return b == a; }
 PRIMITIVE_OP bool operator!=(const T &a, const variant &b) { return b != a; }
@@ -747,7 +778,7 @@ PRIMITIVE_OP T &operator<<=(T &a, const variant &b) { return a <<= (T) b; }
 PRIMITIVE_OP T &operator>>=(T &a, const variant &b) { return a >>= (T) b; }
 
 // String + variant operator we missed above
-template<typename T, typename enigma::StringTypeEnabler<T>::EN = 0> static
+template<typename T, REQUIRE_STRING_TYPE(T)> static
 inline std::string operator+(const T &str, const variant &v) {
   return str + v.to_string();
 }
@@ -776,16 +807,20 @@ static inline bool is_ptr      (const variant &val) {
 
 // Some compilers favor the above variant casts for enums,
 // rather than just comparing them as integers.
+#ifndef JUST_DEFINE_IT_RUN
 #define ENUM_OPERATION template<typename T, typename U, typename Common =      \
     typename enigma::EnumAndNumericBinaryFuncEnabler<T, U>::T>                 \
     static inline constexpr
+#else
+#define ENUM_OPERATION template<typename T, typename U, typename Common>
+#endif
 
 ENUM_OPERATION bool operator==(T a, U b) { return (Common) a == (Common) b; }
 ENUM_OPERATION bool operator!=(T a, U b) { return (Common) a != (Common) b; }
 ENUM_OPERATION bool operator<=(T a, U b) { return (Common) a <= (Common) b; }
 ENUM_OPERATION bool operator>=(T a, U b) { return (Common) a >= (Common) b; }
-ENUM_OPERATION bool operator<(T a, U b)  { return (Common) a <  (Common) b; }
-ENUM_OPERATION bool operator>(T a, U b)  { return (Common) a >  (Common) b; }
+ENUM_OPERATION bool operator< (T a, U b) { return (Common) a <  (Common) b; }
+ENUM_OPERATION bool operator> (T a, U b) { return (Common) a >  (Common) b; }
 
 ENUM_OPERATION Common operator&(T a, U b) { return (Common) a & (Common) b; }
 ENUM_OPERATION Common operator|(T a, U b) { return (Common) a | (Common) b; }

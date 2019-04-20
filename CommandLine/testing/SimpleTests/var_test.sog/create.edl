@@ -643,6 +643,42 @@
   speed |= speed;
   speed ^= speed;
 
+  bool b;
+  v1 = 5;
+  t1 = v1;
+  gtest_assert_eq(t1, 5);
+  t2 = v1;
+  gtest_assert_eq(t2, 5);
+  t3 = v1;
+  gtest_assert_eq(t3, 5);
+  t4 = v1;
+  gtest_assert_eq(t4, 5);
+  t5 = v1;
+  gtest_assert_eq(t5, 5);
+  b = v1;
+  gtest_assert_eq(b, true);
+
+  v1 += t1;
+  gtest_assert_eq(v1, 10);
+  v1 += t2;
+  gtest_assert_eq(v1, 15);
+  v1 += t3;
+  gtest_assert_eq(v1, 20);
+  v1 += t4;
+  gtest_assert_eq(v1, 25);
+  v1 += t5;
+  gtest_assert_eq(v1, 30);
+  v1 += b;
+  gtest_assert_eq(v1, 31);
+
+  s1 = "hi";
+  s2 = "ho";
+  v1 = s1;
+  v1 += s2;
+  v1 += v1;
+  v1 += s1;
+  gtest_assert_eq(v1, "hihohihohi");
+
   cons_show_message("Test end!");
 
   game_end();
