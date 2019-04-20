@@ -332,7 +332,7 @@ inline bool action_if_health(const double value, const int operation)
 	switch (operation)
 	{
 	    case 0: return (fabs(health - value) < _V_EPSILON); break;
-	    case 1:	return (health < value); break;
+	    case 1: return (health < value); break;
 	    case 2: return (health > value); break;
       case 3: return (health <= value); break;
       case 4: return (health >= value); break;
@@ -345,7 +345,7 @@ inline bool action_if_life(const double value, const int operation)
 	switch (operation)
 	{
 	    case 0: return (fabs(lives - value) < _V_EPSILON); break;
-	    case 1:	return (lives < value); break;
+	    case 1: return (lives < value); break;
 	    case 2: return (lives > value); break;
       case 3: return (lives <= value); break;
       case 4: return (lives >= value); break;
@@ -358,7 +358,7 @@ inline bool action_if_score(const double value, const int operation)
 	switch (operation)
 	{
 	    case 0: return (fabs(score - value) < _V_EPSILON); break;
-	    case 1:	return (score < value); break;
+	    case 1: return (score < value); break;
 	    case 2: return (score > value); break;
       case 3: return (score <= value); break;
       case 4: return (score >= value); break;

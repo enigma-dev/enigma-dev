@@ -43,12 +43,8 @@ using namespace std;
 
 #include "include.h"
 
-static inline double maxv(double a, double b) { return (a > b) ? a : b; }
-static inline double minv(double a, double b) { return (a < b) ? a : b; }
-static inline unsigned maxv(unsigned a, unsigned b) { return (a > b) ? a : b; }
-static inline unsigned minv(unsigned a, unsigned b) { return (a < b) ? a : b; }
-static inline int maxv(int a, int b) { return (a > b) ? a : b; }
-static inline int minv(int a, int b) { return (a < b) ? a : b; }
+template<typename T> static inline T maxv(T a, T b) { return (a > b) ? a : b; }
+template<typename T> static inline T minv(T a, T b) { return (a < b) ? a : b; }
 
 template<typename t> bool tequal(t v1, t v2) { return v1 == v2; }
 template<> bool tequal(float v1, float v2)   { return fequal(v1, v2); }
