@@ -72,7 +72,7 @@ string toString(const variant &a) {
     }
     return toString(dVal);
   }
-  return a.sval;
+  return a.sval();
 }
 
 string toString(const var &a) {
