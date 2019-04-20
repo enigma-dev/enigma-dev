@@ -35,7 +35,7 @@
 
 namespace enigma {
 
-// Some syntactic sugar for declaring things 
+// Some syntactic sugar for declaring things
 template<typename E> struct EnabledType {
   typedef E T;
   static constexpr bool V = true;
@@ -134,6 +134,9 @@ template<> struct ArithmeticTypeEnabler<float>     : EnabledType<float> {};
 template<> struct ArithmeticTypeEnabler<double>    : EnabledType<double> {};
 template<> struct ArithmeticTypeEnabler<long double> : EnabledType<long double> {};
 
+template<typename T, typename U> struct NeqEnabler : EnabledType<T> {};
+template<typename T> struct NeqEnabler<T, T> {};
+
 template<typename X, typename Y = X, typename Z = Y,
          typename W = Z, typename P = W, typename R = P,
          typename EN = decltype(X() - Y() - Z() - W() - P() - R())>
@@ -175,10 +178,27 @@ union rvt {
   double d;
   const void * p;
   rvt(double x): d(x) {}
-  rvt(const void * x): p(x) {}
+  rvt(const void *x): p(x) {}
+};
+
+struct variant_real_union {
+  enigma::rvt rval;
+  variant_real_union(double x): rval(x) {}
+  variant_real_union(const void *x): rval(x) {}
+};
+struct variant_string_wrapper : std::string {
+  std::string &sval() { return *this; }
+  const std::string &sval() const { return *this; }
+  variant_string_wrapper() {}
+  variant_string_wrapper(std::string const &x): std::string(x) {}
+  variant_string_wrapper(std::string      &&x): std::string(x) {}
+  std::string &&release_sval() { return std::move(*(std::string*) this); }
 };
 
 }  // namespace enigma
+
+struct var;
+struct variant;
 
 namespace enigma_user {
 
@@ -188,13 +208,6 @@ enum {
   ty_string = 1,
   ty_pointer = 2
 };
-
-}  // namespace enigma_user
-
-struct var;
-struct variant;
-
-namespace enigma_user {
 
 std::string toString(const void*);
 std::string toString(double);
@@ -212,31 +225,33 @@ std::string toString(double);
 //██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟██████████████████████████████
 //▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
 
-struct variant {
+struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
+  int type;  ///< Union tag.
+
   // Default type (-1 or real), changes based on "assume_uninitialized_is_zero."
   // (This variable is defined in a compiler-generated class.)
   static const int default_type;
 
-  enigma::rvt rval;
-  std::string sval;
-  int type;
-
   static constexpr double epsilon = 1e-12;
-  static constexpr int ty_real =  enigma_user::ty_real;
-  static constexpr int ty_string =  enigma_user::ty_string;
+  static constexpr int ty_real   = enigma_user::ty_real;
+  static constexpr int ty_string = enigma_user::ty_string;
 
   // Real-valued casts.
-  template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
-  operator T() const {
-    return (T) rval.d;
-  }
+  // template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0,
+  //                      typename enigma::NeqEnabler<T, char>::EN = 0>
+  // operator T() const {
+  //   return (T) rval.d;
+  // }
   // String cast.
   operator const std::string&() const {
-    return sval;
+    return sval();
   }
 
+  size_t string_length()   const { return sval().length(); }
+  char char_at(size_t ind) const { return sval()[ind]; }
+
   std::string to_string() const {
-    if (type == ty_string)  return sval;
+    if (type == ty_string)  return sval();
     if (type == enigma_user::ty_pointer) return enigma_user::toString(rval.p);
     if (type == ty_real) return enigma_user::toString(rval.d);
     return "<undefined>";
@@ -248,29 +263,46 @@ struct variant {
     return lrint(rval.d) > 0;
   }
 
+  // Char casting must be explicit, or else string construction is ambiguous.
+  // Also, this is a good place for special logic.
+  // explicit operator char() const {
+  //   if (type == ty_string) return sval()[0];
+  //   return (char) rval.d;
+  // }
+
   // How to construct a variant: the basics
   variant():
-      rval(0.0), sval(), type(default_type) {}
+      enigma::variant_real_union(0.0), type(default_type) {}
   variant(const void *p):
-      rval(p), type(enigma_user::ty_pointer) {}
+      enigma::variant_real_union(p), type(enigma_user::ty_pointer) {}
   variant(const variant &x):
-      rval(x.rval.d), sval(x.sval), type(x.type) {}
+      enigma::variant_real_union(x.rval.d),
+      enigma::variant_string_wrapper(x.sval()),
+      type(x.type) {}
   variant(variant &&x):
-      rval(x.rval.d), sval(std::move(x.sval)), type(x.type) {}
+      enigma::variant_real_union(x.rval.d),
+      enigma::variant_string_wrapper(x.release_sval()),
+      type(x.type) {}
 
   // Construct a variant from numeric types
   template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
-  variant(T number): rval((double) number), type(ty_real) {}
+  variant(T number): enigma::variant_real_union((double) number), type(ty_real) {}
 
-  variant(const std::string &str): rval(0.), sval(str), type(ty_string) {}
-  variant(std::string &&str): rval(0.), sval(str), type(ty_string) {}
+  variant(const std::string &str):
+      enigma::variant_real_union(0.),
+      enigma::variant_string_wrapper(str),
+      type(ty_string) {}
+  variant(std::string &&str):
+      enigma::variant_real_union(0.),
+      enigma::variant_string_wrapper(str),
+      type(ty_string) {}
 
   // Assignment operators
   // ===========================================================================
 
   variant& operator=(const variant &v) {
     rval = v.rval;
-    if ((type = v.type) == ty_string) sval = v.sval;
+    if ((type = v.type) == ty_string) sval() = v.sval();
     return *this;
   }
 
@@ -284,15 +316,23 @@ struct variant {
 
   // Assignment to a string type
   variant& operator=(const std::string &str) {
-    sval = str;
+    sval() = str;
     type = ty_string;
     return *this;
   }
   variant& operator=(std::string &&str) {
-    sval = std::move(str);
+    sval() = std::move(str);
     type = ty_string;
     return *this;
   }
+
+  variant& operator=(const char *str) {
+    sval() = str;
+    type = ty_string;
+    return *this;
+  }
+  // TODO: string_view construction/assignment
+
 
   // The plus operator is actually really special.
   template<typename T, typename enigma::NonStringNumberTypeEnabler<T>::EN = 0>
@@ -302,17 +342,17 @@ struct variant {
   }
   template<typename T, typename enigma::StringTypeEnabler<T>::EN = 0>
   variant& operator+=(const T &str) {
-    sval += str;
+    sval() += str;
     return *this;
   }
   variant& operator+=(const variant &other) RLY_INLINE {
-    if (type == ty_string) sval += other.sval;
+    if (type == ty_string) sval() += other.sval();
     else rval.d += other.rval.d;
     return *this;
   }
 
   variant operator+(const variant &other) const RLY_INLINE {
-    if (type == ty_string) return sval + other.sval;
+    if (type == ty_string) return sval() + other.sval();
     return rval.d + other.rval.d;
   }
   template<typename T, typename enigma::StringTypeEnabler<T>::EN = 0>
@@ -385,39 +425,39 @@ struct variant {
   // Block one: Type-aware comparison with other variant.
   bool operator==(const variant &x) const RLY_INLINE {
     if (type != x.type) return false;
-    if (type == ty_string) return sval == x.sval;
+    if (type == ty_string) return sval() == x.sval();
     return epsilon_eq(x.rval.d);
   }
   bool operator!=(const variant &x) const RLY_INLINE {
     if (type != x.type) return true;
-    if (type == ty_string) return sval != x.sval;
+    if (type == ty_string) return sval() != x.sval();
     return epsilon_neq(x.rval.d);
   }
   bool operator<=(const variant &x) const RLY_INLINE {
     if (type == ty_string) {
       if (x.type != ty_string) return false;  // As a string, we are larger.
-      return sval <= x.sval;
+      return sval() <= x.sval();
     }
     return epsilon_leq(x.rval.d);
   }
   bool operator>=(const variant &x) const RLY_INLINE {
     if (type == ty_string) {
       if (x.type != ty_string) return true;  // As a string, we are larger.
-      return sval >= x.sval;
+      return sval() >= x.sval();
     }
     return epsilon_geq(x.rval.d);
   }
   bool operator<(const variant &x) const RLY_INLINE {
     if (type == ty_string) {
       if (x.type != ty_string) return false;  // As a string, we are larger.
-      return sval < x.sval;
+      return sval() < x.sval();
     }
     return epsilon_lt(x.rval.d);
   }
   bool operator>(const variant &x) const RLY_INLINE {
     if (type == ty_string) {
       if (x.type != ty_string) return true;  // As a string, we are larger.
-      return sval > x.sval;
+      return sval() > x.sval();
     }
     return epsilon_gt(x.rval.d);
   }
@@ -446,22 +486,22 @@ struct variant {
   // Block three: string comparisons.
   // As before, Strings are always larger than reals.
   template<typename T> enigma::StringFunc<T, bool> operator==(T x) const {
-    return type == ty_string && sval == x;
+    return type == ty_string && sval() == x;
   }
   template<typename T> enigma::StringFunc<T, bool> operator!=(T x) const {
-    return type != ty_string || sval != x;
+    return type != ty_string || sval() != x;
   }
   template<typename T> enigma::StringFunc<T, bool> operator<=(T x) const {
-    return type != ty_string || sval <= x;
+    return type != ty_string || sval() <= x;
   }
   template<typename T> enigma::StringFunc<T, bool> operator>=(T x) const {
-    return type == ty_string && sval >= x;
+    return type == ty_string && sval() >= x;
   }
   template<typename T> enigma::StringFunc<T, bool> operator<(T x) const {
-    return type != ty_string || sval < x;
+    return type != ty_string || sval() < x;
   }
   template<typename T> enigma::StringFunc<T, bool> operator>(T x) const {
-    return type == ty_string && sval > x;
+    return type == ty_string && sval() > x;
   }
 
   // Bitwise operators:  <<  >>  &  |  ^
@@ -492,8 +532,8 @@ struct variant {
   // ===========================================================================
 
   // Array accessors.
-  char &operator[](int ind)       { return sval[ind]; }
-  char  operator[](int ind) const { return sval[ind]; }
+  char &operator[](int ind)       { return sval()[ind]; }
+  char  operator[](int ind) const { return sval()[ind]; }
 
   // Increment operators.
   variant&  operator++()    { return ++rval.d, *this; }
@@ -716,6 +756,7 @@ namespace enigma_user {
 
 using ::var;
 using ::variant;
+typedef std::string std_string;
 
 static inline bool is_undefined(const variant &val) {
   return val.type == enigma_user::ty_undefined;
