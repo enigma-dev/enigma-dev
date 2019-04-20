@@ -210,6 +210,8 @@ int lang_CPP::load_shared_locals() {
 }
 
 jdi::definition* lang_CPP::look_up(const string &name) {
+  auto builtin = jdip::builtin_declarators.find(name);
+  if (builtin != jdip::builtin_declarators.end()) return builtin->second->def;
   return namespace_enigma_user->find_local(name);
 }
 
