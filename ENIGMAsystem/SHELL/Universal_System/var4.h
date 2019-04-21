@@ -180,6 +180,7 @@ template<typename T> using NonStringNumber =
 #define REQUIRE_NON_STRING_NUMBER(T) \
     typename enigma::NonStringNumberTypeEnabler<T>::EN = 0
 #define REQUIRE_STRING_TYPE(T) typename enigma::StringTypeEnabler<T>::EN = 0
+#define REQUIRE_VARIANT_TYPE(T) typename enigma::VariantTypeEnabler<T>::EN = 0
 
 #else
 
@@ -193,6 +194,7 @@ template<typename T> struct StringType  {};
 
 #define REQUIRE_NON_STRING_NUMBER(T) bool non_string_number = true
 #define REQUIRE_STRING_TYPE(T)       bool is_string_type = true
+#define REQUIRE_VARIANT_TYPE(T)      bool is_variant_type = true
 
 template<typename T, typename U, typename V = decltype(+*(T*)0 | +*(U*)0)>
 struct EnumAndNumericBinaryFuncEnabler {};
@@ -582,6 +584,12 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   ~variant() {}
 };
 
+namespace enigma {
+
+template<typename T> struct VariantTypeEnabler
+    : MaybeEnabled<T, std::is_base_of<variant, T>::value> {};
+
+}
 
 //▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚
 //██▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜█████████████████████████████████████████
@@ -759,33 +767,33 @@ static inline long long operator^(T a, const variant &b) {
 // match in the actual variant class.
 #ifndef JUST_DEFINE_IT_RUN
 #define PRIMITIVE_OP \
-template<class T, typename enigma::NonVariantTypeEnabler<T>::EN = 0> \
+template<class T, typename U, typename enigma::NonVariantTypeEnabler<T>::EN = 0, REQUIRE_VARIANT_TYPE(U)> \
 static inline
 #else
-#define PRIMITIVE_OP template<typename T>
+#define PRIMITIVE_OP template<typename T, typename U>
 #endif
 
-PRIMITIVE_OP bool operator==(const T &a, const variant &b) { return b == a; }
-PRIMITIVE_OP bool operator!=(const T &a, const variant &b) { return b != a; }
-PRIMITIVE_OP bool operator<=(const T &a, const variant &b) { return b >= a; }
-PRIMITIVE_OP bool operator>=(const T &a, const variant &b) { return b <= a; }
-PRIMITIVE_OP bool operator< (const T &a, const variant &b) { return b > a; }
-PRIMITIVE_OP bool operator> (const T &a, const variant &b) { return b < a; }
+PRIMITIVE_OP bool operator==(const T &a, const U &b) { return b == a; }
+PRIMITIVE_OP bool operator!=(const T &a, const U &b) { return b != a; }
+PRIMITIVE_OP bool operator<=(const T &a, const U &b) { return b >= a; }
+PRIMITIVE_OP bool operator>=(const T &a, const U &b) { return b <= a; }
+PRIMITIVE_OP bool operator< (const T &a, const U &b) { return b > a; }
+PRIMITIVE_OP bool operator> (const T &a, const U &b) { return b < a; }
 
-PRIMITIVE_OP T &operator+= (T &a, const variant &b) { return a +=  (T) b; }
-PRIMITIVE_OP T &operator-= (T &a, const variant &b) { return a -=  (T) b; }
-PRIMITIVE_OP T &operator*= (T &a, const variant &b) { return a *=  (T) b; }
-PRIMITIVE_OP T &operator/= (T &a, const variant &b) { return a /=  (T) b; }
-PRIMITIVE_OP T &operator%= (T &a, const variant &b) { return a %=  (T) b; }
-PRIMITIVE_OP T &operator&= (T &a, const variant &b) { return a &=  (T) b; }
-PRIMITIVE_OP T &operator|= (T &a, const variant &b) { return a |=  (T) b; }
-PRIMITIVE_OP T &operator^= (T &a, const variant &b) { return a ^=  (T) b; }
-PRIMITIVE_OP T &operator<<=(T &a, const variant &b) { return a <<= (T) b; }
-PRIMITIVE_OP T &operator>>=(T &a, const variant &b) { return a >>= (T) b; }
+PRIMITIVE_OP T &operator+= (T &a, const U &b) { return a +=  (T) b; }
+PRIMITIVE_OP T &operator-= (T &a, const U &b) { return a -=  (T) b; }
+PRIMITIVE_OP T &operator*= (T &a, const U &b) { return a *=  (T) b; }
+PRIMITIVE_OP T &operator/= (T &a, const U &b) { return a /=  (T) b; }
+PRIMITIVE_OP T &operator%= (T &a, const U &b) { return a %=  (T) b; }
+PRIMITIVE_OP T &operator&= (T &a, const U &b) { return a &=  (T) b; }
+PRIMITIVE_OP T &operator|= (T &a, const U &b) { return a |=  (T) b; }
+PRIMITIVE_OP T &operator^= (T &a, const U &b) { return a ^=  (T) b; }
+PRIMITIVE_OP T &operator<<=(T &a, const U &b) { return a <<= (T) b; }
+PRIMITIVE_OP T &operator>>=(T &a, const U &b) { return a >>= (T) b; }
 
 // String + variant operator we missed above
-template<typename T, REQUIRE_STRING_TYPE(T)> static
-inline std::string operator+(const T &str, const variant &v) {
+template<typename T, typename U, REQUIRE_STRING_TYPE(T), REQUIRE_VARIANT_TYPE(U)>
+static inline std::string operator+(const T &str, const U &v) {
   return str + v.to_string();
 }
 
