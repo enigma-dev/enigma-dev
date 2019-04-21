@@ -426,7 +426,7 @@ std::string execute_shell_for_output(const std::string &command) {
   while (!feof(pf)) {
     res.append(buffer, fread(&buffer, sizeof(wchar_t), BUFSIZ, pf));
   }
-  pclose(pf);
+  _pclose(pf);
   return shorten(res);
 }
 
