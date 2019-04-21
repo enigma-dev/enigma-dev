@@ -148,6 +148,9 @@ struct ArithmeticTypes: EnabledType<EN> {};
 
 template<typename T> struct StringTypeEnabler {};
 template<> struct StringTypeEnabler<std::string> : EnabledType<std::string> {};
+template<> struct StringTypeEnabler<std::string&> : EnabledType<std::string&> {};
+template<> struct StringTypeEnabler<const std::string&> : EnabledType<const std::string&> {};
+template<> struct StringTypeEnabler<std::string&&> : EnabledType<std::string&&> {};
 template<> struct StringTypeEnabler<const char*> : EnabledType<const char*> {};
 // template<size_t K> struct StringTypeEnabler<const char[K]> : EnabledType<const char[K]> {};
 // TODO: support string_view
@@ -380,7 +383,7 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
     return *this;
   }
   template<typename T, REQUIRE_STRING_TYPE(T)>
-  variant& operator+=(const T &str) {
+  variant& operator+=(T str) {
     sval() += str;
     return *this;
   }
@@ -396,7 +399,7 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
     return rval.d + other.rval.d;
   }
   template<typename T, REQUIRE_STRING_TYPE(T)>
-  RLY_INLINE std::string operator+(const T &str) const {
+  RLY_INLINE std::string operator+(T str) const {
     return to_string() + str;
   }
 
@@ -791,7 +794,7 @@ PRIMITIVE_OP T &operator>>=(T &a, const U &b) { return a >>= (T) b; }
 
 // String + variant operator we missed above
 template<typename T, typename U, REQUIRE_STRING_TYPE(T), REQUIRE_VARIANT_TYPE(U)>
-static inline std::string operator+(const T &str, const U &v) {
+static inline std::string operator+(T str, const U &v) {
   return str + v.to_string();
 }
 
