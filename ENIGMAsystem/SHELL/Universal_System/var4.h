@@ -330,6 +330,10 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
   variant(T number): enigma::variant_real_union((double) number), type(ty_real) {}
 
+  variant(const char *str):
+      enigma::variant_real_union(0.),
+      enigma::variant_string_wrapper(str),
+      type(ty_string) {}
   variant(const std::string &str):
       enigma::variant_real_union(0.),
       enigma::variant_string_wrapper(str),
