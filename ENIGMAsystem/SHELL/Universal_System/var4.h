@@ -234,6 +234,13 @@ struct variant_string_wrapper : std::string {
 struct var;
 struct variant;
 
+namespace enigma {
+
+template<typename T> struct VariantTypeEnabler
+    : MaybeEnabled<T, std::is_base_of<variant, T>::value> {};
+
+}
+
 namespace enigma_user {
 
 enum {
@@ -251,7 +258,6 @@ std::string toString(double);
 #endif
 
 }
-
 
 //▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚
 //██▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜██████████████████████████████
@@ -384,7 +390,8 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
     return *this;
   }
 
-  variant operator+(const variant &other) const RLY_INLINE {
+  template<typename T, REQUIRE_VARIANT_TYPE(T)>
+  RLY_INLINE variant operator+(const T &other) const {
     if (type == ty_string) return sval() + other.sval();
     return rval.d + other.rval.d;
   }
@@ -584,13 +591,6 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   ~variant() {}
 };
 
-namespace enigma {
-
-template<typename T> struct VariantTypeEnabler
-    : MaybeEnabled<T, std::is_base_of<variant, T>::value> {};
-
-}
-
 //▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚
 //██▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜█████████████████████████████████████████
 //██▌ var: a sparse matrix of variant ▐█████████████████████████████████████████
@@ -691,10 +691,8 @@ struct var : variant {
     return *this;
   }
 
-  variant operator+(const variant &v) {
-    return *(variant*) this + v;
-  }
-  variant operator+(const var &v) {
+  template<typename T, REQUIRE_VARIANT_TYPE(T)>
+  variant operator+(const T &v) {
     return *(variant*) this + v;
   }
   #endif
