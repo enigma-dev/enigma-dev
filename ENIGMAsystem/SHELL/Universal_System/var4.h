@@ -718,45 +718,45 @@ struct var : variant {
 //██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟████████████████████████████████████
 //▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
 
-template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-static inline decltype(+T() + double()) operator+(T a, const variant &b) {
+template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
+static inline decltype(+T() + double()) operator+(T a, const U &b) {
   return a + b.rval.d;
 }
-template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-static inline decltype(+T() - double()) operator-(T a, const variant &b) {
+template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
+static inline decltype(+T() - double()) operator-(T a, const U &b) {
   return a - b.rval.d;
 }
-template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-static inline decltype(+T() * double()) operator*(T a, const variant &b) {
+template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
+static inline decltype(+T() * double()) operator*(T a, const U &b) {
   return a * b.rval.d;
 }
-template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-static inline decltype(+T() / double()) operator/(T a, const variant &b) {
+template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
+static inline decltype(+T() / double()) operator/(T a, const U &b) {
   return a / b.rval.d;
 }
-template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-double operator%(T a, const variant &b) {
+template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
+double operator%(T a, const U &b) {
   return fmod(a, b.rval.d);
 }
 
-template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-static inline long long operator<<(T a, const variant &b) {
+template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
+static inline long long operator<<(T a, const U &b) {
   return (long long) a << (long long) b.rval.d;
 }
-template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-static inline long long operator>>(T a, const variant &b) {
+template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
+static inline long long operator>>(T a, const U &b) {
   return (long long) a >> (long long) b.rval.d;
 }
-template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-static inline long long operator&(T a, const variant &b) {
+template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
+static inline long long operator&(T a, const U &b) {
   return (long long) a & (long long) b.rval.d;
 }
-template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-static inline long long operator|(T a, const variant &b) {
+template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
+static inline long long operator|(T a, const U &b) {
   return (long long) a | (long long) b.rval.d;
 }
-template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-static inline long long operator^(T a, const variant &b) {
+template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
+static inline long long operator^(T a, const U &b) {
   return (long long) a ^ (long long) b.rval.d;
 }
 
