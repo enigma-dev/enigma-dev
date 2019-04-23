@@ -45,6 +45,8 @@ namespace enigma {
   };
 }
 
+namespace enigma_user {
+
 struct var;
 
 struct variant
@@ -321,5 +323,10 @@ namespace enigma_user {
   bool is_string(variant val);
   bool is_ptr(variant var);
 }
+
+} //enigma_user
+
+using enigma_user::variant;
+using enigma_user::var;
 
 #endif //ENIGMA_VAR4_H
