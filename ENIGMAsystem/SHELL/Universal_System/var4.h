@@ -66,45 +66,52 @@ template<typename T, typename U> class CanCast {
 };
 
 template<typename T> struct SIntTypeEnabler {};
-template<> struct SIntTypeEnabler<int8_t>  : EnabledType<int8_t>  {};
-template<> struct SIntTypeEnabler<int16_t> : EnabledType<int16_t> {};
-template<> struct SIntTypeEnabler<int32_t> : EnabledType<int32_t> {};
-template<> struct SIntTypeEnabler<int64_t> : EnabledType<int64_t> {};
+template<> struct SIntTypeEnabler<signed char> : EnabledType<signed char> {};
+template<> struct SIntTypeEnabler<short int> : EnabledType<short int> {};
+template<> struct SIntTypeEnabler<int> : EnabledType<int> {};
+template<> struct SIntTypeEnabler<long int> : EnabledType<long int> {};
+template<> struct SIntTypeEnabler<long long int> : EnabledType<long long int> {};
 
 template<typename T> struct UIntTypeEnabler {};
-template<> struct UIntTypeEnabler<uint8_t>   : EnabledType<uint8_t>  {};
-template<> struct UIntTypeEnabler<uint16_t>  : EnabledType<uint16_t> {};
-template<> struct UIntTypeEnabler<uint32_t>  : EnabledType<uint32_t> {};
-template<> struct UIntTypeEnabler<uint64_t>  : EnabledType<uint64_t> {};
+template<> struct UIntTypeEnabler<unsigned char> : EnabledType<unsigned char> {};
+template<> struct UIntTypeEnabler<unsigned short int>  : EnabledType<unsigned short int> {};
+template<> struct UIntTypeEnabler<unsigned int> : EnabledType<unsigned int> {};
+template<> struct UIntTypeEnabler<unsigned long int> : EnabledType<unsigned long int> {};
+template<> struct UIntTypeEnabler<unsigned long long int> : EnabledType<unsigned long long int> {};
 
 template<typename T> struct IntTypeEnabler {};
-template<> struct IntTypeEnabler<int8_t>    : EnabledType<int8_t>    {};
-template<> struct IntTypeEnabler<int16_t>   : EnabledType<int16_t>   {};
-template<> struct IntTypeEnabler<int32_t>   : EnabledType<int32_t>   {};
-template<> struct IntTypeEnabler<int64_t>   : EnabledType<int64_t>   {};
-template<> struct IntTypeEnabler<uint8_t>   : EnabledType<uint8_t>   {};
-template<> struct IntTypeEnabler<uint16_t>  : EnabledType<uint16_t>  {};
-template<> struct IntTypeEnabler<uint32_t>  : EnabledType<uint32_t>  {};
-template<> struct IntTypeEnabler<uint64_t>  : EnabledType<uint64_t>  {};
+template<> struct IntTypeEnabler<signed char> : EnabledType<signed char> {};
+template<> struct IntTypeEnabler<short int> : EnabledType<short int> {};
+template<> struct IntTypeEnabler<int> : EnabledType<int> {};
+template<> struct IntTypeEnabler<long int> : EnabledType<long int> {};
+template<> struct IntTypeEnabler<long long int> : EnabledType<long long int> {};
+template<> struct IntTypeEnabler<unsigned char> : EnabledType<unsigned char> {};
+template<> struct IntTypeEnabler<unsigned short int> : EnabledType<unsigned short int> {};
+template<> struct IntTypeEnabler<unsigned int> : EnabledType<unsigned int> {};
+template<> struct IntTypeEnabler<unsigned long int> : EnabledType<unsigned long int> {};
+template<> struct IntTypeEnabler<unsigned long long int> : EnabledType<unsigned long long int> {};
+
 
 template<typename T> struct FloatTypeEnabler {};
-template<> struct FloatTypeEnabler<float>       : EnabledType<float>  {};
-template<> struct FloatTypeEnabler<double>      : EnabledType<double> {};
+template<> struct FloatTypeEnabler<float> : EnabledType<float>  {};
+template<> struct FloatTypeEnabler<double> : EnabledType<double> {};
 template<> struct FloatTypeEnabler<long double> : EnabledType<long double> {};
 
 // Any explicitly numeric type. Note that this does NOT include bool and enum!
 template<typename T> struct NumericTypeEnabler {};
-template<> struct NumericTypeEnabler<char>        : EnabledType<int8_t>      {};
-template<> struct NumericTypeEnabler<int8_t>      : EnabledType<int8_t>      {};
-template<> struct NumericTypeEnabler<int16_t>     : EnabledType<int16_t>     {};
-template<> struct NumericTypeEnabler<int32_t>     : EnabledType<int32_t>     {};
-template<> struct NumericTypeEnabler<int64_t>     : EnabledType<int64_t>     {};
-template<> struct NumericTypeEnabler<uint8_t>     : EnabledType<uint8_t>     {};
-template<> struct NumericTypeEnabler<uint16_t>    : EnabledType<uint16_t>    {};
-template<> struct NumericTypeEnabler<uint32_t>    : EnabledType<uint32_t>    {};
-template<> struct NumericTypeEnabler<uint64_t>    : EnabledType<uint64_t>    {};
-template<> struct NumericTypeEnabler<float>       : EnabledType<float>       {};
-template<> struct NumericTypeEnabler<double>      : EnabledType<double>      {};
+template<> struct NumericTypeEnabler<char> : EnabledType<signed char> {};
+template<> struct NumericTypeEnabler<signed char> : EnabledType<signed char> {};
+template<> struct NumericTypeEnabler<short int> : EnabledType<short int> {};
+template<> struct NumericTypeEnabler<int> : EnabledType<int> {};
+template<> struct NumericTypeEnabler<long int> : EnabledType<long int> {};
+template<> struct NumericTypeEnabler<long long int> : EnabledType<long long int> {};
+template<> struct NumericTypeEnabler<unsigned char> : EnabledType<unsigned char> {};
+template<> struct NumericTypeEnabler<unsigned short int> : EnabledType<unsigned short int> {};
+template<> struct NumericTypeEnabler<unsigned int> : EnabledType<unsigned int> {};
+template<> struct NumericTypeEnabler<unsigned long int> : EnabledType<unsigned long int> {};
+template<> struct NumericTypeEnabler<unsigned long long int> : EnabledType<unsigned long long int> {};
+template<> struct NumericTypeEnabler<float> : EnabledType<float>  {};
+template<> struct NumericTypeEnabler<double> : EnabledType<double> {};
 template<> struct NumericTypeEnabler<long double> : EnabledType<long double> {};
 
 // More lax than NumericType, but does not permit any type that can also be cast
@@ -116,16 +123,16 @@ template<typename T> struct NonVariantTypeEnabler
     : MaybeEnabled<T, CanCast<T, double>::V != CanCast<T, std::string>::V> {};
 
 template<typename T> struct ArithmeticTypeEnabler {};
-template<> struct ArithmeticTypeEnabler<int8_t>    : EnabledType<int8_t> {};
-template<> struct ArithmeticTypeEnabler<int16_t>   : EnabledType<int16_t> {};
-template<> struct ArithmeticTypeEnabler<int32_t>   : EnabledType<int32_t> {};
-template<> struct ArithmeticTypeEnabler<int64_t>   : EnabledType<int64_t> {};
-template<> struct ArithmeticTypeEnabler<uint8_t>   : EnabledType<uint8_t> {};
-template<> struct ArithmeticTypeEnabler<uint16_t>  : EnabledType<uint16_t> {};
-template<> struct ArithmeticTypeEnabler<uint32_t>  : EnabledType<uint32_t> {};
-template<> struct ArithmeticTypeEnabler<uint64_t>  : EnabledType<uint64_t> {};
-template<> struct ArithmeticTypeEnabler<float>     : EnabledType<float> {};
-template<> struct ArithmeticTypeEnabler<double>    : EnabledType<double> {};
+template<> struct ArithmeticTypeEnabler<signed char> : EnabledType<signed char> {};
+template<> struct ArithmeticTypeEnabler<short int> : EnabledType<short int> {};
+template<> struct ArithmeticTypeEnabler<int> : EnabledType<int> {};
+template<> struct ArithmeticTypeEnabler<long int> : EnabledType<long int> {};
+template<> struct ArithmeticTypeEnabler<unsigned char> : EnabledType<unsigned char> {};
+template<> struct ArithmeticTypeEnabler<unsigned short int> : EnabledType<unsigned short int> {};
+template<> struct ArithmeticTypeEnabler<unsigned int> : EnabledType<unsigned int> {};
+template<> struct ArithmeticTypeEnabler<unsigned long int> : EnabledType<unsigned long int> {};
+template<> struct ArithmeticTypeEnabler<float> : EnabledType<float> {};
+template<> struct ArithmeticTypeEnabler<double> : EnabledType<double> {};
 template<> struct ArithmeticTypeEnabler<long double> : EnabledType<long double> {};
 
 template<typename T, typename U> struct NeqEnabler : EnabledType<T> {};
