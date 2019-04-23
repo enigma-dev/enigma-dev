@@ -20,6 +20,8 @@
 
 #include "scalar.h"
 
+#include <cstdlib> // random()
+
 namespace enigma_user {
   // Delphi-esque Random
   extern ma_scalar random(ma_scalar n);
