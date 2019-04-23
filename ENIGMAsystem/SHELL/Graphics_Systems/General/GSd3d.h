@@ -23,12 +23,11 @@
 #include <string>
 
 namespace enigma {
-  extern bool d3dMode;
-  extern bool d3dHidden;
-  extern bool d3dZWriteEnable;
-  extern bool d3dPerspective;
-  extern int d3dCulling;
-}
+
+extern bool d3dMode, d3dPerspective, d3dHidden, d3dZWriteEnable;
+extern int d3dCulling;
+
+} // namespace enigma
 
 // ***** RENDER STATE CONSTANTS *****
 namespace enigma_user {
@@ -94,6 +93,7 @@ namespace enigma_user {
   void d3d_clear_depth(double value=1.0L);
   void d3d_start();
   void d3d_end();
+  void d3d_set_perspective(bool enable);
   void d3d_set_hidden(bool enable);
   void d3d_set_clip_plane(bool enable);
   void d3d_set_zwriteenable(bool enable);
@@ -117,10 +117,6 @@ namespace enigma_user {
   void d3d_set_depth(double dep);
   void d3d_set_shading(bool smooth);
   void d3d_set_color_mask(bool r, bool g, bool b, bool a);
-
-  bool d3d_get_mode();
-  int d3d_get_culling();
-  bool d3d_get_hidden();
 
   // ***** LIGHTS BEGIN *****
   bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);

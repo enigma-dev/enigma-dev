@@ -15,13 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Platforms/platforms_mandatory.h"
+
+using namespace enigma::dx11;
 
 namespace {
 
@@ -31,18 +32,13 @@ void update_depth_stencil_state() {
   static ID3D11DepthStencilState* pDepthStencilState = NULL;
   if (pDepthStencilState) { pDepthStencilState->Release(); pDepthStencilState = NULL; }
   m_device->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState);
-  draw_batch_flush(batch_flush_deferred);
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   m_deviceContext->OMSetDepthStencilState(pDepthStencilState, 1);
 }
 
 } // namespace anonymous
 
 namespace enigma {
-
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
-int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
@@ -103,16 +99,18 @@ void d3d_end()
 
 void d3d_set_hidden(bool enable)
 {
-    draw_batch_flush(batch_flush_deferred);
-    enigma::d3dHidden = enable;
-    depthStencilDesc.DepthEnable = enable;
-    update_depth_stencil_state();
+  draw_batch_flush(batch_flush_deferred);
+  enigma::d3dHidden = enable;
+  depthStencilDesc.DepthEnable = enable;
+  update_depth_stencil_state();
 }
 
 void d3d_set_zwriteenable(bool enable)
 {
-    draw_batch_flush(batch_flush_deferred);
-	enigma::d3dZWriteEnable = enable;
+  draw_batch_flush(batch_flush_deferred);
+  enigma::d3dZWriteEnable = enable;
+  depthStencilDesc.DepthWriteMask = enable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+  update_depth_stencil_state();
 }
 
 void d3d_set_lighting(bool enable)
@@ -170,20 +168,6 @@ void d3d_set_culling(int mode)
 
 }
 
-bool d3d_get_mode()
-{
-    return enigma::d3dMode;
-}
-
-bool d3d_get_hidden()
-{
-    return enigma::d3dHidden;
-}
-
-int d3d_get_culling() {
-	return enigma::d3dCulling;
-}
-
 void d3d_set_fill_mode(int fill)
 {
 
@@ -216,12 +200,12 @@ void d3d_set_clip_plane(bool enable)
    ///TODO: Code this
 }
 
-}
+} // namespace enigma_user
 
 // ***** LIGHTS BEGIN *****
 #include <map>
-#include <list>
-#include "Universal_System/fileio.h"
+
+using std::map;
 
 struct posi { // Homogenous point.
     gs_scalar x;
@@ -242,27 +226,27 @@ class d3d_lights
 
     bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_define_specularity(int id, int r, int g, int b, double a)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_enable(int id)
     {
-
+      return false; //TODO: implement
     }
 
     bool light_disable(int id)
     {
-
+      return false; //TODO: implement
     }
 } d3d_lighting;
 
@@ -286,7 +270,6 @@ bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
-  float specular[4] = {r, g, b, a};
 
 }
 

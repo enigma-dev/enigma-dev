@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
@@ -35,11 +35,6 @@ using namespace std;
 namespace enigma {
 
 void d3d_light_update_positions(); // forward declare
-
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
-int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
@@ -123,20 +118,18 @@ void d3d_start()
   glDepthMask(true);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_NOTEQUAL, 0);
+  glAlphaFunc(GL_GREATER, 0);
   glEnable(GL_NORMALIZE);
   glEnable(GL_COLOR_MATERIAL);
 
   // Set up projection matrix
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+  d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
 
   // Set up modelview matrix
-  glMatrixMode(GL_MODELVIEW);
+  d3d_transform_set_identity();
+
   glClearColor(0,0,0,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity();
 }
 
 void d3d_end()
@@ -153,10 +146,8 @@ void d3d_end()
   glDisable(GL_ALPHA_TEST);
   glDisable(GL_NORMALIZE);
   glDisable(GL_COLOR_MATERIAL);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(0, 1, 0, 1);
-  glMatrixMode(GL_MODELVIEW);
+
+  d3d_set_projection_ortho(0, 0, view_wview[view_current], view_hview[view_current], 0); //This should probably be changed not to use views
 }
 
 // disabling hidden surface removal in means there is no depth buffer
@@ -165,7 +156,6 @@ void d3d_set_hidden(bool enable)
   draw_batch_flush(batch_flush_deferred);
   (enable?glEnable:glDisable)(GL_DEPTH_TEST);
   enigma::d3dHidden = enable;
-  //d3d_set_zwriteenable(enable);
 }
 
 // disabling zwriting can let you turn off testing for a single model, for instance
@@ -249,19 +239,6 @@ void d3d_set_culling(int mode)
   }
 }
 
-bool d3d_get_mode()
-{
-  return enigma::d3dMode;
-}
-
-bool d3d_get_hidden() {
-  return enigma::d3dHidden;
-}
-
-int d3d_get_culling() {
-  return enigma::d3dCulling;
-}
-
 void d3d_set_fill_mode(int fill)
 {
   draw_batch_flush(batch_flush_deferred);
@@ -301,11 +278,9 @@ void d3d_set_clip_plane(bool enable)
   //printf("warning: d3d_set_clip_plane(bool enable) called even though GL1 doesn't support this!\n");
 }
 
-}
+} // namespace enigma_user
 
 #include <map>
-#include <list>
-#include "Universal_System/fileio.h"
 
 struct posi { // Homogenous point.
     gs_scalar x;

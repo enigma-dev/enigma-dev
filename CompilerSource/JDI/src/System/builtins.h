@@ -77,6 +77,7 @@ namespace jdi {
   extern unsigned long builtin_flag__volatile; ///< Builtin volatile flag
   extern unsigned long builtin_flag__static;   ///< Builtin static flag
   extern unsigned long builtin_flag__const;    ///< Builtin const flag
+  extern unsigned long builtin_flag__mutable;  ///< Builtin mutable flag
   extern unsigned long builtin_flag__register; ///< Builtin register flag
   extern unsigned long builtin_flag__inline;   ///< Builtin inline flag
   extern unsigned long builtin_flag__Complex;  ///< Builtin complex flag

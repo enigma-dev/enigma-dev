@@ -16,7 +16,7 @@
 **/
 
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSd3d.h"
@@ -88,10 +88,9 @@ void screen_init()
   glDisable(GL_CULL_FACE);
   glEnable(GL_BLEND);
   glEnable(GL_SCISSOR_TEST);
-  glEnable(GL_ALPHA_TEST);
   glEnable(GL_TEXTURE_2D);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glAlphaFunc(GL_ALWAYS,0);
+  glAlphaFunc(GL_GREATER,0);
   texture_reset();
   draw_set_color(c_white);
 }

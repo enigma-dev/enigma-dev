@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
@@ -23,8 +22,9 @@
 
 #include <math.h>
 
+using namespace enigma::dx9;
+
 namespace enigma {
-  extern unsigned char currentcolor[4];
   D3DCOLOR get_currentcolor() {
 	return D3DCOLOR_RGBA(currentcolor[0], currentcolor[1], currentcolor[2], currentcolor[3]);
   }
@@ -36,13 +36,13 @@ namespace enigma_user
 void draw_clear_alpha(int col, float alpha)
 {
 	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), CLAMP_ALPHA(alpha)), 1.0f, 0);
+	d3dmgr->device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), CLAMP_ALPHA(alpha)), 1.0f, 0);
 }
 
 void draw_clear(int col)
 {
 	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col)), 1.0f, 0);
+	d3dmgr->device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col)), 1.0f, 0);
 }
 
 void draw_set_color(int col)
@@ -75,7 +75,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
 {
 	draw_batch_flush(batch_flush_deferred);
-	DWORD flags = NULL;
+	DWORD flags = 0;
 	if (red) { flags |= D3DCOLORWRITEENABLE_RED; }
 	if (green) { flags |= D3DCOLORWRITEENABLE_GREEN; }
 	if (blue) { flags |= D3DCOLORWRITEENABLE_BLUE; }

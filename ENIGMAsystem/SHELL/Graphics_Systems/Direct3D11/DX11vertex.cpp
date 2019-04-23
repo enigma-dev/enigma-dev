@@ -15,12 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
+#include "Direct3D11Headers.h"
 
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+
+#include "Widget_Systems/widgets_mandatory.h" // for show_error
 
 #include <D3Dcompiler.h>
 
@@ -29,6 +31,8 @@
 
 #include <map>
 using std::map;
+
+using namespace enigma::dx11;
 
 namespace {
 struct MatrixBufferType
@@ -103,7 +107,7 @@ DXGI_FORMAT dxgi_formats[] = {
   DXGI_FORMAT_R32G32_FLOAT,
   DXGI_FORMAT_R32G32B32_FLOAT,
   DXGI_FORMAT_R32G32B32A32_FLOAT,
-  DXGI_FORMAT_R8G8B8A8_UNORM,
+  DXGI_FORMAT_B8G8R8A8_UNORM,
   DXGI_FORMAT_R8G8B8A8_UINT
 };
 size_t dxgi_format_sizes[] = {
@@ -111,8 +115,8 @@ size_t dxgi_format_sizes[] = {
   sizeof(float) * 2,
   sizeof(float) * 3,
   sizeof(float) * 4,
-  sizeof(unsigned byte) * 4,
-  sizeof(unsigned byte) * 4
+  sizeof(unsigned char) * 4,
+  sizeof(unsigned char) * 4
 };
 
 map<int, ID3D11Buffer*> vertexBufferPeers;

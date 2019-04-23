@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
@@ -29,11 +28,38 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+using namespace enigma::dx9;
+
+namespace {
+
+template<typename T, typename F>
+T alias_cast(F raw_data) {
+  T value;
+  memcpy(&value, &raw_data, sizeof(value));
+  return value;
+}
+
+D3DCULL cullingstates[3] = {
+  D3DCULL_NONE, D3DCULL_CCW, D3DCULL_CW
+};
+
+D3DFILLMODE fillmodes[3] = {
+  D3DFILL_POINT, D3DFILL_WIREFRAME, D3DFILL_SOLID
+};
+
+D3DCMPFUNC depthoperators[8] = {
+  D3DCMP_NEVER, D3DCMP_LESS, D3DCMP_EQUAL,
+  D3DCMP_LESSEQUAL, D3DCMP_GREATER, D3DCMP_NOTEQUAL,
+  D3DCMP_GREATEREQUAL, D3DCMP_ALWAYS
+};
+
+D3DFOGMODE fogmodes[3] = {
+    D3DFOG_EXP, D3DFOG_EXP2, D3DFOG_LINEAR
+};
+
+} // anonymous namespace
+
 namespace enigma {
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
-int d3dCulling = 0;
 
 void graphics_set_matrix(int type) {
   enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
@@ -63,30 +89,11 @@ void graphics_set_matrix(int type) {
 
 } // namespace enigma
 
-D3DCULL cullingstates[3] = {
-  D3DCULL_NONE, D3DCULL_CCW, D3DCULL_CW
-};
-
-D3DFILLMODE fillmodes[3] = {
-  D3DFILL_POINT, D3DFILL_WIREFRAME, D3DFILL_SOLID
-};
-
-D3DCMPFUNC depthoperators[8] = {
-  D3DCMP_NEVER, D3DCMP_LESS, D3DCMP_EQUAL,
-  D3DCMP_LESSEQUAL, D3DCMP_GREATER, D3DCMP_NOTEQUAL,
-  D3DCMP_GREATEREQUAL, D3DCMP_ALWAYS
-};
-
-D3DFOGMODE fogmodes[3] = {
-    D3DFOG_EXP, D3DFOG_EXP2, D3DFOG_LINEAR
-};
-
-namespace enigma_user
-{
+namespace enigma_user {
 
 void d3d_clear_depth(double value) {
   draw_batch_flush(batch_flush_deferred);
-  d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
+  d3dmgr->device->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
 }
 
 void d3d_start()
@@ -96,7 +103,9 @@ void d3d_start()
   enigma::d3dPerspective = true;
   enigma::d3dCulling = rs_none;
   d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+  d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
   d3dmgr->SetRenderState(D3DRS_ZENABLE, enigma::d3dHidden = true);
+  d3dmgr->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
 
   // Enable texture repetition by default
   d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
@@ -106,15 +115,16 @@ void d3d_start()
 
 void d3d_end()
 {
-    draw_batch_flush(batch_flush_deferred);
-	enigma::d3dMode = false;
-    enigma::d3dPerspective = false;
-	enigma::d3dCulling = rs_none;
-	d3d_set_hidden(false);
+  draw_batch_flush(batch_flush_deferred);
+  enigma::d3dMode = false;
+  enigma::d3dPerspective = false;
+  enigma::d3dCulling = rs_none;
+  d3dmgr->SetRenderState(D3DRS_NORMALIZENORMALS, FALSE);
+  d3d_set_hidden(false);
 }
 
 void d3d_set_software_vertex_processing(bool software) {
-	d3dmgr->SetSoftwareVertexProcessing(software);
+	d3dmgr->device->SetSoftwareVertexProcessing(software);
 }
 
 void d3d_set_hidden(bool enable)
@@ -172,24 +182,25 @@ void d3d_set_fog_color(int color)
                     D3DCOLOR_RGBA(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), 255)); // Highest 8 bits are not used.
 }
 
+// NOTE: DWORD is 32 bits maximum meaning it can only hold single-precision
+// floats, so yes, we must cast double to float first too.
+// https://docs.microsoft.com/en-us/windows/desktop/direct3d9/d3drenderstatetype
 void d3d_set_fog_start(double start)
 {
-    draw_batch_flush(batch_flush_deferred);
-	float fFogStart = start;
-	d3dmgr->SetRenderState(D3DRS_FOGSTART,*(DWORD*)(&fFogStart));
+  draw_batch_flush(batch_flush_deferred);
+  d3dmgr->SetRenderState(D3DRS_FOGSTART, alias_cast<DWORD>((float)start));
 }
 
 void d3d_set_fog_end(double end)
 {
   draw_batch_flush(batch_flush_deferred);
-  float fFogEnd = end;
-  d3dmgr->SetRenderState(D3DRS_FOGEND,*(DWORD*)(&fFogEnd));
+  d3dmgr->SetRenderState(D3DRS_FOGEND, alias_cast<DWORD>((float)end));
 }
 
 void d3d_set_fog_density(double density)
 {
-	draw_batch_flush(batch_flush_deferred);
-	d3dmgr->SetRenderState(D3DRS_FOGDENSITY, *(DWORD *)(&density));
+  draw_batch_flush(batch_flush_deferred);
+  d3dmgr->SetRenderState(D3DRS_FOGDENSITY, alias_cast<DWORD>((float)density));
 }
 
 void d3d_set_culling(int mode)
@@ -197,20 +208,6 @@ void d3d_set_culling(int mode)
 	draw_batch_flush(batch_flush_deferred);
 	enigma::d3dCulling = mode;
 	d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[mode]);
-}
-
-bool d3d_get_mode()
-{
-    return enigma::d3dMode;
-}
-
-bool d3d_get_hidden()
-{
-    return enigma::d3dHidden;
-}
-
-int d3d_get_culling() {
-	return enigma::d3dCulling;
 }
 
 void d3d_set_fill_mode(int fill)
@@ -249,16 +246,10 @@ void d3d_set_clip_plane(bool enable)
    ///TODO: Code this
 }
 
-}
-
-namespace enigma {
-  extern unsigned char currentcolor[4];
-}
+} // namespace enigma_user
 
 // ***** LIGHTS BEGIN *****
 #include <map>
-#include <list>
-#include "Universal_System/fileio.h"
 
 struct posi { // Homogenous point.
     gs_scalar x;
@@ -292,8 +283,8 @@ class d3d_lights
         {
             ms = light_ind.size();
             D3DCAPS9 caps;
-			d3dmgr->GetDeviceCaps(&caps);
-            if (ms >= caps.MaxActiveLights)
+			d3dmgr->device->GetDeviceCaps(&caps);
+            if (DWORD(ms) >= caps.MaxActiveLights)
                 return false;
 
             light_ind.insert(pair<int,int>(id, ms));
@@ -328,8 +319,8 @@ class d3d_lights
         {
             ms = light_ind.size();
             D3DCAPS9 caps;
-			d3dmgr->GetDeviceCaps(&caps);
-            if (ms >= caps.MaxActiveLights)
+			d3dmgr->device->GetDeviceCaps(&caps);
+            if (DWORD(ms) >= caps.MaxActiveLights)
                 return false;
 
             light_ind.insert(pair<int,int>(id, ms));
@@ -363,8 +354,8 @@ class d3d_lights
         {
             ms = light_ind.size();
             D3DCAPS9 caps;
-			d3dmgr->GetDeviceCaps(&caps);
-            if (ms >= caps.MaxActiveLights)
+			d3dmgr->device->GetDeviceCaps(&caps);
+            if (DWORD(ms) >= caps.MaxActiveLights)
                 return false;
         }
 
@@ -377,8 +368,8 @@ class d3d_lights
         if (it == light_ind.end()) {
             const int ms = light_ind.size();
 			D3DCAPS9 caps;
-			d3dmgr->GetDeviceCaps(&caps);
-            if (ms >= caps.MaxActiveLights)
+			d3dmgr->device->GetDeviceCaps(&caps);
+            if (DWORD(ms) >= caps.MaxActiveLights)
                 return false;
             light_ind.insert(pair<int,int>(id, ms));
 			d3dmgr->LightEnable(ms, TRUE);
@@ -425,7 +416,6 @@ bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
     draw_batch_flush(batch_flush_deferred);
-    float specular[4] = {r, g, b, a};
 }
 
 void d3d_light_shininess(int facemode, int shine)

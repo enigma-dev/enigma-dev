@@ -62,7 +62,7 @@ namespace enigma {
 
     GLenum err = glewInit();
     if (GLEW_OK != err)
-      show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
+      show_error(std::string("Failed to initialize glew for OpenGL. ") + (const char*)glewGetErrorString(err), true);
   }
 
   void DisableDrawing(void* handle) {
@@ -113,9 +113,6 @@ namespace enigma {
 }
 
 namespace enigma_user {
-  // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
-  int display_aa = 14;
-
   void set_synchronization(bool enable) {
     // General notes:
     // Setting swapping on and off is platform-dependent and requires platform-specific extensions.

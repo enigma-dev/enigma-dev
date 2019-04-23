@@ -38,8 +38,6 @@ using namespace std;
 #include "compiler/output_locals.h"
 #include "languages/language_adapter.h"
 
-#include <compiler/jdi_utility.h>
-
 #include "settings.h"
 
 
@@ -99,7 +97,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
   { if (pos >= code.length()) {
       if (mymacroind)
         mymacrostack[--mymacroind].release(code,pos);
-      else break; continue;
+      else break;
+      continue;
     }
     
     //cout << synt.substr(0,bpos) << endl;
@@ -158,11 +157,11 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       if (itt != edl_tokens.end()) {
         c = itt->second;
       }
-      else if ((d = main_context->get_global()->look_up(name)))
+      else if ((d = current_language->look_up(name)))
       {
         if (d->flags & jdi::DEF_TYPENAME)
           c = 't';
-        else if (d->flags & jdi::DEF_FUNCTION and referencers_varargs(((jdi::definition_function*)d)->referencers))
+        else if (current_language->is_variadic_function(d))
           c = 'V', cprime = 'n';
       }
       else if (name == "then")
@@ -399,9 +398,9 @@ int parser_reinterpret(string &code,string &synt)
     {
       const pt spos = pos;
       while ((synt[pos] = 'n', synt[++pos] == 'V'));
-      jdi::definition_function *d = (jdi::definition_function*)main_context->get_global()->look_up(code.substr(spos,pos-spos));
+      jdi::definition_function *d = (jdi::definition_function*)current_language->look_up(code.substr(spos,pos-spos));
       const pt epos = pos;
-      int en = referencers_varargs_at(d->referencers);
+      int en = current_language->function_variadic_after(d);
       if (en == -1) continue;
       cout << "AND EN = " << en  << endl;
       ++pos; for (unsigned lvl = 1; en and lvl; pos++)
@@ -937,7 +936,7 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
   cout << " <" << ((synt && code.length()) == (synt && synt->length()) ? "equivalent" : "UNEQUAL") << "> [" << (pos > code.length()) << "]";
   cout << "ass: " << spos << ", " << epos << ": " << code.length() << endl;
   string ptname = code.substr(spos,epos-spos+1); // Isolate the potential template's name
-  jdi::definition* a = main_context->get_global()->look_up(ptname);
+  jdi::definition* a = current_language->look_up(ptname);
   if (!a) return 0;
   
   if (a->flags & jdi::DEF_TEMPLATE)
@@ -945,7 +944,7 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
     jdi::definition_template *tmp = (jdi::definition_template*)a;
     int tmc = tmp->params.size() - 1;
     for (int i = tmc; i >= 0; i--)
-      if (tmp->params[i]->flags & jdi::DEF_DEFAULTED) tmc = i;
+      if (tmp->params[i]->default_assignment) tmc = i;
     a2i = tmc - a2i;
     string iseg;
     for (int i = 0; i < a2i;)

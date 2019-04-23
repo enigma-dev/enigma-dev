@@ -33,6 +33,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <algorithm> // min/max
 #include <math.h>
 
 using namespace std;
@@ -40,7 +41,6 @@ using namespace std;
 namespace enigma {
 
 vector<Model*> models;
-extern unsigned char currentcolor[4];
 
 unsigned int split(const std::string &txt, std::vector<std::string> &strs, char ch)
 {

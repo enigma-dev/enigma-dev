@@ -74,19 +74,24 @@ inline void stack_clear(std::stack<T> &stack) {
 
 namespace enigma {
 
-bool d3dPerspective = false;
 glm::mat4 world = glm::mat4(1.0f),
           view  = glm::mat4(1.0f),
           projection = glm::mat4(1.0f);
+
+static inline glm::mat4 make_mat4(const var &matrix) {
+  if (matrix.array_len() == 16)
+    return glm::make_mat4(matrix.to_vector<float>().data());
+  glm::mat4 res = {};
+  if (matrix.array_len() != 4 || matrix.array_height() != 4) return res;
+  for (int i = 0, v = 0; i < 4; ++i) for (int j = 0; j < 4; ++j)
+    glm::value_ptr(res)[v++] = matrix(i, j);
+  return res;
+}
 
 } // namespace enigma
 
 namespace enigma_user
 {
-
-bool is_matrix(const var& value) {
-  return (value.array_len() == 16);
-}
 
 bool is_vec3(const var& value) {
   return (value.array_len() == 3);
@@ -94,6 +99,10 @@ bool is_vec3(const var& value) {
 
 bool is_vec4(const var& value) {
   return (value.array_len() == 4);
+}
+
+bool is_matrix(const var& value) {
+  return (value.array_len() == 16);
 }
 
 var matrix_get(int type) {
@@ -114,7 +123,7 @@ var matrix_get(int type) {
 }
 
 void matrix_set(int type, const var& matrix) {
-  glm::mat4 glm_matrix = glm::make_mat4((gs_scalar*)matrix.values);
+  glm::mat4 glm_matrix = enigma::make_mat4(matrix);
   switch (type) {
     case matrix_world:
       enigma::world = glm_matrix;
@@ -135,13 +144,13 @@ void matrix_set(int type, const var& matrix) {
 }
 
 var matrix_multiply(const var& matrix1, const var& matrix2) {
-  glm::mat4 glm_matrix1 = glm::make_mat4((gs_scalar*)matrix1.values),
-            glm_matrix2 = glm::make_mat4((gs_scalar*)matrix2.values);
+  glm::mat4 glm_matrix1 = enigma::make_mat4(matrix1),
+            glm_matrix2 = enigma::make_mat4(matrix2);
   return matrix_vararray(glm_matrix1 * glm_matrix2);
 }
 
 var matrix_transform_vertex(const var& matrix, gs_scalar x, gs_scalar y, gs_scalar z) {
-  glm::mat4 glm_matrix = glm::make_mat4((gs_scalar*)matrix.values);
+  glm::mat4 glm_matrix = enigma::make_mat4(matrix);
   glm::vec4 vertex(x, y, z, 0);
   vertex = glm_matrix * vertex;
   return vec3_vararray(glm::vec3(vertex));
@@ -188,12 +197,12 @@ void matrix_stack_clear() {
 
 void matrix_stack_set(const var& matrix) {
   matrix_stack.pop();
-  glm::mat4 glm_matrix = glm::make_mat4((gs_scalar*)matrix.values);
+  glm::mat4 glm_matrix = enigma::make_mat4(matrix);
   matrix_stack.emplace(glm_matrix);
 }
 
 void matrix_stack_push(const var& matrix) {
-  glm::mat4 glm_matrix = glm::make_mat4((gs_scalar*)matrix.values);
+  glm::mat4 glm_matrix = enigma::make_mat4(matrix);
   matrix_stack.emplace(glm_matrix);
 }
 
@@ -203,16 +212,6 @@ void matrix_stack_pop() {
 
 var matrix_stack_top() {
   return matrix_vararray(matrix_stack.top());
-}
-
-void d3d_set_perspective(bool enable) {
-  // in GM8.1 and GMS v1.4 this does not take effect
-  // until the next frame in screen_redraw
-  enigma::d3dPerspective = enable;
-}
-
-bool d3d_get_perspective() {
-  return enigma::d3dPerspective;
 }
 
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,
@@ -237,7 +236,7 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
   enigma::view = glm::ortho(x, x + width, y + height, y, -32000.0f, 32000.0f);
-  enigma::projection = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f));
+  enigma::projection = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
   enigma::graphics_set_matrix(matrix_view);
   enigma::graphics_set_matrix(matrix_projection);
 }
@@ -247,17 +246,17 @@ void d3d_set_projection_ortho_lookat(gs_scalar x, gs_scalar y, gs_scalar width, 
                                      gs_scalar xto, gs_scalar yto, gs_scalar zto,
                                      gs_scalar xup, gs_scalar yup, gs_scalar zup) {
   enigma::view = glm::lookAt(glm::vec3(xfrom, yfrom, zfrom), glm::vec3(xto, yto, zto), glm::vec3(xup, yup, zup));
+  enigma::view = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(0.0f, 0.0f, 1.0f)) * enigma::view;
   enigma::projection = glm::ortho(x, x + width, y + height, y, -32000.0f, 32000.0f);
-  enigma::projection = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)) * enigma::projection;
   enigma::graphics_set_matrix(matrix_view);
   enigma::graphics_set_matrix(matrix_projection);
 }
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-  enigma::view = glm::ortho(x, x + width, y + height, y, 1.0f, 32000.0f);
+  enigma::view = glm::translate(glm::mat4(1.0f), glm::vec3(-(x + width/2), -(y + height/2), (width+height)/2));
+  enigma::view = glm::rotate(glm::mat4(1.0f), (float)gs_angle_to_radians(angle), glm::vec3(0.0f, 0.0f, 1.0f)) * enigma::view;
   enigma::projection = glm::perspective((float)gs_angle_to_radians(40.0f), width/height, 1.0f, 32000.0f);
-  enigma::projection = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)) * enigma::projection;
   enigma::graphics_set_matrix(matrix_view);
   enigma::graphics_set_matrix(matrix_projection);
 }

@@ -67,7 +67,7 @@ namespace enigma
     int fontsize; bool bold, italic;
     unsigned int glyphRangeCount;
   };
-  extern rawfont rawfontdata[];
+  extern std::vector<rawfont> rawfontdata;
   extern font **fontstructarray;
 
   extern int rawfontcount, rawfontmaxid;

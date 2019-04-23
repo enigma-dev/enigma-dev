@@ -28,13 +28,15 @@
 #ifndef ENIGMA_SYNCHECK_H
 #define ENIGMA_SYNCHECK_H
 
+#include <string>
+
 namespace syncheck
 {
-  extern string syerr;
-  int syntaxcheck(string code, string& newcode);
-  void addscr(string name);
+  extern std::string syerr;
+  int syntaxcheck(std::string code, std::string& newcode);
+  void addscr(std::string name);
 }
 
-int file_check(string filename);
+int file_check(std::string filename);
 
 #endif

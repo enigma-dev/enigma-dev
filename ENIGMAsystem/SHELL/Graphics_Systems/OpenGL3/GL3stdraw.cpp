@@ -16,11 +16,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL3Context.h"
 #include "GLSLshader.h"
 #include "GL3shader.h"
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GStextures.h"
@@ -33,7 +32,6 @@
 
 namespace enigma {
 
-extern unsigned char currentcolor[4];
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 
@@ -127,7 +125,6 @@ int draw_getpixel(int x,int y)
     }
 
     draw_batch_flush(batch_flush_deferred);
-    oglmgr->ReadPixels();
 
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
@@ -163,7 +160,6 @@ int draw_getpixel_ext(int x,int y)
     }
 
     draw_batch_flush(batch_flush_deferred);
-    oglmgr->ReadPixels();
 
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
@@ -181,15 +177,3 @@ int draw_getpixel_ext(int x,int y)
 }
 
 } // namespace enigma_user
-
-namespace enigma {
-
-bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
-{
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-  //TODO: Complex polygon supported only in OpenGL1 at the moment. By returning false here, we fall back
-  //      on a convex-only polygon drawing routine that works on any platform.
-  return false;
-}
-
-} // namespace enigma

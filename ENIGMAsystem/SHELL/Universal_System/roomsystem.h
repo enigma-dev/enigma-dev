@@ -31,6 +31,7 @@
 #include "var4.h"
 
 #include <string>
+#include <vector>
 
 namespace enigma
 {
@@ -60,7 +61,7 @@ int room_set_background_color(int indx, int col, bool show);
 int room_set_caption(int indx, std::string str);
 int room_set_persistent(int indx, bool pers);
 int room_set_view_enabled(int indx, int val);
-int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color = 0xFFFFFF);
+int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, double xscale, double yscale, double alpha, int color = 0xFFFFFF);
 inline int room_tile_add(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth)
 {
     return room_tile_add_ext(indx, bck, left, top, width, height, x, y, depth, 1, 1, 1, 0xFFFFFF);
@@ -120,11 +121,18 @@ namespace enigma
 {
   struct inst {
     int id,obj,x,y;
+    inst(int id, int obj, int x, int y) : id(id), obj(obj), x(x), y(y) {}
   };
   struct tile {
       int id,bckid,bgx,bgy,depth,height,width,roomX,roomY;
       double alpha, xscale, yscale;
       int color;
+      
+      tile(int id, int bckid, int bgx, int bgy, int depth, int height, 
+             int width, int roomX, int roomY, double alpha, 
+             double xscale, double yscale, int color) : 
+        id(id), bckid(bckid), bgx(bgx), bgy(bgy), depth(depth), height(height), width(width), 
+        roomX(roomX), roomY(roomY), alpha(alpha), xscale(xscale), yscale(yscale), color(color) {}
   };
   struct viewstruct
   {
@@ -159,10 +167,8 @@ namespace enigma
     int views_enabled;
     viewstruct views[10];
     backstruct backs[10];
-    int instancecount;
-    inst *instances;
-    int tilecount;
-    tile *tiles;
+    std::vector<inst> instances;
+    std::vector<tile> tiles;
 
     void end();
     void gotome(bool gamestart = false);
