@@ -18,23 +18,23 @@
 /*\\\ This file contains prototypes for functions that must be defined by the audio
 |*||| library wrapper modules. Each of these is used by other systems throughout the engine.
 \*/// Accidental failure to implement them could cause error.
-//#include <cstdlib>
+#include <cstdlib>
 
 namespace enigma
 {
   // This function is called at the beginning of the game.
   int audiosystem_initialize(); // In it, the audio system can make its startup calls.
-
+  
   // This function is called multiple times each frame, and can be invoked by the API in sound playing calls.
   void audiosystem_update(); // In it, the audio system can track what is happening with each sound.
-
+  
   // This function allocates memory for sounds to avoid segfault.
   void sound_safety_override(); // It is called if resource load fails.
-
+  
   // This function is called for each sound in the game's module.
   int sound_add_from_buffer(int id, void* buffer, size_t size); // It should add the sound under the given ID.
 
-  /** This function creates a stream-based sound.
+  /** This function creates a stream-based sound. 
   @param id
   @param callback
   @param seek
@@ -46,7 +46,7 @@ namespace enigma
 
   // This function allocates a new sound resource but does not put anything in it.
   int sound_allocate();
-
+  
   // This function is called at the end of the game, as it closes.
   void audiosystem_cleanup(); // It should free memory and shut down the audio library.
 }
