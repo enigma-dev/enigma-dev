@@ -266,7 +266,7 @@ variant::~variant() { }
   #undef terror
   #undef terror2
   #undef terrortrue
-  
+
   #define div0c(x)
   #define terror(x)
   #define terror2(x)
