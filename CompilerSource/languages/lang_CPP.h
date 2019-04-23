@@ -31,7 +31,7 @@ struct lang_CPP: language_adapter {
   jdi::context definitions;
 
   /// The ENIGMA namespace.
-  jdi::definition_scope *namespace_enigma;
+  jdi::definition_scope *namespace_enigma, *namespace_enigma_user;
   jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
 
   // Utility
@@ -91,6 +91,8 @@ struct lang_CPP: language_adapter {
   void quickmember_integer(jdi::definition_scope* scope, string name) {
     return quickmember_variable(scope, jdi::builtin_type__int, name);
   }
+  /// Look up an enigma_user definition by its name.
+  jdi::definition* look_up(const string &name);
 
   virtual ~lang_CPP();
 

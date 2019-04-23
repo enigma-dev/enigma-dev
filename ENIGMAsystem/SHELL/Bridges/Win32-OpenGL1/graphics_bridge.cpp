@@ -72,7 +72,7 @@ void EnableDrawing(void*)
 
   GLenum err = glewInit();
   if (GLEW_OK != err)
-    show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
+    show_error(std::string("Failed to initialize glew for OpenGL. ") + (const char*)glewGetErrorString(err), true);
 
   //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
   glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);

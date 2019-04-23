@@ -45,6 +45,8 @@ namespace enigma {
   };
 }
 
+namespace enigma_user {
+
 struct var;
 
 struct variant
@@ -308,18 +310,21 @@ types_binary_extrapolate_alldecce(bool, operator<,  const variant&)
 
 #undef unsigll
 
-namespace enigma_user {
-  enum {
+enum {
     ty_undefined = -1,
     ty_real = 0,
     ty_string = 1,
     ty_pointer = 2
-  };
+};
 
-  bool is_undefined(variant var);
-  bool is_real(variant val);
-  bool is_string(variant val);
-  bool is_ptr(variant var);
-}
+bool is_undefined(variant var);
+bool is_real(variant val);
+bool is_string(variant val);
+bool is_ptr(variant var);
+
+} //enigma_user
+
+using enigma_user::variant;
+using enigma_user::var;
 
 #endif //ENIGMA_VAR4_H

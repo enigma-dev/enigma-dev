@@ -92,6 +92,8 @@ struct language_adapter {
   virtual void quickmember_script(jdi::definition_scope* scope, string name) = 0;
   /// Create a standard integer variable member in the given scope.
   virtual void quickmember_integer(jdi::definition_scope* scope, string name) = 0;
+  /// Look up an enigma_user definition by its name.
+  virtual jdi::definition* look_up(const string &name) = 0;
 
   virtual ~language_adapter();
 };

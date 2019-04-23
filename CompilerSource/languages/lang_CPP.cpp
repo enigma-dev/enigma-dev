@@ -127,6 +127,12 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
       } else cerr << "ERROR! No varargs type found!" << endl;
     } else cerr << "ERROR! Namespace enigma is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace enigma not found!" << endl;
+  namespace_enigma_user = main_context->get_global();
+  if ((d = main_context->get_global()->look_up("enigma_user"))) {
+    if (d->flags & jdi::DEF_NAMESPACE) {
+      namespace_enigma_user = (jdi::definition_scope*) d;
+    } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
+  } else cerr << "ERROR! Namespace enigma_user not found!" << endl;
   
   if (res) {
     cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never happy.\n";
@@ -201,6 +207,12 @@ int lang_CPP::load_shared_locals() {
 
   load_extension_locals();
   return 0;
+}
+
+jdi::definition* lang_CPP::look_up(const string &name) {
+  auto builtin = jdip::builtin_declarators.find(name);
+  if (builtin != jdip::builtin_declarators.end()) return builtin->second->def;
+  return namespace_enigma_user->find_local(name);
 }
 
 lang_CPP::~lang_CPP() {

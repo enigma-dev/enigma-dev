@@ -57,6 +57,8 @@ template<>           inline bool varzero(double x) { return codebloxt(x >= 0 && 
 #  define div0c(x)
 #endif
 
+namespace enigma_user {
+
 variant::operator int()       { ccast(0); return int  (rval.d); }
 variant::operator bool()      { ccast(0); return lrint(rval.d) > 0; }
 variant::operator char()      { ccast(0); return char (rval.d); }
@@ -339,9 +341,9 @@ double    variant::operator+  () EVCONST { return  rval.d; }
 #undef EVCONST
 #define EVCONST
 
-namespace enigma_user {
-  bool is_undefined(variant val)   { return val.type == ty_undefined; }
-  bool is_real(variant val)   { return val.type == real; }
-  bool is_string(variant val) { return val.type == tstr;  }
-  bool is_ptr(variant val)   { return val.type == ty_pointer; }
-}
+bool is_undefined(variant val)   { return val.type == ty_undefined; }
+bool is_real(variant val)   { return val.type == real; }
+bool is_string(variant val) { return val.type == tstr;  }
+bool is_ptr(variant val)   { return val.type == ty_pointer; }
+
+} //enigma_user

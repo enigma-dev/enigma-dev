@@ -81,7 +81,7 @@ namespace syncheck
     TT_DIGIT,           // 0 1 2... (...)
     TT_STRING,          // "", ''
     TT_SCOPEACCESS,     // ::
-    TT_FUNCTION,   // game_end
+    TT_FUNCTION,        // game_end
     TT_TYPE_NAME,       // int, double, whatever
     TT_NAMESPACE,       // std, enigma, sf
     TT_LOCGLOBAL,       // global/local
@@ -310,7 +310,7 @@ namespace syncheck
 
         if (shared_object_locals.find(name) == shared_object_locals.end())
         {
-          jdi::definition *d = main_context->get_global()->look_up(name);
+          jdi::definition *d = current_language->look_up(name);
           if (d)
           {
             // Handle typenames
