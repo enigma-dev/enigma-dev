@@ -15,14 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <stdlib.h>     /* malloc, free, rand */
-#include <unordered_map>
-#include <math.h>
-
-using namespace std;
 #include "Universal_System/shaderstruct.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
@@ -40,18 +32,7 @@ using namespace std;
 #include <algorithm>
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 #include "Graphics_Systems/General/GSprimitives.h"
-#include "../General/GSbackground.h"
-#include "../General/GStextures.h"
-#include "../General/GStiles.h"
-#include "../General/GSvertex.h"
-#include "../General/GSsurface.h"
-#include "../General/GSstdraw.h"
-#include "../General/GSsprite.h"
-#include "../General/GSscreen.h"
-#include "../General/GSd3d.h"
-#include "../General/GSblend.h"
-#include "../General/GSmatrix.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/include.h"
 #include "Platforms/platforms_mandatory.h"
 #include <floatcomp.h>
 #include <vector>
@@ -60,6 +41,15 @@ using namespace std;
 #include <list>
 #include <stack>
 #include "Universal_System/estring.h"
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <stdlib.h>     /* malloc, free, rand */
+#include <unordered_map>
+#include <math.h>
+
+using namespace std;
 
 //Below are all functions concerned with drawing anything, or that are tied to
 //the GPU (such as surfaces) and as such have no business in a headless mode
@@ -169,6 +159,10 @@ namespace enigma_user
 
 	void draw_clear_alpha(int col,float alpha){}
 	void draw_clear(int col){}
+	void d3d_clear_depth(double value){}
+	void d3d_stencil_clear_value(int value) {}
+	void d3d_stencil_clear() {}
+	void d3d_set_software_vertex_processing(bool software){}
 
 	extern int window_get_region_height_scaled();
 	int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload){return -1;}
