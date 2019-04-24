@@ -32,6 +32,14 @@
 
 #include <stdio.h>
 
+namespace enigma {
+
+    int initialize_everything();
+    variant ev_perf(int type, int numb);
+
+} // namespace enigma
+
+
 namespace enigma_user
 {
 extern bool argument_relative;
@@ -521,14 +529,6 @@ enum
     ev_step_end     = 2
 };
 
-}
-
-namespace enigma
-{
-    int initialize_everything();
-    variant ev_perf(int type, int numb);
-}
-
 inline variant event_perform(int type, int numb) {
     return enigma::ev_perf(type, numb);
 }
@@ -543,6 +543,8 @@ inline void event_inherited() {
   #include "Widget_Systems/widgets_mandatory.h"
   show_error("Event inherited called on an object that has no event to inherit.", false);
 #endif
+}
+
 }
 
 #define action_inherited event_inherited
