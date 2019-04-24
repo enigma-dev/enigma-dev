@@ -18,6 +18,7 @@
 
 #include "GLSLshader.h"
 #include "GL3shader.h"
+#include "Graphics_Systems/OpenGL/GLenums.h"
 #include "Graphics_Systems/OpenGL/GLtextures_impl.h"
 #include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
@@ -39,45 +40,6 @@
 #include <floatcomp.h>
 
 using namespace std;
-
-namespace {
-
-const GLenum renderstates[3] = {
-  GL_NICEST, GL_FASTEST, GL_DONT_CARE
-};
-
-const GLenum fogmodes[3] = {
-  GL_EXP, GL_EXP2, GL_LINEAR
-};
-
-const GLenum depthoperators[8] = {
-  GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL,
-  GL_GEQUAL, GL_ALWAYS
-};
-
-const GLenum fillmodes[3] = {
-  GL_POINT, GL_LINE, GL_FILL
-};
-
-const GLenum windingstates[2] = {
-  GL_CW, GL_CCW
-};
-
-const GLenum cullingstates[3] = {
-  GL_BACK, GL_FRONT, GL_FRONT_AND_BACK
-};
-
-const GLenum blendequivs[11] = {
-  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,
-  GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR,
-  GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA_SATURATE
-};
-
-const GLenum stenciloperators[8] = {
-  GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT
-};
-
-} // namespace anonymous
 
 namespace enigma {
 
