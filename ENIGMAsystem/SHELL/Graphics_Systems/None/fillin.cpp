@@ -15,6 +15,20 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
+#include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GStiles.h"
+#include "Graphics_Systems/General/GSvertex.h"
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GSstdraw.h"
+#include "Graphics_Systems/General/GSsprite.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSblend.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Collision_Systems/collision_types.h"
 #include "Universal_System/shaderstruct.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
@@ -26,27 +40,24 @@
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
-#include "Collision_Systems/collision_types.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
-#include <algorithm>
-#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
-#include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/include.h"
+#include "Universal_System/estring.h"
 #include "Platforms/platforms_mandatory.h"
-#include <floatcomp.h>
+
 #include <vector>
 #include <limits>
 #include <map>
 #include <list>
 #include <stack>
-#include "Universal_System/estring.h"
-
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <stdlib.h>     /* malloc, free, rand */
 #include <unordered_map>
+#include <algorithm>
+
+#include <stdlib.h>     /* malloc, free, rand */
+#include <floatcomp.h>
 #include <math.h>
 
 using namespace std;
