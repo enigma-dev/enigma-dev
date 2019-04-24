@@ -112,7 +112,7 @@ void EnableDrawing(void*)
 
   GLenum err = glewInit();
   if (GLEW_OK != err)
-    show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
+    show_error(std::string("Failed to initialize glew for OpenGL. ") + (const char*)glewGetErrorString(err), true);
 
   // -- Define an array of Context Attributes
   int attribs[] =
