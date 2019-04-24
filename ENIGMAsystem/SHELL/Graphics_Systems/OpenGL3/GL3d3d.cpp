@@ -67,14 +67,14 @@ const GLenum cullingstates[3] = {
   GL_BACK, GL_FRONT, GL_FRONT_AND_BACK
 };
 
-const GLenum stenciloperators[8] = {
-  GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT
-};
-
 const GLenum blendequivs[11] = {
   GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,
   GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR,
   GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA_SATURATE
+};
+
+const GLenum stenciloperators[8] = {
+  GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT
 };
 
 } // namespace anonymous
@@ -154,6 +154,13 @@ void graphics_state_flush_lighting() {
   enigma_user::glsl_uniformi(current_shader->uni_lights_active, activeLights);
 }
 
+void graphics_state_flush_stencil() {
+  glStencilMask(d3dStencilMask);
+  glStencilFunc(depthoperators[d3dStencilFunc], d3dStencilFuncRef, d3dStencilFuncMask);
+  glStencilOp(stenciloperators[d3dStencilOpStencilFail], stenciloperators[d3dStencilOpDepthFail],
+              stenciloperators[d3dStencilOpPass]);
+}
+
 void graphics_state_flush() {
   const auto current_shader = enigma::shaderprograms[enigma::bound_shader];
   glPolygonMode(GL_FRONT_AND_BACK, fillmodes[drawFillMode]);
@@ -181,6 +188,9 @@ void graphics_state_flush() {
   enigma_user::glsl_uniformi(current_shader->uni_lightEnable, d3dLighting);
   if (d3dLighting) graphics_state_flush_lighting();
 
+  (d3dStencilTest?glEnable:glDisable)(GL_STENCIL_TEST);
+  if (d3dStencilTest) graphics_state_flush_stencil();
+
   //Send transposed (done by GL because of "true" in the function below) matrices to shader
   glm::mat4 mv_matrix = view * world;
   glm::mat4 mvp_matrix = projection * mv_matrix;
@@ -206,6 +216,17 @@ void d3d_clear_depth(double value) {
 void d3d_clear_depth() {
   draw_batch_flush(batch_flush_deferred);
   glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void d3d_stencil_clear_value(int value) {
+  draw_batch_flush(batch_flush_deferred);
+  glClearStencil(value);
+  glClear(GL_STENCIL_BUFFER_BIT);
+}
+
+void d3d_stencil_clear() {
+  draw_batch_flush(batch_flush_deferred);
+  glClear(GL_STENCIL_BUFFER_BIT);
 }
 
 void d3d_set_software_vertex_processing(bool software) {

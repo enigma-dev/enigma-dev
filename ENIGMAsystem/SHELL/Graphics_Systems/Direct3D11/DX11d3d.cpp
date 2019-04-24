@@ -164,8 +164,17 @@ namespace enigma_user {
 
 void d3d_clear_depth(double value) {
   draw_batch_flush(batch_flush_deferred);
-  // Clear the depth buffer.
   m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, value, 0);
+}
+
+void d3d_stencil_clear_value(int value) {
+  draw_batch_flush(batch_flush_deferred);
+  m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_STENCIL, 0, value);
+}
+
+void d3d_stencil_clear() {
+  draw_batch_flush(batch_flush_deferred);
+  m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_STENCIL, 0, 0);
 }
 
 } // namespace enigma_user

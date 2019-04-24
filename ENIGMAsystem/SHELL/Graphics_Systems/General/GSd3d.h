@@ -48,7 +48,9 @@ extern Light d3dLights[8];
 extern bool d3dLightEnabled[8];
 
 extern bool d3dStencilTest;
-extern unsigned d3dStencilMask;
+extern unsigned int d3dStencilMask;
+extern int d3dStencilFunc, d3dStencilFuncRef, d3dStencilFuncMask,
+           d3dStencilOpStencilFail, d3dStencilOpDepthFail, d3dStencilOpPass;
 
 } // namespace enigma
 
@@ -149,8 +151,8 @@ namespace enigma_user {
 
   void d3d_stencil_enable(bool enable);
   void d3d_stencil_clear_value(int value);
-  void d3d_stencil_mask(unsigned int mask);
   void d3d_stencil_clear();
+  void d3d_stencil_mask(unsigned int mask);
   void d3d_stencil_function(int func, int ref, unsigned int mask);
   void d3d_stencil_operator(int sfail, int dpfail, int dppass);
 }

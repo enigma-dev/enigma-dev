@@ -178,6 +178,16 @@ void d3d_clear_depth(double value) {
   d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
 }
 
+void d3d_stencil_clear_value(int value) {
+  draw_batch_flush(batch_flush_deferred);
+  d3ddev->Clear(0, NULL, D3DCLEAR_STENCIL, D3DCOLOR_XRGB(0, 0, 0), 0, value);
+}
+
+void d3d_stencil_clear() {
+  draw_batch_flush(batch_flush_deferred);
+  d3ddev->Clear(0, NULL, D3DCLEAR_STENCIL, D3DCOLOR_XRGB(0, 0, 0), 0, 0);
+}
+
 void d3d_set_software_vertex_processing(bool software) {
   d3ddev->SetSoftwareVertexProcessing(software);
 }

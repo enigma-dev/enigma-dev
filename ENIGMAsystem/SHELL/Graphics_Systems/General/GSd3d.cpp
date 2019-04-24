@@ -40,6 +40,12 @@ float d3dFogColor[3]={0.0f,0.0f,0.0f};
 Light d3dLights[8];
 bool d3dLightEnabled[8]={false};
 
+bool d3dStencilTest = false;
+unsigned int d3dStencilMask = 0x0;
+int d3dStencilFunc = enigma_user::rs_always, d3dStencilFuncRef = 0, d3dStencilFuncMask = -1,
+    d3dStencilOpStencilFail = enigma_user::rs_keep, d3dStencilOpDepthFail = enigma_user::rs_keep,
+    d3dStencilOpPass = enigma_user::rs_keep;
+
 } // namespace enigma
 
 namespace enigma_user {
@@ -211,6 +217,63 @@ void d3d_light_shininess(int facemode, int shine) {
 void d3d_light_enable(int id, bool enable) {
   enigma::draw_set_state_dirty();
   enigma::d3dLightEnabled[id] = enable;
+}
+
+void d3d_stencil_start_mask() {
+  enigma::draw_set_state_dirty();
+  d3d_stencil_enable(true);
+  draw_set_color_write_enable(false, false, false, false);
+  d3d_set_zwriteenable(false);
+  d3d_stencil_mask(0x1);
+  d3d_stencil_function(rs_always, 0x1, 0x1);
+  d3d_stencil_operator(rs_keep, rs_keep, rs_replace);
+  d3d_stencil_clear();
+}
+
+void d3d_stencil_continue_mask() {
+  enigma::draw_set_state_dirty();
+  draw_set_color_write_enable(false, false, false, false);
+  d3d_set_zwriteenable(false);
+  d3d_stencil_mask(0x1);
+  d3d_stencil_function(rs_always, 0x1, 0x1);
+  d3d_stencil_operator(rs_keep, rs_keep, rs_replace);
+}
+
+void d3d_stencil_use_mask() {
+  enigma::draw_set_state_dirty();
+  draw_set_color_write_enable(true, true, true, true);
+  d3d_set_zwriteenable(true);
+  d3d_stencil_mask(0x0);
+  d3d_stencil_function(rs_equal, 0x1, 0x1);
+}
+
+void d3d_stencil_end_mask() {
+  draw_batch_flush(batch_flush_deferred);
+  d3d_stencil_enable(false);
+}
+
+void d3d_stencil_enable(bool enable) {
+  enigma::draw_set_state_dirty();
+  enigma::d3dStencilTest = enable;
+}
+
+void d3d_stencil_mask(unsigned int mask) {
+  enigma::draw_set_state_dirty();
+  enigma::d3dStencilMask = mask;
+}
+
+void d3d_stencil_function(int func, int ref, unsigned int mask) {
+  enigma::draw_set_state_dirty();
+  enigma::d3dStencilFunc = func;
+  enigma::d3dStencilFuncRef = ref;
+  enigma::d3dStencilFuncMask = mask;
+}
+
+void d3d_stencil_operator(int sfail, int dpfail, int dppass) {
+  enigma::draw_set_state_dirty();
+  enigma::d3dStencilOpStencilFail = sfail;
+  enigma::d3dStencilOpDepthFail = dpfail;
+  enigma::d3dStencilOpPass = dppass;
 }
 
 bool d3d_get_mode() { return enigma::d3dMode; }

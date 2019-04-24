@@ -70,6 +70,10 @@ const GLenum blendequivs[11] = {
   GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA_SATURATE
 };
 
+const GLenum stenciloperators[8] = {
+  GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT
+};
+
 } // namespace anonymous
 
 namespace enigma {
@@ -130,6 +134,13 @@ void graphics_state_flush_lighting() {
   }
 }
 
+void graphics_state_flush_stencil() {
+  glStencilMask(d3dStencilMask);
+  glStencilFunc(depthoperators[d3dStencilFunc], d3dStencilFuncRef, d3dStencilFuncMask);
+  glStencilOp(stenciloperators[d3dStencilOpStencilFail], stenciloperators[d3dStencilOpDepthFail],
+              stenciloperators[d3dStencilOpPass]);
+}
+
 void graphics_state_flush() {
   glColor4ubv(enigma::currentcolor);
   glPolygonMode(GL_FRONT_AND_BACK, fillmodes[drawFillMode]);
@@ -165,6 +176,9 @@ void graphics_state_flush() {
   (d3dLighting?glEnable:glDisable)(GL_LIGHTING);
   if (d3dLighting) graphics_state_flush_lighting();
 
+  (d3dStencilTest?glEnable:glDisable)(GL_STENCIL_TEST);
+  if (d3dStencilTest) graphics_state_flush_stencil();
+
   glm::mat4 modelview = view * world;
   glMatrixMode(GL_MODELVIEW);
   glLoadMatrixf(glm::value_ptr(modelview));
@@ -183,9 +197,19 @@ void d3d_clear_depth(double value) {
   glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void d3d_clear_stencil(int value) {
+void d3d_clear_depth() {
+  draw_batch_flush(batch_flush_deferred);
+  glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void d3d_stencil_clear_value(int value) {
   draw_batch_flush(batch_flush_deferred);
   glClearStencil(value);
+  glClear(GL_STENCIL_BUFFER_BIT);
+}
+
+void d3d_stencil_clear() {
+  draw_batch_flush(batch_flush_deferred);
   glClear(GL_STENCIL_BUFFER_BIT);
 }
 
