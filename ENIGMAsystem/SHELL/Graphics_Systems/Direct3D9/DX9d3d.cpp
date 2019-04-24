@@ -102,6 +102,13 @@ void graphics_state_flush_fog() {
 }
 
 void graphics_state_flush_lighting() {
+  // just in case the user does turn on lighting, we need to set a material
+  // that works for lighting vertices that have no color data
+  D3DMATERIAL9 mtrl = {};
+  mtrl.Ambient.r = mtrl.Ambient.g = mtrl.Ambient.b = mtrl.Ambient.a = 1.0;
+  mtrl.Diffuse.r = mtrl.Diffuse.g = mtrl.Diffuse.b = mtrl.Diffuse.a = 1.0;
+  d3ddev->SetMaterial(&mtrl);
+  d3ddev->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
   d3ddev->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
   d3ddev->SetRenderState(D3DRS_AMBIENT, *d3dLightingAmbient);
 
