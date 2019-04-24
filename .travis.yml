@@ -105,13 +105,13 @@ env:
     # this is the default config each job in the matrix overrides a subset of
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
   matrix:
-      # The big ol' None test.
-    - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-      # Cross Compile
-    - COMPILER=MinGW32 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1
-    - COMPILER=MinGW64 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1
     # Test Harness
     - TEST_HARNESS=true AUDIO=OpenAL
+    # The big ol' None test.
+    - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    # Cross Compile
+    - COMPILER=MinGW32 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1
+    - COMPILER=MinGW64 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1
     # Game Modes
     - MODE=Run
     - MODE=Debug
