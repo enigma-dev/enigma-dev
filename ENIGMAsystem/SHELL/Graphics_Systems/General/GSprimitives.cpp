@@ -78,7 +78,7 @@ unsigned draw_primitive_count(int kind, unsigned vertex_count) {
 void draw_batch_flush(int kind) {
   if (kind == pr_undefined)
     kind = draw_get_batch_mode();
-  
+
   static bool flushing = false;
 
   // return if the kind of flush being requested
@@ -220,6 +220,7 @@ void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 
 void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_floor(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep);
   draw_batch_flush(batch_flush_immediate);
@@ -227,6 +228,7 @@ void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
 
 void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_wall(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep);
   draw_batch_flush(batch_flush_immediate);
@@ -234,6 +236,7 @@ void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
 
 void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_block(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
   draw_batch_flush(batch_flush_immediate);
@@ -241,6 +244,7 @@ void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
 
 void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_cylinder(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
   draw_batch_flush(batch_flush_immediate);
@@ -248,6 +252,7 @@ void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, g
 
 void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_cone(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
   draw_batch_flush(batch_flush_immediate);
@@ -255,6 +260,7 @@ void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
 
 void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_ellipsoid(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
   draw_batch_flush(batch_flush_immediate);
@@ -264,6 +270,7 @@ void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2
 }
 
 void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_torus(draw_get_batch_stream(), x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius);
   draw_batch_flush(batch_flush_immediate);
