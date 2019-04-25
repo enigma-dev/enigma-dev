@@ -154,6 +154,7 @@ void graphics_state_flush() {
   d3ddev->SetRenderState(D3DRS_DESTBLEND, blendequivs[(blendMode[1]-1)%11]);
   d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, alphaBlend);
   d3ddev->SetRenderState(D3DRS_ALPHATESTENABLE, alphaTest);
+  d3ddev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
   d3ddev->SetRenderState(D3DRS_ALPHAREF, alphaTestRef);
 
   graphics_state_flush_samplers();
