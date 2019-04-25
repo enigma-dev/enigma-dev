@@ -37,6 +37,7 @@ namespace enigma {
   {
     graphics_init_vbo_method();
 
+    glEnable(GL_SCISSOR_TEST); // constrain clear to viewport like D3D9
     glEnable(GL_NORMALIZE);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_COLOR_MATERIAL);

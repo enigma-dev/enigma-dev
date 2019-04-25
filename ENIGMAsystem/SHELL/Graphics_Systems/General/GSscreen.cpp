@@ -244,8 +244,6 @@ void screen_init() {
     }
   }
 
-  //glEnable(GL_SCISSOR_TEST);
-  //glEnable(GL_TEXTURE_2D);
   enigma::d3dHidden = false;
   enigma::d3dCulling = rs_none;
   enigma::alphaBlend = true;

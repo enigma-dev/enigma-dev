@@ -45,6 +45,7 @@ namespace enigma {
 
   void graphicssystem_initialize()
   {
+    glEnable(GL_SCISSOR_TEST); // constrain clear to viewport like D3D9
     glDepthFunc(GL_LEQUAL); // to match GM8's D3D8 default
 
     init_shaders();
