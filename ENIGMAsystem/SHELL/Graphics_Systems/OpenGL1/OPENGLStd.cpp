@@ -15,51 +15,33 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "OPENGLStd.h"
+#include "GLshader.h"
+#include "GLSLshader.h"
+
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+
+#include "Universal_System/shaderstruct.h"
+#include "Universal_System/var4.h"
+
 #include <iostream>
 #include <string>
 #include <stdlib.h>     /* malloc, free, rand */
 
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 using namespace std;
-#include "OPENGLStd.h"
-#include "GLshader.h"
-#include "GLSLshader.h"
-#include "Universal_System/shaderstruct.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h" // Room dimensions.
-#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
-namespace enigma
-{
 
+namespace enigma {
   void graphics_init_vbo_method();
 
   void graphicssystem_initialize()
   {
     graphics_init_vbo_method();
 
-    //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
-    glMatrixMode(GL_PROJECTION);
-    glClearColor(0,0,0,0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    using enigma_user::room_width;
-    using enigma_user::room_height;
-    glViewport(0,0,(int)room_width,(int)room_height);
-    glOrtho(-1,(int)room_width,-1,(int)room_height,0,1);
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glDisable(GL_DEPTH_TEST);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glEnable(GL_BLEND);
+    glEnable(GL_SCISSOR_TEST); // constrain clear to viewport like D3D9
+    glEnable(GL_NORMALIZE);
     glEnable(GL_TEXTURE_2D);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glAlphaFunc(GL_GREATER,0);
+    glEnable(GL_COLOR_MATERIAL);
     glDepthFunc(GL_LEQUAL); // to match GM8's D3D8 default
-
-    glColor4f(0,0,0,1);
-    glBindTexture(GL_TEXTURE_2D,0);
 
 	  init_shaders();
 	  // read shaders into graphics system structure and compile and link them if needed

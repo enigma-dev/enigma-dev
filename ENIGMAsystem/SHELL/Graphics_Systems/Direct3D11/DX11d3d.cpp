@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2013, 2018, 2019 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,10 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "DX11textures_impl.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSstdraw.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSblend.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 #include "Platforms/platforms_mandatory.h"
 
@@ -26,27 +32,87 @@ using namespace enigma::dx11;
 
 namespace {
 
-D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
+const D3D11_FILL_MODE fillmodes[3] = {
+  D3D11_FILL_WIREFRAME, D3D11_FILL_WIREFRAME, D3D11_FILL_SOLID
+};
 
-void update_depth_stencil_state() {
-  static ID3D11DepthStencilState* pDepthStencilState = NULL;
-  if (pDepthStencilState) { pDepthStencilState->Release(); pDepthStencilState = NULL; }
-  m_device->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState);
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-  m_deviceContext->OMSetDepthStencilState(pDepthStencilState, 1);
+const D3D11_BLEND blend_equivs[11] = {
+  D3D11_BLEND_ZERO, D3D11_BLEND_ONE, D3D11_BLEND_SRC_COLOR, D3D11_BLEND_INV_SRC_COLOR, D3D11_BLEND_SRC_ALPHA,
+  D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_DEST_ALPHA, D3D11_BLEND_INV_DEST_ALPHA, D3D11_BLEND_DEST_COLOR,
+  D3D11_BLEND_INV_DEST_COLOR, D3D11_BLEND_SRC_ALPHA_SAT
+};
+
+ID3D11ShaderResourceView *getDefaultWhiteTexture() {
+    static int texid = -1;
+    if (texid == -1) {
+      unsigned data[1] = {0xFFFFFFFF};
+      texid = enigma::graphics_create_texture(1, 1, 1, 1, (void*)data, false);
+    }
+    return ((enigma::DX11Texture*)enigma::textures[texid])->view;
 }
 
 } // namespace anonymous
 
 namespace enigma {
 
-void graphics_set_matrix(int type) {
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+void graphics_state_flush_samplers() {
+  static ID3D11ShaderResourceView *nullTextureView = getDefaultWhiteTexture();
+  static ID3D11SamplerState *pSamplerStates[8];
+
+  for (int i = 0; i < 8; ++i) {
+    const auto sampler = samplers[i];
+
+    ID3D11ShaderResourceView *view = (sampler.texture == -1)?
+      nullTextureView:((enigma::DX11Texture*)enigma::textures[sampler.texture])->view;
+    m_deviceContext->PSSetShaderResources(i, 1, &view);
+
+    D3D11_SAMPLER_DESC samplerDesc = { };
+
+    samplerDesc.Filter = sampler.interpolate?D3D11_FILTER_MIN_MAG_MIP_LINEAR:D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samplerDesc.AddressU = sampler.wrapu?D3D11_TEXTURE_ADDRESS_WRAP:D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressV = sampler.wrapv?D3D11_TEXTURE_ADDRESS_WRAP:D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressW = sampler.wrapw?D3D11_TEXTURE_ADDRESS_WRAP:D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.MipLODBias = 0.0f;
+    samplerDesc.MaxAnisotropy = 1;
+    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    samplerDesc.BorderColor[0] = 0;
+    samplerDesc.BorderColor[1] = 0;
+    samplerDesc.BorderColor[2] = 0;
+    samplerDesc.BorderColor[3] = 0;
+    samplerDesc.MinLOD = 0;
+    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    ID3D11SamplerState *pSamplerState = pSamplerStates[i];
+    if (pSamplerState) { pSamplerState->Release(); pSamplerState = NULL; }
+    m_device->CreateSamplerState(&samplerDesc, &pSamplerState);
+    m_deviceContext->PSSetSamplers(i, 1, &pSamplerState);
+    pSamplerStates[i] = pSamplerState; // copy the sampler state ptr back to our cache
+  }
 }
 
-void init_depth_stencil_state() {
-  depthStencilDesc.DepthEnable = false;
-  depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+void graphics_state_flush() {
+  // Setup the raster description which will determine how and what polygons will be drawn.
+  D3D11_RASTERIZER_DESC rasterDesc = { };
+  rasterDesc.AntialiasedLineEnable = false;
+  rasterDesc.CullMode = D3D11_CULL_NONE;
+  rasterDesc.DepthBias = 0;
+  rasterDesc.DepthBiasClamp = 0.0f;
+  rasterDesc.DepthClipEnable = false;
+  rasterDesc.FillMode = fillmodes[drawFillMode];
+  rasterDesc.FrontCounterClockwise = false;
+  rasterDesc.MultisampleEnable = msaaEnabled;
+  rasterDesc.ScissorEnable = false;
+  rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+  static ID3D11RasterizerState* pRasterState = NULL;
+  if (pRasterState) { pRasterState->Release(); pRasterState = NULL; }
+  m_device->CreateRasterizerState(&rasterDesc, &pRasterState);
+  m_deviceContext->RSSetState(pRasterState);
+
+  D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
+
+  depthStencilDesc.DepthEnable = d3dHidden;
+  depthStencilDesc.DepthWriteMask = d3dZWriteEnable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
   depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
   depthStencilDesc.StencilEnable = false;
@@ -65,229 +131,50 @@ void init_depth_stencil_state() {
   depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
   depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-  update_depth_stencil_state();
+  static ID3D11DepthStencilState* pDepthStencilState = NULL;
+  if (pDepthStencilState) { pDepthStencilState->Release(); pDepthStencilState = NULL; }
+  m_device->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState);
+  m_deviceContext->OMSetDepthStencilState(pDepthStencilState, 1);
+
+  D3D11_BLEND_DESC blendStateDesc = { };
+
+  blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+
+  blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = blend_equivs[(blendMode[0]-1)%11];
+  blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = blend_equivs[(blendMode[1]-1)%11];
+  blendStateDesc.RenderTarget[0].BlendOpAlpha = blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+  UINT8 colorWriteMask = 0;
+  if (enigma::colorWriteEnable[0]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_RED;
+  if (enigma::colorWriteEnable[1]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_GREEN;
+  if (enigma::colorWriteEnable[2]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_BLUE;
+  if (enigma::colorWriteEnable[3]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_ALPHA;
+  blendStateDesc.RenderTarget[0].RenderTargetWriteMask = colorWriteMask;
+
+  static ID3D11BlendState* pBlendState = NULL;
+  if (pBlendState) { pBlendState->Release(); pBlendState = NULL; }
+  m_device->CreateBlendState(&blendStateDesc, &pBlendState);
+  m_deviceContext->OMSetBlendState(pBlendState, NULL, 0xffffffff);
+
+  graphics_state_flush_samplers();
 }
 
 } // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 void d3d_clear_depth(double value) {
-    draw_batch_flush(batch_flush_deferred);
-	// Clear the depth buffer.
-	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, value, 0);
-}
-
-void d3d_start()
-{
-    draw_batch_flush(batch_flush_deferred);
-	enigma::d3dMode = true;
-    enigma::d3dPerspective = true;
-	enigma::d3dCulling =  rs_none;
-	d3d_set_hidden(false);
-}
-
-void d3d_end()
-{
-    draw_batch_flush(batch_flush_deferred);
-	enigma::d3dMode = false;
-    enigma::d3dPerspective = false;
-	enigma::d3dCulling = rs_none;
-	d3d_set_hidden(false);
-}
-
-void d3d_set_hidden(bool enable)
-{
   draw_batch_flush(batch_flush_deferred);
-  enigma::d3dHidden = enable;
-  depthStencilDesc.DepthEnable = enable;
-  update_depth_stencil_state();
+  m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, value, 0);
 }
 
-void d3d_set_zwriteenable(bool enable)
-{
+void d3d_stencil_clear_value(int value) {
   draw_batch_flush(batch_flush_deferred);
-  enigma::d3dZWriteEnable = enable;
-  depthStencilDesc.DepthWriteMask = enable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
-  update_depth_stencil_state();
+  m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_STENCIL, 0, value);
 }
 
-void d3d_set_lighting(bool enable)
-{
-
-}
-
-void d3d_set_fog(bool enable, int color, double start, double end)
-{
-  d3d_set_fog_enabled(enable);
-  d3d_set_fog_color(color);
-  d3d_set_fog_start(start);
-  d3d_set_fog_end(end);
-  d3d_set_fog_hint(rs_nicest);
-  d3d_set_fog_mode(rs_linear);
-}
-
-void d3d_set_fog_enabled(bool enable)
-{
-
-}
-
-void d3d_set_fog_mode(int mode)
-{
-
-}
-
-void d3d_set_fog_hint(int mode) {
-
-}
-
-void d3d_set_fog_color(int color)
-{
-
-}
-
-void d3d_set_fog_start(double start)
-{
-
-}
-
-void d3d_set_fog_end(double end)
-{
-
-}
-
-void d3d_set_fog_density(double density)
-{
-
-}
-
-void d3d_set_culling(int mode)
-{
-	enigma::d3dCulling = mode;
-
-}
-
-void d3d_set_fill_mode(int fill)
-{
-
-}
-
-void d3d_set_line_width(float value) {
-
-}
-
-void d3d_set_point_size(float value) {
-
-}
-
-void d3d_set_depth_operator(int mode) {
-
-}
-
-void d3d_set_depth(double dep)
-{
-
-}
-
-void d3d_set_shading(bool smooth)
-{
-
-}
-
-void d3d_set_clip_plane(bool enable)
-{
-   ///TODO: Code this
+void d3d_stencil_clear() {
+  draw_batch_flush(batch_flush_deferred);
+  m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_STENCIL, 0, 0);
 }
 
 } // namespace enigma_user
-
-// ***** LIGHTS BEGIN *****
-#include <map>
-
-using std::map;
-
-struct posi { // Homogenous point.
-    gs_scalar x;
-    gs_scalar y;
-    gs_scalar z;
-    gs_scalar w;
-    posi(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar w1) : x(x1), y(y1), z(z1), w(w1){}
-};
-
-class d3d_lights
-{
-    map<int,int> light_ind;
-    map<int,posi> ind_pos; // Internal index to position.
-
-    public:
-    d3d_lights() {}
-    ~d3d_lights() {}
-
-    bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
-    {
-      return false; //TODO: implement
-    }
-
-    bool light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
-    {
-      return false; //TODO: implement
-    }
-
-    bool light_define_specularity(int id, int r, int g, int b, double a)
-    {
-      return false; //TODO: implement
-    }
-
-    bool light_enable(int id)
-    {
-      return false; //TODO: implement
-    }
-
-    bool light_disable(int id)
-    {
-      return false; //TODO: implement
-    }
-} d3d_lighting;
-
-namespace enigma_user
-{
-
-bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
-{
-    return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
-}
-
-bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
-{
-    return d3d_lighting.light_define_point(id, x, y, z, range, col);
-}
-
-bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
-{
-    return d3d_lighting.light_define_specularity(id, r, g, b, a);
-}
-
-void d3d_light_specularity(int facemode, int r, int g, int b, double a)
-{
-
-}
-
-void d3d_light_shininess(int facemode, int shine)
-{
-
-}
-
-void d3d_light_define_ambient(int col)
-{
-
-}
-
-bool d3d_light_enable(int id, bool enable)
-{
-    return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
-}
-
-}
-
-// ***** LIGHTS END *****

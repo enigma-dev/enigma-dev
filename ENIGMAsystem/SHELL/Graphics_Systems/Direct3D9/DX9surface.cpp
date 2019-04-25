@@ -45,8 +45,8 @@ void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest) {
   D3DSURFACE_DESC desc;
   (*src)->GetDesc(&desc);
 
-  d3dmgr->device->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, dest, NULL);
-  d3dmgr->device->GetRenderTargetData(*src, *dest);
+  d3ddev->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, dest, NULL);
+  d3ddev->GetRenderTargetData(*src, *dest);
 }
 
 } // namespace enigma
@@ -62,12 +62,12 @@ bool surface_is_supported()
 int surface_create(int width, int height, bool depthbuffer, bool, bool)
 {
   LPDIRECT3DTEXTURE9 texture = NULL;
-  d3dmgr->device->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
+  d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
   enigma::DX9Texture* gmTexture = new enigma::DX9Texture(texture);
   const int texid = enigma::textures.size();
   enigma::textures.push_back(gmTexture);
-  //d3dmgr->device->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
+  //d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
   texture->GetSurfaceLevel(0,&surface->surf);
   surface->texture = texid; surface->width = width; surface->height = height;
   enigma::surfaces.push_back(surface);
@@ -77,12 +77,12 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
 int surface_create_msaa(int width, int height, int levels)
 {
   LPDIRECT3DTEXTURE9 texture = NULL;
-  d3dmgr->device->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
+  d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
   enigma::DX9Texture* gmTexture = new enigma::DX9Texture(texture);
   const int texid = enigma::textures.size();
   enigma::textures.push_back(gmTexture);
-  d3dmgr->device->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
+  d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
   surface->texture = texid; surface->width = width; surface->height = height;
   enigma::surfaces.push_back(surface);
   return enigma::surfaces.size() - 1;
@@ -93,7 +93,7 @@ void surface_set_target(int id)
   draw_batch_flush(batch_flush_deferred);
 
   get_surface(surface,id);
-  d3dmgr->device->SetRenderTarget(0, surface.surf);
+  d3ddev->SetRenderTarget(0, surface.surf);
 
   d3d_set_projection_ortho(0, 0, surface.width, surface.height, 0);
 }
@@ -103,8 +103,8 @@ void surface_reset_target()
   draw_batch_flush(batch_flush_deferred);
 
   LPDIRECT3DSURFACE9 pBackBuffer;
-  d3dmgr->device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
-  d3dmgr->device->SetRenderTarget(0, pBackBuffer);
+  d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+  d3ddev->SetRenderTarget(0, pBackBuffer);
   pBackBuffer->Release();
 }
 
@@ -215,8 +215,8 @@ int surface_save(int id, string filename)
   D3DSURFACE_DESC desc;
   surface.surf->GetDesc(&desc);
 
-  d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
-  d3dmgr->device->GetRenderTargetData(surface.surf, pDestBuffer);
+  d3ddev->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+  d3ddev->GetRenderTargetData(surface.surf, pDestBuffer);
 
 	D3DLOCKED_RECT rect;
 

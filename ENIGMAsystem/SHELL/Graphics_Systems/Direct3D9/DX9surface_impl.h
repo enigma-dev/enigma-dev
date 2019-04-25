@@ -57,8 +57,8 @@ struct Surface : BaseSurface {
     D3DSURFACE_DESC backupdesc;
     surf->GetDesc(&backupdesc);
 
-    d3dmgr->device->CreateOffscreenPlainSurface(backupdesc.Width, backupdesc.Height, backupdesc.Format, D3DPOOL_SYSTEMMEM, &pCopy, NULL);
-    d3dmgr->device->GetRenderTargetData(surf, pCopy);
+    d3ddev->CreateOffscreenPlainSurface(backupdesc.Width, backupdesc.Height, backupdesc.Format, D3DPOOL_SYSTEMMEM, &pCopy, NULL);
+    d3ddev->GetRenderTargetData(surf, pCopy);
 
     Release();
     auto d3dtex = (DX9Texture*)enigma::textures[texture];
@@ -71,11 +71,11 @@ struct Surface : BaseSurface {
 
     // recreate the texture peer
     auto d3dtex = (DX9Texture*)enigma::textures[texture];
-    d3dmgr->device->CreateTexture(backupdesc.Width, backupdesc.Height, 1, D3DUSAGE_RENDERTARGET, backupdesc.Format, D3DPOOL_DEFAULT, &d3dtex->peer, NULL);
+    d3ddev->CreateTexture(backupdesc.Width, backupdesc.Height, 1, D3DUSAGE_RENDERTARGET, backupdesc.Format, D3DPOOL_DEFAULT, &d3dtex->peer, NULL);
     d3dtex->peer->GetSurfaceLevel(0,&surf);
 
     // reupload the texture data
-    d3dmgr->device->UpdateSurface(pCopy, NULL, surf, NULL);
+    d3ddev->UpdateSurface(pCopy, NULL, surf, NULL);
     pCopy->Release();
   }
 };

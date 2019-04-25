@@ -15,15 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
-
-//#include "OpenGLHeaders.h"
-
 #include "../General/GScolors.h"
 #include "../General/GSprimitives.h"
 #include "../General/GSd3d.h"

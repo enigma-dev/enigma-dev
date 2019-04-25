@@ -24,7 +24,6 @@
 
 namespace enigma{
     extern unsigned bound_texture;
-    extern unsigned char currentcolor[4];
 }
 #define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
 

@@ -15,47 +15,38 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "OPENGL3Std.h"
+#include "GL3shader.h"
+#include "GLSLshader.h"
+
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+
+#include "Universal_System/shaderstruct.h"
+#include "Universal_System/var4.h"
+
 #include <iostream>
 #include <string>
 #include <stdlib.h>     /* malloc, free, rand */
 
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
-#include "Graphics_Systems/General/GSmatrix.h" //For d3d_set_projection_ortho
 using namespace std;
-#include "OPENGL3Std.h"
-#include "GL3shader.h"
-#include "GLSLshader.h"
-#include "Universal_System/shaderstruct.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h" // Room dimensions.
-#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 
-namespace enigma_user{
-	extern string shader_get_name(int i);
-}
+namespace enigma_user {
 
-namespace enigma
-{
+extern string shader_get_name(int i);
+
+} // namespace enigma_user
+
+namespace enigma {
   unsigned default_shader;
   unsigned main_shader;
   unsigned bound_shader;
   unsigned bound_vbo = -1; //This means it's max-1, just so it wouldn't randomly be 0 at first render call.
   unsigned bound_vboi = -1; //This means it's max-1
-  int bound_texture_stage = -1;
-
-  void graphics_initialize_samplers();
 
   void graphicssystem_initialize()
   {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glDisable(GL_DEPTH_TEST);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_SCISSOR_TEST); // constrain clear to viewport like D3D9
     glDepthFunc(GL_LEQUAL); // to match GM8's D3D8 default
-
-    glBindTexture(GL_TEXTURE_2D,0);
 
     init_shaders();
     // read shaders into graphics system structure and compile and link them if needed
@@ -104,13 +95,6 @@ namespace enigma
 
     enigma_user::glsl_program_reset(); //Set the default program
     //END DEFAULT SHADER
-
-    graphics_initialize_samplers();
-
-    using enigma_user::room_width;
-    using enigma_user::room_height;
-    glViewport(0,0,(int)room_width,(int)room_height);
-    enigma_user::d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
 
     //In GL3.3 Core VAO is mandatory. So we create one and never change it
     GLuint vertexArrayObject;

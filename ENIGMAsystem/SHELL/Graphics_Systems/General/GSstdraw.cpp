@@ -27,20 +27,103 @@
 #include <math.h>
 #include <stdio.h>
 
+namespace {
+
+// please keep drawStateDirty private to this translation unit!
+bool drawStateDirty=false;
+
+} // namespace anonymous
+
 namespace enigma {
-  float circleprecision=24;
+
+bool lineStippleEnable=false, msaaEnabled=true, alphaBlend=true, alphaTest=false;
+unsigned short lineStipplePattern=0xFFFF;
+unsigned char alphaTestRef=0;
+float circleprecision=24, drawPointSize=1.0f, drawLineWidth=1.0f;
+int drawFillMode=enigma_user::rs_solid, lineStippleScale=1;
+
+// handler for when a generic rendering state has changed
+void draw_set_state_dirty(bool dirty) { drawStateDirty = dirty; }
+bool draw_get_state_dirty() { return drawStateDirty; }
+
+} // namespace enigma
+
+namespace enigma_user {
+
+void draw_state_flush() {
+  // track whether we are already flushing the state
+  static bool flushing = false;
+
+  // if the state isn't dirty, we don't have to do anything
+  if (!drawStateDirty) return;
+
+  // prevent state flush triggered by batch flush of another state flush
+  if (flushing) return;
+
+  flushing = true; // we are now flushing the state
+
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+  enigma::graphics_state_flush();
+
+  flushing = false; // done flushing state
+
+  drawStateDirty = false; // state is not dirty now
 }
 
-namespace enigma_user
-{
+void draw_set_msaa_enabled(bool enable) {
+  enigma::draw_set_state_dirty();
+  enigma::msaaEnabled = enable;
+}
+
+void draw_enable_alphablend(bool enable) {
+  enigma::draw_set_state_dirty();
+  enigma::alphaBlend = enable;
+}
+
+void draw_set_alpha_test(bool enable) {
+  enigma::draw_set_state_dirty();
+  enigma::alphaTest = enable;
+}
+
+void draw_set_alpha_test_ref_value(unsigned val) {
+  enigma::draw_set_state_dirty();
+  enigma::alphaTestRef = val;
+}
+
+void draw_set_point_size(float value) {
+  enigma::draw_set_state_dirty();
+  enigma::drawPointSize = value;
+}
+
+void draw_set_fill_mode(int fill) {
+  enigma::draw_set_state_dirty();
+  enigma::drawFillMode = fill;
+}
+
+void draw_set_line_width(float value) {
+  enigma::draw_set_state_dirty();
+  enigma::drawLineWidth = value;
+}
+
+void draw_set_line_stipple(bool enable) {
+  enigma::draw_set_state_dirty();
+  enigma::lineStippleEnable = enable;
+}
+
+void draw_set_line_pattern(int scale, unsigned short pattern) {
+  enigma::draw_set_state_dirty();
+  enigma::lineStippleScale = scale;
+  enigma::lineStipplePattern = pattern;
+}
 
 void draw_set_circle_precision(float pr) {
-  enigma::circleprecision = pr<3 ? 3 : pr;
+  enigma::draw_set_state_dirty();
+  enigma::circleprecision = pr < 3 ? 3 : pr;
 }
 
-float draw_get_circle_precision() {
-  return enigma::circleprecision;
-}
+bool draw_get_alpha_test() { return enigma::alphaTest; }
+unsigned draw_get_alpha_test_ref_value() { return enigma::alphaTestRef; }
+float draw_get_circle_precision() { return enigma::circleprecision; }
 
 void draw_point(gs_scalar x, gs_scalar y)
 {

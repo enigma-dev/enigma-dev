@@ -17,6 +17,7 @@
 **/
 
 #include "GSprimitives.h"
+#include "GSstdraw.h"
 #include "GSmodel.h"
 #include "GStextures.h"
 
@@ -28,8 +29,6 @@ namespace {
 
 // the batching mode is initialized to the default here
 int draw_batch_mode = enigma_user::batch_flush_deferred;
-// the texture that was specified when the current primitive batch began
-int draw_batch_texture = -1;
 // whether a batch has been started but not flushed yet
 bool draw_batch_dirty = false;
 // lazy create the batch stream that we use for combining primitives
@@ -40,10 +39,18 @@ int draw_get_batch_stream() {
   return draw_batch_stream;
 }
 // helper function for beginning a deferred batch to determine when texture swap occurs
+// one goal of the function is to ensure the render states are current when a batch begins
 void draw_batch_begin_deferred(int texId) {
-  if (draw_batch_texture != texId) {
-    enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    draw_batch_texture = texId;
+  // if we want to use a different texture, set it now
+  // this marks the state as dirty only if the texture is different
+  if (enigma_user::texture_get() != texId) {
+    enigma_user::texture_set(texId);
+  }
+  // if the draw state is dirty, flush the new state
+  // this will flush any previous batch first before
+  // actually flushing our texture set to the device
+  if (enigma::draw_get_state_dirty()) {
+    enigma_user::draw_state_flush();
   }
   draw_batch_dirty = true;
 }
@@ -71,7 +78,7 @@ unsigned draw_primitive_count(int kind, unsigned vertex_count) {
 void draw_batch_flush(int kind) {
   if (kind == pr_undefined)
     kind = draw_get_batch_mode();
-  
+
   static bool flushing = false;
 
   // return if the kind of flush being requested
@@ -86,7 +93,16 @@ void draw_batch_flush(int kind) {
   // the never flush mode means the batch isn't drawn
   // we must still clear it from memory to avoid leaks
   if (draw_batch_mode != batch_flush_never) {
-    d3d_model_draw(draw_get_batch_stream(), draw_batch_texture);
+    // when we start a batch using draw_batch_begin_deferred
+    // the render state is actually made current immediately
+    // along with the texture that the batch uses so we don't
+    // actually want any state flush to occur while we draw
+    // this batch and then we can restore the dirty state for
+    // the next batch or vertex submit to flush the new state
+    bool wasStateDirty = enigma::draw_get_state_dirty();
+    enigma::draw_set_state_dirty(false);
+    d3d_model_draw(draw_get_batch_stream());
+    enigma::draw_set_state_dirty(wasStateDirty);
   }
   d3d_model_clear(draw_get_batch_stream());
 
@@ -204,6 +220,7 @@ void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 
 void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_floor(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep);
   draw_batch_flush(batch_flush_immediate);
@@ -211,6 +228,7 @@ void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
 
 void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_wall(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep);
   draw_batch_flush(batch_flush_immediate);
@@ -218,6 +236,7 @@ void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
 
 void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_block(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
   draw_batch_flush(batch_flush_immediate);
@@ -225,6 +244,7 @@ void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
 
 void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_cylinder(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
   draw_batch_flush(batch_flush_immediate);
@@ -232,6 +252,7 @@ void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, g
 
 void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_cone(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
   draw_batch_flush(batch_flush_immediate);
@@ -239,6 +260,7 @@ void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
 
 void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps)
 {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_ellipsoid(draw_get_batch_stream(), x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
   draw_batch_flush(batch_flush_immediate);
@@ -248,6 +270,7 @@ void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2
 }
 
 void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
+  texture_set_repeat(true);
   draw_batch_begin_deferred(texId);
   d3d_model_torus(draw_get_batch_stream(), x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius);
   draw_batch_flush(batch_flush_immediate);

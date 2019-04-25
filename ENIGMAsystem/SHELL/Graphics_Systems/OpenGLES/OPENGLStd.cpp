@@ -30,9 +30,6 @@ using namespace std;
 namespace enigma
 {
   unsigned bound_texture=0;
-  unsigned char currentcolor[4] = {0,0,0,255};
-  bool glew_isgo;
-  bool pbo_isgo;
 
   void graphicssystem_initialize()
   {
@@ -43,7 +40,6 @@ namespace enigma
       if (!(glBindFramebufferEXT and glGenFramebuffersEXT and glFramebufferTexture2DEXT))
         MessageBox(0,"Additional drawing surfaces cannot be created. Extension unsupported by graphics card","Error",MB_OK);
     #endif
-    //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
     glMatrixMode(GL_PROJECTION);
       glClearColor(1,1,1,1);
     glMatrixMode(GL_MODELVIEW);

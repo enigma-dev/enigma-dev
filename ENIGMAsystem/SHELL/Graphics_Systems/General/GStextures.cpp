@@ -17,6 +17,7 @@
 **/
 
 #include "GStextures.h"
+#include "GSstdraw.h"
 #include "GStextures_impl.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
@@ -25,6 +26,7 @@
 namespace enigma {
 
 vector<Texture*> textures;
+Sampler samplers[8];
 
 } // namespace enigma
 
@@ -43,7 +45,7 @@ int texture_add(string filename, bool mipmap) {
 }
 
 void texture_save(int texid, string fname) {
-  unsigned w, h;
+  unsigned w = 0, h = 0;
   unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(texid, &w, &h);
 
   string ext = enigma::image_get_format(fname);
@@ -85,6 +87,57 @@ gs_scalar texture_get_texel_width(int texid)
 gs_scalar texture_get_texel_height(int texid)
 {
   return 1.0/enigma::textures[texid]->height;
+}
+
+void texture_set_stage(int stage, int texid) {
+  if (enigma::samplers[stage].texture == texid) return;
+  enigma::draw_set_state_dirty();
+  enigma::samplers[stage].texture = texid;
+}
+
+int texture_get_stage(int stage) {
+  return enigma::samplers[stage].texture;
+}
+
+void texture_reset() {
+  if (enigma::samplers[0].texture == -1) return;
+  enigma::draw_set_state_dirty();
+  enigma::samplers[0].texture = -1;
+}
+
+void texture_set_interpolation_ext(int sampler, bool enable) {
+  enigma::draw_set_state_dirty();
+  enigma::samplers[sampler].interpolate = enable;
+}
+
+void texture_set_repeat_ext(int sampler, bool repeat) {
+  enigma::draw_set_state_dirty();
+  enigma::samplers[sampler].wrapu = repeat;
+  enigma::samplers[sampler].wrapv = repeat;
+  enigma::samplers[sampler].wrapw = repeat;
+}
+
+void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw) {
+  enigma::draw_set_state_dirty();
+  enigma::samplers[sampler].wrapu = wrapu;
+  enigma::samplers[sampler].wrapv = wrapv;
+  enigma::samplers[sampler].wrapw = wrapw;
+}
+
+void texture_set_border_ext(int sampler, int r, int g, int b, double a) {
+  enigma::draw_set_state_dirty();
+}
+
+void texture_set_filter_ext(int sampler, int filter) {
+  enigma::draw_set_state_dirty();
+}
+
+void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel) {
+  enigma::draw_set_state_dirty();
+}
+
+void texture_anisotropy_filter(int sampler, gs_scalar levels) {
+  enigma::draw_set_state_dirty();
 }
 
 } // namespace enigma_user

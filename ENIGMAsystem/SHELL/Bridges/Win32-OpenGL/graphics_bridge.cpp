@@ -101,7 +101,6 @@ void display_reset(int samples, bool vsync) {
   // Attach the render buffers to the multi-sampler fbo
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, ColorBufferID);
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, DepthBufferID);
-
 }
 
 void set_synchronization(bool enable) {

@@ -15,15 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // for show_error()
+#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/Direct3D9/DX9surface_impl.h"
 #include "Graphics_Systems/Direct3D9/Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
-#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
+#include "Graphics_Systems/General/GSstdraw.h"
+#include "Widget_Systems/widgets_mandatory.h" // for show_error()
 
 #include <windows.h>
 #include <d3d9.h>
@@ -32,11 +32,11 @@ using namespace enigma::dx9;
 
 namespace {
 
-LPDIRECT3D9 d3dobj; // the pointer to our Direct3D interface
+LPDIRECT3D9 d3dobj = NULL; // the pointer to our Direct3D interface
 
 inline void get_d3d_present_params(D3DPRESENT_PARAMETERS* d3dpp) {
   IDirect3DSwapChain9 *sc;
-  d3dmgr->device->GetSwapChain(0, &sc);
+  d3ddev->GetSwapChain(0, &sc);
   sc->GetPresentParameters(d3dpp);
   sc->Release();
 }
@@ -47,7 +47,7 @@ namespace enigma {
 
 namespace dx9 {
 
-ContextManager* d3dmgr; // the pointer to the device class
+LPDIRECT3DDEVICE9 d3ddev = NULL; // the pointer to the device class
 
 } // namespace dx9
 
@@ -55,7 +55,7 @@ extern HWND hWnd;
 extern bool forceSoftwareVertexProcessing;
 
 void OnDeviceLost() {
-  d3dmgr->device->EndScene();
+  d3ddev->EndScene();
   if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
   for (BaseSurface* surf : surfaces) {
     if (!surf) continue;
@@ -64,7 +64,7 @@ void OnDeviceLost() {
 }
 
 void OnDeviceReset() {
-  d3dmgr->device->BeginScene();
+  d3ddev->BeginScene();
   if (!Direct3D9Managed) return; // lost device only happens in managed d3d9
   for (BaseSurface* surf : surfaces) {
     if (!surf) continue;
@@ -74,18 +74,18 @@ void OnDeviceReset() {
 
 void Reset(D3DPRESENT_PARAMETERS *d3dpp) {
   OnDeviceLost();
-  HRESULT hr = d3dmgr->device->Reset(d3dpp);
+  HRESULT hr = d3ddev->Reset(d3dpp);
   if (FAILED(hr)) {
     show_error("Direct3D 9 Device Reset Failed", true);
   }
   // the normal, managed d3d 9.0 does not automatically restore render state
-  if (Direct3D9Managed) d3dmgr->RestoreState();
+  if (Direct3D9Managed) graphics_state_flush();
   OnDeviceReset();
 }
 
 extern void (*WindowResizedCallback)();
 void WindowResized() {
-  if (d3dmgr == NULL) { return; }
+  if (d3ddev == NULL) { return; }
   D3DPRESENT_PARAMETERS d3dpp;
   get_d3d_present_params(&d3dpp);
   int ww = enigma_user::window_get_width(),
@@ -102,7 +102,6 @@ void EnableDrawing(void* handle) {
   get_window_handle();
   WindowResizedCallback = &WindowResized;
 
-  d3dmgr = new ContextManager();
   HRESULT hr;
 
   D3DPRESENT_PARAMETERS d3dpp; // create a struct to hold various device information
@@ -120,7 +119,7 @@ void EnableDrawing(void* handle) {
   d3dpp.hDeviceWindow = hWnd;                                 // This is our main (and only) window
   d3dpp.Flags = 0;                                            // No flags to set
   d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT; // Default Refresh Rate
-  d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE; // Present the frame immediately
+  d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE; // Present the frame immediately (no sync)
   d3dpp.BackBufferCount = 1;                                  // We only need a single back buffer
   d3dpp.BackBufferFormat = format;                            // Display format
   d3dpp.EnableAutoDepthStencil = TRUE;                        // Automatic depth stencil buffer
@@ -167,7 +166,7 @@ void EnableDrawing(void* handle) {
           d3dexobj->Release();
         } else {
           d3dobj = d3dexobj;
-          d3dmgr->device = d3dexdev;
+          d3ddev = d3dexdev;
           Direct3D9Managed = false;
         }
       }
@@ -186,14 +185,14 @@ void EnableDrawing(void* handle) {
                               hWnd,
                               behaviors,
                               &d3dpp,
-                              &d3dmgr->device);
+                              &d3ddev);
 
     if (FAILED(hr)) {
       show_error("Failed to create Direct3D 9.0 Device", true);
     }
   }
 
-  d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+  d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
 
   enigma_user::display_aa = 0;
   for (int i = 16; i > 1; i--) {
@@ -233,19 +232,19 @@ void EnableDrawing(void* handle) {
     enigma_user::draw_clear(enigma_user::window_get_color());
 	}
 
-  d3dmgr->device->BeginScene();
+  d3ddev->BeginScene();
 }
 
 void DisableDrawing(void* handle) {
-  d3dmgr->device->EndScene();
-  d3dmgr->Release(); // close and release the 3D device
+  d3ddev->EndScene();
+  d3ddev->Release(); // close and release the 3D device
   d3dobj->Release(); // close and release Direct3D
 }
 
 void ScreenRefresh() {
-  d3dmgr->device->EndScene();
-  d3dmgr->device->Present(NULL, NULL, NULL, NULL);
-  d3dmgr->device->BeginScene();
+  d3ddev->EndScene();
+  d3ddev->Present(NULL, NULL, NULL, NULL);
+  d3ddev->BeginScene();
 }
 
 } // namespace enigma
@@ -253,20 +252,16 @@ void ScreenRefresh() {
 namespace enigma_user {
 
 void display_reset(int samples, bool vsync) {
-  if (d3dmgr == NULL) { return; }
   D3DPRESENT_PARAMETERS d3dpp;
   get_d3d_present_params(&d3dpp);
-  d3dpp.PresentationInterval = vsync?D3DPRESENT_INTERVAL_DEFAULT:D3DPRESENT_INTERVAL_IMMEDIATE;
-  d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + samples);
-  d3dpp.MultiSampleQuality = 0;
-  d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, samples > 0);
+  d3dpp.PresentationInterval = vsync ? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_IMMEDIATE;
+  d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + samples); // Levels of multi-sampling
+  d3dpp.MultiSampleQuality = 0; // No multi-sampling
 
   enigma::Reset(&d3dpp);
 }
 
-void set_synchronization(bool enable)
-{
-  if (d3dmgr == NULL) { return; }
+void set_synchronization(bool enable) {
   D3DPRESENT_PARAMETERS d3dpp;
   get_d3d_present_params(&d3dpp);
   d3dpp.PresentationInterval = enable?D3DPRESENT_INTERVAL_DEFAULT:D3DPRESENT_INTERVAL_IMMEDIATE;

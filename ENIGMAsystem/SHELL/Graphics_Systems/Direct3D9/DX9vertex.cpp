@@ -19,6 +19,7 @@
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h" // for enigma_user::draw_primitive_count
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 
 #include <map>
 using std::map;
@@ -84,7 +85,7 @@ void graphics_prepare_vertex_buffer(const int buffer) {
       DWORD usage = D3DUSAGE_WRITEONLY;
       if (dynamic) usage |= D3DUSAGE_DYNAMIC;
 
-      d3dmgr->device->CreateVertexBuffer(
+      d3ddev->CreateVertexBuffer(
         size, usage, 0, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
       );
       vertexBufferPeers[buffer] = vertexBufferPeer;
@@ -133,7 +134,7 @@ void graphics_prepare_index_buffer(const int buffer) {
       DWORD usage = D3DUSAGE_WRITEONLY;
       if (dynamic) usage |= D3DUSAGE_DYNAMIC;
 
-      d3dmgr->device->CreateIndexBuffer(
+      d3ddev->CreateIndexBuffer(
         size, usage,
         (indexBuffer->type == enigma_user::index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16,
         Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &indexBufferPeer, NULL
@@ -173,7 +174,7 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
   vertexDeclarationElements[vertexFormat->flags.size()] = D3DDECL_END();
 
   LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration;
-  d3dmgr->device->CreateVertexDeclaration(&vertexDeclarationElements[0], &vertexDeclaration);
+  d3ddev->CreateVertexDeclaration(&vertexDeclarationElements[0], &vertexDeclaration);
 
   return vertexDeclaration;
 }
@@ -191,7 +192,7 @@ inline void graphics_apply_vertex_format(int format, size_t &stride) {
     stride = search->second.second;
   }
 
-  d3dmgr->device->SetVertexDeclaration(vertexDeclaration);
+  d3ddev->SetVertexDeclaration(vertexDeclaration);
 }
 
 } // namespace enigma
@@ -208,7 +209,7 @@ void vertex_color(int buffer, int color, double alpha) {
 }
 
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
@@ -218,15 +219,15 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
   enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[buffer];
-  d3dmgr->device->SetStreamSource(0, vertexBufferPeer, offset, stride);
+  d3ddev->SetStreamSource(0, vertexBufferPeer, offset, stride);
 
   int primitive_count = enigma_user::draw_primitive_count(primitive, count);
 
-  d3dmgr->device->DrawPrimitive(primitive_types[primitive], start, primitive_count);
+  d3ddev->DrawPrimitive(primitive_types[primitive], start, primitive_count);
 }
 
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
 
@@ -237,14 +238,14 @@ void index_submit_range(int buffer, int vertex, int primitive, unsigned start, u
   enigma::graphics_apply_vertex_format(vertexBuffer->format, stride);
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = vertexBufferPeers[vertex];
-  d3dmgr->device->SetStreamSource(0, vertexBufferPeer, 0, stride);
+  d3ddev->SetStreamSource(0, vertexBufferPeer, 0, stride);
 
   LPDIRECT3DINDEXBUFFER9 indexBufferPeer = indexBufferPeers[buffer];
-  d3dmgr->device->SetIndices(indexBufferPeer);
+  d3ddev->SetIndices(indexBufferPeer);
 
   int primitive_count = enigma_user::draw_primitive_count(primitive, count);
 
-  d3dmgr->device->DrawIndexedPrimitive(primitive_types[primitive], 0, 0, count, start, primitive_count);
+  d3ddev->DrawIndexedPrimitive(primitive_types[primitive], 0, 0, count, start, primitive_count);
 }
 
 } // namespace enigma_user
