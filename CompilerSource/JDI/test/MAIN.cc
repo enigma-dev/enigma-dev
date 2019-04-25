@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 Josh Ventura
+/* Copyright (C) 2011-2013 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -15,6 +15,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <iomanip>
 #include <unistd.h>
 using namespace std;
 #include <API/jdi.h>
@@ -40,6 +41,7 @@ using namespace jdi;
 using namespace jdip;
 
 void test_expression_evaluator();
+void name_type(string type, context &ct);
 
 static void putcap(string cap) {
   cout << endl << endl << endl << endl;
@@ -71,7 +73,21 @@ int main() {
        << "sizeof(jdi::full_type):          " << sizeof(jdi::full_type) << endl
        << "sizeof(jdi::template::arg_key):  " << sizeof(jdi::arg_key) << endl;
   
-  test_expression_evaluator();
+  //test_expression_evaluator();
+  
+  cout << endl << "Test arg_key::operator<" << endl;
+  {
+    arg_key a(2), b(2);
+    a.put_type(0, full_type(builtin_type__double));
+    a.put_type(1, full_type(builtin_type__int));
+    b.put_type(0, full_type(builtin_type__double));
+    b.put_type(1, full_type(builtin_type__double));
+    const int w = max(a.toString().length(), b.toString().length());
+    cout << "  [" << setw(w) << a.toString() << "]  <  [" << setw(w) << b.toString() << "]: " << (a < b) << endl;
+    cout << "  [" << setw(w) << b.toString() << "]  <  [" << setw(w) << a.toString() << "]: " << (b < a) << endl;
+    cout << "  [" << setw(w) << a.toString() << "]  <  [" << setw(w) << a.toString() << "]: " << (a < a) << endl;
+    cout << "  [" << setw(w) << b.toString() << "]  <  [" << setw(w) << b.toString() << "]: " << (b < b) << endl;
+  }
   
   #if 0
     builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include/c++");
@@ -93,15 +109,16 @@ int main() {
       
       llreader macro_reader("test/defines_mingw.txt");
     #else
-      builtin->add_search_directory("/home/josh/Projects/ENIGMA/ENIGMAsystem/SHELL");
-      builtin->add_search_directory("/usr/include/c++/4.6");
-      builtin->add_search_directory("/usr/include/c++/4.6/x86_64-linux-gnu");
-      builtin->add_search_directory("/usr/include/c++/4.6/backward");
-      builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include");
+      builtin->add_search_directory("/usr/include/c++/4.8");
+      builtin->add_search_directory("/usr/include/x86_64-linux-gnu/c++/4.8");
+      builtin->add_search_directory("/usr/include/c++/4.8/backward");
+      builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.8/include");
       builtin->add_search_directory("/usr/local/include");
-      builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include-fixed");
+      builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed");
       builtin->add_search_directory("/usr/include/x86_64-linux-gnu");
       builtin->add_search_directory("/usr/include");
+      builtin->add_search_directory("/home/josh/Projects/ENIGMA/ENIGMAsystem/SHELL");
+      builtin->add_search_directory("/home/josh/.enigma/");
       
       llreader macro_reader("test/defines_linux.txt");
     #endif
@@ -111,6 +128,14 @@ int main() {
     builtin->parse_C_stream(macro_reader, "defines.txt");
   else
     cout << "ERROR: Could not open GCC macro file for parse!" << endl;
+  
+  putcap("Text type reading");
+  name_type("int", *builtin);
+  name_type("int*", *builtin);
+  name_type("int&", *builtin);
+  name_type("int&()", *builtin);
+  name_type("int(*)()", *builtin);
+  name_type("int&(*)()", *builtin);
   
   putcap("Test parser");
   llreader f("test/test.cc");
@@ -128,6 +153,7 @@ int main() {
       cout << endl << "====[------------------------------ FAILURE. ------------------------------]====" << endl << endl;
     else
       cout << endl << "====[++++++++++++++++++++++++++++++ SUCCESS! ++++++++++++++++++++++++++++++]====" << endl << endl;
+    cout << "Parse completed with " << def_error_handler->error_count << " errors and " << def_error_handler->warning_count << " warnings." << endl;
     
     do_cli(enigma);
     /*/
@@ -147,9 +173,18 @@ int main() {
   return 0;
 }
 
-#ifdef __linux__d
-#include <ncurses>
-#else
+#include <Parser/context_parser.h>
+
+void name_type(string type, context &ct) {
+  llreader llr(type, type.length());
+  macro_map undamageable = ct.get_macros();
+  lexer_cpp c_lex(llr, undamageable, "User expression");
+  context_parser cp(&ct, &c_lex, def_error_handler);
+  token_t tk = c_lex.get_token_in_scope(ct.get_global());
+  full_type ft = cp.read_fulltype(tk, ct.get_global());
+  cout << ft.toString() << ": " << ft.toEnglish() << endl;
+}
+
 static char getch() {
   int c = fgetc(stdin);
   int ignore = c;
@@ -157,77 +192,42 @@ static char getch() {
     ignore = fgetc(stdin);
   return c;
 }
-#endif
 
 #include <cstring>
 #include <System/lex_cpp.h>
 #include <General/parse_basics.h>
 
-void do_cli(context &ct) {
+void do_cli(context &ct)
+{
   putcap("Command Line Interface");
   char c = ' ';
   macro_map undamageable = ct.get_macros();
   while (c != 'q' and c != '\n') { switch (c) {
     case 'd': {
-        bool justflags; justflags = false;
-        if (false) { case 'f': justflags = true; }
+        bool justflags, justorder;
+        justflags = false;
+        justorder = false;
+        if (false) { case 'f': justflags = true; justorder = false; }
+        if (false) { case 'o': justorder = true; justflags = false; }
         cout << "Enter the item to define:" << endl << ">> " << flush;
         char buf[4096]; cin.getline(buf, 4096);
-        size_t start, e = 0;
-        while (is_useless(buf[e]) or buf[e] == ':') ++e;
-        definition* def = ct.get_global();
-        while (buf[e] and def) {
-          if (!is_letter(buf[e])) { cout << "Unexpected symbol '" << buf[e] << "'" << endl; break; }
-          start = e;
-          while (is_letterd(buf[++e]));
-          if (def->flags & DEF_SCOPE) {
-            string name(buf+start, e-start);
-            definition_scope::defiter it = ((definition_scope*)def)->members.find(name);
-            if (it == ((definition_scope*)def)->members.end()) {
-              cout << "No `" << name << "' found in scope `" << def->name << "'" << endl;
-              def = NULL;
-              break;
-            }
-            def = it->second;
-          }
-          else {
-            cout << "Definition `" << def->name << "' is not a scope" << endl;
-            def = NULL;
-            break;
-          }
-          while (is_useless(buf[e]) or buf[e] == ':') ++e;
-        }
-        if (def and e) {
+        llreader llr(buf, strlen(buf));
+        lexer_cpp c_lex(llr, undamageable, "User expression");
+        token_t dummy = c_lex.get_token_in_scope(ct.get_global());
+        context_parser cp(&ct, &c_lex, def_error_handler);
+        definition *def = cp.read_qualified_definition(dummy, ct.get_global());
+        if (def) {
           if (justflags) {
-            map<int, string> flagnames;
-            DEF_FLAGS d = DEF_TYPENAME;
-            switch (d) {
-              case DEF_TYPENAME: flagnames[DEF_TYPENAME] = "DEF_TYPENAME";
-              case DEF_NAMESPACE: flagnames[DEF_NAMESPACE] = "DEF_NAMESPACE";
-              case DEF_CLASS: flagnames[DEF_CLASS] = "DEF_CLASS";
-              case DEF_ENUM: flagnames[DEF_ENUM] = "DEF_ENUM";
-              case DEF_UNION: flagnames[DEF_UNION] = "DEF_UNION";
-              case DEF_SCOPE: flagnames[DEF_SCOPE] = "DEF_SCOPE";
-              case DEF_TYPED: flagnames[DEF_TYPED] = "DEF_TYPED";
-              case DEF_FUNCTION: flagnames[DEF_FUNCTION] = "DEF_FUNCTION";
-              case DEF_VALUED: flagnames[DEF_VALUED] = "DEF_VALUED";
-              case DEF_DEFAULTED: flagnames[DEF_DEFAULTED] = "DEF_DEFAULTED";
-              case DEF_EXTERN: flagnames[DEF_EXTERN] = "DEF_EXTERN";
-              case DEF_TEMPLATE: flagnames[DEF_TEMPLATE] = "DEF_TEMPLATE";
-              case DEF_TEMPPARAM: flagnames[DEF_TEMPPARAM] = "DEF_TEMPPARAM";
-              case DEF_HYPOTHETICAL: flagnames[DEF_HYPOTHETICAL] = "DEF_HYPOTHETICAL";
-              case DEF_TEMPSCOPE: flagnames[DEF_TEMPSCOPE] = "DEF_TEMPSCOPE";
-              case DEF_PRIVATE: flagnames[DEF_PRIVATE] = "DEF_PRIVATE";
-              case DEF_PROTECTED: flagnames[DEF_PROTECTED] = "DEF_PROTECTED";
-              case DEF_INCOMPLETE: flagnames[DEF_INCOMPLETE] = "DEF_INCOMPLETE";
-              case DEF_ATOMIC: flagnames[DEF_ATOMIC] = "DEF_ATOMIC";
-              default: ;
+            cout << flagnames(def->flags) << endl;
+          }
+          else if (justorder) {
+            if (def->flags & DEF_TEMPLATE)
+              def = ((definition_template*)def)->def;
+            if (def->flags & DEF_SCOPE) {
+              definition_scope *sc = (definition_scope*)def;
+              for (definition_scope::orditer it = sc->dec_order.begin(); it != sc->dec_order.end(); ++it)
+                cout << "- " << (((*it)->def())? ((*it)->def())->name : "<null>") << endl;
             }
-            bool hadone = false;
-            for (int i = 1; i < (1 << 30); i <<= 1)
-              if (def->flags & i)
-                cout << (hadone? " | " : "  ") << flagnames[i], hadone = true;
-            cout << endl;
           }
           else
             cout << def->toString() << endl;
@@ -257,22 +257,24 @@ void do_cli(context &ct) {
         cout << "Enter the expression to evaluate:" << endl << ">> " << flush;
         char buf[4096]; cin.getline(buf, 4096);
         llreader llr(buf, strlen(buf));
-        AST a;
         lexer_cpp c_lex(llr, undamageable, "User expression");
+        AST a;
+        context_parser cparse(&ct, &c_lex, def_error_handler);
         token_t dummy = c_lex.get_token_in_scope(ct.get_global());
-        if (!a.parse_expression(dummy, &c_lex, ct.get_global(), precedence::all, def_error_handler)) {
+        if (!cparse.get_AST_builder()->parse_expression(&a, dummy, ct.get_global(), precedence::all)) {
           if (render) {
             cout << "Filename to render to:" << endl;
             cin.getline(buf, 4096);
             a.writeSVG(buf);
           }
           if (eval) {
-            value v = a.eval();
+            value v = a.eval(error_context(def_error_handler, dummy));
             cout << "Value returned: " << v.toString() << endl;
           }
           if (coerce) {
-            full_type t = a.coerce();
+            full_type t = a.coerce(error_context(def_error_handler, dummy));
             cout << "Type of expression: " << t.toString() << endl;
+            cout << (t.def? t.def->toString() : "NULL") << endl;
           }
           if (show) {
             a.writeSVG("/tmp/anus.svg");
@@ -290,6 +292,7 @@ void do_cli(context &ct) {
       "'f' Print flags for a given definition\n"
       "'h' Print this help information\n"
       "'m' Define a macro, printing a breakdown of its definition\n"
+      "'o' Print the order of declarations in a given scope\n"
       "'r' Render an AST representing an expression\n"
       "'s' Render an AST representing an expression and show it\n"
       "'q' Quit this interface\n";
@@ -308,18 +311,22 @@ void do_cli(context &ct) {
 void test_expression_evaluator() {
   putcap("Test expression evaluator");
   
-  AST ast;
   debug_lexer dlex;
+  context ct;//(&dlex, def_error_handler);
+  context_parser cp(&ct, &dlex, def_error_handler);
+  AST ast;
+  error_context dec(def_error_handler, "Test AST", 0, 0);
+  
   dlex << create_token_dec_literal("10",2);
-  ast.parse_expression(&dlex);
-  value v = ast.eval();
+  cp.get_AST_builder()->parse_expression(&ast);
+  value v = ast.eval(dec);
   ast.writeSVG("/home/josh/Desktop/RecursiveAST/AST_00.svg");
   cout << v.val.i << endl;
   
   ast.clear(); dlex.clear();
   dlex << create_token_dec_literal("20",2);
-  ast.parse_expression(&dlex);
-  v = ast.eval();
+  cp.get_AST_builder()->parse_expression(&ast);
+  v = ast.eval(dec);
   ast.writeSVG("/home/josh/Desktop/RecursiveAST/AST_01.svg");
   cout << v.val.i << endl;
   
@@ -327,8 +334,8 @@ void test_expression_evaluator() {
   dlex << create_token_dec_literal("20",2);
   dlex << create_token_operator("+",1);
   dlex << create_token_dec_literal("10",2);
-  ast.parse_expression(&dlex);
-  v = ast.eval();
+  cp.get_AST_builder()->parse_expression(&ast);
+  v = ast.eval(dec);
   ast.writeSVG("/home/josh/Desktop/RecursiveAST/AST_02.svg");
   cout << v.val.i << endl;
   
@@ -338,9 +345,9 @@ void test_expression_evaluator() {
   dlex << create_token_dec_literal("10",2);
   dlex << create_token_operator("+",1);
   dlex << create_token_dec_literal("10",2);
-  ast.parse_expression(&dlex);
+  cp.get_AST_builder()->parse_expression(&ast);
   ast.writeSVG("/home/josh/Desktop/RecursiveAST/AST_03.svg");
-  v = ast.eval();
+  v = ast.eval(dec);
   cout << v.val.i << endl;
   
   ast.clear(); dlex.clear();
@@ -349,9 +356,9 @@ void test_expression_evaluator() {
   dlex << create_token_dec_literal("40",2);
   dlex << create_token_operator("-",1);
   dlex << create_token_dec_literal("10",2);
-  ast.parse_expression(&dlex);
+  cp.get_AST_builder()->parse_expression(&ast);
   ast.writeSVG("/home/josh/Desktop/RecursiveAST/AST_04.svg");
-  v = ast.eval(); dlex.clear();
+  v = ast.eval(dec); dlex.clear();
   cout << v.val.i << endl;
   
   ast.clear(); dlex.clear();
@@ -363,9 +370,9 @@ void test_expression_evaluator() {
   dlex << create_token_operator("<<",2);
   dlex << create_token_dec_literal("1",1);
   token_t token;
-  ast.parse_expression(&dlex);
+  cp.get_AST_builder()->parse_expression(&ast);
   ast.writeSVG("/home/josh/Desktop/RecursiveAST/AST_05.svg");
-  v = ast.eval();
+  v = ast.eval(dec);
   cout << v.val.i << endl;
   
   ast.clear(); dlex.clear();
@@ -402,9 +409,9 @@ void test_expression_evaluator() {
   dlex << create_token_dec_literal("2",1);
   dlex << create_token_operator("+",1);
   dlex << create_token_dec_literal("1",1);
-  ast.parse_expression(&dlex);
+  cp.get_AST_builder()->parse_expression(&ast);
   ast.writeSVG("/home/josh/Desktop/RecursiveAST/AST_06.svg");
-  v = ast.eval();
+  v = ast.eval(dec);
   cout << v.val.i << endl;
   
   ast.clear(); dlex.clear();
@@ -427,9 +434,9 @@ void test_expression_evaluator() {
   dlex << create_token_dec_literal("2",1);
   dlex << create_token_operator("+",1);
   dlex << create_token_dec_literal("1",1);
-  ast.parse_expression(&dlex);
+  cp.get_AST_builder()->parse_expression(&ast);
   ast.writeSVG("/home/josh/Desktop/RecursiveAST/AST_07.svg");
-  v = ast.eval();
+  v = ast.eval(dec);
   cout << v.val.i << endl;
   
   ast.clear();
@@ -454,8 +461,8 @@ void test_expression_evaluator() {
   dlex << create_token_dec_literal("3",1);
   dlex << create_token_operator("+",1);
   dlex << create_token_dec_literal("4",1);
-  ast.parse_expression(&dlex);
+  cp.get_AST_builder()->parse_expression(&ast);
   ast.writeSVG("/home/josh/Desktop/RecursiveAST/AST_08.svg");
-  v = ast.eval();
+  v = ast.eval(dec);
   cout << v.val.i << endl;
 }

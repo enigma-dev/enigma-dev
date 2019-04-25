@@ -15,7 +15,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -50,7 +50,6 @@ namespace jdip {
 #include <System/type_usage_flags.h>
 #include <Storage/definition.h>
 #include <General/llreader.h>
-#include <Parser/parse_context.h>
 #include <API/error_reporting.h>
 #include <API/lexer_interface.h>
 
@@ -61,6 +60,7 @@ namespace jdi
   using std::vector;
   using std::ostream;
   using std::cout;
+  using std::set;
   
   typedef map<string,const jdip::macro_type*> macro_map; ///< Map type used for storing macros
   typedef macro_map::iterator macro_iter; ///< Iterator type for macro maps.
@@ -79,27 +79,16 @@ namespace jdi
   class context
   {
     bool parse_open; ///< True if we're already parsing something
+    friend class jdi::AST;
+    friend class jdip::context_parser;
     
     protected: // Make sure our method-packing child can use these.
-    lexer *lex; ///< The lexer which all methods and all calls therefrom will poll for tokens.
-    error_handler *herr; ///< The error handler to which errors and warnings will be reported.
-    
     macro_map macros; ///< A map of macros defined in this context.
     vector<string> search_directories; ///< A list of #include directories in the order they will be searched.
     definition_scope* global; ///< The global scope represented in this context.
     
   public:
     set<definition*> variadics; ///< Set of variadic types.
-    
-    /// This is a map of structures which conflict with other declarations, which is allowed by the rules of C.
-    map<string, definition*> c_structs;
-    /** Function to insert into c_structs by the rules of definition_scope::declare.
-        @param name  The name of the definition to declare.
-        @param def   Pointer to the definition being declared, if one is presently available.
-    */
-    decpair declare_c_struct(string name, definition* def = NULL);
-    
-    definition_scope* get_global(); ///< Return the global scope.
     
     size_t search_dir_count(); ///< Return the number of search directories
     string search_dir(size_t index); ///< Return the search directory with the given index, in [0, search_dir_count).
@@ -165,7 +154,9 @@ namespace jdi
     void dump_macros();
     
     /// Get a reference to the macro map
-    const macro_map& get_macros();
+    inline const macro_map& get_macros() const { return macros; }
+    /// Get our global scope
+    inline definition_scope* get_global() const { return global; }
     
     /// Get a non-const reference to the global macro set.
     static macro_map &global_macros();
@@ -183,20 +174,20 @@ namespace jdi
         @param errhandl   An instance of \c jdi::error_handler which will receive any warnings or errors encountered.
                           If this parameter is NULL, the previous error handler will be used, or the default will be used.
     **/
-    int parse_stream(lexer *lang_lexer = NULL, error_handler *errhandl = NULL);
+    int parse_stream(lexer *lang_lexer, error_handler *errhandl = NULL);
     
     /** Default constructor; allocates a global context with built-in definitions.
         Definitions are copied into the new context from the \c builtin context.
     **/
     context();
     
-    /** Integer constructor. This constructor circumvents the copy process. It has
+    /** Construct with essentially nothing. This constructor circumvents the copy process. It has
         no purpose other than and is not to be used except in allocating the builtin scope.
         While it is not necessary under common circumstances to avoid copying from the
         global scope into itself on construct, should the scope ever be populated before
         the ctor body due to one change or another, it could potentially cause issues.
         
-        As the issues are as unlikely as the scenario, this mehtod may eventually be removed.
+        As the issues are as unlikely as the scenario, this method may eventually be removed.
         For the time being, we may as well keep a distinction between the constructors of the
         normal scopes and of the builtin scope.
         

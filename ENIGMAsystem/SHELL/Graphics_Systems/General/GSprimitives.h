@@ -23,6 +23,7 @@
 namespace enigma_user
 {
   enum {
+    pr_undefined      = -1,
     pr_pointlist      = 1,     // GL_POINTS            D3DPT_POINTLIST
     pr_linelist       = 2,     // GL_LINES             D3DPT_LINELIST
     pr_linestrip      = 3,     // GL_LINE_STRIP        D3DPT_LINESTRIP
@@ -39,7 +40,7 @@ namespace enigma_user
 
   void draw_set_batch_mode(int mode);
   int draw_get_batch_mode();
-  void draw_batch_flush(int kind = draw_get_batch_mode());
+  void draw_batch_flush(int kind = pr_undefined);
   unsigned draw_primitive_count(int kind, unsigned vertex_count);
   void draw_primitive_begin(int kind);
   void draw_primitive_begin_texture(int kind, int texId);

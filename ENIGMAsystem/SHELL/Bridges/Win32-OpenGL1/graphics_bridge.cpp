@@ -74,7 +74,7 @@ void EnableDrawing(void*)
 
   GLenum err = glewInit();
   if (GLEW_OK != err)
-    show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
+    show_error(std::string("Failed to initialize glew for OpenGL. ") + (const char*)glewGetErrorString(err), true);
 
   init_display_aa_levels();
 }
