@@ -4,6 +4,8 @@
 #include "libEGMstd.h"
 
 #ifdef JUST_DEFINE_IT_RUN
+namespace enigma_user {
+
 void gtest_assert_true(bool exp,  std::string message = "");
 void gtest_assert_false(bool exp, std::string message = "");
 
@@ -30,6 +32,9 @@ void gtest_expect_lt(var a, var b, std::string message = "");
 void gtest_expect_le(var a, var b, std::string message = "");
 void gtest_expect_gt(var a, var b, std::string message = "");
 void gtest_expect_ge(var a, var b, std::string message = "");
+
+} //enigma_user
+
 #else
 
 namespace enigma {

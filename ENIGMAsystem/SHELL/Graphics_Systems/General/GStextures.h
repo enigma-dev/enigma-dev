@@ -30,10 +30,17 @@
 #include <string>
 using std::string;
 
-namespace enigma
-{
-  extern bool interpolate_textures;
-}
+namespace enigma {
+
+struct Sampler {
+  int texture=-1; // GML texture id, NOT GL texture id!
+  bool wrapu=false, wrapv=false, wrapw=false;
+  bool interpolate=false;
+};
+
+extern Sampler samplers[8];
+
+} // namespace enigma
 
 namespace enigma_user {
   enum {
@@ -59,7 +66,10 @@ namespace enigma_user
   void texture_set_enabled(bool enable);
   void texture_set(int texid);
   void texture_set_stage(int stage, int texid);
+  int texture_get();
+  int texture_get_stage(int stage);
   #define texture_set(texid) texture_set_stage(0, texid)
+  #define texture_get(texid) texture_get_stage(0)
   void texture_reset();
   void texture_set_blending(bool enable);
 

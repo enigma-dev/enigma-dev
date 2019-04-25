@@ -25,7 +25,6 @@
 #include <unordered_map>
 #include <math.h>
 
-using namespace std;
 #include <algorithm>
 #include <floatcomp.h>
 #include <vector>
@@ -34,6 +33,8 @@ using namespace std;
 #include <list>
 #include <stack>
 #include "Universal_System/estring.h"
+
+using namespace std;
 
 namespace enigma
 {
@@ -58,18 +59,9 @@ namespace enigma_user
 	void texture_set_priority(int texid, double prio);
 	void texture_set_enabled(bool enable);
 	void texture_set_blending(bool enable);
-	void texture_set_stage(int stage, int texid);
-	void texture_reset();
-	void texture_set_interpolation_ext(int sampler, bool enable);
-	void texture_set_repeat_ext(int sampler, bool repeat);
-	void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw);
-	void texture_set_border_ext(int sampler, int r, int g, int b, double a);
-	void texture_set_filter_ext(int sampler, int filter);
-	void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel);
 	bool texture_mipmapping_supported();
 	bool texture_anisotropy_supported();
 	float texture_anisotropy_maxlevel();
-	void texture_anisotropy_filter(int sampler, gs_scalar levels);
 
 	bool surface_is_supported();
 	int surface_create(int width, int height, bool depthbuffer);
@@ -94,13 +86,6 @@ namespace enigma_user
 
 	int draw_get_msaa_maxlevel();
 	bool draw_get_msaa_supported();
-	void draw_set_msaa_enabled(bool enable);
-	void draw_enable_alphablend(bool enable);
-	bool draw_get_alpha_test();
-	unsigned draw_get_alpha_test_ref_value();
-	void draw_set_alpha_test(bool enable);
-	void draw_set_alpha_test_ref_value(unsigned val);
-	void draw_set_line_pattern(int pattern, int scale);
 
 	int draw_getpixel(int x,int y);
 	int draw_getpixel_ext(int x,int y);
@@ -129,50 +114,10 @@ namespace enigma_user
 	extern int window_get_region_width();
 	extern int window_get_region_height();
 
-	void screen_redraw();
-	void screen_init();
 	int screen_save(string filename);
 	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h);
-	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
-	void display_set_gui_size(unsigned int width, unsigned int height);
 	unsigned int display_get_gui_width();
 	unsigned int display_get_gui_height();
-
-
-	void d3d_set_lighting(bool enable);
-
-	void d3d_set_fog(bool enable, int color, double start, double end);
-	void d3d_set_fog_enabled(bool enable);
-	void d3d_set_fog_mode(int mode);
-	void d3d_set_fog_hint(int mode);
-	void d3d_set_fog_color(int color);
-	void d3d_set_fog_start(double start);
-	void d3d_set_fog_end(double end);
-	void d3d_set_fog_density(double density);
-
-	void d3d_set_fill_mode(int fill);
-	void d3d_set_line_width(float value);
-	void d3d_set_point_size(float value);
-	void d3d_set_depth_operator(int mode);
-	void d3d_set_depth(double dep);
-	void d3d_clear_depth();
-	void d3d_set_shading(bool smooth);
-	void d3d_set_clip_plane(bool enable);
-
-	bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
-	bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col);
-	bool d3d_light_define_specularity(int id, int r, int g, int b, double a);
-	void d3d_light_specularity(int facemode, int r, int g, int b, double a);
-	bool d3d_light_set_ambient(int id, int r, int g, int b, double a);
-	bool d3d_light_set_specularity(int id, int r, int g, int b, double a);
-	void d3d_light_shininess(int facemode, int shine);
-	void d3d_light_define_ambient(int col);
-	bool d3d_light_enable(int id, bool enable);
-
-	void d3d_stencil_start_mask();
-	void d3d_stencil_continue_mask();
-	void d3d_stencil_use_mask();
-	void d3d_stencil_end_mask();
 
 	void draw_clear_alpha(int col,float alpha);
 	void draw_clear(int col);

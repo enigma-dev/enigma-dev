@@ -35,25 +35,6 @@ inline unsigned int lgpp2(unsigned int x) {//Trailing zero count. lg for perfect
 	return (x + (x >> 16)) & 63;
 }
 
-ID3D11ShaderResourceView *getDefaultWhiteTexture() {
-    static int texid = -1;
-    if (texid == -1) {
-      unsigned data[1] = {0xFFFFFFFF};
-      texid = enigma::graphics_create_texture(1, 1, 1, 1, (void*)data, false);
-    }
-    return ((enigma::DX11Texture*)enigma::textures[texid])->view;
-}
-
-D3D11_SAMPLER_DESC samplerDesc = { };
-
-void update_sampler_state() {
-  static ID3D11SamplerState *pSamplerState = NULL;
-  if (pSamplerState) { pSamplerState->Release(); pSamplerState = NULL; }
-  m_device->CreateSamplerState(&samplerDesc, &pSamplerState);
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-  m_deviceContext->PSSetSamplers(0, 1, &pSamplerState);
-}
-
 } // namespace anonymous
 
 namespace enigma {
@@ -138,23 +119,6 @@ unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwi
   return NULL; //TODO: implement
 }
 
-void init_sampler_state() {
-  samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-  samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-  samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-  samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-  samplerDesc.MipLODBias = 0.0f;
-  samplerDesc.MaxAnisotropy = 1;
-  samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-  samplerDesc.BorderColor[0] = 0;
-  samplerDesc.BorderColor[1] = 0;
-  samplerDesc.BorderColor[2] = 0;
-  samplerDesc.BorderColor[3] = 0;
-  samplerDesc.MinLOD = 0;
-  samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-  update_sampler_state();
-}
-
 } // namespace enigma
 
 namespace enigma_user {
@@ -174,54 +138,6 @@ void texture_set_blending(bool enable)
 
 }
 
-void texture_set_stage(int stage, int texid) {
-  draw_batch_flush(batch_flush_deferred);
-  ID3D11ShaderResourceView *view = (texid == -1)?
-    getDefaultWhiteTexture():((enigma::DX11Texture*)enigma::textures[texid])->view;
-
-  m_deviceContext->PSSetShaderResources(stage, 1, &view);
-}
-
-void texture_reset() {
-  ID3D11ShaderResourceView *nullView = getDefaultWhiteTexture();
-  m_deviceContext->PSSetShaderResources(0, 1, &nullView);
-}
-
-void texture_set_interpolation_ext(int sampler, bool enable)
-{
-  samplerDesc.Filter = enable ? D3D11_FILTER_MIN_MAG_MIP_LINEAR : D3D11_FILTER_MIN_MAG_MIP_POINT;
-  update_sampler_state();
-}
-
-void texture_set_repeat_ext(int sampler, bool repeat)
-{
-  D3D11_TEXTURE_ADDRESS_MODE addressMode = repeat ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
-  samplerDesc.AddressU = addressMode;
-  samplerDesc.AddressV = addressMode;
-  samplerDesc.AddressW = addressMode;
-  update_sampler_state();
-}
-
-void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
-{
-
-}
-
-void texture_set_border_ext(int sampler, int r, int g, int b, double a)
-{
-
-}
-
-void texture_set_filter_ext(int sampler, int filter)
-{
-
-}
-
-void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel)
-{
-
-}
-
 bool texture_mipmapping_supported()
 {
   return false; //TODO: implement
@@ -235,11 +151,6 @@ bool texture_anisotropy_supported()
 float texture_anisotropy_maxlevel()
 {
   return 0.0f; //TODO: implement
-}
-
-void texture_anisotropy_filter(int sampler, gs_scalar levels)
-{
-
 }
 
 } // namespace enigma_user

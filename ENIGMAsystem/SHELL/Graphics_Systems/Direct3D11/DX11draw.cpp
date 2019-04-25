@@ -27,10 +27,42 @@
 #include <vector>
 #include <math.h>
 #include <stdio.h>
+
 using std::vector;
 
-namespace enigma_user
+using namespace enigma::dx11;
+
+namespace enigma_user {
+
+void draw_clear_alpha(int col, float alpha)
 {
+	draw_batch_flush(batch_flush_deferred);
+	float color[4];
+
+	// Setup the color to clear the buffer to.
+	color[0] = COL_GET_Rf(col);
+	color[1] = COL_GET_Gf(col);
+	color[2] = COL_GET_Bf(col);
+	color[3] = alpha;
+
+	// Clear the back buffer.
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView, color);
+}
+
+void draw_clear(int col)
+{
+	draw_batch_flush(batch_flush_deferred);
+	float color[4];
+
+	// Setup the color to clear the buffer to.
+	color[0] = COL_GET_Rf(col);
+	color[1] = COL_GET_Gf(col);
+	color[2] = COL_GET_Bf(col);
+	color[3] = 1;
+
+	// Clear the back buffer.
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView, color);
+}
 
 int draw_get_msaa_maxlevel()
 {
@@ -42,41 +74,6 @@ bool draw_get_msaa_supported()
   return false; //TODO: implement
 }
 
-void draw_set_msaa_enabled(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-}
-
-void draw_enable_alphablend(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-}
-
-bool draw_get_alpha_test()
-{
-  return false; //TODO: implement
-}
-
-unsigned draw_get_alpha_test_ref_value()
-{
-  return 0; //TODO: implement
-}
-
-void draw_set_alpha_test(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-}
-
-void draw_set_alpha_test_ref_value(unsigned val)
-{
-  draw_batch_flush(batch_flush_deferred);
-}
-
-void draw_set_line_pattern(int pattern, int scale)
-{
-  draw_batch_flush(batch_flush_deferred);
-}
-
 } // namespace enigma_user
 
 //#include <endian.h>
@@ -84,8 +81,7 @@ void draw_set_line_pattern(int pattern, int scale)
 //   // Doing so is necessary for the function to work at its peak.
 //   // When ENIGMA generates configuration files, one should be included here.
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 int draw_getpixel(int x, int y)
 {
