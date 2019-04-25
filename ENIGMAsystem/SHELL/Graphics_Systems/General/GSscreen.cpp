@@ -16,6 +16,8 @@
 **/
 
 #include "GSscreen.h"
+#include "GSstdraw.h"
+#include "GStextures.h"
 #include "GSsprite.h"
 #include "GStilestruct.h"
 #include "GSbackground.h"
@@ -171,8 +173,8 @@ static inline void draw_gui()
 {
   // turn some state off automatically for the user to draw the GUI
   // this is exactly what GMSv1.4 does
-  int culling = d3d_get_culling();
-  bool hidden = d3d_get_hidden();
+  int culling = enigma::d3dCulling;
+  bool hidden = enigma::d3dHidden;
   bool zwrite = enigma::d3dZWriteEnable;
   d3d_set_zwriteenable(false);
   d3d_set_culling(rs_none);
@@ -204,12 +206,53 @@ static inline void draw_gui()
 
 namespace enigma_user {
 
+void display_set_gui_size(unsigned int width, unsigned int height) {
+  enigma::gui_width = width;
+  enigma::gui_height = height;
+}
+
 unsigned int display_get_gui_width(){
   return enigma::gui_width;
 }
 
 unsigned int display_get_gui_height(){
   return enigma::gui_height;
+}
+
+void screen_init() {
+  enigma::gui_width = window_get_region_width();
+  enigma::gui_height = window_get_region_height();
+
+  draw_clear(c_black);
+  d3d_clear_depth(0.0f);
+
+  if (!view_enabled)
+  {
+    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+    d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
+  } else {
+    for (view_current = 0; view_current < 7; view_current++)
+    {
+      if (view_visible[(int)view_current])
+      {
+        int vc = (int)view_current;
+
+        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
+        d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
+        break;
+      }
+    }
+  }
+
+  enigma::d3dHidden = false;
+  enigma::d3dCulling = rs_none;
+  enigma::alphaBlend = true;
+  texture_reset();
+
+  // make sure all of the default state values are
+  // synchronzied at least once with the device/context
+  enigma::draw_set_state_dirty();
+  draw_state_flush();
 }
 
 void screen_refresh() {

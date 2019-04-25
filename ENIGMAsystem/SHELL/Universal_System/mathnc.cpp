@@ -21,6 +21,7 @@
 #include "generic_args.h"
 
 #include <limits>
+#include <algorithm> // min/max
 #include <stdlib.h>
 #include <cmath>
 

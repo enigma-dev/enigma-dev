@@ -34,6 +34,8 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
 				</Compiler>
 				<Linker>
@@ -41,16 +43,15 @@
 				</Linker>
 			</Target>
 			<Target title="Profile">
-				<Option output="bin/Release/JustDefineIt" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Profile/JustDefineIt" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Profile" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-O3" />
 					<Add option="-pg" />
+					<Add option="-g" />
 				</Compiler>
 				<Linker>
-					<Add option="-s" />
 					<Add option="-pg" />
 				</Linker>
 			</Target>
@@ -75,15 +76,22 @@
 			<Add option="-Werror" />
 			<Add directory="./src" />
 		</Compiler>
+		<Unit filename="dox/scope.dox">
+			<Option virtualFolder="Documentation/" />
+		</Unit>
 		<Unit filename="dox/token.dox">
 			<Option virtualFolder="Documentation/" />
 		</Unit>
 		<Unit filename="src/API/AST.cpp" />
 		<Unit filename="src/API/AST.h" />
 		<Unit filename="src/API/AST_Export.cpp" />
+		<Unit filename="src/API/AST_forward.h" />
+		<Unit filename="src/API/AST_operator.cpp" />
+		<Unit filename="src/API/AST_operator.h" />
 		<Unit filename="src/API/compile_settings.h" />
 		<Unit filename="src/API/context.cpp" />
 		<Unit filename="src/API/context.h" />
+		<Unit filename="src/API/error_context.h" />
 		<Unit filename="src/API/error_reporting.cpp" />
 		<Unit filename="src/API/error_reporting.h" />
 		<Unit filename="src/API/jdi.cpp" />
@@ -105,27 +113,34 @@
 		<Unit filename="src/General/svg_simple.cpp" />
 		<Unit filename="src/General/svg_simple.h" />
 		<Unit filename="src/Parser/base.cpp" />
-		<Unit filename="src/Parser/bodies.h" />
+		<Unit filename="src/Parser/cclass_base.h" />
+		<Unit filename="src/Parser/context_parser.cpp" />
+		<Unit filename="src/Parser/context_parser.h" />
 		<Unit filename="src/Parser/handlers/handle_class.cpp" />
 		<Unit filename="src/Parser/handlers/handle_declarators.cpp" />
 		<Unit filename="src/Parser/handlers/handle_enum.cpp" />
+		<Unit filename="src/Parser/handlers/handle_friend.cpp" />
 		<Unit filename="src/Parser/handlers/handle_function_impl.cpp" />
 		<Unit filename="src/Parser/handlers/handle_function_impl.h" />
 		<Unit filename="src/Parser/handlers/handle_hypothetical.cpp" />
 		<Unit filename="src/Parser/handlers/handle_namespace.cpp" />
+		<Unit filename="src/Parser/handlers/handle_operatorkw_cast.cpp" />
 		<Unit filename="src/Parser/handlers/handle_scope.cpp" />
 		<Unit filename="src/Parser/handlers/handle_templates.cpp" />
 		<Unit filename="src/Parser/handlers/handle_union.cpp" />
-		<Unit filename="src/Parser/parse_context.cpp" />
-		<Unit filename="src/Parser/parse_context.h" />
+		<Unit filename="src/Parser/is_potential_constructor.h" />
 		<Unit filename="src/Parser/readers/read_expression.cpp" />
 		<Unit filename="src/Parser/readers/read_next_token.cpp" />
 		<Unit filename="src/Parser/readers/read_operatorkw_name.cpp" />
 		<Unit filename="src/Parser/readers/read_qualified_definition.cpp" />
 		<Unit filename="src/Parser/readers/read_template_parameters.cpp" />
 		<Unit filename="src/Parser/readers/read_type.cpp" />
+		<Unit filename="src/Storage/arg_key.cpp" />
+		<Unit filename="src/Storage/arg_key.h" />
 		<Unit filename="src/Storage/definition.cpp" />
 		<Unit filename="src/Storage/definition.h" />
+		<Unit filename="src/Storage/definition_duplicate.cpp" />
+		<Unit filename="src/Storage/definition_forward.h" />
 		<Unit filename="src/Storage/full_type.cpp" />
 		<Unit filename="src/Storage/full_type.h" />
 		<Unit filename="src/Storage/references.cpp" />
@@ -147,12 +162,21 @@
 		<Unit filename="src/System/token.cpp" />
 		<Unit filename="src/System/token.h" />
 		<Unit filename="src/System/type_usage_flags.h" />
-		<Unit filename="test/MAIN.cc" />
-		<Unit filename="test/debug_lexer.cpp" />
-		<Unit filename="test/debug_lexer.h" />
-		<Unit filename="test/defines.txt" />
-		<Unit filename="test/modifiers.txt" />
-		<Unit filename="test/primitives.txt" />
+		<Unit filename="test/MAIN.cc">
+			<Option virtualFolder="test/" />
+		</Unit>
+		<Unit filename="test/debug_lexer.cpp">
+			<Option virtualFolder="test/" />
+		</Unit>
+		<Unit filename="test/debug_lexer.h">
+			<Option virtualFolder="test/" />
+		</Unit>
+		<Unit filename="test/modifiers.txt">
+			<Option virtualFolder="test/" />
+		</Unit>
+		<Unit filename="test/primitives.txt">
+			<Option virtualFolder="test/" />
+		</Unit>
 		<Unit filename="test/test.cc">
 			<Option compile="0" />
 			<Option link="0" />

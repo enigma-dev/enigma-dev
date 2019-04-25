@@ -31,6 +31,7 @@
 
 // We want var and variant to support a lot of assignment types.
 #include "var_te.h"
+#include "lua_table.h"
 
 #include <string>
 
@@ -44,6 +45,8 @@ namespace enigma {
   };
 }
 
+namespace enigma_user {
+
 struct var;
 
 struct variant
@@ -55,7 +58,7 @@ struct variant
   enigma::rvt rval;
   std::string sval;
   int type;
-  
+
   operator int();
   operator bool();
   operator char();
@@ -69,9 +72,9 @@ struct variant
   operator long long();
   operator double();
   operator float();
-  
+
   operator std::string();
-  
+
   operator int() const;
   operator bool() const;
   operator char() const;
@@ -85,13 +88,13 @@ struct variant
   operator long long() const;
   operator double() const;
   operator float() const;
-  
+
   operator std::string() const;
-  
+
   variant();
   variant(const void *p);
   types_extrapolate_alldecc(variant)
-  
+
   types_extrapolate_alldec(variant& operator=)
   variant& operator=(const void* p);
   types_extrapolate_alldec(variant& operator+=)
@@ -99,13 +102,13 @@ struct variant
   types_extrapolate_alldec(variant& operator*=)
   types_extrapolate_alldec(variant& operator/=)
   types_extrapolate_alldec(variant& operator%=)
-  
+
   types_extrapolate_alldec(variant& operator<<=)
   types_extrapolate_alldec(variant& operator>>=)
   types_extrapolate_alldec(variant& operator&=)
   types_extrapolate_alldec(variant& operator|=)
   types_extrapolate_alldec(variant& operator^=)
-  
+
   #undef EVCONST
   #define EVCONST const
   types_extrapolate_alldec(variant operator+)
@@ -113,20 +116,20 @@ struct variant
   types_extrapolate_alldec(double  operator*)
   types_extrapolate_alldec(double  operator/)
   types_extrapolate_alldec(double  operator%)
-  
+
   types_extrapolate_alldec(long operator<<)
   types_extrapolate_alldec(long operator>>)
   types_extrapolate_alldec(long operator&)
   types_extrapolate_alldec(long operator|)
   types_extrapolate_alldec(long operator^)
-  
+
   #undef types_extrapolate_alldec
   #define types_extrapolate_alldec(prefix)\
    types_extrapolate_real_p  (prefix,;)\
    types_extrapolate_string_p(prefix,;)\
    prefix (const variant &x) const;\
    prefix (const var &x) const;
-  
+
   types_extrapolate_alldec(bool operator==)
   types_extrapolate_alldec(bool operator!=)
   types_extrapolate_alldec(bool operator>=)
@@ -135,14 +138,14 @@ struct variant
   types_extrapolate_alldec(bool operator<)
   #undef EVCONST
   #define EVCONST
-  
+
   char&     operator[] (int);
   variant&  operator++();
   double    operator++(int);
   variant&  operator--();
   double    operator--(int);
   variant&  operator*();
-  
+
   #undef EVCONST
   #define EVCONST const
   bool      operator!() EVCONST;
@@ -151,7 +154,7 @@ struct variant
   double    operator+() EVCONST;
   #undef EVCONST
   #define EVCONST
-  
+
   ~variant();
 };
 
@@ -163,139 +166,97 @@ struct variant
  types_extrapolate_string_p(prefix,;)\
  prefix (variant x);
 
-struct var
-{
-  void* values;
-  
-  private:
-    void initialize();
-    void cleanup();
-  public:
-  
-  operator variant&();
-  operator const variant&() const;
-  
-  operator int();
-  operator bool();
-  operator char();
-  operator long();
-  operator short();
-  operator unsigned();
-  operator unsigned char();
-  operator unsigned long();
-  operator unsigned short();
-  operator unsigned long long();
-  operator long long();
-  operator double();
-  operator float();
-  
-  operator std::string();
-  
-  operator int() const;
-  operator bool() const;
-  operator char() const;
-  operator long() const;
-  operator short() const;
-  operator unsigned() const;
-  operator unsigned char() const;
-  operator unsigned long() const;
-  operator unsigned short() const;
-  operator unsigned long long() const;
-  operator long long() const;
-  operator double() const;
-  operator float() const;
-  
-  operator std::string() const;
-  
-  var();
-  var(const var&);
-  var(variant value, size_t length, size_t height = 1);
-  types_extrapolate_alldec(var)
-  
-  types_extrapolate_alldec(variant& operator=)
-  var& operator= (const var&);
-  
-  #undef types_extrapolate_alldec
-  #define types_extrapolate_alldec(prefix)\
-   types_extrapolate_real_p  (prefix,;)\
-   types_extrapolate_string_p(prefix,;)\
-   prefix (const var& x) EVCONST;\
-   prefix (variant x) EVCONST;
-  
-  types_extrapolate_alldec(variant& operator+=)
-  types_extrapolate_alldec(variant& operator-=)
-  types_extrapolate_alldec(variant& operator*=)
-  types_extrapolate_alldec(variant& operator/=)
-  types_extrapolate_alldec(variant& operator%=)
-  
-  types_extrapolate_alldec(variant& operator<<=)
-  types_extrapolate_alldec(variant& operator>>=)
-  types_extrapolate_alldec(variant& operator&=)
-  types_extrapolate_alldec(variant& operator|=)
-  types_extrapolate_alldec(variant& operator^=)
-  
-  #undef EVCONST
-  #define EVCONST const
-  types_extrapolate_alldec(variant operator+)
-  types_extrapolate_alldec(double  operator-)
-  types_extrapolate_alldec(double  operator*)
-  types_extrapolate_alldec(double  operator/)
-  types_extrapolate_alldec(double  operator%)
-  
-  types_extrapolate_alldec(long operator<<)
-  types_extrapolate_alldec(long operator>>)
-  types_extrapolate_alldec(long operator&)
-  types_extrapolate_alldec(long operator|)
-  types_extrapolate_alldec(long operator^)
-  
-  #undef types_extrapolate_alldec
-  #define types_extrapolate_alldec(prefix)\
-   types_extrapolate_real_p  (prefix,;)\
-   types_extrapolate_string_p(prefix,;)\
-   prefix (const variant &x) EVCONST;\
-   prefix (const var& x) EVCONST;
-  
-  types_extrapolate_alldec(bool operator==)
-  types_extrapolate_alldec(bool operator!=)
-  types_extrapolate_alldec(bool operator>=)
-  types_extrapolate_alldec(bool operator<=)
-  types_extrapolate_alldec(bool operator>)
-  types_extrapolate_alldec(bool operator<)
-  #undef EVCONST
-  #define EVCONST
-  
-  variant&  operator++();
-  double    operator++(int);
-  variant&  operator--();
-  double    operator--(int);
-  
-  #undef EVCONST
-  #define EVCONST const
-  bool      operator!() EVCONST;
-  long      operator~() EVCONST;
-  double    operator-() EVCONST;
-  double    operator+() EVCONST;
-  #undef EVCONST
-  #define EVCONST
-  
-  variant& operator*  ();
-  variant& operator[] (int);
-  variant& operator() ();
-  variant& operator() (int);
-  variant& operator() (int,int);
-  
-  const variant& operator*  () const;
-  const variant& operator() () const;
-  const variant& operator[] (int) const;
-  const variant& operator() (int) const;
-  const variant& operator() (int,int) const;
+struct var : variant {
+  using variant::operator+;
+  using variant::operator-;
+  using variant::operator*;
+  using variant::operator/;
+  using variant::operator%;
+  using variant::operator<;
+  using variant::operator>;
+  using variant::operator<<;
+  using variant::operator>>;
+  using variant::operator|;
+  using variant::operator^;
+  using variant::operator!;
+  using variant::operator~;
+
+  using variant::operator+=;
+  using variant::operator-=;
+  using variant::operator*=;
+  using variant::operator/=;
+  using variant::operator%=;
+  using variant::operator<=;
+  using variant::operator>=;
+  using variant::operator<<=;
+  using variant::operator>>=;
+  using variant::operator|=;
+  using variant::operator^=;
+  using variant::operator!=;
+
+  lua_table<variant> array1d;
+  lua_table<lua_table<variant>> array2d;
+
+  var() {}
+  var(const var&) = default;
+  var(variant value, size_t length, size_t height = 1):
+      variant(value), array1d(value, length) {
+    for (size_t i = 1; i < height; ++i) array2d[i].fill(value, length);
+  }
+  template<typename T> var(const T &v): variant(v) {}
+
+  variant& operator*  () { return *this; }
+  variant& operator() () { return *this; }
+  variant& operator() (int ind) { return (*this)[ind]; }
+
+  variant& operator[] (int ind) {
+    if (!ind) return *this;
+    return array1d[ind];
+  }
+  variant& operator() (int ind_2d,int ind_1d) {
+    if (ind_2d) return array2d[ind_2d][ind_1d];
+    if (ind_1d) return array1d[ind_1d];
+    return *this;
+  }
+
+  const variant& operator*  () const { return *this; }
+  const variant& operator() () const { return *this; }
+  const variant& operator() (int ind) const { return (*this)[ind]; }
+
+  const variant& operator[] (int ind) const {
+    if (!ind) return *this;
+    return array1d[ind];
+  }
+  const variant& operator() (int ind_2d,int ind_1d) const {
+    if (ind_2d) return array2d[ind_2d][ind_1d];
+    if (ind_1d) return array1d[ind_1d];
+    return *this;
+  }
 
   //Calculate array lengths.
-  int array_len() const;
-  int array_height() const;
-  int array_len(int row) const;
-  
-  ~var();
+  int array_len() const { return array1d.max_index(); }
+  int array_height() const { return array2d.max_index(); }
+  int array_len(int row) const {
+    if (row) return array2d[row].max_index();
+    return array1d.max_index();
+  }
+
+  size_t dense_length() {
+    return array1d.dense_length();
+  }
+
+  const std::vector<variant> &dense_array_1d() {
+    *array1d = *this;
+    return array1d.dense_part();
+  }
+
+  template<typename T>
+  std::vector<T> to_vector() const {
+    return {array1d.dense_part().begin(),
+            array1d.dense_part().end()};
+  }
+
+  ~var() {}
 };
 
 
@@ -308,10 +269,10 @@ types_binary_assign_extrapolate_declare(*, const variant&)
 types_binary_assign_extrapolate_declare(/, const variant&)
 types_binary_assign_extrapolate_declare(%, const variant&)
 
-types_binary_assign_extrapolate_declare(<<, const variant&) 
-types_binary_assign_extrapolate_declare(>>, const variant&) 
-types_binary_assign_extrapolate_declare(&,  const variant&) 
-types_binary_assign_extrapolate_declare(|,  const variant&) 
+types_binary_assign_extrapolate_declare(<<, const variant&)
+types_binary_assign_extrapolate_declare(>>, const variant&)
+types_binary_assign_extrapolate_declare(&,  const variant&)
+types_binary_assign_extrapolate_declare(|,  const variant&)
 types_binary_assign_extrapolate_declare(^,  const variant&)
 
 
@@ -334,42 +295,6 @@ types_binary_extrapolate_alldecce(bool, operator<=, const variant&)
 types_binary_extrapolate_alldecce(bool, operator>,  const variant&)
 types_binary_extrapolate_alldecce(bool, operator<,  const variant&)
 
-
-/* Do the same for var
- *************************/
-
-types_binary_assign_extrapolate_declare(+, const var&)
-types_binary_assign_extrapolate_declare(-, const var&)
-types_binary_assign_extrapolate_declare(*, const var&)
-types_binary_assign_extrapolate_declare(/, const var&)
-types_binary_assign_extrapolate_declare(%, const var&)
-
-types_binary_assign_extrapolate_declare(<<, const var&) 
-types_binary_assign_extrapolate_declare(>>, const var&) 
-types_binary_assign_extrapolate_declare(&,  const var&) 
-types_binary_assign_extrapolate_declare(|,  const var&) 
-types_binary_assign_extrapolate_declare(^,  const var&)
-
-
-types_binary_extrapolate_alldecc(double, operator+, const var&)
-types_binary_extrapolate_alldecc(double, operator-, const var&)
-types_binary_extrapolate_alldecc(double, operator*, const var&)
-types_binary_extrapolate_alldecc(double, operator/, const var&)
-types_binary_extrapolate_alldecc(double, operator%, const var&)
-
-types_binary_bitwise_extrapolate_alldecc(operator<<, const var&)
-types_binary_bitwise_extrapolate_alldecc(operator>>, const var&)
-types_binary_bitwise_extrapolate_alldecc(operator&,  const var&)
-types_binary_bitwise_extrapolate_alldecc(operator|,  const var&)
-types_binary_bitwise_extrapolate_alldecc(operator^,  const var&)
-
-types_binary_extrapolate_alldecce(bool, operator==, const var&)
-types_binary_extrapolate_alldecce(bool, operator!=, const var&)
-types_binary_extrapolate_alldecce(bool, operator>=, const var&)
-types_binary_extrapolate_alldecce(bool, operator<=, const var&)
-types_binary_extrapolate_alldecce(bool, operator>,  const var&)
-types_binary_extrapolate_alldecce(bool, operator<,  const var&)
-
 #undef EVCONST
 #define EVCONST
 
@@ -380,23 +305,26 @@ types_binary_extrapolate_alldecce(bool, operator<,  const var&)
 #undef types_extrapolate_alldecc
 
 #ifdef INCLUDED_FROM_SHELLMAIN
-#define string(VALUE_TO_MAKE_A_STRING_OUT_OF...) toString(VALUE_TO_MAKE_A_STRING_OUT_OF)
+#define string(...) toString(__VA_ARGS__)
 #endif
 
 #undef unsigll
 
-namespace enigma_user {
-  enum {
+enum {
     ty_undefined = -1,
     ty_real = 0,
     ty_string = 1,
     ty_pointer = 2
-  };
+};
 
-  bool is_undefined(variant var);
-  bool is_real(variant val);
-  bool is_string(variant val);
-  bool is_ptr(variant var);
-}
+bool is_undefined(variant var);
+bool is_real(variant val);
+bool is_string(variant val);
+bool is_ptr(variant var);
+
+} //enigma_user
+
+using enigma_user::variant;
+using enigma_user::var;
 
 #endif //ENIGMA_VAR4_H

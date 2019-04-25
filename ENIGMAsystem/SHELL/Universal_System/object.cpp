@@ -16,15 +16,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <map>
-#include <math.h>
-#include <string>
+
 #include "var4.h"
 #include "reflexive_types.h"
-
 #include "object.h"
 #include "libEGMstd.h"
-
 
 #ifdef DEBUG_MODE
   #include "instance_system.h"
@@ -32,11 +28,15 @@
   #include <Widget_Systems/widgets_mandatory.h> // show_error
 #endif
 
+#include <map>
+#include <math.h>
+#include <string>
+#include <vector>
+
 namespace enigma
 {
     extern int maxid;
     objectstruct** objectdata;
-    int instancecount = 0;
     int id_current =0;
 
     #ifdef DEBUG_MODE
@@ -76,7 +76,7 @@ namespace enigma
     object_basic::~object_basic() {}
     bool object_basic::can_cast(int obj) const { return false; }
 
-    extern objectstruct objs[];
+    extern std::vector<objectstruct> objs;
     extern size_t object_idmax;
 
     void objectdata_load()
