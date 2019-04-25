@@ -113,10 +113,12 @@ void graphics_state_flush_lighting() {
   d3ddev->SetRenderState(D3DRS_AMBIENT, *d3dLightingAmbient);
 
   for (int i = 0; i < 8; ++i) {
-    d3ddev->LightEnable(i, d3dLightEnabled[i]);
-    if (!d3dLightEnabled[i]) continue; // don't bother updating disabled lights
+    const bool enabled = (i<d3dLightsActive);
 
-    const Light& light = d3dLights[i];
+    d3ddev->LightEnable(i, enabled);
+    if (!enabled) continue; // don't bother updating disabled lights
+
+    const Light& light = get_active_light(i);
 
     D3DLIGHT9 d3dLight = { };
     d3dLight.Type = light.directional ? D3DLIGHT_DIRECTIONAL : D3DLIGHT_POINT;

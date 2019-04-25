@@ -73,13 +73,15 @@ void graphics_state_flush_lighting() {
   // define lights with respect to view matrix but not world
   glLoadMatrixf(glm::value_ptr(enigma::view));
   for (int i = 0; i < 8; ++i) {
-    (d3dLightEnabled[i]?glEnable:glDisable)(GL_LIGHT0+i);
-    if (!d3dLightEnabled[i]) continue; // don't bother updating disabled lights
+    const bool enabled = (i<d3dLightsActive);
 
-    const Light& light = d3dLights[i];
+    (enabled?glEnable:glDisable)(GL_LIGHT0+i);
+    if (!enabled) continue; // don't bother updating disabled lights
+
+    const Light& light = get_active_light(i);
 
     const float posFactor = light.directional ? -1.0f : 1.0f;
-    const float pos[4] = {posFactor * (float)-light.x, posFactor * (float)light.y, posFactor * (float)light.z, light.directional ? 0.0f : 1.0f},
+    const float pos[4] = {posFactor * (float)light.x, posFactor * (float)light.y, posFactor * (float)light.z, light.directional ? 0.0f : 1.0f},
                 color[4] = {float(COL_GET_Rf(light.color)), float(COL_GET_Gf(light.color)), float(COL_GET_Bf(light.color)), 1.0f};
 
     glLightfv(GL_LIGHT0+i, GL_POSITION, pos);

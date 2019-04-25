@@ -25,6 +25,17 @@
 
 #include "Universal_System/roomsystem.h" // for view variables
 
+#include <unordered_map>
+#include <vector>
+#include <algorithm>
+
+namespace {
+
+std::unordered_map<int,enigma::Light> d3dLights;
+std::vector<int> d3dLightsEnabled;
+
+} // namespace anonymous
+
 namespace enigma {
 
 bool d3dMode=false, d3dHidden=false, d3dClipPlane=false, d3dZWriteEnable=true,
@@ -37,8 +48,14 @@ int d3dFogMode=enigma_user::rs_linear, d3dFogHint=enigma_user::rs_nicest;
 float d3dFogStart=0.0f, d3dFogEnd=0.0f, d3dFogDensity=0.0f;
 float d3dFogColor[3]={0.0f,0.0f,0.0f};
 
-Light d3dLights[8];
-bool d3dLightEnabled[8]={false};
+int d3dLightsActive = 0;
+const Light& get_active_light(int id) {
+  static const Light null_light;
+  if (id >= d3dLightsActive) return null_light;
+  auto it = d3dLights.find(d3dLightsEnabled[id]);
+  if (it == d3dLights.end()) return null_light;
+  return it->second;
+}
 
 bool d3dStencilTest = false;
 unsigned int d3dStencilMask = 0x0;
@@ -181,21 +198,23 @@ void d3d_light_define_ambient(int col) {
 
 void d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col) {
   enigma::draw_set_state_dirty();
-  enigma::d3dLights[id].x = dx;
-  enigma::d3dLights[id].y = dy;
-  enigma::d3dLights[id].z = dz;
-  enigma::d3dLights[id].color = col;
-  enigma::d3dLights[id].directional = true;
+  auto& light = d3dLights[id];
+  light.x = dx;
+  light.y = dy;
+  light.z = dz;
+  light.color = col;
+  light.directional = true;
 }
 
 void d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col) {
   enigma::draw_set_state_dirty();
-  enigma::d3dLights[id].x = x;
-  enigma::d3dLights[id].y = y;
-  enigma::d3dLights[id].z = z;
-  enigma::d3dLights[id].range = range;
-  enigma::d3dLights[id].color = col;
-  enigma::d3dLights[id].directional = false;
+  auto& light = d3dLights[id];
+  light.x = x;
+  light.y = y;
+  light.z = z;
+  light.range = range;
+  light.color = col;
+  light.directional = false;
 }
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a) {
@@ -215,8 +234,17 @@ void d3d_light_shininess(int facemode, int shine) {
 }
 
 void d3d_light_enable(int id, bool enable) {
+  if (enable && enigma::d3dLightsActive >= 8) return;
+  const auto& it = std::find(d3dLightsEnabled.begin(), d3dLightsEnabled.end(), id);
+  if (enable) {
+    if (it != d3dLightsEnabled.end()) return;
+    d3dLightsEnabled.push_back(id);
+  } else {
+    if (it == d3dLightsEnabled.end()) return;
+    d3dLightsEnabled.erase(it);
+  }
   enigma::draw_set_state_dirty();
-  enigma::d3dLightEnabled[id] = enable;
+  enigma::d3dLightsActive = d3dLightsEnabled.size();
 }
 
 void d3d_stencil_start_mask() {

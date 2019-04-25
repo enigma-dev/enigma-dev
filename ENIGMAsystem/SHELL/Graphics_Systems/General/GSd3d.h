@@ -21,7 +21,6 @@
 
 #include "Universal_System/scalar.h"
 #include <string>
-#include <unordered_map>
 
 namespace enigma {
 
@@ -44,8 +43,8 @@ struct Light {
   int color=0;
 };
 
-extern Light d3dLights[8];
-extern bool d3dLightEnabled[8];
+extern int d3dLightsActive;
+const Light& get_active_light(int id);
 
 extern bool d3dStencilTest;
 extern unsigned int d3dStencilMask;

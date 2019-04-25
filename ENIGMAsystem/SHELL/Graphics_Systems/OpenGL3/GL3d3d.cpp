@@ -75,7 +75,7 @@ void graphics_state_flush_samplers() {
   }
 }
 
-void graphics_state_flush_lighting() {
+void graphics_state_flush_lighting(const glm::mat4& mv_matrix, const glm::mat3& normal_matrix) {
   const auto current_shader = enigma::shaderprograms[enigma::bound_shader];
 
   enigma_user::glsl_uniform4fv(current_shader->uni_ambient_color, 1, d3dLightingAmbient);
@@ -90,12 +90,8 @@ void graphics_state_flush_lighting() {
   enigma_user::glsl_uniform4fv(current_shader->uni_material_specular, 1, material_specular);
   enigma_user::glsl_uniformf(current_shader->uni_material_shininess, material_shininess);
 
-  int activeLights = 0;
-  for (int i = 0; i < 8; ++i) {
-    if (!d3dLightEnabled[i]) continue; // don't bother updating disabled lights
-    ++activeLights;
-
-    const Light& light = d3dLights[i];
+  for (int i = 0; i < d3dLightsActive; ++i) {
+    const Light& light = get_active_light(i);
 
     const float posFactor = light.directional ? -1.0f : 1.0f;
     const float pos[4] = {posFactor * (float)light.x, posFactor * (float)light.y, posFactor * (float)light.z, light.directional ? 0.0f : 1.0f},
@@ -103,17 +99,27 @@ void graphics_state_flush_lighting() {
                 specular[4] = {0.0,0.0,0.0,0.0},
                 ambient[4] = {0.0,0.0,0.0,0.0};
 
+    float tpos[4];
+    if (light.directional) {
+      glm::vec3 lpos_eyespace = normal_matrix * glm::vec3(pos[0],pos[1],pos[2]);
+      tpos[0] = lpos_eyespace.x, tpos[1] = lpos_eyespace.y, tpos[2] = lpos_eyespace.z;
+    } else {
+      glm::vec4 lpos_eyespace = mv_matrix * glm::vec4(pos[0],pos[1],pos[2],1.0f);
+      tpos[0] = lpos_eyespace.x, tpos[1] = lpos_eyespace.y, tpos[2] = lpos_eyespace.z;
+    }
+    tpos[3] = pos[3];
+
     enigma_user::glsl_uniform4fv(current_shader->uni_light_diffuse[i], 1, diffuse);
     enigma_user::glsl_uniform4fv(current_shader->uni_light_ambient[i], 1, ambient);
     enigma_user::glsl_uniform4fv(current_shader->uni_light_specular[i], 1, specular);
-    enigma_user::glsl_uniform4fv(current_shader->uni_light_position[i], 1, pos);
+    enigma_user::glsl_uniform4fv(current_shader->uni_light_position[i], 1, tpos);
 
     if (light.directional) continue; // only point lights have range falloff and attenuation
     enigma_user::glsl_uniformf(current_shader->uni_light_cAttenuation[i], 1.0);
     enigma_user::glsl_uniformf(current_shader->uni_light_lAttenuation[i], 0.0);
     enigma_user::glsl_uniformf(current_shader->uni_light_qAttenuation[i], 8.0f/(light.range*light.range));
   }
-  enigma_user::glsl_uniformi(current_shader->uni_lights_active, activeLights);
+  enigma_user::glsl_uniformi(current_shader->uni_lights_active, d3dLightsActive);
 }
 
 void graphics_state_flush_stencil() {
@@ -147,22 +153,23 @@ void graphics_state_flush() {
 
   graphics_state_flush_samplers();
 
-  enigma_user::glsl_uniformi(current_shader->uni_lightEnable, d3dLighting);
-  if (d3dLighting) graphics_state_flush_lighting();
-
   (d3dStencilTest?glEnable:glDisable)(GL_STENCIL_TEST);
   if (d3dStencilTest) graphics_state_flush_stencil();
 
   //Send transposed (done by GL because of "true" in the function below) matrices to shader
-  glm::mat4 mv_matrix = view * world;
-  glm::mat4 mvp_matrix = projection * mv_matrix;
+  const glm::mat4 mv_matrix = view * world;
+  const glm::mat4 mvp_matrix = projection * mv_matrix;
+  const glm::mat3 normal_matrix = glm::transpose(glm::inverse(glm::mat3(mv_matrix)));
   glsl_uniform_matrix4fv_internal(current_shader->uni_modelMatrix,  1, glm::value_ptr(glm::transpose(world)));
   glsl_uniform_matrix4fv_internal(current_shader->uni_viewMatrix,  1, glm::value_ptr(glm::transpose(view)));
   glsl_uniform_matrix4fv_internal(current_shader->uni_projectionMatrix,  1, glm::value_ptr(glm::transpose(projection)));
 
   glsl_uniform_matrix4fv_internal(current_shader->uni_mvMatrix,  1, glm::value_ptr(glm::transpose(mv_matrix)));
   glsl_uniform_matrix4fv_internal(current_shader->uni_mvpMatrix,  1, glm::value_ptr(glm::transpose(mvp_matrix)));
-  glsl_uniform_matrix3fv_internal(current_shader->uni_normalMatrix,  1, glm::value_ptr(glm::mat3(glm::inverse(mv_matrix))));
+  glsl_uniform_matrix3fv_internal(current_shader->uni_normalMatrix,  1, glm::value_ptr(normal_matrix));
+
+  enigma_user::glsl_uniformi(current_shader->uni_lightEnable, d3dLighting);
+  if (d3dLighting) graphics_state_flush_lighting(mv_matrix, normal_matrix);
 }
 
 } // namespace enigma
