@@ -15,14 +15,20 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <stdlib.h>     /* malloc, free, rand */
-#include <unordered_map>
-#include <math.h>
-
-using namespace std;
+#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
+#include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GStiles.h"
+#include "Graphics_Systems/General/GSvertex.h"
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GSstdraw.h"
+#include "Graphics_Systems/General/GSsprite.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSblend.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Collision_Systems/collision_types.h"
 #include "Universal_System/shaderstruct.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
@@ -34,32 +40,27 @@ using namespace std;
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
-#include "Collision_Systems/collision_types.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
-#include <algorithm>
-#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
-#include "Graphics_Systems/General/GSprimitives.h"
-#include "../General/GSbackground.h"
-#include "../General/GStextures.h"
-#include "../General/GStiles.h"
-#include "../General/GSvertex.h"
-#include "../General/GSsurface.h"
-#include "../General/GSstdraw.h"
-#include "../General/GSsprite.h"
-#include "../General/GSscreen.h"
-#include "../General/GSd3d.h"
-#include "../General/GSblend.h"
-#include "../General/GSmatrix.h"
-#include "../General/GScolors.h"
+#include "Universal_System/estring.h"
 #include "Platforms/platforms_mandatory.h"
-#include <floatcomp.h>
+
 #include <vector>
 #include <limits>
 #include <map>
 #include <list>
 #include <stack>
-#include "Universal_System/estring.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <unordered_map>
+#include <algorithm>
+
+#include <stdlib.h>     /* malloc, free, rand */
+#include <floatcomp.h>
+#include <math.h>
+
+using namespace std;
 
 //Below are all functions concerned with drawing anything, or that are tied to
 //the GPU (such as surfaces) and as such have no business in a headless mode
@@ -76,7 +77,7 @@ namespace enigma
 	void graphics_delete_texture(int texid){}
 	unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight){return NULL;}
 
-	void graphics_set_matrix(int type) {}
+	void graphics_state_flush() {}
 
 	void graphics_delete_vertex_buffer_peer(int buffer) {}
 	void graphics_delete_index_buffer_peer(int buffer) {}
@@ -97,18 +98,9 @@ namespace enigma_user
 	void texture_set_priority(int texid, double prio){}
 	void texture_set_enabled(bool enable){}
 	void texture_set_blending(bool enable){}
-	void texture_set_stage(int stage, int texid){}
-	void texture_reset(){}
-	void texture_set_interpolation_ext(int sampler, bool enable){}
-	void texture_set_repeat_ext(int sampler, bool repeat){}
-	void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw){}
-	void texture_set_border_ext(int sampler, int r, int g, int b, double a){}
-	void texture_set_filter_ext(int sampler, int filter){}
-	void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel){}
 	bool texture_mipmapping_supported(){return false;}
 	bool texture_anisotropy_supported(){return false;}
 	float texture_anisotropy_maxlevel(){return 0;}
-	void texture_anisotropy_filter(int sampler, gs_scalar levels){}
 
 	bool surface_is_supported(){return false;}
 	int surface_create(int width, int height, bool depthbuffer, bool, bool){return -1;}
@@ -133,13 +125,6 @@ namespace enigma_user
 
 	int draw_get_msaa_maxlevel(){return 0;}
 	bool draw_get_msaa_supported(){return false;}
-	void draw_set_msaa_enabled(bool enable){}
-	void draw_enable_alphablend(bool enable){}
-	bool draw_get_alpha_test(){return false;}
-	unsigned draw_get_alpha_test_ref_value(){return 0;}
-	void draw_set_alpha_test(bool enable){}
-	void draw_set_alpha_test_ref_value(unsigned val){}
-	void draw_set_line_pattern(int pattern, int scale){}
 
 	int draw_getpixel(int x,int y){return -1;}
 	int draw_getpixel_ext(int x,int y){return -1;}
@@ -179,48 +164,16 @@ namespace enigma_user
 	extern int window_get_region_width();
 	extern int window_get_region_height();
 
-	void screen_init(){}
 	int screen_save(string filename){return -1;}
 	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h){return -1;}
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
-	void display_set_gui_size(unsigned int width, unsigned int height){}
-
-	void d3d_set_lighting(bool enable){}
-
-	void d3d_set_fog(bool enable, int color, double start, double end){}
-	void d3d_set_fog_enabled(bool enable){}
-	void d3d_set_fog_mode(int mode){}
-	void d3d_set_fog_hint(int mode){}
-	void d3d_set_fog_color(int color){}
-	void d3d_set_fog_start(double start){}
-	void d3d_set_fog_end(double end){}
-	void d3d_set_fog_density(double density){}
-
-	void d3d_set_fill_mode(int fill){}
-	void d3d_set_line_width(float value){}
-	void d3d_set_point_size(float value){}
-	void d3d_set_depth_operator(int mode){}
-	void d3d_set_depth(double dep){}
-	void d3d_set_shading(bool smooth){}
-	void d3d_set_clip_plane(bool enable){}
-
-	bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col){return false;}
-	bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col){return false;}
-	bool d3d_light_define_specularity(int id, int r, int g, int b, double a){return false;}
-	void d3d_light_specularity(int facemode, int r, int g, int b, double a){}
-	bool d3d_light_set_ambient(int id, int r, int g, int b, double a){return false;}
-	bool d3d_light_set_specularity(int id, int r, int g, int b, double a){return false;}
-	void d3d_light_shininess(int facemode, int shine){}
-	void d3d_light_define_ambient(int col){}
-	bool d3d_light_enable(int id, bool enable){return false;}
-
-	void d3d_stencil_start_mask(){}
-	void d3d_stencil_continue_mask(){}
-	void d3d_stencil_use_mask(){}
-	void d3d_stencil_end_mask(){}
 
 	void draw_clear_alpha(int col,float alpha){}
 	void draw_clear(int col){}
+	void d3d_clear_depth(double value){}
+	void d3d_stencil_clear_value(int value) {}
+	void d3d_stencil_clear() {}
+	void d3d_set_software_vertex_processing(bool software){}
 
 	extern int window_get_region_height_scaled();
 	int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload){return -1;}
