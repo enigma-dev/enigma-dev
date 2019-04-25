@@ -118,14 +118,14 @@ size_t lang_CPP::definition_overload_count(jdi::definition *d) {
 
 #include "languages/lang_CPP.h"
 definition* lang_CPP::find_typename(string n) {
-  definition* d = main_context->get_global()->look_up(n);
+  definition* d = look_up(n);
   if (!d) return NULL;
   if (d->flags & DEF_TYPENAME) return d;
   return NULL;
 }
 
 bool lang_CPP::global_exists(string n) {
-  definition* d = main_context->get_global()->look_up(n);
+  definition* d = look_up(n);
   return d;
 }
 

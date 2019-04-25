@@ -17,10 +17,15 @@
 
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "Universal_System/image_formats.h"
+#include "Universal_System/nlpo2.h"
+#include "Universal_System/background_internal.h"
+#include "Universal_System/sprites_internal.h"
 #include "Universal_System/roomsystem.h"
 #include "Platforms/General/PFwindow.h"
 
@@ -31,8 +36,7 @@ using namespace std;
 using namespace enigma;
 using namespace enigma::dx11;
 
-namespace enigma
-{
+namespace enigma {
 
 void scene_begin() {
 
@@ -42,46 +46,9 @@ void scene_end() {
 
 }
 
-}
+} // namespace enigma
 
-namespace enigma_user
-{
-
-void screen_init()
-{
-  enigma::gui_width = window_get_region_width();
-  enigma::gui_height = window_get_region_height();
-
-  m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-  if (!view_enabled)
-  {
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
-  } else {
-    for (view_current = 0; view_current < 7; view_current++) {
-      if (view_visible[(int)view_current]) {
-        int vc = (int)view_current;
-
-        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
-        d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
-        break;
-      }
-    }
-  }
-}
-
-int screen_save(string filename)
-{
-  draw_batch_flush(batch_flush_deferred);
-  return -1; //TODO: implement
-}
-
-int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h)
-{
-  draw_batch_flush(batch_flush_deferred);
-  return -1; //TODO: implement
-}
+namespace enigma_user {
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
   draw_batch_flush(batch_flush_deferred);
@@ -105,10 +72,33 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   m_deviceContext->RSSetViewports(1, &viewport);
 }
 
-//TODO: These need to be in some kind of General
-void display_set_gui_size(unsigned int width, unsigned int height) {
-  enigma::gui_width = width;
-  enigma::gui_height = height;
+int screen_save(string filename)
+{
+  draw_batch_flush(batch_flush_deferred);
+  return -1; //TODO: implement
 }
 
+int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h)
+{
+  draw_batch_flush(batch_flush_deferred);
+  return -1; //TODO: implement
 }
+
+int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
+{
+  return -1; //TODO: implement
+}
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
+  return -1; //TODO: implement
+}
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
+  return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
+}
+
+void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
+
+}
+
+} // namespace enigma_user

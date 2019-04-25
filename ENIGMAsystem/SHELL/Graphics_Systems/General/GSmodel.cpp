@@ -26,6 +26,7 @@
 #include "GScolors.h"
 #include "GSmatrix.h"
 #include "GSmatrix_impl.h"
+#include "GSstdraw.h"
 #include "GStextures.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
@@ -205,7 +206,7 @@ void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
   // we have to create a special translation here so that it occurs
   // before any of the user's transformations took place
   enigma::world = glm::translate(enigma::world, glm::vec3(x, y, z));
-  enigma::graphics_set_matrix(matrix_world);
+  enigma::draw_set_state_dirty();
 
   d3d_model_draw(id);
 

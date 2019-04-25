@@ -16,7 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GLSamplerState.h"
 #include "Graphics_Systems/OpenGL/GLtextures_impl.h"
 #include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GStextures.h"
@@ -29,20 +28,6 @@
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
-
-namespace {
-
-enigma::Sampler samplers[8];
-
-// use this helper to change the samplers state so that
-// the texture parameter is set to the texture bound
-// on the same stage as the sampler
-enigma::Sampler* get_sampler(int id) {
-  glActiveTexture(GL_TEXTURE0 + id);
-  return &samplers[id];
-}
-
-} // namespace anonymous
 
 namespace enigma {
 
@@ -137,97 +122,6 @@ void texture_set_blending(bool enable)
   (enable?glEnable:glDisable)(GL_BLEND);
 }
 
-void texture_set_stage(int stage, int texid) {
-  draw_batch_flush(batch_flush_deferred);
-  if (texid == -1) { texture_reset(); return; }
-  auto samplerState = &samplers[stage];
-  if (samplerState->bound_texture != texid) {
-    glActiveTexture(GL_TEXTURE0 + stage);
-    samplerState->bound_texture = texid;
-    glBindTexture(GL_TEXTURE_2D, enigma::get_texture_peer(texid));
-    // synchronize the new texture with the current state of the sampler
-    samplerState->ApplyState();
-  }
-}
-
-void texture_reset() {
-  draw_batch_flush(batch_flush_deferred);
-  glActiveTexture(GL_TEXTURE0);
-  samplers[0].bound_texture = -1;
-  glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void texture_set_interpolation_ext(int sampler, bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  auto samplerState = get_sampler(sampler);
-  samplerState->min = enable?GL_LINEAR:GL_NEAREST;
-  samplerState->mag = enable?GL_LINEAR:GL_NEAREST;
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, samplerState->min);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, samplerState->mag);
-}
-
-void texture_set_repeat_ext(int sampler, bool repeat)
-{
-  draw_batch_flush(batch_flush_deferred);
-  auto samplerState = get_sampler(sampler);
-  samplerState->wrapu = repeat, samplerState->wrapv = repeat, samplerState->wrapw = repeat;
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
-}
-
-void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
-{
-  draw_batch_flush(batch_flush_deferred);
-  auto samplerState = get_sampler(sampler);
-  samplerState->wrapu = wrapu, samplerState->wrapv = wrapv, samplerState->wrapw = wrapw;
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP);
-}
-
-void texture_set_border_ext(int sampler, int r, int g, int b, double a)
-{
-  draw_batch_flush(batch_flush_deferred);
-  auto samplerState = get_sampler(sampler);
-  samplerState->bordercolor[0] = r;
-  samplerState->bordercolor[1] = g;
-  samplerState->bordercolor[2] = b;
-  samplerState->bordercolor[3] = int(a);
-  glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, samplerState->bordercolor);
-}
-
-void texture_set_filter_ext(int sampler, int filter)
-{
-  draw_batch_flush(batch_flush_deferred);
-  auto samplerState = get_sampler(sampler);
-  if (filter == tx_trilinear) {
-    samplerState->min = GL_LINEAR_MIPMAP_LINEAR;
-    samplerState->mag = GL_LINEAR;
-  } else if (filter == tx_bilinear) {
-    samplerState->min = GL_LINEAR_MIPMAP_NEAREST;
-    samplerState->mag = GL_LINEAR;
-  } else if (filter == tx_nearest) {
-    samplerState->min = GL_NEAREST_MIPMAP_NEAREST;
-    samplerState->mag = GL_NEAREST;
-  } else {
-    samplerState->min = GL_NEAREST;
-    samplerState->mag = GL_NEAREST;
-  }
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, samplerState->min);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, samplerState->mag);
-}
-
-void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel)
-{
-  draw_batch_flush(batch_flush_deferred);
-  auto samplerState = get_sampler(sampler);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, samplerState->minlod = minlod);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, samplerState->maxlod = maxlod);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, samplerState->maxlevel = maxlevel);
-}
-
 bool texture_mipmapping_supported()
 {
   return strstr((char*)glGetString(GL_EXTENSIONS),
@@ -245,13 +139,6 @@ float texture_anisotropy_maxlevel()
   float maximumAnisotropy;
   glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maximumAnisotropy);
   return maximumAnisotropy;
-}
-
-void texture_anisotropy_filter(int sampler, gs_scalar levels)
-{
-  draw_batch_flush(batch_flush_deferred);
-  samplers[sampler].anisotropy = levels;
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
 }
 
 } // namespace enigma_user
