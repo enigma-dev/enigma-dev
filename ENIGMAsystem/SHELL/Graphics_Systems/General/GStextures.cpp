@@ -90,6 +90,7 @@ gs_scalar texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
+  if (enigma::samplers[stage].texture == texid) return;
   enigma::draw_set_state_dirty();
   enigma::samplers[stage].texture = texid;
 }
@@ -99,6 +100,7 @@ int texture_get_stage(int stage) {
 }
 
 void texture_reset() {
+  if (enigma::samplers[0].texture == -1) return;
   enigma::draw_set_state_dirty();
   enigma::samplers[0].texture = -1;
 }
