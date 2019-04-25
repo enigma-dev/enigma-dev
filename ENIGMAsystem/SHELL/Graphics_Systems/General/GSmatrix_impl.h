@@ -39,8 +39,6 @@ namespace enigma {
 
 extern glm::mat4 world, view, projection;
 
-void graphics_set_matrix(int type);
-
 } // namespace enigma
 
 #endif // ENIGMA_GSMATRIX_IMPL_H

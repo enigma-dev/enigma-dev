@@ -27,9 +27,6 @@
 namespace enigma
 {
   extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
 }
 
 #if COLORSLIB
@@ -48,4 +45,3 @@ namespace enigma
     #include "../General/GSsurface.h"
 #endif
 #include "../General/GSscreen.h"
-
