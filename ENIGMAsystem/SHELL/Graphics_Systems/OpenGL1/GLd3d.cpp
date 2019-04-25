@@ -113,7 +113,6 @@ void graphics_state_flush() {
   glLineStipple(lineStippleScale,lineStipplePattern);
 
   (msaaEnabled?glEnable:glDisable)(GL_MULTISAMPLE);
-  (d3dLighting?glEnable:glDisable)(GL_ALPHA_TEST);
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glDepthFunc(depthoperators[d3dDepthOperator]);
   glDepthMask(d3dZWriteEnable);
