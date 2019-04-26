@@ -38,7 +38,7 @@
 #include "generic_args.h"
 
 #ifndef INCLUDED_FROM_SHELLMAIN
-#error ln2math and stop including this damn header.
+//#error ln2math and stop including this damn header.
 #endif
 
 #include "math_consts.h"
