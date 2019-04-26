@@ -64,6 +64,7 @@ namespace enigma_user
   gs_scalar texture_get_texel_height(int texid);
   void texture_set_priority(int texid, double prio);
   void texture_set_enabled(bool enable);
+  void texture_set_blending(bool enable);
   void texture_set(int texid);
   void texture_set_stage(int stage, int texid);
   int texture_get();
@@ -71,7 +72,6 @@ namespace enigma_user
   #define texture_set(texid) texture_set_stage(0, texid)
   #define texture_get(texid) texture_get_stage(0)
   void texture_reset();
-  void texture_set_blending(bool enable);
 
   void texture_set_repeat(bool repeat);
   void texture_set_repeat_ext(int sampler, bool repeat);

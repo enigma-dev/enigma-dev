@@ -128,16 +128,6 @@ void texture_set_priority(int texid, double prio)
   // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
 }
 
-void texture_set_enabled(bool enable)
-{
-
-}
-
-void texture_set_blending(bool enable)
-{
-
-}
-
 bool texture_mipmapping_supported()
 {
   return false; //TODO: implement

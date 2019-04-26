@@ -215,18 +215,6 @@ void texture_set_priority(int texid, double prio)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
 }
 
-void texture_set_enabled(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  (enable?glEnable:glDisable)(GL_TEXTURE_2D);
-}
-
-void texture_set_blending(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  (enable?glEnable:glDisable)(GL_BLEND);
-}
-
 bool texture_mipmapping_supported()
 {
   return strstr((char*)glGetString(GL_EXTENSIONS),

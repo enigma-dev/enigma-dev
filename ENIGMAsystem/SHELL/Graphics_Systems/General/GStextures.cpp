@@ -105,6 +105,10 @@ void texture_reset() {
   enigma::samplers[0].texture = -1;
 }
 
+void texture_set_enabled(bool enable){}
+
+void texture_set_blending(bool enable){}
+
 void texture_set_interpolation_ext(int sampler, bool enable) {
   enigma::draw_set_state_dirty();
   enigma::samplers[sampler].interpolate = enable;
