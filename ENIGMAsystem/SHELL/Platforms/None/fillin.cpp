@@ -20,10 +20,7 @@
 **/
 
 #include "Platforms/platforms_mandatory.h"
-#include "Platforms/General/PFmain.h"
-#include "Platforms/General/PFwindow.h"
-#include "Platforms/General/PFfilemanip.h"
-#include "Platforms/General/PFsystem.h"
+#include "Platforms/General/include.h"
 
 #include "Universal_System/roomsystem.h"
 
