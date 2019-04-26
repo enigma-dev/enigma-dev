@@ -96,8 +96,6 @@ namespace enigma_user
 	void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {}
 
 	void texture_set_priority(int texid, double prio){}
-	void texture_set_enabled(bool enable){}
-	void texture_set_blending(bool enable){}
 	bool texture_mipmapping_supported(){return false;}
 	bool texture_anisotropy_supported(){return false;}
 	float texture_anisotropy_maxlevel(){return 0;}
