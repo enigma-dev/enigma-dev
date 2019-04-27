@@ -37,6 +37,9 @@ extern string shader_get_name(int i);
 } // namespace enigma_user
 
 namespace enigma {
+  bool graphics_opengl_core = true;
+  int graphics_opengl_major = 3, graphics_opengl_minor = 3;
+
   unsigned default_shader;
   unsigned main_shader;
   unsigned bound_shader;

@@ -19,3 +19,12 @@
 // something more elegant.          -Josh
 
 #include <GL/glew.h>
+
+namespace enigma {
+
+// whether to create a core or compatibility context
+extern bool graphics_opengl_core;
+// the major and minor version numbers of the context
+extern int graphics_opengl_major, graphics_opengl_minor;
+
+}
