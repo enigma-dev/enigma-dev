@@ -22,12 +22,6 @@ int frames_count = 0;
 unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
 
-long clamp(long value, long min, long max) {
-  if (value < min) return min;
-  if (value > max) return max;
-  return value;
-}
-
 int gameWait() {
   if (enigma_user::os_is_paused()) {
     if (pausedSteps < 1) {

@@ -149,6 +149,15 @@ gtest_assert_eq(min(-1, -2.0, -3.0, -4, -2.5),  -4);
 gtest_assert_eq_eps(lengthdir_x(10, 60), 5);
 gtest_assert_eq_eps(lengthdir_y(10, -30), 5);
 
+// Tests for clamping values in range
+gtest_assert_eq(clamp(2, 0, 1), 1);
+gtest_assert_eq(clamp(1, 0, 1), 1);
+gtest_assert_eq(clamp(0.5, 0, 1), 0.5);
+gtest_assert_eq(clamp(0, 0, 1), 0);
+gtest_assert_eq(clamp(-0.1, 0, 1), 0);
+gtest_assert_eq(clamp(-1, 0, 1), 0);
+gtest_assert_eq(clamp(-2, 0, 1), 0);
+
 // A more complicated helper, angle_difference
 gtest_assert_eq(angle_difference(359, 1), -2);
 gtest_assert_eq(angle_difference(1, 359), +2);

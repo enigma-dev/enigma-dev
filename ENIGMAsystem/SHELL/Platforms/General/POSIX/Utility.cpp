@@ -1,5 +1,7 @@
 #include "Platforms/General/PFmain.h"
 
+#include "Universal_System/mathnc.h" // enigma_user::clamp
+
 #include <time.h> //CLOCK_MONOTONIC
 #include <sys/types.h>     //getpid
 #include <unistd.h>        //usleep
@@ -38,7 +40,7 @@ int updateTimer() {
   {
     long passed_mcs = (time_current.tv_sec - time_offset.tv_sec) * 1000000 +
                       (time_current.tv_nsec / 1000 - +time_offset.tv_nsec / 1000);
-    passed_mcs = clamp(passed_mcs, 0, 1000000);
+    passed_mcs = enigma_user::clamp(passed_mcs, 0, 1000000);
     if (passed_mcs >= 1000000) {  // Handle resetting.
 
       enigma_user::fps = frames_count;
@@ -54,7 +56,7 @@ int updateTimer() {
   if (current_room_speed > 0) {
     spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec) * 1000000 +
                 (time_current.tv_nsec / 1000 - time_offset_slowing.tv_nsec / 1000);
-    spent_mcs = clamp(spent_mcs, 0, 1000000);
+    spent_mcs = enigma_user::clamp(spent_mcs, 0, 1000000);
     long remaining_mcs = 1000000 - spent_mcs;
     long needed_mcs = long((1.0 - 1.0 * frames_count / current_room_speed) * 1e6);
     const int catchup_limit_ms = 50;
@@ -67,7 +69,7 @@ int updateTimer() {
       time_offset_slowing.tv_nsec += 1000 * (needed_mcs - (remaining_mcs + catchup_limit_ms * 1000));
       spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec) * 1000000 +
                   (time_current.tv_nsec / 1000 - time_offset_slowing.tv_nsec / 1000);
-      spent_mcs = clamp(spent_mcs, 0, 1000000);
+      spent_mcs = enigma_user::clamp(spent_mcs, 0, 1000000);
       remaining_mcs = 1000000 - spent_mcs;
       needed_mcs = long((1.0 - 1.0 * frames_count / current_room_speed) * 1e6);
     }
