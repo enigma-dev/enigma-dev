@@ -23,8 +23,8 @@
 namespace enigma {
 
 // whether to create a core or compatibility context
-extern bool graphics_opengl_core;
+extern const bool graphics_opengl_core;
 // the major and minor version numbers of the context
-extern int graphics_opengl_major, graphics_opengl_minor;
+extern const int graphics_opengl_major, graphics_opengl_minor;
 
 }
