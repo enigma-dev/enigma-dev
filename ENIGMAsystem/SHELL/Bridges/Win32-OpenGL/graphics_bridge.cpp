@@ -121,8 +121,6 @@ void EnableDrawing(void*)
     // -- Define an array of Context Attributes
     int attribs[] =
     {
-      WGL_CONTEXT_MAJOR_VERSION_ARB, graphics_opengl_major,
-      WGL_CONTEXT_MINOR_VERSION_ARB, graphics_opengl_minor,
       WGL_CONTEXT_PROFILE_MASK_ARB, graphics_opengl_core?WGL_CONTEXT_CORE_PROFILE_BIT_ARB:WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
       #ifdef DEBUG_MODE
         WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,

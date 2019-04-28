@@ -32,7 +32,6 @@ using namespace std;
 
 namespace enigma {
   const bool graphics_opengl_core = false;
-  const int graphics_opengl_major = 1, graphics_opengl_minor = 1;
 
   void graphics_init_vbo_method();
 

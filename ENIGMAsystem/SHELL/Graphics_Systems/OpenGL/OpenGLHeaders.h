@@ -22,9 +22,7 @@
 
 namespace enigma {
 
-// whether to create a core or compatibility context
+// whether bridge creates a core or compatibility context
 extern const bool graphics_opengl_core;
-// the major and minor version numbers of the context
-extern const int graphics_opengl_major, graphics_opengl_minor;
 
 }
