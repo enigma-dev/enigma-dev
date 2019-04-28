@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/SDL/Window.h"
 
@@ -29,10 +30,12 @@ int msaa_fbo = 0;
 
 SDL_GLContext context;
 
-void set_sdl_gl_context_version();
-
 void init_sdl_window_bridge_attributes() {
-  set_sdl_gl_context_version();
+  #ifdef DEBUG_MODE
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+  #endif
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+    graphics_opengl_core?SDL_GL_CONTEXT_PROFILE_CORE:SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
   SDL_GL_SetSwapInterval(0);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);

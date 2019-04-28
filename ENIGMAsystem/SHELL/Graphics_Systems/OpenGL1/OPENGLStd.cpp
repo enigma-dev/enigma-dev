@@ -31,6 +31,8 @@
 using namespace std;
 
 namespace enigma {
+  const bool graphics_opengl_core = false;
+
   void graphics_init_vbo_method();
 
   void graphicssystem_initialize()
