@@ -47,7 +47,7 @@ int d3dFogMode=enigma_user::rs_linear, d3dFogHint=enigma_user::rs_nicest;
 float d3dFogStart=0.0f, d3dFogEnd=0.0f, d3dFogDensity=0.0f;
 float d3dFogColor[3]={0.0f,0.0f,0.0f};
 
-int d3dLightsActive=0, d3dLightingAmbient=enigma_user::c_white;
+int d3dLightsActive=0, d3dLightingAmbient=enigma_user::c_black;
 const Light& get_active_light(int id) {
   static const Light null_light;
   if (id >= d3dLightsActive) return null_light;

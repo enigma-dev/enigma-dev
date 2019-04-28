@@ -110,7 +110,6 @@ void graphics_state_flush_lighting() {
   d3ddev->SetMaterial(&mtrl);
   d3ddev->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
   d3ddev->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
-  d3ddev->SetRenderState(D3DRS_AMBIENTMATERIALSOURCE, D3DMCS_COLOR1);
   d3ddev->SetRenderState(D3DRS_AMBIENT,
     D3DCOLOR_RGBA(COL_GET_R(d3dLightingAmbient), COL_GET_G(d3dLightingAmbient), COL_GET_B(d3dLightingAmbient), 255));
 
