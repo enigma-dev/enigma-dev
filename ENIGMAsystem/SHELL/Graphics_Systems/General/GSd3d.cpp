@@ -44,9 +44,8 @@ int d3dCulling=0, d3dDepthOperator=enigma_user::rs_lequal;
 float d3dLightingAmbient[4]={0.0f,0.0f,0.0f,1.0f};
 
 bool d3dFogEnabled=false;
-int d3dFogMode=enigma_user::rs_linear, d3dFogHint=enigma_user::rs_nicest;
+int d3dFogColor=enigma_user::c_gray, d3dFogMode=enigma_user::rs_linear, d3dFogHint=enigma_user::rs_nicest;
 float d3dFogStart=0.0f, d3dFogEnd=0.0f, d3dFogDensity=0.0f;
-float d3dFogColor[3]={0.0f,0.0f,0.0f};
 
 int d3dLightsActive = 0;
 const Light& get_active_light(int id) {
@@ -169,9 +168,7 @@ void d3d_set_fog_hint(int mode) {
 
 void d3d_set_fog_color(int color) {
   enigma::draw_set_state_dirty();
-  enigma::d3dFogColor[0] = COL_GET_Rf(color);
-  enigma::d3dFogColor[1] = COL_GET_Gf(color);
-  enigma::d3dFogColor[2] = COL_GET_Bf(color);
+  enigma::d3dFogColor = color;
 }
 
 void d3d_set_fog_start(double start) {

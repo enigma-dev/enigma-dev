@@ -58,7 +58,8 @@ void graphics_state_flush_samplers() {
 void graphics_state_flush_fog() {
   glFogi(GL_FOG_MODE, fogmodes[d3dFogMode]);
   glHint(GL_FOG_HINT, d3dFogHint);
-  glFogfv(GL_FOG_COLOR, d3dFogColor);
+  const float glFogColor[] = {COL_GET_Rf(d3dFogColor),COL_GET_Gf(d3dFogColor),COL_GET_Bf(d3dFogColor)};
+  glFogfv(GL_FOG_COLOR, glFogColor);
   glFogf(GL_FOG_START, d3dFogStart);
   glFogf(GL_FOG_END, d3dFogEnd);
   glFogf(GL_FOG_DENSITY, d3dFogDensity);
