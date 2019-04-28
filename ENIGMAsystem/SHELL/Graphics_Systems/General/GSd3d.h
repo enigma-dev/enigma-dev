@@ -29,7 +29,6 @@ extern bool d3dHidden, d3dClipPlane, d3dZWriteEnable;
 extern bool d3dPerspective;
 extern bool d3dLighting;
 extern bool d3dShading;
-extern float d3dLightingAmbient[4];
 extern int d3dCulling, d3dDepthOperator;
 
 extern bool d3dFogEnabled;
@@ -42,7 +41,7 @@ struct Light {
   int color=0;
 };
 
-extern int d3dLightsActive;
+extern int d3dLightsActive, d3dLightingAmbient;
 const Light& get_active_light(int id);
 
 extern bool d3dStencilTest;
