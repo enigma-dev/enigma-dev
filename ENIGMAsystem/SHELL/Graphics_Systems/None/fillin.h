@@ -57,8 +57,6 @@ namespace enigma_user
 	string draw_get_graphics_error();
 
 	void texture_set_priority(int texid, double prio);
-	void texture_set_enabled(bool enable);
-	void texture_set_blending(bool enable);
 	bool texture_mipmapping_supported();
 	bool texture_anisotropy_supported();
 	float texture_anisotropy_maxlevel();

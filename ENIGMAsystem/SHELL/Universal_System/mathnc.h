@@ -37,10 +37,6 @@
 #include "dynamic_args.h"
 #include "generic_args.h"
 
-#ifndef INCLUDED_FROM_SHELLMAIN
-#error ln2math and stop including this damn header.
-#endif
-
 #include "math_consts.h"
 #include "scalar.h"
 #include "var4.h"
