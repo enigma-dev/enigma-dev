@@ -33,9 +33,8 @@ extern float d3dLightingAmbient[4];
 extern int d3dCulling, d3dDepthOperator;
 
 extern bool d3dFogEnabled;
-extern int d3dFogMode, d3dFogHint;
+extern int d3dFogColor, d3dFogMode, d3dFogHint;
 extern float d3dFogStart, d3dFogEnd, d3dFogDensity;
-extern float d3dFogColor[3];
 
 struct Light {
   gs_scalar x=0, y=0, z=0, range=0;
