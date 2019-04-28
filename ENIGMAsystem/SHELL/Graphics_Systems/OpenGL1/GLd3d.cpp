@@ -67,7 +67,8 @@ void graphics_state_flush_fog() {
 
 void graphics_state_flush_lighting() {
   glShadeModel(d3dShading?GL_SMOOTH:GL_FLAT);
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, d3dLightingAmbient);
+  const float glAmbientColor[4] = {COL_GET_Rf(d3dLightingAmbient),COL_GET_Gf(d3dLightingAmbient),COL_GET_Bf(d3dLightingAmbient),1.0f};
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glAmbientColor);
 
   // this is done for compatibility with D3D/GM
   glMatrixMode(GL_MODELVIEW);
