@@ -41,6 +41,7 @@ namespace enigma
 
     #ifdef DEBUG_MODE
       static inline int DEBUG_ID_CHECK(int id, int objind) {
+        if (id < 0) return -1;
         std::map<int, inst_iter*>::iterator it = instance_list.find(id);
         if (it != instance_list.end()) {
           show_error("Two instances were given the same ID! Object `" + enigma_user::object_get_name(it->second->inst->object_index)
