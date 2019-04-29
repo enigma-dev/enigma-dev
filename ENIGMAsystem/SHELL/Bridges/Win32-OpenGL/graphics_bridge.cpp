@@ -16,7 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/OpenGL/GLinit.h"
+#include "Bridges/OpenGL/GLload.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
@@ -68,7 +68,7 @@ void EnableDrawing(void*)
   LegacyRC = wglCreateContext( enigma::window_hDC );
   wglMakeCurrent( enigma::window_hDC, LegacyRC );
 
-  gl_init();
+  gl_load();
 
   if (graphics_opengl_core && wglewIsSupported("WGL_ARB_create_context"))
   {

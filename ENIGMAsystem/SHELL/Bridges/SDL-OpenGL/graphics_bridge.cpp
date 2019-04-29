@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/OpenGL/GLinit.h"
+#include "Bridges/OpenGL/GLload.h"
 #include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/SDL/Window.h"
@@ -45,7 +45,7 @@ void init_sdl_window_bridge_attributes() {
 void EnableDrawing(void*) {
   context = SDL_GL_CreateContext(windowHandle);
 
-  gl_init();
+  gl_load();
 }
 
 void DisableDrawing(void*) {

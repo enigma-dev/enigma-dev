@@ -1,5 +1,5 @@
 namespace enigma {
 
-void gl_init();
+void gl_load();
 
 } // namespace enigma
