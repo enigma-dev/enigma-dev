@@ -68,7 +68,7 @@ void EnableDrawing(void*)
   LegacyRC = wglCreateContext( enigma::window_hDC );
   wglMakeCurrent( enigma::window_hDC, LegacyRC );
 
-  gl_load();
+  gl_load_exts();
 
   if (graphics_opengl_core && wglewIsSupported("WGL_ARB_create_context"))
   {

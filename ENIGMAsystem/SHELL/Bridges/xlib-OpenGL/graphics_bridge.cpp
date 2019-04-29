@@ -62,7 +62,7 @@ namespace enigma {
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
-    gl_load();
+    gl_load_exts();
   }
 
   void DisableDrawing(void* handle) {

@@ -45,7 +45,7 @@ void init_sdl_window_bridge_attributes() {
 void EnableDrawing(void*) {
   context = SDL_GL_CreateContext(windowHandle);
 
-  gl_load();
+  gl_load_exts();
 }
 
 void DisableDrawing(void*) {

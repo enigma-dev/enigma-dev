@@ -5,7 +5,7 @@
 
 namespace enigma {
 
-void gl_load() {
+void gl_load_exts() {
   GLenum err = glewInit();
   if (GLEW_OK != err)
     show_error(std::string("Failed to initialize glew for OpenGL. ") + (const char*)glewGetErrorString(err), true);
