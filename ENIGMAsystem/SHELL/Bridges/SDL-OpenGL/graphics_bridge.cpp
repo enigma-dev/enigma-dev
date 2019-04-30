@@ -15,12 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/OpenGL/GLload.h"
 #include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/SDL/Window.h"
 
 #include <SDL2/SDL.h>
-#include <GL/glew.h>
 
 namespace enigma {
 
@@ -45,9 +45,7 @@ void init_sdl_window_bridge_attributes() {
 void EnableDrawing(void*) {
   context = SDL_GL_CreateContext(windowHandle);
 
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
-    show_error(std::string("Failed to initialize glew for OpenGL. ") + (const char*)glewGetErrorString(err), true);
+  gl_load_exts();
 }
 
 void DisableDrawing(void*) {
