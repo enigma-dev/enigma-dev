@@ -1,1 +1,1 @@
-SOURCES += $(wildcard Bridges/SDL-OpenGL/*.cpp)
+include Bridges/SDL-OpenGL/Makefile
