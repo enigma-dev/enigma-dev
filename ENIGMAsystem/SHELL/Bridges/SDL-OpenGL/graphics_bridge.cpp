@@ -26,8 +26,6 @@ namespace enigma {
 
 extern unsigned sdl_window_flags;
 
-int msaa_fbo = 0;
-
 SDL_GLContext context;
 
 void init_sdl_window_bridge_attributes() {
@@ -62,10 +60,6 @@ namespace enigma_user {
 
 void set_synchronization(bool enable) {
   SDL_GL_SetSwapInterval(enable);
-}
-
-void display_reset(int samples, bool vsync) {
-  set_synchronization(vsync);
 }
 
 } // namespace enigma_user
