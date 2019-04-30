@@ -19,6 +19,7 @@
 #include "GL3shader.h"
 #include "GLSLshader.h"
 
+#include "Graphics_Systems/OpenGL/GLscreen.h"
 #include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 
 #ifdef DEBUG_MODE
@@ -106,6 +107,8 @@ namespace enigma {
     glDebugMessageControlARB(GL_DEBUG_SOURCE_API_ARB, GL_DEBUG_TYPE_PERFORMANCE_ARB, GL_DONT_CARE, 2, performance_ids, GL_FALSE); //Disable some notifications shown below:
     //OpenGL: Program/shader state performance warning: Vertex shader in program 9 is being recompiled based on GL state. [source=API type=PERFORMANCE severity=MEDIUM id=131218] - This is NVidia only and doesn't tell much
     #endif
+
+    gl_screen_init();
 
     glEnable(GL_SCISSOR_TEST); // constrain clear to viewport like D3D9
     glDepthFunc(GL_LEQUAL); // to match GM8's D3D8 default

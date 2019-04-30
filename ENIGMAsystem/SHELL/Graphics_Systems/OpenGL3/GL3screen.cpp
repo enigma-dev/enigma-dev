@@ -18,6 +18,7 @@
 **/
 
 #include "GL3profiler.h"
+#include "Graphics_Systems/OpenGL/GLscreen.h"
 #include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSbackground.h"
@@ -45,7 +46,6 @@ using namespace enigma_user;
 
 namespace enigma {
 
-extern GLuint msaa_fbo;
 unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
 int viewport_x, viewport_y, viewport_w, viewport_h; //These are used by surfaces, to set back the viewport
 
@@ -53,17 +53,7 @@ void scene_begin() {}
 
 void scene_end() {
   gpuprof.end_frame();
-
-  if (enigma::msaa_fbo != 0) {
-    GLint fbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::msaa_fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    //TODO: Change the code below to fix this to size properly to views
-    glBlitFramebuffer(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-    // glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
-  }
+  msaa_fbo_blit();
 }
 
 } // namespace enigma
