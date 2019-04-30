@@ -34,7 +34,6 @@ namespace enigma {
 
   int enigma_main(int argc, char** argv);
   int game_ending();
-  long clamp(long value, long min, long max);
   void Sleep(int ms);
   void compute_window_size();
   void initialize_directory_globals();

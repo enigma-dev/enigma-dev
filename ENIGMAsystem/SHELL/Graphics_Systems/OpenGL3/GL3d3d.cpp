@@ -78,7 +78,8 @@ void graphics_state_flush_samplers() {
 void graphics_state_flush_lighting(const glm::mat4& mv_matrix, const glm::mat3& normal_matrix) {
   const auto current_shader = enigma::shaderprograms[enigma::bound_shader];
 
-  enigma_user::glsl_uniform4fv(current_shader->uni_ambient_color, 1, d3dLightingAmbient);
+  const float glAmbientColor[4] = {COL_GET_Rf(d3dLightingAmbient),COL_GET_Gf(d3dLightingAmbient),COL_GET_Bf(d3dLightingAmbient),1.0f};
+  enigma_user::glsl_uniform4fv(current_shader->uni_ambient_color, 1, glAmbientColor);
 
   // these 4 are harri's material properties
   float material_ambient[4] = {0.0,0.0,0.0,1.0}; //This is default in GM

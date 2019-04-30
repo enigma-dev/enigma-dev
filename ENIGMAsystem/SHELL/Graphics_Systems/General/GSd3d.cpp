@@ -41,14 +41,12 @@ namespace enigma {
 bool d3dMode=false, d3dHidden=false, d3dClipPlane=false, d3dZWriteEnable=true,
      d3dPerspective=true, d3dLighting=false, d3dShading=true;
 int d3dCulling=0, d3dDepthOperator=enigma_user::rs_lequal;
-float d3dLightingAmbient[4]={0.0f,0.0f,0.0f,1.0f};
 
 bool d3dFogEnabled=false;
-int d3dFogMode=enigma_user::rs_linear, d3dFogHint=enigma_user::rs_nicest;
+int d3dFogColor=enigma_user::c_gray, d3dFogMode=enigma_user::rs_linear, d3dFogHint=enigma_user::rs_nicest;
 float d3dFogStart=0.0f, d3dFogEnd=0.0f, d3dFogDensity=0.0f;
-float d3dFogColor[3]={0.0f,0.0f,0.0f};
 
-int d3dLightsActive = 0;
+int d3dLightsActive=0, d3dLightingAmbient=enigma_user::c_black;
 const Light& get_active_light(int id) {
   static const Light null_light;
   if (id >= d3dLightsActive) return null_light;
@@ -169,9 +167,7 @@ void d3d_set_fog_hint(int mode) {
 
 void d3d_set_fog_color(int color) {
   enigma::draw_set_state_dirty();
-  enigma::d3dFogColor[0] = COL_GET_Rf(color);
-  enigma::d3dFogColor[1] = COL_GET_Gf(color);
-  enigma::d3dFogColor[2] = COL_GET_Bf(color);
+  enigma::d3dFogColor = color;
 }
 
 void d3d_set_fog_start(double start) {
@@ -191,9 +187,7 @@ void d3d_set_fog_density(double density) {
 
 void d3d_light_define_ambient(int col) {
   enigma::draw_set_state_dirty();
-  enigma::d3dLightingAmbient[0] = float(COL_GET_Rf(col));
-  enigma::d3dLightingAmbient[1] = float(COL_GET_Gf(col));
-  enigma::d3dLightingAmbient[2] = float(COL_GET_Bf(col));
+  enigma::d3dLightingAmbient = col;
 }
 
 void d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col) {

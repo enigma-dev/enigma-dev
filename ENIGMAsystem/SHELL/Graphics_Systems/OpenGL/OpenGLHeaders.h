@@ -22,4 +22,11 @@
 
 #include <epoxy/gl.h>
 
+namespace enigma {
+
+// whether bridge creates a core or compatibility context
+extern const bool graphics_opengl_core;
+
+}
+
 #endif
