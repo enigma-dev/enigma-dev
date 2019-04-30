@@ -16,6 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/OpenGL/GLload.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
@@ -23,7 +24,6 @@
 #include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 
 #include <string>
-#include <GL/glew.h>
 #include <GL/wglew.h>
 #include <windows.h>
 
@@ -68,9 +68,7 @@ void EnableDrawing(void*)
   LegacyRC = wglCreateContext( enigma::window_hDC );
   wglMakeCurrent( enigma::window_hDC, LegacyRC );
 
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
-    show_error(std::string("Failed to initialize glew for OpenGL. ") + (const char*)glewGetErrorString(err), true);
+  gl_load_exts();
 
   if (graphics_opengl_core && wglewIsSupported("WGL_ARB_create_context"))
   {
