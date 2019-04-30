@@ -30,7 +30,6 @@
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
 namespace enigma {
-  GLuint msaa_fbo = 0;
   GLXContext glxc;
   XVisualInfo *vi;
 
@@ -141,10 +140,5 @@ namespace enigma_user {
       // be zero or less, so therefore it is not used here.
       // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
     }
-  }
-
-  void display_reset(int samples, bool vsync) {
-    set_synchronization(vsync);
-    //TODO: Copy over from the Win32 bridge
   }
 }

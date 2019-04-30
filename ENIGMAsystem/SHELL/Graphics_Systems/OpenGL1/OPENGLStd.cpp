@@ -19,6 +19,7 @@
 #include "GLshader.h"
 #include "GLSLshader.h"
 
+#include "Graphics_Systems/OpenGL/GLscreen.h"
 #include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 
 #include "Universal_System/shaderstruct.h"
@@ -37,6 +38,7 @@ namespace enigma {
 
   void graphicssystem_initialize()
   {
+    gl_screen_init();
     graphics_init_vbo_method();
 
     glEnable(GL_SCISSOR_TEST); // constrain clear to viewport like D3D9
