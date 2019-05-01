@@ -20,7 +20,7 @@
 #include "GL3shader.h"
 #include "Graphics_Systems/OpenGL/GLenums.h"
 #include "Graphics_Systems/OpenGL/GLtextures_impl.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSblend.h"

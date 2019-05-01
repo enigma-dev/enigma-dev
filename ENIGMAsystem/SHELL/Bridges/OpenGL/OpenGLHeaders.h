@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2010-2013 Josh Ventura, Robert B. Colton, Alasdair Morrison
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,18 +14,8 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include <cstring>
-#include "OpenGLHeaders.h"
-#include "GL3aux.h"
 
-namespace enigma {
+// TGMG: I've replaced your include of the switchboard with this hard-coded job until I find
+// something more elegant.          -Josh
 
-	bool gl_extension_supported(std::string extension){
-		GLint n, i;
-		glGetIntegerv(GL_NUM_EXTENSIONS, &n);
-		for (i = 0; i < n; ++i) {
-			if (std::strstr((char*)glGetStringi(GL_EXTENSIONS, i),extension.c_str())!=NULL) return true;
-		}
-		return false;
-	}
-}
+#include <GL/glew.h>

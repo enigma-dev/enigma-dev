@@ -15,9 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/OpenGL/GLload.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/GLversion.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Bridges/OpenGL/GLload.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/xlib/XLIBwindow.h"

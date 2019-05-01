@@ -38,8 +38,9 @@ environment:
     - {PLATFORM: SDL, PACKAGES: "SDL2:x"}
 
     # Graphics
-    - {GRAPHICS: Direct3D11, PACKAGES: "glm:x"}
+    - {GRAPHICS: Direct3D11}
     - {GRAPHICS: OpenGL1, PACKAGES: "glew:x"}
+    - {GRAPHICS: OpenGLES, PLATFORM: SDL, PACKAGES: "libepoxy:x SDL2:x"}
 
     # Audio
     - {AUDIO: DirectSound}
