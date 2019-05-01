@@ -18,7 +18,7 @@
 
 #include "GL3aux.h" //glExtension_supported
 #include "Graphics_Systems/OpenGL/GLtextures_impl.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
