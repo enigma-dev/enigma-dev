@@ -892,12 +892,12 @@ void ds_map_replace(const unsigned int id, const variant key, const variant val)
 {
   //TODO: Studio made it so this function will add the value if it is not in the map.
   //GM 8.1 does not have this behaviour. This has also been tested.
-  //We will probably not add support for that, but it may cause issues down the road.
-  //If a decision is made, you should probably ask Josh for clarification, but when the
-  //decision is made, please replace my comment here whether or not we support it.
+  //Possible solution is to check compatibility setting once it's fixed for sources.
+  //https://github.com/enigma-dev/enigma-dev/issues/1461
   //If this function is changed to behave this way, please fix it in the Asynchronous dialog
   //extension which had to create a special function to replace a value adding it if it does
   //not exist in the global async_load map.
+
   //Replaces the value corresponding with the key with a new value
   multimap<variant, variant>::iterator it = ds_maps[id].find(key);
   if (it != ds_maps[id].end())
@@ -908,7 +908,7 @@ void ds_map_replace(const unsigned int id, const variant key, const variant val)
 }
 
 //NOTE: Special function, see todo comment above.
-void ds_map_replaceanyway(const unsigned int id, const variant key, const variant val)
+void ds_map_overwrite(const unsigned int id, const variant key, const variant val)
 {
   //Replaces the value corresponding with the key with a new value, adding it if it was not found in the map.
   multimap<variant, variant>::iterator it = ds_maps[id].find(key);
