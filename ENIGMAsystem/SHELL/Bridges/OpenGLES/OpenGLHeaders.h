@@ -18,11 +18,4 @@
 // TGMG: I've replaced your include of the switchboard with this hard-coded job until I find
 // something more elegant.          -Josh
 
-#include <GL/glew.h>
-
-namespace enigma {
-
-// whether bridge creates a core or compatibility context
-extern const bool graphics_opengl_core;
-
-}
+#include <epoxy/gl.h>

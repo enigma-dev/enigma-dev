@@ -18,7 +18,7 @@
 
 #include "Graphics_Systems/OpenGL/GLsurface_impl.h"
 #include "Graphics_Systems/OpenGL/GLtextures_impl.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GSprimitives.h"

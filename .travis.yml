@@ -152,6 +152,9 @@ matrix:
     # SDL
     - env: PLATFORM=SDL
       before_script: sudo apt-get -y install libsdl2-dev libegl1-mesa-dev libgles2-mesa-dev
+    # Graphics
+    - env: GRAPHICS=OpenGLES PLATFORM=SDL
+      before_script: sudo apt-get -y install libepoxy-dev libsdl2-dev libegl1-mesa-dev libgles2-mesa-dev
     # Widgets
     - env: WIDGETS=GTK+
       before_script: sudo apt-get -y install libgtk2.0-dev

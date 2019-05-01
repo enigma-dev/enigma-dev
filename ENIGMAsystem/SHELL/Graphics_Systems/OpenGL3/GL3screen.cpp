@@ -19,7 +19,7 @@
 
 #include "GL3profiler.h"
 #include "Graphics_Systems/OpenGL/GLscreen.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GSsprite.h"

@@ -19,8 +19,9 @@
 #include "GLshader.h"
 #include "GLSLshader.h"
 
+#include "Graphics_Systems/OpenGL/GLversion.h"
 #include "Graphics_Systems/OpenGL/GLscreen.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 
 #include "Universal_System/shaderstruct.h"
 #include "Universal_System/var4.h"
@@ -32,7 +33,7 @@
 using namespace std;
 
 namespace enigma {
-  const bool graphics_opengl_core = false;
+  const gl_profile_type graphics_opengl_profile = gl_profile_compat;
 
   void graphics_init_vbo_method();
 

@@ -19,8 +19,9 @@
 #include "GL3shader.h"
 #include "GLSLshader.h"
 
+#include "Graphics_Systems/OpenGL/GLversion.h"
 #include "Graphics_Systems/OpenGL/GLscreen.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 
 #ifdef DEBUG_MODE
 #include "Widget_Systems/widgets_mandatory.h"
@@ -42,7 +43,7 @@ extern string shader_get_name(int i);
 } // namespace enigma_user
 
 namespace enigma {
-  const bool graphics_opengl_core = true;
+  const gl_profile_type graphics_opengl_profile = gl_profile_core;
 
   unsigned default_shader;
   unsigned main_shader;

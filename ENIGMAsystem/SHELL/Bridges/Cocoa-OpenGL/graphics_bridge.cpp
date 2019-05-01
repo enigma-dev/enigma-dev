@@ -15,13 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <GL/glxew.h>
 #include "Platforms/Cocoa/CocoaMain.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GScolors.h"
 
 #include <iostream>
 #include <cstring>
+
+#include <GL/glxew.h>
 
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
