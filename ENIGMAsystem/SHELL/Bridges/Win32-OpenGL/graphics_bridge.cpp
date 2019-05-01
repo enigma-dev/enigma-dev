@@ -16,12 +16,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/GLversion.h"
+#include "Graphics_Systems/General/GScolors.h"
 #include "Bridges/OpenGL/GLload.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
-#include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
 
 #include <string>
 #include <GL/wglew.h>
@@ -69,12 +70,14 @@ void EnableDrawing(void*)
 
   gl_load_exts();
 
-  if (graphics_opengl_core && wglewIsSupported("WGL_ARB_create_context"))
+  const bool gl_core = (graphics_opengl_profile==gl_profile_core);
+
+  if (gl_core && wglewIsSupported("WGL_ARB_create_context"))
   {
     // -- Define an array of Context Attributes
     int attribs[] =
     {
-      WGL_CONTEXT_PROFILE_MASK_ARB, graphics_opengl_core?WGL_CONTEXT_CORE_PROFILE_BIT_ARB:WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+      WGL_CONTEXT_PROFILE_MASK_ARB,gl_core?WGL_CONTEXT_CORE_PROFILE_BIT_ARB:WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
       #ifdef DEBUG_MODE
         WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
       #endif
