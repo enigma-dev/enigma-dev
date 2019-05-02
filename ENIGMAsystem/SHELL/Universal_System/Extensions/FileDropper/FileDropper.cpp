@@ -150,7 +150,7 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
         fname += nameVec[i];
       } else if (allowdirs && directory_exists(nameVec[i])) {
         if (fname != "") fname += "\n";
-        fname += nameVec[i];
+        fname += nameVec[i] + "\\";
       }
     }
   } else {
@@ -160,7 +160,7 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
         fname += nameVec[0];
       } else if (allowdirs && directory_exists(nameVec[0])) {
         if (fname != "") fname += "\n";
-        fname += nameVec[0];
+        fname += nameVec[0] + "\\";
       }
     }
   }
