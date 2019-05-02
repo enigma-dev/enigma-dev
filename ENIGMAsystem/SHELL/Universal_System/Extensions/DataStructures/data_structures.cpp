@@ -1503,7 +1503,7 @@ variant ds_priority_find_min(const unsigned int id)
 {
   //Returns the value with the smallest priority but does not delete it from the priority queue
   multimap<variant, variant>::iterator it = ds_prioritys[id].begin(), it_check;
-  if (it == ds_prioritys[id].end()) {return 0;}
+  if (it == ds_prioritys[id].end()) {return variant();}
   it_check = it++;
   while (it != ds_prioritys[id].end())
   {
@@ -1517,7 +1517,7 @@ variant ds_priority_delete_max(const unsigned int id)
 {
   //Returns the value with the smallest priority but does not delete it from the priority queue
   multimap<variant, variant>::iterator it = ds_prioritys[id].begin(), it_check;
-  if (it == ds_prioritys[id].end()) {return 0;}
+  if (it == ds_prioritys[id].end()) {return variant();}
   it_check = it++;
   while (it != ds_prioritys[id].end())
   {
@@ -1533,7 +1533,7 @@ variant ds_priority_find_max(const unsigned int id)
 {
   //Returns the value with the smallest priority but does not delete it from the priority queue
   multimap<variant, variant>::iterator it = ds_prioritys[id].begin(), it_check;
-  if (it == ds_prioritys[id].end()) {return 0;}
+  if (it == ds_prioritys[id].end()) {return variant();}
   it_check = it++;
   while (it != ds_prioritys[id].end())
   {

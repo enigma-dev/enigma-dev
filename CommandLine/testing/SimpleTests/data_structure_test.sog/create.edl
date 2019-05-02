@@ -203,4 +203,60 @@ gtest_assert_true(ds_queue_exists(test_queue));
 ds_queue_destroy(test_queue);
 gtest_assert_false(ds_queue_exists(test_queue));
 
+/// DS Priority
+///////////////////////////////////////////////
+
+test_priority = ds_priority_create();
+test_priority2 = ds_priority_create();
+gtest_assert_true(ds_priority_exists(test_priority));
+gtest_assert_true(ds_priority_empty(test_priority));
+gtest_assert_true(ds_priority_exists(test_priority2));
+gtest_assert_true(ds_priority_empty(test_priority2));
+
+gtest_assert_true(is_undefined(ds_priority_find_min(test_priority)));
+gtest_assert_true(is_undefined(ds_priority_find_max(test_priority)));
+gtest_assert_true(is_undefined(ds_priority_find_priority(test_priority, "hello")));
+
+ds_priority_add(test_priority, "one", 56);
+ds_priority_add(test_priority, "two", 0);
+ds_priority_add(test_priority, "three", -5);
+gtest_assert_eq(ds_priority_size(test_priority), 3);
+gtest_assert_eq(ds_priority_find_min(test_priority), "three");
+gtest_assert_eq(ds_priority_find_max(test_priority), "one");
+gtest_assert_eq(ds_priority_find_priority(test_priority, "one"), 56);
+gtest_assert_eq(ds_priority_find_priority(test_priority, "two"), 0);
+
+ds_priority_copy(test_priority2, test_priority);
+gtest_assert_eq(ds_priority_size(test_priority2), 3);
+gtest_assert_false(ds_priority_empty(test_priority2));
+
+ds_priority_add(test_priority2, "five", 1);
+gtest_assert_eq(ds_priority_size(test_priority2), 4);
+
+gtest_assert_eq(ds_priority_delete_max(test_priority2), "one");
+gtest_assert_eq(ds_priority_size(test_priority2), 3);
+gtest_assert_eq(ds_priority_find_max(test_priority2), "five");
+
+gtest_assert_eq(ds_priority_delete_min(test_priority2), "three");
+gtest_assert_eq(ds_priority_size(test_priority2), 2);
+gtest_assert_eq(ds_priority_find_min(test_priority2), "two");
+
+ds_priority_add(test_priority2, "six", 101.1);
+ds_priority_add(test_priority2, "seven", -969);
+ds_priority_add(test_priority2, "eight", 42);
+gtest_assert_eq(ds_priority_size(test_priority2), 5);
+
+gtest_assert_false(is_undefined(ds_priority_find_priority(test_priority2, "six")));
+ds_priority_delete_value(test_priority2, "six");
+gtest_assert_eq(ds_priority_size(test_priority2), 4);
+gtest_assert_true(is_undefined(ds_priority_find_priority(test_priority2, "six")));
+
+ds_priority_clear(test_priority);
+gtest_assert_true(ds_priority_empty(test_priority));
+gtest_assert_eq(ds_priority_size(test_priority), 0);
+gtest_assert_true(ds_priority_exists(test_priority));
+
+ds_priority_destroy(test_priority);
+gtest_assert_false(ds_priority_exists(test_priority));
+
 game_end();
