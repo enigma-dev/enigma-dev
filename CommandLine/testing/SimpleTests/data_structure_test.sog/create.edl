@@ -163,4 +163,44 @@ gtest_assert_true(ds_stack_exists(test_stack));
 ds_stack_destroy(test_stack);
 gtest_assert_false(ds_stack_exists(test_stack));
 
+/// DS Queue
+///////////////////////////////////////////////
+
+test_queue = ds_queue_create();
+test_queue2 = ds_queue_create();
+gtest_assert_true(ds_queue_exists(test_queue));
+gtest_assert_true(ds_queue_empty(test_queue));
+gtest_assert_true(ds_queue_exists(test_queue2));
+gtest_assert_true(ds_queue_empty(test_queue2));
+
+gtest_assert_true(is_undefined(ds_queue_head(test_queue)));
+ds_queue_enqueue(test_queue, 5);
+ds_queue_enqueue(test_queue, 6);
+ds_queue_enqueue(test_queue, -1);
+gtest_assert_eq(ds_queue_head(test_queue),5);
+gtest_assert_eq(ds_queue_tail(test_queue),-1);
+gtest_assert_eq(ds_queue_size(test_queue),3);
+
+ds_queue_copy(test_queue2, test_queue);
+gtest_assert_eq(ds_queue_size(test_queue),3);
+gtest_assert_eq(ds_queue_size(test_queue2),3);
+
+gtest_assert_eq(ds_queue_dequeue(test_queue2),5);
+gtest_assert_eq(ds_queue_size(test_queue2),2);
+gtest_assert_eq(ds_queue_dequeue(test_queue2),6);
+gtest_assert_eq(ds_queue_size(test_queue2),1);
+
+ds_queue_enqueue(test_queue2, 101);
+ds_queue_enqueue(test_queue2, -101.1);
+ds_queue_enqueue(test_queue2, 0);
+gtest_assert_eq(ds_queue_size(test_queue2),4);
+
+ds_queue_clear(test_queue);
+gtest_assert_true(ds_queue_empty(test_queue));
+gtest_assert_eq(ds_queue_size(test_queue), 0);
+gtest_assert_true(ds_queue_exists(test_queue));
+
+ds_queue_destroy(test_queue);
+gtest_assert_false(ds_queue_exists(test_queue));
+
 game_end();
