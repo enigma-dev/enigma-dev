@@ -26,6 +26,7 @@
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFfilemanip.h"
 #include "Platforms/Win32/WINDOWSmain.h"
+#include "strings_util.h"
 
 using std::string;
 using std::size_t;
@@ -39,8 +40,6 @@ static string fname;
 
 using enigma_user::filename_name;
 using enigma_user::filename_ext;
-using enigma_user::string_replace_all;
-using enigma_user::string_split;
 using enigma_user::file_exists;
 using enigma_user::directory_exists;
 
@@ -50,11 +49,11 @@ static void UnInstallHook(HHOOK Hook) {
 
 static LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   LRESULT rc = CallWindowProc(oldProc, hWnd, uMsg, wParam, lParam);
-  
+
   if (uMsg == WM_DROPFILES) {
     hDrop = (HDROP)wParam;
 
-    UINT nNumOfFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, NULL);
+    UINT nNumOfFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
     if (nNumOfFiles > 0) {
       for (UINT i = 0; i < nNumOfFiles; i += 1) {
         UINT nBufSize = DragQueryFileW(hDrop, i, NULL, 0) + 1;
@@ -66,7 +65,7 @@ static LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
       }
     }
 
-    std::vector<string> nameVec = string_split(fname, '\n');
+    std::vector<string> nameVec = split_string(fname, '\n');
     sort(nameVec.begin(), nameVec.end());
     nameVec.erase(unique(nameVec.begin(), nameVec.end()), nameVec.end());
     fname = "";
@@ -110,12 +109,12 @@ bool file_dnd_get_enabled() {
 void file_dnd_set_enabled(bool enable) {
   file_dnd_enabled = enable;
   DragAcceptFiles(enigma::hWnd, file_dnd_enabled);
-  if (file_dnd_enabled && hook == NULL) 
+  if (file_dnd_enabled && hook == NULL)
   InstallHook(); else fname = "";
 }
 
 string file_dnd_get_files() {
-  while (fname.back() == "\n")
+  while (fname.back() == '\n')
     fname.pop_back();
 
   return fname;
@@ -125,8 +124,8 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
   if (pattern == "") { pattern = "."; }
   pattern = string_replace_all(pattern, " ", "");
   pattern = string_replace_all(pattern, "*", "");
-  std::vector<string> extVec = string_split(pattern, ';');
-  std::vector<string> nameVec = string_split(fname, '\n');
+  std::vector<string> extVec = split_string(pattern, ';');
+  std::vector<string> nameVec = split_string(fname, '\n');
   std::vector<string>::size_type sz1 = nameVec.size();
   std::vector<string>::size_type sz2 = extVec.size();
   fname = "";
@@ -140,7 +139,7 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
     }
   }
 
-  nameVec = string_split(fname, '\n');
+  nameVec = split_string(fname, '\n');
   sz1 = nameVec.size();
   fname = "";
 
@@ -169,7 +168,7 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
 
 void file_dnd_add_files(string files) {
   if (files != "") {
-    std::vector<string> pathVec = string_split(files, '\n');
+    std::vector<string> pathVec = split_string(files, '\n');
 
     for (const string &path : pathVec) {
       tstring tstr_path = widen(path); wchar_t wstr_path[MAX_PATH];
@@ -181,7 +180,7 @@ void file_dnd_add_files(string files) {
       }
     }
 
-    std::vector<string> nameVec = string_split(fname, '\n');
+    std::vector<string> nameVec = split_string(fname, '\n');
     sort(nameVec.begin(), nameVec.end());
     nameVec.erase(unique(nameVec.begin(), nameVec.end()), nameVec.end());
     std::vector<string>::size_type sz = nameVec.size();
@@ -195,7 +194,7 @@ void file_dnd_add_files(string files) {
 }
 
 void file_dnd_remove_files(string files) {
-  std::vector<string> pathVec = string_split(files, '\n");
+  std::vector<string> pathVec = split_string(files, '\n');
 
   for (const string &path : pathVec) {
     fname = string_replace_all(fname, path + "\n", "");
