@@ -66,7 +66,7 @@ static LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
       }
     }
 
-    std::vector<string> nameVec = string_split(fname, "\n");
+    std::vector<string> nameVec = string_split(fname, '\n');
     sort(nameVec.begin(), nameVec.end());
     nameVec.erase(unique(nameVec.begin(), nameVec.end()), nameVec.end());
     fname = "";
@@ -125,8 +125,8 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
   if (pattern == "") { pattern = "."; }
   pattern = string_replace_all(pattern, " ", "");
   pattern = string_replace_all(pattern, "*", "");
-  std::vector<string> extVec = string_split(pattern, ";");
-  std::vector<string> nameVec = string_split(fname, "\n");
+  std::vector<string> extVec = string_split(pattern, ';');
+  std::vector<string> nameVec = string_split(fname, '\n');
   std::vector<string>::size_type sz1 = nameVec.size();
   std::vector<string>::size_type sz2 = extVec.size();
   fname = "";
@@ -140,7 +140,7 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
     }
   }
 
-  nameVec = string_split(fname, "\n");
+  nameVec = string_split(fname, '\n');
   sz1 = nameVec.size();
   fname = "";
 
@@ -169,7 +169,7 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
 
 void file_dnd_add_files(string files) {
   if (files != "") {
-    std::vector<string> pathVec = string_split(files, "\n");
+    std::vector<string> pathVec = string_split(files, '\n');
 
     for (const string &path : pathVec) {
       tstring tstr_path = widen(path); wchar_t wstr_path[MAX_PATH];
@@ -181,7 +181,7 @@ void file_dnd_add_files(string files) {
       }
     }
 
-    std::vector<string> nameVec = string_split(fname, "\n");
+    std::vector<string> nameVec = string_split(fname, '\n');
     sort(nameVec.begin(), nameVec.end());
     nameVec.erase(unique(nameVec.begin(), nameVec.end()), nameVec.end());
     std::vector<string>::size_type sz = nameVec.size();
@@ -195,7 +195,7 @@ void file_dnd_add_files(string files) {
 }
 
 void file_dnd_remove_files(string files) {
-  std::vector<string> pathVec = string_split(files, "\n");
+  std::vector<string> pathVec = string_split(files, '\n");
 
   for (const string &path : pathVec) {
     fname = string_replace_all(fname, path + "\n", "");
