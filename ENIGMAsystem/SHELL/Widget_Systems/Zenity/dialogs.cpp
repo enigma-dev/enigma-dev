@@ -15,484 +15,191 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <libgen.h>
-#include <unistd.h>
-#include <climits>
-#include <sstream>
-#include <vector>
-#include <string>
+#include "FileDropper.h"
+#include <windows.h>
 #include <algorithm>
-#include <iostream>
-using std::string;
+#include <sstream>
+#include <string>
+#include <vector>
+#include <cwchar>
 
-#include "strings_util.h"
 #include "Universal_System/estring.h"
-using enigma_user::filename_name;
-using enigma_user::filename_path;
-
-#include "Platforms/General/PFmain.h"
-using enigma_user::execute_shell_for_output;
-
-#include "Platforms/General/PFwindow.h"
-using enigma_user::window_get_caption;
-
 #include "Platforms/General/PFfilemanip.h"
+#include "Platforms/Win32/WINDOWSmain.h"
+#include "strings_util.h"
+
+using std::string;
+using std::size_t;
+using std::vector;
+
+static HHOOK hook = NULL;
+static WNDPROC oldProc = NULL;
+static bool file_dnd_enabled = false;
+static HDROP hDrop = NULL;
+static string fname;
+
+using enigma_user::filename_name;
+using enigma_user::filename_ext;
 using enigma_user::file_exists;
+using enigma_user::directory_exists;
 
-#include "Graphics_Systems/General/GScolors.h"
-using enigma_user::color_get_red;
-using enigma_user::color_get_green;
-using enigma_user::color_get_blue;
-using enigma_user::make_color_rgb;
-
-#ifdef DEBUG_MODE
-#include "Universal_System/var4.h"
-#include "Universal_System/resource_data.h"
-#include "Universal_System/object.h"
-#include "Universal_System/debugscope.h"
-#endif
-
-static string dialog_caption;
-static string error_caption;
-
-static bool message_cancel  = false;
-static bool question_cancel = false;
-
-namespace enigma {
-  
-bool widget_system_initialize() {
-  return true;
-}
-  
-} // namespace enigma
-
-static string shellscript_evaluate(string command) {
-  string result = execute_shell_for_output(command);
-  if (result.back() == '\n') result.pop_back();
-  return result;
+static void UnInstallHook(HHOOK Hook) {
+  UnhookWindowsHookEx(Hook);
 }
 
-static string add_escaping(string str, bool is_caption, string new_caption) {
-  string result; if (is_caption && str.empty()) result = new_caption;
-  result = string_replace_all(str, "\"", "\\\""); // zenity needs this for quotes to show
-  result = string_replace_all(result, "_", "__"); // zenity needs this for underscores to show
-  return result;
-}
+static LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  LRESULT rc = CallWindowProc(oldProc, hWnd, uMsg, wParam, lParam);
 
-static string remove_trailing_zeros(double numb) {
-  string strnumb = std::to_string(numb);
+  if (uMsg == WM_DROPFILES) {
+    hDrop = (HDROP)wParam;
 
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-    strnumb.pop_back();
+    UINT nNumOfFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
+    if (nNumOfFiles > 0) {
+      for (UINT i = 0; i < nNumOfFiles; i += 1) {
+        UINT nBufSize = DragQueryFileW(hDrop, i, NULL, 0) + 1;
+        wchar_t *fName = new wchar_t[nBufSize];
+        DragQueryFileW(hDrop, i, fName, nBufSize);
+        if (fname != "") fname += "\n";
+        fname += shorten(fName);
+        delete[] fName;
+      }
+    }
 
-  return strnumb;
-}
+    std::vector<string> nameVec = split_string(fname, '\n');
+    sort(nameVec.begin(), nameVec.end());
+    nameVec.erase(unique(nameVec.begin(), nameVec.end()), nameVec.end());
+    fname = "";
 
-static string zenity_filter(string input) {
-  std::replace(input.begin(), input.end(), ';', ' ');
-  std::vector<string> stringVec = split_string(input, '|');
-  string string_output = "";
+    std::vector<string>::size_type sz = nameVec.size();
+    for (std::vector<string>::size_type i = 0; i < sz; i += 1) {
+      if (fname != "") fname += "\n";
+      fname += nameVec[i];
+    }
 
-  unsigned int index = 0;
-  for (const string &str : stringVec) {
-    if (index % 2 == 0)
-      string_output += " --file-filter='" + str + "|";
-    else
-      string_output += string_replace_all(str, "*.*", "*") + "'";
-
-    index += 1;
+    DragFinish(hDrop);
   }
 
-  return string_output;
+  return rc;
 }
 
-static int show_message_helperfunc(string str) {
-  if (dialog_caption.empty())
-    dialog_caption = window_get_caption();
+static LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
+  if (nCode == HC_ACTION) {
+    CWPSTRUCT *pwp = (CWPSTRUCT *)lParam;
 
-  string str_command;
-  string str_title;
-  string str_cancel;
-  string str_echo = "echo 1";
+    if (pwp->message == WM_KILLFOCUS) {
+      oldProc = (WNDPROC)SetWindowLongPtrW(enigma::hWnd, GWLP_WNDPROC, (LONG_PTR)HookWndProc);
+      UnInstallHook(hook);
+    }
+  }
 
-  if (message_cancel)
-    str_echo = "if [ $? = 0 ] ;then echo 1;fi";
-
-  str_title = add_escaping(dialog_caption, true, " ");
-  str_cancel = "--info --ok-label=OK ";
-
-  if (message_cancel)
-    str_cancel = "--question --ok-label=OK --cancel-label=Cancel ";
-
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  str_cancel + string("--title=\"") + str_title + string("\" --no-wrap --text=\"") +
-  add_escaping(str, false, "") + string("\" --icon-name=dialog-information);") + str_echo;
-
-  string str_result = shellscript_evaluate(str_command);
-  return (int)strtod(str_result.c_str(), NULL);
+  return CallNextHookEx(hook, nCode, wParam, lParam);
 }
 
-static int show_question_helperfunc(string str) {
-  if (dialog_caption.empty())
-    dialog_caption = window_get_caption();
-
-  string str_command;
-  string str_title;
-  string str_cancel = "";
-
-  str_title = add_escaping(dialog_caption, true, " ");
-  if (question_cancel)
-    str_cancel = "--extra-button=Cancel ";
-
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--question --ok-label=Yes --cancel-label=No ") + str_cancel +  string("--title=\"") +
-  str_title + string("\" --no-wrap --text=\"") + add_escaping(str, false, "") +
-  string("\" --icon-name=dialog-question);if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Cancel\" ] ;then echo -1;else echo 0;fi");
-
-  string str_result = shellscript_evaluate(str_command);
-  return (int)strtod(str_result.c_str(), NULL);
-}
-
-void show_error(string errortext, const bool fatal) {
-  if (error_caption.empty()) error_caption = "Error";
-  string str_command;
-  string str_title;
-  string str_echo;
-  
-  #ifdef DEBUG_MODE
-  errortext += enigma::debug_scope::GetErrors();
-  #endif
-
-  str_echo = fatal ? "echo 1" :
-    "if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Ignore\" ] ;then echo -1;elif [ $? = 2 ] ;then echo 0;fi";
-
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--question --ok-label=Abort --cancel-label=Retry --extra-button=Ignore ") +
-  string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
-  add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
-
-  string str_result = shellscript_evaluate(str_command);
-  if (strtod(str_result.c_str(), NULL) == 1) exit(0);
+static HHOOK InstallHook() {
+  hook = SetWindowsHookExW(WH_CALLWNDPROC, (HOOKPROC)SetHook, NULL, GetWindowThreadProcessId(enigma::hWnd, NULL));
+  return hook;
 }
 
 namespace enigma_user {
 
-void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
-
+bool file_dnd_get_enabled() {
+  return file_dnd_enabled;
 }
 
-int show_message(const string &str) {
-  message_cancel = false;
-  return show_message_helperfunc(str);
+void file_dnd_set_enabled(bool enable) {
+  file_dnd_enabled = enable;
+  DragAcceptFiles(enigma::hWnd, file_dnd_enabled);
+  if (file_dnd_enabled && hook == NULL)
+  InstallHook(); else fname = "";
 }
 
-int show_message_cancelable(string str) {
-  message_cancel = true;
-  return show_message_helperfunc(str);
+string file_dnd_get_files() {
+  while (fname.back() == '\n')
+    fname.pop_back();
+
+  return fname;
 }
 
-bool show_question(string str) {
-  question_cancel = false;
-  return (bool)show_question_helperfunc(str);
-}
+void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool allowmulti) {
+  if (pattern == "") { pattern = "."; }
+  pattern = string_replace_all(pattern, " ", "");
+  pattern = string_replace_all(pattern, "*", "");
+  std::vector<string> extVec = split_string(pattern, ';');
+  std::vector<string> nameVec = split_string(fname, '\n');
+  std::vector<string>::size_type sz1 = nameVec.size();
+  std::vector<string>::size_type sz2 = extVec.size();
+  fname = "";
 
-int show_question_cancelable(string str) {
-  question_cancel = true;
-  return show_question_helperfunc(str);
-}
-
-int show_attempt(string str) {
-  if (error_caption.empty()) error_caption = "Error";
-  string str_command;
-  string str_title;
-
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--question --ok-label=Retry --cancel-label=Cancel ") +  string("--title=\"") +
-  add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
-  add_escaping(str, false, "") +
-  string("\" --icon-name=dialog-error);if [ $? = 0 ] ;then echo 0;else echo -1;fi");
-
-  string str_result = shellscript_evaluate(str_command);
-  return (int)strtod(str_result.c_str(), NULL);
-}
-
-string get_string(string str, string def) {
-  if (dialog_caption.empty())
-    dialog_caption = window_get_caption();
-
-  string str_command;
-  string str_title;
-
-  str_title = add_escaping(dialog_caption, true, " ");
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--entry --title=\"") + str_title + string("\" --text=\"") +
-  add_escaping(str, false, "") + string("\" --entry-text=\"") +
-  add_escaping(def, false, "") + string("\");echo $ans");
-
-  return shellscript_evaluate(str_command);
-}
-
-string get_password(string str, string def) {
-  if (dialog_caption.empty())
-    dialog_caption = window_get_caption();
-
-  string str_command;
-  string str_title;
-
-  str_title = add_escaping(dialog_caption, true, " ");
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--entry --title=\"") + str_title + string("\" --text=\"") +
-  add_escaping(str, false, "") + string("\" --hide-text --entry-text=\"") +
-  add_escaping(def, false, "") + string("\");echo $ans");
-
-  return shellscript_evaluate(str_command);
-}
-
-double get_integer(string str, double def) {
-  string str_def = remove_trailing_zeros(def);
-  string str_result = get_string(str, str_def);
-  return strtod(str_result.c_str(), NULL);
-}
-
-double get_passcode(string str, double def) {
-  string str_def = remove_trailing_zeros(def);
-  string str_result = get_password(str, str_def);
-  return strtod(str_result.c_str(), NULL);
-}
-
-string get_open_filename(string filter, string fname) {
-  string str_command;
-  string str_title = "Open";
-  string str_fname = filename_name(fname);
-
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
-
-  string result = shellscript_evaluate(str_command);
-  return file_exists(result) ? result : "";
-}
-
-string get_open_filename_ext(string filter, string fname, string dir, string title) {
-  string str_command;
-  string str_title = add_escaping(title, true, "Open");
-  string str_fname = filename_name(fname);
-  string str_dir = filename_path(dir);
-
-  string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
-  str_fname = (char *)str_path.c_str();
-
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
-
-  string result = shellscript_evaluate(str_command);
-  return file_exists(result) ? result : "";
-}
-
-string get_open_filenames(string filter, string fname) {
-  string str_command;
-  string str_title = "Open";
-  string str_fname = filename_name(fname);
-
-  str_command = string("zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--file-selection --multiple --separator='\n' --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
-
-  string result = shellscript_evaluate(str_command);
-  std::vector<string> stringVec = split_string(result, '\n');
-
-  bool success = true;
-  for (const string &str : stringVec) {
-    if (!file_exists(str))
-      success = false;
+  for (std::vector<string>::size_type i2 = 0; i2 < sz2; i2 += 1) {
+    for (std::vector<string>::size_type i1 = 0; i1 < sz1; i1 += 1) {
+      if (extVec[i2] == "." || extVec[i2] == filename_ext(nameVec[i1])) {
+        if (fname != "") fname += "\n";
+        fname += nameVec[i1];
+      }
+    }
   }
 
-  return success ? result : "";
-}
+  nameVec = split_string(fname, '\n');
+  sz1 = nameVec.size();
+  fname = "";
 
-string get_open_filenames_ext(string filter, string fname, string dir, string title) {
-  string str_command;
-  string str_title = add_escaping(title, true, "Open");
-  string str_fname = filename_name(fname);
-  string str_dir = filename_path(dir);
-
-  string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
-  str_fname = (char *)str_path.c_str();
-
-  str_command = string("zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--file-selection --multiple --separator='\n' --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
-
-  string result = shellscript_evaluate(str_command);
-  std::vector<string> stringVec = split_string(result, '\n');
-
-  bool success = true;
-  for (const string &str : stringVec) {
-    if (!file_exists(str))
-      success = false;
+  if (allowmulti) {
+    for (std::vector<string>::size_type i = 0; i < sz1; i += 1) {
+      if (allowfiles && file_exists(nameVec[i])) {
+        if (fname != "") fname += "\n";
+        fname += nameVec[i];
+      } else if (allowdirs && directory_exists(nameVec[i])) {
+        if (fname != "") fname += "\n";
+        fname += nameVec[i];
+      }
+    }
+  } else {
+    if (!nameVec.empty()) {
+      if (allowfiles && file_exists(nameVec[0])) {
+        if (fname != "") fname += "\n";
+        fname += nameVec[0];
+      } else if (allowdirs && directory_exists(nameVec[0])) {
+        if (fname != "") fname += "\n";
+        fname += nameVec[0];
+      }
+    }
   }
-
-  return success ? result : "";
 }
 
-string get_save_filename(string filter, string fname) {
-  string str_command;
-  string str_title = "Save As";
-  string str_fname = filename_name(fname);
+void file_dnd_add_files(string files) {
+  if (files != "") {
+    std::vector<string> pathVec = split_string(files, '\n');
 
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
+    for (const string &path : pathVec) {
+      tstring tstr_path = widen(path); wchar_t wstr_path[MAX_PATH];
+      GetFullPathNameW(tstr_path.c_str(), MAX_PATH, wstr_path, NULL);
+      string str_path = shorten(wstr_path);
+      if (file_exists(str_path)) {
+        if (fname != "") fname += "\n";
+        fname += str_path;
+      }
+    }
 
-  return shellscript_evaluate(str_command);
-}
+    std::vector<string> nameVec = split_string(fname, '\n');
+    sort(nameVec.begin(), nameVec.end());
+    nameVec.erase(unique(nameVec.begin(), nameVec.end()), nameVec.end());
+    std::vector<string>::size_type sz = nameVec.size();
+    fname = "";
 
-string get_save_filename_ext(string filter, string fname, string dir, string title) {
-  string str_command;
-  string str_title = add_escaping(title, true, "Save As");
-  string str_fname = filename_name(fname);
-  string str_dir = filename_path(dir);
-
-  string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
-  str_fname = (char *)str_path.c_str();
-
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
-
-  return shellscript_evaluate(str_command);
-}
-
-string get_directory(string dname) {
-  string str_command;
-  string str_title = "Select Directory";
-  string str_dname = dname;
-  string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
-
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_dname, false, "") + str_end;
-
-  return shellscript_evaluate(str_command);
-}
-
-string get_directory_alt(string capt, string root) {
-  string str_command;
-  string str_title = add_escaping(capt, true, "Select Directory");
-  string str_dname = root;
-  string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
-
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_dname, false, "") + str_end;
-
-  return shellscript_evaluate(str_command);
-}
-
-int get_color(int defcol) {
-  string str_command;
-  string str_title = "Color";
-  string str_defcol;
-  string str_result;
-
-  int red; int green; int blue;
-  red = color_get_red(defcol);
-  green = color_get_green(defcol);
-  blue = color_get_blue(defcol);
-
-  str_defcol = string("rgb(") + std::to_string(red) + string(",") +
-  std::to_string(green) + string(",") + std::to_string(blue) + string(")");
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--color-selection --show-palette --title=\"") + str_title + string("\"  --color='") +
-  str_defcol + string("');if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
-
-  str_result = shellscript_evaluate(str_command);
-  if (str_result == "-1") return strtod(str_result.c_str(), NULL);
-  str_result = string_replace_all(str_result, "rgba(", "");
-  str_result = string_replace_all(str_result, "rgb(", "");
-  str_result = string_replace_all(str_result, ")", "");
-  std::vector<string> stringVec = split_string(str_result, ',');
-
-  unsigned int index = 0;
-  for (const string &str : stringVec) {
-    if (index == 0) red = strtod(str.c_str(), NULL);
-    if (index == 1) green = strtod(str.c_str(), NULL);
-    if (index == 2) blue = strtod(str.c_str(), NULL);
-    index += 1;
+    for (std::vector<string>::size_type i = 0; i < sz; i += 1) {
+      if (fname != "") fname += "\n";
+      fname += nameVec[i];
+    }
   }
-
-  return make_color_rgb(red, green, blue);
 }
 
-int get_color_ext(int defcol, string title) {
-  string str_command;
-  string str_title = add_escaping(title, true, "Color");
-  string str_defcol;
-  string str_result;
+void file_dnd_remove_files(string files) {
+  std::vector<string> pathVec = split_string(files, '\n');
 
-  int red; int green; int blue;
-  red = color_get_red(defcol);
-  green = color_get_green(defcol);
-  blue = color_get_blue(defcol);
-
-  str_defcol = string("rgb(") + std::to_string(red) + string(",") +
-  std::to_string(green) + string(",") + std::to_string(blue) + string(")");
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--color-selection --show-palette --title=\"") + str_title + string("\" --color='") +
-  str_defcol + string("');if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
-
-  str_result = shellscript_evaluate(str_command);
-  if (str_result == "-1") return strtod(str_result.c_str(), NULL);
-  str_result = string_replace_all(str_result, "rgba(", "");
-  str_result = string_replace_all(str_result, "rgb(", "");
-  str_result = string_replace_all(str_result, ")", "");
-  std::vector<string> stringVec = split_string(str_result, ',');
-
-  unsigned int index = 0;
-  for (const string &str : stringVec) {
-    if (index == 0) red = strtod(str.c_str(), NULL);
-    if (index == 1) green = strtod(str.c_str(), NULL);
-    if (index == 2) blue = strtod(str.c_str(), NULL);
-    index += 1;
+  for (const string &path : pathVec) {
+    fname = string_replace_all(fname, path + "\n", "");
+    fname = string_replace_all(fname, path, "");
   }
-
-  return make_color_rgb(red, green, blue);
-}
-
-string message_get_caption() {
-  if (dialog_caption.empty()) dialog_caption = window_get_caption();
-  if (error_caption.empty()) error_caption = "Error";
-  if (dialog_caption == window_get_caption() && error_caption == "Error")
-    return ""; else return dialog_caption;
-}
-
-void message_set_caption(string caption) {
-  dialog_caption = caption; error_caption = caption;
-  if (dialog_caption.empty()) dialog_caption = window_get_caption();
-  if (error_caption.empty()) error_caption = "Error";
 }
 
 } // namespace enigma_user
