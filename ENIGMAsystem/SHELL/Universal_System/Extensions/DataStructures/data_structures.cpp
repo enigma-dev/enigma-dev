@@ -964,7 +964,7 @@ variant ds_map_find_previous(const unsigned int id, const variant key)
       return key_check;
     }
   }
-  return 0;
+  return variant();
 }
 
 variant ds_map_find_next(const unsigned int id, const variant key)
@@ -979,7 +979,7 @@ variant ds_map_find_next(const unsigned int id, const variant key)
       return key_check;
     }
   }
-  return 0;
+  return variant();
 }
 
 variant ds_map_find_first(const unsigned int id)
