@@ -148,9 +148,11 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
       if (allowfiles && file_exists(nameVec[i])) {
         if (fname != "") fname += "\n";
         fname += nameVec[i];
-      } else if (allowdirs && directory_exists(nameVec[i]) && nameVec[0].back() != '\\') {
+      } else if (allowdirs && directory_exists(nameVec[i])) {
         if (fname != "") fname += "\n";
+
         fname += nameVec[i] + "\\";
+        fname = string_replace_all(fname, "\\\\", "\\");
       }
     }
   } else {
@@ -158,9 +160,11 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
       if (allowfiles && file_exists(nameVec[0])) {
         if (fname != "") fname += "\n";
         fname += nameVec[0];
-      } else if (allowdirs && directory_exists(nameVec[0]) && nameVec[0].back() != '\\') {
+      } else if (allowdirs && directory_exists(nameVec[0])) {
         if (fname != "") fname += "\n";
+
         fname += nameVec[0] + "\\";
+        fname = string_replace_all(fname, "\\\\", "\\");
       }
     }
   }
