@@ -109,10 +109,10 @@ void ini_section_delete(std::string section)
 
 int file_exists(std::string fname) {
   DWORD file_attr;
-  tstring tstr_dname = widen(dname);
-  file_attr = GetFileAttributesW(tstr_dname.c_str());
+  tstring tstr_fname = widen(fname);
+  file_attr = GetFileAttributesW(tstr_fname.c_str());
   if (file_attr != INVALID_FILE_ATTRIBUTES &&
-    (file_attr & FILE_ATTRIBUTE_DIRECTORY))
+    !(file_attr & FILE_ATTRIBUTE_DIRECTORY))
     return 1;
 
   return 0;
