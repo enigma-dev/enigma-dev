@@ -44,19 +44,19 @@ static LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
         UINT nBufSize = DragQueryFileW(hDrop, i, NULL, 0) + 1;
         wchar_t *fName = new wchar_t[nBufSize];
         DragQueryFileW(hDrop, i, fName, nBufSize);
-		if (fname != "") fname += "\n";
+        if (fname != "") fname += "\n";
         fname += shorten(fName);
         delete[] fName;
       }
     }
 
-	std::vector<string> nameVec = string_split(fname, '\n');
-	sort(nameVec.begin(), nameVec.end());
-	nameVec.erase(unique(nameVec.begin(), nameVec.end()), nameVec.end());
+    std::vector<string> nameVec = string_split(fname, '\n');
+    sort(nameVec.begin(), nameVec.end());
+    nameVec.erase(unique(nameVec.begin(), nameVec.end()), nameVec.end());
     fname = "";
 
-	std::vector<string>::size_type sz = nameVec.size();
-	for (std::vector<string>::size_type i = 0; i < sz; i += 1) {
+    std::vector<string>::size_type sz = nameVec.size();
+    for (std::vector<string>::size_type i = 0; i < sz; i += 1) {
       if (fname != "") fname += "\n";
       fname += nameVec[i];
     }
@@ -88,7 +88,7 @@ static HHOOK InstallHook() {
 namespace enigma_user {
 
 bool file_dnd_get_enabled() {
-	return file_dnd_enabled;
+  return file_dnd_enabled;
 }
 
 void file_dnd_set_enabled(bool enable) {
@@ -118,7 +118,7 @@ void file_dnd_set_files(string pattern, double allowfiles, double allowdirs, dou
   for (std::vector<string>::size_type i2 = 0; i2 < sz2; i2 += 1) {
 	for (std::vector<string>::size_type i1 = 0; i1 < sz1; i1 += 1) {
       if (extVec[i2] == "." || extVec[i2] == filename_ext(nameVec[i1])) {
-		if (fname != "") fname += "\n";
+        if (fname != "") fname += "\n";
         fname += nameVec[i1];
       }
     }
@@ -158,8 +158,8 @@ void file_dnd_add_files(string files) {
     for (const string &path : pathVec) {
       tstring tstr_path = widen(path); wchar_t wstr_path[MAX_PATH];
       GetFullPathNameW(tstr_path.c_str(), MAX_PATH, wstr_path, NULL);
-	  string str_path = shorten(wstr_path);
-	  if (file_exists(str_path)) {
+      string str_path = shorten(wstr_path);
+      if (file_exists(str_path)) {
         if (fname != "") fname += "\n";
         fname += str_path;
       }
@@ -168,7 +168,7 @@ void file_dnd_add_files(string files) {
     std::vector<string> nameVec = string_split(fname, '\n');
     sort(nameVec.begin(), nameVec.end());
     nameVec.erase(unique(nameVec.begin(), nameVec.end()), nameVec.end());
-	  std::vector<string>::size_type sz = nameVec.size();
+    std::vector<string>::size_type sz = nameVec.size();
     fname = "";
 
     for (std::vector<string>::size_type i = 0; i < sz; i += 1) {
@@ -183,7 +183,7 @@ void file_dnd_remove_files(string files) {
 
   for (const string &path : pathVec) {
     fname = string_replace_all(fname, path + "\n", "");
-	  fname = string_replace_all(fname, path, "");
+    fname = string_replace_all(fname, path, "");
   }
 }
 
