@@ -168,7 +168,7 @@ int directory_exists(std::string dname) {
   tstring tstr_dname = widen(dname);
   file_attr = GetFileAttributesW(tstr_dname.c_str());
   return (file_attr != INVALID_FILE_ATTRIBUTES &&
-    (file_attr & FILE_ATTRIBUTE_DIRECTORY))
+    (file_attr & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 // NOTICE: May behave differently than GM. May fail if there are
