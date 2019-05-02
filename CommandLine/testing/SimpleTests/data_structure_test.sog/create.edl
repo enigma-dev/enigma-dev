@@ -120,4 +120,47 @@ gtest_assert_true(ds_map_exists(map_num));
 ds_map_destroy(map_num);
 gtest_assert_false(ds_map_exists(map_num));
 
+/// DS Stack
+///////////////////////////////////////////////
+
+test_stack = ds_stack_create();
+test_stack2 = ds_stack_create();
+gtest_assert_true(ds_stack_exists(test_stack));
+gtest_assert_true(ds_stack_empty(test_stack));
+gtest_assert_true(ds_stack_exists(test_stack2));
+gtest_assert_true(ds_stack_empty(test_stack2));
+
+ds_stack_push(test_stack,5);
+ds_stack_push(test_stack,5);
+ds_stack_push(test_stack,60);
+gtest_assert_eq(ds_stack_size(test_stack), 3);
+gtest_assert_eq(ds_stack_top(test_stack), 60);
+ds_stack_push(test_stack2,2);
+ds_stack_push(test_stack2,1);
+ds_stack_push(test_stack2,0);
+ds_stack_push(test_stack2,-5);
+ds_stack_push(test_stack2,-3.3);
+gtest_assert_eq(ds_stack_size(test_stack2), 5);
+
+ds_stack_copy(test_stack, test_stack2);
+gtest_assert_eq(ds_stack_size(test_stack), 5);
+gtest_assert_eq(ds_stack_top(test_stack), -3.3);
+
+ds_stack_pop(test_stack);
+gtest_assert_eq(ds_stack_size(test_stack), 4);
+gtest_assert_eq(ds_stack_top(test_stack), -5);
+
+ds_stack_push(test_stack,999);
+ds_stack_push(test_stack,999.9);
+gtest_assert_eq(ds_stack_size(test_stack), 6);
+gtest_assert_eq(ds_stack_top(test_stack), 999.9);
+
+ds_stack_clear(test_stack);
+gtest_assert_true(ds_stack_empty(test_stack));
+gtest_assert_eq(ds_stack_size(test_stack), 0);
+gtest_assert_true(ds_stack_exists(test_stack));
+
+ds_stack_destroy(test_stack);
+gtest_assert_false(ds_stack_exists(test_stack));
+
 game_end();
