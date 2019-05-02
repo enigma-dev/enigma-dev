@@ -1,3 +1,6 @@
+/// DS List
+///////////////////////////////////////////////
+
 list_str = ds_list_create();
 list_num = ds_list_create();
 gtest_assert_true(ds_list_exists(list_str));
@@ -61,5 +64,60 @@ gtest_assert_true(ds_list_exists(list_num));
 
 ds_list_destroy(list_num);
 gtest_assert_false(ds_list_exists(list_num));
+
+/// DS Map
+///////////////////////////////////////////////
+
+map_str = ds_map_create();
+map_num = ds_map_create();
+gtest_assert_true(ds_map_exists(map_str));
+gtest_assert_true(ds_map_exists(map_num));
+gtest_assert_true(ds_map_empty(map_str));
+gtest_assert_true(ds_map_empty(map_num));
+
+gtest_assert_true(is_undefined(ds_map_find_first(map_num)));
+gtest_assert_true(is_undefined(ds_map_find_last(map_num)));
+gtest_assert_true(is_undefined(ds_map_find_next(map_num, "hello")));
+gtest_assert_true(is_undefined(ds_map_find_next(map_num, "")));
+gtest_assert_true(is_undefined(ds_map_find_previous(map_num, "")));
+gtest_assert_true(is_undefined(ds_map_find_value(map_num, "")));
+
+ds_map_add(map_str, "teststr", "testone");
+gtest_assert_eq(ds_map_size(map_str), 1);
+// GM ds_map is a multimap and allows duplicate keys
+// this was tested in GameMaker 8.1
+ds_map_add(map_str, "teststr", "testtwo");
+gtest_assert_eq(ds_map_size(map_str), 2);
+ds_map_add(map_str, "teststr1", "testthree");
+ds_map_add(map_str, "teststr2", "testfour");
+gtest_assert_eq(ds_map_size(map_str), 4);
+gtest_assert_eq(ds_map_find_value(map_str, "teststr2"), "testfour");
+
+ds_map_add(map_num, 0, 50);
+ds_map_add(map_num, 0, 50);
+ds_map_add(map_num, 2, 50);
+gtest_assert_eq(ds_map_size(map_num), 3);
+// We still have GM 8.1 replace behavior
+ds_map_replace(map_num, 5, 50);
+gtest_assert_true(is_undefined(ds_map_find_value(map_num, 5)));
+// This is our special function that acts like GMSv1.4 replace
+ds_map_overwrite(map_num, 5, 50);
+gtest_assert_false(is_undefined(ds_map_find_value(map_num, 5)));
+gtest_assert_eq(ds_map_find_value(map_num, 5), 50);
+
+// lmao GM API is so dumb, this should really be called assign
+// second it's broke at the time of this writing in GMSv1.4
+// GM8.1 maps are multimaps and GMSv1.4 maps are regular maps
+// double confirmed by Rusky on Discord/and in Dejavu
+ds_map_copy(map_num, map_str);
+gtest_assert_eq(ds_map_size(map_num), 4);
+
+ds_map_clear(map_num);
+gtest_assert_true(ds_map_empty(map_num));
+gtest_assert_eq(ds_map_size(map_num), 0);
+gtest_assert_true(ds_map_exists(map_num));
+
+ds_map_destroy(map_num);
+gtest_assert_false(ds_map_exists(map_num));
 
 game_end();
