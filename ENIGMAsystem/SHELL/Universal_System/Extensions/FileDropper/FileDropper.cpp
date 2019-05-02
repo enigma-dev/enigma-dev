@@ -116,7 +116,7 @@ void file_dnd_set_files(string pattern, double allowfiles, double allowdirs, dou
   fname = "";
 
   for (std::vector<string>::size_type i2 = 0; i2 < sz2; i2 += 1) {
-	for (std::vector<string>::size_type i1 = 0; i1 < sz1; i1 += 1) {
+    for (std::vector<string>::size_type i1 = 0; i1 < sz1; i1 += 1) {
       if (extVec[i2] == "." || extVec[i2] == filename_ext(nameVec[i1])) {
         if (fname != "") fname += "\n";
         fname += nameVec[i1];
