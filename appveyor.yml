@@ -59,6 +59,7 @@ environment:
     - {EXTENSIONS: "WindowsTouch"}
     - {EXTENSIONS: "XInput"}
     - {EXTENSIONS: "MediaControlInterface"}
+    - {EXTENSIONS: "FileDropper"}
     - {EXTENSIONS: "Box2DPhysics", PACKAGES: "box2d:x"}
     - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
     #TODO: Fix Bullet Physics on Windows
