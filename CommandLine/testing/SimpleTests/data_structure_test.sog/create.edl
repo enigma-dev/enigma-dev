@@ -259,4 +259,122 @@ gtest_assert_true(ds_priority_exists(test_priority));
 ds_priority_destroy(test_priority);
 gtest_assert_false(ds_priority_exists(test_priority));
 
+/// DS Grid
+///////////////////////////////////////////////
+
+test_grid = ds_grid_create(50, 30);
+test_grid2 = ds_grid_create(10, 10);
+gtest_assert_true(ds_grid_exists(test_grid));
+gtest_assert_eq(ds_grid_width(test_grid), 50);
+gtest_assert_eq(ds_grid_height(test_grid), 30);
+gtest_assert_true(ds_grid_exists(test_grid2));
+gtest_assert_eq(ds_grid_width(test_grid2), 10);
+gtest_assert_eq(ds_grid_height(test_grid2), 10);
+
+gtest_assert_false(ds_grid_value_exists(test_grid,0,0,50,30,99));
+gtest_assert_eq(ds_grid_value_x(test_grid,0,0,50,30,99), 0);
+gtest_assert_eq(ds_grid_value_y(test_grid,0,0,50,30,99), 0);
+
+gtest_assert_false(ds_grid_value_disk_exists(test_grid,5,5,2,99));
+gtest_assert_eq(ds_grid_value_disk_x(test_grid,5,5,2,99), 0);
+gtest_assert_eq(ds_grid_value_disk_y(test_grid,5,5,2,99), 0);
+
+gtest_assert_eq(ds_grid_get(test_grid, 0, 0), 0);
+gtest_assert_eq(ds_grid_get(test_grid, 5, 5), 0);
+ds_grid_set(test_grid, 5, 5, 99);
+gtest_assert_eq(ds_grid_get(test_grid, 5, 5), 99);
+
+gtest_assert_true(ds_grid_value_exists(test_grid,2,2,50,30,99));
+gtest_assert_eq(ds_grid_value_x(test_grid,0,0,50,30,99), 5);
+gtest_assert_eq(ds_grid_value_y(test_grid,0,0,50,30,99), 5);
+
+gtest_assert_false(ds_grid_value_exists(test_grid,0,0,3,3,99));
+gtest_assert_eq(ds_grid_value_x(test_grid,0,0,3,3,99), 0);
+gtest_assert_eq(ds_grid_value_y(test_grid,0,0,3,3,99), 0);
+
+ds_grid_add(test_grid, 5, 5, 3);
+gtest_assert_eq(ds_grid_get(test_grid, 5, 5), 102);
+ds_grid_multiply(test_grid, 5, 5, 2);
+gtest_assert_eq(ds_grid_get(test_grid, 5, 5), 204);
+
+ds_grid_set_region(test_grid, 5, 5, 8, 8, -55);
+for (var j = 5; j < 9; ++j)
+  for (var i = 5; i < 9; ++i)
+    gtest_assert_eq(ds_grid_get(test_grid, i, j), -55);
+
+ds_grid_add_region(test_grid, 5, 5, 8, 8, 5);
+for (var j = 5; j < 9; ++j)
+  for (var i = 5; i < 9; ++i)
+    gtest_assert_eq(ds_grid_get(test_grid, i, j), -50);
+
+ds_grid_multiply_region(test_grid, 5, 5, 8, 8, -1);
+for (var j = 5; j < 9; ++j)
+  for (var i = 5; i < 9; ++i)
+    gtest_assert_eq(ds_grid_get(test_grid, i, j), 50);
+
+ds_grid_set_grid_region(test_grid2, test_grid, 5, 5, 8, 8, 1, 2);
+for (var j = 2; j < 6; ++j)
+  for (var i = 1; i < 5; ++i)
+    gtest_assert_eq(ds_grid_get(test_grid2, i, j), 50);
+
+ds_grid_add_grid_region(test_grid2, test_grid, 5, 5, 8, 8, 1, 2);
+for (var j = 2; j < 6; ++j)
+  for (var i = 1; i < 5; ++i)
+    gtest_assert_eq(ds_grid_get(test_grid2, i, j), 100);
+
+ds_grid_multiply_grid_region(test_grid2, test_grid, 5, 5, 8, 8, 1, 2);
+for (var j = 2; j < 6; ++j)
+  for (var i = 1; i < 5; ++i)
+    gtest_assert_eq(ds_grid_get(test_grid2, i, j), 5000);
+
+ds_grid_resize(test_grid2, 25, 5);
+gtest_assert_eq(ds_grid_width(test_grid2), 25);
+gtest_assert_eq(ds_grid_height(test_grid2), 5);
+
+gtest_assert_ne(ds_grid_get(test_grid2, 21, 0), 32);
+ds_grid_set(test_grid2, 21, 0, 32);
+gtest_assert_eq(ds_grid_get(test_grid2, 21, 0), 32);
+
+ds_grid_copy(test_grid2, test_grid);
+gtest_assert_eq(ds_grid_width(test_grid2), 50);
+gtest_assert_eq(ds_grid_height(test_grid2), 30);
+gtest_assert_ne(ds_grid_get(test_grid2, 21, 0), 32);
+
+ds_grid_clear(test_grid2, 100);
+for (var j = 0; j < 30; ++j)
+  for (var i = 0; i < 50; ++i)
+    gtest_assert_eq(ds_grid_get(test_grid2, i, j), 100);
+
+ds_grid_set(test_grid2, 0, 0, -3);
+ds_grid_set(test_grid2, 1, 0, 53);
+ds_grid_set(test_grid2, 2, 0, 786.235);
+ds_grid_set(test_grid2, 0, 1, -1001.735);
+ds_grid_set(test_grid2, 1, 1, 4);
+ds_grid_set(test_grid2, 2, 1, 1);
+ds_grid_set(test_grid2, 0, 2, 45);
+ds_grid_set(test_grid2, 1, 2, 0);
+ds_grid_set(test_grid2, 2, 2, -6);
+
+// whole grid
+gtest_assert_eq(ds_grid_get_min(test_grid2, 0, 0, 2, 2), -1001.735);
+gtest_assert_eq(ds_grid_get_max(test_grid2, 0, 0, 2, 2), 786.235);
+gtest_assert_eq(ds_grid_get_sum(test_grid2, 0, 0, 2, 2), -121.5);
+gtest_assert_eq(ds_grid_get_mean(test_grid2, 0, 0, 2, 2), -13.5);
+
+// middle column
+gtest_assert_eq(ds_grid_get_min(test_grid2, 1, 0, 1, 2), 0);
+gtest_assert_eq(ds_grid_get_max(test_grid2, 1, 0, 1, 2), 53);
+gtest_assert_eq(ds_grid_get_sum(test_grid2, 1, 0, 1, 2), 57);
+gtest_assert_eq(ds_grid_get_mean(test_grid2, 1, 0, 1, 2), 19);
+
+// middle row
+gtest_assert_eq(ds_grid_get_min(test_grid2, 0, 1, 2, 1), -1001.735);
+gtest_assert_eq(ds_grid_get_max(test_grid2, 0, 1, 2, 1), 4);
+gtest_assert_eq(ds_grid_get_sum(test_grid2, 0, 1, 2, 1), -996.735);
+gtest_assert_eq(ds_grid_get_mean(test_grid2, 0, 1, 2, 1), -332.245);
+
+ds_grid_destroy(test_grid);
+gtest_assert_false(ds_grid_exists(test_grid));
+
+/// WE'RE DONE!!!
 game_end();
