@@ -2,7 +2,7 @@
 ---
 
 Name: File Dropper
-Identifier: FileDroper
+Identifier: FileDropper
 Author: Samuel Venable
 Description: Allows the developer to drag and drop files and directories onto the game window and return their full paths.
 Default: false
