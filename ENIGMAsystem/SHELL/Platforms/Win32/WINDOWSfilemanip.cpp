@@ -111,11 +111,8 @@ int file_exists(std::string fname) {
   DWORD file_attr;
   tstring tstr_fname = widen(fname);
   file_attr = GetFileAttributesW(tstr_fname.c_str());
-  if (file_attr != INVALID_FILE_ATTRIBUTES &&
-    !(file_attr & FILE_ATTRIBUTE_DIRECTORY))
-    return 1;
-
-  return 0;
+  return (file_attr != INVALID_FILE_ATTRIBUTES &&
+    !(file_attr & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 int file_delete(std::string fname) {
