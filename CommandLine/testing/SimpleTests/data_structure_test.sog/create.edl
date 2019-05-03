@@ -376,5 +376,5 @@ gtest_assert_eq(ds_grid_get_mean(test_grid2, 0, 1, 2, 1), -332.245);
 ds_grid_destroy(test_grid);
 gtest_assert_false(ds_grid_exists(test_grid));
 
-/// WERE DONE!!!
+/// WE'RE DONE!!!
 game_end();
