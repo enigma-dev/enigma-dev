@@ -166,40 +166,4 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
   }
 }
 
-void file_dnd_add_files(string files) {
-  if (files != "") {
-    std::vector<string> pathVec = split_string(files, '\n');
-
-    for (const string &path : pathVec) {
-      tstring tstr_path = widen(path); wchar_t wstr_path[MAX_PATH];
-      GetFullPathNameW(tstr_path.c_str(), MAX_PATH, wstr_path, NULL);
-      string str_path = shorten(wstr_path);
-      if (file_exists(str_path)) {
-        if (fname != "") fname += "\n";
-        fname += str_path;
-      }
-    }
-
-    std::vector<string> nameVec = split_string(fname, '\n');
-    sort(nameVec.begin(), nameVec.end());
-    nameVec.erase(unique(nameVec.begin(), nameVec.end()), nameVec.end());
-    std::vector<string>::size_type sz = nameVec.size();
-    fname = "";
-
-    for (std::vector<string>::size_type i = 0; i < sz; i += 1) {
-      if (fname != "") fname += "\n";
-      fname += nameVec[i];
-    }
-  }
-}
-
-void file_dnd_remove_files(string files) {
-  std::vector<string> pathVec = split_string(files, '\n');
-
-  for (const string &path : pathVec) {
-    fname = string_replace_all(fname, path + "\n", "");
-    fname = string_replace_all(fname, path, "");
-  }
-}
-
 } // namespace enigma_user
