@@ -65,54 +65,68 @@ template<typename T, typename U> class CanCast {
   static constexpr bool V = Kernel<T>::V;
 };
 
+#define ACCEPT_TYPE(K, T) template<> struct K<T> : EnabledType<T> {}
+
 template<typename T> struct SIntTypeEnabler {};
-template<> struct SIntTypeEnabler<signed char> : EnabledType<signed char> {};
-template<> struct SIntTypeEnabler<short int> : EnabledType<short int> {};
-template<> struct SIntTypeEnabler<int> : EnabledType<int> {};
-template<> struct SIntTypeEnabler<long int> : EnabledType<long int> {};
-template<> struct SIntTypeEnabler<long long int> : EnabledType<long long int> {};
+ACCEPT_TYPE(SIntTypeEnabler, signed char);
+ACCEPT_TYPE(SIntTypeEnabler, short int);
+ACCEPT_TYPE(SIntTypeEnabler, int);
+ACCEPT_TYPE(SIntTypeEnabler, long int);
+ACCEPT_TYPE(SIntTypeEnabler, long long int);
 
 template<typename T> struct UIntTypeEnabler {};
-template<> struct UIntTypeEnabler<unsigned char> : EnabledType<unsigned char> {};
-template<> struct UIntTypeEnabler<unsigned short int>  : EnabledType<unsigned short int> {};
-template<> struct UIntTypeEnabler<unsigned int> : EnabledType<unsigned int> {};
-template<> struct UIntTypeEnabler<unsigned long int> : EnabledType<unsigned long int> {};
-template<> struct UIntTypeEnabler<unsigned long long int> : EnabledType<unsigned long long int> {};
+ACCEPT_TYPE(UIntTypeEnabler, unsigned char);
+ACCEPT_TYPE(UIntTypeEnabler, unsigned short int);
+ACCEPT_TYPE(UIntTypeEnabler, unsigned int);
+ACCEPT_TYPE(UIntTypeEnabler, unsigned long int);
+ACCEPT_TYPE(UIntTypeEnabler, unsigned long long int);
 
 template<typename T> struct IntTypeEnabler {};
-template<> struct IntTypeEnabler<signed char> : EnabledType<signed char> {};
-template<> struct IntTypeEnabler<short int> : EnabledType<short int> {};
-template<> struct IntTypeEnabler<int> : EnabledType<int> {};
-template<> struct IntTypeEnabler<long int> : EnabledType<long int> {};
-template<> struct IntTypeEnabler<long long int> : EnabledType<long long int> {};
-template<> struct IntTypeEnabler<unsigned char> : EnabledType<unsigned char> {};
-template<> struct IntTypeEnabler<unsigned short int> : EnabledType<unsigned short int> {};
-template<> struct IntTypeEnabler<unsigned int> : EnabledType<unsigned int> {};
-template<> struct IntTypeEnabler<unsigned long int> : EnabledType<unsigned long int> {};
-template<> struct IntTypeEnabler<unsigned long long int> : EnabledType<unsigned long long int> {};
+ACCEPT_TYPE(IntTypeEnabler, signed char);
+ACCEPT_TYPE(IntTypeEnabler, short int);
+ACCEPT_TYPE(IntTypeEnabler, int);
+ACCEPT_TYPE(IntTypeEnabler, long int);
+ACCEPT_TYPE(IntTypeEnabler, long long int);
+ACCEPT_TYPE(IntTypeEnabler, unsigned char);
+ACCEPT_TYPE(IntTypeEnabler, unsigned short int);
+ACCEPT_TYPE(IntTypeEnabler, unsigned int);
+ACCEPT_TYPE(IntTypeEnabler, unsigned long int);
+ACCEPT_TYPE(IntTypeEnabler, unsigned long long int);
 
 
 template<typename T> struct FloatTypeEnabler {};
-template<> struct FloatTypeEnabler<float> : EnabledType<float>  {};
-template<> struct FloatTypeEnabler<double> : EnabledType<double> {};
-template<> struct FloatTypeEnabler<long double> : EnabledType<long double> {};
+ACCEPT_TYPE(FloatTypeEnabler, float);
+ACCEPT_TYPE(FloatTypeEnabler, double);
+ACCEPT_TYPE(FloatTypeEnabler, long double);
 
 // Any explicitly numeric type. Note that this does NOT include bool and enum!
 template<typename T> struct NumericTypeEnabler {};
-template<> struct NumericTypeEnabler<char> : EnabledType<signed char> {};
-template<> struct NumericTypeEnabler<signed char> : EnabledType<signed char> {};
-template<> struct NumericTypeEnabler<short int> : EnabledType<short int> {};
-template<> struct NumericTypeEnabler<int> : EnabledType<int> {};
-template<> struct NumericTypeEnabler<long int> : EnabledType<long int> {};
-template<> struct NumericTypeEnabler<long long int> : EnabledType<long long int> {};
-template<> struct NumericTypeEnabler<unsigned char> : EnabledType<unsigned char> {};
-template<> struct NumericTypeEnabler<unsigned short int> : EnabledType<unsigned short int> {};
-template<> struct NumericTypeEnabler<unsigned int> : EnabledType<unsigned int> {};
-template<> struct NumericTypeEnabler<unsigned long int> : EnabledType<unsigned long int> {};
-template<> struct NumericTypeEnabler<unsigned long long int> : EnabledType<unsigned long long int> {};
-template<> struct NumericTypeEnabler<float> : EnabledType<float>  {};
-template<> struct NumericTypeEnabler<double> : EnabledType<double> {};
-template<> struct NumericTypeEnabler<long double> : EnabledType<long double> {};
+ACCEPT_TYPE(NumericTypeEnabler, char);
+ACCEPT_TYPE(NumericTypeEnabler, signed char);
+ACCEPT_TYPE(NumericTypeEnabler, short int);
+ACCEPT_TYPE(NumericTypeEnabler, int);
+ACCEPT_TYPE(NumericTypeEnabler, long int);
+ACCEPT_TYPE(NumericTypeEnabler, long long int);
+ACCEPT_TYPE(NumericTypeEnabler, unsigned char);
+ACCEPT_TYPE(NumericTypeEnabler, unsigned short int);
+ACCEPT_TYPE(NumericTypeEnabler, unsigned int);
+ACCEPT_TYPE(NumericTypeEnabler, unsigned long int);
+ACCEPT_TYPE(NumericTypeEnabler, unsigned long long int);
+ACCEPT_TYPE(NumericTypeEnabler, float);
+ACCEPT_TYPE(NumericTypeEnabler, double);
+ACCEPT_TYPE(NumericTypeEnabler, long double);
+template<typename T> struct ArithmeticTypeEnabler {};
+ACCEPT_TYPE(ArithmeticTypeEnabler, signed char);
+ACCEPT_TYPE(ArithmeticTypeEnabler, short int);
+ACCEPT_TYPE(ArithmeticTypeEnabler, int);
+ACCEPT_TYPE(ArithmeticTypeEnabler, long int);
+ACCEPT_TYPE(ArithmeticTypeEnabler, unsigned char);
+ACCEPT_TYPE(ArithmeticTypeEnabler, unsigned short int);
+ACCEPT_TYPE(ArithmeticTypeEnabler, unsigned int);
+ACCEPT_TYPE(ArithmeticTypeEnabler, unsigned long int);
+ACCEPT_TYPE(ArithmeticTypeEnabler, float);
+ACCEPT_TYPE(ArithmeticTypeEnabler, double);
+ACCEPT_TYPE(ArithmeticTypeEnabler, long double);
 
 // More lax than NumericType, but does not permit any type that can also be cast
 // to a string. Allows booleans and enum constants, but not vars or variants.
@@ -121,19 +135,6 @@ template<typename T> struct NonStringNumberTypeEnabler
 
 template<typename T> struct NonVariantTypeEnabler
     : MaybeEnabled<T, CanCast<T, double>::V != CanCast<T, std::string>::V> {};
-
-template<typename T> struct ArithmeticTypeEnabler {};
-template<> struct ArithmeticTypeEnabler<signed char> : EnabledType<signed char> {};
-template<> struct ArithmeticTypeEnabler<short int> : EnabledType<short int> {};
-template<> struct ArithmeticTypeEnabler<int> : EnabledType<int> {};
-template<> struct ArithmeticTypeEnabler<long int> : EnabledType<long int> {};
-template<> struct ArithmeticTypeEnabler<unsigned char> : EnabledType<unsigned char> {};
-template<> struct ArithmeticTypeEnabler<unsigned short int> : EnabledType<unsigned short int> {};
-template<> struct ArithmeticTypeEnabler<unsigned int> : EnabledType<unsigned int> {};
-template<> struct ArithmeticTypeEnabler<unsigned long int> : EnabledType<unsigned long int> {};
-template<> struct ArithmeticTypeEnabler<float> : EnabledType<float> {};
-template<> struct ArithmeticTypeEnabler<double> : EnabledType<double> {};
-template<> struct ArithmeticTypeEnabler<long double> : EnabledType<long double> {};
 
 template<typename T, typename U> struct NeqEnabler : EnabledType<T> {};
 template<typename T> struct NeqEnabler<T, T> {};
@@ -144,13 +145,14 @@ template<typename X, typename Y = X, typename Z = Y,
 struct ArithmeticTypes: EnabledType<EN> {};
 
 template<typename T> struct StringTypeEnabler {};
-template<> struct StringTypeEnabler<std::string> : EnabledType<std::string> {};
-template<> struct StringTypeEnabler<std::string&> : EnabledType<std::string&> {};
-template<> struct StringTypeEnabler<const std::string&> : EnabledType<const std::string&> {};
-template<> struct StringTypeEnabler<std::string&&> : EnabledType<std::string&&> {};
-template<> struct StringTypeEnabler<const char*> : EnabledType<const char*> {};
-// template<size_t K> struct StringTypeEnabler<const char[K]> : EnabledType<const char[K]> {};
+ACCEPT_TYPE(StringTypeEnabler, std::string);
+ACCEPT_TYPE(StringTypeEnabler, std::string&);
+ACCEPT_TYPE(StringTypeEnabler, const std::string&);
+ACCEPT_TYPE(StringTypeEnabler, std::string&&);
+ACCEPT_TYPE(StringTypeEnabler, const char*);
 // TODO: support string_view
+
+#undef ACCEPT_TYPE
 
 #ifndef JUST_DEFINE_IT_RUN
 
@@ -179,8 +181,12 @@ template<typename T> using NonStringNumber =
 
 #define REQUIRE_NON_STRING_NUMBER(T) \
     typename enigma::NonStringNumberTypeEnabler<T>::EN = 0
-#define REQUIRE_STRING_TYPE(T) typename enigma::StringTypeEnabler<T>::EN = 0
-#define REQUIRE_VARIANT_TYPE(T) typename enigma::VariantTypeEnabler<T>::EN = 0
+#define REQUIRE_STRING_TYPE(T)\
+    typename enigma::StringTypeEnabler<T>::EN = 0
+#define REQUIRE_NON_VARIANT_TYPE(T) \
+    typename enigma::NonVariantTypeEnabler<T>::EN = 0
+#define REQUIRE_VARIANT_TYPE(T) \
+    typename enigma::VariantTypeEnabler<T>::EN = 0
 
 #else
 
@@ -194,6 +200,7 @@ template<typename T> struct StringType  {};
 
 #define REQUIRE_NON_STRING_NUMBER(T) bool non_string_number = true
 #define REQUIRE_STRING_TYPE(T)       bool is_string_type = true
+#define REQUIRE_NON_VARIANT_TYPE(T)  bool is_not_variant_type = true
 #define REQUIRE_VARIANT_TYPE(T)      bool is_variant_type = true
 
 template<typename T, typename U, typename V = decltype(+*(T*)0 | +*(U*)0)>
@@ -238,6 +245,8 @@ namespace enigma {
 
 template<typename T> struct VariantTypeEnabler
     : MaybeEnabled<T, std::is_base_of<variant, T>::value> {};
+template<> struct VariantTypeEnabler<variant> : EnabledType<variant> {};
+template<> struct VariantTypeEnabler<var> : EnabledType<var> {};
 
 }
 
@@ -281,10 +290,6 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   operator T() const {
     return (T) rval.d;
   }
-  // String cast.
-  operator const std::string&() const {
-    return sval();
-  }
 
   size_t string_length()   const { return sval().length(); }
   char char_at(size_t ind) const { return sval()[ind]; }
@@ -304,10 +309,10 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
 
   // Char casting must be explicit, or else string construction is ambiguous.
   // Also, this is a good place for special logic.
-  // explicit operator char() const {
-  //   if (type == ty_string) return sval()[0];
-  //   return (char) rval.d;
-  // }
+  explicit operator char() const {
+    if (type == ty_string) return sval()[0];
+    return (char) rval.d;
+  }
 
   // How to construct a variant: the basics
   variant():
@@ -388,7 +393,8 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
     sval() += str;
     return *this;
   }
-  variant& operator+=(const variant &other) RLY_INLINE {
+  template<class T, REQUIRE_VARIANT_TYPE(T)>
+  RLY_INLINE variant& operator+=(const T &other) {
     if (type == ty_string) sval() += other.sval();
     else rval.d += other.rval.d;
     return *this;
@@ -407,43 +413,43 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   // Arithmetic operators.
   // ===========================================================================
 
+# define VAROP    template<typename T, REQUIRE_VARIANT_TYPE(T)>
+# define NONVAROP template<typename T, REQUIRE_NON_VARIANT_TYPE(T)>
+# define ANYOP    template<typename T>
   // Basic arithmetic operators.
-  template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-  decltype(rval.d + T()) operator+(T x) const {
-    return rval.d + x;
-  }
-  template<typename T> decltype(rval.d - T()) operator-(T x) const {
-    return rval.d - x;
-  }
-  template<typename T> decltype(rval.d * T()) operator*(T x) const {
-    return rval.d * x;
-  }
-  template<typename T> decltype(rval.d / T()) operator/(T x) const {
-    return rval.d / x;
-  }
-  template<typename T> decltype(fmod(rval.d, T())) operator%(T x) const {
+  NONVAROP decltype(rval.d + T()) operator+(T x) const { return rval.d + x; }
+  NONVAROP decltype(rval.d - T()) operator-(T x) const { return rval.d - x; }
+  NONVAROP decltype(rval.d * T()) operator*(T x) const { return rval.d * x; }
+  NONVAROP decltype(rval.d / T()) operator/(T x) const { return rval.d / x; }
+  NONVAROP decltype(fmod(rval.d, T())) operator%(T x) const {
     return fmod(rval.d, x);
   }
 
   // Same as the above, but for another variant.
-  double operator-(const variant &x) const { return rval.d - x.rval.d; }
-  double operator*(const variant &x) const { return rval.d * x.rval.d; }
-  double operator/(const variant &x) const { return rval.d / x.rval.d; }
-  double operator%(const variant &x) const { return fmod(rval.d, x.rval.d); }
+  VAROP double operator-(const T &x) const { return rval.d - x.rval.d; }
+  VAROP double operator*(const T &x) const { return rval.d * x.rval.d; }
+  VAROP double operator/(const T &x) const { return rval.d / x.rval.d; }
+  VAROP double operator%(const T &x) const { return fmod(rval.d, x.rval.d); }
 
   // This is just fucking stupid.
-  template<class T> variant &operator-=(const T &v)  { return *this = *this - v;  }
-  template<class T> variant &operator*=(const T &v)  { return *this = *this * v;  }
-  template<class T> variant &operator/=(const T &v)  { return *this = *this / v;  }
-  template<class T> variant &operator%=(const T &v)  { return *this = *this % v;  }
+  ANYOP variant &operator-=(const T &v)  { return *this = *this - v;  }
+  ANYOP variant &operator*=(const T &v)  { return *this = *this * v;  }
+  ANYOP variant &operator/=(const T &v)  { return *this = *this / v;  }
+  ANYOP variant &operator%=(const T &v)  { return *this = *this % v;  }
 
-  template<class T> variant &operator&=( const T &v) { return *this = *this & v;  }
-  template<class T> variant &operator|=( const T &v) { return *this = *this | v;  }
-  template<class T> variant &operator^=( const T &v) { return *this = *this ^ v;  }
-  template<class T> variant &operator<<=(const T &v) { return *this = *this << v; }
-  template<class T> variant &operator>>=(const T &v) { return *this = *this >> v; }
+  ANYOP variant &operator&=( const T &v) { return *this = *this & v;  }
+  ANYOP variant &operator|=( const T &v) { return *this = *this | v;  }
+  ANYOP variant &operator^=( const T &v) { return *this = *this ^ v;  }
+  ANYOP variant &operator<<=(const T &v) { return *this = *this << v; }
+  ANYOP variant &operator>>=(const T &v) { return *this = *this >> v; }
+
+# undef NONVAROP
+# undef VAROP
+# undef ANYOP
 
   // Comparison helpers.
+  // ===========================================================================
+
   template<typename T> bool epsilon_eq(T x) const {
     return rval.d - epsilon <= x && rval.d + epsilon >= x;
   }
@@ -467,44 +473,46 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   // ===========================================================================
 
   // Block one: Type-aware comparison with other variant.
-  bool operator==(const variant &x) const RLY_INLINE {
+# define VAROP template<typename T, REQUIRE_VARIANT_TYPE(T)> bool RLY_INLINE
+  VAROP operator==(const T &x) const {
     if (type != x.type) return false;
     if (type == ty_string) return sval() == x.sval();
     return epsilon_eq(x.rval.d);
   }
-  bool operator!=(const variant &x) const RLY_INLINE {
+  VAROP operator!=(const T &x) const {
     if (type != x.type) return true;
     if (type == ty_string) return sval() != x.sval();
     return epsilon_neq(x.rval.d);
   }
-  bool operator<=(const variant &x) const RLY_INLINE {
+  VAROP operator<=(const T &x) const {
     if (type == ty_string) {
       if (x.type != ty_string) return false;  // As a string, we are larger.
       return sval() <= x.sval();
     }
     return epsilon_leq(x.rval.d);
   }
-  bool operator>=(const variant &x) const RLY_INLINE {
+  VAROP operator>=(const T &x) const {
     if (type == ty_string) {
       if (x.type != ty_string) return true;  // As a string, we are larger.
       return sval() >= x.sval();
     }
     return epsilon_geq(x.rval.d);
   }
-  bool operator<(const variant &x) const RLY_INLINE {
+  VAROP operator<(const T &x) const {
     if (type == ty_string) {
       if (x.type != ty_string) return false;  // As a string, we are larger.
       return sval() < x.sval();
     }
     return epsilon_lt(x.rval.d);
   }
-  bool operator>(const variant &x) const RLY_INLINE {
+  VAROP operator>(const T &x) const {
     if (type == ty_string) {
       if (x.type != ty_string) return true;  // As a string, we are larger.
       return sval() > x.sval();
     }
     return epsilon_gt(x.rval.d);
   }
+#undef VAROP
 
   // Block two: strictly numeric comparisons.
   // Note: Strings are always larger than reals.
@@ -674,7 +682,7 @@ struct var : variant {
   // ===========================================================================
 
   // Inherit 75 operators from variant like it's 1982
-  using variant::operator=;
+  using variant::operator=;   using variant::operator==;
   using variant::operator+;   using variant::operator+=;
   using variant::operator-;   using variant::operator-=;
   using variant::operator*;   using variant::operator*=;
@@ -701,17 +709,6 @@ struct var : variant {
   }
   #endif
 
-  // auto operator-(const var &v)  { return *(variant *) this -  v; }
-  // auto operator*(const var &v)  { return *(variant *) this *  v; }
-  // auto operator/(const var &v)  { return *(variant *) this /  v; }
-  // auto operator%(const var &v)  { return *(variant *) this %  v; }
-  // auto operator<(const var &v)  { return *(variant *) this <  v; }
-  // auto operator>(const var &v)  { return *(variant *) this >  v; }
-  // auto operator<<(const var &v) { return *(variant *) this << v; }
-  // auto operator>>(const var &v) { return *(variant *) this >> v; }
-  // auto operator|(const var &v)  { return *(variant *) this |  v; }
-  // auto operator^(const var &v)  { return *(variant *) this ^  v; }
-
   ~var() {}
 };
 
@@ -722,55 +719,52 @@ struct var : variant {
 //██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟████████████████████████████████████
 //▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
 
-template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
-static inline decltype(+T() + double()) operator+(T a, const U &b) {
+#define VARBINOP template<typename T, typename U,                              \
+    REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>                     \
+    static inline
+
+VARBINOP decltype(+T() + double()) operator+(T a, const U &b) {
   return a + b.rval.d;
 }
-template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
-static inline decltype(+T() - double()) operator-(T a, const U &b) {
+VARBINOP decltype(+T() - double()) operator-(T a, const U &b) {
   return a - b.rval.d;
 }
-template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
-static inline decltype(+T() * double()) operator*(T a, const U &b) {
+VARBINOP decltype(+T() * double()) operator*(T a, const U &b) {
   return a * b.rval.d;
 }
-template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
-static inline decltype(+T() / double()) operator/(T a, const U &b) {
+VARBINOP decltype(+T() / double()) operator/(T a, const U &b) {
   return a / b.rval.d;
 }
-template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
-double operator%(T a, const U &b) {
+VARBINOP double operator%(T a, const U &b) {
   return fmod(a, b.rval.d);
 }
 
-template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
-static inline long long operator<<(T a, const U &b) {
+VARBINOP long long operator<<(T a, const U &b) {
   return (long long) a << (long long) b.rval.d;
 }
-template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
-static inline long long operator>>(T a, const U &b) {
+VARBINOP long long operator>>(T a, const U &b) {
   return (long long) a >> (long long) b.rval.d;
 }
-template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
-static inline long long operator&(T a, const U &b) {
+VARBINOP long long operator&(T a, const U &b) {
   return (long long) a & (long long) b.rval.d;
 }
-template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
-static inline long long operator|(T a, const U &b) {
+VARBINOP long long operator|(T a, const U &b) {
   return (long long) a | (long long) b.rval.d;
 }
-template<typename T, typename U, REQUIRE_NON_STRING_NUMBER(T), REQUIRE_VARIANT_TYPE(U)>
-static inline long long operator^(T a, const U &b) {
+VARBINOP long long operator^(T a, const U &b) {
   return (long long) a ^ (long long) b.rval.d;
 }
+
+#undef VARBINOP
 
 // We need to disallow these operators for variants or Clang will decide
 // that the global version is equally preferable with the FULLY-SPECIFIED
 // match in the actual variant class.
 #ifndef JUST_DEFINE_IT_RUN
-#define PRIMITIVE_OP \
-template<class T, typename U, typename enigma::NonVariantTypeEnabler<T>::EN = 0, REQUIRE_VARIANT_TYPE(U)> \
-static inline
+#define PRIMITIVE_OP                                                           \
+    template<class T, typename U,                                              \
+        REQUIRE_NON_VARIANT_TYPE(T), REQUIRE_VARIANT_TYPE(U)>                  \
+        static inline
 #else
 #define PRIMITIVE_OP template<typename T, typename U>
 #endif
@@ -792,6 +786,8 @@ PRIMITIVE_OP T &operator|= (T &a, const U &b) { return a |=  (T) b; }
 PRIMITIVE_OP T &operator^= (T &a, const U &b) { return a ^=  (T) b; }
 PRIMITIVE_OP T &operator<<=(T &a, const U &b) { return a <<= (T) b; }
 PRIMITIVE_OP T &operator>>=(T &a, const U &b) { return a >>= (T) b; }
+
+#undef PRIMITIVE_OP
 
 // String + variant operator we missed above
 template<typename T, typename U, REQUIRE_STRING_TYPE(T), REQUIRE_VARIANT_TYPE(U)>
@@ -819,29 +815,6 @@ static inline bool is_ptr      (const variant &val) {
 }
 
 }  // namespace enigma_user
-
-
-// Some compilers favor the above variant casts for enums,
-// rather than just comparing them as integers.
-#ifndef JUST_DEFINE_IT_RUN
-#define ENUM_OPERATION template<typename T, typename U, typename Common =      \
-    typename enigma::EnumAndNumericBinaryFuncEnabler<T, U>::T>                 \
-    static inline constexpr
-#else
-#define ENUM_OPERATION template<typename T, typename U, typename Common>
-#endif
-
-ENUM_OPERATION bool operator==(T a, U b) { return (Common) a == (Common) b; }
-ENUM_OPERATION bool operator!=(T a, U b) { return (Common) a != (Common) b; }
-ENUM_OPERATION bool operator<=(T a, U b) { return (Common) a <= (Common) b; }
-ENUM_OPERATION bool operator>=(T a, U b) { return (Common) a >= (Common) b; }
-ENUM_OPERATION bool operator< (T a, U b) { return (Common) a <  (Common) b; }
-ENUM_OPERATION bool operator> (T a, U b) { return (Common) a >  (Common) b; }
-
-ENUM_OPERATION Common operator&(T a, U b) { return (Common) a & (Common) b; }
-ENUM_OPERATION Common operator|(T a, U b) { return (Common) a | (Common) b; }
-ENUM_OPERATION Common operator^(T a, U b) { return (Common) a ^ (Common) b; }
-
 
 // End of reverse-order operations.
 
