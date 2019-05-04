@@ -73,7 +73,7 @@ namespace enigma
     myiter = NULL;
   }
 
-  depthv::depthv() : myiter(0) {}
+  depthv::depthv() : multifunction_variant<depthv>(0), myiter(0) {}
   depthv::~depthv() {}
 
   void image_singlev::function(const variant&) {

@@ -49,6 +49,7 @@ namespace enigma
     INHERIT_OPERATORS(image_singlev)
     gs_scalar *image_index, *image_speed;
     void function(const variant &oldval);
+    image_singlev(): multifunction_variant<image_singlev>(-1) {}
   };
   struct object_graphics: object_timelines
   {

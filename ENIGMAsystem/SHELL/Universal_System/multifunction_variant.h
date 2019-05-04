@@ -61,7 +61,11 @@ namespace enigma
     declare_relative_assign(^)
 
     #undef declare_relative_assign
+
+    multifunction_variant() = default;
+    template<typename T> explicit multifunction_variant(T t): variant(t) {}
   };
+
 } //namespace enigma
 
 #define INHERIT_OPERATORS(T)\

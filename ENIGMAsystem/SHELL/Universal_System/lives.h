@@ -27,6 +27,7 @@ namespace enigma
 struct livesv: multifunction_variant<livesv> {
   INHERIT_OPERATORS(livesv)
   void function(const variant &oldval);
+  livesv(): multifunction_variant<livesv>(3) {}
 };
 void reset_lives();
 // Updates the status of whether the "lives" variable
