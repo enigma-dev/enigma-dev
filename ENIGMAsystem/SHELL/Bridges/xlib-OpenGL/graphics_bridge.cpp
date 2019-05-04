@@ -14,8 +14,11 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include "Graphics_Systems/graphics_mandatory.h"
+
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/GLversion.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Bridges/OpenGL/GLload.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/xlib/XLIBwindow.h"
@@ -28,7 +31,6 @@
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
 namespace enigma {
-  GLuint msaa_fbo = 0;
   GLXContext glxc;
   XVisualInfo *vi;
 
@@ -60,9 +62,7 @@ namespace enigma {
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
-      show_error(std::string("Failed to initialize glew for OpenGL. ") + (const char*)glewGetErrorString(err), true);
+    gl_load_exts();
   }
 
   void DisableDrawing(void* handle) {
@@ -141,10 +141,5 @@ namespace enigma_user {
       // be zero or less, so therefore it is not used here.
       // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
     }
-  }
-
-  void display_reset(int samples, bool vsync) {
-    set_synchronization(vsync);
-    //TODO: Copy over from the Win32 bridge
   }
 }
