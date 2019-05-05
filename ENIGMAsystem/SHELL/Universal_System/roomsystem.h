@@ -187,6 +187,7 @@ namespace enigma
 namespace enigma { struct roomv: multifunction_variant<roomv> {
   INHERIT_OPERATORS(roomv)
   void function(const variant &oldval);
+  roomv(): multifunction_variant<roomv>(0) {}
 }; }
 namespace enigma_user {
   extern enigma::roomv room;
