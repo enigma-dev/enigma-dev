@@ -36,19 +36,20 @@
 namespace enigma
 {
   extern bool gui_used;
-  struct depthv: multifunction_variant {
+  struct depthv: multifunction_variant<depthv> {
     INHERIT_OPERATORS(depthv)
     struct inst_iter *myiter;
-    void function(variant oldval);
+    void function(const variant &oldval);
     void init(gs_scalar depth, object_basic* who);
     void remove();
     depthv();
     ~depthv();
   };
-  struct image_singlev: multifunction_variant {
+  struct image_singlev: multifunction_variant<image_singlev> {
     INHERIT_OPERATORS(image_singlev)
     gs_scalar *image_index, *image_speed;
-    void function(variant oldval);
+    void function(const variant &oldval);
+    image_singlev(): multifunction_variant<image_singlev>(-1) {}
   };
   struct object_graphics: object_timelines
   {

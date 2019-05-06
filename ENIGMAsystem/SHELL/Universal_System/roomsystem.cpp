@@ -315,8 +315,7 @@ namespace enigma
 
 
 //Implement the "room" global before we continue
-INTERCEPT_DEFAULT_COPY(enigma::roomv)
-void enigma::roomv::function(variant oldval) {
+void enigma::roomv::function(const variant &oldval) {
   enigma_user::room_goto((int)rval.d);
   rval.d = oldval.rval.d;
 }
