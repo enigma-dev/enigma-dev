@@ -109,7 +109,7 @@ void show_info() {
 
 bool show_question(string str) {
   cout << str;
-  char answer;
+  char answer = 0;
   while (answer != 'N' && answer != 'Y') {
     cout << endl << "[Y/N]:";
     cin >> answer;

@@ -1,39 +1,28 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008, 2019 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
 
 #ifndef ENIGMA_H_LUA_TABLE
 #define ENIGMA_H_LUA_TABLE
 
-#ifndef JUST_DEFINE_IT_RUN
 #include <map>     // Sparse part
 #include <vector>  // Dense part
 #include <cstring> // Memcpy
-#include <cstdlib> // Malloc, Realloc, Free
-#endif
+#include <cstddef>
 
 /**
   This file implements a Lua-table-like structure. It borrows ideas not only from
@@ -61,13 +50,8 @@ T my_max(const T& lhs, const T& rhs) {
 
 
 template <class T> struct lua_table {
-# ifndef JUST_DEFINE_IT_RUN
   typedef std::vector<T> dense_type;
   typedef std::map<size_t,T> sparse_type;
-# else
-  typedef T dense_type[1];
-  typedef T sparse_type[1];
-# endif
 
  private:
   dense_type dense;
@@ -83,10 +67,8 @@ template <class T> struct lua_table {
     sparse = who.sparse;
   }
 
-  void upsize(const size_t c)
-  {
+  void upsize(const size_t c) {
     dense.resize(c);
-    mx_size = c;
     //Copy sparse array values that are now within this reserve space.
     for (typename sparse_type::iterator it=sparse.begin(); it!=sparse.end();) {
       if (it->first >= c) {
@@ -126,6 +108,7 @@ template <class T> struct lua_table {
 
   void fill(const T &value, size_t length) {
     upsize(length);
+    if (mx_size < length) mx_size = length;
     for (size_t i = 0; i < length; ++i)
       dense[i] = value;
   }

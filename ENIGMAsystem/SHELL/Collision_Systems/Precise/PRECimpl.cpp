@@ -59,10 +59,8 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
     }
 }
 
-static inline int min(int x, int y) { return x<y? x : y; }
-static inline double min(double x, double y) { return x<y? x : y; }
-static inline int max(int x, int y) { return x>y? x : y; }
-static inline double max(double x, double y) { return x>y? x : y; }
+template<typename T> static inline T min(T x, T y) { return x<y? x : y; }
+template<typename T> static inline T max(T x, T y) { return x>y? x : y; }
 
 static bool precise_collision_single(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
                                 double x1, double y1,

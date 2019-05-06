@@ -128,6 +128,7 @@ namespace enigma
     }
     }
   }
+  using std::abs;
   inline double sqr(double x) {return x*x;}
   void particle_emitter::get_point(int& x, int& y)
   {
