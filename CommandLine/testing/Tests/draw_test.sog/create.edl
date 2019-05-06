@@ -1,1 +1,22 @@
 spr = sprite_add("CommandLine/testing/data/sprite.png", 4, false, false, 16, 10);
+
+vertex_format_begin();
+vertex_format_add_position();
+vertex_format_add_color();
+vf_pos_col = vertex_format_end();
+
+dx = 70, dy = 20;
+vb_diamond = vertex_create_buffer();
+vertex_begin(vb_diamond,vf_pos_col);
+
+vertex_position(vb_diamond, dx, dy-20);
+vertex_color(vb_diamond, c_red, 1);
+vertex_position(vb_diamond, dx-20, dy);
+vertex_color(vb_diamond, c_green, 0.5);
+vertex_position(vb_diamond, dx+20, dy);
+vertex_color(vb_diamond, c_blue, 0.5);
+vertex_position(vb_diamond, dx, dy+20);
+vertex_color(vb_diamond, c_red, 1);
+
+vertex_end(vb_diamond);
+vertex_freeze(vb_diamond);
