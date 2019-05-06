@@ -184,9 +184,10 @@ namespace enigma
 // room variable
 
 #include "multifunction_variant.h"
-namespace enigma { struct roomv: multifunction_variant {
+namespace enigma { struct roomv: multifunction_variant<roomv> {
   INHERIT_OPERATORS(roomv)
-  void function(variant oldval);
+  void function(const variant &oldval);
+  roomv(): multifunction_variant<roomv>(0) {}
 }; }
 namespace enigma_user {
   extern enigma::roomv room;

@@ -18,9 +18,7 @@
 #include "lives.h"
 #include <cmath>
 
-INTERCEPT_DEFAULT_COPY(enigma::livesv)
-namespace enigma
-{
+namespace enigma {
   using enigma_user::lives;
   bool has_been_zeroless = false;
 
@@ -38,7 +36,7 @@ namespace enigma
   }
 }
 
-void enigma::livesv::function(variant oldval) {
+void enigma::livesv::function(const variant &oldval) {
   rval.d = round(rval.d);
   if (rval.d <= 0.0 && oldval.rval.d >= 1.0) {
     has_been_zeroless = true;

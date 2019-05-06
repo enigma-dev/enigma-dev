@@ -43,12 +43,8 @@ using namespace std;
 
 #include "include.h"
 
-static inline double maxv(double a, double b) { return (a > b) ? a : b; }
-static inline double minv(double a, double b) { return (a < b) ? a : b; }
-static inline unsigned maxv(unsigned a, unsigned b) { return (a > b) ? a : b; }
-static inline unsigned minv(unsigned a, unsigned b) { return (a < b) ? a : b; }
-static inline int maxv(int a, int b) { return (a > b) ? a : b; }
-static inline int minv(int a, int b) { return (a < b) ? a : b; }
+template<typename T> static inline T maxv(T a, T b) { return (a > b) ? a : b; }
+template<typename T> static inline T minv(T a, T b) { return (a < b) ? a : b; }
 
 template<typename t> bool tequal(t v1, t v2) { return v1 == v2; }
 template<> bool tequal(float v1, float v2)   { return fequal(v1, v2); }
@@ -751,10 +747,10 @@ std::string ds_grid_write(const unsigned int id)
       }
       else
       {
-        ss.width(4); ss << vari.sval.length();
+        ss.width(4); ss << vari.string_length();
         ss.width(1);
-        for (size_t j = 0; j < vari.sval.length(); ++j)
-          ss << vari.sval[j];
+        for (size_t j = 0; j < vari.string_length(); ++j)
+          ss << vari.char_at(j);
       }
     }
   }
@@ -826,7 +822,7 @@ void ds_grid_read(const unsigned int id, std::string value)
         ss.clear();
         i += 4;
 
-        vari.sval = value.substr(i, len);
+        vari.sval() = value.substr(i, len);
         i += len;
 
         ds_grids[id].add(xx, yy, vari);
@@ -1039,10 +1035,10 @@ std::string ds_map_write(const unsigned int id)
     }
     else
     {
-      ss.width(4); ss << (*it).first.sval.length();
+      ss.width(4); ss << (*it).first.string_length();
       ss.width(1);
-      for (size_t j = 0; j < (*it).first.sval.length(); ++j)
-        ss << (*it).first.sval[j];
+      for (size_t j = 0; j < (*it).first.string_length(); ++j)
+        ss << (*it).first.char_at(j);
     }
 
     // Write type
@@ -1058,10 +1054,10 @@ std::string ds_map_write(const unsigned int id)
         ss << b[i];    }
     else
     {
-      ss.width(4); ss << (*it).second.sval.length();
+      ss.width(4); ss << (*it).second.string_length();
       ss.width(1);
-      for (size_t j = 0; j < (*it).second.sval.length(); ++j)
-        ss << (*it).second.sval[j];
+      for (size_t j = 0; j < (*it).second.string_length(); ++j)
+        ss << (*it).second.char_at(j);
     }
 
     ++it;
@@ -1115,8 +1111,7 @@ void ds_map_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      variKey.type = ty_string;
-      variKey.sval = value.substr(i, len);
+      variKey = value.substr(i, len);
       i += len;
     }
 
@@ -1149,8 +1144,7 @@ void ds_map_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      variValue.type = ty_string;
-      variValue.sval = value.substr(i, len);
+      variValue = value.substr(i, len);
       i += len;
     }
 
@@ -1329,10 +1323,10 @@ std::string ds_list_write(const unsigned int id)
     }
     else
     {
-      ss.width(4); ss << dsList[i].sval.length();
+      ss.width(4); ss << dsList[i].string_length();
       ss.width(1);
-      for (size_t j = 0; j < dsList[i].sval.length(); ++j)
-        ss << dsList[i].sval[j];
+      for (size_t j = 0; j < dsList[i].string_length(); ++j)
+        ss << dsList[i].char_at(j);
     }
   }
 
@@ -1379,7 +1373,6 @@ void ds_list_read(const unsigned int id, std::string value)
     else
     {
       variant vari;
-      vari.type = ty_string;
       int len;
 
       // Read length
@@ -1388,7 +1381,7 @@ void ds_list_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      vari.sval = value.substr(i, len);
+      vari = value.substr(i, len);
       i += len;
 
       ds_lists[id].push_back(vari);
@@ -1590,10 +1583,10 @@ std::string ds_priority_write(const unsigned int id)
     }
     else
     {
-      ss.width(4); ss << (*it).first.sval.length();
+      ss.width(4); ss << (*it).first.string_length();
       ss.width(1);
-      for (size_t j = 0; j < (*it).first.sval.length(); ++j)
-        ss << (*it).first.sval[j];
+      for (size_t j = 0; j < (*it).first.string_length(); ++j)
+        ss << (*it).first.char_at(j);
     }
 
     ++it;
@@ -1659,8 +1652,7 @@ void ds_priority_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      vari.type = ty_string;
-      vari.sval = value.substr(i, len);
+      vari = value.substr(i, len);
       i += len;
     }
 
@@ -1789,10 +1781,10 @@ std::string ds_queue_write(const unsigned int id)
     }
     else
     {
-      ss.width(4); ss << dsQueue[i].sval.length();
+      ss.width(4); ss << dsQueue[i].string_length();
       ss.width(1);
-      for (size_t j = 0; j < dsQueue[i].sval.length(); ++j)
-        ss << dsQueue[i].sval[j];
+      for (size_t j = 0; j < dsQueue[i].string_length(); ++j)
+        ss << dsQueue[i].char_at(j);
     }
   }
 
@@ -1844,8 +1836,7 @@ void ds_queue_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      vari.type = ty_string;
-      vari.sval = value.substr(i, len);
+      vari = value.substr(i, len);
       i += len;
     }
 
@@ -1967,10 +1958,10 @@ std::string ds_stack_write(const unsigned int id)
     }
     else
     {
-      ss.width(4); ss << dsStack[i].sval.length();
+      ss.width(4); ss << dsStack[i].string_length();
       ss.width(1);
-      for (size_t j = 0; j < dsStack[i].sval.length(); ++j)
-        ss << dsStack[i].sval[j];
+      for (size_t j = 0; j < dsStack[i].string_length(); ++j)
+        ss << dsStack[i].char_at(j);
     }
   }
 
@@ -2022,8 +2013,7 @@ void ds_stack_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      vari.type = ty_string;
-      vari.sval = value.substr(i, len);
+      vari = value.substr(i, len);
       i += len;
     }
 
