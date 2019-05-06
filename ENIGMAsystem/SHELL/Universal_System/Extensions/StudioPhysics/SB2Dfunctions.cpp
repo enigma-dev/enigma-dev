@@ -25,7 +25,7 @@
 declare_recast(enigma::extension_studiophysics);
 
 namespace enigma {
-  extension_studiophysics::extension_studiophysics() { 
+  extension_studiophysics::extension_studiophysics() {
   }
 }
 */
@@ -51,7 +51,7 @@ bool systemPaused = false;
 vector<worldInstance*> worlds(0);
 vector<fixtureInstance*> fixtures;
 
-void worldInstance::world_update() 
+void worldInstance::world_update()
 {
   if (!systemPaused && !paused) {
     world->Step(timeStep, velocityIterations, positionIterations);
@@ -64,22 +64,22 @@ void worldInstance::world_update()
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_worldr(w,id,r) \
     if (unsigned(id) >= worlds.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics world with id " + toString(id), false); \
+      enigma_user::show_error("Cannot access GayMaker: Stupido physics world with id " + toString(id), false); \
       return r; \
     } worldInstance* w = worlds[id];
   #define get_world(w,id) \
     if (unsigned(id) >= worlds.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics world with id " + toString(id), false); \
+      enigma_user::show_error("Cannot access GayMaker: Stupido physics world with id " + toString(id), false); \
       return; \
     } worldInstance* w = worlds[id];
   #define get_fixturer(f,id,r) \
     if (unsigned(id) >= fixtures.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), false); \
+      enigma_user::show_error("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), false); \
       return r; \
     } fixtureInstance* f = fixtures[id];
   #define get_fixture(f,id) \
     if (unsigned(id) >= fixtures.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), false); \
+      enigma_user::show_error("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), false); \
       return; \
     } fixtureInstance* f = fixtures[id];
 #else
@@ -134,7 +134,7 @@ int physics_world_create()
 
 void physics_world_delete(int index)
 {
- 
+
 }
 
 void physics_world_pause_enable(int index, bool paused)
@@ -270,7 +270,7 @@ void physics_fixture_set_polygon_shape(int id)
   sb2dfixture->FinishShape();
 }
 
-void physics_fixture_set_edge_shape(int id, bool adjstart, bool adjend) 
+void physics_fixture_set_edge_shape(int id, bool adjstart, bool adjend)
 {
   get_fixture(sb2dfixture, id);
   b2EdgeShape shape;
@@ -511,4 +511,3 @@ void physics_draw_debug()
 }
 
 }
-

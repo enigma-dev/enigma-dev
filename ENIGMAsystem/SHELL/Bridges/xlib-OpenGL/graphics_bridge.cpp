@@ -46,7 +46,7 @@ namespace enigma {
     GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
     vi = glXChooseVisual(enigma::x11::disp,0,att);
     if (!vi)
-      show_error("Failed to Obtain GL Visual Info", true);
+      enigma_user::show_error("Failed to Obtain GL Visual Info", true);
     return vi;
   }
 
@@ -56,7 +56,7 @@ namespace enigma {
     //give us a GL context
     glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
     if (!glxc)
-      show_error("Failed to Create Graphics Context", true);
+      enigma_user::show_error("Failed to Create Graphics Context", true);
 
     //apply context
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
