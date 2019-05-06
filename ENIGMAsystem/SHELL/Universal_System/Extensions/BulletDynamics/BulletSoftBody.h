@@ -20,12 +20,12 @@
   #include "libEGMstd.h"
   #define get_softbodyr(w,id,r) \
     if (unsigned(id) >= bulletSoftBodies.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics body with id " + toString(id), false); \
+      enigma_user::show_error("Cannot access Bullet Dynamics physics body with id " + toString(id), false); \
       return r; \
     } BulletSoftBody* w = bulletSoftBodies[id];
   #define get_softbody(w,id) \
     if (unsigned(id) >= bulletSoftBodies.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics body with id " + toString(id), false); \
+      enigma_user::show_error("Cannot access Bullet Dynamics physics body with id " + toString(id), false); \
       return; \
     } BulletSoftBody* w = bulletSoftBodies[id];
 #else

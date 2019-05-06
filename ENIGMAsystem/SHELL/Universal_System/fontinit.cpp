@@ -32,6 +32,9 @@
 #include <string>
 
 namespace enigma {
+
+using enigma_user::show_error;
+
 void exe_loadfonts(FILE* exe) {
   int nullhere;
   unsigned fontcount, fntid, twid, thgt, gwid, ghgt;

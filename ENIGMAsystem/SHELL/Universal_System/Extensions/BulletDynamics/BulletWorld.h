@@ -20,17 +20,17 @@
   #include "libEGMstd.h"
   #define get_worldr(w,id,r) \
     if (unsigned(id) >= bulletWorlds.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics world with id " + toString(id), false); \
+      enigma_user::show_error("Cannot access Bullet Dynamics physics world with id " + toString(id), false); \
       return r; \
     } BulletWorld* w = bulletWorlds[id];
   #define get_world(w,id) \
     if (unsigned(id) >= bulletWorlds.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics world with id " + toString(id), false); \
+      enigma_user::show_error("Cannot access Bullet Dynamics physics world with id " + toString(id), false); \
       return; \
     } BulletWorld* w = bulletWorlds[id];
   #define get_worldc(w,id, c) \
     if (unsigned(id) >= bulletWorlds.size() || id < 0) { \
-      show_error("Cannot cast Bullet Dynamics physics world with id " + toString(id), false); \
+      enigma_user::show_error("Cannot cast Bullet Dynamics physics world with id " + toString(id), false); \
       return; \
     } c w = (c) bulletWorlds[id]->dynamicsWorld;
 #else

@@ -26,6 +26,8 @@
 #include <windows.h>
 #include <d3d11.h>
 
+using enigma_user::show_error;
+
 namespace enigma {
 
 extern HWND hWnd;

@@ -75,13 +75,13 @@ namespace enigma
   #include "libEGMstd.h"
   #define get_background(bck2d,back)\
     if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      enigma_user::show_error("Attempting to draw non-existing background " + toString(back), false);\
       return;\
     }\
     enigma::background *bck2d = enigma::backgroundstructarray[back];
   #define get_backgroundnv(bck2d,back,r)\
     if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      enigma_user::show_error("Attempting to draw non-existing background " + toString(back), false);\
       return r;\
     }\
     enigma::background *bck2d = enigma::backgroundstructarray[back];

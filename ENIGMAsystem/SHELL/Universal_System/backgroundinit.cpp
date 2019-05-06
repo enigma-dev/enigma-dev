@@ -28,13 +28,15 @@
 #include <cstring>
 #include <cstdio>
 
+using enigma_user::show_error;
+
 namespace enigma
 {
   void exe_loadbackgrounds(FILE *exe)
   {
     int nullhere;
     unsigned bkgid, width, height,transparent,smoothEdges,preload,useAsTileset,tileWidth,tileHeight,hOffset,vOffset,hSep,vSep;
- 
+
     if (!fread(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "BKG ", sizeof(int)) != 0) return;
 

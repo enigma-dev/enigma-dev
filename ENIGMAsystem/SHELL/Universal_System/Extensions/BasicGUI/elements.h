@@ -37,6 +37,7 @@
   #include <string>
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
+  using enigma_user::show_error;
   //This checks and returns an element
   #define get_elementv(element,clastype,entype,id,ret)\
     if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) {\

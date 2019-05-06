@@ -37,10 +37,10 @@
 bool get_sprite(enigma::sprite* &spr, int id)
 {
 #ifdef DEBUG_MODE
-  if (id < -1 || size_t(id) > enigma::sprite_idmax || !enigma::spritestructarray[id]) {
-    show_error("Cannot access sprite with id " + toString(id), false);
-    return false;
-  }
+    if (id < -1 || size_t(id) > enigma::sprite_idmax || !enigma::spritestructarray[id]) {
+        enigma_user::show_error("Cannot access sprite with id " + toString(id), false);
+        return false;
+    }
 #endif
   spr = enigma::spritestructarray[id];
   return true;
@@ -222,7 +222,7 @@ namespace enigma
 {
   // INVARIANT: Should always be equal to the actual size of spritestructarray.
   size_t spritestructarray_actualsize = 0;
-  
+
   //Allocates and zero-fills the array at game start
   void sprites_init() {
     spritestructarray_actualsize = sprite_idmax+1;
@@ -295,8 +295,8 @@ namespace enigma
   void sprite_add_to_index(sprite *ns, string filename, int imgnumb,
       bool precise, bool transparent, bool smooth, int x_offset, int y_offset,
       bool mipmap) {
-  
-    unsigned int width, height, fullwidth, fullheight;
+
+        unsigned int width, height, fullwidth, fullheight;
     unsigned char *pxdata = image_load(
         filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
     
@@ -314,11 +314,11 @@ namespace enigma
       int t_pixel_r = pxdata[(height-1)*fullwidth*4+2];
       unsigned int ih, iw;
       for (ih = 0; ih < height; ih++) {
-        int tmp = ih*fullwidth*4;
-        for (iw = 0; iw < width; iw++)
-        {
-          if (pxdata[tmp] == t_pixel_b 
-              && pxdata[tmp+1] == t_pixel_g 
+            int tmp = ih*fullwidth*4;
+            for (iw = 0; iw < width; iw++)
+            {
+          if (pxdata[tmp] == t_pixel_b
+              && pxdata[tmp+1] == t_pixel_g
               && pxdata[tmp+2] == t_pixel_r) {
             pxdata[tmp+3] = 0;
           }
@@ -498,7 +498,7 @@ namespace enigma
 
   delete[] imgpxdata;
   }
-  
+
   bbox_rect_t dummy_bbox = {32,0,32,0};
 
   const bbox_rect_t &sprite_get_bbox(int sprid)
@@ -509,7 +509,7 @@ namespace enigma
 
     return spr->bbox;
   }
-  
+
   const bbox_rect_t &sprite_get_bbox_relative(int sprid)
   {
     sprite *spr;
@@ -716,7 +716,7 @@ void sprite_collision_mask(int ind, bool sepmasks, int mode,
 
 var sprite_get_uvs(int ind, int subimg){
   var uvs;
-  uvs[4] = 0; 
+  uvs[4] = 0;
 
   enigma::sprite *spr;
   if (!get_sprite(spr,ind))
@@ -730,4 +730,3 @@ var sprite_get_uvs(int ind, int subimg){
 }
 
 }
-

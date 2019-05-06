@@ -560,7 +560,7 @@ namespace enigma
       }
       default:
         #if DEBUG_MODE
-          show_error("Interal error: particle color type not known", false)
+          enigma_user::show_error("Interal error: particle color type not known", false)
         #endif
         ;
       }
@@ -643,4 +643,3 @@ namespace enigma
     return changer_max_id;
   }
 }
-

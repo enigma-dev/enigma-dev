@@ -20,11 +20,6 @@
 #include "../General/ASadvanced.h"
 #include "XAsystem.h"
 
-#ifdef DEBUG_MODE
-#include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
-#endif
-
 #include <vector>
 using std::vector;
 

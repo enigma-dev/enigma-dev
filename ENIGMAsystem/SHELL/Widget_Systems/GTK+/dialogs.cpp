@@ -33,6 +33,8 @@
 
 using namespace std;
 
+namespace enigma_user {
+
 void show_error(string errortext, const bool fatal) {
 //TODO: Implement
 }
@@ -148,8 +150,7 @@ string get_save_filename(string filter, string fname, string caption)
   return ret;
 }
 
-
-
+} // namespace enigma_user
 
 static int* cmret;
 static void menu_item_clicked(gpointer user_data) {

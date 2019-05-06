@@ -21,6 +21,11 @@
 
 #ifndef ENIGMA_AL_SYSTEM_H
 #define ENIGMA_AL_SYSTEM_H
+
+#ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h"  // show_error
+#endif
+
 #include <stddef.h>
 
 #ifdef __APPLE__
@@ -50,13 +55,13 @@ int get_free_channel(double priority);
 #ifdef DEBUG_MODE
 #define get_sound(snd, id, failure)                                                          \
   if (id < 0 or sound_resources.find(id) == sound_resources.end() or !sound_resources[id]) { \
-    show_error("Sound " + enigma_user::toString(id) + " does not exist", false);             \
+    enigma_user::show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
     return failure;                                                                          \
   }                                                                                          \
   SoundResource *const snd = sound_resources[id];
 #define get_soundv(snd, id)                                                                  \
   if (id < 0 or sound_resources.find(id) == sound_resources.end() or !sound_resources[id]) { \
-    show_error("Sound " + enigma_user::toString(id) + " does not exist", false);             \
+    enigma_user::show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
     return;                                                                                  \
   }                                                                                          \
   SoundResource *const snd = sound_resources[id];

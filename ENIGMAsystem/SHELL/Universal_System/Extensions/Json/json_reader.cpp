@@ -21,7 +21,7 @@
 #pragma warning( disable : 4996 )   // disable warning about strdup being deprecated.
 #endif
 
-namespace Json 
+namespace Json
 {
 Features::Features()   : allowComments_( true )   , strictRoot_( false )
 {
@@ -96,7 +96,7 @@ bool Reader::parse( std::istream& sin,Value &root,bool collectComments )
 bool Reader::parse( const char *beginDoc, const char *endDoc, Value &root,bool collectComments )
 {
    if ( !features_.allowComments_ )
-   
+
 {
       collectComments = false;
    }
@@ -112,17 +112,17 @@ bool Reader::parse( const char *beginDoc, const char *endDoc, Value &root,bool c
    while ( !nodes_.empty() )
       nodes_.pop();
    nodes_.push( &root );
-   
+
    bool successful = readValue();
    Token token;
    skipCommentTokens( token );
    if ( collectComments_  &&  !commentsBefore_.empty() )
       root.setComment( commentsBefore_, commentAfter );
    if ( features_.strictRoot_ )
-   
+
 {
       if ( !root.isArray()  &&  !root.isObject() )
-      
+
 {
          // Set error location to start of doc, ideally should be first token found in doc
          token.type_ = tokenError;
@@ -144,7 +144,7 @@ bool Reader::readValue()
    bool successful = true;
 
    if ( collectComments_  &&  !commentsBefore_.empty() )
-   
+
 {
       currentValue().setComment( commentsBefore_, commentBefore );
       commentsBefore_ = "";
@@ -152,7 +152,7 @@ bool Reader::readValue()
 
 
    switch ( token.type_ )
-   
+
 {
    case tokenObjectBegin:
       successful = readObject( token );
@@ -180,7 +180,7 @@ bool Reader::readValue()
    }
 
    if ( collectComments_ )
-   
+
 {
       lastValueEnd_ = current_;
       lastValue_ = &currentValue();
@@ -193,17 +193,17 @@ bool Reader::readValue()
 void Reader::skipCommentTokens( Token &token )
 {
    if ( features_.allowComments_ )
-   
+
 {
       do
-      
+
 {
          readToken( token );
       }
       while ( token.type_ == tokenComment );
    }
    else
-   
+
 {
       readToken( token );
    }
@@ -226,7 +226,7 @@ bool Reader::readToken( Token &token )
    Char c = getNextChar();
    bool ok = true;
    switch ( c )
-   
+
 {
    case '{':
       token.type_ = tokenObjectBegin;
@@ -297,7 +297,7 @@ bool Reader::readToken( Token &token )
 void Reader::skipSpaces()
 {
    while ( current_ != end_ )
-   
+
 {
       Char c = *current_;
       if ( c == ' '  ||  c == '\t'  ||  c == '\r'  ||  c == '\n' )
@@ -334,11 +334,11 @@ bool Reader::readComment()
       return false;
 
    if ( collectComments_ )
-   
+
 {
       CommentPlacement placement = commentBefore;
       if ( lastValueEnd_  &&  !containsNewLine( lastValueEnd_, commentBegin ) )
-      
+
 {
          if ( c != '*'  ||  !containsNewLine( commentBegin, current_ ) )
             placement = commentAfterOnSameLine;
@@ -354,13 +354,13 @@ void Reader::addComment( Location begin, Location end, CommentPlacement placemen
 {
    assert( collectComments_ );
    if ( placement == commentAfterOnSameLine )
-   
+
 {
       assert( lastValue_ != 0 );
       lastValue_->setComment( std::string( begin, end ), placement );
    }
    else
-   
+
 {
       if ( !commentsBefore_.empty() )
          commentsBefore_ += "\n";
@@ -372,7 +372,7 @@ void Reader::addComment( Location begin, Location end, CommentPlacement placemen
 bool Reader::readCStyleComment()
 {
    while ( current_ != end_ )
-   
+
 {
       Char c = getNextChar();
       if ( c == '*'  &&  *current_ == '/' )
@@ -385,7 +385,7 @@ bool Reader::readCStyleComment()
 bool Reader::readCppStyleComment()
 {
    while ( current_ != end_ )
-   
+
 {
       Char c = getNextChar();
       if (  c == '\r'  ||  c == '\n' )
@@ -398,7 +398,7 @@ bool Reader::readCppStyleComment()
 void Reader::readNumber()
 {
    while ( current_ != end_ )
-   
+
 {
       if ( !(*current_ >= '0'  &&  *current_ <= '9')  &&
            !in( *current_, '.', 'e', 'E', '+', '-' ) )
@@ -411,7 +411,7 @@ bool Reader::readString()
 {
    Char c = 0;
    while ( current_ != end_ )
-   
+
 {
       c = getNextChar();
       if ( c == '\\' )
@@ -429,7 +429,7 @@ bool Reader::readObject( Token &/*tokenStart*/ )
    std::string name;
    currentValue() = Value( objectValue );
    while ( readToken( tokenName ) )
-   
+
 {
       bool initialTokenOk = true;
       while ( tokenName.type_ == tokenComment  &&  initialTokenOk )
@@ -440,17 +440,17 @@ bool Reader::readObject( Token &/*tokenStart*/ )
          return true;
       if ( tokenName.type_ != tokenString )
          break;
-      
+
       name = "";
       if ( !decodeString( tokenName, name ) )
          return recoverFromError( tokenObjectEnd );
 
       Token colon;
       if ( !readToken( colon ) ||  colon.type_ != tokenMemberSeparator )
-      
+
 {
-         return addErrorAndRecover( "Missing ':' after object member name", 
-                                    colon, 
+         return addErrorAndRecover( "Missing ':' after object member name",
+                                    colon,
                                     tokenObjectEnd );
       }
       Value &value = currentValue()[ name ];
@@ -462,13 +462,13 @@ bool Reader::readObject( Token &/*tokenStart*/ )
 
       Token comma;
       if ( !readToken( comma )
-            ||  ( comma.type_ != tokenObjectEnd  &&  
+            ||  ( comma.type_ != tokenObjectEnd  &&
                   comma.type_ != tokenArraySeparator &&
                   comma.type_ != tokenComment ) )
-      
+
 {
-         return addErrorAndRecover( "Missing ',' or '}' in object declaration", 
-                                    comma, 
+         return addErrorAndRecover( "Missing ',' or '}' in object declaration",
+                                    comma,
                                     tokenObjectEnd );
       }
       bool finalizeTokenOk = true;
@@ -478,8 +478,8 @@ bool Reader::readObject( Token &/*tokenStart*/ )
       if ( comma.type_ == tokenObjectEnd )
          return true;
    }
-   return addErrorAndRecover( "Missing '}' or object member name", 
-                              tokenName, 
+   return addErrorAndRecover( "Missing '}' or object member name",
+                              tokenName,
                               tokenObjectEnd );
 }
 
@@ -489,7 +489,7 @@ bool Reader::readArray( Token &/*tokenStart*/ )
    currentValue() = Value( arrayValue );
    skipSpaces();
    if ( *current_ == ']' ) // empty array
-   
+
 {
       Token endArray;
       readToken( endArray );
@@ -497,7 +497,7 @@ bool Reader::readArray( Token &/*tokenStart*/ )
    }
    int index = 0;
    for (;;)
-   
+
 {
       Value &value = currentValue()[ index++ ];
       nodes_.push( &value );
@@ -510,17 +510,17 @@ bool Reader::readArray( Token &/*tokenStart*/ )
       // Accept Comment after last item in the array.
       ok = readToken( token );
       while ( token.type_ == tokenComment  &&  ok )
-      
+
 {
          ok = readToken( token );
       }
       bool badTokenType = ( token.type_ != tokenArraySeparator  &&
                             token.type_ != tokenArrayEnd );
       if ( !ok  ||  badTokenType )
-      
+
 {
-         return addErrorAndRecover( "Missing ',' or ']' in array declaration", 
-                                    token, 
+         return addErrorAndRecover( "Missing ',' or ']' in array declaration",
+                                    token,
                                     tokenArrayEnd );
       }
       if ( token.type_ == tokenArrayEnd )
@@ -534,10 +534,10 @@ bool Reader::decodeNumber( Token &token )
 {
    bool isDouble = false;
    for ( Location inspect = token.start_; inspect != token.end_; ++inspect )
-   
+
 {
-      isDouble = isDouble  
-                 ||  in( *inspect, '.', 'e', 'E', '+' )  
+      isDouble = isDouble
+                 ||  in( *inspect, '.', 'e', 'E', '+' )
                  ||  ( *inspect == '-'  &&  inspect != token.start_ );
    }
    if ( isDouble )
@@ -549,27 +549,27 @@ bool Reader::decodeNumber( Token &token )
    bool isNegative = *current == '-';
    if ( isNegative )
       ++current;
-   Value::LargestUInt maxIntegerValue = isNegative ? Value::LargestUInt(-Value::minLargestInt) 
+   Value::LargestUInt maxIntegerValue = isNegative ? Value::LargestUInt(-Value::minLargestInt)
                                                    : Value::maxLargestUInt;
    Value::LargestUInt threshold = maxIntegerValue / 10;
    Value::UInt lastDigitThreshold = Value::UInt( maxIntegerValue % 10 );
    assert( lastDigitThreshold >=0  &&  lastDigitThreshold <= 9 );
    Value::LargestUInt value = 0;
    while ( current < token.end_ )
-   
+
 {
       Char c = *current++;
       if ( c < '0'  ||  c > '9' )
          return addError( "'" + std::string( token.start_, token.end_ ) + "' is not a number.", token );
       Value::UInt digit(c - '0');
       if ( value >= threshold )
-      
+
 {
          // If the current digit is not the last one, or if it is
          // greater than the last digit of the maximum integer value,
          // the parse the number as a double.
          if ( current != token.end_  ||  digit > lastDigitThreshold )
-         
+
 {
             return decodeDouble( token );
          }
@@ -593,7 +593,7 @@ bool Reader::decodeDouble( Token &token )
    int count;
    int length = int(token.end_ - token.start_);
    if ( length <= bufferSize )
-   
+
 {
       Char buffer[bufferSize+1];
       memcpy( buffer, token.start_, length );
@@ -601,7 +601,7 @@ bool Reader::decodeDouble( Token &token )
       count = sscanf( buffer, "%lf", &value );
    }
    else
-   
+
 {
       std::string buffer( token.start_, token.end_ );
       count = sscanf( buffer.c_str(), "%lf", &value );
@@ -630,19 +630,19 @@ bool Reader::decodeString( Token &token, std::string &decoded )
    Location current = token.start_ + 1; // skip '"'
    Location end = token.end_ - 1;      // do not include '"'
    while ( current != end )
-   
+
 {
       Char c = *current++;
       if ( c == '"' )
          break;
       else if ( c == '\\' )
-      
+
 {
          if ( current == end )
             return addError( "Empty escape sequence in string", token, current );
          Char escape = *current++;
          switch ( escape )
-         
+
 {
          case '"': decoded += '"'; break;
          case '/': decoded += '/'; break;
@@ -653,7 +653,7 @@ bool Reader::decodeString( Token &token, std::string &decoded )
          case 'r': decoded += '\r'; break;
          case 't': decoded += '\t'; break;
          case 'u':
-            
+
 {
                unsigned int unicode;
                if ( !decodeUnicodeCodePoint( token, current, end, unicode ) )
@@ -666,7 +666,7 @@ bool Reader::decodeString( Token &token, std::string &decoded )
          }
       }
       else
-      
+
 {
          decoded += c;
       }
@@ -680,23 +680,23 @@ bool Reader::decodeUnicodeCodePoint( Token &token, Location &current,    Locatio
    if ( !decodeUnicodeEscapeSequence( token, current, end, unicode ) )
       return false;
    if (unicode >= 0xD800 && unicode <= 0xDBFF)
-   
+
 {
       // surrogate pairs
       if (end - current < 6)
          return addError( "additional six characters expected to parse unicode surrogate pair.", token, current );
       unsigned int surrogatePair;
       if (*(current++) == '\\' && *(current++)== 'u')
-      
+
 {
          if (decodeUnicodeEscapeSequence( token, current, end, surrogatePair ))
-         
+
 {
             unicode = 0x10000 + ((unicode & 0x3FF) << 10) + (surrogatePair & 0x3FF);
-         } 
+         }
          else
             return false;
-      } 
+      }
       else
          return addError( "expecting another \\u token to begin the second half of a unicode surrogate pair", token, current );
    }
@@ -709,7 +709,7 @@ bool Reader::decodeUnicodeEscapeSequence( Token &token,   Location &current,  Lo
       return addError( "Bad unicode escape sequence in string: four digits expected.", token, current );
    unicode = 0;
    for ( int index =0; index < 4; ++index )
-   
+
 {
       Char c = *current++;
       unicode *= 16;
@@ -742,7 +742,7 @@ bool Reader::recoverFromError( TokenType skipUntilToken )
    int errorCount = int(errors_.size());
    Token skip;
    for (;;)
-   
+
 {
       if ( !readToken(skip) )
          errors_.resize( errorCount ); // discard errors caused by recovery
@@ -781,11 +781,11 @@ void Reader::getLocationLineAndColumn( Location location,  int &line, int &colum
    Location lastLineStart = current;
    line = 0;
    while ( current < location  &&  current != end_ )
-   
+
 {
       Char c = *current++;
       if ( c == '\r' )
-      
+
 {
          if ( *current == '\n' )
             ++current;
@@ -793,7 +793,7 @@ void Reader::getLocationLineAndColumn( Location location,  int &line, int &colum
          ++line;
       }
       else if ( c == '\n' )
-      
+
 {
          lastLineStart = current;
          ++line;
@@ -828,7 +828,7 @@ std::string Reader::getFormattedErrorMessages() const
    for ( Errors::const_iterator itError = errors_.begin();
          itError != errors_.end();
          ++itError )
-   
+
 {
       const ErrorInfo &error = *itError;
       formattedMessage += "* " + getLocationLineAndColumn( error.token_.start_ ) + "\n";
@@ -845,7 +845,7 @@ std::istream& operator>>( std::istream &sin, Value &root )
     Json::Reader reader;
     bool ok = reader.parse(sin, root, true);
     //JSON_ASSERT( ok );
-    if (!ok) show_error(reader.getFormattedErrorMessages(), 1);
+    if (!ok) enigma_user::show_error(reader.getFormattedErrorMessages(), 1);
     return sin;
 }
 

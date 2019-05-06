@@ -76,7 +76,7 @@ namespace enigma
     windowsystem_write_exename(exename);
     FILE* exe = fopen(exename,"rb");
     if (!exe)
-      show_error("Resource load fail: exe unopenable",0);
+      enigma_user::show_error("Resource load fail: exe unopenable",0);
     else do
     {
       int nullhere;

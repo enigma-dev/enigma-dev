@@ -20,12 +20,12 @@
   #include "libEGMstd.h"
   #define get_shaper(s,id,r) \
     if (unsigned(id) >= bulletShapes.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
+      enigma_user::show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
       return r; \
     } BulletShape* s = bulletShapes[id];
   #define get_shape(s,id) \
     if (unsigned(id) >= bulletShapes.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
+      enigma_user::show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
       return; \
     } BulletShape* s = bulletShapes[id];
 #else

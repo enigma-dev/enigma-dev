@@ -932,7 +932,7 @@ namespace enigma
     case pt_sh_snow: {generate_snow(); break;}
     default:
       #if DEBUG_MODE
-        show_error("No such particle type", false);
+        enigma_user::show_error("No such particle type", false);
       #endif
       ;
     }
@@ -971,4 +971,3 @@ namespace enigma
     return sprid;
   }
 }
-

@@ -62,7 +62,7 @@ void EnableDrawing(void*)
   pfd.iLayerType = PFD_MAIN_PLANE;
   iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
 
-  if (iFormat==0) { show_error("Failed to set the format of the OpenGL graphics device.",1); }
+  if (iFormat==0) { enigma_user::show_error("Failed to set the format of the OpenGL graphics device.",1); }
 
   SetPixelFormat ( enigma::window_hDC, iFormat, &pfd );
   LegacyRC = wglCreateContext( enigma::window_hDC );

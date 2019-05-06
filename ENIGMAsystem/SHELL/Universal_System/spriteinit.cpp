@@ -37,20 +37,20 @@ namespace enigma
     int nullhere;
     unsigned sprid, width, height, bbt, bbb, bbl, bbr, bbm, shape;
     int xorig, yorig;
-    
+
     if (!fread(&nullhere,4,1,exe)) return;
     if (memcmp(&nullhere, "SPR ", sizeof(int)) != 0)
       return;
-    
+
     // Determine how many sprites we have
     int sprcount;
     if (!fread(&sprcount,4,1,exe)) return;
-    
+
     // Fetch the highest ID we will be using
     int spr_highid;
     if (!fread(&spr_highid,4,1,exe)) return;
     sprites_init();
-    
+
     for (int i = 0; i < sprcount; i++)
     {
       if (!fread(&sprid, 4,1,exe)) return;
@@ -76,12 +76,12 @@ namespace enigma
         case ct_circle: coll_type = ct_circle; break;
         default: coll_type = ct_bbox; break;
       };
-      
+
       int subimages;
       if (!fread(&subimages,4,1,exe)) return; //co//ut << "Subimages: " << subimages << endl;
-      
+
       sprite_new_empty(sprid, subimages, width, height, xorig, yorig, bbt, bbb, bbl, bbr, 1,0);
-      for (int ii=0;ii<subimages;ii++) 
+      for (int ii=0;ii<subimages;ii++)
       {
         int unpacked;
         if (!fread(&unpacked,4,1,exe)) return;
@@ -90,22 +90,23 @@ namespace enigma
         unsigned char* cpixels=new unsigned char[size+1];
         if (!cpixels)
         {  //FIXME: Uncomment these when tostring is available
-          show_error("Failed to load sprite: Cannot allocate enough memory "+toString(unpacked),0);
+          enigma_user::show_error("Failed to load sprite: Cannot allocate enough memory "+toString(unpacked),0);
           break;
         }
         unsigned int sz2=fread(cpixels,1,size,exe);
         if (size!=sz2) {
-          show_error("Failed to load sprite: Data is truncated before exe end. Read "+toString(sz2)+" out of expected "+toString(size),0);
+          enigma_user::show_error("Failed to load sprite: Data is truncated before exe end. Read "+toString(sz2)+
+                                  " out of expected "+toString(size),0);
           return;
         }
         unsigned char* pixels=new unsigned char[unpacked+1];
         if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
         {
-          show_error("Sprite load error: Sprite does not match expected size",0);
+          enigma_user::show_error("Sprite load error: Sprite does not match expected size",0);
           continue;
         }
         delete[] cpixels;
-        
+
         unsigned char* collision_data = 0;
         switch (coll_type)
         {
@@ -117,15 +118,15 @@ namespace enigma
           case ct_polygon: collision_data = 0; break; //FIXME: Support vertex data.
           default: collision_data = 0; break;
         };
-        
+
         sprite_set_subimage(sprid, ii, width, height, pixels, collision_data, coll_type);
-        
+
         delete[] pixels;
         if (!fread(&nullhere,4,1,exe)) return;
-        
+
         if (nullhere)
         {
-          show_error("Sprite load error: Null terminator expected",0);
+          enigma_user::show_error("Sprite load error: Null terminator expected",0);
           break;
         }
       }
