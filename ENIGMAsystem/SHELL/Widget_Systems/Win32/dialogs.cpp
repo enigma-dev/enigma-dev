@@ -57,24 +57,6 @@ static inline string add_slash(const string& dir) {
   return dir;
 }
 
-void show_error(string errortext, const bool fatal)
-{
-  #ifdef DEBUG_MODE
-  errortext += "\n\n" + enigma::debug_scope::GetErrors();
-  #endif
-
-  if (MessageBox(NULL,errortext.c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
-    exit(0);
-
-  if (fatal)
-    printf("FATAL ERROR: %s\n",errortext.c_str()),
-    exit(0);
-  else
-    printf("ERROR: %s\n",errortext.c_str());
-
-  //ABORT_ON_ALL_ERRORS();
-}
-
 namespace enigma {
 
 extern HINSTANCE hInstance;
@@ -267,6 +249,24 @@ void message_text_font(string name, int size, int color, int style) {
 
 void message_text_charset(int type, int charset) {
 
+}
+
+void show_error(string errortext, const bool fatal)
+{
+  #ifdef DEBUG_MODE
+  errortext += "\n\n" + enigma::debug_scope::GetErrors();
+  #endif
+
+  if (MessageBox(NULL,errortext.c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
+    exit(0);
+
+  if (fatal)
+    printf("FATAL ERROR: %s\n",errortext.c_str()),
+    exit(0);
+  else
+    printf("ERROR: %s\n",errortext.c_str());
+
+  //ABORT_ON_ALL_ERRORS();
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {

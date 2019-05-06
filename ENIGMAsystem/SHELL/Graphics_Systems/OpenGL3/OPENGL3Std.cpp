@@ -90,7 +90,7 @@ namespace enigma {
     char finalMessage[256];
     FormatDebugOutputARB(finalMessage, 256, source, type, id, severity, message);
     printf("%s\n", finalMessage);
-    show_error(toString(finalMessage), false);
+    enigma_user::show_error(toString(finalMessage), false);
   }
 #endif
 
