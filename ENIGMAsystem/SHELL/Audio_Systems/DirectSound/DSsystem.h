@@ -37,17 +37,17 @@ namespace enigma {
 int get_free_channel(double priority);
 
 #ifdef DEBUG_MODE
-#define get_sound(snd, id, failure)                                              \
-  if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {  \
+#define get_sound(snd, id, failure)                                                           \
+  if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {               \
     enigma_user::show_error("Sound " + enigma_user::toString(id) + " does not exist", false); \
-    return failure;                                                              \
-  }                                                                              \
+    return failure;                                                                           \
+  }                                                                                           \
   SoundResource *const snd = sound_resources[id];
-#define get_soundv(snd, id)                                                      \
-  if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {  \
+#define get_soundv(snd, id)                                                                   \
+  if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {               \
     enigma_user::show_error("Sound " + enigma_user::toString(id) + " does not exist", false); \
-    return;                                                                      \
-  }                                                                              \
+    return;                                                                                   \
+  }                                                                                           \
   SoundResource *const snd = sound_resources[id];
 #else
 #define get_sound(snd, id, failure) SoundResource *const snd = sound_resources[id];
