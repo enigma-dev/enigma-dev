@@ -17,10 +17,9 @@
 
 #include <string>
 
-//  void show_error(std::string errortext, const bool fatal);
-
 namespace enigma_user {
-  
+
+//  void show_error(std::string errortext, const bool fatal);
 //  int show_message(const std::string &str);
 int show_message_cancelable(std::string str);
 bool show_question(std::string str);
@@ -42,5 +41,5 @@ int get_color(int defcol);
 int get_color_ext(int defcol, std::string title);
 std::string message_get_caption();
 void message_set_caption(std::string str);
-  
+
 } // namespave enigma_user

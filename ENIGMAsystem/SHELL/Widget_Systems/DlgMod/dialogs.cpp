@@ -35,30 +35,30 @@ using enigma_user::window_handle;
 using std::string;
 
 namespace enigma {
-  
+
 bool widget_system_initialize() {
   return true;
 }
-  
+
 } // namespace enigma
+
+namespace enigma_user {
 
 void show_error(string errortext, const bool fatal) {
   string str_errortext = errortext;
-  
+
   #ifdef DEBUG_MODE
   str_errortext = enigma::debug_scope::GetErrors() + "\n\n" + str_errortext;
   #else
   str_errortext = "Error in some event or another for some object: \r\n\r\n" + str_errortext;
   #endif
-  
+
   bool DialogModule_result;
   DialogModule_result = (bool)external_call(external_define("DialogModule.dll", "show_error", enigma_user::dll_cdecl, enigma_user::ty_real, 2, enigma_user::ty_string, enigma_user::ty_real), (char *)str_errortext.c_str(), (double)fatal);
   external_free("DialogModule.dll");
   if (DialogModule_result || fatal)
     exit(0);
 }
-
-namespace enigma_user {
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
 
@@ -197,7 +197,7 @@ int get_color(int defcol) {
   external_free("DialogModule.dll");
   return DialogModule_result;
 }
-  
+
 int get_color_ext(int defcol, string title) {
   string str_title = title;
   int DialogModule_result;
@@ -205,5 +205,5 @@ int get_color_ext(int defcol, string title) {
   external_free("DialogModule.dll");
   return DialogModule_result;
 }
-  
+
 } // namespace enigma_user

@@ -35,9 +35,9 @@ unsigned char* zlib_compress(unsigned char* inbuffer,int actualsize)
     {
      #if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
      if (res==Z_MEM_ERROR)
-     show_error("Zlib failed to compress the buffer. Out of memory.",0);
+     enigma_user::show_error("Zlib failed to compress the buffer. Out of memory.",0);
      if (res==Z_BUF_ERROR)
-     show_error("Zlib failed to compress the buffer. Output size greater than allotted.",0);
+     enigma_user::show_error("Zlib failed to compress the buffer. Output size greater than allotted.",0);
      #endif
     }
 
@@ -51,17 +51,17 @@ int zlib_decompress(unsigned char* inbuffer, int insize, int uncompresssize,unsi
 	case Z_OK:return outused;
 	case Z_MEM_ERROR:
 		#if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
-			show_error("Zerror: Memory out",0);
+			enigma_user::show_error("Zerror: Memory out",0);
 		#endif
 		return -1;
 	case Z_BUF_ERROR:
 		#if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
-			show_error("Zerror: Output of " + toString(outused) + " above allotted " + toString(uncompresssize),0);
+			enigma_user::show_error("Zerror: Output of " + toString(outused) + " above allotted " + toString(uncompresssize),0);
 		#endif
 		return -2;
 	case Z_DATA_ERROR:
 		#if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
-			show_error("Zerror: Invalid data",0);
+			enigma_user::show_error("Zerror: Invalid data",0);
 		#endif
 		return -3;
 	default:return -4;
