@@ -173,11 +173,11 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
 }
 
 string file_dnd_get_files() {
-  if (fname != "")
+  if (fname != "") {
     file_dnd_apply_filter(def_pattern, def_allowfiles, def_allowdirs, def_allowmulti);
-
-  while (fname.back() == '\n')
-    fname.pop_back();
+    while (fname.back() == '\n')
+      fname.pop_back();
+  }
 
   return fname;
 }
