@@ -38,6 +38,11 @@ static bool file_dnd_enabled = false;
 static HDROP hDrop = NULL;
 static string fname;
 
+static string def_pattern;
+static bool def_allowfiles = true;
+static bool def_allowdirs = true;
+static bool def_allowmulti = true;
+
 using enigma_user::filename_name;
 using enigma_user::filename_ext;
 using enigma_user::file_exists;
@@ -51,6 +56,7 @@ static LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
   LRESULT rc = CallWindowProc(oldProc, hWnd, uMsg, wParam, lParam);
 
   if (uMsg == WM_DROPFILES) {
+    if (!def_allowmulti) fname = "";
     hDrop = (HDROP)wParam;
 
     UINT nNumOfFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
@@ -100,27 +106,7 @@ static HHOOK InstallHook() {
   return hook;
 }
 
-namespace enigma_user {
-
-bool file_dnd_get_enabled() {
-  return file_dnd_enabled;
-}
-
-void file_dnd_set_enabled(bool enable) {
-  file_dnd_enabled = enable;
-  DragAcceptFiles(enigma::hWnd, file_dnd_enabled);
-  if (file_dnd_enabled && hook == NULL)
-  InstallHook(); else fname = "";
-}
-
-string file_dnd_get_files() {
-  while (fname.back() == '\n')
-    fname.pop_back();
-
-  return fname;
-}
-
-void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool allowmulti) {
+static void file_dnd_apply_filter(string pattern, bool allowfiles, bool allowdirs, bool allowmulti) {
   if (pattern == "") { pattern = "."; }
   pattern = string_replace_all(pattern, " ", "");
   pattern = string_replace_all(pattern, "*", "");
@@ -164,6 +150,36 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
       }
     }
   }
+}
+
+namespace enigma_user {
+
+bool file_dnd_get_enabled() {
+  return file_dnd_enabled;
+}
+
+void file_dnd_set_enabled(bool enable) {
+  file_dnd_enabled = enable;
+  DragAcceptFiles(enigma::hWnd, file_dnd_enabled);
+  if (file_dnd_enabled && hook == NULL)
+  InstallHook(); else fname = "";
+}
+
+void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool allowmulti) {
+  def_pattern = pattern;
+  def_allowfiles = allowfiles;
+  def_allowdirs = allowdirs;
+  def_allowmulti = allowmulti;
+}
+
+string file_dnd_get_files() {
+  if (fname != "")
+    file_dnd_apply_filter(def_pattern, def_allowfiles, def_allowdirs, def_allowmulti);
+
+  while (fname.back() == '\n')
+    fname.pop_back();
+
+  return fname;
 }
 
 } // namespace enigma_user
