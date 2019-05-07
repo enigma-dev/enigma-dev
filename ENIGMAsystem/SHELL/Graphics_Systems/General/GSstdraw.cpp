@@ -54,20 +54,22 @@ void draw_state_flush() {
   // track whether we are already flushing the state
   static bool flushing = false;
 
-  // if the state isn't dirty, we don't have to do anything
-  if (!drawStateDirty) return;
-
   // prevent state flush triggered by batch flush of another state flush
   if (flushing) return;
 
+  // flush the batch even if state is not dirty because this function
+  // means we are about to draw something anyway
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+
+  // if the state isn't dirty, we don't have to do anything
+  if (!drawStateDirty) return;
+
   flushing = true; // we are now flushing the state
 
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
   enigma::graphics_state_flush();
+  drawStateDirty = false; // state is not dirty now
 
   flushing = false; // done flushing state
-
-  drawStateDirty = false; // state is not dirty now
 }
 
 void draw_set_msaa_enabled(bool enable) {

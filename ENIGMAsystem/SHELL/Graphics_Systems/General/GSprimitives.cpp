@@ -76,9 +76,6 @@ unsigned draw_primitive_count(int kind, unsigned vertex_count) {
 }
 
 void draw_batch_flush(int kind) {
-  if (kind == pr_undefined)
-    kind = draw_get_batch_mode();
-
   static bool flushing = false;
 
   // return if the kind of flush being requested

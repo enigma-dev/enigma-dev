@@ -40,7 +40,7 @@ namespace enigma_user
 
   void draw_set_batch_mode(int mode);
   int draw_get_batch_mode();
-  void draw_batch_flush(int kind = pr_undefined);
+  void draw_batch_flush(int kind = draw_get_batch_mode());
   unsigned draw_primitive_count(int kind, unsigned vertex_count);
   void draw_primitive_begin(int kind);
   void draw_primitive_begin_texture(int kind, int texId);

@@ -1,3 +1,10 @@
+// put something in the draw batch
+draw_set_color(c_black);
+draw_rectangle(dx-20,dy-20,dx+20,dy+20,false);
+// ensure user-submit flushes the batch first
+// in which case the diamond should occlude the rect
+vertex_submit(vb_diamond,pr_trianglestrip);
+
 draw_set_color(c_yellow);
 draw_rectangle(50, 50, 600, 400, true);
 draw_set_color(c_olive);
