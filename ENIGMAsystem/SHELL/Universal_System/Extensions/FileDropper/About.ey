@@ -9,5 +9,5 @@ Default: false
 Icon: FileDropper.png
 
 Depends:
-  Build-Platforms: Win32
+  Build-Platforms: Win32 
 Dependencies: None
