@@ -24,11 +24,21 @@ gtest_assert_eq(ds_list_find_value(list_str, 0), "alarm");
 gtest_assert_eq(ds_list_find_value(list_str, 1), "bank");
 gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
 
-random_set_seed(65079);
-ds_list_shuffle(list_str);
-gtest_assert_eq(ds_list_find_value(list_str, 0), "bank");
-gtest_assert_eq(ds_list_find_value(list_str, 1), "alarm");
-gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
+// When shuffle is repeated with the same seed, it results
+// in a repeated set of orderings modulo 2.
+for (var i = 0; i < 5; ++i) {
+	random_set_seed(69378);
+	ds_list_shuffle(list_str);
+	if (i % 2) {
+		gtest_assert_eq(ds_list_find_value(list_str, 0), "alarm");
+		gtest_assert_eq(ds_list_find_value(list_str, 1), "bank");
+		gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
+	} else {
+		gtest_assert_eq(ds_list_find_value(list_str, 0), "bank");
+		gtest_assert_eq(ds_list_find_value(list_str, 1), "alarm");
+		gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
+	}
+}
 
 ds_list_add(list_num, 5);
 ds_list_add(list_num, 2);
