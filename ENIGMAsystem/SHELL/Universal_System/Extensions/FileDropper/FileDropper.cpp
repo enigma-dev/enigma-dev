@@ -17,8 +17,7 @@
 
 #include "FileDropper.h"
 #include <windows.h>
-#include <algorithm>
-#include <sstream>
+#include <set>
 #include <string>
 #include <vector>
 #include <cwchar>
@@ -28,58 +27,45 @@
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "strings_util.h"
 
-using std::string;
+using std::set;
 using std::size_t;
+using std::string;
 using std::vector;
 
-static HHOOK hook = NULL;
-static WNDPROC oldProc = NULL;
-static bool file_dnd_enabled = false;
-static HDROP hDrop = NULL;
-static string fname;
+namespace {
 
-static string def_pattern;
-static bool def_allowfiles = true;
-static bool def_allowdirs = true;
-static bool def_allowmulti = true;
+HHOOK hook = NULL;
+WNDPROC oldProc = NULL;
+bool file_dnd_enabled = false;
+HDROP hDrop = NULL;
+set<string> dropped_files;
 
-using enigma_user::filename_name;
+string def_pattern;
+bool def_allowfiles = true;
+bool def_allowdirs = true;
+bool def_allowmulti = true;
+
 using enigma_user::filename_ext;
 using enigma_user::file_exists;
 using enigma_user::directory_exists;
 
-static void UnInstallHook(HHOOK Hook) {
+void UnInstallHook(HHOOK Hook) {
   UnhookWindowsHookEx(Hook);
 }
 
-static LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   LRESULT rc = CallWindowProc(oldProc, hWnd, uMsg, wParam, lParam);
 
   if (uMsg == WM_DROPFILES) {
-    if (!def_allowmulti) fname = "";
+    if (!def_allowmulti) dropped_files.clear();
     hDrop = (HDROP)wParam;
 
     UINT nNumOfFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
-    if (nNumOfFiles > 0) {
-      for (UINT i = 0; i < nNumOfFiles; i += 1) {
-        UINT nBufSize = DragQueryFileW(hDrop, i, NULL, 0) + 1;
-        wchar_t *fName = new wchar_t[nBufSize];
-        DragQueryFileW(hDrop, i, fName, nBufSize);
-        if (fname != "") fname += "\n";
-        fname += shorten(fName);
-        delete[] fName;
-      }
-    }
-
-    std::vector<string> nameVec = split_string(fname, '\n');
-    sort(nameVec.begin(), nameVec.end());
-    nameVec.erase(unique(nameVec.begin(), nameVec.end()), nameVec.end());
-    fname = "";
-
-    std::vector<string>::size_type sz = nameVec.size();
-    for (std::vector<string>::size_type i = 0; i < sz; i += 1) {
-      if (fname != "") fname += "\n";
-      fname += nameVec[i];
+    vector<wchar_t> fName;
+    for (UINT i = 0; i < nNumOfFiles; i += 1) {
+      fName.resize(DragQueryFileW(hDrop, i, NULL, 0) + 1);
+      DragQueryFileW(hDrop, i, fName.data(), fName.size());
+      dropped_files.insert(shorten({fName.data(), fName.size()}));
     }
 
     DragFinish(hDrop);
@@ -88,7 +74,7 @@ static LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
   return rc;
 }
 
-static LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
   if (nCode == HC_ACTION) {
     CWPSTRUCT *pwp = (CWPSTRUCT *)lParam;
 
@@ -101,56 +87,42 @@ static LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
   return CallNextHookEx(hook, nCode, wParam, lParam);
 }
 
-static HHOOK InstallHook() {
+HHOOK InstallHook() {
   hook = SetWindowsHookExW(WH_CALLWNDPROC, (HOOKPROC)SetHook, NULL, GetWindowThreadProcessId(enigma::hWnd, NULL));
   return hook;
 }
 
-static void file_dnd_apply_filter(string pattern, bool allowfiles, bool allowdirs, bool allowmulti) {
+string file_dnd_apply_filter(string pattern, bool allowfiles, bool allowdirs, bool allowmulti) {
   if (pattern == "") { pattern = "."; }
   pattern = string_replace_all(pattern, " ", "");
   pattern = string_replace_all(pattern, "*", "");
-  std::vector<string> extVec = split_string(pattern, ';');
-  std::vector<string> nameVec = split_string(fname, '\n');
-  std::vector<string>::size_type sz1 = nameVec.size();
-  std::vector<string>::size_type sz2 = extVec.size();
-  fname = "";
+  vector<string> extVec = split_string(pattern, ';');
+  set<string> filteredNames;
 
-  for (std::vector<string>::size_type i2 = 0; i2 < sz2; i2 += 1) {
-    for (std::vector<string>::size_type i1 = 0; i1 < sz1; i1 += 1) {
-      if (extVec[i2] == "." || extVec[i2] == filename_ext(nameVec[i1])) {
-        if (fname != "") fname += "\n";
-        fname += nameVec[i1];
+  for (const string &droppedFile : dropped_files) {
+    for (const string &ext : extVec) {
+      if (ext == "." || ext == filename_ext(droppedFile)) {
+        filteredNames.insert(droppedFile);
+        if (allowfiles && file_exists(droppedFile)) {
+          filteredNames.insert(droppedFile);
+        } else if (allowdirs && directory_exists(droppedFile)) {
+          filteredNames.insert(droppedFile);
+        }
       }
     }
   }
 
-  nameVec = split_string(fname, '\n');
-  sz1 = nameVec.size();
-  fname = "";
-
-  if (allowmulti) {
-    for (std::vector<string>::size_type i = 0; i < sz1; i += 1) {
-      if (allowfiles && file_exists(nameVec[i])) {
-        if (fname != "") fname += "\n";
-        fname += nameVec[i];
-      } else if (allowdirs && directory_exists(nameVec[i])) {
-        if (fname != "") fname += "\n";
-        fname += nameVec[i];
-      }
-    }
-  } else {
-    if (!nameVec.empty()) {
-      if (allowfiles && file_exists(nameVec[0])) {
-        if (fname != "") fname += "\n";
-        fname += nameVec[0];
-      } else if (allowdirs && directory_exists(nameVec[0])) {
-        if (fname != "") fname += "\n";
-        fname += nameVec[0];
-      }
-    }
+  string fname = "";
+  if (filteredNames.empty()) return fname;
+  for (const string &filteredName : filteredNames) {
+    fname += filteredName + "\n";
+    if (!def_allowmulti) break;
   }
+  fname.pop_back();
+  return fname;
 }
+
+}  // namespace
 
 namespace enigma_user {
 
@@ -162,7 +134,7 @@ void file_dnd_set_enabled(bool enable) {
   file_dnd_enabled = enable;
   DragAcceptFiles(enigma::hWnd, file_dnd_enabled);
   if (file_dnd_enabled && hook == NULL)
-  InstallHook(); else fname = "";
+  InstallHook(); else dropped_files.clear();
 }
 
 void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool allowmulti) {
@@ -173,12 +145,7 @@ void file_dnd_set_files(string pattern, bool allowfiles, bool allowdirs, bool al
 }
 
 string file_dnd_get_files() {
-  if (fname != "") {
-    file_dnd_apply_filter(def_pattern, def_allowfiles, def_allowdirs, def_allowmulti);
-    while (fname.back() == '\n') fname.pop_back();
-  }
-
-  return fname;
+  return file_dnd_apply_filter(def_pattern, def_allowfiles, def_allowdirs, def_allowmulti);
 }
 
 } // namespace enigma_user
