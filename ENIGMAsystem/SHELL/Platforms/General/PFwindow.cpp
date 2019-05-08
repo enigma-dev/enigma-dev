@@ -84,6 +84,7 @@ int keyboard_lastkey = 0;
 
 double mouse_x, mouse_y;
 int mouse_button, mouse_lastbutton;
+int display_aa = 0;
 short mouse_hscrolls = 0;
 short mouse_vscrolls = 0;
 
@@ -271,9 +272,9 @@ void window_default(bool center_size) {
 
   enigma::windowWidth = enigma::regionWidth = xm;
   enigma::windowHeight = enigma::regionHeight = ym;
-  if (center) window_center();
 
   enigma::compute_window_size();
+  if (center) window_center();
 }
 
 void window_center() {

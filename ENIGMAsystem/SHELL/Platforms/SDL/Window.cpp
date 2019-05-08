@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "Event.h"
+#include "Joystick.h"
 #include "Gamepad.h"
 
 #include "Platforms/General/PFwindow.h"
@@ -7,7 +8,6 @@
 
 #include "Universal_System/estring.h" // ord
 #include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
-
 
 #include <array>
 #include <string>
@@ -31,6 +31,23 @@ namespace enigma {
 void (*WindowResizedCallback)();
 
 SDL_Window* windowHandle = nullptr;
+unsigned sdl_window_flags = SDL_WINDOW_HIDDEN;
+
+// this is to be implemented by an SDL bridge
+// it is for setting any attributes on the
+// window before it is created
+// (e.g, SDL's OpenGL context attributes)
+void init_sdl_window_bridge_attributes();
+
+bool initGameWindow() {
+  SDL_Init(SDL_INIT_VIDEO);
+  if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
+  if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
+  if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
+  init_sdl_window_bridge_attributes();
+  windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
+  return (windowHandle != nullptr);
+}
 
 namespace keyboard {
   using namespace enigma_user;
@@ -62,10 +79,9 @@ static std::array<SDL_Cursor*, -enigma_user::cr_size_all> cursors;
 
 void handleInput() {
   input_push();
+  joystick_update();
   pushGamepads();
 }
-
-void showWindow() { SDL_ShowWindow(windowHandle); }
 
 void initCursors() {
   // cursors are negative ids 0 to -22
@@ -99,6 +115,7 @@ void initInput() {
 
   keyboard::inverse_keymap = inverse_map(keyboard::keymap);
   initCursors();
+  joystick_init();
   initGamepads();
 }
 
@@ -295,6 +312,22 @@ int display_get_height() {
 bool keyboard_check_direct(int key) {
   const Uint8* state = SDL_GetKeyboardState(nullptr);
   return state[enigma::keyboard::inverse_keymap[key]];
+}
+
+void keyboard_key_press(int key) {
+  SDL_Event sdlevent = { };
+  sdlevent.type = SDL_KEYDOWN;
+  sdlevent.key.keysym.sym = enigma::keyboard::inverse_keymap[key];
+
+  SDL_PushEvent(&sdlevent);
+}
+
+void keyboard_key_release(int key) {
+  SDL_Event sdlevent = { };
+  sdlevent.type = SDL_KEYUP;
+  sdlevent.key.keysym.sym = enigma::keyboard::inverse_keymap[key];
+
+  SDL_PushEvent(&sdlevent);
 }
 
 }  // namespace enigma_user

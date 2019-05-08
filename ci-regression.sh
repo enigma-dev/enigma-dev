@@ -1,5 +1,5 @@
 #!/bin/bash +x
-set -e #exit if any command fails
+set -e  # exit if any command fails
 
 if [ -z "$1" ]; then
   echo "No directory specified to check out master for regression tests."
@@ -8,8 +8,12 @@ if [ -z "$1" ]; then
 fi
 export TEST_HARNESS_MASTER_DIR="$1"
 
-if [ -z "$2" ]; then
+if [ -n "$2" ]; then
   MAKE_JOBS=$2
+  echo "Make parallelism set to '$MAKE_JOBS'"
+else
+  MAKE_JOBS=2  # all machines are dual-core or better as of 2015, so sayeth the king
+  echo "Make parallelism defaulted to 2."
 fi
 
 GIT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)

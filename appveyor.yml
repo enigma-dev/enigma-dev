@@ -27,6 +27,7 @@ environment:
   WIDGETS: None
   EXTENSIONS: "None"
   PACKAGES: ""
+  PACKAGES_LATEST: ""
 
   matrix:
     # Game Modes
@@ -38,19 +39,18 @@ environment:
     - {PLATFORM: SDL, PACKAGES: "SDL2:x"}
 
     # Graphics
-    - {GRAPHICS: Direct3D11, PACKAGES: "glm:x"}
+    - {GRAPHICS: Direct3D11}
     - {GRAPHICS: OpenGL1, PACKAGES: "glew:x"}
+    - {GRAPHICS: OpenGLES, PLATFORM: SDL, PACKAGES_LATEST: "libepoxy:x", PACKAGES: "SDL2:x" }
 
     # Audio
     - {AUDIO: DirectSound}
+    - {AUDIO: OpenAL, PACKAGES: "openal:x dumb:x alure:x libmodplug:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
     #TODO: Fix SFML on Windows
     #- {AUDIO: SFML, PACKAGES: "sfml:x"}
-    #TODO: Fix OpenAL on Windows
-    #- {AUDIO: OpenAL, PACKAGES: "openal:x dum:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
 
     # Widgets
     - {WIDGETS: Win32}
-    - {WIDGETS: DlgMod}
     #TODO: Fix GTK+ on Windows
     #- {WIDGETS: GTK+, PACKAGES: "gtk2:x"}
 
@@ -78,7 +78,9 @@ init:
 install:
   - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
   - > # Install packages common to all builds
-    bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x %PACKAGES%"
+    bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x %PACKAGES%"
+  - > # Install latest packages (OpenGLES needs fundies' patched libepoxy)
+    bash -lc "pacboy --noconfirm -Sy %PACKAGES_LATEST%"
   - gcc -v
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {

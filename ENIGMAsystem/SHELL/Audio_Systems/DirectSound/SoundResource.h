@@ -18,11 +18,6 @@
 #ifndef ENIGMA_SOUND_RESOURCE_H
 #define ENIGMA_SOUND_RESOURCE_H
 
-#ifdef DEBUG_MODE
-#include "Widget_Systems/widgets_mandatory.h"  // show_error
-#include "libEGMstd.h"
-#endif
-
 #include <vector>
 using std::vector;
 
@@ -33,8 +28,9 @@ struct SoundResource {
   void (*cleanup)(void *userdata);               // optional cleanup callback for streams
   void *userdata;                                // optional userdata for streams
   void (*seek)(void *userdata, float position);  // optional seeking
-  int type;                                      //0 for sound, 1 for music, -1 for error
+  int type;                                      // 0 for sound, 1 for music, -1 for error
   int kind;                                      //
+  float length;                                  // length of the sound buffer
 
   load_state loaded;  // Degree to which this sound has been loaded successfully
   bool idle;          // True if this sound is not being used, false if playing or paused.

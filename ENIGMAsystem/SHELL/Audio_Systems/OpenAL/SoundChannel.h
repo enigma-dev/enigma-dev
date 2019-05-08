@@ -20,11 +20,6 @@
 
 #include "ALsystem.h"
 
-#ifdef DEBUG_MODE
-#include "Widget_Systems/widgets_mandatory.h"  // show_error
-#include "libEGMstd.h"
-#endif
-
 #include <vector>
 using std::vector;
 

@@ -25,11 +25,15 @@
 **                                                                              **
 \********************************************************************************/
 
+#define NOMINMAX // before all windows.h includes since we use std::min/max
 // As is typical of Win32 code, this code is fuck-ugly. Refer to the GTK version for
 // porting to competent widget systems. Use this only for low-level APIs.
 #define WINVER 9001
-#include <windows.h>
 #include "Widget_Systems/General/WSwidgets.h"
+#include "Widget_Systems/widgets_mandatory.h" // for show_error()
+#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
+
+#include <windows.h>
 #include <commctrl.h>
 #include <windowsx.h>
 #include <stdio.h>
@@ -54,6 +58,10 @@ namespace enigma {
   extern HINSTANCE hInstance;
   bool widget_system_initialize()
   {
+    // make sure the hWnd and hInstance variables are initialized (e.g, SDL)
+    if (get_window_handle() == NULL) {
+      enigma_user::show_error("Cannot initialize Win32 widget system with NULL window handle.", true);
+    }
     INITCOMMONCONTROLSEX iccex;
     iccex.dwSize = sizeof(iccex);
     iccex.dwICC  = ICC_STANDARD_CLASSES | ICC_LISTVIEW_CLASSES;

@@ -11,11 +11,17 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct PathPoint
 {
 	int x;
 	int y;
 	int speed;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif
