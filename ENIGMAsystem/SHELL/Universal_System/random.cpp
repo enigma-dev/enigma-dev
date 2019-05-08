@@ -31,7 +31,7 @@
 #define LOWER_MASK 0x7fffffff // least significant r bits
 
 namespace enigma {
-	unsigned int Random_Seed;
+	int Random_Seed;
 	unsigned long mt[625];
 }
 
@@ -140,7 +140,7 @@ namespace enigma_user
       + 2.3283064365387e-10  * (enigma::Random_Seed / 32 + 1)
       + 4.158057505264878e-3 * (enigma::Random_Seed / 32)
     )*n;
-    enigma::Random_Seed = mtrandom32();
+    enigma::Random_Seed = enigma::Random_Seed * 0x8088405 + 1;
     return rval;
   }
 
