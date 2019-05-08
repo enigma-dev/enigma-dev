@@ -245,6 +245,20 @@ time = 5;
 // This one conflicts with the Win32 CreateFont macro
 CreateFont = 5;
 
+// Random Tests
+// Seeds & Values from Delphi
+random_set_seed(236732942);
+gtest_expect_eq(irandom(10), 3);
+gtest_expect_eq(random_get_seed(), 1493992007);
+gtest_expect_eq(irandom(10), 5);
+gtest_expect_eq(random_get_seed(), 2057512804);
+gtest_expect_eq(irandom(10), 9);
+gtest_expect_eq(random_get_seed(), -526428939);
+gtest_expect_eq(irandom(10), 9);
+gtest_expect_eq(random_get_seed(), -627901238);
+gtest_expect_eq(irandom(10), 2);
+gtest_expect_eq(random_get_seed(), 1166481395);
+
 cons_show_message("Test end!");
 
 game_end();
