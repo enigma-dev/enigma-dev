@@ -70,6 +70,9 @@ void draw_circle(gs_scalar x, gs_scalar y, float radius);
 
 
 //Drawing - Polygons
+void draw_polygon_begin();
+void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color=-1);
+void draw_polygon_end(bool outline, bool allowHoles=true);
 void draw_polygon_end();
 
 }

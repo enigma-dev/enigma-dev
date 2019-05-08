@@ -1,1 +1,1 @@
-SOURCES += $(wildcard Bridges/Cocoa-OpenGL1/*.cpp)
+include Bridges/Cocoa-OpenGL/Makefile

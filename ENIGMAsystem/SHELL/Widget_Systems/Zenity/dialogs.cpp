@@ -62,11 +62,11 @@ static bool message_cancel  = false;
 static bool question_cancel = false;
 
 namespace enigma {
-  
+
 bool widget_system_initialize() {
   return true;
 }
-  
+
 } // namespace enigma
 
 static string shellscript_evaluate(string command) {
@@ -158,12 +158,14 @@ static int show_question_helperfunc(string str) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
+namespace enigma_user {
+
 void show_error(string errortext, const bool fatal) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
   string str_echo;
-  
+
   #ifdef DEBUG_MODE
   errortext += enigma::debug_scope::GetErrors();
   #endif
@@ -180,8 +182,6 @@ void show_error(string errortext, const bool fatal) {
   string str_result = shellscript_evaluate(str_command);
   if (strtod(str_result.c_str(), NULL) == 1) exit(0);
 }
-
-namespace enigma_user {
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
 

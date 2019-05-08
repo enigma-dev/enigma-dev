@@ -52,12 +52,12 @@ namespace enigma
           #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
           default:
           #if defined(SHOW_ERRORS) && SHOW_ERRORS
-              show_error("Object doesn't exist",0);
+              enigma_user::show_error("Object doesn't exist",0);
           #endif
               return;
       }
       (void)ob;
-      
+
       object_graphics* newinst = (object_graphics*) (*fetch_inst_iter_by_int(idn));
       newinst->x=x; newinst->y=y; newinst->yprevious=yprevious; newinst->xprevious=xprevious;
       newinst->xstart=xstart; newinst->ystart=ystart;
@@ -66,7 +66,7 @@ namespace enigma
       newinst->hspeed=hspeed; newinst->vspeed=vspeed;
       if (perf) newinst->myevent_create();
   }
-  
+
   object_basic* instance_create_id(int x,int y,int object,int idn)
   { //This is for use by the system only. Please leave be.
     if (maxid < idn)
@@ -78,7 +78,7 @@ namespace enigma
       #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
       default:
           #if defined(SHOW_ERRORS) && SHOW_ERRORS
-          show_error("Object doesn't exist",0);
+          enigma_user::show_error("Object doesn't exist",0);
           #endif
           return NULL;
     }
@@ -98,7 +98,7 @@ namespace enigma_user
       #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
       default:
           #if defined(SHOW_ERRORS) && SHOW_ERRORS
-          show_error("Object doesn't exist",0);
+          enigma_user::show_error("Object doesn't exist",0);
           #endif
         return -1;
     }
@@ -112,7 +112,7 @@ namespace enigma_user
       enigma::object_graphics* inst = (enigma::object_graphics*) enigma::instance_event_iterator->inst;
       enigma::instance_change_inst(obj, perf, inst);
   }
-  
+
   void instance_copy(bool perf)
   {
     enigma::object_graphics* inst = (enigma::object_graphics*) enigma::instance_event_iterator->inst;
@@ -127,13 +127,13 @@ namespace enigma_user
         #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
         default:
         #if defined(SHOW_ERRORS) && SHOW_ERRORS
-            show_error("Object doesn't exist",0);
+            enigma_user::show_error("Object doesn't exist",0);
         #endif
             (void)x; (void)y;
             return;
     }
     (void)ob;
-    
+
     enigma::object_graphics* newinst = (enigma::object_graphics*) (*enigma::fetch_inst_iter_by_int(idn));
     if (perf) newinst->myevent_create();
     newinst->yprevious=inst->yprevious; newinst->xprevious=inst->xprevious;
@@ -145,4 +145,3 @@ namespace enigma_user
 } //namespace enigma_user
 
 #endif //ENIGMA_INSTANCE_CREATE_H
-

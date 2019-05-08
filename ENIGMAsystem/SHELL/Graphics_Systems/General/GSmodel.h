@@ -23,6 +23,7 @@
 #include "Universal_System/dynamic_args.h" // for d3d_model_vertex_data
 
 #include <string>
+#include <stdint.h>
 
 namespace enigma_user {
   enum {

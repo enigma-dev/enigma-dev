@@ -15,24 +15,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/GLversion.h"
+#include "Bridges/OpenGL/GLload.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/SDL/Window.h"
 
 #include <SDL2/SDL.h>
-#include <GL/glew.h>
 
 namespace enigma {
 
 extern unsigned sdl_window_flags;
 
-int msaa_fbo = 0;
-
 SDL_GLContext context;
 
-void set_sdl_gl_context_version();
+const static SDL_GLprofile profile_types[3] = {SDL_GL_CONTEXT_PROFILE_CORE,SDL_GL_CONTEXT_PROFILE_COMPATIBILITY,SDL_GL_CONTEXT_PROFILE_ES};
 
 void init_sdl_window_bridge_attributes() {
-  set_sdl_gl_context_version();
+  #ifdef DEBUG_MODE
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+  #endif
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,profile_types[graphics_opengl_profile]);
   SDL_GL_SetSwapInterval(0);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -42,9 +45,7 @@ void init_sdl_window_bridge_attributes() {
 void EnableDrawing(void*) {
   context = SDL_GL_CreateContext(windowHandle);
 
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
-    show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
+  gl_load_exts();
 }
 
 void DisableDrawing(void*) {
@@ -61,10 +62,6 @@ namespace enigma_user {
 
 void set_synchronization(bool enable) {
   SDL_GL_SetSwapInterval(enable);
-}
-
-void display_reset(int samples, bool vsync) {
-  set_synchronization(vsync);
 }
 
 } // namespace enigma_user

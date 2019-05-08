@@ -72,10 +72,11 @@ struct language_adapter {
   /// Look up a type by its name.
   jdi::definition* find_typename(string name);
 
+  // Returns whether the given definition is a function accepting `enigma::varargs`.
+  virtual bool is_variadic_function(jdi::definition *d) = 0;
   // Returns the index at which a function parameters ref_stack is variadic;
-  // that is, at which position it accepts `enigma::varargs`.
-  virtual int referencers_varargs_at(jdi::ref_stack &refs) = 0;
-  virtual bool referencers_varargs(jdi::ref_stack &refs) = 0;
+  // that is, at which argument position it accepts `enigma::varargs`.
+  virtual int function_variadic_after(jdi::definition_function *refs) = 0;
 
   //v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@
   // FIXME: JDI has leaked into all languages. I've moved that leak here, into the light.  X
@@ -91,11 +92,8 @@ struct language_adapter {
   virtual void quickmember_script(jdi::definition_scope* scope, string name) = 0;
   /// Create a standard integer variable member in the given scope.
   virtual void quickmember_integer(jdi::definition_scope* scope, string name) = 0;
-
-  bool is_variadic_function(jdi::definition *d) {
-    return definition_is_function(d)
-        && referencers_varargs(((jdi::definition_function*)d)->referencers);
-  }
+  /// Look up an enigma_user definition by its name.
+  virtual jdi::definition* look_up(const string &name) = 0;
 
   virtual ~language_adapter();
 };

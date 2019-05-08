@@ -37,10 +37,10 @@ namespace enigma
 {
     extern int maxid;
     objectstruct** objectdata;
-    int instancecount = 0;
     int id_current =0;
 
     #ifdef DEBUG_MODE
+      using enigma_user::show_error;
       static inline int DEBUG_ID_CHECK(int id, int objind) {
         std::map<int, inst_iter*>::iterator it = instance_list.find(id);
         if (it != instance_list.end()) {

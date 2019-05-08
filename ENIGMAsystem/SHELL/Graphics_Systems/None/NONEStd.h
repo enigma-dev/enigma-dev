@@ -17,8 +17,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <vector>
 #include "../General/GScolors.h"
 #include "../General/GSprimitives.h"
 #include "../General/GSd3d.h"
@@ -28,8 +26,8 @@
 #include "../General/GSscreen.h"
 #include "Universal_System/scalar.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
+
 enum {
   sh_vertex = 0,
   sh_fragment = 1,
@@ -37,4 +35,5 @@ enum {
   sh_tessevaluation = 3,
   sh_geometry = 4
 };
-}
+
+} // namespace enigma_user

@@ -18,6 +18,11 @@
 #ifndef ENIGMA_DS_SYSTEM_H
 #define ENIGMA_DS_SYSTEM_H
 
+#ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h"  // show_error
+#include "libEGMstd.h"
+#endif
+
 #include <dsound.h>
 #include <mmsystem.h>
 #include <stddef.h>
@@ -32,17 +37,17 @@ namespace enigma {
 int get_free_channel(double priority);
 
 #ifdef DEBUG_MODE
-#define get_sound(snd, id, failure)                                              \
-  if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {  \
-    show_error("Sound " + enigma_user::toString(id) + " does not exist", false); \
-    return failure;                                                              \
-  }                                                                              \
+#define get_sound(snd, id, failure)                                                           \
+  if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {               \
+    enigma_user::show_error("Sound " + enigma_user::toString(id) + " does not exist", false); \
+    return failure;                                                                           \
+  }                                                                                           \
   SoundResource *const snd = sound_resources[id];
-#define get_soundv(snd, id)                                                      \
-  if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {  \
-    show_error("Sound " + enigma_user::toString(id) + " does not exist", false); \
-    return;                                                                      \
-  }                                                                              \
+#define get_soundv(snd, id)                                                                   \
+  if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {               \
+    enigma_user::show_error("Sound " + enigma_user::toString(id) + " does not exist", false); \
+    return;                                                                                   \
+  }                                                                                           \
   SoundResource *const snd = sound_resources[id];
 #else
 #define get_sound(snd, id, failure) SoundResource *const snd = sound_resources[id];

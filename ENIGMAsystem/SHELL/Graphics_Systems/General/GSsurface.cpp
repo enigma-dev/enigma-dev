@@ -16,8 +16,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GSprimitives.h"
 #include "GSsurface.h"
+#include "GSsurface_impl.h"
+#include "GSprimitives.h"
 #include "GScolor_macros.h"
 
 #include "Universal_System/nlpo2.h"
@@ -33,12 +34,38 @@
 
 using namespace std;
 
+namespace enigma {
+
+vector<BaseSurface*> surfaces;
+
+} // namespace enigma
+
 namespace enigma_user {
+
 extern int room_width, room_height/*, sprite_idmax*/;
+
+bool surface_exists(int id)
+{
+  return !((id < 0) or (size_t(id) > enigma::surfaces.size()) or (enigma::surfaces[id] == NULL));
 }
 
-namespace enigma_user
+int surface_get_texture(int id)
 {
+  get_surfacev(surf,id,-1);
+  return ((enigma::BaseSurface&)surf).texture;
+}
+
+int surface_get_width(int id)
+{
+  get_surfacev(surf,id,-1);
+  return ((enigma::BaseSurface&)surf).width;
+}
+
+int surface_get_height(int id)
+{
+  get_surfacev(surf,id,-1);
+  return ((enigma::BaseSurface&)surf).height;
+}
 
 void draw_surface(int id, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
