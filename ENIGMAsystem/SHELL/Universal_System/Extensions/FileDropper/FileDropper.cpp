@@ -65,7 +65,7 @@ LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     for (UINT i = 0; i < nNumOfFiles; i += 1) {
       fName.resize(DragQueryFileW(hDrop, i, NULL, 0) + 1);
       DragQueryFileW(hDrop, i, fName.data(), fName.size());
-      dropped_files.insert(shorten({fName.data(), fName.size()}));
+      dropped_files.insert(shorten({fName.data(), fName.size() - 1}));
     }
 
     DragFinish(hDrop);
@@ -102,11 +102,10 @@ string file_dnd_apply_filter(string pattern, bool allowfiles, bool allowdirs, bo
   for (const string &droppedFile : dropped_files) {
     for (const string &ext : extVec) {
       if (ext == "." || ext == filename_ext(droppedFile)) {
-        if (allowfiles && file_exists(droppedFile)) {
+        if ((allowfiles && file_exists(droppedFile))
+           || (allowdirs && directory_exists(droppedFile)))
           filteredNames.insert(droppedFile);
-        } else if (allowdirs && directory_exists(droppedFile)) {
-          filteredNames.insert(droppedFile);
-        }
+        break;
       }
     }
   }
