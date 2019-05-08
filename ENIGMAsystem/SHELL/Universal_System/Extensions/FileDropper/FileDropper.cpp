@@ -102,7 +102,6 @@ string file_dnd_apply_filter(string pattern, bool allowfiles, bool allowdirs, bo
   for (const string &droppedFile : dropped_files) {
     for (const string &ext : extVec) {
       if (ext == "." || ext == filename_ext(droppedFile)) {
-        filteredNames.insert(droppedFile);
         if (allowfiles && file_exists(droppedFile)) {
           filteredNames.insert(droppedFile);
         } else if (allowdirs && directory_exists(droppedFile)) {
