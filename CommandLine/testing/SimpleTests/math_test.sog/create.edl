@@ -246,6 +246,7 @@ time = 5;
 CreateFont = 5;
 
 // Random Tests
+// Seeds & Values from Delphi
 random_set_seed(236732942);
 gtest_expect_eq(irandom(10), 3);
 gtest_expect_eq(random_get_seed(), 1493992007);
