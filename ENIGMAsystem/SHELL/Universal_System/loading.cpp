@@ -24,6 +24,7 @@
 #include "libEGMstd.h"
 //#include "mathnc.h"
 
+#include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -39,11 +40,12 @@ namespace enigma_user
   extern int mtrandom_seed(int x);
 } //namespace enigma_user
 
-namespace enigma 
+namespace enigma
 {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
   extern void timeline_system_initialize();
   extern int game_settings_initialize();
+  extern void extensions_initialize();
 
   //This is like main(), only cross-api
   int initialize_everything()
@@ -74,7 +76,7 @@ namespace enigma
     windowsystem_write_exename(exename);
     FILE* exe = fopen(exename,"rb");
     if (!exe)
-      show_error("Resource load fail: exe unopenable",0);
+      enigma_user::show_error("Resource load fail: exe unopenable",0);
     else do
     {
       int nullhere;
@@ -113,11 +115,16 @@ namespace enigma
     //Load rooms
     enigma::rooms_load();
 
+    //Initialize extensions
+    enigma::extensions_initialize();
+
     //Go to the first room
     if (enigma_user::room_count)
       enigma::game_start();
-    else
-        enigma_user::window_default();
+    else {
+      enigma_user::window_default();
+      enigma_user::window_set_visible(true);
+    }
 
     return 0;
   }

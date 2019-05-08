@@ -33,11 +33,11 @@ namespace enigma
   extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
 }
 
+namespace enigma_user {
+
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
 void show_error(std::string msg, const bool fatal);
-
-namespace enigma_user {
 
 int show_message(const std::string &msg);
 template<typename T> int show_message(T msg) { return show_message(enigma_user::toString(msg)); }

@@ -128,7 +128,6 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
   return &ide_passback_error;
 };
 
-void quickmember_script(jdi::definition_scope* scope, string name);
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {
   cout << "******** Compiling Initialized ********" << endl;
@@ -138,7 +137,7 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
 
   cout << "Checkpoint." << endl;
   for (int i = 0; i < script_count; i++)
-    quickmember_script(&globals_scope,script_names[i]);
+    current_language->quickmember_script(&globals_scope,script_names[i]);
 
   cout << "Starting syntax check." << endl;
   std::string newcode;

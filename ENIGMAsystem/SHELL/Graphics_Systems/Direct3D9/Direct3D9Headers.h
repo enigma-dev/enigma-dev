@@ -15,12 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef __DIRECT3D9_HEADERS_H
-#define __DIRECT3D9_HEADERS_H
-#include <d3d9.h>
-#include <cmath>
-#include <string>
-using namespace std;
+#ifndef ENIGMA_DIRECT3D9_HEADERS_H
+#define ENIGMA_DIRECT3D9_HEADERS_H
 
-#include <d3dx9.h>
-#endif
+#include <d3d9.h>
+
+namespace enigma {
+
+extern bool Direct3D9Managed;
+
+namespace dx9 {
+
+extern LPDIRECT3DDEVICE9 d3ddev; // the pointer to the device class
+
+} // namespace dx9
+
+} // namespace enigma
+
+#endif // ENIGMA_DIRECT3D9_HEADERS_H

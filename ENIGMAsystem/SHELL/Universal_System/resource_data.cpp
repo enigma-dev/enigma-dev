@@ -79,8 +79,7 @@ variant script_execute(int scr, variant arg0, variant arg1, variant arg2, varian
 
 bool script_exists(int script)
 {
-    return (script >= 0 && script < enigma::script_idmax && bool(enigma::callable_scripts[script].base));
+    return (script >= 0 && size_t(script) < enigma::script_idmax && bool(enigma::callable_scripts[script].base));
 }
 
 }
-

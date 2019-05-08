@@ -62,7 +62,7 @@ namespace enigma
   static short hdeltadelta = 0, vdeltadelta = 0;
   static int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
 
-  LRESULT CALLBACK (*touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
+  LRESULT (CALLBACK *touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
   void (*WindowResizedCallback)();
 
   LRESULT CALLBACK WndProc (HWND hWndParameter, UINT message,WPARAM wParam, LPARAM lParam)
@@ -72,7 +72,7 @@ namespace enigma
       case WM_CREATE:
         return 0;
       case WM_CLOSE:
-        instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+        instance_event_iterator = &dummy_event_iterator;
         for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
         {
           it->myevent_closebutton();
@@ -114,7 +114,7 @@ namespace enigma
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
           }
-          instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+          instance_event_iterator = &dummy_event_iterator;
           for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
           {
             ((object_graphics*)*it)->myevent_drawresize();

@@ -18,6 +18,13 @@
 #ifndef ENIGMA_GSCOLORS_H
 #define ENIGMA_GSCOLORS_H
 
+namespace enigma {
+
+extern unsigned char currentcolor[4];
+extern bool colorWriteEnable[4];
+
+} // namespace enigma
+
 namespace enigma_user
 {
   enum {
@@ -77,4 +84,3 @@ namespace enigma_user
 }
 
 #endif // ENIGMA_GSCOLORS_H
-

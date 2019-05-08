@@ -10,3 +10,4 @@ Icon: xinputlogo.png
 
 Depends: None
 Dependencies: None
+Init: extension_xinput_init

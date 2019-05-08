@@ -12,10 +12,16 @@
 #include "backend/JavaStruct.h"
 #include "backend/sub/Action.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Moment
 {
 	int stepNo;
 	String code;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

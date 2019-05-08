@@ -23,6 +23,7 @@
 namespace enigma_user
 {
   enum {
+    pr_undefined      = -1,
     pr_pointlist      = 1,     // GL_POINTS            D3DPT_POINTLIST
     pr_linelist       = 2,     // GL_LINES             D3DPT_LINELIST
     pr_linestrip      = 3,     // GL_LINE_STRIP        D3DPT_LINESTRIP

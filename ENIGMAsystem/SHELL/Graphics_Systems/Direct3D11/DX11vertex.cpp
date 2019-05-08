@@ -15,12 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
+#include "Direct3D11Headers.h"
 
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSstdraw.h"
+
+#include "Widget_Systems/widgets_mandatory.h" // for show_error
 
 #include <D3Dcompiler.h>
 
@@ -29,6 +32,8 @@
 
 #include <map>
 using std::map;
+
+using namespace enigma::dx11;
 
 namespace {
 struct MatrixBufferType
@@ -103,7 +108,7 @@ DXGI_FORMAT dxgi_formats[] = {
   DXGI_FORMAT_R32G32_FLOAT,
   DXGI_FORMAT_R32G32B32_FLOAT,
   DXGI_FORMAT_R32G32B32A32_FLOAT,
-  DXGI_FORMAT_R8G8B8A8_UNORM,
+  DXGI_FORMAT_B8G8R8A8_UNORM,
   DXGI_FORMAT_R8G8B8A8_UINT
 };
 size_t dxgi_format_sizes[] = {
@@ -111,8 +116,8 @@ size_t dxgi_format_sizes[] = {
   sizeof(float) * 2,
   sizeof(float) * 3,
   sizeof(float) * 4,
-  sizeof(unsigned byte) * 4,
-  sizeof(unsigned byte) * 4
+  sizeof(unsigned char) * 4,
+  sizeof(unsigned char) * 4
 };
 
 map<int, ID3D11Buffer*> vertexBufferPeers;
@@ -308,28 +313,6 @@ void graphics_prepare_default_shader() {
     graphics_compile_shader(g_strPS, &pBlobPS, "PS", "PS", "ps_4_0");
     m_device->CreatePixelShader(pBlobPS->GetBufferPointer(), pBlobPS->GetBufferSize(),
                                 NULL, &g_pPixelShader);
-
-    D3D11_SAMPLER_DESC samplerDesc;
-    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.MipLODBias = 0.0f;
-    samplerDesc.MaxAnisotropy = 1;
-    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-    samplerDesc.BorderColor[0] = 0;
-    samplerDesc.BorderColor[1] = 0;
-    samplerDesc.BorderColor[2] = 0;
-    samplerDesc.BorderColor[3] = 0;
-    samplerDesc.MinLOD = 0;
-    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-    ID3D11SamplerState *samplerState;
-    m_device->CreateSamplerState(
-      &samplerDesc,
-      &samplerState
-    );
-    m_deviceContext->PSSetSamplers(0, 1, &samplerState);
   }
 
   D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -374,7 +357,7 @@ void vertex_color(int buffer, int color, double alpha) {
 }
 
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
@@ -392,7 +375,7 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
 }
 
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];

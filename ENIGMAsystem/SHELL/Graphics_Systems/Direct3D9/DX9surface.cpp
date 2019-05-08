@@ -15,12 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Context.h"
-#include "DX9SurfaceStruct.h"
-#include "DX9TextureStruct.h"
+#include "DX9surface_impl.h"
+#include "DX9textures_impl.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Universal_System/nlpo2.h"
@@ -34,11 +35,19 @@
 #include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
+using namespace enigma::dx9;
 
 namespace enigma {
 
-vector<Surface*> Surfaces(0);
-D3DCOLOR get_currentcolor();
+//TODO Add caching of the surface's RAM copy to speed this shit up
+//Maybe also investigate the use of CreateRenderTarget
+void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest) {
+  D3DSURFACE_DESC desc;
+  (*src)->GetDesc(&desc);
+
+  d3ddev->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, dest, NULL);
+  d3ddev->GetRenderTargetData(*src, *dest);
+}
 
 } // namespace enigma
 
@@ -53,90 +62,60 @@ bool surface_is_supported()
 int surface_create(int width, int height, bool depthbuffer, bool, bool)
 {
   LPDIRECT3DTEXTURE9 texture = NULL;
-  d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
+  d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
-  TextureStruct* gmTexture = new TextureStruct(texture);
-  textureStructs.push_back(gmTexture);
-  //d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
+  enigma::DX9Texture* gmTexture = new enigma::DX9Texture(texture);
+  const int texid = enigma::textures.size();
+  enigma::textures.push_back(gmTexture);
+  //d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
   texture->GetSurfaceLevel(0,&surface->surf);
-  surface->tex = textureStructs.size() - 1;
-  surface->width = width; surface->height = height;
-  enigma::Surfaces.push_back(surface);
-  return enigma::Surfaces.size() - 1;
+  surface->texture = texid; surface->width = width; surface->height = height;
+  enigma::surfaces.push_back(surface);
+  return enigma::surfaces.size() - 1;
 }
 
 int surface_create_msaa(int width, int height, int levels)
 {
   LPDIRECT3DTEXTURE9 texture = NULL;
-  d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
+  d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
-  TextureStruct* gmTexture = new TextureStruct(texture);
-  textureStructs.push_back(gmTexture);
-  d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
-  surface->tex = textureStructs.size() - 1;
-  surface->width = width; surface->height = height;
-  enigma::Surfaces.push_back(surface);
-  return enigma::Surfaces.size() - 1;
+  enigma::DX9Texture* gmTexture = new enigma::DX9Texture(texture);
+  const int texid = enigma::textures.size();
+  enigma::textures.push_back(gmTexture);
+  d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
+  surface->texture = texid; surface->width = width; surface->height = height;
+  enigma::surfaces.push_back(surface);
+  return enigma::surfaces.size() - 1;
 }
-
-LPDIRECT3DSURFACE9 pBackBuffer;
 
 void surface_set_target(int id)
 {
   draw_batch_flush(batch_flush_deferred);
 
   get_surface(surface,id);
-  d3dmgr->device->GetRenderTarget(0, &pBackBuffer);
-  d3dmgr->device->SetRenderTarget(0, surface->surf);
+  d3ddev->SetRenderTarget(0, surface.surf);
 
-  D3DXMATRIX matProjection;
-  D3DXMatrixPerspectiveFovLH(&matProjection,D3DX_PI / 4.0f,1,1,100);
-  //set projection matrix
-  d3dmgr->SetTransform(D3DTS_PROJECTION,&matProjection);
+  d3d_set_projection_ortho(0, 0, surface.width, surface.height, 0);
 }
 
 void surface_reset_target()
 {
   draw_batch_flush(batch_flush_deferred);
 
-  //d3dmgr->ResetRenderTarget();
-  d3dmgr->device->SetRenderTarget(0, pBackBuffer);
+  LPDIRECT3DSURFACE9 pBackBuffer;
+  d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+  d3ddev->SetRenderTarget(0, pBackBuffer);
   pBackBuffer->Release();
-  pBackBuffer = NULL;
 }
 
 int surface_get_target()
 {
-
+  return 0; //TODO: implement
 }
 
 void surface_free(int id)
 {
-  get_surface(surf, id);
-  delete surf;
-}
-
-bool surface_exists(int id)
-{
-  return !((id < 0) or (id > enigma::Surfaces.size()) or (enigma::Surfaces[id] == NULL));
-}
-
-int surface_get_texture(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->tex);
-}
-
-int surface_get_width(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->width);
-}
-
-int surface_get_height(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->height);
+  delete enigma::surfaces[id];
 }
 
 int surface_getpixel(int id, int x, int y)
@@ -144,22 +123,21 @@ int surface_getpixel(int id, int x, int y)
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
-  if (x > surface->width || y > surface->height) return 0;
+  if (x > surface.width || y > surface.height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf;
-  d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
-  D3DSURFACE_DESC desc;
-  pBackBuffer->GetDesc(&desc);
+  LPDIRECT3DSURFACE9 pBuffer = surface.surf, pRamBuffer;
+  enigma::surface_copy_to_ram(&pBuffer, &pRamBuffer);
 
   D3DLOCKED_RECT rect;
 
-  pBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+  pRamBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
   unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
   unsigned offset = y * rect.Pitch + x * 4;
-  int ret = bitmap[offset + 1] | (bitmap[offset + 2] << 8) | (bitmap[offset + 3] << 16);
-  pBuffer->UnlockRect();
-  delete[] bitmap;
+  int ret = bitmap[offset + 2] | (bitmap[offset + 1] << 8) | (bitmap[offset + 0] << 16);
+  pRamBuffer->UnlockRect();
+
+  pRamBuffer->Release();
 
   return ret;
 }
@@ -169,22 +147,21 @@ int surface_getpixel_ext(int id, int x, int y)
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
-  if (x > surface->width || y > surface->height) return 0;
+  if (x > surface.width || y > surface.height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf;
-  d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
-  D3DSURFACE_DESC desc;
-  pBackBuffer->GetDesc(&desc);
+  LPDIRECT3DSURFACE9 pBuffer = surface.surf, pRamBuffer;
+  enigma::surface_copy_to_ram(&pBuffer, &pRamBuffer);
 
   D3DLOCKED_RECT rect;
 
-  pBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+  pRamBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
   unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
   unsigned offset = y * rect.Pitch + x * 4;
-  int ret = bitmap[offset + 0] | (bitmap[offset + 1] << 8) | (bitmap[offset + 2] << 16) | (bitmap[offset + 3] << 24);
-  pBuffer->UnlockRect();
-  delete[] bitmap;
+  int ret = bitmap[offset + 2] | (bitmap[offset + 1] << 8) | (bitmap[offset + 0] << 16) | (bitmap[offset + 3] << 24);
+  pRamBuffer->UnlockRect();
+
+  pRamBuffer->Release();
 
   return ret;
 }
@@ -194,22 +171,21 @@ int surface_getpixel_alpha(int id, int x, int y)
   get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
-  if (x > surface->width || y > surface->height) return 0;
+  if (x > surface.width || y > surface.height) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  LPDIRECT3DSURFACE9 pBuffer = surface->surf;
-  d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
-  D3DSURFACE_DESC desc;
-  pBackBuffer->GetDesc(&desc);
+  LPDIRECT3DSURFACE9 pBuffer = surface.surf, pRamBuffer;
+  enigma::surface_copy_to_ram(&pBuffer, &pRamBuffer);
 
   D3DLOCKED_RECT rect;
 
-  pBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+  pRamBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
   unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
   unsigned offset = y * rect.Pitch + x * 4;
-  int ret = bitmap[offset];
-  pBuffer->UnlockRect();
-  delete[] bitmap;
+  int ret = bitmap[offset + 3];
+  pRamBuffer->UnlockRect();
+
+  pRamBuffer->Release();
 
   return ret;
 }
@@ -237,10 +213,10 @@ int surface_save(int id, string filename)
 
   LPDIRECT3DSURFACE9 pDestBuffer;
   D3DSURFACE_DESC desc;
-  surface->surf->GetDesc(&desc);
+  surface.surf->GetDesc(&desc);
 
-  d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
-  d3dmgr->device->GetRenderTargetData(surface->surf, pDestBuffer);
+  d3ddev->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+  d3ddev->GetRenderTargetData(surface.surf, pDestBuffer);
 
   D3DLOCKED_RECT rect;
 
@@ -257,17 +233,17 @@ int surface_save(int id, string filename)
 
 int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
 {
-
+  return 0; //TODO: implement
 }
 
 int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
 {
-
+  return 0; //TODO: implement
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
 {
-
+  return 0; //TODO: implement
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)

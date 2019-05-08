@@ -26,14 +26,14 @@
 
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/rectpack.h"
+#include "rectpacker/rectpack.h"
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_sprite(spr,id) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
+      enigma_user::show_error("Cannot access sprite with id " + toString(id), false); \
       return; \
     } enigma::sprite *const spr = enigma::spritestructarray[id];
 #else
@@ -49,7 +49,7 @@ namespace enigma {
     unsigned int metric = 0;
     unsigned int size = 0;
     TextureAtlasRect(unsigned int m, unsigned int s) : metric(m), size(s) {}
-    const bool operator<(TextureAtlasRect const &rhs) const{   
+    const bool operator<(TextureAtlasRect const &rhs) const{
       return this->size < rhs.size;
     }
   };
