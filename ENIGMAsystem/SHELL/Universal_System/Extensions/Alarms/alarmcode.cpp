@@ -2,7 +2,7 @@
 // Copyright 2011 Josh Ventura
 // Licensed under the GNU General Public License, Version 3 or later.
 
-#include "Universal_System/collisions_object.h"
+#include "Universal_System/Object_Tiers/collisions_object.h"
 #include "Universal_System/instance_system.h"
 #include "implement.h"
 #include "include.h"
@@ -15,7 +15,7 @@ namespace enigma {
 
 namespace enigma_user
 {
- 
+
 void action_set_alarm(int steps, int alarmno)
 {
   extern bool argument_relative;

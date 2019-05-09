@@ -23,7 +23,7 @@
 #define ENIGMA_INSTANCE_SYSTEM_H
 
 #include "instance_iterator.h"
-#include "object.h"
+#include "Object_Tiers/object.h"
 #include "reflexive_types.h"
 #include "var4.h"
 
