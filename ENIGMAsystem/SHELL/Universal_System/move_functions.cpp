@@ -19,7 +19,7 @@
 #include <cmath>
 #include <floatcomp.h>
 
-#include "collisions_object.h"
+#include "Object_Tiers/collisions_object.h"
 #include "instance_system.h"
 #include "roomsystem.h"
 #include "move_functions.h"
@@ -115,4 +115,3 @@ void move_random(const cs_scalar snapHor, const cs_scalar snapVer)
 }
 
 }
-

@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "planar_object.h"
+#include "Object_Tiers/planar_object.h"
 #include "instance_system.h"
 #include "instance.h"
 #include <cfloat>
