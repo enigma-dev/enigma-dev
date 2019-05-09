@@ -29,7 +29,7 @@
 #include <floatcomp.h>
 
 #include "Universal_System/scalar.h"
-#include "Universal_System/collisions_object.h"
+#include "Universal_System/Object_Tiers/collisions_object.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/math_consts.h"
 
@@ -303,4 +303,3 @@ bool mp_linear_path_object(int path, const double x, const double y, const doubl
 }
 
 }
-

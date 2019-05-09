@@ -25,7 +25,7 @@
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/sprites.h"
 #include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/Object_Tiers/graphics_object.h"
 #include "Universal_System/math_consts.h"
 
 #include <cmath>
@@ -74,11 +74,11 @@ void draw_sprite_pos_raw(const enigma::sprite* spr2d, int subimg, gs_scalar x1, 
 {
   alpha = CLAMP_ALPHAF(alpha);
   get_subimg(usi, spr2d, subimg);
-  
+
   gs_scalar
     tx = spr2d->texturexarray[usi], tw = spr2d->texturewarray[usi],
     ty = spr2d->textureyarray[usi], th = spr2d->textureharray[usi];
-  
+
   draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
   draw_vertex_texture_color(x1,y1, tx,    ty,    color,alpha);
   draw_vertex_texture_color(x2,y2, tx+tw, ty,    color,alpha);
@@ -93,13 +93,13 @@ void draw_sprite_pos_part_raw(const enigma::sprite* spr2d, int subimg,
 ) {
   alpha = CLAMP_ALPHAF(alpha);
   get_subimg(usi, spr2d, subimg);
-  
+
   gs_scalar
     tbx = spr2d->texturexarray[usi], tbw = (gs_scalar)spr2d->width  / (gs_scalar)spr2d->texturewarray[usi],
     tby = spr2d->textureyarray[usi], tbh = (gs_scalar)spr2d->height / (gs_scalar)spr2d->textureharray[usi],
     tx1 = tbx + px / tbw, tx2 = tx1 + pw / tbw,
     ty1 = tby + py / tbh, ty2 = ty1 + ph / tbh;
-  
+
   draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
   draw_vertex_texture_color(x1,y1, tx1,ty1, color,alpha);
   draw_vertex_texture_color(x2,y2, tx2,ty1, color,alpha);
