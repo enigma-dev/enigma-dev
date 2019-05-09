@@ -108,12 +108,11 @@ void ini_section_delete(std::string section)
 /* OS Specific; should be moved */
 
 int file_exists(std::string fname) {
-    DWORD attributes = GetFileAttributes(fname.c_str());
-    if(attributes == INVALID_FILE_ATTRIBUTES) {
-        return 0;
-    } else {
-        return 1;
-    }
+  DWORD file_attr;
+  tstring tstr_fname = widen(fname);
+  file_attr = GetFileAttributesW(tstr_fname.c_str());
+  return (file_attr != INVALID_FILE_ATTRIBUTES &&
+    !(file_attr & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 int file_delete(std::string fname) {
@@ -162,10 +161,11 @@ int file_copy(std::string fname, std::string newname) {
 }
 
 int directory_exists(std::string dname) {
-  DWORD dwAttrib = GetFileAttributes(dname.c_str());
-
-  return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
-         (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+  DWORD file_attr;
+  tstring tstr_dname = widen(dname);
+  file_attr = GetFileAttributesW(tstr_dname.c_str());
+  return (file_attr != INVALID_FILE_ATTRIBUTES &&
+    (file_attr & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 // NOTICE: May behave differently than GM. May fail if there are
