@@ -51,7 +51,7 @@ using enigma_user::make_color_rgb;
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
-#include "Universal_System/object.h"
+#include "Universal_System/Object_Tiers/object.h"
 #include "Universal_System/debugscope.h"
 #endif
 

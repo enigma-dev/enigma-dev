@@ -34,7 +34,7 @@
 #define ENIGMA_COLLISIONS_OBJECT_H
 
 #include "transform_object.h"
-#include "sprites_internal.h" //bbox_rect
+#include "Universal_System/sprites_internal.h" //bbox_rect
 
 namespace enigma
 {
@@ -43,7 +43,7 @@ namespace enigma
     //Bit Mask
       int  mask_index;
       bool solid;
-    
+
     //Bounding box
       #ifdef JUST_DEFINE_IT_RUN
         int bbox_left, bbox_right, bbox_top, bbox_bottom;
@@ -59,7 +59,7 @@ namespace enigma
         #define bbox_top    $bbox_top()
         #define bbox_bottom $bbox_bottom()
       #endif
-    
+
     //Constructors
       object_collisions();
       object_collisions(unsigned, int);

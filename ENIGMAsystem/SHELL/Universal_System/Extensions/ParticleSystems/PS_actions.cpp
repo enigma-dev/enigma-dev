@@ -30,7 +30,7 @@
 #include "PS_effects_enums.h"
 #include "PS_particle_system.h"
 #include "PS_particle_system_manager.h"
-#include "Universal_System/planar_object.h"
+#include "Universal_System/Object_Tiers/planar_object.h"
 #include "Universal_System/instance_system_base.h"
 #include <map>
 
@@ -230,7 +230,7 @@ namespace enigma_user {
     }
     return emitter_id;
   }
-  
+
   void action_partemit_create(int emitter, int shape, double x_left, double x_right, double y_top, double y_bottom)
   {
     if (ps_manager.id_to_particlesystem.find(action_ps_id) == ps_manager.id_to_particlesystem.end()) {
@@ -315,4 +315,3 @@ namespace enigma_user {
     }
   }
 }
-

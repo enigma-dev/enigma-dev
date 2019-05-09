@@ -25,13 +25,13 @@
 #define ENIGMA_GRAPHICS_OBJECT_H
 
 #ifndef INCLUDED_FROM_SHELLMAIN
-  #include "var4.h"
-  #include "sprites.h"
+  #include "Universal_System/var4.h"
+  #include "Universal_System/sprites.h"
 #endif
 
-#include "scalar.h"
+#include "Universal_System/scalar.h"
 #include "timelines_object.h"
-#include "multifunction_variant.h"
+#include "Universal_System/multifunction_variant.h"
 
 namespace enigma
 {

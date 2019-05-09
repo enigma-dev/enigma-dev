@@ -31,7 +31,7 @@
 #include "libEGMstd.h"
 #include "instance_system.h"
 #include "instance.h"
-#include "planar_object.h"
+#include "Object_Tiers/planar_object.h"
 #include "background.h"
 
 #include "roomsystem.h"

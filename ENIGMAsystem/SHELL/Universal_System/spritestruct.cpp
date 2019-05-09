@@ -18,7 +18,7 @@
 **/
 
 #include "estring.h"
-#include "graphics_object.h"
+#include "Object_Tiers/graphics_object.h"
 #include "image_formats.h"
 #include "libEGMstd.h"
 #include "sprites_internal.h"

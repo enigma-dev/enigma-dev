@@ -25,9 +25,9 @@
 #define ENIGMA_PLANAR_OBJECT_H
 
 #include "object.h"
-#include "var4.h"
-#include "scalar.h"
-#include "reflexive_types.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/scalar.h"
+#include "Universal_System/reflexive_types.h"
 
 #define ISLOCAL_persistent true
 

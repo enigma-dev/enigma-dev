@@ -47,7 +47,7 @@
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
 #include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
 
-#include "Universal_System/collisions_object.h"
+#include "Universal_System/Object_Tiers/collisions_object.h"
 
 #include "Collision_Systems/collision_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -70,7 +70,7 @@ extern int amain();
 
 #include "Universal_System/image_formats.h"
 
-#include "Universal_System/object.h"
+#include "Universal_System/Object_Tiers/object.h"
 #include "Universal_System/instance.h"
 #include "Universal_System/roomsystem.h"
 

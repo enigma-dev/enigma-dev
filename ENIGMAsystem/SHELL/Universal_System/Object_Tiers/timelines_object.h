@@ -30,8 +30,8 @@
 #define ENIGMA_TIMELINES_OBJECT_H
 
 #include "planar_object.h"
-#include "var4.h"
-#include "scalar.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/scalar.h"
 
 #include <vector>
 #include <map>
@@ -49,7 +49,7 @@ namespace enigma
     bool timeline_running; //True if running, False if not. Setting to True again will continue execution; it's more like a "pause" button.
     gs_scalar timeline_speed; //Can be set to fractions, negative, zero, etc. Defaults to 1.
     gs_scalar timeline_position; //How far along "time" is in this timeline. Bounded by [0,lastMoment)
-    bool timeline_loop; //Allows looping from lastMoment->0 and vice versa. 
+    bool timeline_loop; //Allows looping from lastMoment->0 and vice versa.
 
     //Constructors
     object_timelines();

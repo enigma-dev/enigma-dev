@@ -29,10 +29,10 @@
 #ifndef ENIGMA_INSTANCE_H
 #define ENIGMA_INSTANCE_H
 
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/Object_Tiers/graphics_object.h"
 #include "Universal_System/instance_iterator.h"
 
-namespace enigma 
+namespace enigma
 {
 
 extern int destroycalls, createcalls;
@@ -41,7 +41,7 @@ void instance_change_inst(int obj, bool perf, enigma::object_graphics* inst);
 
 } //namespace enigma
 
-namespace enigma_user 
+namespace enigma_user
 {
 
 enigma::instance_t instance_create(int x,int y,int object);

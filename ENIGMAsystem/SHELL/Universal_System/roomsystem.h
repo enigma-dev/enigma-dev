@@ -127,11 +127,11 @@ namespace enigma
       int id,bckid,bgx,bgy,depth,height,width,roomX,roomY;
       double alpha, xscale, yscale;
       int color;
-      
-      tile(int id, int bckid, int bgx, int bgy, int depth, int height, 
-             int width, int roomX, int roomY, double alpha, 
-             double xscale, double yscale, int color) : 
-        id(id), bckid(bckid), bgx(bgx), bgy(bgy), depth(depth), height(height), width(width), 
+
+      tile(int id, int bckid, int bgx, int bgy, int depth, int height,
+             int width, int roomX, int roomY, double alpha,
+             double xscale, double yscale, int color) :
+        id(id), bckid(bckid), bgx(bgx), bgy(bgy), depth(depth), height(height), width(width),
         roomX(roomX), roomY(roomY), alpha(alpha), xscale(xscale), yscale(yscale), color(color) {}
   };
   struct viewstruct
