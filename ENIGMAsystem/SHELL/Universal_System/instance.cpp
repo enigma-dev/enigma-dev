@@ -31,7 +31,7 @@
 #include <string>
 //#include "reflexive_types.h"
 //#include "EGMstd.h"
-#include "object.h"
+#include "Object_Tiers/object.h"
 
 #include "instance_system.h"
 #include "instance.h"

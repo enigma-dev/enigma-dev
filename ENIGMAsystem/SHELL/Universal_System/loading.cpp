@@ -20,7 +20,7 @@
 #include "sprites_internal.h"
 #include "background_internal.h"
 #include "roomsystem.h"
-#include "object.h"
+#include "Object_Tiers/object.h"
 #include "libEGMstd.h"
 //#include "mathnc.h"
 

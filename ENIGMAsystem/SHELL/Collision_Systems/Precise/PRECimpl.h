@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Universal_System/collisions_object.h"
+#include "Universal_System/Object_Tiers/collisions_object.h"
 
 enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, bool notme, double x, double y);
 enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool prec, bool notme, int x1, int y1, int x2, int y2);
@@ -25,4 +25,3 @@ enigma::object_collisions* const collide_inst_circle(int object, bool solid_only
 enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool prec, bool notme, int x1, int y1, double rx, double ry);
 void destroy_inst_point(int object, bool solid_only, int x1, int y1);
 void change_inst_point(int obj, bool perf, int x1, int y1);
-

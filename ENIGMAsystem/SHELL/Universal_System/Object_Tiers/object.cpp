@@ -17,14 +17,14 @@
 **/
 
 
-#include "var4.h"
-#include "reflexive_types.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/reflexive_types.h"
 #include "object.h"
 #include "libEGMstd.h"
 
 #ifdef DEBUG_MODE
-  #include "instance_system.h"
-  #include "resource_data.h" // TODO: We don't guarantee these functions exist. But they're useful for debugging. We need a debug namespace that offers this, too.
+  #include "Universal_System/instance_system.h"
+  #include "Universal_System/resource_data.h" // TODO: We don't guarantee these functions exist. But they're useful for debugging. We need a debug namespace that offers this, too.
   #include <Widget_Systems/widgets_mandatory.h> // show_error
 #endif
 

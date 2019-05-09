@@ -26,10 +26,10 @@
 
 #include <floatcomp.h>
 
-#include "var4.h"
+#include "Universal_System/var4.h"
 #include "object.h"
-#include "math_consts.h"
-#include "reflexive_types.h"
+#include "Universal_System/math_consts.h"
+#include "Universal_System/reflexive_types.h"
 
 #include "planar_object.h"
 
@@ -88,7 +88,7 @@ namespace enigma
         hb4 = instance->hspeed.rval.d,
         vb4 = instance->vspeed.rval.d;
       int sign = (instance->speed > 0) - (instance->speed < 0);
-      
+
       if (instance->hspeed != 0) {
         instance->hspeed.rval.d -= (sign * instance->friction)
             * cos(instance->direction.rval.d * M_PI/180);
