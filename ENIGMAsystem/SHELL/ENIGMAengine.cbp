@@ -997,7 +997,7 @@
 		<Unit filename="Universal_System/key_game_globals.h" />
 		<Unit filename="Universal_System/lives.cpp" />
 		<Unit filename="Universal_System/lives.h" />
-		<Unit filename="Universal_System/loading.cpp" />
+		<Unit filename="Universal_System/Resources/loading.cpp" />
 		<Unit filename="Universal_System/loading.h" />
 		<Unit filename="Universal_System/lodepng.cpp" />
 		<Unit filename="Universal_System/lodepng.h" />
@@ -1045,8 +1045,8 @@
 		<Unit filename="Universal_System/var4_lua.cpp" />
 		<Unit filename="Universal_System/var_te.h" />
 		<Unit filename="Universal_System/Instances/with.h" />
-		<Unit filename="Universal_System/zlib.cpp" />
-		<Unit filename="Universal_System/zlib.h" />
+		<Unit filename="Universal_System/Resources/zlib.cpp" />
+		<Unit filename="Universal_System/Resources/zlib.h" />
 		<Unit filename="Widget_Systems/None/Info/widget_info.h">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
