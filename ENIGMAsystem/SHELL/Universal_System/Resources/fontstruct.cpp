@@ -20,7 +20,7 @@
 #include "sprites_internal.h"
 #include "fonts_internal.h"
 #include "rectpacker/rectpack.h"
-#include "image_formats.h"
+#include "Universal_System/image_formats.h"
 #include "libEGMstd.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -42,15 +42,15 @@ namespace enigma
   bool fontglyph::empty() {
     return !(std::abs(x2-x) > 0 && std::abs(y2-y) > 0);
   }
-  
+
   int font_new(uint32_t gs, uint32_t gc) // Creates a new font, allocating 'gc' glyphs
   {
     font *ret = new font;
-    
+
     fontglyphrange fgr;
     fgr.glyphstart = gs;
     fgr.glyphcount = gc;
-    
+
     ret->glyphRangeCount = 1;
     ret->glyphRanges.push_back(fgr);
     ret->height = 0;
@@ -252,13 +252,13 @@ bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32
   fnt->bold = bold;
   fnt->italic = italic;
   fnt->glyphRangeCount = 1;
-  
+
   enigma::fontglyphrange fgr;
   fgr.glyphstart = first;
   fgr.glyphcount = last-first;
-  
+
   fnt->glyphRanges.push_back(fgr);
-  
+
   return true;
 }
 
@@ -271,12 +271,12 @@ bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep)
   enigma::font *fnt = enigma::fontstructarray[ind];
   fnt->glyphRanges.clear(); //TODO: Delete glyphs for each range or add it to the destructor?
   fnt->glyphRangeCount = 1;
-  
+
   enigma::fontglyphrange fgr;
   fgr.glyphstart = first;
   fgr.glyphcount = gcount;
   fnt->glyphRanges.push_back(fgr);
-  
+
   return enigma::font_pack(fnt, spr, gcount, prop, sep);
 }
 
@@ -333,4 +333,3 @@ float font_get_glyph_bottom(int fnt, uint32_t character) {
 }
 
 }
-

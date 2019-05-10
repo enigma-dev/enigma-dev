@@ -26,8 +26,8 @@
 
 #include "Universal_System/var4.h"
 #include "Universal_System/math_consts.h"
-#include "Universal_System/fonts_internal.h"
-#include "Universal_System/sprites.h"
+#include "Universal_System/Resources/fonts_internal.h"
+#include "Universal_System/Resources/sprites.h"
 
 #include <cmath>
 #include <string>
