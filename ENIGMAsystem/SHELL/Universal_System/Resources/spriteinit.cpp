@@ -18,7 +18,7 @@
 #include "libEGMstd.h"
 #include "resinit.h"
 #include "sprites_internal.h"
-#include "zlib.h"
+#include "Universal_System/zlib.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/platforms_mandatory.h"

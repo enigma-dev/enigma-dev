@@ -19,7 +19,7 @@
 #include "Platforms/platforms_mandatory.h"
 #include "libEGMstd.h"
 #include "resinit.h"
-#include "zlib.h"
+#include "Universal_System/zlib.h"
 
 #include <cstring>
 #include <cstdio>
