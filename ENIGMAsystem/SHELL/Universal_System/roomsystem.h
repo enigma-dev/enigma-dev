@@ -28,7 +28,7 @@
 #ifndef room_system_h
 #define room_system_h
 
-#include "Universal_System/var4.h"
+#include "var4.h"
 
 #include <string>
 #include <vector>
@@ -183,7 +183,7 @@ namespace enigma
 
 // room variable
 
-#include "Universal_System/multifunction_variant.h"
+#include "multifunction_variant.h"
 namespace enigma { struct roomv: multifunction_variant<roomv> {
   INHERIT_OPERATORS(roomv)
   void function(const variant &oldval);
