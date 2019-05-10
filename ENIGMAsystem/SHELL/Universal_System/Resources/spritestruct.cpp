@@ -17,9 +17,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "estring.h"
-#include "Object_Tiers/graphics_object.h"
-#include "image_formats.h"
+#include "Universal_System/estring.h"
+#include "Universal_System/Object_Tiers/graphics_object.h"
+#include "Universal_System/image_formats.h"
 #include "libEGMstd.h"
 #include "sprites_internal.h"
 
@@ -216,7 +216,7 @@ void sprite_merge(int ind, int copy_sprite)
  * use at load time with data read from the executable. These both expect
  * RAW format, RGB only.
  */
-#include "nlpo2.h"
+#include "Universal_System/nlpo2.h"
 
 namespace enigma
 {

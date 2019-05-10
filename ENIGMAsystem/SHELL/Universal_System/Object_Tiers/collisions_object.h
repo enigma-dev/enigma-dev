@@ -34,7 +34,7 @@
 #define ENIGMA_COLLISIONS_OBJECT_H
 
 #include "transform_object.h"
-#include "Universal_System/sprites_internal.h" //bbox_rect
+#include "Universal_System/Resources/sprites_internal.h" //bbox_rect
 
 namespace enigma
 {

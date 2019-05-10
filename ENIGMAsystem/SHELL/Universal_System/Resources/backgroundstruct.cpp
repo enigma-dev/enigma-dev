@@ -18,9 +18,9 @@
 **/
 
 #include "background_internal.h"
-#include "image_formats.h"
+#include "Universal_System/image_formats.h"
 #include "libEGMstd.h"
-#include "nlpo2.h"
+#include "Universal_System/nlpo2.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
 

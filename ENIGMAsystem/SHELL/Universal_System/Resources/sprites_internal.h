@@ -26,7 +26,7 @@
 #define ENIGMA_SPRITESTRUCT
 
 #include "Collision_Systems/collision_types.h"
-#include "var4.h"
+#include "Universal_System/var4.h"
 
 #include <string>
 #include <vector>

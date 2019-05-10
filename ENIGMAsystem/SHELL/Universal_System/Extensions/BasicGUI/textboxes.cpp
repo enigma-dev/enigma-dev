@@ -24,11 +24,11 @@ using std::unordered_map;
 
 #include "Universal_System/var4.h"
 #include "Platforms/General/PFmain.h" //For mouse_check_button and keyboard_check_button
-#include "Universal_System/resource_data.h" //For script_execute
+#include "Universal_System/Resources/resource_data.h" //For script_execute
 #include "Universal_System/estring.h" //For string manipulation
 #include "Platforms/General/PFwindow.h" //For clipboard
 
-//#include "Universal_System/sprites_internal.h"
+//#include "Universal_System/Resources/sprites_internal.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -86,7 +86,7 @@ namespace gui
         active = true;
         state = enigma_user::gui_state_on_active;
         callback_execute(enigma_user::gui_event_pressed);
-        
+
         set_cursor(tx-ox, ty-oy);
         set_marker_start(cursor_line, cursor_position);
 
@@ -128,7 +128,7 @@ namespace gui
     }else{
       if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         active = false;
-        mark = false;        
+        mark = false;
       }
       state = enigma_user::gui_state_on;
     }
@@ -520,7 +520,7 @@ namespace gui
       }
       l++;
     }
-    
+
     if (active == true){
       if (blink_timer < 15){
         //printf("Drawing cursor at %f and %f\n", textx + cursor_x, texty + cursor_y);
@@ -573,7 +573,7 @@ namespace gui
       }else{
         //Remove at start line
         text[mark_start_line].erase(mark_start_pos, string::npos);
-        
+
         //Add to start
         text[mark_start_line] += text[mark_end_line].substr(mark_end_pos, string::npos);
 
@@ -585,7 +585,7 @@ namespace gui
         }
       }
       cursor_position = mark_start_pos;
-      cursor_line = mark_start_line; 
+      cursor_line = mark_start_line;
       mark = false;
     }
   }
@@ -624,7 +624,7 @@ namespace gui
     size_t i;
     string endOfFirst = text[cursor_line].substr(cursor_position, string::npos);
     text[cursor_line].erase(cursor_position, string::npos);
-    
+
     bool limit = false;
     if (char_limit==0){ //UNLIMITED POWE... chars
       for (i = 0; i < str.length(); ++i){
@@ -857,7 +857,7 @@ namespace enigma_user
     check_data_element(gui::GUI_TYPE::STYLE, style_id);
     tex.marker_style_id = (style_id != -1? style_id : gui::gui_style_textbox);
   }
-  
+
 
   void gui_textbox_set_active(int id, bool active){
     get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
@@ -1097,4 +1097,3 @@ namespace enigma_user
     return ele.parenter.window(wid);
   }
 }
-

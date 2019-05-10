@@ -22,8 +22,8 @@
 #include "GScolor_macros.h"
 
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites_internal.h"
-#include "Universal_System/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
+#include "Universal_System/Resources/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 #include "Universal_System/math_consts.h"
 

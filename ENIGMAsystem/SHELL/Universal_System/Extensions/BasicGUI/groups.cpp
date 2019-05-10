@@ -23,7 +23,7 @@ using std::unordered_map;
 
 #include "Universal_System/var4.h"
 #include "Platforms/General/PFmain.h" //For mouse_check_button
-#include "Universal_System/resource_data.h" //For script_execute
+#include "Universal_System/Resources/resource_data.h" //For script_execute
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"

@@ -18,7 +18,7 @@
 
 #include "background_internal.h"
 #include "libEGMstd.h"
-#include "zlib.h"
+#include "Universal_System/zlib.h"
 #include "resinit.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"

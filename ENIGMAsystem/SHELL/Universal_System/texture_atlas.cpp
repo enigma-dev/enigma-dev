@@ -20,9 +20,9 @@
 #include "texture_atlas.h"
 #include "texture_atlas_internal.h"
 
-#include "Universal_System/background_internal.h"
-#include "Universal_System/fonts_internal.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/fonts_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
