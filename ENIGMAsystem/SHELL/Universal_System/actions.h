@@ -27,7 +27,7 @@
  **                                                                              **
  \********************************************************************************/
 
-#include "instance_system_base.h"
+#include "Instances/instance_system_base.h"
 #include "lives.h"
 
 #include <stdio.h>
