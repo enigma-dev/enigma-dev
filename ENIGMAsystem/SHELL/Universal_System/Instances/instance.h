@@ -30,7 +30,7 @@
 #define ENIGMA_INSTANCE_H
 
 #include "Universal_System/Object_Tiers/graphics_object.h"
-#include "Universal_System/instance_iterator.h"
+#include "instance_iterator.h"
 
 namespace enigma
 {

@@ -18,7 +18,7 @@
 #ifndef INSTANCE_SYSTEM_BASE_h
 #define INSTANCE_SYSTEM_BASE_h
 
-#include "Object_Tiers/object.h"
+#include "Universal_System/Object_Tiers/object.h"
 #include <string>
 
 namespace enigma

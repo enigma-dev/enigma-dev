@@ -17,10 +17,10 @@
 
 
 #include "Universal_System/Object_Tiers/collisions_object.h"
-#include "Universal_System/instance_system.h" //iter
+#include "Universal_System/Instances/instance_system.h" //iter
 //#include "Universal_System/roomsystem.h"
 #include "Collision_Systems/collision_mandatory.h" //iter
-#include "Universal_System/instance.h"
+#include "Universal_System/Instances/instance.h"
 
 #include "SB2Dinstances.h"
 #include "SB2Dfunctions.h"

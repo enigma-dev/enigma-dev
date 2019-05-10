@@ -24,7 +24,7 @@
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/sprites.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Object_Tiers/graphics_object.h"
 #include "Universal_System/math_consts.h"
 

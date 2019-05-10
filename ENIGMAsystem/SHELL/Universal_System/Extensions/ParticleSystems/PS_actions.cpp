@@ -31,7 +31,7 @@
 #include "PS_particle_system.h"
 #include "PS_particle_system_manager.h"
 #include "Universal_System/Object_Tiers/planar_object.h"
-#include "Universal_System/instance_system_base.h"
+#include "Universal_System/Instances/instance_system_base.h"
 #include <map>
 
 namespace enigma_user {

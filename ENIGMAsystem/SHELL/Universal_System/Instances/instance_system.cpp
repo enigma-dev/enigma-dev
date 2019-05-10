@@ -22,8 +22,8 @@
 #include <math.h>
 #include <vector>
 #include <string>
-#include "var4.h"
-#include "reflexive_types.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/reflexive_types.h"
 #include <stdio.h>
 
 #include "instance_system.h"

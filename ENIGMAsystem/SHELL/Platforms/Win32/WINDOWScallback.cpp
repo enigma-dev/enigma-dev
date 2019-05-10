@@ -26,8 +26,8 @@ using std::map;
 #include "../General/PFwindow.h"
 
 #include "Platforms/General/PFmain.h" // For those damn vk_ constants.
-#include "Universal_System/instance_system.h"
-#include "Universal_System/instance.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Instances/instance.h"
 
 #include "Platforms/platforms_mandatory.h"
 

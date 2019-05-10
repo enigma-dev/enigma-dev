@@ -30,7 +30,7 @@
 #include "Universal_System/background.h"
 #include "Universal_System/Object_Tiers/graphics_object.h"
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/roomsystem.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
