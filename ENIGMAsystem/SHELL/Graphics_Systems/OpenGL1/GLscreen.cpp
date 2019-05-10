@@ -31,7 +31,7 @@
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/Resources/roomsystem.h"
+#include "Universal_System/roomsystem.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/Resources/background_internal.h"
 #include "Universal_System/Resources/sprites_internal.h"

@@ -72,7 +72,7 @@ extern int amain();
 
 #include "Universal_System/Object_Tiers/object.h"
 #include "Universal_System/Instances/instance.h"
-#include "Universal_System/Resources/roomsystem.h"
+#include "Universal_System/roomsystem.h"
 
 #include "Universal_System/globalupdate.h"
 

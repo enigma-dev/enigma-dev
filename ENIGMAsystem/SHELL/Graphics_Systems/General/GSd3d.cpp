@@ -23,7 +23,7 @@
 #include "GScolors.h"
 #include "GScolor_macros.h"
 
-#include "Universal_System/Resources/roomsystem.h" // for view variables
+#include "Universal_System/roomsystem.h" // for view variables
 
 #include <unordered_map>
 #include <vector>

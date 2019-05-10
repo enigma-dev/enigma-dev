@@ -32,7 +32,7 @@
 #include "../General/PFfilemanip.h"
 
 #include "Platforms/General/PFmain.h"
-#include "Universal_System/Resources/roomsystem.h"
+#include "Universal_System/roomsystem.h"
 
 using std::string;
 

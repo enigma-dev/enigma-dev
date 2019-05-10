@@ -352,7 +352,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 #include <string>
 using std::string;
 #include "Universal_System/var4.h"
-#include "Universal_System/Resources/roomsystem.h"
+#include "Universal_System/roomsystem.h"
 
 namespace enigma_user
 {

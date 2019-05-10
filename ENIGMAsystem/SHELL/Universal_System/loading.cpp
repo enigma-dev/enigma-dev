@@ -19,7 +19,7 @@
 #include "Resources/resinit.h"
 #include "Resources/sprites_internal.h"
 #include "Resources/background_internal.h"
-#include "Resources/roomsystem.h"
+#include "roomsystem.h"
 #include "Object_Tiers/object.h"
 #include "libEGMstd.h"
 //#include "mathnc.h"

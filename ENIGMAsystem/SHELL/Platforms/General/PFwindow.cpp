@@ -1,7 +1,7 @@
 #include "PFwindow.h"
 #include "PFmain.h"
 
-#include "Universal_System/Resources/roomsystem.h"  // room_width
+#include "Universal_System/roomsystem.h"  // room_width
 
 #include <map>
 

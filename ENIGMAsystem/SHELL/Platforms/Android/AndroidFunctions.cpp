@@ -29,7 +29,7 @@
 #include "AndroidWindow.h"
 #include <stdio.h>
 #include "Platforms/General/PFmain.h"
-#include "Universal_System/Resources/roomsystem.h"
+#include "Universal_System/roomsystem.h"
 #include <android/log.h>
 #define  LOG_TAG    "libenigma"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)

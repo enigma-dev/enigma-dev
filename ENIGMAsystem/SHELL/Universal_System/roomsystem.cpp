@@ -32,7 +32,7 @@
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Instances/instance.h"
 #include "Universal_System/Object_Tiers/planar_object.h"
-#include "background.h"
+#include "Resources/background.h"
 
 #include "roomsystem.h"
 #include "Universal_System/depth_draw.h"

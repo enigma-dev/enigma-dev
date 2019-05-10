@@ -7,7 +7,7 @@
 #include "Platforms/platforms_mandatory.h"
 
 #include "Universal_System/estring.h" // ord
-#include "Universal_System/Resources/roomsystem.h" // room_caption, update_mouse_variables
+#include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
 
 #include <array>
 #include <string>

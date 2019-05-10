@@ -30,7 +30,7 @@
 #include "CocoaMain.h"
 #include <stdio.h>
 #include "Platforms/General/PFmain.h"
-#include "Universal_System/Resources/roomsystem.h"
+#include "Universal_System/roomsystem.h"
 #include <cstring>
 
 

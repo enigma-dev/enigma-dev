@@ -1022,11 +1022,11 @@
 		<Unit filename="Universal_System/Resources/resinit.h" />
 		<Unit filename="Universal_System/Resources/resource_data.cpp" />
 		<Unit filename="Universal_System/Resources/resource_data.h" />
-		<Unit filename="Universal_System/Resources/roomsystem.cpp" />
-		<Unit filename="Universal_System/Resources/roomsystem.h" />
+		<Unit filename="Universal_System/roomsystem.cpp" />
+		<Unit filename="Universal_System/roomsystem.h" />
 		<Unit filename="Universal_System/scalar.h" />
-		<Unit filename="Universal_System/Resources/shaderstruct.cpp" />
-		<Unit filename="Universal_System/Resources/shaderstruct.h" />
+		<Unit filename="Universal_System/shaderstruct.cpp" />
+		<Unit filename="Universal_System/shaderstruct.h" />
 		<Unit filename="Universal_System/simplecollisions.h" />
 		<Unit filename="Universal_System/Resources/soundinit.cpp" />
 		<Unit filename="Universal_System/Resources/spriteinit.cpp" />

@@ -34,7 +34,7 @@ std::string working_directory, temp_directory;
 
 using namespace std;
 
-#include <Universal_System/Resources/roomsystem.h>
+#include <Universal_System/roomsystem.h>
 #include <Universal_System/Platforms/General/PFmain.h>
 
 

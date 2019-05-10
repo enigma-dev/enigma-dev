@@ -22,7 +22,7 @@
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
-#include "Universal_System/Resources/roomsystem.h"
+#include "Universal_System/roomsystem.h"
 
 #include <vector>
 #include <math.h>
