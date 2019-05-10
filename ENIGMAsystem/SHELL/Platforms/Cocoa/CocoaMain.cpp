@@ -67,7 +67,7 @@ void initialize_directory_globals() {
   else
     enigma_user::temp_directory = "/tmp/";
 }
-  
+
 } // namespace enigma
 
 int main(int argc,char** argv) {
@@ -87,7 +87,7 @@ void sleep(int ms) {
   if (ms > 1000) ::sleep(ms/1000);
   usleep((ms % 1000) *1000);
 };
-  
+
 int parameter_count() {
   // TODO
   return 0;
