@@ -32,7 +32,7 @@ endif
 
 CXX := g++
 CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src
-LDFLAGS += -shared -O3 -g -L../ -Wl,-rpath=./
+LDFLAGS += -shared -O3 -g -L../ -Wl,-rpath,./
 LDLIBS += -lProtocols -lprotobuf -lz -L$(SHARED_SRC_DIR)/libpng-util -lpng-util -lpng
 
 # This implements a recursive wildcard allowing us to iterate in subdirs
