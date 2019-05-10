@@ -35,7 +35,7 @@
 #include "PS_particle_system.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "PS_particle_type.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 #include "Universal_System/math_consts.h"
 

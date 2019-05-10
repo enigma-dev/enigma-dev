@@ -20,7 +20,7 @@
 #include "GSstdraw.h"
 #include "GScolors.h"
 
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "Universal_System/math_consts.h"
 
 #include <list>

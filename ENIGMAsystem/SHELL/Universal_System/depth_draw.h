@@ -36,7 +36,7 @@
 #define ENIGMA_DEPTH_DRAW_H
 
 #include "Instances/instance_system.h"
-#include "roomsystem.h"
+#include "Resources/roomsystem.h"
 
 #include <map>
 #include <set>

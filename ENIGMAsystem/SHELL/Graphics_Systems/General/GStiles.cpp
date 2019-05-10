@@ -25,8 +25,8 @@
 #include "GSvertex_impl.h"
 
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/background.h"
-#include "Universal_System/background_internal.h"
+#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/background_internal.h"
 
 #define INCLUDED_FROM_SHELLMAIN Not really.
 // make an exception just for point_in_rectangle

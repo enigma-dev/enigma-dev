@@ -23,7 +23,7 @@
 #include "Graphics_Systems/OpenGL/GLscreen.h"
 #include "OpenGLHeaders.h"
 
-#include "Universal_System/shaderstruct.h"
+#include "Universal_System/Resources/shaderstruct.h"
 #include "Universal_System/var4.h"
 
 #include <iostream>

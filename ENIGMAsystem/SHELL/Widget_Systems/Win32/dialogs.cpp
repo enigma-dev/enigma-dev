@@ -47,7 +47,7 @@ static string gs_but1, gs_but2, gs_but3;
 
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
-#include "Universal_System/resource_data.h"
+#include "Universal_System/Resources/resource_data.h"
 #include "Universal_System/Object_Tiers/object.h"
 #include "Universal_System/debugscope.h"
 #endif

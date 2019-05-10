@@ -27,7 +27,7 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #endif
 
-#include "Universal_System/shaderstruct.h"
+#include "Universal_System/Resources/shaderstruct.h"
 #include "Universal_System/var4.h"
 
 #include <iostream>

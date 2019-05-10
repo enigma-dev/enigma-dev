@@ -21,7 +21,7 @@
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 #include <cstdlib>
 #include <math.h>

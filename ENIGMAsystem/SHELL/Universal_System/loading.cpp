@@ -16,10 +16,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "resinit.h"
-#include "sprites_internal.h"
-#include "background_internal.h"
-#include "roomsystem.h"
+#include "Resources/resinit.h"
+#include "Resources/sprites_internal.h"
+#include "Resources/background_internal.h"
+#include "Resources/roomsystem.h"
 #include "Object_Tiers/object.h"
 #include "libEGMstd.h"
 //#include "mathnc.h"

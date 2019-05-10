@@ -27,7 +27,7 @@
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
 
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "Universal_System/var4.h"
 
 #include <X11/Xlib.h>

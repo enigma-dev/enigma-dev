@@ -20,8 +20,8 @@
 #include <math.h>
 #include <string>
 
-#include "var4.h"
-#include "reflexive_types.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/reflexive_types.h"
 
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
@@ -29,17 +29,17 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/Instances/callbacks_events.h"
 #include "libEGMstd.h"
-#include "Instances/instance_system.h"
-#include "Instances/instance.h"
-#include "Object_Tiers/planar_object.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Instances/instance.h"
+#include "Universal_System/Object_Tiers/planar_object.h"
 #include "background.h"
 
 #include "roomsystem.h"
-#include "depth_draw.h"
+#include "Universal_System/depth_draw.h"
 
 #include "Platforms/General/PFmain.h"
 
-#include "lives.h"
+#include "Universal_System/lives.h"
 #include <string.h>
 
 namespace enigma_user

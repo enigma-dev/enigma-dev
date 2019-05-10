@@ -21,7 +21,7 @@
 #include "Platforms/platforms_mandatory.h"  // For type insurance
 
 #include "Universal_System/globalupdate.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"

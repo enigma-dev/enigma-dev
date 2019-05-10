@@ -36,7 +36,7 @@
 #include "PS_particle_system_manager.h"
 #include "PS_particle_type.h"
 #include "PS_particle_updatedraw.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 #include "Universal_System/math_consts.h"
 

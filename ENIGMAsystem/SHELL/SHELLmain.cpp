@@ -36,9 +36,9 @@
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
-#include "Universal_System/background.h"
-#include "Universal_System/sprites.h"
-#include "Universal_System/fonts.h"
+#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/sprites.h"
+#include "Universal_System/Resources/fonts.h"
 #include "Universal_System/texture_atlas.h"
 
 #include "Universal_System/Instances/callbacks_events.h"
@@ -72,13 +72,13 @@ extern int amain();
 
 #include "Universal_System/Object_Tiers/object.h"
 #include "Universal_System/Instances/instance.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 #include "Universal_System/globalupdate.h"
 
 #include "Universal_System/Instances/instance_system_frontend.h"
 
-#include "Universal_System/resource_data.h"
+#include "Universal_System/Resources/resource_data.h"
 #include "Universal_System/highscore_functions.h"
 
 #include "Universal_System/move_functions.h"

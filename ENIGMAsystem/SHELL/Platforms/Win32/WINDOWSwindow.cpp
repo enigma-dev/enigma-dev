@@ -25,7 +25,7 @@
 
 #include "strings_util.h" // For string_replace_all
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h" // room_caption
+#include "Universal_System/Resources/roomsystem.h" // room_caption
 #include "Universal_System/globalupdate.h"
 
 #include <windows.h>

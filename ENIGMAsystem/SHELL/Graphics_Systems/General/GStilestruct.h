@@ -22,7 +22,7 @@
 #ifndef ENIGMA_GSTILESTRUCT_H
 #define ENIGMA_GSTILESTRUCT_H
 
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 #include <map>
 #include <vector>

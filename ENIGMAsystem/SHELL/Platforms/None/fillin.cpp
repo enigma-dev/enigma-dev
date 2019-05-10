@@ -22,7 +22,7 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/include.h"
 
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "Universal_System/var4.h"
 
 #include <stdio.h>
