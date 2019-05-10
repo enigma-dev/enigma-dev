@@ -27,10 +27,10 @@
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/callbacks_events.h"
+#include "Universal_System/Instances/callbacks_events.h"
 #include "libEGMstd.h"
-#include "instance_system.h"
-#include "instance.h"
+#include "Instances/instance_system.h"
+#include "Instances/instance.h"
 #include "Object_Tiers/planar_object.h"
 #include "background.h"
 

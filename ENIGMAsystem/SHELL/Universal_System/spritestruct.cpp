@@ -25,7 +25,7 @@
 
 #include "Collision_Systems/collision_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
