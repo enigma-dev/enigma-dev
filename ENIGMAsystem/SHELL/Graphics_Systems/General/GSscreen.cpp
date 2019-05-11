@@ -83,9 +83,9 @@ static inline void draw_back()
         background_y[back_current] += background_vspeed[back_current];
         if (background_htiled[back_current] || background_vtiled[back_current]) {
           draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current],
-            background_xscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
+            background_yscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
         } else {
-          draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
+          draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_yscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
         }
       }
     }
