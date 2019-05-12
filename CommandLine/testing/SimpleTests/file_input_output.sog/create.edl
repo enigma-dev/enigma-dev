@@ -1,19 +1,60 @@
-var text_file;
-text_file = file_text_open_write("test.txt");
-file_text_write_string(text_file, "apple");
-file_text_write_string(text_file, " pear");
-file_text_write_string(text_file, ' ');
-file_text_write_string(text_file, "bear");
-file_text_writeln(text_file);
-file_text_write_real(text_file, 0);
-file_text_write_real(text_file, -1);
-file_text_write_real(text_file, 253);
-file_text_writeln(text_file);
-file_text_write_real(text_file, 0.56932);
-file_text_write_real(text_file, -59.003456);
-file_text_write_real(text_file, 253.98997721);
-file_text_writeln(text_file);
-file_text_close(text_file);
+var text_path = "test.txt";
 
-// We're done!
+/// TEXT WRITING
+var text_write;
+text_write = file_text_open_write(text_path);
+file_text_write_string(text_write, "apple");
+file_text_write_string(text_write, " pear");
+file_text_write_string(text_write, ' ');
+file_text_write_string(text_write, "bear");
+file_text_writeln(text_write);
+file_text_write_real(text_write, 0);
+file_text_write_real(text_write, -1);
+file_text_write_real(text_write, 253);
+file_text_writeln(text_write);
+file_text_write_real(text_write, 0.56932);
+file_text_write_real(text_write, -59.003456);
+file_text_write_real(text_write, 253.98997721);
+file_text_writeln(text_write);
+file_text_close(text_write);
+
+/// TEXT APPEND
+var text_append;
+text_append = file_text_open_append(text_path);
+file_text_write_real(text_append, 2);
+file_text_write_real(text_append, 5);
+file_text_write_string(text_append, " b");
+file_text_writeln(text_append);
+file_text_close(text_append);
+
+/// TEXT READ
+var text_read;
+text_read = file_text_open_read(text_path);
+gtest_assert_false(file_text_eof(text_read));
+gtest_assert_false(file_text_eoln(text_read));
+gtest_expect_eq(file_text_read_string(text_read),"apple pear bear");
+gtest_assert_false(file_text_eof(text_read));
+gtest_assert_true(file_text_eoln(text_read));
+file_text_readln(text_read);
+gtest_expect_eq(file_text_read_real(text_read),0);
+gtest_expect_eq(file_text_read_real(text_read),-1);
+gtest_expect_eq(file_text_read_real(text_read),253);
+gtest_assert_false(file_text_eof(text_read));
+gtest_assert_true(file_text_eoln(text_read));
+file_text_readln(text_read);
+file_text_read_real(text_read) // TODO test epsilon
+file_text_read_real(text_read) // TODO test epsilon
+file_text_read_real(text_read) // TODO test epsilon
+file_text_readln(text_read);
+gtest_expect_eq(file_text_read_real(text_read),2);
+gtest_expect_eq(file_text_read_string(text_read)," 5 b");
+file_text_readln(text_read);
+// Unix convention/end of file line is empty
+gtest_assert_false(file_text_eof(text_read));
+gtest_assert_true(file_text_eoln(text_read));
+file_text_readln(text_read);
+gtest_assert_true(file_text_eof(text_read));
+gtest_assert_true(file_text_eoln(text_read));
+file_text_close(text_read);
+
 game_end();
