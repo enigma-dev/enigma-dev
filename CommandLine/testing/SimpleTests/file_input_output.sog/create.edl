@@ -1,6 +1,64 @@
-var text_path = "test.txt";
+/// BINARY FILES
+var bin_path = "file_bin_test.bin";
 
-/// TEXT WRITING
+// BINARY WRITE
+var bin_write;
+bin_write = file_bin_open(bin_path,1);
+file_bin_write_byte(bin_write, 3);
+file_bin_write_byte(bin_write, 255);
+file_bin_write_byte(bin_write, 7);
+gtest_expect_eq(file_bin_size(bin_write),3);
+gtest_expect_eq(file_bin_position(bin_write),3);
+gtest_expect_eq(file_bin_position(bin_write),file_bin_size(bin_write));
+file_bin_seek(bin_write,0);
+gtest_expect_eq(file_bin_size(bin_write),3);
+gtest_expect_eq(file_bin_position(bin_write),0);
+gtest_expect_ne(file_bin_position(bin_write),file_bin_size(bin_write));
+file_bin_write_byte(bin_write,99);
+file_bin_write_byte(bin_write,-1); // underflows to 255
+file_bin_write_byte(bin_write,256); // overflows to 0
+gtest_expect_eq(file_bin_size(bin_write),3);
+gtest_expect_eq(file_bin_position(bin_write),3);
+gtest_expect_eq(file_bin_position(bin_write),file_bin_size(bin_write));
+file_bin_close(bin_write);
+
+// BINARY READ
+var bin_read;
+bin_read = file_bin_open(bin_path,0);
+gtest_expect_eq(file_bin_read_byte(bin_read),99);
+gtest_expect_eq(file_bin_read_byte(bin_read),255);
+gtest_expect_eq(file_bin_read_byte(bin_read),0);
+file_bin_close(bin_read);
+
+// BINARY READ & WRITE
+var bin_read_write;
+bin_read_write = file_bin_open(bin_path,2);
+gtest_expect_eq(file_bin_size(bin_read_write),3);
+gtest_expect_eq(file_bin_position(bin_read_write),0);
+gtest_expect_ne(file_bin_position(bin_read_write),file_bin_size(bin_read_write));
+file_bin_seek(bin_read_write,file_bin_size(bin_read_write));
+gtest_expect_eq(file_bin_size(bin_read_write),3);
+gtest_expect_eq(file_bin_position(bin_read_write),3);
+gtest_expect_eq(file_bin_position(bin_read_write),file_bin_size(bin_read_write));
+file_bin_rewrite(bin_read_write);
+gtest_expect_eq(file_bin_size(bin_read_write),0);
+gtest_expect_eq(file_bin_position(bin_read_write),0);
+gtest_expect_eq(file_bin_position(bin_read_write),file_bin_size(bin_read_write));
+file_bin_write_byte(bin_read_write,1);
+file_bin_write_byte(bin_read_write,2);
+file_bin_write_byte(bin_read_write,3);
+file_bin_seek(bin_read_write,0);
+gtest_expect_eq(file_bin_size(bin_read_write),3);
+gtest_expect_eq(file_bin_position(bin_read_write),0);
+gtest_expect_eq(file_bin_read_byte(bin_read_write),1);
+gtest_expect_eq(file_bin_read_byte(bin_read_write),2);
+gtest_expect_eq(file_bin_read_byte(bin_read_write),3);
+file_bin_close(bin_read_write);
+
+/// TEXT FILES
+var text_path = "file_text_test.txt";
+
+// TEXT WRITING
 var text_write;
 text_write = file_text_open_write(text_path);
 file_text_write_string(text_write, "apple");
@@ -18,7 +76,7 @@ file_text_write_real(text_write, 253.98997721);
 file_text_writeln(text_write);
 file_text_close(text_write);
 
-/// TEXT APPEND
+// TEXT APPEND
 var text_append;
 text_append = file_text_open_append(text_path);
 file_text_write_real(text_append, 2);
@@ -27,7 +85,7 @@ file_text_write_string(text_append, " b");
 file_text_writeln(text_append);
 file_text_close(text_append);
 
-/// TEXT READ
+// TEXT READ
 var text_read;
 text_read = file_text_open_read(text_path);
 gtest_assert_false(file_text_eof(text_read));
@@ -57,4 +115,5 @@ gtest_assert_true(file_text_eof(text_read));
 gtest_assert_true(file_text_eoln(text_read));
 file_text_close(text_read);
 
+/// We're done!
 game_end();
