@@ -1,0 +1,19 @@
+var text_file;
+text_file = file_text_open_write("test.txt");
+file_text_write_string(text_file, "apple");
+file_text_write_string(text_file, " pear");
+file_text_write_string(text_file, ' ');
+file_text_write_string(text_file, "bear");
+file_text_writeln(text_file);
+file_text_write_real(text_file, 0);
+file_text_write_real(text_file, -1);
+file_text_write_real(text_file, 253);
+file_text_writeln(text_file);
+file_text_write_real(text_file, 0.56932);
+file_text_write_real(text_file, -59.003456);
+file_text_write_real(text_file, 253.98997721);
+file_text_writeln(text_file);
+file_text_close(text_file);
+
+// We're done!
+game_end();
