@@ -48,7 +48,8 @@ int file_delete(string fname) { return remove(fname.c_str()); }
 int file_rename(string oldname, string newname) { return rename(oldname.c_str(), newname.c_str()); }
 
 int file_copy(string fname, string newname) {
-  return system(("cp " + fname + " " + newname).c_str());  // Hackish, but there's no good implementation on Linux
+  // Hackish, but there's no good implementation on Linux
+  return system(("cp \"" + fname + "\" \"" + newname + "\"").c_str());
 }
 
 int directory_exists(string dname) {
