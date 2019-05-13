@@ -834,11 +834,11 @@ void d3d_model_cylinder(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sca
   for (int i = 0; i <= steps; i++) {
     v[k][0] = px; v[k][1] = py; v[k][2] = z2;
     t[k][0] = tp; t[k][1] = 0;
-    d3d_model_vertex_normal_texture(id, px, py, z2, cos(a), sin(a), 0, tp, 0);
+    d3d_model_vertex_normal_texture(id, px, py, z2, cos(a), sin(a), 0, tp, vrep);
     k++;
     v[k][0] = px; v[k][1] = py; v[k][2] = z1;
     t[k][0] = tp; t[k][1] = vrep;
-    d3d_model_vertex_normal_texture(id, px, py, z1, cos(a), sin(a), 0, tp, vrep);
+    d3d_model_vertex_normal_texture(id, px, py, z1, cos(a), sin(a), 0, tp, 0);
     k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
   }
   d3d_model_primitive_end(id);
