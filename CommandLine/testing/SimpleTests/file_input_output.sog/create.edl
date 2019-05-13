@@ -111,9 +111,9 @@ file_text_write_real(text_write, 0);
 file_text_write_real(text_write, -1);
 file_text_write_real(text_write, 253);
 file_text_writeln(text_write);
-file_text_write_real(text_write, 0.56932);
-file_text_write_real(text_write, -59.003456);
-file_text_write_real(text_write, 253.98997721);
+file_text_write_real(text_write, 0.1875);
+file_text_write_real(text_write, -59.234375);
+file_text_write_real(text_write, 489.703125);
 file_text_writeln(text_write);
 file_text_close(text_write);
 
@@ -143,9 +143,9 @@ gtest_expect_eq(file_text_read_real(text_read),253);
 gtest_expect_false(file_text_eof(text_read));
 gtest_expect_true(file_text_eoln(text_read));
 file_text_readln(text_read);
-file_text_read_real(text_read) // TODO test epsilon
-file_text_read_real(text_read) // TODO test epsilon
-file_text_read_real(text_read) // TODO test epsilon
+gtest_expect_eq(file_text_read_real(text_read),0.1875);
+gtest_expect_eq(file_text_read_real(text_read),-59.234375);
+gtest_expect_eq(file_text_read_real(text_read),489.703125);
 file_text_readln(text_read);
 gtest_expect_eq(file_text_read_real(text_read),2);
 gtest_expect_eq(file_text_read_string(text_read)," 5 b");
