@@ -14,6 +14,19 @@ file_bin_seek(bin_write,0);
 gtest_expect_eq(file_bin_size(bin_write),3);
 gtest_expect_eq(file_bin_position(bin_write),0);
 gtest_expect_ne(file_bin_position(bin_write),file_bin_size(bin_write));
+
+// reading in write mode should fail
+file_bin_seek(bin_write,0);
+gtest_expect_eq(file_bin_read_byte(bin_write),-1);
+
+// rewrite should change mode from write to read+write
+file_bin_rewrite(bin_write);
+file_bin_write_byte(bin_write,64);
+file_bin_seek(bin_write,0);
+gtest_expect_eq(file_bin_read_byte(bin_write),64);
+
+// restore file for next test
+file_bin_rewrite(bin_write);
 file_bin_write_byte(bin_write,99);
 file_bin_write_byte(bin_write,-1); // underflows to 255
 file_bin_write_byte(bin_write,256); // overflows to 0
@@ -28,6 +41,24 @@ bin_read = file_bin_open(bin_path,0);
 gtest_expect_eq(file_bin_read_byte(bin_read),99);
 gtest_expect_eq(file_bin_read_byte(bin_read),255);
 gtest_expect_eq(file_bin_read_byte(bin_read),0);
+
+// writing in read mode should fail
+file_bin_seek(bin_read,0);
+file_bin_write_byte(bin_read,64);
+file_bin_seek(bin_read,0);
+gtest_expect_eq(file_bin_read_byte(bin_read),99);
+
+// rewrite should change mode from read to read+write
+file_bin_rewrite(bin_read);
+file_bin_write_byte(bin_read,64);
+file_bin_seek(bin_read,0);
+gtest_expect_eq(file_bin_read_byte(bin_read),64);
+
+// restore file for next test
+file_bin_rewrite(bin_read);
+file_bin_write_byte(bin_read,99);
+file_bin_write_byte(bin_read,-1); // underflows to 255
+file_bin_write_byte(bin_read,256); // overflows to 0
 file_bin_close(bin_read);
 
 // BINARY READ & WRITE
