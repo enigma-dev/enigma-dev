@@ -220,7 +220,7 @@ int file_bin_open(string fname,int mode) // Opens the file with the indicated na
 bool file_bin_rewrite(int fileid) // Rewrites the file with the given file id, that is, clears it and starts writing at the start.
 {
   enigma::openFile &mf = enigma::files[fileid];
-  mf.f = freopen (mf.sdata.c_str(), "wb", mf.f);
+  mf.f = freopen (mf.sdata.c_str(), "wb+", mf.f);
 
   if (mf.f == NULL) {
     #ifdef DEBUGMODE
