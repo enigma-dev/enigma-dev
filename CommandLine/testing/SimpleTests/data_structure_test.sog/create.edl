@@ -36,6 +36,12 @@ gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
 ds_list_delete(list_str, 0, 1);
 gtest_assert_eq(ds_list_size(list_str), 1);
 gtest_assert_eq(ds_list_find_value(list_str, 0), "cash");
+ds_list_add(list_str,"moo");
+gtest_assert_eq(ds_list_size(list_str), 2);
+gtest_assert_eq(ds_list_find_value(list_str, 1), "moo");
+ds_list_delete(list_str, 1, 1);
+gtest_assert_eq(ds_list_size(list_str), 1);
+gtest_assert_eq(ds_list_find_value(list_str, 0), "cash");
 
 ds_list_add(list_num, 5);
 ds_list_add(list_num, 2);
