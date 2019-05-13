@@ -14,6 +14,12 @@ ds_list_add(list_str, "cash");
 gtest_assert_eq(ds_list_size(list_str), 3);
 gtest_assert_false(ds_list_empty(list_str));
 
+list_dup = ds_list_duplicate(list_str);
+gtest_assert_eq(ds_list_size(list_dup), 3);
+gtest_assert_eq(ds_list_find_value(list_dup, 0), "alarm");
+gtest_assert_eq(ds_list_find_value(list_dup, 1), "bank");
+gtest_assert_eq(ds_list_find_value(list_dup, 2), "cash");
+
 ds_list_sort(list_str, false);
 gtest_assert_eq(ds_list_find_value(list_str, 0), "cash");
 gtest_assert_eq(ds_list_find_value(list_str, 1), "bank");
@@ -93,6 +99,13 @@ ds_map_add(map_str, "teststr2", "testfour");
 gtest_assert_eq(ds_map_size(map_str), 4);
 gtest_assert_eq(ds_map_find_value(map_str, "teststr2"), "testfour");
 
+map_dup = ds_map_duplicate(map_str);
+gtest_assert_eq(ds_map_size(map_dup), 4);
+gtest_assert_eq(ds_map_find_value(map_dup, "teststr"), "testone");
+gtest_assert_eq(ds_map_find_value(map_dup, "teststr"), "testone");
+gtest_assert_eq(ds_map_find_value(map_dup, "teststr1"), "testthree");
+gtest_assert_eq(ds_map_find_value(map_dup, "teststr2"), "testfour");
+
 ds_map_add(map_num, 0, 50);
 ds_map_add(map_num, 0, 50);
 ds_map_add(map_num, 2, 50);
@@ -135,6 +148,13 @@ ds_stack_push(test_stack,5);
 ds_stack_push(test_stack,60);
 gtest_assert_eq(ds_stack_size(test_stack), 3);
 gtest_assert_eq(ds_stack_top(test_stack), 60);
+
+stack_dup = ds_stack_duplicate(test_stack);
+gtest_assert_eq(ds_stack_size(stack_dup), 3);
+gtest_assert_eq(ds_stack_pop(stack_dup), 60);
+gtest_assert_eq(ds_stack_pop(stack_dup), 5);
+gtest_assert_eq(ds_stack_pop(stack_dup), 5);
+
 ds_stack_push(test_stack2,2);
 ds_stack_push(test_stack2,1);
 ds_stack_push(test_stack2,0);
@@ -181,6 +201,12 @@ gtest_assert_eq(ds_queue_head(test_queue),5);
 gtest_assert_eq(ds_queue_tail(test_queue),-1);
 gtest_assert_eq(ds_queue_size(test_queue),3);
 
+queue_dup = ds_queue_duplicate(test_queue);
+gtest_assert_eq(ds_queue_size(queue_dup),3);
+gtest_assert_eq(ds_queue_dequeue(queue_dup),5);
+gtest_assert_eq(ds_queue_dequeue(queue_dup),6);
+gtest_assert_eq(ds_queue_dequeue(queue_dup),-1);
+
 ds_queue_copy(test_queue2, test_queue);
 gtest_assert_eq(ds_queue_size(test_queue),3);
 gtest_assert_eq(ds_queue_size(test_queue2),3);
@@ -225,6 +251,12 @@ gtest_assert_eq(ds_priority_find_min(test_priority), "three");
 gtest_assert_eq(ds_priority_find_max(test_priority), "one");
 gtest_assert_eq(ds_priority_find_priority(test_priority, "one"), 56);
 gtest_assert_eq(ds_priority_find_priority(test_priority, "two"), 0);
+
+priority_dup = ds_priority_duplicate(test_priority);
+gtest_assert_eq(ds_priority_size(priority_dup), 3);
+gtest_assert_eq(ds_priority_delete_max(priority_dup), "one");
+gtest_assert_eq(ds_priority_delete_max(priority_dup), "two");
+gtest_assert_eq(ds_priority_delete_max(priority_dup), "three");
 
 ds_priority_copy(test_priority2, test_priority);
 gtest_assert_eq(ds_priority_size(test_priority2), 3);
@@ -334,6 +366,13 @@ gtest_assert_eq(ds_grid_height(test_grid2), 5);
 gtest_assert_ne(ds_grid_get(test_grid2, 21, 0), 32);
 ds_grid_set(test_grid2, 21, 0, 32);
 gtest_assert_eq(ds_grid_get(test_grid2, 21, 0), 32);
+
+grid_dup = ds_grid_duplicate(test_grid);
+gtest_assert_eq(ds_grid_width(grid_dup), 50);
+gtest_assert_eq(ds_grid_height(grid_dup), 30);
+for (var j = 5; j < 9; ++j)
+  for (var i = 5; i < 9; ++i)
+    gtest_assert_eq(ds_grid_get(grid_dup, i, j), 50);
 
 ds_grid_copy(test_grid2, test_grid);
 gtest_assert_eq(ds_grid_width(test_grid2), 50);
