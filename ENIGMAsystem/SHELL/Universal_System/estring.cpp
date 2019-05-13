@@ -342,7 +342,9 @@ string filename_dir(string fname)
 
 string filename_drive(string fname)
 {
-  size_t fp = fname.find("/\\");
+  size_t fp = fname.find_first_of("/\\");
+  if (!fp || fp == string::npos || fname[fp-1] != ':')
+    return "";
   return fname.substr(0, fp);
 }
 
