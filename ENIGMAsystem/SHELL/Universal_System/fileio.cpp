@@ -164,14 +164,15 @@ double file_text_read_real(int fileid) { // Reads a real value from the file and
   return r1;
 }
 
-void file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
+std::string file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
 {
-  if (feof(enigma::files[fileid].f))
-    enigma::files[fileid].eof = true;
+  enigma::openFile &mf = enigma::files[fileid];
+  if (feof(mf.f))
+    mf.eof = true;
   string ret;
   char buf[BUFSIZ];
     buf[0] = 0;
-  while (fgets(buf,BUFSIZ,enigma::files[fileid].f))
+  while (fgets(buf,BUFSIZ,mf.f))
   {
     ret += buf;
     if (ret[ret.length()-1] == '\n' or ret[ret.length()-1] == '\r')
@@ -181,8 +182,10 @@ void file_text_readln(int fileid) // Skips the rest of the line in the file and 
   size_t dp;
   for (dp = ret.length()-1; dp != size_t(-1) and (ret[dp] == '\n' or ret[dp] == '\r'); dp--);
   ret.erase(dp+1);
-  enigma::files[fileid].sdata = ret;
-  enigma::files[fileid].spos = 0;
+  std::string last = mf.sdata.substr(mf.spos);
+  mf.sdata = ret;
+  mf.spos = 0;
+  return last;
 }
 
 bool file_text_eof(int fileid) { // Returns whether we reached the end of the file.

@@ -33,7 +33,7 @@ void    file_text_writeln(int fileid);
 std::string file_text_read_string(int fileid);
 std::string file_text_read_all(int fileid);
 double  file_text_read_real(int fileid);
-void    file_text_readln(int fileid);
+std::string file_text_readln(int fileid);
 bool    file_text_eof(int fileid);
 bool file_text_eoln(int fileid);
 void load_info(std::string fname); // game information function
