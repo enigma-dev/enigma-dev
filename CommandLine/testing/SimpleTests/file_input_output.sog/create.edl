@@ -38,9 +38,15 @@ file_bin_close(bin_write);
 // BINARY READ
 var bin_read;
 bin_read = file_bin_open(bin_path,0);
+gtest_expect_eq(file_bin_size(bin_read),3);
+gtest_expect_eq(file_bin_position(bin_read),0);
+gtest_expect_ne(file_bin_position(bin_read),file_bin_size(bin_read));
 gtest_expect_eq(file_bin_read_byte(bin_read),99);
 gtest_expect_eq(file_bin_read_byte(bin_read),255);
 gtest_expect_eq(file_bin_read_byte(bin_read),0);
+gtest_expect_eq(file_bin_size(bin_read),3);
+gtest_expect_eq(file_bin_position(bin_read),3);
+gtest_expect_eq(file_bin_position(bin_read),file_bin_size(bin_read));
 
 // writing in read mode should fail
 file_bin_seek(bin_read,0);
