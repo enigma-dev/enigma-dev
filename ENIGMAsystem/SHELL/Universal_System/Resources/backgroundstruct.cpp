@@ -207,7 +207,7 @@ bool background_replace(int back, std::string filename, bool transparent, bool s
 void background_save(int back, std::string fname) {
   get_background(bck, back);
   unsigned w, h;
-  unsigned char *rgbdata = enigma::graphics_get_texture_pixeldata(bck->texture, &w, &h);
+  unsigned char *rgbdata = enigma::graphics_copy_texture_pixels(bck->texture, &w, &h);
 
   std::string ext = enigma::image_get_format(fname);
 
@@ -226,6 +226,7 @@ void background_delete(int back, bool free_texture) {
 
 int background_duplicate(int back) {
   get_backgroundnv(bck_copy, back, -1);
+  enigma::backgroundstructarray_reallocate();
   enigma::background *bck = enigma::backgroundstructarray[enigma::background_idmax] = new enigma::background;
   enigma::background_add_copy(bck, bck_copy);
   return enigma::background_idmax++;

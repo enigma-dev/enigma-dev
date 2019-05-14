@@ -33,24 +33,7 @@
 #include <list>
 #include <stack>
 #include "Universal_System/estring.h"
-
-using namespace std;
-
-namespace enigma
-{
-	void graphicssystem_initialize();
-	void load_tiles();
-	void delete_tiles();
-	void rebuild_tile_layer(int layer_depth);
-
-	int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap);
-	int graphics_duplicate_texture(int tex, bool mipmap);
-	void graphics_copy_texture(int source, int destination, int x, int y);
-	void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y);
-	void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex);
-	void graphics_delete_texture(int texid);
-	unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight);
-}
+#include "Graphics_Systems/graphics_mandatory.h"
 
 namespace enigma_user
 {

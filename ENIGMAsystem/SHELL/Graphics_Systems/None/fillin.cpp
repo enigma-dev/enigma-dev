@@ -70,12 +70,11 @@ namespace enigma
 	void graphicssystem_initialize(){}
 
 	int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap){return -1;}
-	int graphics_duplicate_texture(int tex, bool mipmap){return -1;}
-	void graphics_copy_texture(int source, int destination, int x, int y){}
-	void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y){}
-	void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex){}
 	void graphics_delete_texture(int texid){}
-	unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight){return NULL;}
+	unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {return NULL;}
+	unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {return NULL;}
+	void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {}
+	void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {}
 
 	void graphics_state_flush() {}
 

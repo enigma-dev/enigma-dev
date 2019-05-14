@@ -116,7 +116,7 @@ void sprite_save(int ind, unsigned subimg, string fname) {
 
   unsigned w, h;
   unsigned char* rgbdata =
-      enigma::graphics_get_texture_pixeldata(spr->texturearray[subimg], &w, &h);
+      enigma::graphics_copy_texture_pixels(spr->texturearray[subimg], &w, &h);
 
   enigma::image_save(fname, rgbdata, spr->width, spr->height, w, h, false);
 
