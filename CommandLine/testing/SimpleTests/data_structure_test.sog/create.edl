@@ -12,6 +12,9 @@ ds_list_add(list_str, "alarm");
 ds_list_add(list_str, "bank");
 ds_list_add(list_str, "cash");
 gtest_assert_eq(ds_list_size(list_str), 3);
+gtest_assert_eq(ds_list_find_index(list_str, "alarm"), 0);
+gtest_assert_eq(ds_list_find_index(list_str, "bank"), 1);
+gtest_assert_eq(ds_list_find_index(list_str, "notfound"), -1);
 gtest_assert_false(ds_list_empty(list_str));
 
 list_dup = ds_list_duplicate(list_str);
@@ -30,11 +33,30 @@ gtest_assert_eq(ds_list_find_value(list_str, 0), "alarm");
 gtest_assert_eq(ds_list_find_value(list_str, 1), "bank");
 gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
 
+ds_list_delete(list_str, 0, 1);
+gtest_assert_eq(ds_list_size(list_str), 1);
+gtest_assert_eq(ds_list_find_value(list_str, 0), "cash");
+ds_list_add(list_str,"moo");
+gtest_assert_eq(ds_list_size(list_str), 2);
+gtest_assert_eq(ds_list_find_value(list_str, 1), "moo");
+ds_list_delete(list_str, 1, 1);
+gtest_assert_eq(ds_list_size(list_str), 1);
+gtest_assert_eq(ds_list_find_value(list_str, 0), "cash");
+
 ds_list_add(list_num, 5);
 ds_list_add(list_num, 2);
 ds_list_add(list_num, 98);
 gtest_assert_eq(ds_list_size(list_num), 3);
+gtest_assert_eq(ds_list_find_index(list_num, 2), 1);
+gtest_assert_eq(ds_list_find_index(list_num, 98), 2);
+gtest_assert_eq(ds_list_find_index(list_num, 404), -1);
 gtest_assert_false(ds_list_empty(list_num));
+
+ds_list_copy(list_dup, list_num);
+gtest_assert_eq(ds_list_size(list_dup), 3);
+gtest_assert_eq(ds_list_find_value(list_dup, 0), 5);
+gtest_assert_eq(ds_list_find_value(list_dup, 1), 2);
+gtest_assert_eq(ds_list_find_value(list_dup, 2), 98);
 
 ds_list_sort(list_num, false);
 gtest_assert_eq(ds_list_find_value(list_num, 0), 98);
@@ -62,6 +84,10 @@ gtest_assert_eq(ds_list_size(list_num), 3);
 gtest_assert_eq(ds_list_find_value(list_num, 0), 2);
 gtest_assert_eq(ds_list_find_value(list_num, 1), 5);
 gtest_assert_eq(ds_list_find_value(list_num, 2), 88);
+
+ds_list_delete(list_num, 1, 2);
+gtest_assert_eq(ds_list_size(list_num), 1);
+gtest_assert_eq(ds_list_find_value(list_num, 0), 2);
 
 ds_list_clear(list_num);
 gtest_assert_true(ds_list_empty(list_num));
@@ -112,10 +138,25 @@ ds_map_add(map_num, 2, 50);
 gtest_assert_eq(ds_map_size(map_num), 3);
 // We still have GM 8.1 replace behavior
 ds_map_replace(map_num, 5, 50);
+gtest_assert_false(ds_map_exists(map_num, 5));
 gtest_assert_true(is_undefined(ds_map_find_value(map_num, 5)));
 // This is our special function that acts like GMSv1.4 replace
-ds_map_overwrite(map_num, 5, 50);
+ds_map_overwrite(map_num, 5, 6667);
 gtest_assert_false(is_undefined(ds_map_find_value(map_num, 5)));
+gtest_assert_eq(ds_map_find_value(map_num, 5), 6667);
+// Actually test overwriting an existing value
+ds_map_overwrite(map_num, 5, 23482348);
+gtest_assert_eq(ds_map_find_value(map_num, 5), 23482348);
+// Actually test replace too
+ds_map_replace(map_num, 5, 78);
+gtest_assert_true(ds_map_exists(map_num, 5));
+gtest_assert_eq(ds_map_find_value(map_num, 5), 78);
+
+ds_map_delete(map_num,5);
+gtest_assert_false(ds_map_exists(map_num, 5));
+gtest_assert_true(is_undefined(ds_map_find_value(map_num, 5)));
+ds_map_add(map_num,5,50);
+gtest_assert_true(ds_map_exists(map_num, 5));
 gtest_assert_eq(ds_map_find_value(map_num, 5), 50);
 
 // lmao GM API is so dumb, this should really be called assign
@@ -242,6 +283,7 @@ gtest_assert_true(ds_priority_empty(test_priority2));
 gtest_assert_true(is_undefined(ds_priority_find_min(test_priority)));
 gtest_assert_true(is_undefined(ds_priority_find_max(test_priority)));
 gtest_assert_true(is_undefined(ds_priority_find_priority(test_priority, "hello")));
+gtest_assert_false(ds_priority_value_exists(test_priority, "hello"));
 
 ds_priority_add(test_priority, "one", 56);
 ds_priority_add(test_priority, "two", 0);
@@ -251,12 +293,16 @@ gtest_assert_eq(ds_priority_find_min(test_priority), "three");
 gtest_assert_eq(ds_priority_find_max(test_priority), "one");
 gtest_assert_eq(ds_priority_find_priority(test_priority, "one"), 56);
 gtest_assert_eq(ds_priority_find_priority(test_priority, "two"), 0);
+gtest_assert_true(ds_priority_value_exists(test_priority, "one"));
+
+ds_priority_change_priority(priority_dup, "one", -5000);
+gtest_assert_eq(ds_priority_find_priority(test_priority, "one"), -5000);
 
 priority_dup = ds_priority_duplicate(test_priority);
 gtest_assert_eq(ds_priority_size(priority_dup), 3);
-gtest_assert_eq(ds_priority_delete_max(priority_dup), "one");
 gtest_assert_eq(ds_priority_delete_max(priority_dup), "two");
 gtest_assert_eq(ds_priority_delete_max(priority_dup), "three");
+gtest_assert_eq(ds_priority_delete_max(priority_dup), "one");
 
 ds_priority_copy(test_priority2, test_priority);
 gtest_assert_eq(ds_priority_size(test_priority2), 3);
@@ -265,13 +311,13 @@ gtest_assert_false(ds_priority_empty(test_priority2));
 ds_priority_add(test_priority2, "five", 1);
 gtest_assert_eq(ds_priority_size(test_priority2), 4);
 
-gtest_assert_eq(ds_priority_delete_max(test_priority2), "one");
+gtest_assert_eq(ds_priority_delete_max(test_priority2), "five");
 gtest_assert_eq(ds_priority_size(test_priority2), 3);
-gtest_assert_eq(ds_priority_find_max(test_priority2), "five");
+gtest_assert_eq(ds_priority_find_max(test_priority2), "two");
 
-gtest_assert_eq(ds_priority_delete_min(test_priority2), "three");
+gtest_assert_eq(ds_priority_delete_min(test_priority2), "one");
 gtest_assert_eq(ds_priority_size(test_priority2), 2);
-gtest_assert_eq(ds_priority_find_min(test_priority2), "two");
+gtest_assert_eq(ds_priority_find_min(test_priority2), "three");
 
 ds_priority_add(test_priority2, "six", 101.1);
 ds_priority_add(test_priority2, "seven", -969);
