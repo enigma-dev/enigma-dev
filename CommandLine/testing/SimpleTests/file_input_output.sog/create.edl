@@ -125,6 +125,12 @@ file_text_write_real(text_append, 2);
 file_text_write_real(text_append, 5);
 file_text_write_string(text_append, " b");
 file_text_writeln(text_append);
+file_text_write_real(text_append, 45);
+file_text_write_real(text_append, -89);
+file_text_write_real(text_append, -102.5);
+file_text_writeln(text_append);
+file_text_write_string(text_append, "holy moly moo");
+file_text_writeln(text_append);
 file_text_close(text_append);
 
 // TEXT READ
@@ -150,6 +156,9 @@ file_text_readln(text_read);
 gtest_expect_eq(file_text_read_real(text_read),2);
 gtest_expect_eq(file_text_read_string(text_read)," 5 b");
 file_text_readln(text_read);
+gtest_expect_eq(file_text_read_real(text_read),45);
+gtest_expect_eq(file_text_readln(text_read)," -89 -102.5");
+gtest_expect_eq(file_text_readln(text_read),"holy moly moo");
 // Unix convention/end of file line is empty
 gtest_expect_false(file_text_eof(text_read));
 gtest_expect_true(file_text_eoln(text_read));
