@@ -23,10 +23,88 @@
 
 #include "Universal_System/image_formats.h"
 
+#include <string.h> // for memcpy
+
+namespace {
+
+inline unsigned int lgpp2(unsigned int x) { // Trailing zero count. lg for perfect powers of two
+  x =  (x & -x) - 1;
+  x -= ((x >> 1) & 0x55555555);
+  x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
+  x =  ((x >> 4) + x) & 0x0f0f0f0f;
+  x += x >> 8;
+  return (x + (x >> 16)) & 63;
+}
+
+} // namespace anonymous
+
 namespace enigma {
 
 vector<Texture*> textures;
 Sampler samplers[8];
+
+int graphics_duplicate_texture(int tex, bool mipmap) {
+  unsigned w = textures[tex]->width, h = textures[tex]->height,
+           fw = textures[tex]->fullwidth, fh = textures[tex]->fullheight;
+
+  unsigned char* bitmap = graphics_copy_texture_pixels(tex, &fw, &fh);
+  unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
+  delete[] bitmap;
+
+  return dup_tex;
+}
+
+void graphics_copy_texture(int source, int destination, int x, int y) {
+  unsigned sw = textures[source]->width, sh = textures[source]->height,
+           sfw = textures[source]->fullwidth, sfh = textures[source]->fullheight;
+  unsigned char* bitmap = graphics_copy_texture_pixels(source, &sfw, &sfh);
+
+  unsigned char* cropped_bitmap = new unsigned char[sw*sh*4];
+  for (unsigned int i=0; i<sh; ++i){
+    memcpy(cropped_bitmap+sw*i*4, bitmap+sfw*i*4, sw*4);
+  }
+
+  unsigned dw = textures[destination]->width, dh = textures[destination]->height;
+  graphics_push_texture_pixels(destination, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), cropped_bitmap);
+
+  delete[] bitmap;
+  delete[] cropped_bitmap;
+}
+
+void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y) {
+  unsigned sw = textures[source]->width, sh = textures[source]->height,
+           sfw = textures[source]->fullwidth, sfh = textures[source]->fullheight;
+  unsigned char* bitmap = graphics_copy_texture_pixels(source, &sfw, &sfh);
+
+  if (xoff+sw>sfw) sw = sfw-xoff;
+  if (yoff+sh>sfh) sh = sfh-yoff;
+  unsigned char* cropped_bitmap = new unsigned char[sw*sh*4];
+  for (unsigned int i=0; i<sh; ++i){
+    memcpy(cropped_bitmap+sw*i*4, bitmap+xoff*4+sfw*(i+yoff)*4, sw*4);
+  }
+
+  unsigned dw = textures[destination]->width, dh = textures[destination]->height;
+  graphics_push_texture_pixels(destination, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), cropped_bitmap);
+
+  delete[] bitmap;
+  delete[] cropped_bitmap;
+}
+
+void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex) {
+  unsigned fw = textures[tex]->fullwidth, fh = textures[tex]->fullheight;
+  unsigned size = (fh<<(lgpp2(fw)+2))|2;
+  unsigned char* bitmap = graphics_copy_texture_pixels(tex, &fw, &fh);
+  unsigned char* bitmap2 = graphics_copy_texture_pixels(copy_tex, &fw, &fh);
+
+  for (unsigned i = 3; i < size; i += 4) {
+    bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
+  }
+
+  graphics_push_texture_pixels(tex, fw, fh, bitmap);
+
+  delete[] bitmap;
+  delete[] bitmap2;
+}
 
 } // namespace enigma
 
@@ -46,7 +124,7 @@ int texture_add(string filename, bool mipmap) {
 
 void texture_save(int texid, string fname) {
   unsigned w = 0, h = 0;
-  unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(texid, &w, &h);
+  unsigned char* rgbdata = enigma::graphics_copy_texture_pixels(texid, &w, &h);
 
   string ext = enigma::image_get_format(fname);
 
