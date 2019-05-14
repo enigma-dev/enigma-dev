@@ -60,7 +60,7 @@ namespace enigma {
   {
     // make sure the hWnd and hInstance variables are initialized (e.g, SDL)
     if (get_window_handle() == NULL) {
-      show_error("Cannot initialize Win32 widget system with NULL window handle.", true);
+      enigma_user::show_error("Cannot initialize Win32 widget system with NULL window handle.", true);
     }
     INITCOMMONCONTROLSEX iccex;
     iccex.dwSize = sizeof(iccex);

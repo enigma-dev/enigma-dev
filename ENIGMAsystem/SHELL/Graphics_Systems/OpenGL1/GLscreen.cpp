@@ -18,7 +18,8 @@
 **/
 
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/GLscreen.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GSsprite.h"
@@ -32,8 +33,8 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/background_internal.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Platforms/General/PFwindow.h"
 
 #include <string>
@@ -44,7 +45,6 @@ using namespace enigma;
 
 namespace enigma {
 
-extern GLuint msaa_fbo;
 unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
 int viewport_x, viewport_y, viewport_w, viewport_h; //These are used by surfaces, to set back the viewport
 
@@ -53,7 +53,7 @@ void scene_begin() {
 }
 
 void scene_end() {
-
+	msaa_fbo_blit();
 }
 
 } // namespace enigma

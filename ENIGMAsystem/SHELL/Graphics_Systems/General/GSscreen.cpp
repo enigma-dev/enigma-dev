@@ -27,10 +27,10 @@
 #include "GSvertex.h"
 #include "GScolors.h"
 
-#include "Universal_System/background.h"
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/Resources/background.h"
+#include "Universal_System/Object_Tiers/graphics_object.h"
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/roomsystem.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -83,9 +83,9 @@ static inline void draw_back()
         background_y[back_current] += background_vspeed[back_current];
         if (background_htiled[back_current] || background_vtiled[back_current]) {
           draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current],
-            background_xscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
+            background_yscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
         } else {
-          draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
+          draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_yscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
         }
       }
     }

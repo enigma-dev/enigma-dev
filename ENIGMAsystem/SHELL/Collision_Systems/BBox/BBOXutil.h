@@ -26,7 +26,7 @@ bool collide_rect_rect(cs_scalar r1x1, cs_scalar r1y1, cs_scalar r1x2, cs_scalar
                        cs_scalar r2x1, cs_scalar r2y1, cs_scalar r2x2, cs_scalar r2y2);
 bool collide_rect_point(cs_scalar rx1, cs_scalar ry1, cs_scalar rx2, cs_scalar ry2, cs_scalar px, cs_scalar py);
 
-#include "Universal_System/collisions_object.h"
+#include "Universal_System/Object_Tiers/collisions_object.h"
 
 bool collide_bbox_rect(const enigma::object_collisions* inst, cs_scalar ox, cs_scalar oy, cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2);
 bool collide_bbox_line(const enigma::object_collisions* inst, cs_scalar ox, cs_scalar oy, cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2);

@@ -18,7 +18,7 @@
 
 #include "Graphics_Systems/OpenGL/GLsurface_impl.h"
 #include "Graphics_Systems/OpenGL/GLtextures_impl.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GSprimitives.h"
@@ -30,8 +30,8 @@
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites_internal.h"
-#include "Universal_System/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
+#include "Universal_System/Resources/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
 #include <cstddef>

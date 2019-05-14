@@ -20,7 +20,7 @@
 #define GL_SHADER_H
 
 #include "GLSLshader.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include <string>
 using std::string;
 

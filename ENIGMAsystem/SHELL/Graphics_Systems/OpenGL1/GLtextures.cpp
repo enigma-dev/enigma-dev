@@ -17,7 +17,7 @@
 **/
 
 #include "Graphics_Systems/OpenGL/GLtextures_impl.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
@@ -108,18 +108,6 @@ void texture_set_priority(int texid, double prio)
   // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
   glBindTexture(GL_TEXTURE_2D, enigma::get_texture_peer(texid));
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
-}
-
-void texture_set_enabled(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  (enable?glEnable:glDisable)(GL_TEXTURE_2D);
-}
-
-void texture_set_blending(bool enable)
-{
-  draw_batch_flush(batch_flush_deferred);
-  (enable?glEnable:glDisable)(GL_BLEND);
 }
 
 bool texture_mipmapping_supported()

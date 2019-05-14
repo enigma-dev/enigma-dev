@@ -17,7 +17,7 @@
 
 #include "GLshader.h"
 #include "GLSLshader.h"
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
 #include <iostream>

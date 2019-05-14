@@ -91,7 +91,8 @@ void graphics_state_flush_fog() {
   d3ddev->SetRenderState(D3DRS_RANGEFOGENABLE, d3dFogEnabled);
   d3ddev->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[d3dFogMode]);
   d3ddev->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[d3dFogMode]);
-  d3ddev->SetRenderState(D3DRS_FOGCOLOR, *d3dFogColor);
+  d3ddev->SetRenderState(D3DRS_FOGCOLOR,
+    D3DCOLOR_RGBA(COL_GET_R(d3dFogColor), COL_GET_G(d3dFogColor), COL_GET_B(d3dFogColor), 255));
 
   // NOTE: DWORD is 32 bits maximum meaning it can only hold single-precision
   // floats, so yes, we must cast double to float first too.
@@ -110,7 +111,8 @@ void graphics_state_flush_lighting() {
   d3ddev->SetMaterial(&mtrl);
   d3ddev->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
   d3ddev->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
-  d3ddev->SetRenderState(D3DRS_AMBIENT, *d3dLightingAmbient);
+  d3ddev->SetRenderState(D3DRS_AMBIENT,
+    D3DCOLOR_RGBA(COL_GET_R(d3dLightingAmbient), COL_GET_G(d3dLightingAmbient), COL_GET_B(d3dLightingAmbient), 255));
 
   for (int i = 0; i < 8; ++i) {
     const bool enabled = (i<d3dLightsActive);

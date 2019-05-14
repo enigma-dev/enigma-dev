@@ -34,14 +34,14 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/background_internal.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Object_Tiers/graphics_object.h"
 #include "Universal_System/estring.h"
 #include "Platforms/platforms_mandatory.h"
 
@@ -95,8 +95,6 @@ namespace enigma_user
 	void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {}
 
 	void texture_set_priority(int texid, double prio){}
-	void texture_set_enabled(bool enable){}
-	void texture_set_blending(bool enable){}
 	bool texture_mipmapping_supported(){return false;}
 	bool texture_anisotropy_supported(){return false;}
 	float texture_anisotropy_maxlevel(){return 0;}

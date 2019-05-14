@@ -149,6 +149,15 @@ gtest_assert_eq(min(-1, -2.0, -3.0, -4, -2.5),  -4);
 gtest_assert_eq_eps(lengthdir_x(10, 60), 5);
 gtest_assert_eq_eps(lengthdir_y(10, -30), 5);
 
+// Tests for clamping values in range
+gtest_assert_eq(clamp(2, 0, 1), 1);
+gtest_assert_eq(clamp(1, 0, 1), 1);
+gtest_assert_eq(clamp(0.5, 0, 1), 0.5);
+gtest_assert_eq(clamp(0, 0, 1), 0);
+gtest_assert_eq(clamp(-0.1, 0, 1), 0);
+gtest_assert_eq(clamp(-1, 0, 1), 0);
+gtest_assert_eq(clamp(-2, 0, 1), 0);
+
 // A more complicated helper, angle_difference
 gtest_assert_eq(angle_difference(359, 1), -2);
 gtest_assert_eq(angle_difference(1, 359), +2);
@@ -235,6 +244,20 @@ yn = 4;
 time = 5;
 // This one conflicts with the Win32 CreateFont macro
 CreateFont = 5;
+
+// Random Tests
+// Seeds & Values from Delphi
+random_set_seed(236732942);
+gtest_expect_eq(irandom(10), 3);
+gtest_expect_eq(random_get_seed(), 1493992007);
+gtest_expect_eq(irandom(10), 5);
+gtest_expect_eq(random_get_seed(), 2057512804);
+gtest_expect_eq(irandom(10), 9);
+gtest_expect_eq(random_get_seed(), -526428939);
+gtest_expect_eq(irandom(10), 9);
+gtest_expect_eq(random_get_seed(), -627901238);
+gtest_expect_eq(irandom(10), 2);
+gtest_expect_eq(random_get_seed(), 1166481395);
 
 cons_show_message("Test end!");
 

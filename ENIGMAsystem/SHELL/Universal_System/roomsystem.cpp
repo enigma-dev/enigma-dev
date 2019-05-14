@@ -27,12 +27,12 @@
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/callbacks_events.h"
+#include "Universal_System/Instances/callbacks_events.h"
 #include "libEGMstd.h"
-#include "instance_system.h"
-#include "instance.h"
-#include "planar_object.h"
-#include "background.h"
+#include "Instances/instance_system.h"
+#include "Instances/instance.h"
+#include "Object_Tiers/planar_object.h"
+#include "Resources/background.h"
 
 #include "roomsystem.h"
 #include "depth_draw.h"
@@ -316,8 +316,7 @@ namespace enigma
 
 
 //Implement the "room" global before we continue
-INTERCEPT_DEFAULT_COPY(enigma::roomv)
-void enigma::roomv::function(variant oldval) {
+void enigma::roomv::function(const variant &oldval) {
   enigma_user::room_goto((int)rval.d);
   rval.d = oldval.rval.d;
 }
@@ -328,10 +327,10 @@ namespace enigma_user {
 #if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
   #define errcheck(indx,err,v) \
   if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]) \
-    return (show_error(err,0), (v))
+    return (enigma_user::show_error(err,0), (v))
   #define errcheck_o(indx,err) \
   if (unsigned(indx) >= unsigned(enigma::room_loadtimecount)) \
-    return (show_error(err,0), 0)
+    return (enigma_user::show_error(err,0), 0)
 #else
   #define errcheck(indx,err,v)
   #define errcheck_o(indx,err)

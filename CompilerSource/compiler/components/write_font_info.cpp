@@ -41,7 +41,7 @@ using namespace std;
 int lang_CPP::compile_writeFontInfo(const GameData &game)
 {
   ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h").c_str(),ios_base::out);
-  wto << license << "#include \"Universal_System/fonts_internal.h\"" << endl
+  wto << license << "#include \"Universal_System/Resources/fonts_internal.h\"" << endl
       << endl;
 
   int maxid = -1, rawfontcount = 0;

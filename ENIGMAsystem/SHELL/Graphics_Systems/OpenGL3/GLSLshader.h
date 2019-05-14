@@ -26,7 +26,7 @@ using std::string;
 using std::vector;
 using std::unordered_map;
 
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 
 extern GLenum shadertypes[];
 
