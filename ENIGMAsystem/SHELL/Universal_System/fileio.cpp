@@ -175,21 +175,21 @@ std::string file_text_readln(int fileid) // Skips the rest of the line in the fi
   enigma::openFile &mf = enigma::files[fileid];
   if (feof(mf.f))
     mf.eof = true;
-  string ret;
+  string next;
   char buf[BUFSIZ];
     buf[0] = 0;
   while (fgets(buf,BUFSIZ,mf.f))
   {
-    ret += buf;
-    if (ret[ret.length()-1] == '\n' or ret[ret.length()-1] == '\r')
+    next += buf;
+    if (next[next.length()-1] == '\n' or next[next.length()-1] == '\r')
       break;
     buf[0] = 0;
   }
   size_t dp;
-  for (dp = ret.length()-1; dp != size_t(-1) and (ret[dp] == '\n' or ret[dp] == '\r'); dp--);
-  ret.erase(dp+1);
+  for (dp = next.length()-1; dp != size_t(-1) and (next[dp] == '\n' or next[dp] == '\r'); dp--);
+  next.erase(dp+1);
   std::string last = mf.sdata.substr(mf.spos);
-  mf.sdata = ret;
+  mf.sdata = next;
   mf.spos = 0;
   return last;
 }
