@@ -30,6 +30,7 @@ void    file_text_close(int fileid);
 void    file_text_write_string(int fileid, std::string str);
 void    file_text_write_real(int fileid, double x);
 void    file_text_writeln(int fileid);
+void    file_text_writeln(int fileid, std::string str);
 std::string file_text_read_string(int fileid);
 std::string file_text_read_all(int fileid);
 double  file_text_read_real(int fileid);

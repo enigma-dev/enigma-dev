@@ -120,6 +120,12 @@ void file_text_writeln(int fileid) // Write a newline character to the file.
   fputc('\n',mf.f);
 }
 
+void file_text_writeln(int fileid,string str) // Write a string and newline character to the file.
+{
+  file_text_write_string(fileid,str);
+  file_text_writeln(fileid);
+}
+
 string file_text_read_string(int fileid) { // Reads a string from the file with the given file id and returns this string. A string ends at the end of line.
   enigma::openFile &mf = enigma::files[fileid];
   if (!mf.sdata[mf.spos]) return "";
