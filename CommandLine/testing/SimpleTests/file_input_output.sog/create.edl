@@ -125,12 +125,8 @@ file_text_write_real(text_append, 2);
 file_text_write_real(text_append, 5);
 file_text_write_string(text_append, " b");
 file_text_writeln(text_append);
-file_text_write_real(text_append, 45);
-file_text_write_real(text_append, -89);
-file_text_write_real(text_append, -102.5);
-file_text_writeln(text_append);
-file_text_write_string(text_append, "holy moly moo");
-file_text_writeln(text_append);
+file_text_writeln(text_append, " 45 -89 -102.5");
+file_text_writeln(text_append, "holy moly moo");
 file_text_close(text_append);
 
 // TEXT READ
