@@ -41,7 +41,7 @@ int graphics_create_texture(unsigned width, unsigned height,
   GLuint texture;
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
   if (mipmap) {
     // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
     // Honestly not a big deal, Unity3D doesn't allow you to specify either.
@@ -95,7 +95,7 @@ void graphics_push_texture_pixels(int texture, int x, int y, int width, int heig
 void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {
   glBindTexture(GL_TEXTURE_2D, get_texture_peer(texture));
 
-  glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
 }
 
 } // namespace enigma
