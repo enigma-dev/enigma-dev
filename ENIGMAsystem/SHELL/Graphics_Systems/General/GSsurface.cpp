@@ -368,17 +368,45 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
 
 void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
 {
+  draw_batch_flush(batch_flush_deferred);
 
+  get_surfacev(surf,id,-1);
+  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+
+  enigma::sprite_add_subimage(ind, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
+  delete[] surfbuf;
 }
 
 void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)
 {
+  draw_batch_flush(batch_flush_deferred);
 
+  get_surface(ssurf,source);
+  get_surface(dsurf,destination);
+  const enigma::BaseSurface& sbase = ((enigma::BaseSurface&)ssurf),
+                             dbase = ((enigma::BaseSurface&)dsurf);
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(sbase.texture,xs,ys,ws,hs);
+  enigma::graphics_push_texture_pixels(dbase.texture, x, y, ws, hs, surfbuf);
+  delete[] surfbuf;
 }
 
 void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
 {
+  draw_batch_flush(batch_flush_deferred);
 
+  get_surface(ssurf,source);
+  get_surface(dsurf,destination);
+  const enigma::BaseSurface& sbase = ((enigma::BaseSurface&)ssurf),
+                             dbase = ((enigma::BaseSurface&)dsurf);
+  unsigned sw = 0, sh = 0;
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(sbase.texture,&sw,&sh);
+  enigma::graphics_push_texture_pixels(dbase.texture, x, y, sw, sh, surfbuf);
+  delete[] surfbuf;
 }
 
 } // namespace enigma_user
