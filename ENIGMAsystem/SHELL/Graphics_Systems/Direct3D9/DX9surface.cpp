@@ -37,20 +37,6 @@
 using namespace std;
 using namespace enigma::dx9;
 
-namespace enigma {
-
-//TODO Add caching of the surface's RAM copy to speed this shit up
-//Maybe also investigate the use of CreateRenderTarget
-void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest) {
-  D3DSURFACE_DESC desc;
-  (*src)->GetDesc(&desc);
-
-  d3ddev->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, dest, NULL);
-  d3ddev->GetRenderTargetData(*src, *dest);
-}
-
-} // namespace enigma
-
 namespace enigma_user {
 
 bool surface_is_supported()

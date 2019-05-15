@@ -26,6 +26,20 @@
 
 using namespace enigma::dx9;
 
+namespace {
+
+//TODO Add caching of the surface's RAM copy to speed this shit up
+//Maybe also investigate the use of CreateRenderTarget
+void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest) {
+  D3DSURFACE_DESC desc;
+  (*src)->GetDesc(&desc);
+
+  d3ddev->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, dest, NULL);
+  d3ddev->GetRenderTargetData(*src, *dest);
+}
+
+} // namespace anonymous
+
 namespace enigma {
 
 LPDIRECT3DTEXTURE9 get_texture_peer(int texid) {
@@ -72,55 +86,64 @@ void graphics_delete_texture(int texid) {
   texture->peer->Release(), texture->peer = NULL;
 }
 
-unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {
+unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {
   auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
   auto peer = d3dtex->peer;
+  LPDIRECT3DSURFACE9 pBuffer,pRamBuffer=nullptr;
+  peer->GetSurfaceLevel(0,&pBuffer);
 
-  *fullwidth = d3dtex->fullwidth;
-  *fullheight = d3dtex->fullheight;
-
-  unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
-
-  D3DLOCKED_RECT lock;
-  peer->LockRect(0, &lock, NULL, D3DLOCK_READONLY);
-  for (unsigned i = 0; i < (*fullheight); ++i) {
-    memcpy((void*)((intptr_t)ret + i * (*fullwidth) * 4), (void*)((intptr_t)lock.pBits + i * lock.Pitch), (*fullwidth) * 4);
+  // copy render target textures to system memory first
+  // use system memory copy to read pixel data
+  D3DSURFACE_DESC desc;
+  pBuffer->GetDesc(&desc);
+  if (desc.Usage == D3DUSAGE_RENDERTARGET) {
+    surface_copy_to_ram(&pBuffer,&pRamBuffer);
+    pBuffer = pRamBuffer;
   }
-  peer->UnlockRect(0);
+
+  unsigned fw = d3dtex->fullwidth, fh = d3dtex->fullheight;
+
+  unsigned char* ret = new unsigned char[width*height*4];
+
+  RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
+  D3DLOCKED_RECT lock;
+  pBuffer->LockRect(&lock, &rect, D3DLOCK_READONLY);
+  for (int i = 0; i < height; ++i) {
+    memcpy((void*)((intptr_t)ret + i * width * 4), (void*)((intptr_t)lock.pBits + i * lock.Pitch), width * 4);
+  }
+  pBuffer->UnlockRect();
+
+  if (pRamBuffer) pRamBuffer->Release();
 
   return ret;
 }
 
-unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {
+unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {
   auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
-  auto peer = d3dtex->peer;
-  unsigned fullwidth = d3dtex->fullwidth, fullheight = d3dtex->fullheight;
-
-  unsigned char* ret = new unsigned char[fullwidth*fullheight*4];
-
-  RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
-  D3DLOCKED_RECT lock;
-  peer->LockRect(0, &lock, &rect, D3DLOCK_READONLY);
-  for (int i = 0; i < height; ++i) {
-    memcpy((void*)((intptr_t)ret + i * fullwidth * 4), (void*)((intptr_t)lock.pBits + i * lock.Pitch), width * 4);
-  }
-  peer->UnlockRect(0);
-
-  return ret;
+  const unsigned fw = d3dtex->fullwidth, fh = d3dtex->fullheight;
+  *fullwidth = fw, *fullheight = fh;
+  return graphics_copy_texture_pixels(texture, 0, 0, fw, fh);
 }
 
 void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {
   auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
   auto peer = d3dtex->peer;
+  LPDIRECT3DSURFACE9 pBuffer,pRamBuffer=nullptr;
+  peer->GetSurfaceLevel(0,&pBuffer);
   unsigned fullwidth = d3dtex->fullwidth;
 
   RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
   D3DLOCKED_RECT lock;
-  peer->LockRect(0, &lock, &rect, 0);
+  pBuffer->LockRect(&lock, &rect, 0);
   for (int i = 0; i < height; ++i) {
     memcpy((void*)((intptr_t)lock.pBits + i * lock.Pitch), (void*)((intptr_t)pxdata + i * fullwidth * 4), width * 4);
   }
-  peer->UnlockRect(0);
+  pBuffer->UnlockRect();
+
+  if (pRamBuffer) {
+    //d3ddev->UpdateSurface(pRamBuffer,NULL,pBuffer,&rect);
+    pRamBuffer->Release();
+  }
 }
 
 void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {
