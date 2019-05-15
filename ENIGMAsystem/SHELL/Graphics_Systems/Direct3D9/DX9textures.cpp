@@ -139,7 +139,7 @@ void graphics_push_texture_pixels(int texture, int x, int y, int width, int heig
 
   RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
   D3DLOCKED_RECT lock;
-  (pRamBuffer?pRamBuffer:pBuffer)->LockRect(&lock, pRamBuffer?NULL:&rect, D3DLOCK_DISCARD);
+  (pRamBuffer?pRamBuffer:pBuffer)->LockRect(&lock, pRamBuffer?NULL:&rect, 0);
   for (int i = 0; i < height; ++i) {
     memcpy((void*)((intptr_t)lock.pBits + i * lock.Pitch), (void*)((intptr_t)pxdata + i * width * 4), width * 4);
   }
