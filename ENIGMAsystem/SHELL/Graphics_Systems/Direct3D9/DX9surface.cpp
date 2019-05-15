@@ -51,6 +51,8 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
   d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
   enigma::DX9Texture* gmTexture = new enigma::DX9Texture(texture);
+  gmTexture->width = gmTexture->fullwidth = width;
+  gmTexture->height = gmTexture->fullheight = height;
   const int texid = enigma::textures.size();
   enigma::textures.push_back(gmTexture);
   //d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
@@ -66,6 +68,8 @@ int surface_create_msaa(int width, int height, int levels)
   d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
   enigma::DX9Texture* gmTexture = new enigma::DX9Texture(texture);
+  gmTexture->width = gmTexture->fullwidth = width;
+  gmTexture->height = gmTexture->fullheight = height;
   const int texid = enigma::textures.size();
   enigma::textures.push_back(gmTexture);
   d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);

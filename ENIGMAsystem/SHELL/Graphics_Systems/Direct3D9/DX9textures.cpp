@@ -23,7 +23,6 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 
 #include <string.h> // for memcpy
-
 using namespace enigma::dx9;
 
 namespace {
@@ -89,6 +88,7 @@ void graphics_delete_texture(int texid) {
 unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {
   auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
   auto peer = d3dtex->peer;
+
   LPDIRECT3DSURFACE9 pBuffer,pRamBuffer=nullptr;
   peer->GetSurfaceLevel(0,&pBuffer);
 
@@ -100,8 +100,6 @@ unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width
     surface_copy_to_ram(&pBuffer,&pRamBuffer);
     pBuffer = pRamBuffer;
   }
-
-  unsigned fw = d3dtex->fullwidth, fh = d3dtex->fullheight;
 
   unsigned char* ret = new unsigned char[width*height*4];
 
@@ -128,20 +126,28 @@ unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, un
 void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {
   auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
   auto peer = d3dtex->peer;
+
   LPDIRECT3DSURFACE9 pBuffer,pRamBuffer=nullptr;
   peer->GetSurfaceLevel(0,&pBuffer);
-  unsigned fullwidth = d3dtex->fullwidth;
+
+  // use system memory surface to update render target texture
+  D3DSURFACE_DESC desc;
+  pBuffer->GetDesc(&desc);
+  if (desc.Usage == D3DUSAGE_RENDERTARGET) {
+    d3ddev->CreateOffscreenPlainSurface(width, height, desc.Format, D3DPOOL_SYSTEMMEM, &pRamBuffer, NULL);
+  }
 
   RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
   D3DLOCKED_RECT lock;
-  pBuffer->LockRect(&lock, &rect, 0);
+  (pRamBuffer?pRamBuffer:pBuffer)->LockRect(&lock, pRamBuffer?NULL:&rect, D3DLOCK_DISCARD);
   for (int i = 0; i < height; ++i) {
-    memcpy((void*)((intptr_t)lock.pBits + i * lock.Pitch), (void*)((intptr_t)pxdata + i * fullwidth * 4), width * 4);
+    memcpy((void*)((intptr_t)lock.pBits + i * lock.Pitch), (void*)((intptr_t)pxdata + i * width * 4), width * 4);
   }
-  pBuffer->UnlockRect();
+  (pRamBuffer?pRamBuffer:pBuffer)->UnlockRect();
 
   if (pRamBuffer) {
-    //d3ddev->UpdateSurface(pRamBuffer,NULL,pBuffer,&rect);
+    const POINT p = {x,y};
+    d3ddev->UpdateSurface(pRamBuffer,NULL,pBuffer,&p);
     pRamBuffer->Release();
   }
 }
