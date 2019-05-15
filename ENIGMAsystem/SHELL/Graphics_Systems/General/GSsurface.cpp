@@ -20,6 +20,7 @@
 #include "GSsurface_impl.h"
 #include "GSprimitives.h"
 #include "GScolor_macros.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/Resources/sprites_internal.h"
@@ -326,12 +327,38 @@ int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned 
 
 int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
 {
-  return -1; //TODO: implement
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surfacev(surf,id,-1);
+  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+
+  enigma::backgroundstructarray_reallocate();
+  int bckid=enigma::background_idmax;
+  enigma::background_new(bckid, w, h, surfbuf, removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
+  delete[] surfbuf;
+  enigma::background_idmax++;
+  return bckid;
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
 {
-  return -1; //TODO: implement
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surfacev(surf,id,-1);
+  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+
+  enigma::spritestructarray_reallocate();
+  int sprid=enigma::sprite_idmax;
+  enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
+  enigma::sprite_set_subimage(sprid, 0, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
+  delete[] surfbuf;
+  return sprid;
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
