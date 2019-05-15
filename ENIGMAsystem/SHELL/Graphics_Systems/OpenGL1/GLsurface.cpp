@@ -26,20 +26,9 @@
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-
-#include "Universal_System/image_formats.h"
-#include "Universal_System/nlpo2.h"
-#include "Universal_System/Resources/sprites_internal.h"
-#include "Universal_System/Resources/background_internal.h"
-#include "Collision_Systems/collision_types.h"
 
 #include <cstddef>
 #include <iostream>
-
-#include <math.h>
-#include <string.h>
-#include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
 

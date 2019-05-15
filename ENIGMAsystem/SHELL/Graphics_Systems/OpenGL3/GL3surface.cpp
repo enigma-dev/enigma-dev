@@ -23,7 +23,6 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -31,16 +30,6 @@
 #ifdef DEBUG_MODE
 #include "Widget_Systems/widgets_mandatory.h" // for show_error
 #endif
-
-#include "Universal_System/nlpo2.h"
-#include "Universal_System/Resources/sprites_internal.h"
-#include "Universal_System/Resources/background_internal.h"
-#include "Collision_Systems/collision_types.h"
-
-#include <cstddef>
-#include <iostream>
-#include <cmath>
-#include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
 
