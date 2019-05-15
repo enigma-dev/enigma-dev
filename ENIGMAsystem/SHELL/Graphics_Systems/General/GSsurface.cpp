@@ -297,4 +297,61 @@ void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1,
     }
 }
 
+//////////////////////////////////////SAVE TO FILE AND CTEATE SPRITE FUNCTIONS/////////
+
+int surface_getpixel(int id, int x, int y)
+{
+  return 0; //TODO: implement
 }
+
+int surface_getpixel_ext(int id, int x, int y)
+{
+  return 0; //TODO: implement
+}
+
+int surface_getpixel_alpha(int id, int x, int y)
+{
+  return 0; //TODO: implement
+}
+
+int surface_save(int id, string filename)
+{
+  return -1; //TODO: implement
+}
+
+int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
+{
+  return -1; //TODO: implement
+}
+
+int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
+{
+  return -1; //TODO: implement
+}
+
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
+{
+  return -1; //TODO: implement
+}
+
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
+{
+  return sprite_create_from_surface(id, x, y, w, h, removeback, smooth, true, xorig, yorig);
+}
+
+void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
+{
+
+}
+
+void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)
+{
+
+}
+
+void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
+{
+
+}
+
+} // namespace enigma_user
