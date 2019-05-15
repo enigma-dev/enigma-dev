@@ -54,3 +54,9 @@ draw_sprite_stretched_ext(spr,0,25,0,25,25,c_red,0.5);
 
 // draw duplicate sprite
 draw_sprite(spr2,0,0,25);
+
+// surface tests
+draw_surface(surf_test,0,room_height-32);
+draw_sprite(surf_spr,0,32,room_height-32);
+draw_background(surf_back,0,room_height-64);
+draw_surface(surf_dup,32,room_height-64);
