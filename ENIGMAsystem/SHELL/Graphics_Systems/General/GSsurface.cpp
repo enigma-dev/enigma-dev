@@ -308,7 +308,7 @@ int surface_getpixel(int id, int x, int y)
   get_surfacev(surf,id,-1);
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
   unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,1,1);
-  int ret = surfbuf[0] + (surfbuf[1] << 8) + (surfbuf[2] << 16);
+  int ret = surfbuf[2] + (surfbuf[1] << 8) + (surfbuf[0] << 16);
   delete[] surfbuf;
   return ret;
 }
@@ -320,7 +320,7 @@ int surface_getpixel_ext(int id, int x, int y)
   get_surfacev(surf,id,-1);
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
   unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,1,1);
-  int ret = surfbuf[0] + (surfbuf[1] << 8) + (surfbuf[2] << 16) + (surfbuf[3] << 24);
+  int ret = surfbuf[2] + (surfbuf[1] << 8) + (surfbuf[0] << 16) + (surfbuf[3] << 24);
   delete[] surfbuf;
   return ret;
 }
@@ -332,7 +332,7 @@ int surface_getpixel_alpha(int id, int x, int y)
   get_surfacev(surf,id,-1);
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
   unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,1,1);
-  int ret = surfbuf[0];
+  int ret = surfbuf[3];
   delete[] surfbuf;
   return ret;
 }
