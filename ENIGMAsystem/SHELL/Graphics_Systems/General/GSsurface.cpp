@@ -410,7 +410,7 @@ void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool r
 {
   draw_batch_flush(batch_flush_deferred);
 
-  get_surfacev(surf,id,-1);
+  get_surface(surf,id);
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
 
   unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
