@@ -81,9 +81,19 @@ unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, un
 
 unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {
   unsigned fw, fh;
-  //We could use glCopyImageSubData here, but it's GL4.3
+  //We could use glCopyImageSubData here instead of cropping, but it's GL4.3
   unsigned char* pxdata = graphics_copy_texture_pixels(texture, &fw, &fh);
-  return pxdata + (x*4) + (y*fw*4);
+  const int bpp = 4; // bytes per pixel
+  const int dp=width*bpp, // destination pitch
+            sp=fw*bpp; // source pitch
+
+  unsigned char* cropped = new unsigned char[height*dp];
+  for (int i = 0; i < height; ++i) {
+    memcpy(cropped + i*dp, pxdata + i*sp, dp);
+  }
+  delete[] pxdata;
+
+  return cropped;
 }
 
 void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {
