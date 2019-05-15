@@ -89,7 +89,7 @@ unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width
 
   unsigned char* cropped = new unsigned char[height*dp];
   for (int i = 0; i < height; ++i) {
-    memcpy(cropped + i*dp, pxdata + i*sp, dp);
+    memcpy(cropped + i*dp, pxdata + (i+y)*sp + x*bpp, dp);
   }
   delete[] pxdata;
 
