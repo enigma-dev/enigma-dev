@@ -302,17 +302,32 @@ void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1,
 
 int surface_getpixel(int id, int x, int y)
 {
-  return 0; //TODO: implement
+  get_surfacev(surf,id,-1);
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,1,1);
+  int ret = surfbuf[0] + (surfbuf[1] << 8) + (surfbuf[2] << 16);
+  delete[] surfbuf;
+  return ret;
 }
 
 int surface_getpixel_ext(int id, int x, int y)
 {
-  return 0; //TODO: implement
+  get_surfacev(surf,id,-1);
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,1,1);
+  int ret = surfbuf[0] + (surfbuf[1] << 8) + (surfbuf[2] << 16) + (surfbuf[3] << 24);
+  delete[] surfbuf;
+  return ret;
 }
 
 int surface_getpixel_alpha(int id, int x, int y)
 {
-  return 0; //TODO: implement
+  get_surfacev(surf,id,-1);
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,1,1);
+  int ret = surfbuf[0];
+  delete[] surfbuf;
+  return ret;
 }
 
 int surface_save(int id, string filename)
@@ -330,7 +345,6 @@ int background_create_from_surface(int id, int x, int y, int w, int h, bool remo
   draw_batch_flush(batch_flush_deferred);
 
   get_surfacev(surf,id,-1);
-  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
 
   unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
@@ -348,7 +362,6 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
   draw_batch_flush(batch_flush_deferred);
 
   get_surfacev(surf,id,-1);
-  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
 
   unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
@@ -371,7 +384,6 @@ void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool r
   draw_batch_flush(batch_flush_deferred);
 
   get_surfacev(surf,id,-1);
-  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
 
   unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
