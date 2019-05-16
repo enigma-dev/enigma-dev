@@ -40,7 +40,7 @@ extern int viewport_x, viewport_y, viewport_w, viewport_h;
 
 //WHERE TO PUT THIS!!!!!????
 //This is GL3 only, because I need formats and types that might not be compatible between graphics systems
-int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, int internalFormat, unsigned format, unsigned type);
+int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, GLint internalFormat, GLenum format, GLenum type);
 
 } // namespace enigma
 
