@@ -106,19 +106,6 @@ namespace enigma_user
 	void surface_reset_target(void){}
 	int surface_get_target(){return -1;}
 	void surface_free(int id){}
-	int surface_getpixel(int id, int x, int y){return -1;}
-	int surface_getpixel_ext(int id, int x, int y){return -1;}
-	int surface_getpixel_alpha(int id, int x, int y){return -1;}
-
-	int surface_save(int id, string filename){return -1;}
-
-	int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h){return -1;}
-	int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload){return -1;}
-	int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig){return -1;}
-	int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig){return -1;}
-	void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth){}
-	void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs){}
-	void surface_copy(int destination, gs_scalar x, gs_scalar y, int source){}
 
 	int draw_get_msaa_maxlevel(){return 0;}
 	bool draw_get_msaa_supported(){return false;}
