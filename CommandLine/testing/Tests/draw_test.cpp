@@ -5,7 +5,7 @@
 TEST(Regression, draw_test) {
   if (!TestHarness::windowing_supported()) return;
   TestConfig tc;
-  tc.extensions = "Paths,libpng";
+  tc.extensions = "Paths,libpng,GTest";
   auto test_harness = LAUNCH_HARNESS_FOR_SOG(tc);
   if (!test_harness) FAIL() << "Game could not be run.";
 
