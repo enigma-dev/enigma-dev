@@ -351,4 +351,41 @@ void screen_redraw()
   screen_refresh();
 }
 
+int screen_save(string filename) { //Assumes native integers are little endian
+  return -1;
+}
+
+int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) { //Assumes native integers are little endian
+  return -1;
+}
+
+// The following three leave a bad taste in my mouth because they depend on views, which should be removable.
+// However, for now, they stay.
+
+int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
+{
+  return -1;
+}
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
+  return -1;
+}
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
+	return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
+}
+
+void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
+}
+
+int draw_getpixel(int x,int y)
+{
+  return 0;
+}
+
+int draw_getpixel_ext(int x,int y)
+{
+  return 0;
+}
+
 }
