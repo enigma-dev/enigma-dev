@@ -23,6 +23,8 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
+#include <cstring> // for std::memcpy
+
 /*enum {
   //Formats and internal formats
   tx_rgba = GL_RGBA,
@@ -120,7 +122,7 @@ unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width
 
   unsigned char* cropped = new unsigned char[height*dp];
   for (int i = 0; i < height; ++i) {
-    memcpy(cropped + i*dp, pxdata + (i+y)*sp + x*bpp, dp);
+    std::memcpy(cropped + i*dp, pxdata + (i+y)*sp + x*bpp, dp);
   }
   delete[] pxdata;
 
