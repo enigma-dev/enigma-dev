@@ -80,8 +80,5 @@ namespace enigma_user
 
 	void draw_clear_alpha(int col,float alpha);
 	void draw_clear(int col);
-
-	extern int window_get_region_height_scaled();
-	int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload);
 }
 #endif

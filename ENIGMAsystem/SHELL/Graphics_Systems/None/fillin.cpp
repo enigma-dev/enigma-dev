@@ -66,11 +66,12 @@ using namespace std;
 //the GPU (such as surfaces) and as such have no business in a headless mode
 namespace enigma
 {
-
 	void graphicssystem_initialize(){}
 
 	int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap){return -1;}
 	void graphics_delete_texture(int texid){}
+	unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {return nullptr;}
+	unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {return nullptr;}
 	unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {return NULL;}
 	unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {return NULL;}
 	void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {}
@@ -149,7 +150,4 @@ namespace enigma_user
 	void d3d_stencil_clear_value(int value) {}
 	void d3d_stencil_clear() {}
 	void d3d_set_software_vertex_processing(bool software){}
-
-	extern int window_get_region_height_scaled();
-	int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload){return -1;}
 }
