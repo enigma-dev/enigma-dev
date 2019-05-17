@@ -447,9 +447,6 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
   delete[] rgba;
 }
 
-// The following two leave a bad taste in my mouth because they depend on views, which should be removable.
-// However, for now, they stay.
-
 int draw_getpixel(int x,int y)
 {
   if (clamp_view(x,y)) return 0;
