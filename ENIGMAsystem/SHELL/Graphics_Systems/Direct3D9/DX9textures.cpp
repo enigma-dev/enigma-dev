@@ -35,7 +35,8 @@ void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest, cons
 
   // lockable render target is only faster when requested area is less than half of total area
   // this should make sense intuitively since the lockable render target will have to copy twice
-  if (width*height < (desc.Width*desc.Height)/2) {
+  // lockable render target is also the only way to get back non-RT video memory texture
+  if (width*height < (desc.Width*desc.Height)/2 || desc.Usage != D3DUSAGE_RENDERTARGET) {
     subsurf = true;
     d3ddev->CreateRenderTarget(width, height, desc.Format, D3DMULTISAMPLE_NONE, 0, true, dest, NULL);
     d3ddev->StretchRect(*src, &rect, *dest, NULL, D3DTEXF_NONE);
