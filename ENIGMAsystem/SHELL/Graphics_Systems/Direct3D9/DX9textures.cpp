@@ -27,33 +27,34 @@ using namespace enigma::dx9;
 
 namespace {
 
-//TODO Add caching of the surface's RAM copy to speed this shit up
-//Maybe also investigate the use of CreateRenderTarget
-void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest) {
+void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest, const RECT& rect) {
   D3DSURFACE_DESC desc;
   (*src)->GetDesc(&desc);
 
-  d3ddev->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, dest, NULL);
-  d3ddev->GetRenderTargetData(*src, *dest);
+  const int width = rect.right-rect.left, height = rect.bottom-rect.top;
+
+  d3ddev->CreateRenderTarget(width, height, desc.Format, D3DMULTISAMPLE_NONE, 0, true, dest, NULL);
+  d3ddev->StretchRect(*src, &rect, *dest, NULL, D3DTEXF_NONE);
 }
 
 unsigned char* surface_copy_pixels(LPDIRECT3DSURFACE9 pBuffer, int x, int y, int width, int height) {
   LPDIRECT3DSURFACE9 pRamBuffer=nullptr;
 
+  RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
+
   // copy render target textures to system memory first
   // use system memory copy to read pixel data
   D3DSURFACE_DESC desc;
   pBuffer->GetDesc(&desc);
-  if (desc.Usage == D3DUSAGE_RENDERTARGET) {
-    surface_copy_to_ram(&pBuffer,&pRamBuffer);
+  if (desc.Usage == D3DUSAGE_RENDERTARGET && desc.Pool == D3DPOOL_DEFAULT) {
+    surface_copy_to_ram(&pBuffer,&pRamBuffer,rect);
     pBuffer = pRamBuffer;
   }
 
   unsigned char* ret = new unsigned char[width*height*4];
 
-  RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
   D3DLOCKED_RECT lock;
-  pBuffer->LockRect(&lock, &rect, D3DLOCK_READONLY);
+  pBuffer->LockRect(&lock, (pBuffer==pRamBuffer)?NULL:&rect, D3DLOCK_READONLY);
   for (int i = 0; i < height; ++i) {
     memcpy((void*)((intptr_t)ret + i * width * 4), (void*)((intptr_t)lock.pBits + i * lock.Pitch), width * 4);
   }
@@ -71,9 +72,8 @@ namespace enigma {
 unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {
   if (flipped) *flipped = false;
 
-	LPDIRECT3DSURFACE9 pBackBuffer;
+  LPDIRECT3DSURFACE9 pBackBuffer;
   d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
-
   return surface_copy_pixels(pBackBuffer, x, y, width, height);
 }
 
