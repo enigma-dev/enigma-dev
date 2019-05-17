@@ -68,7 +68,7 @@ unsigned char* surface_copy_pixels(LPDIRECT3DSURFACE9 pBuffer, int x, int y, int
 
 namespace enigma {
 
-unsigned char* graphics_copy_back_buffer_pixels(int x, int y, int width, int height, bool* flipped) {
+unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {
   if (flipped) *flipped = false;
 
 	LPDIRECT3DSURFACE9 pBackBuffer;
@@ -77,7 +77,7 @@ unsigned char* graphics_copy_back_buffer_pixels(int x, int y, int width, int hei
   return surface_copy_pixels(pBackBuffer, x, y, width, height);
 }
 
-unsigned char* graphics_copy_back_buffer_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
+unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
   if (flipped) *flipped = false;
 
   LPDIRECT3DSURFACE9 pBackBuffer;
@@ -89,7 +89,7 @@ unsigned char* graphics_copy_back_buffer_pixels(unsigned* fullwidth, unsigned* f
 
   *fullwidth = fw;
   *fullheight = fh;
-  return graphics_copy_back_buffer_pixels(0,0,fw,fh,flipped);
+  return graphics_copy_screen_pixels(0,0,fw,fh,flipped);
 }
 
 LPDIRECT3DTEXTURE9 get_texture_peer(int texid) {

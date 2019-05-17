@@ -40,7 +40,7 @@ void scene_end() {
   msaa_fbo_blit();
 }
 
-unsigned char* graphics_copy_back_buffer_pixels(int x, int y, int width, int height, bool* flipped) {
+unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {
   if (flipped) *flipped = true;
 
   const int bpp = 4; // bytes per pixel
@@ -56,7 +56,7 @@ unsigned char* graphics_copy_back_buffer_pixels(int x, int y, int width, int hei
   return pxdata;
 }
 
-unsigned char* graphics_copy_back_buffer_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
+unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
   if (flipped) *flipped = true;
 
   const int fw = enigma_user::window_get_region_width_scaled(),
@@ -64,7 +64,7 @@ unsigned char* graphics_copy_back_buffer_pixels(unsigned* fullwidth, unsigned* f
 
   *fullwidth = fw;
   *fullheight = fh;
-  return graphics_copy_back_buffer_pixels(0,0,fw,fh,flipped);
+  return graphics_copy_screen_pixels(0,0,fw,fh,flipped);
 }
 
 } // namespace enigma

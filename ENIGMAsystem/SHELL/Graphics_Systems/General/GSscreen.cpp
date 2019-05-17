@@ -377,7 +377,7 @@ int screen_save(string filename) { //Assumes native integers are little endian
 
   unsigned int fw = 0, fh = 0;
   bool flipped = false;
-  unsigned char* rgba = enigma::graphics_copy_back_buffer_pixels(&fw,&fh,&flipped);
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(&fw,&fh,&flipped);
   int ret = image_save(filename, rgba, fw, fh, fw, fh, flipped);
 
   delete[] rgba;
@@ -388,7 +388,7 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
   draw_batch_flush(batch_flush_deferred);
 
   bool flipped = false;
-  unsigned char* rgba = enigma::graphics_copy_back_buffer_pixels(x,y,w,h,&flipped);
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
   int ret = image_save(filename, rgba, w, h, w, h, flipped);
 
   delete[] rgba;
@@ -400,7 +400,7 @@ int background_create_from_screen(int x, int y, int w, int h, bool removeback, b
   draw_batch_flush(batch_flush_deferred);
 
   bool flipped = false;
-  unsigned char* rgba = enigma::graphics_copy_back_buffer_pixels(x,y,w,h,&flipped);
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
 
   if (flipped)
     rgba = enigma::image_flip(rgba, w, h, 4);
@@ -417,7 +417,7 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
   draw_batch_flush(batch_flush_deferred);
 
   bool flipped = false;
-  unsigned char* rgba = enigma::graphics_copy_back_buffer_pixels(x,y,w,h,&flipped);
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
 
   if (flipped)
     rgba = enigma::image_flip(rgba, w, h, 4);
@@ -438,7 +438,7 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
   draw_batch_flush(batch_flush_deferred);
 
   bool flipped = false;
-  unsigned char* rgba = enigma::graphics_copy_back_buffer_pixels(x,y,w,h,&flipped);
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
 
   if (flipped)
     rgba = enigma::image_flip(rgba, w, h, 4);
@@ -455,7 +455,7 @@ int draw_getpixel(int x,int y)
   if (clamp_view(x,y)) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  unsigned char* rgba = enigma::graphics_copy_back_buffer_pixels(x,y,1,1);
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,1,1);
   int ret = rgba[2] | rgba[1] << 8 | rgba[0] << 16;
   delete[] rgba;
   return ret;
@@ -466,7 +466,7 @@ int draw_getpixel_ext(int x,int y)
   if (clamp_view(x,y)) return 0;
   draw_batch_flush(batch_flush_deferred);
 
-  unsigned char* rgba = enigma::graphics_copy_back_buffer_pixels(x,y,1,1);
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,1,1);
   int ret = rgba[2] | rgba[1] << 8 | rgba[0] << 16 | rgba[3] << 24;
   delete[] rgba;
   return ret;
