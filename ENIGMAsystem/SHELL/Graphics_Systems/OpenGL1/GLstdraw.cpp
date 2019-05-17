@@ -18,14 +18,7 @@
 #include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
-
-#include "Universal_System/roomsystem.h"
-
-#include <cstdlib>
-#include <math.h>
-#include <stdio.h>
 
 namespace enigma_user
 {
@@ -54,85 +47,6 @@ int draw_get_msaa_maxlevel()
 bool draw_get_msaa_supported()
 {
   return GLEW_EXT_multisample;
-}
-
-} // namespace enigma_user
-
-//#include <endian.h>
-//TODO: Though serprex, the author of the function below, never included endian.h,
-//   // Doing so is necessary for the function to work at its peak.
-//   // When ENIGMA generates configuration files, one should be included here.
-
-namespace enigma_user {
-
-int draw_getpixel(int x,int y)
-{
-    if (view_enabled)
-    {
-        x = x - enigma_user::view_xview[enigma_user::view_current];
-        y = enigma_user::view_hview[enigma_user::view_current] - (y - enigma_user::view_yview[enigma_user::view_current]) - 1;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return 0;
-    }
-    else
-    {
-        y = enigma_user::room_height - y - 1;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
-    }
-
-    draw_batch_flush(batch_flush_deferred);
-
-  #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
-    int ret;
-    glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&ret);
-    return ret;
-  #elif defined __LITTLE_ENDIAN__ || defined __LITTLE_ENDIAN
-    int ret;
-    glReadPixels(x,y,1,1,GL_BGR,GL_UNSIGNED_BYTE,&ret);
-    return ret>>8;
-  #else
-    unsigned char rgb[3];
-    glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&rgb);
-    return rgb[0] | rgb[1] << 8 | rgb[2] << 16;
-  #endif
-}
-
-int draw_getpixel_ext(int x,int y)
-{
-    if (view_enabled)
-    {
-        x = x - enigma_user::view_xview[enigma_user::view_current];
-        y = enigma_user::view_hview[enigma_user::view_current] - (y - enigma_user::view_yview[enigma_user::view_current]) - 1;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return 0;
-    }
-    else
-    {
-        y = enigma_user::room_height - y - 1;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
-    }
-
-    draw_batch_flush(batch_flush_deferred);
-
-  #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
-    int ret;
-    glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&ret);
-    return ret;
-  #elif defined __LITTLE_ENDIAN__ || defined __LITTLE_ENDIAN
-    int ret;
-    glReadPixels(x,y,1,1,GL_BGRA,GL_UNSIGNED_BYTE,&ret);
-    return ret>>8;
-  #else
-    unsigned char rgba[4];
-    glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&rgba);
-    return rgba[0] | rgba[1] << 8 | rgba[2] << 16 | rgba[3] << 24;
-  #endif
 }
 
 } // namespace enigma_user

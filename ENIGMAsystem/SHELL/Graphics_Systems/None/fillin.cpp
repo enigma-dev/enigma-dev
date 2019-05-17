@@ -66,11 +66,12 @@ using namespace std;
 //the GPU (such as surfaces) and as such have no business in a headless mode
 namespace enigma
 {
-
 	void graphicssystem_initialize(){}
 
 	int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap){return -1;}
 	void graphics_delete_texture(int texid){}
+	unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {return nullptr;}
+	unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {return nullptr;}
 	unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {return NULL;}
 	unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {return NULL;}
 	void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {}
@@ -110,14 +111,7 @@ namespace enigma_user
 	int draw_get_msaa_maxlevel(){return 0;}
 	bool draw_get_msaa_supported(){return false;}
 
-	int draw_getpixel(int x,int y){return -1;}
-	int draw_getpixel_ext(int x,int y){return -1;}
-
 	extern int window_get_region_height_scaled();
-
-	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig){return -1;}
-	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig){return -1;}
-	void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth){}
 
 	int glsl_shader_create(int type){return -1;}
 	int glsl_shader_load(int id, string fname){return -1;}
@@ -148,8 +142,6 @@ namespace enigma_user
 	extern int window_get_region_width();
 	extern int window_get_region_height();
 
-	int screen_save(string filename){return -1;}
-	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h){return -1;}
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 
 	void draw_clear_alpha(int col,float alpha){}
@@ -158,7 +150,4 @@ namespace enigma_user
 	void d3d_stencil_clear_value(int value) {}
 	void d3d_stencil_clear() {}
 	void d3d_set_software_vertex_processing(bool software){}
-
-	extern int window_get_region_height_scaled();
-	int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload){return -1;}
 }
