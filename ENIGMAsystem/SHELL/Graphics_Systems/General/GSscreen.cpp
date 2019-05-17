@@ -52,7 +52,7 @@ namespace {
 bool clamp_view(int& x, int& y) {
   if (view_enabled) {
     x = x - enigma_user::view_xview[enigma_user::view_current];
-    x = y - enigma_user::view_yview[enigma_user::view_current];
+    y = y - enigma_user::view_yview[enigma_user::view_current];
     if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return true;
   } else {
     if (x > enigma_user::room_width || y > enigma_user::room_height) return true;
