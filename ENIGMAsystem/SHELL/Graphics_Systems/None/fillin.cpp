@@ -45,20 +45,7 @@
 #include "Universal_System/estring.h"
 #include "Platforms/platforms_mandatory.h"
 
-#include <vector>
-#include <limits>
-#include <map>
-#include <list>
-#include <stack>
-#include <iostream>
-#include <fstream>
 #include <string>
-#include <unordered_map>
-#include <algorithm>
-
-#include <stdlib.h>     /* malloc, free, rand */
-#include <floatcomp.h>
-#include <math.h>
 
 using namespace std;
 
@@ -111,8 +98,6 @@ namespace enigma_user
 	int draw_get_msaa_maxlevel(){return 0;}
 	bool draw_get_msaa_supported(){return false;}
 
-	extern int window_get_region_height_scaled();
-
 	int glsl_shader_create(int type){return -1;}
 	int glsl_shader_load(int id, string fname){return -1;}
 	bool glsl_shader_compile(int id){return false;}
@@ -136,11 +121,6 @@ namespace enigma_user
 	void shader_set_uniform_i(int location, int v0, int v1){}
 	void shader_set_uniform_i(int location, int v0, int v1, int v2){}
 	void shader_set_uniform_i(int location, int v0, int v1, int v2, int v3){}
-
-	extern int window_get_width();
-	extern int window_get_height();
-	extern int window_get_region_width();
-	extern int window_get_region_height();
 
 	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 
