@@ -17,22 +17,12 @@
 
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSscreen.h"
-#include "Graphics_Systems/General/GSbackground.h"
-#include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolors.h"
 
-#include "Universal_System/image_formats.h"
-#include "Universal_System/nlpo2.h"
-#include "Universal_System/Resources/background_internal.h"
-#include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/roomsystem.h"
 #include "Platforms/General/PFwindow.h"
 
-#include <string>
-#include <cstdio>
-
-using namespace std;
 using namespace enigma;
 using namespace enigma::dx11;
 
@@ -44,6 +34,25 @@ void scene_begin() {
 
 void scene_end() {
 
+}
+
+unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {
+  if (flipped) *flipped = false;
+
+  unsigned char* ret = new unsigned char[width*height*4];
+  return ret;
+}
+
+unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
+  DXGI_SWAP_CHAIN_DESC desc;
+  m_swapChain->GetDesc(&desc);
+
+  const int fw = desc.BufferDesc.Width,
+            fh = desc.BufferDesc.Height;
+
+  *fullwidth = fw, *fullheight = fh;
+
+  return graphics_copy_screen_pixels(0,0,fw,fh,flipped);
 }
 
 } // namespace enigma
@@ -70,35 +79,6 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   viewport.MaxDepth = 1.0f;
 
   m_deviceContext->RSSetViewports(1, &viewport);
-}
-
-int screen_save(string filename)
-{
-  draw_batch_flush(batch_flush_deferred);
-  return -1; //TODO: implement
-}
-
-int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h)
-{
-  draw_batch_flush(batch_flush_deferred);
-  return -1; //TODO: implement
-}
-
-int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
-{
-  return -1; //TODO: implement
-}
-
-int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
-  return -1; //TODO: implement
-}
-
-int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
-  return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
-}
-
-void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
-
 }
 
 } // namespace enigma_user

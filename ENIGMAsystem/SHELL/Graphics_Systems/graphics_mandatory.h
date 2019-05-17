@@ -33,6 +33,10 @@ namespace enigma
   /// Delete a texture's native peer data in the backend.
   void graphics_delete_texture(int tex);
 
+  /// Retrieve image data from back buffer, in unsigned char, BGRA format.
+  /// Flipped parameter is optional, but backend must provide it when nonzero.
+  unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped=nullptr);
+  unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped=nullptr);
   /// Retrieve image data from a texture, in unsigned char, BGRA format.
   /// This data will be allocated afresh; the pointer and data are yours to manipulate
   /// and must be freed once you are done.

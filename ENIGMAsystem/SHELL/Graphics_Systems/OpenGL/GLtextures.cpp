@@ -25,6 +25,8 @@
 
 #include <cstring> // for std::memcpy
 
+#include "Platforms/General/PFwindow.h"
+
 /*enum {
   //Formats and internal formats
   tx_rgba = GL_RGBA,

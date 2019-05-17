@@ -22,14 +22,6 @@
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
-#include "Universal_System/roomsystem.h"
-
-#include <vector>
-#include <math.h>
-#include <stdio.h>
-
-using std::vector;
-
 using namespace enigma::dx11;
 
 namespace enigma_user {
@@ -72,27 +64,6 @@ int draw_get_msaa_maxlevel()
 bool draw_get_msaa_supported()
 {
   return false; //TODO: implement
-}
-
-} // namespace enigma_user
-
-//#include <endian.h>
-//TODO: Though serprex, the author of the function below, never included endian.h,
-//   // Doing so is necessary for the function to work at its peak.
-//   // When ENIGMA generates configuration files, one should be included here.
-
-namespace enigma_user {
-
-int draw_getpixel(int x, int y)
-{
-  draw_batch_flush(batch_flush_deferred);
-  return 0; //TODO: implement
-}
-
-int draw_getpixel_ext(int x, int y)
-{
-  draw_batch_flush(batch_flush_deferred);
-  return 0; //TODO: implement
 }
 
 } // namespace enigma_user
