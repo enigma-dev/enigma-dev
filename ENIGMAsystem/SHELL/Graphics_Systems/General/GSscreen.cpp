@@ -27,11 +27,15 @@
 #include "GSvertex.h"
 #include "GScolors.h"
 
+#include "Universal_System/nlpo2.h"
+#include "Universal_System/image_formats.h"
 #include "Universal_System/Resources/background.h"
 #include "Universal_System/Object_Tiers/graphics_object.h"
 #include "Universal_System/depth_draw.h"
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
@@ -42,6 +46,23 @@
 using namespace enigma;
 using namespace enigma_user;
 using namespace std;
+
+namespace {
+
+bool clamp_view(int& x, int& y) {
+  if (view_enabled) {
+    x = x - enigma_user::view_xview[enigma_user::view_current];
+    y = y - enigma_user::view_yview[enigma_user::view_current];
+    if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return true;
+  } else {
+    if (x > enigma_user::room_width || y > enigma_user::room_height) return true;
+  }
+  if (x < 0) x = 0;
+  if (y < 0) y = 0;
+  return false;
+}
+
+} // namespace anonymous
 
 namespace enigma {
 
@@ -349,6 +370,103 @@ void screen_redraw()
   // GM8.1 manual specifies that screen_redraw should call screen_refresh
   // "The first function redraws the internal image and then refreshes the screen image."
   screen_refresh();
+}
+
+int screen_save(string filename) { //Assumes native integers are little endian
+  draw_batch_flush(batch_flush_deferred);
+
+  unsigned int fw = 0, fh = 0;
+  bool flipped = false;
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(&fw,&fh,&flipped);
+  int ret = image_save(filename, rgba, fw, fh, fw, fh, flipped);
+
+  delete[] rgba;
+  return ret;
+}
+
+int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) { //Assumes native integers are little endian
+  draw_batch_flush(batch_flush_deferred);
+
+  bool flipped = false;
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
+  int ret = image_save(filename, rgba, w, h, w, h, flipped);
+
+  delete[] rgba;
+  return ret;
+}
+
+int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  bool flipped = false;
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
+
+  if (flipped)
+    rgba = enigma::image_flip(rgba, w, h, 4);
+
+  enigma::backgroundstructarray_reallocate();
+  int bckid=enigma::background_idmax;
+  enigma::background_new(bckid, w, h, &rgba[0], removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
+  delete[] rgba;
+  enigma::background_idmax++;
+  return bckid;
+}
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
+  draw_batch_flush(batch_flush_deferred);
+
+  bool flipped = false;
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
+
+  if (flipped)
+    rgba = enigma::image_flip(rgba, w, h, 4);
+
+  enigma::spritestructarray_reallocate();
+  int sprid=enigma::sprite_idmax;
+  enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
+  enigma::sprite_set_subimage(sprid, 0, w, h, rgba, rgba, enigma::ct_precise); //TODO: Support toggling of precise.
+  delete[] rgba;
+  return sprid;
+}
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
+  return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
+}
+
+void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
+  draw_batch_flush(batch_flush_deferred);
+
+  bool flipped = false;
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
+
+  if (flipped)
+    rgba = enigma::image_flip(rgba, w, h, 4);
+
+  enigma::sprite_add_subimage(id, w, h, rgba, rgba, enigma::ct_precise); //TODO: Support toggling of precise.
+  delete[] rgba;
+}
+
+int draw_getpixel(int x,int y)
+{
+  if (clamp_view(x,y)) return 0;
+  draw_batch_flush(batch_flush_deferred);
+
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,1,1);
+  int ret = rgba[2] | rgba[1] << 8 | rgba[0] << 16;
+  delete[] rgba;
+  return ret;
+}
+
+int draw_getpixel_ext(int x,int y)
+{
+  if (clamp_view(x,y)) return 0;
+  draw_batch_flush(batch_flush_deferred);
+
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,1,1);
+  int ret = rgba[2] | rgba[1] << 8 | rgba[0] << 16 | rgba[3] << 24;
+  delete[] rgba;
+  return ret;
 }
 
 }

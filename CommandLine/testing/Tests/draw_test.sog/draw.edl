@@ -59,4 +59,22 @@ draw_sprite(spr2,0,0,25);
 draw_surface(surf_test,0,room_height-32);
 draw_sprite(surf_spr,0,32,room_height-32);
 draw_background(surf_back,0,room_height-64);
-draw_surface(surf_dup,32,room_height-64);
+var surf_dupx, surf_dupy;
+surf_dupx = 32;
+surf_dupy = room_height-64;
+draw_surface(surf_dup,surf_dupx,surf_dupy);
+
+// screen copy tests
+if (screen_spr == -1) {
+	// test reading screen pixels just once
+	gtest_expect_eq(draw_getpixel(surf_dupx+2,surf_dupy+2),c_red);
+	gtest_expect_eq(draw_getpixel(surf_dupx+2,surf_dupy+10),c_green);
+	gtest_expect_eq(draw_getpixel(surf_dupx+16,surf_dupy+16),c_blue);
+
+	screen_spr = sprite_create_from_screen(0,room_height-64,32,32,false,false,false,0,0);
+}
+if (screen_bkg == -1) {
+	screen_bkg = background_create_from_screen(0,room_height-32,32,32,false,false);
+}
+draw_sprite(screen_spr,0,64,room_height-64);
+draw_background(screen_bkg,64,room_height-32);

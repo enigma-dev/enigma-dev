@@ -55,14 +55,7 @@ namespace enigma_user
 	int draw_get_msaa_maxlevel();
 	bool draw_get_msaa_supported();
 
-	int draw_getpixel(int x,int y);
-	int draw_getpixel_ext(int x,int y);
-
 	extern int window_get_region_height_scaled();
-
-	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig);
-	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig);
-	void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth);
 
 	void shader_set(int id);
 	void shader_reset();
@@ -82,15 +75,10 @@ namespace enigma_user
 	extern int window_get_region_width();
 	extern int window_get_region_height();
 
-	int screen_save(string filename);
-	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h);
 	unsigned int display_get_gui_width();
 	unsigned int display_get_gui_height();
 
 	void draw_clear_alpha(int col,float alpha);
 	void draw_clear(int col);
-
-	extern int window_get_region_height_scaled();
-	int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload);
 }
 #endif
