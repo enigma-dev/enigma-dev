@@ -27,14 +27,23 @@ using namespace enigma::dx9;
 
 namespace {
 
-void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest, const RECT& rect) {
+void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest, const RECT& rect, bool& subsurf) {
   D3DSURFACE_DESC desc;
   (*src)->GetDesc(&desc);
 
-  const int width = rect.right-rect.left, height = rect.bottom-rect.top;
+  const unsigned int width = rect.right-rect.left, height = rect.bottom-rect.top;
 
-  d3ddev->CreateRenderTarget(width, height, desc.Format, D3DMULTISAMPLE_NONE, 0, true, dest, NULL);
-  d3ddev->StretchRect(*src, &rect, *dest, NULL, D3DTEXF_NONE);
+  // lockable render target is only faster when requested area is less than half of total area
+  // this should make sense intuitively since the lockable render target will have to copy twice
+  if (width*height < (desc.Width*desc.Height)/2) {
+    subsurf = true;
+    d3ddev->CreateRenderTarget(width, height, desc.Format, D3DMULTISAMPLE_NONE, 0, true, dest, NULL);
+    d3ddev->StretchRect(*src, &rect, *dest, NULL, D3DTEXF_NONE);
+  } else {
+    subsurf = false;
+    d3ddev->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, dest, NULL);
+    d3ddev->GetRenderTargetData(*src, *dest);
+  }
 }
 
 unsigned char* surface_copy_pixels(LPDIRECT3DSURFACE9 pBuffer, int x, int y, int width, int height) {
@@ -42,19 +51,21 @@ unsigned char* surface_copy_pixels(LPDIRECT3DSURFACE9 pBuffer, int x, int y, int
 
   RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
 
+  bool subsurf = false;
+
   // copy render target textures to system memory first
   // use system memory copy to read pixel data
   D3DSURFACE_DESC desc;
   pBuffer->GetDesc(&desc);
   if (desc.Usage == D3DUSAGE_RENDERTARGET && desc.Pool == D3DPOOL_DEFAULT) {
-    surface_copy_to_ram(&pBuffer,&pRamBuffer,rect);
+    surface_copy_to_ram(&pBuffer,&pRamBuffer,rect,subsurf);
     pBuffer = pRamBuffer;
   }
 
   unsigned char* ret = new unsigned char[width*height*4];
 
   D3DLOCKED_RECT lock;
-  pBuffer->LockRect(&lock, (pBuffer==pRamBuffer)?NULL:&rect, D3DLOCK_READONLY);
+  pBuffer->LockRect(&lock, subsurf?NULL:&rect, D3DLOCK_READONLY);
   for (int i = 0; i < height; ++i) {
     memcpy((void*)((intptr_t)ret + i * width * 4), (void*)((intptr_t)lock.pBits + i * lock.Pitch), width * 4);
   }
