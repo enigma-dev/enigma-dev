@@ -89,8 +89,6 @@ unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, 
 }
 
 unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
-  if (flipped) *flipped = false;
-
   LPDIRECT3DSURFACE9 pBackBuffer;
   d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
   D3DSURFACE_DESC desc;
@@ -98,8 +96,7 @@ unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullhe
 
   const int fw = desc.Width, fh = desc.Height;
 
-  *fullwidth = fw;
-  *fullheight = fh;
+  *fullwidth = fw, *fullheight = fh;
   return graphics_copy_screen_pixels(0,0,fw,fh,flipped);
 }
 

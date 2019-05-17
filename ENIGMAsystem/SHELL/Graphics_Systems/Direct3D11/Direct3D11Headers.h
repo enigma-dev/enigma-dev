@@ -24,6 +24,7 @@ namespace enigma {
 
 namespace dx11 {
 
+extern IDXGISwapChain* m_swapChain;
 extern ID3D11Device* m_device;
 extern ID3D11DeviceContext* m_deviceContext;
 extern ID3D11RenderTargetView* m_renderTargetView;

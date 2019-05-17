@@ -37,11 +37,22 @@ void scene_end() {
 }
 
 unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {
-  return nullptr;
+  if (flipped) *flipped = false;
+
+  unsigned char* ret = new unsigned char[width*height*4];
+  return ret;
 }
 
 unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
-  return nullptr;
+  DXGI_SWAP_CHAIN_DESC desc;
+  m_swapChain->GetDesc(&desc);
+
+  const int fw = desc.BufferDesc.Width,
+            fh = desc.BufferDesc.Height;
+
+  *fullwidth = fw, *fullheight = fh;
+
+  return graphics_copy_screen_pixels(0,0,fw,fh,flipped);
 }
 
 } // namespace enigma
