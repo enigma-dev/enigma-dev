@@ -53,11 +53,10 @@ unsigned char* surface_copy_pixels(LPDIRECT3DSURFACE9 pBuffer, int x, int y, int
 
   bool subsurf = false;
 
-  // copy render target textures to system memory first
-  // use system memory copy to read pixel data
+  // use system memory surface to copy texture
   D3DSURFACE_DESC desc;
   pBuffer->GetDesc(&desc);
-  if (desc.Usage == D3DUSAGE_RENDERTARGET && desc.Pool == D3DPOOL_DEFAULT) {
+  if (desc.Pool == D3DPOOL_DEFAULT) {
     surface_copy_to_ram(&pBuffer,&pRamBuffer,rect,subsurf);
     pBuffer = pRamBuffer;
   }
@@ -111,26 +110,10 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
 {
   LPDIRECT3DTEXTURE9 texture = NULL;
 
-  DWORD usage = Direct3D9Managed ? 0 : D3DUSAGE_DYNAMIC;
-  if (mipmap) usage |= D3DUSAGE_AUTOGENMIPMAP;
+  DWORD usage = mipmap?D3DUSAGE_AUTOGENMIPMAP:0;
   d3ddev->CreateTexture(fullwidth, fullheight, 1, usage, D3DFMT_A8R8G8B8, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &texture, 0);
 
-  if (pxdata != nullptr) {
-    D3DLOCKED_RECT rect;
-    texture->LockRect(0, &rect, NULL, D3DLOCK_DISCARD);
-    // we have to respect the pitch returned by the lock because some GPU's
-    // have exhibited a minimum pitch size for small textures
-    // (e.g, 8x8 and 16x16 texture both have 64 pitch when created in the default pool)
-    // NOTE: sometime soon we must finally do texture paging...
-    for (size_t i = 0; i < height; ++i) {
-      memcpy((void*)((intptr_t)rect.pBits + i * rect.Pitch), (void*)((intptr_t)pxdata + i * fullwidth * 4), width * 4);
-    }
-    texture->UnlockRect(0);
-  }
-
-  if (mipmap) {
-    texture->GenerateMipSubLevels();
-  }
+  if (mipmap) texture->GenerateMipSubLevels();
 
   DX9Texture* textureStruct = new DX9Texture(texture);
   textureStruct->width = width;
@@ -139,6 +122,7 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   textureStruct->fullheight = fullheight;
   const int id = textures.size();
   textures.push_back(textureStruct);
+  if (pxdata != nullptr) graphics_push_texture_pixels(id, width, height, (unsigned char*)pxdata);
   return id;
 }
 
@@ -169,16 +153,16 @@ void graphics_push_texture_pixels(int texture, int x, int y, int width, int heig
   LPDIRECT3DSURFACE9 pBuffer,pRamBuffer=nullptr;
   peer->GetSurfaceLevel(0,&pBuffer);
 
-  // use system memory surface to update render target texture
+  // use system memory surface to update texture
   D3DSURFACE_DESC desc;
   pBuffer->GetDesc(&desc);
-  if (desc.Usage == D3DUSAGE_RENDERTARGET) {
+  if (desc.Pool == D3DPOOL_DEFAULT) {
     d3ddev->CreateOffscreenPlainSurface(width, height, desc.Format, D3DPOOL_SYSTEMMEM, &pRamBuffer, NULL);
   }
 
   RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
   D3DLOCKED_RECT lock;
-  (pRamBuffer?pRamBuffer:pBuffer)->LockRect(&lock, pRamBuffer?NULL:&rect, 0);
+  (pRamBuffer?pRamBuffer:pBuffer)->LockRect(&lock, pRamBuffer?NULL:&rect, D3DLOCK_DISCARD);
   for (int i = 0; i < height; ++i) {
     memcpy((void*)((intptr_t)lock.pBits + i * lock.Pitch), (void*)((intptr_t)pxdata + i * width * 4), width * 4);
   }
