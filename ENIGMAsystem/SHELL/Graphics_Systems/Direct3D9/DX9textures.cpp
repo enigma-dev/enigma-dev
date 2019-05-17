@@ -37,9 +37,60 @@ void surface_copy_to_ram(IDirect3DSurface9 **src, IDirect3DSurface9 **dest) {
   d3ddev->GetRenderTargetData(*src, *dest);
 }
 
+unsigned char* surface_copy_pixels(LPDIRECT3DSURFACE9 pBuffer, int x, int y, int width, int height) {
+  LPDIRECT3DSURFACE9 pRamBuffer=nullptr;
+
+  // copy render target textures to system memory first
+  // use system memory copy to read pixel data
+  D3DSURFACE_DESC desc;
+  pBuffer->GetDesc(&desc);
+  if (desc.Usage == D3DUSAGE_RENDERTARGET) {
+    surface_copy_to_ram(&pBuffer,&pRamBuffer);
+    pBuffer = pRamBuffer;
+  }
+
+  unsigned char* ret = new unsigned char[width*height*4];
+
+  RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
+  D3DLOCKED_RECT lock;
+  pBuffer->LockRect(&lock, &rect, D3DLOCK_READONLY);
+  for (int i = 0; i < height; ++i) {
+    memcpy((void*)((intptr_t)ret + i * width * 4), (void*)((intptr_t)lock.pBits + i * lock.Pitch), width * 4);
+  }
+  pBuffer->UnlockRect();
+
+  if (pRamBuffer) pRamBuffer->Release();
+
+  return ret;
+}
+
 } // namespace anonymous
 
 namespace enigma {
+
+unsigned char* graphics_copy_back_buffer_pixels(int x, int y, int width, int height, bool* flipped) {
+  if (flipped) *flipped = false;
+
+	LPDIRECT3DSURFACE9 pBackBuffer;
+  d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+
+  return surface_copy_pixels(pBackBuffer, x, y, width, height);
+}
+
+unsigned char* graphics_copy_back_buffer_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
+  if (flipped) *flipped = false;
+
+  LPDIRECT3DSURFACE9 pBackBuffer;
+  d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+  D3DSURFACE_DESC desc;
+  pBackBuffer->GetDesc(&desc);
+
+  const int fw = desc.Width, fh = desc.Height;
+
+  *fullwidth = fw;
+  *fullheight = fh;
+  return graphics_copy_back_buffer_pixels(0,0,fw,fh,flipped);
+}
 
 LPDIRECT3DTEXTURE9 get_texture_peer(int texid) {
   return (size_t(texid) >= textures.size() || texid < 0) ? NULL : ((DX9Texture*)textures[texid])->peer;
@@ -88,32 +139,9 @@ void graphics_delete_texture(int texid) {
 unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {
   auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
   auto peer = d3dtex->peer;
-
-  LPDIRECT3DSURFACE9 pBuffer,pRamBuffer=nullptr;
+  LPDIRECT3DSURFACE9 pBuffer;
   peer->GetSurfaceLevel(0,&pBuffer);
-
-  // copy render target textures to system memory first
-  // use system memory copy to read pixel data
-  D3DSURFACE_DESC desc;
-  pBuffer->GetDesc(&desc);
-  if (desc.Usage == D3DUSAGE_RENDERTARGET) {
-    surface_copy_to_ram(&pBuffer,&pRamBuffer);
-    pBuffer = pRamBuffer;
-  }
-
-  unsigned char* ret = new unsigned char[width*height*4];
-
-  RECT rect = {(LONG)x, (LONG)y, (LONG)(x+width), (LONG)(y+height)};
-  D3DLOCKED_RECT lock;
-  pBuffer->LockRect(&lock, &rect, D3DLOCK_READONLY);
-  for (int i = 0; i < height; ++i) {
-    memcpy((void*)((intptr_t)ret + i * width * 4), (void*)((intptr_t)lock.pBits + i * lock.Pitch), width * 4);
-  }
-  pBuffer->UnlockRect();
-
-  if (pRamBuffer) pRamBuffer->Release();
-
-  return ret;
+  return surface_copy_pixels(pBuffer, x, y, width, height);
 }
 
 unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {

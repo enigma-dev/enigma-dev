@@ -36,6 +36,14 @@ void scene_end() {
 
 }
 
+unsigned char* graphics_copy_back_buffer_pixels(int x, int y, int width, int height, bool* flipped) {
+  return nullptr;
+}
+
+unsigned char* graphics_copy_back_buffer_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
+  return nullptr;
+}
+
 } // namespace enigma
 
 namespace enigma_user {
