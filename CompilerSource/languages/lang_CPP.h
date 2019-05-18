@@ -31,7 +31,7 @@ struct lang_CPP: language_adapter {
   jdi::context definitions;
 
   /// The ENIGMA namespace.
-  jdi::definition_scope *namespace_enigma;
+  jdi::definition_scope *namespace_enigma, *namespace_enigma_user;
   jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
 
   // Utility
@@ -73,12 +73,11 @@ struct lang_CPP: language_adapter {
   /// Look up a type by its name.
   jdi::definition* find_typename(string name);
 
+  // Returns whether the given definition is a function accepting `enigma::varargs`.
+  virtual bool is_variadic_function(jdi::definition *d);
   // Returns the index at which a function parameters ref_stack is variadic;
-  // that is, at which position it accepts `enigma::varargs`.
-  int referencers_varargs_at(jdi::ref_stack &refs);
-  bool referencers_varargs(jdi::ref_stack &refs) {
-    return referencers_varargs_at(refs) != -1;
-  }
+  // that is, at which argument position it accepts `enigma::varargs`.
+  virtual int function_variadic_after(jdi::definition_function *func);
 
   /// Check whether the given definition is callable as a function.
   bool definition_is_function(jdi::definition *d);
@@ -92,6 +91,8 @@ struct lang_CPP: language_adapter {
   void quickmember_integer(jdi::definition_scope* scope, string name) {
     return quickmember_variable(scope, jdi::builtin_type__int, name);
   }
+  /// Look up an enigma_user definition by its name.
+  jdi::definition* look_up(const string &name);
 
   virtual ~lang_CPP();
 

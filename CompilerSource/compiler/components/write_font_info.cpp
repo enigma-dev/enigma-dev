@@ -26,32 +26,35 @@
 \********************************************************************************/
 
 #include "makedir.h"
+
+#include "backend/GameData.h"
+#include "compiler/compile_common.h"
+#include "languages/lang_CPP.h"
+
 #include <cstdio>
 #include <fstream>
-#include "backend/GameData.h"
 #include <string>
+#include <vector>
+
 using namespace std;
-#include "compiler/compile_common.h"
 
-
-#include "languages/lang_CPP.h"
 int lang_CPP::compile_writeFontInfo(const GameData &game)
 {
   ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h").c_str(),ios_base::out);
-  wto << license << "#include \"Universal_System/fonts_internal.h\"" << endl
+  wto << license << "#include \"Universal_System/Resources/fonts_internal.h\"" << endl
       << endl;
 
   int maxid = -1, rawfontcount = 0;
   wto << "namespace enigma {" << endl;
-  wto << "  rawfont rawfontdata[] = {" << endl;
+  wto << "  std::vector<rawfont> rawfontdata = {" << endl;
   for (const auto &font : game.fonts) {
     wto << "    {\""
         << font.name        << "\", "     // string name;
-        << font.id()        << ", \""     // int id;
-        << font.font_name() << "\", "     // string fontName;
-        << font.size()      << ", "       // int size;
-        << font.bold()      << ", "       // bool bold;
-        << font.italic()    << ", "       // bool italic;
+        << font->id()        << ", \""    // int id;
+        << font->font_name() << "\", "    // string fontName;
+        << font->size()      << ", "      // int size;
+        << font->bold()      << ", "      // bool bold;
+        << font->italic()    << ", "      // bool italic;
         << font.normalized_ranges.size()  // int glyphRangeCount;
         << "}," << endl;
 

@@ -26,8 +26,8 @@ using std::map;
 #include "../General/PFwindow.h"
 
 #include "Platforms/General/PFmain.h" // For those damn vk_ constants.
-#include "Universal_System/instance_system.h"
-#include "Universal_System/instance.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Instances/instance.h"
 
 #include "Platforms/platforms_mandatory.h"
 
@@ -62,7 +62,7 @@ namespace enigma
   static short hdeltadelta = 0, vdeltadelta = 0;
   static int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
 
-  LRESULT CALLBACK (*touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
+  LRESULT (CALLBACK *touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
   void (*WindowResizedCallback)();
 
   LRESULT CALLBACK WndProc (HWND hWndParameter, UINT message,WPARAM wParam, LPARAM lParam)

@@ -16,19 +16,22 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#define NOMINMAX // for windows.h because we use std::min/max
 #include "WINDOWSmain.h"
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 
+#include "Universal_System/mathnc.h" // enigma_user::clamp
 #include "Universal_System/estring.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
 #include <mmsystem.h>
 #include <time.h>
-#include <unistd.h>
+#include <chrono>
+#include <thread>
 #include <algorithm>
 #include <cstdio>
 #include <sstream>
@@ -63,14 +66,14 @@ HWND get_window_handle() {
 }
 
 } // namespace enigma
-  
+
 static inline string add_slash(const string& dir) {
   if (dir.empty() || dir.back() != '\\') return dir + '\\';
   return dir;
 }
 
 namespace enigma_user {
-  
+
 bool set_working_directory(string dname) {
   tstring tstr_dname = widen(dname);
   replace(tstr_dname.begin(), tstr_dname.end(), '/', '\\');
@@ -84,7 +87,7 @@ bool set_working_directory(string dname) {
 
   return false;
 }
-  
+
 } // enigma_user
 
 namespace enigma {
@@ -125,17 +128,17 @@ void update_current_time() {
 }
 long get_current_offset_difference_mcs() {
   if (use_pc) {
-    return clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0, 1000000);
+    return enigma_user::clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0, 1000000);
   } else {
-    return clamp((time_current_ft.QuadPart - time_offset_ft.QuadPart) / 10, 0, 1000000);
+    return enigma_user::clamp((time_current_ft.QuadPart - time_offset_ft.QuadPart) / 10, 0, 1000000);
   }
 }
 long get_current_offset_slowing_difference_mcs() {
   if (use_pc) {
-    return clamp((time_current_pc.QuadPart - time_offset_slowing_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0,
+    return enigma_user::clamp((time_current_pc.QuadPart - time_offset_slowing_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0,
                  1000000);
   } else {
-    return clamp((time_current_ft.QuadPart - time_offset_slowing_ft.QuadPart) / 10, 0, 1000000);
+    return enigma_user::clamp((time_current_ft.QuadPart - time_offset_slowing_ft.QuadPart) / 10, 0, 1000000);
   }
 }
 void increase_offset_slowing(long increase_mcs) {
@@ -270,7 +273,7 @@ int updateTimer() {
     }
     if (remaining_mcs > needed_mcs) {
       const long sleeping_time = std::min((remaining_mcs - needed_mcs) / 5, long(999999));
-      usleep(std::max(long(1), sleeping_time));
+      std::this_thread::sleep_for(std::chrono::microseconds(std::max(long(1), sleeping_time)));
       return -1;
     }
   }
@@ -323,7 +326,7 @@ void initialize_directory_globals() {
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
     enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
-  
+
   // Set the temp_directory
   buffer[0] = 0;
   GetTempPathW(MAX_PATH + 1, buffer);

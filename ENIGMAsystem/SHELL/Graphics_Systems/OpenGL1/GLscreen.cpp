@@ -1,4 +1,6 @@
-/** Copyright (C) 2008-2014 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2014 Josh Ventura
+*** Copyright (C) 2010-2013 Alasdair Morrison
+*** Copyright (C) 2013-2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,29 +18,19 @@
 **/
 
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL/GLscreen.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSscreen.h"
-#include "Graphics_Systems/General/GStextures.h"
-#include "Graphics_Systems/General/GSd3d.h"
 #include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GScolors.h"
 
-#include "Universal_System/image_formats.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include "Platforms/General/PFwindow.h"
 
-#include <string>
-#include <cstdio>
-
-using namespace std;
 using namespace enigma;
 
-namespace enigma
-{
+namespace enigma {
 
-extern GLuint msaa_fbo;
 unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
 int viewport_x, viewport_y, viewport_w, viewport_h; //These are used by surfaces, to set back the viewport
 
@@ -47,93 +39,39 @@ void scene_begin() {
 }
 
 void scene_end() {
-
+	msaa_fbo_blit();
 }
 
+unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {
+  if (flipped) *flipped = true;
+
+  const int bpp = 4; // bytes per pixel
+  const int topY = enigma_user::window_get_region_height_scaled()-height-y;
+  unsigned char* pxdata = new unsigned char[width*height*bpp];
+
+  GLint prevFbo;
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+  glPixelStorei(GL_PACK_ALIGNMENT, 1);
+  glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+  glReadPixels(x,topY,width,height,GL_BGRA,GL_UNSIGNED_BYTE,pxdata);
+  glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
+  return pxdata;
 }
 
-namespace enigma_user
-{
+unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
+  if (flipped) *flipped = true;
 
-void screen_init()
-{
-  enigma::gui_width = window_get_region_width();
-  enigma::gui_height = window_get_region_height();
+  const int fw = enigma_user::window_get_region_width_scaled(),
+            fh = enigma_user::window_get_region_height_scaled();
 
-  glClearColor(0,0,0,0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  if (!view_enabled)
-  {
-    glClearColor(0,0,0,0);
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
-  } else {
-    for (view_current = 0; view_current < 7; view_current++)
-    {
-      if (view_visible[(int)view_current])
-      {
-        int vc = (int)view_current;
-
-        glClearColor(0,0,0,0);
-
-        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
-        d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
-        break;
-      }
-    }
-  }
-
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_CULL_FACE);
-  glEnable(GL_BLEND);
-  glEnable(GL_SCISSOR_TEST);
-  glEnable(GL_TEXTURE_2D);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glAlphaFunc(GL_GREATER,0);
-  texture_reset();
-  draw_set_color(c_white);
+  *fullwidth = fw;
+  *fullheight = fh;
+  return graphics_copy_screen_pixels(0,0,fw,fh,flipped);
 }
 
-int screen_save(string filename) { //Assumes native integers are little endian
-  draw_batch_flush(batch_flush_deferred);
+} // namespace enigma
 
-	unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
-	string ext = enigma::image_get_format(filename);
-
-	unsigned char *rgbdata = new unsigned char[sz*4];
-	GLint prevFbo;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
- 	glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-	glReadPixels(0,0,w,h, GL_BGRA, GL_UNSIGNED_BYTE, rgbdata);
-	glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
-
-	int ret = image_save(filename, rgbdata, w, h, w, h, false);
-
-	delete[] rgbdata;
-	return ret;
-}
-
-int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) { //Assumes native integers are little endian
-  draw_batch_flush(batch_flush_deferred);
-
-	unsigned sz = w*h;
-	string ext = enigma::image_get_format(filename);
-
-	unsigned char *rgbdata = new unsigned char[sz*4];
-	GLint prevFbo;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
- 	glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-	glReadPixels(x,window_get_region_height_scaled()-h-y,w,h, GL_BGRA, GL_UNSIGNED_BYTE, rgbdata);
-	glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
-
-	int ret = image_save(filename, rgbdata, w, h, w, h, false);
-
-	delete[] rgbdata;
-	return ret;
-}
+namespace enigma_user {
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
   draw_batch_flush(batch_flush_deferred);
@@ -155,10 +93,4 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   glScissor(viewport_x, viewport_y, viewport_w, viewport_h);
 }
 
-//TODO: These need to be in some kind of General
-void display_set_gui_size(unsigned int width, unsigned int height) {
-	enigma::gui_width = width;
-	enigma::gui_height = height;
-}
-
-}
+} // namespace enigma_user

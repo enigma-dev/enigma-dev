@@ -4,7 +4,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -20,42 +20,68 @@
 **/
 
 #include <cstdio>
-#include <Parser/bodies.h>
+#include <Parser/context_parser.h>
 #include <API/compile_settings.h>
 
-
 using namespace jdip;
-#define alloc_class() new definition_class(classname,scope, DEF_CLASS | DEF_TYPENAME | inherited_flags)
-static inline definition_class* insnew(definition_scope *const &scope, int inherited_flags, const string& classname, const token_t &token, error_handler* const& herr, context *ct) {
-  definition_class* nclass = NULL;
-  decpair dins = scope->declare(classname);
-  if (!dins.inserted) {
-    if (dins.def->flags & DEF_TYPENAME) { // This error is displayed because if the class existed earlier when we were checking, we'd have gotten a different token.
-      token.report_error(herr, "Class `" + classname + "' instantiated inadvertently during parse by another thread. Freeing.");
-      delete ~dins.def;
+
+#define def_kind class
+#define DEF_FLAG DEF_CLASS
+#include <Parser/cclass_base.h>
+#include <System/builtins.h>
+
+int jdip::context_parser::handle_class_inheritance(definition_scope *scope, token_t& token, definition_class *recipient, unsigned default_protection) {
+  do {
+    unsigned iprotection = default_protection; //, ivirtuality = 0; TODO: mark inheritance as virtual
+    token = read_next_token(scope);
+    if (token.type == TT_DECFLAG && ((typeflag*)token.def)->flagbit == builtin_flag__virtual) {
+      token = read_next_token(scope);
     }
-    else {
-      dins = ct->declare_c_struct(classname);
-      if (dins.inserted)
-        goto my_else;
-      if (dins.def->flags & DEF_CLASS)
-        nclass = (definition_class*)dins.def;
+    if (token.type == TT_PUBLIC)
+      iprotection = 0,
+      token = read_next_token(scope);
+    else if (token.type == TT_PRIVATE)
+      iprotection = DEF_PRIVATE,
+      token = read_next_token(scope);
+    else if (token.type == TT_PROTECTED)
+      iprotection = DEF_PRIVATE,
+      token = read_next_token(scope);
+    if (token.type != TT_DECLARATOR and token.type != TT_DEFINITION) {
+      string err = "Ancestor class name expected";
+      if (token.type == TT_DECLARATOR) err += "; `" + token.def->name + "' does not name a class";
+      if (token.type == TT_IDENTIFIER) err += "; `" + token.content.toString() + "' does not name a type";
+      token.report_error(herr, err);
+      return 1;
+    }
+    full_type ft = read_type(token, scope);
+    if (!ft.def) {
+      token.report_errorf(herr, "Expected class name to inherit before %s");
+      return 1;
+    }
+    ft.reduce();
+    if (ft.refs.size())
+      token.report_warning(herr, "Extra qualifications in `" + ft.toString() + "' for ancestor class discarded");
+    if (not(ft.def->flags & DEF_CLASS)) {
+      if (ft.def->flags & DEF_TEMPPARAM) {
+        definition_tempparam *tp = (definition_tempparam*)ft.def;
+        tp->must_be_class = true;
+      }
+      else if (ft.def->flags & DEF_HYPOTHETICAL) {
+        definition_hypothetical *tp = (definition_hypothetical*)ft.def;
+        tp->required_flags |= DEF_CLASS;
+      }
       else {
-        #if FATAL_ERRORS
-          return NULL;
-        #else
-          delete ~dins.def;
-          goto my_else;
-        #endif
+        token.report_errorf(herr, "Expected class name to inherit before %s");
+        return 1;
       }
     }
-  } else { my_else:
-    dins.def = nclass = alloc_class();
+    recipient->ancestors.push_back(definition_class::ancestor(iprotection, (definition_class*)ft.def));
   }
-  return nclass;
+  while (token.type == TT_COMMA);
+  
+  return 0;
 }
 
-static unsigned anon_count = 1;
 jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scope, token_t& token, int inherited_flags)
 {
   unsigned protection = 0;
@@ -82,198 +108,27 @@ jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scop
   // Non-NULL  True               False           Complete class in this scope. MUST be used as a type, not implemented.
   // Non-NULL  True               True            Complete class in another scope; can be redeclared (reallocated and reimplemented) in this scope.
   
-  definition *dulldef = NULL;
-  if (token.type == TT_IDENTIFIER) {
-    classname = token.content.toString();
-    token = read_next_token(scope);
-  }
-  else if (token.type == TT_DEFINITION) {
-    classname = token.content.toString();
-    dulldef = token.def;
-    token = read_next_token(scope);
-  }
-  else if (token.type == TT_DECLARATOR) {
-    nclass = (jdi::definition_class*)token.def;
-    classname = nclass->name;
-    if (not(nclass->flags & DEF_CLASS)) {
-      if (nclass->parent == scope) {
-        pair<definition_scope::defiter, bool> dins = c_structs.insert(pair<string,definition*>(classname, NULL));
-        if (dins.second)
-          dins.first->second = nclass = alloc_class();
-        else {
-          if (dins.first->second->flags & DEF_CLASS)
-            nclass = (definition_class*)dins.first->second;
-          else {
-            token.report_error(herr, "Attempt to redeclare `" + classname + "' as class in this scope");
-            FATAL_RETURN(NULL);
-          }
-        }
-      }
-      else
-        nclass = NULL;
-    }
-    else {
-      will_redeclare = nclass->parent != scope;
-      already_complete = not(nclass->flags & DEF_INCOMPLETE);
-    }
-    token = read_next_token(scope);
-  }
-  else {
-    char buf[32];
-    sprintf(buf, "<anonymousClass%08d>", anon_count++);
-    classname = buf; // I love std::string. Even if I'm lazy for it.
-  }
-  
-  // Handle template access and specialization **before** we go allocating classes.
-  if (token.type == TT_LESSTHAN)
-  {
-    // We'd better have read a definition earlier, and it'd better have been a template.
-    if (not(dulldef and (dulldef->flags & DEF_TEMPLATE))) {
-      token.report_error(herr, "Unexpected '<' token; `" + classname + "' is not a template type");
-      //cerr << dulldef << ": " << (dulldef? dulldef->name : "no definition by that name") << endl;
-      return NULL;
-    }
-    // Now, we might be specializing the template, or we might just be instantiating it.
-    // If we are in a template<> statement, we have to be specializing. Otherwise, we're not.
-    if (scope->flags & DEF_TEMPSCOPE) {
-      definition_template *temp = (definition_template*)dulldef;
-      definition_tempscope *ts = (definition_tempscope*)scope;
-      arg_key k(temp->params.size());
-      if (read_template_parameters(k, temp, lex, token, scope, this, herr))
-        return NULL;
-      if (token.type != TT_GREATERTHAN) {
-        token.report_errorf(herr, "Expected closing triangle bracket here before %s");
-        FATAL_RETURN(NULL);
-      }
-      definition_template *spec = temp->specialize(k, ts);
-      if (spec->def) {
-        if (not(spec->def->flags & DEF_CLASS)) {
-          token.report_error(herr, "Template `" + temp->name + "' does not name a class");
-          return NULL;
-        }
-        nclass = (definition_class*)spec->def;
-        nclass->parent = ts;
-        already_complete = not(nclass->flags & DEF_INCOMPLETE);
-      }
-      else {
-        spec->def = nclass = new definition_class(temp->name, ts, temp->def->flags);
-        already_complete = false;
-      }
-      will_redeclare = false;
-      token = read_next_token(scope);
-    }
-  }
-  else if (dulldef)
-  {
-    definition_scope *nts = scope; // Find a non-tempscope scope
-    while (nts and nts->flags & DEF_TEMPSCOPE)
-      nts = nts->parent;
-    if (dulldef->parent == nts)
-    {
-      if (dulldef->flags & DEF_TEMPLATE)
-      {
-        definition_template* temp = (definition_template*)dulldef; // temp = existing template
-        if (temp->def->flags & DEF_CLASS) { // If the existing template is indeed a class
-          nclass = (definition_class*)temp->def; // Set our class, nclass, to the existing class
-          if (scope->flags & DEF_TEMPSCOPE) { // If that scope is a tempscope,
-            ((definition_tempscope*)scope)->referenced = true; // Denote that we've referenced it,
-            
-            if (temp->params.size() != scope->using_general.size()) { // Make sure our parameter counts are the same
-              token.report_error(herr, "Template parameter mismatch in class definition");
-              scope->using_general.clear();
-            }
-            else {
-              scope->using_general.clear(); // Drop anything we might still be referring to before we toast this bitch
-              definition_template *const ntemp = (definition_template*)((definition_tempscope*)scope)->source;
-              for (size_t i = 0; i < temp->params.size(); ++i) // Replace what we've dropped with the old, likely-to-be-referenced stuff
-                scope->use_general(ntemp->params[i]->name, temp->params[i]);
-            }
-            
-            nclass->parent = scope; // Make sure it can actually use this scope's using scope
-            delete ((definition_tempscope*)scope)->source; // But instead of actually referencing it, just delete it
-            ((definition_tempscope*)scope)->source = temp; // Replace it with our existing one
-            // Be advised that this entire process is to prevent leaks while avoiding the possibility
-            // of deleting a class that is already pointed to by other classes; this is why we delete
-            // our new class rather than merging the old one into it and deleting the old.
-          }
-        }
-        else {
-          token.report_error(herr, "Cannot redeclare template `" + dulldef->name + "' as class in this scope");
-          return NULL;
-        }
-      }
-      else {
-        token.report_error(herr, "Cannot redeclare `" + dulldef->name + "' as class in this scope");
-        return NULL;
-      }
-    }
-  }
+  if (get_location(nclass, will_redeclare, already_complete, token, classname, scope, this, herr))
+    return NULL;
   
   if (!nclass)
-    if (not(nclass = insnew(scope,inherited_flags,classname,token,herr,this)))
+    if (not(nclass = insnew(scope,inherited_flags,classname,token,herr)))
       return NULL;
   
   // Handle inheritance
   if (token.type == TT_COLON) {
     if (will_redeclare) {
       will_redeclare = false;
-      if (not(nclass = insnew(scope,inherited_flags,classname,token,herr,this)))
+      if (not(nclass = insnew(scope,inherited_flags,classname,token,herr)))
         return NULL;
     }
     else if (already_complete) {
       token.report_error(herr, "Attempting to add ancestors to previously defined class `" + classname + "'");
     }
     incomplete = 0;
-    do {
-      unsigned iprotection = protection;
-      token = read_next_token(scope);
-      if (token.type == TT_PUBLIC)
-        iprotection = 0,
-        token = read_next_token(scope);
-      else if (token.type == TT_PRIVATE)
-        iprotection = DEF_PRIVATE,
-        token = read_next_token(scope);
-      else if (token.type == TT_PROTECTED)
-        iprotection = DEF_PRIVATE,
-        token = read_next_token(scope);
-      if (token.type != TT_DECLARATOR and token.type != TT_DEFINITION) {
-        string err = "Ancestor class name expected";
-        if (token.type == TT_DECLARATOR) err += "; `" + token.def->name + "' does not name a class";
-        if (token.type == TT_IDENTIFIER) err += "; `" + token.content.toString() + "' does not name a type";
-        token.report_error(herr, err);
-        return NULL;
-      }
-      full_type ft = read_type(lex, token, scope, this, herr);
-      if (!ft.def) {
-        token.report_errorf(herr, "Expected class name before %s");
-        return NULL;
-      }
-      if (not(ft.def->flags & DEF_CLASS)) {
-        if (ft.def->flags & DEF_TYPENAME) {
-          definition* def = scope;
-          while (def and ~def->flags & DEF_TEMPSCOPE) def = def->parent;
-          if (!def) {
-            token.report_error(herr, "Invalid use of `typename'");
-            return NULL;
-          }
-          else {
-            definition_hypothetical *h = new definition_hypothetical(ft.def->name, ft.def->parent, ft.def->flags, new AST(ft.def));
-            ((definition_template*)((definition_tempscope*)def)->source)->dependents.push_back(h);
-            ft.def = h;
-          }
-        }
-        else {
-          token.report_errorf(herr, "Expected class name before %s");
-          return NULL;
-        }
-      }
-      else {
-        if (ft.flags or ft.refs.size())
-          token.report_error(herr, "Extra qualifiers to inherited class ignored");
-      }
-      nclass->ancestors.push_back(definition_class::ancestor(iprotection, (definition_class*)ft.def));
-    }
-    while (token.type == TT_COMMA);
+    
+    if (handle_class_inheritance(scope, token, nclass, protection))
+      return NULL;
   }
   
   // Handle implementation
@@ -282,7 +137,7 @@ jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scop
     incomplete = 0;
     if (will_redeclare) {
       will_redeclare = false;
-      if (not(nclass = insnew(scope,inherited_flags,classname,token,herr,this)))
+      if (not(nclass = insnew(scope,inherited_flags,classname,token,herr)))
         return NULL;
     }
     else if (already_complete) {
