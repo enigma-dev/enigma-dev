@@ -18,6 +18,11 @@ OBJ_DIR := .eobjs
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 PROTOS := $(call rwildcard,$(SRC_DIR),*.proto)
+ifneq ($(CLI_ENABLE_SERVER), TRUE)
+	# older protobuf does not even support the RPC syntax
+	# so don't even run protoc on server.proto when off
+	PROTOS := $(filter-out ./server.proto,$(PROTOS))
+endif
 PROTO_OUT := $(patsubst $(SRC_DIR)/%, $(PROTO_DIR)/%, $(patsubst %.proto, %.pb.cc, $(PROTOS)))
 
 ifeq ($(CLI_ENABLE_SERVER), TRUE)
