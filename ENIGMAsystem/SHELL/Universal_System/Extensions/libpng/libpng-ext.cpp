@@ -82,10 +82,7 @@ int image_save_png(string filename, const unsigned char* data, unsigned width, u
   for (unsigned i = 0; i < height; i++) {
     unsigned tmp = i;
     unsigned bmp = i;
-    if (!flipped) {
-      tmp = height - 1 - tmp;
-      bmp = height - 1 - bmp;
-    }
+    if (flipped) bmp = height - 1 - tmp;
     tmp *= bytes * fullwidth;
     bmp *= bytes * width;
     for (unsigned ii = 0; ii < width*bytes; ii += bytes) {
