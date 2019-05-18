@@ -1,9 +1,10 @@
 draw_rectangle_color(0, 0, 320, 320, c_red, c_green, c_blue, c_yellow, 0);
 
-for (var i = bm_zero; i < bm_src_alpha_sat; i += 1) {
-    for (var j = bm_zero; j < bm_src_alpha_sat; j += 1) {
-        draw_set_blend_mode_ext(i, j);
-        draw_sprite(spr_hugar, 0, i*32-32, j*32-32);
+var blend_mode_count = bm_src_alpha_sat - bm_zero;
+for (var i = 0; i < blend_mode_count; i += 1) {
+    for (var j = 0; j < blend_mode_count; j += 1) {
+        draw_set_blend_mode_ext(i + bm_zero, j + bm_zero);
+        draw_sprite(spr_hugar, 0, i*32, j*32);
         draw_set_blend_mode(bm_normal);
     }
 }
