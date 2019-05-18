@@ -36,7 +36,6 @@ using namespace std;
 namespace enigma {
 
 extern unsigned int bound_framebuffer;
-extern int viewport_x, viewport_y, viewport_w, viewport_h;
 
 //WHERE TO PUT THIS!!!!!????
 //This is GL3 only, because I need formats and types that might not be compatible between graphics systems
@@ -204,8 +203,7 @@ void surface_reset_target(void)
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
   d3d_transform_stack_pop();
   d3d_projection_stack_pop();
-  glViewport(enigma::viewport_x, enigma::viewport_y, enigma::viewport_w, enigma::viewport_h);
-  glScissor(enigma::viewport_x, enigma::viewport_y, enigma::viewport_w, enigma::viewport_h);
+  screen_reset_viewport();
 }
 
 int surface_get_target()

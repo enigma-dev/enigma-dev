@@ -28,6 +28,9 @@ namespace enigma
   /// Called at game load to allow the system to set up.
   void graphicssystem_initialize(); /// This function can be implemented as an empty call if it is not needed.
 
+  /// Set a scissored rectangle as the viewport.
+  void graphics_set_viewport(float x, float y, float width, float height);
+
   /// Generate a texture from image data. Preserves input pixbuf.
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap=false);
   /// Delete a texture's native peer data in the backend.

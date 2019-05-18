@@ -19,10 +19,6 @@
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
-#include "Universal_System/roomsystem.h"
-
-#include "Platforms/General/PFwindow.h"
-
 using namespace enigma::dx9;
 
 namespace enigma {
@@ -31,22 +27,9 @@ void scene_begin() {}
 
 void scene_end() {}
 
-} // namespace enigma
-
-namespace enigma_user {
-
-void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
-  draw_batch_flush(batch_flush_deferred);
-
-  x = (x / window_get_region_width()) * window_get_region_width_scaled();
-  y = (y / window_get_region_height()) * window_get_region_height_scaled();
-  width = (width / window_get_region_width()) * window_get_region_width_scaled();
-  height = (height / window_get_region_height()) * window_get_region_height_scaled();
-  gs_scalar sx, sy;
-  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
-  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
-	D3DVIEWPORT9 pViewport = { (DWORD)(sx + x), (DWORD)(sy + y), (DWORD)width, (DWORD)height, 0, 1.0f };
+void graphics_set_viewport(float x, float y, float width, float height) {
+	D3DVIEWPORT9 pViewport = { (DWORD)x, (DWORD)y, (DWORD)width, (DWORD)height, 0, 1.0f };
 	d3ddev->SetViewport(&pViewport);
 }
 
-} // namespace enigma_user
+} // namespace enigma

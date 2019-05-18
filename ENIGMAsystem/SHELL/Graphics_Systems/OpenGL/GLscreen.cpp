@@ -6,6 +6,13 @@ namespace enigma {
 
 GLuint msaa_fbo = 0;
 
+void graphics_set_viewport(float x, float y, float width, float height) {
+  //NOTE: OpenGL viewports are bottom left unlike Direct3D viewports which are top left
+  y = enigma_user::window_get_height() - y - height;
+  glViewport(x,y,width,height);
+  glScissor(x,y,width,height);
+}
+
 void gl_screen_init() {
   //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
   glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
