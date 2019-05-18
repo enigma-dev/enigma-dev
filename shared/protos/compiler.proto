@@ -1,0 +1,93 @@
+syntax = "proto2";
+package buffers;
+
+import "game.proto";
+import "Settings.proto";
+
+message Empty {
+}
+
+message Resource {
+  optional string name = 1;
+  optional bool is_function = 2;
+  optional int32 arg_count_min = 3;
+  optional int32 arg_count_max = 4;
+  optional int32 overload_count = 5;
+  optional int32 is_type_name = 6;
+  optional int32 is_global = 7;
+  optional bool is_end = 8;
+  repeated string parameters = 9;
+}
+
+message CompileRequest {
+  enum CompileMode {
+    UNKNOWN = 0;
+    RUN = 1;
+    DEBUG = 2;
+    DESIGN = 3;
+    COMPILE = 4;
+    REBUILD = 5;
+  }
+
+  optional Game game = 1;
+  optional string name = 2;
+  optional CompileMode mode = 3;
+}
+
+message LogMessage {
+  enum Severity {
+    UNKNOWN = 0;
+    FINE = 1;
+    INFO = 2;
+    WARNING = 3;
+    ERROR = 4;
+  }
+  optional Severity severity = 1; ///< The severity and nature of the message.
+  optional string message = 2; ///< The message to display to the user in the output.
+}
+
+message ProgressMessage {
+  optional float progress = 1; ///< In range 1-100 (you can use 0-1, but take a stance, here)
+  optional string message = 2; ///< The message to display inside of or after the progress bar.
+}
+
+message CompileReply {
+  repeated LogMessage message = 1; ///< Compilation messages logged since the last update.
+  optional ProgressMessage progress = 2; ///< Current compilation progress.
+}
+
+message SyntaxError {
+  optional string message = 1; ///< The text associated with the error.
+  optional int32 line = 2; ///< The line number on which the error occurred.
+  optional int32 position = 3; ///< The column number in the line at which the error occurred.
+  optional int32 absolute_index = 4; ///< The zero-based position in the entire code at which the error occurred.
+}
+
+message SetDefinitionsRequest {
+  optional string code = 1;
+  optional string yaml = 2;
+}
+
+//NOTE: This request may change available keywords which should be reobtained with GetResources().
+message SetCurrentConfigRequest {
+  optional resources.Settings settings = 1; ///< The settings that you want to apply including API (e.g, "Direct3D9" for the graphics system).
+}
+
+message SyntaxCheckRequest {
+  optional string code = 1;
+  optional int32 script_count = 2;
+  repeated string script_names = 3;
+}
+
+message SystemType {
+  optional string name = 1; ///< e.g, ("Graphics", "Platform", or "Extensions")
+  repeated SystemInfo subsystems = 2; ///< All of the systems found that are of this type.
+}
+
+message SystemInfo {
+  optional string name = 1; ///< The human-readable name of the system. e.g, ("Direct3D 9.0", "DirectSound", or "Windows")
+  optional string id = 2; ///< The internal identifier used by the buildsystems. e.g, ("Direct3D9", "DirectSound", or "Win32")
+  optional string description = 3; ///< A friendly description of the system and what it does.
+  optional string author = 4; ///< Name of the system author or maintainer (e.g, "John Doe")
+  optional string target = 5; ///< The target-platform of the system. Only used by compiler descriptions presently.
+}
