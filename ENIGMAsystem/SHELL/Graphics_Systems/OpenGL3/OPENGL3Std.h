@@ -15,24 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
-
-//#include "OpenGLHeaders.h"
-
-namespace enigma
-{
-  extern unsigned char currentcolor[4];
-  extern int currentblendmode[2];
-  extern int currentblendtype;
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
-}
-
 #include "../General/GScolors.h"
 #include "../General/GSprimitives.h"
 #include "../General/GSd3d.h"

@@ -26,6 +26,7 @@
 #include "GScolors.h"
 #include "GSmatrix.h"
 #include "GSmatrix_impl.h"
+#include "GSstdraw.h"
 #include "GStextures.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
@@ -33,6 +34,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <algorithm> // min/max
 #include <math.h>
 
 using namespace std;
@@ -40,7 +42,6 @@ using namespace std;
 namespace enigma {
 
 vector<Model*> models;
-extern unsigned char currentcolor[4];
 
 unsigned int split(const std::string &txt, std::vector<std::string> &strs, char ch)
 {
@@ -205,7 +206,7 @@ void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) {
   // we have to create a special translation here so that it occurs
   // before any of the user's transformations took place
   enigma::world = glm::translate(enigma::world, glm::vec3(x, y, z));
-  enigma::graphics_set_matrix(matrix_world);
+  enigma::draw_set_state_dirty();
 
   d3d_model_draw(id);
 
@@ -833,11 +834,11 @@ void d3d_model_cylinder(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sca
   for (int i = 0; i <= steps; i++) {
     v[k][0] = px; v[k][1] = py; v[k][2] = z2;
     t[k][0] = tp; t[k][1] = 0;
-    d3d_model_vertex_normal_texture(id, px, py, z2, cos(a), sin(a), 0, tp, 0);
+    d3d_model_vertex_normal_texture(id, px, py, z2, cos(a), sin(a), 0, tp, vrep);
     k++;
     v[k][0] = px; v[k][1] = py; v[k][2] = z1;
     t[k][0] = tp; t[k][1] = vrep;
-    d3d_model_vertex_normal_texture(id, px, py, z1, cos(a), sin(a), 0, tp, vrep);
+    d3d_model_vertex_normal_texture(id, px, py, z1, cos(a), sin(a), 0, tp, 0);
     k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
   }
   d3d_model_primitive_end(id);

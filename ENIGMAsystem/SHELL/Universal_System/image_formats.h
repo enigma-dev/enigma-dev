@@ -23,8 +23,9 @@
 
 /// NOTE: These image formats expect the data to be un-aligned and always reads and writes with BGRA full color
 
-namespace enigma 
+namespace enigma
 {
+
 /// Color formats
 enum {
   color_fmt_rgba,
@@ -48,10 +49,9 @@ int image_save(std::string filename, const unsigned char* data, std::string form
 int image_save(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 
 unsigned char* image_load_bmp(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped);
-unsigned char* image_load_png(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped);
 unsigned char* image_load_gif(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped);
 int image_save_bmp(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
-int image_save_png(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
+
 } //namespace enigma
 
 #endif //ENIGMA_IMAGEFORMATS_H

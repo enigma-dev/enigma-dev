@@ -16,6 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "strings_util.h"
 #include "makedir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/GameData.h"
@@ -77,17 +78,6 @@ inline void writei(int x, FILE *f) {
 }
 inline void writef(float x, FILE *f) {
   fwrite(&x,4,1,f);
-}
-
-inline string string_replace_all(string str,string substr,string nstr)
-{
-  pt pos=0;
-  while ((pos=str.find(substr,pos)) != string::npos)
-  {
-    str.replace(pos,substr.length(),nstr);
-    pos+=nstr.length();
-  }
-  return str;
 }
 
 inline void write_desktop_entry(const std::string fPath, const GameData& game) {
@@ -157,8 +147,15 @@ inline void write_exe_info(const std::string codegen_directory, const GameData &
 
 #include "System/builtins.h"
 
-dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
+dllexport int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(GameData(es), exe_filename, mode);
+}
+
+dllexport int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
+  GameData gameData(*proj);
+  int error = FlattenProto(*proj, &gameData);
+  if (error) return error;
+  return current_language->compile(gameData, exe_filename, mode);
 }
 
 static bool run_game = true;
@@ -195,9 +192,9 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   ide_dia_clear();
   ide_dia_open();
   cout << "Initialized." << endl;
-  
+
   CompileState state;
-  
+
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
   string compilepath = CURRENT_PLATFORM_NAME "/" + compilerInfo.target_platform + "/" + name;
@@ -240,12 +237,12 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     if (exts_new_parse != exts_last_parse) {
       user << "The IDE didn't tell ENIGMA what extensions "
               "were selected before requesting a build.";
-      
+
       cout << "Extensions I have loaded:" << endl;
       for (const string &e : exts_last_parse) cout << "- " << e << endl;
       cout << "Extensions I should have loaded:" << endl;
       for (const string &e : exts_new_parse) cout << "- " << e << endl;
-      
+
       //idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
       user << "...Continuing anyway..." << flushl;
     }
@@ -263,7 +260,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
 
   // First, we make a space to put our globals.
-  jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
+  jdi::using_scope globals_scope("<ENIGMA Resources>", namespace_enigma_user);
 
   idpr("Copying resources",1);
 
@@ -429,8 +426,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     wto <<"  std::map<int, int> curr;\n\n";
     for (size_t i=0; i<game.timelines.size(); i++) {
       wto <<"  curr.clear();\n";
-      for (int j = 0; j < game.timelines[i].moments().size(); j++) {
-        wto << "  curr[" << game.timelines[i].moments()[j].step()
+      for (int j = 0; j < game.timelines[i]->moments().size(); j++) {
+        wto << "  curr[" << game.timelines[i]->moments()[j].step()
                          << "] = " << j <<";\n";
       }
       wto <<"  res.push_back(curr);\n\n";
@@ -521,7 +518,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
   make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
   make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
-  
+
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")
       make += key.first + "=\"" + key.second + "\" ";

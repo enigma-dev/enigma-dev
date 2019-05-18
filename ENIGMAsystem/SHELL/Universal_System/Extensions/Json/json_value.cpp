@@ -24,8 +24,8 @@
 
 #if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
   #define JSON_ASSERT_UNREACHABLE assert( false )
-  #define JSON_ASSERT( condition ) (condition ? void() : show_error("Assertion failed: " #condition, true))
-  #define JSON_FAIL_MESSAGE( message ) show_error(message, true)
+  #define JSON_ASSERT( condition ) (condition ? void() : enigma_user::show_error("Assertion failed: " #condition, true))
+  #define JSON_FAIL_MESSAGE( message ) enigma_user::show_error(message, true)
   #define JSON_ASSERT_MESSAGE( condition, message ) if (!( condition )) JSON_FAIL_MESSAGE( message )
 #else
   #define JSON_ASSERT_UNREACHABLE
@@ -34,7 +34,7 @@
   #define JSON_ASSERT_MESSAGE( condition, message )
 #endif
 
-namespace Json 
+namespace Json
 {
 const Value Value::null;
 const Int Value::minInt = Int( ~(UInt(-1)/2) );
@@ -73,7 +73,7 @@ static inline void releaseStringValue( char *value )
 # endif // JSON_VALUE_USE_INTERNAL_MAP
 # include "json_valueiterator.inl"
 #endif // if !defined(JSON_IS_AMALGAMATION)
-namespace Json 
+namespace Json
 {
 Value::CommentInfo::CommentInfo(): comment_( 0 )
 {
@@ -129,14 +129,14 @@ Value::CZString & Value::CZString::operator =( const CZString &other )
    return *this;
 }
 
-bool Value::CZString::operator<( const CZString &other ) const 
+bool Value::CZString::operator<( const CZString &other ) const
 {
    if ( cstr_ )
       return strcmp( cstr_, other.cstr_ ) < 0;
    return index_ < other.index_;
 }
 
-bool Value::CZString::operator==( const CZString &other ) const 
+bool Value::CZString::operator==( const CZString &other ) const
 {
    if ( cstr_ )
       return strcmp( cstr_, other.cstr_ ) == 0;
@@ -168,7 +168,7 @@ Value::Value( ValueType type )   : type_( type )   , allocated_( 0 )   , comment
 
 {
    switch ( type )
-   
+
 {
    case nullValue:
       break;
@@ -325,7 +325,7 @@ Value::Value( const Value &other )   : type_( other.type_ )   , comments_( 0 )
 
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
    case intValue:
@@ -336,7 +336,7 @@ Value::Value( const Value &other )   : type_( other.type_ )   , comments_( 0 )
       break;
    case stringValue:
       if ( other.value_.string_ )
-      
+
 {
          value_.string_ = duplicateStringValue( other.value_.string_ );
          allocated_ = true;
@@ -361,11 +361,11 @@ Value::Value( const Value &other )   : type_( other.type_ )   , comments_( 0 )
       JSON_ASSERT_UNREACHABLE;
    }
    if ( other.comments_ )
-   
+
 {
       comments_ = new CommentInfo[numberOfCommentPlacement];
       for ( int comment =0; comment < numberOfCommentPlacement; ++comment )
-      
+
 {
          const CommentInfo &otherComment = other.comments_[comment];
          if ( otherComment.comment_ )
@@ -378,7 +378,7 @@ Value::Value( const Value &other )   : type_( other.type_ )   , comments_( 0 )
 Value::~Value()
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
    case intValue:
@@ -451,7 +451,7 @@ bool Value::operator <( const Value &other ) const
    if ( typeDelta )
       return typeDelta < 0 ? true : false;
    switch ( type_ )
-   
+
 {
    case nullValue:
       return false;
@@ -465,13 +465,13 @@ bool Value::operator <( const Value &other ) const
       return value_.bool_ < other.value_.bool_;
    case stringValue:
       return ( value_.string_ == 0  &&  other.value_.string_ )
-             || ( other.value_.string_  
-                  &&  value_.string_  
+             || ( other.value_.string_
+                  &&  value_.string_
                   && strcmp( value_.string_, other.value_.string_ ) < 0 );
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
    case objectValue:
-      
+
 {
          int delta = int( value_.map_->size() - other.value_.map_->size() );
          if ( delta )
@@ -515,7 +515,7 @@ bool Value::operator ==( const Value &other ) const
    if ( type_ != temp )
       return false;
    switch ( type_ )
-   
+
 {
    case nullValue:
       return true;
@@ -529,8 +529,8 @@ bool Value::operator ==( const Value &other ) const
       return value_.bool_ == other.value_.bool_;
    case stringValue:
       return ( value_.string_ == other.value_.string_ )
-             || ( other.value_.string_  
-                  &&  value_.string_  
+             || ( other.value_.string_
+                  &&  value_.string_
                   && strcmp( value_.string_, other.value_.string_ ) == 0 );
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
@@ -564,7 +564,7 @@ const char * Value::asCString() const
 std::string Value::asString() const
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
       return "";
@@ -585,7 +585,7 @@ std::string Value::asString() const
 }
 
 # ifdef JSON_USE_CPPTL
-CppTL::ConstString 
+CppTL::ConstString
 Value::asConstString() const
 
 {
@@ -596,7 +596,7 @@ Value::asConstString() const
 Value::Int Value::asInt() const
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
       return 0;
@@ -625,7 +625,7 @@ Value::Int Value::asInt() const
 Value::UInt Value::asUInt() const
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
       return 0;
@@ -657,7 +657,7 @@ Value::UInt Value::asUInt() const
 Value::Int64 Value::asInt64() const
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
       return 0;
@@ -687,7 +687,7 @@ Value::asUInt64() const
 
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
       return 0;
@@ -736,7 +736,7 @@ LargestUInt Value::asLargestUInt() const
 double Value::asDouble() const
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
       return 0.0;
@@ -765,7 +765,7 @@ double Value::asDouble() const
 float Value::asFloat() const
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
       return 0.0f;
@@ -794,7 +794,7 @@ float Value::asFloat() const
 bool Value::asBool() const
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
       return false;
@@ -820,7 +820,7 @@ bool Value::asBool() const
 bool Value::isConvertibleTo( ValueType other ) const
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
       return true;
@@ -872,7 +872,7 @@ bool Value::isConvertibleTo( ValueType other ) const
 ArrayIndex Value::size() const
 {
    switch ( type_ )
-   
+
 {
    case nullValue:
    case intValue:
@@ -884,7 +884,7 @@ ArrayIndex Value::size() const
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:  // size of the array is highest index + 1
       if ( !value_.map_->empty() )
-      
+
 {
          ObjectValues::const_iterator itLast = value_.map_->end();
          --itLast;
@@ -926,7 +926,7 @@ void Value::clear()
    JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue  || type_ == objectValue );
 
    switch ( type_ )
-   
+
 {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
@@ -958,10 +958,10 @@ void Value::resize( ArrayIndex newSize )
    else if ( newSize > oldSize )
       (*this)[ newSize - 1 ];
    else
-   
+
 {
       for ( ArrayIndex index = newSize; index < oldSize; ++index )
-      
+
 {
          value_.map_->erase( index );
       }
@@ -1037,7 +1037,7 @@ Value & Value::resolveReference( const char *key,    bool isStatic )
    if ( type_ == nullValue )
       *this = Value( objectValue );
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
-   CZString actualKey( key, isStatic ? CZString::noDuplication 
+   CZString actualKey( key, isStatic ? CZString::noDuplication
                                      : CZString::duplicateOnCopy );
    ObjectValues::iterator it = value_.map_->lower_bound( actualKey );
    if ( it != value_.map_->end()  &&  (*it).first == actualKey )
@@ -1158,7 +1158,7 @@ Value Value::removeMember( const char* key )
       Value old(*value);
       value_.map_.remove( key );
       return old;
-   } else 
+   } else
 {
       return null;
    }
@@ -1171,7 +1171,7 @@ Value Value::removeMember( const std::string &key )
 }
 
 # ifdef JSON_USE_CPPTL
-Value 
+Value
 Value::get( const CppTL::ConstString &key,
             const Value &defaultValue ) const
 
@@ -1194,7 +1194,7 @@ bool Value::isMember( const std::string &key ) const
 
 
 # ifdef JSON_USE_CPPTL
-bool 
+bool
 Value::isMember( const CppTL::ConstString &key ) const
 
 {
@@ -1253,8 +1253,8 @@ bool Value::isUInt() const
 
 bool Value::isIntegral() const
 {
-   return type_ == intValue  
-          ||  type_ == uintValue  
+   return type_ == intValue
+          ||  type_ == uintValue
           ||  type_ == booleanValue;
 }
 
@@ -1326,12 +1326,12 @@ std::string Value::toStyledString() const
 Value::const_iterator Value::begin() const
 {
    switch ( type_ )
-   
+
 {
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
       if ( value_.array_ )
-      
+
 {
          ValueInternalArray::IteratorState it;
          value_.array_->makeBeginIterator( it );
@@ -1340,7 +1340,7 @@ Value::const_iterator Value::begin() const
       break;
    case objectValue:
       if ( value_.map_ )
-      
+
 {
          ValueInternalMap::IteratorState it;
          value_.map_->makeBeginIterator( it );
@@ -1363,12 +1363,12 @@ Value::const_iterator Value::begin() const
 Value::const_iterator Value::end() const
 {
    switch ( type_ )
-   
+
 {
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
       if ( value_.array_ )
-      
+
 {
          ValueInternalArray::IteratorState it;
          value_.array_->makeEndIterator( it );
@@ -1377,7 +1377,7 @@ Value::const_iterator Value::end() const
       break;
    case objectValue:
       if ( value_.map_ )
-      
+
 {
          ValueInternalMap::IteratorState it;
          value_.map_->makeEndIterator( it );
@@ -1401,12 +1401,12 @@ Value::const_iterator Value::end() const
 Value::iterator Value::begin()
 {
    switch ( type_ )
-   
+
 {
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
       if ( value_.array_ )
-      
+
 {
          ValueInternalArray::IteratorState it;
          value_.array_->makeBeginIterator( it );
@@ -1415,7 +1415,7 @@ Value::iterator Value::begin()
       break;
    case objectValue:
       if ( value_.map_ )
-      
+
 {
          ValueInternalMap::IteratorState it;
          value_.map_->makeBeginIterator( it );
@@ -1438,12 +1438,12 @@ Value::iterator Value::begin()
 Value::iterator Value::end()
 {
    switch ( type_ )
-   
+
 {
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
       if ( value_.array_ )
-      
+
 {
          ValueInternalArray::IteratorState it;
          value_.array_->makeEndIterator( it );
@@ -1452,7 +1452,7 @@ Value::iterator Value::end()
       break;
    case objectValue:
       if ( value_.map_ )
-      
+
 {
          ValueInternalMap::IteratorState it;
          value_.map_->makeEndIterator( it );
@@ -1510,16 +1510,16 @@ void Path::makePath( const std::string &path,                const InArgs &in )
    const char *end = current + path.length();
    InArgs::const_iterator itInArg = in.begin();
    while ( current != end )
-   
+
 {
       if ( *current == '[' )
-      
+
 {
          ++current;
          if ( *current == '%' )
             addPathInArg( path, in, itInArg, PathArgument::kindIndex );
          else
-         
+
 {
             ArrayIndex index = 0;
             for ( ; current != end && *current >= '0'  &&  *current <= '9'; ++current )
@@ -1530,18 +1530,18 @@ void Path::makePath( const std::string &path,                const InArgs &in )
             invalidPath( path, int(current - path.c_str()) );
       }
       else if ( *current == '%' )
-      
+
 {
          addPathInArg( path, in, itInArg, PathArgument::kindKey );
          ++current;
       }
       else if ( *current == '.' )
-      
+
 {
          ++current;
       }
       else
-      
+
 {
          const char *beginName = current;
          while ( current != end  &&  !strchr( "[.", *current ) )
@@ -1555,17 +1555,17 @@ void Path::makePath( const std::string &path,                const InArgs &in )
 void Path::addPathInArg( const std::string &path,                     const InArgs &in,                     InArgs::const_iterator &itInArg,                     PathArgument::Kind kind )
 {
    if ( itInArg == in.end() )
-   
+
 {
       // Error: missing argument %d
    }
    else if ( (*itInArg)->kind_ != kind )
-   
+
 {
       // Error: bad argument type
    }
    else
-   
+
 {
       args_.push_back( **itInArg );
    }
@@ -1582,30 +1582,30 @@ const Value & Path::resolve( const Value &root ) const
 {
    const Value *node = &root;
    for ( Args::const_iterator it = args_.begin(); it != args_.end(); ++it )
-   
+
 {
       const PathArgument &arg = *it;
       if ( arg.kind_ == PathArgument::kindIndex )
-      
+
 {
          if ( !node->isArray()  ||  node->isValidIndex( arg.index_ ) )
-         
+
 {
             // Error: unable to resolve path (array value expected at position...
          }
          node = &((*node)[arg.index_]);
       }
       else if ( arg.kind_ == PathArgument::kindKey )
-      
+
 {
          if ( !node->isObject() )
-         
+
 {
             // Error: unable to resolve path (object value expected at position...)
          }
          node = &((*node)[arg.key_]);
          if ( node == &Value::null )
-         
+
 {
             // Error: unable to resolve path (object has no member named '' at position...)
          }
@@ -1619,18 +1619,18 @@ Value Path::resolve( const Value &root,                const Value &defaultValue
 {
    const Value *node = &root;
    for ( Args::const_iterator it = args_.begin(); it != args_.end(); ++it )
-   
+
 {
       const PathArgument &arg = *it;
       if ( arg.kind_ == PathArgument::kindIndex )
-      
+
 {
          if ( !node->isArray()  ||  node->isValidIndex( arg.index_ ) )
             return defaultValue;
          node = &((*node)[arg.index_]);
       }
       else if ( arg.kind_ == PathArgument::kindKey )
-      
+
 {
          if ( !node->isObject() )
             return defaultValue;
@@ -1647,24 +1647,24 @@ Value & Path::make( Value &root ) const
 {
    Value *node = &root;
    for ( Args::const_iterator it = args_.begin(); it != args_.end(); ++it )
-   
+
 {
       const PathArgument &arg = *it;
       if ( arg.kind_ == PathArgument::kindIndex )
-      
+
 {
          if ( !node->isArray() )
-         
+
 {
             // Error: node is not an array at position ...
          }
          node = &((*node)[arg.index_]);
       }
       else if ( arg.kind_ == PathArgument::kindKey )
-      
+
 {
          if ( !node->isObject() )
-         
+
 {
             // Error: node is not an object at position...
          }

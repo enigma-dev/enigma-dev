@@ -12,6 +12,9 @@
 #include "backend/sub/MainEvent.h"
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct GmObject
 {
   String name;
@@ -28,5 +31,8 @@ struct GmObject
   MainEvent *mainEvents;
   int mainEventCount;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

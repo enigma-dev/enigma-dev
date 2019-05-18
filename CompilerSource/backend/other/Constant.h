@@ -11,10 +11,16 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Constant
 {
   String name;
   String value;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

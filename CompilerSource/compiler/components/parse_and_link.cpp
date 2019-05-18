@@ -55,19 +55,19 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   auto &tlines = state.parsed_tlines;
   auto &scr_lookup = state.script_lookup;
   auto &tline_lookup = state.timeline_lookup;
-  
+
   set<string> script_names;
   for (const auto &script : game.scripts)
     script_names.insert(script.name);
-  
+
   // First we just parse the scripts to add semicolons and collect variable names
   scripts.resize(game.scripts.size());
   for (size_t i = 0; i < game.scripts.size(); i++) {
     std::string newcode;
-    int a = syncheck::syntaxcheck(game.scripts[i].code(), newcode);
+    int a = syncheck::syntaxcheck(game.scripts[i]->code(), newcode);
     if (a != -1) {
       user << "Syntax error in script `" << game.scripts[i].name << "'\n"
-           << format_error(game.scripts[i].code(), syncheck::syerr, a) << flushl;
+           << format_error(game.scripts[i]->code(), syncheck::syerr, a) << flushl;
       return E_ERROR_SYNTAX;
     }
     // Keep a parsed record of this script
@@ -89,7 +89,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   for (const auto &timeline : game.timelines)
   {
     tline_lookup[timeline.name].id = timeline.id();
-    for (const auto &moment : timeline.moments())
+    for (const auto &moment : timeline->moments())
     {
       std::string newcode;
       int a = syncheck::syntaxcheck(moment.code(), newcode);
@@ -203,7 +203,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   //TODO: Linking timelines might not be strictly necessary, because scripts can now find their children through the timelines they call.
   int lookup_id = 0;
   for (const auto &timeline : game.timelines) {
-    for (const auto &moment : timeline.moments()) {
+    for (const auto &moment : timeline->moments()) {
       string curscrname = timeline.name;
       parsed_script* curscript = tlines[lookup_id++]; //At this point, what we have is this:     for each script as curscript
       edbg << "Linking `" << curscrname << " moment: " <<moment.step() << "':\n";
@@ -224,7 +224,11 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
   //Done with scripts and timelines.
 
-
+  // Index object ids by name for lookup for collision event name->integer
+  //TODO: could be merged with parsed_objects lookup below
+  map<string, int> object_name_ids;
+  for (const auto &object : game.objects)
+    object_name_ids[object.name] = object.id();
 
   edbg << game.objects.size() << " Objects:\n";
   for (const auto &object : game.objects) {
@@ -232,31 +236,24 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     unsigned ev_count = 0;
     state.parsed_objects.push_back(
       new parsed_object(
-        object.name, object.id(), object.sprite_name(), object.mask_name(),
-        object.parent_name(),
-        object.visible(), object.solid(),
-        object.depth(), object.persistent()
+        object.name, object.id(),
+        object->sprite_name(),
+        object->mask_name(),
+        object->parent_name(),
+        object->visible(),
+        object->solid(),
+        object->depth(),
+        object->persistent()
       ));
     parsed_object* pob = state.parsed_objects.back();
 
-    edbg << " " << object.name << ": " << object.events().size() << " events: " << flushl;
+    edbg << " " << object.name << ": " << object->events().size() << " events: " << flushl;
 
-    for (const auto& event : object.events()) {
+    for (const auto& event : object->events()) {
       int ev_id;
         if (event.has_name()) {
           edbg << "  Event[" << event.type() << ", " << event.name() << "] ";
-          user << "FATAL: Unsupported: Event names. Translation required using "
-                  "events.res. Translation is present but there is no logic to "
-                  "use it.";
-
-          // TODO: Using the event type from events.res, translate the name
-          // string to a number and a valid identifier for use in this routine.
-          // It may be wise to store this information in a normalized table
-          // within GameData, similar to how fonts store glyph metrics.
-          // Also, remember to update calls to event_get_human_name.
-
-          // ev_id = translate_event_name(event.name());
-          return E_ERROR_COMPILER_LOGIC;
+          ev_id = object_name_ids[event.name()];
         } else {
           edbg << "  Event[" << event.type() << ", " << event.number() << "] ";
           ev_id = event.number();
@@ -264,7 +261,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
         //For each individual event (like begin_step) in the main event (Step), parse the code
         parsed_event &pev = pob->events[ev_count++]; //Make sure each sub event knows its main event's event ID.
-        pev.mainId = event.type(), pev.id = event.number();
+        pev.mainId = event.type(), pev.id = ev_id;
 
         //Copy the code into a string, and its attributes elsewhere
         string newcode = event.code();
@@ -292,7 +289,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         edbg << " Done." << flushl;
     }
   }
-  
+
   // Index parsed objects by name for lookup from instance object_types.
   map<string, parsed_object*> parsed_objects;
   for (parsed_object *obj : state.parsed_objects)
@@ -307,16 +304,16 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     pev.mainId = 0, pev.id = 0, pev.myObj = pr;
 
     std::string newcode;
-    int sc = syncheck::syntaxcheck(room.creation_code(), newcode);
+    int sc = syncheck::syntaxcheck(room->creation_code(), newcode);
     if (sc != -1) {
       user << "Syntax error in room creation code for room " << room.id()
            << " (`" << room.name << "'):\n"
-           << format_error(room.creation_code(),syncheck::syerr,sc) << flushl;
+           << format_error(room->creation_code(),syncheck::syerr,sc) << flushl;
       return E_ERROR_SYNTAX;
     }
     parser_main(newcode,&pev,script_names);
 
-    for (const auto &instance : room.instances()) {
+    for (const auto &instance : room->instances()) {
       if (!instance.creation_code().empty()) {
         newcode = "";
         int a = syncheck::syntaxcheck(instance.creation_code(), newcode);
@@ -334,7 +331,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     }
 
     //PreCreate code
-    for (const auto &instance : room.instances()) {
+    for (const auto &instance : room->instances()) {
       if (!instance.initialization_code().empty()) {
         std::string newcode;
         int a = syncheck::syntaxcheck(instance.initialization_code(), newcode);

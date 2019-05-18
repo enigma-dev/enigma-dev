@@ -9,16 +9,16 @@ include $(SHARED_SRC_DIR)/event_reader/Makefile
 
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
-	OS_LIBS=-lboost_system -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
+	OS_LIBS=-lboost_system -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
 else ifeq ($(OS), Darwin)
 	OS_LIBS=-lboost_system -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
 else
-	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options-mt -lboost_iostreams-mt -lboost_filesystem-mt -lboost_system-mt -lpthread
+	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options-mt -lboost_iostreams-mt -lboost_filesystem-mt -lboost_system-mt -lpthread
 endif
 
 PROTO_DIR := $(SHARED_SRC_DIR)/protos
-CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/lodepng -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS) -L../../ -lz -L$(SHARED_SRC_DIR)/lodepng -llodepng -lProtocols -lprotobuf
+CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I$(SHARED_SRC_DIR) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
+LDFLAGS   := $(OS_LIBS) -L../../ -lProtocols -lprotobuf
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)

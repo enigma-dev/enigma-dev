@@ -47,8 +47,8 @@ namespace enigma {
 	extern unsigned bound_texture;
 }
 
-#include "Universal_System/collisions_object.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Object_Tiers/collisions_object.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "implement.h"
 
 namespace enigma {

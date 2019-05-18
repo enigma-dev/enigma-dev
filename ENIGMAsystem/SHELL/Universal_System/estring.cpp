@@ -15,9 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "strings_util.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <cstdlib>
+#include <vector>
 #include "var4.h"
 #include "estring.h"
 
@@ -33,7 +36,6 @@ using std::string;
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 
 #include <windows.h>
-#include <vector>
 using std::vector;
 
 tstring widen(const string &str) {
@@ -189,12 +191,11 @@ size_t string_pos(string substr,string str) {
   return res == string::npos ? 0 : (int)res;
 }
 
-string string_format(double val, unsigned tot, unsigned dec)
-{
-  char sbuf[19]; sbuf[0] = 0;
-  sprintf(sbuf,"%0*.*f",tot,dec,val);
-  const string fstr = sbuf;
-  return fstr.c_str();
+string string_format(double val, unsigned tot, unsigned dec) {
+  std::vector<char> sbuf(19 + tot + dec);
+  sbuf[0] = 0;
+  sprintf(sbuf.data(), "%0*.*f", tot, dec, val);
+  return sbuf.data();
 }
 
 string string_copy(string str, int index, int count) {
@@ -242,13 +243,7 @@ string string_replace(string str,string substr,string newstr) {
 }
 
 string string_replace_all(string str,string substr,string newstr) {
-  size_t pos = 0;
-  const size_t sublen = substr.length(), newlen = newstr.length();
-    while((pos=str.find(substr,pos)) != string::npos) {
-    str.replace(pos,sublen,newstr);
-    pos += newlen;
-  }
-  return str;
+  return ::string_replace_all(str, substr, newstr);
 }
 
 size_t string_count(string substr,string str) {
@@ -347,7 +342,9 @@ string filename_dir(string fname)
 
 string filename_drive(string fname)
 {
-  size_t fp = fname.find("/\\");
+  size_t fp = fname.find_first_of("/\\");
+  if (!fp || fp == string::npos || fname[fp-1] != ':')
+    return "";
   return fname.substr(0, fp);
 }
 
@@ -365,6 +362,24 @@ string filename_change_ext(string fname, string newext)
   if (fp == string::npos)
     return fname + newext;
   return fname.replace(fp,fname.length(),newext);
+}
+
+var string_split(const std::string &str, const std::string &delim,
+                 bool skip_empty) {
+  var res;
+  if (delim.empty()) {
+    res[0] = str;
+    return res;
+  }
+  size_t last = 0, next, found = 0;
+  while ((next = str.find(delim, last)) != std::string::npos) {
+    if (!skip_empty || next > last)
+      res[found++] = str.substr(last, next - last);
+    last = next + delim.length();
+  }
+  if (!skip_empty || last < str.length())
+    res[found++] = str.substr(last);
+  return res;
 }
 
 }

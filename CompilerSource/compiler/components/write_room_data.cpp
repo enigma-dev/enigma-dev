@@ -31,6 +31,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 using namespace std;
 
@@ -49,7 +50,7 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
-inline std::string format_color(uint32_t color) { 
+inline std::string format_color(uint32_t color) {
   std::stringstream ss;
   ss << "0x" << std::hex << color;
   return ss.str();
@@ -68,33 +69,34 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   int room_highid = 0, room_highinstid = 100000,room_hightileid=10000000;
 
   for (const auto &room : game.rooms) {
-    wto << "  tile tiles_" << room.id() << "[] = {\n";
-    for (int ii = 0, modme = 0; ii < room.tiles().size(); ii++) {
+    wto << "  std::vector<tile> tiles_" << room.id() << " = {\n";
+    int modme = 0;
+    for (const auto &tile : room->tiles()) {
       wto << "{"
-          << room.tiles(ii).id()      << ","
-          << resname(room.tiles(ii).background_name()) << ","
-          << room.tiles(ii).xoffset() << ","
-          << room.tiles(ii).yoffset() << ","
-          << room.tiles(ii).depth()   << ","
-          << room.tiles(ii).height()  << ","
-          << room.tiles(ii).width()   << ","
-          << room.tiles(ii).x()       << ","
-          << room.tiles(ii).y()       << ","
-          << room.tiles(ii).xscale()  << ","
-          << room.tiles(ii).yscale()  << ","
-          << room.tiles(ii).alpha()   << ","
-          << room.tiles(ii).color()   << "},";
+          << tile.id()      << ","
+          << resname(tile.background_name()) << ","
+          << tile.xoffset() << ","
+          << tile.yoffset() << ","
+          << tile.depth()   << ","
+          << tile.height()  << ","
+          << tile.width()   << ","
+          << tile.x()       << ","
+          << tile.y()       << ","
+          << tile.xscale()  << ","
+          << tile.yscale()  << ","
+          << tile.alpha()   << ","
+          << tile.color()   << "},";
         if (++modme % 16 == 0) wto << "\n        ";
-      if (room.tiles(ii).id() > room_hightileid)
-        room_hightileid = room.tiles(ii).id();
+      if (tile.id() > room_hightileid)
+        room_hightileid = tile.id();
     }
     wto << "  };\n";
   }
 
   for (const auto &room : game.rooms) {
-    wto << "  inst insts_" << room.id() << "[] = {\n";
+    wto << "  std::vector<inst> insts_" << room.id() << " = {\n";
     int modme = 0;
-    for (const auto &instance : room.instances()) {
+    for (const auto &instance : room->instances()) {
       wto << "{" <<
         instance.id() << "," <<
         instance.object_type() << "," <<
@@ -115,24 +117,24 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     << room.id() << ", "  // The ID of this room
     << room_index << ", \""  // The tree order index of this room
     << room.name << "\",  \""  // The name of this room
-    << room.caption() << "\",\n      "  // The caption of this room
+    << room->caption() << "\",\n      "  // The caption of this room
 
-    << format_color(room.color()) << ", "  // Background color
-    << (room.show_color() ? "true" : "false")  // Draw background color
+    << format_color(room->color()) << ", "  // Background color
+    << (room->show_color() ? "true" : "false")  // Draw background color
     << ", roomcreate" << room.id() << ",\n      "  // Creation code
     << "roomprecreate" << room.id() << ",\n      "  // PreCreation code
 
-    << room.width() << ", " << room.height() << ", " // Width and Height
-    << room.speed() << ",  "  // Speed
-    << (room.persistent() ? "true" : "false") << ",  "  // Persistent
+    <<  room->width() << ", " << room->height() << ", "  // Width and Height
+    <<  room->speed() << ",  "  // Speed
+    << (room->persistent() ? "true" : "false")  << ",  "  // Persistent
 
-    << (room.enable_views() ? "true" : "false") << ", {\n"; // Views Enabled
+    << (room->enable_views() ? "true" : "false") << ", {\n";  // Views Enabled
 
-    for (const auto &view : room.views()) {
+    for (const auto &view : room->views()) {
       wto << "        { "
           << (view.visible() ? "true" : "false") << ",   " // Visible
 
-          << view.xview() << ", "   // Xview 
+          << view.xview() << ", "   // Xview
           << view.yview() << ",  "  // Yview
           << view.wview() << ", "    // Wview
           << view.hview() << ",   "  // Hview
@@ -149,25 +151,25 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     }
     //Start of Backgrounds
     wto << "      }, {\n      ";
-     for (const auto &background : room.backgrounds()) {
+     for (const auto &background : room->backgrounds()) {
         wto << "  { "
         << (background.visible() ? "true" : "false")    << ", "    // Visible
         << (background.foreground() ? "true" : "false") << ", "    // Foreground
-        << resname(background.background_name())        << ",  "   // Background
-        << background.x()                               << ", "    // X
-        << background.y()                               << ",   "  // Y
-        << background.hspeed()                          << ", "    // HSpeed
-        << background.vspeed()                          << ",   "  // VSpeed
+        <<  resname(background.background_name())       << ",  "   // Background
+        <<  background.x()                              << ", "    // X
+        <<  background.y()                              << ",   "  // Y
+        <<  background.hspeed()                         << ", "    // HSpeed
+        <<  background.vspeed()                         << ",   "  // VSpeed
         << (background.htiled()  ? "true" : "false")    << ", "    // tileHor
         << (background.vtiled()  ? "true" : "false")    << ",   "  // tileVert
         << (background.stretch() ? "true" : "false")    << ",   "  // Stretch
-        << background.alpha() << ",   "    // Alpha
-        << background.color() << " },\n      ";  // Color
+        <<  background.alpha()                          << ",   "  // Alpha
+        <<  background.color()  << " },\n      ";                  // Color
      }
     wto <<
     " },\n" //End of Backgrounds
-    "      " << room.instances().size() << ", insts_" << room.id() << ",\n"
-    "      " << room.tiles().size() << ", tiles_" << room.id() << "\n"
+    "      " << "insts_" << room.id() << ",\n"
+    "      " << "tiles_" << room.id() << "\n"
     "    },\n";
 
     if (room.id() > room_highid)

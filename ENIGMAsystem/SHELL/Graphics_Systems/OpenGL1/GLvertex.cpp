@@ -15,10 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+//NOTE: If this source is changed to utilize additional features of the GL_ARB_vertex_buffer_object
+//extension, then please be sure to update the graphics_init_vbo_method() helper below to ensure any
+//functions are properly aliased and will continue working on affected graphics cards.
+
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 
 #include <map>
 using std::map;
@@ -26,8 +31,6 @@ using std::map;
 namespace {
 
 GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN };
-
-bool vbo_is_supported = GL_ARB_vertex_buffer_object;
 
 // for OpenGL1.1
 map<int, std::vector<enigma::VertexElement> > vertexBufferArrays;
@@ -105,6 +108,21 @@ void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
 } // anonymous namespace
 
 namespace enigma {
+
+bool vbo_is_supported = false;
+
+void graphics_init_vbo_method() {
+  // we don't check for extensions until GLEW has been initialized
+  vbo_is_supported = GLEW_ARB_vertex_buffer_object;
+  // if the vbo extension is supported, but the GL version is old,
+  // we need to alias the buffer functions to the extension ones
+  if (GLEW_ARB_vertex_buffer_object == true && GLEW_VERSION_1_5 == false) {
+    glGenBuffers = glGenBuffersARB;
+    glBindBuffer = glBindBufferARB;
+    glBufferData = glBufferDataARB;
+    glDeleteBuffers = glDeleteBuffersARB;
+  }
+}
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
   if (vbo_is_supported) {
@@ -239,20 +257,20 @@ void vertex_color(int buffer, int color, double alpha) {
 }
 
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   void* base_pointer = enigma::graphics_prepare_buffer(buffer, false);
   enigma::ClientState state = enigma::graphics_apply_vertex_format(vertexBuffer->format, (GLvoid*)((intptr_t)base_pointer + offset));
 
-	glDrawArrays(primitive_types[primitive], start, count);
+  glDrawArrays(primitive_types[primitive], start, count);
 
   enigma::graphics_reset_client_state(state);
 }
 
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
@@ -272,7 +290,8 @@ void index_submit_range(int buffer, int vertex, int primitive, unsigned start, u
   glDrawElements(primitive_types[primitive], count, indexType, (GLvoid*)((intptr_t)base_index_pointer + start));
 
   enigma::graphics_reset_client_state(state);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  if (enigma::vbo_is_supported)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 } // namespace enigma_user

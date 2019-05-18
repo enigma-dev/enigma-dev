@@ -21,12 +21,16 @@
 #include "GL3shader.h"
 #include "GLSLshader.h"
 
-#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 
-#include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
+#include <map>
+
+using std::map;
 
 #define bind_array_buffer(vbo) if (enigma::bound_vbo != vbo) glBindBuffer( GL_ARRAY_BUFFER, enigma::bound_vbo = vbo );
 #define bind_element_buffer(vboi) if (enigma::bound_vboi != vboi) glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, enigma::bound_vboi = vboi );
@@ -179,11 +183,10 @@ void graphics_apply_vertex_format(int format, size_t offset) {
                          (float)currentcolor[3]/255.0f);
 
   if (useTextCoords) {
-    if (oglmgr->GetBoundTexture() != 0){
-      glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 1);
-    } else {
-      glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 0);
-    }
+    GLint boundTex;
+    glActiveTexture(GL_TEXTURE0);
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &boundTex);
+    glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, boundTex != 0);
   } else {
     glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 0);
   }
@@ -205,12 +208,12 @@ void vertex_color(int buffer, int color, double alpha) {
 }
 
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
   #ifdef DEBUG_MODE
-  enigma::GPUProfilerBatch& vbd = oglmgr->gpuprof.add_drawcall();
+  enigma::GPUProfilerBatch& vbd = enigma::gpuprof.add_drawcall();
   ++vbd.drawcalls;
   #endif
 
@@ -221,13 +224,13 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
 }
 
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
 
   #ifdef DEBUG_MODE
-  enigma::GPUProfilerBatch& vbd = oglmgr->gpuprof.add_drawcall();
+  enigma::GPUProfilerBatch& vbd = enigma::gpuprof.add_drawcall();
   ++vbd.drawcalls;
   #endif
 
