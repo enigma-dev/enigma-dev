@@ -55,6 +55,8 @@ namespace enigma
 {
 	void graphicssystem_initialize(){}
 
+	void graphics_set_viewport(float x, float y, float width, float height) {}
+
 	int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap){return -1;}
 	void graphics_delete_texture(int texid){}
 	unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {return nullptr;}
@@ -121,8 +123,6 @@ namespace enigma_user
 	void shader_set_uniform_i(int location, int v0, int v1){}
 	void shader_set_uniform_i(int location, int v0, int v1, int v2){}
 	void shader_set_uniform_i(int location, int v0, int v1, int v2, int v3){}
-
-	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
 
 	void draw_clear_alpha(int col,float alpha){}
 	void draw_clear(int col){}
