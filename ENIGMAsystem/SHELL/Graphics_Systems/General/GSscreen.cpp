@@ -62,6 +62,9 @@ bool clamp_view(int& x, int& y) {
   return false;
 }
 
+//These are used to reset the screen viewport for surfaces
+gs_scalar viewport_x, viewport_y, viewport_w, viewport_h;
+
 } // namespace anonymous
 
 namespace enigma {
@@ -238,6 +241,28 @@ unsigned int display_get_gui_width(){
 
 unsigned int display_get_gui_height(){
   return enigma::gui_height;
+}
+
+void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
+  draw_batch_flush(batch_flush_deferred);
+
+  x = (x / window_get_region_width()) * window_get_region_width_scaled();
+  y = (y / window_get_region_height()) * window_get_region_height_scaled();
+  width = (width / window_get_region_width()) * window_get_region_width_scaled();
+  height = (height / window_get_region_height()) * window_get_region_height_scaled();
+  gs_scalar sx, sy;
+  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+  viewport_x = sx + x;
+  viewport_y = sy + y;
+  viewport_w = width;
+  viewport_h = height;
+
+  screen_reset_viewport();
+}
+
+void screen_reset_viewport() {
+  graphics_set_viewport(viewport_x, viewport_y, viewport_w, viewport_h);
 }
 
 void screen_init() {
