@@ -36,6 +36,18 @@ void scene_end() {
 
 }
 
+void graphics_set_viewport(float x, float y, float width, float height) {
+  D3D11_VIEWPORT viewport = { };
+  viewport.TopLeftX = x;
+  viewport.TopLeftY = y;
+  viewport.Width = width;
+  viewport.Height = height;
+  viewport.MinDepth = 0.0f;
+  viewport.MaxDepth = 1.0f;
+
+  m_deviceContext->RSSetViewports(1, &viewport);
+}
+
 unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {
   if (flipped) *flipped = false;
 
@@ -56,29 +68,3 @@ unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullhe
 }
 
 } // namespace enigma
-
-namespace enigma_user {
-
-void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
-  draw_batch_flush(batch_flush_deferred);
-
-  x = (x / window_get_region_width()) * window_get_region_width_scaled();
-  y = (y / window_get_region_height()) * window_get_region_height_scaled();
-  width = (width / window_get_region_width()) * window_get_region_width_scaled();
-  height = (height / window_get_region_height()) * window_get_region_height_scaled();
-  gs_scalar sx, sy;
-  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
-  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
-
-  D3D11_VIEWPORT viewport = { };
-  viewport.TopLeftX = sx + x;
-  viewport.TopLeftY = sy + y;
-  viewport.Width = width;
-  viewport.Height = height;
-  viewport.MinDepth = 0.0f;
-  viewport.MaxDepth = 1.0f;
-
-  m_deviceContext->RSSetViewports(1, &viewport);
-}
-
-} // namespace enigma_user
