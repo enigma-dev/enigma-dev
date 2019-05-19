@@ -70,7 +70,7 @@ using namespace enigma_user;
 namespace enigma
 {
 
-void draw_sprite_pos_raw(const enigma::sprite* spr2d, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar color, gs_scalar alpha)
+void draw_sprite_pos_raw(const enigma::sprite *const spr2d, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar color, gs_scalar alpha)
 {
   alpha = CLAMP_ALPHAF(alpha);
   get_subimg(usi, spr2d, subimg);
@@ -86,7 +86,8 @@ void draw_sprite_pos_raw(const enigma::sprite* spr2d, int subimg, gs_scalar x1, 
   draw_vertex_texture_color(x3,y3, tx+tw, ty+th, color,alpha);
   draw_primitive_end();
 }
-void draw_sprite_pos_part_raw(const enigma::sprite* spr2d, int subimg,
+
+void draw_sprite_pos_part_raw(const enigma::sprite *const spr2d, int subimg,
   gs_scalar px, gs_scalar py, gs_scalar pw, gs_scalar ph,
   gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4,
   gs_scalar color, gs_scalar alpha
