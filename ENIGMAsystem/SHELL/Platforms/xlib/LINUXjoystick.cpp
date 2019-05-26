@@ -58,9 +58,9 @@ namespace enigma
       axis(new float[ac]), button(new bool[bc]), threashold(.25),
       wrapaxis_positive(new char[ac]), wrapaxis_negative(new char[ac]), wrapbutton(new char[bc])
     {
-        for (int i = 0; i < 8; i++)
-          axis[i] = wrapaxis_positive[i] = wrapaxis_negative[i] = wrapbutton[i] = button[i] = 0;
-        for (int i = 8; i < 16; i++)
+        for (int i = 0; i < ac; i++)
+          axis[i] = wrapaxis_positive[i] = wrapaxis_negative[i] = 0;
+        for (int i = 0; i < bc; i++)
           wrapbutton[i] = button[i] = 0;
     }
     
@@ -158,8 +158,8 @@ namespace enigma_user
     if (ioctl(device, JSIOCGAXES, &ac) or ioctl(device, JSIOCGBUTTONS, &bc))
       return (close(device), false);
     
-    char name[256]; name[0] = 0;
-    if (ioctl(device, JSIOCGNAME(256), name) > 0)
+    char name[256] = {0};
+    if (ioctl(device, JSIOCGNAME(256), name) != -1)
       devn = name;
 
     #ifdef DEBUG_MODE
