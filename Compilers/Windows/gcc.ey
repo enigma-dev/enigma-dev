@@ -12,10 +12,10 @@ Make-Vars:
   makeflags:
   binpath:
   cppflags:
-  cxxflags: -std=c++11 -I/mingw64/lib/libffi-3.2.1/include -I../Additional/i686-w64-mingw32/include
+  cxxflags: -std=c++11 -I../Additional/i686-w64-mingw32/include
   cflags:
   ldflags: -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++ -static
-  rcflags: 
+  rcflags:
   links:
 
 Parser-Vars:
