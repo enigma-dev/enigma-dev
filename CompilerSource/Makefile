@@ -43,7 +43,7 @@ OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 DEPENDS := $(OBJECTS:.o=.d)
 PROTO_DIR := $(SHARED_SRC_DIR)/protos
 
-CXXFLAGS += -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/libpng-util -I$(PROTO_DIR)/codegen $(addprefix -I$(SHARED_SRC_DIR)/, $(SHARED_INCLUDES))
+CXXFLAGS += -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/libpng-util -I$(PROTO_DIR)/.eobjs $(addprefix -I$(SHARED_SRC_DIR)/, $(SHARED_INCLUDES))
 SOURCES += $(addprefix $(SHARED_SRC_DIR),$(SHARED_SOURCES))
 OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.o))
 DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))

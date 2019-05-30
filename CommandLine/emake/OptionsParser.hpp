@@ -1,7 +1,7 @@
 #ifndef EMAKE_OPTIONSPARSER_HPP
 #define EMAKE_OPTIONSPARSER_HPP
 
-#include "codegen/Settings.pb.h"
+#include "Settings.pb.h"
 
 #include <boost/program_options.hpp>
 #include <functional>
