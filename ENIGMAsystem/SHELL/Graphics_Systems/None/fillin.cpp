@@ -66,7 +66,7 @@ namespace enigma
 	void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {}
 	void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {}
 
-	void graphics_state_flush() {}
+	void graphics_state_flush(const RenderState& state) {}
 
 	void graphics_delete_vertex_buffer_peer(int buffer) {}
 	void graphics_delete_index_buffer_peer(int buffer) {}
