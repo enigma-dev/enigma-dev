@@ -19,33 +19,22 @@
 #ifndef ENIGMA_GSSTDRAW_H
 #define ENIGMA_GSSTDRAW_H
 
+#include "GSd3d.h"
 #include "Universal_System/scalar.h"
 
 #include <list>
 
 namespace enigma {
 
-extern bool lineStippleEnable, msaaEnabled, alphaBlend, alphaTest;
-extern unsigned short lineStipplePattern;
-extern unsigned char alphaTestRef;
-extern float drawPointSize, drawLineWidth;
-extern int drawFillMode, lineStippleScale;
-
 void draw_set_state_dirty(bool dirty=true);
 bool draw_get_state_dirty();
 
-void graphics_state_flush();
+void graphics_state_flush(const RenderState& state=render_state);
 
 } // namespace enigma
 
 namespace enigma_user
 {
-  enum {
-    rs_point, // Render vertices as points
-    rs_line,  // Render in wireframe mode
-    rs_solid  // Normal render mode
-  };
-
   void draw_state_flush();
   void draw_set_fill_mode(int fill);
   void draw_set_line_width(float value);

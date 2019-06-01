@@ -72,9 +72,9 @@ const D3DBLEND blendequivs[11] = {
 
 namespace enigma {
 
-void graphics_state_flush_samplers() {
+void graphics_state_flush_samplers(const RenderState& state) {
   for (int i = 0; i < 8; ++i) {
-    const Sampler& sampler = samplers[i];
+    const Sampler& sampler = state.samplers[i];
     const auto tex = get_texture_peer(sampler.texture);
     d3ddev->SetTexture(i, tex);
     if (tex == NULL) continue; // texture doesn't exist skip updating the sampler
@@ -87,22 +87,22 @@ void graphics_state_flush_samplers() {
   }
 }
 
-void graphics_state_flush_fog() {
-  d3ddev->SetRenderState(D3DRS_RANGEFOGENABLE, d3dFogEnabled);
-  d3ddev->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[d3dFogMode]);
-  d3ddev->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[d3dFogMode]);
+void graphics_state_flush_fog(const RenderState& state) {
+  d3ddev->SetRenderState(D3DRS_RANGEFOGENABLE, state.d3dFogEnabled);
+  d3ddev->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[state.d3dFogMode]);
+  d3ddev->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[state.d3dFogMode]);
   d3ddev->SetRenderState(D3DRS_FOGCOLOR,
-    D3DCOLOR_RGBA(COL_GET_R(d3dFogColor), COL_GET_G(d3dFogColor), COL_GET_B(d3dFogColor), 255));
+    D3DCOLOR_RGBA(COL_GET_R(state.d3dFogColor), COL_GET_G(state.d3dFogColor), COL_GET_B(state.d3dFogColor), 255));
 
   // NOTE: DWORD is 32 bits maximum meaning it can only hold single-precision
   // floats, so yes, we must cast double to float first too.
   // https://docs.microsoft.com/en-us/windows/desktop/direct3d9/d3drenderstatetype
-  d3ddev->SetRenderState(D3DRS_FOGSTART, alias_cast<DWORD>((float)d3dFogStart));
-  d3ddev->SetRenderState(D3DRS_FOGEND, alias_cast<DWORD>((float)d3dFogEnd));
-  d3ddev->SetRenderState(D3DRS_FOGDENSITY, alias_cast<DWORD>((float)d3dFogDensity));
+  d3ddev->SetRenderState(D3DRS_FOGSTART, alias_cast<DWORD>((float)state.d3dFogStart));
+  d3ddev->SetRenderState(D3DRS_FOGEND, alias_cast<DWORD>((float)state.d3dFogEnd));
+  d3ddev->SetRenderState(D3DRS_FOGDENSITY, alias_cast<DWORD>((float)state.d3dFogDensity));
 }
 
-void graphics_state_flush_lighting() {
+void graphics_state_flush_lighting(const RenderState& state) {
   // just in case the user does turn on lighting, we need to set a material
   // that works for lighting vertices that have no color data
   D3DMATERIAL9 mtrl = {};
@@ -110,12 +110,12 @@ void graphics_state_flush_lighting() {
   mtrl.Diffuse.r = mtrl.Diffuse.g = mtrl.Diffuse.b = mtrl.Diffuse.a = 1.0;
   d3ddev->SetMaterial(&mtrl);
   d3ddev->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
-  d3ddev->SetRenderState(D3DRS_SHADEMODE, d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
+  d3ddev->SetRenderState(D3DRS_SHADEMODE, state.d3dShading?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
   d3ddev->SetRenderState(D3DRS_AMBIENT,
-    D3DCOLOR_RGBA(COL_GET_R(d3dLightingAmbient), COL_GET_G(d3dLightingAmbient), COL_GET_B(d3dLightingAmbient), 255));
+    D3DCOLOR_RGBA(COL_GET_R(state.d3dLightingAmbient), COL_GET_G(state.d3dLightingAmbient), COL_GET_B(state.d3dLightingAmbient), 255));
 
   for (int i = 0; i < 8; ++i) {
-    const bool enabled = (i<d3dLightsActive);
+    const bool enabled = (i<state.d3dLightsActive);
 
     d3ddev->LightEnable(i, enabled);
     if (!enabled) continue; // don't bother updating disabled lights
@@ -138,36 +138,36 @@ void graphics_state_flush_lighting() {
   }
 }
 
-void graphics_state_flush() {
-  d3ddev->SetRenderState(D3DRS_POINTSIZE, drawPointSize);
-  d3ddev->SetRenderState(D3DRS_FILLMODE, fillmodes[drawFillMode]);
+void graphics_state_flush(const RenderState& state) {
+  d3ddev->SetRenderState(D3DRS_POINTSIZE, state.drawPointSize);
+  d3ddev->SetRenderState(D3DRS_FILLMODE, fillmodes[state.drawFillMode]);
 
-  d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, msaaEnabled);
-  d3ddev->SetRenderState(D3DRS_ZENABLE, d3dHidden);
-  d3ddev->SetRenderState(D3DRS_ZFUNC, depthoperators[d3dDepthOperator]);
-  d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, d3dZWriteEnable);
-  d3ddev->SetRenderState(D3DRS_CULLMODE, cullingstates[d3dCulling]);
+  d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, state.msaaEnabled);
+  d3ddev->SetRenderState(D3DRS_ZENABLE, state.d3dHidden);
+  d3ddev->SetRenderState(D3DRS_ZFUNC, depthoperators[state.d3dDepthOperator]);
+  d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, state.d3dZWriteEnable);
+  d3ddev->SetRenderState(D3DRS_CULLMODE, cullingstates[state.d3dCulling]);
 
   DWORD colorWriteMask = 0;
-  if (enigma::colorWriteEnable[0]) colorWriteMask |= D3DCOLORWRITEENABLE_RED;
-  if (enigma::colorWriteEnable[1]) colorWriteMask |= D3DCOLORWRITEENABLE_GREEN;
-  if (enigma::colorWriteEnable[2]) colorWriteMask |= D3DCOLORWRITEENABLE_BLUE;
-  if (enigma::colorWriteEnable[3]) colorWriteMask |= D3DCOLORWRITEENABLE_ALPHA;
+  if (state.colorWriteEnable[0]) colorWriteMask |= D3DCOLORWRITEENABLE_RED;
+  if (state.colorWriteEnable[1]) colorWriteMask |= D3DCOLORWRITEENABLE_GREEN;
+  if (state.colorWriteEnable[2]) colorWriteMask |= D3DCOLORWRITEENABLE_BLUE;
+  if (state.colorWriteEnable[3]) colorWriteMask |= D3DCOLORWRITEENABLE_ALPHA;
   d3ddev->SetRenderState(D3DRS_COLORWRITEENABLE, colorWriteMask);
-  d3ddev->SetRenderState(D3DRS_SRCBLEND, blendequivs[(blendMode[0]-1)%11]);
-  d3ddev->SetRenderState(D3DRS_DESTBLEND, blendequivs[(blendMode[1]-1)%11]);
-  d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, alphaBlend);
-  d3ddev->SetRenderState(D3DRS_ALPHATESTENABLE, alphaTest);
+  d3ddev->SetRenderState(D3DRS_SRCBLEND, blendequivs[(state.blendMode[0]-1)%11]);
+  d3ddev->SetRenderState(D3DRS_DESTBLEND, blendequivs[(state.blendMode[1]-1)%11]);
+  d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, state.alphaBlend);
+  d3ddev->SetRenderState(D3DRS_ALPHATESTENABLE, state.alphaTest);
   d3ddev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
-  d3ddev->SetRenderState(D3DRS_ALPHAREF, alphaTestRef);
+  d3ddev->SetRenderState(D3DRS_ALPHAREF, state.alphaTestRef);
 
-  graphics_state_flush_samplers();
+  graphics_state_flush_samplers(state);
 
-  d3ddev->SetRenderState(D3DRS_FOGENABLE, d3dFogEnabled);
-  if (d3dFogEnabled) graphics_state_flush_fog();
+  d3ddev->SetRenderState(D3DRS_FOGENABLE, state.d3dFogEnabled);
+  if (state.d3dFogEnabled) graphics_state_flush_fog(state);
 
-  d3ddev->SetRenderState(D3DRS_LIGHTING, d3dLighting);
-  if (d3dLighting) graphics_state_flush_lighting();
+  d3ddev->SetRenderState(D3DRS_LIGHTING, state.d3dLighting);
+  if (state.d3dLighting) graphics_state_flush_lighting(state);
 
   d3ddev->SetTransform(D3DTS_WORLD, (D3DMATRIX*)glm::value_ptr(world));
   d3ddev->SetTransform(D3DTS_VIEW, (D3DMATRIX*)glm::value_ptr(view));

@@ -19,21 +19,77 @@
 #ifndef ENIGMA_GSD3D_H
 #define ENIGMA_GSD3D_H
 
+#include "GSblend.h"
+#include "GScolors.h"
 #include "Universal_System/scalar.h"
 #include <string>
 
+namespace enigma_user {
+
+// ***** RENDER STATE CONSTANTS *****
+enum {
+  rs_nicest,
+  rs_fastest,
+  rs_dontcare,
+};
+
+enum {
+  rs_exp,    // D3DFOG_EXP
+  rs_exp2,   // D3DFOG_EXP2
+  rs_linear, // D3DFOG_LINEAR
+};
+
+enum {
+  rs_never, 	// Always False            D3DCMP_NEVER            GL_NEVER
+  rs_less, 	    // source Z < depth Z      D3DCMP_LESS             GL_LESS
+  rs_equal,	    // source Z = depth Z      D3DCMP_EQUAL            GL_EQUAL
+  rs_lequal, 	// source Z <= depth Z     D3DCMP_LESSEQUAL        GL_LEQUAL
+  rs_greater,	// source Z > depth Z      D3DCMP_GREATER          GL_GREATER
+  rs_notequal, 	// source Z != depth Z     D3DCMP_NOTEQUAL         GL_NOTEQUAL
+  rs_gequal, 	// source Z >= depth Z     D3DCMP_GREATEREQUAL     GL_GEQUAL
+  rs_always     // Always True             D3DCMP_ALWAYS           GL_ALWAYS
+};
+
+enum {
+  rs_keep,   // GL_KEEP
+  rs_zero,      //  GL_ZERO
+  rs_replace,     //  GL_REPLACE
+  rs_incr,  // GL_INCR
+  rs_incr_wrap, // GL_INCR_WRAP
+  rs_decr,  // GL_DECR
+  rs_decr_wrap,  // GL_DECR_WRAP
+  rs_invert     // GL_INVERT
+};
+
+// NOTE: Game Maker uses clockwise culling to define the front face,
+// OpenGL's mode sets what defines the front face, Direct3D's mode sets what defines the back face
+enum {
+  rs_none, // No culling
+  rs_cw, // Clockwise culling
+  rs_ccw // Counter-clockwise culling
+};
+
+enum {
+  rs_back,
+  rs_front,
+  rs_front_back
+};
+
+enum {
+  rs_point, // Render vertices as points
+  rs_line,  // Render in wireframe mode
+  rs_solid  // Normal render mode
+};
+
+} // namespace enigma_user
+
 namespace enigma {
 
-extern bool d3dMode;
-extern bool d3dHidden, d3dClipPlane, d3dZWriteEnable;
-extern bool d3dPerspective;
-extern bool d3dLighting;
-extern bool d3dShading;
-extern int d3dCulling, d3dDepthOperator;
-
-extern bool d3dFogEnabled;
-extern int d3dFogColor, d3dFogMode, d3dFogHint;
-extern float d3dFogStart, d3dFogEnd, d3dFogDensity;
+struct Sampler {
+  int texture=-1; // GML texture id, NOT GL texture id!
+  bool wrapu=false, wrapv=false, wrapw=false;
+  bool interpolate=false;
+};
 
 struct Light {
   gs_scalar x=0, y=0, z=0, range=0;
@@ -41,66 +97,41 @@ struct Light {
   int color=0;
 };
 
-extern int d3dLightsActive, d3dLightingAmbient;
-const Light& get_active_light(int id);
+struct RenderState {
+  unsigned char currentcolor[4] = {255,255,255,255};
+  bool colorWriteEnable[4] = {true,true,true,true};
+  bool lineStippleEnable=false, msaaEnabled=true, alphaBlend=true, alphaTest=false;
+  unsigned short lineStipplePattern=0xFFFF;
+  unsigned char alphaTestRef=0;
+  float circleprecision=24, drawPointSize=1.0f, drawLineWidth=1.0f;
+  int drawFillMode=enigma_user::rs_solid, lineStippleScale=1;
+  int blendMode[2]={enigma_user::bm_src_alpha,enigma_user::bm_inv_src_alpha};
 
-extern bool d3dStencilTest;
-extern unsigned int d3dStencilMask;
-extern int d3dStencilFunc, d3dStencilFuncRef, d3dStencilFuncMask,
-           d3dStencilOpStencilFail, d3dStencilOpDepthFail, d3dStencilOpPass;
+  Sampler samplers[8];
+
+  bool d3dMode=false, d3dHidden=false, d3dClipPlane=false, d3dZWriteEnable=true,
+      d3dPerspective=true, d3dLighting=false, d3dShading=true;
+  int d3dCulling=0, d3dDepthOperator=enigma_user::rs_lequal;
+
+  bool d3dFogEnabled=false;
+  int d3dFogColor=enigma_user::c_gray, d3dFogMode=enigma_user::rs_linear, d3dFogHint=enigma_user::rs_nicest;
+  float d3dFogStart=0.0f, d3dFogEnd=0.0f, d3dFogDensity=0.0f;
+
+  int d3dLightsActive=0, d3dLightingAmbient=enigma_user::c_black;
+
+  bool d3dStencilTest = false;
+  unsigned int d3dStencilMask = 0x0;
+  int d3dStencilFunc = enigma_user::rs_always, d3dStencilFuncRef = 0, d3dStencilFuncMask = -1,
+      d3dStencilOpStencilFail = enigma_user::rs_keep, d3dStencilOpDepthFail = enigma_user::rs_keep,
+      d3dStencilOpPass = enigma_user::rs_keep;
+};
+
+extern RenderState render_state;
+const Light& get_active_light(int id);
 
 } // namespace enigma
 
-// ***** RENDER STATE CONSTANTS *****
 namespace enigma_user {
-  enum {
-    rs_nicest,
-    rs_fastest,
-    rs_dontcare,
-  };
-
-  enum {
-    rs_exp,    // D3DFOG_EXP
-    rs_exp2,   // D3DFOG_EXP2
-    rs_linear, // D3DFOG_LINEAR
-  };
-
-  enum {
-    rs_never, 	// Always False            D3DCMP_NEVER            GL_NEVER
-    rs_less, 	    // source Z < depth Z      D3DCMP_LESS             GL_LESS
-    rs_equal,	    // source Z = depth Z      D3DCMP_EQUAL            GL_EQUAL
-    rs_lequal, 	// source Z <= depth Z     D3DCMP_LESSEQUAL        GL_LEQUAL
-    rs_greater,	// source Z > depth Z      D3DCMP_GREATER          GL_GREATER
-    rs_notequal, 	// source Z != depth Z     D3DCMP_NOTEQUAL         GL_NOTEQUAL
-    rs_gequal, 	// source Z >= depth Z     D3DCMP_GREATEREQUAL     GL_GEQUAL
-    rs_always     // Always True             D3DCMP_ALWAYS           GL_ALWAYS
-  };
-
-  enum {
-    rs_keep,   // GL_KEEP
-    rs_zero,      //  GL_ZERO
-    rs_replace,     //  GL_REPLACE
-    rs_incr,  // GL_INCR
-    rs_incr_wrap, // GL_INCR_WRAP
-    rs_decr,  // GL_DECR
-    rs_decr_wrap,  // GL_DECR_WRAP
-    rs_invert     // GL_INVERT
-  };
-
-  // NOTE: Game Maker uses clockwise culling to define the front face,
-  // OpenGL's mode sets what defines the front face, Direct3D's mode sets what defines the back face
-  enum {
-    rs_none, // No culling
-    rs_cw, // Clockwise culling
-    rs_ccw // Counter-clockwise culling
-  };
-
-  enum {
-    rs_back,
-    rs_front,
-    rs_front_back
-  };
-
   void d3d_clear_depth(double value=1.0L);
   void d3d_start();
   void d3d_end();

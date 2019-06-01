@@ -176,12 +176,6 @@ void graphics_apply_vertex_format(int format, size_t offset) {
     offset += size * sizeof(enigma::VertexElement);
   }
 
-  glsl_uniformf_internal(shaderprograms[bound_shader]->uni_color,
-                         (float)currentcolor[0]/255.0f,
-                         (float)currentcolor[1]/255.0f,
-                         (float)currentcolor[2]/255.0f,
-                         (float)currentcolor[3]/255.0f);
-
   if (useTextCoords) {
     GLint boundTex;
     glActiveTexture(GL_TEXTURE0);

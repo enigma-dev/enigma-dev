@@ -17,11 +17,14 @@
 #include "GScolors.h"
 #include "GScurves.h"
 #include "GSprimitives.h"
+#include "GSd3d.h"
 
 #include <stack>
 #include <vector>
 #include <algorithm> // min/max
 #include <math.h>
+
+namespace {
 
 int pr_curve_detail = 20;
 int pr_curve_mode = enigma_user::pr_linestrip;
@@ -35,6 +38,8 @@ struct splinePoint {
 typedef std::vector< splinePoint > spline;
 static std::stack< spline*, std::vector<spline*> > startedSplines;
 static std::stack< int > startedSplinesMode;
+
+} // namespace anonymous
 
 namespace enigma_user
 {
@@ -348,7 +353,7 @@ void draw_spline_begin(int mode)
 
 void draw_spline_vertex(gs_scalar x, gs_scalar y)
 {
-    splinePoint point={x,y,gs_scalar(enigma::currentcolor[3]), int(enigma::currentcolor[0] + (enigma::currentcolor[1] << 8) + (enigma::currentcolor[2] << 16))};
+    splinePoint point={x,y,gs_scalar(enigma::render_state.currentcolor[3]), int(enigma::render_state.currentcolor[0] + (enigma::render_state.currentcolor[1] << 8) + (enigma::render_state.currentcolor[2] << 16))};
     startedSplines.top()->push_back(point);
 }
 

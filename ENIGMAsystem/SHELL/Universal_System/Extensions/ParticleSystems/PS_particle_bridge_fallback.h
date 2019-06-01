@@ -28,7 +28,7 @@
 #include "PS_particle_system.h"
 #include "PS_particle.h"
 
-#include "Graphics_Systems/General/GSblend.h"
+#include "Graphics_Systems/General/GSd3d.h"
 
 namespace enigma {
   namespace particle_bridge {
@@ -83,7 +83,7 @@ namespace enigma {
           const double x = it->x, y = it->y;
           const double xscale = pt->xscale*size, yscale = pt->yscale*size;
 
-          if (pt->blend_additive != enigma::blendMode[0]){
+          if (pt->blend_additive != enigma::render_state.blendMode[0]){
               if (pt->blend_additive) {
                 enigma_user::draw_set_blend_mode(enigma_user::bm_add);
               }
@@ -103,7 +103,7 @@ namespace enigma {
 
           int sprite_id = get_particle_actual_sprite(ps->shape);
 
-          if (pt->blend_additive != enigma::blendMode[0]){
+          if (pt->blend_additive != enigma::render_state.blendMode[0]){
               if (pt->blend_additive) {
                 draw_set_blend_mode(enigma_user::bm_add);
               } else {
@@ -122,7 +122,7 @@ namespace enigma {
         particle_sprite* ps = get_particle_sprite(pt_sh_pixel);
         if (ps == NULL) return; // NOTE: Skip to next particle.
 
-        if (enigma::blendMode[0] != 0){
+        if (enigma::render_state.blendMode[0] != 0){
             draw_set_blend_mode(enigma_user::bm_normal);
         }
 
@@ -144,8 +144,8 @@ namespace enigma {
         y_offset = a_y_offset;
 
         // Draw the particle system either from oldest to youngest or reverse.
-        int blend_src  = enigma::blendMode[0];
-        int blend_dest = enigma::blendMode[1];
+        int blend_src  = enigma::render_state.blendMode[0];
+        int blend_dest = enigma::render_state.blendMode[1];
 
         if (oldtonew) {
           const std::vector<particle_instance>::iterator end = pi_list.end();
@@ -161,7 +161,7 @@ namespace enigma {
           }
         }
 
-        if (enigma::blendMode[0] != blend_src || enigma::blendMode[1] != blend_dest){
+        if (enigma::render_state.blendMode[0] != blend_src || enigma::render_state.blendMode[1] != blend_dest){
           enigma_user::draw_set_blend_mode_ext(blend_src, blend_dest);
         }
     }

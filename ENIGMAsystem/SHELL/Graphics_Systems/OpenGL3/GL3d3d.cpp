@@ -46,7 +46,7 @@ namespace enigma {
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 
-void graphics_state_flush_samplers() {
+void graphics_state_flush_samplers(const RenderState& state) {
   static bool samplers_generated = false;
   static GLuint sampler_ids[8];
   if (!samplers_generated) {
@@ -55,7 +55,7 @@ void graphics_state_flush_samplers() {
   }
 
   for (size_t i = 0; i < 8; i++) {
-    const auto sampler = samplers[i];
+    const auto sampler = state.samplers[i];
 
     const GLuint gt = get_texture_peer(sampler.texture);
     glActiveTexture(GL_TEXTURE0 + i);
@@ -75,10 +75,10 @@ void graphics_state_flush_samplers() {
   }
 }
 
-void graphics_state_flush_lighting(const glm::mat4& mv_matrix, const glm::mat3& normal_matrix) {
+void graphics_state_flush_lighting(const RenderState& state, const glm::mat4& mv_matrix, const glm::mat3& normal_matrix) {
   const auto current_shader = enigma::shaderprograms[enigma::bound_shader];
 
-  const float glAmbientColor[4] = {COL_GET_Rf(d3dLightingAmbient),COL_GET_Gf(d3dLightingAmbient),COL_GET_Bf(d3dLightingAmbient),1.0f};
+  const float glAmbientColor[4] = {COL_GET_Rf(state.d3dLightingAmbient),COL_GET_Gf(state.d3dLightingAmbient),COL_GET_Bf(state.d3dLightingAmbient),1.0f};
   enigma_user::glsl_uniform4fv(current_shader->uni_ambient_color, 1, glAmbientColor);
 
   // these 4 are harri's material properties
@@ -91,7 +91,7 @@ void graphics_state_flush_lighting(const glm::mat4& mv_matrix, const glm::mat3& 
   enigma_user::glsl_uniform4fv(current_shader->uni_material_specular, 1, material_specular);
   enigma_user::glsl_uniformf(current_shader->uni_material_shininess, material_shininess);
 
-  for (int i = 0; i < d3dLightsActive; ++i) {
+  for (int i = 0; i < state.d3dLightsActive; ++i) {
     const Light& light = get_active_light(i);
 
     const float posFactor = light.directional ? -1.0f : 1.0f;
@@ -120,42 +120,48 @@ void graphics_state_flush_lighting(const glm::mat4& mv_matrix, const glm::mat3& 
     enigma_user::glsl_uniformf(current_shader->uni_light_lAttenuation[i], 0.0);
     enigma_user::glsl_uniformf(current_shader->uni_light_qAttenuation[i], 8.0f/(light.range*light.range));
   }
-  enigma_user::glsl_uniformi(current_shader->uni_lights_active, d3dLightsActive);
+  enigma_user::glsl_uniformi(current_shader->uni_lights_active, state.d3dLightsActive);
 }
 
-void graphics_state_flush_stencil() {
-  glStencilMask(d3dStencilMask);
-  glStencilFunc(depthoperators[d3dStencilFunc], d3dStencilFuncRef, d3dStencilFuncMask);
-  glStencilOp(stenciloperators[d3dStencilOpStencilFail], stenciloperators[d3dStencilOpDepthFail],
-              stenciloperators[d3dStencilOpPass]);
+void graphics_state_flush_stencil(const RenderState& state) {
+  glStencilMask(state.d3dStencilMask);
+  glStencilFunc(depthoperators[state.d3dStencilFunc], state.d3dStencilFuncRef, state.d3dStencilFuncMask);
+  glStencilOp(stenciloperators[state.d3dStencilOpStencilFail], stenciloperators[state.d3dStencilOpDepthFail],
+              stenciloperators[state.d3dStencilOpPass]);
 }
 
-void graphics_state_flush() {
+void graphics_state_flush(const RenderState& state) {
   const auto current_shader = enigma::shaderprograms[enigma::bound_shader];
-  glPolygonMode(GL_FRONT_AND_BACK, fillmodes[drawFillMode]);
-  glPointSize(drawPointSize);
-  glLineWidth(drawLineWidth);
+  glsl_uniformf_internal(current_shader->uni_color,
+                        (float)state.currentcolor[0]/255.0f,
+                        (float)state.currentcolor[1]/255.0f,
+                        (float)state.currentcolor[2]/255.0f,
+                        (float)state.currentcolor[3]/255.0f);
 
-  (msaaEnabled?glEnable:glDisable)(GL_MULTISAMPLE);
-  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
-  glDepthFunc(depthoperators[d3dDepthOperator]);
-  glDepthMask(d3dZWriteEnable);
-  (d3dCulling>0?glEnable:glDisable)(GL_CULL_FACE);
-  if (d3dCulling > 0){
-    glFrontFace(windingstates[d3dCulling-1]);
+  glPolygonMode(GL_FRONT_AND_BACK, fillmodes[state.drawFillMode]);
+  glPointSize(state.drawPointSize);
+  glLineWidth(state.drawLineWidth);
+
+  (state.msaaEnabled?glEnable:glDisable)(GL_MULTISAMPLE);
+  (state.d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
+  glDepthFunc(depthoperators[state.d3dDepthOperator]);
+  glDepthMask(state.d3dZWriteEnable);
+  (state.d3dCulling>0?glEnable:glDisable)(GL_CULL_FACE);
+  if (state.d3dCulling > 0){
+    glFrontFace(windingstates[state.d3dCulling-1]);
   }
-  (d3dClipPlane?glEnable:glDisable)(GL_CLIP_DISTANCE0);
+  (state.d3dClipPlane?glEnable:glDisable)(GL_CLIP_DISTANCE0);
 
-  glColorMask(colorWriteEnable[0], colorWriteEnable[1], colorWriteEnable[2], colorWriteEnable[3]);
-  glBlendFunc(blendequivs[(blendMode[0]-1)%11],blendequivs[(blendMode[1]-1)%11]);
-  (alphaBlend?glEnable:glDisable)(GL_BLEND);
-  enigma_user::glsl_uniformi(current_shader->uni_alphaTestEnable, alphaTest);
-  enigma_user::glsl_uniformf(current_shader->uni_alphaTest, (gs_scalar)alphaTestRef/255.0);
+  glColorMask(state.colorWriteEnable[0], state.colorWriteEnable[1], state.colorWriteEnable[2], state.colorWriteEnable[3]);
+  glBlendFunc(blendequivs[(state.blendMode[0]-1)%11],blendequivs[(state.blendMode[1]-1)%11]);
+  (state.alphaBlend?glEnable:glDisable)(GL_BLEND);
+  enigma_user::glsl_uniformi(current_shader->uni_alphaTestEnable, state.alphaTest);
+  enigma_user::glsl_uniformf(current_shader->uni_alphaTest, (gs_scalar)state.alphaTestRef/255.0);
 
-  graphics_state_flush_samplers();
+  graphics_state_flush_samplers(state);
 
-  (d3dStencilTest?glEnable:glDisable)(GL_STENCIL_TEST);
-  if (d3dStencilTest) graphics_state_flush_stencil();
+  (state.d3dStencilTest?glEnable:glDisable)(GL_STENCIL_TEST);
+  if (state.d3dStencilTest) graphics_state_flush_stencil(state);
 
   //Send transposed (done by GL because of "true" in the function below) matrices to shader
   const glm::mat4 mv_matrix = view * world;
@@ -169,8 +175,8 @@ void graphics_state_flush() {
   glsl_uniform_matrix4fv_internal(current_shader->uni_mvpMatrix,  1, glm::value_ptr(glm::transpose(mvp_matrix)));
   glsl_uniform_matrix3fv_internal(current_shader->uni_normalMatrix,  1, glm::value_ptr(normal_matrix));
 
-  enigma_user::glsl_uniformi(current_shader->uni_lightEnable, d3dLighting);
-  if (d3dLighting) graphics_state_flush_lighting(mv_matrix, normal_matrix);
+  enigma_user::glsl_uniformi(current_shader->uni_lightEnable, state.d3dLighting);
+  if (state.d3dLighting) graphics_state_flush_lighting(state, mv_matrix, normal_matrix);
 }
 
 } // namespace enigma

@@ -28,12 +28,6 @@ int draw_set_blend_mode_ext(ARG src,ARG2 dest)
 #ifndef ENIGMA_GSBLEND_H
 #define ENIGMA_GSBLEND_H
 
-namespace enigma {
-
-extern int blendMode[2];
-
-} // namespace enigma
-
 namespace enigma_user {
 
 enum {

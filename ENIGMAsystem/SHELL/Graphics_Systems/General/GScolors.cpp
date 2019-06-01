@@ -20,6 +20,7 @@
 #include "GScolors.h"
 #include "GScolor_macros.h"
 #include "GSstdraw.h"
+#include "GSd3d.h"
 
 #include <math.h>
 
@@ -27,52 +28,45 @@ static inline int min(int x,int y){return x<y ? x:y;}
 static inline int max(int x,int y){return x>y ? x:y;}
 static inline int bclamp(int x){return x > 255 ? 255 : x < 0 ? 0 : x;}
 
-namespace enigma {
-
-unsigned char currentcolor[4] = {255,255,255,255};
-bool colorWriteEnable[4] = {true,true,true,true};
-
-} // namespace enigma
-
 namespace enigma_user {
 
 void draw_set_color(int color)
 {
   enigma::draw_set_state_dirty();
-  enigma::currentcolor[0] = COL_GET_R(color);
-  enigma::currentcolor[1] = COL_GET_G(color);
-  enigma::currentcolor[2] = COL_GET_B(color);
+  enigma::render_state.currentcolor[0] = COL_GET_R(color);
+  enigma::render_state.currentcolor[1] = COL_GET_G(color);
+  enigma::render_state.currentcolor[2] = COL_GET_B(color);
 }
 
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
 {
   enigma::draw_set_state_dirty();
-  enigma::currentcolor[0] = red;
-  enigma::currentcolor[1] = green;
-  enigma::currentcolor[2] = blue;
+  enigma::render_state.currentcolor[0] = red;
+  enigma::render_state.currentcolor[1] = green;
+  enigma::render_state.currentcolor[2] = blue;
 }
 
 void draw_set_alpha(float alpha)
 {
   enigma::draw_set_state_dirty();
-  enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
+  enigma::render_state.currentcolor[3] = CLAMP_ALPHA(alpha);
 }
 
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
 {
   enigma::draw_set_state_dirty();
-  enigma::currentcolor[0] = red;
-  enigma::currentcolor[1] = green;
-  enigma::currentcolor[2] = blue;
-  enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
+  enigma::render_state.currentcolor[0] = red;
+  enigma::render_state.currentcolor[1] = green;
+  enigma::render_state.currentcolor[2] = blue;
+  enigma::render_state.currentcolor[3] = CLAMP_ALPHA(alpha);
 }
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha) {
   enigma::draw_set_state_dirty();
-  enigma::colorWriteEnable[0] = red;
-  enigma::colorWriteEnable[1] = green;
-  enigma::colorWriteEnable[2] = blue;
-  enigma::colorWriteEnable[3] = alpha;
+  enigma::render_state.colorWriteEnable[0] = red;
+  enigma::render_state.colorWriteEnable[1] = green;
+  enigma::render_state.colorWriteEnable[2] = blue;
+  enigma::render_state.colorWriteEnable[3] = alpha;
 }
 
 int merge_color(int c1,int c2,double amount)
@@ -84,14 +78,14 @@ int merge_color(int c1,int c2,double amount)
 }
 
 int draw_get_color(){
-  return enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  return enigma::render_state.currentcolor[0] | (enigma::render_state.currentcolor[1] << 8) | (enigma::render_state.currentcolor[2] << 16);
 }
-int draw_get_red(){return enigma::currentcolor[0];}
-int draw_get_green(){return enigma::currentcolor[1];}
-int draw_get_blue(){return enigma::currentcolor[2];}
+int draw_get_red(){return enigma::render_state.currentcolor[0];}
+int draw_get_green(){return enigma::render_state.currentcolor[1];}
+int draw_get_blue(){return enigma::render_state.currentcolor[2];}
 
 float draw_get_alpha(){
-  return enigma::currentcolor[3] / 255.0;
+  return enigma::render_state.currentcolor[3] / 255.0;
 }
 
 int color_get_red  (int c){return COL_GET_R(c);}

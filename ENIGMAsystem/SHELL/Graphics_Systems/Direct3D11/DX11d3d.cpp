@@ -55,12 +55,12 @@ ID3D11ShaderResourceView *getDefaultWhiteTexture() {
 
 namespace enigma {
 
-void graphics_state_flush_samplers() {
+void graphics_state_flush_samplers(const RenderState& state) {
   static ID3D11ShaderResourceView *nullTextureView = getDefaultWhiteTexture();
   static ID3D11SamplerState *pSamplerStates[8];
 
   for (int i = 0; i < 8; ++i) {
-    const auto sampler = samplers[i];
+    const auto sampler = state.samplers[i];
 
     ID3D11ShaderResourceView *view = (sampler.texture == -1)?
       nullTextureView:((enigma::DX11Texture*)enigma::textures[sampler.texture])->view;
@@ -90,7 +90,7 @@ void graphics_state_flush_samplers() {
   }
 }
 
-void graphics_state_flush() {
+void graphics_state_flush(const RenderState& state) {
   // Setup the raster description which will determine how and what polygons will be drawn.
   D3D11_RASTERIZER_DESC rasterDesc = { };
   rasterDesc.AntialiasedLineEnable = false;
@@ -98,9 +98,9 @@ void graphics_state_flush() {
   rasterDesc.DepthBias = 0;
   rasterDesc.DepthBiasClamp = 0.0f;
   rasterDesc.DepthClipEnable = false;
-  rasterDesc.FillMode = fillmodes[drawFillMode];
+  rasterDesc.FillMode = fillmodes[state.drawFillMode];
   rasterDesc.FrontCounterClockwise = false;
-  rasterDesc.MultisampleEnable = msaaEnabled;
+  rasterDesc.MultisampleEnable = state.msaaEnabled;
   rasterDesc.ScissorEnable = false;
   rasterDesc.SlopeScaledDepthBias = 0.0f;
 
@@ -111,8 +111,8 @@ void graphics_state_flush() {
 
   D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
 
-  depthStencilDesc.DepthEnable = d3dHidden;
-  depthStencilDesc.DepthWriteMask = d3dZWriteEnable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+  depthStencilDesc.DepthEnable = state.d3dHidden;
+  depthStencilDesc.DepthWriteMask = state.d3dZWriteEnable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
   depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
   depthStencilDesc.StencilEnable = false;
@@ -140,14 +140,14 @@ void graphics_state_flush() {
 
   blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
 
-  blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = blend_equivs[(blendMode[0]-1)%11];
-  blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = blend_equivs[(blendMode[1]-1)%11];
+  blendStateDesc.RenderTarget[0].SrcBlendAlpha = blendStateDesc.RenderTarget[0].SrcBlend = blend_equivs[(state.blendMode[0]-1)%11];
+  blendStateDesc.RenderTarget[0].DestBlendAlpha = blendStateDesc.RenderTarget[0].DestBlend = blend_equivs[(state.blendMode[1]-1)%11];
   blendStateDesc.RenderTarget[0].BlendOpAlpha = blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
   UINT8 colorWriteMask = 0;
-  if (enigma::colorWriteEnable[0]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_RED;
-  if (enigma::colorWriteEnable[1]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_GREEN;
-  if (enigma::colorWriteEnable[2]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_BLUE;
-  if (enigma::colorWriteEnable[3]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_ALPHA;
+  if (state.colorWriteEnable[0]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_RED;
+  if (state.colorWriteEnable[1]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_GREEN;
+  if (state.colorWriteEnable[2]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_BLUE;
+  if (state.colorWriteEnable[3]) colorWriteMask |= D3D11_COLOR_WRITE_ENABLE_ALPHA;
   blendStateDesc.RenderTarget[0].RenderTargetWriteMask = colorWriteMask;
 
   static ID3D11BlendState* pBlendState = NULL;
@@ -155,7 +155,7 @@ void graphics_state_flush() {
   m_device->CreateBlendState(&blendStateDesc, &pBlendState);
   m_deviceContext->OMSetBlendState(pBlendState, NULL, 0xffffffff);
 
-  graphics_state_flush_samplers();
+  graphics_state_flush_samplers(state);
 }
 
 } // namespace enigma

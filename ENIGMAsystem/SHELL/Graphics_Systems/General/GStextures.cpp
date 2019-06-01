@@ -17,6 +17,7 @@
 **/
 
 #include "GStextures.h"
+#include "GSd3d.h"
 #include "GSstdraw.h"
 #include "GStextures_impl.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -41,7 +42,6 @@ inline unsigned int lgpp2(unsigned int x) { // Trailing zero count. lg for perfe
 namespace enigma {
 
 vector<Texture*> textures;
-Sampler samplers[8];
 
 int graphics_duplicate_texture(int tex, bool mipmap) {
   unsigned w = textures[tex]->width, h = textures[tex]->height,
@@ -168,19 +168,19 @@ gs_scalar texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
-  if (enigma::samplers[stage].texture == texid) return;
+  if (enigma::render_state.samplers[stage].texture == texid) return;
   enigma::draw_set_state_dirty();
-  enigma::samplers[stage].texture = texid;
+  enigma::render_state.samplers[stage].texture = texid;
 }
 
 int texture_get_stage(int stage) {
-  return enigma::samplers[stage].texture;
+  return enigma::render_state.samplers[stage].texture;
 }
 
 void texture_reset() {
-  if (enigma::samplers[0].texture == -1) return;
+  if (enigma::render_state.samplers[0].texture == -1) return;
   enigma::draw_set_state_dirty();
-  enigma::samplers[0].texture = -1;
+  enigma::render_state.samplers[0].texture = -1;
 }
 
 void texture_set_enabled(bool enable){}
@@ -189,21 +189,21 @@ void texture_set_blending(bool enable){}
 
 void texture_set_interpolation_ext(int sampler, bool enable) {
   enigma::draw_set_state_dirty();
-  enigma::samplers[sampler].interpolate = enable;
+  enigma::render_state.samplers[sampler].interpolate = enable;
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat) {
   enigma::draw_set_state_dirty();
-  enigma::samplers[sampler].wrapu = repeat;
-  enigma::samplers[sampler].wrapv = repeat;
-  enigma::samplers[sampler].wrapw = repeat;
+  enigma::render_state.samplers[sampler].wrapu = repeat;
+  enigma::render_state.samplers[sampler].wrapv = repeat;
+  enigma::render_state.samplers[sampler].wrapw = repeat;
 }
 
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw) {
   enigma::draw_set_state_dirty();
-  enigma::samplers[sampler].wrapu = wrapu;
-  enigma::samplers[sampler].wrapv = wrapv;
-  enigma::samplers[sampler].wrapw = wrapw;
+  enigma::render_state.samplers[sampler].wrapu = wrapu;
+  enigma::render_state.samplers[sampler].wrapv = wrapv;
+  enigma::render_state.samplers[sampler].wrapw = wrapw;
 }
 
 void texture_set_border_ext(int sampler, int r, int g, int b, double a) {

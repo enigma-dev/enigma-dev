@@ -17,13 +17,8 @@
 **/
 
 #include "GSblend.h"
+#include "GSd3d.h"
 #include "GSstdraw.h"
-
-namespace enigma {
-
-int blendMode[2]={enigma_user::bm_src_alpha,enigma_user::bm_inv_src_alpha};
-
-} // namespace enigma
 
 namespace enigma_user {
 
@@ -31,17 +26,17 @@ void draw_set_blend_mode(int mode) {
   enigma::draw_set_state_dirty();
   const static int dest_modes[] = {bm_inv_src_alpha,bm_one,bm_inv_src_color,bm_inv_src_color};
 
-  enigma::blendMode[0] = (mode == bm_subtract) ? bm_zero : bm_src_alpha;
-  enigma::blendMode[1] = dest_modes[mode % 4];
+  enigma::render_state.blendMode[0] = (mode == bm_subtract) ? bm_zero : bm_src_alpha;
+  enigma::render_state.blendMode[1] = dest_modes[mode % 4];
 }
 
 void draw_set_blend_mode_ext(int src, int dest) {
   enigma::draw_set_state_dirty();
-  enigma::blendMode[0] = src;
-  enigma::blendMode[1] = dest;
+  enigma::render_state.blendMode[0] = src;
+  enigma::render_state.blendMode[1] = dest;
 }
 
-int draw_get_blend_mode_src() { return enigma::blendMode[0]; }
-int draw_get_blend_mode_dest() { return enigma::blendMode[1]; }
+int draw_get_blend_mode_src() { return enigma::render_state.blendMode[0]; }
+int draw_get_blend_mode_dest() { return enigma::render_state.blendMode[1]; }
 
 } // namespace enigma_user

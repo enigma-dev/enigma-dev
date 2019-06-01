@@ -179,7 +179,7 @@ static inline int draw_tiles()
 
 void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
 {
-  if (enigma::d3dMode && enigma::d3dPerspective)
+  if (enigma::render_state.d3dMode && enigma::render_state.d3dPerspective)
     d3d_set_projection_perspective(x, y, w, h, angle);
   else
     d3d_set_projection_ortho(x, y, w, h, angle);
@@ -189,7 +189,7 @@ void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
 
   // Clear the depth buffer if 3d mode is on at the beginning of the draw step.
   // Always clear the depth buffer for every view, this was Game Maker 8.1 behaviour
-  if (enigma::d3dMode)
+  if (enigma::render_state.d3dMode)
     enigma_user::d3d_clear_depth();
 }
 
@@ -197,9 +197,9 @@ static inline void draw_gui()
 {
   // turn some state off automatically for the user to draw the GUI
   // this is exactly what GMSv1.4 does
-  int culling = enigma::d3dCulling;
-  bool hidden = enigma::d3dHidden;
-  bool zwrite = enigma::d3dZWriteEnable;
+  int culling = enigma::render_state.d3dCulling;
+  bool hidden = enigma::render_state.d3dHidden;
+  bool zwrite = enigma::render_state.d3dZWriteEnable;
   d3d_set_zwriteenable(false);
   d3d_set_culling(rs_none);
   d3d_set_hidden(false);
@@ -290,9 +290,9 @@ void screen_init() {
     }
   }
 
-  enigma::d3dHidden = false;
-  enigma::d3dCulling = rs_none;
-  enigma::alphaBlend = true;
+  enigma::render_state.d3dHidden = false;
+  enigma::render_state.d3dCulling = rs_none;
+  enigma::render_state.alphaBlend = true;
   texture_reset();
 
   // make sure all of the default state values are
@@ -372,7 +372,7 @@ void screen_redraw()
     d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
 
     // Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
-    if (enigma::d3dMode)
+    if (enigma::render_state.d3dMode)
       d3d_clear_depth();
 
     draw_gui();

@@ -16,8 +16,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GSprimitives.h"
 #include "GSstdraw.h"
+#include "GSprimitives.h"
+#include "GSd3d.h"
 #include "GScolors.h"
 
 #include "Universal_System/roomsystem.h"
@@ -35,12 +36,6 @@ bool drawStateDirty=false;
 } // namespace anonymous
 
 namespace enigma {
-
-bool lineStippleEnable=false, msaaEnabled=true, alphaBlend=true, alphaTest=false;
-unsigned short lineStipplePattern=0xFFFF;
-unsigned char alphaTestRef=0;
-float circleprecision=24, drawPointSize=1.0f, drawLineWidth=1.0f;
-int drawFillMode=enigma_user::rs_solid, lineStippleScale=1;
 
 // handler for when a generic rendering state has changed
 void draw_set_state_dirty(bool dirty) { drawStateDirty = dirty; }
@@ -66,7 +61,7 @@ void draw_state_flush() {
 
   flushing = true; // we are now flushing the state
 
-  enigma::graphics_state_flush();
+  enigma::graphics_state_flush(enigma::render_state);
   drawStateDirty = false; // state is not dirty now
 
   flushing = false; // done flushing state
@@ -74,58 +69,58 @@ void draw_state_flush() {
 
 void draw_set_msaa_enabled(bool enable) {
   enigma::draw_set_state_dirty();
-  enigma::msaaEnabled = enable;
+  enigma::render_state.msaaEnabled = enable;
 }
 
 void draw_enable_alphablend(bool enable) {
   enigma::draw_set_state_dirty();
-  enigma::alphaBlend = enable;
+  enigma::render_state.alphaBlend = enable;
 }
 
 void draw_set_alpha_test(bool enable) {
   enigma::draw_set_state_dirty();
-  enigma::alphaTest = enable;
+  enigma::render_state.alphaTest = enable;
 }
 
 void draw_set_alpha_test_ref_value(unsigned val) {
   enigma::draw_set_state_dirty();
-  enigma::alphaTestRef = val;
+  enigma::render_state.alphaTestRef = val;
 }
 
 void draw_set_point_size(float value) {
   enigma::draw_set_state_dirty();
-  enigma::drawPointSize = value;
+  enigma::render_state.drawPointSize = value;
 }
 
 void draw_set_fill_mode(int fill) {
   enigma::draw_set_state_dirty();
-  enigma::drawFillMode = fill;
+  enigma::render_state.drawFillMode = fill;
 }
 
 void draw_set_line_width(float value) {
   enigma::draw_set_state_dirty();
-  enigma::drawLineWidth = value;
+  enigma::render_state.drawLineWidth = value;
 }
 
 void draw_set_line_stipple(bool enable) {
   enigma::draw_set_state_dirty();
-  enigma::lineStippleEnable = enable;
+  enigma::render_state.lineStippleEnable = enable;
 }
 
 void draw_set_line_pattern(int scale, unsigned short pattern) {
   enigma::draw_set_state_dirty();
-  enigma::lineStippleScale = scale;
-  enigma::lineStipplePattern = pattern;
+  enigma::render_state.lineStippleScale = scale;
+  enigma::render_state.lineStipplePattern = pattern;
 }
 
 void draw_set_circle_precision(float pr) {
   enigma::draw_set_state_dirty();
-  enigma::circleprecision = pr < 3 ? 3 : pr;
+  enigma::render_state.circleprecision = pr < 3 ? 3 : pr;
 }
 
-bool draw_get_alpha_test() { return enigma::alphaTest; }
-unsigned draw_get_alpha_test_ref_value() { return enigma::alphaTestRef; }
-float draw_get_circle_precision() { return enigma::circleprecision; }
+bool draw_get_alpha_test() { return enigma::render_state.alphaTest; }
+unsigned draw_get_alpha_test_ref_value() { return enigma::render_state.alphaTestRef; }
+float draw_get_circle_precision() { return enigma::render_state.circleprecision; }
 
 void draw_point(gs_scalar x, gs_scalar y)
 {
@@ -268,7 +263,7 @@ void draw_rectangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
 
 void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 {
-  gs_scalar pr = 2 * M_PI / enigma::circleprecision;
+  gs_scalar pr = 2 * M_PI / enigma::render_state.circleprecision;
   if (outline) {
     draw_primitive_begin(pr_linestrip);
   } else {
@@ -285,7 +280,7 @@ void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 void draw_circle_color(gs_scalar x, gs_scalar y, float rad,int c1, int c2,bool outline)
 {
   gs_scalar alpha = draw_get_alpha();
-  gs_scalar pr=2*M_PI/enigma::circleprecision;
+  gs_scalar pr=2*M_PI/enigma::render_state.circleprecision;
   if(outline) {
     draw_primitive_begin(pr_linestrip);
   } else {
@@ -356,7 +351,7 @@ void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool o
   gs_scalar
       x=(x1+x2)/2,y=(y1+y2)/2,
       hr=fabs(x2-x),vr=fabs(y2-y),
-      pr=2*M_PI/enigma::circleprecision;
+      pr=2*M_PI/enigma::render_state.circleprecision;
   if (outline)
   {
   draw_primitive_begin(pr_linelist);
@@ -392,7 +387,7 @@ void draw_ellipse_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, 
   gs_scalar
       x=(x1+x2)/2,y=(y1+y2)/2,
       hr=fabs(x2-x),vr=fabs(y2-y),
-      pr=2*M_PI/enigma::circleprecision;
+      pr=2*M_PI/enigma::render_state.circleprecision;
 
   gs_scalar alpha = draw_get_alpha();
     if (outline) {
@@ -437,7 +432,7 @@ void draw_sector(gs_scalar x, gs_scalar y, gs_scalar rx, gs_scalar ry, float a1,
   a1 *= M_PI/180;
   a2 *= M_PI/180;
 
-  gs_scalar pr = 2*M_PI/enigma::circleprecision;
+  gs_scalar pr = 2*M_PI/enigma::render_state.circleprecision;
 
   if (outline) {
     draw_primitive_begin(pr_linestrip);
@@ -507,7 +502,7 @@ void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float
     y1=t;
   }
   x1++, y1++; //This fixes an off-by-one error when drawing over a regular draw_rectangle
-  gs_scalar pr = 2 * M_PI / enigma::circleprecision;
+  gs_scalar pr = 2 * M_PI / enigma::render_state.circleprecision;
   if (outline) {
     draw_primitive_begin(pr_linestrip);
   }else{
@@ -556,7 +551,7 @@ void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2
   }
   x1++, y1++; //This fixes an off-by-one error when drawing over a regular draw_rectangle
   gs_scalar alpha = draw_get_alpha();
-  gs_scalar pr = 2 * M_PI / enigma::circleprecision;
+  gs_scalar pr = 2 * M_PI / enigma::render_state.circleprecision;
   if (outline) {
     draw_primitive_begin(pr_linestrip);
   }else{
@@ -603,7 +598,7 @@ void draw_roundrect_ext(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, 
     y1=t;
   }
   x1++, y1++; //This fixes an off-by-one error when drawing over a regular draw_rectangle
-  gs_scalar pr = 2 * M_PI / enigma::circleprecision;
+  gs_scalar pr = 2 * M_PI / enigma::render_state.circleprecision;
   if (outline) {
     draw_primitive_begin(pr_linestrip);
   }else{
@@ -652,7 +647,7 @@ void draw_roundrect_color_ext(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scala
   }
   x1++, y1++; //This fixes an off-by-one error when drawing over a regular draw_rectangle
   gs_scalar alpha = draw_get_alpha();
-  gs_scalar pr = 2 * M_PI / enigma::circleprecision;
+  gs_scalar pr = 2 * M_PI / enigma::render_state.circleprecision;
   if (outline) {
     draw_primitive_begin(pr_linestrip);
   }else{

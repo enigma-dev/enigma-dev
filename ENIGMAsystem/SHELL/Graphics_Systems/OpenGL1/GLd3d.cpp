@@ -40,9 +40,9 @@ using namespace std;
 
 namespace enigma {
 
-void graphics_state_flush_samplers() {
+void graphics_state_flush_samplers(const RenderState& state) {
   for (int i = 0; i < 8; ++i) {
-    const Sampler& sampler = samplers[i];
+    const Sampler& sampler = state.samplers[i];
     const auto tex = get_texture_peer(sampler.texture);
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, tex);
@@ -55,19 +55,19 @@ void graphics_state_flush_samplers() {
   }
 }
 
-void graphics_state_flush_fog() {
-  glFogi(GL_FOG_MODE, fogmodes[d3dFogMode]);
-  glHint(GL_FOG_HINT, d3dFogHint);
-  const float glFogColor[] = {COL_GET_Rf(d3dFogColor),COL_GET_Gf(d3dFogColor),COL_GET_Bf(d3dFogColor)};
+void graphics_state_flush_fog(const RenderState& state) {
+  glFogi(GL_FOG_MODE, fogmodes[state.d3dFogMode]);
+  glHint(GL_FOG_HINT, state.d3dFogHint);
+  const float glFogColor[] = {COL_GET_Rf(state.d3dFogColor),COL_GET_Gf(state.d3dFogColor),COL_GET_Bf(state.d3dFogColor)};
   glFogfv(GL_FOG_COLOR, glFogColor);
-  glFogf(GL_FOG_START, d3dFogStart);
-  glFogf(GL_FOG_END, d3dFogEnd);
-  glFogf(GL_FOG_DENSITY, d3dFogDensity);
+  glFogf(GL_FOG_START, state.d3dFogStart);
+  glFogf(GL_FOG_END, state.d3dFogEnd);
+  glFogf(GL_FOG_DENSITY, state.d3dFogDensity);
 }
 
-void graphics_state_flush_lighting() {
-  glShadeModel(d3dShading?GL_SMOOTH:GL_FLAT);
-  const float glAmbientColor[4] = {COL_GET_Rf(d3dLightingAmbient),COL_GET_Gf(d3dLightingAmbient),COL_GET_Bf(d3dLightingAmbient),1.0f};
+void graphics_state_flush_lighting(const RenderState& state) {
+  glShadeModel(state.d3dShading?GL_SMOOTH:GL_FLAT);
+  const float glAmbientColor[4] = {COL_GET_Rf(state.d3dLightingAmbient),COL_GET_Gf(state.d3dLightingAmbient),COL_GET_Bf(state.d3dLightingAmbient),1.0f};
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glAmbientColor);
 
   // this is done for compatibility with D3D/GM
@@ -75,7 +75,7 @@ void graphics_state_flush_lighting() {
   // define lights with respect to view matrix but not world
   glLoadMatrixf(glm::value_ptr(enigma::view));
   for (int i = 0; i < 8; ++i) {
-    const bool enabled = (i<d3dLightsActive);
+    const bool enabled = (i<state.d3dLightsActive);
 
     (enabled?glEnable:glDisable)(GL_LIGHT0+i);
     if (!enabled) continue; // don't bother updating disabled lights
@@ -100,49 +100,49 @@ void graphics_state_flush_lighting() {
   }
 }
 
-void graphics_state_flush_stencil() {
-  glStencilMask(d3dStencilMask);
-  glStencilFunc(depthoperators[d3dStencilFunc], d3dStencilFuncRef, d3dStencilFuncMask);
-  glStencilOp(stenciloperators[d3dStencilOpStencilFail], stenciloperators[d3dStencilOpDepthFail],
-              stenciloperators[d3dStencilOpPass]);
+void graphics_state_flush_stencil(const RenderState& state) {
+  glStencilMask(state.d3dStencilMask);
+  glStencilFunc(depthoperators[state.d3dStencilFunc], state.d3dStencilFuncRef, state.d3dStencilFuncMask);
+  glStencilOp(stenciloperators[state.d3dStencilOpStencilFail], stenciloperators[state.d3dStencilOpDepthFail],
+              stenciloperators[state.d3dStencilOpPass]);
 }
 
-void graphics_state_flush() {
-  glColor4ubv(enigma::currentcolor);
-  glPolygonMode(GL_FRONT_AND_BACK, fillmodes[drawFillMode]);
-  glPointSize(drawPointSize);
-  glLineWidth(drawLineWidth);
+void graphics_state_flush(const RenderState& state) {
+  glColor4ubv(state.currentcolor);
+  glPolygonMode(GL_FRONT_AND_BACK, fillmodes[state.drawFillMode]);
+  glPointSize(state.drawPointSize);
+  glLineWidth(state.drawLineWidth);
 
-  (lineStippleEnable?glEnable:glDisable)(GL_LINE_STIPPLE);
-  glLineStipple(lineStippleScale,lineStipplePattern);
+  (state.lineStippleEnable?glEnable:glDisable)(GL_LINE_STIPPLE);
+  glLineStipple(state.lineStippleScale,state.lineStipplePattern);
 
-  (msaaEnabled?glEnable:glDisable)(GL_MULTISAMPLE);
-  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
-  glDepthFunc(depthoperators[d3dDepthOperator]);
-  glDepthMask(d3dZWriteEnable);
-  (d3dCulling>0?glEnable:glDisable)(GL_CULL_FACE);
-  if (d3dCulling > 0){
-    glFrontFace(windingstates[d3dCulling-1]);
+  (state.msaaEnabled?glEnable:glDisable)(GL_MULTISAMPLE);
+  (state.d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
+  glDepthFunc(depthoperators[state.d3dDepthOperator]);
+  glDepthMask(state.d3dZWriteEnable);
+  (state.d3dCulling>0?glEnable:glDisable)(GL_CULL_FACE);
+  if (state.d3dCulling > 0){
+    glFrontFace(windingstates[state.d3dCulling-1]);
   }
 
-  glColorMask(colorWriteEnable[0], colorWriteEnable[1], colorWriteEnable[2], colorWriteEnable[3]);
-  glBlendFunc(blendequivs[(blendMode[0]-1)%11],blendequivs[(blendMode[1]-1)%11]);
-  (alphaBlend?glEnable:glDisable)(GL_BLEND);
-  (alphaTest?glEnable:glDisable)(GL_ALPHA_TEST);
-  glAlphaFunc(GL_GREATER, alphaTestRef/255);
+  glColorMask(state.colorWriteEnable[0], state.colorWriteEnable[1], state.colorWriteEnable[2], state.colorWriteEnable[3]);
+  glBlendFunc(blendequivs[(state.blendMode[0]-1)%11],blendequivs[(state.blendMode[1]-1)%11]);
+  (state.alphaBlend?glEnable:glDisable)(GL_BLEND);
+  (state.alphaTest?glEnable:glDisable)(GL_ALPHA_TEST);
+  glAlphaFunc(GL_GREATER, state.alphaTestRef/255);
 
-  graphics_state_flush_samplers();
+  graphics_state_flush_samplers(state);
 
   //NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
-  (d3dFogEnabled?glEnable:glDisable)(GL_FOG);
-  if (d3dFogEnabled) graphics_state_flush_fog();
+  (state.d3dFogEnabled?glEnable:glDisable)(GL_FOG);
+  if (state.d3dFogEnabled) graphics_state_flush_fog(state);
 
   // flush lighting before matrix so GL1 ffp can compute lights with respect to view only
-  (d3dLighting?glEnable:glDisable)(GL_LIGHTING);
-  if (d3dLighting) graphics_state_flush_lighting();
+  (state.d3dLighting?glEnable:glDisable)(GL_LIGHTING);
+  if (state.d3dLighting) graphics_state_flush_lighting(state);
 
-  (d3dStencilTest?glEnable:glDisable)(GL_STENCIL_TEST);
-  if (d3dStencilTest) graphics_state_flush_stencil();
+  (state.d3dStencilTest?glEnable:glDisable)(GL_STENCIL_TEST);
+  if (state.d3dStencilTest) graphics_state_flush_stencil(state);
 
   glm::mat4 modelview = view * world;
   glMatrixMode(GL_MODELVIEW);
