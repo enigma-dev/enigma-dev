@@ -44,9 +44,9 @@ namespace enigma_user
 
 void ini_open(std::string fname)
 {
-  char rpath[MAX_PATH];
-  GetFullPathName(fname.c_str(), MAX_PATH, rpath, NULL);
-  iniFilename = rpath;
+	char rpath[MAX_PATH];
+	GetFullPathName(fname.c_str(), MAX_PATH, rpath, NULL);
+	iniFilename = rpath;
 }
 
 void ini_close()
