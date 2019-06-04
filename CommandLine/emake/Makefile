@@ -17,7 +17,7 @@ else
 endif
 
 PROTO_DIR := $(SHARED_SRC_DIR)/protos
-CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I$(SHARED_SRC_DIR) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
+CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I$(SHARED_SRC_DIR) -I$(PROTO_DIR)/.eobjs -std=c++11 -Wall -Wextra -Wpedantic -g
 LDFLAGS   := $(OS_LIBS) -L../../ -lProtocols -lprotobuf
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
