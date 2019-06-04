@@ -53,7 +53,7 @@ endif(MSVC)
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${LIB} PRIVATE yaml-cpp)
 
-include_directories(. ../ "${ENIGMA_DIR}/shared/" "${ENIGMA_DIR}/shared/protos/codegen" "${ENIGMA_DIR}/shared/libpng-util")
+include_directories(. ../ "${ENIGMA_DIR}/shared/" "${ENIGMA_DIR}/shared/protos/.eobjs" "${ENIGMA_DIR}/shared/libpng-util")
 
 include(FindProtobuf)
 target_link_libraries(${LIB} PRIVATE ${Protobuf_LIBRARY})
