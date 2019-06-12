@@ -198,6 +198,11 @@ gtest_expect_eq(filename_drive("C/John/Doe/Smoe.txt"),"");
 gtest_expect_eq(filename_drive("/c/John/Doe/Smoe.txt"),"");
 gtest_expect_eq(filename_drive("Smoe.txt"),"");
 gtest_expect_eq(filename_ext("C:/John/Doe/Smoe.txt"),".txt");
+gtest_expect_eq(filename_ext("C:/John/Doe/Smoe.gmx/datafiles/Makefile"),"");
+gtest_expect_eq(filename_ext("C:/John/Doe/Smoe.gmx/datafiles/Makefile.txt"),".txt");
+gtest_expect_eq(filename_ext("archive.tar.gz"),".gz");
+gtest_expect_eq(filename_ext("C:/John/Doe/Smoe/datafiles/archive.tar.gz"),".gz");
+gtest_expect_eq(filename_ext("C:/John/Doe/Smoe.gmx/datafiles/archive.tar.gz"),".gz");
 gtest_expect_eq(filename_change_ext("C:/John/Doe/Smoe.txt",".dingtwo"),"C:/John/Doe/Smoe.dingtwo");
 
 /// We're done!
