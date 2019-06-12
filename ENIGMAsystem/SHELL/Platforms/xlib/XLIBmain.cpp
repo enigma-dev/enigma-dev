@@ -71,8 +71,7 @@ int handleEvents() {
           if (len > 0) {
             enigma_user::keyboard_lastchar = string(1, str[0]);
             if (actualKey == enigma_user::vk_backspace) {
-              enigma_user::keyboard_string =
-                  enigma_user::keyboard_string.substr(0, enigma_user::keyboard_string.length() - 1);
+              if (!enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
             } else {
               enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
             }
