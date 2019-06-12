@@ -350,6 +350,7 @@ string filename_drive(string fname)
 
 string filename_ext(string fname)
 {
+  fname = filename_name(fname);
   size_t fp = fname.find_last_of(".");
   if (fp == string::npos)
     return "";
