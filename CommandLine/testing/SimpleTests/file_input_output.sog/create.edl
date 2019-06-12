@@ -1,5 +1,5 @@
 /// BINARY FILES
-var bin_path = "file_bin_test.bin"; 
+var bin_path = "file_bin_test.bin";
 
 // BINARY WRITE
 var bin_write;
