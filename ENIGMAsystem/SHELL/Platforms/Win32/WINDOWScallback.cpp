@@ -23,7 +23,7 @@ using std::map;
 #include <windows.h>
 //#include <winuser.h> // includes windows.h
 
-#include "Platforms/General/PFmain.h"
+#include "Platforms/General/PFmain.h" // for keyboard_string
 #include "Platforms/General/PFwindow.h" // For those damn vk_ constants.
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Instances/instance.h"
@@ -35,10 +35,6 @@ using std::map;
 #endif
 
 namespace enigma_user {
-extern int keyboard_key;
-extern int keyboard_lastkey;
-extern string keyboard_lastchar;
-extern string keyboard_string;
 void draw_clear(int col);
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
 }
