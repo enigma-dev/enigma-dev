@@ -23,9 +23,8 @@ using std::map;
 #include <windows.h>
 //#include <winuser.h> // includes windows.h
 
-#include "../General/PFwindow.h"
-
-#include "Platforms/General/PFmain.h" // For those damn vk_ constants.
+#include "Platforms/General/PFmain.h" // for keyboard_string
+#include "Platforms/General/PFwindow.h" // For those damn vk_ constants.
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Instances/instance.h"
 
@@ -36,10 +35,6 @@ using std::map;
 #endif
 
 namespace enigma_user {
-extern int keyboard_key;
-extern int keyboard_lastkey;
-extern string keyboard_lastchar;
-extern string keyboard_string;
 void draw_clear(int col);
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
 }
@@ -168,7 +163,7 @@ namespace enigma
       case WM_CHAR:
         keyboard_lastchar = string(1,wParam);
         if (keyboard_lastkey == enigma_user::vk_backspace) {
-          keyboard_string = keyboard_string.substr(0, keyboard_string.length() - 1);
+          if (!keyboard_string.empty()) keyboard_string.pop_back();
         } else {
           keyboard_string += keyboard_lastchar;
         }
