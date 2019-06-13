@@ -154,7 +154,8 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           else //Add to this scope
           {
             igstack[igpos]->ignore[dec_name] = pos;
-            pos++; //cout << "Added `" << dec_name << "' to ig\n";
+            //pos++; //cout << "Added `" << dec_name << "' to ig\n";
+            continue;
           }
         }
         
