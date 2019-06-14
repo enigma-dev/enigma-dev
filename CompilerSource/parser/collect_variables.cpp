@@ -155,7 +155,6 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           {
             igstack[igpos]->ignore[dec_name] = pos;
             //pos++; //cout << "Added `" << dec_name << "' to ig\n";
-            continue;
           }
         }
         
