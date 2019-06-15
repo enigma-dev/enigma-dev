@@ -154,7 +154,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           else //Add to this scope
           {
             igstack[igpos]->ignore[dec_name] = pos;
-            pos++; //cout << "Added `" << dec_name << "' to ig\n";
+            //pos++; //cout << "Added `" << dec_name << "' to ig\n";
           }
         }
         
@@ -164,6 +164,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         dec_prefixes = dec_suffixes = "";
         dec_initializing = false;
         dec_name_givn = false;
+        continue;
       }
       if (!dec_initializing)
       {
