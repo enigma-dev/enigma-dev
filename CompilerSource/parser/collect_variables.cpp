@@ -164,6 +164,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         dec_prefixes = dec_suffixes = "";
         dec_initializing = false;
         dec_name_givn = false;
+        continue;
       }
       if (!dec_initializing)
       {
