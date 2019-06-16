@@ -38,6 +38,7 @@ void array_copy(var& dest, size_t dest_index, const var& src, size_t src_index, 
 int array_length_1d(const var& v);
 int array_length_2d(const var& v, int n);
 int array_height_2d(const var& v);
+void array_set(var& v, int pos, variant value);
 bool is_array(const var& v);
 }  //namespace enigma_user
 

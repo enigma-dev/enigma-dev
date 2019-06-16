@@ -218,6 +218,12 @@ gtest_assert_eq(user_array_same[1], 24);
 gtest_assert_eq(user_array_same[2], 24);
 gtest_assert_eq(user_array_same[3], 347);
 gtest_assert_eq(user_array_same[4], 555);
+array_set(user_array_smaller, 1, "Giorno Giovanna");
+array_set(user_array_smaller, 25, 10);
+array_set(user_array_smaller, 50, "Doppio");
+gtest_assert_eq(user_array_smaller[1], "Giorno Giovanna");
+gtest_assert_eq(user_array_smaller[25], 10);
+gtest_assert_eq(user_array_smaller[50], "Doppio");
 
 // Simple 2D array tests
 var user_array_2d = array_create_2d(3, 5, 256);
