@@ -746,7 +746,7 @@ double get_integer(string str, double def) {
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
 
-  return stod(gs_str_submitted.c_str(), NULL);
+  return strtod(gs_str_submitted.c_str(), NULL);
 }
 
 double get_passcode(string str, double def) {
@@ -755,7 +755,7 @@ double get_passcode(string str, double def) {
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
 
-  return stod(gs_str_submitted.c_str(), NULL);
+  return strtod(gs_str_submitted.c_str(), NULL);
 }
 
 bool get_string_canceled() {
