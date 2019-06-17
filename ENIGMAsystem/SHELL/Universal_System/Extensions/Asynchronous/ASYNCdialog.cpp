@@ -135,7 +135,7 @@ namespace enigma_user {
 
   int get_integer_async(string str, double def) {
     auto fnc = [=] {
-      int result = get_integer(str, def);
+      double result = get_integer(str, def);
       ds_map_overwrite(async_load, "status", true);
       ds_map_overwrite(async_load, "result", result);
     };
