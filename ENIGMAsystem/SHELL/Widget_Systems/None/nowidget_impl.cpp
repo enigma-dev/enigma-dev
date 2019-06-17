@@ -118,7 +118,6 @@ bool show_question(string str) {
 }
 
 string get_login(string username, string password) {
-  cout << c
   string input;
   cout << "Username: " << flush;
   cin >> input;
