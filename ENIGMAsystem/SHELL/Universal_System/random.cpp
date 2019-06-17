@@ -135,7 +135,8 @@ namespace enigma_user
 
   ma_scalar random(ma_scalar n) // Do not fix:  Based off of Delphi PRNG.
   {
-    enigma::Random_Seed = enigma::Random_Seed * 0x8088405 + 1;
+    // signed overflow is undefined, so we use unsigned overflow
+    enigma::Random_Seed = (int)((unsigned int)enigma::Random_Seed * 0x8088405U + 1U);
     return ((unsigned int)enigma::Random_Seed/(double)0x100000000) * n;
   }
 
