@@ -84,6 +84,6 @@ enum {
         return show_question(str);
     }
 
-    string get_login(string username, string password, string cap="");
+    string get_login(string username, string password);
     bool   get_string_canceled();
 }
