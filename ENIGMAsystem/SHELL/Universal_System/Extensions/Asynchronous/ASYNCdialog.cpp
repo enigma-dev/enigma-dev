@@ -124,7 +124,7 @@ namespace enigma_user {
     return queue_async_job(fnc);
   }
 
-  int get_string_async(string message, string def) {
+  int get_string_async(string str, string def) {
     auto fnc = [=] {
       string result = get_string(message, def);
       ds_map_overwrite(async_load, "status", true);
@@ -133,7 +133,7 @@ namespace enigma_user {
     return queue_async_job(fnc);
   }
 
-  int get_integer_async(string message, double def) {
+  int get_integer_async(string str, double def) {
     auto fnc = [=] {
       int result = get_integer(message, def);
       ds_map_overwrite(async_load, "status", true);
