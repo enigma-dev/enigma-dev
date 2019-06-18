@@ -33,6 +33,12 @@
 #include <string>
 using namespace std;
 
+namespace {
+
+std::string current_caption = "";
+
+} // anonymous namespace
+
 namespace enigma
 {
 
