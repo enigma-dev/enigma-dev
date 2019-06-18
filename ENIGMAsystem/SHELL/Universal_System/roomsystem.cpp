@@ -55,7 +55,6 @@ int room_last = 0;
 
 int room_persistent = 0;
 var room_caption = "";
-var current_caption = "";
 
 int background_color = 0xFFFFFF;
 int background_showcolor=1;

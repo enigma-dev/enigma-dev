@@ -98,7 +98,6 @@ extern int room_first;
 extern int room_last;
 
 extern var room_caption;
-extern var current_caption;
 
 int room_count();
 #define room_count room_count()
