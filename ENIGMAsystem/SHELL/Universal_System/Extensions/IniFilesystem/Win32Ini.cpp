@@ -83,12 +83,12 @@ void ini_write_string(string section, string key, string value) {
 }
 
 void ini_write_real(string section, string key, float value) {
-  string ss = to_string(value);
-  tstring tstr_ss = widen(ss);
+  string str_value = to_string(value);
+  tstring tstr_value = widen(str_value);
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
   tstring tstr_iniFilename = widen(iniFilename);
-  WritePrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), tstr_ss.c_str(), tstr_iniFilename.c_str());
+  WritePrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), tstr_value.c_str(), tstr_iniFilename.c_str());
 }
 
 bool ini_key_exists(string section, string key) {
