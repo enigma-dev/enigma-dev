@@ -37,75 +37,8 @@
 
 using namespace std;
 
-static std::string iniFilename = "";
-
 namespace enigma_user
 {
-
-void ini_open(std::string fname)
-{
-	char rpath[MAX_PATH];
-	GetFullPathName(fname.c_str(), MAX_PATH, rpath, NULL);
-	iniFilename = rpath;
-}
-
-void ini_close()
-{
-	iniFilename = "";
-}
-
-std::string ini_read_string(std::string section, std::string key, std::string defaultValue)
-{
-	char buffer[1024];
-	GetPrivateProfileString(section.c_str(), key.c_str(), defaultValue.c_str(), buffer, 1024, iniFilename.c_str());
-
-	return buffer;
-}
-
-float ini_read_real(std::string section, std::string key, float defaultValue)
-{
-	char res[255];
-	char def[255];
-	sprintf(def, "%f", defaultValue);
-	GetPrivateProfileString(section.c_str(), key.c_str(), def, res, 255, iniFilename.c_str());
-	return atof(res);
-	//return GetPrivateProfileInt(section.c_str(), key.c_str(), defaultValue, iniFilename.c_str());
-}
-
-void ini_write_string(std::string section, std::string key, std::string value)
-{
-	WritePrivateProfileString(section.c_str(), key.c_str(), value.c_str(), iniFilename.c_str());
-}
-
-void ini_write_real(std::string section, std::string key, float value)
-{
-	std::stringstream ss;
-	ss << value;
-
-	WritePrivateProfileString(section.c_str(), key.c_str(), ss.str().c_str(), iniFilename.c_str());
-}
-
-bool ini_key_exists(std::string section, std::string key)
-{
-	char buffer[1024];
-	return GetPrivateProfileString(section.c_str(), key.c_str(), "", buffer, 1024, iniFilename.c_str()) != 0;
-}
-
-bool ini_section_exists(std::string section)
-{
-	char buffer[1024];
-	return GetPrivateProfileSection(section.c_str(), buffer, 1024, iniFilename.c_str()) != 0;
-}
-
-void ini_key_delete(std::string section, std::string key)
-{
-	WritePrivateProfileString(section.c_str(), key.c_str(), NULL, iniFilename.c_str());
-}
-
-void ini_section_delete(std::string section)
-{
-  WritePrivateProfileString(section.c_str(), NULL, NULL, iniFilename.c_str());
-}
 
 /* OS Specific; should be moved */
 
