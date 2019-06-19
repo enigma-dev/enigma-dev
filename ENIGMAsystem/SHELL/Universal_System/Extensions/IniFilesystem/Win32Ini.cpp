@@ -33,7 +33,6 @@
 #include <vector>
 #include <string>
 
-using std::basic_string;
 using std::to_string;
 using std::string;
 using std::vector;
