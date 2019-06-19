@@ -36,8 +36,8 @@ using std::string;
 
 static string iniFilename = "";
 
+#include "Platforms/General/PFini.h"
 #include "Universal_System/estring.h"
-#include "../General/PFini.h"
 
 namespace enigma_user {
 
