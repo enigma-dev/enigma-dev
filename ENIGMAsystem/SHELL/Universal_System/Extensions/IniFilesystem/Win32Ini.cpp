@@ -2,6 +2,7 @@
 **                                                                              **
 **  Copyright (C) 2012 Josh Ventura                                             **
 **  Copyright (C) 2014 Seth N. Hetu                                             **
+**  Copyright (C) 2019 Samuel Venable                                           **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
