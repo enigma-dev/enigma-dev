@@ -29,13 +29,10 @@
 
 #include <windows.h>
 #include <cwchar>
-#include <cstdio>
-#include <vector>
 #include <string>
 
 using std::to_string;
 using std::string;
-using std::vector;
 
 static string iniFilename = "";
 
