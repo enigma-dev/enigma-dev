@@ -106,7 +106,7 @@ env:
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
   matrix:
     # Test Harness
-    - TEST_HARNESS=true AUDIO=OpenAL
+    - TEST_HARNESS=true MODE=Compile AUDIO=OpenAL
     # The big ol' None test.
     - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     # Cross Compile
@@ -201,7 +201,7 @@ before_script:
 script:
   - |
     if [ "$TEST_HARNESS" == true ]; then
-      export ASAN_OPTIONS=detect_leaks=0;
+      export ASAN_OPTIONS=detect_leaks=1;
       ./ci-regression.sh "/tmp/enigma-master" 4 || travis_terminate $?
     else
       ./ci-build.sh
