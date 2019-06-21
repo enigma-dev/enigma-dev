@@ -728,7 +728,7 @@ int show_message_ext(string msg, string but1, string but2, string but3) {
   gs_message = msg;
   gs_but1 = but1; gs_but2 = but2; gs_but3 = but3;
 
-  return DialogBox(enigma::hInstance, "showmessageext", enigma::hWnd, ShowMessageExtProc);
+  return DialogBoxW(enigma::hInstance, L"showmessageext", enigma::hWnd, ShowMessageExtProc);
 }
 
 string get_login(string username, string password) {
