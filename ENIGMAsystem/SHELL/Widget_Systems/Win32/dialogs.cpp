@@ -201,8 +201,8 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
     SetWindowTextW(hwndDlg, tstr_gs_cap.c_str());
     tstring tstr_gs_username = widen(gs_username);
     tstring tstr_gs_password = widen(gs_password);
-    SetDlgItemTextW(hwndDlg, 14, gs_username.c_str());
-    SetDlgItemTextW(hwndDlg, 15, gs_password.c_str());
+    SetDlgItemTextW(hwndDlg, 14, tstr_gs_username.c_str());
+    SetDlgItemTextW(hwndDlg, 15, tstr_gs_password.c_str());
     return true;
   }
 
