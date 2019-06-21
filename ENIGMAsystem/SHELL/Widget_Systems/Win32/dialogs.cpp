@@ -167,9 +167,13 @@ static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 static INT_PTR CALLBACK GetStrProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   if (uMsg == WM_INITDIALOG) {
-    SetWindowText(hwndDlg, gs_cap.c_str());
-    SetDlgItemText(hwndDlg, 12, gs_def.c_str());
-    SetDlgItemText(hwndDlg, 13, gs_message.c_str());
+    CenterWindowToMonitor(hdlg, 0);
+    tstring tstr_gs_cap = widen(gs_cap);
+    tstring tstr_gs_def = widen(gs_def);
+    tstring tstr_gs_message = widen(gs_message);
+    SetWindowTextW(hwndDlg, tstr_gs_cap.c_str());
+    SetDlgItemTextW(hwndDlg, 12, tstr_gs_def.c_str());
+    SetDlgItemTextW(hwndDlg, 13, tstr_gs_message.c_str());
     return true;
   }
 
@@ -179,9 +183,9 @@ static INT_PTR CALLBACK GetStrProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
       gs_form_canceled = 1;
       EndDialog(hwndDlg, 1);
     } else if (wParam == 10) {
-      char strget[1024];
-      GetDlgItemText(hwndDlg, 12, strget, 1024);
-      gs_str_submitted = strget;
+      wchar_t strget[1024];
+      GetDlgItemTextW(hwndDlg, 12, strget, 1024);
+      gs_str_submitted = shorten(strget);
       gs_form_canceled = 0;
       EndDialog(hwndDlg, 2);
     }
@@ -193,9 +197,12 @@ static INT_PTR CALLBACK GetStrProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   if (uMsg == WM_INITDIALOG) {
-    SetWindowText(hwndDlg, gs_cap.c_str());
-    SetDlgItemText(hwndDlg, 14, gs_username.c_str());
-    SetDlgItemText(hwndDlg, 15, gs_password.c_str());
+    tstring tstr_gs_cap = widen(gs_cap);
+    SetWindowTextW(hwndDlg, tstr_gs_cap.c_str());
+    tstring tstr_gs_username = widen(gs_username);
+    tstring tstr_gs_password = widen(gs_password);
+    SetDlgItemTextW(hwndDlg, 14, gs_username.c_str());
+    SetDlgItemTextW(hwndDlg, 15, gs_password.c_str());
     return true;
   }
 
@@ -205,11 +212,11 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
       gs_form_canceled = 1;
       EndDialog(hwndDlg, 1);
     } else if (wParam == 10) {
-      char strget[1024];
-      GetDlgItemText(hwndDlg, 14, strget, 1024);
-      gs_str_submitted = strget;
-      GetDlgItemText(hwndDlg, 15, strget, 1024);
-      gs_str_submitted += string(1, 0) + string(strget);
+      wchar_t strget[1024];
+      GetDlgItemTextW(hwndDlg, 14, strget, 1024);
+      gs_str_submitted = shorten(strget);
+      GetDlgItemTextW(hwndDlg, 15, strget, 1024);
+      gs_str_submitted += string(1, 0) + shorten(strget);
       gs_form_canceled = 0;
       EndDialog(hwndDlg, 2);
     }
@@ -221,11 +228,16 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   if (uMsg == WM_INITDIALOG) {
-    SetWindowText(hwndDlg,gs_cap.c_str());
-    SetDlgItemText(hwndDlg, 10, gs_message.c_str());
-    SetDlgItemText(hwndDlg, 11, gs_but1.c_str());
-    SetDlgItemText(hwndDlg, 12, gs_but2.c_str());
-    SetDlgItemText(hwndDlg, 13, gs_but3.c_str());
+    tstring tstr_gs_cap = widen(gs_cap);
+    tstring tstr_gs_message = widen(gs_message);
+    tstring tstr_gs_but1 = widen(gs_but1);
+    tstring tstr_gs_but2 = widen(gs_but2);
+    tstring tstr_gs_but3 = widen(gs_but3);
+    SetWindowTextW(hwndDlg, tstr_gs_cap.c_str());
+    SetDlgItemTextW(hwndDlg, 10, tstr_gs_message.c_str());
+    SetDlgItemTextW(hwndDlg, 11, tstr_gs_but1.c_str());
+    SetDlgItemTextW(hwndDlg, 12, tstr_gs_but2.c_str());
+    SetDlgItemTextW(hwndDlg, 13, tstr_gs_but3.c_str());
   }
 
   if (uMsg == WM_COMMAND) {
@@ -721,28 +733,28 @@ int show_message_ext(string msg, string but1, string but2, string but3) {
 
 string get_login(string username, string password) {
   gs_cap = message_get_caption(); gs_username = username; gs_password = password;
-  DialogBox(enigma::hInstance, "getlogindialog", enigma::hWnd, GetLoginProc);
+  DialogBoxW(enigma::hInstance, L"getlogindialog", enigma::hWnd, GetLoginProc);
 
   return gs_str_submitted;
 }
 
 string get_string(string str, string def) {
   gs_cap = message_get_caption(); gs_message = str; gs_def = def;
-  DialogBox(enigma::hInstance, "getstringdialog", enigma::hWnd, GetStrProc);
+  DialogBoxW(enigma::hInstance, L"getstringdialog", enigma::hWnd, GetStrProc);
 
   return gs_str_submitted;
 }
 
 string get_password(string str, string def) {
   gs_cap = message_get_caption(); gs_message = str; gs_def = def;
-  DialogBox(enigma::hInstance,"getpassworddialog",enigma::hWnd,GetStrProc);
+  DialogBoxW(enigma::hInstance, L"getpassworddialog", enigma::hWnd, GetStrProc);
 
   return gs_str_submitted;
 }
 
 double get_integer(string str, double def) {
   gs_cap = message_get_caption(); gs_message = str; gs_def = remove_trailing_zeros(def);
-  DialogBox(enigma::hInstance, "getstringdialog", enigma::hWnd, GetStrProc);
+  DialogBoxW(enigma::hInstance, L"getstringdialog", enigma::hWnd, GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
 
@@ -751,7 +763,7 @@ double get_integer(string str, double def) {
 
 double get_passcode(string str, double def) {
   gs_cap = message_get_caption(); gs_message = str; gs_def = remove_trailing_zeros(def);
-  DialogBox(enigma::hInstance, "getpassworddialog", enigma::hWnd, GetStrProc);
+  DialogBoxW(enigma::hInstance, L"getpassworddialog", enigma::hWnd, GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
 
