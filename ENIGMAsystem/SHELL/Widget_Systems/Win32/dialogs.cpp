@@ -167,7 +167,7 @@ static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 static INT_PTR CALLBACK GetStrProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   if (uMsg == WM_INITDIALOG) {
-    CenterWindowToMonitor(hdlg, 0);
+    CenterWindowToMonitor(hwndDlg, 0);
     tstring tstr_gs_cap = widen(gs_cap);
     tstring tstr_gs_def = widen(gs_def);
     tstring tstr_gs_message = widen(gs_message);
