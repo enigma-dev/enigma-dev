@@ -145,7 +145,7 @@ namespace enigma_user {
   int get_login_async(string username, string password) {
     auto fnc = [=] {
       string result = get_login(username, password);
-      size_t end = result.find('\0', 0);
+      size_t end = result.find('\n', 0);
       string username, password;
       // must still check if the string is empty which is the case when the user cancels the dialog
       if (end != string::npos) {
