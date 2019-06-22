@@ -419,15 +419,15 @@ void execute_shell(std::string operation, std::string fname, std::string args) {
 }
 
 std::string execute_shell_for_output(const std::string &command) {
-  tstring res;
-  wchar_t buffer[BUFSIZ];
+  string res;
+  char buffer[BUFSIZ];
   tstring tstr_command = widen(command);
   FILE *pf = _wpopen(tstr_command.c_str(), L"r");
   while (!feof(pf)) {
-    res.append(buffer, fread(&buffer, sizeof(wchar_t), BUFSIZ, pf));
+    res.append(buffer, fread(&buffer, sizeof(char), BUFSIZ, pf));
   }
   _pclose(pf);
-  return shorten(res);
+  return res;
 }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
