@@ -418,6 +418,18 @@ void execute_shell(std::string operation, std::string fname, std::string args) {
   ShellExecuteW(enigma::hWnd, tstr_operation.c_str(), tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
 }
 
+std::string execute_shell_for_output(const std::string &command) {
+  tstring res;
+  wchar_t buffer[BUFSIZ];
+  tstring tstr_command = widen(command);
+  FILE *pf = _wpopen(tstr_command.c_str(), L"r");
+  while (!feof(pf)) {
+    res.append(buffer, fread(&buffer, sizeof(wchar_t), BUFSIZ, pf));
+  }
+  _pclose(pf);
+  return shorten(res);
+}
+
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
   SHELLEXECUTEINFOW lpExecInfo;
   tstring tstr_operation = widen(operation);
