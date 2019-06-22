@@ -262,9 +262,11 @@ enum {
 std::string toString(const void*);
 std::string toString(double);
 
-#ifdef INCLUDED_FROM_SHELLMAIN
+#if defined(INCLUDED_FROM_SHELLMAIN) && !defined(JUST_DEFINE_IT_RUN)
 #define string(...) toString(__VA_ARGS__)
 #endif
+
+using std::string;
 
 }
 
