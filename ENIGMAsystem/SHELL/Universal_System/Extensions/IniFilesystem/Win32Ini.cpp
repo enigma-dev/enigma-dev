@@ -34,7 +34,7 @@
 using std::to_string;
 using std::string;
 
-static string iniFilename = "";
+static tstring iniFilename = L"";
 
 #include "Platforms/General/PFini.h"
 #include "Universal_System/estring.h"
@@ -45,18 +45,17 @@ void ini_open(string fname) {
   wchar_t rpath[MAX_PATH];
   tstring tstr_fname = widen(fname);
   GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL);
-  iniFilename = shorten(rpath);
+  iniFilename = rpath;
 }
 
 void ini_close() {
-  iniFilename = "";
+  iniFilename = L"";
 }
 
 string ini_read_string(string section, string key, string defaultValue) {
   wchar_t buffer[1024];
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  tstring tstr_iniFilename = widen(iniFilename);
   tstring tstr_defaultValue = widen(defaultValue);
   GetPrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), tstr_defaultValue.c_str(), buffer, 1024, tstr_iniFilename.c_str());
 
@@ -68,17 +67,15 @@ float ini_read_real(string section, string key, float defaultValue) {
   wchar_t def[255];
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  tstring tstr_iniFilename = widen(iniFilename);
   GetPrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), def, res, 255, tstr_iniFilename.c_str());
   string result = shorten(res);
   return (float)atof(result.c_str());
 }
 
 void ini_write_string(string section, string key, string value) {
+  tstring tstr_value = widen(value);
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  tstring tstr_value = widen(value);
-  tstring tstr_iniFilename = widen(iniFilename);
   WritePrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), tstr_value.c_str(), tstr_iniFilename.c_str());
 }
 
@@ -87,7 +84,6 @@ void ini_write_real(string section, string key, float value) {
   tstring tstr_value = widen(str_value);
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  tstring tstr_iniFilename = widen(iniFilename);
   WritePrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), tstr_value.c_str(), tstr_iniFilename.c_str());
 }
 
@@ -95,27 +91,23 @@ bool ini_key_exists(string section, string key) {
   wchar_t buffer[1024];
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  tstring tstr_iniFilename = widen(iniFilename);
   return GetPrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), L"", buffer, 1024, tstr_iniFilename.c_str()) != 0;
 }
 
 bool ini_section_exists(string section) {
   wchar_t buffer[1024];
   tstring tstr_section = widen(section);
-  tstring tstr_iniFilename = widen(iniFilename);
   return GetPrivateProfileSectionW(tstr_section.c_str(), buffer, 1024, tstr_iniFilename.c_str()) != 0;
 }
 
 void ini_key_delete(string section, string key) {
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  tstring tstr_iniFilename = widen(iniFilename);
   WritePrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), NULL, tstr_iniFilename.c_str());
 }
 
 void ini_section_delete(string section) {
   tstring tstr_section = widen(section);
-  tstring tstr_iniFilename = widen(iniFilename);
   WritePrivateProfileStringW(tstr_section.c_str(), NULL, NULL, tstr_iniFilename.c_str());
 }
 
