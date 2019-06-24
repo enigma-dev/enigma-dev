@@ -57,7 +57,7 @@ string ini_read_string(string section, string key, string defaultValue) {
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
   tstring tstr_defaultValue = widen(defaultValue);
-  GetPrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), tstr_defaultValue.c_str(), buffer, 1024, tstr_iniFilename.c_str());
+  GetPrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), tstr_defaultValue.c_str(), buffer, 1024, iniFilename.c_str());
 
   return shorten(buffer);
 }
@@ -67,7 +67,7 @@ float ini_read_real(string section, string key, float defaultValue) {
   wchar_t def[255];
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  GetPrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), def, res, 255, tstr_iniFilename.c_str());
+  GetPrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), def, res, 255, iniFilename.c_str());
   string result = shorten(res);
   return (float)atof(result.c_str());
 }
@@ -76,7 +76,7 @@ void ini_write_string(string section, string key, string value) {
   tstring tstr_value = widen(value);
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  WritePrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), tstr_value.c_str(), tstr_iniFilename.c_str());
+  WritePrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), tstr_value.c_str(), iniFilename.c_str());
 }
 
 void ini_write_real(string section, string key, float value) {
@@ -84,31 +84,31 @@ void ini_write_real(string section, string key, float value) {
   tstring tstr_value = widen(str_value);
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  WritePrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), tstr_value.c_str(), tstr_iniFilename.c_str());
+  WritePrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), tstr_value.c_str(), iniFilename.c_str());
 }
 
 bool ini_key_exists(string section, string key) {
   wchar_t buffer[1024];
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  return GetPrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), L"", buffer, 1024, tstr_iniFilename.c_str()) != 0;
+  return GetPrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), L"", buffer, 1024, iniFilename.c_str()) != 0;
 }
 
 bool ini_section_exists(string section) {
   wchar_t buffer[1024];
   tstring tstr_section = widen(section);
-  return GetPrivateProfileSectionW(tstr_section.c_str(), buffer, 1024, tstr_iniFilename.c_str()) != 0;
+  return GetPrivateProfileSectionW(tstr_section.c_str(), buffer, 1024, iniFilename.c_str()) != 0;
 }
 
 void ini_key_delete(string section, string key) {
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  WritePrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), NULL, tstr_iniFilename.c_str());
+  WritePrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), NULL, iniFilename.c_str());
 }
 
 void ini_section_delete(string section) {
   tstring tstr_section = widen(section);
-  WritePrivateProfileStringW(tstr_section.c_str(), NULL, NULL, tstr_iniFilename.c_str());
+  WritePrivateProfileStringW(tstr_section.c_str(), NULL, NULL, iniFilename.c_str());
 }
 
 } // namespace enigma_user
