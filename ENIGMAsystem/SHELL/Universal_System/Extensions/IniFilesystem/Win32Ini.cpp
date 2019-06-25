@@ -34,10 +34,10 @@
 using std::to_string;
 using std::string;
 
-static tstring iniFilename = L"";
-
 #include "Platforms/General/PFini.h"
 #include "Universal_System/estring.h"
+
+static tstring iniFilename = L"";
 
 namespace enigma_user {
 
