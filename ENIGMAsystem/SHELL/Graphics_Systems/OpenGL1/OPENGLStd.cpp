@@ -34,6 +34,7 @@ using namespace std;
 
 namespace enigma {
   const gl_profile_type graphics_opengl_profile = gl_profile_compat;
+  const unsigned gl_major = 1, gl_minor = 1;
 
   void graphics_init_vbo_method();
 

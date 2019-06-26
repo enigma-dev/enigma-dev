@@ -21,6 +21,8 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GStextures.h"
 
+#include "Universal_System/PointerVec.h"
+
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -101,8 +103,8 @@ GLenum shadertypes[5] = {
 
 namespace enigma
 {
-  std::vector<enigma::Shader*> shaders(0);
-  std::vector<enigma::ShaderProgram*> shaderprograms(0);
+  PointerVec<enigma::Shader*> shaders(0);
+  PointerVec<enigma::ShaderProgram*> shaderprograms(0);
  // std::vector<enigma::AttributeObject*> attributeobjects(0);
 
   extern unsigned default_shader;

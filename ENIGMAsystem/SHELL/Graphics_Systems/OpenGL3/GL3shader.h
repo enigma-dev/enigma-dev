@@ -21,6 +21,9 @@
 
 #include "GLSLshader.h"
 #include "OpenGLHeaders.h"
+
+#include "Universal_System/PointerVec.h"
+
 #include <string>
 using std::string;
 
@@ -29,7 +32,7 @@ namespace enigma
   extern unsigned bound_vbo;
   extern unsigned bound_vboi;
   extern unsigned bound_shader;
-  extern vector<enigma::ShaderProgram*> shaderprograms;
+  extern PointerVec<enigma::ShaderProgram*> shaderprograms;
 
   string getVertexShaderPrefix();
   string getFragmentShaderPrefix();

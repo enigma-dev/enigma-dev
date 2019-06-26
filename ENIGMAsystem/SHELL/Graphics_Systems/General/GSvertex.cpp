@@ -50,9 +50,9 @@ enigma::VertexFormat currentVertexFormat;
 
 namespace enigma {
 
-vector<VertexFormat*> vertexFormats;
-vector<VertexBuffer*> vertexBuffers;
-vector<IndexBuffer*> indexBuffers;
+PointerVec<VertexFormat*> vertexFormats;
+PointerVec<VertexBuffer*> vertexBuffers;
+PointerVec<IndexBuffer*> indexBuffers;
 
 } // namespace enigma
 

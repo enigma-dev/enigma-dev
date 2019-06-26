@@ -1,6 +1,8 @@
 SOURCES += $(wildcard Graphics_Systems/OpenGL/*.cpp)
 override CXXFLAGS += -IBridges/OpenGL
 
+include Bridges/OpenGLDebug/Makefile
+
 ifeq ($(TARGET-PLATFORM), Windows)
 	override CXXFLAGS += -DGLEW_STATIC
 	override LDLIBS += -lglew32 -lopengl32

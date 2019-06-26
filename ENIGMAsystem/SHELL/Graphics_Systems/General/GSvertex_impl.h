@@ -25,6 +25,7 @@
 #define ENIGMA_GSVERTEX_IMPL_H
 
 #include "GSvertex.h"
+#include "Universal_System/PointerVec.h"
 
 #include <vector>
 #include <utility>
@@ -169,9 +170,9 @@ struct IndexBuffer {
   }
 };
 
-extern vector<VertexFormat*> vertexFormats;
-extern vector<VertexBuffer*> vertexBuffers;
-extern vector<IndexBuffer*> indexBuffers;
+extern PointerVec<VertexFormat*> vertexFormats;
+extern PointerVec<VertexBuffer*> vertexBuffers;
+extern PointerVec<IndexBuffer*> indexBuffers;
 
 }
 

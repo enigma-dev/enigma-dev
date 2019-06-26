@@ -7,5 +7,6 @@ enum gl_profile_type {
 };
 
 extern const gl_profile_type graphics_opengl_profile;
+extern const unsigned gl_major, gl_minor;
 
 } // namespace enigma

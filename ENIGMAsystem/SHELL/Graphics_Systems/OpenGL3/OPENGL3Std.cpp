@@ -44,6 +44,7 @@ extern string shader_get_name(int i);
 
 namespace enigma {
   const gl_profile_type graphics_opengl_profile = gl_profile_core;
+  const unsigned gl_major = 3, gl_minor = 3;
 
   unsigned default_shader;
   unsigned main_shader;

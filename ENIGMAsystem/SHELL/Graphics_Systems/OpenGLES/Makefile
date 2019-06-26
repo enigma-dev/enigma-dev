@@ -1,4 +1,7 @@
 SOURCES += $(wildcard Graphics_Systems/OpenGLES/*.cpp) $(wildcard Graphics_Systems/General/*.cpp) $(wildcard Graphics_Systems/None/*.cpp)
+
+include Bridges/OpenGLDebug/Makefile
+
 override CXXFLAGS += -IBridges/OpenGLES
 override LDLIBS += -lepoxy
 

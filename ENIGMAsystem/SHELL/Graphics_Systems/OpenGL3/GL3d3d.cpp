@@ -44,7 +44,7 @@ using namespace std;
 namespace enigma {
 
 extern unsigned bound_shader;
-extern vector<enigma::ShaderProgram*> shaderprograms;
+extern PointerVec<enigma::ShaderProgram*> shaderprograms;
 
 void graphics_state_flush_samplers() {
   static bool samplers_generated = false;
