@@ -16,7 +16,7 @@
 // with this code. If not, see <http://www.gnu.org/licenses/>
 //
 
-#include "IniFileIndex.h"
+#include "UNIXiniindex.h"
 
 #include <cstdlib>
 #include <algorithm>
