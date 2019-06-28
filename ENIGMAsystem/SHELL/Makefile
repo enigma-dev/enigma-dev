@@ -64,7 +64,7 @@ CC := gcc
 DEPENDENCIES :=
 
 ifeq ($(GMODE), Debug)
-	override CXXFLAGS += -Wall -g -DDEBUG_MODE -D_GLIBCXX_DEBUG
+	override CXXFLAGS += -Wall -g -DDEBUG_MODE
 	override CFLAGS += -Wall -g -DDEBUG_MODE
 else ifeq ($(GMODE), Compile)
 	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
