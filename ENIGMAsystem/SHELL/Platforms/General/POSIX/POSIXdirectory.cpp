@@ -29,6 +29,7 @@ bool set_working_directory(string dname) {
   return false;
 }
 
+// converts a relative path to absolute if the path exists
 std::string filename_absolute(std::string fname) {
   if (file_exists(fname) || directory_exists(fname)) {
     char rpath[PATH_MAX];
