@@ -7,6 +7,9 @@
 
 using std::string;
 
+using enigma_user::file_exists;
+using enigma_user::directory_exists;
+
 static inline string add_slash(const string& dir) {
   if (dir.empty() || *dir.rbegin() != '/') return dir + '/';
   return dir;
