@@ -26,15 +26,6 @@ bool set_working_directory(string dname) {
   return false;
 }
 
-string filename_absolute(string fname) {
-  if (file_exists(fname) || directory_exists(fname)) {
-    wchar_t rpath[MAX_PATH];
-    tstring tstr_fname = widen(fname);
-    GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL); 
-    return shorten(rpath);
-  } else { return ""; }
-}
-
 string environment_get_variable(string name) {
   char *env = getenv((char *)name.c_str());
   return env ? env : "";
