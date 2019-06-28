@@ -66,7 +66,7 @@ void register_gl_debug_callback() {
     cout << "Registered OpenGL debug callback" << endl;
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(openglCallbackFunction, nullptr);
+    glDebugMessageCallback((GLDEBUGPROC)&openglCallbackFunction, nullptr);
     unsigned int unusedIds = 0;
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, true);
   } else cout << "glDebugMessageCallback not available" << endl;

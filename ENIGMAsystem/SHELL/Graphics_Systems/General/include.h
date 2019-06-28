@@ -21,3 +21,4 @@
 #include "GSscreen.h"
 #include "GSstdraw.h"
 #include "actions.h"
+#include "texture_atlas.h"
