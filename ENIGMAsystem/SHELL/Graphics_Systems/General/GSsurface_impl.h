@@ -23,8 +23,6 @@
 #ifndef ENIGMA_GS_SURFACE_IMPL_H
 #define ENIGMA_GS_SURFACE_IMPL_H
 
-#include "OpenGLHeaders.h"
-
 #include <vector>
 using std::vector;
 
@@ -43,7 +41,6 @@ protected:
 extern vector<BaseSurface*> surfaces;
 
 struct Surface; // forward-declaration for get_surface
-int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, GLint internalFormat, GLenum format, GLenum type);
 extern unsigned int bound_framebuffer;
 
 } // namespace enigma
