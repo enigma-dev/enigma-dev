@@ -75,7 +75,7 @@ namespace keyboard {
 }
 
 static SDL_Event_Handler eventHandler;
-static std::array<SDL_Cursor*, -enigma_user::cr_size_all> cursors;
+static std::array<SDL_Cursor*, -enigma_user::cr_size_all+1> cursors;
 
 void handleInput() {
   input_push();
