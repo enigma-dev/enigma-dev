@@ -465,6 +465,14 @@ std::string environment_get_variable(std::string name) {
   return shorten(buffer);
 }
 
+// deletes the environment variable if set to empty string
+bool environment_set_variable(const std::string &name, const std::string &value) {
+  tstring tstr_name = widen(name);
+  tstring tstr_value = widen(value);
+  if (value == "") return (SetEnvironmentVariableW(tstr_name.c_str(), NULL) != 0);
+  return (SetEnvironmentVariableW(tstr_name.c_str(), tstr_value.c_str()) != 0);
+}
+
 void action_webpage(const std::string &url) {
   tstring tstr_url = widen(url);
   tstring tstr_open = widen("open");
