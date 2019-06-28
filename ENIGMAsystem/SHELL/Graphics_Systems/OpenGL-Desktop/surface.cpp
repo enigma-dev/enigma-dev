@@ -4,10 +4,6 @@
 #include "Graphics_Systems/OpenGL-Common/textures_impl.h"
 #include "Graphics_Systems/General/GStextures.h"
 
-namespace enigma {
-  int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, GLint internalFormat, GLenum format, GLenum type);
-}
-
 namespace enigma_user {
 
 bool surface_is_supported()

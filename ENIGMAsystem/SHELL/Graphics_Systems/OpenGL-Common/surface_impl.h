@@ -38,6 +38,8 @@ struct Surface : BaseSurface
   bool write_only = true;
 };
 
+int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, GLint internalFormat, GLenum format, GLenum type);
+
 } // namespace enigma
 
 #endif //ENIGMA_GL_SURFACE_IMPL_H

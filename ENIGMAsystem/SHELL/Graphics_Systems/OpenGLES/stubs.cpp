@@ -3,7 +3,6 @@
 namespace enigma {
 
 void msaa_fbo_blit() {}
-void graphics_state_flush_samplers() {}
 void gl_screen_init() {}
 void init_vao() {}
 void graphics_flush_ext() {}
