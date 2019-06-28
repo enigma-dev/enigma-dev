@@ -26,6 +26,14 @@ bool set_working_directory(string dname) {
   return false;
 }
 
+std::string filename_absolute(std::string fname) {
+  if (file_exists(fname) || directory_exists(fname)) {
+    char rpath1[PATH_MAX];
+    char *ptr = realpath((char *)fname.c_str(), rpath);
+    if (ptr != NULL) { return rpath; }
+  } return "";
+}
+
 string environment_get_variable(string name) {
   char *env = getenv((char *)name.c_str());
   return env ? env : "";
