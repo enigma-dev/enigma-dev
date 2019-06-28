@@ -274,9 +274,10 @@ bool sound_replace(int sound, string fname, int kind, bool preload) {
   if (sound_resources.find(sound) != sound_resources.end() && sound_resources[sound]) {
     get_sound(snd, sound, false);
     alureDestroyStream(snd->stream, 0, 0);
+    return enigma::sound_replace_from_file(sound, fname);
   }
-
-  return enigma::sound_replace_from_file(sound, fname);
+  
+  return sound_add(fname, kind, preload);
 }
 
 void sound_3d_set_sound_cone(int sound, float x, float y, float z, double anglein, double angleout, long voloutside) {}
