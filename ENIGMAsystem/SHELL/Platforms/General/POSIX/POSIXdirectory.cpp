@@ -31,7 +31,7 @@ string environment_get_variable(string name) {
 }
 
 // deletes the environment variable if set to empty string
-bool environment_set_variable(string name, string value) {
+bool environment_set_variable(const string &name, const string &value) {
   if (value == "") return (unsetenv(name.c_str()) == 0);
   return (setenv(name.c_str(), value.c_str(), 1) == 0);
 }
