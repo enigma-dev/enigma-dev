@@ -21,6 +21,7 @@
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
+#include "Platforms/General/PFfilemanip.h"
 #include "Platforms/platforms_mandatory.h"
 
 #include "Universal_System/mathnc.h" // enigma_user::clamp
@@ -457,11 +458,19 @@ void execute_program(std::string operation, std::string fname, std::string args,
 
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
 
+std::string filename_absolute(std::string fname) {
+  if (file_exists(fname) || directory_exists(fname)) {
+    wchar_t rpath[MAX_PATH];
+    tstring tstr_fname = widen(fname);
+    GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL); 
+    return shorten(rpath);
+  } else { return ""; }
+}
+
 std::string environment_get_variable(std::string name) {
   WCHAR buffer[1024];
   tstring tstr_name = widen(name);
   GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
-
   return shorten(buffer);
 }
 
