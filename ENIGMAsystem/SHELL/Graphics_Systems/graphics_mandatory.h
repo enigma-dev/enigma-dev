@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_GRAPHICS_MANDATORY
+#define ENIGMA_GRAPHICS_MANDATORY
+
 /*\\\ This file contains prototypes for functions that must be defined by the graphics
 |*||| library wrapper modules. Each of these is used by other systems throughout the engine.
 \*/// Accidental failure to implement them could cause error.
@@ -93,3 +96,5 @@ namespace enigma_user
   void texture_set_interpolation_ext(int sampler, bool enable);
   #define texture_set_interpolation(enable) texture_set_interpolation_ext(0, enable)
 }
+
+#endif

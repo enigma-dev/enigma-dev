@@ -41,6 +41,7 @@ protected:
 extern vector<BaseSurface*> surfaces;
 
 struct Surface; // forward-declaration for get_surface
+extern unsigned int bound_framebuffer;
 
 } // namespace enigma
 
