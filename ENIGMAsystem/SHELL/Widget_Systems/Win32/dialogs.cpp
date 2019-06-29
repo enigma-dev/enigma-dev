@@ -373,18 +373,18 @@ static inline string get_open_filenames_helper(string filter, string fname, stri
 
     size_t pos = 0;
     size_t prevlen = pos;
-    size_t len = wcslen(wstr_fname1);
+    size_t len = wcslen(wstr_fname);
 
     while (pos < len) {
-      if (wstr_fname1[len - 1] != '\n' && wstr_fname1[len] == '\0')
-        wstr_fname1[len] = '\n';
+      if (wstr_fname[len - 1] != '\n' && wstr_fname[len] == '\0')
+        wstr_fname[len] = '\n';
 
       prevlen = len;
-      len = wcslen(wstr_fname1);
+      len = wcslen(wstr_fname);
       pos += (len - prevlen) + 1;
     }
 
-    tstring tstr_fname2 = wstr_fname1;
+    tstring tstr_fname2 = wstr_fname;
     if (tstr_fname2[len - 1] == '\n') tstr_fname2[len - 1] = '\0';
     if (tstr_fname2[len - 2] == '\\') tstr_fname2[len - 2] = '\0';
     tstr_fname2 = tstring_replace_all(tstr_fname2, L"\n", L"\n" + tstr_fname1);
