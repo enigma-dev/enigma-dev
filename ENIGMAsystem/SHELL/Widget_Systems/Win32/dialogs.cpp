@@ -322,7 +322,7 @@ static inline int show_question_helperfunc(string str) {
   return 0;
 }
 
-static inline string get_open_filename_helper(string filter, string fname, string dir, string title) {
+static inline OPENFILENAMEW get_filename_or_filenames_helper(string filter, string fname, string dir, string title, DWORD flags) {
   OPENFILENAMEW ofn;
 
   filter = filter.append("||");
@@ -346,7 +346,14 @@ static inline string get_open_filename_helper(string filter, string fname, strin
   ofn.nFilterIndex = 0;
   ofn.lpstrTitle = tstr_title.c_str();
   ofn.lpstrInitialDir = tstr_dir.c_str();
-  ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
+  ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR | flags;
+  
+  reutrn ofn;
+}
+
+static inline string get_open_filename_helper(string filter, string fname, string dir, string title) {
+  OPENFILENAMEW ofn;
+  ofn = get_filename_or_filenames_helper(filter, fname, dir, title, 0);
 
   if (GetOpenFileNameW(&ofn) != 0)
     return shorten(wstr_fname);
@@ -356,29 +363,7 @@ static inline string get_open_filename_helper(string filter, string fname, strin
 
 static inline string get_open_filenames_helper(string filter, string fname, string dir, string title) {
   OPENFILENAMEW ofn;
-
-  filter = string(filter).append("||");
-  fname = remove_slash(fname);
-
-  tstring tstr_filter = widen(filter);
-  replace(tstr_filter.begin(), tstr_filter.end(), '|', '\0');
-  tstring tstr_fname = widen(fname);
-  tstring tstr_dir = widen(dir);
-  tstring tstr_title = widen(title);
-
-  wchar_t wstr_fname1[4096];
-  wcsncpy_s(wstr_fname1, tstr_fname.c_str(), 4096);
-
-  ZeroMemory(&ofn, sizeof(ofn));
-  ofn.lStructSize = sizeof(ofn);
-  ofn.hwndOwner = enigma::hWnd;
-  ofn.lpstrFile = wstr_fname1;
-  ofn.nMaxFile = 4096;
-  ofn.lpstrFilter = tstr_filter.c_str();
-  ofn.nFilterIndex = 0;
-  ofn.lpstrTitle = tstr_title.c_str();
-  ofn.lpstrInitialDir = tstr_dir.c_str();
-  ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR | OFN_ALLOWMULTISELECT;
+  ofn = get_filename_or_filenames_helper(filter, fname, dir, title, OFN_ALLOWMULTISELECT);
 
   if (GetOpenFileNameW(&ofn) != 0) {
     tstring tstr_fname1 = wstr_fname1;
@@ -422,29 +407,7 @@ static inline string get_open_filenames_helper(string filter, string fname, stri
 
 static inline string get_save_filename_helper(string filter, string fname, string dir, string title) {
   OPENFILENAMEW ofn;
-
-  filter = string(filter).append("||");
-  fname = remove_slash(fname);
-
-  tstring tstr_filter = widen(filter);
-  replace(tstr_filter.begin(), tstr_filter.end(), '|', '\0');
-  tstring tstr_fname = widen(fname);
-  tstring tstr_dir = widen(dir);
-  tstring tstr_title = widen(title);
-
-  wchar_t wstr_fname[MAX_PATH];
-  wcsncpy_s(wstr_fname, tstr_fname.c_str(), MAX_PATH);
-
-  ZeroMemory(&ofn, sizeof(ofn));
-  ofn.lStructSize = sizeof(ofn);
-  ofn.hwndOwner = enigma::hWnd;
-  ofn.lpstrFile = wstr_fname;
-  ofn.nMaxFile = MAX_PATH;
-  ofn.lpstrFilter = tstr_filter.c_str();
-  ofn.nFilterIndex = 0;
-  ofn.lpstrTitle = tstr_title.c_str();
-  ofn.lpstrInitialDir = tstr_dir.c_str();
-  ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR;
+  ofn = get_filename_or_filenames_helper(filter, fname, dir, title, 0);
 
   if (GetSaveFileNameW(&ofn) != 0)
     return shorten(wstr_fname);
