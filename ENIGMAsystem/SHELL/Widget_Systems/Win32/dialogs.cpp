@@ -62,6 +62,9 @@ static bool question_cancel = false;
 static string str_gctitle;
 static tstring tstr_gctitle;
 
+// file dialog returns
+static wchar_t wstr_fname[MAX_PATH];
+
 using enigma_user::string_replace_all;
 
 #ifdef DEBUG_MODE
@@ -334,7 +337,6 @@ static inline OPENFILENAMEW get_filename_or_filenames_helper(string filter, stri
   tstring tstr_dir = widen(dir);
   tstring tstr_title = widen(title);
 
-  wchar_t wstr_fname[MAX_PATH];
   wcsncpy_s(wstr_fname, tstr_fname.c_str(), MAX_PATH);
 
   ZeroMemory(&ofn, sizeof(ofn));
