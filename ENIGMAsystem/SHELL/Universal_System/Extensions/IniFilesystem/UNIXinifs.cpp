@@ -24,7 +24,7 @@
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h" //show_error()
 
-#include "IniFileIndex.h"
+#include "UNIXiniindex.h"
 
 
 namespace {

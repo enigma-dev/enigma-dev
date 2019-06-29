@@ -1,10 +1,10 @@
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
-	SOURCES += $(wildcard Universal_System/Extensions/IniFilesystem/IniFileIndex.cpp)
-	SOURCES += $(wildcard Universal_System/Extensions/IniFilesystem/inifilesystem.cpp)
+	SOURCES += Universal_System/Extensions/IniFilesystem/UNIXiniindex.cpp
+	SOURCES += Universal_System/Extensions/IniFilesystem/UNIXinifs.cpp
 else ifeq ($(OS), Darwin)
-	SOURCES += $(wildcard Universal_System/Extensions/IniFilesystem/IniFileIndex.cpp)
-	SOURCES += $(wildcard Universal_System/Extensions/IniFilesystem/inifilesystem.cpp)
+	SOURCES += Universal_System/Extensions/IniFilesystem/UNIXiniindex.cpp
+	SOURCES += Universal_System/Extensions/IniFilesystem/UNIXinifs.cpp
 else
-	SOURCES += $(wildcard Universal_System/Extensions/IniFilesystem/Win32Ini.cpp)
+	SOURCES += Universal_System/Extensions/IniFilesystem/WINDOWSinifs.cpp
 endif
