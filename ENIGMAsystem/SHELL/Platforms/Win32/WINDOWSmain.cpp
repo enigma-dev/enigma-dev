@@ -21,6 +21,7 @@
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
+#include "Platforms/General/PFfilemanip.h"
 #include "Platforms/platforms_mandatory.h"
 
 #include "Universal_System/mathnc.h" // enigma_user::clamp
@@ -39,6 +40,9 @@
 #include <vector>
 using std::string;
 using std::vector;
+
+using enigma_user::file_exists;
+using enigma_user::directory_exists;
 
 namespace enigma_user {
 
@@ -457,12 +461,29 @@ void execute_program(std::string operation, std::string fname, std::string args,
 
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
 
+// converts a relative path to absolute if the path exists
+std::string filename_absolute(std::string fname) {
+  if (file_exists(fname) || directory_exists(fname)) {
+    wchar_t rpath[MAX_PATH];
+    tstring tstr_fname = widen(fname);
+    GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL); 
+    return shorten(rpath);
+  } else { return ""; }
+}
+
 std::string environment_get_variable(std::string name) {
   WCHAR buffer[1024];
   tstring tstr_name = widen(name);
   GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
-
   return shorten(buffer);
+}
+
+// deletes the environment variable if set to empty string
+bool environment_set_variable(const std::string &name, const std::string &value) {
+  tstring tstr_name = widen(name);
+  tstring tstr_value = widen(value);
+  if (value == "") return (SetEnvironmentVariableW(tstr_name.c_str(), NULL) != 0);
+  return (SetEnvironmentVariableW(tstr_name.c_str(), tstr_value.c_str()) != 0);
 }
 
 void action_webpage(const std::string &url) {
