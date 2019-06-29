@@ -39,7 +39,6 @@
 #include "Universal_System/Resources/background.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/fonts.h"
-#include "Universal_System/texture_atlas.h"
 
 #include "Universal_System/Instances/callbacks_events.h"
 
