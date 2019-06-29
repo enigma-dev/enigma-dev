@@ -368,7 +368,7 @@ static inline string get_open_filenames_helper(string filter, string fname, stri
   ofn = get_filename_or_filenames_helper(filter, fname, dir, title, OFN_ALLOWMULTISELECT);
 
   if (GetOpenFileNameW(&ofn) != 0) {
-    tstring tstr_fname1 = wstr_fname1;
+    tstring tstr_fname1 = wstr_fname;
     tstr_fname1 += '\\';
 
     size_t pos = 0;
