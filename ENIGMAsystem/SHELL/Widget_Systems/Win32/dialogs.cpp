@@ -350,7 +350,7 @@ static inline OPENFILENAMEW get_filename_or_filenames_helper(string filter, stri
   ofn.lpstrInitialDir = tstr_dir.c_str();
   ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR | flags;
   
-  reutrn ofn;
+  return ofn;
 }
 
 static inline string get_open_filename_helper(string filter, string fname, string dir, string title) {
