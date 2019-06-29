@@ -17,7 +17,7 @@
 **/
 
 #include "OpenGLHeaders.h"
-#include "Graphics_Systems/OpenGL/GLversion.h"
+#include "Graphics_Systems/OpenGL-Common/version.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Bridges/OpenGL/GLload.h"
 #include "Widget_Systems/widgets_mandatory.h"

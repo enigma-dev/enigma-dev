@@ -41,7 +41,7 @@ environment:
     # Graphics
     - {GRAPHICS: Direct3D11}
     - {GRAPHICS: OpenGL1, PACKAGES: "glew:x"}
-    - {GRAPHICS: OpenGLES, PLATFORM: SDL, PACKAGES_LATEST: "libepoxy:x", PACKAGES: "SDL2:x" }
+    - {GRAPHICS: OpenGLES3, PLATFORM: SDL, PACKAGES_LATEST: "libepoxy:x", PACKAGES: "SDL2:x" }
 
     # Audio
     - {AUDIO: DirectSound}

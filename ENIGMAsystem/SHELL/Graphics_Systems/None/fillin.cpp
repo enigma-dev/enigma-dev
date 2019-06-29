@@ -70,9 +70,13 @@ namespace enigma
 
 	void graphics_delete_vertex_buffer_peer(int buffer) {}
 	void graphics_delete_index_buffer_peer(int buffer) {}
+	void graphics_replace_texture_alpha_from_texture(int, int) {}
+	int graphics_duplicate_texture(int, bool) { return -1; }
 
 	void scene_begin() {}
 	void scene_end() {}
+	void delete_tiles() {}
+	void load_tiles() {}
 }
 
 namespace enigma_user
@@ -130,4 +134,11 @@ namespace enigma_user
 	void d3d_stencil_clear_value(int value) {}
 	void d3d_stencil_clear() {}
 	void d3d_set_software_vertex_processing(bool software){}
+	void screen_redraw() {}
+	void screen_refresh() {}
+	void screen_init() {}
+	unsigned int string_width(variant str) { return 0; }
+	void draw_text(float, float, variant) {}
+	void draw_sprite_ext(int, int, float, float, float, float, double, int, float) {}
+	void draw_healthbar(float, float, float, float, float, int, int, int, int, bool, bool) {}
 }
