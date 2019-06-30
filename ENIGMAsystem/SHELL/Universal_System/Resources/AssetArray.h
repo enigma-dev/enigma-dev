@@ -48,6 +48,20 @@ public:
     return id;
   }
 
+  int assign(int id, T asset) {
+    #ifdef DEBUG_MODE
+    if (id < 0) {
+      enigma_user::show_error("Attempting to assign asset " + std::to_string(id) + " to negative index.", false);
+      return id;
+    }
+    #endif
+    if (size_t(id) >= size()) {
+      assets.resize(size_t(id) + 1);
+    }
+    assets[id] = asset;
+    return id;
+  }
+
   T get(int id) {
     static T sentinel;
     CHECK_ID(id,sentinel);
@@ -67,7 +81,7 @@ public:
   }
 
   size_t size() const { return assets.size(); }
-  bool exists(int id) { return (id > 0 && id < size()); }
+  bool exists(int id) { return (id >= 0 && size_t(id) < size()); }
 
 private:
   std::vector<T> assets;

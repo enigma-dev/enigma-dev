@@ -55,16 +55,16 @@ using std::stringstream;
 
 IDirectSoundBuffer* primaryBuffer;
 
-vector<SoundResource*> sound_resources(0);
+AssetArray<SoundResource> sound_resources;
 
 namespace enigma {
 
 extern HWND hWnd;
 
 void eos_callback(void* soundID, unsigned src) {
-  get_sound(snd, (ptrdiff_t)soundID, );
-  snd->playing = false;
-  snd->idle = true;
+  //auto snd = sound_resources.get((ptrdiff_t)soundID);
+  //snd.playing = false;
+  //snd.idle = true;
 }
 
 int audiosystem_initialize() {
@@ -153,11 +153,7 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 }
 
 int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
-  SoundResource* snd = new SoundResource();
-  if (size_t(id) >= sound_resources.size()) {
-    sound_resources.resize(size_t(id) + 1);
-  }
-  sound_resources[id] = snd;
+  SoundResource snd;
 
   WaveHeaderType* waveHeader = buffer_get_wave_header((char*)buffer, bufsize);
   WAVEFORMATEX waveFormat = {};
@@ -178,12 +174,12 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   bufferDesc.dwReserved = 0;
   bufferDesc.lpwfxFormat = &waveFormat;
   bufferDesc.guid3DAlgorithm = GUID_NULL;
-  dsound->CreateSoundBuffer(&bufferDesc, &snd->soundBuffer, NULL);
+  dsound->CreateSoundBuffer(&bufferDesc, &snd.soundBuffer, NULL);
 
   LPVOID lpvWrite;
   DWORD dwLength;
 
-  IDirectSoundBuffer* sndBuf = snd->soundBuffer;
+  IDirectSoundBuffer* sndBuf = snd.soundBuffer;
 
   if (DS_OK == sndBuf->Lock(0,                     // Offset at which to start lock.
                             waveHeader->dataSize,  // Size of lock; ignored because of flag.
@@ -207,15 +203,16 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
         bits = waveHeader->bitsPerSample,
         size = waveHeader->dataSize;
 
-  snd->length = size / channels / (bits / 8) / freq;
+  snd.length = size / channels / (bits / 8) / freq;
 
   delete waveHeader;
 
-  snd->soundBuffer->SetCurrentPosition(0);
+  snd.soundBuffer->SetCurrentPosition(0);
   // Set volume of the buffer to 100%.
-  snd->soundBuffer->SetVolume(0);
-  snd->loaded = LOADSTATE_COMPLETE;
+  snd.soundBuffer->SetVolume(0);
+  snd.loaded = LOADSTATE_COMPLETE;
 
+  sound_resources.assign(id, snd);
   return 0;
 }
 
@@ -223,21 +220,6 @@ int sound_add_from_stream(int id, size_t (*callback)(void* userdata, void* buffe
                           void (*seek)(void* userdata, float position), void (*cleanup)(void* userdata),
                           void* userdata) {
   return -1;
-}
-
-int sound_allocate() {
-  int id = -1;
-  for (unsigned i = 0; i < sound_resources.size(); i++) {
-    if (sound_resources[id] == NULL) {
-      id = i;
-    }
-  }
-  if (id < 0) {
-    id = sound_resources.size();
-    sound_resources.push_back(NULL);
-  }
-
-  return id;
 }
 
 void audiosystem_update(void) {}
