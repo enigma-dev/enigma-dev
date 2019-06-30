@@ -74,6 +74,8 @@ void sound_stop_all() {
 
 void sound_delete(int sound) {
   sound_stop(sound);
+  auto snd = sound_resources.get(sound);
+  snd.Destroy();
   sound_resources.destroy(sound);
 }
 
