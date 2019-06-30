@@ -55,7 +55,7 @@ using std::stringstream;
 
 IDirectSoundBuffer* primaryBuffer;
 
-AssetArray<SoundResource> sound_resources;
+AssetArray<SoundResource> sound_resources("sound");
 
 namespace enigma {
 

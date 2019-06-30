@@ -29,7 +29,7 @@
   #include "Widget_Systems/widgets_mandatory.h" // for show_error
   #define CHECK_ID(id, ret) \
     if (!exists(id)) { \
-      enigma_user::show_error("Requested asset " + std::to_string(id) + " does not exist.", false); \
+      enigma_user::show_error("Requested " + asset_type + " asset " + std::to_string(id) + " does not exist.", false); \
       return ret; \
     }
 #else
@@ -42,6 +42,8 @@ namespace enigma {
 template<typename T>
 class AssetArray {
 public:
+  AssetArray(std::string asset_type): asset_type(asset_type) {}
+
   int add(T asset) {
     int id = assets.size();
     assets.emplace_back(asset);
@@ -51,7 +53,7 @@ public:
   int assign(int id, T asset) {
     #ifdef DEBUG_MODE
     if (id < 0) {
-      enigma_user::show_error("Attempting to assign asset " + std::to_string(id) + " to negative index.", false);
+      enigma_user::show_error("Attempting to assign " + asset_type + " asset " + std::to_string(id) + " to negative index.", false);
       return id;
     }
     #endif
@@ -85,6 +87,7 @@ public:
 
 private:
   std::vector<T> assets;
+  std::string asset_type;
 };
 
 } // namespace enigma
