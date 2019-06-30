@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <string>
+#include <utility>
 
 #ifdef DEBUG_MODE
   #include "Widget_Systems/widgets_mandatory.h" // for show_error
@@ -32,8 +33,10 @@
       enigma_user::show_error("Requested " + asset_type + " asset " + std::to_string(id) + " does not exist.", false); \
       return ret; \
     }
+  #define CHECK_ID_V(id) CHECK_ID(id,)
 #else
   #define CHECK_ID(id, ret)
+  #define CHECK_ID_V(id)
 #endif
 
 namespace enigma {
@@ -46,7 +49,7 @@ public:
 
   int add(T asset) {
     int id = assets.size();
-    assets.emplace_back(asset);
+    assets.emplace_back(true, asset);
     return id;
   }
 
@@ -60,19 +63,19 @@ public:
     if (size_t(id) >= size()) {
       assets.resize(size_t(id) + 1);
     }
-    assets[id] = asset;
+    assets[id] = {true,asset};
     return id;
   }
 
   T get(int id) {
     static T sentinel;
     CHECK_ID(id,sentinel);
-    return assets[id];
+    return assets[id].second;
   }
 
   int replace(int id, T asset) {
     CHECK_ID(id, -1);
-    assets[id] = asset;
+    assets[id] = {true,asset};
     return id;
   }
 
@@ -82,11 +85,17 @@ public:
     return add(asset);
   }
 
+  void destroy(int id) {
+    CHECK_ID_V(id);
+    //TODO: call cleanup method
+    assets[id].first = false;
+  }
+
   size_t size() const { return assets.size(); }
-  bool exists(int id) { return (id >= 0 && size_t(id) < size()); }
+  bool exists(int id) { return (id >= 0 && size_t(id) < size() && assets[id].first); }
 
 private:
-  std::vector<T> assets;
+  std::vector<std::pair<bool,T>> assets;
   std::string asset_type;
 };
 
