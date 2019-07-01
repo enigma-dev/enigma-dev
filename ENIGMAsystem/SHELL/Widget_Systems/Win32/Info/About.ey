@@ -9,7 +9,7 @@ Description: Create Widgets using Win32 API on Windows.
 
 License, documentation, and install instructions: 
 https://enigma-dev.org/docs/Wiki/Dialogs#Win32
-Author: Josh Ventura
+Author: Josh Ventura, Samuel Venable
 
 Depends:
   Build-Platforms: Windows, SDL
