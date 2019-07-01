@@ -64,6 +64,7 @@ static tstring tstr_gctitle;
 
 // file dialog returns
 static wchar_t wstr_fname[4096];
+static wchar_t wstr_filter[256];
 
 using enigma_user::string_replace_all;
 
@@ -337,14 +338,18 @@ static inline OPENFILENAMEW get_filename_or_filenames_helper(string filter, stri
   tstring tstr_dir = widen(dir);
   tstring tstr_title = widen(title);
 
+  wstr_fname[0] = '\0';
+  wstr_filter[0] = '\0';
   wcsncpy_s(wstr_fname, tstr_fname.c_str(), 4096);
+  wcsncpy_s(wstr_filter, tstr_filter.c_str(), 256);
 
   ZeroMemory(&ofn, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner = enigma::hWnd;
   ofn.lpstrFile = wstr_fname;
   ofn.nMaxFile = 4096;
-  ofn.lpstrFilter = tstr_filter.c_str();
+  ofn.lpstrFilter = wstr_filter;
+  ofn.nMaxCustFilter = 256;
   ofn.nFilterIndex = 0;
   ofn.lpstrTitle = tstr_title.c_str();
   ofn.lpstrInitialDir = tstr_dir.c_str();
