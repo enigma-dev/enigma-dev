@@ -62,9 +62,9 @@ static bool question_cancel = false;
 static string str_gctitle;
 static tstring tstr_gctitle;
 
-// file dialog returns
+// file dialogs
+static wchar_t wstr_filter[512];
 static wchar_t wstr_fname[4096];
-static wchar_t wstr_filter[256];
 
 using enigma_user::string_replace_all;
 
@@ -333,15 +333,23 @@ static inline OPENFILENAMEW get_filename_or_filenames_helper(string filter, stri
   fname = remove_slash(fname);
 
   tstring tstr_filter = widen(filter);
-  replace(tstr_filter.begin(), tstr_filter.end(), '|', '\0');
   tstring tstr_fname = widen(fname);
   tstring tstr_dir = widen(dir);
   tstring tstr_title = widen(title);
 
-  wstr_fname[0] = '\0';
   wstr_filter[0] = '\0';
+  wstr_fname[0] = '\0';
+
+  wcsncpy_s(wstr_filter, tstr_filter.c_str(), 512);
   wcsncpy_s(wstr_fname, tstr_fname.c_str(), 4096);
-  wcsncpy_s(wstr_filter, tstr_filter.c_str(), 256);
+  
+  int i = 0;
+  while(wstr_filter[i] != '\0') {
+    if(wstr_filter[i] == '|') {
+      wstr_filter[i] = '\0';
+    }
+    i += 1;
+  }
 
   ZeroMemory(&ofn, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
@@ -349,7 +357,7 @@ static inline OPENFILENAMEW get_filename_or_filenames_helper(string filter, stri
   ofn.lpstrFile = wstr_fname;
   ofn.nMaxFile = 4096;
   ofn.lpstrFilter = wstr_filter;
-  ofn.nMaxCustFilter = 256;
+  ofn.nMaxCustFilter = 512;
   ofn.nFilterIndex = 0;
   ofn.lpstrTitle = tstr_title.c_str();
   ofn.lpstrInitialDir = tstr_dir.c_str();
