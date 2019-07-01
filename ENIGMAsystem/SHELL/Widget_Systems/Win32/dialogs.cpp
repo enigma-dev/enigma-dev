@@ -65,6 +65,8 @@ static tstring tstr_gctitle;
 // file dialogs
 static wchar_t wstr_filter[512];
 static wchar_t wstr_fname[4096];
+static tstring tstr_dir;
+static tstring tstr_title;
 
 using enigma_user::string_replace_all;
 
@@ -334,11 +336,13 @@ static inline OPENFILENAMEW get_filename_or_filenames_helper(string filter, stri
 
   tstring tstr_filter = widen(filter);
   tstring tstr_fname = widen(fname);
-  tstring tstr_dir = widen(dir);
-  tstring tstr_title = widen(title);
+  tstr_dir = widen(dir);
+  tstr_title = widen(title);
 
   wstr_filter[0] = '\0';
   wstr_fname[0] = '\0';
+  tstr_dir[0] = '\0';
+  tstr_title[0] = '\0';
 
   wcsncpy_s(wstr_filter, tstr_filter.c_str(), 512);
   wcsncpy_s(wstr_fname, tstr_fname.c_str(), 4096);
