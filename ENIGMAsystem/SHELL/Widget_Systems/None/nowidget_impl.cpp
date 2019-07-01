@@ -117,8 +117,7 @@ bool show_question(string str) {
   return (answer == 'Y');
 }
 
-string get_login(string username, string password, string cap="") {
-  cout << cap << endl;
+string get_login(string username, string password) {
   string input;
   cout << "Username: " << flush;
   cin >> input;
@@ -132,19 +131,19 @@ string get_login(string username, string password, string cap="") {
   return input;
 }
 
-string get_string(string message, string def, string cap="") {
-  printf("%s\n%s\n", cap.c_str(), message.c_str());
+string get_string(string str, string def) {
+  printf("%s\n", str.c_str());
   string input;
   cin >> input;
   return (input.empty()) ? def : input;
 }
 
-int get_integer(string message, string def, string cap="") {
-  printf("%s\n%s\n", cap.c_str(), message.c_str());
+double get_integer(string str, double def) {
+  printf("%s\n", str.c_str());
   string input;
   cin >> input;
-  if (input.empty()) input = def;
-  return stoi(input);
+  if (input.empty()) return def;
+  return strtod(input.c_str(), NULL);
 }
 
 }
