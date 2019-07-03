@@ -61,7 +61,7 @@ enum {
 	int show_message_ext(string message, string but1, string but2, string but3);
 	bool show_question(string message);
 	int show_question_cancelable(string message);
-	int show_attempt(string message);
+	int show_attempt(string errortext);
 	string get_string(string message, string def);
 	string get_password(string message, string def);
 	double get_integer(string message, double def);
