@@ -504,8 +504,7 @@ static inline int get_color_helper(int defcol, string title) {
 
 namespace enigma_user {
 
-void show_error(string errortext, const bool fatal)
-{
+void show_error(string errortext, const bool fatal) {
   #ifdef DEBUG_MODE
   errortext += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
@@ -690,10 +689,10 @@ int show_question_cancelable(string message) {
   return show_question_helperfunc(message);
 }
 
-int show_attempt(string message) {
+int show_attempt(string errortext) {
   string strWindowCaption = "Error";
 
-  tstring tstrStr = widen(message);
+  tstring tstrStr = widen(errortext);
   tstring tstrWindowCaption = widen(strWindowCaption);
 
   if (error_caption != L"")
