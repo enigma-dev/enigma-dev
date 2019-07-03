@@ -34,7 +34,7 @@ using namespace std;
 #include "Universal_System/estring.h"
 #include "GameSettings.h"
 
-#include "../General/WSdialogs.h"
+#include "Widget_Systems/General/WSdialogs.h"
 
 #include "Graphics_Systems/General/GScolor_macros.h"
 
