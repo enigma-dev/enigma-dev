@@ -79,9 +79,9 @@ enum {
 	string message_get_caption();
 	void message_set_caption(string title);
 	
-	inline bool action_if_question(string str)
+	inline bool action_if_question(string message)
 	{
-		return show_question(str);
+		return show_question(message);
 	}
 	
 	string get_login(string username, string password);
