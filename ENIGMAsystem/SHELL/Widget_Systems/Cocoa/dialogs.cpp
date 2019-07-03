@@ -42,8 +42,8 @@ bool widget_system_initialize() {
 extern "C" const char *cocoa_dialog_caption();
 extern "C" int cocoa_show_message(const char *message, bool has_cancel, const char *title);
 extern "C" int cocoa_show_question(const char *message, bool has_cancel, const char *title);
-extern "C" int cocoa_show_attempt(const char *message, const char *title);
-extern "C" int cocoa_show_error(const char *message, bool abort, const char *title);
+extern "C" int cocoa_show_attempt(const char *errortext, const char *title);
+extern "C" int cocoa_show_error(const char *errortext, bool abort, const char *title);
 extern "C" const char *cocoa_input_box(const char *message, const char *def, const char *title);
 extern "C" const char *cocoa_password_box(const char *message, const char *def, const char *title);
 extern "C" const char *cocoa_get_open_filename(const char *filter, const char *fname, const char *dir, const char *title, const bool mselect);
@@ -92,9 +92,9 @@ int show_question_cancelable(string message) {
   return cocoa_show_question(message.c_str(), true, dialog_caption.c_str());
 }
 
-int show_attempt(string str) {
+int show_attempt(string errortext) {
   if (error_caption == "") error_caption = "Error";
-  return cocoa_show_attempt(str.c_str(), error_caption.c_str());
+  return cocoa_show_attempt(errortext.c_str(), error_caption.c_str());
 }
 
 string get_string(string message, string def) {
