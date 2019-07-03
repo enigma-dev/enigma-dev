@@ -1,1 +1,1 @@
-#include "dialogs.h"
+#include "Widget_Systems/General/WSdialogs.h"
