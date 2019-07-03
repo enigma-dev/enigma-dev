@@ -972,7 +972,7 @@ int glsl_get_attribute_location(int program, string name) {
       if (prog->name == ""){
         DEBUG_MESSAGE("Program[" + std::to_string(program) + "] - Attribute " + name + "not found!", MESSAGE_TYPE::ERROR);
       }else{
-        DEBUG_MESSAGE("Program[" prog->name + " =  " + std::to_string(program) + "] - Attribute " + name + " not found!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("Program[" + prog->name + " =  " + std::to_string(program) + "] - Attribute " + name + " not found!", MESSAGE_TYPE::ERROR);
       }
     #endif
     return -1;

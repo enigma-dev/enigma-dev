@@ -34,6 +34,7 @@ clock_t lasttime;
 #include <vector>
 using std::map;
 using std::vector;
+using std::string;
 
 bool load_al_dll();
 size_t channel_num = 128;

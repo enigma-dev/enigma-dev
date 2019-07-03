@@ -27,6 +27,7 @@
 
 #include "../General/WSdialogs.h"
 #include "../General/WSmenus.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
 #include <gtk/gtk.h>

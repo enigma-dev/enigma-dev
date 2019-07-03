@@ -20,6 +20,7 @@
 #include "libEGMstd.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
 #include <fstream>

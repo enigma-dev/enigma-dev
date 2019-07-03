@@ -121,14 +121,14 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
 
   if (dllmod == NULL)
   {
-    DEBUG_MESSAGE(std::string("Cannot load library \"") + dll + std::string("\"!"));
+    DEBUG_MESSAGE(std::string("Cannot load library ") + dll, MESSAGE_TYPE::ERROR);
     return -1;
   }
 
   FARPROC funcptr = GetProcAddress(dllmod,func.c_str());
   if (funcptr==NULL)
   {
-    DEBUG_MESSAGE(std::string("No such function \"") + func + std::string("\"."));
+    DEBUG_MESSAGE(std::string("No such function") + func, MESSAGE_TYPE::ERROR);
     return -1;
   }
 

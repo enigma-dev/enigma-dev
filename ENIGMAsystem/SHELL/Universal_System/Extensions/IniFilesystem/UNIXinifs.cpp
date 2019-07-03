@@ -99,7 +99,7 @@ namespace enigma_user
 	std::string ini_full_file_text()
 	{
 		if (currIniFile.empty()) {
-			DEBUG_MESSAGE(("IniFileSystem - cannot get full ini text, as there is no ini file currently open.", MESSAGE_TYPE::ERROR);
+			DEBUG_MESSAGE("IniFileSystem - cannot get full ini text, as there is no ini file currently open.", MESSAGE_TYPE::ERROR);
 			return "";
 		}
 

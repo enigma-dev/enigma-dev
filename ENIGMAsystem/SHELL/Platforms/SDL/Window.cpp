@@ -5,7 +5,7 @@
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/estring.h" // ord
 #include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
 
@@ -272,10 +272,10 @@ void window_set_fullscreen(bool fullscreen) {
 
     if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
-    if (r != 0) DEBUG_MESSAGE("Could not set window to fullscreen! SDL Error: " + SDL_GetError(), MESSAGE_TYPE::ERROR);
+    if (r != 0) DEBUG_MESSAGE(std::string("Could not set window to fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::ERROR);
   } else {
     int r = SDL_SetWindowFullscreen(windowHandle, 0);
-    if (r != 0) DEBUG_MESSAGE("Could not unset window fullscreen! SDL Error: " + SDL_GetError(), MESSAGE_TYPE::ERROR);
+    if (r != 0) DEBUG_MESSAGE(std::string("Could not unset window fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::ERROR);
   }
 }
 

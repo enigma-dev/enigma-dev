@@ -560,7 +560,7 @@ namespace enigma
       }
       default:
         #if DEBUG_MODE
-          particle_shape("Interal error: particle color type not known " + std::to_string(pt->c_mode))
+          DEBUG_MESSAGE("Interal error: particle color type not known " + std::to_string(pt->c_mode), MESSAGE_TYPE::ERROR)
         #endif
         ;
       }

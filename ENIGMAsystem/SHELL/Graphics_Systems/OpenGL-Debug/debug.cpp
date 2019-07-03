@@ -1,4 +1,7 @@
 #include "OpenGLHeaders.h"
+#include "Widget_Systems/widgets_mandatory.h"
+
+#include <string>
 
 namespace enigma {
 
@@ -7,7 +10,7 @@ void openglCallbackFunction(GLenum source, GLenum type, unsigned int id, GLenum 
   
   std::string error;
   error += "\n---------------------opengl-callback-start------------\n";
-  error += "message: " + message + "\n";
+  error += "message: " + std::string(message) + "\n";
   error += "type: ";
 
   switch (type) {

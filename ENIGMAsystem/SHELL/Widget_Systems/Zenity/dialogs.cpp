@@ -30,6 +30,7 @@ using std::string;
 
 #include "strings_util.h"
 #include "Universal_System/estring.h"
+#include "Widget_Systems/widgets_mandatory.h"
 using enigma_user::filename_name;
 using enigma_user::filename_path;
 

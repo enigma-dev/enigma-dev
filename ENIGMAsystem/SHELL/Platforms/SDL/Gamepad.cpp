@@ -1,4 +1,5 @@
 #include "Gamepad.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
 

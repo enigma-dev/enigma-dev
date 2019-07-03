@@ -1,4 +1,4 @@
-yt/** Copyright (C) 2015 Harijs Grinbergs
+/** Copyright (C) 2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -40,7 +40,7 @@ yt/** Copyright (C) 2015 Harijs Grinbergs
   //This checks and returns an element
   #define get_elementv(element,clastype,entype,id,ret)\
     if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) {\
-      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::ERROR);
+      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::ERROR);\
       return ret;\
     }\
     clastype &element = gui::gui_elements[id];

@@ -23,6 +23,10 @@
 
 #include <string>
 
+#ifdef _WIN32
+#undef ERROR // TODO: find windows.h included in wrong order
+#endif
+
 #define DEBUG_MESSAGE(msg, severity) show_error(msg + std::string(" | ") + std::string(__FILE__) + std::string(":") + std::to_string(__LINE__), severity)
 
 namespace enigma {

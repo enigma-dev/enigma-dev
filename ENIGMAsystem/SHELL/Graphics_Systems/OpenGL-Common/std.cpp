@@ -52,9 +52,9 @@ namespace enigma {
   {
     #ifdef DEBUG_MODE
     DEBUG_MESSAGE("OpenGL loaded", MESSAGE_TYPE::INFO);
-    DEBUG_MESSAGE("Vendor: " + std::string(glGetString(GL_VENDOR)), MESSAGE_TYPE::INFO);
-    DEBUG_MESSAGE("Renderer: " + std::string(glGetString(GL_RENDERER)), MESSAGE_TYPE::INFO);
-    DEBUG_MESSAGE("Version: " + std::string(glGetString(GL_VERSION)), MESSAGE_TYPE::INFO);
+    DEBUG_MESSAGE("Vendor: " + std::string(reinterpret_cast<const char*>(glGetString(GL_VENDOR))), MESSAGE_TYPE::INFO);
+    DEBUG_MESSAGE("Renderer: " + std::string(reinterpret_cast<const char*>(glGetString(GL_RENDERER))), MESSAGE_TYPE::INFO);
+    DEBUG_MESSAGE("Version: " + std::string(reinterpret_cast<const char*>(glGetString(GL_VERSION))), MESSAGE_TYPE::INFO);
     #endif
     
     register_gl_debug_callback();
