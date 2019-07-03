@@ -810,11 +810,11 @@ string message_get_caption() {
   return shorten(dialog_caption);
 }
 
-void message_set_caption(string message) {
-  if (!str.empty()) dialog_caption = widen(message);
+void message_set_caption(string title) {
+  if (!str.empty()) dialog_caption = widen(title);
   else dialog_caption = L"";
 
-  if (!str.empty()) error_caption = widen(message);
+  if (!str.empty()) error_caption = widen(title);
   else error_caption = L"Error";
 }
 
