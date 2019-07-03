@@ -43,7 +43,7 @@ extern "C" const char *cocoa_dialog_caption();
 extern "C" int cocoa_show_message(const char *message, bool has_cancel, const char *title);
 extern "C" int cocoa_show_question(const char *message, bool has_cancel, const char *title);
 extern "C" int cocoa_show_attempt(const char *errortext, const char *title);
-extern "C" int cocoa_show_error(const char *errortext, bool abort, const char *title);
+extern "C" int cocoa_show_error(const char *errortext, bool fatal, const char *title);
 extern "C" const char *cocoa_input_box(const char *message, const char *def, const char *title);
 extern "C" const char *cocoa_password_box(const char *message, const char *def, const char *title);
 extern "C" const char *cocoa_get_open_filename(const char *filter, const char *fname, const char *dir, const char *title, const bool mselect);
