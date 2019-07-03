@@ -70,6 +70,7 @@ class PasswordContext {
 
 namespace enigma {
   void show_error(string err, MESSAGE_TYPE type) {
+  if (type == MESSAGE_TYPE::M_USER_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) {
       printf((error_type(type) + ": in some action of some event for object %d, instance id %d: %s\n").c_str(),
              (enigma::instance_event_iterator == NULL? enigma_user::global :
                 enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
@@ -79,9 +80,9 @@ namespace enigma {
                   enigma::instance_event_iterator->inst->id),
              err.c_str()
         );
-      //printf((error_type(type) + ": %s\n").c_str(), err.c_str()); 
+    } else printf((error_type(type) + ": %s\n").c_str(), err.c_str()); 
     
-    if (type == MESSAGE_TYPE::M_FATAL_ERROR) exit(0);
+    if (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) exit(0);
     ABORT_ON_ALL_ERRORS();
   }
 

@@ -30,7 +30,9 @@ namespace enigma {
     M_INFO = 0,
     M_WARNING = 1,
     M_ERROR = 2,
-    M_FATAL_ERROR = 3
+    M_USER_ERROR = 3,
+    M_FATAL_ERROR = 4,
+    M_FATAL_USER_ERROR = 5
   };
   
   inline std::string error_type(MESSAGE_TYPE t) {
@@ -38,7 +40,9 @@ namespace enigma {
       case M_INFO: return "INFO";
       case M_WARNING: return "WARNING";
       case M_ERROR: return "ERROR";
+      case M_USER_ERROR: return "USER_ERROR";
       case M_FATAL_ERROR: return "FATAL_ERROR";
+      case M_FATAL_USER_ERROR: return "FATAL_USER_ERROR";
       default: return "ERROR";
     }
   }
@@ -56,7 +60,7 @@ namespace enigma_user {
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
 inline void show_error(std::string msg, const bool fatal) {
-   enigma::show_error(msg, (fatal) ? enigma::M_FATAL_ERROR : enigma::M_ERROR);
+   enigma::show_error(msg, (fatal) ? enigma::M_FATAL_USER_ERROR : enigma::M_USER_ERROR);
 }
 
 int show_message(const std::string &msg);

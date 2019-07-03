@@ -344,6 +344,14 @@ namespace gui
                   if (*p != 0){
                     break;
                   }
+                  /*if (cursor_position == 0){
+                    if (text[cursor_line].find_first_not_of("-+") && !enigma_user::keyboard_lastchar.find_first_not_of("0123456789.-+")){ //+ and - can only be the first chars
+                      break;
+                    }
+                  }else if (!(enigma_user::keyboard_lastchar.find_first_not_of("0123456789."))){ //We could do >'0' && <'9' || '.' || '-' || '+', but this wouldn't work in unicode
+                    break;
+                  }*/
+                }
                 if (mark == true){
                   change = true;
                   marker_delete(); //If something is selected then this deletes it and resets mark
@@ -362,6 +370,17 @@ namespace gui
         }
         repeat_timer++;
         if (change == true){
+          //Resize if needed
+          /*double h = (double)enigma_user::font_height(enigma_user::draw_get_font());
+          double maxw = 0.0;
+          //TODO(harijs): Cache this so we don't have to recalculate every time
+          for (auto &t : text){
+            double w = enigma_user::string_width(t);
+            if (w>maxw) maxw = w;
+          }
+          box.w = maxw + sty.padding.left + sty.padding.right;
+          box.h = h * text.size() + sty.padding.top + sty.padding.bottom;*/
+
           callback_execute(enigma_user::gui_event_change);
         }
       }

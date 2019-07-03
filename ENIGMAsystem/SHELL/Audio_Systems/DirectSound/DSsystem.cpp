@@ -91,7 +91,7 @@ int audiosystem_initialize() {
   // Set the cooperative level to priority so the format of the primary sound buffer can be modified.
   result = dsound->SetCooperativeLevel(hWnd, DSSCL_PRIORITY);
   if (FAILED(result)) {
-    DEBUG_MESSAGE("Failed to set the cooperative level of the Window handle.", MESSAGE_TYPE::M_ERROR)
+    DEBUG_MESSAGE("Failed to set the cooperative level of the Window handle.", MESSAGE_TYPE::M_ERROR);
     return false;
   }
 
