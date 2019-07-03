@@ -210,7 +210,7 @@ int show_question_cancelable(string message) {
   return show_question_helperfunc(message);
 }
 
-int show_attempt(string message) {
+int show_attempt(string errortext) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -219,7 +219,7 @@ int show_attempt(string message) {
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
   string("--question --ok-label=Retry --cancel-label=Cancel ") +  string("--title=\"") +
   add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
-  add_escaping(message, false, "") +
+  add_escaping(errortext, false, "") +
   string("\" --icon-name=dialog-error);if [ $? = 0 ] ;then echo 0;else echo -1;fi");
 
   string str_result = shellscript_evaluate(str_command);
