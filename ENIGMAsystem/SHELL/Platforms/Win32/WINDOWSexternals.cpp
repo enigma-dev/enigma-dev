@@ -32,7 +32,6 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
 
-#include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/General/PFexternals.h"
 
@@ -42,6 +41,8 @@
 #include <string>
 #include <windows.h>
 #include <ffi.h>
+
+#include "Platforms/platforms_mandatory.h" // needs go after windows.h because ERROR defined
 
 using namespace std;
 
