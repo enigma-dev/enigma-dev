@@ -810,10 +810,10 @@ string message_get_caption() {
 }
 
 void message_set_caption(string title) {
-  if (!str.empty()) dialog_caption = widen(title);
+  if (!title.empty()) dialog_caption = widen(title);
   else dialog_caption = L"";
 
-  if (!str.empty()) error_caption = widen(title);
+  if (!title.empty()) error_caption = widen(title);
   else error_caption = L"Error";
 }
 
