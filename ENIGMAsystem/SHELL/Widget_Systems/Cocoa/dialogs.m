@@ -74,8 +74,8 @@ int cocoa_show_question(const char *message, bool has_cancel, const char *title)
   return -1;
 }
 
-int cocoa_show_attempt(const char *message, const char *title) {
-  NSString *myStr = [NSString stringWithUTF8String:message];
+int cocoa_show_attempt(const char *errortext, const char *title) {
+  NSString *myStr = [NSString stringWithUTF8String:errortext];
   NSAlert *alert = [[NSAlert alloc] init];
   [alert setMessageText:@"Error"];
 
@@ -95,8 +95,8 @@ int cocoa_show_attempt(const char *message, const char *title) {
   return -1;
 }
 
-int cocoa_show_error(const char *message, bool abort, const char *title) {
-  NSString *myStr = [NSString stringWithUTF8String:message];
+int cocoa_show_error(const char *errortext, bool fatal, const char *title) {
+  NSString *myStr = [NSString stringWithUTF8String:errortext];
   NSAlert *alert = [[NSAlert alloc] init];
   [alert setMessageText:@"Error"];
 
@@ -111,7 +111,7 @@ int cocoa_show_error(const char *message, bool abort, const char *title) {
   NSModalResponse responseTag = [alert runModal];
   [alert release];
 
-  if (responseTag == NSAlertFirstButtonReturn || abort)
+  if (responseTag == NSAlertFirstButtonReturn || fatal)
     return 1;
 
   if (responseTag == NSAlertSecondButtonReturn)
