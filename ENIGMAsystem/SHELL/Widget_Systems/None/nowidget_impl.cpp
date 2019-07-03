@@ -81,7 +81,7 @@ namespace enigma {
         );
       //printf((error_type(type) + ": %s\n").c_str(), err.c_str()); 
     
-    if (type == MESSAGE_TYPE::FATAL_ERROR) exit(0);
+    if (type == MESSAGE_TYPE::M_FATAL_ERROR) exit(0);
     ABORT_ON_ALL_ERRORS();
   }
 

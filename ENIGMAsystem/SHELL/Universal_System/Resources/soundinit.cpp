@@ -64,7 +64,7 @@ namespace enigma
       if (!fread(fdata,1,size,exe)) return;
 
       int e = sound_add_from_buffer(id,fdata,size);
-      if (e) DEBUG_MESSAGE("Failed to load sound " + std::to_string(i) + " error " + std::to_string(e), MESSAGE_TYPE::ERROR);
+      if (e) DEBUG_MESSAGE("Failed to load sound " + std::to_string(i) + " error " + std::to_string(e), MESSAGE_TYPE::M_ERROR);
       delete[] fdata;
     }
   }

@@ -75,7 +75,7 @@ namespace enigma
     windowsystem_write_exename(exename);
     FILE* exe = fopen(exename,"rb");
     if (!exe)
-      DEBUG_MESSAGE("Resource load fail: exe unopenable", MESSAGE_TYPE::ERROR);
+      DEBUG_MESSAGE("Resource load fail: exe unopenable", MESSAGE_TYPE::M_ERROR);
     else do
     {
       int nullhere;
@@ -83,7 +83,7 @@ namespace enigma
       fseek(exe,-8,SEEK_END);
       char str_quad[4];
       if (!fread(str_quad,4,1,exe) or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
-        DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
         break;
       }
 

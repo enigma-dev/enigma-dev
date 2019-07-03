@@ -54,7 +54,7 @@ namespace enigma {
       GLint test;
       glGetShaderiv(shader, GL_COMPILE_STATUS, &test);
       if (!test) {
-        DEBUG_MESSAGE("Shader compilation failed with this message:", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("Shader compilation failed with this message:", MESSAGE_TYPE::M_ERROR);
         const size_t buffer_size = 512;
         char buffer[buffer_size];
         glGetShaderInfoLog(shader, buffer_size, NULL, buffer);
@@ -72,7 +72,7 @@ namespace enigma {
       if (major_version < 3) {
         int minor_version;
         glGetIntegerv(GL_MINOR_VERSION, &minor_version);
-        DEBUG_MESSAGE("OpenGL 3.0 or more must be supported, but a smaller version number was found: " + std::to_sring(major_version) + "." + std::to_string(minor_version), MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("OpenGL 3.0 or more must be supported, but a smaller version number was found: " + std::to_sring(major_version) + "." + std::to_string(minor_version), MESSAGE_TYPE::M_ERROR);
         exit(-1);
       }
 

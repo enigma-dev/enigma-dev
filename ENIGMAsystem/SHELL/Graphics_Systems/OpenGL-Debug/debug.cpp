@@ -60,18 +60,18 @@ void openglCallbackFunction(GLenum source, GLenum type, unsigned int id, GLenum 
 
   error += "\n";
   error += "---------------------opengl-callback-end--------------\n";
-  DEBUG_MESSAGE(error, MESSAGE_TYPE::ERROR);
+  DEBUG_MESSAGE(error, MESSAGE_TYPE::M_ERROR);
 }
 
 void register_gl_debug_callback() {
   if (glDebugMessageCallback) {
-    DEBUG_MESSAGE("Registered OpenGL debug callback", MESSAGE_TYPE::INFO);
+    DEBUG_MESSAGE("Registered OpenGL debug callback", MESSAGE_TYPE::M_INFO);
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback((GLDEBUGPROC)&openglCallbackFunction, nullptr);
     unsigned int unusedIds = 0;
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, true);
-  } else DEBUG_MESSAGE("glDebugMessageCallback not available", MESSAGE_TYPE::INFO);
+  } else DEBUG_MESSAGE("glDebugMessageCallback not available", MESSAGE_TYPE::M_INFO);
 }
 
 } // namespace enigma

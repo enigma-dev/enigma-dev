@@ -207,7 +207,7 @@ namespace enigma_user
 		bool parsingSuccessful = reader.parse( string(data), root );
 		if ( !parsingSuccessful )
 		{
-			DEBUG_MESSAGE("Failed to parse configuration" + reader.getFormattedErrorMessages(), MESSAGE_TYPE::ERROR);
+			DEBUG_MESSAGE("Failed to parse configuration" + reader.getFormattedErrorMessages(), MESSAGE_TYPE::M_ERROR);
 			return -1;
 		}
 		return RecursiveDSMap(root);

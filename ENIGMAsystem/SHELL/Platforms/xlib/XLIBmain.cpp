@@ -168,7 +168,7 @@ int handleEvents() {
         //else fall through
       default:
 #ifdef DEBUG_MODE
-        DEBUG_MESSAGE("Unhandled xlib event: " + std::to_string(e.type), MESSAGE_TYPE::INFO);
+        DEBUG_MESSAGE("Unhandled xlib event: " + std::to_string(e.type), MESSAGE_TYPE::M_INFO);
 #endif
         continue;
     }

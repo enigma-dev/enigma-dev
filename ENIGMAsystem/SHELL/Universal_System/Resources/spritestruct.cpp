@@ -40,7 +40,7 @@ bool get_sprite(enigma::sprite* &spr, int id)
 {
 #ifdef DEBUG_MODE
     if (id < -1 || size_t(id) > enigma::sprite_idmax || !enigma::spritestructarray[id]) {
-        DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::M_ERROR);
         return false;
     }
 #endif
@@ -284,7 +284,7 @@ namespace enigma
         filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
 
     if (pxdata == NULL) {
-      DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::ERROR);
+      DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR);
       return;
     }
 

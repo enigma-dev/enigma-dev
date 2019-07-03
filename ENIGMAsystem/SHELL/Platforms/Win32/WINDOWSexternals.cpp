@@ -42,8 +42,6 @@
 #include <windows.h>
 #include <ffi.h>
 
-#include "Platforms/platforms_mandatory.h" // needs go after windows.h because ERROR defined
-
 using namespace std;
 
 struct external
@@ -106,7 +104,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
 
   if (status != FFI_OK)
   {
-    DEBUG_MESSAGE("Defining DLL failed.", MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("Defining DLL failed.", MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 
@@ -116,20 +114,20 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   	dllmod = LoadLibrary(dll.c_str());
   else
   {
-    DEBUG_MESSAGE("LOADING PREEXISTING HANDLE", MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("LOADING PREEXISTING HANDLE", MESSAGE_TYPE::M_ERROR);
     dllmod = dllHandles[dll];
   }
 
   if (dllmod == NULL)
   {
-    DEBUG_MESSAGE(std::string("Cannot load library ") + dll, MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE(std::string("Cannot load library ") + dll, MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 
   FARPROC funcptr = GetProcAddress(dllmod,func.c_str());
   if (funcptr==NULL)
   {
-    DEBUG_MESSAGE(std::string("No such function") + func, MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE(std::string("No such function") + func, MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 
@@ -155,7 +153,7 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
   map<int,external*>::iterator it;
   if ((it=externals.find(id)) == externals.end())
   {
-    DEBUG_MESSAGE("Unknown external function called", MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("Unknown external function called", MESSAGE_TYPE::M_ERROR);
     return 0;
   }
   external* a=it->second;

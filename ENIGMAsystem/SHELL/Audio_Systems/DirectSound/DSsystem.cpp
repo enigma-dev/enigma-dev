@@ -69,14 +69,14 @@ void eos_callback(void* soundID, unsigned src) {
 
 int audiosystem_initialize() {
   if (get_window_handle() == NULL) {
-    DEBUG_MESSAGE("Window handle is NULL.", MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("Window handle is NULL.", MESSAGE_TYPE::M_ERROR);
     return false;
   }
 
   starttime = clock();
   elapsedtime = starttime;
   lasttime = elapsedtime;
-  DEBUG_MESSAGE("Initializing audio system...", MESSAGE_TYPE::INFO);
+  DEBUG_MESSAGE("Initializing audio system...", MESSAGE_TYPE::M_INFO);
 
   HRESULT result;
   DSBUFFERDESC bufferDesc;
@@ -84,14 +84,14 @@ int audiosystem_initialize() {
   // Initialize the direct sound interface pointer for the default sound device.
   result = DirectSoundCreate8(NULL, &dsound, NULL);
   if (FAILED(result)) {
-    DEBUG_MESSAGE("Failed to create DirectSound8 object.", MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("Failed to create DirectSound8 object.", MESSAGE_TYPE::M_ERROR);
     return false;
   }
 
   // Set the cooperative level to priority so the format of the primary sound buffer can be modified.
   result = dsound->SetCooperativeLevel(hWnd, DSSCL_PRIORITY);
   if (FAILED(result)) {
-    DEBUG_MESSAGE("Failed to set the cooperative level of the Window handle.", MESSAGE_TYPE::ERROR)
+    DEBUG_MESSAGE("Failed to set the cooperative level of the Window handle.", MESSAGE_TYPE::M_ERROR)
     return false;
   }
 

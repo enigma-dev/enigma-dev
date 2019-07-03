@@ -74,7 +74,7 @@ void show_error(string errortext, MESSAGE_TYPE type) {
   errortext += enigma::debug_scope::GetErrors();
   #endif
 
-  str_echo = (type == MESSAGE_TYPE::FATAL_ERROR) ? "echo 1" :
+  str_echo = (type == MESSAGE_TYPE::M_FATAL_ERROR) ? "echo 1" :
     "x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi";
 
   str_command = string("kdialog ") +

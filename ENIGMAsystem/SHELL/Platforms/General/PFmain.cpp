@@ -54,7 +54,7 @@ int enigma_main(int argc, char** argv) {
   set_program_args(argc, argv);
 
   if (!initGameWindow()) {
-    DEBUG_MESSAGE("Failed to create game window", MESSAGE_TYPE::FATAL_ERROR);
+    DEBUG_MESSAGE("Failed to create game window", MESSAGE_TYPE::M_FATAL_ERROR);
     return -4;
   }
 

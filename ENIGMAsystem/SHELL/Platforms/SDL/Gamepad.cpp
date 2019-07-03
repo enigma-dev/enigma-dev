@@ -37,7 +37,7 @@ void setGamepadButton(int gamepad, int btn, bool pressed) { gamepads[gamepad].st
 
 void addGamepad(unsigned i) {
   if (!SDL_IsGameController(i)) {
-    DEBUG_MESSAGE("Could not open gamepad " + std::to_string(i) + ": " + SDL_GetError(), MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("Could not open gamepad " + std::to_string(i) + ": " + SDL_GetError(), MESSAGE_TYPE::M_ERROR);
     return;
   }
 
@@ -46,11 +46,11 @@ void addGamepad(unsigned i) {
   g.controller = SDL_GameControllerOpen(i);
 
   if (g.controller == nullptr) {
-    DEBUG_MESSAGE("Could not open gamepad " + std::to_string(i) + ": " + SDL_GetError(), MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("Could not open gamepad " + std::to_string(i) + ": " + SDL_GetError(), MESSAGE_TYPE::M_ERROR);
     return;
   }
 
-  DEBUG_MESSAGE("Connected gamepad " + std::to_string(i) + " " + std::string(SDL_GameControllerName(g.controller)), MESSAGE_TYPE::INFO);
+  DEBUG_MESSAGE("Connected gamepad " + std::to_string(i) + " " + std::string(SDL_GameControllerName(g.controller)), MESSAGE_TYPE::M_INFO);
 
   SDL_Joystick* j = SDL_GameControllerGetJoystick(g.controller);
 
@@ -58,9 +58,9 @@ void addGamepad(unsigned i) {
     g.haptic = SDL_HapticOpenFromJoystick(j);
 
     if (SDL_HapticRumbleSupported(g.haptic) && SDL_HapticRumbleInit(g.haptic))
-      DEBUG_MESSAGE("Rumble Supported: yes", MESSAGE_TYPE::INFO);
+      DEBUG_MESSAGE("Rumble Supported: yes", MESSAGE_TYPE::M_INFO);
     else
-      DEBUG_MESSAGE("Rumble Supported: no", MESSAGE_TYPE::INFO);
+      DEBUG_MESSAGE("Rumble Supported: no", MESSAGE_TYPE::M_INFO);
   }
 
   if (i < gamepads.size())
@@ -70,7 +70,7 @@ void addGamepad(unsigned i) {
 }
 
 void removeGamepad(unsigned i) {
-  DEBUG_MESSAGE("Disconnected gamepad " + std::to_string(i) + ": " + std::string(SDL_GameControllerName(gamepads[i].controller)), MESSAGE_TYPE::INFO);
+  DEBUG_MESSAGE("Disconnected gamepad " + std::to_string(i) + ": " + std::string(SDL_GameControllerName(gamepads[i].controller)), MESSAGE_TYPE::M_INFO);
   if (gamepads[i].haptic != nullptr) SDL_HapticClose(gamepads[i].haptic);
   SDL_GameControllerClose(gamepads[i].controller);
 }

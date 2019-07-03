@@ -49,7 +49,7 @@ namespace enigma
                      + "' both have ID " + toString(id)
                      + "': A new ID has been assigned so the game can continue, but references by this ID may fail."
                      " This bug is likely caused by the IDE, and can be worked around by using the 'Defrag IDs'"
-                     " feature to assign new, ordered IDs to all instances.", MESSAGE_TYPE::ERROR);
+                     " feature to assign new, ordered IDs to all instances.", MESSAGE_TYPE::M_ERROR);
           return maxid++;
         }
         return id;
@@ -91,10 +91,10 @@ namespace enigma
 #if DEBUG_MODE
   #define errcheck(objid,err) \
   if (objid < 0 or size_t(objid) >= enigma::object_idmax or !enigma::objectdata[objid]) \
-    return (DEBUG_MESSAGE(err, MESSAGE_TYPE::ERROR), 0)
+    return (DEBUG_MESSAGE(err, MESSAGE_TYPE::M_ERROR), 0)
   #define errcheck_v(objid,err) \
   if (objid < 0 or size_t(objid) >= enigma::object_idmax or !enigma::objectdata[objid]) \
-    DEBUG_MESSAGE(err, MESSAGE_TYPE::ERROR)
+    DEBUG_MESSAGE(err, MESSAGE_TYPE::M_ERROR)
 #else
   #define errcheck(objid,err)
   #define errcheck_v(objid,err)

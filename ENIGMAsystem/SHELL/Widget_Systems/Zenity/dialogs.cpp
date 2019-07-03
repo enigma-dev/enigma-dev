@@ -74,7 +74,7 @@ void show_error(string errortext, MESSAGE_TYPE type) {
   errortext += enigma::debug_scope::GetErrors();
   #endif
 
-  str_echo = (type == MESSAGE_TYPE::FATAL_ERROR) ? "echo 1" :
+  str_echo = (type == MESSAGE_TYPE::M_FATAL_ERROR) ? "echo 1" :
     "if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Ignore\" ] ;then echo -1;elif [ $? = 2 ] ;then echo 0;fi";
 
   str_command = string("ans=$(zenity ") +

@@ -43,7 +43,7 @@ void exe_loadfonts(FILE* exe) {
 
   if (!fread(&fontcount, 4, 1, exe)) return;
   if ((int)fontcount != rawfontcount) {
-    DEBUG_MESSAGE("Resource data does not match up with game metrics. Unable to improvise.", MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("Resource data does not match up with game metrics. Unable to improvise.", MESSAGE_TYPE::M_ERROR);
     return;
   }
 
@@ -81,19 +81,19 @@ void exe_loadfonts(FILE* exe) {
 
     if (size != sz2) {
       DEBUG_MESSAGE("Failed to load font: Data is truncated before exe end. Read " + enigma_user::toString(sz2) +
-                     " out of expected " + enigma_user::toString(size), MESSAGE_TYPE::ERROR);
+                     " out of expected " + enigma_user::toString(size), MESSAGE_TYPE::M_ERROR);
       return;
     }
     if (!fread(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "done", sizeof(int)) != 0) {
-      DEBUG_MESSAGE("Unexpected end; eof: " + feof(exe) ? std::string("true") : std::string("false"), MESSAGE_TYPE::ERROR);
+      DEBUG_MESSAGE("Unexpected end; eof: " + feof(exe) ? std::string("true") : std::string("false"), MESSAGE_TYPE::M_ERROR);
       return;
     }
     //unpacked = width*height*4;
     /*unsigned char* pixels=new unsigned char[unpacked+1];
     if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
     {
-      DEBUG_MESSAGE("Background load error: Background does not match expected size", MESSAGE_TYPE::ERROR);
+      DEBUG_MESSAGE("Background load error: Background does not match expected size", MESSAGE_TYPE::M_ERROR);
       continue;
     }
     delete[] cpixels;*/

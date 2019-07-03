@@ -90,19 +90,19 @@ namespace enigma
         unsigned char* cpixels=new unsigned char[size+1];
         if (!cpixels)
         {  //FIXME: Uncomment these when tostring is available
-          DEBUG_MESSAGE("Failed to load sprite: Cannot allocate enough memory "+ toString(unpacked), MESSAGE_TYPE::ERROR);
+          DEBUG_MESSAGE("Failed to load sprite: Cannot allocate enough memory "+ toString(unpacked), MESSAGE_TYPE::M_ERROR);
           break;
         }
         unsigned int sz2=fread(cpixels,1,size,exe);
         if (size!=sz2) {
           DEBUG_MESSAGE("Failed to load sprite: Data is truncated before exe end. Read "+toString(sz2)+
-                                  " out of expected "+toString(size), MESSAGE_TYPE::ERROR);
+                                  " out of expected "+toString(size), MESSAGE_TYPE::M_ERROR);
           return;
         }
         unsigned char* pixels=new unsigned char[unpacked+1];
         if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
         {
-          DEBUG_MESSAGE("Sprite load error: Sprite does not match expected size", MESSAGE_TYPE::ERROR);
+          DEBUG_MESSAGE("Sprite load error: Sprite does not match expected size", MESSAGE_TYPE::M_ERROR);
           continue;
         }
         delete[] cpixels;
@@ -126,7 +126,7 @@ namespace enigma
 
         if (nullhere)
         {
-          DEBUG_MESSAGE("Sprite load error: Null terminator expected", MESSAGE_TYPE::ERROR);
+          DEBUG_MESSAGE("Sprite load error: Null terminator expected", MESSAGE_TYPE::M_ERROR);
           break;
         }
       }

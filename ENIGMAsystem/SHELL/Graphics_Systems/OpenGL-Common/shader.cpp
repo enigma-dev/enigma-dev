@@ -443,7 +443,7 @@ void main()
       case GL_SAMPLER_2D: return 1;
       case GL_SAMPLER_3D: return 1;
 
-      default: { DEBUG_MESSAGE("getGLTypeSize Asking size for unknown type - " + std::to_string(type), MESSAGE_TYPE::ERROR); return 1; }
+      default: { DEBUG_MESSAGE("getGLTypeSize Asking size for unknown type - " + std::to_string(type), MESSAGE_TYPE::M_ERROR); return 1; }
     }
   }
 
@@ -488,7 +488,7 @@ void glsl_shader_print_infolog(int id)
     free(compiler_log);
   } else {
     enigma::shaders[id]->log = "Shader log empty";
-    DEBUG_MESSAGE(enigma::shaders[id]->log, MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE(enigma::shaders[id]->log, MESSAGE_TYPE::M_ERROR);
   }
 }
 
@@ -503,11 +503,11 @@ void glsl_program_print_infolog(int id)
     GLchar* compiler_log = (GLchar*)malloc(blen);
     glGetProgramInfoLog(enigma::shaderprograms[id]->shaderprogram, blen, &slen, compiler_log);
     enigma::shaderprograms[id]->log = (string)compiler_log;
-    DEBUG_MESSAGE(compiler_log, MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE(compiler_log, MESSAGE_TYPE::M_ERROR);
     free(compiler_log);
   } else {
     enigma::shaderprograms[id]->log = "Shader program log empty";
-    DEBUG_MESSAGE(enigma::shaderprograms[id]->log, MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE(enigma::shaderprograms[id]->log, MESSAGE_TYPE::M_ERROR);
   }
 }
 
@@ -552,7 +552,7 @@ bool glsl_shader_compile(int id)
   if (compiled){
     return true;
   } else {
-    DEBUG_MESSAGE("Shader[" + std::to_string(id) + "] " + (enigma::shaders[id]->type == sh_vertex?"Vertex shader":"Pixel shader") + std::string(" - Compilation failed - Info log: "), MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("Shader[" + std::to_string(id) + "] " + (enigma::shaders[id]->type == sh_vertex?"Vertex shader":"Pixel shader") + std::string(" - Compilation failed - Info log: "), MESSAGE_TYPE::M_ERROR);
     glsl_shader_print_infolog(id);
     return false;
   }
@@ -603,7 +603,7 @@ bool glsl_program_link(int id)
     enigma::getDefaultAttributes(id);
     return true;
   } else {
-    DEBUG_MESSAGE("Shader program[" + std::to_string(id) + "] - Linking failed - Info log:", MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("Shader program[" + std::to_string(id) + "] - Linking failed - Info log:", MESSAGE_TYPE::M_ERROR);
     glsl_program_print_infolog(id);
     return false;
   }
@@ -618,7 +618,7 @@ bool glsl_program_validate(int id)
   if (validated){
     return true;
   } else {
-    DEBUG_MESSAGE("Shader program[" + std::to_string(id) + "] - Validation failed - Info log:", MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("Shader program[" + std::to_string(id) + "] - Validation failed - Info log:", MESSAGE_TYPE::M_ERROR);
     glsl_program_print_infolog(id);
     return false;
   }
@@ -681,9 +681,9 @@ int glsl_get_uniform_location(int program, string name) {
   if (it == enigma::shaderprograms[program]->uniform_names.end()){
     #ifdef DEBUG_MODE
       if (enigma::shaderprograms[program]->name == ""){
-        DEBUG_MESSAGE("Program[" + std::to_string(program) + "] - Uniform " + name + " not found!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("Program[" + std::to_string(program) + "] - Uniform " + name + " not found!", MESSAGE_TYPE::M_ERROR);
       }else{
-       DEBUG_MESSAGE("Program[" + enigma::shaderprograms[program]->name + " = " + std::to_string(program) + "] - Uniform " + name + " not found!", MESSAGE_TYPE::ERROR);
+       DEBUG_MESSAGE("Program[" + enigma::shaderprograms[program]->name + " = " + std::to_string(program) + "] - Uniform " + name + " not found!", MESSAGE_TYPE::M_ERROR);
       }
     #endif
     return -1;
@@ -970,9 +970,9 @@ int glsl_get_attribute_location(int program, string name) {
   if (it == prog->attribute_names.end()){
     #ifdef DEBUG_MODE
       if (prog->name == ""){
-        DEBUG_MESSAGE("Program[" + std::to_string(program) + "] - Attribute " + name + "not found!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("Program[" + std::to_string(program) + "] - Attribute " + name + "not found!", MESSAGE_TYPE::M_ERROR);
       }else{
-        DEBUG_MESSAGE("Program[" + prog->name + " =  " + std::to_string(program) + "] - Attribute " + name + " not found!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("Program[" + prog->name + " =  " + std::to_string(program) + "] - Attribute " + name + " not found!", MESSAGE_TYPE::M_ERROR);
       }
     #endif
     return -1;

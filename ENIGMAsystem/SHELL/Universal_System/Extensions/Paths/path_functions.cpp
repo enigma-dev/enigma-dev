@@ -179,7 +179,7 @@ void path_delete(unsigned pathid)
 {
     #ifdef DEBUG_MODE
     if (!path_exists(pathid)){
-        DEBUG_MESSAGE("Attempting to delete invalid path "+toString(pathid), MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("Attempting to delete invalid path "+toString(pathid), MESSAGE_TYPE::M_ERROR);
         return;
     }
     #endif
@@ -411,7 +411,7 @@ void path_insert_point(unsigned pathid, unsigned n, cs_scalar x, cs_scalar y, cs
 {
     #ifdef DEBUG_MODE
     if (n>enigma::pathstructarray[pathid]->pointarray.size()){
-        DEBUG_MESSAGE("Attempting to insert point in invalid place " + toString(n) + " for path "+ toString(pathid), MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("Attempting to insert point in invalid place " + toString(n) + " for path "+ toString(pathid), MESSAGE_TYPE::M_ERROR);
         return;
     }
     #endif
@@ -424,7 +424,7 @@ void path_change_point(unsigned pathid, unsigned n, cs_scalar x, cs_scalar y, cs
 {
     #ifdef DEBUG_MODE
     if (n>enigma::pathstructarray[pathid]->pointarray.size()){
-        DEBUG_MESSAGE("Attempting to change invalid point " + toString(n) + " for path "+toString(pathid), MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("Attempting to change invalid point " + toString(n) + " for path "+toString(pathid), MESSAGE_TYPE::M_ERROR);
         return;
     }
     #endif
@@ -438,7 +438,7 @@ void path_delete_point(unsigned pathid, unsigned n)
 {
     #ifdef DEBUG_MODE
     if (n>enigma::pathstructarray[pathid]->pointarray.size()){
-        DEBUG_MESSAGE("Attempting to delete invalid point " + toString(n) + " for path "+toString(pathid), MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("Attempting to delete invalid point " + toString(n) + " for path "+toString(pathid), MESSAGE_TYPE::M_ERROR);
         return;
     }
     #endif

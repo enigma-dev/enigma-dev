@@ -545,7 +545,7 @@ inline variant event_user(int numb) {
 #endif
 
 inline void event_inherited() {
-  //DEBUG_MESSAGE("Event inherited called on an object that has no event to inherit.", MESSAGE_TYPE::ERROR);
+  //DEBUG_MESSAGE("Event inherited called on an object that has no event to inherit.", MESSAGE_TYPE::M_ERROR);
 }
 
 }

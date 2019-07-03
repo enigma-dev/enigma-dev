@@ -81,9 +81,9 @@ namespace enigma {
           GLchar* compiler_log = (GLchar*)malloc(blen);
 
           glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
-          DEBUG_MESSAGE(compiler_log, MESSAGE_TYPE::ERROR);
+          DEBUG_MESSAGE(compiler_log, MESSAGE_TYPE::M_ERROR);
         } else {
-          DEBUG_MESSAGE("Vertex shader compile log empty", MESSAGE_TYPE::ERROR);
+          DEBUG_MESSAGE("Vertex shader compile log empty", MESSAGE_TYPE::M_ERROR);
         }
 
         glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
@@ -93,9 +93,9 @@ namespace enigma {
           GLchar* compiler_log = (GLchar*)malloc(blen);
 
           glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
-          DEBUG_MESSAGE(compiler_log, MESSAGE_TYPE::ERROR);
+          DEBUG_MESSAGE(compiler_log, MESSAGE_TYPE::M_ERROR);
         } else {
-          DEBUG_MESSAGE("Fragment shader compile log empty", MESSAGE_TYPE::ERROR);
+          DEBUG_MESSAGE("Fragment shader compile log empty", MESSAGE_TYPE::M_ERROR);
         }
 
       }

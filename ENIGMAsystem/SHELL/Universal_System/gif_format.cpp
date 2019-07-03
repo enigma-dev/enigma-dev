@@ -364,7 +364,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
     } else if (ctrlCode==0x3B) { //EOF; done;
       break;
     } else if (ctrlCode==0x2C) { //It's an image; read and decompress it.
-      DEBUG_MESSAGE("[GIF] Reading image: " + std::to_string(curr_img+1) + " of " + std::to_string(num_images), MESSAGE_TYPE::INFO);
+      DEBUG_MESSAGE("[GIF] Reading image: " + std::to_string(curr_img+1) + " of " + std::to_string(num_images), MESSAGE_TYPE::M_INFO);
       //Read top-level image properties.
       if (pos+9>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
       unsigned int left = bytes[pos] | (bytes[pos+1]<<8);
@@ -496,7 +496,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
 
       //Make sure we read enough colors.
       if (nested != width*height) { 
-        DEBUG_MESSAGE("[GIF] Index mismatch: " + std::to_string(nested)  + " : " + std::to_string(width*height), MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("[GIF] Index mismatch: " + std::to_string(nested)  + " : " + std::to_string(width*height), MESSAGE_TYPE::M_ERROR);
         clearmem(out);
         return ERR_INDEX_COUNT_MISMATCH; 
       }
@@ -534,13 +534,13 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
       xOutStart += screen.canvasWidth;
       curr_img++;
     } else {
-      DEBUG_MESSAGE("[GIF] Unknown control code: " + ctrlCode, MESSAGE_TYPE::ERROR);
+      DEBUG_MESSAGE("[GIF] Unknown control code: " + ctrlCode, MESSAGE_TYPE::M_ERROR);
       clearmem(out);
       return ERR_UNKNOWN_CONTROL_CODE;
     }
   }
 
-  DEBUG_MESSAGE("[GIF] All GIF sub-images saved.", MESSAGE_TYPE::INFO);
+  DEBUG_MESSAGE("[GIF] All GIF sub-images saved.", MESSAGE_TYPE::M_INFO);
   delete [] bytes; 
   return ERR_SUCCESS;
 }

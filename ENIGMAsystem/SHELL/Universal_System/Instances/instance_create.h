@@ -52,7 +52,7 @@ namespace enigma
           #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
           default:
           #ifdef DEBUG_MODE
-              //DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::ERROR);
+              //DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::M_ERROR);
           #endif
               return;
       }
@@ -78,7 +78,7 @@ namespace enigma
       #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
       default:
           #ifdef DEBUG_MODE
-          //DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::ERROR);
+          //DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::M_ERROR);
           #endif
           return NULL;
     }
@@ -98,7 +98,7 @@ namespace enigma_user
       #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
       default:
           #ifdef DEBUG_MODE
-          //DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::ERROR);
+          //DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::M_ERROR);
           #endif
         return -1;
     }
@@ -127,7 +127,7 @@ namespace enigma_user
         #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
         default:
           #ifdef DEBUG_MODE
-          //DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::ERROR);
+          //DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::M_ERROR);
           #endif
             (void)x; (void)y;
             return;

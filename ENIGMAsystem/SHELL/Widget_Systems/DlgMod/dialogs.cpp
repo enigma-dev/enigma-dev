@@ -52,7 +52,7 @@ void show_error(string errortext, MESSAGE_TYPE type) {
   bool DialogModule_result;
   DialogModule_result = (bool)external_call(external_define("DialogModule.dll", "show_error", enigma_user::dll_cdecl, enigma_user::ty_real, 2, enigma_user::ty_string, enigma_user::ty_real), (char *)str_errortext.c_str(), (double)fatal);
   external_free("DialogModule.dll");
-  if (DialogModule_result || type == MESSAGE_TYPE::FATAL_ERROR)
+  if (DialogModule_result || type == MESSAGE_TYPE::M_FATAL_ERROR)
     exit(0);
 }
 

@@ -40,7 +40,7 @@
   //This checks and returns an element
   #define get_elementv(element,clastype,entype,id,ret)\
     if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) {\
-      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::ERROR);\
+      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_ERROR);\
       return ret;\
     }\
     clastype &element = gui::gui_elements[id];
@@ -49,7 +49,7 @@
   //This checks and returns an element but uses the type already assigned
   /*#define get_element_smartv(element,id,ret)\
     if (gui::gui_elements.find(id) == gui::gui_elements.end()) {\
-      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::ERROR);\
+      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_ERROR);\
       return ret;\
     }\
     switch (gui::gui_elements[id].type){ \
@@ -62,14 +62,14 @@
       case gui::GUI_TYPE::SKIN: gui::Skin &element = gui::gui_elements[id]; break; \
       case gui::GUI_TYPE::STYLE: gui::Style &element = gui::gui_elements[id]; break; \
       case gui::GUI_TYPE::GROUP: gui::Group &element = gui::gui_elements[id]; break; \
-      default: DEBUG_MESSAGE("Cannot determine type of element " + std::to_string(id), MESSAGE_TYPE::ERROR); return ret; \
+      default: DEBUG_MESSAGE("Cannot determine type of element " + std::to_string(id), MESSAGE_TYPE::M_ERROR); return ret; \
     }
   #define get_element_smart(element,id) get_element_smartv(element,id,)*/
 
   //This only checks an element if it exists
   #define check_elementv(entype,id,ret)\
     if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) {\
-      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::ERROR);\
+      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_ERROR);\
       return ret;\
     }
   #define check_element(entype,id) check_elementv(entype,id,)
@@ -77,7 +77,7 @@
   //This only checks if an element id exists (so it doesn't care about type)
   #define check_element_existsv(id,ret)\
     if (gui::gui_elements.find(id) == gui::gui_elements.end()) {\
-      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::ERROR);\
+      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_ERROR);\
       return ret;\
     }
    #define check_element_exists(id) check_element_existsv(id,)
@@ -86,7 +86,7 @@
   //This checks and returns an element
   #define get_data_elementv(element,clastype,entype,id,ret)\
     if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end() || gui::gui_data_elements[id].type != entype) {\
-      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::ERROR);\
+      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_ERROR);\
       return ret;\
     }\
     clastype &element = gui::gui_data_elements[id];
@@ -95,7 +95,7 @@
   //This only checks an element if it exists
   #define check_data_elementv(entype,id,ret)\
     if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end() || gui::gui_data_elements[id].type != entype) {\
-      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::ERROR);\
+      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_ERROR);\
       return ret;\
     }
   #define check_data_element(entype,id) check_data_elementv(entype,id,)
@@ -103,7 +103,7 @@
   //This only checks if an element id exists (so it doesn't care about type)
   #define check_data_element_existsv(id,ret)\
     if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end()) {\
-      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::ERROR);\
+      DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_ERROR);\
       return ret;\
     }
    #define check_data_element_exists(id) check_data_element_existsv(id,)
@@ -127,7 +127,7 @@
       case gui::GUI_TYPE::SKIN:      gui::Skin element; break; \
       case gui::GUI_TYPE::STYLE:     gui::Style element; break; \
       case gui::GUI_TYPE::GROUP:     gui::Group element; break; \
-      default: gui::Button element = gui::Button(); DEBUG_MESSAGE("Cannot determine type of element " + std::to_string(id), MESSAGE_TYPE::ERROR)); return ret; \
+      default: gui::Button element = gui::Button(); DEBUG_MESSAGE("Cannot determine type of element " + std::to_string(id), MESSAGE_TYPE::M_ERROR)); return ret; \
     } \
     auto element = &b;
   #define get_element_smart(element,id) get_element_smartv(element,id,)*/
@@ -240,7 +240,7 @@ namespace gui
             data.textbox.~Textbox();
             break;
           default:
-            DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR and id = "+std::to_string(id)+"!", MESSAGE_TYPE::ERROR);
+            DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR and id = "+std::to_string(id)+"!", MESSAGE_TYPE::M_ERROR);
             break;
         }
       }
@@ -250,7 +250,7 @@ namespace gui
         if (type == GUI_TYPE::BUTTON){
           return data.button;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a button! This is going to crash now!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a button! This is going to crash now!", MESSAGE_TYPE::M_ERROR);
         return data.button;
       }
 
@@ -258,7 +258,7 @@ namespace gui
         if (type == GUI_TYPE::SLIDER){
           return data.slider;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a slider! This is going to crash now!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a slider! This is going to crash now!", MESSAGE_TYPE::M_ERROR);
         return data.slider;
       }
 
@@ -266,7 +266,7 @@ namespace gui
         if (type == GUI_TYPE::TOGGLE){
           return data.toggle;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a toggle! This is going to crash now!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a toggle! This is going to crash now!", MESSAGE_TYPE::M_ERROR);
         return data.toggle;
       }
 
@@ -274,7 +274,7 @@ namespace gui
         if (type == GUI_TYPE::LABEL){
           return data.label;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a label! This is going to crash now!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a label! This is going to crash now!", MESSAGE_TYPE::M_ERROR);
         return data.label;
       }
 
@@ -282,7 +282,7 @@ namespace gui
         if (type == GUI_TYPE::SCROLLBAR){
           return data.scrollbar;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a scrollbar! This is going to crash now!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a scrollbar! This is going to crash now!", MESSAGE_TYPE::M_ERROR);
         return data.scrollbar;
       }
 
@@ -290,7 +290,7 @@ namespace gui
         if (type == GUI_TYPE::WINDOW){
           return data.window;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a window! This is going to crash now!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a window! This is going to crash now!", MESSAGE_TYPE::M_ERROR);
         return data.window;
       }
 
@@ -298,7 +298,7 @@ namespace gui
         if (type == GUI_TYPE::TEXTBOX){
           return data.textbox;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a textbox! This is going to crash now!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a textbox! This is going to crash now!", MESSAGE_TYPE::M_ERROR);
         return data.textbox;
       }
 
@@ -328,7 +328,7 @@ namespace gui
               new (&(data.textbox)) Textbox(rhs.data.textbox);
               break;
           default:
-            DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR!", MESSAGE_TYPE::ERROR);
+            DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR!", MESSAGE_TYPE::M_ERROR);
             break;
         }
       }
@@ -382,7 +382,7 @@ namespace gui
             data.skin.~Skin();
             break;
           default:
-            DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR!", MESSAGE_TYPE::ERROR);
+            DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR!", MESSAGE_TYPE::M_ERROR);
             break;
         }
       }
@@ -392,7 +392,7 @@ namespace gui
         if (type == GUI_TYPE::GROUP){
           return data.group;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a group! This is going to crash now!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a group! This is going to crash now!", MESSAGE_TYPE::M_ERROR);
         return data.group;
       }
 
@@ -400,7 +400,7 @@ namespace gui
         if (type == GUI_TYPE::STYLE){
           return data.style;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a style! This is going to crash now!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a style! This is going to crash now!", MESSAGE_TYPE::M_ERROR);
         return data.style;
       }
 
@@ -408,7 +408,7 @@ namespace gui
         if (type == GUI_TYPE::SKIN){
           return data.skin;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a skin! This is going to crash now!", MESSAGE_TYPE::ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a skin! This is going to crash now!", MESSAGE_TYPE::M_ERROR);
         return data.skin;
       }
 
@@ -426,7 +426,7 @@ namespace gui
               new (&(data.skin)) Skin(rhs.data.skin);
               break;
           default:
-            DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR!", MESSAGE_TYPE::ERROR);
+            DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR!", MESSAGE_TYPE::M_ERROR);
             break;
         }
       }

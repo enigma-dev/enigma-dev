@@ -114,9 +114,9 @@ void instance_destroy()
     if (enigma::cleanups.find(a) == enigma::cleanups.end())
         enigma::instance_event_iterator->inst->unlink();
     if (enigma::cleanups.find(a) == enigma::cleanups.end())
-    DEBUG_MESSAGE("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! " + pointer2string(a) + " ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!", MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! " + pointer2string(a) + " ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!", MESSAGE_TYPE::M_ERROR);
     if (a != (enigma::object_basic*)enigma::instance_event_iterator->inst)
-    DEBUG_MESSAGE("FUCKING DAMN IT! THE ITERATOR CHANGED FROM POINTING TO " + pointer2string((void*)a) + " TO POINTING TO " + pointer2string((void*)(enigma::object_basic*)enigma::instance_event_iterator->inst), MESSAGE_TYPE::ERROR);
+    DEBUG_MESSAGE("FUCKING DAMN IT! THE ITERATOR CHANGED FROM POINTING TO " + pointer2string((void*)a) + " TO POINTING TO " + pointer2string((void*)(enigma::object_basic*)enigma::instance_event_iterator->inst), MESSAGE_TYPE::M_ERROR);
   }
 }
 

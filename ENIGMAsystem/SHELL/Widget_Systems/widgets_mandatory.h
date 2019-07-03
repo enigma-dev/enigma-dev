@@ -23,26 +23,22 @@
 
 #include <string>
 
-#ifdef _WIN32
-#undef ERROR // TODO: find windows.h included in wrong order
-#endif
-
 #define DEBUG_MESSAGE(msg, severity) show_error(msg + std::string(" | ") + std::string(__FILE__) + std::string(":") + std::to_string(__LINE__), severity)
 
 namespace enigma {
   enum MESSAGE_TYPE : int {
-    INFO = 0,
-    WARNING = 1,
-    ERROR = 2,
-    FATAL_ERROR = 3
+    M_INFO = 0,
+    M_WARNING = 1,
+    M_ERROR = 2,
+    M_FATAL_ERROR = 3
   };
   
   inline std::string error_type(MESSAGE_TYPE t) {
     switch(t) {
-      case INFO: return "INFO";
-      case WARNING: return "WARNING";
-      case ERROR: return "ERROR";
-      case FATAL_ERROR: return "FATAL_ERROR";
+      case M_INFO: return "INFO";
+      case M_WARNING: return "WARNING";
+      case M_ERROR: return "ERROR";
+      case M_FATAL_ERROR: return "FATAL_ERROR";
       default: return "ERROR";
     }
   }
@@ -60,7 +56,7 @@ namespace enigma_user {
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
 inline void show_error(std::string msg, const bool fatal) {
-   enigma::show_error(msg, (fatal) ? enigma::FATAL_ERROR : enigma::ERROR);
+   enigma::show_error(msg, (fatal) ? enigma::M_FATAL_ERROR : enigma::M_ERROR);
 }
 
 int show_message(const std::string &msg);

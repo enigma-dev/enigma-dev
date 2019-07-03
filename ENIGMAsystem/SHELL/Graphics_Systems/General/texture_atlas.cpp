@@ -33,7 +33,7 @@
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_sprite(spr,id) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::ERROR); \
+      DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::M_ERROR); \
       return; \
     } enigma::sprite *const spr = enigma::spritestructarray[id];
 #else

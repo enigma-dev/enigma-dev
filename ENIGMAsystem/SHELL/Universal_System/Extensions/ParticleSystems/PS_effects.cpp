@@ -800,7 +800,7 @@ namespace enigma
     }
       default:
         #if DEBUG_MODE
-          DEBUG_MESSAGE("Internal error: invalid particle effect type.", MESSAGE_TYPE::ERROR);
+          DEBUG_MESSAGE("Internal error: invalid particle effect type.", MESSAGE_TYPE::M_ERROR);
         #endif
         ;
     }

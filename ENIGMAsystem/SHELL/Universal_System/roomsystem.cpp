@@ -326,10 +326,10 @@ namespace enigma_user {
 #if DEBUG_MODE
 #define errcheck(indx,err,v) \
   if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]) \
-    return (DEBUG_MESSAGE(err, MESSAGE_TYPE::ERROR), (v))
+    return (DEBUG_MESSAGE(err, MESSAGE_TYPE::M_ERROR), (v))
   #define errcheck_o(indx,err) \
   if (unsigned(indx) >= unsigned(enigma::room_loadtimecount)) \
-    return (DEBUG_MESSAGE(err,MESSAGE_TYPE::ERROR), 0)
+    return (DEBUG_MESSAGE(err,MESSAGE_TYPE::M_ERROR), 0)
 #else
   #define errcheck(indx,err,v)
   #define errcheck_o(indx,err)
