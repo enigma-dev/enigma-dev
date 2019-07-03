@@ -219,14 +219,14 @@ int show_question_cancelable(string message) {
   return show_question_helperfunc(message);
 }
 
-int show_attempt(string message) {
+int show_attempt(string errortext) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
 
   str_command = string("kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--warningyesno") + string(" \"") + add_escaping(message, false, "") + string("\" ") +
+  string("--warningyesno") + string(" \"") + add_escaping(errortext, false, "") + string("\" ") +
   string("--yes-label Retry --no-label Cancel ") + string("--title \"") +
   add_escaping(error_caption, true, "Error") + string("\";") +
   string("x=$? ;if [ $x = 0 ] ;then echo 0;else echo -1;fi");
