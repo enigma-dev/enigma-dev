@@ -92,7 +92,7 @@ int audiosystem_initialize() {
   starttime = clock();
   elapsedtime = starttime;
   lasttime = elapsedtime;
-  printf("Initializing audio system...\n");
+  DEBUG_MESSAGE("Initializing audio system...", MESSAGE_TYPE::INFO);
 
   /*#ifdef _WIN32
     if (!load_al_dll())
@@ -101,9 +101,9 @@ int audiosystem_initialize() {
 	init_alure();
     #endif*/
 
-  printf("Opening ALURE devices.\n");
+  DEBUG_MESSAGE("Opening ALURE devices.", MESSAGE_TYPE::INFO);
   if (!alureInitDevice(NULL, NULL)) {
-    fprintf(stderr, "Failed to open OpenAL device: %s\n", alureGetErrorString());
+    DEBUG_MESSAGE("Failed to open OpenAL device: " + std::string(alureGetErrorString()), MESSAGE_TYPE::ERROR);
     return 1;
   }
 
@@ -121,7 +121,7 @@ int sound_add_from_buffer(int id, void *buffer, size_t bufsize) {
   buf = alureCreateBufferFromMemory((ALubyte *)buffer, bufsize);
 
   if (!buf) {
-    fprintf(stderr, "Could not load sound %d from memory buffer: %s\n", id, alureGetErrorString());
+    DEBUG_MESSAGE("Could not load sound " + std::to_string(id) + " from memory buffer: " + std::string(alureGetErrorString()), MESSAGE_TYPE::ERROR);
     return 1;
   }
 
@@ -140,7 +140,7 @@ int sound_add_from_file(int id, string fname) {
   buf = alureCreateBufferFromFile(fname.c_str());
 
   if (!buf) {
-    fprintf(stderr, "Could not add sound %d from file %s: %s\n", id, fname.c_str(), alureGetErrorString());
+    DEBUG_MESSAGE("Could not add sound " + fname + " from file: " + std::string(alureGetErrorString()), MESSAGE_TYPE::ERROR);
     return 1;
   }
 
@@ -156,7 +156,7 @@ int sound_replace_from_file(int id, string fname) {
   buf = alureCreateBufferFromFile(fname.c_str());
 
   if (!buf) {
-    fprintf(stderr, "Could not replace sound %d from file %s: %s\n", id, fname.c_str(), alureGetErrorString());
+    DEBUG_MESSAGE("Could not replace sound " + fname + " from file: " + std::string(alureGetErrorString()), MESSAGE_TYPE::ERROR);
     return 1;
   }
 
@@ -176,7 +176,7 @@ int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffe
   snd->stream = alureCreateStreamFromCallback((ALuint(*)(void *, ALubyte *, ALuint))callback, userdata,
                                               AL_FORMAT_STEREO16, 44100, 4096, 0, NULL);
   if (!snd->stream) {
-    fprintf(stderr, "Could not create stream %d: %s\n", id, alureGetErrorString());
+    DEBUG_MESSAGE("Could not create stream " + std::to_string(id) + ": " + alureGetErrorString(), MESSAGE_TYPE::ERROR);
     return 1;
   }
   snd->cleanup = cleanup;

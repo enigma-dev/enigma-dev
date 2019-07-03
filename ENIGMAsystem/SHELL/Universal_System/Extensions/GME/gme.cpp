@@ -16,7 +16,7 @@ void handle_error( const char* str )
 {
         if (str)
         {
-                printf( "\n GME Error: %s\n", str );
+                DEBUG_MESSAGE("GME Error: " + std::string(str), MESSAGE_TYPE::ERROR);
                 exit( EXIT_FAILURE );
         }
 }

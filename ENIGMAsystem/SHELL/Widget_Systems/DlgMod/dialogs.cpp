@@ -40,11 +40,7 @@ bool widget_system_initialize() {
   return true;
 }
 
-} // namespace enigma
-
-namespace enigma_user {
-
-void show_error(string errortext, const bool fatal) {
+void show_error(string errortext, MESSAGE_TYPE type) {
   string str_errortext = errortext;
 
   #ifdef DEBUG_MODE
@@ -56,9 +52,13 @@ void show_error(string errortext, const bool fatal) {
   bool DialogModule_result;
   DialogModule_result = (bool)external_call(external_define("DialogModule.dll", "show_error", enigma_user::dll_cdecl, enigma_user::ty_real, 2, enigma_user::ty_string, enigma_user::ty_real), (char *)str_errortext.c_str(), (double)fatal);
   external_free("DialogModule.dll");
-  if (DialogModule_result || fatal)
+  if (DialogModule_result || type == MESSAGE_TYPE::FATAL_ERROR)
     exit(0);
 }
+
+} // namespace enigma
+
+namespace enigma_user {
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
 

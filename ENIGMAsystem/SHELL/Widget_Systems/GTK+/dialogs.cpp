@@ -33,11 +33,15 @@
 
 using namespace std;
 
-namespace enigma_user {
+namespace enigma {
 
-void show_error(string errortext, const bool fatal) {
+void show_error(string errortext, MESSAGE_TYPE type) {
 //TODO: Implement
 }
+
+}
+
+namespace enigma_user {
 
 int get_color(int defcol)
 {
@@ -265,7 +269,7 @@ struct hmenustack
   hmenustack* push(GtkWidget *n) { hmenustack* next=new hmenustack; next->prev=this; next->menu=n; return next; }
   hmenustack* pop() { if (prev==NULL) return this; hmenustack* r=prev; delete this; return r; }
 };
-#include <iostream>
+
 int show_menu_ext(int x, int y, string text)
 {
   gdk_threads_enter();
@@ -309,7 +313,6 @@ int show_menu_ext(int x, int y, string text)
         else if (i-is>1 and itxt[0]=='<')
         {
           ms=ms->pop();
-          cout << "\"" << itxt.substr(1) << "\"" << endl;
           menu_add_item(GTK_MENU(ms->menu),iid,id,itxt.substr(1),MFT_STRING);
         }
         else

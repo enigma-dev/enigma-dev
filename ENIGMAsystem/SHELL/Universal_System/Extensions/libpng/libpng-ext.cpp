@@ -35,7 +35,7 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
 
   error = libpng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str());
   if (error) {
-    printf("libpng-util error %u\n", error);
+    DEBUG_MESSAGE("libpng-util error " + std::string(error), MESSAGE_TYPE::ERROR);
     return NULL;
   }
 

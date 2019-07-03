@@ -22,22 +22,42 @@
 #include "libEGMstd.h"
 
 #include <string>
-using std::string;
 
-namespace enigma
-{
+#define DEBUG_MESSAGE(msg, severity) show_error(msg + std::string(" | ") + std::string(__FILE__) + std::string(":") + std::to_string(__LINE__), severity)
+
+namespace enigma {
+  enum MESSAGE_TYPE : int {
+    INFO = 0,
+    WARNING = 1,
+    ERROR = 2,
+    FATAL_ERROR = 3
+  };
+  
+  inline std::string error_type(MESSAGE_TYPE t) {
+    switch(t) {
+      case INFO: return "INFO";
+      case WARNING: return "WARNING";
+      case ERROR: return "ERROR";
+      case FATAL_ERROR: return "FATAL_ERROR";
+      default: return "ERROR";
+    }
+  }
+  
   // This function is called at the beginning of the game to allow the widget system to load.
   bool widget_system_initialize();
-  extern string gameInfoText, gameInfoCaption;
+  extern std::string gameInfoText, gameInfoCaption;
   extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
   extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
+  void show_error(std::string msg, MESSAGE_TYPE type);
 }
 
 namespace enigma_user {
 
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
-void show_error(std::string msg, const bool fatal);
+inline void show_error(std::string msg, const bool fatal) {
+   enigma::show_error(msg, (fatal) ? enigma::FATAL_ERROR : enigma::ERROR);
+}
 
 int show_message(const std::string &msg);
 template<typename T> int show_message(T msg) { return show_message(enigma_user::toString(msg)); }
@@ -50,5 +70,7 @@ void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBac
 static inline void action_show_info() { show_info(); }
 
 }
+
+using enigma::MESSAGE_TYPE;
 
 #endif

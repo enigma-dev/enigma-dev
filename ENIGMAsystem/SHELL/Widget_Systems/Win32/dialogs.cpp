@@ -90,6 +90,26 @@ extern HINSTANCE hInstance;
 extern HWND hWnd;
 HWND infore;
 
+void show_error(string errortext, MESSAGE_TYPE type) {
+  #ifdef DEBUG_MODE
+  errortext += "\n\n" + enigma::debug_scope::GetErrors();
+  #endif
+
+  string strWindowCaption = "Error";
+
+  tstring tstrStr = widen(errortext);
+  tstring tstrWindowCaption = widen(strWindowCaption);
+
+  if (error_caption != L"")
+    tstrWindowCaption = error_caption;
+
+  int result;
+  result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
+  if (result == IDABORT || type == MESSAGE_TYPE::FATAL_ERROR) exit(0);
+
+  //ABORT_ON_ALL_ERRORS();
+}
+
 }
 
 static inline string remove_slash(string dir) {
@@ -503,27 +523,6 @@ static inline int get_color_helper(int defcol, string title) {
 }
 
 namespace enigma_user {
-
-void show_error(string errortext, const bool fatal)
-{
-  #ifdef DEBUG_MODE
-  errortext += "\n\n" + enigma::debug_scope::GetErrors();
-  #endif
-
-  string strWindowCaption = "Error";
-
-  tstring tstrStr = widen(errortext);
-  tstring tstrWindowCaption = widen(strWindowCaption);
-
-  if (error_caption != L"")
-    tstrWindowCaption = error_caption;
-
-  int result;
-  result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
-  if (result == IDABORT || fatal) exit(0);
-
-  //ABORT_ON_ALL_ERRORS();
-}
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
   LoadLibrary(TEXT("Riched32.dll"));

@@ -69,27 +69,28 @@ class PasswordContext {
 };
 
 namespace enigma {
+  void show_error(string err, MESSAGE_TYPE type) {
+      printf((error_type(type) + ": in some action of some event for object %d, instance id %d: %s\n").c_str(),
+             (enigma::instance_event_iterator == NULL? enigma_user::global :
+                enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
+                  enigma::instance_event_iterator->inst->object_index),
+             (enigma::instance_event_iterator == NULL? enigma_user::global :
+                enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
+                  enigma::instance_event_iterator->inst->id),
+             err.c_str()
+        );
+      //printf((error_type(type) + ": %s\n").c_str(), err.c_str()); 
+    
+    if (type == MESSAGE_TYPE::FATAL_ERROR) exit(0);
+    ABORT_ON_ALL_ERRORS();
+  }
+
   bool widget_system_initialize() {
     return 0;
   }
 }
 
 namespace enigma_user {
-
-void show_error(string err, const bool fatal)
-{
-  printf("ERROR in some action of some event for object %d, instance id %d: %s\n",
-         (enigma::instance_event_iterator == NULL? enigma_user::global :
-            enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
-              enigma::instance_event_iterator->inst->object_index),
-         (enigma::instance_event_iterator == NULL? enigma_user::global :
-            enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
-              enigma::instance_event_iterator->inst->id),
-         err.c_str()
-    );
-  if (fatal) exit(0);
-  ABORT_ON_ALL_ERRORS();
-}
 
 int show_message(const string &message)
 {

@@ -19,7 +19,7 @@ public:
 
     FT_Error error = FT_Init_FreeType(&library);
     if (error != 0)
-      std::cerr << "Error initializing freetype!" << std::endl;
+      DEBUG_MESSAGE("Error initializing freetype!", MESSAGE_TYPE::ERROR);
 
     return (error == 0);
   }
@@ -96,7 +96,7 @@ namespace enigma_user {
 
       #ifdef DEBUG_MODE
       if (error != 0)
-        std::cerr << "Freetype error loading metrics for char: " <<  static_cast<char>(c) << std::endl;
+        DEBUG_MESSAGE("Freetype error loading metrics for char: " + std::string(static_cast<char>(c)));
       #endif
 
       FT_Bitmap& charBitmap = slot->bitmap;
@@ -141,7 +141,7 @@ namespace enigma_user {
 
       #ifdef DEBUG_MODE
       if (error != 0) {
-        std::cerr << "Freetype error loading bitmap for char: " <<  static_cast<char>(g.index) << std::endl;
+        DEBUG_MESSAGE("Freetype error loading bitmap for char: " + std::string(static_cast<char>(g.index));
         continue;
       }
       #endif

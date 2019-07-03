@@ -63,6 +63,29 @@ static bool question_cancel = false;
 
 namespace enigma {
 
+void show_error(string errortext, MESSAGE_TYPE type) {
+  if (error_caption.empty()) error_caption = "Error";
+  string str_command;
+  string str_title;
+  string str_echo;
+
+  #ifdef DEBUG_MODE
+  errortext += enigma::debug_scope::GetErrors();
+  #endif
+
+  str_echo = (type == MESSAGE_TYPE::FATAL_ERROR) ? "echo 1" :
+    "if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Ignore\" ] ;then echo -1;elif [ $? = 2 ] ;then echo 0;fi";
+
+  str_command = string("ans=$(zenity ") +
+  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--question --ok-label=Abort --cancel-label=Retry --extra-button=Ignore ") +
+  string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
+  add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
+
+  string str_result = shellscript_evaluate(str_command);
+  if (strtod(str_result.c_str(), NULL) == 1) exit(0);
+}
+
 bool widget_system_initialize() {
   return true;
 }
@@ -159,29 +182,6 @@ static int show_question_helperfunc(string str) {
 }
 
 namespace enigma_user {
-
-void show_error(string errortext, const bool fatal) {
-  if (error_caption.empty()) error_caption = "Error";
-  string str_command;
-  string str_title;
-  string str_echo;
-
-  #ifdef DEBUG_MODE
-  errortext += enigma::debug_scope::GetErrors();
-  #endif
-
-  str_echo = fatal ? "echo 1" :
-    "if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Ignore\" ] ;then echo -1;elif [ $? = 2 ] ;then echo 0;fi";
-
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--question --ok-label=Abort --cancel-label=Retry --extra-button=Ignore ") +
-  string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
-  add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
-
-  string str_result = shellscript_evaluate(str_command);
-  if (strtod(str_result.c_str(), NULL) == 1) exit(0);
-}
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
 

@@ -55,8 +55,6 @@ enum {
 
 #include <string>
 
-	// void show_error(string errortext, const bool fatal);
-	// int show_message(string str);
 	int show_message_cancelable(string str);
 	int show_message_ext(string str, string but1, string but2, string but3);
 	bool show_question(string str);

@@ -19,8 +19,6 @@
 
 namespace enigma_user {
 
-//  void show_error(std::string errortext, const bool fatal);
-//  int show_message(const std::string &str);
 int show_message_cancelable(std::string str);
 bool show_question(std::string str);
 int show_question_cancelable(std::string str);

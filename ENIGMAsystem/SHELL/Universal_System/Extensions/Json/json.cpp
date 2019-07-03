@@ -205,7 +205,7 @@ namespace enigma_user
 		bool parsingSuccessful = reader.parse( string(data), root );
 		if ( !parsingSuccessful )
 		{
-			std::cerr  << "Failed to parse configuration\n" << reader.getFormattedErrorMessages();
+			DEBUG_MESSAGE("Failed to parse configuration\n" + reader.getFormattedErrorMessages(), MESSAGE_TYPE::ERROR);
 			return -1;
 		}
 		return RecursiveDSMap(root);
@@ -214,7 +214,6 @@ namespace enigma_user
 	string json_encode(variant ds_map)
 	{
 		Json::Value root;
-		//std::cerr << root;
 		return string("{  }");
 	}
 }
