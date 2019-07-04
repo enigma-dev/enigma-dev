@@ -34,15 +34,11 @@
 
 using namespace std;
 
-namespace enigma {
+namespace enigma_user {
 
-void show_error(string errortext, MESSAGE_TYPE type) {
+void show_debug_message(string errortext, MESSAGE_TYPE type) {
 //TODO: Implement
 }
-
-}
-
-namespace enigma_user {
 
 int get_color(int defcol)
 {

@@ -272,10 +272,10 @@ void window_set_fullscreen(bool fullscreen) {
 
     if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
-    if (r != 0) DEBUG_MESSAGE("Could not set window to fullscreen! SDL Error: " + SDL_GetError(), MESSAGE_TYPE::M_ERROR);
+    if (r != 0) DEBUG_MESSAGE("Could not set window to fullscreen! SDL Error: " + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   } else {
     int r = SDL_SetWindowFullscreen(windowHandle, 0);
-    if (r != 0) DEBUG_MESSAGE("Could not unset window fullscreen! SDL Error: " + SDL_GetError(), MESSAGE_TYPE::M_ERROR);
+    if (r != 0) DEBUG_MESSAGE("Could not unset window fullscreen! SDL Error: " + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   }
 }
 

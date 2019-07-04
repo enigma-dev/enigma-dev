@@ -115,7 +115,7 @@ var matrix_get(int type) {
       return matrix_vararray(enigma::projection);
     default:
       #ifdef DEBUG_MODE
-      DEBUG_MESSAGE("Unknown matrix type: " + std::to_string(type), MESSAGE_TYPE::M_ERROR);
+      DEBUG_MESSAGE("Unknown matrix type: " + std::to_string(type), MESSAGE_TYPE::M_USER_ERROR);
       #endif
       break;
   }

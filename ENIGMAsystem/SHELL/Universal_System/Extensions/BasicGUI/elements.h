@@ -250,7 +250,7 @@ namespace gui
         if (type == GUI_TYPE::BUTTON){
           return data.button;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a button! This is going to crash now!", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a button! This is going to crash now!", MESSAGE_TYPE::M_FATAL_ERROR);
         return data.button;
       }
 
@@ -258,7 +258,7 @@ namespace gui
         if (type == GUI_TYPE::SLIDER){
           return data.slider;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a slider! This is going to crash now!", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a slider! This is going to crash now!", MESSAGE_TYPE::M_FATAL_ERROR);
         return data.slider;
       }
 
@@ -266,7 +266,7 @@ namespace gui
         if (type == GUI_TYPE::TOGGLE){
           return data.toggle;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a toggle! This is going to crash now!", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a toggle! This is going to crash now!", MESSAGE_TYPE::M_FATAL_ERROR);
         return data.toggle;
       }
 
@@ -274,7 +274,7 @@ namespace gui
         if (type == GUI_TYPE::LABEL){
           return data.label;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a label! This is going to crash now!", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a label! This is going to crash now!", MESSAGE_TYPE::M_FATAL_ERROR);
         return data.label;
       }
 
@@ -282,7 +282,7 @@ namespace gui
         if (type == GUI_TYPE::SCROLLBAR){
           return data.scrollbar;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a scrollbar! This is going to crash now!", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a scrollbar! This is going to crash now!", MESSAGE_TYPE::M_FATAL_ERROR);
         return data.scrollbar;
       }
 
@@ -290,7 +290,7 @@ namespace gui
         if (type == GUI_TYPE::WINDOW){
           return data.window;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a window! This is going to crash now!", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a window! This is going to crash now!", MESSAGE_TYPE::M_FATAL_ERROR);
         return data.window;
       }
 
@@ -298,7 +298,7 @@ namespace gui
         if (type == GUI_TYPE::TEXTBOX){
           return data.textbox;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a textbox! This is going to crash now!", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a textbox! This is going to crash now!", MESSAGE_TYPE::M_FATAL_ERROR);
         return data.textbox;
       }
 

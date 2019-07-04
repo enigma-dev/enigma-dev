@@ -23,17 +23,18 @@
 
 #include <string>
 
-#define DEBUG_MESSAGE(msg, severity) show_error((std::string)msg + " | " + __FILE__ + ":" + std::to_string(__LINE__), severity)
+#define DEBUG_MESSAGE(msg, severity) enigma_user::show_debug_message((std::string)msg + " | " + __FILE__ + ":" + std::to_string(__LINE__), severity)
+
+enum MESSAGE_TYPE : int {
+  M_INFO = 0,
+  M_WARNING = 1,
+  M_ERROR = 2,
+  M_USER_ERROR = 3,
+  M_FATAL_ERROR = 4,
+  M_FATAL_USER_ERROR = 5
+};
 
 namespace enigma {
-  enum MESSAGE_TYPE : int {
-    M_INFO = 0,
-    M_WARNING = 1,
-    M_ERROR = 2,
-    M_USER_ERROR = 3,
-    M_FATAL_ERROR = 4,
-    M_FATAL_USER_ERROR = 5
-  };
   
   inline std::string error_type(MESSAGE_TYPE t) {
     switch(t) {
@@ -52,15 +53,16 @@ namespace enigma {
   extern std::string gameInfoText, gameInfoCaption;
   extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
   extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
-  void show_error(std::string msg, MESSAGE_TYPE type);
 }
 
 namespace enigma_user {
 
+void show_debug_message(std::string msg, MESSAGE_TYPE type);
+
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
 inline void show_error(std::string msg, const bool fatal) {
-   enigma::show_error(msg, (fatal) ? enigma::M_FATAL_USER_ERROR : enigma::M_USER_ERROR);
+   show_debug_message(msg, (fatal) ? M_FATAL_USER_ERROR : M_USER_ERROR);
 }
 
 int show_message(const std::string &msg);
@@ -74,7 +76,5 @@ void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBac
 static inline void action_show_info() { show_info(); }
 
 }
-
-using enigma::MESSAGE_TYPE;
 
 #endif

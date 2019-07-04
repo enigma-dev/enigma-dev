@@ -2,65 +2,72 @@
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
+#include <sstream>
 
 namespace enigma {
 
 void openglCallbackFunction(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length,
                                      const GLchar* message, const void* userParam) {
+                                     
+  MESSAGE_TYPE errType = MESSAGE_TYPE::M_ERROR;
   
-  std::string error;
-  error += "\n---------------------opengl-callback-start------------\n";
-  error += (std::string)"message: " + message + "\n";
-  error += "type: ";
+  std::stringstream error;
+  error << "\n---------------------opengl-callback-start------------\n";
+  error << "message: " << message << "\n";
+  error << "type: ";
 
   switch (type) {
     case GL_DEBUG_TYPE_ERROR:
-      error += "ERROR";
+      error << "ERROR";
       break;
 
     case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-      error += "DEPRECATED_BEHAVIOR";
+      errType = MESSAGE_TYPE::M_WARNING;
+      error << "DEPRECATED_BEHAVIOR";
       break;
 
     case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-      error += "UNDEFINED_BEHAVIOR";
+      error << "UNDEFINED_BEHAVIOR";
       break;
 
     case GL_DEBUG_TYPE_PORTABILITY:
-      error += "PORTABILITY";
+      errType = MESSAGE_TYPE::M_WARNING;
+      error << "PORTABILITY";
       break;
 
     case GL_DEBUG_TYPE_PERFORMANCE:
-      error += "PERFORMANCE";
+      errType = MESSAGE_TYPE::M_WARNING;
+      error << "PERFORMANCE";
       break;
 
     case GL_DEBUG_TYPE_OTHER:
-      error += "OTHER";
+      errType = MESSAGE_TYPE::M_INFO;
+      error << "OTHER";
       break;
   }
 
-  error += "\n";
+  error << "\n";
 
-  error += "id: " + std::to_string(id) + "\n";
-  error += "severity: ";
+  error << "id: " << std::to_string(id) << "\n";
+  error << "severity: ";
 
   switch (severity) {
     case GL_DEBUG_SEVERITY_LOW:
-      error += "LOW";
+      error << "LOW";
       break;
 
     case GL_DEBUG_SEVERITY_MEDIUM:
-      error += "MEDIUM";
+      error << "MEDIUM";
       break;
 
     case GL_DEBUG_SEVERITY_HIGH:
-      error += "HIGH";
+      error << "HIGH";
       break;
   }
 
-  error += "\n";
-  error += "---------------------opengl-callback-end--------------\n";
-  DEBUG_MESSAGE(error, MESSAGE_TYPE::M_ERROR);
+  error << "\n";
+  error << "---------------------opengl-callback-end--------------\n";
+  DEBUG_MESSAGE(error.str(), errType);
 }
 
 void register_gl_debug_callback() {

@@ -54,11 +54,10 @@ namespace enigma {
       GLint test;
       glGetShaderiv(shader, GL_COMPILE_STATUS, &test);
       if (!test) {
-        DEBUG_MESSAGE("Shader compilation failed with this message:", MESSAGE_TYPE::M_ERROR);
         const size_t buffer_size = 512;
         char buffer[buffer_size];
         glGetShaderInfoLog(shader, buffer_size, NULL, buffer);
-        std::cerr << buffer << std::endl;
+        DEBUG_MESSAGE("Shader compilation failed with this message: " + buffer, MESSAGE_TYPE::M_ERROR);
         exit(-1);
       }
       return shader;

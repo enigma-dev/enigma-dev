@@ -932,7 +932,7 @@ namespace enigma
     case pt_sh_snow: {generate_snow(); break;}
     default:
       #if DEBUG_MODE
-        DEBUG_MESSAGE("No such particle type" + std::to_string(particle_shape), MESSAGE_TYPE::M_ERROR)
+        DEBUG_MESSAGE("No such particle type" + std::to_string(particle_shape), MESSAGE_TYPE::M_USER_ERROR)
       #endif
       ;
     }

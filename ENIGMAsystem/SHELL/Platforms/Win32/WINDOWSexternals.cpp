@@ -114,7 +114,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   	dllmod = LoadLibrary(dll.c_str());
   else
   {
-    DEBUG_MESSAGE("LOADING PREEXISTING HANDLE", MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE("LOADING PREEXISTING HANDLE", MESSAGE_TYPE::M_WARNING);
     dllmod = dllHandles[dll];
   }
 
