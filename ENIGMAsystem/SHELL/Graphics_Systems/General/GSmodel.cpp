@@ -264,7 +264,7 @@ void d3d_model_primitive_end(int id) {
   #ifdef DEBUG_MODE
   // there's ZERO reason to keep an empty primitive
   if (!vertex_size) {
-    show_error("A primitive was ended that had 0 size on model: " + std::to_string(id), false);
+    DEBUG_MESSAGE("A primitive was ended that had 0 size on model: " + std::to_string(id), MESSAGE_TYPE::M_ERROR);
     return;
   }
   #endif

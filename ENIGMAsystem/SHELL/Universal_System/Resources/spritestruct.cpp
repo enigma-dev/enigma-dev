@@ -31,6 +31,8 @@
 #include <cstring>
 #include <string>
 
+using std::string;
+
 #define get_current_instance() \
     ((enigma::object_graphics*) enigma::instance_event_iterator->inst)
 
@@ -38,7 +40,7 @@ bool get_sprite(enigma::sprite* &spr, int id)
 {
 #ifdef DEBUG_MODE
     if (id < -1 || size_t(id) > enigma::sprite_idmax || !enigma::spritestructarray[id]) {
-        enigma_user::show_error("Cannot access sprite with id " + toString(id), false);
+        DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::M_ERROR);
         return false;
     }
 #endif
@@ -301,7 +303,7 @@ namespace enigma
         filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
     
     if (pxdata == NULL) {
-      printf("ERROR - Failed to append sprite to index!\n");
+      DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR);
       return;
     }
 

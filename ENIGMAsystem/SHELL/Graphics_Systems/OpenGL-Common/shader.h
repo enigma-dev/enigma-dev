@@ -22,7 +22,6 @@
 #include "GLSLshader.h"
 #include "OpenGLHeaders.h"
 #include <string>
-using std::string;
 
 namespace enigma
 {
@@ -31,10 +30,10 @@ namespace enigma
   extern unsigned bound_shader;
   extern vector<enigma::ShaderProgram*> shaderprograms;
 
-  string getVertexShaderPrefix();
-  string getFragmentShaderPrefix();
-  string getDefaultFragmentShader();
-  string getDefaultVertexShader();
+  std::string getVertexShaderPrefix();
+  std::string getFragmentShaderPrefix();
+  std::string getDefaultFragmentShader();
+  std::string getDefaultVertexShader();
   void getDefaultUniforms(int prog_id);
   void getDefaultAttributes(int prog_id);
   void getUniforms(int prog_id);
@@ -69,9 +68,6 @@ bool glsl_shader_compile(int id);
 bool glsl_shader_get_compiled(int id);
 void glsl_shader_free(int id);
 string glsl_shader_get_infolog(int id);
-
-void glsl_program_print_infolog(int id);
-void glsl_shader_print_infolog(int id);
 
 int glsl_program_create();
 bool glsl_program_link(int id);

@@ -24,8 +24,10 @@
 #ifndef ENIGMA_BACKGROUND_INTERNAL_H
 #define ENIGMA_BACKGROUND_INTERNAL_H
 
-#include <string>
 #include "Universal_System/var4.h"
+#include "Widget_Systems/widgets_mandatory.h"
+
+#include <string>
 
 namespace enigma
 {
@@ -75,13 +77,13 @@ namespace enigma
   #include "libEGMstd.h"
   #define get_background(bck2d,back)\
     if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      enigma_user::show_error("Attempting to draw non-existing background " + toString(back), false);\
+      DEBUG_MESSAGE("Attempting to draw non-existing background " + toString(back), MESSAGE_TYPE::M_USER_ERROR);\
       return;\
     }\
     enigma::background *bck2d = enigma::backgroundstructarray[back];
   #define get_backgroundnv(bck2d,back,r)\
     if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      enigma_user::show_error("Attempting to draw non-existing background " + toString(back), false);\
+      DEBUG_MESSAGE("Attempting to draw non-existing background " + toString(back), MESSAGE_TYPE::M_USER_ERROR);\
       return r;\
     }\
     enigma::background *bck2d = enigma::backgroundstructarray[back];

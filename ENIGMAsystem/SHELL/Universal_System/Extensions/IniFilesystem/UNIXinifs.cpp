@@ -61,7 +61,7 @@ namespace enigma_user
 		//GM will silently fail to save anything if an invalidly-named file is selected. Since we flush the ini file on close, 
 		// we should try to filter out bad inis as early as possible (the final test will be in ini_close()).
 		if (filename.find_first_of(InvalidFilenameChars)!=std::string::npos) {
-			show_error("IniFileSystem - cannot open new ini file; filename contains invalid characters.", true);
+			DEBUG_MESSAGE("IniFileSystem - cannot open new ini file; filename contains invalid characters.", MESSAGE_TYPE::M_ERROR);
 			return;
 		}
 
@@ -99,7 +99,7 @@ namespace enigma_user
 	std::string ini_full_file_text()
 	{
 		if (currIniFile.empty()) {
-			show_error("IniFileSystem - cannot get full ini text, as there is no ini file currently open.", false);
+			DEBUG_MESSAGE("IniFileSystem - cannot get full ini text, as there is no ini file currently open.", MESSAGE_TYPE::M_ERROR);
 			return "";
 		}
 
@@ -114,7 +114,7 @@ namespace enigma_user
 		if (!currIniFile.empty()) {
 			//Non-string-loaded inis are saved back to their original files.
 			if (!currIni.saveToFile(currIniFile)) {
-				show_error("IniFileSystem - could not save ini file to output; perhaps it's in a protected location?", false);
+				DEBUG_MESSAGE("IniFileSystem - could not save ini file to output; perhaps it's in a protected location?", MESSAGE_TYPE::M_ERROR);
 			}
 
 			//Now reset.
@@ -127,7 +127,7 @@ namespace enigma_user
 	{
 		//This won't work if the file isn't open.
 		if (currIniFile.empty()) {
-			show_error("IniFileSystem - cannot delete key, as there is no ini file currently open.", true);
+			DEBUG_MESSAGE("IniFileSystem - cannot delete key, as there is no ini file currently open.", MESSAGE_TYPE::M_ERROR);
 		} else {
 			currIni.delKey(section, key);
 		}
@@ -138,7 +138,7 @@ namespace enigma_user
 	{
 		//This won't work if the file isn't open.
 		if (currIniFile.empty()) {
-			show_error("IniFileSystem - cannot delete section, as there is no ini file currently open.", true);
+			DEBUG_MESSAGE("IniFileSystem - cannot delete section, as there is no ini file currently open.", MESSAGE_TYPE::M_ERROR);
 		} else {
 			currIni.delSection(section);
 		}
@@ -149,7 +149,7 @@ namespace enigma_user
 	{
 		//This won't work if the file isn't open.
 		if (currIniFile.empty()) {
-			show_error("IniFileSystem - cannot check key, as there is no ini file currently open.", true);
+			DEBUG_MESSAGE("IniFileSystem - cannot check key, as there is no ini file currently open.", MESSAGE_TYPE::M_ERROR);
 			return false;
 		} else {
 			return currIni.keyExists(section, key);
@@ -161,7 +161,7 @@ namespace enigma_user
 	{
 		//This won't work if the file isn't open.
 		if (currIniFile.empty()) {
-			show_error("IniFileSystem - cannot check section, as there is no ini file currently open.", true);
+			DEBUG_MESSAGE("IniFileSystem - cannot check section, as there is no ini file currently open.", MESSAGE_TYPE::M_ERROR);
 			return false;
 		} else {
 			return currIni.sectionExists(section);
@@ -174,7 +174,7 @@ namespace enigma_user
 	{
 		//GM will err out when trying to read/write an unopened ini file.
 		if (currIniFile.empty()) {
-			show_error("IniFileSystem - cannot write real, as there is no ini file currently open.", true);
+			DEBUG_MESSAGE("IniFileSystem - cannot write real, as there is no ini file currently open.", MESSAGE_TYPE::M_ERROR);
 		} else {
 			currIni.write(section, key, value);
 		}
@@ -184,7 +184,7 @@ namespace enigma_user
 	{
 		//GM will err out when trying to read/write an unopened ini file.
 		if (currIniFile.empty()) {
-			show_error("IniFileSystem - cannot write string, as there is no ini file currently open.", true);
+			DEBUG_MESSAGE("IniFileSystem - cannot write string, as there is no ini file currently open.", MESSAGE_TYPE::M_ERROR);
 		} else {
 			currIni.write(section, key, value);
 		}
@@ -194,7 +194,7 @@ namespace enigma_user
 	{
 		//GM will err out when trying to read/write an unopened ini file.
 		if (currIniFile.empty()) {
-			show_error("IniFileSystem - cannot read string, as there is no ini file currently open.", true);
+			DEBUG_MESSAGE("IniFileSystem - cannot read string, as there is no ini file currently open.", MESSAGE_TYPE::M_ERROR);
 			return def;
 		} else {
 			return currIni.read(section, key, def);
@@ -206,7 +206,7 @@ namespace enigma_user
 	{
 		//GM will err out when trying to read/write an unopened ini file.
 		if (currIniFile.empty()) {
-			show_error("IniFileSystem - cannot read real, as there is no ini file currently open.", true);
+			DEBUG_MESSAGE("IniFileSystem - cannot read real, as there is no ini file currently open.", MESSAGE_TYPE::M_ERROR);
 			return def;
 		} else {
 			return currIni.read(section, key, def);

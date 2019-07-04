@@ -51,10 +51,10 @@ namespace enigma {
   void graphicssystem_initialize()
   {
     #ifdef DEBUG_MODE
-    std::cout << "OpenGL loaded" << std::endl;
-    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-    std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+    DEBUG_MESSAGE(std::string("OpenGL loaded"), MESSAGE_TYPE::M_INFO);
+    DEBUG_MESSAGE(std::string("Vendor: ") + reinterpret_cast<const char*>(glGetString(GL_VENDOR)), MESSAGE_TYPE::M_INFO);
+    DEBUG_MESSAGE(std::string("Renderer: ") + reinterpret_cast<const char*>(glGetString(GL_RENDERER)), MESSAGE_TYPE::M_INFO);
+    DEBUG_MESSAGE(std::string("Version: ") + reinterpret_cast<const char*>(glGetString(GL_VERSION)), MESSAGE_TYPE::M_INFO);
     #endif
     
     register_gl_debug_callback();

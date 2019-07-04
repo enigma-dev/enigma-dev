@@ -3,6 +3,7 @@
 #include "PFwindow.h"
 #include "PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
 
 #include <chrono> // std::chrono::microseconds
@@ -53,7 +54,7 @@ int enigma_main(int argc, char** argv) {
   set_program_args(argc, argv);
 
   if (!initGameWindow()) {
-    printf("Failed to create game window\n");
+    DEBUG_MESSAGE("Failed to create game window", MESSAGE_TYPE::M_FATAL_ERROR);
     return -4;
   }
 

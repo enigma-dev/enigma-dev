@@ -90,17 +90,17 @@ unsigned draw_get_valign(){
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_font(fnt,id,r) \
     if (id < -1 or (size_t(id+1) > enigma::font_idmax) or !fontstructarray[id]) { \
-      show_error("Cannot access font with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access font with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } const font *const fnt = fontstructarray[id];
   #define get_fontv(fnt,id) \
     if (id < -1 or (size_t(id+1) > enigma::font_idmax) or !fontstructarray[id]) { \
-      show_error("Cannot access font with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access font with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } const font *const fnt = fontstructarray[id];
   #define get_font_null(fnt,id,r) \
     if (id < -1 or (size_t(id+1) > enigma::font_idmax)) { \
-      show_error("Cannot access font with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access font with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } const font *const fnt = fontstructarray[id];
 #else

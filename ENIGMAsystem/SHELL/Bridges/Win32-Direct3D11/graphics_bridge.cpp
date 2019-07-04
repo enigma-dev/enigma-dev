@@ -65,13 +65,13 @@ void initialize_render_targets(UINT samples=1) {
   ID3D11Texture2D* backBufferPtr;
   result = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBufferPtr);
   if (FAILED(result)) {
-    show_error("Failed to obtain pointer to Direct3D11 back buffer.", true);
+    DEBUG_MESSAGE("Failed to obtain pointer to Direct3D11 back buffer.", MESSAGE_TYPE::M_FATAL_ERROR);
   }
 
   // Create the render target view with the back buffer pointer.
   result = m_device->CreateRenderTargetView(backBufferPtr, NULL, &m_renderTargetView);
   if (FAILED(result)) {
-    show_error("Failed to create Direct3D11 render target view.", true);
+    DEBUG_MESSAGE("Failed to create Direct3D11 render target view.", MESSAGE_TYPE::M_FATAL_ERROR);
   }
 
   // Release pointer to the back buffer as we no longer need it.
@@ -97,7 +97,7 @@ void initialize_render_targets(UINT samples=1) {
 
   result = m_device->CreateTexture2D(&depthBufferDesc, NULL, &m_depthStencilBuffer);
   if (FAILED(result)) {
-    show_error("Failed to create Direct3D11 Texture2D for depth stencil buffer.", true);
+    DEBUG_MESSAGE("Failed to create Direct3D11 Texture2D for depth stencil buffer.", MESSAGE_TYPE::M_FATAL_ERROR);
   }
 
   // Set up the depth stencil view description.
@@ -108,7 +108,7 @@ void initialize_render_targets(UINT samples=1) {
 
   result = m_device->CreateDepthStencilView(m_depthStencilBuffer, &depthStencilViewDesc, &m_depthStencilView);
   if (FAILED(result)) {
-    show_error("Failed to create Direct3D11 depth stencil view.", true);
+    DEBUG_MESSAGE("Failed to create Direct3D11 depth stencil view.", MESSAGE_TYPE::M_FATAL_ERROR);
   }
 
   m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
@@ -180,7 +180,7 @@ void EnableDrawing(void* handle) {
   result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, flags, &featureLevel, 1,
                                           D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
   if (FAILED(result)) {
-    show_error("Failed to create Direct3D11 device and swap chain.", true);
+    DEBUG_MESSAGE("Failed to create Direct3D11 device and swap chain.", MESSAGE_TYPE::M_FATAL_ERROR);
   }
 	
   void WindowResized() {

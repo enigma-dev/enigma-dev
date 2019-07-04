@@ -25,7 +25,7 @@
 #ifdef DEBUG_MODE
   #include "Universal_System/Instances/instance_system.h"
   #include "Universal_System/Resources/resource_data.h" // TODO: We don't guarantee these functions exist. But they're useful for debugging. We need a debug namespace that offers this, too.
-  #include <Widget_Systems/widgets_mandatory.h> // show_error
+  #include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
 #include <map>
@@ -44,12 +44,12 @@ namespace enigma
       static inline int DEBUG_ID_CHECK(int id, int objind) {
         std::map<int, inst_iter*>::iterator it = instance_list.find(id);
         if (it != instance_list.end()) {
-          show_error("Two instances were given the same ID! Object `" + enigma_user::object_get_name(it->second->inst->object_index)
+          DEBUG_MESSAGE("Two instances were given the same ID! Object `" + enigma_user::object_get_name(it->second->inst->object_index)
                      + "' and new object `" + enigma_user::object_get_name(objind)
                      + "' both have ID " + toString(id)
                      + "': A new ID has been assigned so the game can continue, but references by this ID may fail."
                      " This bug is likely caused by the IDE, and can be worked around by using the 'Defrag IDs'"
-                     " feature to assign new, ordered IDs to all instances.", false);
+                     " feature to assign new, ordered IDs to all instances.", MESSAGE_TYPE::M_ERROR);
           return maxid++;
         }
         return id;
@@ -88,13 +88,13 @@ namespace enigma
     }
 }
 
-#if defined(SHOW_ERRORS) && SHOW_ERRORS
+#if DEBUG_MODE
   #define errcheck(objid,err) \
   if (objid < 0 or size_t(objid) >= enigma::object_idmax or !enigma::objectdata[objid]) \
-    return (show_error(err,0), 0)
-  #define errcheck(objid,err) \
+    return (DEBUG_MESSAGE(err, MESSAGE_TYPE::M_ERROR), 0)
+  #define errcheck_v(objid,err) \
   if (objid < 0 or size_t(objid) >= enigma::object_idmax or !enigma::objectdata[objid]) \
-    show_error(err,0)
+    DEBUG_MESSAGE(err, MESSAGE_TYPE::M_ERROR)
 #else
   #define errcheck(objid,err)
   #define errcheck_v(objid,err)

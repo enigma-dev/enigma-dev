@@ -322,13 +322,13 @@ namespace enigma_user {
   enigma::roomv room;
 }
 
-#if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
-  #define errcheck(indx,err,v) \
+#if DEBUG_MODE
+#define errcheck(indx,err,v) \
   if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]) \
-    return (enigma_user::show_error(err,0), (v))
+    return (DEBUG_MESSAGE(err, MESSAGE_TYPE::M_USER_ERROR), (v))
   #define errcheck_o(indx,err) \
   if (unsigned(indx) >= unsigned(enigma::room_loadtimecount)) \
-    return (enigma_user::show_error(err,0), 0)
+    return (DEBUG_MESSAGE(err,MESSAGE_TYPE::M_USER_ERROR), 0)
 #else
   #define errcheck(indx,err,v)
   #define errcheck_o(indx,err)

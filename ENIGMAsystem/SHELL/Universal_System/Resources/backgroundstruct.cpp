@@ -106,7 +106,7 @@ void background_add_to_index(background *bak, std::string filename, bool transpa
 
   unsigned char *pxdata = image_load(filename, &w, &h, &fullwidth, &fullheight, &img_numb, false);
   if (pxdata == NULL) {
-    printf("ERROR - Failed to append background to index!\n");
+    DEBUG_MESSAGE("ERROR - Failed to append background to index!", MESSAGE_TYPE::M_ERROR);
     return;
   }
 

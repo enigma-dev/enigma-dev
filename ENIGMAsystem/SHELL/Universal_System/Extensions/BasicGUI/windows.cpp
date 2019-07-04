@@ -28,7 +28,6 @@ using std::deque;
 #include "Universal_System/var4.h"
 #include "Platforms/General/PFwindow.h" //For mouse_check_button
 #include "Universal_System/Resources/resource_data.h" //For script_execute
-//#include "Universal_System/Resources/sprites_internal.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -40,14 +39,6 @@ using std::deque;
 #include "windows.h"
 #include "include.h"
 #include "common.h"
-
-//Children
-/*
-#include "buttons.h"
-#include "toggles.h"
-#include "sliders.h"
-#include "scrollbars.h"
-#include "labels.h"*/
 
 namespace gui
 {
@@ -590,7 +581,6 @@ namespace enigma_user
         }
       }
     }
-    //printf("Window selected = %i and click = %i and size = %i && mouse_check_button_pressed %i\n", window_swap_id, window_click, gui::gui_window_order.size(), enigma_user::mouse_check_button_pressed(enigma_user::mb_left));
     //I REALLY HATE THE MOUSE CHECK HERE :( - Harijs
     if (window_click == true && enigma_user::mouse_check_button_pressed(enigma_user::mb_left)) { //Push to front
       int t = gui::gui_window_order[window_swap_id]; //Get the id of the clicked window
@@ -631,7 +621,6 @@ namespace enigma_user
         }
       }
     }
-    //printf("Window selected = %i and click = %i and size = %i && mouse_check_button_pressed %i\n", window_swap_id, window_click, gui::gui_window_order.size(), enigma_user::mouse_check_button_pressed(enigma_user::mb_left));
     //I REALLY HATE THE MOUSE CHECK HERE :( - Harijs
     if (window_click == true && enigma_user::mouse_check_button_pressed(enigma_user::mb_left)) { //Push to front
       int t = gui::gui_window_order[window_swap_id]; //Get the id of the clicked window

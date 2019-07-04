@@ -22,22 +22,64 @@
 #include "libEGMstd.h"
 
 #include <string>
-using std::string;
 
-namespace enigma
-{
+#define DEBUG_MESSAGE(msg, severity) enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
+
+enum MESSAGE_TYPE : int {
+  /// Diagnostic information not indicative of a problem.
+  M_INFO = 0,
+  /// A mostly-harmless problem where something has misbehaved,
+  /// but the misbehavior is temporary or unlikely to lead to harm.
+  M_WARNING = 1,
+  /// A recoverable error in library code that may be caused by bad state
+  /// in the engine or the operating system. Execution can continue, but
+  /// an operation has failed permanently.
+  M_ERROR = 2,
+  /// A recoverable error caused by misuse of the API, such as closing
+  /// or using something that was never opened, or attempting to access
+  /// a resource that was deleted or never existed.
+  M_USER_ERROR = 3,
+  /// A non-recoverable error caused by library code. Perhaps the window
+  /// or graphics failed to initialize, or the system is completely out of
+  /// memory and execution cannot continue safely.
+  M_FATAL_ERROR = 4,
+  /// A non-recoverable error caused by misuse of the API.
+  /// Generally, this is thrown by the user themselves, but an operation
+  /// that renders the game unable to continue, such as deleting all
+  /// resources, would be grounds for this class of error. 
+  M_FATAL_USER_ERROR = 5
+}; 
+
+namespace enigma {
+  
+  inline std::string error_type(MESSAGE_TYPE t) {
+    switch(t) {
+      case M_INFO: return "INFO";
+      case M_WARNING: return "WARNING";
+      case M_ERROR: return "ERROR";
+      case M_USER_ERROR: return "USER_ERROR";
+      case M_FATAL_ERROR: return "FATAL_ERROR";
+      case M_FATAL_USER_ERROR: return "FATAL_USER_ERROR";
+      default: return "ERROR";
+    }
+  }
+  
   // This function is called at the beginning of the game to allow the widget system to load.
   bool widget_system_initialize();
-  extern string gameInfoText, gameInfoCaption;
+  extern std::string gameInfoText, gameInfoCaption;
   extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
   extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
 }
 
 namespace enigma_user {
 
+void show_debug_message(std::string msg, MESSAGE_TYPE type);
+
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
-void show_error(std::string msg, const bool fatal);
+inline void show_error(std::string msg, const bool fatal) {
+   show_debug_message(msg, (fatal) ? M_FATAL_USER_ERROR : M_USER_ERROR);
+}
 
 int show_message(const std::string &msg);
 template<typename T> int show_message(T msg) { return show_message(enigma_user::toString(msg)); }

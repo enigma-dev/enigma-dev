@@ -56,13 +56,13 @@ static string error_caption;
 
 namespace enigma_user {
 
-void show_error(string errortext, const bool fatal) {
+void show_debug_message(string errortext, MESSAGE_TYPE type) {
   #ifdef DEBUG_MODE
   errortext += enigma::debug_scope::GetErrors();
   #endif
 
   if (error_caption == "") error_caption = "Error";
-  int result = cocoa_show_error(errortext.c_str(), (const bool)fatal, error_caption.c_str());
+  int result = cocoa_show_error(errortext.c_str(), (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR), error_caption.c_str());
   if (result == 1) exit(0);
 }
 

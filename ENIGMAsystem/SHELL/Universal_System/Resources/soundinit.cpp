@@ -17,6 +17,7 @@
 
 #include "Audio_Systems/audio_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "libEGMstd.h"
 #include "resinit.h"
 #include "Universal_System/zlib.h"
@@ -63,7 +64,7 @@ namespace enigma
       if (!fread(fdata,1,size,exe)) return;
 
       int e = sound_add_from_buffer(id,fdata,size);
-      if (e) printf("Failed to load sound %d; error %d\n",i,e);
+      if (e) DEBUG_MESSAGE("Failed to load sound " + std::to_string(i) + " error " + std::to_string(e), MESSAGE_TYPE::M_ERROR);
       delete[] fdata;
     }
   }

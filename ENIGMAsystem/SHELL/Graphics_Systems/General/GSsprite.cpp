@@ -39,17 +39,17 @@ using namespace enigma_user;
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_sprite(spr,id,r) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } const enigma::sprite *const spr = enigma::spritestructarray[id];
   #define get_spritev(spr,id) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } const enigma::sprite *const spr = enigma::spritestructarray[id];
   #define get_sprite_null(spr,id,r) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } const enigma::sprite *const spr = enigma::spritestructarray[id];
 #else

@@ -55,13 +55,13 @@ int get_free_channel(double priority);
 #ifdef DEBUG_MODE
 #define get_sound(snd, id, failure)                                                          \
   if (id < 0 or sound_resources.find(id) == sound_resources.end() or !sound_resources[id]) { \
-    enigma_user::show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
+    DEBUG_MESSAGE("Sound " + enigma_user::toString(id) + " does not exist", MESSAGE_TYPE::M_USER_ERROR);\
     return failure;                                                                          \
   }                                                                                          \
   SoundResource *const snd = sound_resources[id];
 #define get_soundv(snd, id)                                                                  \
   if (id < 0 or sound_resources.find(id) == sound_resources.end() or !sound_resources[id]) { \
-    enigma_user::show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
+    DEBUG_MESSAGE("Sound " + enigma_user::toString(id) + " does not exist", MESSAGE_TYPE::M_USER_ERROR);\
     return;                                                                                  \
   }                                                                                          \
   SoundResource *const snd = sound_resources[id];

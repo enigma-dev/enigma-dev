@@ -33,7 +33,7 @@
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_sprite(spr,id) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      enigma_user::show_error("Cannot access sprite with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } enigma::sprite *const spr = enigma::spritestructarray[id];
 #else
@@ -168,8 +168,6 @@ namespace enigma {
             sspr->textureyarray[s] = (double)metrics[counter].y/(double)(enigma::texture_atlas_array[ta].height);
             sspr->texturewarray[s] = (double)sspr->width/(double)(enigma::texture_atlas_array[ta].width);
             sspr->textureharray[s] = (double)sspr->height/(double)(enigma::texture_atlas_array[ta].height);
-            //printf("Sprite %i subimage %i placed at x = %f and y = %f, w = %f, h = %f\n", i, s,(double)metrics[counter].x, (double)metrics[counter].y, (double)sspr->width/(double)(enigma::texture_atlas_array[ta].width), (double)sspr->height/(double)(enigma::texture_atlas_array[ta].height));
-
             counter++;
             if (counter > max_textures) { return false; }
           }
@@ -185,7 +183,6 @@ namespace enigma {
           bkg->texturey = (double)metrics[counter].y/(double)(enigma::texture_atlas_array[ta].height);
           bkg->texturew = (double)bkg->width/(double)(enigma::texture_atlas_array[ta].width);
           bkg->textureh = (double)bkg->height/(double)(enigma::texture_atlas_array[ta].height);
-          //printf("Sprite %i subimage %i placed at x = %f and y = %f, w = %f, h = %f\n", i, s,(double)metrics[counter].x, (double)metrics[counter].y, (double)sspr->width/(double)(enigma::texture_atlas_array[ta].width), (double)sspr->height/(double)(enigma::texture_atlas_array[ta].height));
 
           counter++;
           if (counter > max_textures) { return false; }
@@ -203,7 +200,6 @@ namespace enigma {
               int gw = fgr.glyphs[s].x2-fgr.glyphs[s].x;
               int gh = fgr.glyphs[s].y2-fgr.glyphs[s].y;
 
-              //printf("Glyph %i from %f, %f placed at x = %i and y = %i, w = %i, h = %i\n",s, tix, tiy, metrics[counter].x, metrics[counter].y, metrics[counter].w, metrics[counter].h);
               enigma::graphics_copy_texture_part(fnt->texture, enigma::texture_atlas_array[ta].texture, tix, tiy, gw, gh, metrics[counter].x, metrics[counter].y);
 
               fgr.glyphs[s].tx = (double)metrics[counter].x/(double)(enigma::texture_atlas_array[ta].width);

@@ -103,10 +103,10 @@ int surface_get_depth_texture(int id)
   get_surfacev(surf,id,-1);
   #ifdef DEBUG_MODE
   if (surf.write_only == true){
-    show_error("Cannot get depth texture from write only surface with ID = " + std::to_string(id), false);
+    DEBUG_MESSAGE("Cannot get depth texture from write only surface with ID = " + std::to_string(id), MESSAGE_TYPE::M_ERROR);
     return -1;
   }else if (surf.has_depth_buffer == false){
-    show_error("Cannot get depth texture from a surface without a depth buffer. Surface ID = " + std::to_string(id), false);
+    DEBUG_MESSAGE("Cannot get depth texture from a surface without a depth buffer. Surface ID = " + std::to_string(id), MESSAGE_TYPE::M_ERROR);
     return -1;
   }
   #endif

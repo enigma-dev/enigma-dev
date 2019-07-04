@@ -19,7 +19,7 @@
 
 #include "Platforms/General/PFmain.h"       // For those damn vk_ constants, and io_clear().
 #include "Platforms/platforms_mandatory.h"  // For type insurance
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
 
@@ -66,7 +66,7 @@ bool initGameWindow()
   // Initiate display
   disp = XOpenDisplay(NULL);
   if (!disp) {
-    printf("Display failed\n");
+    DEBUG_MESSAGE("Display failed", MESSAGE_TYPE::M_FATAL_ERROR);
     return false;
   }
 
@@ -107,7 +107,7 @@ bool initGameWindow()
   //register CloseButton listener
   Atom prots[] = {wm_delwin};
   if (!XSetWMProtocols(disp, win, prots, 1)) {
-    printf("NoClose\n");
+    DEBUG_MESSAGE("NoClose", MESSAGE_TYPE::M_ERROR);
     return false;
   }
 
@@ -117,7 +117,7 @@ bool initGameWindow()
   XColor dummy;
   Pixmap blank = XCreateBitmapFromData(disp, win, "", 1, 1);
   if (blank == None) {  //out of memory
-    printf("Failed to create no cursor. lulz\n");
+    DEBUG_MESSAGE("Failed to create no cursor. lulz", MESSAGE_TYPE::M_ERROR);
     NoCursor = DefCursor;
   } else {
     NoCursor = XCreatePixmapCursor(disp, blank, blank, &dummy, &dummy, 0, 0);
@@ -537,7 +537,7 @@ namespace enigma_user {
 void io_handle() {
   enigma::input_push();
   while (XQLength(disp)) {
-    printf("processing an event...\n");
+    DEBUG_MESSAGE("processing an event...", MESSAGE_TYPE::M_INFO);
     if (enigma::handleEvents() > 0) exit(0);
   }
   enigma::update_mouse_variables();

@@ -137,10 +137,6 @@ namespace gui
 
     get_data_element(sty_ind,gui::Style,gui::GUI_TYPE::STYLE,indicator_style_id);
     if (sty_ind.sprites[state] != -1){
-      /*printf("Ind spr size = %f x %f and %f x %f\n", sty_ind.image_offset.x + ox + box.x + slider_offset + indicator_box.x,
-                                           sty_ind.image_offset.y + oy + box.y + indicator_box.y,
-                                           sty_ind.image_offset.x + ox + box.x + indicator_box.w + slider_offset + indicator_box.x,
-                                           sty_ind.image_offset.y + oy + box.y+indicator_box.h + indicator_box.y);*/
       if (sty_ind.border.zero == true){
         enigma_user::draw_sprite_stretched(sty_ind.sprites[state],-1,
                                            sty_ind.image_offset.x + ox + box.x + slider_offset + indicator_box.x,

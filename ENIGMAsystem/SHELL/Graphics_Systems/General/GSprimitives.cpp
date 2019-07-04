@@ -69,7 +69,7 @@ unsigned draw_primitive_count(int kind, unsigned vertex_count) {
     case pr_trianglestrip: if (vertex_count > 2) return vertex_count - 2; break;
     case pr_trianglefan: if (vertex_count > 2) return vertex_count - 2; break;
     #ifdef DEBUG_MODE
-    default: show_error("Unknown primitive kind: " + std::to_string(kind), true);
+    default: DEBUG_MESSAGE("Unknown primitive kind: " + std::to_string(kind), MESSAGE_TYPE::M_USER_ERROR);
     #endif
   }
   return 0;

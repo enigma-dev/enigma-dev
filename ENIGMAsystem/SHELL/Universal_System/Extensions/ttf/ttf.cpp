@@ -2,6 +2,7 @@
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "rectpacker/rectpack.h"
 
 #include <ft2build.h>
@@ -19,7 +20,7 @@ public:
 
     FT_Error error = FT_Init_FreeType(&library);
     if (error != 0)
-      std::cerr << "Error initializing freetype!" << std::endl;
+      DEBUG_MESSAGE("Error initializing freetype!", MESSAGE_TYPE::M_ERROR);
 
     return (error == 0);
   }
@@ -96,7 +97,7 @@ namespace enigma_user {
 
       #ifdef DEBUG_MODE
       if (error != 0)
-        std::cerr << "Freetype error loading metrics for char: " <<  static_cast<char>(c) << std::endl;
+        DEBUG_MESSAGE("Freetype error loading metrics for char: " + std::to_string(static_cast<char>(c)), MESSAGE_TYPE::M_ERROR);
       #endif
 
       FT_Bitmap& charBitmap = slot->bitmap;
@@ -141,7 +142,7 @@ namespace enigma_user {
 
       #ifdef DEBUG_MODE
       if (error != 0) {
-        std::cerr << "Freetype error loading bitmap for char: " <<  static_cast<char>(g.index) << std::endl;
+        DEBUG_MESSAGE("Freetype error loading bitmap for char: " + std::to_string(static_cast<char>(g.index)), MESSAGE_TYPE::M_ERROR);
         continue;
       }
       #endif
