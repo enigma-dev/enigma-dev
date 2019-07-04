@@ -26,13 +26,29 @@
 #define DEBUG_MESSAGE(msg, severity) enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
 
 enum MESSAGE_TYPE : int {
+  /// Diagnostic information not indicative of a problem.
   M_INFO = 0,
+  /// A mostly-harmless problem where something has misbehaved,
+  /// but the misbehavior is temporary or unlikely to lead to harm.
   M_WARNING = 1,
+  /// A recoverable error in library code that may be caused by bad state
+  /// in the engine or the operating system. Execution can continue, but
+  /// an operation has failed permanently.
   M_ERROR = 2,
+  /// A recoverable error caused by misuse of the API, such as closing
+  /// or using something that was never opened, or attempting to access
+  /// a resource that was deleted or never existed.
   M_USER_ERROR = 3,
+  /// A non-recoverable error caused by library code. Perhaps the window
+  /// or graphics failed to initialize, or the system is completely out of
+  /// memory and execution cannot continue safely.
   M_FATAL_ERROR = 4,
+  /// A non-recoverable error caused by misuse of the API.
+  /// Generally, this is thrown by the user themselves, but an operation
+  /// that renders the game unable to continue, such as deleting all
+  /// resources, would be grounds for this class of error. 
   M_FATAL_USER_ERROR = 5
-};
+}; 
 
 namespace enigma {
   
