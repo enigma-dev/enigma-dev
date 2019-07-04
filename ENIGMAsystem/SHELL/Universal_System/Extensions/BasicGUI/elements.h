@@ -328,7 +328,7 @@ namespace gui
               new (&(data.textbox)) Textbox(rhs.data.textbox);
               break;
           default:
-            //DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR!", MESSAGE_TYPE::M_USER_ERROR);
+            DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR!", MESSAGE_TYPE::M_USER_ERROR);
             break;
         }
       }
@@ -382,7 +382,7 @@ namespace gui
             data.skin.~Skin();
             break;
           default:
-            DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR!", MESSAGE_TYPE::M_USER_ERROR);
+            DEBUG_MESSAGE("BasicGUI: Unknown element type or element type == ERROR!", MESSAGE_TYPE::M_FATAL_ERROR);
             break;
         }
       }
@@ -392,7 +392,7 @@ namespace gui
         if (type == GUI_TYPE::GROUP){
           return data.group;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a group! This is going to crash now!", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a group! This is going to crash now!", MESSAGE_TYPE::M_FATAL_ERROR);
         return data.group;
       }
 
@@ -400,7 +400,7 @@ namespace gui
         if (type == GUI_TYPE::STYLE){
           return data.style;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a style! This is going to crash now!", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a style! This is going to crash now!", MESSAGE_TYPE::M_FATAL_ERROR);
         return data.style;
       }
 
@@ -408,7 +408,7 @@ namespace gui
         if (type == GUI_TYPE::SKIN){
           return data.skin;
         }
-        DEBUG_MESSAGE("BasicGUI: Type is not a skin! This is going to crash now!", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("BasicGUI: Type is not a skin! This is going to crash now!", MESSAGE_TYPE::M_FATAL_ERROR);
         return data.skin;
       }
 

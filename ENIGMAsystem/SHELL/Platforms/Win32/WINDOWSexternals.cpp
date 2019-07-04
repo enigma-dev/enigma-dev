@@ -120,7 +120,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
 
   if (dllmod == NULL)
   {
-    DEBUG_MESSAGE("Cannot load library " + dll, MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE("Cannot load library \"" + dll + "\"", MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 

@@ -57,7 +57,7 @@ namespace enigma {
         const size_t buffer_size = 512;
         char buffer[buffer_size];
         glGetShaderInfoLog(shader, buffer_size, NULL, buffer);
-        DEBUG_MESSAGE("Shader compilation failed with this message: " + buffer, MESSAGE_TYPE::M_ERROR);
+        DEBUG_MESSAGE(std::string("Shader compilation failed with this message: ") + buffer, MESSAGE_TYPE::M_ERROR);
         exit(-1);
       }
       return shader;

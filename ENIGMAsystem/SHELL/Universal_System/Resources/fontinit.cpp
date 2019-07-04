@@ -86,7 +86,7 @@ void exe_loadfonts(FILE* exe) {
     }
     if (!fread(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "done", sizeof(int)) != 0) {
-      DEBUG_MESSAGE("Unexpected end; eof: " + ((feof(exe) == 0) ? "true" : "false"), MESSAGE_TYPE::M_ERROR);
+      DEBUG_MESSAGE(std::string("Unexpected end; eof: ") + ((feof(exe) == 0) ? "true" : "false"), MESSAGE_TYPE::M_ERROR);
       return;
     }
     //unpacked = width*height*4;

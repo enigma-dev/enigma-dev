@@ -104,7 +104,7 @@ int audiosystem_initialize() {
 
   DEBUG_MESSAGE("Opening ALURE devices.", MESSAGE_TYPE::M_INFO);
   if (!alureInitDevice(NULL, NULL)) {
-    DEBUG_MESSAGE("Failed to open OpenAL device: " + alureGetErrorString(), MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE(std::string("Failed to open OpenAL device: ") + alureGetErrorString(), MESSAGE_TYPE::M_ERROR);
     return 1;
   }
 
@@ -122,7 +122,7 @@ int sound_add_from_buffer(int id, void *buffer, size_t bufsize) {
   buf = alureCreateBufferFromMemory((ALubyte *)buffer, bufsize);
 
   if (!buf) {
-    DEBUG_MESSAGE("Could not load sound " + std::to_string(id) + " from memory buffer: " + alureGetErrorString(), MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE(std::string("Could not load sound ") + std::to_string(id) + " from memory buffer: " + alureGetErrorString(), MESSAGE_TYPE::M_USER_ERROR);
     return 1;
   }
 
@@ -141,7 +141,7 @@ int sound_add_from_file(int id, string fname) {
   buf = alureCreateBufferFromFile(fname.c_str());
 
   if (!buf) {
-    DEBUG_MESSAGE("Could not add sound " + fname + " from file: " + alureGetErrorString(), MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE("Could not add sound " + fname + " from file: " + alureGetErrorString(), MESSAGE_TYPE::M_USER_ERROR);
     return 1;
   }
 
@@ -157,7 +157,7 @@ int sound_replace_from_file(int id, string fname) {
   buf = alureCreateBufferFromFile(fname.c_str());
 
   if (!buf) {
-    DEBUG_MESSAGE("Could not replace sound " + fname + " from file: " + alureGetErrorString(), MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE("Could not replace sound " + fname + " from file: " + alureGetErrorString(), MESSAGE_TYPE::M_USER_ERROR);
     return 1;
   }
 
@@ -177,7 +177,7 @@ int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffe
   snd->stream = alureCreateStreamFromCallback((ALuint(*)(void *, ALubyte *, ALuint))callback, userdata,
                                               AL_FORMAT_STEREO16, 44100, 4096, 0, NULL);
   if (!snd->stream) {
-    DEBUG_MESSAGE("Could not create stream " + std::to_string(id) + ": " + alureGetErrorString(), MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE("Could not create stream " + std::to_string(id) + ": " + alureGetErrorString(), MESSAGE_TYPE::M_USER_ERROR);
     return 1;
   }
   snd->cleanup = cleanup;

@@ -90,7 +90,7 @@ void file_text_close(int fileid) // Closes the file with the given file id.
 {
    if(fileid == -1) {
     #ifdef DEBUG_MODE
-      DEBUG_MESSAGE("Cannot close an unopened file.", MESSAGE_TYPE::M_ERROR);
+      DEBUG_MESSAGE("Cannot close an unopened file.", MESSAGE_TYPE::M_USER_ERROR);
     #endif
     return;
   }

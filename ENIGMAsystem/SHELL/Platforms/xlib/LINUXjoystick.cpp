@@ -163,7 +163,7 @@ namespace enigma_user
       devn = name;
 
     #ifdef DEBUG_MODE
-    DEBUG_MESSAGE("Joystick name: " + name, MESSAGE_TYPE::M_INFO);
+    DEBUG_MESSAGE(std::string("Joystick name: ") + name, MESSAGE_TYPE::M_INFO);
     #endif
 
     // There is no guarantee that because /dev/js5 exists, /dev/js0 exists
