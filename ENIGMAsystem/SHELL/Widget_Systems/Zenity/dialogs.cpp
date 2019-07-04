@@ -48,6 +48,9 @@ using enigma_user::color_get_green;
 using enigma_user::color_get_blue;
 using enigma_user::make_color_rgb;
 
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/General/WSdialogs.h"
+
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
 #include "Universal_System/Resources/resource_data.h"
@@ -109,7 +112,7 @@ static string zenity_filter(string input) {
   return string_output;
 }
 
-static int show_message_helperfunc(string str) {
+static int show_message_helperfunc(string message) {
   if (dialog_caption.empty())
     dialog_caption = window_get_caption();
 
@@ -130,13 +133,13 @@ static int show_message_helperfunc(string str) {
   str_command = string("ans=$(zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
   str_cancel + string("--title=\"") + str_title + string("\" --no-wrap --text=\"") +
-  add_escaping(str, false, "") + string("\" --icon-name=dialog-information);") + str_echo;
+  add_escaping(message, false, "") + string("\" --icon-name=dialog-information);") + str_echo;
 
   string str_result = shellscript_evaluate(str_command);
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-static int show_question_helperfunc(string str) {
+static int show_question_helperfunc(string message) {
   if (dialog_caption.empty())
     dialog_caption = window_get_caption();
 
@@ -151,7 +154,7 @@ static int show_question_helperfunc(string str) {
   str_command = string("ans=$(zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
   string("--question --ok-label=Yes --cancel-label=No ") + str_cancel +  string("--title=\"") +
-  str_title + string("\" --no-wrap --text=\"") + add_escaping(str, false, "") +
+  str_title + string("\" --no-wrap --text=\"") + add_escaping(message, false, "") +
   string("\" --icon-name=dialog-question);if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Cancel\" ] ;then echo -1;else echo 0;fi");
 
   string str_result = shellscript_evaluate(str_command);
@@ -187,27 +190,27 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 
 }
 
-int show_message(const string &str) {
+int show_message(const string &message) {
   message_cancel = false;
-  return show_message_helperfunc(str);
+  return show_message_helperfunc(message);
 }
 
-int show_message_cancelable(string str) {
+int show_message_cancelable(string message) {
   message_cancel = true;
-  return show_message_helperfunc(str);
+  return show_message_helperfunc(message);
 }
 
-bool show_question(string str) {
+bool show_question(string message) {
   question_cancel = false;
-  return (bool)show_question_helperfunc(str);
+  return (bool)show_question_helperfunc(message);
 }
 
-int show_question_cancelable(string str) {
+int show_question_cancelable(string message) {
   question_cancel = true;
-  return show_question_helperfunc(str);
+  return show_question_helperfunc(message);
 }
 
-int show_attempt(string str) {
+int show_attempt(string errortext) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -216,14 +219,14 @@ int show_attempt(string str) {
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
   string("--question --ok-label=Retry --cancel-label=Cancel ") +  string("--title=\"") +
   add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
-  add_escaping(str, false, "") +
+  add_escaping(errortext, false, "") +
   string("\" --icon-name=dialog-error);if [ $? = 0 ] ;then echo 0;else echo -1;fi");
 
   string str_result = shellscript_evaluate(str_command);
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-string get_string(string str, string def) {
+string get_string(string message, string def) {
   if (dialog_caption.empty())
     dialog_caption = window_get_caption();
 
@@ -234,13 +237,13 @@ string get_string(string str, string def) {
   str_command = string("ans=$(zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
   string("--entry --title=\"") + str_title + string("\" --text=\"") +
-  add_escaping(str, false, "") + string("\" --entry-text=\"") +
+  add_escaping(message, false, "") + string("\" --entry-text=\"") +
   add_escaping(def, false, "") + string("\");echo $ans");
 
   return shellscript_evaluate(str_command);
 }
 
-string get_password(string str, string def) {
+string get_password(string message, string def) {
   if (dialog_caption.empty())
     dialog_caption = window_get_caption();
 
@@ -251,21 +254,21 @@ string get_password(string str, string def) {
   str_command = string("ans=$(zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
   string("--entry --title=\"") + str_title + string("\" --text=\"") +
-  add_escaping(str, false, "") + string("\" --hide-text --entry-text=\"") +
+  add_escaping(message, false, "") + string("\" --hide-text --entry-text=\"") +
   add_escaping(def, false, "") + string("\");echo $ans");
 
   return shellscript_evaluate(str_command);
 }
 
-double get_integer(string str, double def) {
+double get_integer(string message, double def) {
   string str_def = remove_trailing_zeros(def);
-  string str_result = get_string(str, str_def);
+  string str_result = get_string(message, str_def);
   return strtod(str_result.c_str(), NULL);
 }
 
-double get_passcode(string str, double def) {
+double get_passcode(string message, double def) {
   string str_def = remove_trailing_zeros(def);
-  string str_result = get_password(str, str_def);
+  string str_result = get_password(message, str_def);
   return strtod(str_result.c_str(), NULL);
 }
 
@@ -489,8 +492,8 @@ string message_get_caption() {
     return ""; else return dialog_caption;
 }
 
-void message_set_caption(string caption) {
-  dialog_caption = caption; error_caption = caption;
+void message_set_caption(string title) {
+  dialog_caption = title; error_caption = title;
   if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
 }

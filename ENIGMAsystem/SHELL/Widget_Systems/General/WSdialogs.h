@@ -56,16 +56,16 @@ enum {
 #include <string>
 
 	// void show_error(string errortext, const bool fatal);
-	// int show_message(string str);
-	int show_message_cancelable(string str);
-	int show_message_ext(string str, string but1, string but2, string but3);
-	bool show_question(string str);
-	int show_question_cancelable(string str);
-	int show_attempt(string str);
-	string get_string(string str, string def);
-	string get_password(string str, string def);
-	double get_integer(string str, double def);
-	double get_passcode(string str, double def);
+	// int show_message(const string &message);
+	int show_message_cancelable(string message);
+	int show_message_ext(string message, string but1, string but2, string but3);
+	bool show_question(string message);
+	int show_question_cancelable(string message);
+	int show_attempt(string errortext);
+	string get_string(string message, string def);
+	string get_password(string message, string def);
+	double get_integer(string message, double def);
+	double get_passcode(string message, double def);
 	string get_open_filename(string filter, string fname);
 	string get_open_filenames(string filter, string fname);
 	string get_save_filename(string filter, string fname);
@@ -77,11 +77,11 @@ enum {
 	int get_color(int defcol);
 	int get_color_ext(int defcol, string title);
 	string message_get_caption();
-	void message_set_caption(string str);
+	void message_set_caption(string title);
 	
-	inline bool action_if_question(string str)
+	inline bool action_if_question(string message)
 	{
-		return show_question(str);
+		return show_question(message);
 	}
 	
 	string get_login(string username, string password);

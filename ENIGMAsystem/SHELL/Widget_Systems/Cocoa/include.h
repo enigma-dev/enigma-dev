@@ -1,1 +1,2 @@
-#include "Widget_Systems/Cocoa/dialogs.h"
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/General/WSdialogs.h"

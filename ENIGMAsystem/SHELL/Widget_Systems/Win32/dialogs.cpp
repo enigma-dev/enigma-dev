@@ -34,7 +34,7 @@ using namespace std;
 #include "Universal_System/estring.h"
 #include "GameSettings.h"
 
-#include "../General/WSdialogs.h"
+#include "Widget_Systems/General/WSdialogs.h"
 
 #include "Graphics_Systems/General/GScolor_macros.h"
 
@@ -290,8 +290,8 @@ static UINT_PTR CALLBACK GetColorProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPAR
   return false;
 }
 
-static inline int show_message_helperfunc(const string &str) {
-  tstring tstrStr = widen(str);
+static inline int show_message_helperfunc(const string &message) {
+  tstring tstrStr = widen(message);
 
   wchar_t wstrWindowCaption[512];
   GetWindowTextW(enigma::hWnd, wstrWindowCaption, 512);
@@ -308,8 +308,8 @@ static inline int show_message_helperfunc(const string &str) {
   return 1;
 }
 
-static inline int show_question_helperfunc(string str) {
-  tstring tstrStr = widen(str);
+static inline int show_question_helperfunc(string message) {
+  tstring tstrStr = widen(message);
 
   wchar_t wstrWindowCaption[512];
   GetWindowTextW(enigma::hWnd, wstrWindowCaption, 512);
@@ -504,8 +504,7 @@ static inline int get_color_helper(int defcol, string title) {
 
 namespace enigma_user {
 
-void show_error(string errortext, const bool fatal)
-{
+void show_error(string errortext, const bool fatal) {
   #ifdef DEBUG_MODE
   errortext += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
@@ -670,30 +669,30 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
   */
 }
 
-int show_message(const string &str) {
+int show_message(const string &message) {
   message_cancel = false;
-  return show_message_helperfunc(str);
+  return show_message_helperfunc(message);
 }
 
-int show_message_cancelable(string str) {
+int show_message_cancelable(string message) {
   message_cancel = true;
-  return show_message_helperfunc(str);
+  return show_message_helperfunc(message);
 }
 
-bool show_question(string str) {
+bool show_question(string message) {
   question_cancel = false;
-  return (bool)show_question_helperfunc(str);
+  return (bool)show_question_helperfunc(message);
 }
 
-int show_question_cancelable(string str) {
+int show_question_cancelable(string message) {
   question_cancel = true;
-  return show_question_helperfunc(str);
+  return show_question_helperfunc(message);
 }
 
-int show_attempt(string str) {
+int show_attempt(string errortext) {
   string strWindowCaption = "Error";
 
-  tstring tstrStr = widen(str);
+  tstring tstrStr = widen(errortext);
   tstring tstrWindowCaption = widen(strWindowCaption);
 
   if (error_caption != L"")
@@ -705,9 +704,9 @@ int show_attempt(string str) {
   return -1;
 }
 
-int show_message_ext(string msg, string but1, string but2, string but3) {
+int show_message_ext(string message, string but1, string but2, string but3) {
   gs_cap = message_get_caption();
-  gs_message = msg;
+  gs_message = message;
   gs_but1 = but1; gs_but2 = but2; gs_but3 = but3;
 
   return DialogBoxW(enigma::hInstance, L"showmessageext", enigma::hWnd, ShowMessageExtProc);
@@ -720,22 +719,22 @@ string get_login(string username, string password) {
   return gs_str_submitted;
 }
 
-string get_string(string str, string def) {
-  gs_cap = message_get_caption(); gs_message = str; gs_def = def;
+string get_string(string message, string def) {
+  gs_cap = message_get_caption(); gs_message = message; gs_def = def;
   DialogBoxW(enigma::hInstance, L"getstringdialog", enigma::hWnd, GetStrProc);
 
   return gs_str_submitted;
 }
 
-string get_password(string str, string def) {
-  gs_cap = message_get_caption(); gs_message = str; gs_def = def;
+string get_password(string message, string def) {
+  gs_cap = message_get_caption(); gs_message = message; gs_def = def;
   DialogBoxW(enigma::hInstance, L"getpassworddialog", enigma::hWnd, GetStrProc);
 
   return gs_str_submitted;
 }
 
-double get_integer(string str, double def) {
-  gs_cap = message_get_caption(); gs_message = str; gs_def = remove_trailing_zeros(def);
+double get_integer(string message, double def) {
+  gs_cap = message_get_caption(); gs_message = message; gs_def = remove_trailing_zeros(def);
   DialogBoxW(enigma::hInstance, L"getstringdialog", enigma::hWnd, GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
@@ -743,8 +742,8 @@ double get_integer(string str, double def) {
   return strtod(gs_str_submitted.c_str(), NULL);
 }
 
-double get_passcode(string str, double def) {
-  gs_cap = message_get_caption(); gs_message = str; gs_def = remove_trailing_zeros(def);
+double get_passcode(string message, double def) {
+  gs_cap = message_get_caption(); gs_message = message; gs_def = remove_trailing_zeros(def);
   DialogBoxW(enigma::hInstance, L"getpassworddialog", enigma::hWnd, GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
@@ -810,11 +809,11 @@ string message_get_caption() {
   return shorten(dialog_caption);
 }
 
-void message_set_caption(string str) {
-  if (!str.empty()) dialog_caption = widen(str);
+void message_set_caption(string title) {
+  if (!title.empty()) dialog_caption = widen(title);
   else dialog_caption = L"";
 
-  if (!str.empty()) error_caption = widen(str);
+  if (!title.empty()) error_caption = widen(title);
   else error_caption = L"Error";
 }
 

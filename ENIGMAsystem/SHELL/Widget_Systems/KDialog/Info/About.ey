@@ -1,12 +1,9 @@
 %e-yaml
 ---
 
-Name: KDialog
+Name: KDialog Widgets
 Identifier: KDialog
 Build-Platforms: Linux, SDL
 Represents: 
-Description: Create KDE style widgets with KDialog on Linux.
-
-License, documentation, and install instructions: 
-https://enigma-dev.org/docs/Wiki/Dialogs#KDialog
+Description: Create KDE style widgets with KDialog on Linux. License, documentation, and install instructions: https://enigma-dev.org/docs/Wiki/Dialogs#KDialog_Widgets
 Author: Samuel Venable
