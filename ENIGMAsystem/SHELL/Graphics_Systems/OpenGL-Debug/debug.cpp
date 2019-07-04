@@ -1,75 +1,84 @@
 #include "OpenGLHeaders.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
-#include <iostream>
+#include <string>
+#include <sstream>
 
 namespace enigma {
 
-using std::cout;
-using std::endl;
 void openglCallbackFunction(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length,
                                      const GLchar* message, const void* userParam) {
-  cout << "---------------------opengl-callback-start------------" << endl;
-  cout << "message: " << message << endl;
-  cout << "type: ";
+                                     
+  MESSAGE_TYPE errType = MESSAGE_TYPE::M_ERROR;
+  
+  std::stringstream error;
+  error << "\n---------------------opengl-callback-start------------\n";
+  error << "message: " << message << "\n";
+  error << "type: ";
 
   switch (type) {
     case GL_DEBUG_TYPE_ERROR:
-      cout << "ERROR";
+      error << "ERROR";
       break;
 
     case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-      cout << "DEPRECATED_BEHAVIOR";
+      errType = MESSAGE_TYPE::M_WARNING;
+      error << "DEPRECATED_BEHAVIOR";
       break;
 
     case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-      cout << "UNDEFINED_BEHAVIOR";
+      error << "UNDEFINED_BEHAVIOR";
       break;
 
     case GL_DEBUG_TYPE_PORTABILITY:
-      cout << "PORTABILITY";
+      errType = MESSAGE_TYPE::M_WARNING;
+      error << "PORTABILITY";
       break;
 
     case GL_DEBUG_TYPE_PERFORMANCE:
-      cout << "PERFORMANCE";
+      errType = MESSAGE_TYPE::M_WARNING;
+      error << "PERFORMANCE";
       break;
 
     case GL_DEBUG_TYPE_OTHER:
-      cout << "OTHER";
+      errType = MESSAGE_TYPE::M_INFO;
+      error << "OTHER";
       break;
   }
 
-  cout << endl;
+  error << "\n";
 
-  cout << "id: " << id << endl;
-  cout << "severity: ";
+  error << "id: " << std::to_string(id) << "\n";
+  error << "severity: ";
 
   switch (severity) {
     case GL_DEBUG_SEVERITY_LOW:
-      cout << "LOW";
+      error << "LOW";
       break;
 
     case GL_DEBUG_SEVERITY_MEDIUM:
-      cout << "MEDIUM";
+      error << "MEDIUM";
       break;
 
     case GL_DEBUG_SEVERITY_HIGH:
-      cout << "HIGH";
+      error << "HIGH";
       break;
   }
 
-  cout << endl;
-  cout << "---------------------opengl-callback-end--------------" << endl;
+  error << "\n";
+  error << "---------------------opengl-callback-end--------------\n";
+  DEBUG_MESSAGE(error.str(), errType);
 }
 
 void register_gl_debug_callback() {
   if (glDebugMessageCallback) {
-    cout << "Registered OpenGL debug callback" << endl;
+    DEBUG_MESSAGE("Registered OpenGL debug callback", MESSAGE_TYPE::M_INFO);
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback((GLDEBUGPROC)&openglCallbackFunction, nullptr);
     unsigned int unusedIds = 0;
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, true);
-  } else cout << "glDebugMessageCallback not available" << endl;
+  } else DEBUG_MESSAGE("glDebugMessageCallback not available", MESSAGE_TYPE::M_INFO);
 }
 
 } // namespace enigma

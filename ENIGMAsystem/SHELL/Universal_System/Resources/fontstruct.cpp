@@ -153,7 +153,6 @@ namespace enigma
         {
           w > h ? h <<= 1 : w <<= 1,
           rectplane = rect_packer::expand(rectplane, w, h);
-          printf("Expanded to %d by %d\n", w, h);
           if (!w or !h) return false;
         }
       }

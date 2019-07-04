@@ -100,10 +100,8 @@ namespace enigma
     static inline unsigned find_heuristic(const node* n0, const node* n1, bool allow_diag) //Distance from n0 to n1
     {
         if (!allow_diag){
-            //std::cout << "Straight " << " H = " << fabs((int)n0->x-(int)n1->x) + fabs((int)n0->y-(int)n1->y) << std::endl;
             return fabs((int)n0->x-(int)n1->x) + fabs((int)n0->y-(int)n1->y);
         } else {
-            //std::cout << "Diagn " << " H = " << fmax(fabs((int)n0->x-(int)n1->x) , fabs((int)n0->y-(int)n1->y)) << std::endl;
             return fmax(fabs((int)n0->x-(int)n1->x) , fabs((int)n0->y-(int)n1->y));
         }
     }
@@ -117,12 +115,10 @@ namespace enigma
 
     static inline bool check_corners(unsigned id, node* n0, node* n1) //There must be a better way to do this
     {
-        //std::cout << "Searching..." << std::endl;
         for (vector<enigma::node*>::iterator it0 = n0->neighbor_nodes.begin(); it0!=n0->neighbor_nodes.end(); ++it0)
         {
             for (vector<enigma::node*>::iterator it1 = n1->neighbor_nodes.begin(); it1!=n1->neighbor_nodes.end(); ++it1)
             {
-               // std::cout << (*it0) << " == " << (*it1) << " && it0.cost=" << (*it0)->cost << std::endl;
                 if ((*it0)==(*it1) && (*it0)->cost >= gridstructarray[id]->threshold)
                 return true;
             }
@@ -156,12 +152,6 @@ namespace enigma
         while (find(CLOSED.begin(), CLOSED.end(), destination) == CLOSED.end() && !OPEN.empty())
         //loop until destination is in the closed list or the open multimap is empty
         {
-            //if (OPEN.empty()){break;}
-            //multimap<unsigned,node*>::iterator tit;
-            /*std::cout << "Begin" << std::endl;
-            for ( tit=OPEN.begin() ; tit != OPEN.end(); tit++ )
-                std::cout << (*tit).first << " => " << (*tit).second << std::endl;*/
-
             //this is basically ds_priority_delete_min
             {
               multimap<unsigned,node*>::iterator it = OPEN.begin(), it_check;
@@ -174,12 +164,6 @@ namespace enigma
               current = (*it_check).second;
               OPEN.erase(it_check);
             }
-            //std::cout << OPEN.size() << std::endl;
-            //std::cout << "End" << std::endl;
-            //multimap<unsigned,node*>::iterator tit;
-            /*for ( tit=OPEN.begin() ; tit != OPEN.end(); tit++ )
-                std::cout << (*tit).first << " => " << (*tit).second << std::endl;*/
-            //std::cout << "Ended" << std::endl;
 
             CLOSED.push_front(current);
             for (vector<enigma::node*>::iterator it = current->neighbor_nodes.begin(); it!=current->neighbor_nodes.end(); ++it)
@@ -199,7 +183,6 @@ namespace enigma
                             (*it)->G += ceil((*it)->cost/2.5); //if it is diagonal increase the move cost
                         (*it)->H = find_heuristic(*it,destination,allow_diag);
                         (*it)->F = (*it)->G + (*it)->H;
-                        //std::cout << "Node: " << (*it)->x*gridstructarray[id]->vcells+(*it)->y << " F = " << (*it)->F << " H = " << (*it)->H << " G = " << (*it)->G << std::endl;
                         OPEN.insert(pair<unsigned,node*>((*it)->F,(*it)));
 
                     }else{ //if the node is already on the open list we just have to see if it is a better path

@@ -1,6 +1,7 @@
 #include "Platforms/General/PFmain.h"
 
 #include "Universal_System/mathnc.h" // enigma_user::clamp
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <time.h> //CLOCK_MONOTONIC
 #include <sys/types.h>     //getpid
@@ -109,7 +110,7 @@ void execute_shell(std::string operation, std::string fname, std::string args) {
   if (system(NULL)) {
     system((fname + args + " &").c_str());
   } else {
-    printf("execute_shell cannot be used as there is no command processor!");
+    DEBUG_MESSAGE("execute_shell cannot be used as there is no command processor!", MESSAGE_TYPE::M_ERROR);
     return;
   }
 }
@@ -120,7 +121,7 @@ void execute_program(std::string operation, std::string fname, std::string args,
   if (system(NULL)) {
     system((fname + args + (wait ? " &" : "")).c_str());
   } else {
-    printf("execute_program cannot be used as there is no command processor!");
+    DEBUG_MESSAGE("execute_program cannot be used as there is no command processor!", MESSAGE_TYPE::M_ERROR);
     return;
   }
 }

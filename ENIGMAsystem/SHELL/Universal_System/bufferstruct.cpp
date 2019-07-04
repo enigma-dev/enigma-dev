@@ -20,6 +20,7 @@
 #include "libEGMstd.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
 #include <fstream>
@@ -131,7 +132,7 @@ void buffer_save(int buffer, string filename) {
   get_buffer(binbuff, buffer);
   std::ofstream myfile(filename.c_str());
   if (!myfile.is_open()) {
-    std::cout << "Unable to open file " << filename;
+    DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return;
   }
   myfile.write(reinterpret_cast<const char*>(&binbuff->data[0]), binbuff->data.size());
@@ -142,7 +143,7 @@ void buffer_save_ext(int buffer, string filename, unsigned offset, unsigned size
   get_buffer(binbuff, buffer);
   std::ofstream myfile(filename.c_str());
   if (!myfile.is_open()) {
-    std::cout << "Unable to open file " << filename;
+    DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return;
   }
 
@@ -174,7 +175,7 @@ int buffer_load(string filename) {
 
   std::ifstream myfile(filename.c_str());
   if (!myfile.is_open()) {
-    std::cout << "Unable to open file " << filename;
+    DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return -1;
   }
   myfile.read(reinterpret_cast<char*>(&buffer->data[0]), myfile.tellg());
@@ -188,7 +189,7 @@ void buffer_load_ext(int buffer, string filename, unsigned offset) {
 
   std::ifstream myfile(filename.c_str());
   if (!myfile.is_open()) {
-    std::cout << "Unable to open file " << filename;
+    DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return;
   }
   std::vector<char> data;

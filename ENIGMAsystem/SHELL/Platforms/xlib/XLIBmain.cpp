@@ -26,7 +26,7 @@
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
@@ -168,7 +168,7 @@ int handleEvents() {
         //else fall through
       default:
 #ifdef DEBUG_MODE
-        printf("Unhandled xlib event: %d\n", e.type);
+        DEBUG_MESSAGE("Unhandled xlib event: " + std::to_string(e.type), MESSAGE_TYPE::M_INFO);
 #endif
         continue;
     }

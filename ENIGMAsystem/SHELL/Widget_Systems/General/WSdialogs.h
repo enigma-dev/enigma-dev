@@ -53,10 +53,6 @@ enum {
 };
 */
 
-#include <string>
-
-	// void show_error(string errortext, const bool fatal);
-	// int show_message(const string &message);
 	int show_message_cancelable(string message);
 	int show_message_ext(string message, string but1, string but2, string but3);
 	bool show_question(string message);

@@ -335,7 +335,7 @@ void graphics_prepare_default_shader() {
 #ifdef DEBUG_MODE
 #define set_primitive_mode(primitive)                                                            \
   if (primitive < 0 || primitive >= (int)primitive_types_size) {                                 \
-    show_error("Primitive type " + enigma_user::toString(primitive) + " does not exist", false); \
+    DEBUG_MESSAGE("Primitive type " + enigma_user::toString(primitive) + " does not exist", MESSAGE_TYPE::M_USER_ERROR); \
     return;                                                                                      \
   }                                                                                              \
   m_deviceContext->IASetPrimitiveTopology(primitive_types[primitive]);

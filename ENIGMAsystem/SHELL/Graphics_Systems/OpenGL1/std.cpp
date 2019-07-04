@@ -21,7 +21,7 @@
 
 #include "Graphics_Systems/OpenGL-Common/version.h"
 #include "Graphics_Systems/OpenGL-Common/screen.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/shaderstruct.h"
 #include "Universal_System/var4.h"
 
@@ -81,9 +81,9 @@ namespace enigma {
           GLchar* compiler_log = (GLchar*)malloc(blen);
 
           glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
-          std::cout << compiler_log;
+          DEBUG_MESSAGE(compiler_log, MESSAGE_TYPE::M_ERROR);
         } else {
-          std::cout << "Vertex shader compile log empty";
+          DEBUG_MESSAGE("Vertex shader compile log empty", MESSAGE_TYPE::M_ERROR);
         }
 
         glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
@@ -93,9 +93,9 @@ namespace enigma {
           GLchar* compiler_log = (GLchar*)malloc(blen);
 
           glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
-          std::cout << compiler_log;
+          DEBUG_MESSAGE(compiler_log, MESSAGE_TYPE::M_ERROR);
         } else {
-          std::cout << "Fragment shader compile log empty";
+          DEBUG_MESSAGE("Fragment shader compile log empty", MESSAGE_TYPE::M_ERROR);
         }
 
       }

@@ -5,7 +5,7 @@
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/estring.h" // ord
 #include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
 
@@ -272,10 +272,10 @@ void window_set_fullscreen(bool fullscreen) {
 
     if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
-    if (r != 0) printf("Could not set window to fullscreen! SDL Error: %s\n", SDL_GetError());
+    if (r != 0) DEBUG_MESSAGE(std::string("Could not set window to fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   } else {
     int r = SDL_SetWindowFullscreen(windowHandle, 0);
-    if (r != 0) printf("Could not unset window fullscreen! SDL Error: %s\n", SDL_GetError());
+    if (r != 0) DEBUG_MESSAGE(std::string("Could not unset window fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   }
 }
 
@@ -291,7 +291,7 @@ int window_set_cursor(int cursorID) {
   }
 
 #ifdef DEBUG_MODE
-  printf("Cursor lookup failure\n");
+  DEBUG_MESSAGE("Cursor lookup failure", MESSAGE_TYPE::M_ERROR);
 #endif
 
   return 0;

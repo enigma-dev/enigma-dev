@@ -182,12 +182,10 @@ namespace gui
                   update_cursor();
                   break;
                 }
-                //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
                 if (cursor_position > 0) {
                   cursor_position--;
                   //This would be more efficient, but string_width() returns rounded values
                   //cursor_x -= enigma_user::string_width(text[cursor_line][cursor_position]);
-                  //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
                   text[cursor_line].erase(cursor_position,1);
                 }else{
                   if (cursor_line > 0){
@@ -224,10 +222,8 @@ namespace gui
                 int pcp = cursor_position;
                 if (cursor_position > 0){
                   cursor_position--;
-                  //printf("Line [%i] = [%c] and delta x = %u\n", cursor_line, text[cursor_line][cursor_position], enigma_user::string_width(string(1,text[cursor_line][cursor_position]))/*enigma_user::string_width(to_string(text[cursor_line][cursor_position]))*/);
                   //This would be more efficient, but string_width() returns rounded values
                   //cursor_x -= enigma_user::string_width(string(1,text[cursor_line][cursor_position]));
-                  //printf("String [%s]\n", text[cursor_line].substr(0,cursor_position).c_str());
                 }else{
                   if (cursor_line > 0){
                     cursor_line--;
@@ -255,7 +251,6 @@ namespace gui
                   cursor_position++;
                   //This would be more efficient, but string_width() returns rounded values
                   //cursor_x += enigma_user::string_width(string(1,text[cursor_line][cursor_position]));
-                  //printf("String [%s]\n", text[cursor_line].substr(0,cursor_position).c_str());
                 }else{
                   if (cursor_line < text.size()-1){
                     cursor_line++;
@@ -280,14 +275,8 @@ namespace gui
               case enigma_user::vk_enter:{
                 if (line_limit>0 && text.size()>=line_limit) break;
                 change = true;
-                //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
                 marker_delete();
                 text.insert(text.begin()+cursor_line+1,text[cursor_line].substr(cursor_position, string::npos));
-                /*int in=0;
-                for (auto &str : text){
-                  printf("String[%i] - %s\n",in,str.c_str());
-                  in++;
-                }*/
                 text[cursor_line].erase(cursor_position, string::npos);
                 cursor_line++;
                 cursor_position = 0;
@@ -389,7 +378,6 @@ namespace gui
             double w = enigma_user::string_width(t);
             if (w>maxw) maxw = w;
           }
-          printf("Cw = %f, ch = %f, nw = %f, nh = %f\n", box.w, box.h, maxw, h * text.size());
           box.w = maxw + sty.padding.left + sty.padding.right;
           box.h = h * text.size() + sty.padding.top + sty.padding.bottom;*/
 
@@ -446,23 +434,18 @@ namespace gui
     if (mark == true){
       if (msty.sprites[state] != -1){
         if (msty.border.zero == true){
-          //printf("Start line = %i and end line = %i\n", mark_start_line, mark_end_line);
           for (int l=mark_start_line; l<mark_end_line+1; ++l ){
             double msx, msy, mex, mey;
             if (mark_start_line == l && mark_end_line == l){
-              //printf("1 Line = %i and start pos = %i and end pos = %i\n", l, mark_start_pos, mark_end_pos);
               msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
               mex = enigma_user::string_width(text[mark_end_line].substr(mark_start_pos, mark_end_pos-mark_start_pos));
             }else if (l == mark_start_line){
-              //printf("2 Line = %i and start pos = %i\n", l, mark_start_pos);
               msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
               mex = enigma_user::string_width(text[mark_start_line].substr(mark_start_pos, string::npos));
             }else if (l == mark_end_line){
-              //printf("3 Line = %i and end pos = %i\n", l, mark_end_pos);
               msx = ox + textx;
               mex = enigma_user::string_width(text[mark_end_line].substr(0, mark_end_pos));
             }else{
-              //printf("4 Normal line = %i\n", l);
               msx = ox + textx;
               mex = enigma_user::string_width(text[l]);
             }
@@ -475,23 +458,18 @@ namespace gui
                                                msty.sprite_styles[state].alpha);
           }
         }else{
-          //printf("Start line = %i and end line = %i\n", mark_start_line, mark_end_line);
           for (int l=mark_start_line; l<mark_end_line+1; ++l ){
             double msx, msy, mex, mey;
             if (mark_start_line == l && mark_end_line == l){
-              //printf("Start line = %i and end line = %i and line = %i\n", mark_start_line, mark_end_line, l);
               msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
               mex = ox + textx + enigma_user::string_width(text[mark_end_line].substr(0, mark_end_pos));
             }else if (l == mark_start_line){
-              //printf("Start line = %i and line = %i\n", mark_start_line, l);
               msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
               mex = ox + textx + enigma_user::string_width(text[mark_start_line].substr(mark_start_pos, string::npos));
             }else if (l == mark_end_line){
-              //printf("End line = %i and line = %i\n", mark_end_line, l);
               msx = ox + textx;
               mex = ox + textx + enigma_user::string_width(text[mark_end_line].substr(0, mark_end_pos));
             }else{
-              //printf("Normal line = %i\n", l);
               msx = ox + textx;
               mex = ox + textx + enigma_user::string_width(text[l]);
             }
@@ -515,7 +493,6 @@ namespace gui
     int l = 0;
     for (auto &str : text){
       if (str.empty() == false){
-        //printf("Drawing text at %f and %f\n", textx, texty);
         enigma_user::draw_text(ox + textx,oy + texty + l * h,str);
       }
       l++;
@@ -523,7 +500,6 @@ namespace gui
 
     if (active == true){
       if (blink_timer < 15){
-        //printf("Drawing cursor at %f and %f\n", textx + cursor_x, texty + cursor_y);
         double cw = enigma_user::string_width("|")/2.0;
         enigma_user::draw_text(ox + textx + cursor_x - cw, oy + texty + cursor_y, "|");
       }
@@ -704,7 +680,6 @@ namespace gui
   }
 
   void Textbox::set_cursor(double x, double y){
-    //printf("Line check [%i] with mouse_y = %f and oy = %f and boxy = %f and font_height = %i\n", h, ty, oy, box.y, enigma_user::font_height(enigma_user::draw_get_font()));
     lines = text.size();
     if (y-texty < 0){ //Mouse x less than textbox y, so cursor at beginning
       cursor_position = 0;
@@ -712,7 +687,6 @@ namespace gui
     }else if (y-texty >= (double)enigma_user::font_height(enigma_user::draw_get_font())*lines){ //Mouse y more than textbox height, so cursot at end
       cursor_position = text[lines-1].length();
       cursor_line = (lines-1);
-      //printf("h>=Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
     }else{
       size_t h = floor((y-texty) / (double)enigma_user::font_height(enigma_user::draw_get_font()));
       if (text[h].length() == 0 || x-textx < enigma_user::string_char_width(text[h][0])/2.0){
@@ -731,7 +705,6 @@ namespace gui
         }
         cursor_position++; //Cursor at end is AFTER the last char
         cursor_line = h;
-        //printf("h<Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
       }
     }
     update_cursor();
@@ -753,12 +726,10 @@ namespace enigma_user
   int gui_textbox_create(){
     if (gui::gui_bound_skin == -1){ //Add default one
       gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Textbox(), gui::gui_elements_maxid));
-      //printf("Creating default button with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
     }else{
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
       get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,ski.textbox_style,-1);
       gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(tex, gui::gui_elements_maxid));
-      //printf("Creating button with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
     }
     gui::Textbox &t = gui::gui_elements[gui::gui_elements_maxid];
     t.visible = true;

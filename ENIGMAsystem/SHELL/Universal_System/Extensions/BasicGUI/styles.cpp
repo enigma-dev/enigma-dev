@@ -55,7 +55,6 @@ namespace enigma_user
 		gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, gui::Style());
     gui::Style &sty = gui::gui_data_elements[gui::gui_data_elements_maxid];
 		sty.id = gui::gui_data_elements_maxid;
-    //printf("Creating style with size %i\n", sizeof(gui::gui_data_elements[gui::gui_data_elements_maxid]));
 		return gui::gui_data_elements_maxid++;
 	}
 

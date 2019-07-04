@@ -443,7 +443,7 @@ void main()
       case GL_SAMPLER_2D: return 1;
       case GL_SAMPLER_3D: return 1;
 
-      default: { printf("getGLTypeSize Asking size for unknown type - %i!\n", type); return 1; }
+      default: { DEBUG_MESSAGE("getGLTypeSize Asking size for unknown type - " + std::to_string(type), MESSAGE_TYPE::M_ERROR); return 1; }
     }
   }
 
@@ -474,7 +474,7 @@ unsigned long getFileLength(std::ifstream& file)
 namespace enigma_user
 {
 
-void glsl_shader_print_infolog(int id)
+std::string glsl_shader_get_infolog(int id)
 {
   GLint blen = 0;
   GLsizei slen = 0;
@@ -484,15 +484,14 @@ void glsl_shader_print_infolog(int id)
     GLchar* compiler_log = (GLchar*)malloc(blen);
     glGetShaderInfoLog(enigma::shaders[id]->shader, blen, &slen, compiler_log);
     enigma::shaders[id]->log = (string)compiler_log;
-    std::cout << compiler_log << std::endl;
     free(compiler_log);
   } else {
     enigma::shaders[id]->log = "Shader log empty";
-    std::cout << enigma::shaders[id]->log << std::endl;
   }
+  return enigma::shaders[id]->log;
 }
 
-void glsl_program_print_infolog(int id)
+std::string glsl_program_get_infolog(int id)
 {
   GLint blen = 0;
   GLsizei slen = 0;
@@ -503,12 +502,12 @@ void glsl_program_print_infolog(int id)
     GLchar* compiler_log = (GLchar*)malloc(blen);
     glGetProgramInfoLog(enigma::shaderprograms[id]->shaderprogram, blen, &slen, compiler_log);
     enigma::shaderprograms[id]->log = (string)compiler_log;
-    std::cout << compiler_log << std::endl;
     free(compiler_log);
   } else {
     enigma::shaderprograms[id]->log = "Shader program log empty";
-    std::cout << enigma::shaderprograms[id]->log << std::endl;
   }
+  
+  return enigma::shaderprograms[id]->log;
 }
 
 int glsl_shader_create(int type)
@@ -528,7 +527,6 @@ bool glsl_shader_load(int id, string fname)
   if (enigma::shaders[id]->type == sh_fragment) source = enigma::getFragmentShaderPrefix() + shaderSource;
 
   const char *ShaderSource = source.c_str();
-  //std::cout << ShaderSource << std::endl;
   glShaderSource(enigma::shaders[id]->shader, 1, &ShaderSource, NULL);
   return true; // No Error
 }
@@ -540,7 +538,6 @@ bool glsl_shader_load_string(int id, string shaderSource)
   if (enigma::shaders[id]->type == sh_fragment) source = enigma::getFragmentShaderPrefix() + shaderSource;
 
   const char *ShaderSource = source.c_str();
-  //std::cout << ShaderSource << std::endl;
   glShaderSource(enigma::shaders[id]->shader, 1, &ShaderSource, NULL);
   return true; // No Error
 }
@@ -554,8 +551,9 @@ bool glsl_shader_compile(int id)
   if (compiled){
     return true;
   } else {
-    std::cout << "Shader[" << id << "] " << (enigma::shaders[id]->type == sh_vertex?"Vertex shader":"Pixel shader") << " - Compilation failed - Info log: " << std::endl;
-    glsl_shader_print_infolog(id);
+    DEBUG_MESSAGE("Shader[" + std::to_string(id) + "] " + 
+      (enigma::shaders[id]->type == sh_vertex?"Vertex shader":"Pixel shader") + " - Compilation failed - Info log: " + 
+      glsl_shader_get_infolog(id), MESSAGE_TYPE::M_ERROR);
     return false;
   }
 }
@@ -568,16 +566,6 @@ bool glsl_shader_get_compiled(int id) {
   } else {
     return false;
   }
-}
-
-string glsl_shader_get_infolog(int id)
-{
-  return enigma::shaders[id]->log;
-}
-
-string glsl_program_get_infolog(int id)
-{
-  return enigma::shaderprograms[id]->log;
 }
 
 void glsl_shader_free(int id)
@@ -605,8 +593,8 @@ bool glsl_program_link(int id)
     enigma::getDefaultAttributes(id);
     return true;
   } else {
-    std::cout << "Shader program[" << id << "] - Linking failed - Info log: " << std::endl;
-    glsl_program_print_infolog(id);
+    DEBUG_MESSAGE("Shader program[" + std::to_string(id) + "] - Linking failed - Info log: " + 
+      glsl_program_get_infolog(id), MESSAGE_TYPE::M_ERROR);
     return false;
   }
 }
@@ -620,8 +608,8 @@ bool glsl_program_validate(int id)
   if (validated){
     return true;
   } else {
-    std::cout << "Shader program[" << id << "] - Validation failed - Info log: " << std::endl;
-    glsl_program_print_infolog(id);
+    DEBUG_MESSAGE("Shader program[" + std::to_string(id) + "] - Validation failed - Info log: " + 
+      glsl_program_get_infolog(id), MESSAGE_TYPE::M_ERROR);
     return false;
   }
 }
@@ -683,9 +671,9 @@ int glsl_get_uniform_location(int program, string name) {
   if (it == enigma::shaderprograms[program]->uniform_names.end()){
     #ifdef DEBUG_MODE
       if (enigma::shaderprograms[program]->name == ""){
-        printf("Program[%i] - Uniform %s not found!\n", program, name.c_str());
+        DEBUG_MESSAGE("Program[" + std::to_string(program) + "] - Uniform " + name + " not found!", MESSAGE_TYPE::M_ERROR);
       }else{
-        printf("Program[%s = %i] - Uniform %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
+       DEBUG_MESSAGE("Program[" + enigma::shaderprograms[program]->name + " = " + std::to_string(program) + "] - Uniform " + name + " not found!", MESSAGE_TYPE::M_ERROR);
       }
     #endif
     return -1;
@@ -972,9 +960,9 @@ int glsl_get_attribute_location(int program, string name) {
   if (it == prog->attribute_names.end()){
     #ifdef DEBUG_MODE
       if (prog->name == ""){
-        printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
+        DEBUG_MESSAGE("Program[" + std::to_string(program) + "] - Attribute " + name + "not found!", MESSAGE_TYPE::M_ERROR);
       }else{
-        printf("Program[%s = %i] - Attribute %s not found!\n", prog->name.c_str(), program, name.c_str());
+        DEBUG_MESSAGE("Program[" + prog->name + " =  " + std::to_string(program) + "] - Attribute " + name + " not found!", MESSAGE_TYPE::M_ERROR);
       }
     #endif
     return -1;
