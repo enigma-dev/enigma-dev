@@ -534,7 +534,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
       xOutStart += screen.canvasWidth;
       curr_img++;
     } else {
-      DEBUG_MESSAGE("[GIF] Unknown control code: " + ctrlCode, MESSAGE_TYPE::M_ERROR);
+      DEBUG_MESSAGE("[GIF] Unknown control code: " + std::to_string(ctrlCode), MESSAGE_TYPE::M_ERROR);
       clearmem(out);
       return ERR_UNKNOWN_CONTROL_CODE;
     }

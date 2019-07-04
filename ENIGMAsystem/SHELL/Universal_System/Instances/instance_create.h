@@ -127,7 +127,7 @@ namespace enigma_user
         #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
         default:
           #ifdef DEBUG_MODE
-          //DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::M_ERROR);
+          DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::M_ERROR);
           #endif
             (void)x; (void)y;
             return;

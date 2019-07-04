@@ -10,7 +10,7 @@ void openglCallbackFunction(GLenum source, GLenum type, unsigned int id, GLenum 
   
   std::string error;
   error += "\n---------------------opengl-callback-start------------\n";
-  error += "message: " + std::string(message) + "\n";
+  error += (std::string)"message: " + message + "\n";
   error += "type: ";
 
   switch (type) {

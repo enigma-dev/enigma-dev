@@ -23,7 +23,7 @@
 
 #include <string>
 
-#define DEBUG_MESSAGE(msg, severity) show_error(msg + std::string(" | ") + std::string(__FILE__) + std::string(":") + std::to_string(__LINE__), severity)
+#define DEBUG_MESSAGE(msg, severity) show_error((std::string)msg + " | " + __FILE__ + ":" + std::to_string(__LINE__), severity)
 
 namespace enigma {
   enum MESSAGE_TYPE : int {

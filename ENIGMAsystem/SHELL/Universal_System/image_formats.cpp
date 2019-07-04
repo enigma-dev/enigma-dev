@@ -215,7 +215,7 @@ unsigned char* image_load_gif(string filename, unsigned int* width, unsigned int
 
   error = load_gif_file(filename.c_str(), image, *width, *height, *fullwidth, *fullheight, *imgnumb);
   if (error) {
-    DEBUG_MESSAGE(std::string(load_gif_error_text(error)), MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE(load_gif_error_text(error), MESSAGE_TYPE::M_ERROR);
     return NULL;
   }
 

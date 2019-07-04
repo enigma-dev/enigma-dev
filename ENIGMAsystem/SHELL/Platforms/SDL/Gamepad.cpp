@@ -50,7 +50,7 @@ void addGamepad(unsigned i) {
     return;
   }
 
-  DEBUG_MESSAGE("Connected gamepad " + std::to_string(i) + " " + std::string(SDL_GameControllerName(g.controller)), MESSAGE_TYPE::M_INFO);
+  DEBUG_MESSAGE("Connected gamepad " + std::to_string(i) + " " + SDL_GameControllerName(g.controller), MESSAGE_TYPE::M_INFO);
 
   SDL_Joystick* j = SDL_GameControllerGetJoystick(g.controller);
 
@@ -70,7 +70,7 @@ void addGamepad(unsigned i) {
 }
 
 void removeGamepad(unsigned i) {
-  DEBUG_MESSAGE("Disconnected gamepad " + std::to_string(i) + ": " + std::string(SDL_GameControllerName(gamepads[i].controller)), MESSAGE_TYPE::M_INFO);
+  DEBUG_MESSAGE("Disconnected gamepad " + std::to_string(i) + ": " + SDL_GameControllerName(gamepads[i].controller), MESSAGE_TYPE::M_INFO);
   if (gamepads[i].haptic != nullptr) SDL_HapticClose(gamepads[i].haptic);
   SDL_GameControllerClose(gamepads[i].controller);
 }
