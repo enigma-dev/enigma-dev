@@ -109,7 +109,7 @@ namespace gui
   void Parent::textbox_add(int id){
     get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     if (tex.parent_id != -1){
-      SHOW_ERROR("BasicGUI: Textbox with ID "+to_string(id)+" already has a parent with ID "+to_string(tex.parent_id)+"! Parenting not done!\n");
+      DEBUG_MESSAGE("BasicGUI: Textbox with ID "+to_string(id)+" already has a parent with ID "+to_string(tex.parent_id)+"! Parenting not done!", MESSAGE_TYPE::M_ERROR);
     }
     child_elements.push_back(id);
     tex.parent_id = element_id;

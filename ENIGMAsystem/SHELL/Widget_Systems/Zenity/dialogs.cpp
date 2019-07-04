@@ -30,6 +30,7 @@ using std::string;
 
 #include "strings_util.h"
 #include "Universal_System/estring.h"
+#include "Widget_Systems/widgets_mandatory.h"
 using enigma_user::filename_name;
 using enigma_user::filename_path;
 
@@ -63,14 +64,6 @@ static string error_caption;
 
 static bool message_cancel  = false;
 static bool question_cancel = false;
-
-namespace enigma {
-
-bool widget_system_initialize() {
-  return true;
-}
-
-} // namespace enigma
 
 static string shellscript_evaluate(string command) {
   string result = execute_shell_for_output(command);
@@ -161,9 +154,17 @@ static int show_question_helperfunc(string message) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
+namespace enigma {
+
+bool widget_system_initialize() {
+  return true;
+}
+
+} // namespace enigma
+
 namespace enigma_user {
 
-void show_error(string errortext, const bool fatal) {
+void show_debug_message(string errortext, MESSAGE_TYPE type) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -173,7 +174,7 @@ void show_error(string errortext, const bool fatal) {
   errortext += enigma::debug_scope::GetErrors();
   #endif
 
-  str_echo = fatal ? "echo 1" :
+  str_echo = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) ? "echo 1" :
     "if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Ignore\" ] ;then echo -1;elif [ $? = 2 ] ;then echo 0;fi";
 
   str_command = string("ans=$(zenity ") +

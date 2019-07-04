@@ -52,13 +52,13 @@ extern unsigned int bound_framebuffer;
   #include <string>
   #define get_surface(surf,id)\
     if (surface_exists(id) == false) {\
-      show_error("Attempting to use non-existing surface " + toString(id), false);\
+      DEBUG_MESSAGE("Attempting to use non-existing surface " + toString(id), MESSAGE_TYPE::M_USER_ERROR);\
       return;\
     }\
     enigma::Surface &surf = *((enigma::Surface*)enigma::surfaces[id]);
   #define get_surfacev(surf,id,r)\
     if (surface_exists(id) == false) {\
-      show_error("Attempting to use non-existing surface " + toString(id), false);\
+      DEBUG_MESSAGE("Attempting to use non-existing surface " + toString(id), MESSAGE_TYPE::M_USER_ERROR);\
       return r;\
     }\
     enigma::Surface &surf = *((enigma::Surface*)enigma::surfaces[id]);

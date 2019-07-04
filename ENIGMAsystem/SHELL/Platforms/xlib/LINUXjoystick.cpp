@@ -19,7 +19,7 @@
 #include "LINUXjoystick.h"  
 
 #include "Platforms/General/PFwindow.h"  
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/make_unique.h"
 
@@ -163,7 +163,7 @@ namespace enigma_user
       devn = name;
 
     #ifdef DEBUG_MODE
-    printf("Joystick name: %s\n",name);
+    DEBUG_MESSAGE(std::string("Joystick name: ") + name, MESSAGE_TYPE::M_INFO);
     #endif
 
     // There is no guarantee that because /dev/js5 exists, /dev/js0 exists

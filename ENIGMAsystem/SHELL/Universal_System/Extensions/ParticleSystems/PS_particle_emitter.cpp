@@ -200,7 +200,7 @@ namespace enigma
     }
     default:
       #if DEBUG_MODE
-      enigma_user::show_error("Internal error: invalid particle shape", false)
+      DEBUG_MESSAGE("Internal error: invalid particle shape", MESSAGE_TYPE::M_ERROR)
       #endif
       ;
     }

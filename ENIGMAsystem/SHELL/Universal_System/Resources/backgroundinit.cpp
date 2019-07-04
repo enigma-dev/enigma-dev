@@ -28,8 +28,6 @@
 #include <cstring>
 #include <cstdio>
 
-using enigma_user::show_error;
-
 namespace enigma
 {
   void exe_loadbackgrounds(FILE *exe)
@@ -56,31 +54,17 @@ namespace enigma
       int unpacked;
       if (!fread(&bkgid, 4,1,exe)) return;
       if (!fread(&width, 4,1,exe)) return;
-      printf("width: %d", width);
       if (!fread(&height,4,1,exe)) return;
-      printf("height: %d", height);
-
       if (!fread(&transparent,4,1,exe)) return;
-      printf("transparent: %d", transparent);
       if (!fread(&smoothEdges,4,1,exe)) return;
-      printf("smoothEdges: %d", smoothEdges);
       if (!fread(&preload,4,1,exe)) return;
-      printf("preload: %d", preload);
       if (!fread(&useAsTileset,4,1,exe)) return;
-      printf("useAsTileset: %d", useAsTileset);
       if (!fread(&tileWidth,4,1,exe)) return;
-      printf("tileWidth: %d", tileWidth);
       if (!fread(&tileHeight,4,1,exe)) return;
-      printf("tileHeight: %d", tileHeight);
       if (!fread(&hOffset,4,1,exe)) return;
-      printf("hOffset: %d", hOffset);
       if (!fread(&vOffset,4,1,exe)) return;
-      printf("vOffset: %d", vOffset);
       if (!fread(&hSep,4,1,exe)) return;
-      printf("hSep: %d", hSep);
       if (!fread(&vSep,4,1,exe)) return;
-      printf("vSep: %d", vSep);
-
 
       //need to add: transparent, smooth, preload, tileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep
 
@@ -88,28 +72,26 @@ namespace enigma
 
       unsigned int size;
       if (!fread(&size,4,1,exe)){};
-      printf("Alloc size: %d", size);
-
+      
       unsigned char* cpixels=new unsigned char[size+1];
       if (!cpixels)
       {
-        show_error("Failed to load background: Cannot allocate enough memory "+enigma_user::toString(unpacked),0);
+        DEBUG_MESSAGE("Failed to load background: Cannot allocate enough memory " + enigma_user::toString(unpacked), MESSAGE_TYPE::M_ERROR);
         break;
       }
       unsigned int sz2=fread(cpixels,1,size,exe);
       if (size!=sz2) {
-        show_error("Failed to load background: Data is truncated before exe end. Read "+enigma_user::toString(sz2)+" out of expected "+enigma_user::toString(size),0);
+        DEBUG_MESSAGE("Failed to load background: Data is truncated before exe end. Read " + enigma_user::toString(sz2) + " out of expected " + enigma_user::toString(size), MESSAGE_TYPE::M_ERROR);
         return;
       }
       unsigned char* pixels=new unsigned char[unpacked+1];
       if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
       {
-        show_error("Background load error: Background does not match expected size",0);
+        DEBUG_MESSAGE("Background load error: Background does not match expected size", MESSAGE_TYPE::M_ERROR);
         continue;
       }
       delete[] cpixels;
 
-      printf("Adding background: %d\n\n", i);
       background_new(bkgid, width, height, pixels, false, false, true, false, 32, 32, 0, 0, 1,1);
 
       delete[] pixels;

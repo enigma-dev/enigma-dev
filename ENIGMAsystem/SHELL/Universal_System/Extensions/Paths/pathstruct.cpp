@@ -53,7 +53,6 @@ namespace enigma
     {
       /*if (p0 == p1) return llen(p0,p1); else if (p1 == p2) return llen(p1,p2);
       double ax,bx,ay,by;
-      //std::cout << "p0=" << p0 << " p1=" <<  p1 << " p2=" << p2 << std::endl;
       ax = p0->x - 2*p1->x + p2->x;
       ay = p0->y - 2*p1->y + p2->y;
       bx = 2*p1->x - 2*p0->x;
@@ -69,7 +68,6 @@ namespace enigma
       float BA = B/A_2;
       float BAC2 = BA+C_2;
       BAC2 = BAC2==0?1:BAC2;
-      std::cout << "A_2=" << A_2 << " BA+C_2=" <<  BAC2 << " 4*A_32" << 4*A_32 << std::endl;
 
       return ( A_32*Sabc + A_2*B*(Sabc-C_2) + (4*C*A-B*B)*log( (2*A_2+BA+Sabc)/(BAC2)))/(4*A_32);*/
       double x1=p0->x, y1=p0->y,
@@ -83,7 +81,6 @@ namespace enigma
         y = 0.5 * (((y1 - 2 * y2 + y3) * t + 2 * y2 - 2 * y1) * t + y1 + y2);
         length += hypot(x-lx,y-ly);
         lx = x, ly = y;
-        //std::cout << "i: " << i << " t: " << t << "length: " << length << " x: " << x << " y: " << x << " dx: " << dx << " dy: " << dy << std::endl;
         t += 0.05;
       }
       return length;
@@ -146,11 +143,8 @@ namespace enigma
           //if (pth->pointarray[i].length) {
             pth->pointoffset[position/pth->total_length] = i;
             position += pth->pointarray[i].length;
-            //std::cout << "Position: " << position << " i: " << i << " length: " << pth->pointarray[i].length << std::endl;
           //}
         }
-        //std::cout << "size of pointoffset: " << pth->pointoffset.size() << std::endl;
-        //for (ppi_t i = pth->pointoffset.begin(); i != pth->pointoffset.end(); i++) std::cout << i->first << "=>" << i->second << std::endl;
     }
 
     void pathstructarray_reallocate()
@@ -182,7 +176,6 @@ namespace enigma
       t /= double(pth->pointarray[ppi->second].length) / pth->total_length;
       int sid = ppi->second;
       double x1, x2, x3, y1, y2, y3;
-      //std::cout << "t on path: " << position << " first: " << ppi->first << " second: " << ppi->second << " Sid: " << sid << " delta:" << t << std::endl;
       const size_t pc = pth->pointarray.size();
       const path_point& start = pth->closed ? pth->pointarray[pc-1] : pth->pointarray[0];
       const path_point& end  =  pth->closed ? pth->pointarray[0] : pth->pointarray[pc-1];
@@ -193,7 +186,6 @@ namespace enigma
 
       x2=pth->pointarray[sid].x, y2=pth->pointarray[sid].y;
 
-        //std::cout<<pth->pointarray.size()<<std::endl;
       if (pth->pointarray.size() == 1) {
         x = x1, y = y1;
         return;
@@ -232,7 +224,6 @@ namespace enigma
       t /= double(pth->pointarray[ppi->second].length) / pth->total_length;
       int sid = ppi->second;
       double x1, x2, x3;
-      //std::cout << "t on path: " << position << " first: " << ppi->first << " Sid: " << sid << " delta:" << t << std::endl;
       const size_t pc = pth->pointarray.size();
       const path_point& start = pth->closed ? pth->pointarray[pc-1] : pth->pointarray[0];
       const path_point& end  =  pth->closed ? pth->pointarray[0] : pth->pointarray[pc-1];

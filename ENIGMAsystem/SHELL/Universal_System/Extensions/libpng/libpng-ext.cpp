@@ -21,6 +21,7 @@
 #include "Universal_System/image_formats.h"
 #include "Universal_System/image_formats_exts.h"
 #include "Universal_System/nlpo2.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include "libpng-util.h"
 
@@ -35,7 +36,7 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
 
   error = libpng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str());
   if (error) {
-    printf("libpng-util error %u\n", error);
+    DEBUG_MESSAGE("libpng-util error " + std::to_string(error), MESSAGE_TYPE::M_ERROR);
     return NULL;
   }
 

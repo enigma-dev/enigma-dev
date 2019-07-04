@@ -50,7 +50,7 @@ void EnableDrawing(void*) {
   context = SDL_GL_CreateContext(windowHandle);
   
   #ifdef DEBUG_MODE
-  if (!context) std::cerr << "Failed to intialize GL context: " << SDL_GetError() << std::endl;
+  if (!context) DEBUG_MESSAGE(std::string("Failed to intialize GL context: ") + SDL_GetError(), MESSAGE_TYPE::M_FATAL_ERROR);
   #endif
 
   gl_load_exts();

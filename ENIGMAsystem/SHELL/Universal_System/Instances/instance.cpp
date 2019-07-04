@@ -26,17 +26,25 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <map>
-#include <math.h>
-#include <string>
-//#include "reflexive_types.h"
-//#include "EGMstd.h"
-#include "Universal_System/Object_Tiers/object.h"
 
+#include "Universal_System/Object_Tiers/object.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "instance_system.h"
 #include "instance.h"
 
+#include <map>
+#include <string>
+#include <sstream>
+#include <math.h>
 #include <stdio.h>
+
+namespace {
+ inline std::string pointer2string(void* ptr) {
+   std::stringstream ss;
+   ss << ptr;  
+   return  ss.str(); 
+ }
+}
 
 namespace enigma
 {
@@ -106,9 +114,9 @@ void instance_destroy()
     if (enigma::cleanups.find(a) == enigma::cleanups.end())
         enigma::instance_event_iterator->inst->unlink();
     if (enigma::cleanups.find(a) == enigma::cleanups.end())
-    printf("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! %p ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!", (void*)a);
+    DEBUG_MESSAGE("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! " + pointer2string(a) + " ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!", MESSAGE_TYPE::M_ERROR);
     if (a != (enigma::object_basic*)enigma::instance_event_iterator->inst)
-    printf("FUCKING DAMN IT! THE ITERATOR CHANGED FROM POINTING TO %p TO POINTING TO %p\n", (void*)a, (void*)(enigma::object_basic*)enigma::instance_event_iterator->inst);
+    DEBUG_MESSAGE("FUCKING DAMN IT! THE ITERATOR CHANGED FROM POINTING TO " + pointer2string((void*)a) + " TO POINTING TO " + pointer2string((void*)(enigma::object_basic*)enigma::instance_event_iterator->inst), MESSAGE_TYPE::M_ERROR);
   }
 }
 

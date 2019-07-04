@@ -70,7 +70,7 @@ struct gtkl_container: gtkl_placer
   gtkl_container(int id,int w, int h, int t):  gtkl_placer(id,w,h,t) {}
   virtual void clear() {}
   virtual void remove(char cid) {}
-  virtual void resize(int xr, int yr, int wr, int hr) { printf("Error: Mindless resize of widget %d\n",id); }
+  virtual void resize(int xr, int yr, int wr, int hr) { DEBUG_MESSAGE("Mindless resize of widget " + std::to_string(id), MESSAGE_TYPE::M_ERROR); }
 };
 
 

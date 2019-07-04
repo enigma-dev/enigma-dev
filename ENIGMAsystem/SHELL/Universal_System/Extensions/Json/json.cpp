@@ -19,6 +19,8 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
+
+#include "Widget_Systems/widgets_mandatory.h"
 #include "json.h"
 #include <cstdio>
 #include <iostream>
@@ -205,7 +207,7 @@ namespace enigma_user
 		bool parsingSuccessful = reader.parse( string(data), root );
 		if ( !parsingSuccessful )
 		{
-			std::cerr  << "Failed to parse configuration\n" << reader.getFormattedErrorMessages();
+			DEBUG_MESSAGE("Failed to parse configuration" + reader.getFormattedErrorMessages(), MESSAGE_TYPE::M_ERROR);
 			return -1;
 		}
 		return RecursiveDSMap(root);
@@ -214,7 +216,6 @@ namespace enigma_user
 	string json_encode(variant ds_map)
 	{
 		Json::Value root;
-		//std::cerr << root;
 		return string("{  }");
 	}
 }
