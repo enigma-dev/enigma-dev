@@ -20,6 +20,7 @@
 #define ENIGMA_WIDGETS_MANDATORY_H
 
 #include "libEGMstd.h"
+#include "Widget_Systems/General/WSdialogs.h"
 
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
@@ -27,6 +28,9 @@
 #include "Universal_System/Object_Tiers/object.h"
 #include "Universal_System/debugscope.h"
 #endif
+
+using enigma_user::message_get_caption;
+using enigma_user::message_set_caption;
 
 #include <string>
 
@@ -83,9 +87,6 @@ namespace enigma_user {
 
 void show_debug_message(std::string msg, MESSAGE_TYPE type);
 
-std::string message_get_caption();
-void message_set_caption(std::string title);
-
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
 inline void show_error(std::string msg, const bool fatal) {
@@ -108,10 +109,10 @@ namespace {
 
 inline void show_debug_message_helper(std::string msg, MESSAGE_TYPE severity) {
   #ifdef DEBUG_MODE
-  std::string caption = enigma_user::message_get_caption();
-  enigma_user::message_set_caption(enigma::error_type(severity));
+  std::string caption = message_get_caption();
+  message_set_caption(enigma::error_type(severity));
   enigma_user::show_debug_message(msg + "\n\n", severity);
-  enigma_user::message_set_caption(caption);
+  message_set_caption(caption);
   #endif
 }
 
