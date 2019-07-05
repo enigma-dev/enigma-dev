@@ -20,21 +20,10 @@
 #define ENIGMA_WIDGETS_MANDATORY_H
 
 #include "libEGMstd.h"
-#include "Widget_Systems/General/WSdialogs.h"
-
-#ifdef DEBUG_MODE
-#include "Universal_System/var4.h"
-#include "Universal_System/Resources/resource_data.h"
-#include "Universal_System/Object_Tiers/object.h"
-#include "Universal_System/debugscope.h"
-#endif
-
-using enigma_user::message_get_caption;
-using enigma_user::message_set_caption;
 
 #include <string>
 
-#define DEBUG_MESSAGE(msg, severity) DEBUG_MESSAGE_HELPER((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
+#define DEBUG_MESSAGE(msg, severity) enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
@@ -59,28 +48,27 @@ enum MESSAGE_TYPE : int {
   /// that renders the game unable to continue, such as deleting all
   /// resources, would be grounds for this class of error. 
   M_FATAL_USER_ERROR = 5
-};
+}; 
 
 namespace enigma {
   
-inline std::string error_type(MESSAGE_TYPE t) {
-  switch(t) {
-    case M_INFO: return "INFO";
-    case M_WARNING: return "WARNING";
-    case M_ERROR: return "ERROR";
-    case M_USER_ERROR: return "USER_ERROR";
-    case M_FATAL_ERROR: return "FATAL_ERROR";
-    case M_FATAL_USER_ERROR: return "FATAL_USER_ERROR";
-    default: return "ERROR";
+  inline std::string error_type(MESSAGE_TYPE t) {
+    switch(t) {
+      case M_INFO: return "INFO";
+      case M_WARNING: return "WARNING";
+      case M_ERROR: return "ERROR";
+      case M_USER_ERROR: return "USER_ERROR";
+      case M_FATAL_ERROR: return "FATAL_ERROR";
+      case M_FATAL_USER_ERROR: return "FATAL_USER_ERROR";
+      default: return "ERROR";
+    }
   }
-}
   
-// This function is called at the beginning of the game to allow the widget system to load.
-bool widget_system_initialize();
-extern std::string gameInfoText, gameInfoCaption;
-extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
-extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
-
+  // This function is called at the beginning of the game to allow the widget system to load.
+  bool widget_system_initialize();
+  extern std::string gameInfoText, gameInfoCaption;
+  extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
+  extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
 }
 
 namespace enigma_user {
@@ -102,17 +90,6 @@ void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBac
 	bool embedGameWindow=enigma::gameInfoEmbedGameWindow, bool showBorder=enigma::gameInfoShowBorder, bool allowResize=enigma::gameInfoAllowResize, bool stayOnTop=enigma::gameInfoStayOnTop,
 	bool pauseGame=enigma::gameInfoPauseGame, string caption=enigma::gameInfoCaption);
 static inline void action_show_info() { show_info(); }
-
-}
-
-namespace {
-
-inline void DEBUG_MESSAGE_HELPER(std::string msg, MESSAGE_TYPE severity) {
-  std::string caption = message_get_caption();
-  message_set_caption(enigma::error_type(severity));
-  enigma_user::show_debug_message(msg + "\n\n", severity);
-  message_set_caption(caption);
-}
 
 }
 
