@@ -525,12 +525,10 @@ namespace enigma_user {
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
   if (type != M_INFO && type != M_WARNING) {
-    #ifndef DEBUG_MODE
-    if (type == M_USER_ERROR || type == M_FATAL_USER_ERROR) {
-      show_debug_message_helper(errortext, type);
-    }
-    #else
     show_debug_message_helper(errortext, type);
+  } else {
+    #ifndef DEBUG_MODE
+    fputs(errortext, stderr);
     #endif
   }
 }
