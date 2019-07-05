@@ -34,8 +34,6 @@ using namespace std;
 #include "Universal_System/estring.h"
 #include "GameSettings.h"
 
-#include "Widget_Systems/General/WSdialogs.h"
-
 #include "Graphics_Systems/General/GScolor_macros.h"
 
 #define MONITOR_CENTER 0x0001
