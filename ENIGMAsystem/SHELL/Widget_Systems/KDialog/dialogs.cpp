@@ -49,9 +49,6 @@ using enigma_user::color_get_green;
 using enigma_user::color_get_blue;
 using enigma_user::make_color_rgb;
 
-#include "Widget_Systems/widgets_mandatory.h"
-#include "Widget_Systems/General/WSdialogs.h"
-
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
 #include "Universal_System/Resources/resource_data.h"
