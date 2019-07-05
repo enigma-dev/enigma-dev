@@ -25,7 +25,7 @@
 #include <shlwapi.h> //for Shell API
 #include <shlobj.h> //for Shell API
 #include <richedit.h>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <algorithm>
 
