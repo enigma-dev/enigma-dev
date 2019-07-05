@@ -176,7 +176,7 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   string str_echo;
 
   #ifdef DEBUG_MODE
-  errortext += enigma::debug_scope::GetErrors();
+  errortext += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
 
   str_echo = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) ? "echo 1" :
