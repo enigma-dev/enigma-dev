@@ -526,10 +526,10 @@ namespace enigma_user {
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
   #ifndef DEBUG_MODE
   if (type == M_USER_ERROR || type == M_FATAL_USER_ERROR) {
-    show_debug_message_helper(errortext, type)
+    show_debug_message_helper(errortext, type);
   }
   #else
-  show_debug_message_helper(errortext, type)
+  show_debug_message_helper(errortext, type);
   #endif
   }
 }
