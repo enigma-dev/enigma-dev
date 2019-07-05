@@ -122,7 +122,7 @@ static int show_message_helperfunc(string message) {
   string str_echo = "echo 1";
 
   if (message_cancel)
-    str_echo = "if [ $? = 0 ] ;then echo 1;fi";
+    str_echo = "if [ $? = 0 ] ;then echo 1;else echo -1;fi";
 
   str_title = add_escaping(dialog_caption, true, "KDialog");
   str_cancel = string("--msgbox \"") + add_escaping(message, false, "") + string("\" ");
