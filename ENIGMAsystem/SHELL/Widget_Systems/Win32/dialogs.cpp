@@ -25,16 +25,15 @@
 #include <shlwapi.h> //for Shell API
 #include <shlobj.h> //for Shell API
 #include <richedit.h>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <algorithm>
 
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/General/WSdialogs.h"
 #include "Universal_System/estring.h"
 #include "GameSettings.h"
-
-#include "Widget_Systems/General/WSdialogs.h"
 
 #include "Graphics_Systems/General/GScolor_macros.h"
 
@@ -502,9 +501,7 @@ static inline int get_color_helper(int defcol, string title) {
   return -1;
 }
 
-namespace enigma_user {
-
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
+static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
   #ifdef DEBUG_MODE
   errortext += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
@@ -522,6 +519,18 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
   if (result == IDABORT || type == MESSAGE_TYPE::M_FATAL_ERROR) exit(0);
 
   //ABORT_ON_ALL_ERRORS();
+}
+
+namespace enigma_user {
+
+void show_debug_message(string errortext, MESSAGE_TYPE type) {
+  if (type != M_INFO && type != M_WARNING) {
+    show_debug_message_helper(errortext, type);
+  } else {
+    #ifndef DEBUG_MODE
+    fputs(errortext, stderr);
+    #endif
+  }
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {

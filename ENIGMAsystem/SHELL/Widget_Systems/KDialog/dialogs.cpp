@@ -31,6 +31,7 @@ using std::string;
 #include "strings_util.h"
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/General/WSdialogs.h"
 using enigma_user::filename_name;
 using enigma_user::filename_path;
 
@@ -48,9 +49,6 @@ using enigma_user::color_get_red;
 using enigma_user::color_get_green;
 using enigma_user::color_get_blue;
 using enigma_user::make_color_rgb;
-
-#include "Widget_Systems/widgets_mandatory.h"
-#include "Widget_Systems/General/WSdialogs.h"
 
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
@@ -125,7 +123,7 @@ static int show_message_helperfunc(string message) {
   string str_echo = "echo 1";
 
   if (message_cancel)
-    str_echo = "if [ $? = 0 ] ;then echo 1;fi";
+    str_echo = "if [ $? = 0 ] ;then echo 1;else echo -1;fi";
 
   str_title = add_escaping(dialog_caption, true, "KDialog");
   str_cancel = string("--msgbox \"") + add_escaping(message, false, "") + string("\" ");
@@ -171,16 +169,14 @@ bool widget_system_initialize() {
 
 } // namespace enigma
 
-namespace enigma_user {
-
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
+static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
   string str_echo;
 
   #ifdef DEBUG_MODE
-  errortext += enigma::debug_scope::GetErrors();
+  errortext += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
 
   str_echo = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) ? "echo 1" :
@@ -194,6 +190,18 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
 
   string str_result = shellscript_evaluate(str_command);
   if (strtod(str_result.c_str(), NULL) == 1) exit(0);
+}
+
+namespace enigma_user {
+
+void show_debug_message(string errortext, MESSAGE_TYPE type) {
+  if (type != M_INFO && type != M_WARNING) {
+    show_debug_message_helper(errortext, type);
+  } else {
+    #ifndef DEBUG_MODE
+    fputs(errortext, stderr);
+    #endif
+  }
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {

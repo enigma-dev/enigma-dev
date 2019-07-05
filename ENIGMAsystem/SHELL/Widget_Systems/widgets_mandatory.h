@@ -73,7 +73,7 @@ namespace enigma {
 
 namespace enigma_user {
 
-void show_debug_message(std::string msg, MESSAGE_TYPE type);
+void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO);
 
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
