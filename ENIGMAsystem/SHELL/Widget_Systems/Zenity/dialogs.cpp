@@ -193,7 +193,6 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
   #else
   show_debug_message_helper(errortext, type);
   #endif
-  }
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
