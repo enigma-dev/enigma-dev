@@ -167,8 +167,6 @@ bool widget_system_initialize() {
   return true;
 }
 
-}
-
 } // namespace enigma
 
 static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
