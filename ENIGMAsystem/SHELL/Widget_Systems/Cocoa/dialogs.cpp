@@ -74,7 +74,6 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
   #else
   show_debug_message_helper(errortext, type);
   #endif
-  }
 }
 
 void show_info(string text, int bgcolor, int left, int top, int width, int height,
