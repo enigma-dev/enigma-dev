@@ -56,7 +56,7 @@ static string error_caption;
 
 static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
   #ifdef DEBUG_MODE
-  errortext += enigma::debug_scope::GetErrors();
+  errortext += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
 
   if (error_caption == "") error_caption = "Error";
