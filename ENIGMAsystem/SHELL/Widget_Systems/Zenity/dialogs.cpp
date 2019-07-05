@@ -159,9 +159,7 @@ bool widget_system_initialize() {
 
 } // namespace enigma
 
-namespace enigma_user {
-
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
+static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -182,6 +180,19 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
 
   string str_result = shellscript_evaluate(str_command);
   if (strtod(str_result.c_str(), NULL) == 1) exit(0);
+}
+
+namespace enigma_user {
+
+void show_debug_message(string errortext, MESSAGE_TYPE type) {
+  #ifndef DEBUG_MODE
+  if (type == M_USER_ERROR || type == M_FATAL_USER_ERROR) {
+    show_debug_message_helper(errortext, type)
+  }
+  #else
+  show_debug_message_helper(errortext, type)
+  #endif
+  }
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
