@@ -34,7 +34,7 @@ using enigma_user::message_set_caption;
 
 #include <string>
 
-#define DEBUG_MESSAGE(msg, severity) show_debug_message_helper((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
+#define DEBUG_MESSAGE(msg, severity) DEBUG_MESSAGE_HELPER((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
@@ -107,7 +107,7 @@ static inline void action_show_info() { show_info(); }
 
 namespace {
 
-inline void show_debug_message_helper(std::string msg, MESSAGE_TYPE severity) {
+inline void DEBUG_MESSAGE_HELPER(std::string msg, MESSAGE_TYPE severity) {
   #ifdef DEBUG_MODE
   std::string caption = message_get_caption();
   message_set_caption(enigma::error_type(severity));
