@@ -108,12 +108,10 @@ static inline void action_show_info() { show_info(); }
 namespace {
 
 inline void DEBUG_MESSAGE_HELPER(std::string msg, MESSAGE_TYPE severity) {
-  #ifdef DEBUG_MODE
   std::string caption = message_get_caption();
   message_set_caption(enigma::error_type(severity));
   enigma_user::show_debug_message(msg + "\n\n", severity);
   message_set_caption(caption);
-  #endif
 }
 
 }
