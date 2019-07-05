@@ -54,16 +54,26 @@ extern "C" int cocoa_get_color(int defcol, const char *title);
 static string dialog_caption;
 static string error_caption;
 
-namespace enigma_user {
-
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
+static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
   #ifdef DEBUG_MODE
-  errortext += enigma::debug_scope::GetErrors();
+  errortext += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
 
   if (error_caption == "") error_caption = "Error";
   int result = cocoa_show_error(errortext.c_str(), (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR), error_caption.c_str());
   if (result == 1) exit(0);
+}
+
+namespace enigma_user {
+
+void show_debug_message(string errortext, MESSAGE_TYPE type) {
+  if (type != M_INFO && type != M_WARNING) {
+    show_debug_message_helper(errortext, type);
+  } else {
+    #ifndef DEBUG_MODE
+    fputs(errortext, stderr);
+    #endif
+  }
 }
 
 void show_info(string text, int bgcolor, int left, int top, int width, int height,
