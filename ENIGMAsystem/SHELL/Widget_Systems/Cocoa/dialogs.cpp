@@ -67,13 +67,15 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
 namespace enigma_user {
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
-  #ifndef DEBUG_MODE
-  if (type == M_USER_ERROR || type == M_FATAL_USER_ERROR) {
+  if (type != M_INFO && type != M_WARNING) {
+    #ifndef DEBUG_MODE
+    if (type == M_USER_ERROR || type == M_FATAL_USER_ERROR) {
+      show_debug_message_helper(errortext, type);
+    }
+    #else
     show_debug_message_helper(errortext, type);
+    #endif
   }
-  #else
-  show_debug_message_helper(errortext, type);
-  #endif
 }
 
 void show_info(string text, int bgcolor, int left, int top, int width, int height,
