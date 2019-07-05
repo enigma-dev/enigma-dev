@@ -500,9 +500,7 @@ static inline int get_color_helper(int defcol, string title) {
   return -1;
 }
 
-namespace enigma_user {
-
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
+static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
   #ifdef DEBUG_MODE
   errortext += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
@@ -520,6 +518,19 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
   if (result == IDABORT || type == MESSAGE_TYPE::M_FATAL_ERROR) exit(0);
 
   //ABORT_ON_ALL_ERRORS();
+}
+
+namespace enigma_user {
+
+void show_debug_message(string errortext, MESSAGE_TYPE type) {
+  #ifndef DEBUG_MODE
+  if (type == M_USER_ERROR || type == M_FATAL_USER_ERROR) {
+    show_debug_message_helper(errortext, type)
+  }
+  #else
+  show_debug_message_helper(errortext, type)
+  #endif
+  }
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
