@@ -10,11 +10,6 @@ using std::string;
 
 using enigma_user::file_exists;
 using enigma_user::directory_exists;
-using enigma_user::filename_absolute;
-using enigma_user::file_find_first;
-using enigma_user::file_find_next;
-using enigma_user::file_find_close;
-using enigma_user::string_replace_all;
 
 static inline string add_slash(const string& dir) {
   if (dir.empty() || *dir.rbegin() != '/') return dir + '/';
@@ -51,7 +46,7 @@ std::string directory_contents(std::string dname) {
     if (rpath.back() != '/') rpath += "/";
     std::string item = file_find_first(rpath + "*", fa_readonly + fa_hidden + fa_sysfile + fa_volumeid + fa_directory + fa_archive);
     std::string res = rpath + item;
-    while ((file_exists(rpath + item) || directory_exists(rpath + item)) && item != "") {
+    while ((item != "") {
       item = file_find_next();
       if (item != "." && item != ".." && item != "")
         res += "\n" + rpath + item;
