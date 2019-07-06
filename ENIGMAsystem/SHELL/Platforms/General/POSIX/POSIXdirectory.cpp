@@ -51,13 +51,19 @@ std::string filename_absolute(std::string fname) {
   if (file_exists(fname) || directory_exists(fname)) {
     char rpath[PATH_MAX];
     char *ptr = realpath(fname.c_str(), rpath);
-    if (ptr != NULL) return add_slash(ptr);
+    if (ptr != NULL) {
+      if (directory_exists(ptr)) return add_slash(ptr);
+      if (file_exists(ptr)) return ptr;
+    }
   } 
   return "";
 }
 
 std::string filename_join(std::string prefix, std::string suffix) {
-  return filename_absolute(prefix) + add_slash(suffix);
+  std::string res = filename_absolute(prefix) + suffix;
+  if (directory_exists(res)) return add_slash(res);
+  if (file_exists(res)) return res; 
+  return "";
 }
 
 string environment_get_variable(string name) {
