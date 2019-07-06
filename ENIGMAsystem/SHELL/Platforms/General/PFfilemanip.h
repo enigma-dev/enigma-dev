@@ -28,7 +28,7 @@ enum {
   fa_directory = 16,
   fa_archive   = 32
   fa_files_all = fa_readonly | fa_hidden | fa_sysfile | fa_volumeid | fa_archive;
-  fa_all       = fa_files_al | fa_directory;
+  fa_all       = fa_files_all | fa_directory;
 };
 
 long long file_size(std::string fname);
