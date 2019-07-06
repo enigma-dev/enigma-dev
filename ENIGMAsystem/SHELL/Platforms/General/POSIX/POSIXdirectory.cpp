@@ -51,8 +51,8 @@ std::string directory_contents(std::string dname) {
       if (item != "." && item != ".." && item != "")
         res += "\n" + rpath + item;
     }
-    if (res == rpath + item) return "";
     file_find_close();
+    if (res == rpath + item) return "";
     return res;
   }
   return "";
