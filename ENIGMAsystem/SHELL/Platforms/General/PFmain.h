@@ -81,6 +81,7 @@ void execute_program(std::string fname, std::string args, bool wait);
 void execute_program(std::string operation, std::string fname, std::string args, bool wait);
 
 std::string filename_absolute(std::string fname);
+std::string filename_path_join(std::string prefix, std::string suffix)
 std::string directory_contents(std::string dname);
 std::string environment_get_variable(std::string name);
 bool environment_set_variable(std::string name, std::string value);
