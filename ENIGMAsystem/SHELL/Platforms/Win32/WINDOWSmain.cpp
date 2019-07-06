@@ -474,7 +474,9 @@ std::string filename_absolute(std::string fname) {
 }
 
 std::string filename_join(std::string prefix, std::string suffix) {
-  return filename_absolute(prefix) + suffix;
+  if (directory_exists(filename_absolute(prefix)))
+    return filename_absolute(prefix) + suffix;
+  return "";
 }
 
 std::string environment_get_variable(std::string name) {
