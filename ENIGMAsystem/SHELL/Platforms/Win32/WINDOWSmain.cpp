@@ -476,7 +476,7 @@ std::string directory_contents(std::string dname) {
   if (directory_exists(dname)) {
     std::string rpath = filename_absolute(dname);
     if (rpath.back() != '\\') rpath += "\\";
-    std::string item = file_find_first(rpath + "*", fa_readonly + fa_hidden + fa_sysfile + fa_volumeid + fa_directory + fa_archive);
+    std::string item = file_find_first(rpath + "*", fa_readonly | fa_hidden | fa_sysfile | fa_volumeid | fa_directory | fa_archive);
     std::string res = rpath + item;
     while (item != "") {
       item = file_find_next();
