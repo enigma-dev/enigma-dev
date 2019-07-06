@@ -473,8 +473,8 @@ std::string filename_absolute(std::string fname) {
 }
 
 std::string filename_join(std::string prefix, std::string suffix) {
-  if (directory_exists(filename_absolute(prefix)))
-    return filename_absolute(prefix) + suffix;
+  if (directory_exists(prefix))
+    return add_slash(prefix) + suffix;
   return "";
 }
 
