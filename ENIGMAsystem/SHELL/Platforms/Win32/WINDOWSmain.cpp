@@ -475,16 +475,16 @@ std::string directory_contents(std::string dname) {
   if (string_replace_all(dname, " ", "") == "") dname = ".";
   if (directory_exists(dname)) {
     std::string rpath = filename_absolute(dname);
-    if (rpath.back() != '\\') rpath += "\\";
+    if (rpath.back() != '/') rpath += "/";
     std::string item = file_find_first(rpath + "*", fa_readonly | fa_hidden | fa_sysfile | fa_volumeid | fa_directory | fa_archive);
-    std::string res = rpath + item;
+    std::string res = filename_absolute(rpath + item);
     while (item != "") {
       item = file_find_next();
       if (item != "." && item != ".." && item != "")
-        res += "\n" + rpath + item;
+        res += "\n" + filename_absolute(rpath + item);
     }
     file_find_close();
-    if (res == rpath + item) return "";
+    if (res == filename_absolute(rpath + item)) return "";
     return res;
   }
   return "";
