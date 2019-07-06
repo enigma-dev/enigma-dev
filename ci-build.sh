@@ -9,4 +9,5 @@
         --network "${NETWORK}" \
         --widgets "${WIDGETS}" \
         --extensions "${EXTENSIONS}" \
-        -o "${OUTPUT}"
+        -o "${OUTPUT}" \
+        "CommandLine/testing/SimpleTests/clean_exit.sog/"

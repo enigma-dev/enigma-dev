@@ -16,26 +16,24 @@ before_install:
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
-      sudo add-apt-repository -y ppa:mhier/libboost-latest;
       sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
       # we always build the frontend as 64 bit, even for 32 bit game jobs
       # this is why we first install 64 bit png, then 32 bit png below
-      sudo apt-get -y install build-essential zlib1g-dev libboost1.67-dev\
-        libprotobuf-dev protobuf-compiler libglm-dev libpng-dev;
+      sudo apt-get -y install build-essential zlib1g-dev libboost-dev\
+        libboost-filesystem-dev libboost-system-dev libboost-program-options-dev\
+        libboost-iostreams-dev libprotobuf-dev protobuf-compiler libglm-dev libpng-dev\
+        pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev libgtest-dev wmctrl xvfb\
+        xdotool xfwm4 lcov;
 
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
         sudo apt-get -y install libc6:i386 libc++-dev:i386 libstdc++6:i386\
           libncurses5:i386 libx11-6:i386 libglew-dev:i386 libglu1-mesa-dev:i386\
-          libgl1-mesa-dev:i386 lib32z1-dev libxrandr-dev:i386;
+          libgl1-mesa-dev:i386 lib32z1-dev libxrandr-dev:i386\
+          gcc-multilib g++-multilib libc++abi-7:i386;
 
-        if [ "$COMPILER" == "gcc32" ]; then
-          sudo apt-get -y install gcc-multilib g++-multilib;
-        fi
-
-        sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include;
       elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
-        sudo apt-get -y install mingw-w64 wine;
+        sudo apt-get -y install mingw-w64 wine-stable;
         curl -L https://github.com/enigma-dev/enigma-dev/files/2431000/enigma-libs.zip > enigma-libs.zip;
         unzip enigma-libs.zip -d ENIGMAsystem/;
         mv ENIGMAsystem/Install ENIGMAsystem/Additional;
@@ -49,33 +47,6 @@ before_install:
         sudo apt-get -y install libsfml-dev;
       fi
 
-      if [ "$TEST_HARNESS" == true ]; then
-        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test;
-        sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
-        sudo apt-get -y install cmake libgtest-dev xvfb wmctrl xdotool xfwm4 lcov gcc-7\
-          g++-7 cpp-7 pulseaudio libpugixml-dev libyaml-cpp-dev;
-
-        # download rapidjson manually because ubuntu is ancient
-        wget -O rapidjson-master.zip https://github.com/Tencent/rapidjson/archive/master.zip;
-        unzip rapidjson-master.zip;
-        sudo cp -a rapidjson-master/include/. /usr/include/;
-
-        sudo update-alternatives --remove-all cpp;
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 \
-                    15 \
-                    --slave   /usr/bin/g++ g++ /usr/bin/g++-7 \
-                    --slave   /usr/bin/gcov gcov /usr/bin/gcov-7 \
-                    --slave   /usr/bin/gcov-dump gcov-dump /usr/bin/gcov-dump-7 \
-                    --slave   /usr/bin/gcov-tool gcov-tool /usr/bin/gcov-tool-7 \
-                    --slave   /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-7 \
-                    --slave   /usr/bin/gcc-nm gcc-nm /usr/bin/gcc-nm-7 \
-                    --slave   /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-7;
-        pushd /usr/src/gtest;
-        sudo cmake CMakeLists.txt;
-        sudo make;
-        sudo cp *.a /usr/lib
-        popd
-      fi
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
       brew install glew protobuf pugixml;
@@ -84,13 +55,11 @@ before_install:
 # build JDI and the CLI
 install:
   - |
-    if [ "$TEST_HARNESS" != true ]; then
-      make -j4
-      CLI_ENABLE_EGM=FALSE make -j4 emake
-      if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
-        # frontend uses 64 bit libpng but game will use 32 bit libpng
-        sudo apt-get -y install libpng-dev:i386;
-      fi
+    make -j4
+    make -j4 emake
+    if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
+    # frontend uses 64 bit libpng but game will use 32 bit libpng
+      sudo apt-get -y install libpng-dev:i386;
     fi
 
 # by default most of our jobs will be run on a linux instance
@@ -98,6 +67,7 @@ os: linux
 group: travis_latest
 compiler: gcc
 language: cpp
+dist: bionic
 
 env:
   global:
@@ -190,13 +160,11 @@ matrix:
 
 before_script:
   - |
-    if [ "$TEST_HARNESS" == true ]; then
-      # Start xvfb before the script phase
-      export DISPLAY=:1
-      Xvfb :1 -screen 0 1024x768x24 &
-      xfwm4 &
-      sleep 3
-    fi
+    # Start xvfb before the script phase
+    export DISPLAY=:1
+    Xvfb :1 -screen 0 1024x768x24 &
+    xfwm4 &
+    sleep 3
 
 script:
   - |
@@ -205,4 +173,5 @@ script:
       ./ci-regression.sh "/tmp/enigma-master" 4 || travis_terminate $?
     else
       ./ci-build.sh
+      $OUTPUT
     fi
