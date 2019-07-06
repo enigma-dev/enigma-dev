@@ -483,7 +483,7 @@ std::string directory_contents(std::string dname) {
     if (rpath.back() != '\\') rpath += "\\";
     std::string item = file_find_first(rpath + "*", fa_readonly + fa_hidden + fa_sysfile + fa_volumeid + fa_directory + fa_archive);
     std::string res = rpath + item;
-    while ((file_exists(rpath + item) || directory_exists(rpath + item)) && item != "") {
+    while (item != "") {
       item = file_find_next();
       if (item != "." && item != ".." && item != "")
         res += "\n" + rpath + item;
