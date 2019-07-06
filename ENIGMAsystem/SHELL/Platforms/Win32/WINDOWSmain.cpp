@@ -467,8 +467,13 @@ std::string filename_absolute(std::string fname) {
     wchar_t rpath[MAX_PATH];
     tstring tstr_fname = widen(fname);
     GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL); 
-    return shorten(rpath);
-  } else { return ""; }
+    return add_slash(shorten(rpath));
+  }
+  return "";
+}
+
+std::string filename_join(std::string prefix, std::string suffix) {
+  return filename_absolute(prefix) + add_slash(suffix);
 }
 
 std::string environment_get_variable(std::string name) {
