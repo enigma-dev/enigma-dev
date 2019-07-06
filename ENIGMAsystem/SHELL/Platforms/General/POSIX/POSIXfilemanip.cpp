@@ -83,7 +83,7 @@ string file_find_next() {
 
   const int not_attrib = ~fff_attrib;
 
-  if (r[0] == '.' or r[r.length() - 1] == '~') and not_attrib & fa_hidden)  // Filter hidden files
+  if ((r[0] == '.' or r[r.length() - 1] == '~') and not_attrib & fa_hidden)  // Filter hidden files
     return file_find_next();
 
   struct stat sb;
