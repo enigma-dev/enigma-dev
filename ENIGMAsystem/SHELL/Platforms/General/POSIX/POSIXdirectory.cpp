@@ -50,8 +50,8 @@ std::string directory_contents(std::string dname) {
     std::string rpath = filename_absolute(dname);
     for (string item = file_find_first(rpath, fa_all); item != ""; item = file_find_next())
       res += filename_path_join(rpath, item) + "\n";
+    if (!res.empty()) res.pop_back();
     file_find_close();
-    res.pop_back();
     return res;
   }
   return "";
