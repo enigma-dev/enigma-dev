@@ -39,20 +39,19 @@ std::string filename_absolute(std::string fname) {
   } return "";
 }
 
+std::string filename_path_join(std::string prefix, std::string suffix) {
+  if (prefix.back() != '/') prefix += "/";
+  return prefix + suffix;
+}
+
 std::string directory_contents(std::string dname) {
   if (string_replace_all(dname, " ", "") == "") dname = ".";
   if (directory_exists(dname)) {
     std::string rpath = filename_absolute(dname);
-    if (rpath.back() != '/') rpath += "/";
-    std::string item = file_find_first(rpath + "*", fa_readonly | fa_hidden | fa_sysfile | fa_volumeid | fa_directory | fa_archive);
-    std::string res = filename_absolute(rpath + item);
-    while ((item != "") {
-      item = file_find_next();
-      if (item != "." && item != ".." && item != "")
-        res += "\n" + filename_absolute(rpath + item);
-    }
+    for (string item = file_find_first(rpath, fa_all); item != ""; item = file_find_next())
+      res += filename_path_join(rpath, item) + "\n";
     file_find_close();
-    if (res == filename_absolute(rpath + item)) return "";
+    res.pop_back();
     return res;
   }
   return "";
