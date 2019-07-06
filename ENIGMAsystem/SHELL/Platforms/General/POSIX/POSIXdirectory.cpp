@@ -17,6 +17,7 @@
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFfilemanip.h"
+#include "Universal_System/estring.h"
 
 #include <limits.h>
 #include <unistd.h>
@@ -48,14 +49,13 @@ bool set_working_directory(string dname) {
 
 // converts a relative path to absolute if the path exists
 std::string filename_absolute(std::string fname) {
-  if (file_exists(fname) || directory_exists(fname)) {
-    char rpath[PATH_MAX];
-    char *ptr = realpath(fname.c_str(), rpath);
-    if (ptr != NULL) {
-      if (directory_exists(ptr)) return add_slash(ptr);
-      if (file_exists(ptr)) return ptr;
-    }
-  } 
+  if (string_replace_all(fname, " ", "") == "") fname = ".";
+  char rpath[PATH_MAX];
+  char *ptr = realpath(fname.c_str(), rpath);
+  if (ptr != NULL) {
+    if (directory_exists(ptr)) return add_slash(ptr);
+    if (file_exists(ptr)) return ptr;
+  }
   return "";
 }
 
