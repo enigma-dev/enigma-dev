@@ -51,10 +51,10 @@ bool set_working_directory(string dname) {
 std::string filename_absolute(std::string fname) {
   if (string_replace_all(fname, " ", "") == "") fname = ".";
   char rpath[PATH_MAX];
-  char *ptr = realpath(fname.c_str(), rpath);
-  if (ptr != NULL) {
-    if (directory_exists(ptr)) return add_slash(ptr);
-    if (file_exists(ptr)) return ptr;
+  char *result = realpath(fname.c_str(), rpath);
+  if (result != NULL) {
+    if (directory_exists(result)) return add_slash(result);
+    if (file_exists(result)) return result;
   }
   return "";
 }
