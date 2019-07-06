@@ -170,7 +170,9 @@ string file_find_first(string name,int attributes)
   }
 
   current_find=d;
-  return found.cFileName;
+  if (!(string(found.cFileName) == "." && string(found.cFileName) == ".."))
+    return found.cFileName;
+  return "";
 }
 
 string file_find_next()
@@ -182,7 +184,10 @@ string file_find_next()
     if (FindNextFile(current_find,&found)==0)
     return "";
   }
-  return found.cFileName;
+  
+  if (!(string(found.cFileName) == "." && string(found.cFileName) == ".."))
+    return found.cFileName;
+  return "";
 }
 
 int file_find_close() {
