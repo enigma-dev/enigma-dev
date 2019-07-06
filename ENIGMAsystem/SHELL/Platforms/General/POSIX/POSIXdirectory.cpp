@@ -34,8 +34,13 @@ std::string filename_absolute(std::string fname) {
   if (file_exists(fname) || directory_exists(fname)) {
     char rpath[PATH_MAX];
     char *ptr = realpath(fname.c_str(), rpath);
-    if (ptr != NULL) { return rpath; }
-  } return "";
+    if (ptr != NULL) return add_slash(ptr);
+  } 
+  return "";
+}
+
+std::filename_join(std::string prefix, std::string suffix) {
+  return filename_absolute(prefix) + add_slash(suffix);
 }
 
 string environment_get_variable(string name) {
