@@ -24,16 +24,6 @@
 #include "var4.h"
 #include "estring.h"
 
-#include "Platforms/General/PFmain.h"
-#include "Platforms/General/PFfilemanip.h"
-
-using enigma_user::file_exists;
-using enigma_user::directory_exists;
-using enigma_user::filename_absolute;
-using enigma_user::file_find_first;
-using enigma_user::file_find_next;
-using enigma_user::file_find_close;
-
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -391,29 +381,6 @@ var string_split(const std::string &str, const std::string &delim,
   if (!skip_empty || last < str.length())
     res[found++] = str.substr(last);
   return res;
-}
-
-string directory_contents(string dname) {
-  if (string_replace_all(dname, " ", "") == "") dname = ".";
-  if (directory_exists(dname)) {
-    string rpath = filename_absolute(dname);
-    #if CURRENT_PLATFORM_ID == OS_WINDOWS
-    if (rpath.back() != '\\') rpath += "\\";
-    #else
-    if (rpath.back() != '/') rpath += "/";
-    #endif
-    string item = file_find_first(rpath + "*", fa_readonly + fa_hidden + fa_sysfile + fa_volumeid + fa_directory + fa_archive);
-    string res = rpath + item;
-    while ((file_exists(rpath + item) || directory_exists(rpath + item)) && item != "") {
-      item = file_find_next();
-      if (item != "." && item != ".." && item != "")
-        res += "\n" + rpath + item;
-    }
-    if (res == rpath + item) return "";
-    file_find_close();
-    return res;
-  }
-  return "";
 }
 
 }
