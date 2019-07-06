@@ -466,10 +466,9 @@ std::string filename_absolute(std::string fname) {
   if (string_replace_all(fname, " ", "") == "") fname = ".";
   wchar_t rpath[MAX_PATH];
   tstring tstr_fname = widen(fname);
-  GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL);
-  if (directory_exists(shorten(rpath))) return add_slash(shorten(rpath));
-  if (file_exists(shorten(rpath))) return shorten(rpath);
-  return "";
+  tstring result(rpath, GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL));
+  if (directory_exists(shorten(result))) return add_slash(shorten(result));
+  return shorten(result);
 }
 
 std::string filename_join(std::string prefix, std::string suffix) {
