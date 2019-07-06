@@ -41,6 +41,7 @@ std::string filename_absolute(std::string fname) {
 
 std::string filename_path_join(std::string prefix, std::string suffix) {
   if (prefix.back() != '/') prefix += "/";
+  if (suffix.back() != '/') suffix += "/";
   return prefix + suffix;
 }
 
