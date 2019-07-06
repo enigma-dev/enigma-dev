@@ -43,11 +43,6 @@ using std::vector;
 
 using enigma_user::file_exists;
 using enigma_user::directory_exists;
-using enigma_user::filename_absolute;
-using enigma_user::file_find_first;
-using enigma_user::file_find_next;
-using enigma_user::file_find_close;
-using enigma_user::string_replace_all;
 
 namespace enigma_user {
 
