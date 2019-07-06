@@ -39,7 +39,7 @@ std::string filename_absolute(std::string fname) {
   return "";
 }
 
-std::filename_join(std::string prefix, std::string suffix) {
+std::string filename_join(std::string prefix, std::string suffix) {
   return filename_absolute(prefix) + add_slash(suffix);
 }
 
