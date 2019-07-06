@@ -140,9 +140,9 @@ enum {
   fa_sysfile   = FILE_ATTRIBUTE_SYSTEM,
   fa_volumeid  = 0x00000008,
   fa_directory = FILE_ATTRIBUTE_DIRECTORY,
-  fa_archive   = FILE_ATTRIBUTE_ARCHIVE
-  fa_files_all = fa_readonly | fa_hidden | fa_sysfile | fa_volumeid | fa_archive;
-  fa_all       = fa_files_all | fa_directory;
+  fa_archive   = FILE_ATTRIBUTE_ARCHIVE,
+  fa_files_all = fa_readonly | fa_hidden | fa_sysfile | fa_volumeid | fa_archive,
+  fa_all       = fa_files_all | fa_directory
 };
 
 }
