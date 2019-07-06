@@ -463,6 +463,7 @@ void execute_program(std::string fname, std::string args, bool wait) { execute_p
 
 // converts a relative path to absolute if the path exists
 std::string filename_absolute(std::string fname) {
+  if (string_replace_all(fname, " ", "") == "") fname = ".";
   wchar_t rpath[MAX_PATH];
   tstring tstr_fname = widen(fname);
   GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL);
