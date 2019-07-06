@@ -60,9 +60,7 @@ std::string filename_absolute(std::string fname) {
 }
 
 std::string filename_join(std::string prefix, std::string suffix) {
-  if (directory_exists(prefix))
-    return add_slash(prefix) + suffix;
-  return "";
+  return add_slash(prefix) + suffix;
 }
 
 string environment_get_variable(string name) {
