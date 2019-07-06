@@ -466,8 +466,8 @@ std::string filename_absolute(std::string fname) {
   wchar_t rpath[MAX_PATH];
   tstring tstr_fname = widen(fname);
   GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL);
-  if (directory_exists(rpath)) return add_slash(shorten(rpath));
-  if (file_exists(rpath)) return shorten(rpath);
+  if (directory_exists(shorten(rpath))) return add_slash(shorten(rpath));
+  if (file_exists(shorten(rpath))) return shorten(rpath);
   return "";
 }
 
