@@ -60,8 +60,7 @@ HANDLE mainthread;
 void (*touch_extension_register)(HWND hWnd);
 
 void windowsystem_write_exename(char *exenamehere) { 
-  tstring tstr_exenamehere = widen(exenamehere);
-  GetModuleFileNameW(NULL, (wchar_t *)tstr_exenamehere.c_str(), (DWORD)tstr_exenamehere.length() + 1); 
+  GetModuleFileName(NULL, exenamehere, 1024); 
 }
 
 void Sleep(int ms) { ::Sleep(ms); }
