@@ -18,57 +18,57 @@
 #ifndef BGUI_PARENT_H
 #define BGUI_PARENT_H
 
-#include "common.h" //For gs_scalar
+#include "common.h"  //For gs_scalar
 
 #include <vector>
 
 namespace enigma {
 namespace gui {
-	class Parent{
-		public:
-		  int element_id = -1; //The element id for which this is a parenter
+class Parent {
+ public:
+  int element_id = -1;  //The element id for which this is a parenter
 
-      std::vector<unsigned int> child_elements;
+  std::vector<unsigned int> child_elements;
 
-			void update_children(gs_scalar ox, gs_scalar oy);
-			void draw_children(gs_scalar ox, gs_scalar oy);
+  void update_children(gs_scalar ox, gs_scalar oy);
+  void draw_children(gs_scalar ox, gs_scalar oy);
 
-      void button_add(int id);
-      void toggle_add(int id);
-      void scrollbar_add(int id);
-      void slider_add(int id);
-      void window_add(int id);
-      void label_add(int id);
-      void textbox_add(int id);
+  void button_add(int id);
+  void toggle_add(int id);
+  void scrollbar_add(int id);
+  void slider_add(int id);
+  void window_add(int id);
+  void label_add(int id);
+  void textbox_add(int id);
 
-      void button_remove(int id);
-      void toggle_remove(int id);
-      void scrollbar_remove(int id);
-      void slider_remove(int id);
-      void window_remove(int id);
-      void label_remove(int id);
-      void textbox_remove(int id);
+  void button_remove(int id);
+  void toggle_remove(int id);
+  void scrollbar_remove(int id);
+  void slider_remove(int id);
+  void window_remove(int id);
+  void label_remove(int id);
+  void textbox_remove(int id);
 
-			int button_count();
-			int toggle_count();
-			int scrollbar_count();
-			int slider_count();
-			int window_count();
-			int label_count();
-      int textbox_count();
+  int button_count();
+  int toggle_count();
+  int scrollbar_count();
+  int slider_count();
+  int window_count();
+  int label_count();
+  int textbox_count();
 
-			int button(int id);
-			int toggle(int id);
-			int scrollbar(int id);
-			int slider(int id);
-			int window(int id);
-			int label(int id);
-      int textbox(int id);
+  int button(int id);
+  int toggle(int id);
+  int scrollbar(int id);
+  int slider(int id);
+  int window(int id);
+  int label(int id);
+  int textbox(int id);
 
-			int element_count();
-			int element(int id);
-	};
-} //namespace gui
-} //namespace enigma
+  int element_count();
+  int element(int id);
+};
+}  //namespace gui
+}  //namespace enigma
 
 #endif

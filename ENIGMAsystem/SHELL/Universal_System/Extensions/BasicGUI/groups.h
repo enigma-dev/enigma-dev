@@ -22,15 +22,15 @@
 
 namespace enigma {
 namespace gui {
-	class Group{
-		public:
-			unsigned int id;
+class Group {
+ public:
+  unsigned int id;
 
-      std::vector<unsigned int> group_buttons;
-      std::vector<unsigned int> group_toggles;
-      std::vector<unsigned int> group_windows;
-	};
-} //namespace gui
-} //namespace enigma
+  std::vector<unsigned int> group_buttons;
+  std::vector<unsigned int> group_toggles;
+  std::vector<unsigned int> group_windows;
+};
+}  //namespace gui
+}  //namespace enigma
 
 #endif
