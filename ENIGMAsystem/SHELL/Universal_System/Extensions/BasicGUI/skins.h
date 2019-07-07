@@ -18,8 +18,8 @@
 #ifndef BGUI_SKINS_H
 #define BGUI_SKINS_H
 
-namespace gui
-{
+namespace enigma {
+namespace gui {
 	class Skin{
 		public:
 			unsigned int id;
@@ -34,5 +34,6 @@ namespace gui
 			Skin();
 	};
 }
+} //namespace enigma
 
 #endif

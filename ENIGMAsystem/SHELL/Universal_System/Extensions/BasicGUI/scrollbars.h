@@ -17,18 +17,14 @@
 
 #ifndef BGUI_SCROLLBAR_H
 #define BGUI_SCROLLBAR_H
-#include <array>
-using std::array;
 
+#include "Platforms/General/PFwindow.h" //mouse_x, mouse_y
 #include "common.h"
 
-namespace enigma_user
-{
-	extern double mouse_x, mouse_y;
-}
+#include <array>
 
-namespace gui
-{
+namespace enigma {
+namespace gui {
 	class Scrollbar{
 		public:
 			unsigned int id;
@@ -39,7 +35,7 @@ namespace gui
 			bool active = false; //Is scroll pressed
       bool drag = false;
       bool direction = false; //false - horizontal, true - vertical
-			array<int,4> callback; //Script to run on event
+      std::array<int,4> callback; //Script to run on event
 
 			gs_scalar drag_offset = 0.0;
 
@@ -63,6 +59,7 @@ namespace gui
 			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 			void callback_execute(int event);
 	};
-}
+} //namespace gui
+} //namespace enigma
 
 #endif
