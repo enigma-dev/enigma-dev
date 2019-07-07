@@ -59,7 +59,10 @@ HANDLE mainthread;
 
 void (*touch_extension_register)(HWND hWnd);
 
-void windowsystem_write_exename(char *exenamehere) { GetModuleFileName(NULL, exenamehere, 1024); }
+void windowsystem_write_exename(char *exenamehere) { 
+  tstring tstr_exenamehere = widen(exenamehere);
+  GetModuleFileNameW(NULL, tstr_exenamehere.c_str(), tstr_exenamehere.length() + 1); 
+}
 
 void Sleep(int ms) { ::Sleep(ms); }
 
@@ -277,7 +280,7 @@ int updateTimer() {
     }
     if (remaining_mcs > needed_mcs) {
       const long sleeping_time = std::min((remaining_mcs - needed_mcs) / 5, long(999999));
-      std::this_thread::sleep_for(std::chrono::microseconds(std::max(long(1), sleeping_time)));
+      enigma_user::sleep(enigma_user::max(1, sleeping_time / 1000));
       return -1;
     }
   }
