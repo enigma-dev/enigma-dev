@@ -18,10 +18,6 @@
 #ifndef BGUI_ELEMENTS_H
 #define BGUI_ELEMENTS_H
 
-#include <new> //Placement new
-#include <utility>      // std::pair, std::piecewise_construct
-#include <tuple>        // std::forward_as_tuple
-
 #include "sliders.h"
 #include "buttons.h"
 #include "toggles.h"
@@ -33,42 +29,48 @@
 #include "styles.h"
 #include "skins.h"
 
+#include <new> //Placement new
+#include <utility>      // std::pair, std::piecewise_construct
+#include <tuple>        // std::forward_as_tuple
+#include <map>
+#include <unordered_map>
+
 #ifdef DEBUG_MODE
   #include <string>
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   //This checks and returns an element
   #define get_elementv(element,clastype,entype,id,ret)\
-    if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) {\
+    if (guiElements.gui_elements.find(id) == guiElements.gui_elements.end() || guiElements.gui_elements[id].type != entype) {\
       DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_USER_ERROR);\
       return ret;\
     }\
-    clastype &element = gui::gui_elements[id];
+    clastype &element = guiElements.gui_elements[id];
   #define get_element(element,type,entype,id) get_elementv(element,type,entype,id,)
 
   //This checks and returns an element but uses the type already assigned
   /*#define get_element_smartv(element,id,ret)\
-    if (gui::gui_elements.find(id) == gui::gui_elements.end()) {\
+    if (guiElements.gui_elements.find(id) == guiElements.gui_elements.end()) {\
       DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_USER_ERROR);\
       return ret;\
     }\
-    switch (gui::gui_elements[id].type){ \
-      case gui::GUI_TYPE::BUTTON: gui::Button &element = gui::gui_elements[id]; break; \
-      case gui::GUI_TYPE::TOGGLE: gui::Toggle &element = gui::gui_elements[id]; break; \
-      case gui::GUI_TYPE::LABEL:  gui::Label &element = gui::gui_elements[id]; break; \
-      case gui::GUI_TYPE::SCROLLBAR: gui::Scrollbar &element = gui::gui_elements[id]; break; \
-      case gui::GUI_TYPE::SLIDER: gui::Slider &element = gui::gui_elements[id]; break; \
-      case gui::GUI_TYPE::WINDOW: gui::Window &element = gui::gui_elements[id]; break; \
-      case gui::GUI_TYPE::SKIN: gui::Skin &element = gui::gui_elements[id]; break; \
-      case gui::GUI_TYPE::STYLE: gui::Style &element = gui::gui_elements[id]; break; \
-      case gui::GUI_TYPE::GROUP: gui::Group &element = gui::gui_elements[id]; break; \
+    switch (guiElements.gui_elements[id].type){ \
+      case GUI_TYPE::BUTTON: Button &element = guiElements.gui_elements[id]; break; \
+      case GUI_TYPE::TOGGLE: Toggle &element = guiElements.gui_elements[id]; break; \
+      case GUI_TYPE::LABEL:  Label &element = guiElements.gui_elements[id]; break; \
+      case GUI_TYPE::SCROLLBAR: Scrollbar &element = guiElements.gui_elements[id]; break; \
+      case GUI_TYPE::SLIDER: Slider &element = guiElements.gui_elements[id]; break; \
+      case GUI_TYPE::WINDOW: Window &element = guiElements.gui_elements[id]; break; \
+      case GUI_TYPE::SKIN: Skin &element = guiElements.gui_elements[id]; break; \
+      case GUI_TYPE::STYLE: Style &element = guiElements.gui_elements[id]; break; \
+      case GUI_TYPE::GROUP: Group &element = guiElements.gui_elements[id]; break; \
       default: DEBUG_MESSAGE("Cannot determine type of element " + std::to_string(id), MESSAGE_TYPE::M_USER_ERROR); return ret; \
     }
   #define get_element_smart(element,id) get_element_smartv(element,id,)*/
 
   //This only checks an element if it exists
   #define check_elementv(entype,id,ret)\
-    if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) {\
+    if (guiElements.gui_elements.find(id) == guiElements.gui_elements.end() || guiElements.gui_elements[id].type != entype) {\
       DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_USER_ERROR);\
       return ret;\
     }
@@ -76,7 +78,7 @@
 
   //This only checks if an element id exists (so it doesn't care about type)
   #define check_element_existsv(id,ret)\
-    if (gui::gui_elements.find(id) == gui::gui_elements.end()) {\
+    if (guiElements.gui_elements.find(id) == guiElements.gui_elements.end()) {\
       DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_USER_ERROR);\
       return ret;\
     }
@@ -85,16 +87,16 @@
   ///THIS IS FOR DATA ELEMENTS
   //This checks and returns an element
   #define get_data_elementv(element,clastype,entype,id,ret)\
-    if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end() || gui::gui_data_elements[id].type != entype) {\
+    if (guiElements.gui_data_elements.find(id) == guiElements.gui_data_elements.end() || guiElements.gui_data_elements[id].type != entype) {\
       DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_USER_ERROR);\
       return ret;\
     }\
-    clastype &element = gui::gui_data_elements[id];
+    clastype &element = guiElements.gui_data_elements[id];
   #define get_data_element(element,type,entype,id) get_data_elementv(element,type,entype,id,)
 
   //This only checks an element if it exists
   #define check_data_elementv(entype,id,ret)\
-    if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end() || gui::gui_data_elements[id].type != entype) {\
+    if (guiElements.gui_data_elements.find(id) == guiElements.gui_data_elements.end() || guiElements.gui_data_elements[id].type != entype) {\
       DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_USER_ERROR);\
       return ret;\
     }
@@ -102,37 +104,37 @@
 
   //This only checks if an element id exists (so it doesn't care about type)
   #define check_data_element_existsv(id,ret)\
-    if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end()) {\
+    if (guiElements.gui_data_elements.find(id) == guiElements.gui_data_elements.end()) {\
       DEBUG_MESSAGE("Attempting to use non-existing element " + std::to_string(id), MESSAGE_TYPE::M_USER_ERROR);\
       return ret;\
     }
    #define check_data_element_exists(id) check_data_element_existsv(id,)
 #else
   #define get_elementv(element,clastype,entype,id,ret)\
-    clastype &element = gui::gui_elements[id];
+    clastype &element = guiElements.gui_elements[id];
   #define get_element(element,type,entype,id) get_elementv(element,type,entype,id,)
   #define check_elementv(entype,id,ret)
   #define check_element(entype,id) check_elementv(entype,id,)
   #define check_element_existsv(id,ret)
   #define check_element_exists(id) check_element_existsv(id,)
   /*#define get_element_smartv(element,id,ret) \
-    gui::Button *b, gui::Toggle *t, gui::Label *l, gui::Scrollbar *s, gui::Slider *sl, gui::Window *w, gui::Skin *sk, gui::Style *st, gui::Group *g; \
-    switch (gui::gui_elements[id].type){ \
-      case gui::GUI_TYPE::BUTTON:    element = gui::Button element; break; \
-      case gui::GUI_TYPE::TOGGLE:    gui::Toggle element; break; \
-      case gui::GUI_TYPE::LABEL:     gui::Label element; break; \
-      case gui::GUI_TYPE::SCROLLBAR: gui::Scrollbar element; break; \
-      case gui::GUI_TYPE::SLIDER:    gui::Slider element; break; \
-      case gui::GUI_TYPE::WINDOW:    gui::Window element; break; \
-      case gui::GUI_TYPE::SKIN:      gui::Skin element; break; \
-      case gui::GUI_TYPE::STYLE:     gui::Style element; break; \
-      case gui::GUI_TYPE::GROUP:     gui::Group element; break; \
-      default: gui::Button element = gui::Button(); DEBUG_MESSAGE("Cannot determine type of element " + std::to_string(id), MESSAGE_TYPE::M_USER_ERROR); return ret; \
+    Button *b, Toggle *t, Label *l, Scrollbar *s, Slider *sl, Window *w, Skin *sk, Style *st, Group *g; \
+    switch (guiElements.gui_elements[id].type){ \
+      case GUI_TYPE::BUTTON:    element = Button element; break; \
+      case GUI_TYPE::TOGGLE:    Toggle element; break; \
+      case GUI_TYPE::LABEL:     Label element; break; \
+      case GUI_TYPE::SCROLLBAR: Scrollbar element; break; \
+      case GUI_TYPE::SLIDER:    Slider element; break; \
+      case GUI_TYPE::WINDOW:    Window element; break; \
+      case GUI_TYPE::SKIN:      Skin element; break; \
+      case GUI_TYPE::STYLE:     Style element; break; \
+      case GUI_TYPE::GROUP:     Group element; break; \
+      default: Button element = Button(); DEBUG_MESSAGE("Cannot determine type of element " + std::to_string(id), MESSAGE_TYPE::M_USER_ERROR); return ret; \
     } \
     auto element = &b;
   #define get_element_smart(element,id) get_element_smartv(element,id,)*/
   #define get_data_elementv(element,clastype,entype,id,ret)\
-    clastype &element = gui::gui_data_elements[id];
+    clastype &element = guiElements.gui_data_elements[id];
   #define get_data_element(element,type,entype,id) get_data_elementv(element,type,entype,id,)
   #define check_data_elementv(entype,id,ret)
   #define check_data_element(entype,id) check_data_elementv(entype,id,)
@@ -140,8 +142,8 @@
   #define check_data_element_exists(id) check_data_element_existsv(id,)
 #endif
 
-namespace gui
-{
+namespace enigma {
+namespace gui {
   #undef ERROR //Windows has ERROR of its own
   enum GUI_TYPE{
     ERROR = -1,
@@ -187,7 +189,7 @@ namespace gui
 
       inline Element(const Slider &sli, int id) : id(id){
         type = GUI_TYPE::SLIDER;
-        new (&(data.button)) Slider(sli);
+        new (&(data.slider)) Slider(sli);
       }
 
       inline Element(const Toggle &tog, int id) : id(id){
@@ -431,5 +433,29 @@ namespace gui
         }
       }
 	};
-}
+
+struct GUIElements {
+  GUIElements();
+  unsigned int gui_elements_maxid = 0;
+  unsigned int gui_data_elements_maxid = 0;
+  std::unordered_map<unsigned int, Element> gui_elements;
+  std::unordered_map<unsigned int, DataElement> gui_data_elements;
+  std::map<unsigned int, unsigned int> gui_element_order; //This allows changing rendering order (like depth)
+  unsigned int gui_style_button;
+  unsigned int gui_style_toggle;
+  unsigned int gui_style_window;
+  unsigned int gui_style_slider;
+  unsigned int gui_style_label;
+  unsigned int gui_style_scrollbar;
+  unsigned int gui_style_textbox;
+};
+
+extern GUIElements guiElements;
+extern bool windowStopPropagation;
+extern int gui_bound_skin;
+
+} //namespace gui
+} //namespace enigma
+
+
 #endif

@@ -29,48 +29,41 @@ using std::unordered_map;
 #include "elements.h"
 #include "styles.h"
 
+using namespace enigma::gui;
+
+namespace enigma {
 namespace gui{
-  extern unsigned int gui_data_elements_maxid;
-  extern unordered_map<unsigned int, DataElement> gui_data_elements;
 
 	Style::Style(){
 		font_styles[0].halign = font_styles[1].halign = font_styles[2].halign = font_styles[3].halign = font_styles[4].halign = font_styles[5].halign = enigma_user::fa_left;
 		font_styles[0].valign = font_styles[1].valign = font_styles[2].valign = font_styles[3].valign = font_styles[4].valign = font_styles[5].valign = enigma_user::fa_middle;
     sprites.fill(-1);
 	}
-
-	//Default styles
-	unsigned int gui_style_button = enigma_user::gui_style_create();
-	unsigned int gui_style_toggle = enigma_user::gui_style_create();
-	unsigned int gui_style_window = enigma_user::gui_style_create();
-	unsigned int gui_style_slider = enigma_user::gui_style_create();
-  unsigned int gui_style_label = enigma_user::gui_style_create();
-  unsigned int gui_style_scrollbar = enigma_user::gui_style_create();
-  unsigned int gui_style_textbox = enigma_user::gui_style_create();
-}
+} //namespace gui
+} //namespace enigma
 
 namespace enigma_user
 {
 	int gui_style_create(){
-		gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, gui::Style());
-    gui::Style &sty = gui::gui_data_elements[gui::gui_data_elements_maxid];
-		sty.id = gui::gui_data_elements_maxid;
-		return gui::gui_data_elements_maxid++;
+		guiElements.gui_data_elements.emplace(guiElements.gui_data_elements_maxid, Style());
+    Style &sty = guiElements.gui_data_elements[guiElements.gui_data_elements_maxid];
+		sty.id = guiElements.gui_data_elements_maxid;
+		return guiElements.gui_data_elements_maxid++;
 	}
 
 	int gui_style_duplicate(int style){
-    get_data_elementv(sty,gui::Style,gui::GUI_TYPE::STYLE,style,-1);
-    gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, sty);
-    gui::gui_data_elements[gui::gui_data_elements_maxid].id = gui::gui_data_elements_maxid;
-		return gui::gui_data_elements_maxid++;
+    get_data_elementv(sty,Style,GUI_TYPE::STYLE,style,-1);
+    guiElements.gui_data_elements.emplace(guiElements.gui_data_elements_maxid, sty);
+    guiElements.gui_data_elements[guiElements.gui_data_elements_maxid].id = guiElements.gui_data_elements_maxid;
+		return guiElements.gui_data_elements_maxid++;
 	}
 
 	void gui_style_destroy(int id){
-		gui::gui_data_elements.erase(gui::gui_data_elements.find(id));
+		guiElements.gui_data_elements.erase(guiElements.gui_data_elements.find(id));
 	}
 
   void gui_style_set_font(int id, int state, int font){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
 		if (state == enigma_user::gui_state_all){
       for ( auto &it : sty.font_styles ){
         it.font = font;
@@ -81,7 +74,7 @@ namespace enigma_user
 	}
 
 	void gui_style_set_font_halign(int id, int state, unsigned int halign){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
 		if (state == enigma_user::gui_state_all){
       for ( auto &it : sty.font_styles ){
         it.halign = halign;
@@ -92,7 +85,7 @@ namespace enigma_user
 	}
 
 	void gui_style_set_font_valign(int id, int state, unsigned int valign){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
 		if (state == enigma_user::gui_state_all){
       for ( auto &it : sty.font_styles ){
         it.valign = valign;
@@ -103,7 +96,7 @@ namespace enigma_user
 	}
 
 	void gui_style_set_font_color(int id, int state, int color){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
 		if (state == enigma_user::gui_state_all){
       for ( auto &it : sty.font_styles ){
         it.color = color;
@@ -114,7 +107,7 @@ namespace enigma_user
 	}
 
 	void gui_style_set_font_alpha(int id, int state, gs_scalar alpha){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
 		if (state == enigma_user::gui_state_all){
       for ( auto &it : sty.font_styles ){
         it.alpha = alpha;
@@ -125,7 +118,7 @@ namespace enigma_user
 	}
 
 	void gui_style_set_sprite(int id, int state, int sprid){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
 	  if (state == enigma_user::gui_state_all){
       sty.sprites.fill(sprid);
 	  }else{
@@ -134,7 +127,7 @@ namespace enigma_user
 	}
 
 	void gui_style_set_sprite_color(int id, int state, int color){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
     if (state == enigma_user::gui_state_all){
       for ( auto &it : sty.sprite_styles ){
         it.color = color;
@@ -145,7 +138,7 @@ namespace enigma_user
 	}
 
   void gui_style_set_sprite_alpha(int id, int state, gs_scalar alpha){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
     if (state == enigma_user::gui_state_all){
       for ( auto &it : sty.sprite_styles ){
         it.alpha = alpha;
@@ -156,7 +149,7 @@ namespace enigma_user
 	}
 
   void gui_style_set_sprite_direction(int id, int state, gs_scalar direction){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
     if (state == enigma_user::gui_state_all){
       for ( auto &it : sty.sprite_styles ){
         it.rotation = direction;
@@ -167,7 +160,7 @@ namespace enigma_user
 	}
 
   void gui_style_set_sprite_scale(int id, int state, gs_scalar scale_x, gs_scalar scale_y){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
     if (state == enigma_user::gui_state_all){
       for ( auto &it : sty.sprite_styles ){
         it.scale_x = scale_x;
@@ -180,22 +173,22 @@ namespace enigma_user
 	}
 
 	void gui_style_set_padding(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
 		sty.padding.set(left,top,right,bottom);
 	}
 
 	void gui_style_set_border(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
 		sty.border.set(left,top,right,bottom);
 	}
 
   void gui_style_set_image_offset(int id, gs_scalar x, gs_scalar y){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
 		sty.image_offset.set(x,y);
 	}
 
   void gui_style_set_box(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h){
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,id);
 		sty.box.set(x,y,w,h);
 	}
-}
+} //namespace enigma_users

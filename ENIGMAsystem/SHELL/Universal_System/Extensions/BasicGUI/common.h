@@ -22,8 +22,8 @@
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
 
-namespace gui
-{
+namespace enigma {
+namespace gui {
   struct offset{
     gs_scalar x = 0.0, y = 0.0;
     offset(){ }
@@ -88,6 +88,7 @@ namespace gui
     enigma_user::draw_set_alpha(st.alpha);
     enigma_user::draw_set_font(st.font);
 	}
-}
+} //namespace gui
+} //namespace enigma
 
 #endif

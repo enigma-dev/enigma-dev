@@ -15,17 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <unordered_map>
-#include <deque>
-#include <string>
-using std::string;
-using std::unordered_map;
-using std::deque;
-
 #include "Universal_System/var4.h"
 #include "Platforms/General/PFmain.h" //For mouse_check_button
 #include "Universal_System/Resources/resource_data.h" //For script_execute
-//#include "Universal_System/Resources/sprites_internal.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -37,30 +29,27 @@ using std::deque;
 #include "common.h"
 #include "include.h"
 
-namespace gui
-{
-	extern int gui_bound_skin;
-	extern unsigned int gui_style_label;
+#include <unordered_map>
+#include <deque>
+#include <string>
 
-	extern unsigned int gui_elements_maxid;
-  extern unsigned int gui_data_elements_maxid;
-  extern unordered_map<unsigned int, Element> gui_elements;
-  extern unordered_map<unsigned int, DataElement> gui_data_elements;
+using namespace enigma::gui;
+using std::string;
+using std::unordered_map;
+using std::deque;
 
-  extern deque<unsigned int> gui_element_order;
-
-	extern bool windowStopPropagation;
-
+namespace enigma {
+namespace gui {
 	//Implements label class
 	Label::Label(){
-	  style_id = gui_style_label; //Default style
+	  style_id = guiElements.gui_style_label; //Default style
 	  enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_left);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_top);
 	}
 
 	void Label::draw(gs_scalar ox, gs_scalar oy){
 		//Draw sprite
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,style_id);
     if (sty.sprites[enigma_user::gui_state_default] != -1){
       if (sty.border.zero == true){
         enigma_user::draw_sprite_stretched(sty.sprites[enigma_user::gui_state_default],-1,
@@ -105,131 +94,132 @@ namespace gui
   		enigma_user::draw_text(ox + textx,oy + texty,text);
     }
 	}
-}
+} //namespace gui
+} //namespace enigma
 
 namespace enigma_user
 {
 	int gui_label_create(){
-		if (gui::gui_bound_skin == -1){ //Add default one
-    	gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Label(), gui::gui_elements_maxid));
+		if (gui_bound_skin == -1){ //Add default one
+    	guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(Label(), guiElements.gui_elements_maxid));
 		}else{
-      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-      get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,ski.label_style,-1);
-      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(lab, gui::gui_elements_maxid));
+      get_data_elementv(ski,Skin,GUI_TYPE::SKIN,gui_bound_skin,-1);
+      get_elementv(lab,Label,GUI_TYPE::LABEL,ski.label_style,-1);
+      guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(lab, guiElements.gui_elements_maxid));
 		}
-    gui::Label &lab = gui::gui_elements[gui::gui_elements_maxid];
+    Label &lab = guiElements.gui_elements[guiElements.gui_elements_maxid];
 		lab.visible = true;
-		lab.id = gui::gui_elements_maxid;
-		return (gui::gui_elements_maxid++);
+		lab.id = guiElements.gui_elements_maxid;
+		return (guiElements.gui_elements_maxid++);
 	}
 
 	int gui_label_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text){
-		if (gui::gui_bound_skin == -1){ //Add default one
-    	gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Label(), gui::gui_elements_maxid));
+		if (gui_bound_skin == -1){ //Add default one
+    	guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(Label(), guiElements.gui_elements_maxid));
 		}else{
-      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-      get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,ski.label_style,-1);
-      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(lab, gui::gui_elements_maxid));
+      get_data_elementv(ski,Skin,GUI_TYPE::SKIN,gui_bound_skin,-1);
+      get_elementv(lab,Label,GUI_TYPE::LABEL,ski.label_style,-1);
+      guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(lab, guiElements.gui_elements_maxid));
 		}
-    gui::Label &lab = gui::gui_elements[gui::gui_elements_maxid];
+    Label &lab = guiElements.gui_elements[guiElements.gui_elements_maxid];
 		lab.visible = true;
-		lab.id = gui::gui_elements_maxid;
+		lab.id = guiElements.gui_elements_maxid;
 		lab.box.set(x, y, w, h);
 		lab.text = text;
-		return (gui::gui_elements_maxid++);
+		return (guiElements.gui_elements_maxid++);
 	}
 
   int gui_label_duplicate(int id){
-    get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,id,-1);
-    gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(lab, gui::gui_elements_maxid));
-    gui::gui_elements[gui::gui_elements_maxid].id = gui::gui_elements_maxid;
-    gui::Label &l = gui::gui_elements[gui::gui_elements_maxid];
-    l.id = gui::gui_elements_maxid;
+    get_elementv(lab,Label,GUI_TYPE::LABEL,id,-1);
+    guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(lab, guiElements.gui_elements_maxid));
+    guiElements.gui_elements[guiElements.gui_elements_maxid].id = guiElements.gui_elements_maxid;
+    Label &l = guiElements.gui_elements[guiElements.gui_elements_maxid];
+    l.id = guiElements.gui_elements_maxid;
     l.parent_id = -1; //We cannot duplicate parenting for now
-    return gui::gui_elements_maxid++;
+    return guiElements.gui_elements_maxid++;
   }
 
 	void gui_label_destroy(int id){
-    get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
+    get_element(lab,Label,GUI_TYPE::LABEL,id);
     if (lab.parent_id != -1){
       gui_window_remove_label(lab.parent_id, id);
 	  }
-		gui::gui_elements.erase(gui::gui_elements.find(id));
+		guiElements.gui_elements.erase(guiElements.gui_elements.find(id));
 	}
 
   ///Setters
 	void gui_label_set_text(int id, string text){
-    get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
+    get_element(lab,Label,GUI_TYPE::LABEL,id);
 		lab.text = text;
 	}
 
 	void gui_label_set_position(int id, gs_scalar x, gs_scalar y){
-    get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
+    get_element(lab,Label,GUI_TYPE::LABEL,id);
 		lab.box.x = x;
 		lab.box.y = y;
 	}
 
   void gui_label_set_size(int id, gs_scalar w, gs_scalar h){
-    get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
+    get_element(lab,Label,GUI_TYPE::LABEL,id);
 		lab.box.w = w;
 		lab.box.h = h;
 	}
 
 	void gui_label_set_style(int id, int style_id){
-    get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
-    check_data_element(gui::GUI_TYPE::STYLE, style_id);
-    lab.style_id = (style_id != -1? style_id : gui::gui_style_label);
+    get_element(lab,Label,GUI_TYPE::LABEL,id);
+    check_data_element(GUI_TYPE::STYLE, style_id);
+    lab.style_id = (style_id != -1? style_id : guiElements.gui_style_label);
   }
 
 	void gui_label_set_visible(int id, bool visible){
-    get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
+    get_element(lab,Label,GUI_TYPE::LABEL,id);
 		lab.visible = visible;
 	}
 
   ///Getters
   gs_scalar gui_label_get_width(int id){
-    get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,id,-2);
+    get_elementv(lab,Label,GUI_TYPE::LABEL,id,-2);
     return lab.box.w;
   }
 
   gs_scalar gui_label_get_height(int id){
-    get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,id,-1);
+    get_elementv(lab,Label,GUI_TYPE::LABEL,id,-1);
     return lab.box.h;
   }
 
   gs_scalar gui_label_get_x(int id){
-    get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,id,-1);
+    get_elementv(lab,Label,GUI_TYPE::LABEL,id,-1);
     return lab.box.x;
   }
 
   gs_scalar gui_label_get_y(int id){
-    get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,id,-1);
+    get_elementv(lab,Label,GUI_TYPE::LABEL,id,-1);
     return lab.box.y;
   }
 
   int gui_label_get_style(int id){
-    get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,id,-1);
+    get_elementv(lab,Label,GUI_TYPE::LABEL,id,-1);
     return lab.style_id;
   }
 
 	bool gui_label_get_visible(int id){
-    get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,id,false);
+    get_elementv(lab,Label,GUI_TYPE::LABEL,id,false);
     return lab.visible;
   }
 
   int gui_label_get_parent(int id){
-    get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,id,-1);
+    get_elementv(lab,Label,GUI_TYPE::LABEL,id,-1);
     return lab.parent_id;
   }
 
 	string gui_label_get_text(int id){
-    get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,id,"");
+    get_elementv(lab,Label,GUI_TYPE::LABEL,id,"");
     return lab.text;
   }
 
   ///Drawers
 	void gui_label_draw(int id){
-    get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
+    get_element(lab,Label,GUI_TYPE::LABEL,id);
     int pfont = enigma_user::draw_get_font();
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
@@ -249,10 +239,10 @@ namespace enigma_user
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
 		gs_scalar palpha = enigma_user::draw_get_alpha();
-		for (auto &l : gui::gui_elements){
+		for (auto &l : guiElements.gui_elements){
 		  ///TODO(harijs) - THIS NEEDS TO BE A LOT PRETTIER (now it does lookup twice)
-      if (l.second.type == gui::GUI_TYPE::LABEL){
-        get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,l.first);
+      if (l.second.type == GUI_TYPE::LABEL){
+        get_element(lab,Label,GUI_TYPE::LABEL,l.first);
         if (lab.visible == true && lab.parent_id == -1){
           lab.draw();
         }
@@ -264,4 +254,4 @@ namespace enigma_user
 		enigma_user::draw_set_alpha(palpha);
     enigma_user::draw_set_font(pfont);
 	}
-}
+} //namespace enigma_user

@@ -21,41 +21,48 @@ using std::unordered_map;
 using std::map;
 
 #include "elements.h"
+#include "include.h"
 
-namespace gui
-{
-  unsigned int gui_elements_maxid = 0;
-  unsigned int gui_data_elements_maxid = 0;
+using namespace enigma::gui;
 
-  unordered_map<unsigned int, Element> gui_elements;
-  unordered_map<unsigned int, DataElement> gui_data_elements;
-  map<unsigned int, unsigned int> gui_element_order; //This allows changing rendering order (like depth)
-}
+namespace enigma {
+namespace gui { 
+  GUIElements::GUIElements() :
+  gui_style_button(enigma_user::gui_style_create()),
+	gui_style_toggle(enigma_user::gui_style_create()),
+	gui_style_window(enigma_user::gui_style_create()),
+	gui_style_slider(enigma_user::gui_style_create()),
+  gui_style_label(enigma_user::gui_style_create()),
+  gui_style_scrollbar(enigma_user::gui_style_create()),
+  gui_style_textbox(enigma_user::gui_style_create()) {}
+  GUIElements guiElements;
+} //namespace gui
+} //namespace enigma
 
 namespace enigma_user
 {
   int gui_element_get_type(int ele){
     check_element_existsv(ele,-1);
-    return static_cast<int>(gui::gui_elements[ele].type);
+    return static_cast<int>(guiElements.gui_elements[ele].type);
   }
 
  ///Depth changers
  ///TODO(harijs) - this still needs to be worked on
 	/*void gui_element_push_to_front(int id){
     check_element_exists(id);
-    auto it = gui::gui_element_order.find(id);
-    if (it != gui::gui_element_order.end()){
-      gui::gui_element_order.erase(it);
-      gui::gui_element_order.emplace(gui::gui_element_order.size(),id);
+    auto it = guiElements.gui_element_order.find(id);
+    if (it != guiElements.gui_element_order.end()){
+      guiElements.gui_element_order.erase(it);
+      guiElements.gui_element_order.emplace(guiElements.gui_element_order.size(),id);
     }
 	}
 
   void gui_element_push_to_back(int id){
     check_element_exists(id);
-    auto it = gui::gui_element_order.find(id);
-    if (it != gui::gui_element_order.end()){
-      gui::gui_element_order.erase(it);
-      gui::gui_element_order.emplace(0,id);
+    auto it = guiElements.gui_element_order.find(id);
+    if (it != guiElements.gui_element_order.end()){
+      guiElements.gui_element_order.erase(it);
+      guiElements.gui_element_order.emplace(0,id);
     }
 	}*/
-}
+} //namespace enigma_user

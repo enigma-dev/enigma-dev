@@ -15,15 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <unordered_map>
-#include <string>
-using std::string;
-using std::unordered_map;
-
 #include "Universal_System/var4.h"
 #include "Platforms/General/PFwindow.h" //For mouse_check_button
 #include "Universal_System/Resources/resource_data.h" //For script_execute
-//#include "Universal_System/Resources/sprites_internal.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -37,21 +31,18 @@ using std::unordered_map;
 #include "include.h"
 #include "common.h"
 
-namespace gui
-{
-	extern int gui_bound_skin;
-	extern unsigned int gui_style_toggle;
+#include <unordered_map>
+#include <string>
 
-	extern unsigned int gui_elements_maxid;
-  extern unsigned int gui_data_elements_maxid;
-  extern unordered_map<unsigned int, Element> gui_elements;
-  extern unordered_map<unsigned int, DataElement> gui_data_elements;
+using namespace enigma::gui;
+using std::string;
+using std::unordered_map;
 
-	extern bool windowStopPropagation;
-
+namespace enigma {
+namespace gui {
 	//Implements toggle class
 	Toggle::Toggle(){
-	  style_id = gui_style_toggle; //Default style
+	  style_id = guiElements.gui_style_toggle; //Default style
 	  enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_left);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_middle);
     callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
@@ -65,9 +56,9 @@ namespace gui
 
 	//Update all possible toggle states (hover, click, toggle etc.)
 	void Toggle::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
-		if (box.point_inside(tx-ox,ty-oy) && gui::windowStopPropagation == false){
+		if (box.point_inside(tx-ox,ty-oy) && windowStopPropagation == false){
       callback_execute(enigma_user::gui_event_hover);
-      gui::windowStopPropagation = true;
+      windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         if (active == false){
           state = enigma_user::gui_state_active;
@@ -97,14 +88,14 @@ namespace gui
 						}else{
 							state = enigma_user::gui_state_on_hover;
 							if (group_id != -1){ //Groups disable any other active element
-                get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,group_id);
+                get_data_element(gro,Group,GUI_TYPE::GROUP,group_id);
                 for (const auto &b : gro.group_buttons){
-                  get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,b);
+                  get_element(but,Button,GUI_TYPE::BUTTON,b);
                   but.active = false;
                 }
                 for (const auto &t : gro.group_toggles){
                   if (t != id) {
-                    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,t);
+                    get_element(tog,Toggle,GUI_TYPE::TOGGLE,t);
                     tog.active = false;
                   }
                 }
@@ -124,7 +115,7 @@ namespace gui
 
 	void Toggle::draw(gs_scalar ox, gs_scalar oy){
 	  //Draw toggle
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,style_id);
     if (sty.sprites[state] != -1){
       if (sty.border.zero == true){
         enigma_user::draw_sprite_stretched(sty.sprites[state],-1,
@@ -172,80 +163,80 @@ namespace gui
 
 	void Toggle::update_text_pos(int state){
 	}
-}
+} //namespace gui
+} //namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 	int gui_toggle_create(){
-		if (gui::gui_bound_skin == -1){ //Add default one
-    	gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Toggle(), gui::gui_elements_maxid));
+		if (gui_bound_skin == -1){ //Add default one
+    	guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(Toggle(), guiElements.gui_elements_maxid));
 		}else{
-      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-      get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,ski.toggle_style,-1);
-      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(tog, gui::gui_elements_maxid));
+      get_data_elementv(ski,Skin,GUI_TYPE::SKIN,gui_bound_skin,-1);
+      get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,ski.toggle_style,-1);
+      guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(tog, guiElements.gui_elements_maxid));
 		}
-    gui::Toggle &t = gui::gui_elements[gui::gui_elements_maxid];
+    Toggle &t = guiElements.gui_elements[guiElements.gui_elements_maxid];
 		t.visible = true;
-		t.id = gui::gui_elements_maxid;
-		return (gui::gui_elements_maxid++);
+		t.id = guiElements.gui_elements_maxid;
+		return (guiElements.gui_elements_maxid++);
 	}
 
 	int gui_toggle_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text){
-		if (gui::gui_bound_skin == -1){ //Add default one
-    	gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Toggle(), gui::gui_elements_maxid));
+		if (gui_bound_skin == -1){ //Add default one
+    	guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(Toggle(), guiElements.gui_elements_maxid));
 		}else{
-      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-      get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,ski.toggle_style,-1);
-      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(tog, gui::gui_elements_maxid));
+      get_data_elementv(ski,Skin,GUI_TYPE::SKIN,gui_bound_skin,-1);
+      get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,ski.toggle_style,-1);
+      guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(tog, guiElements.gui_elements_maxid));
 		}
-    gui::Toggle &t = gui::gui_elements[gui::gui_elements_maxid];
+    Toggle &t = guiElements.gui_elements[guiElements.gui_elements_maxid];
 		t.visible = true;
-		t.id = gui::gui_elements_maxid;
+		t.id = guiElements.gui_elements_maxid;
 		t.box.set(x, y, w, h);
 		t.text = text;
 		t.update_text_pos();
-		return (gui::gui_elements_maxid++);
+		return (guiElements.gui_elements_maxid++);
 	}
 
   int gui_toggle_duplicate(int id){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
-    gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(tog, gui::gui_elements_maxid));
-    gui::gui_elements[gui::gui_elements_maxid].id = gui::gui_elements_maxid;
-    gui::Toggle &t = gui::gui_elements[gui::gui_elements_maxid];
-    t.id = gui::gui_elements_maxid;
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,-1);
+    guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(tog, guiElements.gui_elements_maxid));
+    guiElements.gui_elements[guiElements.gui_elements_maxid].id = guiElements.gui_elements_maxid;
+    Toggle &t = guiElements.gui_elements[guiElements.gui_elements_maxid];
+    t.id = guiElements.gui_elements_maxid;
     t.parent_id = -1; //We cannot duplicate parenting for now
-    return gui::gui_elements_maxid++;
+    return guiElements.gui_elements_maxid++;
   }
 
 	void gui_toggle_destroy(int id){
-    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+    get_element(tog,Toggle,GUI_TYPE::TOGGLE,id);
 	  if (tog.parent_id != -1){
       gui_window_remove_toggle(tog.parent_id, id);
 	  }
-		gui::gui_elements.erase(gui::gui_elements.find(id));
+		guiElements.gui_elements.erase(guiElements.gui_elements.find(id));
 	}
 
   ///Setters
 	void gui_toggle_set_text(int id, string text){
-    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+    get_element(tog,Toggle,GUI_TYPE::TOGGLE,id);
 		tog.text = text;
 	}
 
 	void gui_toggle_set_position(int id, gs_scalar x, gs_scalar y){
-    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+    get_element(tog,Toggle,GUI_TYPE::TOGGLE,id);
 		tog.box.x = x;
 		tog.box.y = y;
 	}
 
 	void gui_toggle_set_size(int id, gs_scalar w, gs_scalar h){
-    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+    get_element(tog,Toggle,GUI_TYPE::TOGGLE,id);
 		tog.box.w = w;
 		tog.box.h = h;
 		tog.update_text_pos();
 	}
 
 	void gui_toggle_set_callback(int id, int event, int script_id){
-    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+    get_element(tog,Toggle,GUI_TYPE::TOGGLE,id);
     if (event == enigma_user::gui_event_all){
       tog.callback.fill(script_id);
 	  }else{
@@ -254,80 +245,80 @@ namespace enigma_user
 	}
 
   void gui_toggle_set_style(int id, int style_id){
-    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
-    check_data_element(gui::GUI_TYPE::STYLE, style_id);
-    tog.style_id = (style_id != -1? style_id : gui::gui_style_toggle);
+    get_element(tog,Toggle,GUI_TYPE::TOGGLE,id);
+    check_data_element(GUI_TYPE::STYLE, style_id);
+    tog.style_id = (style_id != -1? style_id : guiElements.gui_style_toggle);
   }
 
   void gui_toggle_set_active(int id, bool active){
-    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+    get_element(tog,Toggle,GUI_TYPE::TOGGLE,id);
 		tog.active = active;
 	}
 
 	void gui_toggle_set_visible(int id, bool visible){
-    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+    get_element(tog,Toggle,GUI_TYPE::TOGGLE,id);
 		tog.visible = visible;
 	}
 
   ///Getters
   int gui_toggle_get_style(int id){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,-1);
     return tog.style_id;
   }
 
 	int gui_toggle_get_state(int id){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,-1);
 		return tog.state;
 	}
 
 	int gui_toggle_get_callback(int id, int event){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,-1);
     return tog.callback[event];
 	}
 
 	int gui_toggle_get_parent(int id){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,-1);
     return tog.parent_id;
 	}
 
 	bool gui_toggle_get_active(int id){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,false);
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,false);
 		return tog.active;
 	}
 
 	bool gui_toggle_get_visible(int id){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,false);
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,false);
     return tog.visible;
 	}
 
 	gs_scalar gui_toggle_get_width(int id){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,-1);
     return tog.box.w;
 	}
 
 	gs_scalar gui_toggle_get_height(int id){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,-1);
     return tog.box.h;
 	}
 
 	gs_scalar gui_toggle_get_x(int id){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,-1);
     return tog.box.x;
 	}
 
 	gs_scalar gui_toggle_get_y(int id){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,-1);
     return tog.box.y;
 	}
 
   string gui_toggle_get_text(int id){
-    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,"");
+    get_elementv(tog,Toggle,GUI_TYPE::TOGGLE,id,"");
     return tog.text;
 	}
 
   ///Drawers
 	void gui_toggle_draw(int id){
-    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+    get_element(tog,Toggle,GUI_TYPE::TOGGLE,id);
     int pfont = enigma_user::draw_get_font();
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
@@ -348,10 +339,10 @@ namespace enigma_user
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
 		gs_scalar palpha = enigma_user::draw_get_alpha();
-		for (auto &b : gui::gui_elements){
+		for (auto &b : guiElements.gui_elements){
 		  ///TODO(harijs) - THIS NEEDS TO BE A LOT PRETTIER (now it does lookup twice)
-      if (b.second.type == gui::GUI_TYPE::TOGGLE){
-        get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,b.first);
+      if (b.second.type == GUI_TYPE::TOGGLE){
+        get_element(tog,Toggle,GUI_TYPE::TOGGLE,b.first);
         if (tog.visible == true && tog.parent_id == -1){
           tog.update();
           tog.draw();
@@ -363,5 +354,5 @@ namespace enigma_user
 		enigma_user::draw_set_color(pcolor);
 		enigma_user::draw_set_alpha(palpha);
     enigma_user::draw_set_font(pfont);
-	}
-}
+    }
+} //namespace enigma_user

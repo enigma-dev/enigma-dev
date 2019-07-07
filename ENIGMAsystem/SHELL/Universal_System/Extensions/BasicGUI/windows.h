@@ -18,20 +18,16 @@
 #ifndef BGUI_WINDOWS_H
 #define BGUI_WINDOWS_H
 
+#include "Platforms/General/PFwindow.h" //mouse_x, mouse_y
+#include "common.h"
+#include "parents.h"
+
 #include <array>
 #include <vector>
 #include <string>
 
-#include "common.h"
-#include "parents.h"
-
-namespace enigma_user
-{
-  extern double mouse_x, mouse_y;
-}
-
-namespace gui
-{
+namespace enigma {
+namespace gui {
   class Window{
     public:
       int id = -1;
@@ -80,6 +76,7 @@ namespace gui
       vector<unsigned int> child_scrollbars;
       vector<unsigned int> child_buttons;*/
   };
-}
+} //namespace gui
+} //namespace enigma
 
 #endif

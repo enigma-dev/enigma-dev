@@ -17,32 +17,25 @@
 
 #ifndef BGUI_TEXTBOXES_H
 #define BGUI_TEXTBOXES_H
-#include <array>
-#include <string>
-#include <vector>
-using std::array;
-using std::string;
-using std::vector;
 
+#include "Platforms/General/PFwindow.h" //mouse_x, mouse_y
+#include "Graphics_Systems/General/GSfont.h" //string_width, font_height, draw_get_font
 #include "common.h"
 #include "parents.h"
 
-#include "Graphics_Systems/General/GSfont.h" //string_width, font_height, draw_get_font
+#include <array>
+#include <string>
+#include <vector>
 
-namespace enigma_user
-{
-  extern double mouse_x, mouse_y;
-}
-
-namespace gui
-{
+namespace enigma {
+namespace gui {
   class Textbox{
     public:
       rect box;
-      vector<string> text{""};
-      vector<double> text_width{0.0};
+      std::vector<string> text{""};
+      std::vector<double> text_width{0.0};
 
-      array<int,6> callback; //Script to run on event
+      std::array<int,6> callback; //Script to run on event
 
       unsigned int id;
       int state = 0;
@@ -93,7 +86,7 @@ namespace gui
       void update_text_pos();
       void callback_execute(int event);
 
-      string get_text();
+      std::string get_text();
 
       void set_cursor(double x, double y); //x/y in global pixels
 
@@ -111,9 +104,10 @@ namespace gui
       }
 
       void marker_delete();
-      string marker_string();
-      void marker_insert(string str);
+      std::string marker_string();
+      void marker_insert(std::string str);
   };
 }
+} //namespace enigma
 
 #endif

@@ -17,18 +17,15 @@
 
 #ifndef BGUI_SLIDER_H
 #define BGUI_SLIDER_H
+
+#include "Platforms/General/PFwindow.h" //mouse_x, mouse_y
+#include "common.h"
+
 #include <array>
 #include <string>
 
-#include "common.h"
-
-namespace enigma_user
-{
-	extern double mouse_x, mouse_y;
-}
-
-namespace gui
-{
+namespace enigma {
+namespace gui {
 	class Slider{
 		public:
 			unsigned int id;
@@ -67,5 +64,6 @@ namespace gui
 			void callback_execute(int event);
 	};
 }
+} //namespace enigma
 
 #endif
