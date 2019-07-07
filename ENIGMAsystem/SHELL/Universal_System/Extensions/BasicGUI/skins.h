@@ -20,20 +20,20 @@
 
 namespace enigma {
 namespace gui {
-	class Skin{
-		public:
-			unsigned int id;
-			int button_style;
-			int window_style;
-			int toggle_style;
-			int slider_style;
-      int scrollbar_style;
-			int label_style;
-			int textbox_style;
+class Skin {
+ public:
+  unsigned int id;
+  int button_style;
+  int window_style;
+  int toggle_style;
+  int slider_style;
+  int scrollbar_style;
+  int label_style;
+  int textbox_style;
 
-			Skin();
-	};
-}
-} //namespace enigma
+  Skin();
+};
+}  // namespace gui
+}  //namespace enigma
 
 #endif
