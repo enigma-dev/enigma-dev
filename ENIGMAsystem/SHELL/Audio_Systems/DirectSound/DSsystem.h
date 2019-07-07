@@ -18,8 +18,9 @@
 #ifndef ENIGMA_DS_SYSTEM_H
 #define ENIGMA_DS_SYSTEM_H
 
-#ifdef DEBUG_MODE
 #include "Widget_Systems/widgets_mandatory.h"  // show_error
+
+#ifdef DEBUG_MODE
 #include "libEGMstd.h"
 #endif
 
