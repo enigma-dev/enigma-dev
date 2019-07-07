@@ -24,22 +24,23 @@
 
 namespace enigma {
 namespace gui {
-	class Label{
-		public:
-			unsigned int id;
-			rect box;
-			std::string text = "";
+class Label {
+ public:
+  unsigned int id;
+  rect box;
+  std::string text = "";
 
-   		bool visible = true;
+  bool visible = true;
 
-			int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
+  int parent_id =
+      -1;  //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
 
-      int style_id = -1; //The style we use
+  int style_id = -1;  //The style we use
 
-			Label();
-			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
-	};
-} //namespace gui
-} //namespace enigma
+  Label();
+  void draw(gs_scalar ox = 0, gs_scalar oy = 0);
+};
+}  //namespace gui
+}  //namespace enigma
 
 #endif
