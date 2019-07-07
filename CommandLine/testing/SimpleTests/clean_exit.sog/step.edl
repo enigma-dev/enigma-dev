@@ -1,2 +1,0 @@
-cons_show_message("Game has reached step event succesfully. Exiting");
-game_end();
