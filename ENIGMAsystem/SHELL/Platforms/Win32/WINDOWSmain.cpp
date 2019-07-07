@@ -16,33 +16,33 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#define NOMINMAX  // for windows.h because we use std::min/max
+#define NOMINMAX // for windows.h because we use std::min/max
 #include "WINDOWSmain.h"
 
-#include "Platforms/General/PFfilemanip.h"
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
+#include "Platforms/General/PFfilemanip.h"
 #include "Platforms/platforms_mandatory.h"
 
+#include "Universal_System/mathnc.h" // enigma_user::clamp
 #include "Universal_System/estring.h"
-#include "Universal_System/mathnc.h"  // enigma_user::clamp
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
 #include <mmsystem.h>
 #include <time.h>
-#include <algorithm>
 #include <chrono>
+#include <thread>
+#include <algorithm>
 #include <cstdio>
 #include <sstream>
 #include <string>
-#include <thread>
 #include <vector>
 using std::string;
 using std::vector;
 
-using enigma_user::directory_exists;
 using enigma_user::file_exists;
+using enigma_user::directory_exists;
 
 namespace enigma_user {
 
@@ -59,20 +59,22 @@ HANDLE mainthread;
 
 void (*touch_extension_register)(HWND hWnd);
 
-void windowsystem_write_exename(char *exenamehere) {
+void windowsystem_write_exename(char *exenamehere) { 
   tstring tstr_exenamehere = widen(exenamehere);
-  GetModuleFileNameW(NULL, (wchar_t *)tstr_exenamehere.c_str(), (DWORD)tstr_exenamehere.length() + 1);
+  GetModuleFileNameW(NULL, (wchar_t *)tstr_exenamehere.c_str(), (DWORD)tstr_exenamehere.length() + 1); 
 }
 
 void Sleep(int ms) { ::Sleep(ms); }
 
 void initInput(){};
 
-HWND get_window_handle() { return hWnd; }
+HWND get_window_handle() {
+  return hWnd;
+}
 
-}  // namespace enigma
+} // namespace enigma
 
-static inline string add_slash(const string &dir) {
+static inline string add_slash(const string& dir) {
   if (dir.empty() || dir.back() != '\\') return dir + '\\';
   return dir;
 }
@@ -93,7 +95,7 @@ bool set_working_directory(string dname) {
   return false;
 }
 
-}  // namespace enigma_user
+} // enigma_user
 
 namespace enigma {
 bool use_pc;
@@ -133,16 +135,15 @@ void update_current_time() {
 }
 long get_current_offset_difference_mcs() {
   if (use_pc) {
-    return enigma_user::clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0,
-                              1000000);
+    return enigma_user::clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0, 1000000);
   } else {
     return enigma_user::clamp((time_current_ft.QuadPart - time_offset_ft.QuadPart) / 10, 0, 1000000);
   }
 }
 long get_current_offset_slowing_difference_mcs() {
   if (use_pc) {
-    return enigma_user::clamp(
-        (time_current_pc.QuadPart - time_offset_slowing_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0, 1000000);
+    return enigma_user::clamp((time_current_pc.QuadPart - time_offset_slowing_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0,
+                 1000000);
   } else {
     return enigma_user::clamp((time_current_ft.QuadPart - time_offset_slowing_ft.QuadPart) / 10, 0, 1000000);
   }
@@ -331,7 +332,7 @@ void initialize_directory_globals() {
   GetModuleFileNameW(NULL, buffer, MAX_PATH + 1);
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
-      enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
+    enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
 
   // Set the temp_directory
   buffer[0] = 0;
@@ -474,7 +475,9 @@ std::string filename_absolute(std::string fname) {
   return "";
 }
 
-std::string filename_join(std::string prefix, std::string suffix) { return add_slash(prefix) + suffix; }
+std::string filename_join(std::string prefix, std::string suffix) {
+  return add_slash(prefix) + suffix;
+}
 
 std::string environment_get_variable(std::string name) {
   WCHAR buffer[1024];
@@ -507,16 +510,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   enigma::hInstance = hInstance;
 
   int argc = 0;
-  std::vector<const char *> argv;
+  std::vector<const char*> argv;
   std::vector<string> shortened;
   if (LPWSTR *_argv = CommandLineToArgvW(GetCommandLineW(), &argc)) {
     for (int i = 0; i < argc; ++i) {
       shortened.push_back(shorten(_argv[i]));
       argv.push_back(shortened[i].c_str());
     }
-    LocalFree(_argv);
+    LocalFree (_argv);
   }
 
   //Main loop
-  return enigma::enigma_main(argc, const_cast<char **>(argv.data()));
+  return enigma::enigma_main(argc, const_cast<char**>(argv.data()));
 }
