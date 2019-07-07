@@ -1,5 +1,23 @@
+/** Copyright (C) 2019 Samuel Venable
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFfilemanip.h"
+#include "Universal_System/estring.h"
 
 #include <limits.h>
 #include <unistd.h>
@@ -31,11 +49,18 @@ bool set_working_directory(string dname) {
 
 // converts a relative path to absolute if the path exists
 std::string filename_absolute(std::string fname) {
-  if (file_exists(fname) || directory_exists(fname)) {
-    char rpath[PATH_MAX];
-    char *ptr = realpath(fname.c_str(), rpath);
-    if (ptr != NULL) { return rpath; }
-  } return "";
+  if (string_replace_all(fname, " ", "") == "") fname = ".";
+  char rpath[PATH_MAX];
+  char *result = realpath(fname.c_str(), rpath);
+  if (result != NULL) {
+    if (directory_exists(result)) return add_slash(result);
+    if (file_exists(result)) return result;
+  }
+  return "";
+}
+
+std::string filename_join(std::string prefix, std::string suffix) {
+  return add_slash(prefix) + suffix;
 }
 
 string environment_get_variable(string name) {
