@@ -90,7 +90,7 @@ void file_text_close(int fileid) // Closes the file with the given file id.
 {
    if(fileid == -1) {
     #ifdef DEBUG_MODE
-      enigma_user::show_error("Cannot close an unopened file.",false);
+      DEBUG_MESSAGE("Cannot close an unopened file.", MESSAGE_TYPE::M_USER_ERROR);
     #endif
     return;
   }
@@ -233,7 +233,7 @@ bool file_bin_rewrite(int fileid) // Rewrites the file with the given file id, t
 
   if (mf.f == NULL) {
     #ifdef DEBUGMODE
-      enigma_user::show_error("Failed to reopen binary file. Sure it's a binary file? Drive been removed?",false);
+      DEBUG_MESSAGE("Failed to reopen binary file. Sure it's a binary file? Drive been removed?", MESSAGE_TYPE::M_ERROR);
     #endif
     return false;
   }

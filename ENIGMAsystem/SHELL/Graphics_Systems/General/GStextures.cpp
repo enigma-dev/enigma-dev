@@ -20,7 +20,7 @@
 #include "GSstdraw.h"
 #include "GStextures_impl.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/image_formats.h"
 
 #include <string.h> // for memcpy
@@ -115,7 +115,7 @@ int texture_add(string filename, bool mipmap) {
   int img_num;
 
   unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,&img_num,false);
-  if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
+  if (pxdata == NULL) { DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR); return -1; }
   unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
 

@@ -33,8 +33,6 @@
 
 namespace enigma {
 
-using enigma_user::show_error;
-
 void exe_loadfonts(FILE* exe) {
   int nullhere;
   unsigned fontcount, fntid, twid, thgt, gwid, ghgt;
@@ -45,7 +43,7 @@ void exe_loadfonts(FILE* exe) {
 
   if (!fread(&fontcount, 4, 1, exe)) return;
   if ((int)fontcount != rawfontcount) {
-    show_error("Resource data does not match up with game metrics. Unable to improvise.", 0);
+    DEBUG_MESSAGE("Resource data does not match up with game metrics. Unable to improvise.", MESSAGE_TYPE::M_ERROR);
     return;
   }
 
@@ -82,21 +80,20 @@ void exe_loadfonts(FILE* exe) {
     }
 
     if (size != sz2) {
-      show_error("Failed to load font: Data is truncated before exe end. Read " + enigma_user::toString(sz2) +
-                     " out of expected " + enigma_user::toString(size),
-                 0);
+      DEBUG_MESSAGE("Failed to load font: Data is truncated before exe end. Read " + enigma_user::toString(sz2) +
+                     " out of expected " + enigma_user::toString(size), MESSAGE_TYPE::M_ERROR);
       return;
     }
     if (!fread(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "done", sizeof(int)) != 0) {
-      printf("Unexpected end; eof:%s\n", feof(exe) ? "true" : "false");
+      DEBUG_MESSAGE(std::string("Unexpected end; eof: ") + ((feof(exe) == 0) ? "true" : "false"), MESSAGE_TYPE::M_ERROR);
       return;
     }
     //unpacked = width*height*4;
     /*unsigned char* pixels=new unsigned char[unpacked+1];
     if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
     {
-      show_error("Background load error: Background does not match expected size",0);
+      DEBUG_MESSAGE("Background load error: Background does not match expected size", MESSAGE_TYPE::M_ERROR);
       continue;
     }
     delete[] cpixels;*/
@@ -138,8 +135,6 @@ void exe_loadfonts(FILE* exe) {
         if (fg.y2 > ymax) ymax = fg.y2;
 
         fgr.glyphs.push_back(fg);
-
-        //printf("fntid%d, twid%d, thgt%d, advance%f, baseline%f, origin%f, gwid%d, ghgt%d, gtx%f, gty%f, gtx2%f, gty2%f\n", fntid, twid, thgt, advance, baseline, origin, gwid, ghgt, gtx, gty, gtx2, gty2);
       }
 
       fontstructarray[i]->glyphRanges.push_back(std::move(fgr));

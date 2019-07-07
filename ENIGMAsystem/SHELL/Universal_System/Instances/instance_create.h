@@ -51,8 +51,8 @@ namespace enigma
       #define NEW_OBJ_PREFIX ob =
           #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
           default:
-          #if defined(SHOW_ERRORS) && SHOW_ERRORS
-              enigma_user::show_error("Object doesn't exist",0);
+          #ifdef DEBUG_MODE
+              DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::M_USER_ERROR);
           #endif
               return;
       }
@@ -77,8 +77,8 @@ namespace enigma
         #define NEW_OBJ_PREFIX ob =
       #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
       default:
-          #if defined(SHOW_ERRORS) && SHOW_ERRORS
-          enigma_user::show_error("Object doesn't exist",0);
+          #ifdef DEBUG_MODE
+          DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::M_USER_ERROR);
           #endif
           return NULL;
     }
@@ -97,8 +97,8 @@ namespace enigma_user
         #define NEW_OBJ_PREFIX ob =
       #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
       default:
-          #if defined(SHOW_ERRORS) && SHOW_ERRORS
-          enigma_user::show_error("Object doesn't exist",0);
+          #ifdef DEBUG_MODE
+          DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::M_USER_ERROR);
           #endif
         return -1;
     }
@@ -126,9 +126,9 @@ namespace enigma_user
     #define NEW_OBJ_PREFIX ob =
         #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
         default:
-        #if defined(SHOW_ERRORS) && SHOW_ERRORS
-            enigma_user::show_error("Object doesn't exist",0);
-        #endif
+          #ifdef DEBUG_MODE
+          DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::M_USER_ERROR);
+          #endif
             (void)x; (void)y;
             return;
     }

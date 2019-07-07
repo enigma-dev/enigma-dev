@@ -20,6 +20,7 @@
 #include "image_formats.h"
 #include "image_formats_exts.h"
 #include "Universal_System/estring.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include "gif_format.h"
 
@@ -214,7 +215,7 @@ unsigned char* image_load_gif(string filename, unsigned int* width, unsigned int
 
   error = load_gif_file(filename.c_str(), image, *width, *height, *fullwidth, *fullheight, *imgnumb);
   if (error) {
-    printf("error %u: %s\n", error, load_gif_error_text(error));
+    DEBUG_MESSAGE(load_gif_error_text(error), MESSAGE_TYPE::M_ERROR);
     return NULL;
   }
 
