@@ -15,20 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <unordered_map>
-#include <string>
-#include <ctype.h> //isalnum
-using std::string;
-using std::to_string;
-using std::unordered_map;
-
 #include "Universal_System/var4.h"
 #include "Platforms/General/PFmain.h" //For mouse_check_button and keyboard_check_button
 #include "Universal_System/Resources/resource_data.h" //For script_execute
 #include "Universal_System/estring.h" //For string manipulation
 #include "Platforms/General/PFwindow.h" //For clipboard
-
-//#include "Universal_System/Resources/sprites_internal.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -42,21 +33,21 @@ using std::unordered_map;
 #include "include.h"
 #include "common.h"
 
-namespace gui
-{
-  extern unsigned int gui_elements_maxid;
-  extern unsigned int gui_data_elements_maxid;
-  extern unordered_map<unsigned int, Element> gui_elements;
-  extern unordered_map<unsigned int, DataElement> gui_data_elements;
+#include <unordered_map>
+#include <string>
+#include <ctype.h> //isalnum
 
-  extern int gui_bound_skin;
-  extern unsigned int gui_style_textbox;
+using namespace enigma::gui;
+using std::string;
+using std::to_string;
+using std::unordered_map;
 
-  extern bool windowStopPropagation;
+namespace enigma {
+namespace gui {
 
   //Implements textbox class
   Textbox::Textbox(){
-    style_id = gui_style_textbox; //Default style
+    style_id = guiElements.gui_style_textbox; //Default style
     enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_center);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_middle);
     callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
@@ -73,15 +64,15 @@ namespace gui
     //Update children
     parenter.update_children(ox+box.x, oy+box.y);
 
-    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,parent_id);
+    get_element(win,Window,GUI_TYPE::WINDOW,parent_id);
 
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,style_id);
     sty.font_styles[state].use();
     ///TODO(harijs) - This box check needs to take into account multi-level parenting
     bool pacheck = (parent_id == -1 || (parent_id != -1 && (win.stencil_mask == false || win.box.point_inside(tx,ty))));
-    if (gui::windowStopPropagation == false && pacheck == true && box.point_inside(tx-ox,ty-oy)){
+    if (windowStopPropagation == false && pacheck == true && box.point_inside(tx-ox,ty-oy)){
       callback_execute(enigma_user::gui_event_hover);
-      gui::windowStopPropagation = true;
+      windowStopPropagation = true;
       if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         active = true;
         state = enigma_user::gui_state_on_active;
@@ -340,7 +331,7 @@ namespace gui
                   char* p;
                   string str = text[cursor_line];
                   str.insert(cursor_position,enigma_user::keyboard_lastchar);
-                  double val = strtod(str.c_str(), &p);
+                  strtod(str.c_str(), &p);
                   if (*p != 0){
                     break;
                   }
@@ -389,7 +380,7 @@ namespace gui
 
   void Textbox::draw(gs_scalar ox, gs_scalar oy){
     //Draw textbox
-    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    get_data_element(sty,Style,GUI_TYPE::STYLE,style_id);
 
     sty.font_styles[state].use();
     double h = (double)enigma_user::font_height(enigma_user::draw_get_font());
@@ -430,12 +421,12 @@ namespace gui
     }
 
     //Draw marker
-    get_data_element(msty,gui::Style,gui::GUI_TYPE::STYLE,marker_style_id);
+    get_data_element(msty,Style,GUI_TYPE::STYLE,marker_style_id);
     if (mark == true){
       if (msty.sprites[state] != -1){
         if (msty.border.zero == true){
           for (int l=mark_start_line; l<mark_end_line+1; ++l ){
-            double msx, msy, mex, mey;
+            double msx, mex;
             if (mark_start_line == l && mark_end_line == l){
               msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
               mex = enigma_user::string_width(text[mark_end_line].substr(mark_start_pos, mark_end_pos-mark_start_pos));
@@ -459,7 +450,7 @@ namespace gui
           }
         }else{
           for (int l=mark_start_line; l<mark_end_line+1; ++l ){
-            double msx, msy, mex, mey;
+            double msx, mex;
             if (mark_start_line == l && mark_end_line == l){
               msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
               mex = ox + textx + enigma_user::string_width(text[mark_end_line].substr(0, mark_end_pos));
@@ -577,7 +568,6 @@ namespace gui
         str += "\n";
 
         //Add the middle
-        int l = mark_start_line+1;
         for (int l = mark_start_line+1; l < mark_end_line; ++l){
           str += text[l];
           str += "\n";
@@ -719,97 +709,98 @@ namespace gui
     }
     return str;
   }
-}
+} //namespace gui
+} //namespace enigma
 
 namespace enigma_user
 {
   int gui_textbox_create(){
-    if (gui::gui_bound_skin == -1){ //Add default one
-      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Textbox(), gui::gui_elements_maxid));
+    if (gui_bound_skin == -1){ //Add default one
+      guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(Textbox(), guiElements.gui_elements_maxid));
     }else{
-      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-      get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,ski.textbox_style,-1);
-      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(tex, gui::gui_elements_maxid));
+      get_data_elementv(ski,Skin,GUI_TYPE::SKIN,gui_bound_skin,-1);
+      get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,ski.textbox_style,-1);
+      guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(tex, guiElements.gui_elements_maxid));
     }
-    gui::Textbox &t = gui::gui_elements[gui::gui_elements_maxid];
+    Textbox &t = guiElements.gui_elements[guiElements.gui_elements_maxid];
     t.visible = true;
-    t.id = gui::gui_elements_maxid;
-    return (gui::gui_elements_maxid++);
+    t.id = guiElements.gui_elements_maxid;
+    return (guiElements.gui_elements_maxid++);
   }
 
   int gui_textbox_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text){
-    if (gui::gui_bound_skin == -1){ //Add default one
-      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Textbox(), gui::gui_elements_maxid));
+    if (gui_bound_skin == -1){ //Add default one
+      guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(Textbox(), guiElements.gui_elements_maxid));
     }else{
-      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-      get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,ski.textbox_style,-1);
-      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(tex, gui::gui_elements_maxid));
+      get_data_elementv(ski,Skin,GUI_TYPE::SKIN,gui_bound_skin,-1);
+      get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,ski.textbox_style,-1);
+      guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(tex, guiElements.gui_elements_maxid));
     }
-    gui::Textbox &t = gui::gui_elements[gui::gui_elements_maxid];
+    Textbox &t = guiElements.gui_elements[guiElements.gui_elements_maxid];
     t.visible = true;
-    t.id = gui::gui_elements_maxid;
+    t.id = guiElements.gui_elements_maxid;
     t.box.set(x, y, w, h);
     t.marker_insert(text);
     t.update_text_pos();
-    return (gui::gui_elements_maxid++);
+    return (guiElements.gui_elements_maxid++);
   }
 
   int gui_textbox_duplicate(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
-    gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(tex, gui::gui_elements_maxid));
-    auto &e = gui::gui_elements[gui::gui_elements_maxid];
-    e.id = gui::gui_elements_maxid;
-    gui::Textbox &t = gui::gui_elements[gui::gui_elements_maxid];
-    t.id = gui::gui_elements_maxid;
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,-1);
+    guiElements.gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(guiElements.gui_elements_maxid), std::forward_as_tuple(tex, guiElements.gui_elements_maxid));
+    auto &e = guiElements.gui_elements[guiElements.gui_elements_maxid];
+    e.id = guiElements.gui_elements_maxid;
+    Textbox &t = guiElements.gui_elements[guiElements.gui_elements_maxid];
+    t.id = guiElements.gui_elements_maxid;
     t.parent_id = -1; //We cannot duplicate parenting for now
-    return gui::gui_elements_maxid++;
+    return guiElements.gui_elements_maxid++;
   }
 
   void gui_textbox_destroy(int id){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
     if (tex.parent_id != -1){
       gui_window_remove_textbox(tex.parent_id, id);
     }
-    gui::gui_elements.erase(gui::gui_elements.find(id));
+    guiElements.gui_elements.erase(guiElements.gui_elements.find(id));
   }
 
   ///Setters
   void gui_textbox_set_text(int id, string text){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
     tex.clear();
     tex.marker_insert(text);
   }
 
   void gui_textbox_set_numeric(int id, bool numeric){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
     tex.numbers_only = numeric;
   }
 
   void gui_textbox_set_max_length(int id, int length){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
     tex.char_limit = length;
   }
 
   void gui_textbox_set_max_lines(int id, int lines){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
     tex.line_limit = lines;
   }
 
   void gui_textbox_set_position(int id, gs_scalar x, gs_scalar y){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
     tex.box.x = x;
     tex.box.y = y;
   }
 
   void gui_textbox_set_size(int id, gs_scalar w, gs_scalar h){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
     tex.box.w = w;
     tex.box.h = h;
     tex.update_text_pos();
   }
 
   void gui_textbox_set_callback(int id, int event, int script_id){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
     if (event == enigma_user::gui_event_all){
       tex.callback.fill(script_id);
     }else{
@@ -818,253 +809,253 @@ namespace enigma_user
   }
 
   void gui_textbox_set_style(int id, int style_id){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
-    check_data_element(gui::GUI_TYPE::STYLE, style_id);
-    tex.style_id = (style_id != -1? style_id : gui::gui_style_textbox);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
+    check_data_element(GUI_TYPE::STYLE, style_id);
+    tex.style_id = (style_id != -1? style_id : guiElements.gui_style_textbox);
   }
 
   void gui_textbox_set_marker_style(int id, int style_id){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
-    check_data_element(gui::GUI_TYPE::STYLE, style_id);
-    tex.marker_style_id = (style_id != -1? style_id : gui::gui_style_textbox);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
+    check_data_element(GUI_TYPE::STYLE, style_id);
+    tex.marker_style_id = (style_id != -1? style_id : guiElements.gui_style_textbox);
   }
 
 
   void gui_textbox_set_active(int id, bool active){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
     tex.active = active;
   }
 
   void gui_textbox_set_visible(int id, bool visible){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
     tex.visible = visible;
   }
 
   ///Getters
   int gui_textbox_get_style(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return tex.style_id;
   }
 
   int gui_textbox_get_state(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return tex.state;
   }
 
   bool gui_textbox_get_active(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,false);
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,false);
     return tex.active;
   }
 
   bool gui_textbox_get_visible(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,false);
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,false);
     return tex.visible;
   }
 
   int gui_textbox_get_callback(int id, int event){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return tex.callback[event];
   }
 
   int gui_textbox_get_parent(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return tex.parent_id;
   }
 
   bool gui_textbox_get_numeric(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return tex.numbers_only;
   }
 
   gs_scalar gui_textbox_get_width(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return tex.box.w;
   }
 
   gs_scalar gui_textbox_get_height(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return tex.box.h;
   }
 
   gs_scalar gui_textbox_get_x(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return tex.box.x;
   }
 
   gs_scalar gui_textbox_get_y(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return tex.box.y;
   }
 
   string gui_textbox_get_text(int id){
-    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,"");
+    get_elementv(tex,Textbox,GUI_TYPE::TEXTBOX,id,"");
     return tex.get_text();
   }
 
   ///Drawers
   void gui_textbox_draw(int id){
-    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
-    gui::font_style psty = gui::get_current_draw_state();
+    get_element(tex,Textbox,GUI_TYPE::TEXTBOX,id);
+    font_style psty = get_current_draw_state();
     tex.update();
     tex.draw();
-    gui::set_current_draw_state(psty);
+    set_current_draw_state(psty);
   }
 
   void gui_textbox_draw(){
-    gui::font_style psty = gui::get_current_draw_state();
-    for (auto &b : gui::gui_elements){
+    font_style psty = get_current_draw_state();
+    for (auto &b : guiElements.gui_elements){
       ///TODO(harijs) - THIS NEEDS TO BE A LOT PRETTIER (now it does lookup twice)
-      if (b.second.type == gui::GUI_TYPE::TEXTBOX){
-        get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,b.first);
+      if (b.second.type == GUI_TYPE::TEXTBOX){
+        get_element(tex,Textbox,GUI_TYPE::TEXTBOX,b.first);
         if (tex.visible == true && tex.parent_id == -1){
           tex.update();
           tex.draw();
         }
       }
     }
-    gui::set_current_draw_state(psty);
+    set_current_draw_state(psty);
   }
 
   ///Parenting
   void gui_textbox_add_textbox(int id, int tid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.textbox_add(tid);
   }
 
   void gui_textbox_add_button(int id, int bid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.button_add(bid);
   }
 
   void gui_textbox_add_toggle(int id, int tid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.toggle_add(tid);
   }
 
   void gui_textbox_add_slider(int id, int sid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.slider_add(sid);
   }
 
   void gui_textbox_add_scrollbar(int id, int sid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.scrollbar_add(sid);
   }
 
   void gui_textbox_add_label(int id, int lid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.label_add(lid);
   }
 
   void gui_textbox_add_window(int id, int wid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.window_add(wid);
   }
 
   void gui_textbox_remove_textbox(int id, int tid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.textbox_remove(tid);
   }
 
   void gui_textbox_remove_button(int id, int bid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.button_remove(bid);
   }
 
   void gui_textbox_remove_toggle(int id, int tid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.toggle_remove(tid);
   }
 
   void gui_textbox_remove_slider(int id, int sid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.slider_remove(sid);
 
   }
 
   void gui_textbox_remove_scrollbar(int id, int sid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.scrollbar_remove(sid);
   }
 
   void gui_textbox_remove_label(int id, int lid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.label_remove(lid);
   }
 
   void gui_textbox_remove_window(int id, int wid){
-    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    get_element(ele,Textbox,GUI_TYPE::TEXTBOX,id);
     ele.parenter.window_remove(wid);
   }
 
   int gui_textbox_get_textbox_count(int id){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.textbox_count();
   }
 
   int gui_textbox_get_button_count(int id){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.button_count();
   }
 
   int gui_textbox_get_toggle_count(int id){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.toggle_count();
   }
 
   int gui_textbox_get_slider_count(int id){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.slider_count();
   }
 
   int gui_textbox_get_scrollbar_count(int id){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.scrollbar_count();
   }
 
   int gui_textbox_get_label_count(int id){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.label_count();
   }
 
   int gui_textbox_get_window_count(int id){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.window_count();
   }
 
   ///GETTERS FOR ELEMENTS
   int gui_textbox_get_textbox(int id, int tex){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.textbox(tex);
   }
 
   int gui_textbox_get_button(int id, int but){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.button(but);
   }
 
   int gui_textbox_get_toggle(int id, int tog){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.toggle(tog);
   }
 
   int gui_textbox_get_slider(int id, int sli){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.slider(sli);
   }
 
   int gui_textbox_get_scrollbar(int id, int scr){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.scrollbar(scr);
   }
 
   int gui_textbox_get_label(int id, int lab){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.label(lab);
   }
 
   int gui_textbox_get_window(int id, int wid){
-    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    get_elementv(ele,Textbox,GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.window(wid);
   }
-}
+} //namespace enigma_user

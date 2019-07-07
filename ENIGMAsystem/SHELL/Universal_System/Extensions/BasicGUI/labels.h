@@ -18,11 +18,12 @@
 #ifndef BGUI_LABELS_H
 #define BGUI_LABELS_H
 
-#include <string>
 #include "common.h"
 
-namespace gui
-{
+#include <string>
+
+namespace enigma {
+namespace gui {
 	class Label{
 		public:
 			unsigned int id;
@@ -38,6 +39,7 @@ namespace gui
 			Label();
 			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 	};
-}
+} //namespace gui
+} //namespace enigma
 
 #endif

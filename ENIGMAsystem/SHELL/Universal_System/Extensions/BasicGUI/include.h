@@ -24,25 +24,22 @@
 #ifndef JUST_DEFINE_IT_RUN
 #include "elements.h"
 #endif
-/*#include <unordered_map>
-using std::unordered_map;
-using std::pair;*/
 
 namespace enigma_user
 {
   ///NOTE: CALLBACKS AND STYLES CAN BE A SECURITY RISK IF STATE IS NOT THE DEFINED ENUM's. NO CHECKING TAKES PLACE DURING RUNTIME
   enum {
-    gui_error = static_cast<int>(gui::GUI_TYPE::ERROR),
-	  gui_button = static_cast<int>(gui::GUI_TYPE::BUTTON),
-	  gui_toggle = static_cast<int>(gui::GUI_TYPE::TOGGLE),
-	  gui_slider = static_cast<int>(gui::GUI_TYPE::SLIDER),
-	  gui_skin = static_cast<int>(gui::GUI_TYPE::SKIN),
-	  gui_window = static_cast<int>(gui::GUI_TYPE::WINDOW),
-	  gui_label = static_cast<int>(gui::GUI_TYPE::LABEL),
-	  gui_group = static_cast<int>(gui::GUI_TYPE::GROUP),
-	  gui_scrollbar = static_cast<int>(gui::GUI_TYPE::SCROLLBAR),
-	  gui_style = static_cast<int>(gui::GUI_TYPE::STYLE),
-    gui_textbox = static_cast<int>(gui::GUI_TYPE::TEXTBOX)
+    gui_error = static_cast<int>(enigma::gui::GUI_TYPE::ERROR),
+	  gui_button = static_cast<int>(enigma::gui::GUI_TYPE::BUTTON),
+	  gui_toggle = static_cast<int>(enigma::gui::GUI_TYPE::TOGGLE),
+	  gui_slider = static_cast<int>(enigma::gui::GUI_TYPE::SLIDER),
+	  gui_skin = static_cast<int>(enigma::gui::GUI_TYPE::SKIN),
+	  gui_window = static_cast<int>(enigma::gui::GUI_TYPE::WINDOW),
+	  gui_label = static_cast<int>(enigma::gui::GUI_TYPE::LABEL),
+	  gui_group = static_cast<int>(enigma::gui::GUI_TYPE::GROUP),
+	  gui_scrollbar = static_cast<int>(enigma::gui::GUI_TYPE::SCROLLBAR),
+	  gui_style = static_cast<int>(enigma::gui::GUI_TYPE::STYLE),
+    gui_textbox = static_cast<int>(enigma::gui::GUI_TYPE::TEXTBOX)
 	};
 
 	enum {
@@ -502,6 +499,6 @@ namespace enigma_user
   int gui_element_get_type(int ele);
 
   void gui_continue_propagation();
-}
+} //namespace enigma_user
 
 #endif

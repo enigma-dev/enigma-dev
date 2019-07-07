@@ -21,15 +21,14 @@
 #include "common.h" //For gs_scalar
 
 #include <vector>
-using std::vector;
 
-namespace gui
-{
+namespace enigma {
+namespace gui {
 	class Parent{
 		public:
 		  int element_id = -1; //The element id for which this is a parenter
 
-      vector<unsigned int> child_elements;
+      std::vector<unsigned int> child_elements;
 
 			void update_children(gs_scalar ox, gs_scalar oy);
 			void draw_children(gs_scalar ox, gs_scalar oy);
@@ -69,6 +68,7 @@ namespace gui
 			int element_count();
 			int element(int id);
 	};
-}
+} //namespace gui
+} //namespace enigma
 
 #endif

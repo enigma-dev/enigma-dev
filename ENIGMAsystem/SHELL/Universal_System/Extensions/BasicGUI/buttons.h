@@ -18,19 +18,15 @@
 #ifndef BGUI_BUTTONS_H
 #define BGUI_BUTTONS_H
 
-#include <array>
-#include <string>
-
+#include "Platforms/General/PFwindow.h" //mouse_x, mouse_y
 #include "common.h"
 #include "parents.h"
 
-namespace enigma_user
-{
-	extern double mouse_x, mouse_y;
-}
+#include <array>
+#include <string>
 
-namespace gui
-{
+namespace enigma {
+namespace gui {
 	class Button{
 		public:
 			unsigned int id;
@@ -57,6 +53,7 @@ namespace gui
 
       Parent parenter;
 	};
-}
+} //namespace gui
+} //namespace enigma
 
 #endif

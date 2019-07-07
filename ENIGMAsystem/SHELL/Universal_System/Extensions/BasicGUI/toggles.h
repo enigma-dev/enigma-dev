@@ -18,18 +18,14 @@
 #ifndef BGUI_TOGGLE_H
 #define BGUI_TOGGLE_H
 
+#include "Platforms/General/PFwindow.h" //mouse_x, mouse_y
+#include "common.h"
+
 #include <array>
 #include <string>
 
-#include "common.h"
-
-namespace enigma_user
-{
-	extern double mouse_x, mouse_y;
-}
-
-namespace gui
-{
+namespace enigma {
+namespace gui {
 	class Toggle{
 		public:
 			unsigned int id;
@@ -52,6 +48,7 @@ namespace gui
 			void update_text_pos(int state = -1);
 			void callback_execute(int event);
 	};
-}
+} //namespace gui
+} //namespace enigma
 
 #endif
