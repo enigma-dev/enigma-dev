@@ -154,6 +154,8 @@ static WIN32_FIND_DATA found;
 namespace enigma_user
 {
 
+string file_find_next();
+
 string file_find_first(string name,int attributes)
 {
   if (current_find != INVALID_HANDLE_VALUE)
