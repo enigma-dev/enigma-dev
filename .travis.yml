@@ -21,6 +21,7 @@ env:
     - OUTPUT=/tmp/test
     # this is the default config each job in the matrix overrides a subset of
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    - CLI_ENABLE_EGM=FALSE
 
 before_install:
   - sudo dpkg --add-architecture i386;
