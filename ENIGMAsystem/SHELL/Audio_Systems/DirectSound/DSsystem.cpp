@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Widget_Systems/widgets_mandatory.h"  // DEBUG_MESSAGE
+
 #include "Bridges/Win32/WINDOWShandle.h" //get_window_handle()
 
 #include <stdio.h>
