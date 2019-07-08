@@ -7,15 +7,15 @@ sleep 3
 
 if [ "$TEST_HARNESS" == true ]; then
   export ASAN_OPTIONS=detect_leaks=0;
-  ./ci-regression.sh "/tmp/enigma-master" 4 || travis_terminate $?
+  ./ci-regression.sh "/tmp/enigma-master" 4 || exit 1
 else
   for mode in "Debug" "Run"; 
   do
     MODE="$mode" ./ci-build.sh
     if [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
       wine $OUTPUT
-    elif [ "$GRAPHICS" != "OpenGLES"* ]; then
-      $OUTPUT
+    elif [[ ! "$GRAPHICS" =~ "OpenGLES" ]]; then
+      $OUTPUT || exit 1
     fi
   done
 fi
