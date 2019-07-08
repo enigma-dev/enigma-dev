@@ -10,7 +10,7 @@ if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
     libgl1-mesa-dev:i386 lib32z1-dev libxrandr-dev:i386\
     gcc-multilib g++-multilib libc++abi-dev:i386 libpng-dev:i386"
 elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
-  LINUX_DEPS="$LINUX_DEPS mingw-w64 wine-stable;"
+  LINUX_DEPS="$LINUX_DEPS mingw-w64 wine-stable"
 fi
 
 ###### Platforms #######
@@ -21,7 +21,7 @@ fi
 if [ "$GRAPHICS" == "OpenGLES2" ]; then
   LINUX_DEPS="$LINUX_DEPS libepoxy-dev libegl1-mesa-dev libgles2-mesa-dev"
 else
-  LINUX_DEPS="$LINUX_DEPS libglew-dev libxrandr-dev;"
+  LINUX_DEPS="$LINUX_DEPS libglew-dev libxrandr-dev"
   OSX_DEPS="$OSX_DEPS glew"
 fi
 
@@ -60,7 +60,7 @@ fi
 
 ###### Install Deps #######
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-  sudo apt-get -y install "$LINUX_DEPS"
+  sudo apt-get -y install "$LINUX_DEPS" || travis_terminate $?
   
   if [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
     curl -L https://github.com/enigma-dev/enigma-dev/files/2431000/enigma-libs.zip > enigma-libs.zip;
