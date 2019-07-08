@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LINUX_DEPS="libc++-dev"
+LINUX_DEPS="libc++-dev libprotobuf-dev"
 OSX_DEPS=""
 
 ###### Compilers #######

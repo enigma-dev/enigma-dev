@@ -24,7 +24,10 @@ env:
 
 cache:
   directories:
-  - $TRAVIS_BUILD_DIR
+  - emake
+  - libcompileEGMf.so
+  - libEGM.so
+  - libProtocols.so
   - /tmp/ENIGMA
 
 before_install:
