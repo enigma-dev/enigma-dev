@@ -14,7 +14,7 @@ else
     MODE="$mode" ./ci-build.sh
     if [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
       wine $OUTPUT
-    else if [ "$GRAPHICS" != "OpenGLES"* ]
+    elif [ "$GRAPHICS" != "OpenGLES"* ]
       $OUTPUT
     fi
   done
