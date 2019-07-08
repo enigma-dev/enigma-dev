@@ -6,9 +6,6 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
 
-#include <chrono> // std::chrono::microseconds
-#include <thread> // sleep_for
-
 namespace enigma {
 
 std::vector<std::function<void()> > extension_update_hooks;
@@ -28,7 +25,7 @@ int gameWait() {
     if (pausedSteps < 1) {
       pausedSteps += 1;
     } else {
-      std::this_thread::sleep_for(std::chrono::microseconds(100000));
+      enigma_user::sleep(100);
       return -1;
     }
   }
