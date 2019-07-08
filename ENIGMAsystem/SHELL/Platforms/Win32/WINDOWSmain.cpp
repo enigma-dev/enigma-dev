@@ -277,7 +277,7 @@ int updateTimer() {
     }
     if (remaining_mcs > needed_mcs) {
       const long sleeping_time = std::min((remaining_mcs - needed_mcs) / 5, long(999999));
-      enigma_user::sleep(std::max(long(1), sleeping_time / 1000));
+      std::this_thread::sleep_for(std::chrono::microseconds(std::max(long(1), sleeping_time)));
       return -1;
     }
   }
