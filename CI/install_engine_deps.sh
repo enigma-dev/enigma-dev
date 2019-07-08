@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LINUX_DEPS="libc++-dev libprotobuf-dev"
+LINUX_DEPS="libc++-dev libprotobuf-dev libgtest-dev wmctrl xvfb xdotool xfwm4 lcov"
 OSX_DEPS=""
 
 ###### Compilers #######
