@@ -43,7 +43,7 @@ jobs:
     - os: osx
   include:
     - stage: Test Harness and platforms # xlib is covered by default
-      env: TEST_HARNESS=true AUDIO=OpenAL
+      env: TEST_HARNESS=true AUDIO=OpenAL CLI_ENABLE_EGM=TRUE
     - stage: Test Harness and platforms
       env: COMPILER=gcc PLATFORM=None GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - stage: Test Harness and platforms
