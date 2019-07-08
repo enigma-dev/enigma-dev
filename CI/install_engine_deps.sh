@@ -60,7 +60,7 @@ fi
 
 ###### Install Deps #######
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-  sudo apt-get -y install "$LINUX_DEPS" || exit 1
+  sudo apt-get -y install $LINUX_DEPS || exit 1
   
   if [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
     curl -L https://github.com/enigma-dev/enigma-dev/files/2431000/enigma-libs.zip > enigma-libs.zip;
@@ -69,5 +69,5 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
   fi
   
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
-  brew install "$OSX_DEPS"
+  brew install "$OSX_DEPS"  || exit 1
 fi
