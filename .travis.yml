@@ -18,7 +18,6 @@ dist: bionic
 
 env:
   global:
-    - CLI_ENABLE_EGM=FALSE
     - OUTPUT=/tmp/test
     # this is the default config each job in the matrix overrides a subset of
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
@@ -43,7 +42,7 @@ jobs:
     - os: osx
   include:
     - stage: Test Harness and platforms # xlib is covered by default
-      env: TEST_HARNESS=true AUDIO=OpenAL CLI_ENABLE_EGM=TRUE
+      env: TEST_HARNESS=true AUDIO=OpenAL
     - stage: Test Harness and platforms
       env: COMPILER=gcc PLATFORM=None GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - stage: Test Harness and platforms
