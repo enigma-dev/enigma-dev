@@ -34,5 +34,5 @@ do
   echo -e "\n\n\e[32m====================================================\n\
 \e[32mRunning ${LINUX_JOBS[$job]}\n\
 \e[32m====================================================\n\n"
-  bash -c "${LINUX_JOBS[$job]} ./CI/build_and_run_game.sh"
+  bash -c "${LINUX_JOBS[$job]} ./CI/build_and_run_game.sh" || exit 1
 done;

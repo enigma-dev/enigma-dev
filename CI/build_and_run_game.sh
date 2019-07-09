@@ -1,9 +1,6 @@
 #!/bin/bash
 
-
-xvfb_pid=$(pgrep Xvfb)
-
-if [ $xvfb_pid -eq 1 ]; then
+if ! pgrep Xvfb >/dev/null 2>&1; then
   export DISPLAY=:1
   Xvfb :1 -screen 0 1024x768x24 &
   xfwm4 &
