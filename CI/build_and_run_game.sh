@@ -1,9 +1,14 @@
 #!/bin/bash
 
-export DISPLAY=:1
-Xvfb :1 -screen 0 1024x768x24 &
-xfwm4 &
-sleep 3
+
+xvfb_pid=$(pgrep Xvfb)
+
+if [ $xvfb_pid -eq 1 ]; then;
+  export DISPLAY=:1
+  Xvfb :1 -screen 0 1024x768x24 &
+  xfwm4 &
+  sleep 3
+fi
 
 if [ "$TEST_HARNESS" == true ]; then
   export ASAN_OPTIONS=detect_leaks=0;
