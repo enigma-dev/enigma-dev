@@ -169,7 +169,7 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   #endif
 
   str_echo = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) ? "echo 1" :
-    "if [ $ans = \"Abort\" ] ;then echo 1;elif [ $ans = \"Ignore\" ] ;then echo -1;elif [ $ans = \"Retry\" ] ;then echo 0;fi";
+    "if [ $ans = \"Abort\" ] ;then echo 1;elif [ $ans = \"Retry\" ] ;then echo 0;else echo -1;fi";
 
   str_command = string("ans=$(zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
