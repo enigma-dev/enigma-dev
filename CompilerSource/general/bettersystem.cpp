@@ -186,7 +186,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           if (!StartupInfo.hStdOutput or StartupInfo.hStdOutput == INVALID_HANDLE_VALUE or !StartupInfo.hStdError or StartupInfo.hStdError == INVALID_HANDLE_VALUE)
           {
             HANDLE conout = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, FALSE, OPEN_EXISTING, 0, NULL);
-              if (!conout || conout == INVALID_HANDLE_VALUE) { cerr << "CreateFile(CONIN$) failed (Error" << (int)GetLastError() << ")" << std::endl }
+              if (!conout || conout == INVALID_HANDLE_VALUE) { cerr << "CreateFile(CONIN$) failed (Error" << (int)GetLastError() << ")" << std::endl; }
 
             if (!StartupInfo.hStdOutput or StartupInfo.hStdOutput == INVALID_HANDLE_VALUE)  StartupInfo.hStdInput = conout;
             if (!StartupInfo.hStdError  or StartupInfo.hStdError  == INVALID_HANDLE_VALUE)  StartupInfo.hStdError = conout;
