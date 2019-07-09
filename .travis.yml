@@ -28,6 +28,7 @@ before_install:
   - sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
 
 install: ./CI/install_emake_deps.sh && ./CI/install_engine_deps.sh
+before_script: make -j4 && make -j4 emake
 script: ./CI/build_and_run_game.sh
     
 jobs:
