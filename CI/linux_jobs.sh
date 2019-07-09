@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LINUX_JOBS[0]='TEST_HARNESS=true AUDIO=OpenAL'
+LINUX_JOBS[0]='TEST_HARNESS=true AUDIO=OpenAL' 
 LINUX_JOBS[1]='PLATFORM=None GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"'
 LINUX_JOBS[2]='PLATFORM=SDL GRAPHICS=OpenGL1'
 LINUX_JOBS[3]='PLATFORM=SDL GRAPHICS=OpenGL3'
@@ -31,5 +31,5 @@ fi
 
 for job in $(seq $START 1 $END);
 do
-  $job ./ci-build.sh
+  bash -c "${LINUX_JOBS[$job]} ./ci-build.sh"
 done;

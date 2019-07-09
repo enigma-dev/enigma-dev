@@ -37,7 +37,6 @@ jobs:
   allow_failures:
     - os: osx
   include:
-    - stage: Dry Run
     - stage: Linux Jobs
       script: ./CI/linux_jobs.sh
       env: WORKER=0
