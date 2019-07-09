@@ -86,11 +86,11 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   realCout.rdbuf(std::cout.rdbuf());
   std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
   if (ENIGMA_DEBUG != "TRUE") {
+    std::cout << "ENIGMA compiler log at: /tmp/enigma_compiler.log" << std::endl;
     std::cout.rdbuf(elog.rdbuf());
     std::cerr.rdbuf(elog.rdbuf());
   } else {
     realCout.rdbuf(nullptr);
-    std::cout << "ENIGMA compiler log at: /tmp/enigma_compiler.log" << std::endl;
   }
   
   if (ecs)
