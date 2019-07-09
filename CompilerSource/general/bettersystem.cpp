@@ -179,14 +179,14 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           if (!StartupInfo.hStdInput or StartupInfo.hStdInput == INVALID_HANDLE_VALUE)
           {
             HANDLE conin = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, FALSE, OPEN_EXISTING, 0, NULL);
-              if (!conin || conin == INVALID_HANDLE_VALUE) { cerr << "CreateFile(CONIN$) failed (Error" << (int)GetLastError()) << ")" << std::endl; }
+              if (!conin || conin == INVALID_HANDLE_VALUE) { cerr << "CreateFile(CONIN$) failed (Error" << (int)GetLastError() << ")" << std::endl; }
             StartupInfo.hStdInput = conin;
           }
 
           if (!StartupInfo.hStdOutput or StartupInfo.hStdOutput == INVALID_HANDLE_VALUE or !StartupInfo.hStdError or StartupInfo.hStdError == INVALID_HANDLE_VALUE)
           {
             HANDLE conout = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, FALSE, OPEN_EXISTING, 0, NULL);
-              if (!conout || conout == INVALID_HANDLE_VALUE) { cerr << "CreateFile(CONIN$) failed (Error" << (int)GetLastError()) << ")" << std::endl }
+              if (!conout || conout == INVALID_HANDLE_VALUE) { cerr << "CreateFile(CONIN$) failed (Error" << (int)GetLastError() << ")" << std::endl }
 
             if (!StartupInfo.hStdOutput or StartupInfo.hStdOutput == INVALID_HANDLE_VALUE)  StartupInfo.hStdInput = conout;
             if (!StartupInfo.hStdError  or StartupInfo.hStdError  == INVALID_HANDLE_VALUE)  StartupInfo.hStdError = conout;
@@ -209,7 +209,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         Cenviron_use = (void*)Cenviron_flat.c_str();
       }
 
-      cout << "\n\n********* EXECUTE:\n" << parameters << "\n\n");
+      cout << "\n\n********* EXECUTE:\n" << parameters << "\n\n";
 
       if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
