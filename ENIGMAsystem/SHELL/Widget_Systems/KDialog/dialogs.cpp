@@ -300,7 +300,7 @@ string get_open_filename(string filter, string fname) {
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--getopenfilename /") + pwd + add_escaping(kdialog_filter(filter), false, "") +
+  string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
   string result = shellscript_evaluate(str_command);
@@ -322,7 +322,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--getopenfilename /") + pwd + add_escaping(kdialog_filter(filter), false, "") +
+  string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
   string result = shellscript_evaluate(str_command);
@@ -339,7 +339,7 @@ string get_open_filenames(string filter, string fname) {
 
   str_command = string("kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--getopenfilename /") + pwd + add_escaping(kdialog_filter(filter), false, "") +
+  string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --multiple --separate-output --title \"") + str_title + string("\"");
 
   static string result;
@@ -370,7 +370,7 @@ string get_open_filenames_ext(string filter,string fname, string dir, string tit
 
   str_command = string("kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--getopenfilename /") + pwd + add_escaping(kdialog_filter(filter), false, "") +
+  string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --multiple --separate-output --title \"") + str_title + string("\"");
 
   static string result;
@@ -396,7 +396,7 @@ string get_save_filename(string filter, string fname) {
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--getsavefilename /") + pwd + add_escaping(kdialog_filter(filter), false, "") +
+  string("--getsavefilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
   return shellscript_evaluate(str_command);
@@ -417,7 +417,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--getsavefilename /") + pwd + add_escaping(kdialog_filter(filter), false, "") +
+  string("--getsavefilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
   return shellscript_evaluate(str_command);
@@ -434,7 +434,7 @@ string get_directory(string dname) {
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--getexistingdirectory /") + pwd + string(" --title \"") + str_title + str_end;
+  string("--getexistingdirectory ") + pwd + string(" --title \"") + str_title + str_end;
 
   return shellscript_evaluate(str_command);
 }
@@ -450,7 +450,7 @@ string get_directory_alt(string capt, string root) {
 
   str_command = string("ans=$(kdialog ") +
   string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--getexistingdirectory /") + pwd + string(" --title \"") + str_title + str_end;
+  string("--getexistingdirectory ") + pwd + string(" --title \"") + str_title + str_end;
 
   return shellscript_evaluate(str_command);
 }

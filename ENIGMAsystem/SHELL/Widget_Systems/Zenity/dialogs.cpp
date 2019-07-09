@@ -108,23 +108,21 @@ static int show_message_helperfunc(string message) {
     dialog_caption = window_get_caption();
 
   string str_command;
-  string str_title;
-  string str_cancel;
+  string str_title = add_escaping(dialog_caption, true, " ");
+  string str_cancel = "--info --ok-label=OK ";
+  string str_icon = "\" --icon-name=dialog-information);";
   string str_echo = "echo 1";
 
-  if (message_cancel)
+  if (message_cancel) {
     str_echo = "if [ $? = 0 ] ;then echo 1;else echo -1;fi";
-
-  str_title = add_escaping(dialog_caption, true, " ");
-  str_cancel = "--info --ok-label=OK ";
-
-  if (message_cancel)
     str_cancel = "--question --ok-label=OK --cancel-label=Cancel ";
+    str_icon = "\" --icon-name=dialog-question);";
+  }
 
   str_command = string("ans=$(zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
   str_cancel + string("--title=\"") + str_title + string("\" --no-wrap --text=\"") +
-  add_escaping(message, false, "") + string("\" --icon-name=dialog-information);") + str_echo;
+  add_escaping(message, false, "") + str_icon + str_echo;
 
   string str_result = shellscript_evaluate(str_command);
   return (int)strtod(str_result.c_str(), NULL);
@@ -171,11 +169,11 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   #endif
 
   str_echo = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) ? "echo 1" :
-    "if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Ignore\" ] ;then echo -1;elif [ $? = 2 ] ;then echo 0;fi";
+    "if [ $ans = \"Abort\" ] ;then echo 1;elif [ $ans = \"Retry\" ] ;then echo 0;else echo -1;fi";
 
   str_command = string("ans=$(zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--question --ok-label=Abort --cancel-label=Retry --extra-button=Ignore ") +
+  string("--error --ok-label=Ignore --extra-button=Retry --extra-button=Abort ") +
   string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
   add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
 
@@ -226,10 +224,10 @@ int show_attempt(string errortext) {
 
   str_command = string("ans=$(zenity ") +
   string("--attach=$(sleep .01;xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
-  string("--question --ok-label=Retry --cancel-label=Cancel ") +  string("--title=\"") +
+  string("--error --ok-label=Cancel --extra-button=Retry ") +  string("--title=\"") +
   add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
   add_escaping(errortext, false, "") +
-  string("\" --icon-name=dialog-error);if [ $? = 0 ] ;then echo 0;else echo -1;fi");
+  string("\" --icon-name=dialog-error);if [ $? = 0 ] ;then echo -1;else echo 0;fi");
 
   string str_result = shellscript_evaluate(str_command);
   return (int)strtod(str_result.c_str(), NULL);
