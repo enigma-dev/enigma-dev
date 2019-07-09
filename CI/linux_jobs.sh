@@ -16,7 +16,7 @@ LINUX_JOBS[12]='NETWORK=BerkeleySockets'
 LINUX_JOBS[13]='WIDGETS=GTK+'
 LINUX_JOBS[14]='WIDGETS=Zenity'
 LINUX_JOBS[15]='WIDGETS=KDialog'
-LINUX_JOBS[16]='COLLISION=BBox EXTENSIONS="Alarms,Timelines,DataStructures,Asynchronous,BasicGUI,DataStructures,DateTime,GM5Compat,IniFilesystem,DataStructures,Json,XRandR,Paths,MotionPlanning,GME,ttf,Box2DPhysics,StudioPhysics,BulletDynamics"'
+LINUX_JOBS[16]='COLLISION=BBox EXTENSIONS="Alarms,Timelines,DataStructures,Asynchronous,BasicGUI,DataStructures,DateTime,GM5Compat,IniFilesystem,Json,XRandR,Paths,MotionPlanning,ttf,Box2DPhysics,StudioPhysics,BulletDynamics"'
 
 JOB_COUNT=16
 TRAVIS_WORKERS=4
@@ -31,5 +31,8 @@ fi
 
 for job in $(seq $START 1 $END);
 do
+  echo "====================================================\n\
+Running ${LINUX_JOBS[$job]} ./ci-build.sh\n\
+===================================================="
   bash -c "${LINUX_JOBS[$job]} ./ci-build.sh"
 done;
