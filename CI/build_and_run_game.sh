@@ -6,9 +6,6 @@ xfwm4 &
 sleep 3
 
 if [ "$TEST_HARNESS" == true ]; then
-  echo "====================================================\n\
-Running Test Harness\n\
-===================================================="
   export ASAN_OPTIONS=detect_leaks=0;
   ./ci-regression.sh "/tmp/enigma-master" 4 || exit 1
 else

@@ -31,8 +31,8 @@ fi
 
 for job in $(seq $START 1 $END);
 do
-  echo -e "====================================================\n\
-Running ${LINUX_JOBS[$job]} ./ci-build.sh\n\
+  echo -e "\e[32m====================================================\n\
+Running ${LINUX_JOBS[$job]} \n\
 ===================================================="
-  bash -c "${LINUX_JOBS[$job]} ./build_and_run_game.sh"
+  bash -c "${LINUX_JOBS[$job]} ./CI/build_and_run_game.sh"
 done;
