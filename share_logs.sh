@@ -3,5 +3,7 @@ for log in "/tmp/enigma_libegm.log" "/tmp/enigma_compiler.log" "/tmp/enigma_comp
 do
   echo -n "$log: "
   cat $log | curl -F 'sprunge=<-' http://sprunge.us
-  if [[ "$TRAVIS" == "true" ]] rm -f "$log"
+  if [[ "$TRAVIS" == "true" ]]; then 
+    rm -f "$log"
+  fi
 done
