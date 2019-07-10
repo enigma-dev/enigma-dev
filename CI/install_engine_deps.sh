@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 LINUX_DEPS="libc++-dev libprotobuf-dev protobuf-compiler libgtest-dev wmctrl xvfb xdotool xfwm4 lcov\
   libsdl2-dev libepoxy-dev libegl1-mesa-dev libgles2-mesa-dev libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev\
   libsfml-dev libgtk2.0-dev zenity kdebase-bin libgme-dev libglew-dev libxrandr-dev libbox2d-dev libbullet-dev libfreetype6-dev"

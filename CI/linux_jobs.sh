@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 LINUX_JOBS[0]='PLATFORM=None GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"'
 LINUX_JOBS[1]='PLATFORM=SDL GRAPHICS=OpenGL1'
 LINUX_JOBS[2]='PLATFORM=SDL GRAPHICS=OpenGL3'
@@ -33,5 +35,5 @@ do
   echo -e "\n\n\e[32m====================================================\n\
 \e[32mRunning ${LINUX_JOBS[$job]}\n\
 \e[32m====================================================\n\n"
-  bash -c "${LINUX_JOBS[$job]} ./CI/build_and_run_game.sh" || exit 1
+  bash -c "${LINUX_JOBS[$job]} ./CI/build_and_run_game.sh"
 done;
