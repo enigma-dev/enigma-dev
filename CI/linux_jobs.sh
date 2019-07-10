@@ -28,7 +28,10 @@ if [[ $WORKER -lt $((TRAVIS_WORKERS-1)) ]]; then
   END=$(($WORKER * $SPLIT + $SPLIT))
 else
   END=$JOB_COUNT
-fi 
+fi
+
+echo "glxinfo"
+glxinfo | grep "OpenGL version"
 
 for job in $(seq $START 1 $END);
 do
