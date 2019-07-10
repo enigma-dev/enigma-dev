@@ -17,7 +17,7 @@ LINUX_JOBS[13]='WIDGETS=Zenity'
 LINUX_JOBS[14]='WIDGETS=KDialog'
 LINUX_JOBS[15]='COLLISION=BBox EXTENSIONS="Alarms,Timelines,DataStructures,Asynchronous,BasicGUI,DateTime,GM5Compat,IniFilesystem,Json,XRandR,Paths,MotionPlanning,ttf,Box2DPhysics,StudioPhysics,BulletDynamics"'
 
-JOB_COUNT=16
+JOB_COUNT=15
 TRAVIS_WORKERS=4
 
 SPLIT=$(($JOB_COUNT / $TRAVIS_WORKERS))
