@@ -205,4 +205,5 @@ script:
       ./ci-regression.sh "/tmp/enigma-master" 4 || travis_terminate $?
     else
       ./ci-build.sh
+      ./share_logs.sh
     fi
