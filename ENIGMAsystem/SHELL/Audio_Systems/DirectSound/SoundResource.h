@@ -43,6 +43,8 @@ struct SoundResource {
     soundBuffer->Release();
     soundBuffer = 0;
   }
+
+  static const char* getAssetTypeName() { return "sound"; }
 };
 
 extern AssetArray<SoundResource> sound_resources;
