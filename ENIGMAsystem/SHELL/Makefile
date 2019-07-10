@@ -104,12 +104,12 @@ override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)
 all: compile_game
 
 print_flags:
-	@echo -e "\n################ Compiler Flags ################"
+	@echo "\n################ Compiler Flags ################"
 	@echo "CXXFLAGS=\"$(CXXFLAGS) $(CPPFLAGS) $(INCLUDES)\""
 	@echo "CFLAGS=\"$(CFLAGS) $(CPPFLAGS)\""
 	@echo "LDFLAGS=\"$(LDFLAGS)\""
 	@echo "LDLIBS=\"$(LDIBS)\""
-	@echo -e "#################################################\n"
+	@echo "#################################################\n"
 
 clean:
 	$(RM) $(OUTPUTNAME) $(RESOURCEBINARY)
@@ -153,7 +153,7 @@ compile_game: print_flags cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEP
 # -MP gives phony rules for non-target files, avoiding problems with missing files
 $(OBJDIR)/%.o: %.cpp | $(OBJDIRS)
 	@echo [$(CXX)] $<
-	$(CXX) -fdiagnostics-color=always $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/shared/%.o: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
 	@echo [$(CXX)] $<
