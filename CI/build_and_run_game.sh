@@ -19,7 +19,7 @@ else
     if [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
       wine $OUTPUT > >(tee logs/enigma_game.log) 2>&1
     elif [[ ! "$GRAPHICS" =~ "OpenGLES" ]]; then
-      wine $OUTPUT > >(tee logs/enigma_game.log) 2>&1
+      $OUTPUT > >(tee logs/enigma_game.log) 2>&1
     fi
     ./share_logs.sh
   done
