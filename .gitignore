@@ -9,7 +9,6 @@
 /coverage_*.info
 /libEGM.*
 /libProtocols.*
-/logs/*
 
 /shared/protos/build/
 /shared/protos/codegen
