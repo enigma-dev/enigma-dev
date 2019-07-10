@@ -99,9 +99,9 @@ endif
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
 override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)
 
-.PHONY: all clean compile_game cleandep clean print_flags
+.PHONY: all clean compile_game cleandep clean print_flags clean_logs
 
-all: compile_game print_flags
+all: compile_game
 
 print_flags:
 	@echo -e "\n################ Compiler Flags ################"
@@ -118,6 +118,9 @@ clean:
 
 cleandep:
 	@$(RM) $(CLEANDEPS)
+
+clean_logs:
+	@$(RM) -f /tmp/enigma_compile.log  /tmp/enigma_compiler.log /tmp/enigma_libegm.log
 
 SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
@@ -143,7 +146,7 @@ endif
 # building #
 ############
 
-compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
+compile_game: clean_logs print_flags cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	@echo "Linking $(OUTPUTNAME)"
 	@$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 	@echo Built to "$(OUTPUTNAME)"
@@ -151,19 +154,19 @@ compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
 # -MP gives phony rules for non-target files, avoiding problems with missing files
-$(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
+$(OBJDIR)/%.o: %.cpp | $(OBJDIRS)
 	@echo [$(CXX)] $<
 	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
-$(OBJDIR)/shared/%.o $(OBJDIR)/%.d: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
+$(OBJDIR)/shared/%.o: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
 	@echo [$(CXX)] $<
 	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/shared/$*.o $<
 
-$(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
+$(OBJDIR)/%.o: %.c | $(OBJDIRS)
 	@echo [$(CC)] $<
 	@$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
-$(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
+$(OBJDIR)/%.o: %.m | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
