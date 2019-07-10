@@ -20,7 +20,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "Platforms/General/PFini.h"
+#include "PFini.h"
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h" //show_error()
 

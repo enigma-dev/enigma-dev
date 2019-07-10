@@ -33,8 +33,6 @@
 #include <time.h>
 #include <sys/stat.h>
 
-#include "../General/PFini.h"
-
 using namespace std;
 
 namespace enigma_user
@@ -187,7 +185,7 @@ string file_find_next()
     if (FindNextFile(current_find,&found)==0)
     return "";
   }
-  
+
   string res = found.cFileName;
   if (res == "." || res == "..")
     return file_find_next();

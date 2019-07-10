@@ -34,7 +34,7 @@
 using std::to_string;
 using std::string;
 
-#include "Platforms/General/PFini.h"
+#include "PFini.h"
 #include "Universal_System/estring.h"
 
 static tstring iniFilename = L"";
@@ -112,4 +112,3 @@ void ini_section_delete(string section) {
 }
 
 } // namespace enigma_user
-
