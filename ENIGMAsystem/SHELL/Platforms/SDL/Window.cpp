@@ -40,7 +40,7 @@ unsigned sdl_window_flags = SDL_WINDOW_HIDDEN;
 void init_sdl_window_bridge_attributes();
 
 bool initGameWindow() {
-  if(!SDL_Init(SDL_INIT_VIDEO)) {
+  if(SDL_Init(SDL_INIT_VIDEO) != 0) {
     DEBUG_MESSAGE(std::string("Unable to initialize SDL: ") + SDL_GetError(), MESSAGE_TYPE::M_FATAL_ERROR);
     return false;
   }
