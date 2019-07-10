@@ -67,3 +67,6 @@ jobs:
       os: osx
       osx_image: xcode9.2
       env: COMPILER=clang PLATFORM=None
+    - stage: Test Harness
+      env: TEST_HARNESS=true AUDIO=OpenAL 
+
