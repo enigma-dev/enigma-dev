@@ -42,8 +42,8 @@ void init_sdl_window_bridge_attributes() {
   #endif
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,profile_types[graphics_opengl_profile]);
   SDL_GL_SetSwapInterval(0);
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+  //SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
   sdl_window_flags |= SDL_WINDOW_OPENGL;
 }
 
