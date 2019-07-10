@@ -31,7 +31,7 @@ else
 fi
 
 echo "glxinfo"
-xvfb-run glxinfo | grep "OpenGL version"
+xvfb-run glxinfo
 
 for job in $(seq $START 1 $END);
 do
