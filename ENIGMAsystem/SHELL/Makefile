@@ -99,9 +99,17 @@ endif
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
 override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)
 
-.PHONY: all clean
+.PHONY: all clean compile_game cleandep clean print_flags
 
 all: compile_game
+
+print_flags:
+	@echo -e "\n################ Compiler Flags ################"
+	@echo "CXXFLAGS=\"$(CXXFLAGS) $(CPPFLAGS) $(INCLUDES)\""
+	@echo "CFLAGS=\"$(CFLAGS) $(CPPFLAGS)\""
+	@echo "LDFLAGS=\"$(LDFLAGS)\""
+	@echo "LDLIBS=\"$(LDIBS)\""
+	@echo -e "#################################################\n"
 
 clean:
 	$(RM) $(OUTPUTNAME) $(RESOURCEBINARY)
@@ -109,7 +117,7 @@ clean:
 	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.d" -exec $(RM) -rf {} \;
 
 cleandep:
-	$(RM) $(CLEANDEPS)
+	@$(RM) $(CLEANDEPS)
 
 SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
@@ -135,36 +143,41 @@ endif
 # building #
 ############
 
-compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
-	$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
+compile_game: print_flags cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
+	@echo "Linking $(OUTPUTNAME)"
+	@$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 	@echo Built to "$(OUTPUTNAME)"
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
 # -MP gives phony rules for non-target files, avoiding problems with missing files
-$(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+$(OBJDIR)/%.o: %.cpp | $(OBJDIRS)
+	@echo [$(CXX)] $<
+	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
-$(OBJDIR)/shared/%.o $(OBJDIR)/%.d: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/shared/$*.o $<
+$(OBJDIR)/shared/%.o: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
+	@echo [$(CXX)] $<
+	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/shared/$*.o $<
 
-$(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+$(OBJDIR)/%.o: %.c | $(OBJDIRS)
+	@echo [$(CC)] $<
+	@$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
-$(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
+$(OBJDIR)/%.o: %.m | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
 	echo // GENERATED RESOURCE FILE FRONTEND > $(OBJDIR)/resources.rc
 	for res in $(RESOURCES); do echo "#include \"$$res\"" >> $(OBJDIR)/resources.rc; done
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff $(RCFLAGS)
+	@$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff $(RCFLAGS)
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc $(RCFLAGS)
+	@echo [$(WINDRES)] $<
+	@$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc $(RCFLAGS)
 
 $(OBJDIRS):
-	$(MKDIR) -p $@
+	@$(MKDIR) -p $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPENDS)

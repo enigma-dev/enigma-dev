@@ -17,7 +17,7 @@ clean: .FORCE
 all: libpng-util libProtocols libEGM ENIGMA emake test-runner .FORCE
 
 Game: .FORCE
-	$(MAKE) -C ENIGMAsystem/SHELL
+	@$(MAKE) -C ENIGMAsystem/SHELL 2>&1 | tee logs/enigma_compile.log
 
 clean-game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL clean
@@ -49,7 +49,7 @@ test-runner: emake .FORCE
 	$(MAKE) -C CommandLine/testing/
 
 required-directories: .FORCE
-	mkdir -p "$(WORKDIR)"
-	mkdir -p "$(CODEGEN)Preprocessor_Environment_Editable/"
+	@mkdir -p "$(WORKDIR)"
+	@mkdir -p "$(CODEGEN)Preprocessor_Environment_Editable/"
 
 .FORCE:

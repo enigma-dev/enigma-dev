@@ -10,7 +10,6 @@
 /libEGM.*
 /libProtocols.*
 
-
 /shared/protos/build/
 /shared/protos/codegen
 /CommandLine/libEGM/build/
