@@ -76,7 +76,7 @@ extern const char* establish_bearings(const char *compiler);
 //FIXME: remove this function from enigma.jar and here
 dllexport void libSetMakeDirectory(const char* dir) {} 
 
-static std::ofstream logFile("/tmp/enigma_compiler.log", std::ofstream::out);
+static std::ofstream logFile("logs/enigma_compiler.log", std::ofstream::out);
 static std::ostream elog(nullptr);
 std::ostream realCout(nullptr);
 
@@ -86,7 +86,7 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   realCout.rdbuf(std::cout.rdbuf());
   std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
   if (ENIGMA_DEBUG != "TRUE") {
-    std::cout << "ENIGMA compiler log at: /tmp/enigma_compiler.log" << std::endl;
+    std::cout << "ENIGMA compiler log at: logs/enigma_compiler.log" << std::endl;
     std::cout.rdbuf(elog.rdbuf());
     std::cerr.rdbuf(elog.rdbuf());
   } else {

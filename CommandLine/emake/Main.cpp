@@ -24,7 +24,7 @@
 
 std::ostream outputStream(nullptr);
 std::ostream errorStream(nullptr);
-std::ofstream egmlog("/tmp/enigma_libegm.log", std::ofstream::out);
+std::ofstream egmlog("logs/enigma_libegm.log", std::ofstream::out);
 
 static std::string tolower(const std::string &str) {
   std::string res = str;
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
   } else {
     outputStream.rdbuf(egmlog.rdbuf());
     errorStream.rdbuf(egmlog.rdbuf());
-    std::cout << "LibEGM parsing log at: /tmp/enigma_libegm.log" << std::endl;
+    std::cout << "LibEGM parsing log at: logs/enigma_libegm.log" << std::endl;
   }
   
   
