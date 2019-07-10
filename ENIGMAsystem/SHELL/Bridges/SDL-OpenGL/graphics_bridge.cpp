@@ -35,12 +35,12 @@ const static SDL_GLprofile profile_types[3] = {SDL_GL_CONTEXT_PROFILE_CORE,SDL_G
 
 void init_sdl_window_bridge_attributes() {
   std::cout <<  "glmajor: " << gl_major << ", " <<  "glminor: " << gl_minor << ", " << "profile: " << profile_types[graphics_opengl_profile] << std::endl;
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor);
+  //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major);
+  //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor);
   #ifdef DEBUG_MODE
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+  //SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
   #endif
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,profile_types[graphics_opengl_profile]);
+  //SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,profile_types[graphics_opengl_profile]);
   SDL_GL_SetSwapInterval(0);
   //SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
