@@ -20,9 +20,11 @@
 #include <fstream>
 #include <iostream>
 #include <streambuf>
+#include <cstdlib>
 
-std::ostream outputStream(std::cout.rdbuf());
-std::ostream errorStream(std::cerr.rdbuf());
+std::ostream outputStream(nullptr);
+std::ostream errorStream(nullptr);
+std::ofstream egmlog("logs/enigma_libegm.log", std::ofstream::out);
 
 static std::string tolower(const std::string &str) {
   std::string res = str;
@@ -34,6 +36,17 @@ static std::string tolower(const std::string &str) {
 
 int main(int argc, char* argv[])
 {
+  std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
+  if (ENIGMA_DEBUG == "TRUE") {
+    outputStream.rdbuf(std::cout.rdbuf());
+    errorStream.rdbuf(std::cerr.rdbuf());
+  } else {
+    outputStream.rdbuf(egmlog.rdbuf());
+    errorStream.rdbuf(egmlog.rdbuf());
+    std::cout << "LibEGM parsing log at: logs/enigma_libegm.log" << std::endl;
+  }
+  
+  
   OptionsParser options;
   options.ReadArgs(argc, argv);
   int result = options.HandleArgs();
