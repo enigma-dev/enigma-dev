@@ -19,30 +19,33 @@
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <cstdio>
+#include <iostream>
 #include <API/error_reporting.h>
+
+using std::cout;
+using std::endl;
 
 namespace jdi {
   void default_error_handler::error(std::string err, std::string filename, int line, int pos) {
     if (!filename.length())
-      fprintf(stderr, "ERROR: %s\n", err.c_str());
+      cout <<  "ERROR: " << err << endl;
     if (line == -1)
-      fprintf(stderr, "ERROR(%s): %s\n", filename.c_str(), err.c_str());
+      cout <<  "ERROR(" << filename << "): " << err << endl;
     else if (pos == -1)
-      fprintf(stderr, "ERROR(%s:%d): %s\n", filename.c_str(), line, err.c_str());
+      cout <<  "ERROR(" << filename << ":" << line <<  "): " << err << endl;
     else
-      fprintf(stderr, "ERROR(%s,%d,%d): %s\n", filename.c_str(), line, pos, err.c_str());
+      cout <<  "ERROR(" << filename << "," << line << "," << pos << "): " << err << endl;
     ++error_count;
   }
   void default_error_handler::warning(std::string err, std::string filename, int line, int pos) {
     if (!filename.length())
-      fprintf(stderr, "Warning: %s\n", err.c_str());
+      cout <<  "WARNING: " << err << endl;
     if (line == -1)
-      fprintf(stderr, "Warning(%s): %s\n", filename.c_str(), err.c_str());
+      cout <<  "WARNING(" << filename << "): " << err << endl;
     else if (pos == -1)
-      fprintf(stderr, "Warning(%s:%d): %s\n", filename.c_str(), line, err.c_str());
+      cout <<  "WARNING(" << filename << ":" << line <<  "): " << err << endl;
     else
-      fprintf(stderr, "Warning(%s,%d,%d): %s\n", filename.c_str(), line, pos, err.c_str());
+      cout <<  "WARNING(" << filename << "," << line <<  "," << pos << "): " << err << endl;
     ++warning_count;
   }
   

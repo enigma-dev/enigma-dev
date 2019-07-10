@@ -33,8 +33,6 @@
 #include <time.h>
 #include <sys/stat.h>
 
-#include "../General/PFini.h"
-
 using namespace std;
 
 namespace enigma_user
@@ -140,7 +138,9 @@ enum {
   fa_sysfile   = FILE_ATTRIBUTE_SYSTEM,
   fa_volumeid  = 0x00000008,
   fa_directory = FILE_ATTRIBUTE_DIRECTORY,
-  fa_archive   = FILE_ATTRIBUTE_ARCHIVE
+  fa_archive   = FILE_ATTRIBUTE_ARCHIVE,
+  fa_files_all = fa_readonly | fa_hidden | fa_sysfile | fa_volumeid | fa_archive,
+  fa_all       = fa_files_all | fa_directory
 };
 
 }
@@ -151,6 +151,8 @@ static WIN32_FIND_DATA found;
 
 namespace enigma_user
 {
+
+string file_find_next();
 
 string file_find_first(string name,int attributes)
 {
@@ -168,7 +170,10 @@ string file_find_first(string name,int attributes)
   }
 
   current_find=d;
-  return found.cFileName;
+  string res = found.cFileName;
+  if (res == "." || res == "..")
+    return file_find_next();
+  return res;
 }
 
 string file_find_next()
@@ -180,7 +185,11 @@ string file_find_next()
     if (FindNextFile(current_find,&found)==0)
     return "";
   }
-  return found.cFileName;
+
+  string res = found.cFileName;
+  if (res == "." || res == "..")
+    return file_find_next();
+  return res;
 }
 
 int file_find_close() {

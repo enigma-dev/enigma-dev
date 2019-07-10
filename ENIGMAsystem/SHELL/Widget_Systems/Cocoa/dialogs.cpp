@@ -71,7 +71,7 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
     show_debug_message_helper(errortext, type);
   } else {
     #ifndef DEBUG_MODE
-    fputs(errortext, stderr);
+    fputs(errortext.c_str(), stderr);
     #endif
   }
 }

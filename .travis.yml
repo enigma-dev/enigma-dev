@@ -50,9 +50,9 @@ jobs:
       script: ./CI/linux_jobs.sh
       env: WORKER=3
     - stage: Cross Compile
-      env: COMPILER=MinGW32 PLATFORM=Win32 Widgets=Win32 AUDIO=DirectSound EXTENSIONS="DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFileSystem"
+      env: COMPILER=MinGW32 PLATFORM=Win32 Widgets=Win32 AUDIO=DirectSound EXTENSIONS="DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFileSystem" OUTPUT="/tmp/test.exe"
     - stage: Cross Compile 
-      env: COMPILER=MinGW64 PLATFORM=Win32 Widgets=Win32 AUDIO=DirectSound EXTENSIONS="DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFileSystem"
+      env: COMPILER=MinGW64 PLATFORM=Win32 Widgets=Win32 AUDIO=DirectSound EXTENSIONS="DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFileSystem" OUTPUT="/tmp/test.exe"
     - stage: Cross Compile 
       env: COMPILER=gcc32
     - stage: Cross Compile 
