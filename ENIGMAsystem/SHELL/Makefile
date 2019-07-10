@@ -99,7 +99,7 @@ endif
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
 override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)
 
-.PHONY: all clean compile_game cleandep clean print_flags clean_logs
+.PHONY: all clean compile_game cleandep clean print_flags
 
 all: compile_game
 
@@ -118,7 +118,6 @@ clean:
 
 cleandep:
 	@$(RM) $(CLEANDEPS)
-
 
 SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
