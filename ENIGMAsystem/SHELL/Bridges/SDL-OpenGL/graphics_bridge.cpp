@@ -34,6 +34,7 @@ SDL_GLContext context;
 const static SDL_GLprofile profile_types[3] = {SDL_GL_CONTEXT_PROFILE_CORE,SDL_GL_CONTEXT_PROFILE_COMPATIBILITY,SDL_GL_CONTEXT_PROFILE_ES};
 
 void init_sdl_window_bridge_attributes() {
+  std::cout <<  "glmajor: " << gl_major << ", " <<  "glminor: " << gl_minor << ", " << "profile: " << profile_types[graphics_opengl_profile] << std::endl;
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor);
   #ifdef DEBUG_MODE
