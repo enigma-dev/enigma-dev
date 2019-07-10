@@ -40,13 +40,21 @@ unsigned sdl_window_flags = SDL_WINDOW_HIDDEN;
 void init_sdl_window_bridge_attributes();
 
 bool initGameWindow() {
-  SDL_Init(SDL_INIT_VIDEO);
+  if(!SDL_Init(SDL_INIT_VIDEO)) {
+    DEBUG_MESSAGE(std::string("Unable to initialize SDL: ") + SDL_GetError(), MESSAGE_TYPE::M_FATAL_ERROR);
+    return false;
+  }
   if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
   if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
   if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
   init_sdl_window_bridge_attributes();
   windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
-  return (windowHandle != nullptr);
+  if (!windowHandle) {
+      DEBUG_MESSAGE(std::string("Failed to create window: ") + SDL_GetError(), MESSAGE_TYPE::M_FATAL_ERROR);
+    return false;
+  }
+  
+  return true;
 }
 
 namespace keyboard {
