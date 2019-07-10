@@ -19,6 +19,7 @@ else
     if [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
       xvfb-run wine $OUTPUT > >(tee -a tee logs/enigma_game.log) 2> >(tee -a tee logs/enigma_game.log >&2)
     elif [[ ! "$GRAPHICS" =~ "OpenGLES" ]]; then
+      glxinfo | grep "OpenGL version"
       xvfb-run $OUTPUT > >(tee -a tee logs/enigma_game.log) 2> >(tee -a tee logs/enigma_game.log >&2)
     fi
     ./share_logs.sh

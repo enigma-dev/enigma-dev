@@ -153,7 +153,7 @@ compile_game: print_flags cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEP
 # -MP gives phony rules for non-target files, avoiding problems with missing files
 $(OBJDIR)/%.o: %.cpp | $(OBJDIRS)
 	@echo [$(CXX)] $<
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/shared/%.o: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
 	@echo [$(CXX)] $<
