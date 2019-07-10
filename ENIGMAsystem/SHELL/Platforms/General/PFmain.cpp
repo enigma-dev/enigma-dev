@@ -65,6 +65,13 @@ int enigma_main(int argc, char** argv) {
 
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
+  
+  // required for linux because x11 is retard 
+  int winw = enigma_user::window_get_width();
+  int winh = enigma_user::window_get_height();
+  int winx = (enigma_user::display_get_width() - winw) / 2;
+  int winy = (enigma_user::display_get_height() - winh) / 2;
+  enigma_user::window_set_rectangle(winx, winy, winw, winh);
 
   while (!game_isending) {
     if (!((std::string)enigma_user::room_caption).empty())
