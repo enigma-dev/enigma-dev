@@ -50,7 +50,7 @@ bool initGameWindow() {
   init_sdl_window_bridge_attributes();
   windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
   if (!windowHandle) {
-      DEBUG_MESSAGE(std::string("Failed to create window: ") + SDL_GetError(), MESSAGE_TYPE::M_FATAL_ERROR);
+    DEBUG_MESSAGE(std::string("Failed to create window: ") + SDL_GetError(), MESSAGE_TYPE::M_FATAL_ERROR);
     return false;
   }
   
