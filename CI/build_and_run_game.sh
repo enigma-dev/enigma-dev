@@ -17,9 +17,9 @@ else
   do
     MODE="$mode" ./ci-build.sh
     if [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
-      wine $OUTPUT 2>&1 | tee logs/enigma_game.log
+      wine $OUTPUT > >(tee logs/enigma_game.log) 2>&1
     elif [[ ! "$GRAPHICS" =~ "OpenGLES" ]]; then
-      $OUTPUT 2>&1 | tee logs/enigma_game.log
+      wine $OUTPUT > >(tee logs/enigma_game.log) 2>&1
     fi
     ./share_logs.sh
   done

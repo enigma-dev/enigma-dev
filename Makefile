@@ -1,4 +1,5 @@
 PATH := $(eTCpath)$(PATH)
+SHELL=/bin/bash
 
 .PHONY: ENIGMA all clean Game clean-game libpng-util libProtocols libEGM required-directories .FORCE
 
@@ -17,7 +18,7 @@ clean: .FORCE
 all: libpng-util libProtocols libEGM ENIGMA emake test-runner .FORCE
 
 Game: .FORCE
-	@$(MAKE) -C ENIGMAsystem/SHELL 2>&1 | tee logs/enigma_compile.log
+	@$(MAKE) -C ENIGMAsystem/SHELL > >(tee logs/enigma_compile.log) 2>&1
 
 clean-game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL clean
