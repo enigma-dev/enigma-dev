@@ -119,8 +119,6 @@ clean:
 cleandep:
 	@$(RM) $(CLEANDEPS)
 
-clean_logs:
-	@$(RM) -f /tmp/enigma_compile.log  /tmp/enigma_compiler.log /tmp/enigma_libegm.log
 
 SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
