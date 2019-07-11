@@ -48,9 +48,9 @@ class AssetArray {
   AssetArray() {}
 
   int add(T asset) {
-    int id = assets_.size();
+    size_t id = size();
     assets_.emplace_back(true, asset);
-    return id;
+    return (int)id;
   }
 
   int assign(int id, T asset) {
