@@ -27,10 +27,10 @@
 #include <utility>
 
 #ifdef DEBUG_MODE
-  #include "Widget_Systems/widgets_mandatory.h" // for show_error
+  #include "Widget_Systems/widgets_mandatory.h" // for DEBUG_MESSAGE
   #define CHECK_ID(id, ret) \
     if (!exists(id)) { \
-      enigma_user::show_error("Requested " + std::string(T::getAssetTypeName()) + " asset " + std::to_string(id) + " does not exist.", false); \
+      DEBUG_MESSAGE("Requested " + std::string(T::getAssetTypeName()) + " asset " + std::to_string(id) + " does not exist.", MESSAGE_TYPE::M_USER_ERROR); \
       return ret; \
     }
   #define CHECK_ID_V(id) CHECK_ID(id,)
@@ -56,7 +56,7 @@ class AssetArray {
   int assign(int id, T asset) {
     #ifdef DEBUG_MODE
     if (id < 0) {
-      enigma_user::show_error("Attempting to assign " + std::string(T::getAssetTypeName()) + " asset " + std::to_string(id) + " to negative index.", false);
+      DEBUG_MESSAGE("Attempting to assign " + std::string(T::getAssetTypeName()) + " asset " + std::to_string(id) + " to negative index.", MESSAGE_TYPE::M_USER_ERROR);
       return id;
     }
     #endif
