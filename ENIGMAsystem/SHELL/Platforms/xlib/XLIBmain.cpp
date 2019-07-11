@@ -194,7 +194,7 @@ void handleInput() {
 
 namespace enigma_user {
 
-int display_get_width() { return XWidthOfScreen(enigma::x11::screen); }
-int display_get_height() { return XHeightOfScreen(enigma::x11::screen); }
+int display_get_width() { return XWidthOfScreen(XDefaultScreenOfDisplay(enigma::x11::disp)); }
+int display_get_height() { return XHeightOfScreen(XDefaultScreenOfDisplay(enigma::x11::disp)); }
 
 }  // namespace enigma_user
