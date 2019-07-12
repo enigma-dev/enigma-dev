@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,7 +19,7 @@
 #define	inline		__inline
 #define	signed		__signed
 #define	volatile	__volatile
-  
+
   template<typename _Category, typename _Tp, typename _Distance = ptrdiff_t,
            typename _Pointer = _Tp*, typename _Reference = _Tp&>
     struct iterator
@@ -57,5 +57,5 @@
       typedef const _Tp*                  pointer;
       typedef const _Tp&                  reference;
     };
-    
+
 #error Ass caekz
