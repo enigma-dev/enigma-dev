@@ -338,11 +338,6 @@ static inline OPENFILENAMEW get_filename_or_filenames_helper(string filter, stri
   tstr_dir = widen(dir);
   tstr_title = widen(title);
 
-  wstr_filter[0] = '\0';
-  wstr_fname[0] = '\0';
-  tstr_dir[0] = '\0';
-  tstr_title[0] = '\0';
-
   wcsncpy_s(wstr_filter, tstr_filter.c_str(), 512);
   wcsncpy_s(wstr_fname, tstr_fname.c_str(), 4096);
   
