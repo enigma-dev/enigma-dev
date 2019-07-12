@@ -16,7 +16,7 @@
 **/
 #include <cstring>
 #include "OpenGLHeaders.h"
-#include "aux.h"
+#include "GLaux.h"
 
 namespace enigma {
 
