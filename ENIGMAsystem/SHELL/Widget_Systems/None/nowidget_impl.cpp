@@ -90,7 +90,7 @@ if (type == MESSAGE_TYPE::M_USER_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERR
       );
   } else printf((enigma::error_type(type) + ": %s\n").c_str(), err.c_str()); 
   
-  if (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) exit(0);
+  if (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) exit(133);
   ABORT_ON_ALL_ERRORS();
 }
 

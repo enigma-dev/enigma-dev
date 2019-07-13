@@ -167,7 +167,7 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
   catch(std::exception& e)
   {
     if (!_rawArgs.count("help"))
-      errorStream << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
+      std::cerr << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
 
     _readArgsFail = true;
 
@@ -366,11 +366,11 @@ int OptionsParser::printInfo(const std::string &api)
   }
   else
   {
-    errorStream << "OPTIONS_ERROR: Unknown System: \"" << api  << '"'
+    std::cerr << "OPTIONS_ERROR: Unknown System: \"" << api  << '"'
               << std::endl << std::endl << "Avaliable Systems: " << std::endl;
 
     for (auto &&a : _api)
-      errorStream << a.first << std::endl;
+      std::cerr << a.first << std::endl;
 
     return OPTIONS_ERROR;
   }
@@ -405,7 +405,7 @@ int OptionsParser::parse(const std::string &str)
     fs::path file(str);
     if (fs::is_directory(file))
     {
-      errorStream << "OPTIONS_ERROR: " << str << " Is a Directory!" << std::endl;
+      std::cerr << "OPTIONS_ERROR: " << str << " Is a Directory!" << std::endl;
       return OPTIONS_ERROR;
     }
 
@@ -418,14 +418,14 @@ int OptionsParser::parse(const std::string &str)
     }
     else
     {
-      errorStream << "OPTIONS_ERROR: No Such File " << str << std::endl;
+      std::cerr << "OPTIONS_ERROR: No Such File " << str << std::endl;
     }
 
     return OPTIONS_ERROR;
   }
   catch (const fs::filesystem_error& ex)
   {
-    errorStream << "OPTIONS_ERROR: " << ex.what() << std::endl;
+    std::cerr << "OPTIONS_ERROR: " << ex.what() << std::endl;
     return OPTIONS_ERROR;
   }
 }
@@ -437,7 +437,7 @@ int OptionsParser::mode(const std::string &str)
     return OPTIONS_SUCCESS;
   }
   else
-    errorStream << "OPTIONS_ERROR: invalid mode: " << str << std::endl
+    std::cerr << "OPTIONS_ERROR: invalid mode: " << str << std::endl
               << "Available Modes: " << std::endl
               << "Run" << std::endl
               << "Debug" << std::endl
@@ -461,7 +461,7 @@ int OptionsParser::searchCompilers(const std::string &target)
     return OPTIONS_SUCCESS;
   }
   else
-    errorStream << "OPTIONS_ERROR: Unknown Compiler Target: " << target << std::endl
+    std::cerr << "OPTIONS_ERROR: Unknown Compiler Target: " << target << std::endl
               << "Run \"emake --info Compiler\" For a List of Available Targets" << std::endl;
 
   return OPTIONS_ERROR;
@@ -494,7 +494,7 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
     return OPTIONS_SUCCESS;
   }
   else
-    errorStream << "OPTIONS_ERROR: Unknown " << api << " Target: " << target << std::endl
+    std::cerr << "OPTIONS_ERROR: Unknown " << api << " Target: " << target << std::endl
               << "Run \"emake --info " << api << "\" For a List of Available Targets" << std::endl;
 
   return OPTIONS_ERROR;

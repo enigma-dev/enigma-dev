@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     mode = emode_invalid;
 
   if (mode == emode_invalid) {
-    errorStream << "Invalid game mode: " << _mode << " aborting!" << std::endl;
+    std::cerr << "Invalid game mode: " << _mode << " aborting!" << std::endl;
     return OPTIONS_ERROR;
   }
 
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 
   if (input_file.size()) {
     if (!boost::filesystem::exists(input_file)) {
-      errorStream << "Input file does not exist: " << input_file << std::endl;
+      std::cerr << "Input file does not exist: " << input_file << std::endl;
       return OPTIONS_ERROR;
     }
 
@@ -156,13 +156,13 @@ int main(int argc, char* argv[])
 #endif
     } else {
       if (ext == "egm") {
-        errorStream << "EGM format not yet supported. "
+        std::cerr << "EGM format not yet supported. "
                        "Please use LateralGM for the time being." << std::endl;
       } else if (ext.empty()) {
-        errorStream << "Error: Unknown filetype: cannot determine type of file "
+        std::cerr << "Error: Unknown filetype: cannot determine type of file "
                     << '"' << input_file << "\"." << std::endl;
       } else {
-        errorStream << "Error: Unknown filetype \"" << ext
+        std::cerr << "Error: Unknown filetype \"" << ext
                     << "\": cannot read input file \"" << input_file
                     << "\"." << std::endl;
       }

@@ -18,6 +18,7 @@
 #ifndef BGUI_ELEMENTS_H
 #define BGUI_ELEMENTS_H
 
+#include "Widget_Systems/widgets_mandatory.h"
 #include "buttons.h"
 #include "groups.h"
 #include "labels.h"
@@ -37,7 +38,6 @@
 
 #ifdef DEBUG_MODE
 #include <string>
-#include "Widget_Systems/widgets_mandatory.h"
 #include "libEGMstd.h"
 //This checks and returns an element
 #define get_elementv(element, clastype, entype, id, ret)                                                       \
