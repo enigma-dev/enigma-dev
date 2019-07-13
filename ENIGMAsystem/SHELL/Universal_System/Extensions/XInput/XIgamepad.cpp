@@ -23,7 +23,7 @@
 #endif
 
 #include <windows.h>
-#include <XInput.h>
+#include <xinput.h>
 
 namespace {
 
