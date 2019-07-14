@@ -57,5 +57,6 @@ extern unsigned game_id;
 extern std::string working_directory;
 extern std::string program_directory;
 extern std::string temp_directory;
+extern std::string game_save_id;
 
 } //namespace enigma_user
