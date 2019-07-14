@@ -17,7 +17,7 @@
 
 // Simple, intuitive, integer based file I/O
 
-#include <stdio.h> //fstream can get staked
+#include <cstdio> //fstream can get staked
 #include <string> //We will use string, though
 using namespace std;
 
