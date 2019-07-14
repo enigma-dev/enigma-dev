@@ -65,7 +65,7 @@ void initialize_directory_globals() {
   enigma_user::temp_directory = env ? add_slash(env) : "/tmp/";
   
   // Set the game_save_id
-  enigma_user::game_save_id = add_slasht(enigma_user::environment_get_variable("HOME")) + 
+  enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("HOME")) + 
     string(".config/") + add_slash(std::to_string(enigma_user::game_id));
 }
 
