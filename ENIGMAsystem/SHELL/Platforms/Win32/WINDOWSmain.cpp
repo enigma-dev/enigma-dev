@@ -320,21 +320,26 @@ void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
 void initialize_directory_globals() {
   // Set the working_directory
-  WCHAR buffer[MAX_PATH + 1];
-  GetCurrentDirectoryW(MAX_PATH + 1, buffer);
+  WCHAR buffer[MAX_PATH];
+  GetCurrentDirectoryW(MAX_PATH, buffer);
   enigma_user::working_directory = add_slash(shorten(buffer));
 
   // Set the program_directory
   buffer[0] = 0;
-  GetModuleFileNameW(NULL, buffer, MAX_PATH + 1);
+  GetModuleFileNameW(NULL, buffer, MAX_PATH);
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory =
     enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
 
   // Set the temp_directory
   buffer[0] = 0;
-  GetTempPathW(MAX_PATH + 1, buffer);
+  GetTempPathW(MAX_PATH, buffer);
   enigma_user::temp_directory = add_slash(shorten(buffer));
+  
+  // Set the game_save_id
+  buffer[0] = 0;
+  GetEnvironmentVariableW(L"LOCALAPPDATA", (LPWSTR)&buffer, 1024);
+  enigma_user::game_save_id = add_slasht(shorten(buffer)) + add_slash(std::to_string(enigma_user::game_id));
 }
 
 }  // namespace enigma
