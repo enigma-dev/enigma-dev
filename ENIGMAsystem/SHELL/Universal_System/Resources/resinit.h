@@ -32,7 +32,7 @@
 #ifndef ENIGMA_RESINIT_H
 #define ENIGMA_RESINIT_H
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace enigma 
 {
