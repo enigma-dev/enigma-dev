@@ -57,7 +57,7 @@ using std::stringstream;
 
 IDirectSoundBuffer* primaryBuffer;
 
-AssetArray<SoundResource> sound_resources;
+AssetArray<Sound> sound_resources;
 
 namespace enigma {
 
@@ -155,7 +155,7 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 }
 
 int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
-  SoundResource snd;
+  Sound snd;
 
   WaveHeaderType* waveHeader = buffer_get_wave_header((char*)buffer, bufsize);
   WAVEFORMATEX waveFormat = {};

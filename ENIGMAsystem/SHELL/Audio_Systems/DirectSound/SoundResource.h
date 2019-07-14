@@ -23,7 +23,7 @@ using enigma::AssetArray;
 
 enum load_state { LOADSTATE_NONE, LOADSTATE_INDICATED, LOADSTATE_COMPLETE };
 
-struct SoundResource {
+struct Sound {
   IDirectSoundBuffer *soundBuffer;
   void (*cleanup)(void *userdata);               // optional cleanup callback for streams
   void *userdata;                                // optional userdata for streams
@@ -36,7 +36,7 @@ struct SoundResource {
   bool idle;          // True if this sound is not being used, false if playing or paused.
   bool playing;       // True if this sound is playing; not paused or idle.
 
-  SoundResource() : soundBuffer(0), cleanup(0), userdata(0), seek(0), type(0), kind(0),
+  Sound() : soundBuffer(0), cleanup(0), userdata(0), seek(0), type(0), kind(0),
     loaded(LOADSTATE_NONE), idle(1), playing(0) {}
 
   void destroy() {
@@ -47,6 +47,6 @@ struct SoundResource {
   static const char* getAssetTypeName() { return "sound"; }
 };
 
-extern AssetArray<SoundResource> sound_resources;
+extern AssetArray<Sound> sound_resources;
 
 #endif
