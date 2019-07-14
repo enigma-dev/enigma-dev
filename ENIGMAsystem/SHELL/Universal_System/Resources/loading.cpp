@@ -41,6 +41,7 @@ namespace enigma_user
 
 namespace enigma
 {
+  extern const char* resource_file_path;
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
   extern void timeline_system_initialize();
   extern int game_settings_initialize();
@@ -71,42 +72,49 @@ namespace enigma
     widget_system_initialize();
 
     // Open the exe for resource load
-    char exename[1025];
-    windowsystem_write_exename(exename);
-    FILE* exe = fopen(exename,"rb");
-    if (!exe)
-      DEBUG_MESSAGE("Resource load fail: exe unopenable", MESSAGE_TYPE::M_ERROR);
-    else do
-    {
+    do { // Allows break
+      FILE* resfile;
+      if (resource_file_path != std::string("$exe")) {
+        if (!(resfile = fopen(resource_file_path,"rb"))) {
+          DEBUG_MESSAGE("Resource load fail: exe unopenable", MESSAGE_TYPE::M_ERROR);
+          break;
+        }
+      } else {
+        char exename[4097];
+        windowsystem_write_exename(exename);
+        if (!(resfile = fopen(exename,"rb"))) {
+          DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
+          break;
+        }
+      }
       int nullhere;
       // Read the magic number so we know we're looking at our own data
-      fseek(exe,-8,SEEK_END);
+      fseek(resfile,-8,SEEK_END);
       char str_quad[4];
-      if (!fread(str_quad,4,1,exe) or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
+      if (!fread(str_quad,4,1,resfile) or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
         DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
         break;
       }
 
       // Get where our resources are located in the module
       int pos;
-      if (!fread(&pos,4,1,exe)) break;
+      if (!fread(&pos,4,1,resfile)) break;
 
       // Go to the start of the resource data
-      fseek(exe,pos,SEEK_SET);
-      if (!fread(&nullhere,4,1,exe)) break;
+      fseek(resfile,pos,SEEK_SET);
+      if (!fread(&nullhere,4,1,resfile)) break;
       if(nullhere) break;
 
-      enigma::exe_loadsprs(exe);
-      enigma::exe_loadsounds(exe);
-      enigma::exe_loadbackgrounds(exe);
-      enigma::exe_loadfonts(exe);
-    #ifdef PATH_EXT_SET
-    enigma::exe_loadpaths(exe);
-    #endif
+      enigma::exe_loadsprs(resfile);
+      enigma::exe_loadsounds(resfile);
+      enigma::exe_loadbackgrounds(resfile);
+      enigma::exe_loadfonts(resfile);
+      #ifdef PATH_EXT_SET
+      enigma::exe_loadpaths(resfile);
+      #endif
 
-      fclose(exe);
-    }
-    while (false);
+      fclose(resfile);
+    } while (false);
 
     //Load object struct
     enigma::objectdata_load();
