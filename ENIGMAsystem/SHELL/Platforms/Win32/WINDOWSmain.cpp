@@ -337,9 +337,8 @@ void initialize_directory_globals() {
   enigma_user::temp_directory = add_slash(shorten(buffer));
   
   // Set the game_save_id
-  buffer[0] = 0;
-  GetEnvironmentVariableW(L"LOCALAPPDATA", (LPWSTR)&buffer, MAX_PATH;
-  enigma_user::game_save_id = add_slasht(shorten(buffer)) + add_slash(std::to_string(enigma_user::game_id));
+  enigma_user::game_save_id = add_slasht(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
+    add_slash(std::to_string(enigma_user::game_id));
 }
 
 }  // namespace enigma
