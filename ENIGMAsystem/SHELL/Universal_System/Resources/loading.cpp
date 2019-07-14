@@ -29,8 +29,8 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
+#include <cstdio>
 
 namespace enigma_user
 {
