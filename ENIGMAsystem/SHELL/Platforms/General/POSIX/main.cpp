@@ -27,7 +27,7 @@ void initialize_directory_globals() {
   ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX);
   if (count != -1) {
     buffer[count] = 0;
-    enigma_user::program_directory = filename_path(buffer);
+    enigma_user::program_directory = enigma_user::filename_path(buffer);
   }
 
   // Set the temp_directory
