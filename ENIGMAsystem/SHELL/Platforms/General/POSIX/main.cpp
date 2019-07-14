@@ -1,4 +1,6 @@
 #include "Platforms/General/PFmain.h"
+#include "Platforms/General/PFfilemanip.h"
+#include "Universal_System/estring.h"
 
 #include <limits.h>
 #include <unistd.h>
@@ -17,25 +19,25 @@ static inline string add_slash(const string& dir) {
   
 void initialize_directory_globals() {
   // Set the working_directory
-  char buffer[PATH_MAX + 1];
-  if (getcwd(buffer, PATH_MAX + 1) != NULL)
+  char buffer[PATH_MAX];
+  if (getcwd(buffer, PATH_MAX) != NULL)
     enigma_user::working_directory = add_slash(buffer);
 
   // Set the program_directory
   buffer[0] = 0;
-  ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX + 1);
+  ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX);
   if (count != -1) {
     buffer[count] = 0;
-    enigma_user::program_directory = add_slash(dirname(buffer));
+    enigma_user::program_directory = enigma_user::filename_path(buffer);
   }
 
   // Set the temp_directory
   char *env = getenv("TMPDIR");
-
-  if (env != NULL)
-    enigma_user::temp_directory = add_slash(env);
-  else
-    enigma_user::temp_directory = "/tmp/";
+  enigma_user::temp_directory = env ? add_slash(env) : "/tmp/";
+  
+  // Set the game_save_id
+  enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("HOME")) + 
+    string(".config/") + add_slash(std::to_string(enigma_user::game_id));
 }
 
 }

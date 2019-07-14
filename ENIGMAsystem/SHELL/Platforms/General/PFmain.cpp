@@ -98,6 +98,7 @@ const int os_browser = browser_not_a_browser;
 std::string working_directory = "";
 std::string program_directory = "";
 std::string temp_directory = "";
+std::string game_save_id = "";
 std::string keyboard_string = "";
 int keyboard_key = 0;
 double fps = 0;

@@ -37,8 +37,8 @@ namespace enigma_user {
 
 bool set_working_directory(string dname) {
   if (chdir((char *)dname.c_str()) == 0) {
-    char buffer[PATH_MAX + 1]; 
-    if (getcwd(buffer, PATH_MAX + 1) != NULL) {
+    char buffer[PATH_MAX]; 
+    if (getcwd(buffer, PATH_MAX) != NULL) {
       working_directory = add_slash(buffer);
       return true;
     }
