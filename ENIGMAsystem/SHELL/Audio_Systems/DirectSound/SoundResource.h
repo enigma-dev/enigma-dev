@@ -44,6 +44,8 @@ struct Sound {
     soundBuffer = 0;
   }
 
+  bool isDestroyed() const { return soundBuffer; }
+
   static const char* getAssetTypeName() { return "sound"; }
 };
 

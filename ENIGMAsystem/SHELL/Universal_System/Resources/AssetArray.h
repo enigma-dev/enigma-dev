@@ -49,7 +49,7 @@ class AssetArray {
 
   int add(const T&& asset) {
     size_t id = size();
-    assets_.emplace_back(true, std::move(asset));
+    assets_.emplace_back(std::move(asset));
     return (int)id;
   }
 
@@ -63,19 +63,19 @@ class AssetArray {
     if (size_t(id) >= size()) {
       assets_.resize(size_t(id) + 1);
     }
-    assets_[id] = {true,asset};
+    assets_[id] = asset;
     return id;
   }
 
   T& get(int id) {
     static T sentinel;
     CHECK_ID(id,sentinel);
-    return assets_[id].second;
+    return assets_[id];
   }
 
   int replace(int id, T asset) {
     CHECK_ID(id, -1);
-    assets_[id] = {true,asset};
+    assets_[id] = asset;
     return id;
   }
 
@@ -88,15 +88,14 @@ class AssetArray {
   void destroy(int id) {
     CHECK_ID_V(id);
     auto& asset = assets_[id];
-    asset.second.destroy();
-    asset.first = false;
+    asset.destroy();
   }
 
   size_t size() const { return assets_.size(); }
-  bool exists(int id) const { return (id >= 0 && size_t(id) < size() && assets_[id].first); }
+  bool exists(int id) const { return (id >= 0 && size_t(id) < size() && assets_[id].isDestroyed()); }
 
  private:
-  std::vector<std::pair<bool,T>> assets_;
+  std::vector<T> assets_;
 };
 
 } // namespace enigma
