@@ -47,9 +47,9 @@ class AssetArray {
  public:
   AssetArray() {}
 
-  int add(T asset) {
+  int add(const T&& asset) {
     size_t id = size();
-    assets_.emplace_back(true, asset);
+    assets_.emplace_back(true, std::move(asset));
     return (int)id;
   }
 
