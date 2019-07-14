@@ -57,14 +57,14 @@ using std::stringstream;
 
 IDirectSoundBuffer* primaryBuffer;
 
-AssetArray<Sound> sound_resources;
+AssetArray<Sound> sounds;
 
 namespace enigma {
 
 extern HWND hWnd;
 
 void eos_callback(void* soundID, unsigned src) {
-  //auto snd = sound_resources.get((ptrdiff_t)soundID);
+  //auto snd = sounds.get((ptrdiff_t)soundID);
   //snd.playing = false;
   //snd.idle = true;
 }
@@ -214,7 +214,7 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   snd.soundBuffer->SetVolume(0);
   snd.loaded = LOADSTATE_COMPLETE;
 
-  sound_resources.assign(id, std::move(snd));
+  sounds.assign(id, std::move(snd));
   return 0;
 }
 

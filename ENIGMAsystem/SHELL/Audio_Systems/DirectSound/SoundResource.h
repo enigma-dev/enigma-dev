@@ -49,6 +49,6 @@ struct Sound {
   static const char* getAssetTypeName() { return "sound"; }
 };
 
-extern AssetArray<Sound> sound_resources;
+extern AssetArray<Sound> sounds;
 
 #endif
