@@ -38,10 +38,9 @@ struct Sound {
 
   Sound() : soundBuffer(0), cleanup(0), userdata(0), seek(0), type(0), kind(0),
     loaded(LOADSTATE_NONE), idle(1), playing(0) {}
-  ~Sound() { destroy(); }
 
   void destroy() {
-    soundBuffer->Release();
+    if (soundBuffer) soundBuffer->Release();
     soundBuffer = 0;
   }
 
