@@ -69,7 +69,7 @@ static void reset_ide_editables()
         f2write += incg + ext.pathname + impl;
     }
 
-  if (f2comp != f2write)
+  if (f2comp != f2write + "\n")
   {
     wto.open((codegen_directory + "API_Switchboard.h").c_str(),ios_base::out);
       wto << f2write << endl;

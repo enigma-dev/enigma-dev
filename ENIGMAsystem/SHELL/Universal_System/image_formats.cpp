@@ -29,8 +29,9 @@
 #include <algorithm>
 #include <string>
 #include <cstring>
+#include <cstdlib>
+#include <cstdio>
 
-#include <stdlib.h>
 using namespace std;
 
 #include "nlpo2.h"

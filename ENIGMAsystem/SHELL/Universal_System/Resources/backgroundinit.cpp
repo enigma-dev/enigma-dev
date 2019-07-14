@@ -26,7 +26,6 @@
 #include "Platforms/platforms_mandatory.h"
 
 #include <cstring>
-#include <cstdio>
 
 namespace enigma
 {

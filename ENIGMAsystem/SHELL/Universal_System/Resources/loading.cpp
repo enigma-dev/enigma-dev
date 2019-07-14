@@ -30,7 +30,6 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 
 #include <time.h>
-#include <stdio.h>
 
 namespace enigma_user
 {
