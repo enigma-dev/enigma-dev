@@ -328,8 +328,7 @@ void initialize_directory_globals() {
   buffer[0] = 0;
   GetModuleFileNameW(NULL, buffer, MAX_PATH);
   enigma_user::program_directory = shorten(buffer);
-  enigma_user::program_directory =
-    enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
+  enigma_user::program_directory = enigma_user::filename_path(enigma_user::program_directory);
 
   // Set the temp_directory
   buffer[0] = 0;
