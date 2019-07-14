@@ -82,8 +82,8 @@ bool set_working_directory(string dname) {
   tstring tstr_dname = widen(dname);
   replace(tstr_dname.begin(), tstr_dname.end(), '/', '\\');
   if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
-    WCHAR wstr_buffer[MAX_PATH + 1];
-    if (GetCurrentDirectoryW(MAX_PATH + 1, wstr_buffer) != 0) {
+    WCHAR wstr_buffer[MAX_PATH];
+    if (GetCurrentDirectoryW(MAX_PATH, wstr_buffer) != 0) {
       working_directory = add_slash(shorten(wstr_buffer));
       return true;
     }
@@ -338,7 +338,7 @@ void initialize_directory_globals() {
   
   // Set the game_save_id
   buffer[0] = 0;
-  GetEnvironmentVariableW(L"LOCALAPPDATA", (LPWSTR)&buffer, 1024);
+  GetEnvironmentVariableW(L"LOCALAPPDATA", (LPWSTR)&buffer, MAX_PATH;
   enigma_user::game_save_id = add_slasht(shorten(buffer)) + add_slash(std::to_string(enigma_user::game_id));
 }
 
