@@ -1,4 +1,5 @@
 #include "Platforms/General/PFmain.h"
+#include "Platforms/General/PFfilemanip.h"
 #include "Universal_System/estring.h"
 
 #include <limits.h>
