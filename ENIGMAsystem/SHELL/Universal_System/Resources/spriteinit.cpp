@@ -25,6 +25,7 @@
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
+#include <cstdio>
 #include <string>
 
 using enigma_user::toString;
