@@ -214,7 +214,7 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   snd.soundBuffer->SetVolume(0);
   snd.loaded = LOADSTATE_COMPLETE;
 
-  sound_resources.assign(id, snd);
+  sound_resources.assign(id, std::move(snd));
   return 0;
 }
 

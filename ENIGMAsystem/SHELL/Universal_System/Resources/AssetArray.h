@@ -53,17 +53,18 @@ class AssetArray {
     return (int)id;
   }
 
-  int assign(int id, T asset) {
-    #ifdef DEBUG_MODE
-    if (id < 0) {
-      DEBUG_MESSAGE("Attempting to assign " + std::string(T::getAssetTypeName()) + " asset " + std::to_string(id) + " to negative index.", MESSAGE_TYPE::M_USER_ERROR);
-      return id;
+  int assign(int id, const T&& asset) {
+    if (exists(id)) assets_[id].destroy();
+    else {
+      #ifdef DEBUG_MODE
+      if (id < 0) {
+        DEBUG_MESSAGE("Attempting to assign " + std::string(T::getAssetTypeName()) + " asset " + std::to_string(id) + " to negative index.", MESSAGE_TYPE::M_USER_ERROR);
+        return id;
+      }
+      #endif
+      if (size_t(id) >= size()) assets_.resize(size_t(id) + 1);
     }
-    #endif
-    if (size_t(id) >= size()) {
-      assets_.resize(size_t(id) + 1);
-    }
-    assets_[id] = asset;
+    assets_[id] = std::move(asset);
     return id;
   }
 
@@ -73,9 +74,10 @@ class AssetArray {
     return assets_[id];
   }
 
-  int replace(int id, T asset) {
+  int replace(int id, const T&& asset) {
     CHECK_ID(id, -1);
-    assets_[id] = asset;
+    assets_[id].destroy();
+    assets_[id] = std::move(asset);
     return id;
   }
 
