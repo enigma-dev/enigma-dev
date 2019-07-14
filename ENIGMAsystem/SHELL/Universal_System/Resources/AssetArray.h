@@ -67,7 +67,7 @@ class AssetArray {
     return id;
   }
 
-  T get(int id) {
+  T& get(int id) {
     static T sentinel;
     CHECK_ID(id,sentinel);
     return assets_[id].second;

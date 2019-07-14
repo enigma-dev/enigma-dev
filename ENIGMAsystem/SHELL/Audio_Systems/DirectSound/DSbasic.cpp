@@ -32,7 +32,7 @@ bool sound_exists(int sound) { return sound_resources.exists(sound); }
 
 bool sound_play(int sound)  // Returns whether sound is playing
 {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   snd.soundBuffer->SetCurrentPosition(0);
   snd.soundBuffer->Play(0, 0, 0);
   return true;
@@ -40,7 +40,7 @@ bool sound_play(int sound)  // Returns whether sound is playing
 
 bool sound_loop(int sound)  // Returns whether sound is playing
 {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   snd.soundBuffer->SetCurrentPosition(0);
   snd.soundBuffer->Play(0, 0, DSBPLAY_LOOPING);
   return true;
@@ -48,39 +48,39 @@ bool sound_loop(int sound)  // Returns whether sound is playing
 
 bool sound_pause(int sound)  // Returns whether the sound was successfully paused
 {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   snd.soundBuffer->Stop();
   return true;
 }
 
 void sound_pause_all() {
   for (size_t i = 0; i < sound_resources.size(); i++) {
-    auto snd = sound_resources.get(i);
+    const Sound& snd = sound_resources.get(i);
     snd.soundBuffer->Stop();
   }
 }
 
 void sound_stop(int sound) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   snd.soundBuffer->Stop();
 }
 
 void sound_stop_all() {
   for (size_t i = 0; i < sound_resources.size(); i++) {
-    auto snd = sound_resources.get(i);
+    const Sound& snd = sound_resources.get(i);
     snd.soundBuffer->Stop();
   }
 }
 
 void sound_delete(int sound) {
   sound_stop(sound);
-  auto snd = sound_resources.get(sound);
+  Sound& snd = sound_resources.get(sound);
   snd.destroy();
   sound_resources.destroy(sound);
 }
 
 void sound_volume(int sound, float volume) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   snd.soundBuffer->SetVolume((1 - volume) * DSBVOLUME_MIN);
 }
 
@@ -88,69 +88,69 @@ void sound_global_volume(float volume) { primaryBuffer->SetVolume(volume); }
 
 bool sound_resume(int sound)  // Returns whether the sound is playing
 {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   snd.soundBuffer->Play(0, 0, 0);
   return true;
 }
 
 void sound_resume_all() {
   for (size_t i = 0; i < sound_resources.size(); i++) {
-    auto snd = sound_resources.get(i);
+    const Sound& snd = sound_resources.get(i);
     snd.soundBuffer->Play(0, 0, 0);
   }
 }
 
 bool sound_isplaying(int sound) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   DWORD ret = 0;
   snd.soundBuffer->GetStatus(&ret);
   return (ret & DSBSTATUS_PLAYING);
 }
 
 bool sound_ispaused(int sound) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   return !snd.idle and !snd.playing;
 }
 
 void sound_pan(int sound, float value) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   snd.soundBuffer->SetPan(value * 10000);
 }
 
 float sound_get_pan(int sound) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   LONG ret = 0;
   snd.soundBuffer->GetPan(&ret);
   return ret;
 }
 
 float sound_get_volume(int sound) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   LONG ret = 0;
   snd.soundBuffer->GetVolume(&ret);
   return ret;
 }
 
 float sound_get_length(int sound) {  // Not for Streams
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   return snd.length;
 }
 
 float sound_get_position(int sound) {  // Not for Streams
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   DWORD ret = 0;
   snd.soundBuffer->GetCurrentPosition(&ret, NULL);
   return ret;
 }
 
 void sound_seek(int sound, float position) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
   snd.soundBuffer->SetCurrentPosition(position);
 }
 
 void sound_seek_all(float position) {
   for (size_t i = 0; i < sound_resources.size(); i++) {
-    auto snd = sound_resources.get(i);
+    const Sound& snd = sound_resources.get(i);
     snd.soundBuffer->SetCurrentPosition(position);
   }
 }
@@ -196,7 +196,7 @@ bool sound_replace(int sound, string fname, int kind, bool preload) {
 }
 
 void sound_3d_set_sound_cone(int sound, float x, float y, float z, double anglein, double angleout, long voloutside) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
 
   // query for the 3d buffer interface
   IDirectSound3DBuffer8* sound3DBuffer8 = 0;
@@ -208,7 +208,7 @@ void sound_3d_set_sound_cone(int sound, float x, float y, float z, double anglei
 }
 
 void sound_3d_set_sound_distance(int sound, float mindist, float maxdist) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
 
   // query for the 3d buffer interface
   IDirectSound3DBuffer8* sound3DBuffer8 = 0;
@@ -219,7 +219,7 @@ void sound_3d_set_sound_distance(int sound, float mindist, float maxdist) {
 }
 
 void sound_3d_set_sound_position(int sound, float x, float y, float z) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
 
   // query for the 3d buffer interface
   IDirectSound3DBuffer8* sound3DBuffer8 = 0;
@@ -229,7 +229,7 @@ void sound_3d_set_sound_position(int sound, float x, float y, float z) {
 }
 
 void sound_3d_set_sound_velocity(int sound, float x, float y, float z) {
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
 
   // query for the 3d buffer interface
   IDirectSound3DBuffer8* sound3DBuffer8 = 0;
@@ -353,7 +353,7 @@ void sound_effect_set(int sound, int effect) {
     }
   }
 
-  auto snd = sound_resources.get(sound);
+  const Sound& snd = sound_resources.get(sound);
 
   // GM8 allows changing the effect flags in the middle of a sound playing
   // but this doesn't work unless we follow the Microsoft documentation
