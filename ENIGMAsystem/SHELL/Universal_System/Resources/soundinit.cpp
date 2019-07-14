@@ -23,6 +23,7 @@
 #include "Universal_System/zlib.h"
 
 #include <cstring>
+#include <cstdio>
 
 namespace enigma_user {
   void sound_play(int sound);
