@@ -99,25 +99,23 @@ endif
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
 override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)
 
-.PHONY: all clean compile_game cleandep clean print_flags
+.PHONY: all clean compile_game clean print_flags
 
 all: compile_game
 
 print_flags:
-	@echo -e "\n################ Compiler Flags ################"
+	@echo -e "\n################ Compiler Info ################"
+	@$(CXX) --version
 	@echo "CXXFLAGS=\"$(CXXFLAGS) $(CPPFLAGS) $(INCLUDES)\""
 	@echo "CFLAGS=\"$(CFLAGS) $(CPPFLAGS)\""
 	@echo "LDFLAGS=\"$(LDFLAGS)\""
 	@echo "LDLIBS=\"$(LDIBS)\""
-	@echo -e "#################################################\n"
+	@echo -e "################################################\n"
 
 clean:
 	$(RM) $(OUTPUTNAME) $(RESOURCEBINARY)
 	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.o" -exec $(RM) -rf {} \;
 	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.d" -exec $(RM) -rf {} \;
-
-cleandep:
-	@$(RM) $(CLEANDEPS)
 
 SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
@@ -143,7 +141,7 @@ endif
 # building #
 ############
 
-compile_game: print_flags cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
+compile_game: print_flags $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	@echo "Linking $(OUTPUTNAME)"
 	@$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 	@echo Built to "$(OUTPUTNAME)"
