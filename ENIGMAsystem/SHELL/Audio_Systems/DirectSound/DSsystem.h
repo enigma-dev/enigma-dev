@@ -18,12 +18,6 @@
 #ifndef ENIGMA_DS_SYSTEM_H
 #define ENIGMA_DS_SYSTEM_H
 
-#include "Widget_Systems/widgets_mandatory.h"  // show_error
-
-#ifdef DEBUG_MODE
-#include "libEGMstd.h"
-#endif
-
 #include <dsound.h>
 #include <mmsystem.h>
 #include <stddef.h>
@@ -37,32 +31,12 @@ namespace enigma {
 
 int get_free_channel(double priority);
 
-#ifdef DEBUG_MODE
-#define get_sound(snd, id, failure)                                                           \
-  if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {               \
-    DEBUG_MESSAGE("Sound " + enigma_user::toString(id) + " does not exist", MESSAGE_TYPE::M_USER_ERROR); \
-    return failure;                                                                           \
-  }                                                                                           \
-  SoundResource *const snd = sound_resources[id];
-#define get_soundv(snd, id)                                                                   \
-  if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {               \
-    DEBUG_MESSAGE("Sound " + enigma_user::toString(id) + " does not exist", MESSAGE_TYPE::M_USER_ERROR); \
-    return;                                                                                   \
-  }                                                                                           \
-  SoundResource *const snd = sound_resources[id];
-#else
-#define get_sound(snd, id, failure) SoundResource *const snd = sound_resources[id];
-#define get_soundv(snd, id) SoundResource *const snd = sound_resources[id];
-#endif
-
 void eos_callback(void *soundID, unsigned src);
 int audiosystem_initialize();
-SoundResource *sound_new_with_source();
 int sound_add_from_buffer(int id, void *buffer, size_t bufsize);
 int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size),
                           void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata),
                           void *userdata);
-int sound_allocate();
 void audiosystem_update(void);
 void audiosystem_cleanup();
 
