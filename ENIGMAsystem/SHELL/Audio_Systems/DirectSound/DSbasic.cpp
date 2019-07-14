@@ -74,8 +74,6 @@ void sound_stop_all() {
 
 void sound_delete(int sound) {
   sound_stop(sound);
-  Sound& snd = sound_resources.get(sound);
-  snd.destroy();
   sound_resources.destroy(sound);
 }
 

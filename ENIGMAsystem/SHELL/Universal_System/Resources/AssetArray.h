@@ -87,12 +87,13 @@ class AssetArray {
 
   void destroy(int id) {
     CHECK_ID_V(id);
-    //TODO: call cleanup method
-    assets_[id].first = false;
+    auto& asset = assets_[id];
+    asset.second.destroy();
+    asset.first = false;
   }
 
   size_t size() const { return assets_.size(); }
-  bool exists(int id) { return (id >= 0 && size_t(id) < size() && assets_[id].first); }
+  bool exists(int id) const { return (id >= 0 && size_t(id) < size() && assets_[id].first); }
 
  private:
   std::vector<std::pair<bool,T>> assets_;
