@@ -33,6 +33,7 @@
 
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/estring.h"
 
 using std::string;
 
@@ -47,8 +48,8 @@ static inline string add_slash(const string& dir) {
 
 void initialize_directory_globals() {
   // Set the working_directory
-  char buffer[PATH_MAX + 1];
-  if (getcwd(buffer, PATH_MAX + 1) != NULL)
+  char buffer[PATH_MAX];
+  if (getcwd(buffer, PATH_MAX) != NULL)
     enigma_user::working_directory = add_slash(buffer);
 
   // Set the program_directory
@@ -56,16 +57,16 @@ void initialize_directory_globals() {
 
   uint32_t bufsize = sizeof(buffer);
   if (_NSGetExecutablePath(buffer, &bufsize) == 0) {
-    enigma_user::program_directory = add_slash(dirname(buffer));
+    enigma_user::program_directory = enigma_user::filename_path(buffer);
   }
 
   // Set the temp_directory
   char *env = getenv("TMPDIR");
-
-  if (env != NULL)
-    enigma_user::temp_directory = add_slash(env);
-  else
-    enigma_user::temp_directory = "/tmp/";
+  enigma_user::temp_directory = env ? add_slash(env) : "/tmp/";
+  
+  // Set the game_save_id
+  enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("HOME")) + 
+    string(".config/") + add_slash(std::to_string(enigma_user::game_id));
 }
 
 } // namespace enigma

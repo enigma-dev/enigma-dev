@@ -19,6 +19,7 @@
 #include "buffers_internal.h"
 #include "libEGMstd.h"
 
+#include "Resources/AssetArray.h" // TODO: start actually using for this resource
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
