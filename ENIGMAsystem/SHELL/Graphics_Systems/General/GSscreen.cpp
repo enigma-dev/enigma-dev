@@ -385,11 +385,13 @@ void screen_redraw()
       d3d_clear_depth();
 
     draw_gui();
-    draw_gui_after_hooks();
-
-    // do an implicit flush to catch anything from the draw GUI events
-    draw_batch_flush(batch_flush_deferred);
   }
+
+  // allow extensions to draw after GUI events handled if there are any
+  draw_gui_after_hooks();
+
+  // do an implicit flush to catch anything from the draw GUI events
+  draw_batch_flush(batch_flush_deferred);
 
   if (sprite_exists(cursor_sprite)) {
     draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);

@@ -52,6 +52,8 @@ void update_virtualkeys() {
 void draw_virtualkeys() {
   for (int i = 0; size_t(i) < virtual_keys.size(); ++i) {
     if (!virtual_keys.exists(i)) continue;
+    const VirtualKey& vk = virtual_keys.get(i);
+    if (!vk.visible) continue;
     virtual_key_draw(i);
   }
 }
