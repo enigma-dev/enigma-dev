@@ -26,12 +26,21 @@ void extension_virtualkeys_init();
 
 namespace enigma_user {
 
+void virtual_key_set_keyboard_press_visible(bool visible);
+bool virtual_key_get_keyboard_press_visible();
 int virtual_key_add(int x, int y, int width, int height, int keycode);
 void virtual_key_delete(int id);
 bool virtual_key_exists(int id);
-void virtual_key_show(int id);
-void virtual_key_hide(int id);
+int virtual_key_get_x(int id);
+int virtual_key_get_y(int id);
+int virtual_key_get_width(int id);
+int virtual_key_get_height(int id);
+int virtual_key_get_keycode(int id);
+bool virtual_key_get_pressed(int id);
+void virtual_key_set_visible(int id, bool visible);
 bool virtual_key_get_visible(int id);
+inline void virtual_key_show(int id) { virtual_key_set_visible(id, true); }
+inline void virtual_key_hide(int id) { virtual_key_set_visible(id, false); }
 void virtual_key_set_sprite(int id, int spr);
 int virtual_key_get_sprite(int id, int spr);
 void virtual_key_draw(int id);

@@ -30,21 +30,25 @@ using namespace enigma_user;
 namespace {
 
 AssetArray<VirtualKey> virtual_keys;
+// whether to make the buttons look pressed
+// when the associated keyboard key is pressed
+bool virtual_key_show_keyboard_pressed = false;
 
 void update_virtualkeys() {
   for (int i = 0; size_t(i) < virtual_keys.size(); ++i) {
     if (!virtual_keys.exists(i)) continue;
-    const VirtualKey& vk = virtual_keys.get(i);
+    VirtualKey& vk = virtual_keys.get(i);
+    // always set it back to false in case of focus loss
+    vk.pressed = false;
 
     if (!point_in_rectangle(mouse_x, mouse_y, vk.x, vk.y, vk.x + vk.width, vk.y + vk.height))
       continue;
 
-    if (mouse_check_button_pressed(mb_left)) {
+    if (mouse_check_button(mb_left)) {
+      vk.pressed = true;
       keyboard_key_press(vk.keycode);
     } else if (mouse_check_button_released(mb_left)) {
       keyboard_key_release(vk.keycode);
-    } else if (mouse_check_button(mb_left)) {
-
     }
   }
 }
@@ -71,6 +75,14 @@ void extension_virtualkeys_init() {
 
 namespace enigma_user {
 
+void virtual_key_set_keyboard_press_visible(bool visible) {
+  virtual_key_show_keyboard_pressed = visible;
+}
+
+bool virtual_key_get_keyboard_press_visible() {
+  return virtual_key_show_keyboard_pressed;
+}
+
 int virtual_key_add(int x, int y, int width, int height, int keycode) {
   VirtualKey vk;
   vk.x = x;
@@ -82,14 +94,39 @@ int virtual_key_add(int x, int y, int width, int height, int keycode) {
   return virtual_keys.add(std::move(vk));
 }
 
-void virtual_key_show(int id) {
-  VirtualKey& vk = virtual_keys.get(id);
-  vk.visible = true;
+int virtual_key_get_x(int id) {
+  const VirtualKey& vk = virtual_keys.get(id);
+  return vk.x;
 }
 
-void virtual_key_hide(int id) {
+int virtual_key_get_y(int id) {
+  const VirtualKey& vk = virtual_keys.get(id);
+  return vk.y;
+}
+
+int virtual_key_get_width(int id) {
+  const VirtualKey& vk = virtual_keys.get(id);
+  return vk.width;
+}
+
+int virtual_key_get_height(int id) {
+  const VirtualKey& vk = virtual_keys.get(id);
+  return vk.height;
+}
+
+int virtual_key_get_keycode(int id) {
+  const VirtualKey& vk = virtual_keys.get(id);
+  return vk.keycode;
+}
+
+bool virtual_key_get_pressed(int id) {
+  const VirtualKey& vk = virtual_keys.get(id);
+  return vk.pressed;
+}
+
+void virtual_key_set_visible(int id, bool visible) {
   VirtualKey& vk = virtual_keys.get(id);
-  vk.visible = false;
+  vk.visible = visible;
 }
 
 bool virtual_key_get_visible(int id) {
@@ -109,10 +146,15 @@ int virtual_key_get_sprite(int id, int spr) {
 
 void virtual_key_draw(int id) {
   const VirtualKey& vk = virtual_keys.get(id);
+  bool pressed = false;
+  if (virtual_key_show_keyboard_pressed)
+    pressed = keyboard_check(vk.keycode);
+  else
+    pressed = vk.pressed;
   if (sprite_exists(vk.sprite)) {
-    draw_sprite_stretched(vk.sprite, !vk.pressed, vk.x, vk.y, vk.width, vk.height);
+    draw_sprite_stretched(vk.sprite, !pressed, vk.x, vk.y, vk.width, vk.height);
   } else {
-    draw_button(vk.x, vk.y, vk.x + vk.width, vk.y + vk.height, !vk.pressed);
+    draw_button(vk.x, vk.y, vk.x + vk.width, vk.y + vk.height, !pressed);
   }
 }
 
