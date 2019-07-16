@@ -24,11 +24,14 @@ using enigma::AssetArray;
 
 namespace {
 
-struct VirtualKey {
+class VirtualKey {
   bool destroyed;
-  int x, y, width, height, keycode;
+ public:
+  bool visible, pressed;
+  int x, y, width, height, keycode, sprite;
 
-  VirtualKey() : destroyed(false), x(0), y(0), width(0), height(0), keycode(-1) {}
+  VirtualKey() : destroyed(false), visible(false), pressed(false), x(0), y(0),
+                 width(0), height(0), keycode(-1), sprite(-1) {}
 
   void destroy() { destroyed = true; }
   bool isDestroyed() const { return destroyed; }

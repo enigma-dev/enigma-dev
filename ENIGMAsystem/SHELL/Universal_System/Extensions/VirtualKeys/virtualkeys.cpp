@@ -17,9 +17,12 @@
 
 #include "virtualkeys.h"
 #include "VirtualKey.h"
+#include "Graphics_Systems/General/GSstdraw.h" // draw_button
+#include "Graphics_Systems/General/GSsprite.h" // draw_sprite_stretched
 #include "Platforms/General/PFwindow.h" // keyboard/mouse
 #include "Platforms/platforms_mandatory.h" // extension_update_hooks
 #include "Universal_System/mathnc.h" // point_in_rectangle
+#include "Universal_System/Resources/sprites.h" // sprite_exists
 
 using namespace enigma_user;
 
@@ -27,10 +30,10 @@ namespace {
 
 AssetArray<VirtualKey> virtual_keys;
 
-void process_virtualkeys() {
+void update_virtualkeys() {
   for (int i = 0; size_t(i) < virtual_keys.size(); ++i) {
     if (!virtual_keys.exists(i)) continue;
-    VirtualKey& vk = virtual_keys.get(i);
+    const VirtualKey& vk = virtual_keys.get(i);
 
     if (!point_in_rectangle(mouse_x, mouse_y, vk.x, vk.y, vk.x + vk.width, vk.y + vk.height))
       continue;
@@ -45,12 +48,19 @@ void process_virtualkeys() {
   }
 }
 
+void draw_virtualkeys() {
+  for (int i = 0; size_t(i) < virtual_keys.size(); ++i) {
+    if (!virtual_keys.exists(i)) continue;
+    virtual_key_draw(i);
+  }
 }
+
+} // namespace anonymous
 
 namespace enigma {
 
 void extension_virtualkeys_init() {
-  extension_update_hooks.push_back(process_virtualkeys);
+  extension_update_hooks.push_back(update_virtualkeys);
 }
 
 } // namespace enigma
@@ -69,11 +79,37 @@ int virtual_key_add(int x, int y, int width, int height, int keycode) {
 }
 
 void virtual_key_show(int id) {
-
+  VirtualKey& vk = virtual_keys.get(id);
+  vk.visible = true;
 }
 
 void virtual_key_hide(int id) {
+  VirtualKey& vk = virtual_keys.get(id);
+  vk.visible = false;
+}
 
+bool virtual_key_get_visible(int id) {
+  const VirtualKey& vk = virtual_keys.get(id);
+  return vk.visible;
+}
+
+void virtual_key_set_sprite(int id, int spr) {
+  VirtualKey& vk = virtual_keys.get(id);
+  vk.sprite = spr;
+}
+
+int virtual_key_get_sprite(int id, int spr) {
+  const VirtualKey& vk = virtual_keys.get(id);
+  return vk.sprite;
+}
+
+void virtual_key_draw(int id) {
+  const VirtualKey& vk = virtual_keys.get(id);
+  if (sprite_exists(vk.sprite)) {
+    draw_sprite_stretched(vk.sprite, !vk.pressed, vk.x, vk.y, vk.width, vk.height);
+  } else {
+    draw_button(vk.x, vk.y, vk.x + vk.width, vk.y + vk.height, !vk.pressed);
+  }
 }
 
 void virtual_key_delete(int id) {
@@ -84,4 +120,4 @@ bool virtual_key_exists(int id) {
   return virtual_keys.exists(id);
 }
 
-}
+} // namespace enigma_user

@@ -27,10 +27,14 @@ void extension_virtualkeys_init();
 namespace enigma_user {
 
 int virtual_key_add(int x, int y, int width, int height, int keycode);
-void virtual_key_show(int id);
-void virtual_key_hide(int id);
 void virtual_key_delete(int id);
 bool virtual_key_exists(int id);
+void virtual_key_show(int id);
+void virtual_key_hide(int id);
+bool virtual_key_get_visible(int id);
+void virtual_key_set_sprite(int id, int spr);
+int virtual_key_get_sprite(int id, int spr);
+void virtual_key_draw(int id);
 
 }
 
