@@ -25,9 +25,14 @@
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_instance.h"
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace enigma
 {
+  #ifndef JUST_DEFINE_IT_RUN // no functional in c++03
+  extern std::vector<std::function<void()> > extension_draw_gui_after_hooks;
+  #endif
+
   /// Called at game load to allow the system to set up.
   void graphicssystem_initialize(); /// This function can be implemented as an empty call if it is not needed.
 

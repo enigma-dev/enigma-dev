@@ -69,6 +69,8 @@ gs_scalar viewport_x, viewport_y, viewport_w, viewport_h;
 
 namespace enigma {
 
+std::vector<std::function<void()> > extension_draw_gui_after_hooks;
+
 unsigned gui_width = 0;
 unsigned gui_height = 0;
 
@@ -228,6 +230,13 @@ static inline void draw_gui()
   d3d_set_zwriteenable(zwrite);
 }
 
+static inline void draw_gui_after_hooks() {
+  // if any extension wants to draw over the user
+  // GUI let's go ahead and call those hooks now
+  for (auto draw_gui_after_hook : extension_draw_gui_after_hooks)
+    draw_gui_after_hook();
+}
+
 namespace enigma_user {
 
 void display_set_gui_size(unsigned int width, unsigned int height) {
@@ -376,6 +385,7 @@ void screen_redraw()
       d3d_clear_depth();
 
     draw_gui();
+    draw_gui_after_hooks();
 
     // do an implicit flush to catch anything from the draw GUI events
     draw_batch_flush(batch_flush_deferred);

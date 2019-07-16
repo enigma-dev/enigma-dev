@@ -19,6 +19,7 @@
 #include "VirtualKey.h"
 #include "Graphics_Systems/General/GSstdraw.h" // draw_button
 #include "Graphics_Systems/General/GSsprite.h" // draw_sprite_stretched
+#include "Graphics_Systems/graphics_mandatory.h" // extension_draw_gui_after_hooks
 #include "Platforms/General/PFwindow.h" // keyboard/mouse
 #include "Platforms/platforms_mandatory.h" // extension_update_hooks
 #include "Universal_System/mathnc.h" // point_in_rectangle
@@ -61,6 +62,7 @@ namespace enigma {
 
 void extension_virtualkeys_init() {
   extension_update_hooks.push_back(update_virtualkeys);
+  extension_draw_gui_after_hooks.push_back(draw_virtualkeys);
 }
 
 } // namespace enigma
