@@ -178,10 +178,9 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   bufferDesc.guid3DAlgorithm = GUID_NULL;
   dsound->CreateSoundBuffer(&bufferDesc, &snd.soundBuffer, NULL);
 
+  auto sndBuf = snd.soundBuffer;
   LPVOID lpvWrite;
   DWORD dwLength;
-
-  IDirectSoundBuffer* sndBuf = snd.soundBuffer;
 
   if (DS_OK == sndBuf->Lock(0,                     // Offset at which to start lock.
                             waveHeader->dataSize,  // Size of lock; ignored because of flag.
