@@ -36,6 +36,6 @@ void virtual_key_set_sprite(int id, int spr);
 int virtual_key_get_sprite(int id, int spr);
 void virtual_key_draw(int id);
 
-}
+} // namespace enigma_user
 
 #endif // ENIGMA_VIRTUALKEYS_H
