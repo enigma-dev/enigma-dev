@@ -114,9 +114,22 @@ int virtual_key_get_height(int id) {
   return vk.height;
 }
 
+void virtual_key_set_area(int id, int x, int y, int width, int height) {
+  VirtualKey& vk = virtual_keys.get(id);
+  vk.x = x;
+  vk.y = y;
+  vk.width = width;
+  vk.height = height;
+}
+
 int virtual_key_get_keycode(int id) {
   const VirtualKey& vk = virtual_keys.get(id);
   return vk.keycode;
+}
+
+void virtual_key_set_keycode(int id, int keycode) {
+  VirtualKey& vk = virtual_keys.get(id);
+  vk.keycode = keycode;
 }
 
 bool virtual_key_get_pressed(int id) {
