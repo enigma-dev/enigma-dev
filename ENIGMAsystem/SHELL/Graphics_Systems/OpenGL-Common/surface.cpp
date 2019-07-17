@@ -16,8 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifdef GL_DRAW_FRAMEBUFFER
-
 #include "surface_impl.h"
 #include "textures_impl.h"
 #include "OpenGLHeaders.h"
@@ -116,5 +114,3 @@ int surface_get_depth_texture(int id)
 }
 
 }
-
-#endif
