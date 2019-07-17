@@ -77,7 +77,12 @@ class Model {
     destroyed(false), type(type), vertex_buffer(-1), current_primitive(), vertex_started(false),
     use_draw_color(use_draw_color), vertex_colored(true), vertex_color(enigma_user::c_white), vertex_alpha(1.0) {}
 
-  void destroy() { destroyed = true; }
+  void destroy() {
+    destroyed = true;
+    // this will give us 0 size and 0 capacity
+    vector<Primitive>().swap(primitives);
+  }
+
   bool isDestroyed() const { return destroyed; }
 
   static const char* getAssetTypeName() { return "model"; }
