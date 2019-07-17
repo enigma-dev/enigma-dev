@@ -7,8 +7,7 @@
 *** Foundation, version 3 of the license or any later version.
 ***
 *** This application and its source code is distributed AS-IS, WITHOUT ANY
-*** WARRANTY {
-} without even the implied warranty of MERCHANTABILITY or FITNESS
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 *** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
 *** details.
 ***
