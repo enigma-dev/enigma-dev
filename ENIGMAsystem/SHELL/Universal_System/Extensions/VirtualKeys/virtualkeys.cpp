@@ -52,8 +52,10 @@ void update_virtualkeys() {
 
     if (mouse_check_button(mb_left)) {
       vk.pressed = true;
+      if (vk.keycode == -1) continue;
       keyboard_key_press(vk.keycode);
     } else if (mouse_check_button_released(mb_left)) {
+      if (vk.keycode == -1) continue;
       keyboard_key_release(vk.keycode);
     }
   }
@@ -175,7 +177,7 @@ void virtual_key_draw(int id) {
   const VirtualKey& vk = virtual_keys.get(id);
   bool pressed = false;
   if (virtual_key_show_pressed)
-    pressed = (virtual_key_show_keyboard_pressed) ? keyboard_check(vk.keycode) : vk.pressed;
+    pressed = (virtual_key_show_keyboard_pressed && vk.keycode != -1) ? keyboard_check(vk.keycode) : vk.pressed;
   if (sprite_exists(vk.sprite)) {
     draw_sprite_stretched(vk.sprite, pressed, vk.x, vk.y, vk.width, vk.height);
   } else {
