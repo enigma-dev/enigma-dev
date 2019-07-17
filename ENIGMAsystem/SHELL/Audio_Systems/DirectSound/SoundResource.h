@@ -19,24 +19,16 @@
 #define ENIGMA_SOUND_RESOURCE_H
 
 #include "Universal_System/Resources/AssetArray.h"
-<<<<<<< HEAD
-using enigma::AssetArray;
-=======
 
 #include <wrl/client.h> // ComPtr
 
 using enigma::AssetArray;
 using Microsoft::WRL::ComPtr;
->>>>>>> upstream/master
 
 enum load_state { LOADSTATE_NONE, LOADSTATE_INDICATED, LOADSTATE_COMPLETE };
 
 struct Sound {
-<<<<<<< HEAD
-  IDirectSoundBuffer *soundBuffer;
-=======
   ComPtr<IDirectSoundBuffer> soundBuffer;
->>>>>>> upstream/master
   void (*cleanup)(void *userdata);               // optional cleanup callback for streams
   void *userdata;                                // optional userdata for streams
   void (*seek)(void *userdata, float position);  // optional seeking
@@ -50,17 +42,8 @@ struct Sound {
 
   Sound() : soundBuffer(0), cleanup(0), userdata(0), seek(0), type(0), kind(0),
     loaded(LOADSTATE_NONE), idle(1), playing(0) {}
-  ~Sound() { destroy(); }
 
-<<<<<<< HEAD
-  void destroy() {
-    soundBuffer->Release();
-    soundBuffer = 0;
-  }
-
-=======
   void destroy() { soundBuffer.Reset(); }
->>>>>>> upstream/master
   bool isDestroyed() const { return soundBuffer; }
 
   static const char* getAssetTypeName() { return "sound"; }
