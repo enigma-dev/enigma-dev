@@ -127,6 +127,9 @@ void execute_program(std::string operation, std::string fname, std::string args,
 }
 
 std::string execute_shell_for_output(const std::string &command) {
+  #ifdef __ANDROID__
+  return "not supported on android";
+  #else
   std::string res;
   char buffer[BUFSIZ];
   FILE *pf = popen(command.c_str(), "r");
@@ -135,6 +138,7 @@ std::string execute_shell_for_output(const std::string &command) {
   }
   pclose(pf);
   return res;
+  #endif
 }
 
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("", fname, args, wait); }
