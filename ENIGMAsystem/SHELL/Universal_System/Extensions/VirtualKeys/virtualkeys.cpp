@@ -43,7 +43,11 @@ void update_virtualkeys() {
     // always set it back to false in case of focus loss
     vk.pressed = false;
 
-    if (!point_in_rectangle(mouse_x, mouse_y, vk.x, vk.y, vk.x + vk.width, vk.y + vk.height))
+    // get the mouse with respect to the view
+    int mx = window_mouse_get_x();
+    int my = window_mouse_get_y();
+    // check if the mouse is inside the virtual key button
+    if (!point_in_rectangle(mx, my, vk.x, vk.y, vk.x + vk.width, vk.y + vk.height))
       continue;
 
     if (mouse_check_button(mb_left)) {

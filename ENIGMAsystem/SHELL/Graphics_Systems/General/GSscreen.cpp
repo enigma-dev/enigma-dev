@@ -375,11 +375,11 @@ void screen_redraw()
 
   // Now process the sub event of draw called draw gui
   // It is for drawing GUI elements without view scaling and transformation
+  screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+  d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
+
   if (enigma::gui_used)
   {
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
-
     // Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
     if (enigma::d3dMode)
       d3d_clear_depth();
