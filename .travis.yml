@@ -34,6 +34,17 @@ jobs:
     - os: osx
   include:
     - stage: ENIGMA CI
+      env: TEST_HARNESS=true AUDIO=OpenAL 
+      script: ./CI/build_and_run_game.sh
+    - stage: ENIGMA CI
+      env: WORKER=0
+    - stage: ENIGMA CI
+      env: WORKER=1
+    - stage: ENIGMA CI
+      env: WORKER=2
+    - stage: ENIGMA CI
+      env: WORKER=3
+    - stage: ENIGMA CI
       env: COMPILER=Android GRAPHICS=OpenGLES2 PLATFORM=SDL MODE=Compile ANDROID_API_LEVEL=28 ANDROID_BUILD_TOOLS_VERSION=28.0.3
       before_install: 
         - git clone --depth 1 https://github.com/fundies/enigma-android.git android
@@ -50,17 +61,6 @@ jobs:
         - platform-tools
         - tools
         - extra-android-m2repository
-    - stage: ENIGMA CI
-      env: TEST_HARNESS=true AUDIO=OpenAL 
-      script: ./CI/build_and_run_game.sh
-    - stage: ENIGMA CI
-      env: WORKER=0
-    - stage: ENIGMA CI
-      env: WORKER=1
-    - stage: ENIGMA CI
-      env: WORKER=2
-    - stage: ENIGMA CI
-      env: WORKER=3
     - stage: ENIGMA CI
       env: WORKER=0
       os: osx

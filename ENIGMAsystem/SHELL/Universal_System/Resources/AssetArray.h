@@ -47,13 +47,13 @@ class AssetArray {
  public:
   AssetArray() {}
 
-  int add(const T&& asset) {
+  int add(T&& asset) {
     size_t id = size();
     assets_.emplace_back(std::move(asset));
     return (int)id;
   }
 
-  int assign(int id, const T&& asset) {
+  int assign(int id, T&& asset) {
     if (exists(id)) assets_[id].destroy();
     else {
       #ifdef DEBUG_MODE
@@ -74,7 +74,7 @@ class AssetArray {
     return assets_[id];
   }
 
-  int replace(int id, const T&& asset) {
+  int replace(int id, T&& asset) {
     CHECK_ID(id, -1);
     assets_[id].destroy();
     assets_[id] = std::move(asset);
