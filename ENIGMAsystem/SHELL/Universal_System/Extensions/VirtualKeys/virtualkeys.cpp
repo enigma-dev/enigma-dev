@@ -31,6 +31,8 @@ namespace {
 
 AssetArray<VirtualKey> virtual_keys;
 // whether to make the buttons look pressed
+bool virtual_key_show_pressed = true;
+// whether to make the buttons look pressed
 // when the associated keyboard key is pressed
 bool virtual_key_show_keyboard_pressed = false;
 
@@ -81,6 +83,14 @@ void virtual_key_set_keyboard_press_visible(bool visible) {
 
 bool virtual_key_get_keyboard_press_visible() {
   return virtual_key_show_keyboard_pressed;
+}
+
+void virtual_key_set_press_visible(bool visible) {
+  virtual_key_show_pressed = visible;
+}
+
+bool virtual_key_get_press_visible() {
+  return virtual_key_show_pressed;
 }
 
 int virtual_key_add(int x, int y, int width, int height, int keycode) {
@@ -160,12 +170,10 @@ int virtual_key_get_sprite(int id, int spr) {
 void virtual_key_draw(int id) {
   const VirtualKey& vk = virtual_keys.get(id);
   bool pressed = false;
-  if (virtual_key_show_keyboard_pressed)
-    pressed = keyboard_check(vk.keycode);
-  else
-    pressed = vk.pressed;
+  if (virtual_key_show_pressed)
+    pressed = (virtual_key_show_keyboard_pressed) ? keyboard_check(vk.keycode) : vk.pressed;
   if (sprite_exists(vk.sprite)) {
-    draw_sprite_stretched(vk.sprite, !pressed, vk.x, vk.y, vk.width, vk.height);
+    draw_sprite_stretched(vk.sprite, pressed, vk.x, vk.y, vk.width, vk.height);
   } else {
     draw_button(vk.x, vk.y, vk.x + vk.width, vk.y + vk.height, !pressed);
   }

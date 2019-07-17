@@ -28,6 +28,8 @@ namespace enigma_user {
 
 void virtual_key_set_keyboard_press_visible(bool visible);
 bool virtual_key_get_keyboard_press_visible();
+void virtual_key_set_press_visible(bool visible);
+bool virtual_key_get_press_visible();
 int virtual_key_add(int x, int y, int width, int height, int keycode);
 void virtual_key_delete(int id);
 bool virtual_key_exists(int id);
