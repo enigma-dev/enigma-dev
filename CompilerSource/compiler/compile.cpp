@@ -396,6 +396,11 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
   wto << license;
 
+  wto << "namespace enigma {\n";
+  std::string res_in = (compilerInfo.exe_vars["RESOURCES_IN"] != "") ? "RESOURCES_IN" : "RESOURCES";
+  wto << "const char *resource_file_path=\"" << compilerInfo.exe_vars[res_in] << "\";\n";
+  wto << "}\n";
+
   write_resource_meta(wto,     "object", game.objects);
   write_resource_meta(wto,     "sprite", game.sprites);
   write_resource_meta(wto, "background", game.backgrounds);
