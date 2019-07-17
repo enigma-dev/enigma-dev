@@ -79,7 +79,7 @@ unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, un
 
   unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
-  #if !defined(__ANDROID__) && !defined(glGetTexImage)
+  #if !defined(__ANDROID__) || defined(glGetTexImage)
   glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, ret);
   #endif
   
