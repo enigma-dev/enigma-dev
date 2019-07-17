@@ -44,7 +44,7 @@ struct Sound {
     loaded(LOADSTATE_NONE), idle(1), playing(0) {}
 
   void destroy() { soundBuffer.Reset(); }
-  bool isDestroyed() const { return soundBuffer; }
+  bool isDestroyed() const { return !soundBuffer; }
 
   static const char* getAssetTypeName() { return "sound"; }
 };

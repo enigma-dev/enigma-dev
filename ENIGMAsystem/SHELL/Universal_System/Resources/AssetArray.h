@@ -94,7 +94,7 @@ class AssetArray {
   }
 
   size_t size() const { return assets_.size(); }
-  bool exists(int id) const { return (id >= 0 && size_t(id) < size() && assets_[id].isDestroyed()); }
+  bool exists(int id) const { return (id >= 0 && size_t(id) < size() && !assets_[id].isDestroyed()); }
 
  private:
   std::vector<T> assets_;

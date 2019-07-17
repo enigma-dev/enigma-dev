@@ -69,6 +69,8 @@ gs_scalar viewport_x, viewport_y, viewport_w, viewport_h;
 
 namespace enigma {
 
+std::vector<std::function<void()> > extension_draw_gui_after_hooks;
+
 unsigned gui_width = 0;
 unsigned gui_height = 0;
 
@@ -228,6 +230,13 @@ static inline void draw_gui()
   d3d_set_zwriteenable(zwrite);
 }
 
+static inline void draw_gui_after_hooks() {
+  // if any extension wants to draw over the user
+  // GUI let's go ahead and call those hooks now
+  for (auto draw_gui_after_hook : extension_draw_gui_after_hooks)
+    draw_gui_after_hook();
+}
+
 namespace enigma_user {
 
 void display_set_gui_size(unsigned int width, unsigned int height) {
@@ -366,20 +375,23 @@ void screen_redraw()
 
   // Now process the sub event of draw called draw gui
   // It is for drawing GUI elements without view scaling and transformation
+  screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+  d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
+
   if (enigma::gui_used)
   {
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
-
     // Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
     if (enigma::d3dMode)
       d3d_clear_depth();
 
     draw_gui();
-
-    // do an implicit flush to catch anything from the draw GUI events
-    draw_batch_flush(batch_flush_deferred);
   }
+
+  // allow extensions to draw after GUI events handled if there are any
+  draw_gui_after_hooks();
+
+  // do an implicit flush to catch anything from the draw GUI events
+  draw_batch_flush(batch_flush_deferred);
 
   if (sprite_exists(cursor_sprite)) {
     draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
