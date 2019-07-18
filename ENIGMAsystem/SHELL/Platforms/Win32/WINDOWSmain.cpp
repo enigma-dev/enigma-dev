@@ -433,12 +433,12 @@ std::string execute_shell_for_output(const std::string &command) {
   si.cb = sizeof(si);
   ZeroMemory(&pi, sizeof(pi));
   std::string str_output_file = temp_directory + string("ENIGMA-DEV-OUTPUT.TMP");
-  std::string str_command = string("CMD.EXE /C ") + command + string(" > \"") + str_output_file + string("\""); 
+  std::string str_command = string("cmd.exe /c chcp 65001 > nul & cmd.exe /c ") + command + string(" > \"") + str_output_file + string("\""); 
   tstring tstr_command = widen(str_command);
   tstr_command.resize(32767);
   if (CreateProcessW(NULL, (wchar_t *)tstr_command.c_str(), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-    // note if user uses "CMD.EXE" as the application to run, they must also use the "/C" flag to avoid endless wait
-    // calling "CMD.EXE /C " is done internally, so all they need to do is specify the command line arguments to CMD
+    // note if user uses "cmd.exe" as the application to run, they must also use the "/c" flag to avoid endless wait
+    // calling "cmd.exe /c " is done internally, so all they need to do is specify the command line arguments to cmd
     // CREATE_NO_WINDOW hides the command prompt to emulate the behavior of the Mac and Linux version of this method
     WaitForSingleObject(pi.hProcess, INFINITE);
     CloseHandle(pi.hProcess);
