@@ -148,8 +148,8 @@ string message_get_caption() {
 }
 
 void message_set_caption(string title) {
-  if (is_kde()) return kdialog::message_set_caption(title);
-  return zenity::message_set_caption(title);
+  if (is_kde()) kdialog::message_set_caption(title);
+  else zenity::message_set_caption(title);
 }
 
 } // namespace enigma_user
