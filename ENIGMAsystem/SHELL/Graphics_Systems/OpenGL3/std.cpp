@@ -29,6 +29,10 @@ namespace enigma {
   const unsigned int gl_major = 3, gl_minor = 3;
   const std::string shader_header = "#version 330\n";
 
+  GLenum shadertypes[5] = {
+    GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER
+  };
+
   bool gl_extension_supported(std::string extension) {
     GLint n, i;
     glGetIntegerv(GL_NUM_EXTENSIONS, &n);

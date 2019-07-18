@@ -96,16 +96,6 @@
     enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
 #endif
 
-#if defined(__ANDROID__) && !defined(GL_GEOMETRY_SHADER)
-GLenum shadertypes[2] = {
-  GL_VERTEX_SHADER, GL_FRAGMENT_SHADER
-};
-#else
-GLenum shadertypes[5] = {
-  GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER
-};
-#endif
-
 namespace enigma
 {
   std::vector<enigma::Shader*> shaders(0);
@@ -415,62 +405,6 @@ void main()
     shaderprograms[prog_id]->att_color = enigma_user::glsl_get_attribute_location(prog_id, "in_Color");
     shaderprograms[prog_id]->att_texture = enigma_user::glsl_get_attribute_location(prog_id, "in_TextureCoord");
     shaderprograms[prog_id]->att_normal = enigma_user::glsl_get_attribute_location(prog_id, "in_Normal");
-  }
-
-  int getGLTypeSize(GLuint type){
-    switch (type){
-      case GL_FLOAT: return 1;
-      case GL_FLOAT_VEC2: return 2;
-      case GL_FLOAT_VEC3: return 3;
-      case GL_FLOAT_VEC4: return 4;
-      case GL_INT: return 1;
-      case GL_INT_VEC2: return 2;
-      case GL_INT_VEC3: return 3;
-      case GL_INT_VEC4: return 4;
-      case GL_UNSIGNED_INT: return 1;
-      #if !defined(__ANDROID__) || defined(GL_UNSIGNED_INT_VEC2)
-      case GL_UNSIGNED_INT_VEC2: return 2;
-      #endif
-      #if !defined(__ANDROID__) || defined(GL_UNSIGNED_INT_VEC3)
-      case GL_UNSIGNED_INT_VEC3: return 3;
-      #endif
-      #if !defined(__ANDROID__) || defined(GL_UNSIGNED_INT_VEC4)
-      case GL_UNSIGNED_INT_VEC4: return 4;
-      #endif
-      case GL_BOOL: return 1;
-      case GL_BOOL_VEC2: return 2;
-      case GL_BOOL_VEC3: return 3;
-      case GL_BOOL_VEC4: return 4;
-      case GL_FLOAT_MAT2: return 4;
-      case GL_FLOAT_MAT3: return 9;
-      case GL_FLOAT_MAT4: return 16;
-      #if !defined(__ANDROID__) || defined(GL_FLOAT_MAT2x3)
-      case GL_FLOAT_MAT2x3: return 6;
-      #endif
-      #if !defined(__ANDROID__) || defined(GL_FLOAT_MAT2x4)
-      case GL_FLOAT_MAT2x4: return 8;
-      #endif
-      #if !defined(__ANDROID__) || defined(GL_FLOAT_MAT3x2)
-      case GL_FLOAT_MAT3x2: return 6;
-      #endif
-      #if !defined(__ANDROID__) || defined(GL_FLOAT_MAT3x4)
-      case GL_FLOAT_MAT3x4: return 12;
-      #endif
-      #if !defined(__ANDROID__) || defined(GL_FLOAT_MAT4x2)
-      case GL_FLOAT_MAT4x2: return 8;
-      #endif
-      #if !defined(__ANDROID__) || defined(GL_FLOAT_MAT4x3)
-      case GL_FLOAT_MAT4x3: return 12;
-      #endif
-      #if !defined(__ANDROID__) || defined(GL_SAMPLER_1D)
-      case GL_SAMPLER_1D: return 1;
-      #endif
-      case GL_SAMPLER_2D: return 1;
-      #if !defined(__ANDROID__) || defined(GL_SAMPLER_3D)
-      case GL_SAMPLER_3D: return 1;
-      #endif
-      default: { DEBUG_MESSAGE("getGLTypeSize Asking size for unknown type - " + std::to_string(type), MESSAGE_TYPE::M_ERROR); return 1; }
-    }
   }
 
   //This seems very stupid for me, but I don't know any more "elegant" way - Harijs G.

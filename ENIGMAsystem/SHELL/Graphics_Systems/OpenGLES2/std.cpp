@@ -6,4 +6,8 @@ const gl_profile_type graphics_opengl_profile = gl_profile_es;
 const unsigned int gl_major = 2, gl_minor = 0; 
 const std::string shader_header = "#version 300 es\nprecision mediump float;\n";
 
+GLenum shadertypes[2] = {
+  GL_VERTEX_SHADER, GL_FRAGMENT_SHADER
+};
+
 } // namespace enigma
