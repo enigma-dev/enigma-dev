@@ -426,15 +426,29 @@ void execute_shell(std::string operation, std::string fname, std::string args) {
 }
 
 std::string execute_shell_for_output(const std::string &command) {
-  string res;
-  char buffer[BUFSIZ];
-  tstring tstr_command = widen(command);
-  FILE *pf = _wpopen(tstr_command.c_str(), L"r");
-  while (!feof(pf)) {
-    res.append(buffer, fread(&buffer, sizeof(char), BUFSIZ, pf));
+  STARTUPINFOW si;
+  PROCESS_INFORMATION pi;
+  ZeroMemory(&si, sizeof(si));
+  si.cb = sizeof(si);
+  ZeroMemory(&pi, sizeof(pi));
+  std::string str_output_file = temp_directory + string("ENIGMA-DEV-OUTPUT.TMP");
+  std::string str_command = string("CMD.EXE /C ") + command + string(" > \"") + str_output_file + string("\""); 
+  tstring tstr_command = widen(str_command);
+  tstr_command.resize(32767);
+  if (CreateProcessW(NULL, (wchar_t *)tstr_command.c_str(), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+	  // note if user uses "CMD.EXE" as the application to run, they must also use the "/C" flag to avoid endless wait
+	  // calling "CMD.EXE /C " is done internally, so all they need to do is specify the command line arguments to CMD
+	  // CREATE_NO_WINDOW hides the command prompt to emulate the behavior of the Mac and Linux version of this method
+    WaitForSingleObject(pi.hProcess, INFINITE);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    int output_file = file_text_open_read(str_output_file);
+    std::string output_file_contents = file_text_read_all(output_file);
+    file_text_close(output_file);
+    file_delete(str_output_file);
+    return output_file_contents;
   }
-  _pclose(pf);
-  return res;
+  return "";
 }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
