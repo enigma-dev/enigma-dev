@@ -1,8 +1,4 @@
 #include "Graphics_Systems/OpenGL-Common/textures_impl.h"
-//#include "Graphics_Systems/General/GStextures.h"
-//#include "Graphics_Systems/General/GStextures_impl.h"
-//#include "Graphics_Systems/General/GSprimitives.h"
-//#include "Graphics_Systems/graphics_mandatory.h"
 
 namespace enigma {
 
