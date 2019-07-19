@@ -16,16 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/OpenGL-Common/textures_impl.h"
-#include "Graphics_Systems/General/GStextures.h"
-#include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-
-#include <cstring> // for std::memcpy
-
-#include "Platforms/General/PFwindow.h"
-
+#include "OpenGLHeaders.h"
 
 namespace enigma_user {
 

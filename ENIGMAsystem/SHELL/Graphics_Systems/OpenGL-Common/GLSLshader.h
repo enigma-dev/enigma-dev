@@ -28,10 +28,9 @@ using std::unordered_map;
 
 #include "OpenGLHeaders.h"
 
-extern GLenum shadertypes[];
+namespace enigma {
+  extern GLenum shadertypes[];
 
-namespace enigma
-{
     struct Shader{
         string log;
         GLuint shader;

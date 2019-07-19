@@ -77,23 +77,6 @@ namespace enigma {
 
 namespace enigma_user {
 
-void show_debug_message(string err, MESSAGE_TYPE type) {
-if (type == MESSAGE_TYPE::M_USER_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) {
-    printf((enigma::error_type(type) + ": in some action of some event for object %d, instance id %d: %s\n").c_str(),
-           (enigma::instance_event_iterator == NULL? enigma_user::global :
-              enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
-                enigma::instance_event_iterator->inst->object_index),
-           (enigma::instance_event_iterator == NULL? enigma_user::global :
-              enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
-                enigma::instance_event_iterator->inst->id),
-           err.c_str()
-      );
-  } else printf((enigma::error_type(type) + ": %s\n").c_str(), err.c_str()); 
-  
-  if (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) exit(133);
-  ABORT_ON_ALL_ERRORS();
-}
-
 int show_message(const string &message)
 {
   printf("show_message: %s\n", message.c_str());

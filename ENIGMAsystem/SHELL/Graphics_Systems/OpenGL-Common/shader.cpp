@@ -45,13 +45,13 @@
     }else{\
         sprintf(str, "Program[%s = %i]", name.c_str(), enigma::bound_shader);\
     }\
-    if (location < 0) { printf("%s - Uniform location < 0 given (%i)!\n", str, location); return; }\
+    if (location < 0) { DEBUG_MESSAGE(std::string(str) + " - Uniform location < 0 given (" + std::to_string(location) + ")!", MESSAGE_TYPE::M_ERROR); return; }\
     std::unordered_map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
     if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
-        printf("%s - Uniform at location %i not found!\n", str, location);\
+        DEBUG_MESSAGE(std::string(str) + " - Uniform at location " + std::to_string(location) + "  not found!", MESSAGE_TYPE::M_ERROR);\
         return;\
     }else if ( uniter->second.size != usize ){\
-        printf("%s - Uniform [%s] at location %i with %i arguments is accesed by a function with %i arguments!\n", str, uniter->second.name.c_str(), location, uniter->second.size, usize);\
+        DEBUG_MESSAGE(std::string(str) + " - Uniform [" + uniter->second.name + "] at location " + std::to_string(location) + " with " +  std::to_string(uniter->second.size) + " arguments is accesed by a function with " + std::to_string(usize) + " arguments!", MESSAGE_TYPE::M_ERROR);\
     }
 
   #define get_attribute(atiter,location)\
@@ -62,17 +62,17 @@
     }else{\
         sprintf(str, "Program[%s = %i]", name.c_str(), enigma::bound_shader);\
     }\
-    if (location < 0) { printf("%s - Attribute location < 0 given (%i)!\n", str, location); return; }\
+    if (location < 0) { DEBUG_MESSAGE(std::string(str) + " - Attribute location < 0 given (" + std::to_string(location) + ")!", MESSAGE_TYPE::M_ERROR); return; }\
     std::unordered_map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader]->attributes.find(location);\
     if (atiter == enigma::shaderprograms[enigma::bound_shader]->attributes.end()){\
-        printf("%s - Attribute at location %i not found!\n", str, location);\
+        DEBUG_MESSAGE(std::string(str) + " - Attribute at location " + std::to_string(location) + " not found!", MESSAGE_TYPE::M_ERROR);\
         return;\
     }
 
     #define get_program(ptiter,program,err)\
-    if (program < 0) { printf("Program id [%i] < 0 given!\n", program); return err; }\
-    if (size_t(program) >= enigma::shaderprograms.size()) { printf("Program id [%i] > size() [%llu] given!\n", program, enigma::shaderprograms.size()); return err; }\
-    if (enigma::shaderprograms[program] == nullptr) { printf("Program with id [%i] is deleted!\n", program); return err; }\
+    if (program < 0) { DEBUG_MESSAGE("Program id [" + std::to_string(program) + "] < 0 given!", MESSAGE_TYPE::M_ERROR); return err; }\
+    if (size_t(program) >= enigma::shaderprograms.size()) { DEBUG_MESSAGE("Program id [" + std::to_string(program) +"] > size() [" + std::to_string(enigma::shaderprograms.size()) +"] given!", MESSAGE_TYPE::M_ERROR); return err; }\
+    if (enigma::shaderprograms[program] == nullptr) { DEBUG_MESSAGE("Program with id [" + std::to_string(program) + "] is deleted!", MESSAGE_TYPE::M_ERROR); return err; }\
     enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
 #else
     #define get_uniform(uniter,location,usize)\
@@ -95,10 +95,6 @@
     if (enigma::shaderprograms[program] == nullptr) { return err; }\
     enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
 #endif
-
-GLenum shadertypes[5] = {
-  GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER
-};
 
 namespace enigma
 {
@@ -409,42 +405,6 @@ void main()
     shaderprograms[prog_id]->att_color = enigma_user::glsl_get_attribute_location(prog_id, "in_Color");
     shaderprograms[prog_id]->att_texture = enigma_user::glsl_get_attribute_location(prog_id, "in_TextureCoord");
     shaderprograms[prog_id]->att_normal = enigma_user::glsl_get_attribute_location(prog_id, "in_Normal");
-  }
-
-  int getGLTypeSize(GLuint type){
-    switch (type){
-      case GL_FLOAT: return 1;
-      case GL_FLOAT_VEC2: return 2;
-      case GL_FLOAT_VEC3: return 3;
-      case GL_FLOAT_VEC4: return 4;
-      case GL_INT: return 1;
-      case GL_INT_VEC2: return 2;
-      case GL_INT_VEC3: return 3;
-      case GL_INT_VEC4: return 4;
-      case GL_UNSIGNED_INT: return 1;
-      case GL_UNSIGNED_INT_VEC2: return 2;
-      case GL_UNSIGNED_INT_VEC3: return 3;
-      case GL_UNSIGNED_INT_VEC4: return 4;
-      case GL_BOOL: return 1;
-      case GL_BOOL_VEC2: return 2;
-      case GL_BOOL_VEC3: return 3;
-      case GL_BOOL_VEC4: return 4;
-      case GL_FLOAT_MAT2: return 4;
-      case GL_FLOAT_MAT3: return 9;
-      case GL_FLOAT_MAT4: return 16;
-      case GL_FLOAT_MAT2x3: return 6;
-      case GL_FLOAT_MAT2x4: return 8;
-      case GL_FLOAT_MAT3x2: return 6;
-      case GL_FLOAT_MAT3x4: return 12;
-      case GL_FLOAT_MAT4x2: return 8;
-      case GL_FLOAT_MAT4x3: return 12;
-
-      case GL_SAMPLER_1D: return 1;
-      case GL_SAMPLER_2D: return 1;
-      case GL_SAMPLER_3D: return 1;
-
-      default: { DEBUG_MESSAGE("getGLTypeSize Asking size for unknown type - " + std::to_string(type), MESSAGE_TYPE::M_ERROR); return 1; }
-    }
   }
 
   //This seems very stupid for me, but I don't know any more "elegant" way - Harijs G.
