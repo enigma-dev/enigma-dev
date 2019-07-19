@@ -1,4 +1,3 @@
-SOURCES += $(wildcard Graphics_Systems/OpenGL-Desktop/*.cpp)
 override CXXFLAGS += -IBridges/OpenGL
 
 ifeq ($(TARGET-PLATFORM), Windows)

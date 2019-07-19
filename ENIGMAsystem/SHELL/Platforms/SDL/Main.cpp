@@ -4,7 +4,11 @@
 
 namespace enigma {
     void initialize_directory_globals() {
-      enigma_user::working_directory = SDL_GetBasePath(); 
+    #ifdef __ANDROID__ //FIXME: this is wrong path but better to set it somewhere I guess
+      enigma_user::working_directory = SDL_AndroidGetInternalStoragePath();
+    #else
+      enigma_user::working_directory = SDL_GetBasePath();
+    #endif
     }
 }
 
