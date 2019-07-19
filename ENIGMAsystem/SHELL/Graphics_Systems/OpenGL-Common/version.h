@@ -1,6 +1,8 @@
 #ifndef ENIGMA_OPENGL_COMMON_VERSION_H
 #define ENIGMA_OPENGL_COMMON_VERSION_H
 
+#include "OpenGLHeaders.h"
+
 #include <string>
 
 namespace enigma {
@@ -20,6 +22,10 @@ void register_gl_debug_callback();
 void init_vao();
 void gl_screen_init();
 void graphics_init_vbo_method();
+
+namespace OpenGL {
+int getGLTypeSize(GLuint type);
+} // namespace OpenGL
 
 } // namespace enigma
 

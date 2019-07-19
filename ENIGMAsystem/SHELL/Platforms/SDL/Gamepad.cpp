@@ -26,11 +26,11 @@ void initGamepads() {
 }
 
 void cleanupGamepads() {
-  for (int i = 0; i < SDL_NumJoysticks(); ++i) removeGamepad(i);
+  for (size_t i = 0; i < gamepads.size(); ++i) removeGamepad(i);
 }
 
 void pushGamepads() {
-  for (int i = 0; i < SDL_NumJoysticks(); ++i) gamepads[i].push();
+  for (Gamepad& gp : gamepads) gp.push();
 }
 
 void setGamepadButton(int gamepad, int btn, bool pressed) { gamepads[gamepad].state.buttonStatus[btn] = pressed; }

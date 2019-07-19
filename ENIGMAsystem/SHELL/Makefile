@@ -18,6 +18,22 @@ else
 	MKDIR := mkdir.exe
 endif
 
+MAKE_TARGETS :=
+ifeq ($(TARGET-PLATFORM), Android)
+	MAKE_TARGETS += android_game
+	BASENAME := $(shell basename $(OUTPUTNAME))
+	SDL_CSTDIO := TRUE
+	ifeq ($(GMODE), Compile)
+		GRADLE_TARGET := build
+		APK_OUT := $(WORKDIR)/android/enigma/outputs/apk/release
+	else
+		GRADLE_TARGET := installDebug
+		APK_OUT := $(WORKDIR)/android/enigma/outputs/apk/debug
+	endif
+else
+	MAKE_TARGETS += compile_game
+endif
+
 # GMODE { Run, Build, Debug, Compile }
 GMODE ?= Run
 
@@ -51,7 +67,7 @@ SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AU
 
 OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 
-SHARED_SRC_DIR := ../../shared
+SHARED_SRC_DIR := ../../shared/
 include $(SHARED_SRC_DIR)/Makefile
 include $(SHARED_SRC_DIR)/rectpacker/Makefile
 
@@ -99,9 +115,9 @@ endif
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
 override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)
 
-.PHONY: all clean compile_game clean print_flags
+.PHONY: all clean compile_game clean print_flags write_src_files android_game
 
-all: compile_game
+all: $(MAKE_TARGETS)
 
 print_flags:
 	@echo -e "\n################ Compiler Info ################"
@@ -140,6 +156,13 @@ endif
 ############
 # building #
 ############
+
+write_src_files:
+	@echo "$(SOURCES)" > $(WORKDIR)/sources.list
+
+android_game: write_src_files
+	@cd ../../android && BASENAME=$(BASENAME) ./gradlew $(GRADLE_TARGET)
+	@cp $(APK_OUT)/$(BASENAME) $(OUTPUTNAME)
 
 compile_game: print_flags $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	@echo "Linking $(OUTPUTNAME)"
