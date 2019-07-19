@@ -22,10 +22,10 @@
 #endif
 #include <cstddef>    // size_t
 
-#if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
+#if DEBUG_MODE
   #define JSON_ASSERT_UNREACHABLE assert( false )
-  #define JSON_ASSERT( condition ) (condition ? void() : enigma_user::show_error("Assertion failed: " #condition, true))
-  #define JSON_FAIL_MESSAGE( message ) enigma_user::show_error(message, true)
+  #define JSON_ASSERT( condition ) (condition ? void() : DEBUG_MESSAGE("Assertion failed: " #condition, MESSAGE_TYPE::M_ERROR))
+  #define JSON_FAIL_MESSAGE( message ) DEBUG_MESSAGE(message, MESSAGE_TYPE::M_ERROR)
   #define JSON_ASSERT_MESSAGE( condition, message ) if (!( condition )) JSON_FAIL_MESSAGE( message )
 #else
   #define JSON_ASSERT_UNREACHABLE

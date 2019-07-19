@@ -47,6 +47,7 @@ void array_copy(var& dest, size_t dest_index, const var& src, size_t src_index, 
 int array_length_1d(const var& v) { return v.array_len(); }
 int array_length_2d(const var& v, int n) { return v.array_len(n); }
 int array_height_2d(const var& v) { return v.array_height(); }
+void array_set(var& v, int pos, variant value) { v[pos] = value; }
 bool is_array(const var& v) {
   //There is no way (currently) to downsize an array from >1 element, so this might not be accurate.
   return (v.array_height() > 1) || (v.array_len() > 1);

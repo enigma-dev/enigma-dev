@@ -27,12 +27,12 @@
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/callbacks_events.h"
+#include "Universal_System/Instances/callbacks_events.h"
 #include "libEGMstd.h"
-#include "instance_system.h"
-#include "instance.h"
-#include "planar_object.h"
-#include "background.h"
+#include "Instances/instance_system.h"
+#include "Instances/instance.h"
+#include "Object_Tiers/planar_object.h"
+#include "Resources/background.h"
 
 #include "roomsystem.h"
 #include "depth_draw.h"
@@ -55,7 +55,6 @@ int room_last = 0;
 
 int room_persistent = 0;
 var room_caption = "";
-var current_caption = "";
 
 int background_color = 0xFFFFFF;
 int background_showcolor=1;
@@ -324,13 +323,13 @@ namespace enigma_user {
   enigma::roomv room;
 }
 
-#if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
-  #define errcheck(indx,err,v) \
+#if DEBUG_MODE
+#define errcheck(indx,err,v) \
   if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]) \
-    return (enigma_user::show_error(err,0), (v))
+    return (DEBUG_MESSAGE(err, MESSAGE_TYPE::M_USER_ERROR), (v))
   #define errcheck_o(indx,err) \
   if (unsigned(indx) >= unsigned(enigma::room_loadtimecount)) \
-    return (enigma_user::show_error(err,0), 0)
+    return (DEBUG_MESSAGE(err,MESSAGE_TYPE::M_USER_ERROR), 0)
 #else
   #define errcheck(indx,err,v)
   #define errcheck_o(indx,err)

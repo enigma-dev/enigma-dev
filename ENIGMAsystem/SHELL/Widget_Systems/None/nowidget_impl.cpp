@@ -19,7 +19,7 @@
 #include <string>
 using std::string;
 #include "Widget_Systems/widgets_mandatory.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include <cstdlib>
 #include <cstdio>
 
@@ -69,27 +69,13 @@ class PasswordContext {
 };
 
 namespace enigma {
+
   bool widget_system_initialize() {
     return 0;
   }
 }
 
 namespace enigma_user {
-
-void show_error(string err, const bool fatal)
-{
-  printf("ERROR in some action of some event for object %d, instance id %d: %s\n",
-         (enigma::instance_event_iterator == NULL? enigma_user::global :
-            enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
-              enigma::instance_event_iterator->inst->object_index),
-         (enigma::instance_event_iterator == NULL? enigma_user::global :
-            enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
-              enigma::instance_event_iterator->inst->id),
-         err.c_str()
-    );
-  if (fatal) exit(0);
-  ABORT_ON_ALL_ERRORS();
-}
 
 int show_message(const string &message)
 {
@@ -117,8 +103,7 @@ bool show_question(string str) {
   return (answer == 'Y');
 }
 
-string get_login(string username, string password, string cap="") {
-  cout << cap << endl;
+string get_login(string username, string password) {
   string input;
   cout << "Username: " << flush;
   cin >> input;
@@ -132,19 +117,19 @@ string get_login(string username, string password, string cap="") {
   return input;
 }
 
-string get_string(string message, string def, string cap="") {
-  printf("%s\n%s\n", cap.c_str(), message.c_str());
+string get_string(string str, string def) {
+  printf("%s\n", str.c_str());
   string input;
   cin >> input;
   return (input.empty()) ? def : input;
 }
 
-int get_integer(string message, string def, string cap="") {
-  printf("%s\n%s\n", cap.c_str(), message.c_str());
+double get_integer(string str, double def) {
+  printf("%s\n", str.c_str());
   string input;
   cin >> input;
-  if (input.empty()) input = def;
-  return stoi(input);
+  if (input.empty()) return def;
+  return strtod(input.c_str(), NULL);
 }
 
 }

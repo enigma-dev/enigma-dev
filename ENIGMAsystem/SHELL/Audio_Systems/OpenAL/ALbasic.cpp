@@ -32,7 +32,6 @@ using std::string;
 #include "SoundResource.h"
 
 #ifdef DEBUG_MODE
-#include "Widget_Systems/widgets_mandatory.h"  // show_error
 #include "libEGMstd.h"
 #endif
 
