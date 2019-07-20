@@ -97,7 +97,7 @@ static string kdialog_filter(string input) {
       if (first != string::npos) {
         size_t last = str.find(')', first);
         if (last != string::npos)
-          str.erase(first, last-first + 1);
+          str.erase(first, last - first + 1);
       }
       string_output += str + " (";
     } else {
