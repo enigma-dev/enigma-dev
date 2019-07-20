@@ -86,16 +86,17 @@ static string remove_trailing_zeros(double numb) {
 }
 
 static string zenity_filter(string input) {
-  std::replace(input.begin(), input.end(), ';', ' ');
   std::vector<string> stringVec = split_string(input, '|');
   string string_output = "";
 
   unsigned int index = 0;
-  for (const string &str : stringVec) {
+  for (string str : stringVec) {
     if (index % 2 == 0)
       string_output += " --file-filter='" + str + "|";
-    else
+    else {
+      std::replace(str.begin(), str.end(), ';', ' ');
       string_output += string_replace_all(str, "*.*", "*") + "'";
+    }
 
     index += 1;
   }
