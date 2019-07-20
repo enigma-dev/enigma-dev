@@ -19,6 +19,7 @@
 #include "filesystem.h"
 #include "action.h"
 #include "event.h"
+#include "strings_util.h"
 
 #include "event_reader/event_parser.h"
 
@@ -1357,6 +1358,8 @@ buffers::Project *LoadGMK(std::string fName) {
   game->set_allocated_root(root.release());
   // ensure all temp data files are written and the paths are set in the protos
   dec.processTempFileFutures();
+
+  game->set_events(FileToString("events.res"));
 
   return proj.release();
 }

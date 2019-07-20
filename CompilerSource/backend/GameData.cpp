@@ -512,7 +512,7 @@ GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es): filename(es->filen
   cout << "Transfer complete." << endl << endl;
 }
 
-GameData::GameData(const buffers::Project &proj): filename("") {}
+GameData::GameData(const buffers::Project &proj): filename(""), events(proj.game().events()) {}
 
 int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
   int error = 0;

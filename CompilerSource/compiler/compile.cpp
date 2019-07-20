@@ -249,7 +249,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
 
   //Read the types of events
-  event_parse_resourcefile();
+  event_parse_resourcefile(game.events);
 
   /**** Segment One: This segment of the compile process is responsible for
   * @ * translating the code into C++. Basically, anything essential to the
