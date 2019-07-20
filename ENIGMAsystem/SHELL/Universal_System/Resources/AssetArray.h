@@ -62,10 +62,7 @@ class AssetArray {
 
   AssetArray() {}
 
-  iterator begin() {
-    iterator it(*this, 0);
-    return (exists(0) ? it : ++it);
-  }
+  iterator begin() { return ++iterator(*this, -1); }
   iterator end() { return iterator(*this, size()); }
 
   int add(T&& asset) {
