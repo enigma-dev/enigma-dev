@@ -18,7 +18,6 @@
 #include "gmx.h"
 #include "action.h"
 #include "event.h"
-#include "Util.h"
 #include "strings_util.h"
 
 #include "event_reader/event_parser.h"

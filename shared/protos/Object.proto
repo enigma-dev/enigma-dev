@@ -4,25 +4,6 @@ package buffers.resources;
 import "options.proto";
 
 message Object {
-<<<<<<< HEAD
-  optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
-
-  optional string parent_name = 3 [(resource_ref)="object", (gmx) = "parentName", (yyp_id) = "parentObjectId"];
-  optional string sprite_name = 4 [(resource_ref)="sprite", (gmx) = "spriteName", (yyp_id) = "spriteId"];
-  optional string mask_name = 5 [(resource_ref)="sprite", (gmx) = "maskName", (yyp_id) = "maskSpriteId"];
-
-  optional int32 depth = 6 [(yyp) = "YYP_DEPRECATED"];
-  optional bool solid = 7;
-  optional bool visible = 8;
-  optional bool persistent = 9;
-
-  message Event {
-    optional string name = 1 [(gmx) = "eventtype"];
-    optional string code = 5 [(gmx) = "action"];
-  }
-
-  repeated Event events = 10 [(gmx) = "events/event", (yyp) = "eventList"];
-=======
   message Event {
     optional int32 type = 1 [(gmx) = "eventtype"];
     oneof reference {
@@ -31,7 +12,6 @@ message Object {
     }
     optional string code = 4 [(gmx) = "action"];
   }
->>>>>>> upstream/master
 
   enum PhysicsShape { CIRCLE = 0; BOX = 1; SHAPE = 2; }
 
