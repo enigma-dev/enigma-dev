@@ -17,6 +17,9 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Room
 {
 	String name;
@@ -66,5 +69,8 @@ struct Room
 	Tile *tiles;
 	int tileCount;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

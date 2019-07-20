@@ -84,6 +84,7 @@ int keyboard_lastkey = 0;
 
 double mouse_x, mouse_y;
 int mouse_button, mouse_lastbutton;
+int display_aa = 0;
 short mouse_hscrolls = 0;
 short mouse_vscrolls = 0;
 

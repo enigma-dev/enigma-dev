@@ -21,9 +21,9 @@
 // In this case, we treat instances as their bounding box (BBox).
 ////////////////////////////////////
 
-#include "Universal_System/collisions_object.h"
-#include "Universal_System/instance_system.h" //iter
-#include "Universal_System/instance.h"
+#include "Universal_System/Object_Tiers/collisions_object.h"
+#include "Universal_System/Instances/instance_system.h" //iter
+#include "Universal_System/Instances/instance.h"
 #include "Universal_System/math_consts.h"
 
 #include "PRECimpl.h"
@@ -59,10 +59,8 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
     }
 }
 
-static inline int min(int x, int y) { return x<y? x : y; }
-static inline double min(double x, double y) { return x<y? x : y; }
-static inline int max(int x, int y) { return x>y? x : y; }
-static inline double max(double x, double y) { return x>y? x : y; }
+template<typename T> static inline T min(T x, T y) { return x<y? x : y; }
+template<typename T> static inline T max(T x, T y) { return x>y? x : y; }
 
 static bool precise_collision_single(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
                                 double x1, double y1,
@@ -877,4 +875,3 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
         }
     }
 }
-

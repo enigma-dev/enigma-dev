@@ -12,6 +12,9 @@
 #include "backend/JavaStruct.h"
 #include "backend/util/Image.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Background
 {
   String name;
@@ -30,5 +33,8 @@ struct Background
 
   Image backgroundImage;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

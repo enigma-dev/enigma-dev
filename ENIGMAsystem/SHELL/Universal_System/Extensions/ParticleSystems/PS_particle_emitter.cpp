@@ -128,6 +128,7 @@ namespace enigma
     }
     }
   }
+  using std::abs;
   inline double sqr(double x) {return x*x;}
   void particle_emitter::get_point(int& x, int& y)
   {
@@ -199,7 +200,7 @@ namespace enigma
     }
     default:
       #if DEBUG_MODE
-      show_error("Internal error: invalid particle shape", false)
+      DEBUG_MESSAGE("Internal error: invalid particle shape", MESSAGE_TYPE::M_ERROR)
       #endif
       ;
     }
@@ -305,4 +306,3 @@ namespace enigma_user {
     }
   }
 }
-

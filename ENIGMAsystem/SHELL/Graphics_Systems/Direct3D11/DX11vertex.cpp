@@ -15,12 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
+#include "Direct3D11Headers.h"
 
 #include "Graphics_Systems/General/GSvertex_impl.h"
 #include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSstdraw.h"
+
+#include "Widget_Systems/widgets_mandatory.h" // for show_error
 
 #include <D3Dcompiler.h>
 
@@ -29,6 +32,8 @@
 
 #include <map>
 using std::map;
+
+using namespace enigma::dx11;
 
 namespace {
 struct MatrixBufferType
@@ -111,8 +116,8 @@ size_t dxgi_format_sizes[] = {
   sizeof(float) * 2,
   sizeof(float) * 3,
   sizeof(float) * 4,
-  sizeof(unsigned byte) * 4,
-  sizeof(unsigned byte) * 4
+  sizeof(unsigned char) * 4,
+  sizeof(unsigned char) * 4
 };
 
 map<int, ID3D11Buffer*> vertexBufferPeers;
@@ -330,7 +335,7 @@ void graphics_prepare_default_shader() {
 #ifdef DEBUG_MODE
 #define set_primitive_mode(primitive)                                                            \
   if (primitive < 0 || primitive >= (int)primitive_types_size) {                                 \
-    show_error("Primitive type " + enigma_user::toString(primitive) + " does not exist", false); \
+    DEBUG_MESSAGE("Primitive type " + enigma_user::toString(primitive) + " does not exist", MESSAGE_TYPE::M_USER_ERROR); \
     return;                                                                                      \
   }                                                                                              \
   m_deviceContext->IASetPrimitiveTopology(primitive_types[primitive]);
@@ -352,7 +357,7 @@ void vertex_color(int buffer, int color, double alpha) {
 }
 
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
 
@@ -370,7 +375,7 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
 }
 
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
   const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];

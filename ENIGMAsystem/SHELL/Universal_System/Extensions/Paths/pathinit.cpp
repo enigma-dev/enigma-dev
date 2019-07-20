@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 #include "pathstruct.h"
-#include "Universal_System/resinit.h"
+#include "Universal_System/Resources/resinit.h"
 
 #include <cstring>
 #include <cstdio>

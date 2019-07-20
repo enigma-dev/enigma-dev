@@ -11,6 +11,9 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct BackgroundDef
 {
 	boolean visible;
@@ -26,5 +29,8 @@ struct BackgroundDef
   /*  double alpha;
     int color;*/
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

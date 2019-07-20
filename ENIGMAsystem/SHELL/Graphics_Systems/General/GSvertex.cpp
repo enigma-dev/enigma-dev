@@ -222,8 +222,8 @@ void vertex_data(int buffer, const enigma::varargs& data) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
   #ifdef DEBUG_MODE
   if (!vertex_format_exists(vertexBuffer->format)) {
-    show_error("Vertex format " + enigma_user::toString(vertexBuffer->format) +
-               " does not exist and is required for vertex_data to decode varargs", false);
+    DEBUG_MESSAGE("Vertex format " + enigma_user::toString(vertexBuffer->format) +
+               " does not exist and is required for vertex_data to decode varargs", MESSAGE_TYPE::M_ERROR);
     return;
   }
   #endif
@@ -257,8 +257,8 @@ void vertex_data(int buffer, const enigma::varargs& data) {
         continue;
     }
 
-    show_error("Vertex format " + enigma_user::toString(vertexBuffer->format) +
-               " contains attribute with unknown type " + enigma_user::toString(attr.first), false);
+    DEBUG_MESSAGE("Vertex format " + enigma_user::toString(vertexBuffer->format) +
+               " contains attribute with unknown type " + enigma_user::toString(attr.first), MESSAGE_TYPE::M_ERROR);
     break;
   }
 }

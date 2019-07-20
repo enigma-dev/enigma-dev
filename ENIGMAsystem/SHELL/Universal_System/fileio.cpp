@@ -17,7 +17,7 @@
 
 // Simple, intuitive, integer based file I/O
 
-#include <stdio.h> //fstream can get staked
+#include <cstdio> //fstream can get staked
 #include <string> //We will use string, though
 using namespace std;
 
@@ -90,11 +90,11 @@ void file_text_close(int fileid) // Closes the file with the given file id.
 {
    if(fileid == -1) {
     #ifdef DEBUG_MODE
-      show_error("Cannot close an unopened file.",false);
+      DEBUG_MESSAGE("Cannot close an unopened file.", MESSAGE_TYPE::M_USER_ERROR);
     #endif
     return;
   }
-  
+
   fclose(enigma::files[fileid].f);
   enigma::files[fileid].f = NULL;
 
@@ -118,6 +118,12 @@ void file_text_writeln(int fileid) // Write a newline character to the file.
 {
   const enigma::openFile &mf = enigma::files[fileid];
   fputc('\n',mf.f);
+}
+
+void file_text_writeln(int fileid,string str) // Write a string and newline character to the file.
+{
+  file_text_write_string(fileid,str);
+  file_text_writeln(fileid);
 }
 
 string file_text_read_string(int fileid) { // Reads a string from the file with the given file id and returns this string. A string ends at the end of line.
@@ -164,25 +170,28 @@ double file_text_read_real(int fileid) { // Reads a real value from the file and
   return r1;
 }
 
-void file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
+std::string file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
 {
-  if (feof(enigma::files[fileid].f))
-    enigma::files[fileid].eof = true;
-  string ret;
+  enigma::openFile &mf = enigma::files[fileid];
+  if (feof(mf.f))
+    mf.eof = true;
+  string next;
   char buf[BUFSIZ];
     buf[0] = 0;
-  while (fgets(buf,BUFSIZ,enigma::files[fileid].f))
+  while (fgets(buf,BUFSIZ,mf.f))
   {
-    ret += buf;
-    if (ret[ret.length()-1] == '\n' or ret[ret.length()-1] == '\r')
+    next += buf;
+    if (next[next.length()-1] == '\n' or next[next.length()-1] == '\r')
       break;
     buf[0] = 0;
   }
   size_t dp;
-  for (dp = ret.length()-1; dp != size_t(-1) and (ret[dp] == '\n' or ret[dp] == '\r'); dp--);
-  ret.erase(dp+1);
-  enigma::files[fileid].sdata = ret;
-  enigma::files[fileid].spos = 0;
+  for (dp = next.length()-1; dp != size_t(-1) and (next[dp] == '\n' or next[dp] == '\r'); dp--);
+  next.erase(dp+1);
+  std::string last = mf.sdata.substr(mf.spos);
+  mf.sdata = next;
+  mf.spos = 0;
+  return last;
 }
 
 bool file_text_eof(int fileid) { // Returns whether we reached the end of the file.
@@ -220,11 +229,11 @@ int file_bin_open(string fname,int mode) // Opens the file with the indicated na
 bool file_bin_rewrite(int fileid) // Rewrites the file with the given file id, that is, clears it and starts writing at the start.
 {
   enigma::openFile &mf = enigma::files[fileid];
-  mf.f = freopen (mf.sdata.c_str(), "wb", mf.f);
+  mf.f = freopen (mf.sdata.c_str(), "wb+", mf.f);
 
   if (mf.f == NULL) {
     #ifdef DEBUGMODE
-      show_error("Failed to reopen binary file. Sure it's a binary file? Drive been removed?",false);
+      DEBUG_MESSAGE("Failed to reopen binary file. Sure it's a binary file? Drive been removed?", MESSAGE_TYPE::M_ERROR);
     #endif
     return false;
   }
