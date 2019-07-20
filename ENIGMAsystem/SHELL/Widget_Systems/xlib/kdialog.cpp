@@ -85,33 +85,30 @@ static string remove_trailing_zeros(double numb) {
 }
 
 static string kdialog_filter(string input) {
-  std::replace(input.begin(), input.end(), ';', ' ');
   std::vector<string> stringVec = split_string(input, '|');
   string string_output = " '";
 
-  string even = "";
-  string odd = "";
-
   unsigned int index = 0;
-  for (const string &str : stringVec) {
-    if (index % 2 != 0) {
-      if (index == 1)
-        odd = str;
-      else
-        odd = "\n" + str;
-
-      string_output += string_replace_all(odd, "*.*", "*") + even;
+  for (string str : stringVec) {
+    if (index % 2 == 0) {
+      if (index != 0)
+        string_output += "\n";
+      size_t first = str.find('(');
+      size_t last = str.find(')', first);
+      str.erase(first, last-first + 1);
+      string_output += str + " (";
+    } else {
+      std::replace(str.begin(), str.end(), ';', ' ');
+      string_output += string_replace_all(str, "*.*", "*") + ")";
     }
-    else
-      even = "|" + str;
 
     index += 1;
   }
 
   string_output += "'";
-
   return string_output;
 }
+
 
 static int show_message_helperfunc(string message) {
   if (dialog_caption.empty())
