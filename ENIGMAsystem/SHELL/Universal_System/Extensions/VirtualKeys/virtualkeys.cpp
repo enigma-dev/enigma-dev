@@ -37,9 +37,8 @@ bool virtual_key_show_pressed = true;
 bool virtual_key_show_keyboard_pressed = false;
 
 void update_virtualkeys() {
-  for (int i = 0; size_t(i) < virtual_keys.size(); ++i) {
-    if (!virtual_keys.exists(i)) continue;
-    VirtualKey& vk = virtual_keys.get(i);
+  for (std::pair<int, VirtualKey&> vki : virtual_keys) {
+    VirtualKey& vk = vki.second;
     // always set it back to false in case of focus loss
     vk.pressed = false;
 
@@ -62,11 +61,9 @@ void update_virtualkeys() {
 }
 
 void draw_virtualkeys() {
-  for (int i = 0; size_t(i) < virtual_keys.size(); ++i) {
-    if (!virtual_keys.exists(i)) continue;
-    const VirtualKey& vk = virtual_keys.get(i);
-    if (!vk.visible) continue;
-    virtual_key_draw(i);
+  for (std::pair<int, VirtualKey&> vk : virtual_keys) {
+    if (!vk.second.visible) continue;
+    virtual_key_draw(vk.first);
   }
 }
 
