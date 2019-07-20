@@ -863,29 +863,33 @@ void draw_button(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scala
   float alpha = 0.5;
     if (up == true){ color = make_color_rgb(127,127,127); } else { color = make_color_rgb(255,255,255); }
 
+  // bottom
   draw_primitive_begin(pr_trianglestrip);
   draw_vertex_color(x1+border_width,y2-border_width,color,alpha);
-  draw_vertex_color(x2-border_width,y1-border_width,color,alpha);
+  draw_vertex_color(x2-border_width,y2-border_width,color,alpha);
   draw_vertex_color(x1,y2,color,alpha);
   draw_vertex_color(x2,y2,color,alpha);
   draw_primitive_end();
 
+  // right
   draw_primitive_begin(pr_trianglestrip);
   draw_vertex_color(x2-border_width,y1+border_width,color,alpha);
   draw_vertex_color(x2,y1,color,alpha);
-  draw_vertex_color(x1-border_width,y1-border_width,color,alpha);
+  draw_vertex_color(x2-border_width,y2-border_width,color,alpha);
   draw_vertex_color(x2,y2,color,alpha);
   draw_primitive_end();
 
   if (up == true){ color = make_color_rgb(255,255,255); } else { color = make_color_rgb(127,127,127); }
+
+  // top
   draw_primitive_begin(pr_trianglestrip);
   draw_vertex_color(x1,y1,color,alpha);
   draw_vertex_color(x2,y1,color,alpha);
   draw_vertex_color(x1+border_width,y1+border_width,color,alpha);
-  draw_vertex_color(x2-border_width,y2+border_width,color,alpha);
+  draw_vertex_color(x2-border_width,y1+border_width,color,alpha);
   draw_primitive_end();
 
-
+  // left
   draw_primitive_begin(pr_trianglestrip);
   draw_vertex_color(x1,y1,color,alpha);
   draw_vertex_color(x1+border_width,y1+border_width,color,alpha);
