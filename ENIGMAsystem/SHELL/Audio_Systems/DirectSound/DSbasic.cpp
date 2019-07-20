@@ -54,9 +54,8 @@ bool sound_pause(int sound)  // Returns whether the sound was successfully pause
 }
 
 void sound_pause_all() {
-  for (size_t i = 0; i < sounds.size(); i++) {
-    const Sound& snd = sounds.get(i);
-    snd.soundBuffer->Stop();
+  for (std::pair<int, const Sound&> sndi : sounds) {
+    sndi.second.soundBuffer->Stop();
   }
 }
 
@@ -66,9 +65,8 @@ void sound_stop(int sound) {
 }
 
 void sound_stop_all() {
-  for (size_t i = 0; i < sounds.size(); i++) {
-    const Sound& snd = sounds.get(i);
-    snd.soundBuffer->Stop();
+  for (std::pair<int, const Sound&> sndi : sounds) {
+    sndi.second.soundBuffer->Stop();
   }
 }
 
@@ -92,9 +90,8 @@ bool sound_resume(int sound)  // Returns whether the sound is playing
 }
 
 void sound_resume_all() {
-  for (size_t i = 0; i < sounds.size(); i++) {
-    const Sound& snd = sounds.get(i);
-    snd.soundBuffer->Play(0, 0, 0);
+  for (std::pair<int, const Sound&> sndi : sounds) {
+    sndi.second.soundBuffer->Play(0, 0, 0);
   }
 }
 
@@ -147,9 +144,8 @@ void sound_seek(int sound, float position) {
 }
 
 void sound_seek_all(float position) {
-  for (size_t i = 0; i < sounds.size(); i++) {
-    const Sound& snd = sounds.get(i);
-    snd.soundBuffer->SetCurrentPosition(position);
+  for (std::pair<int, const Sound&> sndi : sounds) {
+    sndi.second.soundBuffer->SetCurrentPosition(position);
   }
 }
 
