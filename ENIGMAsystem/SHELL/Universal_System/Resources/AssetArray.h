@@ -50,8 +50,7 @@ class AssetArray {
    public:
     iterator(AssetArray& assets, int ind): assets(assets), ind(ind) {}
     iterator operator++() {
-      do { ++ind; }
-      while (!assets.exists(ind) && size_t(ind) < assets.size());
+      while (!assets.exists(++ind) && size_t(ind) < assets.size());
       return *this;
     }
     bool operator!=(const iterator& other) const { return ind != other.ind; }
@@ -63,7 +62,10 @@ class AssetArray {
 
   AssetArray() {}
 
-  iterator begin() { return iterator(*this, 0); }
+  iterator begin() {
+    iterator it(*this, 0);
+    return (exists(0) ? it : ++it);
+  }
   iterator end() { return iterator(*this, size()); }
 
   int add(T&& asset) {
