@@ -45,7 +45,28 @@ namespace enigma {
 template<typename T>
 class AssetArray {
  public:
+  // Custom iterator for looping over only the existing assets in the array.
+  class iterator {
+   public:
+    iterator(AssetArray& assets, int ind): assets(assets), ind(ind) {}
+    iterator operator++() {
+      while (!assets.exists(++ind) && size_t(ind) < assets.size());
+      return *this;
+    }
+    bool operator!=(const iterator& other) const { return ind != other.ind; }
+    std::pair<int, T&> operator*() const { return {ind, assets[ind]}; }
+   private:
+    AssetArray& assets;
+    int ind;
+  };
+
   AssetArray() {}
+
+  iterator begin() {
+    iterator it(*this, 0);
+    return (exists(0) ? it : ++it);
+  }
+  iterator end() { return iterator(*this, size()); }
 
   int add(T&& asset) {
     size_t id = size();
@@ -71,6 +92,13 @@ class AssetArray {
   T& get(int id) {
     static T sentinel;
     CHECK_ID(id,sentinel);
+    return assets_[id];
+  }
+
+  // NOTE: absolutely no bounds checking!
+  // only used in rare cases where you
+  // already know the asset exists
+  T& operator[](int id) {
     return assets_[id];
   }
 
