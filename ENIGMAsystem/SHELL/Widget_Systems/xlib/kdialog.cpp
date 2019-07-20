@@ -94,8 +94,11 @@ static string kdialog_filter(string input) {
       if (index != 0)
         string_output += "\n";
       size_t first = str.find('(');
-      size_t last = str.find(')', first);
-      str.erase(first, last-first + 1);
+      if (first != string::npos) {
+        size_t last = str.find(')', first);
+        if (last != string::npos)
+          str.erase(first, last-first + 1);
+      }
       string_output += str + " (";
     } else {
       std::replace(str.begin(), str.end(), ';', ' ');
