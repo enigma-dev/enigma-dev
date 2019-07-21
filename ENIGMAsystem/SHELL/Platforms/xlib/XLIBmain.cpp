@@ -192,9 +192,39 @@ void handleInput() {
 
 }  // namespace enigma
 
+static inline int getScreenSize(int *w, int*h) {
+  Display* pdsp = NULL;
+  Screen* pscr = NULL;
+
+  pdsp = XOpenDisplay(NULL);
+  if (!pdsp) {
+    return -1;
+  }
+
+  pscr = DefaultScreenOfDisplay(pdsp);
+  if (!pscr) {
+    return -2;
+  }
+
+  *w = pscr->width;
+  *h = pscr->height;
+
+  XCloseDisplay(pdsp);
+  return 0;
+}
+
 namespace enigma_user {
 
-int display_get_width() { return XWidthOfScreen(enigma::x11::screen); }
-int display_get_height() { return XHeightOfScreen(enigma::x11::screen); }
+int display_get_width() {
+  int w, h;
+  getScreenSize(&w, &h);
+  return w;
+}
+
+int display_get_height() {
+  int w, h;
+  getScreenSize(&w, &h);
+  return h;
+}
 
 }  // namespace enigma_user
