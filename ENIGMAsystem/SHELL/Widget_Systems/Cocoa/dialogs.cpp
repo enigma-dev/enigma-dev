@@ -64,15 +64,15 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   if (result == 1) exit(0);
 }
 
-static int widget = enigma_user::ws_cocoa;
+static string widget = enigma_user::ws_cocoa;
 
 namespace enigma_user {
     
-int widget_get_system() {
+string widget_get_system() {
   return widget;
 }
 
-void widget_set_system(int sys) {
+void widget_set_system(string sys) {
   // place holder
 }
 
