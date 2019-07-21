@@ -364,10 +364,16 @@ int parser_reinterpret(string &code,string &synt)
       synt[pos-1] = '0';
     else if (synt[pos] == 't')
     {
-      if (synt[pos-1] == '(')
-      {
+      pt rp = pos;
+      while (synt[++rp] == 't'); // find the right end
+
+      if (synt[rp] == '(') { // constructor e.g, string("test")
+        for (pt i = pos; i < rp; i++)
+          synt[i] = 'c';
+        pos = rp;
+      } else if (synt[pos-1] == '(') { // traditional cast e.g, (string)"test"
         const pt sp = pos-1;
-        while (synt[++pos] == 't');
+        pos = rp;
         if (synt[pos] == ')')
           for (pt i = sp; i <= pos; i++)
             synt[i] = 'c';
