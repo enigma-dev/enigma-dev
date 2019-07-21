@@ -3,9 +3,11 @@
 #include "PFwindow.h"
 #include "PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
 
-#include <unistd.h>  //getcwd, usleep
+#include <chrono> // std::chrono::microseconds
+#include <thread> // sleep_for
 
 namespace enigma {
 
@@ -21,18 +23,12 @@ int frames_count = 0;
 unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
 
-long clamp(long value, long min, long max) {
-  if (value < min) return min;
-  if (value > max) return max;
-  return value;
-}
-
 int gameWait() {
   if (enigma_user::os_is_paused()) {
     if (pausedSteps < 1) {
       pausedSteps += 1;
     } else {
-      usleep(100000);
+      std::this_thread::sleep_for(std::chrono::microseconds(100000));
       return -1;
     }
   }
@@ -58,7 +54,7 @@ int enigma_main(int argc, char** argv) {
   set_program_args(argc, argv);
 
   if (!initGameWindow()) {
-    printf("Failed to create game window\n");
+    DEBUG_MESSAGE("Failed to create game window", MESSAGE_TYPE::M_FATAL_ERROR);
     return -4;
   }
 
@@ -102,6 +98,7 @@ const int os_browser = browser_not_a_browser;
 std::string working_directory = "";
 std::string program_directory = "";
 std::string temp_directory = "";
+std::string game_save_id = "";
 std::string keyboard_string = "";
 int keyboard_key = 0;
 double fps = 0;

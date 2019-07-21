@@ -18,7 +18,7 @@
 #ifndef EGM_EVENT_H
 #define EGM_EVENT_H
 
-#include "codegen/treenode.pb.h"
+#include "treenode.pb.h"
 #include "event_reader/event_parser.h"
 
 #include <map>

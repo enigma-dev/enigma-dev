@@ -35,8 +35,8 @@ int main(int argc,char** argv)
 	enigma::parameters=new char* [argc];
 	for (int i=0; i<argc; i++)
 		enigma::parameters[i]=argv[i];
-	
-	
+
+
 	return mainO(argc, argv);
 }
 

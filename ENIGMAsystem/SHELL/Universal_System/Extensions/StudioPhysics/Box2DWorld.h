@@ -83,22 +83,22 @@ extern vector<fixtureInstance*> fixtures;
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_worldr(w,id,r) \
     if (unsigned(id) >= worlds.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics world with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access GayMaker: Stupido physics world with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } worldInstance* w = worlds[id];
   #define get_world(w,id) \
     if (unsigned(id) >= worlds.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics world with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access GayMaker: Stupido physics world with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } worldInstance* w = worlds[id];
   #define get_fixturer(f,id,r) \
     if (unsigned(id) >= fixtures.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } fixtureInstance* f = fixtures[id];
   #define get_fixture(f,id) \
     if (unsigned(id) >= fixtures.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } fixtureInstance* f = fixtures[id];
 #else

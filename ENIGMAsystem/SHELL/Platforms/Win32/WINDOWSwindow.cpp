@@ -23,7 +23,7 @@
 
 #include "Widget_Systems/widgets_mandatory.h"
 
-#include "Universal_System/estring.h" // For string_replace_all
+#include "strings_util.h" // For string_replace_all
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // room_caption
 #include "Universal_System/globalupdate.h"
@@ -32,6 +32,12 @@
 #include <stdio.h>
 #include <string>
 using namespace std;
+
+namespace {
+
+std::string current_caption = "";
+
+} // anonymous namespace
 
 namespace enigma
 {

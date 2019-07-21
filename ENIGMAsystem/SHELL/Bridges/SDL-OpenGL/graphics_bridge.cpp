@@ -15,58 +15,61 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL-Common/version.h"
+#include "Bridges/OpenGL/GLload.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/SDL/Window.h"
 
 #include <SDL2/SDL.h>
-#include <GL/glew.h>
+
+#include <iostream>
 
 namespace enigma {
 
-int msaa_fbo = 0;
+extern unsigned sdl_window_flags;
 
 SDL_GLContext context;
-SDL_Renderer *renderer;
 
-bool initGameWindow() {
-  SDL_Init(SDL_INIT_VIDEO);
-  windowHandle = SDL_CreateWindow("SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-  return (windowHandle != nullptr);
-}
+const static SDL_GLprofile profile_types[3] = {SDL_GL_CONTEXT_PROFILE_CORE,SDL_GL_CONTEXT_PROFILE_COMPATIBILITY,SDL_GL_CONTEXT_PROFILE_ES};
 
-void EnableDrawing(void*) {
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, ENIGMA_GL_MAJOR_VERSION);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, ENIGMA_GL_MINOR_VERSION);
+void init_sdl_window_bridge_attributes() {
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor);
+  #ifdef DEBUG_MODE
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+  #endif
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,profile_types[graphics_opengl_profile]);
   SDL_GL_SetSwapInterval(0);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-  context = SDL_GL_CreateContext(windowHandle);
-  renderer = SDL_CreateRenderer(windowHandle, -1, SDL_RENDERER_ACCELERATED);
+  sdl_window_flags |= SDL_WINDOW_OPENGL;
+}
 
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
-    show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
+void EnableDrawing(void*) {
+  context = SDL_GL_CreateContext(windowHandle);
+  
+  #ifdef DEBUG_MODE
+  if (!context) DEBUG_MESSAGE(std::string("Failed to intialize GL context: ") + SDL_GetError(), MESSAGE_TYPE::M_FATAL_ERROR);
+  #endif
+
+  gl_load_exts();
 }
 
 void DisableDrawing(void*) {
-  SDL_DestroyRenderer(renderer);
+  SDL_GL_DeleteContext(context);
 }
 
 void ScreenRefresh() {
   SDL_GL_SwapWindow(windowHandle);
 }
 
-}
+} // namespace enigma
 
 namespace enigma_user {
-  // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
-  int display_aa = 14;
 
-  void set_synchronization(bool enable) {
-    SDL_GL_SetSwapInterval(enable);
-  }
-
-  void display_reset(int samples, bool vsync) {
-    set_synchronization(vsync);
-  }
+void set_synchronization(bool enable) {
+  SDL_GL_SetSwapInterval(enable);
 }
+
+} // namespace enigma_user

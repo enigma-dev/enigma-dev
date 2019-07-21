@@ -96,7 +96,7 @@ struct main_event_info
   main_event_info();
 };
 
-int event_parse_resourcefile();
+int event_parse_resourcefile(const std::string& str);
 void event_info_clear();
 
 typedef pair<int, int> evpair;

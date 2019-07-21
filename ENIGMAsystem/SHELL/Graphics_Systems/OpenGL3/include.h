@@ -1,5 +1,2 @@
-#include "OPENGL3Std.h"
 #include "Info/graphics_info.h"
-#include "GL3shader.h"
-#include "GL3profiler.h"
 #include "Graphics_Systems/General/include.h"

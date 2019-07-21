@@ -16,6 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "strings_util.h"
 #include "makedir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/GameData.h"
@@ -77,17 +78,6 @@ inline void writei(int x, FILE *f) {
 }
 inline void writef(float x, FILE *f) {
   fwrite(&x,4,1,f);
-}
-
-inline string string_replace_all(string str,string substr,string nstr)
-{
-  pt pos=0;
-  while ((pos=str.find(substr,pos)) != string::npos)
-  {
-    str.replace(pos,substr.length(),nstr);
-    pos+=nstr.length();
-  }
-  return str;
 }
 
 inline void write_desktop_entry(const std::string fPath, const GameData& game) {
@@ -157,7 +147,7 @@ inline void write_exe_info(const std::string codegen_directory, const GameData &
 
 #include "System/builtins.h"
 
-dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
+dllexport int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(GameData(es), exe_filename, mode);
 }
 
@@ -259,7 +249,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
 
   //Read the types of events
-  event_parse_resourcefile();
+  event_parse_resourcefile(game.events);
 
   /**** Segment One: This segment of the compile process is responsible for
   * @ * translating the code into C++. Basically, anything essential to the
@@ -270,7 +260,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
 
   // First, we make a space to put our globals.
-  jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
+  jdi::using_scope globals_scope("<ENIGMA Resources>", namespace_enigma_user);
 
   idpr("Copying resources",1);
 
@@ -406,6 +396,11 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
   wto << license;
 
+  wto << "namespace enigma {\n";
+  std::string res_in = (compilerInfo.exe_vars["RESOURCES_IN"] != "") ? "RESOURCES_IN" : "RESOURCES";
+  wto << "const char *resource_file_path=\"" << compilerInfo.exe_vars[res_in] << "\";\n";
+  wto << "}\n";
+
   write_resource_meta(wto,     "object", game.objects);
   write_resource_meta(wto,     "sprite", game.sprites);
   write_resource_meta(wto, "background", game.backgrounds);
@@ -436,8 +431,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     wto <<"  std::map<int, int> curr;\n\n";
     for (size_t i=0; i<game.timelines.size(); i++) {
       wto <<"  curr.clear();\n";
-      for (int j = 0; j < game.timelines[i].moments().size(); j++) {
-        wto << "  curr[" << game.timelines[i].moments()[j].step()
+      for (int j = 0; j < game.timelines[i]->moments().size(); j++) {
+        wto << "  curr[" << game.timelines[i]->moments()[j].step()
                          << "] = " << j <<";\n";
       }
       wto <<"  res.push_back(curr);\n\n";

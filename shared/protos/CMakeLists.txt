@@ -78,10 +78,10 @@ target_link_libraries(${LIB} PRIVATE ${Protobuf_LIBRARIES})
 
 foreach(_proto ${PROTO_FILES})
     get_filename_component(_basename ${_proto} NAME_WE)
-	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.pb.h" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/codegen")
+	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.pb.h" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/.eobjs")
 endforeach()
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.h" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/codegen")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.h" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/.eobjs")
 get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
 get_filename_component(ENIGMA_DIR "${ENIGMA_DIR}" PATH)
 install(TARGETS ${LIB} DESTINATION "${ENIGMA_DIR}")

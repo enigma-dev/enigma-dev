@@ -23,11 +23,10 @@ using std::map;
 #include <windows.h>
 //#include <winuser.h> // includes windows.h
 
-#include "../General/PFwindow.h"
-
-#include "Platforms/General/PFmain.h" // For those damn vk_ constants.
-#include "Universal_System/instance_system.h"
-#include "Universal_System/instance.h"
+#include "Platforms/General/PFmain.h" // for keyboard_string
+#include "Platforms/General/PFwindow.h" // For those damn vk_ constants.
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Instances/instance.h"
 
 #include "Platforms/platforms_mandatory.h"
 
@@ -36,10 +35,6 @@ using std::map;
 #endif
 
 namespace enigma_user {
-extern int keyboard_key;
-extern int keyboard_lastkey;
-extern string keyboard_lastchar;
-extern string keyboard_string;
 void draw_clear(int col);
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
 }
@@ -62,7 +57,7 @@ namespace enigma
   static short hdeltadelta = 0, vdeltadelta = 0;
   static int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
 
-  LRESULT CALLBACK (*touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
+  LRESULT (CALLBACK *touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
   void (*WindowResizedCallback)();
 
   LRESULT CALLBACK WndProc (HWND hWndParameter, UINT message,WPARAM wParam, LPARAM lParam)
@@ -168,7 +163,7 @@ namespace enigma
       case WM_CHAR:
         keyboard_lastchar = string(1,wParam);
         if (keyboard_lastkey == enigma_user::vk_backspace) {
-          keyboard_string = keyboard_string.substr(0, keyboard_string.length() - 1);
+          if (!keyboard_string.empty()) keyboard_string.pop_back();
         } else {
           keyboard_string += keyboard_lastchar;
         }

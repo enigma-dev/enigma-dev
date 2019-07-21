@@ -28,36 +28,41 @@ int draw_set_blend_mode_ext(ARG src,ARG2 dest)
 #ifndef ENIGMA_GSBLEND_H
 #define ENIGMA_GSBLEND_H
 
-namespace enigma_user
-{
-  enum {
-    bm_normal   = 0,
-    bm_add      = 1,
-    bm_max      = 2,
-    bm_subtract = 3
-  };
+namespace enigma {
 
-  enum {
-    bm_zero             =  1,  // GL_ZERO                  D3DBLEND_ZERO
-    bm_one              =  2,  // GL_ONE                   D3DBLEND_ONE
-    bm_src_color        =  3,  // GL_SRC_COLOR             D3DBLEND_SRCCOLOR    //only for dest
-    bm_inv_src_color    =  4,  // GL_ONE_MINUS_SRC_COLOR   D3DBLEND_INVSRCCOLOR //only for dest
-    bm_src_alpha        =  5,  // GL_SRC_ALPHA             D3DBLEND_SRCALPHA
-    bm_inv_src_alpha    =  6,  // GL_ONE_MINUS_SRC_ALPHA   D3DBLEND_INVSRCALPHA
-    bm_dest_alpha       =  7,  // GL_DST_ALPHA             D3DBLEND_DESTALPHA
-    bm_inv_dest_alpha   =  8,  // GL_ONE_MINUS_DST_ALPHA   D3DBLEND_INVDESTALPHA
-    bm_dest_color       =  9,  // GL_DST_COLOR             D3DBLEND_DESTCOLOR     //only for src
-    bm_inv_dest_color   = 10,  // GL_ONE_MINUS_DST_COLOR   D3DBLEND_INVDESTCOLOR  //only for src
-    bm_src_alpha_sat    = 11   // GL_SRC_ALPHA_SATURATE    D3DBLEND_SRCALPHASAT   //only for src
-  };
+extern int blendMode[2];
 
-  int draw_set_blend_mode(int mode);
-  int draw_set_blend_mode_ext(int src,int dest);
+} // namespace enigma
 
-  int draw_get_blend_mode();
-  int draw_get_blend_mode_ext(bool src);
-  int draw_get_blend_mode_type();
+namespace enigma_user {
+
+enum {
+  bm_normal   = 0,
+  bm_add      = 1,
+  bm_max      = 2,
+  bm_subtract = 3
+};
+
+enum {
+  bm_zero             =  1,  // GL_ZERO                  D3DBLEND_ZERO
+  bm_one              =  2,  // GL_ONE                   D3DBLEND_ONE
+  bm_src_color        =  3,  // GL_SRC_COLOR             D3DBLEND_SRCCOLOR    //only for dest
+  bm_inv_src_color    =  4,  // GL_ONE_MINUS_SRC_COLOR   D3DBLEND_INVSRCCOLOR //only for dest
+  bm_src_alpha        =  5,  // GL_SRC_ALPHA             D3DBLEND_SRCALPHA
+  bm_inv_src_alpha    =  6,  // GL_ONE_MINUS_SRC_ALPHA   D3DBLEND_INVSRCALPHA
+  bm_dest_alpha       =  7,  // GL_DST_ALPHA             D3DBLEND_DESTALPHA
+  bm_inv_dest_alpha   =  8,  // GL_ONE_MINUS_DST_ALPHA   D3DBLEND_INVDESTALPHA
+  bm_dest_color       =  9,  // GL_DST_COLOR             D3DBLEND_DESTCOLOR     //only for src
+  bm_inv_dest_color   = 10,  // GL_ONE_MINUS_DST_COLOR   D3DBLEND_INVDESTCOLOR  //only for src
+  bm_src_alpha_sat    = 11   // GL_SRC_ALPHA_SATURATE    D3DBLEND_SRCALPHASAT   //only for src
+};
+
+void draw_set_blend_mode(int mode);
+void draw_set_blend_mode_ext(int src, int dest);
+
+int draw_get_blend_mode_src();
+int draw_get_blend_mode_dest();
+
 }
 
 #endif // ENIGMA_GSBLEND_H
-

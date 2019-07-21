@@ -107,7 +107,7 @@ struct ESLookup {
     }
   };
   Lookup sprite, background, script, object;
-  ESLookup(EnigmaStruct *es):
+  ESLookup(deprecated::JavaStruct::EnigmaStruct *es):
     sprite(es->sprites, es->spriteCount, "sprite"),
     background(es->backgrounds, es->backgroundCount, "background"),
     script(es->scripts, es->scriptCount, "script"),
@@ -115,38 +115,38 @@ struct ESLookup {
 };
 
 SpriteData::SpriteData(const buffers::resources::Sprite &q, const std::string& name, const std::vector<ImageData>& subimages):
-  buffers::resources::Sprite(q), name(name), image_data(subimages) {}
-SpriteData::SpriteData(const ::Sprite &sprite):
+  BaseProtoWrapper(q), name(name), image_data(subimages) {}
+SpriteData::SpriteData(const deprecated::JavaStruct::Sprite &sprite):
   name(sprite.name) {
-  set_id(sprite.id);
+  data.set_id(sprite.id);
 
   // Discarded: sprite.transparent
   // Discarded: sprite.maskShapes
 
-  set_shape((buffers::resources::Sprite_Shape) sprite.shape);  // Enum correspondence guaranteed
-  set_alpha_tolerance(sprite.alphaTolerance);
-  set_separate_mask(sprite.separateMask);
-  set_smooth_edges(sprite.smoothEdges);
-  set_preload(sprite.preload);
-  set_origin_x(sprite.originX);
-  set_origin_y(sprite.originY);
+  data.set_shape((buffers::resources::Sprite_Shape) sprite.shape);  // Enum correspondence guaranteed
+  data.set_alpha_tolerance(sprite.alphaTolerance);
+  data.set_separate_mask(sprite.separateMask);
+  data.set_smooth_edges(sprite.smoothEdges);
+  data.set_preload(sprite.preload);
+  data.set_origin_x(sprite.originX);
+  data.set_origin_y(sprite.originY);
 
-  set_bbox_mode((buffers::resources::Sprite_BoundingBox) sprite.bbMode);  // Enum correspondence guaranteed
-  set_bbox_left(sprite.bbLeft);
-  set_bbox_right(sprite.bbRight);
-  set_bbox_top(sprite.bbTop);
-  set_bbox_bottom(sprite.bbBottom);
+  data.set_bbox_mode((buffers::resources::Sprite_BoundingBox) sprite.bbMode);  // Enum correspondence guaranteed
+  data.set_bbox_left(sprite.bbLeft);
+  data.set_bbox_right(sprite.bbRight);
+  data.set_bbox_top(sprite.bbTop);
+  data.set_bbox_bottom(sprite.bbBottom);
 
   for (int i = 0; i < sprite.subImageCount; ++i)
     image_data.emplace_back(sprite.subImages[i].image);
 }
 
 SoundData::SoundData(const buffers::resources::Sound &q, const std::string& name, const BinaryData& data):
-  buffers::resources::Sound(q), name(name), audio(data) {}
-SoundData::SoundData(const ::Sound &sound):
+  BaseProtoWrapper(q), name(name), audio(data) {}
+SoundData::SoundData(const deprecated::JavaStruct::Sound &sound):
   name(sound.name),
   audio(sound.data, sound.data + sound.size) {
-  set_id(sound.id);
+  data.set_id(sound.id);
 
   // Discarded: sound.chorus
   // Discarded: sound.echo
@@ -154,55 +154,55 @@ SoundData::SoundData(const ::Sound &sound):
   // Discarded: sound.gargle
   // Discarded: sound.reverb
 
-  set_kind((buffers::resources::Sound_Kind) sound.kind);
-  set_file_extension(sound.fileType);
-  set_file_name(sound.fileName);
-  set_volume(sound.volume);
-  set_pan(sound.pan);
-  set_preload(sound.preload);
+  data.set_kind((buffers::resources::Sound_Kind) sound.kind);
+  data.set_file_extension(sound.fileType);
+  data.set_file_name(sound.fileName);
+  data.set_volume(sound.volume);
+  data.set_pan(sound.pan);
+  data.set_preload(sound.preload);
 }
 
 BackgroundData::BackgroundData(const buffers::resources::Background &q, const std::string& name, const ImageData& image):
-  buffers::resources::Background(q), name(name), image_data(image) {}
-BackgroundData::BackgroundData(const ::Background &background):
+  BaseProtoWrapper(q), name(name), image_data(image) {}
+BackgroundData::BackgroundData(const deprecated::JavaStruct::Background &background):
   name(background.name),
   image_data(background.backgroundImage) {
-  set_id(background.id);
+  data.set_id(background.id);
 
   legacy_transparency = background.transparent;
 
   // Discarded: background.smoothEdges
 
-  set_preload(background.preload);
-  set_use_as_tileset(background.useAsTileset);
-  set_tile_width(background.tileWidth);
-  set_tile_height(background.tileHeight);
-  set_horizontal_offset(background.hOffset);
-  set_vertical_offset(background.vOffset);
-  set_horizontal_spacing(background.hSep);
-  set_vertical_spacing(background.vSep);
+  data.set_preload(background.preload);
+  data.set_use_as_tileset(background.useAsTileset);
+  data.set_tile_width(background.tileWidth);
+  data.set_tile_height(background.tileHeight);
+  data.set_horizontal_offset(background.hOffset);
+  data.set_vertical_offset(background.vOffset);
+  data.set_horizontal_spacing(background.hSep);
+  data.set_vertical_spacing(background.vSep);
 }
 
 FontData::FontData(const buffers::resources::Font &q, const std::string& name):
-  buffers::resources::Font(q), name(name) {}
-FontData::FontData(const ::Font &font):
+  BaseProtoWrapper(q), name(name) {}
+FontData::FontData(const deprecated::JavaStruct::Font &font):
   name(font.name) {
-  set_id(font.id);
+  data.set_id(font.id);
 
-  set_font_name(font.fontName);
-  set_size(font.size);
-  set_bold(font.bold);
-  set_italic(font.italic);
+  data.set_font_name(font.fontName);
+  data.set_size(font.size);
+  data.set_bold(font.bold);
+  data.set_italic(font.italic);
 
   for (int i = 0; i < font.glyphRangeCount; ++i) {
     normalized_ranges.emplace_back(font.glyphRanges[i]);
     for (const auto &glyph : normalized_ranges.back().glyphs) {
-      *add_glyphs() = glyph.metrics;
+      *data.add_glyphs() = glyph.metrics;
     }
   }
 }
 
-FontData::NormalizedRange::NormalizedRange(const ::GlyphRange &range):
+FontData::NormalizedRange::NormalizedRange(const deprecated::JavaStruct::GlyphRange &range):
     min(range.rangeMin), max(range.rangeMax) {
   const int gcount = range.rangeMax - range.rangeMin + 1;
   glyphs.reserve(gcount);
@@ -211,7 +211,7 @@ FontData::NormalizedRange::NormalizedRange(const ::GlyphRange &range):
   }
 }
 
-FontData::GlyphData::GlyphData(const ::Glyph &glyph):
+FontData::GlyphData::GlyphData(const deprecated::JavaStruct::Glyph &glyph):
     ImageData(glyph.width, glyph.height, glyph.data,
               glyph.width * glyph.height) { // Glyph images are alpha-only.
   metrics.set_origin(glyph.origin);
@@ -222,21 +222,21 @@ FontData::GlyphData::GlyphData(const ::Glyph &glyph):
 }
 
 PathData::PathData(const buffers::resources::Path &q, const std::string& name):
-  buffers::resources::Path(q), name(name) {}
-PathData::PathData(const ::Path &path):
+  BaseProtoWrapper(q), name(name) {}
+PathData::PathData(const deprecated::JavaStruct::Path &path):
   name(path.name) {
-  set_id(path.id);
+  data.set_id(path.id);
 
-  set_smooth(path.smooth);
-  set_closed(path.closed);
-  set_precision(path.precision);
+  data.set_smooth(path.smooth);
+  data.set_closed(path.closed);
+  data.set_precision(path.precision);
 
 	// Discarded: backgroundRoomId;
-  set_hsnap(path.snapX);
-  set_vsnap(path.snapY);
+  data.set_hsnap(path.snapX);
+  data.set_vsnap(path.snapY);
 
   for (int i = 0; i < path.pointCount; ++i) {
-    auto *p = add_points();
+    auto *p = data.add_points();
     p->set_x(path.points[i].x);
     p->set_y(path.points[i].y);
     p->set_speed(path.points[i].speed);
@@ -244,59 +244,59 @@ PathData::PathData(const ::Path &path):
 }
 
 ScriptData::ScriptData(const buffers::resources::Script &q, const std::string& name):
-  buffers::resources::Script(q), name(name) {}
-ScriptData::ScriptData(const ::Script &script):
+  BaseProtoWrapper(q), name(name) {}
+ScriptData::ScriptData(const deprecated::JavaStruct::Script &script):
   name(script.name) {
-  set_id(script.id);
-  set_code(script.code);
+  data.set_id(script.id);
+  data.set_code(script.code);
 }
 
 ShaderData::ShaderData(const buffers::resources::Shader &q, const std::string& name):
-  buffers::resources::Shader(q), name(name) {}
-ShaderData::ShaderData(const ::Shader &shader):
+  BaseProtoWrapper(q), name(name) {}
+ShaderData::ShaderData(const deprecated::JavaStruct::Shader &shader):
   name(shader.name) {
-  set_id(shader.id);
+  data.set_id(shader.id);
 
-  set_vertex_code(shader.vertex);
-  set_fragment_code(shader.fragment);
-  set_type(shader.type);
-  set_precompile(shader.precompile);
+  data.set_vertex_code(shader.vertex);
+  data.set_fragment_code(shader.fragment);
+  data.set_type(shader.type);
+  data.set_precompile(shader.precompile);
 
 }
 
 TimelineData::TimelineData(const buffers::resources::Timeline &q, const std::string& name):
-  buffers::resources::Timeline(q), name(name) {}
-TimelineData::TimelineData(const ::Timeline &timeline):
+  BaseProtoWrapper(q), name(name) {}
+TimelineData::TimelineData(const deprecated::JavaStruct::Timeline &timeline):
   name(timeline.name) {
-  set_id(timeline.id);
+  data.set_id(timeline.id);
 
   for (int i = 0; i < timeline.momentCount; ++i) {
-    auto *moment = add_moments();
+    auto *moment = data.add_moments();
     moment->set_step(timeline.moments[i].stepNo);
     moment->set_code(timeline.moments[i].code);
   }
 }
 
 ObjectData::ObjectData(const buffers::resources::Object &q, const std::string& name):
-  buffers::resources::Object(q), name(name) {}
-ObjectData::ObjectData(const ::GmObject &object, const ESLookup &lookup):
+  BaseProtoWrapper(q), name(name) {}
+ObjectData::ObjectData(const deprecated::JavaStruct::GmObject &object, const ESLookup &lookup):
   name(object.name) {
-  set_id(object.id);
+  data.set_id(object.id);
 
   if (object.spriteId >= 0)
-    set_sprite_name(lookup.sprite[object.spriteId]);
-  set_solid(object.solid);
-  set_visible(object.visible);
-  set_depth(object.depth);
-  set_persistent(object.persistent);
+    data.set_sprite_name(lookup.sprite[object.spriteId]);
+  data.set_solid(object.solid);
+  data.set_visible(object.visible);
+  data.set_depth(object.depth);
+  data.set_persistent(object.persistent);
   if (object.parentId >= 0)
-    set_parent_name(lookup.object[object.parentId]);
+    data.set_parent_name(lookup.object[object.parentId]);
   if (object.maskId >= 0)
-    set_mask_name(lookup.sprite[object.maskId]);
+    data.set_mask_name(lookup.sprite[object.maskId]);
 
   for (int i = 0; i < object.mainEventCount; ++i) {
     for (int j = 0; j < object.mainEvents[i].eventCount; ++j) {
-      auto *event = add_events();
+      auto *event = data.add_events();
       event->set_type(object.mainEvents[i].id);
       event->set_number(object.mainEvents[i].events[j].id);
       event->set_code(object.mainEvents[i].events[j].code);
@@ -305,32 +305,32 @@ ObjectData::ObjectData(const ::GmObject &object, const ESLookup &lookup):
 }
 
 RoomData::RoomData(const buffers::resources::Room &q, const std::string& name):
-  buffers::resources::Room(q), name(name) {}
-RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
+  BaseProtoWrapper(q), name(name) {}
+RoomData::RoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup):
   name(room.name) {
   cout << "Import room." << endl;
-  set_id(room.id);
+  data.set_id(room.id);
 
   if (room.caption)
-    set_caption(room.caption);
-  set_width(room.width);
-  set_height(room.height);
+    data.set_caption(room.caption);
+  data.set_width(room.width);
+  data.set_height(room.height);
 
-  set_hsnap(room.snapX);
-  set_vsnap(room.snapY);
-  set_isometric(room.isometric);
+  data.set_hsnap(room.snapX);
+  data.set_vsnap(room.snapY);
+  data.set_isometric(room.isometric);
 
-  set_speed(room.speed);
-  set_persistent(room.persistent);
-  set_color(javaColor(room.backgroundColor));  // RGBA
-  set_show_color(room.drawBackgroundColor);
+  data.set_speed(room.speed);
+  data.set_persistent(room.persistent);
+  data.set_color(javaColor(room.backgroundColor));  // RGBA
+  data.set_show_color(room.drawBackgroundColor);
   if (room.creationCode)
-    set_creation_code(room.creationCode);
+    data.set_creation_code(room.creationCode);
 
-  set_enable_views(room.enableViews);
+  data.set_enable_views(room.enableViews);
 
   for (int i = 0; i < room.backgroundDefCount; ++i) {
-    auto *background = add_backgrounds();
+    auto *background = data.add_backgrounds();
     const auto &es_background = room.backgroundDefs[i];
 
     background->set_visible(es_background.visible);
@@ -347,7 +347,7 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
   }
 
   for (int i = 0; i < room.viewCount; ++i) {
-    auto *view = add_views();
+    auto *view = data.add_views();
     const auto &es_view = room.views[i];
 
     view->set_visible(es_view.visible);
@@ -368,7 +368,7 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
   }
 
   for (int i = 0; i < room.instanceCount; ++i) {
-    auto *instance = add_instances();
+    auto *instance = data.add_instances();
     const auto &es_instance = room.instances[i];
     // Discarded: es_instance.locked
 
@@ -383,7 +383,7 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
   }
 
   for (int i = 0; i < room.tileCount; ++i) {
-    auto *tile = add_tiles();
+    auto *tile = data.add_tiles();
     const auto &es_tile = room.tiles[i];
 
     tile->set_id(es_tile.id);
@@ -399,7 +399,8 @@ RoomData::RoomData(const ::Room &room, const ESLookup &lookup):
   }
 }
 
-static void ImportSettings(const ::GameSettings &settings, const ESLookup &lookup, buffers::resources::Settings& set) {
+static void ImportSettings(const deprecated::JavaStruct::GameSettings &settings,
+    const ESLookup &lookup, buffers::resources::Settings& set) {
   cout << "Import game settings." << endl;
 
   buffers::resources::General *gen = set.mutable_general();
@@ -458,7 +459,7 @@ ImageData::ImageData(const Image &img):
 ImageData::ImageData(int w, int h, const uint8_t *data, size_t size):
     width(w), height(h), pixels(data, data + size) {}
 
-GameData::GameData(EnigmaStruct *es): filename(es->filename ?: "") {
+GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es): filename(es->filename ?: "") {
   cout << "Translating EnigmaStruct" << endl;
   cout << "- Indexing names" << endl;
   ESLookup lookup(es);
@@ -511,7 +512,7 @@ GameData::GameData(EnigmaStruct *es): filename(es->filename ?: "") {
   cout << "Transfer complete." << endl << endl;
 }
 
-GameData::GameData(const buffers::Project &proj): filename("") {}
+GameData::GameData(const buffers::Project &proj): filename(""), events(proj.game().events()) {}
 
 int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
   int error = 0;

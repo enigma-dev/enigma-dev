@@ -26,7 +26,7 @@
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
@@ -71,8 +71,7 @@ int handleEvents() {
           if (len > 0) {
             enigma_user::keyboard_lastchar = string(1, str[0]);
             if (actualKey == enigma_user::vk_backspace) {
-              enigma_user::keyboard_string =
-                  enigma_user::keyboard_string.substr(0, enigma_user::keyboard_string.length() - 1);
+              if (!enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
             } else {
               enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
             }
@@ -169,7 +168,7 @@ int handleEvents() {
         //else fall through
       default:
 #ifdef DEBUG_MODE
-        printf("Unhandled xlib event: %d\n", e.type);
+        DEBUG_MESSAGE("Unhandled xlib event: " + std::to_string(e.type), MESSAGE_TYPE::M_INFO);
 #endif
         continue;
     }

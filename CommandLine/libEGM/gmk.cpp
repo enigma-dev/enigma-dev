@@ -19,6 +19,7 @@
 #include "filesystem.h"
 #include "action.h"
 #include "event.h"
+#include "strings_util.h"
 
 #include "event_reader/event_parser.h"
 
@@ -970,7 +971,10 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
   room->set_speed(dec.read4());
   room->set_persistent(dec.readBool());
   room->set_color(dec.read4());
-  room->set_show_color(dec.readBool());
+  //NOTE: GM8.1 is inconsistent packing a second boolean into this one.
+  int clearBackgroundAndView = dec.read4();
+  room->set_show_color((clearBackgroundAndView & 1) != 0);
+  room->set_clear_view_background((clearBackgroundAndView & (1 << 1)) == 0);
   room->set_creation_code(dec.readStr());
 
   int nobackgrounds = dec.read4();
@@ -1354,6 +1358,8 @@ buffers::Project *LoadGMK(std::string fName) {
   game->set_allocated_root(root.release());
   // ensure all temp data files are written and the paths are set in the protos
   dec.processTempFileFutures();
+
+  game->set_events(FileToString("events.res"));
 
   return proj.release();
 }

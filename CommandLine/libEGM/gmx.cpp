@@ -18,7 +18,7 @@
 #include "gmx.h"
 #include "action.h"
 #include "event.h"
-#include "Util.h"
+#include "strings_util.h"
 
 #include "event_reader/event_parser.h"
 
@@ -28,7 +28,6 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <unordered_map>
 #include <vector>
 
@@ -217,22 +216,6 @@ class gmx_root_walker {
   }
 };
 
-std::string FileToString(const std::string &fName) {
-  std::ifstream t(fName.c_str());
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-  return buffer.str();
-}
-
-std::vector<std::string> SplitString(const std::string &str, char delimiter) {
-  std::vector<std::string> vec;
-  std::stringstream sstr(str);
-  std::string tmp;
-  while (std::getline(sstr, tmp, delimiter)) vec.push_back(tmp);
-
-  return vec;
-}
-
 }  // Anonymous namespace
 
 void PackScript(std::string fName, int id, buffers::resources::Script *script) {
@@ -392,7 +375,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
 
       // if it's not a split then we deal with yoyo's useless nesting
       if (!isSplit && alias != "EGM_NESTED") {  // and our useless nesting
-        std::vector<std::string> nodes = SplitString(alias, '/');
+        std::vector<std::string> nodes = split_string(alias, '/');
 
         for (auto n : nodes) {
           child = child.child(n.c_str());
@@ -457,7 +440,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
 
           if (!isAttribute) {  // if data we want is not in an attribute (eg <bar x="9001">)
             if (isSplit) {     // if data use a comma delimiter (eg (<foo>0,7,9</foo>)
-              std::vector<std::string> split = SplitString(node.text().as_string(), ',');
+              std::vector<std::string> split = split_string(node.text().as_string(), ',');
               splitValue = split[static_cast<int>(gmxName.back()) - '0'];
             } else  // else data is just in an xml tag (eg <foo>Josh can't read code</foo>)
               xmlValue = child.text();
