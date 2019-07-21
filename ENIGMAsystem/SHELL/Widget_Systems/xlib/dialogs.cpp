@@ -27,134 +27,112 @@ bool widget_system_initialize() {
   return true;
 }
 
-} // namespace enigma
+CommandLineWidgetEngine *current_widget_engine = zenity_widgets;
 
-static string widget = enigma_user::ws_x11_zenity;
+} // namespace enigma
 
 namespace enigma_user {
     
 string widget_get_system() {
-  return widget;
+  if (enigma::current_widget_engine == enigma::kdialog_widgets) return ws_x11_kdialog;
+  return ws_x11_zenity;
 }
 
 void widget_set_system(string sys) {
-  if (sys == ws_x11_kdialog) widget = sys;
-  else widget = ws_x11_zenity;
+  if (sys == ws_x11_kdialog) enigma::current_widget_engine = enigma::kdialog_widgets;
+  else enigma::current_widget_engine = enigma::zenity_widgets;
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) { 
-  if (widget_get_system() == ws_x11_kdialog) kdialog::show_info(info, bgcolor, left, top, width, height, embedGameWindow, showBorder, allowResize, stayOnTop, pauseGame, caption); 
-  else zenity::show_info(info, bgcolor, left, top, width, height, embedGameWindow, showBorder, allowResize, stayOnTop, pauseGame, caption); 
+  enigma::current_widget_engine->show_info(info, bgcolor, left, top, width, height, embedGameWindow, showBorder, allowResize, stayOnTop, pauseGame, caption); 
 }
 
 int show_message(const string &message) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::show_message(message);
-  return zenity::show_message(message);
+  return enigma::current_widget_engine->show_message(message);
 }
 
 int show_message_cancelable(string message) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::show_message_cancelable(message);
-  return zenity::show_message_cancelable(message);
+  return enigma::current_widget_engine->show_message_cancelable(message);
 }
 
 bool show_question(string message) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::show_question(message);
-  return zenity::show_question(message);
+  return enigma::current_widget_engine->show_question(message);
 }
 
 int show_question_cancelable(string message) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::show_question_cancelable(message);
-  return zenity::show_question_cancelable(message);
+  return enigma::current_widget_engine->show_question_cancelable(message);
 }
 
 int show_attempt(string errortext) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::show_attempt(errortext);
-  return zenity::show_attempt(errortext);
+  return enigma::current_widget_engine->show_attempt(errortext);
 }
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
-  if (widget_get_system() == ws_x11_kdialog) kdialog::show_debug_message(errortext, type);
-  else zenity::show_debug_message(errortext, type);
+  enigma::current_widget_engine->show_debug_message(errortext, type);
 }
 
 string get_string(string message, string def) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_string(message, def);
-  return zenity::get_string(message, def);
+  return enigma::current_widget_engine->get_string(message, def);
 }
 
 string get_password(string message, string def) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_password(message, def);
-  return zenity::get_password(message, def);
+  return enigma::current_widget_engine->get_password(message, def);
 }
 
 double get_integer(string message, double def) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_integer(message, def);
-  return zenity::get_integer(message, def);
+  return enigma::current_widget_engine->get_integer(message, def);
 }
 
 double get_passcode(string message, double def) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_passcode(message, def);
-  return zenity::get_passcode(message, def);
+  return enigma::current_widget_engine->get_passcode(message, def);
 }
 
 string get_open_filename(string filter, string fname) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_open_filename(filter, fname);
-  return zenity::get_open_filename(filter, fname);
+  return enigma::current_widget_engine->get_open_filename(filter, fname);
 }
 
 string get_open_filenames(string filter, string fname) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_open_filenames(filter, fname);
-  return zenity::get_open_filenames(filter, fname);
+  return enigma::current_widget_engine->get_open_filenames(filter, fname);
 }
 
 string get_save_filename(string filter, string fname) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_save_filename(filter, fname);
-  return zenity::get_save_filename(filter, fname);
+  return enigma::current_widget_engine->get_save_filename(filter, fname);
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_open_filename_ext(filter, fname, dir, title);
-  return zenity::get_open_filename_ext(filter, fname, dir, title);
+  return enigma::current_widget_engine->get_open_filename_ext(filter, fname, dir, title);
 }
 
 string get_open_filenames_ext(string filter, string fname, string dir, string title) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_open_filenames_ext(filter, fname, dir, title);
-  return zenity::get_open_filenames_ext(filter, fname, dir, title);
+  return enigma::current_widget_engine->get_open_filenames_ext(filter, fname, dir, title);
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_save_filename_ext(filter, fname, dir, title);
-  return zenity::get_save_filename_ext(filter, fname, dir, title);
+  return enigma::current_widget_engine->get_save_filename_ext(filter, fname, dir, title);
 }
 
 string get_directory(string dname) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_directory(dname);
-  return zenity::get_directory(dname);
+  return enigma::current_widget_engine->get_directory(dname);
 }
 
 string get_directory_alt(string capt, string root) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_directory_alt(capt, root);
-  return zenity::get_directory_alt(capt, root);
+  return enigma::current_widget_engine->get_directory_alt(capt, root);
 }
 
 int get_color(int defcol) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_color(defcol);
-  return zenity::get_color(defcol);
+  return enigma::current_widget_engine->get_color(defcol);
 }
 
 int get_color_ext(int defcol, string title) {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::get_color_ext(defcol, title);
-  return zenity::get_color_ext(defcol, title);
+  return enigma::current_widget_engine->get_color_ext(defcol, title);
 }
 
 string message_get_caption() {
-  if (widget_get_system() == ws_x11_kdialog) return kdialog::message_get_caption();
-  return zenity::message_get_caption();
+  return enigma::current_widget_engine->message_get_caption();
 }
 
 void message_set_caption(string title) {
-  if (widget_get_system() == ws_x11_kdialog) kdialog::message_set_caption(title);
-  else zenity::message_set_caption(title);
+  enigma::current_widget_engine->message_set_caption(title);
 }
 
 } // namespace enigma_user
