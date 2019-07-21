@@ -53,6 +53,15 @@ enum {
 };
 */
 
+enum {
+	ws_win32       = 0,
+	ws_cocoa       = 1,
+	ws_x11_zenity  = 2,
+	ws_x11_kdialog = 3
+};
+
+	int widget_get_system();
+	void widget_set_system(int sys);
 	int show_message_cancelable(string message);
 	int show_message_ext(string message, string but1, string but2, string but3);
 	bool show_question(string message);
