@@ -516,15 +516,15 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   //ABORT_ON_ALL_ERRORS();
 }
 
-static int widget = enigma_user::ws_win32;
+static string widget = enigma_user::ws_win32;
 
 namespace enigma_user {
     
-int widget_get_system() {
+string widget_get_system() {
   return widget;
 }
 
-void widget_set_system(int sys) {
+void widget_set_system(string sys) {
   // place holder
 }
 
