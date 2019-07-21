@@ -29,15 +29,15 @@ bool widget_system_initialize() {
 
 } // namespace enigma
 
-static int widget = enigma_user::ws_x11_zenity;
+static string widget = enigma_user::ws_x11_zenity;
 
 namespace enigma_user {
     
-int widget_get_system() {
+string widget_get_system() {
   return widget;
 }
 
-void widget_set_system(int sys) {
+void widget_set_system(string sys) {
   if (sys == ws_x11_kdialog) widget = sys;
   else widget = ws_x11_zenity;
 }
