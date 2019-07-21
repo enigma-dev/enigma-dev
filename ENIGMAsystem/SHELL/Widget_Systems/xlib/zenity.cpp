@@ -174,9 +174,10 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   if (strtod(str_result.c_str(), NULL) == 1) exit(0);
 }
 
-namespace zenity {
+class ZenityWidgets : public enigma::CommandLineWidgetEngine {
+ public:
 
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
+void show_debug_message(string errortext, MESSAGE_TYPE type) override {
   if (type != M_INFO && type != M_WARNING) {
     show_debug_message_helper(errortext, type);
   } else {
@@ -186,31 +187,31 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
   }
 }
 
-void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
+void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) override {
 
 }
 
-int show_message(const string &message) {
+int show_message(const string &message) override {
   message_cancel = false;
   return show_message_helperfunc(message);
 }
 
-int show_message_cancelable(string message) {
+int show_message_cancelable(string message) override {
   message_cancel = true;
   return show_message_helperfunc(message);
 }
 
-bool show_question(string message) {
+bool show_question(string message) override {
   question_cancel = false;
   return (bool)show_question_helperfunc(message);
 }
 
-int show_question_cancelable(string message) {
+int show_question_cancelable(string message) override {
   question_cancel = true;
   return show_question_helperfunc(message);
 }
 
-int show_attempt(string errortext) {
+int show_attempt(string errortext) override {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -226,7 +227,7 @@ int show_attempt(string errortext) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-string get_string(string message, string def) {
+string get_string(string message, string def) override {
   if (dialog_caption.empty())
     dialog_caption = window_get_caption();
 
@@ -243,7 +244,7 @@ string get_string(string message, string def) {
   return shellscript_evaluate(str_command);
 }
 
-string get_password(string message, string def) {
+string get_password(string message, string def) override {
   if (dialog_caption.empty())
     dialog_caption = window_get_caption();
 
@@ -260,19 +261,19 @@ string get_password(string message, string def) {
   return shellscript_evaluate(str_command);
 }
 
-double get_integer(string message, double def) {
+double get_integer(string message, double def) override {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_string(message, str_def);
   return strtod(str_result.c_str(), NULL);
 }
 
-double get_passcode(string message, double def) {
+double get_passcode(string message, double def) override {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_password(message, str_def);
   return strtod(str_result.c_str(), NULL);
 }
 
-string get_open_filename(string filter, string fname) {
+string get_open_filename(string filter, string fname) override {
   string str_command;
   string str_title = "Open";
   string str_fname = filename_name(fname);
@@ -286,7 +287,7 @@ string get_open_filename(string filter, string fname) {
   return file_exists(result) ? result : "";
 }
 
-string get_open_filename_ext(string filter, string fname, string dir, string title) {
+string get_open_filename_ext(string filter, string fname, string dir, string title) override {
   string str_command;
   string str_title = add_escaping(title, true, "Open");
   string str_fname = filename_name(fname);
@@ -305,7 +306,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   return file_exists(result) ? result : "";
 }
 
-string get_open_filenames(string filter, string fname) {
+string get_open_filenames(string filter, string fname) override {
   string str_command;
   string str_title = "Open";
   string str_fname = filename_name(fname);
@@ -327,7 +328,7 @@ string get_open_filenames(string filter, string fname) {
   return success ? result : "";
 }
 
-string get_open_filenames_ext(string filter, string fname, string dir, string title) {
+string get_open_filenames_ext(string filter, string fname, string dir, string title) override {
   string str_command;
   string str_title = add_escaping(title, true, "Open");
   string str_fname = filename_name(fname);
@@ -354,7 +355,7 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
   return success ? result : "";
 }
 
-string get_save_filename(string filter, string fname) {
+string get_save_filename(string filter, string fname) override {
   string str_command;
   string str_title = "Save As";
   string str_fname = filename_name(fname);
@@ -367,7 +368,7 @@ string get_save_filename(string filter, string fname) {
   return shellscript_evaluate(str_command);
 }
 
-string get_save_filename_ext(string filter, string fname, string dir, string title) {
+string get_save_filename_ext(string filter, string fname, string dir, string title) override {
   string str_command;
   string str_title = add_escaping(title, true, "Save As");
   string str_fname = filename_name(fname);
@@ -385,7 +386,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   return shellscript_evaluate(str_command);
 }
 
-string get_directory(string dname) {
+string get_directory(string dname) override {
   string str_command;
   string str_title = "Select Directory";
   string str_dname = dname;
@@ -399,7 +400,7 @@ string get_directory(string dname) {
   return shellscript_evaluate(str_command);
 }
 
-string get_directory_alt(string capt, string root) {
+string get_directory_alt(string capt, string root) override {
   string str_command;
   string str_title = add_escaping(capt, true, "Select Directory");
   string str_dname = root;
@@ -413,7 +414,7 @@ string get_directory_alt(string capt, string root) {
   return shellscript_evaluate(str_command);
 }
 
-int get_color(int defcol) {
+int get_color(int defcol) override {
   string str_command;
   string str_title = "Color";
   string str_defcol;
@@ -449,7 +450,7 @@ int get_color(int defcol) {
   return make_color_rgb(red, green, blue);
 }
 
-int get_color_ext(int defcol, string title) {
+int get_color_ext(int defcol, string title) override {
   string str_command;
   string str_title = add_escaping(title, true, "Color");
   string str_defcol;
@@ -485,17 +486,23 @@ int get_color_ext(int defcol, string title) {
   return make_color_rgb(red, green, blue);
 }
 
-string message_get_caption() {
+string message_get_caption() override {
   if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
   if (dialog_caption == window_get_caption() && error_caption == "Error")
     return ""; else return dialog_caption;
 }
 
-void message_set_caption(string title) {
+void message_set_caption(string title) override {
   dialog_caption = title; error_caption = title;
   if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
 }
 
-} // namespace zenity
+};  // class ZenityWidgets
+
+// Declares storage for our implementation and exposes it as a system.
+static ZenityWidgets zenity_widgets_impl;
+namespace enigma {
+  CommandLineWidgetEngine *zenity_widgets = &zenity_widgets_impl;
+}
