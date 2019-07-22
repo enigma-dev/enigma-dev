@@ -5,7 +5,7 @@ Name: Virtual Keys
 Identifier: VirtualKeys
 Author: Robert Colton
 Description: Graphical virtualization of keyboard events.
-Default: true
+Default: false
 Icon: virtualkeyslogo.png
 
 Depends: None
