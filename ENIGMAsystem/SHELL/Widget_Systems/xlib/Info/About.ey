@@ -1,0 +1,15 @@
+%e-yaml
+---
+
+Name: Linux X11 Widgets
+Identifier: xlib
+Build-Platforms: Linux
+Represents: Linux
+Description: Use KDE with KDialog Widgets by calling "widget_set_system(ws_x11_kdialog)". Use GTK+ with Zenity Widgets by calling "widget_set_system(ws_x11_zenity)". Zenity Widgets is the default. License, documentation, and install instructions: https://enigma-dev.org/docs/Wiki/Dialogs#Zenity_Widgets
+Author: Samuel Venable
+
+Depends:
+  Build-Platforms: Linux
+
+Represents:
+  Build-Platforms: Linux

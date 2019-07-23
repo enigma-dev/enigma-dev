@@ -1,9 +1,0 @@
-%e-yaml
----
-
-Name: Zenity Widgets
-Identifier: Zenity
-Build-Platforms: Linux, SDL
-Represents: 
-Description: Create GTK+ style widgets with Zenity on Linux. License, documentation, and install instructions: https://enigma-dev.org/docs/Wiki/Dialogs#Zenity_Widgets
-Author: Samuel Venable

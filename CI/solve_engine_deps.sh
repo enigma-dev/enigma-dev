@@ -36,10 +36,8 @@ fi
 ###### Widgets #######
 if [ "$WIDGETS" == "GTK+" ]; then
   LINUX_DEPS="$LINUX_DEPS libgtk2.0-dev"
-elif [ "$WIDGETS" == "Zenity" ]; then
-  LINUX_DEPS="$LINUX_DEPS zenity"
-elif [ "$WIDGETS" == "KDialog" ]; then
-  LINUX_DEPS="$LINUX_DEPS kdebase-bin"
+elif [ "$WIDGETS" == "xlib" ]; then
+  LINUX_DEPS="$LINUX_DEPS zenity kdialog"
 fi
 
 ###### Extensions #######

@@ -28,10 +28,10 @@
 #include <iostream>
 using std::string;
 
+#include "dialogs.h"
 #include "strings_util.h"
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "Widget_Systems/General/WSdialogs.h"
 using enigma_user::filename_name;
 using enigma_user::filename_path;
 
@@ -85,33 +85,33 @@ static string remove_trailing_zeros(double numb) {
 }
 
 static string kdialog_filter(string input) {
-  std::replace(input.begin(), input.end(), ';', ' ');
   std::vector<string> stringVec = split_string(input, '|');
   string string_output = " '";
 
-  string even = "";
-  string odd = "";
-
   unsigned int index = 0;
-  for (const string &str : stringVec) {
-    if (index % 2 != 0) {
-      if (index == 1)
-        odd = str;
-      else
-        odd = "\n" + str;
-
-      string_output += string_replace_all(odd, "*.*", "*") + even;
+  for (string str : stringVec) {
+    if (index % 2 == 0) {
+      if (index != 0)
+        string_output += "\n";
+      size_t first = str.find('(');
+      if (first != string::npos) {
+        size_t last = str.find(')', first);
+        if (last != string::npos)
+          str.erase(first, last - first + 1);
+      }
+      string_output += str + " (";
+    } else {
+      std::replace(str.begin(), str.end(), ';', ' ');
+      string_output += string_replace_all(str, "*.*", "*") + ")";
     }
-    else
-      even = "|" + str;
 
     index += 1;
   }
 
   string_output += "'";
-
   return string_output;
 }
+
 
 static int show_message_helperfunc(string message) {
   if (dialog_caption.empty())
@@ -132,7 +132,7 @@ static int show_message_helperfunc(string message) {
     str_cancel = string("--yesno \"") + add_escaping(message, false, "") + string("\" --yes-label Ok --no-label Cancel ");
 
   str_command = string("kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") + str_cancel +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") + str_cancel +
   string("--title \"") + str_title + string("\";") + str_echo;
 
   string str_result = shellscript_evaluate(str_command);
@@ -152,7 +152,7 @@ static int show_question_helperfunc(string message) {
     str_cancel = "cancel";
 
   str_command = string("kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--yesno") + str_cancel + string(" \"") + add_escaping(message, false, "") + string("\" ") +
   string("--yes-label Yes --no-label No ") + string("--title \"") + str_title + string("\";") +
   string("x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi");
@@ -160,14 +160,6 @@ static int show_question_helperfunc(string message) {
   string str_result = shellscript_evaluate(str_command);
   return (int)strtod(str_result.c_str(), NULL);
 }
-
-namespace enigma {
-
-bool widget_system_initialize() {
-  return true;
-}
-
-} // namespace enigma
 
 static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
   if (error_caption.empty()) error_caption = "Error";
@@ -183,7 +175,7 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
     "x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi";
 
   str_command = string("kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--warningyesnocancel \"") + add_escaping(errortext, false, "") + string("\" ") +
   string("--yes-label Abort --no-label Retry --cancel-label Ignore ") +
   string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
@@ -192,9 +184,10 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   if (strtod(str_result.c_str(), NULL) == 1) exit(0);
 }
 
-namespace enigma_user {
+class KDialogWidgets : public enigma::CommandLineWidgetEngine {
+ public:
 
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
+void show_debug_message(string errortext, MESSAGE_TYPE type) override {
   if (type != M_INFO && type != M_WARNING) {
     show_debug_message_helper(errortext, type);
   } else {
@@ -204,37 +197,37 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
   }
 }
 
-void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
+void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) override {
 
 }
 
-int show_message(const string &message) {
+int show_message(const string &message) override {
   message_cancel = false;
   return show_message_helperfunc(message);
 }
 
-int show_message_cancelable(string message) {
+int show_message_cancelable(string message) override {
   message_cancel = true;
   return show_message_helperfunc(message);
 }
 
-bool show_question(string message) {
+bool show_question(string message) override {
   question_cancel = false;
   return (bool)show_question_helperfunc(message);
 }
 
-int show_question_cancelable(string message) {
+int show_question_cancelable(string message) override {
   question_cancel = true;
   return show_question_helperfunc(message);
 }
 
-int show_attempt(string errortext) {
+int show_attempt(string errortext) override {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
 
   str_command = string("kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--warningyesno") + string(" \"") + add_escaping(errortext, false, "") + string("\" ") +
   string("--yes-label Retry --no-label Cancel ") + string("--title \"") +
   add_escaping(error_caption, true, "Error") + string("\";") +
@@ -244,7 +237,7 @@ int show_attempt(string errortext) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-string get_string(string message, string def) {
+string get_string(string message, string def) override {
   if (dialog_caption.empty())
     dialog_caption = window_get_caption();
 
@@ -253,7 +246,7 @@ string get_string(string message, string def) {
 
   str_title = add_escaping(dialog_caption, true, "KDialog");
   str_command = string("ans=$(kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--inputbox \"") + add_escaping(message, false, "") + string("\" \"") +
   add_escaping(def, false, "") + string("\" --title \"") +
   str_title + string("\");echo $ans");
@@ -261,7 +254,7 @@ string get_string(string message, string def) {
   return shellscript_evaluate(str_command);
 }
 
-string get_password(string message, string def) {
+string get_password(string message, string def) override {
   if (dialog_caption.empty())
     dialog_caption = window_get_caption();
 
@@ -270,7 +263,7 @@ string get_password(string message, string def) {
 
   str_title = add_escaping(dialog_caption, true, "KDialog");
   str_command = string("ans=$(kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--password \"") + add_escaping(message, false, "") + string("\" \"") +
   add_escaping(def, false, "") + string("\" --title \"") +
   str_title + string("\");echo $ans");
@@ -278,19 +271,19 @@ string get_password(string message, string def) {
   return shellscript_evaluate(str_command);
 }
 
-double get_integer(string message, double def) {
+double get_integer(string message, double def) override {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_string(message, str_def);
   return strtod(str_result.c_str(), NULL);
 }
 
-double get_passcode(string message, double def) {
+double get_passcode(string message, double def) override {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_password(message, str_def);
   return strtod(str_result.c_str(), NULL);
 }
 
-string get_open_filename(string filter, string fname) {
+string get_open_filename(string filter, string fname) override {
   string str_command; string pwd;
   string str_title = "Open";
   string str_fname = filename_name(fname);
@@ -299,7 +292,7 @@ string get_open_filename(string filter, string fname) {
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
@@ -307,7 +300,7 @@ string get_open_filename(string filter, string fname) {
   return file_exists(result) ? result : "";
 }
 
-string get_open_filename_ext(string filter, string fname, string dir, string title) {
+string get_open_filename_ext(string filter, string fname, string dir, string title) override {
   string str_command; string pwd;
   string str_title = add_escaping(title, true, "Open");
   string str_fname = filename_name(fname);
@@ -321,7 +314,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
@@ -329,7 +322,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   return file_exists(result) ? result : "";
 }
 
-string get_open_filenames(string filter, string fname) {
+string get_open_filenames(string filter, string fname) override {
   string str_command; string pwd;
   string str_title = "Open";
   string str_fname = filename_name(fname);
@@ -338,7 +331,7 @@ string get_open_filenames(string filter, string fname) {
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --multiple --separate-output --title \"") + str_title + string("\"");
 
@@ -355,7 +348,7 @@ string get_open_filenames(string filter, string fname) {
   return success ? result : "";
 }
 
-string get_open_filenames_ext(string filter,string fname, string dir, string title) {
+string get_open_filenames_ext(string filter,string fname, string dir, string title) override {
   string str_command; string pwd;
   string str_title = add_escaping(title, true, "Open");
   string str_fname = filename_name(fname);
@@ -369,7 +362,7 @@ string get_open_filenames_ext(string filter,string fname, string dir, string tit
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --multiple --separate-output --title \"") + str_title + string("\"");
 
@@ -386,7 +379,7 @@ string get_open_filenames_ext(string filter,string fname, string dir, string tit
   return success ? result : "";
 }
 
-string get_save_filename(string filter, string fname) {
+string get_save_filename(string filter, string fname) override {
   string str_command; string pwd;
   string str_title = "Save As";
   string str_fname = filename_name(fname);
@@ -395,14 +388,14 @@ string get_save_filename(string filter, string fname) {
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--getsavefilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
   return shellscript_evaluate(str_command);
 }
 
-string get_save_filename_ext(string filter, string fname, string dir, string title) {
+string get_save_filename_ext(string filter, string fname, string dir, string title) override {
   string str_command; string pwd;
   string str_title = add_escaping(title, true, "Save As");
   string str_fname = filename_name(fname);
@@ -416,14 +409,14 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--getsavefilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
   return shellscript_evaluate(str_command);
 }
 
-string get_directory(string dname) {
+string get_directory(string dname) override {
   string str_command; string pwd;
   string str_title = "Select Directory";
   string str_dname = dname;
@@ -433,13 +426,13 @@ string get_directory(string dname) {
     add_escaping(str_dname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--getexistingdirectory ") + pwd + string(" --title \"") + str_title + str_end;
 
   return shellscript_evaluate(str_command);
 }
 
-string get_directory_alt(string capt, string root) {
+string get_directory_alt(string capt, string root) override {
   string str_command; string pwd;
   string str_title = add_escaping(capt, true, "Select Directory");
   string str_dname = root;
@@ -449,13 +442,13 @@ string get_directory_alt(string capt, string root) {
     add_escaping(str_dname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--getexistingdirectory ") + pwd + string(" --title \"") + str_title + str_end;
 
   return shellscript_evaluate(str_command);
 }
 
-int get_color(int defcol) {
+int get_color(int defcol) override {
   string str_command;
   string str_title = "Color";
   string str_defcol;
@@ -473,7 +466,7 @@ int get_color(int defcol) {
   std::transform(str_defcol.begin(), str_defcol.end(), str_defcol.begin(), ::toupper);
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--getcolor --default '") + str_defcol + string("' --title \"") + str_title +
   string("\");if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
@@ -493,7 +486,7 @@ int get_color(int defcol) {
   return make_color_rgb(red, green, blue);
 }
 
-int get_color_ext(int defcol, string title) {
+int get_color_ext(int defcol, string title) override {
   string str_command;
   string str_title = add_escaping(title, true, "Color");
   string str_defcol;
@@ -511,7 +504,7 @@ int get_color_ext(int defcol, string title) {
   std::transform(str_defcol.begin(), str_defcol.end(), str_defcol.begin(), ::toupper);
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) ") +
+  string("--attach=") + std::to_string((int)enigma::x11::win) + string(" ") +
   string("--getcolor --default '") + str_defcol + string("' --title \"") + str_title +
   string("\");if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
@@ -531,17 +524,23 @@ int get_color_ext(int defcol, string title) {
   return make_color_rgb(red, green, blue);
 }
 
-string message_get_caption() {
+string message_get_caption() override {
   if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
   if (dialog_caption == window_get_caption() && error_caption == "Error")
     return ""; else return dialog_caption;
 }
 
-void message_set_caption(string title) {
+void message_set_caption(string title) override {
   dialog_caption = title; error_caption = title;
   if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
 }
 
-} // namespace enigma_user
+};  // class KDialogWidgets
+
+// Declares storage for our implementation and exposes it as a system.
+static KDialogWidgets kdialog_widgets_impl;
+namespace enigma {
+  CommandLineWidgetEngine *kdialog_widgets = &kdialog_widgets_impl;
+}

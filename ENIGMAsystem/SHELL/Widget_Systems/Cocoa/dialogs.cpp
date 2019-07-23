@@ -64,7 +64,17 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   if (result == 1) exit(0);
 }
 
+static string widget = enigma_user::ws_cocoa;
+
 namespace enigma_user {
+    
+string widget_get_system() {
+  return widget;
+}
+
+void widget_set_system(string sys) {
+  // place holder
+}
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
   if (type != M_INFO && type != M_WARNING) {
