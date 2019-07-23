@@ -83,7 +83,7 @@ void execute_program(std::string operation, std::string fname, std::string args,
 std::string filename_absolute(std::string fname);
 std::string filename_join(std::string prefix, std::string suffix);
 std::string environment_get_variable(std::string name);
-bool environment_set_variable(std::string name, std::string value);
+bool environment_set_variable(const std::string &name, const std::string &value);
 bool set_working_directory(std::string dname);
 }
 

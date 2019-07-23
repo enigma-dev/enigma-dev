@@ -2,4 +2,4 @@
 // or API-dependent behavior. This file can define any number of macros
 // describing various compatibility and feature points.
 
-#define ENIGMA_WT_ZENITY 1
+#define ENIGMA_WT_XLIB 1
