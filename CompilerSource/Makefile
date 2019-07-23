@@ -4,6 +4,7 @@ include $(SHARED_SRC_DIR)/Makefile
 include $(SHARED_SRC_DIR)/eyaml/Makefile
 include $(SHARED_SRC_DIR)/event_reader/Makefile
 include $(SHARED_SRC_DIR)/rectpacker/Makefile
+include $(SHARED_SRC_DIR)/fonts/Makefile
 
 #################
 # configuration #
@@ -14,11 +15,11 @@ BASE = compileEGMf
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	TARGET := ../lib$(BASE).so
-	CXXFLAGS += -fPIC
+	override CXXFLAGS += -fPIC
 	MKDIR := mkdir
 else ifeq ($(OS), Darwin)
 	TARGET := ../lib$(BASE).dylib
-	CXXFLAGS += -fPIC
+	override CXXFLAGS += -fPIC
 	MKDIR := mkdir
 else
 	TARGET := ../$(BASE).dll
@@ -31,9 +32,16 @@ endif
 ###########
 
 CXX := g++
-CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src
+GCCVER := $(shell gcc -dumpversion | cut -c 1)
+ifeq ($(shell expr $(GCCVER) \>= 8), 1)
+	override CXXFLAGS += -std=c++17
+else
+	override CXXFLAGS += -std=c++11
+endif
+
+override CXXFLAGS += -Wall -O3 -g -I./JDI/src
 LDFLAGS += -shared -O3 -g -L../ -Wl,-rpath,./
-LDLIBS += -lProtocols -lprotobuf -lz -L$(SHARED_SRC_DIR)/libpng-util -lpng-util -lpng
+override LDLIBS += -lProtocols -lprotobuf -lz -L$(SHARED_SRC_DIR)/libpng-util -lpng-util -lpng
 
 # This implements a recursive wildcard allowing us to iterate in subdirs
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
@@ -43,7 +51,7 @@ OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 DEPENDS := $(OBJECTS:.o=.d)
 PROTO_DIR := $(SHARED_SRC_DIR)/protos
 
-CXXFLAGS += -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/libpng-util -I$(PROTO_DIR)/.eobjs $(addprefix -I$(SHARED_SRC_DIR)/, $(SHARED_INCLUDES))
+override CXXFLAGS += -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/libpng-util -I$(PROTO_DIR)/.eobjs $(addprefix -I$(SHARED_SRC_DIR)/, $(SHARED_INCLUDES))
 SOURCES += $(addprefix $(SHARED_SRC_DIR),$(SHARED_SOURCES))
 OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.o))
 DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))

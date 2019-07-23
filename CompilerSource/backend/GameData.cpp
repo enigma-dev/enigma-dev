@@ -7,12 +7,16 @@
  */
 
 #include "GameData.h"
-
+#include "fonts/fonts.h"
 #include "libpng-util.h"
 
 #include <map>
 #include <string>
 #include <iostream>
+#if __cplusplus > 201402L
+  #include <filesystem>
+  namespace fs = std::filesystem;
+#endif
 
 #include <zlib.h>
 
@@ -541,10 +545,32 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
       gameData->backgrounds.emplace_back(root.background(), root.name(), data);
       break;
     }
+    case TypeCase::kFont: {
+      #if __cplusplus > 201402L
+      //font_add_search_path(fs::path::parent_path(fs::path(gameData->filename)));
+      #endif
+      
+      const buffers::resources::Font &font = root.font();
+
+      std::string fontName = enigma_user::font_find(font.font_name(), font.bold(), font.italic());
+
+      unsigned w, h; //size of texture 
+      unsigned fontHeight = 0;
+      int yoffset;
+      std::vector<enigma::GlyphRange> glyphRanges;
+      for (auto& range : font.ranges()) glyphRanges.emplace_back(range.min(), range.max());
+      unsigned char* pxdata = enigma::font_add(fontName, font.size(), font.bold(), font.italic(), w, h, yoffset, fontHeight, glyphRanges);
+      
+      if (!pxdata) return -4; // font load error*/
+
+      ImageData data(w, h, pxdata, w*h*4);
+      
+      gameData->fonts.emplace_back(root.font(), root.name()); 
+      break;
+    }
     case TypeCase::kPath:     gameData->paths.emplace_back(root.path(), root.name()); break;
     case TypeCase::kScript:   gameData->scripts.emplace_back(root.script(), root.name()); break;
     case TypeCase::kShader:   gameData->shaders.emplace_back(root.shader(), root.name()); break;
-    case TypeCase::kFont:     gameData->fonts.emplace_back(root.font(), root.name()); break;
     case TypeCase::kTimeline: gameData->timelines.emplace_back(root.timeline(), root.name()); break;
     case TypeCase::kObject:   gameData->objects.emplace_back(root.object(), root.name()); break;
     case TypeCase::kRoom:     gameData->rooms.emplace_back(root.room(), root.name()); break;

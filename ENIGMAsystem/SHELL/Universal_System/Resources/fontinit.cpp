@@ -30,6 +30,7 @@
 #include <cstring>
 #include <cstdio>
 #include <string>
+#include <iostream>
 
 namespace enigma {
 
@@ -66,8 +67,6 @@ void exe_loadfonts(FILE* exe) {
 
     fontstructarray[i]->height = 0;
 
-    fontstructarray[i]->glyphRangeCount = rawfontdata[rf].glyphRangeCount;
-
     const unsigned int size = twid * thgt;
 
     int* pixels =
@@ -98,18 +97,15 @@ void exe_loadfonts(FILE* exe) {
     }
     delete[] cpixels;*/
     int ymin = 100, ymax = -100;
-    for (size_t gri = 0; gri < enigma::fontstructarray[i]->glyphRangeCount; gri++) {
-      fontglyphrange fgr;
-
+    for (size_t gri = 0; gri < enigma::fontstructarray[i]->glyphRanges.size(); gri++) {
 
       unsigned strt, cnt;
       if (!fread(&strt, 4, 1, exe)) return;
       if (!fread(&cnt, 4, 1, exe)) return;
 
-      fgr.glyphstart = strt;
-      fgr.glyphcount = cnt;
+      GlyphRange fgr(strt, strt+cnt);
 
-      for (unsigned gi = 0; gi < fgr.glyphcount; gi++) {
+      for (unsigned gi = 0; gi < fgr.size(); gi++) {
         if (!fread(&advance, 4, 1, exe)) return;
         if (!fread(&baseline, 4, 1, exe)) return;
         if (!fread(&origin, 4, 1, exe)) return;
@@ -119,7 +115,7 @@ void exe_loadfonts(FILE* exe) {
         if (!fread(&gty, 4, 1, exe)) return;
         if (!fread(&gtx2, 4, 1, exe)) return;
         if (!fread(&gty2, 4, 1, exe)) return;
-        fontglyph fg;
+        Glyph fg;
 
         fg.x = int(origin + .5);
         fg.y = int(baseline + .5);
@@ -138,6 +134,7 @@ void exe_loadfonts(FILE* exe) {
       }
 
       fontstructarray[i]->glyphRanges.push_back(std::move(fgr));
+      std::cout << "size: " << fontstructarray[i]->glyphRanges.size() << std::endl;
     }
 
     fontstructarray[i]->height = ymax - ymin + 2;

@@ -1,3 +1,4 @@
+include $(SHARED_SRC_DIR)/fonts/Makefile
+
 SOURCES +=  $(wildcard Universal_System/Extensions/ttf/*.cpp) 
-override CXXFLAGS += $(shell pkg-config --cflags freetype2)
-override LDLIBS += $(shell pkg-config --libs freetype2)
+override LDLIBS += -lpng

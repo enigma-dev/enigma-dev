@@ -79,6 +79,8 @@ CXX := g++
 CC := gcc
 DEPENDENCIES :=
 
+override CXXFLAGS += -DENIGMA_GAME
+
 ifeq ($(GMODE), Debug)
 	override CXXFLAGS += -Wall -g -DDEBUG_MODE
 	override CFLAGS += -Wall -g -DDEBUG_MODE
