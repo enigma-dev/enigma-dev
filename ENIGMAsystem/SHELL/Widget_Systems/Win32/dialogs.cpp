@@ -516,7 +516,17 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   //ABORT_ON_ALL_ERRORS();
 }
 
+static string widget = enigma_user::ws_win32;
+
 namespace enigma_user {
+    
+string widget_get_system() {
+  return widget;
+}
+
+void widget_set_system(string sys) {
+  // place holder
+}
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
   if (type != M_INFO && type != M_WARNING) {
