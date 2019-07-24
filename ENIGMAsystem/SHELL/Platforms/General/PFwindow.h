@@ -24,7 +24,6 @@
 #include <string>
 
 namespace enigma {
-
 extern char mousestatus[3];
 extern char last_mousestatus[3];
 extern char last_keybdstatus[256];
@@ -35,12 +34,6 @@ extern int windowY;
 
 void input_initialize();
 void input_push();
-
-int window_min_width = -1;
-int window_max_width = -1;
-int window_min_height = -1;
-int window_max_height = -1;
-
 }  // namespace enigma
 
 namespace enigma_user {
