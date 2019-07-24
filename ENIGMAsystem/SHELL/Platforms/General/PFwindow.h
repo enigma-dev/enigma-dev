@@ -237,6 +237,11 @@ int window_get_region_height();
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
 
+void window_set_min_width(int width);
+void window_set_min_height(int height);
+void window_set_max_width(int width);
+void window_set_max_height(int height);
+
 void window_set_minimized(bool minimized);
 void window_set_maximized(bool maximized);
 void window_set_visible(bool visible);
