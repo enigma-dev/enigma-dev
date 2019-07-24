@@ -29,6 +29,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 #include <stdio.h>   //printf, NULL
 #include <stdlib.h>  //malloc
 #include <time.h>    //clock
@@ -103,6 +104,14 @@ bool initGameWindow()
   win = XCreateWindow(disp, root, 0, 0, winw, winh, 0, vi->depth, InputOutput, vi->visual, valmask, &swa);
   set_net_wm_pid(win);
   XMoveWindow(disp, win, (screen->width - winw) / 2, (screen->height - winh) / 2);
+ 
+  // Window is fixed size by default
+  XSizeHints *sh = XAllocSizeHints();
+  sh->flags = PMinSize | PMaxSize;
+  sh->min_width = sh->max_width = winw;
+  sh->min_height = sh->max_height = winh;
+  XSetWMSizeHints(disp, win, sh, XA_WM_NORMAL_HINTS);
+  XFree(sh);
 
   //register CloseButton listener
   Atom prots[] = {wm_delwin};
