@@ -7,6 +7,11 @@
 
 namespace enigma {
 
+int window_min_width = -1;
+int window_max_width = -1;
+int window_min_height = -1;
+int window_max_height = -1;
+
 char mousestatus[3];
 char last_mousestatus[3];
 char last_keybdstatus[256];
