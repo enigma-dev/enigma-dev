@@ -29,6 +29,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 #include <stdio.h>   //printf, NULL
 #include <stdlib.h>  //malloc
 #include <time.h>    //clock
@@ -42,6 +43,11 @@
 //////////
 
 Cursor NoCursor, DefCursor;
+
+static int window_get_min_width = -1;
+static int window_get_max_width = -1;
+static int window_get_min_height = -1;
+static int window_get_max_height = -1;
 
 using namespace enigma::x11;
 
@@ -267,15 +273,50 @@ bool window_get_stayontop() {
 }
 
 void window_set_sizeable(bool sizeable) {
-  if (enigma::isSizeable == sizeable) return;
   enigma::isSizeable = sizeable;
+  XSizeHints *sh = XAllocSizeHints();
+  sh->flags = PMinSize | PMaxSize;
+  
+  if (window_get_min_width == -1)
+    window_get_min_width = 1;
+  if (window_get_max_width == -1) 
+    window_get_max_width = display_get_width();
+  if (window_get_min_height == -1) 
+    window_get_min_height = 1;
+  if (window_get_max_height == -1) 
+    window_get_max_height = display_get_height();
+  
+  if (sizeable) {
+    sh->min_width = window_get_min_width;
+    sh->max_width = window_get_max_width;
+    sh->min_height = window_get_min_height;
+    sh->max_height = window_get_max_height;
+  } else {
+    sh->min_width = sh->max_width = window_get_width();
+    sh->min_height = sh->max_height = window_get_height();
+  }
+  XSetWMSizeHints(disp, win, sh, XA_WM_NORMAL_HINTS);
+  XFree(sh);
+}
 
-  XSizeHints hints;
-  hints.min_width = 640;
-  hints.min_height = 480;
-  hints.max_width = 641;
-  hints.max_height = 481;
-  XSetWMNormalHints(disp, win, &hints);
+void window_set_min_width(int width) {
+  window_get_min_width = width;
+  window_set_sizeable(enigma::isSizeable);
+}
+
+void window_set_min_height(int height) {
+  window_get_min_height = height;
+  window_set_sizeable(enigma::isSizeable);
+}
+
+void window_set_max_width(int width) {
+  window_get_max_width = width;
+  window_set_sizeable(enigma::isSizeable);
+}
+
+void window_set_max_height(int height) {
+  window_get_max_height = height;
+  window_set_sizeable(enigma::isSizeable);
 }
 
 bool window_get_sizeable() { return enigma::isSizeable; }
