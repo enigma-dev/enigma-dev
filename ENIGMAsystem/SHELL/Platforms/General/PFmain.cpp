@@ -65,9 +65,6 @@ int enigma_main(int argc, char** argv) {
 
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
-  
-  // required for global game setting resizeable window
-  enigma_user::window_set_sizeable(enigma::isSizeable);
 
   while (!game_isending) {
     if (!((std::string)enigma_user::room_caption).empty())
