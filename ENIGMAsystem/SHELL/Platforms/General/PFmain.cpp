@@ -22,8 +22,6 @@ int parameterc;
 int frames_count = 0;
 unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
-int window_get_widthprevious = 640;
-int window_get_heightprevious = 480;
 
 int gameWait() {
   if (enigma_user::os_is_paused()) {
@@ -76,14 +74,6 @@ int enigma_main(int argc, char** argv) {
     if (updateTimer() != 0) continue;
     if (handleEvents() != 0) break;
     if (gameWait() != 0) continue;
-    
-    // required to scale the game draw area properly to window size
-    if (window_get_widthprevious != enigma_user::window_get_width() ||
-        window_get_heightprevious != enigma_user::window_get_height())
-      enigma_user::window_set_size(enigma_user::window_get_width(), enigma_user::window_get_height());
-    
-    window_get_widthprevious = enigma_user::window_get_width();
-    window_get_heightprevious = enigma_user::window_get_height();
 
     // if any extensions need updated, update them now
     // just before we fire off user events like step
