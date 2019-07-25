@@ -149,8 +149,6 @@ int handleEvents() {
 
         if (WindowResizedCallback != NULL) {
           WindowResizedCallback();
-          // makes sure the graphics scale to window size properly in all windowing systems
-          compute_window_size();
         }
         continue;
       }
