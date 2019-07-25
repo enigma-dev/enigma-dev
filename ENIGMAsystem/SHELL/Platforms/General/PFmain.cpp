@@ -1,4 +1,4 @@
-#include "PFmain.h" 
+#include "PFmain.h"
 
 #include "PFwindow.h"
 #include "PFsystem.h"
