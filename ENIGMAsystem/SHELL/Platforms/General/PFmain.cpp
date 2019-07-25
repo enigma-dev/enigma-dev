@@ -74,9 +74,6 @@ int enigma_main(int argc, char** argv) {
     if (updateTimer() != 0) continue;
     if (handleEvents() != 0) break;
     if (gameWait() != 0) continue;
-    
-    // makes sure the graphics scale to window size properly in all windowing systems
-    enigma_user::window_set_size(enigma_user::window_get_width(), enigma_user::window_get_height());
 
     // if any extensions need updated, update them now
     // just before we fire off user events like step
