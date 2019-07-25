@@ -274,11 +274,11 @@ void window_set_sizeable(bool sizeable) {
   if (enigma::window_min_width == -1)
     enigma::window_min_width = 1;
   if (enigma::window_max_width == -1) 
-    enigma::window_max_width = display_get_width();
+    enigma::window_max_width = INT_MAX;
   if (enigma::window_min_height == -1) 
     enigma::window_min_height = 1;
   if (enigma::window_max_height == -1) 
-    enigma::window_max_height = display_get_height();
+    enigma::window_max_height = INT_MAX;
   
   if (sizeable) {
     sh->min_width = enigma::window_min_width;
