@@ -39,24 +39,25 @@ bool virtual_key_show_keyboard_pressed = false;
 void update_virtualkeys() {
   for (std::pair<int, VirtualKey&> vki : virtual_keys) {
     VirtualKey& vk = vki.second;
-    // always set it back to false in case of focus loss
-    vk.pressed = false;
 
     // get the mouse with respect to the view
     int mx = window_mouse_get_x();
     int my = window_mouse_get_y();
-    // check if the mouse is inside the virtual key button
-    if (!point_in_rectangle(mx, my, vk.x, vk.y, vk.x + vk.width, vk.y + vk.height))
+    // continue if the left mouse button isn't down or the mouse arrow is not inside the virtual key
+    if (!point_in_rectangle(mx, my, vk.x, vk.y, vk.x + vk.width, vk.y + vk.height) || !mouse_check_button(mb_left)) {
+      if (vk.pressed) {
+        vk.pressed = false;
+        if (vk.keycode == -1) continue;
+        keyboard_key_release(vk.keycode);
+      }
       continue;
-
-    if (mouse_check_button(mb_left)) {
-      vk.pressed = true;
-      if (vk.keycode == -1) continue;
-      keyboard_key_press(vk.keycode);
-    } else if (mouse_check_button_released(mb_left)) {
-      if (vk.keycode == -1) continue;
-      keyboard_key_release(vk.keycode);
     }
+
+    // the left mouse button was down and in our rectangle
+    // classic example of De Morgan's laws
+    vk.pressed = true;
+    if (vk.keycode == -1) continue;
+    keyboard_key_press(vk.keycode);
   }
 }
 
