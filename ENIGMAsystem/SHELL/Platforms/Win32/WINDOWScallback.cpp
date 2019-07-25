@@ -108,8 +108,6 @@ namespace enigma
         if (hWndParameter == hWnd) {
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
-            // makes sure the graphics scale to window size properly in all windowing systems
-            compute_window_size();
           }
           instance_event_iterator = &dummy_event_iterator;
           for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
