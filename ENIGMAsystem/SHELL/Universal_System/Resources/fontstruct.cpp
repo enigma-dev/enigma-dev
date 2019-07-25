@@ -36,8 +36,7 @@ using std::string;
 
 namespace enigma
 {
-  font **fontstructarray = NULL;
-  extern size_t font_idmax;
+  AssetArray<font> fonts;
 
   bool fontglyph::empty() {
     return !(std::abs(x2-x) > 0 && std::abs(y2-y) > 0);
@@ -45,26 +44,17 @@ namespace enigma
 
   int font_new(uint32_t gs, uint32_t gc) // Creates a new font, allocating 'gc' glyphs
   {
-    font *ret = new font;
+    font ret;
 
     fontglyphrange fgr;
     fgr.glyphstart = gs;
     fgr.glyphcount = gc;
 
-    ret->glyphRangeCount = 1;
-    ret->glyphRanges.push_back(fgr);
-    ret->height = 0;
+    ret.glyphRangeCount = 1;
+    ret.glyphRanges.push_back(fgr);
+    ret.height = 0;
 
-    font **fsan = new font*[font_idmax+2];
-    font ** const fold = fontstructarray - 1;
-    if (fontstructarray and fold) {
-      for (unsigned i = 0; i <= font_idmax; i++)
-        fsan[i] = fold[i];
-      delete[] fold;
-    }
-    fontstructarray = fsan + 1;
-    fontstructarray[font_idmax] = ret;
-    return font_idmax++;
+    return fonts.add(std::move(ret));
   }
 
   int font_pack(font *font, int spr, uint32_t gcount, bool prop, int sep)
@@ -183,9 +173,9 @@ namespace enigma
       return true;
   }
 
-fontglyph findGlyph(const font *const fnt, uint32_t character) {
-  for (size_t i = 0; i < fnt->glyphRangeCount; i++) {
-    fontglyphrange fgr = fnt->glyphRanges[i];
+fontglyph findGlyph(const font& fnt, uint32_t character) {
+  for (size_t i = 0; i < fnt.glyphRangeCount; i++) {
+    fontglyphrange fgr = fnt.glyphRanges[i];
     if (character >= fgr.glyphstart && character < fgr.glyphstart + fgr.glyphcount) {
       return fgr.glyphs[character - fgr.glyphstart];
     }
@@ -200,52 +190,51 @@ namespace enigma_user
 
 int font_get_size(int fnt)
 {
-    return enigma::fontstructarray[fnt]->fontsize;
+    return enigma::fonts[fnt].fontsize;
 }
 
 bool font_get_bold(int fnt)
 {
-    return enigma::fontstructarray[fnt]->bold;
+    return enigma::fonts[fnt].bold;
 }
 
 bool font_get_italic(int fnt)
 {
-    return enigma::fontstructarray[fnt]->italic;
+    return enigma::fonts[fnt].italic;
 }
 
 uint32_t font_get_first(int fnt, int range)
 {
-    return enigma::fontstructarray[fnt]->glyphRanges[range].glyphstart;
+    return enigma::fonts[fnt].glyphRanges[range].glyphstart;
 }
 
 uint32_t font_get_last(int fnt, int range)
 {
-    return enigma::fontstructarray[fnt]->glyphRanges[range].glyphstart + enigma::fontstructarray[fnt]->glyphRanges[range].glyphcount;
+    return enigma::fonts[fnt].glyphRanges[range].glyphstart + enigma::fonts[fnt].glyphRanges[range].glyphcount;
 }
 
 int font_get_range_count(int fnt) {
-	return enigma::fontstructarray[fnt]->glyphRangeCount;
+	return enigma::fonts[fnt].glyphRangeCount;
 }
 
 string font_get_fontname(int fnt)
 {
-    return enigma::fontstructarray[fnt]->fontname;
+    return enigma::fonts[fnt].fontname;
 }
 
 void font_delete(int fnt)
 {
-    delete enigma::fontstructarray[fnt];
-    enigma::fontstructarray[fnt] = NULL;
+    enigma::fonts.destroy(fnt);
 }
 
 bool font_exists(int fnt)
 {
-    return unsigned(fnt) < enigma::font_idmax && bool(enigma::fontstructarray[fnt]);
+    return enigma::fonts.exists(fnt);
 }
 
 bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32_t first, uint32_t last)
 {
-  enigma::font *fnt = enigma::fontstructarray[ind];
+  enigma::font *fnt = &enigma::fonts[ind];
   fnt->name = name;
   fnt->fontsize = size;
   fnt->bold = bold;
@@ -267,7 +256,7 @@ bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep)
   if (!sspr) return false;
 
   unsigned char gcount = sspr->subcount;
-  enigma::font *fnt = enigma::fontstructarray[ind];
+  enigma::font *fnt = &enigma::fonts[ind];
   fnt->glyphRanges.clear(); //TODO: Delete glyphs for each range or add it to the destructor?
   fnt->glyphRangeCount = 1;
 
@@ -286,48 +275,48 @@ int font_add_sprite(int spr, uint32_t first, bool prop, int sep)
 
   unsigned char gcount = sspr->subcount;
   int idfont = enigma::font_new(first, gcount);
-  enigma::font *font = enigma::fontstructarray[idfont];
+  enigma::font *font = &enigma::fonts[idfont];
   if (!enigma::font_pack(font, spr, gcount, prop, sep)) return -1;
   return idfont;
 }
 
 float font_get_glyph_texture_left(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
+  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fonts[fnt], character);
   return glyph.tx;
 }
 
 float font_get_glyph_texture_top(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
+  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fonts[fnt], character);
   return glyph.ty;
 }
 
 float font_get_glyph_texture_right(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
+  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fonts[fnt], character);
   return glyph.tx2;
 }
 
 float font_get_glyph_texture_bottom(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
+  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fonts[fnt], character);
   return glyph.ty2;
 }
 
 float font_get_glyph_left(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
+  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fonts[fnt], character);
   return glyph.x;
 }
 
 float font_get_glyph_top(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
+  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fonts[fnt], character);
   return glyph.y;
 }
 
 float font_get_glyph_right(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
+  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fonts[fnt], character);
   return glyph.x2;
 }
 
 float font_get_glyph_bottom(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
+  const enigma::fontglyph glyph = enigma::findGlyph(enigma::fonts[fnt], character);
   return glyph.y2;
 }
 

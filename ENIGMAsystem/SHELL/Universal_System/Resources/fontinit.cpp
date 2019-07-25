@@ -47,7 +47,7 @@ void exe_loadfonts(FILE* exe) {
     return;
   }
 
-  fontstructarray = (new font*[rawfontmaxid + 2]) + 1;
+  //fonts = (new font*[rawfontmaxid + 2]) + 1;
 
   for (int rf = 0; rf < rawfontcount; rf++) {
     // int unpacked;
@@ -56,17 +56,17 @@ void exe_loadfonts(FILE* exe) {
     if (!fread(&thgt, 4, 1, exe)) return;
     const int i = fntid;
 
-    fontstructarray[i] = new font;
+    font font;
 
-    fontstructarray[i]->name = rawfontdata[rf].name;
-    fontstructarray[i]->fontname = rawfontdata[rf].fontname;
-    fontstructarray[i]->fontsize = rawfontdata[rf].fontsize;
-    fontstructarray[i]->bold = rawfontdata[rf].bold;
-    fontstructarray[i]->italic = rawfontdata[rf].italic;
+    font.name = rawfontdata[rf].name;
+    font.fontname = rawfontdata[rf].fontname;
+    font.fontsize = rawfontdata[rf].fontsize;
+    font.bold = rawfontdata[rf].bold;
+    font.italic = rawfontdata[rf].italic;
 
-    fontstructarray[i]->height = 0;
+    font.height = 0;
 
-    fontstructarray[i]->glyphRangeCount = rawfontdata[rf].glyphRangeCount;
+    font.glyphRangeCount = rawfontdata[rf].glyphRangeCount;
 
     const unsigned int size = twid * thgt;
 
@@ -98,7 +98,7 @@ void exe_loadfonts(FILE* exe) {
     }
     delete[] cpixels;*/
     int ymin = 100, ymax = -100;
-    for (size_t gri = 0; gri < enigma::fontstructarray[i]->glyphRangeCount; gri++) {
+    for (size_t gri = 0; gri < font.glyphRangeCount; gri++) {
       fontglyphrange fgr;
 
 
@@ -137,17 +137,18 @@ void exe_loadfonts(FILE* exe) {
         fgr.glyphs.push_back(fg);
       }
 
-      fontstructarray[i]->glyphRanges.push_back(std::move(fgr));
+      font.glyphRanges.push_back(std::move(fgr));
     }
 
-    fontstructarray[i]->height = ymax - ymin + 2;
-    fontstructarray[i]->yoffset = -ymin + 1;
+    font.height = ymax - ymin + 2;
+    font.yoffset = -ymin + 1;
 
-    fontstructarray[i]->texture = graphics_create_texture(twid, thgt, twid, thgt, pixels, false);
-    fontstructarray[i]->twid = twid;
-    fontstructarray[i]->thgt = thgt;
+    font.texture = graphics_create_texture(twid, thgt, twid, thgt, pixels, false);
+    font.twid = twid;
+    font.thgt = thgt;
 
     delete[] pixels;
+    fonts.assign(i, std::move(font));
 
     if (!fread(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "endf", sizeof(int)) != 0) return;

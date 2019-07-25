@@ -72,7 +72,7 @@ namespace enigma {
         case 2: { //Add font glyps
           //We remove one as it's the font resource itself, but we only need glyps
           metrics.erase(metrics.begin());
-          enigma::font *fnt = enigma::fontstructarray[textures[i].id];
+          enigma::font *fnt = &enigma::fonts[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
             enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
             for (size_t s = 0; s < fgr.glyphcount; s++){
@@ -101,7 +101,7 @@ namespace enigma {
           counter++;
         } break;
         case 2: { //Metrics for font glyps
-          enigma::font *fnt = enigma::fontstructarray[textures[i].id];
+          enigma::font *fnt = &enigma::fonts[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
             enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
             for (size_t s = 0; s < fgr.glyphcount; s++){
@@ -189,7 +189,7 @@ namespace enigma {
         } break;
         case 2: { //Copy textures for all font glyps
           ///This sometimes draws cut of letters - need to investigate!
-          enigma::font *fnt = enigma::fontstructarray[textures[i].id];
+          enigma::font *fnt = &enigma::fonts[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
             enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
             for (size_t s = 0; s < fgr.glyphcount; s++){

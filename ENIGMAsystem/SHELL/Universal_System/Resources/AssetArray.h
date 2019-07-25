@@ -30,7 +30,7 @@
   #include "Widget_Systems/widgets_mandatory.h" // for DEBUG_MESSAGE
   #define CHECK_ID(id, ret) \
     if (!exists(id)) { \
-      DEBUG_MESSAGE("Requested " + std::string(T::getAssetTypeName()) + " asset " + std::to_string(id) + " does not exist.", MESSAGE_TYPE::M_USER_ERROR); \
+      DEBUG_MESSAGE("Requested " + (std::string)T::getAssetTypeName() + " asset " + std::to_string(id) + " does not exist.", MESSAGE_TYPE::M_USER_ERROR); \
       return ret; \
     }
   #define CHECK_ID_V(id) CHECK_ID(id,)
@@ -76,7 +76,7 @@ class AssetArray {
     else {
       #ifdef DEBUG_MODE
       if (id < 0) {
-        DEBUG_MESSAGE("Attempting to assign " + std::string(T::getAssetTypeName()) + " asset " + std::to_string(id) + " to negative index.", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("Attempting to assign " + (std::string)T::getAssetTypeName() + " asset " + std::to_string(id) + " to negative index.", MESSAGE_TYPE::M_USER_ERROR);
         return id;
       }
       #endif

@@ -25,6 +25,8 @@
 #ifndef ENIGMA_FONTS_INTERNAL_H
 #define ENIGMA_FONTS_INTERNAL_H
 
+#include "AssetArray.h"
+
 #include <string>
 #include <vector>
 #include <stdint.h>
@@ -44,8 +46,10 @@ namespace enigma
     unsigned int glyphstart, glyphcount;
     std::vector<fontglyph> glyphs;
   };
-  struct font
+  class font
   {
+    bool destroyed = false;
+   public:
     // Trivia
     std::string name, fontname;
     int fontsize; bool bold, italic;
@@ -58,6 +62,11 @@ namespace enigma
     // Texture layer
     int texture;
     int twid, thgt;
+
+    void destroy() { destroyed = true; }
+    bool isDestroyed() const { return destroyed; }
+
+    static const char* getAssetTypeName() { return "font"; }
   };
   struct rawfont {
     std::string name;
@@ -68,12 +77,12 @@ namespace enigma
     unsigned int glyphRangeCount;
   };
   extern std::vector<rawfont> rawfontdata;
-  extern font **fontstructarray;
+  extern AssetArray<font> fonts;
 
   extern int rawfontcount, rawfontmaxid;
   int font_new(uint32_t gs, uint32_t gc); // Creates a new font, allocating 'gc' glyphs
   int font_pack(enigma::font *font, int spr, uint32_t gcount, bool prop, int sep);
-  fontglyph findGlyph(const font *const fnt, uint32_t character);
+  fontglyph findGlyph(const font& fnt, uint32_t character);
 } //namespace enigma
 
 #endif //ENIGMA_FONTS_INTERNAL_H
