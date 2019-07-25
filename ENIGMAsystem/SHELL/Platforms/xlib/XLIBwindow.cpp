@@ -290,7 +290,7 @@ void window_set_sizeable(bool sizeable) {
     sh->min_width = sh->max_width = window_get_width();
     sh->min_height = sh->max_height = window_get_height();
   }
-  XSetWMSizeHints(disp, win, sh, XA_WM_NORMAL_HINTS);
+  XSetWMNormalHints(disp, win, sh);
   XFree(sh);
 }
 
