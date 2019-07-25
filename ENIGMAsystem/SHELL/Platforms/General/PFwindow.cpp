@@ -229,7 +229,7 @@ bool mouse_check_button_released(int button) {
   }
 }
 
-void mouse_clear(const int button) { enigma::mousestatus[button] = enigma::last_mousestatus[button] = 0; }
+void mouse_clear(const int button) { enigma::mousestatus[button - 1] = enigma::last_mousestatus[button - 1] = 0; }
 
 void mouse_wait() {
   for (;;) {
