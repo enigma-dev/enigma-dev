@@ -211,6 +211,15 @@ namespace enigma
         }
         return 0;
       }
+      case WM_SYSCOMMAND:
+        switch(wParam)
+        {
+          case SC_MAXIMIZE:
+            compute_window_scaling();
+          case SC_RESTORE:
+            compute_window_scaling();
+          return 0;
+        }
       case WM_MOUSEWHEEL:
          vdeltadelta += (int)HIWORD(wParam);
          enigma_user::mouse_vscrolls += vdeltadelta / WHEEL_DELTA;
