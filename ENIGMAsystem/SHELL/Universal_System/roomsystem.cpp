@@ -232,6 +232,8 @@ namespace enigma
     //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
     //if the window size changes.
     enigma_user::window_default(true);
+ 	// required for global game setting borderless window
+    enigma_user::window_set_showborder(enigma::showBorder);
     // required for global game setting resizeable window
     enigma_user::window_set_sizeable(enigma::isSizeable);
     // window sized by first room, can make visible now
