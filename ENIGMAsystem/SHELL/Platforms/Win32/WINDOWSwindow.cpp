@@ -169,7 +169,7 @@ void window_set_fullscreen(bool full) {
   if (full) {
     window_set_stayontop(true);
     LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
-    style &= ~(WS_CAPTION | WS_BORDER | WS_MAXIMIZEBOX);
+    style &= ~(WS_CAPTION | WS_BORDER | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
     style |= WS_SIZEBOX;
     SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
     window_set_maximized(full);
@@ -189,6 +189,7 @@ void window_set_sizeable(bool sizeable) {
   DWORD style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
   if (sizeable) style |= WS_SIZEBOX | WS_MAXIMIZEBOX;
   else style &= ~(WS_SIZEBOX | WS_MAXIMIZEBOX);
+  style |= WS_MINIMIZEBOX;
   SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
   enigma::compute_window_size();
 }
