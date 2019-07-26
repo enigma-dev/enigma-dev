@@ -329,8 +329,10 @@ void window_set_showborder(bool show) {
 }
 
 bool window_get_showborder() {
-  Atom a[] = {XInternAtom(disp, "_NET_WM_STATE_ABOVE", False)};
-  return windowHasAtom(a);
+  Hints hints;
+  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
+  XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
+  return (hints.decorations == 0);
 }
 
 void window_set_showicons(bool show) {
@@ -458,7 +460,7 @@ void window_set_rectangle(int x, int y, int w, int h) {
 ////////////////
 
 void window_set_fullscreen(bool full) {
-  if (enigma::isFullScreen == full) return;
+  if (enigma::isFullScreen == full && !full) return;
   enigma::isFullScreen = full;
 
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
