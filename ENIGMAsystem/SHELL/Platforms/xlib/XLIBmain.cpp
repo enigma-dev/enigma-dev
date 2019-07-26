@@ -144,9 +144,11 @@ int handleEvents() {
         continue;
       }
       case ConfigureNotify: {  
+        windowWidth = e.xconfigure.width;
+        windowHeight = e.xconfigure.height;
         bool isFullScreen = enigma_user::window_get_fullscreen();
-        int parWidth = isFullScreen ? enigma_user::display_get_width() : e.xconfigure.width,
-        parHeight = isFullScreen ? enigma_user::display_get_height() : e.xconfigure.height;
+        int parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth,
+        parHeight = isFullScreen ? enigma_user::display_get_height() : windowHeight;
         if (viewScale > 0) {  //Fixed Scale
           double viewDouble = viewScale / 100.0;
           scaledWidth = regionWidth * viewDouble;
