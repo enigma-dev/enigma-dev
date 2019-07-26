@@ -267,6 +267,7 @@ bool window_get_stayontop() {
 }
 
 void window_set_sizeable(bool sizeable) {
+  if (window_get_maximized()) return;
   enigma::isSizeable = sizeable;
   XSizeHints *sh = XAllocSizeHints();
   sh->flags = PMinSize | PMaxSize;
@@ -291,6 +292,8 @@ void window_set_sizeable(bool sizeable) {
   }
   XSetWMNormalHints(disp, win, sh);
   XFree(sh);
+
+  XResizeWindow(disp, win, enigma::windowWidth, enigma::windowHeight);
 }
 
 void window_set_min_width(int width) {
@@ -317,7 +320,7 @@ bool window_get_sizeable() { return enigma::isSizeable; }
 
 void window_set_showborder(bool show) {
   if (show == window_get_showborder() && show) return;
-  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
+  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
   if (!show) {
     Hints hints;
     hints.flags = 2;        // Specify that we're changing the window decorations.
@@ -329,12 +332,8 @@ void window_set_showborder(bool show) {
 }
 
 bool window_get_showborder() {
-  Hints hints;
-  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
-  XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
-  bool decorations = (hints.decorations != 0);
-  XDeleteProperty(disp, win, property);
-  return decorations;
+  Atom a[] = {XInternAtom(disp, "_NET_WM_STATE_ABOVE", False)};
+  return !windowHasAtom(a);
 }
 
 void window_set_showicons(bool show) {
