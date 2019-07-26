@@ -238,6 +238,8 @@ namespace enigma
     enigma_user::window_set_sizeable(enigma::isSizeable);
     // window sized by first room, can make visible now
     enigma_user::window_set_visible(true);
+    // required for global game setting fullscreen window
+    enigma_user::window_set_fullscreen(enigma::isFullScreen);
     enigma_user::io_clear();
     // we only initialize the screen and clear the window color during game start
     // NOTE: no version of GM has EVER reset the drawing color or alpha during room transition
