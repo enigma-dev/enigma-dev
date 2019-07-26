@@ -316,7 +316,7 @@ void window_set_max_height(int height) {
 bool window_get_sizeable() { return enigma::isSizeable; }
 
 void window_set_showborder(bool show) {
-  if (show == window_get_showborder()) return;
+  if (show == window_get_showborder() && show) return;
   Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
   if (!show) {
     Hints hints;
