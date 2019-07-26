@@ -330,9 +330,11 @@ void window_set_showborder(bool show) {
 
 bool window_get_showborder() {
   Hints hints;
-  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
+  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
-  return (hints.decorations == 0);
+  bool decorations = (hints.decorations != 0);
+  XDeleteProperty(disp, win, property);
+  return decorations;
 }
 
 void window_set_showicons(bool show) {
