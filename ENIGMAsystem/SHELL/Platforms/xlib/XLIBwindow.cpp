@@ -468,7 +468,7 @@ void window_set_rectangle(int x, int y, int w, int h) {
 ////////////////
 
 void window_set_fullscreen(bool full) {
-  if (enigma::isFullScreen == full) return;
+  if (enigma::isFullScreen == full && !full) return;
   enigma::isFullScreen = full;
   if (full) {
     tmpSize::tmpW = enigma::windowWidth;
