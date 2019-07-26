@@ -48,9 +48,7 @@ namespace enigma
 
     fontglyphrange fgr;
     fgr.glyphstart = gs;
-    fgr.glyphcount = gc;
 
-    ret.glyphRangeCount = 1;
     ret.glyphRanges.push_back(fgr);
     ret.height = 0;
 
@@ -174,9 +172,9 @@ namespace enigma
   }
 
 fontglyph findGlyph(const font& fnt, uint32_t character) {
-  for (size_t i = 0; i < fnt.glyphRangeCount; i++) {
+  for (size_t i = 0; i < fnt.glyphRanges.size(); i++) {
     fontglyphrange fgr = fnt.glyphRanges[i];
-    if (character >= fgr.glyphstart && character < fgr.glyphstart + fgr.glyphcount) {
+    if (character >= fgr.glyphstart && character < fgr.glyphstart + fgr.glyphs.size()) {
       return fgr.glyphs[character - fgr.glyphstart];
     }
   }
@@ -210,11 +208,11 @@ uint32_t font_get_first(int fnt, int range)
 
 uint32_t font_get_last(int fnt, int range)
 {
-    return enigma::fonts[fnt].glyphRanges[range].glyphstart + enigma::fonts[fnt].glyphRanges[range].glyphcount;
+    return enigma::fonts[fnt].glyphRanges[range].glyphstart + enigma::fonts[fnt].glyphRanges[range].glyphs.size();
 }
 
 int font_get_range_count(int fnt) {
-	return enigma::fonts[fnt].glyphRangeCount;
+	return enigma::fonts[fnt].glyphRanges.size();
 }
 
 string font_get_fontname(int fnt)
@@ -239,11 +237,9 @@ bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32
   fnt->fontsize = size;
   fnt->bold = bold;
   fnt->italic = italic;
-  fnt->glyphRangeCount = 1;
 
   enigma::fontglyphrange fgr;
   fgr.glyphstart = first;
-  fgr.glyphcount = last-first;
 
   fnt->glyphRanges.push_back(fgr);
 
@@ -258,11 +254,9 @@ bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep)
   unsigned char gcount = sspr->subcount;
   enigma::font *fnt = &enigma::fonts[ind];
   fnt->glyphRanges.clear(); //TODO: Delete glyphs for each range or add it to the destructor?
-  fnt->glyphRangeCount = 1;
 
   enigma::fontglyphrange fgr;
   fgr.glyphstart = first;
-  fgr.glyphcount = gcount;
   fnt->glyphRanges.push_back(fgr);
 
   return enigma::font_pack(fnt, spr, gcount, prop, sep);

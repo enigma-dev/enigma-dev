@@ -84,10 +84,8 @@ namespace enigma_user {
     fnt->fontsize = size;
     fnt->bold = bold;
     fnt->italic = italic;
-    fnt->glyphRangeCount = 1;
     enigma::fontglyphrange fgr;
     fgr.glyphstart = first;
-    fgr.glyphcount = gcount;
     fgr.glyphs.resize(gcount);
 
     std::vector<pvrect> glyphmetrics(gcount);

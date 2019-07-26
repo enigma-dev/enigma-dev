@@ -42,8 +42,8 @@ namespace enigma
     float xs; // Spacing: used to increment xx
   };
   struct fontglyphrange {
-    fontglyphrange() : glyphstart(0), glyphcount(0) {}
-    unsigned int glyphstart, glyphcount;
+    fontglyphrange() : glyphstart(0) {}
+    unsigned int glyphstart;
     std::vector<fontglyph> glyphs;
   };
   class font
@@ -55,7 +55,6 @@ namespace enigma
     int fontsize; bool bold, italic;
 
     // Metrics and such
-    unsigned glyphRangeCount;
     std::vector<fontglyphrange> glyphRanges;
     unsigned int height, yoffset;
 

@@ -66,8 +66,6 @@ void exe_loadfonts(FILE* exe) {
 
     font.height = 0;
 
-    font.glyphRangeCount = rawfontdata[rf].glyphRangeCount;
-
     const unsigned int size = twid * thgt;
 
     int* pixels =
@@ -98,18 +96,16 @@ void exe_loadfonts(FILE* exe) {
     }
     delete[] cpixels;*/
     int ymin = 100, ymax = -100;
-    for (size_t gri = 0; gri < font.glyphRangeCount; gri++) {
+    for (size_t gri = 0; gri < rawfontdata[rf].glyphRangeCount; gri++) {
       fontglyphrange fgr;
-
 
       unsigned strt, cnt;
       if (!fread(&strt, 4, 1, exe)) return;
       if (!fread(&cnt, 4, 1, exe)) return;
 
       fgr.glyphstart = strt;
-      fgr.glyphcount = cnt;
 
-      for (unsigned gi = 0; gi < fgr.glyphcount; gi++) {
+      for (unsigned gi = 0; gi < cnt; gi++) {
         if (!fread(&advance, 4, 1, exe)) return;
         if (!fread(&baseline, 4, 1, exe)) return;
         if (!fread(&origin, 4, 1, exe)) return;
