@@ -45,6 +45,13 @@ Cursor NoCursor, DefCursor;
 
 using namespace enigma::x11;
 
+namespace tmpSize {
+    
+int tmpW = enigma::windowWidth;
+int tmpH = enigma::windowHeight;
+
+} // namespace tmpSize
+
 namespace enigma {
 
 namespace x11 {
@@ -461,9 +468,12 @@ void window_set_rectangle(int x, int y, int w, int h) {
 ////////////////
 
 void window_set_fullscreen(bool full) {
-  if (enigma::isFullScreen == full && !full) return;
+  if (enigma::isFullScreen == full) return;
   enigma::isFullScreen = full;
-
+  if (full) {
+    tmpSize::tmpW = enigma::windowWidth;
+    tmpSize::tmpH = enigma::windowHeight;
+  }
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aFullScreen = XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False);
   XEvent xev;
@@ -477,8 +487,7 @@ void window_set_fullscreen(bool full) {
   xev.xclient.data.l[1] = aFullScreen;
   xev.xclient.data.l[2] = 0;
   XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
-
-  enigma::compute_window_size();
+  if (!full) XResizeWindow(disp, win, tmpSize::tmpW, tmpSize::tmpH);
 }
 
 bool window_get_fullscreen() {
