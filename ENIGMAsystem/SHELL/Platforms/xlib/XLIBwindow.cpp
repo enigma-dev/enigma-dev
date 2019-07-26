@@ -317,7 +317,7 @@ bool window_get_sizeable() { return enigma::isSizeable; }
 
 void window_set_showborder(bool show) {
   if (show == window_get_showborder() && show) return;
-  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
+  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   if (!show) {
     Hints hints;
     hints.flags = 2;        // Specify that we're changing the window decorations.
