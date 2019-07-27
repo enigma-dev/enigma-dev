@@ -143,7 +143,7 @@ int handleEvents() {
           }
         continue;
       }
-      case ConfigureNotify: {  
+      case ConfigureNotify: {
         windowWidth = e.xconfigure.width;
         windowHeight = e.xconfigure.height;
         compute_window_scaling();
