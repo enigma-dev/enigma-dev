@@ -231,7 +231,7 @@ namespace enigma
 
     //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
     //if the window size changes.
-    if (gamestart) {
+    if (!enigma::initGame) {
       // GMS doesn't do this every room init; only game init
       // keep this false until xlib window_center() is fixed
       enigma_user::window_default(false);
@@ -243,6 +243,7 @@ namespace enigma
       enigma_user::window_set_visible(true);
       // required for global game setting fullscreen window
       enigma_user::window_set_fullscreen(enigma::isFullScreen);
+      enigma::initGame = true;
     }
     enigma_user::io_clear();
     // we only initialize the screen and clear the window color during game start
