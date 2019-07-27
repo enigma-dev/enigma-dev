@@ -54,7 +54,7 @@ namespace enigma_user {
     unsigned area;
   };
 
-  int font_add(std::string name, int size, bool bold, bool italic, unsigned first, unsigned last) {
+  int font_add(std::string name, unsigned size, bool bold, bool italic, unsigned first, unsigned last) {
 
     if (!enigma::FreeTypeAlive)
       return -1;
