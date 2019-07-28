@@ -54,6 +54,9 @@ int tmpH = enigma::windowHeight;
 
 namespace enigma {
 
+unsigned long decorationsPrevious = !showBorder;
+unsigned long decorationsCurrent = showBorder;
+
 namespace x11 {
 Display* disp;
 Screen* screen;
@@ -327,20 +330,25 @@ bool window_get_sizeable() { return enigma::isSizeable; }
 
 void window_set_showborder(bool show) {
   if (show == window_get_showborder() && show) return;
-  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
+  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   if (!show) {
     Hints hints;
     hints.flags = 2;        // Specify that we're changing the window decorations.
+    enigma::decorationsPrevious = hints.decorations; // Save current decorations before changing them.
     hints.decorations = 0;  // 0 (false) means that window decorations should go bye-bye.
+    enigma::decorationsCurrent = hints.decorations; // Save current decorations after changing them.
     XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
   } else {
-    XDeleteProperty(disp, win, property);
+    Hints hints;
+    hints.flags = 2;        // Specify that we're changing the window decorations.
+    hints.decorations = enigma::decorationsPrevious; // Set decorations back to the way they were.
+    enigma::decorationsCurrent = hints.decorations; // Save current decorations after changing them.
+    XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
   }
 }
 
 bool window_get_showborder() {
-  Atom a[] = {XInternAtom(disp, "_NET_WM_STATE_ABOVE", False)};
-  return !windowHasAtom(a);
+  return enigma::decorationsCurrent;
 }
 
 void window_set_showicons(bool show) {
