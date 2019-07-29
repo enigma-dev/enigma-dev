@@ -48,11 +48,30 @@ namespace enigma
   };
   class font
   {
-    bool destroyed = false;
+    bool destroyed;
    public:
+     font() : destroyed(false), name(""), fontname(""), fontsize(0),
+       bold(false), italic(false), height(0), yoffset(0), texture(-1),
+       twid(0), thgt(0) {}
+     font& operator= (const font &fnt) {
+       destroyed = fnt.destroyed;
+       name = fnt.name;
+       fontname = fnt.fontname;
+       fontsize = fnt.fontsize;
+       bold = fnt.bold;
+       italic = fnt.italic;
+       height = fnt.height;
+       yoffset = fnt.yoffset;
+       texture = fnt.texture;
+       twid = fnt.twid;
+       thgt = fnt.thgt;
+       glyphRanges = fnt.glyphRanges;
+       return *this;
+     }
     // Trivia
     std::string name, fontname;
-    int fontsize; bool bold, italic;
+    int fontsize; 
+    bool bold, italic;
 
     // Metrics and such
     std::vector<fontglyphrange> glyphRanges;

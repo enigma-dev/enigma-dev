@@ -52,7 +52,7 @@ class OffsetVector {
     return data_owner_.size() + LEFT;
   }
   T *data() { return data_; }
-  const T *data() const { return data_owner_.data(); }
+  const T *data() const { return data_; }
   template<typename... U> size_t push_back(U... args) {
     data_owner_.push_back(args...);
     data_ = data_owner_.data() - LEFT;
