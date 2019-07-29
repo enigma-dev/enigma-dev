@@ -161,14 +161,16 @@ int handleEvents() {
         continue;
       }
       case ConfigureNotify: {
+        if (showBorder && 
+          (windowX != e.xconfigure.x ||
+          windowY != e.xconfigure.y)) {
+          winEdgeX = getWindowDimension(0);
+          winEdgeY = getWindowDimension(1);
+        }
         windowX = e.xconfigure.x;
         windowY = e.xconfigure.y;
         windowWidth = e.xconfigure.width;
         windowHeight = e.xconfigure.height;
-        if (showBorder) {
-          winEdgeX = getWindowDimension(0);
-          winEdgeY = getWindowDimension(1);
-        }
         compute_window_scaling();
         if (WindowResizedCallback != NULL) {
           WindowResizedCallback();
