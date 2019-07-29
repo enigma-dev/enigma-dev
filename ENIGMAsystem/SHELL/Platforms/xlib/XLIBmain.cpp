@@ -47,6 +47,23 @@ const int os_type = os_linux;
 
 namespace enigma {
 
+int winEdgeX = windowX;
+int winEdgeY = windowY;
+
+static int getWindowDimension(int i) {
+  XFlush(disp);
+  XWindowAttributes wa;
+  XGetWindowAttributes(disp, win, &wa);
+  if (i == 2) return wa.width;
+  if (i == 3) return wa.height;
+  Window root, parent, *child;
+  uint children;
+  XQueryTree(disp, win, &root, &parent, &child, &children);
+  XWindowAttributes pwa;
+  XGetWindowAttributes(disp, parent, &pwa);
+  return i ? (i == 1 ? pwa.y + wa.y : -1) : pwa.x + wa.x;
+}
+
 void (*WindowResizedCallback)();
 void WindowResized();
 
@@ -144,8 +161,14 @@ int handleEvents() {
         continue;
       }
       case ConfigureNotify: {
+        windowX = e.xconfigure.x;
+        windowY = e.xconfigure.y;
         windowWidth = e.xconfigure.width;
         windowHeight = e.xconfigure.height;
+        if (showBorder) {
+          winEdgeX = getWindowDimension(0);
+          winEdgeY = getWindowDimension(1);
+        }
         compute_window_scaling();
         if (WindowResizedCallback != NULL) {
           WindowResizedCallback();
