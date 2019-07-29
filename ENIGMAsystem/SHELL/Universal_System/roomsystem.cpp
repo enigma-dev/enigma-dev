@@ -234,7 +234,6 @@ namespace enigma
     if (!enigma::initGame) {
       // GMS doesn't do this every room init; only game init
       enigma_user::window_default(false);
-      compute_window_size(); // update window size detection
       // window sized by first room, can make visible now
       enigma_user::window_set_visible(true);
       // required for global game setting resizeable window
