@@ -74,10 +74,11 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   GLuint bufferPeer;
   auto it = isIndex ? indexBufferPeers.find(buffer) : vertexBufferPeers.find(buffer);
   const GLenum target = isIndex ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER;
+  size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
 
   // if the contents of the buffer are dirty then we need to update
   // our native buffer object "peer"
-  if (!dirty) {
+  if (!dirty || !size) {
     if (isIndex) {
       bind_element_buffer(it->second);
     } else {
@@ -85,8 +86,6 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
     }
     return;
   }
-
-  size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
 
   // if we haven't created a native "peer" for this buffer yet,
   // then we need to do so now

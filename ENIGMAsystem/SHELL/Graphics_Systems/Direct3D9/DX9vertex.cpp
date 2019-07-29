@@ -54,14 +54,14 @@ void graphics_delete_index_buffer_peer(int buffer) {
 
 void graphics_prepare_vertex_buffer(const int buffer) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  size_t size = enigma_user::vertex_get_buffer_size(buffer);
 
   // if the contents of the vertex buffer are dirty then we need to update
   // our native vertex buffer object "peer"
-  if (!vertexBuffer->dirty) return;
+  if (!vertexBuffer->dirty || !size) return;
 
   LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = NULL;
   auto it = vertexBufferPeers.find(buffer);
-  size_t size = enigma_user::vertex_get_buffer_size(buffer);
 
   // if we have already created a native "peer" vbo for this user buffer,
   // then we have to release it if it isn't big enough to hold the new contents
@@ -103,14 +103,14 @@ void graphics_prepare_vertex_buffer(const int buffer) {
 
 void graphics_prepare_index_buffer(const int buffer) {
   enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  size_t size = enigma_user::index_get_buffer_size(buffer);
 
   // if the contents of the index buffer are dirty then we need to update
   // our native index buffer object "peer"
-  if (!indexBuffer->dirty) return;
+  if (!indexBuffer->dirty || !size) return;
 
   LPDIRECT3DINDEXBUFFER9 indexBufferPeer = NULL;
   auto it = indexBufferPeers.find(buffer);
-  size_t size = enigma_user::index_get_buffer_size(buffer);
 
   // if we have already created a native "peer" ibo for this user buffer,
   // then we have to release it if it isn't big enough to hold the new contents
