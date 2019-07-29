@@ -39,25 +39,20 @@ map<int, std::vector<short unsigned int> > indexBufferArrays;
 map<int, GLuint> vertexBufferPeers;
 map<int, GLuint> indexBufferPeers;
 
-void* graphics_prepare_buffer_array(const int buffer, const bool isIndex) {
+void graphics_prepare_buffer_array(const int buffer, const bool isIndex) {
   using namespace enigma;
 
   const bool dirty = isIndex ? indexBuffers[buffer]->dirty : vertexBuffers[buffer]->dirty;
-  if (dirty) {
-    if (isIndex) {
-      IndexBuffer* indexBuffer = indexBuffers[buffer];
-      indexBufferArrays[buffer] = indexBuffer->indices;
-      indexBuffer->clearData();
-    } else {
-      VertexBuffer* vertexBuffer = vertexBuffers[buffer];
-      vertexBufferArrays[buffer] = vertexBuffer->vertices;
-      vertexBuffer->clearData();
-    }
-  }
+  if (!dirty) return;
+
   if (isIndex) {
-    return (void*)indexBufferArrays[buffer].data();
+    IndexBuffer* indexBuffer = indexBuffers[buffer];
+    indexBufferArrays[buffer] = indexBuffer->indices;
+    indexBuffer->clearData();
   } else {
-    return (void*)vertexBufferArrays[buffer].data();
+    VertexBuffer* vertexBuffer = vertexBuffers[buffer];
+    vertexBufferArrays[buffer] = vertexBuffer->vertices;
+    vertexBuffer->clearData();
   }
 }
 
@@ -73,35 +68,36 @@ void graphics_prepare_buffer_peer(const int buffer, const bool isIndex) {
 
   // if the contents of the buffer are dirty then we need to update
   // our native buffer object "peer"
-  if (dirty) {
-    size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
+  if (!dirty) {
+    glBindBuffer(target, it->second);
+    return;
+  }
 
-    // if we haven't created a native "peer" for this buffer yet,
-    // then we need to do so now
-    if (it == (isIndex ? indexBufferPeers.end() : vertexBufferPeers.end())) {
-      glGenBuffers(1, &bufferPeer);
-      if (isIndex) {
-        indexBufferPeers[buffer] = bufferPeer;
-      } else {
-        vertexBufferPeers[buffer] = bufferPeer;
-      }
-    } else {
-      bufferPeer = it->second;
-    }
+  size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
 
-    glBindBuffer(target, bufferPeer);
-
-    const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
-    GLenum usage = frozen ? (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW) : GL_STREAM_DRAW;
-    glBufferData(target, size, data, usage);
-
+  // if we haven't created a native "peer" for this buffer yet,
+  // then we need to do so now
+  if (it == (isIndex ? indexBufferPeers.end() : vertexBufferPeers.end())) {
+    glGenBuffers(1, &bufferPeer);
     if (isIndex) {
-      indexBuffers[buffer]->clearData();
+      indexBufferPeers[buffer] = bufferPeer;
     } else {
-      vertexBuffers[buffer]->clearData();
+      vertexBufferPeers[buffer] = bufferPeer;
     }
   } else {
-    glBindBuffer(target, it->second);
+    bufferPeer = it->second;
+  }
+
+  glBindBuffer(target, bufferPeer);
+
+  const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
+  GLenum usage = frozen ? (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW) : GL_STREAM_DRAW;
+  glBufferData(target, size, data, usage);
+
+  if (isIndex) {
+    indexBuffers[buffer]->clearData();
+  } else {
+    vertexBuffers[buffer]->clearData();
   }
 }
 
@@ -145,10 +141,15 @@ void graphics_delete_index_buffer_peer(int buffer) {
 GLvoid* graphics_prepare_buffer(const int buffer, const bool isIndex) {
   if (vbo_is_supported) {
     graphics_prepare_buffer_peer(buffer, isIndex);
-    return NULL;
   } else {
-    return graphics_prepare_buffer_array(buffer, isIndex);
+    graphics_prepare_buffer_array(buffer, isIndex);
+    if (isIndex) {
+      return (void*)indexBufferArrays[buffer].data();
+    } else {
+      return (void*)vertexBufferArrays[buffer].data();
+    }
   }
+  return NULL;
 }
 
 struct ClientState {
