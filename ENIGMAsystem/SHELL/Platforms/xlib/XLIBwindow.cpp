@@ -201,20 +201,6 @@ typedef struct {
   unsigned long status;
 } Hints;
 
-static int getWindowDimension(int i) {
-  XFlush(disp);
-  XWindowAttributes wa;
-  XGetWindowAttributes(disp, win, &wa);
-  if (i == 2) return wa.width;
-  if (i == 3) return wa.height;
-  Window root, parent, *child;
-  uint children;
-  XQueryTree(disp, win, &root, &parent, &child, &children);
-  XWindowAttributes pwa;
-  XGetWindowAttributes(disp, parent, &pwa);
-  return i ? (i == 1 ? pwa.y + wa.y : -1) : pwa.x + wa.x;
-}
-
 template <int count>
 static bool windowHasAtom(const Atom (&atom)[count]) {
   bool res = false;
@@ -331,6 +317,7 @@ bool window_get_sizeable() { return enigma::isSizeable; }
 void window_set_showborder(bool show) {
   if (show == window_get_showborder() && show) return;
   Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
+  enigma::showBorder = show;
   if (!show) {
     Hints hints;
     hints.flags = 2;        // Specify that we're changing the window decorations.
@@ -338,17 +325,19 @@ void window_set_showborder(bool show) {
     hints.decorations = 0;  // 0 (false) means that window decorations should go bye-bye.
     enigma::decorationsCurrent = hints.decorations; // Save current decorations after changing them.
     XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
+    XMoveWindow(disp, win, enigma::windowX, enigma::windowY);
   } else {
     Hints hints;
     hints.flags = 2;        // Specify that we're changing the window decorations.
     hints.decorations = enigma::decorationsPrevious; // Set decorations back to the way they were.
     enigma::decorationsCurrent = hints.decorations; // Save current decorations after changing them.
     XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
+    XMoveWindow(disp, win, enigma::windowX - enigma::winEdgeX, enigma::windowY - enigma::winEdgeY);
   }
 }
 
 bool window_get_showborder() {
-  return enigma::decorationsCurrent;
+  return enigma::showBorder;
 }
 
 void window_set_showicons(bool show) {
@@ -443,10 +432,10 @@ void display_mouse_set(int x, int y) { XWarpPointer(disp, None, DefaultRootWindo
 ////////////
 
 //Getters
-int window_get_x() { return getWindowDimension(0); }
-int window_get_y() { return getWindowDimension(1); }
-int window_get_width() { return getWindowDimension(2); }
-int window_get_height() { return getWindowDimension(3); }
+int window_get_x() { return enigma::windowX; }
+int window_get_y() { return enigma::windowY; }
+int window_get_width() { return enigma::windowWidth; }
+int window_get_height() { return enigma::windowHeight; }
 
 //Setters
 void window_set_position(int x, int y) {
