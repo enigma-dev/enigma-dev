@@ -71,6 +71,7 @@ class OffsetVector {
   }
   void resize(size_t count) {
     data_owner_.resize(count - LEFT);
+    data_ = data_owner_.data() - LEFT;
   }
 };
 
@@ -182,6 +183,10 @@ class AssetArray {
   bool exists(int id) const { return (id >= 0 && size_t(id) < size() && !assets_[id].isDestroyed()); }
 
   T* data() { return assets_.data(); }
+
+  void resize(size_t count) {
+    assets_.resize(count);
+  }
 
  private:
   OffsetVector<T, LEFT> assets_;
