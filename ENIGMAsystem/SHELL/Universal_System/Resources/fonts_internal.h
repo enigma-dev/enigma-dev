@@ -76,7 +76,7 @@ namespace enigma
     unsigned int glyphRangeCount;
   };
   extern std::vector<rawfont> rawfontdata;
-  extern AssetArray<font> fonts;
+  extern AssetArray<font, -1> fonts;
 
   extern int rawfontcount, rawfontmaxid;
   int font_new(uint32_t gs, uint32_t gc); // Creates a new font, allocating 'gc' glyphs

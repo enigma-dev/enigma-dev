@@ -36,7 +36,7 @@ using std::string;
 
 namespace enigma
 {
-  AssetArray<font> fonts;
+  AssetArray<font, -1> fonts;
 
   bool fontglyph::empty() {
     return !(std::abs(x2-x) > 0 && std::abs(y2-y) > 0);
