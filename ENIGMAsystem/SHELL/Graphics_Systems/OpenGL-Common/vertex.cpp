@@ -77,43 +77,44 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
 
   // if the contents of the buffer are dirty then we need to update
   // our native buffer object "peer"
-  if (dirty) {
-    size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
-
-    // if we haven't created a native "peer" for this buffer yet,
-    // then we need to do so now
-    if (it == (isIndex ? indexBufferPeers.end() : vertexBufferPeers.end())) {
-      glGenBuffers(1, &bufferPeer);
-      if (isIndex) {
-        indexBufferPeers[buffer] = bufferPeer;
-      } else {
-        vertexBufferPeers[buffer] = bufferPeer;
-      }
-    } else {
-      bufferPeer = it->second;
-    }
-
-    if (isIndex) {
-      bind_element_buffer(bufferPeer);
-    } else {
-      bind_array_buffer(bufferPeer);
-    }
-
-    const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
-    GLenum usage = frozen ? (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW) : GL_STREAM_DRAW;
-    glBufferData(target, size, data, usage);
-
-    if (isIndex) {
-      indexBuffers[buffer]->clearData();
-    } else {
-      vertexBuffers[buffer]->clearData();
-    }
-  } else {
+  if (!dirty) {
     if (isIndex) {
       bind_element_buffer(it->second);
     } else {
       bind_array_buffer(it->second);
     }
+    return;
+  }
+
+  size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
+
+  // if we haven't created a native "peer" for this buffer yet,
+  // then we need to do so now
+  if (it == (isIndex ? indexBufferPeers.end() : vertexBufferPeers.end())) {
+    glGenBuffers(1, &bufferPeer);
+    if (isIndex) {
+      indexBufferPeers[buffer] = bufferPeer;
+    } else {
+      vertexBufferPeers[buffer] = bufferPeer;
+    }
+  } else {
+    bufferPeer = it->second;
+  }
+
+  if (isIndex) {
+    bind_element_buffer(bufferPeer);
+  } else {
+    bind_array_buffer(bufferPeer);
+  }
+
+  const GLvoid *data = isIndex ? (const GLvoid *)&indexBuffers[buffer]->indices[0] : (const GLvoid *)&vertexBuffers[buffer]->vertices[0];
+  GLenum usage = frozen ? (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW) : GL_STREAM_DRAW;
+  glBufferData(target, size, data, usage);
+
+  if (isIndex) {
+    indexBuffers[buffer]->clearData();
+  } else {
+    vertexBuffers[buffer]->clearData();
   }
 }
 
