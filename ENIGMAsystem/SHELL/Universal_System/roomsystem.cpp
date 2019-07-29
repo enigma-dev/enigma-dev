@@ -232,7 +232,8 @@ namespace enigma
     //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
     //if the window size changes.
     if (!enigma::initGame) {
-      compute_window_size(); // update window size detection
+      // update window size detection
+      window_set_size(windowWidth, windowHeight);
       // GMS doesn't do this every room init; only game init
       // keep this false until xlib window_center() is fixed
       enigma_user::window_default(false);
