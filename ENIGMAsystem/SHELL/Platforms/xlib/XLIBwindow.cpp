@@ -321,7 +321,7 @@ void window_set_showborder(bool show) {
   if (!show) {
     Hints hints;
     hints.flags = 2;        // Specify that we're changing the window decorations.
-    enigma::decorationsPrevious = hints.decorations; // Save current decorations before changing them.
+    enigma::decorationsPrevious = 1; // Save current decorations before changing them.
     hints.decorations = 0;  // 0 (false) means that window decorations should go bye-bye.
     enigma::decorationsCurrent = hints.decorations; // Save current decorations after changing them.
     XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
