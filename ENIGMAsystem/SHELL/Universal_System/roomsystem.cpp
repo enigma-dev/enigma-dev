@@ -235,10 +235,10 @@ namespace enigma
       // GMS doesn't do this every room init; only game init
       // keep this false until xlib window_center() is fixed
       enigma_user::window_default(false);
-      // required for global game setting borderless window
-      enigma_user::window_set_showborder(enigma::showBorder);
       // required for global game setting resizeable window
       enigma_user::window_set_sizeable(enigma::isSizeable);
+      // required for global game setting borderless window
+      enigma_user::window_set_showborder(enigma::showBorder);
       // window sized by first room, can make visible now
       enigma_user::window_set_visible(true);
       // required for global game setting fullscreen window
