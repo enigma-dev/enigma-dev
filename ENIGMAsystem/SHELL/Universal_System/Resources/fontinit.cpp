@@ -47,7 +47,7 @@ void exe_loadfonts(FILE* exe) {
     return;
   }
 
-  fonts.resize(rawfontmaxid);
+  fonts.resize(rawfontmaxid+1);
 
   for (int rf = 0; rf < rawfontcount; rf++) {
     // int unpacked;

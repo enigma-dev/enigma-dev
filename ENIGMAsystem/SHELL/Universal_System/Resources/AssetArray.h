@@ -48,6 +48,8 @@ class OffsetVector {
 
  public:
   OffsetVector(): data_(nullptr) {}
+  OffsetVector(const OffsetVector<T, LEFT> &other):
+    data_owner_(other.data_owner_), data_(data_owner_.data() - LEFT) {}
   size_t size() const {
     return data_owner_.size() + LEFT;
   }
