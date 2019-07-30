@@ -40,6 +40,8 @@ namespace enigma
   extern std::vector<std::function<void()> > extension_update_hooks;
   #endif
   
+  extern bool initGame;
+  
   bool initGameWindow();
 
   void destroyWindow();
