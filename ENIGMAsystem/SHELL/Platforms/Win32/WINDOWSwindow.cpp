@@ -17,19 +17,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Platforms/General/PFmain.h"  // For those damn vk_ constants.
-#include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
+#include "Platforms/General/PFmain.h" // For those damn vk_ constants.
+#include "Platforms/General/PFwindow.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
 
-#include "Universal_System/globalupdate.h"
-#include "Universal_System/roomsystem.h"  // room_caption
+#include "strings_util.h" // For string_replace_all
 #include "Universal_System/var4.h"
-#include "strings_util.h"  // For string_replace_all
+#include "Universal_System/roomsystem.h" // room_caption
+#include "Universal_System/globalupdate.h"
 
-#include <stdio.h>
 #include <windows.h>
+#include <stdio.h>
 #include <string>
 using namespace std;
 
@@ -37,14 +37,15 @@ namespace {
 
 std::string current_caption = "";
 
-}  // anonymous namespace
+} // anonymous namespace
 
-namespace enigma {
+namespace enigma
+{
 
 extern HWND hWnd;
 HCURSOR currentCursor = LoadCursor(NULL, IDC_ARROW);
 
-void configure_devmode(DEVMODE& devMode, int w, int h, int freq, int bitdepth) {
+void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
   if (w != -1) {
     devMode.dmFields |= DM_PELSWIDTH;
     devMode.dmPelsWidth = w;
@@ -66,79 +67,95 @@ void configure_devmode(DEVMODE& devMode, int w, int h, int freq, int bitdepth) {
   }
 }
 
-}  // namespace enigma
+}
 
 namespace enigma_user {
 
 #if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle() { return (unsigned long long)enigma::hWnd; }
+unsigned long long window_handle() {
+  return (unsigned long long)enigma::hWnd;
+}
 #else
-void* window_handle() { return enigma::hWnd; }
+void* window_handle() {
+  return enigma::hWnd;
+}
 #endif
 
 // GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
 // Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,
 // I have decided to go with the Studio method because it is still backwards compatible but also because it saves us some variables.
 // NOTE: X and Y are -32000 when the window is minimized.
-int window_get_x() {
+int window_get_x()
+{
   RECT rc;
   GetWindowRect(enigma::hWnd, &rc);
   return rc.left;
 }
 
-int window_get_y() {
+int window_get_y()
+{
   RECT rc;
   GetWindowRect(enigma::hWnd, &rc);
   return rc.top;
 }
 
-int window_get_width() {
+int window_get_width()
+{
   RECT rc;
   GetClientRect(enigma::hWnd, &rc);
-  return rc.right - rc.left;
+  return rc.right-rc.left;
 }
 
-int window_get_height() {
+int window_get_height()
+{
   RECT rc;
   GetClientRect(enigma::hWnd, &rc);
-  return rc.bottom - rc.top;
+  return rc.bottom-rc.top;
 }
 
-void window_set_caption(const string& caption) {
-  /*  if (caption == "")
+void window_set_caption(const string &caption)
+{
+/*  if (caption == "")
       if (score != 0)
         caption = "Score: " + string(score);  //GM does this but it's rather fucktarded */
 
-  if (caption != current_caption) {
-    SetWindowText(enigma::hWnd, (char*)caption.c_str());
-    current_caption = caption;
-  }
+    if (caption != current_caption)
+    {
+        SetWindowText(enigma::hWnd,(char*) caption.c_str());
+        current_caption = caption;
+    }
 }
 
-string window_get_caption() { return current_caption; }
+string window_get_caption()
+{
+  return current_caption;
+}
 
 void window_set_alpha(double alpha) {
   // Set WS_EX_LAYERED on this window
-  SetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE, GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+  SetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE,
+      GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
 
   // Make this window transparent
-  SetLayeredWindowAttributes(enigma::hWnd, 0, (unsigned char)(alpha * 255), LWA_ALPHA);
+  SetLayeredWindowAttributes(enigma::hWnd, 0, (unsigned char)(alpha*255), LWA_ALPHA);
 }
 
 double window_get_alpha() {
-  unsigned char alpha;
-  // Make this window transparent
-  GetLayeredWindowAttributes(enigma::hWnd, 0, &alpha, 0);
-  return alpha / 255;
+	unsigned char alpha;
+	// Make this window transparent
+	GetLayeredWindowAttributes(enigma::hWnd, 0, &alpha, 0);
+	return alpha/255;
 }
 
-void window_set_position(int x, int y) {
+void window_set_position(int x, int y)
+{
   enigma::windowX = x;
   enigma::windowY = y;
-  SetWindowPos(enigma::hWnd, HWND_TOP, enigma::windowX, enigma::windowY, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE);
+  SetWindowPos(enigma::hWnd, HWND_TOP, enigma::windowX, enigma::windowY, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
 }
 
-void window_set_size(unsigned int width, unsigned int height) {
+void window_set_size(unsigned int width, unsigned int height)
+{
   enigma::windowWidth = width;
   enigma::windowHeight = height;
   enigma::compute_window_size();
@@ -146,21 +163,17 @@ void window_set_size(unsigned int width, unsigned int height) {
 
 void window_set_rectangle(int x, int y, int width, int height) {
   RECT c;
-  c.left = (enigma::windowX = x);
-  c.top = (enigma::windowY = y);
-  c.right = enigma::windowX + (enigma::windowWidth = width);
-  c.bottom = enigma::windowY + (enigma::windowHeight = height);
+  c.left = (enigma::windowX = x); c.top = (enigma::windowY = y); c.right = enigma::windowX + (enigma::windowWidth = width); c.bottom = enigma::windowY + (enigma::windowHeight = height);
   AdjustWindowRect(&c, GetWindowLongPtr(enigma::hWnd, GWL_STYLE), false);
-  SetWindowPos(enigma::hWnd, HWND_TOP, c.left, c.top, c.right - c.left, c.bottom - c.top,
-               SWP_NOZORDER | SWP_FRAMECHANGED);
+  SetWindowPos(enigma::hWnd, HWND_TOP, c.left, c.top, c.right-c.left, c.bottom-c.top, SWP_NOZORDER|SWP_FRAMECHANGED);
 }
 
 namespace {
-bool prefer_sizeable;
-bool prefer_borderless;
-bool get_fullscreen;
-bool get_stayontop;
-}  // namespace
+  bool prefer_sizeable;
+  bool prefer_borderless;
+  bool get_fullscreen;
+  bool get_stayontop;
+}
 
 void window_set_fullscreen(bool full) {
   get_fullscreen = full;
@@ -182,7 +195,9 @@ void window_set_fullscreen(bool full) {
   }
 }
 
-bool window_get_fullscreen() { return get_fullscreen; }
+bool window_get_fullscreen() {
+  return get_fullscreen;
+}
 
 void window_set_sizeable(bool sizeable) {
   prefer_sizeable = sizeable;
@@ -194,7 +209,9 @@ void window_set_sizeable(bool sizeable) {
   enigma::compute_window_size();
 }
 
-bool window_get_sizeable() { return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_THICKFRAME) == WS_THICKFRAME; }
+bool window_get_sizeable() {
+  return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_THICKFRAME) == WS_THICKFRAME;
+}
 
 void window_set_showborder(bool show) {
   prefer_borderless = !show;
@@ -205,39 +222,56 @@ void window_set_showborder(bool show) {
   enigma::compute_window_size();
 }
 
-bool window_get_showborder() { return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION; }
+bool window_get_showborder() {
+  return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION;
+}
 
 void window_set_showicons(bool show) {
-  SetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE, GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+  SetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE,
+      GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
 }
 
-bool window_get_showicons() { return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_THICKFRAME) == WS_THICKFRAME; }
-
-void window_set_visible(bool visible) { ShowWindow(enigma::hWnd, visible ? SW_SHOW : SW_HIDE); }
-
-int window_get_visible() { return IsWindowVisible(enigma::hWnd); }
-
-void window_set_minimized(bool minimized) { ShowWindow(enigma::hWnd, minimized ? SW_MINIMIZE : SW_RESTORE); }
-
-void window_set_maximized(bool maximized) { 
-  ShowWindow(enigma::hWnd, maximized ? SW_MAXIMIZE : SW_RESTORE);
-  enigma::compute_window_scaling();
+bool window_get_showicons() {
+  return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_THICKFRAME) == WS_THICKFRAME;
 }
 
-bool window_get_minimized() { return IsIconic(enigma::hWnd); }
+void window_set_visible(bool visible) {
+  ShowWindow(enigma::hWnd, visible? SW_SHOW : SW_HIDE);
+}
 
-bool window_get_maximized() { return IsZoomed(enigma::hWnd); }
+int window_get_visible() {
+  return IsWindowVisible(enigma::hWnd);
+}
 
-void window_set_stayontop(bool stay) {
+void window_set_minimized(bool minimized) {
+  ShowWindow(enigma::hWnd, minimized? SW_MINIMIZE : SW_RESTORE);
+}
+
+void window_set_maximized(bool maximized) {
+  ShowWindow(enigma::hWnd, maximized? SW_MAXIMIZE : SW_RESTORE);
+}
+
+bool window_get_minimized() {
+  return IsIconic(enigma::hWnd);
+}
+
+bool window_get_maximized() {
+  return IsZoomed(enigma::hWnd);
+}
+
+void window_set_stayontop(bool stay)
+{
   if (stay) {
-    SetWindowPos(enigma::hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+    SetWindowPos(enigma::hWnd,HWND_TOPMOST,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
   } else {
-    SetWindowPos(enigma::hWnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
-    SetWindowPos(enigma::hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+    SetWindowPos(enigma::hWnd,HWND_BOTTOM,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOACTIVATE);
+    SetWindowPos(enigma::hWnd,HWND_TOP,   0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
   }
 }
 
-bool window_get_stayontop() { return (GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) & WS_EX_TOPMOST) == WS_EX_TOPMOST; }
+bool window_get_stayontop() {
+    return (GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) & WS_EX_TOPMOST) == WS_EX_TOPMOST;
+}
 
 int display_mouse_get_x() {
   POINT mouse;
@@ -251,77 +285,105 @@ int display_mouse_get_y() {
   return mouse.y;
 }
 
-void display_mouse_set(int x, int y) { SetCursorPos(x, y); }
+void display_mouse_set(int x,int y) {
+    SetCursorPos(x,y);
+}
 
-int display_get_width() { return GetSystemMetrics(SM_CXSCREEN); }
+int display_get_width() {
+   return GetSystemMetrics(SM_CXSCREEN);
+}
 
-int display_get_height() { return GetSystemMetrics(SM_CYSCREEN); }
+int display_get_height() {
+   return GetSystemMetrics(SM_CYSCREEN);
+}
 
-int display_get_colordepth() { return GetDeviceCaps(GetDC(enigma::hWnd), BITSPIXEL); }
+int display_get_colordepth() {
+  return GetDeviceCaps(GetDC(enigma::hWnd), BITSPIXEL);
+}
 
-int display_get_frequency() { return GetDeviceCaps(GetDC(enigma::hWnd), VREFRESH); }
+int display_get_frequency() {
+  return GetDeviceCaps(GetDC(enigma::hWnd), VREFRESH);
+}
 
-unsigned display_get_dpi_x() { return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSX); }
+unsigned display_get_dpi_x() {
+  return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSX);
+}
 
-unsigned display_get_dpi_y() { return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSY); }
+unsigned display_get_dpi_y() {
+  return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSY);
+}
 
-void display_reset() { ChangeDisplaySettings(NULL, 0); }
+void display_reset()
+{
+	ChangeDisplaySettings(NULL, 0);
+}
 
-bool display_set_size(int w, int h) {
-  DEVMODE devMode;
+bool display_set_size(int w, int h)
+{
+	DEVMODE devMode;
 
-  if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode)) return false;
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return false;
 
-  devMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
-  devMode.dmPelsWidth = w;
-  devMode.dmPelsHeight = h;
+	devMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
+	devMode.dmPelsWidth = w;
+	devMode.dmPelsHeight = h;
+
+	return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
+}
+
+bool display_set_frequency(int freq)
+{
+	DEVMODE devMode;
+
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return false;
+
+	devMode.dmFields = DM_DISPLAYFREQUENCY;
+	devMode.dmDisplayFrequency = freq;
+
+	return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
+}
+
+bool display_set_colordepth(int depth)
+{
+	DEVMODE devMode;
+
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return true;
+
+	devMode.dmFields = DM_BITSPERPEL;
+	devMode.dmBitsPerPel = depth;
 
   return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
 }
 
-bool display_set_frequency(int freq) {
-  DEVMODE devMode;
+bool display_set_all(int w, int h, int freq, int bitdepth)
+{
+	DEVMODE devMode;
 
-  if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode)) return false;
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return false;
 
-  devMode.dmFields = DM_DISPLAYFREQUENCY;
-  devMode.dmDisplayFrequency = freq;
+	enigma::configure_devmode(devMode, w, h, freq, bitdepth);
 
-  return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
+	return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
 }
 
-bool display_set_colordepth(int depth) {
-  DEVMODE devMode;
+bool display_test_all(int w, int h, int freq, int bitdepth)
+{
+	DEVMODE devMode;
 
-  if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode)) return true;
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return false;
 
-  devMode.dmFields = DM_BITSPERPEL;
-  devMode.dmBitsPerPel = depth;
+	enigma::configure_devmode(devMode, w, h, freq, bitdepth);
 
-  return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
+	return (ChangeDisplaySettings(&devMode, CDS_TEST) == DISP_CHANGE_SUCCESSFUL);
 }
 
-bool display_set_all(int w, int h, int freq, int bitdepth) {
-  DEVMODE devMode;
-
-  if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode)) return false;
-
-  enigma::configure_devmode(devMode, w, h, freq, bitdepth);
-
-  return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
-}
-
-bool display_test_all(int w, int h, int freq, int bitdepth) {
-  DEVMODE devMode;
-
-  if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode)) return false;
-
-  enigma::configure_devmode(devMode, w, h, freq, bitdepth);
-
-  return (ChangeDisplaySettings(&devMode, CDS_TEST) == DISP_CHANGE_SUCCESSFUL);
-}
-
-int window_mouse_get_x() {
+int window_mouse_get_x()
+{
   POINT mouse;
   GetCursorPos(&mouse);
   ScreenToClient(enigma::hWnd, &mouse);
@@ -329,7 +391,8 @@ int window_mouse_get_x() {
   return mouse.x;
 }
 
-int window_mouse_get_y() {
+int window_mouse_get_y()
+{
   POINT mouse;
   GetCursorPos(&mouse);
   ScreenToClient(enigma::hWnd, &mouse);
@@ -337,125 +400,137 @@ int window_mouse_get_y() {
   return mouse.y;
 }
 
-void window_mouse_set(int x, int y) {
+void window_mouse_set(int x, int y)
+{
   POINT pt;
-  pt.x = x;
-  pt.y = y;
+  pt.x=x;
+  pt.y=y;
   ClientToScreen(enigma::hWnd, &pt);
   SetCursorPos(pt.x, pt.y);
 }
 
-}  // namespace enigma_user
+}
 
-namespace enigma_user {
+namespace enigma_user
+{
 
-int window_set_cursor(int c) {
+int window_set_cursor(int c)
+{
   enigma::cursorInt = c;
   char* cursor = NULL;
   // this switch statement could be replaced with an array aligned to the constants
-  switch (c) {
-    case cr_default:
-    case cr_arrow:
-      cursor = IDC_ARROW;
-      break;
-    case cr_none:
-      cursor = NULL;
-      break;
-    case cr_cross:
-      cursor = IDC_CROSS;
-      break;
-    case cr_beam:
-      cursor = IDC_IBEAM;
-      break;
-    case cr_size_nesw:
-      cursor = IDC_SIZENESW;
-      break;
-    case cr_size_ns:
-      cursor = IDC_SIZENS;
-      break;
-    case cr_size_nwse:
-      cursor = IDC_SIZENWSE;
-      break;
-    case cr_size_we:
-      cursor = IDC_SIZEWE;
-      break;
-    case cr_uparrow:
-      cursor = IDC_UPARROW;
-      break;
-    case cr_hourglass:
-      cursor = IDC_WAIT;
-      break;
-    case cr_drag:
-      // Delphi-made?
-      cursor = IDC_HAND;
-      break;
-    case cr_nodrop:
-      cursor = IDC_NO;
-      break;
-    case cr_hsplit:
-      // Delphi-made?
-      cursor = IDC_SIZENS;
-      break;
-    case cr_vsplit:
-      // Delphi-made?
-      cursor = IDC_SIZEWE;
-      break;
-    case cr_multidrag:
-      cursor = IDC_SIZEALL;
-      break;
-    case cr_sqlwait:
-      // DEAR GOD WHY
-      cursor = IDC_WAIT;
-      break;
-    case cr_no:
-      cursor = IDC_NO;
-      break;
-    case cr_appstart:
-      cursor = IDC_APPSTARTING;
-      break;
-    case cr_help:
-      cursor = IDC_HELP;
-      break;
-    case cr_handpoint:
-      cursor = IDC_HAND;
-      break;
-    case cr_size_all:
-      cursor = IDC_SIZEALL;
-      break;
+  switch (c)
+  {
+      case cr_default:
+      case cr_arrow:
+          cursor = IDC_ARROW;
+          break;
+      case cr_none:
+          cursor = NULL;
+          break;
+      case cr_cross:
+          cursor = IDC_CROSS;
+          break;
+      case cr_beam:
+          cursor = IDC_IBEAM;
+          break;
+      case cr_size_nesw:
+          cursor = IDC_SIZENESW;
+          break;
+      case cr_size_ns:
+          cursor = IDC_SIZENS;
+          break;
+      case cr_size_nwse:
+          cursor = IDC_SIZENWSE;
+          break;
+      case cr_size_we:
+          cursor = IDC_SIZEWE;
+          break;
+      case cr_uparrow:
+          cursor = IDC_UPARROW;
+          break;
+      case cr_hourglass:
+          cursor = IDC_WAIT;
+          break;
+      case cr_drag:
+          // Delphi-made?
+          cursor = IDC_HAND;
+          break;
+      case cr_nodrop:
+          cursor = IDC_NO;
+          break;
+      case cr_hsplit:
+          // Delphi-made?
+          cursor = IDC_SIZENS;
+          break;
+      case cr_vsplit:
+          // Delphi-made?
+          cursor = IDC_SIZEWE;
+          break;
+      case cr_multidrag:
+          cursor = IDC_SIZEALL;
+          break;
+      case cr_sqlwait:
+          // DEAR GOD WHY
+          cursor = IDC_WAIT;
+          break;
+      case cr_no:
+          cursor = IDC_NO;
+          break;
+      case cr_appstart:
+          cursor = IDC_APPSTARTING;
+          break;
+      case cr_help:
+          cursor = IDC_HELP;
+          break;
+      case cr_handpoint:
+          cursor = IDC_HAND;
+          break;
+      case cr_size_all:
+          cursor = IDC_SIZEALL;
+          break;
   }
   enigma::currentCursor = LoadCursor(NULL, cursor);
   return SendMessage(enigma::hWnd, WM_SETCURSOR, (WPARAM)enigma::hWnd, MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
 }
 
-int window_get_cursor() { return enigma::cursorInt; }
+int window_get_cursor()
+{
+  return enigma::cursorInt;
+}
 
-void io_handle() {
+void io_handle()
+{
   MSG msg;
   enigma::input_push();
-  while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
+  while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
+  {
+    TranslateMessage (&msg);
+    DispatchMessage (&msg);
   }
   enigma::update_mouse_variables();
 }
 
-bool keyboard_check_direct(int key) {
-  BYTE keyState[256];
 
-  if (GetKeyboardState(keyState)) {
-    for (int x = 0; x < 256; x++) keyState[x] = (char)(GetKeyState(x) >> 8);
-  } else {
-    //TODO: print error message.
-    return 0;
-  }
+bool keyboard_check_direct(int key)
+{
+   BYTE keyState[256];
+
+   if ( GetKeyboardState( keyState ) )  {
+	  for (int x = 0; x < 256; x++)
+		keyState[x] = (char) (GetKeyState(x) >> 8);
+   } else {
+      //TODO: print error message.
+	  return 0;
+   }
 
   if (key == vk_anykey) {
-    for (int i = 0; i < 256; i++)
+    for(int i = 0; i < 256; i++)
       if (keyState[i] == 1) return 1;
     return 0;
   }
   if (key == vk_nokey) {
-    for (int i = 0; i < 256; i++)
+    for(int i = 0; i < 256; i++)
       if (keyState[i] == 1) return 0;
     return 1;
   }
@@ -468,7 +543,10 @@ void keyboard_key_press(int key) {
   GetKeyboardState((LPBYTE)&keyState);
 
   // Simulate a key press
-  keybd_event(key, keyState[key], KEYEVENTF_EXTENDEDKEY | 0, 0);
+  keybd_event( key,
+        keyState[key],
+        KEYEVENTF_EXTENDEDKEY | 0,
+        0 );
 }
 
 void keyboard_key_release(int key) {
@@ -477,26 +555,34 @@ void keyboard_key_release(int key) {
   GetKeyboardState((LPBYTE)&keyState);
 
   // Simulate a key release
-  keybd_event(key, keyState[key], KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+  keybd_event( key, keyState[key], KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
 }
 
-bool keyboard_get_capital() { return (((unsigned short)GetKeyState(0x14)) & 0xffff) != 0; }
+bool keyboard_get_capital() {
+	return (((unsigned short)GetKeyState(0x14)) & 0xffff) != 0;
+}
 
-bool keyboard_get_numlock() { return (((unsigned short)GetKeyState(0x90)) & 0xffff) != 0; }
+bool keyboard_get_numlock() {
+	return (((unsigned short)GetKeyState(0x90)) & 0xffff) != 0;
+}
 
-bool keyboard_get_scroll() { return (((unsigned short)GetKeyState(0x91)) & 0xffff) != 0; }
+bool keyboard_get_scroll() {
+	return (((unsigned short)GetKeyState(0x91)) & 0xffff) != 0;
+}
 
 void keyboard_set_capital(bool on) {
   BYTE keyState[256];
 
   GetKeyboardState((LPBYTE)&keyState);
 
-  if ((on && !(keyState[VK_CAPITAL] & 1)) || (!on && (keyState[VK_CAPITAL] & 1))) {
+  if( (on && !(keyState[VK_CAPITAL] & 1)) ||
+  (!on && (keyState[VK_CAPITAL] & 1)) )
+  {
     // Simulate a key press
-    keybd_event(VK_CAPITAL, 0x14, KEYEVENTF_EXTENDEDKEY | 0, 0);
+    keybd_event( VK_CAPITAL, 0x14, KEYEVENTF_EXTENDEDKEY | 0, 0 );
 
     // Simulate a key release
-    keybd_event(VK_CAPITAL, 0x14, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+    keybd_event( VK_CAPITAL, 0x14, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
   }
 }
 
@@ -505,12 +591,14 @@ void keyboard_set_numlock(bool on) {
 
   GetKeyboardState((LPBYTE)&keyState);
 
-  if ((on && !(keyState[VK_NUMLOCK] & 1)) || (!on && (keyState[VK_NUMLOCK] & 1))) {
+  if( (on && !(keyState[VK_NUMLOCK] & 1)) ||
+  (!on && (keyState[VK_NUMLOCK] & 1)) )
+  {
     // Simulate a key press
-    keybd_event(VK_NUMLOCK, 0x45, KEYEVENTF_EXTENDEDKEY | 0, 0);
+    keybd_event( VK_NUMLOCK, 0x45, KEYEVENTF_EXTENDEDKEY | 0, 0 );
 
     // Simulate a key release
-    keybd_event(VK_NUMLOCK, 0x45, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+    keybd_event( VK_NUMLOCK, 0x45, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
   }
 }
 
@@ -519,54 +607,63 @@ void keyboard_set_scroll(bool on) {
 
   GetKeyboardState((LPBYTE)&keyState);
 
-  if ((on && !(keyState[VK_SCROLL] & 1)) || (!on && (keyState[VK_SCROLL] & 1))) {
+  if( (on && !(keyState[VK_SCROLL] & 1)) ||
+  (!on && (keyState[VK_SCROLL] & 1)) )
+  {
     // Simulate a key press
-    keybd_event(VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | 0, 0);
+    keybd_event( VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | 0, 0 );
 
     // Simulate a key release
-    keybd_event(VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+    keybd_event( VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
   }
 }
 
-string clipboard_get_text() {
+string clipboard_get_text()
+{
   if (!OpenClipboard(enigma::hWnd)) return "";
-  unsigned int format = EnumClipboardFormats(0);
+  unsigned int format=EnumClipboardFormats(0);
   string res = "";
   while (format) {
-    if (format == CF_TEXT) {
+    if (format == CF_TEXT)
+    {
       HGLOBAL clip_data = GetClipboardData(format);
       char* clip_text = (char*)GlobalLock(clip_data);
-      if (clip_text) {
+      if (clip_text)
+      {
         unsigned long clip_size = GlobalSize(clip_data) - 1;
-        if (clip_size) res = string(clip_text, clip_size);
-        GlobalUnlock(clip_data);  //Give Windows back its clipdata
+        if (clip_size)
+          res = string(clip_text,clip_size);
+        GlobalUnlock(clip_data); //Give Windows back its clipdata
       }
     }
-    format = EnumClipboardFormats(format);  //Next
+    format=EnumClipboardFormats(format);  //Next
   }
   CloseClipboard();
   return res;
 }
 
-void clipboard_set_text(string text) {
-  text = string_replace_all(text, "\n", "\r\n");  //Otherwise newlines don't work
-  HGLOBAL hGlobal, hgBuffer;
-  if (!OpenClipboard(enigma::hWnd)) return;
-  EmptyClipboard();
-  hGlobal = GlobalAlloc(GMEM_DDESHARE, text.length() + 1);
-  hgBuffer = GlobalLock(hGlobal);
-  strcpy((char*)hgBuffer, text.c_str());
-  GlobalUnlock(hGlobal);
-  SetClipboardData(CF_TEXT, (HANDLE)hGlobal);
-  CloseClipboard();
+void clipboard_set_text(string text)
+{
+  text = string_replace_all(text, "\n", "\r\n"); //Otherwise newlines don't work
+	HGLOBAL hGlobal, hgBuffer;
+	if (!OpenClipboard(enigma::hWnd)) return;
+	EmptyClipboard();
+	hGlobal = GlobalAlloc(GMEM_DDESHARE, text.length() + 1);
+	hgBuffer = GlobalLock(hGlobal);
+    strcpy((char*)hgBuffer, text.c_str());
+    GlobalUnlock(hGlobal);
+	SetClipboardData(CF_TEXT, (HANDLE)hGlobal);
+	CloseClipboard();
 }
 
-bool clipboard_has_text() {
-  if (!OpenClipboard(enigma::hWnd)) return false;
+bool clipboard_has_text()
+{
+  if (!OpenClipboard(enigma::hWnd))
+      return false;
 
   bool value = GetClipboardData(CF_TEXT);
   CloseClipboard();
   return value;
 }
 
-}  // namespace enigma_user
+}
