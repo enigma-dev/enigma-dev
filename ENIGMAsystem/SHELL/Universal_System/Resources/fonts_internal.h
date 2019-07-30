@@ -70,8 +70,8 @@ namespace enigma
       glyphRanges.clear();
       if (texture >= 0) graphics_delete_texture(texture);
       texture = -1;
-    }                                 // TODO: uncomment once emake can pack fonts
-    bool isDestroyed() const { return /*texture == -1 ||*/ glyphRanges.empty(); }
+    }
+    bool isDestroyed() const { return texture == -1 || glyphRanges.empty(); }
 
     static const char* getAssetTypeName() { return "font"; }
   };
