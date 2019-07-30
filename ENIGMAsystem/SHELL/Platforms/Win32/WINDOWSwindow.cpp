@@ -186,6 +186,7 @@ void window_set_fullscreen(bool full) {
     style |= WS_SIZEBOX;
     SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
     window_set_maximized(full);
+    enigma::compute_window_scaling();
   } else {
     window_set_maximized(full);
     window_set_showborder(!prefer_borderless);
