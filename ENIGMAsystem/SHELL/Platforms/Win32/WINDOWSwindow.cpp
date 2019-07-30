@@ -201,6 +201,8 @@ bool window_get_fullscreen() {
 }
 
 void window_set_sizeable(bool sizeable) {
+  if (window_get_maximized()) return;
+  if (window_get_fullscreen()) return;
   prefer_sizeable = sizeable;
   DWORD style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
   if (sizeable) style |= WS_SIZEBOX | WS_MAXIMIZEBOX;
@@ -215,6 +217,8 @@ bool window_get_sizeable() {
 }
 
 void window_set_showborder(bool show) {
+  if (window_get_maximized()) return;
+  if (window_get_fullscreen()) return;
   prefer_borderless = !show;
   DWORD style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
   if (show) style |= WS_CAPTION | WS_BORDER;
