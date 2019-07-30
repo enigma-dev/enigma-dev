@@ -22,7 +22,6 @@ int parameterc;
 int frames_count = 0;
 unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
-bool initGame;
 
 int gameWait() {
   if (enigma_user::os_is_paused()) {
@@ -48,8 +47,6 @@ void set_program_args(int argc, char** argv) {
 }
 
 int enigma_main(int argc, char** argv) {
-  enigma::initGame = false;
-
   // Initialize directory globals
   initialize_directory_globals();
 
