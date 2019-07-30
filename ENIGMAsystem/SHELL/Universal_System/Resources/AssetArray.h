@@ -65,10 +65,10 @@ class OffsetVector {
     data_ = data_owner_.data() - LEFT;
     return size() - 1;
   }
-  T& operator[](int index) {
+  template<typename ind_t> T& operator[](ind_t index) {
     return data()[index];
   }
-  const T& operator[](int index) const {
+  template<typename ind_t> const T& operator[](ind_t index) const {
     return data()[index];
   }
   void resize(size_t count) {
@@ -93,10 +93,10 @@ template<typename T> class OffsetVector<T, 0> {
     data_owner_.emplace_back(args...);
     return size() - 1;
   }
-  T& operator[](int index) {
+  template<typename ind_t> T& operator[](ind_t index) {
     return data()[index];
   }
-  const T& operator[](int index) const {
+  template<typename ind_t> const T& operator[](ind_t index) const {
     return data()[index];
   }
   void resize(size_t count) {
