@@ -268,6 +268,7 @@ bool window_get_stayontop() {
 
 void window_set_sizeable(bool sizeable) {
   if (window_get_maximized()) return;
+  if (window_get_fullscreen()) return;
   enigma::isSizeable = sizeable;
   XSizeHints *sh = XAllocSizeHints();
   sh->flags = PMinSize | PMaxSize;
@@ -319,6 +320,8 @@ void window_set_max_height(int height) {
 bool window_get_sizeable() { return enigma::isSizeable; }
 
 void window_set_showborder(bool show) {
+  if (window_get_maximized()) return;
+  if (window_get_fullscreen()) return;
   if (show == window_get_showborder() && show) return;
   Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   enigma::showBorder = show;
