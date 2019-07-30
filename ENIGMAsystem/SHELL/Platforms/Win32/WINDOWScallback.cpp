@@ -263,7 +263,8 @@ namespace enigma
         } else {
           return DefWindowProc(hWndParameter, message, wParam, lParam);
         }
-		return 0;
+        return 0;
+      }
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);
   }
