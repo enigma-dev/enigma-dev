@@ -47,7 +47,7 @@ void exe_loadfonts(FILE* exe) {
     return;
   }
 
-  fonts.resize(rawfontmaxid+1);
+  sprite_fonts.resize(rawfontmaxid+1);
 
   for (int rf = 0; rf < rawfontcount; rf++) {
     // int unpacked;
@@ -55,7 +55,7 @@ void exe_loadfonts(FILE* exe) {
     if (!fread(&twid, 4, 1, exe)) return;
     if (!fread(&thgt, 4, 1, exe)) return;
 
-    font font;
+    SpriteFont font;
 
     font.name = rawfontdata[rf].name;
     font.fontname = rawfontdata[rf].fontname;
@@ -143,7 +143,7 @@ void exe_loadfonts(FILE* exe) {
     font.thgt = thgt;
 
     delete[] pixels;
-    fonts[fntid] = std::move(font);
+    sprite_fonts[fntid] = std::move(font);
 
     if (!fread(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "endf", sizeof(int)) != 0) return;

@@ -89,31 +89,31 @@ unsigned draw_get_valign(){
 #ifdef DEBUG_MODE
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_font(fnt,id,r) \
-    if (!enigma::fonts.exists(id)) { \
+    if (!enigma::sprite_fonts.exists(id)) { \
       DEBUG_MESSAGE("Cannot access font with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
-    } font& fnt = fonts[id];
+    } SpriteFont& fnt = sprite_fonts[id];
   #define get_fontv(fnt,id) \
-    if (!enigma::fonts.exists(id)) { \
+    if (!enigma::sprite_fonts.exists(id)) { \
       DEBUG_MESSAGE("Cannot access font with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
-    } font& fnt = fonts[id];
+    } SpriteFont& fnt = sprite_fonts[id];
   #define get_font_null(fnt,id,r) \
-    if (!enigma::fonts.exists(id)) { \
+    if (!enigma::sprite_fonts.exists(id)) { \
       DEBUG_MESSAGE("Cannot access font with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
-    } font& fnt = fonts[id];
+    } SpriteFont& fnt = sprite_fonts[id];
 #else
   #define get_font(fnt,id,r) \
-    const font& fnt = fonts[id];
+    const SpriteFont& fnt = sprite_fonts[id];
   #define get_fontv(fnt,id) \
-    const font& fnt = fonts[id];
+    const SpriteFont& fnt = sprite_fonts[id];
   #define get_font_null(fnt,id,r) \
-    const font& fnt = fonts[id];
+    const SpriteFont& fnt = sprite_fonts[id];
 #endif
 
 namespace enigma {
-  inline float get_space_width(const font& fnt) {
+  inline float get_space_width(const SpriteFont& fnt) {
     fontglyph g = findGlyph(fnt, ' ');
     // Use the width of the space glyph when available,
     // else use the backup.
