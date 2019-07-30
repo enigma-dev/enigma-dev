@@ -79,7 +79,7 @@ namespace enigma_user {
     unsigned gcount = last-first;
     int fontid = enigma::font_new(first, gcount);
 
-    enigma::font* fnt = &enigma::fonts[fontid];
+    enigma::SpriteFont* fnt = &enigma::sprite_fonts[fontid];
     fnt->name = name;
     fnt->fontsize = size;
     fnt->bold = bold;

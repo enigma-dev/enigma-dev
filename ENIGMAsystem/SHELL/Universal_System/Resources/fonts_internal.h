@@ -25,6 +25,7 @@
 #ifndef ENIGMA_FONTS_INTERNAL_H
 #define ENIGMA_FONTS_INTERNAL_H
 
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "AssetArray.h"
 
 #include <string>
@@ -46,11 +47,10 @@ namespace enigma
     unsigned int glyphstart;
     std::vector<fontglyph> glyphs;
   };
-  class font
+  class SpriteFont
   {
-    bool destroyed;
    public:
-     font() : destroyed(false), name(""), fontname(""), fontsize(0),
+     SpriteFont() : name(""), fontname(""), fontsize(0),
        bold(false), italic(false), height(0), yoffset(0), texture(-1),
        twid(0), thgt(0) {}
     // Trivia
@@ -66,8 +66,12 @@ namespace enigma
     int texture;
     int twid, thgt;
 
-    void destroy() { destroyed = true; }
-    bool isDestroyed() const { return destroyed; }
+    void destroy() { 
+      glyphRanges.clear();
+      if (texture >= 0) graphics_delete_texture(texture);
+      texture = -1;
+    }
+    bool isDestroyed() const { return texture == -1 || glyphRanges.empty(); }
 
     static const char* getAssetTypeName() { return "font"; }
   };
@@ -80,12 +84,12 @@ namespace enigma
     unsigned int glyphRangeCount;
   };
   extern std::vector<rawfont> rawfontdata;
-  extern AssetArray<font, -1> fonts;
+  extern AssetArray<SpriteFont, -1> sprite_fonts;
 
   extern int rawfontcount, rawfontmaxid;
   int font_new(uint32_t gs, uint32_t gc); // Creates a new font, allocating 'gc' glyphs
-  int font_pack(enigma::font *font, int spr, uint32_t gcount, bool prop, int sep);
-  fontglyph findGlyph(const font& fnt, uint32_t character);
+  int font_pack(SpriteFont *font, int spr, uint32_t gcount, bool prop, int sep);
+  fontglyph findGlyph(const SpriteFont& fnt, uint32_t character);
 } //namespace enigma
 
 #endif //ENIGMA_FONTS_INTERNAL_H
