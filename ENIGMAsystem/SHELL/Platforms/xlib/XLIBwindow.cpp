@@ -54,8 +54,8 @@ int tmpH = enigma::windowHeight;
 
 namespace {
 
-unsigned long decorationsPrevious = !showBorder;
-unsigned long decorationsCurrent = showBorder;
+unsigned long decorationsPrevious = !enigma::showBorder;
+unsigned long decorationsCurrent = enigma::showBorder;
 
 } // anonymous namespace
 
@@ -325,16 +325,16 @@ void window_set_showborder(bool show) {
   if (!show) {
     Hints hints;
     hints.flags = 2;        // Specify that we're changing the window decorations.
-    enigma::decorationsPrevious = 1; // Save current decorations before changing them.
+    decorationsPrevious = 1; // Save current decorations before changing them.
     hints.decorations = 0;  // 0 (false) means that window decorations should go bye-bye.
-    enigma::decorationsCurrent = hints.decorations; // Save current decorations after changing them.
+    decorationsCurrent = hints.decorations; // Save current decorations after changing them.
     XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
     XMoveResizeWindow(disp, win, enigma::windowX, enigma::windowY, enigma::windowWidth, enigma::windowHeight);
   } else {
     Hints hints;
     hints.flags = 2;        // Specify that we're changing the window decorations.
-    hints.decorations = enigma::decorationsPrevious; // Set decorations back to the way they were.
-    enigma::decorationsCurrent = hints.decorations; // Save current decorations after changing them.
+    hints.decorations = decorationsPrevious; // Set decorations back to the way they were.
+    decorationsCurrent = hints.decorations; // Save current decorations after changing them.
     XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
     XMoveResizeWindow(disp, win, enigma::windowX - enigma::winEdgeX, enigma::windowY - enigma::winEdgeY, enigma::windowWidth, enigma::windowHeight);
   }
