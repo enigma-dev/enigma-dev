@@ -41,6 +41,7 @@ namespace enigma_user
 
 namespace enigma
 {
+  bool initGame;
   extern const char* resource_file_path;
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
   extern void timeline_system_initialize();
@@ -50,6 +51,8 @@ namespace enigma
   //This is like main(), only cross-api
   int initialize_everything()
   {
+    initGame = false;
+
     time_t ss = time(0);
     enigma_user::random_set_seed(ss);
     enigma_user::mtrandom_seed(ss);
