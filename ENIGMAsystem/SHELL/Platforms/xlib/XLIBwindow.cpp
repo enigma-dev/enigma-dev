@@ -52,10 +52,14 @@ int tmpH = enigma::windowHeight;
 
 } // namespace tmpSize
 
-namespace enigma {
+namespace {
 
 unsigned long decorationsPrevious = !showBorder;
 unsigned long decorationsCurrent = showBorder;
+
+} // anonymous namespace
+
+namespace enigma {
 
 namespace x11 {
 Display* disp;
