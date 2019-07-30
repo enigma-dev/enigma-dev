@@ -34,8 +34,8 @@
 namespace enigma {
 
 void exe_loadfonts(FILE* exe) {
-  int nullhere;
-  unsigned fontcount, fntid, twid, thgt, gwid, ghgt;
+  int nullhere, fntid;
+  unsigned fontcount, twid, thgt, gwid, ghgt;
   float advance, baseline, origin, gtx, gty, gtx2, gty2;
 
   if (!fread(&nullhere, 4, 1, exe)) return;
@@ -47,14 +47,13 @@ void exe_loadfonts(FILE* exe) {
     return;
   }
 
-  //fonts = (new font*[rawfontmaxid + 2]) + 1;
+  fonts.resize(rawfontmaxid+1);
 
   for (int rf = 0; rf < rawfontcount; rf++) {
     // int unpacked;
     if (!fread(&fntid, 4, 1, exe)) return;
     if (!fread(&twid, 4, 1, exe)) return;
     if (!fread(&thgt, 4, 1, exe)) return;
-    const int i = fntid;
 
     font font;
 
@@ -144,7 +143,7 @@ void exe_loadfonts(FILE* exe) {
     font.thgt = thgt;
 
     delete[] pixels;
-    fonts.assign(i, std::move(font));
+    fonts[fntid] = std::move(font);
 
     if (!fread(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "endf", sizeof(int)) != 0) return;

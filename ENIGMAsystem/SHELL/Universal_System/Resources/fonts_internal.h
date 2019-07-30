@@ -48,11 +48,15 @@ namespace enigma
   };
   class font
   {
-    bool destroyed = false;
+    bool destroyed;
    public:
+     font() : destroyed(false), name(""), fontname(""), fontsize(0),
+       bold(false), italic(false), height(0), yoffset(0), texture(-1),
+       twid(0), thgt(0) {}
     // Trivia
     std::string name, fontname;
-    int fontsize; bool bold, italic;
+    int fontsize; 
+    bool bold, italic;
 
     // Metrics and such
     std::vector<fontglyphrange> glyphRanges;
@@ -76,7 +80,7 @@ namespace enigma
     unsigned int glyphRangeCount;
   };
   extern std::vector<rawfont> rawfontdata;
-  extern AssetArray<font> fonts;
+  extern AssetArray<font, -1> fonts;
 
   extern int rawfontcount, rawfontmaxid;
   int font_new(uint32_t gs, uint32_t gc); // Creates a new font, allocating 'gc' glyphs
