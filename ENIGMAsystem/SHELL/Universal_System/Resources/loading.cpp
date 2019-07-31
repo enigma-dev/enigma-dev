@@ -141,6 +141,10 @@ namespace enigma
     enigma_user::window_set_fullscreen(isFullScreen);
     // don't ask me why this is necessary, but it 100% is
     enigma_user::window_set_rectangle(windowX, windowY, windowWidth, windowHeight);
+    
+    // needed for DrawGUI event
+    enigma_user::screen_init();
+    enigma_user::screen_refresh();
 
     return 0;
   }
