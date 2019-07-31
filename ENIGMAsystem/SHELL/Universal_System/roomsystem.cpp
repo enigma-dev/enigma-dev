@@ -229,21 +229,6 @@ namespace enigma
       view_angle[i] = 0;
     }
 
-    //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
-    //if the window size changes.
-    if (!enigma::initGame) {
-      // GMS doesn't do this every room init; only game init
-      enigma_user::window_default(false);
-      // window sized by first room, can make visible now
-      enigma_user::window_set_visible(true);
-      // required for global game setting resizeable window
-      enigma_user::window_set_sizeable(enigma::isSizeable);
-      // required for global game setting borderless window
-      enigma_user::window_set_showborder(enigma::showBorder);
-      // required for global game setting fullscreen window
-      enigma_user::window_set_fullscreen(enigma::isFullScreen);
-      enigma::initGame = true;
-    }
     enigma_user::io_clear();
     // we only initialize the screen and clear the window color during game start
     // NOTE: no version of GM has EVER reset the drawing color or alpha during room transition
