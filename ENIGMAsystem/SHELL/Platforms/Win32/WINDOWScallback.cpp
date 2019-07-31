@@ -113,6 +113,9 @@ namespace enigma
         if (hWndParameter == hWnd) {
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
+            windowWidth = enigma_user::window_get_width();
+            windowHeight = enigma_user::window_get_height();
+            enigma::compute_window_scaling();
           }
           instance_event_iterator = &dummy_event_iterator;
           for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
