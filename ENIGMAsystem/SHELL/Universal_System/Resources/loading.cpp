@@ -140,10 +140,10 @@ namespace enigma
     enigma_user::window_set_sizeable(isSizeable);
     // required for global game setting borderless window
     enigma_user::window_set_showborder(showBorder);
-    // required for global game setting fullscreen window
-    enigma_user::window_set_fullscreen(isFullScreen);
     // don't ask me why this is necessary, but it 100% is
     enigma_user::window_set_rectangle(windowX, windowY, windowWidth, windowHeight);
+    // required for global game setting fullscreen window
+    enigma_user::window_set_fullscreen(isFullScreen);
     
     // needed for DrawGUI event
     enigma_user::screen_init();
