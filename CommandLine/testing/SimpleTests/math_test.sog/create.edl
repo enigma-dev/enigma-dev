@@ -23,6 +23,9 @@ var pi_over_6 = pi / 6;
 
 cons_show_message("Test start!");
 
+gtest_expect_eq(false, 1);
+gtest_expect_eq(true, 0);
+
 gtest_assert_true(f && d && ld && i && u && l && lu && (v != 0) && (a != 0),
                   "Someone zeroed one of the inputs.");
 
