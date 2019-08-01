@@ -56,7 +56,8 @@ extern unsigned long delta_time;
 extern unsigned long current_time;
 
 void sleep(int ms);
-void game_end(int ret=0);
+void game_end();
+void game_end(int ret);
 void action_end_game();
 void url_open(std::string url,std::string target="_self",std::string options="");
 void url_open_ext(std::string url, std::string target);

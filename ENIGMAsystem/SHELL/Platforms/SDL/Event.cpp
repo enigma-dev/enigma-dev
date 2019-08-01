@@ -263,5 +263,5 @@ void SDL_Event_Handler::mouseWheel(const SDL_Event *event) {
   enigma_user::mouse_vscrolls += event->wheel.y;
 }
 
-void SDL_Event_Handler::quit(const SDL_Event *event) { enigma_user::game_end(0); }
+void SDL_Event_Handler::quit(const SDL_Event *event) { enigma_user::game_end(); }
 }  // namespace enigma
