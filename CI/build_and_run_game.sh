@@ -4,7 +4,6 @@ set -e
 
 if [ "$TEST_HARNESS" == true ]; then
   export ASAN_OPTIONS=detect_leaks=0;
-  export DISPLAY=:1
   xvfb-run -s "-screen 0 1024x768x24" ./ci-regression.sh "/tmp/enigma-master" 4
 else
   for mode in "Debug" "Run"; 
