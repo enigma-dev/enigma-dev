@@ -25,6 +25,9 @@
 #ifndef ENIGMA_FONTS_INTERNAL_H
 #define ENIGMA_FONTS_INTERNAL_H
 
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "AssetArray.h"
+
 #include <string>
 #include <vector>
 #include <stdint.h>
@@ -40,24 +43,37 @@ namespace enigma
     float xs; // Spacing: used to increment xx
   };
   struct fontglyphrange {
-    fontglyphrange() : glyphstart(0), glyphcount(0) {}
-    unsigned int glyphstart, glyphcount;
+    fontglyphrange() : glyphstart(0) {}
+    unsigned int glyphstart;
     std::vector<fontglyph> glyphs;
   };
-  struct font
+  class SpriteFont
   {
+   public:
+     SpriteFont() : name(""), fontname(""), fontsize(0),
+       bold(false), italic(false), height(0), yoffset(0), texture(-1),
+       twid(0), thgt(0) {}
     // Trivia
     std::string name, fontname;
-    int fontsize; bool bold, italic;
+    int fontsize; 
+    bool bold, italic;
 
     // Metrics and such
-    unsigned glyphRangeCount;
     std::vector<fontglyphrange> glyphRanges;
     unsigned int height, yoffset;
 
     // Texture layer
     int texture;
     int twid, thgt;
+
+    void destroy() { 
+      glyphRanges.clear();
+      if (texture >= 0) graphics_delete_texture(texture);
+      texture = -1;
+    }
+    bool isDestroyed() const { return texture == -1 || glyphRanges.empty(); }
+
+    static const char* getAssetTypeName() { return "font"; }
   };
   struct rawfont {
     std::string name;
@@ -68,12 +84,12 @@ namespace enigma
     unsigned int glyphRangeCount;
   };
   extern std::vector<rawfont> rawfontdata;
-  extern font **fontstructarray;
+  extern AssetArray<SpriteFont, -1> sprite_fonts;
 
   extern int rawfontcount, rawfontmaxid;
   int font_new(uint32_t gs, uint32_t gc); // Creates a new font, allocating 'gc' glyphs
-  int font_pack(enigma::font *font, int spr, uint32_t gcount, bool prop, int sep);
-  fontglyph findGlyph(const font *const fnt, uint32_t character);
+  int font_pack(SpriteFont *font, int spr, uint32_t gcount, bool prop, int sep);
+  fontglyph findGlyph(const SpriteFont& fnt, uint32_t character);
 } //namespace enigma
 
 #endif //ENIGMA_FONTS_INTERNAL_H

@@ -79,15 +79,13 @@ namespace enigma_user {
     unsigned gcount = last-first;
     int fontid = enigma::font_new(first, gcount);
 
-    enigma::font* fnt = enigma::fontstructarray[fontid];
+    enigma::SpriteFont* fnt = &enigma::sprite_fonts[fontid];
     fnt->name = name;
     fnt->fontsize = size;
     fnt->bold = bold;
     fnt->italic = italic;
-    fnt->glyphRangeCount = 1;
     enigma::fontglyphrange fgr;
     fgr.glyphstart = first;
-    fgr.glyphcount = gcount;
     fgr.glyphs.resize(gcount);
 
     std::vector<pvrect> glyphmetrics(gcount);

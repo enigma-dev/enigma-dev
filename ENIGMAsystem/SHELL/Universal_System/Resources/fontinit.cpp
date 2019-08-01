@@ -34,8 +34,8 @@
 namespace enigma {
 
 void exe_loadfonts(FILE* exe) {
-  int nullhere;
-  unsigned fontcount, fntid, twid, thgt, gwid, ghgt;
+  int nullhere, fntid;
+  unsigned fontcount, twid, thgt, gwid, ghgt;
   float advance, baseline, origin, gtx, gty, gtx2, gty2;
 
   if (!fread(&nullhere, 4, 1, exe)) return;
@@ -47,26 +47,23 @@ void exe_loadfonts(FILE* exe) {
     return;
   }
 
-  fontstructarray = (new font*[rawfontmaxid + 2]) + 1;
+  sprite_fonts.resize(rawfontmaxid+1);
 
   for (int rf = 0; rf < rawfontcount; rf++) {
     // int unpacked;
     if (!fread(&fntid, 4, 1, exe)) return;
     if (!fread(&twid, 4, 1, exe)) return;
     if (!fread(&thgt, 4, 1, exe)) return;
-    const int i = fntid;
 
-    fontstructarray[i] = new font;
+    SpriteFont font;
 
-    fontstructarray[i]->name = rawfontdata[rf].name;
-    fontstructarray[i]->fontname = rawfontdata[rf].fontname;
-    fontstructarray[i]->fontsize = rawfontdata[rf].fontsize;
-    fontstructarray[i]->bold = rawfontdata[rf].bold;
-    fontstructarray[i]->italic = rawfontdata[rf].italic;
+    font.name = rawfontdata[rf].name;
+    font.fontname = rawfontdata[rf].fontname;
+    font.fontsize = rawfontdata[rf].fontsize;
+    font.bold = rawfontdata[rf].bold;
+    font.italic = rawfontdata[rf].italic;
 
-    fontstructarray[i]->height = 0;
-
-    fontstructarray[i]->glyphRangeCount = rawfontdata[rf].glyphRangeCount;
+    font.height = 0;
 
     const unsigned int size = twid * thgt;
 
@@ -98,18 +95,16 @@ void exe_loadfonts(FILE* exe) {
     }
     delete[] cpixels;*/
     int ymin = 100, ymax = -100;
-    for (size_t gri = 0; gri < enigma::fontstructarray[i]->glyphRangeCount; gri++) {
+    for (size_t gri = 0; gri < rawfontdata[rf].glyphRangeCount; gri++) {
       fontglyphrange fgr;
-
 
       unsigned strt, cnt;
       if (!fread(&strt, 4, 1, exe)) return;
       if (!fread(&cnt, 4, 1, exe)) return;
 
       fgr.glyphstart = strt;
-      fgr.glyphcount = cnt;
 
-      for (unsigned gi = 0; gi < fgr.glyphcount; gi++) {
+      for (unsigned gi = 0; gi < cnt; gi++) {
         if (!fread(&advance, 4, 1, exe)) return;
         if (!fread(&baseline, 4, 1, exe)) return;
         if (!fread(&origin, 4, 1, exe)) return;
@@ -137,17 +132,18 @@ void exe_loadfonts(FILE* exe) {
         fgr.glyphs.push_back(fg);
       }
 
-      fontstructarray[i]->glyphRanges.push_back(std::move(fgr));
+      font.glyphRanges.push_back(std::move(fgr));
     }
 
-    fontstructarray[i]->height = ymax - ymin + 2;
-    fontstructarray[i]->yoffset = -ymin + 1;
+    font.height = ymax - ymin + 2;
+    font.yoffset = -ymin + 1;
 
-    fontstructarray[i]->texture = graphics_create_texture(twid, thgt, twid, thgt, pixels, false);
-    fontstructarray[i]->twid = twid;
-    fontstructarray[i]->thgt = thgt;
+    font.texture = graphics_create_texture(twid, thgt, twid, thgt, pixels, false);
+    font.twid = twid;
+    font.thgt = thgt;
 
     delete[] pixels;
+    sprite_fonts[fntid] = std::move(font);
 
     if (!fread(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "endf", sizeof(int)) != 0) return;
