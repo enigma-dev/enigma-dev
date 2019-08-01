@@ -72,10 +72,10 @@ namespace enigma {
         case 2: { //Add font glyps
           //We remove one as it's the font resource itself, but we only need glyps
           metrics.erase(metrics.begin());
-          enigma::font *fnt = enigma::fontstructarray[textures[i].id];
-          for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
+          enigma::SpriteFont *fnt = &enigma::sprite_fonts[textures[i].id];
+          for (size_t g = 0; g < fnt->glyphRanges.size(); g++) {
             enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
-            for (size_t s = 0; s < fgr.glyphcount; s++){
+            for (size_t s = 0; s < fgr.glyphs.size(); s++){
               metrics.emplace_back();
             }
           }
@@ -101,10 +101,10 @@ namespace enigma {
           counter++;
         } break;
         case 2: { //Metrics for font glyps
-          enigma::font *fnt = enigma::fontstructarray[textures[i].id];
-          for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
+          enigma::SpriteFont *fnt = &enigma::sprite_fonts[textures[i].id];
+          for (size_t g = 0; g < fnt->glyphRanges.size(); g++) {
             enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
-            for (size_t s = 0; s < fgr.glyphcount; s++){
+            for (size_t s = 0; s < fgr.glyphs.size(); s++){
               metrics[counter].w = fgr.glyphs[s].x2-fgr.glyphs[s].x, metrics[counter].h = fgr.glyphs[s].y2-fgr.glyphs[s].y;
               counter++;
             }
@@ -189,10 +189,10 @@ namespace enigma {
         } break;
         case 2: { //Copy textures for all font glyps
           ///This sometimes draws cut of letters - need to investigate!
-          enigma::font *fnt = enigma::fontstructarray[textures[i].id];
-          for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
+          enigma::SpriteFont *fnt = &enigma::sprite_fonts[textures[i].id];
+          for (size_t g = 0; g < fnt->glyphRanges.size(); g++) {
             enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
-            for (size_t s = 0; s < fgr.glyphcount; s++){
+            for (size_t s = 0; s < fgr.glyphs.size(); s++){
               double tix, tiy; //Calculate texture position in image space (pixels) instead of normalized 0-1. We sadly don't hold this information, but maybe we should
               tix = (double)fgr.glyphs[s].tx*(double)fnt->twid;
               tiy = (double)fgr.glyphs[s].ty*(double)fnt->thgt;

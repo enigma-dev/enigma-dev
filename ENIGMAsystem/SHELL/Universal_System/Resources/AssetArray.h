@@ -30,7 +30,7 @@
   #include "Widget_Systems/widgets_mandatory.h" // for DEBUG_MESSAGE
   #define CHECK_ID(id, ret) \
     if (!exists(id)) { \
-      DEBUG_MESSAGE("Requested " + std::string(T::getAssetTypeName()) + " asset " + std::to_string(id) + " does not exist.", MESSAGE_TYPE::M_USER_ERROR); \
+      DEBUG_MESSAGE("Requested " + (std::string)T::getAssetTypeName() + " asset " + std::to_string(id) + " does not exist.", MESSAGE_TYPE::M_USER_ERROR); \
       return ret; \
     }
   #define CHECK_ID_V(id) CHECK_ID(id,)
@@ -41,8 +41,71 @@
 
 namespace enigma {
 
+template<typename T, int LEFT> 
+class OffsetVector {
+  std::vector<T> data_owner_;
+  T* data_;
+
+ public:
+  OffsetVector(): data_(nullptr) {}
+  OffsetVector(const OffsetVector<T, LEFT> &other):
+    data_owner_(other.data_owner_), data_(data_owner_.data() - LEFT) {}
+  size_t size() const {
+    return data_owner_.size() + LEFT;
+  }
+  T *data() { return data_; }
+  const T *data() const { return data_; }
+  template<typename... U> size_t push_back(U... args) {
+    data_owner_.push_back(args...);
+    data_ = data_owner_.data() - LEFT;
+    return size() - 1;
+  }
+  template<typename... U> size_t emplace_back(U... args) {
+    data_owner_.emplace_back(args...);
+    data_ = data_owner_.data() - LEFT;
+    return size() - 1;
+  }
+  template<typename ind_t> T& operator[](ind_t index) {
+    return data()[index];
+  }
+  template<typename ind_t> const T& operator[](ind_t index) const {
+    return data()[index];
+  }
+  void resize(size_t count) {
+    data_owner_.resize(count - LEFT);
+    data_ = data_owner_.data() - LEFT;
+  }
+};
+
+template<typename T> class OffsetVector<T, 0> {
+  std::vector<T> data_owner_;
+ public:
+  size_t size() const {
+    return data_owner_.size();
+  }
+  T *data() { return data_owner_.data(); }
+  const T *data() const { return data_owner_.data(); }
+  template<typename... U> size_t push_back(U... args) {
+    data_owner_.push_back(args...);
+    return data_owner_.size() - 1;
+  }
+  template<typename... U> size_t emplace_back(U... args) {
+    data_owner_.emplace_back(args...);
+    return size() - 1;
+  }
+  template<typename ind_t> T& operator[](ind_t index) {
+    return data()[index];
+  }
+  template<typename ind_t> const T& operator[](ind_t index) const {
+    return data()[index];
+  }
+  void resize(size_t count) {
+    data_owner_.resize(count);
+  }
+};
+
 // Asset storage container designed for dense cache-efficient resource processing.
-template<typename T>
+template<typename T, int LEFT = 0>
 class AssetArray {
  public:
   // Custom iterator for looping over only the existing assets in the array.
@@ -76,7 +139,7 @@ class AssetArray {
     else {
       #ifdef DEBUG_MODE
       if (id < 0) {
-        DEBUG_MESSAGE("Attempting to assign " + std::string(T::getAssetTypeName()) + " asset " + std::to_string(id) + " to negative index.", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("Attempting to assign " + (std::string)T::getAssetTypeName() + " asset " + std::to_string(id) + " to negative index.", MESSAGE_TYPE::M_USER_ERROR);
         return id;
       }
       #endif
@@ -121,8 +184,14 @@ class AssetArray {
   size_t size() const { return assets_.size(); }
   bool exists(int id) const { return (id >= 0 && size_t(id) < size() && !assets_[id].isDestroyed()); }
 
+  T* data() { return assets_.data(); }
+
+  void resize(size_t count) {
+    assets_.resize(count);
+  }
+
  private:
-  std::vector<T> assets_;
+  OffsetVector<T, LEFT> assets_;
 };
 
 } // namespace enigma
