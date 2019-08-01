@@ -118,6 +118,10 @@ void game_end(int ret) {
   enigma::game_return = ret;
 }
 
+void game_end() {
+  enigma::game_isending = true;
+}
+
 void action_end_game() { return game_end(); }
 
 }  //namespace enigma_user

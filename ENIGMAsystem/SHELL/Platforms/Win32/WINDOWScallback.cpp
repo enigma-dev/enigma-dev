@@ -76,7 +76,7 @@ namespace enigma
         // so the user can execute something before the escape is processed, no sense in an override if user is going to call game_end() anyway.
         // - Robert
         if (treatCloseAsEscape) {
-          PostQuitMessage (0);
+          PostQuitMessage(game_return);
         }
         return 0;
 
