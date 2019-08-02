@@ -1,47 +1,52 @@
+#include "fonts/fonts.h"
+#include "include.h"
 #include "Universal_System/Resources/fonts_internal.h"
-#include "Universal_System/Resources/sprites_internal.h"
-#include "Universal_System/Resources/sprites.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "rectpacker/rectpack.h"
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
+#include <string>
 
-#include <iostream>
-#include <algorithm>
+#if __cplusplus > 201402L
+  #include <filesystem>
+  namespace fs = std::filesystem;
+#endif
 
+using enigma::GlyphRange;
+using enigma::RawFont;
 
-namespace enigma {
+namespace enigma_user {
 
-class FontManager {
-public:
-  static bool Init() {
-
-    FT_Error error = FT_Init_FreeType(&library);
-    if (error != 0)
-      DEBUG_MESSAGE("Error initializing freetype!", MESSAGE_TYPE::M_ERROR);
-
-    return (error == 0);
+int font_add(std::string name, unsigned size, bool bold, bool italic, unsigned first, unsigned last) {
+  if (last < first) {
+    DEBUG_MESSAGE("Freetype error invalid glyph range last < first", MESSAGE_TYPE::M_ERROR);
+    return -1;
   }
 
-  static const FT_Library& GetLibrary() {
-    return library;
+  unsigned w, h; // size of texture 
+  unsigned fontHeight = 0;
+  int yoffset;
+  
+  #if __cplusplus > 201402L
+  if (stringtolower(fs::path(name).extension()) != ".ttf") {
+    name = font_find(name, bold, italic, false);
+    if (name.empty()) return -1;
   }
+  #endif
 
-  ~FontManager() {
-    FT_Done_FreeType(library);
-  }
+  RawFont rawFont;
+  rawFont.ranges = {{GlyphRange(first, last)};
+  if (!enigma::font_load(name, size, bold, italic, &font)
+    return -1;
 
-private:
-  FontManager() = default;
-  static FT_Library library;
-};
+  unsigned char* pxdata = enigma::font_pack(rawFont, w, h, yoffset, fontHeight);
+  if (pxdata == nullptr)
+    return -1;
 
-FT_Library FontManager::library;
-static bool FreeTypeAlive = FontManager::Init();
-
+  enigma::SpriteFont fnt(name, size, bold, italic, rawFont.ranges, pxdata, w, h, yoffset, fontHeight);
+  fnt.init();
+  return sprite_fonts.add(fnt);
 }
+<<<<<<< HEAD
 
 namespace enigma_user {
 
@@ -186,4 +191,6 @@ namespace enigma_user {
 
     return fontid;
   }
+=======
+>>>>>>> a03fdbeb... broke ass fonts
 }

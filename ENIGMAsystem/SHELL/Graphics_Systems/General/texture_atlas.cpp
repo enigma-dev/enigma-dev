@@ -27,6 +27,7 @@
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "rectpacker/rectpack.h"
+#include "fonts/fonts.h"
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"
@@ -43,6 +44,7 @@
 
 using std::unordered_map;
 using std::vector;
+using namespace enigma::fonts;
 
 namespace enigma {
   struct TextureAtlasRect{
@@ -72,9 +74,9 @@ namespace enigma {
         case 2: { //Add font glyps
           //We remove one as it's the font resource itself, but we only need glyps
           metrics.erase(metrics.begin());
-          enigma::SpriteFont *fnt = &enigma::sprite_fonts[textures[i].id];
-          for (size_t g = 0; g < fnt->glyphRanges.size(); g++) {
-            enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
+          SpriteFont *fnt = &sprite_fonts[textures[i].id];
+          for (size_t g = 0; g < fnt->ranges.size(); g++) {
+            GlyphRange& fgr = fnt->ranges[g];
             for (size_t s = 0; s < fgr.glyphs.size(); s++){
               metrics.emplace_back();
             }
@@ -101,9 +103,9 @@ namespace enigma {
           counter++;
         } break;
         case 2: { //Metrics for font glyps
-          enigma::SpriteFont *fnt = &enigma::sprite_fonts[textures[i].id];
-          for (size_t g = 0; g < fnt->glyphRanges.size(); g++) {
-            enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
+          SpriteFont *fnt = &sprite_fonts[textures[i].id];
+          for (size_t g = 0; g < fnt->ranges.size(); g++) {
+            GlyphRange& fgr = fnt->ranges[g];
             for (size_t s = 0; s < fgr.glyphs.size(); s++){
               metrics[counter].w = fgr.glyphs[s].x2-fgr.glyphs[s].x, metrics[counter].h = fgr.glyphs[s].y2-fgr.glyphs[s].y;
               counter++;
@@ -189,18 +191,18 @@ namespace enigma {
         } break;
         case 2: { //Copy textures for all font glyps
           ///This sometimes draws cut of letters - need to investigate!
-          enigma::SpriteFont *fnt = &enigma::sprite_fonts[textures[i].id];
-          for (size_t g = 0; g < fnt->glyphRanges.size(); g++) {
-            enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
+          SpriteFont *fnt = &sprite_fonts[textures[i].id];
+          for (size_t g = 0; g < fnt->ranges.size(); g++) {
+            GlyphRange& fgr = fnt->ranges[g];
             for (size_t s = 0; s < fgr.glyphs.size(); s++){
               double tix, tiy; //Calculate texture position in image space (pixels) instead of normalized 0-1. We sadly don't hold this information, but maybe we should
-              tix = (double)fgr.glyphs[s].tx*(double)fnt->twid;
-              tiy = (double)fgr.glyphs[s].ty*(double)fnt->thgt;
+              tix = (double)fgr.glyphs[s].tx*(double)fnt->texture.width;
+              tiy = (double)fgr.glyphs[s].ty*(double)fnt->texture.height;
 
               int gw = fgr.glyphs[s].x2-fgr.glyphs[s].x;
               int gh = fgr.glyphs[s].y2-fgr.glyphs[s].y;
 
-              enigma::graphics_copy_texture_part(fnt->texture, enigma::texture_atlas_array[ta].texture, tix, tiy, gw, gh, metrics[counter].x, metrics[counter].y);
+              enigma::graphics_copy_texture_part(fnt->texture.ID, enigma::texture_atlas_array[ta].texture, tix, tiy, gw, gh, metrics[counter].x, metrics[counter].y);
 
               fgr.glyphs[s].tx = (double)metrics[counter].x/(double)(enigma::texture_atlas_array[ta].width);
               fgr.glyphs[s].ty = (double)metrics[counter].y/(double)(enigma::texture_atlas_array[ta].height);
@@ -212,9 +214,9 @@ namespace enigma {
             }
           }
           if (free_textures == true){
-            enigma::graphics_delete_texture(fnt->texture);
+            enigma::graphics_delete_texture(fnt->texture.ID);
           }
-          fnt->texture = enigma::texture_atlas_array[ta].texture;
+          fnt->texture.ID = enigma::texture_atlas_array[ta].texture;
         } break;
         default: break; //We do nothing for the rest
       }

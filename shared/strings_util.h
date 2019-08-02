@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
 inline std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
   size_t pos = 0;
@@ -26,5 +27,11 @@ inline std::vector<std::string> split_string(const std::string &str, char delimi
         return vec;
 }
 
+inline std::string stringtolower(const std::string str) {
+std::string ret = str;
+ std::transform(ret.begin(), ret.end(), ret.begin(),
+    [](unsigned char c){ return std::tolower(c); });
+ return ret;
+}
 
 #endif

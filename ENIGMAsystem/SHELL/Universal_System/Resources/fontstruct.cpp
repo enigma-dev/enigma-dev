@@ -24,6 +24,7 @@
 #include "libEGMstd.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GScolors.h"
 
 #include <list>
 #include <string>
@@ -31,166 +32,62 @@
 #include <stdio.h>
 #include <vector>
 
+#include "Universal_System/image_formats.h"
+#include <iostream>
+
 using std::list;
 using std::string;
+using enigma::rect_packer::pvrect;
+using namespace enigma::fonts;
 
-namespace enigma
-{
-  AssetArray<SpriteFont, -1> sprite_fonts;
+namespace enigma {
+namespace fonts {
 
-  bool fontglyph::empty() {
-    return !(std::abs(x2-x) > 0 && std::abs(y2-y) > 0);
-  }
+AssetArray<SpriteFont, -1> sprite_fonts;
 
-  int font_new(uint32_t gs, uint32_t gc) // Creates a new font, allocating 'gc' glyphs
-  {
-    SpriteFont ret;
+void SpriteFont::destroy() {
+  ranges.clear();
+  if (texture.ID >= 0) graphics_delete_texture(texture.ID);
+  texture.ID = -1;
+}
 
-    fontglyphrange fgr;
-    fgr.glyphstart = gs;
+bool SpriteFont::isDestroyed() const { return texture.ID == -1 || ranges.empty(); }
 
-    ret.glyphRanges.push_back(fgr);
-    ret.height = 0;
+const char* SpriteFont::getAssetTypeName() { return "font"; }
 
-    return sprite_fonts.add(std::move(ret));
-  }
-
-  int font_pack(SpriteFont *font, int spr, uint32_t gcount, bool prop, int sep)
-  {
-      // Implement packing algorithm.
-      // This algorithm will try to fit as many glyphs as possible into
-      // a square space based on the max height of the font.
-
-      sprite *sspr = spritestructarray[spr];
-      std::vector<unsigned char*> glyphdata(gcount); // Raw SpriteFont image data
-      std::vector<rect_packer::pvrect> glyphmetrics(gcount);
-      std::vector<int> glyphx(gcount), glyphy(gcount);
-
-      int gwm = sspr->width, // Glyph width max: sprite width
-          ghm = sspr->height, // Glyph height max: sprite height
-          gtw = 0;
-
-      font->height = ghm;
-
-      fontglyphrange& fgr = font->glyphRanges[0];
-
-      for (unsigned i = 0; i < gcount; i++)
-      {
-        fontglyph fg;
-        unsigned fw, fh;
-        unsigned char* data = graphics_copy_texture_pixels(sspr->texturearray[i], &fw, &fh);
-        //NOTE: Following line replaced gtw = int((double)sspr->width / sspr->texturewarray[i]);
-        //this was to fix non-power of two subimages
-        //NTOE2: The commented out code was actually wrong - the width was divided by y instead of x. That is why it only worked with power of two.
-        gtw = int((double)sspr->width / sspr->texturewarray[i]);
-        //gtw = fw;
-        glyphdata[i] = data;
-
-        // Here we calculate the bbox
-        if (!prop)
-           glyphmetrics[i].x = 0,   glyphmetrics[i].y = 0,
-           glyphmetrics[i].w = gwm-1, glyphmetrics[i].h = ghm-1;
-        else
-        {
-          glyphmetrics[i].x = gwm, glyphmetrics[i].y = ghm,
-          glyphmetrics[i].w = 0,   glyphmetrics[i].h = 0;
-          for (int bx = 0; bx < gwm; bx++)
-          for (int by = 0; by < ghm; by++)
-          {
-            if (data[(by*gtw + bx)<<2]) // If this pixel isn't completely transparent
-            {
-              if (bx < glyphmetrics[i].x) glyphmetrics[i].x = bx;
-              if (bx > glyphmetrics[i].w) glyphmetrics[i].w = bx; // Treat width as right for now
-              if (by < glyphmetrics[i].y) glyphmetrics[i].y = by;
-              if (by > glyphmetrics[i].h) glyphmetrics[i].h = by; // Treat height as bottom for now
-            }
-          }
-          if (glyphmetrics[i].x > glyphmetrics[i].w)
-            glyphmetrics[i].x = 0, glyphmetrics[i].y = 0,
-            glyphmetrics[i].w = 0, glyphmetrics[i].h = 0;
-        }
-        fg.x = glyphmetrics[i].x; // Save these metrics while x and y are still relative to each glyph
-        fg.y = glyphmetrics[i].y;
-        fg.x2 = glyphmetrics[i].w + 1; // And while w and h are still the right and bottom edge coordinates
-        fg.y2 = glyphmetrics[i].h + 1;
-
-        fg.xs = glyphmetrics[i].w + sep; // This is just user-specified for sprite-loaded fonts
-
-        glyphmetrics[i].w -= glyphmetrics[i].x - 1; // Fix width and height to be such
-        glyphmetrics[i].h -= glyphmetrics[i].y - 1; // instead of right and bottom
-        glyphx[i] = glyphmetrics[i].x, glyphy[i] = glyphmetrics[i].y;
-        glyphmetrics[i].placed = -1;
-
-        fgr.glyphs.push_back(fg);
-      }
-
-      list<unsigned int> boxes;
-      for (unsigned i = 0; i < gcount; i++)
-        boxes.push_back((glyphmetrics[i].w * glyphmetrics[i].h << 8) + i);
-      boxes.sort();
-
-      unsigned w = 64, h = 64;
-      rect_packer::rectpnode *rectplane = new rect_packer::rectpnode(0,0,w,h);
-      for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
-      {
-        rect_packer::rectpnode *nn = rect_packer::rninsert(rectplane, *i & 0xFF, &glyphmetrics.front());
-        if (nn)
-          rect_packer::rncopy(nn, &glyphmetrics.front(), *i & 0xFF),
-          i++;
-        else
-        {
-          w > h ? h <<= 1 : w <<= 1,
-          rectplane = rect_packer::expand(rectplane, w, h);
-          if (!w or !h) return false;
-        }
-      }
-
-      std::vector<int> bigtex(w*h);
-      for (unsigned i = 0; i < gcount; i++)
-      {
-        fontglyph& fg = fgr.glyphs[i];
-        // Copy the SpriteFont glyph image into the big texture we just allocated
-        for (int yy = 0; yy < glyphmetrics[i].h; yy++) {
-          for (int xx = 0; xx < glyphmetrics[i].w; xx++) {
-            bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = ((unsigned int*)glyphdata[i])[gtw*(glyphy[i] + yy) + xx + glyphx[i]];
-          }
-        }
-        delete[] glyphdata[i]; // Delete the image data we just copied
-
-        fg.tx = glyphmetrics[i].x / double(w);
-        fg.ty = glyphmetrics[i].y / double(h);
-        fg.tx2 = (glyphmetrics[i].x + glyphmetrics[i].w) / double(w);
-        fg.ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
-      }
-
-      font->texture = graphics_create_texture(w,h,w,h,bigtex.data(),false);
-      font->twid = w;
-      font->thgt = h;
-      font->yoffset = 0;
-
-      return true;
-  }
-
-fontglyph findGlyph(const SpriteFont& fnt, uint32_t character) {
-  for (size_t i = 0; i < fnt.glyphRanges.size(); i++) {
-    fontglyphrange fgr = fnt.glyphRanges[i];
-    if (character >= fgr.glyphstart && character < fgr.glyphstart + fgr.glyphs.size()) {
-      return fgr.glyphs[character - fgr.glyphstart];
+GlyphMetrics findGlyph(const SpriteFont& fnt, uint32_t character) {
+  for (size_t i = 0; i < fnt.ranges.size(); i++) {
+    const GlyphRange& fgr = fnt.ranges[i];
+    if (character >= fgr.start && character < fgr.start + fgr.glyphs.size()) {
+      return fgr.glyphs[character - fgr.start];
     }
   }
-  return fontglyph();
+  return GlyphMetrics();
+}
+
+} // namespace fonts
+
+void Texture::init() {
+  unsigned char* rgba = new unsigned char[width * height * 4];
+  for (int i = 0; i < width * height; ++i) {
+    unsigned index_out = i * 4;
+    rgba[index_out] = rgba[index_out + 1] = rgba[index_out + 2] = 255;
+    rgba[index_out + 3] = pxdata[i];
+  }
+
+  ID = graphics_create_texture(width, height, width, height, rgba, false);
+  delete[] pxdata;
+  delete[] rgba;
 }
 
 } // namespace enigma
 
-using enigma::sprite_fonts;
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 int font_get_size(int fnt)
 {
-    return sprite_fonts[fnt].fontsize;
+    return sprite_fonts[fnt].fontSize;
 }
 
 bool font_get_bold(int fnt)
@@ -205,21 +102,21 @@ bool font_get_italic(int fnt)
 
 uint32_t font_get_first(int fnt, int range)
 {
-    return sprite_fonts[fnt].glyphRanges[range].glyphstart;
+    return sprite_fonts[fnt].ranges[range].start;
 }
 
 uint32_t font_get_last(int fnt, int range)
 {
-    return sprite_fonts[fnt].glyphRanges[range].glyphstart + sprite_fonts[fnt].glyphRanges[range].glyphs.size();
+    return sprite_fonts[fnt].ranges[range].start + sprite_fonts[fnt].ranges[range].glyphs.size();
 }
 
 int font_get_range_count(int fnt) {
-	return sprite_fonts[fnt].glyphRanges.size();
+	return sprite_fonts[fnt].ranges.size();
 }
 
 string font_get_fontname(int fnt)
 {
-    return sprite_fonts[fnt].fontname;
+    return sprite_fonts[fnt].fontName;
 }
 
 void font_delete(int fnt)
@@ -234,85 +131,124 @@ bool font_exists(int fnt)
 
 bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32_t first, uint32_t last)
 {
-  enigma::SpriteFont *fnt = &sprite_fonts[ind];
+  SpriteFont *fnt = &sprite_fonts[ind];
   fnt->name = name;
-  fnt->fontsize = size;
+  fnt->fontSize = size;
   fnt->bold = bold;
   fnt->italic = italic;
 
-  enigma::fontglyphrange fgr;
-  fgr.glyphstart = first;
+  GlyphRange fgr;
+  fgr.start = first;
 
-  fnt->glyphRanges.push_back(fgr);
+  fnt->ranges.push_back(fgr);
 
   return true;
+}
+
+static pvrect get_image_bounds(unsigned char* pxdata, unsigned width, unsigned height, bool alpha) {
+  pvrect rect(0, 0, 0, 0, -1);
+  
+  int transparenyColor = make_color_rgb(pxdata[0], pxdata[1], pxdata[2]);
+
+  for (unsigned x = 0; x < width; ++x) {
+    for (unsigned y = 0; y < height; ++y) {
+      bool transparent = false;
+      int index = width * x + y;
+      if (alpha) transparent = (pxdata[index + 3] == 255);
+      else transparent = (make_color_rgb(pxdata[index], pxdata[index + 1], pxdata[index + 2]) == transparenyColor);
+
+      if (!transparent) {
+        if (rect.x == 0) rect.x = x;
+        if (rect.y == 0) rect.y = y;
+        rect.w = x;
+        rect.h = y;
+      }
+    }
+  }
+
+  return rect;
+}
+
+static SpriteFont font_sprite_helper(enigma::sprite* sprite, uint32_t first, bool prop, int sep) {
+  size_t glyphCount = sprite->subcount;
+  
+  RawFont rawFont;
+  rawFont.ranges = { GlyphRange(first, first + glyphCount) };
+  
+  rawFont.glyphs.resize(glyphCount);
+  
+  size_t index = 0;
+  for (RawGlyph& g : rawFont.glyphs) {
+    g.character = first + index;
+    unsigned w, h;
+    g.pxdata = enigma::graphics_copy_texture_pixels(sprite->texturearray[index], &w, &h);
+    g.index = index;
+    g.horiBearingX = sep;
+    g.horiBearingY = sep;
+    (prop) ? g.dimensions = pvrect(0, 0, w, h, -1) : g.dimensions = get_image_bounds(g.pxdata, w, h, true);
+    g.linearHoriAdvance = g.dimensions.w + sep;
+  }
+
+  unsigned textureW, textureH;
+  unsigned char* pxdata = font_pack(rawFont, textureW, textureH);
+  
+  SpriteFont font("SpriteFont", "SpriteFont", 1, false, false, rawFont.yOffset, rawFont.lineHeight, textureW, textureH, pxdata, rawFont.ranges);
+  font.texture.init();
+  
+  return font;
 }
 
 bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep)
 {
   enigma::sprite *sspr = enigma::spritestructarray[spr];
   if (!sspr) return false;
-
-  unsigned char gcount = sspr->subcount;
-  enigma::SpriteFont *fnt = &sprite_fonts[ind];
-  fnt->glyphRanges.clear(); //TODO: Delete glyphs for each range or add it to the destructor?
-
-  enigma::fontglyphrange fgr;
-  fgr.glyphstart = first;
-  fnt->glyphRanges.push_back(fgr);
-
-  return enigma::font_pack(fnt, spr, gcount, prop, sep);
+  return (sprite_fonts.replace(ind, font_sprite_helper(sspr, first, prop, sep)) > 0);
 }
 
 int font_add_sprite(int spr, uint32_t first, bool prop, int sep)
 {
   enigma::sprite *sspr = enigma::spritestructarray[spr];
   if (!sspr) return -1;
-
-  unsigned char gcount = sspr->subcount;
-  int id = enigma::font_new(first, gcount);
-  enigma::SpriteFont* font = &sprite_fonts[id];
-  if (!enigma::font_pack(font, spr, gcount, prop, sep)) return -1;
-  return id;
+  return (sprite_fonts.add(font_sprite_helper(sspr, first, prop, sep)) > 0);
 }
 
 float font_get_glyph_texture_left(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(sprite_fonts[fnt], character);
+  const GlyphMetrics glyph = findGlyph(sprite_fonts[fnt], character);
   return glyph.tx;
 }
 
 float font_get_glyph_texture_top(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(sprite_fonts[fnt], character);
+  const GlyphMetrics glyph = findGlyph(sprite_fonts[fnt], character);
   return glyph.ty;
 }
 
 float font_get_glyph_texture_right(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(sprite_fonts[fnt], character);
+  const GlyphMetrics glyph = findGlyph(sprite_fonts[fnt], character);
   return glyph.tx2;
 }
 
 float font_get_glyph_texture_bottom(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(sprite_fonts[fnt], character);
+  const GlyphMetrics glyph = findGlyph(sprite_fonts[fnt], character);
   return glyph.ty2;
 }
 
 float font_get_glyph_left(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(sprite_fonts[fnt], character);
+  const GlyphMetrics glyph = findGlyph(sprite_fonts[fnt], character);
   return glyph.x;
 }
 
 float font_get_glyph_top(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(sprite_fonts[fnt], character);
+  const GlyphMetrics glyph = findGlyph(sprite_fonts[fnt], character);
   return glyph.y;
 }
 
 float font_get_glyph_right(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(sprite_fonts[fnt], character);
+  const GlyphMetrics glyph = findGlyph(sprite_fonts[fnt], character);
   return glyph.x2;
 }
 
 float font_get_glyph_bottom(int fnt, uint32_t character) {
-  const enigma::fontglyph glyph = enigma::findGlyph(sprite_fonts[fnt], character);
+  const GlyphMetrics glyph = findGlyph(sprite_fonts[fnt], character);
   return glyph.y2;
 }
 
