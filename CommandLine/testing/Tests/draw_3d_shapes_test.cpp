@@ -20,4 +20,6 @@ TEST(Regression, draw_3d_shapes_test) {
     game_running = test_harness->game_is_running();
   }
   ASSERT_FALSE(game_running) << "Game did not exit after window was closed!";
+  int game_return = test_harness->get_return();
+  ASSERT_TRUE(game_return == 0) << "Game returned non-zero exit code!";
 }
