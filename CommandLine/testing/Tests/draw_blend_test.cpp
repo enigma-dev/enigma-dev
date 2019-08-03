@@ -22,4 +22,5 @@ TEST(Regression, draw_blend_test) {
     game_running = test_harness->game_is_running();
   }
   ASSERT_FALSE(game_running) << "Game did not exit after window was closed!";
+  EXPECT_EQ(test_harness->get_return(), 0) << "Game returned non-zero exit code!";
 }

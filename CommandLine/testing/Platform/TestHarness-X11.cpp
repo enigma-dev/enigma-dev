@@ -133,6 +133,9 @@ class X11_TestHarness final: public TestHarness {
   void wait() final {
     usleep(1000000);
   }
+  int get_return() final {
+    return return_code;
+  }
   X11_TestHarness(Display *disp, pid_t game_pid, Window game_window,
                   const TestConfig &tc):
       pid(game_pid), window_id(game_window), display(disp), test_config(tc) {}
