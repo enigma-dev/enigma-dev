@@ -23,6 +23,33 @@ int frames_count = 0;
 unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
 
+void initGame(unsigned started) {
+  // game window will become visible at step zero when splash screen is turned
+  // on, and there will be a briefly running call to enigma_user::sleep(), and
+  // if splash is turned off, wait until step two to become visible w/o sleep.
+  // this is the exact behavior of GameMaker Studio. since this is executed at
+  // a time that is after rooms and views init, the window will be sized right
+  if (started == 2) {
+    // In pull request 1831, it was decided to adopt GMS behavior instead of GM8.
+    // The window is no longer moved, centered, or resized when switching rooms.
+    // This is always true, even if the room sizes are different.
+    enigma_user::window_default(false);
+    // window sized by first room, can make visible now
+    enigma_user::window_set_visible(true);
+    // allow time for game to open for measuring titlebar
+    // and border to calculate proper window positioning.
+  } else if (started == 10) {
+    // required for global game setting resizeable window
+    enigma_user::window_set_sizeable(isSizeable);
+    // required for global game setting borderless window
+    enigma_user::window_set_showborder(showBorder);
+    // don't ask me why this is necessary, but it 100% is
+    enigma_user::window_center();
+    // required for global game setting fullscreen window
+    enigma_user::window_set_fullscreen(isFullScreen);
+  }
+}
+
 int gameWait() {
   if (enigma_user::os_is_paused()) {
     if (pausedSteps < 1) {
@@ -66,7 +93,11 @@ int enigma_main(int argc, char** argv) {
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
 
+  unsigned started = 0;
   while (!game_isending) {
+    initGame(started); 
+    if (started < 11) started++;
+
     if (!((std::string)enigma_user::room_caption).empty())
       enigma_user::window_set_caption(enigma_user::room_caption);
     update_mouse_variables();
