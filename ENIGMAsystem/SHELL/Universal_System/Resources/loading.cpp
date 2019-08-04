@@ -132,9 +132,6 @@ namespace enigma
       enigma_user::window_default();
       enigma_user::window_set_visible(true);
     }
-    
-    // center window at start up
-    enigma_user::window_center();
 
     return 0;
   }
