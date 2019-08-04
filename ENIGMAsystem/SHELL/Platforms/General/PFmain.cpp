@@ -2,6 +2,7 @@
 
 #include "PFwindow.h"
 #include "PFsystem.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
@@ -47,6 +48,9 @@ void initGame(unsigned started) {
     enigma_user::window_center();
     // required for global game setting fullscreen window
     enigma_user::window_set_fullscreen(isFullScreen);
+    // required for Draw GUI event
+    enigma_user::screen_init();
+    enigma_user::screen_refresh();
   }
 }
 
