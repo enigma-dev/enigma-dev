@@ -26,7 +26,10 @@ bool game_window_focused = true;
 void initGame(unsigned step) {
   // allow time for game to open for measuring titlebar
   // and border to calculate proper window positioning.
-  if (step == 10) {
+  if (step == 2) {
+    // center window at start up
+    enigma_user::window_center();
+  } else if (step == 10) {
     // required for global game setting resizeable window
     enigma_user::window_set_sizeable(isSizeable);
     // required for global game setting borderless window
