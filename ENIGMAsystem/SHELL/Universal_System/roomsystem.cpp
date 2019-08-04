@@ -235,7 +235,6 @@ namespace enigma
     enigma_user::window_default(false);
     // window sized by first room, can make visible now
     enigma_user::window_set_visible(true);
-    enigma_user::window_center();
 
     enigma_user::io_clear();
     // we only initialize the screen and clear the window color during game start
