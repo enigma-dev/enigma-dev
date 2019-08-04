@@ -25,9 +25,6 @@
 
 namespace enigma {
 
-extern int winEdgeX;
-extern int winEdgeY;
-
 namespace x11 {
 extern Display* disp;
 extern Screen* screen;
