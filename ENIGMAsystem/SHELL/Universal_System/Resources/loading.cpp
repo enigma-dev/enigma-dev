@@ -124,7 +124,6 @@ namespace enigma
 
     //Initialize extensions
     enigma::extensions_initialize();
-    
 
     //Go to the first room
     if (enigma_user::room_count)
