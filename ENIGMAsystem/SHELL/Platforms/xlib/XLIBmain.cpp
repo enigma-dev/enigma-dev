@@ -47,23 +47,6 @@ const int os_type = os_linux;
 
 namespace enigma {
 
-int winEdgeX = windowX;
-int winEdgeY = windowY;
-
-static int getWindowDimension(int i) {
-  XFlush(disp);
-  XWindowAttributes wa;
-  XGetWindowAttributes(disp, win, &wa);
-  if (i == 2) return wa.width;
-  if (i == 3) return wa.height;
-  Window root, parent, *child;
-  uint children;
-  XQueryTree(disp, win, &root, &parent, &child, &children);
-  XWindowAttributes pwa;
-  XGetWindowAttributes(disp, parent, &pwa);
-  return i ? (i == 1 ? pwa.y + wa.y : -1) : pwa.x + wa.x;
-}
-
 void (*WindowResizedCallback)();
 void WindowResized();
 
@@ -161,18 +144,12 @@ int handleEvents() {
         continue;
       }
       case ConfigureNotify: {
-        if (showBorder && 
-          (windowX != e.xconfigure.x ||
-          windowY != e.xconfigure.y)) {
-          winEdgeX = getWindowDimension(0);
-          winEdgeY = getWindowDimension(1);
-        }
-        windowX = e.xconfigure.x;
-        windowY = e.xconfigure.y;
-        windowWidth = e.xconfigure.width;
-        windowHeight = e.xconfigure.height;
-        compute_window_scaling();
         if (WindowResizedCallback != NULL) {
+          windowX = e.xconfigure.x;
+          windowY = e.xconfigure.y;
+          windowWidth = e.xconfigure.width;
+          windowHeight = e.xconfigure.height;
+          compute_window_scaling();
           WindowResizedCallback();
         }
         continue;
@@ -219,7 +196,12 @@ void handleInput() {
 
 namespace enigma_user {
 
-int display_get_width() { return XWidthOfScreen(enigma::x11::screen); }
-int display_get_height() { return XHeightOfScreen(enigma::x11::screen); }
+int display_get_width() {
+  return XDisplayWidth(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
+}
+
+int display_get_height() { 
+  return XDisplayHeight(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
+}
 
 }  // namespace enigma_user
