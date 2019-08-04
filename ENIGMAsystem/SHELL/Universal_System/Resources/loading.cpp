@@ -129,25 +129,10 @@ namespace enigma
     //Go to the first room
     if (enigma_user::room_count)
       enigma::game_start();
-
-    // In pull request 1831, it was decided to adopt GMS behavior instead of GM8.
-    // The window is no longer moved, centered, or resized when switching rooms.
-    // This is always true, even if the room sizes are different.
-    enigma_user::window_default(false);
-    // window sized by first room, can make visible now
-    enigma_user::window_set_visible(true);
-    // required for global game setting resizeable window
-    enigma_user::window_set_sizeable(isSizeable);
-    // required for global game setting borderless window
-    enigma_user::window_set_showborder(showBorder);
-    // don't ask me why this is necessary, but it 100% is
-    enigma_user::window_set_rectangle(windowX, windowY, windowWidth, windowHeight);
-    // required for global game setting fullscreen window
-    enigma_user::window_set_fullscreen(isFullScreen);
-    
-    // needed for DrawGUI event
-    enigma_user::screen_init();
-    enigma_user::screen_refresh();
+    else {
+      enigma_user::window_default(false);
+      enigma_user::window_set_visible(true);
+    }
 
     return 0;
   }
