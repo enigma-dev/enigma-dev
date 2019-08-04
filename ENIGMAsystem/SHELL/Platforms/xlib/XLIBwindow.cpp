@@ -34,6 +34,7 @@
 #include <time.h>    //clock
 #include <unistd.h>  //usleep
 #include <climits>
+#include <cstring>
 #include <map>
 #include <string>  //Return strings without needing a GC
 
@@ -323,28 +324,41 @@ void window_set_showborder(bool show) {
   if (window_get_maximized()) return;
   if (window_get_fullscreen()) return;
   if (show == window_get_showborder() && show) return;
-  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   enigma::showBorder = show;
-  if (!show) {
-    Hints hints;
-    hints.flags = 2;        // Specify that we're changing the window decorations.
-    decorationsPrevious = 1; // Save current decorations before changing them.
-    hints.decorations = 0;  // 0 (false) means that window decorations should go bye-bye.
-    decorationsCurrent = hints.decorations; // Save current decorations after changing them.
-    XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
-    XMoveResizeWindow(disp, win, enigma::windowX, enigma::windowY, enigma::windowWidth, enigma::windowHeight);
-  } else {
-    Hints hints;
-    hints.flags = 2;        // Specify that we're changing the window decorations.
-    hints.decorations = decorationsPrevious; // Set decorations back to the way they were.
-    decorationsCurrent = hints.decorations; // Save current decorations after changing them.
-    XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
-    XMoveResizeWindow(disp, win, enigma::windowX - enigma::winEdgeX, enigma::windowY - enigma::winEdgeY, enigma::windowWidth, enigma::windowHeight);
-  }
+  const char *desktopEnvironment = getenv("XDG_CURRENT_DESKTOP");
+  bool isKDE = (desktopEnvironment != NULL && strcmp(desktopEnvironment, "KDE") == 0);
+  Hints hints;
+  Atom mwmHintsProperty = XInternAtom(disp, "_MOTIF_WM_HINTS", 0);
+  hints.flags = 2;
+  hints.decorations = show;
+  XChangeProperty(disp, win, mwmHintsProperty, mwmHintsProperty, 32, PropModeReplace, (unsigned char *)&hints, 5);
+  XWindowAttributes wa;
+  XGetWindowAttributes(disp, win, &wa);
+  Window root, parent, *child; uint children;
+  XQueryTree(disp, win, &root, &parent, &child, &children);
+  XWindowAttributes pwa;
+  XGetWindowAttributes(disp, parent, &pwa);
+  static const int xoffset = isKDE ? pwa.x : wa.x;
+  static const int yoffset = isKDE ? pwa.y : wa.y;
+  int xpos = show ? enigma::windowX - xoffset : enigma::windowX;
+  int ypos = show ? enigma::windowY - yoffset : enigma::windowY;
+  XMoveResizeWindow(disp, win, xpos, ypos, isKDE ? wa.width : wa.width + xoffset, isKDE ? wa.height : wa.height + yoffset);
 }
 
 bool window_get_showborder() {
-  return enigma::showBorder;
+  Atom type;
+  int format;
+  unsigned long bytes;
+  unsigned long items;
+  unsigned char *data = NULL;
+  bool ret = true;
+  Atom mwmHintsProperty = XInternAtom(disp, "_MOTIF_WM_HINTS", 0);
+  if (XGetWindowProperty(disp, win, mwmHintsProperty, 0, LONG_MAX, False, AnyPropertyType, &type, &format, &items, &bytes, &data) == Success && data != NULL) {
+    Hints *hints = (Hints *)data;
+    ret = hints->decorations;
+    XFree(data);
+  }
+  return ret;
 }
 
 void window_set_showicons(bool show) {
