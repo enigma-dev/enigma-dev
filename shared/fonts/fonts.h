@@ -33,13 +33,11 @@ struct GlyphRange {
 
 /// Struct holding the pixel data and dimensions for individual glyphs
 struct RawGlyph {
-  RawGlyph() : character(0), pxdata(nullptr), index(0), dimensions(0,0,0,0,-1), horiBearingX(0), horiBearingY(0), range(nullptr) {}
-  ~RawGlyph() { /*delete[] pxdata;*/ }
+  RawGlyph() : character(0), pxdata(nullptr), dimensions(0,0,0,0,-1), horiBearingX(0), horiBearingY(0), range(nullptr) {}
+  void destroy() { delete[] pxdata; }
   unsigned character; // the letter/character we want to render
   unsigned char* pxdata; // raw pixel data of glyph
-  size_t index; // our index in vector
   rect_packer::pvrect dimensions; // rectange(x,y,w,h) holding the dimensions of our glyph in pixels
-  unsigned area() const { return dimensions.w * dimensions.h; }
   int x() const { return dimensions.x; }
   int y() const { return dimensions.y; }
   unsigned w() const { return dimensions.w; }
@@ -52,7 +50,8 @@ struct RawGlyph {
 
 /// Ready to be packed font data
 struct RawFont {
-  RawFont() : lineHeight(0), yOffset(0) {}
+  RawFont() : name(""), lineHeight(0), yOffset(0) {}
+  std::string name;
   unsigned lineHeight; // space between lines
   int yOffset;
   std::vector<RawGlyph> glyphs;

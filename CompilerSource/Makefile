@@ -39,8 +39,8 @@ else
 	override CXXFLAGS += -std=c++11
 endif
 
-override CXXFLAGS += -Wall -O3 -g -I./JDI/src
-LDFLAGS += -shared -O3 -g -L../ -Wl,-rpath,./
+override CXXFLAGS += -Wall -O0 -g -I./JDI/src
+LDFLAGS += -shared -O0 -g -L../ -Wl,-rpath,./
 override LDLIBS += -lProtocols -lprotobuf -lz -L$(SHARED_SRC_DIR)/libpng-util -lpng-util -lpng
 
 # This implements a recursive wildcard allowing us to iterate in subdirs

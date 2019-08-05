@@ -15,17 +15,38 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <stdlib.h>
 #include "rectpack.h"
 
-namespace enigma
-{
-  namespace rect_packer
-  {
-    // This is a simple rectangle to be mass-instantiated; you should probably allocate a large array statically, one per glyph.
-    pvrect::pvrect(): x(0),y(0),w(1),h(1),placed(-1) {}
-    pvrect::pvrect(int a,int b,int c,int d,int e):
-        x(a), y(b), w(c), h(d), placed(e) {}
+#include <algorithm>
+#include <stdlib.h>
+
+namespace enigma {
+namespace rect_packer {
+    bool pack_rectangles(std::vector<pvrect>& rects, unsigned& width, unsigned &height) {
+
+      // insert the metrics and calculate a minimum (power of 2) texture size
+      width = 64, height = 64; // starter size for our texture
+      rectpnode* rootNode = new rectpnode(0, 0, width, height);
+      for (std::vector<pvrect>::reverse_iterator ii = rects.rbegin(); ii != rects.rend();) {
+        size_t index = rects.size() - 1 - std::distance(rects.rbegin(), ii);
+        rectpnode* node = rninsert(rootNode, index, rects.data());
+
+        if (node) {
+          rncopy(node, rects.data(), index);
+          ii++;
+        } else {
+          width > height ? height <<= 1 : width <<= 1,
+          rootNode = expand(rootNode, width, height);
+          if (!width or !height) {
+            delete rootNode;
+            return false;
+          }
+        }
+      }
+      
+      delete rootNode;
+      return true;
+    }
     
     // This is a container of which you will allocate and refer to precisely one instance.
     // It is best to use new and keep a reference to it, in case an insert() leads to an overflow,
@@ -63,7 +84,7 @@ namespace enigma
         if (who->c != -1) //already a rect here
           return NULL;
         
-        if (boxes[c].w > who->wid or boxes[c].h > who->hgt) //doesn't fit
+        if ((int)boxes[c].w > who->wid or (int)boxes[c].h > who->hgt) //doesn't fit
           return NULL;
 
         if (who->wid - boxes[c].w < 2 and who->hgt - boxes[c].h < 2) //tight squeeze; too tight to fit a glyph inside, I promise.

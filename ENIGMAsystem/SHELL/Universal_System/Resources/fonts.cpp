@@ -67,17 +67,28 @@ GlyphMetrics findGlyph(const SpriteFont& fnt, uint32_t character) {
 
 } // namespace fonts
 
-void Texture::init() {
+// TODO: move this
+static inline unsigned char* mono2rgba(unsigned char* pxdata, unsigned width, unsigned height) {
   unsigned char* rgba = new unsigned char[width * height * 4];
-  for (int i = 0; i < width * height; ++i) {
+  for (unsigned i = 0; i < width * height; ++i) {
     unsigned index_out = i * 4;
     rgba[index_out] = rgba[index_out + 1] = rgba[index_out + 2] = 255;
     rgba[index_out + 3] = pxdata[i];
   }
+  return rgba;
+}
 
-  ID = graphics_create_texture(width, height, width, height, rgba, false);
-  delete[] pxdata;
-  delete[] rgba;
+// TODO: move this
+void Texture::init() {
+  if (pxdata != nullptr) {
+    if (channels == 1) {
+      unsigned char* rgba = mono2rgba(pxdata, width, height);
+      ID = graphics_create_texture(width, height, width, height, rgba, false);
+      delete[] rgba;
+    } else ID = graphics_create_texture(width, height, width, height, pxdata, false);
+    
+    delete[] pxdata;
+  } else DEBUG_MESSAGE("Error: trying to intialize texture from empty pixel data", MESSAGE_TYPE::M_ERROR);
 }
 
 } // namespace enigma
@@ -182,7 +193,6 @@ static SpriteFont font_sprite_helper(enigma::sprite* sprite, uint32_t first, boo
     g.character = first + index;
     unsigned w, h;
     g.pxdata = enigma::graphics_copy_texture_pixels(sprite->texturearray[index], &w, &h);
-    g.index = index;
     g.horiBearingX = sep;
     g.horiBearingY = sep;
     (prop) ? g.dimensions = pvrect(0, 0, w, h, -1) : g.dimensions = get_image_bounds(g.pxdata, w, h, true);

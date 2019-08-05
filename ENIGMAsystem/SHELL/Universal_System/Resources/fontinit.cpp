@@ -37,12 +37,12 @@ namespace enigma {
 
 using namespace fonts;
 
-unsigned char* exe_get_pxdata(FILE* exe, unsigned size) {
+unsigned char* exe_get_pxdata(FILE* exe, unsigned expectedSize) {
   
   unsigned int compressedSize;
-  if (!fread(&compressedSize, 4, 1, exe)) {};
-
-  std::cout << "size in: " << compressedSize << std::endl;
+  if (!fread(&compressedSize, 4, 1, exe)) {
+    DEBUG_MESSAGE("Failed to load size of compressed pixel data", MESSAGE_TYPE::M_ERROR);
+  }
   
   unsigned char* cpxdata = new unsigned char[compressedSize];
   if (!cpxdata) {
@@ -58,8 +58,8 @@ unsigned char* exe_get_pxdata(FILE* exe, unsigned size) {
     return nullptr;
   }
 
-  unsigned char* pxdata=new unsigned char[size];
-  if (zlib_decompress(cpxdata, compressedSize, size, pxdata) != (int)size) {
+  unsigned char* pxdata=new unsigned char[expectedSize];
+  if (zlib_decompress(cpxdata, compressedSize, expectedSize, pxdata) != (int)expectedSize) {
     DEBUG_MESSAGE("Failed to load pixel data: Data does not match expected size", MESSAGE_TYPE::M_ERROR);
     delete[] cpxdata;
     delete[] pxdata;

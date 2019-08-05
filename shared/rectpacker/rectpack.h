@@ -18,14 +18,51 @@
 #ifndef ENIGMA_RECT_PACT_H
 #define ENIGMA_RECT_PACT_H
 
+#include <vector>
+#include <algorithm>
+
 namespace enigma {
 
 namespace rect_packer {
+
 struct pvrect {
-  int x, y, w, h, placed;
-  pvrect();
-  pvrect(int a, int b, int c, int d, int e);
+  pvrect(int x = 0, int y = 0, unsigned w = 0, unsigned h = 0, int placed = -1) :  
+    x(x), y(y), w(w), h(h), placed(placed) {}
+  int x, y;
+  unsigned w, h;
+  int placed;
+  unsigned area() const { return w * h; };
 };
+
+bool pack_rectangles(std::vector<pvrect>& rects, unsigned& width, unsigned &height);
+
+template <class T>
+bool pack_rectangles(std::vector<T>& vec, unsigned& width, unsigned &height) {
+
+  // sort our vector by area
+  std::sort(vec.begin(), vec.end(), [](const T& a, const T& b) {
+    return (a.dimensions.area() > b.dimensions.area());
+  });
+
+  std::vector<pvrect> copy(vec.size());
+  size_t currIndex = 0;
+  for (auto& i : vec) {
+    copy[currIndex++] = i.dimensions;
+  }
+
+  pack_rectangles(copy, width, height);
+
+  // Copy our updated positions back to our array
+  currIndex = 0;
+  for (pvrect& rect : copy) {
+    vec[currIndex].dimensions.x = rect.x;
+    vec[currIndex].dimensions.y = rect.y;
+    currIndex++;
+  }
+
+  return true;
+}
+
 
 struct rectpnode {
   rectpnode* child[2];

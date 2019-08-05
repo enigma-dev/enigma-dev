@@ -89,6 +89,35 @@ ImageData loadImageData(const std::string &filePath, int &errorc) {
   return ImageData(pngwidth, pngheight, data, dataSize);
 }
 
+static bool font_load_helper(const buffers::resources::Font& font, ImageData& data, RawFont& raw_font) {
+  int error = 0;
+
+  //FIXME: should be has_image() but lgm writter bugged and always writes a image even if one doesnt exist
+  if (font.glyphs_size() > 0) { // font with pre-rendered texture atlas
+    data = loadImageData(font.image(), error);
+    if (error) return false; // image file missing
+  } else { // load ttf and generate texture atlas
+    std::string ttf = enigma_user::font_find(font.font_name(), font.bold(), font.italic(), false);
+    if (!ttf.empty()) {
+      std::cout << "Loading font file: " << ttf << std::endl;
+      for (const buffers::resources::Font::Range& range : font.ranges())
+        raw_font.ranges.emplace_back(range.min(), range.max());
+      
+      if (!font_load(ttf, font.size(), raw_font)) return false; // ttf load error
+      
+      unsigned textureW, textureH;
+      unsigned char* pxdata = font_pack(raw_font, textureW, textureH);
+      int size = textureW * textureH;
+      unsigned char* cpxdata = zlib_compress(pxdata, size);
+      delete[] pxdata;
+      data = ImageData(textureW, textureH, cpxdata, size);
+
+    } else return false; // font load error
+  }
+
+  return true;
+}
+
 struct ESLookup {
   struct Lookup {
     std::string kind;
@@ -194,30 +223,15 @@ FontData::FontData(const deprecated::JavaStruct::Font &font):
   data.set_bold(font.bold);
   data.set_italic(font.italic);
 
-  for (size_t i = 0; i < font.glyphRangeCount; ++i) {
-    GlyphRange range(font.glyphRanges[i].rangeMin, font.glyphRanges[i].rangeMax);
-    raw_font.ranges.emplace_back(range);
-    for (size_t j = 0; j < range.size(); ++j) {
-      deprecated::JavaStruct::Glyph& jg = font.glyphRanges[i].glyphs[j];
-      RawGlyph rg;
-      rg.character = font.glyphRanges[i].rangeMin + j;
-      rg.pxdata = jg.data;
-      rg.index = j;
-      rg.horiBearingX = 0;
-      rg.horiBearingY = 0;
-      rg.dimensions = enigma::rect_packer::pvrect(0, 0, jg.width, jg.height, -1);
-      rg.linearHoriAdvance = jg.advance;
-      rg.range = &raw_font.ranges.back();
-      raw_font.glyphs.emplace_back(rg);
-    }
+  for (int i = 0; i < font.glyphRangeCount; ++i) {
+    buffers::resources::Font_Range* range = data.add_ranges();
+    range->set_min(font.glyphRanges[i].rangeMin); 
+    range->set_max(font.glyphRanges[i].rangeMax);
   }
 
-  unsigned textureW, textureH;
-  unsigned char* pxdata = font_pack(raw_font, textureW, textureH);
-  int size = textureW * textureH;
-  unsigned char* cpxdata = zlib_compress(pxdata, size);
-  delete[] pxdata;
-  image_data = ImageData(textureW, textureH, cpxdata, size);
+  if (!font_load_helper(data, image_data, raw_font))
+    std::cerr << "Failed to load font: " << font.name << " aka "  << font.fontName << std::endl;
+  
 }
 
 PathData::PathData(const buffers::resources::Path &q, const std::string& name):
@@ -230,7 +244,7 @@ PathData::PathData(const deprecated::JavaStruct::Path &path):
   data.set_closed(path.closed);
   data.set_precision(path.precision);
 
-	// Discarded: backgroundRoomId;
+  // Discarded: backgroundRoomId;
   data.set_hsnap(path.snapX);
   data.set_vsnap(path.snapY);
 
@@ -541,32 +555,12 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
       break;
     }
     case TypeCase::kFont: {
-      const buffers::resources::Font font = root.font();
-      
-      RawFont raw_font;
       ImageData data;
-      //FIXME: should be has_image() but lgm writter bugged and always writes a image even if one doesnt exist
-      if (font.glyphs_size() > 0) { // font with pre-rendered texture atlas
-        data = loadImageData(font.image(), error);
-        if (error) return -4; // font load error
-      } else { // load ttf and generate texture atlas
-        std::string ttf = enigma_user::font_find(font.font_name(), font.bold(), font.italic(), false);
-        if (!ttf.empty()) {
-          std::cout << "loading ttf: " << ttf << std::endl;
-          for (const buffers::resources::Font::Range& range : font.ranges())
-            raw_font.ranges.emplace_back(range.min(), range.max());
-          
-          if (!font_load(ttf, font.size(), raw_font)) return -4; // font load error
-          unsigned textureW, textureH;
-          unsigned char* pxdata = font_pack(raw_font, textureW, textureH);
-          int size = textureW * textureH;
-          unsigned char* cpxdata = zlib_compress(pxdata, size);
-          delete[] pxdata;
-          data = ImageData(textureW, textureH, cpxdata, size);
-
-        } else return -4; // font load error
+      RawFont raw_font;
+      if (!font_load_helper(root.font(), data, raw_font)) {
+        std::cerr << "Failed to load font: " << root.name() << " aka " << root.font().font_name() << std::endl;
+        return -4; // font load error
       }
-      
       gameData->fonts.emplace_back(root.font(), root.name(), data, raw_font); break;
       break;
     }

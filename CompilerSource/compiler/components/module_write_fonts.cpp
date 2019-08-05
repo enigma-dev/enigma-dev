@@ -55,9 +55,7 @@ int lang_CPP::module_write_fonts(const GameData &game, FILE *gameModule) {
   for (const auto &font : game.fonts) {
     cout << "Iterating included fonts..." << endl;
 
-    //writei(font.id(), gameModule);
     const ImageData& img = font.image_data;
-    std::cout << "size out: " << img.pixels.size() << std::endl;
     writei(img.pixels.size(), gameModule);
     fwrite(img.pixels.data(), 1, img.pixels.size(), gameModule);
 

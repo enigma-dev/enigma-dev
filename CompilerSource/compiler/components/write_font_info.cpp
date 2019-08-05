@@ -47,14 +47,15 @@ int lang_CPP::compile_writeFontInfo(const GameData &game)
       << "#undef INCLUDED_FROM_SHELLMAIN" << endl
       << "#endif" << endl
       << "#include \"fonts/fonts.h\"" << endl
-      << "#include <unordered_map>" << endl
+      << "#include <map>" << endl
       << endl;
 
   int maxid = -1, rawfontcount = 0;
   wto << "namespace enigma {" << endl;
   wto << "namespace fonts {" << endl;
-  wto << "std::unordered_map<int, SpriteFont> exeFonts = {" << endl;
+  wto << "std::map<int, SpriteFont> exeFonts = {" << endl;
   for (auto font_it = game.fonts.begin(); font_it != game.fonts.end(); ++font_it) {
+   
     const auto& font = *font_it;
     wto << "    { " << font.id() << ", SpriteFont(\"" //begin font
         << font.name         << "\", \""  // string name;
@@ -64,11 +65,11 @@ int lang_CPP::compile_writeFontInfo(const GameData &game)
         << font->italic()    << ", ";     // bool italic;
 
         std::stringstream ranges;
-        //int ymin = 100, ymax = -100;
         ranges << "{ "; //begin glyph ranges
         //FIXME: should be has_image() but lgm writter bugged and always writes a image even if one doesnt exist
         if (font->glyphs_size() > 0)  { // font used pre-rendered texture
-         //todo: parse glyphs 
+         // TODO: this is where gmx with a pre-rendered texture should be handled
+         // iterate font.glyphs() and write them out to IDE_FONTS like below. I've already packed the texture
         } else { // we rendered the texture
           for (auto range = font.raw_font.ranges.begin(); range != font.raw_font.ranges.end(); ++range) {
             ranges << "GlyphRange(";
@@ -95,15 +96,15 @@ int lang_CPP::compile_writeFontInfo(const GameData &game)
               ranges << " ,";
           }
         }
-        //if (font.raw_font.lineHeight != 0 || font.raw_font.yOffset != 0) { // use lineHeight from ttf
-          wto << font.raw_font.lineHeight    << ", "
-              << font.raw_font.yOffset        << ", "
-              << font.image_data.width        << ", " 
-              << font.image_data.height  << ", " 
-              << "nullptr" << ", " 
-              << ranges.str()                << " }"; // end ranges
-        //}
-        wto << ") }"; // end SpriteFont
+          
+       wto << font.raw_font.lineHeight    << ", "
+           << font.raw_font.yOffset        << ", "
+           << font.image_data.width        << ", " 
+           << font.image_data.height  << ", " 
+           << "nullptr" << ", " 
+           << ranges.str()                << " }"; // end ranges
+
+        wto << ") }"; // end SpriteFont & end map index
         
         if (std::next(font_it) != game.fonts.end())
           wto << ",\n"; 
