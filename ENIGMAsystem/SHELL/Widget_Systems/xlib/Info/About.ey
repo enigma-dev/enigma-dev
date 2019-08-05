@@ -8,7 +8,7 @@ Description: Use KDE with KDialog Widgets by calling "widget_set_system(ws_x11_k
 Author: Samuel Venable
 
 Depends:
-	Windowing: xlib
+  Windowing: xlib
 
 Represents:
-	Build-platforms: None
+  Build-platforms: None
