@@ -249,8 +249,6 @@ static inline void font_add_search_path_helper(const fs::path& p) {
      FT_Get_Sfnt_Name(face, TT_NAME_ID_FONT_FAMILY, &family);
      std::string fontFamily(reinterpret_cast<char*>(family.string), family.string_len);
      fontFamilies[fontFamily] = p;
-
-     std::cout << fontFamily << std::endl;
   }
 }
 #endif
