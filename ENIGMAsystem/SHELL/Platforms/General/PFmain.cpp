@@ -23,19 +23,26 @@ int frames_count = 0;
 unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
 
-void initGame(unsigned step) {
+void initGame(int step, bool sizeable, bool border, bool fullscreen) {
   // allow time for game to open for measuring titlebar
   // and border to calculate proper window positioning.
   if (step == 2) {
     // center window at start up
     enigma_user::window_center();
-  } else if (step == 10) {
+  } else if (step > 2 && step < 32) { // apply defaults
     // required for global game setting resizeable window
-    enigma_user::window_set_sizeable(isSizeable);
+    enigma_user::window_set_sizeable(false);
     // required for global game setting borderless window
-    enigma_user::window_set_showborder(showBorder);
+    enigma_user::window_set_showborder(true);
     // required for global game setting fullscreen window
-    enigma_user::window_set_fullscreen(isFullScreen);
+    enigma_user::window_set_fullscreen(false);
+  } else if (step == 32) { // apply global game settings
+    // required for global game setting resizeable window
+    enigma_user::window_set_sizeable(sizeable);
+    // required for global game setting borderless window
+    enigma_user::window_set_showborder(border);
+    // required for global game setting fullscreen window
+    enigma_user::window_set_fullscreen(fullscreen);
   }
 }
 
@@ -81,11 +88,15 @@ int enigma_main(int argc, char** argv) {
 
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
+  
+  int step = 0;
+  bool initSizeable = isSizeable;
+  bool initBorder = showBorder;
+  bool initFullScreen = isFullScreen;
 
-  unsigned step = 0;
   while (!game_isending) {
-    initGame(step); 
-    if (step < 11) step++;
+    initGame(step, initSizeable, initBorder, initFullScreen); 
+    if (step < 33) step++; // Jesus died at age 33.
 
     if (!((std::string)enigma_user::room_caption).empty())
       enigma_user::window_set_caption(enigma_user::room_caption);
