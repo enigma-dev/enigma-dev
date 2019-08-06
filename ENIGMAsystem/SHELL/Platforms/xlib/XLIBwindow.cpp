@@ -34,7 +34,6 @@
 #include <time.h>    //clock
 #include <unistd.h>  //usleep
 #include <climits>
-#include <cstring>
 #include <map>
 #include <string>  //Return strings without needing a GC
 
@@ -316,26 +315,28 @@ bool window_get_sizeable() { return enigma::isSizeable; }
 void window_set_showborder(bool show) {
   if (window_get_maximized()) return;
   if (window_get_fullscreen()) return;
-  if (show == window_get_showborder() && show) return;
+  if (window_get_showborder() == show) return;
   enigma::showBorder = show;
-  const char *desktopEnvironment = getenv("XDG_CURRENT_DESKTOP");
-  bool isKDE = (desktopEnvironment != NULL && strcmp(desktopEnvironment, "KDE") == 0);
+  Atom aKWinRunning = XInternAtom(disp, "KWIN_RUNNING", True);
+  bool bKWinRunning = (aKWinRunning != None);
   Hints hints;
-  Atom mwmHintsProperty = XInternAtom(disp, "_MOTIF_WM_HINTS", 0);
+  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
   hints.flags = 2;
   hints.decorations = show;
-  XChangeProperty(disp, win, mwmHintsProperty, mwmHintsProperty, 32, PropModeReplace, (unsigned char *)&hints, 5);
+  XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
   XWindowAttributes wa;
   XGetWindowAttributes(disp, win, &wa);
   Window root, parent, *child; uint children;
   XQueryTree(disp, win, &root, &parent, &child, &children);
   XWindowAttributes pwa;
   XGetWindowAttributes(disp, parent, &pwa);
-  static const int xoffset = isKDE ? pwa.x : wa.x;
-  static const int yoffset = isKDE ? pwa.y : wa.y;
+  static const int xoffset = bKWinRunning ? pwa.x : wa.x;
+  static const int yoffset = bKWinRunning ? pwa.y : wa.y;
   int xpos = show ? enigma::windowX - xoffset : enigma::windowX;
   int ypos = show ? enigma::windowY - yoffset : enigma::windowY;
-  XMoveResizeWindow(disp, win, xpos, ypos, isKDE ? wa.width : wa.width + xoffset, isKDE ? wa.height : wa.height + yoffset);
+  XResizeWindow(disp, win, enigma::windowWidth + 1, enigma::windowHeight + 1); // trigger ConfigureNotify event
+  XResizeWindow(disp, win, enigma::windowWidth - 1, enigma::windowHeight - 1); // set window back to was it was
+  XMoveResizeWindow(disp, win, xpos, ypos, bKWinRunning ? wa.width : wa.width + xoffset, bKWinRunning ? wa.height : wa.height + yoffset);
 }
 
 bool window_get_showborder() {
@@ -345,8 +346,8 @@ bool window_get_showborder() {
   unsigned long items;
   unsigned char *data = NULL;
   bool ret = true;
-  Atom mwmHintsProperty = XInternAtom(disp, "_MOTIF_WM_HINTS", 0);
-  if (XGetWindowProperty(disp, win, mwmHintsProperty, 0, LONG_MAX, False, AnyPropertyType, &type, &format, &items, &bytes, &data) == Success && data != NULL) {
+  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
+  if (XGetWindowProperty(disp, win, property, 0, LONG_MAX, False, AnyPropertyType, &type, &format, &items, &bytes, &data) == Success && data != NULL) {
     Hints *hints = (Hints *)data;
     ret = hints->decorations;
     XFree(data);
