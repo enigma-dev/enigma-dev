@@ -26,22 +26,14 @@ bool game_window_focused = true;
 void initGame(int step, bool sizeable, bool border, bool fullscreen) {
   // allow time for game to open for measuring titlebar
   // and border to calculate proper window positioning.
-  if (step == 2) {
-    // center window at start up
+  if (step < 15) {
     enigma_user::window_center();
-  } else if (step > 2 && step < 32) { // apply defaults
-    // required for global game setting resizeable window
     enigma_user::window_set_sizeable(false);
-    // required for global game setting borderless window
     enigma_user::window_set_showborder(true);
-    // required for global game setting fullscreen window
     enigma_user::window_set_fullscreen(false);
-  } else if (step == 32) { // apply global game settings
-    // required for global game setting resizeable window
+  } else if (step == 15) {
     enigma_user::window_set_sizeable(sizeable);
-    // required for global game setting borderless window
     enigma_user::window_set_showborder(border);
-    // required for global game setting fullscreen window
     enigma_user::window_set_fullscreen(fullscreen);
   }
 }
@@ -95,8 +87,10 @@ int enigma_main(int argc, char** argv) {
   bool initFullScreen = isFullScreen;
 
   while (!game_isending) {
-    initGame(step, initSizeable, initBorder, initFullScreen); 
-    if (step < 33) step++; // Jesus died at age 33.
+    if (step < 16) {
+      initGame(step, initSizeable, initBorder, initFullScreen);
+      step++;
+    }
 
     if (!((std::string)enigma_user::room_caption).empty())
       enigma_user::window_set_caption(enigma_user::room_caption);
