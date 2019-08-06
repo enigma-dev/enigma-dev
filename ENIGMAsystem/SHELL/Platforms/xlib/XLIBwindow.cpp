@@ -335,7 +335,7 @@ void window_set_showborder(bool show) {
   int xpos = show ? enigma::windowX - xoffset : enigma::windowX;
   int ypos = show ? enigma::windowY - yoffset : enigma::windowY;
   XResizeWindow(disp, win, enigma::windowWidth + 1, enigma::windowHeight + 1); // trigger ConfigureNotify event
-  XResizeWindow(disp, win, enigma::windowWidth - 1, enigma::windowHeight - 1); // set window back to was it was
+  XResizeWindow(disp, win, enigma::windowWidth - 1, enigma::windowHeight - 1); // set window back to how it was
   XMoveResizeWindow(disp, win, xpos, ypos, bKWinRunning ? wa.width : wa.width + xoffset, bKWinRunning ? wa.height : wa.height + yoffset);
 }
 
