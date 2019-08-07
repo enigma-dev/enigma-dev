@@ -320,10 +320,10 @@ void window_set_showborder(bool show) {
   Atom aKWinRunning = XInternAtom(disp, "KWIN_RUNNING", True);
   bool bKWinRunning = (aKWinRunning != None);
   Hints hints;
-  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
+  Atom aProperty = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
   hints.flags = 2;
   hints.decorations = show;
-  XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
+  XChangeProperty(disp, win, aProperty, aProperty, 32, PropModeReplace, (unsigned char *)&hints, 5);
   XWindowAttributes wa;
   XGetWindowAttributes(disp, win, &wa);
   Window root, parent, *child; uint children;
@@ -346,8 +346,8 @@ bool window_get_showborder() {
   unsigned long items;
   unsigned char *data = NULL;
   bool ret = true;
-  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
-  if (XGetWindowProperty(disp, win, property, 0, LONG_MAX, False, AnyPropertyType, &type, &format, &items, &bytes, &data) == Success && data != NULL) {
+  Atom aProperty = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
+  if (XGetWindowProperty(disp, win, aProperty, 0, LONG_MAX, False, AnyPropertyType, &type, &format, &items, &bytes, &data) == Success && data != NULL) {
     Hints *hints = (Hints *)data;
     ret = hints->decorations;
     XFree(data);
