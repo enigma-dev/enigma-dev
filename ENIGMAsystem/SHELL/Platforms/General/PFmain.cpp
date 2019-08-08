@@ -24,17 +24,12 @@ unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
 
 void initGame(int step, bool sizeable, bool border, bool fullscreen) {
-  // allow time for game to open for measuring titlebar
-  // and border to calculate proper window positioning.
   if (step < 15) {
-    enigma_user::window_center();
-    enigma_user::window_set_sizeable(false);
-    enigma_user::window_set_showborder(true);
-    enigma_user::window_set_fullscreen(false);
-  } else if (step == 15) {
     enigma_user::window_set_sizeable(sizeable);
     enigma_user::window_set_showborder(border);
     enigma_user::window_set_fullscreen(fullscreen);
+    enigma_user::window_set_size(windowWidth, windowHeight);
+    enigma_user::window_center();
   }
 }
 
@@ -87,7 +82,7 @@ int enigma_main(int argc, char** argv) {
   bool initFullScreen = isFullScreen;
 
   while (!game_isending) {
-    if (step < 16) {
+    if (step < 15) {
       initGame(step, initSizeable, initBorder, initFullScreen);
       step++;
     }
