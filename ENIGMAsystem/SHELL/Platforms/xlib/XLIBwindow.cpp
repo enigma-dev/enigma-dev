@@ -354,7 +354,7 @@ bool window_get_showborder() {
   Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   if (XGetWindowProperty(disp, win, property, 0, LONG_MAX, False, AnyPropertyType, &type, &format, &items, &bytes, &data) == Success && data != NULL) {
     Hints *hints = (Hints *)data;
-    ret = (hints->decorations || items == None);
+    ret = hints->decorations;
     XFree(data);
   }
   return ret;
