@@ -23,14 +23,12 @@ int frames_count = 0;
 unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
 
-void initGame(int step, bool sizeable, bool border, bool fullscreen) {
-  if (step < 15) {
-    enigma_user::window_set_sizeable(sizeable);
-    enigma_user::window_set_showborder(border);
-    enigma_user::window_set_fullscreen(fullscreen);
-    enigma_user::window_set_size(windowWidth, windowHeight);
-    enigma_user::window_center();
-  }
+void initGame() {
+  enigma_user::window_set_sizeable(isSizeable);
+  enigma_user::window_set_showborder(showBorder);
+  enigma_user::window_set_fullscreen(isFullScreen);
+  enigma_user::window_set_size(windowWidth, windowHeight);
+  enigma_user::window_center();
 }
 
 int gameWait() {
@@ -75,15 +73,11 @@ int enigma_main(int argc, char** argv) {
 
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
-  
-  int step = 0;
-  bool initSizeable = isSizeable;
-  bool initBorder = showBorder;
-  bool initFullScreen = isFullScreen;
 
+  unsigned step = 0;
   while (!game_isending) {
     if (step < 15) {
-      initGame(step, initSizeable, initBorder, initFullScreen);
+      initGame();
       step++;
     }
 
