@@ -319,19 +319,24 @@ void window_set_showborder(bool show) {
   enigma::showBorder = show;
   Atom aKWinRunning = XInternAtom(disp, "KWIN_RUNNING", True);
   bool bKWinRunning = (aKWinRunning != None);
+  XWindowAttributes wa;
+  Window root, parent, *child; uint children;
+  XWindowAttributes pwa;
+  for (;;) {
+    XGetWindowAttributes(disp, win, &wa);
+    XQueryTree(disp, win, &root, &parent, &child, &children);
+    XGetWindowAttributes(disp, parent, &pwa);
+    // allow time for the titlebar and border sizes to be measured for proper window positioning...
+    if ((bKWinRunning ? pwa.x : wa.x) || (bKWinRunning ? pwa.y : wa.y) || !window_get_showborder())
+      break;
+  }
+  static const int xoffset = bKWinRunning ? pwa.x : wa.x;
+  static const int yoffset = bKWinRunning ? pwa.y : wa.y;
   Hints hints;
   Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   hints.flags = 2;
   hints.decorations = show;
   XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
-  XWindowAttributes wa;
-  XGetWindowAttributes(disp, win, &wa);
-  Window root, parent, *child; uint children;
-  XQueryTree(disp, win, &root, &parent, &child, &children);
-  XWindowAttributes pwa;
-  XGetWindowAttributes(disp, parent, &pwa);
-  static const int xoffset = bKWinRunning ? pwa.x : wa.x;
-  static const int yoffset = bKWinRunning ? pwa.y : wa.y;
   int xpos = show ? enigma::windowX - xoffset : enigma::windowX;
   int ypos = show ? enigma::windowY - yoffset : enigma::windowY;
   XResizeWindow(disp, win, enigma::windowWidth + 1, enigma::windowHeight + 1); // trigger ConfigureNotify event
@@ -349,7 +354,7 @@ bool window_get_showborder() {
   Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   if (XGetWindowProperty(disp, win, property, 0, LONG_MAX, False, AnyPropertyType, &type, &format, &items, &bytes, &data) == Success && data != NULL) {
     Hints *hints = (Hints *)data;
-    ret = hints->decorations;
+    ret = (hints->decorations || items == None);
     XFree(data);
   }
   return ret;
