@@ -180,11 +180,13 @@ int tmpHeight = enigma::windowHeight;
 }  // anonymous namespace
 
 void window_set_fullscreen(bool full) {
-  prefer_stayontop = window_get_stayontop();
   if (window_get_fullscreen() == full) return;
   enigma::isFullScreen = full;
   // tweak the style first to remove or restore the window border
   if (full) {
+    prefer_borderless = !window_get_showborder();
+    prefer_sizeable = window_get_sizeable();
+    prefer_stayontop = window_get_stayontop();
     tmpWidth = window_get_width();
     tmpHeight = window_get_height();
     window_set_stayontop(true);
@@ -193,15 +195,14 @@ void window_set_fullscreen(bool full) {
     style |= WS_SIZEBOX;
     SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
     window_set_maximized(full);
-    enigma::compute_window_scaling();
   } else {
     window_set_maximized(full);
     window_set_showborder(!prefer_borderless);
     window_set_sizeable(prefer_sizeable);
     window_set_stayontop(prefer_stayontop);
     window_set_size(tmpWidth, tmpHeight);
-    enigma::compute_window_scaling();
   }
+  enigma::compute_window_scaling();
 }
 
 bool window_get_fullscreen() {
@@ -239,6 +240,7 @@ void window_set_showborder(bool show) {
   DWORD style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
   if (show) style |= WS_CAPTION | WS_BORDER | WS_MINIMIZEBOX;
   else style &= ~(WS_CAPTION | WS_BORDER);
+  if (show && prefer_sizeable) style |= WS_MAXIMIZEBOX;
   SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
   window_set_size(tmp2Width, tmp2Height);
 }
