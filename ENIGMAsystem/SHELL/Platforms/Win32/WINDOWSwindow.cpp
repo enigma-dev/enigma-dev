@@ -172,11 +172,13 @@ void window_set_rectangle(int x, int y, int width, int height) {
 }
 
 namespace {
-bool prefer_stayontop;
-bool prefer_sizeable = enigma::isSizeable;
+
 bool prefer_borderless = !enigma::showBorder;
+bool prefer_sizeable = enigma::isSizeable;
+bool prefer_stayontop;
 int tmpWidth = enigma::windowWidth;
 int tmpHeight = enigma::windowHeight;
+
 }  // anonymous namespace
 
 void window_set_fullscreen(bool full) {
@@ -187,6 +189,7 @@ void window_set_fullscreen(bool full) {
     prefer_borderless = !window_get_showborder();
     prefer_sizeable = window_get_sizeable();
     prefer_stayontop = window_get_stayontop();
+    window_set_maximized(false);
     tmpWidth = window_get_width();
     tmpHeight = window_get_height();
     window_set_stayontop(true);
