@@ -175,7 +175,8 @@ namespace {
 
 bool prefer_borderless = !enigma::showBorder;
 bool prefer_sizeable = enigma::isSizeable;
-bool prefer_stayontop;
+bool prefer_fullscreen = false;
+bool prefer_stayontop = false;
 int tmpWidth = enigma::windowWidth;
 int tmpHeight = enigma::windowHeight;
 
@@ -184,6 +185,7 @@ int tmpHeight = enigma::windowHeight;
 void window_set_fullscreen(bool full) {
   if (window_get_fullscreen() == full) return;
   enigma::isFullScreen = full;
+  prefer_fullscreen = full;
   // tweak the style first to remove or restore the window border
   if (full) {
     prefer_borderless = !window_get_showborder();
@@ -209,7 +211,7 @@ void window_set_fullscreen(bool full) {
 }
 
 bool window_get_fullscreen() {
-  return enigma::isFullScreen;
+  return prefer_fullscreen;
 }
 
 void window_set_sizeable(bool sizeable) {
