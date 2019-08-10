@@ -257,12 +257,6 @@ namespace enigma
           enigma::windowHeight = enigma_user::window_get_height();
           enigma::compute_window_scaling();
           break;
-        } else if (wParam == SC_RESTORE) {
-          ShowWindow(hWnd, SW_RESTORE);
-          enigma::windowWidth = enigma_user::window_get_width();
-          enigma::windowHeight = enigma_user::window_get_height();
-          enigma::compute_window_scaling();
-          break;
         } else {
           return DefWindowProc(hWndParameter, message, wParam, lParam);
         }
