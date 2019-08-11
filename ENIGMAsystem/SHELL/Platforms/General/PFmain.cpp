@@ -23,6 +23,14 @@ int frames_count = 0;
 unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
 
+void initGame() {
+  enigma_user::window_set_sizeable(isSizeable);
+  enigma_user::window_set_showborder(showBorder);
+  enigma_user::window_set_fullscreen(isFullScreen);
+  enigma_user::window_set_size(windowWidth, windowHeight);
+  enigma_user::window_center();
+}
+
 int gameWait() {
   if (enigma_user::os_is_paused()) {
     if (pausedSteps < 1) {
@@ -66,7 +74,13 @@ int enigma_main(int argc, char** argv) {
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
 
+  unsigned step = 0;
   while (!game_isending) {
+    if (step < 15) {
+      initGame();
+      step++;
+    }
+
     if (!((std::string)enigma_user::room_caption).empty())
       enigma_user::window_set_caption(enigma_user::room_caption);
     update_mouse_variables();
