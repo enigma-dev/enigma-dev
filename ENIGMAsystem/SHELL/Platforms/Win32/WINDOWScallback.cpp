@@ -37,7 +37,7 @@ using std::map;
 namespace enigma_user {
 void draw_clear(int col);
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
-}
+} // namespace enigma_user
 
 namespace enigma
 {
@@ -65,6 +65,11 @@ namespace enigma
     switch (message)
     {
       case WM_CREATE:
+        return 0;
+      case WM_SHOWWINDOW:
+        enigma::windowWidth = enigma_user::window_get_width();
+        enigma::windowHeight = enigma_user::window_get_height();
+        enigma::compute_window_scaling();
         return 0;
       case WM_CLOSE:
         instance_event_iterator = &dummy_event_iterator;
@@ -108,6 +113,9 @@ namespace enigma
         if (hWndParameter == hWnd) {
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
+            windowWidth = enigma_user::window_get_width();
+            windowHeight = enigma_user::window_get_height();
+            enigma::compute_window_scaling();
           }
           instance_event_iterator = &dummy_event_iterator;
           for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
@@ -136,7 +144,9 @@ namespace enigma
         windowY += tempWindow.top - tempTop;
         windowWidth = tempWidth;
         windowHeight = tempHeight;
-        compute_window_size();
+        enigma::windowWidth = enigma_user::window_get_width();
+        enigma::windowHeight = enigma_user::window_get_height();
+        enigma::compute_window_scaling();
         return 0;
 
       case WM_GETMINMAXINFO: {
@@ -239,6 +249,19 @@ namespace enigma
       case WM_PAINT:
         DefWindowProc(hWndParameter, message, wParam, lParam);
         return 0;
+
+      case WM_SYSCOMMAND: {
+        if (wParam == SC_MAXIMIZE) {
+          ShowWindow(hWnd, SW_MAXIMIZE);
+          enigma::windowWidth = enigma_user::window_get_width();
+          enigma::windowHeight = enigma_user::window_get_height();
+          enigma::compute_window_scaling();
+          break;
+        } else {
+          return DefWindowProc(hWndParameter, message, wParam, lParam);
+        }
+        return 0;
+      }
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);
   }
