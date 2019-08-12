@@ -194,7 +194,7 @@ void window_set_fullscreen(bool full) {
     window_set_maximized(false);
     tmpWidth = window_get_width();
     tmpHeight = window_get_height();
-    window_set_stayontop(true);
+    window_set_stayontop(false);
     LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
     style &= ~(WS_CAPTION | WS_BORDER | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
     style |= WS_SIZEBOX;
