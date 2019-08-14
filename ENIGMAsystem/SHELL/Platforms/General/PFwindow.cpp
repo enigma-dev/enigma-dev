@@ -238,7 +238,7 @@ bool mouse_check_button_released(int button) {
   }
 }
 
-void mouse_clear(const int button) { enigma::mousestatus[button - 1] = enigma::last_mousestatus[button - 1] = 0; }
+void mouse_clear(const int button) { enigma::mousestatus[button] = enigma::last_mousestatus[button] = 0; }
 
 void mouse_wait() {
   for (;;) {
@@ -287,8 +287,9 @@ void window_default(bool center_size) {
 }
 
 void window_center() {
-  window_set_position(display_get_width() / 2 - window_get_width() / 2,
-                      display_get_height() / 2 - window_get_height() / 2);
+  // without this while loop, the window won't be guaranteed to center at game init, in xlib, which is weird, but this makes it necessary.
+  while (enigma::windowX != display_get_width() / 2 - window_get_width() / 2 && enigma::windowY != display_get_height() / 2 - window_get_height() / 2)
+    window_set_position(display_get_width() / 2 - window_get_width() / 2, display_get_height() / 2 - window_get_height() / 2);
 }
 
 void window_set_freezeonlosefocus(bool freeze) { enigma::freezeOnLoseFocus = freeze; }
