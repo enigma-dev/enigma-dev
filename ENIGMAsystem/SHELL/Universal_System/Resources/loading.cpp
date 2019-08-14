@@ -133,6 +133,13 @@ namespace enigma
       enigma_user::window_set_visible(true);
     }
 
+    enigma_user::window_set_size(windowWidth, windowHeight);
+    enigma_user::window_center();
+    
+    enigma_user::window_set_sizeable(isSizeable);
+    enigma_user::window_set_showborder(showBorder);
+    enigma_user::window_set_fullscreen(isFullScreen);
+
     return 0;
   }
 } //namespace enigma
