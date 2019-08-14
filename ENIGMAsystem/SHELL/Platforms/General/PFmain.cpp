@@ -66,7 +66,6 @@ int enigma_main(int argc, char** argv) {
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
 
-  unsigned step = 0;
   while (!game_isending) {
 
     if (!((std::string)enigma_user::room_caption).empty())
