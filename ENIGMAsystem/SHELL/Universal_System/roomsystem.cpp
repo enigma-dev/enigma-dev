@@ -228,7 +228,7 @@ namespace enigma
       view_visible[i] = (bool)views[i].start_vis;
       view_angle[i] = 0;
     }
-
+    
     // In pull request 1831, it was decided to adopt GMS behavior instead of GM8.
     // The window is no longer moved, centered, or resized when switching rooms.
     // This is always true, even if the room sizes are different.
