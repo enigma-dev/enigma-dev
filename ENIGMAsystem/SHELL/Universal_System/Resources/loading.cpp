@@ -133,6 +133,15 @@ namespace enigma
       enigma_user::window_set_visible(true);
     }
 
+    // resize and center window
+    enigma_user::window_set_size(windowWidth, windowHeight);
+    enigma_user::window_center();
+    
+    // apply global game settings
+    enigma_user::window_set_sizeable(isSizeable);
+    enigma_user::window_set_showborder(showBorder);
+    enigma_user::window_set_fullscreen(isFullScreen);
+
     return 0;
   }
 } //namespace enigma
