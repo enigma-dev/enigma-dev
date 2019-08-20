@@ -437,7 +437,7 @@ static inline string get_directory_helper(string dname, string title) {
   selectDirectory->GetOptions(&options);
   selectDirectory->SetOptions(options | FOS_PICKFOLDERS | FOS_NOCHANGEDIR | FOS_FORCEFILESYSTEM);
 
-  tstring tstr_dname = widen((dname == "") ? working_directory : dname);
+  tstring tstr_dname = widen((dname == "") ? enigma_user::working_directory : dname);
   LPWSTR szFilePath = (wchar_t *)tstr_dname.c_str();
 
   IShellItem* pItem = nullptr;
