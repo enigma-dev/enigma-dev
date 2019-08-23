@@ -32,6 +32,7 @@
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
+#include "Platforms/General/PFmain.h"
 #include "Universal_System/estring.h"
 #include "GameSettings.h"
 
@@ -420,7 +421,7 @@ static inline string get_open_filenames_helper(string filter, string fname, stri
 
 static inline string get_save_filename_helper(string filter, string fname, string dir, string title) {
   OPENFILENAMEW ofn;
-  ofn = get_filename_or_filenames_helper(filter, fname, dir, title, 0);
+  ofn = get_filename_or_filenames_helper(filter, fname, dir, title, OFN_OVERWRITEPROMPT);
 
   if (GetSaveFileNameW(&ofn) != 0)
     return shorten(wstr_fname);
@@ -436,7 +437,7 @@ static inline string get_directory_helper(string dname, string title) {
   selectDirectory->GetOptions(&options);
   selectDirectory->SetOptions(options | FOS_PICKFOLDERS | FOS_NOCHANGEDIR | FOS_FORCEFILESYSTEM);
 
-  tstring tstr_dname = widen(dname);
+  tstring tstr_dname = widen((dname == "") ? enigma_user::working_directory : dname);
   LPWSTR szFilePath = (wchar_t *)tstr_dname.c_str();
 
   IShellItem* pItem = nullptr;

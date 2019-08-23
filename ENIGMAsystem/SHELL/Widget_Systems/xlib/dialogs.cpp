@@ -18,16 +18,27 @@
 #include "dialogs.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
+#include <X11/Xlib.h>
 #include <string>
 using std::string;
 
 namespace enigma {
 
-bool widget_system_initialize() {
-  return true;
+CommandLineWidgetEngine *current_widget_engine = zenity_widgets;
+
+static bool kwin_running() {
+  Display *d = XOpenDisplay(NULL);
+  Atom aKWinRunning = XInternAtom(d, "KWIN_RUNNING", True);
+  bool bKWinRunning = (aKWinRunning != None);
+  XCloseDisplay(d);
+  return bKWinRunning;
 }
 
-CommandLineWidgetEngine *current_widget_engine = zenity_widgets;
+bool widget_system_initialize() {
+  // Defaults to the GUI toolkit (GTK+/Qt) that matches Desktop Environment.
+  current_widget_engine = kwin_running() ? kdialog_widgets : zenity_widgets;
+  return true;
+}
 
 } // namespace enigma
 
