@@ -70,8 +70,8 @@ static string shellscript_evaluate(string command) {
 }
 
 static string add_escaping(string str, bool is_caption, string new_caption) {
-  string result; if (is_caption && str.empty()) result = new_caption;
-  result = string_replace_all(str, "\"", "\\\""); // zenity needs this for quotes to show
+  string result = str; if (is_caption && str.empty()) result = new_caption;
+  result = string_replace_all(result, "\"", "\\\""); // zenity needs this for quotes to show
   result = string_replace_all(result, "_", "__"); // zenity needs this for underscores to show
   return result;
 }
