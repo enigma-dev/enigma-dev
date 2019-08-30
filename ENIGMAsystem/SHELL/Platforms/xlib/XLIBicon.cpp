@@ -26,7 +26,6 @@
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
 #include <X11/Xatom.h>
-#include <X11/Xmu/WinUtil.h>
 #include <gd.h>
 
 typedef unsigned long int CARD32;
