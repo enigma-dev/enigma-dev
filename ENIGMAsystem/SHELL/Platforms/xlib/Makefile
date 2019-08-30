@@ -7,4 +7,3 @@ GD_LIBS=-lgd
 SOURCES += $(wildcard Platforms/xlib/*.cpp) $(wildcard Platforms/General/POSIX/*.cpp)
 override CXXFLAGS += ${GLIB_CFLAGS} ${XLIB_CFLAGS}
 override LDLIBS += -lz -lpthread -lX11 ${GLIB_LIBS} ${XLIB_LIBS} ${GD_LIBS}
- 
