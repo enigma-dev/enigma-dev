@@ -27,7 +27,8 @@ before_install:
         sudo dpkg --add-architecture i386;
         sudo apt-get -y install libc6:i386 libc++-dev:i386 libstdc++6:i386\
           libncurses5:i386 libx11-6:i386 libglew-dev:i386 libglu1-mesa-dev:i386\
-          libgl1-mesa-dev:i386 lib32z1-dev libxrandr-dev:i386;
+          libgl1-mesa-dev:i386 lib32z1-dev libxrandr-dev:i386\
+          libxmu-headers:i386 libgd-dev:i386 libxmu-dev:i386 libglib2.0-dev:i386;
 
         if [ "$COMPILER" == "gcc32" ]; then
           sudo apt-get -y install gcc-multilib g++-multilib;
@@ -40,7 +41,8 @@ before_install:
         unzip enigma-libs.zip -d ENIGMAsystem/;
         mv ENIGMAsystem/Install ENIGMAsystem/Additional;
       else
-        sudo apt-get -y install libc++-dev libglew-dev libglu1-mesa-dev libxrandr-dev;
+        sudo apt-get -y install libc++-dev libglew-dev libglu1-mesa-dev libxrandr-dev\
+          libxmu-headers libgd-dev libxmu-dev libglib2.0-dev;
       fi
 
       if [ "$AUDIO" == "OpenAL" ]; then
@@ -158,7 +160,7 @@ matrix:
     - env: WIDGETS=Zenity
       before_script: sudo apt-get -y install zenity
     - env: WIDGETS=KDialog
-      before_script: sudo apt-get -y install kdebase-bin
+      before_script: sudo apt-get -y install kdialog
     # GME (Note: requires an Audio system)
     - env: AUDIO=OpenAL EXTENSIONS="GME"
       before_script: sudo apt-get -y install libgme-dev
