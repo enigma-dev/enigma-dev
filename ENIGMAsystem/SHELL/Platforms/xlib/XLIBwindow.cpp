@@ -22,6 +22,8 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/sprites.h"
+#include "Universal_System/Resources/background.h"
 
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"
@@ -144,12 +146,25 @@ void destroyWindow() {
 
 namespace enigma_user {
 
+void window_set_icon(const string &fname) {
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  if (file_exists(fname)) enigma::XSetIcon(disp, win, fname.c_str());
+}
+
+void window_set_icon_from_unpacked_sprite(int ind, unsigned subimg, const std::string &fname) {
+  sprite_save(ind, subimg, fname);
+  window_set_icon(fname);
+}
+
+void window_set_icon_from_unpacked_background(int back, const std::string &fname) {
+  background_save(back, fname);
+  window_set_icon(fname);
+}
+
 void window_set_visible(bool visible) {
   if (visible) {
     XMapRaised(disp, win);
-    // Set the window's icon
-    if (file_exists("assets/icon.png"))
-      enigma::XSetIcon(disp, win, "assets/icon.png");
   } else {
     XUnmapWindow(disp, win);
   }
