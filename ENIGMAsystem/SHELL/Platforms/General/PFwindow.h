@@ -251,7 +251,11 @@ void window_set_max_height(int height);
 
 void window_set_minimized(bool minimized);
 void window_set_maximized(bool maximized);
+void window_set_icon(const string &fname);
+void window_set_icon_from_unpacked_sprite(int ind, unsigned subimg, const std::string &fname);
+void window_set_icon_from_unpacked_background(int back, const std::string &fname);
 void window_set_visible(bool visible);
+string window_get_icon();
 int window_get_visible();
 bool window_get_stayontop();
 bool window_get_sizeable();
