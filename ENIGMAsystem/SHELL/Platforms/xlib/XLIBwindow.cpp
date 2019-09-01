@@ -153,8 +153,8 @@ string window_get_icon() {
 }
 
 void window_set_icon(const string &fname) {
-  if (currentIcon == fname) return; 
-  currentIcon = fname;
+  if (currentIcon == filename_absolute(fname)) return; 
+  currentIcon = filename_absolute(fname);
 
   // needs to be visible first to prevent segfault
   if (!window_get_visible()) window_set_visible(true);
