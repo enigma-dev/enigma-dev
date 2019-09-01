@@ -146,7 +146,16 @@ void destroyWindow() {
 
 namespace enigma_user {
 
+static string currentIcon;
+
+string window_get_icon() {
+  return currentIcon;
+}
+
 void window_set_icon(const string &fname) {
+  if (currentIcon == fname) return; 
+  currentIcon = fname;
+
   // needs to be visible first to prevent segfault
   if (!window_get_visible()) window_set_visible(true);
   if (file_exists(fname)) enigma::XSetIcon(disp, win, fname.c_str());
