@@ -85,6 +85,7 @@ void XSetIcon(Display *display, Window window, const char *icon) {
     (unsigned char *)data, nelements);
 
   XFlush(display);
+  free(data);
 }
 
 }
