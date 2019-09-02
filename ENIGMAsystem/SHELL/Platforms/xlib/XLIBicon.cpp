@@ -47,7 +47,7 @@ void load_icon(char *filename, uint *ndata, unsigned long int **data) {
     for (x = 0; x < width; x++) {
       // data is RGBA
       // We'll do some horrible data-munging here
-      unsigned char * cols = (unsigned char *)&((*data)[i++]);
+      unsigned char *cols = (unsigned char *)&((*data)[i++]);
       
       int pixcolour = gdImageGetPixel(icon, x, y);
 
