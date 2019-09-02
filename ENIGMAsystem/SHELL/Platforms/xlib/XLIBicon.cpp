@@ -21,17 +21,14 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <glib.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
 #include <X11/Xatom.h>
 #include <gd.h>
 
-typedef unsigned long int CARD32;
-
-void load_icon(gchar* filename, uint* ndata, CARD32** data) {
-  FILE* iconfile = fopen(filename, "r");
+void load_icon(char *filename, uint *ndata, unsigned long int **data) {
+  FILE *iconfile = fopen(filename, "r");
   gdImagePtr icon = gdImageCreateFromPng(iconfile);
   fclose(iconfile);
   
@@ -39,18 +36,18 @@ void load_icon(gchar* filename, uint* ndata, CARD32** data) {
   width = gdImageSX(icon);
   height = gdImageSY(icon);
   (*ndata) = (width * height) + 2;
-  (*data) = g_new0(CARD32, (*ndata));
+  (*data) = (unsigned long int *)malloc((*ndata) * sizeof(unsigned long int));
 
   int i = 0;
   (*data)[i++] = width;
   (*data)[i++] = height;
   
   int x, y;
-  for(y = 0; y < height; y++) {
-    for(x = 0; x < width; x++) {
+  for (y = 0; y < height; y++) {
+    for (x = 0; x < width; x++) {
       // data is RGBA
       // We'll do some horrible data-munging here
-      guint8* cols = (guint8*)&((*data)[i++]);
+      unsigned char * cols = (unsigned char *)&((*data)[i++]);
       
       int pixcolour = gdImageGetPixel(icon, x, y);
 
@@ -61,7 +58,7 @@ void load_icon(gchar* filename, uint* ndata, CARD32** data) {
       /* Alpha is more difficult */
       int alpha = 127 - gdImageAlpha(icon, pixcolour); // 0 to 127
       
-      // Scale it up to 0 to 255; remembering that 2*127 should be max
+      // Scale it up to 0 to 255; remembering that 2 * 127 should be max
       if (alpha == 127)
         alpha = 255;
       else
@@ -77,15 +74,15 @@ void load_icon(gchar* filename, uint* ndata, CARD32** data) {
 namespace enigma {
 
 void XSetIcon(Display *display, Window window, const char *icon) {
-  XSynchronize(display, TRUE);
+  XSynchronize(display, True);
   Atom property = XInternAtom(display, "_NET_WM_ICON", 0);
 
-  guint nelements;
-  CARD32* data;
+  unsigned int nelements;
+  unsigned long int *data;
 
-  load_icon((gchar*)icon, &nelements, &data);
+  load_icon((char *)icon, &nelements, &data);
   XChangeProperty(display, window, property, XA_CARDINAL, 32, PropModeReplace, 
-      (unsigned char*)data, nelements);
+      (unsigned char *)data, nelements);
 
   XFlush(display);
 }
