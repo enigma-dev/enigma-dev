@@ -82,7 +82,7 @@ void XSetIcon(Display *display, Window window, const char *icon) {
 
   load_icon((char *)icon, &nelements, &data);
   XChangeProperty(display, window, property, XA_CARDINAL, 32, PropModeReplace, 
-      (unsigned char *)data, nelements);
+    (unsigned char *)data, nelements);
 
   XFlush(display);
 }
