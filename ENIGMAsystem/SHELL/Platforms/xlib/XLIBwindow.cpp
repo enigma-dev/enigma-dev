@@ -161,7 +161,7 @@ void window_set_icon(const string &fname) {
   if (currentIcon == filename_absolute(fname)) return; 
   // the line below prevents glitchy minimizing when 
   // icons are changed rapidly (i.e. for animation).
-  if (window_get_maximized()) return;
+  if (window_get_minimized()) return;
   currentIcon = filename_absolute(fname);
 
   // needs to be visible first to prevent segfault
