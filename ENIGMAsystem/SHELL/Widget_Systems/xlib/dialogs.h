@@ -22,6 +22,8 @@ using std::string;
 
 namespace enigma {
 
+void window_id_init();
+
 class CommandLineWidgetEngine {
  public:
   virtual ~CommandLineWidgetEngine() = default;
