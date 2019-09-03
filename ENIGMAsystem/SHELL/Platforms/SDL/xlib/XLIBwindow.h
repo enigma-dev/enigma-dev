@@ -15,12 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../Window.h"
-#include "XLIBwindow.h"
-#include "Platforms/xlib/XLIBicon.h"
-#include "Platforms/SDL/xlib/XLIBicon.h"
-#include "Platforms/General/PFwindow.h"
-#include "Platforms/General/PFmain.h"
-#include "Platforms/General/PFfilemanip.h"
-#include "Universal_System/Resources/sprites.h"
-#include "Universal_System/Resources/background.h"
+#include <X11/Xlib.h>
+
+namespace enigma {
+
+namespace x11 {
+
+Display *disp;
+Window win;
+
+}
+
+}
