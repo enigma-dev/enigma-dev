@@ -27,6 +27,7 @@ void window_id_init() {
   SDL_SysWMinfo wmInfo;
   SDL_VERSION(&wmInfo.version);
   SDL_GetWindowWMInfo(enigma::windowHandle, &wmInfo);
+  enigma::x11::disp = wmInfo.info.x11.display;
   enigma::x11::win = wmInfo.info.x11.window;
 }
 
