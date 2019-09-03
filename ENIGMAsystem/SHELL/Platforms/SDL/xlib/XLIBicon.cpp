@@ -47,6 +47,7 @@ void window_set_icon_from_unpacked_background(int back, const std::string &fname
   window_set_icon(fname);
   file_delete(fname);
 }
+
 */
 
 }
