@@ -70,7 +70,12 @@ void set_net_wm_pid(Window window) {
   Atom net_wm_pid = XInternAtom(disp, "_NET_WM_PID", False);
   XChangeProperty(disp, window, net_wm_pid, cardinal, 32, PropModeReplace, (unsigned char*)&pid, sizeof(pid) / 4);
 }
+
 } // namespace x11;
+
+void window_id_init() {
+
+}
 
 bool initGameWindow()
 {
