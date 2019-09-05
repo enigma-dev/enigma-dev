@@ -17,8 +17,10 @@
 
 #include "XLIBicon.h"
 #include <X11/Xatom.h>
+
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/nlpo2.h"
+
 #include "libpng-util.h"
 #include <png.h>
 
