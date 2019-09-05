@@ -24,9 +24,6 @@
 #include "libpng-util.h"
 #include <png.h>
 
-#include <string>
-using std::string;
-
 namespace enigma {
 
 void XSetIcon(Display *display, Window window, const char *icon) {
