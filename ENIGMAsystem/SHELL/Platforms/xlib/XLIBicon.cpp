@@ -70,9 +70,9 @@ void XSetIcon(Display *display, Window window, const char *icon) {
   XChangeProperty(display, window, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)result, elem_numb);
   
   XFlush(display);
+  delete[] result;
   delete[] bitmap;
   delete[] data;
-  delete[] result;
 }
 
 }
