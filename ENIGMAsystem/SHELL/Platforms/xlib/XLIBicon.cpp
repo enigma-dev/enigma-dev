@@ -47,7 +47,6 @@ void XSetIcon(Display *display, Window window, const char *icon) {
   const int bitmap_size = widfull * hgtfull * 4;
   unsigned char *bitmap = new unsigned char[bitmap_size]();
 
-  string output;
   unsigned i = 0;
   unsigned elem_numb = 2 + pngwidth * pngheight;
   unsigned long int *result = new unsigned long int[elem_numb]();
