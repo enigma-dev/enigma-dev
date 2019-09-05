@@ -19,9 +19,9 @@ else
 	ifeq ($(TARGET-PLATFORM), Linux)
 		SOURCES += $(wildcard Platforms/SDL/xlib/*.cpp)
 		SOURCES += Platforms/xlib/XLIBicon.cpp
-		override CXXFLAGS += -I/usr/X11R6/include -I/usr/include -I/usr/include/libpng16
-		override CFLAGS += -I/usr/X11R6/include -I/usr/include -I/usr/include/libpng16
-		override LDLIBS += -Wl,-Bstatic -lpng16 -lz -Wl,-Bdynamic -lz -lpthread -lX11
+		override CXXFLAGS += -I$(SHARED_SRC_DIR)/libpng-util -I/usr/X11R6/include -I/usr/include -I/usr/include/libpng16
+		override CFLAGS += -I$(SHARED_SRC_DIR)/libpng-util -I/usr/X11R6/include -I/usr/include -I/usr/include/libpng16
+		override LDLIBS += -L$(SHARED_SRC_DIR)/libpng-util -Wl,-Bstatic -lpng16 -lz -Wl,-Bdynamic -lz -lpthread -lX11
 		override LDFLAGS += -L/usr/X11R6/lib -L/usr/lib
 	endif
 endif
