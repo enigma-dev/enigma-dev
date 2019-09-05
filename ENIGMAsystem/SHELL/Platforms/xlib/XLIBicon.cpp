@@ -21,7 +21,7 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/nlpo2.h"
 
-#include "libpng-util/libpng-util.h"
+#include <libpng-util/libpng-util.h>
 #include <png.h>
 
 namespace enigma {
