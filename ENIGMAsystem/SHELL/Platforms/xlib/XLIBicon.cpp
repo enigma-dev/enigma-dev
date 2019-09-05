@@ -1,91 +1,78 @@
-/*
- * Copyright (C) 2012, Paul Evans <leonerd@leonerd.org.uk>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
- */
+/** Copyright (C) 2019 Samuel Venable
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include "XLIBicon.h"
-
-#include <cstdio>
-#include <cstdlib>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/cursorfont.h>
 #include <X11/Xatom.h>
-#include <gd.h>
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Universal_System/nlpo2.h"
+#include "libpng-util.h"
+#include <png.h>
 
-void load_icon(char *filename, uint *ndata, unsigned long int **data) {
-  FILE *iconfile = fopen(filename, "r");
-  gdImagePtr icon = gdImageCreateFromPng(iconfile);
-  fclose(iconfile);
-  
-  int width, height;
-  width = gdImageSX(icon);
-  height = gdImageSY(icon);
-  (*ndata) = (width * height) + 2;
-  (*data) = (unsigned long int *)malloc((*ndata) * sizeof(unsigned long int));
-
-  int i = 0;
-  (*data)[i++] = width;
-  (*data)[i++] = height;
-  
-  int x, y;
-  for (y = 0; y < height; y++) {
-    for (x = 0; x < width; x++) {
-      // data is RGBA
-      // We'll do some horrible data-munging here
-      unsigned char *cols = (unsigned char *)&((*data)[i++]);
-      
-      int pixcolour = gdImageGetPixel(icon, x, y);
-
-      cols[0] = gdImageBlue(icon, pixcolour);
-      cols[1] = gdImageGreen(icon, pixcolour);
-      cols[2] = gdImageRed(icon, pixcolour);
-
-      /* Alpha is more difficult */
-      int alpha = 127 - gdImageAlpha(icon, pixcolour); // 0 to 127
-      
-      // Scale it up to 0 to 255; remembering that 2 * 127 should be max
-      if (alpha == 127)
-        alpha = 255;
-      else
-        alpha *= 2;
-      
-      cols[3] = alpha;
-    }
-  }
-
-  gdImageDestroy(icon);
-}
+#include <string>
+using std::string;
 
 namespace enigma {
 
 void XSetIcon(Display *display, Window window, const char *icon) {
   XSynchronize(display, True);
-  Atom property = XInternAtom(display, "_NET_WM_ICON", 0);
+  Atom property = XInternAtom(display, "_NET_WM_ICON", False);
 
-  unsigned int nelements;
-  unsigned long int *data;
+  unsigned error;
+  unsigned char *data = nullptr;
+  unsigned pngwidth, pngheight;
 
-  load_icon((char *)icon, &nelements, &data);
-  XChangeProperty(display, window, property, XA_CARDINAL, 32, PropModeReplace, 
-    (unsigned char *)data, nelements);
+  error = libpng_decode32_file(&data, &pngwidth, &pngheight, icon);
+  if (error) {
+    DEBUG_MESSAGE("libpng-util error " + std::to_string(error), MESSAGE_TYPE::M_ERROR);
+    return;
+  }
+  
+  unsigned
+    widfull = nlpo2dc(pngwidth) + 1,
+    hgtfull = nlpo2dc(pngheight) + 1,
+    ih,iw;
+  const int bitmap_size = widfull * hgtfull * 4;
+  unsigned char *bitmap = new unsigned char[bitmap_size]();
 
+  string output;
+  unsigned i = 0;
+  unsigned elem_numb = 2 + pngwidth * pngheight;
+  unsigned long int *result = new unsigned long int[elem_numb]();
+
+  result[i++] = pngwidth;
+  result[i++] = pngheight;
+  for (ih = 0; ih < pngheight; ih++) {
+    unsigned tmp = ih * widfull * 4;
+    for (iw = 0; iw < pngwidth; iw++) {
+      bitmap[tmp + 0] = data[4 * pngwidth * ih + iw * 4 + 2];
+      bitmap[tmp + 1] = data[4 * pngwidth * ih + iw * 4 + 1];
+      bitmap[tmp + 2] = data[4 * pngwidth * ih + iw * 4 + 0];
+      bitmap[tmp + 3] = data[4 * pngwidth * ih + iw * 4 + 3];
+      result[i++] = bitmap[tmp + 0] | (bitmap[tmp + 1] << 8) | (bitmap[tmp + 2] << 16) | (bitmap[tmp + 3] << 24);
+      tmp += 4;
+    }
+  }
+  
+  XChangeProperty(display, window, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)result, elem_numb);
+  
   XFlush(display);
-  free(data);
+  delete[] bitmap;
+  delete[] data;
+  delete[] result;
 }
 
 }
