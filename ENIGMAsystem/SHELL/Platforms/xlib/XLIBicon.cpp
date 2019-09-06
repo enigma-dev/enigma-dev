@@ -24,7 +24,7 @@
 #include <X11/Xatom.h>
 #include <png.h>
 
-static inline unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename) {
+static inline unsigned libpng_decode32_file(unsigned char **out, unsigned *w, unsigned *h, const char *filename) {
   (*w) = 0; (*h) = 0;
   FILE *fp = fopen(filename, "rb");
 
