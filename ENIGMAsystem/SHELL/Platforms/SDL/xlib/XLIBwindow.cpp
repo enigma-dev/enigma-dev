@@ -31,11 +31,10 @@ namespace enigma_user {
 static string currentIcon;
 
 string window_get_icon() {
-  return currentIcon;
+  return file_exists(currentIcon) ? currentIcon : "";
 }
 
 void window_set_icon(const string &fname) {
-  if (currentIcon == filename_absolute(fname)) return;
   // the line below prevents glitchy minimizing when 
   // icons are changed rapidly (i.e. for animation).
   if (window_get_minimized()) return;
