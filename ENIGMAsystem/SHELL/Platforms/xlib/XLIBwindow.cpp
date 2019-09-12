@@ -171,13 +171,11 @@ void window_set_icon(const string &fname) {
 void window_set_icon_from_unpacked_sprite(int ind, unsigned subimg, const std::string &fname) {
   sprite_save(ind, subimg, fname);
   window_set_icon(fname);
-  file_delete(fname);
 }
 
 void window_set_icon_from_unpacked_background(int back, const std::string &fname) {
   background_save(back, fname);
   window_set_icon(fname);
-  file_delete(fname);
 }
 
 void window_set_visible(bool visible) {
