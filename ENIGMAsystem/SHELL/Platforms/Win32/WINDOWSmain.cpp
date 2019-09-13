@@ -427,19 +427,26 @@ void execute_shell(std::string operation, std::string fname, std::string args) {
 }
 
 std::string execute_shell_for_output(const std::string &command) {
-  STARTUPINFOW si;
-  PROCESS_INFORMATION pi;
-  ZeroMemory(&si, sizeof(si));
-  si.cb = sizeof(si);
-  ZeroMemory(&pi, sizeof(pi));
-  std::string str_output_file = temp_directory + string("ENIGMA_DEV_OUTPUT.TMP");
-  std::string str_command = string("cmd.exe /c chcp 65001 > nul & cmd.exe /c ") + command + string(" > \"") + str_output_file + string("\""); 
-  tstring tstr_command = widen(str_command);
+  tstring tstr_command = widen(command);
   tstr_command.resize(32767);
-  if (CreateProcessW(NULL, (wchar_t *)tstr_command.c_str(), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-    // note if user uses "cmd.exe" as the application to run, they must also use the "/c" flag to avoid endless wait
-    // calling "cmd.exe /c " is done internally, so all they need to do is specify the command line arguments to cmd
-    // CREATE_NO_WINDOW hides the command prompt to emulate the behavior of the Mac and Linux version of this method
+  BOOL ok = TRUE;
+  HANDLE hStdInPipeRead = NULL;
+  HANDLE hStdInPipeWrite = NULL;
+  HANDLE hStdOutPipeRead = NULL;
+  HANDLE hStdOutPipeWrite = NULL;
+  SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
+  ok = CreatePipe(&hStdInPipeRead, &hStdInPipeWrite, &sa, 0);
+  if (ok == FALSE) return "\r\n";
+  ok = CreatePipe(&hStdOutPipeRead, &hStdOutPipeWrite, &sa, 0);
+  if (ok == FALSE) return "\r\n";
+  STARTUPINFOW si = { };
+  si.cb = sizeof(STARTUPINFOW);
+  si.dwFlags = STARTF_USESTDHANDLES;
+  si.hStdError = hStdOutPipeWrite;
+  si.hStdOutput = hStdOutPipeWrite;
+  si.hStdInput = hStdInPipeRead;
+  PROCESS_INFORMATION pi = { };
+  if (CreateProcessW(NULL, (wchar_t *)tstr_command.c_str(), NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
     while (WaitForSingleObject(pi.hThread, 0) == WAIT_TIMEOUT) {
       MSG msg;
       if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -447,15 +454,27 @@ std::string execute_shell_for_output(const std::string &command) {
         DispatchMessage(&msg);
       }
     }
+    CloseHandle(hStdOutPipeWrite);
+    CloseHandle(hStdInPipeRead);
+    char buf[4096] = { };
+    DWORD dwRead = 0;
+    DWORD dwAvail = 0;
+    ok = ReadFile(hStdOutPipeRead, buf, 4095, &dwRead, NULL);
+    string str_buf = buf; tstring output = widen(str_buf);
+    while (ok == TRUE) {
+      buf[dwRead] = '\0';
+      OutputDebugStringW(output.c_str());
+      _putws(output.c_str());
+      ok = ReadFile(hStdOutPipeRead, buf, 4095, &dwRead, NULL);
+      str_buf = buf; output += widen(str_buf);
+    }
+    CloseHandle(hStdOutPipeRead);
+    CloseHandle(hStdInPipeWrite);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-    int output_file = file_text_open_read(str_output_file);
-    std::string output_file_contents = file_text_read_all(output_file);
-    file_text_close(output_file);
-    file_delete(str_output_file);
-    return output_file_contents;
+    return shorten(output);
   }
-  return "";
+  return "\r\n";
 }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
