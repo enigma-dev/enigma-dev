@@ -26,6 +26,7 @@
 
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 #include "Universal_System/estring.h"
+#include "Universal_System/fileio.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
@@ -426,15 +427,55 @@ void execute_shell(std::string operation, std::string fname, std::string args) {
 }
 
 std::string execute_shell_for_output(const std::string &command) {
-  string res;
-  char buffer[BUFSIZ];
   tstring tstr_command = widen(command);
-  FILE *pf = _wpopen(tstr_command.c_str(), L"r");
-  while (!feof(pf)) {
-    res.append(buffer, fread(&buffer, sizeof(char), BUFSIZ, pf));
+  wchar_t ctstr_command[32768];
+  wcsncpy(ctstr_command, tstr_command.c_str(), 32768);
+  BOOL ok = TRUE;
+  HANDLE hStdInPipeRead = NULL;
+  HANDLE hStdInPipeWrite = NULL;
+  HANDLE hStdOutPipeRead = NULL;
+  HANDLE hStdOutPipeWrite = NULL;
+  SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
+  ok = CreatePipe(&hStdInPipeRead, &hStdInPipeWrite, &sa, 0);
+  if (ok == FALSE) return "\r\n";
+  ok = CreatePipe(&hStdOutPipeRead, &hStdOutPipeWrite, &sa, 0);
+  if (ok == FALSE) return "\r\n";
+  STARTUPINFOW si = { };
+  si.cb = sizeof(STARTUPINFOW);
+  si.dwFlags = STARTF_USESTDHANDLES;
+  si.hStdError = hStdOutPipeWrite;
+  si.hStdOutput = hStdOutPipeWrite;
+  si.hStdInput = hStdInPipeRead;
+  PROCESS_INFORMATION pi = { };
+  if (CreateProcessW(NULL, ctstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+    while (WaitForSingleObject(pi.hThread, 0) == WAIT_TIMEOUT) {
+      MSG msg;
+      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
+    }
+    CloseHandle(hStdOutPipeWrite);
+    CloseHandle(hStdInPipeRead);
+    char buf[4096] = { };
+    DWORD dwRead = 0;
+    DWORD dwAvail = 0;
+    ok = ReadFile(hStdOutPipeRead, buf, 4095, &dwRead, NULL);
+    string str_buf = buf; tstring output = widen(str_buf);
+    while (ok == TRUE) {
+      buf[dwRead] = '\0';
+      OutputDebugStringW(output.c_str());
+      _putws(output.c_str());
+      ok = ReadFile(hStdOutPipeRead, buf, 4095, &dwRead, NULL);
+      str_buf = buf; output += widen(str_buf);
+    }
+    CloseHandle(hStdOutPipeRead);
+    CloseHandle(hStdInPipeWrite);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return shorten(output);
   }
-  _pclose(pf);
-  return res;
+  return "\r\n";
 }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
