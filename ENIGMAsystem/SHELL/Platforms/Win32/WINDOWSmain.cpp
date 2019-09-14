@@ -429,7 +429,7 @@ void execute_shell(std::string operation, std::string fname, std::string args) {
 std::string execute_shell_for_output(const std::string &command) {
   tstring tstr_command = widen(command);
   wchar_t ctstr_command[32768];
-  wcsncpy_s(ctstr_command, tstr_command.c_str(), 32768);
+  wcsncpy(ctstr_command, tstr_command.c_str(), 32768);
   BOOL ok = TRUE;
   HANDLE hStdInPipeRead = NULL;
   HANDLE hStdInPipeWrite = NULL;
