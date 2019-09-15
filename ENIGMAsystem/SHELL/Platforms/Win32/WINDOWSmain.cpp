@@ -454,8 +454,8 @@ std::string execute_shell_for_output(const std::string &command) {
         DispatchMessage(&msg);
       }
     }
-    if (hStdOutPipeWrite != NULL) { CloseHandle(hStdOutPipeWrite); }
-    if (hStdInPipeRead != NULL) { CloseHandle(hStdInPipeRead); }
+    CloseHandle(hStdOutPipeWrite);
+    CloseHandle(hStdInPipeRead);
     char buf[4096] = { };
     DWORD dwRead = 0;
     DWORD dwAvail = 0;
@@ -468,8 +468,8 @@ std::string execute_shell_for_output(const std::string &command) {
       ok = ReadFile(hStdOutPipeRead, buf, 4095, &dwRead, NULL);
       str_buf = buf; output += widen(str_buf);
     }
-    if (hStdOutPipeRead != NULL) { CloseHandle(hStdOutPipeRead); }
-    if (hStdInPipeWrite != NULL) { CloseHandle(hStdInPipeWrite); }
+    CloseHandle(hStdOutPipeRead);
+    CloseHandle(hStdInPipeWrite);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     return shorten(output);
