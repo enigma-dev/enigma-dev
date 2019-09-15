@@ -26,7 +26,6 @@
 
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 #include "Universal_System/estring.h"
-#include "Universal_System/fileio.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
@@ -455,8 +454,8 @@ std::string execute_shell_for_output(const std::string &command) {
         DispatchMessage(&msg);
       }
     }
-    CloseHandle(hStdOutPipeWrite);
-    CloseHandle(hStdInPipeRead);
+    if (hStdOutPipeWrite != NULL) { CloseHandle(hStdOutPipeWrite); }
+    if (hStdInPipeRead != NULL) { CloseHandle(hStdInPipeRead); }
     char buf[4096] = { };
     DWORD dwRead = 0;
     DWORD dwAvail = 0;
@@ -469,10 +468,10 @@ std::string execute_shell_for_output(const std::string &command) {
       ok = ReadFile(hStdOutPipeRead, buf, 4095, &dwRead, NULL);
       str_buf = buf; output += widen(str_buf);
     }
-    CloseHandle(hStdOutPipeRead);
-    CloseHandle(hStdInPipeWrite);
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
+    if (hStdOutPipeRead != NULL) { CloseHandle(hStdOutPipeRead); }
+    if (hStdInPipeWrite != NULL) { CloseHandle(hStdInPipeWrite); }
+    if (pi.hProcess != NULL) { CloseHandle(pi.hProcess); }
+    if (pi.hThread != NULL) { CloseHandle(pi.hThread); }
     return shorten(output);
   }
   return "\r\n";
@@ -498,9 +497,16 @@ void execute_program(std::string operation, std::string fname, std::string args,
 
   //wait until a file is finished printing
   if (wait && lpExecInfo.hProcess != NULL) {
-    ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
-    ::CloseHandle(lpExecInfo.hProcess);
+    while (WaitForSingleObject(lpExecInfo.hProcess, 0) == WAIT_TIMEOUT) {
+      MSG msg;
+      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
+    }
   }
+  if (lpExecInfo.hProcess != NULL)
+    CloseHandle(lpExecInfo.hProcess);
 }
 
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
