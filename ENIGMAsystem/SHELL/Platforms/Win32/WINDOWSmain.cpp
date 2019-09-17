@@ -26,7 +26,6 @@
 
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 #include "Universal_System/estring.h"
-#include "Universal_System/fileio.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
@@ -437,9 +436,9 @@ std::string execute_shell_for_output(const std::string &command) {
   HANDLE hStdOutPipeWrite = NULL;
   SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
   ok = CreatePipe(&hStdInPipeRead, &hStdInPipeWrite, &sa, 0);
-  if (ok == FALSE) return "\r\n";
+  if (ok == FALSE) return "";
   ok = CreatePipe(&hStdOutPipeRead, &hStdOutPipeWrite, &sa, 0);
-  if (ok == FALSE) return "\r\n";
+  if (ok == FALSE) return "";
   STARTUPINFOW si = { };
   si.cb = sizeof(STARTUPINFOW);
   si.dwFlags = STARTF_USESTDHANDLES;
@@ -448,7 +447,7 @@ std::string execute_shell_for_output(const std::string &command) {
   si.hStdInput = hStdInPipeRead;
   PROCESS_INFORMATION pi = { };
   if (CreateProcessW(NULL, ctstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-    while (WaitForSingleObject(pi.hThread, 0) == WAIT_TIMEOUT) {
+    while (WaitForSingleObject(pi.hProcess, 5) == WAIT_TIMEOUT) {
       MSG msg;
       if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
@@ -475,7 +474,7 @@ std::string execute_shell_for_output(const std::string &command) {
     CloseHandle(pi.hThread);
     return shorten(output);
   }
-  return "\r\n";
+  return "";
 }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
@@ -498,9 +497,16 @@ void execute_program(std::string operation, std::string fname, std::string args,
 
   //wait until a file is finished printing
   if (wait && lpExecInfo.hProcess != NULL) {
-    ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
-    ::CloseHandle(lpExecInfo.hProcess);
+    while (WaitForSingleObject(lpExecInfo.hProcess, 5) == WAIT_TIMEOUT) {
+      MSG msg;
+      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
+    }
   }
+  if (lpExecInfo.hProcess != NULL)
+    CloseHandle(lpExecInfo.hProcess);
 }
 
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
