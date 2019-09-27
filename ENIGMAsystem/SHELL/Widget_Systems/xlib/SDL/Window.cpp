@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Window.h"
 #include "Platforms/SDL/Window.h"
-#include "Platforms/SDL/xlib/XLIBwindow.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 #include <X11/Xlib.h>
