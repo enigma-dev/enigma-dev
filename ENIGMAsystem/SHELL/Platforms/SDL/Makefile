@@ -16,12 +16,4 @@ else
 	SOURCES += Platforms/General/POSIX/POSIXfilemanip.cpp
 	SOURCES += Platforms/General/POSIX/POSIXdirectory.cpp
 	override LDLIBS += -lpthread $(shell $(PKG-CONFIG) --libs --static sdl2)
-	ifeq ($(TARGET-PLATFORM), Linux)
-		SOURCES += $(wildcard Platforms/SDL/xlib/*.cpp)
-		SOURCES += Platforms/xlib/XLIBicon.cpp
-		override CXXFLAGS += -I/usr/X11R6/include -I/usr/include -I/usr/include/libpng16
-		override CFLAGS += -I/usr/X11R6/include -I/usr/include -I/usr/include/libpng16
-		override LDLIBS += -Wl,-Bstatic -lpng16 -lz -Wl,-Bdynamic -lz -lpthread -lX11
-		override LDLIBS += -L/usr/X11R6/lib -L/usr/lib
-	endif
 endif
