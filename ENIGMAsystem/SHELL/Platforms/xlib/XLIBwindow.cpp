@@ -73,10 +73,6 @@ void set_net_wm_pid(Window window) {
 
 } // namespace x11;
 
-void window_id_init() {
-
-}
-
 bool initGameWindow()
 {
   // Initiate display
