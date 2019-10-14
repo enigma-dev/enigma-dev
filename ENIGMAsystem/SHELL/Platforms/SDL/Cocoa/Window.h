@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "CocoaWindow.h"
 #include "Platforms/General/PFwindow.h"
 
 namespace enigma {
