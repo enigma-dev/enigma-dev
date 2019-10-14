@@ -37,18 +37,20 @@ void window_id_init() {
   SDL_SysWMinfo systemInfo;
   SDL_VERSION(&systemInfo.version);
   SDL_GetWindowWMInfo(windowHandle, &systemInfo);
-  ANWin = systemInfo.info.android.window;
-  EGLSurf = systemInfo.info.android.surface;
+  // ANWin = systemInfo.info.android.window;
+  // EGLSurf = systemInfo.info.android.surface;
 }
 
 }
 
 namespace enigma_user {
 
+/*
 // returns sdl window pointer for extensions
 // we cast to/from a void * for generic-ness
 void *window_handle() {
   return (void *)enigma::ANWin;
 }
-
+*/
+  
 }
