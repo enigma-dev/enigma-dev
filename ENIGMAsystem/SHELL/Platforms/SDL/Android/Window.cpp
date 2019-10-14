@@ -18,18 +18,20 @@
 #include "Window.h"
 #include "Platforms/SDL/Window.h"
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_syswm.h>
+// #include <SDL2/SDL_syswm.h> // pussy not found !
 
 namespace enigma {
 
 // called from initGameWindow()
 // capture sdl window disp/hwnd
 void window_id_init() {
+  /*
   SDL_SysWMinfo systemInfo;
   SDL_VERSION(&systemInfo.version);
   SDL_GetWindowWMInfo(windowHandle, &systemInfo);
-  // ANWin = systemInfo.info.android.window;
-  // EGLSurf = systemInfo.info.android.surface;
+  ANWin = systemInfo.info.android.window;
+  EGLSurf = systemInfo.info.android.surface;
+  */
 }
 
 }
