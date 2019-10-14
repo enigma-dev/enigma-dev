@@ -37,7 +37,6 @@ static bool kwin_running() {
 bool widget_system_initialize() {
   // Defaults to the GUI toolkit (GTK+/Qt) that matches Desktop Environment.
   current_widget_engine = kwin_running() ? kdialog_widgets : zenity_widgets;
-  window_id_init();
   return true;
 }
 
