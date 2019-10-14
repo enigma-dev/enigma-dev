@@ -23,5 +23,6 @@
 namespace enigma {
 
 HWND hWnd;
+HINSTANCE hInstance;
 
 }
