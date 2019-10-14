@@ -212,7 +212,7 @@ bool display_test_all(int w, int h, int freq, int bitdepth);
 void set_synchronization(bool enable);
 
 void *window_handle(); // we're adopting GMStudio behavior since the compatibility switcher is probably never going to be fixed
-std::string window_identifier(); // a string containing the number corresponding to the game's main window handdle (shell script)
+std::string window_identifier(); // a string containing the number corresponding to the game's main window handle (shell script)
 std::string window_get_identifier(void *hwnd); // a string containing the number corresponding to the specified window pointer
   
 int window_get_x();
