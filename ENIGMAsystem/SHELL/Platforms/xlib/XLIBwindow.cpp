@@ -145,6 +145,15 @@ void destroyWindow() {
 
 }  //namespace enigma
 
+static inline string remove_trailing_zeros(int numb) {
+  string strnumb = std::to_string(numb);
+
+  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
+    strnumb.pop_back();
+
+  return strnumb;
+}
+
 namespace enigma_user {
 
 // returns gay window pointer for extensions
