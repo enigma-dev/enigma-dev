@@ -34,13 +34,11 @@ namespace enigma {
 // called from initGameWindow()
 // capture sdl window disp/hwnd
 void window_id_init() {
-  if (hWnd == NULL) { // dsound or d3d could init this first depending on systems used
-    SDL_SysWMinfo systemInfo;
-    SDL_VERSION(&systemInfo.version);
-    SDL_GetWindowWMInfo(windowHandle, &systemInfo);
-    hWnd = systemInfo.info.win.window;
-    hInstance = systemInfo.info.win.hinstance;
-  }
+  SDL_SysWMinfo systemInfo;
+  SDL_VERSION(&systemInfo.version);
+  SDL_GetWindowWMInfo(windowHandle, &systemInfo);
+  hWnd = systemInfo.info.win.window;
+  hInstance = systemInfo.info.win.hinstance;
 }
 
 }
