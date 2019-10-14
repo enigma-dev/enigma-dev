@@ -71,15 +71,9 @@ void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
 
 namespace enigma_user {
 
-#if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle() {
-  return (unsigned long long)enigma::hWnd;
-}
-#else
-void* window_handle() {
+void *window_handle() {
   return enigma::hWnd;
 }
-#endif
 
 // GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
 // Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,
