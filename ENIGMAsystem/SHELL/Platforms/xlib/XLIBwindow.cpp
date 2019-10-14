@@ -147,6 +147,24 @@ void destroyWindow() {
 
 namespace enigma_user {
 
+// returns gay window pointer for extensions
+// we cast to/from a void * for generic-ness
+void *window_handle() {
+  return (void *)enigma::x11::win;
+}
+
+// returns an identifier for the gay window
+// this string can be used in shell scripts
+string window_identifier() {
+  return remove_trailing_zeros((int)enigma::x11::win);
+}
+
+// returns an identifier for certain window
+// this string can be used in shell scripts
+string window_get_identifier(void *hwnd) {
+  return remove_trailing_zeros((int)(Window)hwnd);
+}
+
 static string currentIcon;
 
 string window_get_icon() {
