@@ -7,6 +7,7 @@ override CXXFLAGS += $(shell $(PKG-CONFIG) --cflags sdl2) -DENIGMA_PLATFORM_SDL
 
 ifneq ($(TARGET-PLATFORM), Android)
 	SOURCES += Platforms/General/POSIX/shell.cpp
+	SOURCES += Platforms/SDL/Android/Window.cpp
 endif
 
 ifeq ($(TARGET-PLATFORM), Windows)
