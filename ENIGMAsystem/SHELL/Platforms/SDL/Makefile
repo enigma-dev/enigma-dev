@@ -10,7 +10,7 @@ ifneq ($(TARGET-PLATFORM), Android)
 endif
 
 ifeq ($(TARGET-PLATFORM), Windows)
-	SOURCES += $(wildcard Bridges/SDL-Win32/*.cpp) Platforms/Win32/WINDOWSfilemanip.cpp
+	SOURCES += Platforms/Win32/WINDOWSfilemanip.cpp
 	SOURCES += Platforms/SDL/Win32/Window.cpp
 override LDLIBS += $(shell $(PKG-CONFIG) --libs --static sdl2)
 else
