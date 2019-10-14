@@ -19,7 +19,6 @@
 #include "Platforms/SDL/Window.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
-#include <windows.h>
 
 static inline string remove_trailing_zeros(long long numb) {
   string strnumb = std::to_string(numb);
