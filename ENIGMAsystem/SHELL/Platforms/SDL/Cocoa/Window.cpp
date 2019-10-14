@@ -20,8 +20,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
-extern "C" long cocoa_window_identifier();
-extern "C" long cocoa_window_get_identifier(void *hwnd);
+static inline extern "C" long cocoa_window_identifier();
+static inline extern "C" long cocoa_window_get_identifier(void *hwnd);
 
 static inline string remove_trailing_zeros(long numb) {
   string strnumb = std::to_string(numb);
