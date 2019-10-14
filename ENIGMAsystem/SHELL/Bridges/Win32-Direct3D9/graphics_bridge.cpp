@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -99,7 +98,6 @@ void WindowResized() {
 }
 
 void EnableDrawing(void* handle) {
-  get_window_handle();
   WindowResizedCallback = &WindowResized;
 
   HRESULT hr;
