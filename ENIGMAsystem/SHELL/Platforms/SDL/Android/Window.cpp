@@ -20,15 +20,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
-static inline string remove_trailing_zeros(long long numb) {
-  string strnumb = std::to_string(numb);
-
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-    strnumb.pop_back();
-
-  return strnumb;
-}
-
 namespace enigma {
 
 // called from initGameWindow()
