@@ -27,6 +27,6 @@ long cocoa_window_identifier() {
   return [(NSWindow *)wmInfo.info.cocoa.window windowNubmer];
 }
 
-long cocoa_window_identifier(void *hwnd) {
+long cocoa_window_get_identifier(void *hwnd) {
   return [(NSWindow *)hwnd windowNubmer];
 }
