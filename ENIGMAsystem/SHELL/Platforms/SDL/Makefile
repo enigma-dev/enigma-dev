@@ -17,10 +17,13 @@ else
 	SOURCES += Platforms/General/POSIX/POSIXfilemanip.cpp
 	SOURCES += Platforms/General/POSIX/POSIXdirectory.cpp
 	override LDLIBS += -lpthread $(shell $(PKG-CONFIG) --libs --static sdl2)
-	ifeq ($(TARGET-PLATFORM), Linux)
-		SOURCES += Platforms/SDL/xlib/Window.cpp
-	else
+
+	ifeq ($(TARGET-PLATFORM), MacOSX)
 		SOURCES += Platforms/SDL/Cocoa/Window.cpp
 		SOURCES += Platforms/SDL/Cocoa/CocoaWindow.m
+	endif
+
+	ifeq ($(TARGET-PLATFORM), Linux)
+		SOURCES += Platforms/SDL/xlib/Window.cpp
 	endif
 endif
