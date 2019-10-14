@@ -11,9 +11,16 @@ endif
 
 ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += $(wildcard Bridges/SDL-Win32/*.cpp) Platforms/Win32/WINDOWSfilemanip.cpp
+	SOURCES += Platforms/SDL/Win32/Window.cpp
 override LDLIBS += $(shell $(PKG-CONFIG) --libs --static sdl2)
 else
 	SOURCES += Platforms/General/POSIX/POSIXfilemanip.cpp
 	SOURCES += Platforms/General/POSIX/POSIXdirectory.cpp
 	override LDLIBS += -lpthread $(shell $(PKG-CONFIG) --libs --static sdl2)
+	ifeq ($(TARGET-PLATFORM), Linux)
+		SOURCES += Platforms/SDL/xlib/Window.cpp
+	else
+		SOURCES += Platforms/SDL/Cocoa/Window.cpp
+		SOURCES += Platforms/SDL/Cocoa/CocoaWindow.m
+	endif
 endif
