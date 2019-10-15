@@ -17,7 +17,7 @@
 
 #include "Widget_Systems/widgets_mandatory.h"  // DEBUG_MESSAGE
 
-#include "Platforms/Win32/WINDOWSmain.h" // enigma::hWnd
+#include "Platforms/Win32/WINDOWSmain.h" // enigma::hWnd/hInstance
 
 #include <stdio.h>
 
@@ -70,7 +70,7 @@ void eos_callback(void* soundID, unsigned src) {
 }
 
 int audiosystem_initialize() {
-  if (enigma::hWnd == NULL) {
+  if (enigma::hWnd == NULL || enigma::hInstance == NULL) {
     DEBUG_MESSAGE("Window handle is NULL.", MESSAGE_TYPE::M_ERROR);
     return false;
   }
