@@ -32,8 +32,6 @@
 #include <vector>
 
 namespace enigma {
-bool get_sprite_mtx(enigma::sprite* &spr, int id);
-
 struct bbox_rect_t {
   int bottom, left, right, top;
 };
@@ -75,6 +73,8 @@ void sprite_set_subimage(int sprid, int imgindex, unsigned int w, unsigned int h
 void sprite_add_subimage(int sprid, unsigned int w, unsigned int h, unsigned char *chunk, unsigned char *collision_data,
                          collision_type ct);
 void spritestructarray_reallocate();
+
+bool get_sprite_mtx(enigma::sprite* &spr, int id);
 
 extern const bbox_rect_t &sprite_get_bbox(int sprid);
 extern const bbox_rect_t &sprite_get_bbox_relative(int sprid);
