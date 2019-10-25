@@ -55,9 +55,9 @@ void XSetIconFromSprite(Display *display, Window window, int ind, unsigned subim
   for (ih = 0; ih < pngheight; ih++) {
     unsigned tmp = ih * widfull * 4;
     for (iw = 0; iw < pngwidth; iw++) {
-      bitmap[tmp + 0] = data[4 * pngwidth * ih + iw * 4 + 2];
+      bitmap[tmp + 0] = data[4 * pngwidth * ih + iw * 4 + 0];
       bitmap[tmp + 1] = data[4 * pngwidth * ih + iw * 4 + 1];
-      bitmap[tmp + 2] = data[4 * pngwidth * ih + iw * 4 + 0];
+      bitmap[tmp + 2] = data[4 * pngwidth * ih + iw * 4 + 2];
       bitmap[tmp + 3] = data[4 * pngwidth * ih + iw * 4 + 3];
       result[i++] = bitmap[tmp + 0] | (bitmap[tmp + 1] << 8) | (bitmap[tmp + 2] << 16) | (bitmap[tmp + 3] << 24);
       tmp += 4;
