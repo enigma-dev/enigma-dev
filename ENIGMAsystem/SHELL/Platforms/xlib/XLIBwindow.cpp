@@ -174,31 +174,28 @@ string window_get_identifier(void *hwnd) {
   return remove_trailing_zeros((int)(Window)hwnd);
 }
 
-static string currentIcon;
+static int currentIconIndex;
+static unsigned currentIconFrame;
 
-string window_get_icon() {
-  return file_exists(currentIcon) ? currentIcon : "";
+int window_get_icon_index() {
+  return currentIconIndex;
 }
 
-void window_set_icon(const string &fname) {
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
   // the line below prevents glitchy minimizing when 
   // icons are changed rapidly (i.e. for animation).
   if (window_get_minimized()) return;
-  currentIcon = filename_absolute(fname);
 
   // needs to be visible first to prevent segfault
   if (!window_get_visible()) window_set_visible(true);
-  if (file_exists(fname)) enigma::XSetIcon(disp, win, fname.c_str());
-}
+  enigma::XSetIconFromSprite(disp, win, ind, subimg);
 
-void window_set_icon_from_unpacked_sprite(int ind, unsigned subimg, const std::string &fname) {
-  sprite_save(ind, subimg, fname);
-  window_set_icon(fname);
-}
-
-void window_set_icon_from_unpacked_background(int back, const std::string &fname) {
-  background_save(back, fname);
-  window_set_icon(fname);
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
 }
 
 void window_set_visible(bool visible) {
