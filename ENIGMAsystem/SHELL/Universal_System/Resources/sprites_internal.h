@@ -32,6 +32,8 @@
 #include <vector>
 
 namespace enigma {
+bool get_sprite_mtx(enigma::sprite* &spr, int id);
+
 struct bbox_rect_t {
   int bottom, left, right, top;
 };
