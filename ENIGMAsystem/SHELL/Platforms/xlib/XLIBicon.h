@@ -19,6 +19,6 @@
 
 namespace enigma {
 
-void XSetIcon(Display *display, Window window, const char *icon);
+void XSetIconFromSprite(Display *display, Window window, int ind, unsigned subimg);
 
 }
