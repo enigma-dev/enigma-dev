@@ -20,18 +20,25 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFmain.h" // For those damn vk_ constants.
 #include "Platforms/General/PFwindow.h"
+#include "Platforms/General/PFfilemanip.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
 
+#include "libpng-util/libpng-util.h"
 #include "strings_util.h" // For string_replace_all
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // room_caption
 #include "Universal_System/globalupdate.h"
+#include "Universal_System/estring.h"
 
 #include <windows.h>
+#include <gdiplus.h>
+#include <wchar.h>
 #include <stdio.h>
 #include <string>
+
 using namespace std;
+using enigma_user::file_exists;
 
 namespace {
 
@@ -69,17 +76,34 @@ void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
 
 }
 
+static inline string remove_trailing_zeros(long long numb) {
+  string strnumb = std::to_string(numb);
+
+  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
+    strnumb.pop_back();
+
+  return strnumb;
+}
+
 namespace enigma_user {
 
-#if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle() {
-  return (unsigned long long)enigma::hWnd;
+// returns gay window pointer for extensions
+// we cast to/from a void * for generic-ness
+void *window_handle() {
+  return (void *)enigma::hWnd;
 }
-#else
-void* window_handle() {
-  return enigma::hWnd;
+
+// returns an identifier for the gay window
+// this string can be used in shell scripts
+string window_identifier() {
+  return remove_trailing_zeros((long long)enigma::hWnd);
 }
-#endif
+
+// returns an identifier for certain window
+// this string can be used in shell scripts
+string window_get_identifier(void *hwnd) {
+  return remove_trailing_zeros((long long)(HWND)hwnd);
+}
 
 // GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
 // Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,
@@ -692,6 +716,81 @@ bool clipboard_has_text()
   bool value = GetClipboardData(CF_TEXT);
   CloseClipboard();
   return value;
+}
+
+void clipboard_load_pngfile(string fname) {
+  if (!file_exists(fname)) return;
+  HBITMAP hBitmap;
+  wstring wstrPngFile = widen(fname);
+
+  Gdiplus::Bitmap *bmp = Gdiplus::Bitmap::FromFile(wstrPngFile.c_str());
+  bmp->GetHBITMAP(Gdiplus::Color::MakeARGB(0, 0, 0, 0), &hBitmap);
+
+  OpenClipboard(NULL);
+  DIBSECTION ds;
+  GetObject(hBitmap, sizeof(DIBSECTION), &ds);
+  ds.dsBmih.biCompression = BI_RGB;
+  HDC hdc = ::GetDC(NULL);
+  HBITMAP hbitmap_ddb = CreateDIBitmap(hdc, &ds.dsBmih, CBM_INIT, ds.dsBm.bmBits, (BITMAPINFO *)&ds.dsBmih, DIB_RGB_COLORS);
+  ReleaseDC(NULL, hdc);
+
+  EmptyClipboard();
+  SetClipboardData(CF_BITMAP, hbitmap_ddb);
+  CloseClipboard();
+
+  DeleteObject(hBitmap);
+  delete bmp;
+}
+
+void clipboard_dump_pngfile(string fname) {
+  if (!clipboard_has_imgdata()) return;
+  OpenClipboard(NULL);
+  HBITMAP hBitmap = (HBITMAP)GetClipboardData(CF_BITMAP);
+
+  BITMAPINFOHEADER bi = { 0 };
+  bi.biSize = sizeof(BITMAPINFOHEADER);
+
+  HDC hdc = GetDC(NULL);
+  GetDIBits(hdc, hBitmap, 0, (UINT)bi.biHeight, NULL, (BITMAPINFO *)&bi, DIB_RGB_COLORS);
+  if (bi.biBitCount <= 8) GetDIBits(hdc, hBitmap, 0, (UINT)bi.biHeight, NULL, (BITMAPINFO *)&bi, DIB_RGB_COLORS);
+
+  BYTE *src = (BYTE *)malloc(bi.biWidth * bi.biHeight * 4);
+  memset(src, 0, bi.biWidth * bi.biHeight * 4);
+
+  GetDIBits(hdc, hBitmap, 0, (UINT)bi.biHeight, src, (BITMAPINFO *)&bi, DIB_RGB_COLORS);
+  ReleaseDC(NULL, hdc);
+
+  std::vector<unsigned char> dst;
+  int n = bi.biWidth * bi.biHeight * 4;
+  dst.resize(n);
+
+  int i = 0;
+  for (int y = bi.biHeight - 1; y >= 0; y--) {
+    for (int x = 0; x < bi.biWidth; x++) {
+      int base = (y * bi.biWidth + x) * 4;
+      if (src[base + 3] == 0) i++;
+    }
+  }
+
+  int j = 0;
+  for (int y = bi.biHeight - 1; y >= 0; y--) {
+    for (int x = 0; x < bi.biWidth; x++) {
+      int base = (y * bi.biWidth + x) * 4;
+      dst[j++] = src[base + 2];
+      dst[j++] = src[base + 1];
+      dst[j++] = src[base];
+      dst[j++] = (i != n / 4) ? src[base + 3] : 255;
+    }
+  }
+
+  libpng_encode32_file(dst.data(), bi.biWidth, bi.biHeight, fname.c_str());
+  CloseClipboard();
+  CloseHandle(hBitmap);
+  free(src);
+}
+
+bool clipboard_has_imgdata() {
+  return IsClipboardFormatAvailable(CF_BITMAP);
 }
 
 }
