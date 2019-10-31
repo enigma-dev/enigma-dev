@@ -81,6 +81,7 @@ namespace enigma_user {
 #if GM_COMPATIBILITY_VERSION <= 81
 unsigned long long window_handle() {
   return (unsigned long long)enigma::hWnd;
+}
 #else
 void* window_handle() {
   return enigma::hWnd;
