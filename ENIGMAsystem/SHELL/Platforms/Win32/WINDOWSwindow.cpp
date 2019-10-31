@@ -33,7 +33,7 @@
 
 #include <windows.h>
 #include <gdiplus.h>
-#include <wchar.h>
+#include <cwchar>
 #include <stdio.h>
 #include <string>
 
