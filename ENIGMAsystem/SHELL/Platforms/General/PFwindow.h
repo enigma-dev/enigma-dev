@@ -279,6 +279,10 @@ std::string clipboard_get_text();
 void clipboard_set_text(std::string text);
 bool clipboard_has_text();
 
+void clipboard_load_pngfile(std::string fname);
+void clipboard_dump_pngfile(std::string fname);
+bool clipboard_has_imgdata();
+
 }  // namespace enigma_user
 
 #endif
