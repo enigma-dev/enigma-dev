@@ -758,9 +758,9 @@ void clipboard_dump_pngfile(string fname) {
   for (int y = bi.biHeight - 1; y >= 0; y--) {
     for (int x = 0; x < bi.biWidth; x++) {
       int base = (y * bi.biWidth + x) * 4;
-      dst[j++] = src[base + 2];
-      dst[j++] = src[base + 1];
       dst[j++] = src[base];
+      dst[j++] = src[base + 1];
+      dst[j++] = src[base + 2];
       dst[j++] = (i != n / 4) ? src[base + 3] : 255;
     }
   }
