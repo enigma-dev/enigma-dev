@@ -34,7 +34,7 @@
 #include <windows.h>
 #include <gdiplus.h>
 #include <cwchar>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 
 using namespace std;
