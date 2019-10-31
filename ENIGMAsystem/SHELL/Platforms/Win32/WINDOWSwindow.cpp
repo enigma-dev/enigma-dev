@@ -34,8 +34,8 @@
 
 #include <windows.h>
 #include <gdiplus.h>
-#include <wchar.h>
-#include <stdio.h>
+#include <cwchar>
+#include <cstdio>
 #include <string>
 
 using namespace std;
