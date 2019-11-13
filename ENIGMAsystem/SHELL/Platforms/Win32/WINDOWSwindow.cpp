@@ -23,6 +23,9 @@
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFfilemanip.h"
 
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/Resources/sprites_internal.h"
+#include "Collision_Systems/collision_types.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include "strings_util.h" // For string_replace_all
@@ -701,64 +704,30 @@ bool clipboard_has_text()
   return value;
 }
 
-void clipboard_load_pngfile(string fname) {
-  if (!file_exists(fname)) return;
-  HBITMAP hBitmap;
-  wstring wstrPngFile = widen(fname);
+void clipboard_set_sprite(int ind, unsigned subimg) {
+  unsigned char *src = nullptr;
+  unsigned width, height;
 
-  Gdiplus::Bitmap *bmp = Gdiplus::Bitmap::FromFile(wstrPngFile.c_str());
-  bmp->GetHBITMAP(Gdiplus::Color::MakeARGB(0, 0, 0, 0), &hBitmap);
-
-  OpenClipboard(NULL);
-  DIBSECTION ds;
-  GetObject(hBitmap, sizeof(DIBSECTION), &ds);
-  ds.dsBmih.biCompression = BI_RGB;
-  HDC hdc = ::GetDC(NULL);
-  HBITMAP hbitmap_ddb = CreateDIBitmap(hdc, &ds.dsBmih, CBM_INIT, ds.dsBm.bmBits, (BITMAPINFO *)&ds.dsBmih, DIB_RGB_COLORS);
-  ReleaseDC(NULL, hdc);
-
-  EmptyClipboard();
-  SetClipboardData(CF_BITMAP, hbitmap_ddb);
-  CloseClipboard();
-
-  DeleteObject(hBitmap);
-  delete bmp;
-}
-
-void clipboard_dump_pngfile(string fname) {
-  if (!clipboard_has_imgdata()) return;
-  OpenClipboard(NULL);
-  HBITMAP hBitmap = (HBITMAP)GetClipboardData(CF_BITMAP);
-
-  BITMAPINFOHEADER bi = { 0 };
-  bi.biSize = sizeof(BITMAPINFOHEADER);
-
-  HDC hdc = GetDC(NULL);
-  GetDIBits(hdc, hBitmap, 0, (UINT)bi.biHeight, NULL, (BITMAPINFO *)&bi, DIB_RGB_COLORS);
-  if (bi.biBitCount <= 8) GetDIBits(hdc, hBitmap, 0, (UINT)bi.biHeight, NULL, (BITMAPINFO *)&bi, DIB_RGB_COLORS);
-
-  BYTE *src = (BYTE *)malloc(bi.biWidth * bi.biHeight * 4);
-  memset(src, 0, bi.biWidth * bi.biHeight * 4);
-
-  GetDIBits(hdc, hBitmap, 0, (UINT)bi.biHeight, src, (BITMAPINFO *)&bi, DIB_RGB_COLORS);
-  ReleaseDC(NULL, hdc);
+  enigma::sprite *spr;
+  if (!enigma::get_sprite_mtx(spr, ind)) return;  
+  src = enigma::graphics_copy_texture_pixels(spr->texturearray[subimg], &width, &height);
 
   std::vector<unsigned char> dst;
-  int n = bi.biWidth * bi.biHeight * 4;
+  int n = width * height * 4;
   dst.resize(n);
 
   int i = 0;
-  for (int y = bi.biHeight - 1; y >= 0; y--) {
-    for (int x = 0; x < bi.biWidth; x++) {
-      int base = (y * bi.biWidth + x) * 4;
+  for (int y = 0; y < (int)height; y++) {
+    for (int x = 0; x < (int)width; x++) {
+      int base = (y * width + x) * 4;
       if (src[base + 3] == 0) i++;
     }
   }
 
   int j = 0;
-  for (int y = bi.biHeight - 1; y >= 0; y--) {
-    for (int x = 0; x < bi.biWidth; x++) {
-      int base = (y * bi.biWidth + x) * 4;
+  for (int y = 0; y < (int)height; y++) {
+    for (int x = 0; x < (int)width; x++) {
+      int base = (y * width + x) * 4;
       dst[j++] = src[base];
       dst[j++] = src[base + 1];
       dst[j++] = src[base + 2];
@@ -766,13 +735,73 @@ void clipboard_dump_pngfile(string fname) {
     }
   }
 
-  enigma::image_save(fname, dst.data(), bi.biWidth, bi.biHeight, bi.biWidth, bi.biHeight, false);
+  HBITMAP hBitmap = CreateBitmap(width, height, 1, 32, dst.data());
+
+  OpenClipboard(NULL);
+  EmptyClipboard();
+  SetClipboardData(CF_BITMAP, hBitmap);
   CloseClipboard();
+
   CloseHandle(hBitmap);
   free(src);
 }
 
-bool clipboard_has_imgdata() {
+int clipboard_get_sprite(bool precise) {
+  if (!clipboard_has_sprite()) return -1;
+  OpenClipboard(NULL);
+  HBITMAP hBitmap = (HBITMAP)GetClipboardData(CF_BITMAP);
+  CloseClipboard();
+
+  BITMAPINFOHEADER bih = {0};
+  bih.biSize = sizeof(BITMAPINFOHEADER);
+
+  HDC hdc = GetDC(NULL);
+  GetDIBits(hdc, hBitmap, 0, (UINT)bih.biHeight, NULL, (BITMAPINFO *)&bih, DIB_RGB_COLORS);
+  if (bih.biBitCount <= 8) GetDIBits(hdc, hBitmap, 0, (UINT)bih.biHeight, NULL, (BITMAPINFO *)&bih, DIB_RGB_COLORS);
+
+  unsigned char *src = (unsigned char *)malloc(bih.biWidth * bih.biHeight * 4);
+  memset(src, 0, bih.biWidth * bih.biHeight * 4);
+
+  GetDIBits(hdc, hBitmap, 0, (UINT)bih.biHeight, src, (BITMAPINFO *)&bih, DIB_RGB_COLORS);
+  ReleaseDC(NULL, hdc);
+
+  std::vector<unsigned char> dst;
+  int n = bih.biWidth * bih.biHeight * 4;
+  dst.resize(n);
+
+  int i = 0;
+  for (int y = bih.biHeight - 1; y >= 0; y--) {
+    for (int x = 0; x < bih.biWidth; x++) {
+      int base = (y * bih.biWidth + x) * 4;
+      if (src[base + 3] == 0) i++;
+    }
+  }
+
+  int j = 0;
+  for (int y = bih.biHeight - 1; y >= 0; y--) {
+    for (int x = 0; x < bih.biWidth; x++) {
+      int base = (y * bih.biWidth + x) * 4;
+      dst[j++] = src[base];
+      dst[j++] = src[base + 1];
+      dst[j++] = src[base + 2];
+      dst[j++] = (i != n / 4) ? src[base + 3] : 255;
+    }
+  }
+
+  enigma::spritestructarray_reallocate();
+  enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite();
+  spr->id = enigma::sprite_idmax;
+
+  enigma::collision_type coll_type = precise ? enigma::ct_precise : enigma::ct_bbox;
+  enigma::sprite_add_subimage(enigma::sprite_idmax, (unsigned)bih.biWidth, (unsigned)bih.biHeight, dst.data(), dst.data(), coll_type);
+
+  CloseHandle(hBitmap);
+  free(src);
+
+  return enigma::sprite_idmax++;
+}
+
+bool clipboard_has_sprite() {
   return IsClipboardFormatAvailable(CF_BITMAP);
 }
 
