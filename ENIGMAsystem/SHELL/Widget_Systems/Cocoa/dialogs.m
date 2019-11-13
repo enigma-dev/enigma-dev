@@ -502,10 +502,10 @@ int cocoa_get_color(int defcol, const char *title) {
 
   [myOKButton setTitle:@"OK"];
   [myOKButton setAlternateTitle:@"OK"];
-  [myOKButton setBezelStyle:NSRoundedBezelStyle];
+  [myOKButton setBezelStyle:1];
   [myCancelButton setTitle:@"Cancel"];
   [myCancelButton setAlternateTitle:@"Cancel"];
-  [myCancelButton setBezelStyle:NSRoundedBezelStyle];
+  [myCancelButton setBezelStyle:1];
   [myButtonView addSubview:myOKButton];
   [myButtonView addSubview:myCancelButton];
   [myOKButton setKeyEquivalent:@"\r"];
@@ -566,7 +566,7 @@ int cocoa_get_color(int defcol, const char *title) {
 
   if (colorOKPressed) {
     myColor = [myColorPanel color];
-    convertedColor = [myColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+    convertedColor = [myColor colorUsingType:NSColorTypeComponentBased];
 
     if (convertedColor) {
       [convertedColor getRed:&r green:&g blue:&b alpha:&a];
