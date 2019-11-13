@@ -36,7 +36,6 @@
 #include "Universal_System/image_formats.h"
 
 #include <windows.h>
-#include <gdiplus.h>
 #include <cwchar>
 #include <cstdio>
 #include <string>
