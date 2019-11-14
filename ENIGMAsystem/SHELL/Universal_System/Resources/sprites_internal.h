@@ -64,7 +64,7 @@ int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, 
                      bool pl, bool sm);
 
 void sprite_add_to_fucker(sprite *ns, unsigned char *pxdata, int imgnumb, bool precise, bool transparent, bool smooth, 
-                         int x_offset, int y_offset, bool mipmap, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight)
+                         int x_offset, int y_offset, bool mipmap, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight);
 
 void sprite_add_to_index(sprite *ns, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth,
                          int x_offset, int y_offset, bool mipmap);
