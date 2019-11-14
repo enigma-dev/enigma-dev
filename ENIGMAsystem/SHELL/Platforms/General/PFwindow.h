@@ -280,7 +280,7 @@ void clipboard_set_text(std::string text);
 bool clipboard_has_text();
 
 void clipboard_set_sprite(int ind, unsigned subimg);
-int clipboard_get_sprite(bool precise);
+int clipboard_get_sprite(bool precise, bool transparent, bool smooth, int x_offset, int y_offset);
 bool clipboard_has_sprite();
 
 }  // namespace enigma_user
