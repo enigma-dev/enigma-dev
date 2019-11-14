@@ -789,10 +789,7 @@ int clipboard_get_sprite(bool precise) {
 
   enigma::spritestructarray_reallocate();
   enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite();
-  spr->id = enigma::sprite_idmax;
-
-  enigma::collision_type coll_type = precise ? enigma::ct_precise : enigma::ct_bbox;
-  enigma::sprite_add_subimage(enigma::sprite_idmax, (unsigned)bih.biWidth, (unsigned)bih.biHeight, dst.data(), dst.data(), coll_type);
+  enigma::sprite_add_to_fucker(spr, dst.data(), 1, precise, transparent, smooth, x_offset, y_offset, false, bih.biWidth, bih.biHeight, bih.biWidth, bih.biHeight);
 
   CloseHandle(hBitmap);
   free(src);
