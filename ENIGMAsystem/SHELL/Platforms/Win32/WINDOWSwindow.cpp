@@ -745,7 +745,7 @@ void clipboard_set_sprite(int ind, unsigned subimg) {
   free(src);
 }
 
-int clipboard_get_sprite(bool precise) {
+int clipboard_get_sprite(bool precise, bool transparent, bool smooth, int x_offset, int y_offset) {
   if (!clipboard_has_sprite()) return -1;
   OpenClipboard(NULL);
   HBITMAP hBitmap = (HBITMAP)GetClipboardData(CF_BITMAP);
