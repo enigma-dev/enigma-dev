@@ -359,7 +359,6 @@ namespace enigma
       ns->colldata.push_back(get_collision_mask(ns,(unsigned char*)pixels,coll_type));
         }
         delete[] pixels;
-        delete[] pxdata;
   }
 
   void sprite_add_to_index(sprite *ns, string filename, int imgnumb,
@@ -371,6 +370,7 @@ namespace enigma
         filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
       
       sprite_add_to_fucker(ns, pxdata, imgnumb, precise, transparent, smooth, x_offset, y_offset, mipmap, width, height, fullwidth, fullheight);
+      delete[] pxdata;
     }
 
   void sprite_add_copy(sprite *spr, sprite *spr_copy) {
