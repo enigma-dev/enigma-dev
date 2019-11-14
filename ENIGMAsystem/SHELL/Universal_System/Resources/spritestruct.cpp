@@ -274,16 +274,11 @@ namespace enigma
 
         return sprid;
     }
-
-  void sprite_add_to_index(sprite *ns, string filename, int imgnumb,
+    
+  void sprite_add_to_fucker(sprite *ns, unsigned char *pxdata, int imgnumb,
       bool precise, bool transparent, bool smooth, int x_offset, int y_offset,
       bool mipmap) {
-
-        unsigned int width, height, fullwidth, fullheight;
-    unsigned char *pxdata = image_load(
-        filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
-
-    if (pxdata == NULL) {
+   if (pxdata == NULL) {
       DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR);
       return;
     }
@@ -367,6 +362,19 @@ namespace enigma
         }
         delete[] pixels;
         delete[] pxdata;
+  }
+
+  void sprite_add_to_index(sprite *ns, string filename, int imgnumb,
+      bool precise, bool transparent, bool smooth, int x_offset, int y_offset,
+      bool mipmap) {
+
+        unsigned int width, height, fullwidth, fullheight;
+    unsigned char *pxdata = image_load(
+        filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
+      
+      sprite_add_to_fucker(ns, pxdata, imgnumb,
+      precise, transparent, smooth, x_offset, y_offset,
+      mipmap)
     }
 
   void sprite_add_copy(sprite *spr, sprite *spr_copy) {
