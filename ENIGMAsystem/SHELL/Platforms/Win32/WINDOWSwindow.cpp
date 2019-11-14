@@ -711,30 +711,7 @@ void clipboard_set_sprite(int ind, unsigned subimg) {
   if (!enigma::get_sprite_mtx(spr, ind)) return;  
   src = enigma::graphics_copy_texture_pixels(spr->texturearray[subimg], &width, &height);
 
-  std::vector<unsigned char> dst;
-  int n = width * height * 4;
-  dst.resize(n);
-
-  int i = 0;
-  for (int y = 0; y < (int)height; y++) {
-    for (int x = 0; x < (int)width; x++) {
-      int base = (y * width + x) * 4;
-      if (src[base + 3] == 0) i++;
-    }
-  }
-
-  int j = 0;
-  for (int y = 0; y < (int)height; y++) {
-    for (int x = 0; x < (int)width; x++) {
-      int base = (y * width + x) * 4;
-      dst[j++] = src[base];
-      dst[j++] = src[base + 1];
-      dst[j++] = src[base + 2];
-      dst[j++] = (i != n / 4) ? src[base + 3] : 255;
-    }
-  }
-
-  HBITMAP hBitmap = CreateBitmap(width, height, 1, 32, dst.data());
+  HBITMAP hBitmap = CreateBitmap(width, height, 1, 32, src);
 
   OpenClipboard(NULL);
   EmptyClipboard();
