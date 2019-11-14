@@ -48,20 +48,19 @@ bool get_sprite(enigma::sprite* &spr, int id)
     return true;
 }
 
-bool get_sprite_mtx(enigma::sprite* &spr, int id)
-{
-    bool rtn = get_sprite(spr, id);
-    if (rtn) {
-        // TODO: Lock a lock by reference and allow it to be timely destructed and released
-    }
-    return rtn;
-}
-
 namespace enigma {
   sprite** spritestructarray;
   extern size_t sprite_idmax;
   sprite::sprite() {}
   sprite::sprite(int x) {}
+    
+bool get_sprite_mtx(enigma::sprite* &spr, int id) {
+  bool rtn = get_sprite(spr, id);
+  if (rtn) {
+    // TODO: Lock a lock by reference and allow it to be timely destructed and released
+  }
+  return rtn;
+}
 }
 
 namespace enigma_user
