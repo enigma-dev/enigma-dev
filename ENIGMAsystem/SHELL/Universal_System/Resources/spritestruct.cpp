@@ -372,9 +372,7 @@ namespace enigma
     unsigned char *pxdata = image_load(
         filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
       
-      sprite_add_to_fucker(ns, pxdata, imgnumb,
-      precise, transparent, smooth, x_offset, y_offset,
-      mipmap)
+      sprite_add_to_fucker(ns, pxdata, imgnumb, precise, transparent, smooth, x_offset, y_offset, mipmap);
     }
 
   void sprite_add_copy(sprite *spr, sprite *spr_copy) {
