@@ -26,6 +26,7 @@
 
 #include <map>
 #include <fstream>      // std::ofstream
+#include <sstream>
 #include <algorithm>
 #include <string>
 #include <cstring>
@@ -126,85 +127,189 @@ int image_save(string filename, const unsigned char* data, unsigned width, unsig
   return image_save(filename, data, format, width, height, fullwidth, fullheight, flipped);
 }
 
-unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
-  FILE *imgfile;
-  unsigned bmpstart,bmpwidth,bmpheight;
-  if(!(imgfile=fopen(filename.c_str(),"rb"))) return 0;
-  fseek(imgfile,0,SEEK_END);
-  fseek(imgfile,0,SEEK_SET);
-  if (fgetc(imgfile)!=0x42 && fgetc(imgfile)!=0x4D) // Not a BMP
-  {
-    fclose(imgfile);
-    return NULL;
+unsigned char* image_load_bmp(
+    string filename, unsigned int* width, unsigned int* height,
+    unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
+  if (std::ifstream bmp{filename}) {
+    std::stringstream buffer;
+    buffer << bmp.rdbuf();
+    return image_decode_bmp(buffer.str(), width, height,
+                            fullwidth, fullheight, flipped);
   }
-  fseek(imgfile,10,SEEK_SET);
-  if (fread(&bmpstart,1,4,imgfile) != 4)
-    return NULL;
-  fseek(imgfile,18,SEEK_SET);
-  if (fread(&bmpwidth,1,4,imgfile) != 4)
-    return NULL;
-  if (fread(&bmpheight,1,4,imgfile) != 4)
-    return NULL;
+  return nullptr;
+}
 
-  fseek(imgfile,28,SEEK_SET); // Color depth
+namespace {
 
-  // Only take 24 or 32-bit bitmaps for now
-  int bitdepth=fgetc(imgfile);
-  if(bitdepth != 24 && bitdepth != 32)
-    return 0;
+#pragma pack(push, whatever)
+#pragma pack(2)
+enum class BitmapCompression: uint32_t {
+  RGB       = 0x00,
+  RLE8      = 0x01,
+  RLE4      = 0x02,
+  BITFIELDS = 0x03,
+  JPEG      = 0x04,
+  PNG       = 0x05,
+  CMYK      = 0x0B,
+  CMYKRLE8  = 0x0C,
+  CMYKRLE4  = 0x0D
+};
 
-  fseek(imgfile,69,SEEK_SET); // Alpha in last byte
-  int bgramask=fgetc(imgfile);
+enum class LogicalColorSpace: uint32_t {
+  CALIBRATED_RGB = 0,   // Invokes the wrath of the calibration vectors below
+  sRGB    = 0x73524742, // 'sRGB', big endian
+  WINDOWS = 0x57696E20  // 'Win ', big endian (Windows default colorspace)
+};
 
-  unsigned
-    widfull = nlpo2dc(bmpwidth) + 1,
-    hgtfull = nlpo2dc(bmpheight) + 1,
-    ih,iw;
+enum class BitmapIntent: uint32_t {
+  ABS_COLORIMETRIC, // Maintains white point; match to nearest color in dest gamut.
+  BUSINESS, // Maintains saturation; used when undithered colors are required.
+  GRAPHICS, // Maintains colorimetric match; used for everything
+  IMAGES // Maintains contrast; used for photographs and natural images
+};
+
+struct FP2d30 {
+  int32_t fraction: 30;
+  int32_t whole: 2;
+  FP2d30(): fraction(0), whole(0) {}
+};
+
+struct FP2d30Vec {
+  FP2d30 x, y, z;
+};
+
+struct BMPFileHeader {
+  const int8_t magic_b = 'B';
+  const int8_t magic_m = 'M';
+  uint32_t size = 0;
+  const int16_t reserved1 = 0;
+  const int16_t reserved2 = 0;
+  const uint32_t dataStart;
+};
+
+static_assert(sizeof(BMPFileHeader) == 14);
+
+struct BMPInfoHeader {
+  const uint32_t size = sizeof(*this);
+  uint32_t width, height;
+  const uint16_t numMipmaps = 1;  // Bitmap still only supports one...
+  uint16_t bitsPerPixel = 32;
+  BitmapCompression compression = BitmapCompression::BITFIELDS;
+  uint32_t imageSize = 0;
+  uint32_t hPixelsPerMeter = 26;
+  uint32_t vPixelsPerMeter = 26;
+  uint32_t colorUsed = 0;
+  uint32_t colorImportant = 0;
+  uint32_t maskRed   = 0x000000FF;
+  uint32_t maskGreen = 0x0000FF00;
+  uint32_t maskBlue  = 0x00FF0000;
+  uint32_t maskAlpha = 0xFF000000;
+  LogicalColorSpace colorSpace = LogicalColorSpace::sRGB;
+  FP2d30Vec endpointRed = {};
+  FP2d30Vec endpointGreen = {};
+  FP2d30Vec endpointBlue = {};
+  uint32_t gammaRed = 0;
+  uint32_t gammaGreen = 0;
+  uint32_t gammaBlue = 0;
+  BitmapIntent intent = BitmapIntent::GRAPHICS;
+  int32_t profileData = 0;
+  int32_t profileSize = 0;
+  const int32_t reserved = 0;
+
+  bool isRGBA() const {
+    return  maskRed == 0xFF000000 && maskGreen == 0x00FF0000 &&
+           maskBlue == 0x0000FF00 && maskAlpha == 0x000000FF;
+  }
+  bool isARGB() const {
+    return maskAlpha == 0xFF000000 &&  maskRed == 0x00FF0000 &&
+           maskGreen == 0x0000FF00 && maskBlue == 0x000000FF;
+  }
+};
+
+#pragma pack(pop)
+}  // namespace
+
+
+unsigned char* image_decode_bmp(
+    const string &image_data, unsigned int* width, unsigned int* height,
+    unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
+  // Check file size against bitmap header size
+  if (image_data.length() < sizeof(BMPFileHeader)) {
+    fprintf(stderr, "Junk bitmap of size %ul", image_data.size());
+    return nullptr;
+  }
+
+  const BMPFileHeader &bmp_file = *(BMPFileHeader*) image_data.data();
+
+  // Verify magic number, check header offset sanity.
+  if (bmp_file.magic_b != 'B' || bmp_file.magic_m != 'M' ||
+      bmp_file.dataStart + sizeof(BMPInfoHeader) > image_data.length()) {
+    fprintf(stderr, "Junk bitmap of size %ul", image_data.size());
+    return nullptr;
+  }
+
+  const BMPInfoHeader &bmp_info =
+      *(BMPInfoHeader*) (image_data.data() + sizeof(BMPFileHeader));
+
+  if(bmp_info.bitsPerPixel != 32 && bmp_info.bitsPerPixel != 24) {
+    fprintf(stderr, "No support for %dbpp bitmaps\n", bmp_info.bitsPerPixel);
+    return nullptr;
+  }
+  const bool rgba = bmp_info.isRGBA();
+  const bool argb = bmp_info.isARGB();
+  if (bmp_info.bitsPerPixel == 32 && !rgba && !argb) {
+    fprintf(stderr, "No support for mask format (%08X, %08X, %08X, %08X)\n",
+            bmp_info.maskRed, bmp_info.maskGreen, bmp_info.maskBlue,
+            bmp_info.maskAlpha);
+    return nullptr;
+  }
+
+  const unsigned widfull = nlpo2dc(bmp_info.width) + 1;
+  const unsigned hgtfull = nlpo2dc(bmp_info.height) + 1;
   const unsigned bitmap_size = widfull*hgtfull*4;
-  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
-  long int pad=bmpwidth & 3; //This is that set of nulls that follows each line
-  fseek(imgfile,bmpstart,SEEK_SET);
 
-  for (ih = 0; ih < bmpheight; ih++)
-  {
+  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to 0.
+
+  // Calculate the number of nulls that follows each line.
+  const int overlap = bmp_info.width * (bmp_info.bitsPerPixel / 8) % 4;
+  const int pad = overlap ? 4 - overlap : 0;
+
+  printf("Bitmap pad: %d\n", pad);
+  const char *bmp_it = image_data.data() + bmp_file.dataStart;
+
+  for (unsigned ih = 0; ih < bmp_info.height; ih++) {
     unsigned tmp = 0;
     if (flipped) {
-      tmp = ih*widfull*4;
+      tmp = ih * widfull * 4;
     } else {
-      tmp = (bmpheight - 1 - ih)*widfull*4;
+      tmp = (bmp_info.height - 1 - ih) * widfull * 4;
     }
-    for (iw = 0; iw < bmpwidth; iw++) {
-      if (bitdepth == 24)
-      {
-        bitmap[tmp+0] = fgetc(imgfile);
-        bitmap[tmp+1] = fgetc(imgfile);
-        bitmap[tmp+2] = fgetc(imgfile);
-        bitmap[tmp+3] = (char)0xFF;
+    for (unsigned iw = 0; iw < bmp_info.width; iw++) {
+      if (bmp_info.bitsPerPixel == 24) {
+        bitmap[tmp+0] = *bmp_it++;
+        bitmap[tmp+1] = *bmp_it++;
+        bitmap[tmp+2] = *bmp_it++;
+        bitmap[tmp+3] = (char) 0xFF;
       }
-      if (bitdepth == 32)
-      {
-        if (bgramask) //BGRA
-        {
-          bitmap[tmp+0] = fgetc(imgfile);
-          bitmap[tmp+1] = fgetc(imgfile);
-         bitmap[tmp+2] = fgetc(imgfile);
-          bitmap[tmp+3] = fgetc(imgfile);
-        }
-        else //ABGR
-        {
-          bitmap[tmp+3] = fgetc(imgfile);
-          bitmap[tmp+0] = fgetc(imgfile);
-          bitmap[tmp+1] = fgetc(imgfile);
-          bitmap[tmp+2]   = fgetc(imgfile);
+      else if (bmp_info.bitsPerPixel == 32) {
+        if (argb) {
+          bitmap[tmp+0] = *bmp_it++;
+          bitmap[tmp+1] = *bmp_it++;
+          bitmap[tmp+2] = *bmp_it++;
+          bitmap[tmp+3] = *bmp_it++;
+        } else {
+          bitmap[tmp+3] = *bmp_it++;
+          bitmap[tmp+0] = *bmp_it++;
+          bitmap[tmp+1] = *bmp_it++;
+          bitmap[tmp+2] = *bmp_it++;
         }
       }
-      tmp+=4;
+      tmp += 4;
     }
-    fseek(imgfile,pad,SEEK_CUR);
+    bmp_it += pad;
   }
-  fclose(imgfile);
-  *width  = bmpwidth;
-  *height = bmpheight;
+  *width  = bmp_info.width;
+  *height = bmp_info.height;
   *fullwidth  = widfull;
   *fullheight = hgtfull;
   return bitmap;
