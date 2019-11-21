@@ -137,6 +137,9 @@ struct GameData {
   /// Name of project file. Used in metadata, and later, resource loading.
   std::string filename;
 
+  /// Event names
+  std::string events;
+
   std::vector<SpriteData>     sprites;
   std::vector<SoundData>      sounds;
   std::vector<BackgroundData> backgrounds;

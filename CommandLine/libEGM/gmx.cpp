@@ -18,9 +18,9 @@
 #include "gmx.h"
 #include "action.h"
 #include "event.h"
-#include "filesystem.h"
-#include "event_reader/event_parser.h"
 #include "strings_util.h"
+
+#include "event_reader/event_parser.h"
 
 #include <pugixml.hpp>
 
@@ -216,13 +216,6 @@ class gmx_root_walker {
   }
 };
 
-std::string FileToString(const std::string &fName) {
-  std::ifstream t(fName.c_str());
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-  return buffer.str();
-}
-
 }  // Anonymous namespace
 
 void PackScript(std::string fName, int id, buffers::resources::Script *script) {
@@ -337,6 +330,25 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
 
       if (gmxName == "GMX_DEPRECATED")
         continue;
+
+      if (gmxName == "eventtype") {
+        int mid = child.attribute("eventtype").as_int();
+        auto enumb = child.attribute("enumb");
+        int sid = 0;
+        std::string name = "";
+        if (enumb) {
+          sid = enumb.as_int();
+        } else {
+          auto ename = child.attribute("ename");
+          if (ename) {
+            name = ename.as_string();
+          } else {
+            errorStream << "Error: event '" << mid << "' with no secondary id or name" << std::endl;
+          }
+        }
+        postponeEventName(m, field, mid, sid, name);
+        continue;
+      }
 
       if (gmxName == "action") {
         std::vector<Action> actions;

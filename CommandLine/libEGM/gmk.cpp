@@ -18,6 +18,10 @@
 #include "gmk.h"
 #include "filesystem.h"
 #include "action.h"
+#include "event.h"
+#include "strings_util.h"
+
+#include "event_reader/event_parser.h"
 
 #include "libpng-util.h"
 
@@ -38,6 +42,8 @@
 using namespace buffers;
 using namespace buffers::resources;
 using namespace std;
+
+using std::map;
 
 using TypeCase = TreeNode::TypeCase;
 using IdMap = unordered_map<int, std::unique_ptr<google::protobuf::Message> >;
@@ -370,29 +376,57 @@ class Decoder {
   }
 
   void postponeName(std::string* name, int id, TypeCase type) {
-    postponeds[type][id].push_back(name);
+    postponedNames[type][id].push_back(name);
   }
 
-  void processPostoned(const std::string name, const int id, const TypeCase type) {
-    auto idMapIt = postponeds.find(type);
-    if (idMapIt == postponeds.end()) {
-      return; // no postponeds for this type
+  void postponeEventName(std::string* name, int mid, int sid) {
+    postponedEventNames.push_back(std::make_pair(name, evpair(mid, sid)));
+  }
+
+  void processPostponedName(const std::string name, const int id, const TypeCase type) {
+    auto idMapIt = postponedNames.find(type);
+    if (idMapIt == postponedNames.end()) {
+      return; // no postponedNames for this type
     }
     auto &idMap = idMapIt->second;
     auto mutableNameIt = idMap.find(id);
     if (mutableNameIt == idMap.end()) {
-      return; // no postponeds for this id
+      return; // no postponedNames for this id
     }
     for (std::string *mutableName : mutableNameIt->second)
       mutableName->append(name.c_str(), name.size());
   }
 
+  void processPostponedEventNames(const map<p_type, map<int, string>> &resource_ids) {
+    EventNameMapping event_name_map("", "", "[", "]", resource_ids);
+    for (auto postponed : postponedEventNames) {
+      std::string *mutableName = postponed.first;
+      auto event_names = event_name_map.event_names;
+      auto event_pair = evpair(postponed.second.first, postponed.second.second);
+      auto name = event_names.find(event_pair);
+      if (name == event_names.end()) continue;
+      mutableName->append((*name).second);
+    }
+  }
+
   private:
+  // this is the input stream used by the decoder for actually reading bytes from the GMK
   std::istream &in;
+
   std::unique_ptr<char[]> zlibBuffer;
   int zlibPos, zlibStart;
   std::unique_ptr<int[]> decodeTable;
-  std::unordered_map<TypeCase, std::unordered_map<int, std::vector<std::string*> > > postponeds;
+
+  // because our protocol model prefers to work with resources by string name,
+  // we have to postpone dereferencing any integer id in the gmk until the
+  // end after which all resources have been loaded
+  std::unordered_map<TypeCase, std::unordered_map<int, std::vector<std::string*> > > postponedNames;
+  // because our protocol model prefers to use string names for events, we
+  // also need to postpone dereferencing of the event name until just after
+  // all postponed resource names have been resolved
+  std::vector<std::pair<std::string*, evpair> > postponedEventNames;
+  // this is a collection of all of the temporary file futures we started asynchronously
+  // it is used to verify that all of the temporary files have been written before returning
   std::vector<std::pair<std::future<std::string>, std::string*> > tempFileFuturesCreated;
 
   std::unique_ptr<int[]> makeEncodeTable(int seed) {
@@ -916,8 +950,7 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
       if (second == -1) break;
 
       auto event = object->add_events();
-      event->set_type(i);
-      event->set_number(second);
+      dec.postponeEventName(event->mutable_name(), i, second);
 
       if (!LoadActions(dec, event->mutable_code(), event->name())) return nullptr;
     }
@@ -1168,7 +1201,7 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
   return 1;
 }
 
-void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
+void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root, map<p_type, map<int, string>> &resource_ids) {
   const int status = dec.read4();
   const int kind = dec.read4();
   const int id = dec.read4();
@@ -1180,7 +1213,7 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
   node->set_folder(status <= 2);
   if (node->folder()) {
     for (int i = 0; i < children; i++) {
-      LoadTree(dec, typeMap, node);
+      LoadTree(dec, typeMap, node, resource_ids);
     }
   } else {
     static const TypeCase RESOURCE_KIND[] = { TypeCase::TYPE_NOT_SET,TypeCase::kObject,TypeCase::kSprite,TypeCase::kSound,
@@ -1190,7 +1223,13 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
     const TypeCase type = RESOURCE_KIND[kind];
 
     // Handle postponed id->name references
-    dec.processPostoned(name, id, type);
+    dec.processPostponedName(name, id, type);
+
+    // Handle postponed id->name event references
+    auto event_type = event_type_map.find(type);
+    if (event_type != event_type_map.end()) {
+      resource_ids[(*event_type).second][id] = name;
+    }
 
     auto typeMapIt = typeMap.find(type);
     if (typeMapIt == typeMap.end()) {
@@ -1308,15 +1347,19 @@ buffers::Project *LoadGMK(std::string fName) {
   // Project Tree
   auto root = make_unique<TreeNode>();
   int rootnodes = (ver > 540) ? 12 : 11;
+  map<p_type, map<int, string> > resource_ids;
   while (rootnodes-- > 0) {
-    LoadTree(dec, typeMap, root.get());
+    LoadTree(dec, typeMap, root.get(), resource_ids);
   }
+  dec.processPostponedEventNames(resource_ids);
 
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(root.release());
   // ensure all temp data files are written and the paths are set in the protos
   dec.processTempFileFutures();
+
+  game->set_events(FileToString(fs::path("events.res")));
 
   return proj.release();
 }

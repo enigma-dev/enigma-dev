@@ -21,6 +21,10 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <sstream>
+#include <fstream>
+#include <iostream>
+
 using namespace std;
 #define tostring to_string
 
@@ -29,6 +33,7 @@ using namespace std;
 inline bool is_letterh(char x) { return is_letter(x) or x == '-' or x == ' '; }
 
 #include "event_parser.h"
+#include "strings_util.h"
 
 inline bool lc(const string &s, const string &ss)
 {
@@ -83,14 +88,9 @@ inline void event_add(int evid,event_info* last)
   event_sequence.push_back(evpair(evid,lid));
 }
 
-int event_parse_resourcefile()
+int event_parse_resourcefile(const std::string& str)
 {
-  FILE* events = fopen("events.res","rt");
-  if (!events) {
-    puts("events.res: File not found");
-    return -1;
-  }
-
+  std::stringstream events(str);
   char line[4096];
 
   // Parse modes
@@ -105,7 +105,7 @@ int event_parse_resourcefile()
     exp_locals, exp_iterdec, exp_iterinit, exp_iterrm, exp_iterdel
   } last_exp = exp_default; // Whether last EXPRESSION was sub or super
 
-  while (!feof(events) and fgets(line,4096,events))
+  while (!events.eof() and events.getline(line,4096))
   {
     linenum++;
     bool lw = false;
@@ -378,7 +378,7 @@ EventNameMapping
 ::EventNameMapping(const string &name_prefix,  const string &name_suffix,
                    const string &index_prefix, const string &index_suffix,
                    const map<p_type, map<int, string>> &resource_ids) {
-  event_parse_resourcefile();
+  event_parse_resourcefile(FileToString("./events.res"));
   for (evpair e : event_sequence) {
     // Verifies that we're a stacked event and not a specialization of it
     if (!e.second && event_is_instance(e.first, e.second)) {

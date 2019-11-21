@@ -18,6 +18,7 @@ inline bool ParseBool(const std::string &b) {
   return std::stod(bl);
 }
 
+
 inline std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
   size_t pos = 0;
   while ((pos = str.find(substr, pos)) != std::string::npos)

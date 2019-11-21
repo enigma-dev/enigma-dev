@@ -5,4 +5,5 @@ import "treenode.proto";
 
 message Game {
   optional TreeNode root = 1;
+  optional string events = 2;
 }
