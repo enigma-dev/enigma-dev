@@ -26,7 +26,7 @@
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
@@ -71,8 +71,7 @@ int handleEvents() {
           if (len > 0) {
             enigma_user::keyboard_lastchar = string(1, str[0]);
             if (actualKey == enigma_user::vk_backspace) {
-              enigma_user::keyboard_string =
-                  enigma_user::keyboard_string.substr(0, enigma_user::keyboard_string.length() - 1);
+              if (!enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
             } else {
               enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
             }
@@ -145,10 +144,12 @@ int handleEvents() {
         continue;
       }
       case ConfigureNotify: {
-        enigma::windowWidth = e.xconfigure.width;
-        enigma::windowHeight = e.xconfigure.height;
-
         if (WindowResizedCallback != NULL) {
+          windowX = e.xconfigure.x;
+          windowY = e.xconfigure.y;
+          windowWidth = e.xconfigure.width;
+          windowHeight = e.xconfigure.height;
+          compute_window_scaling();
           WindowResizedCallback();
         }
         continue;
@@ -169,7 +170,7 @@ int handleEvents() {
         //else fall through
       default:
 #ifdef DEBUG_MODE
-        printf("Unhandled xlib event: %d\n", e.type);
+        DEBUG_MESSAGE("Unhandled xlib event: " + std::to_string(e.type), MESSAGE_TYPE::M_INFO);
 #endif
         continue;
     }
@@ -195,7 +196,12 @@ void handleInput() {
 
 namespace enigma_user {
 
-int display_get_width() { return XWidthOfScreen(enigma::x11::screen); }
-int display_get_height() { return XHeightOfScreen(enigma::x11::screen); }
+int display_get_width() {
+  return XDisplayWidth(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
+}
+
+int display_get_height() { 
+  return XDisplayHeight(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
+}
 
 }  // namespace enigma_user

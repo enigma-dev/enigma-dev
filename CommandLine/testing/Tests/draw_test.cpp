@@ -5,7 +5,7 @@
 TEST(Regression, draw_test) {
   if (!TestHarness::windowing_supported()) return;
   TestConfig tc;
-  tc.extensions = "Paths,libpng";
+  tc.extensions = "Paths,libpng,GTest";
   auto test_harness = LAUNCH_HARNESS_FOR_SOG(tc);
   if (!test_harness) FAIL() << "Game could not be run.";
 
@@ -22,4 +22,5 @@ TEST(Regression, draw_test) {
     game_running = test_harness->game_is_running();
   }
   ASSERT_FALSE(game_running) << "Game did not exit after window was closed!";
+  EXPECT_EQ(test_harness->get_return(), 0) << "Game returned non-zero exit code!";
 }

@@ -25,8 +25,8 @@
 #include "GSvertex_impl.h"
 
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/background.h"
-#include "Universal_System/background_internal.h"
+#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/background_internal.h"
 
 #define INCLUDED_FROM_SHELLMAIN Not really.
 // make an exception just for point_in_rectangle
@@ -166,23 +166,23 @@ namespace enigma_user
 
 int tile_add(int background, int left, int top, int width, int height, int x, int y, int depth, double xscale, double yscale, double alpha, int color)
 {
-    enigma::tile *ntile = new enigma::tile;
-    ntile->id = enigma::maxtileid++;
-    ntile->bckid = background;
-    ntile->bgx = left;
-    ntile->bgy = top;
-    ntile->width = width;
-    ntile->height = height;
-    ntile->roomX = x;
-    ntile->roomY = y;
-    ntile->depth = depth;
-    ntile->xscale = xscale;
-    ntile->yscale = yscale;
-    ntile->alpha = alpha;
-    ntile->color = color;
-    enigma::drawing_depths[ntile->depth].tiles.push_back(*ntile);
-    enigma::rebuild_tile_layer(ntile->depth);
-    return ntile->id;
+    enigma::drawing_depths[depth].tiles.emplace_back(
+      enigma::maxtileid++,
+      background,
+      left,
+      top,
+      depth,
+      height,
+      width,
+      x,
+      y,
+      alpha,
+      xscale,
+      yscale,
+      color
+    );
+    enigma::rebuild_tile_layer(depth);
+    return enigma::maxtileid-1;
 }
 
 bool tile_delete(int id)

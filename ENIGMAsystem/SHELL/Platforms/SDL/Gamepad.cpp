@@ -1,4 +1,5 @@
 #include "Gamepad.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
 
@@ -25,18 +26,18 @@ void initGamepads() {
 }
 
 void cleanupGamepads() {
-  for (int i = 0; i < SDL_NumJoysticks(); ++i) removeGamepad(i);
+  for (size_t i = 0; i < gamepads.size(); ++i) removeGamepad(i);
 }
 
 void pushGamepads() {
-  for (int i = 0; i < SDL_NumJoysticks(); ++i) gamepads[i].push();
+  for (Gamepad& gp : gamepads) gp.push();
 }
 
 void setGamepadButton(int gamepad, int btn, bool pressed) { gamepads[gamepad].state.buttonStatus[btn] = pressed; }
 
 void addGamepad(unsigned i) {
   if (!SDL_IsGameController(i)) {
-    fprintf(stderr, "Could not open gamepad %i: %s\n", i, SDL_GetError());
+    DEBUG_MESSAGE("Could not open gamepad " + std::to_string(i) + ": " + SDL_GetError(), MESSAGE_TYPE::M_ERROR);
     return;
   }
 
@@ -45,11 +46,11 @@ void addGamepad(unsigned i) {
   g.controller = SDL_GameControllerOpen(i);
 
   if (g.controller == nullptr) {
-    fprintf(stderr, "Could not open gamepad %i: %s\n", i, SDL_GetError());
+    DEBUG_MESSAGE("Could not open gamepad " + std::to_string(i) + ": " + SDL_GetError(), MESSAGE_TYPE::M_ERROR);
     return;
   }
 
-  printf("Connected gamepad %u %s\n", i, SDL_GameControllerName(g.controller));
+  DEBUG_MESSAGE("Connected gamepad " + std::to_string(i) + " " + SDL_GameControllerName(g.controller), MESSAGE_TYPE::M_INFO);
 
   SDL_Joystick* j = SDL_GameControllerGetJoystick(g.controller);
 
@@ -57,9 +58,9 @@ void addGamepad(unsigned i) {
     g.haptic = SDL_HapticOpenFromJoystick(j);
 
     if (SDL_HapticRumbleSupported(g.haptic) && SDL_HapticRumbleInit(g.haptic))
-      printf("Rumble Supported: yes\n");
+      DEBUG_MESSAGE("Rumble Supported: yes", MESSAGE_TYPE::M_INFO);
     else
-      printf("Rumble Supported: no\n");
+      DEBUG_MESSAGE("Rumble Supported: no", MESSAGE_TYPE::M_INFO);
   }
 
   if (i < gamepads.size())
@@ -69,7 +70,7 @@ void addGamepad(unsigned i) {
 }
 
 void removeGamepad(unsigned i) {
-  printf("Disconnected gamepad %u %s\n", i, SDL_GameControllerName(gamepads[i].controller));
+  DEBUG_MESSAGE("Disconnected gamepad " + std::to_string(i) + ": " + SDL_GameControllerName(gamepads[i].controller), MESSAGE_TYPE::M_INFO);
   if (gamepads[i].haptic != nullptr) SDL_HapticClose(gamepads[i].haptic);
   SDL_GameControllerClose(gamepads[i].controller);
 }

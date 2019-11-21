@@ -34,7 +34,7 @@
 #include "PS_particle_sprites.h"
 #include "PS_particle_enums.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Collision_Systems/collision_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 #include "Universal_System/math_consts.h"
@@ -932,7 +932,7 @@ namespace enigma
     case pt_sh_snow: {generate_snow(); break;}
     default:
       #if DEBUG_MODE
-        show_error("No such particle type", false);
+        DEBUG_MESSAGE("No such particle type" + std::to_string(particle_shape), MESSAGE_TYPE::M_USER_ERROR)
       #endif
       ;
     }
@@ -971,4 +971,3 @@ namespace enigma
     return sprid;
   }
 }
-

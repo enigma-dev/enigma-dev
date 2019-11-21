@@ -34,8 +34,8 @@ namespace enigma {
 
   int enigma_main(int argc, char** argv);
   int game_ending();
-  long clamp(long value, long min, long max);
   void Sleep(int ms);
+  void compute_window_scaling();
   void compute_window_size();
   void initialize_directory_globals();
   void set_program_args(int argc, char** argv);
@@ -57,7 +57,8 @@ extern unsigned long delta_time;
 extern unsigned long current_time;
 
 void sleep(int ms);
-void game_end(int ret=0);
+void game_end();
+void game_end(int ret);
 void action_end_game();
 void url_open(std::string url,std::string target="_self",std::string options="");
 void url_open_ext(std::string url, std::string target);
@@ -81,7 +82,10 @@ std::string execute_shell_for_output(const std::string &command);
 void execute_program(std::string fname, std::string args, bool wait);
 void execute_program(std::string operation, std::string fname, std::string args, bool wait);
 
+std::string filename_absolute(std::string fname);
+std::string filename_join(std::string prefix, std::string suffix);
 std::string environment_get_variable(std::string name);
+bool environment_set_variable(const std::string &name, const std::string &value);
 bool set_working_directory(std::string dname);
 }
 

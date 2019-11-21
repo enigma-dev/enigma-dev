@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Widget_Systems/widgets_mandatory.h"  // DEBUG_MESSAGE
+
 #include "Bridges/Win32/WINDOWShandle.h" //get_window_handle()
 
 #include <stdio.h>
@@ -55,28 +57,28 @@ using std::stringstream;
 
 IDirectSoundBuffer* primaryBuffer;
 
-vector<SoundResource*> sound_resources(0);
+AssetArray<Sound> sounds;
 
 namespace enigma {
 
 extern HWND hWnd;
 
 void eos_callback(void* soundID, unsigned src) {
-  get_sound(snd, (ptrdiff_t)soundID, );
-  snd->playing = false;
-  snd->idle = true;
+  //auto snd = sounds.get((ptrdiff_t)soundID);
+  //snd.playing = false;
+  //snd.idle = true;
 }
 
 int audiosystem_initialize() {
   if (get_window_handle() == NULL) {
-    MessageBox(NULL, "Window handle is NULL.", "Error", MB_OK);
+    DEBUG_MESSAGE("Window handle is NULL.", MESSAGE_TYPE::M_ERROR);
     return false;
   }
 
   starttime = clock();
   elapsedtime = starttime;
   lasttime = elapsedtime;
-  printf("Initializing audio system...\n");
+  DEBUG_MESSAGE("Initializing audio system...", MESSAGE_TYPE::M_INFO);
 
   HRESULT result;
   DSBUFFERDESC bufferDesc;
@@ -84,14 +86,14 @@ int audiosystem_initialize() {
   // Initialize the direct sound interface pointer for the default sound device.
   result = DirectSoundCreate8(NULL, &dsound, NULL);
   if (FAILED(result)) {
-    MessageBox(NULL, "Failed to create DirectSound8 object.", "Error", MB_OK);
+    DEBUG_MESSAGE("Failed to create DirectSound8 object.", MESSAGE_TYPE::M_ERROR);
     return false;
   }
 
   // Set the cooperative level to priority so the format of the primary sound buffer can be modified.
   result = dsound->SetCooperativeLevel(hWnd, DSSCL_PRIORITY);
   if (FAILED(result)) {
-    MessageBox(NULL, "Failed to set the cooperative level of the Window handle.", "Error", MB_OK);
+    DEBUG_MESSAGE("Failed to set the cooperative level of the Window handle.", MESSAGE_TYPE::M_ERROR);
     return false;
   }
 
@@ -153,11 +155,7 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 }
 
 int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
-  SoundResource* snd = new SoundResource();
-  if (size_t(id) >= sound_resources.size()) {
-    sound_resources.resize(size_t(id) + 1);
-  }
-  sound_resources[id] = snd;
+  Sound snd;
 
   WaveHeaderType* waveHeader = buffer_get_wave_header((char*)buffer, bufsize);
   WAVEFORMATEX waveFormat = {};
@@ -178,12 +176,11 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   bufferDesc.dwReserved = 0;
   bufferDesc.lpwfxFormat = &waveFormat;
   bufferDesc.guid3DAlgorithm = GUID_NULL;
-  dsound->CreateSoundBuffer(&bufferDesc, &snd->soundBuffer, NULL);
+  dsound->CreateSoundBuffer(&bufferDesc, &snd.soundBuffer, NULL);
 
+  auto sndBuf = snd.soundBuffer;
   LPVOID lpvWrite;
   DWORD dwLength;
-
-  IDirectSoundBuffer* sndBuf = snd->soundBuffer;
 
   if (DS_OK == sndBuf->Lock(0,                     // Offset at which to start lock.
                             waveHeader->dataSize,  // Size of lock; ignored because of flag.
@@ -207,15 +204,16 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
         bits = waveHeader->bitsPerSample,
         size = waveHeader->dataSize;
 
-  snd->length = size / channels / (bits / 8) / freq;
+  snd.length = size / channels / (bits / 8) / freq;
 
   delete waveHeader;
 
-  snd->soundBuffer->SetCurrentPosition(0);
+  snd.soundBuffer->SetCurrentPosition(0);
   // Set volume of the buffer to 100%.
-  snd->soundBuffer->SetVolume(0);
-  snd->loaded = LOADSTATE_COMPLETE;
+  snd.soundBuffer->SetVolume(0);
+  snd.loaded = LOADSTATE_COMPLETE;
 
+  sounds.assign(id, std::move(snd));
   return 0;
 }
 
@@ -223,21 +221,6 @@ int sound_add_from_stream(int id, size_t (*callback)(void* userdata, void* buffe
                           void (*seek)(void* userdata, float position), void (*cleanup)(void* userdata),
                           void* userdata) {
   return -1;
-}
-
-int sound_allocate() {
-  int id = -1;
-  for (unsigned i = 0; i < sound_resources.size(); i++) {
-    if (sound_resources[id] == NULL) {
-      id = i;
-    }
-  }
-  if (id < 0) {
-    id = sound_resources.size();
-    sound_resources.push_back(NULL);
-  }
-
-  return id;
 }
 
 void audiosystem_update(void) {}

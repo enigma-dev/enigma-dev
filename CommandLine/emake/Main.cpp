@@ -21,9 +21,11 @@
 #include <fstream>
 #include <iostream>
 #include <streambuf>
+#include <cstdlib>
 
-std::ostream outputStream(std::cout.rdbuf());
-std::ostream errorStream(std::cerr.rdbuf());
+std::ostream outputStream(nullptr);
+std::ostream errorStream(nullptr);
+std::ofstream egmlog("logs/enigma_libegm.log", std::ofstream::out);
 
 static std::string tolower(const std::string &str) {
   std::string res = str;
@@ -35,6 +37,17 @@ static std::string tolower(const std::string &str) {
 
 int main(int argc, char* argv[])
 {
+  std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
+  if (ENIGMA_DEBUG == "TRUE") {
+    outputStream.rdbuf(std::cout.rdbuf());
+    errorStream.rdbuf(std::cerr.rdbuf());
+  } else {
+    outputStream.rdbuf(egmlog.rdbuf());
+    errorStream.rdbuf(egmlog.rdbuf());
+    std::cout << "LibEGM parsing log at: logs/enigma_libegm.log" << std::endl;
+  }
+  
+  
   OptionsParser options;
   options.ReadArgs(argc, argv);
   int result = options.HandleArgs();
@@ -99,7 +112,7 @@ int main(int argc, char* argv[])
     mode = emode_invalid;
 
   if (mode == emode_invalid) {
-    errorStream << "Invalid game mode: " << _mode << " aborting!" << std::endl;
+    std::cerr << "Invalid game mode: " << _mode << " aborting!" << std::endl;
     return OPTIONS_ERROR;
   }
 
@@ -113,7 +126,7 @@ int main(int argc, char* argv[])
 
   if (input_file.size()) {
     if (!boost::filesystem::exists(input_file)) {
-      errorStream << "Input file does not exist: " << input_file << std::endl;
+      std::cerr << "Input file does not exist: " << input_file << std::endl;
       return OPTIONS_ERROR;
     }
 
@@ -152,11 +165,14 @@ int main(int argc, char* argv[])
       return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
 #endif
     } else {
-      if (ext.empty()) {
-        errorStream << "Error: Unknown filetype: cannot determine type of file "
+      if (ext == "egm") {
+        std::cerr << "EGM format not yet supported. "
+                       "Please use LateralGM for the time being." << std::endl;
+      } else if (ext.empty()) {
+        std::cerr << "Error: Unknown filetype: cannot determine type of file "
                     << '"' << input_file << "\"." << std::endl;
       } else {
-        errorStream << "Error: Unknown filetype \"" << ext
+        std::cerr << "Error: Unknown filetype \"" << ext
                     << "\": cannot read input file \"" << input_file
                     << "\"." << std::endl;
       }

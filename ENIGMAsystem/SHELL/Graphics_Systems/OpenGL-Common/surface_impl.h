@@ -1,0 +1,45 @@
+/** Copyright (C) 2008-2013 Josh Ventura, Dave "biggoron", Harijs Grinbergs
+*** Copyright (C) 2013 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
+#ifdef INCLUDED_FROM_SHELLMAIN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
+#ifndef ENIGMA_GL_SURFACE_IMPL_H
+#define ENIGMA_GL_SURFACE_IMPL_H
+
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSsurface_impl.h"
+
+namespace enigma {
+
+struct Surface : BaseSurface
+{
+  GLuint fbo;
+  GLuint depth_buffer;
+  GLuint stencil_buffer;
+  bool has_depth_buffer = false;
+  bool has_stencil_buffer = false;
+  bool write_only = true;
+};
+
+int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, GLint internalFormat, GLenum format, GLenum type);
+
+} // namespace enigma
+
+#endif //ENIGMA_GL_SURFACE_IMPL_H

@@ -1,5 +1,6 @@
 /** Copyright (C) 2008 Josh Ventura
 *** Copyright (C) 2014 Robert B. Colton
+*** Copyright (C) 2019 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -52,41 +53,40 @@ enum {
 };
 */
 
-    void message_alpha(double alpha);
-    void message_background(int back);
-    void message_button(int spr);
-    void message_button_font(string name, int size, int color, int style);
-    void message_caption(bool show, string str);
-    void message_input_color(int col);
-    void message_input_font(string name, int size, int color, int style);
-    void message_mouse_color(int col);
-    void message_position(int x, int y);
-    void message_size(int w, int h);
-    void message_text_font(string name, int size, int color, int style); 
-	void message_text_charset(int type, int charset); 
+	static string ws_win32       = "Win32";
+	static string ws_cocoa       = "Cocoa";
+	static string ws_x11_zenity  = "Zenity";
+	static string ws_x11_kdialog = "KDialog";
+
+	string widget_get_system();
+	void widget_set_system(string sys);
+	int show_message_cancelable(string message);
+	int show_message_ext(string message, string but1, string but2, string but3);
+	bool show_question(string message);
+	int show_question_cancelable(string message);
+	int show_attempt(string errortext);
+	string get_string(string message, string def);
+	string get_password(string message, string def);
+	double get_integer(string message, double def);
+	double get_passcode(string message, double def);
+	string get_open_filename(string filter, string fname);
+	string get_open_filenames(string filter, string fname);
+	string get_save_filename(string filter, string fname);
+	string get_open_filename_ext(string filter, string fname, string dir, string title);
+	string get_open_filenames_ext(string filter, string fname, string dir, string title);
+	string get_save_filename_ext(string filter, string fname, string dir, string title);
+	string get_directory(string dname);
+	string get_directory_alt(string capt, string root);
+	int get_color(int defcol);
+	int get_color_ext(int defcol, string title);
+	string message_get_caption();
+	void message_set_caption(string title);
 	
-	int show_message_ext(string str, string but1, string but2, string but3);
-  
-	bool show_question(string str);
-	inline bool action_if_question(string str)
+	inline bool action_if_question(string message)
 	{
-		return show_question(str);
+		return show_question(message);
 	}
 	
-	// IMPLEMENTS from widgets_mandatory:
-	// void show_error(string errortext, const bool fatal);
-
-	int get_color(int defcol, bool advanced = false);
-	
-	string get_open_filename(string filter, string fname, string caption="");
-	string get_save_filename(string filter, string fname, string caption="");
-	string get_directory(string dname, string caption="Select Folder");
-	string get_directory_alt(string message, string root, bool modern=false, string caption="Browse for Folder");
-
-	string get_login(string username, string password, string cap="");
-	string get_string(string message, string def, string cap="");
-	double get_number(string message, string def, string cap="");
-	int    get_integer(string message, string def, string cap="");
+	string get_login(string username, string password);
 	bool   get_string_canceled();
-
 }

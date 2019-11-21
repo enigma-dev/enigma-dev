@@ -18,26 +18,29 @@
 #ifndef BGUI_LABELS_H
 #define BGUI_LABELS_H
 
-#include <string>
 #include "common.h"
 
-namespace gui
-{
-	class Label{
-		public:
-			unsigned int id;
-			rect box;
-			std::string text = "";
+#include <string>
 
-   		bool visible = true;
+namespace enigma {
+namespace gui {
+class Label {
+ public:
+  unsigned int id;
+  rect box;
+  std::string text = "";
 
-			int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
+  bool visible = true;
 
-      int style_id = -1; //The style we use
+  int parent_id =
+      -1;  //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
 
-			Label();
-			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
-	};
-}
+  int style_id = -1;  //The style we use
+
+  Label();
+  void draw(gs_scalar ox = 0, gs_scalar oy = 0);
+};
+}  //namespace gui
+}  //namespace enigma
 
 #endif

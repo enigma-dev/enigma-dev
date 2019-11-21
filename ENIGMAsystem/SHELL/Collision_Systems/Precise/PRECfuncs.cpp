@@ -23,11 +23,11 @@
 #include <cmath>
 #include <limits>
 
-#include "Universal_System/collisions_object.h"
-#include "Universal_System/instance_system.h" //iter
+#include "Universal_System/Object_Tiers/collisions_object.h"
+#include "Universal_System/Instances/instance_system.h" //iter
 #include "Universal_System/roomsystem.h"
 #include "Collision_Systems/collision_mandatory.h" //iter
-#include "Universal_System/instance.h"
+#include "Universal_System/Instances/instance.h"
 #include "Universal_System/math_consts.h"
 
 #include "../General/CSfuncs.h"
@@ -62,10 +62,8 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
     }
 }
 
-static inline int min(int x, int y) { return x<y? x : y; }
-static inline double min(double x, double y) { return x<y? x : y; }
-static inline int max(int x, int y) { return x>y? x : y; }
-static inline double max(double x, double y) { return x>y? x : y; }
+template<typename T> static inline T min(T x, T y) { return x<y? x : y; }
+template<typename T> static inline T max(T x, T y) { return x>y? x : y; }
 static inline double angle_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;}
 static inline double point_direction(cs_scalar x1, cs_scalar y1,cs_scalar x2, cs_scalar y2) {return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);}
 

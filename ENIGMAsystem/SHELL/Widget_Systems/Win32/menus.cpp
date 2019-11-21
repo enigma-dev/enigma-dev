@@ -156,7 +156,6 @@ int show_menu_ext(int x, int y, string text)
         else if (i-is>1 and itxt[0]=='<')
         {
           ms=ms->pop();
-          cout << "\"" << itxt.substr(1) << "\"" << endl;
           menu_add_item(ms->menu,iid,id,itxt.substr(1),MFT_STRING);
         }
         else

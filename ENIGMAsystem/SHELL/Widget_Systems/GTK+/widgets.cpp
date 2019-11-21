@@ -57,10 +57,8 @@ struct threadsafety
 
 static void widget_destroy(GtkObject *who, gpointer wgtid)
 {
-  printf("Destroyed widget #%d\n",(int)long(wgtid));
   widgets[(int)long(wgtid)]->exists = false;
   if (widgets[(int)long(wgtid)]->occc.size())
-    printf("  (and %lu children)\n",widgets[(int)long(wgtid)]->occc.size()),
     widgets[(int)long(wgtid)]->occc.clear();
 }
 
@@ -126,7 +124,6 @@ int wgt_layout_create(int win, string layout, int hpad, int vpad)
     pair<swmap::iterator, bool> insd = tblew->occc.insert(gwpair(string(1,cat),NULL));
     if (insd.second)
     {
-      //printf("Inserted cell of ID '%c' at (%d, %d)[%d, %d]\n", cat, x,y,cs,rs);
       insd.first->second = gtk_alignment_new(0,0,1,1),
       gtk_table_attach(GTK_TABLE(tbl),insd.first->second,x,x+cs,y,y+rs,GTK_EXPAND_FILL,GTK_EXPAND_FILL,hpad,vpad);
     }

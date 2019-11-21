@@ -74,6 +74,8 @@ struct ey_data: ey_base // Contains multiple members
        begin(), end(); // Iterator to first element and to end of data map (an invalid iterator)
   eylist* first(); // Get the first element defined chronologically
   
+  ey_data(ey_data &&data);
+  ey_data(const ey_data&) = delete;
   ey_data(string); // Construct with a name
   ey_data(); ~ey_data(); // Background work
 };

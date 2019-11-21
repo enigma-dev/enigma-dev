@@ -133,6 +133,9 @@ class X11_TestHarness final: public TestHarness {
   void wait() final {
     usleep(1000000);
   }
+  int get_return() final {
+    return return_code;
+  }
   X11_TestHarness(Display *disp, pid_t game_pid, Window game_window,
                   const TestConfig &tc):
       pid(game_pid), window_id(game_window), display(disp), test_config(tc) {}
@@ -161,7 +164,9 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   if (pid_t emake = fork()) {
     int status = 0;
     if (emake == -1) return -1;
-    if (waitpid(emake, &status, 0) == -1) return -1;
+    int ret = (waitpid(emake, &status, 0) == -1);
+    system("./share_logs.sh");
+    if (ret) return -1;
     if (WIFEXITED(status)) return WEXITSTATUS(status);
     return -1;
   }

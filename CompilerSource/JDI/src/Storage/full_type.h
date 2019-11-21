@@ -4,7 +4,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2013 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -28,7 +28,7 @@ namespace jdi {
 
 #endif
 
-#include <Storage/definition.h>
+#include <Storage/definition_forward.h>
 #include <Storage/references.h>
 
 #ifndef _FULL_TYPE__H__DETAIL
@@ -51,18 +51,22 @@ namespace jdi {
     void copy(const full_type& ft); ///< Copy a full_type without warning; this is for when copy is inevitable.
     
     std::string toString() const; ///< Represent as a string.
+    std::string toEnglish() const; ///< Represent as a string giving a plain-English description.
     
-    bool operator==(const full_type& other) const; ///< Compare for equality across all three attributes.
+    bool operator==(const full_type& other) const; ///< Compare for STRICT equality across all three attributes; to factor in synonyms, use \c synonymous_with.
     bool operator!=(const full_type& other) const; ///< Compare against equality across all three attributes.
     bool operator< (const full_type& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
     bool operator> (const full_type& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
     bool operator<= (const full_type& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
     bool operator>= (const full_type& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
     
+    bool synonymous_with(const full_type& x) const; ///< Returns whether this reference stack is equal to another when you consider typedefs.
+    full_type &reduce(); ///< Reduces this type by unrolling typedefs.
+    
     full_type(); ///< Default constructor.
     full_type(jdi::definition*); ///< Construct with only a definition.
     full_type(jdi::definition* d, int f); ///< Construct with a definition and flags, but no refs.
-    full_type(jdi::definition*, jdi::ref_stack, int); ///< Construct from individual components. Consumes the given \c ref_stack.
+    full_type(jdi::definition*, const jdi::ref_stack&, int); ///< Construct from individual components. Copies the given \c ref_stack, so may be slow.
     full_type(const full_type&); ///< Copy constructor. Makes a copy, so slowish.
   };
 }

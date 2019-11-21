@@ -666,8 +666,8 @@ static inline void write_object_declarations(lang_CPP* lcpp, const GameData &gam
   ofstream wto;
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h").c_str(),ios_base::out);
   wto << license;
-  wto << "#include \"Universal_System/collisions_object.h\"\n";
-  wto << "#include \"Universal_System/object.h\"\n\n";
+  wto << "#include \"Universal_System/Object_Tiers/collisions_object.h\"\n";
+  wto << "#include \"Universal_System/Object_Tiers/object.h\"\n\n";
   wto << "#include <map>";
 
   declare_scripts(wto, game, state);
@@ -978,7 +978,6 @@ static inline void write_basic_constructor(ofstream &wto) {
       "    instance->image_xscale = 1;\n"
       "    instance->image_yscale = 1;\n"
       "    \n"
-      "    instancecount++;\n"
       "    instance_count++;\n"
       "  }\n"
       "}\n";

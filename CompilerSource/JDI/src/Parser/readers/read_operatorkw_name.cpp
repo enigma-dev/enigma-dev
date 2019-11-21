@@ -1,7 +1,32 @@
-#include <Parser/bodies.h>
+/**
+ * @file read_operatorkw_name.cpp
+ * @brief Source handling reading operator function names.
+ * 
+ * @section License
+ * 
+ * Copyright (C) 2011-2013 Josh Ventura
+ * This file is part of JustDefineIt.
+ * 
+ * JustDefineIt is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3 of the License, or (at your option) any later version.
+ * 
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
+**/
+
+
+#include <Parser/context_parser.h>
 #include <API/compile_settings.h>
 
-string jdip::read_operatorkw_name(lexer* lex, token_t &token, definition_scope *scope, error_handler *herr)
+using std::string;
+using namespace jdi;
+
+string jdip::context_parser::read_operatorkw_name(token_t &token, definition_scope *scope)
 {
   string res;
   token = lex->get_token_in_scope(scope, herr);
@@ -28,6 +53,10 @@ string jdip::read_operatorkw_name(lexer* lex, token_t &token, definition_scope *
     }
     else
       token = lex->get_token_in_scope(scope, herr);
+  }
+  else if (token.type == TT_COMMA) {
+    res = "operator,";
+    token = lex->get_token_in_scope(scope, herr);
   }
   else if (token.type == TT_NEW) {
     token = lex->get_token_in_scope(scope, herr);
