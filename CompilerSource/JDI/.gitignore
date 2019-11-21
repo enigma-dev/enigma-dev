@@ -8,3 +8,8 @@ ValgrindOut.xml
 cachegrind.*
 src/User/token_cases.h
 src/User/token_cases.h
+*.cbTemp
+gmon.out
+profiling/
+test/dump-win32.cpp
+test/dump-mymachine.cpp

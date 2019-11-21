@@ -17,7 +17,6 @@
 **/
 
 #include "strings_util.h"
-
 #include "makedir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/GameData.h"
@@ -261,7 +260,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
 
   // First, we make a space to put our globals.
-  jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
+  jdi::using_scope globals_scope("<ENIGMA Resources>", namespace_enigma_user);
 
   idpr("Copying resources",1);
 
@@ -396,6 +395,11 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Writing resource names and maxima" << flushl;
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
   wto << license;
+
+  wto << "namespace enigma {\n";
+  std::string res_in = (compilerInfo.exe_vars["RESOURCES_IN"] != "") ? "RESOURCES_IN" : "RESOURCES";
+  wto << "const char *resource_file_path=\"" << compilerInfo.exe_vars[res_in] << "\";\n";
+  wto << "}\n";
 
   write_resource_meta(wto,     "object", game.objects);
   write_resource_meta(wto,     "sprite", game.sprites);

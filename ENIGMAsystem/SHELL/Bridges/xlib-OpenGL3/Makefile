@@ -1,1 +1,1 @@
-SOURCES += $(wildcard Bridges/xlib-OpenGL/*.cpp)
+include Bridges/xlib-OpenGL/Makefile

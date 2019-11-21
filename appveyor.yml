@@ -27,6 +27,7 @@ environment:
   WIDGETS: None
   EXTENSIONS: "None"
   PACKAGES: ""
+  PACKAGES_LATEST: ""
 
   matrix:
     # Game Modes
@@ -38,8 +39,9 @@ environment:
     - {PLATFORM: SDL, PACKAGES: "SDL2:x"}
 
     # Graphics
-    - {GRAPHICS: Direct3D11, PACKAGES: "glm:x"}
+    - {GRAPHICS: Direct3D11}
     - {GRAPHICS: OpenGL1, PACKAGES: "glew:x"}
+    - {GRAPHICS: OpenGLES3, PLATFORM: SDL, PACKAGES_LATEST: "libepoxy:x", PACKAGES: "SDL2:x" }
 
     # Audio
     - {AUDIO: DirectSound}
@@ -49,7 +51,6 @@ environment:
 
     # Widgets
     - {WIDGETS: Win32}
-    - {WIDGETS: DlgMod}
     #TODO: Fix GTK+ on Windows
     #- {WIDGETS: GTK+, PACKAGES: "gtk2:x"}
 
@@ -58,6 +59,8 @@ environment:
     - {EXTENSIONS: "WindowsTouch"}
     - {EXTENSIONS: "XInput"}
     - {EXTENSIONS: "MediaControlInterface"}
+    - {EXTENSIONS: "FileDropper"}
+    - {EXTENSIONS: "IniFilesystem"}
     - {EXTENSIONS: "Box2DPhysics", PACKAGES: "box2d:x"}
     - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
     #TODO: Fix Bullet Physics on Windows
@@ -78,6 +81,8 @@ install:
   - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
   - > # Install packages common to all builds
     bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x %PACKAGES%"
+  - > # Install latest packages (OpenGLES needs fundies' patched libepoxy)
+    bash -lc "pacboy --noconfirm -Sy %PACKAGES_LATEST%"
   - gcc -v
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
@@ -107,4 +112,4 @@ install:
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
-  - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh"
+  - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh && ./share_logs.sh"

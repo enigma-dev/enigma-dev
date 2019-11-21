@@ -1,5 +1,6 @@
 #include "Audio_Systems/audio_mandatory.h"
 #include "Universal_System/estring.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include <gme/gme.h>
 #include <vector>
 #include <cstdio>
@@ -16,7 +17,7 @@ void handle_error( const char* str )
 {
         if (str)
         {
-                printf( "\n GME Error: %s\n", str );
+                DEBUG_MESSAGE(std::string("GME Error: ") + str, MESSAGE_TYPE::M_ERROR);
                 exit( EXIT_FAILURE );
         }
 }

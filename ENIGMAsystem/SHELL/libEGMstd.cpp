@@ -52,6 +52,7 @@ string toString(char* n)              { return string(n); }
 string toString(float n)              { return string(buf,sprintf(buf,"%g", n)); }
 string toString(double n)             { return string(buf,sprintf(buf,"%g", n)); }
 string toString(long double n)        { return std::to_string(n); }
+string toString(const void *n)        { return string(buf,sprintf(buf,"%p",  n)); }
 
 string toString()                                        { return string ();     }
 string toString(const string& str)                       { return string (str);  }
@@ -71,7 +72,7 @@ string toString(const variant &a) {
     }
     return toString(dVal);
   }
-  return a.sval;
+  return a.sval();
 }
 
 string toString(const var &a) {

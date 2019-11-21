@@ -15,29 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX11SurfaceStruct.h"
-#include "DX11TextureStruct.h"
+#include "DX11surface_impl.h"
+#include "DX11textures_impl.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-
-#include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites_internal.h"
-#include "Universal_System/background_internal.h"
-#include "Collision_Systems/collision_types.h"
-
-#include <iostream>
-#include <cstddef>
-#include <math.h>
-#include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
 using namespace enigma::dx11;
-
-namespace enigma {
-vector<Surface*> Surfaces(0);
-}
 
 namespace enigma_user {
 
@@ -107,13 +93,14 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
   }
 
   enigma::Surface* surface = new enigma::Surface();
-  TextureStruct* gmTexture = new TextureStruct(renderTargetTexture, shaderResourceView);
-  textureStructs.push_back(gmTexture);
+  enigma::DX11Texture* gmTexture = new enigma::DX11Texture(renderTargetTexture, shaderResourceView);
+  const int texid = enigma::textures.size();
+  enigma::textures.push_back(gmTexture);
   surface->renderTargetView = renderTargetView;
-  surface->tex = textureStructs.size() - 1;
+  surface->texture = texid;
   surface->width = width; surface->height = height;
-  enigma::Surfaces.push_back(surface);
-  return enigma::Surfaces.size() - 1;
+  enigma::surfaces.push_back(surface);
+  return enigma::surfaces.size() - 1;
 }
 
 int surface_create_msaa(int width, int height, int levels)
@@ -126,7 +113,7 @@ void surface_set_target(int id)
   draw_batch_flush(batch_flush_deferred);
 
   get_surface(surface,id);
-  m_deviceContext->OMSetRenderTargets(1, &surface->renderTargetView, NULL);
+  m_deviceContext->OMSetRenderTargets(1, &surface.renderTargetView, NULL);
 }
 
 void surface_reset_target()
@@ -143,99 +130,7 @@ int surface_get_target()
 
 void surface_free(int id)
 {
-  get_surface(surf, id);
-  delete surf;
-}
-
-bool surface_exists(int id)
-{
-  return !((id < 0) or (size_t(id) > enigma::Surfaces.size()) or (enigma::Surfaces[id] == NULL));
-}
-
-int surface_get_texture(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->tex);
-}
-
-int surface_get_width(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->width);
-}
-
-int surface_get_height(int id)
-{
-  get_surfacev(surf,id,-1);
-  return (surf->height);
-}
-
-int surface_getpixel(int id, int x, int y)
-{
-  return 0; //TODO: implement
-}
-
-int surface_getpixel_ext(int id, int x, int y)
-{
-  return 0; //TODO: implement
-}
-
-int surface_getpixel_alpha(int id, int x, int y)
-{
-  return 0; //TODO: implement
-}
-
-}
-
-//////////////////////////////////////SAVE TO FILE AND CTEATE SPRITE FUNCTIONS/////////
-//Fuck whoever did this to the spec
-#ifndef DX_BGR
-  #define DX_BGR 0x80E0
-#endif
-
-#include "Universal_System/estring.h"
-
-namespace enigma_user
-{
-
-int surface_save(int id, string filename)
-{
-  return -1; //TODO: implement
-}
-
-int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
-{
-  return -1; //TODO: implement
-}
-
-int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
-{
-  return -1; //TODO: implement
-}
-
-int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
-{
-  return -1; //TODO: implement
-}
-
-int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
-{
-  return sprite_create_from_surface(id, x, y, w, h, removeback, smooth, true, xorig, yorig);
-}
-
-void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
-{
-
-}
-
-void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)
-{
-
-}
-
-void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
-{
-
+  delete enigma::surfaces[id];
 }
 
 }

@@ -36,6 +36,8 @@ namespace quick {
       node *next; ///< The node before this node, be it in this chunk or the last. If next==NULL, a push will allocate a new node.
     } *ntop;
     
+    size_t tnum;
+    
     /**
       Private utility function to allocate a new chunk of nodes and validate it.
       This is accomplished by setting enveloped nodes' \c next and \c prev members
@@ -68,18 +70,18 @@ namespace quick {
     
     public:
       /// Default constructor; creates an empty stack.
-      stack() { ntop = alloc(0); } 
+      stack(): tnum(0) { ntop = alloc(0); } 
       /** Push a new node onto the stack with the value given by x.
           In actuality, it is unlikely that a new node will be allocated
           rather than a pointer being incremented and value being set. **/
-      void push(tp x) { if (!ntop->next) ntop->next = alloc(ntop); ntop = ntop->next; ntop->data = x; }
+      void push(tp x) { if (!ntop->next) ntop->next = alloc(ntop); ntop = ntop->next; ntop->data = x; ++tnum; }
       /** Pushes a new node onto the stack, but instead of copying x, simply swaps it with the new node.
           This leaves the given value in the same state it would be if constructed fresh. **/
-      void enswap(tp &x) { if (!ntop->next) ntop->next = alloc(ntop); ntop = ntop->next; ntop->data.swap(x); }
+      void enswap(tp &x) { if (!ntop->next) ntop->next = alloc(ntop); ntop = ntop->next; ntop->data.swap(x); ++tnum; }
       /** Pops an item from the stack, returning the value it contained.
           In actuality, this only involves changing the top pointer to
           its previous node's. **/
-      tp &pop() { tp &r = ntop->data; ntop = ntop->prev; return r; }
+      tp &pop() { tp &r = ntop->data; ntop = ntop->prev; --tnum; return r; }
       /** Return the item of the top node on the stack. **/
       tp& top() { return ntop->data; }
       /** Default destructor. Picks up after our class. **/
@@ -88,6 +90,10 @@ namespace quick {
           In other words, returns whether any of the nodes in our stack
           are in use. **/
       bool empty() { return !ntop->prev; }
+      /** Returns whether the stack is empty.
+          In other words, returns whether any of the nodes in our stack
+          are in use. **/
+      size_t size() { return tnum; }
       
       /// Standard iterator type
       class iterator {

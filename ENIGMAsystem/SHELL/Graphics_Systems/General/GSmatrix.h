@@ -64,8 +64,6 @@ bool is_matrix(const var& value);
 bool is_vec3(const var& value);
 bool is_vec4(const var& value);
 
-void d3d_set_perspective(bool enable);
-bool d3d_get_perspective();
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,
                         gs_scalar xto, gs_scalar yto, gs_scalar zto,
                         gs_scalar xup, gs_scalar yup, gs_scalar zup);

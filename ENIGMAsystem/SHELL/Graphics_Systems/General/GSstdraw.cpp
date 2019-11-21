@@ -24,30 +24,108 @@
 #include "Universal_System/math_consts.h"
 
 #include <list>
-#include <vector>
 #include <math.h>
 #include <stdio.h>
 
-using std::vector;
+namespace {
+
+// please keep drawStateDirty private to this translation unit!
+bool drawStateDirty=false;
+
+} // namespace anonymous
 
 namespace enigma {
-  float circleprecision=24;
-  extern unsigned char currentcolor[4];
 
-  //List of vertices we are buffering to draw.
-  std::list<PolyVertex> currComplexPoly;
+bool lineStippleEnable=false, msaaEnabled=true, alphaBlend=true, alphaTest=false;
+unsigned short lineStipplePattern=0xFFFF;
+unsigned char alphaTestRef=0;
+float circleprecision=24, drawPointSize=1.0f, drawLineWidth=1.0f;
+int drawFillMode=enigma_user::rs_solid, lineStippleScale=1;
+
+// handler for when a generic rendering state has changed
+void draw_set_state_dirty(bool dirty) { drawStateDirty = dirty; }
+bool draw_get_state_dirty() { return drawStateDirty; }
+
+} // namespace enigma
+
+namespace enigma_user {
+
+void draw_state_flush() {
+  // track whether we are already flushing the state
+  static bool flushing = false;
+
+  // prevent state flush triggered by batch flush of another state flush
+  if (flushing) return;
+
+  // flush the batch even if state is not dirty because this function
+  // means we are about to draw something anyway
+  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
+
+  // if the state isn't dirty, we don't have to do anything
+  if (!drawStateDirty) return;
+
+  flushing = true; // we are now flushing the state
+
+  enigma::graphics_state_flush();
+  drawStateDirty = false; // state is not dirty now
+
+  flushing = false; // done flushing state
 }
 
-namespace enigma_user
-{
+void draw_set_msaa_enabled(bool enable) {
+  enigma::draw_set_state_dirty();
+  enigma::msaaEnabled = enable;
+}
+
+void draw_enable_alphablend(bool enable) {
+  enigma::draw_set_state_dirty();
+  enigma::alphaBlend = enable;
+}
+
+void draw_set_alpha_test(bool enable) {
+  enigma::draw_set_state_dirty();
+  enigma::alphaTest = enable;
+}
+
+void draw_set_alpha_test_ref_value(unsigned val) {
+  enigma::draw_set_state_dirty();
+  enigma::alphaTestRef = val;
+}
+
+void draw_set_point_size(float value) {
+  enigma::draw_set_state_dirty();
+  enigma::drawPointSize = value;
+}
+
+void draw_set_fill_mode(int fill) {
+  enigma::draw_set_state_dirty();
+  enigma::drawFillMode = fill;
+}
+
+void draw_set_line_width(float value) {
+  enigma::draw_set_state_dirty();
+  enigma::drawLineWidth = value;
+}
+
+void draw_set_line_stipple(bool enable) {
+  enigma::draw_set_state_dirty();
+  enigma::lineStippleEnable = enable;
+}
+
+void draw_set_line_pattern(int scale, unsigned short pattern) {
+  enigma::draw_set_state_dirty();
+  enigma::lineStippleScale = scale;
+  enigma::lineStipplePattern = pattern;
+}
 
 void draw_set_circle_precision(float pr) {
+  enigma::draw_set_state_dirty();
   enigma::circleprecision = pr < 3 ? 3 : pr;
 }
 
-float draw_get_circle_precision() {
-  return enigma::circleprecision;
-}
+bool draw_get_alpha_test() { return enigma::alphaTest; }
+unsigned draw_get_alpha_test_ref_value() { return enigma::alphaTestRef; }
+float draw_get_circle_precision() { return enigma::circleprecision; }
 
 void draw_point(gs_scalar x, gs_scalar y)
 {
@@ -785,29 +863,33 @@ void draw_button(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scala
   float alpha = 0.5;
     if (up == true){ color = make_color_rgb(127,127,127); } else { color = make_color_rgb(255,255,255); }
 
+  // bottom
   draw_primitive_begin(pr_trianglestrip);
   draw_vertex_color(x1+border_width,y2-border_width,color,alpha);
-  draw_vertex_color(x2-border_width,y1-border_width,color,alpha);
+  draw_vertex_color(x2-border_width,y2-border_width,color,alpha);
   draw_vertex_color(x1,y2,color,alpha);
   draw_vertex_color(x2,y2,color,alpha);
   draw_primitive_end();
 
+  // right
   draw_primitive_begin(pr_trianglestrip);
   draw_vertex_color(x2-border_width,y1+border_width,color,alpha);
   draw_vertex_color(x2,y1,color,alpha);
-  draw_vertex_color(x1-border_width,y1-border_width,color,alpha);
+  draw_vertex_color(x2-border_width,y2-border_width,color,alpha);
   draw_vertex_color(x2,y2,color,alpha);
   draw_primitive_end();
 
   if (up == true){ color = make_color_rgb(255,255,255); } else { color = make_color_rgb(127,127,127); }
+
+  // top
   draw_primitive_begin(pr_trianglestrip);
   draw_vertex_color(x1,y1,color,alpha);
   draw_vertex_color(x2,y1,color,alpha);
   draw_vertex_color(x1+border_width,y1+border_width,color,alpha);
-  draw_vertex_color(x2-border_width,y2+border_width,color,alpha);
+  draw_vertex_color(x2-border_width,y1+border_width,color,alpha);
   draw_primitive_end();
 
-
+  // left
   draw_primitive_begin(pr_trianglestrip);
   draw_vertex_color(x1,y1,color,alpha);
   draw_vertex_color(x1+border_width,y1+border_width,color,alpha);
@@ -898,67 +980,6 @@ int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned i
       }
     draw_primitive_end();
     return c;
-}
-
-
-void draw_polygon_begin()
-{
-  enigma::currComplexPoly.clear();
-}
-
-void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color)
-{
-  //-1 means "the color of the previous vertex.
-  //The default color (first vertex) is the current draw color.
-  //This conforms to GM5's treatment of draw colors.
-  enigma::currComplexPoly.push_back(enigma::PolyVertex(x, y, color));
-}
-
-void draw_polygon_end(bool outline, bool allowHoles)
-{
-  std::list<enigma::PolyVertex>& currPoly = enigma::currComplexPoly;
-  if (outline) {
-    if (currPoly.size() >= 2) {
-      int color = draw_get_color();
-      gs_scalar alpha = draw_get_alpha();
-
-      //Close it, ensure the correct color.
-      currPoly.push_back(currPoly.front());
-      if (currPoly.back().color==-1) { currPoly.back().color = color; }
-
-      //Draw it.
-      draw_primitive_begin(pr_linestrip);
-      for (std::list<enigma::PolyVertex>::const_iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
-        color = (it->color!=-1 ? it->color : color);
-        draw_vertex_color(it->x, it->y, color, alpha);
-      }
-
-      //Close it.
-      draw_primitive_end();
-    }
-  } else {
-    if (currPoly.size() >= 3) {
-      //Self-intersecting polygons makes this much harder than "outline" mode; we need to make a call
-      //   to the platform-specific Graphics backend.
-      if (!enigma::fill_complex_polygon(currPoly, draw_get_color(), allowHoles)) {
-        //If drawing failed, try using a triangle fan as a backup. This will work for concave polygons only.
-        int color = draw_get_color();
-        gs_scalar alpha = draw_get_alpha();
-
-        //Draw it.
-        draw_primitive_begin(pr_trianglefan);
-        for (std::list<enigma::PolyVertex>::const_iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
-          color = (it->color!=-1 ? it->color : color);
-          draw_vertex_color(it->x, it->y, color, alpha);
-        }
-
-        //Close it.
-        draw_primitive_end();
-      }
-    }
-  }
-
-  currPoly.clear();
 }
 
 }

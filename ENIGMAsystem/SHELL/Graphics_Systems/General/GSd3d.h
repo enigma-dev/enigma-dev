@@ -23,12 +23,33 @@
 #include <string>
 
 namespace enigma {
-  extern bool d3dMode;
-  extern bool d3dHidden;
-  extern bool d3dZWriteEnable;
-  extern bool d3dPerspective;
-  extern int d3dCulling;
-}
+
+extern bool d3dMode;
+extern bool d3dHidden, d3dClipPlane, d3dZWriteEnable;
+extern bool d3dPerspective;
+extern bool d3dLighting;
+extern bool d3dShading;
+extern int d3dCulling, d3dDepthOperator;
+
+extern bool d3dFogEnabled;
+extern int d3dFogColor, d3dFogMode, d3dFogHint;
+extern float d3dFogStart, d3dFogEnd, d3dFogDensity;
+
+struct Light {
+  gs_scalar x=0, y=0, z=0, range=0;
+  bool directional=false;
+  int color=0;
+};
+
+extern int d3dLightsActive, d3dLightingAmbient;
+const Light& get_active_light(int id);
+
+extern bool d3dStencilTest;
+extern unsigned int d3dStencilMask;
+extern int d3dStencilFunc, d3dStencilFuncRef, d3dStencilFuncMask,
+           d3dStencilOpStencilFail, d3dStencilOpDepthFail, d3dStencilOpPass;
+
+} // namespace enigma
 
 // ***** RENDER STATE CONSTANTS *****
 namespace enigma_user {
@@ -80,32 +101,26 @@ namespace enigma_user {
     rs_front_back
   };
 
-  enum {
-    rs_point, // Render vertices as points
-    rs_line,  // Render in wireframe mode
-    rs_solid  // Normal render mode
-  };
-
-  }
-
-  namespace enigma_user
-  {
-
   void d3d_clear_depth(double value=1.0L);
   void d3d_start();
   void d3d_end();
-  void d3d_set_hidden(bool enable);
-  void d3d_set_clip_plane(bool enable);
-  void d3d_set_zwriteenable(bool enable);
-  void d3d_set_lighting(bool enable);
-
   void d3d_set_software_vertex_processing(bool software);
-  void d3d_set_culling(int mode);
-
-  void d3d_set_fill_mode(int fill);
-  void d3d_set_line_width(float value);
-  void d3d_set_point_size(float value);
+  void d3d_set_perspective(bool enable);
+  void d3d_set_hidden(bool enable);
+  void d3d_set_depth(double dep);
   void d3d_set_depth_operator(int mode);
+  void d3d_set_zwriteenable(bool enable);
+  void d3d_set_culling(int mode);
+  void d3d_set_clip_plane(bool enable);
+  void d3d_set_lighting(bool enable);
+  void d3d_set_shading(bool smooth);
+
+  bool d3d_get_mode();
+  bool d3d_get_perspective();
+  int d3d_get_culling();
+  bool d3d_get_hidden();
+
+  // Fog
   void d3d_set_fog(bool enable, int color, double start, double end);
   void d3d_set_fog_enabled(bool enable);
   void d3d_set_fog_hint(int mode);
@@ -114,26 +129,18 @@ namespace enigma_user {
   void d3d_set_fog_start(double start);
   void d3d_set_fog_end(double end);
   void d3d_set_fog_density(double density);
-  void d3d_set_depth(double dep);
-  void d3d_set_shading(bool smooth);
-  void d3d_set_color_mask(bool r, bool g, bool b, bool a);
 
-  bool d3d_get_mode();
-  int d3d_get_culling();
-  bool d3d_get_hidden();
-
-  // ***** LIGHTS BEGIN *****
-  bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
-  bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col);
+  // Lighting
+  void d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
+  void d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col);
   void d3d_light_specularity(int facemode, int r, int g, int b, double a);
-  bool d3d_light_set_ambient(int id, int r, int g, int b, double a);
-  bool d3d_light_set_specularity(int id, int r, int g, int b, double a);
+  void d3d_light_set_ambient(int id, int r, int g, int b, double a);
+  void d3d_light_set_specularity(int id, int r, int g, int b, double a);
   void d3d_light_shininess(int facemode, int shine);
   void d3d_light_define_ambient(int col);
-  bool d3d_light_enable(int id, bool enable);
-  // ***** LIGHTS END *****
+  void d3d_light_enable(int id, bool enable);
 
-  //Stencil stuff
+  // Stencil stuff
   void d3d_stencil_start_mask();
   void d3d_stencil_continue_mask();
   void d3d_stencil_use_mask();
@@ -141,8 +148,8 @@ namespace enigma_user {
 
   void d3d_stencil_enable(bool enable);
   void d3d_stencil_clear_value(int value);
-  void d3d_stencil_mask(unsigned int mask);
   void d3d_stencil_clear();
+  void d3d_stencil_mask(unsigned int mask);
   void d3d_stencil_function(int func, int ref, unsigned int mask);
   void d3d_stencil_operator(int sfail, int dpfail, int dppass);
 }

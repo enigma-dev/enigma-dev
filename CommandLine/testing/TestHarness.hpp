@@ -47,6 +47,8 @@ class TestHarness {
   virtual void close_game() = 0;
   /// Check if the game process is still running.
   virtual bool game_is_running() = 0;
+  /// Check the game process's exit code.
+  virtual int get_return() = 0;
 
   virtual ~TestHarness() {}
 

@@ -16,17 +16,82 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL-Common/version.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Bridges/OpenGL/GLload.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
 
 #include <string>
-#include <GL/glew.h>
 #include <GL/wglew.h>
+#include <windows.h>
 
 namespace enigma {
 
-GLuint msaa_fbo = 0;
 extern HGLRC hRC;
+
+extern void (*WindowResizedCallback)();
+void WindowResized() {
+  // clear the window color, viewport does not need set because backbuffer was just recreated
+  enigma_user::draw_clear(enigma_user::window_get_color());
+}
+
+void EnableDrawing(void*)
+{
+  WindowResizedCallback = &WindowResized;
+  /**
+   * Edited by Cool Breeze on 16th October 2013
+   * + Updated the Pixel Format to support 24-bitdepth buffers
+   * + Correctly create a GL 3.x compliant context
+   */
+  HGLRC LegacyRC;
+  PIXELFORMATDESCRIPTOR pfd;
+  int iFormat;
+
+  enigma::window_hDC = GetDC (hWnd);
+  ZeroMemory (&pfd, sizeof (pfd));
+  pfd.nSize = sizeof (pfd);
+  pfd.nVersion = 1;
+  pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+  pfd.iPixelType = PFD_TYPE_RGBA;
+  pfd.cColorBits = 24;
+  pfd.cDepthBits = 24;
+  pfd.cStencilBits = 8;
+  pfd.iLayerType = PFD_MAIN_PLANE;
+  iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
+
+  if (iFormat==0) { DEBUG_MESSAGE("Failed to set the format of the OpenGL graphics device.", MESSAGE_TYPE::M_FATAL_ERROR); }
+
+  SetPixelFormat ( enigma::window_hDC, iFormat, &pfd );
+  LegacyRC = wglCreateContext( enigma::window_hDC );
+  wglMakeCurrent( enigma::window_hDC, LegacyRC );
+
+  gl_load_exts();
+
+  const bool gl_core = (graphics_opengl_profile==gl_profile_core);
+
+  if (gl_core && wglewIsSupported("WGL_ARB_create_context"))
+  {
+    // -- Define an array of Context Attributes
+    int attribs[] =
+    {
+      WGL_CONTEXT_PROFILE_MASK_ARB,gl_core?WGL_CONTEXT_CORE_PROFILE_BIT_ARB:WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+      #ifdef DEBUG_MODE
+        WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
+      #endif
+      0
+    };
+
+    hRC = wglCreateContextAttribsARB( enigma::window_hDC,0, attribs );
+    wglMakeCurrent( NULL,NULL );
+    wglDeleteContext( LegacyRC );
+    wglMakeCurrent(enigma::window_hDC, hRC );
+  } else { // unable to get a core context, use the legacy context
+    hRC = LegacyRC;
+  }
+}
 
 void DisableDrawing(void*)
 {
@@ -62,47 +127,6 @@ void ScreenRefresh() {
 }
 
 namespace enigma_user {
-
-void display_reset(int samples, bool vsync) {
-  int interval = vsync ? 1 : 0;
-
-  if (enigma::is_ext_swapcontrol_supported()) {
-    wglSwapIntervalEXT(interval);
-  }
-
-  GLint fbo;
-  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
-
-  GLuint ColorBufferID, DepthBufferID;
-
-  // Cleanup the multi-sampler fbo if turning off multi-sampling
-  if (samples == 0) {
-    if (enigma::msaa_fbo != 0) {
-      glDeleteFramebuffers(1, &enigma::msaa_fbo);
-      enigma::msaa_fbo = 0;
-    }
-    return;
-  }
-
-  //TODO: Change the code below to fix this to size properly to views
-  // If we don't already have a multi-sample fbo then create one
-  if (enigma::msaa_fbo == 0) {
-    glGenFramebuffersEXT(1, &enigma::msaa_fbo);
-  }
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, enigma::msaa_fbo);
-  // Now make a multi-sample color buffer
-  glGenRenderbuffersEXT(1, &ColorBufferID);
-  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, ColorBufferID);
-  glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_RGBA8, window_get_region_width(), window_get_region_height());
-  // We also need a depth buffer
-  glGenRenderbuffersEXT(1, &DepthBufferID);
-  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, DepthBufferID);
-  glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_DEPTH_COMPONENT24, window_get_region_width(), window_get_region_height());
-  // Attach the render buffers to the multi-sampler fbo
-  glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, ColorBufferID);
-  glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, DepthBufferID);
-
-}
 
 void set_synchronization(bool enable) {
   // General notes:

@@ -33,11 +33,11 @@ unsigned char* zlib_compress(unsigned char* inbuffer,int actualsize)
 
     if (res != Z_OK)
     {
-     #if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
+     #if DEBUG_MODE
      if (res==Z_MEM_ERROR)
-     show_error("Zlib failed to compress the buffer. Out of memory.",0);
+     DEBUG_MESSAGE("Zlib failed to compress the buffer. Out of memory.", MESSAGE_TYPE::M_ERROR);
      if (res==Z_BUF_ERROR)
-     show_error("Zlib failed to compress the buffer. Output size greater than allotted.",0);
+     DEBUG_MESSAGE("Zlib failed to compress the buffer. Output size greater than allotted.", MESSAGE_TYPE::M_ERROR);
      #endif
     }
 
@@ -50,18 +50,18 @@ int zlib_decompress(unsigned char* inbuffer, int insize, int uncompresssize,unsi
 	switch(uncompress(outbytef,&outused,(Bytef*)inbuffer,insize)){
 	case Z_OK:return outused;
 	case Z_MEM_ERROR:
-		#if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
-			show_error("Zerror: Memory out",0);
+		#if DEBUG_MODE
+			DEBUG_MESSAGE("Zerror: Memory out", MESSAGE_TYPE::M_ERROR);
 		#endif
 		return -1;
 	case Z_BUF_ERROR:
-		#if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
-			show_error("Zerror: Output of " + toString(outused) + " above allotted " + toString(uncompresssize),0);
+		#if DEBUG_MODE
+			DEBUG_MESSAGE("Zerror: Output of " + toString(outused) + " above allotted " + toString(uncompresssize), MESSAGE_TYPE::M_ERROR);
 		#endif
 		return -2;
 	case Z_DATA_ERROR:
-		#if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
-			show_error("Zerror: Invalid data",0);
+		#if DEBUG_MODE
+			DEBUG_MESSAGE("Zerror: Invalid data", MESSAGE_TYPE::M_ERROR);
 		#endif
 		return -3;
 	default:return -4;

@@ -23,12 +23,11 @@
 #include "math_consts.h"
 
 // Variable not zero.
-inline bool varnz(double x) { return fabs(x) > var_e; }
+inline bool varnz(double x) { return fabs(x) > variant::epsilon; }
 
 namespace enigma {
   //Make direction work
-  INTERCEPT_DEFAULT_COPY(directionv)
-  void directionv::function(variant) {
+  void directionv::function(const variant&) {
     rval.d = fmod(rval.d, 360.0);
     if(rval.d < 0.0){
       rval.d += 360.0;
@@ -38,15 +37,13 @@ namespace enigma {
   }
 
   //Make speed work -- same as above, but rval.d and reflex1 are switched.
-  INTERCEPT_DEFAULT_COPY(speedv)
-  void speedv::function(variant) {
+  void speedv::function(const variant&) {
     *hspd = rval.d * cos(*dir*M_PI/180.0);
     *vspd = rval.d *-sin(*dir*M_PI/180.0);
   }
 
   //Make hspeed work
-  INTERCEPT_DEFAULT_COPY(hspeedv)
-  void hspeedv::function(variant oldval) {
+  void hspeedv::function(const variant &oldval) {
     if (rval.d == oldval.rval.d)
     { // If no changes, return, don't make potentially negative speed non-negative.
         return;
@@ -63,8 +60,7 @@ namespace enigma {
   }
 
   //Make vspeed work -- Same as above, except the arguments to atan2 are reversed
-  INTERCEPT_DEFAULT_COPY(vspeedv)
-  void vspeedv::function(variant oldval) {
+  void vspeedv::function(const variant &oldval) {
     if (rval.d == oldval.rval.d)
     { // If no changes, return, don't make potentially negative speed non-negative.
         return;

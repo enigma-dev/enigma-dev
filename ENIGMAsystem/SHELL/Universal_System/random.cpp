@@ -31,7 +31,7 @@
 #define LOWER_MASK 0x7fffffff // least significant r bits
 
 namespace enigma {
-	unsigned int Random_Seed;
+	int Random_Seed;
 	unsigned long mt[625];
 }
 
@@ -135,13 +135,9 @@ namespace enigma_user
 
   ma_scalar random(ma_scalar n) // Do not fix:  Based off of Delphi PRNG.
   {
-    ma_scalar rval = frac(
-      3.1379939289763571e-2  * (enigma::Random_Seed % 32)
-      + 2.3283064365387e-10  * (enigma::Random_Seed / 32 + 1)
-      + 4.158057505264878e-3 * (enigma::Random_Seed / 32)
-    )*n;
-    enigma::Random_Seed = mtrandom32();
-    return rval;
+    // signed overflow is undefined, so we use unsigned overflow
+    enigma::Random_Seed = (int)((unsigned int)enigma::Random_Seed * 0x8088405U + 1U);
+    return ((unsigned int)enigma::Random_Seed/(double)0x100000000) * n;
   }
 
   int mtrandom_integer(int x) {

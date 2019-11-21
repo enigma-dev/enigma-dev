@@ -23,7 +23,7 @@
 #endif
 
 #include <windows.h>
-#include <XInput.h>
+#include <xinput.h>
 
 namespace {
 
@@ -329,7 +329,7 @@ float gamepad_button_value(int device, int button) {
 void gamepad_set_color(int device, int color) {
   if (!gamepad_is_connected(device)) return;
   #ifdef DEBUG_MODE
-  show_error("gamepad_set_color is not supported by XInput devices", false);
+  DEBUG_MESSAGE("gamepad_set_color is not supported by XInput devices", MESSAGE_TYPE::M_ERROR);
   #endif
 }
 

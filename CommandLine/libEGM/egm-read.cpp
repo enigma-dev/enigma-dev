@@ -19,7 +19,7 @@
 #include "egm-rooms.h"
 #include "filesystem.h"
 #include "svg-d.h"
-#include "Util.h"
+#include "proto_util.h"
 
 #include <yaml-cpp/yaml.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -214,7 +214,7 @@ inline void loadObjectEvents(const fs::path& fPath, google::protobuf::Message *m
   for(auto& f : fs::directory_iterator(fPath)) {
     if (f.path().extension() == ".edl") {
       const std::string eventName = f.path().stem().string();
-      buffers::resources::Event event;
+      buffers::resources::Object_Event event;
       event.set_name(eventName);
       event.set_code(FileToString(f.path()));
 

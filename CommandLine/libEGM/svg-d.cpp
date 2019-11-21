@@ -19,7 +19,7 @@
 #include "svg-d.h"
 #include "algorithm/connected-components.h"
 #include "serialization-helpers.h"
-#include "Util.h"
+#include "proto_util.h"
 
 #include <sstream>
 

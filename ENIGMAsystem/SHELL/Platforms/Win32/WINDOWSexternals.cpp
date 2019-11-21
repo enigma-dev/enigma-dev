@@ -29,19 +29,18 @@
 #define X86_WIN32 
 #endif
 
-#include <map>
-#include <string>
-#include <windows.h>
-
-#include <ffi.h>
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
 
-#include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/General/PFexternals.h"
 
+#include <vector>
 #include <cstdio>
+#include <map>
+#include <string>
+#include <windows.h>
+#include <ffi.h>
 
 using namespace std;
 
@@ -105,7 +104,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
 
   if (status != FFI_OK)
   {
-    show_error("Defining DLL failed.",0);
+    DEBUG_MESSAGE("Defining DLL failed.", MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 
@@ -115,20 +114,20 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   	dllmod = LoadLibrary(dll.c_str());
   else
   {
-    printf("LOADING PREEXISTING HANDLE");
+    DEBUG_MESSAGE("LOADING PREEXISTING HANDLE", MESSAGE_TYPE::M_WARNING);
     dllmod = dllHandles[dll];
   }
 
   if (dllmod == NULL)
   {
-    show_error(std::string("Cannot load library \"") + dll + std::string("\"!"), 0);
+    DEBUG_MESSAGE("Cannot load library \"" + dll + "\"", MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 
   FARPROC funcptr = GetProcAddress(dllmod,func.c_str());
   if (funcptr==NULL)
   {
-    show_error(std::string("No such function \"") + func + std::string("\"."), 0);
+    DEBUG_MESSAGE("No such function" + func, MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 
@@ -154,13 +153,13 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
   map<int,external*>::iterator it;
   if ((it=externals.find(id)) == externals.end())
   {
-    show_error("Unknown external function called", 0);
+    DEBUG_MESSAGE("Unknown external function called", MESSAGE_TYPE::M_ERROR);
     return 0;
   }
   external* a=it->second;
 
-  ambiguous array[a->argc];
-  void *arg_values[a->argc];
+  std::vector<ambiguous> array(a->argc);
+  std::vector<void *> arg_values(a->argc);
 
   variant args[] = { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16 };
   for (int i = 0; i < a->argc; ++i)
@@ -175,7 +174,7 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
   }
 
   ambiguous result;
-  ffi_call(&(a->cif), a->functionptr, &result, arg_values);
+  ffi_call(&(a->cif), a->functionptr, &result, arg_values.data());
   if (a->restype==ty_string) return result.s;
   return result.d;
 }

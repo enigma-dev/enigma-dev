@@ -16,7 +16,7 @@
 **/
 
 #include "yyp.h"
-#include "strings_util.h"
+#include "proto_util.h"
 
 #define RAPIDJSON_HAS_STDSTRING 1
 

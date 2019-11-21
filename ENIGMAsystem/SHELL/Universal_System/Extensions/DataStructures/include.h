@@ -82,7 +82,7 @@ unsigned int ds_map_size(const unsigned int id);
 bool ds_map_empty(const unsigned int id);
 void ds_map_add(const unsigned int id, const variant key, const variant val);
 void ds_map_replace(const unsigned int id, const variant key, const variant val);
-void ds_map_replaceanyway(const unsigned int id, const variant key, const variant val);
+void ds_map_overwrite(const unsigned int id, const variant key, const variant val);
 void ds_map_delete(const unsigned int id, const variant key);
 void ds_map_delete(const unsigned int id, const variant first, const variant last);
 bool ds_map_exists(const unsigned int id, const variant key);

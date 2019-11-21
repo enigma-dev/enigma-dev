@@ -1,5 +1,8 @@
 #include "Platforms/General/PFmain.h"
 
+#include "Universal_System/mathnc.h" // enigma_user::clamp
+#include "Widget_Systems/widgets_mandatory.h"
+
 #include <time.h> //CLOCK_MONOTONIC
 #include <sys/types.h>     //getpid
 #include <unistd.h>        //usleep
@@ -38,7 +41,7 @@ int updateTimer() {
   {
     long passed_mcs = (time_current.tv_sec - time_offset.tv_sec) * 1000000 +
                       (time_current.tv_nsec / 1000 - +time_offset.tv_nsec / 1000);
-    passed_mcs = clamp(passed_mcs, 0, 1000000);
+    passed_mcs = enigma_user::clamp(passed_mcs, 0, 1000000);
     if (passed_mcs >= 1000000) {  // Handle resetting.
 
       enigma_user::fps = frames_count;
@@ -54,7 +57,7 @@ int updateTimer() {
   if (current_room_speed > 0) {
     spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec) * 1000000 +
                 (time_current.tv_nsec / 1000 - time_offset_slowing.tv_nsec / 1000);
-    spent_mcs = clamp(spent_mcs, 0, 1000000);
+    spent_mcs = enigma_user::clamp(spent_mcs, 0, 1000000);
     long remaining_mcs = 1000000 - spent_mcs;
     long needed_mcs = long((1.0 - 1.0 * frames_count / current_room_speed) * 1e6);
     const int catchup_limit_ms = 50;
@@ -67,7 +70,7 @@ int updateTimer() {
       time_offset_slowing.tv_nsec += 1000 * (needed_mcs - (remaining_mcs + catchup_limit_ms * 1000));
       spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec) * 1000000 +
                   (time_current.tv_nsec / 1000 - time_offset_slowing.tv_nsec / 1000);
-      spent_mcs = clamp(spent_mcs, 0, 1000000);
+      spent_mcs = enigma_user::clamp(spent_mcs, 0, 1000000);
       remaining_mcs = 1000000 - spent_mcs;
       needed_mcs = long((1.0 - 1.0 * frames_count / current_room_speed) * 1e6);
     }
@@ -102,48 +105,5 @@ unsigned long get_timer() {  // microseconds since the start of the game
 
   return (enigma::time_current.tv_sec) * 1000000 + (enigma::time_current.tv_nsec / 1000);
 }
-
-void execute_shell(std::string operation, std::string fname, std::string args) {
-  if (system(NULL)) {
-    system((fname + args + " &").c_str());
-  } else {
-    printf("execute_shell cannot be used as there is no command processor!");
-    return;
-  }
-}
-
-void execute_shell(std::string fname, std::string args) { execute_shell("", fname, args); }
-
-void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
-  if (system(NULL)) {
-    system((fname + args + (wait ? " &" : "")).c_str());
-  } else {
-    printf("execute_program cannot be used as there is no command processor!");
-    return;
-  }
-}
-
-std::string execute_shell_for_output(const std::string &command) {
-  std::string res;
-  char buffer[BUFSIZ];
-  FILE *pf = popen(command.c_str(), "r");
-  while (!feof(pf)) {
-    res.append(buffer, fread(&buffer, sizeof(char), BUFSIZ, pf));
-  }
-  pclose(pf);
-  return res;
-}
-
-void execute_program(std::string fname, std::string args, bool wait) { execute_program("", fname, args, wait); }
-
-void url_open(std::string url, std::string target, std::string options) {
-  execute_program("xdg-open", url, false);
-}
-
-void url_open_ext(std::string url, std::string target) { url_open(url, target); }
-
-void url_open_full(std::string url, std::string target, std::string options) { url_open(url, target, options); }
-
-void action_webpage(const std::string& url) { url_open(url); }
 
 }  //namespace enigma_user

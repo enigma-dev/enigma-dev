@@ -1,4 +1,5 @@
 PATH := $(eTCpath)$(PATH)
+SHELL=/bin/bash
 
 .PHONY: ENIGMA all clean Game clean-game libpng-util libProtocols libEGM required-directories .FORCE
 
@@ -17,7 +18,8 @@ clean: .FORCE
 all: libpng-util libProtocols libEGM ENIGMA emake test-runner .FORCE
 
 Game: .FORCE
-	$(MAKE) -C ENIGMAsystem/SHELL
+	@$(RM) -f logs/enigma_compile.log
+	@$(MAKE) -C ENIGMAsystem/SHELL > >(tee -a logs/enigma_compile.log) 2> >(tee -a logs/enigma_compile.log >&2)
 
 clean-game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL clean
@@ -43,13 +45,13 @@ emake: $(EMAKE_TARGETS)
 	$(MAKE) -C CommandLine/emake/
 
 gm2egm: libEGM .FORCE
-	$(CXX) -Ishared/protos/ -Ishared/protos/codegen -ICommandLine/libEGM/ CommandLine/gm2egm/main.cpp -Wl,-rpath=. -L. -lEGM -lProtocols -o gm2egm
+	$(CXX) -std=c++17 -Ishared/ -Ishared/protos/.eobjs -ICommandLine/libEGM/ CommandLine/gm2egm/main.cpp shared/event_reader/event_parser.cpp -Wl,-rpath,. -L. -lEGM -lProtocols -lpthread -o gm2egm
 
 test-runner: emake .FORCE
 	$(MAKE) -C CommandLine/testing/
 
 required-directories: .FORCE
-	mkdir -p "$(WORKDIR)"
-	mkdir -p "$(CODEGEN)Preprocessor_Environment_Editable/"
+	@mkdir -p "$(WORKDIR)"
+	@mkdir -p "$(CODEGEN)Preprocessor_Environment_Editable/"
 
 .FORCE:

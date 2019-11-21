@@ -1,7 +1,8 @@
-#include "Universal_System/fonts_internal.h"
-#include "Universal_System/sprites_internal.h"
-#include "Universal_System/sprites.h"
+#include "Universal_System/Resources/fonts_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
+#include "Universal_System/Resources/sprites.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "rectpacker/rectpack.h"
 
 #include <ft2build.h>
@@ -16,18 +17,18 @@ namespace enigma {
 class FontManager {
 public:
   static bool Init() {
-    
+
     FT_Error error = FT_Init_FreeType(&library);
     if (error != 0)
-      std::cerr << "Error initializing freetype!" << std::endl;
-      
+      DEBUG_MESSAGE("Error initializing freetype!", MESSAGE_TYPE::M_ERROR);
+
     return (error == 0);
   }
-  
+
   static const FT_Library& GetLibrary() {
     return library;
   }
-  
+
   ~FontManager() {
     FT_Done_FreeType(library);
   }
@@ -43,77 +44,76 @@ static bool FreeTypeAlive = FontManager::Init();
 }
 
 namespace enigma_user {
-  
+
   using enigma::rect_packer::pvrect;
   using enigma::rect_packer::rectpnode;
-  
+
   struct GlyphPair {
     GlyphPair(unsigned index = 0, unsigned area = 0) : index(index), area(area) {}
     unsigned index;
     unsigned area;
   };
-   
-  int font_add(std::string name, int size, bool bold, bool italic, unsigned first, unsigned last) {
-    
+
+  int font_add(std::string name, unsigned size, bool bold, bool italic, unsigned first, unsigned last) {
+
     if (!enigma::FreeTypeAlive)
       return -1;
-    
+
     FT_Face face;
     FT_GlyphSlot slot;
     FT_Error error;
 
     error = FT_New_Face(enigma::FontManager::GetLibrary(), name.c_str(), 0, &face );
-    
+
     if (error != 0)
       return -1;
-    
-    error = FT_Set_Char_Size( face, size * 64, 0, 72, 0); // 72 dpi, 64 is 26.6 fixed point conversion
-    
+
+    // GameMaker has always generated fonts at 96 dpi, default Windows dpi since 1980s
+    error = FT_Set_Char_Size( face, size * 64, 0, 96, 0); // 96 dpi, 64 is 26.6 fixed point conversion
+
     if (error != 0)
       return -1;
 
     slot = face->glyph;
-    
+
     unsigned gcount = last-first;
     int fontid = enigma::font_new(first, gcount);
-    
-    enigma::font* fnt = enigma::fontstructarray[fontid];
+
+    enigma::SpriteFont* fnt = &enigma::sprite_fonts[fontid];
     fnt->name = name;
     fnt->fontsize = size;
     fnt->bold = bold;
     fnt->italic = italic;
-    fnt->glyphRangeCount = 1;
     enigma::fontglyphrange fgr;
     fgr.glyphstart = first;
-    fgr.glyphcount = gcount;
     fgr.glyphs.resize(gcount);
-    
+
     std::vector<pvrect> glyphmetrics(gcount);
-    std::vector<GlyphPair> glyphPairs(gcount);  
+    std::vector<GlyphPair> glyphPairs(gcount);
     for (unsigned c = first; c < last; ++c) {
       error = FT_Load_Char(face, c, FT_LOAD_DEFAULT);
-      
+
       #ifdef DEBUG_MODE
       if (error != 0)
-        std::cerr << "Freetype error loading metrics for char: " <<  static_cast<char>(c) << std::endl;
+        DEBUG_MESSAGE("Freetype error loading metrics for char: " + std::to_string(static_cast<char>(c)), MESSAGE_TYPE::M_ERROR);
       #endif
-      
+
       FT_Bitmap& charBitmap = slot->bitmap;
-      
+
       glyphmetrics[c-first] = pvrect(0, 0, charBitmap.width, charBitmap.rows, -1);
       glyphPairs[c-first] = GlyphPair(c-first, charBitmap.width * charBitmap.rows);
-    
+
     }
-    
+
     std::sort(glyphPairs.begin(), glyphPairs.end(), [](const GlyphPair &a, const GlyphPair &b) {
       return (a.area > b.area);
     });
-    
+
     unsigned w = 64, h = 64; // starter size for our texture
     rectpnode* rootNode = new rectpnode(0, 0, w, h);
     for (std::vector<GlyphPair>::reverse_iterator ii = glyphPairs.rbegin(); ii != glyphPairs.rend();) {
       rectpnode* node = rninsert(rootNode, ii->index, glyphmetrics.data());
-      
+
       if (node) {
         rncopy(node, glyphmetrics.data(), ii->index);
         ii++;
@@ -125,31 +125,31 @@ namespace enigma_user {
         if (!w or !h) return -1;
       }
     }
-    
+
     unsigned char* pxdata = new unsigned char[w * h * 4];
-    
+
     for (unsigned y = 0; y < h; ++y) {
       for (unsigned x = 0; x < w; ++x) {
         unsigned index = y * w + x;
         pxdata[index] = 255;
       }
     }
-    
+
     for (const GlyphPair &g : glyphPairs) {
       error = FT_Load_Char(face, g.index + first, FT_LOAD_RENDER);
-      
+
       #ifdef DEBUG_MODE
       if (error != 0) {
-        std::cerr << "Freetype error loading bitmap for char: " <<  static_cast<char>(g.index) << std::endl;
+        DEBUG_MESSAGE("Freetype error loading bitmap for char: " + std::to_string(static_cast<char>(g.index)), MESSAGE_TYPE::M_ERROR);
         continue;
       }
       #endif
-      
+
       FT_Bitmap& charBitmap = slot->bitmap;
       FT_Glyph_Metrics fftMetrics = face->glyph->metrics;
-      
+
       pvrect glyphInfo = glyphmetrics[g.index];
-      
+
       enigma::fontglyph glyph;
       glyph.x = fftMetrics.horiBearingX / 64;
       glyph.y = -fftMetrics.horiBearingY / 64;
@@ -160,9 +160,9 @@ namespace enigma_user {
       glyph.tx2 = (glyphInfo.x +charBitmap.width) / double(w);
       glyph.ty2 = (glyphInfo.y + charBitmap.rows) / double(h);
       glyph.xs = face->glyph->linearHoriAdvance / 65536; // more fixed point conversion
-      
+
       fgr.glyphs[g.index] = glyph;
-      
+
       for (unsigned y = 0; y < charBitmap.rows; ++y) {
         for (unsigned x = 0; x < charBitmap.width; ++x) {
           unsigned index = (y * charBitmap.width + x);
@@ -172,7 +172,7 @@ namespace enigma_user {
         }
       }
     }
-    
+
     fnt->glyphRanges[0] = fgr;
     fnt->texture = enigma::graphics_create_texture(w, h, w, h, pxdata, false);
     fnt->twid = w;
