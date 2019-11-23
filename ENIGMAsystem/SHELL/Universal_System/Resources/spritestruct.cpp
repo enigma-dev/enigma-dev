@@ -374,7 +374,7 @@ namespace enigma
         return;
       }
       
-      sprite_add_to_fucker(ns, pxdata, imgnumb, precise, transparent, smooth, x_offset, y_offset, mipmap, width, height, fullwidth, fullheight);
+      sprite_add_to_index_from_buffer(ns, pxdata, imgnumb, precise, transparent, smooth, x_offset, y_offset, mipmap, width, height, fullwidth, fullheight);
       delete[] pxdata;
     }
 
