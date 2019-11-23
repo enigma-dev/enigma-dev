@@ -764,14 +764,14 @@ int clipboard_get_sprite(bool precise, bool transparent, bool smooth, int x_offs
     }
   }
 
-  enigma::spritestructarray_reallocate();
-  enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite();
+  int ind = enigma::sprite_new_empty(enigma::sprite_idmax++, 1, bih.biWidth, bih.biHeight, x_offset, y_offset, 0, y_offset, 0, x_offset, true, smooth);
+  enigma::sprite *spr; if (!enigma::get_sprite_mtx(spr, ind)) return -1; 
   enigma::sprite_add_to_index_from_buffer(spr, dst.data(), 1, precise, transparent, smooth, x_offset, y_offset, false, bih.biWidth, bih.biHeight, bih.biWidth, bih.biHeight);
 
   CloseHandle(hBitmap);
   free(src);
 
-  return enigma::sprite_idmax++;
+  return ind;
 }
 
 bool clipboard_has_sprite() {
