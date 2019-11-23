@@ -766,7 +766,7 @@ int clipboard_get_sprite(bool precise, bool transparent, bool smooth, int x_offs
 
   enigma::spritestructarray_reallocate();
   enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite();
-  enigma::sprite_add_to_fucker(spr, dst.data(), 1, precise, transparent, smooth, x_offset, y_offset, false, bih.biWidth, bih.biHeight, bih.biWidth, bih.biHeight);
+  enigma::sprite_add_to_index_from_buffer(spr, dst.data(), 1, precise, transparent, smooth, x_offset, y_offset, false, bih.biWidth, bih.biHeight, bih.biWidth, bih.biHeight);
 
   CloseHandle(hBitmap);
   free(src);
