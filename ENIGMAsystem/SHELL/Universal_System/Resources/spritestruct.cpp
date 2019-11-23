@@ -274,7 +274,7 @@ namespace enigma
         return sprid;
     }
     
-  void sprite_add_to_fucker(sprite *ns, unsigned char *pxdata, int imgnumb,
+  void sprite_add_to_index_from_buffer(sprite *ns, unsigned char *pxdata, int imgnumb,
       bool precise, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight) {
    if (pxdata == NULL) {
       DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR);
