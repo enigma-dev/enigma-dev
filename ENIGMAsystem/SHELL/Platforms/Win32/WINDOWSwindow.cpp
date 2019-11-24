@@ -704,13 +704,9 @@ bool clipboard_has_text()
 }
 
 void clipboard_set_sprite(int ind, unsigned subimg) {
-  unsigned char *src = nullptr;
   unsigned width, height;
-
-  enigma::sprite *spr;
-  if (!enigma::get_sprite_mtx(spr, ind)) return;  
-  src = enigma::graphics_copy_texture_pixels(spr->texturearray[subimg], &width, &height);
-
+  enigma::sprite *spr; if (!enigma::get_sprite_mtx(spr, ind)) return;  
+  unsigned char *src = enigma::graphics_copy_texture_pixels(spr->texturearray[subimg], &width, &height);
   HBITMAP hBitmap = CreateBitmap(width, height, 1, 32, src);
 
   OpenClipboard(NULL);
