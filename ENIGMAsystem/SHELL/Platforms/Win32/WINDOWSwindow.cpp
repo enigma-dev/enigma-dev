@@ -725,50 +725,18 @@ void clipboard_set_sprite(int ind, unsigned subimg) {
 int clipboard_get_sprite(bool precise, bool transparent, bool smooth, int x_offset, int y_offset) {
   if (!clipboard_has_sprite()) return -1;
   OpenClipboard(NULL);
-  HBITMAP hBitmap = (HBITMAP)GetClipboardData(CF_BITMAP);
-  CloseClipboard();
+  HANDLE hBitmap = GetClipboardData(CF_BITMAP);
 
-  BITMAPINFOHEADER bih = {0};
-  bih.biSize = sizeof(BITMAPINFOHEADER);
-
-  HDC hdc = GetDC(NULL);
-  GetDIBits(hdc, hBitmap, 0, (UINT)bih.biHeight, NULL, (BITMAPINFO *)&bih, DIB_RGB_COLORS);
-  if (bih.biBitCount <= 8) GetDIBits(hdc, hBitmap, 0, (UINT)bih.biHeight, NULL, (BITMAPINFO *)&bih, DIB_RGB_COLORS);
-
-  unsigned char *src = (unsigned char *)malloc(bih.biWidth * bih.biHeight * 4);
-  memset(src, 0, bih.biWidth * bih.biHeight * 4);
-
-  GetDIBits(hdc, hBitmap, 0, (UINT)bih.biHeight, src, (BITMAPINFO *)&bih, DIB_RGB_COLORS);
-  ReleaseDC(NULL, hdc);
-
-  std::vector<unsigned char> dst;
-  int n = bih.biWidth * bih.biHeight * 4;
-  dst.resize(n);
-
-  int i = 0;
-  for (int y = bih.biHeight - 1; y >= 0; y--) {
-    for (int x = 0; x < bih.biWidth; x++) {
-      int base = (y * bih.biWidth + x) * 4;
-      if (src[base + 3] == 0) i++;
-    }
-  }
-
-  int j = 0;
-  for (int y = bih.biHeight - 1; y >= 0; y--) {
-    for (int x = 0; x < bih.biWidth; x++) {
-      int base = (y * bih.biWidth + x) * 4;
-      dst[j++] = src[base];
-      dst[j++] = src[base + 1];
-      dst[j++] = src[base + 2];
-      dst[j++] = (i != n / 4) ? src[base + 3] : 255;
-    }
-  }
-
-  int ind = enigma::sprite_new_empty(enigma::sprite_idmax++, 1, bih.biWidth, bih.biHeight, x_offset, y_offset, 0, y_offset, 0, x_offset, true, smooth);
+  unsigned width, height;
+  char *data = (char *)GlobalLock(hBitmap);
+  unsigned char *src = enigma::image_decode_bmp(string(data, GlobalSize(data)), &width, &height, &width, &height, true);
+  int ind = enigma::sprite_new_empty(enigma::sprite_idmax++, 1, width, height, x_offset, y_offset, 0, y_offset, 0, x_offset, true, smooth);
   enigma::sprite *spr; if (!enigma::get_sprite_mtx(spr, ind)) return -1; 
-  enigma::sprite_add_to_index_from_buffer(spr, dst.data(), 1, precise, transparent, smooth, x_offset, y_offset, false, bih.biWidth, bih.biHeight, bih.biWidth, bih.biHeight);
+  enigma::sprite_add_to_index_from_buffer(spr, src, 1, precise, transparent, smooth, x_offset, y_offset, false, width, height, width, height);
 
+  GlobalUnlock(hBitmap);
   CloseHandle(hBitmap);
+  CloseClipboard();
   free(src);
 
   return ind;
