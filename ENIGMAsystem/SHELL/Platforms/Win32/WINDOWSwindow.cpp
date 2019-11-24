@@ -715,7 +715,7 @@ void clipboard_set_sprite(int ind, unsigned subimg) {
 int clipboard_get_sprite(bool precise, bool transparent, bool smooth, int x_offset, int y_offset) {
   if (!clipboard_has_sprite()) return -1;
   OpenClipboard(NULL);
-  HANDLE hBitmap = GetClipboardData(CF_BITMAP);
+  HGLOBAL hBitmap = GetClipboardData(CF_BITMAP);
 
   unsigned width, height;
   char *data = (char *)GlobalLock(hBitmap);
