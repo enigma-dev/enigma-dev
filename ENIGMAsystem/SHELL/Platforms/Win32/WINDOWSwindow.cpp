@@ -719,7 +719,7 @@ int clipboard_get_sprite(bool precise, bool transparent, bool smooth, int x_offs
 
   unsigned width, height;
   char *data = (char *)GlobalLock(hBitmap);
-  unsigned char *src = enigma::image_decode_bmp(string(data, GlobalSize(data)), &width, &height, &width, &height, true);
+  unsigned char *src = enigma::image_decode_bmp(string(data, GlobalSize(data) - 1), &width, &height, &width, &height, true);
   int ind = enigma::sprite_new_empty(enigma::sprite_idmax++, 1, width, height, x_offset, y_offset, 0, y_offset, 0, x_offset, true, smooth);
   enigma::sprite *spr; if (!enigma::get_sprite_mtx(spr, ind)) return -1; 
   enigma::sprite_add_to_index_from_buffer(spr, src, 1, precise, transparent, smooth, x_offset, y_offset, false, width, height, width, height);
