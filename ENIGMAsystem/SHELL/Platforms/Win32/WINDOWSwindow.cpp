@@ -693,14 +693,8 @@ void clipboard_set_text(string text)
 	CloseClipboard();
 }
 
-bool clipboard_has_text()
-{
-  if (!OpenClipboard(enigma::hWnd))
-      return false;
-
-  bool value = GetClipboardData(CF_TEXT);
-  CloseClipboard();
-  return value;
+bool clipboard_has_text() {
+  return IsClipboardFormatAvailable(CF_TEXT);
 }
 
 void clipboard_set_sprite(int ind, unsigned subimg) {
