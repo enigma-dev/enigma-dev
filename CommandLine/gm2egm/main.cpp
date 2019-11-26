@@ -3,6 +3,7 @@
 #include "yyp.h"
 #include "egm.h"
 #include "filesystem.h"
+#include <event_reader/event_parser.h>
 
 #include <iostream>
 #include <string>
@@ -34,6 +35,7 @@ int main(int argc, char *argv[])
       return -5;
     }
   }
+  event_parse_resourcefile();
 
   std::string input_file = argv[1];
   std::string ext;

@@ -20,6 +20,7 @@
 #include "filesystem.h"
 
 #include <yaml-cpp/yaml.h>
+#include <event_reader/event_parser.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/util/message_differencer.h>
 #include <iostream>
@@ -227,7 +228,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   }
 
   // Write the code to edl
-  if (std::ofstream fout{(dir/"create[room].edl").string()}) {
+  if (std::ofstream fout{(dir/"roomcreate.edl").string()}) {
     fout << room->creation_code();
   } else return false;
 
@@ -301,7 +302,7 @@ bool WriteObject(const fs::path &egm_root, const fs::path &dir, const buffers::r
     return false;
 
   for (auto &e : events) {
-  string edlFile = dir.string() + "/" + e.name() + ".edl";
+  string edlFile = dir.string() + "/" + event_get_function_name(e.type(), e.number()) + ".edl";
     std::ofstream fout{edlFile};
     fout << e.code();
   }
