@@ -21,7 +21,7 @@
 #include <string> //We will use string, though
 using namespace std;
 
-#include "darray.h" //Simpler vector with logarithmic time
+#include "general/darray.h" //Simpler vector with logarithmic time
 #include "fileio.h" //Simpler vector with logarithmic time
 
 #include "Widget_Systems/widgets_mandatory.h"
