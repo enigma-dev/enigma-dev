@@ -177,7 +177,7 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
 class ZenityWidgets : public enigma::CommandLineWidgetEngine {
  public:
 
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
+void show_debug_message(string errortext, MESSAGE_TYPE type) override {
   if (type != M_INFO && type != M_WARNING) {
     show_debug_message_helper(errortext, type);
   } else {
