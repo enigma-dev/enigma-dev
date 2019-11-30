@@ -177,13 +177,19 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
 class ZenityWidgets : public enigma::CommandLineWidgetEngine {
  public:
 
-void show_debug_message(string errortext, MESSAGE_TYPE type) override {
+void show_debug_message(string errortext, MESSAGE_TYPE type) {
   if (type != M_INFO && type != M_WARNING) {
     show_debug_message_helper(errortext, type);
   } else {
     #ifndef DEBUG_MODE
     fputs(errortext.c_str(), stderr);
+    if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
+      type == MESSAGE_TYPE::M_FATAL_USER_ERROR) 
+      abort();
     #endif
+    if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
+      type == MESSAGE_TYPE::M_FATAL_USER_ERROR) 
+      exit(0);
   }
 }
 
