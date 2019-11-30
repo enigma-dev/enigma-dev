@@ -512,7 +512,7 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
 
   int result;
   result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
-  if (result == IDABORT || type == MESSAGE_TYPE::M_FATAL_ERROR) exit(0);
+  if (result == IDABORT || type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) exit(0);
 
   //ABORT_ON_ALL_ERRORS();
 }
@@ -535,7 +535,13 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
   } else {
     #ifndef DEBUG_MODE
     fputs(errortext.c_str(), stderr);
+    if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
+      type == MESSAGE_TYPE::M_FATAL_USER_ERROR) 
+      abort();
     #endif
+    if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
+      type == MESSAGE_TYPE::M_FATAL_USER_ERROR) 
+      exit(0);
   }
 }
 
