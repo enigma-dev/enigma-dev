@@ -535,13 +535,14 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
   } else {
     #ifndef DEBUG_MODE
     fputs(errortext.c_str(), stderr);
-    if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
-      type == MESSAGE_TYPE::M_FATAL_USER_ERROR) 
-      abort();
     #endif
     if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
-      type == MESSAGE_TYPE::M_FATAL_USER_ERROR) 
+      type == MESSAGE_TYPE::M_FATAL_USER_ERROR)
+    #ifdef DEBUG_MODE
+      abort();
+    #else
       exit(0);
+    #endif
   }
 }
 
