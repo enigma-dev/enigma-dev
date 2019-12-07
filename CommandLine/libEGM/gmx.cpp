@@ -448,13 +448,13 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
   resName = resName.substr(0, resName.find_last_of('.'));
 
   if (type == "script") {
-    buffers::resources::Script *script = new buffers::resources::Script();
-    PackScript(fName, id++, script);
-    m->CopyFrom(*static_cast<google::protobuf::Message *>(script));
+    buffers::resources::Script script;
+    PackScript(fName, id++, &script);
+    m->CopyFrom(*static_cast<google::protobuf::Message *>(&script));
   } else if (type == "shader") {
-    buffers::resources::Shader *shader = new buffers::resources::Shader();
-    PackShader(fName, id++, shader);
-    m->CopyFrom(*static_cast<google::protobuf::Message *>(shader));
+    buffers::resources::Shader shader;
+    PackShader(fName, id++, &shader);
+    m->CopyFrom(*static_cast<google::protobuf::Message *>(&shader));
   } else {
     std::string fileExt = type;
     fName += "." + fileExt + ".gmx";
