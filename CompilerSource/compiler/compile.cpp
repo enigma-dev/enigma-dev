@@ -186,7 +186,20 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
   wto << "namespace enigma { size_t " << kind << "_idmax = " << max << "; }\n\n";
 }
 
+static bool ends_with(std::string const &fullString, std::string const &ending) {
+    if (fullString.length() < ending.length())
+      return false;
+
+    return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+}
+
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
+  std::string exename = std::string(exe_filename);
+  const std::string buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
+  if (!ends_with(exename, buildext)) {
+    exename += buildext;
+    exe_filename = exename.c_str();
+  }
 
   cout << "Initializing dialog boxes" << endl;
   ide_dia_clear();
