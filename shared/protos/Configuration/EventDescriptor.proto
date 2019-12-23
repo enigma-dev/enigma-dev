@@ -1,0 +1,149 @@
+syntax = "proto2";
+package buffers.config;
+
+message EventDescriptor {
+  // The internal ID of the event. Used in filenames and function names.
+  optional string id = 1;
+  // The human-readable name of the event.
+  optional string name = 2;
+  // A human-readable description of the event included FYI and for editors.
+  optional string description = 3;
+
+  enum ExecutionStrategy {
+    // A normal event. A container will be emitted so that instances can
+    // register themselves as having this event, and a simple loop will be
+    // emitted to iterate that collection and fire the event each frame.
+    // This is the default, so don't expect it to appear in events.ey.
+    NORMAL = 0;
+    // This event will need to be generated once for each permutation of input
+    // parameters, which will be specified in the "parameters" field.
+    PARAMETERIZED = 1;
+    // Instead of normal iteration logic, a specific piece of code will be used
+    // to fire this event.
+    SPECIAL = 2;
+    // This event is only invoked by the system.
+    // Do not include iteration logic for it in the codegen.
+    SYSTEM = 3;
+    // This is not an instance-specific event, but a block of engine code
+    // that should simply be placed in the event loop at this position.
+    INLINE = 4;
+  }
+
+  // The type of this event, in terms of its ExecutionStrategy. See above.
+  optional ExecutionStrategy type = 4;
+
+  // A hint to editors that this event is similar to others in a group.
+  optional string group = 5;
+
+  // If type is parameterized, this is a list of the types of each parameter.
+  // The type can be "integer", the name of a resource (e.g. "object"), or
+  // any of the alias types defined at the bottom of EventFile.
+  repeated string parameters = 6;
+
+  // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+  // ┃ These fields allow augmenting user code for events in various ways.     ┃
+  // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  // This code will be prefixed onto user code, whatever that code may be.
+  optional string prefix = 10;
+  // This code will be appended onto user code, similar to prefix code.
+  // Note that user code may exit early, so effective lines of code included
+  // here may, in fact, never run.
+  optional string suffix = 11;
+  // This allows supplying default code for an event. This code will only be
+  // executed if the user has not provided their own implementation
+  // (similar to virtual code that has been overridden).
+  optional string default = 12;
+
+  // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+  // ┃ These fields allow tuning event execution.                              ┃
+  // ┃ They influence how code is generated for the event loop.                ┃
+  // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  // This check is performed for each instance, before invoking the event.
+  optional string sub_check = 21;
+  // This check is performed once for each event, to skip event iteration in
+  // cases where the event is inapplicable (or to optimize by performing the
+  // check once up front rather than repeatedly in each instance).
+  optional string super_check = 22;
+  // Specifies that a given block of code should be executed instead of an
+  // ordinary event loop. When specified, sub_check and super_check are ignored.
+  optional string instead = 23;
+
+  // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+  // ┃ These fields allow tuning event registration.                           ┃
+  // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  // Included in the class declaration for objects having this event.
+  // This declaration allows instances to manage their registration with the
+  // event handler for this particular event. By default, a stable event
+  // iterator will be declared here.
+  optional string iterator_declare = 30;
+  // This snippet is executed in the object's constrcutor. By default, it
+  // initializes the iterator declared in the block above to the result of an
+  // insert, registering the event for later execution.
+  optional string iterator_initialize = 31;
+  // This is the tear-down logic corresponding to the initialize logic above.
+  // By default, this unregisters this instance's event from the event loop upon
+  // object destruction.
+  optional string iterator_remove = 32;
+  // This is additional logic to finalize the iterator after it has been
+  // unlinked and all references to it have been purged.
+  optional string iterator_delete = 33;
+}
+
+message ParameterAlias {
+  // The ID as it will appear in filenames or XML IDs.
+  optional string id = 1;
+  // The EDL spelling. Should be a constant or literal, but can technically
+  // be anything that appears in the final codegen.
+  optional string spelling = 2;
+  // The value of this constant, as it would appear in binaries.
+  optional int32 value = 3;
+}
+
+message AliasSet {
+  // Identifies the type of this alias. Used in the rest of the file.
+  optional string id = 1;
+  // Individual aliases.
+  repeated ParameterAlias aliases = 2;
+}
+
+message IntegerMapping {
+  // The main event ID.
+  optional int32 id = 1;
+
+  // Information on how to map sub IDs.
+  oneof SubId {
+    // This event category has no secondary ID (it's always zero).
+    // This names that event within the ENIGMA engine.
+    string single = 2;
+
+    // This event category has a secondary event that translates directly
+    // to a parameterized event within ENIGMA. This string will name the event,
+    // and specify the parameter(s) to it by their EGM name.
+    // Example: Joystick[2]Axis[Up]
+    string parameterized = 3;
+
+    // This event completely changes meaning according to the SubID.
+    // It does not directly correspond to a single parameterized event.
+    EventSpecialization specialized = 4;
+  }
+
+  message EventSpecialization {
+    // Maps SubIDs to their ENIGMA event. Each string value in this map is
+    // handled identically to `parameterized` values.
+    map<int32, string> cases = 1;
+  }
+}
+
+message EventFile {
+  // Description of each event supported by the engine or used by the game.
+  repeated EventDescriptor events = 1;
+
+  // Names and EDL translations of parameters used in various events.
+  repeated ParameterAlias aliases = 2;
+
+  // Mapping of Game Maker ids to ENIGMA events.
+  repeated IntegerMapping game_maker_event_mappings = 3;
+}
