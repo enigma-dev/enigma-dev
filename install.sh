@@ -22,8 +22,9 @@ mkdir -p "plugins/shared"
 if [ -f "plugins/shared/jna.jar" ]; then
   echo -e "plugins/shared/jna.jar \e[32mAlready up to date, skipping...\e[0m"
 else
-  echo -e "\e[32mAttempting to download jna.jar to ${PWD}/plugins/shared/jna.jar from https://dl.dropboxusercontent.com/s/8n2pgy9qhsnc972/jna.jar \e[0m"
-  curl -L -o "plugins/shared/jna.jar" "https://dl.dropboxusercontent.com/s/8n2pgy9qhsnc972/jna.jar"
+  jnaJar='https://enigma-dev.org/bin/jna.jar'
+  echo -e "\e[32mAttempting to download jna.jar to ${PWD}/plugins/shared/jna.jar from $jnaJar \e[0m"
+  curl -L -o "plugins/shared/jna.jar" "$jnaJar"
 fi
 
 if [ ! -f ".deps" ]; then
