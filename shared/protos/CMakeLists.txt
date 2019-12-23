@@ -38,7 +38,7 @@ else()
   set(GRPC_EXE "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/grpc/grpc_cpp_plugin.exe")
 endif(NOT MSVC)
 
-file(GLOB PROTO_FILES *.proto)
+file(GLOB PROTO_FILES *.proto Configuration/*.proto)
 include(FindProtobuf)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
