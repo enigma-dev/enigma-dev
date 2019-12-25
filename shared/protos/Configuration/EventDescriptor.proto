@@ -24,8 +24,11 @@ message EventDescriptor {
     // This event is only invoked by the system.
     // Do not include iteration logic for it in the codegen.
     SYSTEM = 3;
-    // This is not an instance-specific event, but a block of engine code
-    // that should simply be placed in the event loop at this position.
+    // This is not a user-defined event, but a block of engine code that needs
+    // to be executed within the event loop. When this type is set, the IDE
+    // should not allow editing this event. Instead, the field `instead` or
+    // `constant` should be defined with the engine code to be executed
+    // (the former for once-per-frame logic, the latter for per-instance logic).
     INLINE = 4;
   }
 
@@ -39,6 +42,11 @@ message EventDescriptor {
   // The type can be "integer", the name of a resource (e.g. "object"), or
   // any of the alias types defined at the bottom of EventFile.
   repeated string parameters = 6;
+
+  // Any local variables that this event requires.
+  // This is specified as a declaration block to be inserted directly into the
+  // class definition for objects having this event.
+  optional string locals = 7;
 
   // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
   // ┃ These fields allow augmenting user code for events in various ways.     ┃
@@ -54,6 +62,11 @@ message EventDescriptor {
   // executed if the user has not provided their own implementation
   // (similar to virtual code that has been overridden).
   optional string default = 12;
+  // Similar to `default`, except the given code will always appear in the event
+  // (even if the user supplies an implementation). In other words, this field
+  // behaves like `prefix` in the presence of a user-defined implementation,
+  // or like `default` in the absence of one.
+  optional string constant = 13;
 
   // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
   // ┃ These fields allow tuning event execution.                              ┃
@@ -142,7 +155,7 @@ message EventFile {
   repeated EventDescriptor events = 1;
 
   // Names and EDL translations of parameters used in various events.
-  repeated ParameterAlias aliases = 2;
+  repeated AliasSet aliases = 2;
 
   // Mapping of Game Maker ids to ENIGMA events.
   repeated IntegerMapping game_maker_event_mappings = 3;

@@ -18,27 +18,27 @@
 Events:
   GameStart:
     Name: "Game Start"
-    Description: "Start of the game"
+    Description: "Start of the game."
     Type: System
 
   WindowClose:
     Name: "Window Close"
-    Description: "Window was closed"
+    Description: "Window was closed."
     Type: System
 
   ImageLoaded:
     Name: "Image Loaded"
-    Description: "Image finished loading"
+    Description: "Image finished loading."
     Type: System
 
   SoundLoaded:
     Name: "Sound Loaded"
-    Description: "Sound finished loading"
+    Description: "Sound finished loading."
     Type: System
 
   HTTP:
     Name: "HTTP"
-    Description: "Callback from one of the http_ functions, like http_post_string"
+    Description: "Callback from one of the http_ functions, such as `http_post_string`."
     Type: System
 
   Dialog:
@@ -53,42 +53,42 @@ Events:
 
   Cloud:
     Name: "Cloud"
-    Description: "Callback from one of the cloud_ functions, like cloud_synchronise"
+    Description: "Callback from one of the cloud_ functions, such as `cloud_synchronise`."
     Type: System
 
   Networking:
     Name: "Networking"
-    Description: "Network traffic detected"
+    Description: "Network traffic detected."
     Type: System
 
   Steam:
     Name: "Steam"
-    Description: "Callback from one of the Steam API functions"
+    Description: "Callback from one of the Steam API functions."
     Type: System
 
   Social:
     Name: "Social"
-    Description: "Callback from one of the Social API functions"
+    Description: "Callback from one of the Social API functions."
     Type: System
 
   RoomStart:
     Name: "Room Start"
-    Description: "New room loaded"
+    Description: "New room loaded."
     Type: System
 
   Create:
     Name: "Create"
-    Description: "Instance constructor"
+    Description: "Instance constructor (called when the instance is first created)."
     Type: System
 
   Destroy:
     Name: "Destroy"
-    Description: "Instance destructor"
+    Description: "Instance destructor (called as the instance is destroyed)."
     Type: System
 
   BeginStep:
     Name: "Begin Step"
-    Description: "The first executed step event"
+    Description: "The first step event executed each frame."
     Group: "Step"
     Constant: |
       {
@@ -112,7 +112,7 @@ Events:
 
   Keyboard:
     Name: "Keyboard %1"
-    Description: "A key is pressed or held"
+    Description: "A key was pressed or is being held."
     Group: "Input"
     Type: Parameterized
     Parameters:
@@ -122,7 +122,7 @@ Events:
 
   KeyPressed:
     Name: "Key Pressed %1"
-    Description: "A key was pressed"
+    Description: "A key was pressed."
     Group: "Input"
     Type: Parameterized
     Parameters:
@@ -132,7 +132,7 @@ Events:
 
   KeyReleased:
     Name: "Key Released %1"
-    Description: "A key was pressed"
+    Description: "A key was pressed."
     Group: "Input"
     Type: Parameterized
     Parameters:
@@ -142,7 +142,7 @@ Events:
 
   MouseButton:
     Name: "Mouse Button %1"
-    Description: "A mouse button is pressed or held inside the window"
+    Description: "A mouse button is pressed or held and the mouse is hovering this instance."
     Group: "Input"
     Type: Parameterized
     Parameters:
@@ -154,7 +154,7 @@ Events:
 
   MousePressed:
     Name: "Mouse Button Pressed %1"
-    Description: "A mouse button was pressed inside the window"
+    Description: "A mouse button was pressed while hovering this instance."
     Group: "Input"
     Type: Parameterized
     Parameters:
@@ -166,7 +166,7 @@ Events:
 
   MouseReleased:
     Name: "Mouse Button Released %1"
-    Description: "A mouse button was pressed inside the window"
+    Description: "A mouse button was released while hovering this instance."
     Group: "Input"
     Type: Parameterized
     Parameters:
@@ -178,7 +178,7 @@ Events:
 
   GlobalMouseButton:
     Name: "Global Mouse Button %1"
-    Description: "A mouse button is pressed or held"
+    Description: "A mouse button was pressed or is being held."
     Type: Parameterized
     Parameters:
       - mouseButton
@@ -187,7 +187,7 @@ Events:
 
   GlobalMousePressed:
     Name: "Global Mouse Button Pressed %1"
-    Description: "A mouse button was pressed"
+    Description: "A mouse button was pressed."
     Group: "Input"
     Type: Parameterized
     Parameters:
@@ -197,7 +197,7 @@ Events:
 
   GlobalMouseReleased:
     Name: "Global Mouse Button Released %1"
-    Description: "A mouse button was pressed inside"
+    Description: "A mouse button was released."
     Group: "Input"
     Type: Parameterized
     Parameters:
@@ -208,20 +208,20 @@ Events:
   MouseWheelUp:
     Name: "Mouse Wheel Up"
     Type: Special
-    Description: "Mouse scroll wheel spun upwards"
+    Description: "Mouse scroll wheel was rotated upwards. See `mouse_vscrolls`."
     SuperCheck: |
       mouse_vscrolls > 0
 
   MouseWheelDown:
     Name: "Mouse Wheel Down"
     Type: Special
-    Description: "Mouse scroll wheel spun downwards"
+    Description: "Mouse scroll wheel was rotated downwards. See `mouse_vscrolls`."
     SuperCheck: |
       mouse_vscrolls < 0
 
   MouseEnterWindow:
     Name: "Mouse Enter Window"
-    Description:  "Mouse has entered the window"
+    Description:  "Mouse has entered the window."
     Type: Special
     Locals: bool $innowEnter = false;
     SubCheck: |
@@ -233,7 +233,7 @@ Events:
 
   MouseLeaveWindow:
     Name: "Mouse Leave Window"
-    Description: "Mouse has left the window"
+    Description: "Mouse has left the window."
     Type: Special
     Locals: |
       bool $innowLeave = false;
@@ -247,7 +247,7 @@ Events:
   Step:
     Name: "Step"
     Group: "Step"
-    Description: "Standard step event excuted after begin step"
+    Description: "Standard step event executed after begin step and input handling."
     Type: Special
     Constant: |
       {
@@ -258,20 +258,20 @@ Events:
 
   localsweep:
     Name: "Locals sweep"
-    Description: "Internal event to update local variables"
+    Description: "Internal event to update local variables."
     Type: Inline
     Constant: |
       enigma::propagate_locals(this);
 
   PathEnd:
     Name: "Path End"
-    Description: "Instance reached the endpoint of a path"
+    Description: "Instance has reached the endpoint of a path."
     Type: Special
     SuperCheck: "false" # TODO: Paths are not yet implemented.
 
   OutsideRoom:
     Name: "Outside Room"
-    Description: "Instance has move outside the room's bounds"
+    Description: "Instance has move outside the room's bounds."
     Type: Special
     SubCheck: |
       (bbox_right < 0)  || (bbox_left > room_width) ||
@@ -279,7 +279,7 @@ Events:
 
   InsideRoom:
     Name: "Inside Room"
-    Description: "Instance has moved inside the room's bounds"
+    Description: "Instance has moved inside the room's bounds."
     Type: Special
     SubCheck: |
       (bbox_left < 0) || (bbox_right > room_width) ||
@@ -287,7 +287,7 @@ Events:
 
   OutsideView:
     Name: "Outside View %1"
-    Description: "Instance has moved outside of the view's bounds"
+    Description: "Instance has moved outside of the view's bounds."
     Type: Parameterized
     SubCheck: |
       view_enabled && !view_visible[%1] && (
@@ -299,7 +299,7 @@ Events:
 
   InsideView:
     Name: "Inside View %1"
-    Description: "Instance has moved inside of the view's bounds"
+    Description: "Instance has moved inside of the view's bounds."
     Type: Parameterized
     SubCheck: |
       view_enabled && view_visible[%1] && (
@@ -311,14 +311,14 @@ Events:
 
   NoMoreLives:
     Name: "No More Lives"
-    Description: "Lives variable has become 0"
+    Description: "Lives variable has dropped to 0."
     Type: Special
     SuperCheck: |
       enigma::update_lives_status_and_return_zeroless()
 
   NoMoreHealth:
     Name: "No More Health"
-    Description: "Health variable has become 0"
+    Description: "Health variable has dropped to 0."
     Type: Special
     Locals: "bool $out_of_health = 0;"
     SubCheck: |
@@ -331,7 +331,7 @@ Events:
       if (health > 0) $out_of_health = 0;
 
   beforecollisionautomaticcollisionhandling:
-    Name: "Before collision automatic collision handling"
+    Name: "Pre-collision automatic collision handling."
     Description: "Internal event to update collision stuff"
     Type: Inline
     Default: ";"
@@ -340,7 +340,7 @@ Events:
 
   Collision:
     Name: "Colision %1"
-    Description: "Instances is overlapping with another object"
+    Description: "Instance is colliding (overlapping) with another object."
     Group: "Collisions"
     Type: Parameterized
     Parameters:
@@ -376,7 +376,7 @@ Events:
 
   EndStep:
     Name: "End Step"
-    Description: "The last of the step events"
+    Description: "The last of the step events."
     Group: "Step"
     Type: Special
     Constant: |
@@ -386,7 +386,7 @@ Events:
       }
 
   particlesystemsupdate:
-    Name: "Particle Systems Update"
+    Name: "Particle systems update."
     Description: "Internal event to update particles"
     Type: Inline
     Default: ";"
@@ -395,7 +395,7 @@ Events:
 
   Draw:
     Name: "Draw"
-    Description: "Draw inside the viewport into consideration"
+    Description: "Draw inside the current viewport."
     Group: "Draw"
     Type: Special
     SubCheck: "visible"
@@ -415,39 +415,39 @@ Events:
 
   DrawGUI:
     Name: "Draw GUI"
-    Description: "Draws directly on top the window ignoring any viewport"
+    Description: "Draw directly on top the window, ignoring any viewports."
     Group: "Draw"
     Type: Special
     SubCheck: "visible"
 
   WindowResize:
     Name: "Window Resize"
-    Description: "Window size changed"
+    Description: "Window size has changed."
     Type: System
 
   AnimationEnd:
     Name: "Animation End"
-    Description: "Instance sprite has reached the last subimage"
+    Description: "Instance sprite has reached the last subimage."
     Type: Special
     SubCheck: |
       !(image_index + image_speed < sprite_get_number(sprite_index))
 
   RoomEnd:
     Name: "Room End"
-    Description: "Changed the current room"
+    Description: "The current room has changed."
     Type: System
 
   GameEnd:
     Name: "Game End"
-    Description: "Game ended"
+    Description: "Game is ending."
     Type: System
 
   User:
     Name: "User %1"
-    Description: "Custom user event"
+    Description: "Custom user event. Invoked manually."
     Type: Parameterized
     Parameters:
-      - integer
+      - string
 
   Joystick.Axis:
     Name: "Joystick %1 Axis %2"
