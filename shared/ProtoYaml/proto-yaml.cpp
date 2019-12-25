@@ -245,10 +245,12 @@ bool DecodeHelper::PutScalarToField(const YAML::Node &yaml_scalar,
       } else {
         refl->SetString(to, field, yaml_scalar.Scalar());
       }
+      break;
     }
     case CppType::CPPTYPE_MESSAGE:
-      std::cerr << "Cannot parse string value as message: "
-                << yaml_scalar.Scalar() << std::endl;
+      std::cerr << "Cannot parse string value as message `"
+                << cache_for(field->message_type()).message_name
+                << "`: " << yaml_scalar.Scalar() << std::endl;
       return false;
     default:
       std::cerr << "Internal error: Unknown Proto CppType!" << std::endl;
@@ -265,7 +267,8 @@ bool DecodeHelper::FitMapToMessage(const YAML::Node &yaml_map,
     const auto *fd = cache.field(field_name);
     if (!fd) {
       std::cerr << "Yaml2Proto: Can't find field `" << field_name
-                << "` in message `" << cache.message_name << "`...";
+                << "` in message `" << cache.message_name << "`..."
+                << std::endl;
       continue;
     }
     FitNodeToField(entry.second, fd, out);
@@ -273,27 +276,162 @@ bool DecodeHelper::FitMapToMessage(const YAML::Node &yaml_map,
   return true;
 }
 
+std::pair<const proto::FieldDescriptor*, const proto::FieldDescriptor*>
+MessageIsKeyValue(const proto::Descriptor *desc) {
+  if (!desc || desc->field_count() < 1) return {};
+  const proto::FieldDescriptor *kfd = desc->field(0);
+  if (kfd->is_repeated()) return {};
+  if (ToLower(kfd->name()) != "id"  &&
+      ToLower(kfd->name()) != "key" &&
+      ToLower(kfd->name()) != "name") {
+    return {};
+  }
+  const proto::FieldDescriptor *vfd =
+      (desc->field_count() == 2) ? desc->field(1) : nullptr;
+  return {kfd, vfd};
+}
+
+bool YamlFitsValueField(const YAML::Node &yaml,
+                        FieldCache &kv_field_cache,
+                        const proto::FieldDescriptor *value_field) {
+  using CppType = proto::FieldDescriptor::CppType;
+  if (yaml.Type() != YAML::NodeType::Map) {
+    // We must be trying to fit this to the value field, because the only other
+    // interpretation is that this would be a map of all fields other than ID.
+    // Not a map, so can't logically be anything other than the value field.
+    return true;
+  }
+  if (value_field->cpp_type() != CppType::CPPTYPE_MESSAGE) {
+    // For scalar fields (fields that aren't messages), having a map bound would
+    // be an error. But we just established above that we must have a map on our
+    // hands, so the fact that the "value" field would have a map bound to it
+    // means it must not be intended to be our value field.
+    return false;
+  }
+
+  // This is the hard investigation. We have a map field. Maybe the map is
+  // supposed to be from non-ID fields to their values. But there's only one
+  // non-ID field in the context in which this method is called. So now the
+  // question is whether the map is for values of the "value" field, or just
+  // for the value field itself. There's the additional complication that this
+  // could be another key-value mapping, but actually, we can solve both cases
+  // using the same basic check.
+
+  // The easiest way to tell is if the mapping has keys that aren't from this
+  // key-value message.
+  for (const auto &subpair : yaml) {
+    if (subpair.first.Type() == YAML::NodeType::Scalar &&
+        !kv_field_cache.field(subpair.first.Scalar())) {
+      // We checked for various spellings of the key/value field names, but we
+      // didn't fit the YAML map key to either.
+      return true;
+    }
+  }
+  // The YAML file is literally listing `key: { value: X }` instead of `key: X`.
+  std::cerr << "Debug: your YAML is so ugly it looks like an error.\n"
+            << "Consider saying `key: value` instead of "
+               "`key: { value_name: value }`." << std::endl;
+  return false;
+}
+
 bool DecodeHelper::FitNodeToField(const YAML::Node &yaml,
                                   const proto::FieldDescriptor *field,
                                   proto::Message *out) {
+  using CppType = proto::FieldDescriptor::CppType;
   switch (yaml.Type()) {
     case YAML::NodeType::Null: {
       return false;
     }
     case YAML::NodeType::Scalar: {
-      PutScalarToField(yaml, field, out);
+      return PutScalarToField(yaml, field, out);
     }
     case YAML::NodeType::Sequence: {
-      std::cerr << "Sequence value given for Message "
-                << out->GetDescriptor()->name() << std::endl;
-      return false;
+      if (!field->is_repeated()) {
+        std::cerr << "Sequence value given for non-repeated field "
+                  << out->GetDescriptor()->name() << std::endl;
+        return false;
+      }
+      bool success_bit = true;
+      const proto::Reflection* refl = out->GetReflection();
+      if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
+        for (const auto &item : yaml) {
+          if (item.Type() != YAML::NodeType::Map) {
+            std::cerr
+                << "Non-map was given for message entry in repeated field `"
+                << field->name()
+                << "`. Custom string transformers not currently supported.";
+            success_bit = false;
+            continue;
+          }
+          success_bit &= FitMapToMessage(item, refl->AddMessage(out, field));
+        }
+      } else {
+        for (const auto &item : yaml) {
+          if (item.Type() != YAML::NodeType::Scalar) {
+            std::cerr
+                << "Non-scalar was given for entry in repeated field `"
+                << field->name()
+                << "`. Custom transformers not currently supported.";
+            success_bit = false;
+            continue;
+          }
+          success_bit &= PutScalarToField(item, field, out);
+        }
+      }
+      return success_bit;
     }
     case YAML::NodeType::Map: {
-      if (field->is_repeated()) {
-        std::cerr << "TODO: Add support for treating mapping key as Name/ID" << std::endl;
+      if (field->cpp_type() != CppType::CPPTYPE_MESSAGE) {
+        std::cerr << "Map was given for non-message field `" << field->name()
+                  << "`. Custom YAML transformers not currently supported.";
         return false;
+      }
+      const proto::Reflection* refl = out->GetReflection();
+      if (field->is_repeated()) {
+        const proto::Descriptor *subdesc = field->message_type();
+        FieldCache &cache = cache_for(subdesc);
+        auto [k_field, v_field] = MessageIsKeyValue(subdesc);
+
+        bool success_bit = true;
+        for (const auto &kv_pair : yaml) {
+          if (kv_pair.first.Type() != YAML::NodeType::Scalar) {
+            std::cerr << "YAML-Cpp error: map key for field `" << field->name()
+                      << "` is not a scalar!" << std::endl;
+            success_bit = false;
+            continue;
+          }
+          string kv_key = kv_pair.first.Scalar();
+          proto::Message *sub = refl->AddMessage(out, field);
+          if (v_field && YamlFitsValueField(kv_pair.second, cache, v_field)) {
+            // This is a canonical YAML representation of a key-value proto.
+            // We've determined the two fields to be a key (k_field) and value
+            // (v_field), and we've verified that the value of the YAML
+            // key-value pair is compatible with the value field of our Proto
+            // key-value pair. Now just fit the YAML value to the Proto value.
+            FitNodeToField(kv_pair.second, v_field, sub);
+          } else if (kv_pair.second.Type() != YAML::NodeType::Map) {
+            std::cerr << "Value of map entry `" << kv_key << "` for field `"
+                      << field->name() << "`is not a nested  map. This field "
+                         "is repeated; if you meant for these values to appear "
+                         "in the first entry, add a - before the mapping in "
+                         "your YAML file." << std::endl;
+            success_bit = false;
+            continue;
+          } else {  // Only the key was provided by the map struct.
+            // Fit the rest of the fields to it directly.
+            FitMapToMessage(kv_pair.second, sub);
+          }
+          if (sub->GetReflection()->HasField(*sub, k_field)) {
+            std::cerr << "Redundant assignment of key `" << kv_key
+                      << "` in `" << cache.message_name << "` entry."
+                      << std::endl;
+          }
+          // Update the key from our map.
+          PutScalarToField(kv_pair.first, k_field, sub);
+        }
+        return success_bit;
       } else {
-        return FitMapToMessage(yaml, out);
+        return FitMapToMessage(yaml, refl->MutableMessage(out, field));
       }
     }
     case YAML::NodeType::Undefined: {
@@ -335,13 +473,4 @@ bool egm::DecodeYaml(const YAML::Node &yaml, proto::Message *out) {
     }
   }
   return true;
-}
-
-#include </home/josh/Projects/ENIGMA/shared/protos/.eobjs/Configuration/EventDescriptor.pb.h>
-using buffers::config::EventFile;
-
-
-int main() {
-  EventFile ev = egm::ReadYamlFileAs<EventFile>("/home/josh/Projects/ENIGMA/events.ey");
-
 }
