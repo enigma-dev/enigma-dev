@@ -37,14 +37,13 @@ using namespace std;
 #include "event_reader/event_parser.h"
 #include "languages/lang_CPP.h"
 
-struct foundevent {
-  int mid, id, count;
-  foundevent(): mid(0),id(0),count(0) {}
-  void f2(int m, int i)  { id = i, mid = m; }
-  void inc(int m, int i) { mid = m, id = i, count++; }
-  void operator++(int) { count++; }
+struct EventGroup {
+  std::vector<Event*> events;
+  EventGroup &operator+=(const Event *ev) {
+    events.push_back(ev);
+    return *this;
+  }
 };
-typedef map<string,foundevent>::iterator evfit;
 
 static inline int event_get_number(const buffers::resources::Object::Event &event) {
   if (event.has_name()) {
@@ -58,18 +57,18 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   /* Generate a new list of events used by the objects in
   ** this game. Only events on this list will be exported.
   ***********************************************************/
-  map<string,foundevent> used_events;
+  map<string, EventGroup> used_events;
 
-  // Defragged events must be written before object data, or object data cannot determine which events were used.
-  used_events.clear();
+  // Defragged events must be written before object data, or object data cannot
+  // determine which events were used.
   for (size_t i = 0; i < game.objects.size(); i++) {
     for (int ii = 0; ii < game.objects[i]->events().size(); ii++) {
       const int mid = game.objects[i]->events(ii).type();
       const int  id = event_get_number(game.objects[i]->events(ii));
       if (event_is_instance(mid, id)) {
-        used_events[event_stacked_get_root_name(mid)].inc(mid,id);
+        used_events[event_stacked_get_root_name(mid)] += translate_legacy_id_pair(mid,id);
       } else {
-        used_events[event_get_function_name(mid,id)].inc(mid,id);
+        used_events[event_get_function_name(mid,id)] += translate_legacy_id_pair(mid,id);
       }
     }
   }
@@ -92,8 +91,8 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   for (size_t i=0; i<event_sequence.size(); i++)
   {
     const int mid = event_sequence[i].first, id = event_sequence[i].second;
-    if (event_has_default_code(mid,id)) // We may not be using this event, but if it's persistent... (constant or defaulted: mandatory)
-    {
+    // We may not be using this event, but it may have default code.
+    if (event_has_default_code(mid,id)) {  // (defaulted includes "constant")
       used_events[event_get_function_name(mid,id)].f2(mid,id); // ...Reserve it anyway.
 
       for (parsed_object *obj : parsed_objects) { // Then shell it out into the other objects.

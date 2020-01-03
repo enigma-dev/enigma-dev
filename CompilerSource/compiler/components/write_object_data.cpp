@@ -48,6 +48,8 @@ inline bool iscomment(const string &n) {
 
 inline string event_forge_group_code(int mainId, int id) {
   string evname = event_get_function_name(mainId,id);
+  // TODO: Robert "fixed" something inheritance-related by moving the supercheck
+  // inside every single subcheck block.
   string ret = event_has_sub_check(mainId, id) ? "        if (myevent_" + evname + "_subcheck()) {\n" : "";
   ret += (event_has_super_check(mainId,id) ?
     "          if (" + event_get_super_check_condition(mainId,id) + ") myevent_" : "          myevent_") + evname + "();\n",

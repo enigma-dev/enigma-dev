@@ -1,4 +1,4 @@
-/** Copyright (C) 2008 Josh Ventura
+/** Copyright (C) 2008-2018 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -24,11 +24,8 @@
 using namespace std;
 #define tostring to_string
 
-#include "general/darray.h"
-#include "general/parse_basics_old.h"
-inline bool is_letterh(char x) { return is_letter(x) or x == '-' or x == ' '; }
-
 #include "event_parser.h"
+#include "ProtoYaml/proto-yaml.h"
 
 inline bool lc(const string &s, const string &ss)
 {
@@ -41,15 +38,8 @@ inline bool lc(const string &s, const string &ss)
   return true;
 }
 
-const char *e_type_strs[] = {
-  "Inline",
-  "Stacked",
-  "Special",
-  "Spec-sys",
-  "System",
-  "None"
-};
 const char *p_type_strs[] = {
+  "Non-resource",
   "Sprite",
   "Sound",
   "Background",
@@ -59,555 +49,254 @@ const char *p_type_strs[] = {
   "Timeline",
   "Object",
   "Room",
-  "Key"
 };
 
-event_info::event_info():               name(),  gmid(0), humanname(), par2type(p2t_error), mode(et_error), mmod(0), def(), cons(), super(), sub(), instead() { }
-event_info::event_info(string n,int i): name(n), gmid(i), humanname(), par2type(p2t_error), mode(et_error), mmod(0), def(), cons(), super(), sub(), instead() { }
+using buffers::config::EventFile;
+using buffers::config::EventDescriptor;
 
-main_event_info::main_event_info(): name(), is_group(false), specs() { }
-
-varray<main_event_info> main_event_infos;
-typedef pair<int, int> evpair;
-vector<evpair> event_sequence;
-
-inline void event_add(int evid,event_info* last)
-{
-  int lid;
-  if (last->mode == et_special or last->mode == et_spec_sys or last->mmod)
-    lid = last->mmod;
-  else
-    lid = main_event_infos[evid].specs.rbegin() != main_event_infos[evid].specs.rend() ? main_event_infos[evid].specs.rbegin()->first + 1 : 0;
-  if (lid) main_event_infos[evid].is_group = true;
-  main_event_infos[evid].specs[lid] = last;
-  event_sequence.push_back(evpair(evid,lid));
+const Event *EventData::get_event(int mid, int sid) const {
+  auto it = compatability_mapping_.find({mid, sid});
+  if (it == compatability_mapping_.end()) return nullptr;
+  return &it->second;
 }
 
-int event_parse_resourcefile()
-{
-  FILE* events = fopen("events.res","rt");
-  if (!events) {
-    puts("events.res: File not found");
-    return -1;
-  }
-
-  char line[4096];
-
-  // Parse modes
-  int evid = -1;            // If we are in an event, this is its ID. Otherwise, it must be -1.
-  event_info *last = NULL; // What we're dealing with thus far
-  int linenum = 0;   // What line we're on, for error reporting
-  int braces = 0;   // Number of curly braces we are in
-  int iq = 0;      // In a quote in an expression
-
-  enum {
-    exp_default, exp_constant, exp_sub, exp_super, exp_instead, exp_prefix, exp_suffix,
-    exp_locals, exp_iterdec, exp_iterinit, exp_iterrm, exp_iterdel
-  } last_exp = exp_default; // Whether last EXPRESSION was sub or super
-
-  while (!feof(events) and fgets(line,4096,events))
-  {
-    linenum++;
-    bool lw = false;
-    int pos = 0;
-
-    if (braces) // We're still reading inside {}
-    {
-      int i;
-      for (i = 0; line[i]; i++)
-        if (!iq) { braces += (line[i] == '{') - (line[i] == '}');
-          iq = (line[i] == '"') + ((line[i] == '\'') << 1);
-        } else { iq = (iq == 1 and line[i] != '"') + ((iq == 2 and line[i] != '\'') << 1);
-          i += (line[i] == '\\');
-        }
-      switch (last_exp) {
-        case exp_default:  last->def      += string(line,i); continue;
-        case exp_constant: last->cons     += string(line,i); continue;
-        case exp_sub:      last->super    += string(line,i); continue;
-        case exp_super:    last->sub      += string(line,i); continue;
-        case exp_instead:  last->instead  += string(line,i); continue;
-        case exp_prefix:   last->prefix   += string(line,i); continue;
-        case exp_suffix:   last->suffix   += string(line,i); continue;
-        case exp_locals:   last->locals   += string(line,i); continue;
-        case exp_iterdec:  last->iterdec  += string(line,i); continue;
-        case exp_iterdel:  last->iterdel  += string(line,i); continue;
-        case exp_iterinit: last->iterinit += string(line,i); continue;
-        case exp_iterrm:   last->iterrm   += string(line,i); continue;
-        default: puts("THIS ERROR IS IMPOSSIBLE"); return 2;
-      }
-    }
-
-    // Skip to end of leading whitespace
-    // Lead whitespace means we're adding attributes
-    if (is_useless(line[pos])) {
-      lw = true;
-      while (is_useless(line[++pos]));
-    }
-
-    if (line[pos] == '#' or !line[pos])
-      continue;
-
-    // If we're not adding to an event yet, error.
-    if (lw and evid == -1) {
-      printf("Error on line %d: No event name declared to which attributes should be added.\n",linenum);
-      return 1;
-    }
-
-    // Adding an attribute to the current event, we hope
-    char* nbegin = line + pos;
-    if (!is_letter(*nbegin)) {
-      printf("Error on line %d: Expected attribute name.\n",linenum);
-      return 1;
-    }
-
-    // Find the end of the word
-    if(lw) while (is_letterh(line[++pos]));
-    else   while (is_letter (line[++pos]));
-    if (line[pos] != ':') {
-      printf("Error on line %d: Expected colon following attribute name.\n",linenum);
-      return 1;
-    }
-
-    line[pos] = 0;
-    string str = nbegin;
-    line[pos] = ':';
-
-    //Skip whitespace after :
-    while (is_useless(line[++pos]));
-
-    if (lw) // If the leading character was white
-    {
-      char *begin = line + pos;
-      while (line[pos] and line[pos] != '#') pos++;
-      while (is_useless(line[--pos])); pos++;
-
-      string v(begin,line+pos-begin > 0 ? line+pos-begin : 0);
-
-      if (lc(str,"Mode"))
-      {
-        for (int i=0; i != et_error; i++)
-          if (lc(v,e_type_strs[i]))
-            last->mode = e_type(i);
-        if (last->mode == et_error) {
-          printf("Error on line %d: Unrecognized mode `%s`.\n",linenum,v.c_str());
-          return 1;
-        }
-      }
-
-      else if (lc(str,"Group"))
-        main_event_infos[last->gmid].name = v;
-      else if (lc(str,"Name"))
-        last->humanname = v;
-      else if (lc(str,"Type"))
-      {
-        for (int i=0; i != p2t_error; i++)
-          if (lc(v,p_type_strs[i]))
-            last->par2type = p_type(i);
-        if (last->par2type == p2t_error) {
-          printf("Error on line %d: Unrecognized parameter type `%s`.\n",linenum,v.c_str());
-          return 1;
-        }
-      }
-
-      else if (lc(str,"Default")){
-        last->def = v, last_exp = exp_default;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Constant")){
-        last->cons = v, last_exp = exp_constant;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Sub check")) {
-        last->sub = v, last_exp = exp_sub;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Super check")) {
-        last->super = v, last_exp = exp_super;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Prefix")) {
-        last->prefix = v, last_exp = exp_prefix;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Suffix")) {
-        last->suffix= v, last_exp = exp_suffix;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Instead")) {
-        last->instead = v, last_exp = exp_instead;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Locals")) {
-        last->locals = v, last_exp = exp_locals;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Iterator-declare")) {
-        last->iterdec = v, last_exp = exp_iterdec;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Iterator-init") or lc(str,"Iterator-initialize")) {
-        last->iterinit = v, last_exp = exp_iterinit;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Iterator-remove")) {
-        last->iterrm = v, last_exp = exp_iterrm;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Iterator-delete")) {
-        last->iterdel = v, last_exp = exp_iterdel;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Case"))
-      {
-        if (last->mode != et_special and last->mode != et_spec_sys) {
-          printf("Error on line %d: Conditional attribute `case` incompatible with mode `%s`.\n",linenum,e_type_strs[last->mode]);
-          return 1;
-        } last->mmod = atol(v.c_str());
-      }
-      else {
-        printf("Warning, line %d: Ignoring unknown attribute `%s`.\n",linenum,str.c_str());
-      }
-
-      continue;
-      EXPRESSION:
-        if (v[0] == '{')
-        {
-          braces = 1;
-          int iq = 0;
-          for (size_t i=1; i<v.length(); i++)
-            if (!iq) { braces += (v[i] == '{') - (v[i] == '}');
-              iq = (v[i] == '"') + ((v[i] == '\'') << 1);
-            } else { iq = (iq == 1 and v[i] != '"') + ((iq == 2 and v[i] != '\'') << 1);
-              i += (v[i] == '\\');
-            }
-        }
-      continue;
-    }
-    else
-    {
-      // This is the declaration of a new event.
-      // So far we have "eventname: "; we now expect an integer
-
-      // First, take care of the old event
-      if (last and evid != -1)
-        event_add(evid,last);
-
-      char *num = line + pos;
-
-      if (!is_digit(line[pos])) {
-        printf("Error on line %d: Expected integer ID following colon.\n",linenum);
-        return 1;
-      }
-
-      while (is_digit(line[++pos]));
-
-      if (!is_useless(line[pos]) and line[pos] != '#' and line[pos]) {
-        printf("Error on line %d: Expected end of line following integer.\n",linenum);
-        return 1;
-      }
-
-      line[pos] = 0;
-      evid = atol(num);
-      last = new event_info(str,evid);
+EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
+  for (const auto &aliases : event_file_.aliases()) {
+    for (const buffers::config::ParameterAlias &alias : aliases.aliases()) {
+      parameter_values_.insert({{aliases.id(), alias.id()}, &alias});
     }
   }
-
-  if (last and evid != -1)
-    event_add(evid,last);
-
-  for (size_t i=0; i<main_event_infos.size; i++)
-  {
-    for (main_event_info::iter ii = main_event_infos[i].specs.begin(); ii != main_event_infos[i].specs.end(); ii++)
-      if (ii->second->humanname == "")
-        ii->second->humanname = ii->second->name;
-
-    main_event_info::iter ii = main_event_infos[i].specs.begin();
-    if (main_event_infos[i].name == "" and ii != main_event_infos[i].specs.end())
-      main_event_infos[i].name = main_event_infos[i].specs[0]->humanname;
-  }
-
-  return 0;
 }
 
-string format_lookup(int id, p_type t)
-{
-  switch (t)
-  {
-    case p2t_sprite:     return "spr_" + tostring(id);
-    case p2t_sound:      return "snd_" + tostring(id);
-    case p2t_background: return "bk_" + tostring(id);
-    case p2t_path:       return "pth_" + tostring(id);
-    case p2t_script:     return "scr_" + tostring(id);
-    case p2t_font:       return "fnt_" + tostring(id);
-    case p2t_timeline:   return "tl_" + tostring(id);
-    case p2t_object:     return "obj_" + tostring(id);
-    case p2t_room:       return "rm_" + tostring(id);
-    case p2t_key:        return "key" + tostring(id);
-    case p2t_error:      return "...";
-  }
-  return tostring(id);
-}
-string format_lookup_econstant(int id, p_type t)
-{
-  switch (t)
-  {
-    case p2t_sprite:     return tostring(id);
-    case p2t_sound:      return tostring(id);
-    case p2t_background: return tostring(id);
-    case p2t_path:       return tostring(id);
-    case p2t_script:     return tostring(id);
-    case p2t_font:       return tostring(id);
-    case p2t_timeline:   return tostring(id);
-    case p2t_object:     return tostring(id);
-    case p2t_room:       return tostring(id);
-    case p2t_key:        return tostring(id);
-    case p2t_error:      return tostring(id);
-  }
-  return tostring(id);
+static EventData *legacy_events = nullptr;
+
+// Used by the rest of these functions
+static inline const Event *event_access(int mid, int id) {
+  if (!legacy_events) return nullptr;
+  return legacy_events->get_event(mid, id);
 }
 
-inline string autoparam(string x,string y)
-{
-  const size_t p = x.find("%1");
-  if (p != string::npos) return x.replace(p,2,y);
-  return x;
+// Query for a name suitable for use as an identifier. No spaces or specials.
+string event_get_function_name(int mid, int id) {
+  if (const auto *ev = event_access(mid, id))
+    return ev->FunctionName();
+  return "undefinedEvent" + std::to_string(mid)
+                    + "_" + std::to_string(id) + "ERROR";
 }
 
-// Query for a name suitable for use as
-// an identifier. No spaces or specials.
-string event_get_function_name(int mid, int id)
-{
-  main_event_info &mei = main_event_infos[mid];
-  if (mei.is_group or mei.specs[0]->mode != et_stacked) {
-    main_event_info::iter i = main_event_infos[mid].specs.find(id);
-    return i != main_event_infos[mid].specs.end() ? i->second->name : "undefinedEventERROR";
-  }
-  string buf = mei.specs[0]->name;
-  size_t pp = buf.find("%1");
-  if (pp != string::npos)
-    buf.replace(pp,2,format_lookup(id, mei.specs[0]->par2type));
-  else
-    buf += "_" + tostring(id);
-  return buf;
-}
-
+// Query for a root (stacked event) name suitable for use as an identifier.
 string event_stacked_get_root_name(int mid) {
-  main_event_info &mei = main_event_infos[mid];
-  return autoparam(mei.specs[0]->name,"stackroot");
+  if (const auto *ev = event_access(mid, 0))
+    return ev->BaseFunctionName();
+  return "undefinedMainEvent" + std::to_string(mid) + "ERROR";
 }
 
 // Fetch a user-friendly name for the event
 // with the given credentials.
-string event_get_human_name(int mid, int id)
-{
-  main_event_info &mei = main_event_infos[mid];
-  if (mei.is_group) {
-    char buf[64];
-    main_event_info::iter i = main_event_infos[mid].specs.find(id);
-    return i != main_event_infos[mid].specs.end() ? i->second->humanname : (sprintf(buf,"Undefined or Unsupported (%d,%d)",mid,id),buf);
-  }
-  string buf = mei.specs[0]->humanname;
-  size_t pp = buf.find("%1");
-  if (pp != string::npos)
-    buf.replace(pp,2,format_lookup(id, mei.specs[0]->par2type));
-  return buf;
-}
-string event_get_human_name_min(int mid, int id)
-{
-  main_event_info &mei = main_event_infos[mid];
-  if (mei.is_group) {
-    char buf[64];
-    main_event_info::iter i = main_event_infos[mid].specs.find(id);
-    return i != main_event_infos[mid].specs.end() ? i->second->humanname : (sprintf(buf,"Undefined or Unsupported (%d,%d)",mid,id),buf);
-  }
-  if (mei.specs[0]->mode == et_stacked)
-    return mei.name;
-  string buf = mei.specs[0]->humanname;
-  size_t pp = buf.find("%1");
-  if (pp != string::npos)
-    buf.replace(pp,2,format_lookup(id, mei.specs[0]->par2type));
-  return buf;
-}
-
-// Used by the rest of these functions
-event_info *event_access(int mid, int id)
-{
-  main_event_info &mei = main_event_infos[mid];
-  return (mei.is_group) ? mei.specs[id] : mei.specs[0];
+string event_get_human_name(int mid, int id) {
+  if (const auto *ev = event_access(mid, 0))
+    return ev->HumanName();
+  return "undefined or unsupported event (" + std::to_string(mid) + ", "
+                                            + std::to_string(id) + ")";
 }
 
 // Test whether there is code that will remain
 // active if a user has not declared this event.
 bool event_has_default_code(int mid, int id) {
-  return event_access(mid,id)->def != "" or event_access(mid,id)->cons != "";
+  if (const auto *ev = event_access(mid, id))
+    return ev->HasDefaultCode();
+  return false;
 }
 
 string event_get_default_code(int mid, int id) {
-  return event_access(mid,id)->def + event_access(mid,id)->cons;
+  if (const auto *ev = event_access(mid, id))
+    return ev->DefaultCode();
+  return "";
 }
 
 
-// Test whether there is code that will remain
-// active whether or not a user has declared this event.
+// Test whether this event has code that will remain active regardless of
+// whether a user has declared this event.
 bool event_has_const_code(int mid, int id) {
-  return event_access(mid,id)->cons != "";
+  if (const auto *ev = event_access(mid, id))
+    return ev->HasConstantCode();
+  return false;
 }
 
 string event_get_const_code(int mid, int id) {
-  return event_access(mid,id)->cons;
+  if (const auto *ev = event_access(mid, id))
+    return ev->ConstantCode();
+  return "";
 }
 
 // Some events have special behavior as placeholders, instead of simple iteration.
 // These two functions will test for and return such.
 
 bool event_has_instead(int mid, int id) {
-  return event_access(mid,id)->instead != "";
+  if (const auto *ev = event_access(mid, id))
+    return ev->HasInsteadCode();
+  return false;
 }
 
 string event_get_instead(int mid, int id) {
-  return event_access(mid,id)->instead;
+  if (const auto *ev = event_access(mid, id))
+    return ev->InsteadCode();
+  return "";
 }
 
+bool event_has_prefix_code(int mid, int id) {
+  if (const auto *ev = event_access(mid, id))
+    return ev->HasPrefixCode();
+  return false;
+}
 
-
-
+string event_get_prefix_code(int mid, int id) {
+  if (const auto *ev = event_access(mid, id))
+    return ev->PrefixCode();
+  return "";
+}
 
 bool event_has_suffix_code(int mid, int id) {
-  return event_access(mid,id)->suffix != "";
+  if (const auto *ev = event_access(mid, id))
+    return ev->HasSuffixCode();
+  return false;
 }
 
 string event_get_suffix_code(int mid, int id) {
-  return event_access(mid,id)->suffix;
-}
-
-
-// The rest of these functions use this
-string evres_code_substitute(string code, int sid, p_type t)
-{
-  for (size_t i = code.find("%1"); i != string::npos; i = code.find("%1"))
-    code.replace(i, 2, format_lookup_econstant(sid, t));
-  return code;
-}
-
-// Some events have special behavior as placeholders, instead of simple iteration.
-// These two functions will test for and return such.
-
-bool event_has_prefix_code(int mid, int id) {
-  return event_access(mid,id)->prefix != "";
-}
-string event_get_prefix_code(int mid, int id) {
-    event_info* ei = event_access(mid,id);
-    const string res = evres_code_substitute(ei->prefix, id, ei->par2type);
-  return res;//event_access(mid,id)->prefix; //TGMG edit
+  if (const auto *ev = event_access(mid, id))
+    return ev->SuffixCode();
+  return "";
 }
 
 // Many events check things before executing, some before starting the loop. Deal with them.
 
-bool event_has_super_check(int mid, int id) {
-  return event_access(mid,id)->super != "";
-}
-
 bool event_has_sub_check(int mid, int id) {
-  return event_access(mid,id)->sub != "";
+  if (const auto *ev = event_access(mid, id)) return ev->HasSubCheck();
+  return false;
 }
 
-string event_get_super_check_condition(int mid, int id) {
-  event_info* ei = event_access(mid,id);
-  return evres_code_substitute(ei->super, id, ei->par2type);
+bool event_has_super_check(int mid, int id) {
+  if (const auto *ev = event_access(mid, id)) return ev->HasSuperCheck();
+  return false;
+}
+
+bool event_has_super_check_condition(int mid, int id) {
+  if (const auto *ev = event_access(mid, id)) return ev->HasSuperCheckExpression();
+  return false;
 }
 
 string event_get_super_check_function(int mid, int id) {
-  event_info *e = event_access(mid,id);
-  return (e->super != "" and e->super[0] == '{') ? "static inline bool supercheck_" + e->name + "() " + e->super + "\n\n" : "";
-}
-
-string event_get_sub_check_condition(int mid, int id) {
-  event_info* ei = event_access(mid,id);
-  const string res = evres_code_substitute(ei->sub, id, ei->par2type);
-  return res[0] == '{' ? res : "return (" + res + ");";
-}
-
-// Does this event belong on the list of events to execute?
-bool event_execution_uses_default(int mid, int id) {
-  event_info *e = event_access(mid,id);
-  return e->mode == et_inline or e->mode == et_special or e->mode == et_stacked;
-}
-
-// Clear all data from previous parses, save
-// main events, which can just be overwritten.
-void event_info_clear()
-{
-  for (unsigned i=0; i<main_event_infos.size; i++)
-    main_event_infos[i].specs.clear();
-  event_sequence.clear();
-}
-
-bool event_is_instance(int mid, int id) { // Returns if the event with the given ID pair is an instance of a stacked event
-  main_event_info &mei = main_event_infos[mid];
-  return !mei.is_group and mei.specs[0]->mode == et_stacked;
-}
-
-string event_forge_sequence_code(int mid, int id, string preferred_name)
-{
-  string base_indent = string(4, ' ');
-  event_info *const ev = event_access(mid,id);
-  if (ev->instead != "")
-  {
-    return base_indent + ev->instead + base_indent + '\n';
-  }
-  else
-    if (event_execution_uses_default(mid,id))
-    {
-      string ret = "";
-      bool perfsubcheck = event_has_sub_check(mid, id) && !event_is_instance(mid, id);
-      if (event_has_super_check(mid,id) and !event_is_instance(mid,id)) {
-        ret =        base_indent + "if (" + event_get_super_check_condition(mid,id) + ")\n" +
-                     base_indent + "  for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
-        if (perfsubcheck) { ret += "    if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "_subcheck()) {\n"; }
-        ret +=       base_indent + "      ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
-        if (perfsubcheck) { ret += "    }\n"; }
-        ret +=       base_indent + "    if (enigma::room_switching_id != -1) goto after_events;\n" +
-                     base_indent + "  }\n";
-      } else {
-         ret =  base_indent + "for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
-         if (perfsubcheck) { ret += "    if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "_subcheck()) {\n"; }
-         ret += base_indent + "  ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
-         if (perfsubcheck) { ret += "    }\n"; }
-         ret += base_indent + "  if (enigma::room_switching_id != -1) goto after_events;\n" +
-                base_indent + "}\n";
-      }
-      return ret;
-    }
+  if (const auto *ev = event_access(mid, id)) return ev->SuperCheckExpression();
   return "";
 }
 
 bool event_has_iterator_declare_code(int mid, int id) {
-  return event_access(mid,id)->iterdec != "";
+  if (const auto *ev = event_access(mid, id)) return ev->HasIteratorDeclareCode();
+  return false;
 }
 bool event_has_iterator_initialize_code(int mid, int id) {
-  return event_access(mid,id)->iterinit != "";
+  if (const auto *ev = event_access(mid, id)) return ev->HasIteratorInitializeCode();
+  return false;
 }
 bool event_has_iterator_unlink_code(int mid, int id) {
-  return event_access(mid,id)->iterrm != "";
+  if (const auto *ev = event_access(mid, id)) return ev->HasIteratorRemoveCode();
+  return false;
 }
 bool event_has_iterator_delete_code(int mid, int id) {
-  return event_access(mid,id)->iterdel != "";
+  if (const auto *ev = event_access(mid, id)) return ev->HasIteratorDeleteCode();
+  return false;
 }
 string event_get_iterator_declare_code(int mid, int id) {
-  return event_access(mid,id)->iterdec;
+  if (const auto *ev = event_access(mid, id)) return ev->IteratorDeclareCode();
+  return "";
 }
 string event_get_iterator_initialize_code(int mid, int id) {
-  return event_access(mid,id)->iterinit;
+  if (const auto *ev = event_access(mid, id)) return ev->IteratorInitializeCode();
+  return "";
 }
 string event_get_iterator_unlink_code(int mid, int id) {
-  return event_access(mid,id)->iterrm;
+  if (const auto *ev = event_access(mid, id)) return ev->IteratorRemoveCode();
+  return "";
 }
 string event_get_iterator_delete_code(int mid, int id) {
-  return event_access(mid,id)->iterdel;
+  if (const auto *ev = event_access(mid, id)) return ev->IteratorDeleteCode();
+  return "";
 }
 
 string event_get_locals(int mid, int id) {
-  return event_access(mid,id)->locals;
+  if (const auto *ev = event_access(mid, id)) return ev->LocalDeclarations();
+  return "";
+}
+
+// This is the fucking compiler oversharing. I don't know how this happened,
+// but this method always returns a function *body*. Not even a full signature.
+// JUST the body. And it's still named identically to the above.
+// TODO: When deleting this method, rewire the compiler to actually
+// *conditionally* emit a subcheck function, and otherwise embed the
+// conditional.
+string event_get_sub_check_condition(int mid, int id) {
+  if (const auto *ev = event_access(mid, id)) return ev->SubCheckFunction();
+  return "";
+}
+
+// Does this event belong on the list of events to execute?
+bool event_execution_uses_default(int mid, int id) {
+  if (const auto *ev = event_access(mid, id)) return ev->UsesEventLoop();
+  return false;
+}
+
+// Clear all data from previous parses, save
+// main events, which can just be overwritten.
+void event_info_clear() {
+  delete legacy_events;
+  legacy_events = nullptr;
+}
+
+// Returns if the event with the given ID pair is an instance of a stacked event
+bool event_is_instance(int mid, int id) {
+  if (const auto *ev = event_access(mid, id)) return ev->parameters.size();
+  return false;
+}
+
+string event_forge_sequence_code(int mid, int id, string preferred_name) {
+  string base_indent = string(4, ' ');
+  const Event *const ev = event_access(mid,id);
+  if (!ev) return "#error Invalid event (" + std::to_string(mid) + ", " + std::to_string(id) + "\n";
+
+  if (ev->HasInsteadCode())
+    return base_indent + ev->InsteadCode() + "\n\n";
+
+  if (event_execution_uses_default(mid,id))
+  {
+    string ret = "";
+    bool perfsubcheck = event_has_sub_check(mid, id) && !event_is_instance(mid, id);
+    if (event_has_super_check(mid,id) and !event_is_instance(mid,id)) {
+      ret =        base_indent + "if (" + event_get_super_check_condition(mid,id) + ")\n" +
+                   base_indent + "  for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
+      if (perfsubcheck) { ret += "    if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "_subcheck()) {\n"; }
+      ret +=       base_indent + "      ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
+      if (perfsubcheck) { ret += "    }\n"; }
+      ret +=       base_indent + "    if (enigma::room_switching_id != -1) goto after_events;\n" +
+                   base_indent + "  }\n";
+    } else {
+       ret =  base_indent + "for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
+       if (perfsubcheck) { ret += "    if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "_subcheck()) {\n"; }
+       ret += base_indent + "  ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
+       if (perfsubcheck) { ret += "    }\n"; }
+       ret += base_indent + "  if (enigma::room_switching_id != -1) goto after_events;\n" +
+              base_indent + "}\n";
+    }
+    return ret;
+  }
+  return "";
+}
+
+google::protobuf::RepeatedPtrField<Event> event_execution_order() {
+  return legacy_events->events();
+}
+
+const Event* translate_legacy_id_pair(int mid, int id) {
+  return event_access(mid, id);
 }
 
 /*

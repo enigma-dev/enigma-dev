@@ -1,7 +1,7 @@
 PATH := $(eTCpath)$(PATH)
 SHELL=/bin/bash
 
-.PHONY: ENIGMA all clean Game clean-game libpng-util libProtocols libEGM required-directories .FORCE
+.PHONY: ENIGMA all clean Game clean-game clean-protos libpng-util libProtocols libEGM required-directories .FORCE
 
 ENIGMA: .FORCE libProtocols libpng-util
 	$(MAKE) -C CompilerSource
@@ -23,6 +23,9 @@ Game: .FORCE
 
 clean-game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL clean
+
+clean-protos: .FORCE
+	$(MAKE) -C shared/protos/ clean
 
 libpng-util: .FORCE
 	$(MAKE) -C shared/libpng-util/

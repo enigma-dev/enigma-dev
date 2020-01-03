@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008-2018 Josh Ventura                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,17 +25,19 @@
 **                                                                              **
 \********************************************************************************/
 
-enum e_type {
-  et_inline,
-  et_stacked,
-  et_special,
-  et_spec_sys,
-  et_system,
-  et_none,
-  et_error
-};
+#ifndef ENIGMA_EVENT_PARSER_H
+#define ENIGMA_EVENT_PARSER_H
 
+#include <Configuration/EventDescriptor.pb.h>
+#include <boost/container/small_vector.hpp>
+
+// TODO: Move this to a common header with GameData as a ResourceType enum.
+// We don't currently have a generic resource metadata specifier, and it
+// probably doesn't make sense given how different resources are from one
+// another. Another consideration is to use TreeNode::TypeCase, but it includes
+// settings nodes and folder nodes.
 enum p_type {
+  p2t_non_resource,
   p2t_sprite,
   p2t_sound,
   p2t_background,
@@ -44,57 +46,82 @@ enum p_type {
   p2t_font,
   p2t_timeline,
   p2t_object,
-  p2t_room,
-  p2t_key,
-  p2t_error
+  p2t_room
 };
 
-#include <string>
-#include <vector>
-#include <map>
+struct Event {
+  // Raw data stored in our event file proto.
+  const buffers::config::EventDescriptor *event;
+  // Any parameters to this event.
+  boost::container::small_vector<std::string, 4> parameters;
 
-using std::map;
-using std::string;
-using std::vector;
-using std::pair;
+  bool is_complete() const {
+    return parameters.size() == (unsigned) event->parameters_size();
+  }
 
-struct event_info
-{
-  string name; // The identifier-compliant name of this event.
-  int    gmid; // The ID used in the popular Game Maker format.
-  
-  string humanname; // The name the user sees
-  p_type par2type; // The type of any parameters in the name; a resource name? keyboard key?
-  
-  e_type mode; // Executed each step in-line? System called?
-  int    mmod; // Specialization ID, or other generic integer info
-  
-  string def;  // Default code -- In place if nothing else is given
-  string cons; // Constant code -- Added whether the event exists or not
-  string super; // Check made before iteration begins
-  string sub;   // Check made by each instance in each execution
-  string prefix; // Inserted at the beginning of existing events
-  string suffix; // Appended to the end of existing events
-  string instead; // Overrides all other options: Replaces the event loop for this event
-  
-  string locals; // Any variables that the event requires to perform correctly
-  string iterdec, iterdel, iterinit, iterrm; // Overrides iterator code
-  
-  event_info();
-  event_info(string n,int i);
+  std::string HumanName() const;
+  std::string FunctionName() const;
+  std::string BaseFunctionName() const;
+  std::string LocalDeclarations() const;
+
+  bool HasPrefixCode() const { return event->has_prefix(); }
+  bool HasSuffixCode() const { return event->has_suffix(); }
+  bool HasDefaultCode() const { return event->has_default_() || HasConstantCode(); }
+  bool HasConstantCode() const { return event->has_constant(); }
+
+  std::string PrefixCode() const;
+  std::string SuffixCode() const;
+  std::string DefaultCode() const;
+  std::string ConstantCode() const;
+
+  bool HasSubCheck() const { return event->has_sub_check(); }
+  bool HasSubCheckFunction() const;
+  bool HasSubCheckExpression() const;
+  bool HasSuperCheck() const { return event->has_super_check(); }
+  bool HasSuperCheckFunction() const;
+  bool HasSuperCheckExpression() const;
+  bool HasInsteadCode() const { return event->has_instead(); }
+
+  std::string SubCheckFunction() const;
+  std::string SubCheckExpression() const;
+  std::string SuperCheckFunction() const;
+  std::string SuperCheckExpression() const;
+  std::string InsteadCode() const;
+
+  bool HasIteratorDeclareCode()    const { return event->has_iterator_declare(); }
+  bool HasIteratorInitializeCode() const { return event->has_iterator_initialize(); }
+  bool HasIteratorRemoveCode()     const { return event->has_iterator_remove(); }
+  bool HasIteratorDeleteCode()     const { return event->has_iterator_delete(); }
+
+  const std::string IteratorDeclareCode() const;
+  const std::string IteratorInitializeCode() const;
+  const std::string IteratorRemoveCode() const;
+  const std::string IteratorDeleteCode() const;
+
+  // Returns whether this event will be included in the main event loop.
+  // This will be true except for events marked as System events.
+  bool UsesEventLoop() const;
 };
 
-struct main_event_info
-{
-  string name; // The name of this event. Set by "Group:", defaults to first sub event name.
-  bool is_group; // Whether or not this event 
-  map<int,event_info*> specs;
-  typedef map<int,event_info*>::iterator iter;
-  main_event_info();
+class EventData {
+ public:
+  // Look up an event by its legacy ID pair.
+  const Event *get_event(int mid, int sid) const;
+
+  EventData(buffers::config::EventFile&&);
+
+ private:
+  // Raw data read from the event configuration.
+  buffers::config::EventFile event_file_;
+  // Index into the event file by Game Maker ID pair.
+  std::map<std::pair<int, int>, Event> compatability_mapping_;
+  // Map of type and constant name pair (eg, {"key", "enter"}) to alias info.
+  std::map<std::pair<std::string, std::string>,
+           const buffers::config::ParameterAlias*> parameter_values_;
 };
 
-int event_parse_resourcefile();
-void event_info_clear();
+// TODO: Delete all methods below this line.
+// Let an object own this state instead of relying on statics.
 
 extern string event_get_function_name(int mid, int id);
 extern string event_get_human_name(int mid, int id);
@@ -117,11 +144,6 @@ extern bool   event_execution_uses_default(int mid, int id);
 bool event_is_instance(int mid, int id);
 string event_stacked_get_root_name(int mid);
 
-string event_forge_sequence_code(int mid,int id, string preferred_name);
-
-typedef pair<int, int> evpair;
-extern  vector<evpair> event_sequence;
-
 bool event_has_iterator_declare_code(int mid, int id);
 bool event_has_iterator_initialize_code(int mid, int id);
 bool event_has_iterator_unlink_code(int mid, int id);
@@ -132,3 +154,13 @@ string event_get_iterator_unlink_code(int mid, int id);
 string event_get_iterator_delete_code(int mid, int id);
 
 string event_get_locals(int mid, int id);
+
+string event_forge_sequence_code(int mid,int id, string preferred_name);
+
+void event_parse_resourcefile();
+void event_info_clear();
+
+google::protobuf::RepeatedPtrField<Event> event_execution_order();
+const Event* translate_legacy_id_pair(int mid, int id);
+
+#endif // ENIGMA_EVENT_PARSER_H
