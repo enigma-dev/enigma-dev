@@ -38,11 +38,33 @@ using namespace std;
 #include "languages/lang_CPP.h"
 
 struct EventGroup {
-  std::vector<Event*> events;
+  const EventDescriptor *base_event = nullptr;
+  int count = 0;
   EventGroup &operator+=(const Event *ev) {
-    events.push_back(ev);
+    if (!base_event) {
+      base_event = ev;
+    } else if (base_event != ev) {
+      if (base_event->internal_id != ev->internal_id) {
+        std::cerr << "Two distinct events seem to have the same name ("
+                  << base_event->BaseFunctionName() << ")! Check IDs "
+                  << base_event->internal_id << " (" << base_event->HumanName()
+                  << ") and " << ev->internal_id << " (" << ev->HumanName()
+                  << ")" << std::endl;
+      } else {
+        std::cerr << "FYI: two distinct event pointers exist for event "
+                  << base_event->internal_id << " (" << base_event->HumanName()
+                  << ")..." << std::endl;
+      }
+    }
     return *this;
   }
+  EventGroup &operator=(const EventDescriptor *ev) {
+    base_event = ev;
+    return *this;
+  }
+  const EventDescriptor *operator->() const { return base_event; }
+  EventGroup(const Event *e): base_event(e) {}
+  EventGroup() = default;
 };
 
 static inline int event_get_number(const buffers::resources::Object::Event &event) {
@@ -88,20 +110,25 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   /* Some events are included in all objects, even if the user
   ** hasn't specified code for them. Account for those here.
   ***********************************************************/
-  for (size_t i=0; i<event_sequence.size(); i++)
-  {
-    const int mid = event_sequence[i].first, id = event_sequence[i].second;
+  for (const EventDescriptor &event : event_declarations()) {
     // We may not be using this event, but it may have default code.
-    if (event_has_default_code(mid,id)) {  // (defaulted includes "constant")
-      used_events[event_get_function_name(mid,id)].f2(mid,id); // ...Reserve it anyway.
+    if (event.HasDefaultCode()) {  // (defaulted includes "constant")
+      used_events[event.BaseFunctionName()] = &event;
 
       for (parsed_object *obj : parsed_objects) { // Then shell it out into the other objects.
         bool exists = false;
-        for (unsigned j = 0; j < obj->events.size; j++)
-          if (obj->events[j].mainId == mid and obj->events[j].id == id)
-            { exists = true; break; }
-        if (!exists)
-          obj->events[obj->events.size] = parsed_event(mid, id, obj);
+        for (unsigned j = 0; j < obj->events.size; j++) {
+          const auto *ev2 = translate_legacy_id_pair(obj->events[j].mainId,
+                                                     obj->events[j].id);
+          if (ev2 && ev2->internal_id == event.internal_id) {
+            exists = true;
+            break;
+          }
+        }
+        if (!exists) {
+          auto hack = reverse_lookup_legacy_event(event);
+          obj->events[obj->events.size] = parsed_event(hack.mid, hack.id, obj);
+        }
       }
     }
   }
@@ -113,16 +140,15 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
 
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;
   wto << "  {" << endl;
-            for (evfit it = used_events.begin(); it != used_events.end(); it++)
-            {
-              const bool e_is_inst = event_is_instance(it->second.mid, it->second.id);
-              if (event_has_sub_check(it->second.mid, it->second.id) && !e_is_inst) {
+            for (auto it = used_events.begin(); it != used_events.end(); it++) {
+              const bool e_is_inst = it->second->IsInstance();
+              if (it->second->HasSubCheck() && !e_is_inst) {
                 wto << "    inline virtual bool myevent_" << it->first << "_subcheck() { return false; }\n";
               }
               wto << (e_is_inst ? "    virtual void    myevent_" : "    virtual variant myevent_") << it->first << "()";
-              if (event_has_default_code(it->second.mid,it->second.id))
-                wto << endl << "    {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << (e_is_inst ? "    }" : "    return 0;\n    }") << endl;
-              else wto << (e_is_inst ? " { } // No default " : " { return 0; } // No default ") << event_get_human_name(it->second.mid,it->second.id) << " code." << endl;
+              if (it->second->HasDefaultCode())
+                wto << endl << "    {" << endl << "  " << it->second->DefaultCode() << endl << (e_is_inst ? "    }" : "    return 0;\n    }") << endl;
+              else wto << (e_is_inst ? " { } // No default " : " { return 0; } // No default ") << it->second->HumanName() << " code." << endl;
             }
 
   //The event_parent also contains the definitive lookup table for all timelines, as a fail-safe in case localized instances can't find their own timelines.
@@ -162,7 +188,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   wto << "namespace enigma" << endl << "{" << endl;
 
   // Start by defining storage locations for our event lists to iterate.
-  for (evfit it = used_events.begin(); it != used_events.end(); it++)
+  for (auto it = used_events.begin(); it != used_events.end(); it++)
     wto << "  event_iter *event_" << it->first << "; // Defined in " << it->second.count << " objects" << endl;
 
   // Here's the initializer
@@ -176,8 +202,9 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   wto << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
 
   int ind = 0;
-  for (evfit it = used_events.begin(); it != used_events.end(); it++)
-    wto << "    event_" << it->first << " = events + " << ind++ << ";  event_" << it->first << "->name = \"" << event_get_human_name(it->second.mid,it->second.id) << "\";" << endl;
+  for (auto it = used_events.begin(); it != used_events.end(); it++)
+    wto << "    event_" << it->first << " = events + " << ind++ << ";  event_"
+        << it->first << "->name = \"" << it->second->HumanName() << "\";" << endl;
   wto << "    return 0;" << endl;
   wto << "  }" << endl;
 
@@ -196,28 +223,20 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   wto << "  variant ev_perf(int type, int numb)\n  {\n    return ((enigma::event_parent*)(instance_event_iterator->inst))->myevents_perf(type, numb);\n  }\n";
 
   /* Some Super Checks are more complicated than others, requiring a function. Export those functions here. */
-  for (evfit it = used_events.begin(); it != used_events.end(); it++)
-    wto << event_get_super_check_function(it->second.mid, it->second.id);
+  for (auto it = used_events.begin(); it != used_events.end(); it++) {
+    if (it->second->HasSuperCheckFunction()) {
+      wto << "  static inline bool supercheck_" << it->second->BaseFunctionName()
+          << "() " << it->second->SuperCheckFunction() << "\n\n";
+    }
+  }
 
   /* Now the event sequence */
-  bool using_gui = false;
   wto << "  int ENIGMA_events()" << endl << "  {" << endl;
-  for (size_t i=0; i<event_sequence.size(); i++)
-  {
-    // First, make sure we're actually using this event in some object
-    const int mid = event_sequence[i].first, id = event_sequence[i].second;
-    evfit it = used_events.find(event_is_instance(mid,id) ? event_stacked_get_root_name(mid) : event_get_function_name(mid,id));
+  for (const EventDescriptor &event : event_declarations()) {
+    auto it = used_events.find(event.BaseFunctionName());
     if (it == used_events.end()) continue;
-    if (mid == 7 && (id >= 10 && id <= 25)) continue;   //User events, don't want to be run in the event sequence. TODO: Remove hard-coded values.
-    string seqcode = event_forge_sequence_code(mid,id,it->first);
-    if (mid == 8 && id == 64)
-    {
-      if (seqcode != "")
-        using_gui = true;
-
-      continue;       // Don't want gui loop to be added
-    }
-
+    if (!event.UsesEventLoop()) continue;
+    string seqcode = event_forge_sequence_code(&event, it->first);
     if (seqcode != "")
       wto << seqcode,
       wto << "    " << endl,
@@ -246,7 +265,6 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   wto << "    return 0;" << endl;
   wto << "  } // event function" << endl;
 
-  wto << "  bool gui_used = " << using_gui << ";" << endl;
   // Done, end the namespace
   wto << "} // namespace enigma" << endl;
   wto.close();

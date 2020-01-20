@@ -555,6 +555,7 @@ namespace syncheck
               while (++pos < code.length() and (code[pos] != '/' or code[pos-1] != '*'));
               pos++; continue;
             }
+          break;
         case '%':
             if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike) {
               syerr = "Primary expression expected before operator";
@@ -571,6 +572,7 @@ namespace syncheck
               lex.push_back(token(TT_OPERATOR, "!=", superPos, 2, false, false, true, mymacroind)), pos += 2;
               continue;
             }
+          break;
         case '~':
             if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike)
               lex.push_back(token(TT_UNARYPRE, code.substr(pos,1), superPos, 1, false, false, true, mymacroind)), ++pos; // ~ !

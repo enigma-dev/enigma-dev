@@ -31,6 +31,14 @@ bool DecodeYaml(const YAML::Node &yaml, google::protobuf::Message *out);
 
 template<typename Proto, typename std::enable_if<
     std::is_base_of<google::protobuf::Message, Proto>::value, int>::type = 0>
+Proto ReadYamlAs(std::istream &file) {
+  Proto result;
+  DecodeYaml(YAML::Load(file), &result);
+  return result;
+}
+
+template<typename Proto, typename std::enable_if<
+    std::is_base_of<google::protobuf::Message, Proto>::value, int>::type = 0>
 Proto ReadYamlFileAs(const std::string &file) {
   Proto result;
   DecodeYaml(YAML::LoadFile(file), &result);

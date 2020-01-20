@@ -94,12 +94,14 @@ Events:
       {
         xprevious = x;
         yprevious = y;
-        image_number = sprite_get_number(sprite_index);
-        image_index = fmod(image_index + image_speed + image_number, image_number);
+        if (sprite_index != -1) {
+          int imgnum = image_number;  // Special sauce happens here
+          image_index = fmod(image_index + image_speed + imgnum, imgnum);
+        }
       }
 
   Alarm:
-    Name: Alarm %1
+    Name: "Alarm %1"
     Type: Parameterized
     Parameters:
       - integer
@@ -418,6 +420,10 @@ Events:
     Description: "Draw directly on top the window, ignoring any viewports."
     Group: "Draw"
     Type: Special
+    IteratorDeclare: "/* DrawGUI is handled by depth */"
+    IteratorInitialize: "++enigma::gui_used;"
+    IteratorRemove: "--enigma::gui_used;"
+    IteratorDelete: "/* Nothing to do for DrawGUI */"
     SubCheck: "visible"
 
   WindowResize:

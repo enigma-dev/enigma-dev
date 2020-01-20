@@ -682,7 +682,7 @@ void BuildLayers(const RepeatedPtrField<Entity> &entities, Layers *out) {
 
   // Sort out snowflakes (Instances which cannot be lumped).
   for (const Entity &entity : entities) {
-    if (!StripForLump(entity).ByteSize()) {
+    if (!StripForLump(entity).ByteSizeLong()) {
       lumpable[entity].insert(Coords{entity});
     } else {
       std::cout << "INFO: Cannot lump instance because it has special fields.\n"

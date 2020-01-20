@@ -4,6 +4,7 @@ include $(SHARED_SRC_DIR)/Makefile
 include $(SHARED_SRC_DIR)/eyaml/Makefile
 include $(SHARED_SRC_DIR)/event_reader/Makefile
 include $(SHARED_SRC_DIR)/rectpacker/Makefile
+include $(SHARED_SRC_DIR)/ProtoYaml/Makefile
 
 #################
 # configuration #
@@ -33,7 +34,7 @@ endif
 CXX := g++
 CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src
 LDFLAGS += -shared -O3 -g -L../ -Wl,-rpath,./
-LDLIBS += -lProtocols -lprotobuf -lz -L$(SHARED_SRC_DIR)/libpng-util -lpng-util -lpng
+LDLIBS += -lProtocols -lprotobuf -lz -L$(SHARED_SRC_DIR)/libpng-util -lpng-util -lpng -lyaml-cpp
 
 # This implements a recursive wildcard allowing us to iterate in subdirs
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
@@ -65,6 +66,9 @@ clean:
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS)
+
+emake:
+	$(MAKE) -C .. emake
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
