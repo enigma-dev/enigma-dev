@@ -46,7 +46,7 @@ TEST(ConnectedComponentsTest, BridgingComponentConnections) {
   for (const auto &s : comp.components) {
     cout << " - Component " << s.first << " (" << s.second.size() << " items)\n";
     for (const Coords &c : s.second) {
-      cout << "    • (" << c.x << ", " << c.y << ", " << c.z << ")" << endl;
+      cout << "    * (" << c.x << ", " << c.y << ", " << c.z << ")" << endl;
     }
   }
   
