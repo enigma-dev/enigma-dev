@@ -258,7 +258,7 @@ Events:
         }
       }
 
-  localsweep:
+  LocalSweep:
     Name: "Locals sweep"
     Description: "Internal event to update local variables."
     Type: Inline
@@ -291,6 +291,8 @@ Events:
     Name: "Outside View %1"
     Description: "Instance has moved outside of the view's bounds."
     Type: Parameterized
+    Parameters:
+      - integer
     SubCheck: |
       view_enabled && !view_visible[%1] && (
         (bbox_right  < view_xview[%1])                  ||
@@ -303,6 +305,8 @@ Events:
     Name: "Inside View %1"
     Description: "Instance has moved inside of the view's bounds."
     Type: Parameterized
+    Parameters:
+      - integer
     SubCheck: |
       view_enabled && view_visible[%1] && (
         (bbox_right  < view_xview[%1])                  ||
@@ -332,7 +336,7 @@ Events:
     Suffix: |
       if (health > 0) $out_of_health = 0;
 
-  beforecollisionautomaticcollisionhandling:
+  BeforeCollisionAutomaticCollisionHandling:
     Name: "Pre-collision automatic collision handling."
     Description: "Internal event to update collision stuff"
     Type: Inline
@@ -341,7 +345,7 @@ Events:
       enigma::perform_callbacks_before_collision_event();
 
   Collision:
-    Name: "Colision %1"
+    Name: "Collision %1"
     Description: "Instance is colliding (overlapping) with another object."
     Group: "Collisions"
     Type: Parameterized
@@ -387,7 +391,7 @@ Events:
           loop_curr_timeline();
       }
 
-  particlesystemsupdate:
+  ParticleSystemsUpdate:
     Name: "Particle systems update."
     Description: "Internal event to update particles"
     Type: Inline
@@ -712,14 +716,14 @@ GameMakerEventMappings:
         56: InsideView[6]
         57: InsideView[7]
 
-        60: ImageLoad
+        60: ImageLoaded
         61: SoundLoaded
         62: HTTP
         63: Dialog
 
         66: IAP
         67: Cloud
-        68: NetWorking
+        68: Networking
         69: Steam
         70: Social
 

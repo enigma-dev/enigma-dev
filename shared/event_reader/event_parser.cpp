@@ -16,16 +16,18 @@
 **/
 
 
+#include "event_parser.h"
+
+#include <strings_util.h>
+
+#include <ProtoYaml/proto-yaml.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
 #include <map>
-using namespace std;
-#define tostring to_string
 
-#include "event_parser.h"
-#include "ProtoYaml/proto-yaml.h"
 
 // Note: there are two kinds of legacy in this file.
 //
@@ -38,44 +40,18 @@ using namespace std;
 
 // Good luck.
 
-namespace {
-
-// TODO: move to library, replace result type with optional<int>
-std::pair<bool, int> safeatol(const std::string &str) {
-  int res = 0;
-  for (char c : str) {
-    if (c < '0' || c > '9') return { false, 0 };
-    res = 10 * res + c - '0';
-  }
-  return {true, res};
-}
-
-// TODO: move to library.
-const std::string &FirstNotEmpty(const std::string &a, const std::string &b) {
-  return a.empty() ? b : a;
-}
-
-// Removes all dots from the given string.
-std::string StripDots(std::string str) {
-  size_t i = 0;
-  for (size_t j = 0; j < str.length(); ++j) {
-    if (str[j] != '.') str[i++] = str[j];
-  }
-  str.resize(i);
-  return str;
-}
+constexpr int kMinInternalID = 1000;
+constexpr int kParameterizedSubId = -1;
 
 // Checks if the given string is an "Expression," which is defined, for the
 // purpose of the events file, as anything not starting with a brace.
-bool IsExpression(const std::string &str) {
+static bool IsExpression(const std::string &str) {
   return !str.empty() && str[0] != '{';
 }
 
-}
-
-// End library calls -----------------------------------------------------------
 // -----------------------------------------------------------------------------
-// Begin safety mechanisms -----------------------------------------------------
+// Safety mechanisms -----------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 namespace cb = buffers::config;
 using cb::EventFile;
@@ -87,7 +63,10 @@ static cb::EventDescriptor MakeSentinelDescriptor() {
   return res;
 }
 static cb::EventDescriptor kSentinelDescriptor = MakeSentinelDescriptor();
-static EventDescriptor kSentinelEvent(&kSentinelDescriptor, -1);
+static EventDescriptor kSentinelEventDesc(&kSentinelDescriptor, -1);
+static Event kSentinelEvent(kSentinelEventDesc);
+
+bool EventDescriptor::IsValid() const { return event != &kSentinelDescriptor; }
 
 
 // End safety mechanisms -------------------------------------------------------
@@ -140,14 +119,18 @@ Event EventData::DecodeEventString(const std::string &evstring) {
   }
   id += evstring.substr(at);
   auto evi = event_index_.find(id);
-  if (evi == event_index_.end() || !evi->second) return Event(kSentinelEvent);
+  if (evi == event_index_.end() || !evi->second) {
+    std::cerr << "EVENT ERROR: Event `" << id << "` is not known to the system\n";
+    return Event(kSentinelEvent);
+  }
 
   const EventDescriptor &base_event = *evi->second;
   Event res(base_event);
   size_t correct_arg_count = base_event.event->parameters_size();
   if (args.size() != correct_arg_count) {
-    std::cerr << "Wrong number of arguments given for event " << id
-              << ": wanted " << correct_arg_count << ", got " << args.size();
+    std::cerr << "EVENT ERROR: Wrong number of arguments given for event " << id
+              << ": wanted " << correct_arg_count << ", got " << args.size()
+              << std::endl;
     args.resize(correct_arg_count, "0");
   }
   for (size_t argn = 0; argn < correct_arg_count; ++argn) {
@@ -177,19 +160,12 @@ std::string Event::ParamSubst(const std::string &str) const {
       res += arguments[pnum].spelling;
       start = ++pc;
     } else {
-      std::cerr << "Ignoring junk parameter " << str[pc] << std::endl;
+      std::cerr << "EVENT ERROR: Ignoring junk parameter " << str[pc] << std::endl;
     }
     pc = str.find_first_of('%', pc);
   }
   res += str.substr(start);
   return res;
-}
-
-
-const Event *EventData::get_event(int mid, int sid) const {
-  auto it = compatability_mapping_.find({mid, sid});
-  if (it == compatability_mapping_.end()) return nullptr;
-  return &it->second;
 }
 
 EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
@@ -198,26 +174,43 @@ EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
       parameter_values_.insert({{aliases.id(), alias.id()}, &alias});
     }
   }
+  // Start numbering internal IDs in the new system from 1000, for good measure.
   for (long i = 0; i < event_file_.events_size(); ++i) {
-    event_wrappers_.emplace_back(&event_file_.events(i), i);
+    event_wrappers_.emplace_back(&event_file_.events(i), kMinInternalID + i);
   }
   for (const EventDescriptor &event_wrapper : event_wrappers_) {
-    std::string evid = StripDots(event_wrapper.event->id());
+    const int iid = event_wrapper.internal_id;
+    const string evid = StripChar(event_wrapper.event->id(), '.');
     if (!event_index_.insert({evid, &event_wrapper}).second) {
-      std::cerr << "Duplicate event ID " << evid << std::endl;
+      std::cerr << "EVENT ERROR: Duplicate event ID " << evid << std::endl;
+    }
+    if (!event_wrapper.IsInstance() &&  // Only insert non-parameterized events.
+        !event_iid_index_.insert({iid, &event_wrapper}).second) {
+      std::cerr << "EVENT ERROR: Duplicate event IID " << iid
+                << "; how did this even happen!?";
     }
   }
 
   // Now that our index is built, we can populate the legacy maps.
   for (const auto &mapping : event_file_.game_maker_event_mappings()) {
     int main_id = mapping.id();
-    if (mapping.has_single() || mapping.has_parameterized()) {
-      const std::string &id =
-          mapping.has_single() ? mapping.single() : mapping.parameterized();
-      Event cev = DecodeEventString(id);
+    if (mapping.has_single()) {
+      Event cev = DecodeEventString(mapping.single());
+      cev.arguments.clear();
       auto insert = compatability_mapping_.insert({{main_id, 0}, cev});
       if (!insert.second) {
-        std::cerr << "Duplicate event compatability id (" << main_id << ")\n";
+        std::cerr << "EVENT ERROR: Duplicate event compatability id ("
+                  << main_id << ")\n";
+      }
+      hacky_reverse_mapping_[cev.internal_id].main_id = main_id;
+    } else if (mapping.has_parameterized()) {
+      Event cev = DecodeEventString(mapping.parameterized());
+      cev.arguments.clear();
+      auto insert =
+          compatability_mapping_.insert({{main_id, kParameterizedSubId}, cev});
+      if (!insert.second) {
+        std::cerr << "EVENT ERROR: Duplicate event compatability id ("
+                  << main_id << ")\n";
       }
       hacky_reverse_mapping_[cev.internal_id].main_id = main_id;
     } else if (mapping.has_specialized()) {
@@ -227,7 +220,7 @@ EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
         auto insert =
             compatability_mapping_.insert({{main_id, ev_case.first}, cev});
         if (!insert.second) {
-          std::cerr << "Duplicate event compatability case ("
+          std::cerr << "EVENT ERROR: Duplicate event compatability case ("
                     << main_id << ", " << sub_id << ")\n";
         }
         SubEventCollection &sec = hacky_reverse_mapping_[cev.internal_id];
@@ -236,9 +229,27 @@ EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
       }
     }
   }
-
-  std::map<int, SubEventCollection> hacky_reverse_mapping_;
 }
+
+const Event EventData::get_event(int mid, int sid) const {
+  auto it = compatability_mapping_.find({mid, sid});
+  if (it == compatability_mapping_.end()) {
+    it = compatability_mapping_.find({mid, kParameterizedSubId});
+    if (it == compatability_mapping_.end()) {
+      auto res = event_iid_index_.find(mid);
+      if (res != event_iid_index_.end()) return Event(*res->second);
+      std::cerr << "EVENT ERROR: Event (" << mid << ", " << sid
+                << ") is not known to the system." << std::endl;
+      return kSentinelEvent;
+    }
+    Event res = it->second;
+    string integer = std::to_string(sid);
+    res.arguments.emplace_back(integer, integer);
+    return res;
+  }
+  return it->second;
+}
+
 
 bool Event::IsComplete() const {
   return arguments.size() == (unsigned) event->parameters_size();
@@ -262,7 +273,7 @@ std::string Event::HumanName() const {
   return ParamSubst(event->name());
 }
 std::string EventDescriptor::BaseFunctionName() const {
-  return StripDots(event->id());
+  return ToLower(StripChar(event->id(), '.'));
 }
 std::string EventDescriptor::LocalDeclarations() const {
   return event->locals();
@@ -289,22 +300,12 @@ bool EventDescriptor::HasSubCheckExpression() const {
   return HasSubCheck() && IsExpression(event->sub_check());
 }
 bool EventDescriptor::HasSuperCheckFunction() const {
-  if (HasSuperCheck() && event->super_check().empty()) {
-    std::cerr << "This shit is retarded." << std::endl;
-  }
   return HasSuperCheck() && !IsExpression(event->super_check());
 }
 bool EventDescriptor::HasSuperCheckExpression() const {
   return HasSuperCheck() && IsExpression(event->super_check());
 }
 
-std::string EventDescriptor::SuperCheckFunction() const {
-  if (HasSuperCheckFunction()) return event->super_check();
-  return "{ return " + FirstNotEmpty(event->super_check(), "true") + "; }";
-}
-std::string EventDescriptor::SuperCheckExpression() const {
-  return event->super_check();
-}
 std::string EventDescriptor::InsteadCode() const {
   return event->instead();
 }
@@ -332,8 +333,16 @@ std::string Event::SubCheckExpression() const {
 }
 std::string Event::SubCheckFunction() const {
   if (HasSubCheckFunction()) return ParamSubst(event->sub_check());
+  return "{ return " + ParamSubst(FirstNotEmpty(event->sub_check(), "true"))
+                     + "; }";
+}
+std::string Event::SuperCheckFunction() const {
+  if (HasSuperCheckFunction()) return ParamSubst(event->super_check());
   return "{ return " + ParamSubst(FirstNotEmpty(event->super_check(), "true"))
-                     + ": }";
+                     + "; }";
+}
+std::string Event::SuperCheckExpression() const {
+  return ParamSubst(event->super_check());
 }
 
 std::string Event::FunctionName() const {
@@ -342,11 +351,11 @@ std::string Event::FunctionName() const {
   size_t arg = 0, at = 0, dot;
   while (arg < arguments.size() &&
          (dot = ntempl.find_first_of('.', at)) != std::string::npos) {
-    res += ntempl.substr(at, dot - at);
+    res += ToLower(ntempl.substr(at, dot - at));
     res += "_" + arguments[arg++].name + "_";
     at = dot + 1;
   }
-  res += ntempl.substr(at);
+  res += ToLower(ntempl.substr(at));
   while (arg < arguments.size()) {
     res += "_" + arguments[arg++].name;
   }
@@ -397,11 +406,20 @@ bool Event::operator<(const Event &other) const {
 LegacyEventPair EventData::reverse_get_event(const EventDescriptor &ev) const {
   auto it = hacky_reverse_mapping_.find(ev.internal_id);
   if (it == hacky_reverse_mapping_.end()) {
-    std::cerr << "Event " << ev.internal_id << " (" << ev.HumanName()
-              << ") not found\n";
-    return {-1, 0};
+    std::cerr << "EVENT WARNING: Event " << ev.internal_id
+              << " (" << ev.HumanName() << ") not found; using own ID\n";
+    return {ev.internal_id, 0};
   }
   const SubEventCollection &amap = it->second;
+  auto sit = amap.subevents.find(Event(ev));
+  if (sit != amap.subevents.end()) {
+    return {amap.main_id, sit->second};
+  }
+  if (!amap.subevents.empty() || !ev.event->parameters().empty()) {
+    std::cerr <<  "EVENT ERROR: Event " << ev.internal_id
+              << " (" << ev.HumanName()
+              << ") cannot be looked up in the compatibility map\n";
+  }
   return {amap.main_id, 0};
 }
 
@@ -409,9 +427,9 @@ LegacyEventPair EventData::reverse_get_event(const EventDescriptor &ev) const {
 LegacyEventPair EventData::reverse_get_event(const Event &ev) const {
   auto it = hacky_reverse_mapping_.find(ev.internal_id);
   if (it == hacky_reverse_mapping_.end()) {
-    std::cerr << "Event " << ev.internal_id << " (" << ev.HumanName()
-              << ") not found\n";
-    return {-1, 0};
+    std::cerr << "EVENT ERROR: Event " << ev.internal_id
+              << " (" << ev.HumanName() << ") not found; using own ID\n";
+    return {ev.internal_id, 0};
   }
   const SubEventCollection &amap = it->second;
   auto sit = amap.subevents.find(ev);
@@ -422,8 +440,8 @@ LegacyEventPair EventData::reverse_get_event(const Event &ev) const {
     return {amap.main_id, 0};
   }
   if (!amap.subevents.empty() || ev.arguments.size() != 1) {
-    std::cerr <<  "Event " << ev.internal_id << " (" << ev.HumanName()
-              << ") missing from subevent map\n";
+    std::cerr <<  "EVENT ERROR: Event " << ev.internal_id
+              << " (" << ev.HumanName() << ") missing from subevent map\n";
   }
   const std::string &arg = ev.arguments[0].name;
   const std::string &arg_kind = ev.event->parameters(0);
@@ -431,9 +449,9 @@ LegacyEventPair EventData::reverse_get_event(const Event &ev) const {
   if (pv != parameter_values_.end()) {
     return LegacyEventPair{amap.main_id, pv->second->value()};
   }
-  auto iv = safeatol(arg);
+  auto iv = SafeAtoL(arg);
   if (iv.first) return LegacyEventPair{amap.main_id, iv.second};
-  std::cerr << "Unknown " << arg_kind << " parameter value " << arg
+  std::cerr << "EVENT ERROR: Unknown " << arg_kind << " parameter value " << arg
             << ": cannot map argument to event sub-ID\n";
   return LegacyEventPair{amap.main_id, 0};
 }
@@ -444,8 +462,11 @@ LegacyEventPair EventData::reverse_get_event(const Event &ev) const {
 // Legacy shit continnues below ------------------------------------------------
 
 // Used by the rest of these functions
-static inline const Event *event_access(int mid, int id) {
-  if (!legacy_events) return nullptr;
+static inline const Event event_access(int mid, int id) {
+  if (!legacy_events) {
+    std::cerr << "EVENT ERROR: Someone is querying event data without parsing events.\n";
+    return kSentinelEvent;
+  }
   return legacy_events->get_event(mid, id);
 }
 
@@ -459,24 +480,24 @@ const std::vector<EventDescriptor> &event_declarations() {
 
 // Query for a name suitable for use as an identifier. No spaces or specials.
 string event_get_function_name(int mid, int id) {
-  if (const auto *ev = event_access(mid, id))
-    return ev->FunctionName();
+  Event ev = event_access(mid, id);
+  if (ev.IsValid()) return ev.FunctionName();
   return "undefinedEvent" + std::to_string(mid)
                     + "_" + std::to_string(id) + "ERROR";
 }
 
 // Query for a root (stacked event) name suitable for use as an identifier.
 string event_stacked_get_root_name(int mid) {
-  if (const auto *ev = event_access(mid, 0))
-    return ev->BaseFunctionName();
+  Event ev = event_access(mid, 0);
+  if (ev.IsValid()) return ev.BaseFunctionName();
   return "undefinedMainEvent" + std::to_string(mid) + "ERROR";
 }
 
 // Fetch a user-friendly name for the event
 // with the given credentials.
 string event_get_human_name(int mid, int id) {
-  if (const auto *ev = event_access(mid, 0))
-    return ev->HumanName();
+  Event ev = event_access(mid, 0);
+  if (ev.IsValid()) return ev.HumanName();
   return "undefined or unsupported event (" + std::to_string(mid) + ", "
                                             + std::to_string(id) + ")";
 }
@@ -484,124 +505,90 @@ string event_get_human_name(int mid, int id) {
 // Test whether there is code that will remain
 // active if a user has not declared this event.
 bool event_has_default_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id))
-    return ev->HasDefaultCode();
-  return false;
+  return event_access(mid, id).HasDefaultCode();
 }
 
 string event_get_default_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id))
-    return ev->DefaultCode();
-  return "";
+  return event_access(mid, id).DefaultCode();
 }
 
 
 // Test whether this event has code that will remain active regardless of
 // whether a user has declared this event.
 bool event_has_const_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id))
-    return ev->HasConstantCode();
-  return false;
+  return event_access(mid, id).HasConstantCode();
 }
 
 string event_get_const_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id))
-    return ev->ConstantCode();
-  return "";
+  return event_access(mid, id).ConstantCode();
 }
 
 // Some events have special behavior as placeholders, instead of simple iteration.
 // These two functions will test for and return such.
 
 bool event_has_instead(int mid, int id) {
-  if (const auto *ev = event_access(mid, id))
-    return ((EventDescriptor*) ev)->HasInsteadCode();
-  return false;
+  return event_access(mid, id).EventDescriptor::HasInsteadCode();
 }
 
 string event_get_instead(int mid, int id) {
-  if (const auto *ev = event_access(mid, id))
-    return ev->InsteadCode();
-  return "";
+  return event_access(mid, id).InsteadCode();
 }
 
 bool event_has_prefix_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id))
-    return ev->HasPrefixCode();
-  return false;
+  return event_access(mid, id).HasPrefixCode();
 }
 
 string event_get_prefix_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id))
-    return ev->PrefixCode();
-  return "";
+  return event_access(mid, id).PrefixCode();
 }
 
 bool event_has_suffix_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id))
-    return ev->HasSuffixCode();
-  return false;
+  return event_access(mid, id).HasSuffixCode();
 }
 
 string event_get_suffix_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id))
-    return ev->SuffixCode();
-  return "";
+  return event_access(mid, id).SuffixCode();
 }
 
 // Many events check things before executing, some before starting the loop. Deal with them.
 
 bool event_has_sub_check(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->HasSubCheck();
-  return false;
+  return event_access(mid, id).HasSubCheck();
 }
-
 bool event_has_super_check(int mid, int id) {
-  if (const EventDescriptor *ev = event_access(mid, id)) return ev->HasSuperCheck();
-  return false;
+  return event_access(mid, id).HasSuperCheck();
 }
-
 bool event_has_super_check_condition(int mid, int id) {
-  if (const EventDescriptor *ev = event_access(mid, id)) return ev->HasSuperCheckExpression();
-  return false;
+  return event_access(mid, id).HasSuperCheckExpression();
 }
 
 bool event_has_iterator_declare_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->HasIteratorDeclareCode();
-  return false;
+  return event_access(mid, id).HasIteratorDeclareCode();
 }
 bool event_has_iterator_initialize_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->HasIteratorInitializeCode();
-  return false;
+  return event_access(mid, id).HasIteratorInitializeCode();
 }
 bool event_has_iterator_unlink_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->HasIteratorRemoveCode();
-  return false;
+  return event_access(mid, id).HasIteratorRemoveCode();
 }
 bool event_has_iterator_delete_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->HasIteratorDeleteCode();
-  return false;
+  return event_access(mid, id).HasIteratorDeleteCode();
 }
 string event_get_iterator_declare_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->IteratorDeclareCode();
-  return "";
+  return event_access(mid, id).IteratorDeclareCode();
 }
 string event_get_iterator_initialize_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->IteratorInitializeCode();
-  return "";
+  return event_access(mid, id).IteratorInitializeCode();
 }
 string event_get_iterator_unlink_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->IteratorRemoveCode();
-  return "";
+  return event_access(mid, id).IteratorRemoveCode();
 }
 string event_get_iterator_delete_code(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->IteratorDeleteCode();
-  return "";
+  return event_access(mid, id).IteratorDeleteCode();
 }
 
 string event_get_locals(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->LocalDeclarations();
-  return "";
+  return event_access(mid, id).LocalDeclarations();
 }
 
 // This is the fucking compiler oversharing. I don't know how this happened,
@@ -611,14 +598,16 @@ string event_get_locals(int mid, int id) {
 // *conditionally* emit a subcheck function, and otherwise embed the
 // conditional.
 string event_get_sub_check_condition(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->SubCheckFunction();
-  return "";
+  return event_access(mid, id).SubCheckFunction();
+}
+
+string event_get_super_check_condition(int mid, int id) {
+  return event_access(mid, id).SuperCheckExpression();
 }
 
 // Does this event belong on the list of events to execute?
 bool event_execution_uses_default(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->UsesEventLoop();
-  return false;
+  return event_access(mid, id).UsesEventLoop();
 }
 
 // Clear all data from previous parses, save
@@ -630,46 +619,14 @@ void event_info_clear() {
 
 // Returns if the event with the given ID pair is an instance of a stacked event
 bool event_is_instance(int mid, int id) {
-  if (const auto *ev = event_access(mid, id)) return ev->IsInstance();
-  return false;
-}
-
-// Look, the events.ey file should contain snippets of EDL, not C++.
-// It should be up to the language adapter to generate C++ for the event loop.
-string event_forge_sequence_code(const EventDescriptor *ev, string preferred_name) {
-  string base_indent = string(4, ' ');
-  if (ev->HasInsteadCode())
-    return base_indent + ev->InsteadCode() + "\n\n";
-
-  if (ev->UsesEventLoop()) {
-    string ret = "";
-    bool perfsubcheck = ev->HasSubCheck() && !ev->IsInstance();
-    if (ev->HasSuperCheck() and !ev->IsInstance()) {
-      ret =        base_indent + "if (" + ev->SuperCheckExpression() + ")\n" +
-                   base_indent + "  for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
-      if (perfsubcheck) { ret += "    if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "_subcheck()) {\n"; }
-      ret +=       base_indent + "      ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
-      if (perfsubcheck) { ret += "    }\n"; }
-      ret +=       base_indent + "    if (enigma::room_switching_id != -1) goto after_events;\n" +
-                   base_indent + "  }\n";
-    } else {
-       ret =  base_indent + "for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
-       if (perfsubcheck) { ret += "    if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "_subcheck()) {\n"; }
-       ret += base_indent + "  ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
-       if (perfsubcheck) { ret += "    }\n"; }
-       ret += base_indent + "  if (enigma::room_switching_id != -1) goto after_events;\n" +
-              base_indent + "}\n";
-    }
-    return ret;
-  }
-  return "";
+  return event_access(mid, id).IsInstance();
 }
 
 const std::vector<EventDescriptor> &event_execution_order() {
   return legacy_events->events();
 }
 
-const Event* translate_legacy_id_pair(int mid, int id) {
+const Event translate_legacy_id_pair(int mid, int id) {
   return event_access(mid, id);
 }
 
@@ -678,4 +635,7 @@ const Event* translate_legacy_id_pair(int mid, int id) {
 // replacing its keys/values with the new Event ids.
 LegacyEventPair reverse_lookup_legacy_event(const Event &ev) {
   return legacy_events->reverse_get_event(ev);
+}
+LegacyEventPair reverse_lookup_legacy_event(const EventDescriptor &evd) {
+  return legacy_events->reverse_get_event(evd);
 }

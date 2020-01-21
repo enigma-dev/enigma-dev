@@ -16,7 +16,9 @@
 **/
 
 #include "proto-yaml.h"
-#include "../proto_util.h"
+
+#include <proto_util.h>
+#include <strings_util.h>
 
 #include <yaml-cpp/yaml.h>
 
@@ -34,26 +36,6 @@ namespace proto = google::protobuf;
 using CppType = proto::FieldDescriptor::CppType;
 using std::map;
 using std::string;
-
-std::string ToLower(string str) {
-  for (char &c : str) if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
-  return str;
-}
-
-std::string Hyphenate(string snake) {
-  for (char &c : snake) if (c == '_') c = '-';
-  return snake;
-}
-
-std::string Spaceify(string snake) {
-  for (char &c : snake) if (c == '_') c = ' ';
-  return snake;
-}
-
-std::string Capitalize(string str) {
-  if (char &c = str[0]; c >= 'a' && c <= 'z') c -= 'a' - 'A';
-  return str;
-}
 
 struct FieldCache {
   string message_name;

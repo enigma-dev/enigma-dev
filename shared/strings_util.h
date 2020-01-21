@@ -6,16 +6,58 @@
 #include <sstream>
 #include <fstream>
 
-inline std::string strtolower(std::string r) {
-  for (size_t i = 0; i < r.length(); ++i)
-    if (r[i] >= 'A' && r[i] <= 'Z') r[i] += 'a' - 'A';
-  return r;
+inline std::string ToLower(std::string str) {
+  for (char &c : str) if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
+  return str;
+}
+
+inline std::string Hyphenate(std::string snake) {
+  for (char &c : snake) if (c == '_') c = '-';
+  return snake;
+}
+
+inline std::string Spaceify(std::string snake) {
+  for (char &c : snake) if (c == '_') c = ' ';
+  return snake;
+}
+
+inline std::string Capitalize(std::string str) {
+  if (char &c = str[0]; c >= 'a' && c <= 'z') c -= 'a' - 'A';
+  return str;
 }
 
 inline bool ParseBool(const std::string &b) {
-  const std::string bl = strtolower(b);
+  const std::string bl = ToLower(b);
   if (bl == "yes" || bl == "true" || bl == "y") return true;
   return std::stod(bl);
+}
+
+// Parses the given string as an integer, returning nullopt if any character in
+// the given string is not a digit (Does not support negatives).
+// TODO: Replace result type with optional<int>.
+inline std::pair<bool, int> SafeAtoL(const std::string &str) {
+  int res = 0;
+  for (char c : str) {
+    if (c < '0' || c > '9' || res > 429496729) return {false, 0};
+    res = 10 * res + c - '0';
+  }
+  return {true, res};
+}
+
+// Returns the first argument that isn't empty, or empty if all are empty.
+inline const std::string &FirstNotEmpty(const std::string &a,
+                                        const std::string &b) {
+  return a.empty() ? b : a;
+}
+
+// Removes all occurrences of the given character from the given string.
+inline std::string StripChar(std::string str, char c) {
+  size_t i = 0;
+  for (size_t j = 0; j < str.length(); ++j) {
+    if (str[j] != c) str[i++] = str[j];
+  }
+  str.resize(i);
+  return str;
 }
 
 inline std::string string_replace_all(std::string str, std::string substr, std::string nstr) {

@@ -77,8 +77,6 @@ struct EventDescriptor {
   bool HasSuperCheckExpression() const;
   bool HasInsteadCode() const { return event->has_instead(); }
 
-  std::string SuperCheckFunction() const;
-  std::string SuperCheckExpression() const;
   std::string InsteadCode() const;
 
   bool HasIteratorDeclareCode()    const { return event->has_iterator_declare(); }
@@ -95,10 +93,8 @@ struct EventDescriptor {
   // This will be true except for events marked as System events.
   bool UsesEventLoop() const;
 
-  // Implicitly checks this event for validity.
-  explicit operator bool() const { return IsValid(); }
   // Explicitly checks this event for validity.
-  bool IsValid() const { return event; }
+  bool IsValid() const;
 };
 
 struct Event : EventDescriptor {
@@ -115,7 +111,7 @@ struct Event : EventDescriptor {
   boost::container::small_vector<Argument, 4> arguments;
 
   // Construct with a base EventDescriptor.
-  Event(const EventDescriptor &edesc): EventDescriptor(edesc) {}
+  explicit Event(const EventDescriptor &edesc): EventDescriptor(edesc) {}
 
   // Represents this Event as a unique string, including any parameters.
   std::string IdString() const;
@@ -132,16 +128,14 @@ struct Event : EventDescriptor {
 
   // Returns whether all parameters of this event are set.
   bool IsComplete() const;
-
-  bool HasSuperCheck() const = delete;
-  bool HasSuperCheckFunction() const = delete;
-  bool HasSuperCheckExpression() const = delete;
+  // This should have been obtained from the EventDescriptor.
+  // It's not applicable to a user event.
   bool HasInsteadCode() const = delete;
 
   std::string SubCheckFunction() const;
   std::string SubCheckExpression() const;
-
-  using EventDescriptor::operator bool;
+  std::string SuperCheckFunction() const;
+  std::string SuperCheckExpression() const;
 
   bool operator==(const Event &other) const;
   bool operator<(const Event &other) const;
@@ -154,7 +148,7 @@ struct Event : EventDescriptor {
 class EventData {
  public:
   // Look up an event by its legacy ID pair.
-  const Event *get_event(int mid, int sid) const;
+  const Event get_event(int mid, int sid) const;
   // Look up a legacy ID pair for a non-parameterized event.
   LegacyEventPair reverse_get_event(const EventDescriptor &) const;
   // Look up a legacy ID pair for an event.
@@ -177,6 +171,8 @@ class EventData {
   std::vector<EventDescriptor> event_wrappers_;
   // Index over event ID strings.
   std::map<std::string, const EventDescriptor*> event_index_;
+  // Index over event Internal IDs.
+  std::map<int, const EventDescriptor*> event_iid_index_;
 
   // Legacy shit.
 
@@ -233,15 +229,13 @@ string event_get_iterator_delete_code(int mid, int id);
 
 string event_get_locals(int mid, int id);
 
-string event_forge_sequence_code(const EventDescriptor *ev, string preferred_name);
-
 void event_parse_resourcefile();
 void event_info_clear();
 
 const std::vector<EventDescriptor> &event_declarations();
-const Event* translate_legacy_id_pair(int mid, int id);
+const Event translate_legacy_id_pair(int mid, int id);
 
-LegacyEventPair reverse_lookup_legacy_event(const EventDescriptor &ed);
 LegacyEventPair reverse_lookup_legacy_event(const Event &e);
+LegacyEventPair reverse_lookup_legacy_event(const EventDescriptor &e);
 
 #endif // ENIGMA_EVENT_PARSER_H

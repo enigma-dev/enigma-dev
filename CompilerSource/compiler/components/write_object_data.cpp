@@ -431,13 +431,14 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object,
     wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << object->id << ";\n"; // Keep track of a pointer to `this` inside this list.
   }
   // This tracks components of the event system.
-  for (vector<unsigned>::iterator it = parent_undefined.begin(); it != parent_undefined.end(); it++) { // Export a tracker for all events
-    if (!event_is_instance(object->events[*it].mainId, object->events[*it].id)) { //...well, all events which aren't stacked
-      if (event_has_iterator_declare_code(object->events[*it].mainId, object->events[*it].id)) {
-        if (!iscomment(event_get_iterator_declare_code(object->events[*it].mainId, object->events[*it].id)))
-          wto << "      " << event_get_iterator_declare_code(object->events[*it].mainId, object->events[*it].id) << ";\n";
+  for (unsigned evind : parent_undefined) { // Export a tracker for all events
+    auto &event = object->events[evind];
+    if (!event_is_instance(event.mainId, event.id)) { //...well, all events which aren't stacked
+      if (event_has_iterator_declare_code(event.mainId, event.id)) {
+        if (!iscomment(event_get_iterator_declare_code(event.mainId, event.id)))
+          wto << "      " << event_get_iterator_declare_code(event.mainId, event.id) << ";\n";
       } else
-        wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(object->events[*it].mainId, object->events[*it].id) << ";\n";
+        wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(event.mainId, event.id) << ";\n";
     }
   }
   for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported

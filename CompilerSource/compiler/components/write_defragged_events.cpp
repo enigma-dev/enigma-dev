@@ -22,6 +22,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include <set>
 
 #include "backend/ideprint.h"
 
@@ -67,6 +68,20 @@ struct EventGroup {
   EventGroup() = default;
 };
 
+struct UsedEventIndex {
+  map<string, EventDescriptor> base_methods;
+  set<Event> all;
+  void insert(int mid, int id) {
+    Event ev = translate_legacy_id_pair(mid, id);
+    base_methods.insert({ev.BaseFunctionName(), ev});
+    all.insert(ev);
+  }
+  void insert(const Event &ev) {
+    base_methods.insert({ev.BaseFunctionName(), ev});
+    all.insert(ev);
+  }
+};
+
 static inline int event_get_number(const buffers::resources::Object::Event &event) {
   if (event.has_name()) {
     std::cerr << "ERROR! IMPLEMENT ME: Event names not supported in compiler.\n";
@@ -79,7 +94,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   /* Generate a new list of events used by the objects in
   ** this game. Only events on this list will be exported.
   ***********************************************************/
-  map<string, EventGroup> used_events;
+  UsedEventIndex used_events;
 
   // Defragged events must be written before object data, or object data cannot
   // determine which events were used.
@@ -87,11 +102,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
     for (int ii = 0; ii < game.objects[i]->events().size(); ii++) {
       const int mid = game.objects[i]->events(ii).type();
       const int  id = event_get_number(game.objects[i]->events(ii));
-      if (event_is_instance(mid, id)) {
-        used_events[event_stacked_get_root_name(mid)] += translate_legacy_id_pair(mid,id);
-      } else {
-        used_events[event_get_function_name(mid,id)] += translate_legacy_id_pair(mid,id);
-      }
+      used_events.insert(mid,id);
     }
   }
 
@@ -113,19 +124,22 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   for (const EventDescriptor &event : event_declarations()) {
     // We may not be using this event, but it may have default code.
     if (event.HasDefaultCode()) {  // (defaulted includes "constant")
-      used_events[event.BaseFunctionName()] = &event;
+      // Defaulted events may NOT be parameterized.
+      used_events.insert(Event(event));
 
       for (parsed_object *obj : parsed_objects) { // Then shell it out into the other objects.
         bool exists = false;
         for (unsigned j = 0; j < obj->events.size; j++) {
-          const auto *ev2 = translate_legacy_id_pair(obj->events[j].mainId,
-                                                     obj->events[j].id);
-          if (ev2 && ev2->internal_id == event.internal_id) {
+          Event ev2 = translate_legacy_id_pair(obj->events[j].mainId,
+                                               obj->events[j].id);
+          if (ev2.internal_id == event.internal_id) {
             exists = true;
             break;
           }
         }
         if (!exists) {
+          std::cout << "EVENT SYSTEM: Adding a " << event.HumanName()
+                    << " event with default code.\n";
           auto hack = reverse_lookup_legacy_event(event);
           obj->events[obj->events.size] = parsed_event(hack.mid, hack.id, obj);
         }
@@ -140,16 +154,18 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
 
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;
   wto << "  {" << endl;
-            for (auto it = used_events.begin(); it != used_events.end(); it++) {
-              const bool e_is_inst = it->second->IsInstance();
-              if (it->second->HasSubCheck() && !e_is_inst) {
-                wto << "    inline virtual bool myevent_" << it->first << "_subcheck() { return false; }\n";
-              }
-              wto << (e_is_inst ? "    virtual void    myevent_" : "    virtual variant myevent_") << it->first << "()";
-              if (it->second->HasDefaultCode())
-                wto << endl << "    {" << endl << "  " << it->second->DefaultCode() << endl << (e_is_inst ? "    }" : "    return 0;\n    }") << endl;
-              else wto << (e_is_inst ? " { } // No default " : " { return 0; } // No default ") << it->second->HumanName() << " code." << endl;
-            }
+  for (const auto &str_ev : used_events.base_methods) {
+    const string &fname = str_ev.first;
+    const EventDescriptor &event = str_ev.second;
+    const bool e_is_inst = event.IsInstance();
+    if (event.HasSubCheck() && !e_is_inst) {
+      wto << "    inline virtual bool myevent_" << fname << "_subcheck() { return false; }\n";
+    }
+    wto << (e_is_inst ? "    virtual void    myevent_" : "    virtual variant myevent_") << fname << "()";
+    if (event.HasDefaultCode())
+      wto << endl << "    {" << endl << "  " << event.DefaultCode() << endl << (e_is_inst ? "    }" : "    return 0;\n    }") << endl;
+    else wto << (e_is_inst ? " { } // No default " : " { return 0; } // No default ") << event.HumanName() << " code." << endl;
+  }
 
   //The event_parent also contains the definitive lookup table for all timelines, as a fail-safe in case localized instances can't find their own timelines.
   wto << "    virtual void timeline_call_moment_script(int timeline_index, int moment_index) {\n";
@@ -188,12 +204,12 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   wto << "namespace enigma" << endl << "{" << endl;
 
   // Start by defining storage locations for our event lists to iterate.
-  for (auto it = used_events.begin(); it != used_events.end(); it++)
-    wto << "  event_iter *event_" << it->first << "; // Defined in " << it->second.count << " objects" << endl;
+  for (const auto &evfun : used_events.base_methods)
+    wto << "  event_iter *event_" << evfun.first << ";" << endl;
 
   // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
-  wto << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
+  wto << "    events = new event_iter[" << used_events.base_methods.size() << "]; // Allocated here; not really meant to change." << endl;
 
   int obj_high_id = 0;
   for (parsed_object *obj : parsed_objects) {
@@ -202,9 +218,9 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   wto << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
 
   int ind = 0;
-  for (auto it = used_events.begin(); it != used_events.end(); it++)
-    wto << "    event_" << it->first << " = events + " << ind++ << ";  event_"
-        << it->first << "->name = \"" << it->second->HumanName() << "\";" << endl;
+  for (const auto &evfun : used_events.base_methods)
+    wto << "    event_" << evfun.first << " = events + " << ind++ << ";  event_"
+        << evfun.first << "->name = \"" << evfun.second.HumanName() << "\";\n";
   wto << "    return 0;" << endl;
   wto << "  }" << endl;
 
@@ -223,25 +239,57 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   wto << "  variant ev_perf(int type, int numb)\n  {\n    return ((enigma::event_parent*)(instance_event_iterator->inst))->myevents_perf(type, numb);\n  }\n";
 
   /* Some Super Checks are more complicated than others, requiring a function. Export those functions here. */
-  for (auto it = used_events.begin(); it != used_events.end(); it++) {
-    if (it->second->HasSuperCheckFunction()) {
-      wto << "  static inline bool supercheck_" << it->second->BaseFunctionName()
-          << "() " << it->second->SuperCheckFunction() << "\n\n";
+  for (const auto &event : used_events.all) {
+    if (event.HasSuperCheckFunction()) {
+      wto << "  static inline bool supercheck_" << event.FunctionName()
+          << "() " << event.SuperCheckFunction() << "\n\n";
     }
   }
 
   /* Now the event sequence */
   wto << "  int ENIGMA_events()" << endl << "  {" << endl;
   for (const EventDescriptor &event : event_declarations()) {
-    auto it = used_events.find(event.BaseFunctionName());
-    if (it == used_events.end()) continue;
+    auto it = used_events.base_methods.find(event.BaseFunctionName());
+    if (it == used_events.base_methods.end()) continue;
     if (!event.UsesEventLoop()) continue;
-    string seqcode = event_forge_sequence_code(&event, it->first);
-    if (seqcode != "")
-      wto << seqcode,
-      wto << "    " << endl,
-      wto << "    enigma::update_globals();" << endl,
-      wto << "    " << endl;
+
+    string base_indent = string(4, ' ');
+    bool callsubcheck =   event.HasSubCheck()   && !event.IsInstance();
+    bool emitsupercheck = event.HasSuperCheck() && !event.IsInstance();
+    const string fname = event.BaseFunctionName();
+
+    if (event.HasInsteadCode()) {
+      wto << base_indent << event.InsteadCode() + "\n\n";
+    } else if (emitsupercheck) {
+      if (event.HasSuperCheckExpression()) {
+        wto << base_indent << "if (" << Event(event).SuperCheckExpression() << ")\n";
+      } else {
+        wto << base_indent << "if (myevent_" << fname + "_supercheck())\n";
+      }
+      wto <<   base_indent << "  for (instance_event_iterator = event_" << fname << "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
+      if (callsubcheck) {
+        wto << base_indent << "    if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" << fname << "_subcheck()) {\n";
+      }
+      wto <<   base_indent << "      ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" << fname << "();\n";
+      if (callsubcheck) {
+        wto << base_indent << "    }\n";
+      }
+      wto <<   base_indent << "    if (enigma::room_switching_id != -1) goto after_events;\n"
+          <<   base_indent << "  }\n";
+    } else {
+      wto <<   base_indent << "for (instance_event_iterator = event_" << fname << "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
+      if (callsubcheck) {
+        wto << base_indent << "  if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" << fname << "_subcheck()) {\n"; }
+      wto <<   base_indent << "    ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" << fname << "();\n";
+      if (callsubcheck) {
+        wto << base_indent << "  }\n";
+      }
+      wto <<   base_indent << "  if (enigma::room_switching_id != -1) goto after_events;\n"
+          <<   base_indent << "}\n";
+    }
+    wto <<     base_indent << endl
+        <<     base_indent << "enigma::update_globals();" << endl
+        <<     base_indent << endl;
   }
   wto << "    after_events:" << endl;
   if (game.settings.shortcuts().let_escape_end_game())
