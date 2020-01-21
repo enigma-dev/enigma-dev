@@ -35,7 +35,7 @@ jobs:
   include:
     - stage: ENIGMA CI
       env: TEST_HARNESS=true AUDIO=OpenAL 
-      script: ./CI/build_and_run_game.sh
+      script: make emake-tests && ./emake-tests && ./CI/build_and_run_game.sh
     - stage: ENIGMA CI
       env: WORKER=0
     - stage: ENIGMA CI
