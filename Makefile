@@ -10,12 +10,13 @@ clean: .FORCE
 	$(MAKE) -C CompilerSource/ clean
 	$(MAKE) -C CommandLine/emake/ clean
 	$(MAKE) -C CommandLine/libEGM/ clean
+	$(MAKE) -C CommandLine/emake-tests/ clean
 	$(MAKE) -C CommandLine/testing/ clean
 	$(MAKE) -C shared/libpng-util/ clean
 	$(MAKE) -C shared/protos/ clean
 	rm -f ./gm2egm
 
-all: libpng-util libProtocols libEGM ENIGMA emake test-runner .FORCE
+all: libpng-util libProtocols libEGM ENIGMA emake emake-tests test-runner .FORCE
 
 Game: .FORCE
 	@$(RM) -f logs/enigma_compile.log
@@ -36,8 +37,8 @@ libProtocols: .FORCE
 libEGM: .FORCE libpng-util libProtocols
 	$(MAKE) -C CommandLine/libEGM/
 
-StandAlone:
-	echo hi
+emake-tests: .FORCE libEGM
+	$(MAKE) -C CommandLine/emake-tests/
 
 EMAKE_TARGETS = .FORCE
 
