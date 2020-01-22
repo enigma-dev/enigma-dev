@@ -6,7 +6,7 @@ ifeq ($(OS), Linux)
 	BIN_EXT :=
 else ifeq ($(OS), Darwin)
 	LIB_EXT := .dylib
-  BIN_EXT :=
+	BIN_EXT :=
 else
 	LIB_EXT := .dll
 	BIN_EXT := .exe
