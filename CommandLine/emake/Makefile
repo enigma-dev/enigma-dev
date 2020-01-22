@@ -36,8 +36,8 @@ endif
 
 #OFF BY DEFAULT
 ifeq ($(CLI_ENABLE_SERVER), TRUE)
-	override CXXFLAGS += -DCLI_ENABLE_SERVER
-	override LDFLAGS += -lgrpc++
+	CXXFLAGS += -DCLI_ENABLE_SERVER
+	LDFLAGS += -lgrpc++
 else
 	SOURCES := $(filter-out ./Server.cpp, $(SOURCES))
 endif
