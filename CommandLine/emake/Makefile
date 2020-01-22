@@ -24,7 +24,7 @@ ifeq ($(TESTS), TRUE)
 	LDFLAGS += -lgtest -lpthread -lgtest_main
 else
 	TARGET = ../../emake
-  SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
+	SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 endif
 
 #ON BY DEFAULT
