@@ -1,7 +1,7 @@
 PATH := $(eTCpath)$(PATH)
 SHELL=/bin/bash
 
-.PHONY: ENIGMA all clean Game clean-game clean-protos libpng-util libProtocols libEGM required-directories .FORCE
+.PHONY: ENIGMA all clean Game clean-game clean-protos emake emake-tests gm2egm libpng-util libProtocols libEGM required-directories .FORCE
 
 ENIGMA: .FORCE libProtocols libpng-util
 	$(MAKE) -C CompilerSource
@@ -10,11 +10,10 @@ clean: .FORCE
 	$(MAKE) -C CompilerSource/ clean
 	$(MAKE) -C CommandLine/emake/ clean
 	$(MAKE) -C CommandLine/libEGM/ clean
-	$(MAKE) -C CommandLine/emake-tests/ clean
 	$(MAKE) -C CommandLine/testing/ clean
 	$(MAKE) -C shared/libpng-util/ clean
 	$(MAKE) -C shared/protos/ clean
-	rm -f ./gm2egm
+	$(MAKE) -C CommandLine/gm2egm/ clean
 
 all: libpng-util libProtocols libEGM ENIGMA emake emake-tests test-runner .FORCE
 
@@ -37,9 +36,6 @@ libProtocols: .FORCE
 libEGM: .FORCE libpng-util libProtocols
 	$(MAKE) -C CommandLine/libEGM/
 
-emake-tests: .FORCE libEGM
-	$(MAKE) -C CommandLine/emake-tests/
-
 EMAKE_TARGETS = .FORCE
 
 ifneq ($(CLI_ENABLE_EGM), FALSE)
@@ -51,8 +47,11 @@ endif
 emake: $(EMAKE_TARGETS)
 	$(MAKE) -C CommandLine/emake/
 
+emake-tests: .FORCE libEGM
+	TESTS=TRUE $(MAKE) -C CommandLine/emake/
+
 gm2egm: libEGM .FORCE
-	$(CXX) -Ishared/protos/ -Ishared/protos/.eobjs -ICommandLine/libEGM/ CommandLine/gm2egm/main.cpp -Wl,-rpath,. -L. -lEGM -lProtocols -o gm2egm
+	$(MAKE) -C CommandLine/gm2egm/
 
 test-runner: emake .FORCE
 	$(MAKE) -C CommandLine/testing/
