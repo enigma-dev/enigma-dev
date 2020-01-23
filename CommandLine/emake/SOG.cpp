@@ -11,7 +11,7 @@ using std::map;
 using evpair = std::pair<int, int>;
 
 bool ReadSOG(const std::string &input_file, Game *game) {
-  EventData event_data(ParseEventFile("events.res"));
+  EventData event_data(ParseEventFile("events.ey"));
   map<evpair, string> events;
   boost::filesystem::path targetDir(input_file);
   boost::filesystem::recursive_directory_iterator iter(targetDir), eod;
