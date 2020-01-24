@@ -22,7 +22,7 @@ LDFLAGS   += $(OS_LIBS) -L../../ -lProtocols -lprotobuf -lyaml-cpp
 ifeq ($(TESTS), TRUE)
 	TARGET=../../emake-tests
 	SOURCES := $(call rwildcard, ../libEGM-test,*.cpp)
-	LDFLAGS += -lgtest -lpthread -lgtest_main
+	LDFLAGS += -lpthread -lgtest_main -lgtest
 else
 	TARGET = ../../emake
 	SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
