@@ -37,9 +37,6 @@ libProtocols: .FORCE
 libEGM: .FORCE libpng-util libProtocols
 	$(MAKE) -C CommandLine/libEGM/
 
-emake-tests: .FORCE libEGM
-	$(MAKE) -C CommandLine/emake-tests/
-
 EMAKE_TARGETS = .FORCE
 
 ifneq ($(CLI_ENABLE_EGM), FALSE)

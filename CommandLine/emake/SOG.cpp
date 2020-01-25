@@ -17,7 +17,10 @@ bool ReadSOG(const std::string &input_file, Game *game) {
   boost::filesystem::recursive_directory_iterator iter(targetDir), eod;
   BOOST_FOREACH(boost::filesystem::path const& i, std::make_pair(iter, eod)) {
     if (is_regular_file(i)) {
-      Event ev = event_data.DecodeEventString(i.filename().string());
+      std::string evstr = i.filename().string();
+      if (evstr.length() > 4 && evstr.substr(evstr.length() - 4) == ".edl")
+        evstr.erase(evstr.length() - 4);
+      Event ev = event_data.DecodeEventString(evstr);
       if (ev.IsValid())  {
         if (std::ifstream f{i.string()}) {
           evpair eid = reverse_lookup_legacy_event(ev);

@@ -118,7 +118,7 @@ Event EventData::DecodeEventString(const std::string &evstring) {
     }
   }
   id += evstring.substr(at);
-  auto evi = event_index_.find(id);
+  auto evi = event_index_.find(ToLower(id));
   if (evi == event_index_.end() || !evi->second) {
     std::cerr << "EVENT ERROR: Event `" << id << "` is not known to the system\n";
     return Event(kSentinelEvent);
@@ -136,7 +136,7 @@ Event EventData::DecodeEventString(const std::string &evstring) {
   for (size_t argn = 0; argn < correct_arg_count; ++argn) {
     const std::string &arg = args[argn];
     const std::string &arg_kind = base_event.event->parameters(argn);
-    auto pv = parameter_values_.find({arg_kind, arg});
+    auto pv = parameter_values_.find({arg_kind, ToLower(arg)});
     if (pv == parameter_values_.end()) {
       // Assume that spelling == name (this is the case for resource names/ints)
       res.arguments.emplace_back(arg, arg);
@@ -171,7 +171,7 @@ std::string Event::ParamSubst(const std::string &str) const {
 EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
   for (const auto &aliases : event_file_.aliases()) {
     for (const buffers::config::ParameterAlias &alias : aliases.aliases()) {
-      parameter_values_.insert({{aliases.id(), alias.id()}, &alias});
+      parameter_values_.insert({{aliases.id(), ToLower(alias.id())}, &alias});
     }
   }
   // Start numbering internal IDs in the new system from 1000, for good measure.
@@ -181,7 +181,7 @@ EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
   for (const EventDescriptor &event_wrapper : event_wrappers_) {
     const int iid = event_wrapper.internal_id;
     const string evid = StripChar(event_wrapper.event->id(), '.');
-    if (!event_index_.insert({evid, &event_wrapper}).second) {
+    if (!event_index_.insert({ToLower(evid), &event_wrapper}).second) {
       std::cerr << "EVENT ERROR: Duplicate event ID " << evid << std::endl;
     }
     if (!event_wrapper.IsInstance() &&  // Only insert non-parameterized events.
@@ -445,7 +445,7 @@ LegacyEventPair EventData::reverse_get_event(const Event &ev) const {
   }
   const std::string &arg = ev.arguments[0].name;
   const std::string &arg_kind = ev.event->parameters(0);
-  auto pv = parameter_values_.find({arg_kind, arg});
+  auto pv = parameter_values_.find({arg_kind, ToLower(arg)});
   if (pv != parameter_values_.end()) {
     return LegacyEventPair{amap.main_id, pv->second->value()};
   }

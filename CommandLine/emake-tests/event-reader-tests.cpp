@@ -131,83 +131,125 @@ TEST(EventReaderTest, ReadsEventFile) {
   EXPECT_TRUE(event_has_sub_check(3, 0));
   EXPECT_FALSE(event_has_sub_check(3, 1));
   EXPECT_TRUE(event_has_sub_check(3, 2));
-  {
-    Event ev = events.DecodeEventString("Keyboard[Up]");
-    EXPECT_EQ(ev.HumanName(), "Keyboard vk_up");
-    EXPECT_EQ(ev.IdString(), "Keyboard[Up]");
-    EXPECT_EQ(ev.BaseFunctionName(), "keyboard");
-    EXPECT_EQ(ev.FunctionName(), "keyboard_Up");
-    EXPECT_EQ(events.reverse_get_event(ev).mid, 5);
-    EXPECT_EQ(events.reverse_get_event(ev).id, 38);
-    EXPECT_FALSE(ev.HasSubCheck());
-    EXPECT_FALSE(ev.HasSubCheckExpression());
-    EXPECT_FALSE(ev.HasSubCheckFunction());
-    EXPECT_TRUE(ev.HasSuperCheck());
-    EXPECT_TRUE(ev.HasSuperCheckExpression());
-    EXPECT_EQ(ev.event->super_check(), "keyboard_check(%1)");
-    EXPECT_EQ(ev.SuperCheckExpression(), "keyboard_check(vk_up)");
-  }
-  {
-    Event ev = events.DecodeEventString("EndStep");
-    EXPECT_EQ(ev.HumanName(), "End Step");
-    EXPECT_EQ(ev.IdString(), "EndStep");
-    EXPECT_EQ(ev.BaseFunctionName(), "endstep");
-    EXPECT_EQ(ev.FunctionName(), "endstep");
-    EXPECT_EQ(events.reverse_get_event(ev).mid, 3);
-    EXPECT_EQ(events.reverse_get_event(ev).id, 2);
-  }
-  {
-    Event ev = events.get_event(3, 2);
-    EXPECT_EQ(ev.HumanName(), "End Step");
-    EXPECT_EQ(ev.IdString(), "EndStep");
-    EXPECT_EQ(ev.BaseFunctionName(), "endstep");
-    EXPECT_EQ(ev.FunctionName(), "endstep");
-    EXPECT_EQ(events.reverse_get_event(ev).mid, 3);
-    EXPECT_EQ(events.reverse_get_event(ev).id, 2);
-  }
-  {
-    Event ev = events.DecodeEventString("Collision[1337]");
-    EXPECT_EQ(ev.HumanName(), "Collision 1337");
-    EXPECT_EQ(ev.IdString(), "Collision[1337]");
-    EXPECT_EQ(ev.BaseFunctionName(), "collision");
-    EXPECT_EQ(ev.FunctionName(), "collision_1337");
-    EXPECT_EQ(events.reverse_get_event(ev).mid, 4);
-    EXPECT_EQ(events.reverse_get_event(ev).id, 1337);
-  }
-  {
-    Event ev = events.get_event(4, 1337);
-    EXPECT_EQ(ev.HumanName(), "Collision 1337");
-    EXPECT_EQ(ev.IdString(), "Collision[1337]");
-    EXPECT_EQ(ev.BaseFunctionName(), "collision");
-    EXPECT_EQ(ev.FunctionName(), "collision_1337");
-    EXPECT_EQ(events.reverse_get_event(ev).mid, 4);
-    EXPECT_EQ(events.reverse_get_event(ev).id, 1337);
-  }
-  {
-    Event ev = events.DecodeEventString("Alarm[12]");
-    EXPECT_EQ(ev.HumanName(), "Alarm 12");
-    EXPECT_EQ(ev.IdString(), "Alarm[12]");
-    EXPECT_EQ(ev.BaseFunctionName(), "alarm");
-    EXPECT_EQ(ev.FunctionName(), "alarm_12");
-    EXPECT_EQ(events.reverse_get_event(ev).mid, 2);
-    EXPECT_EQ(events.reverse_get_event(ev).id, 12);
-  }
-  {
-    Event ev = events.get_event(2, 12);
-    EXPECT_EQ(ev.HumanName(), "Alarm 12");
-    EXPECT_EQ(ev.IdString(), "Alarm[12]");
-    EXPECT_EQ(ev.BaseFunctionName(), "alarm");
-    EXPECT_EQ(ev.FunctionName(), "alarm_12");
-    EXPECT_EQ(events.reverse_get_event(ev).mid, 2);
-    EXPECT_EQ(events.reverse_get_event(ev).id, 12);
-  }
-  {
-    Event ev = events.DecodeEventString("JoystickButton[1][2]");
-    EXPECT_EQ(ev.HumanName(), "Joystick 1 Button 2");
-    EXPECT_EQ(ev.IdString(), "Joystick[1]Button[2]");
-    EXPECT_EQ(ev.BaseFunctionName(), "joystickbutton");
-    EXPECT_EQ(ev.FunctionName(), "joystick_1_button_2");
-    EXPECT_EQ(events.reverse_get_event(ev).mid, 6);
-    EXPECT_EQ(events.reverse_get_event(ev).id, 22);
-  }
+}
+
+
+TEST(EventReaderTest, KeyboardUp) {
+  std::istringstream str(kTestEvents);
+  EventData events(ParseEventFile(str));
+  Event ev = events.DecodeEventString("Keyboard[Up]");
+  EXPECT_EQ(ev.HumanName(), "Keyboard vk_up");
+  EXPECT_EQ(ev.IdString(), "Keyboard[Up]");
+  EXPECT_EQ(ev.BaseFunctionName(), "keyboard");
+  EXPECT_EQ(ev.FunctionName(), "keyboard_Up");
+  EXPECT_EQ(events.reverse_get_event(ev).mid, 5);
+  EXPECT_EQ(events.reverse_get_event(ev).id, 38);
+  EXPECT_FALSE(ev.HasSubCheck());
+  EXPECT_FALSE(ev.HasSubCheckExpression());
+  EXPECT_FALSE(ev.HasSubCheckFunction());
+  EXPECT_TRUE(ev.HasSuperCheck());
+  EXPECT_TRUE(ev.HasSuperCheckExpression());
+  EXPECT_EQ(ev.event->super_check(), "keyboard_check(%1)");
+  EXPECT_EQ(ev.SuperCheckExpression(), "keyboard_check(vk_up)");
+}
+
+TEST(EventReaderTest, EndStep) {
+  std::istringstream str(kTestEvents);
+  EventData events(ParseEventFile(str));
+  Event ev = events.DecodeEventString("EndStep");
+  EXPECT_EQ(ev.HumanName(), "End Step");
+  EXPECT_EQ(ev.IdString(), "EndStep");
+  EXPECT_EQ(ev.BaseFunctionName(), "endstep");
+  EXPECT_EQ(ev.FunctionName(), "endstep");
+  EXPECT_EQ(events.reverse_get_event(ev).mid, 3);
+  EXPECT_EQ(events.reverse_get_event(ev).id, 2);
+}
+
+TEST(EventReaderTest, EndStepById) {
+  std::istringstream str(kTestEvents);
+  EventData events(ParseEventFile(str));
+  Event ev = events.get_event(3, 2);
+  EXPECT_EQ(ev.HumanName(), "End Step");
+  EXPECT_EQ(ev.IdString(), "EndStep");
+  EXPECT_EQ(ev.BaseFunctionName(), "endstep");
+  EXPECT_EQ(ev.FunctionName(), "endstep");
+  EXPECT_EQ(events.reverse_get_event(ev).mid, 3);
+  EXPECT_EQ(events.reverse_get_event(ev).id, 2);
+}
+
+TEST(EventReaderTest, Collision) {
+  std::istringstream str(kTestEvents);
+  EventData events(ParseEventFile(str));
+  Event ev = events.DecodeEventString("Collision[1337]");
+  EXPECT_EQ(ev.HumanName(), "Collision 1337");
+  EXPECT_EQ(ev.IdString(), "Collision[1337]");
+  EXPECT_EQ(ev.BaseFunctionName(), "collision");
+  EXPECT_EQ(ev.FunctionName(), "collision_1337");
+  EXPECT_EQ(events.reverse_get_event(ev).mid, 4);
+  EXPECT_EQ(events.reverse_get_event(ev).id, 1337);
+}
+
+TEST(EventReaderTest, CollisionById) {
+  std::istringstream str(kTestEvents);
+  EventData events(ParseEventFile(str));
+  Event ev = events.get_event(4, 1337);
+  EXPECT_EQ(ev.HumanName(), "Collision 1337");
+  EXPECT_EQ(ev.IdString(), "Collision[1337]");
+  EXPECT_EQ(ev.BaseFunctionName(), "collision");
+  EXPECT_EQ(ev.FunctionName(), "collision_1337");
+  EXPECT_EQ(events.reverse_get_event(ev).mid, 4);
+  EXPECT_EQ(events.reverse_get_event(ev).id, 1337);
+}
+
+TEST(EventReaderTest, Alarm) {
+  std::istringstream str(kTestEvents);
+  EventData events(ParseEventFile(str));
+  Event ev = events.DecodeEventString("Alarm[12]");
+  EXPECT_EQ(ev.HumanName(), "Alarm 12");
+  EXPECT_EQ(ev.IdString(), "Alarm[12]");
+  EXPECT_EQ(ev.BaseFunctionName(), "alarm");
+  EXPECT_EQ(ev.FunctionName(), "alarm_12");
+  EXPECT_EQ(events.reverse_get_event(ev).mid, 2);
+  EXPECT_EQ(events.reverse_get_event(ev).id, 12);
+}
+
+TEST(EventReaderTest, AlarmById) {
+  std::istringstream str(kTestEvents);
+  EventData events(ParseEventFile(str));
+  Event ev = events.get_event(2, 12);
+  EXPECT_EQ(ev.HumanName(), "Alarm 12");
+  EXPECT_EQ(ev.IdString(), "Alarm[12]");
+  EXPECT_EQ(ev.BaseFunctionName(), "alarm");
+  EXPECT_EQ(ev.FunctionName(), "alarm_12");
+  EXPECT_EQ(events.reverse_get_event(ev).mid, 2);
+  EXPECT_EQ(events.reverse_get_event(ev).id, 12);
+}
+
+TEST(EventReaderTest, Joystick) {
+  std::istringstream str(kTestEvents);
+  EventData events(ParseEventFile(str));
+  Event ev = events.DecodeEventString("JoystickButton[1][2]");
+  EXPECT_EQ(ev.HumanName(), "Joystick 1 Button 2");
+  EXPECT_EQ(ev.IdString(), "Joystick[1]Button[2]");
+  EXPECT_EQ(ev.BaseFunctionName(), "joystickbutton");
+  EXPECT_EQ(ev.FunctionName(), "joystick_1_button_2");
+  EXPECT_EQ(events.reverse_get_event(ev).mid, 6);
+  EXPECT_EQ(events.reverse_get_event(ev).id, 22);
+}
+
+TEST(EventReaderTest, CaseInsensitivity) {
+  std::istringstream str(kTestEvents);
+  EventData events(ParseEventFile(str));
+  Event ev = events.DecodeEventString("JoyStickButton[1][2]");
+  EXPECT_EQ(events.reverse_get_event(ev).mid, 6);
+  EXPECT_EQ(events.reverse_get_event(ev).id, 22);
+  EXPECT_EQ(ev.IdString(), "Joystick[1]Button[2]");
+  ev = events.DecodeEventString("AlArM[1]");
+  EXPECT_EQ(events.reverse_get_event(ev).mid, 2);
+  EXPECT_EQ(events.reverse_get_event(ev).id, 1);
+  EXPECT_EQ(ev.IdString(), "Alarm[1]");
+  ev = events.DecodeEventString("kEyBoArD[lEFt]");
+  EXPECT_EQ(events.reverse_get_event(ev).mid, 5);
+  EXPECT_EQ(events.reverse_get_event(ev).id, 37);
+  EXPECT_EQ(ev.IdString(), "Keyboard[Left]");
 }
