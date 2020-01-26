@@ -52,7 +52,10 @@ struct EventDescriptor {
       event(ev), internal_id(iid) {}
 
   // Returns whether this event is an instance of a parameterized event.
-  bool IsInstance() const;
+  bool IsParameterized() const;
+  // Returns whether this event is a "stacked" event—a parameterized event whose
+  // different parameterizations are fired at the same time.
+  bool IsStacked() const;
 
   // Returns human-readable examples of ID strings belonging to this event.
   std::string ExampleIDStrings() const;

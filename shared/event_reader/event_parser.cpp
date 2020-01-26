@@ -184,7 +184,7 @@ EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
     if (!event_index_.insert({ToLower(evid), &event_wrapper}).second) {
       std::cerr << "EVENT ERROR: Duplicate event ID " << evid << std::endl;
     }
-    if (!event_wrapper.IsInstance() &&  // Only insert non-parameterized events.
+    if (!event_wrapper.IsParameterized() &&  // Only insert non-parameterized events.
         !event_iid_index_.insert({iid, &event_wrapper}).second) {
       std::cerr << "EVENT ERROR: Duplicate event IID " << iid
                 << "; how did this even happen!?";
@@ -254,8 +254,12 @@ const Event EventData::get_event(int mid, int sid) const {
 bool Event::IsComplete() const {
   return arguments.size() == (unsigned) event->parameters_size();
 }
-bool EventDescriptor::IsInstance() const {
+bool EventDescriptor::IsParameterized() const {
   return event->parameters_size();
+}
+bool EventDescriptor::IsStacked() const {
+  return event->parameters_size() &&
+         event->type() != cb::EventDescriptor::SYSTEM;
 }
 
 std::string EventDescriptor::ExampleIDStrings() const {
@@ -619,7 +623,7 @@ void event_info_clear() {
 
 // Returns if the event with the given ID pair is an instance of a stacked event
 bool event_is_instance(int mid, int id) {
-  return event_access(mid, id).IsInstance();
+  return event_access(mid, id).IsStacked();
 }
 
 const std::vector<EventDescriptor> &event_execution_order() {

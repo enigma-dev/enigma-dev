@@ -38,46 +38,20 @@ using namespace std;
 #include "event_reader/event_parser.h"
 #include "languages/lang_CPP.h"
 
-struct EventGroup {
-  const EventDescriptor *base_event = nullptr;
-  int count = 0;
-  EventGroup &operator+=(const Event *ev) {
-    if (!base_event) {
-      base_event = ev;
-    } else if (base_event != ev) {
-      if (base_event->internal_id != ev->internal_id) {
-        std::cerr << "Two distinct events seem to have the same name ("
-                  << base_event->BaseFunctionName() << ")! Check IDs "
-                  << base_event->internal_id << " (" << base_event->HumanName()
-                  << ") and " << ev->internal_id << " (" << ev->HumanName()
-                  << ")" << std::endl;
-      } else {
-        std::cerr << "FYI: two distinct event pointers exist for event "
-                  << base_event->internal_id << " (" << base_event->HumanName()
-                  << ")..." << std::endl;
-      }
-    }
-    return *this;
-  }
-  EventGroup &operator=(const EventDescriptor *ev) {
-    base_event = ev;
-    return *this;
-  }
-  const EventDescriptor *operator->() const { return base_event; }
-  EventGroup(const Event *e): base_event(e) {}
-  EventGroup() = default;
-};
-
 struct UsedEventIndex {
-  map<string, EventDescriptor> base_methods;
+  map<string, Event> base_methods;
   set<Event> all;
+  std::string StackedFunctionName(const Event &ev) {
+    return ev.IsStacked() ? ev.BaseFunctionName()
+                          : ev.FunctionName();
+  }
   void insert(int mid, int id) {
     Event ev = translate_legacy_id_pair(mid, id);
-    base_methods.insert({ev.BaseFunctionName(), ev});
+    base_methods.insert({StackedFunctionName(ev), ev});
     all.insert(ev);
   }
   void insert(const Event &ev) {
-    base_methods.insert({ev.BaseFunctionName(), ev});
+    base_methods.insert({StackedFunctionName(ev), ev});
     all.insert(ev);
   }
 };
@@ -157,7 +131,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   for (const auto &str_ev : used_events.base_methods) {
     const string &fname = str_ev.first;
     const EventDescriptor &event = str_ev.second;
-    const bool e_is_inst = event.IsInstance();
+    const bool e_is_inst = event.IsStacked();
     if (event.HasSubCheck() && !e_is_inst) {
       wto << "    inline virtual bool myevent_" << fname << "_subcheck() { return false; }\n";
     }
@@ -254,8 +228,8 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
     if (!event.UsesEventLoop()) continue;
 
     string base_indent = string(4, ' ');
-    bool callsubcheck =   event.HasSubCheck()   && !event.IsInstance();
-    bool emitsupercheck = event.HasSuperCheck() && !event.IsInstance();
+    bool callsubcheck =   event.HasSubCheck()   && !event.IsStacked();
+    bool emitsupercheck = event.HasSuperCheck() && !event.IsStacked();
     const string fname = event.BaseFunctionName();
 
     if (event.HasInsteadCode()) {

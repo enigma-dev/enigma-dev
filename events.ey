@@ -455,7 +455,7 @@ Events:
   User:
     Name: "User %1"
     Description: "Custom user event. Invoked manually."
-    Type: Parameterized
+    Type: System
     Parameters:
       - string
 

@@ -22,7 +22,7 @@ inline std::string Spaceify(std::string snake) {
 }
 
 inline std::string Capitalize(std::string str) {
-  if (char &c = str[0]; c >= 'a' && c <= 'z') c -= 'a' - 'A';
+  if (str[0] >= 'a' && str[0] <= 'z') str[0] -= 'a' - 'A';
   return str;
 }
 

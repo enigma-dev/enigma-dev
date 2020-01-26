@@ -42,8 +42,9 @@ struct FieldCache {
   map<string, const proto::FieldDescriptor*> fields;
 
   const proto::FieldDescriptor* field(const std::string &n) {
-    if (auto it = fields.find(n); it != fields.end()) return it->second;
-    if (auto it = fields.find(ToLower(n)); it != fields.end()) {
+    auto it = fields.find(n);
+    if (it != fields.end()) return it->second;
+    if ((it = fields.find(ToLower(n))) != fields.end()) {
       fields.insert({n, it->second});
       return it->second;
     }
@@ -79,8 +80,9 @@ struct ConstantCache {
   map<string, const proto::EnumValueDescriptor*> values;
 
   const proto::EnumValueDescriptor* value(const std::string &n) {
-    if (auto it = values.find(n); it != values.end()) return it->second;
-    if (auto it = values.find(ToLower(n)); it != values.end()) {
+    auto it = values.find(n);
+    if (it != values.end()) return it->second;
+    if ((it = values.find(ToLower(n))) != values.end()) {
       values.insert({n, it->second});
       return it->second;
     }
@@ -372,7 +374,9 @@ bool DecodeHelper::FitNodeToField(const YAML::Node &yaml,
       if (field->is_repeated()) {
         const proto::Descriptor *subdesc = field->message_type();
         FieldCache &cache = cache_for(subdesc);
-        auto [k_field, v_field] = MessageIsKeyValue(subdesc);
+        const auto pair_thing = MessageIsKeyValue(subdesc);
+        const auto &k_field = pair_thing.first;
+        const auto &v_field = pair_thing.second;
 
         bool success_bit = true;
         for (const auto &kv_pair : yaml) {

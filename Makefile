@@ -10,7 +10,6 @@ clean: .FORCE
 	$(MAKE) -C CompilerSource/ clean
 	$(MAKE) -C CommandLine/emake/ clean
 	$(MAKE) -C CommandLine/libEGM/ clean
-	$(MAKE) -C CommandLine/emake-tests/ clean
 	$(MAKE) -C CommandLine/testing/ clean
 	$(MAKE) -C shared/libpng-util/ clean
 	$(MAKE) -C shared/protos/ clean
