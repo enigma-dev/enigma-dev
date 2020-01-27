@@ -8,7 +8,7 @@ if [ "$COMPILER" == "Android" ]; then
   sudo add-apt-repository -y ppa:mhier/libboost-latest;
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
   sudo apt-get -y install build-essential zlib1g-dev libboost1.67-dev\
-        libprotobuf-dev protobuf-compiler libglm-dev libpng-dev;
+        libprotobuf-dev protobuf-compiler libglm-dev libpng-dev libyaml-cpp-dev;
 elif [ "$TRAVIS_OS_NAME" == "linux" ]; then
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
   sudo apt-get -y install build-essential zlib1g-dev libboost-dev\
