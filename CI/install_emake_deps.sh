@@ -8,7 +8,7 @@ install_yaml_cpp () {
   git clone https://github.com/jbeder/yaml-cpp /tmp/yaml-cpp
   mkdir /tmp/yaml-cpp/build
   pushd /tmp/yaml-cpp/build
-  cmake -DYAML_CPP_BUILD_TESTS=OFF -DYAML_CPP_BUILD_TOLLS=OFF -DYAML_CPP_BUILD_SHARED_LIBS=ON ..
+  cmake -DYAML_CPP_BUILD_TESTS=OFF -DYAML_CPP_BUILD_TOLLS=OFF -DYAML_CPP_BUILD_SHARED_LIBS=ON -DCMAKE_CXX_FLAGS="-fPIC" ..
   make
   sudo make install
   popd
