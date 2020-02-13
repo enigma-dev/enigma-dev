@@ -53,16 +53,27 @@ endif(MSVC)
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${LIB} PRIVATE yaml-cpp)
 
-include_directories(. ../ "${ENIGMA_DIR}/shared/" "${ENIGMA_DIR}/shared/protos/.eobjs" "${ENIGMA_DIR}/shared/libpng-util")
+include_directories(. ../ "${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/libProtocols" "${ENIGMA_DIR}/shared/" "${ENIGMA_DIR}/shared/libpng-util")
 
 include(FindProtobuf)
 target_link_libraries(${LIB} PRIVATE ${Protobuf_LIBRARY})
 
 #Linux is a turd
-if(NOT MSVC)
+if(NOT WIN32)
   find_library(LIB_FS NAMES stdc++fs)
   target_link_libraries(${LIB} PRIVATE ${LIB_FS})
-endif(NOT MSVC)
+endif()
+
+add_subdirectory(../../shared/protos libProtocols)
+add_dependencies(${EXE} "Protocols")
+target_link_libraries(${LIB} PRIVATE "Protocols")
+
+find_package(PNG REQUIRED)
+include_directories(${PNG_INCLUDE_DIR})
+target_link_libraries(${LIB} PRIVATE ${PNG_LIBRARY})
+
+find_package(ZLIB)
+target_link_libraries(${LIB} PRIVATE ${ZLIB_LIBRARIES})
 
 install(TARGETS ${LIB} DESTINATION "${ENIGMA_DIR}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB}.dir/Debug/${LIB}.pdb" DESTINATION "${ENIGMA_DIR}" OPTIONAL)
