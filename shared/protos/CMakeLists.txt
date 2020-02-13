@@ -32,11 +32,18 @@ endforeach()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-if(NOT MSVC)
-  set(GRPC_EXE "/usr/bin/grpc_cpp_plugin")
-else()
+# Hack to get msys path
+if(WIN32 AND NOT MSVC)
+  get_filename_component(MINGW_BIN ${CMAKE_C_COMPILER} DIRECTORY)
+endif()
+
+if(MSVC)
   set(GRPC_EXE "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/grpc/grpc_cpp_plugin.exe")
-endif(NOT MSVC)
+elseif(WIN32)
+  set(GRPC_EXE "${MINGW_BIN}/grpc_cpp_plugin.exe")
+else()
+  set(GRPC_EXE "/usr/bin/grpc_cpp_plugin")
+endif()
 
 file(GLOB PROTO_FILES *.proto)
 include(FindProtobuf)
