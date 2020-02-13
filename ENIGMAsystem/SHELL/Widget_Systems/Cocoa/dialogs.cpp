@@ -85,11 +85,7 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
     #endif
     if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
       type == MESSAGE_TYPE::M_FATAL_USER_ERROR)
-    #ifdef DEBUG_MODE
       abort();
-    #else
-      exit(0);
-    #endif
   }
 }
 
