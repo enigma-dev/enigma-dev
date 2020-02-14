@@ -199,12 +199,11 @@ void handleInput() {
 namespace {
 
 int display_get_helper(unsigned i) {
-  int result = 0;
   string output = enigma_user::execute_shell_for_output("xrandr | awk '/primary/ { print $4 }'");
   output = enigma_user::string_replace_all(output, "x", "|");
   output = enigma_user::string_replace_all(output, "+", "|");
   var split_output = enigma_user::string_split(output, "|");
-  result = std::stoi(split_output[i], nullptr, 10);
+  int result = std::stoi(split_output[i], nullptr, 10);
   return result;
 }
 
@@ -213,11 +212,19 @@ int display_get_helper(unsigned i) {
 namespace enigma_user {
 
 int display_get_width() {
-  return display_get_helper(0);
+  int result = display_get_helper(0);
+  // in case the awk prints zero for some reason be sure to fall back on the old behavior
+  // just note that the old behavior retrieves the display size of all monitors combined
+  if (!result) result = XDisplayWidth(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
+  return result;
 }
 
-int display_get_height() { 
-  return display_get_helper(1);
+int display_get_height() {
+  int result = display_get_helper(1);
+  // in case the awk prints zero for some reason be sure to fall back on the old behavior
+  // just note that the old behavior retrieves the display size of all monitors combined
+  if (!result) result = XDisplayHeight(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
+  return result;
 }
 
 int display_get_x() {
