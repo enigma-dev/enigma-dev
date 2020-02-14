@@ -3,6 +3,7 @@
 *** Copyright (C) 2013 Robert B. Colton
 *** Copyright (C) 2014 Seth N. Hetu
 *** Copyright (C) 2015 Harijs Grinbergs
+*** Copyright (C) 2020 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -28,6 +29,7 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/estring.h"
 #include "Universal_System/var4.h"
 
 #include <X11/Xlib.h>
@@ -194,14 +196,36 @@ void handleInput() {
 
 }  // namespace enigma
 
+namespace {
+
+int display_get_helper(unsigned i) {
+  int result = 0;
+  string output = enigma_user::execute_shell_for_output("xrandr | awk '/primary/ { print $4 }'");
+  output = enigma_user::string_replace_all(output, "x", "|");
+  output = enigma_user::string_replace_all(output, "+", "|");
+  var split_output = enigma_user::string_split(output, "|");
+  result = std::stoi(split_output[i], nullptr, 10);
+  return result;
+}
+
+} // anonymous namespace
+
 namespace enigma_user {
 
 int display_get_width() {
-  return XDisplayWidth(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
+  return display_get_helper(0);
 }
 
 int display_get_height() { 
-  return XDisplayHeight(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
+  return display_get_helper(1);
 }
 
-}  // namespace enigma_user
+int display_get_x() {
+  return display_get_helper(2);
+}
+
+int display_get_y() { 
+  return display_get_helper(3);
+}
+
+} // namespace enigma_user
