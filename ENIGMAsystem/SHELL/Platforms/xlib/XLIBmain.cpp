@@ -205,7 +205,7 @@ int display_get_helper(unsigned i) {
   output = enigma_user::string_replace_all(output, "x", " ");
   output = enigma_user::string_replace_all(output, "+", " ");
   var split_output = enigma_user::string_split(output, " ");
-  int result = std::stoi(split_output[i], nullptr, 10);
+  int result = (i < split_output.size()) ? std::stoi(split_output[i], nullptr, 10) : 0;
   return result;
 }
 
@@ -214,11 +214,13 @@ int display_get_helper(unsigned i) {
 namespace enigma_user {
 
 int display_get_width() {
-  return display_get_helper(0);
+  int result = display_get_helper(0);
+  return (!result) ? XDisplayWidth(enigma::x11::disp, XDefaultScreen(enigma::x11::disp)) : result;
 }
 
 int display_get_height() { 
-  return display_get_helper(1);
+  int result = display_get_helper(1);
+  return (!result) ? XDisplayHeight(enigma::x11::disp, XDefaultScreen(enigma::x11::disp)) : result;
 }
 
 int display_get_x() {
