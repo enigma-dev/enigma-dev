@@ -203,7 +203,7 @@ int display_get_helper(unsigned i) {
   output = enigma_user::string_replace_all(output, "x", "|");
   output = enigma_user::string_replace_all(output, "+", "|");
   var split_output = enigma_user::string_split(output, "|");
-  int result = std::stoi((i < split_output.size()) ? split_output[i] : "0", nullptr, 10);
+  int result = (i < split_output.size()) ? std::stoi(split_output[i], nullptr, 10) : 0;
   return result;
 }
 
