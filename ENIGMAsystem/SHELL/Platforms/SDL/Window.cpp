@@ -299,23 +299,27 @@ int window_set_cursor(int cursorID) {
 
 int display_get_x() {
   SDL_Rect r;
-  return (SDL_GetDisplayBounds(0, &r) != 0) ? r.x : 0;
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  return (SDL_GetDisplayBounds(d, &r) != 0) ? r.x : 0;
 }
 
 int display_get_y() {;
   SDL_Rect r;
-  return (SDL_GetDisplayBounds(0, &r) != 0) ? r.y : 0;
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  return (SDL_GetDisplayBounds(d, &r) != 0) ? r.y : 0;
 }
 
 int display_get_width() {
   SDL_DisplayMode DM;
-  SDL_GetCurrentDisplayMode(0, &DM);
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  SDL_GetCurrentDisplayMode(d, &DM);
   return DM.w;
 }
 
 int display_get_height() {
   SDL_DisplayMode DM;
-  SDL_GetCurrentDisplayMode(0, &DM);
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  SDL_GetCurrentDisplayMode(d, &DM);
   return DM.h;
 }
 
