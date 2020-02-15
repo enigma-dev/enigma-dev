@@ -200,7 +200,10 @@ void handleInput() {
 
 namespace {
 
-int display_get_helper(unsigned i) {
+int display_get_result = 0;
+
+int display_get_helper(unsigned i, int r) {
+  if (r != 0) return r;
   if (i == 0 || i == 1) {
     int num_sizes;
     int result = 0;
@@ -213,6 +216,7 @@ int display_get_helper(unsigned i) {
     SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
     if (i == 0) result = xrrs[original_size_id].width;
     if (i == 1) result = xrrs[original_size_id].height;
+    r = result;
     return result;
   } else if (i == 2 || i == 3) {
     string output = enigma_user::execute_shell_for_output("xrandr | awk '/primary/ { print $0 }'");
@@ -222,6 +226,7 @@ int display_get_helper(unsigned i) {
     output = enigma_user::string_replace_all(output, "+", " ");
     var split_output = enigma_user::string_split(output, " ");
     int result = (i < split_output.size()) ? std::stoi(split_output[i], nullptr, 10) : 0;
+    r = result;
     return result;
   }
   return 0;
@@ -231,20 +236,25 @@ int display_get_helper(unsigned i) {
 
 namespace enigma_user {
 
+
 int display_get_width() {
-  return display_get_helper(0);
+  static int result = display_get_helper(0, display_get_result);
+  return result;
 }
 
 int display_get_height() { 
-  return display_get_helper(1);
+  static int result = display_get_helper(1, display_get_result);
+  return result;
 }
 
 int display_get_x() {
-  return display_get_helper(2);
+  static int result = display_get_helper(2, display_get_result);
+  return result;
 }
 
 int display_get_y() { 
-  return display_get_helper(3);
+  static int result = display_get_helper(3, display_get_result);
+  return result;
 }
 
 }  // namespace enigma_user
