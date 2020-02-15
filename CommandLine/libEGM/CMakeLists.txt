@@ -33,22 +33,13 @@ set(CompilerFlags
 	  CMAKE_CXX_FLAGS_MINSIZEREL
 	  CMAKE_CXX_FLAGS_RELEASE
 	  CMAKE_CXX_FLAGS_RELWITHDEBINFO
-        )
-foreach(CompilerFlag ${CompilerFlags})
-  if(MSVC)
-    string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-  endif(MSVC)
-  message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
-endforeach()
+    )
 
 find_package(pugixml CONFIG REQUIRED)
 target_link_libraries(${LIB} PRIVATE pugixml)
 
 find_package(RapidJSON REQUIRED)
 include_directories(${LIB} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
-if(MSVC)
-  target_link_libraries(${LIB} PRIVATE rapidjson)
-endif(MSVC)
 
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${LIB} PRIVATE yaml-cpp)
