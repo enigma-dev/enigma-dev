@@ -300,11 +300,13 @@ int window_set_cursor(int cursorID) {
 }
 
 int display_get_x() {
-  return 0; // Not possible in SDL
+  SDL_Rect r;
+  return (SDL_GetDisplayBounds(0, &r) != 0) ? r.x : 0;
 }
 
 int display_get_y() {;
-  return 0; // Not possible in SDL
+  SDL_Rect r;
+  return (SDL_GetDisplayBounds(0, &r) != 0) ? r.y : 0;
 }
 
 int display_get_width() {
