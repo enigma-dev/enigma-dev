@@ -1,5 +1,5 @@
 namespace enigma_user {
 
-window_center();
+void window_center();
 
 }
