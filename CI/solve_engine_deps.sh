@@ -23,7 +23,7 @@ fi
 if [ "$GRAPHICS" == "OpenGLES2" ]; then
   LINUX_DEPS="$LINUX_DEPS libepoxy-dev libegl1-mesa-dev libgles2-mesa-dev"
 else
-  LINUX_DEPS="$LINUX_DEPS libglew-dev libxrandr-dev"
+  LINUX_DEPS="$LINUX_DEPS libglew-dev libxrandr-dev libxinerama-dev"
 fi
 
 ###### Audio #######
