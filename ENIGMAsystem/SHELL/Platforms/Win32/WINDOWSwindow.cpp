@@ -317,6 +317,14 @@ void display_mouse_set(int x,int y) {
     SetCursorPos(x,y);
 }
 
+int display_get_x() {
+  return 0; // TODO
+}
+
+int display_get_x() {
+  return 0; // TODO
+}
+
 int display_get_width() {
    return GetSystemMetrics(SM_CXSCREEN);
 }
