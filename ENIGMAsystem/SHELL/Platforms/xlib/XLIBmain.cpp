@@ -201,7 +201,7 @@ namespace {
 int display_get_result = 0;
 
 int display_get_helper(unsigned i, int r) {
-  if (res != 0) return r;
+  if (r != 0) return r;
   string output = enigma_user::execute_shell_for_output("xrandr | awk '/primary/ { print $0 }'");
   size_t pos1 = output.find("primary"); if (pos1 != string::npos) output = output.substr(pos1 + 8);
   size_t pos2 = output.find(" "); if (pos2 != string::npos) output = output.substr(0, pos2);
