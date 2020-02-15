@@ -317,7 +317,7 @@ void display_mouse_set(int x,int y) {
     SetCursorPos(x,y);
 }
 
-int display_get_x() {
+int display_get_x() { 
   return 0; // TODO
 }
 
