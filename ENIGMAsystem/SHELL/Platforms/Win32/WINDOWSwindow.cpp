@@ -321,7 +321,7 @@ int display_get_x() {
   return 0; // TODO
 }
 
-int display_get_x() {
+int display_get_y() {
   return 0; // TODO
 }
 
