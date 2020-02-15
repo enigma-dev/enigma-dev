@@ -22,13 +22,7 @@ set(CompilerFlags
 	  CMAKE_CXX_FLAGS_MINSIZEREL
 	  CMAKE_CXX_FLAGS_RELEASE
 	  CMAKE_CXX_FLAGS_RELWITHDEBINFO
-        )
-foreach(CompilerFlag ${CompilerFlags})
-  if(MSVC)
-	string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-  endif(MSVC)
-  message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
-endforeach()
+    )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
