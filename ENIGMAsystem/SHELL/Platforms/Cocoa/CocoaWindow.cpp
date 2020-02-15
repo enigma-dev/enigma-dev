@@ -495,6 +495,14 @@ namespace enigma_user {
   bool window_get_region_scale() {return 1;}
   void window_set_region_size(int w, int h, bool adaptwindow) {}
 
+  int display_get_x() {
+    return 0; // TODO
+  }
+
+  int display_get_x() {
+    return 0; // TODO
+  }
+
   int display_get_width() {
     return cocoa_get_screen_size(true);
   }
