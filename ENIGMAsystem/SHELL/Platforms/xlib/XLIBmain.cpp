@@ -198,7 +198,10 @@ void handleInput() {
 
 namespace {
 
-int display_get_helper(unsigned i) {
+int display_get_result = 0;
+
+int display_get_helper(unsigned i, int r) {
+  if (res != 0) return r;
   string output = enigma_user::execute_shell_for_output("xrandr | awk '/primary/ { print $0 }'");
   size_t pos1 = output.find("primary"); if (pos1 != string::npos) output = output.substr(pos1 + 8);
   size_t pos2 = output.find(" "); if (pos2 != string::npos) output = output.substr(0, pos2);
@@ -206,6 +209,7 @@ int display_get_helper(unsigned i) {
   output = enigma_user::string_replace_all(output, "+", " ");
   var split_output = enigma_user::string_split(output, " ");
   int result = (i < split_output.size()) ? std::stoi(split_output[i], nullptr, 10) : 0;
+  r = result;
   return result;
 }
 
@@ -214,21 +218,23 @@ int display_get_helper(unsigned i) {
 namespace enigma_user {
 
 int display_get_width() {
-  int result = display_get_helper(0);
+  static int result = display_get_helper(0, display_get_result);
   return (!result) ? XDisplayWidth(enigma::x11::disp, XDefaultScreen(enigma::x11::disp)) : result;
 }
 
 int display_get_height() { 
-  int result = display_get_helper(1);
+  static int result = display_get_helper(1, display_get_result);
   return (!result) ? XDisplayHeight(enigma::x11::disp, XDefaultScreen(enigma::x11::disp)) : result;
 }
 
 int display_get_x() {
-  return display_get_helper(2);
+  static int result = display_get_helper(2, display_get_result);
+  return result;
 }
 
 int display_get_y() { 
-  return display_get_helper(3);
+  static int result = display_get_helper(3, display_get_result);
+  return result;
 }
 
-} // namespace enigma_user
+}  // namespace enigma_user
