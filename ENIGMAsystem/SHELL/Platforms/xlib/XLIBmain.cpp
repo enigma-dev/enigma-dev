@@ -29,13 +29,13 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/estring.h"
 #include "Universal_System/var4.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
 #include <X11/extensions/Xrandr.h>
+#include <X11/extensions/Xinerama.h>
 
 #include <sys/types.h>  //getpid
 #include <unistd.h>
@@ -204,32 +204,25 @@ int display_get_result = 0;
 
 int display_get_helper(unsigned i, int r) {
   if (r != 0) return r;
-  if (i == 0 || i == 1) {
-    int num_sizes;
-    int result = 0;
-    XRRScreenSize *xrrs;
-    Rotation original_rotation;
-    Window root = RootWindow(enigma::x11::disp, 0);
-    xrrs = XRRSizes(enigma::x11::disp, 0, &num_sizes);
-    XRRScreenConfiguration *conf = XRRGetScreenInfo(enigma::x11::disp, root);
-    short original_rate = XRRConfigCurrentRate(conf);
-    SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
-    if (i == 0) result = xrrs[original_size_id].width;
-    if (i == 1) result = xrrs[original_size_id].height;
-    r = result;
-    return result;
-  } else if (i == 2 || i == 3) {
-    string output = enigma_user::execute_shell_for_output("xrandr | awk '/primary/ { print $0 }'");
-    size_t pos1 = output.find("primary"); if (pos1 != string::npos) output = output.substr(pos1 + 8);
-    size_t pos2 = output.find(" "); if (pos2 != string::npos) output = output.substr(0, pos2);
-    output = enigma_user::string_replace_all(output, "x", " ");
-    output = enigma_user::string_replace_all(output, "+", " ");
-    var split_output = enigma_user::string_split(output, " ");
-    int result = (i < split_output.size()) ? std::stoi(split_output[i], nullptr, 10) : 0;
-    r = result;
-    return result;
+  int num_sizes;
+  int result = 0;
+  XRRScreenSize *xrrs;
+  Rotation original_rotation;
+  Window root = RootWindow(enigma::x11::disp, 0);
+  xrrs = XRRSizes(enigma::x11::disp, 0, &num_sizes);
+  XRRScreenConfiguration *conf = XRRGetScreenInfo(enigma::x11::disp, root);
+  short original_rate = XRRConfigCurrentRate(conf);
+  SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
+  if (XineramaIsActive (enigma::x11::disp)) {
+    int m = 0; int pixels = 0;
+    XineramaScreenInfo *xs = XineramaQueryScreens(enigma::x11::disp, &m);
+    if (i == 2) result = xs[original_size_id].x_org;
+    if (i == 3) result = xs[original_size_id].y_org;
+    XFree(xs);
   }
-  return 0;
+  if (i == 0) result = xrrs[original_size_id].width;
+  if (i == 1) result = xrrs[original_size_id].height;
+  return result;
 }
 
 } // anonymous namespace
