@@ -299,6 +299,14 @@ int window_set_cursor(int cursorID) {
   return 0;
 }
 
+int display_get_x() {
+  return 0; // Not possible in SDL
+}
+
+int display_get_y() {;
+  return 0; // Not possible in SDL
+}
+
 int display_get_width() {
   SDL_DisplayMode DM;
   SDL_GetCurrentDisplayMode(0, &DM);
