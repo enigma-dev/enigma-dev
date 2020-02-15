@@ -203,25 +203,24 @@ namespace {
 int display_get_result = 0;
 
 int display_get_helper(unsigned i, int r) {
-  if (r != 0) return r;
-  int num_sizes;
-  int result = 0;
-  XRRScreenSize *xrrs;
-  Rotation original_rotation;
+  if (r != 0) return r; int num_sizes, result = 0;
+  XRRScreenSize *xrrs; Rotation original_rotation;
   Window root = RootWindow(enigma::x11::disp, 0);
   xrrs = XRRSizes(enigma::x11::disp, 0, &num_sizes);
   XRRScreenConfiguration *conf = XRRGetScreenInfo(enigma::x11::disp, root);
   short original_rate = XRRConfigCurrentRate(conf);
   SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
+  
   if (XineramaIsActive (enigma::x11::disp)) {
-    int m = 0; int pixels = 0;
+    int m = 0, pixels = 0; 
     XineramaScreenInfo *xs = XineramaQueryScreens(enigma::x11::disp, &m);
-    if (i == 2) result = xs[original_size_id].x_org;
-    if (i == 3) result = xs[original_size_id].y_org;
+    if (i == 0) result = xs[original_size_id].x_org;
+    if (i == 1) result = xs[original_size_id].y_org;
     XFree(xs);
   }
-  if (i == 0) result = xrrs[original_size_id].width;
-  if (i == 1) result = xrrs[original_size_id].height;
+
+  if (i == 2) result = xrrs[original_size_id].width;
+  if (i == 3) result = xrrs[original_size_id].height;
   return result;
 }
 
@@ -229,22 +228,22 @@ int display_get_helper(unsigned i, int r) {
 
 namespace enigma_user {
 
-int display_get_width() {
+int display_get_x() {
   static int result = display_get_helper(0, display_get_result);
   return result;
 }
 
-int display_get_height() { 
+int display_get_y() { 
   static int result = display_get_helper(1, display_get_result);
   return result;
 }
 
-int display_get_x() {
+int display_get_width() {
   static int result = display_get_helper(2, display_get_result);
   return result;
 }
 
-int display_get_y() { 
+int display_get_height() { 
   static int result = display_get_helper(3, display_get_result);
   return result;
 }
