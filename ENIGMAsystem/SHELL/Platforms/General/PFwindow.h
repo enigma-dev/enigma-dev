@@ -19,7 +19,6 @@
 #define ENIGMA_PLATFORM_WINDOW_H
 
 #include "libEGMstd.h"
-#include "Platforms/General/nonSDL/PFcenter.h"
 #include "Platforms/platforms_mandatory.h"
 
 #include <string>
