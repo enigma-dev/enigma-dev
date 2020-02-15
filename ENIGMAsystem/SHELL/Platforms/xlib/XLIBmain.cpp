@@ -236,7 +236,6 @@ int display_get_helper(unsigned i, int r) {
 
 namespace enigma_user {
 
-
 int display_get_width() {
   static int result = display_get_helper(0, display_get_result);
   return result;
