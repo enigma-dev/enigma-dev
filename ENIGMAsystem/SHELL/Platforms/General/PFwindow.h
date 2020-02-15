@@ -19,6 +19,7 @@
 #define ENIGMA_PLATFORM_WINDOW_H
 
 #include "libEGMstd.h"
+#include "Platforms/General/nonSDL/PFcenter.h"
 #include "Platforms/platforms_mandatory.h"
 
 #include <string>
@@ -237,7 +238,6 @@ double window_get_region_scale();
 void window_set_position(int x, int y);
 void window_set_size(unsigned int width, unsigned int height);
 void window_set_rectangle(int x, int y, int width, int height);
-void window_center();
 void window_default(bool center_size);  // default false specified in platforms mandatory
 void window_set_region_size(int w, int h, bool adaptwindow);
 
