@@ -300,13 +300,13 @@ int window_set_cursor(int cursorID) {
 int display_get_x() {
   SDL_Rect r;
   int d = SDL_GetWindowDisplayIndex(windowHandle);
-  return (SDL_GetDisplayBounds(d, &r) != 0) ? r.x : 0;
+  return (SDL_GetDisplayBounds(d, &r) == 0) ? r.x : 0;
 }
 
 int display_get_y() {;
   SDL_Rect r;
   int d = SDL_GetWindowDisplayIndex(windowHandle);
-  return (SDL_GetDisplayBounds(d, &r) != 0) ? r.y : 0;
+  return (SDL_GetDisplayBounds(d, &r) == 0) ? r.y : 0;
 }
 
 int display_get_width() {
