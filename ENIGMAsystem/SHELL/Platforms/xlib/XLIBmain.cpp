@@ -204,7 +204,8 @@ Copyright (C) 2020 Samuel Venable
 
 These features were contributed by Samuel Venable and 
 may be relicensed under MIT for those who want to use 
-it in their stuff permissively outside of enigma-dev:
+it in their stuff permissively outside of enigma-dev;
+it's the least he can do since it wasn't easily done:
 
 int displayX            = -1;
 int displayY            = -1;
