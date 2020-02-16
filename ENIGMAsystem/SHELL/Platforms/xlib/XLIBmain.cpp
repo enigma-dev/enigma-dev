@@ -211,7 +211,7 @@ int display_get_width() {
 }
 
 int display_get_height() { 
-  return ::display_get_height();;
+  return ::display_get_height();
 }
 
 }  // namespace enigma_user
