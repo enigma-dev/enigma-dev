@@ -207,6 +207,9 @@ may be relicensed under MIT for those who want to use
 it in their stuff permissively outside of enigma-dev;
 it's the least he can do since it wasn't easily done:
 
+#include <X11/extensions/Xrandr.h>
+#include <X11/extensions/Xinerama.h>
+
 int displayX;
 int displayY;
 int displayWidth;
