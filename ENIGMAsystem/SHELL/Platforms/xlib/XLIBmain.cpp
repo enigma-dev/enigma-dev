@@ -197,24 +197,23 @@ void handleInput() {
 }
 
 }  // namespace enigma
-
 namespace {
 
-int display_get_position(unsigned i) {
+int display_get_position(bool i) {
   int result = 0; Rotation original_rotation; 
   Window root = DefaultRootWindow(enigma::x11::disp);
   XRRScreenConfiguration *conf = XRRGetScreenInfo(enigma::x11::disp, root);
   SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
   if (XineramaIsActive (enigma::x11::disp)) {
     int m = 0; XineramaScreenInfo *xrrp = XineramaQueryScreens(enigma::x11::disp, &m);
-    if (i == 0) result = xrrp[original_size_id].x_org;
-    else if (i == 1) result = xrrp[original_size_id].y_org;
+    if (!i) result = xrrp[original_size_id].x_org;
+    else if (i) result = xrrp[original_size_id].y_org;
     XFree(xrrp);
   }
   return result;
 }
 
-int display_get_size(unsigned i) {
+int display_get_size(bool i) {
   int result = 0, num_sizes; Rotation original_rotation; 
   Window root = DefaultRootWindow(enigma::x11::disp);
   int screen = XDefaultScreen(enigma::x11::disp);
@@ -222,10 +221,10 @@ int display_get_size(unsigned i) {
   SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
   if (XineramaIsActive (enigma::x11::disp)) {
     XRRScreenSize *xrrs = XRRSizes(enigma::x11::disp, screen, &num_sizes);
-    if (i == 0) result = xrrs[original_size_id].width;
-    else if (i == 1) result = xrrs[original_size_id].height;
-  } else if (i == 0) result = XDisplayWidth(enigma::x11::disp, screen);
-  else if (i == 1) result = XDisplayHeight(enigma::x11::disp, screen);
+    if (!i) result = xrrs[original_size_id].width;
+    else if (i) result = xrrs[original_size_id].height;
+  } else if (!i) result = XDisplayWidth(enigma::x11::disp, screen);
+  else if (i) result = XDisplayHeight(enigma::x11::disp, screen);
   return result;
 }
 
@@ -234,22 +233,22 @@ int display_get_size(unsigned i) {
 namespace enigma_user {
 
 int display_get_x() {
-  static int result = display_get_position(0);
+  static int result = display_get_position(false);
   return result;
 }
 
 int display_get_y() { 
-  static int result = display_get_position(1);
+  static int result = display_get_position(true);
   return result;
 }
 
 int display_get_width() {
-  static int result = display_get_size(0);
+  static int result = display_get_size(false);
   return result;
 }
 
 int display_get_height() { 
-  static int result = display_get_size(1);
+  static int result = display_get_size(true);
   return result;
 }
 
