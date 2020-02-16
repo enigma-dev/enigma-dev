@@ -207,15 +207,15 @@ may be relicensed under MIT for those who want to use
 it in their stuff permissively outside of enigma-dev;
 it's the least he can do since it wasn't easily done:
 
-int displayX            = -1;
-int displayY            = -1;
-int displayWidth        = -1;
-int displayHeight       = -1;
+int displayX;
+int displayY;
+int displayWidth;
+int displayHeight;
 
-int displayXGetter      = -1;
-int displayYGetter      = -1;
-int displayWidthGetter  = -1;
-int displayHeightGetter = -1;
+int displayXGetter;
+int displayYGetter;
+int displayWidthGetter;
+int displayHeightGetter;
 
 void display_get_position(bool i, int *result);
 void display_get_size(bool i, int *result);
