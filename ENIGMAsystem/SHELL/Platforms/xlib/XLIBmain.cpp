@@ -200,27 +200,33 @@ void handleInput() {
 
 namespace {
 
-int display_get_result = 0;
-
-int display_get_helper(unsigned i, int r) {
-  if (r != 0) return r; int result = 0, num_sizes; XRRScreenSize *xrrs;
-  Rotation original_rotation; Window root = DefaultRootWindow(enigma::x11::disp);
+int display_get_position(unsigned i) {
+  int result = 0; Rotation original_rotation; 
+  Window root = DefaultRootWindow(enigma::x11::disp);
   XRRScreenConfiguration *conf = XRRGetScreenInfo(enigma::x11::disp, root);
-  xrrs = XRRSizes(enigma::x11::disp, XDefaultScreen(enigma::x11::disp), &num_sizes);
   SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
-  if (i == 2) result = XDisplayWidth(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
-  else if (i == 3) result = XDisplayHeight(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
-  
   if (XineramaIsActive (enigma::x11::disp)) {
     int m = 0; XineramaScreenInfo *xrrp = XineramaQueryScreens(enigma::x11::disp, &m);
     if (i == 0) result = xrrp[original_size_id].x_org;
     else if (i == 1) result = xrrp[original_size_id].y_org;
-    else if (i == 2) result = xrrs[original_size_id].width;
-    else if (i == 3) result = xrrs[original_size_id].height;
     XFree(xrrp);
   }
-  
-  r = result; return result;
+  return result;
+}
+
+int display_get_size(unsigned i) {
+  int result = 0, num_sizes; Rotation original_rotation; 
+  Window root = DefaultRootWindow(enigma::x11::disp);
+  int screen = XDefaultScreen(enigma::x11::disp);
+  XRRScreenConfiguration *conf = XRRGetScreenInfo(enigma::x11::disp, root);
+  SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
+  if (XineramaIsActive (enigma::x11::disp)) {
+    XRRScreenSize *xrrs = XRRSizes(enigma::x11::disp, screen, &num_sizes);
+    if (i == 0) result = xrrs[original_size_id].width;
+    else if (i == 1) result = xrrs[original_size_id].height;
+  } else if (i == 0) result = XDisplayWidth(enigma::x11::disp, screen);
+  else if (i == 1) result = XDisplayHeight(enigma::x11::disp, screen);
+  return result;
 }
 
 } // anonymous namespace
@@ -228,22 +234,22 @@ int display_get_helper(unsigned i, int r) {
 namespace enigma_user {
 
 int display_get_x() {
-  static int result = display_get_helper(0, display_get_result);
+  static int result = display_get_position(0);
   return result;
 }
 
 int display_get_y() { 
-  static int result = display_get_helper(1, display_get_result);
+  static int result = display_get_position(1);
   return result;
 }
 
 int display_get_width() {
-  static int result = display_get_helper(2, display_get_result);
+  static int result = display_get_size(0);
   return result;
 }
 
 int display_get_height() { 
-  static int result = display_get_helper(3, display_get_result);
+  static int result = display_get_size(1);
   return result;
 }
 
