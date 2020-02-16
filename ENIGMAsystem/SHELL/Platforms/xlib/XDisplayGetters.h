@@ -28,3 +28,4 @@ int display_get_x();
 int display_get_y();
 int display_get_width();
 int display_get_height();
+ 
