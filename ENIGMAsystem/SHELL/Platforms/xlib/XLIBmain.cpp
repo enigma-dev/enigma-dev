@@ -3,7 +3,6 @@
 *** Copyright (C) 2013 Robert B. Colton
 *** Copyright (C) 2014 Seth N. Hetu
 *** Copyright (C) 2015 Harijs Grinbergs
-*** Copyright (C) 2020 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -23,6 +22,7 @@
 #include "XLIBmain.h"
 #include "LINUXjoystick.h"
 #include "XLIBwindow.h"
+#include "XDisplayGetters.h"
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
@@ -33,9 +33,6 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-
-#include <X11/extensions/Xrandr.h>
-#include <X11/extensions/Xinerama.h>
 
 #include <sys/types.h>  //getpid
 #include <unistd.h>
@@ -197,118 +194,4 @@ void handleInput() {
 }
 
 }  // namespace enigma
-
-/*
-
-Copyright (C) 2020 Samuel Venable
-
-These features were contributed by Samuel Venable and 
-may be relicensed under MIT for those who want to use 
-it in their stuff permissively outside of enigma-dev;
-it's the least he can do since it wasn't easily done:
-
-Example Usage: https://github.com/time-killer-games/XGetDisplay
-
-#include <X11/extensions/Xrandr.h>
-#include <X11/extensions/Xinerama.h>
-
-int displayX;
-int displayY;
-int displayWidth;
-int displayHeight;
-
-int displayXGetter;
-int displayYGetter;
-int displayWidthGetter;
-int displayHeightGetter;
-
-void display_get_position(bool i, int *result);
-void display_get_size(bool i, int *result);
-
-int display_get_x();
-int display_get_y();
-int display_get_width();
-int display_get_height();
-
-*/
-
-namespace {
-
-int displayX            = -1;
-int displayY            = -1;
-int displayWidth        = -1;
-int displayHeight       = -1;
-
-int displayXGetter      = -1;
-int displayYGetter      = -1;
-int displayWidthGetter  = -1;
-int displayHeightGetter = -1;
-
-void display_get_position(bool i, int *result) {
-  *result = 0; Rotation original_rotation; 
-  Window root = DefaultRootWindow(enigma::x11::disp);
-  XRRScreenConfiguration *conf = XRRGetScreenInfo(enigma::x11::disp, root);
-  SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
-  if (XineramaIsActive (enigma::x11::disp)) {
-    int m = 0; XineramaScreenInfo *xrrp = XineramaQueryScreens(enigma::x11::disp, &m);
-    if (!i) *result = xrrp[original_size_id].x_org;
-    else if (i) *result = xrrp[original_size_id].y_org;
-    XFree(xrrp);
-  }
-}
-
-void display_get_size(bool i, int *result) {
-  *result = 0; int num_sizes; Rotation original_rotation; 
-  Window root = DefaultRootWindow(enigma::x11::disp);
-  int screen = XDefaultScreen(enigma::x11::disp);
-  XRRScreenConfiguration *conf = XRRGetScreenInfo(enigma::x11::disp, root);
-  SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
-  if (XineramaIsActive (enigma::x11::disp)) {
-    XRRScreenSize *xrrs = XRRSizes(enigma::x11::disp, screen, &num_sizes);
-    if (!i) *result = xrrs[original_size_id].width;
-    else if (i) *result = xrrs[original_size_id].height;
-  } else if (!i) *result = XDisplayWidth(enigma::x11::disp, screen);
-  else if (i) *result = XDisplayHeight(enigma::x11::disp, screen);
-}
-
-} // anonymous namespace
-
-namespace enigma_user {
-
-int display_get_x() {
-  if (displayXGetter == displayX && displayX != -1)
-    return displayXGetter;
-  display_get_position(false, &displayXGetter);
-  int result = displayXGetter;
-  displayX = result;
-  return result;
-}
-
-int display_get_y() { 
-  if (displayYGetter == displayY && displayY != -1)
-    return displayYGetter;
-  display_get_position(true, &displayYGetter);
-  int result = displayYGetter;
-  displayY = result;
-  return result;
-}
-
-int display_get_width() {
-  if (displayWidthGetter == displayWidth && displayWidth != -1) 
-    return displayWidthGetter;
-  display_get_size(false, &displayWidthGetter);
-  int result = displayWidthGetter;
-  displayWidth = result;
-  return result;
-}
-
-int display_get_height() {
-  if (displayHeightGetter == displayHeight && displayHeight != -1)
-    return displayHeightGetter;
-  display_get_size(true, &displayHeightGetter);
-  int result = displayHeightGetter;
-  displayHeight = result;
-  return result;
-}
-
-}  // namespace enigma_user
+  
