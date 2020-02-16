@@ -78,6 +78,8 @@ void os_powersave_enable(bool enable) {}
 int display_mouse_get_x() { return -1; }
 int display_mouse_get_y() { return -1; }
 void display_mouse_set(int x, int y) {}
+int display_get_x() { return 0; }
+int display_get_y() { return 0; }
 int display_get_width() { return 0; }
 int display_get_height() { return 0; }
 
