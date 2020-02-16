@@ -198,6 +198,34 @@ void handleInput() {
 
 }  // namespace enigma
 
+/*
+
+Copyright (C) 2020 Samuel Venable
+
+These features were contributed by Samuel Venable and 
+may be relicensed under MIT for those who want to use 
+it in their stuff permissively outside of enigma-dev:
+
+int displayX            = -1;
+int displayY            = -1;
+int displayWidth        = -1;
+int displayHeight       = -1;
+
+int displayXGetter      = -1;
+int displayYGetter      = -1;
+int displayWidthGetter  = -1;
+int displayHeightGetter = -1;
+
+void display_get_position(bool i, int *result);
+void display_get_size(bool i, int *result);
+
+int display_get_x();
+int  display_get_y();
+int  display_get_width();
+int display_get_height();
+
+*/
+
 namespace {
 
 int displayX            = -1;
