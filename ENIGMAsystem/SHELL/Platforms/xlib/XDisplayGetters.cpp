@@ -40,13 +40,13 @@ static int displayYGetter      = -1;
 static int displayWidthGetter  = -1;
 static int displayHeightGetter = -1;
 
-static void display_get_position(Bool i, int *result) {
+static void display_get_position(bool i, int *result) {
   Display *display = XOpenDisplay(NULL);
   *result = 0; Rotation original_rotation; 
-  Window root = DefaultRootWindow(display);
+  Window root = XDefaultRootWindow(display);
   XRRScreenConfiguration *conf = XRRGetScreenInfo(display, root);
   SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
-  if (XineramaIsActive (display)) {
+  if (XineramaIsActive(display)) {
     int m = 0; XineramaScreenInfo *xrrp = XineramaQueryScreens(display, &m);
     if (!i) *result = xrrp[original_size_id].x_org;
     else if (i) *result = xrrp[original_size_id].y_org;
@@ -55,14 +55,14 @@ static void display_get_position(Bool i, int *result) {
   XCloseDisplay(display);
 }
 
-static void display_get_size(Bool i, int *result) {
+static void display_get_size(bool i, int *result) {
   Display *display = XOpenDisplay(NULL);
   *result = 0; int num_sizes; Rotation original_rotation; 
-  Window root = DefaultRootWindow(display);
+  Window root = XDefaultRootWindow(display);
   int screen = XDefaultScreen(display);
   XRRScreenConfiguration *conf = XRRGetScreenInfo(display, root);
   SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
-  if (XineramaIsActive (display)) {
+  if (XineramaIsActive(display)) {
     XRRScreenSize *xrrs = XRRSizes(display, screen, &num_sizes);
     if (!i) *result = xrrs[original_size_id].width;
     else if (i) *result = xrrs[original_size_id].height;
@@ -74,7 +74,7 @@ static void display_get_size(Bool i, int *result) {
 int display_get_x() {
   if (displayXGetter == displayX && displayX != -1)
     return displayXGetter;
-  display_get_position(False, &displayXGetter);
+  display_get_position(false, &displayXGetter);
   int result = displayXGetter;
   displayX = result;
   return result;
@@ -83,7 +83,7 @@ int display_get_x() {
 int display_get_y() { 
   if (displayYGetter == displayY && displayY != -1)
     return displayYGetter;
-  display_get_position(True, &displayYGetter);
+  display_get_position(true, &displayYGetter);
   int result = displayYGetter;
   displayY = result;
   return result;
@@ -92,7 +92,7 @@ int display_get_y() {
 int display_get_width() {
   if (displayWidthGetter == displayWidth && displayWidth != -1) 
     return displayWidthGetter;
-  display_get_size(False, &displayWidthGetter);
+  display_get_size(false, &displayWidthGetter);
   int result = displayWidthGetter;
   displayWidth = result;
   return result;
@@ -101,7 +101,7 @@ int display_get_width() {
 int display_get_height() {
   if (displayHeightGetter == displayHeight && displayHeight != -1)
     return displayHeightGetter;
-  display_get_size(True, &displayHeightGetter);
+  display_get_size(true, &displayHeightGetter);
   int result = displayHeightGetter;
   displayHeight = result;
   return result;
