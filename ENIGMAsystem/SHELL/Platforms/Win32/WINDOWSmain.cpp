@@ -18,6 +18,7 @@
 
 #define NOMINMAX // for windows.h because we use std::min/max
 #include "WINDOWSmain.h"
+#include "WINDOWShandle.h"
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
