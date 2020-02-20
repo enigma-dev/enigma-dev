@@ -66,5 +66,5 @@ target_link_libraries(${LIB} PRIVATE ${PNG_LIBRARY})
 find_package(ZLIB)
 target_link_libraries(${LIB} PRIVATE ${ZLIB_LIBRARIES})
 
-install(TARGETS ${LIB} DESTINATION "${ENIGMA_DIR}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB}.dir/Debug/${LIB}.pdb" DESTINATION "${ENIGMA_DIR}" OPTIONAL)
+install(TARGETS ${LIB} DESTINATION .)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB}.dir/Debug/${LIB}.pdb" DESTINATION . OPTIONAL)
