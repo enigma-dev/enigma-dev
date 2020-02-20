@@ -22,6 +22,7 @@
 #include "XLIBmain.h"
 #include "LINUXjoystick.h"
 #include "XLIBwindow.h"
+#include "XDisplayGetters.h"
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
@@ -193,15 +194,24 @@ void handleInput() {
 }
 
 }  // namespace enigma
+  
 
 namespace enigma_user {
 
+int display_get_x() {
+  return ::display_get_x();
+}
+
+int display_get_y() { 
+  return ::display_get_y();
+}
+
 int display_get_width() {
-  return XDisplayWidth(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
+  return ::display_get_width();
 }
 
 int display_get_height() { 
-  return XDisplayHeight(enigma::x11::disp, XDefaultScreen(enigma::x11::disp));
+  return ::display_get_height();
 }
 
 }  // namespace enigma_user

@@ -1,6 +1,17 @@
 syntax = "proto2";
 package buffers;
 
+enum FileKind {
+  UNKNOWN = 0;
+  APPLICATION = 1;
+  AUDIO = 2;
+  FONT = 3;
+  IMAGE = 4;
+  MODEL = 5;
+  TEXT = 6;
+  VIDEO = 7;
+}
+
 import "google/protobuf/descriptor.proto";
 extend google.protobuf.FieldOptions {
   optional int32 id_start = 50000;
@@ -10,4 +21,6 @@ extend google.protobuf.FieldOptions {
   optional string gmx_id = 50004;
   optional string yyp = 50005;
   optional string yyp_id = 50006;
+  // When file_path is true, this is the type of file indicated.
+  optional FileKind file_kind = 50007;
 }

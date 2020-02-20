@@ -287,12 +287,12 @@ void window_default(bool center_size) {
 
 void window_center() {
   int i = 0;
+  int targetX = display_get_x() + ((display_get_width() - window_get_width()) / 2);
+  int targetY = display_get_y() + ((display_get_height() - window_get_height()) / 2);
   // without this while loop, the window won't be guaranteed to center 
   // at game init, in xlib, which is weird, but this makes it necessary.
-  while ((enigma::windowX != display_get_width() / 2 - window_get_width() / 2 || 
-          enigma::windowY != display_get_height() / 2 - window_get_height() / 2)) {
-          window_set_position(display_get_width() / 2 - window_get_width() / 2, 
-                              display_get_height() / 2 - window_get_height() / 2);
+  while (enigma::windowX != targetX || enigma::windowY != targetY) {
+    window_set_position(targetX, targetY);
     if (i >= 15) break; 
     i++;
   }

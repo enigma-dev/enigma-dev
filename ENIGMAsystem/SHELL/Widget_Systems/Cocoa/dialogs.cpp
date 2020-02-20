@@ -83,6 +83,9 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
     #ifndef DEBUG_MODE
     fputs(errortext.c_str(), stderr);
     #endif
+    if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
+      type == MESSAGE_TYPE::M_FATAL_USER_ERROR)
+      abort();
   }
 }
 
