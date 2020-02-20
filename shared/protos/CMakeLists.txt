@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 set(LIB "Protocols")
 set(LIB_VERSION "0.1")
 set(LIB_DESCRIPTION "Protobuf interface for ENIGMA and GameMaker files")
@@ -77,13 +79,5 @@ target_link_libraries(${LIB} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR}
 include_directories(${Protobuf_INCLUDE_DIRS})
 target_link_libraries(${LIB} PRIVATE ${Protobuf_LIBRARIES})
 
-foreach(_proto ${PROTO_FILES})
-    get_filename_component(_basename ${_proto} NAME_WE)
-	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.pb.h" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/.eobjs")
-endforeach()
-
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.h" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/.eobjs")
-get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
-get_filename_component(ENIGMA_DIR "${ENIGMA_DIR}" PATH)
-install(TARGETS ${LIB} DESTINATION "${ENIGMA_DIR}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB}.dir/Debug/${LIB}.pdb" DESTINATION "${ENIGMA_DIR}" OPTIONAL)
+install(TARGETS ${LIB} DESTINATION .)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB}.dir/Debug/${LIB}.pdb" DESTINATION . OPTIONAL)
