@@ -22,6 +22,7 @@
 #include <dshow.h>
 
 #include "Platforms/Win32/WINDOWSmain.h"
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
 namespace enigma {
 	vector<VideoStruct*> videoStructs;
