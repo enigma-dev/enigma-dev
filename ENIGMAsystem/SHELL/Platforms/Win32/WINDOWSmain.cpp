@@ -53,6 +53,12 @@ const int os_type = os_windows;
 
 namespace enigma
 {
+
+HINSTANCE hInstance;
+HWND hWnd;
+HDC window_hDC;
+HANDLE mainthread;
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 void (*touch_extension_register)(HWND hWnd);
