@@ -21,4 +21,4 @@ namespace enigma {
 
 void XSetIconFromSprite(Display *display, Window window, int ind, unsigned subimg);
 
-}
+} // namespace enigma
