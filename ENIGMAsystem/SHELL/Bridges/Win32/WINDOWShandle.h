@@ -2,9 +2,9 @@
 
 namespace enigma {
 
-HINSTANCE hInstance;
-HWND hWnd;
-HDC window_hDC;
-HANDLE mainthread;
+extern HINSTANCE hInstance;
+extern HWND hWnd;
+extern HDC window_hDC;
+extern HANDLE mainthread;
 
 } // namespace enigma
