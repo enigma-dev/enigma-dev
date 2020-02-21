@@ -23,7 +23,6 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "Universal_System/nlpo2.h"
 
 #include <Gdiplus.h>
 
@@ -38,30 +37,19 @@ void SetIconFromSprite(HWND window, int ind, unsigned subimg) {
   unsigned pngwidth, pngheight;
   data = graphics_copy_texture_pixels(spr->texturearray[subimg], &pngwidth, &pngheight);
 
-  const unsigned
-    widfull = nlpo2dc(pngwidth) + 1,
-    hgtfull = nlpo2dc(pngheight) + 1;
-  const int bitmap_size = widfull * hgtfull * 4;
+  HBITMAP hBitmap = CreateBitmap(pngwidth, pngheight, 1, 32, data);
 
-  HGLOBAL m_hMem = GlobalAlloc(GMEM_FIXED, bitmap_size);
-  BYTE *pmem = (BYTE *)GlobalLock(m_hMem);
-  memcpy(pmem, data, bitmap_size);
-
-  IStream *pstm;
-  CreateStreamOnHGlobal(m_hMem, FALSE, &pstm);
-
-  Gdiplus::Bitmap *bitmap = Gdiplus::Bitmap::FromStream(pstm, FALSE);
-  pstm->Release();
-
-  GlobalUnlock(m_hMem);
-
-  bitmap->RotateFlip(RotateNoneFlipX);
-  HICON hIcon = bitmap->GetHICON(&hIcon);
+  ICONINFO iconinfo;
+  iconinfo.fIcon = TRUE;
+  iconinfo.xHotspot = 0;
+  iconinfo.yHotspot = 0;
+  iconinfo.hbmMask = hBitmap;
+  iconinfo.hbmColor = hBitmap;
+  HICON hIcon = CreateIconIndirect(&iconinfo);
   PostMessage(window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 
   DeleteObject(hIcon);
-  delete bitmap;
-  GlobalFree(m_hMem);
+  DeleteObject(hBitmap);
 }
 
 } // namespace enigma
