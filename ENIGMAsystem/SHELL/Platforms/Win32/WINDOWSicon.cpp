@@ -18,7 +18,9 @@
 // Josh will probably gaze at this code lazily and think he has a better way to do it
 // but not realize we are dependent on converting the char array to an HICON datatype
 
-static inline void SetIconFromSprite(HWND window, int ind, unsigned subimg) {
+namespace enigma {
+
+void SetIconFromSprite(HWND window, int ind, unsigned subimg) {
   sprite *spr;
   if (!get_sprite_mtx(spr, ind))
     return;
@@ -52,3 +54,5 @@ static inline void SetIconFromSprite(HWND window, int ind, unsigned subimg) {
   delete bitmap;
   GlobalFree(m_hMem);
 }
+
+} // namespace enigma
