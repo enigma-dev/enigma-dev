@@ -28,9 +28,7 @@
 namespace enigma {
 
 void XSetIconFromSprite(Display *display, Window window, int ind, unsigned subimg) {
-  sprite *spr;
-  if (!get_sprite_mtx(spr, ind))
-    return;  
+  sprite *spr; if (!get_sprite_mtx(spr, ind)) return;  
 
   XSynchronize(display, True);
   Atom property = XInternAtom(display, "_NET_WM_ICON", False);
