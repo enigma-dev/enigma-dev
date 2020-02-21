@@ -17,7 +17,7 @@
 
 #include "Widget_Systems/widgets_mandatory.h"  // DEBUG_MESSAGE
 
-#include "Bridges/Win32/WINDOWSmain.h" // enigma::hWnd/hInstance
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
 #include <stdio.h>
 
