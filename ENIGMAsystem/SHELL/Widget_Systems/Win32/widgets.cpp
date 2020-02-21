@@ -31,7 +31,7 @@
 #define WINVER 9001
 #include "Widget_Systems/General/WSwidgets.h"
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
-#include "Platforms/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
 #include <windows.h>
 #include <commctrl.h>
