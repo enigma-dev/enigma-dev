@@ -21,6 +21,8 @@
 #include "Platforms/General/PFthreads.h"
 #include "Platforms/General/PFthreads_impl.h"
 
+#include "Bridges/Win32/WINDOWShandle.h"
+
 using enigma::ethread;
 using enigma::threads;
 
