@@ -45,13 +45,9 @@ namespace enigma_user {
 const int os_type = os_windows;
 }  // namespace enigma_user
 
-namespace enigma  //TODO: Find where this belongs
+namespace enigma
 {
-HINSTANCE hInstance;
-HWND hWnd;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-HDC window_hDC;
-HANDLE mainthread;
 
 void (*touch_extension_register)(HWND hWnd);
 
