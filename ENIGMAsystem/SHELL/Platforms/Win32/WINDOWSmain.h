@@ -21,6 +21,15 @@
 
 #include "Platforms/General/PFmain.h"
 
+
+#include <windows.h>
+
+namespace enigma //TODO: Find where this belongs
+{
+  extern HDC window_hDC;
+  extern HANDLE mainthread;
+}
+
 void enigma_catchmouse_backend(bool x);
 #define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
 
