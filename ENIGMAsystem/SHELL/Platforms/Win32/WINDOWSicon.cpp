@@ -27,14 +27,10 @@
 namespace enigma {
 
 void SetIconFromSprite(HWND window, int ind, unsigned subimg) {
-  sprite *spr;
-  if (!get_sprite_mtx(spr, ind))
-    return;
+  sprite *spr; if (!get_sprite_mtx(spr, ind)) return;
 
-  unsigned char *data = nullptr;
-  unsigned pngwidth, pngheight;
+  unsigned char *data = nullptr; unsigned pngwidth, pngheight;
   data = graphics_copy_texture_pixels(spr->texturearray[subimg], &pngwidth, &pngheight);
-
   HBITMAP hBitmap = CreateBitmap(pngwidth, pngheight, 1, 32, data);
 
   ICONINFO iconinfo;
