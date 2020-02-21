@@ -32,6 +32,11 @@ static inline string remove_trailing_zeros(long long numb) {
 
 namespace enigma {
 
+HINSTANCE hInstance;
+HWND hWnd;
+HDC window_hDC;
+HANDLE mainthread;
+
 // called from initGameWindow()
 // capture sdl window disp/hwnd
 void window_id_init() {
@@ -42,7 +47,7 @@ void window_id_init() {
   hInstance = systemInfo.info.win.hinstance;
 }
 
-}
+} // namespace enigma
 
 namespace enigma_user {
 
