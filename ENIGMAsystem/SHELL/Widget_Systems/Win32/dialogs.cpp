@@ -32,7 +32,6 @@
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
-#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/estring.h"
 #include "GameSettings.h"
