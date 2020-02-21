@@ -21,6 +21,7 @@
 #include "Platforms/General/PFmain.h" // For those damn vk_ constants.
 #include "Platforms/General/PFwindow.h"
 
+#include "WINDOWSicon.h"
 #include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
 #include "Widget_Systems/widgets_mandatory.h"
