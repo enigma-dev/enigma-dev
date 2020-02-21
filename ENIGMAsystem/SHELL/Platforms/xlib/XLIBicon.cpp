@@ -33,14 +33,10 @@ void XSetIconFromSprite(Display *display, Window window, int ind, unsigned subim
   XSynchronize(display, True);
   Atom property = XInternAtom(display, "_NET_WM_ICON", False);
 
-  unsigned char *data = nullptr;
-  unsigned pngwidth, pngheight;
+  unsigned char *data = nullptr; unsigned pngwidth, pngheight;
   data = graphics_copy_texture_pixels(spr->texturearray[subimg], &pngwidth, &pngheight);
   
-  unsigned
-    widfull = nlpo2dc(pngwidth) + 1,
-    hgtfull = nlpo2dc(pngheight) + 1,
-    ih,iw;
+  unsigned widfull = nlpo2dc(pngwidth) + 1, hgtfull = nlpo2dc(pngheight) + 1, ih,iw;
   const int bitmap_size = widfull * hgtfull * 4;
   unsigned char *bitmap = new unsigned char[bitmap_size]();
 
