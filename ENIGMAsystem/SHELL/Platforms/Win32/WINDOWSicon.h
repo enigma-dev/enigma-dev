@@ -21,4 +21,4 @@ namespace enigma {
 
 void SetIconFromSprite(HWND window, int ind, unsigned subimg);
 
-}
+} // namespace enigma
