@@ -17,7 +17,7 @@
 
 #include "Window.h"
 #include "Platforms/SDL/Window.h"
-#include "Platforms/Win32/WINDOWShandle.h"
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
