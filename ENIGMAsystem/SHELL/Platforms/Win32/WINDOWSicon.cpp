@@ -18,6 +18,15 @@
 // Josh will probably gaze at this code lazily and think he has a better way to do it
 // but not realize we are dependent on converting the char array to an HICON datatype
 
+#include "WINDOWSicon.h"
+
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/Resources/sprites_internal.h"
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Universal_System/nlpo2.h"
+
+#include <Gdiplus.h>
+
 namespace enigma {
 
 void SetIconFromSprite(HWND window, int ind, unsigned subimg) {
