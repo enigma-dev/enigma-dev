@@ -99,6 +99,30 @@ string window_identifier() {
 string window_get_identifier(void *hwnd) {
   return remove_trailing_zeros((long long)(HWND)hwnd);
 }
+	
+static int currentIconIndex;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::SetIconFromSprite(enigma::hWnd, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
+}
 
 // GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
 // Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,
