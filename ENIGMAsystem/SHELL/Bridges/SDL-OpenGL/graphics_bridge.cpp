@@ -19,6 +19,7 @@
 #include "Graphics_Systems/OpenGL-Common/version.h"
 #include "Bridges/OpenGL/GLload.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 #include "Platforms/SDL/Window.h"
 
 #include <SDL2/SDL.h>
