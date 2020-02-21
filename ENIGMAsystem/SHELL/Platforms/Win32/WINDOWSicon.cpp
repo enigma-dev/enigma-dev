@@ -24,8 +24,6 @@
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
-#include <Gdiplus.h>
-
 namespace enigma {
 
 void SetIconFromSprite(HWND window, int ind, unsigned subimg) {
