@@ -31,6 +31,7 @@
 using namespace std;
 
 #include "../General/WSmenus.h"
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
 static bool menu_add_item(HMENU menu,int iid,int id,string str,unsigned int type)
 {
