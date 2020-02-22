@@ -2,6 +2,7 @@
 #include "Event.h"
 #include "Joystick.h"
 #include "Gamepad.h"
+#include "Icon.h"
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
@@ -138,6 +139,30 @@ void io_handle() {
   enigma::input_push();
   if (enigma::handleEvents() != 0) exit(0);
   enigma::update_mouse_variables();
+}
+
+static int currentIconIndex;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::SetIconFromSprite(windowHandle, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
 }
 
 int window_get_visible() {
