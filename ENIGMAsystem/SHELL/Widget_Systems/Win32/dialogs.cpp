@@ -750,7 +750,7 @@ string get_password(string message, string def) {
   return gs_str_submitted;
 }
 
-double get_integer(string message, var def) {
+double get_integer(string message, variant def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
   gs_cap = message_get_caption(); gs_message = message; gs_def = remove_trailing_zeros(val);
   DialogBoxW(enigma::hInstance, L"getstringdialog", enigma::hWnd, GetStrProc);
@@ -760,7 +760,7 @@ double get_integer(string message, var def) {
   return strtod(gs_str_submitted.c_str(), NULL);
 }
 
-double get_passcode(string message, var def) {
+double get_passcode(string message, variant def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
   gs_cap = message_get_caption(); gs_message = message; gs_def = remove_trailing_zeros(val);
   DialogBoxW(enigma::hInstance, L"getpassworddialog", enigma::hWnd, GetStrProc);
