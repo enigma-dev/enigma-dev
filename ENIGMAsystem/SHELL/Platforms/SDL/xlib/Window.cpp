@@ -45,11 +45,15 @@ void window_id_init() {
 
 namespace enigma_user {
 
-// returns sdl window pointer for extensions
-// we cast to/from a void * for generic-ness
+#if GM_COMPATIBILITY_VERSION <= 81
+unsigned long long window_handle() {
+  return (unsigned long long)enigma::x11::win;
+}
+#else
 void *window_handle() {
   return (void *)enigma::x11::win;
 }
+#endif  
 
 // returns an identifier for the sdl window
 // this string can be used in shell scripts
