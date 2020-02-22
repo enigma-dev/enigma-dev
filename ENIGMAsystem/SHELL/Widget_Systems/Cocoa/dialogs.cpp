@@ -129,7 +129,7 @@ string get_password(string message, string def) {
   return cocoa_password_box(message.c_str(), def.c_str(), dialog_caption.c_str());
 }
 
-double get_integer(string message, var def) {
+double get_integer(string message, variant def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
   string integer = remove_trailing_zeros(val);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
@@ -137,7 +137,7 @@ double get_integer(string message, var def) {
   return !result.empty() ? strtod(result.c_str(), NULL) : 0;
 }
 
-double get_passcode(string message, var def) {
+double get_passcode(string message, variant def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
   string integer = remove_trailing_zeros(val);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
