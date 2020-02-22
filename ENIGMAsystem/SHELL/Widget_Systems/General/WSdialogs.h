@@ -69,8 +69,8 @@ enum {
 	int show_attempt(string errortext);
 	string get_string(string message, string def);
 	string get_password(string message, string def);
-	double get_integer(string message, variant def);
-	double get_passcode(string message, variant def);
+	double get_integer(string message, var def);
+	double get_passcode(string message, var def);
 	string get_open_filename(string filter, string fname);
 	string get_open_filenames(string filter, string fname);
 	string get_save_filename(string filter, string fname);
