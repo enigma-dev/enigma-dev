@@ -217,7 +217,7 @@ void set_synchronization(bool enable);
 #if GM_COMPATIBILITY_VERSION <= 81
 unsigned long long window_handle();
 #else
-void* window_handle();
+void *window_handle();
 #endif 
 
 std::string window_identifier(); // a string containing the number corresponding to the game's main window handle (shell script)
