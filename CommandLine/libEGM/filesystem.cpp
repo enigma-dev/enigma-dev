@@ -1,6 +1,7 @@
 #include "filesystem.h"
 
 #include <iostream>
+#include <string>
 
 bool StartsWith(const string &str, const string &prefix) {
   if (prefix.length() > str.length()) return false;
