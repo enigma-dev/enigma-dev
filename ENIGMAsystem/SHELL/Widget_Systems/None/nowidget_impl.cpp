@@ -125,7 +125,7 @@ string get_string(string str, string def) {
   return (input.empty()) ? def : input;
 }
 
-double get_integer(string str, var def) {
+double get_integer(string str, variant def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
   printf("%s\n", str.c_str());
   string input;
