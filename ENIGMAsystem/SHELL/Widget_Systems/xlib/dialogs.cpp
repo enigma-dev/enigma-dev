@@ -90,12 +90,14 @@ string get_password(string message, string def) {
   return enigma::current_widget_engine->get_password(message, def);
 }
 
-double get_integer(string message, double def) {
-  return enigma::current_widget_engine->get_integer(message, def);
+double get_integer(string message, var def) {
+  double val = (strtod(def.c_str(), NULL)) ? : (double)def;
+  return enigma::current_widget_engine->get_integer(message, val);
 }
 
-double get_passcode(string message, double def) {
-  return enigma::current_widget_engine->get_passcode(message, def);
+double get_passcode(string message, var def) {
+  double val = (strtod(def.c_str(), NULL)) ? : (double)def;
+  return enigma::current_widget_engine->get_passcode(message, val);
 }
 
 string get_open_filename(string filter, string fname) {
