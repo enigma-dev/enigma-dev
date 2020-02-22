@@ -331,7 +331,7 @@ Events:
       {
         bool OoH = $out_of_health;
         $out_of_health = (health <= 0);
-        return out_of_health && !OoH;
+        return $out_of_health && !OoH;
       }
     Suffix: |
       if (health > 0) $out_of_health = 0;
