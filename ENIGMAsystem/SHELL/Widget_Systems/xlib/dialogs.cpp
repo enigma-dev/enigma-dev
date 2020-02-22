@@ -90,12 +90,12 @@ string get_password(string message, string def) {
   return enigma::current_widget_engine->get_password(message, def);
 }
 
-double get_integer(string message, var def) {
+double get_integer(string message, variant def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
   return enigma::current_widget_engine->get_integer(message, val);
 }
 
-double get_passcode(string message, var def) {
+double get_passcode(string message, variant def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
   return enigma::current_widget_engine->get_passcode(message, val);
 }
