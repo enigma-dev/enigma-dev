@@ -6,7 +6,7 @@
   <depth>0</depth>
   <persistent>0</persistent>
   <maskName>&lt;undefined&gt;</maskName>
-  <parentName>obj_single_parent</parentName>
+  <parentName>&lt;undefined&gt;</parentName>
   <events>
     <event enumb="0" eventtype="3">
       <action>
