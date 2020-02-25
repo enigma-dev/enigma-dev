@@ -25,10 +25,7 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>var trig;&#13;
-trig = 0;&#13;
-&#13;
-//In room creation, global.event_num = -1;&#13;
+            <string>//In room creation, global.event_num = -1;&#13;
 &#13;
 //Run this first&#13;
 if (global.event_num == -1)&#13;
@@ -47,12 +44,8 @@ else&#13;
 &#13;
 	event_triggered[0] = "Create"; &#13;
     event_perform(ev_destroy,0);&#13;
-    //1==Begin step?&#13;
-    trig = 1;&#13;
 	event_perform(ev_step,ev_step_begin);&#13;
-	trig = 2;&#13;
     event_perform(ev_step,ev_step_normal);&#13;
-    trig = 3;&#13;
     event_perform(ev_step,ev_step_end);&#13;
     event_perform(ev_alarm,0);&#13;
     event_perform(ev_alarm,1);&#13;
@@ -387,11 +380,7 @@ else&#13;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>//if (trig == 3)&#13;
-{&#13;
-    event_triggered[4] = "End step";&#13;
-    trig = 0;&#13;
-}</string>
+            <string>event_triggered[4] = "End step";</string>
           </argument>
         </arguments>
       </action>
@@ -413,11 +402,7 @@ else&#13;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>//if (trig == 1)&#13;
-{&#13;
-    event_triggered[2] = "Begin step";&#13;
-    trig = 0;&#13;
-}</string>
+            <string>event_triggered[2] = "Begin step";</string>
           </argument>
         </arguments>
       </action>
@@ -439,16 +424,12 @@ else&#13;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>//if (trig == 2)&#13;
-{&#13;
-    event_triggered[3] = "Step";&#13;
-    trig = 0;&#13;
-}</string>
+            <string>event_triggered[3] = "Step";</string>
           </argument>
         </arguments>
       </action>
     </event>
-    <event ename="&lt;undefined&gt;" eventtype="4">
+    <event ename="obj_events" eventtype="4">
       <action>
         <libid>1</libid>
         <id>603</id>

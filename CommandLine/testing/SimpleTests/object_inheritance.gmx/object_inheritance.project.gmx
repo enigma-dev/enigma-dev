@@ -16,7 +16,4 @@
     <room>rooms\rm_0</room>
   </rooms>
   <constants number="0"/>
-  <help>
-    <rtf>help.rtf</rtf>
-  </help>
 </assets>
