@@ -380,8 +380,8 @@ int OptionsParser::printInfo(const std::string &api)
 
 void OptionsParser::printHelp()
 {
-  outputStream << "Enigma Command Line Compiler" << std::endl
-            << _desc << std::endl;
+  outputStream << "Enigma Command Line Compiler" << std::endl << _desc << std::endl;
+  std::cout    << "Enigma Command Line Compiler" << std::endl << _desc << std::endl;
 }
 
 int OptionsParser::help(const std::string &str)
