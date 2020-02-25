@@ -113,7 +113,7 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("widgets,w", opt::value<std::string>()->default_value("None"), "Widget System (Win32, xlib, Cocoa, GTK+, None)")
     ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (DirectPlay, Asynchronous, BerkeleySockets, None)")
     ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System")
-    ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Alarms, Paths, Timelines, Particles, MotionPlanning, ttf, libpng, IniFilesystem, RegistrySpoof, Asynchronous, StudioPhysics, VirtualKeys, XRandR, XTEST, FileDropper)")
+    ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Alarms, Paths, Timelines, Particles, MotionPlanning, ttf, libpng, IniFilesystem, RegistrySpoof, Asynchronous, StudioPhysics, VirtualKeys, XRandR, XTEST, FileDropper, None)")
     ("compiler,x", opt::value<std::string>()->default_value(def_compiler), "Compiler.ey Descriptor")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
   ;
