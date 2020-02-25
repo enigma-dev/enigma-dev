@@ -448,7 +448,7 @@ else&#13;
         </arguments>
       </action>
     </event>
-    <event ename="obj_events" eventtype="4">
+    <event ename="&lt;undefined&gt;" eventtype="4">
       <action>
         <libid>1</libid>
         <id>603</id>

@@ -6,7 +6,7 @@
   <depth>0</depth>
   <persistent>0</persistent>
   <maskName>&lt;undefined&gt;</maskName>
-  <parentName>&lt;undefined&gt;</parentName>
+  <parentName>obj_grandchild_grandparent</parentName>
   <events/>
   <PhysicsObject>0</PhysicsObject>
   <PhysicsObjectSensor>0</PhysicsObjectSensor>
