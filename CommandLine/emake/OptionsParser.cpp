@@ -354,8 +354,10 @@ int OptionsParser::printInfo(const std::string &api)
           id = ey.stem().string();
         }
 
-        if (!name.empty() && !id.empty())
+        if (!name.empty() && !id.empty()) {
           outputStream << '\t' << name << " (" << id << "):" << std::endl;
+          std::cout    << '\t' << name << " (" << id << "):" << std::endl;
+        }
 
         if (!target.empty())
           outputStream << "\t\t Target: " << target << std::endl << std::endl;
