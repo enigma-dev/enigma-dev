@@ -1,4 +1,4 @@
-#include "OptionsParser.hpp" 
+#include "OptionsParser.hpp"
 #include "Main.hpp"
 
 #include "eyaml/eyaml.h"
