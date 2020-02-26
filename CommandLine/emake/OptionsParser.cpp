@@ -104,16 +104,16 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("port", opt::value<int>()->default_value(37818), "The port number to bind when in server mode.")
 #endif
     ("output,o", opt::value<std::string>(), "Output executable file")
-    ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
+    ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (Win32, xlib, Cocoa, SDL, None)")
     ("workdir,d", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
     ("codegen,k", opt::value<std::string>()->default_value(def_workdir), "Codegen Directory")
-    ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Release, Debug, Design)")
-    ("graphics,g", opt::value<std::string>()->default_value("OpenGL1"), "Graphics System (OpenGL1, OpenGL3, DirectX)")
-    ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (OpenAL, DirectSound, SFML, None)")
-    ("widgets,w", opt::value<std::string>()->default_value("None"), "Widget System (Win32, GTK, None)")
-    ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (Async, Berkeley, DirectPlay)")
+    ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Compile, Debug, Design)")
+    ("graphics,g", opt::value<std::string>()->default_value("OpenGL1"), "Graphics System (Direct3D9, Direct3D11, OpenGL1, OpenGL3, OpenGLES2, OpenGLES3, None)")
+    ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (DirectSound, OpenAL, SFML, FMODAudio, XAudio2, None)")
+    ("widgets,w", opt::value<std::string>()->default_value("None"), "Widget System (Win32, xlib, Cocoa, GTK+, None)")
+    ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (DirectPlay, Asynchronous, BerkeleySockets, None)")
     ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System")
-    ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Paths, Timelines, Particles)")
+    ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Alarms, Paths, Timelines, Particles, MotionPlanning, ttf, libpng, IniFilesystem, RegistrySpoof, Asynchronous, StudioPhysics, VirtualKeys, XRandR, XTEST, FileDropper, None)")
     ("compiler,x", opt::value<std::string>()->default_value(def_compiler), "Compiler.ey Descriptor")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
   ;
@@ -354,8 +354,10 @@ int OptionsParser::printInfo(const std::string &api)
           id = ey.stem().string();
         }
 
-        if (!name.empty() && !id.empty())
+        if (!name.empty() && !id.empty()) {
           outputStream << '\t' << name << " (" << id << "):" << std::endl;
+          std::cout    << '\t' << name << " (" << id << "):" << std::endl;
+        }
 
         if (!target.empty())
           outputStream << "\t\t Target: " << target << std::endl << std::endl;
@@ -380,8 +382,8 @@ int OptionsParser::printInfo(const std::string &api)
 
 void OptionsParser::printHelp()
 {
-  outputStream << "Enigma Command Line Compiler" << std::endl
-            << _desc << std::endl;
+  outputStream << "Enigma Command Line Compiler" << std::endl << _desc << std::endl;
+  std::cout    << "Enigma Command Line Compiler" << std::endl << _desc << std::endl;
 }
 
 int OptionsParser::help(const std::string &str)
