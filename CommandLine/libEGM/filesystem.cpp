@@ -37,14 +37,10 @@ fs::path InternalizeFile(const fs::path &file,
   }
   fs::path relative = data/StripPath(file.string());
 
-  #ifdef USE_BOOST_FS
-    fs::copy_file(file, directory/relative);
-  #else
-    if (!fs::copy_file(file, directory/relative)) {
-      std::cerr << "Failed to copy \"" << file << "\" into EGM." << std::endl;
-      return "";
-    }
-  #endif
+  if (!fs::copy_file(file, directory/relative)) {
+    std::cerr << "Failed to copy \"" << file << "\" into EGM." << std::endl;
+    return "";
+  }
 
   return relative;
 }
@@ -64,10 +60,5 @@ string TempFileName(const string &pattern) {
 }
 
 void DeleteFile(const string &fName) {
-#ifdef USE_BOOST_FS
-  fs::remove(fName.c_str());
-#else
   std::remove(fName.c_str());
-#endif
-
 }

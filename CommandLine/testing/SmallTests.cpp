@@ -1,12 +1,14 @@
-#include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
+#include "TestHarness.hpp"
+
 #include <gtest/gtest.h>
+
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
-
-#include "TestHarness.hpp"
 
 namespace {
 
@@ -21,9 +23,10 @@ const char *const kDrivenTestDirectory = "CommandLine/testing/Tests";
 
 void read_files(string directory,
                 NameMap *games, NameMap *sources, NameMap *others) {
-  boost::filesystem::path targetDir(directory);
-  boost::filesystem::directory_iterator iter(targetDir), eod;
-  BOOST_FOREACH(boost::filesystem::path const& i, std::make_pair(iter, eod)) {
+  fs::path targetDir(directory);
+  fs::directory_iterator iter(targetDir);
+  for(auto& p : iter) {
+    fs::path i = p.path();
     string fullname = i.filename().string();
     string filename = i.filename().stem().string();
     string ext = i.filename().extension().string();

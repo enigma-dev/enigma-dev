@@ -9,12 +9,12 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   # new gcc 
   sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
-  # new lcov
-  sudo add-apt-repository -y ppa:cheeseboy16/travis-backports
-
   # new boost for old travis
   if [ "$COMPILER" == "Android" ]; then
     sudo add-apt-repository -y ppa:mhier/libboost-latest;
+  else
+    # new lcov
+    sudo add-apt-repository -y ppa:cheeseboy16/travis-backports
   fi
 
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";

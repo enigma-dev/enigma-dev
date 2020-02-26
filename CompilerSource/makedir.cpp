@@ -18,7 +18,6 @@
 #include "makedir.h"
 
 #include <iostream>
-using namespace std;
 
 // Only include the headers for mkdir() if we are not on Windows; on Windows we use CreateDirectory() from windows.h
 #if CURRENT_PLATFORM_ID != OS_WINDOWS
@@ -28,7 +27,7 @@ using namespace std;
 #include <windows.h>
 #endif
 
-string myReplace(string str, const string& oldStr, const string& newStr)
+std::string myReplace(std::string str, const std::string& oldStr, const std::string& newStr)
 {
   std::string nstr = str;
   size_t pos = 0;
@@ -40,15 +39,15 @@ string myReplace(string str, const string& oldStr, const string& newStr)
   return nstr;
 }
 
-string escapeEnv(string str, string env) {
+std::string escapeEnv(std::string str, std::string env) {
 	char* val = getenv(env.c_str());
 	if (val != NULL)
 		return myReplace(str, "%" + env + "%", val);
 	return str;
 }
 
-string escapeEnv(string str) {
-	string escaped = escapeEnv(str, "LOCALAPPDATA");
+std::string escapeEnv(std::string str) {
+	std::string escaped = escapeEnv(str, "LOCALAPPDATA");
 	escaped = escapeEnv(escaped, "APPDATA");
 	escaped = escapeEnv(escaped, "PROGRAMDATA");
 	escaped = escapeEnv(escaped, "ALLUSERSPROFILE");
