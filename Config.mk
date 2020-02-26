@@ -18,7 +18,9 @@ LDFLAGS := -g
 
 # For older travis instances
 ifeq ($(shell expr $(GCCVER) \<= 6), 1)
-  CXXFLAGS += -std=c++11
+	ifneq ($(OS), Darwin)
+		CXXFLAGS += -std=c++11
+	endif
 endif
 
 # These will be relative to the file that includes this Makefile
