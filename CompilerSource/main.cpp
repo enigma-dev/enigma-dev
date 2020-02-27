@@ -39,12 +39,14 @@ int m_prog_loop_cfp();
 #include <sys/time.h>
 
 #ifdef _WIN32
+ #define byte __windows_byte_workaround
  #include <windows.h>
  #define dllexport extern "C" __declspec(dllexport)
    #define DECLARE_TIME() clock_t cs, ce
    #define START_TIME() cs = clock()
    #define STOP_TIME() ce = clock()
    #define PRINT_TIME() (((ce - cs) * 1000)/CLOCKS_PER_SEC)
+  #undef byte
 #else
  #define dllexport extern "C"
  #include <cstdio>

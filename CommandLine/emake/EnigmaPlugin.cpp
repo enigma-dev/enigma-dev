@@ -4,7 +4,9 @@
 #include "OS_Switchboard.h"
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-#	include <windows.h>
+# define byte __windows_byte_workaround
+# include <windows.h>
+# undef byte
 #	include <process.h>
 #else
 #	include <pthread.h>
