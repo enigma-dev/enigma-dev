@@ -318,11 +318,13 @@ void display_mouse_set(int x,int y) {
 }
 
 int display_get_x() {
-  return 0; // TODO
+  RECT rc; GetWindowRect(GetDesktopWindow(), &rc);
+  return rc.left;
 }
 
 int display_get_y() {
-  return 0; // TODO
+  RECT rc; GetWindowRect(GetDesktopWindow(), &rc);
+  return rc.top;
 }
 
 int display_get_width() {
