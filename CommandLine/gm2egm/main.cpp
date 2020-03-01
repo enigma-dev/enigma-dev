@@ -3,16 +3,10 @@
 #include "yyp.h"
 #include "egm.h"
 
+#include "strings_util.h"
+
 #include <iostream>
 #include <string>
-
-static std::string tolower(const std::string &str) {
-  std::string res = str;
-  for (size_t i = 0; i < res.length(); ++i) {
-    if (res[i] >= 'A' && res[i] <= 'Z') res[i] += 'a' - 'A';
-  }
-  return res;
-}
 
 int main(int argc, char *argv[])
 {

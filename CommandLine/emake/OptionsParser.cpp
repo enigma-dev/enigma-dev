@@ -2,18 +2,14 @@
 #include "Main.hpp"
 
 #include "eyaml/eyaml.h"
+#include "strings_util.h"
 #include "OS_Switchboard.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/exception/diagnostic_information.hpp>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <iostream>
 #include <cctype> // std::ispace
-
-namespace fs = boost::filesystem;
 
 inline std::string word_wrap(std::string text, unsigned per_line)
 {
@@ -222,8 +218,8 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
               widgets = _rawArgs["widgets"].as<std::string>(),
               collision = _rawArgs["collision"].as<std::string>(),
               network = _rawArgs["network"].as<std::string>(),
-              eobjs_directory = boost::filesystem::absolute(_rawArgs["workdir"].as<std::string>()).string(),
-              codegen_directory = boost::filesystem::absolute(_rawArgs["codegen"].as<std::string>()).string();
+              eobjs_directory = fs::absolute(_rawArgs["workdir"].as<std::string>()).string(),
+              codegen_directory = fs::absolute(_rawArgs["codegen"].as<std::string>()).string();
 
   int inherit_strings = 0,
       inherit_escapes = 0,
@@ -287,11 +283,12 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
 
 int OptionsParser::find_ey(const char* dir)
 {
-  boost::filesystem::path targetDir(dir);
-  boost::filesystem::recursive_directory_iterator iter(targetDir), eod;
+  fs::path targetDir(dir);
+  fs::recursive_directory_iterator iter(targetDir);
 
-  BOOST_FOREACH(boost::filesystem::path const& i, std::make_pair(iter, eod))
+  for(auto& p : iter)
   {
+    fs::path i = p.path();
     if (is_regular_file(i))
     {
       auto ey = i.string().find(".ey");
@@ -350,7 +347,7 @@ int OptionsParser::printInfo(const std::string &api)
           id = about.get("id"); // allow alias
         if (id.empty()) {
           // compilers use filename minus ext as id
-          boost::filesystem::path ey(p);
+          fs::path ey(p);
           id = ey.stem().string();
         }
 
@@ -454,7 +451,7 @@ int OptionsParser::searchCompilers(const std::string &target)
 {
   auto it = std::find_if(std::begin(_api["Compilers"]), std::end(_api["Compilers"]), [target](std::string &a)
   {
-    boost::filesystem::path ey(a);
+    fs::path ey(a);
     return ey.stem().string() == target;
   });
 
@@ -485,8 +482,7 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
   if (it != std::end(_api[api]))
   {
     //set api
-    std::string lower = api;
-    boost::algorithm::to_lower(lower);
+    std::string lower = tolower(api);
 
     if (lower == "extensions")
     {
