@@ -318,11 +318,13 @@ void display_mouse_set(int x,int y) {
 }
 
 int display_get_x() {
-  return 0; // TODO
+  // Windows is different than our Unix-like platforms in that this value is always zero...
+  return 0;
 }
 
 int display_get_y() {
-  return 0; // TODO
+  // Windows is different than our Unix-like platforms in that this value is always zero...
+  return 0;
 }
 
 int display_get_width() {
