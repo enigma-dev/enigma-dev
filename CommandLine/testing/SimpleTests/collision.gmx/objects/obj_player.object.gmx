@@ -53,14 +53,14 @@ gtest_expect_eq(position_free(x,y),0);&#13;
 &#13;
 gtest_expect_eq(position_empty(122,122),1);&#13;
 gtest_expect_eq(position_meeting(48,48,obj_player),1);&#13;
-gtest_expect_eq(instance_exists(collision_rectangle(16,16,80,80,obj_player,1,0)),1);&#13;
-gtest_expect_eq(instance_exists(collision_line(16,10,80,80,obj_player,1,0)),1);&#13;
-gtest_expect_eq(instance_exists(collision_point(40,56,obj_player,1,0)),1);&#13;
-gtest_expect_eq(instance_exists(collision_circle(44,52,3,obj_player,1,0)),1);&#13;
-gtest_expect_eq(instance_exists(collision_ellipse(40,40,54,54,obj_player,1,0)),1);&#13;
-gtest_expect_eq(instance_exists(instance_position(48,48,obj_player)),1);&#13;
+gtest_expect_eq(collision_rectangle(16,16,80,80,obj_player,1,0),100000);&#13;
+gtest_expect_eq(collision_line(16,10,80,80,obj_player,1,0),100000);&#13;
+gtest_expect_eq(collision_point(40,56,obj_player,1,0),100000);&#13;
+gtest_expect_eq(collision_circle(44,52,3,obj_player,1,0),100000);&#13;
+gtest_expect_eq(collision_ellipse(40,40,54,54,obj_player,1,0),100000);&#13;
+gtest_expect_eq(instance_position(48,48,obj_player),100000);&#13;
 &#13;
-gtest_expect_eq(round(distance_to_point(63,64)),45);&#13;
+gtest_expect_eq(distance_to_point(33,32),1);&#13;
 alarm[0] = 1;</string>
           </argument>
         </arguments>
@@ -83,31 +83,31 @@ alarm[0] = 1;</string>
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>gtest_expect_eq(instance_exists(instance_position(112,112,obj_enemy)),1);&#13;
-position_destroy_solid(112,112);&#13;
-gtest_expect_eq(instance_exists(instance_position(112,112,obj_enemy)),0);&#13;
+            <string>gtest_expect_eq(instance_position(128,48,obj_enemy),100002);&#13;
+position_destroy_solid(128,48);&#13;
+gtest_expect_eq(instance_exists(instance_position(128,48,obj_enemy)),0);&#13;
 instance_create(224,224,obj_enemy);&#13;
-gtest_expect_eq(instance_exists(instance_position(224,224,obj_enemy)),1);&#13;
+gtest_expect_eq(instance_position(224,224,obj_enemy),100003);&#13;
 position_destroy(224,224);&#13;
 gtest_expect_eq(instance_exists(instance_position(224,224,obj_enemy)),0);&#13;
 &#13;
-instance_create(48,208,obj_enemy);&#13;
+instance_create(48,128,obj_enemy);&#13;
 move_contact_object(obj_enemy,270,-1,1);&#13;
-gtest_expect_eq(round(y),175);&#13;
+gtest_expect_eq_eps(y,95);&#13;
 x = 48;&#13;
-y = 208;&#13;
+y = 128;&#13;
 move_outside_object(obj_enemy,0,-1,0);&#13;
-gtest_expect_eq(round(x),81);&#13;
+gtest_expect_eq_eps(x,81);&#13;
 x = 96;&#13;
 y = 212;&#13;
-instance_deactivate_region(16,180,32,32,1,1);&#13;
-gtest_expect_eq(instance_exists(instance_position(48,208,obj_enemy)),0);&#13;
-instance_activate_region(16,180,32,32,1);&#13;
-gtest_expect_eq(instance_exists(instance_position(48,208,obj_enemy)),1);&#13;
-instance_deactivate_circle(48,208,6,1,1);&#13;
-gtest_expect_eq(instance_exists(instance_position(48,208,obj_enemy)),0);&#13;
-instance_activate_circle(48,208,6,1);&#13;
-gtest_expect_eq(instance_exists(instance_position(48,208,obj_enemy)),1);&#13;
+instance_deactivate_region(16,96,32,32,1,1);&#13;
+gtest_expect_eq(instance_exists(instance_position(48,128,obj_enemy)),0);&#13;
+instance_activate_region(16,96,32,32,1);&#13;
+gtest_expect_eq(instance_position(48,128,obj_enemy),100004);&#13;
+instance_deactivate_circle(48,96,6,1,1);&#13;
+gtest_expect_eq(instance_exists(instance_position(48,96,obj_enemy)),0);&#13;
+instance_activate_circle(48,96,6,1);&#13;
+gtest_expect_eq(instance_position(48,128,obj_enemy),100004);&#13;
 &#13;
 game_end();</string>
           </argument>
@@ -131,18 +131,18 @@ game_end();</string>
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>gtest_expect_eq(floor(distance_to_object(obj_enemy)),181);&#13;
-position_change(208,208,obj_change,1);&#13;
+            <string>position_change(128,128,obj_change,1);&#13;
 gtest_expect_eq(instance_exists(obj_change),1);&#13;
-gtest_expect_eq(instance_exists(instance_position(208,208,obj_change)),1);&#13;
-gtest_expect_eq(instance_exists(instance_position(208,208,obj_enemy)),0);&#13;
+gtest_expect_eq(instance_position(128,128,obj_change),100001);&#13;
+gtest_expect_eq(instance_exists(instance_position(128,128,obj_enemy)),0);&#13;
 &#13;
 //Check destroying objects at position&#13;
-position_destroy_object(208,208,obj_change);&#13;
-gtest_expect_eq(instance_exists(instance_position(208,208,obj_change)),0);&#13;
+position_destroy_object(128,128,obj_change);&#13;
+gtest_expect_eq(instance_exists(instance_position(128,128,obj_change)),0);&#13;
 object_set_solid(obj_enemy,1);&#13;
-instance_create(112,112,obj_enemy);&#13;
-gtest_expect_eq(instance_exists(instance_position(112,112,obj_enemy)),1);&#13;
+instance_create(128,48,obj_enemy);&#13;
+gtest_expect_eq_eps(distance_to_object(obj_enemy),48);
+gtest_expect_eq(instance_position(128,48,obj_enemy),100002);&#13;
 alarm[1] = 1;</string>
           </argument>
         </arguments>

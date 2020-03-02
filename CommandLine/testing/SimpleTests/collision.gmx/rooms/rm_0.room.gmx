@@ -51,7 +51,7 @@
   </views>
   <instances>
     <instance code="" colour="4294967295" id="100008" locked="0" name="inst_E2E58C14" objName="obj_player" rotation="0.0" scaleX="1.0" scaleY="1.0" x="48" y="48"/>
-    <instance code="" colour="4294967295" id="100007" locked="0" name="inst_1A8AFBE7" objName="obj_enemy" rotation="0.0" scaleX="1.0" scaleY="1.0" x="208" y="208"/>
+    <instance code="" colour="4294967295" id="100007" locked="0" name="inst_1A8AFBE7" objName="obj_enemy" rotation="0.0" scaleX="1.0" scaleY="1.0" x="128" y="128"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>
