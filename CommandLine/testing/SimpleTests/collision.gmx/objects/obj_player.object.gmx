@@ -97,7 +97,7 @@ gtest_expect_eq(y,94);&#13;
 x = 48;&#13;
 y = 128;&#13;
 move_outside_object(obj_enemy,0,-1,0);&#13;
-gtest_expect_eq_eps(x,80);&#13;
+gtest_expect_eq(x,80);&#13;
 x = 96;&#13;
 y = 212;&#13;
 instance_deactivate_region(16,96,32,32,1,1);&#13;
@@ -141,7 +141,7 @@ position_destroy_object(128,128,obj_change);&#13;
 gtest_expect_eq(instance_position(128,128,obj_change),noone);&#13;
 object_set_solid(obj_enemy,1);&#13;
 instance_create(128,48,obj_enemy);&#13;
-gtest_expect_eq_eps(distance_to_object(obj_enemy),48);
+gtest_expect_eq(distance_to_object(obj_enemy),48);
 gtest_expect_eq(instance_position(128,48,obj_enemy),100002);&#13;
 alarm[1] = 1;</string>
           </argument>
