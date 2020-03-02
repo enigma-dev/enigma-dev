@@ -93,7 +93,7 @@ gtest_expect_eq(instance_exists(instance_position(224,224,obj_enemy)),0);&#13;
 &#13;
 instance_create(48,128,obj_enemy);&#13;
 move_contact_object(obj_enemy,270,-1,1);&#13;
-gtest_expect_eq_eps(y,95);&#13;
+gtest_expect_eq(y,95);&#13;
 x = 48;&#13;
 y = 128;&#13;
 move_outside_object(obj_enemy,0,-1,0);&#13;
