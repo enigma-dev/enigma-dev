@@ -20,11 +20,15 @@
 #import <SDL2/SDL.h>
 #import <SDL2/SDL_syswm.h>
 
-long cocoa_window_identifier() {
+void *cocoa_window_handle() {
   SDL_SysWMinfo wmInfo;
   SDL_VERSION(&wmInfo.version);
   SDL_GetWindowWMInfo(enigma::windowHandle, &wmInfo);
-  return [(NSWindow *)wmInfo.info.cocoa.window windowNubmer];
+  return (void *)wmInfo.info.cocoa.window;
+}
+
+long cocoa_window_identifier() {
+  return [(NSWindow *)cocoa_window_handle() windowNubmer];
 }
 
 long cocoa_window_get_identifier(void *hwnd) {
