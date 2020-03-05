@@ -20,6 +20,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
+static inline extern "C" void *cocoa_window_handle();
 static inline extern "C" long cocoa_window_identifier();
 static inline extern "C" long cocoa_window_get_identifier(void *hwnd);
 
@@ -35,12 +36,9 @@ static inline string remove_trailing_zeros(long numb) {
 namespace enigma {
 
 // called from initGameWindow()
-// capture sdl window disp/hwnd
+// capture sdl window win/winid
 void window_id_init() {
-  SDL_SysWMinfo wmInfo;
-  SDL_VERSION(&wmInfo.version);
-  SDL_GetWindowWMInfo(enigma::windowHandle, &wmInfo);
-  enigma::NSWin = (void *)wmInfo.info.cocoa.window;
+  enigma::NSWin = cocoa_window_handle();
   enigma::WinNum = cocoa_window_identifier();
 }
 
