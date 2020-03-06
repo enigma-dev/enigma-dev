@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 Samuel Venable
+/** Copyright (C) 2020 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -55,11 +55,9 @@ void UnInstallHook(HHOOK Hook) {
 
 LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   LRESULT rc = CallWindowProc(oldProc, hWnd, uMsg, wParam, lParam);
-
   if (uMsg == WM_DROPFILES) {
     if (!def_allowmulti) dropped_files.clear();
     hDrop = (HDROP)wParam;
-
     UINT nNumOfFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
     vector<wchar_t> fName;
     for (UINT i = 0; i < nNumOfFiles; i += 1) {
@@ -67,23 +65,23 @@ LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       DragQueryFileW(hDrop, i, fName.data(), fName.size());
       dropped_files.insert(shorten({fName.data(), fName.size() - 1}));
     }
-
     DragFinish(hDrop);
+    AllowSetForegroundWindow(GetWindowThreadProcessId(enigma::hWnd, NULL));
+    SetForegroundWindow(enigma::hWnd);
+    SetActiveWindow(enigma::hWnd);
+    SetFocus(enigma::hWnd);
   }
-
   return rc;
 }
 
 LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
   if (nCode == HC_ACTION) {
     CWPSTRUCT *pwp = (CWPSTRUCT *)lParam;
-
     if (pwp->message == WM_KILLFOCUS) {
       oldProc = (WNDPROC)SetWindowLongPtrW(enigma::hWnd, GWLP_WNDPROC, (LONG_PTR)HookWndProc);
       UnInstallHook(hook);
     }
   }
-
   return CallNextHookEx(hook, nCode, wParam, lParam);
 }
 
@@ -98,7 +96,6 @@ string file_dnd_apply_filter(string pattern, bool allowfiles, bool allowdirs, bo
   pattern = string_replace_all(pattern, "*", "");
   vector<string> extVec = split_string(pattern, ';');
   set<string> filteredNames;
-
   for (const string &droppedFile : dropped_files) {
     for (const string &ext : extVec) {
       if (ext == "." || ext == filename_ext(droppedFile)) {
@@ -109,7 +106,6 @@ string file_dnd_apply_filter(string pattern, bool allowfiles, bool allowdirs, bo
       }
     }
   }
-
   string fname = "";
   if (filteredNames.empty()) return fname;
   for (const string &filteredName : filteredNames) {
