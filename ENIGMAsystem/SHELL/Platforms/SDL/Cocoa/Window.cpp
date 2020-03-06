@@ -20,9 +20,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
-static inline extern "C" void *cocoa_window_handle();
-static inline extern "C" long cocoa_window_identifier();
-static inline extern "C" long cocoa_window_get_identifier(void *hwnd);
+extern "C" void *cocoa_window_handle();
+extern "C" long cocoa_window_identifier();
+extern "C" long cocoa_window_get_identifier(void *hwnd);
 
 static inline string remove_trailing_zeros(long numb) {
   string strnumb = std::to_string(numb);
