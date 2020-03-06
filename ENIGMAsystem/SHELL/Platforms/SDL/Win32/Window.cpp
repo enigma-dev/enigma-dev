@@ -33,7 +33,7 @@ static inline string remove_trailing_zeros(long long numb) {
 namespace enigma {
 
 // called from initGameWindow()
-// capture sdl window disp/hwnd
+// capture sdl window hwnd/inst
 void window_id_init() {
   SDL_SysWMinfo systemInfo;
   SDL_VERSION(&systemInfo.version);
