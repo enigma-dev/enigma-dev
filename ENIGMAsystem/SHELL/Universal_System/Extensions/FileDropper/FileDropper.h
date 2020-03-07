@@ -1,4 +1,4 @@
-/** Copyright (C) 2019-2020 Samuel Venable
+/** Copyright (C) 2019 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
