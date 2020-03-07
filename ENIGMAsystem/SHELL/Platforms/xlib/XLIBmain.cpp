@@ -145,12 +145,10 @@ int handleEvents() {
         continue;
       }
       case ConfigureNotify: {
+        enigma::windowWidth = e.xconfigure.width;
+        enigma::windowHeight = e.xconfigure.height;
+
         if (WindowResizedCallback != NULL) {
-          windowX = e.xconfigure.x;
-          windowY = e.xconfigure.y;
-          windowWidth = e.xconfigure.width;
-          windowHeight = e.xconfigure.height;
-          compute_window_scaling();
           WindowResizedCallback();
         }
         continue;

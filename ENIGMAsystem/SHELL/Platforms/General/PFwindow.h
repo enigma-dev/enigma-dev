@@ -24,7 +24,6 @@
 #include <string>
 
 namespace enigma {
-
 extern char mousestatus[3];
 extern char last_mousestatus[3];
 extern char last_keybdstatus[256];
@@ -33,14 +32,8 @@ extern int cursorInt;
 extern int windowX;
 extern int windowY;
 
-extern int window_min_width;
-extern int window_max_width;
-extern int window_min_height;
-extern int window_max_height;
-
 void input_initialize();
 void input_push();
-
 }  // namespace enigma
 
 namespace enigma_user {
@@ -245,11 +238,6 @@ int window_get_region_width();
 int window_get_region_height();
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
-
-void window_set_min_width(int width);
-void window_set_min_height(int height);
-void window_set_max_width(int width);
-void window_set_max_height(int height);
 
 void window_set_minimized(bool minimized);
 void window_set_maximized(bool maximized);
