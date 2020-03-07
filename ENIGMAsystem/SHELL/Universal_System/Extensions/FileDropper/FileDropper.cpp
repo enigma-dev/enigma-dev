@@ -65,7 +65,12 @@ LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       DragQueryFileW(hDrop, i, fName.data(), fName.size());
       dropped_files.insert(shorten({fName.data(), fName.size() - 1}));
     }
-    DragFinish(hDrop);
+    DragFinish(hDrop); DWORD dwProcessId;
+    GetWindowThreadProcessId(enigma::hWnd, &dwProcessId);
+    AllowSetForegroundWindow(dwProcessId);
+    SetForegroundWindow(enigma::hWnd);
+    SetActiveWindow(enigma::hWnd);
+    SetFocus(enigma::hWnd);
     return 0;
   }
   return rc;
