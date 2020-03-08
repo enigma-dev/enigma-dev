@@ -121,13 +121,11 @@ int EnigmaPlugin::BuildGame(deprecated::JavaStruct::EnigmaStruct* data,
   return plugin_CompileEGM(data, fpath, mode);
 }
 
-int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* fpath)
+int EnigmaPlugin::BuildGame(const buffers::Game* data, GameMode mode, const char* fpath)
 {
   buffers::Project proj;
-  proj.set_allocated_game(data);
-  int ret = plugin_CompileProto(&proj, fpath, mode);
-  proj.release_game();
-  return ret;
+  proj.mutable_game()->CopyFrom(*data);
+  return plugin_CompileProto(&proj, fpath, mode);
 }
 
 const char* EnigmaPlugin::NextResource() {
