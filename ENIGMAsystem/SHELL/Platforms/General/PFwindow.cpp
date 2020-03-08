@@ -72,7 +72,7 @@ void compute_window_scaling() {
 
 void compute_window_size() {
   if (!regionWidth) return;
-  int isFullScreen = enigma_user::window_get_fullscreen();
+  compute_window_scaling();
   if (!isFullScreen) {
     if (windowAdapt && viewScale > 0) {  // If the window is to be adapted and Fixed Scale
       if (scaledWidth > windowWidth) windowWidth = scaledWidth;
