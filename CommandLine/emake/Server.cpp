@@ -12,10 +12,11 @@
 #include <grpc++/server_builder.h>
 #include <grpc++/server_context.h>
 
-#include <boost/filesystem.hpp>
-
+#include <filesystem>
 #include <memory>
 #include <future>
+
+namespace fs = std::filesystem;
 
 using namespace grpc;
 using namespace buffers;
@@ -115,7 +116,7 @@ class CompilerServiceImpl final : public Compiler::Service {
           id = about.get("id"); // allow alias
         if (id.empty()) {
           // compilers use filename minus ext as id
-          boost::filesystem::path ey(subsystem);
+          fs::path ey(subsystem);
           id = ey.stem().string();
         }
 
