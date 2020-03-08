@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     } else if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
       buffers::Project* project;
       if (!(project = gmk::LoadGMK(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+      return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext == "gmx") {
       fs::path p = input_file;
       if (fs::is_directory(p)) {
@@ -149,11 +149,11 @@ int main(int argc, char* argv[])
 
       buffers::Project* project;
       if (!(project = gmx::LoadGMX(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+      return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext == "yyp") {
       buffers::Project* project;
       if (!(project = yyp::LoadYYP(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+      return plugin.BuildGame(project->game(), mode, output_file.c_str());
 #endif
     } else {
       if (ext == "egm") {
