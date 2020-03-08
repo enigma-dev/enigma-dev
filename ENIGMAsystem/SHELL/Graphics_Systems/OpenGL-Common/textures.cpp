@@ -80,7 +80,7 @@ int graphics_create_texture_custom(unsigned width, unsigned height, unsigned ful
 int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap) {
   unsigned char* converted_pxdata = bgra2rgba((unsigned char*)pxdata, width, height);
   int ret = graphics_create_texture_custom(width, height, fullwidth, fullheight, converted_pxdata, mipmap, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
-  delete converted_pxdata;
+  delete[] converted_pxdata;
   return ret;
 }
 
@@ -116,7 +116,7 @@ void graphics_push_texture_pixels(int texture, int width, int height, unsigned c
   glBindTexture(GL_TEXTURE_2D, get_texture_peer(texture));
   unsigned char* converted_pxdata = bgra2rgba(pxdata, width, height);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, converted_pxdata);
-  delete converted_pxdata;
+  delete[] converted_pxdata;
 }
 
 } // namespace enigma
