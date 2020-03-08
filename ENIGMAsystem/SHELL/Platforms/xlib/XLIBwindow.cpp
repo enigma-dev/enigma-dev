@@ -28,7 +28,6 @@
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"
 #include "XLIBwindow.h"  // Type insurance for non-mandatory functions
-#include "Platforms/General/PFfilemanip.h"
 #include "XLIBicon.h"
 
 #include <X11/Xlib.h>
