@@ -38,7 +38,7 @@ public:
   void HandleGameLaunch();
   void LogMakeToConsole();
   int BuildGame(deprecated::JavaStruct::EnigmaStruct* data, GameMode mode, const char* fpath);
-  int BuildGame(buffers::Game* data, GameMode mode, const char* fpath);
+  int BuildGame(const buffers::Game& data, GameMode mode, const char* fpath);
   const char* NextResource();
   const char* FirstResource();
   bool ResourceIsFunction();
