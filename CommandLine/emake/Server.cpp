@@ -27,9 +27,8 @@ class CompilerServiceImpl final : public Compiler::Service {
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
     // use lambda capture to contain compile logic
-    auto fnc = [=] {
-      const CompileRequest req = *request;
-      plugin.BuildGame(const_cast<buffers::Game*>(&req.game()), emode_run, req.name().c_str());
+    auto fnc = [&] {
+      plugin.BuildGame(const_cast<buffers::Game*>(&request->game()), emode_run, request->name().c_str());
     };
     // asynchronously launch the compile request
     std::future<void> future = std::async(fnc);
