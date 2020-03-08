@@ -138,6 +138,30 @@ void io_handle() {
   enigma::update_mouse_variables();
 }
 
+static int currentIconIndex;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::SetIconFromSprite(windowHandle, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
+}
+
 int window_get_visible() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);
   return (flags & SDL_WINDOW_SHOWN);
