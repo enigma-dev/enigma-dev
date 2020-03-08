@@ -41,9 +41,17 @@ void init_sdl_window_bridge_attributes();
 
 bool initGameWindow() {
   SDL_Init(SDL_INIT_VIDEO);
-  if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
-  if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
-  if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
+  #ifdef __ANDROID__
+    // If you set window'd window on android it spazzes out
+    sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
+    // Lanscape oreintation for android by default
+    SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
+  #else
+    if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
+    if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
+    if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
+  #endif
+
   init_sdl_window_bridge_attributes();
   windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
   return (windowHandle != nullptr);
