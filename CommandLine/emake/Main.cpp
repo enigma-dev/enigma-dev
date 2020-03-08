@@ -15,8 +15,7 @@
 #include "yyp.h"
 #endif
 
-#include <filesystem>
-namespace fs = std::filesystem;
+#include <boost/filesystem.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -125,7 +124,7 @@ int main(int argc, char* argv[])
     game.SetOutputFile(input_file);
 
   if (input_file.size()) {
-    if (!fs::exists(input_file)) {
+    if (!boost::filesystem::exists(input_file)) {
       std::cerr << "Input file does not exist: " << input_file << std::endl;
       return OPTIONS_ERROR;
     }
@@ -140,20 +139,20 @@ int main(int argc, char* argv[])
     } else if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
       buffers::Project* project;
       if (!(project = gmk::LoadGMK(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+      return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext == "gmx") {
-      fs::path p = input_file;
-      if (fs::is_directory(p)) {
+      boost::filesystem::path p = input_file;
+      if (boost::filesystem::is_directory(p)) {
         input_file += "/" + p.filename().stem().string() + ".project.gmx";
       }
 
       buffers::Project* project;
       if (!(project = gmx::LoadGMX(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+      return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext == "yyp") {
       buffers::Project* project;
       if (!(project = yyp::LoadYYP(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+      return plugin.BuildGame(project->game(), mode, output_file.c_str());
 #endif
     } else {
       if (ext == "egm") {
