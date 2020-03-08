@@ -125,7 +125,9 @@ int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* fpat
 {
   buffers::Project proj;
   proj.set_allocated_game(data);
-  return plugin_CompileProto(&proj, fpath, mode);
+  int ret = plugin_CompileProto(&proj, fpath, mode);
+  proj.release_game();
+  return ret;
 }
 
 const char* EnigmaPlugin::NextResource() {
