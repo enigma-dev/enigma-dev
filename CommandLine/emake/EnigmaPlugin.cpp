@@ -4,9 +4,7 @@
 #include "OS_Switchboard.h"
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-# define byte __windows_byte_workaround
-# include <windows.h>
-# undef byte
+#	include <windows.h>
 #	include <process.h>
 #else
 #	include <pthread.h>
@@ -121,10 +119,10 @@ int EnigmaPlugin::BuildGame(deprecated::JavaStruct::EnigmaStruct* data,
   return plugin_CompileEGM(data, fpath, mode);
 }
 
-int EnigmaPlugin::BuildGame(const buffers::Game* data, GameMode mode, const char* fpath)
+int EnigmaPlugin::BuildGame(const buffers::Game& data, GameMode mode, const char* fpath)
 {
   buffers::Project proj;
-  proj.mutable_game()->CopyFrom(*data);
+  proj.mutable_game()->CopyFrom(data);
   return plugin_CompileProto(&proj, fpath, mode);
 }
 
