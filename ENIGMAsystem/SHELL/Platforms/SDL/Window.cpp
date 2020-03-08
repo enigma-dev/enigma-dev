@@ -2,6 +2,7 @@
 #include "Event.h"
 #include "Joystick.h"
 #include "Gamepad.h"
+#include "Icon.h"
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
