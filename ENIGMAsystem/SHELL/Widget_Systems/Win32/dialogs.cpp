@@ -20,7 +20,10 @@
 // Windows Vista or later for IFileDialog
 #define NTDDI_VERSION NTDDI_VISTA
 #define _WIN32_WINNT _WIN32_WINNT_VISTA
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <shobjidl.h> //for IFileDialog
 #include <shlwapi.h> //for Shell API
 #include <shlobj.h> //for Shell API

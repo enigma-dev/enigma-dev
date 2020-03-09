@@ -1,4 +1,7 @@
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 
 1 RT_MANIFEST "Widget_Systems/Win32/manifest.xml"
 

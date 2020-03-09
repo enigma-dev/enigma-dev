@@ -26,7 +26,10 @@
 \*********************************************************************************/
 
 #include <iostream>
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <string>
 using namespace std;
 

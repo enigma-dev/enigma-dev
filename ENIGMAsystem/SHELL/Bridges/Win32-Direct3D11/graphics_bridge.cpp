@@ -23,7 +23,10 @@
 #include "Graphics_Systems/General/GScolors.h"
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <d3d11.h>
 
 using enigma_user::show_error;
