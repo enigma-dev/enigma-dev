@@ -26,7 +26,10 @@
 
 #include <string>
 #include <GL/wglew.h>
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 
 namespace enigma {
 

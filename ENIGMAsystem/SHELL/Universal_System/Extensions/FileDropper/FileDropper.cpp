@@ -16,7 +16,10 @@
 **/
 
 #include "FileDropper.h"
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <set>
 #include <string>
 #include <vector>

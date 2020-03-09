@@ -12,7 +12,7 @@ Make-Vars:
   cc: x86_64-apple-darwin13-clang
   cxx: x86_64-apple-darwin13-clang++
   cppflags:
-  cxxflags: -std=c++11 -stdlib=libc++
+  cxxflags: -stdlib=libc++
   cflags:
   ldflags: -stdlib=libc++
   links: -lobjc -lz -framework Cocoa
