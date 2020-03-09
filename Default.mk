@@ -43,13 +43,13 @@ $(OBJ_DIR)/shared/%.o: $(SHARED_SRC_DIR)/%.cpp | obj_dirs
 # Proto rules
 # The order-only dependency on $(GENERATED) is an over-approximation to force all protos to be built
 # before any object files. This matters on the first run when Make can't yet know about #includes.
-$(OBJ_DIR)/%.pb.o $(OBJ_DIR)/%.pb.d: $(OBJDIR)/%.pb.cc | $(GENERATED)
+$(OBJ_DIR)/%.pb.o $(OBJ_DIR)/%.pb.d: $(OBJ_DIR)/%.pb.cc | $(GENERATED)
 	$(CXX) $(CXXFLAGS) -MMD -MP -c -o $(OBJ_DIR)/$*.pb.o $(OBJ_DIR)/$*.pb.cc
 
 $(OBJ_DIR)/%.pb.cc $(OBJ_DIR)/%.pb.h: %.proto | obj_dirs 
 	protoc -I. --cpp_out=$(OBJ_DIR) $<
 
-$(OBJ_DIR)/%.grpc.pb.cc $(OBJDIR)/%.grpc.pb.h: %.proto | obj_dirs 
+$(OBJ_DIR)/%.grpc.pb.cc $(OBJ_DIR)/%.grpc.pb.h: %.proto | obj_dirs 
 	protoc -I. --grpc_out=$(OBJ_DIR) --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
 
 .PRECIOUS: $(GENERATED)
