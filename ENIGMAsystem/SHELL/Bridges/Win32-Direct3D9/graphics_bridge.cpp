@@ -25,7 +25,10 @@
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <d3d9.h>
 
 using namespace enigma::dx9;

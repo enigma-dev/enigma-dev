@@ -12,7 +12,7 @@ Make-Vars:
   cc: x86_64-w64-mingw32-gcc
   cxx: x86_64-w64-mingw32-g++
   cppflags:
-  cxxflags: -std=c++11 -I/usr/lib/libffi-3.2.1/include/ -I../Additional/x86_64-w64-mingw32/include
+  cxxflags: -I/usr/lib/libffi-3.2.1/include/ -I../Additional/x86_64-w64-mingw32/include
   cflags:
   ldflags: -L../Additional/x86_64-w64-mingw32/lib -static-libgcc -static-libstdc++ -static
   links:

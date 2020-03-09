@@ -39,7 +39,10 @@
 #include <cstdio>
 #include <map>
 #include <string>
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <ffi.h>
 
 using namespace std;

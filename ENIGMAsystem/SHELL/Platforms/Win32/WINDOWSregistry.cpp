@@ -20,7 +20,10 @@
 #include <sstream>
 using std::string;
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 
 #include "../General/PFregistry.h"
 

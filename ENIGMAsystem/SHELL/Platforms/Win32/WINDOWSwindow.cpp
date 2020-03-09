@@ -28,7 +28,10 @@
 #include "Universal_System/roomsystem.h" // room_caption
 #include "Universal_System/globalupdate.h"
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <stdio.h>
 #include <string>
 using namespace std;
