@@ -32,6 +32,7 @@
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <unordered_map>
+#include <memory>
 
 namespace {
 
