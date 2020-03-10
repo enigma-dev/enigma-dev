@@ -12,7 +12,7 @@ if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
     libgl1-mesa-dev:i386 lib32z1-dev libxrandr-dev:i386 libxinerama-dev:i386\
     gcc-multilib g++-multilib libc++abi-dev:i386 libpng-dev:i386"
 elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
-  LINUX_DEPS="$LINUX_DEPS mingw-w64 wine64 wine32 wine-stable"
+  LINUX_DEPS="$LINUX_DEPS mingw-w64 wine64 wine32 wine-stable libgl1-mesa-glx:i386"
 fi
 
 ###### Platforms #######

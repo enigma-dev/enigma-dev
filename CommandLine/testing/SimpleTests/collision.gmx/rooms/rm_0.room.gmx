@@ -10,7 +10,7 @@
   <persistent>0</persistent>
   <colour>12632256</colour>
   <showcolour>-1</showcolour>
-  <code>global.event_num = -1;</code>
+  <code/>
   <enableViews>0</enableViews>
   <clearViewBackground>-1</clearViewBackground>
   <makerSettings>
@@ -25,7 +25,7 @@
     <showViews>0</showViews>
     <deleteUnderlyingObj>0</deleteUnderlyingObj>
     <deleteUnderlyingTiles>0</deleteUnderlyingTiles>
-    <page>1</page>
+    <page>0</page>
     <xoffset>0</xoffset>
     <yoffset>0</yoffset>
   </makerSettings>
@@ -50,10 +50,8 @@
     <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
   </views>
   <instances>
-    <instance code="" colour="4294967295" id="100005" locked="0" name="inst_B290928D" objName="obj_controller" rotation="0.0" scaleX="1.0" scaleY="1.0" x="0" y="0"/>
-    <instance code="" colour="4294967295" id="100006" locked="0" name="inst_C5AC74C7" objName="obj_single" rotation="0.0" scaleX="1.0" scaleY="1.0" x="0" y="16"/>
-    <instance code="" colour="4294967295" id="100011" locked="0" name="inst_CEF7628D" objName="obj_grandchild" rotation="0.0" scaleX="1.0" scaleY="1.0" x="0" y="32"/>
-    <instance code="" colour="4294967295" id="100019" locked="0" name="inst_1CE54C81" objName="obj_events" rotation="0.0" scaleX="1.0" scaleY="1.0" x="0" y="48"/>
+    <instance code="" colour="4294967295" id="100008" locked="0" name="inst_E2E58C14" objName="obj_player" rotation="0.0" scaleX="1.0" scaleY="1.0" x="48" y="48"/>
+    <instance code="" colour="4294967295" id="100007" locked="0" name="inst_1A8AFBE7" objName="obj_enemy" rotation="0.0" scaleX="1.0" scaleY="1.0" x="128" y="128"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>

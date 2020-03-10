@@ -53,7 +53,7 @@ void graphics_delete_index_buffer_peer(int buffer) {
 }
 
 void graphics_prepare_vertex_buffer(const int buffer) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   // if the contents of the vertex buffer are dirty then we need to update
   // our native vertex buffer object "peer"
@@ -102,7 +102,7 @@ void graphics_prepare_vertex_buffer(const int buffer) {
 }
 
 void graphics_prepare_index_buffer(const int buffer) {
-  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  auto& indexBuffer = enigma::indexBuffers[buffer];
 
   // if the contents of the index buffer are dirty then we need to update
   // our native index buffer object "peer"
@@ -180,12 +180,12 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
 }
 
 inline void graphics_apply_vertex_format(int format, size_t &stride) {
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
+  const auto& vertexFormat = enigma::vertexFormats[format];
 
   auto search = vertexFormatPeers.find(format);
   LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = NULL;
   if (search == vertexFormatPeers.end()) {
-     vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
+     vertexDeclaration = vertex_format_declaration(vertexFormat.get(), stride);
      vertexFormatPeers[format] = std::make_pair(vertexDeclaration, stride);
   } else {
     vertexDeclaration = search->second.first;
@@ -211,7 +211,7 @@ void vertex_color(int buffer, int color, double alpha) {
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   enigma::graphics_prepare_vertex_buffer(buffer);
 
@@ -229,7 +229,7 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
+  const auto& vertexBuffer = enigma::vertexBuffers[vertex];
 
   enigma::graphics_prepare_vertex_buffer(vertex);
   enigma::graphics_prepare_index_buffer(buffer);

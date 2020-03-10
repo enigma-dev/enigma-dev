@@ -12,7 +12,7 @@ Make-Vars:
   cc: clang
   cxx: clang++
   cppflags:
-  cxxflags: -std=c++11 -m32 -std=c++11 -stdlib=libc++ -Wno-missing-declarations -Wno-parentheses-equality
+  cxxflags: -m32 -stdlib=libc++ -Wno-missing-declarations -Wno-parentheses-equality
   cflags: -m32 -Wall -O3
   ldflags: -m32 -Wall -O3 -stdlib=libc++
   links:

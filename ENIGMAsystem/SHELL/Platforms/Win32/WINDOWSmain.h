@@ -21,8 +21,10 @@
 
 #include "Platforms/General/PFmain.h"
 
-
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 
 namespace enigma //TODO: Find where this belongs
 {

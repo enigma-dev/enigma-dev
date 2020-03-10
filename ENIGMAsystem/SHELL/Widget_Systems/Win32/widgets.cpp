@@ -33,7 +33,10 @@
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
 #include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <commctrl.h>
 #include <windowsx.h>
 #include <stdio.h>

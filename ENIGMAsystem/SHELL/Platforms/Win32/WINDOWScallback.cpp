@@ -20,7 +20,10 @@
 #include <string>
 using std::string;
 using std::map;
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 //#include <winuser.h> // includes windows.h
 
 #include "Platforms/General/PFmain.h" // for keyboard_string

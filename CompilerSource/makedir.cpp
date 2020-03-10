@@ -25,7 +25,9 @@ using namespace std;
 #include <sys/stat.h>
 #include <unistd.h>
 #else
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
 #endif
 
 string myReplace(string str, const string& oldStr, const string& newStr)

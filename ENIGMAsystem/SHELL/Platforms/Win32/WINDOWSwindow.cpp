@@ -31,7 +31,10 @@
 #include "Universal_System/roomsystem.h" // room_caption
 #include "Universal_System/globalupdate.h"
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <stdio.h>
 #include <string>
 using namespace std;
@@ -104,7 +107,7 @@ string window_identifier() {
 string window_get_identifier(void *hwnd) {
   return remove_trailing_zeros((long long)(HWND)hwnd);
 }
-	
+
 static int currentIconIndex;
 static unsigned currentIconFrame;
 
@@ -366,11 +369,13 @@ void display_mouse_set(int x,int y) {
 }
 
 int display_get_x() {
-  return 0; // TODO
+  // Windows is different than our Unix-like platforms in that this value is always zero...
+  return 0;
 }
 
 int display_get_y() {
-  return 0; // TODO
+  // Windows is different than our Unix-like platforms in that this value is always zero...
+  return 0;
 }
 
 int display_get_width() {
