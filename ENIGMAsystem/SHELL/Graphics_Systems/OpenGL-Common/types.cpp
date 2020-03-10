@@ -6,6 +6,7 @@ namespace OpenGL {
 
 int getGLTypeSize(GLuint type){
   switch (type){
+    case GL_SAMPLER_2D: return 1;
     case GL_FLOAT: return 1;
     case GL_FLOAT_VEC2: return 2;
     case GL_FLOAT_VEC3: return 3;

@@ -17,6 +17,7 @@
 
 #include "OpenGLHeaders.h"
 #include "Graphics_Systems/OpenGL-Common/version.h"
+#include "Graphics_Systems/OpenGL-Common/shader.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Bridges/OpenGL/GLload.h"
 
@@ -66,15 +67,8 @@ namespace enigma {
   }
 
   void DisableDrawing(void* handle) {
+   cleanup_shaders(); // delete shaders before context
    glXDestroyContext(enigma::x11::disp,glxc);
-      /*
-    for(char q=1;q;ENIGMA_events())
-        while(XQLength(disp))
-            if(handleEvents()>0) q=0;
-    glxc = glXGetCurrentContext();
-    glXDestroyContext(disp,glxc);
-    XCloseDisplay(disp);
-    return 0;*/
   }
 
   namespace swaphandling {
