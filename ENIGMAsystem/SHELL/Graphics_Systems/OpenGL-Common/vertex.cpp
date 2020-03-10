@@ -121,7 +121,7 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
 void graphics_apply_vertex_format(int format, size_t offset) {
   using namespace enigma_user;
 
-  const VertexFormat* vertexFormat = vertexFormats[format];
+  const auto& vertexFormat = vertexFormats[format];
 
   //Bind texture
   glsl_uniformi_internal(shaderprograms[bound_shader]->uni_texSampler, 0);
@@ -211,7 +211,7 @@ void vertex_color(int buffer, int color, double alpha) {
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   #ifdef DEBUG_MODE
   enigma::GPUProfilerBatch& vbd = enigma::gpuprof.add_drawcall();
@@ -227,8 +227,8 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
-  const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[vertex];
+  const auto& indexBuffer = enigma::indexBuffers[buffer];
 
   #ifdef DEBUG_MODE
   enigma::GPUProfilerBatch& vbd = enigma::gpuprof.add_drawcall();

@@ -25,7 +25,7 @@
 
 #include "Widget_Systems/widgets_mandatory.h" // for show_error
 
-#include <D3Dcompiler.h>
+#include <d3dcompiler.h>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
@@ -253,13 +253,13 @@ inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* verte
 }
 
 inline void graphics_apply_vertex_format(int format, size_t &stride) {
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
+  const auto& vertexFormat = enigma::vertexFormats[format];
 
   auto search = vertexFormatPeers.find(format);
   ID3D11InputLayout* vertexLayout = NULL;
   if (search == vertexFormatPeers.end()) {
     stride = vertexFormat->stride_size;
-    vertexLayout = vertex_format_layout(vertexFormat);
+    vertexLayout = vertex_format_layout(vertexFormat.get());
     vertexFormatPeers[format] = std::make_pair(vertexLayout, stride);
   } else {
     vertexLayout = search->second.first;
@@ -359,7 +359,7 @@ void vertex_color(int buffer, int color, double alpha) {
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   enigma::graphics_prepare_default_shader();
   enigma::graphics_prepare_buffer(buffer, false);
@@ -377,8 +377,8 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
-  const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[vertex];
+  const auto& indexBuffer = enigma::indexBuffers[buffer];
 
   enigma::graphics_prepare_default_shader();
   enigma::graphics_prepare_buffer(buffer, true);
