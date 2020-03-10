@@ -52,15 +52,17 @@ namespace enigma
 std::map<std::string, ImageLoadFunction> image_load_handlers;
 std::map<std::string, ImageSaveFunction> image_save_handlers;
 
-unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight) {
-  unsigned widfull = nlpo2dc(pngwidth) + 1, hgtfull = nlpo2dc(pngheight) + 1, ih,iw;
+unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size) {
+  unsigned widfull = nlpo2dc(pngwidth) + 1, hgtfull = nlpo2dc(pngheight) + 1, ih, iw;
   const int bitmap_size = widfull * hgtfull * 4;
   unsigned char *bitmap = new unsigned char[bitmap_size]();
 
   unsigned i = 0;
-  unsigned elem_numb = pngwidth * pngheight + 2;
+  unsigned elem_numb = pngwidth * pngheight + (prepend_size) ? 2 : 0;
   unsigned long *result = new unsigned long[elem_numb]();
-  result[i++] = pngwidth; result[i++] = pngheight; // this is required for xlib icon hint
+  if (prepend_size) {
+    result[i++] = pngwidth; result[i++] = pngheight; // this is required for xlib icon hint
+  }
 
   for (ih = 0; ih < pngheight; ih++) {
     unsigned tmp = ih * widfull * 4;
