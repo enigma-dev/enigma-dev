@@ -22,10 +22,13 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/sprites.h"
+#include "Universal_System/Resources/background.h"
 
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"
 #include "XLIBwindow.h"  // Type insurance for non-mandatory functions
+#include "XLIBicon.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -148,6 +151,30 @@ void window_set_visible(bool visible) {
   } else {
     XUnmapWindow(disp, win);
   }
+}
+
+static int currentIconIndex;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::XSetIconFromSprite(disp, win, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
 }
 
 int window_get_visible() {

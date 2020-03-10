@@ -21,6 +21,8 @@
 #include "Platforms/General/PFmain.h" // For those damn vk_ constants.
 #include "Platforms/General/PFwindow.h"
 
+#include "WINDOWSicon.h"
+
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include "strings_util.h" // For string_replace_all
@@ -83,6 +85,30 @@ void* window_handle() {
   return enigma::hWnd;
 }
 #endif
+
+static int currentIconIndex;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::SetIconFromSprite(enigma::hWnd, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
+}
 
 // GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
 // Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,
