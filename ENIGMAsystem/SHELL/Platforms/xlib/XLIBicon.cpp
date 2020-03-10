@@ -34,7 +34,7 @@ void XSetIconFromSprite(Display *display, Window window, int ind, unsigned subim
   unsigned char *data = nullptr; unsigned pngwidth, pngheight;
   data = graphics_copy_texture_pixels(spr->texturearray[subimg], &pngwidth, &pngheight);
   unsigned elem_numb = 2 + pngwidth * pngheight;
-  unsigned long *result = bgra_to_argb(data, pngwidth, pngheight);
+  unsigned long *result = bgra_to_argb(data, pngwidth, pngheight, true);
   XChangeProperty(display, window, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)result, elem_numb);
   XFlush(display);
   delete[] result;
