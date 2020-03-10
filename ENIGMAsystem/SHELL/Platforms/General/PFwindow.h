@@ -253,7 +253,10 @@ void window_set_max_height(int height);
 
 void window_set_minimized(bool minimized);
 void window_set_maximized(bool maximized);
+void window_set_icon(int ind, unsigned subimg);
 void window_set_visible(bool visible);
+int window_get_icon_index();
+unsigned window_get_icon_subimg();
 int window_get_visible();
 bool window_get_stayontop();
 bool window_get_sizeable();
