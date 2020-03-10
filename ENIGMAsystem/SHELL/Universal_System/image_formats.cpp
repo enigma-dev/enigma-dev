@@ -262,7 +262,7 @@ unsigned char* image_decode_bmp(
     unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
   // Check file size against bitmap header size
   if (image_data.length() < sizeof(BMPFileHeader)) {
-    fprintf(stderr, "Junk bitmap of size %ul", image_data.size());
+    fprintf(stderr, "Junk bitmap of size %lu", image_data.size());
     return nullptr;
   }
 
@@ -271,7 +271,7 @@ unsigned char* image_decode_bmp(
   // Verify magic number, check header offset sanity.
   if (bmp_file.magic_b != 'B' || bmp_file.magic_m != 'M' ||
       bmp_file.dataStart + sizeof(BMPInfoHeader) > image_data.length()) {
-    fprintf(stderr, "Junk bitmap of size %ul", image_data.size());
+    fprintf(stderr, "Junk bitmap of size %lu", image_data.size());
     return nullptr;
   }
 
