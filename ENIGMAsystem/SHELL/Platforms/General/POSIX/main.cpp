@@ -36,11 +36,11 @@ void initialize_directory_globals() {
     enigma_user::program_directory = enigma_user::filename_path(buffer);
   }
   #else // __FreeBSD__
-    int result; pid_t pid = getpid();
-    char buffer[PROC_PIDPATHINFO_MAXSIZE];
-    result = proc_pidpath (pid, buffer, sizeof(buffer));
-    if ( result > 0 )
-      enigma_user::program_directory = enigma_user::filename_path(buffer);
+  int result; pid_t pid = getpid();
+  char buffer[PROC_PIDPATHINFO_MAXSIZE];
+  result = proc_pidpath (pid, buffer, sizeof(buffer));
+  if ( result > 0 )
+    enigma_user::program_directory = enigma_user::filename_path(buffer);
   #endif
 
   // Set the temp_directory
