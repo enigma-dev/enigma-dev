@@ -2,6 +2,10 @@
 #include "Platforms/General/PFfilemanip.h"
 #include "Universal_System/estring.h"
 
+#ifndef __linux__ // __FreeBSD__
+#include <libproc.h>
+#endif
+
 #include <limits.h>
 #include <unistd.h>
 #include <libgen.h>
@@ -23,6 +27,7 @@ void initialize_directory_globals() {
   if (getcwd(buffer, PATH_MAX) != NULL)
     enigma_user::working_directory = add_slash(buffer);
 
+  #ifdef __linux__
   // Set the program_directory
   buffer[0] = 0;
   ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX);
@@ -30,6 +35,13 @@ void initialize_directory_globals() {
     buffer[count] = 0;
     enigma_user::program_directory = enigma_user::filename_path(buffer);
   }
+  #else // __FreeBSD__
+    int result; pid_t pid = getpid();
+    char buffer[PROC_PIDPATHINFO_MAXSIZE];
+    result = proc_pidpath (pid, buffer, sizeof(buffer));
+    if ( result > 0 )
+      enigma_user::program_directory = enigma_user::filename_path(buffer);
+  #endif
 
   // Set the temp_directory
   char *env = getenv("TMPDIR");
