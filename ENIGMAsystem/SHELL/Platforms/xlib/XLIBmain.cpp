@@ -20,7 +20,7 @@
 **/
 
 #include "XLIBmain.h"
-#include "LINUXjoystick.h"
+#include "UNIXjoystick.h"
 #include "XLIBwindow.h"
 #include "XDisplayGetters.h"
 
