@@ -27,8 +27,8 @@ void initialize_directory_globals() {
   if (getcwd(buffer, PATH_MAX) != NULL)
     enigma_user::working_directory = add_slash(buffer);
 
-  #ifdef __linux__
   // Set the program_directory
+  #ifdef __linux__
   buffer[0] = 0;
   ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX);
   if (count != -1) {
