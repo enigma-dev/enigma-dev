@@ -139,7 +139,7 @@ void io_handle() {
   enigma::update_mouse_variables();
 }
 
-static int currentIconIndex;
+static int currentIconIndex = -1;
 static unsigned currentIconFrame;
 
 int window_get_icon_index() {
