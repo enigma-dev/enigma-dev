@@ -23,7 +23,12 @@
 #include "Universal_System/scalar.h"
 #include "Universal_System/make_unique.h"
 
+#ifdef __linux__
 #include <linux/joystick.h>
+#else // __FreeBSD__
+#include <machine/joystick.h>
+#endif
+
 #include <math.h>
 #include <unistd.h>
 #include <fcntl.h>
