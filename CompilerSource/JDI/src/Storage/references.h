@@ -29,6 +29,12 @@
 #include <string>
 #include "definition_forward.h"
 
+#if (__cplusplus - 0) >= 201703L
+  #define __REGISTER
+#else
+  #define __REGISTER                             register
+#endif
+
 namespace jdi {
   using std::string;
   /**
