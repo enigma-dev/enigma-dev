@@ -7,11 +7,11 @@ Target-platform: FreeBSD
 
 Make-Vars:
   path:
-  make: make
+  make: gmake
   makeflags:
   cc: gcc
   cxx: g++
-  cppflags: 
+  cppflags: -I/usr/local/include
   cxxflags: -I/usr/local/include -m32 -fdiagnostics-color=always
   cflags: -I/usr/local/include -m32
   ldflags: -L/usr/local/lib -m32
