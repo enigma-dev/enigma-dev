@@ -1,6 +1,6 @@
 SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
 
-ifeq ($(OS), FreeBSD)
+ifeq ($(TARGET-PLATFORM), FreeBSD)
 	override LDLIBS += -lopenal -lalure -lvorbisfile -lvorbis -ldumb
 else ifeq ($(TARGET-PLATFORM), Linux)
 	override LDLIBS += -lopenal -lalure -lvorbisfile -lvorbis -ldumb
