@@ -1,4 +1,5 @@
 include ../../Config.mk
+include ../../Default.mk
 
 TARGET := ../../libEGM$(LIB_EXT)
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
