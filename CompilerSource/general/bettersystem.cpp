@@ -246,9 +246,13 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     #include <sys/wait.h>
     #include <sys/stat.h>
 
+    #if CURRENT_PLATFORM_ID == OS_FREEBSD
+        extern char **environ;
+    #endif
+
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
-#if CURRENT_PLATFORM_ID ==  OS_MACOSX
+#if CURRENT_PLATFORM_ID == OS_MACOSX
     #include <crt_externs.h>
     #define environ (*_NSGetEnviron())
     extern char **environ;
