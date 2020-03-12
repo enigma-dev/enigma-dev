@@ -31,6 +31,8 @@
 #include "Universal_System/Resources/AssetArray.h"
 using enigma::AssetArray;
 
+#include <vector>
+using std::vector;
 // this is for GLM's transition to radians only
 // let's define it just in case some enigma
 // user's package manager happens to be old
