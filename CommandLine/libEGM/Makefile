@@ -3,7 +3,7 @@ include ../../Config.mk
 TARGET := ../../libEGM$(LIB_EXT)
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 SHARED_SRC_DIR := ../../shared
-PROTO_DIR += $(SHARED_SRC_DIR)/protos/.eobjs -L/usr/local/lib
+PROTO_DIR += $(SHARED_SRC_DIR)/protos/.eobjs /usr/local/lib
 
 ifeq ($(OS), Linux)
 	FS_LIBS=-lstdc++fs
