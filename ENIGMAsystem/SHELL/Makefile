@@ -21,6 +21,12 @@ else
 	MKDIR := mkdir.exe
 endif
 
+ifeq ($(OS), FreeBSD)
+	CXXFLAGS += -I/usr/local/include
+	CFLAGS   += -I/usr/local/include
+	LDFLAGS  += -L/usr/local/lib
+endif
+
 MAKE_TARGETS :=
 ifeq ($(TARGET-PLATFORM), Android)
 	MAKE_TARGETS += android_game
