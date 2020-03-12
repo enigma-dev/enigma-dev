@@ -21,12 +21,6 @@
 
 #include <API/lexer_interface.h>
 
-#if (__cplusplus - 0) >= 201703L
-  #define __REGISTER
-#else
-  #define __REGISTER                             register
-#endif
-
 namespace jdip {
   /**
     A queue-like buffer class for reading in tokens and passing them around as a lexer.
