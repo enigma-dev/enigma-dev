@@ -1,4 +1,5 @@
 #include "progdir.h"
+#include <unistd.h>
 #include <libproc.h>
 
 namespace enigma {
