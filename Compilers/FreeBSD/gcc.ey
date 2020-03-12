@@ -13,8 +13,8 @@ Make-Vars:
   cxx: g++
   cppflags: -I/usr/local/include
   cxxflags: -I/usr/local/include -fdiagnostics-color=always
-  cflags: -L/usr/local/lib
-  ldflags:
+  cflags: -I/usr/local/include
+  ldflags: -L/usr/local/lib
   links:
 
 Parser-Vars:
