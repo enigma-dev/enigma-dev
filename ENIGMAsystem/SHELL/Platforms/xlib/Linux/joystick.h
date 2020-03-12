@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "../../General/PFjoystick.h"
+#include "Platforms/General/PFjoystick.h"
 
 namespace enigma {
   void init_joysticks();
