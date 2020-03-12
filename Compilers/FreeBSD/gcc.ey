@@ -11,10 +11,10 @@ Make-Vars:
   makeflags:
   cc: gcc
   cxx: g++
-  cppflags: -I/usr/local/include
-  cxxflags: -I/usr/local/include -fdiagnostics-color=always
-  cflags: -I/usr/local/include
-  ldflags: -L/usr/local/lib
+  cppflags:
+  cxxflags: -fdiagnostics-color=always
+  cflags:
+  ldflags:
   links:
 
 Parser-Vars:
