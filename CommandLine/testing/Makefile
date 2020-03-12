@@ -3,7 +3,7 @@ include ../../Config.mk
 TARGET := ../../test-runner
 TESTCASES_DIR := $(SRC_DIR)/Tests
 
-ifeq ($(OS), Linux) 
+ifeq ($(OS), Linux)
 	OS_SRCS=$(wildcard ./Platform/*-X11.cpp)
 	OS_LIBS=-lX11 -lstdc++fs
 else ifeq ($(OS), FreeBSD)
