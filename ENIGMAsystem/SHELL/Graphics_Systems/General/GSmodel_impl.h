@@ -73,6 +73,28 @@ class Model {
   int vertex_color; // the color that was set when the last vertex was added
   gs_scalar vertex_alpha; // the alpha that was set when the last vertex was added
 
+  // NOTE: vertex_buffer should always exist but not outlive the model
+  // NOTE: current_primitive is not reset until the next begin call
+  // NOTE: current_primitive is not a pointer (same allocation) to avoid allocation overhead
+  // NOTE: vertex_started is true until the user attempts to draw the model
+  // NOTE: vertex_colored waits until the next vertex or primitive end to add the color
+  //       because GM has always specified color as the last argument on its vertex formats
+
+  Model(int type = enigma_user::model_static, bool use_draw_color = false):
+    destroyed(false), type(type), vertex_buffer(-1), current_primitive(), vertex_started(false),
+    use_draw_color(use_draw_color), vertex_colored(true), vertex_color(enigma_user::c_white), vertex_alpha(1.0) {}
+
+  void destroy() {
+    destroyed = true;
+    // this will give us 0 size and 0 capacity
+    vector<Primitive>().swap(primitives);
+  }
+
+  bool isDestroyed() const { return destroyed; }
+
+  static const char* getAssetTypeName() { return "model"; }
+};
+
 namespace enigma {
 
 extern glm::mat4 world, view, projection;
