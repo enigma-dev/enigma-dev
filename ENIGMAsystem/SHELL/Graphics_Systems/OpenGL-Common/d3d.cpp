@@ -35,7 +35,6 @@
 #include "Universal_System/roomsystem.h" // for view variables
 
 #include <glm/gtc/type_ptr.hpp>
-
 #include <math.h>
 #include <floatcomp.h>
 
@@ -43,11 +42,8 @@ using namespace std;
 
 namespace enigma {
 
-extern unsigned bound_shader;
-extern vector<enigma::ShaderProgram*> shaderprograms;
-
 void graphics_state_flush_lighting(const glm::mat4& mv_matrix, const glm::mat3& normal_matrix) {
-  const auto current_shader = enigma::shaderprograms[enigma::bound_shader];
+  const auto& current_shader = enigma::shaderprograms[enigma::bound_shader];
 
   const float glAmbientColor[4] = {COL_GET_Rf(d3dLightingAmbient),COL_GET_Gf(d3dLightingAmbient),COL_GET_Bf(d3dLightingAmbient),1.0f};
   enigma_user::glsl_uniform4fv(current_shader->uni_ambient_color, 1, glAmbientColor);
@@ -103,7 +99,7 @@ void graphics_state_flush_stencil() {
 
 void graphics_state_flush_samplers();
 void graphics_state_flush() {
-  const auto current_shader = enigma::shaderprograms[enigma::bound_shader];
+  const auto& current_shader = enigma::shaderprograms[enigma::bound_shader];
   
   graphics_flush_ext();
   
