@@ -19,8 +19,9 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/make_unique.h"
-#include "joystick.h"
+#include "Platforms/General/PFjoystick.h"
 
+#include <linux/joystick.h>
 #include <math.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -31,7 +32,6 @@
 #include <iostream>
 #include <cmath>
 #include <sys/stat.h>
-#include <linux/joystick.h>
 
 using namespace std;
 
