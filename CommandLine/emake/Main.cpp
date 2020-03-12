@@ -37,7 +37,7 @@ static std::string tolower(const std::string &str) {
 int main(int argc, char* argv[])
 {
   std::ofstream egmlog(fs::temp_directory_path().string() + "/enigma_libegm.log", std::ofstream::out);
-  std::ofstream elog(fs::temp_directory_path().string() + "/enigma.log", std::ofstream::out);
+  std::ofstream elog(fs::temp_directory_path().string() + "/enigma_compiler.log", std::ofstream::out);
 
   std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
   if (ENIGMA_DEBUG == "TRUE") {
