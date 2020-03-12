@@ -11,9 +11,9 @@ Make-Vars:
   makeflags:
   cc: gcc
   cxx: g++
-  cppflags:
-  cxxflags: -fdiagnostics-color=always
-  cflags:
+  cppflags: -I/usr/local/include
+  cxxflags: -I/usr/local/include -fdiagnostics-color=always
+  cflags: -L/usr/local/lib
   ldflags:
   links:
 
