@@ -93,9 +93,8 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
   }
 
   enigma::Surface* surface = new enigma::Surface();
-  enigma::DX11Texture* gmTexture = new enigma::DX11Texture(renderTargetTexture, shaderResourceView);
   const int texid = enigma::textures.size();
-  enigma::textures.push_back(gmTexture);
+  enigma::textures.push_back(std::make_unique<enigma::DX11Texture>(renderTargetTexture, shaderResourceView));
   surface->renderTargetView = renderTargetView;
   surface->texture = texid;
   surface->width = width; surface->height = height;
