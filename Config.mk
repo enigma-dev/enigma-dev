@@ -4,6 +4,9 @@ OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	LIB_EXT := .so
 	BIN_EXT :=
+else ifeq ($(OS), FreeBSD)
+	LIB_EXT := .so
+	BIN_EXT :=
 else ifeq ($(OS), Darwin)
 	LIB_EXT := .dylib
 	BIN_EXT :=
