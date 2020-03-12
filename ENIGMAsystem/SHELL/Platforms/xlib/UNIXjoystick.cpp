@@ -22,8 +22,7 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/make_unique.h"
-
-#include <joystick.h>
+#include "joystick.h"
 
 #include <math.h>
 #include <unistd.h>
