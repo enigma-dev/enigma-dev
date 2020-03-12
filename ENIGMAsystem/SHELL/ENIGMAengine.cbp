@@ -761,7 +761,22 @@
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
 		</Unit>
-		<Unit filename="Platforms/xlib/Linux/joystick.cpp">
+		<Unit filename="Platforms/xlib/Linux/LINUXjoystick.cpp">
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+		</Unit>
+		<Unit filename="Platforms/xlib/XLIBjoystick.h">
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+		</Unit>
+		<Unit filename="Platforms/xlib/Linux/LINUXprogdir.cpp">
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+		</Unit>
+		<Unit filename="Platforms/xlib/XLIBprogdir.h">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
