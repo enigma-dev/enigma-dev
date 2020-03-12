@@ -31,7 +31,9 @@
 #include <iostream>
 
 #ifndef __APPLE__
+#ifndef __FreeBSD__
 #include <malloc.h>
+#endif
 #endif
 
 #include <cstring>
