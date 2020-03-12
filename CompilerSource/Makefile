@@ -24,10 +24,4 @@ CXXFLAGS += -fPIC -I./JDI/src -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/libpng-uti
 LDFLAGS += -shared -g -L../ -Wl,-rpath,./ -lProtocols -lprotobuf -lz -L$(SHARED_SRC_DIR)/libpng-util -lpng-util -lpng
 SOURCES := $(filter-out ./standalone_main.cpp, $(call rwildcard,.,*.cpp))
 
-ifeq ($(OS), FreeBSD)
-	CXXFLAGS+=-I/usr/local/include
-	CFLAGS+=-I/usr/local/include
-	LDFLAGS+=-L/usr/local/lib
-endif
-
 include ../Default.mk
