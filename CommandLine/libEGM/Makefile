@@ -7,8 +7,6 @@ PROTO_DIR += $(SHARED_SRC_DIR)/protos/.eobjs
 
 ifeq ($(OS), Linux)
 	FS_LIBS=-lstdc++fs
-else ifeq ($(OS), FreeBSD)
-	FS_LIBS=-lstdc++fs
 endif
 
 CXXFLAGS += -I../ $(shell pkg-config --cflags pugixml) -I/usr/local/include -I$(PROTO_DIR) -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/libpng-util -fPIC
