@@ -3,8 +3,7 @@
 #include "Universal_System/estring.h"
 #include "progdir.h"
 
-#include <libproc.h>
-#include <limits.h>
+#include <climits>
 #include <unistd.h>
 #include <libgen.h>
 #include <cstdlib>
