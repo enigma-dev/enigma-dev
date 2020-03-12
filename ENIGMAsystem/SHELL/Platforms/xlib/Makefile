@@ -1,6 +1,6 @@
 SOURCES += $(wildcard Platforms/xlib/*.cpp) $(wildcard Platforms/General/POSIX/*.cpp)
-	override CXXFLAGS += $(shell pkg-config x11 --cflags)
-	override CFLAGS += $(shell pkg-config x11 --cflags)
+override CXXFLAGS += $(shell pkg-config x11 --cflags)
+override CFLAGS += $(shell pkg-config x11 --cflags)
 ifeq ($(OS), Linux)
 	SOURCES += $(wildcard Platforms/xlib/Linux/*.cpp)
 	override CXXFLAGS += -IPlatforms/xlib/Linux
