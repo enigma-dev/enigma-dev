@@ -41,7 +41,37 @@ using std::vector;
 // anyway for the same reasons as above
 #define GLM_FORCE_LEFT_HANDED
 
-#include <glm/glm.hpp>
+namespace enigma {
+
+struct Primitive {
+  int type; // one of the enigma_user primitive type constants (e.g, pr_trianglelist)
+  int format; // index of the user vertex format that describes the vertex data of this primitive
+  bool format_started; // if the format has been started yet from specifying any vertex data
+  bool format_defined; // if the format has been guessed yet from how vertex data is being specified
+  unsigned vertex_offset; // byte offset into the vertex buffer where this primitive's data begins
+  unsigned vertex_count; // number of vertices this primitive is composed of
+
+  // NOTE: format may not exist until d3d_model_primitive_end is called
+  // NOTE: when format_defined is true the format may still not exist yet
+
+  Primitive(): type(0), format(-1), format_started(false), format_defined(false), vertex_offset(0), vertex_count(0) {}
+  Primitive(int type, int format, bool format_exists, unsigned offset):
+    type(type), format(format), format_started(format_exists), format_defined(format_exists), vertex_offset(offset), vertex_count(0) {}
+};
+
+class Model {
+  bool destroyed;
+ public:
+  int type; // one of the enigma_user model type constants (e.g, model_static is the default)
+  int vertex_buffer; // index of the user vertex buffer this model uses to buffer its vertex data
+  Primitive current_primitive; // the current primitive being specified by the user
+  bool vertex_started; // whether the user has begun specifying the model by starting a primitive
+  vector<Primitive> primitives; // all primitives the user has finished specifying for this model
+
+  bool use_draw_color; // whether to store the current color per-vertex when no format given
+  bool vertex_colored; // whether the last vertex specified color or not
+  int vertex_color; // the color that was set when the last vertex was added
+  gs_scalar vertex_alpha; // the alpha that was set when the last vertex was added
 
 namespace enigma {
 
