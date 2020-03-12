@@ -1,6 +1,5 @@
-.PHONY: libpng-util.a clean .FORCE
-
 include ../../Default.mk
+.PHONY: libpng-util.a clean .FORCE
 
 libpng-util.a: .FORCE
 	mkdir -p .eobjs/
