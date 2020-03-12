@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+
 #include "Platforms/General/PFjoystick.h"
 
 #include "Platforms/General/PFwindow.h"  
@@ -266,3 +267,4 @@ namespace enigma_user
   
   int joystick_lastbutton = -1;
 }
+
