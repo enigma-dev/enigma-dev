@@ -25,7 +25,6 @@ namespace fs = std::filesystem;
 
 std::ostream outputStream(nullptr);
 std::ostream errorStream(nullptr);
-std::ofstream egmlog("logs/enigma_libegm.log", std::ofstream::out);
 
 static std::string tolower(const std::string &str) {
   std::string res = str;
@@ -37,6 +36,9 @@ static std::string tolower(const std::string &str) {
 
 int main(int argc, char* argv[])
 {
+  std::ofstream egmlog(fs::temp_directory_path().string() + "/enigma_libegm.log", std::ofstream::out);
+  std::ofstream elog(fs::temp_directory_path().string() + "/enigma.log", std::ofstream::out);
+
   std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
   if (ENIGMA_DEBUG == "TRUE") {
     outputStream.rdbuf(std::cout.rdbuf());
@@ -44,7 +46,8 @@ int main(int argc, char* argv[])
   } else {
     outputStream.rdbuf(egmlog.rdbuf());
     errorStream.rdbuf(egmlog.rdbuf());
-    std::cout << "LibEGM parsing log at: logs/enigma_libegm.log" << std::endl;
+    std::cout << "LibEGM parsing log at: " << fs::temp_directory_path().string() << "/enigma_libegm.log" << std::endl;
+    std::cout << "ENIGMA compiler log at: " << fs::temp_directory_path().string() << "/enigma_compiler.log" << std::endl;
   }
   
   
@@ -69,11 +72,21 @@ int main(int argc, char* argv[])
   gmx::bind_output_streams(outputStream, errorStream);
   gmk::bind_output_streams(outputStream, errorStream);
 #endif
+
+  // Hijack cout/cerr from plugin to hide jdi startup crap that scares people
+  std::streambuf* cout_rdbuf = std::cout.rdbuf();
+  std::streambuf* cerr_rdbuf = std::cerr.rdbuf();
+  std::cout.rdbuf(elog.rdbuf());
+  std::cerr.rdbuf(elog.rdbuf());
+  
   CallBack ecb;
   plugin.Init(&ecb);
   plugin.SetDefinitions(options.APIyaml().c_str());
-
   std::string output_file;
+
+  //Restore cout/cerr
+  std::cout.rdbuf(cout_rdbuf);
+  std::cerr.rdbuf(cerr_rdbuf);
 
   if (!options.GetOption("output").empty())
     output_file = options.GetOption("output").as<std::string>();
