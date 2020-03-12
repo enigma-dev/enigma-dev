@@ -16,14 +16,14 @@ project(${LIB} VERSION ${LIB_VERSION} DESCRIPTION ${LIB_DESCRIPTION})
 
 message(STATUS "Initial build flags:")
 set(CompilerFlags
-	  CMAKE_C_FLAGS_DEBUG
-	  CMAKE_C_FLAGS_MINSIZEREL
-	  CMAKE_C_FLAGS_RELEASE
-	  CMAKE_C_FLAGS_RELWITHDEBINFO
-	  CMAKE_CXX_FLAGS_DEBUG
-	  CMAKE_CXX_FLAGS_MINSIZEREL
-	  CMAKE_CXX_FLAGS_RELEASE
-	  CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    CMAKE_C_FLAGS_DEBUG
+    CMAKE_C_FLAGS_MINSIZEREL
+    CMAKE_C_FLAGS_RELEASE
+    CMAKE_C_FLAGS_RELWITHDEBINFO
+    CMAKE_CXX_FLAGS_DEBUG
+    CMAKE_CXX_FLAGS_MINSIZEREL
+    CMAKE_CXX_FLAGS_RELEASE
+    CMAKE_CXX_FLAGS_RELWITHDEBINFO
     )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -45,35 +45,42 @@ file(GLOB PROTO_FILES *.proto)
 include(FindProtobuf)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
-add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc
-  COMMAND  protobuf::protoc
-  ARGS --cpp_out ${CMAKE_CURRENT_BINARY_DIR}
-	   --grpc_out=${CMAKE_CURRENT_BINARY_DIR}
-	   -I=${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include
-	   --plugin=protoc-gen-grpc=${GRPC_EXE}
-	   --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
-	   server.proto
-  DEPENDS protobuf::protoc
-  COMMENT "Generating grpc protocol buffer compiler on ${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc"
-  VERBATIM )
- 
-add_custom_target(generate_grpc DEPENDS ${PROTO_FILES})
+if (RGM_ENABLE_GRPC_SERVER)
+  set(GRPC_SRCS "${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc")
+  
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc
+    COMMAND  protobuf::protoc
+    ARGS --cpp_out ${CMAKE_CURRENT_BINARY_DIR}
+       --grpc_out=${CMAKE_CURRENT_BINARY_DIR}
+       -I=${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include
+       --plugin=protoc-gen-grpc=${GRPC_EXE}
+       --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
+       server.proto
+    DEPENDS protobuf::protoc
+    COMMENT "Generating grpc protocol buffer compiler on ${GRPC_SRCS}"
+    VERBATIM )
+   
+  add_custom_target(generate_grpc DEPENDS ${PROTO_FILES})
+endif()
 
 if(MSVC)
-  add_library(${LIB} STATIC ${PROTO_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc)
+  add_library(${LIB} STATIC ${PROTO_SRCS} ${GRPC_SRCS})
   target_include_directories(${LIB} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/" "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
 else()
-  add_library(${LIB} SHARED ${PROTO_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc)
+  add_library(${LIB} SHARED ${PROTO_SRCS} ${GRPC_SRCS})
 endif(MSVC)
 
 set_target_properties(${LIB} PROPERTIES VERSION ${LIB_VERSION})
 
-# Find GRPC
-find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-find_library(LIB_GRPC NAMES grpc)
-find_library(LIB_GPR NAMES gpr)
-target_link_libraries(${LIB} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
+
+if (RGM_ENABLE_GRPC_SERVER)
+  # Find GRPC
+  find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
+  find_library(LIB_GRPC NAMES grpc)
+  find_library(LIB_GPR NAMES gpr)
+  target_link_libraries(${LIB} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
+endif()
 
 # Find Protobuf
 include_directories(${Protobuf_INCLUDE_DIRS})
