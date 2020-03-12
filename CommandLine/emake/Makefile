@@ -5,6 +5,10 @@ include $(SHARED_SRC_DIR)/Makefile
 include $(SHARED_SRC_DIR)/eyaml/Makefile
 include $(SHARED_SRC_DIR)/event_reader/Makefile
 
+CXXFLAGS+=-I/usr/local/include
+CFLAGS+=-I/usr/local/include
+LDFLAGS+=-L/usr/local/lib
+
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
 ifeq ($(OS), Linux)
