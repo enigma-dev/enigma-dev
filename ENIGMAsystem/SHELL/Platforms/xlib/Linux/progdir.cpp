@@ -4,7 +4,7 @@
 
 namespace enigma {
 
-initialize_program_directory() {
+void initialize_program_directory() {
   char buffer[PATH_MAX];
   ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX);
   if (count != -1) {
