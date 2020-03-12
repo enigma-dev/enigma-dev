@@ -41,6 +41,12 @@ namespace jdip {
 #include <API/error_reporting.h>
 #include <System/token.h>
 
+#if (__cplusplus - 0) >= 201703L
+  #define __REGISTER
+#else
+  #define __REGISTER                             register
+#endif
+
 namespace jdip {
   using std::string;
   using std::vector;
