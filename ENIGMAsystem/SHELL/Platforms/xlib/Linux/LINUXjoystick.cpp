@@ -15,11 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Platforms/General/PFjoystick.h"
+
 #include "Platforms/General/PFwindow.h"  
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/make_unique.h"
-#include "Platforms/General/PFjoystick.h"
 
 #include <linux/joystick.h>
 #include <math.h>
