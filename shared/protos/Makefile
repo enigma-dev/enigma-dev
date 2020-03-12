@@ -1,4 +1,5 @@
 include ../../Config.mk
+include ../../Default.mk
 
 PROTO_SOURCES := $(wildcard *.proto)
 SOURCES_GRPC :=
