@@ -1,0 +1,31 @@
+%e-yaml
+---
+Name: GNU GCC G++ 32
+Native: No
+Maintainer: fundies
+Target-platform: FreeBSD
+
+Make-Vars:
+  path:
+  make: make
+  makeflags:
+  cc: gcc
+  cxx: g++
+  cppflags:
+  cxxflags: -m32 -fdiagnostics-color=always
+  cflags: -m32
+  ldflags: -m32
+  links:
+
+Parser-Vars:
+  defines: cpp -dM -x c++ --std=c++03 -E $blank
+  searchdirs: gcc -E -x c++ --std=c++03 -v $blank
+  searchdirs-start: "#include <...> search starts here:"
+  searchdirs-end: "End of search list."
+
+EXE-Vars:
+  resources: $exe
+  Build-Extension:
+  Run-output: $tempfile
+  Run-Program: $game
+  Run-Params:
