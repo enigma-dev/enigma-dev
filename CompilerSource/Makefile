@@ -11,7 +11,7 @@ BASE = compileEGMf
 ifeq ($(OS), Linux)
 	TARGET := ../lib$(BASE).so
 else ifeq ($(OS), FreeBSD)
-	TARGET := ..lib$(BASE).so
+	TARGET := ../lib$(BASE).so
 else ifeq ($(OS), Darwin)
 	TARGET := ../lib$(BASE).dylib
 else
