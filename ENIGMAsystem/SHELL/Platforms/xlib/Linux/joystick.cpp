@@ -31,7 +31,7 @@
 #include <iostream>
 #include <cmath>
 #include <sys/stat.h>
-
+#include <linux/joystick.h>
 
 using namespace std;
 
