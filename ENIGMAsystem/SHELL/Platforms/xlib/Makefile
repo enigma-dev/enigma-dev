@@ -1,8 +1,10 @@
 SOURCES += $(wildcard Platforms/xlib/*.cpp) $(wildcard Platforms/General/POSIX/*.cpp)
 ifeq ($(OS), Linux)
+	SOURCES += Platforms/xlib/Linux/progdir.cpp
 	override CXXFLAGS += $(shell pkg-config x11 --cflags) -IPlatforms/xlib/Linux
 	override CFLAGS += $(shell pkg-config x11 --cflags) -IPlatforms/xlib/Linux
 else ifeq ($(OS), FreeBSD)
+	SOURCES += Platforms/xlib/BSD/progdir.cpp
 	override CXXFLAGS += $(shell pkg-config x11 --cflags) -IPlatforms/xlib/BSD
 	override CFLAGS += $(shell pkg-config x11 --cflags) -IPlatforms/xlib/BSD
 endif
