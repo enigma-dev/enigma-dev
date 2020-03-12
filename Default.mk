@@ -4,6 +4,7 @@
 
 .FORCE:
 
+OS := $(shell uname -s)
 ifeq ($(OS), FreeBSD)
 	CXXFLAGS += -I/usr/local/include
 	CFLAGS   += -I/usr/local/include
