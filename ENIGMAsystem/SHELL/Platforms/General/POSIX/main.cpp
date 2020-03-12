@@ -1,7 +1,7 @@
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFfilemanip.h"
 #include "Universal_System/estring.h"
-#include "progdir.h"
+#include "Platforms/xlib/XLIBprogdir.h"
 
 #include <climits>
 #include <unistd.h>
