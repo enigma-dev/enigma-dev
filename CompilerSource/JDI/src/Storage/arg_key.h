@@ -30,6 +30,12 @@ namespace jdi { class arg_key; }
 #include <Storage/value.h>
 #include <API/error_context.h>
 
+#if (__cplusplus - 0) >= 201703L
+  #define __REGISTER
+#else
+  #define __REGISTER                             register
+#endif
+
 namespace jdi {
   /** Structure containing template arguments; can be used as the key in an std::map. **/
   class arg_key {
