@@ -4,7 +4,7 @@
 
 namespace enigma {
 
-initialize_program_directory() {
+void initialize_program_directory() {
   int result; pid_t pid = getpid();
   char buffer[PROC_PIDPATHINFO_MAXSIZE];
   result = proc_pidpath (pid, buffer, sizeof(buffer));
