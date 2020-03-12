@@ -1,9 +1,10 @@
 #include "progdir.h"
+#include <climits>
 
 namespace enigma {
 
 initialize_program_directory() {
-  buffer[0] = 0;
+  char buffer[PATH_MAX];
   ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX);
   if (count != -1) {
     buffer[count] = 0;
