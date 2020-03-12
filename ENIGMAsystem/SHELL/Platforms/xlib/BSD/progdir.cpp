@@ -2,6 +2,7 @@
 #include "Universal_System/estring.h"
 #include "progdir.h"
 #include <cstdlib>
+#include <climits>
 #include <unistd.h>
 #include <sys/sysctl.h>
 
@@ -13,7 +14,7 @@ void initialize_program_directory() {
   mib[1] = KERN_PROC;
   mib[2] = KERN_PROC_PATHNAME;
   mib[3] = -1;
-  char buffer[1024];
+  char buffer[PATH_MAX];
   size_t cb = sizeof(buffer);
   sysctl(mib, 4, buffer, &cb, NULL, 0);
   enigma_user::program_directory = enigma_user::filename_path(buffer);
