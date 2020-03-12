@@ -22,6 +22,14 @@
 #  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
 #endif
 
+#ifndef ENIGMA_GSMODEL_IMPL_H
+#define ENIGMA_GSMODEL_IMPL_H
+
+#include "GSmodel.h"
+#include "GScolors.h"
+#include "Universal_System/scalar.h"
+#include "Universal_System/Resources/AssetArray.h"
+using enigma::AssetArray;
 #ifndef ENIGMA_GSMATRIX_IMPL_H
 #define ENIGMA_GSMATRIX_IMPL_H
 
@@ -31,9 +39,6 @@
 #define GLM_FORCE_RADIANS
 // first one is deprecated but define it
 // anyway for the same reasons as above
-#ifndef __FreeBSD__
-#define GLM_LEFT_HANDED
-#endif
 #define GLM_FORCE_LEFT_HANDED
 
 #include <glm/glm.hpp>
