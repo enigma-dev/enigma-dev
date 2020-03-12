@@ -1,9 +1,4 @@
-#include "Platforms/General/PFmain.h"
-#include "Universal_System/estring.h"
 #include "progdir.h"
-#include <cstdlib>
-#include <climits>
-#include <unistd.h>
 #include <sys/sysctl.h>
 
 namespace enigma {
