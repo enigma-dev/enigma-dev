@@ -88,9 +88,7 @@ class Model {
   static const char* getAssetTypeName() { return "model"; }
 };
 
-namespace enigma {
-
-extern glm::mat4 world, view, projection;
+extern AssetArray<Model> models;
 
 } // namespace enigma
 
