@@ -92,4 +92,4 @@ extern AssetArray<Model> models;
 
 } // namespace enigma
 
-#endif // ENIGMA_GSMATRIX_IMPL_H
+#endif // ENIGMA_GSMODEL_IMPL_H
