@@ -10,6 +10,9 @@ OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	PLATFORM := xlib
 	MKDIR := mkdir
+else ifeq ($(OS), FreeBSD)
+	PLATFORM := xlib
+	MKDIR := mkdir
 else ifeq ($(OS), Darwin)
 	PLATFORM := Cocoa
 	MKDIR := mkdir
