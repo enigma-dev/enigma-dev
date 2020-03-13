@@ -12,12 +12,12 @@
 using std::string;
 
 namespace enigma {
-
+ 
 static inline string add_slash(const string& dir) {
   if (dir.empty() || *dir.rbegin() != '/') return dir + '/';
   return dir;
 }
-
+ 
 void initialize_directory_globals() {
   // Set the working_directory
   char buffer[PATH_MAX];
