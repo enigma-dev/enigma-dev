@@ -28,10 +28,8 @@
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/General/PFjoystick.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Platforms/xlib/XLIBprogdir.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/estring.h"
 #include "Universal_System/var4.h"
 
 #include <X11/Xlib.h>
@@ -39,9 +37,6 @@
 
 #include <sys/types.h>  //getpid
 #include <unistd.h>
-#include <libgen.h>
-#include <cstdlib>
-#include <climits>
 #include <string>
 
 using std::string;
