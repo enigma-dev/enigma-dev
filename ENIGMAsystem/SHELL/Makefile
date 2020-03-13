@@ -27,7 +27,7 @@ ifeq ($(OS), FreeBSD)
 	LDFLAGS  += -L/usr/local/lib
 endif
 
-ifeq !($(TARGET-PLATFORM), FreeBSD)
+ifneq ($(TARGET-PLATFORM), FreeBSD)
 	CXXFLAGS += -DGLM_FORCE_LEFT_HANDED -DGLM_LEFT_HANDED
 	CFLAGS   += -DGLM_FORCE_LEFT_HANDED -DGLM_LEFT_HANDED
 endif
