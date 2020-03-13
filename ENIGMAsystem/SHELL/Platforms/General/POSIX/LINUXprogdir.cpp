@@ -1,4 +1,4 @@
-#include "Platforms/xlib/XLIBprogdir.h"
+#include "Platforms/General/POSIXprogdir.h"
 
 namespace enigma {
 
