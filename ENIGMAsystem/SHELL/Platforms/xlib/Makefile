@@ -1,6 +1,7 @@
-ifeq ($(TARGET-PLATFORM), Linux)
+OS := $(shell uname -s)
+ifeq ($(OS), Linux)
 	SOURCES += $(wildcard Platforms/xlib/Linux/*.cpp)
-else ifeq ($(TARGET-PLATFORM), FreeBSD)
+else ifeq ($(OS), FreeBSD)
 	SOURCES += $(wildcard Platforms/xlib/BSD/*.cpp)
 endif
 SOURCES += $(wildcard Platforms/xlib/*.cpp) $(wildcard Platforms/General/POSIX/*.cpp)
