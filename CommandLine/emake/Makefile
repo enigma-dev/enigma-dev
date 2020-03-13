@@ -7,9 +7,7 @@ include $(SHARED_SRC_DIR)/event_reader/Makefile
 
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
-ifeq ($(OS), Linux)
-	OS_LIBS=-lboost_program_options -Wl,--no-as-needed -Wl,-rpath,./ -lpthread -ldl
-else ifeq ($(OS), FreeBSD)
+ifeq (($(OS), Linux) || ($(OS), FreeBSD))
 	OS_LIBS=-lboost_program_options -Wl,--no-as-needed -Wl,-rpath,./ -lpthread -ldl
 else ifeq ($(OS), Darwin)
 	OS_LIBS=-lboost_program_options -lpthread -ldl
