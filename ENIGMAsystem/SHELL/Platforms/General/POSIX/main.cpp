@@ -12,7 +12,7 @@
 using std::string;
 
 namespace enigma {
- 
+  
 static inline string add_slash(const string& dir) {
   if (dir.empty() || *dir.rbegin() != '/') return dir + '/';
   return dir;
@@ -35,7 +35,7 @@ void initialize_directory_globals() {
   enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("HOME")) + 
     string(".config/") + add_slash(std::to_string(enigma_user::game_id));
 }
- 
+
 } // namespace enigma
 
 int main(int argc, char** argv) {
