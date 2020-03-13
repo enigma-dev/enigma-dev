@@ -1,9 +1,11 @@
 .PHONY: libpng-util.a clean .FORCE
 
 # I tried include ../../Default.mk and it had a warning saying overriding .FORCE
-CXXFLAGS += -I/usr/local/include
-CFLAGS   += -I/usr/local/include
-LDFLAGS  += -L/usr/local/lib
+ifeq ($(OS), FreeBSD)
+	CXXFLAGS += -I/usr/local/include
+	CFLAGS   += -I/usr/local/include
+	LDFLAGS  += -L/usr/local/lib
+endif
 
 libpng-util.a: .FORCE
 	mkdir -p .eobjs/
