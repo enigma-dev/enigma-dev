@@ -4,7 +4,7 @@ OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	LIB_EXT := .so
 	BIN_EXT :=
-ifeq ($(OS), FreeBSD)
+else ifeq ($(OS), FreeBSD)
 	LIB_EXT := .so
 	BIN_EXT :=
 else ifeq ($(OS), Darwin)
