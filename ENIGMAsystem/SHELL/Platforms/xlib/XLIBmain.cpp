@@ -24,7 +24,6 @@
 #include "XDisplayGetters.h"
 
 #include "Platforms/General/PFmain.h"
-#include "Platforms/General/PFfilemanip.h"
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/General/PFjoystick.h"
 #include "Platforms/platforms_mandatory.h"
