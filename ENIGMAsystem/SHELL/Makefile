@@ -25,7 +25,9 @@ ifeq ($(OS), FreeBSD)
 	CXXFLAGS += -I/usr/local/include
 	CFLAGS   += -I/usr/local/include
 	LDFLAGS  += -L/usr/local/lib
-else
+endif
+
+ifeq !($(TARGET-PLATFORM), FreeBSD)
 	CXXFLAGS += -DGLM_FORCE_LEFT_HANDED -DGLM_LEFT_HANDED
 	CFLAGS   += -DGLM_FORCE_LEFT_HANDED -DGLM_LEFT_HANDED
 endif
