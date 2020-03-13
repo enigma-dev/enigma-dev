@@ -20,12 +20,12 @@
 **/
 
 #include "XLIBmain.h"
-#include "joystick.h"
 #include "XLIBwindow.h"
 #include "XDisplayGetters.h"
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
+#include "Platforms/General/PFjoystick.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
