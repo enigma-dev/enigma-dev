@@ -1,6 +1,8 @@
 SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
 
-ifeq ($(filter ($(TARGET-PLATFORM), Linux), ($(TARGET-PLATFORM), FreeBSD)),)
+ifeq ($(TARGET-PLATFORM), Linux)
+	override LDLIBS += -lopenal -lalure -lvorbisfile -lvorbis -ldumb
+else ifeq ($(TARGET-PLATFORM), FreeBSD)
 	override LDLIBS += -lopenal -lalure -lvorbisfile -lvorbis -ldumb
 else ifeq ($(TARGET-PLATFORM), Windows)
 	override CXXFLAGS += $(shell pkg-config --cflags openal)
