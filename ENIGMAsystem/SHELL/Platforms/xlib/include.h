@@ -1,3 +1,3 @@
-#include "progdir.h"
-#include "joystick.h"
+#include "XLIBprogdir.h"
+#include "XLIBjoystick.h"
 #include "Platforms/General/include.h"
