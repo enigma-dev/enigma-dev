@@ -1,7 +1,7 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 
 OS := $(shell uname -s)
-ifeq (($(OS), Linux) || ($(OS), FreeBSD))
+ifeq ($(filter ($(OS), Linux), ($(OS), FreeBSD)))
 	LIB_EXT := .so
 	BIN_EXT :=
 else ifeq ($(OS), Darwin)
