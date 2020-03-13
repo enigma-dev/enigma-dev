@@ -7,10 +7,7 @@
 
 # PLATFORM { Platforms/* }
 OS := $(shell uname -s)
-ifeq ($(OS), Linux)
-	PLATFORM := xlib
-	MKDIR := mkdir
-else ifeq ($(OS), FreeBSD)
+ifeq ($(OS), Linux) || ($(OS), FreeBSD)
 	PLATFORM := xlib
 	MKDIR := mkdir
 else ifeq ($(OS), Darwin)
