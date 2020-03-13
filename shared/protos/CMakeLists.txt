@@ -77,9 +77,8 @@ set_target_properties(${LIB} PROPERTIES VERSION ${LIB_VERSION})
 if (RGM_ENABLE_GRPC_SERVER)
   # Find GRPC
   find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-  find_library(LIB_GRPC NAMES grpc)
   find_library(LIB_GPR NAMES gpr)
-  target_link_libraries(${LIB} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
+  target_link_libraries(${LIB} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GPR})
 endif()
 
 # Find Protobuf
