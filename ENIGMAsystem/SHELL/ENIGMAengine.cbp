@@ -771,12 +771,12 @@
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
 		</Unit>
-		<Unit filename="Platforms/xlib/Linux/LINUXprogdir.cpp">
+		<Unit filename="Platforms/General/POSIX/Linux/LINUXprogdir.cpp">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
 		</Unit>
-		<Unit filename="Platforms/xlib/XLIBprogdir.h">
+		<Unit filename="Platforms/General/POSIX/POSIXprogdir.h">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
