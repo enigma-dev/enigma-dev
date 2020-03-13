@@ -28,9 +28,6 @@
 // let's define it just in case some enigma
 // user's package manager happens to be old
 #define GLM_FORCE_RADIANS
-// first one is deprecated but define it
-// anyway for the same reasons as above
-#define GLM_FORCE_LEFT_HANDED
 
 #include <glm/glm.hpp>
 
