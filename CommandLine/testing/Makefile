@@ -3,7 +3,7 @@ include ../../Config.mk
 TARGET := ../../test-runner
 TESTCASES_DIR := $(SRC_DIR)/Tests
 
-ifeq ($(filter ($(OS), Linux), ($(OS), FreeBSD))
+ifeq ($(filter ($(OS), Linux), ($(OS), FreeBSD)))
 	OS_SRCS=$(wildcard ./Platform/*-X11.cpp)
 	OS_LIBS=-lX11 -lstdc++fs
 else ifeq ($(OS), Darwin)
