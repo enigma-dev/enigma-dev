@@ -22,6 +22,9 @@
 
 namespace enigma {
 
+// ANativeWindow *ANWin;
+// EGLSurface EGLSurf;
+
 // called from initGameWindow()
 // capture sdl window hwnd/surf
 void window_id_init() {
