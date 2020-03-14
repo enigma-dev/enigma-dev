@@ -108,7 +108,7 @@ string window_get_identifier(void *hwnd) {
   return remove_trailing_zeros((long long)(HWND)hwnd);
 }
 
-static int currentIconIndex;
+static int currentIconIndex = -1;
 static unsigned currentIconFrame;
 
 int window_get_icon_index() {

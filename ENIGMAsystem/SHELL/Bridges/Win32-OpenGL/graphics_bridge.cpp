@@ -18,6 +18,7 @@
 
 #include "OpenGLHeaders.h"
 #include "Graphics_Systems/OpenGL-Common/version.h"
+#include "Graphics_Systems/OpenGL-Common/shader.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Bridges/OpenGL/GLload.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -99,6 +100,7 @@ void EnableDrawing(void*)
 
 void DisableDrawing(void*)
 {
+  cleanup_shaders(); // delete shaders before context
   wglMakeCurrent(NULL, NULL);
   wglDeleteContext(hRC);
   ReleaseDC(enigma::hWnd, enigma::window_hDC);

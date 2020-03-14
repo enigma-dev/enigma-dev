@@ -40,7 +40,7 @@ inline unsigned int lgpp2(unsigned int x) { // Trailing zero count. lg for perfe
 
 namespace enigma {
 
-vector<Texture*> textures;
+vector<std::unique_ptr<Texture>> textures;
 Sampler samplers[8];
 
 int graphics_duplicate_texture(int tex, bool mipmap) {
@@ -135,8 +135,7 @@ void texture_save(int texid, string fname) {
 
 void texture_delete(int texid) {
   enigma::graphics_delete_texture(texid); // delete the peer
-  delete enigma::textures[texid];         // now delete the user object
-  enigma::textures[texid] = NULL;         // GM ids are forever!
+  enigma::textures[texid] = nullptr;         // GM ids are forever!
 }
 
 bool texture_exists(int texid) {
