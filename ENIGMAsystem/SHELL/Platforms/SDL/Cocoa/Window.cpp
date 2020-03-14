@@ -27,15 +27,6 @@ extern "C" void *cocoa_window_handle();
 extern "C" long cocoa_window_identifier();
 extern "C" long cocoa_window_get_identifier(void *hwnd);
 
-static inline string remove_trailing_zeros(long numb) {
-  string strnumb = std::to_string(numb);
-
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-    strnumb.pop_back();
-
-  return strnumb;
-}
-
 namespace enigma {
 
 void *NSWin; // NSWindow * a.k.a CocoaAPI Window Handle
@@ -65,13 +56,13 @@ void *window_handle() {
 // returns an identifier for the sdl window
 // this string can be used in shell scripts
 string window_identifier() {
-  return remove_trailing_zeros(enigma::WinNum);
+  return std::to_string(enigma::WinNum);
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
 string window_get_identifier(void *hwnd) {
-  return remove_trailing_zeros(cocoa_window_get_identifier(hwnd));
+  return std::to_string(cocoa_window_get_identifier(hwnd));
 }
 
 }
