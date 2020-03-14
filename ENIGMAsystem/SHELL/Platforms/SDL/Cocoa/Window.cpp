@@ -19,6 +19,9 @@
 #include "Platforms/SDL/Window.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
+#include <string>
+
+using std::string;
 
 extern "C" void *cocoa_window_handle();
 extern "C" long cocoa_window_identifier();
