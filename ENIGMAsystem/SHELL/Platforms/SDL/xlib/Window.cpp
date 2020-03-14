@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Platforms/General/PFwindow.h
+#include "Platforms/General/PFwindow.h"
 #include "Platforms/SDL/Window.h"
 #include <X11/Xlib.h>
 #include <SDL2/SDL.h>
