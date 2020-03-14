@@ -58,7 +58,7 @@ unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigne
   unsigned char *bitmap = new unsigned char[bitmap_size]();
 
   unsigned i = 0;
-  unsigned elem_numb = pngwidth * pngheight + (prepend_size) ? 2 : 0;
+  unsigned elem_numb = pngwidth * pngheight + ((prepend_size) ? 2 : 0);
   unsigned long *result = new unsigned long[elem_numb]();
   if (prepend_size) {
     result[i++] = pngwidth; result[i++] = pngheight; // this is required for xlib icon hint
