@@ -35,6 +35,9 @@ static inline string remove_trailing_zeros(long numb) {
 
 namespace enigma {
 
+void *NSWin; // NSWindow * a.k.a CocoaAPI Window Handle
+long WinNum; // Window ID a.k.a [NSWindow windowNumber]
+
 // called from initGameWindow()
 // capture sdl window win/winid
 void window_id_init() {
