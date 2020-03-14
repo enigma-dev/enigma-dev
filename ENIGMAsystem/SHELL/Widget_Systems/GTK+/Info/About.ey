@@ -3,7 +3,7 @@
 
 Name: GTK+ (Currently Broken)
 Identifier: GTK+
-Build-Platforms: MacOSX, Windows, Linux, SDL
+Build-Platforms: Windows, MacOSX, Linux, FreeBSD, SDL
 Represents: Linux
 Description: Create Widgets using GTK+, the primary widget toolkit of GNOME.
 Author: Josh Ventura
