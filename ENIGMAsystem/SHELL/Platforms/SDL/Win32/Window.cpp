@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Window.h"
+#include "Platforms/General/PFwindow.h"
 #include "Platforms/SDL/Window.h"
 #include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 #include <SDL2/SDL.h>
@@ -31,6 +31,9 @@ static inline string remove_trailing_zeros(long long numb) {
 }
 
 namespace enigma {
+
+HWND hWnd;
+HINSTANCE hInstance;
 
 // called from initGameWindow()
 // capture sdl window hwnd/inst
