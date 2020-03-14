@@ -18,8 +18,12 @@
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/SDL/Window.h"
 #include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
+#include <windows.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
+#include <string>
+
+using std::string;
 
 static inline string remove_trailing_zeros(long long numb) {
   string strnumb = std::to_string(numb);
