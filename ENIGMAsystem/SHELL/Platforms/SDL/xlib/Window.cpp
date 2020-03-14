@@ -15,10 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Platforms/General/PFwindow.h"
+#include "Platforms/General/PFwindow.h
 #include "Platforms/SDL/Window.h"
+#include <X11/Xlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
+#include <string>
+
+using std::string;
 
 static inline string remove_trailing_zeros(int numb) {
   string strnumb = std::to_string(numb);
@@ -30,6 +34,13 @@ static inline string remove_trailing_zeros(int numb) {
 }
 
 namespace enigma {
+
+namespace x11 {
+
+Display *disp;
+Window win;
+
+}
 
 // called from initGameWindow()
 // capture sdl window disp/hwnd
