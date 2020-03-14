@@ -19,7 +19,7 @@
 
 #include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
-#include <stdio.h> 
+#include <stdio.h>
 
 #include "DSsystem.h"
 struct WaveHeaderType {
