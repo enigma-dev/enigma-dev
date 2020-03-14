@@ -144,15 +144,6 @@ void destroyWindow() {
 
 }  //namespace enigma
 
-static inline string remove_trailing_zeros(int numb) {
-  string strnumb = std::to_string(numb);
-
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-    strnumb.pop_back();
-
-  return strnumb;
-}
-
 namespace enigma_user {
 
 #if GM_COMPATIBILITY_VERSION <= 81
@@ -168,13 +159,13 @@ void *window_handle() {
 // returns an identifier for the gay window
 // this string can be used in shell scripts
 string window_identifier() {
-  return remove_trailing_zeros((int)enigma::x11::win);
+  return std::to_string((int)enigma::x11::win);
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
 string window_get_identifier(void *hwnd) {
-  return remove_trailing_zeros((int)(Window)hwnd);
+  return std::to_string((int)(Window)hwnd);
 }
 
 void window_set_visible(bool visible) {
