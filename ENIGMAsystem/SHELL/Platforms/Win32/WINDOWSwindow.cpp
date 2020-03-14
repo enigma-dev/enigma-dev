@@ -75,15 +75,6 @@ void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
 
 }
 
-static inline string remove_trailing_zeros(long long numb) {
-  string strnumb = std::to_string(numb);
-
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-    strnumb.pop_back();
-
-  return strnumb;
-}
-
 namespace enigma_user {
 
 #if GM_COMPATIBILITY_VERSION <= 81
@@ -99,13 +90,13 @@ void *window_handle() {
 // returns an identifier for the gay window
 // this string can be used in shell scripts
 string window_identifier() {
-  return remove_trailing_zeros((long long)enigma::hWnd);
+  return std::to_string((long long)enigma::hWnd);
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
 string window_get_identifier(void *hwnd) {
-  return remove_trailing_zeros((long long)(HWND)hwnd);
+  return std::to_string((long long)(HWND)hwnd);
 }
 
 static int currentIconIndex = -1;
