@@ -35,4 +35,62 @@ namespace enigma {
   void handle_joysticks(){
 
   }
+} // namespace enigma
+
+namespace enigma_user {
+
+  bool joystick_load(int id) {
+    return false;
+  }
+
+  void joystick_map_button(int id, int butnum, char key) {
+
+  }
+
+  void joystick_map_axis(int id, int axisnum, char keyneg, char keypos) {
+
+  }
+
+  double joystick_axis(int id, int axisnum) {
+    return 0;
+  }
+  bool joystick_button(int id, int buttonnum) {
+    return false;
+  }
+
+  bool joystick_exists(int id) {
+    return false;
+  }
+
+  string joystick_name(int id) {
+    return "";
+  }
+
+  int joystick_axes(int id) {
+    checkId(0);
+    enigma::e_joystick * const js = enigma::joysticks[id].get();
+    return js->axiscount;
+  }
+
+  int joystick_buttons(int id) {
+    return 0;
+  }
+
+  bool joystick_has_pov(int id) {
+    return false;
+  }
+  
+  int joystick_direction(int id, int axis1, int axis2) {
+    return 0;
+  }
+  
+  double joystick_pov(int id, int axis1, int axis2) {
+    return 0;
+  }
+  
+  double joystick_pov(int id) {
+    return 0;
+  }
+  
+  int joystick_lastbutton = -1;
 }
