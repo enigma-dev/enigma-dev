@@ -26,6 +26,9 @@
 \********************************************************************************/
 
 #include "Platforms/General/PFjoystick.h"
+#include <string>
+
+using std::string;
 
 namespace enigma
 {
