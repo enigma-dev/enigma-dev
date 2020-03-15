@@ -16,6 +16,7 @@
 **/
 
 #include <string>
+#include <time.h>
 
 namespace enigma_user {
 
