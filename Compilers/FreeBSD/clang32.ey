@@ -1,20 +1,20 @@
 %e-yaml
 ---
-Name: GNU GCC G++ 32
-Native: No
+Name: Clang 32
+Native: Yes
 Maintainer: fundies
 Target-platform: FreeBSD
 
 Make-Vars:
   path:
-  make: gmake
+  make: make
   makeflags:
-  cc: gcc
-  cxx: g++
+  cc: clang
+  cxx: clang++
   cppflags:
-  cxxflags: -m32 -fdiagnostics-color=always
-  cflags: -m32
-  ldflags: -m32
+  cxxflags: -m32 -stdlib=libc++ -Wno-missing-declarations -Wno-parentheses-equality
+  cflags: -m32 -Wall -O3
+  ldflags: -m32 -Wall -O3 -stdlib=libc++
   links:
 
 Parser-Vars:
