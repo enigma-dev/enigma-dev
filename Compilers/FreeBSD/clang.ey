@@ -7,7 +7,7 @@ Target-platform: FreeBSD
 
 Make-Vars:
   path:
-  make: make
+  make: gmake
   makeflags:
   cc: clang
   cxx: clang++
