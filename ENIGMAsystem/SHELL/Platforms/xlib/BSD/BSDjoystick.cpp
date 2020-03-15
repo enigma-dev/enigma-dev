@@ -27,15 +27,17 @@
 
 #include "Platforms/General/PFjoystick.h"
 
-namespace enigma {
+namespace enigma
+{
   void init_joysticks() {
-
+    enigma_user::joystick_load(0);
+    enigma_user::joystick_load(1);
   }
 
-  void handle_joysticks(){
+  void handle_joysticks() {
 
   }
-} // namespace enigma
+}  // namespace enigma
 
 namespace enigma_user {
 
@@ -67,9 +69,7 @@ namespace enigma_user {
   }
 
   int joystick_axes(int id) {
-    checkId(0);
-    enigma::e_joystick * const js = enigma::joysticks[id].get();
-    return js->axiscount;
+    return 0;
   }
 
   int joystick_buttons(int id) {
