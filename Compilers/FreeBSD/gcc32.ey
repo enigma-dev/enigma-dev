@@ -14,7 +14,7 @@ Make-Vars:
   cppflags:
   cxxflags: -m32 -fdiagnostics-color=always
   cflags: -m32
-  ldflags: -m32
+  ldflags: -m32 -Wl,-rpath=/usr/local/lib/gcc9
   links:
 
 Parser-Vars:
