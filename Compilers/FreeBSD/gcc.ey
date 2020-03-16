@@ -14,7 +14,7 @@ Make-Vars:
   cppflags:
   cxxflags: -fdiagnostics-color=always
   cflags:
-  ldflags:
+  ldflags: -Wl,-rpath=/usr/local/lib/gcc9
   links:
 
 Parser-Vars:
