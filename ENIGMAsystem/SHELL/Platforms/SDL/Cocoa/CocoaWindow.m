@@ -27,10 +27,10 @@ void *cocoa_window_handle() {
   return (void *)wmInfo.info.cocoa.window;
 }
 
-long cocoa_window_identifier() {
+unsigned long cocoa_window_identifier() {
   return [(NSWindow *)cocoa_window_handle() windowNubmer];
 }
 
-long cocoa_window_get_identifier(void *hwnd) {
+unsigned long cocoa_window_get_identifier(void *hwnd) {
   return [(NSWindow *)hwnd windowNubmer];
 }
