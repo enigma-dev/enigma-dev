@@ -60,13 +60,13 @@ void *window_handle() {
 // returns an identifier for the sdl window
 // this string can be used in shell scripts
 string window_identifier() {
-  return std::to_string((int)enigma::x11::win);
+  return std::to_string((unsigned long)enigma::x11::win);
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
 string window_get_identifier(void *hwnd) {
-  return std::to_string((int)(Window)hwnd);
+  return std::to_string((unsigned long)(Window)hwnd);
 }
 
 }
