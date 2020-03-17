@@ -27,5 +27,7 @@ else
 
 	ifeq ($(TARGET-PLATFORM), Linux)
 		SOURCES += Platforms/SDL/xlib/Window.cpp
+	else ifeq ($(TARGET-PLATFORM), FreeBSD)
+		SOURCES += Platforms/SDL/xlib/Window.cpp
 	endif
 endif
