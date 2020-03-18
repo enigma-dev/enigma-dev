@@ -51,7 +51,7 @@ template<> bool tequal(float v1, float v2)   { return fequal(v1, v2); }
 template<> bool tequal(double v1, double v2) { return fequal(v1, v2); }
 
 template<class RandomIt>
-void random_shuffle_new(RandomIt first, RandomIt last) {
+void mt_random_shuffle(RandomIt first, RandomIt last) {
   std::random_device rd;
   std::mt19937 g(rd());
   std::shuffle(first, last, g);
@@ -471,7 +471,7 @@ class grid
     }
     void shuffle()
     {
-        random_shuffle_new(grid_array, grid_array + (xgrid*ygrid - 1));
+        mt_random_shuffle(grid_array, grid_array + (xgrid*ygrid - 1));
     }
 };
 
@@ -1280,7 +1280,7 @@ void ds_list_sort(const unsigned int id, const bool ascend)
 void ds_list_shuffle(const unsigned int id)
 {
   //shuffles the values in the list into a random order
-  random_shuffle_new(ds_lists[id].begin(), ds_lists[id].end());
+  mt_random_shuffle(ds_lists[id].begin(), ds_lists[id].end());
 }
 
 bool ds_list_exists(const unsigned int id)
