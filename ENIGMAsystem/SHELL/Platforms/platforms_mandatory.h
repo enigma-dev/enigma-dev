@@ -110,6 +110,12 @@ namespace enigma_user
 // Each instance must implement these, even if they are unable to do anything
 // on the target platform.
 
+#if GM_COMPATIBILITY_VERSION <= 81
+unsigned long long window_handle();
+#else
+void *window_handle();
+#endif 
+
 // This is used with roomsystem
 void window_default(bool center_size = false);
 
