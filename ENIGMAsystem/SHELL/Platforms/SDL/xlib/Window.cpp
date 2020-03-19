@@ -47,26 +47,20 @@ void window_id_init() {
 
 namespace enigma_user {
 
-#if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle() {
-  return (unsigned long long)enigma::x11::win;
+window_t window_handle() {
+  return static_cast<window_t>(enigma::x11::win);
 }
-#else
-void *window_handle() {
-  return (void *)enigma::x11::win;
-}
-#endif  
 
 // returns an identifier for the sdl window
 // this string can be used in shell scripts
 string window_identifier() {
-  return std::to_string((unsigned long)enigma::x11::win);
+  return std::to_string(static_cast<unsigned long>(enigma::x11::win));
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
 string window_get_identifier(void *hwnd) {
-  return std::to_string((unsigned long)(Window)hwnd);
+  return std::to_string(static_cast<unsigned long>(hwnd));
 }
 
 }
