@@ -15,5 +15,3 @@ variables:
 
 jobs:
 - template: azure-jobs.yml@radialgm  # Template reference
-  parameters:
-    submodule: true
