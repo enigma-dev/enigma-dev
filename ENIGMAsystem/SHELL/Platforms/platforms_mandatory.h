@@ -28,7 +28,11 @@
 #include <functional>
 #include <vector>
 
+#if GM_COMPATIBILITY_VERSION <= 81
 using window_t = unsigned long long;
+#else
+using window_t = void *;
+#endif 
 
 namespace enigma_user {
   extern const int os_type;
@@ -112,11 +116,7 @@ namespace enigma_user
 // Each instance must implement these, even if they are unable to do anything
 // on the target platform.
 
-#if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle();
-#else
-void *window_handle();
-#endif 
+window_t window_handle();
 
 // This is used with roomsystem
 void window_default(bool center_size = false);
