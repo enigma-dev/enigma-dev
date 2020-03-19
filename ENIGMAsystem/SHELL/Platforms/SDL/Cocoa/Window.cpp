@@ -29,7 +29,7 @@ extern "C" long cocoa_window_get_identifier(void *hwnd);
 
 namespace enigma {
 
-window_t NSWin; // NSWindow * a.k.a CocoaAPI Window Handle
+void *NSWin; // NSWindow * a.k.a CocoaAPI Window Handle
 unsigned long WinNum; // Window ID a.k.a [NSWindow windowNumber]
 
 // called from initGameWindow()
