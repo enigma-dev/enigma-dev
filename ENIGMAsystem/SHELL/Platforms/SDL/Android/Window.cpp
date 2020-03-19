@@ -17,9 +17,9 @@
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/SDL/Window.h"
-// #include <?????.h> idk what android-specific header(s) define(s) ANativeWindow * and EGLSurface...
+// #include <?????.h> FIXME: idk what android-specific header(s) define(s) ANativeWindow * and EGLSurface...
 #include <SDL2/SDL.h>
-// #include <SDL2/SDL_syswm.h> // pussy not found !
+// #include <SDL2/SDL_syswm.h> // FIXME: pussy not found !
 
 namespace enigma {
 
