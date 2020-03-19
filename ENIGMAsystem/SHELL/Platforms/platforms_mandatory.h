@@ -28,6 +28,8 @@
 #include <functional>
 #include <vector>
 
+using window_t = unsigned long long;
+
 namespace enigma_user {
   extern const int os_type;
   extern unsigned long current_time; // milliseconds since the start of the game
