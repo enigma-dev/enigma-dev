@@ -61,8 +61,8 @@ namespace enigma {
   extern HINSTANCE hInstance;
   bool widget_system_initialize()
   {
-    // make sure the hWnd and hInstance variables are initialized (e.g, SDL)
-    if (enigma::hWnd == NULL || enigma::hInstance == NULL) {
+    // make sure the window handle is initialized (e.g, SDL)
+    if (window_handle() == NULL) {
       DEBUG_MESSAGE("Cannot initialize Win32 widget system with NULL window handle.", MESSAGE_TYPE::M_FATAL_ERROR);
     }
     INITCOMMONCONTROLSEX iccex;
