@@ -11,10 +11,10 @@ pr:  # Trigger a build on every PR.
     include:
       - '*'  # Must quote since "*" is a YAML reserved character
 variables:
-- template: azure-vars.yml@radialgm  # Template reference
+- template: azure-vars.yml@radialgm
 
 jobs:
-- template: azure-jobs.yml@radialgm  # Template reference
+- template: azure-jobs.yml@radialgm
   parameters:
     repo: radialgm
     enigmaref: $(Build.SourceBranch)
