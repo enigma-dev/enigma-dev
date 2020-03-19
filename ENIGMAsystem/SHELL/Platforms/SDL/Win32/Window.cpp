@@ -56,7 +56,7 @@ string window_identifier() {
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
-string window_get_identifier(void *hwnd) {
+string window_get_identifier(window_t hwnd) {
   return std::to_string(static_cast<unsigned long long>(hwnd));
 }
 
