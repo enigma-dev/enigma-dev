@@ -29,7 +29,7 @@ extern "C" long cocoa_window_get_identifier(void *hwnd);
 
 namespace enigma {
 
-void *NSWin; // NSWindow * a.k.a CocoaAPI Window Handle
+window_t NSWin; // NSWindow * a.k.a CocoaAPI Window Handle
 unsigned long WinNum; // Window ID a.k.a [NSWindow windowNumber]
 
 // called from initGameWindow()
@@ -43,15 +43,9 @@ void window_id_init() {
 
 namespace enigma_user {
 
-#if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle() {
-  return (unsigned long long)enigma::NSWin;
+window_t window_handle() {
+  return static_cast<window_t>(enigma::NSWin);
 }
-#else
-void *window_handle() {
-  return (void *)enigma::NSWin;
-}
-#endif
 
 // returns an identifier for the sdl window
 // this string can be used in shell scripts
