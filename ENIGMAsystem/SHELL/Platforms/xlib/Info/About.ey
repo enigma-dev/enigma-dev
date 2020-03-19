@@ -5,7 +5,7 @@ Name: X11
 Identifier: xlib
 Represents:
 	Build-Platforms: Linux, FreeBSD
-Description: Run on any Linux or FreeBSD distribution powered by the X Window Server.
+Description: Run on any macOS, Linux, or FreeBSD distribution powered by the X Window Server.
 Author: IsmAvatar, Josh Ventura
 
 Depends:
