@@ -3,6 +3,7 @@ resources:
     - repository: radialgm
       type: github
       name: enigma-dev/RadialGM
+      endpoint: github.com_EnigmaBot
       ref: refs/pull/106/merge # use this for testing a co-dependent rgm pr but comment this before merging
       
 pr:  # Trigger a build on every PR.
