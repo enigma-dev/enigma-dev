@@ -1,7 +1,7 @@
 %e-yaml
 ---
 
-Name: Linux/FreeBSD X11
+Name: X11
 Identifier: xlib
 Represents:
 	Build-Platforms: Linux, FreeBSD
@@ -9,4 +9,4 @@ Description: Run on any Linux or FreeBSD distribution powered by the X Window Se
 Author: IsmAvatar, Josh Ventura
 
 Depends:
-	Build-Platforms: Linux, FreeBSD
+	Build-Platforms: MacOSX, Linux, FreeBSD
