@@ -15,3 +15,5 @@ variables:
 
 jobs:
 - template: azure-jobs.yml@radialgm  # Template reference
+  parameters:
+    repo: radialgm
