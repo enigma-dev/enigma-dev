@@ -43,15 +43,9 @@ void window_id_init() {
 namespace enigma_user {
 
 /*
-#if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle() {
-  return (unsigned long long)enigma::ANWin;
+window_t window_handle() {
+  return static_cast<window_t>(enigma::ANWin);
 }
-#else
-void *window_handle() {
-  return (void *)enigma::ANWin;
-}
-#endif
 */
   
 }
