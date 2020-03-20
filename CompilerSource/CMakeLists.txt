@@ -34,3 +34,13 @@ add_dependencies(${TARGET} "Protocols")
 
 install(TARGETS ${TARGET} DESTINATION .)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB}.dir/Debug/${LIB}.pdb" DESTINATION . OPTIONAL)
+
+target_link_libraries(${TARGET} PRIVATE "Protocols")
+
+# Find libpng
+find_package(PNG REQUIRED)
+target_link_libraries(${TARGET} PRIVATE ${PNG_LIBRARY})
+
+# Find zlib
+find_package(ZLIB)
+target_link_libraries(${TARGET} PRIVATE ZLIB::ZLIB)
