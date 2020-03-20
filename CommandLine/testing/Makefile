@@ -5,10 +5,12 @@ TESTCASES_DIR := $(SRC_DIR)/Tests
 
 ifeq ($(OS), Darwin)
 	OS_SRCS=./Platform/TestHarness-Cocoa.cpp
-	OS_LIBS=-lstdc++fs
 else ifeq ($(UNIX_BASED), true)
 	OS_SRCS=$(wildcard ./Platform/*-X11.cpp)
-	OS_LIBS=$(shell pkg-config x11 --libs) -lstdc++fs
+	OS_LIBS:=$(shell pkg-config x11 --libs)
+	ifeq ($(OS), Linux)
+		OS_LIBS+=-lstdc++fs
+	endif
 else
 	OS_SRCS=./Platform/TestHarness-Win32.cpp
 endif
