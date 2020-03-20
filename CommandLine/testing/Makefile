@@ -3,11 +3,12 @@ include ../../Config.mk
 TARGET := ../../test-runner
 TESTCASES_DIR := $(SRC_DIR)/Tests
 
-ifeq ($(UNIX_MACOS), true)
+ifeq ($(OS), Darwin)
 	OS_SRCS=./Platform/TestHarness-Cocoa.cpp
+	OS_LIBS=-lstdc++fs
 else ifeq ($(UNIX_BASED), true)
 	OS_SRCS=$(wildcard ./Platform/*-X11.cpp)
-	OS_LIBS=-lX11 -lstdc++fs
+	OS_LIBS=$(shell pkg-config x11 --libs) -lstdc++fs
 else
 	OS_SRCS=./Platform/TestHarness-Win32.cpp
 endif
