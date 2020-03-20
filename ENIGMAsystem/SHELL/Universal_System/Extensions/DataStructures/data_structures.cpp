@@ -52,7 +52,10 @@ template<> bool tequal(double v1, double v2) { return fequal(v1, v2); }
 
 namespace enigma {
   static inline int random_integer(int x) {
-    return int(enigma_user::random(x));
+    // subtract 2 because GML random integer is inclusive of x
+    // but also because this generator must return less than its argument
+    // http://www.cplusplus.com/reference/algorithm/random_shuffle/
+    return enigma_user::random_integer(x - 2);
   }
 }
 
