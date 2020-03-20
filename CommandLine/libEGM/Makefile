@@ -5,7 +5,7 @@ SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 SHARED_SRC_DIR := ../../shared
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
-ifeq ($(UNIX_MACOS), false)
+ifneq ($(OS), Darwin)
 	ifeq ($(UNIX_BASED), true)
 		FS_LIBS=-lstdc++fs
 	endif
