@@ -4,13 +4,6 @@
 
 .FORCE:
 
-OS := $(shell uname -s)
-ifeq ($(OS), FreeBSD)
-	CXXFLAGS += -I/usr/local/include
-	CFLAGS   += -I/usr/local/include
-	LDFLAGS  += -L/usr/local/lib
-endif
-
 # libProtocols uses non-standard file extensions so it handles it's own objects list
 ifndef OBJECTS
 OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURCES)))
