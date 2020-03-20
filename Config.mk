@@ -1,6 +1,6 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 
-include ./Unix.mk
+include Unix.mk
 
 ifeq ($(UNIX_MACOS), true)
 	LIB_EXT := .dylib
