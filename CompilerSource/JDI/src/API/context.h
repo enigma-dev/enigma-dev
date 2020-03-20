@@ -39,12 +39,6 @@
 #include <vector>
 #include <iostream>
 
-#if (__cplusplus - 0) >= 201703L
-  #define __REGISTER
-#else
-  #define __REGISTER                             register
-#endif
-
 namespace jdi {
   class context;
 }
