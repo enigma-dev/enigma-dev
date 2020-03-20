@@ -30,6 +30,13 @@ include_directories(${TARGET} PRIVATE
                    "${ENIGMA_DIR}/shared/protos/codegen/"
 )
 
+if(MSVC)
+    # Default MSVC warnings are overkill. Set to Lvl 2
+    target_compile_options(${TARGET} PRIVATE /W1)
+    # Fixes 'and' and 'or'
+    target_compile_options(${TARGET} PRIVATE "/permissive-")
+endif()
+
 add_dependencies(${TARGET} "Protocols")
 
 install(TARGETS ${TARGET} DESTINATION .)
