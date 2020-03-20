@@ -26,8 +26,6 @@
  **                                                                              **
  \********************************************************************************/
 
-#include "Universal_System/random.h"
-
 #include <float.h>
 #include <random>
 #include <algorithm>
@@ -52,15 +50,11 @@ template<typename t> bool tequal(t v1, t v2) { return v1 == v2; }
 template<> bool tequal(float v1, float v2)   { return fequal(v1, v2); }
 template<> bool tequal(double v1, double v2) { return fequal(v1, v2); }
 
-namespace enigma {
-  static inline int random_integer(int x) {
-    return int(enigma_user::random(x));
-  }
-}
-
 template<class RandomIt>
-void random_shuffle_replacement(RandomIt first, RandomIt last) {
-  std::shuffle(first, last, enigma::random_integer);
+void mt_random_shuffle(RandomIt first, RandomIt last) {
+  std::random_device rd;
+  std::mt19937 g(rd());
+  std::shuffle(first, last, g);
 }
 
 template <typename t>
@@ -477,7 +471,7 @@ class grid
     }
     void shuffle()
     {
-        random_shuffle_replacement(grid_array, grid_array + (xgrid*ygrid - 1));
+        mt_random_shuffle(grid_array, grid_array + (xgrid*ygrid - 1));
     }
 };
 
@@ -1286,7 +1280,7 @@ void ds_list_sort(const unsigned int id, const bool ascend)
 void ds_list_shuffle(const unsigned int id)
 {
   //shuffles the values in the list into a random order
-  random_shuffle_replacement(ds_lists[id].begin(), ds_lists[id].end());
+  mt_random_shuffle(ds_lists[id].begin(), ds_lists[id].end());
 }
 
 bool ds_list_exists(const unsigned int id)
