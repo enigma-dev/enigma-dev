@@ -25,6 +25,12 @@ endif
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -g -I.
 LDFLAGS := -g
 
+ifeq ($(OS), FreeBSD)
+	CXXFLAGS += -I/usr/local/include
+	CFLAGS   += -I/usr/local/include
+	LDFLAGS  += -L/usr/local/lib
+endif
+
 # These will be relative to the file that includes this Makefile
 SRC_DIR := .
 OBJ_DIR := .eobjs
