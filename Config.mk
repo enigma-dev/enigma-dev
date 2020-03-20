@@ -39,6 +39,9 @@ ifeq ($(OS), FreeBSD)
 	CXXFLAGS += -I/usr/local/include
 	CFLAGS   += -I/usr/local/include
 	LDFLAGS  += -L/usr/local/lib
+else # These flags are deprecated in FreeBSD
+	CXXFLAGS += -DGLM_LEFT_HANDED
+	CFLAGS   += -DGLM_LEFT_HANDED
 endif
 
 # These will be relative to the file that includes this Makefile
