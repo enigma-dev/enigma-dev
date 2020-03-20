@@ -52,8 +52,7 @@ window_t window_handle() {
 // returns an identifier for the sdl window
 // this string can be used in shell scripts
 string window_identifier() {
-  void *window_pointer = static_cast<void *>(enigma::hWnd);
-  return std::to_string(static_cast<unsigned long long>(window_pointer));
+  return std::to_string(static_cast<unsigned long long>(window_handle()));
 }
 
 // returns an identifier for certain window
