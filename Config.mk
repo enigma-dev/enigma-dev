@@ -1,30 +1,40 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
-
-SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
-
 OS := $(shell uname -s)
-ifeq ($(OS), Linux)
-	LIB_EXT := .so
-	BIN_EXT :=
+
+# Determine whether Unix-based
+ifeq ($(OS), Darwin)
+	UNIX_BASED := true
+else ifeq ($(OS), Linux)
 	UNIX_BASED := true
 else ifeq ($(OS), FreeBSD)
-	LIB_EXT := .so
-	BIN_EXT :=
-	UNIX_BASED := true
-else ifeq ($(OS), Darwin)
-	LIB_EXT := .dylib
-	BIN_EXT :=
 	UNIX_BASED := true
 else 
+	UNIX_BASED := false
+endif
+
+# Determine current platform
+ifeq ($(OS), Darwin)
+	PLATFORM := Cocoa
+	MKDIR := mkdir
+	LIB_EXT := .dylib
+	BIN_EXT :=
+else ifeq ($(UNIX_BASED), true)
+	PLATFORM := xlib
+	MKDIR := mkdir
+	LIB_EXT := .so
+	BIN_EXT :=
+else
+	PLATFORM := Win32
+	MKDIR := mkdir.exe
 	LIB_EXT := .dll
 	BIN_EXT := .exe
-	UNIX_BASED := false
 endif
 
 # Global g++ flags
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -g -I.
 LDFLAGS := -g
 
+# FreeBSD include and lib folders
 ifeq ($(OS), FreeBSD)
 	CXXFLAGS += -I/usr/local/include
 	CFLAGS   += -I/usr/local/include
