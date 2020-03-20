@@ -25,7 +25,10 @@
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <d3d9.h>
 
 using namespace enigma::dx9;
@@ -76,7 +79,7 @@ void Reset(D3DPRESENT_PARAMETERS *d3dpp) {
   OnDeviceLost();
   HRESULT hr = d3ddev->Reset(d3dpp);
   if (FAILED(hr)) {
-    enigma_user::show_error("Direct3D 9 Device Reset Failed", true);
+    DEBUG_MESSAGE("Direct3D 9 Device Reset Failed", MESSAGE_TYPE::M_FATAL_ERROR);
   }
   // the normal, managed d3d 9.0 does not automatically restore render state
   if (Direct3D9Managed) graphics_state_flush();
@@ -188,7 +191,7 @@ void EnableDrawing(void* handle) {
                               &d3ddev);
 
     if (FAILED(hr)) {
-      enigma_user::show_error("Failed to create Direct3D 9.0 Device", true);
+      DEBUG_MESSAGE("Failed to create Direct3D 9.0 Device", MESSAGE_TYPE::M_FATAL_ERROR);
     }
   }
 

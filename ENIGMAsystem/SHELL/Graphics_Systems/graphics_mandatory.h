@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_GRAPHICS_MANDATORY
+#define ENIGMA_GRAPHICS_MANDATORY
+
 /*\\\ This file contains prototypes for functions that must be defined by the graphics
 |*||| library wrapper modules. Each of these is used by other systems throughout the engine.
 \*/// Accidental failure to implement them could cause error.
@@ -22,24 +25,48 @@
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_instance.h"
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace enigma
 {
+  #ifndef JUST_DEFINE_IT_RUN // no functional in c++03
+  extern std::vector<std::function<void()> > extension_draw_gui_after_hooks;
+  #endif
+
   /// Called at game load to allow the system to set up.
   void graphicssystem_initialize(); /// This function can be implemented as an empty call if it is not needed.
 
-  /// Generate a texture from image data. Preserves input pixbuf.
-  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap = false);
-  int graphics_duplicate_texture(int tex, bool mipmap=false);
-  void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex);
-  void graphics_delete_texture(int tex);
-  void graphics_copy_texture(int source, int destination, int x, int y); //Copy one into another with position offset x,y
-  void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y); //Copy rectangle [xoff,yoff,xoff+w,yoff+h] from source to [x,y] in destination
+  /// Set a scissored rectangle as the viewport.
+  void graphics_set_viewport(float x, float y, float width, float height);
 
+  /// Generate a texture from image data. Preserves input pixbuf.
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap=false);
+  /// Delete a texture's native peer data in the backend.
+  void graphics_delete_texture(int tex);
+
+  /// Retrieve image data from back buffer, in unsigned char, BGRA format.
+  /// Flipped parameter is optional, but backend must provide it when nonzero.
+  unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped=nullptr);
+  unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped=nullptr);
   /// Retrieve image data from a texture, in unsigned char, BGRA format.
   /// This data will be allocated afresh; the pointer and data are yours to manipulate
   /// and must be freed once you are done.
-  unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight);
+  unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight);
+  unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height);
+  /// Push image data to a texture on the GPU, in unsigned char, BGRA format.
+  void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata);
+  void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata);
+
+  /// NOTE: The following texture functions are implemented generically from the ones above!
+
+  /// Make an exact duplicate of a texture that will be assigned a new id.
+  int graphics_duplicate_texture(int tex, bool mipmap=false);
+  /// Replaces the transparency of a texture by copying it from another texture.
+  void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex);
+  /// Copy one into another with position offset x,y
+  void graphics_copy_texture(int source, int destination, int x, int y);
+  /// Copy rectangle [xoff,yoff,xoff+w,yoff+h] from source to [x,y] in destination
+  void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y);
 
   struct particles_implementation
   {
@@ -74,3 +101,5 @@ namespace enigma_user
   void texture_set_interpolation_ext(int sampler, bool enable);
   #define texture_set_interpolation(enable) texture_set_interpolation_ext(0, enable)
 }
+
+#endif

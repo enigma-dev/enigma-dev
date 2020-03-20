@@ -845,7 +845,7 @@ std::istream& operator>>( std::istream &sin, Value &root )
     Json::Reader reader;
     bool ok = reader.parse(sin, root, true);
     //JSON_ASSERT( ok );
-    if (!ok) enigma_user::show_error(reader.getFormattedErrorMessages(), 1);
+    if (!ok) DEBUG_MESSAGE(reader.getFormattedErrorMessages(), MESSAGE_TYPE::M_ERROR);
     return sin;
 }
 

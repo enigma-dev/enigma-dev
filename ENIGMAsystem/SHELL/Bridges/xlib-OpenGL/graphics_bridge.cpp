@@ -16,7 +16,8 @@
 **/
 
 #include "OpenGLHeaders.h"
-#include "Graphics_Systems/OpenGL/GLversion.h"
+#include "Graphics_Systems/OpenGL-Common/version.h"
+#include "Graphics_Systems/OpenGL-Common/shader.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Bridges/OpenGL/GLload.h"
 
@@ -46,7 +47,7 @@ namespace enigma {
     GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
     vi = glXChooseVisual(enigma::x11::disp,0,att);
     if (!vi)
-      enigma_user::show_error("Failed to Obtain GL Visual Info", true);
+      DEBUG_MESSAGE("Failed to Obtain GL Visual Info", MESSAGE_TYPE::M_FATAL_ERROR);
     return vi;
   }
 
@@ -56,7 +57,7 @@ namespace enigma {
     //give us a GL context
     glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
     if (!glxc)
-      enigma_user::show_error("Failed to Create Graphics Context", true);
+      DEBUG_MESSAGE("Failed to Create Graphics Context", MESSAGE_TYPE::M_FATAL_ERROR);
 
     //apply context
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
@@ -66,15 +67,8 @@ namespace enigma {
   }
 
   void DisableDrawing(void* handle) {
+   cleanup_shaders(); // delete shaders before context
    glXDestroyContext(enigma::x11::disp,glxc);
-      /*
-    for(char q=1;q;ENIGMA_events())
-        while(XQLength(disp))
-            if(handleEvents()>0) q=0;
-    glxc = glXGetCurrentContext();
-    glXDestroyContext(disp,glxc);
-    XCloseDisplay(disp);
-    return 0;*/
   }
 
   namespace swaphandling {

@@ -34,6 +34,8 @@ enum {
   color_fmt_bgr
 };
 
+unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size = false);
+
 /// Gets the image format, eg. ".bmp", ".png", etc.
 std::string image_get_format(std::string filename);
 /// Reverses the scan-lines from top to bottom or vice verse, this is not actually to be used, you should load and save the data correctly to avoid duplicating it
@@ -49,6 +51,7 @@ int image_save(std::string filename, const unsigned char* data, std::string form
 int image_save(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 
 unsigned char* image_load_bmp(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped);
+unsigned char* image_decode_bmp(const std::string &image_data, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped);
 unsigned char* image_load_gif(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped);
 int image_save_bmp(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 

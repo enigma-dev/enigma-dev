@@ -1,5 +1,10 @@
 #!/bin/bash +x
+
 set -e  # exit if any command fails
+
+if [[ "$TRAVIS" -eq "true" ]]; then
+  xfwm4 & # We need a wm for these tests
+fi
 
 if [ -z "$1" ]; then
   echo "No directory specified to check out master for regression tests."
@@ -66,6 +71,10 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
     git checkout master
   fi
   git clean -f -d
+
+  # re-install deps incase they've changed
+  echo "Reinstalling deps"
+  ./CI/install_emake_deps.sh && ./CI/split_jobs.sh install
 
   echo "Rebuilding plugin and harness from last commit..."
   make all -j$MAKE_JOBS

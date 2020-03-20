@@ -26,9 +26,9 @@ const char *cocoa_dialog_caption() {
     return "";
 }
 
-int cocoa_show_message(const char *str, bool has_cancel, const char *title) {
+int cocoa_show_message(const char *message, bool has_cancel, const char *title) {
   NSString *myTitle = [NSString stringWithUTF8String:title];
-  NSString *myStr = [NSString stringWithUTF8String:str];
+  NSString *myStr = [NSString stringWithUTF8String:message];
 
   if ([[NSString stringWithUTF8String:title] isEqualToString:@""])
     myTitle = [NSString stringWithUTF8String:cocoa_dialog_caption()];
@@ -48,9 +48,9 @@ int cocoa_show_message(const char *str, bool has_cancel, const char *title) {
   return -1;
 }
 
-int cocoa_show_question(const char *str, bool has_cancel, const char *title) {
+int cocoa_show_question(const char *message, bool has_cancel, const char *title) {
   NSString *myTitle = [NSString stringWithUTF8String:title];
-  NSString *myStr = [NSString stringWithUTF8String:str];
+  NSString *myStr = [NSString stringWithUTF8String:message];
 
   if ([[NSString stringWithUTF8String:title] isEqualToString:@""])
     myTitle = [NSString stringWithUTF8String:cocoa_dialog_caption()];
@@ -74,8 +74,8 @@ int cocoa_show_question(const char *str, bool has_cancel, const char *title) {
   return -1;
 }
 
-int cocoa_show_attempt(const char *str, const char *title) {
-  NSString *myStr = [NSString stringWithUTF8String:str];
+int cocoa_show_attempt(const char *errortext, const char *title) {
+  NSString *myStr = [NSString stringWithUTF8String:errortext];
   NSAlert *alert = [[NSAlert alloc] init];
   [alert setMessageText:@"Error"];
 
@@ -95,8 +95,8 @@ int cocoa_show_attempt(const char *str, const char *title) {
   return -1;
 }
 
-int cocoa_show_error(const char *str, bool abort, const char *title) {
-  NSString *myStr = [NSString stringWithUTF8String:str];
+int cocoa_show_error(const char *errortext, bool fatal, const char *title) {
+  NSString *myStr = [NSString stringWithUTF8String:errortext];
   NSAlert *alert = [[NSAlert alloc] init];
   [alert setMessageText:@"Error"];
 
@@ -111,7 +111,7 @@ int cocoa_show_error(const char *str, bool abort, const char *title) {
   NSModalResponse responseTag = [alert runModal];
   [alert release];
 
-  if (responseTag == NSAlertFirstButtonReturn || abort)
+  if (responseTag == NSAlertFirstButtonReturn || fatal)
     return 1;
 
   if (responseTag == NSAlertSecondButtonReturn)
@@ -120,9 +120,9 @@ int cocoa_show_error(const char *str, bool abort, const char *title) {
   return -1;
 }
 
-const char *cocoa_input_box(const char *str, const char *def, const char *title) {
+const char *cocoa_input_box(const char *message, const char *def, const char *title) {
   NSString *myTitle = [NSString stringWithUTF8String:title];
-  NSString *myStr = [NSString stringWithUTF8String:str];
+  NSString *myStr = [NSString stringWithUTF8String:message];
   NSString *myDef = [NSString stringWithUTF8String:def];
 
   if ([[NSString stringWithUTF8String:title] isEqualToString:@""])
@@ -157,9 +157,9 @@ const char *cocoa_input_box(const char *str, const char *def, const char *title)
   return result;
 }
 
-const char *cocoa_password_box(const char *str, const char *def, const char *title) {
+const char *cocoa_password_box(const char *message, const char *def, const char *title) {
   NSString *myTitle = [NSString stringWithUTF8String:title];
-  NSString *myStr = [NSString stringWithUTF8String:str];
+  NSString *myStr = [NSString stringWithUTF8String:message];
   NSString *myDef = [NSString stringWithUTF8String:def];
 
   if ([[NSString stringWithUTF8String:title] isEqualToString:@""])
@@ -502,10 +502,10 @@ int cocoa_get_color(int defcol, const char *title) {
 
   [myOKButton setTitle:@"OK"];
   [myOKButton setAlternateTitle:@"OK"];
-  [myOKButton setBezelStyle:NSRoundedBezelStyle];
+  [myOKButton setBezelStyle:1];
   [myCancelButton setTitle:@"Cancel"];
   [myCancelButton setAlternateTitle:@"Cancel"];
-  [myCancelButton setBezelStyle:NSRoundedBezelStyle];
+  [myCancelButton setBezelStyle:1];
   [myButtonView addSubview:myOKButton];
   [myButtonView addSubview:myCancelButton];
   [myOKButton setKeyEquivalent:@"\r"];
@@ -566,7 +566,7 @@ int cocoa_get_color(int defcol, const char *title) {
 
   if (colorOKPressed) {
     myColor = [myColorPanel color];
-    convertedColor = [myColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+    convertedColor = [myColor colorUsingType:NSColorTypeComponentBased];
 
     if (convertedColor) {
       [convertedColor getRed:&r green:&g blue:&b alpha:&a];

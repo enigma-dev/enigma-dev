@@ -33,36 +33,38 @@ set(CompilerFlags
 	  CMAKE_CXX_FLAGS_MINSIZEREL
 	  CMAKE_CXX_FLAGS_RELEASE
 	  CMAKE_CXX_FLAGS_RELWITHDEBINFO
-        )
-foreach(CompilerFlag ${CompilerFlags})
-  if(MSVC)
-    string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-  endif(MSVC)
-  message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
-endforeach()
+    )
 
 find_package(pugixml CONFIG REQUIRED)
 target_link_libraries(${LIB} PRIVATE pugixml)
 
 find_package(RapidJSON REQUIRED)
 include_directories(${LIB} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
-if(MSVC)
-  target_link_libraries(${LIB} PRIVATE rapidjson)
-endif(MSVC)
 
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${LIB} PRIVATE yaml-cpp)
 
-include_directories(. ../ "${ENIGMA_DIR}/shared/" "${ENIGMA_DIR}/shared/protos/codegen" "${ENIGMA_DIR}/shared/libpng-util")
+include_directories(. ../ "${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/libProtocols" "${ENIGMA_DIR}/shared/" "${ENIGMA_DIR}/shared/libpng-util")
 
 include(FindProtobuf)
 target_link_libraries(${LIB} PRIVATE ${Protobuf_LIBRARY})
 
 #Linux is a turd
-if(NOT MSVC)
+if(NOT WIN32)
   find_library(LIB_FS NAMES stdc++fs)
   target_link_libraries(${LIB} PRIVATE ${LIB_FS})
-endif(NOT MSVC)
+endif()
 
-install(TARGETS ${LIB} DESTINATION "${ENIGMA_DIR}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB}.dir/Debug/${LIB}.pdb" DESTINATION "${ENIGMA_DIR}" OPTIONAL)
+add_subdirectory(../../shared/protos libProtocols)
+add_dependencies(${EXE} "Protocols")
+target_link_libraries(${LIB} PRIVATE "Protocols")
+
+find_package(PNG REQUIRED)
+include_directories(${PNG_INCLUDE_DIR})
+target_link_libraries(${LIB} PRIVATE ${PNG_LIBRARY})
+
+find_package(ZLIB)
+target_link_libraries(${LIB} PRIVATE ${ZLIB_LIBRARIES})
+
+install(TARGETS ${LIB} DESTINATION .)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB}.dir/Debug/${LIB}.pdb" DESTINATION . OPTIONAL)

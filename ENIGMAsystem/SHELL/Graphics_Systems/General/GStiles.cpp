@@ -25,8 +25,8 @@
 #include "GSvertex_impl.h"
 
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/background.h"
-#include "Universal_System/background_internal.h"
+#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/background_internal.h"
 
 #define INCLUDED_FROM_SHELLMAIN Not really.
 // make an exception just for point_in_rectangle
@@ -77,7 +77,7 @@ namespace enigma
       enigma_user::vertex_texcoord(vertex, tbx2, tby2);
       enigma_user::vertex_color(vertex, t.color, t.alpha);
 
-      IndexBuffer* indexBuffer = indexBuffers[index];
+      auto& indexBuffer = indexBuffers[index];
       int indices[] = {ind + 0, ind + 1, ind + 2, ind + 2, ind + 1, ind + 3};
       indexBuffer->indices.insert(indexBuffer->indices.end(), indices, indices + 6);
       ind += 4;

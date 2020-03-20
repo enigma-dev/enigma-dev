@@ -26,7 +26,9 @@ enum {
   fa_sysfile   = 4,
   fa_volumeid  = 8,
   fa_directory = 16,
-  fa_archive   = 32
+  fa_archive   = 32,
+  fa_files_all = fa_readonly | fa_hidden | fa_sysfile | fa_volumeid | fa_archive,
+  fa_all       = fa_files_all | fa_directory
 };
 
 long long file_size(std::string fname);
@@ -55,5 +57,6 @@ extern unsigned game_id;
 extern std::string working_directory;
 extern std::string program_directory;
 extern std::string temp_directory;
+extern std::string game_save_id;
 
 } //namespace enigma_user

@@ -8,201 +8,62 @@ git:
 branches:
   only:
     - "master"
-
-before_install:
-  - |
-    # install general dependencies used by more than one job
-    set -eo pipefail
-
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
-      sudo add-apt-repository -y ppa:mhier/libboost-latest;
-      sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
-      # we always build the frontend as 64 bit, even for 32 bit game jobs
-      # this is why we first install 64 bit png, then 32 bit png below
-      sudo apt-get -y install build-essential zlib1g-dev libboost1.67-dev\
-        libprotobuf-dev protobuf-compiler libglm-dev libpng-dev;
-
-      if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
-        sudo dpkg --add-architecture i386;
-        sudo apt-get -y install libc6:i386 libc++-dev:i386 libstdc++6:i386\
-          libncurses5:i386 libx11-6:i386 libglew-dev:i386 libglu1-mesa-dev:i386\
-          libgl1-mesa-dev:i386 lib32z1-dev libxrandr-dev:i386;
-
-        if [ "$COMPILER" == "gcc32" ]; then
-          sudo apt-get -y install gcc-multilib g++-multilib;
-        fi
-
-        sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include;
-      elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
-        sudo apt-get -y install mingw-w64 wine;
-        curl -L https://github.com/enigma-dev/enigma-dev/files/2431000/enigma-libs.zip > enigma-libs.zip;
-        unzip enigma-libs.zip -d ENIGMAsystem/;
-        mv ENIGMAsystem/Install ENIGMAsystem/Additional;
-      else
-        sudo apt-get -y install libc++-dev libglew-dev libxrandr-dev;
-      fi
-
-      if [ "$AUDIO" == "OpenAL" ]; then
-        sudo apt-get -y install libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev;
-      elif [ "$AUDIO" == "SFML" ]; then
-        sudo apt-get -y install libsfml-dev;
-      fi
-
-      if [ "$TEST_HARNESS" == true ]; then
-        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test;
-        sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
-        sudo apt-get -y install cmake libgtest-dev xvfb wmctrl xdotool xfwm4 lcov gcc-7\
-          g++-7 cpp-7 pulseaudio libpugixml-dev libyaml-cpp-dev;
-
-        # download rapidjson manually because ubuntu is ancient
-        wget -O rapidjson-master.zip https://github.com/Tencent/rapidjson/archive/master.zip;
-        unzip rapidjson-master.zip;
-        sudo cp -a rapidjson-master/include/. /usr/include/;
-
-        sudo update-alternatives --remove-all cpp;
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 \
-                    15 \
-                    --slave   /usr/bin/g++ g++ /usr/bin/g++-7 \
-                    --slave   /usr/bin/gcov gcov /usr/bin/gcov-7 \
-                    --slave   /usr/bin/gcov-dump gcov-dump /usr/bin/gcov-dump-7 \
-                    --slave   /usr/bin/gcov-tool gcov-tool /usr/bin/gcov-tool-7 \
-                    --slave   /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-7 \
-                    --slave   /usr/bin/gcc-nm gcc-nm /usr/bin/gcc-nm-7 \
-                    --slave   /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-7;
-        pushd /usr/src/gtest;
-        sudo cmake CMakeLists.txt;
-        sudo make;
-        sudo cp *.a /usr/lib
-        popd
-      fi
-    elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
-      brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
-      brew install glew protobuf pugixml;
-    fi
-
-# build JDI and the CLI
-install:
-  - |
-    if [ "$TEST_HARNESS" != true ]; then
-      make -j4
-      CLI_ENABLE_EGM=FALSE make -j4 emake
-      if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
-        # frontend uses 64 bit libpng but game will use 32 bit libpng
-        sudo apt-get -y install libpng-dev:i386;
-      fi
-    fi
-
+    
 # by default most of our jobs will be run on a linux instance
 os: linux
 group: travis_latest
 compiler: gcc
 language: cpp
+dist: bionic
 
 env:
   global:
     - OUTPUT=/tmp/test
     # this is the default config each job in the matrix overrides a subset of
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-  matrix:
-    # Test Harness
-    - TEST_HARNESS=true AUDIO=OpenAL
-    # The big ol' None test.
-    - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # Cross Compile
-    - COMPILER=MinGW32 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1
-    - COMPILER=MinGW64 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1
-    # Game Modes
-    - MODE=Run
-    - MODE=Debug
-    - MODE=Compile
-    # Compilers
-    - COMPILER=gcc32
-    - COMPILER=clang
-    - COMPILER=clang32
-    # Graphics
-    - GRAPHICS=OpenGL3
-    # Audio
-    - AUDIO=OpenAL
-    - AUDIO=SFML
-    # Collision
-    - COLLISION=BBox NETWORK=None
-    - COLLISION=Precise NETWORK=None
-    # Networking
-    - NETWORK=Asynchronous
-    - NETWORK=BerkeleySockets
-    # Extensions
-    - EXTENSIONS="Alarms"
-    - EXTENSIONS="DataStructures,Asynchronous"
-    - EXTENSIONS="BasicGUI"
-    - EXTENSIONS="DataStructures"
-    - EXTENSIONS="DateTime"
-    - EXTENSIONS="GM5Compat"
-    - EXTENSIONS="IniFilesystem"
-    - EXTENSIONS="DataStructures,Json"
-    - EXTENSIONS="XRandR"
-    - COLLISION=BBox EXTENSIONS="Paths"
-    - COLLISION=BBox EXTENSIONS="Paths,MotionPlanning"
-    - COLLISION=Precise EXTENSIONS="Paths,MotionPlanning"
-    - GRAPHICS=OpenGL1 EXTENSIONS="ParticleSystems"
-    - GRAPHICS=OpenGL3 EXTENSIONS="ParticleSystems"
-    - EXTENSIONS="Timelines"
-matrix:
-  include:
-    # SDL
-    - env: PLATFORM=SDL
-      before_script: sudo apt-get -y install libsdl2-dev libegl1-mesa-dev libgles2-mesa-dev
-    # Graphics
-    - env: GRAPHICS=OpenGLES PLATFORM=SDL
-      before_script: sudo apt-get -y install libepoxy-dev libsdl2-dev libegl1-mesa-dev libgles2-mesa-dev
-    # Widgets
-    - env: WIDGETS=GTK+
-      before_script: sudo apt-get -y install libgtk2.0-dev
-    - env: WIDGETS=Zenity
-      before_script: sudo apt-get -y install zenity
-    - env: WIDGETS=KDialog
-      before_script: sudo apt-get -y install kdebase-bin
-    # GME (Note: requires an Audio system)
-    - env: AUDIO=OpenAL EXTENSIONS="GME"
-      before_script: sudo apt-get -y install libgme-dev
-    - env: AUDIO=SFML EXTENSIONS="GME"
-      before_script: sudo apt-get -y install libgme-dev
-    # Box2D
-    - env: EXTENSIONS="Box2DPhysics"
-      before_script: sudo apt-get -y install libbox2d-dev
-    - env: EXTENSIONS="StudioPhysics"
-      before_script: sudo apt-get -y install libbox2d-dev
-    # Bullet Physics
-    - env: EXTENSIONS="BulletDynamics"
-      before_script: sudo apt-get -y install libbullet-dev
-    #FreeType
-    - env: EXTENSIONS="ttf"
-      before_script: sudo apt-get -y install libfreetype6-dev
-    # OSX
-    - { os: osx, osx_image: xcode9.2,
-        env: COMPILER=clang PLATFORM=None }
-    - { os: osx, osx_image: xcode9.2,
-        env: COMPILER=gcc PLATFORM=None }
+
+before_install: sudo dpkg --add-architecture i386;
+install: ./CI/install_emake_deps.sh && ./CI/split_jobs.sh install
+before_script: make -j4 && make -j4 emake
+script: ./CI/split_jobs.sh run
+    
+jobs:
   # don't wait for OSX
   fast_finish: true
   allow_failures:
     - os: osx
+  include:
+    - stage: ENIGMA CI
+      env: TEST_HARNESS=true AUDIO=OpenAL 
+      script: make emake-tests && ./emake-tests && ./CI/build_and_run_game.sh
+    - stage: ENIGMA CI
+      env: WORKER=0
+    - stage: ENIGMA CI
+      env: WORKER=1
+    - stage: ENIGMA CI
+      env: WORKER=2
+    - stage: ENIGMA CI
+      env: WORKER=3
+    - stage: ENIGMA CI
+      env: COMPILER=Android GRAPHICS=OpenGLES2 PLATFORM=SDL MODE=Compile ANDROID_API_LEVEL=28 ANDROID_BUILD_TOOLS_VERSION=28.0.3
+      before_install: 
+        - git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
+        - yes | sdkmanager "platforms;android-28"
+        - yes | sdkmanager "build-tools;28.0.3"
+      install: ./CI/install_emake_deps.sh 
+      before_script: make -j4 && CLI_ENABLE_EGM=FALSE make -j4 emake
+      script: ./ci-build.sh
+      language: android
+      dist: trusty
+      android:
+      components:
+        - tools
+        - platform-tools
+        - tools
+        - extra-android-m2repository
+    - stage: ENIGMA CI
+      env: WORKER=0
+      os: osx
+      osx_image: xcode10.2
+      before_install:
 
-before_script:
-  - |
-    if [ "$TEST_HARNESS" == true ]; then
-      # Start xvfb before the script phase
-      export DISPLAY=:1
-      Xvfb :1 -screen 0 1024x768x24 &
-      xfwm4 &
-      sleep 3
-    fi
-
-script:
-  - |
-    if [ "$TEST_HARNESS" == true ]; then
-      export ASAN_OPTIONS=detect_leaks=0;
-      ./ci-regression.sh "/tmp/enigma-master" 4 || travis_terminate $?
-    else
-      ./ci-build.sh
-    fi

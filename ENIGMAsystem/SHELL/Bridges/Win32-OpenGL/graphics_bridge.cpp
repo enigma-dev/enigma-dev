@@ -17,7 +17,8 @@
 **/
 
 #include "OpenGLHeaders.h"
-#include "Graphics_Systems/OpenGL/GLversion.h"
+#include "Graphics_Systems/OpenGL-Common/version.h"
+#include "Graphics_Systems/OpenGL-Common/shader.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Bridges/OpenGL/GLload.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -26,7 +27,10 @@
 
 #include <string>
 #include <GL/wglew.h>
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 
 namespace enigma {
 
@@ -62,7 +66,7 @@ void EnableDrawing(void*)
   pfd.iLayerType = PFD_MAIN_PLANE;
   iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
 
-  if (iFormat==0) { enigma_user::show_error("Failed to set the format of the OpenGL graphics device.",1); }
+  if (iFormat==0) { DEBUG_MESSAGE("Failed to set the format of the OpenGL graphics device.", MESSAGE_TYPE::M_FATAL_ERROR); }
 
   SetPixelFormat ( enigma::window_hDC, iFormat, &pfd );
   LegacyRC = wglCreateContext( enigma::window_hDC );
@@ -95,6 +99,7 @@ void EnableDrawing(void*)
 
 void DisableDrawing(void*)
 {
+  cleanup_shaders(); // delete shaders before context
   wglMakeCurrent(NULL, NULL);
   wglDeleteContext(hRC);
   ReleaseDC(enigma::hWnd, enigma::window_hDC);

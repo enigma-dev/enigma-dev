@@ -41,7 +41,7 @@ environment:
     # Graphics
     - {GRAPHICS: Direct3D11}
     - {GRAPHICS: OpenGL1, PACKAGES: "glew:x"}
-    - {GRAPHICS: OpenGLES, PLATFORM: SDL, PACKAGES_LATEST: "libepoxy:x", PACKAGES: "SDL2:x" }
+    - {GRAPHICS: OpenGLES3, PLATFORM: SDL, PACKAGES_LATEST: "libepoxy:x", PACKAGES: "SDL2:x" }
 
     # Audio
     - {AUDIO: DirectSound}
@@ -59,6 +59,8 @@ environment:
     - {EXTENSIONS: "WindowsTouch"}
     - {EXTENSIONS: "XInput"}
     - {EXTENSIONS: "MediaControlInterface"}
+    - {EXTENSIONS: "FileDropper"}
+    - {EXTENSIONS: "IniFilesystem"}
     - {EXTENSIONS: "Box2DPhysics", PACKAGES: "box2d:x"}
     - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
     #TODO: Fix Bullet Physics on Windows
@@ -110,4 +112,4 @@ install:
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
-  - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh"
+  - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh && ./share_logs.sh"

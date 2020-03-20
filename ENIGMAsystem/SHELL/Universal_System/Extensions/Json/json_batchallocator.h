@@ -4,12 +4,12 @@
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 #ifndef JSONCPP_BATCHALLOCATOR_H_INCLUDED
-# define JSONCPP_BATCHALLOCATOR_H_INCLUDED
+#define JSONCPP_BATCHALLOCATOR_H_INCLUDED
 
 # include <stdlib.h>
 # include <assert.h>
 
-# ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
+#ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
 
 namespace Json {
 
@@ -36,7 +36,6 @@ public:
       : freeHead_( 0 )
       , objectsPerPage_( objectsPerPage )
    {
-//      printf( "Size: %d => %s\n", sizeof(AllocatedType), typeid(AllocatedType).name() );
       assert( sizeof(AllocatedType) * objectPerAllocation >= sizeof(AllocatedType *) ); // We must be able to store a slist in the object free space.
       assert( objectsPerPage >= 16 );
       batches_ = allocateBatch( 0 );   // allocated a dummy page
@@ -124,7 +123,7 @@ private:
 
 } // namespace Json
 
-# endif // ifndef JSONCPP_DOC_INCLUDE_IMPLEMENTATION
+#endif // ifndef JSONCPP_DOC_INCLUDE_IMPLEMENTATION
 
 #endif // JSONCPP_BATCHALLOCATOR_H_INCLUDED
 

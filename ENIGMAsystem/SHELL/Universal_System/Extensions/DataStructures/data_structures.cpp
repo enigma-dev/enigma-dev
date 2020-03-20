@@ -1243,7 +1243,7 @@ void ds_list_delete(const unsigned int id, const unsigned int first, const unsig
   //Deletes the values in the range between first and last
   if (first < ds_lists[id].size() && last < ds_lists[id].size())
   {
-    ds_lists[id].erase(ds_lists[id].begin() + first, ds_lists[id].begin() + last);
+    ds_lists[id].erase(ds_lists[id].begin() + first, ds_lists[id].begin() + last+1);
   }
 }
 

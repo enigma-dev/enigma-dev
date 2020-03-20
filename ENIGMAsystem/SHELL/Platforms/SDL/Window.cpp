@@ -2,10 +2,11 @@
 #include "Event.h"
 #include "Joystick.h"
 #include "Gamepad.h"
+#include "Icon.h"
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/estring.h" // ord
 #include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
 
@@ -75,7 +76,7 @@ namespace keyboard {
 }
 
 static SDL_Event_Handler eventHandler;
-static std::array<SDL_Cursor*, -enigma_user::cr_size_all> cursors;
+static std::array<SDL_Cursor*, -enigma_user::cr_size_all+1> cursors;
 
 void handleInput() {
   input_push();
@@ -136,6 +137,30 @@ void io_handle() {
   enigma::input_push();
   if (enigma::handleEvents() != 0) exit(0);
   enigma::update_mouse_variables();
+}
+
+static int currentIconIndex = -1;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::SetIconFromSprite(windowHandle, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
 }
 
 int window_get_visible() {
@@ -272,10 +297,10 @@ void window_set_fullscreen(bool fullscreen) {
 
     if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
-    if (r != 0) printf("Could not set window to fullscreen! SDL Error: %s\n", SDL_GetError());
+    if (r != 0) DEBUG_MESSAGE(std::string("Could not set window to fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   } else {
     int r = SDL_SetWindowFullscreen(windowHandle, 0);
-    if (r != 0) printf("Could not unset window fullscreen! SDL Error: %s\n", SDL_GetError());
+    if (r != 0) DEBUG_MESSAGE(std::string("Could not unset window fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   }
 }
 
@@ -291,21 +316,35 @@ int window_set_cursor(int cursorID) {
   }
 
 #ifdef DEBUG_MODE
-  printf("Cursor lookup failure\n");
+  DEBUG_MESSAGE("Cursor lookup failure", MESSAGE_TYPE::M_ERROR);
 #endif
 
   return 0;
 }
 
+int display_get_x() {
+  SDL_Rect r;
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  return (SDL_GetDisplayBounds(d, &r) == 0) ? r.x : 0;
+}
+
+int display_get_y() {;
+  SDL_Rect r;
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  return (SDL_GetDisplayBounds(d, &r) == 0) ? r.y : 0;
+}
+
 int display_get_width() {
   SDL_DisplayMode DM;
-  SDL_GetCurrentDisplayMode(0, &DM);
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  SDL_GetCurrentDisplayMode(d, &DM);
   return DM.w;
 }
 
 int display_get_height() {
   SDL_DisplayMode DM;
-  SDL_GetCurrentDisplayMode(0, &DM);
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  SDL_GetCurrentDisplayMode(d, &DM);
   return DM.h;
 }
 

@@ -34,31 +34,18 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/background_internal.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Object_Tiers/graphics_object.h"
 #include "Universal_System/estring.h"
 #include "Platforms/platforms_mandatory.h"
 
-#include <vector>
-#include <limits>
-#include <map>
-#include <list>
-#include <stack>
-#include <iostream>
-#include <fstream>
 #include <string>
-#include <unordered_map>
-#include <algorithm>
-
-#include <stdlib.h>     /* malloc, free, rand */
-#include <floatcomp.h>
-#include <math.h>
 
 using namespace std;
 
@@ -66,24 +53,30 @@ using namespace std;
 //the GPU (such as surfaces) and as such have no business in a headless mode
 namespace enigma
 {
-
 	void graphicssystem_initialize(){}
 
+	void graphics_set_viewport(float x, float y, float width, float height) {}
+
 	int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap){return -1;}
-	int graphics_duplicate_texture(int tex, bool mipmap){return -1;}
-	void graphics_copy_texture(int source, int destination, int x, int y){}
-	void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y){}
-	void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex){}
 	void graphics_delete_texture(int texid){}
-	unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight){return NULL;}
+	unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {return nullptr;}
+	unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {return nullptr;}
+	unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {return NULL;}
+	unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {return NULL;}
+	void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {}
+	void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {}
 
 	void graphics_state_flush() {}
 
 	void graphics_delete_vertex_buffer_peer(int buffer) {}
 	void graphics_delete_index_buffer_peer(int buffer) {}
+	void graphics_replace_texture_alpha_from_texture(int, int) {}
+	int graphics_duplicate_texture(int, bool) { return -1; }
 
 	void scene_begin() {}
 	void scene_end() {}
+	void delete_tiles() {}
+	void load_tiles() {}
 }
 
 namespace enigma_user
@@ -107,31 +100,9 @@ namespace enigma_user
 	void surface_reset_target(void){}
 	int surface_get_target(){return -1;}
 	void surface_free(int id){}
-	int surface_getpixel(int id, int x, int y){return -1;}
-	int surface_getpixel_ext(int id, int x, int y){return -1;}
-	int surface_getpixel_alpha(int id, int x, int y){return -1;}
-
-	int surface_save(int id, string filename){return -1;}
-
-	int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h){return -1;}
-	int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload){return -1;}
-	int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig){return -1;}
-	int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig){return -1;}
-	void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth){}
-	void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs){}
-	void surface_copy(int destination, gs_scalar x, gs_scalar y, int source){}
 
 	int draw_get_msaa_maxlevel(){return 0;}
 	bool draw_get_msaa_supported(){return false;}
-
-	int draw_getpixel(int x,int y){return -1;}
-	int draw_getpixel_ext(int x,int y){return -1;}
-
-	extern int window_get_region_height_scaled();
-
-	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig){return -1;}
-	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig){return -1;}
-	void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth){}
 
 	int glsl_shader_create(int type){return -1;}
 	int glsl_shader_load(int id, string fname){return -1;}
@@ -157,22 +128,17 @@ namespace enigma_user
 	void shader_set_uniform_i(int location, int v0, int v1, int v2){}
 	void shader_set_uniform_i(int location, int v0, int v1, int v2, int v3){}
 
-	extern int window_get_width();
-	extern int window_get_height();
-	extern int window_get_region_width();
-	extern int window_get_region_height();
-
-	int screen_save(string filename){return -1;}
-	int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h){return -1;}
-	void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height){}
-
 	void draw_clear_alpha(int col,float alpha){}
 	void draw_clear(int col){}
 	void d3d_clear_depth(double value){}
 	void d3d_stencil_clear_value(int value) {}
 	void d3d_stencil_clear() {}
 	void d3d_set_software_vertex_processing(bool software){}
-
-	extern int window_get_region_height_scaled();
-	int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload){return -1;}
+	void screen_redraw() {}
+	void screen_refresh() {}
+	void screen_init() {}
+	unsigned int string_width(variant str) { return 0; }
+	void draw_text(float, float, variant) {}
+	void draw_sprite_ext(int, int, float, float, float, float, double, int, float) {}
+	void draw_healthbar(float, float, float, float, float, int, int, int, int, bool, bool) {}
 }

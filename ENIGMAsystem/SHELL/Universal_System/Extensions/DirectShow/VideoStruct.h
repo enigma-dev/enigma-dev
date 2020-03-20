@@ -47,12 +47,12 @@ extern vector<VideoStruct*> videoStructs;
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_videor(s,id,r) \
     if (unsigned(id) >= enigma::videoStructs.size() || id < 0) { \
-      enigma_user::show_error("Cannot access video with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access video with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } enigma::VideoStruct* s = enigma::videoStructs[id];
   #define get_video(s,id) \
     if (unsigned(id) >= enigma::videoStructs.size() || id < 0) { \
-      enigma_user::show_error("Cannot access video with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access video with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } enigma::VideoStruct* s = enigma::videoStructs[id];
 #else

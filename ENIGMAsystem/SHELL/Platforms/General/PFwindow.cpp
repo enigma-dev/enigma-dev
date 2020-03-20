@@ -7,6 +7,11 @@
 
 namespace enigma {
 
+int window_min_width = -1;
+int window_max_width = -1;
+int window_min_height = -1;
+int window_max_height = -1;
+
 char mousestatus[3];
 char last_mousestatus[3];
 char last_keybdstatus[256];
@@ -17,6 +22,7 @@ bool windowAdapt = true;
 int windowWidth = 0, windowHeight = 0;
 int cursorInt = 0, regionWidth = 0, regionHeight = 0, windowX = 0, windowY = 0;
 double scaledWidth = 0, scaledHeight = 0;
+int parWidth = 0, parHeight = 0;
 
 void input_initialize() {
   //Clear the input arrays
@@ -40,12 +46,11 @@ void input_push() {
   enigma_user::mouse_hscrolls = enigma_user::mouse_vscrolls = 0;
 }
 
-void compute_window_size() {
+void compute_window_scaling() {
   if (!regionWidth) return;
-
-  bool isFullScreen = enigma_user::window_get_fullscreen();
-  int parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth,
-      parHeight = isFullScreen ? enigma_user::display_get_height() : windowHeight;
+  int isFullScreen = enigma_user::window_get_fullscreen();
+  parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth;
+  parHeight = isFullScreen ? enigma_user::display_get_height() : windowHeight;
   if (viewScale > 0) {  //Fixed Scale
     double viewDouble = viewScale / 100.0;
     scaledWidth = regionWidth * viewDouble;
@@ -63,7 +68,11 @@ void compute_window_size() {
       scaledHeight = parHeight;
     }
   }
+}
 
+void compute_window_size() {
+  if (!regionWidth) return;
+  compute_window_scaling();
   if (!isFullScreen) {
     if (windowAdapt && viewScale > 0) {  // If the window is to be adapted and Fixed Scale
       if (scaledWidth > windowWidth) windowWidth = scaledWidth;
@@ -229,7 +238,7 @@ bool mouse_check_button_released(int button) {
   }
 }
 
-void mouse_clear(const int button) { enigma::mousestatus[button] = enigma::last_mousestatus[button] = 0; }
+void mouse_clear(const int button) { enigma::mousestatus[button - 1] = enigma::last_mousestatus[button - 1] = 0; }
 
 void mouse_wait() {
   for (;;) {
@@ -278,8 +287,16 @@ void window_default(bool center_size) {
 }
 
 void window_center() {
-  window_set_position(display_get_width() / 2 - window_get_width() / 2,
-                      display_get_height() / 2 - window_get_height() / 2);
+  int i = 0;
+  int targetX = display_get_x() + ((display_get_width() - window_get_width()) / 2);
+  int targetY = display_get_y() + ((display_get_height() - window_get_height()) / 2);
+  // without this while loop, the window won't be guaranteed to center 
+  // at game init, in xlib, which is weird, but this makes it necessary.
+  while (enigma::windowX != targetX || enigma::windowY != targetY) {
+    window_set_position(targetX, targetY);
+    if (i >= 15) break; 
+    i++;
+  }
 }
 
 void window_set_freezeonlosefocus(bool freeze) { enigma::freezeOnLoseFocus = freeze; }

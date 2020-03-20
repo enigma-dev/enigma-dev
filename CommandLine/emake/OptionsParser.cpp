@@ -2,18 +2,14 @@
 #include "Main.hpp"
 
 #include "eyaml/eyaml.h"
+#include "strings_util.h"
 #include "OS_Switchboard.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/exception/diagnostic_information.hpp>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <iostream>
 #include <cctype> // std::ispace
-
-namespace fs = boost::filesystem;
 
 inline std::string word_wrap(std::string text, unsigned per_line)
 {
@@ -104,16 +100,16 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("port", opt::value<int>()->default_value(37818), "The port number to bind when in server mode.")
 #endif
     ("output,o", opt::value<std::string>(), "Output executable file")
-    ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
+    ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (Win32, xlib, Cocoa, SDL, None)")
     ("workdir,d", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
     ("codegen,k", opt::value<std::string>()->default_value(def_workdir), "Codegen Directory")
-    ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Release, Debug, Design)")
-    ("graphics,g", opt::value<std::string>()->default_value("OpenGL1"), "Graphics System (OpenGL1, OpenGL3, DirectX)")
-    ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (OpenAL, DirectSound, SFML, None)")
-    ("widgets,w", opt::value<std::string>()->default_value("None"), "Widget System (Win32, GTK, None)")
-    ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (Async, Berkeley, DirectPlay)")
-    ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System")
-    ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Paths, Timelines, Particles)")
+    ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Compile, Debug, Design)")
+    ("graphics,g", opt::value<std::string>()->default_value("OpenGL1"), "Graphics System (Direct3D9, Direct3D11, OpenGL1, OpenGL3, OpenGLES2, OpenGLES3, None)")
+    ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (DirectSound, OpenAL, SFML, FMODAudio, XAudio2, None)")
+    ("widgets,w", opt::value<std::string>()->default_value("None"), "Widget System (Win32, xlib, Cocoa, GTK+, None)")
+    ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (DirectPlay, Asynchronous, BerkeleySockets, None)")
+    ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System (Precise, BBox, None)")
+    ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Alarms, Paths, Timelines, Particles, MotionPlanning, ttf, libpng, IniFilesystem, RegistrySpoof, Asynchronous, StudioPhysics, VirtualKeys, XRandR, XTEST, FileDropper, None)")
     ("compiler,x", opt::value<std::string>()->default_value(def_compiler), "Compiler.ey Descriptor")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
   ;
@@ -167,7 +163,7 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
   catch(std::exception& e)
   {
     if (!_rawArgs.count("help"))
-      errorStream << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
+      std::cerr << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
 
     _readArgsFail = true;
 
@@ -222,8 +218,8 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
               widgets = _rawArgs["widgets"].as<std::string>(),
               collision = _rawArgs["collision"].as<std::string>(),
               network = _rawArgs["network"].as<std::string>(),
-              eobjs_directory = boost::filesystem::absolute(_rawArgs["workdir"].as<std::string>()).string(),
-              codegen_directory = boost::filesystem::absolute(_rawArgs["codegen"].as<std::string>()).string();
+              eobjs_directory = fs::absolute(_rawArgs["workdir"].as<std::string>()).string(),
+              codegen_directory = fs::absolute(_rawArgs["codegen"].as<std::string>()).string();
 
   int inherit_strings = 0,
       inherit_escapes = 0,
@@ -287,11 +283,12 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
 
 int OptionsParser::find_ey(const char* dir)
 {
-  boost::filesystem::path targetDir(dir);
-  boost::filesystem::recursive_directory_iterator iter(targetDir), eod;
+  fs::path targetDir(dir);
+  fs::recursive_directory_iterator iter(targetDir);
 
-  BOOST_FOREACH(boost::filesystem::path const& i, std::make_pair(iter, eod))
+  for(auto& p : iter)
   {
+    fs::path i = p.path();
     if (is_regular_file(i))
     {
       auto ey = i.string().find(".ey");
@@ -350,12 +347,14 @@ int OptionsParser::printInfo(const std::string &api)
           id = about.get("id"); // allow alias
         if (id.empty()) {
           // compilers use filename minus ext as id
-          boost::filesystem::path ey(p);
+          fs::path ey(p);
           id = ey.stem().string();
         }
 
-        if (!name.empty() && !id.empty())
+        if (!name.empty() && !id.empty()) {
           outputStream << '\t' << name << " (" << id << "):" << std::endl;
+          std::cout    << '\t' << name << " (" << id << "):" << std::endl;
+        }
 
         if (!target.empty())
           outputStream << "\t\t Target: " << target << std::endl << std::endl;
@@ -366,11 +365,11 @@ int OptionsParser::printInfo(const std::string &api)
   }
   else
   {
-    errorStream << "OPTIONS_ERROR: Unknown System: \"" << api  << '"'
+    std::cerr << "OPTIONS_ERROR: Unknown System: \"" << api  << '"'
               << std::endl << std::endl << "Avaliable Systems: " << std::endl;
 
     for (auto &&a : _api)
-      errorStream << a.first << std::endl;
+      std::cerr << a.first << std::endl;
 
     return OPTIONS_ERROR;
   }
@@ -380,8 +379,8 @@ int OptionsParser::printInfo(const std::string &api)
 
 void OptionsParser::printHelp()
 {
-  outputStream << "Enigma Command Line Compiler" << std::endl
-            << _desc << std::endl;
+  outputStream << "Enigma Command Line Compiler" << std::endl << _desc << std::endl;
+  std::cout    << "Enigma Command Line Compiler" << std::endl << _desc << std::endl;
 }
 
 int OptionsParser::help(const std::string &str)
@@ -405,7 +404,7 @@ int OptionsParser::parse(const std::string &str)
     fs::path file(str);
     if (fs::is_directory(file))
     {
-      errorStream << "OPTIONS_ERROR: " << str << " Is a Directory!" << std::endl;
+      std::cerr << "OPTIONS_ERROR: " << str << " Is a Directory!" << std::endl;
       return OPTIONS_ERROR;
     }
 
@@ -418,14 +417,14 @@ int OptionsParser::parse(const std::string &str)
     }
     else
     {
-      errorStream << "OPTIONS_ERROR: No Such File " << str << std::endl;
+      std::cerr << "OPTIONS_ERROR: No Such File " << str << std::endl;
     }
 
     return OPTIONS_ERROR;
   }
   catch (const fs::filesystem_error& ex)
   {
-    errorStream << "OPTIONS_ERROR: " << ex.what() << std::endl;
+    std::cerr << "OPTIONS_ERROR: " << ex.what() << std::endl;
     return OPTIONS_ERROR;
   }
 }
@@ -437,7 +436,7 @@ int OptionsParser::mode(const std::string &str)
     return OPTIONS_SUCCESS;
   }
   else
-    errorStream << "OPTIONS_ERROR: invalid mode: " << str << std::endl
+    std::cerr << "OPTIONS_ERROR: invalid mode: " << str << std::endl
               << "Available Modes: " << std::endl
               << "Run" << std::endl
               << "Debug" << std::endl
@@ -452,7 +451,7 @@ int OptionsParser::searchCompilers(const std::string &target)
 {
   auto it = std::find_if(std::begin(_api["Compilers"]), std::end(_api["Compilers"]), [target](std::string &a)
   {
-    boost::filesystem::path ey(a);
+    fs::path ey(a);
     return ey.stem().string() == target;
   });
 
@@ -461,7 +460,7 @@ int OptionsParser::searchCompilers(const std::string &target)
     return OPTIONS_SUCCESS;
   }
   else
-    errorStream << "OPTIONS_ERROR: Unknown Compiler Target: " << target << std::endl
+    std::cerr << "OPTIONS_ERROR: Unknown Compiler Target: " << target << std::endl
               << "Run \"emake --info Compiler\" For a List of Available Targets" << std::endl;
 
   return OPTIONS_ERROR;
@@ -483,8 +482,7 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
   if (it != std::end(_api[api]))
   {
     //set api
-    std::string lower = api;
-    boost::algorithm::to_lower(lower);
+    std::string lower = tolower(api);
 
     if (lower == "extensions")
     {
@@ -494,7 +492,7 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
     return OPTIONS_SUCCESS;
   }
   else
-    errorStream << "OPTIONS_ERROR: Unknown " << api << " Target: " << target << std::endl
+    std::cerr << "OPTIONS_ERROR: Unknown " << api << " Target: " << target << std::endl
               << "Run \"emake --info " << api << "\" For a List of Available Targets" << std::endl;
 
   return OPTIONS_ERROR;

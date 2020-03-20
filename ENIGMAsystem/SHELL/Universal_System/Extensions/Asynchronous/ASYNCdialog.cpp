@@ -7,8 +7,7 @@
 *** Foundation, version 3 of the license or any later version.
 ***
 *** This application and its source code is distributed AS-IS, WITHOUT ANY
-*** WARRANTY {
-} without even the implied warranty of MERCHANTABILITY or FITNESS
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 *** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
 *** details.
 ***
@@ -21,8 +20,8 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Universal_System/Extensions/DataStructures/include.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/instance.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Instances/instance.h"
 
 // include after variant
 #include "implement.h"
@@ -124,27 +123,27 @@ namespace enigma_user {
     return queue_async_job(fnc);
   }
 
-  int get_string_async(string message, string def, string cap) {
+  int get_string_async(string str, string def) {
     auto fnc = [=] {
-      string result = get_string(message, def, cap);
+      string result = get_string(str, def);
       ds_map_overwrite(async_load, "status", true);
       ds_map_overwrite(async_load, "result", result);
     };
     return queue_async_job(fnc);
   }
 
-  int get_integer_async(string message, string def, string cap) {
+  int get_integer_async(string str, double def) {
     auto fnc = [=] {
-      int result = get_integer(message, def, cap);
+      double result = get_integer(str, def);
       ds_map_overwrite(async_load, "status", true);
       ds_map_overwrite(async_load, "result", result);
     };
     return queue_async_job(fnc);
   }
 
-  int get_login_async(string username, string password, string cap) {
+  int get_login_async(string username, string password) {
     auto fnc = [=] {
-      string result = get_login(username, password, cap);
+      string result = get_login(username, password);
       size_t end = result.find('\0', 0);
       string username, password;
       // must still check if the string is empty which is the case when the user cancels the dialog

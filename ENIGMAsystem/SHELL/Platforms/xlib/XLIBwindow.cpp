@@ -19,13 +19,16 @@
 
 #include "Platforms/General/PFmain.h"       // For those damn vk_ constants, and io_clear().
 #include "Platforms/platforms_mandatory.h"  // For type insurance
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/sprites.h"
+#include "Universal_System/Resources/background.h"
 
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"
 #include "XLIBwindow.h"  // Type insurance for non-mandatory functions
+#include "XLIBicon.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -44,6 +47,13 @@
 Cursor NoCursor, DefCursor;
 
 using namespace enigma::x11;
+
+namespace tmpSize {
+    
+int tmpW = enigma::windowWidth;
+int tmpH = enigma::windowHeight;
+
+} // namespace tmpSize
 
 namespace enigma {
 
@@ -66,7 +76,7 @@ bool initGameWindow()
   // Initiate display
   disp = XOpenDisplay(NULL);
   if (!disp) {
-    printf("Display failed\n");
+    DEBUG_MESSAGE("Display failed", MESSAGE_TYPE::M_FATAL_ERROR);
     return false;
   }
 
@@ -107,7 +117,7 @@ bool initGameWindow()
   //register CloseButton listener
   Atom prots[] = {wm_delwin};
   if (!XSetWMProtocols(disp, win, prots, 1)) {
-    printf("NoClose\n");
+    DEBUG_MESSAGE("NoClose", MESSAGE_TYPE::M_ERROR);
     return false;
   }
 
@@ -117,7 +127,7 @@ bool initGameWindow()
   XColor dummy;
   Pixmap blank = XCreateBitmapFromData(disp, win, "", 1, 1);
   if (blank == None) {  //out of memory
-    printf("Failed to create no cursor. lulz\n");
+    DEBUG_MESSAGE("Failed to create no cursor. lulz", MESSAGE_TYPE::M_ERROR);
     NoCursor = DefCursor;
   } else {
     NoCursor = XCreatePixmapCursor(disp, blank, blank, &dummy, &dummy, 0, 0);
@@ -141,6 +151,30 @@ void window_set_visible(bool visible) {
   } else {
     XUnmapWindow(disp, win);
   }
+}
+
+static int currentIconIndex = -1;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::XSetIconFromSprite(disp, win, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
 }
 
 int window_get_visible() {
@@ -190,20 +224,6 @@ typedef struct {
   long inputMode;
   unsigned long status;
 } Hints;
-
-static int getWindowDimension(int i) {
-  XFlush(disp);
-  XWindowAttributes wa;
-  XGetWindowAttributes(disp, win, &wa);
-  if (i == 2) return wa.width;
-  if (i == 3) return wa.height;
-  Window root, parent, *child;
-  uint children;
-  XQueryTree(disp, win, &root, &parent, &child, &children);
-  XWindowAttributes pwa;
-  XGetWindowAttributes(disp, parent, &pwa);
-  return i ? (i == 1 ? pwa.y + wa.y : -1) : pwa.x + wa.x;
-}
 
 template <int count>
 static bool windowHasAtom(const Atom (&atom)[count]) {
@@ -267,34 +287,97 @@ bool window_get_stayontop() {
 }
 
 void window_set_sizeable(bool sizeable) {
-  if (enigma::isSizeable == sizeable) return;
+  if (window_get_maximized()) return;
+  if (window_get_fullscreen()) return;
   enigma::isSizeable = sizeable;
+  XSizeHints *sh = XAllocSizeHints();
+  sh->flags = PMinSize | PMaxSize;
+  
+  if (enigma::window_min_width == -1)
+    enigma::window_min_width = 1;
+  if (enigma::window_max_width == -1) 
+    enigma::window_max_width = INT_MAX;
+  if (enigma::window_min_height == -1) 
+    enigma::window_min_height = 1;
+  if (enigma::window_max_height == -1) 
+    enigma::window_max_height = INT_MAX;
+  
+  if (sizeable) {
+    sh->min_width = enigma::window_min_width;
+    sh->max_width = enigma::window_max_width;
+    sh->min_height = enigma::window_min_height;
+    sh->max_height = enigma::window_max_height;
+  } else {
+    sh->min_width = sh->max_width = window_get_width();
+    sh->min_height = sh->max_height = window_get_height();
+  }
+  XSetWMNormalHints(disp, win, sh);
+  XFree(sh);
 
-  XSizeHints hints;
-  hints.min_width = 640;
-  hints.min_height = 480;
-  hints.max_width = 641;
-  hints.max_height = 481;
-  XSetWMNormalHints(disp, win, &hints);
+  XResizeWindow(disp, win, enigma::windowWidth, enigma::windowHeight);
+}
+
+void window_set_min_width(int width) {
+  enigma::window_min_width = width;
+  window_set_sizeable(enigma::isSizeable);
+}
+
+void window_set_min_height(int height) {
+  enigma::window_min_height = height;
+  window_set_sizeable(enigma::isSizeable);
+}
+
+void window_set_max_width(int width) {
+  enigma::window_max_width = width;
+  window_set_sizeable(enigma::isSizeable);
+}
+
+void window_set_max_height(int height) {
+  enigma::window_max_height = height;
+  window_set_sizeable(enigma::isSizeable);
 }
 
 bool window_get_sizeable() { return enigma::isSizeable; }
 
 void window_set_showborder(bool show) {
-  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", True);
-  if (!show) {
-    Hints hints;
-    hints.flags = 2;        // Specify that we're changing the window decorations.
-    hints.decorations = 0;  // 0 (false) means that window decorations should go bye-bye.
-    XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char*)&hints, 5);
-  } else {
-    XDeleteProperty(disp, win, property);
+  if (window_get_maximized()) return;
+  if (window_get_fullscreen()) return;
+  if (window_get_showborder() == show) return;
+  enigma::showBorder = show;
+  Window child, root = DefaultRootWindow(disp); 
+  int x1, y1, x2, y2, x3, y3; unsigned w1, h1, w2, h2, border_width, depth;
+  for (;;) {
+    XTranslateCoordinates(disp, win, root, 0, 0, &x1, &y1, &child);
+    XGetGeometry(disp, win, &root, &x2, &y2, &w1, &h1, &border_width, &depth);
+    XGetGeometry(disp, child, &root, &x3, &y3, &w2, &h2, &border_width, &depth);
+    // allow time for the titlebar and border sizes to be measured because x11 is async...
+    if (x3 || y3 || !window_get_showborder())
+      break;
+  }
+  Hints hints;
+  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
+  hints.flags = 2;
+  hints.decorations = show;
+  XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
+  if (x2 || y2) {
+    XMoveResizeWindow(disp, win, x1, y1, w1, h1);
   }
 }
 
 bool window_get_showborder() {
-  Atom a[] = {XInternAtom(disp, "_NET_WM_STATE_ABOVE", False)};
-  return windowHasAtom(a);
+  Atom type;
+  int format;
+  unsigned long bytes;
+  unsigned long items;
+  unsigned char *data = NULL;
+  bool ret = true;
+  Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
+  if (XGetWindowProperty(disp, win, property, 0, LONG_MAX, False, AnyPropertyType, &type, &format, &items, &bytes, &data) == Success && data != NULL) {
+    Hints *hints = (Hints *)data;
+    ret = hints->decorations;
+    XFree(data);
+  }
+  return ret;
 }
 
 void window_set_showicons(bool show) {
@@ -389,13 +472,14 @@ void display_mouse_set(int x, int y) { XWarpPointer(disp, None, DefaultRootWindo
 ////////////
 
 //Getters
-int window_get_x() { return getWindowDimension(0); }
-int window_get_y() { return getWindowDimension(1); }
-int window_get_width() { return getWindowDimension(2); }
-int window_get_height() { return getWindowDimension(3); }
+int window_get_x() { return enigma::windowX; }
+int window_get_y() { return enigma::windowY; }
+int window_get_width() { return enigma::windowWidth; }
+int window_get_height() { return enigma::windowHeight; }
 
 //Setters
 void window_set_position(int x, int y) {
+  if (window_get_fullscreen()) return;
   enigma::windowX = x;
   enigma::windowY = y;
   XWindowAttributes wa;
@@ -404,12 +488,14 @@ void window_set_position(int x, int y) {
 }
 
 void window_set_size(unsigned int w, unsigned int h) {
+  if (window_get_fullscreen()) return;
   enigma::windowWidth = w;
   enigma::windowHeight = h;
   enigma::compute_window_size();
 }
 
 void window_set_rectangle(int x, int y, int w, int h) {
+  if (window_get_fullscreen()) return;
   enigma::windowX = x;
   enigma::windowY = y;
   enigma::windowWidth = w;
@@ -422,9 +508,12 @@ void window_set_rectangle(int x, int y, int w, int h) {
 ////////////////
 
 void window_set_fullscreen(bool full) {
-  if (enigma::isFullScreen == full) return;
+  if (enigma::isFullScreen == full && !full) return;
   enigma::isFullScreen = full;
-
+  if (full) {
+    tmpSize::tmpW = enigma::windowWidth;
+    tmpSize::tmpH = enigma::windowHeight;
+  }
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aFullScreen = XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False);
   XEvent xev;
@@ -438,8 +527,7 @@ void window_set_fullscreen(bool full) {
   xev.xclient.data.l[1] = aFullScreen;
   xev.xclient.data.l[2] = 0;
   XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
-
-  enigma::compute_window_size();
+  if (!full) XResizeWindow(disp, win, tmpSize::tmpW, tmpSize::tmpH);
 }
 
 bool window_get_fullscreen() {
@@ -537,7 +625,7 @@ namespace enigma_user {
 void io_handle() {
   enigma::input_push();
   while (XQLength(disp)) {
-    printf("processing an event...\n");
+    DEBUG_MESSAGE("processing an event...", MESSAGE_TYPE::M_INFO);
     if (enigma::handleEvents() > 0) exit(0);
   }
   enigma::update_mouse_variables();

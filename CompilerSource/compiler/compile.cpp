@@ -186,7 +186,20 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
   wto << "namespace enigma { size_t " << kind << "_idmax = " << max << "; }\n\n";
 }
 
+static bool ends_with(std::string const &fullString, std::string const &ending) {
+    if (fullString.length() < ending.length())
+      return false;
+
+    return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+}
+
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
+  std::string exename = std::string(exe_filename);
+  const std::string buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
+  if (!ends_with(exename, buildext)) {
+    exename += buildext;
+    exe_filename = exename.c_str();
+  }
 
   cout << "Initializing dialog boxes" << endl;
   ide_dia_clear();
@@ -395,6 +408,11 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Writing resource names and maxima" << flushl;
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
   wto << license;
+
+  wto << "namespace enigma {\n";
+  std::string res_in = (compilerInfo.exe_vars["RESOURCES_IN"] != "") ? "RESOURCES_IN" : "RESOURCES";
+  wto << "const char *resource_file_path=\"" << compilerInfo.exe_vars[res_in] << "\";\n";
+  wto << "}\n";
 
   write_resource_meta(wto,     "object", game.objects);
   write_resource_meta(wto,     "sprite", game.sprites);

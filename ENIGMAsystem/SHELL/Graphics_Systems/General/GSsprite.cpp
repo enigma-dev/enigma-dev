@@ -22,10 +22,10 @@
 #include "GSprimitives.h"
 
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites_internal.h"
-#include "Universal_System/sprites.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/Resources/sprites_internal.h"
+#include "Universal_System/Resources/sprites.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Object_Tiers/graphics_object.h"
 #include "Universal_System/math_consts.h"
 
 #include <cmath>
@@ -39,17 +39,17 @@ using namespace enigma_user;
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_sprite(spr,id,r) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } const enigma::sprite *const spr = enigma::spritestructarray[id];
   #define get_spritev(spr,id) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } const enigma::sprite *const spr = enigma::spritestructarray[id];
   #define get_sprite_null(spr,id,r) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access sprite with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } const enigma::sprite *const spr = enigma::spritestructarray[id];
 #else
@@ -70,15 +70,15 @@ using namespace enigma_user;
 namespace enigma
 {
 
-void draw_sprite_pos_raw(const enigma::sprite* spr2d, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar color, gs_scalar alpha)
+void draw_sprite_pos_raw(const enigma::sprite *const spr2d, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar color, gs_scalar alpha)
 {
   alpha = CLAMP_ALPHAF(alpha);
   get_subimg(usi, spr2d, subimg);
-  
+
   gs_scalar
     tx = spr2d->texturexarray[usi], tw = spr2d->texturewarray[usi],
     ty = spr2d->textureyarray[usi], th = spr2d->textureharray[usi];
-  
+
   draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
   draw_vertex_texture_color(x1,y1, tx,    ty,    color,alpha);
   draw_vertex_texture_color(x2,y2, tx+tw, ty,    color,alpha);
@@ -86,20 +86,21 @@ void draw_sprite_pos_raw(const enigma::sprite* spr2d, int subimg, gs_scalar x1, 
   draw_vertex_texture_color(x3,y3, tx+tw, ty+th, color,alpha);
   draw_primitive_end();
 }
-void draw_sprite_pos_part_raw(const enigma::sprite* spr2d, int subimg,
+
+void draw_sprite_pos_part_raw(const enigma::sprite *const spr2d, int subimg,
   gs_scalar px, gs_scalar py, gs_scalar pw, gs_scalar ph,
   gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4,
   gs_scalar color, gs_scalar alpha
 ) {
   alpha = CLAMP_ALPHAF(alpha);
   get_subimg(usi, spr2d, subimg);
-  
+
   gs_scalar
     tbx = spr2d->texturexarray[usi], tbw = (gs_scalar)spr2d->width  / (gs_scalar)spr2d->texturewarray[usi],
     tby = spr2d->textureyarray[usi], tbh = (gs_scalar)spr2d->height / (gs_scalar)spr2d->textureharray[usi],
     tx1 = tbx + px / tbw, tx2 = tx1 + pw / tbw,
     ty1 = tby + py / tbh, ty2 = ty1 + ph / tbh;
-  
+
   draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
   draw_vertex_texture_color(x1,y1, tx1,ty1, color,alpha);
   draw_vertex_texture_color(x2,y2, tx2,ty1, color,alpha);

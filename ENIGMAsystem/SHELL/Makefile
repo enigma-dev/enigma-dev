@@ -18,6 +18,22 @@ else
 	MKDIR := mkdir.exe
 endif
 
+MAKE_TARGETS :=
+ifeq ($(TARGET-PLATFORM), Android)
+	MAKE_TARGETS += android_game
+	BASENAME := $(shell basename $(OUTPUTNAME))
+	SDL_CSTDIO := TRUE
+	ifeq ($(GMODE), Compile)
+		GRADLE_TARGET := build
+		APK_OUT := $(WORKDIR)/android/enigma/outputs/apk/release
+	else
+		GRADLE_TARGET := installDebug
+		APK_OUT := $(WORKDIR)/android/enigma/outputs/apk/debug
+	endif
+else
+	MAKE_TARGETS += compile_game
+endif
+
 # GMODE { Run, Build, Debug, Compile }
 GMODE ?= Run
 
@@ -51,7 +67,7 @@ SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AU
 
 OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 
-SHARED_SRC_DIR := ../../shared
+SHARED_SRC_DIR := ../../shared/
 include $(SHARED_SRC_DIR)/Makefile
 include $(SHARED_SRC_DIR)/rectpacker/Makefile
 
@@ -62,7 +78,8 @@ include $(SHARED_SRC_DIR)/rectpacker/Makefile
 CXX := g++
 CC := gcc
 DEPENDENCIES :=
-
+override CXXFLAGS += -std=c++17
+ 
 ifeq ($(GMODE), Debug)
 	override CXXFLAGS += -Wall -g -DDEBUG_MODE
 	override CFLAGS += -Wall -g -DDEBUG_MODE
@@ -99,17 +116,23 @@ endif
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
 override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)
 
-.PHONY: all clean
+.PHONY: all clean compile_game clean print_flags write_src_files android_game
 
-all: compile_game
+all: $(MAKE_TARGETS)
+
+print_flags:
+	@echo -e "\n################ Compiler Info ################"
+	@$(CXX) --version
+	@echo "CXXFLAGS=\"$(CXXFLAGS) $(CPPFLAGS) $(INCLUDES)\""
+	@echo "CFLAGS=\"$(CFLAGS) $(CPPFLAGS)\""
+	@echo "LDFLAGS=\"$(LDFLAGS)\""
+	@echo "LDLIBS=\"$(LDIBS)\""
+	@echo -e "################################################\n"
 
 clean:
 	$(RM) $(OUTPUTNAME) $(RESOURCEBINARY)
 	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.o" -exec $(RM) -rf {} \;
 	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.d" -exec $(RM) -rf {} \;
-
-cleandep:
-	$(RM) $(CLEANDEPS)
 
 SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
@@ -135,36 +158,48 @@ endif
 # building #
 ############
 
-compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
-	$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
+write_src_files:
+	@echo "$(SOURCES)" > $(WORKDIR)/sources.list
+
+android_game: write_src_files
+	@cd ../../android && BASENAME=$(BASENAME) ./gradlew $(GRADLE_TARGET)
+	@cp $(APK_OUT)/$(BASENAME) $(OUTPUTNAME)
+
+compile_game: print_flags $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
+	@echo "Linking $(OUTPUTNAME)"
+	@$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 	@echo Built to "$(OUTPUTNAME)"
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
 # -MP gives phony rules for non-target files, avoiding problems with missing files
-$(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+$(OBJDIR)/%.o: %.cpp | $(OBJDIRS)
+	@echo [$(CXX)] $<
+	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
-$(OBJDIR)/shared/%.o $(OBJDIR)/%.d: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/shared/$*.o $<
+$(OBJDIR)/shared/%.o: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
+	@echo [$(CXX)] $<
+	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/shared/$*.o $<
 
-$(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+$(OBJDIR)/%.o: %.c | $(OBJDIRS)
+	@echo [$(CC)] $<
+	@$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
-$(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
+$(OBJDIR)/%.o: %.m | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
 	echo // GENERATED RESOURCE FILE FRONTEND > $(OBJDIR)/resources.rc
 	for res in $(RESOURCES); do echo "#include \"$$res\"" >> $(OBJDIR)/resources.rc; done
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff $(RCFLAGS)
+	@$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff $(RCFLAGS)
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc $(RCFLAGS)
+	@echo [$(WINDRES)] $<
+	@$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc $(RCFLAGS)
 
 $(OBJDIRS):
-	$(MKDIR) -p $@
+	@$(MKDIR) -p $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPENDS)

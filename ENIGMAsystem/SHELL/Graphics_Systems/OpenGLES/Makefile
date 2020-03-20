@@ -1,5 +1,6 @@
-SOURCES += $(wildcard Graphics_Systems/OpenGLES/*.cpp) $(wildcard Graphics_Systems/General/*.cpp) $(wildcard Graphics_Systems/None/*.cpp)
+SOURCES += $(wildcard Graphics_Systems/OpenGLES/*.cpp) $(wildcard Graphics_Systems/General/*.cpp)
 override CXXFLAGS += -IBridges/OpenGLES
+
 override LDLIBS += -lepoxy
 
 ifeq ($(TARGET-PLATFORM), Windows)

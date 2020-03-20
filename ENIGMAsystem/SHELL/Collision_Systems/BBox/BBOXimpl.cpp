@@ -20,9 +20,9 @@
 // In this case, we treat instances as their bounding box (BBox).
 ////////////////////////////////////
 
-#include "Universal_System/collisions_object.h"
-#include "Universal_System/instance_system.h" //iter
-#include "Universal_System/instance.h"
+#include "Universal_System/Object_Tiers/collisions_object.h"
+#include "Universal_System/Instances/instance_system.h" //iter
+#include "Universal_System/Instances/instance.h"
 
 #include "BBOXutil.h"
 #include "BBOXimpl.h"

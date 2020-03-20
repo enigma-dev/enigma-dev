@@ -61,7 +61,7 @@ struct Surface : BaseSurface {
     d3ddev->GetRenderTargetData(surf, pCopy);
 
     Release();
-    auto d3dtex = (DX9Texture*)enigma::textures[texture];
+    DX9Texture* d3dtex = static_cast<DX9Texture*>(enigma::textures[texture].get());
     d3dtex->peer->Release(), d3dtex->peer = NULL;
   }
 
@@ -70,7 +70,7 @@ struct Surface : BaseSurface {
     pCopy->GetDesc(&backupdesc);
 
     // recreate the texture peer
-    auto d3dtex = (DX9Texture*)enigma::textures[texture];
+    DX9Texture* d3dtex = static_cast<DX9Texture*>(enigma::textures[texture].get());
     d3ddev->CreateTexture(backupdesc.Width, backupdesc.Height, 1, D3DUSAGE_RENDERTARGET, backupdesc.Format, D3DPOOL_DEFAULT, &d3dtex->peer, NULL);
     d3dtex->peer->GetSurfaceLevel(0,&surf);
 

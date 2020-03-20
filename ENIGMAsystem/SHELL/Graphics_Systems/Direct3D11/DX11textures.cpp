@@ -24,19 +24,6 @@
 
 using namespace enigma::dx11;
 
-namespace {
-
-inline unsigned int lgpp2(unsigned int x) {//Trailing zero count. lg for perfect powers of two
-	x =  (x & -x) - 1;
-	x -= ((x >> 1) & 0x55555555);
-	x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
-	x =  ((x >> 4) + x) & 0x0f0f0f0f;
-	x += x >> 8;
-	return (x + (x >> 16)) & 63;
-}
-
-} // namespace anonymous
-
 namespace enigma {
 
 int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
@@ -77,47 +64,40 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   ID3D11ShaderResourceView *view;
   m_device->CreateShaderResourceView(tex, &vdesc, &view);
 
-  DX11Texture* textureStruct = new DX11Texture(tex, view);
+  const int id = textures.size();
+  textures.push_back(std::make_unique<DX11Texture>(tex, view));
+  auto& textureStruct = textures.back();
   textureStruct->width = width;
   textureStruct->height = height;
   textureStruct->fullwidth = fullwidth;
   textureStruct->fullheight = fullheight;
-  const int id = textures.size();
-  textures.push_back(textureStruct);
   return id;
 }
 
-int graphics_duplicate_texture(int tex, bool mipmap)
-{
-  return -1; //TODO: implement
-}
-
-void graphics_copy_texture(int source, int destination, int x, int y)
-{
-
-}
-
-void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y)
-{
-
-}
-
-void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
-{
-
-}
-
-void graphics_delete_texture(int tex)
-{
-  auto texture = (DX11Texture*)textures[tex];
+void graphics_delete_texture(int tex) {
+  DX11Texture* texture = static_cast<DX11Texture*>(textures[tex].get());
   texture->peer->Release(), texture->peer = NULL;
   texture->view->Release(), texture->view = NULL;
 }
 
-unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
-{
-  return NULL; //TODO: implement
+unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {
+  *fullwidth = textures[texture]->fullwidth;
+  *fullheight = textures[texture]->fullheight;
+
+  unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
+
+  return ret;
 }
+
+unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {
+  unsigned fw, fh;
+  unsigned char* pxdata = graphics_copy_texture_pixels(texture, &fw, &fh);
+  return pxdata;
+}
+
+void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {}
+
+void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {}
 
 } // namespace enigma
 

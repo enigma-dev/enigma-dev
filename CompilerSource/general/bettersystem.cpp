@@ -28,7 +28,7 @@
 #include <string>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
+#include <iostream>
 
 using namespace std;
 
@@ -100,7 +100,9 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    #define byte __windows_byte_workaround
     #include <windows.h>
+    #undef byte
 
     int e_exec(const char* fcmd, const char* *Cenviron)
     {
@@ -179,14 +181,14 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           if (!StartupInfo.hStdInput or StartupInfo.hStdInput == INVALID_HANDLE_VALUE)
           {
             HANDLE conin = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, FALSE, OPEN_EXISTING, 0, NULL);
-              if (!conin || conin == INVALID_HANDLE_VALUE) { printf("CreateFile(CONIN$) failed (Error%d)\n", (int)GetLastError()); }
+              if (!conin || conin == INVALID_HANDLE_VALUE) { cerr << "CreateFile(CONIN$) failed (Error" << (int)GetLastError() << ")" << std::endl; }
             StartupInfo.hStdInput = conin;
           }
 
           if (!StartupInfo.hStdOutput or StartupInfo.hStdOutput == INVALID_HANDLE_VALUE or !StartupInfo.hStdError or StartupInfo.hStdError == INVALID_HANDLE_VALUE)
           {
             HANDLE conout = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, FALSE, OPEN_EXISTING, 0, NULL);
-              if (!conout || conout == INVALID_HANDLE_VALUE) { printf("CreateFile(CONOUT$) failed (Error %d)\n", (int)GetLastError()); }
+              if (!conout || conout == INVALID_HANDLE_VALUE) { cerr << "CreateFile(CONIN$) failed (Error" << (int)GetLastError() << ")" << std::endl; }
 
             if (!StartupInfo.hStdOutput or StartupInfo.hStdOutput == INVALID_HANDLE_VALUE)  StartupInfo.hStdInput = conout;
             if (!StartupInfo.hStdError  or StartupInfo.hStdError  == INVALID_HANDLE_VALUE)  StartupInfo.hStdError = conout;
@@ -209,8 +211,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         Cenviron_use = (void*)Cenviron_flat.c_str();
       }
 
-      printf("\n\n********* EXECUTE:\n%s\n\n",parameters.c_str());
-      fflush(stdout);
+      cout << "\n\n********* EXECUTE:\n" << parameters << "\n\n";
 
       if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
@@ -224,7 +225,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       else {
         CloseHandle(handleout);
         if (handleerr != handleout) CloseHandle(handleerr);
-        printf("ENIGMA: Failed to create process `%s': error %d.\nCommand line: `%s`", ename.c_str(), (int)GetLastError(), parameters.c_str());
+        cerr << "ENIGMA: Failed to create process `" << ename << "`: error " << (int)GetLastError() << ".\nCommand line: `" << parameters.c_str() << "`";
         return -1;
       }
       return (int)result;
@@ -331,11 +332,10 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       // Cap our parameters
       argv[argc] = NULL;
 
-      printf("\n\n*********** EXECUTE \n");
+      cout << "\n\n*********** EXECUTE \n";
       for (char **i = argv; *i; i++)
-        printf("  `%s`\n",*i);
-      puts("\n\n");
-      fflush(stdout);
+        cout << "  `" << *i << "`\n";
+      cout << ("\n\n");
 
       int result = -1;
       pid_t fk = fork();
@@ -396,7 +396,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
     int e_execp(const char* cmd, string path)
     {
-      puts ("TRUE\n\n");
+      cout << "TRUE\n\n";
       path.insert(0, "PATH=");
       if (path != "PATH=") path += ":";
       path += getenv("PATH");

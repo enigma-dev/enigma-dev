@@ -112,7 +112,7 @@ void highscore_set_border(bool show) {enigma::highscore_border=show;}
 
 void highscore_set_font(std::string name, int size, int style) {
     //not cross platform compatible?
-    show_error("Warning function: highscore_set_font doesn't work, please use draw_set_font", false);
+    DEBUG_MESSAGE("highscore_set_font doesn't work, please use draw_set_font", MESSAGE_TYPE::M_WARNING);
 }
 
 void highscore_set_colors(int back, int newcol, int othercol) {

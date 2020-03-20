@@ -3,6 +3,7 @@
 #include "PFwindow.h"
 #include "PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
 
 #include <chrono> // std::chrono::microseconds
@@ -53,7 +54,7 @@ int enigma_main(int argc, char** argv) {
   set_program_args(argc, argv);
 
   if (!initGameWindow()) {
-    printf("Failed to create game window\n");
+    DEBUG_MESSAGE("Failed to create game window", MESSAGE_TYPE::M_FATAL_ERROR);
     return -4;
   }
 
@@ -66,6 +67,7 @@ int enigma_main(int argc, char** argv) {
   initialize_everything();
 
   while (!game_isending) {
+
     if (!((std::string)enigma_user::room_caption).empty())
       enigma_user::window_set_caption(enigma_user::room_caption);
     update_mouse_variables();
@@ -97,6 +99,7 @@ const int os_browser = browser_not_a_browser;
 std::string working_directory = "";
 std::string program_directory = "";
 std::string temp_directory = "";
+std::string game_save_id = "";
 std::string keyboard_string = "";
 int keyboard_key = 0;
 double fps = 0;
@@ -114,6 +117,10 @@ void sleep(int ms) { enigma::Sleep(ms); }
 void game_end(int ret) {
   enigma::game_isending = true;
   enigma::game_return = ret;
+}
+
+void game_end() {
+  enigma::game_isending = true;
 }
 
 void action_end_game() { return game_end(); }

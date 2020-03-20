@@ -33,7 +33,10 @@
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
 #include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <commctrl.h>
 #include <windowsx.h>
 #include <stdio.h>
@@ -60,7 +63,7 @@ namespace enigma {
   {
     // make sure the hWnd and hInstance variables are initialized (e.g, SDL)
     if (get_window_handle() == NULL) {
-      enigma_user::show_error("Cannot initialize Win32 widget system with NULL window handle.", true);
+      DEBUG_MESSAGE("Cannot initialize Win32 widget system with NULL window handle.", MESSAGE_TYPE::M_FATAL_ERROR);
     }
     INITCOMMONCONTROLSEX iccex;
     iccex.dwSize = sizeof(iccex);

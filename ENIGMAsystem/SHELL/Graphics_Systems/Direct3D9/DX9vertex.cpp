@@ -53,103 +53,103 @@ void graphics_delete_index_buffer_peer(int buffer) {
 }
 
 void graphics_prepare_vertex_buffer(const int buffer) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   // if the contents of the vertex buffer are dirty then we need to update
   // our native vertex buffer object "peer"
-  if (vertexBuffer->dirty) {
-    LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = NULL;
-    auto it = vertexBufferPeers.find(buffer);
-    size_t size = enigma_user::vertex_get_buffer_size(buffer);
+  if (!vertexBuffer->dirty) return;
 
-    // if we have already created a native "peer" vbo for this user buffer,
-    // then we have to release it if it isn't big enough to hold the new contents
-    // or if it has just been frozen (so we can remove its D3DUSAGE_DYNAMIC)
-    if (it != vertexBufferPeers.end()) {
-      vertexBufferPeer = it->second;
+  LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = NULL;
+  auto it = vertexBufferPeers.find(buffer);
+  size_t size = enigma_user::vertex_get_buffer_size(buffer);
 
-      D3DVERTEXBUFFER_DESC pDesc;
-      vertexBufferPeer->GetDesc(&pDesc);
+  // if we have already created a native "peer" vbo for this user buffer,
+  // then we have to release it if it isn't big enough to hold the new contents
+  // or if it has just been frozen (so we can remove its D3DUSAGE_DYNAMIC)
+  if (it != vertexBufferPeers.end()) {
+    vertexBufferPeer = it->second;
 
-      if (size > pDesc.Size || vertexBuffer->frozen) {
-        vertexBufferPeer->Release();
-        vertexBufferPeer = NULL;
-      }
+    D3DVERTEXBUFFER_DESC pDesc;
+    vertexBufferPeer->GetDesc(&pDesc);
+
+    if (size > pDesc.Size || vertexBuffer->frozen) {
+      vertexBufferPeer->Release();
+      vertexBufferPeer = NULL;
     }
-
-    bool dynamic = (!vertexBuffer->frozen && !Direct3D9Managed);
-
-    // create either a static or dynamic vbo peer depending on if the user called
-    // vertex_freeze on the buffer
-    if (!vertexBufferPeer) {
-      DWORD usage = D3DUSAGE_WRITEONLY;
-      if (dynamic) usage |= D3DUSAGE_DYNAMIC;
-
-      d3ddev->CreateVertexBuffer(
-        size, usage, 0, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
-      );
-      vertexBufferPeers[buffer] = vertexBufferPeer;
-    }
-
-    // copy the vertex buffer contents over to the native peer vbo on the GPU
-    VOID* pVoid;
-    vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, dynamic ? D3DLOCK_DISCARD : 0);
-    memcpy(pVoid, vertexBuffer->vertices.data(), size);
-    vertexBufferPeer->Unlock();
-
-    vertexBuffer->clearData();
   }
+
+  bool dynamic = (!vertexBuffer->frozen && !Direct3D9Managed);
+
+  // create either a static or dynamic vbo peer depending on if the user called
+  // vertex_freeze on the buffer
+  if (!vertexBufferPeer) {
+    DWORD usage = D3DUSAGE_WRITEONLY;
+    if (dynamic) usage |= D3DUSAGE_DYNAMIC;
+
+    d3ddev->CreateVertexBuffer(
+      size, usage, 0, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
+    );
+    vertexBufferPeers[buffer] = vertexBufferPeer;
+  }
+
+  // copy the vertex buffer contents over to the native peer vbo on the GPU
+  VOID* pVoid;
+  vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, dynamic ? D3DLOCK_DISCARD : 0);
+  memcpy(pVoid, vertexBuffer->vertices.data(), size);
+  vertexBufferPeer->Unlock();
+
+  vertexBuffer->clearData();
 }
 
 void graphics_prepare_index_buffer(const int buffer) {
-  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  auto& indexBuffer = enigma::indexBuffers[buffer];
 
   // if the contents of the index buffer are dirty then we need to update
   // our native index buffer object "peer"
-  if (indexBuffer->dirty) {
-    LPDIRECT3DINDEXBUFFER9 indexBufferPeer = NULL;
-    auto it = indexBufferPeers.find(buffer);
-    size_t size = enigma_user::index_get_buffer_size(buffer);
+  if (!indexBuffer->dirty) return;
 
-    // if we have already created a native "peer" ibo for this user buffer,
-    // then we have to release it if it isn't big enough to hold the new contents
-    // or if it has just been frozen (so we can remove its D3DUSAGE_DYNAMIC)
-    if (it != indexBufferPeers.end()) {
-      indexBufferPeer = it->second;
+  LPDIRECT3DINDEXBUFFER9 indexBufferPeer = NULL;
+  auto it = indexBufferPeers.find(buffer);
+  size_t size = enigma_user::index_get_buffer_size(buffer);
 
-      D3DINDEXBUFFER_DESC pDesc;
-      indexBufferPeer->GetDesc(&pDesc);
+  // if we have already created a native "peer" ibo for this user buffer,
+  // then we have to release it if it isn't big enough to hold the new contents
+  // or if it has just been frozen (so we can remove its D3DUSAGE_DYNAMIC)
+  if (it != indexBufferPeers.end()) {
+    indexBufferPeer = it->second;
 
-      if (size > pDesc.Size || indexBuffer->frozen) {
-        indexBufferPeer->Release();
-        indexBufferPeer = NULL;
-      }
+    D3DINDEXBUFFER_DESC pDesc;
+    indexBufferPeer->GetDesc(&pDesc);
+
+    if (size > pDesc.Size || indexBuffer->frozen) {
+      indexBufferPeer->Release();
+      indexBufferPeer = NULL;
     }
-
-    bool dynamic = (!indexBuffer->frozen && !Direct3D9Managed);
-
-    // create either a static or dynamic ibo peer depending on if the user called
-    // index_freeze on the buffer
-    if (!indexBufferPeer) {
-      DWORD usage = D3DUSAGE_WRITEONLY;
-      if (dynamic) usage |= D3DUSAGE_DYNAMIC;
-
-      d3ddev->CreateIndexBuffer(
-        size, usage,
-        (indexBuffer->type == enigma_user::index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16,
-        Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &indexBufferPeer, NULL
-      );
-      indexBufferPeers[buffer] = indexBufferPeer;
-    }
-
-    // copy the index buffer contents over to the native peer ibo on the GPU
-    VOID* pVoid;
-    indexBufferPeer->Lock(0, 0, (VOID**)&pVoid, dynamic ? D3DLOCK_DISCARD : 0);
-    memcpy(pVoid, indexBuffer->indices.data(), size);
-    indexBufferPeer->Unlock();
-
-    indexBuffer->clearData();
   }
+
+  bool dynamic = (!indexBuffer->frozen && !Direct3D9Managed);
+
+  // create either a static or dynamic ibo peer depending on if the user called
+  // index_freeze on the buffer
+  if (!indexBufferPeer) {
+    DWORD usage = D3DUSAGE_WRITEONLY;
+    if (dynamic) usage |= D3DUSAGE_DYNAMIC;
+
+    d3ddev->CreateIndexBuffer(
+      size, usage,
+      (indexBuffer->type == enigma_user::index_type_uint) ? D3DFMT_INDEX32 : D3DFMT_INDEX16,
+      Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &indexBufferPeer, NULL
+    );
+    indexBufferPeers[buffer] = indexBufferPeer;
+  }
+
+  // copy the index buffer contents over to the native peer ibo on the GPU
+  VOID* pVoid;
+  indexBufferPeer->Lock(0, 0, (VOID**)&pVoid, dynamic ? D3DLOCK_DISCARD : 0);
+  memcpy(pVoid, indexBuffer->indices.data(), size);
+  indexBufferPeer->Unlock();
+
+  indexBuffer->clearData();
 }
 
 inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::VertexFormat* vertexFormat, size_t &stride) {
@@ -180,12 +180,12 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
 }
 
 inline void graphics_apply_vertex_format(int format, size_t &stride) {
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
+  const auto& vertexFormat = enigma::vertexFormats[format];
 
   auto search = vertexFormatPeers.find(format);
   LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = NULL;
   if (search == vertexFormatPeers.end()) {
-     vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
+     vertexDeclaration = vertex_format_declaration(vertexFormat.get(), stride);
      vertexFormatPeers[format] = std::make_pair(vertexDeclaration, stride);
   } else {
     vertexDeclaration = search->second.first;
@@ -211,7 +211,7 @@ void vertex_color(int buffer, int color, double alpha) {
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   enigma::graphics_prepare_vertex_buffer(buffer);
 
@@ -229,7 +229,7 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
+  const auto& vertexBuffer = enigma::vertexBuffers[vertex];
 
   enigma::graphics_prepare_vertex_buffer(vertex);
   enigma::graphics_prepare_index_buffer(buffer);
