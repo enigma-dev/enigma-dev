@@ -5,10 +5,8 @@ SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 SHARED_SRC_DIR := ../../shared
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
-ifneq ($(OS), Darwin)
-	ifeq ($(UNIX_BASED), true)
-		FS_LIBS=-lstdc++fs
-	endif
+ifeq ($(UNIX_BASED), true)
+	FS_LIBS=-lstdc++fs
 endif
 
 CXXFLAGS += -I../ $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/libpng-util -fPIC
