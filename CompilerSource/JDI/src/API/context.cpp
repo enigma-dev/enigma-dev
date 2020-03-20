@@ -153,7 +153,7 @@ void context::copy(const context &ct)
 }
 void context::swap(context &ct) {
   if (!parse_open and !ct.parse_open) {
-    { __REGISTER definition_scope* gs = ct.global;
+    { definition_scope* gs = ct.global;
       ct.global = global; global = gs; }
     macros.swap(ct.macros);
     variadics.swap(ct.variadics);
