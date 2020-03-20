@@ -147,13 +147,14 @@ void destroyWindow() {
 namespace enigma_user {
 
 window_t window_handle() {
-  return static_cast<window_t>(enigma::x11::win);
+  void *window_pointer = static_cast<void *>(enigma::x11::win);
+  return static_cast<window_t>(window_pointer);
 }
 
-// returns an identifier for the gay window
+// returns an identifier for the x11 window
 // this string can be used in shell scripts
 string window_identifier() {
-  return std::to_string(static_cast<unsigned long>(enigma::x11::win));
+  return std::to_string(static_cast<unsigned long>(window_handle()));
 }
 
 // returns an identifier for certain window
