@@ -25,7 +25,7 @@ gtest_assert_eq(ds_list_find_value(list_str, 1), "bank");
 gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
 
 // When shuffle is repeated with the same seed, it results
-// in a repeated set of orderings modulo 2.
+// in a repeated set of orderings modulo the list size.
 for (var i = 0; i < 5; ++i) {
 	random_set_seed(69378);
 	ds_list_shuffle(list_str);
