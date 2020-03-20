@@ -78,13 +78,14 @@ void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
 namespace enigma_user {
 
 window_t window_handle() {
-  return static_cast<window_t>(enigma::hWnd);
+  void *window_pointer = static_cast<void *>(enigma::hWnd);
+  return static_cast<window_t>(window_pointer);
 }
 
-// returns an identifier for the gay window
+// returns an identifier for the sdl window
 // this string can be used in shell scripts
 string window_identifier() {
-  return std::to_string(static_cast<unsigned long long>(enigma::hWnd));
+  return std::to_string(static_cast<unsigned long long>(window_handle()));
 }
 
 // returns an identifier for certain window
