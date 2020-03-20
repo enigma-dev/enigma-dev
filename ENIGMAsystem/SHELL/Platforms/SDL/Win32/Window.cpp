@@ -45,8 +45,8 @@ void window_id_init() {
 namespace enigma_user {
 
 window_t window_handle() {
-  void *window_pointer = static_cast<void *>(enigma::hWnd);
-  return static_cast<window_t>(window_pointer);
+  unsigned long long window_uint64 = static_cast<unsigned long long>(enigma::hWnd);
+  return static_cast<window_t>(window_uint64);
 }
 
 // returns an identifier for the SDL2 window
