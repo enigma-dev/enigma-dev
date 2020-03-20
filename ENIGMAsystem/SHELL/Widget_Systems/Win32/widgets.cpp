@@ -62,7 +62,7 @@ namespace enigma {
   bool widget_system_initialize()
   {
     // make sure the window handle is initialized (e.g, SDL)
-    if (enigma_usr::window_handle() == NULL) {
+    if (enigma_user::window_handle() == NULL) {
       DEBUG_MESSAGE("Cannot initialize Win32 widget system with NULL window handle.", MESSAGE_TYPE::M_FATAL_ERROR);
     }
     INITCOMMONCONTROLSEX iccex;
