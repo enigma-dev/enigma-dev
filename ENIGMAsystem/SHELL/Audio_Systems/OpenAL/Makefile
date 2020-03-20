@@ -1,4 +1,4 @@
-include ../../../../../Unix.mk
+include ../../../../Unix.mk
 
 SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
 
