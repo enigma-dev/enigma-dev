@@ -14,7 +14,10 @@ ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += Platforms/Win32/WINDOWSfilemanip.cpp
 	SOURCES += Platforms/SDL/Win32/Window.cpp
 else
-	SOURCES += Platforms/General/POSIX/shell.cpp
+	ifneq ($(TARGET-PLATFORM), Android)
+		SOURCES += Platforms/General/POSIX/shell.cpp
+	endif
+
 	SOURCES += Platforms/General/POSIX/POSIXfilemanip.cpp
 	SOURCES += Platforms/General/POSIX/POSIXdirectory.cpp
 	override LDLIBS += -lpthread
