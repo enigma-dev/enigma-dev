@@ -70,7 +70,7 @@ void eos_callback(void* soundID, unsigned src) {
 }
 
 int audiosystem_initialize() {
-  if (enigma_usr::window_handle() == NULL) {
+  if (enigma_user::window_handle() == NULL) {
     DEBUG_MESSAGE("Window handle is NULL.", MESSAGE_TYPE::M_ERROR);
     return false;
   }
