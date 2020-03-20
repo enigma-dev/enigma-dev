@@ -26,6 +26,8 @@
  **                                                                              **
  \********************************************************************************/
 
+#include "Universal_System/random.h"
+
 #include <float.h>
 #include <random>
 #include <algorithm>
