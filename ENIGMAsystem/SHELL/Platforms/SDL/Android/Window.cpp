@@ -44,7 +44,8 @@ namespace enigma_user {
 
 /*
 window_t window_handle() {
-  return static_cast<window_t>(enigma::ANWin);
+  void *window_pointer = static_cast<void *>(enigma::ANWin);
+  return static_cast<window_t>(window_pointer);
 }
 */
   
