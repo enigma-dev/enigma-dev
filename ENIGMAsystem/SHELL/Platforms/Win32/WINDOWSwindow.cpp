@@ -78,7 +78,7 @@ void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
 namespace enigma_user {
 
 window_t window_handle() {
-  unsigned long long window_uint64 = *(static_cast<unsigned long long *>(enigma::hWnd));
+  unsigned long long window_uint64 = static_cast<unsigned long long>(enigma::hWnd);
   return static_cast<window_t>(window_uint64);
 }
 
