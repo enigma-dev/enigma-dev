@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2017 Josh Ventura
+/** Copyright (C) 2008-2017 Josh Ventura 
 *** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>
 *** Copyright (C) 2014 Seth N. Hetu
 ***
