@@ -45,14 +45,14 @@ void window_id_init() {
 namespace enigma_user {
 
 window_t window_handle() {
-  unsigned long long window_uint64 = static_cast<unsigned long long>(enigma::hWnd);
-  return static_cast<window_t>(window_uint64);
+  unsigned long long window_uint64 = reinterpret_cast<unsigned long long>(enigma::hWnd);
+  return reinterpret_cast<window_t>(window_uint64);
 }
 
 // returns an identifier for the SDL2 window
 // this string can be used in shell scripts
 string window_identifier() {
-  return std::to_string(static_cast<unsigned long long>(window_handle()));
+  return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
 }
 
 // returns an identifier for certain window
