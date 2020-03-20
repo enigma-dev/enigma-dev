@@ -8,12 +8,11 @@ include $(SHARED_SRC_DIR)/event_reader/Makefile
 include $(SHARED_SRC_DIR)/rectpacker/Makefile
 
 BASE = compileEGMf
-ifeq ($(OS), Linux)
-	TARGET := ../lib$(BASE).so
-else ifeq ($(OS), FreeBSD)
-	TARGET := ../lib$(BASE).so
-else ifeq ($(OS), Darwin)
+
+ifeq ($(UNIX_MACOS), true)
 	TARGET := ../lib$(BASE).dylib
+else ifeq ($(UNIX_BASED), true)
+	TARGET := ../lib$(BASE).so
 else
 	TARGET := ../$(BASE).dll
 	LDFLAGS += -static-libgcc
