@@ -46,7 +46,7 @@ namespace jdi {
   bool arg_key::operator<(const arg_key& other) const {
     // cout << "Comparing (" << toString() << ") < (" << other.toString() << ")" << endl;
     {
-      __REGISTER int l1 = other.endv - other.values, l2 = endv - values;
+      int l1 = other.endv - other.values, l2 = endv - values;
       if (l1 != l2)
         return l1 > l2;
     }
