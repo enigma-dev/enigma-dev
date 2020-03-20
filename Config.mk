@@ -1,6 +1,7 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 
-include Unix.mk
+SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(SELF_DIR)/Unix.mk
 
 ifeq ($(UNIX_MACOS), true)
 	LIB_EXT := .dylib
