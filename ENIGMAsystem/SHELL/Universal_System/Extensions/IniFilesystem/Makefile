@@ -1,11 +1,5 @@
-OS := $(shell uname -s)
-ifeq ($(OS), Linux)
-	SOURCES += Universal_System/Extensions/IniFilesystem/UNIXiniindex.cpp
-	SOURCES += Universal_System/Extensions/IniFilesystem/UNIXinifs.cpp
-else ifeq ($(OS), FreeBSD)
-	SOURCES += Universal_System/Extensions/IniFilesystem/UNIXiniindex.cpp
-	SOURCES += Universal_System/Extensions/IniFilesystem/UNIXinifs.cpp
-else ifeq ($(OS), Darwin)
+include ../../../../../../Unix.mk
+ifeq ($(UNIX_BASED), true)
 	SOURCES += Universal_System/Extensions/IniFilesystem/UNIXiniindex.cpp
 	SOURCES += Universal_System/Extensions/IniFilesystem/UNIXinifs.cpp
 else
