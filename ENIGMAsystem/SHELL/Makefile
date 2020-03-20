@@ -6,15 +6,12 @@
 # TODO: better config process based on features rather than OS
 
 # PLATFORM { Platforms/* }
-OS := $(shell uname -s)
-ifeq ($(OS), Linux)
-	PLATFORM := xlib
-	MKDIR := mkdir
-else ifeq ($(OS), FreeBSD)
-	PLATFORM := xlib
-	MKDIR := mkdir
-else ifeq ($(OS), Darwin)
+include ../../Unix.mk
+ifeq ($(UNIX_MACOS), true)
 	PLATFORM := Cocoa
+	MKDIR := mkdir
+else ifeq ($(UNIX_BASED), true)
+	PLATFORM := xlib
 	MKDIR := mkdir
 else
 	PLATFORM := Win32
