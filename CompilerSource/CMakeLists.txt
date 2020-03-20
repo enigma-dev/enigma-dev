@@ -37,6 +37,10 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB}.dir/Debug/${LIB}.pdb" DESTINAT
 
 target_link_libraries(${TARGET} PRIVATE "Protocols")
 
+# Find Protobuf
+include(FindProtobuf)
+target_link_libraries(${TARGET} PRIVATE ${Protobuf_LIBRARIES})
+
 # Find libpng
 find_package(PNG REQUIRED)
 target_link_libraries(${TARGET} PRIVATE ${PNG_LIBRARY})
