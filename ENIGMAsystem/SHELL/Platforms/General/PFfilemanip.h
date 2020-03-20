@@ -16,7 +16,7 @@
 **/
 
 #include <string>
-#include <ctime>
+#include <ctime> // Required header for time_t in FreeBSD/Clang
 
 namespace enigma_user {
 
