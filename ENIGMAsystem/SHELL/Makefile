@@ -6,7 +6,7 @@
 # TODO: better config process based on features rather than OS
 
 # PLATFORM { Platforms/* }
-include ../../Unix.mk
+include ../../Config.mk
 ifeq ($(OS), Darwin)
 	PLATFORM := Cocoa
 	MKDIR := mkdir
