@@ -9,7 +9,7 @@ include $(SHARED_SRC_DIR)/rectpacker/Makefile
 
 BASE = compileEGMf
 
-ifeq ($(UNIX_MACOS), true)
+ifeq ($(OS), Darwin)
 	TARGET := ../lib$(BASE).dylib
 else ifeq ($(UNIX_BASED), true)
 	TARGET := ../lib$(BASE).so
