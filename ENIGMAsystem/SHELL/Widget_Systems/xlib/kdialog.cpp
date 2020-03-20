@@ -40,6 +40,7 @@ using enigma_user::execute_shell_for_output;
 
 #include "Platforms/General/PFwindow.h"
 using enigma_user::window_get_caption;
+using enigma_user::window_identifier;
 
 #include "Platforms/General/PFfilemanip.h"
 using enigma_user::file_exists;
