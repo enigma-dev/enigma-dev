@@ -8,15 +8,6 @@
 # PLATFORM { Platforms/* }
 include ../../Config.mk
 
-ifeq ($(OS), FreeBSD)
-	CXXFLAGS += -I/usr/local/include
-	CFLAGS   += -I/usr/local/include
-	LDFLAGS  += -L/usr/local/lib
-else
-	CXXFLAGS += -DGLM_LEFT_HANDED
-	CFLAGS   += -DGLM_LEFT_HANDED
-endif
-
 MAKE_TARGETS :=
 ifeq ($(TARGET-PLATFORM), Android)
 	MAKE_TARGETS += android_game
