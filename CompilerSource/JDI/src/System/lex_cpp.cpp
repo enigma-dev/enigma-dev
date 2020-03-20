@@ -92,7 +92,7 @@ static inline void skip_multiline_comment(const char* cfile, size_t &pos, size_t
 
 void lexer_cpp::skip_string(error_handler *herr)
 {
-  __REGISTER const char endc = cfile[pos];
+  const char endc = cfile[pos];
   while (++pos < length and cfile[pos] != endc)
   {
     if (cfile[pos] == '\\') {
@@ -113,7 +113,7 @@ void lexer_cpp::skip_string(error_handler *herr)
 
 static inline void skip_string(const char* cfile, size_t &pos, size_t length)
 {
-  __REGISTER const char endc = cfile[pos];
+  const char endc = cfile[pos];
   while (++pos < length and cfile[pos] != endc)
     if (cfile[pos] == '\\') if (cfile[pos++] == '\r' and cfile[pos] == '\n') ++pos;
 }
