@@ -60,7 +60,7 @@ namespace enigma {
 
 template<class RandomIt>
 void random_shuffle_replacement(RandomIt first, RandomIt last) {
-  std::shuffle(first, last, random_integer);
+  std::shuffle(first, last, enigma::random_integer);
 }
 
 template <typename t>
