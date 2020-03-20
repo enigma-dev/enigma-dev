@@ -226,7 +226,7 @@ namespace jdi {
   void ref_stack::parameter::swap(ref_stack::parameter &param) {
     full_type::swap(param);
     
-    __REGISTER bool swb;
+    bool swb;
     swb = param.variadic;
     param.variadic = variadic;
     variadic = swb;
