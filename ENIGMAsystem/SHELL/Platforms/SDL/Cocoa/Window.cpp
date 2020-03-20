@@ -45,7 +45,7 @@ namespace enigma_user {
 
 window_t window_handle() {
   unsigned long long window_uint64 = reinterpret_cast<unsigned long long>(enigma::NSWin);
-  return static_cast<window_t>(window_uint64);
+  return reinterpret_cast<window_t>(window_uint64);
 }
 
 // returns an identifier for the SDL2 window
