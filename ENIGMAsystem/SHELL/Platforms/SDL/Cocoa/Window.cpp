@@ -44,7 +44,7 @@ void window_id_init() {
 namespace enigma_user {
 
 window_t window_handle() {
-  unsigned long long window_uint64 = *(static_cast<unsigned long long *>(enigma::NSWin));
+  unsigned long long window_uint64 = static_cast<unsigned long long>(enigma::NSWin);
   return static_cast<window_t>(window_uint64);
 }
 
