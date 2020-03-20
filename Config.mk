@@ -1,17 +1,24 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 
 SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(SELF_DIR)/Unix.mk
 
-ifeq ($(OS), Darwin)
-	LIB_EXT := .dylib
-	BIN_EXT :=
-else ifeq ($(UNIX_BASED), true)
+OS := $(shell uname -s)
+ifeq ($(OS), Linux)
 	LIB_EXT := .so
 	BIN_EXT :=
-else
+	UNIX_BASED := true
+else ifeq ($(OS), FreeBSD)
+	LIB_EXT := .so
+	BIN_EXT :=
+	UNIX_BASED := true
+else ifeq ($(OS), Darwin)
+	LIB_EXT := .dylib
+	BIN_EXT :=
+	UNIX_BASED := true
+else 
 	LIB_EXT := .dll
 	BIN_EXT := .exe
+	UNIX_BASED := false
 endif
 
 # Global g++ flags
