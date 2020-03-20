@@ -29,14 +29,22 @@ gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
 for (var i = 0; i < 5; ++i) {
 	random_set_seed(69378);
 	ds_list_shuffle(list_str);
-	if (i % 2) {
+	switch (i % 3) {
+	case 0:
 		gtest_assert_eq(ds_list_find_value(list_str, 0), "alarm");
+		gtest_assert_eq(ds_list_find_value(list_str, 1), "cash");
+		gtest_assert_eq(ds_list_find_value(list_str, 2), "bank");
+		break;
+	case 1:
+		gtest_assert_eq(ds_list_find_value(list_str, 0), "cash");
 		gtest_assert_eq(ds_list_find_value(list_str, 1), "bank");
-		gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
-	} else {
+		gtest_assert_eq(ds_list_find_value(list_str, 2), "alarm");
+		break;
+	case 2:
 		gtest_assert_eq(ds_list_find_value(list_str, 0), "bank");
 		gtest_assert_eq(ds_list_find_value(list_str, 1), "alarm");
 		gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
+		break;
 	}
 }
 
