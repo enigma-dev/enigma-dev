@@ -3,7 +3,7 @@ GCCVER := $(shell gcc -dumpversion | cut -c 1)
 SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 include $(SELF_DIR)/Unix.mk
 
-ifeq ($(UNIX_MACOS), true)
+ifeq ($(OS), Darwin)
 	LIB_EXT := .dylib
 	BIN_EXT :=
 else ifeq ($(UNIX_BASED), true)
