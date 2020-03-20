@@ -344,31 +344,24 @@ void window_set_showborder(bool show) {
   if (window_get_fullscreen()) return;
   if (window_get_showborder() == show) return;
   enigma::showBorder = show;
-  Atom aKWinRunning = XInternAtom(disp, "KWIN_RUNNING", True);
-  bool bKWinRunning = (aKWinRunning != None);
-  XWindowAttributes wa;
-  Window root, parent, *child; uint children;
-  XWindowAttributes pwa;
+  Window child, root = DefaultRootWindow(disp); 
+  int x1, y1, x2, y2, x3, y3; unsigned w1, h1, w2, h2, border_width, depth;
   for (;;) {
-    XGetWindowAttributes(disp, win, &wa);
-    XQueryTree(disp, win, &root, &parent, &child, &children);
-    XGetWindowAttributes(disp, parent, &pwa);
-    // allow time for the titlebar and border sizes to be measured for proper window positioning...
-    if ((bKWinRunning ? pwa.x : wa.x) || (bKWinRunning ? pwa.y : wa.y) || !window_get_showborder())
+    XTranslateCoordinates(disp, win, root, 0, 0, &x1, &y1, &child);
+    XGetGeometry(disp, win, &root, &x2, &y2, &w1, &h1, &border_width, &depth);
+    XGetGeometry(disp, child, &root, &x3, &y3, &w2, &h2, &border_width, &depth);
+    // allow time for the titlebar and border sizes to be measured because x11 is async...
+    if (x3 || y3 || !window_get_showborder())
       break;
   }
-  static const int xoffset = bKWinRunning ? pwa.x : wa.x;
-  static const int yoffset = bKWinRunning ? pwa.y : wa.y;
   Hints hints;
   Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   hints.flags = 2;
   hints.decorations = show;
   XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
-  int xpos = show ? enigma::windowX - xoffset : enigma::windowX;
-  int ypos = show ? enigma::windowY - yoffset : enigma::windowY;
-  XResizeWindow(disp, win, enigma::windowWidth + 1, enigma::windowHeight + 1); // trigger ConfigureNotify event
-  XResizeWindow(disp, win, enigma::windowWidth - 1, enigma::windowHeight - 1); // set window back to how it was
-  XMoveResizeWindow(disp, win, xpos, ypos, bKWinRunning ? wa.width : wa.width + xoffset, bKWinRunning ? wa.height : wa.height + yoffset);
+  if (x2 || y2) {
+    XMoveResizeWindow(disp, win, x1, y1, w1, h1);
+  }
 }
 
 bool window_get_showborder() {
