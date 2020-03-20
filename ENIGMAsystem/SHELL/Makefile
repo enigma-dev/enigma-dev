@@ -7,16 +7,6 @@
 
 # PLATFORM { Platforms/* }
 include ../../Config.mk
-ifeq ($(OS), Darwin)
-	PLATFORM := Cocoa
-	MKDIR := mkdir
-else ifeq ($(UNIX_BASED), true)
-	PLATFORM := xlib
-	MKDIR := mkdir
-else
-	PLATFORM := Win32
-	MKDIR := mkdir.exe
-endif
 
 ifeq ($(OS), FreeBSD)
 	CXXFLAGS += -I/usr/local/include
