@@ -1,5 +1,3 @@
-include ../../../../Unix.mk
-
 SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
 
 ifeq ($(TARGET-PLATFORM), MacOSX)
