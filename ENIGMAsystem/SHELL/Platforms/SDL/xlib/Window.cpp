@@ -55,7 +55,7 @@ window_t window_handle() {
 // returns an identifier for the sdl window
 // this string can be used in shell scripts
 string window_identifier() {
-  return std::to_string(static_cast<unsigned long long>(window_handle()));
+  return std::to_string(static_cast<unsigned long>(window_handle()));
 }
 
 // returns an identifier for certain window
