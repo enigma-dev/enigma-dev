@@ -1,14 +1,12 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 
-OS := $(shell uname -s)
-ifeq ($(OS), Linux)
-	LIB_EXT := .so
-	BIN_EXT :=
-else ifeq ($(OS), FreeBSD)
-	LIB_EXT := .so
-	BIN_EXT :=
-else ifeq ($(OS), Darwin)
+include ./Unix.mk
+
+ifeq ($(UNIX_MACOS), true)
 	LIB_EXT := .dylib
+	BIN_EXT :=
+else ifeq ($(UNIX_BASED), true)
+	LIB_EXT := .so
 	BIN_EXT :=
 else
 	LIB_EXT := .dll
