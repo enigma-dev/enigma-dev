@@ -92,7 +92,7 @@ static inline void skip_multiline_comment(const char* cfile, size_t &pos, size_t
 
 void lexer_cpp::skip_string(error_handler *herr)
 {
-  register const char endc = cfile[pos];
+  const char endc = cfile[pos];
   while (++pos < length and cfile[pos] != endc)
   {
     if (cfile[pos] == '\\') {
@@ -113,7 +113,7 @@ void lexer_cpp::skip_string(error_handler *herr)
 
 static inline void skip_string(const char* cfile, size_t &pos, size_t length)
 {
-  register const char endc = cfile[pos];
+  const char endc = cfile[pos];
   while (++pos < length and cfile[pos] != endc)
     if (cfile[pos] == '\\') if (cfile[pos++] == '\r' and cfile[pos] == '\n') ++pos;
 }
@@ -330,7 +330,7 @@ string lexer_cpp::read_preprocessor_args(error_handler *herr)
   }
   res += string(cfile+spos,pos-spos);
   {
-    register size_t trim = res.length() - 1;
+    size_t trim = res.length() - 1;
     if (is_useless(res[trim])) {
       while (is_useless(res[--trim]));
       res.erase(++trim);
@@ -1064,10 +1064,10 @@ openfile::openfile() {}
 openfile::openfile(const char* fname): filename(fname), line(0), lpos(0) {}
 openfile::openfile(const char* fname, string sdir, size_t line_num, size_t line_pos, llreader &consume): filename(fname), searchdir(sdir), line(line_num), lpos(line_pos) { file.consume(consume); }
 void openfile::swap(openfile &f) {
-  { register const char* tmpl = filename;
+  { const char* tmpl = filename;
   filename = f.filename, f.filename = tmpl; }
   searchdir.swap(f.searchdir);
-  register size_t tmpl = line;
+  size_t tmpl = line;
   line = f.line, f.line = tmpl;
   tmpl = lpos, lpos = f.lpos, f.lpos = tmpl;
   llreader tmpr;

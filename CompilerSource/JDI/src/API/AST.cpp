@@ -1,4 +1,4 @@
-/** 
+/**
  * @file  AST.cpp
  * @brief Source implementing a class that handles expression evaluation and type
  *        coercion via an AST.
@@ -30,7 +30,7 @@
 #include <API/compile_settings.h>
 #include <iostream>
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 #include <malloc.h>
 #endif
 
