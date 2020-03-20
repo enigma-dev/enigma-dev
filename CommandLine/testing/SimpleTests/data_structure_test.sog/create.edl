@@ -40,18 +40,18 @@ for (var i = 0; i < 6; ++i) {
 	ds_list_shuffle(list_str);
 	switch (i % 3) {
 	case 0:
-		gtest_assert_eq(ds_list_find_value(list_str, 0), "alarm");
+		gtest_assert_eq(ds_list_find_value(list_str, 0), "bank");
 		gtest_assert_eq(ds_list_find_value(list_str, 1), "cash");
-		gtest_assert_eq(ds_list_find_value(list_str, 2), "bank");
+		gtest_assert_eq(ds_list_find_value(list_str, 2), "alarm");
 		break;
 	case 1:
 		gtest_assert_eq(ds_list_find_value(list_str, 0), "cash");
-		gtest_assert_eq(ds_list_find_value(list_str, 1), "bank");
-		gtest_assert_eq(ds_list_find_value(list_str, 2), "alarm");
+		gtest_assert_eq(ds_list_find_value(list_str, 1), "alarm");
+		gtest_assert_eq(ds_list_find_value(list_str, 2), "bank");
 		break;
 	case 2:
-		gtest_assert_eq(ds_list_find_value(list_str, 0), "bank");
-		gtest_assert_eq(ds_list_find_value(list_str, 1), "alarm");
+		gtest_assert_eq(ds_list_find_value(list_str, 0), "alarm");
+		gtest_assert_eq(ds_list_find_value(list_str, 1), "bank");
 		gtest_assert_eq(ds_list_find_value(list_str, 2), "cash");
 		break;
 	}
