@@ -151,7 +151,7 @@ window_t window_handle() {
   return *(static_cast<window_t *>(window_uint64));
 }
 
-// returns an identifier for the SDL2 window
+// returns an identifier for the XLIB window
 // this string can be used in shell scripts
 string window_identifier() {
   return std::to_string(*(static_cast<unsigned long long *>(window_handle())));
