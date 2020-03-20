@@ -7,7 +7,7 @@
 
 # PLATFORM { Platforms/* }
 include ../../Unix.mk
-ifeq ($(UNIX_MACOS), true)
+ifeq ($(OS), Darwin)
 	PLATFORM := Cocoa
 	MKDIR := mkdir
 else ifeq ($(UNIX_BASED), true)
