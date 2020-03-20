@@ -48,7 +48,7 @@ void window_id_init() {
 namespace enigma_user {
 
 window_t window_handle() {
-  unsigned long long window_uint64 = *(static_cast<unsigned long long *>(enigma::x11::win));
+  unsigned long long window_uint64 = static_cast<unsigned long>(enigma::x11::win);
   return static_cast<window_t>(window_uint64);
 }
 
