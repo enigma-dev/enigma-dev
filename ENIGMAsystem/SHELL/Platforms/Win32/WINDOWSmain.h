@@ -28,6 +28,8 @@
 
 namespace enigma //TODO: Find where this belongs
 {
+  extern HINSTANCE hInstance;
+  extern HWND hWnd;
   extern HDC window_hDC;
   extern HANDLE mainthread;
 }
