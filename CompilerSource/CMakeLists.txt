@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 set(TARGET "compileEGMf")
 set(TARGET_DESCRIPTION "Enigma Compiler")
+set(CMAKE_DEBUG_POSTFIX d)
 
 project(${TARGET} DESCRIPTION ${TARGET_DESCRIPTION})
 
@@ -29,6 +30,8 @@ include_directories(${TARGET} PRIVATE
                    "${ENIGMA_DIR}/shared/protos/"
                    "${ENIGMA_DIR}/shared/protos/codegen/"
 )
+
+set_target_properties(${TARGET} PROPERTIES PREFIX "lib")
 
 if(MSVC)
     # Default MSVC warnings are overkill. Set to Lvl 2
