@@ -9,4 +9,4 @@ namespace enigma {
 extern HWND hWnd;
 extern HINSTANCE hInstance;
 
-}; //namespace enigma
+} // namespace enigma
