@@ -73,20 +73,25 @@ int main(int argc, char* argv[])
   gmk::bind_output_streams(outputStream, errorStream);
 #endif
 
-  // Hijack cout/cerr from plugin to hide jdi startup crap that scares people
   std::streambuf* cout_rdbuf = std::cout.rdbuf();
   std::streambuf* cerr_rdbuf = std::cerr.rdbuf();
-  std::cout.rdbuf(elog.rdbuf());
-  std::cerr.rdbuf(elog.rdbuf());
+    
+  if (ENIGMA_DEBUG != "TRUE") {
+    // Hijack cout/cerr from plugin to hide jdi startup crap that scares people
+    std::cout.rdbuf(elog.rdbuf());
+    std::cerr.rdbuf(elog.rdbuf());
+  }
   
   CallBack ecb;
   plugin.Init(&ecb);
   plugin.SetDefinitions(options.APIyaml().c_str());
   std::string output_file;
 
-  //Restore cout/cerr
-  std::cout.rdbuf(cout_rdbuf);
-  std::cerr.rdbuf(cerr_rdbuf);
+  if (ENIGMA_DEBUG != "TRUE") {
+    //Restore cout/cerr
+    std::cout.rdbuf(cout_rdbuf);
+    std::cerr.rdbuf(cerr_rdbuf);
+  }
 
   if (!options.GetOption("output").empty())
     output_file = options.GetOption("output").as<std::string>();
