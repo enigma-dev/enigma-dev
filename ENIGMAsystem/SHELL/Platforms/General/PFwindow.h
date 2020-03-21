@@ -213,6 +213,7 @@ bool display_set_all(int w, int h, int freq, int bitdepth);
 bool display_test_all(int w, int h, int freq, int bitdepth);
 void set_synchronization(bool enable);
 
+window_t window_handle();
 std::string window_identifier(); // a string containing the number corresponding to the game's main window handle (shell script)
 std::string window_get_identifier(window_t hwnd); // a string containing the number corresponding to the specified window pointer
   
