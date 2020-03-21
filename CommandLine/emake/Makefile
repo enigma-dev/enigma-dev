@@ -8,15 +8,15 @@ include $(SHARED_SRC_DIR)/event_reader/Makefile
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
 ifeq ($(OS), Linux)
-	OS_LIBS=-lboost_program_options -Wl,--no-as-needed -Wl,-rpath,./ -lpthread -ldl
+	OS_LIBS=-lboost_program_options -Wl,--no-as-needed -Wl,-rpath,./ -lpthread
 else ifeq ($(OS), Darwin)
-	OS_LIBS=-lboost_program_options -lpthread -ldl
+	OS_LIBS=-lboost_program_options -lpthread
 else
 	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options-mt -lpthread
 endif
 
 CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR)
-LDFLAGS   += $(OS_LIBS) -L../../ -lProtocols -lprotobuf
+LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lProtocols -lprotobuf
 
 ifeq ($(TESTS), TRUE)
 	TARGET=../../emake-tests

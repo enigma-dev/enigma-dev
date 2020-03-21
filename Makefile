@@ -33,10 +33,10 @@ libProtocols: .FORCE
 libEGM: .FORCE libpng-util libProtocols
 	$(MAKE) -C CommandLine/libEGM/
 
-EMAKE_TARGETS = .FORCE
+EMAKE_TARGETS = .FORCE ENIGMA
 
 ifneq ($(CLI_ENABLE_EGM), FALSE)
-	EMAKE_TARGETS += libEGM
+	EMAKE_TARGETS += libEGM 
 else
 	EMAKE_TARGETS += libProtocols
 endif
