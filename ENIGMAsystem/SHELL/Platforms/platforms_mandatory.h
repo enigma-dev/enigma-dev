@@ -29,9 +29,9 @@
 #include <vector>
 
 #if GM_COMPATIBILITY_VERSION <= 81
-using window_t = unsigned long long;
+typedef unsigned long long window_t;
 #else
-using window_t = void *;
+typedef void * window_t;
 #endif 
 
 namespace enigma_user {
