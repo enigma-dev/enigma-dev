@@ -44,7 +44,8 @@ namespace enigma_user {
 
 /*
 window_t window_handle() {
-  unsigned long long window_uint64 = static_cast<unsigned long long>(enigma::ANWin);
+  void *window_voidp = &enigma::ANWin;
+  unsigned long long window_uint64 = *(static_cast<unsigned long long *>(window_voidp));
   return static_cast<window_t>(window_uint64);
 }
 */
