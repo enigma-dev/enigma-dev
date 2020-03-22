@@ -17,7 +17,7 @@
 
 #include "Widget_Systems/widgets_mandatory.h"  // DEBUG_MESSAGE
 
-#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd
 
 #include <cstdio>
 
@@ -60,8 +60,6 @@ IDirectSoundBuffer* primaryBuffer;
 AssetArray<Sound> sounds;
 
 namespace enigma {
-
-extern HWND hWnd;
 
 void eos_callback(void* soundID, unsigned src) {
   //auto snd = sounds.get((ptrdiff_t)soundID);
