@@ -1,9 +1,11 @@
+include Config.mk
+
 PATH := $(eTCpath)$(PATH)
 SHELL=/bin/bash
 
 .PHONY: ENIGMA all clean Game clean-game emake emake-tests gm2egm libpng-util libProtocols libEGM required-directories .FORCE
 
-ENIGMA: .FORCE libProtocols libENIGMAShared
+ENIGMA: .FORCE libProtocols$(LIB_EXT) libENIGMAShared$(LIB_EXT)
 	$(MAKE) -C CompilerSource
 
 clean: .FORCE
@@ -24,30 +26,33 @@ Game: .FORCE
 clean-game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 
+libENIGMAShared$(LIB_EXT): libENIGMAShared
 libENIGMAShared: .FORCE
 	$(MAKE) -C shared/
 
+libProtocols$(LIB_EXT): libProtocols
 libProtocols: .FORCE
 	$(MAKE) -C shared/protos/
 
-libEGM: .FORCE libProtocols libENIGMAShared
+libEGM$(LIB_EXT): libEGM
+libEGM: .FORCE libProtocols$(LIB_EXT) libENIGMAShared$(LIB_EXT)
 	$(MAKE) -C CommandLine/libEGM/
 
 EMAKE_TARGETS = .FORCE ENIGMA
 
 ifneq ($(CLI_ENABLE_EGM), FALSE)
-	EMAKE_TARGETS += libEGM 
+	EMAKE_TARGETS += libEGM$(LIB_EXT)
 else
-	EMAKE_TARGETS += libProtocols
+	EMAKE_TARGETS += libProtocols$(LIB_EXT)
 endif
 
 emake: $(EMAKE_TARGETS)
 	$(MAKE) -C CommandLine/emake/
 
-emake-tests: .FORCE libEGM
+emake-tests: .FORCE libEGM$(LIB_EXT)
 	TESTS=TRUE $(MAKE) -C CommandLine/emake/
 
-gm2egm: libEGM .FORCE
+gm2egm: libEGM$(LIB_EXT) .FORCE
 	$(MAKE) -C CommandLine/gm2egm/
 
 test-runner: emake .FORCE
