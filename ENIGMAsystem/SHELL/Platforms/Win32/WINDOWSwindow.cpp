@@ -76,15 +76,21 @@ void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
 
 namespace enigma_user {
 
-#if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle() {
-  return (unsigned long long)enigma::hWnd;
+window_t window_handle() {
+  return reinterpret_cast<window_t>(enigma::hWnd);
 }
-#else
-void* window_handle() {
-  return enigma::hWnd;
+
+// returns an identifier for the HWND window
+// this string can be used in shell scripts
+string window_identifier() {
+  return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
 }
-#endif
+
+// returns an identifier for certain window
+// this string can be used in shell scripts
+string window_get_identifier(window_t hwnd) {
+  return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
+}
 
 static int currentIconIndex = -1;
 static unsigned currentIconFrame;

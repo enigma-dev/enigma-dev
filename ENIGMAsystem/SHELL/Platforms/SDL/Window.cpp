@@ -47,7 +47,9 @@ bool initGameWindow() {
   if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
   init_sdl_window_bridge_attributes();
   windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
-  return (windowHandle != nullptr);
+  bool notnull = (windowHandle != nullptr);
+  if (notnull) window_id_init();
+  return notnull;
 }
 
 namespace keyboard {

@@ -69,6 +69,7 @@ void set_net_wm_pid(Window window) {
   Atom net_wm_pid = XInternAtom(disp, "_NET_WM_PID", False);
   XChangeProperty(disp, window, net_wm_pid, cardinal, 32, PropModeReplace, (unsigned char*)&pid, sizeof(pid) / 4);
 }
+
 } // namespace x11;
 
 bool initGameWindow()
@@ -144,6 +145,23 @@ void destroyWindow() {
 }  //namespace enigma
 
 namespace enigma_user {
+
+window_t window_handle() {
+  unsigned long long window_uint64 = enigma::x11::win;
+  return reinterpret_cast<window_t>(window_uint64);
+}
+
+// returns an identifier for the XLIB window
+// this string can be used in shell scripts
+string window_identifier() {
+  return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
+}
+
+// returns an identifier for certain window
+// this string can be used in shell scripts
+string window_get_identifier(window_t hwnd) {
+  return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
+}
 
 void window_set_visible(bool visible) {
   if (visible) {
