@@ -3,7 +3,7 @@ include Config.mk
 PATH := $(eTCpath)$(PATH)
 SHELL=/bin/bash
 
-.PHONY: ENIGMA all clean Game clean-game emake emake-tests gm2egm libpng-util libProtocols libEGM required-directories .FORCE
+.PHONY: ENIGMA all clean Game clean-game emake emake-tests gm2egm libProtocols libEGM required-directories .FORCE
 
 ENIGMA: .FORCE libProtocols$(LIB_EXT) libENIGMAShared$(LIB_EXT)
 	$(MAKE) -C CompilerSource
