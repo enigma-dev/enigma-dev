@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -32,6 +31,8 @@
 using enigma_user::show_error;
 
 namespace enigma {
+
+extern HWND hWnd;
 
 namespace dx11 {
 
