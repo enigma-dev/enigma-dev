@@ -290,7 +290,8 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
 
 int OptionsParser::find_ey(const char* dir)
 {
-  fs::path targetDir(_enigmaRoot + dir);
+  fs::path targetDir(_enigmaRoot);
+  targetDir /= dir;
   fs::recursive_directory_iterator iter(targetDir);
 
   for(auto& p : iter)
