@@ -28,7 +28,6 @@
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFfilemanip.h"
 #include "Platforms/Win32/WINDOWSmain.h"
-#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 #include "strings_util.h"
 
 using std::set;
