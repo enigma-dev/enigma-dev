@@ -104,6 +104,8 @@ static void reset_ide_editables()
 
 extern const char* establish_bearings(const char *compiler);
 
+std::string enigma_root;
+
 void parse_ide_settings(const char* eyaml)
 {
   ey_data settree = parse_eyaml_str(eyaml);
@@ -135,6 +137,12 @@ void parse_ide_settings(const char* eyaml)
   setting::automatic_semicolons   = settree.get("automatic-semicolons").toBool();
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
+  // Path to enigma sources
+  enigma_root = settree.get("enigma-root").toString();
+  if (enigma_root.empty()) {
+    enigma_root = ".";
+  }
+
   // Use a platform-specific make directory.
   eobjs_directory = settree.get("eobjs-directory").toString();
   
@@ -156,10 +164,15 @@ void parse_ide_settings(const char* eyaml)
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
   eobjs_directory = myReplace(escapeEnv(eobjs_directory), "\\","/");
   codegen_directory = myReplace(escapeEnv(codegen_directory), "\\","/");
+  enigma_root = myReplace(escapeEnv(enigma_root), "\\","/");
 #else
   eobjs_directory = escapeEnv(eobjs_directory);
   codegen_directory = escapeEnv(codegen_directory);
+  enigma_root = escapeEnv(enigma_root);
 #endif
+
+  if (enigma_root.back() != '/')
+    enigma_root += '/';
 
   if (eobjs_directory.back() != '/')
     eobjs_directory += '/';
@@ -190,7 +203,7 @@ void parse_ide_settings(const char* eyaml)
   ey_cp(network,   networking,system)
 
   ifstream ifs; string eyname;
-  ifs.open((eyname = "ENIGMAsystem/SHELL/Platforms/" + extensions::targetAPI.windowSys + "/Info/About.ey").c_str());
+  ifs.open((eyname = enigma_root + "ENIGMAsystem/SHELL/Platforms/" + extensions::targetAPI.windowSys + "/Info/About.ey").c_str());
   if (ifs.is_open())
   {
     ey_data l = parse_eyaml(ifs, eyname.c_str());
@@ -223,7 +236,7 @@ void parse_ide_settings(const char* eyaml)
   eygl(Networking_Systems, network);
 
   string target_compiler = settree.get("target-compiler");
-  string cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + target_compiler + ".ey";
+  string cinffile = enigma_root + "Compilers/" CURRENT_PLATFORM_NAME "/" + target_compiler + ".ey";
 
   const char *a = establish_bearings(cinffile.c_str());
   if (a) cout << "Parse fail: " << a << endl;
