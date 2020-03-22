@@ -22,7 +22,7 @@
 #include "backend/GameData.h"
 #include "settings.h"
 
-#include "general/darray.h"
+#include "darray.h"
 
 #include <cstdio>
 
