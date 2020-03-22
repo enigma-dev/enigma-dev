@@ -13,7 +13,7 @@ else
 endif
 
 CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR)
-LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lProtocols -lENIGMAShared -lprotobuf
+LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lProtocols -lENIGMAShared -lprotobuf -lpng
 
 ifeq ($(TESTS), TRUE)
 	TARGET=../../emake-tests
