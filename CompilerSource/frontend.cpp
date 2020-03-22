@@ -38,7 +38,7 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "general/darray.h"
+#include "darray.h"
 
 #include <API/context.h>
 #include "languages/language_adapter.h"

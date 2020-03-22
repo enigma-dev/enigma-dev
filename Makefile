@@ -3,7 +3,7 @@ SHELL=/bin/bash
 
 .PHONY: ENIGMA all clean Game clean-game emake emake-tests gm2egm libpng-util libProtocols libEGM required-directories .FORCE
 
-ENIGMA: .FORCE libProtocols libpng-util
+ENIGMA: .FORCE libProtocols libENIGMAShared
 	$(MAKE) -C CompilerSource
 
 clean: .FORCE
@@ -11,11 +11,11 @@ clean: .FORCE
 	$(MAKE) -C CommandLine/emake/ clean
 	$(MAKE) -C CommandLine/libEGM/ clean
 	$(MAKE) -C CommandLine/testing/ clean
-	$(MAKE) -C shared/libpng-util/ clean
+	$(MAKE) -C shared/ clean
 	$(MAKE) -C shared/protos/ clean
 	$(MAKE) -C CommandLine/gm2egm/ clean
 
-all: libpng-util libProtocols libEGM ENIGMA emake emake-tests test-runner .FORCE
+all: libENIGMAShared libProtocols libEGM ENIGMA emake emake-tests test-runner .FORCE
 
 Game: .FORCE
 	@$(RM) -f logs/enigma_compile.log
@@ -24,13 +24,13 @@ Game: .FORCE
 clean-game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 
-libpng-util: .FORCE
-	$(MAKE) -C shared/libpng-util/
+libENIGMAShared: .FORCE
+	$(MAKE) -C shared/
 
 libProtocols: .FORCE
 	$(MAKE) -C shared/protos/
 
-libEGM: .FORCE libpng-util libProtocols
+libEGM: .FORCE libProtocols libENIGMAShared
 	$(MAKE) -C CommandLine/libEGM/
 
 EMAKE_TARGETS = .FORCE ENIGMA

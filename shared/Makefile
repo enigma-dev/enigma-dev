@@ -1,2 +1,12 @@
-arbitrary_relative_wildcard=$(patsubst $1/%,%,$(wildcard $1/$2))
-relative_wildcard=$(call arbitrary_relative_wildcard,$(dir $(lastword $(MAKEFILE_LIST))),$1)
+include ../Config.mk
+
+TARGET := ../libENIGMAShared$(LIB_EXT)
+SHARED_SRC_DIR := .
+SHARED_SOURCES := $(call rwildcard,event_reader,*.cpp) $(call rwildcard,eyaml,*.cpp) $(call rwildcard,libpng-util,*.cpp) $(call rwildcard,rectpacker,*.cpp)
+
+CXXFLAGS += -fPIC -I../CompilerSource
+LDFLAGS += -shared
+
+#SHARED_SRC_DIR := ../../shared
+
+include ../Default.mk
