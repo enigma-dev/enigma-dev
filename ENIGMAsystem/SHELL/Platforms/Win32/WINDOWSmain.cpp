@@ -24,8 +24,6 @@
 #include "Platforms/General/PFfilemanip.h"
 #include "Platforms/platforms_mandatory.h"
 
-#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
-
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 #include "Universal_System/estring.h"
 #include "Universal_System/roomsystem.h"
