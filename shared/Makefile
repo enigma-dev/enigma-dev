@@ -5,8 +5,6 @@ SHARED_SRC_DIR := .
 SHARED_SOURCES := $(call rwildcard,event_reader,*.cpp) $(call rwildcard,eyaml,*.cpp) $(call rwildcard,libpng-util,*.cpp) $(call rwildcard,rectpacker,*.cpp)
 
 CXXFLAGS += -fPIC -I../CompilerSource
-LDFLAGS += -shared
-
-#SHARED_SRC_DIR := ../../shared
+LDFLAGS += -shared -lpng
 
 include ../Default.mk
