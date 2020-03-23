@@ -459,7 +459,7 @@ ImageData::ImageData(const Image &img):
 ImageData::ImageData(int w, int h, const uint8_t *data, size_t size):
     width(w), height(h), pixels(data, data + size) {}
 
-GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es): filename(es->filename ?: "") {
+GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es): filename(es->filename ? es->filename : "") {
   cout << "Translating EnigmaStruct" << endl;
   cout << "- Indexing names" << endl;
   ESLookup lookup(es);
