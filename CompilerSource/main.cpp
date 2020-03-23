@@ -36,8 +36,6 @@ using namespace std;
 
 int m_prog_loop_cfp();
 
-#include <sys/time.h>
-
 #ifdef _WIN32
  #define byte __windows_byte_workaround
  #include <windows.h>
