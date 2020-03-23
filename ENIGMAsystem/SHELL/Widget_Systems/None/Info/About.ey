@@ -4,7 +4,7 @@
 Name: None
 Identifier: None
 Build-Platforms: Windows, MacOSX, Linux, FreeBSD, SDL
-Represents: All
+Represents: None
 Description: Console based output and filler functions.
 Author: Josh Ventura
 
