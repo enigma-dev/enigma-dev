@@ -7,6 +7,7 @@ else()
 endif()
 
 set(CLI_TARGET_DESCRIPTION "ENIGMA CLI")
+set(Boost_NO_BOOST_CMAKE ON)
 
 project(emake)
 
