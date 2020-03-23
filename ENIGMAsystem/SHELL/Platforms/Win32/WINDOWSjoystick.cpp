@@ -25,6 +25,7 @@ using std::string;
 
 #include "Platforms/General/PFjoystick.h"
 #include "Platforms/Win32/WINDOWSmain.h"
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
 #include "Universal_System/scalar.h"
 #include "Universal_System/math_consts.h"
