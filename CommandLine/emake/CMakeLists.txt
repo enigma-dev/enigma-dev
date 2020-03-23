@@ -22,9 +22,9 @@ SET(CMAKE_SKIP_BUILD_RPATH ON)
 set(CMAKE_INSTALL_RPATH $ORIGIN)
 
 if(WIN32)
-  add_executable(${CLI_TARGET} WIN32 ${EMAKE_SOURCES} ${SHARED_SOURCES})
+  add_executable(${CLI_TARGET} WIN32 ${EMAKE_SOURCES})
 else()
-  add_executable(${CLI_TARGET} ${EMAKE_SOURCES} ${SHARED_SOURCES})
+  add_executable(${CLI_TARGET} ${EMAKE_SOURCES})
 endif(WIN32)
 
 if(MSVC)
