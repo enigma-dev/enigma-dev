@@ -111,7 +111,7 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System (Precise, BBox, None)")
     ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Alarms, Paths, Timelines, Particles, MotionPlanning, ttf, libpng, IniFilesystem, RegistrySpoof, Asynchronous, StudioPhysics, VirtualKeys, XRandR, XTEST, FileDropper, None)")
     ("compiler,x", opt::value<std::string>()->default_value(def_compiler), "Compiler.ey Descriptor")
-    ("enigma-root,s", opt::value<std::string>()->default_value(fs::current_path().string()), "Path to ENIGMA's sources")
+    ("enigma-root", opt::value<std::string>()->default_value(fs::current_path().string()), "Path to ENIGMA's sources")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
   ;
 

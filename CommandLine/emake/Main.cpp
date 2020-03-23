@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 
   Game game;
   std::string input_file = options.GetOption("input").as<std::string>();
-  if (input_file.back() == '/') input_file.pop_back();
+  if (!input_file.empty() && input_file.back() == '/') input_file.pop_back();
 
   // Working directory hacks
   if (mode != emode_compile)

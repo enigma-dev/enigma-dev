@@ -8,7 +8,7 @@
 
 #include "GameData.h"
 
-#include "libpng-util.h"
+#include "libpng-util/libpng-util.h"
 
 #include <map>
 #include <string>
