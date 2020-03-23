@@ -21,7 +21,7 @@ if(MSVC)
   # Default MSVC warnings are overkill. Set to Lvl 1
   target_compile_options(${SHARED_LIB} PRIVATE /W1)
   # Fixes 'and' and 'or'
-  target_compile_options(${COMPILER_LIB} PRIVATE "/permissive-")
+  target_compile_options(${SHARED_LIB} PRIVATE "/permissive-")
 endif()
 
 # Find libpng
