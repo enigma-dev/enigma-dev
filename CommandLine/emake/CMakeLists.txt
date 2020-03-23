@@ -28,6 +28,8 @@ endif()
 if (RGM_ENABLE_GRPC_SERVER)
   set(CLI_ENABLE_SERVER ON)
   add_definitions(-DCLI_ENABLE_SERVER)
+else()
+  list(REMOVE_ITEM EMAKE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Server.cpp")
 endif()
 
 if(MSVC)

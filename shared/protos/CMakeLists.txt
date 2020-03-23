@@ -63,7 +63,7 @@ if (RGM_ENABLE_GRPC_SERVER)
   #Find gRPC
   if (MSVC) # Windows actually does something right for once
     find_package(gRPC CONFIG REQUIRED)
-    target_link_libraries(${CLI_TARGET} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
+    target_link_libraries(${LIB_PROTO} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
   else() # https://tinyurl.com/arch-grpc-bug
     find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
     find_library(LIB_GPR NAMES gpr)
