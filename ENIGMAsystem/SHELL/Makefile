@@ -58,8 +58,6 @@ SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AU
 OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 
 SHARED_SRC_DIR := ../../shared/
-include $(SHARED_SRC_DIR)/Makefile
-include $(SHARED_SRC_DIR)/rectpacker/Makefile
 
 ###########
 # options #

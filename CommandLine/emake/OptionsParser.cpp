@@ -108,9 +108,10 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (DirectSound, OpenAL, SFML, FMODAudio, XAudio2, None)")
     ("widgets,w", opt::value<std::string>()->default_value("None"), "Widget System (Win32, xlib, Cocoa, GTK+, None)")
     ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (DirectPlay, Asynchronous, BerkeleySockets, None)")
-    ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System")
+    ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System (Precise, BBox, None)")
     ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Alarms, Paths, Timelines, Particles, MotionPlanning, ttf, libpng, IniFilesystem, RegistrySpoof, Asynchronous, StudioPhysics, VirtualKeys, XRandR, XTEST, FileDropper, None)")
     ("compiler,x", opt::value<std::string>()->default_value(def_compiler), "Compiler.ey Descriptor")
+    ("enigma-root,s", opt::value<std::string>()->default_value(fs::current_path().string()), "Path to ENIGMA's sources")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
   ;
 
@@ -147,6 +148,10 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
     opt::store(opt::command_line_parser(argc, argv)
                    .options(_desc).positional(_positional).run(),
                _rawArgs);
+               
+    _enigmaRoot = fs::absolute(_rawArgs["enigma-root"].as<std::string>()).string();
+    
+    if (!_enigmaRoot.empty() && _enigmaRoot.back() != '/') _enigmaRoot += "/";
 
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
@@ -220,6 +225,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
               network = _rawArgs["network"].as<std::string>(),
               eobjs_directory = fs::absolute(_rawArgs["workdir"].as<std::string>()).string(),
               codegen_directory = fs::absolute(_rawArgs["codegen"].as<std::string>()).string();
+              
 
   int inherit_strings = 0,
       inherit_escapes = 0,
@@ -259,6 +265,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   yaml += "inherit-equivalence-from: " + std::to_string(inherit_equivalence) + "\n";
   yaml += "eobjs-directory: " + eobjs_directory + "\n";
   yaml += "codegen-directory: " + codegen_directory + "\n";
+  yaml += "enigma-root: " + _enigmaRoot + "\n";
   yaml += "sample-checkbox: on\n";
   yaml += "sample-edit: DEADBEEF\n";
   yaml += "sample-combobox: 0\n";
@@ -283,7 +290,8 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
 
 int OptionsParser::find_ey(const char* dir)
 {
-  fs::path targetDir(dir);
+  fs::path targetDir(_enigmaRoot);
+  targetDir /= dir;
   fs::recursive_directory_iterator iter(targetDir);
 
   for(auto& p : iter)

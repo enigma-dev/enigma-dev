@@ -1,9 +1,6 @@
 include ../../Config.mk
 
 SHARED_SRC_DIR := ../../shared
-include $(SHARED_SRC_DIR)/Makefile
-include $(SHARED_SRC_DIR)/eyaml/Makefile
-include $(SHARED_SRC_DIR)/event_reader/Makefile
 
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
@@ -16,7 +13,7 @@ else
 endif
 
 CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR)
-LDFLAGS   += $(OS_LIBS) -L../../ -lProtocols -lprotobuf
+LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lProtocols -lENIGMAShared -lprotobuf -lpng
 
 ifeq ($(TESTS), TRUE)
 	TARGET=../../emake-tests

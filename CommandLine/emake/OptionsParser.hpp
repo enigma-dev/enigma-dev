@@ -54,6 +54,7 @@ private:
 
   bool _readArgsFail;
   std::string _extensions;
+  std::string _enigmaRoot;
 
   opt::variables_map _rawArgs;
   opt::options_description _desc;

@@ -23,15 +23,13 @@ ideprint::ideprint(void(*ftu)(const char*)): f(ftu) {}
 
 #include <iostream>
 
-extern std::ostream realCout;
-
 // Now specialize it 
 // Declare functions it'll call
 void ide_dia_add_direct(const char* x) {
-  realCout << x; std::cout << x; fflush(stdout); ide_dia_add(x);
+  std::cout << x; fflush(stdout); ide_dia_add(x);
 }
 void ide_dia_add_debug(const char* x) {
-  realCout << x; std::cout << x; fflush(stdout); ide_dia_add(x);
+  std::cout << x; fflush(stdout); ide_dia_add(x);
 }
 // Link them together
 ideprint user(ide_dia_add_direct);

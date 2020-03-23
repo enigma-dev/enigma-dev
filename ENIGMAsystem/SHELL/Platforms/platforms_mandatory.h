@@ -28,6 +28,12 @@
 #include <functional>
 #include <vector>
 
+#if GM_COMPATIBILITY_VERSION <= 81
+typedef unsigned long long window_t;
+#else
+typedef void * window_t;
+#endif 
+
 namespace enigma_user {
   extern const int os_type;
   extern unsigned long current_time; // milliseconds since the start of the game
@@ -109,6 +115,8 @@ namespace enigma_user
 // These functions are standard GML that are an integral part of the system.
 // Each instance must implement these, even if they are unable to do anything
 // on the target platform.
+
+window_t window_handle();
 
 // This is used with roomsystem
 void window_default(bool center_size = false);

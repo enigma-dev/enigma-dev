@@ -17,6 +17,7 @@
 
 #include "OpenGLHeaders.h"
 #include "Graphics_Systems/OpenGL-Common/version.h"
+#include "Graphics_Systems/OpenGL-Common/shader.h"
 #include "Bridges/OpenGL/GLload.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/SDL/Window.h"
@@ -57,6 +58,7 @@ void EnableDrawing(void*) {
 }
 
 void DisableDrawing(void*) {
+  cleanup_shaders(); // delete shaders before context
   SDL_GL_DeleteContext(context);
 }
 

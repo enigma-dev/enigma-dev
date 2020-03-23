@@ -24,7 +24,7 @@
 using namespace std;
 #define tostring to_string
 
-#include "general/darray.h"
+#include "darray.h"
 #include "general/parse_basics_old.h"
 inline bool is_letterh(char x) { return is_letter(x) or x == '-' or x == ' '; }
 

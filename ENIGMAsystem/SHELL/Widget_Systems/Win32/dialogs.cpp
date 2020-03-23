@@ -40,6 +40,7 @@ using namespace std;
 #include "GameSettings.h"
 
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
 #define MONITOR_CENTER 0x0001
 
@@ -88,8 +89,6 @@ static inline string add_slash(const string& dir) {
 
 namespace enigma {
 
-extern HINSTANCE hInstance;
-extern HWND hWnd;
 HWND infore;
 
 }

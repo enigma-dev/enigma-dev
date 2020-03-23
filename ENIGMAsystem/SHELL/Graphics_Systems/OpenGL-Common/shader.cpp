@@ -73,7 +73,7 @@
     if (program < 0) { DEBUG_MESSAGE("Program id [" + std::to_string(program) + "] < 0 given!", MESSAGE_TYPE::M_ERROR); return err; }\
     if (size_t(program) >= enigma::shaderprograms.size()) { DEBUG_MESSAGE("Program id [" + std::to_string(program) +"] > size() [" + std::to_string(enigma::shaderprograms.size()) +"] given!", MESSAGE_TYPE::M_ERROR); return err; }\
     if (enigma::shaderprograms[program] == nullptr) { DEBUG_MESSAGE("Program with id [" + std::to_string(program) + "] is deleted!", MESSAGE_TYPE::M_ERROR); return err; }\
-    enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
+    auto& ptiter = enigma::shaderprograms[program];
 #else
     #define get_uniform(uniter,location,usize)\
     if (location < 0) return; \
@@ -93,13 +93,13 @@
     if (program < 0) { return err; }\
     if (size_t(program) >= enigma::shaderprograms.size()) { return err; }\
     if (enigma::shaderprograms[program] == nullptr) { return err; }\
-    enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
+    auto& ptiter = enigma::shaderprograms[program];
 #endif
 
 namespace enigma
 {
-  std::vector<enigma::Shader*> shaders(0);
-  std::vector<enigma::ShaderProgram*> shaderprograms(0);
+  std::vector<std::unique_ptr<enigma::Shader>> shaders(0);
+  std::vector<std::unique_ptr<enigma::ShaderProgram>> shaderprograms(0);
  // std::vector<enigma::AttributeObject*> attributeobjects(0);
 
   extern unsigned default_shader;
@@ -473,7 +473,7 @@ std::string glsl_program_get_infolog(int id)
 int glsl_shader_create(int type)
 {
   unsigned int id = enigma::shaders.size();
-  enigma::shaders.push_back(new enigma::Shader(type));
+  enigma::shaders.push_back(std::make_unique<enigma::Shader>(type));
   return id;
 }
 
@@ -530,13 +530,13 @@ bool glsl_shader_get_compiled(int id) {
 
 void glsl_shader_free(int id)
 {
-  delete enigma::shaders[id];
+  enigma::shaders[id] = nullptr;
 }
 
 int glsl_program_create()
 {
   unsigned int id = enigma::shaderprograms.size();
-  enigma::shaderprograms.push_back(new enigma::ShaderProgram());
+  enigma::shaderprograms.push_back(std::make_unique<enigma::ShaderProgram>());
   return id;
 }
 
@@ -617,7 +617,6 @@ void glsl_program_default_reset(){
 
 void glsl_program_free(int id)
 {
-  delete enigma::shaderprograms[id];
   enigma::shaderprograms[id] = nullptr;
 }
 
@@ -1045,5 +1044,10 @@ namespace enigma
       it->second.offset = offset;
       it->second.vao = enigma::bound_vbo;
     //}
+  }
+
+  void cleanup_shaders() {
+    for(size_t i = 0; i < shaderprograms.size(); ++i) shaderprograms[i] = nullptr;
+    for(size_t i = 0; i < shaders.size(); ++i) shaders[i] = nullptr;
   }
 }

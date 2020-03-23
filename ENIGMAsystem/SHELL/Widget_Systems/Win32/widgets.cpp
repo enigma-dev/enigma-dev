@@ -31,7 +31,7 @@
 #define WINVER 9001
 #include "Widget_Systems/General/WSwidgets.h"
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
-#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
 #define byte __windows_byte_workaround
 #include <windows.h>
@@ -57,12 +57,10 @@ vector<gtkl_object*> widgets;
 static INT_PTR widget_idmax = 0;
 
 namespace enigma {
-  extern HWND hWnd;
-  extern HINSTANCE hInstance;
   bool widget_system_initialize()
   {
-    // make sure the hWnd and hInstance variables are initialized (e.g, SDL)
-    if (get_window_handle() == NULL) {
+    // make sure the window handle is initialized (e.g, SDL)
+    if (enigma_user::window_handle() == NULL) {
       DEBUG_MESSAGE("Cannot initialize Win32 widget system with NULL window handle.", MESSAGE_TYPE::M_FATAL_ERROR);
     }
     INITCOMMONCONTROLSEX iccex;

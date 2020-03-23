@@ -281,7 +281,7 @@
 		<Unit filename="general/bettersystem.cpp" />
 		<Unit filename="general/bettersystem.h" />
 		<Unit filename="general/darray.cpp" />
-		<Unit filename="general/darray.h" />
+		<Unit filename="darray.h" />
 		<Unit filename="general/estring.h" />
 		<Unit filename="general/implicit_stack.h" />
 		<Unit filename="general/macro_integration.cpp" />

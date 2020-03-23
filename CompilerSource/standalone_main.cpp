@@ -26,7 +26,7 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "general/darray.h"
+#include "darray.h"
 
 
 #include "syntax/syncheck.h"
