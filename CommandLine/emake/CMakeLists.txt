@@ -112,5 +112,5 @@ endif(WIN32)
 find_package(Boost COMPONENTS system program_options filesystem REQUIRED)
 target_link_libraries(${CLI_TARGET} PRIVATE Boost::program_options)
 
-install(TARGETS ${CLI_TARGET} DESTINATION .)
+install(TARGETS ${CLI_TARGET} RUNTIME DESTINATION .)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${CLI_TARGET}.dir/Debug/${CLI_TARGET}.pdb" DESTINATION . OPTIONAL)
