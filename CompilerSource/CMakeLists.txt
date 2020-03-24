@@ -13,7 +13,7 @@ list(REMOVE_ITEM COMPILER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/standalone_main.c
 
 get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
 
-add_library(${COMPILER_LIB} SHARED ${COMPILER_SOURCES})
+add_library(${COMPILER_LIB} ${LIB_TYPE} ${COMPILER_SOURCES})
 
 target_include_directories(${COMPILER_LIB} PRIVATE "JDI/src")
 
