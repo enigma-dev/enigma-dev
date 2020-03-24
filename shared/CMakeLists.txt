@@ -13,7 +13,7 @@ set(SHARED_SOURCES
    "libpng-util/libpng-util.cpp"
 )
 
-add_library(${SHARED_LIB} SHARED ${SHARED_SOURCES})
+add_library(${SHARED_LIB} ${LIB_TYPE} ${SHARED_SOURCES})
 
 target_include_directories(${SHARED_LIB} PRIVATE "${ENIGMA_DIR}/CompilerSource")
 
