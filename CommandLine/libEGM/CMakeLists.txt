@@ -9,7 +9,7 @@ project(${LIB_EGM} DESCRIPTION ${LIB_EGM_DESCRIPTION})
 
 file(GLOB SRC_FILES *.cpp)
 
-add_library(${LIB_EGM} SHARED ${SRC_FILES})
+add_library(${LIB_EGM} ${LIB_TYPE} ${SRC_FILES})
 
 if(MSVC)
   # Default MSVC warnings are overkill. Set to Lvl 1
