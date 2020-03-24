@@ -36,8 +36,8 @@ if(NOT WIN32)
   target_link_libraries(${LIB_EGM} PRIVATE ${LIB_FS})
 endif()
 
-add_dependencies(${LIB_EGM} "Protocols")
-target_link_libraries(${LIB_EGM} PRIVATE "Protocols")
+add_dependencies(${LIB_EGM} "Protocols" "ENIGMAShared")
+target_link_libraries(${LIB_EGM} PRIVATE "Protocols" "ENIGMAShared")
 
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
