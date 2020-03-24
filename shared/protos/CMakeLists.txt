@@ -75,7 +75,7 @@ endif()
 
 # Find Protobuf
 include_directories(${Protobuf_INCLUDE_DIRS})
-target_link_libraries(${LIB_PROTO} PRIVATE ${Protobuf_LIB_PROTORARIES})
+target_link_libraries(${LIB_PROTO} PRIVATE ${Protobuf_LIBRARIES})
 
 install(TARGETS ${LIB_PROTO} DESTINATION .)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB_PROTO}.dir/Debug/${LIB_PROTO}.pdb" DESTINATION . OPTIONAL)
