@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#import "EvaluateShell.h"
 #import <Cocoa/Cocoa.h>
 
 const char *cocoa_dialog_caption() {
