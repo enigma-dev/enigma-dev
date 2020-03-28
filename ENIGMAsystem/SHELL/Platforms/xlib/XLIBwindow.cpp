@@ -362,24 +362,11 @@ void window_set_showborder(bool show) {
   if (window_get_fullscreen()) return;
   if (window_get_showborder() == show) return;
   enigma::showBorder = show;
-  Window child, root = DefaultRootWindow(disp); 
-  int x1, y1, x2, y2, x3, y3; unsigned w1, h1, w2, h2, border_width, depth;
-  for (;;) {
-    XTranslateCoordinates(disp, win, root, 0, 0, &x1, &y1, &child);
-    XGetGeometry(disp, win, &root, &x2, &y2, &w1, &h1, &border_width, &depth);
-    XGetGeometry(disp, child, &root, &x3, &y3, &w2, &h2, &border_width, &depth);
-    // allow time for the titlebar and border sizes to be measured because x11 is async...
-    if (x3 || y3 || !window_get_showborder())
-      break;
-  }
   Hints hints;
   Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   hints.flags = 2;
   hints.decorations = show;
   XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
-  if (x2 || y2) {
-    XMoveResizeWindow(disp, win, x1, y1, w1, h1);
-  }
 }
 
 bool window_get_showborder() {
