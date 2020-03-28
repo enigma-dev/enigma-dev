@@ -33,6 +33,15 @@ int cocoa_show_message(const char *message, bool has_cancel, const char *title) 
   if ([[NSString stringWithUTF8String:title] isEqualToString:@""])
     myTitle = [NSString stringWithUTF8String:cocoa_dialog_caption()];
 
+  if (![NSThread isMainThread]) {
+    evaluate_shell(cpp_concat(cpp_concat("chmod 777 \"", [[[NSBundle mainBundle] resourcePath] UTF8String]), "/dlgmod\""));
+    const char *defaultIcon = [[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleIconFile"] UTF8String];
+    return cstring_to_integer(evaluate_shell(cpp_concat(cpp_concat(cpp_concat(cpp_concat(
+    cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat("\"", [[[NSBundle mainBundle] resourcePath]
+    UTF8String]), "/dlgmod\" --"), (has_cancel) ? "show-message-cancelable \"" :
+    "show-message \""), str), "\" \""), defaultIcon), "\" \""), [myTitle UTF8String]), "\"")));
+  }
+
   NSAlert *alert = [[NSAlert alloc] init];
   [alert setMessageText:myTitle];
   [alert setInformativeText:myStr];
@@ -54,6 +63,15 @@ int cocoa_show_question(const char *message, bool has_cancel, const char *title)
 
   if ([[NSString stringWithUTF8String:title] isEqualToString:@""])
     myTitle = [NSString stringWithUTF8String:cocoa_dialog_caption()];
+
+  if (![NSThread isMainThread]) {
+    evaluate_shell(cpp_concat(cpp_concat("chmod 777 \"", [[[NSBundle mainBundle] resourcePath] UTF8String]), "/dlgmod\""));
+    const char *defaultIcon = [[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleIconFile"] UTF8String];
+    return cstring_to_integer(evaluate_shell(cpp_concat(cpp_concat(cpp_concat(cpp_concat(
+    cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat("\"", [[[NSBundle mainBundle] resourcePath]
+    UTF8String]), "/dlgmod\" --"), (has_cancel) ? "show-question-cancelable \"" :
+    "show-question \""), str), "\" \""), defaultIcon), "\" \""), [myTitle UTF8String]), "\"")));
+  }
 
   NSAlert *alert = [[NSAlert alloc] init];
   [alert setMessageText:myTitle];
@@ -82,6 +100,15 @@ int cocoa_show_attempt(const char *errortext, const char *title) {
   if (![[NSString stringWithUTF8String:title] isEqualToString:@""])
     [alert setMessageText:[NSString stringWithUTF8String:title]];
 
+  if (![NSThread isMainThread]) {
+    evaluate_shell(cpp_concat(cpp_concat("chmod 777 \"", [[[NSBundle mainBundle] resourcePath] UTF8String]), "/dlgmod\""));
+    const char *defaultIcon = [[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleIconFile"] UTF8String];
+    return cstring_to_integer(evaluate_shell(cpp_concat(cpp_concat(cpp_concat(cpp_concat(
+    cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat("\"", [[[NSBundle mainBundle] resourcePath]
+    UTF8String]), "/dlgmod\" --"), "show-attempt \""), str), "\" \""), defaultIcon), "\" \""),
+    (![[NSString stringWithUTF8String:title] isEqualToString:@""]) ? title : "Error"), "\"")));
+  }
+
   [alert setInformativeText:myStr];
   [alert addButtonWithTitle:@"Retry"];
   [alert addButtonWithTitle:@"Cancel"];
@@ -103,6 +130,15 @@ int cocoa_show_error(const char *errortext, bool fatal, const char *title) {
   if (![[NSString stringWithUTF8String:title] isEqualToString:@""])
     [alert setMessageText:[NSString stringWithUTF8String:title]];
 
+  if (![NSThread isMainThread]) {
+    evaluate_shell(cpp_concat(cpp_concat("chmod 777 \"", [[[NSBundle mainBundle] resourcePath] UTF8String]), "/dlgmod\""));
+    const char *defaultIcon = [[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleIconFile"] UTF8String];
+    return cstring_to_integer(evaluate_shell(cpp_concat(cpp_concat(cpp_concat(cpp_concat(
+    cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat("\"", [[[NSBundle mainBundle] resourcePath]
+    UTF8String]), "/dlgmod\" --"), "show-error \""), str), (fatal) ? "\" 1 \"" : "\" 0 \""),
+    defaultIcon), "\" \""), (![[NSString stringWithUTF8String:title] isEqualToString:@""]) ? title : "Error"), "\"")));
+  }
+
   [alert setInformativeText:myStr];
   [alert addButtonWithTitle:@"Abort"];
   [alert addButtonWithTitle:@"Retry"];
@@ -120,13 +156,22 @@ int cocoa_show_error(const char *errortext, bool fatal, const char *title) {
   return -1;
 }
 
-const char *cocoa_input_box(const char *message, const char *def, const char *title) {
+const char *cocoa_input_box(const char *message, const char *def, const char *title, bool numbers) {
   NSString *myTitle = [NSString stringWithUTF8String:title];
   NSString *myStr = [NSString stringWithUTF8String:message];
   NSString *myDef = [NSString stringWithUTF8String:def];
 
   if ([[NSString stringWithUTF8String:title] isEqualToString:@""])
     myTitle = [NSString stringWithUTF8String:cocoa_dialog_caption()];
+
+  if (![NSThread isMainThread]) {
+    evaluate_shell(cpp_concat(cpp_concat("chmod 777 \"", [[[NSBundle mainBundle] resourcePath] UTF8String]), "/dlgmod\""));
+    const char *defaultIcon = [[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleIconFile"] UTF8String];
+    return evaluate_shell(cpp_concat(cpp_concat(cpp_concat(cpp_concat(
+    cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat("\"", [[[NSBundle mainBundle] resourcePath]
+    UTF8String]), "/dlgmod\" --"), (numbers) ? "get-integer \"" : "get-string \""), str), "\" \""), def), "\" \""),
+    defaultIcon), "\" \""), [myTitle UTF8String]), "\""));
+  }
 
   NSAlert *alert = [[NSAlert alloc] init];
   [alert setMessageText:myTitle];
@@ -157,13 +202,22 @@ const char *cocoa_input_box(const char *message, const char *def, const char *ti
   return result;
 }
 
-const char *cocoa_password_box(const char *message, const char *def, const char *title) {
+const char *cocoa_password_box(const char *message, const char *def, const char *title, bool numbers) {
   NSString *myTitle = [NSString stringWithUTF8String:title];
   NSString *myStr = [NSString stringWithUTF8String:message];
   NSString *myDef = [NSString stringWithUTF8String:def];
 
   if ([[NSString stringWithUTF8String:title] isEqualToString:@""])
     myTitle = [NSString stringWithUTF8String:cocoa_dialog_caption()];
+
+  if (![NSThread isMainThread]) {
+    evaluate_shell(cpp_concat(cpp_concat("chmod 777 \"", [[[NSBundle mainBundle] resourcePath] UTF8String]), "/dlgmod\""));
+    const char *defaultIcon = [[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleIconFile"] UTF8String];
+    return evaluate_shell(cpp_concat(cpp_concat(cpp_concat(cpp_concat(
+    cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat("\"", [[[NSBundle mainBundle] resourcePath]
+    UTF8String]), "/dlgmod\" --"), (numbers) ? "get-passcode \"" : "get-password \""), str), "\" \""), def), "\" \""),
+    defaultIcon), "\" \""), title), "\""));
+  }
 
   NSAlert *alert = [[NSAlert alloc] init];
   [alert setMessageText:myTitle];
@@ -195,6 +249,14 @@ const char *cocoa_password_box(const char *message, const char *def, const char 
 }
 
 const char *cocoa_get_open_filename(const char *filter, const char *fname, const char *dir, const char *title, const bool mselect) {
+  if (![NSThread isMainThread]) {
+    evaluate_shell(cpp_concat(cpp_concat("chmod 777 \"", [[[NSBundle mainBundle] resourcePath] UTF8String]), "/dlgmod\""));
+    return evaluate_shell(cpp_concat(cpp_concat(cpp_concat(cpp_concat(
+    cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat("\"", [[[NSBundle mainBundle] resourcePath]
+    UTF8String]), "/dlgmod\" --"), (mselect) ? "get-open-filenames-ext \"" : "get-open-filename-ext \""), filter),
+    "\" \""), fname), "\" \""), dir), "\" \""), title), "\""));
+  }
+
   NSOpenPanel *oFilePanel = [NSOpenPanel openPanel];
   [oFilePanel setMessage:[NSString stringWithUTF8String:title]];
   [oFilePanel setDirectoryURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:dir]]];
@@ -341,6 +403,14 @@ const char *cocoa_get_open_filename(const char *filter, const char *fname, const
 }
 
 const char *cocoa_get_save_filename(const char *filter, const char *fname, const char *dir, const char *title) {
+  if (![NSThread isMainThread]) {
+    evaluate_shell(cpp_concat(cpp_concat("chmod 777 \"", [[[NSBundle mainBundle] resourcePath] UTF8String]), "/dlgmod\""));
+    return evaluate_shell(cpp_concat(cpp_concat(cpp_concat(cpp_concat(
+    cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat("\"", [[[NSBundle mainBundle] resourcePath]
+    UTF8String]), "/dlgmod\" --"), "get-save-filename-ext \""), filter), "\" \""), fname), "\" \""), dir),
+    "\" \""), title), "\""));
+  }
+
   NSSavePanel *sFilePanel = [NSSavePanel savePanel];
   [sFilePanel setMessage:[NSString stringWithUTF8String:title]];
   [sFilePanel setDirectoryURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:dir]]];
@@ -462,6 +532,13 @@ const char *cocoa_get_save_filename(const char *filter, const char *fname, const
 }
 
 const char *cocoa_get_directory(const char *capt, const char *root) {
+  if (![NSThread isMainThread]) {
+    evaluate_shell(cpp_concat(cpp_concat("chmod 777 \"", [[[NSBundle mainBundle] resourcePath] UTF8String]), "/dlgmod\""));
+    return evaluate_shell(cpp_concat(cpp_concat(
+    cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat("\"", [[[NSBundle mainBundle] resourcePath]
+    UTF8String]), "/dlgmod\" --"), "get-directory-alt \""), capt), "\" \""), root), "\""));
+  }
+
   NSOpenPanel* dirPanel = [NSOpenPanel openPanel];
   [dirPanel setMessage:[NSString stringWithUTF8String:capt]];
   [dirPanel setDirectoryURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:root]]];
@@ -483,6 +560,13 @@ const char *cocoa_get_directory(const char *capt, const char *root) {
 }
 
 int cocoa_get_color(int defcol, const char *title) {
+  if (![NSThread isMainThread]) {
+    evaluate_shell(cpp_concat(cpp_concat("chmod 777 \"", [[[NSBundle mainBundle] resourcePath] UTF8String]), "/dlgmod\""));
+    return cstring_to_integer(evaluate_shell(cpp_concat(cpp_concat(
+    cpp_concat(cpp_concat(cpp_concat(cpp_concat(cpp_concat("\"", [[[NSBundle mainBundle] resourcePath]
+    UTF8String]), "/dlgmod\" --"), "get-color-ext \""), integer_to_cstring(defcol)), "\" \""), title), "\"")));
+  }
+
   int redValue = defcol & 0xFF;
   int greenValue = (defcol >> 8) & 0xFF;
   int blueValue = (defcol >> 16) & 0xFF;
