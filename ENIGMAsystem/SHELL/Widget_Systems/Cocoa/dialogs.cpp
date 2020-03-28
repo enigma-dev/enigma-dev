@@ -43,8 +43,8 @@ extern "C" int cocoa_show_message(const char *message, bool has_cancel, const ch
 extern "C" int cocoa_show_question(const char *message, bool has_cancel, const char *title);
 extern "C" int cocoa_show_attempt(const char *errortext, const char *title);
 extern "C" int cocoa_show_error(const char *errortext, bool fatal, const char *title);
-extern "C" const char *cocoa_input_box(const char *message, const char *def, const char *title);
-extern "C" const char *cocoa_password_box(const char *message, const char *def, const char *title);
+extern "C" const char *cocoa_input_box(const char *message, const char *def, const char *title, bool numbers);
+extern "C" const char *cocoa_password_box(const char *message, const char *def, const char *title, bool numbers);
 extern "C" const char *cocoa_get_open_filename(const char *filter, const char *fname, const char *dir, const char *title, const bool mselect);
 extern "C" const char *cocoa_get_save_filename(const char *filter, const char *fname, const char *dir, const char *title);
 extern "C" const char *cocoa_get_directory(const char *capt, const char *root);
@@ -121,19 +121,19 @@ int show_attempt(string errortext) {
 
 string get_string(string message, string def) {
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
-  return cocoa_input_box(message.c_str(), def.c_str(), dialog_caption.c_str());
+  return cocoa_input_box(message.c_str(), def.c_str(), dialog_caption.c_str(), false);
 }
 
 string get_password(string message, string def) {
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
-  return cocoa_password_box(message.c_str(), def.c_str(), dialog_caption.c_str());
+  return cocoa_password_box(message.c_str(), def.c_str(), dialog_caption.c_str(), false);
 }
 
 double get_integer(string message, var def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
   string integer = remove_trailing_zeros(val);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
-  string result = cocoa_input_box(message.c_str(), integer.c_str(), dialog_caption.c_str());
+  string result = cocoa_input_box(message.c_str(), integer.c_str(), dialog_caption.c_str(), true);
   return !result.empty() ? strtod(result.c_str(), NULL) : 0;
 }
 
@@ -141,7 +141,7 @@ double get_passcode(string message, var def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
   string integer = remove_trailing_zeros(val);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
-  string result = cocoa_password_box(message.c_str(), integer.c_str(), dialog_caption.c_str());
+  string result = cocoa_password_box(message.c_str(), integer.c_str(), dialog_caption.c_str(), true);
   return !result.empty() ? strtod(result.c_str(), NULL) : 0;
 }
 
