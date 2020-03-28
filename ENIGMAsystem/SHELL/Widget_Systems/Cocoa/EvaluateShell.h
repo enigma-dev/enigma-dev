@@ -21,7 +21,6 @@ extern "C" {
 
 const char *integer_to_cstring(int n);
 int cstring_to_integer(const char *s);
-bool file_exists(const char *fname);
 const char *cpp_concat(const char *s1, const char *s2);
 const char *evaluate_shell(const char *command);
 
