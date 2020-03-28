@@ -16,8 +16,7 @@
 **/
 
 #include "EvaluateShell.h"
-
-#include <sys/stat.h>
+#include "Platforms/General/PFmain.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -36,12 +35,6 @@ int cstring_to_integer(const char *s) {
   return (int)strtol(s, NULL, 10);
 }
 
-bool file_exists(const char *fname) {
-  struct stat sb;
-  return (stat(fname, &sb) == 0 &&
-    S_ISREG(sb.st_mode) != 0);
-}
-
 const char *cpp_concat(const char *s1, const char *s2) {
   static string str_result;
   str_result = string(s1) + string(s2);
@@ -49,22 +42,8 @@ const char *cpp_concat(const char *s1, const char *s2) {
 }
 
 const char *evaluate_shell(const char *command) {
-  char *buffer = NULL;
-  size_t buffer_size = 0;
-  string str_buffer;
-
-  FILE *file = popen(command, "r");
-  while (getline(&buffer, &buffer_size, file) != -1)
-    str_buffer += buffer;
-
-  free(buffer);
-  pclose(file);
-
-  if (str_buffer.back() == '\n')
-    str_buffer.pop_back();
-
-  static string str_result;
-  str_result = str_buffer;
-
+  string str_buffer = execute_shell_for_output(command);
+  if (str_buffer.back() == '\n') str_buffer.pop_back();
+  static string str_result; str_result = str_buffer;
   return str_result.c_str();
 }
