@@ -72,7 +72,7 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
         return NULL;
     }
 
-    const enigma::BBox_t &box = inst1->$bbox_relative();
+    const enigma::BoundingBox &box = inst1->$bbox_relative();
     const double xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
     int left1, top1, right1, bottom1;
@@ -89,7 +89,7 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
         if (inst2->sprite_index == -1 && inst2->mask_index == -1) //no sprite/mask then no collision
             continue;
 
-        const enigma::BBox_t &box2 = inst2->$bbox_relative();
+        const enigma::BoundingBox &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
                      ia2 = inst2->image_angle;
@@ -125,7 +125,7 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
          if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
-        const enigma::BBox_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                      xscale = inst->image_xscale, yscale = inst->image_yscale,
                      ia = inst->image_angle;
@@ -154,7 +154,7 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
-        const enigma::BBox_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                      xscale = inst->image_xscale, yscale = inst->image_yscale,
                      ia = inst->image_angle;
@@ -212,7 +212,7 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
-        const enigma::BBox_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                      xscale = inst->image_xscale, yscale = inst->image_yscale,
                      ia = inst->image_angle;
@@ -259,7 +259,7 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
-        const enigma::BBox_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                      xscale = inst->image_xscale, yscale = inst->image_yscale,
                      ia = inst->image_angle;
@@ -289,7 +289,7 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
-        const enigma::BBox_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                      xscale = inst->image_xscale, yscale = inst->image_yscale,
                      ia = inst->image_angle;

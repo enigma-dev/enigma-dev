@@ -46,13 +46,13 @@ void Sprite::AddSubimage(const Subimage& s) {
   _subimages.add(std::move(copy));
 }
 
-BBox_t sprite_get_bbox(int ind) {
+BoundingBox sprite_get_bbox(int ind) {
   return sprites.get(ind).bbox;
 }
 
-BBox_t sprite_get_bbox_relative(int ind) {
+BoundingBox sprite_get_bbox_relative(int ind) {
   const Sprite& spr = sprites.get(ind);
-  BBox_t bbox = spr.bbox;
+  BoundingBox bbox = spr.bbox;
   bbox.x -= spr.xoffset;
   bbox.y -= spr.yoffset;
   return bbox;

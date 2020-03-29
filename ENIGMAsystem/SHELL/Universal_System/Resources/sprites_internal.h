@@ -49,7 +49,7 @@ struct Rect {
   T y2() const { return y + h; }
 };
 
-using BBox_t = Rect<int>;
+using BoundingBox = Rect<int>;
 using TexRect = Rect<gs_scalar>;
 
 struct Subimage {
@@ -97,7 +97,7 @@ public:
   int height = 0;
   int xoffset = 0;
   int yoffset = 0;
-  BBox_t bbox = {0, 0, 0, 0};
+  BoundingBox bbox = {0, 0, 0, 0};
   int bbox_mode = 0;  //Default is automatic
   
   // AssArray mandatory
@@ -112,8 +112,8 @@ protected:
 
 extern AssetArray<Sprite> sprites;
 
-BBox_t sprite_get_bbox(int spr);
-BBox_t sprite_get_bbox_relative(int spr);
+BoundingBox sprite_get_bbox(int spr);
+BoundingBox sprite_get_bbox_relative(int spr);
 
 }  //namespace enigma
 

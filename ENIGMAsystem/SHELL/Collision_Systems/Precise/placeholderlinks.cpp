@@ -56,7 +56,7 @@ namespace enigma
           // Create ellipse inside bbox.
           const unsigned int w = spr.width, h = spr.height;
           unsigned char* colldata = new unsigned char[w*h](); // Initialize all elements to 0.
-          const BBox_t bbox = spr.bbox;
+          const BoundingBox bbox = spr.bbox;
 
           const unsigned int a = max(bbox.right()-bbox.left(), bbox.bottom()-bbox.top())/2, // Major radius.
                                b = min(bbox.right()-bbox.left(), bbox.bottom()-bbox.top())/2; // Minor radius.
@@ -86,7 +86,7 @@ namespace enigma
           // Create diamond inside bbox.
           const unsigned int w = spr.width, h = spr.height;
           unsigned char* colldata = new unsigned char[w*h](); // Initialize all elements to 0.
-          const BBox_t bbox = spr.bbox;
+          const BoundingBox bbox = spr.bbox;
 
           // Diamond corners.
           const int xl = bbox.left(), yl = (bbox.top() + bbox.bottom())/2,
@@ -125,7 +125,7 @@ namespace enigma
           // Create circle fitting inside bbox.
           const unsigned int w = spr.width, h = spr.height;
           unsigned char* colldata = new unsigned char[w*h](); // Initialize all elements to 0.
-          const BBox_t bbox = spr.bbox;
+          const BoundingBox bbox = spr.bbox;
 
           const unsigned int r = min(bbox.right()-bbox.left(), bbox.bottom()-bbox.top())/2; // Radius.
           const unsigned int xc = (bbox.right()+bbox.left())/2, // Center of circle.
