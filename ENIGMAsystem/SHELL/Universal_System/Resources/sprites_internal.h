@@ -116,7 +116,7 @@ BoundingBox sprite_get_bbox(int spr);
 BoundingBox sprite_get_bbox_relative(int spr);
 
 struct RawImage {
-  ~RawImage() { delete pxdata; }
+  ~RawImage() { delete[] pxdata; }
   unsigned char* pxdata = nullptr;
   unsigned w = 0, h = 0;
 };
