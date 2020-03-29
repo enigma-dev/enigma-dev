@@ -30,6 +30,14 @@
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "strings_util.h"
 
+ifndef WM_COPYGLOBALDATA
+#define WM_COPYGLOBALDATA 0x0049
+#endif
+
+ifndef MSGFLT_ADD
+#define MSGFLT_ADD 1
+#endif
+
 using std::set;
 using std::size_t;
 using std::string;
@@ -89,9 +97,9 @@ LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
 }
 
 HHOOK InstallHook() {
-  ChangeWindowMessageFilter(WM_DROPFILES, 1 /* = MSGFLT_ADD */);
-  ChangeWindowMessageFilter(WM_COPYDATA, 1 /* = MSGFLT_ADD */);
-  ChangeWindowMessageFilter(0x0049 /* = WM_COPYGLOBALDATA */, 1 /* = MSGFLT_ADD */);
+  ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
+  ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
+  ChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
   hook = SetWindowsHookExW(WH_CALLWNDPROC, (HOOKPROC)SetHook, NULL, GetWindowThreadProcessId(enigma::hWnd, NULL));
   return hook;
 }
