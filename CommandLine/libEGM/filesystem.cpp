@@ -1,7 +1,8 @@
 #include "filesystem.h"
 
 #include <iostream>
-#include <string>
+#include <fstream>
+#include <sstream>
 
 bool StartsWith(const string &str, const string &prefix) {
   if (prefix.length() > str.length()) return false;
@@ -70,4 +71,25 @@ void DeleteFile(const string &fName) {
   std::remove(fName.c_str());
 #endif
 
+}
+
+void DeleteFolder(const string &fName) {
+  fs::remove_all(fName.c_str());
+}
+
+bool FolderExists(const string &folder) {
+  const fs::path f = folder;
+  return (fs::exists(f) && fs::is_directory(f));
+}
+
+bool FileExists(const string &fName) {
+  const fs::path f = fName;
+  return (fs::exists(f) && fs::is_regular_file(f));
+}
+
+std::string FileToString(const std::string &fName) {
+  std::ifstream t(fName.c_str());
+  std::stringstream buffer;
+  buffer << t.rdbuf();
+  return buffer.str();
 }

@@ -1,7 +1,8 @@
-#include "egm-rooms.cpp"
+#include "algorithm/connected-components.h"
+
 #include <gtest/gtest.h>
 
-using namespace egm::util;
+using namespace egm::algorithm;
 
 Coords A { 0, 0, 0 };
 Coords B { 0, 0, 1 };

@@ -18,7 +18,11 @@
 #include "project.pb.h"
 
 #include <string>
+#include <map>
 
 namespace egm {
   bool WriteEGM(std::string fName, buffers::Project* project);
+  buffers::Project* LoadEGM(std::string fName);
+  std::map<std::string, const buffers::TreeNode*> FlattenTree(
+      const buffers::TreeNode &tree);
 } //namespace egm

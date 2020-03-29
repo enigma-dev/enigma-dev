@@ -7,34 +7,29 @@
 #include <vector>
 
 namespace egm {
-namespace util {
 
-struct InstanceLayers {
-  struct Layer {
+struct InstanceLayer {
+  // The compaction format, eg, "svg-d".
     std::string format;
+  // The raw string encoding of the compacted data.
     std::string data;
-  };
-  // Layers of compacted instances.
-  std::vector<Layer> layers;
   // Any instances with noncompactable attributes.
   std::vector<buffers::resources::Room::Instance> snowflakes;
-
 };
 
-struct TileLayers {
-  struct Layer {
+struct TileLayer {
+  // The compaction format, eg, "svg-d".
     std::string format;
+  // The raw string encoding of the compacted data.
     std::string data;
-  };
-  // Layers of compacted tiles.
-  std::vector<Layer> layers;
-  // Any tiles with noncompactable attributes.
+  // Any instances with noncompactable attributes.
   std::vector<buffers::resources::Room::Tile> snowflakes;
-
 };
 
-InstanceLayers BuildInstanceLayers(const buffers::resources::Room &room);
-TileLayers BuildTileLayers(const buffers::resources::Room &room);
+namespace util {
+
+std::vector<InstanceLayer> BuildInstanceLayers(const buffers::resources::Room &room);
+std::vector<TileLayer> BuildTileLayers(const buffers::resources::Room &room);
 
 }  // namespace util
 }  // namespace egm
