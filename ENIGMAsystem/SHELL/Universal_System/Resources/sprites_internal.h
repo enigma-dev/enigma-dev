@@ -115,6 +115,14 @@ extern AssetArray<Sprite> sprites;
 BoundingBox sprite_get_bbox(int spr);
 BoundingBox sprite_get_bbox_relative(int spr);
 
+struct RawImage {
+  ~RawImage() { delete pxdata; }
+  unsigned char* pxdata = nullptr;
+  unsigned w = 0, h = 0;
+};
+  
+RawImage sprite_get_raw(int spr, unsigned subimg);
+
 }  //namespace enigma
 
 #endif  // ENIGMA_SPRITESTRUCT

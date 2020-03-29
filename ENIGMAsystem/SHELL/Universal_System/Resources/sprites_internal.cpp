@@ -58,5 +58,14 @@ BoundingBox sprite_get_bbox_relative(int ind) {
   return bbox;
 }
 
+RawImage sprite_get_raw(int ind, unsigned subimg) {
+  RawImage img;
+  if (!sprites.exists(ind)) return img;
+  const Sprite& spr = sprites.get(ind);
+  if (subimg >= spr.SubimageCount()) return img;
+  img.pxdata = graphics_copy_texture_pixels(spr.GetTexture(subimg), &img.w, &img.h);
+  return img;
+}
+
 
 } // namespace enigma
