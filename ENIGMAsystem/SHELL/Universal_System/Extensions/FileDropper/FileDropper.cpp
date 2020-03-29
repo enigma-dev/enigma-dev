@@ -89,9 +89,9 @@ LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
 }
 
 HHOOK InstallHook() {
-  ChangeWindowMessageFilterEx(enigma::hWnd, WM_DROPFILES, MSGFLT_ADD, NULL);
-  ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYDATA, MSGFLT_ADD, NULL);
-  ChangeWindowMessageFilterEx(enigma::hWnd, 0x0049 /* = WM_COPYGLOBALDATA */, MSGFLT_ADD, NULL);
+  ChangeWindowMessageFilter(WM_DROPFILES, 1 /* = MSGFLT_ADD */);
+  ChangeWindowMessageFilter(WM_COPYDATA, 1 /* = MSGFLT_ADD */);
+  ChangeWindowMessageFilter(0x0049 /* = WM_COPYGLOBALDATA */, 1 /* = MSGFLT_ADD */);
   hook = SetWindowsHookExW(WH_CALLWNDPROC, (HOOKPROC)SetHook, NULL, GetWindowThreadProcessId(enigma::hWnd, NULL));
   return hook;
 }
