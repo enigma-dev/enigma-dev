@@ -38,7 +38,6 @@ ifndef MSGFLT_ADD
 #define MSGFLT_ADD 1
 #endif
 
-using std::set;
 using std::size_t;
 using std::string;
 using std::vector;
@@ -49,7 +48,7 @@ HHOOK hook = NULL;
 WNDPROC oldProc = NULL;
 bool file_dnd_enabled = false;
 HDROP hDrop = NULL;
-set<string> dropped_files;
+std::set<string> dropped_files;
 
 string def_pattern;
 bool def_allowfiles = true;
@@ -109,7 +108,7 @@ string file_dnd_apply_filter(string pattern, bool allowfiles, bool allowdirs, bo
   pattern = string_replace_all(pattern, " ", "");
   pattern = string_replace_all(pattern, "*", "");
   vector<string> extVec = split_string(pattern, ';');
-  set<string> filteredNames;
+  std::set<string> filteredNames;
   for (const string &droppedFile : dropped_files) {
     for (const string &ext : extVec) {
       if (ext == "." || ext == filename_ext(droppedFile)) {
