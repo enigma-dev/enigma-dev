@@ -74,7 +74,9 @@ struct Subimage {
 class Sprite {
 public:
   Sprite() {}
-  Sprite(int width, int height, int xoffset = 0, int yoffset = 0) : width(width), height(height), xoffset(xoffset), yoffset(yoffset) {}
+  Sprite(int width, int height, int xoffset = 0, int yoffset = 0) : width(width), height(height), xoffset(xoffset), yoffset(yoffset) 
+    { bbox = {0, 0, width, height}; }
+    
   size_t SubimageCount() const { return _subimages.size(); }
   
   void FreeTextures() { for (std::pair<int, Subimage&> s : _subimages) s.second.FreeTexture(); }
