@@ -115,11 +115,11 @@ namespace enigma
         return cos(arad)*h - sin(arad)*w + y + .5;
     }
 
-    const bbox_rect_t& object_collisions::$bbox_relative() const
+    const BBox_t object_collisions::$bbox_relative() const
     {
         return (mask_index >= 0 ? sprite_get_bbox_relative(mask_index) : sprite_get_bbox_relative(sprite_index));
     }
-    const bbox_rect_t& object_collisions::$bbox() const
+    const BBox_t object_collisions::$bbox() const
     {
          return (mask_index >= 0 ? sprite_get_bbox(mask_index) : sprite_get_bbox(sprite_index));
     }
