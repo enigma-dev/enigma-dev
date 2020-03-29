@@ -72,8 +72,6 @@ LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     GetWindowThreadProcessId(enigma::hWnd, &dwProcessId);
     AllowSetForegroundWindow(dwProcessId);
     SetForegroundWindow(enigma::hWnd);
-    SetActiveWindow(enigma::hWnd);
-    SetFocus(enigma::hWnd);
     return 0;
   }
   return rc;
@@ -91,6 +89,7 @@ LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
 }
 
 HHOOK InstallHook() {
+  ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
   hook = SetWindowsHookExW(WH_CALLWNDPROC, (HOOKPROC)SetHook, NULL, GetWindowThreadProcessId(enigma::hWnd, NULL));
   return hook;
 }
