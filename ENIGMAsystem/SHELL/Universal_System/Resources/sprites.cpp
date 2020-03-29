@@ -22,6 +22,7 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
 
