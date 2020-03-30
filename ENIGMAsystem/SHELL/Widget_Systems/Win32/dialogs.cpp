@@ -430,6 +430,39 @@ static inline string get_save_filename_helper(string filter, string fname, strin
   return "";
 }
 
+#if (_WIN32_WINNT <= _WIN32_WINNT_WINXP)
+static int CALLBACK GetDirectoryProc(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
+  if (uMsg == BFFM_INITIALIZED) {
+    if (!cpp_wstr_dir.empty())
+      PostMessageW(hWnd, BFFM_SETEXPANDED, true, (LPARAM)cpp_wstr_dir.c_str());
+  }
+  return 0;
+}
+
+static inline string get_directory_helper(string dname, string title) {
+  cpp_wstr_title = widen(title);
+  cpp_wstr_dir = (!dname.empty()) ? widen(dname) : L"";
+  BROWSEINFOW bi = { 0 };
+  LPITEMIDLIST pidl = NULL;
+  wchar_t buffer[MAX_PATH];
+
+  bi.hwndOwner = enigma::hWnd;
+  bi.pszDisplayName = buffer;
+  bi.pidlRoot = NULL;
+  bi.lpszTitle = cpp_wstr_title.c_str();
+  bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON;
+  bi.lpfn = GetDirectoryProc;
+
+  if ((pidl = SHBrowseForFolderW(&bi)) != NULL) {
+    wchar_t full_folder_selection[MAX_PATH];
+    SHGetPathFromIDListW(pidl, full_folder_selection);
+    string result = add_slash(narrow(full_folder_selection));
+    CoTaskMemFree(pidl); return result;
+  }
+
+  return "";
+}
+#else
 static inline string get_directory_helper(string dname, string title) {
   IFileDialog *selectDirectory;
   CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&selectDirectory));
@@ -474,6 +507,7 @@ static inline string get_directory_helper(string dname, string title) {
 
   return "";
 }
+#endif
 
 static inline int get_color_helper(int defcol, string title) {
   CHOOSECOLORW cc;
