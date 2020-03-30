@@ -433,15 +433,15 @@ static inline string get_save_filename_helper(string filter, string fname, strin
 #if (_WIN32_WINNT <= _WIN32_WINNT_WINXP)
 static int CALLBACK GetDirectoryProc(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
   if (uMsg == BFFM_INITIALIZED) {
-    if (!cpp_wstr_dir.empty())
-      PostMessageW(hWnd, BFFM_SETEXPANDED, true, (LPARAM)cpp_wstr_dir.c_str());
+    if (!tstr_dir.empty())
+      PostMessageW(hWnd, BFFM_SETEXPANDED, true, (LPARAM)tstr_dir.c_str());
   }
   return 0;
 }
 
 static inline string get_directory_helper(string dname, string title) {
-  cpp_wstr_title = widen(title);
-  cpp_wstr_dir = (!dname.empty()) ? widen(dname) : L"";
+  tstr_title = widen(title);
+  tstr_dir = (!dname.empty()) ? widen(dname) : L"";
   BROWSEINFOW bi = { 0 };
   LPITEMIDLIST pidl = NULL;
   wchar_t buffer[MAX_PATH];
@@ -449,7 +449,7 @@ static inline string get_directory_helper(string dname, string title) {
   bi.hwndOwner = enigma::hWnd;
   bi.pszDisplayName = buffer;
   bi.pidlRoot = NULL;
-  bi.lpszTitle = cpp_wstr_title.c_str();
+  bi.lpszTitle = tstr_title.c_str();
   bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON;
   bi.lpfn = GetDirectoryProc;
 
