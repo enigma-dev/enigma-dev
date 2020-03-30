@@ -30,14 +30,7 @@
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "strings_util.h"
 
-#ifndef WM_COPYGLOBALDATA
-#define WM_COPYGLOBALDATA 0x0049
-#endif
-
-#ifndef MSGFLT_ADD
-#define MSGFLT_ADD 1
-#endif
-
+using std::set;
 using std::size_t;
 using std::string;
 using std::vector;
@@ -48,7 +41,7 @@ HHOOK hook = NULL;
 WNDPROC oldProc = NULL;
 bool file_dnd_enabled = false;
 HDROP hDrop = NULL;
-std::set<string> dropped_files;
+set<string> dropped_files;
 
 string def_pattern;
 bool def_allowfiles = true;
@@ -79,6 +72,8 @@ LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     GetWindowThreadProcessId(enigma::hWnd, &dwProcessId);
     AllowSetForegroundWindow(dwProcessId);
     SetForegroundWindow(enigma::hWnd);
+    SetActiveWindow(enigma::hWnd);
+    SetFocus(enigma::hWnd);
     return 0;
   }
   return rc;
@@ -96,9 +91,6 @@ LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
 }
 
 HHOOK InstallHook() {
-  ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
-  ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
-  ChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
   hook = SetWindowsHookExW(WH_CALLWNDPROC, (HOOKPROC)SetHook, NULL, GetWindowThreadProcessId(enigma::hWnd, NULL));
   return hook;
 }
@@ -108,7 +100,7 @@ string file_dnd_apply_filter(string pattern, bool allowfiles, bool allowdirs, bo
   pattern = string_replace_all(pattern, " ", "");
   pattern = string_replace_all(pattern, "*", "");
   vector<string> extVec = split_string(pattern, ';');
-  std::set<string> filteredNames;
+  set<string> filteredNames;
   for (const string &droppedFile : dropped_files) {
     for (const string &ext : extVec) {
       if (ext == "." || ext == filename_ext(droppedFile)) {
