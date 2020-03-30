@@ -30,11 +30,11 @@
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "strings_util.h"
 
-ifndef WM_COPYGLOBALDATA
+#ifndef WM_COPYGLOBALDATA
 #define WM_COPYGLOBALDATA 0x0049
 #endif
 
-ifndef MSGFLT_ADD
+#ifndef MSGFLT_ADD
 #define MSGFLT_ADD 1
 #endif
 
