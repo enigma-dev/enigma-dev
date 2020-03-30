@@ -5,7 +5,7 @@ draw_rectangle(dx-20,dy-20,dx+20,dy+20,false);
 // in which case the diamond should occlude the rect
 vertex_submit(vb_diamond,pr_trianglestrip);
 
-draw_set_color(c_yellow);
+draw_set_color(c_red);
 draw_rectangle(50, 50, 600, 400, true);
 draw_set_color(c_olive);
 draw_circle(275, 175, 200, false);
