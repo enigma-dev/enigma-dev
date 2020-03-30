@@ -101,10 +101,8 @@ HHOOK InstallHook() {
   ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
   ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
   ChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
-  #endif
-
   // Windows 7 and newer
-  #if (_WIN32_WINNT > _WIN32_WINNT_VISTA)
+  #elif (_WIN32_WINNT > _WIN32_WINNT_VISTA)
   ChangeWindowMessageFilterEx(enigma::hWnd, WM_DROPFILES, MSGFLT_ADD, NULL);
   ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYDATA, MSGFLT_ADD, NULL);
   ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYGLOBALDATA, MSGFLT_ADD, NULL);
