@@ -97,17 +97,17 @@ LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
 
 HHOOK InstallHook() {
   // Windows Vista
-  #ifdef ChangeWindowMessageFilter
+  #if (_WIN32_WINNT == _WIN32_WINNT_VISTA)
   ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
   ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
   ChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
   #endif
 
   // Windows 7 and newer
-  #ifdef ChangeWindowMessageFilterEx
-  ChangeWindowMessageFilterEx(enigma::hWnd, WM_DROPFILES, MSGFLT_ADD, NULL);
-  ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYDATA, MSGFLT_ADD, NULL);
-  ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYGLOBALDATA, MSGFLT_ADD, NULL);
+  #if (_WIN32_WINNT > _WIN32_WINNT_VISTA)
+  ChangeWindowMessageFilterEx(window_handle, WM_DROPFILES, MSGFLT_ADD, NULL);
+  ChangeWindowMessageFilterEx(window_handle, WM_COPYDATA, MSGFLT_ADD, NULL);
+  ChangeWindowMessageFilterEx(window_handle, WM_COPYGLOBALDATA, MSGFLT_ADD, NULL);
   #endif
 
   hook = SetWindowsHookExW(WH_CALLWNDPROC, (HOOKPROC)SetHook, NULL, GetWindowThreadProcessId(enigma::hWnd, NULL));
