@@ -105,9 +105,9 @@ HHOOK InstallHook() {
 
   // Windows 7 and newer
   #if (_WIN32_WINNT > _WIN32_WINNT_VISTA)
-  ChangeWindowMessageFilterEx(window_handle, WM_DROPFILES, MSGFLT_ADD, NULL);
-  ChangeWindowMessageFilterEx(window_handle, WM_COPYDATA, MSGFLT_ADD, NULL);
-  ChangeWindowMessageFilterEx(window_handle, WM_COPYGLOBALDATA, MSGFLT_ADD, NULL);
+  ChangeWindowMessageFilterEx(enigma::hWnd, WM_DROPFILES, MSGFLT_ADD, NULL);
+  ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYDATA, MSGFLT_ADD, NULL);
+  ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYGLOBALDATA, MSGFLT_ADD, NULL);
   #endif
 
   hook = SetWindowsHookExW(WH_CALLWNDPROC, (HOOKPROC)SetHook, NULL, GetWindowThreadProcessId(enigma::hWnd, NULL));
