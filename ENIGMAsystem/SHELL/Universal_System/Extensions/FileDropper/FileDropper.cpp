@@ -31,7 +31,7 @@
 #include "strings_util.h"
 
 #ifndef PCHANGEFILTERSTRUCT
-#define PCHANGEFILTERSTRUCT void *
+typedef void *PCHANGEFILTERSTRUCT;
 #endif
 
 #ifndef ChangeWindowMessageFilter
