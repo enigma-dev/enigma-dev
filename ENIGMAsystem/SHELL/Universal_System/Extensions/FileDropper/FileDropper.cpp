@@ -30,6 +30,10 @@
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "strings_util.h"
 
+#ifndef PCHANGEFILTERSTRUCT
+#define PCHANGEFILTERSTRUCT
+#endif
+
 #ifndef ChangeWindowMessageFilter
 WINUSERAPI BOOL WINAPI ChangeWindowMessageFilterEx(HWND, UINT, DWORD, PCHANGEFILTERSTRUCT);
 #endif
