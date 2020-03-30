@@ -97,7 +97,7 @@ LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
 
 HHOOK InstallHook() {
   // old travis ci mingw m-i-n-g-w-o
-  #ifdef ChangeWindowMessageFilter
+  #ifdef ChangeWindowMessageFilterEx
   ChangeWindowMessageFilterEx(enigma::hWnd, WM_DROPFILES, MSGFLT_ADD, NULL);
   ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYDATA, MSGFLT_ADD, NULL);
   ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYGLOBALDATA, MSGFLT_ADD, NULL);
