@@ -26,6 +26,12 @@
 namespace enigma
 {
 
+struct RawImage {
+  ~RawImage() { delete[] pxdata; }
+  unsigned char* pxdata = nullptr;
+  unsigned w = 0, h = 0;
+};
+
 /// Color formats
 enum {
   color_fmt_rgba,
@@ -34,6 +40,8 @@ enum {
   color_fmt_bgr
 };
 
+
+RawImage pad_image(unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight); 
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size = false);
 
 /// Gets the image format, eg. ".bmp", ".png", etc.

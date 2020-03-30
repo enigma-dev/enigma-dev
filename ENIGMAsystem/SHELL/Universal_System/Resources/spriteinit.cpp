@@ -80,7 +80,7 @@ namespace enigma
       if (!fread(&subimages,4,1,exe)) return; //co//ut << "Subimages: " << subimages << endl;
 
       Sprite spr(width, height, xorig, yorig);
-      spr.SetBBox(bbl, bbt, bbr-bbl, bbt-bbb);
+      spr.SetBBox(bbl, bbt, bbr-bbl, bbb-bbt);
       
       for (int ii=0;ii<subimages;ii++)
       {

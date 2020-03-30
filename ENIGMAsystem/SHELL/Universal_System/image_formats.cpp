@@ -52,6 +52,32 @@ namespace enigma
 std::map<std::string, ImageLoadFunction> image_load_handlers;
 std::map<std::string, ImageSaveFunction> image_save_handlers;
 
+RawImage pad_image(unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight) {
+  RawImage padded;
+  padded.w = newWidth;
+  padded.h = newHeight;
+  
+  padded.pxdata = new unsigned char[4 * newWidth * newHeight + 1];
+  
+  unsigned char* imgpxptr = padded.pxdata;
+  unsigned rowindex, colindex;
+  for (rowindex = 0; rowindex < origHeight; rowindex++) {
+    for (colindex = 0; colindex < origWidth; colindex++) {
+      *imgpxptr++ = *pxdata++;
+      *imgpxptr++ = *pxdata++;
+      *imgpxptr++ = *pxdata++;
+      *imgpxptr++ = *pxdata++;
+    }
+    
+    std::memset(imgpxptr, 0, (newWidth - colindex) << 2);
+    imgpxptr += (newWidth - colindex) << 2;
+  }
+  
+  std::memset(imgpxptr, 0, (newHeight - origHeight) * newWidth);
+  
+  return padded;
+}
+
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size) {
   unsigned widfull = nlpo2dc(pngwidth) + 1, hgtfull = nlpo2dc(pngheight) + 1, ih, iw;
   const int bitmap_size = widfull * hgtfull * 4;

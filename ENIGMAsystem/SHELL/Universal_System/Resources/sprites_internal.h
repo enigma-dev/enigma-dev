@@ -28,6 +28,7 @@
 #include "AssetArray.h"
 #include "Collision_Systems/collision_types.h"
 #include "Universal_System/scalar.h"
+#include "Universal_System/image_formats.h"
 
 namespace enigma {
 
@@ -116,13 +117,6 @@ extern AssetArray<Sprite> sprites;
 
 BoundingBox sprite_get_bbox(int spr);
 BoundingBox sprite_get_bbox_relative(int spr);
-
-struct RawImage {
-  ~RawImage() { delete[] pxdata; }
-  unsigned char* pxdata = nullptr;
-  unsigned w = 0, h = 0;
-};
-  
 RawImage sprite_get_raw(int spr, unsigned subimg);
 
 }  //namespace enigma

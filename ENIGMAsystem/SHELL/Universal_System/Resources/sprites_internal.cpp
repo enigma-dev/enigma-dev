@@ -37,7 +37,8 @@ int Sprite::AddSubimage(int texid, TexRect texRect, collision_type ct, void* col
 
 int Sprite::AddSubimage(unsigned char* pxdata, int w, int h, collision_type ct, void* collisionData) {
   unsigned fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
-  int texID = graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false);
+  RawImage img = pad_image(pxdata, w, h, fullwidth, fullheight);
+  int texID = graphics_create_texture(w, h, fullwidth, fullheight, img.pxdata, false);
   return AddSubimage(texID, TexRect(0, 0, static_cast<gs_scalar>(w) / fullwidth, static_cast<gs_scalar>(h) / fullheight), ct, collisionData);
 }
 
