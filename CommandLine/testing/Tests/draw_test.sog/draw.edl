@@ -13,7 +13,7 @@ draw_set_color(c_red);
 draw_ellipse(100, 100, 300, 200, false);
 draw_set_color(c_green);
 draw_ellipse(350, 100, 550, 200, false);
-draw_set_color(c_fuchsia);
+draw_set_color(c_green);
 draw_triangle(300, 300, 500, 300, 400, 480, false);
 
 // test using current color & alpha per-vertex on 2D primitive
