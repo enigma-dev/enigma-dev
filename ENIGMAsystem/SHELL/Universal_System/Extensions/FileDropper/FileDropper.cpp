@@ -30,15 +30,6 @@
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "strings_util.h"
 
-#ifndef ChangeWindowMessageFilter
-typedef struct tagCHANGEFILTERSTRUCT
-{
-    DWORD cbSize;
-    DWORD ExtStatus;
-} CHANGEFILTERSTRUCT, *PCHANGEFILTERSTRUCT;
-WINUSERAPI BOOL WINAPI ChangeWindowMessageFilterEx(HWND, UINT, DWORD, PCHANGEFILTERSTRUCT);
-#endif
-
 #ifndef WM_COPYGLOBALDATA
 #define WM_COPYGLOBALDATA 0x0049
 #endif
@@ -105,9 +96,12 @@ LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
 }
 
 HHOOK InstallHook() {
+  // old travis ci mingw m-i-n-g-w-o
+  #ifdef ChangeWindowMessageFilter
   ChangeWindowMessageFilterEx(enigma::hWnd, WM_DROPFILES, MSGFLT_ADD, NULL);
   ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYDATA, MSGFLT_ADD, NULL);
   ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYGLOBALDATA, MSGFLT_ADD, NULL);
+  #endif
   hook = SetWindowsHookExW(WH_CALLWNDPROC, (HOOKPROC)SetHook, NULL, GetWindowThreadProcessId(enigma::hWnd, NULL));
   return hook;
 }
