@@ -86,9 +86,9 @@ public:
   const TexRect& GetTextureRect(int subimg) const { return _subimages.get(subimg).textureBounds; } 
   
   /// Add Subimage from existing texture
-  int AddSubimage(int texid, TexRect texRect, collision_type ct = ct_precise, void* collisionData = nullptr);
+  int AddSubimage(int texid, TexRect texRect, collision_type ct = ct_precise, void* collisionData = nullptr, bool mipmap = false);
   /// Add Subimage from raw pixel data (creating a new texture)
-  int AddSubimage(unsigned char* pxdata, int w, int h, collision_type ct = ct_precise, void* collisionData = nullptr);
+  int AddSubimage(unsigned char* pxdata, int w, int h, collision_type ct = ct_precise, void* collisionData = nullptr, bool mipmap = false);
   /// Copy an existing subimage into the sprite (duplicating the texture)
   void AddSubimage(const Subimage& s);
   

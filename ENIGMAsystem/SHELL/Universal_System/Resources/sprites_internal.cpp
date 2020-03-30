@@ -27,7 +27,7 @@ void Sprite::SetTexture(int subimg, int textureID, TexRect texRect) {
   s.textureBounds = texRect;
 }
 
-int Sprite::AddSubimage(int texid, TexRect texRect, collision_type ct, void* collisionData) {
+int Sprite::AddSubimage(int texid, TexRect texRect, collision_type ct, void* collisionData, bool mipmap) {
   Subimage subimg;
   subimg.textureID = texid;
   subimg.textureBounds = texRect;
@@ -35,10 +35,10 @@ int Sprite::AddSubimage(int texid, TexRect texRect, collision_type ct, void* col
   return _subimages.add(std::move(subimg));
 }
 
-int Sprite::AddSubimage(unsigned char* pxdata, int w, int h, collision_type ct, void* collisionData) {
+int Sprite::AddSubimage(unsigned char* pxdata, int w, int h, collision_type ct, void* collisionData, bool mipmap) {
   unsigned fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
-  RawImage img = pad_image(pxdata, w, h, fullwidth, fullheight);
-  int texID = graphics_create_texture(w, h, fullwidth, fullheight, img.pxdata, false);
+  RawImage img = image_pad(pxdata, w, h, fullwidth, fullheight);
+  int texID = graphics_create_texture(w, h, fullwidth, fullheight, img.pxdata, mipmap);
   return AddSubimage(texID, TexRect(0, 0, static_cast<gs_scalar>(w) / fullwidth, static_cast<gs_scalar>(h) / fullheight), ct, collisionData);
 }
 

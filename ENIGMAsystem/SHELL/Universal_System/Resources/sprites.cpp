@@ -24,11 +24,14 @@
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
+#include <iostream>
 
 using enigma::Sprite;
 using enigma::sprites;
 using enigma::nlpo2dc;
 using enigma::TexRect;
+using enigma::Color;
+using enigma::RawImage;
 
 namespace {
 
@@ -36,10 +39,8 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
   unsigned int width, height, fullwidth, fullheight;
   unsigned char *pxdata = enigma::image_load(
       filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
-      
-  unsigned cellwidth = width/imgnumb;
-  unsigned fullcellwidth = nlpo2dc(cellwidth) + 1;
-
+  
+  unsigned cellwidth = width / imgnumb;
   Sprite ns(cellwidth, height, x_offset, y_offset);
   ns.SetBBox(0, 0, cellwidth, height);
 
@@ -51,55 +52,15 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
   // If sprite transparent, set the alpha to zero for pixels that should be
   // transparent from lower left pixel color
   if (transparent) {
-    int t_pixel_b = pxdata[(height-1)*fullwidth*4];
-    int t_pixel_g = pxdata[(height-1)*fullwidth*4+1];
-    int t_pixel_r = pxdata[(height-1)*fullwidth*4+2];
-    unsigned int ih, iw;
-      
-    for (ih = 0; ih < height; ih++) {
-      int tmp = ih*fullwidth*4;
-      
-      for (iw = 0; iw < width; iw++) {
-        if (pxdata[tmp] == t_pixel_b
-          && pxdata[tmp+1] == t_pixel_g
-          && pxdata[tmp+2] == t_pixel_r) {
-            pxdata[tmp+3] = 0;
-        }
-
-          tmp+=4;
-      }
-    }
+    Color c = enigma::image_get_pixel_color(pxdata, width, height, 0, height - 1);
+    enigma::image_swap_color(pxdata, width, height, c, Color {0, 0, 0, 0});
   }
   
-  unsigned char* pixels = new unsigned char[fullcellwidth*fullheight*4]();
-  for (int ii = 0; ii < imgnumb; ii++) {
-    unsigned ih,iw;
-    unsigned xcelloffset = ii * cellwidth * 4;
-    
-    for (ih = 0; ih < height; ih++) {
-      unsigned tmp = ih * fullwidth * 4 + xcelloffset;
-      unsigned tmpcell = ih * fullcellwidth * 4;
-      
-      for (iw = 0; iw < cellwidth; iw++) {
-        pixels[tmpcell+0] = pxdata[tmp+0];
-        pixels[tmpcell+1] = pxdata[tmp+1];
-        pixels[tmpcell+2] = pxdata[tmp+2];
-        pixels[tmpcell+3] = pxdata[tmp+3];
-        tmp += 4;
-        tmpcell += 4;
-      }
-    }
-    
-    unsigned texture = enigma::graphics_create_texture(
-        cellwidth, height, fullcellwidth, fullheight, pixels, mipmap);
-
-    ns.AddSubimage(texture, 
-      TexRect { 0, 0, static_cast<gs_scalar>(cellwidth)/fullcellwidth, static_cast<gs_scalar>(height)/fullheight },
-      precise ? enigma::ct_precise : enigma::ct_bbox,
-      pixels);
+  std::vector<RawImage> rawSubimages = enigma::image_split(pxdata, width, height, imgnumb);
+  for (const RawImage& i : rawSubimages) {
+    ns.AddSubimage(i.pxdata, i.w, i.h, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
   }
   
-  delete[] pixels;
   delete[] pxdata;
   
   return ns;
