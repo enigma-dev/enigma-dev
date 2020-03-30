@@ -30,11 +30,12 @@
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "strings_util.h"
 
-#ifndef PCHANGEFILTERSTRUCT
-#define PCHANGEFILTERSTRUCT void *
-#endif
-
 #ifndef ChangeWindowMessageFilter
+typedef struct tagCHANGEFILTERSTRUCT
+{
+    DWORD cbSize;
+    DWORD ExtStatus;
+} CHANGEFILTERSTRUCT, *PCHANGEFILTERSTRUCT;
 WINUSERAPI BOOL WINAPI ChangeWindowMessageFilterEx(HWND, UINT, DWORD, PCHANGEFILTERSTRUCT);
 #endif
 
