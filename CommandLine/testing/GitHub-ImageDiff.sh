@@ -22,7 +22,7 @@ function imgur_upload {
 }
 
 function enigmabot_post_comment {
-  echo $(curl --header "Authorization: token $bot_comment_token Content-Type: application/json" \
+  echo $(curl --header "Authorization: token $bot_comment_token\r\nContent-Type: application/json" \
               --request POST \
               --data '{"body":"'"$1"'"}' \
               "$pullrequest")
