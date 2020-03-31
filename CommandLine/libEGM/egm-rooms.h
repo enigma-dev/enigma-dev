@@ -10,18 +10,18 @@ namespace egm {
 
 struct InstanceLayer {
   // The compaction format, eg, "svg-d".
-    std::string format;
+  std::string format;
   // The raw string encoding of the compacted data.
-    std::string data;
+  std::string data;
   // Any instances with noncompactable attributes.
   std::vector<buffers::resources::Room::Instance> snowflakes;
 };
 
 struct TileLayer {
   // The compaction format, eg, "svg-d".
-    std::string format;
+  std::string format;
   // The raw string encoding of the compacted data.
-    std::string data;
+  std::string data;
   // Any instances with noncompactable attributes.
   std::vector<buffers::resources::Room::Tile> snowflakes;
 };
