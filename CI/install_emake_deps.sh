@@ -2,22 +2,6 @@
 
 set -e
 
-if [ "$TRAVIS_OS_NAME" != "osx" ]; then
-  # new protobuf
-  sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
-
-  # new gcc 
-  sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-
-  # new boost for old travis
-  if [ "$COMPILER" == "Android" ]; then
-    sudo add-apt-repository -y ppa:mhier/libboost-latest;
-  else
-    # new lcov
-    sudo add-apt-repository -y ppa:cheeseboy16/travis-backports
-  fi
-
-<<<<<<< HEAD
 install_yaml_cpp () {
   git clone https://github.com/jbeder/yaml-cpp /tmp/yaml-cpp
   mkdir /tmp/yaml-cpp/build
@@ -28,13 +12,22 @@ install_yaml_cpp () {
   popd
 }
 
-if [ "$COMPILER" == "Android" ]; then
-  sudo add-apt-repository -y ppa:mhier/libboost-latest;
-  sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
-  sudo apt-get -y install build-essential zlib1g-dev libboost1.67-dev\
-        libprotobuf-dev protobuf-compiler libglm-dev libpng-dev;
-  install_yaml_cpp
-=======
+if [ "$TRAVIS_OS_NAME" != "osx" ]; then
+  # new protobuf
+  sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
+
+  # new gcc 
+  sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+  # new boost & yaml-cpp for old travis
+  if [ "$COMPILER" == "Android" ]; then
+    sudo add-apt-repository -y ppa:mhier/libboost-latest;
+    install_yaml_cpp
+  else
+    # new lcov
+    sudo add-apt-repository -y ppa:cheeseboy16/travis-backports
+  fi
+
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
   sudo apt-get -y install gcc-9 g++-9 cpp-9 build-essential libprotobuf-dev protobuf-compiler zlib1g-dev libglm-dev libpng-dev
 
@@ -54,7 +47,6 @@ fi
 
 if [ "$COMPILER" == "Android" ]; then
   sudo apt-get -y install libboost1.67-dev
->>>>>>> origin/master
 elif [ "$TRAVIS_OS_NAME" == "linux" ]; then
   sudo apt-get -y install libboost-program-options-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
