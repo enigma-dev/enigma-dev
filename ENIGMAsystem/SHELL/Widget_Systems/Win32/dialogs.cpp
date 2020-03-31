@@ -17,9 +17,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// Windows Vista or later for IFileDialog
-#define NTDDI_VERSION NTDDI_VISTA
-#define _WIN32_WINNT _WIN32_WINNT_VISTA
 #define byte __windows_byte_workaround
 #include <windows.h>
 #undef byte
