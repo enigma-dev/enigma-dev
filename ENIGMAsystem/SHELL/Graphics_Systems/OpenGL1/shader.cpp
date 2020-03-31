@@ -31,23 +31,18 @@
 using namespace std;
 using std::vector;
 
+namespace enigma {
+
 GLenum shadertypes[5] = {
   GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER
 };
 
-vector<Shader*> shaders(0);
-vector<ShaderProgram*> shaderprograms(0);
+vector<std::unique_ptr<Shader>> shaders(0);
+vector<std::unique_ptr<ShaderProgram>> shaderprograms(0);
 
-namespace enigma_user
-{
-
-int glsl_shader_create(int type)
-{
-  unsigned int id = shaders.size();
-  shaders.push_back(new Shader(type));
-  return id;
-}
-
+void cleanup_shaders() {
+  for(size_t i = 0; i < shaderprograms.size(); ++i) shaderprograms[i] = nullptr;
+  for(size_t i = 0; i < shaders.size(); ++i) shaders[i] = nullptr;
 }
 
 unsigned long getFileLength(ifstream& file)
@@ -62,8 +57,21 @@ unsigned long getFileLength(ifstream& file)
     return len;
 }
 
-namespace enigma_user
+}
+
+namespace enigma_user {
+
+using enigma::shaders;
+using enigma::shaderprograms;
+using enigma::ShaderProgram;
+using enigma::Shader;
+
+int glsl_shader_create(int type)
 {
+  unsigned int id = shaders.size();
+  shaders.push_back(std::make_unique<Shader>(type));
+  return id;
+}
 
 int glsl_shader_load(int id, string fname)
 {
@@ -71,7 +79,7 @@ int glsl_shader_load(int id, string fname)
   file.open(fname.c_str(), ios::in); // opens as ASCII
   if (!file.is_open()) return 1; // Error: File could not be oppenned
 
-  unsigned long len = getFileLength(file);
+  unsigned long len = enigma::getFileLength(file);
   if (len == 0) return 2;   // Error: Empty File
 
   GLchar* ShaderSource;
@@ -142,13 +150,13 @@ string glsl_shader_get_infolog(int id)
 
 void glsl_shader_free(int id)
 {
-  delete shaders[id];
+  shaders[id] = nullptr;
 }
 
 int glsl_program_create()
 {
   unsigned int id = shaderprograms.size();
-  shaderprograms.push_back(new ShaderProgram());
+  shaderprograms.push_back(std::make_unique<ShaderProgram>());
   return id;
 }
 
@@ -204,7 +212,7 @@ void glsl_program_reset()
 
 void glsl_program_free(int id)
 {
-  delete shaderprograms[id];
+  shaderprograms[id] = nullptr;
 }
 
 int glsl_get_uniform_location(int program, string name) {

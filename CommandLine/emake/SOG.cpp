@@ -2,8 +2,9 @@
 #include "Main.hpp"
 #include "event_reader/event_parser.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include <fstream>
 #include <iostream>
 
@@ -13,9 +14,10 @@ using evpair = std::pair<int, int>;
 bool ReadSOG(const std::string &input_file, Game *game) {
   EventData event_data(ParseEventFile("events.ey"));
   map<evpair, string> events;
-  boost::filesystem::path targetDir(input_file);
-  boost::filesystem::recursive_directory_iterator iter(targetDir), eod;
-  BOOST_FOREACH(boost::filesystem::path const& i, std::make_pair(iter, eod)) {
+  fs::path targetDir(input_file);
+  fs::recursive_directory_iterator iter(targetDir);
+  for(auto& p : iter) {
+    fs::path i = p.path();
     if (is_regular_file(i)) {
       std::string evstr = i.filename().string();
       if (evstr.length() > 4 && evstr.substr(evstr.length() - 4) == ".edl")

@@ -72,6 +72,10 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   fi
   git clean -f -d
 
+  # re-install deps incase they've changed
+  echo "Reinstalling deps"
+  ./CI/install_emake_deps.sh && ./CI/split_jobs.sh install
+
   echo "Rebuilding plugin and harness from last commit..."
   make all -j$MAKE_JOBS
   echo "Generating regression comparison images..."

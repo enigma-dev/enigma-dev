@@ -88,6 +88,4 @@ inline std::string FileToString(const std::string &fName) {
   return buffer.str();
 }
 
-
-
 #endif

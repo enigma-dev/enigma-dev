@@ -48,7 +48,6 @@ void input_push() {
 
 void compute_window_scaling() {
   if (!regionWidth) return;
-  int isFullScreen = enigma_user::window_get_fullscreen();
   parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth;
   parHeight = isFullScreen ? enigma_user::display_get_height() : windowHeight;
   if (viewScale > 0) {  //Fixed Scale
@@ -72,7 +71,7 @@ void compute_window_scaling() {
 
 void compute_window_size() {
   if (!regionWidth) return;
-  int isFullScreen = enigma_user::window_get_fullscreen();
+  compute_window_scaling();
   if (!isFullScreen) {
     if (windowAdapt && viewScale > 0) {  // If the window is to be adapted and Fixed Scale
       if (scaledWidth > windowWidth) windowWidth = scaledWidth;

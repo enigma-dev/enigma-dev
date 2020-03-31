@@ -20,7 +20,7 @@
 #include <sstream>
 
 #include "Platforms/General/PFregistry.h"
-#include "Universal_System/Extensions/IniFilesystem/IniFileIndex.h"
+#include "Universal_System/Extensions/IniFilesystem/UNIXiniindex.h"
 
 #include "Universal_System/estring.h"
 

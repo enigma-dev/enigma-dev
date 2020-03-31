@@ -36,7 +36,9 @@
 #include <cstdlib>
 
 #ifdef _WIN32
- #include <windows.h>
+  #define byte __windows_byte_workaround
+  #include <windows.h>
+  #undef byte
  #define dllexport extern "C" __declspec(dllexport)
 #else
  #define dllexport extern "C"

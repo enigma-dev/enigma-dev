@@ -49,13 +49,15 @@ namespace enigma_user {
 const int os_type = os_windows;
 }  // namespace enigma_user
 
-namespace enigma  //TODO: Find where this belongs
+namespace enigma
 {
+
 HINSTANCE hInstance;
 HWND hWnd;
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 HDC window_hDC;
 HANDLE mainthread;
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 void (*touch_extension_register)(HWND hWnd);
 
@@ -64,10 +66,6 @@ void windowsystem_write_exename(char *exenamehere) { GetModuleFileName(NULL, exe
 void Sleep(int ms) { ::Sleep(ms); }
 
 void initInput(){};
-
-HWND get_window_handle() {
-  return hWnd;
-}
 
 } // namespace enigma
 

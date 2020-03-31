@@ -21,14 +21,17 @@
 
 #include "GLSLshader.h"
 #include "OpenGLHeaders.h"
+
 #include <string>
+#include <memory>
 
 namespace enigma
 {
   extern unsigned bound_vbo;
   extern unsigned bound_vboi;
   extern unsigned bound_shader;
-  extern vector<enigma::ShaderProgram*> shaderprograms;
+  extern vector<std::unique_ptr<ShaderProgram>> shaderprograms;
+  extern vector<std::unique_ptr<Shader>> shaders;
 
   std::string getVertexShaderPrefix();
   std::string getFragmentShaderPrefix();
@@ -48,6 +51,8 @@ namespace enigma
   void glsl_attribute_enable_all_internal(bool enable);
   void glsl_attribute_enable_internal(int location, bool enable);
   void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, unsigned offset);
+
+  void cleanup_shaders();
 }
 
 namespace enigma_user

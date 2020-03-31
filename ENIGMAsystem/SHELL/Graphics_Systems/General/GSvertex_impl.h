@@ -26,10 +26,12 @@
 
 #include "GSvertex.h"
 
+#include <memory>
 #include <vector>
 #include <utility>
 #include <functional>
 #include <stdint.h>
+
 using std::vector;
 using std::pair;
 
@@ -169,9 +171,9 @@ struct IndexBuffer {
   }
 };
 
-extern vector<VertexFormat*> vertexFormats;
-extern vector<VertexBuffer*> vertexBuffers;
-extern vector<IndexBuffer*> indexBuffers;
+extern vector<std::unique_ptr<VertexFormat>> vertexFormats;
+extern vector<std::unique_ptr<VertexBuffer>> vertexBuffers;
+extern vector<std::unique_ptr<IndexBuffer>> indexBuffers;
 
 }
 

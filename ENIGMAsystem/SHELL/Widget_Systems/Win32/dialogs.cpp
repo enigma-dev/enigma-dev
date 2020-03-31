@@ -20,7 +20,10 @@
 // Windows Vista or later for IFileDialog
 #define NTDDI_VERSION NTDDI_VISTA
 #define _WIN32_WINNT _WIN32_WINNT_VISTA
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <shobjidl.h> //for IFileDialog
 #include <shlwapi.h> //for Shell API
 #include <shlobj.h> //for Shell API
@@ -37,6 +40,7 @@ using namespace std;
 #include "GameSettings.h"
 
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
 #define MONITOR_CENTER 0x0001
 
@@ -71,7 +75,6 @@ static tstring tstr_title;
 using enigma_user::string_replace_all;
 
 #ifdef DEBUG_MODE
-#include "Universal_System/var4.h"
 #include "Universal_System/Resources/resource_data.h"
 #include "Universal_System/Object_Tiers/object.h"
 #include "Universal_System/debugscope.h"
@@ -86,8 +89,6 @@ static inline string add_slash(const string& dir) {
 
 namespace enigma {
 
-extern HINSTANCE hInstance;
-extern HWND hWnd;
 HWND infore;
 
 }
@@ -751,8 +752,9 @@ string get_password(string message, string def) {
   return gs_str_submitted;
 }
 
-double get_integer(string message, double def) {
-  gs_cap = message_get_caption(); gs_message = message; gs_def = remove_trailing_zeros(def);
+double get_integer(string message, var def) {
+  double val = (strtod(def.c_str(), NULL)) ? : (double)def;
+  gs_cap = message_get_caption(); gs_message = message; gs_def = remove_trailing_zeros(val);
   DialogBoxW(enigma::hInstance, L"getstringdialog", enigma::hWnd, GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
@@ -760,8 +762,9 @@ double get_integer(string message, double def) {
   return strtod(gs_str_submitted.c_str(), NULL);
 }
 
-double get_passcode(string message, double def) {
-  gs_cap = message_get_caption(); gs_message = message; gs_def = remove_trailing_zeros(def);
+double get_passcode(string message, var def) {
+  double val = (strtod(def.c_str(), NULL)) ? : (double)def;
+  gs_cap = message_get_caption(); gs_message = message; gs_def = remove_trailing_zeros(val);
   DialogBoxW(enigma::hInstance, L"getpassworddialog", enigma::hWnd, GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
