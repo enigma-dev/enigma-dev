@@ -427,7 +427,7 @@ static inline string get_save_filename_helper(string filter, string fname, strin
   return "";
 }
 
-#if (__MINGW64_VERSION_MAJOR < 8)
+#if (__MINGW32_MAJOR_VERSION < 8 || __MINGW64_VERSION_MAJOR < 8)
 static int CALLBACK GetDirectoryProc(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
   if (uMsg == BFFM_INITIALIZED) {
     if (!tstr_dir.empty())
