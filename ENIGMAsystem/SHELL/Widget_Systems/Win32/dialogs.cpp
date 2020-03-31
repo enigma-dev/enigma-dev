@@ -453,7 +453,7 @@ static inline string get_directory_helper(string dname, string title) {
   if ((pidl = SHBrowseForFolderW(&bi)) != NULL) {
     wchar_t full_folder_selection[MAX_PATH];
     SHGetPathFromIDListW(pidl, full_folder_selection);
-    string result = add_slash(narrow(full_folder_selection));
+    string result = add_slash(shorten(full_folder_selection));
     CoTaskMemFree(pidl); return result;
   }
 
