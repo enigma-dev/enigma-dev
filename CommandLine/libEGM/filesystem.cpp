@@ -62,3 +62,17 @@ string TempFileName(const string &pattern) {
 void DeleteFile(const string &fName) {
   std::remove(fName.c_str());
 }
+
+void DeleteFolder(const string &fName) {
+  fs::remove_all(fName.c_str());
+}
+
+bool FolderExists(const string &folder) {
+  const fs::path f = folder;
+  return (fs::exists(f) && fs::is_directory(f));
+}
+
+bool FileExists(const string &fName) {
+  const fs::path f = fName;
+  return (fs::exists(f) && fs::is_regular_file(f));
+}
