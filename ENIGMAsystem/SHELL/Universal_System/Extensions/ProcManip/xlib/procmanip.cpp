@@ -12,7 +12,7 @@ pid_t pid_from_wid(string wid) {
   int actual_format, status;
   unsigned long nitems, bytes_after;
 
-  filter_atom = XInternAtom(display, "_NET_WM_PID", True);
+  filter_atom = XInternAtom(enigma::x11::disp, "_NET_WM_PID", True);
   status = XGetWindowProperty(enigma::x11::disp, window, filter_atom, 0, 1000, False, 
     AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
 
