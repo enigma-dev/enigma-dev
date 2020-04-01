@@ -17,4 +17,4 @@ else ifeq ($(UNIX_BASED), true)
 else
 	SOURCES += Universal_System/Extensions/ProcManip/Win32/procmanip.cpp
 endif
-
+SOURCES += Universal_System/Extensions/ProcManip/procmanip.cpp
