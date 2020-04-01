@@ -24,6 +24,7 @@
  
 */
 
+#include "../procmanip.h"
 #include <proc/readproc.h>
 #include <unistd.h>
 #include <climits>
