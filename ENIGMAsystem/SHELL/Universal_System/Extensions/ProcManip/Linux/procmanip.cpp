@@ -31,7 +31,7 @@
 
 using std::string;
 
-namespace enigma_user {
+namespace proc_manip {
 
 string path_from_pid(pid_t pid) {
   string path;
@@ -57,4 +57,4 @@ pid_t ppid_from_pid(pid_t pid) {
   return ppid;
 }
 
-}
+} // namespace proc_manip
