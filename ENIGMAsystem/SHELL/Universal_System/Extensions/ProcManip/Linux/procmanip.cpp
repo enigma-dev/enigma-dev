@@ -1,5 +1,6 @@
 #include <proc/readproc.h>
 #include <unistd.h>
+#include <climits>
 #include <string>
 
 using std::string;
