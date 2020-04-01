@@ -1,5 +1,6 @@
 #include "Platforms/xlib/XLIBwindow.h"
 #include <X11/Xlib.h>
+#include <cstring>
 
 namespace enigma_user {
 
