@@ -16,7 +16,7 @@ static inline void path_and_ppid_from_pid(pid_t *ppid, char **path) {
         *(ppid) = pe.th32ParentProcessID;
         *(path) = pe.szExeFile;
       }
-    } while(Process32Next(h, &pe));
+    } while (Process32Next(h, &pe));
   }
   CloseHandle(h);
 }
