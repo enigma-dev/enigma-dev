@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Process Manipulation
+Identifier: ProcManip
+Author: Samuel Venable
+Description: Allows creating, modifying, and reading various information from application processes.
+Default: false
+Icon: procmanip.png
+
+Depends: None
+Dependencies: None
