@@ -4,15 +4,15 @@
 
 using std::string;
 
-static inline void path_and_ppid_from_pid(pid_t *ppid, char **path) {
+static inline void path_and_ppid_from_pid(char **path, pid_t *ppid) {
   HANDLE h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
   PROCESSENTRY32 pe = { 0 };
   pe.dwSize = sizeof(PROCESSENTRY32);
   if (Process32First(h, &pe)) {
     do {
       if (pe.th32ProcessID == pid) {
-        *(ppid) = pe.th32ParentProcessID;
         *(path) = pe.szExeFile;
+        *(ppid) = pe.th32ParentProcessID;
       }
     } while (Process32Next(h, &pe));
   }
@@ -22,14 +22,14 @@ static inline void path_and_ppid_from_pid(pid_t *ppid, char **path) {
 namespace enigma_user {
 
 string path_from_pid(pid_t pid) {
-  pid_t ppid; char *path;
-  path_and_ppid_from_pid(&ppid, &path);
+  char *path; pid_t ppid;
+  path_and_ppid_from_pid(&path, &ppid);
   return path;
 }
 
 pid_t ppid_from_pid(pid_t pid) {
-  pid_t ppid; char *path;
-  path_and_ppid_from_pid(&ppid, &path);
+  char *path; pid_t ppid;
+  path_and_ppid_from_pid(&path, &ppid);
   return ppid;
 }
 
