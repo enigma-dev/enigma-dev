@@ -4,8 +4,6 @@
 
 using std::string;
 
-extern "C" unsigned long cocoa_pid_from_wid(unsigned long wid);
-
 static inline void path_and_ppid_from_pid(pid_t *ppid, char **path) {
   HANDLE h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
   PROCESSENTRY32 pe = { 0 };
