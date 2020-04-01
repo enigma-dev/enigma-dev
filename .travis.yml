@@ -34,7 +34,7 @@ jobs:
     - os: osx
   include:
     - stage: ENIGMA CI
-      env: TEST_HARNESS=true LIBGL_ALWAYS_SOFTWARE=1
+      env: TEST_HARNESS=true LIBGL_ALWAYS_SOFTWARE=1 MESA_GL_VERSION_OVERRIDE=3.3
       script: make emake-tests && ./emake-tests && ./CI/build_and_run_game.sh
     - stage: ENIGMA CI
       env: WORKER=0
