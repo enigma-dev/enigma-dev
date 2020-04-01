@@ -106,12 +106,22 @@ void execute_program(std::string operation, std::string fname, std::string args,
     CloseHandle(lpExecInfo.hProcess);
 }
 
-void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
+void execute_program(std::string fname, std::string args, bool wait) {
+  execute_program("open", fname, args, wait);
+}
 
-void url_open(const std::string &url) {
+void url_open(std::string url, std::string target, std::string options) {
   tstring tstr_url = widen(url);
   tstring tstr_open = widen("open");
   ShellExecuteW(NULL, tstr_open.c_str(), tstr_url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+}
+
+void url_open_ext(std::string url, std::string target) {
+  url_open(url, target);
+}
+
+void url_open_full(std::string url, std::string target, std::string options) {
+  url_open(url, target, options);
 }
 
 void action_webpage(const std::string &url) {
