@@ -24,6 +24,7 @@
  
 */
 
+#include "../procmanip.h"
 #include <sys/user.h>
 #include <libutil.h>
 #include <string>
