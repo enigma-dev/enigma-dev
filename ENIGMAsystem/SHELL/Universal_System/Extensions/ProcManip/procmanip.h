@@ -30,16 +30,16 @@ using std::string;
 
 namespace proc_manip {
 
-  // get executable path from process id
-  string path_from_pid(pid_t pid);
-  
-  // get parent process id of process id
-  pid_t ppid_from_pid(pid_t pid);
+// get executable path from process id
+string path_from_pid(pid_t pid);
 
-  // get process id from window id;
-  // e.g. wid = window_identifier()
-  // process_id = pid_from_wid(wid)
-  // for getting current process id
-  pid_t pid_from_wid(string wid);
+// get parent process id of process id
+pid_t ppid_from_pid(pid_t pid);
+
+// get process id from window id;
+// e.g. wid = window_identifier()
+// process_id = pid_from_wid(wid)
+// for getting current process id
+pid_t pid_from_wid(string wid);
 
 }
