@@ -29,7 +29,7 @@ fi
 ###### Audio #######
 if [ "$AUDIO" == "OpenAL" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev"
-elif [ "$AUDIO" == "SFML" ] || [ "$TEST_HARNESS" == true ];
+elif [ "$AUDIO" == "SFML" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libsfml-dev"
 fi
 
