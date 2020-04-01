@@ -39,7 +39,7 @@ static inline void path_and_ppid_from_pid(pid_t pid, char **path, pid_t *ppid) {
   free(proc_info);
 }
 
-namespace enigma_user {
+namespace proc_manip {
 
 string path_from_pid(pid_t pid) {
   char *path; pid_t ppid;
@@ -53,4 +53,4 @@ pid_t ppid_from_pid(pid_t pid) {
   return ppid;
 }
 
-}
+} // namespace proc_manip
