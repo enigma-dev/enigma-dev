@@ -20,23 +20,22 @@ if [ "$PLATFORM" == "SDL" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libsdl2-dev"
 fi
 
-if [ "$GRAPHICS" == "OpenGLES2" ] || [ "$TEST_HARNESS" == true ]; then
-  LINUX_DEPS="$LINUX_DEPS libepoxy-dev libegl1-mesa-dev libgles2-mesa-dev"
-else
-  LINUX_DEPS="$LINUX_DEPS libglew-dev libxrandr-dev libxinerama-dev"
-fi
+###### Graphics #######
+LINUX_DEPS="$LINUX_DEPS libepoxy-dev libegl1-mesa-dev libgles2-mesa-dev libglew-dev libxrandr-dev libxinerama-dev"
 
 ###### Audio #######
 if [ "$AUDIO" == "OpenAL" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev"
-elif [ "$AUDIO" == "SFML" ] || [ "$TEST_HARNESS" == true ]; then
+fi
+if [ "$AUDIO" == "SFML" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libsfml-dev"
 fi
 
 ###### Widgets #######
 if [ "$WIDGETS" == "GTK+" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libgtk2.0-dev"
-elif [ "$WIDGETS" == "xlib" ] || [ "$TEST_HARNESS" == true ]; then
+fi
+if [ "$WIDGETS" == "xlib" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS zenity kdialog"
 fi
 
