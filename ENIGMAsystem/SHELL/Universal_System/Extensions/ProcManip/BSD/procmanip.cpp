@@ -4,25 +4,26 @@
 
 using std::string;
 
+static inline void path_and_ppid_from_pid(char **path, pid_t *ppid) {
+  struct kinfo_proc *proc_info = kinfo_getproc(pid);
+  if (proc_info) {
+    *(path) = proc_info->ki_comm;
+    *(ppid) = proc_info->ki_ppid;
+  }
+  free(proc_info);
+}
+
 namespace enigma_user {
 
 string path_from_pid(pid_t pid) {
-  string path;
-  struct kinfo_proc *proc_info = kinfo_getproc(pid);
-  if (proc_info) {
-    path = proc_info->ki_comm;
-  }
-  free(proc_info);
+  char *path, pid_t ppid;
+  path_and_ppid_from_pid(&path, &ppid);
   return path;
 }
 
 pid_t ppid_from_pid(pid_t pid) {
-  pid_t ppid;
-  struct kinfo_proc *proc_info = kinfo_getproc(pid);
-  if (proc_info) {
-    ppid = proc_info->ki_ppid;
-  }
-  free(proc_info);
+  char *path, pid_t ppid;
+  path_and_ppid_from_pid(&path, &ppid);
   return ppid;
 }
 
