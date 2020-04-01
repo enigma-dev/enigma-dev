@@ -119,7 +119,7 @@ TEST_P(SimpleTestHarness, SimpleTestRunner) {
         
         tc.extensions = "Alarms,Timelines,Paths,MotionPlanning,IniFilesystem,ParticleSystems,DateTime,DataStructures,libpng,GTest";
         int ret = TestHarness::run_to_completion(game, tc);
-        if (!ret) return;
+        if (!ret) continue;
         switch (ret) {
           case TestHarness::ErrorCodes::BUILD_FAILED:
             FAIL() << "Building game \"" << game << "\" failed!";
