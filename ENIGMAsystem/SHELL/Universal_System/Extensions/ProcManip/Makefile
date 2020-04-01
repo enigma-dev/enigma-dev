@@ -1,4 +1,5 @@
 ifeq ($(OS), Darwin)
+	SOURCES += Universal_System/Extensions/ProcManip/MacOSX/cocoa.m
 	SOURCES += Universal_System/Extensions/ProcManip/MacOSX/procmanip.cpp
 else ifeq ($(UNIX_BASED), true)
 	override CXXFLAGS += $(shell pkg-config x11 --cflags)
@@ -16,3 +17,4 @@ else ifeq ($(UNIX_BASED), true)
 else
 	SOURCES += Universal_System/Extensions/ProcManip/Win32/procmanip.cpp
 endif
+
