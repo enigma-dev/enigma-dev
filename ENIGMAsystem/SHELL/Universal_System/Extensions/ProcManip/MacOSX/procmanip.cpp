@@ -24,6 +24,7 @@
  
 */
 
+#include "../procmanip.h"
 #include <libproc.h>
 #include <string>
 
