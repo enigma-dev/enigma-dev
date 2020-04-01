@@ -11,6 +11,7 @@ struct TestConfig {
   std::string codegen;
   std::string compiler;
   std::string mode;
+  std::string platform;
   std::string graphics;
   std::string audio;
   std::string widgets;

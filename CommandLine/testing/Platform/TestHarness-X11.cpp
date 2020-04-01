@@ -176,6 +176,7 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   string emake_cmd = "./emake";
   string compiler = "--compiler=" + tc.get_or(&TC::compiler, "TestHarness");
   string mode = "--mode=" + tc.get_or(&TC::mode, "Debug");
+  string platform = "--platform=" + tc.get_or(&TC::graphics, "xlib");
   string graphics = "--graphics=" + tc.get_or(&TC::graphics, "OpenGL1");
   string audio = "--audio=" + tc.get_or(&TC::audio, "OpenAL");
   string widgets = "--widgets=" + tc.get_or(&TC::widgets, "None");
@@ -188,6 +189,7 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
     emake_cmd.c_str(),
     compiler.c_str(),
     mode.c_str(),
+    platform.c_str(),
     graphics.c_str(),
     audio.c_str(),
     widgets.c_str(),

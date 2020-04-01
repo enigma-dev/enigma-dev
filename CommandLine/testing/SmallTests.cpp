@@ -103,31 +103,46 @@ vector<string> enumerate_simple_games() {
 class SimpleTestHarness : public testing::TestWithParam<string> {};
 
 TEST_P(SimpleTestHarness, SimpleTestRunner) {
-  string game = GetParam();
-  TestConfig tc;
-  tc.extensions = "Alarms,Timelines,Paths,MotionPlanning,IniFilesystem,ParticleSystems,DateTime,DataStructures,libpng,GTest";
-  int ret = TestHarness::run_to_completion(game, tc);
-  if (!ret) return;
-  switch (ret) {
-    case TestHarness::ErrorCodes::BUILD_FAILED:
-      FAIL() << "Building game \"" << game << "\" failed!";
-    case TestHarness::ErrorCodes::LAUNCH_FAILED:
-      FAIL() << "Could not launch game \"" << game << "\"! Linkage error? "
-                "Shift in the spacetime continuum?";
-    case TestHarness::ErrorCodes::SYSCALL_FAILED:
-      FAIL() << "Universe collapsed while running game \"" << game << "\"! "
-                "Job pre-empted? PCR? Shift in the spacetime continuum?";
-    case TestHarness::ErrorCodes::GAME_CRASHED:
-      FAIL() << "Game \"" << game << "\" did not exit normally! "
-                "Access violation?";
-    case TestHarness::ErrorCodes::TIMED_OUT:
-      FAIL() << "Game \"" << game << "\" did not finish running in the time "
-                "allotted, and has therefore been killed.";
-    case 42:
-      FAIL() << "Game \"" << game << "\" had failing tests.";
-    default:
-      FAIL() << "Game \"" << game << "\" returned " << ret << ". "
-                "Check log for other errors (possibly gTest-flavored).";
+  for (std::string platform : {"xlib", "SDL"}) {
+    for (std::string graphics : {"OpenGL1", "OpenGL3", "OpenGLES2", "OpenGLES3"}) {
+      for (std::string collision : {"Precise", "BBox" }) {
+        
+        // Invalid combos
+        if (graphics == "OpenGLES2" && platform != "SDL2") continue;
+        if (graphics == "OpenGLES3" && platform != "SDL2") continue;
+        
+        string game = GetParam();
+        TestConfig tc;
+        tc.platform = platform;
+        tc.graphics = graphics;
+        tc.collision = collision;
+        
+        tc.extensions = "Alarms,Timelines,Paths,MotionPlanning,IniFilesystem,ParticleSystems,DateTime,DataStructures,libpng,GTest";
+        int ret = TestHarness::run_to_completion(game, tc);
+        if (!ret) return;
+        switch (ret) {
+          case TestHarness::ErrorCodes::BUILD_FAILED:
+            FAIL() << "Building game \"" << game << "\" failed!";
+          case TestHarness::ErrorCodes::LAUNCH_FAILED:
+            FAIL() << "Could not launch game \"" << game << "\"! Linkage error? "
+                      "Shift in the spacetime continuum?";
+          case TestHarness::ErrorCodes::SYSCALL_FAILED:
+            FAIL() << "Universe collapsed while running game \"" << game << "\"! "
+                      "Job pre-empted? PCR? Shift in the spacetime continuum?";
+          case TestHarness::ErrorCodes::GAME_CRASHED:
+            FAIL() << "Game \"" << game << "\" did not exit normally! "
+                      "Access violation?";
+          case TestHarness::ErrorCodes::TIMED_OUT:
+            FAIL() << "Game \"" << game << "\" did not finish running in the time "
+                      "allotted, and has therefore been killed.";
+          case 42:
+            FAIL() << "Game \"" << game << "\" had failing tests.";
+          default:
+            FAIL() << "Game \"" << game << "\" returned " << ret << ". "
+                      "Check log for other errors (possibly gTest-flavored).";
+        }
+      }
+    }
   }
 }
 
