@@ -16,13 +16,13 @@ static inline void path_and_ppid_from_pid(pid_t pid, char **path, pid_t *ppid) {
 namespace enigma_user {
 
 string path_from_pid(pid_t pid) {
-  char *path, pid_t ppid;
+  char *path; pid_t ppid;
   path_and_ppid_from_pid(pid, &path, &ppid);
   return path;
 }
 
 pid_t ppid_from_pid(pid_t pid) {
-  char *path, pid_t ppid;
+  char *path; pid_t ppid;
   path_and_ppid_from_pid(pid, &path, &ppid);
   return ppid;
 }
