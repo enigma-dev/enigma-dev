@@ -31,7 +31,7 @@ using std::string;
 
 extern "C" unsigned long cocoa_pid_from_wid(unsigned long wid);
 
-namespace enigma_user {
+namespace proc_manip {
 
 string path_from_pid(pid_t pid) {
   string path;
@@ -55,4 +55,4 @@ pid_t pid_from_wid(string wid) {
   return cocoa_pid_from_wid(stoul(wid, nullptr, 10));
 }
 
-}
+} // namespace proc_manip
