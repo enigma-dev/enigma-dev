@@ -45,7 +45,7 @@ static inline void path_and_ppid_from_pid(pid_t pid, char **path, pid_t *ppid) {
   CloseHandle(h);
 }
 
-namespace enigma_user {
+namespace proc_manip {
 
 string path_from_pid(pid_t pid) {
   char *path; pid_t ppid;
@@ -69,4 +69,4 @@ pid_t pid_from_wid(string wid) {
   return reinterpret_cast<pid_t>(ul_pid);
 }
 
-}
+} // namespace proc_manip
