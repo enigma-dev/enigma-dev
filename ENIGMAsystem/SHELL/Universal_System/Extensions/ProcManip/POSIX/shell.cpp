@@ -40,10 +40,16 @@ void url_open(std::string url, std::string target, std::string options) {
   execute_program("xdg-open", url, false);
 }
 
-void url_open_ext(std::string url, std::string target) { url_open(url, target); }
+void url_open_ext(std::string url, std::string target) {
+  url_open(url, target);
+}
 
-void url_open_full(std::string url, std::string target, std::string options) { url_open(url, target, options); }
+void url_open_full(std::string url, std::string target, std::string options) {
+  url_open(url, target, options);
+}
 
-void action_webpage(const std::string& url) { url_open(url); }
+void action_webpage(const std::string& url) {
+  url_open(url);
+}
 
 } // namespace enigma_user
