@@ -91,10 +91,8 @@ void execute_program(std::string operation, std::string fname, std::string args,
   GetCurrentDirectoryW(MAX_PATH, cDir);
   lpExecInfo.lpDirectory = cDir;
   lpExecInfo.nShow = SW_SHOW;
-  lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;  //WINSHELLAPI BOOL WINAPI result;
+  lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;  // WINSHELLAPI BOOL WINAPI result;
   ShellExecuteExW(&lpExecInfo);
-
-  //wait until a file is finished printing
   if (wait && lpExecInfo.hProcess != NULL) {
     while (WaitForSingleObject(lpExecInfo.hProcess, 5) == WAIT_TIMEOUT) {
       MSG msg;
@@ -110,10 +108,14 @@ void execute_program(std::string operation, std::string fname, std::string args,
 
 void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
 
-void action_webpage(const std::string &url) {
+void url_open(const std::string &url) {
   tstring tstr_url = widen(url);
   tstring tstr_open = widen("open");
   ShellExecuteW(NULL, tstr_open.c_str(), tstr_url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+}
+
+void action_webpage(const std::string &url) {
+  url_open(url);
 }
 
 } // namespace enigma_user
