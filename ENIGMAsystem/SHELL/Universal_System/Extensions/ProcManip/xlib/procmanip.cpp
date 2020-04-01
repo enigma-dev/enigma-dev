@@ -27,7 +27,7 @@
 #include <X11/Xlib.h>
 #include <cstring>
 
-namespace enigma_user {
+namespace proc_manip {
 
 pid_t pid_from_wid(string wid) {
   unsigned long window = stoul(wid, nullptr, 10);
@@ -55,4 +55,4 @@ pid_t pid_from_wid(string wid) {
   return 0;
 }
 
-}
+} // namespace proc_manip
