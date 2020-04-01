@@ -12,7 +12,9 @@ void execute_shell(std::string operation, std::string fname, std::string args) {
   }
 }
 
-void execute_shell(std::string fname, std::string args) { execute_shell("", fname, args); }
+void execute_shell(std::string fname, std::string args) {
+  execute_shell("", fname, args);
+}
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
   if (system(NULL)) {
@@ -34,7 +36,9 @@ std::string execute_shell_for_output(const std::string &command) {
   return res;
 }
 
-void execute_program(std::string fname, std::string args, bool wait) { execute_program("", fname, args, wait); }
+void execute_program(std::string fname, std::string args, bool wait) {
+  execute_program("", fname, args, wait);
+}
 
 void url_open(std::string url, std::string target, std::string options) {
   execute_program("xdg-open", url, false);
