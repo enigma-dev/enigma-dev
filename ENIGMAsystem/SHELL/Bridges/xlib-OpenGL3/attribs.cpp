@@ -1,4 +1,4 @@
-#include <GL/glxew.h>
+#include <GL/gl.h>
 #include <GL/glx.h>
 
 namespace enigma {

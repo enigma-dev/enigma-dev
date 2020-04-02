@@ -44,10 +44,17 @@ namespace enigma {
   }
 
   GLXFBConfig* CreateFBConfig() {
+    
+    // Bind some functions we need
+    glXChooseFBConfig = (PFNGLXCHOOSEFBCONFIGPROC)glXGetProcAddress((GLubyte*)"glXChooseFBConfig");
+    glXGetVisualFromFBConfig = (PFNGLXGETVISUALFROMFBCONFIGPROC)glXGetProcAddress((GLubyte*)"glXGetVisualFromFBConfig");
+    glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddress((GLubyte*)"glXCreateContextAttribsARB");
+    
     // Prepare openGL
     GLint att[] = { GLX_DOUBLEBUFFER, True, GLX_DEPTH_SIZE, 24, None };
     int config_count;
-    fbc = glXChooseFBConfig(enigma::x11::disp, 0, att, &config_count);
+    
+    fbc = glXChooseFBConfig(enigma::x11::disp, DefaultScreen(enigma::x11::disp), att, &config_count);
     if (!fbc || config_count < 1)
       DEBUG_MESSAGE("Failed to Obtain GL Frambuffer config", MESSAGE_TYPE::M_FATAL_ERROR);
     return fbc;
