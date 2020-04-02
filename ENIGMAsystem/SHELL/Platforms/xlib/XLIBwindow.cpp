@@ -87,13 +87,15 @@ bool initGameWindow()
 
   // Defined in the appropriate graphics bridge.
   // Populates GLX attributes (or other graphics-system-specific properties).
-  XVisualInfo* vi = enigma::CreateVisualInfo();
+  GLXFBConfig* fbc = enigma::CreateFBConfig();
 
   // Window event listening and coloring
   XSetWindowAttributes swa;
   swa.border_pixel = 0;
   swa.background_pixel = (enigma::windowColor & 0xFF000000) | ((enigma::windowColor & 0xFF0000) >> 16) |
                          (enigma::windowColor & 0xFF00) | ((enigma::windowColor & 0xFF) << 16);
+                         
+  XVisualInfo* vi = glXGetVisualFromFBConfig(enigma::x11::disp, fbc[0]);
   swa.colormap = XCreateColormap(disp, root, vi->visual, AllocNone);
   swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
                    FocusChangeMask | StructureNotifyMask;
