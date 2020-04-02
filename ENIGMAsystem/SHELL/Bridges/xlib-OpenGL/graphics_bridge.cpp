@@ -32,8 +32,9 @@
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
 namespace enigma {
+  extern int context_attribs[];
   GLXContext glxc;
-  XVisualInfo *vi;
+  GLXFBConfig* fbc;
 
   extern void (*WindowResizedCallback)();
   void WindowResized() {
@@ -42,20 +43,21 @@ namespace enigma {
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
 
-  XVisualInfo* CreateVisualInfo() {
+  GLXFBConfig* CreateFBConfig() {
     // Prepare openGL
-    GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
-    vi = glXChooseVisual(enigma::x11::disp,0,att);
-    if (!vi)
-      DEBUG_MESSAGE("Failed to Obtain GL Visual Info", MESSAGE_TYPE::M_FATAL_ERROR);
-    return vi;
+    GLint att[] = { GLX_DOUBLEBUFFER, True, GLX_DEPTH_SIZE, 24, None };
+    int config_count;
+    fbc = glXChooseFBConfig(enigma::x11::disp, 0, att, &config_count);
+    if (!fbc || config_count < 1)
+      DEBUG_MESSAGE("Failed to Obtain GL Frambuffer config", MESSAGE_TYPE::M_FATAL_ERROR);
+    return fbc;
   }
 
   void EnableDrawing(void* handle) {
     WindowResizedCallback = &WindowResized;
 
     //give us a GL context
-    glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
+    glxc = glXCreateContextAttribsARB(enigma::x11::disp, fbc[0], 0, True, context_attribs);
     if (!glxc)
       DEBUG_MESSAGE("Failed to Create Graphics Context", MESSAGE_TYPE::M_FATAL_ERROR);
 
