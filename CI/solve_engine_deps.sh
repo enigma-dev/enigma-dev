@@ -17,7 +17,15 @@ fi
 
 ###### Platforms #######
 if [ "$PLATFORM" == "SDL" ] || [ "$TEST_HARNESS" == true ]; then
-  LINUX_DEPS="$LINUX_DEPS libsdl2-dev"
+  #LINUX_DEPS="$LINUX_DEPS libsdl2-dev"
+  pushd /tmp
+  curl -O https://www.libsdl.org/release/SDL2-2.0.12.tar.gz
+  tar -xf SDL2-2.0.12.tar.gz
+  cd SDL2-2.0.12/
+  ./configure --prefix=/usr
+  make
+  sudo make install
+  popd
 fi
 
 ###### Graphics #######

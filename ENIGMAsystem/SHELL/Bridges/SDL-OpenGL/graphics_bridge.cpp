@@ -35,6 +35,7 @@ SDL_GLContext context;
 const static SDL_GLprofile profile_types[3] = {SDL_GL_CONTEXT_PROFILE_CORE,SDL_GL_CONTEXT_PROFILE_COMPATIBILITY,SDL_GL_CONTEXT_PROFILE_ES};
 
 void init_sdl_window_bridge_attributes() {
+  SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "1");
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor);
   #ifdef DEBUG_MODE
