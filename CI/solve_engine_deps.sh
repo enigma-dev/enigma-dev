@@ -18,7 +18,6 @@ fi
 ###### Platforms #######
 if [ "$PLATFORM" == "SDL" ] || [ "$TEST_HARNESS" == true ]; then
   #LINUX_DEPS="$LINUX_DEPS libsdl2-dev"
-  ./CI/build-sdl.sh
 fi
 
 ###### Graphics #######

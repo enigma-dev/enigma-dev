@@ -2,6 +2,8 @@
 
 set -e
 
+./CI/build-sdl.sh
+
 export LIBGL_ALWAYS_SOFTWARE=1
 
 if [ "$TEST_HARNESS" == true ]; then
