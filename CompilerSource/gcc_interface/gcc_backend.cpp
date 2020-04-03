@@ -173,7 +173,7 @@ const char* establish_bearings(const char *compiler)
       }
       pos += idirstart.length();
     }
-    jdi::builtin->add_search_directory("/home/greg/enigma-dev/ENIGMAsystem/SHELL");
+    jdi::builtin->add_search_directory((enigma_root + "ENIGMAsystem/SHELL").c_str());
     jdi::builtin->add_search_directory(codegen_directory.c_str());
 
     while (is_useless(idirs[++pos]));
