@@ -206,4 +206,6 @@ gtest_expect_eq(filename_ext("C:/John/Doe/Smoe.gmx/datafiles/archive.tar.gz"),".
 gtest_expect_eq(filename_change_ext("C:/John/Doe/Smoe.txt",".dingtwo"),"C:/John/Doe/Smoe.dingtwo");
 
 /// We're done!
+file_delete(bin_path);
+file_delete(text_path);
 game_end();
