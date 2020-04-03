@@ -28,7 +28,7 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "general/darray.h"
+#include "darray.h"
 
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
@@ -39,12 +39,14 @@ int m_prog_loop_cfp();
 #include <sys/time.h>
 
 #ifdef _WIN32
+ #define byte __windows_byte_workaround
  #include <windows.h>
  #define dllexport extern "C" __declspec(dllexport)
    #define DECLARE_TIME() clock_t cs, ce
    #define START_TIME() cs = clock()
    #define STOP_TIME() ce = clock()
    #define PRINT_TIME() (((ce - cs) * 1000)/CLOCKS_PER_SEC)
+  #undef byte
 #else
  #define dllexport extern "C"
  #include <cstdio>
@@ -76,23 +78,8 @@ extern const char* establish_bearings(const char *compiler);
 //FIXME: remove this function from enigma.jar and here
 dllexport void libSetMakeDirectory(const char* dir) {} 
 
-static std::ofstream logFile("logs/enigma_compiler.log", std::ofstream::out);
-static std::ostream elog(nullptr);
-std::ostream realCout(nullptr);
-
 dllexport const char* libInit(EnigmaCallbacks* ecs)
-{
-  elog.rdbuf(logFile.rdbuf());
-  realCout.rdbuf(std::cout.rdbuf());
-  std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
-  if (ENIGMA_DEBUG != "TRUE") {
-    std::cout << "ENIGMA compiler log at: logs/enigma_compiler.log" << std::endl;
-    std::cout.rdbuf(elog.rdbuf());
-    std::cerr.rdbuf(elog.rdbuf());
-  } else {
-    realCout.rdbuf(nullptr);
-  }
-  
+{  
   if (ecs)
   {
     cout << "Linking up to IDE" << endl;

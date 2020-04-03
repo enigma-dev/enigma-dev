@@ -17,6 +17,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/var4.h"
+
 #include <string>
 using std::string;
 
@@ -67,8 +69,8 @@ enum {
 	int show_attempt(string errortext);
 	string get_string(string message, string def);
 	string get_password(string message, string def);
-	double get_integer(string message, double def);
-	double get_passcode(string message, double def);
+	double get_integer(string message, var def);
+	double get_passcode(string message, var def);
 	string get_open_filename(string filter, string fname);
 	string get_open_filenames(string filter, string fname);
 	string get_save_filename(string filter, string fname);

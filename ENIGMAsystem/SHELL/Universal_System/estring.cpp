@@ -35,7 +35,10 @@ using std::string;
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 using std::vector;
 
 tstring widen(const string &str) {

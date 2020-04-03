@@ -11,7 +11,7 @@ Make-Vars:
   cc: gcc-7
   cxx: g++-7
   cppflags:
-  cxxflags: -std=c++11 
+  cxxflags:
   cflags:
   ldflags:
   links:

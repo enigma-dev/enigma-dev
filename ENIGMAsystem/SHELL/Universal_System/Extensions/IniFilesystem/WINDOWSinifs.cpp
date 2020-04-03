@@ -27,7 +27,10 @@
 **                                                                              **
 \********************************************************************************/
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <cwchar>
 #include <string>
 

@@ -20,10 +20,10 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
   JOBS[15]='COLLISION=BBox EXTENSIONS="Alarms,Timelines,DataStructures,Asynchronous,BasicGUI,DateTime,GM5Compat,IniFilesystem,Json,XRandR,Paths,MotionPlanning,ttf,Box2DPhysics,StudioPhysics,BulletDynamics"'
   JOBS[16]='COMPILER=MinGW32 PLATFORM=Win32 Widgets=Win32 AUDIO=DirectSound EXTENSIONS="DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper" OUTPUT="/tmp/test.exe"'
   JOBS[17]='COMPILER=MinGW64 PLATFORM=Win32 Widgets=Win32 AUDIO=DirectSound EXTENSIONS="DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper" OUTPUT="/tmp/test.exe"'
-  JOBS[18]='COMPILER=gcc32'
-  JOBS[19]='COMPILER=clang'
-  JOBS[20]='COMPILER=clang32'
-  JOB_COUNT=21
+  JOBS[18]='COMPILER=clang'
+  #JOBS[18]='COMPILER=gcc32'
+  #JOBS[20]='COMPILER=clang32'
+  JOB_COUNT=19
   TRAVIS_WORKERS=4
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
   JOBS[0]='COMPILER=gcc PLATFORM=None'

@@ -3,16 +3,10 @@
 #include "yyp.h"
 #include "egm.h"
 
+#include "strings_util.h"
+
 #include <iostream>
 #include <string>
-
-static std::string tolower(const std::string &str) {
-  std::string res = str;
-  for (size_t i = 0; i < res.length(); ++i) {
-    if (res[i] >= 'A' && res[i] <= 'Z') res[i] += 'a' - 'A';
-  }
-  return res;
-}
 
 int main(int argc, char *argv[])
 {
@@ -24,7 +18,7 @@ int main(int argc, char *argv[])
   std::string input_file = argv[1];
   std::string ext;
   size_t dot = input_file.find_last_of('.');
-  if (dot != std::string::npos) ext = tolower(input_file.substr(dot + 1));
+  if (dot != std::string::npos) ext = ToLower(input_file.substr(dot + 1));
 
   buffers::Project* project = nullptr;
 

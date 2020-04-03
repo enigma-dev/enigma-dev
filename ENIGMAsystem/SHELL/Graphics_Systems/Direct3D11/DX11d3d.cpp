@@ -48,7 +48,7 @@ ID3D11ShaderResourceView *getDefaultWhiteTexture() {
       unsigned data[1] = {0xFFFFFFFF};
       texid = enigma::graphics_create_texture(1, 1, 1, 1, (void*)data, false);
     }
-    return ((enigma::DX11Texture*)enigma::textures[texid])->view;
+    return static_cast<enigma::DX11Texture*>(enigma::textures[texid].get())->view;
 }
 
 } // namespace anonymous
@@ -63,7 +63,7 @@ void graphics_state_flush_samplers() {
     const auto sampler = samplers[i];
 
     ID3D11ShaderResourceView *view = (sampler.texture == -1)?
-      nullTextureView:((enigma::DX11Texture*)enigma::textures[sampler.texture])->view;
+      nullTextureView:static_cast<enigma::DX11Texture*>(enigma::textures[sampler.texture].get())->view;
     m_deviceContext->PSSetShaderResources(i, 1, &view);
 
     D3D11_SAMPLER_DESC samplerDesc = { };

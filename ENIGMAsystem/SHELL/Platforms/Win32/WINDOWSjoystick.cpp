@@ -16,7 +16,10 @@
 **/
 
 #include <math.h>
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <string>
 using std::string;
 

@@ -28,7 +28,6 @@
 #include <vector>
 #include <map>
 
-
 // Note: there are two kinds of legacy in this file.
 //
 // 1. Legacy event identifiers, from the days of yore. These will forever exist

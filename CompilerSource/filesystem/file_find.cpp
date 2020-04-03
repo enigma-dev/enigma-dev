@@ -32,7 +32,9 @@ using namespace std;
 #include "file_find.h"
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-  #include <windows.h>
+   #define byte __windows_byte_workaround
+   #include <windows.h>
+   #undef byte
 
   static int ff_attribs=0;
   static HANDLE current_find = INVALID_HANDLE_VALUE;

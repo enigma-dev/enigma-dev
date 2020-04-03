@@ -21,6 +21,8 @@
 #include "Platforms/General/PFmain.h" // For those damn vk_ constants.
 #include "Platforms/General/PFwindow.h"
 
+#include "WINDOWSicon.h"
+
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include "strings_util.h" // For string_replace_all
@@ -28,7 +30,10 @@
 #include "Universal_System/roomsystem.h" // room_caption
 #include "Universal_System/globalupdate.h"
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <stdio.h>
 #include <string>
 using namespace std;
@@ -71,15 +76,45 @@ void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
 
 namespace enigma_user {
 
-#if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle() {
-  return (unsigned long long)enigma::hWnd;
+window_t window_handle() {
+  return reinterpret_cast<window_t>(enigma::hWnd);
 }
-#else
-void* window_handle() {
-  return enigma::hWnd;
+
+// returns an identifier for the HWND window
+// this string can be used in shell scripts
+string window_identifier() {
+  return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
 }
-#endif
+
+// returns an identifier for certain window
+// this string can be used in shell scripts
+string window_get_identifier(window_t hwnd) {
+  return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
+}
+
+static int currentIconIndex = -1;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::SetIconFromSprite(enigma::hWnd, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
+}
 
 // GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
 // Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,
@@ -318,11 +353,13 @@ void display_mouse_set(int x,int y) {
 }
 
 int display_get_x() {
-  return 0; // TODO
+  // Windows is different than our Unix-like platforms in that this value is always zero...
+  return 0;
 }
 
 int display_get_y() {
-  return 0; // TODO
+  // Windows is different than our Unix-like platforms in that this value is always zero...
+  return 0;
 }
 
 int display_get_width() {

@@ -1,0 +1,20 @@
+resources:
+  repositories:
+    - repository: radialgm
+      type: github
+      name: enigma-dev/RadialGM
+      endpoint: github.com_EnigmaBot
+      # ref: refs/pull/106/merge # Use this for testing a co-dependent rgm pr but comment this before merging 
+      
+pr:  # Trigger a build on every PR.
+  branches:
+    include:
+      - '*'  # Must quote since "*" is a YAML reserved character
+variables:
+- template: azure-vars.yml@radialgm
+
+jobs:
+- template: azure-jobs.yml@radialgm
+  parameters:
+    repo: radialgm
+    enigmaref: $(Build.SourceBranch)

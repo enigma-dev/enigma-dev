@@ -21,6 +21,7 @@
 #include "image_formats_exts.h"
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Universal_System/nlpo2.h"
 
 #include "gif_format.h"
 
@@ -50,6 +51,34 @@ namespace enigma
 
 std::map<std::string, ImageLoadFunction> image_load_handlers;
 std::map<std::string, ImageSaveFunction> image_save_handlers;
+
+unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size) {
+  unsigned widfull = nlpo2dc(pngwidth) + 1, hgtfull = nlpo2dc(pngheight) + 1, ih, iw;
+  const int bitmap_size = widfull * hgtfull * 4;
+  unsigned char *bitmap = new unsigned char[bitmap_size]();
+
+  unsigned i = 0;
+  unsigned elem_numb = pngwidth * pngheight + ((prepend_size) ? 2 : 0);
+  unsigned long *result = new unsigned long[elem_numb]();
+  if (prepend_size) {
+    result[i++] = pngwidth; result[i++] = pngheight; // this is required for xlib icon hint
+  }
+
+  for (ih = 0; ih < pngheight; ih++) {
+    unsigned tmp = ih * widfull * 4;
+    for (iw = 0; iw < pngwidth; iw++) {
+      bitmap[tmp + 0] = bgra_data[4 * pngwidth * ih + iw * 4 + 0];
+      bitmap[tmp + 1] = bgra_data[4 * pngwidth * ih + iw * 4 + 1];
+      bitmap[tmp + 2] = bgra_data[4 * pngwidth * ih + iw * 4 + 2];
+      bitmap[tmp + 3] = bgra_data[4 * pngwidth * ih + iw * 4 + 3];
+      result[i++] = bitmap[tmp + 0] | (bitmap[tmp + 1] << 8) | (bitmap[tmp + 2] << 16) | (bitmap[tmp + 3] << 24);
+      tmp += 4;
+    }
+  }
+
+  delete[] bitmap;
+  return result;
+}
 
 void image_add_loader(std::string format, ImageLoadFunction fnc) {
   image_load_handlers[format] = fnc;
@@ -235,7 +264,7 @@ unsigned char* image_decode_bmp(
     unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
   // Check file size against bitmap header size
   if (image_data.length() < sizeof(BMPFileHeader)) {
-    fprintf(stderr, "Junk bitmap of size %ul", image_data.size());
+    fprintf(stderr, "Junk bitmap of size %lu", image_data.size());
     return nullptr;
   }
 
@@ -244,7 +273,7 @@ unsigned char* image_decode_bmp(
   // Verify magic number, check header offset sanity.
   if (bmp_file.magic_b != 'B' || bmp_file.magic_m != 'M' ||
       bmp_file.dataStart + sizeof(BMPInfoHeader) > image_data.length()) {
-    fprintf(stderr, "Junk bitmap of size %ul", image_data.size());
+    fprintf(stderr, "Junk bitmap of size %lu", image_data.size());
     return nullptr;
   }
 
