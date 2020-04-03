@@ -2,7 +2,7 @@
 
 set -e
 
-./CI/build-sdl.sh
+./CI/build_sdl.sh
 
 export LIBGL_ALWAYS_SOFTWARE=1
 
