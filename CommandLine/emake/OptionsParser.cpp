@@ -265,7 +265,6 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   yaml += "inherit-equivalence-from: " + std::to_string(inherit_equivalence) + "\n";
   yaml += "eobjs-directory: " + eobjs_directory + "\n";
   yaml += "codegen-directory: " + codegen_directory + "\n";
-  yaml += "enigma-root: " + _enigmaRoot + "\n";
   yaml += "sample-checkbox: on\n";
   yaml += "sample-edit: DEADBEEF\n";
   yaml += "sample-combobox: 0\n";

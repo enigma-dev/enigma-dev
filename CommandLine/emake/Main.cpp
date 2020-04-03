@@ -60,6 +60,9 @@ int main(int argc, char* argv[])
 
   EnigmaPlugin plugin;
   plugin.Load();
+  CallBack ecb;
+  plugin.Init(&ecb, options.EnigmaRoot());
+  
   bool quiet = options.GetOption("quiet").as<bool>();
   if (!quiet) {
     plugin.LogMakeToConsole();
@@ -82,8 +85,6 @@ int main(int argc, char* argv[])
     std::cerr.rdbuf(elog.rdbuf());
   }
   
-  CallBack ecb;
-  plugin.Init(&ecb);
   plugin.SetDefinitions(options.APIyaml().c_str());
   std::string output_file;
 
