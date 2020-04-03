@@ -74,6 +74,8 @@ void sprite_add_subimage(int sprid, unsigned int w, unsigned int h, unsigned cha
                          collision_type ct);
 void spritestructarray_reallocate();
 
+bool get_sprite_mtx(sprite* &spr, int id);
+
 extern const bbox_rect_t &sprite_get_bbox(int sprid);
 extern const bbox_rect_t &sprite_get_bbox_relative(int sprid);
 }  //namespace enigma

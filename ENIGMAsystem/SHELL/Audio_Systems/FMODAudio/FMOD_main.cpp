@@ -40,7 +40,10 @@ static inline double max(double x,double y) { return x>y?x:y; }
 #define WIN32_LEAN_AND_MEAN
 #define NOGDI
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 //#include <windowsx.h>
 #include "additional/FMOD/inc/fmod.h" // FIX ME: additional is missing
 #include "Universal_System/var4.h"

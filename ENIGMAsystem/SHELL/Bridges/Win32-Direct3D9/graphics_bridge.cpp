@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -25,7 +25,10 @@
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <d3d9.h>
 
 using namespace enigma::dx9;
@@ -51,7 +54,6 @@ LPDIRECT3DDEVICE9 d3ddev = NULL; // the pointer to the device class
 
 } // namespace dx9
 
-extern HWND hWnd;
 extern bool forceSoftwareVertexProcessing;
 
 void OnDeviceLost() {
@@ -99,7 +101,6 @@ void WindowResized() {
 }
 
 void EnableDrawing(void* handle) {
-  get_window_handle();
   WindowResizedCallback = &WindowResized;
 
   HRESULT hr;

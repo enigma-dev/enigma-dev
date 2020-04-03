@@ -10,12 +10,12 @@ else
   do
     MODE="$mode" ./ci-build.sh
     if [ "$COMPILER" == "MinGW64" ]; then
-      WINEPREFIX=~/.wine64 WINEARCH=win64 xvfb-run wine64 $OUTPUT > >(tee -a tee logs/enigma_game.log) 2> >(tee -a tee logs/enigma_game.log >&2)
+      WINEPREFIX=~/.wine64 WINEARCH=win64 xvfb-run wine64 $OUTPUT > >(tee -a tee /tmp/enigma_game.log) 2> >(tee -a tee /tmp/enigma_game.log >&2)
     elif [ "$COMPILER" == "MinGW32" ]; then
-      WINEPREFIX=~/.wine32 WINEARCH=win32 xvfb-run wine $OUTPUT > >(tee -a tee logs/enigma_game.log) 2> >(tee -a tee logs/enigma_game.log >&2)
+      WINEPREFIX=~/.wine32 WINEARCH=win32 xvfb-run wine $OUTPUT > >(tee -a tee /tmp/enigma_game.log) 2> >(tee -a tee /tmp/enigma_game.log >&2)
     #FIXME: these should run but are bugged
     elif [[ ! "$GRAPHICS" =~ "OpenGLES" ]] && [ "$PLATFORM" != "SDL" ] && [[ ! "$COMPILER" =~ "clang" ]]; then
-      xvfb-run $OUTPUT > >(tee -a tee logs/enigma_game.log) 2> >(tee -a tee logs/enigma_game.log >&2)
+      xvfb-run $OUTPUT > >(tee -a tee /tmp/enigma_game.log) 2> >(tee -a tee /tmp/enigma_game.log >&2)
     fi
     ./share_logs.sh
   done

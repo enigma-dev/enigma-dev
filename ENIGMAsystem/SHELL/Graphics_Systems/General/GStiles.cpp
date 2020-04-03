@@ -77,7 +77,7 @@ namespace enigma
       enigma_user::vertex_texcoord(vertex, tbx2, tby2);
       enigma_user::vertex_color(vertex, t.color, t.alpha);
 
-      IndexBuffer* indexBuffer = indexBuffers[index];
+      auto& indexBuffer = indexBuffers[index];
       int indices[] = {ind + 0, ind + 1, ind + 2, ind + 2, ind + 1, ind + 3};
       indexBuffer->indices.insert(indexBuffer->indices.end(), indices, indices + 6);
       ind += 4;

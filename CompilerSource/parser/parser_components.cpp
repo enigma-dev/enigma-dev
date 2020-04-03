@@ -31,7 +31,7 @@
 #include <iostream>
 #include <cstdio>
 using namespace std;
-#include "general/darray.h"
+#include "darray.h"
 
 #include "general/parse_basics_old.h"
 #include "general/macro_integration.h"

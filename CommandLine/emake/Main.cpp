@@ -15,7 +15,8 @@
 #include "yyp.h"
 #endif
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <fstream>
 #include <iostream>
@@ -24,7 +25,6 @@
 
 std::ostream outputStream(nullptr);
 std::ostream errorStream(nullptr);
-std::ofstream egmlog("logs/enigma_libegm.log", std::ofstream::out);
 
 static std::string tolower(const std::string &str) {
   std::string res = str;
@@ -36,6 +36,9 @@ static std::string tolower(const std::string &str) {
 
 int main(int argc, char* argv[])
 {
+  std::ofstream egmlog(fs::temp_directory_path().string() + "/enigma_libegm.log", std::ofstream::out);
+  std::ofstream elog(fs::temp_directory_path().string() + "/enigma_compiler.log", std::ofstream::out);
+
   std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
   if (ENIGMA_DEBUG == "TRUE") {
     outputStream.rdbuf(std::cout.rdbuf());
@@ -43,7 +46,8 @@ int main(int argc, char* argv[])
   } else {
     outputStream.rdbuf(egmlog.rdbuf());
     errorStream.rdbuf(egmlog.rdbuf());
-    std::cout << "LibEGM parsing log at: logs/enigma_libegm.log" << std::endl;
+    std::cout << "LibEGM parsing log at: " << fs::temp_directory_path().string() << "/enigma_libegm.log" << std::endl;
+    std::cout << "ENIGMA compiler log at: " << fs::temp_directory_path().string() << "/enigma_compiler.log" << std::endl;
   }
   
   
@@ -68,11 +72,26 @@ int main(int argc, char* argv[])
   gmx::bind_output_streams(outputStream, errorStream);
   gmk::bind_output_streams(outputStream, errorStream);
 #endif
+
+  std::streambuf* cout_rdbuf = std::cout.rdbuf();
+  std::streambuf* cerr_rdbuf = std::cerr.rdbuf();
+    
+  if (ENIGMA_DEBUG != "TRUE") {
+    // Hijack cout/cerr from plugin to hide jdi startup crap that scares people
+    std::cout.rdbuf(elog.rdbuf());
+    std::cerr.rdbuf(elog.rdbuf());
+  }
+  
   CallBack ecb;
   plugin.Init(&ecb);
   plugin.SetDefinitions(options.APIyaml().c_str());
-
   std::string output_file;
+
+  if (ENIGMA_DEBUG != "TRUE") {
+    //Restore cout/cerr
+    std::cout.rdbuf(cout_rdbuf);
+    std::cerr.rdbuf(cerr_rdbuf);
+  }
 
   if (!options.GetOption("output").empty())
     output_file = options.GetOption("output").as<std::string>();
@@ -124,7 +143,7 @@ int main(int argc, char* argv[])
     game.SetOutputFile(input_file);
 
   if (input_file.size()) {
-    if (!boost::filesystem::exists(input_file)) {
+    if (!fs::exists(input_file)) {
       std::cerr << "Input file does not exist: " << input_file << std::endl;
       return OPTIONS_ERROR;
     }
@@ -139,20 +158,20 @@ int main(int argc, char* argv[])
     } else if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
       buffers::Project* project;
       if (!(project = gmk::LoadGMK(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+      return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext == "gmx") {
-      boost::filesystem::path p = input_file;
-      if (boost::filesystem::is_directory(p)) {
+      fs::path p = input_file;
+      if (fs::is_directory(p)) {
         input_file += "/" + p.filename().stem().string() + ".project.gmx";
       }
 
       buffers::Project* project;
       if (!(project = gmx::LoadGMX(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+      return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext == "yyp") {
       buffers::Project* project;
       if (!(project = yyp::LoadYYP(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+      return plugin.BuildGame(project->game(), mode, output_file.c_str());
 #endif
     } else {
       if (ext == "egm") {

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<object>
+  <spriteName>&lt;undefined&gt;</spriteName>
+  <solid>-1</solid>
+  <visible>-1</visible>
+  <depth>1</depth>
+  <persistent>0</persistent>
+  <maskName>&lt;undefined&gt;</maskName>
+  <parentName>&lt;undefined&gt;</parentName>
+  <events>
+    <event enumb="0" eventtype="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>//Make a sprite&#13;
+s_sfc = surface_create(32,32);&#13;
+&#13;
+surface_set_target(s_sfc);&#13;
+draw_clear_alpha(c_white,0);&#13;
+draw_set_color(c_navy);&#13;
+draw_circle(16,16,16,0);&#13;
+surface_reset_target();&#13;
+&#13;
+if (surface_exists(s_sfc))&#13;
+{&#13;
+	s_sprt = sprite_create_from_surface(s_sfc,0,0,32,32,0,1,16,16);&#13;
+}&#13;
+else&#13;
+{&#13;
+	s_sprt = 0;&#13;
+}&#13;
+&#13;
+if (sprite_exists(s_sprt))&#13;
+{&#13;
+	sprite_index = s_sprt;&#13;
+}&#13;
+&#13;
+//Not handled yet: move_bounce_object, line_ellipse_intersects&#13;
+gtest_expect_eq(position_free(x,y),0);&#13;
+&#13;
+gtest_expect_eq(position_empty(122,122),1);&#13;
+gtest_expect_eq(position_meeting(48,48,obj_player),1);&#13;
+gtest_expect_eq(collision_rectangle(16,16,80,80,obj_player,1,0),100000);&#13;
+gtest_expect_eq(collision_line(16,10,80,80,obj_player,1,0),100000);&#13;
+gtest_expect_eq(collision_point(40,56,obj_player,1,0),100000);&#13;
+gtest_expect_eq(collision_circle(44,52,3,obj_player,1,0),100000);&#13;
+gtest_expect_eq(collision_ellipse(40,40,54,54,obj_player,1,0),100000);&#13;
+gtest_expect_eq(instance_position(48,48,obj_player),100000);&#13;
+&#13;
+gtest_expect_eq(distance_to_point(33,32),1);&#13;
+alarm[0] = 1;</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="1" eventtype="2">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>gtest_expect_eq(instance_position(128,48,obj_enemy),100002);&#13;
+position_destroy_solid(128,48);&#13;
+gtest_expect_eq(instance_position(128,48,obj_enemy),noone);&#13;
+instance_create(224,224,obj_enemy);&#13;
+gtest_expect_eq(instance_position(224,224,obj_enemy),100003);&#13;
+position_destroy(224,224);&#13;
+gtest_expect_eq(instance_position(224,224,obj_enemy),noone);&#13;
+&#13;
+instance_create(48,128,obj_enemy);&#13;
+move_contact_object(obj_enemy,270,-1,1);&#13;
+gtest_expect_eq(y,96);&#13;
+x = 48;&#13;
+y = 128;&#13;
+move_outside_object(obj_enemy,0,-1,0);&#13;
+gtest_expect_eq(x,80);&#13;
+x = 96;&#13;
+y = 212;&#13;
+instance_deactivate_region(16,96,32,32,1,1);&#13;
+gtest_expect_eq(instance_position(48,128,obj_enemy),noone);&#13;
+instance_activate_region(16,96,32,32,1);&#13;
+gtest_expect_eq(instance_position(48,128,obj_enemy),100004);&#13;
+instance_deactivate_circle(48,96,6,1,1);&#13;
+gtest_expect_eq(instance_position(48,96,obj_enemy),noone);&#13;
+instance_activate_circle(48,96,6,1);&#13;
+gtest_expect_eq(instance_position(48,128,obj_enemy),100004);&#13;
+&#13;
+game_end();</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="0" eventtype="2">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>position_change(128,128,obj_change,1);&#13;
+gtest_expect_eq(instance_exists(obj_change),1);&#13;
+gtest_expect_eq(instance_position(128,128,obj_change),100001);&#13;
+gtest_expect_eq(instance_position(128,128,obj_enemy),noone);&#13;
+&#13;
+//Check destroying objects at position&#13;
+position_destroy_object(128,128,obj_change);&#13;
+gtest_expect_eq(instance_position(128,128,obj_change),noone);&#13;
+object_set_solid(obj_enemy,1);&#13;
+instance_create(128,48,obj_enemy);&#13;
+gtest_expect_eq(distance_to_object(obj_enemy),48);
+gtest_expect_eq(instance_position(128,48,obj_enemy),100002);&#13;
+alarm[1] = 1;</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="0" eventtype="8">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/*if (position_meeting(x,y,obj_enemy))&#13;
+{draw_set_color(c_red)}&#13;
+else&#13;
+{draw_set_color(c_lime);}&#13;
+draw_circle(x,y,16,0);&#13;
+draw_set_color(c_black);&#13;
+draw_circle(x,y,1,0);*/&#13;
+draw_sprite(sprite_index,image_index,x,y);&#13;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+  </events>
+  <PhysicsObject>0</PhysicsObject>
+  <PhysicsObjectSensor>0</PhysicsObjectSensor>
+  <PhysicsObjectShape>0</PhysicsObjectShape>
+  <PhysicsObjectDensity>0.5</PhysicsObjectDensity>
+  <PhysicsObjectRestitution>0.1</PhysicsObjectRestitution>
+  <PhysicsObjectGroup>0</PhysicsObjectGroup>
+  <PhysicsObjectLinearDamping>0.1</PhysicsObjectLinearDamping>
+  <PhysicsObjectAngularDamping>0.1</PhysicsObjectAngularDamping>
+  <PhysicsObjectFriction>0.2</PhysicsObjectFriction>
+  <PhysicsObjectAwake>-1</PhysicsObjectAwake>
+  <PhysicsObjectKinematic>0</PhysicsObjectKinematic>
+  <PhysicsShapePoints/>
+</object>

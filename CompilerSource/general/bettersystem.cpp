@@ -100,7 +100,9 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    #define byte __windows_byte_workaround
     #include <windows.h>
+    #undef byte
 
     int e_exec(const char* fcmd, const char* *Cenviron)
     {

@@ -48,6 +48,8 @@ bool get_sprite(enigma::sprite* &spr, int id)
     return true;
 }
 
+namespace enigma {
+
 bool get_sprite_mtx(enigma::sprite* &spr, int id)
 {
     bool rtn = get_sprite(spr, id);
@@ -57,11 +59,11 @@ bool get_sprite_mtx(enigma::sprite* &spr, int id)
     return rtn;
 }
 
-namespace enigma {
-  sprite** spritestructarray;
-  extern size_t sprite_idmax;
-  sprite::sprite() {}
-  sprite::sprite(int x) {}
+sprite** spritestructarray;
+extern size_t sprite_idmax;
+sprite::sprite() {}
+sprite::sprite(int x) {}
+
 }
 
 namespace enigma_user

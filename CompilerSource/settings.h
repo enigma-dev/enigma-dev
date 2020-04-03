@@ -94,7 +94,7 @@ struct CompilerInfo {
 };
 
 extern CompilerInfo compilerInfo;
-
+extern std::string enigma_root;
 bool load_compiler_ey(std::string fPath);
 
 #endif

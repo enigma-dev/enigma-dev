@@ -68,8 +68,6 @@ SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AU
 OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 
 SHARED_SRC_DIR := ../../shared/
-include $(SHARED_SRC_DIR)/Makefile
-include $(SHARED_SRC_DIR)/rectpacker/Makefile
 
 ###########
 # options #
@@ -78,7 +76,8 @@ include $(SHARED_SRC_DIR)/rectpacker/Makefile
 CXX := g++
 CC := gcc
 DEPENDENCIES :=
-
+override CXXFLAGS += -std=c++17
+ 
 ifeq ($(GMODE), Debug)
 	override CXXFLAGS += -Wall -g -DDEBUG_MODE
 	override CFLAGS += -Wall -g -DDEBUG_MODE
