@@ -24,7 +24,7 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
   #JOBS[18]='COMPILER=gcc32'
   #JOBS[20]='COMPILER=clang32'
   JOB_COUNT=19
-  TRAVIS_WORKERS=4
+  TRAVIS_WORKERS=5
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
   JOBS[0]='COMPILER=gcc PLATFORM=None'
   JOBS[1]='COMPILER=clang PLATFORM=None'
