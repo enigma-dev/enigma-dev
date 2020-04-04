@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$TRAVIS_OS_NAME" == "linux" ] || ["$Agent.OS" == "Linux" ]; then
+if [ "$TRAVIS_OS_NAME" == "linux" ] || ["${Agent.OS}" == "Linux" ]; then
   JOBS[0]='PLATFORM=None GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"'
   JOBS[1]='PLATFORM=SDL GRAPHICS=OpenGL1'
   JOBS[2]='PLATFORM=SDL GRAPHICS=OpenGL3'
@@ -25,7 +25,7 @@ if [ "$TRAVIS_OS_NAME" == "linux" ] || ["$Agent.OS" == "Linux" ]; then
   #JOBS[20]='COMPILER=clang32'
   JOB_COUNT=19
   TRAVIS_WORKERS=5
-elif [ "$TRAVIS_OS_NAME" == "osx" ] || ["$Agent.OS" == "Darwin" ]; then
+elif [ "$TRAVIS_OS_NAME" == "osx" ] || ["${Agent.OS}" == "Darwin" ]; then
   JOBS[0]='COMPILER=gcc PLATFORM=None'
   JOBS[1]='COMPILER=clang PLATFORM=None'
   JOB_COUNT=2
@@ -55,18 +55,18 @@ if [ "$1" == "install" ]; then
   MINGW_DEPS="FALSE"
   for job in $(seq $START 1 $END);
   do
-    if [ "$TRAVIS_OS_NAME" == "linux" ] || ["$Agent.OS" == "Linux" ]; then
+    if [ "$TRAVIS_OS_NAME" == "linux" ] || ["${Agent.OS}" == "Linux" ]; then
       LINUX_DEPS=$(bash -c "${JOBS[$job]} LINUX_DEPS=\"$LINUX_DEPS\" ./CI/solve_engine_deps.sh")
       if [[ "${JOBS[$job]}" =~ "MinGW" ]]; then
         MINGW_DEPS="TRUE"
       fi
-    elif [ "$TRAVIS_OS_NAME" == "osx" ] || ["$Agent.OS" == "Darwin" ]; then
+    elif [ "$TRAVIS_OS_NAME" == "osx" ] || ["${Agent.OS}" == "Darwin" ]; then
       OSX_DEPS=$(bash -c "${JOBS[$job]} OSX_DEPS=\"$OSX_DEPS\" ./CI/solve_engine_deps.sh")
     fi
   done
 
   ###### Install Deps #######
-  if [ "$TRAVIS_OS_NAME" == "linux" ] || ["$Agent.OS" == "Linux" ]; then
+  if [ "$TRAVIS_OS_NAME" == "linux" ] || ["${Agent.OS}" == "Linux" ]; then
     sudo apt-get -y install $LINUX_DEPS
     
     if [ "$MINGW_DEPS" == "TRUE" ]; then
@@ -77,7 +77,7 @@ if [ "$1" == "install" ]; then
       mv ENIGMAsystem/Install ENIGMAsystem/Additional;
     fi
     
-  elif [ "$TRAVIS_OS_NAME" == "osx" ] || ["$Agent.OS" == "Darwin" ]; then
+  elif [ "$TRAVIS_OS_NAME" == "osx" ] || ["${Agent.OS}" == "Darwin" ]; then
     brew install $OSX_DEPS
   fi
   
