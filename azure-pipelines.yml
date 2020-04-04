@@ -24,6 +24,7 @@ jobs:
   variables:
     TEST_HARNESS: "true"
     TRAVIS_OS_NAME: "linux"
+    TRAVIS: "true"
   pool:
     vmImage: 'ubuntu-latest'
   timeoutInMinutes: 360
