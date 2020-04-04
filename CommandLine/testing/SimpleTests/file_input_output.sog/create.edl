@@ -190,6 +190,9 @@ gtest_expect_false(file_exists("Games Are Fun.txt"));
 gtest_expect_false(file_exists("Development Community.txt"));
 gtest_expect_false(file_exists("ENIGMA John Doe.txt"));
 
+directory_delete("ENIGMA Folders");
+gtest_expect_false(directory_exists("ENIGMA Folders"));
+
 gtest_expect_eq(filename_name("C:/John/Doe/Smoe.txt"),"Smoe.txt");
 gtest_expect_eq(filename_path("C:/John/Doe/Smoe.txt"),"C:/John/Doe/");
 gtest_expect_eq(filename_dir("C:/John/Doe/Smoe.txt"),"C:/John/Doe");
