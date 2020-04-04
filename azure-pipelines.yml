@@ -36,6 +36,7 @@ jobs:
         sudo dpkg --add-architecture i386
         ./CI/install_emake_deps.sh
         ./CI/split_jobs.sh install
+        ./CI/build_sdl.sh
       displayName: Install Dependencies
       
     - script: |
