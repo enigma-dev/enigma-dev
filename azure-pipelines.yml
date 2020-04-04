@@ -23,6 +23,7 @@ jobs:
   displayName: 'Test Harness'
   variables:
     TEST_HARNESS: "true"
+    TRAVIS_OS_NAME: "linux"
   pool:
     vmImage: 'ubuntu-latest'
   timeoutInMinutes: 360
