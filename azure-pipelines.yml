@@ -19,7 +19,7 @@ jobs:
     repo: radialgm
     enigmaref: $(Build.SourceBranch)
 
-- job: Test Harness
+- job: TestHarness
   displayName: 'Test Harness'
   variables:
     TEST_HARNESS: true
