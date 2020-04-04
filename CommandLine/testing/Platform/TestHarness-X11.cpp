@@ -7,6 +7,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <X11/Xlib.h>
@@ -71,6 +72,36 @@ Window find_window_by_pid(Display *disp, Window win, pid_t pid) {
 
 class X11_TestHarness final: public TestHarness {
  public:
+  std::vector<TestConfig> GetValidConfigs(bool platforms, bool graphics, bool audio, bool collisions, bool widgets, bool network) {
+    std::vector<TestConfig> tcs;
+    
+    for (std::string_view p : (platforms) ? {"xlib", "SDL" } : {"xlib"}) {
+      for (std::string_view g : (graphics) ? {"OpenGL1", "OpenGL3", "OpenGLES2", "OpenGLES3" } : {"OpenGL1"}) {
+        // Invalid combos
+        if (g == "OpenGLES2" && p != "SDL2") continue;
+        if (g == "OpenGLES3" && p != "SDL2") continue;
+        for (std::string_view a : (audio) ? {"OpenAL", "SFML" } : {"OpenAL"}) {
+          for (std::string_view c : (collisions) ? {"BBox", "Precise" } : {"Precise"}) {
+            for (std::string_view w : (widgets) ? {"None", "GTK+", "xlib" } : {"None"}) {
+              for (std::string_view n : (network) ? {"None", "BerkeleySockets", "Asynchronous" } : {"None"}) {
+                TestConfig tc;
+                tc.platform = p;
+                tc.graphics = g;
+                tc.audio = a;
+                tc.collision = c;
+                tc.widgets = w;
+                tc.network = n;
+                tcs.push_back(tc);
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    return tcs;
+  }
+  
   string get_caption() final {
     return get_window_caption(display, window_id);
   }
