@@ -7,6 +7,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <X11/Xlib.h>
@@ -71,6 +72,36 @@ Window find_window_by_pid(Display *disp, Window win, pid_t pid) {
 
 class X11_TestHarness final: public TestHarness {
  public:
+  std::vector<TestConfig> GetValidConfigs(bool platforms, bool graphics, bool audio, bool collisions, bool widgets, bool network) {
+    std::vector<TestConfig> tcs;
+    
+    for (std::string_view p : (platforms) ? {"xlib", "SDL" } : {"xlib"}) {
+      for (std::string_view g : (graphics) ? {"OpenGL1", "OpenGL3", "OpenGLES2", "OpenGLES3" } : {"OpenGL1"}) {
+        // Invalid combos
+        if (g == "OpenGLES2" && p != "SDL2") continue;
+        if (g == "OpenGLES3" && p != "SDL2") continue;
+        for (std::string_view a : (audio) ? {"OpenAL", "SFML" } : {"OpenAL"}) {
+          for (std::string_view c : (collisions) ? {"BBox", "Precise" } : {"Precise"}) {
+            for (std::string_view w : (widgets) ? {"None", "GTK+", "xlib" } : {"None"}) {
+              for (std::string_view n : (network) ? {"None", "BerkeleySockets", "Asynchronous" } : {"None"}) {
+                TestConfig tc;
+                tc.platform = p;
+                tc.graphics = g;
+                tc.audio = a;
+                tc.collision = c;
+                tc.widgets = w;
+                tc.network = n;
+                tcs.push_back(tc);
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    return tcs;
+  }
+  
   string get_caption() final {
     return get_window_caption(display, window_id);
   }
@@ -176,6 +207,7 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   string emake_cmd = "./emake";
   string compiler = "--compiler=" + tc.get_or(&TC::compiler, "TestHarness");
   string mode = "--mode=" + tc.get_or(&TC::mode, "Debug");
+  string platform = "--platform=" + tc.get_or(&TC::platform, "xlib");
   string graphics = "--graphics=" + tc.get_or(&TC::graphics, "OpenGL1");
   string audio = "--audio=" + tc.get_or(&TC::audio, "OpenAL");
   string widgets = "--widgets=" + tc.get_or(&TC::widgets, "None");
@@ -188,6 +220,7 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
     emake_cmd.c_str(),
     compiler.c_str(),
     mode.c_str(),
+    platform.c_str(),
     graphics.c_str(),
     audio.c_str(),
     widgets.c_str(),

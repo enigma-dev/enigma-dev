@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 const std::string kGamesDir = "CommandLine/testing/Tests/";
 
@@ -11,6 +12,7 @@ struct TestConfig {
   std::string codegen;
   std::string compiler;
   std::string mode;
+  std::string platform;
   std::string graphics;
   std::string audio;
   std::string widgets;
@@ -22,10 +24,26 @@ struct TestConfig {
     std::string mine = this->*option;
     return mine.empty() ? alt : mine;
   }
+  
+  std::string stringify() {
+    std::string str;
+    
+    str += "[" + platform + "]";
+    str += "[" + graphics + "]";
+    str += "[" + audio + "]";
+    str += "[" + collision + "]";
+    str += "[" + widgets + "]";
+    str += "[" + network + "]";
+    str += "[" + extensions + "]";
+    
+    return str;
+  }
 };
 
 class TestHarness {
  public:
+  virtual std::vector<TestConfig> GetValidConfigs(bool platforms, bool graphics, bool audio, bool collisions, bool widgets, bool network) = 0;
+  
   virtual std::string get_caption() = 0;
 
   // Window manipulation

@@ -18,3 +18,38 @@ jobs:
   parameters:
     repo: radialgm
     enigmaref: $(Build.SourceBranch)
+
+- job: TestHarness
+  displayName: 'Test Harness'
+  variables:
+    TEST_HARNESS: "true"
+    TRAVIS_OS_NAME: "linux"
+    TRAVIS: "true"
+  pool:
+    vmImage: 'ubuntu-latest'
+  timeoutInMinutes: 360
+
+  steps:
+    - checkout: self
+      persistCredentials: true
+      
+    - script: |
+        sudo dpkg --add-architecture i386
+        ./CI/install_emake_deps.sh
+        ./CI/split_jobs.sh install
+        ./CI/build_sdl.sh
+      displayName: Install Dependencies
+      
+    - script: |
+        make -j4
+        make -j4 emake
+      displayName: Build emake
+      
+    - script: |
+        make emake-tests
+        ./emake-tests
+      displayName: Test emake
+      
+    - script: |
+        ./CI/build_and_run_game.sh
+      displayName: Run Test Harness
