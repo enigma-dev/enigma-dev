@@ -10,8 +10,9 @@ namespace fs = std::filesystem;
 #include <string>
 #include <vector>
 
-namespace {
+TestHarness* TestHarness::m_instance = nullptr;
 
+namespace {
 
 using std::map;
 using std::string;
@@ -103,11 +104,10 @@ vector<string> enumerate_simple_games() {
 class SimpleTestHarness : public testing::TestWithParam<string> {};
 
 TEST_P(SimpleTestHarness, SimpleTestRunner) {
-        
   string game = GetParam();
     
   // Iterate only platforms, graphics & collision systems for now
-  for (TestConfig tc : TestHarness::GetValidConfigs(true, true, false, true, false, false)) {
+  for (TestConfig tc : TestHarness::m_instance->GetValidConfigs(true, true, false, true, false, false)) {
   
     tc.extensions = "Alarms,Timelines,Paths,MotionPlanning,IniFilesystem,ParticleSystems,DateTime,DataStructures,libpng,GTest";
     int ret = TestHarness::run_to_completion(game, tc);
@@ -132,6 +132,7 @@ TEST_P(SimpleTestHarness, SimpleTestRunner) {
       default:
         FAIL() << "Game \"" << game << "\" returned " << ret << ". "
                   "Check log for other errors (possibly gTest-flavored).";
+    }
   }
 }
 
