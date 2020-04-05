@@ -36,6 +36,7 @@ using enigma_user::filename_name;
 using enigma_user::filename_path;
 
 #include "Platforms/General/PFmain.h"
+#include "Platforms/General/PFshell.h"
 using enigma_insecure::execute_shell_for_output;
 
 #include "Platforms/General/PFwindow.h"
