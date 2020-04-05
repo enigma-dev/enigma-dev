@@ -3,9 +3,6 @@
 static bool secure_mode = true;
 static bool permission_requested = false;
 
-using enigma_insecure::execute_shell;
-using enigma_insecure::execute_shell_for_output;
-
 static void request_permission() {
   if (!permission_requested) {
     if (enigma_user::show_question("This application is requesting permission to use the command line.\
