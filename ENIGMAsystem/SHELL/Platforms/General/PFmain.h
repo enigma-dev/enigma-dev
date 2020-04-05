@@ -45,6 +45,11 @@ namespace enigma {
   void set_room_speed(int rs);
 }
 
+namespace enigma_insecure {
+  void execute_shell(std::string operation, std::string fname, std::string args, bool wait = false);
+  void execute_shell_for_output(const std::string &command, std::string& res);
+}  
+  
 namespace enigma_user {
 
 extern std::string working_directory;
