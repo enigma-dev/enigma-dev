@@ -5,5 +5,5 @@ TEST(Game, window_test) {
   TestConfig tc;
   tc.extensions = "Paths,GTest";
   auto test_harness = LAUNCH_HARNESS_FOR_SOG(tc);
-  test_common(test_harness, "window_test", false);
+  test_common(test_harness.get(), "window_test", false);
 }
