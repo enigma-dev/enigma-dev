@@ -5,5 +5,5 @@ TEST(Regression, room_transition_test) {
   TestConfig tc;
   tc.extensions = "Paths,GTest";
   auto test_harness = LAUNCH_HARNESS_FOR_GAME(tc, "gmx");
-  test_common(test_harness, "room_transition_test");
+  test_common(test_harness.get(), "room_transition_test");
 }
