@@ -73,6 +73,8 @@ namespace enigma {
 
 namespace enigma_user {
 
+bool show_question(string str);
+
 void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO);
 
 // This obviously displays an error message.
