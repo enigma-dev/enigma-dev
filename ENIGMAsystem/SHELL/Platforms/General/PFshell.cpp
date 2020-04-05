@@ -1,4 +1,4 @@
-#include "PFshell.h"
+#include "Platforms/General/PFshell.h"
 #include <string>
 
 using string;
@@ -19,6 +19,14 @@ required for the application to behave as expected.")) {
 }
 
 namespace enigma_user {
+
+bool securemode_get_enabled() {
+  return secure_mode;
+}
+
+void securemode_set_enabled(bool enable) {
+  secure_mode = enable;
+}
 
 void execute_shell(string fname, string args) {
   request_permission();
