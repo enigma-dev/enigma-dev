@@ -96,14 +96,7 @@ void show_info() {
 }
 
 bool show_question(string str) {
-  cout << str;
-  char answer = 0;
-  while (answer != 'N' && answer != 'Y') {
-    cout << endl << "[Y/N]:";
-    cin >> answer;
-    answer = toupper(answer);
-  }
-  return (answer == 'Y');
+  return cli_show_question;
 }
 
 string get_login(string username, string password) {

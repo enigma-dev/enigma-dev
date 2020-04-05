@@ -6,7 +6,7 @@ static bool confirmed_idiot = false;
 
 static void ask_if_idiot() {
   if (!asked_if_idiot) {
-    if (enigma_user::show_question("The following game runs shell functions that are almost always unnecessary\
+    if (enigma_user::cli_show_question("The following game runs shell functions that are almost always unnecessary\
       and can potentionally cause irreparable harm to your system such as deleting you home folder.\
       We advise only enabling these functions after careful inspection of the game's source code\
       Would you like to enable these dangerous funtions?")) { confirmed_idiot = true; }

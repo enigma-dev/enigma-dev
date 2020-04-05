@@ -22,6 +22,7 @@
 #include "libEGMstd.h"
 
 #include <string>
+#include <iostream>
 
 #define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
 
@@ -73,7 +74,16 @@ namespace enigma {
 
 namespace enigma_user {
 
-bool show_question(string str);
+inline bool cli_show_question(std::string str) {
+  std::cout << str;
+  char answer = 0;
+  while (answer != 'N' && answer != 'Y') {
+    std::cout << std::endl << "[Y/N]:";
+    std::cin >> answer;
+    answer = toupper(answer);
+  }
+  return (answer == 'Y');
+}
 
 void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO);
 
