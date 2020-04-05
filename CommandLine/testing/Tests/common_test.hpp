@@ -1,3 +1,6 @@
+#ifndef COMMON_TEST_HPP
+#define COMMON_TEST_HPP
+
 #include "TestHarness.hpp"
 
 #include <gtest/gtest.h>
@@ -22,3 +25,5 @@ void test_common(TestHarness* test_harness, const std::string& name, bool save_i
   ASSERT_FALSE(game_running) << "Game did not exit after window was closed!";
   EXPECT_EQ(test_harness->get_return(), 0) << "Game returned non-zero exit code!";
 }
+
+#endif // COMMON_TEST_HPP
