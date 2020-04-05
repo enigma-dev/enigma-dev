@@ -5,5 +5,5 @@ TEST(Regression, draw_blend_test) {
   TestConfig tc;
   tc.extensions = "Paths,libpng";
   auto test_harness = LAUNCH_HARNESS_FOR_SOG(tc);
-  test_common(test_harness, "draw_blend_test");
+  test_common(test_harness.get(), "draw_blend_test");
 }
