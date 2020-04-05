@@ -45,7 +45,7 @@ void execute_shell(std::string fname, std::string args) { execute_shell("", fnam
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
   ask_if_idiot();
-  if (confirmed_idiot) enigma_insecure::execute_shell(operation, fname, args, false);
+  if (confirmed_idiot) enigma_insecure::execute_shell(operation, fname, args, wait);
 }
 
 std::string execute_shell_for_output(const std::string &command) {
