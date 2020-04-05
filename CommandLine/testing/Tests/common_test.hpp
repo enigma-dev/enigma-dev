@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-void test_common(TestHarness* test_harness, const std::string& name, bool save_image = true) {
+void test_common(std::unique_ptr<TestHarness> test_harness, const std::string& name, bool save_image = true) {
   if (!test_harness) FAIL() << "Game could not be run.";
 
   test_harness->wait();  // Let the game render a frame first.
