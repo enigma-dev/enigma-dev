@@ -1,4 +1,4 @@
-#include "common_test.hpp"
+#include "CommonTest.hpp"
 
 TEST(Game, window_test) {
   if (!TestHarness::windowing_supported()) return;
