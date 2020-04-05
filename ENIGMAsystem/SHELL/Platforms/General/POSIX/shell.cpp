@@ -1,4 +1,5 @@
 #include "Platforms/General/PFmain.h"
+#include "Platforms/General/PFshell.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 namespace enigma_insecure {
@@ -23,32 +24,16 @@ namespace enigma_insecure {
 
 namespace enigma_user {
 
-void execute_shell(std::string operation, std::string fname, std::string args) {
-  enigma_insecure::execute_shell(operation, fname, args, false);
+void execute_program(std::string fname, std::string args, bool wait) {
+  execute_shell(fname, args, wait);
 }
 
-void execute_shell(std::string fname, std::string args) { execute_shell("", fname, args); }
-
-void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
-  enigma_insecure::execute_shell(operation, fname, args, wait);
-}
-
-std::string execute_shell_for_output(const std::string &command) {
-  std::string res;
-  enigma_insecure::execute_shell_for_output(command, res);
-  return res;
-}
-
-void execute_program(std::string fname, std::string args, bool wait) { execute_program("", fname, args, wait); }
-
-void url_open(std::string url, std::string target, std::string options) {
+void url_open(std::string url) {
   execute_program("xdg-open", url, false);
 }
 
-void url_open_ext(std::string url, std::string target) { url_open(url, target); }
-
-void url_open_full(std::string url, std::string target, std::string options) { url_open(url, target, options); }
-
-void action_webpage(const std::string& url) { url_open(url); }
+void action_webpage(const std::string& url) {
+  url_open(url);
+}
 
 } // namespace enigma_user
