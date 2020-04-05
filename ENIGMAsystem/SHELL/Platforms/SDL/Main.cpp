@@ -13,5 +13,5 @@ namespace enigma {
 }
 
 int main(int argc, char** argv) {
-  return enigma::enigma_main(argc, argv);
+  return 0;
 }
