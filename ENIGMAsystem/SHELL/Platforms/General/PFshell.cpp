@@ -1,4 +1,4 @@
-#include "PFshell.sh"
+#include "PFshell.h"
 
 static bool secure_mode = true;
 static bool permission_requested = false;
