@@ -24,7 +24,7 @@ namespace enigma_insecure {
     pclose(pf);
     return res;
   }
-}
+} // namsepace enigma_insecure
 
 namespace enigma_user {
 
