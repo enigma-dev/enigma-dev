@@ -1,19 +1,6 @@
 #include "Platforms/General/PFmain.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
-static bool asked_if_idiot = false;
-static bool confirmed_idiot = false;
-
-static void ask_if_idiot() {
-  if (!asked_if_idiot) {
-    if (enigma_user::show_question("The following game runs shell functions that are almost always unnecessary\
-      and can potentionally cause irreparable harm to your system such as deleting you home folder.\
-      We advise only enabling these functions after careful inspection of the game's source code\
-      Would you like to enable these dangerous funtions?")) { confirmed_idiot = true; }
-      asked_if_idiot = true;
-  }
-}
-
 namespace enigma_insecure {
   void execute_shell(std::string operation, std::string fname, std::string args, bool wait) {
     if (system(NULL)) {
@@ -37,21 +24,18 @@ namespace enigma_insecure {
 namespace enigma_user {
 
 void execute_shell(std::string operation, std::string fname, std::string args) {
-  ask_if_idiot();
-  if (confirmed_idiot) enigma_insecure::execute_shell(operation, fname, args, false);
+  enigma_insecure::execute_shell(operation, fname, args, false);
 }
 
 void execute_shell(std::string fname, std::string args) { execute_shell("", fname, args); }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
-  ask_if_idiot();
-  if (confirmed_idiot) enigma_insecure::execute_shell(operation, fname, args, wait);
+  enigma_insecure::execute_shell(operation, fname, args, wait);
 }
 
 std::string execute_shell_for_output(const std::string &command) {
-  ask_if_idiot();
   std::string res;
-  if (confirmed_idiot) enigma_insecure::execute_shell_for_output(command, res);
+  enigma_insecure::execute_shell_for_output(command, res);
   return res;
 }
 
