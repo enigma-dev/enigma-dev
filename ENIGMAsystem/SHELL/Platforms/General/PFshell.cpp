@@ -1,4 +1,7 @@
 #include "PFshell.h"
+#include <string>
+
+using string;
 
 static bool secure_mode = true;
 static bool permission_requested = false;
@@ -17,17 +20,17 @@ required for the application to behave as expected.")) {
 
 namespace enigma_user {
 
-void execute_shell(std::string fname, std::string args) {
+void execute_shell(string fname, string args) {
   request_permission();
   if (!secure_mode) enigma_insecure::execute_shell(fname, args);
 }
 
-void execute_program(std::string fname, std::string args, bool wait) {
+void execute_program(string fname, string args, bool wait) {
   request_permission();
-  if (!secure_mode) enigma_insecure::execute_shell(fname, args, wait);
+  if (!secure_mode) enigma_insecure::execute_program(fname, args, wait);
 }
 
-std::string execute_shell_for_output(const std::string &command) {
+string execute_shell_for_output(const string &command) {
   request_permission();
   if (!secure_mode) return enigma_insecure::execute_shell_for_output(command);
   else return "";
