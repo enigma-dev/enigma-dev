@@ -34,7 +34,7 @@ jobs:
     - checkout: self
       persistCredentials: true
       
-   - script: |
+    - script: |
        echo "$(dongs)"
       
     - script: |
