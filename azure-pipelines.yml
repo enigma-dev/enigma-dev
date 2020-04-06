@@ -35,7 +35,7 @@ jobs:
       persistCredentials: true
       
    - script: |
-       echo $(dongs)
+       echo "$(dongs)"
       
     - script: |
         sudo dpkg --add-architecture i386
