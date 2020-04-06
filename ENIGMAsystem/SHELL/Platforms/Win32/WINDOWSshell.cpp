@@ -110,4 +110,4 @@ void action_webpage(const string &url) {
   url_open(string url);
 }
 
-}
+} // namespace enigma_user
