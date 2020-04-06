@@ -6,7 +6,7 @@ namespace enigma_insecure {
 
 void execute_program(string fname, string args, bool wait) {
   if (system(NULL)) {
-    system(("\"" + fname + "\" " + args + (wait ? " &" : "")).c_str());
+    system(("\"" + fname + "\" " + args + (wait ? "" : " &")).c_str());
   } else {
     DEBUG_MESSAGE("shell execution cannot be used as there is no command processor!", MESSAGE_TYPE::M_ERROR);
     return;
