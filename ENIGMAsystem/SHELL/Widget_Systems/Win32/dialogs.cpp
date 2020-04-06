@@ -615,9 +615,7 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
   }
 }
 
-void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, 
-
-bool pauseGame, string caption) {
+void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
   LoadLibrary(TEXT("Riched32.dll"));
 
   // Center Information Window to the Middle of the Screen
@@ -661,9 +659,7 @@ bool pauseGame, string caption) {
   }
 
   enigma::infore=CreateWindowEx(WS_EX_TOPMOST,"RICHEDIT",TEXT("information text"),
-    ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | 
-
-WS_TABSTOP,
+    ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,
     0, 0, width, height, parent, 0, enigma::hInstance, 0);
 
   // Size the RTF Component to the Window
