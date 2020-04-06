@@ -5,6 +5,8 @@
 #include "Platforms/General/PFshell.h"
 #include "Universal_Systems/estring.h"
 
+namespace enigma_insecure {
+
 void execute_shell(string fname, string args) {
   WCHAR cDir[MAX_PATH];
   GetCurrentDirectoryW(MAX_PATH, cDir);
@@ -94,6 +96,10 @@ void execute_program(string fname, string args, bool wait) {
     CloseHandle(lpExecInfo.hProcess);
 }
 
+} // namespace enigma_insecure
+
+namespace enigma_user {
+
 void url_open(string url) {
   tstring tstr_url = widen(url);
   tstring tstr_open = widen("open");
@@ -102,4 +108,6 @@ void url_open(string url) {
 
 void action_webpage(const string &url) {
   url_open(string url);
+}
+
 }
