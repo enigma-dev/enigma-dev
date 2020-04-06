@@ -59,6 +59,7 @@ static tstring error_caption = L"";
 HHOOK hook_handle = NULL;
 HWND dlg_error = NULL;
 bool init_error = false;
+bool fatal_error = false;
 
 // show cancel button?
 static bool message_cancel = false;
@@ -164,9 +165,13 @@ static LRESULT CALLBACK ShowDebugMessageProc(int nCode, WPARAM wParam, LPARAM lP
     if (dlg_error != NULL && init_error) {
       SetDlgItemTextW(dlg_error, IDOK, L"Abort");
       SetDlgItemTextW(dlg_error, IDCANCEL, L"Ignore");
-      wchar_t dlg_abort[32];
+      wchar_t dlg_abort[32]; wchar_t dlg_ignore[32];
       GetDlgItemTextW(dlg_error, IDOK, dlg_abort, 32);
-      if (shorten(dlg_abort) == "Abort") {
+      GetDlgItemTextW(dlg_error, IDOK, dlg_ignore, 32);
+      if (shorten(dlg_abort) == "Abort" && fatal_error) {
+        init_error = false;
+      } else if (shorten(dlg_abort) == "Abort" && 
+        shorten(dlg_ignore) == "Ignore") {
         init_error = false;
       }
     }
@@ -576,7 +581,9 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   DWORD ThreadID = GetCurrentThreadId();
   HINSTANCE ModHwnd = GetModuleHandle(NULL);
   hook_handle = SetWindowsHookEx(WH_CBT, &ShowDebugMessageProc, ModHwnd, ThreadID);
-  bool fatal = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR);
+  bool fatal = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR); 
+  fatal_error = fatal;
+
   result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), ((fatal) ? MB_OK : MB_OKCANCEL) | 
   MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
   UnhookWindowsHookEx(hook_handle);
