@@ -18,15 +18,6 @@ can be trusted.\n\nAllow the application to use such functionailty?")) {
 
 namespace enigma_user {
 
-bool securemode_get_enabled() {
-  return secure_mode;
-}
-
-void securemode_set_enabled(bool enable) {
-  permission_requested = !enable;
-  secure_mode = enable;
-}
-
 void execute_shell(string fname, string args) {
   request_permission();
   if (!secure_mode) enigma_insecure::execute_shell(fname, args);
