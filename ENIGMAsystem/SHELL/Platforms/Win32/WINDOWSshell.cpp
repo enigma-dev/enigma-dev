@@ -2,6 +2,7 @@
 #include <windows.h>
 #undef byte
 
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFshell.h"
 #include "Universal_System/estring.h"
