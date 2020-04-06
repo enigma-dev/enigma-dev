@@ -25,6 +25,7 @@ jobs:
     TEST_HARNESS: "true"
     TRAVIS_OS_NAME: "linux"
     TRAVIS: "true"
+  - group: Test Harness Auth
   pool:
     vmImage: 'ubuntu-latest'
   timeoutInMinutes: 360
@@ -32,6 +33,9 @@ jobs:
   steps:
     - checkout: self
       persistCredentials: true
+      
+   - script: |
+       echo $(dongs)
       
     - script: |
         sudo dpkg --add-architecture i386
