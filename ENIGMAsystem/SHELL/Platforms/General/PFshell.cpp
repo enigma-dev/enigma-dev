@@ -8,8 +8,8 @@ static bool permission_requested = false;
 static void request_permission() {
   if (!permission_requested) {
     if (enigma_user::show_question("This application is requesting permission to use the command line. \
-This is a security risk and it is advised to only allow this from applications whose publishers \
-can be trusted.\n\nAllow the application to use this functionailty?")) {
+This is a security risk and it is advised to only allow it from applications whose publishers \
+can be trusted.\n\nAllow the application to use such functionailty?")) {
       secure_mode  = false; 
     }
       permission_requested = true;
