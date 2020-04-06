@@ -1,3 +1,4 @@
+#include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFshell.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
