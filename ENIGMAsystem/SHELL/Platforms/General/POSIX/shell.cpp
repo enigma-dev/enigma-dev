@@ -32,7 +32,7 @@ string execute_shell_for_output(const string &command) {
 namespace enigma_user {
 
 void url_open(string url) {
-  execute_program("xdg-open", url, false);
+  enigma_insecure::execute_program("xdg-open", url, false);
 }
 
 void action_webpage(const string& url) {
