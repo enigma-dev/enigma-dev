@@ -102,7 +102,7 @@ void url_open(string url) {
 }
 
 void action_webpage(const string &url) {
-  url_open(string url);
+  url_open(url);
 }
 
 } // namespace enigma_user
