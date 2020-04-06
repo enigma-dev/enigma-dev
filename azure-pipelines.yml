@@ -12,6 +12,7 @@ pr:  # Trigger a build on every PR.
       - '*'  # Must quote since "*" is a YAML reserved character
 variables:
 - template: azure-vars.yml@radialgm
+- group: Test Harness Auth
 
 jobs:
 - template: azure-jobs.yml@radialgm
@@ -25,7 +26,6 @@ jobs:
     TEST_HARNESS: "true"
     TRAVIS_OS_NAME: "linux"
     TRAVIS: "true"
-  - group: Test Harness Auth
   pool:
     vmImage: 'ubuntu-latest'
   timeoutInMinutes: 360
