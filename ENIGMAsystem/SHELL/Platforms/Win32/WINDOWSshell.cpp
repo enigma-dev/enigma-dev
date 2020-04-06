@@ -98,8 +98,7 @@ namespace enigma_user {
 
 void url_open(string url) {
   tstring tstr_url = widen(url);
-  tstring tstr_open = widen("open");
-  ShellExecuteW(NULL, tstr_open.c_str(), tstr_url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+  ShellExecuteW(NULL, L"open", tstr_url.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
 void action_webpage(const string &url) {
