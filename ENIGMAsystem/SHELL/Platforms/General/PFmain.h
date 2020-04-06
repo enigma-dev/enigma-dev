@@ -21,8 +21,6 @@
 
 #include <string>
 
-using std::string;
-
 namespace enigma {
   extern bool game_isending;
   extern int game_return;
@@ -49,10 +47,10 @@ namespace enigma {
   
 namespace enigma_user {
 
-extern string working_directory;
-extern string program_directory;
-extern string temp_directory;
-extern string keyboard_string;
+extern std::string working_directory;
+extern std::string program_directory;
+extern std::string temp_directory;
+extern std::string keyboard_string;
 extern int keyboard_key;
 extern double fps;
 extern unsigned long delta_time;
@@ -65,26 +63,26 @@ void action_end_game();
 
 // Data type could be unsigned for the paramter since the collection is size_t, however this would make the function not behave as GM.
 // show_message(parameter_string(-1)); in GM8.1 will show an empty string, if this function cast the parameter to unsigned that won't be the behavior.
-string parameter_string(int x);
+std::string parameter_string(int x);
 // This function does not work the same as GM8.1, while it returns the native argument count, GM8.1 reports an argument count of 0 for an empty game, even
 // though the first parameter which is the filename is successfully returned from parameter_string. So the assumption is GM8.1's version always reports 1 less
 // than the ENIGMA version.
 int parameter_count();
-unsigned long long disk_size(string drive);
-unsigned long long disk_free(string drive);
+unsigned long long disk_size(std::string drive);
+unsigned long long disk_free(std::string drive);
 
-void execute_shell(string fname, string args);
-void execute_program(string fname, string args, bool wait);
-string execute_shell_for_output(const string &command);
-void url_open(string url);
-void action_webpage(const string &url);
+void execute_shell(std::string fname, std::string args);
+void execute_program(std::string fname, std::string args, bool wait);
+std::string execute_shell_for_output(const std::string &command);
+void url_open(std::string url);
+void action_webpage(const std::string &url);
 
 void set_program_priority(int value);
-string filename_absolute(string fname);
-string filename_join(string prefix, string suffix);
-string environment_get_variable(string name);
-bool environment_set_variable(const string &name, const string &value);
-bool set_working_directory(string dname);
+std::string filename_absolute(std::string fname);
+std::string filename_join(std::string prefix, std::string suffix);
+std::string environment_get_variable(std::string name);
+bool environment_set_variable(const std::string &name, const std::string &value);
+bool set_working_directory(std::string dname);
 
 } // namespace enigma_user
 
