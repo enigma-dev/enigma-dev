@@ -13,6 +13,10 @@ pr:  # Trigger a build on every PR.
 variables:
 - template: azure-vars.yml@radialgm
 - group: Test Harness Auth
+env:
+  imgur_client_id: $(imgur_client_id)
+  bot_comment_token: $(bot_comment_token)
+  bot_push_on_green_token: $(bot_push_on_green_token)
 
 jobs:
 - template: azure-jobs.yml@radialgm
@@ -31,11 +35,6 @@ jobs:
   timeoutInMinutes: 360
 
   steps:
-    env:
-      imgur_client_id: $(imgur_client_id)
-      bot_comment_token: $(bot_comment_token)
-      bot_push_on_green_token: $(bot_push_on_green_token)
-    
     - checkout: self
       persistCredentials: true
       
