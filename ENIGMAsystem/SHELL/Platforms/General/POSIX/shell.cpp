@@ -2,6 +2,8 @@
 #include "Platforms/General/PFshell.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
+using std::string;
+
 namespace enigma_insecure {
 
 void execute_program(string fname, string args, bool wait) {
