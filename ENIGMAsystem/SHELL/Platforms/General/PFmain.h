@@ -25,7 +25,7 @@ namespace enigma {
   extern bool game_isending;
   extern int game_return;
   extern int parameterc;
-  extern string* parameters;
+  extern std::string* parameters;
   extern int pausedSteps;
   extern int current_room_speed;
   extern int frames_count;
