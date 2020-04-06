@@ -26,6 +26,10 @@ jobs:
     TEST_HARNESS: "true"
     TRAVIS_OS_NAME: "linux"
     TRAVIS: "true"
+  env:
+    imgur_client_id: $(imgur_client_id)
+    bot_comment_token: $(bot_comment_token)
+    bot_push_on_green_token: $(bot_push_on_green_token)
   pool:
     vmImage: 'ubuntu-latest'
   timeoutInMinutes: 360
@@ -33,9 +37,6 @@ jobs:
   steps:
     - checkout: self
       persistCredentials: true
-      
-    - script: |
-       echo "$(dongs)"
       
     - script: |
         sudo dpkg --add-architecture i386
