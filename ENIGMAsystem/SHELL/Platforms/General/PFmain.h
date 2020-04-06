@@ -46,11 +46,6 @@ namespace enigma {
   int gameWait();
   void set_room_speed(int rs);
 }
-
-namespace enigma_insecure {
-  void execute_shell(string operation, string fname, string args, bool wait = false);
-  void execute_shell_for_output(const string &command, string& res);
-}  
   
 namespace enigma_user {
 
@@ -92,6 +87,7 @@ string filename_join(string prefix, string suffix);
 string environment_get_variable(string name);
 bool environment_set_variable(const string &name, const string &value);
 bool set_working_directory(string dname);
-}
+
+} // namespace enigma_user
 
 #endif //ENIGMA_PLATFORM_MAIN
