@@ -23,7 +23,7 @@ void execute_program(string fname, string args, bool wait) {
   GetCurrentDirectoryW(MAX_PATH, cDir);
   lpExecInfo.lpDirectory = cDir;
   lpExecInfo.nShow = SW_SHOW;
-  lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;  //WINSHELLAPI BOOL WINAPI result;
+  lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;
   ShellExecuteExW(&lpExecInfo);
   if (wait && lpExecInfo.hProcess != NULL) {
     while (WaitForSingleObject(lpExecInfo.hProcess, 5) == WAIT_TIMEOUT) {
