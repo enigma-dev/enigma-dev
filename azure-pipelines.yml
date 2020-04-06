@@ -13,10 +13,6 @@ pr:  # Trigger a build on every PR.
 variables:
 - template: azure-vars.yml@radialgm
 - group: Test Harness Auth
-env:
-  imgur_client_id: $(imgur_client_id)
-  bot_comment_token: $(bot_comment_token)
-  bot_push_on_green_token: $(bot_push_on_green_token)
 
 jobs:
 - template: azure-jobs.yml@radialgm
@@ -43,8 +39,12 @@ jobs:
         ./CI/install_emake_deps.sh
         ./CI/split_jobs.sh install
         ./CI/build_sdl.sh
+      env:
+        imgur_client_id: $(imgur_client_id)
+        bot_comment_token: $(bot_comment_token)
+        bot_push_on_green_token: $(bot_push_on_green_token)
       displayName: Install Dependencies
-      
+
     - script: |
         make -j4
         make -j4 emake
