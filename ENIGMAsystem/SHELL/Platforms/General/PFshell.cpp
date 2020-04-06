@@ -1,7 +1,6 @@
 #include "Platforms/General/PFshell.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include <string>
-
-using string;
 
 static bool secure_mode = true;
 static bool permission_requested = false;
@@ -44,4 +43,4 @@ string execute_shell_for_output(const string &command) {
   else return "";
 }
 
-}
+} // namspace enigma_user
