@@ -2,6 +2,8 @@
 #include "Platforms/General/PFshell.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
+using std::string;
+
 static bool secure_mode = true;
 static bool permission_requested = false;
 
