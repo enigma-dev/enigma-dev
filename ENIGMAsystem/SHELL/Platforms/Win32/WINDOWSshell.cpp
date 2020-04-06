@@ -7,12 +7,37 @@
 
 namespace enigma_insecure {
 
-void execute_shell(string fname, string args) {
-  WCHAR cDir[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, cDir);
+void execute_program(string fname, string args, bool wait) {
+  SHELLEXECUTEINFOW lpExecInfo;
   tstring tstr_fname = widen(fname);
   tstring tstr_args = widen(args);
-  ShellExecuteW(enigma::hWnd, NULL, tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
+  lpExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
+  lpExecInfo.lpFile = tstr_fname.c_str();
+  lpExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
+  lpExecInfo.hwnd = enigma::hWnd;
+  lpExecInfo.lpVerb = NULL;
+  lpExecInfo.lpParameters = tstr_args.c_str();
+  WCHAR cDir[MAX_PATH];
+  GetCurrentDirectoryW(MAX_PATH, cDir);
+  lpExecInfo.lpDirectory = cDir;
+  lpExecInfo.nShow = SW_SHOW;
+  lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;  //WINSHELLAPI BOOL WINAPI result;
+  ShellExecuteExW(&lpExecInfo);
+  if (wait && lpExecInfo.hProcess != NULL) {
+    while (WaitForSingleObject(lpExecInfo.hProcess, 5) == WAIT_TIMEOUT) {
+      MSG msg;
+      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
+    }
+  }
+  if (lpExecInfo.hProcess != NULL)
+    CloseHandle(lpExecInfo.hProcess);
+}
+
+void execute_shell(string fname, string args) {
+  execute_program(fname, args, false);
 }
 
 string execute_shell_for_output(const string &command) {
@@ -65,35 +90,6 @@ string execute_shell_for_output(const string &command) {
     return shorten(output);
   }
   return "";
-}
-
-void execute_program(string fname, string args, bool wait) {
-  SHELLEXECUTEINFOW lpExecInfo;
-  tstring tstr_fname = widen(fname);
-  tstring tstr_args = widen(args);
-  lpExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
-  lpExecInfo.lpFile = tstr_fname.c_str();
-  lpExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
-  lpExecInfo.hwnd = enigma::hWnd;
-  lpExecInfo.lpVerb = NULL;
-  lpExecInfo.lpParameters = tstr_args.c_str();
-  WCHAR cDir[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, cDir);
-  lpExecInfo.lpDirectory = cDir;
-  lpExecInfo.nShow = SW_SHOW;
-  lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;  //WINSHELLAPI BOOL WINAPI result;
-  ShellExecuteExW(&lpExecInfo);
-  if (wait && lpExecInfo.hProcess != NULL) {
-    while (WaitForSingleObject(lpExecInfo.hProcess, 5) == WAIT_TIMEOUT) {
-      MSG msg;
-      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
-    }
-  }
-  if (lpExecInfo.hProcess != NULL)
-    CloseHandle(lpExecInfo.hProcess);
 }
 
 } // namespace enigma_insecure
