@@ -23,7 +23,7 @@ bool securemode_get_enabled() {
 }
 
 void securemode_set_enabled(bool enable) {
-  permission_requested = !enabled;
+  permission_requested = !enable;
   secure_mode = enable;
 }
 
