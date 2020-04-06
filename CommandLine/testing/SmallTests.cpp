@@ -10,8 +10,6 @@ namespace fs = std::filesystem;
 #include <string>
 #include <vector>
 
-TestHarness* TestHarness::m_instance = nullptr;
-
 namespace {
 
 using std::map;
@@ -107,7 +105,7 @@ TEST_P(SimpleTestHarness, SimpleTestRunner) {
   string game = GetParam();
     
   // Iterate only platforms, graphics & collision systems for now
-  for (TestConfig tc : TestHarness::m_instance->GetValidConfigs(true, true, false, true, false, false)) {
+  for (TestConfig tc : GetValidConfigs(true, true, false, true, false, false)) {
   
     tc.extensions = "Alarms,Timelines,Paths,MotionPlanning,IniFilesystem,ParticleSystems,DateTime,DataStructures,libpng,GTest";
     int ret = TestHarness::run_to_completion(game, tc);

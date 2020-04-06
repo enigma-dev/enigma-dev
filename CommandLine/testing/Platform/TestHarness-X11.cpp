@@ -13,6 +13,42 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+std::vector<TestConfig> GetValidConfigs(bool platforms, bool graphics, bool audio, bool collisions, bool widgets, bool network) {
+  std::vector<TestConfig> tcs;
+  
+  for (std::string_view p : {"xlib", "SDL"} ) {
+    for (std::string_view g : {"OpenGL1", "OpenGL3", "OpenGLES2", "OpenGLES3" }) {
+      // Invalid combos
+      if (g == "OpenGLES2" && p != "SDL2") continue;
+      if (g == "OpenGLES3" && p != "SDL2") continue;
+      for (std::string_view a : {"OpenAL", "SFML" }) {
+        for (std::string_view c : {"Precise", "BBox" }) {
+          for (std::string_view w : {"None", "GTK+", "xlib" }) {
+            for (std::string_view n : {"None", "BerkeleySockets", "Asynchronous" }) {
+              TestConfig tc;
+              tc.platform = p;
+              tc.graphics = g;
+              tc.audio = a;
+              tc.collision = c;
+              tc.widgets = w;
+              tc.network = n;
+              tcs.push_back(tc);
+              if (!network) break;
+            }
+            if (!widgets) break;
+          }
+          if (!collisions) break;
+        }
+        if (!audio) break;
+      }
+      if (!graphics) break;
+    }
+    if (!platforms) break;
+  }
+  
+  return tcs;
+}
+
 namespace {
 using std::string;
 using std::to_string;
@@ -72,42 +108,7 @@ Window find_window_by_pid(Display *disp, Window win, pid_t pid) {
 
 class X11_TestHarness final: public TestHarness {
  public:
-  std::vector<TestConfig> GetValidConfigs(bool platforms, bool graphics, bool audio, bool collisions, bool widgets, bool network) {
-    std::vector<TestConfig> tcs;
-    
-  for (std::string_view p : {"xlib", "SDL"} ) {
-      for (std::string_view g : {"OpenGL1", "OpenGL3", "OpenGLES2", "OpenGLES3" }) {
-        // Invalid combos
-        if (g == "OpenGLES2" && p != "SDL2") continue;
-        if (g == "OpenGLES3" && p != "SDL2") continue;
-        for (std::string_view a : {"OpenAL", "SFML" }) {
-          for (std::string_view c : {"Precise", "BBox" }) {
-            for (std::string_view w : {"None", "GTK+", "xlib" }) {
-              for (std::string_view n : {"None", "BerkeleySockets", "Asynchronous" }) {
-                TestConfig tc;
-                tc.platform = p;
-                tc.graphics = g;
-                tc.audio = a;
-                tc.collision = c;
-                tc.widgets = w;
-                tc.network = n;
-                tcs.push_back(tc);
-                if (!network) break;
-              }
-              if (!widgets) break;
-            }
-            if (!collisions) break;
-          }
-          if (!audio) break;
-        }
-        if (!graphics) break;
-      }
-      if (!platforms) break;
-    }
-    
-    return tcs;
-  }
-  
+ 
   string get_caption() final {
     return get_window_caption(display, window_id);
   }

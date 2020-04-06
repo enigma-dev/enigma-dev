@@ -40,12 +40,10 @@ struct TestConfig {
   }
 };
 
+std::vector<TestConfig> GetValidConfigs(bool platforms, bool graphics, bool audio, bool collisions, bool widgets, bool network);
+
 class TestHarness {
  public:
-  static TestHarness* m_instance;
-
-  virtual std::vector<TestConfig> GetValidConfigs(bool platforms, bool graphics, bool audio, bool collisions, bool widgets, bool network) = 0;
-  
   virtual std::string get_caption() = 0;
 
   // Window manipulation
@@ -70,8 +68,7 @@ class TestHarness {
   /// Check the game process's exit code.
   virtual int get_return() = 0;
 
-  TestHarness() { m_instance = this; }
-  virtual ~TestHarness() { m_instance = nullptr; }
+  virtual ~TestHarness() {}
 
   static std::string swap_extension(std::string file, std::string ext) {
     const size_t slash = file.find_last_of("/\\");
