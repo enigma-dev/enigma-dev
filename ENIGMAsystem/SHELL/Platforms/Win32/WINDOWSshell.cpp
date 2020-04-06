@@ -7,6 +7,8 @@
 #include "Platforms/General/PFshell.h"
 #include "Universal_System/estring.h"
 
+using std::string;
+
 namespace enigma_insecure {
 
 void execute_program(string fname, string args, bool wait) {
