@@ -2,6 +2,7 @@
 #include <windows.h>
 #undef byte
 
+#include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFshell.h"
 #include "Universal_Systems/estring.h"
 
