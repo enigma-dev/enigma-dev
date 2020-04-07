@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e
+
 # Used to have EnigmaBot comment on GitHub pull requests with image analysis/benchmark results.
 
 # GitHub information
@@ -17,12 +20,12 @@ imgur_api='https://api.imgur.com/3/image'  # This is the Imgur API URL. We need 
 function imgur_upload {
   echo $(curl --request POST \
               --url $imgur_api \
-              --header "Authorization: Client-ID $imgur_client_id" \
+              --header "Authorization: Client-ID $IMGUR_CLIENT_ID" \
               --form "image=@$1")
 }
 
 function enigmabot_post_comment {
-  echo $(curl -H "Authorization: token $bot_comment_token" \
+  echo $(curl -H "Authorization: token $BOT_COMMENT_TOKEN" \
               -H "Content-Type: application/json" \
               --request POST \
               --data '{"body":"'"$1"'"}' \
