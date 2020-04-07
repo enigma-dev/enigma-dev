@@ -39,10 +39,6 @@ jobs:
         ./CI/install_emake_deps.sh
         ./CI/split_jobs.sh install
         ./CI/build_sdl.sh
-      env:
-        imgur_client_id: $(imgur_client_id)
-        bot_comment_token: $(bot_comment_token)
-        bot_push_on_green_token: $(bot_push_on_green_token)
       displayName: Install Dependencies
 
     - script: |
@@ -57,4 +53,8 @@ jobs:
       
     - script: |
         ./CI/build_and_run_game.sh
+      env:
+        imgur_client_id: $(imgur_client_id)
+        bot_comment_token: $(bot_comment_token)
+        bot_push_on_green_token: $(bot_push_on_green_token)
       displayName: Run Test Harness
