@@ -20,12 +20,12 @@ imgur_api='https://api.imgur.com/3/image'  # This is the Imgur API URL. We need 
 function imgur_upload {
   echo $(curl --request POST \
               --url $imgur_api \
-              --header "Authorization: Client-ID $IMGUR_CLIENT_ID" \
+              --header "Authorization: Client-ID $_IMGUR_CLIENT_ID" \
               --form "image=@$1")
 }
 
 function enigmabot_post_comment {
-  echo $(curl -H "Authorization: token $BOT_COMMENT_TOKEN" \
+  echo $(curl -H "Authorization: token $_BOT_COMMENT_TOKEN" \
               -H "Content-Type: application/json" \
               --request POST \
               --data '{"body":"'"$1"'"}' \
