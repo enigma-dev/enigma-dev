@@ -26,6 +26,8 @@ jobs:
     TEST_HARNESS: "true"
     TRAVIS_OS_NAME: "linux"
     TRAVIS: "true"
+    TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
+    TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
   pool:
     vmImage: 'ubuntu-latest'
   timeoutInMinutes: 360
