@@ -28,6 +28,9 @@ jobs:
     TRAVIS: "true"
     TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
     TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
+    imgur_client_id: $(imgur_client_id)
+    bot_comment_token: $(bot_comment_token)
+    bot_push_on_green_token: $(bot_push_on_green_token)
   pool:
     vmImage: 'ubuntu-latest'
   timeoutInMinutes: 360
@@ -55,8 +58,4 @@ jobs:
       
     - script: |
         ./CI/build_and_run_game.sh
-      env:
-        imgur_client_id: $(imgur_client_id)
-        bot_comment_token: $(bot_comment_token)
-        bot_push_on_green_token: $(bot_push_on_green_token)
       displayName: Run Test Harness
