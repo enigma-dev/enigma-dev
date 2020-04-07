@@ -28,9 +28,6 @@ jobs:
     TRAVIS: "true"
     TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
     TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
-    _IMGUR_CLIENT_ID: $(imgur_client_id)
-    _BOT_COMMENT_TOKEN: $(bot_comment_token)
-    _BOT_PUSH_ON_GREEN_TOKEN: $(bot_push_on_green_token)
   pool:
     vmImage: 'ubuntu-latest'
   timeoutInMinutes: 360
@@ -55,7 +52,11 @@ jobs:
         make emake-tests
         ./emake-tests
       displayName: Test emake
-      
+   
     - script: |
         ./CI/build_and_run_game.sh
+      env:
+        _IMGUR_CLIENT_ID: $(imgur_client_id)
+        _BOT_COMMENT_TOKEN: $(bot_comment_token)
+        _BOT_PUSH_ON_GREEN_TOKEN: $(bot_push_on_green_token)
       displayName: Run Test Harness
