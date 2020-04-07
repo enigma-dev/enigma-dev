@@ -28,9 +28,9 @@ jobs:
     TRAVIS: "true"
     TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
     TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
-    imgur_client_id: $(imgur_client_id)
-    bot_comment_token: $(bot_comment_token)
-    bot_push_on_green_token: $(bot_push_on_green_token)
+    IMGUR_CLIENT_ID: $(imgur_client_id)
+    BOT_COMMENT_TOKEN: $(bot_comment_token)
+    BOT_PUSH_ON_GREEN_TOKEN: $(bot_push_on_green_token)
   pool:
     vmImage: 'ubuntu-latest'
   timeoutInMinutes: 360
