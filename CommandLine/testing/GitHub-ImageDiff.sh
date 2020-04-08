@@ -60,7 +60,7 @@ com_pr_master=$(comm -1 -3 <(echo "$master_images") <(echo "$pr_images") | tr -d
 if [[ ! -z "${com_master_pr}" ]]; then
   deleted_images_comment="Error: The following images are found in master but not the pull request:\n"
   while read -r image; do
-    deleted_images_commen+="${image}\n"
+    deleted_images_comment+="${image}\n"
   done <<< ${com_master_pr}
 
   echo -e "${deleted_images_comment}"
