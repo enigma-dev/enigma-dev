@@ -90,3 +90,7 @@ else
 fi
 
 ./CommandLine/testing/GitHub-ImageDiff.sh
+
+if [[ "$TRAVIS" -eq "true" ]]; then
+  xfce4-session-logout --logout
+fi
