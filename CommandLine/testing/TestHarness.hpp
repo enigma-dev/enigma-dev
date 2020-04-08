@@ -1,6 +1,8 @@
 #ifndef EMAKE_TESTHARNESS_HPP
 #define EMAKE_TESTHARNESS_HPP
 
+#include "strings_util.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -34,7 +36,7 @@ struct TestConfig {
     str += "[" + collision + "]";
     str += "[" + widgets + "]";
     str += "[" + network + "]";
-    str += "[" + extensions + "]";
+    str += "[" + string_replace_all(extensions, ",", "_") + "]";
     
     return str;
   }

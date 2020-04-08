@@ -19,8 +19,8 @@ std::vector<TestConfig> GetValidConfigs(bool platforms, bool graphics, bool audi
   for (std::string_view p : {"xlib", "SDL"} ) {
     for (std::string_view g : {"OpenGL1", "OpenGL3", "OpenGLES2", "OpenGLES3" }) {
       // Invalid combos
-      if (g == "OpenGLES2" && p != "SDL2") continue;
-      if (g == "OpenGLES3" && p != "SDL2") continue;
+      if (g == "OpenGLES2" && p != "SDL") continue;
+      if (g == "OpenGLES3" && p != "SDL") continue;
       for (std::string_view a : {"OpenAL", "SFML" }) {
         for (std::string_view c : {"Precise", "BBox" }) {
           for (std::string_view w : {"None", "GTK+", "xlib" }) {
