@@ -47,6 +47,7 @@ pr_images=$(ls ${pr_dir}/*.png | xargs -n1 basename | sort)
 # GitHub/JSON don't like tabs which comm can output, so delete them with tr
 com_master_pr=$(comm -2 -3 <(echo "$master_images") <(echo "$pr_images") | tr -d '\t')
 com_pr_master=$(comm -1 -3 <(echo "$master_images") <(echo "$pr_images") | tr -d '\t')
+com_both_have=$(comm -1 -2 <(echo "$master_images") <(echo "$pr_images") | tr -d '\t')
 
 if [[ ! -z "${com_master_pr}" ]]; then
   deleted_images_comment="Error: The following images are found in master but not the pull request:\n"
@@ -109,7 +110,7 @@ else
         <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
       fi
     fi
-  done <<< "${master_images}"
+  done <<< "${com_both_have}"
 fi
 
 if [[ "$TRAVIS" -eq "true" ]] && [[ ! -z "${gh_comment_images}" ]]; then
