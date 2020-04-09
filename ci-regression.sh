@@ -1,7 +1,5 @@
 #!/bin/bash +x
 
-set -e  # exit if any command fails
-
 if [[ "$TRAVIS" -eq "true" ]]; then
   startxfce4 & # We need a wm for these tests
 fi
@@ -90,9 +88,3 @@ else
 fi
 
 ./CommandLine/testing/GitHub-ImageDiff.sh
-
-if [[ "$TRAVIS" -eq "true" ]]; then
-  xfce4-session-logout --logout
-  kill $(pgrep X)
-  exit 0
-fi
