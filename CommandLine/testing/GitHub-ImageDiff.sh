@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Used to have EnigmaBot comment on GitHub pull requests with image analysis/benchmark results.
 
 # GitHub information
