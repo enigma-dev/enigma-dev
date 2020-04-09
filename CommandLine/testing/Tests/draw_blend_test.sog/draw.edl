@@ -1,5 +1,5 @@
 draw_rectangle_color(0, 0, 352, 352, c_red, c_green, c_blue, c_yellow, 0);
-draw_rectangle_color(0, 0, 2, 2, c_red, c_green, c_blue, c_yellow, 0);
+draw_rectangle_color(0, 0, 10, 10, c_red, c_green, c_blue, c_yellow, 0);
 
 var blend_mode_count = bm_src_alpha_sat - bm_zero;
 for (var i = 0; i <= blend_mode_count; i += 1) {
