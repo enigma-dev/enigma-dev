@@ -1,5 +1,7 @@
 #!/bin/bash +x
 
+set -e  # exit if any command fails
+
 if [[ "$TRAVIS" -eq "true" ]]; then
   startxfce4 & # We need a wm for these tests
 fi
