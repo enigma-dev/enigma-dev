@@ -60,6 +60,9 @@ int main(int argc, char* argv[])
 
   EnigmaPlugin plugin;
   plugin.Load();
+  CallBack ecb;
+  plugin.Init(&ecb, options.EnigmaRoot());
+  
   bool quiet = options.GetOption("quiet").as<bool>();
   if (!quiet) {
     plugin.LogMakeToConsole();
@@ -82,8 +85,6 @@ int main(int argc, char* argv[])
     std::cerr.rdbuf(elog.rdbuf());
   }
   
-  CallBack ecb;
-  plugin.Init(&ecb);
   plugin.SetDefinitions(options.APIyaml().c_str());
   std::string output_file;
 
@@ -136,7 +137,7 @@ int main(int argc, char* argv[])
 
   Game game;
   std::string input_file = options.GetOption("input").as<std::string>();
-  if (input_file.back() == '/') input_file.pop_back();
+  if (!input_file.empty() && input_file.back() == '/') input_file.pop_back();
 
   // Working directory hacks
   if (mode != emode_compile)

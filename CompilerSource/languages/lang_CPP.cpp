@@ -93,7 +93,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   
   cout << "Opening ENIGMA for parse..." << endl;
   
-  llreader f("ENIGMAsystem/SHELL/SHELLmain.cpp");
+  llreader f((enigma_root + "ENIGMAsystem/SHELL/SHELLmain.cpp").c_str());
   int res = 1;
   DECLARE_TIME_TYPE ts, te;
   if (f.is_open()) {
