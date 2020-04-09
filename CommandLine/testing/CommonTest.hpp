@@ -8,7 +8,7 @@
 inline void test_common(TestHarness* test_harness, const std::string& name, bool save_image = true) {
   if (!test_harness) FAIL() << "Game could not be run.";
 
-  for (int i = 0; game_running && i < 10; ++i) {
+  for (int i = 0; i < 10; ++i) {
     test_harness->wait();  // Let the game render a few frames first.
   }
   
@@ -20,7 +20,6 @@ inline void test_common(TestHarness* test_harness, const std::string& name, bool
 
   // Close the window and verify that the game ends normally.
   test_harness->close_window();
-  bool game_running = test_harness->game_is_running();
   for (int i = 0; game_running && i < 10; ++i) {
     test_harness->wait();
     game_running = test_harness->game_is_running();
