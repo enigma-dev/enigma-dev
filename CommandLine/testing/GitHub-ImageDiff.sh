@@ -35,6 +35,7 @@ Carefully review the following image comparison for anomalies and adjust the cha
 $TRAVIS_PULL_REQUEST_SHA | Master | Diff\n\
 --- | --- | ---\n"
 
+gh_comment=""
 gh_comment_images=""
 
 master_dir="/tmp/enigma-master/test-harness-out"
@@ -50,38 +51,34 @@ com_pr_master=$(comm -1 -3 <(echo "$master_images") <(echo "$pr_images") | tr -d
 com_both_have=$(comm -1 -2 <(echo "$master_images") <(echo "$pr_images") | tr -d '\t')
 
 if [[ ! -z "${com_master_pr}" ]]; then
-  deleted_images_comment="Error: The following images are found in master but not the pull request:\n"
+  gh_comment="Error: The following images are found in master but not the pull request:\n"
   while read -r image; do
-    deleted_images_comment+="${image}\n"
+    gh_comment+="${image}\n"
   done <<< ${com_master_pr}
 
-  echo -e "${deleted_images_comment}"
+  echo -e "${gh_comment}"
   echo "Aborting!"
-  if [[ "$TRAVIS" -eq "true" ]]; then
-    enigmabot_post_comment "${deleted_images_comment}"
-  fi
 fi
 
 if [[ ! -z "${com_pr_master}" ]]; then
   new_images_comment="Warning: The following images are found in the pull request but not master (new tests?):"
-
+  gh_comment+="${new_images_comment}\n"
   echo "${new_images_comment}"
   echo "${com_pr_master}"
   echo "Continuing..."
   if [[ "$TRAVIS" -eq "true" ]]; then
-    new_images_comment+="\n"
+    gh_comment+="\n"
     while read -r image; do
       imgur_response=$(imgur_upload "${pr_dir}/${image}")
       imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
-      new_images_comment+="### ${image}\n<a href='$imgur_url'><img alt='${image}' src='$imgur_url' width='200'/></a>\n"
+      gh_comment+="### ${image}\n<a href='$imgur_url'><img alt='${image}' src='$imgur_url' width='200'/></a>\n"
     done <<< "${com_pr_master}"
-    enigmabot_post_comment "${new_images_comment}"
   fi
 fi
 
 if [[ -z "${master_images}" ]]; then
   echo "Error: Comparison image folder is empty. Something is horribly wrong..."
-else
+elif [[ -z "${com_both_have}" ]]; then
   while read -r image; do
     diffname="${diff_dir}"/$(basename "${image}" .png)"_diff.png"
     echo "Comparing ${master_dir}/${image} to ${pr_dir}/${image}..."
@@ -111,8 +108,12 @@ else
       fi
     fi
   done <<< "${com_both_have}"
+  
+  if [[ "$TRAVIS" -eq "true" ]] && [[ ! -z "${gh_comment_images}" ]]; then
+    gh_comment+="${gh_comment_header}${gh_comment_images}"
+  fi
 fi
 
-if [[ "$TRAVIS" -eq "true" ]] && [[ ! -z "${gh_comment_images}" ]]; then
-  enigmabot_post_comment "${gh_comment_header}${gh_comment_images}"
+if [[ "$TRAVIS" -eq "true" ]] && [[ ! -z "${gh_comment}" ]]; then
+  enigmabot_post_comment "${gh_comment}"
 fi
