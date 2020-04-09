@@ -93,4 +93,6 @@ fi
 
 if [[ "$TRAVIS" -eq "true" ]]; then
   xfce4-session-logout --logout
+  kill $(pgrep X)
+  exit 0
 fi
