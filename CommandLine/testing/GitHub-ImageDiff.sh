@@ -78,7 +78,7 @@ fi
 
 if [[ -z "${master_images}" ]]; then
   echo "Error: Comparison image folder is empty. Something is horribly wrong..."
-elif [[ -z "${com_both_have}" ]]; then
+elif [[ ! -z "${com_both_have}" ]]; then
   while read -r image; do
     diffname="${diff_dir}"/$(basename "${image}" .png)"_diff.png"
     echo "Comparing ${master_dir}/${image} to ${pr_dir}/${image}..."
