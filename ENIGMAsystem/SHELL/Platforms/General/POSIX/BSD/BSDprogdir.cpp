@@ -11,8 +11,9 @@ void initialize_program_directory() {
   mib[3] = -1;
   char buffer[PATH_MAX];
   size_t cb = sizeof(buffer);
-  sysctl(mib, 4, buffer, &cb, NULL, 0);
-  enigma_user::program_directory = enigma_user::filename_path(buffer);
+  if (sysctl(mib, 4, buffer, &cb, NULL, 0) == 0) {
+    enigma_user::program_directory = enigma_user::filename_path(buffer);
+  }
 }
 
 } // namespace enigma
