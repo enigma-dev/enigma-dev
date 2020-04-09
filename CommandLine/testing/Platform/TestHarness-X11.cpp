@@ -17,7 +17,8 @@ std::vector<TestConfig> GetValidConfigs(bool platforms, bool graphics, bool audi
   std::vector<TestConfig> tcs;
   
   for (std::string_view p : {"xlib", "SDL"} ) {
-    for (std::string_view g : {"OpenGL1", "OpenGL3", "OpenGLES2", "OpenGLES3" }) {
+    // FIXME: glgetteximage is used in opengl-common and is unsupported by gles. This function currently is required to copy surfaces in some tests
+    for (std::string_view g : {"OpenGL1", "OpenGL3"/*, "OpenGLES2", "OpenGLES3"*/ }) {
       // Invalid combos
       if (g == "OpenGLES2" && p != "SDL") continue;
       if (g == "OpenGLES3" && p != "SDL") continue;
