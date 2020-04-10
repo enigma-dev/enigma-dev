@@ -58,4 +58,5 @@ jobs:
         _IMGUR_CLIENT_ID: $(imgur_client_id)
         _BOT_COMMENT_TOKEN: $(bot_comment_token)
         _BOT_PUSH_ON_GREEN_TOKEN: $(bot_push_on_green_token)
+        _CODECOV_UPLOAD_TOKEN: $(codecov_upload_token)
       displayName: Run Test Harness
