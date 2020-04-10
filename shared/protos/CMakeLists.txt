@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.14)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(LIB "Protocols")
-set(LIB_VERSION "0.1")
-set(LIB_DESCRIPTION "Protobuf interface for ENIGMA and GameMaker files")
+set(LIB_PROTO "Protocols")
+set(LIB_PROTO_DESCRIPTION "Protobuf interface for ENIGMA and GameMaker files")
 
 set(CMAKE_DEBUG_POSTFIX d)
 
@@ -12,19 +11,7 @@ if(WIN32)
   add_definitions(-D_WIN32_WINNT=0x0600)
 endif(WIN32)
 
-project(${LIB} VERSION ${LIB_VERSION} DESCRIPTION ${LIB_DESCRIPTION})
-
-message(STATUS "Initial build flags:")
-set(CompilerFlags
-    CMAKE_C_FLAGS_DEBUG
-    CMAKE_C_FLAGS_MINSIZEREL
-    CMAKE_C_FLAGS_RELEASE
-    CMAKE_C_FLAGS_RELWITHDEBINFO
-    CMAKE_CXX_FLAGS_DEBUG
-    CMAKE_CXX_FLAGS_MINSIZEREL
-    CMAKE_CXX_FLAGS_RELEASE
-    CMAKE_CXX_FLAGS_RELWITHDEBINFO
-    )
+project(${LIB_PROTO} DESCRIPTION ${LIB_PROTO_DESCRIPTION})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -64,26 +51,31 @@ if (RGM_ENABLE_GRPC_SERVER)
   add_custom_target(generate_grpc DEPENDS ${PROTO_FILES})
 endif()
 
+add_library(${LIB_PROTO} ${LIB_TYPE} ${PROTO_SRCS} ${GRPC_SRCS})
+
 if(MSVC)
-  add_library(${LIB} STATIC ${PROTO_SRCS} ${GRPC_SRCS})
-  target_include_directories(${LIB} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/" "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
-else()
-  add_library(${LIB} SHARED ${PROTO_SRCS} ${GRPC_SRCS})
-endif(MSVC)
-
-set_target_properties(${LIB} PROPERTIES VERSION ${LIB_VERSION})
-
+  target_include_directories(${LIB_PROTO} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/" "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
+  # Default MSVC warnings are overkill. Set to Lvl 1
+  target_compile_options(${LIB_PROTO} PRIVATE /W1)
+endif()
 
 if (RGM_ENABLE_GRPC_SERVER)
-  # Find GRPC
-  find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-  find_library(LIB_GPR NAMES gpr)
-  target_link_libraries(${LIB} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GPR})
+  #Find gRPC
+  if (MSVC) # Windows actually does something right for once
+    find_package(gRPC CONFIG REQUIRED)
+    target_link_libraries(${LIB_PROTO} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
+  else() # https://tinyurl.com/arch-grpc-bug
+    find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
+    find_library(LIB_GPR NAMES gpr)
+    find_library(LIB_CARES NAMES cares)
+    find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
+    target_link_libraries(${LIB_PROTO} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
+  endif()
 endif()
 
 # Find Protobuf
 include_directories(${Protobuf_INCLUDE_DIRS})
-target_link_libraries(${LIB} PRIVATE ${Protobuf_LIBRARIES})
+target_link_libraries(${LIB_PROTO} PRIVATE ${Protobuf_LIBRARIES})
 
-install(TARGETS ${LIB} DESTINATION .)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB}.dir/Debug/${LIB}.pdb" DESTINATION . OPTIONAL)
+install(TARGETS ${LIB_PROTO} DESTINATION .)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB_PROTO}.dir/Debug/${LIB_PROTO}.pdb" DESTINATION . OPTIONAL)

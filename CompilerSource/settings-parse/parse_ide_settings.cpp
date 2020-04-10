@@ -137,12 +137,6 @@ void parse_ide_settings(const char* eyaml)
   setting::automatic_semicolons   = settree.get("automatic-semicolons").toBool();
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
-  // Path to enigma sources
-  enigma_root = settree.get("enigma-root").toString();
-  if (enigma_root.empty()) {
-    enigma_root = ".";
-  }
-
   // Use a platform-specific make directory.
   eobjs_directory = settree.get("eobjs-directory").toString();
   
@@ -164,15 +158,10 @@ void parse_ide_settings(const char* eyaml)
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
   eobjs_directory = myReplace(escapeEnv(eobjs_directory), "\\","/");
   codegen_directory = myReplace(escapeEnv(codegen_directory), "\\","/");
-  enigma_root = myReplace(escapeEnv(enigma_root), "\\","/");
 #else
   eobjs_directory = escapeEnv(eobjs_directory);
   codegen_directory = escapeEnv(codegen_directory);
-  enigma_root = escapeEnv(enigma_root);
 #endif
-
-  if (enigma_root.back() != '/')
-    enigma_root += '/';
 
   if (eobjs_directory.back() != '/')
     eobjs_directory += '/';

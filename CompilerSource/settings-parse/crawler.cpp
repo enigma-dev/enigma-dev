@@ -44,8 +44,8 @@ namespace settings
   
   int scour_settings()
   {
-    string bdir = "ENIGMAsystem/SHELL/";
-    for (string mdir = file_find_first("ENIGMAsystem/SHELL/*",fa_sysfile | fa_readonly | fa_directory | fa_nofiles); mdir != ""; mdir = file_find_next())
+    string bdir = enigma_root + "ENIGMAsystem/SHELL/";
+    for (string mdir = file_find_first(enigma_root + "ENIGMAsystem/SHELL/*",fa_sysfile | fa_readonly | fa_directory | fa_nofiles); mdir != ""; mdir = file_find_next())
     {
       FILE *module_descriptor = fopen((bdir+mdir).c_str(),"rt");
       if (module_descriptor)
@@ -85,7 +85,7 @@ namespace extensions
         if (pe.path[pos] == '\\')
           pe.path[i] = '/';
       
-      ifstream iey(("ENIGMAsystem/SHELL/" + exts[i]+"/About.ey").c_str());
+      ifstream iey((enigma_root + "ENIGMAsystem/SHELL/" + exts[i]+"/About.ey").c_str());
       if (!iey.is_open())
         cout << "ERROR! Failed to open extension descriptor for " << exts[i] << endl;
       ey_data about = parse_eyaml(iey,exts[i]);
@@ -105,9 +105,9 @@ namespace extensions
   {
     all_platforms.clear();
     cout << "\n\n\n\nStarting platform inspection\n";
-    for (string ef = file_find_first("ENIGMAsystem/SHELL/Platforms/*",fa_sysfile | fa_readonly | fa_directory | fa_nofiles); ef != ""; ef = file_find_next())
+    for (string ef = file_find_first(enigma_root + "ENIGMAsystem/SHELL/Platforms/*",fa_sysfile | fa_readonly | fa_directory | fa_nofiles); ef != ""; ef = file_find_next())
     {
-      const string ef_path = "ENIGMAsystem/SHELL/Platforms/" + ef + "/Info/About.ey";
+      const string ef_path = enigma_root + "ENIGMAsystem/SHELL/Platforms/" + ef + "/Info/About.ey";
       ifstream ext(ef_path.c_str(), ios_base::in);
       if (!ext.is_open()) continue;
 

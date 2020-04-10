@@ -10,6 +10,3 @@ Author: Samuel Venable
 
 Depends:
   Build-Platforms: MacOSX, Linux, FreeBSD
-
-Represents:
-  Build-Platforms: Linux, FreeBSD

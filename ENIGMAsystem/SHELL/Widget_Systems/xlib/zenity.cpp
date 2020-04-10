@@ -36,7 +36,7 @@ using enigma_user::filename_name;
 using enigma_user::filename_path;
 
 #include "Platforms/General/PFmain.h"
-using enigma_user::execute_shell_for_output;
+using enigma_insecure::execute_shell_for_output;
 
 #include "Platforms/General/PFwindow.h"
 using enigma_user::window_get_caption;
@@ -65,7 +65,8 @@ static bool message_cancel  = false;
 static bool question_cancel = false;
 
 static string shellscript_evaluate(string command) {
-  string result = execute_shell_for_output(command);
+  string result;
+  execute_shell_for_output(command, result);
   if (result.back() == '\n') result.pop_back();
   return result;
 }
