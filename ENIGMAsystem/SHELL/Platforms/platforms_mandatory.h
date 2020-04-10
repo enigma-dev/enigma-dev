@@ -28,11 +28,15 @@
 #include <functional>
 #include <vector>
 
+// window handle type
 #if GM_COMPATIBILITY_VERSION <= 81
 typedef unsigned long long window_t;
 #else
 typedef void * window_t;
-#endif 
+#endif
+
+// window identifier type
+typedef std::string wid_t;
 
 namespace enigma_user {
   extern const int os_type;
