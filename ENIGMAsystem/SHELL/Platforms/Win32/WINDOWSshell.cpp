@@ -75,22 +75,18 @@ string execute_shell_for_output(const string &command) {
     }
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
-    char buf[4096] = { };
+    char buffer[4096] = { };
     DWORD dwRead = 0;
-    ok = ReadFile(hStdOutPipeRead, buf, 4095, &dwRead, NULL);
-    string str_buf = buf; tstring output = widen(str_buf);
+    ok = ReadFile(hStdOutPipeRead, buffer, 4095, &dwRead, NULL);
     while (ok == TRUE) {
-      buf[dwRead] = '\0';
-      OutputDebugStringW(output.c_str());
-      _putws(output.c_str());
-      ok = ReadFile(hStdOutPipeRead, buf, 4095, &dwRead, NULL);
-      str_buf = buf; output += widen(str_buf);
+      buffer[dwRead] = '\0';
+      ok = ReadFile(hStdOutPipeRead, buffer, 4095, &dwRead, NULL);
     }
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-    return shorten(output);
+    return shorten(widen(buffer));
   }
   return "";
 }
