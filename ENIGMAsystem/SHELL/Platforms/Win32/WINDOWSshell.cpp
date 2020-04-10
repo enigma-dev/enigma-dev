@@ -79,7 +79,7 @@ string execute_shell_for_output(const string &command) {
     DWORD dwRead = 0;
     ok = ReadFile(hStdOutPipeRead, buffer, 4095, &dwRead, NULL);
     while (ok == TRUE) {
-      buffer[dwRead] = '\0';
+      buffer[dwRead] = 0;
       ok = ReadFile(hStdOutPipeRead, buffer, 4095, &dwRead, NULL);
     }
     CloseHandle(hStdOutPipeRead);
