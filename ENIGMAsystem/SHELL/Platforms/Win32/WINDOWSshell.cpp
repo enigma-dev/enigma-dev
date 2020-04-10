@@ -77,7 +77,6 @@ string execute_shell_for_output(const string &command) {
     CloseHandle(hStdInPipeRead);
     char buf[4096] = { };
     DWORD dwRead = 0;
-    DWORD dwAvail = 0;
     ok = ReadFile(hStdOutPipeRead, buf, 4095, &dwRead, NULL);
     string str_buf = buf; tstring output = widen(str_buf);
     while (ok == TRUE) {
