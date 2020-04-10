@@ -28,7 +28,12 @@ namespace enigma
 {
 
 struct RawImage {
+  RawImage() {}
   ~RawImage() { delete[] pxdata; }
+  RawImage(const RawImage&) = delete;
+  RawImage(RawImage &&other): pxdata(other.pxdata), w(other.w), h(other.h) {
+    other.pxdata = nullptr;
+  }
   unsigned char* pxdata = nullptr;
   unsigned w = 0, h = 0;
 };

@@ -7,10 +7,14 @@ namespace enigma {
 
 AssetArray<Sprite> sprites;
 
-Subimage::Subimage(const Subimage &s) {
+Subimage::Subimage(const Subimage &s, bool duplicateTexture) {
   // FIXME: instead of duplicating the texture we should probably use a ref counter
   // especially when using an atlas
-  textureID = graphics_duplicate_texture(s.textureID);
+  if (duplicateTexture && s.textureID != -1) {
+    textureID = graphics_duplicate_texture(s.textureID);
+  } else {
+    textureID = s.textureID;
+  }
   textureBounds = s.textureBounds;
   collisionType = s.collisionType;
   collisionData  = s.collisionData;
@@ -25,6 +29,20 @@ void Sprite::SetTexture(int subimg, int textureID, TexRect texRect) {
   Subimage& s = _subimages.get(subimg);
   s.textureID = textureID;
   s.textureBounds = texRect;
+}
+
+Sprite::Sprite(const Sprite& s) {
+  width = s.width;
+  height = s.height;
+  xoffset = s.xoffset;
+  yoffset = s.yoffset;
+  bbox = s.bbox;
+  bbox_mode = s.bbox_mode;
+  
+  for (size_t i = 0; i < s.SubimageCount(); ++i) {
+    Subimage copy(s.GetSubimage(i), true);
+    _subimages.add(std::move(copy));
+  }
 }
 
 int Sprite::AddSubimage(int texid, TexRect texRect, collision_type ct, void* collisionData, bool mipmap) {
@@ -43,7 +61,7 @@ int Sprite::AddSubimage(unsigned char* pxdata, int w, int h, collision_type ct, 
 }
 
 void Sprite::AddSubimage(const Subimage& s) {
-  Subimage copy = s;
+  Subimage copy(s, true);
   _subimages.add(std::move(copy));
 }
 

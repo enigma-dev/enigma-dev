@@ -26,29 +26,12 @@
 #define ENIGMA_SPRITESTRUCT
 
 #include "AssetArray.h"
+#include "rect.h"
 #include "Collision_Systems/collision_types.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/image_formats.h"
 
 namespace enigma {
-
-template <class T = int>
-struct Rect {
-  Rect() {}
-  Rect(T x, T y, T w, T h) : x(x), y(y), w(w), h(h) {}
-  T x = 0;
-  T y = 0;
-  T w = 0;
-  T h = 0;
-  
-  // Aliases to appease existing code
-  T left() const { return x; }
-  T top() const { return y; }
-  T right() const { return x2(); }
-  T bottom() const { return y2(); }
-  T x2() const { return x + w; }
-  T y2() const { return y + h; }
-};
 
 using BoundingBox = Rect<int>;
 using TexRect = Rect<gs_scalar>;
@@ -57,7 +40,7 @@ struct Subimage {
   
   Subimage() {}
   /// Copy constructor that duplicates the texture
-  Subimage(const Subimage &s);
+  Subimage(const Subimage &s, bool duplicateTexture = false);
   void FreeTexture();
   
   // AssArray mandatory
@@ -75,6 +58,7 @@ struct Subimage {
 class Sprite {
 public:
   Sprite() {}
+  Sprite(const Sprite& s);
   Sprite(int width, int height, int xoffset = 0, int yoffset = 0) : width(width), height(height), xoffset(xoffset), yoffset(yoffset) 
     { bbox = {0, 0, width, height}; }
     

@@ -463,7 +463,7 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
   spr.AddSubimage(rgba, w, h, enigma::ct_precise, rgba); //TODO: Support toggling of precise
   
   delete[] rgba;
-  return sprites.add(std::move(spr));;
+  return sprites.add(std::move(spr));
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
