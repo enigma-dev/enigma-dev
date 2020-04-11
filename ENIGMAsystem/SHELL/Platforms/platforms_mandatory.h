@@ -28,6 +28,7 @@
 #include <functional>
 #include <vector>
 
+// window handle type
 #if GM_COMPATIBILITY_VERSION <= 81
 typedef unsigned long long window_t;
 #else
