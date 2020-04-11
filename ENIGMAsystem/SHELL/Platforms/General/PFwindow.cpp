@@ -77,7 +77,7 @@ void compute_window_size() {
       if (scaledWidth > windowWidth) windowWidth = scaledWidth;
       if (scaledHeight > windowHeight) windowHeight = scaledHeight;
     }
-    enigma_user::window_set_rectangle(windowX, windowY, windowWidth, windowHeight);
+    enigma_user::window_set_size(windowWidth, windowHeight);
   } else {
     enigma_user::window_set_rectangle(0, 0, parWidth, parHeight);
   }
@@ -252,7 +252,7 @@ void window_set_color(int color) { enigma::windowColor = color; }
 
 int window_get_color() { return enigma::windowColor; }
 
-void window_default(bool center_size) {
+void window_default() {
   int xm = room_width, ym = room_height;
   if (view_enabled) {
     int tx = 0, ty = 0;
@@ -273,16 +273,10 @@ void window_default(bool center_size) {
     if (xm > screen_width) xm = screen_width;
     if (ym > screen_height) ym = screen_height;
   }
-  bool center = true;
-  if (center_size) {
-    center = (xm != enigma::windowWidth || ym != enigma::windowHeight);
-  }
 
   enigma::windowWidth = enigma::regionWidth = xm;
   enigma::windowHeight = enigma::regionHeight = ym;
-
   enigma::compute_window_size();
-  if (center) window_center();
 }
 
 void window_center() {
