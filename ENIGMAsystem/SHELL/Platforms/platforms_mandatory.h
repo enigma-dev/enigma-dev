@@ -28,15 +28,11 @@
 #include <functional>
 #include <vector>
 
-// window handle type
 #if GM_COMPATIBILITY_VERSION <= 81
 typedef unsigned long long window_t;
 #else
 typedef void * window_t;
-#endif
-
-// window identifier type
-typedef std::string wid_t;
+#endif 
 
 namespace enigma_user {
   extern const int os_type;
@@ -123,7 +119,7 @@ namespace enigma_user
 window_t window_handle();
 
 // This is used with roomsystem
-void window_default(bool center_size = false);
+void window_default();
 
 // These four are a surprisingly integral part of the system
 int window_mouse_get_x();
