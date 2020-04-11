@@ -252,7 +252,7 @@ void window_set_color(int color) { enigma::windowColor = color; }
 
 int window_get_color() { return enigma::windowColor; }
 
-void window_default() {
+void window_default(bool center) {
   int xm = room_width, ym = room_height;
   if (view_enabled) {
     int tx = 0, ty = 0;
@@ -278,6 +278,7 @@ void window_default() {
   enigma::windowHeight = enigma::regionHeight = ym;
 
   enigma::compute_window_size();
+  if (center) window_center();
 }
 
 void window_center() {
