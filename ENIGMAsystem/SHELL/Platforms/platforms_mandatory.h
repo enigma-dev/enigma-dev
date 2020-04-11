@@ -36,7 +36,6 @@ typedef void * window_t;
 
 // window identifier type
 typedef std::string wid_t;
-#endif 
 
 namespace enigma_user {
   extern const int os_type;
