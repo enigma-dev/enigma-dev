@@ -46,7 +46,7 @@ make all -j$MAKE_JOBS
 ./test-runner
 if [[ "$TRAVIS" -eq "true" ]]; then
   # upload coverage report before running regression tests
-  bash <(curl -s https://codecov.io/bash) -f "*.info" -t "$_CODECOV_UPLOAD_TOKEN" -P "$TRAVIS_PULL_REQUEST"
+  bash <(curl -s https://codecov.io/bash) -f "*.info" -t "$_CODECOV_UPLOAD_TOKEN"
 fi
 # move output to safe space until we can compare
 mv ./test-harness-out ${PREVIOUS_PWD}
