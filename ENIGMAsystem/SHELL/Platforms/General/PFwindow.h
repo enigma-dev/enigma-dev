@@ -235,7 +235,7 @@ void window_set_position(int x, int y);
 void window_set_size(unsigned int width, unsigned int height);
 void window_set_rectangle(int x, int y, int width, int height);
 void window_center();
-void window_default();
+void window_default(bool center_size);  // default true specified in platforms mandatory
 void window_set_region_size(int w, int h, bool adaptwindow);
 
 int window_get_region_width();
