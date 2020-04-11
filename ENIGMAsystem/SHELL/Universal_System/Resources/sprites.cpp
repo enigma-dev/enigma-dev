@@ -87,19 +87,19 @@ gs_scalar sprite_get_texture_height_factor(int sprid, int subimg) {
 }
 
 int sprite_get_bbox_bottom(int sprid) {
-  return sprites.get(sprid).bbox.y2();
+  return sprites.get(sprid).bbox.bottom();
 }
 
 int sprite_get_bbox_left(int sprid) {
-  return sprites.get(sprid).bbox.x;
+  return sprites.get(sprid).bbox.left();
 }
 
 int sprite_get_bbox_right(int sprid) {
-  return sprites.get(sprid).bbox.x2();
+  return sprites.get(sprid).bbox.right();
 }
 
 int sprite_get_bbox_top(int sprid) {
-  return sprites.get(sprid).bbox.y;
+  return sprites.get(sprid).bbox.top();
 }
 
 int sprite_get_bbox_mode(int sprid) {
@@ -108,22 +108,22 @@ int sprite_get_bbox_mode(int sprid) {
 
 int sprite_get_bbox_bottom_relative(int sprid) {
   const Sprite& spr = sprites.get(sprid);
-  return spr.bbox.y2() - spr.yoffset;
+  return spr.bbox.bottom() - spr.yoffset;
 }
 
 int sprite_get_bbox_left_relative(int sprid) {
   const Sprite& spr = sprites.get(sprid);
-  return spr.bbox.x - spr.xoffset;
+  return spr.bbox.left() - spr.xoffset;
 }
 
 int sprite_get_bbox_right_relative(int sprid) {
   const Sprite& spr = sprites.get(sprid);
-  return spr.bbox.x2() - spr.xoffset;
+  return spr.bbox.right() - spr.xoffset;
 }
 
 int sprite_get_bbox_top_relative(int sprid) {
   const Sprite& spr = sprites.get(sprid);
-  return spr.bbox.y - spr.yoffset;
+  return spr.bbox.top() - spr.yoffset;
 }
 
 int sprite_get_number(int sprid) {
@@ -219,7 +219,11 @@ void sprite_set_bbox_mode(int ind, int mode) {
 }
 
 void sprite_set_bbox(int ind, int left, int top, int right, int bottom) {
-  sprites.get(ind).bbox = {left, top, right - left, bottom - top };
+  enigma::BoundingBox& bb = sprites.get(ind).bbox; 
+  bb.x = left;
+  bb.y = top;
+  bb.w = right - left;
+  bb.h = bottom - top;
 }
 
 //FIXME: This only updates the bbox currently
@@ -234,10 +238,10 @@ var sprite_get_uvs(int ind, int subimg) {
 
   const enigma::Subimage& s = sprites.get(ind).GetSubimage(subimg);
 
-  uvs[0] = s.textureBounds.x;
-  uvs[1] = s.textureBounds.y;
-  uvs[2] = s.textureBounds.x2();
-  uvs[3] = s.textureBounds.y2();
+  uvs[0] = s.textureBounds.left();
+  uvs[1] = s.textureBounds.right();
+  uvs[2] = s.textureBounds.right();
+  uvs[3] = s.textureBounds.bottom();
   return uvs;
 }
 

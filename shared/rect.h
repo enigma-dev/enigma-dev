@@ -15,10 +15,8 @@ struct Rect {
   // Aliases to appease existing code
   T left() const { return x; }
   T top() const { return y; }
-  T right() const { return x2(); }
-  T bottom() const { return y2(); }
-  T x2() const { return x + w; }
-  T y2() const { return y + h; }
+  T right() const { return x + w; }
+  T bottom() const { return y + h; }
 };
 
 }

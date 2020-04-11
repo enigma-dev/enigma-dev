@@ -53,7 +53,7 @@ namespace enigma
         int $bbox_top()    const;
         int $bbox_bottom() const;
         const BoundingBox $bbox_relative() const;
-        const BoundingBox $bbox() const;
+        const BoundingBox& $bbox() const;
         #define bbox_left   $bbox_left()
         #define bbox_right  $bbox_right()
         #define bbox_top    $bbox_top()

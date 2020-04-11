@@ -65,7 +65,7 @@ void Sprite::AddSubimage(const Subimage& s) {
   _subimages.add(std::move(copy));
 }
 
-BoundingBox sprite_get_bbox(int ind) {
+const BoundingBox& sprite_get_bbox(int ind) {
   return sprites.get(ind).bbox;
 }
 

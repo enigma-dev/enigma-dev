@@ -99,7 +99,7 @@ protected:
 
 extern AssetArray<Sprite> sprites;
 
-BoundingBox sprite_get_bbox(int spr);
+const BoundingBox& sprite_get_bbox(int spr);
 BoundingBox sprite_get_bbox_relative(int spr);
 RawImage sprite_get_raw(int spr, unsigned subimg);
 

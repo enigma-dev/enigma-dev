@@ -119,7 +119,7 @@ namespace enigma
     {
         return (mask_index >= 0 ? sprite_get_bbox_relative(mask_index) : sprite_get_bbox_relative(sprite_index));
     }
-    const BoundingBox object_collisions::$bbox() const
+    const BoundingBox& object_collisions::$bbox() const
     {
          return (mask_index >= 0 ? sprite_get_bbox(mask_index) : sprite_get_bbox(sprite_index));
     }
