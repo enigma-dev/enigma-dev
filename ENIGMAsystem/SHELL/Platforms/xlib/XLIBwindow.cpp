@@ -99,8 +99,8 @@ bool initGameWindow()
   swa.colormap = XCreateColormap(disp, root, vi->visual, AllocNone);
   swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
                    FocusChangeMask | StructureNotifyMask;
-  
   unsigned long valmask = CWColormap | CWEventMask | CWBackPixel;  // | CWBorderPixel;
+  
   // Prepare window for display (center, caption, etc)
   screen = DefaultScreenOfDisplay(disp);
   int winw = enigma_user::room_width;
