@@ -87,15 +87,13 @@ bool initGameWindow()
 
   // Defined in the appropriate graphics bridge.
   // Populates GLX attributes (or other graphics-system-specific properties).
-  GLXFBConfig* fbc = enigma::CreateFBConfig();
+  XVisualInfo* vi = enigma::CreateVisualInfo();
 
   // Window event listening and coloring
   XSetWindowAttributes swa;
   swa.border_pixel = 0;
   swa.background_pixel = (enigma::windowColor & 0xFF000000) | ((enigma::windowColor & 0xFF0000) >> 16) |
                          (enigma::windowColor & 0xFF00) | ((enigma::windowColor & 0xFF) << 16);
-                         
-  XVisualInfo* vi = glXGetVisualFromFBConfig(enigma::x11::disp, fbc[0]);
   swa.colormap = XCreateColormap(disp, root, vi->visual, AllocNone);
   swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
                    FocusChangeMask | StructureNotifyMask;
@@ -155,13 +153,13 @@ window_t window_handle() {
 
 // returns an identifier for the XLIB window
 // this string can be used in shell scripts
-wid_t window_identifier() {
+string window_identifier() {
   return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
-wid_t window_get_identifier(window_t hwnd) {
+string window_get_identifier(window_t hwnd) {
   return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
 }
 
@@ -487,25 +485,23 @@ int window_get_height() { return enigma::windowHeight; }
 //Setters
 void window_set_position(int x, int y) {
   if (window_get_fullscreen()) return;
-  enigma::windowX = x;
+  enigma::windowX = x; 
   enigma::windowY = y;
-  XWindowAttributes wa;
-  XGetWindowAttributes(disp, win, &wa);
-  XMoveWindow(disp, win, (int)x - wa.x, (int)y - wa.y);
+  XMoveWindow(disp, win, x, y);
 }
 
 void window_set_size(unsigned int w, unsigned int h) {
   if (window_get_fullscreen()) return;
-  enigma::windowWidth = w;
+  enigma::windowWidth = w; 
   enigma::windowHeight = h;
-  enigma::compute_window_size();
+  XResizeWindow(disp, win, w, h);
 }
 
 void window_set_rectangle(int x, int y, int w, int h) {
   if (window_get_fullscreen()) return;
-  enigma::windowX = x;
-  enigma::windowY = y;
-  enigma::windowWidth = w;
+  enigma::windowX = x; 
+  enigma::windowY = y; 
+  enigma::windowWidth = w; 
   enigma::windowHeight = h;
   XMoveResizeWindow(disp, win, x, y, w, h);
 }
