@@ -32,6 +32,10 @@
 typedef unsigned long long window_t;
 #else
 typedef void * window_t;
+#endif
+
+// window identifier type
+typedef std::string wid_t;
 #endif 
 
 namespace enigma_user {
