@@ -129,7 +129,7 @@ namespace enigma
     if (enigma_user::room_count)
       enigma::game_start();
     else {
-      enigma_user::window_default();
+      enigma_user::window_default(false);
       enigma_user::window_set_visible(true);
     }
 
