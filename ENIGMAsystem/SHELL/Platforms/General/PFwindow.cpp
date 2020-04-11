@@ -276,7 +276,7 @@ void window_default() {
 
   enigma::windowWidth = enigma::regionWidth = xm;
   enigma::windowHeight = enigma::regionHeight = ym;
-  
+
   enigma::compute_window_size();
 }
 
