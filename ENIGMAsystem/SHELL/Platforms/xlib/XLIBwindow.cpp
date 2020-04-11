@@ -487,25 +487,24 @@ int window_get_height() { return enigma::windowHeight; }
 //Setters
 void window_set_position(int x, int y) {
   if (window_get_fullscreen()) return;
-  enigma::windowX = x;
+  enigma::windowX = x; 
   enigma::windowY = y;
-  XMoveWindow(disp, win, x, y);
+  XWindowAttributes wa;
+  XGetWindowAttributes(disp, win, &wa);
+  XMoveWindow(disp, win, x - wa.x, y - wa.y);
 }
 
 void window_set_size(unsigned int w, unsigned int h) {
   if (window_get_fullscreen()) return;
-  enigma::windowWidth = w;
+  enigma::windowWidth = w; 
   enigma::windowHeight = h;
   XResizeWindow(disp, win, w, h);
 }
 
 void window_set_rectangle(int x, int y, int w, int h) {
   if (window_get_fullscreen()) return;
-  enigma::windowX = x;
-  enigma::windowY = y;
-  enigma::windowWidth = w;
-  enigma::windowHeight = h;
-  XMoveResizeWindow(disp, win, x, y, w, h);
+  window_set_position(x, y);
+  window_set_size(w, h);
 }
 
 ////////////////
