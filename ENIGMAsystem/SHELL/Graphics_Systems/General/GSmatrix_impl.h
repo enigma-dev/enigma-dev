@@ -29,11 +29,11 @@
 // user's package manager happens to be old
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_LEFT_HANDED
-
-#define GLM_LEFT_HANDED
 #include <glm/glm.hpp>
 // FreeBSD won't compile otheriwse because this is deprecated
-#undef GLM_LEFT_HANDED
+#ifndef GLM_LEFT_HANDED
+#define GLM_LEFT_HANDED
+#endif
 
 namespace enigma {
 
