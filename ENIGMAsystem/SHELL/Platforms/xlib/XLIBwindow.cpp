@@ -87,18 +87,19 @@ bool initGameWindow()
 
   // Defined in the appropriate graphics bridge.
   // Populates GLX attributes (or other graphics-system-specific properties).
-  XVisualInfo* vi = enigma::CreateVisualInfo();
+  GLXFBConfig* fbc = enigma::CreateFBConfig();
 
   // Window event listening and coloring
   XSetWindowAttributes swa;
   swa.border_pixel = 0;
   swa.background_pixel = (enigma::windowColor & 0xFF000000) | ((enigma::windowColor & 0xFF0000) >> 16) |
                          (enigma::windowColor & 0xFF00) | ((enigma::windowColor & 0xFF) << 16);
+  
+  XVisualInfo* vi = glXGetVisualFromFBConfig(enigma::x11::disp, fbc[0]);
   swa.colormap = XCreateColormap(disp, root, vi->visual, AllocNone);
   swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
                    FocusChangeMask | StructureNotifyMask;
   unsigned long valmask = CWColormap | CWEventMask | CWBackPixel;  // | CWBorderPixel;
-
   // Prepare window for display (center, caption, etc)
   screen = DefaultScreenOfDisplay(disp);
   int winw = enigma_user::room_width;
@@ -153,13 +154,13 @@ window_t window_handle() {
 
 // returns an identifier for the XLIB window
 // this string can be used in shell scripts
-string window_identifier() {
+wid_t window_identifier() {
   return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
-string window_get_identifier(window_t hwnd) {
+wid_t window_get_identifier(window_t hwnd) {
   return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
 }
 
