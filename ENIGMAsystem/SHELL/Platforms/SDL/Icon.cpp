@@ -25,13 +25,11 @@
 namespace enigma {
 
 void SetIconFromSprite(SDL_Window *window, int ind, unsigned subimg) {
-  sprite *spr; if (!get_sprite_mtx(spr, ind)) return;  
-  unsigned char *data = nullptr; unsigned pngwidth, pngheight;
-  data = graphics_copy_texture_pixels(spr->texturearray[subimg], &pngwidth, &pngheight);
-  SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)data, pngwidth, pngheight, 32, pngwidth * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+  RawImage img = sprite_get_raw(ind, subimg);
+  if (img.pxdata == nullptr) return;
+  SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)img.pxdata, img.w, img.h, 32, img.w * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
   SDL_SetWindowIcon(window, surface);
   SDL_FreeSurface(surface);
-  delete[] data;
 }
 
 } // namespace enigma

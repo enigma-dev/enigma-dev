@@ -35,6 +35,8 @@
 #include <math.h>
 
 using namespace std;
+using enigma::Sprite;
+using enigma::sprites;
 
 namespace enigma {
 
@@ -392,13 +394,13 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
 
   unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
-
-  enigma::spritestructarray_reallocate();
-  int sprid=enigma::sprite_idmax;
-  enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
-  enigma::sprite_set_subimage(sprid, 0, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
+  
+  Sprite spr(w, h, xorig, yorig);
+  spr.AddSubimage(surfbuf, w, h, enigma::ct_precise, surfbuf); //TODO: Support toggling of precise.
+  
   delete[] surfbuf;
-  return sprid;
+  
+  return sprites.add(std::move(spr));;
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
@@ -415,7 +417,9 @@ void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool r
 
   unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
 
-  enigma::sprite_add_subimage(ind, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
+  Sprite& spr = sprites.get(ind);
+  spr.AddSubimage(surfbuf, w, h, enigma::ct_precise, surfbuf); //TODO: Support toggling of precise.
+  
   delete[] surfbuf;
 }
 

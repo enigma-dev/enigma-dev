@@ -67,7 +67,6 @@ namespace enigma
     event_system_initialize();
     timeline_system_initialize();
     input_initialize();
-    sprites_init();
     backgrounds_init();
     widget_system_initialize();
 

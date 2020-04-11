@@ -15,10 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifdef INCLUDED_FROM_SHELLMAIN
-#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
-#endif
-
 #ifndef E_ASSET_ARRAY
 #define E_ASSET_ARRAY
 
@@ -154,6 +150,12 @@ class AssetArray {
     CHECK_ID(id,sentinel);
     return assets_[id];
   }
+  
+  const T& get(int id) const {
+    static T sentinel;
+    CHECK_ID(id,sentinel);
+    return assets_[id];
+  }
 
   // NOTE: absolutely no bounds checking!
   // only used in rare cases where you
@@ -172,7 +174,7 @@ class AssetArray {
   int duplicate(int id) {
     CHECK_ID(id, -1);
     T asset = assets_[id];
-    return add(asset);
+    return add(std::move(asset));
   }
 
   void destroy(int id) {

@@ -20,29 +20,32 @@
 #ifndef ENIGMA_SPRITES_H
 #define ENIGMA_SPRITES_H
 
+#include "Universal_System/scalar.h"
+#include "Universal_System/var4.h"
+
 #include <string>
 
 namespace enigma_user {
 
-extern int sprite_get_width(int sprid);
-extern int sprite_get_height(int sprid);
-extern double sprite_get_texture_width_factor(int sprid, int subimg);
-extern double sprite_get_texture_height_factor(int sprid, int subimg);
+int sprite_get_width(int sprid);
+int sprite_get_height(int sprid);
+gs_scalar sprite_get_texture_width_factor(int sprid, int subimg);
+gs_scalar sprite_get_texture_height_factor(int sprid, int subimg);
 
-extern int sprite_get_bbox_bottom(int sprid);
-extern int sprite_get_bbox_left(int sprid);
-extern int sprite_get_bbox_right(int sprid);
-extern int sprite_get_bbox_top(int sprid);
-extern int sprite_get_bbox_mode(int sprid);
-extern int sprite_get_bbox_bottom_relative(int sprid);
-extern int sprite_get_bbox_left_relative(int sprid);
-extern int sprite_get_bbox_right_relative(int sprid);
-extern int sprite_get_bbox_top_relative(int sprid);
+int sprite_get_bbox_bottom(int sprid);
+int sprite_get_bbox_left(int sprid);
+int sprite_get_bbox_right(int sprid);
+int sprite_get_bbox_top(int sprid);
+int sprite_get_bbox_mode(int sprid);
+int sprite_get_bbox_bottom_relative(int sprid);
+int sprite_get_bbox_left_relative(int sprid);
+int sprite_get_bbox_right_relative(int sprid);
+int sprite_get_bbox_top_relative(int sprid);
 
-extern int sprite_get_number(int sprid);
-extern int sprite_get_texture(int sprid, int subimage);
-extern int sprite_get_xoffset(int sprid);
-extern int sprite_get_yoffset(int sprid);
+int sprite_get_number(int sprid);
+int sprite_get_texture(int sprid, int subimage);
+int sprite_get_xoffset(int sprid);
+int sprite_get_yoffset(int sprid);
 
 int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload,
                int x_offset, int y_offset, bool mipmap = false);  //GM8+ compatible

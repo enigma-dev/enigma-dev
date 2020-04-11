@@ -955,18 +955,12 @@ namespace enigma
     if (ps == 0) {
       return -1;
     }
-    enigma::spritestructarray_reallocate();
-    int sprid = enigma::sprite_idmax;
-    sprite_new_empty(sprid, 1, ps->width, ps->height, ps->width/2.0, ps->height/2.0, 0, ps->height, 0, ps->width, true, false);
-
-    sprite* sprstr = enigma::spritestructarray[sprid];
-    sprstr->texturearray.push_back(ps->texture);
-    sprstr->texturexarray.push_back(0.0); // Assumes multiple of 2.
-    sprstr->textureyarray.push_back(0.0); // Assumes multiple of 2.
-    sprstr->texturewarray.push_back(1.0); // Assumes multiple of 2.
-    sprstr->textureharray.push_back(1.0); // Assumes multiple of 2.
-    sprstr->colldata.push_back(get_collision_mask(sprstr,0,ct_bbox));
-
+    
+    enigma::Sprite spr(ps->width, ps->height, ps->width/2.0, ps->height/2.0);
+    spr.SetBBox(0, 0, ps->height, ps->width);
+    spr.AddSubimage(ps->texture, TexRect { 0, 0, 1, 1 }, ct_bbox);
+    int sprid = enigma::sprites.add(std::move(spr));
+    
     shape_to_actual_sprite.insert(std::pair<pt_shape,int>(particle_shape,sprid));
     return sprid;
   }

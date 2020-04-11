@@ -459,12 +459,11 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
   if (flipped)
     rgba = enigma::image_flip(rgba, w, h, 4);
 
-  enigma::spritestructarray_reallocate();
-  int sprid=enigma::sprite_idmax;
-  enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
-  enigma::sprite_set_subimage(sprid, 0, w, h, rgba, rgba, enigma::ct_precise); //TODO: Support toggling of precise.
+  Sprite spr(w, h, xorig, yorig);
+  spr.AddSubimage(rgba, w, h, enigma::ct_precise, rgba); //TODO: Support toggling of precise
+  
   delete[] rgba;
-  return sprid;
+  return sprites.add(std::move(spr));
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
@@ -479,8 +478,10 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
 
   if (flipped)
     rgba = enigma::image_flip(rgba, w, h, 4);
-
-  enigma::sprite_add_subimage(id, w, h, rgba, rgba, enigma::ct_precise); //TODO: Support toggling of precise.
+    
+  Sprite& spr = sprites.get(id);
+  spr.AddSubimage(rgba, w, h, enigma::ct_precise, rgba); //TODO: Support toggling of precise.
+  
   delete[] rgba;
 }
 
