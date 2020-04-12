@@ -7,10 +7,6 @@
 
 inline void test_common(TestHarness* test_harness, const std::string& name, bool save_image = true) {
   if (!test_harness) FAIL() << "Game could not be run.";
-
-  for (int i = 0; i < 10; ++i) {
-    test_harness->wait();  // Let the game render a few frames first.
-  }
   
   ASSERT_TRUE(test_harness->game_is_running())
       << "Game stopped running unexpectedly";
