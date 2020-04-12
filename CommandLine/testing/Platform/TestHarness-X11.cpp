@@ -7,10 +7,48 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+
+std::vector<TestConfig> GetValidConfigs(bool platforms, bool graphics, bool audio, bool collisions, bool widgets, bool network) {
+  std::vector<TestConfig> tcs;
+  
+  for (std::string_view p : {"xlib", "SDL"} ) {
+    // FIXME: glgetteximage is used in opengl-common and is unsupported by gles. This function currently is required to copy surfaces in some tests
+    for (std::string_view g : {"OpenGL1", "OpenGL3"/*, "OpenGLES2", "OpenGLES3"*/ }) {
+      // Invalid combos
+      if (g == "OpenGLES2" && p != "SDL") continue;
+      if (g == "OpenGLES3" && p != "SDL") continue;
+      for (std::string_view a : {"OpenAL", "SFML" }) {
+        for (std::string_view c : {"Precise", "BBox" }) {
+          for (std::string_view w : {"None", "GTK+", "xlib" }) {
+            for (std::string_view n : {"None", "BerkeleySockets", "Asynchronous" }) {
+              TestConfig tc;
+              tc.platform = p;
+              tc.graphics = g;
+              tc.audio = a;
+              tc.collision = c;
+              tc.widgets = w;
+              tc.network = n;
+              tcs.push_back(tc);
+              if (!network) break;
+            }
+            if (!widgets) break;
+          }
+          if (!collisions) break;
+        }
+        if (!audio) break;
+      }
+      if (!graphics) break;
+    }
+    if (!platforms) break;
+  }
+  
+  return tcs;
+}
 
 namespace {
 using std::string;
@@ -71,6 +109,7 @@ Window find_window_by_pid(Display *disp, Window win, pid_t pid) {
 
 class X11_TestHarness final: public TestHarness {
  public:
+ 
   string get_caption() final {
     return get_window_caption(display, window_id);
   }
@@ -176,6 +215,7 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   string emake_cmd = "./emake";
   string compiler = "--compiler=" + tc.get_or(&TC::compiler, "TestHarness");
   string mode = "--mode=" + tc.get_or(&TC::mode, "Debug");
+  string platform = "--platform=" + tc.get_or(&TC::platform, "xlib");
   string graphics = "--graphics=" + tc.get_or(&TC::graphics, "OpenGL1");
   string audio = "--audio=" + tc.get_or(&TC::audio, "OpenAL");
   string widgets = "--widgets=" + tc.get_or(&TC::widgets, "None");
@@ -188,6 +228,7 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
     emake_cmd.c_str(),
     compiler.c_str(),
     mode.c_str(),
+    platform.c_str(),
     graphics.c_str(),
     audio.c_str(),
     widgets.c_str(),
@@ -280,7 +321,7 @@ TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
     abort();
   }
   if (pid == -1) return nullptr;
-  usleep(250000); // Give the window a quarter second to load and display.
+  usleep(5000000); // Give the window a 5 seconds to load and display.
 
   Display *display = XOpenDisplay(0);
   Window root = XDefaultRootWindow(display);

@@ -2,7 +2,7 @@
 
 ###### Harness #######
 if [ "$TEST_HARNESS" == true ]; then
-  LINUX_DEPS="$LINUX_DEPS xfwm4 libgtest-dev wmctrl xdotool lcov"
+  LINUX_DEPS="$LINUX_DEPS xfce4 libgtest-dev wmctrl xdotool lcov"
 fi
 
 ###### Compilers #######
@@ -16,44 +16,43 @@ elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
 fi
 
 ###### Platforms #######
-if [ "$PLATFORM" == "SDL" ]; then
-  LINUX_DEPS="$LINUX_DEPS libsdl2-dev"
-fi
+#if [ "$PLATFORM" == "SDL" ] || [ "$TEST_HARNESS" == true ]; then
+  #LINUX_DEPS="$LINUX_DEPS libsdl2-dev"
+#fi
 
-if [ "$GRAPHICS" == "OpenGLES2" ]; then
-  LINUX_DEPS="$LINUX_DEPS libepoxy-dev libegl1-mesa-dev libgles2-mesa-dev"
-else
-  LINUX_DEPS="$LINUX_DEPS libglew-dev libxrandr-dev libxinerama-dev"
-fi
+###### Graphics #######
+LINUX_DEPS="$LINUX_DEPS libepoxy-dev libegl1-mesa-dev libgles2-mesa-dev libglew-dev libxrandr-dev libxinerama-dev"
 
 ###### Audio #######
-if [ "$AUDIO" == "OpenAL" ]; then
+if [ "$AUDIO" == "OpenAL" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev"
-elif [ "$AUDIO" == "SFML" ]; then
+fi
+if [ "$AUDIO" == "SFML" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libsfml-dev"
 fi
 
 ###### Widgets #######
-if [ "$WIDGETS" == "GTK+" ]; then
+if [ "$WIDGETS" == "GTK+" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libgtk2.0-dev"
-elif [ "$WIDGETS" == "xlib" ]; then
+fi
+if [ "$WIDGETS" == "xlib" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS zenity kdialog"
 fi
 
 ###### Extensions #######
-if [[ "$EXTENSIONS" =~ "GME" ]]; then
+if [[ "$EXTENSIONS" =~ "GME" ]] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libgme-dev"
 fi
 
-if [[ "$EXTENSIONS" =~ "Box2DPhysics" ]] || [[ "$EXTENSIONS" =~ "StudioPhysics" ]]; then
+if [[ "$EXTENSIONS" =~ "Box2DPhysics" ]] || [[ "$EXTENSIONS" =~ "StudioPhysics" ]] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libbox2d-dev"
 fi
 
-if [[ "$EXTENSIONS" =~ "BulletDynamics" ]]; then
+if [[ "$EXTENSIONS" =~ "BulletDynamics" ]] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libbullet-dev"
 fi
 
-if [[ "$EXTENSIONS" =~ "ttf" ]]; then
+if [[ "$EXTENSIONS" =~ "ttf" ]] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libfreetype6-dev"
 fi
 

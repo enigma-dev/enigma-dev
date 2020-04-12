@@ -7,8 +7,7 @@
 
 inline void test_common(TestHarness* test_harness, const std::string& name, bool save_image = true) {
   if (!test_harness) FAIL() << "Game could not be run.";
-
-  test_harness->wait();  // Let the game render a frame first.
+  
   ASSERT_TRUE(test_harness->game_is_running())
       << "Game stopped running unexpectedly";
 

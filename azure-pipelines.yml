@@ -11,9 +11,52 @@ pr:  # Trigger a build on every PR.
       - '*'  # Must quote since "*" is a YAML reserved character
 variables:
 - template: azure-vars.yml@radialgm
+- group: Test Harness Auth
 
 jobs:
 - template: azure-jobs.yml@radialgm
   parameters:
     repo: radialgm
     enigmaref: $(Build.SourceBranch)
+
+- job: TestHarness
+  displayName: 'Test Harness'
+  variables:
+    TEST_HARNESS: "true"
+    TRAVIS_OS_NAME: "linux"
+    TRAVIS: "true"
+    TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
+    TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
+  pool:
+    vmImage: 'ubuntu-latest'
+  timeoutInMinutes: 360
+
+  steps:
+    - checkout: self
+      persistCredentials: true
+      
+    - script: |
+        sudo dpkg --add-architecture i386
+        ./CI/install_emake_deps.sh
+        ./CI/split_jobs.sh install
+        ./CI/build_sdl.sh
+      displayName: Install Dependencies
+
+    - script: |
+        make -j4
+        make -j4 emake
+      displayName: Build emake
+      
+    - script: |
+        make emake-tests
+        ./emake-tests
+      displayName: Test emake
+   
+    - script: |
+        ./CI/build_and_run_game.sh
+      env:
+        _IMGUR_CLIENT_ID: $(imgur_client_id)
+        _BOT_COMMENT_TOKEN: $(bot_comment_token)
+        _BOT_PUSH_ON_GREEN_TOKEN: $(bot_push_on_green_token)
+        _CODECOV_UPLOAD_TOKEN: $(codecov_upload_token)
+      displayName: Run Test Harness

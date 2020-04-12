@@ -17,12 +17,12 @@ imgur_api='https://api.imgur.com/3/image'  # This is the Imgur API URL. We need 
 function imgur_upload {
   echo $(curl --request POST \
               --url $imgur_api \
-              --header "Authorization: Client-ID $imgur_client_id" \
+              --header "Authorization: Client-ID $_IMGUR_CLIENT_ID" \
               --form "image=@$1")
 }
 
 function enigmabot_post_comment {
-  echo $(curl -H "Authorization: token $bot_comment_token" \
+  echo $(curl -H "Authorization: token $_BOT_COMMENT_TOKEN" \
               -H "Content-Type: application/json" \
               --request POST \
               --data '{"body":"'"$1"'"}' \
@@ -35,6 +35,7 @@ Carefully review the following image comparison for anomalies and adjust the cha
 $TRAVIS_PULL_REQUEST_SHA | Master | Diff\n\
 --- | --- | ---\n"
 
+gh_comment=""
 gh_comment_images=""
 
 master_dir="/tmp/enigma-master/test-harness-out"
@@ -47,69 +48,72 @@ pr_images=$(ls ${pr_dir}/*.png | xargs -n1 basename | sort)
 # GitHub/JSON don't like tabs which comm can output, so delete them with tr
 com_master_pr=$(comm -2 -3 <(echo "$master_images") <(echo "$pr_images") | tr -d '\t')
 com_pr_master=$(comm -1 -3 <(echo "$master_images") <(echo "$pr_images") | tr -d '\t')
+com_both_have=$(comm -1 -2 <(echo "$master_images") <(echo "$pr_images") | tr -d '\t')
 
 if [[ ! -z "${com_master_pr}" ]]; then
-  deleted_images_comment="Error: The following images are found in master but not the pull request:\n\
-  ${com_master_pr}\n"
+  gh_comment="Error: The following images are found in master but not the pull request:\n"
+  while read -r image; do
+    gh_comment+="${image}\n"
+  done <<< ${com_master_pr}
 
-  echo -e "${deleted_images_comment}"
+  echo -e "${gh_comment}"
   echo "Aborting!"
+fi
+
+if [[ ! -z "${com_pr_master}" ]]; then
+  new_images_comment="Warning: The following images are found in the pull request but not master (new tests?):"
+  gh_comment+="${new_images_comment}\n"
+  echo "${new_images_comment}"
+  echo "${com_pr_master}"
+  echo "Continuing..."
   if [[ "$TRAVIS" -eq "true" ]]; then
-    enigmabot_post_comment "${deleted_images_comment}"
-  fi
-else
-  if [[ ! -z "${com_pr_master}" ]]; then
-    new_images_comment="Warning: The following images are found in the pull request but not master (new tests?):"
-
-    echo "${new_images_comment}"
-    echo "${com_pr_master}"
-    echo "Continuing..."
-    if [[ "$TRAVIS" -eq "true" ]]; then
-      new_images_comment+="\n"
-      while read -r image; do
-        imgur_response=$(imgur_upload "${pr_dir}/${image}")
-        imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
-        new_images_comment+="### ${image}\n<a href='$imgur_url'><img alt='${image}' src='$imgur_url' width='200'/></a>\n"
-      done <<< "${com_pr_master}"
-      enigmabot_post_comment "${new_images_comment}"
-    fi
-  fi
-
-  if [[ -z "${master_images}" ]]; then
-    echo "Error: Comparison image folder is empty. Something is horribly wrong..."
-  else
+    gh_comment+="\n"
     while read -r image; do
-      diffname="${diff_dir}"/$(basename "${image}" .png)"_diff.png"
-      echo "Comparing ${master_dir}/${image} to ${pr_dir}/${image}..."
-      result=$(compare -metric AE "${master_dir}/${image}" "${pr_dir}/${image}" "${diffname}" 2>&1 >/dev/null)
-      echo "$result"
-      if [[ "$result" -eq "0" ]]; then
-        echo "No differences detected :)"
-      else
-        echo "Mismatches detected :("
+      imgur_response=$(imgur_upload "${pr_dir}/${image}")
+      imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
+      gh_comment+="### ${image}\n<a href='$imgur_url'><img alt='${image}' src='$imgur_url' width='200'/></a>\n"
+    done <<< "${com_pr_master}"
+  fi
+fi
 
-        if [[ "$TRAVIS" -eq "true" ]]; then
-          echo "Uploading images..."
+if [[ -z "${master_images}" ]]; then
+  echo "Error: Comparison image folder is empty. Something is horribly wrong..."
+elif [[ ! -z "${com_both_have}" ]]; then
+  while read -r image; do
+    diffname="${diff_dir}"/$(basename "${image}" .png)"_diff.png"
+    echo "Comparing ${master_dir}/${image} to ${pr_dir}/${image}..."
+    result=$(compare -metric AE "${master_dir}/${image}" "${pr_dir}/${image}" "${diffname}" 2>&1 >/dev/null)
+    echo "$result"
+    if [[ "$result" -eq "0" ]]; then
+      echo "No differences detected :)"
+    else
+      echo "Mismatches detected :("
 
-          imgur_response=$(imgur_upload "${pr_dir}/${image}")
-          imgur_master_response=$(imgur_upload "${master_dir}/${image}")
-          imgur_diff_response=$(imgur_upload "${diffname}")
+      if [[ "$TRAVIS" -eq "true" ]]; then
+        echo "Uploading images..."
 
-          imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
-          imgur_master_url=$(echo $imgur_master_response | jq --raw-output '.data."link"' )
-          imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
+        imgur_response=$(imgur_upload "${pr_dir}/${image}")
+        imgur_master_response=$(imgur_upload "${master_dir}/${image}")
+        imgur_diff_response=$(imgur_upload "${diffname}")
 
-          echo $imgur_url
+        imgur_url=$(echo $imgur_response | jq --raw-output '.data."link"' )
+        imgur_master_url=$(echo $imgur_master_response | jq --raw-output '.data."link"' )
+        imgur_diff_url=$(echo $imgur_diff_response | jq --raw-output '.data."link"' )
 
-          gh_comment_images="<a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
-          <a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
-          <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
-        fi
+        echo $imgur_url
+
+        gh_comment_images="<a href='$imgur_url'><img alt='Image Diff' src='$imgur_url' width='200'/></a>|\
+        <a href='$imgur_master_url'><img alt='Image Diff' src='$imgur_master_url' width='200'/></a>|\
+        <a href='$imgur_diff_url'><img alt='Screen Save' src='$imgur_diff_url' width='200'/></a>\n"
       fi
-    done <<< "${master_images}"
-  fi
-
+    fi
+  done <<< "${com_both_have}"
+  
   if [[ "$TRAVIS" -eq "true" ]] && [[ ! -z "${gh_comment_images}" ]]; then
-    enigmabot_post_comment "${gh_comment_header}${gh_comment_images}"
+    gh_comment+="${gh_comment_header}${gh_comment_images}"
   fi
+fi
+
+if [[ "$TRAVIS" -eq "true" ]] && [[ ! -z "${gh_comment}" ]]; then
+  enigmabot_post_comment "${gh_comment}"
 fi
