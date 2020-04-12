@@ -321,7 +321,7 @@ TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
     abort();
   }
   if (pid == -1) return nullptr;
-  usleep(1000000); // Give the window a second to load and display.
+  usleep(5000000); // Give the window a 5 seconds to load and display.
 
   Display *display = XOpenDisplay(0);
   Window root = XDefaultRootWindow(display);
