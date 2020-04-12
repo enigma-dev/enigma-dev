@@ -193,9 +193,7 @@ void window_set_position(int x, int y)
 void window_set_size(unsigned int width, unsigned int height)
 {
   if (window_get_fullscreen()) return;
-  enigma::windowWidth = width;
-  enigma::windowHeight = height;
-  enigma::compute_window_size();
+  window_set_rectangle(enigma::windowX, enigma::windowY, width, height);
 }
 
 void window_set_rectangle(int x, int y, int width, int height) {

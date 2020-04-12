@@ -123,7 +123,7 @@ namespace enigma_user
 window_t window_handle();
 
 // This is used with roomsystem
-void window_default(bool center_size = false);
+void window_default(bool center = true);
 
 // These four are a surprisingly integral part of the system
 int window_mouse_get_x();
