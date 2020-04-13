@@ -36,19 +36,19 @@ string narrow(wstring wstr) {
 }
 
 string get_temp_directory() {
-  wchar buffer[MAX_PATH + 1];
+  wchar_t buffer[MAX_PATH + 1];
   GetTempPathW(MAX_PATH + 1, buffer);
   return (narrow(buffer).back() == '\\') ? narrow(buffer) : narrow(buffer) + "\\";
 }
 
 struct handle_data {
-  unsigned long process_id;
+  DWORD process_id;
   HWND window_handle;
 };
 
 BOOL CALLBACK enum_windows_callback(HWND handle, LPARAM lParam) {
   handle_data& data = *(handle_data*)lParam;
-  unsigned long process_id = 0;
+  DWORD process_id = 0;
   GetWindowThreadProcessId(handle, &process_id);
   if (data.process_id != process_id || !is_main_window(handle))
     return TRUE;
