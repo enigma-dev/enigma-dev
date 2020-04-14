@@ -4,11 +4,14 @@ TARGET := ../../test-runner
 TESTCASES_DIR := $(SRC_DIR)/Tests
 SHARED_SRC_DIR := ../../shared
 
-ifeq ($(OS), Linux)
-	OS_SRCS=$(wildcard ./Platform/*-X11.cpp)
-	OS_LIBS=-lX11 -lstdc++fs
-else ifeq ($(OS), Darwin)
+ifeq ($(OS), Darwin)
 	OS_SRCS=./Platform/TestHarness-Cocoa.cpp
+else ifeq ($(UNIX_BASED), true)
+	OS_SRCS=$(wildcard ./Platform/*-X11.cpp)
+	OS_LIBS:=$(shell pkg-config x11 --libs)
+	ifeq ($(OS), Linux)
+		OS_LIBS+=-lstdc++fs
+	endif
 else
 	OS_SRCS=./Platform/TestHarness-Win32.cpp
 endif

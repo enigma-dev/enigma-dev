@@ -7,7 +7,7 @@ Description: SFML is a portable and easy to use multimedia API written in C++. Y
 Author: fundies and Robert
 
 Depends:
-	Build-platforms: Windows, Linux, MacOSX, SDL
+	Build-platforms: Windows, MacOSX, Linux, FreeBSD, SDL
 Represents:
 	Build-platforms: None
 

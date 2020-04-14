@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: Linux X11
+Name: X11
 Identifier: xlib
 Represents:
-	Build-Platforms: Linux
-Description: Run on any Linux distribution powered by the X Window Server.
+	Build-Platforms: Linux, FreeBSD
+Description: Run on any Mac, Linux, or FreeBSD environment with the X Window System.
 Author: IsmAvatar, Josh Ventura
 
 Depends:
-	Build-Platforms: Linux
+	Build-Platforms: MacOSX, Linux, FreeBSD

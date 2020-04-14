@@ -10,4 +10,4 @@ Depends:
 	Windowing: xlib, Win32, Cocoa, SDL
 
 Represents:
-	Build-platforms: Windows, Linux, MacOSX, SDL
+	Build-platforms: Windows, MacOSX, Linux, FreeBSD, SDL
