@@ -18,7 +18,6 @@
 
 #define NOMINMAX // for windows.h because we use std::min/max
 #include "WINDOWSmain.h"
-#include "WINDOWShandle.h"
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
@@ -52,6 +51,11 @@ const int os_type = os_windows;
 
 namespace enigma
 {
+
+HINSTANCE hInstance;
+HWND hWnd;
+HDC window_hDC;
+HANDLE mainthread;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
