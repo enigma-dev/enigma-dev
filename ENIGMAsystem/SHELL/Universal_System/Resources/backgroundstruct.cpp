@@ -23,9 +23,11 @@
 #include "Universal_System/nlpo2.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GStextures.h"
 
 #include <cstring>
 #include <string>
+#include <iostream>
 
 namespace enigma {
 background **backgroundstructarray;
@@ -277,4 +279,15 @@ var background_get_uvs(int backId) {
   uvs[3] = bck2d->texturey + bck2d->textureh;
   return uvs;
 }
+
+bool background_textures_equal(int id1, int id2) {
+  // Note: this will need to be amended to use textures_regions_equal when atlas support is implemented
+  return textures_equal(background_get_texture(id1), background_get_texture(id2));
+}
+
+uint32_t background_get_pixel(int bkgID, unsigned x, unsigned y) {
+  // Note: this will need to be amended when atlas support is implemented
+  return texture_get_pixel(background_get_texture(bkgID), x, y);
+}
+
 }  // namespace enigma_user
