@@ -498,7 +498,13 @@ void window_set_size(unsigned int w, unsigned int h) {
   if (window_get_fullscreen()) return;
   enigma::windowWidth = w;
   enigma::windowHeight = h;
-  XResizeWindow(disp, win, w, h);
+  if (!enigma::isSizeable) {
+    window_set_sizeable(true);
+    XResizeWindow(disp, win, w, h);
+    window_set_sizeable(false);
+  } else {
+    XResizeWindow(disp, win, w, h);
+  }
 }
 
 void window_set_rectangle(int x, int y, int w, int h) {
