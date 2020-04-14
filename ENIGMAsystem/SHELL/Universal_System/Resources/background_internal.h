@@ -34,6 +34,7 @@ namespace enigma
   extern size_t background_idmax;
   struct background
   {
+    virtual ~background() {}
     int width, height;
     int texture;
 
@@ -52,6 +53,7 @@ namespace enigma
   };
   struct background_tileset: background
   {
+    ~background_tileset() {}
     int tileWidth;
     int tileHeight;
     int hOffset;
