@@ -1,7 +1,5 @@
 int bkg1, bkg2;
 
-//int background_add(std::string filename, bool transparent = false, bool smooth = false, bool preload = true, bool mipmap = false);
-
 // add / del
 bkg1 = background_add("../data/sprite.png", false);
 gtest_assert_eq(bkg1, 0);
