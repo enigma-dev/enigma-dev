@@ -23,9 +23,9 @@
 #ifndef ENIGMA_GSTEXTURES_IMPL_H
 #define ENIGMA_GSTEXTURES_IMPL_H
 
-#include "GStextures.h"
-
 #include <vector>
+#include <memory>
+
 using std::vector;
 
 namespace enigma {
@@ -33,6 +33,7 @@ namespace enigma {
 struct Texture {
   unsigned width,height;
   unsigned fullwidth,fullheight;
+  virtual ~Texture() = default;
 protected:
   // we want Texture abstract/non-instantiable
   // each backend assumes it can safely cast
@@ -41,7 +42,7 @@ protected:
   Texture() {}
 };
 
-extern vector<Texture*> textures;
+extern vector<std::unique_ptr<Texture>> textures;
 
 } // namespace enigma
 

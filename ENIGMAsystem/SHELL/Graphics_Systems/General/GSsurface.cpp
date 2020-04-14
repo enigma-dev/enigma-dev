@@ -16,13 +16,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GSprimitives.h"
 #include "GSsurface.h"
+#include "GSsurface_impl.h"
+#include "GSprimitives.h"
 #include "GScolor_macros.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
+#include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites_internal.h"
-#include "Universal_System/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
+#include "Universal_System/Resources/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 #include "Universal_System/math_consts.h"
 
@@ -32,13 +35,41 @@
 #include <math.h>
 
 using namespace std;
+using enigma::Sprite;
+using enigma::sprites;
+
+namespace enigma {
+
+vector<BaseSurface*> surfaces;
+
+} // namespace enigma
 
 namespace enigma_user {
+
 extern int room_width, room_height/*, sprite_idmax*/;
+
+bool surface_exists(int id)
+{
+  return !((id < 0) or (size_t(id) > enigma::surfaces.size()) or (enigma::surfaces[id] == NULL));
 }
 
-namespace enigma_user
+int surface_get_texture(int id)
 {
+  get_surfacev(surf,id,-1);
+  return ((enigma::BaseSurface&)surf).texture;
+}
+
+int surface_get_width(int id)
+{
+  get_surfacev(surf,id,-1);
+  return ((enigma::BaseSurface&)surf).width;
+}
+
+int surface_get_height(int id)
+{
+  get_surfacev(surf,id,-1);
+  return ((enigma::BaseSurface&)surf).height;
+}
 
 void draw_surface(int id, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
@@ -270,4 +301,155 @@ void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1,
     }
 }
 
+//////////////////////////////////////SAVE TO FILE AND CTEATE SPRITE FUNCTIONS/////////
+
+int surface_getpixel(int id, int x, int y)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surfacev(surf,id,-1);
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,1,1);
+  int ret = surfbuf[2] + (surfbuf[1] << 8) + (surfbuf[0] << 16);
+  delete[] surfbuf;
+  return ret;
 }
+
+int surface_getpixel_ext(int id, int x, int y)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surfacev(surf,id,-1);
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,1,1);
+  int ret = surfbuf[2] + (surfbuf[1] << 8) + (surfbuf[0] << 16) + (surfbuf[3] << 24);
+  delete[] surfbuf;
+  return ret;
+}
+
+int surface_getpixel_alpha(int id, int x, int y)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surfacev(surf,id,-1);
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,1,1);
+  int ret = surfbuf[3];
+  delete[] surfbuf;
+  return ret;
+}
+
+int surface_save(int id, string filename)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surfacev(surf,id,-1);
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+  const gs_scalar w=base.width,h=base.height;
+  unsigned fw=0, fh=0;
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,&fw,&fh);
+
+  int ret = enigma::image_save(filename, surfbuf, w, h, fw, fh, false);
+  delete[] surfbuf;
+  return ret;
+}
+
+int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surfacev(surf,id,-1);
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+
+  int ret = enigma::image_save(filename, surfbuf, w, h, w, h, false);
+  delete[] surfbuf;
+  return ret;
+}
+
+int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surfacev(surf,id,-1);
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+
+  enigma::backgroundstructarray_reallocate();
+  int bckid=enigma::background_idmax;
+  enigma::background_new(bckid, w, h, surfbuf, removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
+  delete[] surfbuf;
+  enigma::background_idmax++;
+  return bckid;
+}
+
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surfacev(surf,id,-1);
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+  
+  Sprite spr(w, h, xorig, yorig);
+  spr.AddSubimage(surfbuf, w, h, enigma::ct_precise, surfbuf); //TODO: Support toggling of precise.
+  
+  delete[] surfbuf;
+  
+  return sprites.add(std::move(spr));;
+}
+
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
+{
+  return sprite_create_from_surface(id, x, y, w, h, removeback, smooth, true, xorig, yorig);
+}
+
+void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surface(surf,id);
+  const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+
+  Sprite& spr = sprites.get(ind);
+  spr.AddSubimage(surfbuf, w, h, enigma::ct_precise, surfbuf); //TODO: Support toggling of precise.
+  
+  delete[] surfbuf;
+}
+
+void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surface(ssurf,source);
+  get_surface(dsurf,destination);
+  const enigma::BaseSurface& sbase = ((enigma::BaseSurface&)ssurf),
+                             dbase = ((enigma::BaseSurface&)dsurf);
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(sbase.texture,xs,ys,ws,hs);
+  enigma::graphics_push_texture_pixels(dbase.texture, x, y, ws, hs, surfbuf);
+  delete[] surfbuf;
+}
+
+void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  get_surface(ssurf,source);
+  get_surface(dsurf,destination);
+  const enigma::BaseSurface& sbase = ((enigma::BaseSurface&)ssurf),
+                             dbase = ((enigma::BaseSurface&)dsurf);
+  unsigned sw = 0, sh = 0;
+
+  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(sbase.texture,&sw,&sh);
+  enigma::graphics_push_texture_pixels(dbase.texture, x, y, sw, sh, surfbuf);
+  delete[] surfbuf;
+}
+
+} // namespace enigma_user

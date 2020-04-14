@@ -21,6 +21,8 @@
 #include "Platforms/General/PFmain.h" // For those damn vk_ constants.
 #include "Platforms/General/PFwindow.h"
 
+#include "WINDOWSicon.h"
+
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include "strings_util.h" // For string_replace_all
@@ -28,10 +30,19 @@
 #include "Universal_System/roomsystem.h" // room_caption
 #include "Universal_System/globalupdate.h"
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <stdio.h>
 #include <string>
 using namespace std;
+
+namespace {
+
+std::string current_caption = "";
+
+} // anonymous namespace
 
 namespace enigma
 {
@@ -65,15 +76,45 @@ void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
 
 namespace enigma_user {
 
-#if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle() {
-  return (unsigned long long)enigma::hWnd;
+window_t window_handle() {
+  return reinterpret_cast<window_t>(enigma::hWnd);
 }
-#else
-void* window_handle() {
-  return enigma::hWnd;
+
+// returns an identifier for the HWND window
+// this string can be used in shell scripts
+wid_t window_identifier() {
+  return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
 }
-#endif
+
+// returns an identifier for certain window
+// this string can be used in shell scripts
+wid_t window_get_identifier(window_t hwnd) {
+  return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
+}
+
+static int currentIconIndex = -1;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::SetIconFromSprite(enigma::hWnd, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
+}
 
 // GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
 // Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,
@@ -143,6 +184,7 @@ double window_get_alpha() {
 
 void window_set_position(int x, int y)
 {
+  if (window_get_fullscreen()) return;
   enigma::windowX = x;
   enigma::windowY = y;
   SetWindowPos(enigma::hWnd, HWND_TOP, enigma::windowX, enigma::windowY, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
@@ -150,12 +192,12 @@ void window_set_position(int x, int y)
 
 void window_set_size(unsigned int width, unsigned int height)
 {
-  enigma::windowWidth = width;
-  enigma::windowHeight = height;
-  enigma::compute_window_size();
+  if (window_get_fullscreen()) return;
+  window_set_rectangle(enigma::windowX, enigma::windowY, width, height);
 }
 
 void window_set_rectangle(int x, int y, int width, int height) {
+  if (window_get_fullscreen()) return;
   RECT c;
   c.left = (enigma::windowX = x); c.top = (enigma::windowY = y); c.right = enigma::windowX + (enigma::windowWidth = width); c.bottom = enigma::windowY + (enigma::windowHeight = height);
   AdjustWindowRect(&c, GetWindowLongPtr(enigma::hWnd, GWL_STYLE), false);
@@ -163,41 +205,62 @@ void window_set_rectangle(int x, int y, int width, int height) {
 }
 
 namespace {
-  bool prefer_sizeable;
-}
+
+bool prefer_borderless = !enigma::showBorder;
+bool prefer_sizeable = enigma::isSizeable;
+bool prefer_fullscreen = false;
+bool prefer_stayontop = false;
+int tmpWidth = enigma::windowWidth;
+int tmpHeight = enigma::windowHeight;
+
+}  // anonymous namespace
 
 void window_set_fullscreen(bool full) {
+  if (window_get_fullscreen() == full) return;
+  enigma::isFullScreen = full;
+  prefer_fullscreen = full;
   // tweak the style first to remove or restore the window border
-  LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
   if (full) {
-    style &= ~(WS_CAPTION | WS_SIZEBOX | WS_MAXIMIZEBOX);
-    style |= WS_POPUP;
+    prefer_borderless = !window_get_showborder();
+    prefer_sizeable = window_get_sizeable();
+    prefer_stayontop = window_get_stayontop();
+    window_set_maximized(false);
+    tmpWidth = window_get_width();
+    tmpHeight = window_get_height();
+    window_set_stayontop(false);
+    LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
+    style &= ~(WS_CAPTION | WS_BORDER | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
+    style |= WS_SIZEBOX;
+    SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
+    window_set_maximized(full);
   } else {
-    style &= ~(WS_POPUP);
-    style |= WS_CAPTION;
-    if (prefer_sizeable) {
-      style |= WS_SIZEBOX | WS_MAXIMIZEBOX;
-    }
+    window_set_maximized(full);
+    window_set_showborder(!prefer_borderless);
+    window_set_sizeable(prefer_sizeable);
+    window_set_stayontop(prefer_stayontop);
+    window_set_size(tmpWidth, tmpHeight);
   }
-  SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
-
-  enigma::compute_window_size();
+  enigma::compute_window_scaling();
 }
 
 bool window_get_fullscreen() {
-  LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
-  // The window should be a maximized popup window.
-  if ((style & WS_POPUP) != WS_POPUP) return false;
-  // The window should have no caption, resize box, or (probably?) border
-  if ((style & WS_CAPTION) == WS_CAPTION) return false;
-  if ((style & WS_THICKFRAME) == WS_THICKFRAME) return false;
-  if ((style & WS_BORDER) == WS_BORDER) return false;
-  return true;
+  return prefer_fullscreen;
 }
 
 void window_set_sizeable(bool sizeable) {
-  SetWindowLongPtr(enigma::hWnd, GWL_STYLE,
-      GetWindowLongPtr(enigma::hWnd, GWL_STYLE) | WS_SIZEBOX);
+  if (window_get_maximized()) return;
+  if (window_get_fullscreen()) return;
+  if (window_get_sizeable() == sizeable) return;
+  prefer_sizeable = sizeable;
+  enigma::isSizeable = sizeable;
+  int tmp2Width = window_get_width();
+  int tmp2Height = window_get_height();
+  DWORD style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
+  if (sizeable) style |= WS_SIZEBOX | WS_MAXIMIZEBOX;
+  else style &= ~(WS_SIZEBOX | WS_MAXIMIZEBOX);
+  style |= WS_MINIMIZEBOX;
+  SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
+  window_set_size(tmp2Width, tmp2Height);
 }
 
 bool window_get_sizeable() {
@@ -205,8 +268,19 @@ bool window_get_sizeable() {
 }
 
 void window_set_showborder(bool show) {
-  SetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE,
-      GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+  if (window_get_maximized()) return;
+  if (window_get_fullscreen()) return;
+  if (window_get_showborder() == show) return;
+  prefer_borderless = !show;
+  enigma::showBorder = show;
+  int tmp2Width = window_get_width();
+  int tmp2Height = window_get_height();
+  DWORD style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
+  if (show) style |= WS_CAPTION | WS_BORDER | WS_MINIMIZEBOX;
+  else style &= ~(WS_CAPTION | WS_BORDER);
+  if (show && prefer_sizeable) style |= WS_MAXIMIZEBOX;
+  SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
+  window_set_size(tmp2Width, tmp2Height);
 }
 
 bool window_get_showborder() {
@@ -274,6 +348,16 @@ int display_mouse_get_y() {
 
 void display_mouse_set(int x,int y) {
     SetCursorPos(x,y);
+}
+
+int display_get_x() {
+  // Windows is different than our Unix-like platforms in that this value is always zero...
+  return 0;
+}
+
+int display_get_y() {
+  // Windows is different than our Unix-like platforms in that this value is always zero...
+  return 0;
 }
 
 int display_get_width() {

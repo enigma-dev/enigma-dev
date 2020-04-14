@@ -38,7 +38,7 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "general/darray.h"
+#include "darray.h"
 
 #include <API/context.h>
 #include "languages/language_adapter.h"
@@ -48,7 +48,9 @@ string fc(const char* fn);
 int m_prog_loop_cfp();
 
 #ifdef _WIN32
+ #define byte __windows_byte_workaround
  #include <windows.h>
+ #undef byte
  #define dllexport extern "C" __declspec(dllexport)
 #else
  #define dllexport extern "C"

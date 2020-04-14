@@ -36,18 +36,17 @@
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
-#include "Universal_System/background.h"
-#include "Universal_System/sprites.h"
-#include "Universal_System/fonts.h"
-#include "Universal_System/texture_atlas.h"
+#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/sprites.h"
+#include "Universal_System/Resources/fonts.h"
 
-#include "Universal_System/callbacks_events.h"
+#include "Universal_System/Instances/callbacks_events.h"
 
 #include "GameSettings.h"
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
 #include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
 
-#include "Universal_System/collisions_object.h"
+#include "Universal_System/Object_Tiers/collisions_object.h"
 
 #include "Collision_Systems/collision_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -70,15 +69,15 @@ extern int amain();
 
 #include "Universal_System/image_formats.h"
 
-#include "Universal_System/object.h"
-#include "Universal_System/instance.h"
+#include "Universal_System/Object_Tiers/object.h"
+#include "Universal_System/Instances/instance.h"
 #include "Universal_System/roomsystem.h"
 
 #include "Universal_System/globalupdate.h"
 
-#include "Universal_System/instance_system_frontend.h"
+#include "Universal_System/Instances/instance_system_frontend.h"
 
-#include "Universal_System/resource_data.h"
+#include "Universal_System/Resources/resource_data.h"
 #include "Universal_System/highscore_functions.h"
 
 #include "Universal_System/move_functions.h"
@@ -96,7 +95,7 @@ using namespace enigma_user;
   #ifndef JUST_DEFINE_IT_RUN
   #include "Universal_System/syntax_quirks.h"
 
-  #include "Universal_System/with.h"
+  #include "Universal_System/Instances/with.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_events.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h"
@@ -113,7 +112,7 @@ using namespace enigma_user;
     #include "Modes/buildmode.h"
   #endif
 
-  #include "Universal_System/instance_create.h"
+  #include "Universal_System/Instances/instance_create.h"
 #endif
 
 namespace enigma

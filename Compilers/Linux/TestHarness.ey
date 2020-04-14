@@ -13,7 +13,7 @@ Make-Vars:
   cc: gcc
   cxx: g++
   cppflags:
-  cxxflags: -std=c++11 -ftest-coverage -fprofile-arcs -fsanitize=undefined -fno-omit-frame-pointer 
+  cxxflags: -fdiagnostics-color=always -ftest-coverage -fprofile-arcs -fsanitize=undefined -fno-omit-frame-pointer 
   cflags:
   ldflags:
   ldlibs: -lgcov -lasan -lubsan

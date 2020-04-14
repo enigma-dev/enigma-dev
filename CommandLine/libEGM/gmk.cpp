@@ -19,7 +19,7 @@
 #include "filesystem.h"
 #include "action.h"
 
-#include "libpng-util.h"
+#include "libpng-util/libpng-util.h"
 
 #include <fstream>
 #include <utility>
@@ -938,7 +938,10 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
   room->set_speed(dec.read4());
   room->set_persistent(dec.readBool());
   room->set_color(dec.read4());
-  room->set_show_color(dec.readBool());
+  //NOTE: GM8.1 is inconsistent packing a second boolean into this one.
+  int clearBackgroundAndView = dec.read4();
+  room->set_show_color((clearBackgroundAndView & 1) != 0);
+  room->set_clear_view_background((clearBackgroundAndView & (1 << 1)) == 0);
   room->set_creation_code(dec.readStr());
 
   int nobackgrounds = dec.read4();

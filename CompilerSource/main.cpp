@@ -18,6 +18,7 @@
 #include <time.h>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <cstdlib>
 #include <stdio.h>
@@ -27,7 +28,7 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "general/darray.h"
+#include "darray.h"
 
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
@@ -35,15 +36,15 @@ using namespace std;
 
 int m_prog_loop_cfp();
 
-#include <sys/time.h>
-
 #ifdef _WIN32
+ #define byte __windows_byte_workaround
  #include <windows.h>
  #define dllexport extern "C" __declspec(dllexport)
    #define DECLARE_TIME() clock_t cs, ce
    #define START_TIME() cs = clock()
    #define STOP_TIME() ce = clock()
    #define PRINT_TIME() (((ce - cs) * 1000)/CLOCKS_PER_SEC)
+  #undef byte
 #else
  #define dllexport extern "C"
  #include <cstdio>
@@ -70,11 +71,17 @@ extern const char* establish_bearings(const char *compiler);
 
 #include "makedir.h"
 
-//FIXME: remove this function from enigma.jar and here
-dllexport void libSetMakeDirectory(const char* dir) {} 
+#include <cstdlib>
 
-dllexport const char* libInit(EnigmaCallbacks* ecs)
+//FIXME: remove this function from enigma.jar and here
+dllexport void libSetMakeDirectory(const char* /*dir*/) {} 
+
+dllexport const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path) 
 {
+  enigma_root = enigma_path;
+  if (enigma_root.back() != '/')
+    enigma_root += '/';
+  
   if (ecs)
   {
     cout << "Linking up to IDE" << endl;
@@ -106,6 +113,11 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   return 0;
 }
 
+dllexport const char* libInit(EnigmaCallbacks* ecs)
+{
+  return libInit_path(ecs, ".");
+}
+
 dllexport void libFree() {
   delete main_context;
   delete current_language;
@@ -126,7 +138,7 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
 {
   current_language->definitionsModified(wscode, targetYaml);
   return &ide_passback_error;
-};
+}
 
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {

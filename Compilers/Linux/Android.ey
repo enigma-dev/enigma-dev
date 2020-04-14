@@ -2,28 +2,31 @@
 ---
 Name: Android compile
 Native: No
-Maintainer: TGMG,IsmAvatar
+Maintainer: fundies
 Target-platform: Android
 
 Make-Vars:
-  Path:
+  path:
   make: make
   makeflags:
-  gcc: gcc
-  g++: g++
+  cc: gcc
+  cxx: g++
   cppflags:
+  cxxflags:
   cflags:
+  ldflags:
   links:
 
 Parser-Vars:
-  defines: gcc -dM -x c++ -E $blank
-  searchdirs: gcc -E -x c++ -v $blank
+  defines: cpp -dM -x c++ --std=c++03 -E $blank
+  searchdirs: gcc -E -x c++ --std=c++03 -v $blank 
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
 
 EXE-Vars:
-  resources: $exe
-  Build-Extension: .app
-  Run-output: EnigmaAndroidGame-debug.so
-  Run-Program: make androidrun
+  resources: android/enigma/src/main/assets/resources.res
+  resources_in: resources.res
+  Build-Extension:
+  Run-output:
+  Run-Program:
   Run-Params:

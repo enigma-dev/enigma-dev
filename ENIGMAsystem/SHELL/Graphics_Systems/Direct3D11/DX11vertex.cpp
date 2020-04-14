@@ -21,10 +21,11 @@
 #include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 
 #include "Widget_Systems/widgets_mandatory.h" // for show_error
 
-#include <D3Dcompiler.h>
+#include <d3dcompiler.h>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
@@ -143,55 +144,55 @@ void graphics_prepare_buffer(const int buffer, const bool isIndex) {
   const bool frozen = isIndex ? indexBuffers[buffer]->frozen : vertexBuffers[buffer]->frozen;
 
   // if the contents of the buffer are dirty then we need to update our native "peer"
-  if (dirty) {
-    ID3D11Buffer* bufferPeer = NULL;
-    auto it = bufferPeers.find(buffer);
-    size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
+  if (!dirty) return;
 
-    // if we have already created a native "peer" for this user buffer,
-    // then we have to release it if it isn't big enough to hold the new contents
-    // or if it has just been frozen (so we can remove its D3D11_USAGE_DYNAMIC)
-    if (it != bufferPeers.end()) {
-      bufferPeer = it->second;
+  ID3D11Buffer* bufferPeer = NULL;
+  auto it = bufferPeers.find(buffer);
+  size_t size = isIndex ? enigma_user::index_get_buffer_size(buffer) : enigma_user::vertex_get_buffer_size(buffer);
 
-      D3D11_BUFFER_DESC pDesc;
-      bufferPeer->GetDesc(&pDesc);
+  // if we have already created a native "peer" for this user buffer,
+  // then we have to release it if it isn't big enough to hold the new contents
+  // or if it has just been frozen (so we can remove its D3D11_USAGE_DYNAMIC)
+  if (it != bufferPeers.end()) {
+    bufferPeer = it->second;
 
-      if (size > pDesc.ByteWidth || frozen) {
-        bufferPeer->Release();
-        bufferPeer = NULL;
-      }
+    D3D11_BUFFER_DESC pDesc;
+    bufferPeer->GetDesc(&pDesc);
+
+    if (size > pDesc.ByteWidth || frozen) {
+      bufferPeer->Release();
+      bufferPeer = NULL;
     }
+  }
 
-    const void *data = isIndex ? (const void *)&indexBuffers[buffer]->indices[0] : (const void *)&vertexBuffers[buffer]->vertices[0];
-    if (!bufferPeer) {
-      // create either a static or dynamic peer, depending on if the user called
-      // freeze on the buffer, and initialize its contents
-      D3D11_BUFFER_DESC bd = { };
-      bd.Usage = frozen ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DYNAMIC;
-      bd.ByteWidth = size;
-      bd.BindFlags = isIndex ? D3D11_BIND_INDEX_BUFFER : D3D11_BIND_VERTEX_BUFFER;
-      bd.CPUAccessFlags = frozen ? 0 : D3D11_CPU_ACCESS_WRITE;
-      bd.MiscFlags = 0;
-      bd.StructureByteStride = 0;
-      D3D11_SUBRESOURCE_DATA initData = { };
-      initData.pSysMem = data;
-      m_device->CreateBuffer(&bd, &initData, &bufferPeer);
+  const void *data = isIndex ? (const void *)&indexBuffers[buffer]->indices[0] : (const void *)&vertexBuffers[buffer]->vertices[0];
+  if (!bufferPeer) {
+    // create either a static or dynamic peer, depending on if the user called
+    // freeze on the buffer, and initialize its contents
+    D3D11_BUFFER_DESC bd = { };
+    bd.Usage = frozen ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DYNAMIC;
+    bd.ByteWidth = size;
+    bd.BindFlags = isIndex ? D3D11_BIND_INDEX_BUFFER : D3D11_BIND_VERTEX_BUFFER;
+    bd.CPUAccessFlags = frozen ? 0 : D3D11_CPU_ACCESS_WRITE;
+    bd.MiscFlags = 0;
+    bd.StructureByteStride = 0;
+    D3D11_SUBRESOURCE_DATA initData = { };
+    initData.pSysMem = data;
+    m_device->CreateBuffer(&bd, &initData, &bufferPeer);
 
-      bufferPeers[buffer] = bufferPeer;
-    } else {
-      // update the contents of the native peer on the GPU
-      D3D11_MAPPED_SUBRESOURCE mappedResource;
-      m_deviceContext->Map(bufferPeer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-      memcpy(mappedResource.pData, data, size);
-      m_deviceContext->Unmap(bufferPeer, 0);
-    }
+    bufferPeers[buffer] = bufferPeer;
+  } else {
+    // update the contents of the native peer on the GPU
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    m_deviceContext->Map(bufferPeer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    memcpy(mappedResource.pData, data, size);
+    m_deviceContext->Unmap(bufferPeer, 0);
+  }
 
-    if (isIndex) {
-      indexBuffers[buffer]->clearData();
-    } else {
-      vertexBuffers[buffer]->clearData();
-    }
+  if (isIndex) {
+    indexBuffers[buffer]->clearData();
+  } else {
+    vertexBuffers[buffer]->clearData();
   }
 }
 
@@ -252,13 +253,13 @@ inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* verte
 }
 
 inline void graphics_apply_vertex_format(int format, size_t &stride) {
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
+  const auto& vertexFormat = enigma::vertexFormats[format];
 
   auto search = vertexFormatPeers.find(format);
   ID3D11InputLayout* vertexLayout = NULL;
   if (search == vertexFormatPeers.end()) {
     stride = vertexFormat->stride_size;
-    vertexLayout = vertex_format_layout(vertexFormat);
+    vertexLayout = vertex_format_layout(vertexFormat.get());
     vertexFormatPeers[format] = std::make_pair(vertexLayout, stride);
   } else {
     vertexLayout = search->second.first;
@@ -334,7 +335,7 @@ void graphics_prepare_default_shader() {
 #ifdef DEBUG_MODE
 #define set_primitive_mode(primitive)                                                            \
   if (primitive < 0 || primitive >= (int)primitive_types_size) {                                 \
-    show_error("Primitive type " + enigma_user::toString(primitive) + " does not exist", false); \
+    DEBUG_MESSAGE("Primitive type " + enigma_user::toString(primitive) + " does not exist", MESSAGE_TYPE::M_USER_ERROR); \
     return;                                                                                      \
   }                                                                                              \
   m_deviceContext->IASetPrimitiveTopology(primitive_types[primitive]);
@@ -356,9 +357,9 @@ void vertex_color(int buffer, int color, double alpha) {
 }
 
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   enigma::graphics_prepare_default_shader();
   enigma::graphics_prepare_buffer(buffer, false);
@@ -374,10 +375,10 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
 }
 
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
-  draw_batch_flush(batch_flush_deferred);
+  draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
-  const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[vertex];
+  const auto& indexBuffer = enigma::indexBuffers[buffer];
 
   enigma::graphics_prepare_default_shader();
   enigma::graphics_prepare_buffer(buffer, true);

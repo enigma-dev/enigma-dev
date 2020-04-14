@@ -12,7 +12,7 @@ Make-Vars:
   cc: gcc
   cxx: g++
   cppflags:
-  cxxflags: -std=c++11
+  cxxflags: -fdiagnostics-color=always
   cflags:
   ldflags:
   links:

@@ -26,11 +26,12 @@
 #include <string>
 
 using namespace std;
+using namespace enigma::dx9;
 
-namespace enigma
-{
+namespace enigma {
 
 bool Direct3D9Managed = true;
+
 void graphicssystem_initialize() {}
 
 } // namespace enigma

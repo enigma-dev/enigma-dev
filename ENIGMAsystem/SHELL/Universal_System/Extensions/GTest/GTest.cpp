@@ -1,4 +1,6 @@
 #include "include.h"
+#include "Platforms/General/PFmain.h"
+
 #include <gtest/gtest.h>
 #include <iostream>
 using std::string;
@@ -21,6 +23,7 @@ void gtest_binary(string expression, string left_value, string right_value,
       << right_value << ")."
       << (user_message.empty() ? "" : "\n" + user_message);
   if (assert) exit(42);
+  else game_return = 43;
 }
 
 void gtest_unary(string expression, string value, string expected_value,
@@ -35,6 +38,7 @@ void gtest_unary(string expression, string value, string expected_value,
       << "; it is actually " << value
       << (user_message.empty() ? "." : ".\n" + user_message);
   if (assert) exit(42);
+  else game_return = 43;
 }
 
 }  // namespace enigma

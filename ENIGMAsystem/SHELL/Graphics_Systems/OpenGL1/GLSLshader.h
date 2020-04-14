@@ -20,10 +20,14 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+
 using std::string;
 using std::vector;
 
-#include "Graphics_Systems/OpenGL/OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
+
+namespace enigma {
 
 extern GLenum shadertypes[];
 
@@ -55,7 +59,9 @@ struct ShaderProgram{
   }
 };
 
-extern vector<Shader*> shaders;
-extern vector<ShaderProgram*> shaderprograms;
+extern vector<std::unique_ptr<Shader>> shaders;
+extern vector<std::unique_ptr<ShaderProgram>> shaderprograms;
+
+}
 
 #endif

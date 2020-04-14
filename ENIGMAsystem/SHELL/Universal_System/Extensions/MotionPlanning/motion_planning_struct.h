@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Copyright (C) 2011 Harijs GrÃ®nbergs                                         **
 **  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
@@ -26,8 +26,8 @@
 **                                                                              **
 \********************************************************************************/
 #include <vector>
-#include <cstdlib>
 #include <map>
+
 using std::vector;
 using std::multimap;
 

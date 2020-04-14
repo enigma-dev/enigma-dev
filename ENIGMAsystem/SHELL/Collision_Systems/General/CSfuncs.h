@@ -16,7 +16,7 @@
 **/
 
 #include "Universal_System/scalar.h"
-#include "Universal_System/instance_system_base.h"
+#include "Universal_System/Instances/instance_system_base.h"
 
 namespace enigma_user
 {
@@ -82,4 +82,3 @@ void instance_deactivate_circle(int x, int y, int r, bool inside = true, bool no
 void instance_activate_circle(int x, int y, int r, bool inside = true);
 
 }
-

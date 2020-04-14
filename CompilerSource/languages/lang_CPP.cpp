@@ -52,7 +52,9 @@ void lang_CPP::load_extension_locals() {
 }
 
 #ifdef _WIN32
+ #define byte __windows_byte_workaround
  #include <windows.h>
+ #undef byte
  #define dllexport extern "C" __declspec(dllexport)
    #define DECLARE_TIME_TYPE clock_t
    #define CURRENT_TIME(t) t = clock()
@@ -91,7 +93,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   
   cout << "Opening ENIGMA for parse..." << endl;
   
-  llreader f("ENIGMAsystem/SHELL/SHELLmain.cpp");
+  llreader f((enigma_root + "ENIGMAsystem/SHELL/SHELLmain.cpp").c_str());
   int res = 1;
   DECLARE_TIME_TYPE ts, te;
   if (f.is_open()) {
@@ -127,6 +129,12 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
       } else cerr << "ERROR! No varargs type found!" << endl;
     } else cerr << "ERROR! Namespace enigma is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace enigma not found!" << endl;
+  namespace_enigma_user = main_context->get_global();
+  if ((d = main_context->get_global()->look_up("enigma_user"))) {
+    if (d->flags & jdi::DEF_NAMESPACE) {
+      namespace_enigma_user = (jdi::definition_scope*) d;
+    } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
+  } else cerr << "ERROR! Namespace enigma_user not found!" << endl;
   
   if (res) {
     cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never happy.\n";
@@ -201,6 +209,12 @@ int lang_CPP::load_shared_locals() {
 
   load_extension_locals();
   return 0;
+}
+
+jdi::definition* lang_CPP::look_up(const string &name) {
+  auto builtin = jdip::builtin_declarators.find(name);
+  if (builtin != jdip::builtin_declarators.end()) return builtin->second->def;
+  return namespace_enigma_user->find_local(name);
 }
 
 lang_CPP::~lang_CPP() {

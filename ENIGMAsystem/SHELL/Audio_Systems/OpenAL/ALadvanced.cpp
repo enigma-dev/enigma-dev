@@ -34,11 +34,6 @@ using std::string;
 #include <AL/alure.h>
 #endif
 
-#ifdef DEBUG_MODE
-#include "Widget_Systems/widgets_mandatory.h"  // show_error
-#include "libEGMstd.h"
-#endif
-
 #include "Universal_System/estring.h"
 
 #include <vector>

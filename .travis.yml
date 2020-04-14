@@ -100,6 +100,7 @@ os: linux
 group: travis_latest
 compiler: gcc
 language: cpp
+dist: bionic
 
 env:
   global:
@@ -186,22 +187,37 @@ matrix:
   fast_finish: true
   allow_failures:
     - os: osx
+  include:
+    - stage: ENIGMA CI
+      env: WORKER=0
+    - stage: ENIGMA CI
+      env: WORKER=1
+    - stage: ENIGMA CI
+      env: WORKER=2
+    - stage: ENIGMA CI
+      env: WORKER=3
+    - stage: ENIGMA CI
+      env: WORKER=4
+    - stage: ENIGMA CI
+      env: COMPILER=Android GRAPHICS=OpenGLES2 PLATFORM=SDL MODE=Compile ANDROID_API_LEVEL=28 ANDROID_BUILD_TOOLS_VERSION=28.0.3
+      before_install: 
+        - git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
+        - yes | sdkmanager "platforms;android-28"
+        - yes | sdkmanager "build-tools;28.0.3"
+      install: ./CI/install_emake_deps.sh 
+      before_script: make -j4 && CLI_ENABLE_EGM=FALSE make -j4 emake
+      script: ./ci-build.sh
+      language: android
+      dist: trusty
+      android:
+      components:
+        - tools
+        - platform-tools
+        - tools
+        - extra-android-m2repository
+    - stage: ENIGMA CI
+      env: WORKER=0
+      os: osx
+      osx_image: xcode11.3
+      before_install:
 
-before_script:
-  - |
-    if [ "$TEST_HARNESS" == true ]; then
-      # Start xvfb before the script phase
-      export DISPLAY=:1
-      Xvfb :1 -screen 0 1024x768x24 &
-      xfwm4 &
-      sleep 3
-    fi
-
-script:
-  - |
-    if [ "$TEST_HARNESS" == true ]; then
-      export ASAN_OPTIONS=detect_leaks=0;
-      ./ci-regression.sh "/tmp/enigma-master" 4 || travis_terminate $?
-    else
-      ./ci-build.sh
-    fi

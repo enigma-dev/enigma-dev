@@ -27,14 +27,22 @@
 
 #include "../General/WSdialogs.h"
 #include "../General/WSmenus.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
 #include <gtk/gtk.h>
 
 using namespace std;
 
-void show_error(string errortext, const bool fatal) {
+namespace enigma_user {
+
+void show_debug_message(string errortext, MESSAGE_TYPE type) {
 //TODO: Implement
+}
+
+bool show_question(std::string str) {
+//TODO: Implement
+return false;
 }
 
 int get_color(int defcol)
@@ -148,8 +156,7 @@ string get_save_filename(string filter, string fname, string caption)
   return ret;
 }
 
-
-
+} // namespace enigma_user
 
 static int* cmret;
 static void menu_item_clicked(gpointer user_data) {
@@ -264,7 +271,7 @@ struct hmenustack
   hmenustack* push(GtkWidget *n) { hmenustack* next=new hmenustack; next->prev=this; next->menu=n; return next; }
   hmenustack* pop() { if (prev==NULL) return this; hmenustack* r=prev; delete this; return r; }
 };
-#include <iostream>
+
 int show_menu_ext(int x, int y, string text)
 {
   gdk_threads_enter();
@@ -308,7 +315,6 @@ int show_menu_ext(int x, int y, string text)
         else if (i-is>1 and itxt[0]=='<')
         {
           ms=ms->pop();
-          cout << "\"" << itxt.substr(1) << "\"" << endl;
           menu_add_item(GTK_MENU(ms->menu),iid,id,itxt.substr(1),MFT_STRING);
         }
         else

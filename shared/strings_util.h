@@ -26,5 +26,12 @@ inline std::vector<std::string> split_string(const std::string &str, char delimi
         return vec;
 }
 
+inline std::string tolower(const std::string &str) {
+  std::string res = str;
+  for (size_t i = 0; i < res.length(); ++i) {
+    if (res[i] >= 'A' && res[i] <= 'Z') res[i] += 'a' - 'A';
+  }
+  return res;
+}
 
 #endif

@@ -16,6 +16,8 @@
 **/
 
 #include "GSscreen.h"
+#include "GSstdraw.h"
+#include "GStextures.h"
 #include "GSsprite.h"
 #include "GStilestruct.h"
 #include "GSbackground.h"
@@ -25,11 +27,15 @@
 #include "GSvertex.h"
 #include "GScolors.h"
 
-#include "Universal_System/background.h"
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/nlpo2.h"
+#include "Universal_System/image_formats.h"
+#include "Universal_System/Resources/background.h"
+#include "Universal_System/Object_Tiers/graphics_object.h"
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
@@ -41,7 +47,29 @@ using namespace enigma;
 using namespace enigma_user;
 using namespace std;
 
+namespace {
+
+bool clamp_view(int& x, int& y) {
+  if (view_enabled) {
+    x = x - enigma_user::view_xview[enigma_user::view_current];
+    y = y - enigma_user::view_yview[enigma_user::view_current];
+    if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return true;
+  } else {
+    if (x > enigma_user::room_width || y > enigma_user::room_height) return true;
+  }
+  if (x < 0) x = 0;
+  if (y < 0) y = 0;
+  return false;
+}
+
+//These are used to reset the screen viewport for surfaces
+gs_scalar viewport_x, viewport_y, viewport_w, viewport_h;
+
+} // namespace anonymous
+
 namespace enigma {
+
+std::vector<std::function<void()> > extension_draw_gui_after_hooks;
 
 unsigned gui_width = 0;
 unsigned gui_height = 0;
@@ -81,9 +109,9 @@ static inline void draw_back()
         background_y[back_current] += background_vspeed[back_current];
         if (background_htiled[back_current] || background_vtiled[back_current]) {
           draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current],
-            background_xscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
+            background_yscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
         } else {
-          draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
+          draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_yscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
         }
       }
     }
@@ -202,7 +230,19 @@ static inline void draw_gui()
   d3d_set_zwriteenable(zwrite);
 }
 
+static inline void draw_gui_after_hooks() {
+  // if any extension wants to draw over the user
+  // GUI let's go ahead and call those hooks now
+  for (auto draw_gui_after_hook : extension_draw_gui_after_hooks)
+    draw_gui_after_hook();
+}
+
 namespace enigma_user {
+
+void display_set_gui_size(unsigned int width, unsigned int height) {
+  enigma::gui_width = width;
+  enigma::gui_height = height;
+}
 
 unsigned int display_get_gui_width(){
   return enigma::gui_width;
@@ -210,6 +250,64 @@ unsigned int display_get_gui_width(){
 
 unsigned int display_get_gui_height(){
   return enigma::gui_height;
+}
+
+void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
+  draw_batch_flush(batch_flush_deferred);
+
+  x = (x / window_get_region_width()) * window_get_region_width_scaled();
+  y = (y / window_get_region_height()) * window_get_region_height_scaled();
+  width = (width / window_get_region_width()) * window_get_region_width_scaled();
+  height = (height / window_get_region_height()) * window_get_region_height_scaled();
+  gs_scalar sx, sy;
+  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+  viewport_x = sx + x;
+  viewport_y = sy + y;
+  viewport_w = width;
+  viewport_h = height;
+
+  screen_reset_viewport();
+}
+
+void screen_reset_viewport() {
+  graphics_set_viewport(viewport_x, viewport_y, viewport_w, viewport_h);
+}
+
+void screen_init() {
+  enigma::gui_width = window_get_region_width();
+  enigma::gui_height = window_get_region_height();
+
+  draw_clear(c_black);
+  d3d_clear_depth(0.0f);
+
+  if (!view_enabled)
+  {
+    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+    d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
+  } else {
+    for (view_current = 0; view_current < 7; view_current++)
+    {
+      if (view_visible[(int)view_current])
+      {
+        int vc = (int)view_current;
+
+        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
+        d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
+        break;
+      }
+    }
+  }
+
+  enigma::d3dHidden = false;
+  enigma::d3dCulling = rs_none;
+  enigma::alphaBlend = true;
+  texture_reset();
+
+  // make sure all of the default state values are
+  // synchronzied at least once with the device/context
+  enigma::draw_set_state_dirty();
+  draw_state_flush();
 }
 
 void screen_refresh() {
@@ -277,20 +375,23 @@ void screen_redraw()
 
   // Now process the sub event of draw called draw gui
   // It is for drawing GUI elements without view scaling and transformation
+  screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+  d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
+
   if (enigma::gui_used)
   {
-    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
-
     // Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
     if (enigma::d3dMode)
       d3d_clear_depth();
 
     draw_gui();
-
-    // do an implicit flush to catch anything from the draw GUI events
-    draw_batch_flush(batch_flush_deferred);
   }
+
+  // allow extensions to draw after GUI events handled if there are any
+  draw_gui_after_hooks();
+
+  // do an implicit flush to catch anything from the draw GUI events
+  draw_batch_flush(batch_flush_deferred);
 
   if (sprite_exists(cursor_sprite)) {
     draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
@@ -306,6 +407,104 @@ void screen_redraw()
   // GM8.1 manual specifies that screen_redraw should call screen_refresh
   // "The first function redraws the internal image and then refreshes the screen image."
   screen_refresh();
+}
+
+int screen_save(string filename) { //Assumes native integers are little endian
+  draw_batch_flush(batch_flush_deferred);
+
+  unsigned int fw = 0, fh = 0;
+  bool flipped = false;
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(&fw,&fh,&flipped);
+  int ret = image_save(filename, rgba, fw, fh, fw, fh, flipped);
+
+  delete[] rgba;
+  return ret;
+}
+
+int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) { //Assumes native integers are little endian
+  draw_batch_flush(batch_flush_deferred);
+
+  bool flipped = false;
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
+  int ret = image_save(filename, rgba, w, h, w, h, flipped);
+
+  delete[] rgba;
+  return ret;
+}
+
+int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
+{
+  draw_batch_flush(batch_flush_deferred);
+
+  bool flipped = false;
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
+
+  if (flipped)
+    rgba = enigma::image_flip(rgba, w, h, 4);
+
+  enigma::backgroundstructarray_reallocate();
+  int bckid=enigma::background_idmax;
+  enigma::background_new(bckid, w, h, &rgba[0], removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
+  delete[] rgba;
+  enigma::background_idmax++;
+  return bckid;
+}
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
+  draw_batch_flush(batch_flush_deferred);
+
+  bool flipped = false;
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
+
+  if (flipped)
+    rgba = enigma::image_flip(rgba, w, h, 4);
+
+  Sprite spr(w, h, xorig, yorig);
+  spr.AddSubimage(rgba, w, h, enigma::ct_precise, rgba); //TODO: Support toggling of precise
+  
+  delete[] rgba;
+  return sprites.add(std::move(spr));
+}
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
+  return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
+}
+
+void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
+  draw_batch_flush(batch_flush_deferred);
+
+  bool flipped = false;
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
+
+  if (flipped)
+    rgba = enigma::image_flip(rgba, w, h, 4);
+    
+  Sprite& spr = sprites.get(id);
+  spr.AddSubimage(rgba, w, h, enigma::ct_precise, rgba); //TODO: Support toggling of precise.
+  
+  delete[] rgba;
+}
+
+int draw_getpixel(int x,int y)
+{
+  if (clamp_view(x,y)) return 0;
+  draw_batch_flush(batch_flush_deferred);
+
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,1,1);
+  int ret = rgba[2] | rgba[1] << 8 | rgba[0] << 16;
+  delete[] rgba;
+  return ret;
+}
+
+int draw_getpixel_ext(int x,int y)
+{
+  if (clamp_view(x,y)) return 0;
+  draw_batch_flush(batch_flush_deferred);
+
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,1,1);
+  int ret = rgba[2] | rgba[1] << 8 | rgba[0] << 16 | rgba[3] << 24;
+  delete[] rgba;
+  return ret;
 }
 
 }

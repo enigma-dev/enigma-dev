@@ -6,7 +6,7 @@
 //Should be:
 //#include "backend/EnigmaCallbacks.h"
 
-#include "codegen/server.pb.h"
+#include "compiler.pb.h"
 
 #include <fstream>
 #include <string>

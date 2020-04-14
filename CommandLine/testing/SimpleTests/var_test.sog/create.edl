@@ -1,0 +1,684 @@
+  double t1 = 1;
+  int t2 = 1;
+  long long t3 = 1;
+  char t4 = 1;
+  float t5 = 1;
+  bool t6 = 1;
+  const char *s1;
+  std_string s2;
+  variant v1;
+  var v2;
+
+  s1 = "one";
+  s2 = "one";
+
+  v1 += t1 + v1;
+  v1 += v1 + t1;
+  v1 -= t1 - v1;
+  v1 -= v1 - t1;
+  v1 *= t1 * v1;
+  v1 *= v1 * t1;
+  v1 /= t1 / v1;
+  v1 /= v1 / t1;
+  v1 %= t1 % v1;
+  v1 %= v1 % t1;
+  v1 += t1 == v1;
+  v1 -= t1 != v1;
+  v1 *= t1 <= v1;
+  v1 /= t1 >= v1;
+  v1 %= t1 < v1;
+  v1 &= t1 > v1;
+  v1 |= t1;
+  v1 ^= t1;
+
+  v1 += t2  + v1;
+  v1 += v1 + t2 ;
+  v1 -= t2  - v1;
+  v1 -= v1 - t2 ;
+  v1 *= t2  * v1;
+  v1 *= v1 * t2 ;
+  v1 /= t2  / v1;
+  v1 /= v1 / t2 ;
+  v1 %= t2  % v1;
+  v1 %= v1 % t2 ;
+  v1 += t2  == v1;
+  v1 -= t2  != v1;
+  v1 *= t2  <= v1;
+  v1 /= t2  >= v1;
+  v1 %= t2  < v1;
+  v1 &= t2  > v1;
+  v1 |= t2;
+  v1 ^= t2;
+
+  v1 += t3  + v1;
+  v1 += v1 + t3 ;
+  v1 -= t3  - v1;
+  v1 -= v1 - t3 ;
+  v1 *= t3  * v1;
+  v1 *= v1 * t3 ;
+  v1 /= t3  / v1;
+  v1 /= v1 / t3 ;
+  v1 %= t3  % v1;
+  v1 %= v1 % t3 ;
+  v1 += t3  == v1;
+  v1 -= t3  != v1;
+  v1 *= t3  <= v1;
+  v1 /= t3  >= v1;
+  v1 %= t3  < v1;
+  v1 &= t3  > v1;
+  v1 |= t3;
+  v1 ^= t3;
+
+  v1 += t4 + v1;
+  v1 += v1 + t4;
+  v1 -= t4 - v1;
+  v1 -= v1 - t4;
+  v1 *= t4 * v1;
+  v1 *= v1 * t4;
+  v1 /= t4 / v1;
+  v1 /= v1 / t4;
+  v1 %= t4 % v1;
+  v1 %= v1 % t4;
+  v1 += t4 == v1;
+  v1 -= t4 != v1;
+  v1 *= t4 <= v1;
+  v1 /= t4 >= v1;
+  v1 %= t4 < v1;
+  v1 &= t4 > v1;
+  v1 |= t4;
+  v1 ^= t4;
+
+  v1 += t5 + v1;
+  v1 += v1 + t5;
+  v1 -= t5 - v1;
+  v1 -= v1 - t5;
+  v1 *= t5 * v1;
+  v1 *= v1 * t5;
+  v1 /= t5 / v1;
+  v1 /= v1 / t5;
+  v1 %= t5 % v1;
+  v1 %= v1 % t5;
+  v1 += t5 == v1;
+  v1 -= t5 != v1;
+  v1 *= t5 <= v1;
+  v1 /= t5 >= v1;
+  v1 %= t5 < v1;
+  v1 &= t5 > v1;
+  v1 |= t5;
+  v1 ^= t5;
+
+  v1 += t6 + v1;
+  v1 += v1 + t6;
+  v1 -= t6 - v1;
+  v1 -= v1 - t6;
+  v1 *= t6 * v1;
+  v1 *= v1 * t6;
+  v1 /= t6 / v1;
+  v1 /= v1 / t6;
+  v1 %= t6 % v1;
+  v1 %= v1 % t6;
+  v1 += t6 == v1;
+  v1 -= t6 != v1;
+  v1 *= t6 <= v1;
+  v1 /= t6 >= v1;
+  v1 %= t6 < v1;
+  v1 &= t6 > v1;
+  v1 |= t6;
+  v1 ^= t6;
+
+  v1 += s1 + v1;
+  v1 += v1 + s1;
+  // v1 -= s1 - v1; [string - variant undefined]
+  // v1 -= v1 - s1; [variant - string undefined]
+  // v1 *= s1 * v1; [string * variant undefined]
+  // v1 *= v1 * s1; [variant * string undefined]
+  // v1 /= s1 / v1; [string / variant undefined]
+  // v1 /= v1 / s1; [variant / string undefined]
+  // v1 %= s1 % v1; [string % variant undefined]
+  // v1 %= v1 % s1; [variant % string undefined]
+  v1 += s1 == v1;
+  v1 -= s1 != v1;
+  v1 *= s1 <= v1;
+  v1 /= s1 >= v1;
+  v1 %= s1 < v1;
+  v1 &= s1 > v1;
+  v1 |= s1;
+  v1 ^= s1;
+
+  v1 += s2 + v1;
+  v1 += v1 + s2;
+  // v1 -= s2 - v1; [string - variant undefined]
+  // v1 -= v1 - s2; [variant - string undefined]
+  // v1 *= s2 * v1; [string * variant undefined]
+  // v1 *= v1 * s2; [variant * string undefined]
+  // v1 /= s2 / v1; [string / variant undefined]
+  // v1 /= v1 / s2; [variant / string undefined]
+  // v1 %= s2 % v1; [string % variant undefined]
+  // v1 %= v1 % s2; [variant % string undefined]
+  v1 += s2 == v1;
+  v1 -= s2 != v1;
+  v1 *= s2 <= v1;
+  v1 /= s2 >= v1;
+  v1 %= s2 < v1;
+  v1 &= s2 > v1;
+  v1 |= s2 < v1;
+  v1 ^= s2 > v1;
+
+  v1 += v1 + v1;
+  v1 += v1 + v1;
+  v1 -= v1 - v1;
+  v1 -= v1 - v1;
+  v1 *= v1 * v1;
+  v1 *= v1 * v1;
+  v1 /= v1 / v1;
+  v1 /= v1 / v1;
+  v1 %= v1 % v1;
+  v1 %= v1 % v1;
+  v1 += v1 == v1;
+  v1 -= v1 != v1;
+  v1 *= v1 <= v1;
+  v1 /= v1 >= v1;
+  v1 %= v1 < v1;
+  v1 &= v1 > v1;
+  v1 |= v1;
+  v1 ^= v1;
+
+  v1 += v2 + v1;
+  v1 += v1 + v2;
+  v1 -= v2 - v1;
+  v1 -= v1 - v2;
+  v1 *= v2 * v1;
+  v1 *= v1 * v2;
+  v1 /= v2 / v1;
+  v1 /= v1 / v2;
+  v1 %= v2 % v1;
+  v1 %= v1 % v2;
+  v1 += v2 == v1;
+  v1 -= v2 != v1;
+  v1 *= v2 <= v1;
+  v1 /= v2 >= v1;
+  v1 %= v2 < v1;
+  v1 &= v2 > v1;
+  v1 |= v2;
+  v1 ^= v2;
+
+  v1 += speed + v1;
+  v1 += v1 + speed;
+  v1 -= speed - v1;
+  v1 -= v1 - speed;
+  v1 *= speed * v1;
+  v1 *= v1 * speed;
+  v1 /= speed / v1;
+  v1 /= v1 / speed;
+  v1 %= speed % v1;
+  v1 %= v1 % speed;
+  v1 += speed == v1;
+  v1 -= speed != v1;
+  v1 *= speed <= v1;
+  v1 /= speed >= v1;
+  v1 %= speed < v1;
+  v1 &= speed > v1;
+  v1 |= speed;
+  v1 ^= speed;
+
+  // =========================================================================
+
+  v2 += t1 + v1;
+  v2 += v1 + t1;
+  v2 -= t1 - v1;
+  v2 -= v1 - t1;
+  v2 *= t1 * v1;
+  v2 *= v1 * t1;
+  v2 /= t1 / v1;
+  v2 /= v1 / t1;
+  v2 %= t1 % v1;
+  v2 %= v1 % t1;
+  v2 += t1 == v1;
+  v2 -= t1 != v1;
+  v2 *= t1 <= v1;
+  v2 /= t1 >= v1;
+  v2 %= t1 < v1;
+  v2 &= t1 > v1;
+  v2 |= t1;
+  v2 ^= t1;
+
+  v2 += t2  + v1;
+  v2 += v1 + t2 ;
+  v2 -= t2  - v1;
+  v2 -= v1 - t2 ;
+  v2 *= t2  * v1;
+  v2 *= v1 * t2 ;
+  v2 /= t2  / v1;
+  v2 /= v1 / t2 ;
+  v2 %= t2  % v1;
+  v2 %= v1 % t2 ;
+  v2 += t2  == v1;
+  v2 -= t2  != v1;
+  v2 *= t2  <= v1;
+  v2 /= t2  >= v1;
+  v2 %= t2  < v1;
+  v2 &= t2  > v1;
+  v2 |= t2;
+  v2 ^= t2;
+
+  v2 += t3  + v1;
+  v2 += v1 + t3 ;
+  v2 -= t3  - v1;
+  v2 -= v1 - t3 ;
+  v2 *= t3  * v1;
+  v2 *= v1 * t3 ;
+  v2 /= t3  / v1;
+  v2 /= v1 / t3 ;
+  v2 %= t3  % v1;
+  v2 %= v1 % t3 ;
+  v2 += t3  == v1;
+  v2 -= t3  != v1;
+  v2 *= t3  <= v1;
+  v2 /= t3  >= v1;
+  v2 %= t3  < v1;
+  v2 &= t3  > v1;
+  v2 |= t3;
+  v2 ^= t3;
+
+  v2 += t4 + v1;
+  v2 += v1 + t4;
+  v2 -= t4 - v1;
+  v2 -= v1 - t4;
+  v2 *= t4 * v1;
+  v2 *= v1 * t4;
+  v2 /= t4 / v1;
+  v2 /= v1 / t4;
+  v2 %= t4 % v1;
+  v2 %= v1 % t4;
+  v2 += t4 == v1;
+  v2 -= t4 != v1;
+  v2 *= t4 <= v1;
+  v2 /= t4 >= v1;
+  v2 %= t4 < v1;
+  v2 &= t4 > v1;
+  v2 |= t4;
+  v2 ^= t4;
+
+  v2 += t5 + v1;
+  v2 += v1 + t5;
+  v2 -= t5 - v1;
+  v2 -= v1 - t5;
+  v2 *= t5 * v1;
+  v2 *= v1 * t5;
+  v2 /= t5 / v1;
+  v2 /= v1 / t5;
+  v2 %= t5 % v1;
+  v2 %= v1 % t5;
+  v2 += t5 == v1;
+  v2 -= t5 != v1;
+  v2 *= t5 <= v1;
+  v2 /= t5 >= v1;
+  v2 %= t5 < v1;
+  v2 &= t5 > v1;
+  v2 |= t5;
+  v2 ^= t5;
+
+  v2 += t6 + v1;
+  v2 += v1 + t6;
+  v2 -= t6 - v1;
+  v2 -= v1 - t6;
+  v2 *= t6 * v1;
+  v2 *= v1 * t6;
+  v2 /= t6 / v1;
+  v2 /= v1 / t6;
+  v2 %= t6 % v1;
+  v2 %= v1 % t6;
+  v2 += t6 == v1;
+  v2 -= t6 != v1;
+  v2 *= t6 <= v1;
+  v2 /= t6 >= v1;
+  v2 %= t6 < v1;
+  v2 &= t6 > v1;
+  v2 |= t6;
+  v2 ^= t6;
+
+  v2 += s1 + v1;
+  v2 += v1 + s1;
+  // v2 -= s1 - v1; [string - var undefined]
+  // v2 -= v1 - s1; [var - string undefined]
+  // v2 *= s1 * v1; [string * var undefined]
+  // v2 *= v1 * s1; [var * string undefined]
+  // v2 /= s1 / v1; [string / var undefined]
+  // v2 /= v1 / s1; [var / string undefined]
+  // v2 %= s1 % v1; [string % var undefined]
+  // v2 %= v1 % s1; [var % string undefined]
+  v2 += s1 == v1;
+  v2 -= s1 != v1;
+  v2 *= s1 <= v1;
+  v2 /= s1 >= v1;
+  v2 %= s1 < v1;
+  v2 &= s1 > v1;
+  v2 |= s1;
+  v2 ^= s1;
+
+  v2 += s2 + v1;
+  v2 += v1 + s2;
+  // v2 -= s2 - v1; [string - var undefined]
+  // v2 -= v1 - s2; [var - string undefined]
+  // v2 *= s2 * v1; [string * var undefined]
+  // v2 *= v1 * s2; [var * string undefined]
+  // v2 /= s2 / v1; [string / var undefined]
+  // v2 /= v1 / s2; [var / string undefined]
+  // v2 %= s2 % v1; [string % var undefined]
+  // v2 %= v1 % s2; [var % string undefined]
+  v2 += s2 == v1;
+  v2 -= s2 != v1;
+  v2 *= s2 <= v1;
+  v2 /= s2 >= v1;
+  v2 %= s2 < v1;
+  v2 &= s2 > v1;
+  v2 |= s2 < v1;
+  v2 ^= s2 > v1;
+
+  v2 += v1 + v1;
+  v2 += v1 + v1;
+  v2 -= v1 - v1;
+  v2 -= v1 - v1;
+  v2 *= v1 * v1;
+  v2 *= v1 * v1;
+  v2 /= v1 / v1;
+  v2 /= v1 / v1;
+  v2 %= v1 % v1;
+  v2 %= v1 % v1;
+  v2 += v1 == v1;
+  v2 -= v1 != v1;
+  v2 *= v1 <= v1;
+  v2 /= v1 >= v1;
+  v2 %= v1 < v1;
+  v2 &= v1 > v1;
+  v2 |= v1;
+  v2 ^= v1;
+
+  v2 += v2 + v1;
+  v2 += v1 + v2;
+  v2 -= v2 - v1;
+  v2 -= v1 - v2;
+  v2 *= v2 * v1;
+  v2 *= v1 * v2;
+  v2 /= v2 / v1;
+  v2 /= v1 / v2;
+  v2 %= v2 % v1;
+  v2 %= v1 % v2;
+  v2 += v2 == v1;
+  v2 -= v2 != v1;
+  v2 *= v2 <= v1;
+  v2 /= v2 >= v1;
+  v2 %= v2 < v1;
+  v2 &= v2 > v1;
+  v2 |= v2;
+  v2 ^= v2;
+
+  v2 += speed + v1;
+  v2 += v1 + speed;
+  v2 -= speed - v1;
+  v2 -= v1 - speed;
+  v2 *= speed * v1;
+  v2 *= v1 * speed;
+  v2 /= speed / v1;
+  v2 /= v1 / speed;
+  v2 %= speed % v1;
+  v2 %= v1 % speed;
+  v2 += speed == v1;
+  v2 -= speed != v1;
+  v2 *= speed <= v1;
+  v2 /= speed >= v1;
+  v2 %= speed < v1;
+  v2 &= speed > v1;
+  v2 |= speed;
+  v2 ^= speed;
+
+  // =========================================================================
+
+  speed += t1 + v1;
+  speed += v1 + t1;
+  speed -= t1 - v1;
+  speed -= v1 - t1;
+  speed *= t1 * v1;
+  speed *= v1 * t1;
+  speed /= t1 / v1;
+  speed /= v1 / t1;
+  speed %= t1 % v1;
+  speed %= v1 % t1;
+  speed += t1 == v1;
+  speed -= t1 != v1;
+  speed *= t1 <= v1;
+  speed /= t1 >= v1;
+  speed %= t1 < v1;
+  speed &= t1 > v1;
+  speed |= t1;
+  speed ^= t1;
+
+  speed += t2  + v1;
+  speed += v1 + t2 ;
+  speed -= t2  - v1;
+  speed -= v1 - t2 ;
+  speed *= t2  * v1;
+  speed *= v1 * t2 ;
+  speed /= t2  / v1;
+  speed /= v1 / t2 ;
+  speed %= t2  % v1;
+  speed %= v1 % t2 ;
+  speed += t2  == v1;
+  speed -= t2  != v1;
+  speed *= t2  <= v1;
+  speed /= t2  >= v1;
+  speed %= t2  < v1;
+  speed &= t2  > v1;
+  speed |= t2;
+  speed ^= t2;
+
+  speed += t3  + v1;
+  speed += v1 + t3 ;
+  speed -= t3  - v1;
+  speed -= v1 - t3 ;
+  speed *= t3  * v1;
+  speed *= v1 * t3 ;
+  speed /= t3  / v1;
+  speed /= v1 / t3 ;
+  speed %= t3  % v1;
+  speed %= v1 % t3 ;
+  speed += t3  == v1;
+  speed -= t3  != v1;
+  speed *= t3  <= v1;
+  speed /= t3  >= v1;
+  speed %= t3  < v1;
+  speed &= t3  > v1;
+  speed |= t3;
+  speed ^= t3;
+
+  speed += t4 + v1;
+  speed += v1 + t4;
+  speed -= t4 - v1;
+  speed -= v1 - t4;
+  speed *= t4 * v1;
+  speed *= v1 * t4;
+  speed /= t4 / v1;
+  speed /= v1 / t4;
+  speed %= t4 % v1;
+  speed %= v1 % t4;
+  speed += t4 == v1;
+  speed -= t4 != v1;
+  speed *= t4 <= v1;
+  speed /= t4 >= v1;
+  speed %= t4 < v1;
+  speed &= t4 > v1;
+  speed |= t4;
+  speed ^= t4;
+
+  speed += t5 + v1;
+  speed += v1 + t5;
+  speed -= t5 - v1;
+  speed -= v1 - t5;
+  speed *= t5 * v1;
+  speed *= v1 * t5;
+  speed /= t5 / v1;
+  speed /= v1 / t5;
+  speed %= t5 % v1;
+  speed %= v1 % t5;
+  speed += t5 == v1;
+  speed -= t5 != v1;
+  speed *= t5 <= v1;
+  speed /= t5 >= v1;
+  speed %= t5 < v1;
+  speed &= t5 > v1;
+  speed |= t5;
+  speed ^= t5;
+
+  speed += t6 + v1;
+  speed += v1 + t6;
+  speed -= t6 - v1;
+  speed -= v1 - t6;
+  speed *= t6 * v1;
+  speed *= v1 * t6;
+  speed /= t6 / v1;
+  speed /= v1 / t6;
+  speed %= t6 % v1;
+  speed %= v1 % t6;
+  speed += t6 == v1;
+  speed -= t6 != v1;
+  speed *= t6 <= v1;
+  speed /= t6 >= v1;
+  speed %= t6 < v1;
+  speed &= t6 > v1;
+  speed |= t6;
+  speed ^= t6;
+
+  speed += s1 + v1;
+  speed += v1 + s1;
+  // speed -= s1 - v1; [string - variant undefined]
+  // speed -= v1 - s1;
+  // speed *= s1 * v1; [string * variant undefined]
+  // speed *= v1 * s1;
+  // speed /= s1 / v1; [string / variant undefined]
+  // speed /= v1 / s1;
+  // speed %= s1 % v1; [string % variant undefined]
+  // speed %= v1 % s1;
+  speed += s1 == v1;
+  speed -= s1 != v1;
+  speed *= s1 <= v1;
+  speed /= s1 >= v1;
+  speed %= s1 < v1;
+  speed &= s1 > v1;
+  speed |= s1;
+  speed ^= s1;
+
+  speed += s2 + v1;
+  speed += v1 + s2;
+  // speed -= s2 - v1; [string - variant undefined]
+  // speed -= v1 - s2;
+  // speed *= s2 * v1; [string * variant undefined]
+  // speed *= v1 * s2;
+  // speed /= s2 / v1; [string / variant undefined]
+  // speed /= v1 / s2;
+  // speed %= s2 % v1; [string % variant undefined]
+  // speed %= v1 % s2;
+  speed += s2 == v1;
+  speed -= s2 != v1;
+  speed *= s2 <= v1;
+  speed /= s2 >= v1;
+  speed %= s2 < v1;
+  speed &= s2 > v1;
+  speed |= s2 < v1;
+  speed ^= s2 > v1;
+
+  speed += v1 + v1;
+  speed += v1 + v1;
+  speed -= v1 - v1;
+  speed -= v1 - v1;
+  speed *= v1 * v1;
+  speed *= v1 * v1;
+  speed /= v1 / v1;
+  speed /= v1 / v1;
+  speed %= v1 % v1;
+  speed %= v1 % v1;
+  speed += v1 == v1;
+  speed -= v1 != v1;
+  speed *= v1 <= v1;
+  speed /= v1 >= v1;
+  speed %= v1 < v1;
+  speed &= v1 > v1;
+  speed |= v1;
+  speed ^= v1;
+
+  speed += v2 + v1;
+  speed += v1 + v2;
+  speed -= v2 - v1;
+  speed -= v1 - v2;
+  speed *= v2 * v1;
+  speed *= v1 * v2;
+  speed /= v2 / v1;
+  speed /= v1 / v2;
+  speed %= v2 % v1;
+  speed %= v1 % v2;
+  speed += v2 == v1;
+  speed -= v2 != v1;
+  speed *= v2 <= v1;
+  speed /= v2 >= v1;
+  speed %= v2 < v1;
+  speed &= v2 > v1;
+  speed |= v2;
+  speed ^= v2;
+
+  speed += speed + v1;
+  speed += v1 + speed;
+  speed -= speed - v1;
+  speed -= v1 - speed;
+  speed *= speed * v1;
+  speed *= v1 * speed;
+  speed /= speed / v1;
+  speed /= v1 / speed;
+  speed %= speed % v1;
+  speed %= v1 % speed;
+  speed += speed == v1;
+  speed -= speed != v1;
+  speed *= speed <= v1;
+  speed /= speed >= v1;
+  speed %= speed < v1;
+  speed &= speed > v1;
+  speed |= speed;
+  speed ^= speed;
+
+  bool b;
+  v1 = 5;
+  t1 = v1;
+  gtest_assert_eq(t1, 5);
+  t2 = v1;
+  gtest_assert_eq(t2, 5);
+  t3 = v1;
+  gtest_assert_eq(t3, 5);
+  t4 = v1;
+  gtest_assert_eq(t4, 5);
+  t5 = v1;
+  gtest_assert_eq(t5, 5);
+  b = v1;
+  gtest_assert_eq(b, true);
+
+  v1 += t1;
+  gtest_assert_eq(v1, 10);
+  v1 += t2;
+  gtest_assert_eq(v1, 15);
+  v1 += t3;
+  gtest_assert_eq(v1, 20);
+  v1 += t4;
+  gtest_assert_eq(v1, 25);
+  v1 += t5;
+  gtest_assert_eq(v1, 30);
+  v1 += b;
+  gtest_assert_eq(v1, 31);
+
+  s1 = "hi";
+  s2 = "ho";
+  v1 = s1;
+  v1 += s2;
+  v1 += v1;
+  v1 += s1;
+  gtest_assert_eq(v1, "hihohihohi");
+
+  cons_show_message("Test end!");
+
+  game_end();

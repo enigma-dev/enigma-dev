@@ -36,7 +36,9 @@
 #include <cstdlib>
 
 #ifdef _WIN32
- #include <windows.h>
+  #define byte __windows_byte_workaround
+  #include <windows.h>
+  #undef byte
  #define dllexport extern "C" __declspec(dllexport)
 #else
  #define dllexport extern "C"
@@ -171,8 +173,7 @@ const char* establish_bearings(const char *compiler)
       }
       pos += idirstart.length();
     }
-    jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/");
-    jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/Mock_JDI_Headers/");
+    jdi::builtin->add_search_directory((enigma_root + "ENIGMAsystem/SHELL").c_str());
     jdi::builtin->add_search_directory(codegen_directory.c_str());
 
     while (is_useless(idirs[++pos]));
@@ -201,6 +202,7 @@ const char* establish_bearings(const char *compiler)
       return "Call to `defines' toolchain executable returned no data.\n";
 
     int res = jdi::builtin->parse_C_stream(macro_reader, (codegen_directory + "enigma_defines.txt").c_str());
+    jdi::builtin->add_macro("_GLIBCXX_USE_CXX11_ABI", "0");
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
 

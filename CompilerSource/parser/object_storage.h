@@ -33,7 +33,7 @@
 #include <set>
 #include <string>
 #include <vector>
-#include "general/darray.h"
+#include "darray.h"
 
 using namespace std;
 

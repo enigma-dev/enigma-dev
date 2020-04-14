@@ -69,7 +69,7 @@ static void reset_ide_editables()
         f2write += incg + ext.pathname + impl;
     }
 
-  if (f2comp != f2write)
+  if (f2comp != f2write + "\n")
   {
     wto.open((codegen_directory + "API_Switchboard.h").c_str(),ios_base::out);
       wto << f2write << endl;
@@ -103,6 +103,8 @@ static void reset_ide_editables()
 #define flushl "\n\n\n\n\n"
 
 extern const char* establish_bearings(const char *compiler);
+
+std::string enigma_root;
 
 void parse_ide_settings(const char* eyaml)
 {
@@ -190,7 +192,7 @@ void parse_ide_settings(const char* eyaml)
   ey_cp(network,   networking,system)
 
   ifstream ifs; string eyname;
-  ifs.open((eyname = "ENIGMAsystem/SHELL/Platforms/" + extensions::targetAPI.windowSys + "/Info/About.ey").c_str());
+  ifs.open((eyname = enigma_root + "ENIGMAsystem/SHELL/Platforms/" + extensions::targetAPI.windowSys + "/Info/About.ey").c_str());
   if (ifs.is_open())
   {
     ey_data l = parse_eyaml(ifs, eyname.c_str());
@@ -223,7 +225,7 @@ void parse_ide_settings(const char* eyaml)
   eygl(Networking_Systems, network);
 
   string target_compiler = settree.get("target-compiler");
-  string cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + target_compiler + ".ey";
+  string cinffile = enigma_root + "Compilers/" CURRENT_PLATFORM_NAME "/" + target_compiler + ".ey";
 
   const char *a = establish_bearings(cinffile.c_str());
   if (a) cout << "Parse fail: " << a << endl;

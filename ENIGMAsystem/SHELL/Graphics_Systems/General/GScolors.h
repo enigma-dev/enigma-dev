@@ -21,6 +21,7 @@
 namespace enigma {
 
 extern unsigned char currentcolor[4];
+extern bool colorWriteEnable[4];
 
 } // namespace enigma
 

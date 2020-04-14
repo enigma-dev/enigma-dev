@@ -14,8 +14,12 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include "Graphics_Systems/graphics_mandatory.h"
+
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/OpenGL-Common/version.h"
+#include "Graphics_Systems/OpenGL-Common/shader.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Bridges/OpenGL/GLload.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/xlib/XLIBwindow.h"
@@ -28,9 +32,9 @@
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
 namespace enigma {
-  GLuint msaa_fbo = 0;
+  extern int context_attribs[];
   GLXContext glxc;
-  XVisualInfo *vi;
+  GLXFBConfig* fbc;
 
   extern void (*WindowResizedCallback)();
   void WindowResized() {
@@ -39,42 +43,41 @@ namespace enigma {
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
 
-  XVisualInfo* CreateVisualInfo() {
+  GLXFBConfig* CreateFBConfig() {
+    
+    // Bind some functions we need
+    glXChooseFBConfig = (PFNGLXCHOOSEFBCONFIGPROC)glXGetProcAddress((GLubyte*)"glXChooseFBConfig");
+    glXGetVisualFromFBConfig = (PFNGLXGETVISUALFROMFBCONFIGPROC)glXGetProcAddress((GLubyte*)"glXGetVisualFromFBConfig");
+    glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddress((GLubyte*)"glXCreateContextAttribsARB");
+    
     // Prepare openGL
-    GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
-    vi = glXChooseVisual(enigma::x11::disp,0,att);
-    if (!vi)
-      show_error("Failed to Obtain GL Visual Info", true);
-    return vi;
+    GLint att[] = { GLX_DOUBLEBUFFER, True, GLX_DEPTH_SIZE, 24, None };
+    int config_count;
+    
+    fbc = glXChooseFBConfig(enigma::x11::disp, DefaultScreen(enigma::x11::disp), att, &config_count);
+    if (!fbc || config_count < 1)
+      DEBUG_MESSAGE("Failed to Obtain GL Frambuffer config", MESSAGE_TYPE::M_FATAL_ERROR);
+    return fbc;
   }
 
   void EnableDrawing(void* handle) {
     WindowResizedCallback = &WindowResized;
 
     //give us a GL context
-    glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
+    glxc = glXCreateContextAttribsARB(enigma::x11::disp, fbc[0], 0, True, context_attribs);
     if (!glxc)
-      show_error("Failed to Create Graphics Context", true);
+      DEBUG_MESSAGE("Failed to Create Graphics Context", MESSAGE_TYPE::M_FATAL_ERROR);
 
     //apply context
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
-      show_error(std::string("Failed to initialize glew for OpenGL. ") + glewGetErrorString(err), true);
+    gl_load_exts();
   }
 
   void DisableDrawing(void* handle) {
+   cleanup_shaders(); // delete shaders before context
    glXDestroyContext(enigma::x11::disp,glxc);
-      /*
-    for(char q=1;q;ENIGMA_events())
-        while(XQLength(disp))
-            if(handleEvents()>0) q=0;
-    glxc = glXGetCurrentContext();
-    glXDestroyContext(disp,glxc);
-    XCloseDisplay(disp);
-    return 0;*/
   }
 
   namespace swaphandling {
@@ -141,10 +144,5 @@ namespace enigma_user {
       // be zero or less, so therefore it is not used here.
       // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
     }
-  }
-
-  void display_reset(int samples, bool vsync) {
-    set_synchronization(vsync);
-    //TODO: Copy over from the Win32 bridge
   }
 }

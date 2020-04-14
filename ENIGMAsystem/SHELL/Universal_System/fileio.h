@@ -20,25 +20,27 @@
 #define ENIGMA_FILEIO_H
 
 #include <string>
+using std::string;
 
 namespace enigma_user
 {
-int     file_text_open_read(std::string fname);
-int     file_text_open_write(std::string fname);
-int     file_text_open_append(std::string fname);
+int     file_text_open_read(string fname);
+int     file_text_open_write(string fname);
+int     file_text_open_append(string fname);
 void    file_text_close(int fileid);
-void    file_text_write_string(int fileid, std::string str);
+void    file_text_write_string(int fileid, string str);
 void    file_text_write_real(int fileid, double x);
 void    file_text_writeln(int fileid);
-std::string file_text_read_string(int fileid);
-std::string file_text_read_all(int fileid);
+void    file_text_writeln(int fileid,string str);
+string  file_text_read_string(int fileid);
+string  file_text_read_all(int fileid);
 double  file_text_read_real(int fileid);
-void    file_text_readln(int fileid);
+string  file_text_readln(int fileid);
 bool    file_text_eof(int fileid);
-bool file_text_eoln(int fileid);
-void load_info(std::string fname); // game information function
+bool    file_text_eoln(int fileid);
+void    load_info(string fname); // game information function
 
-int     file_bin_open(std::string fname,int mode);
+int     file_bin_open(string fname,int mode);
 bool    file_bin_rewrite(int fileid);
 void    file_bin_close(int fileid);
 size_t  file_bin_size(int fileid);

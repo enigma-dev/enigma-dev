@@ -15,7 +15,10 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include "WINDOWStouch.h"
 
 namespace enigma {

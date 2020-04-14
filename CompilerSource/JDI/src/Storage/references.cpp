@@ -8,7 +8,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -24,6 +24,7 @@
 **/
 
 #include "references.h"
+#include <API/AST.h>
 
 #ifndef dbg_assert
   #ifdef DEBUG_MODE
@@ -35,10 +36,11 @@
 #endif
 #include <iostream>
 #include <cstdio>
+using namespace std;
 
 namespace jdi {
-  ref_stack::ref_stack(): ntop(NULL), nbottom(NULL), sz(0) {}
-  ref_stack::ref_stack(ref_stack& rf): ntop(NULL), nbottom(NULL), sz(0) { swap(rf); }
+  ref_stack::ref_stack(): name(), ndef(NULL), ntop(NULL), nbottom(NULL), sz(0) {}
+  ref_stack::ref_stack(ref_stack& rf): name(), ndef(NULL), ntop(NULL), nbottom(NULL), sz(0) { swap(rf); }
   ref_stack::ref_stack(const ref_stack& rf) { /* cerr << "IMPLICITLY DUPLICATED REF STACK (CTOR)" << endl; */ copy(rf); }
   ref_stack::~ref_stack() { clear(); }
   
@@ -49,9 +51,11 @@ namespace jdi {
   ref_stack::node::node(node* p, ref_type rt): previous(p), type(rt) {}
   ref_stack::node_array::node_array(node* p, size_t b): node(p,RT_ARRAYBOUND), bound(b) {}
   ref_stack::node_func::node_func(node* p, parameter_ct &ps): node(p,RT_FUNCTION), params() { params.swap(ps); }
+  ref_stack::node_memptr::node_memptr(node* p, definition_class *memof): node(p,RT_MEMBER_POINTER), member_of(memof) {}
   
   ref_stack::node::~node() { }
   ref_stack::node_func::~node_func() {}
+  ref_stack::node_memptr::~node_memptr() {}
   
   ref_stack::node* ref_stack::node::duplicate() {
     if (type == RT_ARRAYBOUND) return new node_array(NULL,((node_array*)this)->bound);
@@ -59,9 +63,13 @@ namespace jdi {
     return new node(NULL,type);
   }
   
-  size_t ref_stack::node::arraysize() {
+  size_t ref_stack::node::arraysize() const {
     dbg_assert(this->type == RT_ARRAYBOUND);
     return ((node_array*)this)->bound;
+  }
+  size_t ref_stack::node::paramcount() const {
+    dbg_assert(this->type == RT_FUNCTION);
+    return ((node_func*)this)->params.size();
   }
   
   ref_stack::node* ref_stack::iterator::operator*() { return n; }
@@ -73,6 +81,14 @@ namespace jdi {
   
   ref_stack::iterator ref_stack::begin() const { return ref_stack::iterator(ntop); }
   ref_stack::iterator ref_stack::end() const { return ref_stack::iterator(NULL); }
+  
+  bool ref_stack::ends_with(const ref_stack &rf) const {
+    for (const node *n1 = ntop, *n2 = rf.ntop; n2; n1 = n1->previous, n2 = n2->previous) {
+      if (!n1) return false;
+      if (*n1 != *n2) return false;
+    }
+    return true;
+  }
   
   void ref_stack::push(ref_stack::ref_type reference_type) {
     ntop = new node(ntop, reference_type);
@@ -93,6 +109,13 @@ namespace jdi {
     else ntop = nbottom;
     ++sz;
   }
+  void ref_stack::push_memptr(definition_class *memof) {
+    node* bo = nbottom;
+    nbottom = new node_memptr(NULL, memof);
+    if (bo) bo->previous = nbottom;
+    else ntop = nbottom;
+    ++sz;
+  }
   
   void ref_stack::pop() {
     node *dme = ntop;
@@ -100,12 +123,22 @@ namespace jdi {
       ntop = dme->previous;
       if (!ntop)
         nbottom = NULL;
-      delete dme;
+      free(dme);
     }
   }
   
+  void ref_stack::free(node* n) {
+    switch (n->type) {
+      case RT_FUNCTION: delete (node_func*)n; break;
+      case RT_ARRAYBOUND: delete (node_array*)n; break;
+      case RT_MEMBER_POINTER: delete (node_memptr*)n; break;
+      case RT_POINTERTO: case RT_REFERENCE: default: delete n; break;
+    }
+  }
+
   void ref_stack::copy(const ref_stack& rf) {
     name = rf.name;
+    ndef = rf.ndef;
     sz = rf.sz;
     if (!rf.nbottom) {
       ntop = nbottom = NULL;
@@ -119,6 +152,8 @@ namespace jdi {
   }
   void ref_stack::swap(ref_stack& rf) {
     name.swap(rf.name);
+    definition* sdef = ndef;
+    ndef = rf.ndef; rf.ndef = sdef;
     node *ts = ntop, *bs= nbottom;
     ntop = rf.ntop, nbottom = rf.nbottom;
     rf.ntop = ts, rf.nbottom = bs;
@@ -138,6 +173,7 @@ namespace jdi {
   void ref_stack::append_nest_c(ref_stack &rf) {
     if (!rf.nbottom) {
       if (!rf.name.empty()) name = rf.name; // Grab the name, if it's meaningful
+      if (rf.ndef) ndef = rf.ndef; // This way, we don't overwrite with NULL/""
       return; // Appending an empty stack is meaningless
     }
     if (!nbottom) nbottom = rf.nbottom; // If we didn't have anything on our stack, our nbottom is now its nbottom.
@@ -146,6 +182,7 @@ namespace jdi {
     rf.ntop = rf.nbottom = NULL; // Make sure it doesn't free what we just stole
     sz += rf.sz; rf.sz = 0; // Steal its size, too.
     name = rf.name; // Steal the name from the nested expression.
+    ndef = rf.ndef;
   }
   
   void ref_stack::prepend_c(ref_stack& rf) {
@@ -165,11 +202,7 @@ namespace jdi {
   void ref_stack::clear() {
     for (node* n = ntop, *p; n; n = p) {
       p = n->previous;
-      switch (n->type) {
-        case RT_FUNCTION: delete (node_func*)n; break;
-        case RT_ARRAYBOUND: delete (node_array*)n; break;
-        case RT_POINTERTO: case RT_REFERENCE: default: delete n; break;
-      }
+      free(n);
     }
     sz = 0;
   }
@@ -187,12 +220,13 @@ namespace jdi {
   }
   
   ref_stack::parameter::parameter(): variadic(false), default_value(NULL) {}
+  ref_stack::parameter::parameter(const full_type& ft, AST* dv): full_type(ft), variadic(false), default_value(dv) {}
   ref_stack::parameter::~parameter() { delete default_value; }
     
   void ref_stack::parameter::swap(ref_stack::parameter &param) {
     full_type::swap(param);
     
-    register bool swb;
+    bool swb;
     swb = param.variadic;
     param.variadic = variadic;
     variadic = swb;
@@ -216,8 +250,16 @@ namespace jdi {
     while (it)
     {
       while (it and (it->type == RT_ARRAYBOUND || it->type == RT_FUNCTION)) ++it;
-      while (it and (it->type == RT_POINTERTO  || it->type == RT_REFERENCE))
-        res = (it->type == ref_stack::RT_POINTERTO? '*' : '&') + res, ++it;
+      while (it) {
+        if (it->type == RT_POINTERTO)
+          res = '*' + res;
+        else if (it->type == RT_REFERENCE)
+          res = '&' + res;
+        else if (it->type == RT_MEMBER_POINTER)
+          res = ((node_memptr*)(*it))->member_of->toString(0,0) + "::*" + res;
+        else break;
+        ++it;
+      }
       if (it) res = '(' + res;
     }
     return res;
@@ -249,7 +291,7 @@ namespace jdi {
         }
         ++it;
       }
-      while (it and (it->type == RT_POINTERTO || it->type == RT_REFERENCE)) ++it;
+      while (it and (it->type == RT_POINTERTO || it->type == RT_REFERENCE || it->type == RT_MEMBER_POINTER)) ++it;
       if (it) res += ')';
     }
     return res;
@@ -259,38 +301,63 @@ namespace jdi {
     return toStringLHS() + name + toStringRHS();
   }
   
+  string ref_stack::toEnglish() const {
+    string res = name.empty()? name : name + ": ";
+    bool pl = false;
+    
+    for (iterator it = begin(); it; ++it)
+    switch (it->type) {
+      case RT_ARRAYBOUND:     res += pl?           "arrays of ":           "array of "; pl = true;  break;
+      case RT_FUNCTION:       res += pl? "functions returning ": "function returning "; pl = false; break;
+      case RT_MEMBER_POINTER: res += pl?  "member pointers to ":  "member pointer to "; break;
+      case RT_POINTERTO:      res += pl?         "pointers to ":         "pointer to "; break;
+      case RT_REFERENCE:      res += pl?       "references to ":       "reference to "; break;
+      default: res += "{error}"; break;
+    }
+    
+    return res;
+  }
+  
   //================================================================================
   //====: Comparison operators :====================================================
   //================================================================================
   
+  bool ref_stack::node::operator==(const ref_stack::node &j) const {
+      if (type != j.type) return false;
+      if (type == RT_ARRAYBOUND and arraysize() != j.arraysize()) return false;
+      if (type == RT_FUNCTION and ((node_func*)this)->params != ((node_func*)&j)->params) return false;
+      return true;
+  }
+  bool ref_stack::node::operator!=(const ref_stack::node &j) const {
+      if (type != j.type) return true;
+      if (type == RT_ARRAYBOUND and arraysize() != j.arraysize()) return true;
+      if (type == RT_FUNCTION and ((node_func*)this)->params != ((node_func*)&j)->params) return true;
+      return false;
+  }
+  
+  #ifdef DEBUG_MODE
+    #define doublecheck_size(i, j, res) \
+    if (not(j and i)) {        \
+      cerr << "ref_stack::size() lied" << endl; \
+      return res;\
+    }
+  #else
+    #define doublecheck_size(i, j, res) void()
+  #endif
   
   bool ref_stack::operator==(const ref_stack& other) const {
     if (size() != other.size()) return false;
     for (node *i = ntop, *j = other.ntop; i or j; i = i->previous, j = j->previous) {
-      #ifdef DEBUG_MODE
-      if (not(j and i)) {
-        cerr << "ref_stack::size() lied" << endl;
-        return false;
-      }
-      #endif
-      if (i->type != j->type) return false;
-      if (i->type == RT_ARRAYBOUND and i->arraysize() != j->arraysize()) return false;
-      if (i->type == RT_FUNCTION and ((node_func*)i)->params != ((node_func*)j)->params) return false;
+      doublecheck_size(i, j, false);
+      if (*i != *j) return false;
     }
     return true;
   }
   bool ref_stack::operator!=(const ref_stack& other) const {
     if (size() != other.size()) return true;
     for (node *i = ntop, *j = other.ntop; i or j; i = i->previous, j = j->previous) {
-      #ifdef DEBUG_MODE
-      if (not(j and i)) {
-        cerr << "ref_stack::size() lied" << endl;
-        return true;
-      }
-      #endif
-      if (i->type != j->type) return true;
-      if (i->type == RT_ARRAYBOUND and i->arraysize() != j->arraysize()) return true;
-      if (i->type == RT_FUNCTION and ((node_func*)i)->params != ((node_func*)j)->params) return true;
+      doublecheck_size(i, j, true);
+      if (*i != *j) return true;
     }
     return false;
   }
@@ -298,12 +365,7 @@ namespace jdi {
     if (size() < other.size()) return true;
     if (size() > other.size()) return false;
     for (node *i = ntop, *j = other.ntop; i or j; i = i->previous, j = j->previous) {
-      #ifdef DEBUG_MODE
-      if (not(j and i)) {
-        cerr << "ref_stack::size() lied" << endl;
-        return true;
-      }
-      #endif
+      doublecheck_size(i, j, true);
       if (i->type != j->type) return i->type < j->type;
       if (i->type == RT_ARRAYBOUND and i->arraysize() != j->arraysize()) return i->arraysize() < j->arraysize();
       if (i->type == RT_FUNCTION and ((node_func*)i)->params != ((node_func*)j)->params) return ((node_func*)i)->params < ((node_func*)j)->params;
@@ -314,12 +376,7 @@ namespace jdi {
     if (size() > other.size()) return true;
     if (size() < other.size()) return false;
     for (node *i = ntop, *j = other.ntop; i or j; i = i->previous, j = j->previous) {
-      #ifdef DEBUG_MODE
-      if (not(j and i)) {
-        cerr << "ref_stack::size() lied" << endl;
-        return false;
-      }
-      #endif
+      doublecheck_size(i, j, false);
       if (i->type != j->type) return i->type < j->type;
       if (i->type == RT_ARRAYBOUND and i->arraysize() != j->arraysize()) return i->arraysize() > j->arraysize();
       if (i->type == RT_FUNCTION and ((node_func*)i)->params != ((node_func*)j)->params) return ((node_func*)i)->params > ((node_func*)j)->params;
@@ -330,12 +387,7 @@ namespace jdi {
     if (size() < other.size()) return true;
     if (size() > other.size()) return false;
     for (node *i = ntop, *j = other.ntop; i or j; i = i->previous, j = j->previous) {
-      #ifdef DEBUG_MODE
-      if (not(j and i)) {
-        cerr << "ref_stack::size() lied" << endl;
-        return true;
-      }
-      #endif
+      doublecheck_size(i, j, true);
       if (i->type != j->type) return i->type < j->type;
       if (i->type == RT_ARRAYBOUND and i->arraysize() != j->arraysize()) return i->arraysize() < j->arraysize();
       if (i->type == RT_FUNCTION and ((node_func*)i)->params != ((node_func*)j)->params) return ((node_func*)i)->params < ((node_func*)j)->params;
@@ -346,12 +398,7 @@ namespace jdi {
     if (size() > other.size()) return true;
     if (size() < other.size()) return false;
     for (node *i = ntop, *j = other.ntop; i or j; i = i->previous, j = j->previous) {
-      #ifdef DEBUG_MODE
-      if (not(j and i)) {
-        cerr << "ref_stack::size() lied" << endl;
-        return false;
-      }
-      #endif
+      doublecheck_size(i, j, false);
       if (i->type != j->type) return i->type >= j->type;
       if (i->type == RT_ARRAYBOUND and i->arraysize() != j->arraysize()) return i->arraysize() > j->arraysize();
       if (i->type == RT_FUNCTION and ((node_func*)i)->params != ((node_func*)j)->params) return ((node_func*)i)->params > ((node_func*)j)->params;

@@ -20,10 +20,7 @@
 **/
 
 #include "Platforms/platforms_mandatory.h"
-#include "Platforms/General/PFmain.h"
-#include "Platforms/General/PFwindow.h"
-#include "Platforms/General/PFfilemanip.h"
-#include "Platforms/General/PFsystem.h"
+#include "Platforms/General/include.h"
 
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
@@ -81,6 +78,8 @@ void os_powersave_enable(bool enable) {}
 int display_mouse_get_x() { return -1; }
 int display_mouse_get_y() { return -1; }
 void display_mouse_set(int x, int y) {}
+int display_get_x() { return 0; }
+int display_get_y() { return 0; }
 int display_get_width() { return 0; }
 int display_get_height() { return 0; }
 

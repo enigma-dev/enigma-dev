@@ -35,7 +35,10 @@ using std::string;
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 using std::vector;
 
 tstring widen(const string &str) {
@@ -213,7 +216,7 @@ char string_byte_at(string str, int index) {
   unsigned int n = index <= 1 ? 0 : (unsigned int)(index - 1);
   #ifdef DEBUG_MODE
     if (n > str.length())
-      show_error("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", false);
+      DEBUG_MESSAGE("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", MESSAGE_TYPE::M_ERROR);
   #endif
   return str[n];
 }
@@ -222,7 +225,7 @@ string string_char_at(string str,int index) {
   unsigned int n = index <= 1 ? 0 : (unsigned int)(index - 1);
   #ifdef DEBUG_MODE
     if (n > str.length())
-      show_error("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", false);
+      DEBUG_MESSAGE("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", MESSAGE_TYPE::M_ERROR);
   #endif
   return string(1, str[n]);
 }
@@ -342,12 +345,15 @@ string filename_dir(string fname)
 
 string filename_drive(string fname)
 {
-  size_t fp = fname.find("/\\");
+  size_t fp = fname.find_first_of("/\\");
+  if (!fp || fp == string::npos || fname[fp-1] != ':')
+    return "";
   return fname.substr(0, fp);
 }
 
 string filename_ext(string fname)
 {
+  fname = filename_name(fname);
   size_t fp = fname.find_last_of(".");
   if (fp == string::npos)
     return "";

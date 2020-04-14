@@ -16,6 +16,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_PLATFORM_JOYSTICK
+#define ENIGMA_PLATFORM_JOYSTICK
+
 #include <string>
 
 namespace enigma_user {
@@ -46,3 +49,5 @@ bool joystick_button(int id, int button);
 extern int joystick_lastbutton;
 
 }
+
+#endif
