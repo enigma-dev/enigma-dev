@@ -21,6 +21,8 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
+#include <cstring>
 
 /// NOTE: These image formats expect the data to be un-aligned and always reads and writes with BGRA full color
 
@@ -39,7 +41,8 @@ struct RawImage {
 };
 
 struct Color {
-  unsigned r, g, b, a;
+  uint8_t b, g, r, a;
+  uint32_t asInt() { return (b << 24) | (g << 16) | (r << 8) | a;  }
 };
 
 /// Color formats
@@ -54,7 +57,7 @@ Color image_get_pixel_color(unsigned char* pxdata, unsigned w, unsigned h, unsig
 void image_swap_color(unsigned char* pxdata, unsigned w, unsigned h, Color oldColor, Color newColor);
 /// Note splits horizontally
 std::vector<RawImage> image_split(unsigned char* pxdata, unsigned w, unsigned h, unsigned imgcount);
-RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight); 
+RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight);
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size = false);
 
 /// Gets the image format, eg. ".bmp", ".png", etc.

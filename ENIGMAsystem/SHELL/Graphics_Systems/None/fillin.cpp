@@ -141,4 +141,7 @@ namespace enigma_user
 	void draw_text(float, float, variant) {}
 	void draw_sprite_ext(int, int, float, float, float, float, double, int, float) {}
 	void draw_healthbar(float, float, float, float, float, int, int, int, int, bool, bool) {}
+  
+  uint32_t texture_get_pixel(int, unsigned int, unsigned int) {return 0;}
+  bool textures_equal(int, int) {return false;}
 }

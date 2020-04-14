@@ -221,4 +221,34 @@ void texture_anisotropy_filter(int sampler, gs_scalar levels) {
   enigma::draw_set_state_dirty();
 }
 
+bool textures_equal(int textureID1, int textureID2) {
+  return textures_regions_equal(textureID1, textureID2, 0, 0, 0, 0, enigma::textures[textureID1]->width, enigma::textures[textureID1]->height);
+}
+
+bool textures_regions_equal(int textureID1, int textureID2, unsigned xOff1, unsigned yOff1, unsigned xOff2, unsigned yOff2, unsigned w, unsigned h) {
+  enigma::RawImage i1;
+  i1.pxdata = enigma::graphics_copy_texture_pixels(textureID1, &i1.w, &i1.h);
+  
+  enigma::RawImage i2;
+  i2.pxdata = enigma::graphics_copy_texture_pixels(textureID2, &i2.w, &i2.h);
+  
+  unsigned stride = 4;
+  for (unsigned i = 0; i < h; ++i) {
+    for (unsigned j = 0; j < w; ++j) {
+      for (unsigned k = 0; k < stride; ++k) {
+        unsigned index1 = (i + yOff1) * w + (j + xOff1) + k;
+        unsigned index2 = (i + yOff2) * w + (j + xOff2) + k;
+        if (i1.pxdata[index1] != i2.pxdata[index2]) return false; 
+      }
+    }
+  }
+  return true;
+}
+
+uint32_t texture_get_pixel(int texid, unsigned x, unsigned y) {
+  enigma::RawImage i;
+  i.pxdata = enigma::graphics_copy_texture_pixels(texid, &i.w, &i.h);
+  return enigma::image_get_pixel_color(i.pxdata, i.w, i.h, x, y).asInt();
+}
+
 } // namespace enigma_user
