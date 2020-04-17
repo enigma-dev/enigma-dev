@@ -49,6 +49,8 @@ namespace enigma
     // Fetch the highest ID we will be using
     int spr_highid;
     if (!fread(&spr_highid,4,1,exe)) return;
+    
+    sprites.resize(spr_highid);
 
     for (int i = 0; i < sprcount; i++)
     {
@@ -132,7 +134,7 @@ namespace enigma
         }
       }
       
-      sprites.add(std::move(spr));
+      sprites.assign(sprid, std::move(spr));
     }
   }
 }
