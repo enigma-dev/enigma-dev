@@ -50,7 +50,7 @@ namespace enigma
     int spr_highid;
     if (!fread(&spr_highid,4,1,exe)) return;
     
-    sprites.resize(spr_highid);
+    sprites.resize(spr_highid+1);
 
     for (int i = 0; i < sprcount; i++)
     {
