@@ -164,7 +164,18 @@ dllexport void ide_handles_game_launch() { run_game = false; }
 static bool redirect_make = true;
 dllexport void log_make_to_console() { redirect_make = false; }
 
+template<typename T> void defrag_ids(vector<T>& resources) {
+  int id = 0;
+  for (T &res : resources) {
+    res.set_id(id++);
+  }
+}
+
 template<typename T> void write_resource_meta(ofstream &wto, const char *kind, vector<T> resources, bool gen_names = true) {
+  
+  // FIXME: this should be all resources as we move to asset array in engine
+  if (std::string(kind) == "sprite") defrag_ids(resources);
+  
   int max = 0;
   stringstream swb;  // switch body
   wto << "namespace enigma_user {\n"

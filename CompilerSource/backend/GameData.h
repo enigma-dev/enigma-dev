@@ -28,6 +28,10 @@ template<class Proto> struct ProtoMessageInheritor {
   decltype(((Proto*)nullptr)->id()) id() const {
     return data.id();
   }
+  
+  void set_id(int id) {
+    data.set_id(id);
+  }
 
   Proto *operator->() {
     return &data;
