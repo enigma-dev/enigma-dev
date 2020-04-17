@@ -35,7 +35,8 @@ struct Background {
     unsigned tw = 0, unsigned th = 0, int ho = 0, int vo = 0, int hs = 0, int vs = 0) : 
     width(w), 
     height(h), 
-    textureID(tex), 
+    textureID(tex),
+    textureBounds({0, 0, 1, 1}), 
     isTileset(ts), 
     tileWidth(tw),
     tileHeight(th),
