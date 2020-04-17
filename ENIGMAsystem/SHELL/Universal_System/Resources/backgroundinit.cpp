@@ -16,11 +16,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "background_internal.h"
+#include "backgrounds_internal.h"
 #include "libEGMstd.h"
-#include "Universal_System/zlib.h"
 #include "resinit.h"
-
+#include "Universal_System/zlib.h"
+#include "Universal_System/image_formats.h"
+#include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
@@ -66,8 +67,6 @@ namespace enigma
       if (!fread(&hSep,4,1,exe)) return;
       if (!fread(&vSep,4,1,exe)) return;
 
-      //need to add: transparent, smooth, preload, tileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep
-
       unpacked = width*height*4;
 
       unsigned int size;
@@ -92,7 +91,10 @@ namespace enigma
       }
       delete[] cpixels;
 
-      background_new(bkgid, width, height, pixels, false, false, true, false, 32, 32, 0, 0, 1,1);
+      RawImage img = image_pad(pixels, width, height, nlpo2dc(width)+1, nlpo2dc(height)+1);
+      int texID = graphics_create_texture(width, height, img.w, img.h, img.pxdata, false);
+      Background bkg(width, height, texID, useAsTileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
+      backgrounds.add(std::move(bkg));
 
       delete[] pixels;
     }

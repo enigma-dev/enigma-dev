@@ -23,7 +23,7 @@
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/Resources/sprites.h"
-#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/backgrounds.h"
 
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"
