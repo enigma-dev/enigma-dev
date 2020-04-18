@@ -19,16 +19,11 @@
 
 #include "backgrounds_internal.h"
 #include "Universal_System/image_formats.h"
-#include "libEGMstd.h"
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Widget_Systems/widgets_mandatory.h"
-
-#include <cstring>
-#include <string>
-#include <iostream>
 
 using enigma::Background;
 using enigma::backgrounds;

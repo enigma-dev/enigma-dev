@@ -21,14 +21,11 @@
 #define ENIGMA_BACKGROUND_INTERNAL_H
 
 #include "AssetArray.h"
-#include "rect.h"
 #include "Universal_System/scalar.h"
 
 #include <string>
 
 namespace enigma {
-  
-using TexRect = Rect<gs_scalar>;
   
 struct Background {
   Background(unsigned w = 0, unsigned h = 0, int tex = -1, bool ts = false, 

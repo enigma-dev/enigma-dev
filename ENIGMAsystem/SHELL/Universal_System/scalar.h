@@ -16,6 +16,7 @@
 **/
 
 #include "math_consts.h"
+#include "rect.h"
 
 // This header implements scalar data types for double and floating point precision
 // for major systems and coordinate space. Angular unit functions are also implemented
@@ -96,3 +97,9 @@ typedef float cs_scalar;
 #define cs_angle_from_radians(radians) ((radians) * 180 / M_PI)
 #define cs_angle_to_radians(degrees) ((degrees) / 180 * M_PI)
 #endif
+
+namespace enigma {
+  
+using TexRect = Rect<gs_scalar>;
+
+}
