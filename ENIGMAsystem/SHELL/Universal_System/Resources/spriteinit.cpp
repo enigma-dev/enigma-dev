@@ -49,7 +49,8 @@ namespace enigma
     // Fetch the highest ID we will be using
     int spr_highid;
     if (!fread(&spr_highid,4,1,exe)) return;
-    
+
+    if (sprcount == 0) return;
     sprites.resize(spr_highid+1);
 
     for (int i = 0; i < sprcount; i++)
