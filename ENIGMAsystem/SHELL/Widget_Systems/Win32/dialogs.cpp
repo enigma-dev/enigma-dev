@@ -53,8 +53,8 @@ static string gs_str_submitted;
 static string gs_but1, gs_but2, gs_but3;
 
 // highscore table
-int highscore_array[12] = { };
-int highscore_prev[12] = { };
+int highscore_array[10] = { };
+int highscore_prev[10] = { };
 int highscore_index = 0;
 int highscore = 0;
 
