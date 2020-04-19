@@ -34,7 +34,7 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/backgrounds_internal.h"
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"

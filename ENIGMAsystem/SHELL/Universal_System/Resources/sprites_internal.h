@@ -26,7 +26,6 @@
 #define ENIGMA_SPRITESTRUCT
 
 #include "AssetArray.h"
-#include "rect.h"
 #include "Collision_Systems/collision_types.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/image_formats.h"
@@ -34,7 +33,6 @@
 namespace enigma {
 
 using BoundingBox = Rect<int>;
-using TexRect = Rect<gs_scalar>;
 
 struct Subimage {
   

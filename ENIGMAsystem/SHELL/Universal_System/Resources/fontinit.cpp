@@ -17,7 +17,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "background_internal.h"
+#include "backgrounds_internal.h"
 #include "fonts_internal.h"
 #include "libEGMstd.h"
 #include "resinit.h"

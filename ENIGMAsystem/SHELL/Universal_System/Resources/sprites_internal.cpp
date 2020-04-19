@@ -21,7 +21,7 @@ Subimage::Subimage(const Subimage &s, bool duplicateTexture) {
 }
 
 void Subimage::FreeTexture() {
-  if (textureID != -1) enigma::graphics_delete_texture(textureID);
+  enigma::graphics_delete_texture(textureID);
   textureID = -1;
 }
 
