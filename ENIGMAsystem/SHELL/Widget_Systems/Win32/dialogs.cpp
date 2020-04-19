@@ -30,8 +30,10 @@
 #include <algorithm>
 
 using namespace std;
+#include "Widget_Systems/Win32/dialogs.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
+#include "Platforms/General/PFregistry.h"
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/estring.h"
 #include "GameSettings.h"
@@ -50,10 +52,22 @@ static bool   gs_form_canceled;
 static string gs_str_submitted;
 static string gs_but1, gs_but2, gs_but3;
 
+// highscore table
+int highscore_array[12] = { };
+int highscore_prev[12] = { };
+int highscore_index = 0;
+int highscore = 0;
+
 // message and error captions
 static string message_caption;
 static tstring dialog_caption = L"";
 static tstring error_caption = L"";
+
+// error hook proc
+HHOOK hook_handle = NULL;
+HWND dlg_error = NULL;
+bool init_error = false;
+bool fatal_error = false;
 
 // show cancel button?
 static bool message_cancel = false;
@@ -145,6 +159,35 @@ static tstring tstring_replace_all(tstring str, tstring substr, tstring newstr) 
   return widen(string_replace_all(shorten(str), shorten(substr), shorten(newstr)));
 }
 
+
+static LRESULT CALLBACK ShowDebugMessageProc(int nCode, WPARAM wParam, LPARAM lParam) {
+  if (nCode < HC_ACTION)
+    return CallNextHookEx(hook_handle, nCode, wParam, lParam);
+
+  if (nCode == HCBT_CREATEWND) {
+    CBT_CREATEWNDW *cbtcr = (CBT_CREATEWNDW *)lParam;
+    if (cbtcr->lpcs->hwndParent == enigma::hWnd) {
+      dlg_error = (HWND)wParam;
+      init_error = true;
+    }
+    if (dlg_error != NULL && init_error) {
+      SetDlgItemTextW(dlg_error, IDOK, L"Abort");
+      SetDlgItemTextW(dlg_error, IDCANCEL, L"Ignore");
+      wchar_t dlg_abort[32]; wchar_t dlg_ignore[32];
+      GetDlgItemTextW(dlg_error, IDOK, dlg_abort, 32);
+      GetDlgItemTextW(dlg_error, IDOK, dlg_ignore, 32);
+      if (shorten(dlg_abort) == "Abort" && fatal_error) {
+        init_error = false;
+      } else if (shorten(dlg_abort) == "Abort" && 
+        shorten(dlg_ignore) == "Ignore") {
+        init_error = false;
+      }
+    }
+  }
+
+  return CallNextHookEx(hook_handle, nCode, wParam, lParam);
+}
+
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   if (uMsg == WM_INITDIALOG) {
@@ -227,6 +270,89 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
   }
 
   return 0;
+}
+
+static INT_PTR CALLBACK HighscoreShowProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
+  if (uMsg == WM_INITDIALOG) {
+    for (int i = 9; i >= 0; i--) {
+      HWND did1 = GetDlgItem(hwndDlg, 1000 + 9 - i);
+      HWND did2 = GetDlgItem(hwndDlg, 1010 + 9 - i);
+
+      PostMessage(did1, EM_SETREADONLY, TRUE, 0);
+      PostMessage(did2, EM_SETREADONLY, TRUE, 0);
+
+      string str1 = "entry" + std::to_string(9 - i);
+      string str2 = "entry" + std::to_string(9 - i + 10);
+      SetWindowText(did1, (enigma_user::registry_exists(str1)) ? enigma_user::registry_read_string(str1).c_str() : "<nobody>");
+      SetWindowText(did2, (enigma_user::registry_exists(str2)) ? std::to_string(enigma_user::registry_read_real(str2)).c_str() : "0");
+      highscore_array[i] = (enigma_user::registry_exists(str2)) ? enigma_user::registry_read_real(str2) : 0;
+
+      if (highscore >= highscore_array[9 - i] && highscore >= 0) {
+        highscore_prev[9 - i] = highscore_array[9 - i];
+        did1 = GetDlgItem(hwndDlg, 1000 + 9 - i);
+        did2 = GetDlgItem(hwndDlg, 1010 + 9 - i);
+        string str1 = "entry" + std::to_string(9 - i);
+        string str2 = "entry" + std::to_string(9 - i + 10);
+        tstring tstr = (enigma_user::registry_exists(str1)) ? widen(enigma_user::registry_read_string(str1)) : L"<nobody>";
+        SetWindowText(did2, (enigma_user::registry_exists(str2)) ? std::to_string(enigma_user::registry_read_real(str2)).c_str() : "0");
+        SetWindowTextW(did1, tstr.c_str());
+      }
+    }
+
+    for (int i = 9; i >= 0; i--) {
+      if (highscore >= highscore_array[9 - i] && highscore >= 0) {
+        HWND did3 = GetDlgItem(hwndDlg, 1000 + 9 - i);
+        HWND did4 = GetDlgItem(hwndDlg, 1010 + 9 - i);
+
+        if (highscore > 0) {
+          PostMessage(did3, EM_SETREADONLY, FALSE, 0);
+          SetWindowTextW(did3, L"");
+        }
+
+        SetWindowText(did4, std::to_string(highscore_array[9 - i]).c_str());
+        highscore_index = 9 - i;
+        break;
+      }
+    }
+
+    CenterWindowToMonitor(hwndDlg, MONITOR_CENTER);
+    PostMessageW(hwndDlg, WM_SETFOCUS, 0, 0);
+  }
+
+  if(GetAsyncKeyState(VK_ESCAPE))
+    PostMessageW(hwndDlg, WM_CLOSE, 0, 0);
+
+  if (uMsg == WM_CLOSE) {
+    wchar_t wtxt1[256];
+    wchar_t wtxt2[256];
+
+    for (int i = 9; i >= 0; i--) {
+      if (1000 + i <= 1000) {
+        GetWindowTextW(GetDlgItem(hwndDlg, 1000 + 9 - i), wtxt1, 256);
+        enigma_user::registry_write_string("entry" + std::to_string(9 - i), shorten(wtxt1));
+      }
+
+      if (1020 + i <= 1010) {
+        GetWindowTextW(GetDlgItem(hwndDlg, 1010 + 9 - i), wtxt2, 256);
+        enigma_user::registry_write_real("entry" + std::to_string(9 - i + 10), (int)stol(shorten(wtxt2)));
+      }
+    }
+
+    if (highscore >= highscore_prev[highscore_index]) {
+      HWND did1 = GetDlgItem(hwndDlg, 1000 + highscore_index);
+      HWND did2 = GetDlgItem(hwndDlg, 1010 + highscore_index);
+      GetWindowTextW(GetDlgItem(hwndDlg, 1000 + highscore_index), wtxt1, 256);
+      enigma_user::registry_write_string("entry" + std::to_string(highscore_index), std::to_string(highscore_index));
+      GetWindowTextW(GetDlgItem(hwndDlg, 1010 + highscore_index), wtxt2, 256);
+      enigma_user::registry_write_real("entry" + std::to_string(highscore_index + 10), highscore);
+    }
+
+    EndDialog(hwndDlg, 0);
+  }
+
+  return 0;
+
 }
 
 static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -543,10 +669,16 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
     tstrWindowCaption = error_caption;
 
   int result;
-  result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
-  if (result == IDABORT || type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) exit(0);
+  DWORD ThreadID = GetCurrentThreadId();
+  HINSTANCE ModHwnd = GetModuleHandle(NULL);
+  hook_handle = SetWindowsHookEx(WH_CBT, &ShowDebugMessageProc, ModHwnd, ThreadID);
+  bool fatal = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR); 
+  fatal_error = fatal;
 
-  //ABORT_ON_ALL_ERRORS();
+  result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), ((fatal) ? MB_OK : MB_OKCANCEL) | 
+  MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
+  UnhookWindowsHookEx(hook_handle);
+  if (result == IDOK || fatal) exit(0);
 }
 
 static string widget = enigma_user::ws_win32;
@@ -752,6 +884,11 @@ int show_attempt(string errortext) {
   result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_RETRYCANCEL | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
   if (result == IDRETRY) return 0;
   return -1;
+}
+
+void highscore_show(int numb) {
+  highscore = numb;
+  DialogBoxW(enigma::hInstance, L"highscoretable", enigma::hWnd, HighscoreShowProc);
 }
 
 int show_message_ext(string message, string but1, string but2, string but3) {
