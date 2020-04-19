@@ -295,9 +295,9 @@ bool window_get_fullscreen() {
 
 void window_set_fullscreen(bool fullscreen) {
   if (fullscreen) {
-    int r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN);
+    int r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
-    if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN);
 
     if (r != 0) DEBUG_MESSAGE(std::string("Could not set window to fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   } else {
