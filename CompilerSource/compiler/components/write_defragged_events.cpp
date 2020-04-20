@@ -56,7 +56,7 @@ struct UsedEventIndex {
   }
 };
 
-static inline int event_get_number(const buffers::resources::Object::Event &event) {
+static inline int event_get_number(const buffers::resources::Object::LegacyEvent &event) {
   if (event.has_name()) {
     std::cerr << "ERROR! IMPLEMENT ME: Event names not supported in compiler.\n";
   }
@@ -73,9 +73,9 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   // Defragged events must be written before object data, or object data cannot
   // determine which events were used.
   for (size_t i = 0; i < game.objects.size(); i++) {
-    for (int ii = 0; ii < game.objects[i]->events().size(); ii++) {
-      const int mid = game.objects[i]->events(ii).type();
-      const int  id = event_get_number(game.objects[i]->events(ii));
+    for (int ii = 0; ii < game.objects[i]->legacy_events().size(); ii++) {
+      const int mid = game.objects[i]->legacy_events(ii).type();
+      const int  id = event_get_number(game.objects[i]->legacy_events(ii));
       used_events.insert(mid,id);
     }
   }

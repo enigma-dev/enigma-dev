@@ -30,6 +30,6 @@ inline void bind_output_streams(std::ostream &out, std::ostream &err) {
   gmk::err.rdbuf(err.rdbuf());
 }
 
-buffers::Project* LoadGMK(std::string fName);
+std::unique_ptr<buffers::Project> LoadGMK(std::string fName);
 
 }  //namespace gmk

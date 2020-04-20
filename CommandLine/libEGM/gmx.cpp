@@ -478,14 +478,14 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
   }
 }
 
-buffers::Project *LoadGMX(std::string fName) {
+std::unique_ptr<buffers::Project> LoadGMX(std::string fName) {
   pugi::xml_document doc;
   if (!doc.load_file(fName.c_str())) return nullptr;
 
   fName = string_replace_all(fName, "\\", "/");
   std::string gmxPath = fName.substr(0, fName.find_last_of("/") + 1);
 
-  buffers::Project *proj = new buffers::Project();
+  auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   gmx_root_walker walker(game->mutable_root(), gmxPath);
   // we use our own traverse(...) instead of the pugixml one

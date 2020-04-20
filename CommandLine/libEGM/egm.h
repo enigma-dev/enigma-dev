@@ -16,13 +16,59 @@
 **/
 
 #include "project.pb.h"
+#include "event_reader/event_parser.h"
 
-#include <string>
+#include <yaml-cpp/yaml.h>
+
+#include <filesystem>
 #include <map>
+#include <memory>
+#include <string>
 
 namespace egm {
-  bool WriteEGM(std::string fName, buffers::Project* project);
-  buffers::Project* LoadEGM(std::string fName);
+namespace fs = std::filesystem;
+
+// Reads and writes EGM files
+class EGM {
+ public:
+  bool WriteEGM(std::string fName, buffers::Project* project) const;
+  std::unique_ptr<buffers::Project> LoadEGM(std::string fName) const;
+
+  EGM(const EventData &events): events_(events) {}
+  EGM():
+      storage_do_not_use_(
+          std::make_unique<EventData>(ParseEventFile("events.ey"))),
+      events_(*storage_do_not_use_) {}
+
+ private:
+  // Reading ===================================================================
+  bool LoadEGM(const std::string& yaml, buffers::Game* game) const;
+
+  bool LoadTree(const fs::path& fPath, YAML::Node yaml,
+                buffers::TreeNode* buffer) const;
+  bool LoadDirectory(const fs::path& fPath, buffers::TreeNode* n,
+                     int depth) const;
+  bool LoadResource(const fs::path& fPath, google::protobuf::Message *m,
+                    int id) const;
+  void LoadObjectEvents(const fs::path& fPath, google::protobuf::Message *m,
+                        const google::protobuf::FieldDescriptor *field) const;
+  void RecursivePackBuffer(google::protobuf::Message *m, int id,
+                           YAML::Node& yaml, const fs::path& fPath,
+                           int depth) const;
+
+  // Writing ===================================================================
+  bool WriteNode(buffers::TreeNode* folder, string dir,
+                 const fs::path &egm_root, YAML::Emitter& tree) const;
+  bool WriteRes(buffers::TreeNode* res, const fs::path &dir,
+                const fs::path &egm_root) const;
+  bool WriteObject(const fs::path &egm_root, const fs::path &dir,
+                   const buffers::resources::Object& object) const;
+
+  // 'Rithmatic ================================================================
   std::map<std::string, const buffers::TreeNode*> FlattenTree(
       const buffers::TreeNode &tree);
+  std::unique_ptr<EventData> storage_do_not_use_;
+  const EventData &events_;
+};
+
 } //namespace egm

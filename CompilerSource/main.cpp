@@ -131,7 +131,7 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
 {
   current_language->definitionsModified(wscode, targetYaml);
   return &ide_passback_error;
-};
+}
 
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {

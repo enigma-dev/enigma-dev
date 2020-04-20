@@ -149,9 +149,11 @@ int main(int argc, char* argv[])
       return OPTIONS_ERROR;
     }
 
+    // FIXME: Remove all occurrences of wrap_unique in the following code.
+    // There is no reason for these projects to be bare pointers.
     std::string ext;
     size_t dot = input_file.find_last_of('.');
-    buffers::Project* project;
+    std::unique_ptr<buffers::Project> project;
     if (dot != std::string::npos) ext = tolower(input_file.substr(dot + 1));
     if (ext == "sog") {
       if (!ReadSOG(input_file, &game)) return 1;
@@ -178,7 +180,8 @@ int main(int argc, char* argv[])
         if (fs::is_directory(p)) {
           input_file += "/" + p.filename().stem().string() + ".egm";
         }
-        if (!(project = egm::LoadEGM(input_file))) return 1;
+        egm::EGM egm;  // TODO: Pass in parsed events file, here.
+        if (!(project = egm.LoadEGM(input_file))) return 1;
         return plugin.BuildGame(project->game(), mode, output_file.c_str());
       } else if (ext.empty()) {
         std::cerr << "Error: Unknown filetype: cannot determine type of file "

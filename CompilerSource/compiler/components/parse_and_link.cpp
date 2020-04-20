@@ -247,9 +247,9 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       ));
     parsed_object* pob = state.parsed_objects.back();
 
-    edbg << " " << object.name << ": " << object->events().size() << " events: " << flushl;
+    edbg << " " << object.name << ": " << object->legacy_events().size() << " events: " << flushl;
 
-    for (const auto& event : object->events()) {
+    for (const auto& event : object->legacy_events()) {
       int ev_id;
         if (event.has_name()) {
           edbg << "  Event[" << event.type() << ", " << event.name() << "] ";

@@ -296,7 +296,7 @@ ObjectData::ObjectData(const deprecated::JavaStruct::GmObject &object, const ESL
 
   for (int i = 0; i < object.mainEventCount; ++i) {
     for (int j = 0; j < object.mainEvents[i].eventCount; ++j) {
-      auto *event = data.add_events();
+      auto *event = data.add_legacy_events();
       event->set_type(object.mainEvents[i].id);
       event->set_number(object.mainEvents[i].events[j].id);
       event->set_code(object.mainEvents[i].events[j].code);

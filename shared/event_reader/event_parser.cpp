@@ -101,7 +101,7 @@ void event_parse_resourcefile() {
 // -----------------------------------------------------------------------------
 // Begin class method implementations ------------------------------------------
 
-Event EventData::DecodeEventString(const std::string &evstring) {
+Event EventData::DecodeEventString(const std::string &evstring) const {
   std::string id;
   std::vector<std::string> args;
   size_t at = 0, lbracket;
@@ -117,6 +117,11 @@ Event EventData::DecodeEventString(const std::string &evstring) {
     }
   }
   id += evstring.substr(at);
+  return get_event(id, args);
+}
+
+Event EventData::get_event(const std::string &id,
+                           const std::vector<std::string> &args) const {
   auto evi = event_index_.find(ToLower(id));
   if (evi == event_index_.end() || !evi->second) {
     std::cerr << "EVENT ERROR: Event `" << id << "` is not known to the system\n";
@@ -130,13 +135,13 @@ Event EventData::DecodeEventString(const std::string &evstring) {
     std::cerr << "EVENT ERROR: Wrong number of arguments given for event " << id
               << ": wanted " << correct_arg_count << ", got " << args.size()
               << std::endl;
-    args.resize(correct_arg_count, "0");
   }
+  std::string defv = "0";
   for (size_t argn = 0; argn < correct_arg_count; ++argn) {
-    const std::string &arg = args[argn];
+    const std::string &arg = argn < correct_arg_count ? args[argn] : defv;
     const std::string &arg_kind = base_event.event->parameters(argn);
-    auto pv = parameter_values_.find({arg_kind, ToLower(arg)});
-    if (pv == parameter_values_.end()) {
+    auto pv = parameter_ids_.find({arg_kind, ToLower(arg)});
+    if (pv == parameter_ids_.end()) {
       // Assume that spelling == name (this is the case for resource names/ints)
       res.arguments.emplace_back(arg, arg);
     } else {
@@ -170,7 +175,8 @@ std::string Event::ParamSubst(const std::string &str) const {
 EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
   for (const auto &aliases : event_file_.aliases()) {
     for (const buffers::config::ParameterAlias &alias : aliases.aliases()) {
-      parameter_values_.insert({{aliases.id(), ToLower(alias.id())}, &alias});
+      parameter_ids_.insert({{aliases.id(), ToLower(alias.id())}, &alias});
+      parameter_vals_.insert({{aliases.id(), alias.value()}, &alias});
     }
   }
   // Start numbering internal IDs in the new system from 1000, for good measure.
@@ -231,24 +237,43 @@ EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
 }
 
 const Event EventData::get_event(int mid, int sid) const {
+  // Check for a direct mapping (used for specialized ID pairs).
   auto it = compatability_mapping_.find({mid, sid});
-  if (it == compatability_mapping_.end()) {
-    it = compatability_mapping_.find({mid, kParameterizedSubId});
-    if (it == compatability_mapping_.end()) {
-      auto res = event_iid_index_.find(mid);
-      if (res != event_iid_index_.end()) return Event(*res->second);
-      std::cerr << "EVENT ERROR: Event (" << mid << ", " << sid
-                << ") is not known to the system." << std::endl;
-      return kSentinelEvent;
-    }
-    Event res = it->second;
-    string integer = std::to_string(sid);
-    res.arguments.emplace_back(integer, integer);
-    return res;
-  }
-  return it->second;
-}
+  if (it != compatability_mapping_.end()) return it->second;
 
+  // Check for parameterized events.
+  it = compatability_mapping_.find({mid, kParameterizedSubId});
+  if (it == compatability_mapping_.end()) {
+    std::cerr << "EVENT ERROR: Legacy event (" << mid << ", " << sid
+              << ") is not known to the system. Using EGM event." << std::endl;
+    // Error case. Default to internal event ID. This will show up funny in the
+    // IDE, but at least the user's code will be intact.
+    auto res = event_iid_index_.find(mid);
+    if (res != event_iid_index_.end()) {
+    std::cerr << "EVENT ERROR: Event (" << mid << ", " << sid
+              << ") is not a known Legacy event nor EGM event." << std::endl;
+      return Event(*res->second);
+    }
+    return kSentinelEvent;
+  }
+
+  Event res = it->second;
+  string value, spelling;
+  const std::string &kind = res.ParameterKind(0);
+  auto pit = parameter_vals_.find({kind, sid});
+  if (pit != parameter_vals_.end()) {
+    value = pit->second->id();
+    spelling = pit->second->spelling();
+  } else {
+    if (kind != "object" && kind != "integer") {
+      std::cerr << "Failed to look up " << kind << " parameter " << sid << ".\n";
+    }
+    value = std::to_string(sid);
+    spelling = value;
+  }
+  res.arguments.emplace_back(value, spelling);
+  return res;
+}
 
 bool Event::IsComplete() const {
   return arguments.size() == (unsigned) event->parameters_size();
@@ -448,8 +473,8 @@ LegacyEventPair EventData::reverse_get_event(const Event &ev) const {
   }
   const std::string &arg = ev.arguments[0].name;
   const std::string &arg_kind = ev.event->parameters(0);
-  auto pv = parameter_values_.find({arg_kind, ToLower(arg)});
-  if (pv != parameter_values_.end()) {
+  auto pv = parameter_ids_.find({arg_kind, ToLower(arg)});
+  if (pv != parameter_ids_.end()) {
     return LegacyEventPair{amap.main_id, pv->second->value()};
   }
   auto iv = SafeAtoL(arg);

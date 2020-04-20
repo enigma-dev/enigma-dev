@@ -915,7 +915,7 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
       int second = dec.read4();
       if (second == -1) break;
 
-      auto event = object->add_events();
+      auto *event = object->add_legacy_events();
       event->set_type(i);
       event->set_number(second);
 
@@ -1212,7 +1212,7 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
   }
 }
 
-buffers::Project *LoadGMK(std::string fName) {
+std::unique_ptr<buffers::Project> LoadGMK(std::string fName) {
   static const vector<GroupFactory> groupFactories({
     { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, LoadSound      },
     { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     },
@@ -1318,7 +1318,7 @@ buffers::Project *LoadGMK(std::string fName) {
   // ensure all temp data files are written and the paths are set in the protos
   dec.processTempFileFutures();
 
-  return proj.release();
+  return proj;
 }
 
 }  //namespace gmk

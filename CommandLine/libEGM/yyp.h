@@ -30,6 +30,6 @@ inline void bind_output_streams(std::ostream &out, std::ostream &err) {
   yyp::err.rdbuf(err.rdbuf());
 }
 
-buffers::Project* LoadYYP(std::string fName);
+std::unique_ptr<buffers::Project> LoadYYP(std::string fName);
 
 }  //namespace yyp

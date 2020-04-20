@@ -37,6 +37,7 @@ using CppType = proto::FieldDescriptor::CppType;
 using std::string;
 
 namespace egm {
+namespace {
 
 using buffers::TreeNode;
 using Type = buffers::TreeNode::TypeCase;
@@ -209,25 +210,32 @@ void RepackLayers(buffers::resources::Room *room, bool tiles, YAML::Node& yaml,
   }
 }
 
+}  // namespace
+
 // Load all edl files in our object dir
-inline void loadObjectEvents(const fs::path& fPath, google::protobuf::Message *m, const google::protobuf::FieldDescriptor *field) {
+void EGM::LoadObjectEvents(const fs::path& fPath, google::protobuf::Message *m,
+                           const google::protobuf::FieldDescriptor *field) const {
   for(auto& f : fs::directory_iterator(fPath)) {
     if (f.path().extension() == ".edl") {
-      const std::string eventName = f.path().stem().string();
-      buffers::resources::Object_Event event;
-      event.set_name(eventName);
-      event.set_code(FileToString(f.path()));
+      const std::string eventIdString = f.path().stem().string();
+      auto event = events_.DecodeEventString(eventIdString);
+
+      buffers::resources::Object::EgmEvent event_proto;
+      event_proto.set_id(event.bare_id());
+      for (const auto &arg : event.arguments)
+        event_proto.add_arguments(arg.name);
 
       const google::protobuf::Reflection *refl = m->GetReflection();
 
       google::protobuf::Message* msg = refl->AddMessage(m, field);
-      msg->CopyFrom(event);
+      msg->CopyFrom(event_proto);
     }
   }
 }
 
-void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
-                         const fs::path& fPath, int depth) {
+void EGM::RecursivePackBuffer(google::protobuf::Message *m, int id,
+                              YAML::Node& yaml, const fs::path& fPath,
+                              int depth) const {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   const std::string ext = fPath.extension().string();
@@ -249,7 +257,7 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
     if (ext == ".obj" && depth == 0) {
        // code is loaded from edl files
       if (key == "events") {
-        loadObjectEvents(fPath, m, field);
+        LoadObjectEvents(fPath, m, field);
         continue;
       }
     }
@@ -264,7 +272,8 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
 
     // YAML field not in properties.yaml
     if (!node) {
-      std::cerr << "Warning: could not locate YAML field " << field->name() << " in " << fPath << std::endl;
+      std::cerr << "Warning: could not locate YAML field " << field->name()
+                << " in " << fPath << std::endl;
       continue;
     }
 
@@ -330,6 +339,8 @@ void RecursivePackBuffer(google::protobuf::Message *m, int id, YAML::Node& yaml,
   }
 }
 
+namespace {
+
 inline bool isNumber(const std::string& s) {
   return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
 }
@@ -388,8 +399,10 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
   }
 }
 
-bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
+}  // namespace
 
+bool EGM::LoadResource(const fs::path& fPath, google::protobuf::Message *m,
+                       int id) const {
   std::string ext = fPath.extension().string();
 
   // Scripts and shaders are not folders so we exit here
@@ -436,8 +449,8 @@ bool LoadResource(const fs::path& fPath, google::protobuf::Message *m, int id) {
 }
 
 // Load EGM using tree file
-bool LoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode* buffer) {
-
+bool EGM::LoadTree(const fs::path& fPath, YAML::Node yaml,
+                   buffers::TreeNode* buffer) const {
   if (!FolderExists(fPath)) {
     std::cerr << "Error: the folder " << fPath << " referenced in the project tree does not exist" << std::endl;
   }
@@ -476,13 +489,15 @@ bool LoadTree(const fs::path& fPath, YAML::Node yaml, buffers::TreeNode* buffer)
   return true;
 }
 
-auto fsCompare = [](const fs::directory_entry& a, const fs::directory_entry& b) { return a.path().stem().string() < b.path().stem().string(); };
+static bool fsCompare(const fs::directory_entry& a, const fs::directory_entry& b) {
+  return a.path().stem().string() < b.path().stem().string();
+}
 
 // Load EGM without a tree file
-bool LoadDirectory(const fs::path& fPath, buffers::TreeNode* n, int depth) {
-
-  // Sort dirs alphabetical
-  std::set<fs::directory_entry, decltype(fsCompare)> files(fsCompare);
+bool EGM::LoadDirectory(const fs::path& fPath, buffers::TreeNode* n,
+                        int depth) const {
+  // Sort dirs alphabetically
+  std::set<fs::directory_entry, decltype(&fsCompare)> files(fsCompare);
   for(auto& p: fs::directory_iterator(fPath)) {
     files.insert(p);
   }
@@ -518,23 +533,6 @@ bool LoadDirectory(const fs::path& fPath, buffers::TreeNode* n, int depth) {
   }
 
   return true;
-}
-
-bool LoadEGM(const std::string& yaml, buffers::Game* game) {
-  YAML::Node project = YAML::LoadFile(yaml);
-
-  const fs::path egm_root = fs::path(yaml).parent_path();
-  buffers::TreeNode* game_root = game->mutable_root();
-  game_root->set_name("/");
-
-  // Load EGM without a tree file
-  if (!project["tree"] || project["tree"].as<std::string>() == "autogen") {
-    return LoadDirectory(egm_root, game_root, 0);
-  // Load EGM with a tree file
-  } else {
-    YAML::Node tree = YAML::LoadFile(egm_root.string() + "/tree.yaml");
-    return LoadTree(egm_root, tree["contents"], game_root);
-  }
 }
 
 void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<int, std::string>>& IDmap) {
@@ -602,7 +600,8 @@ void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<
       id = refl->GetInt32(*m, field);
     else if (id == -1) {
       id = ++maxID.at(c->type_case());
-      std::cerr << "Warning: the " << type << " \"" << c->name() << "\" has no ID set assigning new ID: " << id << std::endl;
+      std::cerr << "Warning: the " << type << " \"" << c->name()
+                << "\" has no ID set assigning new ID: " << id << std::endl;
       refl->SetInt32(m, field, id);
       continue;
     }
@@ -611,7 +610,9 @@ void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<
     if (it != IDmap[c->type_case()].end()) {
       id = ++maxID.at(c->type_case());
       std::string dupName = (*it).second;
-      std::cerr << "Warning: the " << type << "s \"" << dupName << "\" and \"" << c->name() << "\" have the same ID reassigning " << c->name() << "\'s ID to: " << id << std::endl;
+      std::cerr << "Warning: the " << type << "s \"" << dupName << "\" and \""
+                << c->name() << "\" have the same ID reassigning " << c->name()
+                << "\'s ID to: " << id << std::endl;
       refl->SetInt32(m, field, id);
     } else IDmap[c->type_case()].emplace(id, c->name());
 
@@ -624,8 +625,25 @@ void ResourceSanityCheck(buffers::TreeNode* n) {
   RecursiveResourceSanityCheck(n, IDmap);
 }
 
-buffers::Project* LoadEGM(std::string fName) {
-  buffers::Project* proj = new buffers::Project();
+bool EGM::LoadEGM(const std::string& yaml, buffers::Game* game) const {
+  YAML::Node project = YAML::LoadFile(yaml);
+
+  const fs::path egm_root = fs::path(yaml).parent_path();
+  buffers::TreeNode* game_root = game->mutable_root();
+  game_root->set_name("/");
+
+  // Load EGM without a tree file
+  if (!project["tree"] || project["tree"].as<std::string>() == "autogen") {
+    return LoadDirectory(egm_root, game_root, 0);
+  // Load EGM with a tree file
+  } else {
+    YAML::Node tree = YAML::LoadFile(egm_root.string() + "/tree.yaml");
+    return LoadTree(egm_root, tree["contents"], game_root);
+  }
+}
+
+std::unique_ptr<buffers::Project> EGM::LoadEGM(std::string fName) const {
+  auto proj = std::make_unique<buffers::Project>();
 
   if (!FileExists(fName)) {
     std::cerr << "Error: " << fName << " does not exist" << std::endl;

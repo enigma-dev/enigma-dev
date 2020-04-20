@@ -280,7 +280,8 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   return true;
 }
 
-bool WriteTimeline(const fs::path &egm_root, const fs::path &dir, const buffers::resources::Timeline& timeline) {
+bool WriteTimeline(const fs::path &/*egm_root*/, const fs::path &dir,
+                   const buffers::resources::Timeline& timeline) {
   if (!CreateDirectory(dir))
     return false;
 
@@ -293,16 +294,21 @@ bool WriteTimeline(const fs::path &egm_root, const fs::path &dir, const buffers:
   return true;
 }
 
-bool WriteObject(const fs::path &egm_root, const fs::path &dir, const buffers::resources::Object& object) {
+}  // namespace
+namespace egm {
+
+bool EGM::WriteObject(const fs::path &egm_root, const fs::path &dir,
+                      const buffers::resources::Object& object) const {
   buffers::resources::Object cleaned = object;
-  auto events = object.events();
-  cleaned.clear_events();
+  auto events = object.egm_events();
+  cleaned.clear_egm_events();
 
   if (!WriteYaml(egm_root, dir, &cleaned))
     return false;
 
   for (auto &e : events) {
-  string edlFile = dir.string() + "/" + event_get_function_name(e.type(), e.number()) + ".edl";
+    auto event = events_.get_event(e.id(), {e.arguments().begin(), e.arguments().end()});
+    auto edlFile = dir/(event.IdString() + ".edl");
     std::ofstream fout{edlFile};
     fout << e.code();
   }
@@ -310,7 +316,8 @@ bool WriteObject(const fs::path &egm_root, const fs::path &dir, const buffers::r
   return true;
 }
 
-bool WriteRes(buffers::TreeNode* res, const fs::path &dir, const fs::path &egm_root) {
+bool EGM::WriteRes(buffers::TreeNode* res, const fs::path &dir,
+                   const fs::path &egm_root) const {
   string newDir = (dir/res->name()).string();
   switch (res->type_case()) {
    case Type::kBackground:
@@ -339,6 +346,8 @@ bool WriteRes(buffers::TreeNode* res, const fs::path &dir, const fs::path &egm_r
 
   return true;
 }
+
+namespace {
 
 inline const std::string type2name(int type) {
   switch (type) {
@@ -396,7 +405,10 @@ inline int getResID(buffers::TreeNode* res) {
   }
 }
 
-bool WriteNode(buffers::TreeNode* folder, string dir, const fs::path &egm_root, YAML::Emitter& tree) {
+}  // namespace
+
+bool EGM::WriteNode(buffers::TreeNode* folder, string dir,
+                    const fs::path &egm_root, YAML::Emitter& tree) const {
   tree << YAML::BeginMap << YAML::Key << "folder" << YAML::Value << folder->name();
 
   if (folder->child_size() > 0) {
@@ -436,13 +448,9 @@ bool WriteNode(buffers::TreeNode* folder, string dir, const fs::path &egm_root, 
   return true;
 }
 
-}  // namespace
-
-namespace egm {
-
 static const std::string EGM_VERSION = "2.0.0";
 
-bool WriteEGM(string fName, buffers::Project* project) {
+bool EGM::WriteEGM(string fName, buffers::Project* project) const {
 
   if (fName.back() != '/')
     fName += '/';

@@ -118,7 +118,7 @@ Events:
     Group: "Input"
     Type: Parameterized
     Parameters:
-      - key
+      - Key
     SuperCheck: |
       keyboard_check(%1)
 
@@ -128,7 +128,7 @@ Events:
     Group: "Input"
     Type: Parameterized
     Parameters:
-      - key
+      - Key
     SuperCheck: |
       keyboard_check_pressed(%1)
 
@@ -138,7 +138,7 @@ Events:
     Group: "Input"
     Type: Parameterized
     Parameters:
-      - key
+      - Key
     SuperCheck: |
       keyboard_check_pressed(%1)
 
