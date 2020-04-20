@@ -104,7 +104,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
 
   ffi_type *restype = (returntype == ty_real) ? &ffi_type_double : &ffi_type_pointer;
   ffi_abi callabi;
-#if defined(X86_64) || (defined (__x86_64__) && defined (X86_DARWIN))
+#if __x86_64__
   callabi = FFI_DEFAULT_ABI;
 #else
   callabi = ((calltype==dll_stdcall)?FFI_STDCALL:FFI_DEFAULT_ABI);
