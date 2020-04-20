@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#import <Cocoa/Cocoa.h>
+#import <Cocoa/Cocoa.h> 
 
 const char *cocoa_dialog_caption() {
   NSWindow *window_handle = [[NSApplication sharedApplication] mainWindow];
