@@ -27,9 +27,6 @@ LINUX_DEPS="$LINUX_DEPS libepoxy-dev libegl1-mesa-dev libgles2-mesa-dev libglew-
 if [ "$AUDIO" == "OpenAL" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev"
 fi
-if [ "$AUDIO" == "SFML" ] || [ "$TEST_HARNESS" == true ]; then
-  LINUX_DEPS="$LINUX_DEPS libsfml-dev"
-fi
 
 ###### Widgets #######
 if [ "$WIDGETS" == "GTK+" ] || [ "$TEST_HARNESS" == true ]; then
