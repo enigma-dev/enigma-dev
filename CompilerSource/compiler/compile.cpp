@@ -21,7 +21,7 @@
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/GameData.h"
 #include "settings.h"
-
+#include "AssetEnum.h"
 #include "darray.h"
 
 #include <cstdio>
@@ -184,6 +184,27 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
   }
   wto << "}\n";
   wto << "namespace enigma { size_t " << kind << "_idmax = " << max << "; }\n\n";
+}
+
+static const std::map<enigma_user::AssetType, std::string> assetTypeStr = {
+  { enigma_user::asset_unknown,    "asset_unknown"    },
+  { enigma_user::asset_object,     "asset_object"     },
+  { enigma_user::asset_sprite,     "asset_sprite"     },
+  { enigma_user::asset_sound,      "asset_sound"      },
+  { enigma_user::asset_room,       "asset_room"       },
+  { enigma_user::asset_tiles,      "asset_tiles"      },
+  { enigma_user::asset_background, "asset_background" },
+  { enigma_user::asset_path,       "asset_path"       },
+  { enigma_user::asset_script,     "asset_script"     },
+  { enigma_user::asset_font,       "asset_font"       },
+  { enigma_user::asset_timeline,   "asset_timeline"   },
+  { enigma_user::asset_shader,     "asset_shader"     }
+};    
+    
+template<typename T> void write_asset_map(std::string& str, vector<T> resources, enigma_user::AssetType type) {
+  for (const T &res : resources) {
+    str += "  { \"" + res.name + "\", " + "AssetInfo{ enigma_user::" + assetTypeStr.at(type) + ", " + std::to_string(res.id()) + " } },\n";
+  }
 }
 
 static bool ends_with(std::string const &fullString, std::string const &ending) {
@@ -425,6 +446,32 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   write_resource_meta(wto,     "script", game.scripts);
   write_resource_meta(wto,     "shader", game.shaders);
   write_resource_meta(wto,       "room", game.rooms, false);
+  
+  
+  // asset_get_index/type map
+  wto << "#include \"AssetEnum.h\"\n";
+  wto << "namespace enigma {\n\n";
+  wto << "std::map<std::string, AssetInfo> assetMap = {\n";
+  
+  std::string assets;
+  write_asset_map(assets, game.objects,     enigma_user::asset_object);
+  write_asset_map(assets, game.sprites,     enigma_user::asset_sprite);
+  write_asset_map(assets, game.backgrounds, enigma_user::asset_background);
+  write_asset_map(assets, game.fonts,       enigma_user::asset_font);
+  write_asset_map(assets, game.timelines,   enigma_user::asset_timeline);
+  write_asset_map(assets, game.paths,       enigma_user::asset_path);
+  write_asset_map(assets, game.sounds,      enigma_user::asset_sound);
+  write_asset_map(assets, game.scripts,     enigma_user::asset_script);
+  write_asset_map(assets, game.shaders,     enigma_user::asset_shader);
+  write_asset_map(assets, game.rooms,       enigma_user::asset_room);
+  if (assets.length() >= 2) {
+    assets.pop_back(); // \n
+    assets.pop_back(); // ,
+  }
+  wto << assets;
+  
+  wto << "\n};\n";
+  wto << "\n\n}\n";
   wto.close();
 
 
