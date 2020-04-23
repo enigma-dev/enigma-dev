@@ -30,7 +30,7 @@ class EnigmaPlugin
 public:
   EnigmaPlugin();
   int Load();
-  const char* Init(CallBack *cb);
+  const char* Init(CallBack *cb, const char* enigmaRoot);
   syntax_error* SetDefinitions(const char* def, const char* yaml);
   syntax_error* SetDefinitions(const char* yaml);
   syntax_error* SyntaxCheck(int count, const char** names, const char* code);

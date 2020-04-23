@@ -82,13 +82,13 @@ window_t window_handle() {
 
 // returns an identifier for the HWND window
 // this string can be used in shell scripts
-string window_identifier() {
+wid_t window_identifier() {
   return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
-string window_get_identifier(window_t hwnd) {
+wid_t window_get_identifier(window_t hwnd) {
   return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
 }
 
@@ -193,9 +193,7 @@ void window_set_position(int x, int y)
 void window_set_size(unsigned int width, unsigned int height)
 {
   if (window_get_fullscreen()) return;
-  enigma::windowWidth = width;
-  enigma::windowHeight = height;
-  enigma::compute_window_size();
+  window_set_rectangle(enigma::windowX, enigma::windowY, width, height);
 }
 
 void window_set_rectangle(int x, int y, int width, int height) {

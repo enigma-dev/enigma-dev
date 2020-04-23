@@ -29,12 +29,12 @@
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/image_formats.h"
-#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/backgrounds.h"
 #include "Universal_System/Object_Tiers/graphics_object.h"
 #include "Universal_System/depth_draw.h"
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/backgrounds_internal.h"
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -60,6 +60,35 @@ bool clamp_view(int& x, int& y) {
   if (x < 0) x = 0;
   if (y < 0) y = 0;
   return false;
+}
+
+RawImage create_from_screen_helper(int x, int y, int w, int h, bool removeback, bool pad) {
+  enigma_user::draw_batch_flush(batch_flush_deferred);
+
+  bool flipped = false;
+
+  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x, y, w, h, &flipped);
+
+  // FIXME: This logic is duplicated here, backgrounds.cpp, sprites_internal.cpp in this file somewhat and likely 12 other places
+  if (flipped)
+    rgba = enigma::image_flip(rgba, w, h, 4);
+    
+  if (removeback) {
+    Color c = enigma::image_get_pixel_color(rgba, w, h, 0, h - 1);
+    enigma::image_swap_color(rgba, w, h, c, Color {0, 0, 0, 0});
+  }
+  
+  if (pad) {
+    RawImage i = image_pad(rgba, w, h, nlpo2dc(w)+1, nlpo2dc(h)+1);
+    delete[] rgba;
+    return i;
+  } else {
+    RawImage i;
+    i.pxdata = rgba;
+    i.w = w;
+    i.h = h;
+    return i;  
+  }
 }
 
 //These are used to reset the screen viewport for surfaces
@@ -432,39 +461,18 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
   return ret;
 }
 
-int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
-{
-  draw_batch_flush(batch_flush_deferred);
-
-  bool flipped = false;
-  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
-
-  if (flipped)
-    rgba = enigma::image_flip(rgba, w, h, 4);
-
-  enigma::backgroundstructarray_reallocate();
-  int bckid=enigma::background_idmax;
-  enigma::background_new(bckid, w, h, &rgba[0], removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
-  delete[] rgba;
-  enigma::background_idmax++;
-  return bckid;
+int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {
+  RawImage img = create_from_screen_helper(x, y, w, h, removeback, true);
+  Background bkg(w, h, graphics_create_texture(w, h, img.w, img.h, img.pxdata, false));
+  return backgrounds.add(std::move(bkg));
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
-  draw_batch_flush(batch_flush_deferred);
-
-  bool flipped = false;
-  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
-
-  if (flipped)
-    rgba = enigma::image_flip(rgba, w, h, 4);
-
-  enigma::spritestructarray_reallocate();
-  int sprid=enigma::sprite_idmax;
-  enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
-  enigma::sprite_set_subimage(sprid, 0, w, h, rgba, rgba, enigma::ct_precise); //TODO: Support toggling of precise.
-  delete[] rgba;
-  return sprid;
+  RawImage img = create_from_screen_helper(x, y, w, h, removeback, false);
+  Sprite spr(w, h, xorig, yorig);
+  int id = sprites.add(std::move(spr));
+  sprite_add_from_screen(id, x, y, w, h, removeback, smooth);
+  return id;
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
@@ -472,16 +480,9 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
 }
 
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
-  draw_batch_flush(batch_flush_deferred);
-
-  bool flipped = false;
-  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x,y,w,h,&flipped);
-
-  if (flipped)
-    rgba = enigma::image_flip(rgba, w, h, 4);
-
-  enigma::sprite_add_subimage(id, w, h, rgba, rgba, enigma::ct_precise); //TODO: Support toggling of precise.
-  delete[] rgba;
+  RawImage img = create_from_screen_helper(x, y, w, h, removeback, false);
+  Sprite& spr = sprites.get(id);
+  spr.AddSubimage(img.pxdata, w, h, enigma::ct_precise, img.pxdata); //TODO: Support toggling of precise.
 }
 
 int draw_getpixel(int x,int y)

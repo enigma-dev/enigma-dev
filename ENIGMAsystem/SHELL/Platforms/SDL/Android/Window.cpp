@@ -28,7 +28,7 @@ namespace enigma {
 
 // called from initGameWindow()
 // capture sdl window hwnd/surf
-void window_id_init() {
+void window_init() {
   /*
   SDL_SysWMinfo systemInfo;
   SDL_VERSION(&systemInfo.version);

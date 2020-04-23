@@ -8,6 +8,7 @@
 extern "C" {
   
 const char* libInit(EnigmaCallbacks* ecs);
+const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path);
 int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode);
 int compileProto(const buffers::Project *proj, const char* exe_filename, int mode);
 const char* next_available_resource();

@@ -2,6 +2,7 @@ include ../../Config.mk
 
 TARGET := ../../test-runner
 TESTCASES_DIR := $(SRC_DIR)/Tests
+SHARED_SRC_DIR := ../../shared
 
 ifeq ($(OS), Darwin)
 	OS_SRCS=./Platform/TestHarness-Cocoa.cpp

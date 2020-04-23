@@ -214,8 +214,8 @@ bool display_test_all(int w, int h, int freq, int bitdepth);
 void set_synchronization(bool enable);
 
 window_t window_handle();
-std::string window_identifier(); // a string containing the number corresponding to the game's main window handle (shell script)
-std::string window_get_identifier(window_t hwnd); // a string containing the number corresponding to the specified window pointer
+wid_t window_identifier(); // a string containing the number corresponding to the game's main window handle (shell script)
+wid_t window_get_identifier(window_t hwnd); // a string containing the number corresponding to the specified window handle
   
 int window_get_x();
 int window_get_y();
@@ -235,7 +235,7 @@ void window_set_position(int x, int y);
 void window_set_size(unsigned int width, unsigned int height);
 void window_set_rectangle(int x, int y, int width, int height);
 void window_center();
-void window_default(bool center_size);  // default false specified in platforms mandatory
+void window_default(bool center);  // default true specified in platforms mandatory
 void window_set_region_size(int w, int h, bool adaptwindow);
 
 int window_get_region_width();

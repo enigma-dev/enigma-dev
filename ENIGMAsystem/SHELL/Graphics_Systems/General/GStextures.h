@@ -93,6 +93,11 @@ namespace enigma_user
   bool  texture_anisotropy_supported();
   float texture_anisotropy_maxlevel();
   void  texture_anisotropy_filter(int samplerid, gs_scalar level);
+  
+  // Used in testing
+  bool textures_equal(int textureID1, int textureID2);
+  bool textures_regions_equal(int textureID1, int textureID2, unsigned xOff1, unsigned yOff1, unsigned xOff2, unsigned yOff2, unsigned w, unsigned h);
+  uint32_t texture_get_pixel(int texid, unsigned x, unsigned y);
 }
 
 #endif //ENIGMA_GSTEXTURES_H

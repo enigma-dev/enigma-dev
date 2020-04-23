@@ -23,7 +23,7 @@
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/Resources/sprites.h"
-#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/backgrounds.h"
 
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"
@@ -87,13 +87,15 @@ bool initGameWindow()
 
   // Defined in the appropriate graphics bridge.
   // Populates GLX attributes (or other graphics-system-specific properties).
-  XVisualInfo* vi = enigma::CreateVisualInfo();
+  GLXFBConfig* fbc = enigma::CreateFBConfig();
 
   // Window event listening and coloring
   XSetWindowAttributes swa;
   swa.border_pixel = 0;
   swa.background_pixel = (enigma::windowColor & 0xFF000000) | ((enigma::windowColor & 0xFF0000) >> 16) |
                          (enigma::windowColor & 0xFF00) | ((enigma::windowColor & 0xFF) << 16);
+                         
+  XVisualInfo* vi = glXGetVisualFromFBConfig(enigma::x11::disp, fbc[0]);
   swa.colormap = XCreateColormap(disp, root, vi->visual, AllocNone);
   swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
                    FocusChangeMask | StructureNotifyMask;
@@ -153,13 +155,13 @@ window_t window_handle() {
 
 // returns an identifier for the XLIB window
 // this string can be used in shell scripts
-string window_identifier() {
+wid_t window_identifier() {
   return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
-string window_get_identifier(window_t hwnd) {
+wid_t window_get_identifier(window_t hwnd) {
   return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
 }
 
@@ -362,24 +364,11 @@ void window_set_showborder(bool show) {
   if (window_get_fullscreen()) return;
   if (window_get_showborder() == show) return;
   enigma::showBorder = show;
-  Window child, root = DefaultRootWindow(disp); 
-  int x1, y1, x2, y2, x3, y3; unsigned w1, h1, w2, h2, border_width, depth;
-  for (;;) {
-    XTranslateCoordinates(disp, win, root, 0, 0, &x1, &y1, &child);
-    XGetGeometry(disp, win, &root, &x2, &y2, &w1, &h1, &border_width, &depth);
-    XGetGeometry(disp, child, &root, &x3, &y3, &w2, &h2, &border_width, &depth);
-    // allow time for the titlebar and border sizes to be measured because x11 is async...
-    if (x3 || y3 || !window_get_showborder())
-      break;
-  }
   Hints hints;
   Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   hints.flags = 2;
   hints.decorations = show;
   XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
-  if (x2 || y2) {
-    XMoveResizeWindow(disp, win, x1, y1, w1, h1);
-  }
 }
 
 bool window_get_showborder() {
@@ -502,23 +491,26 @@ void window_set_position(int x, int y) {
   enigma::windowY = y;
   XWindowAttributes wa;
   XGetWindowAttributes(disp, win, &wa);
-  XMoveWindow(disp, win, (int)x - wa.x, (int)y - wa.y);
+  XMoveWindow(disp, win, x - wa.x, y - wa.y);
 }
 
 void window_set_size(unsigned int w, unsigned int h) {
   if (window_get_fullscreen()) return;
   enigma::windowWidth = w;
   enigma::windowHeight = h;
-  enigma::compute_window_size();
+  if (!enigma::isSizeable) {
+    window_set_sizeable(true);
+    XResizeWindow(disp, win, w, h);
+    window_set_sizeable(false);
+  } else {
+    XResizeWindow(disp, win, w, h);
+  }
 }
 
 void window_set_rectangle(int x, int y, int w, int h) {
   if (window_get_fullscreen()) return;
-  enigma::windowX = x;
-  enigma::windowY = y;
-  enigma::windowWidth = w;
-  enigma::windowHeight = h;
-  XMoveResizeWindow(disp, win, x, y, w, h);
+  window_set_position(x, y);
+  window_set_size(w, h);
 }
 
 ////////////////

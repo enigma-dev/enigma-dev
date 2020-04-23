@@ -21,8 +21,6 @@
 #include <SDL2/SDL_syswm.h>
 #include <string>
 
-using std::string;
-
 extern "C" void *cocoa_window_handle();
 extern "C" long cocoa_window_identifier();
 extern "C" long cocoa_window_get_identifier(void *hwnd);
@@ -34,7 +32,7 @@ unsigned long WinNum; // CGWindowID a.k.a [NSWindow windowNumber]
 
 // called from initGameWindow()
 // capture sdl window win/winid
-void window_id_init() {
+void window_init() {
   enigma::NSWin = cocoa_window_handle();
   enigma::WinNum = cocoa_window_identifier();
 }
@@ -49,13 +47,13 @@ window_t window_handle() {
 
 // returns an identifier for the SDL2 window
 // this string can be used in shell scripts
-string window_identifier() {
+wid_t window_identifier() {
   return std::to_string(enigma::WinNum);
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
-string window_get_identifier(window_t hwnd) {
+wid_t window_get_identifier(window_t hwnd) {
   return std::to_string(cocoa_window_get_identifier(hwnd));
 }
 

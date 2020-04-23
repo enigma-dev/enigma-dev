@@ -154,8 +154,10 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
 }
 
 void graphics_delete_texture(int texid) {
-  DX9Texture* texture = static_cast<DX9Texture*>(enigma::textures[texid].get());
-  texture->peer->Release(), texture->peer = NULL;
+  if (texid >= 0) {
+    DX9Texture* texture = static_cast<DX9Texture*>(enigma::textures[texid].get());
+    texture->peer->Release(), texture->peer = NULL;
+  }
 }
 
 unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {
