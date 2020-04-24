@@ -23,6 +23,7 @@
 #include "settings.h"
 #include "AssetEnum.h"
 #include "darray.h"
+#include "treenode.pb.h"
 
 #include <cstdio>
 
@@ -202,9 +203,14 @@ static const std::map<enigma_user::AssetType, std::string> assetTypeStr = {
 };    
     
 template<typename T> void write_asset_map(std::string& str, vector<T> resources, enigma_user::AssetType type) {
+  str += "\n{ enigma_user::" + assetTypeStr.at(type) + ",\n  {\n";
   for (const T &res : resources) {
-    str += "  { \"" + res.name + "\", " + "AssetInfo{ enigma_user::" + assetTypeStr.at(type) + ", " + std::to_string(res.id()) + " } },\n";
+    str += "    { \"" + res.name  + "\", " + std::to_string(res.id()) + " },\n";
   }
+  
+  if (resources.size() > 0) { str.pop_back(); str.back() = '\n'; }
+  
+  str += "  }\n},\n";
 }
 
 static bool ends_with(std::string const &fullString, std::string const &ending) {
@@ -451,7 +457,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   // asset_get_index/type map
   wto << "#include \"AssetEnum.h\"\n";
   wto << "namespace enigma {\n\n";
-  wto << "std::map<std::string, AssetInfo> assetMap = {\n";
+  wto << "std::map<enigma_user::AssetType, std::map<std::string, int>> assetMap = {\n";
   
   std::string assets;
   write_asset_map(assets, game.objects,     enigma_user::asset_object);
