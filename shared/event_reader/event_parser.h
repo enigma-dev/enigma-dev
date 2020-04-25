@@ -57,8 +57,21 @@ struct EventDescriptor {
   // different parameterizations are fired at the same time.
   bool IsStacked() const;
 
+  int ParameterCount() const {
+    return event->parameters_size();
+  }
+  const std::string &ParameterKind(int n) const {
+    if (n < event->parameters_size()) return event->parameters(n);
+    static std::string BAD_PARAMETER_INDEX = "N/A";
+    return BAD_PARAMETER_INDEX;
+  }
+
   // Returns human-readable examples of ID strings belonging to this event.
   std::string ExampleIDStrings() const;
+
+  // Return the base ID of this event, such as "Collision" or "Draw."
+  // Not to be confused with the IdString of an instance of this event.
+  const std::string &bare_id() { return event->id(); }
 
   std::string HumanName() const;
   std::string BaseFunctionName() const;
@@ -152,6 +165,8 @@ class EventData {
  public:
   // Look up an event by its legacy ID pair.
   const Event get_event(int mid, int sid) const;
+  // Retrieves an Event with the given ID and arguments.
+  Event get_event(const std::string &id, const std::vector<std::string> &args) const;
   // Look up a legacy ID pair for a non-parameterized event.
   LegacyEventPair reverse_get_event(const EventDescriptor &) const;
   // Look up a legacy ID pair for an event.
@@ -160,7 +175,7 @@ class EventData {
   const std::vector<EventDescriptor> &events() const { return event_wrappers_; }
 
   // Decodes an Event ID string, such as Keyboard[Left], into an Event object.
-  Event DecodeEventString(const std::string &evstring);
+  Event DecodeEventString(const std::string &evstring) const;
 
   EventData(buffers::config::EventFile&&);
 
@@ -169,7 +184,10 @@ class EventData {
   buffers::config::EventFile event_file_;
   // Map of type and constant name pair (eg, {"key", "enter"}) to alias info.
   std::map<std::pair<std::string, std::string>,
-           const buffers::config::ParameterAlias*> parameter_values_;
+           const buffers::config::ParameterAlias*> parameter_ids_;
+  // Map of type and constant value pair (eg, {"key", 10}) to alias info.
+  std::map<std::pair<std::string, int>,
+           const buffers::config::ParameterAlias*> parameter_vals_;
   // Wraps the `EventDescriptor`s read in from the events file.
   std::vector<EventDescriptor> event_wrappers_;
   // Index over event ID strings.

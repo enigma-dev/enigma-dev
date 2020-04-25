@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include <sstream>
+#include <fstream>
 
 constexpr char kTestEvents[] = R"yaml(
 Events:
@@ -117,6 +118,13 @@ GameMakerEventMappings:
         42: Joystick[2]Button[7]
         43: Joystick[2]Button[8]
 )yaml";
+
+TEST(EventReaderTest, RealEventFileIsReadable) {
+  std::ifstream file("events.ey");
+  EventData events(ParseEventFile(file));
+  Event ev = events.DecodeEventString("Create");
+  EXPECT_TRUE(ev.IsValid());
+}
 
 TEST(EventReaderTest, ReadsEventFile) {
   std::istringstream str(kTestEvents);
