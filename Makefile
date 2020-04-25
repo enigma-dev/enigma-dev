@@ -5,6 +5,7 @@ SHELL=/bin/bash
 
 .PHONY: ENIGMA all clean Game clean-game emake emake-tests gm2egm libProtocols libEGM required-directories .FORCE
 
+libcompileEGMf$(LIB_EXT): ENIGMA
 ENIGMA: .FORCE libProtocols$(LIB_EXT) libENIGMAShared$(LIB_EXT)
 	$(MAKE) -C CompilerSource
 
