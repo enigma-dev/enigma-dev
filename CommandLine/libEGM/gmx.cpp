@@ -36,8 +36,8 @@ namespace gmx {
 std::ostream outputStream(nullptr);
 std::ostream errorStream(nullptr);
 
-void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Message *m, std::string gmxPath);
-void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::Message *m, int depth);
+void PackBuffer(std::string type, std::string res, std::unordered_map<std::string, int>& ids, google::protobuf::Message *m, std::string gmxPath);
+void PackRes(std::string &dir, std::unordered_map<std::string, int>& ids, pugi::xml_node &node, google::protobuf::Message *m, int depth);
 
 namespace {
 
@@ -110,9 +110,9 @@ class gmx_root_walker {
           for (auto parent = std::next(nodes.begin()); parent != nodes.end(); ++parent) {
             groupPath += (*parent)->name() + "/";
           }
-          PackRes(groupPath, idMap[resType], xmlNode, res, 0);
+          PackRes(groupPath, idMap, xmlNode, res, 0);
         } else {
-          PackBuffer(resType, xmlNode.value(), idMap[resType], res, gmxPath);
+          PackBuffer(resType, xmlNode.value(), idMap, res, gmxPath);
         }
         return;
     }
@@ -245,7 +245,7 @@ void PackShader(std::string fName, int id, buffers::resources::Shader *shader) {
   }
 }
 
-void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
+void PackRes(std::string &dir, std::unordered_map<std::string, int>& ids, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
@@ -255,7 +255,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
     const google::protobuf::FieldOptions opts = field->options();
 
     if (field->name() == "id") {
-      id += opts.GetExtension(buffers::id_start);
+      int id = opts.GetExtension(buffers::id_start) + ids[m->GetTypeName()]++;
       outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << id << std::endl;
       refl->SetInt32(m, field, id);
     } else {
@@ -273,12 +273,11 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
 
       if (gmxName == "action") {
         std::vector<Action> actions;
-        int cid = 0;
         for (pugi::xml_node n = child.child("action"); n != nullptr; n = n.next_sibling()) {
           if (strcmp(n.name(), "action") == 0) {  // skip over any siblings that aren't twins <foo/><bar/><foo/> <- bar would be skipped
             n.append_attribute("visited") = "true";
             Action action;
-            PackRes(dir, cid++, n, &action, depth + 1);
+            PackRes(dir, ids, n, &action, depth + 1);
             actions.emplace_back(action);
           }
         }
@@ -320,13 +319,12 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
 
           switch (field->cpp_type()) {
             case CppType::CPPTYPE_MESSAGE: {
-              int cid = 0;
               for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
                 if (n.name() ==
                     alias) {  // skip over any siblings that aren't twins <foo/><bar/><foo/> <- bar would be skipped
                   n.append_attribute("visited") = "true";
                   google::protobuf::Message *msg = refl->AddMessage(m, field);
-                  PackRes(dir, cid++, n, msg, depth + 1);
+                  PackRes(dir, ids, n, msg, depth + 1);
                 }
               }
               break;
@@ -377,7 +375,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
             // If field is a singular message we need to recurse into this method again
             case CppType::CPPTYPE_MESSAGE: {
               google::protobuf::Message *msg = refl->MutableMessage(m, field);
-              PackRes(dir, 0, child, msg, depth + 1);
+              PackRes(dir, ids, child, msg, depth + 1);
               break;
             }
             case CppType::CPPTYPE_INT32: {
@@ -441,7 +439,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
   }
 }
 
-void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Message *m, std::string gmxPath) {
+void PackBuffer(std::string type, std::string res, std::unordered_map<std::string, int>& ids, google::protobuf::Message *m, std::string gmxPath) {
   // Scripts and Shaders are plain text not xml
   std::string fName = gmxPath + string_replace_all(res, "\\", "/");
   std::string resName = fName.substr(fName.find_last_of('/') + 1, fName.length() - 1);
@@ -449,11 +447,11 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
 
   if (type == "script") {
     buffers::resources::Script script;
-    PackScript(fName, id++, &script);
+    PackScript(fName, ids[script.GetTypeName()]++, &script);
     m->CopyFrom(*static_cast<google::protobuf::Message *>(&script));
   } else if (type == "shader") {
     buffers::resources::Shader shader;
-    PackShader(fName, id++, &shader);
+    PackShader(fName, ids[shader.GetTypeName()]++, &shader);
     m->CopyFrom(*static_cast<google::protobuf::Message *>(&shader));
   } else {
     std::string fileExt = type;
@@ -470,7 +468,7 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
       outputStream << "Parsing " << fName << "..." << std::endl;
       // Start a resource (sprite, object, room)
       std::string dir = fName.substr(0, fName.find_last_of("/"));
-      PackRes(dir, id++, root, m, 0);
+      PackRes(dir, ids, root, m, 0);
 
       visited_walker walker;
       doc.traverse(walker);
@@ -523,9 +521,9 @@ T* LoadResource(std::string fName, std::string type) {
   if (resType != type || resName.empty()) // trying to load wrong type (eg a.gmx has <b> instead of <a> as root xml)
     return nullptr;
 
-  int id = 0;
+  static std::unordered_map<std::string, int> ids;
   T* res = new T();
-  PackBuffer(resType, resName, id, res, dir);
+  PackBuffer(resType, resName, ids, res, dir);
   return res;
 }
 
