@@ -521,7 +521,7 @@ T* LoadResource(std::string fName, std::string type) {
   if (resType != type || resName.empty()) // trying to load wrong type (eg a.gmx has <b> instead of <a> as root xml)
     return nullptr;
 
-  static std::unordered_map<std::string, int> ids;
+  std::unordered_map<std::string, int> ids;
   T* res = new T();
   PackBuffer(resType, resName, ids, res, dir);
   return res;
