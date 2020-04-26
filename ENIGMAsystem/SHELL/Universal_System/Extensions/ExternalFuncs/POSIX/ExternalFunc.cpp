@@ -1,3 +1,5 @@
+#include "ExternalFuncs.h"
+
 void *ExternalLoad(const char *dll) {
   return dlopen(dll, RTLD_LAZY);
 }
