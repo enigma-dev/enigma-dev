@@ -15,7 +15,5 @@ bool ExternalFree(void *handle) {
 }
 
 void *ExternalFunc(void *handle, const char *func) {
-  string str_func = func;
-  tstring tstr_func = widen(str_func);
-  return (void *)GetProcAddressW((HMODULE)handle, tstr_func.c_str());
+  return (void *)GetProcAddressW((HMODULE)handle, func);
 }
