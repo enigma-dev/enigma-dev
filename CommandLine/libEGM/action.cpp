@@ -116,7 +116,7 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
       case ActionKind::ACT_NORMAL:
         if (action.exe_type() == ActionExecution::EXEC_NONE) break;
 
-        code += "argument_relative = " + std::to_string(action.relative()) + ";\n";
+        code += action.relative() ? "argument_relative = true;\n" : "argument_relative = false;\n";
 
         if (action.is_question()) {
           code += "__if__ = ";
