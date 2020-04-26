@@ -20,9 +20,9 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
   # new boost & yaml-cpp for old travis
+  install_yaml_cpp
   if [ "$COMPILER" == "Android" ]; then
     sudo add-apt-repository -y ppa:mhier/libboost-latest;
-    install_yaml_cpp
   else
     # new lcov
     sudo add-apt-repository -y ppa:cheeseboy16/travis-backports
