@@ -494,8 +494,8 @@ namespace enigma
       pi.pt = pt;
       // Shape.
       if (!pt->is_particle_sprite) {
-        const enigma::sprite *const spr = enigma::spritestructarray[pt->sprite_id];
-        const int subimage_count = spr->subcount;
+        const enigma::Sprite& spr = enigma::sprites.get(pt->sprite_id);
+        const int subimage_count = spr.SubimageCount();
         int subimageindex_initial;
         if (pt->sprite_random) {
           subimageindex_initial = int(subimage_count*1.0*rand()/(RAND_MAX-1)) % subimage_count;

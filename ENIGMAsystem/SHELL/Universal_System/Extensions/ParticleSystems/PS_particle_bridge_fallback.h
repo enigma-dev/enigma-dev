@@ -69,8 +69,8 @@ namespace enigma {
             subimg = it->sprite_subimageindex_initial;
           }
           else {
-            const sprite *const spr = spritestructarray[pt->sprite_id];
-            const int subimage_count = spr->subcount;
+            const Sprite& spr = sprites.get(pt->sprite_id);
+            const int subimage_count = spr.SubimageCount();
             if (pt->sprite_stretched) {
               subimg = int(subimage_count*(1.0 - 1.0*it->life_current/it->life_start));
               subimg = subimg >= subimage_count ? subimage_count - 1 : subimg;

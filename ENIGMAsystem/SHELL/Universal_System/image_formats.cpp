@@ -52,6 +52,96 @@ namespace enigma
 std::map<std::string, ImageLoadFunction> image_load_handlers;
 std::map<std::string, ImageSaveFunction> image_save_handlers;
 
+Color image_get_pixel_color(unsigned char* pxdata, unsigned w, unsigned h, unsigned x, unsigned y) {
+  Color c;
+  size_t index = 4 * (y * w + x);
+  c.b = pxdata[index];
+  c.g = pxdata[index + 1];
+  c.r = pxdata[index + 2];
+  c.a = pxdata[index + 3];
+  return c;
+}
+
+void image_swap_color(unsigned char* pxdata, unsigned w, unsigned h, Color oldColor, Color newColor) {  
+  unsigned int ih, iw;
+  for (ih = 0; ih < h; ih++) {
+    int index = ih * w * 4;
+    
+    for (iw = 0; iw < w; iw++) {
+      if (
+           pxdata[index]     == oldColor.b
+        && pxdata[index + 1] == oldColor.g
+        && pxdata[index + 2] == oldColor.r
+        && pxdata[index + 3] == oldColor.a
+        ) {
+          pxdata[index]     = newColor.b;
+          pxdata[index + 1] = newColor.g;
+          pxdata[index + 2] = newColor.r;
+          pxdata[index + 3] = newColor.a;
+      }
+
+      index += 4;
+    }
+  }
+}
+
+std::vector<RawImage> image_split(unsigned char* pxdata, unsigned w, unsigned h, unsigned imgcount) {
+  std::vector<RawImage> imgs(imgcount);
+  unsigned splitWidth = w / imgcount;
+  
+  for (unsigned i = 0; i < imgcount; ++i) {
+    
+    imgs[i].pxdata = new unsigned char[splitWidth * h * 4]();
+    imgs[i].w = splitWidth;
+    imgs[i].h = h;
+    
+    unsigned ih,iw;
+    unsigned xcelloffset = i * splitWidth * 4;
+    
+    for (ih = 0; ih < h; ih++) {
+      unsigned tmp = ih * w * 4 + xcelloffset;
+      unsigned tmpcell = ih * splitWidth * 4;
+      
+      for (iw = 0; iw < splitWidth; iw++) {
+        imgs[i].pxdata[tmpcell]     = pxdata[tmp];
+        imgs[i].pxdata[tmpcell + 1] = pxdata[tmp + 1];
+        imgs[i].pxdata[tmpcell + 2] = pxdata[tmp + 2];
+        imgs[i].pxdata[tmpcell + 3] = pxdata[tmp + 3];
+        tmp += 4;
+        tmpcell += 4;
+      }
+    }
+  }
+  
+  return imgs;
+}
+
+RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight) {
+  RawImage padded;
+  padded.w = newWidth;
+  padded.h = newHeight;
+  
+  padded.pxdata = new unsigned char[4 * newWidth * newHeight + 1];
+  
+  unsigned char* imgpxptr = padded.pxdata;
+  unsigned rowindex, colindex;
+  for (rowindex = 0; rowindex < origHeight; rowindex++) {
+    for (colindex = 0; colindex < origWidth; colindex++) {
+      *imgpxptr++ = *pxdata++;
+      *imgpxptr++ = *pxdata++;
+      *imgpxptr++ = *pxdata++;
+      *imgpxptr++ = *pxdata++;
+    }
+    
+    std::memset(imgpxptr, 0, (newWidth - colindex) << 2);
+    imgpxptr += (newWidth - colindex) << 2;
+  }
+  
+  std::memset(imgpxptr, 0, (newHeight - origHeight) * newWidth);
+  
+  return padded;
+}
+
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size) {
   unsigned widfull = nlpo2dc(pngwidth) + 1, hgtfull = nlpo2dc(pngheight) + 1, ih, iw;
   const int bitmap_size = widfull * hgtfull * 4;

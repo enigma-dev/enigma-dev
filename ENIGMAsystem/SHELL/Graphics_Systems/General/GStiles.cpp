@@ -25,8 +25,8 @@
 #include "GSvertex_impl.h"
 
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/Resources/background.h"
-#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/backgrounds.h"
+#include "Universal_System/Resources/backgrounds_internal.h"
 
 #define INCLUDED_FROM_SHELLMAIN Not really.
 // make an exception just for point_in_rectangle
@@ -52,10 +52,11 @@ namespace enigma
     static void draw_tile(int &ind, int index, int vertex, const tile& t)
     {
       if (!enigma_user::background_exists(t.bckid)) return;
-      get_background(bck2d,t.bckid);
+      const enigma::Background& bck2d = enigma::backgrounds.get(t.bckid);
+      const enigma::TexRect& tr = bck2d.textureBounds;
 
-      const gs_scalar tbx = bck2d->texturex, tby = bck2d->texturey,
-                      tbw = bck2d->width/(gs_scalar)bck2d->texturew, tbh = bck2d->height/(gs_scalar)bck2d->textureh,
+      const gs_scalar tbx = tr.x, tby = tr.y,
+                      tbw = bck2d.width/(gs_scalar)tr.w, tbh = bck2d.height/(gs_scalar)tr.h,
                       xvert1 = t.roomX, xvert2 = xvert1 + t.width*t.xscale,
                       yvert1 = t.roomY, yvert2 = yvert1 + t.height*t.yscale,
                       tbx1 = tbx+t.bgx/tbw, tbx2 = tbx1 + t.width/tbw,
@@ -120,19 +121,19 @@ namespace enigma
                 for (std::vector<tile>::size_type i = 0; i != dtiles.size(); ++i)
                 {
                     const tile& t = dtiles[i];
-                    get_background(bck2d,t.bckid);
-
+                    const enigma::Background& bck2d = enigma::backgrounds.get(t.bckid);
+                    
                     // if this is the first tile, go ahead and start a batch
                     if (i == 0)
-                        tile_layer_metadata[layer_depth].push_back({bck2d->texture, index_start, 0});
+                        tile_layer_metadata[layer_depth].push_back({bck2d.textureID, index_start, 0});
                     std::vector<int>& batch = tile_layer_metadata[layer_depth].back();
                     draw_tile(vertex_ind, tile_index_buffer, tile_vertex_buffer, t);
                     // if this tile has the same texture as the batch, then just increase
                     // the index count, otherwise, start a new batch that includes this tile
-                    if (batch[0] == bck2d->texture) {
+                    if (batch[0] == bck2d.textureID) {
                         batch[2] += 6;
                     } else {
-                        tile_layer_metadata[layer_depth].push_back({bck2d->texture, index_start, 6});
+                        tile_layer_metadata[layer_depth].push_back({bck2d.textureID, index_start, 6});
                     }
                     index_start += 6;
                 }

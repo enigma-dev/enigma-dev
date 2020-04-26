@@ -19,7 +19,7 @@
 #include "filesystem.h"
 #include "action.h"
 
-#include "libpng-util.h"
+#include "libpng-util/libpng-util.h"
 
 #include <fstream>
 #include <utility>

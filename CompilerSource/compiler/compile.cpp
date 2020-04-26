@@ -217,7 +217,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     edbg << "Cleaning..." << flushl;
 
   	string make = compilerInfo.make_vars["MAKEFLAGS"];
-    make += " -C " + enigma_root + " ";
+    make += " -C \"" + enigma_root + "\"";
     make += " clean-game ";
   	make += "COMPILEPATH=\"" + compilepath + "\" ";
   	make += "WORKDIR=\"" + eobjs_directory + "\" ";
@@ -525,7 +525,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   string make = compilerInfo.make_vars["MAKEFLAGS"];
 
-  make += "-C " + enigma_root + " ";
+  make += "-C \"" + enigma_root + "\" ";
   make += "Game ";
   make += "WORKDIR=\"" + eobjs_directory + "\" ";
   make += "CODEGEN=\"" + codegen_directory + "\" ";

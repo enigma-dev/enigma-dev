@@ -12,8 +12,8 @@ int EnigmaPlugin::Load() {
   return PLUGIN_SUCCESS;
 }
 
-const char* EnigmaPlugin::Init(CallBack *ecb) {
-  return libInit(ecb);
+const char* EnigmaPlugin::Init(CallBack *ecb, const char* enigmaRoot) {
+  return libInit_path(ecb, enigmaRoot);
 }
 
 syntax_error* EnigmaPlugin::SetDefinitions(const char* def, const char* yaml) {

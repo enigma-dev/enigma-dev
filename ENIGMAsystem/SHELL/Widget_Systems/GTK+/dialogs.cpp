@@ -40,6 +40,11 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
 //TODO: Implement
 }
 
+bool show_question(std::string str) {
+//TODO: Implement
+return false;
+}
+
 int get_color(int defcol)
 {
   gdk_threads_enter();
