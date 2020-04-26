@@ -178,7 +178,7 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
     else if (args[i].type == ty_pointer)
       array[i].p = args[i].rval.p;
     else
-      array[i].s = ((string)args[i]).c_str();
+      array[i].s = ((const string&)args[i]).c_str();
     arg_values[i]=&array[i];
   }
 
