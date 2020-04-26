@@ -1,4 +1,7 @@
 #include "Universal_System/estring.h"
+#include <string>
+
+using std::string;
 
 void *ExternalLoad(const char *dll) {
   string str_dll = dll;
