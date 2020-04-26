@@ -3,4 +3,4 @@
 #undef byte
 
 #define ExternalLoad(x) (void *)LoadLibrary(x)
-#define ExternalFree(x) (bool)FreeLibrary(x)
+#define ExternalFree(x) (bool)FreeLibrary((HMODULE)x)
