@@ -131,7 +131,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
     return -1;
   }
 
-  FARPROC funcptr = GetProcAddress(dllmod,func.c_str());
+  void *funcptr = ExternalFunc(dllmod,func.c_str());
   if (funcptr==NULL)
   {
     DEBUG_MESSAGE("No such function" + func, MESSAGE_TYPE::M_ERROR);
