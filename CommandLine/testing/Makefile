@@ -2,6 +2,7 @@ include ../../Config.mk
 
 TARGET := ../../test-runner
 TESTCASES_DIR := $(SRC_DIR)/Tests
+SHARED_SRC_DIR := ../../shared
 
 ifeq ($(OS), Linux)
 	OS_SRCS=$(wildcard ./Platform/*-X11.cpp)

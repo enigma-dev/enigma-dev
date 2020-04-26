@@ -15,6 +15,7 @@ ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += Platforms/SDL/Win32/Window.cpp
 else
 	ifneq ($(TARGET-PLATFORM), Android)
+		SOURCES += Platforms/General/PFshell/PFshell.cpp
 		SOURCES += Platforms/General/POSIX/shell.cpp
 	endif
 

@@ -48,7 +48,7 @@ bool initGameWindow() {
   init_sdl_window_bridge_attributes();
   windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
   bool notnull = (windowHandle != nullptr);
-  if (notnull) window_id_init();
+  if (notnull) window_init();
   return notnull;
 }
 
@@ -295,9 +295,9 @@ bool window_get_fullscreen() {
 
 void window_set_fullscreen(bool fullscreen) {
   if (fullscreen) {
-    int r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN);
+    int r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
-    if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN);
 
     if (r != 0) DEBUG_MESSAGE(std::string("Could not set window to fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   } else {

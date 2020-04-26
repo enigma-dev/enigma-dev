@@ -68,8 +68,10 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
 }
 
 void graphics_delete_texture(int texid) {
-  const GLuint peer = get_texture_peer(texid);
-  glDeleteTextures(1, &peer);
+  if (texid >= 0) {
+    const GLuint peer = get_texture_peer(texid);
+    glDeleteTextures(1, &peer);
+  }
 }
 
 unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {

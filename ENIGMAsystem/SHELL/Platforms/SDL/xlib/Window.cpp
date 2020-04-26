@@ -22,8 +22,6 @@
 #include <SDL2/SDL_syswm.h>
 #include <string>
 
-using std::string;
-
 namespace enigma {
 
 namespace x11 {
@@ -35,7 +33,7 @@ Window win;
 
 // called from initGameWindow()
 // capture sdl window disp/hwnd
-void window_id_init() {
+void window_init() {
   SDL_SysWMinfo wmInfo;
   SDL_VERSION(&wmInfo.version);
   SDL_GetWindowWMInfo(enigma::windowHandle, &wmInfo);
@@ -54,13 +52,13 @@ window_t window_handle() {
 
 // returns an identifier for the SDL2 window
 // this string can be used in shell scripts
-string window_identifier() {
+wid_t window_identifier() {
   return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
-string window_get_identifier(window_t hwnd) {
+wid_t window_get_identifier(window_t hwnd) {
   return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
 }
 

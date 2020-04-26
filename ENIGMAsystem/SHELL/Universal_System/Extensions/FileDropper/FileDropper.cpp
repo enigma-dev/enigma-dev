@@ -96,18 +96,11 @@ LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
 }
 
 HHOOK InstallHook() {
-  // Windows Vista
-  #if (_WIN32_WINNT == _WIN32_WINNT_VISTA)
+  #if (__MINGW32_MAJOR_VERSION >= 8 || __MINGW64_VERSION_MAJOR >= 8)
   ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
   ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
   ChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
-  // Windows 7 and newer
-  #elif (_WIN32_WINNT > _WIN32_WINNT_VISTA)
-  ChangeWindowMessageFilterEx(enigma::hWnd, WM_DROPFILES, MSGFLT_ADD, NULL);
-  ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYDATA, MSGFLT_ADD, NULL);
-  ChangeWindowMessageFilterEx(enigma::hWnd, WM_COPYGLOBALDATA, MSGFLT_ADD, NULL);
   #endif
-
   hook = SetWindowsHookExW(WH_CALLWNDPROC, (HOOKPROC)SetHook, NULL, GetWindowThreadProcessId(enigma::hWnd, NULL));
   return hook;
 }

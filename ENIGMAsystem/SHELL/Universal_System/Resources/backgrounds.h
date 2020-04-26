@@ -14,5 +14,10 @@ void background_set_alpha_from_background(int back, int copy_background, bool fr
 int background_get_texture(int backId);
 int background_get_width(int backId);
 int background_get_height(int backId);
-var sprite_get_uvs(int backId);
+var background_get_uvs(int backId);
+
+// Used for testing
+bool background_textures_equal(int id1, int id2);
+uint32_t background_get_pixel(int bkg, unsigned x, unsigned y);
+
 } //namespace enigma_user

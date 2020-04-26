@@ -36,8 +36,6 @@ using namespace std;
 
 int m_prog_loop_cfp();
 
-#include <sys/time.h>
-
 #ifdef _WIN32
  #define byte __windows_byte_workaround
  #include <windows.h>
@@ -76,10 +74,14 @@ extern const char* establish_bearings(const char *compiler);
 #include <cstdlib>
 
 //FIXME: remove this function from enigma.jar and here
-dllexport void libSetMakeDirectory(const char* dir) {} 
+dllexport void libSetMakeDirectory(const char* /*dir*/) {} 
 
-dllexport const char* libInit(EnigmaCallbacks* ecs)
-{  
+dllexport const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path) 
+{
+  enigma_root = enigma_path;
+  if (enigma_root.back() != '/')
+    enigma_root += '/';
+  
   if (ecs)
   {
     cout << "Linking up to IDE" << endl;
@@ -111,6 +113,11 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   return 0;
 }
 
+dllexport const char* libInit(EnigmaCallbacks* ecs)
+{
+  return libInit_path(ecs, ".");
+}
+
 dllexport void libFree() {
   delete main_context;
   delete current_language;
@@ -131,7 +138,7 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
 {
   current_language->definitionsModified(wscode, targetYaml);
   return &ide_passback_error;
-};
+}
 
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {

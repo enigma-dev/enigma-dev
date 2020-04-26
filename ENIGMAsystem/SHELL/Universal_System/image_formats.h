@@ -20,11 +20,30 @@
 #define ENIGMA_IMAGEFORMATS_H
 
 #include <string>
+#include <vector>
+#include <cstdint>
+#include <cstring>
 
 /// NOTE: These image formats expect the data to be un-aligned and always reads and writes with BGRA full color
 
 namespace enigma
 {
+
+struct RawImage {
+  RawImage() {}
+  ~RawImage() { delete[] pxdata; }
+  RawImage(const RawImage&) = delete;
+  RawImage(RawImage &&other): pxdata(other.pxdata), w(other.w), h(other.h) {
+    other.pxdata = nullptr;
+  }
+  unsigned char* pxdata = nullptr;
+  unsigned w = 0, h = 0;
+};
+
+struct Color {
+  uint8_t b, g, r, a;
+  uint32_t asInt() { return (b << 24) | (g << 16) | (r << 8) | a;  }
+};
 
 /// Color formats
 enum {
@@ -34,6 +53,11 @@ enum {
   color_fmt_bgr
 };
 
+Color image_get_pixel_color(unsigned char* pxdata, unsigned w, unsigned h, unsigned x, unsigned y);
+void image_swap_color(unsigned char* pxdata, unsigned w, unsigned h, Color oldColor, Color newColor);
+/// Note splits horizontally
+std::vector<RawImage> image_split(unsigned char* pxdata, unsigned w, unsigned h, unsigned imgcount);
+RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight);
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size = false);
 
 /// Gets the image format, eg. ".bmp", ".png", etc.

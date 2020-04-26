@@ -1,31 +1,26 @@
 #include "Platforms/General/PFmain.h"
+#include "Platforms/General/PFshell.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
-namespace enigma_user {
+using std::string;
 
-void execute_shell(std::string operation, std::string fname, std::string args) {
+namespace enigma_insecure {
+
+void execute_program(string fname, string args, bool wait) {
   if (system(NULL)) {
-    system((fname + args + " &").c_str());
+    system(("\"" + fname + "\" " + args + (wait ? "" : " &")).c_str());
   } else {
-    DEBUG_MESSAGE("execute_shell cannot be used as there is no command processor!", MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE("shell execution cannot be used as there is no command processor!", MESSAGE_TYPE::M_ERROR);
     return;
   }
 }
-
-void execute_shell(std::string fname, std::string args) { execute_shell("", fname, args); }
-
-void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
-  if (system(NULL)) {
-    system((fname + args + (wait ? " &" : "")).c_str());
-  } else {
-    DEBUG_MESSAGE("execute_program cannot be used as there is no command processor!", MESSAGE_TYPE::M_ERROR);
-    return;
-  }
+  
+void execute_shell(string fname, string args) {
+  execute_program(fname, args, false);
 }
-
-std::string execute_shell_for_output(const std::string &command) {
-  std::string res;
-  char buffer[BUFSIZ];
+  
+string execute_shell_for_output(const string &command) {
+  char buffer[BUFSIZ]; string res;
   FILE *pf = popen(command.c_str(), "r");
   while (!feof(pf)) {
     res.append(buffer, fread(&buffer, sizeof(char), BUFSIZ, pf));
@@ -33,17 +28,17 @@ std::string execute_shell_for_output(const std::string &command) {
   pclose(pf);
   return res;
 }
+  
+} // namsepace enigma_insecure
 
-void execute_program(std::string fname, std::string args, bool wait) { execute_program("", fname, args, wait); }
+namespace enigma_user {
 
-void url_open(std::string url, std::string target, std::string options) {
-  execute_program("xdg-open", url, false);
+void url_open(string url) {
+  enigma_insecure::execute_program("xdg-open", url, false);
 }
 
-void url_open_ext(std::string url, std::string target) { url_open(url, target); }
-
-void url_open_full(std::string url, std::string target, std::string options) { url_open(url, target, options); }
-
-void action_webpage(const std::string& url) { url_open(url); }
+void action_webpage(const string& url) {
+  url_open(url);
+}
 
 } // namespace enigma_user

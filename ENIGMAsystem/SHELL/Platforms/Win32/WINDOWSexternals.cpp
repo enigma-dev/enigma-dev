@@ -103,7 +103,13 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   }
 
   ffi_type *restype = (returntype == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-  status=ffi_prep_cif(&(a->cif), ((calltype==dll_stdcall)?FFI_STDCALL:FFI_DEFAULT_ABI), ac, restype, a->arg_type);
+  ffi_abi callabi;
+#if __x86_64__
+  callabi = FFI_DEFAULT_ABI;
+#else
+  callabi = ((calltype==dll_stdcall)?FFI_STDCALL:FFI_DEFAULT_ABI);
+#endif
+  status=ffi_prep_cif(&(a->cif), callabi, ac, restype, a->arg_type);
 
   if (status != FFI_OK)
   {
@@ -172,7 +178,7 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
     else if (args[i].type == ty_pointer)
       array[i].p = args[i].rval.p;
     else
-      array[i].s = ((string)args[i]).c_str();
+      array[i].s = ((const string&)args[i]).c_str();
     arg_values[i]=&array[i];
   }
 
