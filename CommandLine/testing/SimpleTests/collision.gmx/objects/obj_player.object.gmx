@@ -53,12 +53,12 @@ gtest_expect_eq(position_free(x,y),0);&#13;
 &#13;
 gtest_expect_eq(position_empty(122,122),1);&#13;
 gtest_expect_eq(position_meeting(48,48,obj_player),1);&#13;
-gtest_expect_eq(collision_rectangle(16,16,80,80,obj_player,1,0),100000);&#13;
-gtest_expect_eq(collision_line(16,10,80,80,obj_player,1,0),100000);&#13;
-gtest_expect_eq(collision_point(40,56,obj_player,1,0),100000);&#13;
-gtest_expect_eq(collision_circle(44,52,3,obj_player,1,0),100000);&#13;
-gtest_expect_eq(collision_ellipse(40,40,54,54,obj_player,1,0),100000);&#13;
-gtest_expect_eq(instance_position(48,48,obj_player),100000);&#13;
+gtest_expect_eq(collision_rectangle(16,16,80,80,obj_player,1,0),100001);&#13;
+gtest_expect_eq(collision_line(16,10,80,80,obj_player,1,0),100001);&#13;
+gtest_expect_eq(collision_point(40,56,obj_player,1,0),100001);&#13;
+gtest_expect_eq(collision_circle(44,52,3,obj_player,1,0),100001);&#13;
+gtest_expect_eq(collision_ellipse(40,40,54,54,obj_player,1,0),100001);&#13;
+gtest_expect_eq(instance_position(48,48,obj_player),100001);&#13;
 &#13;
 gtest_expect_eq(distance_to_point(33,32),1);&#13;
 alarm[0] = 1;</string>
