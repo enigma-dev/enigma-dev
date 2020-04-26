@@ -15,5 +15,5 @@ bool ExternalFree(void *handle) {
 }
 
 void *ExternalFunc(void *handle, const char *func) {
-  return (void *)GetProcAddressW((HMODULE)handle, func);
+  return (void *)GetProcAddress((HMODULE)handle, func);
 }
