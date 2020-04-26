@@ -59,7 +59,7 @@ message Room {
 
   message Instance {
     optional string name = 1;
-    optional int32 id = 2 [(id_start) = 100000];
+    optional int32 id = 2 [(id_start) = 100001];
     optional string object_type = 3 [(resource_ref)="object", (gmx) = "objName"];
     optional double x = 4;
     optional double y = 5;
