@@ -84,7 +84,7 @@ message Room {
 
   message Tile {
     optional string name = 1;
-    optional int32 id = 2 [(id_start) = 10000000];
+    optional int32 id = 2 [(id_start) = 10000001];
     optional string background_name = 3 [(resource_ref)="background", (gmx) = "bgName"];
     optional double x = 4;
     optional double y = 5;
