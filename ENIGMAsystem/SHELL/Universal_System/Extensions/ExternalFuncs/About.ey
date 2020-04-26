@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: External Functions
+Identifier: ExternalFuncs
+Author: Samuel Venable
+Description: Enables the use of GameMaker's legacy external functions for calling stuff from various DLL's.
+Default: false
+Icon: ExternalFuncs.png
+
+Depends:
+  Build-Platforms: Windows, MacOSX, Linux, FreeBSD
+Dependencies: None
