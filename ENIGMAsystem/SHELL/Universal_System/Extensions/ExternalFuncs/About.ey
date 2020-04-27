@@ -3,7 +3,7 @@
 
 Name: External Functions
 Identifier: ExternalFuncs
-Author: Samuel Venable
+Author: Robert
 Description: Enables the use of GameMaker's legacy external functions for calling stuff from various DLL's. Requires the libffi dependency.
 Default: false
 Icon: ExternalFuncs.png
