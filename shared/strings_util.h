@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <fstream>
 
 inline std::string ToLower(std::string str) {
   for (char &c : str) if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
@@ -79,13 +78,6 @@ inline std::vector<std::string> split_string(const std::string &str, char delimi
                 vec.push_back(tmp);
 
         return vec;
-}
-
-inline std::string FileToString(const std::string &fName) {
-  std::ifstream t(fName.c_str());
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-  return buffer.str();
 }
 
 #endif
