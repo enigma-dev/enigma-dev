@@ -5,9 +5,9 @@ void *ExternalLoad(const char *dll) {
 }
 
 bool ExternalFree(void *handle) {
-  dlclose(handle);
+  return (dlclose(handle) == 0);
 }
 
 void *ExternalFunc(void *handle, const char *func) {
-  return (dlsym(handle, func) == 0);
+  return dlsym(handle, func);
 }
