@@ -29,6 +29,9 @@ endif()
 find_package(PNG REQUIRED)
 target_link_libraries(${SHARED_LIB} PRIVATE ${PNG_LIBRARY})
 
+find_package(yaml-cpp CONFIG REQUIRED)
+target_link_libraries(${SHARED_LIB} PRIVATE yaml-cpp)
+
 include(FindProtobuf)
 target_link_libraries(${SHARED_LIB} PRIVATE ${Protobuf_LIBRARY})
 
