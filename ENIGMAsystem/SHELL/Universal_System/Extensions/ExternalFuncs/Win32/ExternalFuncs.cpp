@@ -1,6 +1,10 @@
-#include "ExternalFuncs.h"
+#include "../ExternalFuncs.h"
 #include "Universal_System/estring.h"
 #include <string>
+
+#define byte __windows_byte_workaround
+#include <windows.h>
+#undef byte
 
 using std::string;
 
