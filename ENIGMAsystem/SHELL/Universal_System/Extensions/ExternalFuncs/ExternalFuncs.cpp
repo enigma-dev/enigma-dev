@@ -118,7 +118,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   void *dllmod;
   std::map<std::string, void *>::iterator dllIt;
   if ((dllIt=dllHandles.find(dll)) == dllHandles.end())
-  	dllmod = ExternalLoad(dll.c_str());
+  	dllmod = enigma::ExternalLoad(dll.c_str());
   else
   {
     DEBUG_MESSAGE("LOADING PREEXISTING HANDLE", MESSAGE_TYPE::M_WARNING);
@@ -131,7 +131,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
     return -1;
   }
 
-  void *funcptr = ExternalFunc(dllmod,func.c_str());
+  void *funcptr = enigma::ExternalFunc(dllmod,func.c_str());
   if (funcptr==NULL)
   {
     DEBUG_MESSAGE("No such function" + func, MESSAGE_TYPE::M_ERROR);
@@ -190,7 +190,7 @@ void external_free(std::string dll)
 {
   std::map<std::string, void *>::iterator dllIt;
   if ((dllIt=dllHandles.find(dll)) != dllHandles.end())
-    ExternalFree(dllHandles[dll]);
+    enigma::ExternalFree(dllHandles[dll]);
 }
 
 }
