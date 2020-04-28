@@ -8,6 +8,8 @@
 
 using std::string;
 
+namespace enigma {
+
 void *ExternalLoad(const char *dll) {
   string str_dll = dll;
   tstring tstr_dll = widen(str_dll);
@@ -21,3 +23,5 @@ bool ExternalFree(void *handle) {
 void *ExternalFunc(void *handle, const char *func) {
   return (void *)GetProcAddress((HMODULE)handle, func);
 }
+
+} // namespace enigma
