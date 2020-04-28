@@ -1,4 +1,4 @@
-#include "../ExternalFuncs.h"
+#include "Universal_System/Extensions/ExternalFuncs/ExternalFuncs.h"
 #include <dlfcn.h>
 
 namespace enigma {
