@@ -172,15 +172,14 @@ int main(int argc, char* argv[])
     } else if (ext == "yyp") {
       if (!(project = yyp::LoadYYP(input_file))) return 1;
       return plugin.BuildGame(project->game(), mode, output_file.c_str());
-#endif
-    } else {
-      if (ext == "egm") {
+    } else if (ext == "egm") {
         fs::path p = input_file;
         if (fs::is_directory(p)) {
           input_file += "/" + p.filename().stem().string() + ".egm";
         }
         if (!(project = egm::LoadEGM(input_file))) return 1;
         return plugin.BuildGame(project->game(), mode, output_file.c_str());
+#endif
       } else if (ext.empty()) {
         std::cerr << "Error: Unknown filetype: cannot determine type of file "
                     << '"' << input_file << "\"." << std::endl;
@@ -189,7 +188,7 @@ int main(int argc, char* argv[])
                     << "\": cannot read input file \"" << input_file
                     << "\"." << std::endl;
       }
-    }
+      
     return 1;
   }
 

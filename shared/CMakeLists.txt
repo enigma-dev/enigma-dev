@@ -11,6 +11,7 @@ set(SHARED_SOURCES
    "event_reader/event_parser.cpp"
    "rectpacker/rectpack.cpp"
    "libpng-util/libpng-util.cpp"
+   "ProtoYaml/proto-yaml.cpp"
 )
 
 add_library(${SHARED_LIB} ${LIB_TYPE} ${SHARED_SOURCES})
@@ -27,6 +28,15 @@ endif()
 # Find libpng
 find_package(PNG REQUIRED)
 target_link_libraries(${SHARED_LIB} PRIVATE ${PNG_LIBRARY})
+
+find_package(yaml-cpp CONFIG REQUIRED)
+target_link_libraries(${SHARED_LIB} PRIVATE yaml-cpp)
+
+include(FindProtobuf)
+target_link_libraries(${SHARED_LIB} PRIVATE ${Protobuf_LIBRARY})
+
+add_dependencies(${SHARED_LIB} "Protocols")
+target_link_libraries(${SHARED_LIB} PRIVATE "Protocols")
 
 install(TARGETS ${SHARED_LIB} DESTINATION .)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${SHARED_LIB}.dir/Debug/${SHARED_LIB}.pdb" DESTINATION . OPTIONAL)

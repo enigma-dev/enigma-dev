@@ -16,6 +16,7 @@
 **/
 
 #include "gmx.h"
+#include "filesystem.h"
 #include "action.h"
 #include "strings_util.h"
 
@@ -196,13 +197,6 @@ class gmx_root_walker {
     return true;
   }
 };
-
-std::string FileToString(const std::string &fName) {
-  std::ifstream t(fName.c_str());
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-  return buffer.str();
-}
 
 }  // Anonymous namespace
 

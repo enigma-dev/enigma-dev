@@ -19,6 +19,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <algorithm> // std::max
 
 namespace egm {
 namespace algorithm {

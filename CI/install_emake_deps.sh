@@ -48,7 +48,7 @@ fi
 if [ "$COMPILER" == "Android" ]; then
   sudo apt-get -y install libboost1.67-dev
 elif [ "$TRAVIS_OS_NAME" == "linux" ]; then
-  sudo apt-get -y install libboost-program-options-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev
+  sudo apt-get -y install libboost-program-options-dev pulseaudio libpugixml-dev rapidjson-dev
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
   brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
   brew install protobuf pugixml yaml-cpp rapidjson
