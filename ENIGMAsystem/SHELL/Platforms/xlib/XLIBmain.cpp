@@ -21,6 +21,7 @@
 
 #include "XLIBmain.h"
 #include "XLIBwindow.h"
+#include "XLIBsystem.h"
 #include "XDisplayGetters.h"
 
 #include "Platforms/General/PFmain.h"
