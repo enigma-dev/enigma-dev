@@ -21,6 +21,7 @@
 
 #include "XLIBmain.h"
 #include "XLIBwindow.h"
+#include "XLIBsystem.h"
 #include "XDisplayGetters.h"
 
 #include "Platforms/General/PFmain.h"
@@ -41,6 +42,8 @@
 using std::string;
 
 using namespace enigma::x11;
+
+#include "Platforms/General/PFsystem.h"
 
 namespace enigma {
 
