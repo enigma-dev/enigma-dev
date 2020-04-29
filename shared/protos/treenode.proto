@@ -16,24 +16,26 @@ import "Settings.proto";
 
 message TreeNode {
   oneof type {
-    bool folder = 1;
+    bool folder = 100;
+    // NOTE: these are all off by 1 cause protobutt don't allow you to set field number to 0
+    resources.Object object = 1;
     resources.Sprite sprite = 2;
     resources.Sound sound = 3;
-    resources.Background background = 4;
-    resources.Path path = 5;
-    resources.Script script = 6;
-    resources.Shader shader = 7;
+    resources.Room room = 4;
+    resources.Background background = 5;
+    resources.Path path = 6;
+    resources.Script script = 7;
     resources.Font font = 8;
     resources.Timeline timeline = 9;
-    resources.Object object = 10;
-    resources.Room room = 11;
+    // NOTE: No idea what 9 is in GM
+    resources.Shader shader = 11;
+    // NOTE: these below don't exist in GM's map
     resources.Include include = 12;
     resources.Settings settings = 13;
     //resources.Macros macros = 14;
     //resources.Help help = 15;
   }
 
-  optional string name = 16;
-
-  repeated TreeNode child = 17;
+  optional string name = 101;
+  repeated TreeNode child = 102;
 }
