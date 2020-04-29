@@ -1,4 +1,4 @@
-OS := $(shell uname -s)
+OS := $(shell uname -s) 
 ifeq ($(OS), Linux)
 	SOURCES += $(wildcard Platforms/General/POSIX/Linux/*.cpp)
 	SOURCES += $(wildcard Platforms/xlib/Linux/*.cpp)
