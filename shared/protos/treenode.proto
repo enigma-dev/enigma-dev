@@ -27,7 +27,7 @@ message TreeNode {
     resources.Script script = 7;
     resources.Font font = 8;
     resources.Timeline timeline = 9;
-    // NOTE: No idea what 9 is in GM
+    // NOTE: No idea what 9(+1) is in GM
     resources.Shader shader = 11;
     // NOTE: these below don't exist in GM's map
     resources.Include include = 12;
