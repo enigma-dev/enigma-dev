@@ -42,10 +42,6 @@ using std::string;
 
 using namespace enigma::x11;
 
-namespace enigma_user {
-const int os_type = os_linux;
-}  // namespace enigma_user
-
 namespace enigma {
 
 void (*WindowResizedCallback)();
