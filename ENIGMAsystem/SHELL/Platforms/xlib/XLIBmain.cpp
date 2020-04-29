@@ -43,8 +43,6 @@ using std::string;
 
 using namespace enigma::x11;
 
-#include "Platforms/General/PFsystem.h"
-
 namespace enigma {
 
 void (*WindowResizedCallback)();
