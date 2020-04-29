@@ -34,14 +34,12 @@
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/General/PFexternals.h"
+#include "ExternalFuncs.h"
 
 #include <vector>
 #include <cstdio>
 #include <map>
 #include <string>
-#define byte __windows_byte_workaround
-#include <windows.h>
-#undef byte
 
 #include <ffi.h>
 
@@ -66,7 +64,7 @@ struct external
   }
 };
 
-std::map<std::string, HMODULE> dllHandles;
+std::map<std::string, void *> dllHandles;
 map<int,external*> externals;
 int external_count=0;
 
@@ -104,7 +102,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
 
   ffi_type *restype = (returntype == ty_real) ? &ffi_type_double : &ffi_type_pointer;
   ffi_abi callabi;
-#if __x86_64__
+#if __x86_64__ || !defined(_WIN32)
   callabi = FFI_DEFAULT_ABI;
 #else
   callabi = ((calltype==dll_stdcall)?FFI_STDCALL:FFI_DEFAULT_ABI);
@@ -117,10 +115,10 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
     return -1;
   }
 
-  HMODULE dllmod;
-  std::map<std::string, HMODULE>::iterator dllIt;
+  void *dllmod;
+  std::map<std::string, void *>::iterator dllIt;
   if ((dllIt=dllHandles.find(dll)) == dllHandles.end())
-  	dllmod = LoadLibrary(dll.c_str());
+  	dllmod = enigma::ExternalLoad(dll.c_str());
   else
   {
     DEBUG_MESSAGE("LOADING PREEXISTING HANDLE", MESSAGE_TYPE::M_WARNING);
@@ -133,7 +131,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
     return -1;
   }
 
-  FARPROC funcptr = GetProcAddress(dllmod,func.c_str());
+  void *funcptr = enigma::ExternalFunc(dllmod,func.c_str());
   if (funcptr==NULL)
   {
     DEBUG_MESSAGE("No such function" + func, MESSAGE_TYPE::M_ERROR);
@@ -190,10 +188,9 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
 
 void external_free(std::string dll)
 {
-  std::map<std::string, HMODULE>::iterator dllIt;
+  std::map<std::string, void *>::iterator dllIt;
   if ((dllIt=dllHandles.find(dll)) != dllHandles.end())
-    FreeLibrary(dllHandles[dll]);
+    enigma::ExternalFree(dllHandles[dll]);
 }
 
 }
-
