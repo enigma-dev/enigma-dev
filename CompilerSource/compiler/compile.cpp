@@ -194,8 +194,9 @@ static bool ends_with(std::string const &fullString, std::string const &ending) 
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
+  std::string exename = "";
   if (mode != emode_rebuild) {
-    std::string exename = std::string(exe_filename);
+    exename = std::string(exe_filename);
     const std::string buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
     if (!ends_with(exename, buildext)) {
       exename += buildext;
