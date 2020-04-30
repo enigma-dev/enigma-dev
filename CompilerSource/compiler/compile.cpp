@@ -194,11 +194,13 @@ static bool ends_with(std::string const &fullString, std::string const &ending) 
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
-  std::string exename = std::string(exe_filename);
-  const std::string buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
-  if (!ends_with(exename, buildext)) {
-    exename += buildext;
-    exe_filename = exename.c_str();
+  if (mode != emode_rebuild) {
+    std::string exename = std::string(exe_filename);
+    const std::string buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
+    if (!ends_with(exename, buildext)) {
+      exename += buildext;
+      exe_filename = exename.c_str();
+    }
   }
 
   cout << "Initializing dialog boxes" << endl;
