@@ -73,9 +73,6 @@ extern const char* establish_bearings(const char *compiler);
 
 #include <cstdlib>
 
-//FIXME: remove this function from enigma.jar and here
-dllexport void libSetMakeDirectory(const char* /*dir*/) {} 
-
 dllexport const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path) 
 {
   enigma_root = enigma_path;
