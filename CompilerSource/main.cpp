@@ -78,8 +78,6 @@ dllexport void libSetMakeDirectory(const char* /*dir*/) {}
 dllexport const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path) 
 {
   enigma_root = enigma_path;
-  //if (enigma_root.back() != '/')
-    //enigma_root += '/';
   
   if (ecs)
   {
