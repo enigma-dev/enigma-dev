@@ -17,7 +17,6 @@
 **/
 
 #include "strings_util.h"
-#include "makedir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/GameData.h"
 #include "settings.h"
@@ -210,18 +209,18 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
-  string compilepath = CURRENT_PLATFORM_NAME "/" + compilerInfo.target_platform + "/" + name;
+  std::filesystem::path compilepath = std::filesystem::path(CURRENT_PLATFORM_NAME)/compilerInfo.target_platform/name;
 
   if (mode == emode_rebuild)
   {
     edbg << "Cleaning..." << flushl;
 
   	string make = compilerInfo.make_vars["MAKEFLAGS"];
-    make += " -C \"" + enigma_root + "\"";
+    make += " -C \"" + enigma_root.string() + "\"";
     make += " clean-game ";
-  	make += "COMPILEPATH=\"" + compilepath + "\" ";
-  	make += "WORKDIR=\"" + eobjs_directory + "\" ";
-    make += "CODEGEN=\"" + codegen_directory + "\" ";
+  	make += "COMPILEPATH=\"" + compilepath.string() + "\" ";
+  	make += "WORKDIR=\"" + eobjs_directory.string() + "\" ";
+    make += "CODEGEN=\"" + codegen_directory .string() + "\" ";
 
   	edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
     e_execs(compilerInfo.MAKE_location,make);
@@ -357,7 +356,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   // Modes, settings and executable information.
 
   idpr("Adding resources...",90);
-  string desstr = "./ENIGMAsystem/SHELL/design_game" + compilerInfo.exe_vars["BUILD-EXTENSION"];
+  std::filesystem::path desstr = "./ENIGMAsystem/SHELL/design_game" + compilerInfo.exe_vars["BUILD-EXTENSION"];
   string gameFname = mode == emode_design ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
 
   edbg << "Writing executable information and resources." << flushl;
@@ -367,7 +366,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     write_desktop_entry(gameFname, game);
 
   edbg << "Writing modes and settings" << flushl;
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
   wto << license;
   wto << "#define ASSUMEZERO 0\n";
   wto << "#define PRIMBUFFER 0\n";
@@ -379,20 +378,20 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   wto << '\n';
   wto.close();
 
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
   wto << license;
   wto << "#define BUILDMODE " << 0 << "\n";
   wto << "#define DEBUGMODE " << 0 << "\n";
   wto << '\n';
   wto.close();
 
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
   wto.close();
 
   //NEXT FILE ----------------------------------------
   //Object switch: A listing of all object IDs and the code to allocate them.
   edbg << "Writing object switch" << flushl;
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
     wto << license;
     wto << "#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n";
     for (auto *obj : state.parsed_objects) {
@@ -407,7 +406,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   //NEXT FILE ----------------------------------------
   //Resource names: Defines integer constants for all resources.
   edbg << "Writing resource names and maxima" << flushl;
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
   wto << license;
 
   wto << "namespace enigma {\n";
@@ -431,7 +430,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   //NEXT FILE ----------------------------------------
   //Timelines: Defines "moment" lookup structures for timelines.
   edbg << "Writing timeline control information" << flushl;
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
   {
     wto << license;
     wto <<"namespace enigma {\n\n";
@@ -525,10 +524,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   string make = compilerInfo.make_vars["MAKEFLAGS"];
 
-  make += "-C \"" + enigma_root + "\" ";
+  make += "-C \"" + enigma_root.string() + "\" ";
   make += "Game ";
-  make += "WORKDIR=\"" + eobjs_directory + "\" ";
-  make += "CODEGEN=\"" + codegen_directory + "\" ";
+  make += "WORKDIR=\"" + eobjs_directory.string() + "\" ";
+  make += "CODEGEN=\"" + codegen_directory.string() + "\" ";
   make += mode == emode_debug? "GMODE=\"Debug\"" : mode == emode_design? "GMODE=\"Design\"" : mode == emode_compile?"GMODE=\"Compile\"" : "GMODE=\"Run\"";
   make += " ";
   make += "GRAPHICS=\"" + extensions::targetAPI.graphicsSys + "\" ";
@@ -544,7 +543,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       make += key.first + "=\"" + key.second + "\" ";
   }
 
-  make += "COMPILEPATH=\"" + compilepath + "\" ";
+  make += "COMPILEPATH=\"" + compilepath.string() + "\" ";
 
   string extstr = "EXTENSIONS=\"";
   for (unsigned i = 0; i < parsed_extensions.size(); i++)
@@ -559,26 +558,22 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Running make from `" << compilerInfo.MAKE_location << "'" << flushl;
   edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
 
-//  #if CURRENT_PLATFORM_ID == OS_MACOSX
-//  int makeres = better_system("cd ","/MacOS/");
-//  int makeres = better_system(MAKE_location,"MacOS");
-
   string flags = "";
 
   if (redirect_make) {
 
-    std::string dirs = "CODEGEN=" + codegen_directory + " ";
-    dirs += "WORKDIR=" + eobjs_directory + " ";
+    std::string dirs = "CODEGEN=" + codegen_directory.string() + " ";
+    dirs += "WORKDIR=" + eobjs_directory.string() + " ";
     e_execs("make", dirs, "required-directories");
 
     // Pick a file and flush it
-    const string redirfile = (eobjs_directory + "enigma_compile.log");
+    const std::filesystem::path redirfile = (eobjs_directory/"enigma_compile.log");
     fclose(fopen(redirfile.c_str(),"wb"));
 
     // Redirect it
     ide_output_redirect_file(redirfile.c_str()); //TODO: If you pass this function the address it will screw up the value; most likely a JNA/Plugin bug.
 
-    flags += "&> \"" + redirfile + "\"";
+    flags += "&> \"" + redirfile.string() + "\"";
   }
 
   int makeres = e_execs(compilerInfo.MAKE_location, make, flags);

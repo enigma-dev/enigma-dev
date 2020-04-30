@@ -29,6 +29,7 @@ using namespace std;
 #define flushs flush
 
 #include "darray.h"
+#include "settings.h"
 
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
@@ -69,8 +70,6 @@ extern const char* establish_bearings(const char *compiler);
 #include <System/builtins.h>
 #include <API/jdi.h>
 
-#include "makedir.h"
-
 #include <cstdlib>
 
 //FIXME: remove this function from enigma.jar and here
@@ -79,8 +78,8 @@ dllexport void libSetMakeDirectory(const char* /*dir*/) {}
 dllexport const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path) 
 {
   enigma_root = enigma_path;
-  if (enigma_root.back() != '/')
-    enigma_root += '/';
+  //if (enigma_root.back() != '/')
+    //enigma_root += '/';
   
   if (ecs)
   {

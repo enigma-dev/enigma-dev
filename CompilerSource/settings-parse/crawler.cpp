@@ -31,31 +31,10 @@
 
 using namespace std;
 
-#include "filesystem/file_find.h"
-
 #include "crawler.h"
 #include "utility.h"
 
 #include "eyaml/eyaml.h"
-
-namespace settings
-{
-  list<string> systems;
-  
-  int scour_settings()
-  {
-    string bdir = enigma_root + "ENIGMAsystem/SHELL/";
-    for (string mdir = file_find_first(enigma_root + "ENIGMAsystem/SHELL/*",fa_sysfile | fa_readonly | fa_directory | fa_nofiles); mdir != ""; mdir = file_find_next())
-    {
-      FILE *module_descriptor = fopen((bdir+mdir).c_str(),"rt");
-      if (module_descriptor)
-      {
-        
-      }
-    }
-    return 0;
-  }
-}
 
 #include "parser/object_storage.h"
 #include "OS_Switchboard.h"
@@ -85,7 +64,7 @@ namespace extensions
         if (pe.path[pos] == '\\')
           pe.path[i] = '/';
       
-      ifstream iey((enigma_root + "ENIGMAsystem/SHELL/" + exts[i]+"/About.ey").c_str());
+      ifstream iey((enigma_root/"ENIGMAsystem/SHELL"/exts[i]/"About.ey").c_str());
       if (!iey.is_open())
         cout << "ERROR! Failed to open extension descriptor for " << exts[i] << endl;
       ey_data about = parse_eyaml(iey,exts[i]);
@@ -105,21 +84,22 @@ namespace extensions
   {
     all_platforms.clear();
     cout << "\n\n\n\nStarting platform inspection\n";
-    for (string ef = file_find_first(enigma_root + "ENIGMAsystem/SHELL/Platforms/*",fa_sysfile | fa_readonly | fa_directory | fa_nofiles); ef != ""; ef = file_find_next())
+    for (auto& ef : std::filesystem::directory_iterator(enigma_root/"ENIGMAsystem/SHELL/Platforms/"))
     {
-      const string ef_path = enigma_root + "ENIGMAsystem/SHELL/Platforms/" + ef + "/Info/About.ey";
+      if (!ef.is_directory()) continue;
+      const std::filesystem::path ef_path = enigma_root/"ENIGMAsystem/SHELL/Platforms"/ef/"Info/About.ey";
       ifstream ext(ef_path.c_str(), ios_base::in);
       if (!ext.is_open()) continue;
 
       cout << " - " << ef_path << ": Opened.\n";
-      ey_data dat = parse_eyaml(ext,ef);
+      ey_data dat = parse_eyaml(ext,ef.path().string());
       eyit hasname = dat.values.find("represents");
       if (hasname == dat.values.end()) {
         cout << "Skipping invalid platform API under `" << ef << "': File does not specify an OS it represents.";
         continue;
       }
       
-      sdk_descriptor& sdk = all_platforms[toUpper(ef)];
+      sdk_descriptor& sdk = all_platforms[toUpper(ef.path().string())];
       sdk.name   = dat.get("name");
       sdk.author = dat.get("author");
       sdk.build_platforms = dat.get("build-platforms");
@@ -127,7 +107,6 @@ namespace extensions
       sdk.identifier  = dat.get("identifier");
       sdk.represents  = dat.get("represents");
     }
-    file_find_close();
     
     if (targetAPI.windowSys != "")
       targetSDK = all_platforms[toUpper(targetAPI.windowSys)];

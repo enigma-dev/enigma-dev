@@ -26,7 +26,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "makedir.h"
+#include "settings.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -62,7 +62,7 @@ inline string resname(string name) {
 
 int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, parsed_object *EGMglobal, int mode)
 {
-  ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
+  ofstream wto((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
 
   wto << license << "namespace enigma {\n"
   << "  int room_loadtimecount = " << game.rooms.size() << ";\n";
@@ -196,7 +196,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   wto.close();
 
 
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
   wto << license;
 
   wto << "namespace enigma {\n\n";

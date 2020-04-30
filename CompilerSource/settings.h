@@ -28,8 +28,11 @@
 #ifndef ENIGMA_SETTINGS_H
 #define ENIGMA_SETTINGS_H
 
+#include "strings_util.h"
+
 #include <string>
 #include <map>
+#include <filesystem>
 
 namespace extensions
 {
@@ -94,7 +97,27 @@ struct CompilerInfo {
 };
 
 extern CompilerInfo compilerInfo;
-extern std::string enigma_root;
 bool load_compiler_ey(std::string fPath);
+
+extern std::filesystem::path enigma_root;
+extern std::filesystem::path eobjs_directory;
+extern std::filesystem::path codegen_directory;
+
+// FIXME: this code is garbage 
+inline std::string escapeEnv(std::string str, std::string env) {
+	char* val = getenv(env.c_str());
+	if (val != NULL)
+		return string_replace_all(str, "%" + env + "%", val);
+	return str;
+}
+
+inline std::string escapeEnv(std::string str) {
+	std::string escaped = escapeEnv(str, "LOCALAPPDATA");
+	escaped = escapeEnv(escaped, "APPDATA");
+	escaped = escapeEnv(escaped, "PROGRAMDATA");
+	escaped = escapeEnv(escaped, "ALLUSERSPROFILE");
+	escaped = escapeEnv(escaped, "HOME");
+	return escaped;
+}
 
 #endif
