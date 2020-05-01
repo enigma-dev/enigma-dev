@@ -179,11 +179,12 @@ void parse_ide_settings(const char* eyaml)
   // Get requested networking system
   ey_cp(network,   networking,system)
 
-  ifstream ifs; std::filesystem::path eyname;
-  ifs.open((eyname = enigma_root/"ENIGMAsystem/SHELL/Platforms"/extensions::targetAPI.windowSys/"Info/About.ey").u8string().c_str());
+  ifstream ifs; 
+  std::filesystem::path eyname = enigma_root/"ENIGMAsystem/SHELL/Platforms"/extensions::targetAPI.windowSys/"Info/About.ey");
+  ifs.open((eyname.u8string().c_str());
   if (ifs.is_open())
   {
-    ey_data l = parse_eyaml(ifs, eyname.c_str());
+    ey_data l = parse_eyaml(ifs, eyname.u8string().c_str());
     it = l.find("links");
     if (it != l.end())
       extensions::targetAPI.windowLinks = eyscalar(it);

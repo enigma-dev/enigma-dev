@@ -194,7 +194,7 @@ static bool ends_with(std::string const &fullString, std::string const &ending) 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename = exe_filename;
   const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
-  if (!ends_with(exename, buildext.u8string())) {
+  if (!ends_with(exename.u8string(), buildext.u8string())) {
     exename /= buildext;
     exe_filename = exename.u8string().c_str();
   }
@@ -549,7 +549,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   	extstr += " " + parsed_extensions[i].pathname;
   make += extstr + "\"";
 
-  string mfgfn = gameFname;
+  string mfgfn = gameFname.u8string();
   for (size_t i = 0; i < mfgfn.length(); i++)
     if (mfgfn[i] == '\\') mfgfn[i] = '/';
   make += string(" OUTPUTNAME=\"") + mfgfn + "\" ";
@@ -622,7 +622,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   {
     auto resname = resfile.u8string();
     for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
-      resname.replace(p,4,gameFname);
+      resname.replace(p,4,gameFname.u8string());
     gameModule = fopen(resname.c_str(),"wb");
     if (!gameModule) {
       user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
@@ -683,8 +683,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     #endif
 
     string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
-    rprog = string_replace_all(rprog,"$game",gameFname);
-    rparam = string_replace_all(rparam,"$game",gameFname);
+    rprog = string_replace_all(rprog,"$game",gameFname.u8string());
+    rparam = string_replace_all(rparam,"$game",gameFname.u8string());
     user << "Running \"" << rprog << "\" " << rparam << flushl;
     int gameres = e_execs(rprog, rparam);
     user << "\n\nGame returned " << gameres << "\n";
