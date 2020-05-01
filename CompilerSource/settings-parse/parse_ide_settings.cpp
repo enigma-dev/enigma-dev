@@ -180,8 +180,8 @@ void parse_ide_settings(const char* eyaml)
   ey_cp(network,   networking,system)
 
   ifstream ifs; 
-  std::filesystem::path eyname = enigma_root/"ENIGMAsystem/SHELL/Platforms"/extensions::targetAPI.windowSys/"Info/About.ey");
-  ifs.open((eyname.u8string().c_str());
+  std::filesystem::path eyname = enigma_root/"ENIGMAsystem/SHELL/Platforms"/extensions::targetAPI.windowSys/"Info/About.ey";
+  ifs.open(eyname.u8string().c_str());
   if (ifs.is_open())
   {
     ey_data l = parse_eyaml(ifs, eyname.u8string().c_str());
