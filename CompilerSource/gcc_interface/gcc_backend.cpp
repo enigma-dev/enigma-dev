@@ -132,8 +132,8 @@ const char* establish_bearings(const char *compiler)
 
   std::string MAKE_paths = compilerInfo.make_vars["PATH"];
   
-  std::string dirs = "CODEGEN=" + codegen_directory.string() + " ";
-  dirs += "WORKDIR=" + eobjs_directory.string() + " ";
+  std::string dirs = "CODEGEN=" + unixfy_path(codegen_directory) + " ";
+  dirs += "WORKDIR=" + unixfy_path(eobjs_directory) + " ";
   e_execs("make", dirs, "required-directories");
 
   /* Get a list of all macros defined by our compiler.

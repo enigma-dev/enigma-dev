@@ -72,10 +72,6 @@ using namespace std;
 std::map <string, char> unimplemented_function_list;
 #endif
 
-inline std::string unixfy_path(const std::filesystem::path& path) {
-  return string_replace_all(path.u8string(), "\\", "/");
-}
-
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }

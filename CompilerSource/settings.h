@@ -120,4 +120,8 @@ inline std::string escapeEnv(std::string str) {
 	return escaped;
 }
 
+inline std::string unixfy_path(const std::filesystem::path& path) {
+  return string_replace_all(path.u8string(), "\\", "/");
+}
+
 #endif
