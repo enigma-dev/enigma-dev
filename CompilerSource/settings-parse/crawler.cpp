@@ -99,7 +99,7 @@ namespace extensions
         continue;
       }
       
-      sdk_descriptor& sdk = all_platforms[toUpper(ef.path().string())];
+      sdk_descriptor& sdk = all_platforms[toUpper(ef.path().u8string())];
       sdk.name   = dat.get("name");
       sdk.author = dat.get("author");
       sdk.build_platforms = dat.get("build-platforms");

@@ -150,9 +150,9 @@ const char* establish_bearings(const char *compiler)
   ** These are where we'll look for headers to parse.
   ****************************************************/
   cmd = compilerInfo.searchdirs_cmd;
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory.string() + "enigma_searchdirs.txt\""));
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory.u8string() + "enigma_searchdirs.txt\""));
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + codegen_directory.string() + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + codegen_directory.u8string() + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
   else cout << "Call succeeded" << endl;
 
