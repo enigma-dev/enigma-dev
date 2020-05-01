@@ -68,7 +68,7 @@ class OffsetVector {
     return data()[index];
   }
   void resize(size_t count) {
-    data_owner_.resize(count + LEFT);
+    data_owner_.resize(count - LEFT);
     data_ = data_owner_.data() - LEFT * sizeof(T);
   }
 };
@@ -121,11 +121,11 @@ class AssetArray {
 
   AssetArray() {}
 
-  iterator begin() { return ++iterator(*this, -(LEFT + 1)); }
-  iterator end() { return iterator(*this, size() - LEFT); }
+  iterator begin() { return ++iterator(*this, -1); }
+  iterator end() { return iterator(*this, size()); }
 
   int add(T&& asset) {
-    size_t id = size() - LEFT;
+    size_t id = size();
     assets_.emplace_back(std::move(asset));
     return (int)id;
   }
@@ -139,7 +139,7 @@ class AssetArray {
         return id;
       }
       #endif
-      if (size_t(id) >= size() - LEFT) assets_.resize(size_t(id) + 1);
+      if (size_t(id) >= size()) assets_.resize(size_t(id) + 1);
     }
     assets_[id] = std::move(asset);
     return id;
@@ -184,7 +184,7 @@ class AssetArray {
   }
 
   size_t size() const { return assets_.size(); }
-  bool exists(int id) const { return (id >= 0 && size_t(id) < size() - LEFT && !assets_[id].isDestroyed()); }
+  bool exists(int id) const { return (id >= 0 && size_t(id) < size() && !assets_[id].isDestroyed()); }
 
   T* data() { return assets_.data(); }
 
