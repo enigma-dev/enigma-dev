@@ -542,7 +542,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       make += key.first + "=\"" + key.second + "\" ";
   }
 
-  make += "COMPILEPATH=\"" + compilepath.u8string() + "\" ";
+  make += "COMPILEPATH=\"" + unixfy_path(compilepath) + "\" ";
 
   string extstr = "EXTENSIONS=\"";
   for (unsigned i = 0; i < parsed_extensions.size(); i++)
