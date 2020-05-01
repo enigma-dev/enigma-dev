@@ -48,7 +48,7 @@ inline string fc(const char* fn);
 static void reset_ide_editables()
 {
   ofstream wto;
-  string f2comp = fc((codegen_directory/"API_Switchboard.h").c_str());
+  string f2comp = fc((codegen_directory/"API_Switchboard.h").u8string().c_str());
   string f2write = license;
     string inc = "/include.h\"\n";
     f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys)            + "/include.h\"\n"
@@ -70,7 +70,7 @@ static void reset_ide_editables()
 
   if (f2comp != f2write + "\n")
   {
-    wto.open((codegen_directory/"API_Switchboard.h").c_str(),ios_base::out);
+    wto.open((codegen_directory/"API_Switchboard.h").u8string().c_str(),ios_base::out);
       wto << f2write << endl;
     wto.close();
   }
@@ -155,9 +155,9 @@ void parse_ide_settings(const char* eyaml)
   if (codegen_directory.empty())
     codegen_directory = eobjs_directory;
     
-  eobjs_directory = escapeEnv(eobjs_directory);
-  codegen_directory = escapeEnv(codegen_directory);
-  enigma_root = escapeEnv(enigma_root);
+  eobjs_directory = escapeEnv(eobjs_directory.u8string());
+  codegen_directory = escapeEnv(codegen_directory.u8string());
+  enigma_root = escapeEnv(enigma_root.u8string());
 
   #define ey_cp(v,x,y) \
   it = settree.find("target-" #x); \
@@ -179,8 +179,8 @@ void parse_ide_settings(const char* eyaml)
   // Get requested networking system
   ey_cp(network,   networking,system)
 
-  ifstream ifs; string eyname;
-  ifs.open((eyname = enigma_root/"ENIGMAsystem/SHELL/Platforms"/extensions::targetAPI.windowSys/"Info/About.ey").c_str());
+  ifstream ifs; std::filesystem::path eyname;
+  ifs.open((eyname = enigma_root/"ENIGMAsystem/SHELL/Platforms"/extensions::targetAPI.windowSys/"Info/About.ey").u8string().c_str());
   if (ifs.is_open())
   {
     ey_data l = parse_eyaml(ifs, eyname.c_str());
@@ -215,7 +215,7 @@ void parse_ide_settings(const char* eyaml)
   string target_compiler = settree.get("target-compiler");
   std::filesystem::path cinffile = enigma_root/"Compilers"/CURRENT_PLATFORM_NAME/(target_compiler + ".ey");
 
-  const char *a = establish_bearings(cinffile.c_str());
+  const char *a = establish_bearings(cinffile.u8string().c_str());
   if (a) cout << "Parse fail: " << a << endl;
 
   cout << "Setting up IDE editables... " << endl;

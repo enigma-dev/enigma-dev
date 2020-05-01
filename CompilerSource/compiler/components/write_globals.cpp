@@ -62,7 +62,7 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
                                    const parsed_object* global,
                                    const DotLocalMap &dot_accessed_locals) {
   ofstream wto;
-  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_globals.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_globals.h").u8string().c_str(),ios_base::out);
   wto << license;
 
   global_script_argument_count=16; //write all 16 arguments

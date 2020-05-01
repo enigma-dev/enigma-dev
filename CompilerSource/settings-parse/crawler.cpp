@@ -64,7 +64,7 @@ namespace extensions
         if (pe.path[pos] == '\\')
           pe.path[i] = '/';
       
-      ifstream iey((enigma_root/"ENIGMAsystem/SHELL"/exts[i]/"About.ey").c_str());
+      ifstream iey((enigma_root/"ENIGMAsystem/SHELL"/exts[i]/"About.ey").u8string().c_str());
       if (!iey.is_open())
         cout << "ERROR! Failed to open extension descriptor for " << exts[i] << endl;
       ey_data about = parse_eyaml(iey,exts[i]);
@@ -92,10 +92,10 @@ namespace extensions
       if (!ext.is_open()) continue;
 
       cout << " - " << ef_path << ": Opened.\n";
-      ey_data dat = parse_eyaml(ext,ef.path().string());
+      ey_data dat = parse_eyaml(ext,ef.path().u8string());
       eyit hasname = dat.values.find("represents");
       if (hasname == dat.values.end()) {
-        cout << "Skipping invalid platform API under `" << ef << "': File does not specify an OS it represents.";
+        cout << "Skipping invalid platform API under `" << ef.path().u8string() << "': File does not specify an OS it represents.";
         continue;
       }
       
