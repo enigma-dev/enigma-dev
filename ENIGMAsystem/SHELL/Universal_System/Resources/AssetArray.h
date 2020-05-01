@@ -45,7 +45,7 @@ class OffsetVector {
  public:
   OffsetVector(): data_(nullptr) {}
   OffsetVector(const OffsetVector<T, LEFT> &other):
-    data_owner_(other.data_owner_), data_(data_owner_.data() - LEFT * sizeof(T)) {}
+    data_owner_(other.data_owner_), data_((T*) data_owner_.data() - LEFT) {}
   size_t size() const {
     return data_owner_.size() + LEFT;
   }
@@ -58,7 +58,7 @@ class OffsetVector {
   }
   template<typename... U> size_t emplace_back(U... args) {
     data_owner_.emplace_back(args...);
-    data_ = data_owner_.data() - LEFT * sizeof(T);
+    data_ = (T*) data_owner_.data() - LEFT;
     return size() - 1;
   }
   template<typename ind_t> T& operator[](ind_t index) {
@@ -69,7 +69,7 @@ class OffsetVector {
   }
   void resize(size_t count) {
     data_owner_.resize(count - LEFT);
-    data_ = data_owner_.data() - LEFT * sizeof(T);
+    data_ = (T*) data_owner_.data() - LEFT;
   }
 };
 
