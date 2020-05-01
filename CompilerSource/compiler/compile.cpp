@@ -72,6 +72,10 @@ using namespace std;
 std::map <string, char> unimplemented_function_list;
 #endif
 
+inline std::string unixfy_path(const std::filesystem::path& path) {
+  return string_replace_all(path.u8string(), "\\", "/");
+}
+
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
@@ -215,11 +219,11 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     edbg << "Cleaning..." << flushl;
 
   	string make = compilerInfo.make_vars["MAKEFLAGS"];
-    make += " -C \"" + enigma_root.string() + "\"";
+    make += " -C \"" + unixfy_path(enigma_root) + "\"";
     make += " clean-game ";
-  	make += "COMPILEPATH=\"" + compilepath.string() + "\" ";
-  	make += "WORKDIR=\"" + eobjs_directory.string() + "\" ";
-    make += "CODEGEN=\"" + codegen_directory .string() + "\" ";
+  	make += "COMPILEPATH=\"" + unixfy_path(compilepath) + "\" ";
+  	make += "WORKDIR=\"" + unixfy_path(eobjs_directory) + "\" ";
+    make += "CODEGEN=\"" + unixfy_path(codegen_directory) + "\" ";
 
   	edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
     e_execs(compilerInfo.MAKE_location,make);
@@ -523,10 +527,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   string make = compilerInfo.make_vars["MAKEFLAGS"];
 
-  make += "-C \"" + enigma_root.u8string() + "\" ";
+  make += "-C \"" + unixfy_path(enigma_root) + "\" ";
   make += "Game ";
-  make += "WORKDIR=\"" + eobjs_directory.string() + "\" ";
-  make += "CODEGEN=\"" + codegen_directory.string() + "\" ";
+  make += "WORKDIR=\"" + unixfy_path(eobjs_directory) + "\" ";
+  make += "CODEGEN=\"" + unixfy_path(codegen_directory) + "\" ";
   make += mode == emode_debug? "GMODE=\"Debug\"" : mode == emode_design? "GMODE=\"Design\"" : mode == emode_compile?"GMODE=\"Compile\"" : "GMODE=\"Run\"";
   make += " ";
   make += "GRAPHICS=\"" + extensions::targetAPI.graphicsSys + "\" ";
