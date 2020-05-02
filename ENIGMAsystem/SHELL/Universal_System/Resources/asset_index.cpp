@@ -27,7 +27,7 @@ int asset_get_type(std::string resource) {
   for (const AssetType t : assetTypes) {
     auto mit = assetMap.find(t);
     if (mit == assetMap.end()) continue;
-    const auto& m = *mit;
+    const auto& m = mit.second;
     auto it = m.find(resource);
     if (it != m.end()) return t;
   }
