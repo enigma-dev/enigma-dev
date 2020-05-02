@@ -17,7 +17,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "makedir.h"
+#include "settings.h"
 #include "parser/parser.h"
 #include "backend/GameData.h"
 #include "compiler/compile_common.h"
@@ -664,7 +664,7 @@ static inline void write_object_declarations(lang_CPP* lcpp, const GameData &gam
   //NEXT FILE ----------------------------------------
   //Object declarations: object classes/names and locals.
   ofstream wto;
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h").u8string().c_str(),ios_base::out);
   wto << license;
   wto << "#include \"Universal_System/Object_Tiers/collisions_object.h\"\n";
   wto << "#include \"Universal_System/Object_Tiers/object.h\"\n\n";
@@ -697,7 +697,7 @@ static inline void write_basic_constructor(ofstream &wto);
 
 static inline void write_object_functionality(const GameData &game, const CompileState &state, int mode, robertmap &parent_undefinitions) {
   vector<unsigned> parent_undefined;
-  ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").c_str(),ios_base::out);
+  ofstream wto((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").u8string().c_str(),ios_base::out);
 
   wto << license;
   wto << endl << "#define log_xor || log_xor_helper() ||" << endl;
