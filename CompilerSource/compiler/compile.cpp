@@ -202,7 +202,7 @@ void wite_asset_enum(const std::filesystem::path& fName) {
   for (int i = 0; i < desc->field_count(); i++) {
     const google::protobuf::FieldDescriptor *field = desc->field(i);
     if (field->containing_oneof() && field->cpp_type() == google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE)
-      // NOTE: -1 because protobutt doesn't allow index 0 and we're typing to match GM's values 
+      // NOTE: -1 because protobutt doesn't allow index 0 and we're trying to match GM's values 
       wto << "  asset_" << field->name() << " = " << field->number()-1 <<  "," << std::endl;
   }
   
