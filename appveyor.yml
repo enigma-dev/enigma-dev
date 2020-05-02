@@ -61,6 +61,7 @@ environment:
     - {EXTENSIONS: "IniFilesystem"}
     - {EXTENSIONS: "Box2DPhysics", PACKAGES: "box2d:x"}
     - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
+    - {EXTENSIONS: "ExternalFuncs", PACKAGES: "libffi:x"}
     #TODO: Fix Bullet Physics on Windows
     #- {EXTENSIONS: "BulletDynamics", PACKAGES: "bullet:x"}
 
