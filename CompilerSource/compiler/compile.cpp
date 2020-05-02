@@ -186,7 +186,7 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
  
 void wite_asset_enum(const std::string& fName) {
   std::ofstream wto;
-  wto.open(fName.c_str());
+  wto.open(fName.u8string().c_str());
   
   wto<< "#ifndef ASSET_ENUM_H\n#define ASSET_ENUM_H\n\n";
   
@@ -478,7 +478,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   write_resource_meta(wto,       "room", game.rooms, false);
   
   // asset_get_index/type map
-  wite_asset_enum(codegen_directory + "AssetEnum.h");
+  wite_asset_enum(codegen_directory/"AssetEnum.h");
   
   wto << "#include \"AssetEnum.h\"\n";
   wto << "namespace enigma {\n\n";
