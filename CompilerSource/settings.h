@@ -28,8 +28,12 @@
 #ifndef ENIGMA_SETTINGS_H
 #define ENIGMA_SETTINGS_H
 
+#include "strings_util.h"
+
 #include <string>
 #include <map>
+#include <filesystem>
+#include <iostream>
 
 namespace extensions
 {
@@ -94,7 +98,31 @@ struct CompilerInfo {
 };
 
 extern CompilerInfo compilerInfo;
-extern std::string enigma_root;
 bool load_compiler_ey(std::string fPath);
+
+extern std::filesystem::path enigma_root;
+extern std::filesystem::path eobjs_directory;
+extern std::filesystem::path codegen_directory;
+
+inline std::string escapeEnv(std::string str) {
+  size_t i = str.find_first_of('%');
+  while (i != std::string::npos) {
+    size_t j = str.find_first_of('%', i + 1);
+    if (j == std::string::npos) {
+      std::cerr << "Unmatched %s in " << str << std::endl;
+      break;
+    }
+    char* val = getenv(str.substr(i + 1, j - i - 1).c_str());
+    std::string repl = val == nullptr ? "" : val;
+    str.replace(i, j - i + 1, repl);
+    i = str.find_first_of('%');
+  }
+  
+  return str;
+}
+
+inline std::string unixfy_path(const std::filesystem::path& path) {
+  return string_replace_all(path.u8string(), "\\", "/");
+}
 
 #endif
