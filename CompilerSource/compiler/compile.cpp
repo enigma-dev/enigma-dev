@@ -184,7 +184,7 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
   wto << "namespace enigma { size_t " << kind << "_idmax = " << max << "; }\n\n";
 }   
  
-void wite_asset_enum(const std::string& fName) {
+void wite_asset_enum(const std::filesystem::path& fName) {
   std::ofstream wto;
   wto.open(fName.u8string().c_str());
   
