@@ -192,11 +192,14 @@ static bool ends_with(std::string const &fullString, std::string const &ending) 
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
-  std::filesystem::path exename = exe_filename;
-  const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
-  if (!ends_with(exename.u8string(), buildext.u8string())) {
-    exename /= buildext;
-    exe_filename = exename.u8string().c_str();
+  std::filesystem::path exename;
+  if (exe_filename) {
+    exename = exe_filename;
+    const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
+    if (!ends_with(exename.u8string(), buildext.u8string())) {
+      exename += buildext;
+      exe_filename = exename.u8string().c_str();
+    }
   }
 
   cout << "Initializing dialog boxes" << endl;
