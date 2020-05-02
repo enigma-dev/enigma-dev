@@ -197,7 +197,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     exename = exe_filename;
     const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
     if (!ends_with(exename.u8string(), buildext.u8string())) {
-      exename /= buildext;
+      exename += buildext;
       exe_filename = exename.u8string().c_str();
     }
   }
