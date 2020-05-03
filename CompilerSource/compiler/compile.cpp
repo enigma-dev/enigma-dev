@@ -20,8 +20,8 @@
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/GameData.h"
 #include "settings.h"
-
 #include "darray.h"
+#include "treenode.pb.h"
 
 #include <cstdio>
 
@@ -182,6 +182,56 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
   }
   wto << "}\n";
   wto << "namespace enigma { size_t " << kind << "_idmax = " << max << "; }\n\n";
+}   
+ 
+void wite_asset_enum(const std::filesystem::path& fName) {
+  std::ofstream wto;
+  wto.open(fName.u8string().c_str());
+  
+  wto<< "#ifndef ASSET_ENUM_H\n#define ASSET_ENUM_H\n\n";
+  
+  wto << "namespace enigma_user {\n\nenum AssetType : int {\n";
+  
+  // "unknown" / "any" need to added manually
+  wto << "  asset_any = -2,\n";
+  wto << "  asset_unknown = -1,\n";
+  
+  buffers::TreeNode tn;
+  google::protobuf::Message *m = &tn;
+  const google::protobuf::Descriptor *desc = m->GetDescriptor();
+  for (int i = 0; i < desc->field_count(); i++) {
+    const google::protobuf::FieldDescriptor *field = desc->field(i);
+    if (field->containing_oneof() && field->cpp_type() == google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE)
+      // NOTE: -1 because protobutt doesn't allow index 0 and we're trying to match GM's values 
+      wto << "  asset_" << field->name() << " = " << field->number()-1 <<  "," << std::endl;
+  }
+  
+  // This one doesn't really exist but added for GM compatibility
+  wto << "  asset_tileset = asset_background\n";
+  wto << "};\n\n}\n\n";
+  
+  wto << "namespace enigma {\n\nstatic const enigma_user::AssetType assetTypes[] = {\n";
+  
+  for (int i = 0; i < desc->field_count(); i++) {
+    const google::protobuf::FieldDescriptor *field = desc->field(i);
+    if (field->containing_oneof() && field->cpp_type() == google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE)
+      wto << "  enigma_user::asset_" << field->name() << "," << std::endl;
+  }
+  
+  wto << "};\n\n}\n\n#endif\n";
+  
+  wto.close();
+}
+    
+template<typename T> void write_asset_map(std::string& str, vector<T> resources, const std::string& type) {
+  str += "\n{ enigma_user::" + type + ",\n  {\n";
+  for (const T &res : resources) {
+    str += "    { \"" + res.name  + "\", " + std::to_string(res.id()) + " },\n";
+  }
+  
+  if (resources.size() > 0) { str.pop_back(); str.back() = '\n'; }
+  
+  str += "  }\n},\n";
 }
 
 static bool ends_with(std::string const &fullString, std::string const &ending) {
@@ -426,6 +476,33 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   write_resource_meta(wto,     "script", game.scripts);
   write_resource_meta(wto,     "shader", game.shaders);
   write_resource_meta(wto,       "room", game.rooms, false);
+  
+  // asset_get_index/type map
+  wite_asset_enum(codegen_directory/"AssetEnum.h");
+  
+  wto << "#include \"AssetEnum.h\"\n";
+  wto << "namespace enigma {\n\n";
+  wto << "std::map<enigma_user::AssetType, std::map<std::string, int>> assetMap = {\n";
+  
+  std::string assets;
+  write_asset_map(assets, game.objects,     "asset_object");
+  write_asset_map(assets, game.sprites,     "asset_sprite");
+  write_asset_map(assets, game.backgrounds, "asset_background");
+  write_asset_map(assets, game.fonts,       "asset_font");
+  write_asset_map(assets, game.timelines,   "asset_timeline");
+  write_asset_map(assets, game.paths,       "asset_path");
+  write_asset_map(assets, game.sounds,      "asset_sound");
+  write_asset_map(assets, game.scripts,     "asset_script");
+  write_asset_map(assets, game.shaders,     "asset_shader");
+  write_asset_map(assets, game.rooms,       "asset_room");
+  while (!assets.empty() && (assets.back() == ',' || assets.back() == '\n')) {
+    assets.pop_back();
+  }
+  
+  wto << assets;
+  
+  wto << "\n};\n";
+  wto << "\n\n}\n";
   wto.close();
 
 
