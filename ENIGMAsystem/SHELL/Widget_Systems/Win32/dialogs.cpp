@@ -175,7 +175,7 @@ static LRESULT CALLBACK ShowDebugMessageProc(int nCode, WPARAM wParam, LPARAM lP
       SetDlgItemTextW(dlg_error, IDCANCEL, L"Ignore");
       wchar_t dlg_abort[32]; wchar_t dlg_ignore[32];
       GetDlgItemTextW(dlg_error, IDOK, dlg_abort, 32);
-      GetDlgItemTextW(dlg_error, IDOK, dlg_ignore, 32);
+      GetDlgItemTextW(dlg_error, IDCANCEL, dlg_ignore, 32);
       if (shorten(dlg_abort) == "Abort" && fatal_error) {
         init_error = false;
       } else if (shorten(dlg_abort) == "Abort" && 

@@ -105,17 +105,13 @@ int cocoa_show_error(const char *errortext, bool fatal, const char *title) {
 
   [alert setInformativeText:myStr];
   [alert addButtonWithTitle:@"Abort"];
-  [alert addButtonWithTitle:@"Retry"];
-  [alert addButtonWithTitle:@"Ignore"];
+  if (!fatal) [alert addButtonWithTitle:@"Ignore"];
   [alert setAlertStyle:2];
   NSModalResponse responseTag = [alert runModal];
   [alert release];
 
   if (responseTag == NSAlertFirstButtonReturn || fatal)
     return 1;
-
-  if (responseTag == NSAlertSecondButtonReturn)
-    return 0;
 
   return -1;
 }

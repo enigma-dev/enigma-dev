@@ -406,109 +406,6 @@ void set_program_priority(int value) {
   SetPriorityClass(GetCurrentThread(), priorityValue);
 }
 
-void execute_shell(std::string fname, std::string args) {
-  WCHAR cDir[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, cDir);
-  tstring tstr_fname = widen(fname);
-  tstring tstr_args = widen(args);
-  ShellExecuteW(enigma::hWnd, NULL, tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
-}
-
-void execute_shell(std::string operation, std::string fname, std::string args) {
-  WCHAR cDir[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, cDir);
-  tstring tstr_operation = widen(operation);
-  tstring tstr_fname = widen(fname);
-  tstring tstr_args = widen(args);
-  ShellExecuteW(enigma::hWnd, tstr_operation.c_str(), tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
-}
-
-std::string execute_shell_for_output(const std::string &command) {
-  tstring tstr_command = widen(command);
-  wchar_t ctstr_command[32768];
-  wcsncpy(ctstr_command, tstr_command.c_str(), 32768);
-  BOOL ok = TRUE;
-  HANDLE hStdInPipeRead = NULL;
-  HANDLE hStdInPipeWrite = NULL;
-  HANDLE hStdOutPipeRead = NULL;
-  HANDLE hStdOutPipeWrite = NULL;
-  SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
-  ok = CreatePipe(&hStdInPipeRead, &hStdInPipeWrite, &sa, 0);
-  if (ok == FALSE) return "";
-  ok = CreatePipe(&hStdOutPipeRead, &hStdOutPipeWrite, &sa, 0);
-  if (ok == FALSE) return "";
-  STARTUPINFOW si = { };
-  si.cb = sizeof(STARTUPINFOW);
-  si.dwFlags = STARTF_USESTDHANDLES;
-  si.hStdError = hStdOutPipeWrite;
-  si.hStdOutput = hStdOutPipeWrite;
-  si.hStdInput = hStdInPipeRead;
-  PROCESS_INFORMATION pi = { };
-  if (CreateProcessW(NULL, ctstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-    while (WaitForSingleObject(pi.hProcess, 5) == WAIT_TIMEOUT) {
-      MSG msg;
-      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
-    }
-    CloseHandle(hStdOutPipeWrite);
-    CloseHandle(hStdInPipeRead);
-    char buf[4096] = { };
-    DWORD dwRead = 0;
-    DWORD dwAvail = 0;
-    ok = ReadFile(hStdOutPipeRead, buf, 4095, &dwRead, NULL);
-    string str_buf = buf; tstring output = widen(str_buf);
-    while (ok == TRUE) {
-      buf[dwRead] = '\0';
-      OutputDebugStringW(output.c_str());
-      _putws(output.c_str());
-      ok = ReadFile(hStdOutPipeRead, buf, 4095, &dwRead, NULL);
-      str_buf = buf; output += widen(str_buf);
-    }
-    CloseHandle(hStdOutPipeRead);
-    CloseHandle(hStdInPipeWrite);
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-    return shorten(output);
-  }
-  return "";
-}
-
-void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
-  SHELLEXECUTEINFOW lpExecInfo;
-  tstring tstr_operation = widen(operation);
-  tstring tstr_fname = widen(fname);
-  tstring tstr_args = widen(args);
-  lpExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
-  lpExecInfo.lpFile = tstr_fname.c_str();
-  lpExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
-  lpExecInfo.hwnd = enigma::hWnd;
-  lpExecInfo.lpVerb = tstr_operation.c_str();
-  lpExecInfo.lpParameters = tstr_args.c_str();
-  WCHAR cDir[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, cDir);
-  lpExecInfo.lpDirectory = cDir;
-  lpExecInfo.nShow = SW_SHOW;
-  lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;  //WINSHELLAPI BOOL WINAPI result;
-  ShellExecuteExW(&lpExecInfo);
-
-  //wait until a file is finished printing
-  if (wait && lpExecInfo.hProcess != NULL) {
-    while (WaitForSingleObject(lpExecInfo.hProcess, 5) == WAIT_TIMEOUT) {
-      MSG msg;
-      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
-    }
-  }
-  if (lpExecInfo.hProcess != NULL)
-    CloseHandle(lpExecInfo.hProcess);
-}
-
-void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
-
 // converts a relative path to absolute if the path exists
 std::string filename_absolute(std::string fname) {
   if (string_replace_all(fname, " ", "") == "") fname = ".";
@@ -537,12 +434,6 @@ bool environment_set_variable(const std::string &name, const std::string &value)
   tstring tstr_value = widen(value);
   if (value == "") return (SetEnvironmentVariableW(tstr_name.c_str(), NULL) != 0);
   return (SetEnvironmentVariableW(tstr_name.c_str(), tstr_value.c_str()) != 0);
-}
-
-void action_webpage(const std::string &url) {
-  tstring tstr_url = widen(url);
-  tstring tstr_open = widen("open");
-  ShellExecuteW(NULL, tstr_open.c_str(), tstr_url.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
 }  // namespace enigma_user

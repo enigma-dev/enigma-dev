@@ -50,6 +50,9 @@ namespace enigma
     int spr_highid;
     if (!fread(&spr_highid,4,1,exe)) return;
 
+    if (sprcount == 0) return;
+    sprites.resize(spr_highid+1);
+
     for (int i = 0; i < sprcount; i++)
     {
       if (!fread(&sprid, 4,1,exe)) return;
@@ -132,7 +135,7 @@ namespace enigma
         }
       }
       
-      sprites.add(std::move(spr));
+      sprites.assign(sprid, std::move(spr));
     }
   }
 }

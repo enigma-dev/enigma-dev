@@ -20,7 +20,7 @@
 #include "texture_atlas.h"
 #include "texture_atlas_internal.h"
 
-#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/backgrounds_internal.h"
 #include "Universal_System/Resources/fonts_internal.h"
 #include "Universal_System/Resources/sprites_internal.h"
 
@@ -83,8 +83,8 @@ namespace enigma {
           }
         } break;
         case 1: { //Metrics for backgrounds
-          enigma::background *bkg = enigma::backgroundstructarray[textures[i].id];
-          metrics[counter].w = bkg->width, metrics[counter].h = bkg->height;
+          const enigma::Background& bkg = enigma::backgrounds.get(textures[i].id);
+          metrics[counter].w = bkg.width, metrics[counter].h = bkg.height;
           counter++;
         } break;
         case 2: { //Metrics for font glyps
@@ -162,16 +162,17 @@ namespace enigma {
           }
         } break;
         case 1: { //Copy textures for all the backgrounds
-          enigma::background *bkg = enigma::backgroundstructarray[textures[i].id];
-          enigma::graphics_copy_texture(bkg->texture, enigma::texture_atlas_array[ta].texture, metrics[counter].x, metrics[counter].y);
+          enigma::Background& bkg = enigma::backgrounds.get(textures[i].id);
+          enigma::graphics_copy_texture(bkg.textureID, enigma::texture_atlas_array[ta].texture, metrics[counter].x, metrics[counter].y);
           if (free_textures == true){
-            enigma::graphics_delete_texture(bkg->texture);
+            enigma::graphics_delete_texture(bkg.textureID);
           }
-          bkg->texture = enigma::texture_atlas_array[ta].texture;
-          bkg->texturex = (gs_scalar)metrics[counter].x/(gs_scalar)(enigma::texture_atlas_array[ta].width);
-          bkg->texturey = (gs_scalar)metrics[counter].y/(gs_scalar)(enigma::texture_atlas_array[ta].height);
-          bkg->texturew = (gs_scalar)bkg->width/(gs_scalar)(enigma::texture_atlas_array[ta].width);
-          bkg->textureh = (gs_scalar)bkg->height/(gs_scalar)(enigma::texture_atlas_array[ta].height);
+          bkg.textureID = enigma::texture_atlas_array[ta].texture;
+          enigma::TexRect& tr = bkg.textureBounds;
+          tr.x = (gs_scalar)metrics[counter].x/(gs_scalar)(enigma::texture_atlas_array[ta].width);
+          tr.y = (gs_scalar)metrics[counter].y/(gs_scalar)(enigma::texture_atlas_array[ta].height);
+          tr.w = (gs_scalar)bkg.width/(gs_scalar)(enigma::texture_atlas_array[ta].width);
+          tr.h = (gs_scalar)bkg.height/(gs_scalar)(enigma::texture_atlas_array[ta].height);
 
           counter++;
           if (counter > max_textures) { return false; }

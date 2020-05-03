@@ -36,6 +36,7 @@ using enigma_user::filename_name;
 using enigma_user::filename_path;
 
 #include "Platforms/General/PFmain.h"
+#include "Platforms/General/PFshell.h"
 using enigma_insecure::execute_shell_for_output;
 
 #include "Platforms/General/PFwindow.h"
@@ -65,8 +66,7 @@ static bool message_cancel  = false;
 static bool question_cancel = false;
 
 static string shellscript_evaluate(string command) {
-  string result;
-  execute_shell_for_output(command, result);
+  string result = execute_shell_for_output(command);
   if (result.back() == '\n') result.pop_back();
   return result;
 }
@@ -174,13 +174,22 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   #endif
 
   str_echo = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) ? "echo 1" :
-    "x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi";
+    "x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo -1;fi";
 
-  str_command = string("kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
-  string("--warningyesnocancel \"") + add_escaping(errortext, false, "") + string("\" ") +
-  string("--yes-label Abort --no-label Retry --cancel-label Ignore ") +
-  string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
+  if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
+    type == MESSAGE_TYPE::M_FATAL_USER_ERROR) {
+    str_command = string("kdialog ") +
+    string("--attach=") + window_identifier() + string(" ") +
+    string("--sorry \"") + add_escaping(errortext, false, "") + string("\" ") +
+    string("--ok-label Abort ") +
+    string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
+  } else {
+    str_command = string("kdialog ") +
+    string("--attach=") + window_identifier() + string(" ") +
+    string("--warningyesno \"") + add_escaping(errortext, false, "") + string("\" ") +
+    string("--yes-label Abort --no-label Ignore ") +
+    string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
+  }
 
   string str_result = shellscript_evaluate(str_command);
   if (strtod(str_result.c_str(), NULL) == 1) exit(0);

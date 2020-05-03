@@ -75,9 +75,11 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
 }
 
 void graphics_delete_texture(int tex) {
-  DX11Texture* texture = static_cast<DX11Texture*>(textures[tex].get());
-  texture->peer->Release(), texture->peer = NULL;
-  texture->view->Release(), texture->view = NULL;
+  if (tex >= 0) {
+    DX11Texture* texture = static_cast<DX11Texture*>(textures[tex].get());
+    texture->peer->Release(), texture->peer = NULL;
+    texture->view->Release(), texture->view = NULL;
+  }
 }
 
 unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {
