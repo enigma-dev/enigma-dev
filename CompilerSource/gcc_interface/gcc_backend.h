@@ -38,6 +38,7 @@
 #include <fstream> // std::ifstream
 #include <iostream> // std::cerr
 
+// TODO: delete me once this has a permenant home in shared
 inline std::string fc(const char* fn) {
   std::ifstream t(fn);
   
@@ -65,12 +66,6 @@ static inline std::vector<std::string> explode(std::string n) {
   }
   if (n.length() > pos) ret.push_back(n.substr(pos));
   return ret;
-}
-
-inline std::string tolower(std::string x) {
-  for (size_t i = 0; i < x.length(); i++)
-    if (x[i] >= 'A' and x[i] <= 'Z') x[i] -= 'A' - 'a';
-  return x;
 }
 
 #endif

@@ -55,6 +55,12 @@ static string message_caption;
 static tstring dialog_caption = L"";
 static tstring error_caption = L"";
 
+// error hook proc
+HHOOK hook_handle = NULL;
+HWND dlg_error = NULL;
+bool init_error = false;
+bool fatal_error = false;
+
 // show cancel button?
 static bool message_cancel = false;
 static bool question_cancel = false;
@@ -143,6 +149,35 @@ static inline void CenterWindowToMonitor(HWND hwnd, UINT flags) {
 
 static tstring tstring_replace_all(tstring str, tstring substr, tstring newstr) {
   return widen(string_replace_all(shorten(str), shorten(substr), shorten(newstr)));
+}
+
+
+static LRESULT CALLBACK ShowDebugMessageProc(int nCode, WPARAM wParam, LPARAM lParam) {
+  if (nCode < HC_ACTION)
+    return CallNextHookEx(hook_handle, nCode, wParam, lParam);
+
+  if (nCode == HCBT_CREATEWND) {
+    CBT_CREATEWNDW *cbtcr = (CBT_CREATEWNDW *)lParam;
+    if (cbtcr->lpcs->hwndParent == enigma::hWnd) {
+      dlg_error = (HWND)wParam;
+      init_error = true;
+    }
+    if (dlg_error != NULL && init_error) {
+      SetDlgItemTextW(dlg_error, IDOK, L"Abort");
+      SetDlgItemTextW(dlg_error, IDCANCEL, L"Ignore");
+      wchar_t dlg_abort[32]; wchar_t dlg_ignore[32];
+      GetDlgItemTextW(dlg_error, IDOK, dlg_abort, 32);
+      GetDlgItemTextW(dlg_error, IDCANCEL, dlg_ignore, 32);
+      if (shorten(dlg_abort) == "Abort" && fatal_error) {
+        init_error = false;
+      } else if (shorten(dlg_abort) == "Abort" && 
+        shorten(dlg_ignore) == "Ignore") {
+        init_error = false;
+      }
+    }
+  }
+
+  return CallNextHookEx(hook_handle, nCode, wParam, lParam);
 }
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -543,10 +578,16 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
     tstrWindowCaption = error_caption;
 
   int result;
-  result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
-  if (result == IDABORT || type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) exit(0);
+  DWORD ThreadID = GetCurrentThreadId();
+  HINSTANCE ModHwnd = GetModuleHandle(NULL);
+  hook_handle = SetWindowsHookEx(WH_CBT, &ShowDebugMessageProc, ModHwnd, ThreadID);
+  bool fatal = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR); 
+  fatal_error = fatal;
 
-  //ABORT_ON_ALL_ERRORS();
+  result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), ((fatal) ? MB_OK : MB_OKCANCEL) | 
+  MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
+  UnhookWindowsHookEx(hook_handle);
+  if (result == IDOK || fatal) exit(0);
 }
 
 static string widget = enigma_user::ws_win32;
