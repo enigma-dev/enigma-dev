@@ -36,7 +36,7 @@
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
-#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/backgrounds.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/fonts.h"
 

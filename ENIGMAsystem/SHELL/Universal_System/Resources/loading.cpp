@@ -18,7 +18,7 @@
 
 #include "resinit.h"
 #include "sprites_internal.h"
-#include "background_internal.h"
+#include "backgrounds_internal.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/Object_Tiers/object.h"
 #include "libEGMstd.h"
@@ -67,7 +67,6 @@ namespace enigma
     event_system_initialize();
     timeline_system_initialize();
     input_initialize();
-    backgrounds_init();
     widget_system_initialize();
 
     // Open the exe for resource load

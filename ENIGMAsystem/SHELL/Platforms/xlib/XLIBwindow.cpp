@@ -23,7 +23,7 @@
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/Resources/sprites.h"
-#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/backgrounds.h"
 
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"
@@ -498,7 +498,13 @@ void window_set_size(unsigned int w, unsigned int h) {
   if (window_get_fullscreen()) return;
   enigma::windowWidth = w;
   enigma::windowHeight = h;
-  XResizeWindow(disp, win, w, h);
+  if (!enigma::isSizeable) {
+    window_set_sizeable(true);
+    XResizeWindow(disp, win, w, h);
+    window_set_sizeable(false);
+  } else {
+    XResizeWindow(disp, win, w, h);
+  }
 }
 
 void window_set_rectangle(int x, int y, int w, int h) {

@@ -21,10 +21,11 @@
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
-#include <iostream>
 
 using enigma::Sprite;
 using enigma::sprites;
@@ -239,7 +240,7 @@ var sprite_get_uvs(int ind, int subimg) {
   const enigma::Subimage& s = sprites.get(ind).GetSubimage(subimg);
 
   uvs[0] = s.textureBounds.left();
-  uvs[1] = s.textureBounds.right();
+  uvs[1] = s.textureBounds.top();
   uvs[2] = s.textureBounds.right();
   uvs[3] = s.textureBounds.bottom();
   return uvs;
@@ -259,4 +260,26 @@ void sprite_save(int ind, unsigned subimg, std::string fname) {
 
 //void sprite_set_precise(int ind, bool precise); //FIXME: We don't support this yet
 //void sprite_save_strip(int ind, std::string fname); //FIXME: We don't support this yet
+
+int sprite_create_color(unsigned w, unsigned h, int col) {
+  RawImage img;
+  img.pxdata = new unsigned char[w * h * 4];
+  std::fill((unsigned*)(img.pxdata), (unsigned*)(img.pxdata) + w * h, (COL_GET_R(col) | (COL_GET_G(col) << 8) | (COL_GET_B(col) << 16) | 255 << 24));
+
+  Sprite s(w, h, 0, 0);
+  s.SetBBox(0, 0, w, h);
+  s.AddSubimage(img.pxdata, w, h, enigma::ct_bbox, img.pxdata, false);
+  return sprites.add(std::move(s));
+}
+
+bool sprite_textures_equal(int id1, int subimg1, int id2, int subimg2) {
+  // Note: this will need to be amended to use textures_regions_equal when atlas support is implemented
+  return textures_equal(sprite_get_texture(id1, subimg1), sprite_get_texture(id2, subimg2));
+}
+
+uint32_t sprite_get_pixel(int id, int subimg, unsigned x, unsigned y) {
+  // Note: this will need to be amended when atlas support is implemented
+  return texture_get_pixel(sprite_get_texture(id, subimg), x, y);
+}
+
 }

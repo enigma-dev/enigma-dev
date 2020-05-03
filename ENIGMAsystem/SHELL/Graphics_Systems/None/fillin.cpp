@@ -34,7 +34,7 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/backgrounds_internal.h"
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
@@ -141,4 +141,7 @@ namespace enigma_user
 	void draw_text(float, float, variant) {}
 	void draw_sprite_ext(int, int, float, float, float, float, double, int, float) {}
 	void draw_healthbar(float, float, float, float, float, int, int, int, int, bool, bool) {}
+  
+  uint32_t texture_get_pixel(int, unsigned int, unsigned int) {return 0;}
+  bool textures_equal(int, int) {return false;}
 }

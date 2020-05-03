@@ -12,8 +12,22 @@ gtest_assert_false(sprite_exists(spr1));
 spr1 = sprite_add("../data/sprite.png", 4, false, false, xoff, yoff); // same spr but split into 4 subimg
 gtest_assert_eq(spr1, 1);
 
-// replace / assign / duplicate
+// uvs
+var uvs = sprite_get_uvs(spr1, 1);
+gtest_assert_eq(uvs[0], 0);
+gtest_assert_eq(uvs[1], 0);
+gtest_assert_eq(uvs[2], 1);
+gtest_assert_eq(uvs[3], 1);
+
 spr2 = sprite_add("../data/sprite.png", 1, false, false, xoff+4, yoff+4);
+
+uvs = sprite_get_uvs(spr2, 0);
+gtest_assert_eq(uvs[0], 0);
+gtest_assert_eq(uvs[1], 0);
+gtest_assert_eq(uvs[2], 1);
+gtest_assert_eq(uvs[3], 1);
+
+// replace / assign / duplicate
 sprite_assign(spr2, spr1);
 
 for (unsigned i = 0; i < 2; i+=1)  {
@@ -143,15 +157,34 @@ gtest_assert_eq(sprite_get_bbox_mode(spr1), 2);
 sprite_delete(spr1);
 sprite_delete(spr2);
 
-// save : for now just check sizes no img../data
+// alpha
+spr1 = sprite_create_color(256, 64, c_black);
+int spr_alpha = sprite_add("../data/alpha.png", 1, true, false, 0, 0, false);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 0), 255);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 32), 255);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 63), 255);
+sprite_set_alpha_from_sprite(spr1, spr_alpha);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 0), 255);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 32), 128);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 63), 0);
+
+// save
 // Also checks our load / replace overloads
 spr1 = sprite_add("../data/sprite.png", 4, true, false, xoff, yoff, false);
 gtest_assert_eq(sprite_get_number(spr1), 4);
-sprite_save(spr1, 0, "/tmp/sprite.png");
+
+for (int i = 0; i < sprite_get_number(spr1); i+=1) {
+  sprite_save(spr1, i, "/tmp/sprite.png");
+  int spr_frame = sprite_add("/tmp/sprite.png", 1, true, false, xoff, yoff, false);
+  gtest_assert_true(sprite_textures_equal(spr_frame, 0, spr1, i));
+}
+
 spr2 = sprite_add("/tmp/sprite.png", 1, false, false, xoff, yoff, false);
 gtest_assert_eq(sprite_get_width(spr2), sprite_get_width(spr1));
 gtest_assert_eq(sprite_get_height(spr2), sprite_get_height(spr1));
 gtest_assert_eq(sprite_get_number(spr2), 1);
+int spr_frame = sprite_add("/tmp/sprite.png", 1, true, false, xoff, yoff, false);
+gtest_assert_true(sprite_textures_equal(spr_frame, 0, spr2, 0));
 
 /*sprite_save_strip(spr1, "/tmp/sprite2.png");
 sprite_replace(spr2, "/tmp/sprite2.png", 1, false, false, xoff, yoff, false);
