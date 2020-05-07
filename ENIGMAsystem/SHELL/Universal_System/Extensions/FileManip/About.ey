@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: File Manipulation
+Identifier: FileManip
+Author: Samuel Venable
+Description: Allows creating, copying, moving, renaming, and deleting files and directories.
+Default: true
+Icon: fileman.png
+
+Depends: None
+Dependencies: None
