@@ -41,14 +41,15 @@ namespace enigma
 
     // Determine how many backgrounds we have
     int bkgcount;
-    if (!fread(&bkgcount,4,1,exe) || bkgcount == 0)
+    if (!fread(&bkgcount,4,1,exe))
       return;
 
     // Fetch the highest ID we will be using
     int bkg_highid;
     if (!fread(&bkg_highid,4,1,exe))
       return;
-      
+    
+    if (bkgcount == 0) return;
     backgrounds.resize(bkg_highid+1);
 
     for (int i = 0; i < bkgcount; i++)
