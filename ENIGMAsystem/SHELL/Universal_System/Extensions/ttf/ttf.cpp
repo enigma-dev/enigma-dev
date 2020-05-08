@@ -174,7 +174,7 @@ namespace enigma_user {
     }
 
     fnt->glyphRanges[0] = fgr;
-    fnt->texture = enigma::graphics_create_texture(w, h, w, h, pxdata, false);
+    fnt->texture = enigma::graphics_create_texture(w, h, pxdata, false);
     fnt->twid = w;
     fnt->thgt = h;
     fnt->yoffset = face->glyph->linearVertAdvance / 65536;
