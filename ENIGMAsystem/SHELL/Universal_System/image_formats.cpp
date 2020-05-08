@@ -193,22 +193,6 @@ unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigne
   return result;
 }
 
-unsigned char* rgba_to_bgra(unsigned char* pxdata, int w, int h) {
-  unsigned char* out = new unsigned char[w * h * 4];
-  for (int y = 0; y < h; ++y) {
-    unsigned idx = w * h * 4;
-    for (int x = 0; x < w; ++x) {
-      out[idx + 0] = pxdata[idx + 2];
-      out[idx + 1] = pxdata[idx + 1];
-      out[idx + 2] = pxdata[idx + 0];
-      out[idx + 3] = pxdata[idx + 3];
-      idx += 4;
-    }
-  }
-  return out;
-}
-
-
 void image_add_loader(std::string format, ImageLoadFunction fnc) {
   image_load_handlers[format] = fnc;
 }
