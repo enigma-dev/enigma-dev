@@ -92,8 +92,7 @@ namespace enigma
       }
       delete[] cpixels;
 
-      RawImage img = image_pad(pixels, width, height, nlpo2dc(width)+1, nlpo2dc(height)+1);
-      int texID = graphics_create_texture(width, height, img.w, img.h, img.pxdata, false);
+      int texID = graphics_create_texture(width, height, pixels, false);
       Background bkg(width, height, texID, useAsTileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
       backgrounds.assign(bkgid, std::move(bkg));
 

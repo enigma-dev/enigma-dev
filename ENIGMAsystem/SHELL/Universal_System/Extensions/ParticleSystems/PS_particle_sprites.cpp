@@ -119,7 +119,7 @@ namespace enigma
   // Assumes fullwidth == fullheight == 2^n for some n>0.
   static void create_particle_sprite(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, char* imgpxdata, pt_shape pt_sh)
   {
-    unsigned texture = graphics_create_texture(width, height, fullwidth, fullheight, imgpxdata, false);
+    unsigned texture = graphics_create_texture(width, height, imgpxdata, false, &fullwidth, &fullheight);
 
     particle_sprite* p_sprite = new particle_sprite();
     p_sprite->texture = texture;

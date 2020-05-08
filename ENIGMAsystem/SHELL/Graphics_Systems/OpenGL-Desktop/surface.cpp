@@ -27,7 +27,7 @@ int surface_create(int width, int height, bool depthbuffer, bool stencilbuffer, 
   surf->height = h;
 
     glGenFramebuffers(1, &fbo);
-    int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
+    int texture = enigma::graphics_create_texture(w,h,0,false);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
     glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, enigma::get_texture_peer(texture), 0);
@@ -62,12 +62,12 @@ int surface_create(int width, int height, bool depthbuffer, bool stencilbuffer, 
       surf->write_only = true;
     }else{ //These use Framebuffers which a slower, but can be sampled
       if (stencilbuffer == true){ //If you use stencilbuffer you MUST also use depth buffer, as a free standing stencil buffer is seldom supported in FBO (GL spec even encourages against it)
-        surf->depth_buffer = enigma::graphics_create_texture_custom(w,h,w,h,0,false, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
+        surf->depth_buffer = enigma::graphics_create_texture_custom(w,h,0,false, nullptr, nullptr, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, enigma::get_texture_peer(surf->depth_buffer), 0);
         flags = flags | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
         surf->has_depth_buffer = true;
       }else if (depthbuffer == true){
-        surf->depth_buffer = enigma::graphics_create_texture_custom(w,h,w,h,0,false, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
+        surf->depth_buffer = enigma::graphics_create_texture_custom(w,h,0,false,nullptr,nullptr, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, enigma::get_texture_peer(surf->depth_buffer), 0);
         flags = flags | GL_DEPTH_BUFFER_BIT;
         surf->has_depth_buffer = true;
@@ -102,7 +102,7 @@ int surface_create_msaa(int width, int height, int samples)
   surf->width = w;
   surf->height = h;
 
-  int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
+  int texture = enigma::graphics_create_texture(w,h,0,false);
   glGenFramebuffers(1, &fbo);
   glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, enigma::get_texture_peer(texture));
 

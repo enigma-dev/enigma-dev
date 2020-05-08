@@ -21,6 +21,8 @@
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Universal_System/image_formats.h"
+#include "Universal_System/nlpo2.h"
 
 #include <string.h> // for memcpy
 using namespace enigma::dx9;
@@ -133,7 +135,7 @@ void graphics_push_texture_pixels(int texture, int x, int y, int width, int heig
   }
 }
 
-int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
+int graphics_create_texture(unsigned width, unsigned height, void* pxdata, bool mipmap, unsigned* fullwidth, unsigned* fullheight)
 {
   LPDIRECT3DTEXTURE9 texture = NULL;
 
@@ -141,15 +143,24 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   d3ddev->CreateTexture(fullwidth, fullheight, 1, usage, D3DFMT_A8R8G8B8, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &texture, 0);
 
   if (mipmap) texture->GenerateMipSubLevels();
+  
+  unsigned fw, fh;
+  if (fullwidth == nullptr) fullwidth = &fw; 
+  if (fullheight == nullptr) fullheight = &fh;
+  
+  *fullwidth  = nlpo2dc(width)+1;
+  *fullheight = nlpo2dc(height)+1;
+  
+  RawImage padded = image_pad((unsigned char*)pxdata, width, height, *fullwidth, *fullheight);
 
   const int id = textures.size();
   textures.push_back(std::make_unique<DX9Texture>(texture));
   auto& textureStruct = textures.back();
   textureStruct->width = width;
   textureStruct->height = height;
-  textureStruct->fullwidth = fullwidth;
-  textureStruct->fullheight = fullheight;
-  if (pxdata != nullptr) graphics_push_texture_pixels(id, 0, 0, width, height, fullwidth, fullheight, (unsigned char*)pxdata);
+  textureStruct->fullwidth = *fullwidth;
+  textureStruct->fullheight = *fullheight;
+  if (padded.pxdata != nullptr) graphics_push_texture_pixels(id, 0, 0, width, height, *fullwidth, *fullheight, padded.pxdata);
   return id;
 }
 

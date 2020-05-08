@@ -37,9 +37,8 @@ using enigma::RawImage;
 namespace {
 
 Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool mipmap) {
-  unsigned int width, height, fullwidth, fullheight;
-  unsigned char *pxdata = enigma::image_load(
-      filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
+  unsigned int width, height;
+  unsigned char *pxdata = enigma::image_load(filename, &width, &height, &imgnumb, false);
   
   unsigned cellwidth = width / imgnumb;
   Sprite ns(cellwidth, height, x_offset, y_offset);

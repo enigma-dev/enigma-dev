@@ -383,8 +383,7 @@ int background_create_from_surface(int id, int x, int y, int w, int h, bool remo
     enigma::image_swap_color(surfbuf, w, h, c, enigma::Color {0, 0, 0, 0});
   }
   
-  enigma::RawImage img = enigma::image_pad(surfbuf, w, h, enigma::nlpo2dc(w)+1, enigma::nlpo2dc(h)+1);
-  enigma::Background bkg(w, h, enigma::graphics_create_texture(w, h, img.w, img.h, img.pxdata, false));
+  enigma::Background bkg(w, h, enigma::graphics_create_texture(w, h, surfbuf, false));
   
   delete[] surfbuf;
 

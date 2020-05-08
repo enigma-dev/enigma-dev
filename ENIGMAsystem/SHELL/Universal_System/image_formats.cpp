@@ -142,6 +142,29 @@ RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeigh
   return padded;
 }
 
+RawImage image_crop(const unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight) {
+  RawImage img;
+  img.w = newWidth;
+  img.h = newHeight;
+  img.pxdata = new unsigned char[newWidth * newHeight * 4];
+  
+  unsigned stride = 4;
+  for (unsigned i = 0; i < newHeight; i++) {
+    unsigned tmp = i;
+    unsigned bmp = i;
+    tmp *= stride * origWidth;
+    bmp *= stride * newWidth;
+    for (unsigned ii = 0; ii < newWidth*stride; ii += stride) {
+      img.pxdata[bmp + ii + 2] = pxdata[tmp + ii + 0];
+      img.pxdata[bmp + ii + 1] = pxdata[tmp + ii + 1];
+      img.pxdata[bmp + ii + 0] = pxdata[tmp + ii + 2];
+      img.pxdata[bmp + ii + 3] = pxdata[tmp + ii + 3];
+    }
+  }
+  
+  return img;
+}
+
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size) {
   unsigned widfull = nlpo2dc(pngwidth) + 1, hgtfull = nlpo2dc(pngheight) + 1, ih, iw;
   const int bitmap_size = widfull * hgtfull * 4;
@@ -169,6 +192,22 @@ unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigne
   delete[] bitmap;
   return result;
 }
+
+unsigned char* rgba_to_bgra(unsigned char* pxdata, int w, int h) {
+  unsigned char* out = new unsigned char[w * h * 4];
+  for (int y = 0; y < h; ++y) {
+    unsigned idx = w * h * 4;
+    for (int x = 0; x < w; ++x) {
+      out[idx + 0] = pxdata[idx + 2];
+      out[idx + 1] = pxdata[idx + 1];
+      out[idx + 2] = pxdata[idx + 0];
+      out[idx + 3] = pxdata[idx + 3];
+      idx += 4;
+    }
+  }
+  return out;
+}
+
 
 void image_add_loader(std::string format, ImageLoadFunction fnc) {
   image_load_handlers[format] = fnc;
@@ -202,27 +241,27 @@ string image_get_format(string filename) {
 }
 
 /// Generic all-purpose image loading call.
-unsigned char* image_load(string filename, string format, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped) {
+unsigned char* image_load(string filename, string format, unsigned int* width, unsigned int* height, int* imgnumb) {
   if (format.compare(".bmp") == 0) {
-    return image_load_bmp(filename, width, height, fullwidth, fullheight, flipped);
+    return image_load_bmp(filename, width, height);
   } else if (format.compare(".gif") == 0) {
-    return image_load_gif(filename, width, height, fullwidth, fullheight, imgnumb, flipped);
+    return image_load_gif(filename, width, height, imgnumb);
   }
   auto handler = image_load_handlers.find(format);
   if (handler != image_load_handlers.end()) {
-    return (*handler).second(filename, width, height, fullwidth, fullheight, flipped);
+    return (*handler).second(filename, width, height);
   }
-  return image_load_bmp(filename, width, height, fullwidth, fullheight, flipped);
+  return image_load_bmp(filename, width, height);
 }
 
 
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
-unsigned char* image_load(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped) {
+unsigned char* image_load(string filename, unsigned int* width, unsigned int* height, int* imgnumb, bool flipped) {
   string format = image_get_format(filename);
   if (format.empty()) {
     format = ".bmp";
   }
-  return image_load(filename, format, width, height, fullwidth, fullheight, imgnumb, flipped);
+  return image_load(filename, format, width, height, imgnumb);
 }
 
 /// Generic all-purpose image saving call.
@@ -247,13 +286,11 @@ int image_save(string filename, const unsigned char* data, unsigned width, unsig
 }
 
 unsigned char* image_load_bmp(
-    string filename, unsigned int* width, unsigned int* height,
-    unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
+    string filename, unsigned int* width, unsigned int* height) {
   if (std::ifstream bmp{filename}) {
     std::stringstream buffer;
     buffer << bmp.rdbuf();
-    return image_decode_bmp(buffer.str(), width, height,
-                            fullwidth, fullheight, flipped);
+    return image_decode_bmp(buffer.str(), width, height);
   }
   return nullptr;
 }
@@ -350,8 +387,7 @@ struct BMPInfoHeader {
 
 
 unsigned char* image_decode_bmp(
-    const string &image_data, unsigned int* width, unsigned int* height,
-    unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
+    const string &image_data, unsigned int* width, unsigned int* height) {
   // Check file size against bitmap header size
   if (image_data.length() < sizeof(BMPFileHeader)) {
     fprintf(stderr, "Junk bitmap of size %lu", image_data.size());
@@ -383,62 +419,20 @@ unsigned char* image_decode_bmp(
     return nullptr;
   }
 
-  const unsigned widfull = nlpo2dc(bmp_info.width) + 1;
-  const unsigned hgtfull = nlpo2dc(bmp_info.height) + 1;
-  const unsigned bitmap_size = widfull*hgtfull*4;
-
-  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to 0.
-
-  // Calculate the number of nulls that follows each line.
-  const int overlap = bmp_info.width * (bmp_info.bitsPerPixel / 8) % 4;
-  const int pad = overlap ? 4 - overlap : 0;
-
-  printf("Bitmap pad: %d\n", pad);
-  const char *bmp_it = image_data.data() + bmp_file.dataStart;
-
-  for (unsigned ih = 0; ih < bmp_info.height; ih++) {
-    unsigned tmp = 0;
-    if (flipped) {
-      tmp = ih * widfull * 4;
-    } else {
-      tmp = (bmp_info.height - 1 - ih) * widfull * 4;
-    }
-    for (unsigned iw = 0; iw < bmp_info.width; iw++) {
-      if (bmp_info.bitsPerPixel == 24) {
-        bitmap[tmp+0] = *bmp_it++;
-        bitmap[tmp+1] = *bmp_it++;
-        bitmap[tmp+2] = *bmp_it++;
-        bitmap[tmp+3] = (char) 0xFF;
-      }
-      else if (bmp_info.bitsPerPixel == 32) {
-        if (argb) {
-          bitmap[tmp+0] = *bmp_it++;
-          bitmap[tmp+1] = *bmp_it++;
-          bitmap[tmp+2] = *bmp_it++;
-          bitmap[tmp+3] = *bmp_it++;
-        } else {
-          bitmap[tmp+3] = *bmp_it++;
-          bitmap[tmp+0] = *bmp_it++;
-          bitmap[tmp+1] = *bmp_it++;
-          bitmap[tmp+2] = *bmp_it++;
-        }
-      }
-      tmp += 4;
-    }
-    bmp_it += pad;
-  }
   *width  = bmp_info.width;
   *height = bmp_info.height;
-  *fullwidth  = widfull;
-  *fullheight = hgtfull;
-  return bitmap;
+  
+  int sz =*width * *height * 4;
+  unsigned char* pxdata = new unsigned char[sz];
+  std::memcpy(pxdata, image_data.data() + bmp_file.dataStart, sz);
+  return pxdata;
 }
 
-unsigned char* image_load_gif(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped) {
+unsigned char* image_load_gif(string filename, unsigned int* width, unsigned int* height, int* imgnumb) {
   unsigned int error = 0;
   unsigned char* image = 0;
 
-  error = load_gif_file(filename.c_str(), image, *width, *height, *fullwidth, *fullheight, *imgnumb);
+  error = load_gif_file(filename.c_str(), image, *width, *height, *imgnumb);
   if (error) {
     DEBUG_MESSAGE(load_gif_error_text(error), MESSAGE_TYPE::M_ERROR);
     return NULL;

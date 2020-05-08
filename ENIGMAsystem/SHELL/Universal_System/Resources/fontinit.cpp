@@ -138,7 +138,7 @@ void exe_loadfonts(FILE* exe) {
     font.height = ymax - ymin + 2;
     font.yoffset = -ymin + 1;
 
-    font.texture = graphics_create_texture(twid, thgt, twid, thgt, pixels, false);
+    font.texture = graphics_create_texture(twid, thgt, pixels, false, &twid, &thgt);
     font.twid = twid;
     font.thgt = thgt;
 

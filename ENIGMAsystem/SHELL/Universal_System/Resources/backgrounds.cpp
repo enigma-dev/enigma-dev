@@ -41,7 +41,7 @@ Background background_add_helper(std::string filename, bool transparent, bool sm
   unsigned int width, height, fullwidth, fullheight;
   int imgnumb = 1;
   unsigned char *pxdata = image_load(
-      filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
+      filename, &width, &height, &imgnumb, false);
       
   Background nb;
 
@@ -61,8 +61,7 @@ Background background_add_helper(std::string filename, bool transparent, bool sm
     enigma::image_swap_color(pxdata, width, height, c, Color {0, 0, 0, 0});
   }
 
-  RawImage img = image_pad(pxdata, width, height, fullwidth, fullheight);
-  nb.textureID = graphics_create_texture(width, height, fullwidth, fullheight, img.pxdata, mipmap);
+  nb.textureID = graphics_create_texture(width, height, pxdata, mipmap, &fullwidth, &fullheight);
   nb.textureBounds = TexRect(0, 0, static_cast<gs_scalar>(width) / fullwidth, static_cast<gs_scalar>(height) / fullheight);
 
   delete[] pxdata;
@@ -83,7 +82,7 @@ int background_create_color(unsigned w, unsigned h, int col, bool preload) {
   RawImage img;
   img.pxdata = new unsigned char[fullwidth * fullheight * 4];
   std::fill((unsigned*)(img.pxdata), (unsigned*)(img.pxdata) + fullwidth * fullheight, (COL_GET_R(col) | (COL_GET_G(col) << 8) | (COL_GET_B(col) << 16) | 255 << 24));
-  int textureID = graphics_create_texture(w, h, fullwidth, fullheight, img.pxdata, false);
+  int textureID = graphics_create_texture(w, h, img.pxdata, false);
   return backgrounds.add(std::move(Background(w, h, textureID)));
 }
 

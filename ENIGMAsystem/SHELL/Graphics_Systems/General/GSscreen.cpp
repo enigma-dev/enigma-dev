@@ -67,28 +67,21 @@ RawImage create_from_screen_helper(int x, int y, int w, int h, bool removeback, 
 
   bool flipped = false;
 
-  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x, y, w, h, &flipped);
+  RawImage i;
+  i.pxdata = enigma::graphics_copy_screen_pixels(x, y, w, h, &flipped);
+  i.w = w;
+  i.h = h;
 
   // FIXME: This logic is duplicated here, backgrounds.cpp, sprites_internal.cpp in this file somewhat and likely 12 other places
   if (flipped)
-    rgba = enigma::image_flip(rgba, w, h, 4);
+    i.pxdata = enigma::image_flip(i.pxdata, w, h, 4);
     
   if (removeback) {
-    Color c = enigma::image_get_pixel_color(rgba, w, h, 0, h - 1);
-    enigma::image_swap_color(rgba, w, h, c, Color {0, 0, 0, 0});
+    Color c = enigma::image_get_pixel_color(i.pxdata, w, h, 0, h - 1);
+    enigma::image_swap_color(i.pxdata, w, h, c, Color {0, 0, 0, 0});
   }
   
-  if (pad) {
-    RawImage i = image_pad(rgba, w, h, nlpo2dc(w)+1, nlpo2dc(h)+1);
-    delete[] rgba;
-    return i;
-  } else {
-    RawImage i;
-    i.pxdata = rgba;
-    i.w = w;
-    i.h = h;
-    return i;  
-  }
+  return i;
 }
 
 //These are used to reset the screen viewport for surfaces
@@ -463,7 +456,7 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {
   RawImage img = create_from_screen_helper(x, y, w, h, removeback, true);
-  Background bkg(w, h, graphics_create_texture(w, h, img.w, img.h, img.pxdata, false));
+  Background bkg(w, h, graphics_create_texture(img.w, img.h, img.pxdata, false));
   return backgrounds.add(std::move(bkg));
 }
 

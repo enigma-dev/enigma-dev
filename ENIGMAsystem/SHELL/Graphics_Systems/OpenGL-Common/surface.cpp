@@ -38,7 +38,7 @@ namespace enigma_user {
 void surface_add_colorbuffer(int id, int index, int internalFormat, unsigned format, unsigned type){
   get_surface(surf,id);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, surf.fbo);
-  int texture = enigma::graphics_create_texture_custom(surf.width, surf.height, surf.width, surf.height, 0, false, internalFormat, format, type);
+  int texture = enigma::graphics_create_texture_custom(surf.width, surf.height, 0, false, nullptr, nullptr, internalFormat, format, type);
   glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+index, GL_TEXTURE_2D, enigma::get_texture_peer(texture), 0);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
 }
@@ -46,7 +46,7 @@ void surface_add_colorbuffer(int id, int index, int internalFormat, unsigned for
 void surface_add_depthbuffer(int id, int internalFormat, unsigned format, unsigned type){
   get_surface(surf,id);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, surf.fbo);
-  int texture = enigma::graphics_create_texture_custom(surf.width, surf.height, surf.width, surf.height, 0, false, internalFormat, format, type);
+  int texture = enigma::graphics_create_texture_custom(surf.width, surf.height, 0, false, nullptr, nullptr, internalFormat, format, type);
   glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, enigma::get_texture_peer(texture), 0);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
 }

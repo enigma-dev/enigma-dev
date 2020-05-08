@@ -209,9 +209,9 @@ unsigned char* read_entire_file(const char* filename, size_t& size)
 
 namespace enigma
 {
-unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned int& gif_width, unsigned int& gif_height, unsigned int& image_width, unsigned int& image_height, int& num_images)
+unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned int& image_width, unsigned int& image_height, int& num_images)
 {
-  //Read the entire file into a byte array. This is reasonable because we will output width*height*4 bytes, and the 
+  /*//Read the entire file into a byte array. This is reasonable because we will output width*height*4 bytes, and the 
   // GIF file will be noticeably less (it's compressed, indexed color, and no alpha).
   size_t pos = 0;
   size_t size = 0;
@@ -542,7 +542,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
 
   DEBUG_MESSAGE("[GIF] All GIF sub-images saved.", MESSAGE_TYPE::M_INFO);
   delete [] bytes; 
-  return ERR_SUCCESS;
+  return ERR_SUCCESS;*/
 }
 
 const char* load_gif_error_text(unsigned int err)

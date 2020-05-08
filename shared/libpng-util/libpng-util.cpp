@@ -19,7 +19,7 @@
 
 #include <png.h>
 
-unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename) {
+unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename, bool bgra) {
   FILE *fp = fopen(filename, "wb");
 
   png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -36,6 +36,9 @@ unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, cons
   png_set_IHDR(png, info, w, h,
                8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
                PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+               
+  if (bgra)
+    png_set_bgr(png);
 
   png_write_info(png, info);
 
@@ -51,7 +54,7 @@ unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, cons
   return 0;
 }
 
-unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename) {
+unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename, bool bgra) {
   (*w) = 0; (*h) = 0;
   FILE *fp = fopen(filename, "rb");
 
@@ -97,6 +100,9 @@ unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, con
   if (color_type == PNG_COLOR_TYPE_GRAY ||
       color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
     png_set_gray_to_rgb(png);
+    
+  if (bgra)
+    png_set_bgr(png);
 
   png_read_update_info(png, info);
 

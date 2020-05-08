@@ -163,7 +163,7 @@ namespace enigma
         fg.ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
       }
 
-      font->texture = graphics_create_texture(w,h,w,h,bigtex.data(),false);
+      font->texture = graphics_create_texture(w,h,bigtex.data(),false);
       font->twid = w;
       font->thgt = h;
       font->yoffset = 0;

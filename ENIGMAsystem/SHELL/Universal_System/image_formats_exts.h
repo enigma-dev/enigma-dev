@@ -24,7 +24,7 @@
 namespace enigma
 {
 
-using ImageLoadFunction = std::function<unsigned char*(std::string, unsigned int*, unsigned int*, unsigned int*, unsigned int*, bool)>;
+using ImageLoadFunction = std::function<unsigned char*(std::string, unsigned int*, unsigned int*)>;
 using ImageSaveFunction = std::function<int(std::string, const unsigned char*, unsigned, unsigned, unsigned, unsigned, bool)>;
 
 void image_add_loader(std::string format, ImageLoadFunction fnc);

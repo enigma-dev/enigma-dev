@@ -58,6 +58,7 @@ void image_swap_color(unsigned char* pxdata, unsigned w, unsigned h, Color oldCo
 /// Note splits horizontally
 std::vector<RawImage> image_split(unsigned char* pxdata, unsigned w, unsigned h, unsigned imgcount);
 RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight);
+RawImage image_crop(const unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight);
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size = false);
 
 /// Gets the image format, eg. ".bmp", ".png", etc.
@@ -66,17 +67,17 @@ std::string image_get_format(std::string filename);
 unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned height, unsigned bytesperpixel);
 
 /// Generic all-purpose image loading call.
-unsigned char* image_load(std::string filename, std::string format, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped);
+unsigned char* image_load(std::string filename, std::string format, unsigned int* width, unsigned int* height, int* imgnumb, bool flipped);
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
-unsigned char* image_load(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped);
+unsigned char* image_load(std::string filename, unsigned int* width, unsigned int* height, int* imgnumb, bool flipped);
 /// Generic all-purpose image saving call.
 int image_save(std::string filename, const unsigned char* data, std::string format, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 /// Generic all-purpose image saving call that will regexp the filename for the format and call the appropriate function.
 int image_save(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 
-unsigned char* image_load_bmp(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped);
-unsigned char* image_decode_bmp(const std::string &image_data, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped);
-unsigned char* image_load_gif(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped);
+unsigned char* image_load_bmp(std::string filename, unsigned int* width, unsigned int* height);
+unsigned char* image_decode_bmp(const std::string &image_data, unsigned int* width, unsigned int* height);
+unsigned char* image_load_gif(std::string filename, unsigned int* width, unsigned int* height, int* imgnumb);
 int image_save_bmp(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 
 } //namespace enigma

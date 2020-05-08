@@ -137,7 +137,7 @@ namespace enigma {
       if (enigma::texture_atlas_array[ta].texture != -1){
         graphics_delete_texture(texture_atlas_array[ta].texture);
       }
-      texture_atlas_array[ta].texture = graphics_create_texture(w, h, w, h, nullptr, false);
+      texture_atlas_array[ta].texture = graphics_create_texture(w, h, nullptr, false);
     }
 
     counter = 0;
@@ -233,7 +233,7 @@ namespace enigma_user {
       unsigned int fullwidth = enigma::nlpo2dc(w)+1, fullheight = enigma::nlpo2dc(h)+1; //We only take power of two
       enigma::texture_atlas_array[id].width = fullwidth;
       enigma::texture_atlas_array[id].height = fullheight;
-      enigma::texture_atlas_array[id].texture = enigma::graphics_create_texture(fullwidth, fullheight, fullwidth, fullheight, nullptr, false);
+      enigma::texture_atlas_array[id].texture = enigma::graphics_create_texture(fullwidth, fullheight, nullptr, false);
     }else{
       enigma::texture_atlas_array[id].width = -1;
       enigma::texture_atlas_array[id].height = -1;

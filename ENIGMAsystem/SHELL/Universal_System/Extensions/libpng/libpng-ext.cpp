@@ -29,75 +29,33 @@ using std::string;
 
 namespace enigma {
 
-unsigned char* image_load_png(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
+unsigned char* image_load_png(string filename, unsigned int* width, unsigned int* height) {
   unsigned error;
   unsigned char* image = nullptr;
   unsigned pngwidth, pngheight;
 
-  error = libpng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str());
+  error = libpng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str(), true);
   if (error) {
     DEBUG_MESSAGE("libpng-util error " + std::to_string(error), MESSAGE_TYPE::M_ERROR);
     return NULL;
   }
 
-  unsigned
-    widfull = nlpo2dc(pngwidth) + 1,
-    hgtfull = nlpo2dc(pngheight) + 1,
-    ih,iw;
-  const int bitmap_size = widfull*hgtfull*4;
-  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
-
-  for (ih = 0; ih < pngheight; ih++) {
-    unsigned tmp = 0;
-    if (!flipped) {
-      tmp = ih*widfull*4;
-    } else {
-      tmp = (pngheight - 1 - ih)*widfull*4;
-    }
-    for (iw = 0; iw < pngwidth; iw++) {
-      bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
-      bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
-      bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
-      bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
-      tmp+=4;
-    }
-  }
-
-  delete[] image;
   *width  = pngwidth;
   *height = pngheight;
-  *fullwidth  = widfull;
-  *fullheight = hgtfull;
-  return bitmap;
+  return image;
 }
 
 int image_save_png(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped)
 {
-  //TODO: Use width/height instead of full size, lodepng didn't support this apparently
-  //TODO: lodepng didn't let us specify if our image data is flipped
-  //TODO: lodepng didn't support BGRA
-  unsigned bytes = 4;
-
-  unsigned char* bitmap = new unsigned char[width*height*bytes]();
-
-  for (unsigned i = 0; i < height; i++) {
-    unsigned tmp = i;
-    unsigned bmp = i;
-    if (flipped) bmp = height - 1 - tmp;
-    tmp *= bytes * fullwidth;
-    bmp *= bytes * width;
-    for (unsigned ii = 0; ii < width*bytes; ii += bytes) {
-      bitmap[bmp + ii + 2] = data[tmp + ii + 0];
-      bitmap[bmp + ii + 1] = data[tmp + ii + 1];
-      bitmap[bmp + ii + 0] = data[tmp + ii + 2];
-      bitmap[bmp + ii + 3] = data[tmp + ii + 3];
-    }
+  RawImage img = image_crop(data, fullwidth, fullheight, width, height);
+  
+  if (flipped) { 
+    image_flip(img.pxdata, width, height, 4);
   }
-
-  unsigned error = libpng_encode32_file(bitmap, width, height, filename.c_str());
-
-  delete[] bitmap;
-
+  
+  unsigned error = libpng_encode32_file(img.pxdata, width, height, filename.c_str(), false);
+  
+  
   if (error) return -1; else return 1;
 }
 
