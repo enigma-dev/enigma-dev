@@ -37,6 +37,24 @@ using namespace std;
 
 #include "nlpo2.h"
 
+// FIXME: as of 05-09-2020 some filesystem stuff like extension() isn't implemented on android
+// https://github.com/android/ndk/issues/609
+#ifdef __ANDROID__
+std::string_view std::__ndk1::__fs::filesystem::path::__extension() const {
+  std::string filename = u8string();
+  size_t fp = filename.find_last_of(".");
+  if (fp == string::npos){
+    return "";
+  }
+  return filename.substr(fp);
+}
+
+int std::__ndk1::__fs::filesystem::path::__compare(std::__ndk1::basic_string_view<char, std::__ndk1::char_traits<char> > other) const {
+  if (u8string() == other) return 0; 
+  if (u8string() > other) return 1; else return -1; 
+}
+#endif
+
 namespace enigma
 {
 
@@ -207,7 +225,7 @@ unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned he
 
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
 std::vector<RawImage> image_load(const std::filesystem::path& filename) {
-  std::filesystem::path extension = filename.extension();
+  /*std::filesystem::path extension = filename.extension();
   if (extension.empty()) {
     DEBUG_MESSAGE("No extension in image filename: " + filename.u8string() + ". Assumimg .bmp", MESSAGE_TYPE::M_WARNING);
     extension = ".bmp";
@@ -219,19 +237,19 @@ std::vector<RawImage> image_load(const std::filesystem::path& filename) {
   } else {
     DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() , MESSAGE_TYPE::M_ERROR);
     return std::vector<RawImage>();
-  }
+  }*/
 }
 
 /// Generic all-purpose image saving call.
 int image_save(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
-  std::filesystem::path extension = filename.extension();
+  /*std::filesystem::path extension = filename.extension();
   auto handler = image_save_handlers.find(tolower(extension.u8string()));
   if (extension.empty() || handler != image_save_handlers.end()) {
     return (*handler).second(filename, data, width, height, fullwidth, fullheight, flipped);
   } else {
     DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() + " saving as BMP" , MESSAGE_TYPE::M_WARNING);
     return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
-  }
+  }*/
 }
 
 std::vector<RawImage> image_load_bmp(const std::filesystem::path& filename) {
