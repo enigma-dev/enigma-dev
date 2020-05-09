@@ -14,7 +14,7 @@ Make-Vars:
   cppflags: -Wall -O3
   cxxflags: -stdlib=libc++ -Wno-missing-declarations -Wno-parentheses-equality
   cflags: -Wall -O3
-  ldflags: -stdlib=libc++
+  ldflags: -stdlib=libc++ -lc++fs
   links:
 
 Parser-Vars:

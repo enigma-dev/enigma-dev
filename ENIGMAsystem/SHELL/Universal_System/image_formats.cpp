@@ -40,8 +40,8 @@ using namespace std;
 namespace enigma
 {
 
-std::map<std::string, ImageLoadFunction> image_load_handlers = {{".bmp", image_load_bmp}, {".gif", image_load_gif}};
-std::map<std::string, ImageSaveFunction> image_save_handlers = {{".bmp", image_save_bmp}};
+std::map<std::filesystem::path, ImageLoadFunction> image_load_handlers = {{".bmp", image_load_bmp}, {".gif", image_load_gif}};
+std::map<std::filesystem::path, ImageSaveFunction> image_save_handlers = {{".bmp", image_save_bmp}};
 
 Color image_get_pixel_color(unsigned char* pxdata, unsigned w, unsigned h, unsigned x, unsigned y) {
   Color c;
