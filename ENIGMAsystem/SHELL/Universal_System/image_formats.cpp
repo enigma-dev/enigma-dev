@@ -380,7 +380,7 @@ std::vector<RawImage> image_decode_bmp(const string& image_data) {
 
 int image_save_bmp(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
   unsigned sz = width * height;
-  FILE *bmp = fopen(filename,u8string().c_str(), "wb");
+  FILE *bmp = fopen(filename.u8string().c_str(), "wb");
   if (!bmp) return -1;
   fwrite("BM", 2, 1, bmp);
 
