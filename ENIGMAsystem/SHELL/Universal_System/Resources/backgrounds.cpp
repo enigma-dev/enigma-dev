@@ -38,34 +38,30 @@ using enigma::image_load;
 namespace {
 
 Background background_add_helper(std::string filename, bool transparent, bool smooth, bool preload, bool mipmap) {
-  unsigned int width, height, fullwidth, fullheight;
-  int imgnumb = 1;
-  unsigned char *pxdata = image_load(
-      filename, &width, &height, &imgnumb, false);
+  unsigned fullwidth, fullheight;
+  std::vector<RawImage> imgs = image_load(filename);
       
   Background nb;
-
-  nb.width = width; 
-  nb.height = height;
   nb.isTileset = false;
   
-  if (pxdata == NULL) {
+  if (imgs.empty()) {
     DEBUG_MESSAGE("ERROR - Failed to append background to index!", MESSAGE_TYPE::M_ERROR);
     return nb;
   }
+  
+  nb.width = imgs[0].w; 
+  nb.height = imgs[0].h;
 
   // If background is transparent, set the alpha to zero for pixels that should be
   // transparent from lower left pixel color
   if (transparent) {
-    Color c = enigma::image_get_pixel_color(pxdata, width, height, 0, height - 1);
-    enigma::image_swap_color(pxdata, width, height, c, Color {0, 0, 0, 0});
+    Color c = enigma::image_get_pixel_color(imgs[0].pxdata, imgs[0].w, imgs[0].h, 0, imgs[0].h - 1);
+    enigma::image_swap_color(imgs[0].pxdata, imgs[0].w, imgs[0].h, c, Color {0, 0, 0, 0});
   }
 
-  nb.textureID = graphics_create_texture(width, height, pxdata, mipmap, &fullwidth, &fullheight);
-  nb.textureBounds = TexRect(0, 0, static_cast<gs_scalar>(width) / fullwidth, static_cast<gs_scalar>(height) / fullheight);
+  nb.textureID = graphics_create_texture(imgs[0].w, imgs[0].h, imgs[0].pxdata, mipmap, &fullwidth, &fullheight);
+  nb.textureBounds = TexRect(0, 0, static_cast<gs_scalar>(imgs[0].w) / fullwidth, static_cast<gs_scalar>(imgs[0].h) / fullheight);
 
-  delete[] pxdata;
-  
   return nb;
 }
 

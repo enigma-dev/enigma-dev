@@ -37,31 +37,38 @@ using enigma::RawImage;
 namespace {
 
 Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool mipmap) {
-  unsigned int width, height;
-  unsigned char *pxdata = enigma::image_load(filename, &width, &height, &imgnumb, false);
+  std::vector<RawImage> imgs = enigma::image_load(filename);
   
-  unsigned cellwidth = width / imgnumb;
-  Sprite ns(cellwidth, height, x_offset, y_offset);
-  ns.SetBBox(0, 0, cellwidth, height);
-
-  if (pxdata == NULL) {
+  if (imgs.empty()) {
     DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR);
-    return ns;
+    return Sprite();
   }
+  
+  unsigned cellwidth = ((imgs.size() > 1) ? imgs[0].w : imgs[0].w / imgnumb);
+  Sprite ns(cellwidth, imgs[0].h, x_offset, y_offset);
+  ns.SetBBox(0, 0, cellwidth, imgs[0].h);
 
   // If sprite transparent, set the alpha to zero for pixels that should be
   // transparent from lower left pixel color
-  if (transparent) {
-    Color c = enigma::image_get_pixel_color(pxdata, width, height, 0, height - 1);
-    enigma::image_swap_color(pxdata, width, height, c, Color {0, 0, 0, 0});
-  }
+  Color c = enigma::image_get_pixel_color(imgs[0].pxdata, imgs[0].w, imgs[0].h, 0, imgs[0].h - 1);
   
-  std::vector<RawImage> rawSubimages = enigma::image_split(pxdata, width, height, imgnumb);
-  for (const RawImage& i : rawSubimages) {
-    ns.AddSubimage(i.pxdata, i.w, i.h, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
-  }
+  if (imgs.size() == 1 && imgnumb > 1) {
+    if (transparent) {      
+      enigma::image_swap_color(imgs[0].pxdata, imgs[0].w, imgs[0].h, c, Color {0, 0, 0, 0});
+    }
   
-  delete[] pxdata;
+    std::vector<RawImage> rawSubimages = enigma::image_split(imgs[0].pxdata, imgs[0].w, imgs[0].h, imgnumb);
+    for (const RawImage& i : rawSubimages) {
+      ns.AddSubimage(i.pxdata, i.w, i.h, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
+    }
+  } else {
+    for (const RawImage& i : imgs) {
+      if (transparent) {
+        enigma::image_swap_color(i.pxdata, i.w, i.h, c, Color {0, 0, 0, 0});
+      }
+      ns.AddSubimage(i.pxdata, i.w, i.h, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
+    }
+  }
   
   return ns;
 }
@@ -247,6 +254,13 @@ var sprite_get_uvs(int ind, int subimg) {
 
 void sprite_save(int ind, unsigned subimg, std::string fname) {
   const Sprite& spr = sprites.get(ind);
+  
+  if (spr.SubimageCount() <= subimg) {
+    DEBUG_MESSAGE("Requested subimage: " + std::to_string(subimg) + " out of range. Sprite: " 
+                 +  std::to_string(ind) + " only has " + std::to_string(spr.SubimageCount()) 
+                 + " subimages.", MESSAGE_TYPE::M_USER_ERROR);
+    return;
+  }
   
   unsigned w, h;
   unsigned char* rgbdata =

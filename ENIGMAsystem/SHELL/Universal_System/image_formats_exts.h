@@ -20,15 +20,16 @@
 
 #include <functional>
 #include <string>
+#include <filesystem>
 
 namespace enigma
 {
 
-using ImageLoadFunction = std::function<unsigned char*(std::string, unsigned int*, unsigned int*)>;
-using ImageSaveFunction = std::function<int(std::string, const unsigned char*, unsigned, unsigned, unsigned, unsigned, bool)>;
+using ImageLoadFunction = std::function<std::vector<RawImage>(const std::filesystem::path&)>;
+using ImageSaveFunction = std::function<int(const std::filesystem::path&, const unsigned char*, unsigned, unsigned, unsigned, unsigned, bool)>;
 
-void image_add_loader(std::string format, ImageLoadFunction fnc);
-void image_add_saver(std::string format, ImageSaveFunction fnc);
+void image_add_loader(const std::filesystem::path&, ImageLoadFunction fnc);
+void image_add_saver(const std::filesystem::path&, ImageSaveFunction fnc);
 
 } //namespace enigma
 

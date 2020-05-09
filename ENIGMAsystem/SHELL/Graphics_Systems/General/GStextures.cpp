@@ -113,13 +113,9 @@ void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex) {
 namespace enigma_user {
 
 int texture_add(string filename, bool mipmap) {
-  unsigned int w, h;
-  int img_num;
-
-  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&img_num,false);
-  if (pxdata == NULL) { DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR); return -1; }
-  unsigned texture = enigma::graphics_create_texture(w, h, pxdata, mipmap);
-  delete[] pxdata;
+  std::vector<enigma::RawImage> imgs = enigma::image_load(filename);
+  if (imgs.empty()) { DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR); return -1; }
+  unsigned texture = enigma::graphics_create_texture(imgs[0].w, imgs[0].h, imgs[0].pxdata, mipmap);
 
   return texture;
 }
@@ -127,11 +123,7 @@ int texture_add(string filename, bool mipmap) {
 void texture_save(int texid, string fname) {
   unsigned w = 0, h = 0;
   unsigned char* rgbdata = enigma::graphics_copy_texture_pixels(texid, &w, &h);
-
-  string ext = enigma::image_get_format(fname);
-
   enigma::image_save(fname, rgbdata, w, h, w, h, false);
-
   delete[] rgbdata;
 }
 

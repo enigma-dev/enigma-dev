@@ -17,7 +17,7 @@
  */
 
 #include "Widget_Systems/widgets_mandatory.h"
-#include "gif_format.h"
+#include "image_formats.h"
 #include "nlpo2.h"
 
 #include <cstring>
@@ -209,7 +209,7 @@ unsigned char* read_entire_file(const char* filename, size_t& size)
 
 namespace enigma
 {
-unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned int& image_width, unsigned int& image_height, int& num_images)
+std::vector<RawImage> image_load_gif(const std::filesystem::path& filename)
 {
   /*//Read the entire file into a byte array. This is reasonable because we will output width*height*4 bytes, and the 
   // GIF file will be noticeably less (it's compressed, indexed color, and no alpha).

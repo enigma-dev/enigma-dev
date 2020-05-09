@@ -29,23 +29,23 @@ using std::string;
 
 namespace enigma {
 
-unsigned char* image_load_png(string filename, unsigned int* width, unsigned int* height) {
+std::vector<RawImage> image_load_png(const std::filesystem::path& filename) {
   unsigned error;
   unsigned char* image = nullptr;
   unsigned pngwidth, pngheight;
 
-  error = libpng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str(), true);
+  std::vector<RawImage> imgs(1);
+  
+  error = libpng_decode32_file(&imgs[0].pxdata, &imgs[0].w, &imgs[0].h, filename.u8string().c_str(), true);
   if (error) {
     DEBUG_MESSAGE("libpng-util error " + std::to_string(error), MESSAGE_TYPE::M_ERROR);
-    return NULL;
+    return std::vector<RawImage>();
   }
 
-  *width  = pngwidth;
-  *height = pngheight;
-  return image;
+  return imgs;
 }
 
-int image_save_png(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped)
+int image_save_png(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped)
 {
   RawImage img = image_crop(data, fullwidth, fullheight, width, height);
   

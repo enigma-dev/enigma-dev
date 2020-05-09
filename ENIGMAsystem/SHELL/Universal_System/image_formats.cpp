@@ -18,12 +18,11 @@
 **/
 
 #include "image_formats.h"
+#include "strings_util.h"
 #include "image_formats_exts.h"
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/nlpo2.h"
-
-#include "gif_format.h"
 
 #include <map>
 #include <fstream>      // std::ofstream
@@ -37,20 +36,12 @@
 using namespace std;
 
 #include "nlpo2.h"
-inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
-  x =  (x & -x) - 1;
-  x -= ((x >> 1) & 0x55555555);
-  x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
-  x =  ((x >> 4) + x) & 0x0f0f0f0f;
-  x += x >> 8;
-  return (x + (x >> 16)) & 63;
-}
 
 namespace enigma
 {
 
-std::map<std::string, ImageLoadFunction> image_load_handlers;
-std::map<std::string, ImageSaveFunction> image_save_handlers;
+std::map<std::string, ImageLoadFunction> image_load_handlers = {{".bmp", image_load_bmp}, {".gif", image_load_gif}};
+std::map<std::string, ImageSaveFunction> image_save_handlers = {{".bmp", image_save_bmp}};
 
 Color image_get_pixel_color(unsigned char* pxdata, unsigned w, unsigned h, unsigned x, unsigned y) {
   Color c;
@@ -193,12 +184,12 @@ unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigne
   return result;
 }
 
-void image_add_loader(std::string format, ImageLoadFunction fnc) {
-  image_load_handlers[format] = fnc;
+void image_add_loader(const std::filesystem::path& extension, ImageLoadFunction fnc) {
+  image_load_handlers[extension] = fnc;
 }
 
-void image_add_saver(std::string format, ImageSaveFunction fnc) {
-  image_save_handlers[format] = fnc;
+void image_add_saver(const std::filesystem::path& extension, ImageSaveFunction fnc) {
+  image_save_handlers[extension] = fnc;
 }
 
 unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned height, unsigned bytes) {
@@ -214,69 +205,42 @@ unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned he
   return rgbdata;
 }
 
-string image_get_format(string filename) {
-  size_t fp = filename.find_last_of(".");
-  if (fp == string::npos){
-    return "";
-  }
-  string ext = filename.substr(fp);
-  transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-  return ext;
-}
-
-/// Generic all-purpose image loading call.
-unsigned char* image_load(string filename, string format, unsigned int* width, unsigned int* height, int* imgnumb) {
-  if (format.compare(".bmp") == 0) {
-    return image_load_bmp(filename, width, height);
-  } else if (format.compare(".gif") == 0) {
-    return image_load_gif(filename, width, height, imgnumb);
-  }
-  auto handler = image_load_handlers.find(format);
-  if (handler != image_load_handlers.end()) {
-    return (*handler).second(filename, width, height);
-  }
-  return image_load_bmp(filename, width, height);
-}
-
-
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
-unsigned char* image_load(string filename, unsigned int* width, unsigned int* height, int* imgnumb, bool flipped) {
-  string format = image_get_format(filename);
-  if (format.empty()) {
-    format = ".bmp";
+std::vector<RawImage> image_load(const std::filesystem::path& filename) {
+  std::filesystem::path extension = filename.extension();
+  if (extension.empty()) {
+    DEBUG_MESSAGE("No extension in image filename: " + filename.u8string() + ". Assumimg .bmp", MESSAGE_TYPE::M_WARNING);
+    extension = ".bmp";
   }
-  return image_load(filename, format, width, height, imgnumb);
+  
+  auto handler = image_load_handlers.find(tolower(extension.u8string()));
+  if (handler != image_load_handlers.end()) {
+    return (*handler).second(filename);
+  } else {
+    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() , MESSAGE_TYPE::M_ERROR);
+    return std::vector<RawImage>();
+  }
 }
 
 /// Generic all-purpose image saving call.
-int image_save(string filename, const unsigned char* data, string format, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
-  if (format.compare(".bmp") == 0) {
+int image_save(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
+  std::filesystem::path extension = filename.extension();
+  auto handler = image_save_handlers.find(tolower(extension.u8string()));
+  if (extension.empty() || handler != image_save_handlers.end()) {
+    return (*handler).second(filename, data, width, height, fullwidth, fullheight, flipped);
+  } else {
+    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() + " saving as BMP" , MESSAGE_TYPE::M_WARNING);
     return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
   }
-  auto handler = image_save_handlers.find(format);
-  if (handler != image_save_handlers.end()) {
-    return (*handler).second(filename, data, width, height, fullwidth, fullheight, flipped);
-  }
-  return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
 }
 
-/// Generic all-purpose image saving call that will regexp the filename for the format and call the appropriate function.
-int image_save(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
-  string format = image_get_format(filename);
-  if (format.empty()) {
-    format = ".bmp";
-  }
-  return image_save(filename, data, format, width, height, fullwidth, fullheight, flipped);
-}
-
-unsigned char* image_load_bmp(
-    string filename, unsigned int* width, unsigned int* height) {
-  if (std::ifstream bmp{filename}) {
+std::vector<RawImage> image_load_bmp(const std::filesystem::path& filename) {
+  if (std::ifstream bmp{filename.u8string()}) {
     std::stringstream buffer;
     buffer << bmp.rdbuf();
-    return image_decode_bmp(buffer.str(), width, height);
+    return image_decode_bmp(buffer.str());
   }
-  return nullptr;
+  return std::vector<RawImage>();
 }
 
 namespace {
@@ -370,12 +334,13 @@ struct BMPInfoHeader {
 }  // namespace
 
 
-unsigned char* image_decode_bmp(
-    const string &image_data, unsigned int* width, unsigned int* height) {
+std::vector<RawImage> image_decode_bmp(const string& image_data) {
+  std::vector<RawImage> imgs;
+  
   // Check file size against bitmap header size
   if (image_data.length() < sizeof(BMPFileHeader)) {
     fprintf(stderr, "Junk bitmap of size %lu", image_data.size());
-    return nullptr;
+    return imgs;
   }
 
   const BMPFileHeader &bmp_file = *(BMPFileHeader*) image_data.data();
@@ -384,7 +349,7 @@ unsigned char* image_decode_bmp(
   if (bmp_file.magic_b != 'B' || bmp_file.magic_m != 'M' ||
       bmp_file.dataStart + sizeof(BMPInfoHeader) > image_data.length()) {
     fprintf(stderr, "Junk bitmap of size %lu", image_data.size());
-    return nullptr;
+    return imgs;
   }
 
   const BMPInfoHeader &bmp_info =
@@ -392,7 +357,7 @@ unsigned char* image_decode_bmp(
 
   if(bmp_info.bitsPerPixel != 32 && bmp_info.bitsPerPixel != 24) {
     fprintf(stderr, "No support for %dbpp bitmaps\n", bmp_info.bitsPerPixel);
-    return nullptr;
+    return imgs;
   }
   const bool rgba = bmp_info.isRGBA();
   const bool argb = bmp_info.isARGB();
@@ -400,32 +365,20 @@ unsigned char* image_decode_bmp(
     fprintf(stderr, "No support for mask format (%08X, %08X, %08X, %08X)\n",
             bmp_info.maskRed, bmp_info.maskGreen, bmp_info.maskBlue,
             bmp_info.maskAlpha);
-    return nullptr;
+    return imgs;
   }
-
-  *width  = bmp_info.width;
-  *height = bmp_info.height;
   
-  int sz =*width * *height * 4;
-  unsigned char* pxdata = new unsigned char[sz];
-  std::memcpy(pxdata, image_data.data() + bmp_file.dataStart, sz);
-  return pxdata;
+  imgs.resize(1);
+  imgs[0].w = bmp_info.width;
+  imgs[0].h = bmp_info.height;
+  
+  int sz = imgs[0].w * imgs[0].h * 4;
+  imgs[0].pxdata = new unsigned char[sz];
+  std::memcpy(imgs[0].pxdata, image_data.data() + bmp_file.dataStart, sz);
+  return imgs;
 }
 
-unsigned char* image_load_gif(string filename, unsigned int* width, unsigned int* height, int* imgnumb) {
-  unsigned int error = 0;
-  unsigned char* image = 0;
-
-  error = load_gif_file(filename.c_str(), image, *width, *height, *imgnumb);
-  if (error) {
-    DEBUG_MESSAGE(load_gif_error_text(error), MESSAGE_TYPE::M_ERROR);
-    return NULL;
-  }
-
-  return image;
-}
-
-int image_save_bmp(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
+int image_save_bmp(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
   unsigned sz = width * height;
   FILE *bmp = fopen(filename.c_str(), "wb");
   if (!bmp) return -1;
