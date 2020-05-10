@@ -92,45 +92,28 @@ namespace fileman {
 
 namespace enigma_user {
 
-  std::string get_working_directory_ns();
-
-  bool set_working_directory_ns(std::string dname);
-
-  std::string get_temp_directory_ns();
-
-  std::string get_program_directory_ns();
-
-  std::string get_program_filename_ns();
-
-  std::string get_program_pathname_ns();
-
-  std::string filename_absolute_ns(std::string fname);
-
-  bool file_exists_ns(std::string fname);
-
-  bool file_delete_ns(std::string fname);
-
-  bool file_rename_ns(std::string oldname, std::string newname);
-
-  bool file_copy_ns(std::string fname, std::string newname);
-
-  bool directory_exists_ns(std::string dname);
-
-  bool directory_create_ns(std::string dname);
-
-  bool directory_destroy_ns(std::string dname);
-
-  bool directory_rename_ns(std::string oldname, std::string newname);
-
-  bool directory_copy_ns(std::string dname, std::string newname);
-
-  std::string directory_contents_ns(std::string dname);
-
-  std::string directory_contents_ext_ns(std::string dname, std::string pattern, bool includedirs);
-
-  std::string environment_get_variable_ns(std::string name);
-
-  bool environment_set_variable_ns(std::string name, std::string value);
+#ifdef OVERRIDE_SANDBOX
+using ::fileman::get_working_directory_ns;
+using ::fileman::set_working_directory_ns;
+using ::fileman::get_temp_directory_ns;
+using ::fileman::get_program_directory_ns;
+using ::fileman::get_program_filename_ns;
+using ::fileman::get_program_pathname_ns;
+using ::fileman::filename_absolute_ns;
+using ::fileman::file_exists_ns;
+using ::fileman::file_delete_ns;
+using ::fileman::file_rename_ns;
+using ::fileman::file_copy_ns;
+using ::fileman::directory_exists_ns;
+using ::fileman::directory_create_ns;
+using ::fileman::directory_destroy_ns;
+using ::fileman::directory_rename_ns;
+using ::fileman::directory_copy_ns;
+using ::fileman::directory_contents_ns;
+using ::fileman::directory_contents_ns;
+using ::fileman::environment_get_variable_ns;
+using ::fileman::environment_set_variable_ns;
+#endif
 
 } // namespace enigma_user
 
