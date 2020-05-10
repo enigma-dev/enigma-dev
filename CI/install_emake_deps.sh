@@ -43,7 +43,6 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-10 20
   sudo update-alternatives --install /usr/bin/llvm-link llvm-link /usr/bin/llvm-link-10 20
   sudo update-alternatives --install /usr/bin/llvm-dis llvm-dis /usr/bin/llvm-dis-10 20
-  sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-10 20
 
   clang++ --version
 fi
