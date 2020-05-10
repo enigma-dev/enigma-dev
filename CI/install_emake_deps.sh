@@ -39,7 +39,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   g++ --version
   
   sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 \
-              81 \ 
+              81 \
               --slave /usr/bin/clang++ clang++ /usr/bin/clang++-10 \
               --slave /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-10 \
               --slave /usr/bin/clang-format clang-format /usr/bin/clang-format-10;
