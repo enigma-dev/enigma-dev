@@ -110,4 +110,4 @@ namespace enigma_user {
   #define environment_set_variable(x, y) environment_set_variable_ns(x, y)
   #endif
 
-}
+} // namespace enigma_user
