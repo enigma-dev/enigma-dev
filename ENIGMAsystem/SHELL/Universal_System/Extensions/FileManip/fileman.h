@@ -2,7 +2,7 @@
 
  MIT License
  
- Copyright © 2020 Samuel Venable
+ Copyright Â© 2020 Samuel Venable
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -67,47 +67,47 @@ namespace fileman {
 
 namespace enigma_user {
 
-#ifdef OVERRIDE_SANDBOX
-using ::fileman::get_working_directory_ns;
-using ::fileman::set_working_directory_ns;
-using ::fileman::get_temp_directory_ns;
-using ::fileman::get_program_directory_ns;
-using ::fileman::get_program_filename_ns;
-using ::fileman::get_program_pathname_ns;
-using ::fileman::filename_absolute_ns;
-using ::fileman::file_exists_ns;
-using ::fileman::file_delete_ns;
-using ::fileman::file_rename_ns;
-using ::fileman::file_copy_ns;
-using ::fileman::directory_exists_ns;
-using ::fileman::directory_create_ns;
-using ::fileman::directory_destroy_ns;
-using ::fileman::directory_rename_ns;
-using ::fileman::directory_copy_ns;
-using ::fileman::directory_contents_ns;
-using ::fileman::directory_contents_ns;
-using ::fileman::environment_get_variable_ns;
-using ::fileman::environment_set_variable_ns;
-#define working_directory get_working_directory_ns()
-#define temp_directory get_temp_directory_ns()
-#define program_directory get_program_directory_ns()
-#define program_filename get_program_filename_ns()
-#define program_pathname get_program_pathname_ns()
-#define set_working_directory(x) set_working_directory_ns(x)
-#define filename_absolute(x) filename_absolute_ns(x)
-#define file_exists(x) file_exists_ns(x)
-#define file_delete(x) file_delete_ns(x)
-#define file_rename(x, y) file_rename_ns(x, y)
-#define file_copy(x, y) file_copy_ns(x, y)
-#define directory_exists(x) directory_exists_ns(x)
-#define directory_create(x) directory_create_ns(x)
-#define directory_destroy(x) directory_destroy_ns(x)
-#define directory_rename(x, y) directory_rename_ns(x, y)
-#define directory_copy(x, y) directory_copy_ns(x, y)
-#define directory_contents(x) directory_contents_ns(x, "*.*", true)
-#define directory_contents_ext(x, y, z) directory_contents_ns(x, y, z)
-#define environment_get_variable(x) environment_get_variable_ns(x)
-#define environment_set_variable(x, y) environment_set_variable_ns(x, y)
-#endif
+  #ifdef OVERRIDE_SANDBOX
+  using ::fileman::get_working_directory_ns;
+  using ::fileman::set_working_directory_ns;
+  using ::fileman::get_temp_directory_ns;
+  using ::fileman::get_program_directory_ns;
+  using ::fileman::get_program_filename_ns;
+  using ::fileman::get_program_pathname_ns;
+  using ::fileman::filename_absolute_ns;
+  using ::fileman::file_exists_ns;
+  using ::fileman::file_delete_ns;
+  using ::fileman::file_rename_ns;
+  using ::fileman::file_copy_ns;
+  using ::fileman::directory_exists_ns;
+  using ::fileman::directory_create_ns;
+  using ::fileman::directory_destroy_ns;
+  using ::fileman::directory_rename_ns;
+  using ::fileman::directory_copy_ns;
+  using ::fileman::directory_contents_ns;
+  using ::fileman::directory_contents_ns;
+  using ::fileman::environment_get_variable_ns;
+  using ::fileman::environment_set_variable_ns;
+  #define working_directory get_working_directory_ns()
+  #define temp_directory get_temp_directory_ns()
+  #define program_directory get_program_directory_ns()
+  #define program_filename get_program_filename_ns()
+  #define program_pathname get_program_pathname_ns()
+  #define set_working_directory(x) set_working_directory_ns(x)
+  #define filename_absolute(x) filename_absolute_ns(x)
+  #define file_exists(x) file_exists_ns(x)
+  #define file_delete(x) file_delete_ns(x)
+  #define file_rename(x, y) file_rename_ns(x, y)
+  #define file_copy(x, y) file_copy_ns(x, y)
+  #define directory_exists(x) directory_exists_ns(x)
+  #define directory_create(x) directory_create_ns(x)
+  #define directory_destroy(x) directory_destroy_ns(x)
+  #define directory_rename(x, y) directory_rename_ns(x, y)
+  #define directory_copy(x, y) directory_copy_ns(x, y)
+  #define directory_contents(x) directory_contents_ns(x, "*.*", true)
+  #define directory_contents_ext(x, y, z) directory_contents_ns(x, y, z)
+  #define environment_get_variable(x) environment_get_variable_ns(x)
+  #define environment_set_variable(x, y) environment_set_variable_ns(x, y)
+  #endif
 
 }
