@@ -44,7 +44,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
               --slave /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-10 \
               --slave /usr/bin/clang-format clang-format /usr/bin/clang-format-10;
   
-  sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-6.0 \
+  sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-7.0 \
               60 \
               --slave /usr/bin/clang++ clang++ /usr/bin/clang++-7.0 \
               --slave /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-7.0 \
