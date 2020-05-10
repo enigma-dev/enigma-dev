@@ -150,7 +150,7 @@ int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidt
   d3ddev->CreateTexture(*fullwidth, *fullheight, 1, usage, D3DFMT_A8R8G8B8, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &texture, 0);
   
   const int id = textures.size();
-  if (pxdata != nullptr) {
+  if (img.pxdata != nullptr) {
     if (img.w != *fullwidth || img.h != *fullheight) {
       RawImage padded = image_pad((img.pxdata, img.w, img.h, *fullwidth, *fullheight);
       graphics_push_texture_pixels(id, 0, 0, img.w, img.h, *fullwidth, *fullheight, padded.pxdata);
