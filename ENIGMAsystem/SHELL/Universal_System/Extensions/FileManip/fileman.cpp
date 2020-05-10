@@ -30,9 +30,7 @@ using std::string;
 
 namespace enigma_user {
 
-  string get_working_directory_ns() {
-    return fileman::get_working_directory_ns();
-  }
+using ::fileman::get_working_directory_ns;
 
   bool set_working_directory_ns(string dname) {
     return fileman::set_working_directory_ns(dname);
