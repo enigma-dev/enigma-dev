@@ -14,6 +14,5 @@ else
 	SOURCES += Universal_System/Extensions/FileManip/Win32/fileman.cpp
 endif
 SOURCES += Universal_System/Extensions/FileManip/Universal/fileman.cpp
-SOURCES += Universal_System/Extensions/FileManip/fileman.cpp
 override CXXFLAGS += -fexceptions
 override CFLAGS += -fexceptions
