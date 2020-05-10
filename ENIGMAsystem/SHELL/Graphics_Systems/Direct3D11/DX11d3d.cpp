@@ -46,7 +46,7 @@ ID3D11ShaderResourceView *getDefaultWhiteTexture() {
     static int texid = -1;
     if (texid == -1) {
       unsigned data[1] = {0xFFFFFFFF};
-      texid = enigma::graphics_create_texture(1, 1, (void*)data, false);
+      texid = enigma::graphics_create_texture(RawImage((unsigned char*)data, 1, 1) , false);
     }
     return static_cast<enigma::DX11Texture*>(enigma::textures[texid].get())->view;
 }
