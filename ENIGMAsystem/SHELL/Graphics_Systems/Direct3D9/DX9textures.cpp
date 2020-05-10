@@ -152,7 +152,7 @@ int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidt
   const int id = textures.size();
   if (img.pxdata != nullptr) {
     if (img.w != *fullwidth || img.h != *fullheight) {
-      RawImage padded = image_pad((img.pxdata, img.w, img.h, *fullwidth, *fullheight);
+      RawImage padded = image_pad(img.pxdata, img.w, img.h, *fullwidth, *fullheight);
       graphics_push_texture_pixels(id, 0, 0, img.w, img.h, *fullwidth, *fullheight, padded.pxdata);
     } else graphics_push_texture_pixels(id, 0, 0, img.w, img.h, *fullwidth, *fullheight, img.pxdata);
   }

@@ -35,8 +35,8 @@ struct RawImage {
   RawImage(RawImage &&other): pxdata(other.pxdata), w(other.w), h(other.h) {
     other.pxdata = nullptr;
   }
-  unsigned char* pxdata = nullptr;
-  unsigned w = 0, h = 0;
+  unsigned char* pxdata;
+  unsigned w, h;
 };
 
 struct Color {

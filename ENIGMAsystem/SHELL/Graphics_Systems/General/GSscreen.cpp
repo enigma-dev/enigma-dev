@@ -67,10 +67,7 @@ RawImage create_from_screen_helper(int x, int y, int w, int h, bool removeback, 
 
   bool flipped = false;
 
-  RawImage i;
-  i.pxdata = enigma::graphics_copy_screen_pixels(x, y, w, h, &flipped);
-  i.w = w;
-  i.h = h;
+  RawImage i(enigma::graphics_copy_screen_pixels(x, y, w, h, &flipped), w, h);
 
   // FIXME: This logic is duplicated here, backgrounds.cpp, sprites_internal.cpp in this file somewhat and likely 12 other places
   if (flipped)
