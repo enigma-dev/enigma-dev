@@ -135,14 +135,14 @@ void graphics_push_texture_pixels(int texture, int x, int y, int width, int heig
   }
 }
 
-int graphics_create_texture(unsigned width, unsigned height, void* pxdata, bool mipmap, unsigned* fullwidth, unsigned* fullheight)
+int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight)
 {
   unsigned fw, fh;
   if (fullwidth == nullptr) fullwidth = &fw; 
   if (fullheight == nullptr) fullheight = &fh;
   
-  *fullwidth  = nlpo2dc(width)+1;
-  *fullheight = nlpo2dc(height)+1;
+  *fullwidth  = nlpo2dc(img.w)+1;
+  *fullheight = nlpo2dc(img.h)+1;
   
   LPDIRECT3DTEXTURE9 texture = NULL;
 
@@ -151,18 +151,18 @@ int graphics_create_texture(unsigned width, unsigned height, void* pxdata, bool 
   
   const int id = textures.size();
   if (pxdata != nullptr) {
-    if (width != *fullwidth || height != *fullheight) {
-      RawImage padded = image_pad((unsigned char*)pxdata, width, height, *fullwidth, *fullheight);
-      graphics_push_texture_pixels(id, 0, 0, width, height, *fullwidth, *fullheight, padded.pxdata);
-    } else graphics_push_texture_pixels(id, 0, 0, width, height, *fullwidth, *fullheight, pxdata);
+    if (img.w != *fullwidth || img.h != *fullheight) {
+      RawImage padded = image_pad((img.pxdata, img.w, img.h, *fullwidth, *fullheight);
+      graphics_push_texture_pixels(id, 0, 0, img.w, img.h, *fullwidth, *fullheight, padded.pxdata);
+    } else graphics_push_texture_pixels(id, 0, 0, img.w, img.h, *fullwidth, *fullheight, img.pxdata);
   }
 
   if (mipmap) texture->GenerateMipSubLevels();
 
   textures.push_back(std::make_unique<DX9Texture>(texture));
   auto& textureStruct = textures.back();
-  textureStruct->width = width;
-  textureStruct->height = height;
+  textureStruct->width = img.w;
+  textureStruct->height = img.h;
   textureStruct->fullwidth = *fullwidth;
   textureStruct->fullheight = *fullheight;
   return id;
