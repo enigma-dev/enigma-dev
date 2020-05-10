@@ -456,7 +456,7 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {
   RawImage img = create_from_screen_helper(x, y, w, h, removeback, true);
-  Background bkg(w, h, graphics_create_texture(img.w, img.h, img.pxdata, false));
+  Background bkg(w, h, graphics_create_texture(img, false));
   return backgrounds.add(std::move(bkg));
 }
 
@@ -475,7 +475,7 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
   RawImage img = create_from_screen_helper(x, y, w, h, removeback, false);
   Sprite& spr = sprites.get(id);
-  spr.AddSubimage(img.pxdata, w, h, enigma::ct_precise, img.pxdata); //TODO: Support toggling of precise.
+  spr.AddSubimage(img, enigma::ct_precise, img.pxdata); //TODO: Support toggling of precise.
 }
 
 int draw_getpixel(int x,int y)

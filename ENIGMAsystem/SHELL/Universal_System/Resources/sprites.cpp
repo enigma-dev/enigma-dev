@@ -59,14 +59,14 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
   
     std::vector<RawImage> rawSubimages = enigma::image_split(imgs[0].pxdata, imgs[0].w, imgs[0].h, imgnumb);
     for (const RawImage& i : rawSubimages) {
-      ns.AddSubimage(i.pxdata, i.w, i.h, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
+      ns.AddSubimage(i, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
     }
   } else {
     for (const RawImage& i : imgs) {
       if (transparent) {
         enigma::image_swap_color(i.pxdata, i.w, i.h, c, Color {0, 0, 0, 0});
       }
-      ns.AddSubimage(i.pxdata, i.w, i.h, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
+      ns.AddSubimage(i, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
     }
   }
   
@@ -275,13 +275,12 @@ void sprite_save(int ind, unsigned subimg, std::string fname) {
 //void sprite_save_strip(int ind, std::string fname); //FIXME: We don't support this yet
 
 int sprite_create_color(unsigned w, unsigned h, int col) {
-  RawImage img;
-  img.pxdata = new unsigned char[w * h * 4];
+  RawImage img(new unsigned char[w * h * 4], w, h);
   std::fill((unsigned*)(img.pxdata), (unsigned*)(img.pxdata) + w * h, (COL_GET_R(col) | (COL_GET_G(col) << 8) | (COL_GET_B(col) << 16) | 255 << 24));
 
   Sprite s(w, h, 0, 0);
   s.SetBBox(0, 0, w, h);
-  s.AddSubimage(img.pxdata, w, h, enigma::ct_bbox, img.pxdata, false);
+  s.AddSubimage(img, enigma::ct_bbox, img.pxdata, false);
   return sprites.add(std::move(s));
 }
 

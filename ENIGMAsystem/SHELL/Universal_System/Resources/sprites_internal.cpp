@@ -53,10 +53,10 @@ int Sprite::AddSubimage(int texid, TexRect texRect, collision_type ct, void* col
   return _subimages.add(std::move(subimg));
 }
 
-int Sprite::AddSubimage(unsigned char* pxdata, int w, int h, collision_type ct, void* collisionData, bool mipmap) {
+int Sprite::AddSubimage(const RawImage& img, collision_type ct, void* collisionData, bool mipmap) {
   unsigned fullwidth, fullheight;
-  int texID = graphics_create_texture(w, h, pxdata, mipmap, &fullwidth, &fullheight);
-  return AddSubimage(texID, TexRect(0, 0, static_cast<gs_scalar>(w) / fullwidth, static_cast<gs_scalar>(h) / fullheight), ct, collisionData);
+  int texID = graphics_create_texture(img, mipmap, &fullwidth, &fullheight);
+  return AddSubimage(texID, TexRect(0, 0, static_cast<gs_scalar>(img.w) / fullwidth, static_cast<gs_scalar>(img.h) / fullheight), ct, collisionData);
 }
 
 void Sprite::AddSubimage(const Subimage& s) {

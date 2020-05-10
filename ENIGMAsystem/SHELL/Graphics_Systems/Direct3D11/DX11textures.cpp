@@ -41,9 +41,11 @@ int graphics_create_texture(unsigned width, unsigned height, void* pxdata, bool 
   *fullwidth  = nlpo2dc(width)+1;
   *fullheight = nlpo2dc(height)+1;
   
-  RawImage padded = image_pad((unsigned char*)pxdata, width, height, *fullwidth, *fullheight);
-
-  tbsd.pSysMem = padded.pxdata;
+  if (pxdata != nullptr && (width != *fullwidth || height != *fullheight))
+    RawImage padded = image_pad((unsigned char*)pxdata, width, height, *fullwidth, *fullheight);
+    tbsd.pSysMem = padded.pxdata;
+  } else tbsd.pSysMem = pxdata;
+  
   tbsd.SysMemPitch = *fullwidth*4;
   // not needed since this is a 2d texture,
   // but we can pass size info for debugging

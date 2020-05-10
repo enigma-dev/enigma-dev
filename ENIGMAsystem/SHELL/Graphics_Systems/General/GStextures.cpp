@@ -48,11 +48,9 @@ int graphics_duplicate_texture(int tex, bool mipmap) {
            fw = textures[tex]->fullwidth, fh = textures[tex]->fullheight;
 
   unsigned char* bitmap = graphics_copy_texture_pixels(tex, &fw, &fh);
-  unsigned dup_tex = graphics_create_texture(fw, fh, bitmap, mipmap);
+  unsigned dup_tex = graphics_create_texture(RawImage(bitmap, fw, fh), mipmap);
   textures[dup_tex]->width = w;
   textures[dup_tex]->height = h;
-  delete[] bitmap;
-
   return dup_tex;
 }
 
@@ -115,7 +113,7 @@ namespace enigma_user {
 int texture_add(string filename, bool mipmap) {
   std::vector<enigma::RawImage> imgs = enigma::image_load(filename);
   if (imgs.empty()) { DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR); return -1; }
-  unsigned texture = enigma::graphics_create_texture(imgs[0].w, imgs[0].h, imgs[0].pxdata, mipmap);
+  unsigned texture = enigma::graphics_create_texture(imgs[0], mipmap);
 
   return texture;
 }

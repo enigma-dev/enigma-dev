@@ -36,22 +36,26 @@ GLuint get_texture_peer(int texid) {
 }
 
 //This allows GL3 surfaces to bind and hold many different types of data
-int graphics_create_texture_custom(unsigned width, unsigned height, void* pxdata, bool mipmap, unsigned* fullwidth, unsigned* fullheight, GLint internalFormat, GLenum format, GLenum type)
+int graphics_create_texture_custom(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight, GLint internalFormat, GLenum format, GLenum type)
 {
   unsigned fw, fh;
   if (fullwidth == nullptr) fullwidth = &fw; 
   if (fullheight == nullptr) fullheight = &fh;
   
-  *fullwidth  = nlpo2dc(width)+1;
-  *fullheight = nlpo2dc(height)+1;
+  *fullwidth  = nlpo2dc(img.w)+1;
+  *fullheight = nlpo2dc(img.h)+1;
   
-  RawImage padded = image_pad((unsigned char*)pxdata, width, height, *fullwidth, *fullheight);
+  bool pad = img.pxdata != nullptr && (img.w != *fullwidth || img.h != *fullheight);
   
   GLuint texture;
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, *fullwidth, *fullheight, 0, format, type, padded.pxdata);
+  if (pad) {
+    RawImage padded = image_pad(img.pxdata, img.w, img.h, *fullwidth, *fullheight);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, *fullwidth, *fullheight, 0, format, type, padded.pxdata);
+  } else glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, *fullwidth, *fullheight, 0, format, type, img.pxdata);
+  
   if (mipmap) {
     // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
     // Honestly not a big deal, Unity3D doesn't allow you to specify either.
@@ -64,17 +68,16 @@ int graphics_create_texture_custom(unsigned width, unsigned height, void* pxdata
   const int id = textures.size();
   textures.push_back(std::make_unique<GLTexture>(texture));
   auto& textureStruct = textures.back();
-  textureStruct->width = width;
-  textureStruct->height = height;
+  textureStruct->width = img.w;
+  textureStruct->height = img.h;
   textureStruct->fullwidth = *fullwidth;
   textureStruct->fullheight = *fullheight;
-  
   return id;
 }
 
-int graphics_create_texture(unsigned width, unsigned height, void* pxdata, bool mipmap, unsigned* fullwidth, unsigned* fullheight)
+int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight)
 {
-  return graphics_create_texture_custom(width, height, pxdata, mipmap, fullwidth, fullheight, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE);
+  return graphics_create_texture_custom(img, mipmap, fullwidth, fullheight, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE);
 }
 
 void graphics_delete_texture(int texid) {

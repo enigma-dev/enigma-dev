@@ -117,9 +117,9 @@ namespace enigma
   };
 
   // Assumes fullwidth == fullheight == 2^n for some n>0.
-  static void create_particle_sprite(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, char* imgpxdata, pt_shape pt_sh)
+  static void create_particle_sprite(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, unsigned char* imgpxdata, pt_shape pt_sh)
   {
-    unsigned texture = graphics_create_texture(width, height, imgpxdata, false, &fullwidth, &fullheight);
+    unsigned texture = graphics_create_texture(RawImage(imgpxdata, width, height), false, &fullwidth, &fullheight);
 
     particle_sprite* p_sprite = new particle_sprite();
     p_sprite->texture = texture;
@@ -133,7 +133,7 @@ namespace enigma
   static void generate_pixel()
   {
     const int fullwidth = 8, fullheight = 8;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
     for (int x = 0; x < fullwidth; x++)
@@ -158,7 +158,7 @@ namespace enigma
   static void generate_disk()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
     const int halfwidth = fullwidth/2;
@@ -187,7 +187,7 @@ namespace enigma
   static void generate_square()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
     const int halfwidth = fullwidth/2;
@@ -216,7 +216,7 @@ namespace enigma
   static void generate_line()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
     const int halfwidth = fullwidth/2;
@@ -248,7 +248,7 @@ namespace enigma
   static void generate_star()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
     V2 center(center_x, center_y);
@@ -345,7 +345,7 @@ namespace enigma
   static void generate_circle()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
     const int rad = 26;
@@ -373,7 +373,7 @@ namespace enigma
   static void generate_ring()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
     const int out_r = 26;
@@ -407,7 +407,7 @@ namespace enigma
   static void generate_sphere()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
     const int halfwidth = fullwidth/2;
@@ -432,7 +432,7 @@ namespace enigma
   static void generate_flare()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
 
@@ -487,7 +487,7 @@ namespace enigma
   static void generate_spark()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
 
@@ -575,7 +575,7 @@ namespace enigma
   static void generate_explosion()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     random_seed = 191; // NOTE: Setting random.
     const int mapwidth = 64, mapheight = 64;
@@ -651,7 +651,7 @@ namespace enigma
   static void generate_cloud()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     random_seed = 191; // NOTE: Setting random.
     const int mapwidth = 64, mapheight = 64;
@@ -727,7 +727,7 @@ namespace enigma
   static void generate_smoke()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     random_seed = 191; // NOTE: Setting random.
     const int mapwidth = 64, mapheight = 64;
@@ -802,7 +802,7 @@ namespace enigma
   static void generate_snow()
   {
     const int fullwidth = 64, fullheight = 64;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+    unsigned char *imgpxdata = new unsigned char[4*fullwidth*fullheight+1];
 
     const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
 

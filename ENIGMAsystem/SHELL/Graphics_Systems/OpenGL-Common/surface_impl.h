@@ -25,6 +25,7 @@
 
 #include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSsurface_impl.h"
+#include "Universal_System/image_formats.h"
 
 namespace enigma {
 
@@ -38,7 +39,7 @@ struct Surface : BaseSurface
   bool write_only = true;
 };
 
-int graphics_create_texture_custom(unsigned width, unsigned height, void* pxdata, bool mipmap, unsigned* fullwidth, unsigned* fullheight, GLint internalFormat, GLenum format, GLenum type);
+int graphics_create_texture_custom(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight, GLint internalFormat, GLenum format, GLenum type);
 
 } // namespace enigma
 

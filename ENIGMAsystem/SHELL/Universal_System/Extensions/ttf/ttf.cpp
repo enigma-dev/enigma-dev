@@ -174,14 +174,13 @@ namespace enigma_user {
     }
 
     fnt->glyphRanges[0] = fgr;
-    fnt->texture = enigma::graphics_create_texture(w, h, pxdata, false);
+    fnt->texture = enigma::graphics_create_texture(enigma::RawImage(pxdata, w, h), false);
     fnt->twid = w;
     fnt->thgt = h;
     fnt->yoffset = face->glyph->linearVertAdvance / 65536;
     fnt->height = face->glyph->linearVertAdvance / 65536;
 
     delete rootNode;
-    delete[] pxdata;
     FT_Done_Face(face);
 
     return fontid;

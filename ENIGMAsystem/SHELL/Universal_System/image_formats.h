@@ -28,7 +28,8 @@ namespace enigma
 {
 
 struct RawImage {
-  RawImage() {}
+  RawImage(unsigned char* pxdata = nullptr, unsigned w = 0, unsigned h = 0) :
+    pxdata(pxdata), w(w), h(h) {}
   ~RawImage() { delete[] pxdata; }
   RawImage(const RawImage&) = delete;
   RawImage(RawImage &&other): pxdata(other.pxdata), w(other.w), h(other.h) {
@@ -55,8 +56,9 @@ Color image_get_pixel_color(unsigned char* pxdata, unsigned w, unsigned h, unsig
 void image_swap_color(unsigned char* pxdata, unsigned w, unsigned h, Color oldColor, Color newColor);
 /// Note splits horizontally
 std::vector<RawImage> image_split(unsigned char* pxdata, unsigned w, unsigned h, unsigned imgcount);
+//RawImage image_pad(const RawImage& in, unsigned newWidth, unsigned newHeight);
 RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight);
-RawImage image_crop(const unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight);
+RawImage image_crop(const RawImage& in, unsigned newWidth, unsigned newHeight);
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size = false);
 
 /// Reverses the scan-lines from top to bottom or vice verse, this is not actually to be used, you should load and save the data correctly to avoid duplicating it

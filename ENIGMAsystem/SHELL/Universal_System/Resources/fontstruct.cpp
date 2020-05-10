@@ -145,14 +145,14 @@ namespace enigma
         }
       }
 
-      std::vector<int> bigtex(w*h);
+      unsigned char* bigtex = new unsigned char[w*h]();
       for (unsigned i = 0; i < gcount; i++)
       {
         fontglyph& fg = fgr.glyphs[i];
         // Copy the SpriteFont glyph image into the big texture we just allocated
         for (int yy = 0; yy < glyphmetrics[i].h; yy++) {
           for (int xx = 0; xx < glyphmetrics[i].w; xx++) {
-            bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = ((unsigned int*)glyphdata[i])[gtw*(glyphy[i] + yy) + xx + glyphx[i]];
+            bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = (glyphdata[i])[gtw*(glyphy[i] + yy) + xx + glyphx[i]];
           }
         }
         delete[] glyphdata[i]; // Delete the image data we just copied
@@ -163,7 +163,7 @@ namespace enigma
         fg.ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
       }
 
-      font->texture = graphics_create_texture(w,h,bigtex.data(),false);
+      font->texture = graphics_create_texture(RawImage(bigtex, w, h), false);
       font->twid = w;
       font->thgt = h;
       font->yoffset = 0;

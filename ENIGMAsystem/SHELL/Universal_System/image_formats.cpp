@@ -32,6 +32,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#include <iostream>
 
 using namespace std;
 
@@ -151,7 +152,31 @@ RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeigh
   return padded;
 }
 
-RawImage image_crop(const unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight) {
+/* IDK wtf im doing wrong below but it doesn't work
+RawImage image_pad(const RawImage& in, unsigned newWidth, unsigned newHeight) {
+  RawImage padded;
+  padded.w = newWidth;
+  padded.h = newHeight;
+  
+  unsigned stride = 4;
+  padded.pxdata = new unsigned char[stride * newWidth * newHeight + 1]();
+  
+  unsigned rowindex, colindex;
+  for (rowindex = 0; rowindex < in.h; rowindex++) {
+    int index = in.h * in.w * stride;
+    for (colindex = 0; colindex < in.w; colindex++) {
+      for (unsigned s = 0; s < stride; s++) {
+        padded.pxdata[index + s] = in.pxdata[index + s];
+      }
+      index += stride;
+    }
+  }
+  
+  return padded;
+}
+*/
+
+RawImage image_crop(const RawImage& in, unsigned newWidth, unsigned newHeight) {
   RawImage img;
   img.w = newWidth;
   img.h = newHeight;
@@ -161,13 +186,13 @@ RawImage image_crop(const unsigned char* pxdata, unsigned origWidth, unsigned or
   for (unsigned i = 0; i < newHeight; i++) {
     unsigned tmp = i;
     unsigned bmp = i;
-    tmp *= stride * origWidth;
+    tmp *= stride * in.w;
     bmp *= stride * newWidth;
     for (unsigned ii = 0; ii < newWidth*stride; ii += stride) {
-      img.pxdata[bmp + ii + 2] = pxdata[tmp + ii + 0];
-      img.pxdata[bmp + ii + 1] = pxdata[tmp + ii + 1];
-      img.pxdata[bmp + ii + 0] = pxdata[tmp + ii + 2];
-      img.pxdata[bmp + ii + 3] = pxdata[tmp + ii + 3];
+      img.pxdata[bmp + ii + 2] = in.pxdata[tmp + ii + 0];
+      img.pxdata[bmp + ii + 1] = in.pxdata[tmp + ii + 1];
+      img.pxdata[bmp + ii + 0] = in.pxdata[tmp + ii + 2];
+      img.pxdata[bmp + ii + 3] = in.pxdata[tmp + ii + 3];
     }
   }
   
@@ -225,7 +250,7 @@ unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned he
 
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
 std::vector<RawImage> image_load(const std::filesystem::path& filename) {
-  /*std::filesystem::path extension = filename.extension();
+  std::filesystem::path extension = filename.extension();
   if (extension.empty()) {
     DEBUG_MESSAGE("No extension in image filename: " + filename.u8string() + ". Assumimg .bmp", MESSAGE_TYPE::M_WARNING);
     extension = ".bmp";
@@ -237,19 +262,19 @@ std::vector<RawImage> image_load(const std::filesystem::path& filename) {
   } else {
     DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() , MESSAGE_TYPE::M_ERROR);
     return std::vector<RawImage>();
-  }*/
+  }
 }
 
 /// Generic all-purpose image saving call.
 int image_save(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
-  /*std::filesystem::path extension = filename.extension();
+  std::filesystem::path extension = filename.extension();
   auto handler = image_save_handlers.find(tolower(extension.u8string()));
   if (extension.empty() || handler != image_save_handlers.end()) {
     return (*handler).second(filename, data, width, height, fullwidth, fullheight, flipped);
   } else {
     DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() + " saving as BMP" , MESSAGE_TYPE::M_WARNING);
     return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
-  }*/
+  }
 }
 
 std::vector<RawImage> image_load_bmp(const std::filesystem::path& filename) {

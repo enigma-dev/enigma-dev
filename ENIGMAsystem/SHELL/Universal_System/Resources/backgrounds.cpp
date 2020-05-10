@@ -59,7 +59,7 @@ Background background_add_helper(std::string filename, bool transparent, bool sm
     enigma::image_swap_color(imgs[0].pxdata, imgs[0].w, imgs[0].h, c, Color {0, 0, 0, 0});
   }
 
-  nb.textureID = graphics_create_texture(imgs[0].w, imgs[0].h, imgs[0].pxdata, mipmap, &fullwidth, &fullheight);
+  nb.textureID = graphics_create_texture(imgs[0], mipmap, &fullwidth, &fullheight);
   nb.textureBounds = TexRect(0, 0, static_cast<gs_scalar>(imgs[0].w) / fullwidth, static_cast<gs_scalar>(imgs[0].h) / fullheight);
 
   return nb;
@@ -78,7 +78,7 @@ int background_create_color(unsigned w, unsigned h, int col, bool preload) {
   RawImage img;
   img.pxdata = new unsigned char[fullwidth * fullheight * 4];
   std::fill((unsigned*)(img.pxdata), (unsigned*)(img.pxdata) + fullwidth * fullheight, (COL_GET_R(col) | (COL_GET_G(col) << 8) | (COL_GET_B(col) << 16) | 255 << 24));
-  int textureID = graphics_create_texture(w, h, img.pxdata, false);
+  int textureID = graphics_create_texture(img, false);
   return backgrounds.add(std::move(Background(w, h, textureID)));
 }
 

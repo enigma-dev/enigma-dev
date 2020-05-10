@@ -23,6 +23,8 @@
 \*/// Accidental failure to implement them could cause error.
 
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_instance.h"
+#include "Universal_System/image_formats.h"
+
 #include <string>
 #include <vector>
 #include <functional>
@@ -40,7 +42,7 @@ namespace enigma
   void graphics_set_viewport(float x, float y, float width, float height);
 
   /// Generate a texture from image data. Preserves input pixbuf.
-  int graphics_create_texture(unsigned width, unsigned height, void* pxdata, bool mipmap=false, unsigned* fullwidth = nullptr, unsigned* fullheight = nullptr);
+  int graphics_create_texture(const RawImage& img, bool mipmap=false, unsigned* fullwidth = nullptr, unsigned* fullheight = nullptr);
   /// Delete a texture's native peer data in the backend.
   void graphics_delete_texture(int tex);
 

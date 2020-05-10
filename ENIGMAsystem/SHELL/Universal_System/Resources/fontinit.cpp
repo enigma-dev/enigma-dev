@@ -67,8 +67,8 @@ void exe_loadfonts(FILE* exe) {
 
     const unsigned int size = twid * thgt;
 
-    int* pixels =
-        new int[size + 1];  //FYI: This variable was once called "cpixels." When you do compress them, change it back.
+    unsigned char* pixels =
+        new unsigned char[size + 1];  //FYI: This variable was once called "cpixels." When you do compress them, change it back.
 
     unsigned int sz2;
     for (sz2 = 0; !feof(exe) and sz2 < size; sz2++) {
@@ -138,11 +138,10 @@ void exe_loadfonts(FILE* exe) {
     font.height = ymax - ymin + 2;
     font.yoffset = -ymin + 1;
 
-    font.texture = graphics_create_texture(twid, thgt, pixels, false);
+    font.texture = graphics_create_texture(RawImage(pixels, twid, thgt), false);
     font.twid = twid;
     font.thgt = thgt;
 
-    delete[] pixels;
     sprite_fonts[fntid] = std::move(font);
 
     if (!fread(&nullhere, 4, 1, exe)) return;

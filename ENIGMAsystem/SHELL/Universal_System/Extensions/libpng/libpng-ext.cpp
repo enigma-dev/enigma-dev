@@ -31,9 +31,6 @@ namespace enigma {
 
 std::vector<RawImage> image_load_png(const std::filesystem::path& filename) {
   unsigned error;
-  unsigned char* image = nullptr;
-  unsigned pngwidth, pngheight;
-
   std::vector<RawImage> imgs(1);
   
   error = libpng_decode32_file(&imgs[0].pxdata, &imgs[0].w, &imgs[0].h, filename.u8string().c_str(), true);
@@ -47,7 +44,12 @@ std::vector<RawImage> image_load_png(const std::filesystem::path& filename) {
 
 int image_save_png(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped)
 {
-  RawImage img = image_crop(data, fullwidth, fullheight, width, height);
+  // FIXME: the save functions should take const RawImages too instead of unsigned char*
+  RawImage in(const_cast<unsigned char*>(data), fullwidth, fullheight);
+  RawImage img = image_crop(in, width, height);
+  
+  // Don't delete data
+  in.pxdata = nullptr;
   
   if (flipped) { 
     image_flip(img.pxdata, width, height, 4);

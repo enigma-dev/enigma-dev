@@ -383,9 +383,7 @@ int background_create_from_surface(int id, int x, int y, int w, int h, bool remo
     enigma::image_swap_color(surfbuf, w, h, c, enigma::Color {0, 0, 0, 0});
   }
   
-  enigma::Background bkg(w, h, enigma::graphics_create_texture(w, h, surfbuf, false));
-  
-  delete[] surfbuf;
+  enigma::Background bkg(w, h, enigma::graphics_create_texture(enigma::RawImage(surfbuf, w, h), false));
 
   return enigma::backgrounds.add(std::move(bkg));
 }
@@ -397,12 +395,10 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
   get_surfacev(surf,id,-1);
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
 
-  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+  enigma::RawImage surfImg(enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h), w, h);
   
   Sprite spr(w, h, xorig, yorig);
-  spr.AddSubimage(surfbuf, w, h, enigma::ct_precise, surfbuf); //TODO: Support toggling of precise.
-  
-  delete[] surfbuf;
+  spr.AddSubimage(surfImg, enigma::ct_precise, surfImg.pxdata); //TODO: Support toggling of precise.
   
   return sprites.add(std::move(spr));
 }
@@ -419,12 +415,10 @@ void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool r
   get_surface(surf,id);
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
 
-  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+  enigma::RawImage surfImg(enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h), w, h);
 
   Sprite& spr = sprites.get(ind);
-  spr.AddSubimage(surfbuf, w, h, enigma::ct_precise, surfbuf); //TODO: Support toggling of precise.
-  
-  delete[] surfbuf;
+  spr.AddSubimage(surfImg, enigma::ct_precise, surfImg.pxdata); //TODO: Support toggling of precise.
 }
 
 void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)
