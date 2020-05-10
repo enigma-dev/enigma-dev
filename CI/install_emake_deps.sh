@@ -8,6 +8,10 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
 
   # new gcc 
   sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  
+  # new clang
+  wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+  sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
 
   # new boost for old travis
   if [ "$COMPILER" == "Android" ]; then
@@ -18,7 +22,8 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   fi
 
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
-  sudo apt-get -y install gcc-9 g++-9 cpp-9 build-essential libprotobuf-dev protobuf-compiler zlib1g-dev libglm-dev libpng-dev
+  sudo apt-get -y install gcc-9 g++-9 cpp-9 build-essential libprotobuf-dev protobuf-compiler zlib1g-dev libglm-dev libpng-dev \
+    clang-10 lldb-10 lld-10
 
   sudo update-alternatives --remove-all cpp;
   sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 \
@@ -32,6 +37,15 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
               --slave   /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-9;
 
   g++ --version
+  
+  sudo ln -s /usr/bin/clang-10 /usr/bin/clang
+  sudo ln -s /usr/bin/clang++-10 /usr/bin/clang++
+  sudo ln -s /usr/bin/llvm-ar-10 /usr/bin/llvm-ar
+  sudo ln -s /usr/bin/llvm-as-10 /usr/bin/llvm-as
+  sudo ln -s /usr/bin/clangd-10 /usr/bin/clangd
+  sudo ln -s /usr/bin/clang-tidy-10 /usr/bin/clang-tidy
+
+  clang++ --version
 fi
 
 if [ "$COMPILER" == "Android" ]; then
