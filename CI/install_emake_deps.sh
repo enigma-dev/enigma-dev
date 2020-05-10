@@ -38,7 +38,6 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
 
   g++ --version
   
-  sudo update-alternatives --remove-all clang;
   sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 \
               81 \
               --slave /usr/bin/clang++ clang++ /usr/bin/clang++-10 \
