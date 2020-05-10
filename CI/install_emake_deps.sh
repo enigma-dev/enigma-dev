@@ -38,6 +38,11 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
 
   g++ --version
 
+  # Remove clang symlinks from the travis base install.
+  # The update-alternatives changes will not change the used clang version without this.
+  # /usr/local is searched for clang binaries before the /usr/bin direcory.
+  sudo rm -rf /usr/local/clang-*
+    
   sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 20
   sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 20
   sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-10 20
