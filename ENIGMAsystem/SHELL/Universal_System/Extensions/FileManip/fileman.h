@@ -113,11 +113,6 @@ using ::fileman::directory_contents_ns;
 using ::fileman::directory_contents_ns;
 using ::fileman::environment_get_variable_ns;
 using ::fileman::environment_set_variable_ns;
-#endif
-
-} // namespace enigma_user
-
-#ifdef OVERRIDE_SANDBOX
 #define working_directory get_working_directory_ns()
 #define temp_directory get_temp_directory_ns()
 #define program_directory get_program_directory_ns()
@@ -139,3 +134,5 @@ using ::fileman::environment_set_variable_ns;
 #define environment_get_variable(x) environment_get_variable_ns(x)
 #define environment_set_variable(x, y) environment_set_variable_ns(x, y)
 #endif
+
+}
