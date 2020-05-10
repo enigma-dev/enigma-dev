@@ -37,7 +37,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   g++ --version
 
   if [ "$COMPILER" != "Android" ]; then
-    sudo apt-get -y install clang-10 lldb-10 lld-10
+    sudo apt-get -y install clang-10 lldb-10 lld-10 libc++abi-10-dev libc++-10-dev
     # Remove clang symlinks from the travis base install.
     # The update-alternatives changes will not change the used clang version without this.
     # /usr/local is searched for clang binaries before the /usr/bin direcory.

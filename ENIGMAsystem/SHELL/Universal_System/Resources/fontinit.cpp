@@ -68,7 +68,7 @@ void exe_loadfonts(FILE* exe) {
     const unsigned int size = twid * thgt;
 
     unsigned char* pixels =
-        new unsigned char[size + 1];  //FYI: This variable was once called "cpixels." When you do compress them, change it back.
+        new unsigned char[size * 4 + 1];  //FYI: This variable was once called "cpixels." When you do compress them, change it back.
 
     unsigned int sz2;
     for (sz2 = 0; !feof(exe) and sz2 < size; sz2++) {
