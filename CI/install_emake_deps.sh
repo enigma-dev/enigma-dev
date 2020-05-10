@@ -38,11 +38,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
 
   g++ --version
   
-  sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 \
-              81 \
-              --slave /usr/bin/clang++ clang++ /usr/bin/clang++-10 \
-              --slave /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-10 \
-              --slave /usr/bin/clang-format clang-format /usr/bin/clang-format-10;
+  sudo apt -y remove -f clang-7 clang-7-doc libclang-common-7-dev libclang-7-dev libclang1-7 libllvm7 libllvm7 lldb-7 llvm-7 llvm-7-dev llvm-7-doc llvm-7-examples llvm-7-runtime clang-format-7 python-clang-7 libfuzzer-7-dev
   
   clang++ --version
 fi
