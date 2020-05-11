@@ -2,11 +2,10 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <cstddef>
+#include <string>
 
 using std::string;
 using std::size_t;
-using std::cout;
-using std::endl;
 
 static inline string program_directory_helper(size_t length) {
   string path;
