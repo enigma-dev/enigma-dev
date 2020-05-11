@@ -85,7 +85,7 @@ jobs:
         echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
         pacman-key --init 
         pacman-key --populate archlinux
-        pacman -Syu --noconfirm base base-devel sudo go git protobuf yaml-cpp pugixml rapidjson boost
+        pacman -Syu --noconfirm base base-devel sudo go git protobuf yaml-cpp pugixml rapidjson boost xorg-server-xvfb
         echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
         mkdir -p /home/aur/packages/done
         useradd -G wheel aur
@@ -115,3 +115,63 @@ jobs:
         EOF
       displayName: 'AUR Packages'
       condition: ne(variables.CACHE_RESTORED, 'true')
+      
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        pacman -U --noconfirm  /home/aur/packages/done/*.tar.xz
+        EOF
+      displayName: 'AUR Packages (Cached)'
+      condition: eq(variables.CACHE_RESTORED, 'true')
+
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        echo "[multilib]
+              Include = /etc/pacman.d/mirrorlist
+              [mingw32]
+              Include = /etc/pacman.d/mirrorlist.mingw32
+              [mingw64]
+              Include = /etc/pacman.d/mirrorlist.mingw64
+              [msys]
+              Include = /etc/pacman.d/mirrorlist.msys"  >> /etc/pacman.conf
+        pacman -Sy wine mingw-w64-x86_64-openal mingw-w64-x86_64-dumb mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123 mingw-w64-x86_64-libsndfile mingw-w64-x86_64-zlib mingw-w64-x86_64-libffi mingw-w64-x86_64-box2d mingw-w64-x86_64-glew mingw-w64-x86_64-glm mingw-w64-x86_64-alure mingw-w64-x86_64-SDL2 mingw-w64-x86_64-pkg-config
+        pacman -S mingw-w64-i686-openal mingw-w64-i686-dumb mingw-w64-i686-libvorbis mingw-w64-i686-libogg mingw-w64-i686-flac mingw-w64-i686-mpg123 mingw-w64-i686-libsndfile mingw-w64-i686-zlib mingw-w64-i686-libffi mingw-w64-i686-box2d mingw-w64-i686-glew mingw-w64-i686-glm mingw-w64-i686-alure mingw-w64-i686-SDL2 mingw-w64-i686-pkg-config
+        EOF
+      displayName: 'Install MinGW Engine Dependencies'
+      
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        cd enigma-dev
+        make emake
+        EOF
+      displayName: 'emake'
+      
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        cd enigma-dev
+        ./emake -x MinGW32 -p Win32 -w Win32 -a DirectSound -e DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,ExternalFuncs -o /tmp/test32.exe
+        WINEPREFIX=~/.wine32 WINEARCH=win32 xvfb-run wine /tmp/test32.exe
+        EOF
+      displayName: 'MinGW 32'
+      
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        cd enigma-dev
+        ./emake -x MinGW64 -p Win32 -w Win32 -a DirectSound -e DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,ExternalFuncs -o /tmp/test64.exe
+        WINEPREFIX=~/.wine64 WINEARCH=win64 xvfb-run wine /tmp/test64.exe
+        EOF
+      displayName: 'MinGW 64'
