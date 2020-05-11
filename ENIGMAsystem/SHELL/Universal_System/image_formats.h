@@ -52,17 +52,16 @@ enum {
   color_fmt_bgr
 };
 
-Color image_get_pixel_color(unsigned char* pxdata, unsigned w, unsigned h, unsigned x, unsigned y);
-void image_swap_color(unsigned char* pxdata, unsigned w, unsigned h, Color oldColor, Color newColor);
+Color image_get_pixel_color(const RawImage& in, unsigned x, unsigned y);
+void image_swap_color(RawImage& in, Color oldColor, Color newColor);
 /// Note splits horizontally
-std::vector<RawImage> image_split(unsigned char* pxdata, unsigned w, unsigned h, unsigned imgcount);
-//RawImage image_pad(const RawImage& in, unsigned newWidth, unsigned newHeight);
-RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight);
+std::vector<RawImage> image_split(const RawImage& in, unsigned imgcount);
+RawImage image_pad(const RawImage& in, unsigned newWidth, unsigned newHeight);
 RawImage image_crop(const RawImage& in, unsigned newWidth, unsigned newHeight);
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size = false);
 
 /// Reverses the scan-lines from top to bottom or vice verse, this is not actually to be used, you should load and save the data correctly to avoid duplicating it
-unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned height, unsigned bytesperpixel);
+void image_flip(RawImage& in);
 
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
 std::vector<RawImage> image_load(const std::filesystem::path& filename);

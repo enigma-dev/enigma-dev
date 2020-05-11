@@ -62,32 +62,32 @@ namespace enigma
 std::map<std::filesystem::path, ImageLoadFunction> image_load_handlers = {{".bmp", image_load_bmp}, {".gif", image_load_gif}};
 std::map<std::filesystem::path, ImageSaveFunction> image_save_handlers = {{".bmp", image_save_bmp}};
 
-Color image_get_pixel_color(unsigned char* pxdata, unsigned w, unsigned h, unsigned x, unsigned y) {
+Color image_get_pixel_color(const RawImage& in, unsigned x, unsigned y) {
   Color c;
-  size_t index = 4 * (y * w + x);
-  c.b = pxdata[index];
-  c.g = pxdata[index + 1];
-  c.r = pxdata[index + 2];
-  c.a = pxdata[index + 3];
+  size_t index = 4 * (y * in.w + x);
+  c.b = in.pxdata[index];
+  c.g = in.pxdata[index + 1];
+  c.r = in.pxdata[index + 2];
+  c.a = in.pxdata[index + 3];
   return c;
 }
 
-void image_swap_color(unsigned char* pxdata, unsigned w, unsigned h, Color oldColor, Color newColor) {  
+void image_swap_color(RawImage& in, Color oldColor, Color newColor) {  
   unsigned int ih, iw;
-  for (ih = 0; ih < h; ih++) {
-    int index = ih * w * 4;
+  for (ih = 0; ih < in.h; ih++) {
+    int index = ih * in.w * 4;
     
-    for (iw = 0; iw < w; iw++) {
+    for (iw = 0; iw < in.w; iw++) {
       if (
-           pxdata[index]     == oldColor.b
-        && pxdata[index + 1] == oldColor.g
-        && pxdata[index + 2] == oldColor.r
-        && pxdata[index + 3] == oldColor.a
+           in.pxdata[index]     == oldColor.b
+        && in.pxdata[index + 1] == oldColor.g
+        && in.pxdata[index + 2] == oldColor.r
+        && in.pxdata[index + 3] == oldColor.a
         ) {
-          pxdata[index]     = newColor.b;
-          pxdata[index + 1] = newColor.g;
-          pxdata[index + 2] = newColor.r;
-          pxdata[index + 3] = newColor.a;
+          in.pxdata[index]     = newColor.b;
+          in.pxdata[index + 1] = newColor.g;
+          in.pxdata[index + 2] = newColor.r;
+          in.pxdata[index + 3] = newColor.a;
       }
 
       index += 4;
@@ -95,28 +95,28 @@ void image_swap_color(unsigned char* pxdata, unsigned w, unsigned h, Color oldCo
   }
 }
 
-std::vector<RawImage> image_split(unsigned char* pxdata, unsigned w, unsigned h, unsigned imgcount) {
+std::vector<RawImage> image_split(const RawImage& in, unsigned imgcount) {
   std::vector<RawImage> imgs(imgcount);
-  unsigned splitWidth = w / imgcount;
+  unsigned splitWidth = in.w / imgcount;
   
   for (unsigned i = 0; i < imgcount; ++i) {
     
-    imgs[i].pxdata = new unsigned char[splitWidth * h * 4]();
+    imgs[i].pxdata = new unsigned char[splitWidth * in.h * 4]();
     imgs[i].w = splitWidth;
-    imgs[i].h = h;
+    imgs[i].h = in.h;
     
     unsigned ih,iw;
     unsigned xcelloffset = i * splitWidth * 4;
     
-    for (ih = 0; ih < h; ih++) {
-      unsigned tmp = ih * w * 4 + xcelloffset;
+    for (ih = 0; ih < in.h; ih++) {
+      unsigned tmp = ih * in.w * 4 + xcelloffset;
       unsigned tmpcell = ih * splitWidth * 4;
       
       for (iw = 0; iw < splitWidth; iw++) {
-        imgs[i].pxdata[tmpcell]     = pxdata[tmp];
-        imgs[i].pxdata[tmpcell + 1] = pxdata[tmp + 1];
-        imgs[i].pxdata[tmpcell + 2] = pxdata[tmp + 2];
-        imgs[i].pxdata[tmpcell + 3] = pxdata[tmp + 3];
+        imgs[i].pxdata[tmpcell]     = in.pxdata[tmp];
+        imgs[i].pxdata[tmpcell + 1] = in.pxdata[tmp + 1];
+        imgs[i].pxdata[tmpcell + 2] = in.pxdata[tmp + 2];
+        imgs[i].pxdata[tmpcell + 3] = in.pxdata[tmp + 3];
         tmp += 4;
         tmpcell += 4;
       }
@@ -126,7 +126,7 @@ std::vector<RawImage> image_split(unsigned char* pxdata, unsigned w, unsigned h,
   return imgs;
 }
 
-RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight) {
+RawImage image_pad(const RawImage& in, unsigned newWidth, unsigned newHeight) {
   RawImage padded;
   padded.w = newWidth;
   padded.h = newHeight;
@@ -134,47 +134,24 @@ RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeigh
   padded.pxdata = new unsigned char[4 * newWidth * newHeight + 1];
   
   unsigned char* imgpxptr = padded.pxdata;
+  const unsigned char* inpxdata = in.pxdata;
   unsigned rowindex, colindex;
-  for (rowindex = 0; rowindex < origHeight; rowindex++) {
-    for (colindex = 0; colindex < origWidth; colindex++) {
-      *imgpxptr++ = *pxdata++;
-      *imgpxptr++ = *pxdata++;
-      *imgpxptr++ = *pxdata++;
-      *imgpxptr++ = *pxdata++;
+  for (rowindex = 0; rowindex < in.h; rowindex++) {
+    for (colindex = 0; colindex < in.w; colindex++) {
+      *imgpxptr++ = *inpxdata++;
+      *imgpxptr++ = *inpxdata++;
+      *imgpxptr++ = *inpxdata++;
+      *imgpxptr++ = *inpxdata++;
     }
     
     std::memset(imgpxptr, 0, (newWidth - colindex) << 2);
     imgpxptr += (newWidth - colindex) << 2;
   }
   
-  std::memset(imgpxptr, 0, (newHeight - origHeight) * newWidth);
+  std::memset(imgpxptr, 0, (newHeight - in.h) * newWidth);
   
   return padded;
 }
-
-/* IDK wtf im doing wrong below but it doesn't work
-RawImage image_pad(const RawImage& in, unsigned newWidth, unsigned newHeight) {
-  RawImage padded;
-  padded.w = newWidth;
-  padded.h = newHeight;
-  
-  unsigned stride = 4;
-  padded.pxdata = new unsigned char[stride * newWidth * newHeight + 1]();
-  
-  unsigned rowindex, colindex;
-  for (rowindex = 0; rowindex < in.h; rowindex++) {
-    int index = in.h * in.w * stride;
-    for (colindex = 0; colindex < in.w; colindex++) {
-      for (unsigned s = 0; s < stride; s++) {
-        padded.pxdata[index + s] = in.pxdata[index + s];
-      }
-      index += stride;
-    }
-  }
-  
-  return padded;
-}
-*/
 
 RawImage image_crop(const RawImage& in, unsigned newWidth, unsigned newHeight) {
   RawImage img;
@@ -235,17 +212,19 @@ void image_add_saver(const std::filesystem::path& extension, ImageSaveFunction f
   image_save_handlers[extension] = fnc;
 }
 
-unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned height, unsigned bytes) {
+void image_flip(RawImage& in) {
   //flipped upside down
-  unsigned sz = width * height;
-  unsigned char* rgbdata = new unsigned char[sz * bytes];
-  for (unsigned int i = 0; i < height; i++) { // Doesn't matter the order now
-    memcpy(&rgbdata[i*width*bytes*sizeof(unsigned char)],           // address of destination
-           &data[(height-i-1)*width*bytes*sizeof(unsigned char)],   // address of source
-           width*bytes*sizeof(unsigned char) );                     // number of bytes to copy
+  unsigned bytes = 4;
+  unsigned sz = in.w * in.h * bytes;
+  unsigned char* rgbdata = new unsigned char[sz];
+  for (unsigned int i = 0; i < in.h; i++) { // Doesn't matter the order now
+    memcpy(&rgbdata[i*in.w*bytes*sizeof(unsigned char)],           // address of destination
+           &in.pxdata[(in.h-i-1)*in.w*bytes*sizeof(unsigned char)],   // address of source
+           in.w*bytes*sizeof(unsigned char) );                     // number of bytes to copy
   }
-
-  return rgbdata;
+  
+  delete[] in.pxdata;
+  in.pxdata = rgbdata;
 }
 
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.

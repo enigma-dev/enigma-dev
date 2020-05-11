@@ -240,7 +240,7 @@ bool textures_regions_equal(int textureID1, int textureID2, unsigned xOff1, unsi
 uint32_t texture_get_pixel(int texid, unsigned x, unsigned y) {
   enigma::RawImage i;
   i.pxdata = enigma::graphics_copy_texture_pixels(texid, &i.w, &i.h);
-  return enigma::image_get_pixel_color(i.pxdata, i.w, i.h, x, y).asInt();
+  return enigma::image_get_pixel_color(i, x, y).asInt();
 }
 
 } // namespace enigma_user

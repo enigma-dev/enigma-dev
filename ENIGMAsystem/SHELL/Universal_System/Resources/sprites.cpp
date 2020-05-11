@@ -50,21 +50,21 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
 
   // If sprite transparent, set the alpha to zero for pixels that should be
   // transparent from lower left pixel color
-  Color c = enigma::image_get_pixel_color(imgs[0].pxdata, imgs[0].w, imgs[0].h, 0, imgs[0].h - 1);
+  Color c = enigma::image_get_pixel_color(imgs[0], 0, imgs[0].h - 1);
   
   if (imgs.size() == 1 && imgnumb > 1) {
     if (transparent) {      
-      enigma::image_swap_color(imgs[0].pxdata, imgs[0].w, imgs[0].h, c, Color {0, 0, 0, 0});
+      enigma::image_swap_color(imgs[0], c, Color {0, 0, 0, 0});
     }
   
-    std::vector<RawImage> rawSubimages = enigma::image_split(imgs[0].pxdata, imgs[0].w, imgs[0].h, imgnumb);
+    std::vector<RawImage> rawSubimages = enigma::image_split(imgs[0], imgnumb);
     for (const RawImage& i : rawSubimages) {
       ns.AddSubimage(i, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
     }
   } else {
-    for (const RawImage& i : imgs) {
+    for (RawImage& i : imgs) {
       if (transparent) {
-        enigma::image_swap_color(i.pxdata, i.w, i.h, c, Color {0, 0, 0, 0});
+        enigma::image_swap_color(i, c, Color {0, 0, 0, 0});
       }
       ns.AddSubimage(i, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
     }

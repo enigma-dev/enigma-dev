@@ -42,7 +42,7 @@ int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidt
   *fullheight = nlpo2dc(img.h)+1;
   
   if (img.pxdata != nullptr && (img.w != *fullwidth || img.h != *fullheight)) {
-    RawImage padded = image_pad(img.pxdata, img.w, img.h, *fullwidth, *fullheight);
+    RawImage padded = image_pad(img, *fullwidth, *fullheight);
     tbsd.pSysMem = padded.pxdata;
   } else tbsd.pSysMem = img.pxdata;
   

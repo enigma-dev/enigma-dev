@@ -52,7 +52,7 @@ int graphics_create_texture_custom(const RawImage& img, bool mipmap, unsigned* f
   glBindTexture(GL_TEXTURE_2D, texture);
 
   if (pad) {
-    RawImage padded = image_pad(img.pxdata, img.w, img.h, *fullwidth, *fullheight);
+    RawImage padded = image_pad(img, *fullwidth, *fullheight);
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, *fullwidth, *fullheight, 0, format, type, padded.pxdata);
   } else glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, *fullwidth, *fullheight, 0, format, type, img.pxdata);
   

@@ -52,7 +52,7 @@ int image_save_png(const std::filesystem::path& filename, const unsigned char* d
   in.pxdata = nullptr;
   
   if (flipped) { 
-    image_flip(img.pxdata, width, height, 4);
+    image_flip(img);
   }
   
   unsigned error = libpng_encode32_file(img.pxdata, width, height, filename.u8string().c_str(), false);

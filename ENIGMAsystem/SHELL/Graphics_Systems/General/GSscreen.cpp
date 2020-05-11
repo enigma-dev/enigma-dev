@@ -71,11 +71,11 @@ RawImage create_from_screen_helper(int x, int y, int w, int h, bool removeback, 
 
   // FIXME: This logic is duplicated here, backgrounds.cpp, sprites_internal.cpp in this file somewhat and likely 12 other places
   if (flipped)
-    i.pxdata = enigma::image_flip(i.pxdata, w, h, 4);
+    enigma::image_flip(i);
     
   if (removeback) {
-    Color c = enigma::image_get_pixel_color(i.pxdata, w, h, 0, h - 1);
-    enigma::image_swap_color(i.pxdata, w, h, c, Color {0, 0, 0, 0});
+    Color c = enigma::image_get_pixel_color(i, 0, h - 1);
+    enigma::image_swap_color(i, c, Color {0, 0, 0, 0});
   }
   
   return i;
