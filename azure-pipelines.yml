@@ -90,6 +90,14 @@ jobs:
         mkdir -p /home/aur/packages/done
         useradd -G wheel aur
         chown -R aur:aur /home/aur
+        echo "[multilib]
+        Include = /etc/pacman.d/mirrorlist
+        [mingw32]
+        Include = /etc/pacman.d/mirrorlist.mingw32
+        [mingw64]
+        Include = /etc/pacman.d/mirrorlist.mingw64
+        [msys]
+        Include = /etc/pacman.d/mirrorlist.msys"  >> /etc/pacman.conf
         curl https://raw.githubusercontent.com/msys2/msys2-ci-base/master/usr/share/pacman/keyrings/msys2.gpg -o /usr/share/pacman/keyrings/msys2.gpg
         pacman-key --populate msys2
         pacman -Sy
