@@ -1,4 +1,5 @@
 #include "Platforms/General/POSIX/POSIXprogdir.h"
+#include <sys/types.h>
 #include <sys/sysctl.h>
 #include <cstddef>
 
