@@ -1,10 +1,10 @@
 ##
-## MSYS2 repository mirrorlist
+## 32-bit Mingw-w64 repository mirrorlist
 ##
 
 ## Primary
 ## msys2.org
-Server = http://repo.msys2.org/msys/i686/
-Server = https://sourceforge.net/projects/msys2/files/REPOS/MSYS2/i686/
-Server = http://www2.futureware.at/~nickoe/msys2-mirror/msys/i686/
-Server = https://mirror.yandex.ru/mirrors/msys2/msys/i686/
+Server = http://repo.msys2.org/mingw/i686/
+Server = https://sourceforge.net/projects/msys2/files/REPOS/MINGW/i686/
+Server = http://www2.futureware.at/~nickoe/msys2-mirror/mingw/i686/
+Server = https://mirror.yandex.ru/mirrors/msys2/mingw/i686/
