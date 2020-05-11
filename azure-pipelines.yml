@@ -118,7 +118,7 @@ jobs:
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
         cd /home/aur/packages
-        sudo -u aur git clone https://aur.archlinux.org/yay-git.git
+        su aur -c 'git clone https://aur.archlinux.org/yay-git.git'
         cd yay-git
         su aur -c makepkg
         pacman -U --noconfirm  yay-*.tar.xz
