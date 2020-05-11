@@ -101,7 +101,8 @@ jobs:
         curl https://raw.githubusercontent.com/msys2/msys2-ci-base/master/usr/share/pacman/keyrings/msys2.gpg -o /usr/share/pacman/keyrings/msys2.gpg
         pacman-key --populate msys2
         pacman-key --refresh-keys
-        pacman -Syu --noconfirm base base-devel sudo go git protobuf yaml-cpp pugixml rapidjson boost xorg-server-xvfb
+        pacman -Syuu --verbose --debug
+        pacman -S --noconfirm base base-devel sudo go git protobuf yaml-cpp pugixml rapidjson boost xorg-server-xvfb
         EOF
       displayName: 'Bootstrap Archlinux'
     
