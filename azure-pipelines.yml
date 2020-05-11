@@ -141,7 +141,8 @@ jobs:
               Include = /etc/pacman.d/mirrorlist.mingw64
               [msys]
               Include = /etc/pacman.d/mirrorlist.msys"  >> /etc/pacman.conf
-        pacman-key -r 4DF3B7664CA56930 D595C9AB2C51581E 5F92EFC1A47D45A1 9F418C233E652008 BBE514E53E0D0813 DA7EF2ABAEEA755C F40D263ECA25678A
+        pacman-key --populate msys2
+        pacman-key --refresh-keys
         pacman -Sy wine mingw-w64-x86_64-openal mingw-w64-x86_64-dumb mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123 mingw-w64-x86_64-libsndfile mingw-w64-x86_64-zlib mingw-w64-x86_64-libffi mingw-w64-x86_64-box2d mingw-w64-x86_64-glew mingw-w64-x86_64-glm mingw-w64-x86_64-alure mingw-w64-x86_64-SDL2 mingw-w64-x86_64-pkg-config
         pacman -S mingw-w64-i686-openal mingw-w64-i686-dumb mingw-w64-i686-libvorbis mingw-w64-i686-libogg mingw-w64-i686-flac mingw-w64-i686-mpg123 mingw-w64-i686-libsndfile mingw-w64-i686-zlib mingw-w64-i686-libffi mingw-w64-i686-box2d mingw-w64-i686-glew mingw-w64-i686-glm mingw-w64-i686-alure mingw-w64-i686-SDL2 mingw-w64-i686-pkg-config
         EOF
