@@ -101,15 +101,16 @@ jobs:
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
+        echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/users
         mkdir /home/aur
         cd /home/aur
-        useradd aur
+        useradd -G wheel aur
         git clone https://aur.archlinux.org/yay-git.git
         chown -R aur:aur /home/aur
         cd yay-git
         sudo -u aur makepkg
         pacman -U --noconfirm  yay-*.tar.xz
-        yay -S --noconfirm lcov
+        sudo -u aur sudo yay -S --noconfirm lcov
         EOF
       displayName: 'AUR Packages'
       condition: ne(variables.CACHE_RESTORED, 'true')
