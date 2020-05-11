@@ -12,7 +12,6 @@ pr:  # Trigger a build on every PR.
 variables:
 - template: azure-vars.yml@radialgm
 - group: Test Harness Auth
-- aur_cache_ver: "v1.0.0"
 
 jobs:
 - template: azure-jobs.yml@radialgm
@@ -62,6 +61,8 @@ jobs:
       displayName: Run Test Harness
       
 - job: CrossCompile
+  variables:
+    aur_cache_ver: "v1.0.0"
   displayName: 'Cross Compile'
   pool:
     vmImage: 'ubuntu-latest'
