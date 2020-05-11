@@ -85,11 +85,12 @@ jobs:
         echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
         pacman-key --init 
         pacman-key --populate archlinux
-        pacman -Syu --noconfirm base base-devel sudo go git protobuf yaml-cpp pugixml rapidjson boost xorg-server-xvfb
+        #pacman -Syu --noconfirm base base-devel sudo go git protobuf yaml-cpp pugixml rapidjson boost xorg-server-xvfb
         echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
         mkdir -p /home/aur/packages/done
         useradd -G wheel aur
         chown -R aur:aur /home/aur
+        cp enigma-dev/CI/mirrorlist* /etc/pacman.d/
         echo "[multilib]
         Include = /etc/pacman.d/mirrorlist
         [mingw32]
