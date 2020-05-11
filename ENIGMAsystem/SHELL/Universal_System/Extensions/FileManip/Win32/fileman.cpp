@@ -137,9 +137,9 @@ namespace fileman {
 
   string environment_get_variable_ns(string name) {
     string value;
-    wchar_t buffer[MAX_PATH];
+    wchar_t buffer[32767];
     wstring u8name = widen(name);
-    if (GetEnvironmentVariableW(u8name.c_str(), buffer, MAX_PATH) != 0) {
+    if (GetEnvironmentVariableW(u8name.c_str(), buffer, 32767) != 0) {
       value = narrow(buffer);
     }
     return value;

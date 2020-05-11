@@ -1,5 +1,4 @@
-﻿/*
-
+/*
  MIT License
  
  Copyright © 2020 Samuel Venable
@@ -25,9 +24,8 @@
 */
 
 #include "../fileman.h"
-#include <unistd.h>
 #include <iostream>
-#include <climits>
+#include <cstdlib>
 
 using std::string;
 using std::cout;
@@ -37,15 +35,14 @@ namespace fileman {
 
   string get_program_pathname_ns(bool print) {
     string path;
-    char buffer[PATH_MAX];
-    ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX);
-    if (count != -1) {
-      buffer[count] = 0;
-      path = buffer;
+    char *buffer = realpath("/proc/self/exe", NULL);
+    path = buffer ? : "";
+    if (!path.empty()) {
       if (print) {
         cout << "program_pathname = \"" << path << "\"" << endl;
       }
     }
+    free(buffer);
     return path;
   }
 
