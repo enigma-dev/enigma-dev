@@ -128,6 +128,7 @@ jobs:
         EOF
       displayName: 'Install AUR Packages (Cached)'
       condition: eq(variables.CACHE_RESTORED, 'true')
+    
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
@@ -149,6 +150,7 @@ jobs:
         pacman -S mingw-w64-i686-openal mingw-w64-i686-dumb mingw-w64-i686-libvorbis mingw-w64-i686-libogg mingw-w64-i686-flac mingw-w64-i686-mpg123 mingw-w64-i686-libsndfile mingw-w64-i686-zlib mingw-w64-i686-libffi mingw-w64-i686-box2d mingw-w64-i686-glew mingw-w64-i686-glm mingw-w64-i686-alure mingw-w64-i686-SDL2 mingw-w64-i686-pkg-config
         EOF
       displayName: 'Install MinGW Engine Dependencies'
+      condition: always()
       
     - bash: |
         set -e
