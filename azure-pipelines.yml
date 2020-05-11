@@ -95,8 +95,8 @@ jobs:
     
     - task: Cache@2
       inputs:
-        key: change_me_to_update_aur| "$(Agent.OS)"
-        restoreKeys: change_me_to_update_aur
+        key: cache_ver_1| "$(Agent.OS)"
+        restoreKeys: cache_ver_1
         path: $(Build.BinariesDirectory)/root.x86_64/home/aur/packages/done
         cacheHitVar: CACHE_RESTORED
     
@@ -112,6 +112,7 @@ jobs:
         pacman -U --noconfirm  yay-*.tar.xz
         sudo -u aur yay -S --noconfirm --builddir /home/aur/packages lcov mingw-w64-gcc-bin mingw-w64-binutils-bin mingw-w64-crt-bin mingw-w64-headers-bin mingw-w64-winpthreads-bin
         find /home/aur/packages/ -iname '*.pkg.tar.xz' -exec mv '{}' /home/aur/packages/done \;
+        chmod -R 775 /home/aur/packages/done
         EOF
       displayName: 'AUR Packages'
       condition: ne(variables.CACHE_RESTORED, 'true')
