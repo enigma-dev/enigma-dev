@@ -110,7 +110,7 @@ jobs:
         cd yay-git
         sudo -u aur makepkg
         pacman -U --noconfirm  yay-*.tar.xz
-        sudo -u aur sudo yay -S --noconfirm lcov
+        sudo -u aur yay -S --noconfirm lcov
         EOF
       displayName: 'AUR Packages'
       condition: ne(variables.CACHE_RESTORED, 'true')
