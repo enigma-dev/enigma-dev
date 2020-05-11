@@ -104,8 +104,8 @@ jobs:
         mkdir /home/aur
         cd /home/aur
         useradd aur
-        chown -R aur:aur /home/aur
         git clone https://aur.archlinux.org/yay-git.git
+        chown -R aur:aur /home/aur
         cd yay-git
         sudo -u aur makepkg
         pacman -U --noconfirm  yay-*.tar.xz
