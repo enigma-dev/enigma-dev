@@ -141,6 +141,7 @@ jobs:
               Include = /etc/pacman.d/mirrorlist.mingw64
               [msys]
               Include = /etc/pacman.d/mirrorlist.msys"  >> /etc/pacman.conf
+        curl https://raw.githubusercontent.com/msys2/msys2-ci-base/master/usr/share/pacman/keyrings/msys2.gpg -o /usr/share/pacman/keyrings/msys2.gpg
         pacman-key --populate msys2
         pacman-key --refresh-keys
         pacman -Sy wine mingw-w64-x86_64-openal mingw-w64-x86_64-dumb mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123 mingw-w64-x86_64-libsndfile mingw-w64-x86_64-zlib mingw-w64-x86_64-libffi mingw-w64-x86_64-box2d mingw-w64-x86_64-glew mingw-w64-x86_64-glm mingw-w64-x86_64-alure mingw-w64-x86_64-SDL2 mingw-w64-x86_64-pkg-config
