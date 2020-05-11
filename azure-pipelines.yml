@@ -60,3 +60,56 @@ jobs:
         _BOT_PUSH_ON_GREEN_TOKEN: $(bot_push_on_green_token)
         _CODECOV_UPLOAD_TOKEN: $(codecov_upload_token)
       displayName: Run Test Harness
+      
+- job: CrossCompile
+  displayName: 'Cross Compile'
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  steps:
+    - checkout: self
+      persistCredentials: true
+      path: enigma-dev
+    
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        ARCH_URL=`curl -s https://mirrors.acm.wpi.edu/archlinux/iso/latest/ | egrep -o 'archlinux-bootstrap-([0-9._]+)-x86_64.tar.gz' | head -n1`
+        echo https://mirrors.acm.wpi.edu/archlinux/iso/latest/$ARCH_URL
+        curl https://mirrors.acm.wpi.edu/archlinux/iso/latest/$ARCH_URL -o arch.tar.gz
+        sudo tar xzf arch.tar.gz
+        sudo mount --bind ./root.x86_64/ ./root.x86_64/
+        sudo cp -R $(Agent.BuildDirectory)/enigma-dev ./root.x86_64/
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
+        pacman-key --init 
+        pacman-key --populate archlinux
+        pacman -Syu --noconfirm base base-devel sudo go git protobuf yaml-cpp pugixml rapidjson boost
+        EOF
+      displayName: 'Bootstrap Archlinux'
+    
+    - task: Cache@2
+      inputs:
+        key: mykey | mylockfile
+        restoreKeys: mykey
+        path: $(Pipeline.Workspace)/mycache
+        cacheHitVar: CACHE_RESTORED
+    
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        mkdir /home/aur
+        cd /home/aur
+        useradd aur
+        chown -R aur:aur /home/aur
+        git clone https://aur.archlinux.org/yay-git.git
+        cd yay-git
+        sudo -u aur makepkg
+        pacman -U --noconfirm  yay-*.tar.xz
+        yay -S --noconfirm lcov
+        EOF
+      displayName: 'AUR Packages'
+      condition: ne(variables.CACHE_RESTORED, 'true')
