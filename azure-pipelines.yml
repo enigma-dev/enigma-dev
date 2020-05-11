@@ -61,8 +61,6 @@ jobs:
       displayName: Run Test Harness
       
 - job: CrossCompile
-  variables:
-    aur_cache_ver: "v1.0.0"
   displayName: 'Cross Compile'
   pool:
     vmImage: 'ubuntu-latest'
@@ -94,14 +92,6 @@ jobs:
         EOF
       displayName: 'Bootstrap Archlinux'
     
-    - task: Cache@2
-      inputs:
-        key: $(aur_cache_ver)| "$(Agent.OS)"
-        restoreKeys: $(aur_cache_ver)
-        path: $(Build.BinariesDirectory)/root.x86_64/home/aur/packages/done
-        cacheHitVar: CACHE_RESTORED
-      displayName: 'Cache AUR Packages'
-    
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
@@ -113,21 +103,8 @@ jobs:
         sudo -u aur makepkg
         pacman -U --noconfirm  yay-*.tar.xz
         sudo -u aur yay -S --noconfirm --builddir /home/aur/packages lcov mingw-w64-gcc-bin mingw-w64-binutils-bin mingw-w64-crt-bin mingw-w64-headers-bin mingw-w64-winpthreads-bin
-        find /home/aur/packages/ -iname '*.pkg.tar.xz' -exec mv '{}' /home/aur/packages/done \;
-        chmod -R 775 /home/aur/packages/done
         EOF
       displayName: 'Build & Install AUR Packages'
-      condition: ne(variables.CACHE_RESTORED, 'true')
-      
-    - bash: |
-        set -e
-        cd $(Build.BinariesDirectory)
-        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
-        set -e
-        pacman -U --noconfirm  /home/aur/packages/done/*.tar.xz
-        EOF
-      displayName: 'Install AUR Packages (Cached)'
-      condition: eq(variables.CACHE_RESTORED, 'true')
     
     - bash: |
         set -e
@@ -150,7 +127,6 @@ jobs:
         pacman -S --noconfirm mingw-w64-i686-openal mingw-w64-i686-dumb mingw-w64-i686-libvorbis mingw-w64-i686-libogg mingw-w64-i686-flac mingw-w64-i686-mpg123 mingw-w64-i686-libsndfile mingw-w64-i686-zlib mingw-w64-i686-libffi mingw-w64-i686-box2d mingw-w64-i686-glew mingw-w64-i686-glm mingw-w64-i686-alure mingw-w64-i686-SDL2 mingw-w64-i686-pkg-config
         EOF
       displayName: 'Install MinGW Engine Dependencies'
-      condition: always()
       
     - bash: |
         set -e
