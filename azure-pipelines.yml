@@ -101,7 +101,7 @@ jobs:
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
-        echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/users
+        echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
         mkdir /home/aur
         cd /home/aur
         useradd -G wheel aur
