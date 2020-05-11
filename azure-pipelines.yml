@@ -88,7 +88,6 @@ jobs:
         pacman -Syu --noconfirm base base-devel sudo go git protobuf yaml-cpp pugixml rapidjson boost
         echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
         mkdir -p /home/aur/packages/done
-        cd /home/aur/packages
         useradd -G wheel aur
         chown -R aur:aur /home/aur
         EOF
@@ -106,6 +105,7 @@ jobs:
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
+        cd /home/aur/packages
         sudo -u aur git clone https://aur.archlinux.org/yay-git.git
         cd yay-git
         sudo -u aur makepkg
