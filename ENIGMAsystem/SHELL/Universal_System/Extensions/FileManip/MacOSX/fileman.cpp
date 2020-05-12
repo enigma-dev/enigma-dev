@@ -1,4 +1,4 @@
-﻿/*
+/*
 
  MIT License
  
@@ -40,6 +40,7 @@ namespace fileman {
     string path;
     uint32_t length = 0;
     _NSGetExecutablePath(NULL, &length);
+    path.resize(length, '\0');
     char *buffer1 = path.data();
     if (_NSGetExecutablePath(buffer1, &length) == 0) {
       char *buffer2 = realpath(buffer1, NULL);
