@@ -112,6 +112,7 @@ jobs:
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
         cp enigma-dev/CI/mirrorlist* /etc/pacman.d/
+        cp enigma-dev/CI/asound.conf /etc/asound.conf
         echo "[multilib]
               Include = /etc/pacman.d/mirrorlist
               [mingw32]
