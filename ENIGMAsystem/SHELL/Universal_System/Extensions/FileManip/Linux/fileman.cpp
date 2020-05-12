@@ -37,12 +37,12 @@ namespace fileman {
     string path;
     char *buffer = realpath("/proc/self/exe", NULL);
     path = buffer ? : "";
+    free(buffer);
     if (!path.empty()) {
       if (print) {
         cout << "program_pathname = \"" << path << "\"" << endl;
       }
     }
-    free(buffer);
     return path;
   }
 
