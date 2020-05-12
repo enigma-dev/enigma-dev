@@ -43,6 +43,7 @@ static inline string get_program_pathname_helper(string path = "", size_t length
   mib[1] = KERN_PROC;
   mib[2] = KERN_PROC_PATHNAME;
   mib[3] = -1;
+  path.resize(length, '\0');
   char *buffer = path.data();
   size_t cb = length;
   if (sysctl(mib, 4, buffer, &cb, NULL, 0) == -1) {
