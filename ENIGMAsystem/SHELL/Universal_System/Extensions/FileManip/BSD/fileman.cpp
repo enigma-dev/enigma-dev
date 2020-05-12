@@ -63,8 +63,8 @@ namespace fileman {
     mib[1] = KERN_PROC;
     mib[2] = KERN_PROC_PATHNAME;
     mib[3] = -1;
-    char *buffer = new char[length]();
-    size_t cb = sizeof(buffer);
+    char *buffer = path.data();
+    size_t cb = length;
     if (sysctl(mib, 4, buffer, &cb, NULL, 0) == -1) {
       path = get_program_pathname_helper(length);
     } else if (sysctl(mib, 4, buffer, &cb, NULL, 0) == 0) {
@@ -76,7 +76,6 @@ namespace fileman {
         cout << "program_pathname = \"" << path << "\"" << endl;
       }
     }
-    delete[] buffer;
     return path;
   }
 
