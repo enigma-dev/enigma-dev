@@ -7,9 +7,9 @@
 using std::string;
 using std::size_t;
 
-static inline string program_directory_helper(size_t length) {
-  string path;
-  length++;
+static const size_t PATH_SIZE = 256;
+
+static inline string program_directory_helper(string path = "", size_t length = 0) {
   int mib[4];
   mib[0] = CTL_KERN;
   mib[1] = KERN_PROC;
@@ -18,9 +18,10 @@ static inline string program_directory_helper(size_t length) {
   char *buffer = path.data();
   size_t cb = length;
   if (sysctl(mib, 4, buffer, &cb, NULL, 0) == -1) {
-    path = program_directory_helper(length);
+    length += PATH_SIZE;
+    path = program_directory_helper(path, length);
   } else if (sysctl(mib, 4, buffer, &cb, NULL, 0) == 0) {
-    path = enigma_user::filename_path(buffer);
+    path = enigma_user::filename_path(buffer) + "\0";
     path.shrink_to_fit();
   }
   return path;
@@ -29,7 +30,7 @@ static inline string program_directory_helper(size_t length) {
 namespace enigma {
 
   void initialize_program_directory() {
-    enigma_user::program_directory = program_directory_helper(256);
+    enigma_user::program_directory = program_directory_helper();
   }
 
 } // namespace enigma
