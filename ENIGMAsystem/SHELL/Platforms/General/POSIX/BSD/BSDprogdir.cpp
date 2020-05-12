@@ -35,8 +35,8 @@ namespace enigma {
     mib[1] = KERN_PROC;
     mib[2] = KERN_PROC_PATHNAME;
     mib[3] = -1;
-    char *buffer = new char[length]();
-    size_t cb = sizeof(buffer);
+    char *buffer = path.data();
+    size_t cb = length;
     if (sysctl(mib, 4, buffer, &cb, NULL, 0) == -1) {
       path = program_directory_helper(length);
     } else if (sysctl(mib, 4, buffer, &cb, NULL, 0) == 0) {
@@ -44,7 +44,6 @@ namespace enigma {
     }
     path.shrink_to_fit();
     enigma_user::program_directory = path;
-    delete[] buffer;
   }
 
 } // namespace enigma
