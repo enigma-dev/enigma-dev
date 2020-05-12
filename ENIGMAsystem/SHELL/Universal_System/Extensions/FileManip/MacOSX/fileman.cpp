@@ -44,6 +44,7 @@ namespace fileman {
     if (_NSGetExecutablePath(buffer1, &length) == 0) {
       char *buffer2 = realpath(buffer1, NULL);
       path = buffer2 ? : "";
+      free(buffer2);
     }
     if (!path.empty()) {
       if (print) {
@@ -51,7 +52,6 @@ namespace fileman {
       }
     }
     delete[] buffer1;
-    free(buffer2);
     return path;
   }
 
