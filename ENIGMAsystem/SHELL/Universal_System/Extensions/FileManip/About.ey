@@ -5,7 +5,7 @@ Name: File Manipulation
 Identifier: FileManip
 Author: Samuel Venable
 Description: Allows creating, copying, moving, renaming, and deleting files and directories.
-Default: false
+Default: true
 Icon: fileman.png
 
 Depends: None

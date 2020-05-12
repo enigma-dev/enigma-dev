@@ -31,7 +31,7 @@
 namespace strings {
 
   std::string string_replace_all(std::string str, std::string substr, std::string nstr);
-  std::vector<std::string> split_string(const std::string &str, char delimiter);
+  std::vector<std::string> string_split(std::string str, char delimiter);
   std::string filename_path(std::string fname);
   std::string filename_name(std::string fname);
   std::string filename_ext(std::string fname);

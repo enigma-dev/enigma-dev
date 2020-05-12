@@ -51,7 +51,7 @@ namespace strings {
     return str;
   }
 
-  vector<string> split_string(const string &str, char delimiter) {
+  vector<string> string_split(string str, char delimiter) {
     vector<string> vec;
     std::stringstream sstr(str);
     string tmp;
@@ -325,7 +325,7 @@ namespace fileman {
           fs::copy(path1, path2, fs::copy_options::recursive);
           result = (directory_exists_ns(newname) && directory_size(dname) == directory_size(newname));
         } else if (path1.u8string() == path3.u8string()) {
-          vector<string> itemVec = split_string(directory_contents_ns(dname), '\n');
+          vector<string> itemVec = string_split(directory_contents_ns(dname), '\n');
           if (!directory_exists_ns(newname)) {
             directory_create_ns(newname);
             for (const string &item : itemVec) {
@@ -379,8 +379,8 @@ namespace fileman {
     if (result.back() == '\n') result.pop_back();
     pattern = string_replace_all(pattern, " ", "");
     pattern = string_replace_all(pattern, "*", "");
-    vector<string> itemVec = split_string(result, '\n');
-    vector<string> extVec = split_string(pattern, ';');
+    vector<string> itemVec = string_split(result, '\n');
+    vector<string> extVec = string_split(pattern, ';');
     std::set<string> filteredItems;
     for (const string &item : itemVec) {
       for (const string &ext : extVec) {
