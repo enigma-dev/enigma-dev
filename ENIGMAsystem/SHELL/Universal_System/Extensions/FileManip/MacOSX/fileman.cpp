@@ -40,7 +40,7 @@ namespace fileman {
     string path;
     uint32_t length = 0;
     _NSGetExecutablePath(NULL, &length);
-    char *buffer1 = new char[length]();
+    char *buffer1 = path.data();
     if (_NSGetExecutablePath(buffer1, &length) == 0) {
       char *buffer2 = realpath(buffer1, NULL);
       path = buffer2 ? : "";
@@ -51,7 +51,6 @@ namespace fileman {
         cout << "program_pathname = \"" << path << "\"" << endl;
       }
     }
-    delete[] buffer1;
     return path;
   }
 
