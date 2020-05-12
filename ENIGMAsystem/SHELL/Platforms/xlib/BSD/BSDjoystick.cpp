@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include "Platforms/General/PFjoystick.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include <string>
 
 using std::string;
@@ -33,18 +34,19 @@ using std::string;
 namespace enigma
 {
   void init_joysticks() {
-    enigma_user::joystick_load(0);
-    enigma_user::joystick_load(1);
+    // enigma_user::joystick_load(0);
+    // enigma_user::joystick_load(1);
   }
 
   void handle_joysticks() {
-
+    
   }
 }  // namespace enigma
 
 namespace enigma_user {
 
   bool joystick_load(int id) {
+    DEBUG_MESSAGE("Joysticks are not yet implemented in X11 for FreeBSD!", MESSAGE_TYPE::M_ERROR);
     return false;
   }
 
