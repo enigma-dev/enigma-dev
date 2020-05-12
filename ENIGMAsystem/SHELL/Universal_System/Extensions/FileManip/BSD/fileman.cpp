@@ -1,4 +1,4 @@
-﻿/*
+/*
 
  MIT License
  
@@ -35,9 +35,9 @@ using std::size_t;
 using std::cout;
 using std::endl;
 
-static inline string get_program_pathname_helper(size_t length) {
-  string path;
-  length++;
+static const size_t PATH_SIZE = 256;
+
+static inline string get_program_pathname_helper(string path = "", size_t length = 0) {
   int mib[4];
   mib[0] = CTL_KERN;
   mib[1] = KERN_PROC;
@@ -46,9 +46,11 @@ static inline string get_program_pathname_helper(size_t length) {
   char *buffer = path.data();
   size_t cb = length;
   if (sysctl(mib, 4, buffer, &cb, NULL, 0) == -1) {
-    path = get_program_pathname_helper(length);
+    length += PATH_SIZE;
+    path = get_program_pathname_helper(path, length);
   } else if (sysctl(mib, 4, buffer, &cb, NULL, 0) == 0) {
-    path = buffer;
+    path = string(buffer) + "\0";
+    path.shrink_to_fit();
   }
   return path;
 }
@@ -56,21 +58,7 @@ static inline string get_program_pathname_helper(size_t length) {
 namespace fileman {
 
   string get_program_pathname_ns(bool print) {
-    string path;
-    size_t length = 256;
-    int mib[4];
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_PATHNAME;
-    mib[3] = -1;
-    char *buffer = path.data();
-    size_t cb = length;
-    if (sysctl(mib, 4, buffer, &cb, NULL, 0) == -1) {
-      path = get_program_pathname_helper(length);
-    } else if (sysctl(mib, 4, buffer, &cb, NULL, 0) == 0) {
-      path = buffer;
-    }
-    path.shrink_to_fit();
+    string path = get_program_pathname_helper();
     if (!path.empty()) {
       if (print) {
         cout << "program_pathname = \"" << path << "\"" << endl;
