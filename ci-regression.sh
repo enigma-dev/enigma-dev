@@ -2,6 +2,9 @@
 
 set -e  # exit if any command fails
 
+echo "Writing codegen for current commit"
+./CI/dump_codegen.sh
+
 if [[ "$TRAVIS" -eq "true" ]]; then
   startxfce4 & # We need a wm for these tests
 fi
@@ -71,6 +74,10 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
     git checkout master
   fi
   git clean -f -d
+  
+  echo "Writing codegen for previous commit"
+  mv /tmp/codegen /tmp/codegen_curr
+  ./CI/dump_codegen.sh
 
   # re-install deps incase they've changed
   echo "Reinstalling deps"

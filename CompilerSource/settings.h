@@ -100,6 +100,7 @@ struct CompilerInfo {
 extern CompilerInfo compilerInfo;
 bool load_compiler_ey(std::string fPath);
 
+extern bool codegen_only;
 extern std::filesystem::path enigma_root;
 extern std::filesystem::path eobjs_directory;
 extern std::filesystem::path codegen_directory;
