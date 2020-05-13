@@ -74,10 +74,6 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
     git checkout master
   fi
   git clean -f -d
-  
-  echo "Writing codegen for previous commit"
-  mv /tmp/codegen /tmp/codegen_curr
-  ./CI/dump_codegen.sh
 
   # re-install deps incase they've changed
   echo "Reinstalling deps"
@@ -87,6 +83,11 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   make all -j$MAKE_JOBS
   echo "Generating regression comparison images..."
   mkdir -p "${PWD}/test-harness-out"
+  
+  echo "Writing codegen for previous commit"
+  mv /tmp/codegen /tmp/codegen_curr
+  ./CI/dump_codegen.sh
+  
   ./test-runner --gtest_filter=Regression.*
 
   popd
