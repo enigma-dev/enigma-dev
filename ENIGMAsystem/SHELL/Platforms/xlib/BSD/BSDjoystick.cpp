@@ -34,68 +34,10 @@ using std::string;
 namespace enigma
 {
   void init_joysticks() {
-    // enigma_user::joystick_load(0);
-    // enigma_user::joystick_load(1);
+    DEBUG_MESSAGE("Joysticks are not yet implemented in X11 for FreeBSD!", MESSAGE_TYPE::M_WARNING);
   }
 
   void handle_joysticks() {
     
   }
 }  // namespace enigma
-
-namespace enigma_user {
-
-  bool joystick_load(int id) {
-    DEBUG_MESSAGE("Joysticks are not yet implemented in X11 for FreeBSD!", MESSAGE_TYPE::M_ERROR);
-    return false;
-  }
-
-  void joystick_map_button(int id, int butnum, char key) {
-
-  }
-
-  void joystick_map_axis(int id, int axisnum, char keyneg, char keypos) {
-
-  }
-
-  double joystick_axis(int id, int axisnum) {
-    return 0;
-  }
-  bool joystick_button(int id, int buttonnum) {
-    return false;
-  }
-
-  bool joystick_exists(int id) {
-    return false;
-  }
-
-  string joystick_name(int id) {
-    return "";
-  }
-
-  int joystick_axes(int id) {
-    return 0;
-  }
-
-  int joystick_buttons(int id) {
-    return 0;
-  }
-
-  bool joystick_has_pov(int id) {
-    return false;
-  }
-  
-  int joystick_direction(int id, int axis1, int axis2) {
-    return 0;
-  }
-  
-  double joystick_pov(int id, int axis1, int axis2) {
-    return 0;
-  }
-  
-  double joystick_pov(int id) {
-    return 0;
-  }
-  
-  int joystick_lastbutton = -1;
-}
