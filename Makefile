@@ -60,6 +60,6 @@ test-runner: emake .FORCE
 
 required-directories: .FORCE
 	@mkdir -p "$(WORKDIR)"
-	@mkdir -p "$(CODEGEN)Preprocessor_Environment_Editable/"
+	@mkdir -p "$(CODEGEN)/Preprocessor_Environment_Editable/"
 
 .FORCE:
