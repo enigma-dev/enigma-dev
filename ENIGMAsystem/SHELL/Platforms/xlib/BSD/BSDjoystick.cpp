@@ -6,8 +6,13 @@ using std::string;
 
 namespace enigma
 {
+  static bool init_jsmsg = false;
+  
   void init_joysticks() {
-    DEBUG_MESSAGE("Joysticks are not yet implemented in X11 for FreeBSD!", MESSAGE_TYPE::M_WARNING);
+    if (init_jsmsg) {
+      DEBUG_MESSAGE("Joysticks are not yet implemented in X11 for FreeBSD!", MESSAGE_TYPE::M_WARNING);
+      init_jsmsg = true;
+    }
   }
 
   void handle_joysticks() {
