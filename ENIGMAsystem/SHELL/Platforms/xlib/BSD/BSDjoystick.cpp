@@ -1,3 +1,6 @@
+// FIXME: actually add support for joysticks. 
+// FreeBSD has no joystick handling api built-in to the operating system, so good luck with that...
+
 #include "Platforms/General/PFjoystick.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include <string>
