@@ -592,6 +592,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     outputFile.close();
 #endif
 
+  if (codegen_only) {
+    edbg << "The \"codegen-only\" flag was passed. Skipping compile and exiting," << flushl;
+    return 0;
+  }
 
 
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
