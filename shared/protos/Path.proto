@@ -12,7 +12,7 @@ message Path {
 
   optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
 
-  optional string background_room_name = 3 [(resource_ref)="room", (gmx_id) = "backroom"];
+  optional string background_room_name = 3 [(resource_ref)="room", (gmx) = "backroom"];
   optional int32 hsnap= 4;
   optional int32 vsnap = 5;
 
