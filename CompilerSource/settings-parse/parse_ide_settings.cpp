@@ -160,7 +160,8 @@ void parse_ide_settings(const char* eyaml)
   codegen_directory = escapeEnv(codegen_directory.u8string());
   enigma_root = escapeEnv(enigma_root.u8string());
   
-  codegen_only = settree.get("codegen-only").toBool();
+  if (settree.exists("codegen-only"))
+    codegen_only = settree.get("codegen-only").toBool();
 
   #define ey_cp(v,x,y) \
   it = settree.find("target-" #x); \
