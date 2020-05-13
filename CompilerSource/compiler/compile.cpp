@@ -606,10 +606,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   idpr("Starting compile (This may take a while...)", 30);
 
   string make = compilerInfo.make_vars["MAKEFLAGS"];
-  
-  // FIXME: compilerInfo.make_vars["MAKEFLAGS"] is empty for some reason when passing 
-  // --codegen path other than the default (/tmp/ENIGMA/) to emake
-  if (make.empty()) make += "make ";
 
   make += "-C \"" + unixfy_path(enigma_root) + "\" ";
   make += "Game ";
