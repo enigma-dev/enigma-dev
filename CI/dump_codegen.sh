@@ -5,7 +5,6 @@ GAMES=$(find CommandLine/testing/SimpleTests/* CommandLine/testing/Tests/* -maxd
 for game in ${GAMES}
 do
  game_name=$(basename ${game%%.*})
- #echo $game_name
  ./emake -g "OpenGL1" \
          -a "OpenAL" \
          -c "Precise" \
