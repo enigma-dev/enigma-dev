@@ -46,10 +46,11 @@ static inline string get_program_pathname_helper(string path, size_t length) {
   path.resize(length, '\0');
   char *buffer = path.data();
   size_t cb = length;
-  if (sysctl(mib, 4, buffer, &cb, NULL, 0) == -1) {
+  int result = sysctl(mib, 4, buffer, &cb, NULL, 0);
+  if (result == -1) {
     length += PATH_SIZE;
     path = get_program_pathname_helper(path, length);
-  } else if (sysctl(mib, 4, buffer, &cb, NULL, 0) == 0) {
+  } else if (result == 0) {
     path = string(buffer) + "\0";
     path.shrink_to_fit();
   }
