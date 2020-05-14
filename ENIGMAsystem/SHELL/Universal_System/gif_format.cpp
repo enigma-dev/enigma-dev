@@ -219,7 +219,7 @@ std::vector<RawImage> image_load_gif(const std::filesystem::path& filename)
   std::vector<RawImage> res;
 
   //File input
-  std::unique_ptr<unsigned char> bytes_c(read_entire_file(filename, size));
+  std::unique_ptr<unsigned char> bytes_c(read_entire_file(filename.u8string().c_str(), size));
   unsigned char *bytes = bytes_c.get();
   if (!bytes) { errno = ERR_FILE_CANT_OPEN; return res; }
 
@@ -368,7 +368,7 @@ std::vector<RawImage> image_load_gif(const std::filesystem::path& filename)
     } else if (ctrlCode==0x3B) { //EOF; done;
       break;
     } else if (ctrlCode==0x2C) { //It's an image; read and decompress it.
-      DEBUG_MESSAGE("[GIF] Reading image: " + std::to_string(curr_img+1) + " of " + std::to_string(num_images), MESSAGE_TYPE::M_INFO);
+      DEBUG_MESSAGE("[GIF] Reading image: " + std::to_string(curr_img+1) + " of " + std::to_string(res.size()), MESSAGE_TYPE::M_INFO);
       //Read top-level image properties.
       if (pos+9>size) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; }
       unsigned int left = bytes[pos] | (bytes[pos+1]<<8);

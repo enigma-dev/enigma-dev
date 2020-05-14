@@ -73,6 +73,15 @@ Color image_get_pixel_color(const RawImage& in, unsigned x, unsigned y) {
 }
 
 void image_swap_color(RawImage& in, Color oldColor, Color newColor) {  
+  #ifdef DEBUG_MODE
+  if (in.pxdata == nullptr) {
+    in.pxdata = new unsigned char[in.w * in.h * 4];
+    std::fill(in.pxdata, in.pxdata + (in.w * in.h * 4), 255);
+    DEBUG_MESSAGE("Attempt to access a null pointer" , MESSAGE_TYPE::M_ERROR);
+    return;
+  }
+  #endif
+  
   unsigned int ih, iw;
   for (ih = 0; ih < in.h; ih++) {
     int index = ih * in.w * 4;
