@@ -37,7 +37,7 @@ using std::endl;
 
 static const size_t PATH_SIZE = 256;
 
-static inline string get_program_pathname_helper(string path = "", size_t length = 0) {
+static inline string get_program_pathname_helper(string path, size_t length) {
   int mib[4];
   mib[0] = CTL_KERN;
   mib[1] = KERN_PROC;
@@ -59,7 +59,7 @@ static inline string get_program_pathname_helper(string path = "", size_t length
 namespace fileman {
 
   string get_program_pathname_ns(bool print) {
-    string path = get_program_pathname_helper();
+    string path = get_program_pathname_helper("", PATH_SIZE);
     if (!path.empty()) {
       if (print) {
         cout << "program_pathname = \"" << path << "\"" << endl;
