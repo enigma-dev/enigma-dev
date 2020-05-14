@@ -103,6 +103,7 @@ static void reset_ide_editables()
 
 extern const char* establish_bearings(const char *compiler);
 
+bool codegen_only = false;
 std::filesystem::path enigma_root;
 std::filesystem::path eobjs_directory;
 std::filesystem::path codegen_directory;
@@ -158,6 +159,9 @@ void parse_ide_settings(const char* eyaml)
   eobjs_directory = escapeEnv(eobjs_directory.u8string());
   codegen_directory = escapeEnv(codegen_directory.u8string());
   enigma_root = escapeEnv(enigma_root.u8string());
+  
+  if (settree.exists("codegen-only"))
+    codegen_only = settree.get("codegen-only").toBool();
 
   #define ey_cp(v,x,y) \
   it = settree.find("target-" #x); \
