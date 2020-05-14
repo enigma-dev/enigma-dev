@@ -1,0 +1,49 @@
+// Sprites
+
+// Non power of 2
+npow2_spr_gif = sprite_add("CommandLine/testing/data/npow2.gif", -1, false, false, 0, 0);
+// Save frames as bmp/png
+sprite_save(npow2_spr_gif, 0, "/tmp/img.bmp");
+sprite_save(npow2_spr_gif, 0, "/tmp/img.png");
+npow2_spr_bmp = sprite_add("/tmp/img.bmp", 1, false, false, 0, 0);
+npow2_spr_png = sprite_add("/tmp/img.png", 1, false, false, 0, 0);
+
+file_delete("/tmp/img.bmp")
+file_delete("/tmp/img.png")
+
+// Power of 2
+pow2_spr_gif = sprite_add("CommandLine/testing/data/pow2.gif", -1, true, false, 0, 0);
+// Save frames as bmp/png
+sprite_save(pow2_spr_gif, 0, "/tmp/img.bmp");
+sprite_save(pow2_spr_gif, 1, "/tmp/img.png");
+pow2_spr_bmp = sprite_add("/tmp/img.bmp", 1, false, false, 0, 0);
+pow2_spr_png = sprite_add("/tmp/img.png", 1, false, false, 0, 0);
+
+// Strip
+spr_strip = sprite_add("CommandLine/testing/data/sprite.png", 4, true, false, 0, 0);
+
+file_delete("/tmp/img.bmp")
+file_delete("/tmp/img.png")
+
+// Backgrounds
+
+// Non power of 2
+npow2_bkg_gif = background_add("CommandLine/testing/data/npow2.gif", false, false);
+// Save frames as bmp/png
+background_save(npow2_bkg_gif, "/tmp/img.bmp");
+background_save(npow2_bkg_gif, "/tmp/img.png");
+npow2_bkg_bmp = background_add("/tmp/img.bmp", 1, false, false);
+npow2_bkg_png = background_add("/tmp/img.png", 1, false, false);
+
+file_delete("/tmp/img.bmp")
+file_delete("/tmp/img.png")
+
+// Power of 2
+pow2_bkg_gif = background_add("CommandLine/testing/data/pow2.gif", false, false);
+background_save(pow2_bkg_gif, "/tmp/img.bmp");
+background_save(pow2_bkg_gif, "/tmp/img.png");
+pow2_bkg_bmp = background_add("/tmp/img.bmp", 1, false, false);
+pow2_bkg_png = background_add("/tmp/img.png", 1, false, false);
+
+file_delete("/tmp/img.bmp")
+file_delete("/tmp/img.png")
