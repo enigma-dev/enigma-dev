@@ -16,13 +16,11 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
   JOBS[10]='NETWORK=BerkeleySockets'
   JOBS[11]='WIDGETS=GTK+'
   JOBS[12]='WIDGETS=xlib'
-  JOBS[13]='COLLISION=BBox EXTENSIONS="Alarms,Timelines,DataStructures,Asynchronous,BasicGUI,DateTime,GM5Compat,IniFilesystem,Json,XRandR,Paths,MotionPlanning,ttf,Box2DPhysics,StudioPhysics,BulletDynamics,ExternalFuncs"'
-  JOBS[14]='COMPILER=clang'
-  #JOBS[15]='COMPILER=MinGW32 PLATFORM=Win32 Widgets=Win32 AUDIO=DirectSound EXTENSIONS="DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,ExternalFuncs" OUTPUT="/tmp/test.exe"'
-  #JOBS[16]='COMPILER=MinGW64 PLATFORM=Win32 Widgets=Win32 AUDIO=DirectSound EXTENSIONS="DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,ExternalFuncs" OUTPUT="/tmp/test.exe"'
-  #JOBS[17]='COMPILER=gcc32'
-  #JOBS[18]='COMPILER=clang32'
-  JOB_COUNT=14
+  JOBS[14]='COLLISION=BBox EXTENSIONS="Alarms,Timelines,DataStructures,Asynchronous,BasicGUI,DateTime,GM5Compat,IniFilesystem,Json,XRandR,Paths,MotionPlanning,ttf,Box2DPhysics,StudioPhysics,BulletDynamics,ExternalFuncs"'
+  JOBS[15]='COMPILER=clang'
+  #JOBS[16]='COMPILER=gcc32'
+  #JOBS[17]='COMPILER=clang32'
+  JOB_COUNT=16
   TRAVIS_WORKERS=5
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
   JOBS[0]='COMPILER=gcc PLATFORM=None'

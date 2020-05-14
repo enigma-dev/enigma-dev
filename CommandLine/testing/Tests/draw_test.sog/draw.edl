@@ -78,6 +78,3 @@ if (screen_bkg == -1) {
 }
 draw_sprite(screen_spr,0,64,room_height-64);
 draw_background(screen_bkg,64,room_height-32);
-
-draw_sprite(npow2_spr, 0, 500, 406);
-draw_background(npow2_bkg, 500, 442);

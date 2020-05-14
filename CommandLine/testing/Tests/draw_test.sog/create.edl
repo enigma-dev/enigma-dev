@@ -52,6 +52,3 @@ gtest_expect_eq(surface_getpixel(surf_dup,16,16),c_blue);
 
 screen_spr = -1;
 screen_bkg = -1;
-
-npow2_spr = sprite_add("CommandLine/testing/data/npow2.png", 1, false, false, 0, 0);
-npow2_bkg = background_add("CommandLine/testing/data/npow2.png", false, false);
