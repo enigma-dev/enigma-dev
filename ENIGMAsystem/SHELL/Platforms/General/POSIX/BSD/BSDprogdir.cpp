@@ -9,7 +9,7 @@ using std::size_t;
 
 static const size_t PATH_SIZE = 256;
 
-static inline string program_directory_helper(string path = "", size_t length = 0) {
+static inline string program_directory_helper(string path, size_t length) {
   int mib[4];
   mib[0] = CTL_KERN;
   mib[1] = KERN_PROC;
@@ -31,7 +31,7 @@ static inline string program_directory_helper(string path = "", size_t length = 
 namespace enigma {
 
   void initialize_program_directory() {
-    enigma_user::program_directory = program_directory_helper();
+    enigma_user::program_directory = program_directory_helper("", PATH_SIZE);
   }
 
 } // namespace enigma
