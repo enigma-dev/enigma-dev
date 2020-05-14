@@ -390,13 +390,46 @@ std::vector<RawImage> image_decode_bmp(const string& image_data) {
     return imgs;
   }
   
-  imgs.resize(1);
-  imgs[0].w = bmp_info.width;
-  imgs[0].h = bmp_info.height;
-  
-  int sz = imgs[0].w * imgs[0].h * 4;
-  imgs[0].pxdata = new unsigned char[sz];
-  std::memcpy(imgs[0].pxdata, image_data.data() + bmp_file.dataStart, sz);
+  unsigned char* bitmap;
+  auto &img = imgs.emplace_back();
+  img.w = bmp_info.width;
+  img.h = bmp_info.height;
+  img.pxdata = bitmap = new unsigned char[img.w * img.h * 4](); // Initialize to 0.
+
+  // Calculate the number of nulls that follows each line.
+  const int overlap = bmp_info.width * (bmp_info.bitsPerPixel / 8) % 4;
+  const int pad = overlap ? 4 - overlap : 0;
+
+  printf("Bitmap pad: %d\n", pad);
+  const char *bmp_it = image_data.data() + bmp_file.dataStart;
+
+  for (unsigned ih = 0; ih < bmp_info.height; ih++) {
+    unsigned tmp = (bmp_info.height - 1 - ih) * bmp_info.width * 4;
+    for (unsigned iw = 0; iw < bmp_info.width; iw++) {
+      if (bmp_info.bitsPerPixel == 24) {
+        bitmap[tmp+0] = *bmp_it++;
+        bitmap[tmp+1] = *bmp_it++;
+        bitmap[tmp+2] = *bmp_it++;
+        bitmap[tmp+3] = (char) 0xFF;
+      }
+      else if (bmp_info.bitsPerPixel == 32) {
+        if (argb) {
+          bitmap[tmp+0] = *bmp_it++;
+          bitmap[tmp+1] = *bmp_it++;
+          bitmap[tmp+2] = *bmp_it++;
+          bitmap[tmp+3] = *bmp_it++;
+        } else {
+          bitmap[tmp+3] = *bmp_it++;
+          bitmap[tmp+0] = *bmp_it++;
+          bitmap[tmp+1] = *bmp_it++;
+          bitmap[tmp+2] = *bmp_it++;
+        }
+      }
+      tmp += 4;
+    }
+    bmp_it += pad;
+  }
+
   return imgs;
 }
 
