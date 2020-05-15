@@ -75,11 +75,10 @@ int background_add(std::string filename, bool transparent, bool smooth, bool pre
 
 int background_create_color(unsigned w, unsigned h, int col, bool preload) {
   unsigned int fullwidth = nlpo2dc(w) + 1, fullheight = nlpo2dc(h) + 1;
-  RawImage img;
-  img.pxdata = new unsigned char[fullwidth * fullheight * 4];
+  RawImage img(new unsigned char[fullwidth * fullheight * 4], fullwidth, fullheight);
   std::fill((unsigned*)(img.pxdata), (unsigned*)(img.pxdata) + fullwidth * fullheight, (COL_GET_R(col) | (COL_GET_G(col) << 8) | (COL_GET_B(col) << 16) | 255 << 24));
   int textureID = graphics_create_texture(img, false);
-  return backgrounds.add(std::move(Background(w, h, textureID)));
+  return backgrounds.add(std::move(Background(w, h, fullwidth, fullheight, textureID)));
 }
 
 bool background_replace(int back, std::string filename, bool transparent, bool smooth, bool preload, bool free_texture,

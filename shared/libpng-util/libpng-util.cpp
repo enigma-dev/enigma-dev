@@ -49,7 +49,7 @@ unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, cons
 
   fclose(fp);
   png_free_data(png, info, PNG_FREE_ALL, -1);
-  png_destroy_write_struct(&png, (png_infopp)NULL);
+  png_destroy_write_struct(&png, &info);
 
   return 0;
 }
@@ -62,7 +62,7 @@ unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, con
   if (!png) return -1;
   png_infop info = png_create_info_struct(png);
   if (!info) {
-    png_destroy_write_struct(&png, NULL);
+    png_destroy_read_struct(&png, NULL, NULL);
     return -2;
   }
 
