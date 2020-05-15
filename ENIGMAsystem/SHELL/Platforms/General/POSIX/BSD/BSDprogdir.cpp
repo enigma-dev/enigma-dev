@@ -23,8 +23,7 @@ namespace enigma {
       char *buffer = path.data();
       result = sysctl(mib, 4, buffer, &length, NULL, 0);
       if (result == 0) {
-        path = buffer;
-        path.resize(length + 1, '\0');
+        path = string(buffer) + "\0";
       }
     }
     enigma_user::program_directory = path;
