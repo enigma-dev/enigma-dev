@@ -27,11 +27,6 @@ namespace enigma {
         path.resize(length + 1, '\0');
       }
     }
-    if (!path.empty()) {
-      if (print) {
-        cout << "program_pathname = \"" << path << "\"" << endl;
-      }
-    }
     enigma_user::program_directory = path;
   }
 
