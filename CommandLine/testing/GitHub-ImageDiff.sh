@@ -119,7 +119,7 @@ if [[ "$TRAVIS" -eq "true" ]] && [[ ! -z "${gh_comment}" ]]; then
 fi
 
 CODEGEN_DIFF=$(git diff --no-index /tmp/codegen_curr /tmp/codegen/)
-if [[ -z "$CODEGEN_DIFF" ]]; then
-  enigmabot_post_comment "Differences in the codegen of games has been detected. Please review the following diff carefully:\n ```${CODEGEN_DIFF}```"
+if [[ -n "$CODEGEN_DIFF" ]]; then
+  enigmabot_post_comment "Differences in the codegen of games has been detected. Please review the following diff carefully:\n ${CODEGEN_DIFF}"
 fi
 
