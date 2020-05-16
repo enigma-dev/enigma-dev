@@ -12,17 +12,11 @@ namespace enigma {
   void initialize_program_directory() {
     string path;
     size_t length;
-    int mib[4] { 0 };
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_PATHNAME;
-    mib[3] = -1;
-    int result = sysctl(mib, 4, NULL, &length, NULL, 0);
-    if (result == 0) {
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
+    if (sysctl(mib, 4, NULL, &length, NULL, 0) == 0) {
       path.resize(length, '\0');
       char *buffer = path.data();
-      result = sysctl(mib, 4, buffer, &length, NULL, 0);
-      if (result == 0) {
+      if (sysctl(mib, 4, buffer, &length, NULL, 0) == 0) {
         path = string(buffer) + "\0";
       }
     }
