@@ -25,10 +25,9 @@
 */
 
 #include "../fileman.h"
-#include <mach-o/dyld.h>
+#include <libproc.h>
+#include <unistd.h>
 #include <iostream>
-#include <cstdint>
-#include <cstdlib>
 
 using std::string;
 using std::cout;
@@ -38,14 +37,9 @@ namespace fileman {
 
   string get_program_pathname_ns(bool print) {
     string path;
-    uint32_t length = 0;
-    _NSGetExecutablePath(NULL, &length);
-    path.resize(length, '\0');
-    char *buffer1 = path.data();
-    if (_NSGetExecutablePath(buffer1, &length) == 0) {
-      char *buffer2 = realpath(buffer1, NULL);
-      path = buffer2 ? : "";
-      free(buffer2);
+    char buffer[PROC_PIDPATHINFO_MAXSIZE];
+    if (proc_pidpath(getpid(), buffer, sizeof(buffer)) > 0) {
+      path = string(buffer) + "\0";
     }
     if (!path.empty()) {
       if (print) {
