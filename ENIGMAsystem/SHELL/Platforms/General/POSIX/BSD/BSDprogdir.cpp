@@ -12,6 +12,7 @@ namespace enigma {
   void initialize_program_directory() {
     string path;
     size_t length;
+    // CTL_KERN::KERN_PROC::KERN_PROC_PATHNAME(-1 (= getpid()))
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
     if (sysctl(mib, 4, NULL, &length, NULL, 0) == 0) {
       path.resize(length, '\0');
