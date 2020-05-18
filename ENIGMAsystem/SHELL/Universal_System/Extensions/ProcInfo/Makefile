@@ -23,4 +23,3 @@ else
 	SOURCES += Universal_System/Extensions/ProcInfo/Win32/procinfo.cpp
 endif
 SOURCES += Universal_System/Extensions/ProcInfo/Universal/procinfo.cpp
-SOURCES += Universal_System/Extensions/ProcInfo/procinfo.cpp
