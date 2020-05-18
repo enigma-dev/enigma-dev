@@ -27,6 +27,7 @@
 #include "../procinfo.h"
 #include <sys/wait.h>
 #include <signal.h>
+#include <unistd.h>
 #include <cstdio>
 
 using std::string;
@@ -69,9 +70,16 @@ void process_clear_out() {
   prevout = "";
 }
 
+process_t pid_from_self() {
+  return getpid();
+}
+
+process_t ppid_from_self() {
+  return getppid();
+}
+
 bool pid_exists(process_t pid) {
   return (kill(pid, 0) == 0);
 }
 
 } // namepace procinfo
-
