@@ -30,7 +30,7 @@
 
 #ifdef _WiN32
 #include <windows.h>
-#definex process_t DWORD;
+#define process_t DWORD;
 #else
 #include <sys/types.h>
 #define process_t pid_t;
