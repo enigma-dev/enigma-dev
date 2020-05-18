@@ -29,7 +29,6 @@
 #include <thread>
 
 using std::string;
-using std::to_string;
 using std::size_t;
 using std::thread;
 
