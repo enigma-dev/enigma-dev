@@ -16,7 +16,7 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
   JOBS[10]='NETWORK=BerkeleySockets'
   JOBS[11]='WIDGETS=GTK+'
   JOBS[12]='WIDGETS=xlib'
-  JOBS[14]='COLLISION=BBox EXTENSIONS="Alarms,Timelines,DataStructures,Asynchronous,BasicGUI,DateTime,GM5Compat,IniFilesystem,Json,XRandR,Paths,MotionPlanning,ttf,Box2DPhysics,StudioPhysics,BulletDynamics,ExternalFuncs"'
+  JOBS[14]='COLLISION=BBox EXTENSIONS="Alarms,Timelines,DataStructures,Asynchronous,BasicGUI,DateTime,GM5Compat,IniFilesystem,Json,XRandR,Paths,MotionPlanning,ttf,Box2DPhysics,StudioPhysics,BulletDynamics,ExternalFuncs,ProcInfo"'
   JOBS[15]='COMPILER=clang'
   #JOBS[16]='COMPILER=gcc32'
   #JOBS[17]='COMPILER=clang32'
