@@ -25,10 +25,6 @@
 */
 
 #include "../procinfo.h"
-#ifdef _WIN32
-#include <process.h>
-#endif
-#include <unistd.h>
 #include <cstddef>
 #include <thread>
 
@@ -42,22 +38,6 @@ namespace procinfo {
 void process_execute_async(string command) {
   thread proc_thread(process_execute, command);
   proc_thread.detach();
-}
-
-process_t pid_from_self() {
-  #ifdef _WIN32
-  return _getpid();
-  #else
-  return getpid();
-  #endif
-}
-
-process_t ppid_from_self() {
-  #ifdef _WIN32
-  return ppid_from_pid(pid_from_self());
-  #else
-  return getppid();
-  #endif
 }
 
 string dir_from_pid(process_t pid) {
