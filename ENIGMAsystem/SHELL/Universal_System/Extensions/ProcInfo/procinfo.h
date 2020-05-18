@@ -107,33 +107,26 @@ void wid_set_pwid(wid_t wid, wid_t pwid);
 
 namespace enigma_user {
 
-process_t process_execute(std::string command);
-void process_execute_async(std::string command);
-
-process_t process_previous();
-std::string process_evaluate();
-void process_clear_pid();
-void process_clear_out();
-
-process_t pid_from_self();
-process_t ppid_from_self();
-
-std::string path_from_pid(process_t pid);
-std::string dir_from_pid(process_t pid);
-std::string name_from_pid(process_t pid);
-
-bool pid_exists(process_t pid);
-bool wid_exists(wid_t wid);
-
-window_t window_from_wid(wid_t wid);
-wid_t wid_from_window(window_t window);
-
-process_t pid_from_wid(wid_t wid);
-process_t ppid_from_pid(process_t pid);
-
-wid_t wid_from_top();
-process_t pid_from_top();
-void wid_to_top(wid_t wid);
-void wid_set_pwid(wid_t wid, wid_t pwid);
+using procinfo::process_execute;
+using procinfo::process_execute_async;
+using procinfo::process_previous;
+using procinfo::process_evaluate;
+using procinfo::process_clear_pid;
+using procinfo::process_clear_out;
+using procinfo::pid_from_self;
+using procinfo::ppid_from_self;
+using procinfo::path_from_pid;
+using procinfo::dir_from_pid;
+using procinfo::name_from_pid;
+using procinfo::pid_exists;
+using procinfo::wid_exists;
+using procinfo::window_from_wid;
+using procinfo::wid_from_window;
+using procinfo::pid_from_wid;
+using procinfo::ppid_from_pid;
+using procinfo::wid_from_top;
+using procinfo::pid_from_top;
+using procinfo::wid_to_top;
+using procinfo::wid_set_pwid;
 
 } // namespace enigma_user
