@@ -5,7 +5,7 @@ Name: Process Information
 Identifier: ProcInfo
 Author: Samuel Venable
 Description: Allows reading various information from application processes.
-Default: true
+Default: false
 Icon: procinfo.png
 
 Depends: None
