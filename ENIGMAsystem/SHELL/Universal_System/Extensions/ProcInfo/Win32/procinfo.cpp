@@ -1,4 +1,4 @@
-﻿/*
+/*
 
  MIT License
  
@@ -27,6 +27,7 @@
 #include "../procinfo.h"
 #include <windows.h>
 #include <tlhelp32.h>
+#include <process.h>
 #include <psapi.h>
 #include <cstddef>
 #include <vector>
@@ -123,6 +124,14 @@ void process_clear_pid() {
 
 void process_clear_out() {
   prevout = "";
+}
+
+process_t pid_from_self() {
+  return _getpid();
+}
+
+process_t ppid_from_self() {
+  return ppid_from_pid(pid_from_self());
 }
 
 string path_from_pid(process_t pid) {
