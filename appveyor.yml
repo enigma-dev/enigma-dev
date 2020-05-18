@@ -59,6 +59,7 @@ environment:
     - {EXTENSIONS: "MediaControlInterface"}
     - {EXTENSIONS: "FileDropper"}
     - {EXTENSIONS: "IniFilesystem"}
+    - {EXTENSIONS: "ProcInfo"}
     - {EXTENSIONS: "Box2DPhysics", PACKAGES: "box2d:x"}
     - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
     - {EXTENSIONS: "ExternalFuncs", PACKAGES: "libffi:x"}
