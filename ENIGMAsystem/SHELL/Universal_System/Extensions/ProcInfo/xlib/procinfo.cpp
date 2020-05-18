@@ -123,15 +123,13 @@ process_t pid_from_top() {
 }
 
 void wid_to_top(wid_t wid) {
-  if (wid_exists(wid)) {
-    XSetErrorHandler(XErrorHandlerImpl);
-    XSetIOErrorHandler(XIOErrorHandlerImpl);
-    unsigned long window = stoul(wid, nullptr, 10);
-    Display *display = XOpenDisplay(NULL);
-    XRaiseWindow(display, window);
-    XSetInputFocus(display, window, RevertToPointerRoot, CurrentTime);
-    XCloseDisplay(display);
-  }
+  XSetErrorHandler(XErrorHandlerImpl);
+  XSetIOErrorHandler(XIOErrorHandlerImpl);
+  unsigned long window = stoul(wid, nullptr, 10);
+  Display *display = XOpenDisplay(NULL);
+  XRaiseWindow(display, window);
+  XSetInputFocus(display, window, RevertToPointerRoot, CurrentTime);
+  XCloseDisplay(display);
 }
 
 void wid_set_pwid(wid_t wid, wid_t pwid) {
