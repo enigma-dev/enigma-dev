@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Process Information
+Identifier: ProcInfo
+Author: Samuel Venable
+Description: Allows reading various information from application processes.
+Default: true
+Icon: procinfo.png
+
+Depends: None
+Dependencies: None
