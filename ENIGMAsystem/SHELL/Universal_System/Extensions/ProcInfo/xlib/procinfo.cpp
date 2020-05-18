@@ -1,4 +1,4 @@
-﻿/*
+/*
 
  MIT License
  
@@ -30,14 +30,16 @@
 using std::to_string;
 
 static inline int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
-    return 0;
+  return 0;
 }
 
 static inline int XIOErrorHandlerImpl(Display *display) {
-    return 0;
+  return 0;
 }
 
 static inline unsigned long get_wid_or_pid(Display *display, Window window, bool wid) {
+  XSetErrorHandler(XErrorHandlerImpl);
+  XSetIOErrorHandler(XIOErrorHandlerImpl);
   unsigned char *prop;
   unsigned long property;
   Atom actual_type, filter_atom;
@@ -56,10 +58,10 @@ static inline unsigned long get_wid_or_pid(Display *display, Window window, bool
 namespace procinfo {
 
 bool wid_exists(wid_t wid) {
-  bool result = false;
-  Display *display = XOpenDisplay(NULL);
   XSetErrorHandler(XErrorHandlerImpl);
   XSetIOErrorHandler(XIOErrorHandlerImpl);
+  bool result = false;
+  Display *display = XOpenDisplay(NULL);
   Window window = XDefaultRootWindow(display);
   unsigned char *prop;
   Atom actual_type, filter_atom;
@@ -93,6 +95,8 @@ wid_t wid_from_window(window_t window) {
 }
 
 process_t pid_from_wid(wid_t wid) {
+  XSetErrorHandler(XErrorHandlerImpl);
+  XSetIOErrorHandler(XIOErrorHandlerImpl);
   process_t pid; Window window;
   window = stoul(wid, nullptr, 10);
   if (!window) return pid;
@@ -103,6 +107,8 @@ process_t pid_from_wid(wid_t wid) {
 }
 
 wid_t wid_from_top() {
+  XSetErrorHandler(XErrorHandlerImpl);
+  XSetIOErrorHandler(XIOErrorHandlerImpl);
   wid_t wid; Window window;
   Display *display = XOpenDisplay(NULL);
   int screen = XDefaultScreen(display);
@@ -118,6 +124,8 @@ process_t pid_from_top() {
 
 void wid_to_top(wid_t wid) {
   if (wid_exists(wid)) {
+    XSetErrorHandler(XErrorHandlerImpl);
+    XSetIOErrorHandler(XIOErrorHandlerImpl);
     unsigned long window = stoul(wid, nullptr, 10);
     Display *display = XOpenDisplay(NULL);
     XRaiseWindow(display, window);
@@ -127,6 +135,8 @@ void wid_to_top(wid_t wid) {
 }
 
 void wid_set_pwid(wid_t wid, wid_t pwid) {
+  XSetErrorHandler(XErrorHandlerImpl);
+  XSetIOErrorHandler(XIOErrorHandlerImpl);
   Display *display = XOpenDisplay(NULL);
   unsigned long window = stoul(wid, nullptr, 10);
   unsigned long parent = stoul(pwid, nullptr, 10);
