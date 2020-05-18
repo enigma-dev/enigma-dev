@@ -26,17 +26,17 @@
 
 // individual platforms need their platform-specific
 // window types casted to an unsigned long long type
-typedef unsigned long long window_t;
+#define window_t unsigned long long;
 
 #ifdef _WiN32
 #include <windows.h>
-typedef DWORD process_t;
+#definex process_t DWORD;
 #else
 #include <sys/types.h>
-typedef pid_t process_t;
+#define process_t pid_t;
 #endif
 #include <string>
-typedef std::string wid_t;
+#define wid_t std::string;
 
 namespace procinfo {
 
