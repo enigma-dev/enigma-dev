@@ -43,15 +43,38 @@ string path_from_pid(process_t pid) {
   return path;
 }
 
+string pids_enum(bool trim_dir) {
+  proc_t proc_info;
+  memset(&proc_info, 0, sizeof(proc_info));
+  PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
+  string pids = "PID\tPPID\t";
+  pids += trim_dir ? "NAME\n" : "PATH\n";
+  while (readproc(proc, &proc_info) != 0) {
+    string exe = trim_dir ? 
+      name_from_pid(proc_info.tid) :
+      path_from_pid(proc_info.tid);
+    if (!exe.empty()) {
+      pids += to_string(proc_info.tid) + "\t";
+      pids += to_string(proc_info.ppid) + "\t";
+      pids += exe + "\n";
+    }
+  }
+  if (pids.back() == '\n')
+    pids.pop_back();
+  pids += "\0";
+  closeproc(proc);
+  return pids;
+}
+
 process_t ppid_from_pid(process_t pid) {
   process_t ppid;
   proc_t proc_info;
   memset(&proc_info, 0, sizeof(proc_info));
-  PROCTAB *pt_ptr = openproc(PROC_FILLSTATUS | PROC_PID, &pid);
-  if (readproc(pt_ptr, &proc_info) != 0) { 
+  PROCTAB *proc = openproc(PROC_FILLSTATUS | PROC_PID, &pid);
+  if (readproc(proc, &proc_info) != 0) { 
     ppid = proc_info.ppid;
   }
-  closeproc(pt_ptr);
+  closeproc(proc);
   return ppid;
 }
 

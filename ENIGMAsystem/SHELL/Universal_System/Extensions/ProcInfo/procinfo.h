@@ -79,6 +79,9 @@ bool pid_exists(process_t pid);
 // check existence for given window id
 bool wid_exists(wid_t wid);
 
+// kill an application from process id
+bool pid_kill(process_t pid);
+
 // return window handle from window id
 window_t window_from_wid(wid_t wid);
 
@@ -87,6 +90,9 @@ wid_t wid_from_window(window_t window);
 
 // get owner process id from window id
 process_t pid_from_wid(wid_t wid);
+
+// return strings for every process id
+std::string pids_enum(bool trim_dir);
 
 // get parent process id of process id
 process_t ppid_from_pid(process_t pid);
@@ -120,9 +126,11 @@ using procinfo::dir_from_pid;
 using procinfo::name_from_pid;
 using procinfo::pid_exists;
 using procinfo::wid_exists;
+using procinfo::pid_kill;
 using procinfo::window_from_wid;
 using procinfo::wid_from_window;
 using procinfo::pid_from_wid;
+using procinfo::pids_enum;
 using procinfo::ppid_from_pid;
 using procinfo::wid_from_top;
 using procinfo::pid_from_top;

@@ -82,4 +82,9 @@ bool pid_exists(process_t pid) {
   return (kill(pid, 0) == 0);
 }
 
+bool pid_kill(process_t pid) {
+  return (kill(pid, SIGKILL) == 0);
+}
+
 } // namepace procinfo
+
