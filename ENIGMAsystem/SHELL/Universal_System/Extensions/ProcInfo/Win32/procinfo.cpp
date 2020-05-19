@@ -172,7 +172,7 @@ bool pid_exists(process_t pid) {
 bool wid_exists(wid_t wid) {
   void *voidp_wid = reinterpret_cast<void *>(stoull(wid, nullptr, 10));
   HWND hwnd_wid = reinterpret_cast<HWND>(voidp_wid);
-  return IsWindow(hwnd_wid);
+  return (IsWindow(hwnd_wid) && hwnd_wid == GetAncestor(hwnd_wid, GA_ROOT));
 }
 
 bool pid_kill(process_t pid) {
@@ -199,26 +199,29 @@ process_t pid_from_wid(wid_t wid) {
   return dw_pid;
 }
 
+
 string pids_enum(bool trim_dir, bool trim_empty) {
-  DWORD proc_info[1024], length, cntp;
   string pids = "PID\tPPID\t";
   pids += trim_dir ? "NAME\n" : "PATH\n";
-  if (EnumProcesses(proc_info, sizeof(proc_info), &length)) {
-    cntp = length / sizeof(DWORD);
-    for (unsigned i = 0; i < cntp; i++) {
+  HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  PROCESSENTRY32 pe = { 0 };
+  pe.dwSize = sizeof(PROCESSENTRY32);
+  if (Process32First(hp, &pe)) {
+    do {
       string exe = trim_dir ? 
-        name_from_pid(proc_info[i]) :
-        path_from_pid(proc_info[i]);
+        name_from_pid(pe.th32ProcessID) :
+        path_from_pid(pe.th32ProcessID);
       if (!trim_empty || !exe.empty()) {
-        pids += to_string(proc_info[i]) + "\t";
-        pids += to_string(ppid_from_pid(proc_info[i])) + "\t";
+        pids += to_string(pe.th32ProcessID) + "\t";
+        pids += to_string(pe.th32ParentProcessID) + "\t";
         pids += exe + "\n";
       }
-    }
+    } while (Process32Next(hp, &pe));
   }
   if (pids.back() == '\n')
     pids.pop_back();
   pids += "\0";
+  CloseHandle(hp);
   return pids;
 }
 
