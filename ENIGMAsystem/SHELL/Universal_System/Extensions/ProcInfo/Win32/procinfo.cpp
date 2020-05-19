@@ -178,7 +178,7 @@ bool wid_exists(wid_t wid) {
 bool pid_kill(process_t pid) {
     HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
     if (hProcess == NULL) return false;
-    bool result = TerminateProcess(hProcess, uExitCode);
+    bool result = TerminateProcess(hProcess, 0);
     CloseHandle(hProcess);
     return result;
 }
