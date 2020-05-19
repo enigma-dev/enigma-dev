@@ -1,4 +1,4 @@
-/*
+﻿/*
 
  MIT License
  
@@ -43,7 +43,7 @@ string path_from_pid(process_t pid) {
   return path;
 }
 
-string pids_enum(bool trim_dir) {
+string pids_enum(bool trim_dir, bool trim_empty) {
   proc_t proc_info;
   memset(&proc_info, 0, sizeof(proc_info));
   PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
@@ -53,7 +53,7 @@ string pids_enum(bool trim_dir) {
     string exe = trim_dir ? 
       name_from_pid(proc_info.tid) :
       path_from_pid(proc_info.tid);
-    if (!exe.empty()) {
+    if (!trim_empty || !exe.empty()) {
       pids += to_string(proc_info.tid) + "\t";
       pids += to_string(proc_info.ppid) + "\t";
       pids += exe + "\n";

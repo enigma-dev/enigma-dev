@@ -62,16 +62,16 @@ process_t process_execute(string command) {
   wstring wstr_command = widen(command);
   wchar_t cwstr_command[32768];
   wcsncpy(cwstr_command, wstr_command.c_str(), 32768);
-  BOOL ok = TRUE;
+  BOOL proceed = TRUE;
   HANDLE hStdInPipeRead = NULL;
   HANDLE hStdInPipeWrite = NULL;
   HANDLE hStdOutPipeRead = NULL;
   HANDLE hStdOutPipeWrite = NULL;
   SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
-  ok = CreatePipe(&hStdInPipeRead, &hStdInPipeWrite, &sa, 0);
-  if (ok == FALSE) return pid;
-  ok = CreatePipe(&hStdOutPipeRead, &hStdOutPipeWrite, &sa, 0);
-  if (ok == FALSE) return pid;
+  proceed = CreatePipe(&hStdInPipeRead, &hStdInPipeWrite, &sa, 0);
+  if (proceed == FALSE) return pid;
+  proceed = CreatePipe(&hStdOutPipeRead, &hStdOutPipeWrite, &sa, 0);
+  if (proceed == FALSE) return pid;
   STARTUPINFOW si = { };
   si.cb = sizeof(STARTUPINFOW);
   si.dwFlags = STARTF_USESTDHANDLES;
@@ -91,10 +91,10 @@ process_t process_execute(string command) {
     CloseHandle(hStdInPipeRead);
     char buffer[4096] = { };
     DWORD dwRead = 0;
-    ok = ReadFile(hStdOutPipeRead, buffer, 4096, &dwRead, NULL);
-    while (ok == TRUE) {
+    proceed = ReadFile(hStdOutPipeRead, buffer, 4096, &dwRead, NULL);
+    while (proceed == TRUE) {
       buffer[dwRead] = 0;
-      ok = ReadFile(hStdOutPipeRead, buffer, 4096, &dwRead, NULL);
+      proceed = ReadFile(hStdOutPipeRead, buffer, 4096, &dwRead, NULL);
     }
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
@@ -156,13 +156,13 @@ bool pid_exists(process_t pid) {
   // but doesn't return true with processes of a wrong pid.
   // OpenProcess will succeed with a specific number within
   // 3 of any existing pid, which returns true incorrectly.
-  DWORD aProcesses[1024], cbNeeded, cProcesses;
-  if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded)) {
+  DWORD proc_info[1024], length, cntp;
+  if (!EnumProcesses(proc_info, sizeof(proc_info), &length)) {
     return false;
   }
-  cProcesses = cbNeeded / sizeof(DWORD);
-  for (unsigned i = 0; i < cProcesses; i++) {
-    if (pid == aProcesses[i]) {
+  cntp = length / sizeof(DWORD);
+  for (unsigned i = 0; i < cntp; i++) {
+    if (pid == proc_info[i]) {
       return true;
     }
   }
@@ -189,6 +189,31 @@ process_t pid_from_wid(wid_t wid) {
   HWND hwnd_wid = reinterpret_cast<HWND>(voidp_wid);
   GetWindowThreadProcessId(hwnd_wid, &dw_pid);
   return dw_pid;
+}
+
+
+string pids_enum(bool trim_dir, bool trim_empty) {
+  DWORD proc_info[1024], length, cntp;
+  string pids = "PID\tPPID\t";
+  pids += trim_dir ? "NAME\n" : "PATH\n";
+  if (EnumProcesses(proc_info, sizeof(proc_info), &length)) {
+    cntp = length / sizeof(DWORD);
+    for (unsigned i = 0; i < cntp; i++) {
+      string exe = trim_dir ? 
+        name_from_pid(proc_info[i]) :
+        path_from_pid(proc_info[i]);
+      if (!trim_empty || !exe.empty()) {
+        pids += to_string(proc_info[i]) + "\t";
+        pids += to_string(ppid_from_pid(proc_info[i])) + "\t";
+        pids += exe + "\n";
+      }
+    }
+  }
+  if (pids.back() == '\n')
+    pids.pop_back();
+  pids += "\0";
+  free(proc_info);
+  return pids;
 }
 
 process_t ppid_from_pid(process_t pid) {

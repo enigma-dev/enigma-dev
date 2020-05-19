@@ -1,4 +1,4 @@
-/*
+﻿/*
 
  MIT License
  
@@ -52,7 +52,7 @@ string path_from_pid(process_t pid) {
   return path;
 }
 
-string pids_enum(bool trim_dir) {
+string pids_enum(bool trim_dir, bool trim_empty) {
   int cntp;
   string pids = "PID\tPPID\t";
   pids += trim_dir ? "NAME\n" : "PATH\n";
@@ -62,7 +62,7 @@ string pids_enum(bool trim_dir) {
       string exe = trim_dir ? 
         name_from_pid(proc_info[i].ki_tid) :
         path_from_pid(proc_info[i].ki_tid);
-      if (!exe.empty()) {
+      if (!trim_empty || !exe.empty()) {
         pids += to_string(proc_info[i].ki_tid) + "\t";
         pids += to_string(proc_info[i].ki_ppid) + "\t";
         pids += exe + "\n";

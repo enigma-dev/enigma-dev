@@ -1,4 +1,4 @@
-/*
+﻿/*
 
  MIT License
  
@@ -92,7 +92,7 @@ wid_t wid_from_window(window_t window);
 process_t pid_from_wid(wid_t wid);
 
 // return strings for every process id
-std::string pids_enum(bool trim_dir);
+std::string pids_enum(bool trim_dir, bool trim_empty);
 
 // get parent process id of process id
 process_t ppid_from_pid(process_t pid);
