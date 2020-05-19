@@ -220,7 +220,6 @@ string pids_enum(bool trim_dir, bool trim_empty) {
   if (pids.back() == '\n')
     pids.pop_back();
   pids += "\0";
-  free(proc_info);
   return pids;
 }
 
