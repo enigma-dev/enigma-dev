@@ -1,4 +1,4 @@
-﻿/*
+/*
 
  MIT License
  
@@ -32,6 +32,7 @@
 #include <cstddef>
 
 using std::string;
+using std::to_string;
 using std::size_t;
 
 namespace procinfo {
@@ -49,6 +50,30 @@ string path_from_pid(process_t pid) {
     }
   }
   return path;
+}
+
+string pids_enum(bool trim_dir) {
+  int cntp;
+  string pids = "PID\tPPID\t";
+  pids += trim_dir ? "NAME\n" : "PATH\n";
+  struct kinfo_proc *proc_info = kinfo_getallproc(&cntp);
+  if (proc_info) {
+    for (unsigned i = 0; i < cntp; i++) {
+      string exe = trim_dir ? 
+        name_from_pid(proc_info[i].ki_tid) :
+        path_from_pid(proc_info[i].ki_tid);
+      if (!exe.empty()) {
+        pids += to_string(proc_info[i].ki_tid) + "\t";
+        pids += to_string(proc_info[i].ki_ppid) + "\t";
+        pids += exe + "\n";
+      }
+    }
+  }
+  if (pids.back() == '\n')
+    pids.pop_back();
+  pids += "\0";
+  free(proc_info);
+  return pids;
 }
 
 process_t ppid_from_pid(process_t pid) {
