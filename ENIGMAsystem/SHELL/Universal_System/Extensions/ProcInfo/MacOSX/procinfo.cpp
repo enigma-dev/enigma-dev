@@ -79,8 +79,7 @@ string pids_enum(bool trim_dir, bool trim_empty) {
   pid_t proc_info[cntp];
   bzero(proc_info, sizeof(proc_info));
   proc_listpids(PROC_ALL_PIDS, 0, proc_info, sizeof(proc_info));
-  for (int i = 0; i < cntp; ++i) {
-    if (proc_info[i] == 0) { continue; }
+  for (int i = 0; i < cntp; i++) {
     string exe = trim_dir ?
       name_from_pid(proc_info[i]) :
       path_from_pid(proc_info[i]);
