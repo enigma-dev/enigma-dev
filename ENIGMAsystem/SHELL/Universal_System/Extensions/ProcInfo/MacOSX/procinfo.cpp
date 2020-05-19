@@ -25,6 +25,7 @@
 */
 
 #include "../procinfo.h"
+#include <sys/proc_info.h>
 #include <libproc.h>
 #include <cstdint>
 
@@ -69,6 +70,30 @@ wid_t wid_from_window(window_t window) {
 
 process_t pid_from_wid(wid_t wid) {
   return cocoa_pid_from_wid(stoul(wid, nullptr, 10));
+}
+
+string pids_enum(bool trim_dir, bool trim_empty) {
+  string pids = "PID\tPPID\t";
+  pids += trim_dir ? "NAME\n" : "PATH\n";
+  int cntp = proc_listpids(PROC_ALL_PIDS, 0, NULL, 0);
+  pid_t proc_info[cntp];
+  bzero(proc_info, sizeof(proc_info));
+  proc_listpids(PROC_ALL_PIDS, 0, proc_info, sizeof(proc_info));
+  for (int i = 0; i < cntp; ++i) {
+    if (proc_info[i] == 0) { continue; }
+    string exe = trim_dir ?
+      name_from_pid(proc_info[i]) :
+      path_from_pid(proc_info[i]);
+    if (!trim_empty || !exe.empty()) {
+      pids += to_string(proc_info[i]) + "\t";
+      pids += to_string(ppid_from_pid(proc_info[i])) + "\t";
+      pids += exe + "\n";
+    }
+  }
+  if (pids.back() == '\n')
+    pids.pop_back();
+  pids += "\0";
+  return pids;
 }
 
 process_t ppid_from_pid(process_t pid) {
