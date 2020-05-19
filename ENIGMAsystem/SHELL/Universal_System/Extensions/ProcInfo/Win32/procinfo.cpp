@@ -199,7 +199,6 @@ process_t pid_from_wid(wid_t wid) {
   return dw_pid;
 }
 
-
 string pids_enum(bool trim_dir, bool trim_empty) {
   DWORD proc_info[1024], length, cntp;
   string pids = "PID\tPPID\t";
