@@ -1,4 +1,4 @@
-﻿/*
+/*
 
  MIT License
  
@@ -173,6 +173,14 @@ bool wid_exists(wid_t wid) {
   void *voidp_wid = reinterpret_cast<void *>(stoull(wid, nullptr, 10));
   HWND hwnd_wid = reinterpret_cast<HWND>(voidp_wid);
   return IsWindow(hwnd_wid);
+}
+
+bool pid_kill(process_t pid) {
+    HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+    if (hProcess == NULL) return false;
+    bool result = TerminateProcess(hProcess, uExitCode);
+    CloseHandle(hProcess);
+    return result;
 }
 
 window_t window_from_wid(wid_t wid) {
