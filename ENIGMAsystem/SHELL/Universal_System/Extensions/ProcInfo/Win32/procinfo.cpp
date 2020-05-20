@@ -72,13 +72,13 @@ process_t process_execute(string command) {
   if (proceed == FALSE) return pid;
   proceed = CreatePipe(&hStdOutPipeRead, &hStdOutPipeWrite, &sa, 0);
   if (proceed == FALSE) return pid;
-  STARTUPINFOW si = { };
+  STARTUPINFOW si = { 0 };
   si.cb = sizeof(STARTUPINFOW);
   si.dwFlags = STARTF_USESTDHANDLES;
   si.hStdError = hStdOutPipeWrite;
   si.hStdOutput = hStdOutPipeWrite;
   si.hStdInput = hStdInPipeRead;
-  PROCESS_INFORMATION pi = { };
+  PROCESS_INFORMATION pi = { 0 };
   if (CreateProcessW(NULL, cwstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
     while (WaitForSingleObject(pi.hProcess, 5) == WAIT_TIMEOUT) {
       MSG msg;
@@ -89,7 +89,7 @@ process_t process_execute(string command) {
     }
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
-    char buffer[4096] = { };
+    char buffer[4096];
     DWORD dwRead = 0;
     proceed = ReadFile(hStdOutPipeRead, buffer, 4096, &dwRead, NULL);
     while (proceed == TRUE) {
@@ -156,17 +156,20 @@ bool pid_exists(process_t pid) {
   // but doesn't return true with processes of a wrong pid.
   // OpenProcess will succeed with a specific number within
   // 3 of any existing pid, which returns true incorrectly.
-  DWORD proc_info[1024], length, cntp;
-  if (!EnumProcesses(proc_info, sizeof(proc_info), &length)) {
-    return false;
+  bool result = false;
+  HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  PROCESSENTRY32 pe = { 0 };
+  pe.dwSize = sizeof(PROCESSENTRY32);
+  if (Process32First(hp, &pe)) {
+    do {
+      if (pe.th32ProcessID == pid) {
+        result = true;
+        break;
+      }
+    } while (Process32Next(hp, &pe));
   }
-  cntp = length / sizeof(DWORD);
-  for (unsigned i = 0; i < cntp; i++) {
-    if (pid == proc_info[i]) {
-      return true;
-    }
-  }
-  return false;
+  CloseHandle(hp);
+  return result;
 }
 
 bool wid_exists(wid_t wid) {
