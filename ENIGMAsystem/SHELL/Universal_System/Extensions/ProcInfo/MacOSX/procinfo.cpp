@@ -84,6 +84,7 @@ string pids_enum(bool trim_dir, bool trim_empty) {
       name_from_pid(proc_info[i]) :
       path_from_pid(proc_info[i]);
     if (!trim_empty || !exe.empty()) {
+      if (proc_info[i] == 0) { continue; }
       pids += to_string(proc_info[i]) + "\t";
       pids += to_string(ppid_from_pid(proc_info[i])) + "\t";
       pids += exe + "\n";
