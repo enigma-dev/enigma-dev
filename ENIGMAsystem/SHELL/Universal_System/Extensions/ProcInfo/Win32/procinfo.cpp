@@ -51,6 +51,20 @@ static inline string narrow(wstring wstr) {
   return string{ buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, NULL, NULL) };
 }
 
+static inline HANDLE OpenProcessWithDebugPrivilege(process_t pid) {
+  HANDLE hToken;
+  LUID luid;
+  TOKEN_PRIVILEGES tkp;
+  OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken);
+  LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid);
+  tkp.PrivilegeCount = 1;
+  tkp.Privileges[0].Luid = luid;
+  tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+  AdjustTokenPrivileges(hToken, false, &tkp, sizeof(tkp), NULL, NULL);
+  CloseHandle(hToken);
+  return OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+}
+
 namespace procinfo {
 
 static process_t prevpid;
@@ -136,18 +150,12 @@ process_t ppid_from_self() {
 
 string path_from_pid(process_t pid) {
   string path;
-  HANDLE hm = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid);
-  MODULEENTRY32W me = { 0 };
-  me.dwSize = sizeof(MODULEENTRY32W);
-  if (Module32FirstW(hm, &me)) {
-    do {
-      if (me.th32ProcessID == pid) {
-        path = narrow(me.szExePath);
-        break;
-      }
-    } while (Module32NextW(hm, &me));
+  HANDLE hProcess = OpenProcessWithDebugPrivilege(pid);
+  wchar_t szFilename[MAX_PATH]; DWORD dwPathSize = MAX_PATH;
+  if (QueryFullProcessImageNameW(hProcess, 0, szFilename, &dwPathSize) != 0) {
+    path = narrow(szFilename);
   }
-  CloseHandle(hm);
+  CloseHandle(hProcess);
   return path;
 }
 
@@ -179,11 +187,11 @@ bool wid_exists(wid_t wid) {
 }
 
 bool pid_kill(process_t pid) {
-    HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
-    if (hProcess == NULL) return false;
-    bool result = TerminateProcess(hProcess, 0);
-    CloseHandle(hProcess);
-    return result;
+  HANDLE hProcess = OpenProcessWithDebugPrivilege(pid);
+  if (hProcess == NULL) return false;
+  bool result = TerminateProcess(hProcess, 0);
+  CloseHandle(hProcess);
+  return result;
 }
 
 window_t window_from_wid(wid_t wid) {
