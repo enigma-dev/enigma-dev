@@ -517,12 +517,15 @@ void window_set_rectangle(int x, int y, int w, int h) {
 // FULLSCREEN //
 ////////////////
 
+static bool prefer_sizeable = enigma::isSizeable;
 void window_set_fullscreen(bool full) {
   if (enigma::isFullScreen == full && !full) return;
   enigma::isFullScreen = full;
   if (full) {
+    prefer_sizeable = enigma::isSizeable;
     tmpSize::tmpW = enigma::windowWidth;
     tmpSize::tmpH = enigma::windowHeight;
+    window_set_sizeable(true);
   }
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aFullScreen = XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False);
@@ -537,7 +540,10 @@ void window_set_fullscreen(bool full) {
   xev.xclient.data.l[1] = aFullScreen;
   xev.xclient.data.l[2] = 0;
   XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
-  if (!full) XResizeWindow(disp, win, tmpSize::tmpW, tmpSize::tmpH);
+  if (!full) {
+    window_set_size(tmpSize::tmpW, tmpSize::tmpH);
+    window_set_sizeable(prefer_sizeable);
+  }
 }
 
 bool window_get_fullscreen() {
