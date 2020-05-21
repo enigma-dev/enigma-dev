@@ -23,7 +23,7 @@
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/Resources/sprites.h"
-#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/backgrounds.h"
 
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"
@@ -517,7 +517,7 @@ void window_set_rectangle(int x, int y, int w, int h) {
 // FULLSCREEN //
 ////////////////
 
-void window_set_fullscreen(bool full) {
+static inline void window_set_fullscreen_helper(bool full) {
   if (enigma::isFullScreen == full && !full) return;
   enigma::isFullScreen = full;
   if (full) {
@@ -538,6 +538,16 @@ void window_set_fullscreen(bool full) {
   xev.xclient.data.l[2] = 0;
   XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
   if (!full) XResizeWindow(disp, win, tmpSize::tmpW, tmpSize::tmpH);
+}
+
+void window_set_fullscreen(bool full) {
+  if (!enigma::isSizeable) {
+    window_set_sizeable(true);
+    window_set_fullscreen_helper(full);
+    window_set_sizeable(false);
+  } else {
+    window_set_fullscreen_helper(full);
+  }
 }
 
 bool window_get_fullscreen() {
