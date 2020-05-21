@@ -540,10 +540,23 @@ static inline void window_set_fullscreen_helper(bool full) {
   if (!full) XResizeWindow(disp, win, tmpSize::tmpW, tmpSize::tmpH);
 }
 
-static bool prefer_sizeable = enigma::isSizeable;
+namespace {
+
+bool prefer_sizeable = enigma::isSizeable;
+int tmpX = enigma::windowX;
+int tmpY = enigma::windowY;
+unsigned tmpWidth = enigma::windowWidth;
+unsigned tmpHeight = enigma::windowHeight;
+
+} // anonymous namespace
+
 void window_set_fullscreen(bool full) {
   if (!prefer_sizeable) {
     if (full) {
+      tmpX = enigma::windowX;
+      tmpY = enigma::windowY;
+      tmpWidth = enigma::windowWidth;
+      tmpHeight = enigma::windowHeight;
       prefer_sizeable = enigma::isSizeable;
       window_set_sizeable(true);
       window_set_fullscreen_helper(full);
@@ -551,10 +564,20 @@ void window_set_fullscreen(bool full) {
       window_set_fullscreen_helper(full);
       window_set_sizeable(false);
       prefer_sizeable = enigma::isSizeable;
+      window_set_rectangle(tmpX, tmpY, tmpWidth, tmpHeight);
     }
   } else {
     prefer_sizeable = enigma::isSizeable;
-    window_set_fullscreen_helper(full);
+    if (full) {
+      tmpX = enigma::windowX;
+      tmpY = enigma::windowY;
+      tmpWidth = enigma::windowWidth;
+      tmpHeight = enigma::windowHeight;
+      window_set_fullscreen_helper(full);
+    } else {
+      window_set_fullscreen_helper(full);
+      window_set_rectangle(tmpX, tmpY, tmpWidth, tmpHeight);
+    }
   }
 }
 
