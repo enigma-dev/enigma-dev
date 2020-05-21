@@ -12,6 +12,7 @@ ifeq ($(UNIX_BASED), true)
 	SOURCES += Universal_System/Extensions/FileManip/POSIX/fileman.cpp
 else
 	SOURCES += Universal_System/Extensions/FileManip/Win32/fileman.cpp
+	override LDLIBS += -lshell32
 endif
 SOURCES += Universal_System/Extensions/FileManip/Universal/fileman.cpp
 override CXXFLAGS += -fexceptions
