@@ -517,7 +517,15 @@ void window_set_rectangle(int x, int y, int w, int h) {
 // FULLSCREEN //
 ////////////////
 
-static inline void window_set_fullscreen_helper(bool full) {
+namespace {
+
+bool prefer_sizeable = enigma::isSizeable;
+int tmpX = enigma::windowX;
+int tmpY = enigma::windowY;
+unsigned tmpWidth = enigma::windowWidth;
+unsigned tmpHeight = enigma::windowHeight;
+
+void window_set_fullscreen_helper(bool full) {
   if (enigma::isFullScreen == full && !full) return;
   enigma::isFullScreen = full;
   if (full) {
@@ -539,14 +547,6 @@ static inline void window_set_fullscreen_helper(bool full) {
   XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
   if (!full) XResizeWindow(disp, win, tmpSize::tmpW, tmpSize::tmpH);
 }
-
-namespace {
-
-bool prefer_sizeable = enigma::isSizeable;
-int tmpX = enigma::windowX;
-int tmpY = enigma::windowY;
-unsigned tmpWidth = enigma::windowWidth;
-unsigned tmpHeight = enigma::windowHeight;
 
 } // anonymous namespace
 
