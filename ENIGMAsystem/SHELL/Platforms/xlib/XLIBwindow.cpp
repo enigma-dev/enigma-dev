@@ -567,15 +567,16 @@ void window_set_fullscreen(bool full) {
       window_set_rectangle(tmpX, tmpY, tmpWidth, tmpHeight);
     }
   } else {
-    prefer_sizeable = enigma::isSizeable;
     if (full) {
       tmpX = enigma::windowX;
       tmpY = enigma::windowY;
       tmpWidth = enigma::windowWidth;
       tmpHeight = enigma::windowHeight;
+      prefer_sizeable = enigma::isSizeable;
       window_set_fullscreen_helper(full);
     } else {
       window_set_fullscreen_helper(full);
+      prefer_sizeable = enigma::isSizeable;
       window_set_rectangle(tmpX, tmpY, tmpWidth, tmpHeight);
     }
   }
