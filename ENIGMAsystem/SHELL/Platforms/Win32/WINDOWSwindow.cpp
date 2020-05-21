@@ -229,8 +229,7 @@ void window_set_fullscreen(bool full) {
     tmpHeight = window_get_height();
     window_set_stayontop(false);
     LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
-    style &= ~(WS_CAPTION | WS_BORDER | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
-    style |= WS_SIZEBOX;
+    style &= ~(WS_CAPTION | WS_BORDER | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX);
     SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
     window_set_maximized(full);
   } else {
