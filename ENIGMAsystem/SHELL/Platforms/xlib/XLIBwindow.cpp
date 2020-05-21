@@ -517,15 +517,7 @@ void window_set_rectangle(int x, int y, int w, int h) {
 // FULLSCREEN //
 ////////////////
 
-namespace {
-
-bool prefer_sizeable = enigma::isSizeable;
-int tmpX = enigma::windowX;
-int tmpY = enigma::windowY;
-unsigned tmpWidth = enigma::windowWidth;
-unsigned tmpHeight = enigma::windowHeight;
-
-void window_set_fullscreen_helper(bool full) {
+void window_set_fullscreen(bool full) {
   if (enigma::isFullScreen == full && !full) return;
   enigma::isFullScreen = full;
   if (full) {
@@ -546,40 +538,6 @@ void window_set_fullscreen_helper(bool full) {
   xev.xclient.data.l[2] = 0;
   XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
   if (!full) XResizeWindow(disp, win, tmpSize::tmpW, tmpSize::tmpH);
-}
-
-} // anonymous namespace
-
-void window_set_fullscreen(bool full) {
-  if (!prefer_sizeable) {
-    if (full) {
-      tmpX = enigma::windowX;
-      tmpY = enigma::windowY;
-      tmpWidth = enigma::windowWidth;
-      tmpHeight = enigma::windowHeight;
-      prefer_sizeable = enigma::isSizeable;
-      window_set_sizeable(true);
-      window_set_fullscreen_helper(full);
-    } else {
-      window_set_fullscreen_helper(full);
-      window_set_sizeable(false);
-      prefer_sizeable = enigma::isSizeable;
-      window_set_rectangle(tmpX, tmpY, tmpWidth, tmpHeight);
-    }
-  } else {
-    if (full) {
-      tmpX = enigma::windowX;
-      tmpY = enigma::windowY;
-      tmpWidth = enigma::windowWidth;
-      tmpHeight = enigma::windowHeight;
-      prefer_sizeable = enigma::isSizeable;
-      window_set_fullscreen_helper(full);
-    } else {
-      window_set_fullscreen_helper(full);
-      prefer_sizeable = enigma::isSizeable;
-      window_set_rectangle(tmpX, tmpY, tmpWidth, tmpHeight);
-    }
-  }
 }
 
 bool window_get_fullscreen() {
