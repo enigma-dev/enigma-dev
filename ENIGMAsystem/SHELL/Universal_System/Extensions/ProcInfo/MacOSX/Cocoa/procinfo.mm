@@ -35,6 +35,8 @@ CGWindowID cocoa_wid_from_window(NSWindow *window) {
   return [window windowNumber];
 }
 
+// TODO: create helper functions for everything below this line...
+
 bool cocoa_wid_exists(CGWindowID wid) {
   bool result = false;
   const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
@@ -106,4 +108,15 @@ unsigned long cocoa_get_wid_or_pid(bool wid) {
   }
   CFRelease(windowArray);
   return result;
+}
+
+void cocoa_wid_to_top(CGWindowID wid) {
+  CFIndex appCount = [[[NSWorkspace sharedWorkspace] runningApplications] count];
+  for (CFIndex i = 0; i < appCount; i++) {
+    if (cocoa_pid_from_wid(wid) == [[[[NSWorkspace sharedWorkspace] runningApplications] objectAtIndex:i] processIdentifier]) {
+      NSRunningApplication *appWithPID = [[[NSWorkspace sharedWorkspace] runningApplications] objectAtIndex:i];
+      [appWithPID activateWithOptions:NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps];
+      break;
+    }
+  }
 }

@@ -40,6 +40,7 @@ extern "C" CGWindowID cocoa_wid_from_window(NSWindow *window);
 extern "C" bool cocoa_wid_exists(CGWindowID wid);
 extern "C" pid_t cocoa_pid_from_wid(CGWindowID wid);
 extern "C" unsigned long cocoa_get_wid_or_pid(bool wid);
+extern "C" void cocoa_wid_to_top(CGWindowID wid);
 
 namespace procinfo {
 
@@ -114,11 +115,11 @@ process_t pid_from_top() {
 }
 
 void wid_to_top(wid_t wid) {
-  // not possible on macOS due to system lockdown...
+  cocoa_wid_to_top(stoul(wid, nullptr, 10));
 }
 
 void wid_set_pwid(wid_t wid, wid_t pwid) {
-  // not possible on macOS due to system lockdown...
+  // TODO: add implementation...
 }
 
 } // namespace procinfo
