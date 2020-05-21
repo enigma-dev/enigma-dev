@@ -542,16 +542,18 @@ static inline void window_set_fullscreen_helper(bool full) {
 
 static bool prefer_sizeable = enigma::isSizeable;
 void window_set_fullscreen(bool full) {
-  prefer_sizeable = enigma::isSizeable;
   if (!prefer_sizeable) {
     if (full) {
+      prefer_sizeable = enigma::isSizeable;
       window_set_sizeable(true);
       window_set_fullscreen_helper(full);
     } else {
       window_set_fullscreen_helper(full);
       window_set_sizeable(false);
+      prefer_sizeable = enigma::isSizeable;
     }
   } else {
+    prefer_sizeable = enigma::isSizeable;
     window_set_fullscreen_helper(full);
   }
 }
