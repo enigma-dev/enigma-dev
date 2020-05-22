@@ -306,10 +306,9 @@ bool window_get_stayontop() {
   return windowHasAtom(a);
 }
 
-static bool set_sizeable = false;
 void window_set_sizeable(bool sizeable) {
   if (window_get_maximized()) return;
-  if (window_get_fullscreen() && !set_sizeable) return;
+  if (enigma::isFullScreen) return;
   enigma::isSizeable = sizeable;
   XSizeHints *sh = XAllocSizeHints();
   sh->flags = PMinSize | PMaxSize;
@@ -495,9 +494,8 @@ void window_set_position(int x, int y) {
   XMoveWindow(disp, win, x - wa.x, y - wa.y);
 }
 
-static bool set_size = false;
 void window_set_size(unsigned int w, unsigned int h) {
-  if (window_get_fullscreen() && !set_size) return;
+  if (enigma::isFullScreen) return;
   enigma::windowWidth = w;
   enigma::windowHeight = h;
   if (!enigma::isSizeable) {
@@ -519,21 +517,25 @@ void window_set_rectangle(int x, int y, int w, int h) {
 // FULLSCREEN //
 ////////////////
 
-static bool prefer_sizeable = enigma::isSizeable;
+static bool prefer_sizeable = false;
+static bool initial_fullscreen = true;
 void window_set_fullscreen(bool full) {
-  if (window_get_fullscreen() != full && full) {
-    set_size = true;
+  if (enigma::isFullScreen != full && full) {
     window_set_size(enigma::windowWidth, enigma::windowHeight);
-    set_size = false;
+    if (initial_fullscreen) {
+      window_center();
+      initial_fullscreen = false;
+    }
   }
   if (enigma::isFullScreen == full && !full) return;
-  enigma::isFullScreen = full;
+  enigma::isFullScreen = false;
   if (full) {
-    prefer_sizeable = enigma::isSizeable;
+    prefer_sizeable = window_get_sizeable();
     tmpSize::tmpW = enigma::windowWidth;
     tmpSize::tmpH = enigma::windowHeight;
     window_set_sizeable(true);
   }
+  enigma::isFullScreen = full;
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aFullScreen = XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False);
   XEvent xev;
@@ -548,12 +550,8 @@ void window_set_fullscreen(bool full) {
   xev.xclient.data.l[2] = 0;
   XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
   if (!full) {
-    set_size = true;
     window_set_size(tmpSize::tmpW, tmpSize::tmpH);
-    set_size = false;
-    set_sizeable = true;
     window_set_sizeable(prefer_sizeable);
-    set_sizeable = false;
   }
 }
 
