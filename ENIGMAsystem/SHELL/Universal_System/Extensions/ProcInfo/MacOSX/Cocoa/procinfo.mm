@@ -35,87 +35,68 @@ CGWindowID cocoa_wid_from_window(NSWindow *window) {
   return [window windowNumber];
 }
 
-// TODO: create helper functions for everything below this line...
+const unsigned
+RES_BOOL = 0,
+RES_WID = 1,
+RES_PID = 2;
 
-bool cocoa_wid_exists(CGWindowID wid) {
-  bool result = false;
+unsigned long cocoa_helper_function(unsigned long arg, unsigned restype) {
+  bool result = 0;
   const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
-  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListExcludeDesktopElements |
-  kCGWindowListOptionIncludingWindow, (CGWindowID)wid);
-  CFIndex windowCount = 0;
-  if ((windowCount = CFArrayGetCount(windowArray))) {
-    for (CFIndex i = 0; i < windowCount; i++) {
-      NSDictionary *windowInfoDictionary =
-      (__bridge NSDictionary *)((CFDictionaryRef)CFArrayGetValueAtIndex(windowArray, i));
-      NSNumber *ownerPID = (NSNumber *)(windowInfoDictionary[(id)kCGWindowOwnerPID]);
-      NSNumber *level = (NSNumber *)(windowInfoDictionary[(id)kCGWindowLayer]);
-      if (level.integerValue < kScreensaverWindowLevel) {
-        NSNumber *windowID = windowInfoDictionary[(id)kCGWindowNumber];
-        if (wid == windowID.integerValue) {
-          result = true;
-          break;
-        }
-      }
-    }
-  }
-  CFRelease(windowArray);
-  return result;
-}
-
-pid_t cocoa_pid_from_wid(CGWindowID wid) {
-  pid_t pid;
-  const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
-  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListExcludeDesktopElements | 
-  kCGWindowListOptionIncludingWindow, (CGWindowID)wid);
-  CFIndex windowCount = 0;
-  if ((windowCount = CFArrayGetCount(windowArray))) {
-    for (CFIndex i = 0; i < windowCount; i++) {
-      NSDictionary *windowInfoDictionary = 
-      (__bridge NSDictionary *)((CFDictionaryRef)CFArrayGetValueAtIndex(windowArray, i));
-      NSNumber *ownerPID = (NSNumber *)(windowInfoDictionary[(id)kCGWindowOwnerPID]);
-      NSNumber *level = (NSNumber *)(windowInfoDictionary[(id)kCGWindowLayer]);
-      if (level.integerValue < kScreensaverWindowLevel) {
-        NSNumber *windowID = windowInfoDictionary[(id)kCGWindowNumber];
-        if (wid == windowID.integerValue) {
-          pid = ownerPID.integerValue;
-          break;
-        }
-      }
-    }
-  }
-  CFRelease(windowArray);
-  return pid;
-}
-
-unsigned long cocoa_get_wid_or_pid(bool wid) {
-  unsigned long result;
-  const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
-  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | 
+  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly |
   kCGWindowListExcludeDesktopElements, kCGNullWindowID);
   CFIndex windowCount = 0;
   if ((windowCount = CFArrayGetCount(windowArray))) {
     for (CFIndex i = 0; i < windowCount; i++) {
-      NSDictionary *windowInfoDictionary = 
-      (__bridge NSDictionary *)((CFDictionaryRef)CFArrayGetValueAtIndex(windowArray, i));
+      NSDictionary *windowInfoDictionary =
+        (__bridge NSDictionary *)((CFDictionaryRef)CFArrayGetValueAtIndex(windowArray, i));
       NSNumber *ownerPID = (NSNumber *)(windowInfoDictionary[(id)kCGWindowOwnerPID]);
       NSNumber *level = (NSNumber *)(windowInfoDictionary[(id)kCGWindowLayer]);
-      if (level.integerValue == 0) {
+      if (level.integerValue < kScreensaverWindowLevel) {
         NSNumber *windowID = windowInfoDictionary[(id)kCGWindowNumber];
-        result = wid ? windowID.integerValue : ownerPID.integerValue;
-        break;
+        if (arg == windowID.integerValue) {
+          pid_t pid = ownerPID.integerValue;
+          if (restype == RES_BOOL) result = 1;
+          if (restype == RES_PID) result = pid;
+          break;
+        }
+      }
+      if (level.integerValue == 0) {
+        if (restype == RES_WID + RES_PID) {
+          NSNumber *windowID = windowInfoDictionary[(id)kCGWindowNumber];
+          result = arg ? windowID.integerValue : ownerPID.integerValue;
+          break;
+        }
       }
     }
   }
   CFRelease(windowArray);
   return result;
+}
+
+bool cocoa_wid_exists(CGWindowID wid) {
+  return cocoa_helper_function(wid, RES_BOOL);
+}
+
+pid_t cocoa_pid_from_wid(CGWindowID wid) {
+  return cocoa_helper_function(wid, RES_PID);
+}
+
+unsigned long cocoa_get_wid_or_pid(bool wid) {
+  return cocoa_helper_function(wid, RES_WID + RES_PID);
 }
 
 void cocoa_wid_to_top(CGWindowID wid) {
   CFIndex appCount = [[[NSWorkspace sharedWorkspace] runningApplications] count];
   for (CFIndex i = 0; i < appCount; i++) {
-    if (cocoa_pid_from_wid(wid) == [[[[NSWorkspace sharedWorkspace] runningApplications] objectAtIndex:i] processIdentifier]) {
-      NSRunningApplication *appWithPID = [[[NSWorkspace sharedWorkspace] runningApplications] objectAtIndex:i];
-      [appWithPID activateWithOptions:NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps];
+    NSWorkspace *sharedWS = [NSWorkspace sharedWorkspace];
+    NSArray *runningApps = [sharedWS runningApplications];
+    NSRunningApplication *currentApp = [runningApps objectAtIndex:i];
+    if (cocoa_pid_from_wid(wid) == [currentApp processIdentifier]) {
+      NSRunningApplication *appWithPID = currentApp;
+      NSUInteger options = NSApplicationActivateAllWindows;
+      options |= NSApplicationActivateIgnoringOtherApps;
+      [appWithPID activateWithOptions:options];
       break;
     }
   }
