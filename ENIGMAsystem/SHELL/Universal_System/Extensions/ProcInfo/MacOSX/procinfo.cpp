@@ -42,6 +42,7 @@ extern "C" bool cocoa_wid_exists(CGWindowID wid);
 extern "C" pid_t cocoa_pid_from_wid(CGWindowID wid);
 extern "C" unsigned long cocoa_get_wid_or_pid(bool wid);
 extern "C" void cocoa_wid_to_top(CGWindowID wid);
+extern "C" void cocoa_wid_set_pwid(CGWindowID wid, CGWindowID pwid);
 
 namespace procinfo {
 
@@ -120,7 +121,7 @@ void wid_to_top(wid_t wid) {
 }
 
 void wid_set_pwid(wid_t wid, wid_t pwid) {
-  // TODO: add implementation...
+  cocoa_wid_set_pwid(stoul(wid, nullptr, 10), stoul(pwid, nullptr, 10));
 }
 
 } // namespace procinfo

@@ -25,9 +25,7 @@
 */
 
 #include "../procinfo.h"
-#define byte __windows_byte_workaround
 #include <windows.h>
-#undef byte
 #include <tlhelp32.h>
 #include <process.h>
 #include <psapi.h>

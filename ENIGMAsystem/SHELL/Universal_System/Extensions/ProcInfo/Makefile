@@ -1,7 +1,8 @@
 ifeq ($(UNIX_BASED), true)
 	ifeq ($(OS), Darwin)
 		SOURCES += Universal_System/Extensions/ProcInfo/MacOSX/procinfo.cpp
-		SOURCES += Universal_System/Extensions/ProcInfo/MacOSX/Cocoa/procinfo.m
+		SOURCES += Universal_System/Extensions/ProcInfo/MacOSX/Cocoa/procinfo.mm
+		SOURCES += Universal_System/Extensions/ProcInfo/MacOSX/Cocoa/subclass.mm
 		override CXXFLAGS += -ObjC
 		override CFLAGS += -ObjC
 		override LDLIBS += -framework Cocoa

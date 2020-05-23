@@ -29,9 +29,7 @@
 #define window_t unsigned long long
 
 #ifdef _WiN32
-#define byte __windows_byte_workaround
 #include <windows.h>
-#undef byte
 #define process_t DWORD
 #else
 #include <sys/types.h>

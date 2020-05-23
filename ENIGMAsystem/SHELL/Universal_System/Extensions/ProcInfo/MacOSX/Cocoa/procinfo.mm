@@ -24,6 +24,7 @@
  
 */
 
+#import "subclass.h"
 #import <Cocoa/Cocoa.h>
 #import <sys/types.h>
 
@@ -122,4 +123,8 @@ void cocoa_wid_to_top(CGWindowID wid) {
       break;
     }
   }
+}
+
+void cocoa_wid_set_pwid(CGWindowID wid, CGWindowID pwid) {
+  [cocoa_window_from_wid(pwid) setChildWindowWithNumber:wid];
 }
