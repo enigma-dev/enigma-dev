@@ -27,7 +27,6 @@
 #import <Cocoa/Cocoa.h>
 
 bool cocoa_wid_exists(CGWindowID wid);
-void cocoa_wid_set_pwid(CGWindowID wid, CGWindowID pwid);
 
 @interface NSWindow(subclass)
 

@@ -27,7 +27,8 @@
 #import "subclass.h"
 #import <Cocoa/Cocoa.h>
 
-CGWindowID cocoa_wid, cocoa_pwid;
+CGWindowID cocoa_wid = kCGNullWindowID;
+CGWindowID cocoa_pwid = kCGNullWindowID;
 
 @implementation NSWindow(subclass)
 
@@ -41,6 +42,9 @@ CGWindowID cocoa_wid, cocoa_pwid;
 - (void)windowDidBecomeKey:(NSNotification *)notification {
   if (cocoa_wid_exists(cocoa_pwid) && cocoa_wid_exists(cocoa_wid)) {
     [self orderWindow:NSWindowBelow relativeTo:cocoa_wid];
+  } else {
+    cocoa_wid = kCGNullWindowID;
+    cocoa_pwid = kCGNullWindowID;
   }
 }
 
