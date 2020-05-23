@@ -37,9 +37,13 @@ static inline int XIOErrorHandlerImpl(Display *display) {
   return 0;
 }
 
-static inline unsigned long get_wid_or_pid(Display *display, Window window, bool wid) {
+static inline void SetErrorHandlers() {
   XSetErrorHandler(XErrorHandlerImpl);
   XSetIOErrorHandler(XIOErrorHandlerImpl);
+}
+
+static inline unsigned long get_wid_or_pid(Display *display, Window window, bool wid) {
+  SetErrorHandlers();
   unsigned char *prop;
   unsigned long property;
   Atom actual_type, filter_atom;
@@ -58,8 +62,7 @@ static inline unsigned long get_wid_or_pid(Display *display, Window window, bool
 namespace procinfo {
 
 bool wid_exists(wid_t wid) {
-  XSetErrorHandler(XErrorHandlerImpl);
-  XSetIOErrorHandler(XIOErrorHandlerImpl);
+  SetErrorHandlers();
   bool result = false;
   Display *display = XOpenDisplay(NULL);
   Window window = XDefaultRootWindow(display);
@@ -95,8 +98,7 @@ wid_t wid_from_window(window_t window) {
 }
 
 process_t pid_from_wid(wid_t wid) {
-  XSetErrorHandler(XErrorHandlerImpl);
-  XSetIOErrorHandler(XIOErrorHandlerImpl);
+  SetErrorHandlers();
   process_t pid; Window window;
   window = stoul(wid, nullptr, 10);
   if (!window) return pid;
@@ -107,8 +109,7 @@ process_t pid_from_wid(wid_t wid) {
 }
 
 wid_t wid_from_top() {
-  XSetErrorHandler(XErrorHandlerImpl);
-  XSetIOErrorHandler(XIOErrorHandlerImpl);
+  SetErrorHandlers();
   wid_t wid; Window window;
   Display *display = XOpenDisplay(NULL);
   int screen = XDefaultScreen(display);
@@ -123,8 +124,7 @@ process_t pid_from_top() {
 }
 
 void wid_to_top(wid_t wid) {
-  XSetErrorHandler(XErrorHandlerImpl);
-  XSetIOErrorHandler(XIOErrorHandlerImpl);
+  SetErrorHandlers();
   unsigned long window = stoul(wid, nullptr, 10);
   Display *display = XOpenDisplay(NULL);
   XRaiseWindow(display, window);
@@ -133,8 +133,7 @@ void wid_to_top(wid_t wid) {
 }
 
 void wid_set_pwid(wid_t wid, wid_t pwid) {
-  XSetErrorHandler(XErrorHandlerImpl);
-  XSetIOErrorHandler(XIOErrorHandlerImpl);
+  SetErrorHandlers();
   Display *display = XOpenDisplay(NULL);
   unsigned long window = stoul(wid, nullptr, 10);
   unsigned long parent = stoul(pwid, nullptr, 10);
