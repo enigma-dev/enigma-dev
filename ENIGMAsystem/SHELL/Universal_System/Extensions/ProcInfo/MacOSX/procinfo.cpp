@@ -28,6 +28,7 @@
 #include <sys/proc_info.h>
 #include <libproc.h>
 #include <cstdint>
+#include <cstring>
 
 typedef void NSWindow;
 typedef unsigned long CGWindowID;
