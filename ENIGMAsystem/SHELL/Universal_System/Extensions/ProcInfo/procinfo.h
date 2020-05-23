@@ -31,7 +31,8 @@
 #ifdef _WiN32
 #define process_t unsigned long
 #else
-#define process_t signed int
+#include <sys/types.h>
+#define process_t pid_t
 #endif
 #include <string>
 #define wid_t std::string
