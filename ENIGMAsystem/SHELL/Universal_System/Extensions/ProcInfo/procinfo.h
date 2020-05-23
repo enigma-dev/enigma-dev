@@ -29,11 +29,9 @@
 #define window_t unsigned long long
 
 #ifdef _WiN32
-#include <windows.h>
-#define process_t DWORD
+#define process_t unsigned long
 #else
-#include <sys/types.h>
-#define process_t pid_t
+#define process_t signed int
 #endif
 #include <string>
 #define wid_t std::string
