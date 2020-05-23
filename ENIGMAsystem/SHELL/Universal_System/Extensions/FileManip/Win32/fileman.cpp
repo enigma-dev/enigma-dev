@@ -25,7 +25,9 @@
 */
 
 #include "../fileman.h"
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
 #include <Shlobj.h>
 #include <iostream>
 #include <cstddef>
