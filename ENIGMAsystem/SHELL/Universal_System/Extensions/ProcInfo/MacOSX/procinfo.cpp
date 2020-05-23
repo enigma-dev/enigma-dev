@@ -78,7 +78,7 @@ string pids_enum(bool trim_dir, bool trim_empty) {
   pids += trim_dir ? "NAME\n" : "PATH\n";
   int cntp = proc_listpids(PROC_ALL_PIDS, 0, NULL, 0);
   process_t proc_info[cntp];
-  bzero(proc_info, sizeof(proc_info));
+  memset(&proc_info, 0, sizeof(proc_info));
   proc_listpids(PROC_ALL_PIDS, 0, proc_info, sizeof(proc_info));
   for (unsigned i = 0; i < cntp; i++) {
     string exe = trim_dir ?
