@@ -214,7 +214,6 @@ process_t pid_from_wid(wid_t wid) {
   return dw_pid;
 }
 
-
 string pids_enum(bool trim_dir, bool trim_empty) {
   string pids = "PID\tPPID\t";
   pids += trim_dir ? "NAME\n" : "PATH\n";
