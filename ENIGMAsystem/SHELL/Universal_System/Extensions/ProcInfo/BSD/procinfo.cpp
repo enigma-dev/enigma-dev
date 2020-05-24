@@ -1,4 +1,4 @@
-﻿/*
+/*
 
  MIT License
  
@@ -84,6 +84,22 @@ process_t ppid_from_pid(process_t pid) {
   }
   free(proc_info);
   return ppid;
+}
+
+string pids_from_ppid(process_t ppid) {
+  string pids; int cntp;
+  struct kinfo_proc *proc_info = kinfo_getallproc(&cntp);
+  if (proc_info) {
+    for (unsigned i = 0; i < cntp; i++) {
+      if (proc_info[i].ki_ppid == ppid) {
+        pids += to_string(proc_info[i].ki_tid) + "|";
+      }
+    }
+  }
+  if (pids.back() == '|')
+    pids.pop_back();
+  pids += "\0";
+  return pids;
 }
 
 } // namespace procinfo

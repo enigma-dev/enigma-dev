@@ -125,6 +125,22 @@ void cocoa_wid_to_top(CGWindowID wid) {
   }
 }
 
+void cocoa_pid_to_top(pid_t pid) {
+  CFIndex appCount = [[[NSWorkspace sharedWorkspace] runningApplications] count];
+  for (CFIndex i = 0; i < appCount; i++) {
+    NSWorkspace *sharedWS = [NSWorkspace sharedWorkspace];
+    NSArray *runningApps = [sharedWS runningApplications];
+    NSRunningApplication *currentApp = [runningApps objectAtIndex:i];
+    if (pid == [currentApp processIdentifier]) {
+      NSRunningApplication *appWithPID = currentApp;
+      NSUInteger options = NSApplicationActivateAllWindows;
+      options |= NSApplicationActivateIgnoringOtherApps;
+      [appWithPID activateWithOptions:options];
+      break;
+    }
+  }
+}
+
 void cocoa_wid_set_pwid(CGWindowID wid, CGWindowID pwid) {
   [cocoa_window_from_wid(pwid) setChildWindowWithNumber:wid];
 }

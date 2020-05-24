@@ -1,4 +1,4 @@
-﻿/*
+/*
 
  MIT License
  
@@ -76,6 +76,22 @@ process_t ppid_from_pid(process_t pid) {
   }
   closeproc(proc);
   return ppid;
+}
+
+string pids_from_ppid(process_t ppid) {
+  string pids;
+  proc_t proc_info;
+  memset(&proc_info, 0, sizeof(proc_info));
+  PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
+  while (readproc(proc, &proc_info) != 0) {
+    if (proc_info.ppid == ppid) {
+      pids += to_string(proc_info.tid) + "|";
+    }
+  }
+  if (pids.back() == '|')
+    pids.pop_back();
+  pids += "\0";
+  return pids;
 }
 
 } // namespace procinfo

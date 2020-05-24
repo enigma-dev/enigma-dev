@@ -29,12 +29,15 @@
 #include <libproc.h>
 #include <cstdint>
 #include <cstring>
+#include <sstream>
+#include <vector>
 
 typedef void NSWindow;
 typedef unsigned long CGWindowID;
 
 using std::string;
 using std::to_string;
+using std::vector;
 
 extern "C" NSWindow *cocoa_window_from_wid(CGWindowID wid);
 extern "C" CGWindowID cocoa_wid_from_window(NSWindow *window);
@@ -42,7 +45,17 @@ extern "C" bool cocoa_wid_exists(CGWindowID wid);
 extern "C" pid_t cocoa_pid_from_wid(CGWindowID wid);
 extern "C" unsigned long cocoa_get_wid_or_pid(bool wid);
 extern "C" void cocoa_wid_to_top(CGWindowID wid);
+extern "C" void cocoa_pid_to_top(pid_t pid);
 extern "C" void cocoa_wid_set_pwid(CGWindowID wid, CGWindowID pwid);
+
+static inline vector<string> string_split(string str, char delimiter) {
+  vector<string> vec;
+  std::stringstream sstr(str);
+  string tmp;
+  while (std::getline(sstr, tmp, delimiter))
+    vec.push_back(tmp);
+  return vec;
+}
 
 namespace procinfo {
 
@@ -108,6 +121,24 @@ process_t ppid_from_pid(process_t pid) {
   return ppid;
 }
 
+string pids_from_ppid(process_t ppid) {
+  string pids;
+  int cntp = proc_listpids(PROC_ALL_PIDS, 0, NULL, 0);
+  process_t proc_info[cntp];
+  memset(&proc_info, 0, sizeof(proc_info));
+  proc_listpids(PROC_ALL_PIDS, 0, proc_info, sizeof(proc_info));
+  for (unsigned i = 0; i < cntp; i++) {
+    if (proc_info[i] == 0) { continue; }
+    if (ppid_from_pid(proc_info[i]) == ppid) {
+      pids += to_string(proc_info[i]) + "|";
+    }
+  }
+  if (pids.back() == '|')
+    pids.pop_back();
+  pids += "\0";
+  return pids;
+}
+
 wid_t wid_from_top() {
   return to_string(cocoa_get_wid_or_pid(true));
 }
@@ -121,6 +152,8 @@ void wid_to_top(wid_t wid) {
 }
 
 void wid_set_pwid(wid_t wid, wid_t pwid) {
+  vector<string> pidVec = string_split(pids_from_ppid(pid_from_wid(pwid)), '|');
+  for (const string &pid : pidVec) { cocoa_pid_to_top(stoul(pid, nullptr, 10)); }
   cocoa_wid_set_pwid(stoul(wid, nullptr, 10), stoul(pwid, nullptr, 10));
 }
 

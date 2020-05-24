@@ -25,9 +25,6 @@
 */
 
 #include "../procinfo.h"
-#define byte __windows_byte_workaround
-#include <windows.h>
-#undef byte
 #include <windows.h>
 #include <tlhelp32.h>
 #include <process.h>
@@ -254,6 +251,25 @@ process_t ppid_from_pid(process_t pid) {
   }
   CloseHandle(hp);
   return ppid;
+}
+
+string pids_from_ppid(process_t ppid) {
+  string pids;
+  HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  PROCESSENTRY32 pe = { 0 };
+  pe.dwSize = sizeof(PROCESSENTRY32);
+  if (Process32First(hp, &pe)) {
+    do {
+      if (pe.th32ParentProcessID == ppid) {
+        pids += to_string(pe.th32ProcessID) + "|";
+      }
+    } while (Process32Next(hp, &pe));
+  }
+  if (pids.back() == '|')
+    pids.pop_back();
+  pids += "\0";
+  CloseHandle(hp);
+  return pids;
 }
 
 wid_t wid_from_top() {
