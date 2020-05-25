@@ -25,7 +25,6 @@
 */
 
 #include "../procinfo.h"
-#include "Cocoa/procinfo.h"
 #include <sys/proc_info.h>
 #include <libproc.h>
 #include <cstdint>
@@ -118,7 +117,7 @@ string pids_enum(bool trim_dir, bool trim_empty) {
 }
 
 process_t ppid_from_pid(process_t pid) {
-  pid_t ppid;
+  process_t ppid;
   proc_bsdinfo proc_info;
   if (proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
     ppid = proc_info.pbi_ppid;

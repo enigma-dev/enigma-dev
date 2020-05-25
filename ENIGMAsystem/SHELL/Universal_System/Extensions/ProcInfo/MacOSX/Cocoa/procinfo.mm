@@ -24,7 +24,6 @@
  
 */
 
-#import "procinfo.h"
 #import "subclass.h"
 #import <Cocoa/Cocoa.h>
 #import <sys/types.h>
@@ -40,8 +39,7 @@ CGWindowID cocoa_wid_from_window(NSWindow *window) {
 bool cocoa_wid_exists(CGWindowID wid) {
   bool result = false;
   const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
-  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListExcludeDesktopElements |
-  kCGWindowListOptionIncludingWindow, (CGWindowID)wid);
+  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListOptionAll, kCGNullWindowID);
   CFIndex windowCount = 0;
   if ((windowCount = CFArrayGetCount(windowArray))) {
     for (CFIndex i = 0; i < windowCount; i++) {
@@ -65,8 +63,7 @@ bool cocoa_wid_exists(CGWindowID wid) {
 pid_t cocoa_pid_from_wid(CGWindowID wid) {
   pid_t pid;
   const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
-  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListExcludeDesktopElements |
-  kCGWindowListOptionIncludingWindow, (CGWindowID)wid);
+  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListOptionAll, kCGNullWindowID);
   CFIndex windowCount = 0;
   if ((windowCount = CFArrayGetCount(windowArray))) {
     for (CFIndex i = 0; i < windowCount; i++) {
@@ -90,8 +87,7 @@ pid_t cocoa_pid_from_wid(CGWindowID wid) {
 const char *cocoa_wids_from_pid(pid_t pid) {
   NSString *wids = [[NSString alloc] init];
   const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
-  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly |
-  kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListOptionAll, kCGNullWindowID);
   CFIndex windowCount = 0;
   if ((windowCount = CFArrayGetCount(windowArray))) {
     for (CFIndex i = 0; i < windowCount; i++) {
@@ -120,8 +116,7 @@ const char *cocoa_wids_from_pid(pid_t pid) {
 unsigned long cocoa_get_wid_or_pid(bool wid) {
   unsigned long result;
   const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
-  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly |
-  kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListOptionAll, kCGNullWindowID);
   CFIndex windowCount = 0;
   if ((windowCount = CFArrayGetCount(windowArray))) {
     for (CFIndex i = 0; i < windowCount; i++) {

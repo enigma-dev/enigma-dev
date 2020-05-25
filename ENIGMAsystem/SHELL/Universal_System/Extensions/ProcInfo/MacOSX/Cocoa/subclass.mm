@@ -25,14 +25,10 @@
 */
 
 #import "subclass.h"
-#import "procinfo.h"
 #import <Cocoa/Cocoa.h>
-#import <unistd.h>
-#import <signal.h>
 
 CGWindowID cocoa_wid = kCGNullWindowID;
 CGWindowID cocoa_pwid = kCGNullWindowID;
-pid_t cocoa_pid = 0;
 
 @implementation NSWindow(subclass)
 
@@ -42,17 +38,15 @@ pid_t cocoa_pid = 0;
     name:NSWindowDidUpdateNotification object:self];
   cocoa_pwid = [self windowNumber]; cocoa_wid = wid;
   [self orderWindow:NSWindowBelow relativeTo:wid];
-  cocoa_pid = cocoa_pid_from_wid(cocoa_wid);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
-  if (kill(cocoa_pid, 0) == 0 && getpid() == cocoa_ppid_from_pid(cocoa_pid)) {
+  if (cocoa_wid_exists(cocoa_wid)) {
     [self setCanHide:NO];
     [self orderWindow:NSWindowBelow relativeTo:cocoa_wid];
   } else {
     cocoa_wid = kCGNullWindowID;
     [self setCanHide:YES];
-    cocoa_pid = 0;
   }
 }
 

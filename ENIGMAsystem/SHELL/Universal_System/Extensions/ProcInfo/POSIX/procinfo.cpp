@@ -44,7 +44,7 @@ process_t process_execute(string command) {
   FILE *pf = popen(command.c_str(), "r");
   while (!feof(pf)) {
     output.append(buffer, fread(&buffer, sizeof(char), BUFSIZ, pf));
-    pid = waitpid(-1, NULL, WNOHANG);
+    pid = wait(NULL);
   }
   prevpid = pid;
   pclose(pf);
