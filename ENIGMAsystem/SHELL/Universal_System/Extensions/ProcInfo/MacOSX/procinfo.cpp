@@ -48,10 +48,6 @@ extern "C" unsigned long cocoa_get_wid_or_pid(bool wid);
 extern "C" void cocoa_wid_to_top(CGWindowID wid);
 extern "C" void cocoa_wid_set_pwid(CGWindowID wid, CGWindowID pwid);
 
-pid_t cocoa_ppid_from_pid(pid_t pid) {
-  return procinfo::ppid_from_pid(pid);
-}
-
 static inline vector<string> string_split(string str, char delimiter) {
   vector<string> vec;
   std::stringstream sstr(str);
