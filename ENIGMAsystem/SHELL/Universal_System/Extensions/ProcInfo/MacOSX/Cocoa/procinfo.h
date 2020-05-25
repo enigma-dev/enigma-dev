@@ -24,67 +24,14 @@
  
 */
 
-#include "../procinfo.h"
-#include <sys/wait.h>
-#include <signal.h>
-#include <unistd.h>
-#include <cstdio>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-using std::string;
+#include <sys/types.h>
 
-namespace procinfo {
+pid_t cocoa_ppid_from_pid(pid_t pid);
 
-static process_t prevpid;
-static string prevout;
-
-process_t process_execute(string command) {
-  pid_t pid;
-  string output;
-  char buffer[BUFSIZ];
-  FILE *pf = popen(command.c_str(), "r");
-  while (!feof(pf)) {
-    output.append(buffer, fread(&buffer, sizeof(char), BUFSIZ, pf));
-    pid = waitpid(-1, NULL, WNOHANG);
-  }
-  prevpid = pid;
-  pclose(pf);
-  while (output.back() == '\r' || output.back() == '\n')
-    output.pop_back();
-  prevout = output;
-  return pid;
+#ifdef __cplusplus
 }
-
-process_t process_previous() {
-  return prevpid;
-}
-
-string process_evaluate() {
-  return prevout;
-}
-
-void process_clear_pid() {
-  prevpid = 0;
-}
-
-void process_clear_out() {
-  prevout = "";
-}
-
-process_t pid_from_self() {
-  return getpid();
-}
-
-process_t ppid_from_self() {
-  return getppid();
-}
-
-bool pid_exists(process_t pid) {
-  return (kill(pid, 0) == 0);
-}
-
-bool pid_kill(process_t pid) {
-  return (kill(pid, SIGKILL) == 0);
-}
-
-} // namepace procinfo
-
+#endif

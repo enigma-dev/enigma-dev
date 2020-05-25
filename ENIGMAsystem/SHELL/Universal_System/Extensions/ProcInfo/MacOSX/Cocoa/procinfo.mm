@@ -24,6 +24,7 @@
  
 */
 
+#import "procinfo.h"
 #import "subclass.h"
 #import <Cocoa/Cocoa.h>
 #import <sys/types.h>
@@ -86,6 +87,36 @@ pid_t cocoa_pid_from_wid(CGWindowID wid) {
   return pid;
 }
 
+const char *cocoa_wids_from_pid(pid_t pid) {
+  NSString *wids = [[NSString alloc] init];
+  const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
+  CFArrayRef windowArray = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly |
+  kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+  CFIndex windowCount = 0;
+  if ((windowCount = CFArrayGetCount(windowArray))) {
+    for (CFIndex i = 0; i < windowCount; i++) {
+      NSDictionary *windowInfoDictionary =
+      (__bridge NSDictionary *)((CFDictionaryRef)CFArrayGetValueAtIndex(windowArray, i));
+      NSNumber *ownerPID = (NSNumber *)(windowInfoDictionary[(id)kCGWindowOwnerPID]);
+      NSNumber *level = (NSNumber *)(windowInfoDictionary[(id)kCGWindowLayer]);
+      if (level.integerValue < kScreensaverWindowLevel) {
+        NSNumber *windowID = windowInfoDictionary[(id)kCGWindowNumber];
+        if (pid == ownerPID.integerValue) {
+          wids = [wids stringByAppendingString:[@(windowID.integerValue) stringValue]];
+          wids = [wids stringByAppendingString:@"|"];
+        }
+      }
+    }
+  }
+  if ([wids length] > 0) {
+    wids = [wids substringWithRange:NSMakeRange(0, [wids length] - 1)];
+  }
+  const char *result = [wids UTF8String];
+  CFRelease(windowArray);
+  [wids release];
+  return result;
+}
+
 unsigned long cocoa_get_wid_or_pid(bool wid) {
   unsigned long result;
   const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
@@ -115,23 +146,8 @@ void cocoa_wid_to_top(CGWindowID wid) {
     NSWorkspace *sharedWS = [NSWorkspace sharedWorkspace];
     NSArray *runningApps = [sharedWS runningApplications];
     NSRunningApplication *currentApp = [runningApps objectAtIndex:i];
-    if (cocoa_pid_from_wid(wid) == [currentApp processIdentifier]) {
-      NSRunningApplication *appWithPID = currentApp;
-      NSUInteger options = NSApplicationActivateAllWindows;
-      options |= NSApplicationActivateIgnoringOtherApps;
-      [appWithPID activateWithOptions:options];
-      break;
-    }
-  }
-}
-
-void cocoa_pid_to_top(pid_t pid) {
-  CFIndex appCount = [[[NSWorkspace sharedWorkspace] runningApplications] count];
-  for (CFIndex i = 0; i < appCount; i++) {
-    NSWorkspace *sharedWS = [NSWorkspace sharedWorkspace];
-    NSArray *runningApps = [sharedWS runningApplications];
-    NSRunningApplication *currentApp = [runningApps objectAtIndex:i];
-    if (pid == [currentApp processIdentifier]) {
+    pid_t currentPid = [currentApp processIdentifier];
+    if (cocoa_pid_from_wid(wid) == currentPid) {
       NSRunningApplication *appWithPID = currentApp;
       NSUInteger options = NSApplicationActivateAllWindows;
       options |= NSApplicationActivateIgnoringOtherApps;

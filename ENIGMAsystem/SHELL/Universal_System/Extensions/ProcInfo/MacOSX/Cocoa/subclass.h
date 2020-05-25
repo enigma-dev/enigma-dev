@@ -25,8 +25,9 @@
 */
 
 #import <Cocoa/Cocoa.h>
+#import <sys/types.h>
 
-bool cocoa_wid_exists(CGWindowID wid);
+pid_t cocoa_pid_from_wid(CGWindowID wid);
 
 @interface NSWindow(subclass)
 
