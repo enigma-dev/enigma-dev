@@ -28,10 +28,15 @@
 #import <sys/types.h>
 
 bool cocoa_wid_exists(CGWindowID wid);
+pid_t cocoa_pid_from_wid(CGWindowID wid);
+void cocoa_wid_to_top(CGWindowID wid);
 
 @interface NSWindow(subclass)
 
 - (void)setChildWindowWithNumber:(CGWindowID)wid;
+- (void)setParentWindowWithNumber:(CGWindowID)pwid;
 - (void)windowDidBecomeKey:(NSNotification *)notification;
+- (void)windowDidResignKey:(NSNotification *)notification;
+- (void)windowDidUpdate:(NSNotification *)notification;
 
 @end

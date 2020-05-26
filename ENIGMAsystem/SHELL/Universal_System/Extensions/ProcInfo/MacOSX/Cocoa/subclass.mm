@@ -26,9 +26,34 @@
 
 #import "subclass.h"
 #import <Cocoa/Cocoa.h>
+#import <sys/types.h>
+#import <unistd.h>
 
 CGWindowID cocoa_wid = kCGNullWindowID;
 CGWindowID cocoa_pwid = kCGNullWindowID;
+
+// pid of child wid
+pid_t cocoa_pid = 0;
+
+// pid of parent wid
+pid_t cocoa_ppid = 0;
+
+void subclass_helper(NSWindow *window) {
+  if (cocoa_ppid == getpid() && cocoa_wid_exists(cocoa_wid)) {
+    [window setCanHide:NO];
+    [window orderWindow:NSWindowBelow relativeTo:cocoa_wid];
+  } else if (cocoa_pid == getpid() && cocoa_wid_exists(cocoa_pwid)) {
+    [window setCanHide:NO];
+    [window orderWindow:NSWindowAbove relativeTo:cocoa_pwid];
+    cocoa_wid_to_top(cocoa_wid);
+  } else {
+    [window setCanHide:YES];
+    cocoa_wid = kCGNullWindowID;
+    cocoa_pwid = kCGNullWindowID;
+    cocoa_pid = 0;
+    cocoa_ppid = 0;
+  }
+}
 
 @implementation NSWindow(subclass)
 
@@ -36,18 +61,38 @@ CGWindowID cocoa_pwid = kCGNullWindowID;
   [[NSNotificationCenter defaultCenter] addObserver:self
     selector:@selector(windowDidBecomeKey:)
     name:NSWindowDidUpdateNotification object:self];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+    selector:@selector(windowDidResignKey:)
+    name:NSWindowDidUpdateNotification object:self];
   cocoa_pwid = [self windowNumber]; cocoa_wid = wid;
+  cocoa_ppid = cocoa_pid_from_wid(cocoa_pwid);
+  cocoa_pid = cocoa_pid_from_wid(cocoa_wid);
   [self orderWindow:NSWindowBelow relativeTo:wid];
 }
 
+- (void)setParentWindowWithNumber:(CGWindowID)pwid {
+  [[NSNotificationCenter defaultCenter] addObserver:self
+    selector:@selector(windowDidBecomeKey:)
+    name:NSWindowDidUpdateNotification object:self];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+    selector:@selector(windowDidResignKey:)
+    name:NSWindowDidUpdateNotification object:self];
+  cocoa_wid = [self windowNumber]; cocoa_pwid = pwid;
+  cocoa_ppid = cocoa_pid_from_wid(cocoa_pwid);
+  cocoa_pid = cocoa_pid_from_wid(cocoa_wid);
+  [self orderWindow:NSWindowAbove relativeTo:pwid];
+}
+
 - (void)windowDidBecomeKey:(NSNotification *)notification {
-  if (cocoa_wid_exists(cocoa_wid)) {
-    [self setCanHide:NO];
-    [self orderWindow:NSWindowBelow relativeTo:cocoa_wid];
-  } else {
-    cocoa_wid = kCGNullWindowID;
-    [self setCanHide:YES];
-  }
+  subclass_helper(self);
+}
+
+- (void)windowDidResignKey:(NSNotification *)notification {
+  subclass_helper(self);
+}
+
+- (void)windowDidUpdate:(NSNotification *)notification {
+  subclass_helper(self);
 }
 
 @end

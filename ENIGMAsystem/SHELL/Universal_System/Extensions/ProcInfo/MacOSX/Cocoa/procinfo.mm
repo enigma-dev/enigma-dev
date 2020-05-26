@@ -27,6 +27,7 @@
 #import "subclass.h"
 #import <Cocoa/Cocoa.h>
 #import <sys/types.h>
+#import <unistd.h>
 
 NSWindow *cocoa_window_from_wid(CGWindowID wid) {
   return [NSApp windowWithWindowNumber:wid];
@@ -153,5 +154,9 @@ void cocoa_wid_to_top(CGWindowID wid) {
 }
 
 void cocoa_wid_set_pwid(CGWindowID wid, CGWindowID pwid) {
-  [cocoa_window_from_wid(pwid) setChildWindowWithNumber:wid];
+  if (cocoa_pid_from_wid(pwid) == getpid()) {
+    [cocoa_window_from_wid(pwid) setChildWindowWithNumber:wid];
+  } else if (cocoa_pid_from_wid(wid) == getpid()) {
+    [cocoa_window_from_wid(wid) setParentWindowWithNumber:pwid];
+  }
 }
