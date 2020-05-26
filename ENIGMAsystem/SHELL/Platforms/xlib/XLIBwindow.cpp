@@ -517,9 +517,9 @@ void window_set_rectangle(int x, int y, int w, int h) {
 // FULLSCREEN //
 ////////////////
 
-static bool prefer_sizeable = false;
-static bool initial_fullscreen = true;
 void window_set_fullscreen(bool full) {
+  bool prefer_sizeable = false;
+  bool initial_fullscreen = true;
   if (enigma::isFullScreen != full && full) {
     window_set_size(enigma::windowWidth, enigma::windowHeight);
     if (initial_fullscreen) {
