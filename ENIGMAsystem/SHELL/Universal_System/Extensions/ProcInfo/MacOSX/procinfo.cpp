@@ -29,15 +29,12 @@
 #include <libproc.h>
 #include <cstdint>
 #include <cstring>
-#include <sstream>
-#include <vector>
 
 typedef void NSWindow;
 typedef unsigned long CGWindowID;
 
 using std::string;
 using std::to_string;
-using std::vector;
 
 extern "C" NSWindow *cocoa_window_from_wid(CGWindowID wid);
 extern "C" CGWindowID cocoa_wid_from_window(NSWindow *window);
@@ -47,15 +44,6 @@ extern "C" const char *cocoa_wids_from_pid(pid_t pid);
 extern "C" unsigned long cocoa_get_wid_or_pid(bool wid);
 extern "C" void cocoa_wid_to_top(CGWindowID wid);
 extern "C" void cocoa_wid_set_pwid(CGWindowID wid, CGWindowID pwid);
-
-static inline vector<string> string_split(string str, char delimiter) {
-  vector<string> vec;
-  std::stringstream sstr(str);
-  string tmp;
-  while (std::getline(sstr, tmp, delimiter))
-    vec.push_back(tmp);
-  return vec;
-}
 
 namespace procinfo {
 
