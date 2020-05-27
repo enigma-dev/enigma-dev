@@ -69,6 +69,19 @@ static inline HANDLE OpenProcessWithDebugPrivilege(process_t pid) {
   return OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 }
 
+static string proc_wids;
+static process_t proc_pid;
+static inline BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lparam) {
+  DWORD dw_pid;
+  GetWindowThreadProcessId(hWnd, &dw_pid);
+  if (dw_pid == proc_pid && IsWindowVisible(hWnd)) {
+    void *voidp_wid = reinterpret_cast<void *>(hWnd);
+    proc_wids += to_string(reinterpret_cast<unsigned long long>(voidp_wid));
+    proc_wids += "|";
+  }
+  return TRUE;
+}
+
 namespace procinfo {
 
 static process_t prevpid;
@@ -273,6 +286,15 @@ string pids_from_ppid(process_t ppid) {
   pids += "\0";
   CloseHandle(hp);
   return pids;
+}
+
+string wids_from_pid(process_t pid) {
+  proc_wids = "";
+  proc_pid = pid;
+  EnumWindows(EnumWindowsProc, NULL);
+  if (proc_wids.back() == '|')
+    proc_wids.pop_back();
+  return proc_wids;
 }
 
 wid_t wid_from_top() {
