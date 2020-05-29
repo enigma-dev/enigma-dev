@@ -74,7 +74,7 @@ static process_t proc_pid;
 static inline BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lparam) {
   DWORD dw_pid;
   GetWindowThreadProcessId(hWnd, &dw_pid);
-  if (dw_pid == proc_pid && IsWindowVisible(hWnd)) {
+  if (dw_pid == proc_pid) {
     void *voidp_wid = reinterpret_cast<void *>(hWnd);
     proc_wids += to_string(reinterpret_cast<unsigned long long>(voidp_wid));
     proc_wids += "|";
