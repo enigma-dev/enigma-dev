@@ -27,6 +27,7 @@
 #include "../procinfo.h"
 #include <X11/Xlib.h>
 
+using std::string;
 using std::to_string;
 
 static inline int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
@@ -71,7 +72,7 @@ bool wid_exists(wid_t wid) {
   int actual_format, status;
   unsigned long nitems, bytes_after;
   filter_atom = XInternAtom(display, "_NET_CLIENT_LIST", True);
-  status = XGetWindowProperty(display, window, filter_atom, 0, 1024, False, 
+  status = XGetWindowProperty(display, window, filter_atom, 0, 1024, False,
   AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
   if (status == Success && prop != NULL && nitems) {
     if (actual_format == 32) {
@@ -108,6 +109,36 @@ process_t pid_from_wid(wid_t wid) {
   return pid;
 }
 
+string wids_from_pid(process_t pid) {
+  SetErrorHandlers();
+  string result;
+  Display *display = XOpenDisplay(NULL);
+  Window window = XDefaultRootWindow(display);
+  unsigned char *prop;
+  Atom actual_type, filter_atom;
+  int actual_format, status;
+  unsigned long nitems, bytes_after;
+  filter_atom = XInternAtom(display, "_NET_CLIENT_LIST", True);
+  status = XGetWindowProperty(display, window, filter_atom, 0, 1024, False,
+  AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
+  if (status == Success && prop != NULL && nitems) {
+    if (actual_format == 32) {
+      unsigned long *array = (unsigned long *)prop;
+      for (unsigned i = 0; i < nitems; i++) {
+        string wid = to_string((unsigned long)array[i]);
+        if (pid_from_wid(wid) == pid) {
+          result += wid + "|";
+        }
+      }
+    }
+    XFree(prop);
+  }
+  if (result.back() == '|')
+    result.pop_back();
+  XCloseDisplay(display);
+  return result;
+}
+
 wid_t wid_from_top() {
   SetErrorHandlers();
   wid_t wid; Window window;
@@ -142,3 +173,4 @@ void wid_set_pwid(wid_t wid, wid_t pwid) {
 }
 
 } // namespace procinfo
+
