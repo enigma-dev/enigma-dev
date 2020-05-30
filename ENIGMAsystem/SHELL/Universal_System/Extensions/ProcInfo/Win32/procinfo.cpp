@@ -291,7 +291,7 @@ string pids_from_ppid(process_t ppid) {
 string wids_from_pid(process_t pid) {
   proc_wids = "";
   proc_pid = pid;
-  EnumWindows(EnumWindowsProc, NULL);
+  EnumWindows(EnumWindowsProc, 0);
   if (proc_wids.back() == '|')
     proc_wids.pop_back();
   return proc_wids;
