@@ -22,6 +22,8 @@
 #include "GLSLshader.h"
 #include "OpenGLHeaders.h"
 
+#include "Universal_System/var4.h"
+
 #include <string>
 #include <memory>
 
@@ -110,15 +112,15 @@ void glsl_uniform2fv(int location, int size, const float *value);
 void glsl_uniform3fv(int location, int size, const float *value);
 void glsl_uniform4fv(int location, int size, const float *value);
 
-void glsl_uniform1iv(int location, int size, const float *value);
-void glsl_uniform2iv(int location, int size, const float *value);
-void glsl_uniform3iv(int location, int size, const float *value);
-void glsl_uniform4iv(int location, int size, const float *value);
+void glsl_uniform1iv(int location, int size, const int *value);
+void glsl_uniform2iv(int location, int size, const int *value);
+void glsl_uniform3iv(int location, int size, const int *value);
+void glsl_uniform4iv(int location, int size, const int *value);
 
-void glsl_uniform1uiv(int location, int size, const float *value);
-void glsl_uniform2uiv(int location, int size, const float *value);
-void glsl_uniform3uiv(int location, int size, const float *value);
-void glsl_uniform4uiv(int location, int size, const float *value);
+void glsl_uniform1uiv(int location, int size, const unsigned *value);
+void glsl_uniform2uiv(int location, int size, const unsigned *value);
+void glsl_uniform3uiv(int location, int size, const unsigned *value);
+void glsl_uniform4uiv(int location, int size, const unsigned *value);
 
 void glsl_uniform_matrix2fv(int location, int size, const float *matrix);
 void glsl_uniform_matrix3fv(int location, int size, const float *matrix);
@@ -136,6 +138,16 @@ void glsl_attribute_set(int location, int size, int type, bool normalize, int st
 #define shader_set_uniform_f  glsl_uniformf
 #define shader_set_uniform_i  glsl_uniformi
 #define shader_is_compiled    glsl_shader_get_compiled
+
+inline void shader_set_uniform_f_array(int location, const var& array) {
+  auto values = array.to_vector<float>();
+  glsl_uniform1fv(location, values.size(), values.data());
+}
+
+inline void shader_set_uniform_i_array(int location, const var& array) {
+  auto values = array.to_vector<int>();
+  glsl_uniform1iv(location, values.size(), values.data());
+}
 
 }
 
