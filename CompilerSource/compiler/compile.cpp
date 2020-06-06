@@ -26,11 +26,11 @@
 #include <cstdio>
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
- #define dllexport extern "C" __declspec(dllexport)
+ #define DLLEXPORT extern "C" __declspec(DLLEXPORT)
  #include <windows.h>
  #define sleep Sleep
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <unistd.h>
  #define sleep(x) usleep(x * 1000)
 #endif
@@ -145,11 +145,11 @@ inline void write_exe_info(const std::filesystem::path& codegen_directory, const
 
 #include "System/builtins.h"
 
-dllexport int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
+DLLEXPORT int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(GameData(es), exe_filename, mode);
 }
 
-dllexport int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
+DLLEXPORT int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
   GameData gameData(*proj);
   int error = FlattenProto(*proj, &gameData);
   if (error) return error;
@@ -157,10 +157,10 @@ dllexport int compileProto(const buffers::Project *proj, const char* exe_filenam
 }
 
 static bool run_game = true;
-dllexport void ide_handles_game_launch() { run_game = false; }
+DLLEXPORT void ide_handles_game_launch() { run_game = false; }
 
 static bool redirect_make = true;
-dllexport void log_make_to_console() { redirect_make = false; }
+DLLEXPORT void log_make_to_console() { redirect_make = false; }
 
 template<typename T> void write_resource_meta(ofstream &wto, const char *kind, vector<T> resources, bool gen_names = true) {
   int max = 0;
