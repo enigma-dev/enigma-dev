@@ -2,9 +2,11 @@ GCCVER := $(shell gcc -dumpversion | cut -c 1)
 
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
+	LIB_PFX := lib
 	LIB_EXT := .so
 	BIN_EXT :=
 else ifeq ($(OS), Darwin)
+	LIB_PFX := lib
 	LIB_EXT := .dylib
 	BIN_EXT :=
 else
