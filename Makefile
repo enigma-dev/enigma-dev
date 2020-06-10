@@ -5,6 +5,7 @@ SHELL=/bin/bash
 
 .PHONY: ENIGMA all clean Game clean-game emake emake-tests gm2egm libProtocols libEGM required-directories .FORCE
 
+$(LIB_PFX)compileEGMf$(LIB_EXT): ENIGMA
 ENIGMA: .FORCE libProtocols$(LIB_EXT) libENIGMAShared$(LIB_EXT)
 	$(MAKE) -C CompilerSource
 
@@ -46,10 +47,10 @@ else
 	EMAKE_TARGETS += libProtocols$(LIB_EXT)
 endif
 
-emake: $(EMAKE_TARGETS)
+emake: $(EMAKE_TARGETS) $(LIB_PFX)compileEGMf$(LIB_EXT)
 	$(MAKE) -C CommandLine/emake/
 
-emake-tests: .FORCE libEGM$(LIB_EXT)
+emake-tests: .FORCE libEGM$(LIB_EXT) $(LIB_PFX)compileEGMf$(LIB_EXT)
 	TESTS=TRUE $(MAKE) -C CommandLine/emake/
 
 gm2egm: libEGM$(LIB_EXT) .FORCE

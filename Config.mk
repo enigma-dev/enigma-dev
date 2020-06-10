@@ -16,16 +16,19 @@ endif
 ifeq ($(OS), Darwin)
 	PLATFORM := Cocoa
 	MKDIR := mkdir
+  LIB_PFX := lib
 	LIB_EXT := .dylib
 	BIN_EXT :=
 else ifeq ($(UNIX_BASED), true)
 	PLATFORM := xlib
 	MKDIR := mkdir
+  LIB_PFX := lib
 	LIB_EXT := .so
 	BIN_EXT :=
 else
 	PLATFORM := Win32
 	MKDIR := mkdir.exe
+  LIB_PFX := lib
 	LIB_EXT := .dll
 	BIN_EXT := .exe
 endif
