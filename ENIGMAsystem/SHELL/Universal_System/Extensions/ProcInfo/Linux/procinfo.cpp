@@ -91,6 +91,7 @@ string pids_from_ppid(process_t ppid) {
   if (pids.back() == '|')
     pids.pop_back();
   pids += "\0";
+  closeproc(proc);
   return pids;
 }
 
