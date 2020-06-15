@@ -61,8 +61,6 @@ enum {
 	static const std::string ws_x11_kdialog = "KDialog";
 
 	// dialog functions
-	std::string widget_get_system();
-	void widget_set_system(std::string sys);
 	int show_message_cancelable(std::string message);
 	int show_message_ext(std::string message, std::string but1, std::string but2, std::string but3);
 	bool show_question(std::string message);
