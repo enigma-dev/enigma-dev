@@ -65,11 +65,19 @@ namespace enigma_user {
   }
 
   void show_debug_message(string errortext, MESSAGE_TYPE type) {
+    const bool fatal = (type == M_FATAL_ERROR || type == M_FATAL_USER_ERROR);
     #ifdef DEBUG_MODE
     errortext += "\n\n" + enigma::debug_scope::GetErrors();
     #endif
-    const bool fatal = (type == M_FATAL_ERROR || type == M_FATAL_USER_ERROR);
-    external_call(external_define(dll, "show_error", dll_cdecl, ty_real, 2, ty_string, ty_real), errortext, fatal);
+    if (type != M_INFO && type != M_WARNING) {
+      external_call(external_define(dll, "show_error", dll_cdecl, ty_real, 2, ty_string, ty_real), errortext, fatal);
+    } else {
+      #ifndef DEBUG_MODE
+      errortext += "\n";
+      fputs(errortext.c_str(), stderr);
+      #endif
+      if (fatal) { abort(); }
+    }
   }
 
   int show_message(const string &str) {
