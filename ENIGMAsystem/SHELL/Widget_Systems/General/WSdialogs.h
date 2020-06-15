@@ -98,5 +98,5 @@ enum {
 	// dumb stuff
 	inline bool action_if_question(std::string message) { return show_question(message); }
 	std::string get_login(std::string username, std::string password);
-	bool   get_std::string_canceled();
+	bool get_string_canceled();
 }
