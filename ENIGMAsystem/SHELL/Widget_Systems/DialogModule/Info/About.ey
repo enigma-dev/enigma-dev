@@ -1,0 +1,9 @@
+%e-yaml
+---
+
+Name: Dialog Module
+Identifier: DialogModule
+Build-Platforms: Windows, MacOSX, Linux, FreeBSD, SDL
+Represents: Windows, MacOSX, Linux, FreeBSD, SDL
+Description: Requires the 'External Functions' extension enabled. Create widgets with DialogModule.dll (Windows), DialogModule.dylib (Mac), and/or DialogModule.so (Linux, FreeBSD). DialogModule.so needs to be rebuilt from source code if the library is not recognized. Download for your target architecture (x86, x64), here: https://github.com/time-killer-games/DialogModule
+Author: Samuel Venable
