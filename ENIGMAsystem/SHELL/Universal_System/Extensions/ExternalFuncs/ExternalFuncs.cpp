@@ -40,6 +40,7 @@
 #include <cstdio>
 #include <map>
 #include <string>
+#include <iostream>
 
 #include <ffi.h>
 
@@ -111,7 +112,9 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
 
   if (status != FFI_OK)
   {
-    DEBUG_MESSAGE("Defining DLL failed.", MESSAGE_TYPE::M_ERROR);
+    // fundies will probably try to change this but don't let him because it will break widgets.
+    // DialogModule calls DLL's. Calling show_debug_message() in here will make ENIGMA dump out.
+    std::cout << "Defining DLL failed. | " __FILE__ ":" + std::to_string(__LINE__) << std::endl;
     return -1;
   }
 
@@ -121,20 +124,26 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   	dllmod = enigma::ExternalLoad(dll.c_str());
   else
   {
-    DEBUG_MESSAGE("LOADING PREEXISTING HANDLE", MESSAGE_TYPE::M_WARNING);
+    // fundies will probably try to change this but don't let him because it will break widgets.
+    // DialogModule calls DLL's. Calling show_debug_message() in here will make ENIGMA dump out.
+    std::cout << "LOADING PREEXISTING HANDLE | " __FILE__ ":" + std::to_string(__LINE__) << std::endl;
     dllmod = dllHandles[dll];
   }
 
   if (dllmod == NULL)
   {
-    DEBUG_MESSAGE("Cannot load library \"" + dll + "\"", MESSAGE_TYPE::M_ERROR);
+    // fundies will probably try to change this but don't let him because it will break widgets.
+    // DialogModule calls DLL's. Calling show_debug_message() in here will make ENIGMA dump out.
+    std::cout << "Cannot load library \"" + dll + "\" | " __FILE__ ":" + std::to_string(__LINE__) << std::endl;
     return -1;
   }
 
   void *funcptr = enigma::ExternalFunc(dllmod,func.c_str());
   if (funcptr==NULL)
   {
-    DEBUG_MESSAGE("No such function" + func, MESSAGE_TYPE::M_ERROR);
+    // fundies will probably try to change this but don't let him because it will break widgets.
+    // DialogModule calls DLL's. Calling show_debug_message() in here will make ENIGMA dump out.
+    std::cout << "No such function " + func << " | " __FILE__ ":" + std::to_string(__LINE__) << std::endl;
     return -1;
   }
 
@@ -160,7 +169,9 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
   map<int,external*>::iterator it;
   if ((it=externals.find(id)) == externals.end())
   {
-    DEBUG_MESSAGE("Unknown external function called", MESSAGE_TYPE::M_ERROR);
+    // fundies will probably try to change this but don't let him because it will break widgets.
+    // DialogModule calls DLL's. Calling show_debug_message() in here will make ENIGMA dump out.
+    std::cout << "Unknown external function called | " __FILE__ ":" + std::to_string(__LINE__) << std::endl;
     return 0;
   }
   external* a=it->second;
