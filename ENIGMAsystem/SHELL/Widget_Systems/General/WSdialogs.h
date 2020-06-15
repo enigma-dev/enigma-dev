@@ -68,7 +68,7 @@ enum {
 	bool show_question(std::string message);
 	int show_question_cancelable(std::string message);
 	int show_attempt(std::string errortext);
-	std::string get_std::string(std::string message, std::string def);
+	std::string get_string(std::string message, std::string def);
 	std::string get_password(std::string message, std::string def);
 	double get_integer(std::string message, var def);
 	double get_passcode(std::string message, var def);
