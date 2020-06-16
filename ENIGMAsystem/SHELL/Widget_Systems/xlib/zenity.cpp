@@ -501,14 +501,14 @@ int get_color_ext(int defcol, string title) override {
   return make_color_rgb(red, green, blue);
 }
 
-string message_get_caption() override {
+string widget_get_caption() override {
   if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
   if (dialog_caption == window_get_caption() && error_caption == "Error")
     return ""; else return dialog_caption;
 }
 
-void message_set_caption(string title) override {
+void widget_set_caption(string title) override {
   dialog_caption = title; error_caption = title;
   if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
