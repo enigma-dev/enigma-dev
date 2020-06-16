@@ -141,11 +141,11 @@ int get_color_ext(int defcol, string title) {
 }
 
 string widget_get_caption() {
-  return enigma::current_widget_engine->message_get_caption();
+  return enigma::current_widget_engine->widget_get_caption();
 }
 
 void widget_set_caption(string title) {
-  enigma::current_widget_engine->message_set_caption(title);
+  enigma::current_widget_engine->widget_set_caption(title);
 }
 
 } // namespace enigma_user
