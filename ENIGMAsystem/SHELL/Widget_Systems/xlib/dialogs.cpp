@@ -140,11 +140,11 @@ int get_color_ext(int defcol, string title) {
   return enigma::current_widget_engine->get_color_ext(defcol, title);
 }
 
-string message_get_caption() {
+string widget_get_caption() {
   return enigma::current_widget_engine->message_get_caption();
 }
 
-void message_set_caption(string title) {
+void widget_set_caption(string title) {
   enigma::current_widget_engine->message_set_caption(title);
 }
 
