@@ -889,7 +889,7 @@ string get_directory_alt(string capt, string root) {
   return get_directory_helper(root, capt);
 }
 
-string message_get_caption() {
+string widget_get_caption() {
   if (dialog_caption.empty()) {
     wchar_t wstrWindowCaption[512];
     GetWindowTextW(enigma::hWnd, wstrWindowCaption, 512);
@@ -903,7 +903,7 @@ string message_get_caption() {
   return shorten(dialog_caption);
 }
 
-void message_set_caption(string title) {
+void widget_set_caption(string title) {
   if (!title.empty()) dialog_caption = widen(title);
   else dialog_caption = L"";
 
