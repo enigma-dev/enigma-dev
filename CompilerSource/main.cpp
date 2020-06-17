@@ -40,7 +40,7 @@ int m_prog_loop_cfp();
 #ifdef _WIN32
  #define byte __windows_byte_workaround
  #include <windows.h>
- #define DLLEXPORT extern "C" __declspec(DLLEXPORT)
+ #define DLLEXPORT extern "C" __declspec(dllexport)
    #define DECLARE_TIME() clock_t cs, ce
    #define START_TIME() cs = clock()
    #define STOP_TIME() ce = clock()
