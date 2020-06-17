@@ -26,7 +26,7 @@
 #include <cstdio>
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
- #define DLLEXPORT extern "C" __declspec(DLLEXPORT)
+ #define DLLEXPORT extern "C" __declspec(dllexport)
  #include <windows.h>
  #define sleep Sleep
 #else
