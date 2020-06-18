@@ -42,9 +42,9 @@ int m_prog_loop_cfp();
 
 #ifdef _WIN32
  #include <windows.h>
- #define dllexport extern "C" __declspec(dllexport)
+ #define DLLEXPORT extern "C" __declspec(dllexport)
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <cstdio>
 #endif
 
