@@ -63,6 +63,7 @@ void execute_shell(string fname, string args) {
 }
 
 string execute_shell_for_output(const string &command) {
+  string output;
   tstring tstr_command = widen(command);
   wchar_t ctstr_command[32768];
   wcsncpy(ctstr_command, tstr_command.c_str(), 32768);
@@ -108,7 +109,7 @@ string execute_shell_for_output(const string &command) {
     CloseHandle(hStdInPipeWrite);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-    return buffer;
+    return output;
   }
   return "";
 }
