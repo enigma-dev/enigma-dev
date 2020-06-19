@@ -1,4 +1,4 @@
-﻿/*
+/*
 
  MIT License
  
@@ -25,11 +25,7 @@
 */
 
 #include "../procinfo.h"
-
-#define byte __windows_byte_workaround
 #include <windows.h>
-#undef byte
-
 #include <tlhelp32.h>
 #include <process.h>
 #include <psapi.h>
@@ -117,23 +113,26 @@ process_t process_execute(string command) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
       }
+      DWORD dwRead = 0;
+      DWORD dwAvail = 0;
+      PeekNamedPipe(hStdOutPipeRead, NULL, 0, NULL, &dwAvail, NULL);
+      if (dwAvail) {
+        char buffer[dwAvail];
+        BOOL success = ReadFile(hStdOutPipeRead, buffer, dwAvail, &dwRead, NULL);
+        if (success || dwRead) {
+          buffer[dwAvail] = 0;
+          output.append(buffer, dwAvail);
+        }
+      }
     }
+    CloseHandle(hStdInPipeWrite);
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
-    char buffer[4096];
-    DWORD dwRead = 0;
-    proceed = ReadFile(hStdOutPipeRead, buffer, 4096, &dwRead, NULL);
-    while (proceed == TRUE) {
-      buffer[dwRead] = 0;
-      proceed = ReadFile(hStdOutPipeRead, buffer, 4096, &dwRead, NULL);
-    }
     CloseHandle(hStdOutPipeRead);
-    CloseHandle(hStdInPipeWrite);
     pid = pi.dwProcessId;
     prevpid = pid;
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-    output = buffer;
     while (output.back() == '\r' || output.back() == '\n')
       output.pop_back();
     prevout = output;
