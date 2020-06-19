@@ -90,21 +90,25 @@ string execute_shell_for_output(const string &command) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
       }
+      DWORD dwRead = 0;
+      DWORD dwAvail = 0;
+      PeekNamedPipe(hStdOutPipeRead, NULL, 0, NULL, &dwAvail, NULL);
+      if (dwAvail) {
+        char buffer[dwAvail];
+        BOOL success = ReadFile(hStdOutPipeRead, buffer, dwAvail, &dwRead, NULL);
+        if (success || dwRead) {
+          buffer[dwAvail] = 0;
+          output.append(buffer, dwAvail);
+        }
+      }
     }
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
-    char buffer[4096] = { };
-    DWORD dwRead = 0;
-    ok = ReadFile(hStdOutPipeRead, buffer, 4095, &dwRead, NULL);
-    while (ok == TRUE) {
-      buffer[dwRead] = 0;
-      ok = ReadFile(hStdOutPipeRead, buffer, 4095, &dwRead, NULL);
-    }
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-    return shorten(widen(buffer));
+    return buffer;
   }
   return "";
 }
