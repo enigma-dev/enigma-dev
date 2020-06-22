@@ -86,7 +86,7 @@ string execute_shell_for_output(const string &command) {
   PROCESS_INFORMATION pi = { 0 };
   DWORD dwRead = 0;
   DWORD dwAvail = 0;
-  if (CreateProcessW(NULL, cwstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+  if (CreateProcessW(NULL, ctstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeWrite);
