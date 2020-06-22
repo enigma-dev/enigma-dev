@@ -99,7 +99,6 @@ string execute_shell_for_output(const string &command) {
       if (success || dwRead) {
         buffer[dwRead] = 0;
         output.append(buffer, dwRead);
-        buffer[0] = 0;
       } else { break; }
     }
     CloseHandle(hStdOutPipeRead);
