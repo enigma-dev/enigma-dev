@@ -86,21 +86,21 @@ string execute_shell_for_output(const string &command) {
   PROCESS_INFORMATION pi = { };
   if (CreateProcessW(NULL, ctstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
     while (WaitForSingleObject(pi.hProcess, 5) == WAIT_TIMEOUT) {
-      MSG msg;
-      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
       DWORD dwRead = 0;
       DWORD dwAvail = 0;
       PeekNamedPipe(hStdOutPipeRead, NULL, 0, NULL, &dwAvail, NULL);
       if (dwAvail) {
-        char buffer[dwAvail];
-        BOOL success = ReadFile(hStdOutPipeRead, buffer, dwAvail, &dwRead, NULL);
+        vector<char> buffer(dwAvail);
+        BOOL success = ReadFile(hStdOutPipeRead, &buffer[0], dwAvail, &dwRead, NULL);
         if (success || dwRead) {
           buffer[dwAvail] = 0;
-          output.append(buffer, dwAvail);
+          output.append(buffer.data(), dwAvail);
         }
+      }
+      MSG msg;
+      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
       }
     }
     CloseHandle(hStdOutPipeWrite);
