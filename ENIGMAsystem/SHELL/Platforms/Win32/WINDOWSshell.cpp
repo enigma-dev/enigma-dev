@@ -90,9 +90,8 @@ string execute_shell_for_output(const string &command) {
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
     char buffer[BUFSIZ];
-    BOOL success = TRUE;
-    DWORD dwRead = 0;
     for (;;) {
+      DWORD dwRead = 0;
       BOOL success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
       if (success || dwRead) {
         buffer[dwRead] = 0;
