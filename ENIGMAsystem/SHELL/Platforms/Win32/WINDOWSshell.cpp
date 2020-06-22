@@ -89,8 +89,8 @@ string execute_shell_for_output(const string &command) {
     CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
-    char buffer[BUFSIZ];
     for (;;) {
+      char buffer[BUFSIZ];
       DWORD dwRead = 0;
       BOOL success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
       if (success || dwRead) {
