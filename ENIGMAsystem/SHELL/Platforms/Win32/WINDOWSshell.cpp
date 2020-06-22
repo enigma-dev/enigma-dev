@@ -87,37 +87,23 @@ string execute_shell_for_output(const string &command) {
   DWORD dwRead = 0;
   DWORD dwAvail = 0;
   if (CreateProcessW(NULL, cwstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-    while (WaitForSingleObject(pi.hProcess, 5) == WAIT_TIMEOUT) {
-      PeekNamedPipe(hStdOutPipeRead, NULL, 0, NULL, &dwAvail, NULL);
-      if (dwAvail) {
-        vector<char> buffer(dwAvail);
-        BOOL success = ReadFile(hStdOutPipeRead, &buffer[0], dwAvail, &dwRead, NULL);
-        if (success || dwRead) {
-          buffer[dwAvail] = 0;
-          output.append(buffer.data(), dwAvail);
-        }
-      }
-      MSG msg;
-      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
-    }
-    PeekNamedPipe(hStdOutPipeRead, NULL, 0, NULL, &dwAvail, NULL);
-    if (dwAvail) {
-      vector<char> buffer(dwAvail);
-      BOOL success = ReadFile(hStdOutPipeRead, &buffer[0], dwAvail, &dwRead, NULL);
-      if (success || dwRead) {
-        buffer[dwAvail] = 0;
-        output.append(buffer.data(), dwAvail);
-      }
-    }
-    CloseHandle(hStdOutPipeWrite);
-    CloseHandle(hStdInPipeRead);
-    CloseHandle(hStdOutPipeRead);
-    CloseHandle(hStdInPipeWrite);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
+    CloseHandle(hStdOutPipeWrite);
+    CloseHandle(hStdInPipeRead);
+    char buffer[BUFSIZ];
+    BOOL success = TRUE;
+    DWORD dwRead = 0;
+    for (;;) {
+      BOOL success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
+      if (success || dwRead) {
+        buffer[dwRead] = 0;
+        output.append(buffer, dwRead);
+        buffer[0] = 0;
+      } else { break; }
+    }
+    CloseHandle(hStdOutPipeRead);
+    CloseHandle(hStdInPipeWrite);
     return output;
   }
   return "";
