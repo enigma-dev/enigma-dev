@@ -77,17 +77,17 @@ string execute_shell_for_output(const string &command) {
   if (ok == FALSE) return "";
   ok = CreatePipe(&hStdOutPipeRead, &hStdOutPipeWrite, &sa, 0);
   if (ok == FALSE) return "";
-  STARTUPINFOW si = { };
+  STARTUPINFOW si = { 0 };
   si.cb = sizeof(STARTUPINFOW);
   si.dwFlags = STARTF_USESTDHANDLES;
   si.hStdError = hStdOutPipeWrite;
   si.hStdOutput = hStdOutPipeWrite;
   si.hStdInput = hStdInPipeRead;
-  PROCESS_INFORMATION pi = { };
-  if (CreateProcessW(NULL, ctstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+  PROCESS_INFORMATION pi = { 0 };
+  DWORD dwRead = 0;
+  DWORD dwAvail = 0;
+  if (CreateProcessW(NULL, cwstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
     while (WaitForSingleObject(pi.hProcess, 5) == WAIT_TIMEOUT) {
-      DWORD dwRead = 0;
-      DWORD dwAvail = 0;
       PeekNamedPipe(hStdOutPipeRead, NULL, 0, NULL, &dwAvail, NULL);
       if (dwAvail) {
         vector<char> buffer(dwAvail);
@@ -101,6 +101,15 @@ string execute_shell_for_output(const string &command) {
       if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
+      }
+    }
+    PeekNamedPipe(hStdOutPipeRead, NULL, 0, NULL, &dwAvail, NULL);
+    if (dwAvail) {
+      vector<char> buffer(dwAvail);
+      BOOL success = ReadFile(hStdOutPipeRead, &buffer[0], dwAvail, &dwRead, NULL);
+      if (success || dwRead) {
+        buffer[dwAvail] = 0;
+        output.append(buffer.data(), dwAvail);
       }
     }
     CloseHandle(hStdOutPipeWrite);
