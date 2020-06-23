@@ -82,10 +82,9 @@ int audiosystem_initialize() {
   DSBUFFERDESC bufferDesc;
 
   // Initialize the direct sound interface pointer for the default sound device.
-  result = DirectSoundCreate8(NULL, &dsound, NULL);
-  if (FAILED(result)) {
+  // Allow the user to retry until a device is created.
+  while (FAILED(result = DirectSoundCreate8(NULL, &dsound, NULL))) {
     DEBUG_MESSAGE("Failed to create DirectSound8 object.", MESSAGE_TYPE::M_ERROR);
-    return false;
   }
 
   // Set the cooperative level to priority so the format of the primary sound buffer can be modified.
