@@ -70,7 +70,7 @@ int directory_create(string dname) {
 #endif
 }
 
-int directory_delete(string dname) { return rmdir(dname.c_str()); }
+int directory_destroy(string dname) { return rmdir(dname.c_str()); }
 
 string file_find_next() {
   if (fff_dir_open == NULL) return "";
