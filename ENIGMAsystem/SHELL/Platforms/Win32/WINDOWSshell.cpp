@@ -46,9 +46,10 @@ void execute_program(string fname, string args, bool wait) {
   lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;
   ShellExecuteExW(&lpExecInfo);
   if (wait && lpExecInfo.hProcess != NULL) {
-    while (WaitForSingleObject(lpExecInfo.hProcess, 5) == WAIT_TIMEOUT) {
+    while (DWORD eventSignalId = MsgWaitForMultipleObjects(1, &lpExecInfo.hProcess, false, INFINITE, QS_ALLEVENTS)) {
+      if (eventSignalId == WAIT_OBJECT_0) break;
       MSG msg;
-      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+      while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
       }
