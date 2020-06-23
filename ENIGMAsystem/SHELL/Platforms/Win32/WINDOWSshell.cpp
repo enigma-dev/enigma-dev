@@ -89,14 +89,21 @@ string execute_shell_for_output(const string &command) {
     CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
-    for (;;) {
+    HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
+    while (DWORD eventSignalId = MsgWaitForMultipleObjects(2, waitHandles, false, INFINITE, QS_ALLEVENTS)) {
+      if (eventSignalId == WAIT_OBJECT_0) break;
+      MSG msg;
+      while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
       char buffer[BUFSIZ];
       DWORD dwRead = 0;
       BOOL success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
       if (success || dwRead) {
         buffer[dwRead] = 0;
         output.append(buffer, dwRead);
-      } else { break; }
+      }
     }
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
