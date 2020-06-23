@@ -42,7 +42,7 @@ int file_copy(std::string fname,std::string newname);
 int directory_exists(std::string dname);
 int directory_create(std::string dname);
 int directory_delete(std::string dname);
-int inline directory_destroy(std::string dname) { return directory_delete(dname); }
+inline int directory_destroy(std::string dname) { return directory_delete(dname); }
 
 std::string file_find_next();
 void file_find_close();
