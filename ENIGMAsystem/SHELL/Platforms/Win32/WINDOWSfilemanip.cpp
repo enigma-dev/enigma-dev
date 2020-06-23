@@ -125,7 +125,7 @@ int directory_create(std::string dname) {
     }
 }
 
-int directory_delete(std::string dname) {
+int directory_destroy(std::string dname) {
   BOOL result = RemoveDirectory(dname.c_str());
   if (result) return 1;
   else return 0;
