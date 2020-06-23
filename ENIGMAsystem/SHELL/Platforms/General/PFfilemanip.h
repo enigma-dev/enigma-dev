@@ -41,7 +41,7 @@ int file_rename(std::string oldname,std::string newname);
 int file_copy(std::string fname,std::string newname);
 int directory_exists(std::string dname);
 int directory_create(std::string dname);
-int directory_delete(std::string dname);
+int directory_destroy(std::string dname);
 
 std::string file_find_next();
 void file_find_close();
