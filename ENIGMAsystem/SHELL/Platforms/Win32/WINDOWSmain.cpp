@@ -296,6 +296,14 @@ int updateTimer() {
   return 0;
 }
 
+extern char mousestatus[3];
+
+void updateInput() {
+  mousestatus[0] = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) ? 1 : 0;
+  mousestatus[1] = (GetAsyncKeyState(VK_RBUTTON) & 0x8000) ? 1 : 0;
+  mousestatus[2] = (GetAsyncKeyState(VK_MBUTTON) & 0x8000) ? 1 : 0;
+}
+
 int handleEvents() {
   if (enigma::game_isending) PostQuitMessage(enigma::game_return);
 

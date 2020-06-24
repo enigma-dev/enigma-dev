@@ -76,6 +76,8 @@ int enigma_main(int argc, char** argv) {
     if (handleEvents() != 0) break;
     if (gameWait() != 0) continue;
 
+    updateInput();
+
     // if any extensions need updated, update them now
     // just before we fire off user events like step
     for (auto update_hook : extension_update_hooks)

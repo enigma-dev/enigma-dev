@@ -41,6 +41,7 @@ namespace enigma {
   void set_program_args(int argc, char** argv);
   void initTimer();
   int updateTimer();
+  void updateInput();
   int gameWait();
   void set_room_speed(int rs);
 }

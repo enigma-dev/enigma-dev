@@ -52,7 +52,7 @@ namespace enigma
   using enigma_user::keyboard_lastchar;
   using enigma_user::keyboard_string;
 
-  extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
+  extern char keybdstatus[256],last_keybdstatus[256];
   extern int windowX, windowY, windowColor;
   extern HCURSOR currentCursor;
 
@@ -235,13 +235,6 @@ namespace enigma
          enigma_user::mouse_hscrolls += hdeltadelta / WHEEL_DELTA;
          hdeltadelta %= WHEEL_DELTA;
          return 0;
-
-      case WM_LBUTTONUP:   ReleaseCapture(); mousestatus[0]=0; return 0;
-      case WM_LBUTTONDOWN: SetCapture(hWnd); mousestatus[0]=1; return 0;
-      case WM_RBUTTONUP:   ReleaseCapture(); mousestatus[1]=0; return 0;
-      case WM_RBUTTONDOWN: SetCapture(hWnd); mousestatus[1]=1; return 0;
-      case WM_MBUTTONUP:   ReleaseCapture(); mousestatus[2]=0; return 0;
-      case WM_MBUTTONDOWN: SetCapture(hWnd); mousestatus[2]=1; return 0;
 
       case WM_ERASEBKGND:
         RECT rc;
