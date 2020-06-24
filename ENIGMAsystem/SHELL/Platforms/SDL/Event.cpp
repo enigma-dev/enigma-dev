@@ -135,8 +135,8 @@ int SDL_Event_Handler::processEvents() {
 int SDL_map_button_enum(const char button) {
   switch (button) {
     case SDL_BUTTON_LEFT: return 0;
-    case SDL_BUTTON_MIDDLE: return 1;
-    case SDL_BUTTON_RIGHT: return 2;
+    case SDL_BUTTON_RIGHT: return 1;
+    case SDL_BUTTON_MIDDLE: return 2;
     default: return -1;
   }
 }
