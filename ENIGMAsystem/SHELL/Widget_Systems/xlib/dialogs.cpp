@@ -82,10 +82,6 @@ int show_attempt(string errortext) {
   return enigma::current_widget_engine->show_attempt(errortext);
 }
 
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
-  enigma::current_widget_engine->show_debug_message(errortext, type);
-}
-
 string get_string(string message, string def) {
   return enigma::current_widget_engine->get_string(message, def);
 }
