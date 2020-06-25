@@ -163,7 +163,7 @@ static int show_question_helperfunc(string message) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+void show_debug_message_kdialog_helper(string errortext, MESSAGE_TYPE type) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -197,6 +197,10 @@ void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
 
 class KDialogWidgets : public enigma::CommandLineWidgetEngine {
  public:
+
+void show_debug_message(string message, MESSAGE_TYPE type) override {
+  show_debug_zenity_helperfunc(message);
+}
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) override {
 

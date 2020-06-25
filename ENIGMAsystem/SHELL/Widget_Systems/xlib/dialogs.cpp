@@ -22,6 +22,10 @@
 #include <string>
 using std::string;
 
+void show_debug_message_helper(string message, MESSAGE_TYPE type) {
+  enigma::current_widget_engine->show_debug_message(message, type);
+}
+
 namespace enigma {
 
 CommandLineWidgetEngine *current_widget_engine = zenity_widgets;
