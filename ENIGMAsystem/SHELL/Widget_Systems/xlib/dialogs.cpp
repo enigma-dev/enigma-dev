@@ -42,8 +42,8 @@ bool widget_system_initialize() {
 
 } // namespace enigma
 
-void show_debug_message_helper(string message, MESSAGE_TYPE type) {
-  enigma::current_widget_engine->show_debug_message(message, type);
+void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+  enigma::current_widget_engine->show_debug_message(errortext, type);
 }
 
 namespace enigma_user {
