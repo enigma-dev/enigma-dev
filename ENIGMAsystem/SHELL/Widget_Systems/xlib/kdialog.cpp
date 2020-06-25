@@ -199,7 +199,7 @@ class KDialogWidgets : public enigma::CommandLineWidgetEngine {
  public:
 
 void show_debug_message(string message, MESSAGE_TYPE type) override {
-  show_debug_message_helperfunc(message);
+  show_debug_message_helperfunc(message, type);
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) override {
