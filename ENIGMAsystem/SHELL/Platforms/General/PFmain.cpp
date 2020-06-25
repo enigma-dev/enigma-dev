@@ -23,6 +23,24 @@ int frames_count = 0;
 unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
 
+void platform_focus_gained() {
+  game_window_focused = true;
+  pausedSteps = 0;
+  input_initialize();
+}
+
+void platform_focus_lost() {
+  game_window_focused = false;
+  for (int i = 0; i < 255; i++) {
+    last_keybdstatus[i] = keybdstatus[i];
+    keybdstatus[i] = 0;
+  }
+  for (int i=0; i < 3; i++) {
+    last_mousestatus[i] = mousestatus[i];
+    mousestatus[i] = 0;
+  }
+}
+
 int gameWait() {
   if (enigma_user::os_is_paused()) {
     if (pausedSteps < 1) {
