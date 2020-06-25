@@ -632,15 +632,6 @@ void initkeymap() {
 
 namespace enigma_user {
 
-void io_handle() {
-  enigma::input_push();
-  while (XQLength(disp)) {
-    DEBUG_MESSAGE("processing an event...", MESSAGE_TYPE::M_INFO);
-    if (enigma::handleEvents() > 0) exit(0);
-  }
-  enigma::update_mouse_variables();
-}
-
 int window_set_cursor(int c) {
   enigma::cursorInt = c;
   XUndefineCursor(disp, win);
