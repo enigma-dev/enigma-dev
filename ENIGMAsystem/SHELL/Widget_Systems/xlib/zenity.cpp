@@ -153,7 +153,7 @@ static int show_question_helperfunc(string message) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
+static void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
