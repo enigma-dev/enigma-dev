@@ -236,11 +236,11 @@ namespace enigma
          hdeltadelta %= WHEEL_DELTA;
          return 0;
 
-      case WM_LBUTTONUP:   ReleaseCapture(); mousestatus[0]=0; return 0;
+      case WM_LBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[0]=0; return 0; }
       case WM_LBUTTONDOWN: SetCapture(hWnd); mousestatus[0]=1; return 0;
-      case WM_RBUTTONUP:   ReleaseCapture(); mousestatus[1]=0; return 0;
+      case WM_RBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[1]=0; return 0; }
       case WM_RBUTTONDOWN: SetCapture(hWnd); mousestatus[1]=1; return 0;
-      case WM_MBUTTONUP:   ReleaseCapture(); mousestatus[2]=0; return 0;
+      case WM_MBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[2]=0; return 0; }
       case WM_MBUTTONDOWN: SetCapture(hWnd); mousestatus[2]=1; return 0;
 
       case WM_ERASEBKGND:
