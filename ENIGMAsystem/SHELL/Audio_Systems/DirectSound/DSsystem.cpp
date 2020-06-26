@@ -169,7 +169,7 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   bufferDesc.dwSize = sizeof(DSBUFFERDESC);
   // DSBCAPS_CTRLFX causes all kinds of weird nasty shit, please read #1508 on GitHub
   // before considering whether to readd it to the dwFlags below
-  bufferDesc.dwFlags = DSBCAPS_CTRLPAN | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY;
+  bufferDesc.dwFlags = DSBCAPS_CTRLPAN | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY | DSBCAPS_GLOBALFOCUS;
   bufferDesc.dwBufferBytes = waveHeader->dataSize;
   bufferDesc.dwReserved = 0;
   bufferDesc.lpwfxFormat = &waveFormat;
