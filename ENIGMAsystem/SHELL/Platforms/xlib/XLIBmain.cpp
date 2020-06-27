@@ -193,24 +193,3 @@ void handleInput() {
 }
 
 }  // namespace enigma
-  
-
-namespace enigma_user {
-
-int display_get_x() {
-  return ::display_get_x();
-}
-
-int display_get_y() { 
-  return ::display_get_y();
-}
-
-int display_get_width() {
-  return ::display_get_width();
-}
-
-int display_get_height() { 
-  return ::display_get_height();
-}
-
-}  // namespace enigma_user
