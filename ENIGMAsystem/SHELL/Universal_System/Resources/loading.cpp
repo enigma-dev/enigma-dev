@@ -123,6 +123,11 @@ namespace enigma
     //Initialize extensions
     enigma::extensions_initialize();
 
+    // apply global game settings
+    enigma_user::window_set_sizeable(isSizeable);
+    enigma_user::window_set_showborder(showBorder);
+    enigma_user::window_set_fullscreen(isFullScreen);
+    
     //Go to the first room
     if (enigma_user::room_count)
       enigma::game_start();
@@ -134,11 +139,6 @@ namespace enigma
     // resize and center window
     enigma_user::window_set_size(windowWidth, windowHeight);
     enigma_user::window_center();
-    
-    // apply global game settings
-    enigma_user::window_set_sizeable(isSizeable);
-    enigma_user::window_set_showborder(showBorder);
-    enigma_user::window_set_fullscreen(isFullScreen);
 
     return 0;
   }
