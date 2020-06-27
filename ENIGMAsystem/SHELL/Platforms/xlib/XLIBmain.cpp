@@ -22,7 +22,6 @@
 #include "XLIBmain.h"
 #include "LINUXjoystick.h"
 #include "XLIBwindow.h"
-#include "XDisplayGetters.h"
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
