@@ -204,7 +204,7 @@ namespace enigma
                last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
           else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
         }
-        return 0;
+        break;
       }
       case WM_SYSKEYUP: {
         int key = enigma_user::keyboard_get_map(wParam);
