@@ -333,8 +333,6 @@ void window_set_sizeable(bool sizeable) {
   }
   XSetWMNormalHints(disp, win, sh);
   XFree(sh);
-
-  XResizeWindow(disp, win, enigma::windowWidth, enigma::windowHeight);
 }
 
 void window_set_min_width(int width) {
