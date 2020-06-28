@@ -116,7 +116,6 @@ int window_set_cursor(int c) {
   return 0;
 }
 
-void io_handle() {}
 void clipboard_set_text(string text) {}
 string clipboard_get_text() { return ""; }
 bool clipboard_has_text() { return false; }

@@ -135,8 +135,8 @@ int SDL_Event_Handler::processEvents() {
 int SDL_map_button_enum(const char button) {
   switch (button) {
     case SDL_BUTTON_LEFT: return 0;
-    case SDL_BUTTON_MIDDLE: return 1;
-    case SDL_BUTTON_RIGHT: return 2;
+    case SDL_BUTTON_RIGHT: return 1;
+    case SDL_BUTTON_MIDDLE: return 2;
     default: return -1;
   }
 }
@@ -253,7 +253,7 @@ void SDL_Event_Handler::mouseButtonDown(const SDL_Event *event) {
 void SDL_Event_Handler::mouseButtonUp(const SDL_Event *event) {
   int btn = SDL_map_button_enum(event->button.button);
   if (btn < 0) return;
-  SDL_CaptureMouse(SDL_FALSE);
+  if (!SDL_GetMouseState(NULL, NULL)) SDL_CaptureMouse(SDL_FALSE);
   enigma::last_mousestatus[btn] = enigma::mousestatus[btn];
   enigma::mousestatus[btn] = false;
 }

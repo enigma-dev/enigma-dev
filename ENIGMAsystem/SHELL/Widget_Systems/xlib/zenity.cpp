@@ -153,7 +153,7 @@ static int show_question_helperfunc(string message) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+static void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -189,17 +189,7 @@ class ZenityWidgets : public enigma::CommandLineWidgetEngine {
  public:
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) override {
-  if (type != M_INFO && type != M_WARNING) {
-    show_debug_message_helper(errortext, type);
-  } else {
-    #ifndef DEBUG_MODE
-    errortext += "\n";
-    fputs(errortext.c_str(), stderr);
-    #endif
-    if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
-      type == MESSAGE_TYPE::M_FATAL_USER_ERROR)
-      abort();
-  }
+  show_debug_message_helperfunc(errortext, type);
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) override {

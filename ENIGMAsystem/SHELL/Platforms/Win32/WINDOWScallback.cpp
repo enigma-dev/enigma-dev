@@ -67,8 +67,6 @@ namespace enigma
   {
     switch (message)
     {
-      case WM_CREATE:
-        return 0;
       case WM_SHOWWINDOW:
         enigma::windowWidth = enigma_user::window_get_width();
         enigma::windowHeight = enigma_user::window_get_height();
@@ -86,9 +84,6 @@ namespace enigma
         if (treatCloseAsEscape) {
           PostQuitMessage(game_return);
         }
-        return 0;
-
-      case WM_DESTROY:
         return 0;
 
       case WM_SETFOCUS:
@@ -236,11 +231,11 @@ namespace enigma
          hdeltadelta %= WHEEL_DELTA;
          return 0;
 
-      case WM_LBUTTONUP:   ReleaseCapture(); mousestatus[0]=0; return 0;
+      case WM_LBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[0]=0; return 0; }
       case WM_LBUTTONDOWN: SetCapture(hWnd); mousestatus[0]=1; return 0;
-      case WM_RBUTTONUP:   ReleaseCapture(); mousestatus[1]=0; return 0;
+      case WM_RBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[1]=0; return 0; }
       case WM_RBUTTONDOWN: SetCapture(hWnd); mousestatus[1]=1; return 0;
-      case WM_MBUTTONUP:   ReleaseCapture(); mousestatus[2]=0; return 0;
+      case WM_MBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[2]=0; return 0; }
       case WM_MBUTTONDOWN: SetCapture(hWnd); mousestatus[2]=1; return 0;
 
       case WM_ERASEBKGND:
@@ -249,21 +244,14 @@ namespace enigma
         FillRect((HDC) wParam, &rc, CreateSolidBrush(windowColor));
         return 1L;
 
-      case WM_PAINT:
-        DefWindowProc(hWndParameter, message, wParam, lParam);
-        return 0;
-
       case WM_SYSCOMMAND: {
         if (wParam == SC_MAXIMIZE) {
           ShowWindow(hWnd, SW_MAXIMIZE);
           enigma::windowWidth = enigma_user::window_get_width();
           enigma::windowHeight = enigma_user::window_get_height();
           enigma::compute_window_scaling();
-          break;
-        } else {
-          return DefWindowProc(hWndParameter, message, wParam, lParam);
         }
-        return 0;
+        break;
       }
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);
