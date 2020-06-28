@@ -98,7 +98,7 @@ short mouse_vscrolls = 0;
 
 void io_handle() {
   enigma::input_push();
-  if (enigma::handleEvents() != 0) exit(0);
+  if (enigma::handleEvents() != 0) return;
   enigma::update_mouse_variables();
 }
 
