@@ -297,8 +297,6 @@ int updateTimer() {
 }
 
 int handleEvents() {
-  if (enigma::game_isending) PostQuitMessage(enigma::game_return);
-
   while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
     if (msg.message == WM_QUIT) {
       enigma::game_return = msg.wParam;
