@@ -201,7 +201,7 @@ namespace enigma
         if (key!=18)
         {
           if ((lParam&(1<<29))>0) {
-            if (wParam == VK_F4) PostMessage(hWnd, WM_CLOSE, 0, 0);
+            if (wParam == VK_F4) PostMessage(hWnd, WM_SYSCOMMAND, SC_CLOSE, 0);
             last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
           } else
             last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
