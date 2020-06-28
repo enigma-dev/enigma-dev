@@ -48,11 +48,7 @@ void execute_program(string fname, string args, bool wait) {
   if (wait && lpExecInfo.hProcess != NULL) {
     while (DWORD eventSignalId = MsgWaitForMultipleObjects(1, &lpExecInfo.hProcess, false, INFINITE, QS_ALLEVENTS)) {
       if (eventSignalId == WAIT_OBJECT_0) break;
-      MSG msg;
-      while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
+      enigma::handleEvents(false);
     }
   }
   if (lpExecInfo.hProcess != NULL)

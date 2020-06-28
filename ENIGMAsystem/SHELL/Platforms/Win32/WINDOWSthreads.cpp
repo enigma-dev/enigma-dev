@@ -18,6 +18,7 @@
 
 #include "WINDOWSmain.h"
 
+#include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFthreads.h"
 #include "Platforms/General/PFthreads_impl.h"
 
@@ -45,11 +46,7 @@ int thread_start(int thread) {
 void thread_join(int thread) {
   if (GetCurrentThread() == enigma::mainthread) {
     while (WaitForSingleObject(threads[thread]->handle, 10) == WAIT_TIMEOUT) {
-      MSG msg;
-      while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage (&msg);
-        DispatchMessage (&msg);
-      }
+      enigma::handleEvents(false);
     }
   } else {
     WaitForSingleObject(threads[thread]->handle, INFINITE);

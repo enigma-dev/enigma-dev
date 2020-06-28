@@ -571,13 +571,8 @@ int window_get_cursor()
 
 void io_handle()
 {
-  MSG msg;
   enigma::input_push();
-  while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
-  {
-    TranslateMessage (&msg);
-    DispatchMessage (&msg);
-  }
+  enigma::handleEvents(false);
   enigma::update_mouse_variables();
 }
 
