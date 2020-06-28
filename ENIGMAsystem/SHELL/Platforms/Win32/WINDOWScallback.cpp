@@ -200,11 +200,13 @@ namespace enigma
         keybdstatus[key]=1;
         if (key!=18)
         {
-          if ((lParam&(1<<29))>0)
-               last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
-          else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
+          if ((lParam&(1<<29))>0) {
+            if (wParam == VK_F4) PostMessage(hWnd, WM_CLOSE, 0, 0);
+            last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
+          } else
+            last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
         }
-        break;
+        return 0;
       }
       case WM_SYSKEYUP: {
         int key = enigma_user::keyboard_get_map(wParam);
