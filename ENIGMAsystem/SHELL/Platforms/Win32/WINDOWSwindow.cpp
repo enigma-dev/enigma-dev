@@ -571,20 +571,7 @@ int window_get_cursor()
 
 bool keyboard_check_direct(int key)
 {
-  BYTE keyState[256];
-  if (!GetKeyboardState(keyState)) return false;
-
-  if (key == vk_anykey) {
-    for(int i = 0; i < 256; i++)
-      if ((char)keyState[i] < 0) return 1;
-    return 0;
-  }
-  if (key == vk_nokey) {
-    for(int i = 0; i < 256; i++)
-      if ((char)keyState[i] < 0) return 0;
-    return 1;
-  }
-  return (char)keyState[key & 0xFF] < 0;
+  return GetAsyncKeyState(key) < 0;
 }
 
 void keyboard_key_press(int key) {
