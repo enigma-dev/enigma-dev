@@ -223,18 +223,36 @@ void SDL_Event_Handler::controllerButtonUp(const SDL_Event *event) {
   setGamepadButton(event->cdevice.which, event->cbutton.button, false);
 }
 
+static int key_map_modifier(int key) {
+  switch (key) {
+    case enigma_user::vk_lalt:     case enigma_user::vk_ralt:     return enigma_user::vk_alt;
+    case enigma_user::vk_lcontrol: case enigma_user::vk_rcontrol: return enigma_user::vk_control;
+    case enigma_user::vk_lshift:   case enigma_user::vk_rshift:   return enigma_user::vk_shift; 
+  }
+  return key;
+}
+
+static void key_set_state(int key, char state) {
+  enigma::last_keybdstatus[key] = enigma::keybdstatus[key];
+  enigma::keybdstatus[key] = state;
+
+  int mod = key_map_modifier(key);
+  if (mod != key) key_set_state(mod, state);
+}
+
 void SDL_Event_Handler::keyboardDown(const SDL_Event *event) {
   int key = enigma::keyboard::keymap[event->key.keysym.sym];
-  enigma::last_keybdstatus[key] = enigma::keybdstatus[key];
-  enigma::keybdstatus[key] = true;
-
+  key_set_state(key, 1);
+  enigma_user::keyboard_lastkey = enigma_user::keyboard_key;
+  enigma_user::keyboard_key = key;
+  
   if (key == enigma_user::vk_backspace && !enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
 }
 
 void SDL_Event_Handler::keyboardUp(const SDL_Event *event) {
   int key = enigma::keyboard::keymap[event->key.keysym.sym];
-  enigma::last_keybdstatus[key] = enigma::keybdstatus[key];
-  enigma::keybdstatus[key] = false;
+  key_set_state(key, 0);
+  enigma_user::keyboard_key = key;
 }
 
 void SDL_Event_Handler::textInput(const SDL_Event *event) {
