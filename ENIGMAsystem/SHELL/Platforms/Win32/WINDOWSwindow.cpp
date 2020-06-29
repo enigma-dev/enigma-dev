@@ -595,24 +595,13 @@ bool keyboard_check_direct(int key)
 }
 
 void keyboard_key_press(int key) {
-  BYTE keyState[256];
-
-  GetKeyboardState((LPBYTE)&keyState);
-
-  // Simulate a key press
-  keybd_event( key,
-        keyState[key],
-        KEYEVENTF_EXTENDEDKEY | 0,
-        0 );
+  UINT scancode = MapVirtualKey(key, MAPVK_VK_TO_VSC);
+  keybd_event(key, scancode, 0, 0);
 }
 
 void keyboard_key_release(int key) {
-  BYTE keyState[256];
-
-  GetKeyboardState((LPBYTE)&keyState);
-
-  // Simulate a key release
-  keybd_event( key, keyState[key], KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+  UINT scancode = MapVirtualKey(key, MAPVK_VK_TO_VSC);
+  keybd_event(key, scancode, KEYEVENTF_KEYUP, 0);
 }
 
 bool keyboard_get_capital() {
