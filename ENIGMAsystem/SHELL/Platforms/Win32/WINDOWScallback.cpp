@@ -60,6 +60,36 @@ namespace enigma
   static short hdeltadelta = 0, vdeltadelta = 0;
   static int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
 
+  static WPARAM map_leftright_keys(WPARAM wParam, LPARAM lParam)
+  {
+    UINT scancode = (lParam & 0x00ff0000) >> 16;
+    int extended  = (lParam & 0x01000000) != 0;
+
+    switch (wParam) {
+      case VK_SHIFT:   return MapVirtualKey(scancode, MAPVK_VSC_TO_VK_EX);
+      case VK_CONTROL: return extended ? VK_RCONTROL : VK_LCONTROL;
+      case VK_MENU:    return extended ? VK_RMENU : VK_LMENU;
+      default:         break;
+    }
+
+    return wParam;
+  }
+
+  static void handle_keydown(WPARAM wParam) {
+    int key = enigma_user::keyboard_get_map(wParam);
+    keyboard_lastkey = key;
+    keyboard_key = key;
+    last_keybdstatus[key]=keybdstatus[key];
+    keybdstatus[key]=1;
+  }
+
+  static void handle_keyup(WPARAM wParam) {
+    int key = enigma_user::keyboard_get_map(wParam);
+    keyboard_key = 0;
+    last_keybdstatus[key]=keybdstatus[key];
+    keybdstatus[key]=0;
+  }
+
   LRESULT (CALLBACK *touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
   void (*WindowResizedCallback)();
 
@@ -177,48 +207,17 @@ namespace enigma
         }
         return 0;
 
-      case WM_KEYDOWN: {
-        int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_lastkey = key;
-        keyboard_key = key;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=1;
-        return 0;
-      }
-      case WM_KEYUP: {
-        int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_key = 0;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=0;
-        return 0;
-      }
-      case WM_SYSKEYDOWN: {
-        int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_lastkey = key;
-        keyboard_key = key;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=1;
-        if (key!=18)
-        {
-          if (HIWORD(lParam) & KF_ALTDOWN)
-               last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
-          else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
-        }
+      case WM_KEYDOWN:    handle_keydown(wParam); return 0;
+      case WM_KEYUP:      handle_keyup(wParam);   return 0;
+      case WM_SYSKEYDOWN:
+        handle_keydown(wParam);
+        handle_keydown(map_leftright_keys(wParam, lParam));
         break;
-      }
-      case WM_SYSKEYUP: {
-        int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_key = 0;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=0;
-        if (key!=(unsigned int)18)
-        {
-          if (HIWORD(lParam) & KF_ALTDOWN)
-               last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
-          else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
-        }
+      case WM_SYSKEYUP:
+        handle_keyup(wParam);
+        handle_keyup(map_leftright_keys(wParam, lParam));
         break;
-      }
+      
       case WM_MOUSEWHEEL:
          vdeltadelta += (int)HIWORD(wParam);
          enigma_user::mouse_vscrolls += vdeltadelta / WHEEL_DELTA;
