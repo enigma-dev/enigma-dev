@@ -21,6 +21,7 @@
 #undef byte
 
 #include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd
+#include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFshell.h"
 #include "Universal_System/estring.h"
@@ -47,11 +48,7 @@ void execute_program(string fname, string args, bool wait) {
   ShellExecuteExW(&lpExecInfo);
   if (wait && lpExecInfo.hProcess != NULL) {
     while (WaitForSingleObject(lpExecInfo.hProcess, 5) == WAIT_TIMEOUT) {
-      MSG msg;
-      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
+      enigma::handleEvents();
     }
   }
   if (lpExecInfo.hProcess != NULL)
@@ -92,11 +89,7 @@ string execute_shell_for_output(const string &command) {
     HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
     while (DWORD eventSignalId = MsgWaitForMultipleObjects(2, waitHandles, false, INFINITE, QS_ALLEVENTS)) {
       if (eventSignalId == WAIT_OBJECT_0) break;
-      MSG msg;
-      while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
+      enigma::handleEvents();
       char buffer[BUFSIZ];
       DWORD dwRead = 0;
       BOOL success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
