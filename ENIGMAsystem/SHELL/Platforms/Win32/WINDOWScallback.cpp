@@ -200,7 +200,7 @@ namespace enigma
         keybdstatus[key]=1;
         if (key!=18)
         {
-          if ((lParam&(1<<29))>0)
+          if (HIWORD(lParam) & KF_ALTDOWN)
                last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
           else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
         }
@@ -213,9 +213,9 @@ namespace enigma
         keybdstatus[key]=0;
         if (key!=(unsigned int)18)
         {
-          if ((lParam&(1<<29))>0)
-               last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
-          else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
+          if (HIWORD(lParam) & KF_ALTDOWN)
+               last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
+          else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
         }
         break;
       }
