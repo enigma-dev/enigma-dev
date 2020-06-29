@@ -346,7 +346,9 @@ int display_get_height() {
 
 bool keyboard_check_direct(int key) {
   const Uint8* state = SDL_GetKeyboardState(nullptr);
-  return state[enigma::keyboard::inverse_keymap[key]];
+  const SDL_Keycode keycode = enigma::keyboard::inverse_keymap[key];
+  const SDL_Scancode scancode = SDL_GetScancodeFromKey(keycode);
+  return state[scancode];
 }
 
 void keyboard_key_press(int key) {
