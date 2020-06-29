@@ -90,6 +90,20 @@ namespace enigma
     keybdstatus[key]=0;
   }
 
+  static void handle_keydown(WPARAM wParam, LPARAM lParam) {
+    handle_keydown(wParam);
+    WPARAM extended = map_leftright_keys(wParam, lParam);
+    if (extended == wParam) return;
+    handle_keydown(extended);
+  }
+
+  static void handle_keyup(WPARAM wParam, LPARAM lParam) {
+    handle_keyup(wParam);
+    WPARAM extended = map_leftright_keys(wParam, lParam);
+    if (extended == wParam) return;
+    handle_keyup(extended);
+  }
+
   LRESULT (CALLBACK *touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
   void (*WindowResizedCallback)();
 
@@ -207,17 +221,11 @@ namespace enigma
         }
         return 0;
 
-      case WM_KEYDOWN:    handle_keydown(wParam); return 0;
-      case WM_KEYUP:      handle_keyup(wParam);   return 0;
-      case WM_SYSKEYDOWN:
-        handle_keydown(wParam);
-        handle_keydown(map_leftright_keys(wParam, lParam));
-        break;
-      case WM_SYSKEYUP:
-        handle_keyup(wParam);
-        handle_keyup(map_leftright_keys(wParam, lParam));
-        break;
-      
+      case WM_KEYDOWN:    handle_keydown(wParam, lParam); return 0;
+      case WM_KEYUP:      handle_keyup(wParam, lParam);   return 0;
+      case WM_SYSKEYDOWN: handle_keydown(wParam, lParam); break;
+      case WM_SYSKEYUP:   handle_keyup(wParam, lParam);   break;
+  
       case WM_MOUSEWHEEL:
          vdeltadelta += (int)HIWORD(wParam);
          enigma_user::mouse_vscrolls += vdeltadelta / WHEEL_DELTA;
