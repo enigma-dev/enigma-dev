@@ -57,8 +57,8 @@ namespace keyboard {
   std::unordered_map<int,SDL_Keycode> keymap = {
     {SDLK_LEFT, vk_left}, {SDLK_RIGHT, vk_right}, {SDLK_UP, vk_up}, {SDLK_DOWN, vk_down},
     {SDLK_TAB, vk_tab}, {SDLK_RETURN, vk_enter}, {SDLK_SPACE, vk_space},
-    {SDLK_LSHIFT, vk_shift}, {SDLK_LCTRL, vk_control}, {SDLK_LALT, vk_alt},
-    {SDLK_RSHIFT, vk_shift}, {SDLK_RCTRL, vk_control}, {SDLK_RALT, vk_alt},
+    {SDLK_LSHIFT, vk_lshift}, {SDLK_LCTRL, vk_lcontrol}, {SDLK_LALT, vk_lalt},
+    {SDLK_RSHIFT, vk_rshift}, {SDLK_RCTRL, vk_rcontrol}, {SDLK_RALT, vk_ralt},
     {SDLK_0, vk_numpad0}, {SDLK_1, vk_numpad1}, {SDLK_2, vk_numpad2}, {SDLK_3, vk_numpad3},
     {SDLK_4, vk_numpad4}, {SDLK_5, vk_numpad5}, {SDLK_6, vk_numpad6}, {SDLK_7, vk_numpad7},
     {SDLK_8, vk_numpad8}, {SDLK_9, vk_numpad9},
