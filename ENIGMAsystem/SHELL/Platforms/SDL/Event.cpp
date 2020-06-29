@@ -252,7 +252,7 @@ void SDL_Event_Handler::keyboardDown(const SDL_Event *event) {
 void SDL_Event_Handler::keyboardUp(const SDL_Event *event) {
   int key = enigma::keyboard::keymap[event->key.keysym.sym];
   key_set_state(key, 0);
-  enigma_user::keyboard_key = key;
+  enigma_user::keyboard_key = 0;
 }
 
 void SDL_Event_Handler::textInput(const SDL_Event *event) {
