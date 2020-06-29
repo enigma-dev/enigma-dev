@@ -217,7 +217,7 @@ namespace enigma
                last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
           else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
         }
-        return 0;
+        break;
       }
       case WM_MOUSEWHEEL:
          vdeltadelta += (int)HIWORD(wParam);
