@@ -96,6 +96,12 @@ int display_aa = 0;
 short mouse_hscrolls = 0;
 short mouse_vscrolls = 0;
 
+void io_handle() {
+  enigma::input_push();
+  if (enigma::handleEvents() != 0) return;
+  enigma::update_mouse_variables();
+}
+
 void io_clear() {
   for (int i = 0; i < 255; i++) enigma::keybdstatus[i] = enigma::last_keybdstatus[i] = 0;
   for (int i = 0; i < 3; i++) enigma::mousestatus[i] = enigma::last_mousestatus[i] = 0;

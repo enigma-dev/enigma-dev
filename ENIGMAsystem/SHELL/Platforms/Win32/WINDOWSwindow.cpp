@@ -569,19 +569,6 @@ int window_get_cursor()
   return enigma::cursorInt;
 }
 
-void io_handle()
-{
-  MSG msg;
-  enigma::input_push();
-  while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
-  {
-    TranslateMessage (&msg);
-    DispatchMessage (&msg);
-  }
-  enigma::update_mouse_variables();
-}
-
-
 bool keyboard_check_direct(int key)
 {
    BYTE keyState[256];
