@@ -227,8 +227,6 @@ void SDL_Event_Handler::keyboardDown(const SDL_Event *event) {
   int key = enigma::keyboard::keymap[event->key.keysym.sym];
   enigma::last_keybdstatus[key] = enigma::keybdstatus[key];
   enigma::keybdstatus[key] = true;
-
-  if (key == enigma_user::vk_backspace && !enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
 }
 
 void SDL_Event_Handler::keyboardUp(const SDL_Event *event) {
@@ -238,8 +236,7 @@ void SDL_Event_Handler::keyboardUp(const SDL_Event *event) {
 }
 
 void SDL_Event_Handler::textInput(const SDL_Event *event) {
-  enigma_user::keyboard_string += event->text.text;
-  enigma_user::keyboard_lastchar = enigma_user::keyboard_string.back();
+  enigma::platform_text_input(event->text.text);
 }
 
 void SDL_Event_Handler::mouseButtonDown(const SDL_Event *event) {

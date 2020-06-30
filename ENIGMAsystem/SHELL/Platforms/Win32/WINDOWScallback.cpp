@@ -26,10 +26,11 @@ using std::map;
 
 //#include <winuser.h> // includes windows.h
 
-#include "Platforms/General/PFmain.h" // for keyboard_string
+#include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h" // For those damn vk_ constants.
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Instances/instance.h"
+#include "Universal_System/estring.h"
 
 #include "Platforms/platforms_mandatory.h"
 
@@ -49,8 +50,6 @@ namespace enigma
 
   using enigma_user::keyboard_key;
   using enigma_user::keyboard_lastkey;
-  using enigma_user::keyboard_lastchar;
-  using enigma_user::keyboard_string;
 
   extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
   extern int windowX, windowY, windowColor;
@@ -168,15 +167,10 @@ namespace enigma
           return TRUE;
         }
         break;
-      case WM_CHAR:
-        keyboard_lastchar = string(1,wParam);
-        if (keyboard_lastkey == enigma_user::vk_backspace) {
-          if (!keyboard_string.empty()) keyboard_string.pop_back();
-        } else {
-          keyboard_string += keyboard_lastchar;
-        }
-        return 0;
 
+      case WM_CHAR:
+        enigma::platform_text_input(shorten(tstring(1,wParam)));
+        return 0;
       case WM_KEYDOWN: {
         int key = enigma_user::keyboard_get_map(wParam);
         keyboard_lastkey = key;

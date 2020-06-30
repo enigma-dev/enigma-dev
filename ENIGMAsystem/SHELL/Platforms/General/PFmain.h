@@ -50,7 +50,6 @@ namespace enigma_user {
 extern std::string working_directory;
 extern std::string program_directory;
 extern std::string temp_directory;
-extern std::string keyboard_string;
 extern int keyboard_key;
 extern double fps;
 extern unsigned long delta_time;

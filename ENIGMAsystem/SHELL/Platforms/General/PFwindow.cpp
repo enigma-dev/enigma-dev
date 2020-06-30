@@ -46,6 +46,15 @@ void input_push() {
   enigma_user::mouse_hscrolls = enigma_user::mouse_vscrolls = 0;
 }
 
+void platform_text_input(std::string text) {
+  if (enigma_user::keyboard_lastkey == enigma_user::vk_backspace) {
+    if (!enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
+    return;
+  }
+  enigma_user::keyboard_string += text;
+  enigma_user::keyboard_lastchar = enigma_user::keyboard_string.back();
+}
+
 void compute_window_scaling() {
   if (!regionWidth) return;
   parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth;
@@ -87,8 +96,9 @@ void compute_window_size() {
 
 namespace enigma_user {
 
-std::string keyboard_lastchar = "";
 int keyboard_lastkey = 0;
+std::string keyboard_string = "";
+std::string keyboard_lastchar = "";
 
 double mouse_x, mouse_y;
 int mouse_button, mouse_lastbutton;

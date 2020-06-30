@@ -24,6 +24,7 @@
 #include "XLIBwindow.h"
 
 #include "Platforms/General/PFmain.h"
+#include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -65,16 +66,11 @@ int handleEvents() {
           actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
         else
           actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
-        {  // Set keyboard_lastchar. Seems to work without
+        {
           char str[1];
           int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
           if (len > 0) {
-            enigma_user::keyboard_lastchar = string(1, str[0]);
-            if (actualKey == enigma_user::vk_backspace) {
-              if (!enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
-            } else {
-              enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
-            }
+            enigma::platform_text_input(string(1, str[0]));
           }
         }
         enigma_user::keyboard_lastkey = actualKey;

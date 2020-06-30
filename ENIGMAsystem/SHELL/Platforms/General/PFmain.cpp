@@ -67,7 +67,6 @@ int enigma_main(int argc, char** argv) {
   initialize_everything();
 
   while (!game_isending) {
-
     if (!((std::string)enigma_user::room_caption).empty())
       enigma_user::window_set_caption(enigma_user::room_caption);
     update_mouse_variables();
@@ -100,7 +99,6 @@ std::string working_directory = "";
 std::string program_directory = "";
 std::string temp_directory = "";
 std::string game_save_id = "";
-std::string keyboard_string = "";
 int keyboard_key = 0;
 double fps = 0;
 unsigned long delta_time = 0;

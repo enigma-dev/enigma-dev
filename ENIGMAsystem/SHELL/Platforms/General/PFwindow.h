@@ -40,6 +40,7 @@ extern int window_max_height;
 
 void input_initialize();
 void input_push();
+void platform_text_input(std::string text);
 
 }  // namespace enigma
 
@@ -156,8 +157,9 @@ enum {
 
 extern double mouse_x, mouse_y;
 extern int mouse_button, mouse_lastbutton;
-extern std::string keyboard_lastchar;
 extern int keyboard_lastkey;
+extern std::string keyboard_string;
+extern std::string keyboard_lastchar;
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
 
