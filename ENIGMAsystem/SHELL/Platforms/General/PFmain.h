@@ -56,6 +56,11 @@ extern double fps;
 extern unsigned long delta_time;
 extern unsigned long current_time;
 
+extern std::string caption_score, caption_lives, caption_health;
+extern bool show_score, show_lives, show_health;
+extern double score;
+extern double health;
+
 void sleep(int ms);
 void game_end();
 void game_end(int ret);

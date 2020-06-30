@@ -30,30 +30,9 @@
 #include "Instances/instance_system_base.h"
 #include "lives.h"
 
-#include <sstream>
 #include <stdio.h>
 
 namespace enigma {
-
-std::string game_format_caption() {
-  std::ostringstream out;
-  // round ALL the numbers, like 5.5 to 6 lives
-  // e.g, GM8.1 behavior
-  out.precision(0);
-
-  // DON'T append anything that isn't set so the main loop
-  // could optimize the caption out completely
-  if (!((std::string)enigma_user::room_caption).empty())
-    out << (std::string)enigma_user::room_caption << " ";
-  if (enigma_user::show_score && enigma_user::score != 0)
-    out << enigma_user::caption_score << std::fixed << enigma_user::score << " ";
-  if (enigma_user::show_lives)
-    out << enigma_user::caption_lives << std::fixed << (double)enigma_user::lives << " ";
-  if (enigma_user::show_health)
-    out << enigma_user::caption_health << std::fixed << enigma_user::health;
-
-  return out.str();
-}
 
     int initialize_everything();
     variant ev_perf(int type, int numb);

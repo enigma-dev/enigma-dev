@@ -38,10 +38,6 @@ GM Global variables
 #endif
 
 namespace enigma_user {
-std::string caption_score = "Score: ", caption_lives = "Lives: ", caption_health = "Health: ";
-bool argument_relative = false;
-double health = 100;
-
 // TODO: MOVEME: Who put this here?
 #ifndef JUST_DEFINE_IT_RUN
 std::deque<int> instance_id;
@@ -49,9 +45,8 @@ std::deque<int> instance_id;
 int *instance_id;
 #endif
 
-double score = 0;
+bool argument_relative = false;
 bool secure_mode = false;
-bool show_score = 0, show_lives = 0, show_health = 0;
 int transition_kind = 0;
 int transition_steps = 80;
 bool automatic_redraw = true;
