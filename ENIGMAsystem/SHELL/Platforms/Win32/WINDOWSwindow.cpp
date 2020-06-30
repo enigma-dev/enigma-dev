@@ -582,14 +582,45 @@ int window_get_cursor()
 
 bool keyboard_check_direct(int key)
 {
+  if (key == vk_anykey) {
+    // whack-a-mole the pressed key
+    for (int i = 0; i < 255; ++i)
+      if (GetAsyncKeyState(i) < 0) return true;
+    return false;
+  } else if (key == vk_nokey) {
+    // whack-a-mole the released key
+    for (int i = 0; i < 255; ++i)
+      if (GetAsyncKeyState(i) < 0) return false;
+    return true;
+  }
   return GetAsyncKeyState(key) < 0;
 }
 
 void keyboard_key_press(int key) {
+  if (key == vk_anykey) {
+    // press a random key
+    keyboard_set_direct(random(255), false);
+  } else if (key == vk_nokey) {
+    // press NONE of the keys aka
+    // release ALL of the keys
+    for (int i = 0; i < 255; ++i)
+      keyboard_set_direct(i, false);
+    return;
+  }
   keyboard_set_direct(key, true);
 }
 
 void keyboard_key_release(int key) {
+  if (key == vk_anykey) {
+    // release a random key
+    keyboard_set_direct(random(255), false);
+  } else if (key == vk_nokey) {
+    // release NONE of the keys aka
+    // press ALL of the keys
+    for (int i = 0; i < 255; ++i)
+      keyboard_set_direct(i, true);
+    return;
+  }
   keyboard_set_direct(key, false);
 }
 
