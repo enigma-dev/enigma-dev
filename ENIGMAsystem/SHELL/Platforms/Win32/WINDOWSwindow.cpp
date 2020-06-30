@@ -33,6 +33,10 @@
 #define byte __windows_byte_workaround
 #include <windows.h>
 #undef byte
+// mingw32 cross-compile bug workaround below
+#ifndef MAPVK_VK_TO_VSC_EX
+#define MAPVK_VK_TO_VSC_EX 0x04
+#endif
 
 #include <stdio.h>
 #include <string>
@@ -481,6 +485,13 @@ void window_mouse_set(int x, int y)
 
 }
 
+static void keyboard_set_direct(int key, bool down) {
+  UINT scancode = MapVirtualKey(key, MAPVK_VK_TO_VSC_EX);
+  DWORD flags = ((scancode >> 8) == 0xE0) ? KEYEVENTF_EXTENDEDKEY : 0;
+  if (!down) flags |= KEYEVENTF_KEYUP;
+  keybd_event(key, scancode, flags, 0);
+}
+
 namespace enigma_user
 {
 
@@ -595,24 +606,11 @@ bool keyboard_check_direct(int key)
 }
 
 void keyboard_key_press(int key) {
-  BYTE keyState[256];
-
-  GetKeyboardState((LPBYTE)&keyState);
-
-  // Simulate a key press
-  keybd_event( key,
-        keyState[key],
-        KEYEVENTF_EXTENDEDKEY | 0,
-        0 );
+  keyboard_set_direct(key, true);
 }
 
 void keyboard_key_release(int key) {
-  BYTE keyState[256];
-
-  GetKeyboardState((LPBYTE)&keyState);
-
-  // Simulate a key release
-  keybd_event( key, keyState[key], KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+  keyboard_set_direct(key, false);
 }
 
 bool keyboard_get_capital() {
