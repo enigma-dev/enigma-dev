@@ -33,6 +33,10 @@
 #define byte __windows_byte_workaround
 #include <windows.h>
 #undef byte
+// mingw32 cross-compile bug workaround below
+#ifndef MAPVK_VK_TO_VSC_EX
+#define MAPVK_VK_TO_VSC_EX 0x04
+#endif
 
 #include <stdio.h>
 #include <string>
