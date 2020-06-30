@@ -154,15 +154,9 @@ int window_get_height()
 
 void window_set_caption(const string &caption)
 {
-/*  if (caption == "")
-      if (score != 0)
-        caption = "Score: " + string(score);  //GM does this but it's rather fucktarded */
-
-    if (caption != current_caption)
-    {
-        SetWindowText(enigma::hWnd,(char*) caption.c_str());
-        current_caption = caption;
-    }
+  if (caption == current_caption) return;
+  SetWindowText(enigma::hWnd,(char*) caption.c_str());
+  current_caption = caption;
 }
 
 string window_get_caption()
