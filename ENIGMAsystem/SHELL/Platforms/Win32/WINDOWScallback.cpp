@@ -86,12 +86,14 @@ namespace enigma
         }
         return 0;
 
+      case WM_ENABLE:
+        if (!wParam) EnableWindow(hWnd, TRUE);
+        return 0;
       case WM_SETFOCUS:
         input_initialize();
         game_window_focused = true;
         pausedSteps = 0;
         return 0;
-
       case WM_KILLFOCUS:
         for (int i = 0; i < 255; i++)
         {
