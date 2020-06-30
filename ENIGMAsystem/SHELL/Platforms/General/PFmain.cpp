@@ -23,6 +23,10 @@ int frames_count = 0;
 unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
 
+// located in actions.h but not included
+// to avoid multiple definitions
+std::string game_format_caption();
+
 int gameWait() {
   if (enigma_user::os_is_paused()) {
     if (pausedSteps < 1) {
@@ -67,9 +71,9 @@ int enigma_main(int argc, char** argv) {
   initialize_everything();
 
   while (!game_isending) {
+    std::string caption = game_format_caption();
+    if (!caption.empty()) enigma_user::window_set_caption(caption);
 
-    if (!((std::string)enigma_user::room_caption).empty())
-      enigma_user::window_set_caption(enigma_user::room_caption);
     update_mouse_variables();
 
     if (updateTimer() != 0) continue;
