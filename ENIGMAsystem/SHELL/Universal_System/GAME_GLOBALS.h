@@ -38,7 +38,7 @@ GM Global variables
 #endif
 
 namespace enigma_user {
-std::string caption_score = "Score:", caption_lives = "Lives:", caption_health = "Health:";
+std::string caption_score = "Score: ", caption_lives = "Lives: ", caption_health = "Health: ";
 bool argument_relative = false;
 double health = 100;
 
