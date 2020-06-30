@@ -481,6 +481,13 @@ void window_mouse_set(int x, int y)
 
 }
 
+static void keyboard_set_direct(int key, bool down) {
+  UINT scancode = MapVirtualKey(key, MAPVK_VK_TO_VSC_EX);
+  DWORD flags = ((scancode >> 8) == 0xE0) ? KEYEVENTF_EXTENDEDKEY : 0;
+  if (!down) flags |= KEYEVENTF_KEYUP;
+  keybd_event(key, scancode, flags, 0);
+}
+
 namespace enigma_user
 {
 
@@ -595,13 +602,11 @@ bool keyboard_check_direct(int key)
 }
 
 void keyboard_key_press(int key) {
-  UINT scancode = MapVirtualKey(key, MAPVK_VK_TO_VSC);
-  keybd_event(key, scancode, 0, 0);
+  keyboard_set_direct(key, true);
 }
 
 void keyboard_key_release(int key) {
-  UINT scancode = MapVirtualKey(key, MAPVK_VK_TO_VSC);
-  keybd_event(key, scancode, KEYEVENTF_KEYUP, 0);
+  keyboard_set_direct(key, false);
 }
 
 bool keyboard_get_capital() {
