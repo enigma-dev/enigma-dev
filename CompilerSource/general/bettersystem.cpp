@@ -51,13 +51,14 @@ using namespace std;
 #endif
 std::mutex e_exec_process_mutex;
 
-void e_exec_shutdown() {
+void e_exec_stop() {
   std::lock_guard<std::mutex> lock(e_exec_process_mutex);
   if (!e_exec_process) return;
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-  TerminateProcess(e_exec_process, 0);
+  DWORD e_exec_pid = GetProcessId(e_exec_process);
+  GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, e_exec_pid);
 #else
-  kill(e_exec_process, SIGTERM);
+  kill(e_exec_process, SIGINT);
 #endif
   e_exec_process = 0;
 }
@@ -234,7 +235,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       cout << "\n\n********* EXECUTE:\n" << parameters << "\n\n";
 
-      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
+      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE|CREATE_NEW_PROCESS_GROUP,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
         std::unique_lock<std::mutex> lock(e_exec_process_mutex);
         e_exec_process = ProcessInformation.hProcess;
