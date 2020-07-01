@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <mutex>
 
 using namespace std;
 
@@ -36,6 +37,30 @@ using namespace std;
 #include "OS_Switchboard.h"
 #include "general/parse_basics_old.h"
 
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+  #define byte __windows_byte_workaround
+  #include <windows.h>
+  #undef byte
+  HANDLE e_exec_process = 0;
+#else
+  #include <fcntl.h>
+  #include <unistd.h>
+  #include <sys/wait.h>
+  #include <sys/stat.h>
+  pid_t e_exec_process = 0;
+#endif
+std::mutex e_exec_process_mutex;
+
+void e_exec_shutdown() {
+  std::lock_guard<std::mutex> lock(e_exec_process_mutex);
+  if (!e_exec_process) return;
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+  TerminateProcess(e_exec_process, 0);
+#else
+  kill(e_exec_process, SIGTERM);
+#endif
+  e_exec_process = 0;
+}
 
 inline char* scopy(string& str)
 {
@@ -100,10 +125,6 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-    #define byte __windows_byte_workaround
-    #include <windows.h>
-    #undef byte
-
     int e_exec(const char* fcmd, const char* *Cenviron)
     {
       while (is_useless(*fcmd))
@@ -215,6 +236,9 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
+        std::unique_lock<std::mutex> lock(e_exec_process_mutex);
+        e_exec_process = ProcessInformation.hProcess;
+        lock.unlock();
         WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
         GetExitCodeProcess(ProcessInformation.hProcess, &result);
         CloseHandle(ProcessInformation.hProcess);
@@ -241,11 +265,6 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       return e_exec(cmd, eCenviron);
     }
 #else
-    #include <fcntl.h>
-    #include <unistd.h>
-    #include <sys/wait.h>
-    #include <sys/stat.h>
-
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
 #if CURRENT_PLATFORM_ID ==  OS_MACOSX
@@ -387,6 +406,9 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
+      std::unique_lock<std::mutex> lock(e_exec_process_mutex);
+      e_exec_process = fk;
+      lock.unlock();
       waitpid(fk,&result,0);
       for (char** i = argv+1; *i; i++)
         free(*i);
