@@ -85,8 +85,9 @@ namespace enigma
           PostQuitMessage(game_return);
         }
         return 0;
-
+        
       case WM_ENABLE:
+        // don't allow modal dialogs to disable the close buttons
         if (!wParam) EnableWindow(hWnd, TRUE);
         return 0;
       case WM_SETFOCUS:
