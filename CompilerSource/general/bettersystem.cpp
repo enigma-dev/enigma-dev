@@ -397,11 +397,13 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       while (waitpid(fk,&result,WNOHANG) == 0) {
         if (build_stopping) {
-          kill(fk,SIGINT);
+          kill(fk,SIGINT); // send CTRL+C
+          // wait for entire process group to signal,
+          // important for GNU make to stop outputting
           waitpid(fk,0,__WALL);
           break;
         }
-        usleep(10000);
+        usleep(10000); // hundreth of a second
       }
       for (char** i = argv+1; *i; i++)
         free(*i);
