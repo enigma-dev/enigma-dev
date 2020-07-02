@@ -398,6 +398,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       while (waitpid(fk,&result,WNOHANG) == 0) {
         if (build_stopping) {
           kill(fk,SIGINT);
+          waitpid(fk,0,__WALL);
           break;
         }
         usleep(10000);
