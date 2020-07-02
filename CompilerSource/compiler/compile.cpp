@@ -242,8 +242,6 @@ static bool ends_with(std::string const &fullString, std::string const &ending) 
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
-  build_stopping = false;
-
   std::filesystem::path exename;
   if (exe_filename) {
     exename = exe_filename;
@@ -255,8 +253,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
 
   cout << "Initializing dialog boxes" << endl;
+  // reset this as IDE will soon enable stop button
+  build_stopping = false;
   ide_dia_clear();
-  ide_dia_open();
+  ide_dia_open(); // <- stop button usually enabled
   cout << "Initialized." << endl;
 
   CompileState state;
