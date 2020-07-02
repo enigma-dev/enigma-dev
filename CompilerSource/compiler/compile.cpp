@@ -253,7 +253,9 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
 
   cout << "Initializing dialog boxes" << endl;
-  ide_dia_clear();
+  // reset this as IDE will soon enable stop button
+  build_stopping = false;
+  ide_dia_clear(); // <- stop button usually enabled IDE side
   ide_dia_open();
   cout << "Initialized." << endl;
 
@@ -660,6 +662,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
 
   int makeres = e_execs(compilerInfo.MAKE_location, make, flags);
+  if (build_stopping) { build_stopping = false; return 0; }
 
   // Stop redirecting GCC output
   if (redirect_make)

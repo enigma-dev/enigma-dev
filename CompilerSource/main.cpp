@@ -66,6 +66,7 @@ extern const char* establish_bearings(const char *compiler);
 #  define DLLEXPORT
 #endif
 
+#include "general/bettersystem.h"
 #include "languages/lang_CPP.h"
 #include <System/builtins.h>
 #include <API/jdi.h>
@@ -74,6 +75,9 @@ extern const char* establish_bearings(const char *compiler);
 
 //FIXME: remove this function from enigma.jar and here
 DLLEXPORT void libSetMakeDirectory(const char* /*dir*/) {} 
+
+volatile bool build_stopping = false;
+DLLEXPORT void libStopBuild() { build_stopping = true; } 
 
 DLLEXPORT const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path) 
 {

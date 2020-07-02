@@ -35,6 +35,7 @@ using namespace std;
 #include "bettersystem.h"
 #include "OS_Switchboard.h"
 #include "general/parse_basics_old.h"
+#include "frontend.h"
 
 
 inline char* scopy(string& str)
@@ -213,9 +214,15 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       cout << "\n\n********* EXECUTE:\n" << parameters << "\n\n";
 
-      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
+      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE|CREATE_NEW_PROCESS_GROUP,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
-        WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+        while (WaitForSingleObject(ProcessInformation.hProcess, 10) == WAIT_TIMEOUT) {
+          if (!build_stopping) continue;
+          DWORD pId = GetProcessId(ProcessInformation.hProcess);
+          GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, pId);
+          WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+          break;
+        }
         GetExitCodeProcess(ProcessInformation.hProcess, &result);
         CloseHandle(ProcessInformation.hProcess);
         CloseHandle(ProcessInformation.hThread);
@@ -387,6 +394,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
+      //TODO: respect build_stopping here
       waitpid(fk,&result,0);
       for (char** i = argv+1; *i; i++)
         free(*i);
