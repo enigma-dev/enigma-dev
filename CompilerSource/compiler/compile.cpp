@@ -255,8 +255,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   cout << "Initializing dialog boxes" << endl;
   // reset this as IDE will soon enable stop button
   build_stopping = false;
-  ide_dia_clear();
-  ide_dia_open(); // <- stop button usually enabled
+  ide_dia_clear(); // <- stop button usually enabled IDE side
+  ide_dia_open();
   cout << "Initialized." << endl;
 
   CompileState state;
