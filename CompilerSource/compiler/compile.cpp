@@ -242,6 +242,8 @@ static bool ends_with(std::string const &fullString, std::string const &ending) 
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
+  build_stopping = false;
+
   std::filesystem::path exename;
   if (exe_filename) {
     exename = exe_filename;
