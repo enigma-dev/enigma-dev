@@ -660,6 +660,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
 
   int makeres = e_execs(compilerInfo.MAKE_location, make, flags);
+  if (build_stopping) { build_stopping = false; return 0; }
 
   // Stop redirecting GCC output
   if (redirect_make)

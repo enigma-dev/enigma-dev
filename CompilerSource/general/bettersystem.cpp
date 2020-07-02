@@ -29,39 +29,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <mutex>
 
 using namespace std;
 
 #include "bettersystem.h"
 #include "OS_Switchboard.h"
 #include "general/parse_basics_old.h"
+#include "frontend.h"
 
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-  #define byte __windows_byte_workaround
-  #include <windows.h>
-  #undef byte
-  HANDLE e_exec_process = 0;
-#else
-  #include <fcntl.h>
-  #include <unistd.h>
-  #include <sys/wait.h>
-  #include <sys/stat.h>
-  pid_t e_exec_process = 0;
-#endif
-std::mutex e_exec_process_mutex;
-
-void e_exec_stop() {
-  std::lock_guard<std::mutex> lock(e_exec_process_mutex);
-  if (!e_exec_process) return;
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-  DWORD e_exec_pid = GetProcessId(e_exec_process);
-  GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, e_exec_pid);
-#else
-  kill(e_exec_process, SIGINT);
-#endif
-  e_exec_process = 0;
-}
 
 inline char* scopy(string& str)
 {
@@ -126,6 +101,10 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    #define byte __windows_byte_workaround
+    #include <windows.h>
+    #undef byte
+
     int e_exec(const char* fcmd, const char* *Cenviron)
     {
       while (is_useless(*fcmd))
@@ -237,10 +216,13 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE|CREATE_NEW_PROCESS_GROUP,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
-        std::unique_lock<std::mutex> lock(e_exec_process_mutex);
-        e_exec_process = ProcessInformation.hProcess;
-        lock.unlock();
-        WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+        while (WaitForSingleObject(ProcessInformation.hProcess, 10) == WAIT_TIMEOUT) {
+          if (!build_stopping) continue;
+          DWORD pId = GetProcessId(ProcessInformation.hProcess);
+          GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, pId);
+          WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+          break;
+        }
         GetExitCodeProcess(ProcessInformation.hProcess, &result);
         CloseHandle(ProcessInformation.hProcess);
         CloseHandle(ProcessInformation.hThread);
@@ -266,6 +248,11 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       return e_exec(cmd, eCenviron);
     }
 #else
+    #include <fcntl.h>
+    #include <unistd.h>
+    #include <sys/wait.h>
+    #include <sys/stat.h>
+
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
 #if CURRENT_PLATFORM_ID ==  OS_MACOSX
@@ -407,9 +394,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      std::unique_lock<std::mutex> lock(e_exec_process_mutex);
-      e_exec_process = fk;
-      lock.unlock();
+      //TODO: respect build_stopping here
       waitpid(fk,&result,0);
       for (char** i = argv+1; *i; i++)
         free(*i);

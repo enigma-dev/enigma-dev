@@ -76,7 +76,8 @@ extern const char* establish_bearings(const char *compiler);
 //FIXME: remove this function from enigma.jar and here
 DLLEXPORT void libSetMakeDirectory(const char* /*dir*/) {} 
 
-DLLEXPORT void libStopBuild() { e_exec_stop(); } 
+volatile bool build_stopping = false;
+DLLEXPORT void libStopBuild() { build_stopping = true; } 
 
 DLLEXPORT const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path) 
 {
