@@ -394,8 +394,13 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      //TODO: respect build_stopping here
-      waitpid(fk,&result,0);
+      do {
+        if (!build_stopping) {
+          ualarm(10000, 10000);
+          continue;
+        }
+        kill(fk, SIGINT);
+      } while waitpid(fk,&result,0) == -1;
       for (char** i = argv+1; *i; i++)
         free(*i);
       free(argv);
