@@ -390,7 +390,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         }
         else usenviron = environ;
 
-          execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
+        setpgid(fk, 0); // new process group
+        execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
         exit(-1);
       }
 
