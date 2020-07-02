@@ -394,13 +394,13 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      do {
-        if (!build_stopping) {
-          ualarm(10000, 10000);
-          continue;
+      while (waitpid(fk,&result,WNOHANG) == 0) {
+        if (build_stopping) {
+          kill(fk,SIGINT);
+          break;
         }
-        kill(fk, SIGINT);
-      } while (waitpid(fk,&result,WNOHANG) == -1);
+        usleep(10000);
+      }
       for (char** i = argv+1; *i; i++)
         free(*i);
       free(argv);
