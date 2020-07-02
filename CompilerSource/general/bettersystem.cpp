@@ -400,7 +400,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           continue;
         }
         kill(fk, SIGINT);
-      } while (waitpid(fk,&result,0) == -1);
+      } while (waitpid(fk,&result,WNOHANG) == -1);
       for (char** i = argv+1; *i; i++)
         free(*i);
       free(argv);
