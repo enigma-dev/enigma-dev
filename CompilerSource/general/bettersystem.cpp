@@ -346,6 +346,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       int result = -1;
       pid_t fk = fork();
+
       if (!fk)
       {
         // equivalent to DETACHED_PROCESS on Win32 (e.g, the CreateProcess default)
