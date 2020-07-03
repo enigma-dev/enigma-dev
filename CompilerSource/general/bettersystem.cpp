@@ -346,6 +346,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       int result = -1;
       pid_t fk = fork();
+      setpgid(fk, 0); // new process group
 
       if (!fk)
       {
@@ -390,7 +391,6 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         }
         else usenviron = environ;
 
-        setpgid(fk, 0); // new process group
         execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
         exit(-1);
       }
