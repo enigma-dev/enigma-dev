@@ -353,7 +353,9 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         // Redirect STDIN
         // Background process groups get SIGTTIN if
         // reading from the terminal.
-        close(STDIN_FILENO); // read from /dev/null
+        int infd = open("/dev/null", O_RDONLY);
+        dup2(infd, STDIN_FILNO);
+        close(STDIN_FILENO);
 
         // Redirect STDOUT
         if (redirout == "") {
