@@ -350,11 +350,11 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       if (!fk)
       {
-        // We need an STDIN
-        int flags = fcntl(STDIN_FILENO, F_GETFD);
-        if (flags != -1)
-          flags &= ~FD_CLOEXEC,
-          fcntl(STDIN_FILENO, F_SETFD, flags);
+        // Duplicate STDIN
+        // Necessary for background process group,
+        // else SIGTTIN when attempting to read.
+        dup2(STDIN_FILENO, STDIN_FILENO);
+        close(STDIN_FILENO);
 
         // Redirect STDOUT
         if (redirout == "") {
