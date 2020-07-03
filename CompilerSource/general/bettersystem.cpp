@@ -397,7 +397,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       while (waitpid(fk,&result,WNOHANG) == 0) {
         if (build_stopping) {
-          kill(fk,SIGINT); // send CTRL+C to process group
+          kill(-fk,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
           // important for GNU make to stop outputting
           // before run buttons are enabled again
