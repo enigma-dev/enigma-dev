@@ -350,12 +350,10 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       if (!fk)
       {
-        // Duplicate STDIN
-        // Necessary for background process group,
-        // else SIGTTIN when attempting to read.
-        int dupin = dup(STDIN_FILENO);
-        dup2(dupin, STDIN_FILENO);
-        close(dupin);
+        // Redirect STDIN
+        // Background process groups get SIGTTIN if
+        // reading from the terminal.
+        close(STDIN_FILENO); // read from /dev/null
 
         // Redirect STDOUT
         if (redirout == "") {
