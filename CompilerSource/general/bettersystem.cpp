@@ -346,12 +346,12 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       int result = -1;
       pid_t fk = fork();
-      //setsid();
-      setpgid(getpid(), getpid()); // new process group
-
       if (!fk)
       {
-        std::cout << "gradle out?" << std::endl;
+        // equivalent to DETACHED_PROCESS on Win32 (e.g, the CreateProcess default)
+        // i.e, creates a new session & process group with child as leader
+        setsid();
+
         // Redirect STDOUT
         if (redirout == "") {
             int flags = fcntl(STDOUT_FILENO, F_GETFD);
@@ -392,14 +392,12 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           *dest = NULL;
         }
         else usenviron = environ;
-        std::cout << "gradle exec?" << std::endl;
+
         execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
-        std::cout << "gradle done?" << std::endl;
         exit(-1);
       }
 
       while (waitpid(fk,&result,WNOHANG) == 0) {
-        //std::cout << "gradle" << std::endl;
         if (build_stopping) {
           kill(-fk,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
