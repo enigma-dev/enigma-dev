@@ -395,13 +395,14 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      while (waitpid(-fk,&result,WNOHANG) == 0) {
+      pid_t fkgid = getpgid(fk);
+      while (waitpid(-fkgid,&result,WNOHANG) == 0) {
         if (build_stopping) {
-          kill(-fk,SIGINT); // send CTRL+C to process group
+          kill(-fkgid,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
           // important for GNU make to stop outputting
           // before run buttons are enabled again
-          waitpid(-fk,&result,__WALL);
+          waitpid(-fkgid,&result,__WALL);
           break;
         }
         usleep(10000); // hundreth of a second
