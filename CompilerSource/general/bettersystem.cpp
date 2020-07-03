@@ -358,10 +358,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         close(STDIN_FILENO);
         // need FD_CLOEXEC to get EOF signal
         // gradlew does this insanity!
-        int flags = fcntl(infd, F_GETFD);
-        if (flags != -1)
-          flags |= FD_CLOEXEC,
-          fcntl(infd, F_SETFD, flags);
+        fcntl(infd, F_SETFD, FD_CLOEXEC);
 
         // Redirect STDOUT
         if (redirout == "") {
