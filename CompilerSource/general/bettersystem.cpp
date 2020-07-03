@@ -350,6 +350,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       if (!fk)
       {
+        std::cout << "gradle out?" << std::endl;
         // Redirect STDOUT
         if (redirout == "") {
             int flags = fcntl(STDOUT_FILENO, F_GETFD);
@@ -390,13 +391,14 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           *dest = NULL;
         }
         else usenviron = environ;
-
+        std::cout << "gradle exec?" << std::endl;
         execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
+        std::cout << "gradle done?" << std::endl;
         exit(-1);
       }
 
       while (waitpid(fk,&result,WNOHANG) == 0) {
-        std::cout << "gradle" << std::endl;
+        //std::cout << "gradle" << std::endl;
         if (build_stopping) {
           kill(-fk,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
