@@ -350,7 +350,11 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       if (!fk)
       {
-        close(STDIN_FILENO);
+        // We need an STDIN
+        int flags = fcntl(STDIN_FILENO, F_GETFD);
+        if (flags != -1)
+          flags &= ~FD_CLOEXEC,
+          fcntl(STDIN_FILENO, F_SETFD, flags);
 
         // Redirect STDOUT
         if (redirout == "") {
