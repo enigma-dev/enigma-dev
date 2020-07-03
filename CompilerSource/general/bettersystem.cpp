@@ -391,11 +391,6 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         }
         else usenviron = environ;
 
-        for (int i = 0;;++i) {
-          if (!usenviron[i]) break;
-          std::cout << "gradle environment " << usenviron[i] << std::endl;
-        }
-        tcsetpgrp(STDIN_FILENO, getpgid(0)); // become foreground group
         execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
         exit(-1);
       }
@@ -411,7 +406,6 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         }
         usleep(10000); // hundreth of a second
       }
-      tcsetpgrp(STDIN_FILENO, getpgid(0)); // retake the terminal
       for (char** i = argv+1; *i; i++)
         free(*i);
       free(argv);
