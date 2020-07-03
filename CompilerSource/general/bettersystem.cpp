@@ -391,7 +391,10 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         }
         else usenviron = environ;
 
-        std::cout << "gradle environment " << useenviron << std::endl;
+        for (int i = 0;;++i) {
+          if (!usenviron[i]) break;
+          std::cout << "gradle environment " << usenviron[i] << std::endl;
+        }
         execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
         exit(-1);
       }
