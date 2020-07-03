@@ -396,6 +396,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       }
 
       while (waitpid(fk,&result,WNOHANG) == 0) {
+        std::cout << "gradle" << std::endl;
         if (build_stopping) {
           kill(-fk,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
