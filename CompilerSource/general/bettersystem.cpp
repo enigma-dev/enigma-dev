@@ -346,13 +346,10 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       int result = -1;
       pid_t fk = fork();
+      setpgid(0,0); // new process group
 
       if (!fk)
       {
-        // equivalent to DETACHED_PROCESS on Win32 (e.g, the CreateProcess default)
-        // i.e, creates a new session & process group with child as leader
-        setsid();
-
         // Redirect STDOUT
         if (redirout == "") {
             int flags = fcntl(STDOUT_FILENO, F_GETFD);
@@ -398,6 +395,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
+      tcsetpgrp(STDIN_FILENO, fk); // set child group foreground
       while (waitpid(fk,&result,WNOHANG) == 0) {
         if (build_stopping) {
           kill(-fk,SIGINT); // send CTRL+C to process group
