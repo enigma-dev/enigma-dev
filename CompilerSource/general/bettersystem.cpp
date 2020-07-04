@@ -355,7 +355,6 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         // reading from the terminal.
         int infd = open("/dev/zero", O_RDONLY);
         dup2(infd, STDIN_FILENO);
-        close(STDIN_FILENO);
 
         // Redirect STDOUT
         if (redirout == "") {
