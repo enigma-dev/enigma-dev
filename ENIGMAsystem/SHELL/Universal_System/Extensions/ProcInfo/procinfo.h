@@ -78,34 +78,7 @@ std::string echo(std::string expression);
 
 namespace enigma_user {
 
-using procinfo::process_execute;
-using procinfo::process_execute_async;
-using procinfo::process_previous;
-using procinfo::process_evaluate;
-using procinfo::process_clear_pid;
-using procinfo::process_clear_out;
-using procinfo::pid_from_self;
-using procinfo::ppid_from_self;
-using procinfo::path_from_pid;
-using procinfo::dir_from_pid;
-using procinfo::name_from_pid;
-using procinfo::cmd_from_pid;
-using procinfo::env_from_pid;
-using procinfo::pid_exists;
-using procinfo::wid_exists;
-using procinfo::pid_kill;
-using procinfo::window_from_wid;
-using procinfo::wid_from_window;
-using procinfo::pid_from_wid;
-using procinfo::pids_enum;
-using procinfo::ppid_from_pid;
-using procinfo::pids_from_ppid;
-using procinfo::wids_from_pid;
-using procinfo::wid_from_top;
-using procinfo::pid_from_top;
-using procinfo::wid_to_top;
-using procinfo::wid_set_pwid;
-using procinfo::echo;
+using namespace procinfo;
 
 } // namespace enigma_user
 
