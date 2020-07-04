@@ -294,11 +294,11 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     }
 
     #include <mutex>
-    #include <condition_variable>
+    #include <semaphore>
     std::mutex stop_mutex;
-    std::condition_variable stop_condition;
+    std::binary_semaphore stop_semaphore;
     void e_exec_stop() {
-      stop_condition.notify_all();
+      stop_semaphore.release();
     }
 
     int e_exec(const char* fcmd, const char* *Cenviron)
@@ -416,7 +416,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      while (!pthread_cond_wait(stop_condition.native_handle(), stop_mutex.native_handle()) && errno != ECHILD)
+      while (build_semaphore.acquire() && errno != ECHILD)
         if (build_stopping) {
           kill(-fk,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
