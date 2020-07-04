@@ -299,6 +299,12 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       sem_init(&stop_semaphore,0,1);
     }
 
+    volatile bool stop_signal = false;
+    void sigchld(int stat) {
+      if (stat == SIGCHILD)
+        stop_signal = true;
+    }
+
     int e_exec(const char* fcmd, const char* *Cenviron)
     {
       while (is_useless(*fcmd))
@@ -358,6 +364,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       cout << ("\n\n");
 
       int result = -1;
+      stop_signal = false;
+      signal(SIGCHLD,sigchld);
       pid_t fk = fork();
       setpgid(0,0); // new process group
 
@@ -414,7 +422,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      while (!sem_wait(&stop_semaphore) && errno != EINTR)
+      while (!sem_wait(&stop_semaphore) && !stop_signal)
         if (build_stopping) {
           kill(-fk,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
