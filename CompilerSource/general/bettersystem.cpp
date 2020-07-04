@@ -405,7 +405,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      while (!waitpid(fk,&result,WNOHANG) && !WIFEXITED(result) && !WIFSIGNALED(result)) {
+      while (!waitpid(fk,&result,WNOHANG|WUNTRACED) && !WIFEXITED(result) && !WIFSIGNALED(result)) {
         if (build_stopping) {
           kill(-fk,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
@@ -414,6 +414,15 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           waitpid(-fk,&result,__WALL);
           break;
         }
+           if (WIFEXITED(result)) {
+                std::cout << "exited, status=" << WEXITSTATUS(result) << std::endl;
+            } else if (WIFSIGNALED(result)) {
+                std::cout << "killed by signal " << WTERMSIG(result) << std::endl;
+            } else if (WIFSTOPPED(result)) {
+                std::cout << "stopped by signal " << WSTOPSIG(result) << std::endl;
+            } else if (WIFCONTINUED(result)) {
+                std::cout << "continued" << std::endl;
+            }
         usleep(10000); // hundreth of a second
       }
       for (char** i = argv+1; *i; i++)
