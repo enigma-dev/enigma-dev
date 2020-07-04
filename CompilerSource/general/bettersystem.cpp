@@ -414,7 +414,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      while (sem_wait(&stop_semaphore) && errno != ECHILD)
+      while (!sem_wait(&stop_semaphore) && errno != EINTR)
         if (build_stopping) {
           kill(-fk,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
