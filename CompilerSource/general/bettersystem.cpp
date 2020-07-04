@@ -301,7 +301,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
     volatile bool stop_signal = false;
     void sigchld(int stat) {
-      if (stat == SIGCHILD)
+      if (stat == SIGCHLD)
         stop_signal = true;
     }
 
