@@ -104,6 +104,11 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     #define byte __windows_byte_workaround
     #include <windows.h>
     #undef byte
+    static HANDLE stopSemaphore = CreateSemaphore(NULL, 0, 1, NULL);
+
+    void e_exec_stop() {
+      ReleaseSemaphore(stopSemaphore, 1, NULL);
+    }
 
     int e_exec(const char* fcmd, const char* *Cenviron)
     {
@@ -216,8 +221,10 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE|CREATE_NEW_PROCESS_GROUP,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
-        while (WaitForSingleObject(ProcessInformation.hProcess, 10) == WAIT_TIMEOUT) {
-          if (!build_stopping) continue;
+        HANDLE waitHandles[2] = {ProcessInformation.hProcess, stopSemaphore};
+        while (DWORD result = WaitForMultipleObjects(2, waitHandles, FALSE, INFINITE)) {
+          if (result == WAIT_OBJECT_0) break; // child exited
+          if (result == WAIT_OBJECT_0 + 1 && !build_stopping) continue; // woke up, but not stopping
           DWORD pId = GetProcessId(ProcessInformation.hProcess);
           GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, pId);
           WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
@@ -284,6 +291,12 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       }
 
       free(a);
+    }
+
+    std::mutex stop_mutex;
+    std::condition_variable stop_condition;
+    void e_exec_stop() {
+      stop_condition.notify_all();
     }
 
     int e_exec(const char* fcmd, const char* *Cenviron)
@@ -401,7 +414,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      while (!waitpid(fk,&result,WNOHANG)) {
+      while (!pthread_cond_wait(stop_condition.native_handle(), stop_mutex.native_handle()) && errno != ECHLD)
         if (build_stopping) {
           kill(-fk,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
@@ -410,8 +423,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           waitpid(-fk,&result,__WALL);
           break;
         }
-        usleep(10000); // hundredth of a second
-      }
+
+      waitpid(fk,&result,WNOHANG);
       for (char** i = argv+1; *i; i++)
         free(*i);
       free(argv);

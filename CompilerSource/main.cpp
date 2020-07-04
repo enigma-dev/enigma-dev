@@ -77,7 +77,10 @@ extern const char* establish_bearings(const char *compiler);
 DLLEXPORT void libSetMakeDirectory(const char* /*dir*/) {} 
 
 volatile bool build_stopping = false;
-DLLEXPORT void libStopBuild() { build_stopping = true; } 
+DLLEXPORT void libStopBuild() {
+  build_stopping = true;
+  e_exec_stop();
+} 
 
 DLLEXPORT const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path) 
 {

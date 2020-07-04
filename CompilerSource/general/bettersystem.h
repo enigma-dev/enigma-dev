@@ -27,6 +27,7 @@
 
 #include <string>
 
+void e_exec_stop();
 int e_exec(const char* fcmd, const char* *Cenviron = NULL);
 int e_execp(const char* cmd, std::string path);
 int e_execs(std::string cmd);
