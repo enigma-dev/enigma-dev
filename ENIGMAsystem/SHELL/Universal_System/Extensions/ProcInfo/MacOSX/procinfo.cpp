@@ -24,16 +24,22 @@
  
 */
 
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+
 #include "../procinfo.h"
+
+#include <sys/sysctl.h>
 #include <sys/proc_info.h>
 #include <libproc.h>
-#include <cstdint>
-#include <cstring>
 
 typedef void NSWindow;
 typedef unsigned long CGWindowID;
 
 using std::string;
+using std::vector;
 using std::to_string;
 
 extern "C" NSWindow *cocoa_window_from_wid(CGWindowID wid);
@@ -45,6 +51,86 @@ extern "C" unsigned long cocoa_get_wid_or_pid(bool wid);
 extern "C" void cocoa_wid_to_top(CGWindowID wid);
 extern "C" void cocoa_wid_set_pwid(CGWindowID wid, CGWindowID pwid);
 
+static inline string cmdenv_from_pid(process_t pid, bool environ) {
+  string cmd;
+  if (!procinfo::pid_exists(pid)) { return ""; }
+  int argmax, nargs;
+  size_t size;
+  char *procargs, *sp, *cp;
+  int mib[3];
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_ARGMAX;
+  size = sizeof(argmax);
+  if (sysctl(mib, 2, &argmax, &size, NULL, 0) == -1) {
+    return "";
+  }
+  procargs = (char *)malloc(argmax);
+  if (procargs == NULL) {
+    free(procargs);
+    return "";
+  }
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_PROCARGS2;
+  mib[2] = pid;
+  size = (size_t)argmax;
+  if (sysctl(mib, 3, procargs, &size, NULL, 0) == -1) {
+    free(procargs);
+    return "";
+  }
+  memcpy(&nargs, procargs, sizeof(nargs));
+  cp = procargs + sizeof(nargs);
+  for (; cp < &procargs[size]; cp++) {
+    if (*cp == '\0') {
+      break;
+    }
+  }
+  if (cp == &procargs[size]) {
+    free(procargs);
+    return "";
+  }
+  for (; cp < &procargs[size]; cp++) {
+    if (*cp != '\0') {
+      break;
+    }
+  }
+  if (cp == &procargs[size]) {
+    free(procargs);
+    return "";
+  }
+  sp = cp;
+  size_t i = 1, j = 0;
+  string arg = string(sp) + "\0";
+  while (strchr(sp, '\0') != NULL &&
+    (!(sp[strlen(sp) - 1] == '\0' && sp[strlen(sp)] == '\0'))) {
+    if (string_has_whitespace(arg)) {
+      if (!environ && i <= nargs) {
+        cmd += "\"" + string_replace_all(arg, "\"", "\\\"") + "\" ";
+      } else if (environ && i > nargs) {
+        vector<string> envVec = string_split(arg, '=');
+        for (const string &env : envVec) {
+          if (j == 0) { cmd += env; }
+          else { cmd += "=\"" + string_replace_all(env, "\"", "\\\"") + "\"\n"; }
+          j++;
+        }
+        j = 0;
+      }
+    } else {
+      if (!environ && i <= nargs) {
+        cmd += string(arg) + " ";
+      } else if (environ && i > nargs) {
+        cmd += string(arg) + "\n";
+      }
+    }
+    sp += strlen(sp) + 1;
+    arg = sp;
+    i++;
+  }
+  if (cmd.back() == ' ' || cmd.back() == '\n')
+    cmd.pop_back();
+  free(procargs);
+  return cmd;
+}
+
 namespace procinfo {
 
 string path_from_pid(process_t pid) {
@@ -54,6 +140,14 @@ string path_from_pid(process_t pid) {
     path = string(buffer) + "\0";
   }
   return path;
+}
+
+string cmd_from_pid(process_t pid) {
+  return cmdenv_from_pid(pid, false);
+}
+
+string env_from_pid(process_t pid) {
+  return cmdenv_from_pid(pid, true);
 }
 
 bool wid_exists(wid_t wid) {
@@ -80,7 +174,7 @@ string pids_enum(bool trim_dir, bool trim_empty) {
   string pids = "PID\tPPID\t";
   pids += trim_dir ? "NAME\n" : "PATH\n";
   int cntp = proc_listpids(PROC_ALL_PIDS, 0, NULL, 0);
-  process_t proc_info[cntp];
+  process_t *proc_info = new process_t[cntp]();
   memset(&proc_info, 0, sizeof(proc_info));
   proc_listpids(PROC_ALL_PIDS, 0, proc_info, sizeof(proc_info));
   for (unsigned i = 0; i < cntp; i++) {
@@ -97,6 +191,7 @@ string pids_enum(bool trim_dir, bool trim_empty) {
   if (pids.back() == '\n')
     pids.pop_back();
   pids += "\0";
+  delete[] proc_info;
   return pids;
 }
 
@@ -112,7 +207,7 @@ process_t ppid_from_pid(process_t pid) {
 string pids_from_ppid(process_t ppid) {
   string pids;
   int cntp = proc_listpids(PROC_ALL_PIDS, 0, NULL, 0);
-  process_t proc_info[cntp];
+  process_t *proc_info = new process_t[cntp]();
   memset(&proc_info, 0, sizeof(proc_info));
   proc_listpids(PROC_ALL_PIDS, 0, proc_info, sizeof(proc_info));
   for (unsigned i = 0; i < cntp; i++) {
@@ -124,6 +219,7 @@ string pids_from_ppid(process_t ppid) {
   if (pids.back() == '|')
     pids.pop_back();
   pids += "\0";
+  delete[] proc_info;
   return pids;
 }
 

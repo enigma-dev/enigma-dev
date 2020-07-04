@@ -1,4 +1,4 @@
-/*
+﻿/*
 
  MIT License
  
@@ -24,14 +24,23 @@
  
 */
 
-#include "../procinfo.h"
-#include <sys/user.h>
-#include <sys/sysctl.h>
-#include <libutil.h>
 #include <cstdlib>
 #include <cstddef>
+#include <cstdint>
+
+#include "../procinfo.h"
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/sysctl.h>
+#include <sys/param.h>
+#include <sys/queue.h>
+#include <sys/user.h>
+#include <libprocstat.h>
+#include <libutil.h>
 
 using std::string;
+using std::vector;
 using std::to_string;
 using std::size_t;
 
@@ -40,8 +49,11 @@ namespace procinfo {
 string path_from_pid(process_t pid) {
   string path;
   size_t length;
-  // CTL_KERN::KERN_PROC::KERN_PROC_PATHNAME(pid)
-  int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid };
+  int mib[4];
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_PROC;
+  mib[2] = KERN_PROC_PATHNAME;
+  mib[3] = pid;
   if (sysctl(mib, 4, NULL, &length, NULL, 0) == 0) {
     path.resize(length, '\0');
     char *buffer = path.data();
@@ -50,6 +62,59 @@ string path_from_pid(process_t pid) {
     }
   }
   return path;
+}
+
+string cmd_from_pid(process_t pid) {
+  string cmd;
+  if (!pid_exists(pid)) { return ""; }
+  struct procstat *proc_stat = procstat_open_sysctl();
+  struct kinfo_proc *proc_info = kinfo_getproc(pid);
+  char **args = procstat_getargv(proc_stat, proc_info, 0);
+  if (args != NULL) {
+    for (unsigned i = 0; args[i] != NULL; i++) {
+      if (string_has_whitespace(args[i])) {
+        cmd += "\"" + string_replace_all(args[i], "\"", "\\\"") + "\"";
+      } else {
+        cmd += args[i];
+      }
+      if (args[i + 1] != NULL) {
+        cmd += " ";
+      }
+    }
+  }
+  free(proc_info);
+  free(proc_stat);
+  return cmd;
+}
+
+string env_from_pid(process_t pid) {
+  string env;
+  if (!pid_exists(pid)) { return ""; }
+  struct procstat *proc_stat = procstat_open_sysctl();
+  struct kinfo_proc *proc_info = kinfo_getproc(pid);
+  char **envs = procstat_getenvv(proc_stat, proc_info, 0);
+  if (envs != NULL) {
+    unsigned j = 0;
+    for (unsigned i = 0; envs[i] != NULL; i++) {
+      if (string_has_whitespace(envs[i])) {
+        vector<string> envVec = string_split(env, '=');
+        for (const string &environ : envVec) {
+          if (j == 0) { env += environ; }
+          else { env += "\"" + string_replace_all(environ, "\"", "\\\"") + "\""; }
+          j++;
+        }
+        j = 0;
+      } else {
+        env += envs[i];
+      }
+      if (envs[i + 1] != NULL) {
+        env += "\n";
+      }
+    }
+  }
+  free(proc_info);
+  free(proc_stat);
+  return env;
 }
 
 string pids_enum(bool trim_dir, bool trim_empty) {

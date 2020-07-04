@@ -1,4 +1,4 @@
-/*
+﻿/*
 
  MIT License
  
@@ -25,6 +25,7 @@
 */
 
 #include "../procinfo.h"
+
 #include <X11/Xlib.h>
 
 using std::string;
@@ -173,4 +174,3 @@ void wid_set_pwid(wid_t wid, wid_t pwid) {
 }
 
 } // namespace procinfo
-

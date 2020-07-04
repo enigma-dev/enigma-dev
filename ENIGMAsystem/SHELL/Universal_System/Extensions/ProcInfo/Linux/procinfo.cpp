@@ -24,12 +24,15 @@
  
 */
 
-#include "../procinfo.h"
-#include <proc/readproc.h>
 #include <cstdlib>
 #include <cstring>
 
+#include "../procinfo.h"
+
+#include <proc/readproc.h>
+
 using std::string;
+using std::vector;
 using std::to_string;
 
 namespace procinfo {
@@ -41,6 +44,63 @@ string path_from_pid(process_t pid) {
   path = buffer ? : "";
   free(buffer);
   return path;
+}
+
+string cmd_from_pid(process_t pid) {
+  string cmd;
+  proc_t proc_info;
+  if (!pid_exists(pid)) { return ""; }
+  memset(&proc_info, 0, sizeof(proc_info));
+  PROCTAB *proc = openproc(PROC_FILLCOM | PROC_PID, &pid);
+  if (readproc(proc, &proc_info) != 0) {
+    char **args = proc_info.cmdline;
+    size_t cnta = 0;
+    for (; args[cnta] != NULL && strlen(args[cnta]) != 0; cnta++);
+    for (size_t i = 0; i < cnta; i++) {
+      if (string_has_whitespace(args[i])) {
+        cmd += "\"" + string_replace_all(args[i], "\"", "\\\"") + "\"";
+      } else {
+        cmd += args[i];
+      }
+      if (args[i + 1] != NULL) {
+        cmd += " ";
+      }
+    }
+  }
+  closeproc(proc);
+  return cmd;
+}
+
+string env_from_pid(process_t pid) {
+  string env;
+  proc_t proc_info;
+  if (!pid_exists(pid)) { return ""; }
+  memset(&proc_info, 0, sizeof(proc_info));
+  PROCTAB *proc = openproc(PROC_FILLENV | PROC_PID, &pid);
+  if (readproc(proc, &proc_info) != 0) {
+    char **envs = proc_info.environ;
+    size_t cnta = 0;
+    for (; envs[cnta] != NULL && strlen(envs[cnta]) != 0; cnta++);
+    for (size_t i = 0; i < cnta; i++) {
+      unsigned j = 0;
+      if (string_has_whitespace(envs[i])) {
+        vector<string> envVec = string_split(env, '=');
+        for (const string &environ : envVec) {
+          if (j == 0) { env += environ; }
+          else { env += "\"" + string_replace_all(environ, "\"", "\\\"") + "\""; }
+          j++;
+        }
+        j = 0;
+      } else {
+        env += envs[i];
+      }
+      if (envs[i + 1] != NULL) {
+        env += "\n";
+      }
+    }
+  }
+  closeproc(proc);
+  return env;
 }
 
 string pids_enum(bool trim_dir, bool trim_empty) {
@@ -96,3 +156,4 @@ string pids_from_ppid(process_t ppid) {
 }
 
 } // namespace procinfo
+

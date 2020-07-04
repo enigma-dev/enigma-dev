@@ -1,4 +1,4 @@
-/*
+﻿/*
 
  MIT License
  
@@ -24,13 +24,16 @@
  
 */
 
+#include <cstdio>
+
 #include "../procinfo.h"
+
 #include <sys/wait.h>
 #include <signal.h>
 #include <unistd.h>
-#include <cstdio>
 
 using std::string;
+using std::to_string;
 
 namespace procinfo {
 
@@ -84,6 +87,11 @@ bool pid_exists(process_t pid) {
 
 bool pid_kill(process_t pid) {
   return (kill(pid, SIGKILL) == 0);
+}
+
+string echo(string expression) {
+  process_execute("echo " + expression);
+  return process_evaluate();
 }
 
 } // namepace procinfo

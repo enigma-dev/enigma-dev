@@ -12,7 +12,7 @@ ifeq ($(UNIX_BASED), true)
 			override LDLIBS += -lprocps
 		else ifeq ($(OS), FreeBSD)
 			SOURCES += Universal_System/Extensions/ProcInfo/BSD/procinfo.cpp
-			override LDLIBS += -lc -lutil
+			override LDLIBS += -lc -lutil -lprocstat
 		endif
 		SOURCES += Universal_System/Extensions/ProcInfo/xlib/procinfo.cpp
 		override CXXFLAGS += $(shell pkg-config x11 --cflags)
@@ -21,6 +21,6 @@ ifeq ($(UNIX_BASED), true)
 	endif
 	SOURCES += Universal_System/Extensions/ProcInfo/POSIX/procinfo.cpp
 else
-	SOURCES += Universal_System/Extensions/ProcInfo/Win32/procinfo.cpp
+	SOURCES += Universal_System/Extensions/ProcInfo/Win32/procinfo.cpp -lole32 -lwbemuuid
 endif
 SOURCES += Universal_System/Extensions/ProcInfo/Universal/procinfo.cpp

@@ -24,13 +24,38 @@
  
 */
 
-#include "../procinfo.h"
 #include <cstddef>
+#include <sstream>
 #include <thread>
 
+#include "../procinfo.h"
+
 using std::string;
+using std::vector;
 using std::size_t;
 using std::thread;
+
+bool string_has_whitespace(string str) {
+  return str.find_first_of("\t\r\n ") != string::npos;
+}
+
+string string_replace_all(string str, string substr, string nstr) {
+  size_t pos = 0;
+  while ((pos = str.find(substr, pos)) != string::npos) {
+    str.replace(pos, substr.length(), nstr);
+    pos += nstr.length();
+  }
+  return str;
+}
+
+vector<string> string_split(string str, char delimiter) {
+  vector<string> vec;
+  std::stringstream sstr(str);
+  string tmp;
+  while (std::getline(sstr, tmp, delimiter))
+    vec.push_back(tmp);
+  return vec;
+}
 
 namespace procinfo {
 
@@ -52,3 +77,4 @@ string name_from_pid(process_t pid) {
 }
 
 } // namespace procinfo
+
