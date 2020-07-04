@@ -293,6 +293,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       free(a);
     }
 
+    #include <mutex>
+    #include <condition_variable>
     std::mutex stop_mutex;
     std::condition_variable stop_condition;
     void e_exec_stop() {
@@ -414,7 +416,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      while (!pthread_cond_wait(stop_condition.native_handle(), stop_mutex.native_handle()) && errno != ECHLD)
+      while (!pthread_cond_wait(stop_condition.native_handle(), stop_mutex.native_handle()) && errno != ECHILD)
         if (build_stopping) {
           kill(-fk,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
