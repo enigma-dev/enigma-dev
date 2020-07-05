@@ -272,8 +272,8 @@ string env_from_pid(process_t pid) {
     size_t i = 1, j = 0;
     string arg = narrow(wenvs);
     do {
-      if (string_has_whitespace(arg)) {
-        vector<string> envVec = string_split(arg, '=');
+      if (string_has_whitespace(arg) || string_count_equalssigns(arg) > 1) {
+        vector<string> envVec = string_split_by_first_equalssign(arg);
         for (const string &env : envVec) {
           if (j == 0) { envs += env; }
           else { envs += "=\"" + string_replace_all(env, "\"", "\\\"") + "\"\n"; }
@@ -281,7 +281,7 @@ string env_from_pid(process_t pid) {
         }
         j = 0;
       } else {
-        envs += string(arg) + "\n";
+        envs += arg + "\n";
       }
       wenvs += wcslen(wenvs) + 1;
       arg = narrow(wenvs);

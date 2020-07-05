@@ -106,7 +106,7 @@ static inline string cmdenv_from_pid(process_t pid, bool environ) {
       if (!environ && i <= nargs) {
         cmd += "\"" + string_replace_all(arg, "\"", "\\\"") + "\" ";
       } else if (environ && i > nargs) {
-        vector<string> envVec = string_split(arg, '=');
+        vector<string> envVec = string_split_by_first_equalssign(arg);
         for (const string &env : envVec) {
           if (j == 0) { cmd += env; }
           else { cmd += "=\"" + string_replace_all(env, "\"", "\\\"") + "\"\n"; }
@@ -116,9 +116,19 @@ static inline string cmdenv_from_pid(process_t pid, bool environ) {
       }
     } else {
       if (!environ && i <= nargs) {
-        cmd += string(arg) + " ";
+        cmd += arg + " ";
       } else if (environ && i > nargs) {
-        cmd += string(arg) + "\n";
+        if (string_count_equalssigns(arg) > 1) {
+          vector<string> envVec = string_split_by_first_equalssign(arg);
+          for (const string &env : envVec) {
+            if (j == 0) { cmd += env; }
+            else { cmd += "=\"" + string_replace_all(env, "\"", "\\\"") + "\"\n"; }
+            j++;
+          }
+          j = 0;
+        } else {
+          cmd += arg + "\n";
+        }
       }
     }
     sp += strlen(sp) + 1;

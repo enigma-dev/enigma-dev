@@ -96,11 +96,11 @@ string env_from_pid(process_t pid) {
   if (envs != NULL) {
     unsigned j = 0;
     for (unsigned i = 0; envs[i] != NULL; i++) {
-      if (string_has_whitespace(envs[i])) {
-        vector<string> envVec = string_split(env, '=');
+      if (string_has_whitespace(envs[i]) || string_count_equalssigns(envs[i]) > 1) {
+        vector<string> envVec = string_split_by_first_equalssign(envs[i]);
         for (const string &environ : envVec) {
           if (j == 0) { env += environ; }
-          else { env += "\"" + string_replace_all(environ, "\"", "\\\"") + "\""; }
+          else { env += "=\"" + string_replace_all(environ, "\"", "\\\"") + "\""; }
           j++;
         }
         j = 0;
