@@ -24,7 +24,12 @@
  
 */
 
+#include <sstream>
+
 #include "helpers.h"
+
+using std::string;
+using std::vector;
 
 string string_replace_all(string str, string substr, string nstr) {
   size_t pos = 0;
