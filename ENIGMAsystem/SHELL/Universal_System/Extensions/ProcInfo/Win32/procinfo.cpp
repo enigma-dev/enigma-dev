@@ -31,12 +31,13 @@
 
 #include "../procinfo.h"
 
+#include <wbemidl.h>
+
 #define byte __windows_byte_workaround
 #include <windows.h>
 #undef byte
 
 #include <Objbase.h>
-#include <wbemidl.h>
 #include <tlhelp32.h>
 #include <winternl.h>
 #include <process.h>
