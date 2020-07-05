@@ -44,15 +44,6 @@ size_t string_count_equalssigns(string str) {
   return std::count(str.begin(), str.end(), '=');
 }
 
-string string_replace_all(string str, string substr, string nstr) {
-  size_t pos = 0;
-  while ((pos = str.find(substr, pos)) != string::npos) {
-    str.replace(pos, substr.length(), nstr);
-    pos += nstr.length();
-  }
-  return str;
-}
-
 vector<string> string_split_by_first_equalssign(string str) {
   size_t pos = 0;
   vector<string> vec;
@@ -60,15 +51,6 @@ vector<string> string_split_by_first_equalssign(string str) {
     vec.push_back(str.substr(0, pos));
     vec.push_back(str.substr(pos + 1));
   }
-  return vec;
-}
-
-vector<string> string_split(string str, char delimiter) {
-  vector<string> vec;
-  std::stringstream sstr(str);
-  string tmp;
-  while (std::getline(sstr, tmp, delimiter))
-    vec.push_back(tmp);
   return vec;
 }
 

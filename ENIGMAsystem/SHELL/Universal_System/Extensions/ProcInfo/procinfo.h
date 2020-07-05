@@ -24,8 +24,11 @@
  
 */
 
-#include <string>
-#include <vector>
+#ifdef SELF_CONTAINED
+#include "helpers.h"
+#else
+#include "strings_util.h"
+#endif
 
 // individual platforms need their platform-specific
 // window types casted to an unsigned long long type
@@ -41,9 +44,7 @@
 
 bool string_has_whitespace(std::string str);
 size_t string_count_equalssigns(std::string str);
-std::string string_replace_all(std::string str, std::string substr, std::string nstr);
 std::vector<std::string> string_split_by_first_equalssign(std::string str);
-std::vector<std::string> string_split(std::string str, char delimiter);
 
 namespace procinfo {
 
