@@ -24,7 +24,7 @@
  
 */
 
-#ifdef SELF_CONTAINED
+#ifdef PROCINFO_SELF_CONTAINED
 #include "helpers.h"
 #else
 #include "strings_util.h"
