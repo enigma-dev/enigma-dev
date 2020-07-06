@@ -279,8 +279,10 @@ string env_from_pid(process_t pid) {
       if (string_has_whitespace(arg) || string_count_equalssigns(arg) > 1) {
         vector<string> envVec = string_split_by_first_equalssign(arg);
         for (const string &env : envVec) {
-          if (j == 0) { envs += env; }
-          else { envs += "=\"" + string_replace_all(env, "\"", "\\\"") + "\"\n"; }
+          if (j == 0) { 
+            if (envs[0] == '\0') { continue; }
+            envs += env; 
+          } else { envs += "=\"" + string_replace_all(env, "\"", "\\\"") + "\"\n"; }
           j++;
         }
         j = 0;
