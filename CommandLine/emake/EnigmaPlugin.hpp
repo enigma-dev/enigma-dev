@@ -36,6 +36,7 @@ public:
   syntax_error* SyntaxCheck(int count, const char** names, const char* code);
   void HandleGameLaunch();
   void LogMakeToConsole();
+  void StopBuild();
   int BuildGame(deprecated::JavaStruct::EnigmaStruct* data, GameMode mode, const char* fpath);
   int BuildGame(const buffers::Game& data, GameMode mode, const char* fpath);
   const char* NextResource();

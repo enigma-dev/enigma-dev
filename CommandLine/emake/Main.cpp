@@ -23,6 +23,20 @@ namespace fs = std::filesystem;
 #include <streambuf>
 #include <cstdlib>
 
+EnigmaPlugin plugin;
+
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+#define byte __windows_byte_workaround
+#include <windows.h>
+#undef byte
+BOOL WINAPI CtrlHandler(DWORD /*fdwCtrlType*/) {
+  plugin.StopBuild();
+  return TRUE;
+}
+#else
+//TODO: Handle CTRL+C SIGINT
+#endif
+
 std::ostream outputStream(nullptr);
 std::ostream errorStream(nullptr);
 
@@ -36,6 +50,12 @@ static std::string tolower(const std::string &str) {
 
 int main(int argc, char* argv[])
 {
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+  SetConsoleCtrlHandler(NULL, TRUE);
+#else
+  //TODO: Handle SIGINT
+#endif
+
   std::ofstream egmlog(fs::temp_directory_path().string() + "/enigma_libegm.log", std::ofstream::out);
   std::ofstream elog(fs::temp_directory_path().string() + "/enigma_compiler.log", std::ofstream::out);
 
@@ -58,7 +78,6 @@ int main(int argc, char* argv[])
   if (result == OPTIONS_ERROR || result == OPTIONS_HELP)
     return result;
 
-  EnigmaPlugin plugin;
   plugin.Load();
   CallBack ecb;
   plugin.Init(&ecb, options.EnigmaRoot());

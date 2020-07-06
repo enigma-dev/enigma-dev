@@ -36,6 +36,10 @@ void EnigmaPlugin::LogMakeToConsole() {
   log_make_to_console();
 }
 
+void EnigmaPlugin::StopBuild() {
+  libStopBuild();
+}
+
 int EnigmaPlugin::BuildGame(deprecated::JavaStruct::EnigmaStruct* data,
                             GameMode mode, const char* fpath) {
   return compileEGMf(data, fpath, mode);
