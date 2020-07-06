@@ -54,17 +54,19 @@ using std::wstring;
 using std::vector;
 using std::size_t;
 
+#ifdef PROCINFO_SELF_CONTAINED
 static inline wstring widen(string str) {
   size_t wchar_count = str.size() + 1;
   vector<wchar_t> buf(wchar_count);
   return wstring { buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count) };
 }
 
-static inline string narrow(wstring wstr) {
+static inline string shorten(wstring wstr) {
   int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
   vector<char> buf(nbytes);
   return string { buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, NULL, NULL) };
 }
+#endif
 
 static inline HANDLE OpenProcessWithDebugPrivilege(process_t pid) {
   HANDLE hToken;
@@ -230,7 +232,7 @@ string path_from_pid(process_t pid) {
   HANDLE hProcess = OpenProcessWithDebugPrivilege(pid);
   wchar_t szFilename[MAX_PATH]; DWORD dwPathSize = MAX_PATH;
   if (QueryFullProcessImageNameW(hProcess, 0, szFilename, &dwPathSize) != 0) {
-    path = narrow(szFilename);
+    path = shorten(szFilename);
   }
   CloseHandle(hProcess);
   return path;
@@ -256,7 +258,7 @@ string cmd_from_pid(process_t pid) {
       hr = result->Get(L"ProcessId", 0, &ProcessId, 0, 0);
       hr = result->Get(L"CommandLine", 0, &CommandLine, 0, 0);            
       if (ProcessId.uintVal == pid && !(CommandLine.vt == VT_NULL))
-      cmd = narrow((wchar_t *)CommandLine.bstrVal);
+      cmd = shorten((wchar_t *)CommandLine.bstrVal);
       result->Release();
     }
   }
@@ -274,7 +276,7 @@ string env_from_pid(process_t pid) {
   try { 
     wchar_t *wenvs = GetEnvironmentStringsW(proc);
     size_t i = 1, j = 0;
-    string arg = narrow(wenvs);
+    string arg = shorten(wenvs);
     do {
       if (string_has_whitespace(arg) || string_count_equalssigns(arg) > 1) {
         vector<string> envVec = string_split_by_first_equalssign(arg);
@@ -290,7 +292,7 @@ string env_from_pid(process_t pid) {
         envs += arg + "\n";
       }
       wenvs += wcslen(wenvs) + 1;
-      arg = narrow(wenvs);
+      arg = shorten(wenvs);
       i++;
     } while (*wenvs);
     if (envs.back() == '\n')

@@ -1,4 +1,4 @@
-/*
+﻿/*
 
  MIT License
  
@@ -48,4 +48,3 @@ vector<string> string_split(string str, char delimiter) {
     vec.push_back(tmp);
   return vec;
 }
-

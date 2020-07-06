@@ -1,4 +1,4 @@
-/*
+﻿/*
 
  MIT License
  
@@ -27,7 +27,8 @@
 #ifdef PROCINFO_SELF_CONTAINED
 #include "helpers.h"
 #else
-#include "strings_util.h"
+#include "Universal_System/estring.h"
+using enigma_user::string_replace_all;
 #endif
 
 // individual platforms need their platform-specific
