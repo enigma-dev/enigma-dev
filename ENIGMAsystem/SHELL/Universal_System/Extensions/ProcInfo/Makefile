@@ -21,6 +21,7 @@ ifeq ($(UNIX_BASED), true)
 	endif
 	SOURCES += Universal_System/Extensions/ProcInfo/POSIX/procinfo.cpp
 else
-	SOURCES += Universal_System/Extensions/ProcInfo/Win32/procinfo.cpp -lole32 -lwbemuuid
+	SOURCES += Universal_System/Extensions/ProcInfo/Win32/procinfo.cpp
+	override LDLIBS += -lole32 -lwbemuuid
 endif
 SOURCES += Universal_System/Extensions/ProcInfo/Universal/procinfo.cpp
