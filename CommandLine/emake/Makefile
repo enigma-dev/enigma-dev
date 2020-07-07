@@ -39,4 +39,18 @@ else
 	SOURCES := $(filter-out ./Server.cpp, $(SOURCES))
 endif
 
+ifeq ($(OS), Darwin)
+	LINKING_TARGETS += make AppleProto
+	ifneq ($(CLI_ENABLE_EGM), FALSE)
+		MORE_APPLE_NONSENSE := AppleEGM
+	endif
+endif
+
+AppleEGM:
+	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib ../../libEGM.dylib
+	install_name_tool -change ../../libEGM.dylib @loader_path/./libEGM.dylib $(TARGET)
+
+AppleProto: $(MORE_APPLE_NONSENSE)
+	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib $(TARGET)
+
 include ../../Default.mk
