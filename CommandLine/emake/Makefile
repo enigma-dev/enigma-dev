@@ -50,6 +50,7 @@ AppleEGM:
 	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib ../../libEGM.dylib
 	install_name_tool -change ../../libEGM.dylib @loader_path/./libEGM.dylib $(TARGET)
 	install_name_tool -change ../libcompileEGMf.dylib @loader_path/./libcompileEGMf.dylib $(TARGET)
+	install_name_tool -change ../libENIGMAShared.dylib @loader_path/./libENIGMAShared.dylib $(TARGET)
 
 AppleProto: $(MORE_APPLE_NONSENSE)
 	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib $(TARGET)
