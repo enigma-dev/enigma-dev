@@ -65,6 +65,6 @@ jobs:
     - stage: ENIGMA CI
       env: WORKER=0
       os: osx
-      osx_image: xcode11.3
+      osx_image: xcode12
       before_install:
 
