@@ -37,6 +37,7 @@ using namespace std;
 #include "general/parse_basics_old.h"
 #include "frontend.h"
 
+#include <signal.h>
 
 inline char* scopy(string& str)
 {
