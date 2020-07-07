@@ -8,6 +8,7 @@
 #endif
 
 #include "SOG.hpp"
+#include "OS_Switchboard.h"
 
 #ifdef CLI_ENABLE_EGM
 #include "gmk.h"
