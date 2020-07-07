@@ -45,6 +45,7 @@ endif
 
 AppleFixLinks:
 	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib ../../libEGM.dylib
+	install_name_tool -change ../libENIGMAShared.dylib @loader_path/./libENIGMAShared.dylib ../../libEGM.dylib
 	install_name_tool -change ../../libProtocols.dylib @loader_path/./libProtocols.dylib ../../libcompileEGMf.dylib
 	install_name_tool -change ../libENIGMAShared.dylib @loader_path/./libENIGMAShared.dylib ../../libcompileEGMf.dylib
 	install_name_tool -change ../../libEGM.dylib @loader_path/./libEGM.dylib $(TARGET)
