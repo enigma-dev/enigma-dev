@@ -408,7 +408,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           // wait for entire process group to signal,
           // important for GNU make to stop outputting
           // before run buttons are enabled again
-          waitpid(-fk,&result,P_ALL);
+          waitpid(-fk,&result,__WALL);
           break;
         }
         usleep(10000); // hundredth of a second
