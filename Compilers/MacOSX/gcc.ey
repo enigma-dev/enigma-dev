@@ -1,15 +1,15 @@
 %e-yaml
 ---
-Name: GNU GCC G++
-Native: No
+Name: Clang
+Native: Yes
 Maintainer: fundies
 Target-platform: MacOSX
 
 Make-Vars:
   make: make
   makeflags:
-  cc: gcc-7
-  cxx: g++-7
+  cc: clang
+  cxx: clang++
   cppflags:
   cxxflags:
   cflags:
@@ -17,8 +17,8 @@ Make-Vars:
   links:
 
 Parser-Vars:
-  defines: cpp-7 -dM -x c++ --std=c++03 -E $blank
-  searchdirs: gcc-7 -E -x c++ --std=c++03 -v $blank 
+  defines: clang -dM -E -x c++ --std=c++03 $blank
+  searchdirs: clang -E -x c++ --std=c++03 -v $blank
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
 
