@@ -103,19 +103,25 @@ static inline wchar_t *GetEnvironmentStringsW(HANDLE hproc) {
   PROCESS_BASIC_INFORMATION pbi;
   ULONG res_len = 0;
   NTSTATUS status = pfn_qip(hproc, ProcessBasicInformation, &pbi, sizeof(pbi), &res_len);
-  size_t ppeb = size_t(pbi.PebBaseAddress);
-  char peb[sizeof(PEB)];
+  PEB peb = { 0 };
   SIZE_T read;
-  ReadProcessMemory(hproc, pbi.PebBaseAddress, peb, sizeof(peb), &read); 
-  enum { OFFSET_PEB = 0x10, OFFSET_X = 0x48 };
-  void *ptr = (void *) *(INT_PTR *)(peb + OFFSET_PEB);
-  char buffer[OFFSET_X + sizeof(void *)];
-  ReadProcessMemory(hproc, ptr, buffer, sizeof(buffer), &read); 
-  void *penv = (void *) *(INT_PTR *)(buffer + OFFSET_X);
+  ReadProcessMemory(hproc, pbi.PebBaseAddress, &peb, sizeof(peb), &read); 
+  if (!read) { return (wchar_t *)""; } 
+  char *ppeb = (char *)&peb;
+  char *ptr = (char *) *(INT_PTR *)(ppeb + 0x10);
   SIZE_T nSiZe;
+  if (!HasReadAccess(hproc, ptr, nSiZe)) { return (wchar_t *)""; }
+  char buffer[0x64] = { 0 };
+  ReadProcessMemory(hproc, ptr, buffer, sizeof(buffer), &read); 
+  char *penv = (char *) *(INT_PTR *)(&buffer[0] + 0x48);
   if (!HasReadAccess(hproc, penv, nSiZe)) { return (wchar_t *)""; }
   wchar_t *env = new wchar_t[nSiZe];
-  ReadProcessMemory(hproc, penv, env, nSiZe, &read); 
+  memset(env, 0, sizeof(wchar_t) * nSiZe);
+  ReadProcessMemory(hproc, penv, env, nSiZe, &read);
+  if (!read) { return (wchar_t *)""; }
+  wstring result = env ? : L"";
+  if (result.find_first_of(L"=") == wstring::npos) 
+  { return (wchar_t *)""; }
   return env;
 }
 
@@ -282,6 +288,7 @@ string env_from_pid(process_t pid) {
         vector<string> envVec = string_split_by_first_equalssign(arg);
         for (const string &env : envVec) {
           if (j == 0) { 
+            if (envs.find_first_of("%<>^&|=:\0") != string::npos) { continue; }
             if (envs[0] == '\0') { continue; }
             envs += env; 
           } else { envs += "=\"" + string_replace_all(env, "\"", "\\\"") + "\"\n"; }
