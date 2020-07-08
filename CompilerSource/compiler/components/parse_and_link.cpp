@@ -71,16 +71,24 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       return E_ERROR_SYNTAX;
     }
     // Keep a parsed record of this script
-    scr_lookup[game.scripts[i].name] = scripts[i] = new parsed_script;
-    parser_main(newcode, &scripts[i]->pev, script_names);
-    edbg << "Parsed `" << game.scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
+    scr_lookup[game.scripts[i].name] = scripts[i] = new ParsedScript;
+    scripts[i]->code.code = newcode;
+    parser_main(&scripts[i]->code, script_names);
+    edbg << "Parsed `" << game.scripts[i].name << "': " << scripts[i]->scope.locals.size() << " locals, " << scripts[i]->scope.globals.size() << " globals" << flushl;
 
     // If the script accesses variables from outside its scope implicitly
-    if (scripts[i]->obj.locals.size() or scripts[i]->obj.globallocals.size() or scripts[i]->obj.ambiguous.size()) {
-      parsed_object temporary_object = *scripts[i]->pev.myObj;
-      scripts[i]->pev_global = new parsed_event(&temporary_object);
-      parser_main(string("with (self) {\n") + newcode + "\n/* */}",scripts[i]->pev_global, script_names);
-      scripts[i]->pev_global->myObj = NULL;
+    if (scripts[i]->scope.locals.size() or scripts[i]->scope.globallocals.size() or scripts[i]->scope.ambiguous.size()) {
+      // This is a neat hack to treat everything in the script as with().
+      // We make a temporary scope so that anything local to it is ignored, then
+      // ultimately throw it away.
+      // TODO: Looking at this now, I'm not sure if we actually want to throw
+      // locals away; what if a script explicitly declares `local var foo;`?
+      ParsedScope temporary_scope = *scripts[i]->code.my_scope;
+      scripts[i]->global_code = new ParsedCode(&temporary_scope);
+      scripts[i]->global_code->code =
+          string("with (self) {\n") + newcode + "\n/* */}";
+      parser_main(scripts[i]->global_code, script_names);
+      scripts[i]->global_code->my_scope = nullptr;
     }
     fflush(stdout);
   }
@@ -102,24 +110,30 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
       // Add a parsed_script record. We can retrieve this later; its order is well-defined (timeline i, moment j) and can be calculated with a global counter.
       // Note from 2019: yeah, we're not relying on that ordering anymore. Or at least, we're really gonna try not to.
-      parsed_script *tline = new parsed_script();
+      auto *tline = new ParsedScript();
 
       // Two places to log this.
       tlines.push_back(tline);
       tline_lookup[timeline.name].moments.emplace_back(moment.step(), tline);
 
-      parser_main(newcode, &tline->pev, script_names);
+      tline->code.code = newcode;
+      parser_main(&tline->code, script_names);
       edbg << "Parsed `" << timeline.name << ", moment: "
            << moment.step() << "': "
-           << tline->obj.locals.size() << " locals, "
-           << tline->obj.globals.size() << " globals" << flushl;
+           << tline->scope.locals.size() << " locals, "
+           << tline->scope.globals.size() << " globals" << flushl;
 
       // If the timeline accesses variables from outside its scope implicitly
-      if (tline->obj.locals.size() or tline->obj.globallocals.size() or tline->obj.ambiguous.size()) {
-        parsed_object temporary_object = *tline->pev.myObj;
-        tline->pev_global = new parsed_event(&temporary_object);
-        parser_main(string("with (self) {\n") + newcode + "\n/* */}",tline->pev_global, script_names);
-        tline->pev_global->myObj = NULL;
+      if (tline->scope.locals.size() or tline->scope.globallocals.size() or tline->scope.ambiguous.size()) {
+        // TODO: as above... except this whole func's redundant so just delete it.
+        // At some point, timelines should just be refactored into collections of scripts and a controller to call them.
+        // Or maybe into one big script made from a switch statement based on the current moment.
+        ParsedScope temporary_object = *tline->code.my_scope;
+        tline->global_code = new ParsedCode(&temporary_object);
+        tline->global_code->code =
+            string("with (self) {\n") + newcode + "\n/* */}";
+        parser_main(tline->global_code, script_names);
+        tline->global_code->my_scope = NULL;
       }
       fflush(stdout);
     }
@@ -136,41 +150,41 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   for (unsigned _necit = 0; _necit < nec_iters; _necit++) //We will iterate the list of scripts just enough times to copy everything
   {
     for (size_t _im = 0; _im < game.scripts.size(); _im++) {  // For each script
-      parsed_script* curscript = scripts[_im];  // At this point, what we have is this:     for each script as curscript
-      for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
+      ParsedScript* curscript = scripts[_im];  // At this point, what we have is this:     for each script as curscript
+      for (parsed_object::funcit it = curscript->scope.funcs.begin(); it != curscript->scope.funcs.end(); it++) //For each function called by each script
       {
-        map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+        auto subscr = scr_lookup.find(it->first); //Check if it's a script
         if (subscr != scr_lookup.end()) { //At this point, what we have is this:     for each script called by curscript
-          curscript->obj.copy_calls_from(subscr->second->obj);
-          curscript->obj.copy_tlines_from(subscr->second->obj);
+          curscript->scope.copy_calls_from(subscr->second->scope);
+          curscript->scope.copy_tlines_from(subscr->second->scope);
         }
       }
 
-      for (parsed_object::tlineit it = curscript->obj.tlines.begin(); it != curscript->obj.tlines.end(); it++) { //For each tline called by each script
+      for (parsed_object::tlineit it = curscript->scope.tlines.begin(); it != curscript->scope.tlines.end(); it++) { //For each tline called by each script
         auto timit = tline_lookup.find(it->first); //Check if it's a timeline.
         if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
           for (const auto &moment : timit->second.moments) {
-            curscript->obj.copy_calls_from(moment.script->obj);
-            curscript->obj.copy_tlines_from(moment.script->obj);
+            curscript->scope.copy_calls_from(moment.script->scope);
+            curscript->scope.copy_tlines_from(moment.script->scope);
           }
         }
       }
     }
 
-    for (parsed_script* curscript : tlines) {
-      for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) {  //For each function called by each timeline
-        map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+    for (ParsedScript* curscript : tlines) {
+      for (parsed_object::funcit it = curscript->scope.funcs.begin(); it != curscript->scope.funcs.end(); it++) {  //For each function called by each timeline
+        auto subscr = scr_lookup.find(it->first); //Check if it's a script
         if (subscr != scr_lookup.end()) { //At this point, what we have is this:     for each script called by curscript
-          curscript->obj.copy_calls_from(subscr->second->obj);
+          curscript->scope.copy_calls_from(subscr->second->scope);
         }
       }
 
-      for (parsed_object::tlineit it = curscript->obj.tlines.begin(); it != curscript->obj.tlines.end(); it++) {  // For each tline called by each tline
+      for (parsed_object::tlineit it = curscript->scope.tlines.begin(); it != curscript->scope.tlines.end(); it++) {  // For each tline called by each tline
         auto timit = tline_lookup.find(it->first); // Check if it's a timeline.
         if (timit != tline_lookup.end()) { // If we've got ourselves a timeline
           for (const auto &moment : timit->second.moments) {
-            curscript->obj.copy_calls_from(moment.script->obj);
-            curscript->obj.copy_tlines_from(moment.script->obj);
+            curscript->scope.copy_calls_from(moment.script->scope);
+            curscript->scope.copy_tlines_from(moment.script->scope);
           }
         }
       }
@@ -180,20 +194,17 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   edbg << "Completing script \"Link\"" << flushl;
 
   for (size_t script_ind = 0; script_ind < game.scripts.size(); ++script_ind) {
-    parsed_script* curscript = scripts[script_ind];
+    ParsedScript* curscript = scripts[script_ind];
     string curscrname = game.scripts[script_ind].name;
     edbg << "Linking `" << curscrname << "':\n";
-    for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
-    {
-      cout << string(it->first) << "::";
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
-      {
-        cout << "is_script::";
-        curscript->obj.copy_from(subscr->second->obj,  "script `"+it->first+"'",  "script `"+curscrname + "'");
+    for (const auto &func_entry : curscript->scope.funcs) {  // For each function called by each script
+      auto subscr = scr_lookup.find(func_entry.first);  // Check if it's a script
+      if (subscr != scr_lookup.end()) {  // At this point, what we have is this:     for each script called by curscript
+        curscript->scope.copy_from(subscr->second->scope, 
+                                   "script `" + func_entry.first + "`",
+                                   "script `" + curscrname + "`");
       }
     }
-    cout << endl;
   }
   edbg << "Done." << flushl;
 
@@ -205,16 +216,16 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   for (const auto &timeline : game.timelines) {
     for (const auto &moment : timeline->moments()) {
       string curscrname = timeline.name;
-      parsed_script* curscript = tlines[lookup_id++]; //At this point, what we have is this:     for each script as curscript
+      ParsedScript* curscript = tlines[lookup_id++]; //At this point, what we have is this:     for each script as curscript
       edbg << "Linking `" << curscrname << " moment: " <<moment.step() << "':\n";
-      for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
+      for (parsed_object::funcit it = curscript->scope.funcs.begin(); it != curscript->scope.funcs.end(); it++) //For each function called by each script
       {
         cout << string(it->first) << "::";
-        map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+        auto subscr = scr_lookup.find(it->first); //Check if it's a script
         if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
         {
           cout << "is_script::";
-          curscript->obj.copy_from(subscr->second->obj,  "script `"+it->first+"'",  "script `"+curscrname + "'");
+          curscript->scope.copy_from(subscr->second->scope,  "script `"+it->first+"'",  "script `"+curscrname + "'");
         }
       }
     }
@@ -233,7 +244,6 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   edbg << game.objects.size() << " Objects:\n";
   for (const auto &object : game.objects) {
     //For every object in Ism's struct, make our own
-    unsigned ev_count = 0;
     state.parsed_objects.push_back(
       new parsed_object(
         object.name, object.id(),
@@ -249,19 +259,9 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
     edbg << " " << object.name << ": " << object->legacy_events().size() << " events: " << flushl;
 
-    for (const auto& event : object->legacy_events()) {
-      int ev_id;
-        if (event.has_name()) {
-          edbg << "  Event[" << event.type() << ", " << event.name() << "] ";
-          ev_id = object_name_ids[event.name()];
-        } else {
-          edbg << "  Event[" << event.type() << ", " << event.number() << "] ";
-          ev_id = event.number();
-        }
-
-        //For each individual event (like begin_step) in the main event (Step), parse the code
-        parsed_event &pev = pob->events[ev_count++]; //Make sure each sub event knows its main event's event ID.
-        pev.mainId = event.type(), pev.id = ev_id;
+    for (const auto& event : object->egm_events()) {
+        // For each individual event (like begin_step) in the main event (Step), parse the code
+        ParsedEvent &pev = pob->all_events.emplace_back(evdata_.get_event(event), pob);
 
         //Copy the code into a string, and its attributes elsewhere
         string newcode = event.code();
@@ -269,22 +269,23 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         //Syntax check the code
 
         // Print debug info
-        edbg << "Check `" << object.name << "::" << event_get_function_name(event.type(), ev_id) << "...";
+        edbg << "Check `" << object.name << "::" << pev.ev_id.FunctionName() << "...";
 
         // Check the code
         int sc = syncheck::syntaxcheck(event.code(), newcode);
         if (sc != -1) {
           // Error. Report it.
-          user << "Syntax error in object `" << object.name << "', " << event_get_human_name(event.type(), ev_id) << " event:"
-               << ev_id << ":\n" << format_error(event.code(), syncheck::syerr, sc) << flushl;
+          user << "Syntax error in object `" << object.name << "', "
+               << pev.ev_id.HumanName() << " (" << event.DebugString() << "):\n"
+               << format_error(event.code(), syncheck::syerr, sc) << flushl;
           return E_ERROR_SYNTAX;
         }
 
         edbg << " Done. Parse...";
 
         //Add this to our objects map
-        pev.myObj = pob; //Link to its calling object.
-        parser_main(newcode,&pev,script_names, setting::compliance_mode!=setting::COMPL_STANDARD); //Format it to C++
+        pev.code = newcode;
+        parser_main(&pev, script_names, setting::compliance_mode!=setting::COMPL_STANDARD); //Format it to C++
 
         edbg << " Done." << flushl;
     }
@@ -300,8 +301,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   for (const auto &room : game.rooms) {
     parsed_room *pr;
     state.parsed_rooms.push_back(pr = new parsed_room);
-    parsed_event &pev = pr->events[0]; //Make sure each sub event knows its main event's event ID.
-    pev.mainId = 0, pev.id = 0, pev.myObj = pr;
+    pr->creation_code = new ParsedCode(&pr->pseudo_scope);
 
     std::string newcode;
     int sc = syncheck::syntaxcheck(room->creation_code(), newcode);
@@ -311,7 +311,8 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
            << format_error(room->creation_code(),syncheck::syerr,sc) << flushl;
       return E_ERROR_SYNTAX;
     }
-    parser_main(newcode,&pev,script_names);
+    pr->creation_code->code = newcode;
+    parser_main(pr->creation_code, script_names);
 
     for (const auto &instance : room->instances()) {
       if (!instance.creation_code().empty()) {
@@ -325,8 +326,10 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         }
 
         pr->instance_create_codes[instance.id()].object_name = instance.object_type();
-        parsed_event* icce = pr->instance_create_codes[instance.id()].pe = new parsed_event(-1,-1,parsed_objects[instance.object_type()]);
-        parser_main(string("with (") + to_string(instance.id()) + ") {" + newcode + "\n/* */}", icce, script_names);
+        ParsedCode* icce = pr->instance_create_codes[instance.id()].code =
+            new ParsedCode(parsed_objects[instance.object_type()]);
+        icce->code = string("with (") + to_string(instance.id()) + ") {" + newcode + "\n/* */}";
+        parser_main(icce, script_names);
       }
     }
 
@@ -344,9 +347,10 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         }
 
         pr->instance_precreate_codes[instance.id()].object_name = instance.object_type();
-        parsed_event* icce = pr->instance_precreate_codes[instance.id()].pe =
-            new parsed_event(-1,-1,parsed_objects[instance.object_type()]);
-        parser_main(string("with (") + tostring(instance.id()) + ") {" + newcode + "\n/* */}", icce, script_names);
+        ParsedCode* icce = pr->instance_precreate_codes[instance.id()].code =
+            new ParsedCode(parsed_objects[instance.object_type()]);
+        icce->code = string("with (") + tostring(instance.id()) + ") {" + newcode + "\n/* */}";
+        parser_main(icce, script_names);
       }
     }
   }
@@ -360,18 +364,17 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     parsed_object* t = i->second;
     for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
     {
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first);  // Check if it's a script
+      auto subscr = scr_lookup.find(it->first);  // Check if it's a script
       if (subscr != scr_lookup.end()) {  // If we've got ourselves a script
-        t->copy_calls_from(subscr->second->obj);
-        t->copy_tlines_from(subscr->second->obj);
+        t->copy_calls_from(subscr->second->scope);
+        t->copy_tlines_from(subscr->second->scope);
       }
     }
     for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
     {
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+      auto subscr = scr_lookup.find(it->first); //Check if it's a script
       if (subscr != scr_lookup.end()) { //If we've got ourselves a script
-
-        t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
+        t->copy_from(subscr->second->scope,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
       }
     }
   }
@@ -385,8 +388,8 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       auto timit = tline_lookup.find(it->first); //Check if it's a timeline.
       if (timit != tline_lookup.end()) { // If we've got ourselves a timeline
         for (const auto &moment : timit->second.moments) {
-          t->copy_calls_from(moment.script->obj);
-          t->copy_tlines_from(moment.script->obj);
+          t->copy_calls_from(moment.script->scope);
+          t->copy_tlines_from(moment.script->scope);
         }
       }
     }
@@ -396,7 +399,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
         //Iterate through its moments:
         for (const auto &moment : timit->second.moments) {
-          t->copy_from(moment.script->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
+          t->copy_from(moment.script->scope,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
         }
       }
     }
@@ -422,21 +425,21 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 }
 
 
-int lang_CPP::link_globals(const GameData &game, CompileState &state) {
+int lang_CPP::link_globals(const GameData &/*game*/, CompileState &state) {
   for (parsed_object *obj : state.parsed_objects)
     state.global_object.copy_from(*obj, "object `" + obj->name + "'", "the Global Scope");
   //TODO: because parsed_room inherits parsed_object it tries to use that as the name but it looks
   //like it never gets initialized, this is obviously a bug because this output never tells us the room name always just `'
   for (parsed_room *room : state.parsed_rooms)
-    state.global_object.copy_from(*room, "room `" + room->name + "'", "the Global Scope");
-  for (parsed_script *script : state.parsed_scripts)
-    state.global_object.copy_from(script->obj, "script `" + script->obj.name + "'", "the Global Scope");
-  for (parsed_script *tline : state.parsed_tlines)
-    state.global_object.copy_from(tline->obj, "timeline `" + tline->obj.name + "'", "the Global Scope");
+    state.global_object.copy_from(room->pseudo_scope, "room `" + room->name + "'", "the Global Scope");
+  for (ParsedScript *script : state.parsed_scripts)
+    state.global_object.copy_from(script->scope, "script `" + script->name + "'", "the Global Scope");
+  for (ParsedScript *tline : state.parsed_tlines)
+    state.global_object.copy_from(tline->scope, "timeline `" + tline->name + "'", "the Global Scope");
   return 0;
 }
 
-static inline void link_ambigous(parsed_object* t, parsed_object *global, string desc) {
+static void link_ambigous(ParsedScope* t, ParsedScope *global, string desc) {
   for (parsed_object::ambit it = t->ambiguous.begin(); it != t->ambiguous.end(); it++) {
     parsed_object::globit g = global->globals.find(it->first);
     if (g == global->globals.end())
@@ -447,16 +450,16 @@ static inline void link_ambigous(parsed_object* t, parsed_object *global, string
 }
 
 //Converts ambiguous types to locals if the globalvar does not exist
-int lang_CPP::link_ambiguous(const GameData &game, CompileState &state)
+int lang_CPP::link_ambiguous(const GameData &/*game*/, CompileState &state)
 {
   for (parsed_object *obj : state.parsed_objects) {
     link_ambigous(obj, &state.global_object, "object " + obj->name);
   }
   for (parsed_room *room : state.parsed_rooms) {
-    link_ambigous(room, &state.global_object, "room " + room->name);
+    link_ambigous(&room->pseudo_scope, &state.global_object, "room " + room->name);
   }
   for (const auto &script_entry : state.script_lookup) {
-    link_ambigous(&script_entry.second->obj, &state.global_object,
+    link_ambigous(&script_entry.second->scope, &state.global_object,
                   "script " + script_entry.first);
   }
   // XXX: Didn't sorlok already merge these? either the code in link_globals
@@ -465,7 +468,7 @@ int lang_CPP::link_ambiguous(const GameData &game, CompileState &state)
   for (const auto &tl_entry : state.timeline_lookup) {
     const auto &timeline = tl_entry.second;
     for (const auto &moment : timeline.moments) {
-      link_ambigous(&moment.script->obj, &state.global_object,
+      link_ambigous(&moment.script->scope, &state.global_object,
           "timeline " + tl_entry.first + ", moment " + to_string(moment.step));
     }
   }

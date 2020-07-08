@@ -95,27 +95,24 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   /* Some events are included in all objects, even if the user
   ** hasn't specified code for them. Account for those here.
   ***********************************************************/
-  for (const EventDescriptor &event : event_declarations()) {
+  for (const EventDescriptor &event_desc : event_declarations()) {
     // We may not be using this event, but it may have default code.
-    if (event.HasDefaultCode()) {  // (defaulted includes "constant")
+    if (event_desc.HasDefaultCode()) {  // (defaulted includes "constant")
       // Defaulted events may NOT be parameterized.
+      if (event_desc.IsParameterized()) {
+        std::cerr << "INTERNAL ERROR: Event " << event_desc.internal_id
+                  << " (" << event_desc.HumanName()
+                  << ") is parameterized, but has default code.";
+        continue;
+      }
+      Event event(event_desc);
       used_events.insert(Event(event));
 
       for (parsed_object *obj : parsed_objects) { // Then shell it out into the other objects.
-        bool exists = false;
-        for (unsigned j = 0; j < obj->events.size; j++) {
-          Event ev2 = translate_legacy_id_pair(obj->events[j].mainId,
-                                               obj->events[j].id);
-          if (ev2.internal_id == event.internal_id) {
-            exists = true;
-            break;
-          }
-        }
-        if (!exists) {
+        if (!obj->has_event(event)) {
           std::cout << "EVENT SYSTEM: Adding a " << event.HumanName()
                     << " event with default code.\n";
-          auto hack = reverse_lookup_legacy_event(event);
-          obj->events[obj->events.size] = parsed_event(hack.mid, hack.id, obj);
+          obj->all_events.emplace_back(event, obj);
         }
       }
     }

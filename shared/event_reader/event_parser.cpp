@@ -275,6 +275,11 @@ const Event EventData::get_event(int mid, int sid) const {
   return res;
 }
 
+Event EventData::get_event(const buffers::resources::Object::EgmEvent &event) const {
+  return get_event(event.id(), {event.arguments().begin(),
+                                event.arguments().end()});
+}
+
 bool Event::IsComplete() const {
   return arguments.size() == (unsigned) event->parameters_size();
 }
@@ -615,10 +620,6 @@ string event_get_iterator_delete_code(int mid, int id) {
   return event_access(mid, id).IteratorDeleteCode();
 }
 
-string event_get_locals(int mid, int id) {
-  return event_access(mid, id).LocalDeclarations();
-}
-
 // This is the fucking compiler oversharing. I don't know how this happened,
 // but this method always returns a function *body*. Not even a full signature.
 // JUST the body. And it's still named identically to the above.
@@ -643,11 +644,6 @@ bool event_execution_uses_default(int mid, int id) {
 void event_info_clear() {
   delete legacy_events;
   legacy_events = nullptr;
-}
-
-// Returns if the event with the given ID pair is an instance of a stacked event
-bool event_is_instance(int mid, int id) {
-  return event_access(mid, id).IsStacked();
 }
 
 const std::vector<EventDescriptor> &event_execution_order() {

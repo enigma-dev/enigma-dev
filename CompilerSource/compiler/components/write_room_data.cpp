@@ -60,7 +60,7 @@ inline string resname(string name) {
   return name.empty() ? "-1" : name;
 }
 
-int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, parsed_object *EGMglobal, int mode)
+int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, ParsedScope *EGMglobal, int mode)
 {
   ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
 
@@ -219,17 +219,17 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
       std::string codeOvr;
       std::string syntOvr;
-      if (int_ev_pair.second.pe->code.find("with((")==0) {
+      if (int_ev_pair.second.code->code.find("with((")==0) {
         //We're basically replacing "with((100002)){" with "with_room_inst((100002)){" (synt: "ssss((000000)){")
         //This is because room-instance-creation code might need a deactivated instance, which "with" cannot find.
-        codeOvr = "with_room_inst(" + int_ev_pair.second.pe->code.substr(5);
-        syntOvr = "ssssssssssssss(" + int_ev_pair.second.pe->synt.substr(5);
+        codeOvr = "with_room_inst(" + int_ev_pair.second.code->code.substr(5);
+        syntOvr = "ssssssssssssss(" + int_ev_pair.second.code->synt.substr(5);
       }
 
       print_to_file(
-        codeOvr.empty() ? int_ev_pair.second.pe->code : codeOvr,
-        syntOvr.empty() ? int_ev_pair.second.pe->synt : syntOvr,
-        int_ev_pair.second.pe->strc, int_ev_pair.second.pe->strs, 2, wto
+        codeOvr.empty() ? int_ev_pair.second.code->code : codeOvr,
+        syntOvr.empty() ? int_ev_pair.second.code->synt : syntOvr,
+        int_ev_pair.second.code->strc, int_ev_pair.second.code->strs, 2, wto
       );
       wto << "  return 0;\n}\n\n";
     }
@@ -243,17 +243,17 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
       std::string codeOvr;
       std::string syntOvr;
-      if (it->second.pe->code.find("with((")==0) {
+      if (it->second.code->code.find("with((")==0) {
         //We're basically replacing "with((100002)){" with "with_room_inst((100002)){" (synt: "ssss((000000)){")
         //This is because room-instance-precreation code might need a deactivated instance, which "with" cannot find.
-        codeOvr = "with_room_inst(" + it->second.pe->code.substr(5);
-        syntOvr = "ssssssssssssss(" + it->second.pe->synt.substr(5);
+        codeOvr = "with_room_inst(" + it->second.code->code.substr(5);
+        syntOvr = "ssssssssssssss(" + it->second.code->synt.substr(5);
       }
 
       print_to_file(
-        codeOvr.empty() ? it->second.pe->code : codeOvr,
-        syntOvr.empty() ? it->second.pe->synt : syntOvr,
-        it->second.pe->strc, it->second.pe->strs, 2, wto
+        codeOvr.empty() ? it->second.code->code : codeOvr,
+        syntOvr.empty() ? it->second.code->synt : syntOvr,
+        it->second.code->strc, it->second.code->strs, 2, wto
       );
       wto << "  return 0;\n}\n\n";
     }
@@ -277,8 +277,8 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     if (mode == emode_debug) {
       wto << "  enigma::debug_scope $current_scope(\"'room creation' for room '" << room.name << "'\");\n";
     }
-    parsed_event& ev = pr->events[0];
-    print_to_file(ev.code, ev.synt, ev.strc, ev.strs, 2, wto);
+    print_to_file(pr->creation_code->code, pr->creation_code->synt,
+                  pr->creation_code->strc, pr->creation_code->strs, 2, wto);
 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
       wto << "\n  room_"<< room.id() <<"_instancecreate_" << it->first << "();";

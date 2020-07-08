@@ -29,6 +29,8 @@
 #define ENIGMA_EVENT_PARSER_H
 
 #include <Configuration/EventDescriptor.pb.h>
+#include <Object.pb.h>
+
 #include <boost/container/small_vector.hpp>
 
 #include <string>
@@ -99,6 +101,13 @@ struct EventDescriptor {
   bool HasIteratorInitializeCode() const { return event->has_iterator_initialize(); }
   bool HasIteratorRemoveCode()     const { return event->has_iterator_remove(); }
   bool HasIteratorDeleteCode()     const { return event->has_iterator_delete(); }
+  
+  bool HasAnyAutomaticCode() const {
+    return HasPrefixCode()          || HasSuffixCode()
+        || HasConstantCode()        || HasDefaultCode()
+        || HasIteratorRemoveCode()  || HasIteratorDeleteCode()
+        || HasIteratorDeclareCode() || HasIteratorInitializeCode();
+  }
 
   std::string IteratorDeclareCode() const;
   std::string IteratorInitializeCode() const;
@@ -153,6 +162,9 @@ struct Event : EventDescriptor {
   std::string SuperCheckFunction() const;
   std::string SuperCheckExpression() const;
 
+  // Renders this event invalid.
+  void Clear();
+
   bool operator==(const Event &other) const;
   bool operator<(const Event &other) const;
 
@@ -167,6 +179,8 @@ class EventData {
   const Event get_event(int mid, int sid) const;
   // Retrieves an Event with the given ID and arguments.
   Event get_event(const std::string &id, const std::vector<std::string> &args) const;
+  // Retrieves an Event from the proto representation.
+  Event get_event(const buffers::resources::Object::EgmEvent &event) const;
   // Look up a legacy ID pair for a non-parameterized event.
   LegacyEventPair reverse_get_event(const EventDescriptor &) const;
   // Look up a legacy ID pair for an event.

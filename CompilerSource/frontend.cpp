@@ -96,7 +96,7 @@ dllexport int resource_overloadCount() {
 }
 /// Returns a simple string of parameters and defaults that would serve as the prototype of this function
 /// The returned pointer to the string is INVALIDATED upon the next call to definitionsModified().
-dllexport const char* resource_parameters(int i)  {
+dllexport const char* resource_parameters(int /* i */)  {
   static string res;
   res = current_resource->toString();
   return res.c_str();
