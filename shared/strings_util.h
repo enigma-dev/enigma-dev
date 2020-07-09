@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <cstdlib>
 
 inline std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
   size_t pos = 0;
@@ -32,6 +33,19 @@ inline std::string tolower(const std::string &str) {
     if (res[i] >= 'A' && res[i] <= 'Z') res[i] += 'a' - 'A';
   }
   return res;
+}
+
+// helper function to parse strings contain environment variables
+// example: "${HOME}/fuck you bitch/i hate you bitch ass faggots"
+string environment_expand_variables(string str) {
+  if (str.find("${") == string::npos) return str;
+  string pre = str.substr(0, str.find( "${" ));
+  string post = str.substr(str.find( "${" ) + 2);
+  if (post.find('}') == string::npos) return str;
+  string variable = post.substr(0, post.find('}'));
+  post = post.substr(post.find('}') + 1);
+  string value = std::getenv(variable) ? : "";
+  return environment_expand_variables(pre + value + post);
 }
 
 #endif
