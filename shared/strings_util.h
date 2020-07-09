@@ -44,7 +44,7 @@ inline std::string environment_expand_variables(std::string str) {
   if (post.find('}') == std::string::npos) return str;
   std::string variable = post.substr(0, post.find('}'));
   post = post.substr(post.find('}') + 1);
-  std::string value = std::getenv(variable) ? : "";
+  std::string value = std::getenv(variable.c_str()) ? : "";
   return environment_expand_variables(pre + value + post);
 }
 
