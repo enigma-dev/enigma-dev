@@ -39,8 +39,8 @@ inline std::string tolower(const std::string &str) {
 // example: "${HOME}/fuck you bitch/i hate you bitch ass faggots"
 inline std::string environment_expand_variables(std::string str) {
   if (str.find("${") == std::string::npos) return str;
-  std::string pre = str.substr(0, str.find( "${" ));
-  std::string post = str.substr(str.find( "${" ) + 2);
+  std::string pre = str.substr(0, str.find("${"));
+  std::string post = str.substr(str.find("${") + 2);
   if (post.find('}') == std::string::npos) return str;
   std::string variable = post.substr(0, post.find('}'));
   post = post.substr(post.find('}') + 1);
