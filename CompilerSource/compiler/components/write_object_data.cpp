@@ -781,9 +781,9 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
 
     if  (event.code.size() || event.ev_id.HasDefaultCode()) {
       // Write event sub check code
-      if (event.ev_id.HasSubCheck()) {
+      if (event.ev_id.HasSubCheckFunction()) {
         wto << "inline bool enigma::OBJ_" << object->name << "::myevent_" << evname << "_subcheck()\n{\n  ";
-        wto << event.ev_id.SubCheckExpression() << endl;
+        wto << event.ev_id.SubCheckFunction() << endl;
         wto << "\n}\n\n";
       }
     }
