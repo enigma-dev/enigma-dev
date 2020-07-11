@@ -259,6 +259,10 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
     edbg << " " << object.name << ": " << object->legacy_events().size() << " events: " << flushl;
 
+    if (object->egm_events_size() == 0 && object->legacy_events_size() != 0) {
+      std::cerr << "Some asshole populated legacy_events and not egm_events.\n";
+      abort();
+    }
     for (const auto& event : object->egm_events()) {
         // For each individual event (like begin_step) in the main event (Step), parse the code
         ParsedEvent &pev = pob->all_events.emplace_back(evdata_.get_event(event), pob);

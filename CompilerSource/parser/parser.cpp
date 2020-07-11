@@ -151,7 +151,7 @@ void parser_init()
 
 
 
-string parser_main(ParsedCode* pev, const std::set<std::string>& script_names, bool isObject)
+void parser_main(ParsedCode* pev, const std::set<std::string>& script_names, bool isObject)
 {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
@@ -185,8 +185,6 @@ string parser_main(ParsedCode* pev, const std::set<std::string>& script_names, b
   if (pev) { cout << "collecting variables..."; fflush(stdout);
     collect_variables(current_language, pev, script_names, isObject); cout << " done>"; fflush(stdout);
   }
-
-  return code;
 }
 
 typedef map<string,dectrip> localscope;

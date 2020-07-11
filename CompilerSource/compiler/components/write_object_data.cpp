@@ -761,25 +761,29 @@ static void write_event_bodies(ofstream& wto, const GameData &game, int mode, co
 static void write_object_event_funcs(ofstream& wto, const parsed_object *const object, int mode) {
   for (const ParsedEvent &event : object->all_events) {
     string evname = event.ev_id.FunctionName();
-    if (event.code.size()) {
-      bool defined_inherited = false;
 
-      // TODO(JoshDreamland): This is a pretty major hack; it's an extra line
-      // for no reason 99% of the time, and it doesn't allow us to give any
-      // feedback as to why a call to event_inherited() may not be valid.
-      if (object->Inherits(event.ev_id)) {
-        wto << "#define event_inherited OBJ_" + object->parent->name + "::myevent_" + evname + "\n";
-        defined_inherited = true;
-      }
+    // Inherit default code from object_locals. Don't generate the same default
+    // code for all objects.
+    if (event.code.empty()) continue;
 
-      write_event_func(wto, event, object->name, evname, mode);
+    bool defined_inherited = false;
 
-      if (defined_inherited) {
-        wto << "#undef event_inherited\n";
-      }
+    // TODO(JoshDreamland): This is a pretty major hack; it's an extra line
+    // for no reason 99% of the time, and it doesn't allow us to give any
+    // feedback as to why a call to event_inherited() may not be valid.
+    if (object->Inherits(event.ev_id) &&
+        event.code.find("event_inherited") != std::string::npos) {
+      wto << "#define event_inherited OBJ_" + object->parent->name + "::myevent_" + evname + "\n";
+      defined_inherited = true;
     }
 
-    if  (event.code.size() || event.ev_id.HasDefaultCode()) {
+    write_event_func(wto, event, object->name, evname, mode);
+
+    if (defined_inherited) {
+      wto << "#undef event_inherited\n";
+    }
+
+    if (event.ev_id.HasDefaultCode()) {
       // Write event sub check code
       if (event.ev_id.HasSubCheckFunction()) {
         wto << "inline bool enigma::OBJ_" << object->name << "::myevent_" << evname << "_subcheck()\n{\n  ";
