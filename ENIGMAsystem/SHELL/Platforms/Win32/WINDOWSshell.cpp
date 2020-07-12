@@ -91,9 +91,11 @@ string execute_shell_for_output(const string &command) {
     while (DWORD eventSignalId = MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS)) {
       if (eventSignalId == WAIT_OBJECT_0) break;
       MSG msg;
-      while (GetMessage(&msg, NULL, 0, 0)) {
-        eventSignalId = MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS);
-        if (eventSignalId == WAIT_OBJECT_0) break;
+      BOOL success;
+      char buffer[BUFSIZ];
+      DWORD dwRead = 0;
+      while (GetMessage(&msg, NULL, 0, 0) && 
+        MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
         if (msg.message == WM_NCLBUTTONDOWN && msg.wParam == HTCLOSE ||
           msg.message == WM_NCLBUTTONUP && msg.wParam == HTCLOSE) {
           PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
@@ -101,10 +103,13 @@ string execute_shell_for_output(const string &command) {
           TranslateMessage(&msg);
           DispatchMessage(&msg);
         }
+        success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
+        if (success || dwRead) {
+          buffer[dwRead] = 0;
+          output.append(buffer, dwRead);
+        } else { break; }
       }
-      char buffer[BUFSIZ];
-      DWORD dwRead = 0;
-      BOOL success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
+      success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
       if (success || dwRead) {
         buffer[dwRead] = 0;
         output.append(buffer, dwRead);
