@@ -1,5 +1,9 @@
 # ENIGMA [![Travis CI Build Status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)](https://travis-ci.org/enigma-dev/enigma-dev/) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/4j4hklw0ned5wbys?svg=true)](https://ci.appveyor.com/project/enigma-dev/enigma-dev) [![codecov](https://codecov.io/gh/enigma-dev/enigma-dev/branch/master/graph/badge.svg)](https://codecov.io/gh/enigma-dev/enigma-dev)
 
+If you find our tools useful, then please consider supporting ENIGMA on Patreon!
+
+[![Patreon](https://enigma-dev.org/site/images/v4/patreon.png)](https://www.patreon.com/m/enigma_dev) 
+
 Official Website: http://enigma-dev.org
 
 ENIGMA, the Extensible Non-Interpreted Game Maker Augmentation, is an open-source, cross-platform game development environment based on the popular software, Game Maker. Its intent is to provide users with a quality game creation tool and a bridge between high- and low-level programming languages. It can be used either through an IDE, such as its sister project, [LateralGM](https://github.com/IsmAvatar/LateralGM), or its up-and-coming custom frontend, [RadialGM](https://github.com/enigma-dev/RadialGM), or also through its command line interface, [emake](CommandLine/emake).
