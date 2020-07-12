@@ -102,11 +102,8 @@ string execute_shell_for_output(const string &command) {
     }
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
-    while (output.back() == '\r' || output.back() == '\n')
-      output.pop_back();
-    prevout = output;
   }
-  return pid;
+  return output;
 }
 
 } // namespace enigma_insecure
