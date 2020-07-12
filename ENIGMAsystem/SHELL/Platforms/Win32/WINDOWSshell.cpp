@@ -108,14 +108,12 @@ string execute_shell_for_output(const string &command) {
         if (success || dwRead) {
           buffer[dwRead] = 0;
           output.append(buffer, dwRead);
-          printf("%s", buffer);
         } else { break; }
       }
       success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
       if (success || dwRead) {
         buffer[dwRead] = 0;
         output.append(buffer, dwRead);
-        printf("%s", buffer);
       } else { break; }
     }
     CloseHandle(hStdOutPipeRead);
