@@ -96,7 +96,7 @@ string execute_shell_for_output(const string &command) {
       DWORD dwRead = 0;
       while (GetMessage(&msg, NULL, 0, 0) && 
       (eventSignalId = MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS))) {
-      if (eventSignalId == WAIT_OBJECT_0) break;
+        if (eventSignalId == WAIT_OBJECT_0) break;
         if (msg.message == WM_NCLBUTTONDOWN && msg.wParam == HTCLOSE ||
           msg.message == WM_NCLBUTTONUP && msg.wParam == HTCLOSE) {
           PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
