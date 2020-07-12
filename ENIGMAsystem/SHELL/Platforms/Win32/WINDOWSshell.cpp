@@ -88,18 +88,15 @@ string execute_shell_for_output(const string &command) {
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
     HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
-    while (MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+    while (DWORD eventSignalId = MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS)) {
+      if (eventSignalId == WAIT_OBJECT_0) break;
       MSG msg;
       BOOL success;
       char buffer[BUFSIZ];
       DWORD dwRead = 0;
-      success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
-      if (success || dwRead) {
-        buffer[dwRead] = 0;
-        output.append(buffer, dwRead);
-      } else { break; }
       while (GetMessage(&msg, NULL, 0, 0) && 
-        MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+      (eventSignalId = MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS))) {
+      if (eventSignalId == WAIT_OBJECT_0) break;
         if (msg.message == WM_NCLBUTTONDOWN && msg.wParam == HTCLOSE ||
           msg.message == WM_NCLBUTTONUP && msg.wParam == HTCLOSE) {
           PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
@@ -111,8 +108,15 @@ string execute_shell_for_output(const string &command) {
         if (success || dwRead) {
           buffer[dwRead] = 0;
           output.append(buffer, dwRead);
+          printf("%s", buffer);
         } else { break; }
       }
+      success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
+      if (success || dwRead) {
+        buffer[dwRead] = 0;
+        output.append(buffer, dwRead);
+        printf("%s", buffer);
+      } else { break; }
     }
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
