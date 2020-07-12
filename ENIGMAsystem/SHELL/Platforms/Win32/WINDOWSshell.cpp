@@ -90,6 +90,7 @@ string execute_shell_for_output(const string &command) {
     HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
     while (DWORD eventSignalId = MsgWaitForMultipleObjects(2, waitHandles, false, INFINITE, QS_ALLEVENTS)) {
       if (eventSignalId == WAIT_OBJECT_0) break;
+      if (eventSignalId == WAIT_OBJECT_0 + 1) break;
       enigma::handleEvents();
       char buffer[BUFSIZ];
       DWORD dwRead = 0;
@@ -97,13 +98,16 @@ string execute_shell_for_output(const string &command) {
       if (success || dwRead) {
         buffer[dwRead] = 0;
         output.append(buffer, dwRead);
-      }
+        printf("%s", buffer);
+      } else { break; }
     }
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
-    return output;
+    while (output.back() == '\r' || output.back() == '\n')
+      output.pop_back();
+    prevout = output;
   }
-  return "";
+  return pid;
 }
 
 } // namespace enigma_insecure
