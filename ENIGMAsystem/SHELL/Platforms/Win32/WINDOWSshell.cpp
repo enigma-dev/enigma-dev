@@ -88,12 +88,16 @@ string execute_shell_for_output(const string &command) {
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
     HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
-    while (DWORD eventSignalId = MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS)) {
-      if (eventSignalId == WAIT_OBJECT_0) break;
+    while (MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
       MSG msg;
       BOOL success;
       char buffer[BUFSIZ];
       DWORD dwRead = 0;
+      success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
+      if (success || dwRead) {
+        buffer[dwRead] = 0;
+        output.append(buffer, dwRead);
+      } else { break; }
       while (GetMessage(&msg, NULL, 0, 0) && 
         MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
         if (msg.message == WM_NCLBUTTONDOWN && msg.wParam == HTCLOSE ||
@@ -109,11 +113,6 @@ string execute_shell_for_output(const string &command) {
           output.append(buffer, dwRead);
         } else { break; }
       }
-      success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
-      if (success || dwRead) {
-        buffer[dwRead] = 0;
-        output.append(buffer, dwRead);
-      } else { break; }
     }
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
