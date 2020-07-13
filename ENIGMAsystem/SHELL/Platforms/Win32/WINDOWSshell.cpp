@@ -88,33 +88,23 @@ string execute_shell_for_output(const string &command) {
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
     HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
-    while (DWORD eventSignalId = MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS)) {
-      if (eventSignalId == WAIT_OBJECT_0) break;
-      MSG msg;
-      BOOL success;
-      char buffer[BUFSIZ];
-      DWORD dwRead = 0;
-      while (GetMessage(&msg, NULL, 0, 0) && 
-      (eventSignalId = MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS))) {
-        if (eventSignalId == WAIT_OBJECT_0) break;
-        if (msg.message == WM_NCLBUTTONDOWN && msg.wParam == HTCLOSE ||
-          msg.message == WM_NCLBUTTONUP && msg.wParam == HTCLOSE) {
-          PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
-        } else {
-          TranslateMessage(&msg);
-          DispatchMessage(&msg);
-        }
-        success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
-        if (success || dwRead) {
-          buffer[dwRead] = 0;
-          output.append(buffer, dwRead);
-        } else { break; }
+    while (GetMessage(&msg, NULL, 0, 0) &&
+      MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+      if (msg.message == WM_NCLBUTTONDOWN && msg.wParam == HTCLOSE ||
+        msg.message == WM_NCLBUTTONUP && msg.wParam == HTCLOSE) {
+        PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+      } else {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
       }
-      success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
-      if (success || dwRead) {
-        buffer[dwRead] = 0;
-        output.append(buffer, dwRead);
-      } else { break; }
+      DWORD dwRead = 0;
+      PeekNamedPipe(hStdOutPipeRead, NULL, 0, NULL, &dwAvail, NULL);
+      vector<char> buffer(dwAvail);
+      if (dwAvail) {
+        ReadFile(hStdOutPipeRead, &buffer[0], dwAvail, &dwRead, NULL);
+        buffer[dwRead] = '\0';
+        output.append(buffer.data(), dwRead);
+      }
     }
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
