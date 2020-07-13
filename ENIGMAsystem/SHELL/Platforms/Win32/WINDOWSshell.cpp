@@ -16,6 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <thread>
 #define byte __windows_byte_workaround
 #include <windows.h>
 #undef byte
@@ -60,6 +61,16 @@ void execute_shell(string fname, string args) {
   execute_program(fname, args, false);
 }
 
+static string thrdout;
+static inline void output_thread(HANDLE handle) {
+  DWORD dwRead = 0;
+  char buffer[BUFSIZ];
+  while (ReadFile(handle, buffer, BUFSIZ, &dwRead, NULL) && dwRead) {
+    buffer[dwRead] = '\0';
+    thrdout.append(buffer, dwRead);
+  }
+}
+
 string execute_shell_for_output(const string &command) {
   string output;
   tstring tstr_command = widen(command);
@@ -82,14 +93,14 @@ string execute_shell_for_output(const string &command) {
   si.hStdOutput = hStdOutPipeWrite;
   si.hStdInput = hStdInPipeRead;
   PROCESS_INFORMATION pi = { 0 };
-  if (CreateProcessW(NULL, ctstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
+  if (CreateProcessW(NULL, cwstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
+    MSG msg;
     HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
+    std::thread outthrd(output_thread, hStdOutPipeRead);
     while (GetMessage(&msg, NULL, 0, 0) &&
-      MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+      MsgWaitForMultipleObjects(2, waitHandles, false, INFINITE, QS_ALLEVENTS) != WAIT_OBJECT_0) {
       if (msg.message == WM_NCLBUTTONDOWN && msg.wParam == HTCLOSE ||
         msg.message == WM_NCLBUTTONUP && msg.wParam == HTCLOSE) {
         PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
@@ -97,15 +108,11 @@ string execute_shell_for_output(const string &command) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
       }
-      DWORD dwRead = 0;
-      PeekNamedPipe(hStdOutPipeRead, NULL, 0, NULL, &dwAvail, NULL);
-      vector<char> buffer(dwAvail);
-      if (dwAvail) {
-        ReadFile(hStdOutPipeRead, &buffer[0], dwAvail, &dwRead, NULL);
-        buffer[dwRead] = '\0';
-        output.append(buffer.data(), dwRead);
-      }
     }
+    outthrd.join();
+    output = thrdout;
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
   }
