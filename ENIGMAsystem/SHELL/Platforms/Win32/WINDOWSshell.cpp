@@ -111,6 +111,7 @@ string execute_shell_for_output(const string &command) {
     }
     outthrd.join();
     output = thrdout;
+    thrdout = "";
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeRead);
