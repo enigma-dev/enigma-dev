@@ -63,6 +63,7 @@ void execute_shell(string fname, string args) {
 
 static string thrdout;
 static inline void output_thread(HANDLE handle) {
+  thrdout = "";
   DWORD dwRead = 0;
   char buffer[BUFSIZ];
   while (ReadFile(handle, buffer, BUFSIZ, &dwRead, NULL) && dwRead) {
@@ -111,7 +112,6 @@ string execute_shell_for_output(const string &command) {
     }
     outthrd.join();
     output = thrdout;
-    thrdout = "";
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeRead);
