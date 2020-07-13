@@ -329,4 +329,8 @@ void window_set_region_size(int w, int h, bool adaptwindow) {
   enigma::compute_window_size();
 }
 
+bool window_has_focus() {
+  return enigma::game_window_focused;
+}
+
 }  //namespace enigma_user
