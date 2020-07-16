@@ -99,7 +99,7 @@ string execute_shell_for_output(const string &command) {
     CloseHandle(hStdInPipeRead);
     HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
     std::thread outthrd(output_thread, hStdOutPipeRead, &output);
-    while (MsgWaitForMultipleObjects(2, waitHandles, false, INFINITE, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+    while (MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
       enigma::handleEvents();
     }
     outthrd.join();
