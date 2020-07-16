@@ -97,7 +97,6 @@ string execute_shell_for_output(const string &command) {
   if (CreateProcessW(NULL, ctstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
-    MSG msg;
     HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
     std::thread outthrd(output_thread, hStdOutPipeRead, &output);
     while (MsgWaitForMultipleObjects(2, waitHandles, false, INFINITE, QS_ALLEVENTS) != WAIT_OBJECT_0) {
