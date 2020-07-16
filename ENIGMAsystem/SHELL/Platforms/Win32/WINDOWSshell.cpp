@@ -104,7 +104,6 @@ string execute_shell_for_output(const string &command) {
       enigma::handleEvents();
     }
     outthrd.join();
-    output = thrdout;
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeRead);
