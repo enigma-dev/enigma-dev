@@ -61,15 +61,15 @@ void execute_shell(string fname, string args) {
   execute_program(fname, args, false);
 }
 
-static string thrdout;
-static inline void output_thread(HANDLE handle) {
-  thrdout = "";
+static inline void output_thread(HANDLE handle, string *output) {
+  string result;
   DWORD dwRead = 0;
   char buffer[BUFSIZ];
   while (ReadFile(handle, buffer, BUFSIZ, &dwRead, NULL) && dwRead) {
     buffer[dwRead] = '\0';
-    thrdout.append(buffer, dwRead);
+    result.append(buffer, dwRead);
   }
+  *(output) = result;
 }
 
 string execute_shell_for_output(const string &command) {
@@ -99,16 +99,9 @@ string execute_shell_for_output(const string &command) {
     CloseHandle(hStdInPipeRead);
     MSG msg;
     HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
-    std::thread outthrd(output_thread, hStdOutPipeRead);
-    while (GetMessage(&msg, NULL, 0, 0) &&
-      MsgWaitForMultipleObjects(2, waitHandles, false, INFINITE, QS_ALLEVENTS) != WAIT_OBJECT_0) {
-      if (msg.message == WM_NCLBUTTONDOWN && msg.wParam == HTCLOSE ||
-        msg.message == WM_NCLBUTTONUP && msg.wParam == HTCLOSE) {
-        PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
-      } else {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
+    std::thread outthrd(output_thread, hStdOutPipeRead, &output);
+    while (MsgWaitForMultipleObjects(2, waitHandles, false, INFINITE, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+      enigma::handleEvents();
     }
     outthrd.join();
     output = thrdout;
