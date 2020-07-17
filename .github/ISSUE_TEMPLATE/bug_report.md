@@ -26,7 +26,7 @@ In the event of a crash or segfault, please post a backtrace from gdb if possibl
 A clear and concise description of what you expected to happen.
 
 ### Game files & Screenshots
-If applicable, upload a a simple game file and/or screenshots demonstrating the issue. Please upload any files directly to the GitHub issue so the links do not die,
+If applicable, upload a simple game file and/or screenshots demonstrating the issue. Please upload any files directly to the GitHub issue so the links do not die.
 
 ### ENIGMA Configuration:
 * The OS you're on (Windows, Linux, etc)
