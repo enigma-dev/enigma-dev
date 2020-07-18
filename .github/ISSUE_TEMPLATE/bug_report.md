@@ -1,3 +1,12 @@
+---
+name: Bug Report
+about: Report an issue with ENIGMA
+title: ''
+labels: 'Unconfirmed'
+assignees: ''
+
+---
+
 ### LateralGM / RadialGM Bugs
 If your bug relates specifically to the IDE please file it on the appropriate tracker.
 
