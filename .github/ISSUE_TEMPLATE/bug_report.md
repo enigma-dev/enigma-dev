@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+<!-- Please search existing issues first to avoid creating duplicates. -->
+
 ### LateralGM / RadialGM Bugs
 If your bug relates specifically to the IDE please file it on the appropriate tracker.
 
