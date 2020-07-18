@@ -1,11 +1,13 @@
 ---
-name: Bug Report
-about: Report an issue with ENIGMA
+name: ENIGMA Compiler, Command Line, & Engine Bug Report
+about: Report an issue with building, running, and debugging a game or reading a project using libEGM or any of the other command line-related tools.
 title: ''
 labels: 'Unconfirmed'
 assignees: ''
 
 ---
+
+<!-- Please search existing issues first to avoid creating duplicates. -->
 
 ### LateralGM / RadialGM Bugs
 If your bug relates specifically to the IDE please file it on the appropriate tracker.
