@@ -38,24 +38,6 @@ using namespace std;
 #include "event_reader/event_parser.h"
 #include "languages/lang_CPP.h"
 
-struct UsedEventIndex {
-  map<string, Event> base_methods;
-  set<Event> all;
-  std::string StackedFunctionName(const Event &ev) {
-    return ev.IsStacked() ? ev.BaseFunctionName()
-                          : ev.FunctionName();
-  }
-  void insert(int mid, int id) {
-    Event ev = translate_legacy_id_pair(mid, id);
-    base_methods.insert({StackedFunctionName(ev), ev});
-    all.insert(ev);
-  }
-  void insert(const Event &ev) {
-    base_methods.insert({StackedFunctionName(ev), ev});
-    all.insert(ev);
-  }
-};
-
 static inline int event_get_number(const buffers::resources::Object::LegacyEvent &event) {
   if (event.has_name()) {
     std::cerr << "ERROR! IMPLEMENT ME: Event names not supported in compiler.\n";
@@ -68,15 +50,14 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   /* Generate a new list of events used by the objects in
   ** this game. Only events on this list will be exported.
   ***********************************************************/
-  UsedEventIndex used_events;
+  std::set<EventGroupKey> used_events;
 
   // Defragged events must be written before object data, or object data cannot
   // determine which events were used.
-  for (size_t i = 0; i < game.objects.size(); i++) {
-    for (int ii = 0; ii < game.objects[i]->legacy_events().size(); ii++) {
-      const int mid = game.objects[i]->legacy_events(ii).type();
-      const int  id = event_get_number(game.objects[i]->legacy_events(ii));
-      used_events.insert(mid,id);
+  for (const parsed_object *object : parsed_objects) {
+    for (const ParsedEvent &event : object->all_events) {
+      if (event.ev_id.RegistersIterator())
+        used_events.insert({event.ev_id});
     }
   }
 
@@ -95,7 +76,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   /* Some events are included in all objects, even if the user
   ** hasn't specified code for them. Account for those here.
   ***********************************************************/
-  for (const EventDescriptor &event_desc : event_declarations()) {
+  for (const EventDescriptor &event_desc : event_data().events()) {
     // We may not be using this event, but it may have default code.
     if (event_desc.HasDefaultCode()) {  // (defaulted includes "constant")
       // Defaulted events may NOT be parameterized.
@@ -105,14 +86,19 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
                   << ") is parameterized, but has default code.";
         continue;
       }
-      Event event(event_desc);
-      used_events.insert(Event(event));
+      // This is a valid construction because we just checked that the event
+      // has no parameters. It's neither stacked nor specialized.
+      Event event{event_desc};
+      if (event.RegistersIterator()) used_events.insert({event});
 
       for (parsed_object *obj : parsed_objects) { // Then shell it out into the other objects.
         if (!obj->has_event(event)) {
           std::cout << "EVENT SYSTEM: Adding a " << event.HumanName()
                     << " event with default code.\n";
-          obj->all_events.emplace_back(event, obj);
+          // Insert the event, but don't put anything in it.
+          // Probably the tackiest thing I've done for this new event system,
+          // but shouldn't manage to break anything.
+          obj->registered_events.insert(event);
         }
       }
     }
@@ -125,9 +111,8 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
 
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;
   wto << "  {" << endl;
-  for (const auto &str_ev : used_events.base_methods) {
-    const string &fname = str_ev.first;
-    const EventDescriptor &event = str_ev.second;
+  for (const auto &event : used_events) {
+    const string fname = event.FunctionName();
     const bool e_is_inst = event.IsStacked();
     if (event.HasSubCheck() && !e_is_inst) {
       wto << "    inline virtual bool myevent_" << fname << "_subcheck() { return false; }\n";
@@ -167,20 +152,20 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   wto.close();
 
 
-  /* Now we write the actual event sequence code, as
-  ** well as an initializer function for the whole system.
-  ***************************************************************/
+  /* Now we writes an initializer function for the whole system. This allocates
+  ** event iterator queue heads and populates some metadata for error reporting.
+  *****************************************************************************/
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_events.h").c_str());
   wto << license;
   wto << "namespace enigma" << endl << "{" << endl;
 
   // Start by defining storage locations for our event lists to iterate.
-  for (const auto &evfun : used_events.base_methods)
-    wto << "  event_iter *event_" << evfun.first << ";" << endl;
+  for (const auto &event : used_events)
+    wto << "  event_iter *event_" << event.FunctionName() << ";" << endl;
 
   // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
-  wto << "    events = new event_iter[" << used_events.base_methods.size() << "]; // Allocated here; not really meant to change." << endl;
+  wto << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
 
   int obj_high_id = 0;
   for (parsed_object *obj : parsed_objects) {
@@ -189,14 +174,17 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   wto << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
 
   int ind = 0;
-  for (const auto &evfun : used_events.base_methods)
-    wto << "    event_" << evfun.first << " = events + " << ind++ << ";  event_"
-        << evfun.first << "->name = \"" << evfun.second.HumanName() << "\";\n";
+  for (const auto &event : used_events) {
+    const string evname = event.FunctionName();
+    wto << "    event_" << evname << " = events + " << ind++ << ";\n"
+        << "    event_" << evname << "->name = \"" << event.HumanName() << "\";"
+           "\n\n";
+  }
   wto << "    return 0;" << endl;
   wto << "  }" << endl;
 
-    // Game setting initaliser
-  wto << "  int game_settings_initialize()" << endl << "  {" << endl;
+  // Game setting initaliser
+  wto << "  int game_settings_initialize() {" << endl;
   // This should only effect texture interpolation if it has not already been enabled
   if (!game.settings.general().show_cursor())
     wto << "    window_set_cursor(cr_none);" << endl;
@@ -207,33 +195,49 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   wto << "    return 0;" << endl;
   wto << "  }" << endl;
 
-  wto << "  variant ev_perf(int type, int numb)\n  {\n    return ((enigma::event_parent*)(instance_event_iterator->inst))->myevents_perf(type, numb);\n  }\n";
+  wto << "  variant ev_perf(int type, int numb) {\n"
+         "    return ((enigma::event_parent*) instance_event_iterator->inst)->myevents_perf(type, numb);\n"
+         "  }\n";
 
   /* Some Super Checks are more complicated than others, requiring a function. Export those functions here. */
-  for (const auto &event : used_events.all) {
+  for (const auto &event : used_events) {
     if (event.HasSuperCheckFunction()) {
       wto << "  static inline bool supercheck_" << event.FunctionName()
           << "() " << event.SuperCheckFunction() << "\n\n";
     }
   }
 
-  /* Now the event sequence */
+  /* Lastly, add any events that have Instead code to our used_event map for
+  ** consideration. These will simply have their instead blocks thrown in.
+  *****************************************************************************/
+  for (const EventDescriptor &event_desc : event_data().events()) {
+    if (!event_desc.HasInsteadCode()) continue;
+    // Inlined events may NOT be parameterized.
+    if (event_desc.IsParameterized()) {
+      std::cerr << "INTERNAL ERROR: Event " << event_desc.internal_id
+                << " (" << event_desc.HumanName()
+                << ") is parameterized, but has inlined event loop code.";
+      continue;
+    }
+    used_events.insert({Event{event_desc}});
+  }
+
+  /* Now for the grand finale:  the actual event sequence.
+  *****************************************************************************/
   wto << "  int ENIGMA_events()" << endl << "  {" << endl;
-  for (const EventDescriptor &event : event_declarations()) {
-    auto it = used_events.base_methods.find(event.BaseFunctionName());
-    if (it == used_events.base_methods.end()) continue;
+  for (const EventGroupKey &event : used_events) {
     if (!event.UsesEventLoop()) continue;
 
-    string base_indent = string(4, ' ');
+    string base_indent =  string(4, ' ');
     bool callsubcheck =   event.HasSubCheck()   && !event.IsStacked();
     bool emitsupercheck = event.HasSuperCheck() && !event.IsStacked();
-    const string fname = event.BaseFunctionName();
+    const string fname =  event.FunctionName();
 
-    if (event.HasInsteadCode()) {
+    if (((EventDescriptor&) event).HasInsteadCode()) {
       wto << base_indent << event.InsteadCode() + "\n\n";
     } else if (emitsupercheck) {
       if (event.HasSuperCheckExpression()) {
-        wto << base_indent << "if (" << Event(event).SuperCheckExpression() << ")\n";
+        wto << base_indent << "if (" << event.SuperCheckExpression() << ")\n";
       } else {
         wto << base_indent << "if (myevent_" << fname + "_supercheck())\n";
       }

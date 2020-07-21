@@ -19,72 +19,72 @@ Events:
   - ID: GameStart
     Name: "Game Start"
     Description: "Start of the game."
-    Type: System
+    Type: TriggerAll
 
   - ID: WindowClose
     Name: "Window Close"
     Description: "Window was closed."
-    Type: System
+    Type: TriggerAll
 
   - ID: ImageLoaded
     Name: "Image Loaded"
     Description: "Image finished loading."
-    Type: System
+    Type: TriggerAll
 
   - ID: SoundLoaded
     Name: "Sound Loaded"
     Description: "Sound finished loading."
-    Type: System
+    Type: TriggerAll
 
   - ID: HTTP
     Name: "HTTP"
     Description: "Callback from one of the http_ functions, such as `http_post_string`."
-    Type: System
+    Type: TriggerAll
 
   - ID: Dialog
     Name: "Dialog"
     Description: "Dialog resolved"
-    Type: System
+    Type: TriggerAll
 
   - ID: IAP
     Name: "In App Purchase"
     Description: "In-App purchase"
-    Type: System
+    Type: TriggerAll
 
   - ID: Cloud
     Name: "Cloud"
     Description: "Callback from one of the cloud_ functions, such as `cloud_synchronise`."
-    Type: System
+    Type: TriggerAll
 
   - ID: Networking
     Name: "Networking"
     Description: "Network traffic detected."
-    Type: System
+    Type: TriggerAll
 
   - ID: Steam
     Name: "Steam"
     Description: "Callback from one of the Steam API functions."
-    Type: System
+    Type: TriggerAll
 
   - ID: Social
     Name: "Social"
     Description: "Callback from one of the Social API functions."
-    Type: System
+    Type: TriggerAll
 
   - ID: RoomStart
     Name: "Room Start"
     Description: "New room loaded."
-    Type: System
+    Type: TriggerAll
 
   - ID: Create
     Name: "Create"
     Description: "Instance constructor (called when the instance is first created)."
-    Type: System
+    Type: TriggerOnce
 
   - ID: Destroy
     Name: "Destroy"
     Description: "Instance destructor (called as the instance is destroyed)."
-    Type: System
+    Type: TriggerOnce
 
   - ID: BeginStep
     Name: "Begin Step"
@@ -102,7 +102,7 @@ Events:
 
   - ID: Alarm
     Name: "Alarm %1"
-    Type: Parameterized
+    Type: Stacked
     Parameters:
       - integer
     Group: Alarm
@@ -116,7 +116,7 @@ Events:
     Name: "Keyboard %1"
     Description: "A key was pressed or is being held."
     Group: "Input"
-    Type: Parameterized
+    Type: Specialized  # We want the event loop to handle checking each key.
     Parameters:
       - Key
     SuperCheck: |
@@ -126,7 +126,7 @@ Events:
     Name: "Key Pressed %1"
     Description: "A key was pressed."
     Group: "Input"
-    Type: Parameterized
+    Type: Specialized  # We want the event loop to handle checking each key.
     Parameters:
       - Key
     SuperCheck: |
@@ -136,7 +136,7 @@ Events:
     Name: "Key Released %1"
     Description: "A key was pressed."
     Group: "Input"
-    Type: Parameterized
+    Type: Specialized  # We want the event loop to handle checking each key.
     Parameters:
       - Key
     SuperCheck: |
@@ -146,7 +146,7 @@ Events:
     Name: "Mouse Button %1"
     Description: "A mouse button is pressed or held and the mouse is hovering this instance."
     Group: "Input"
-    Type: Parameterized
+    Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
       - mouseButton
     SuperCheck: |
@@ -158,7 +158,7 @@ Events:
     Name: "Mouse Button Pressed %1"
     Description: "A mouse button was pressed while hovering this instance."
     Group: "Input"
-    Type: Parameterized
+    Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
       - mouseButton
     SuperCheck: |
@@ -170,7 +170,7 @@ Events:
     Name: "Mouse Button Released %1"
     Description: "A mouse button was released while hovering this instance."
     Group: "Input"
-    Type: Parameterized
+    Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
       - mouseButton
     SuperCheck: |
@@ -181,7 +181,7 @@ Events:
   - ID: GlobalMouseButton
     Name: "Global Mouse Button %1"
     Description: "A mouse button was pressed or is being held."
-    Type: Parameterized
+    Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
       - mouseButton
     SuperCheck: |
@@ -191,7 +191,7 @@ Events:
     Name: "Global Mouse Button Pressed %1"
     Description: "A mouse button was pressed."
     Group: "Input"
-    Type: Parameterized
+    Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
       - mouseButton
     SuperCheck: |
@@ -201,7 +201,7 @@ Events:
     Name: "Global Mouse Button Released %1"
     Description: "A mouse button was released."
     Group: "Input"
-    Type: Parameterized
+    Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
       - mouseButton
     SuperCheck: |
@@ -209,14 +209,12 @@ Events:
 
   - ID: MouseWheelUp
     Name: "Mouse Wheel Up"
-    Type: Special
     Description: "Mouse scroll wheel was rotated upwards. See `mouse_vscrolls`."
     SuperCheck: |
       mouse_vscrolls > 0
 
   - ID: MouseWheelDown
     Name: "Mouse Wheel Down"
-    Type: Special
     Description: "Mouse scroll wheel was rotated downwards. See `mouse_vscrolls`."
     SuperCheck: |
       mouse_vscrolls < 0
@@ -224,7 +222,6 @@ Events:
   - ID: MouseEnterWindow
     Name: "Mouse Enter Window"
     Description:  "Mouse has entered the window."
-    Type: Special
     Locals: bool $innowEnter = false;
     SubCheck: |
       {
@@ -236,7 +233,6 @@ Events:
   - ID: MouseLeaveWindow
     Name: "Mouse Leave Window"
     Description: "Mouse has left the window."
-    Type: Special
     Locals: |
       bool $innowLeave = false;
     SubCheck: |
@@ -250,31 +246,26 @@ Events:
     Name: "Step"
     Group: "Step"
     Description: "Standard step event executed after begin step and input handling."
-    Type: Special
     Constant: |
-      {
-        if (timeline_running && timeline_speed != 0) {
-          advance_curr_timeline();
-        }
+      if (timeline_running && timeline_speed != 0) {
+        advance_curr_timeline();
       }
 
   - ID: LocalSweep
     Name: "Locals sweep"
     Description: "Internal event to update local variables."
-    Type: Inline
+    Type: System
     Constant: |
       enigma::propagate_locals(this);
 
   - ID: PathEnd
     Name: "Path End"
     Description: "Instance has reached the endpoint of a path."
-    Type: Special
     SuperCheck: "false" # TODO: Paths are not yet implemented.
 
   - ID: OutsideRoom
     Name: "Outside Room"
     Description: "Instance has move outside the room's bounds."
-    Type: Special
     SubCheck: |
       (bbox_right < 0)  || (bbox_left > room_width) ||
       (bbox_bottom < 0) || (bbox_top > room_height)
@@ -282,7 +273,6 @@ Events:
   - ID: InsideRoom
     Name: "Inside Room"
     Description: "Instance has moved inside the room's bounds."
-    Type: Special
     SubCheck: |
       (bbox_left < 0) || (bbox_right > room_width) ||
       (bbox_top < 0)  || (bbox_bottom > room_height)
@@ -290,7 +280,7 @@ Events:
   - ID: OutsideView
     Name: "Outside View %1"
     Description: "Instance has moved outside of the view's bounds."
-    Type: Parameterized
+    Type: Stacked
     Parameters:
       - integer
     SubCheck: |
@@ -304,7 +294,7 @@ Events:
   - ID: InsideView
     Name: "Inside View %1"
     Description: "Instance has moved inside of the view's bounds."
-    Type: Parameterized
+    Type: Stacked
     Parameters:
       - integer
     SubCheck: |
@@ -318,14 +308,13 @@ Events:
   - ID: NoMoreLives
     Name: "No More Lives"
     Description: "Lives variable has dropped to 0."
-    Type: Special
     SuperCheck: |
       enigma::update_lives_status_and_return_zeroless()
 
   - ID: NoMoreHealth
     Name: "No More Health"
     Description: "Health variable has dropped to 0."
-    Type: Special
+    Type: Specialized
     Locals: "bool $out_of_health = 0;"
     SubCheck: |
       {
@@ -340,7 +329,6 @@ Events:
     Name: "Pre-collision automatic collision handling."
     Description: "Internal event to update collision stuff"
     Type: Inline
-    Default: ";"
     Instead: |
       enigma::perform_callbacks_before_collision_event();
 
@@ -348,11 +336,11 @@ Events:
     Name: "Collision %1"
     Description: "Instance is colliding (overlapping) with another object."
     Group: "Collisions"
-    Type: Parameterized
+    Type: Stacked
     Parameters:
       - object
-    SuperCheck: |
-      instance_number(%1)
+    # SuperCheck: |
+    #   instance_number(%1)
     SubCheck: |
       (instance_other = enigma::place_meeting_inst(x,y,%1))
     Prefix: |
@@ -367,6 +355,7 @@ Events:
           }
       /* [ Begin user code ] */
 
+    
     Suffix: |
       /* [ End user code ] */
           if (enigma::glaccess(int(other))->solid) {
@@ -384,7 +373,6 @@ Events:
     Name: "End Step"
     Description: "The last of the step events."
     Group: "Step"
-    Type: Special
     Constant: |
       {
         if (timeline_running && timeline_loop && timeline_speed != 0)
@@ -395,7 +383,6 @@ Events:
     Name: "Particle systems update."
     Description: "Internal event to update particles"
     Type: Inline
-    Default: ";"
     Instead: |
       enigma::perform_callbacks_particle_updating();
 
@@ -403,7 +390,6 @@ Events:
     Name: "Draw"
     Description: "Draw inside the current viewport."
     Group: "Draw"
-    Type: Special
     SubCheck: "visible"
     IteratorDeclare: "/* Draw is handled by depth */"
     IteratorInitialize: "/* Draw is initialized in the constructor */"
@@ -423,7 +409,6 @@ Events:
     Name: "Draw GUI"
     Description: "Draw directly on top the window, ignoring any viewports."
     Group: "Draw"
-    Type: Special
     IteratorDeclare: "/* DrawGUI is handled by depth */"
     IteratorInitialize: "++enigma::gui_used;"
     IteratorRemove: "--enigma::gui_used;"
@@ -433,29 +418,28 @@ Events:
   - ID: WindowResize
     Name: "Window Resize"
     Description: "Window size has changed."
-    Type: System
+    Type: TriggerAll
 
   - ID: AnimationEnd
     Name: "Animation End"
     Description: "Instance sprite has reached the last subimage."
-    Type: Special
     SubCheck: |
       !(image_index + image_speed < sprite_get_number(sprite_index))
 
   - ID: RoomEnd
     Name: "Room End"
     Description: "The current room has changed."
-    Type: System
+    Type: TriggerAll
 
   - ID: GameEnd
     Name: "Game End"
     Description: "Game is ending."
-    Type: System
+    Type: TriggerAll
 
   - ID: User
     Name: "User %1"
     Description: "Custom user event. Invoked manually."
-    Type: System
+    Type: TriggerOnce
     Parameters:
       - string
 
@@ -463,7 +447,7 @@ Events:
     Name: "Joystick %1 Axis %2"
     Description: "A joystick button is pressed or held"
     Group: "Input"
-    Type: Parameterized
+    Type: Specialized
     Parameters:
       - integer
       - joystickButton
@@ -473,7 +457,7 @@ Events:
     Name: "Joystick %1 Button %2"
     Description: "A joystick button is pressed or held"
     Group: "Input"
-    Type: Parameterized
+    Type: Specialized
     Parameters:
       - integer
       - joystickButton

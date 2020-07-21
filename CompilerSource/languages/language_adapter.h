@@ -65,6 +65,11 @@ struct language_adapter {
   virtual syntax_error* definitionsModified(const char*, const char*) = 0;
   virtual int compile(const GameData &game, const char* exe_filename, int mode) = 0;
 
+  // Getter to retrieve event data. Sort of arbitrary but idgaf right now.
+  // Lots of loose ends to sort regarding ownership of static state.
+  // Maybe this all belongs in CompileState. Who knows.
+  virtual const EventData &event_data() const = 0;
+
   // ===============================================================================================
   // == Language Integration =======================================================================
   // ===============================================================================================

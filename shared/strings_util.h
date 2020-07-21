@@ -21,6 +21,30 @@ inline std::string Spaceify(std::string snake) {
   return snake;
 }
 
+inline std::string ToCamelCase(std::string snake, bool upper = false) {
+  size_t out = 0;
+  for (char &c : snake) {
+    if (c == '_') {
+      upper = true;
+      continue;
+    }
+    if (c >= 'a' && c <= 'z') {
+      snake[out++] = upper ? c + 'A' - 'a' : c;
+    } else if (c >= 'A' && c <= 'Z') {
+      snake[out++] = upper ? c : c + 'a' - 'A';
+    } else {
+      snake[out++] = c;
+    }
+    upper = false;
+  }
+  snake.erase(out);
+  return snake;
+}
+
+inline std::string ToPascalCase(std::string snake) {
+  return ToCamelCase(snake, true);
+}
+
 inline std::string Capitalize(std::string str) {
   if (str[0] >= 'a' && str[0] <= 'z') str[0] -= 'a' - 'A';
   return str;
@@ -79,6 +103,13 @@ inline std::vector<std::string> split_string(const std::string &str, char delimi
                 vec.push_back(tmp);
 
         return vec;
+}
+
+inline std::string StrTrim(const std::string &str) {
+  size_t s = str.find_first_not_of(" \t\r\n");
+  if (s == std::string::npos) return {};
+  size_t e = str.find_last_not_of(" \t\r\n");
+  return str.substr(s, e - s + 1);
 }
 
 inline std::string FileToString(const std::string &fName) {

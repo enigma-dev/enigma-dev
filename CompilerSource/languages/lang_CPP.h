@@ -66,6 +66,8 @@ struct lang_CPP: language_adapter {
   virtual syntax_error* definitionsModified(const char*, const char*) final;
   virtual int compile(const GameData &game, const char* exe_filename, int mode) final;
 
+  virtual const EventData &event_data() const final { return evdata_; }
+
 
   // ===============================================================================================
   // == The following methods are implemented in jdi_utility.cpp ===================================

@@ -57,7 +57,7 @@ class EGM {
                            int depth) const;
 
   // Writing ===================================================================
-  bool WriteNode(buffers::TreeNode* folder, string dir,
+  bool WriteNode(buffers::TreeNode* folder, std::string dir,
                  const fs::path &egm_root, YAML::Emitter& tree) const;
   bool WriteRes(buffers::TreeNode* res, const fs::path &dir,
                 const fs::path &egm_root) const;

@@ -46,19 +46,6 @@ inline bool iscomment(const string &n) {
   return true;
 }
 
-inline string event_forge_group_code(Event ev) {
-  string evname = ev.FunctionName();
-  // TODO: Robert "fixed" something inheritance-related by moving the supercheck
-  // inside every single subcheck block.
-  string ret = ev.HasSubCheck() ? "        if (myevent_" + evname + "_subcheck()) {\n" : "";
-  ret += (ev.HasSuperCheck()
-      ? "          if (" + ev.SuperCheckExpression() + ") myevent_"
-      : "          myevent_") + evname + "();\n";
-  if (ev.HasSubCheck())
-    ret += "        }\n";
-  return ret;
-}
-
 static inline void declare_scripts(std::ostream &wto, const GameData &game, const CompileState &state) {
   wto << "// Script identifiers\n";
   for (size_t i = 0; i < game.scripts.size(); i++)
@@ -324,7 +311,7 @@ static inline void generate_robertvecs(const ParsedObjectVec &objects) {
         } else {
           object->non_stacked_events.declare(&pev);
         }
-        if (pev.ev_id.UsesEventLoop()) {
+        if (pev.ev_id.RegistersIterator()) {
           object->registered_events.declare(&pev);
         }
       }
@@ -337,15 +324,15 @@ static inline void generate_robertvecs(const ParsedObjectVec &objects) {
 }
 
 // Write out declarations for *all* events implemented by *this* object.
-// This include events overridden from a parent event, but does not include the
-// parent's events otherwise. This includes special events like create or
-// destroy, and stacked events like individual keyboard key events (even though
-// stacked events will be wrapped into a single virtual method to be called as
-// part of the event loop). Note also that this array also includes events that
+// This include events overridden from a parent event, but does not include
+// the parent's events otherwise. This includes special events like create or
+// destroy, and stacked events like individual alarms (even though stacked
+// events will be wrapped into a single virtual method to be called as part
+// of the event loop). Note also that this array also includes events that
 // were automatically added to this object per `events.ey`.
 static void write_object_events(std::ostream &wto, parsed_object *object) {
   for (const ParsedEvent &pev : object->all_events) {
-    string evname = pev.ev_id.FunctionName();
+    string evname = pev.ev_id.TrueFunctionName();
     if (!pev.code.empty() || pev.ev_id.HasDefaultCode()) {
       wto << "    variant myevent_" << evname << "();\n";
       if (pev.ev_id.HasSubCheck()) {
@@ -364,22 +351,35 @@ static void write_stacked_event_groups(std::ostream &wto, parsed_object *object)
   wto << "      \n      // Grouped event bases\n";
   for (const ParsedEventGroup &event_stack : object->stacked_events) {
     wto << "      void myevent_"
-        << event_stack.base_event.BaseFunctionName() << "() {\n";
+        << event_stack.event_key.BaseFunctionName() << "() {\n";
     for (ParsedEvent *event : event_stack) {
-      wto << event_forge_group_code(event->ev_id) << "\n";
+      const auto &ev = event->ev_id;
+      // Use the full function name to call individual events in this stack.
+      const string evname = ev.TrueFunctionName();
+      if (ev.HasSubCheck()) {
+        if (ev.HasSubCheckExpression()) {
+          wto << "        if (" << ev.SubCheckExpression() << ") {\n";
+        } else {
+          wto << "        if (myevent_" + evname + "_subcheck()) {\n";
+        }
+      }
+      wto << "          myevent_" + evname + "();\n";
+      if (ev.HasSubCheck())
+        wto << "        }\n";
     }
     wto << "      }\n";
   }
 }
 
-static inline void write_event_perform(std::ostream &wto, parsed_object *object) {
+static inline void write_event_perform(
+    std::ostream &wto, const EventData &events, parsed_object *object) {
   /* Event Perform Code */
   wto << "      // Event Perform Code\n";
   wto << "      variant myevents_perf(int type, int numb)\n      {\n";
 
   for (const auto &event : object->all_events) {
-    string evname = event.ev_id.FunctionName();
-    auto legacy_pair = reverse_lookup_legacy_event(event.ev_id);
+    string evname = event.ev_id.TrueFunctionName();
+    auto legacy_pair = events.reverse_get_event(event.ev_id);
     wto << "        if (type == " << legacy_pair.mid << " && numb == " << legacy_pair.id << ")\n";
     wto << "          return myevent_" << evname << "();\n";
   }
@@ -408,8 +408,8 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object)
   wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << object->id << ";\n";
 
   // This tracks components of the event system.
-  for (const auto &event_group : object->registered_events) {
-    const auto &event = event_group.base_event;
+  for (const ParsedEventGroup &group : object->registered_events) {
+    const EventGroupKey &event = group.event_key;
     if (object->InheritsAny(event)) continue;
     if (event.HasIteratorDeclareCode()) {
       if (!iscomment(event.IteratorDeclareCode())) {
@@ -417,7 +417,7 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object)
       }
     } else {
       wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_"
-          << event.BaseFunctionName() << ";\n";
+          << event.FunctionName() << ";\n";
     }
   }
 
@@ -433,25 +433,28 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object)
   // Write out the unlink code in a deactivate routine that does not schedule
   // garbage collection of the instance. This is used to implement the
   // `instance_deactivate` family of functions.
-  wto << "    void deactivate()\n    {\n";
+  wto << "    void deactivate() {\n";
 
   // Unlink ourself. The rootmost parent unlinks the instance list entry.
   // Each object then unlinks its respective object list entry.
   if (!object->parent) {
     wto << "      enigma::unlink_main(ENOBJ_ITER_me);\n";
+  }else {
+    wto << "      OBJ_" << object->parent->name << "::deactivate();\n";
   }
   wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << object->id << ", "
                                       << object->id << ");\n";
 
-  for (const auto &event_group : object->registered_events) {
-    const auto &event = event_group.base_event;
+  for (const ParsedEventGroup &group : object->registered_events) {
+    const EventGroupKey &event = group.event_key;
     if (object->InheritsAny(event)) continue;
-    const string evname = event.BaseFunctionName();
+    const string evname = event.FunctionName();
     if (event.HasIteratorRemoveCode()) {
       if (!iscomment(event.IteratorRemoveCode()))
         wto << "      " << event.IteratorRemoveCode() << ";\n";
-    } else
+    } else {
       wto << "      enigma::event_" << evname << "->unlink(ENOBJ_ITER_myevent_" << evname << ");\n";
+    }
   }
 
   wto << "    }\n";
@@ -513,10 +516,10 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
     wto << "      ENOBJ_ITER_myobj" << object->id << " = enigma::link_obj_instance(this, " << object->id << ");\n";
   }
   // Event system interface
-  for (auto &event_group : object->registered_events) {
-    const auto &event = event_group.base_event;
+  for (const ParsedEventGroup &group : object->registered_events) {
+    const EventGroupKey &event = group.event_key;
     if (object->InheritsAny(event)) continue;
-    const string evname = event.BaseFunctionName();
+    const string evname = event.FunctionName();
     if (event.HasIteratorInitializeCode()) {
       if (!iscomment(event.IteratorInitializeCode()))
         wto << "      " << event.IteratorInitializeCode() << ";\n";
@@ -540,14 +543,14 @@ static void write_object_destructor(std::ostream &wto, parsed_object *object) {
   } else {
     wto << "      delete ENOBJ_ITER_myobj" << object->id << ";\n";
   }
-  for (const auto &event_group : object->registered_events) {
-    const auto &event = event_group.base_event;
+  for (const ParsedEventGroup &group : object->registered_events) {
+    const EventGroupKey &event = group.event_key;
     if (object->InheritsAny(event)) continue;
     if (event.HasIteratorDeleteCode()) {
       if (!iscomment(event.IteratorDeleteCode()))
         wto << "      " << event.IteratorDeleteCode() << ";\n";
     } else {
-      wto << "      delete ENOBJ_ITER_myevent_" << event.BaseFunctionName() << ";\n";
+      wto << "      delete ENOBJ_ITER_myevent_" << event.FunctionName() << ";\n";
     }
   }
   wto << "    }\n";
@@ -571,7 +574,7 @@ static void write_object_class_body(parsed_object* object, language_adapter *lan
   write_object_events(wto, object);
 
   write_stacked_event_groups(wto, object);
-  write_event_perform(wto, object);
+  write_event_perform(wto, lang->event_data(), object);
   write_object_unlink(wto, object);
   write_object_constructors(wto, object);
   write_object_destructor(wto, object);
@@ -760,7 +763,7 @@ static void write_event_bodies(ofstream& wto, const GameData &game, int mode, co
 
 static void write_object_event_funcs(ofstream& wto, const parsed_object *const object, int mode) {
   for (const ParsedEvent &event : object->all_events) {
-    string evname = event.ev_id.FunctionName();
+    string evname = event.ev_id.TrueFunctionName();
 
     // Inherit default code from object_locals. Don't generate the same default
     // code for all objects.
@@ -771,7 +774,7 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
     // TODO(JoshDreamland): This is a pretty major hack; it's an extra line
     // for no reason 99% of the time, and it doesn't allow us to give any
     // feedback as to why a call to event_inherited() may not be valid.
-    if (object->Inherits(event.ev_id) &&
+    if (object->InheritsSpecifically(event.ev_id) &&
         event.code.find("event_inherited") != std::string::npos) {
       wto << "#define event_inherited OBJ_" + object->parent->name + "::myevent_" + evname + "\n";
       defined_inherited = true;

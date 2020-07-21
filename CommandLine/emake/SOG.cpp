@@ -9,6 +9,7 @@ namespace fs = std::filesystem;
 #include <iostream>
 
 using std::map;
+using std::string;
 using evpair = std::pair<int, int>;
 
 bool ReadSOG(const std::string &input_file, Game *game) {
@@ -25,7 +26,7 @@ bool ReadSOG(const std::string &input_file, Game *game) {
       Event ev = event_data.DecodeEventString(evstr);
       if (ev.IsValid())  {
         if (std::ifstream f{i.string()}) {
-          evpair eid = reverse_lookup_legacy_event(ev);
+          evpair eid = event_data.reverse_get_event(ev);
           std::string code {
             std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>()
           };

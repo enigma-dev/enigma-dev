@@ -103,6 +103,8 @@ struct ConstantCache {
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
       values[Spaceify(vd->name())] = vd;
       values[Hyphenate(vd->name())] = vd;
+      values[ToPascalCase(vd->name())] = vd;
+      std::cout << " > " << ToPascalCase(vd->name()) << std::endl;
     }
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
       values[ToLower(vd->name())] = vd;

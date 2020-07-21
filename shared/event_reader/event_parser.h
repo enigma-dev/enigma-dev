@@ -115,8 +115,11 @@ struct EventDescriptor {
   std::string IteratorDeleteCode() const;
 
   // Returns whether this event will be included in the main event loop.
-  // This will be true except for events marked as System events.
+  // This will be true for all events not marked as triggered manually.
   bool UsesEventLoop() const;
+  // Returns whether this event should be registered for iteration.
+  // This will be true for all events except TRIGGER_ONCE and INLINE.
+  bool RegistersIterator() const;
 
   // Explicitly checks this event for validity.
   bool IsValid() const;
@@ -146,7 +149,7 @@ struct Event : EventDescriptor {
 
   // Returns a function name specific to this instance of an event.
   // Identical to BaseFunctionName for non-parameterized events.
-  std::string FunctionName() const;
+  std::string TrueFunctionName() const;
 
   std::string PrefixCode() const;
   std::string SuffixCode() const;
@@ -171,6 +174,14 @@ struct Event : EventDescriptor {
  private:
   // Replaces %1 with parameter 1, %2 with parameter 2, etc.
   std::string ParamSubst(const std::string &str) const;
+};
+
+struct EventGroupKey : Event {
+  bool operator<(const Event &other) const;
+  std::string FunctionName() const {
+    if (IsStacked()) return BaseFunctionName();
+    return TrueFunctionName();
+  }
 };
 
 class EventData {
@@ -228,49 +239,5 @@ buffers::config::EventFile ParseEventFile(std::istream &file);
 // Reads the given file in as an EventFile proto.
 // This is just a convenience method around ReadYamlFileAs<EventFile>().
 buffers::config::EventFile ParseEventFile(const std::string &filename);
-
-// TODO: Delete all methods below this line.
-// Let an object own this state instead of relying on statics.
-
-using std::string;
-extern string event_get_function_name(int mid, int id);
-extern string event_get_human_name(int mid, int id);
-extern bool   event_has_default_code(int mid, int id);
-extern string event_get_default_code(int mid, int id);
-extern bool   event_has_instead(int mid, int id);
-extern string event_get_instead(int mid, int id);
-extern bool   event_has_super_check(int mid, int id);
-extern string event_get_super_check_condition(int mid, int id);
-extern bool   event_has_sub_check(int mid, int id);
-extern string event_get_sub_check_condition(int mid, int id);
-extern bool   event_has_const_code(int mid, int id);
-extern string event_get_const_code(int mid, int id);
-extern bool   event_has_prefix_code(int mid, int id);
-extern string event_get_prefix_code(int mid, int id);
-extern bool   event_has_suffix_code(int mid, int id);
-extern string event_get_suffix_code(int mid, int id);
-extern bool   event_execution_uses_default(int mid, int id);
-bool event_is_instance(int mid, int id);
-string event_stacked_get_root_name(int mid);
-
-bool event_has_iterator_declare_code(int mid, int id);
-bool event_has_iterator_initialize_code(int mid, int id);
-bool event_has_iterator_unlink_code(int mid, int id);
-bool event_has_iterator_delete_code(int mid, int id);
-string event_get_iterator_declare_code(int mid, int id);
-string event_get_iterator_initialize_code(int mid, int id);
-string event_get_iterator_unlink_code(int mid, int id);
-string event_get_iterator_delete_code(int mid, int id);
-
-string event_get_locals(int mid, int id);
-
-void event_parse_resourcefile();
-void event_info_clear();
-
-const std::vector<EventDescriptor> &event_declarations();
-const Event translate_legacy_id_pair(int mid, int id);
-
-LegacyEventPair reverse_lookup_legacy_event(const Event &e);
-LegacyEventPair reverse_lookup_legacy_event(const EventDescriptor &e);
 
 #endif // ENIGMA_EVENT_PARSER_H

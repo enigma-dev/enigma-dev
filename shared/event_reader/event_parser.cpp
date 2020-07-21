@@ -58,7 +58,7 @@ using cb::EventFile;
 static cb::EventDescriptor MakeSentinelDescriptor() {
   cb::EventDescriptor res;
   res.set_id("InvalidEvent");
-  res.set_type(cb::EventDescriptor::SYSTEM);
+  res.set_type(cb::EventDescriptor::TRIGGER_ONCE);
   return res;
 }
 static cb::EventDescriptor kSentinelDescriptor = MakeSentinelDescriptor();
@@ -169,7 +169,7 @@ std::string Event::ParamSubst(const std::string &str) const {
     pc = str.find_first_of('%', pc);
   }
   res += str.substr(start);
-  return res;
+  return StrTrim(res);
 }
 
 EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
@@ -185,7 +185,7 @@ EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
   }
   for (const EventDescriptor &event_wrapper : event_wrappers_) {
     const int iid = event_wrapper.internal_id;
-    const string evid = StripChar(event_wrapper.event->id(), '.');
+    const std::string evid = StripChar(event_wrapper.event->id(), '.');
     if (!event_index_.insert({ToLower(evid), &event_wrapper}).second) {
       std::cerr << "EVENT ERROR: Duplicate event ID " << evid << std::endl;
     }
@@ -258,7 +258,7 @@ const Event EventData::get_event(int mid, int sid) const {
   }
 
   Event res = it->second;
-  string value, spelling;
+  std::string value, spelling;
   const std::string &kind = res.ParameterKind(0);
   auto pit = parameter_vals_.find({kind, sid});
   if (pit != parameter_vals_.end()) {
@@ -287,13 +287,12 @@ bool EventDescriptor::IsParameterized() const {
   return event->parameters_size();
 }
 bool EventDescriptor::IsStacked() const {
-  return event->parameters_size() &&
-         event->type() != cb::EventDescriptor::SYSTEM;
+  return event->type() == cb::EventDescriptor::STACKED;
 }
 
 std::string EventDescriptor::ExampleIDStrings() const {
   Event example(*this);
-  for (const string &p : event->parameters()) {
+  for (const std::string &p : event->parameters()) {
     example.arguments.push_back({p, p});
   }
   return example.IdString();
@@ -358,7 +357,12 @@ std::string EventDescriptor::IteratorDeleteCode() const {
 }
 
 bool EventDescriptor::UsesEventLoop() const {
-  return event->type()  != cb::EventDescriptor::SYSTEM;
+  return event->type() != cb::EventDescriptor::TRIGGER_ONCE &&
+         event->type() != cb::EventDescriptor::TRIGGER_ALL;
+}
+bool EventDescriptor::RegistersIterator() const {
+  return event->type() != cb::EventDescriptor::TRIGGER_ONCE &&
+         event->type() != cb::EventDescriptor::INLINE;
 }
 
 std::string Event::SubCheckExpression() const {
@@ -378,7 +382,7 @@ std::string Event::SuperCheckExpression() const {
   return ParamSubst(event->super_check());
 }
 
-std::string Event::FunctionName() const {
+std::string Event::TrueFunctionName() const {
   std::string res;
   std::string ntempl = event->id();
   size_t arg = 0, at = 0, dot;
@@ -422,6 +426,22 @@ bool Event::operator==(const Event &other) const {
 
 bool Event::operator<(const Event &other) const {
   if (internal_id != other.internal_id) return internal_id < other.internal_id;
+  if (arguments.size() != other.arguments.size())
+    return arguments.size() < other.arguments.size();
+  for (size_t i = 0; i < arguments.size(); ++i) {
+    if (arguments[i].name != other.arguments[i].name)
+      return arguments[i].name < other.arguments[i].name;
+  }
+  return false;
+}
+
+bool EventGroupKey::operator<(const Event &other) const {
+  if (internal_id != other.internal_id) return internal_id < other.internal_id;
+
+  // This is the operative difference. We treat stacked events as the same event
+  // group, even if the parameters are different.
+  if (IsStacked()) return false;
+
   if (arguments.size() != other.arguments.size())
     return arguments.size() < other.arguments.size();
   for (size_t i = 0; i < arguments.size(); ++i) {
@@ -487,179 +507,4 @@ LegacyEventPair EventData::reverse_get_event(const Event &ev) const {
   std::cerr << "EVENT ERROR: Unknown " << arg_kind << " parameter value " << arg
             << ": cannot map argument to event sub-ID\n";
   return LegacyEventPair{amap.main_id, 0};
-}
-
-
-// End method implementations --------------------------------------------------
-// -----------------------------------------------------------------------------
-// Legacy shit continnues below ------------------------------------------------
-
-// Used by the rest of these functions
-static inline const Event event_access(int mid, int id) {
-  if (!legacy_events) {
-    std::cerr << "EVENT ERROR: Someone is querying event data without parsing events.\n";
-    return kSentinelEvent;
-  }
-  return legacy_events->get_event(mid, id);
-}
-
-const std::vector<EventDescriptor> &event_declarations() {
-  if (!legacy_events) {
-    static std::vector<EventDescriptor> empty;
-    return empty;
-  }
-  return legacy_events->events();
-}
-
-// Query for a name suitable for use as an identifier. No spaces or specials.
-string event_get_function_name(int mid, int id) {
-  Event ev = event_access(mid, id);
-  if (ev.IsValid()) return ev.FunctionName();
-  return "undefinedEvent" + std::to_string(mid)
-                    + "_" + std::to_string(id) + "ERROR";
-}
-
-// Query for a root (stacked event) name suitable for use as an identifier.
-string event_stacked_get_root_name(int mid) {
-  Event ev = event_access(mid, 0);
-  if (ev.IsValid()) return ev.BaseFunctionName();
-  return "undefinedMainEvent" + std::to_string(mid) + "ERROR";
-}
-
-// Fetch a user-friendly name for the event
-// with the given credentials.
-string event_get_human_name(int mid, int id) {
-  Event ev = event_access(mid, 0);
-  if (ev.IsValid()) return ev.HumanName();
-  return "undefined or unsupported event (" + std::to_string(mid) + ", "
-                                            + std::to_string(id) + ")";
-}
-
-// Test whether there is code that will remain
-// active if a user has not declared this event.
-bool event_has_default_code(int mid, int id) {
-  return event_access(mid, id).HasDefaultCode();
-}
-
-string event_get_default_code(int mid, int id) {
-  return event_access(mid, id).DefaultCode();
-}
-
-
-// Test whether this event has code that will remain active regardless of
-// whether a user has declared this event.
-bool event_has_const_code(int mid, int id) {
-  return event_access(mid, id).HasConstantCode();
-}
-
-string event_get_const_code(int mid, int id) {
-  return event_access(mid, id).ConstantCode();
-}
-
-// Some events have special behavior as placeholders, instead of simple iteration.
-// These two functions will test for and return such.
-
-bool event_has_instead(int mid, int id) {
-  return event_access(mid, id).EventDescriptor::HasInsteadCode();
-}
-
-string event_get_instead(int mid, int id) {
-  return event_access(mid, id).InsteadCode();
-}
-
-bool event_has_prefix_code(int mid, int id) {
-  return event_access(mid, id).HasPrefixCode();
-}
-
-string event_get_prefix_code(int mid, int id) {
-  return event_access(mid, id).PrefixCode();
-}
-
-bool event_has_suffix_code(int mid, int id) {
-  return event_access(mid, id).HasSuffixCode();
-}
-
-string event_get_suffix_code(int mid, int id) {
-  return event_access(mid, id).SuffixCode();
-}
-
-// Many events check things before executing, some before starting the loop. Deal with them.
-
-bool event_has_sub_check(int mid, int id) {
-  return event_access(mid, id).HasSubCheck();
-}
-bool event_has_super_check(int mid, int id) {
-  return event_access(mid, id).HasSuperCheck();
-}
-bool event_has_super_check_condition(int mid, int id) {
-  return event_access(mid, id).HasSuperCheckExpression();
-}
-
-bool event_has_iterator_declare_code(int mid, int id) {
-  return event_access(mid, id).HasIteratorDeclareCode();
-}
-bool event_has_iterator_initialize_code(int mid, int id) {
-  return event_access(mid, id).HasIteratorInitializeCode();
-}
-bool event_has_iterator_unlink_code(int mid, int id) {
-  return event_access(mid, id).HasIteratorRemoveCode();
-}
-bool event_has_iterator_delete_code(int mid, int id) {
-  return event_access(mid, id).HasIteratorDeleteCode();
-}
-string event_get_iterator_declare_code(int mid, int id) {
-  return event_access(mid, id).IteratorDeclareCode();
-}
-string event_get_iterator_initialize_code(int mid, int id) {
-  return event_access(mid, id).IteratorInitializeCode();
-}
-string event_get_iterator_unlink_code(int mid, int id) {
-  return event_access(mid, id).IteratorRemoveCode();
-}
-string event_get_iterator_delete_code(int mid, int id) {
-  return event_access(mid, id).IteratorDeleteCode();
-}
-
-// This is the fucking compiler oversharing. I don't know how this happened,
-// but this method always returns a function *body*. Not even a full signature.
-// JUST the body. And it's still named identically to the above.
-// TODO: When deleting this method, rewire the compiler to actually
-// *conditionally* emit a subcheck function, and otherwise embed the
-// conditional.
-string event_get_sub_check_condition(int mid, int id) {
-  return event_access(mid, id).SubCheckFunction();
-}
-
-string event_get_super_check_condition(int mid, int id) {
-  return event_access(mid, id).SuperCheckExpression();
-}
-
-// Does this event belong on the list of events to execute?
-bool event_execution_uses_default(int mid, int id) {
-  return event_access(mid, id).UsesEventLoop();
-}
-
-// Clear all data from previous parses, save
-// main events, which can just be overwritten.
-void event_info_clear() {
-  delete legacy_events;
-  legacy_events = nullptr;
-}
-
-const std::vector<EventDescriptor> &event_execution_order() {
-  return legacy_events->events();
-}
-
-const Event translate_legacy_id_pair(int mid, int id) {
-  return event_access(mid, id);
-}
-
-// This method exists to prolong the life of robertmap, which is prohibitively
-// inscrutable. Delete this method after deleting that entire system or
-// replacing its keys/values with the new Event ids.
-LegacyEventPair reverse_lookup_legacy_event(const Event &ev) {
-  return legacy_events->reverse_get_event(ev);
-}
-LegacyEventPair reverse_lookup_legacy_event(const EventDescriptor &evd) {
-  return legacy_events->reverse_get_event(evd);
 }

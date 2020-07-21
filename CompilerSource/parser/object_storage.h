@@ -94,14 +94,49 @@ struct decquad {
 // groupings, and this struct can represent each of them. Each distinct type of
 // logical grouping uses a separate collection in a parsed_object.
 struct ParsedEventGroup {
-  EventDescriptor base_event;
+  EventGroupKey event_key;
   std::vector<ParsedEvent*> events;
 
+  bool empty() const { return events.empty(); }
   void push_back(ParsedEvent *ev) { events.push_back(ev); }
   std::vector<ParsedEvent*>::iterator begin() { return events.begin(); }
   std::vector<ParsedEvent*>::iterator end() { return events.end(); }
   std::vector<ParsedEvent*>::const_iterator begin() const { return events.begin(); }
   std::vector<ParsedEvent*>::const_iterator end() const { return events.end(); }
+};
+
+template<typename Map> class ValueIterator {
+  typedef typename Map::iterator It;
+  It it_;
+
+ public:
+  ValueIterator(It it): it_(it) {}
+
+  ValueIterator &operator++() { ++it_; return *this; }
+  ValueIterator &operator--() { --it_; return *this; }
+  ValueIterator operator++(int) { ValueIterator res = *this; ++it_; return res; }
+  ValueIterator operator--(int) { ValueIterator res = *this; --it_; return res; }
+
+  bool operator==(const ValueIterator &other) const { return it_ == other.it_; }
+  bool operator!=(const ValueIterator &other) const { return it_ != other.it_; }
+  
+  auto &operator*() const { return it_->second; }
+  auto &operator->() const { return it_->second; }
+};
+
+// Serves as an index over 
+class EventIndex {
+  std::map<Event, ParsedEvent*> mapping_;
+
+ public:
+  bool declare(ParsedEvent *ev) {
+    auto i = mapping_.insert({ev->ev_id, ev});
+    return i.first->second;
+  }
+
+  typedef ValueIterator<decltype(mapping_)> iterator;
+  iterator begin() { return iterator(mapping_.begin()); }
+  iterator end() { return iterator(mapping_.end()); }
 };
 
 // Groups events by their base event. This has a dual purpose:
@@ -117,38 +152,27 @@ struct ParsedEventGroup {
 //
 // See notes on its usage in parsed_object.
 class EventGroupIndex {
+  typedef std::map<EventGroupKey, ParsedEventGroup> Mapping;
+  Mapping mapping_;
+
  public:
-  ParsedEventGroup &insert(const EventDescriptor &ev) {
-    auto i = mapping_.insert({ev.internal_id, {ev, {}}});
+  ParsedEventGroup &insert(const Event &ev) {
+    auto i = mapping_.insert({EventGroupKey{ev}, ParsedEventGroup{ev, {}}});
     return i.first->second;
   }
   void declare(ParsedEvent *ev) {
-    insert(ev->ev_id).push_back(ev);
+    ParsedEventGroup &g = insert(ev->ev_id);
+    if (ev->ev_id.IsStacked() || g.empty()) {
+      g.push_back(ev);
+    } else {
+      std::cerr << "ERROR: Multiple declarations of event `"
+                << ev->ev_id.HumanName() << "` in one object!";
+    }
   }
-  
-  class iterator {
-    std::map<int, ParsedEventGroup>::iterator it_;
 
-   public:
-    iterator(std::map<int, ParsedEventGroup>::iterator it): it_(it) {}
-
-    iterator &operator++() { ++it_; return *this; }
-    iterator &operator--() { --it_; return *this; }
-    iterator operator++(int) { iterator res = *this; ++it_; return res; }
-    iterator operator--(int) { iterator res = *this; --it_; return res; }
-
-    bool operator==(const iterator &other) const { return it_ == other.it_; }
-    bool operator!=(const iterator &other) const { return it_ != other.it_; }
-    
-    ParsedEventGroup &operator*() const { return it_->second; }
-    ParsedEventGroup &operator->() const { return it_->second; }
-  };
-  
+  typedef ValueIterator<decltype(mapping_)> iterator;
   iterator begin() { return iterator(mapping_.begin()); }
   iterator end() { return iterator(mapping_.end()); }
-
- private:
-  std::map<int, ParsedEventGroup> mapping_;
 };
 
 // Represents a collection of variable name usages detected while parsing code
@@ -203,21 +227,23 @@ struct parsed_object : ParsedScope {
   // An index over normal (non-stacked) events. Because these events do not
   // accept parameters, every group in this index should be a singleton.
   // However, not all of these events will be registered!
-  EventGroupIndex non_stacked_events;
+  EventIndex non_stacked_events;
   // An index over stacked (parameterized) events. Generally, ENIGMA only emits
   // one event routine for these to avoid event pollution in generated code and
   // unnecessary overhead for vtable lookups. However, this is not the
   // collection to use for registering events. Use `registered_events`.
   EventGroupIndex stacked_events;
-  // An index over events that will be registered with the event loop.
-  // This includes both stacked and non-stacked events alike, but excludes
-  // special events (like create or destroy).
+  // Index over non-stacked events that will be registered with the event loop.
+  // Put simply, this is all non-stacked events for which UsesEventLoop is true.
+  // This includes normal and special events, but excludes trigger-once events
+  // because they are never iterated for invocation. Stacked events would be
+  // included, except they must be indexed by their base event type.
   EventGroupIndex registered_events;
   // Specific events (including arguments of parameterized events) that were
   // inherited from any other object in the chain.
   std::set<Event> inherited_events;
   // Just the internal IDs of the inherited_events set.
-  std::set<int> inherited_base_events;
+  std::set<EventGroupKey> inherited_event_groups;
 
   string name;
   int id;
@@ -239,6 +265,7 @@ struct parsed_object : ParsedScope {
   // not prevent this object from overriding the event for itself.
   void Inherit(const Event &ev) {
     inherited_events.insert(ev);
+    inherited_event_groups.insert({ev});
   }
   // Inherits into this group the events owned by the given group.
   // This explicitly excludes transitive inheritance! To achieve that,
@@ -246,12 +273,14 @@ struct parsed_object : ParsedScope {
   void InheritFrom(parsed_object *other) {
     for (const auto &e : other->all_events) Inherit(e.ev_id);
   }
-  // Checks whether any events of this type are inherited from another object.
-  bool InheritsAny(const EventDescriptor &e) const {
-    return inherited_base_events.find(e.internal_id) != inherited_base_events.end();
+  // Checks whether this event or stack is inherited from another object.
+  bool InheritsAny(const EventGroupKey &e) const {
+    return inherited_event_groups.find(e) != inherited_event_groups.end();
   }
-  // Checks whether any events of this type are inherited from another object.
-  bool Inherits(const Event &e) const {
+  // Checks whether this event in particular is inherited from another object.
+  // This is for checking specific event inheritance in EDL rather than for
+  // vtable generation.
+  bool InheritsSpecifically(const Event &e) const {
     return inherited_events.find(e) != inherited_events.end();
   }
 

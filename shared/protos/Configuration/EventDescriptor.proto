@@ -15,21 +15,28 @@ message EventDescriptor {
     // emitted to iterate that collection and fire the event each frame.
     // This is the default, so don't expect it to appear in events.ey.
     NORMAL = 0;
+    // When an event is perameterized, it often makes sense to lump all
+    // parameterizations together into a single routine to call from the event
+    // loop. This is what's meant by stacking.
+    STACKED = 1;
     // This event will need to be generated once for each permutation of input
     // parameters, which will be specified in the "parameters" field.
-    PARAMETERIZED = 1;
-    // Instead of normal iteration logic, a specific piece of code will be used
-    // to fire this event.
-    SPECIAL = 2;
-    // This event is only invoked by the system.
-    // Do not include iteration logic for it in the codegen.
-    SYSTEM = 3;
+    // This enables super checks to be used with each unique parameterization,
+    // called a "specialization."
+    SPECIALIZED = 2;
+    // This event is invoked by a particular method in the engine on a
+    // per-instance basis. Do not include iteration logic for it in the codegen.
+    TRIGGER_ONCE = 3;
+    // This event is invoked by a particular method in the engine for all
+    // interested instances. Register an iterable for it, but do not invoke it
+    // as part of the event loop.
+    TRIGGER_ALL = 4;
     // This is not a user-defined event, but a block of engine code that needs
     // to be executed within the event loop. When this type is set, the IDE
     // should not allow editing this event. Instead, the field `instead` or
     // `constant` should be defined with the engine code to be executed
     // (the former for once-per-frame logic, the latter for per-instance logic).
-    INLINE = 4;
+    INLINE = 5;
   }
 
   // The type of this event, in terms of its ExecutionStrategy. See above.

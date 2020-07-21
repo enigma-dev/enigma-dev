@@ -273,7 +273,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         //Syntax check the code
 
         // Print debug info
-        edbg << "Check `" << object.name << "::" << pev.ev_id.FunctionName() << "...";
+        edbg << "Check `" << object.name << "::" << pev.ev_id.TrueFunctionName() << "...";
 
         // Check the code
         int sc = syncheck::syntaxcheck(event.code(), newcode);

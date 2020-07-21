@@ -148,13 +148,12 @@ inline void write_exe_info(const std::string codegen_directory, const GameData &
 #include "System/builtins.h"
 
 dllexport int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
-  return current_language->compile(GameData(es), exe_filename, mode);
+  return current_language->compile(GameData(es, current_language->event_data()),
+                                   exe_filename, mode);
 }
 
 dllexport int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
-  GameData gameData(*proj);
-  int error = FlattenProto(*proj, &gameData);
-  if (error) return error;
+  GameData gameData(*proj, current_language->event_data());
   return current_language->compile(gameData, exe_filename, mode);
 }
 
@@ -232,11 +231,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
 
-  // Clean up from any previous executions.
-  edbg << "Cleaning up from previous executions" << flushl;
-  event_info_clear();     //Forget event definitions, we'll re-get them
-  edbg << " - Cleared event info." << flushl;
-
   // Re-establish ourself
   // Read the global locals: locals that will be included with each instance
   {
@@ -261,9 +255,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       user << "...Continuing anyway..." << flushl;
     }
   }
-
-  //Read the types of events
-  event_parse_resourcefile();
 
   /**** Segment One: This segment of the compile process is responsible for
   * @ * translating the code into C++. Basically, anything essential to the
