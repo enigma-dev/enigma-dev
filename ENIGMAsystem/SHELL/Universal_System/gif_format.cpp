@@ -525,6 +525,7 @@ std::vector<RawImage> image_load_gif(const std::filesystem::path& filename)
       disposalMethod = 0;
       transpColor = 1<<14;
       curr_img++;
+      res[curr_img].pxdata = out = new unsigned char[final_size](); // Initialize to zero.
     } else {
       DEBUG_MESSAGE("[GIF] Unknown control code: " + std::to_string(ctrlCode), MESSAGE_TYPE::M_ERROR);
       clearmem(out);
