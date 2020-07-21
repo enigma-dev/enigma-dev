@@ -508,6 +508,7 @@ std::vector<RawImage> image_load_gif(const std::filesystem::path& filename)
 
       //We're done! React to the disposal method.
       if (curr_img+1<res.size()) {
+        res[curr_img+1].pxdata = out = new unsigned char[final_size](); // Initialize to zero.
         if (disposalMethod==1) {
           //Leave the background in place (i.e., repaint it).
           memcpy(res[curr_img+1].pxdata, res[curr_img].pxdata, final_size);
@@ -525,7 +526,6 @@ std::vector<RawImage> image_load_gif(const std::filesystem::path& filename)
       disposalMethod = 0;
       transpColor = 1<<14;
       curr_img++;
-      res[curr_img].pxdata = out = new unsigned char[final_size](); // Initialize to zero.
     } else {
       DEBUG_MESSAGE("[GIF] Unknown control code: " + std::to_string(ctrlCode), MESSAGE_TYPE::M_ERROR);
       clearmem(out);
