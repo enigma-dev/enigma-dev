@@ -266,7 +266,7 @@ int image_save(const std::filesystem::path& filename, const unsigned char* data,
 }
 
 std::vector<RawImage> image_load_bmp(const std::filesystem::path& filename) {
-  if (std::ifstream bmp{filename.u8string()}) {
+  if (std::ifstream bmp{filename.u8string(),ios::in | ios::binary}) {
     std::stringstream buffer;
     buffer << bmp.rdbuf();
     return image_decode_bmp(buffer.str());
