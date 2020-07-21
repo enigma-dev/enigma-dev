@@ -249,7 +249,7 @@ int image_save(string filename, const unsigned char* data, unsigned width, unsig
 unsigned char* image_load_bmp(
     string filename, unsigned int* width, unsigned int* height,
     unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
-  if (std::ifstream bmp{filename}) {
+  if (std::ifstream bmp{filename, ios::in | ios::binary}) {
     std::stringstream buffer;
     buffer << bmp.rdbuf();
     return image_decode_bmp(buffer.str(), width, height,
