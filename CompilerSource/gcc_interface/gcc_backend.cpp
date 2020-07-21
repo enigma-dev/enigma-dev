@@ -39,9 +39,9 @@
   #define byte __windows_byte_workaround
   #include <windows.h>
   #undef byte
- #define dllexport extern "C" __declspec(dllexport)
+ #define DLLEXPORT extern "C" __declspec(dllexport)
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <cstdio>
 #endif
 
@@ -223,7 +223,7 @@ const char* establish_bearings(const char *compiler)
   return 0;
 }
 
-/*dllexport const char* gccDefinePath(const char* compiler)
+/*DLLEXPORT const char* gccDefinePath(const char* compiler)
 {
   return establish_bearings(compiler);
 }*/
