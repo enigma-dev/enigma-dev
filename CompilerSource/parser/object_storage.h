@@ -267,7 +267,7 @@ struct parsed_object : ParsedScope {
     inherited_events.insert(ev);
     inherited_event_groups.insert({ev});
   }
-  // Inherits into this group the events owned by the given group.
+  // Inherits into this object the events owned by the given object.
   // This explicitly excludes transitive inheritance! To achieve that,
   // you must inherit from each object in the chain.
   void InheritFrom(parsed_object *other) {
@@ -282,6 +282,17 @@ struct parsed_object : ParsedScope {
   // vtable generation.
   bool InheritsSpecifically(const Event &e) const {
     return inherited_events.find(e) != inherited_events.end();
+  }
+  // Used to include default code for a given event in this object.
+  // Behaves like inheriting from an object that doesn't exist.
+  // This is sort of a hack to make up for how event_parent isn't
+  // really an object. Some of this code would be simpler if it was.
+  void InheritDefaultedEvent(const Event &event) {
+    // Insert the event, but don't put anything in it. Only do this in objects
+    // which don't have a parent (otherwise, we'll get redundant declare code).
+    // Probably the tackiest thing I've done for this new event system,
+    // but shouldn't manage to break anything.
+    if (!parent) registered_events.insert(event);
   }
 
   // These can eventually go away. This was from a time when "auto" was a

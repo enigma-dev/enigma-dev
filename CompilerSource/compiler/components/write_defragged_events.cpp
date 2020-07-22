@@ -95,10 +95,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
         if (!obj->has_event(event)) {
           std::cout << "EVENT SYSTEM: Adding a " << event.HumanName()
                     << " event with default code.\n";
-          // Insert the event, but don't put anything in it.
-          // Probably the tackiest thing I've done for this new event system,
-          // but shouldn't manage to break anything.
-          obj->registered_events.insert(event);
+          obj->InheritDefaultedEvent(event);
         }
       }
     }
@@ -115,7 +112,12 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
     const string fname = event.FunctionName();
     const bool e_is_inst = event.IsStacked();
     if (event.HasSubCheck() && !e_is_inst) {
-      wto << "    inline virtual bool myevent_" << fname << "_subcheck() { return false; }\n";
+      wto << "    bool myevent_" << fname << "_subcheck() ";
+      if (event.HasSubCheckFunction()) {
+        wto << event.SubCheckFunction() << "\n";
+      } else {
+        wto << "{\n  return " << event.SubCheckExpression() << ";\n}\n";
+      }
     }
     wto << (e_is_inst ? "    virtual void    myevent_" : "    virtual variant myevent_") << fname << "()";
     if (event.HasDefaultCode())
@@ -234,7 +236,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
     const string fname =  event.FunctionName();
 
     if (((EventDescriptor&) event).HasInsteadCode()) {
-      wto << base_indent << event.InsteadCode() + "\n\n";
+      wto << base_indent << event.InsteadCode();
     } else if (emitsupercheck) {
       if (event.HasSuperCheckExpression()) {
         wto << base_indent << "if (" << event.SuperCheckExpression() << ")\n";

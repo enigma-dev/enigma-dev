@@ -422,7 +422,7 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object)
   }
 
   //This is the actual call to remove the current instance from all linked records before destroying it.
-  wto << "\n    void unlink()\n    {\n";
+  wto << "\n    void unlink() {\n";
   wto << "      instance_iter_queue_for_destroy(this); // Queue for delete while we're still valid\n";
   wto << "      if (enigma::instance_deactivated_list.erase(id)==0) {\n";
   wto << "        // If it's not in the deactivated list, then it's active (so deactivate it).\n";
@@ -438,10 +438,13 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object)
   // Unlink ourself. The rootmost parent unlinks the instance list entry.
   // Each object then unlinks its respective object list entry.
   if (!object->parent) {
+    // We're the rootmost parent; unlink ourself from the instance list.
     wto << "      enigma::unlink_main(ENOBJ_ITER_me);\n";
   }else {
+    // Let the parent handle the instance unlink (and its own object unlinking).
     wto << "      OBJ_" << object->parent->name << "::deactivate();\n";
   }
+  // This is our object list entry.
   wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << object->id << ", "
                                       << object->id << ");\n";
 
@@ -786,13 +789,16 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
       wto << "#undef event_inherited\n";
     }
 
-    if (event.ev_id.HasDefaultCode()) {
+    if (event.ev_id.HasSubCheck()) {
       // Write event sub check code
+      wto << "inline bool enigma::OBJ_" << object->name
+          << "::myevent_" << evname << "_subcheck() ";
       if (event.ev_id.HasSubCheckFunction()) {
-        wto << "inline bool enigma::OBJ_" << object->name << "::myevent_" << evname << "_subcheck()\n{\n  ";
-        wto << event.ev_id.SubCheckFunction() << endl;
-        wto << "\n}\n\n";
+        wto << event.ev_id.SubCheckFunction();
+      } else {
+        wto << "{\n  return " << event.ev_id.SubCheckExpression() << ";\n}";
       }
+      wto << "\n\n";
     }
   }
 }
@@ -890,10 +896,14 @@ static inline void write_known_timelines(ofstream& wto, const GameData &game, co
 
 static inline void write_can_cast_func(ofstream& wto, const parsed_object *const pobj) {
   wto << "bool enigma::OBJ_" << pobj->name << "::can_cast(int obj) const {\n";
-  wto << "  return false";
+  bool written = false;
+  wto << "  return ";
   for (parsed_object* curr=pobj->parent; curr; curr=curr->parent) {
-    wto << " || (obj==" << curr->id << ")";
+    if (written) wto << " || ";
+    wto << "(obj==" << curr->id << ")";
+    written = true;
   }
+  if (!written) wto << "false";
   wto << ";\n" << "}\n\n";
 }
 
