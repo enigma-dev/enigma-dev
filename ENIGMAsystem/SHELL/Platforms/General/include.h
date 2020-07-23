@@ -4,11 +4,11 @@
 // and it should be included last in case any of them have already been
 // included before
 
-#include "Platforms/General/PFmain.h"
-#include "Platforms/General/PFwindow.h"
-#include "Platforms/General/PFthreads.h"
-#include "Platforms/General/PFfilemanip.h"
-#include "Platforms/General/PFexternals.h"
-#include "Platforms/General/PFsystem.h"
-#include "Platforms/General/PFjoystick.h"
-#include "Platforms/General/PFgamepad.h"
+#include "PFmain.h"
+#include "PFwindow.h"
+#include "PFthreads.h"
+#include "PFfilemanip.h"
+#include "PFexternals.h"
+#include "PFsystem.h"
+#include "PFjoystick.h"
+#include "PFgamepad.h"
