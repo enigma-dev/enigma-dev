@@ -16,7 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "makedir.h"
+#include "settings.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -61,7 +61,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
     }
   }
 
-  ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
+  ofstream wto((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").u8string().c_str());
   wto << license;
 
   //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
@@ -157,7 +157,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
   /* Now we writes an initializer function for the whole system. This allocates
   ** event iterator queue heads and populates some metadata for error reporting.
   *****************************************************************************/
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_events.h").c_str());
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_events.h").u8string().c_str());
   wto << license;
   wto << "namespace enigma" << endl << "{" << endl;
 

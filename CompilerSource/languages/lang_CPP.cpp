@@ -18,7 +18,7 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../makedir.h"
+#include "settings.h"
 #include <ctime>
 #include <cstdio>
 #include "languages/lang_CPP.h"
@@ -55,12 +55,12 @@ void lang_CPP::load_extension_locals() {
  #define byte __windows_byte_workaround
  #include <windows.h>
  #undef byte
- #define dllexport extern "C" __declspec(dllexport)
+ #define DLLEXPORT extern "C" __declspec(dllexport)
    #define DECLARE_TIME_TYPE clock_t
    #define CURRENT_TIME(t) t = clock()
    #define PRINT_TIME(ts, te) (((te - ts) * 1000)/CLOCKS_PER_SEC)
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <cstdio>
  #include <sys/time.h>
    #define DECLARE_TIME_TYPE timeval
@@ -88,12 +88,12 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   main_context = new jdi::context();
   
   cout << "Dumping whiteSpace definitions..." << endl;
-  FILE *of = wscode ? fopen((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").c_str(),"wb") : NULL;
+  FILE *of = wscode ? fopen((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").u8string().c_str(),"wb") : NULL;
   if (of) fputs(wscode,of), fclose(of);
   
   cout << "Opening ENIGMA for parse..." << endl;
   
-  llreader f((enigma_root + "ENIGMAsystem/SHELL/SHELLmain.cpp").c_str());
+  llreader f((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string().c_str());
   int res = 1;
   DECLARE_TIME_TYPE ts, te;
   if (f.is_open()) {

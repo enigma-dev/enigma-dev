@@ -32,7 +32,6 @@ namespace enigma_user {
 
 void cons_show_message(string message) { puts(message.c_str()); }
 void cons_print_overwritable(string message) { printf("%s\r", message.c_str()); }
-void show_debug_message(string message) { debug_message(message); }
 char cons_get_byte() {
   int c, first;
   first = c = getchar();

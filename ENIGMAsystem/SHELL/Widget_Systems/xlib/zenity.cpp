@@ -153,7 +153,7 @@ static int show_question_helperfunc(string message) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+static void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -164,13 +164,22 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   #endif
 
   str_echo = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) ? "echo 1" :
-    "if [ $ans = \"Abort\" ] ;then echo 1;elif [ $ans = \"Retry\" ] ;then echo 0;else echo -1;fi";
+    "if [ $ans = \"Abort\" ] ;then echo 1;else echo -1;fi";
 
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
-  string("--error --ok-label=Ignore --extra-button=Retry --extra-button=Abort ") +
-  string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
-  add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
+  if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
+    type == MESSAGE_TYPE::M_FATAL_USER_ERROR) {
+    str_command = string("ans=$(zenity ") +
+    string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
+    string("--error --ok-label=Abort ") +
+    string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
+    add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
+  } else {
+    str_command = string("ans=$(zenity ") +
+    string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
+    string("--error --ok-label=Ignore --extra-button=Abort ") +
+    string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
+    add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
+  }
 
   string str_result = shellscript_evaluate(str_command);
   if (strtod(str_result.c_str(), NULL) == 1) exit(0);
@@ -180,16 +189,7 @@ class ZenityWidgets : public enigma::CommandLineWidgetEngine {
  public:
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) override {
-  if (type != M_INFO && type != M_WARNING) {
-    show_debug_message_helper(errortext, type);
-  } else {
-    #ifndef DEBUG_MODE
-    fputs(errortext.c_str(), stderr);
-    #endif
-    if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
-      type == MESSAGE_TYPE::M_FATAL_USER_ERROR)
-      abort();
-  }
+  show_debug_message_helperfunc(errortext, type);
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) override {
