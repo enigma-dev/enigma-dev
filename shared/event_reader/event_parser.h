@@ -28,7 +28,7 @@
 #ifndef ENIGMA_EVENT_PARSER_H
 #define ENIGMA_EVENT_PARSER_H
 
-#include <Configuration/EventDescriptor.pb.h>
+#include <EventDescriptor.pb.h>
 #include <Object.pb.h>
 
 #include <boost/container/small_vector.hpp>
