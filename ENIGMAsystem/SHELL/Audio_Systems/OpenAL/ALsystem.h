@@ -26,7 +26,9 @@
 #include "Widget_Systems/widgets_mandatory.h"  // show_error
 #endif
 
-#include <stddef.h>
+#include <cstddef>
+#include <list>
+#include <string>
 
 #ifdef __APPLE__
 #include "../../../additional/alure/include/AL/alure.h"
@@ -41,7 +43,6 @@ extern ALfloat listenerPos[];
 extern ALfloat listenerVel[];
 extern ALfloat listenerOri[];
 
-#include <list>
 using std::list;
 extern list<ALuint> garbageBuffers;
 
