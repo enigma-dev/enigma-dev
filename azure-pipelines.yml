@@ -18,6 +18,7 @@ jobs:
   parameters:
     repo: radialgm
     enigmaref: $(Build.SourceBranch)
+    ref: refs/pull/138/merge # Use this for testing a co-dependent rgm pr but comment this before merging 
 
 - job: TestHarness
   displayName: 'Test Harness'
