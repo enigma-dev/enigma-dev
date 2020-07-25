@@ -174,24 +174,22 @@ int main(int argc, char* argv[])
     } else if (ext == "yyp") {
       if (!(project = yyp::LoadYYP(input_file))) return 1;
       return plugin.BuildGame(project->game(), mode, output_file.c_str());
+    } else if (ext == "egm") {
+      fs::path p = input_file;
+      if (fs::is_directory(p)) {
+        input_file += "/" + p.filename().stem().string() + ".egm";
+      }
+      egm::EGM egm;  // TODO: Pass in parsed events file, here.
+      if (!(project = egm.LoadEGM(input_file))) return 1;
+      return plugin.BuildGame(project->game(), mode, output_file.c_str());
+    } else if (ext.empty()) {
+      std::cerr << "Error: Unknown filetype: cannot determine type of file "
+                  << '"' << input_file << "\"." << std::endl;
 #endif
     } else {
-      if (ext == "egm") {
-        fs::path p = input_file;
-        if (fs::is_directory(p)) {
-          input_file += "/" + p.filename().stem().string() + ".egm";
-        }
-        egm::EGM egm;  // TODO: Pass in parsed events file, here.
-        if (!(project = egm.LoadEGM(input_file))) return 1;
-        return plugin.BuildGame(project->game(), mode, output_file.c_str());
-      } else if (ext.empty()) {
-        std::cerr << "Error: Unknown filetype: cannot determine type of file "
-                    << '"' << input_file << "\"." << std::endl;
-      } else {
-        std::cerr << "Error: Unknown filetype \"" << ext
-                    << "\": cannot read input file \"" << input_file
-                    << "\"." << std::endl;
-      }
+      std::cerr << "Error: Unknown filetype \"" << ext
+                  << "\": cannot read input file \"" << input_file
+                  << "\"." << std::endl;
     }
     return 1;
   }
