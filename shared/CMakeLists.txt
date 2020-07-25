@@ -11,6 +11,7 @@ set(SHARED_SOURCES
    "event_reader/event_parser.cpp"
    "rectpacker/rectpack.cpp"
    "libpng-util/libpng-util.cpp"
+   "ProtoYaml/proto-yaml.cpp"
 )
 
 add_library(${SHARED_LIB} ${LIB_TYPE} ${SHARED_SOURCES})
