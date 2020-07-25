@@ -22,11 +22,12 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   # new boost & yaml-cpp for old travis
   if [ "$COMPILER" == "Android" ]; then
     sudo add-apt-repository -y ppa:mhier/libboost-latest;
-    install_yaml_cpp
   else
     # new lcov
     sudo add-apt-repository -y ppa:cheeseboy16/travis-backports
   fi
+
+  install_yaml_cpp
 
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
   sudo apt-get -y install gcc-9 g++-9 cpp-9 build-essential libprotobuf-dev protobuf-compiler zlib1g-dev libglm-dev libpng-dev
@@ -48,7 +49,7 @@ fi
 if [ "$COMPILER" == "Android" ]; then
   sudo apt-get -y install libboost1.67-dev
 elif [ "$TRAVIS_OS_NAME" == "linux" ]; then
-  sudo apt-get -y install libboost-program-options-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev
+  sudo apt-get -y install libboost-program-options-dev pulseaudio libpugixml-dev rapidjson-dev
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
   brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
   brew install protobuf pugixml yaml-cpp rapidjson
