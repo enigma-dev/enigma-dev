@@ -42,7 +42,7 @@ static inline void joysticks_close() {
   for (size_t i = 0; i < joystick_count; i++) {
     if (joysticks[i] != NULL) {
       SDL_JoystickClose(joysticks[i]);
-	  joysticks[i] = NULL;
+      joysticks[i] = NULL;
     }
   }
 }
