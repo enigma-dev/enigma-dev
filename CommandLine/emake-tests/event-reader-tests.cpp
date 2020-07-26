@@ -129,16 +129,16 @@ TEST(EventReaderTest, RealEventFileIsReadable) {
 TEST(EventReaderTest, ReadsEventFile) {
   std::istringstream str(kTestEvents);
   EventData events(ParseEventFile(str));
-  EXPECT_EQ(event_get_function_name(2, 0), "alarm_0");
-  EXPECT_EQ(event_get_function_name(2, 12), "alarm_12");
-  EXPECT_EQ(event_get_function_name(4, 0), "collision_0");
-  EXPECT_EQ(event_get_function_name(4, 1000), "collision_1000");
-  EXPECT_EQ(event_get_function_name(6, 24), "joystick_1_button_4");
-  EXPECT_TRUE(event_has_sub_check(2, 0));
-  EXPECT_TRUE(event_has_sub_check(2, 8));
-  EXPECT_TRUE(event_has_sub_check(3, 0));
-  EXPECT_FALSE(event_has_sub_check(3, 1));
-  EXPECT_TRUE(event_has_sub_check(3, 2));
+  EXPECT_EQ(events.get_event(2, 0).TrueFunctionName(), "alarm_0");
+  EXPECT_EQ(events.get_event(2, 12).TrueFunctionName(), "alarm_12");
+  EXPECT_EQ(events.get_event(4, 0).TrueFunctionName(), "collision_0");
+  EXPECT_EQ(events.get_event(4, 1000).TrueFunctionName(), "collision_1000");
+  EXPECT_EQ(events.get_event(6, 24).TrueFunctionName(), "joystick_1_button_4");
+  EXPECT_TRUE(events.get_event(2, 0).HasSubCheck());
+  EXPECT_TRUE(events.get_event(2, 8).HasSubCheck());
+  EXPECT_TRUE(events.get_event(3, 0).HasSubCheck());
+  EXPECT_FALSE(events.get_event(3, 1).HasSubCheck());
+  EXPECT_TRUE(events.get_event(3, 2).HasSubCheck());
 }
 
 
@@ -149,7 +149,7 @@ TEST(EventReaderTest, KeyboardUp) {
   EXPECT_EQ(ev.HumanName(), "Keyboard vk_up");
   EXPECT_EQ(ev.IdString(), "Keyboard[Up]");
   EXPECT_EQ(ev.BaseFunctionName(), "keyboard");
-  EXPECT_EQ(ev.FunctionName(), "keyboard_Up");
+  EXPECT_EQ(ev.TrueFunctionName(), "keyboard_Up");
   EXPECT_EQ(events.reverse_get_event(ev).mid, 5);
   EXPECT_EQ(events.reverse_get_event(ev).id, 38);
   EXPECT_FALSE(ev.HasSubCheck());
@@ -168,7 +168,7 @@ TEST(EventReaderTest, EndStep) {
   EXPECT_EQ(ev.HumanName(), "End Step");
   EXPECT_EQ(ev.IdString(), "EndStep");
   EXPECT_EQ(ev.BaseFunctionName(), "endstep");
-  EXPECT_EQ(ev.FunctionName(), "endstep");
+  EXPECT_EQ(ev.TrueFunctionName(), "endstep");
   EXPECT_EQ(events.reverse_get_event(ev).mid, 3);
   EXPECT_EQ(events.reverse_get_event(ev).id, 2);
 }
@@ -180,7 +180,7 @@ TEST(EventReaderTest, EndStepById) {
   EXPECT_EQ(ev.HumanName(), "End Step");
   EXPECT_EQ(ev.IdString(), "EndStep");
   EXPECT_EQ(ev.BaseFunctionName(), "endstep");
-  EXPECT_EQ(ev.FunctionName(), "endstep");
+  EXPECT_EQ(ev.TrueFunctionName(), "endstep");
   EXPECT_EQ(events.reverse_get_event(ev).mid, 3);
   EXPECT_EQ(events.reverse_get_event(ev).id, 2);
 }
@@ -192,7 +192,7 @@ TEST(EventReaderTest, Collision) {
   EXPECT_EQ(ev.HumanName(), "Collision 1337");
   EXPECT_EQ(ev.IdString(), "Collision[1337]");
   EXPECT_EQ(ev.BaseFunctionName(), "collision");
-  EXPECT_EQ(ev.FunctionName(), "collision_1337");
+  EXPECT_EQ(ev.TrueFunctionName(), "collision_1337");
   EXPECT_EQ(events.reverse_get_event(ev).mid, 4);
   EXPECT_EQ(events.reverse_get_event(ev).id, 1337);
 }
@@ -204,7 +204,7 @@ TEST(EventReaderTest, CollisionById) {
   EXPECT_EQ(ev.HumanName(), "Collision 1337");
   EXPECT_EQ(ev.IdString(), "Collision[1337]");
   EXPECT_EQ(ev.BaseFunctionName(), "collision");
-  EXPECT_EQ(ev.FunctionName(), "collision_1337");
+  EXPECT_EQ(ev.TrueFunctionName(), "collision_1337");
   EXPECT_EQ(events.reverse_get_event(ev).mid, 4);
   EXPECT_EQ(events.reverse_get_event(ev).id, 1337);
 }
@@ -216,7 +216,7 @@ TEST(EventReaderTest, Alarm) {
   EXPECT_EQ(ev.HumanName(), "Alarm 12");
   EXPECT_EQ(ev.IdString(), "Alarm[12]");
   EXPECT_EQ(ev.BaseFunctionName(), "alarm");
-  EXPECT_EQ(ev.FunctionName(), "alarm_12");
+  EXPECT_EQ(ev.TrueFunctionName(), "alarm_12");
   EXPECT_EQ(events.reverse_get_event(ev).mid, 2);
   EXPECT_EQ(events.reverse_get_event(ev).id, 12);
 }
@@ -228,7 +228,7 @@ TEST(EventReaderTest, AlarmById) {
   EXPECT_EQ(ev.HumanName(), "Alarm 12");
   EXPECT_EQ(ev.IdString(), "Alarm[12]");
   EXPECT_EQ(ev.BaseFunctionName(), "alarm");
-  EXPECT_EQ(ev.FunctionName(), "alarm_12");
+  EXPECT_EQ(ev.TrueFunctionName(), "alarm_12");
   EXPECT_EQ(events.reverse_get_event(ev).mid, 2);
   EXPECT_EQ(events.reverse_get_event(ev).id, 12);
 }
@@ -240,7 +240,7 @@ TEST(EventReaderTest, Joystick) {
   EXPECT_EQ(ev.HumanName(), "Joystick 1 Button 2");
   EXPECT_EQ(ev.IdString(), "Joystick[1]Button[2]");
   EXPECT_EQ(ev.BaseFunctionName(), "joystickbutton");
-  EXPECT_EQ(ev.FunctionName(), "joystick_1_button_2");
+  EXPECT_EQ(ev.TrueFunctionName(), "joystick_1_button_2");
   EXPECT_EQ(events.reverse_get_event(ev).mid, 6);
   EXPECT_EQ(events.reverse_get_event(ev).id, 22);
 }
