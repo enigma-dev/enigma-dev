@@ -5,6 +5,7 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
+#include <filesystem>
 
 inline std::string ToLower(std::string str) {
   for (char &c : str) if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
@@ -117,6 +118,10 @@ inline std::string FileToString(const std::string &fName) {
   std::stringstream buffer;
   buffer << t.rdbuf();
   return buffer.str();
+}
+
+inline std::string FileToString(const std::filesystem::path &path) {
+  return FileToString(path.string());
 }
 
 #endif
