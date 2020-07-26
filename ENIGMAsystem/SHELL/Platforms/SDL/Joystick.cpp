@@ -22,7 +22,7 @@
 
 namespace {
 
-SDL_Joystick *joysticks[2];
+SDL_Joystick *joysticks[2] = { NULL, NULL };
 
 static inline SDL_Joystick *joystick_get_handle(int id) {
   return (id - 1 < 0.5) ? joysticks[0] : joysticks[1];
