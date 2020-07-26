@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Samuel Venable
+/** Copyright (C) 2018-2020 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -22,11 +22,27 @@
 
 namespace {
 
-SDL_Joystick *joystick1 = NULL;
-SDL_Joystick *joystick2 = NULL;
+SDL_Joystick *joysticks[2] = { NULL, NULL };
 
-static inline SDL_Joystick* joystick_get_handle(int id) {
-  return (id - 1 < 0.5) ? joystick1 : joystick2;
+static inline SDL_Joystick *joystick_get_handle(int id) {
+  if (id == 1 || id == 2) { return joysticks[id - 1]; }
+  return NULL;
+}
+
+static inline void joysticks_open() {
+  for (size_t i = 0; i < 2; i++) {
+    if (joysticks[i] == NULL) {
+      joysticks[i] = SDL_JoystickOpen(i);
+    }
+  }
+}
+
+static inline void joysticks_close() {
+  for (size_t i = 0; i < 2; i++) {
+    if (joysticks[i] == NULL) {
+      joysticks[i] = SDL_JoystickClose(i);
+    }
+  }
 }
 
 } // anonymous namespace
@@ -79,46 +95,22 @@ namespace enigma {
 bool joystick_init() {
   double init;
   init = (SDL_InitSubSystem(SDL_INIT_JOYSTICK) > 0);
-  if (joystick1 == NULL)
-    joystick1 = SDL_JoystickOpen(0);
-
-  if (joystick2 == NULL)
-    joystick2 = SDL_JoystickOpen(1);
-
+  joysticks_open();
   return init;
 }
 
 void joystick_uninit() {
-  if (joystick1 != NULL)
-    SDL_JoystickClose(joystick1);
-
-  if (joystick2 != NULL)
-    SDL_JoystickClose(joystick2);
-
+  joysticks_close();
   SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
 
 void joystick_update() {
   int joystick_count = SDL_NumJoysticks();
   if (joystick_count <= 0) {
-    if (joystick1 != NULL) {
-      SDL_JoystickClose(joystick1);
-      joystick1 = NULL;
-    }
-
-    if (joystick2 != NULL) {
-      SDL_JoystickClose(joystick2);
-      joystick2 = NULL;
-    }
+    joysticks_close();
+  } else {
+    joysticks_open();
   }
-
-  if (joystick_count > 0) {
-    if (joystick1 == NULL)
-      joystick1 = SDL_JoystickOpen(0);
-    if (joystick2 == NULL)
-      joystick2 = SDL_JoystickOpen(1);
-  }
-
   SDL_JoystickUpdate();
 }
 
