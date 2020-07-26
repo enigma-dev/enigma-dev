@@ -25,12 +25,11 @@ namespace {
 SDL_Joystick *joysticks[2];
 
 static inline SDL_Joystick *joystick_get_handle(int id) {
-  return (id - 1 < 0.5) ? joystick[0] : joystick[0];
+  return (id - 1 < 0.5) ? joysticks[0] : joysticks[1];
 }
 
 static inline void joysticks_open() {
-  int joystick_count = SDL_NumJoysticks();
-  for (size_t i = 0; i < joystick_count; i++) {
+  for (size_t i = 0; i < 2; i++) {
     if (joysticks[i] == NULL) {
       joysticks[i] = SDL_JoystickOpen(i);
     }
@@ -38,8 +37,7 @@ static inline void joysticks_open() {
 }
 
 static inline void joysticks_close() {
-  int joystick_count = SDL_NumJoysticks();
-  for (size_t i = 0; i < joystick_count; i++) {
+  for (size_t i = 0; i < 2; i++) {
     if (joysticks[i] != NULL) {
       SDL_JoystickClose(joysticks[i]);
       joysticks[i] = NULL;
