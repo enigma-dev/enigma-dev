@@ -39,8 +39,8 @@ static inline void joysticks_open() {
 
 static inline void joysticks_close() {
   for (size_t i = 0; i < 2; i++) {
-    if (joysticks[i] == NULL) {
-      joysticks[i] = SDL_JoystickClose(i);
+    if (joysticks[i] != NULL) {
+      SDL_JoystickClose(joysticks[i]);
     }
   }
 }
