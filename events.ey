@@ -148,7 +148,7 @@ Events:
     Group: "Input"
     Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
-      - mouseButton
+      - MouseButton
     SuperCheck: |
       mouse_check_button(%1)
     SubCheck: |
@@ -160,7 +160,7 @@ Events:
     Group: "Input"
     Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
-      - mouseButton
+      - MouseButton
     SuperCheck: |
       mouse_check_button_pressed(%1)
     SubCheck: |
@@ -172,7 +172,7 @@ Events:
     Group: "Input"
     Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
-      - mouseButton
+      - MouseButton
     SuperCheck: |
       mouse_check_button_pressed(%1)
     SubCheck: |
@@ -183,7 +183,7 @@ Events:
     Description: "A mouse button was pressed or is being held."
     Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
-      - mouseButton
+      - MouseButton
     SuperCheck: |
       mouse_check_button(%1)
 
@@ -193,7 +193,7 @@ Events:
     Group: "Input"
     Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
-      - mouseButton
+      - MouseButton
     SuperCheck: |
       mouse_check_button_pressed(%1)
 
@@ -203,7 +203,7 @@ Events:
     Group: "Input"
     Type: Specialized  # We want the event loop to handle checking each button.
     Parameters:
-      - mouseButton
+      - MouseButton
     SuperCheck: |
       mouse_check_button_pressed(%1)
 
@@ -450,7 +450,7 @@ Events:
     Type: Specialized
     Parameters:
       - integer
-      - joystickButton
+      - JoystickButton
     SuperCheck: "false" # TODO: not implemented yet
 
   - ID: Joystick.Button
@@ -460,7 +460,7 @@ Events:
     Type: Specialized
     Parameters:
       - integer
-      - joystickButton
+      - JoystickButton
     SuperCheck: "false" # TODO: not implemented yet
 
 # These are definitions of constants used in the above.
