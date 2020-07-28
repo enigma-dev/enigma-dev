@@ -20,27 +20,29 @@
 #include "Platforms/General/PFjoystick.h"
 #include <string>
 
+#define JOYSTICK_MAX 16
+
 namespace {
 
-SDL_Joystick *joysticks[2] = { NULL, NULL };
+std::vector<SDL_Joystick *>(JOYSTICK_MAX);
 
 static inline SDL_Joystick *joystick_get_handle(int id) {
-  return (id - 1 < 0.5) ? joysticks[0] : joysticks[1];
+  return (id < JOYSTICK_MAX) ? ((id < 1) ? joysticks[0] : joysticks[id - 1]) : joysticks[JOYSTICK_MAX - 1];
 }
 
 static inline void joysticks_open() {
-  for (size_t i = 0; i < 2; i++) {
-    if (joysticks[i] == NULL) {
+  for (size_t i = 0; i < joysticks.size(); i++) {
+    if (joysticks[i] == nullptr) {
       joysticks[i] = SDL_JoystickOpen(i);
     }
   }
 }
 
 static inline void joysticks_close() {
-  for (size_t i = 0; i < 2; i++) {
-    if (joysticks[i] != NULL) {
+  for (size_t i = 0; i < joysticks.size(); i++) {
+    if (joysticks[i] != nullptr) {
       SDL_JoystickClose(joysticks[i]);
-      joysticks[i] = NULL;
+      joysticks[i] = nullptr;
     }
   }
 }
@@ -54,22 +56,19 @@ bool joystick_exists(int id) {
 }
 
 std::string joystick_name(int id) {
-  const char *name;
-  name = SDL_JoystickName(joystick_get_handle(id));
+  const char *name = SDL_JoystickName(joystick_get_handle(id));
   return (name ? name : "");
 }
 
 int joystick_axes(int id) {
-  int axes;
   SDL_Joystick *joystick = joystick_get_handle(id);
-  axes = SDL_JoystickNumAxes(joystick);
+  int axes = SDL_JoystickNumAxes(joystick);
   return (axes > 0 ? axes : 0);
 }
 
 int joystick_buttons(int id) {
-  int buttons;
   SDL_Joystick *joystick = joystick_get_handle(id);
-  buttons = SDL_JoystickNumButtons(joystick);
+  int buttons = SDL_JoystickNumButtons(joystick);
   return (buttons > 0 ? buttons : 0);
 }
 
@@ -78,9 +77,8 @@ bool joystick_button(int id, int numb) {
 }
 
 double joystick_axis(int id, int numb) {
-  double axis;
   double pos = 0;
-  axis = SDL_JoystickGetAxis(joystick_get_handle(id), numb - 1);
+  double axis = SDL_JoystickGetAxis(joystick_get_handle(id), numb - 1);
   if (axis != -256 && axis != 0) // don't ask why this shit is necessary; it just is...
     pos = (axis / 32768);
   else if (joystick_exists(id))
@@ -93,8 +91,10 @@ double joystick_axis(int id, int numb) {
 namespace enigma {
 
 bool joystick_init() {
-  double init;
-  init = (SDL_InitSubSystem(SDL_INIT_JOYSTICK) > 0);
+  for (size_t i = 0; i < JOYSTICK_MAX; i++) {
+    joysticks[i] = nullptr;
+  }
+  bool init = (SDL_InitSubSystem(SDL_INIT_JOYSTICK) > 0);
   joysticks_open();
   return init;
 }
@@ -105,8 +105,7 @@ void joystick_uninit() {
 }
 
 void joystick_update() {
-  int joystick_count = SDL_NumJoysticks();
-  if (joystick_count <= 0) {
+  if (SDL_NumJoysticks() <= 0) {
     joysticks_close();
   } else {
     joysticks_open();
