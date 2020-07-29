@@ -5,7 +5,7 @@
 #include <vector>
 #include <sstream>
 
-inline bool string_endswith(std::string const &fullString, std::string const &ending) {
+inline bool string_ends_with(std::string const &fullString, std::string const &ending) {
     if (fullString.length() < ending.length())
       return false;
 
