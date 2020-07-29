@@ -304,7 +304,7 @@ void PackRes(const LookupMap& resMap, std::string &dir, int id, pugi::xml_node &
         continue;
       } 
         
-      if (string_endswith(gmxName, "action")) {
+      if (string_ends_with(gmxName, "action")) {
         std::vector<Action> actions;
         int cid = 0;
         for (pugi::xml_node n = child.first_element_by_path(gmxName.c_str()); n != nullptr; n = n.next_sibling()) {
