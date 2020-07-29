@@ -304,10 +304,10 @@ void PackRes(const LookupMap& resMap, std::string &dir, int id, pugi::xml_node &
         continue;
       } 
         
-      if (gmxName == "action") {
+      if (string_endswith(gmxName, "action")) {
         std::vector<Action> actions;
         int cid = 0;
-        for (pugi::xml_node n = child.child("action"); n != nullptr; n = n.next_sibling()) {
+        for (pugi::xml_node n = child.first_element_by_path(gmxName.c_str()); n != nullptr; n = n.next_sibling()) {
           if (strcmp(n.name(), "action") == 0) {  // skip over any siblings that aren't twins <foo/><bar/><foo/> <- bar would be skipped
             n.append_attribute("visited") = "true";
             Action action;

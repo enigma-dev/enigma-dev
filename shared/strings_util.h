@@ -5,6 +5,13 @@
 #include <vector>
 #include <sstream>
 
+inline bool string_endswith(std::string const &fullString, std::string const &ending) {
+    if (fullString.length() < ending.length())
+      return false;
+
+    return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+}
+
 inline std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
   size_t pos = 0;
   while ((pos = str.find(substr, pos)) != std::string::npos)

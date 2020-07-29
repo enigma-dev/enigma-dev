@@ -234,19 +234,12 @@ template<typename T> void write_asset_map(std::string& str, vector<T> resources,
   str += "  }\n},\n";
 }
 
-static bool ends_with(std::string const &fullString, std::string const &ending) {
-    if (fullString.length() < ending.length())
-      return false;
-
-    return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
-}
-
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename;
   if (exe_filename) {
     exename = exe_filename;
     const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
-    if (!ends_with(exename.u8string(), buildext.u8string())) {
+    if (!string_endswith(exename.u8string(), buildext.u8string())) {
       exename += buildext;
       exe_filename = exename.u8string().c_str();
     }
