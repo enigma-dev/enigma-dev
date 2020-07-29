@@ -23,7 +23,7 @@
 
 namespace {
 
-size_t JOYSTICK_MAX = 0;
+int JOYSTICK_MAX = 0;
 
 std::vector<SDL_Joystick *>(JOYSTICK_MAX);
 
@@ -106,7 +106,7 @@ void joystick_uninit() {
 }
 
 void joystick_update() {
-  size_t joystick_count = SDL_NumJoysticks();
+  int joystick_count = SDL_NumJoysticks();
   if (joystick_count <= 0) {
     joysticks_close();
   } else {
