@@ -109,10 +109,12 @@ void joystick_update() {
   int joystick_count = SDL_NumJoysticks();
   if (joystick_count <= 0) {
     joysticks_close();
+    JOYSTICK_MAX = 0;
+    joysticks.resize(0);
   } else {
     if (joystick_count != JOYSTICK_MAX) {
-      joysticks.resize(JOYSTICK_MAX, nullptr);
       JOYSTICK_MAX = joystick_count;
+      joysticks.resize(JOYSTICK_MAX, nullptr);
     }
     joysticks_open();
   }
