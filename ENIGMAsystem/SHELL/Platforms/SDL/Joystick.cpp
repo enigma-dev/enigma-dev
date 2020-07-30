@@ -22,11 +22,18 @@
 #include "Platforms/General/PFjoystick.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
+#ifdef DEBUG_MODE
+#include "Universal_System/Resources/resource_data.h"
+#include "Universal_System/Object_Tiers/object.h"
+#include "Universal_System/debugscope.h"
+#endif
+
 using enigma::joysticks;
 
 namespace {
 
 static inline SDL_Joystick *joystick_get_handle(int id) {
+  // joystick id starts at 1 in GameMaker
   #ifdef DEBUG_MODE
   if (id < 1 || id > joysticks.size())) { 
     DEBUG_MESSAGE("invalid joystick id: " + std::to_string(id), MESSAGE_TYPE::M_INFO); 
@@ -46,18 +53,33 @@ bool joystick_exists(int id) {
 
 std::string joystick_name(int id) {
   const char *name = SDL_JoystickName(joystick_get_handle(id));
+  #ifdef DEBUG_MODE
+  if (name == nullptr) {
+    DEBUG_MESSAGE(std::string("SDL_JoystickName failed: ") + SDL_GetError(), MESSAGE_TYPE::M_INFO);
+  }
+  #endif
   return ((name == nullptr) ? name : "");
 }
 
 int joystick_axes(int id) {
   SDL_Joystick *joystick = joystick_get_handle(id);
   int axes = SDL_JoystickNumAxes(joystick);
+  #ifdef DEBUG_MODE
+  if (axes < 0) {
+    DEBUG_MESSAGE(std::string("SDL_JoystickNumAxes failed: ") + SDL_GetError(), MESSAGE_TYPE::M_INFO);
+  }
+  #endif
   return (axes > 0 ? axes : 0);
 }
 
 int joystick_buttons(int id) {
   SDL_Joystick *joystick = joystick_get_handle(id);
   int buttons = SDL_JoystickNumButtons(joystick);
+  #ifdef DEBUG_MODE
+  if (buttons < 0) {
+    DEBUG_MESSAGE(std::string("SDL_JoystickNumButtons failed: ") + SDL_GetError(), MESSAGE_TYPE::M_INFO);
+  }
+  #endif
   return (buttons > 0 ? buttons : 0);
 }
 
@@ -95,6 +117,10 @@ void joystick_uninit() {
 
 void joysticks_open() {
   for (size_t i = 0; i < joysticks.size(); i++) {
+    int joystick_count = SDL_NumJoysticks();
+    if (joysticks.size() < joystick_count) {
+      joysticks.resize(joystick_count, nullptr);
+    }
     if (joysticks[i] == nullptr) {
       joysticks[i] = SDL_JoystickOpen(i);
     }
