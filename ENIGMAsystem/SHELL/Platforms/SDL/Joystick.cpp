@@ -23,12 +23,8 @@
 
 namespace {
 
-int JOYSTICK_MAX = 0;
-
-std::vector<SDL_Joystick *>(JOYSTICK_MAX);
-
 static inline SDL_Joystick *joystick_get_handle(int id) {
-  return (id < JOYSTICK_MAX) ? ((id < 1) ? joysticks[0] : joysticks[id - 1]) : joysticks[JOYSTICK_MAX - 1];
+  return (id < joysticks.size()) ? ((id < 1) ? joysticks[0] : joysticks[id - 1]) : joysticks[joysticks.size() - 1];
 }
 
 static inline void joysticks_open() {
@@ -92,7 +88,7 @@ double joystick_axis(int id, int numb) {
 namespace enigma {
 
 bool joystick_init() {
-  for (size_t i = 0; i < JOYSTICK_MAX; i++) {
+  for (size_t i = 0; i < joysticks.size(); i++) {
     joysticks[i] = nullptr;
   }
   bool init = (SDL_InitSubSystem(SDL_INIT_JOYSTICK) > 0);
@@ -109,12 +105,10 @@ void joystick_update() {
   int joystick_count = SDL_NumJoysticks();
   if (joystick_count <= 0) {
     joysticks_close();
-    JOYSTICK_MAX = 0;
     joysticks.resize(0);
   } else {
-    if (joystick_count != JOYSTICK_MAX) {
-      JOYSTICK_MAX = joystick_count;
-      joysticks.resize(JOYSTICK_MAX, nullptr);
+    if (joystick_count != joysticks.size()) {
+      joysticks.resize(joystick_count, nullptr);
     }
     joysticks_open();
   }
