@@ -25,7 +25,7 @@ std::vector<SDL_Joystick *> joysticks(0);
 bool joystick_init();
 void joystick_uninit();
 void joystick_update();
-void joysticks_open()
-void joysticks_close()
+void joysticks_open();
+void joysticks_close();
 
 }
