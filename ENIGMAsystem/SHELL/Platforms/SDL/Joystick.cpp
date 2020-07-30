@@ -16,6 +16,7 @@
 **/
 
 #include <string>
+#include <vector>
 
 #include "SDL2/SDL.h"
 #include "Joystick.h"
@@ -28,11 +29,11 @@
 #include "Universal_System/debugscope.h"
 #endif
 
-using enigma::joysticks;
-
 namespace {
 
-static inline SDL_Joystick *joystick_get_handle(int id) {
+std::vector<SDL_Joystick *> joysticks(0);
+
+SDL_Joystick *joystick_get_handle(int id) {
   // joystick id starts at 1 in GameMaker
   #ifdef DEBUG_MODE
   if (id < 1 || id > joysticks.size())) { 
