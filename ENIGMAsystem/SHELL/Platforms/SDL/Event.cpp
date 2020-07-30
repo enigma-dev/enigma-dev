@@ -214,10 +214,7 @@ void SDL_Event_Handler::windowResized(const SDL_Event *event) {
 
 void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) {
   addGamepad(event->cdevice.which);
-  int joystick_count = SDL_NumJoysticks();
-  if (joystick_count != joysticks.size()) {
-    joysticks.resize(joystick_count, nullptr);
-  }
+  joysticks.resize(SDL_NumJoysticks(), nullptr);
   joysticks_open();
 }
 
