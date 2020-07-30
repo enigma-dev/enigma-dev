@@ -101,16 +101,6 @@ void joystick_uninit() {
 }
 
 void joystick_update() {
-  int joystick_count = SDL_NumJoysticks();
-  if (joystick_count <= 0) {
-    joysticks_close();
-    joysticks.resize(0);
-  } else {
-    if (joystick_count != joysticks.size()) {
-      joysticks.resize(joystick_count, nullptr);
-    }
-    joysticks_open();
-  }
   SDL_JoystickUpdate();
 }
 
