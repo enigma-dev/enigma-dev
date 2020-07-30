@@ -46,7 +46,7 @@ bool joystick_exists(int id) {
 
 std::string joystick_name(int id) {
   const char *name = SDL_JoystickName(joystick_get_handle(id));
-  return (name ? name : "");
+  return ((name == nullptr) ? name : "");
 }
 
 int joystick_axes(int id) {
