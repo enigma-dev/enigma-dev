@@ -220,12 +220,6 @@ void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) {
 
 void SDL_Event_Handler::joyDeviceRemoved(const SDL_Event *event) {
   removeGamepad(event->cdevice.which);
-  int joystick_count = SDL_NumJoysticks();
-  if (joystick_count < 0) {
-    joysticks.resize(0);
-  } else {
-    joysticks.resize(joystick_count);
-  }
   joysticks_close();
 }
 
