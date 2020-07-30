@@ -15,17 +15,25 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <string>
+
 #include "SDL2/SDL.h"
 #include "Joystick.h"
 #include "Platforms/General/PFjoystick.h"
-#include <string>
+#include "Widget_Systems/widgets_mandatory.h"
 
 using enigma::joysticks;
 
 namespace {
 
 static inline SDL_Joystick *joystick_get_handle(int id) {
-  return (id < joysticks.size()) ? ((id < 1) ? joysticks[0] : joysticks[id - 1]) : joysticks[joysticks.size() - 1];
+  #ifdef DEBUG_MODE
+  if (id < 1 || id > joysticks.size())) { 
+    DEBUG_MESSAGE("invalid joystick id: " + std::to_string(id), MESSAGE_TYPE::M_INFO); 
+    return nullptr
+  }
+  #endif
+  return joysticks[id - 1];
 }
 
 } // anonymous namespace
