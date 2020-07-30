@@ -117,11 +117,11 @@ void joystick_uninit() {
 }
 
 void joysticks_open() {
+  int joystick_count = SDL_NumJoysticks();
+  if (joysticks.size() < joystick_count) {
+    joysticks.resize(joystick_count, nullptr);
+  }
   for (size_t i = 0; i < joysticks.size(); i++) {
-    int joystick_count = SDL_NumJoysticks();
-    if (joysticks.size() < joystick_count) {
-      joysticks.resize(joystick_count, nullptr);
-    }
     if (joysticks[i] == nullptr) {
       joysticks[i] = SDL_JoystickOpen(i);
     }
