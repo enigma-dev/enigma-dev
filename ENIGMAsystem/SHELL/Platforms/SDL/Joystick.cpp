@@ -20,27 +20,12 @@
 #include "Platforms/General/PFjoystick.h"
 #include <string>
 
+using enigma::joysticks;
+
 namespace {
 
 static inline SDL_Joystick *joystick_get_handle(int id) {
   return (id < joysticks.size()) ? ((id < 1) ? joysticks[0] : joysticks[id - 1]) : joysticks[joysticks.size() - 1];
-}
-
-static inline void joysticks_open() {
-  for (size_t i = 0; i < joysticks.size(); i++) {
-    if (joysticks[i] == nullptr) {
-      joysticks[i] = SDL_JoystickOpen(i);
-    }
-  }
-}
-
-static inline void joysticks_close() {
-  for (size_t i = 0; i < joysticks.size(); i++) {
-    if (joysticks[i] != nullptr) {
-      SDL_JoystickClose(joysticks[i]);
-      joysticks[i] = nullptr;
-    }
-  }
 }
 
 } // anonymous namespace
@@ -98,6 +83,23 @@ bool joystick_init() {
 void joystick_uninit() {
   joysticks_close();
   SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+}
+
+void joysticks_open() {
+  for (size_t i = 0; i < joysticks.size(); i++) {
+    if (joysticks[i] == nullptr) {
+      joysticks[i] = SDL_JoystickOpen(i);
+    }
+  }
+}
+
+void joysticks_close() {
+  for (size_t i = 0; i < joysticks.size(); i++) {
+    if (joysticks[i] != nullptr) {
+      SDL_JoystickClose(joysticks[i]);
+      joysticks[i] = nullptr;
+    }
+  }
 }
 
 void joystick_update() {
