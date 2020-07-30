@@ -148,15 +148,15 @@ void joysticks_close() {
         enigma_user::joystick_name(i) + std::string("\")..."), MESSAGE_TYPE::M_INFO);
       #endif
       SDL_JoystickClose(joysticks[i]);
-      #ifdef DEBUG_MODE
-      if (joysticks[i] == nullptr) {
-        DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i) + std::string(" doesn't exit; cannot close!"), MESSAGE_TYPE::M_INFO);
-      } else {
-        DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i) + std::string(" removed!"), MESSAGE_TYPE::M_INFO);
-      }
-      #endif
-      joysticks[i] = nullptr;
     }
+    #ifdef DEBUG_MODE
+    if (joysticks[i] == nullptr) {
+      DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i) + std::string(" doesn't exit; cannot close!"), MESSAGE_TYPE::M_INFO);
+    } else {
+      DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i) + std::string(" removed!"), MESSAGE_TYPE::M_INFO);
+    }
+    #endif
+    joysticks[i] = nullptr;
   }
 }
 
