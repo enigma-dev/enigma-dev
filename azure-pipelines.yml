@@ -121,13 +121,13 @@ jobs:
               Include = /etc/pacman.d/mirrorlist.mingw64
               [msys]
               Include = /etc/pacman.d/mirrorlist.msys"  >> /etc/pacman.conf
-        #curl https://raw.githubusercontent.com/msys2/msys2-ci-base/master/usr/share/pacman/keyrings/msys2.gpg -o /usr/share/pacman/keyrings/msys2.gpg
-        #curl https://raw.githubusercontent.com/msys2/msys2-ci-base/master/usr/share/pacman/keyrings/msys2-trusted -o /usr/share/pacman/keyrings/msys2-trusted
+        curl https://raw.githubusercontent.com/msys2/msys2-ci-base/master/usr/share/pacman/keyrings/msys2.gpg -o /usr/share/pacman/keyrings/msys2.gpg
+        curl https://raw.githubusercontent.com/msys2/msys2-ci-base/master/usr/share/pacman/keyrings/msys2-trusted -o /usr/share/pacman/keyrings/msys2-trusted
         curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
         curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig
-        #pacman-key --populate msys2
+        pacman-key --populate msys2
         pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig
-        pacman --noconfirm -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
+        pacman --overwrite='*' --noconfirm -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
         pacman -Sy --noconfirm wine pulseaudio lib32-libpulse mingw-w64-x86_64-openal mingw-w64-x86_64-dumb mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123 mingw-w64-x86_64-libsndfile mingw-w64-x86_64-zlib mingw-w64-x86_64-libffi mingw-w64-x86_64-box2d mingw-w64-x86_64-glew mingw-w64-x86_64-glm mingw-w64-x86_64-alure mingw-w64-x86_64-SDL2 mingw-w64-x86_64-pkg-config
         pacman -S --noconfirm mingw-w64-i686-openal mingw-w64-i686-dumb mingw-w64-i686-libvorbis mingw-w64-i686-libogg mingw-w64-i686-flac mingw-w64-i686-mpg123 mingw-w64-i686-libsndfile mingw-w64-i686-zlib mingw-w64-i686-libffi mingw-w64-i686-box2d mingw-w64-i686-glew mingw-w64-i686-glm mingw-w64-i686-alure mingw-w64-i686-SDL2 mingw-w64-i686-pkg-config
         EOF
