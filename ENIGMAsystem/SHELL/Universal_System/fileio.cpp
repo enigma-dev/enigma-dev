@@ -178,9 +178,9 @@ void file_bin_write_byte(int fileid, unsigned char byte) { // Writes a byte of d
 }
 
 int file_bin_read_byte(int fileid) { // Reads a byte of data from the file and returns this.
-  char byte;
-  enigma::files[fileid].fs.get(byte);
-  return (enigma::files[fileid].fs.good()) ? (int)byte : -1;
+  int byte;
+  enigma::files[fileid].fs >> byte;
+  return (enigma::files[fileid].fs.good()) ? byte : -1;
 }
 
 }
