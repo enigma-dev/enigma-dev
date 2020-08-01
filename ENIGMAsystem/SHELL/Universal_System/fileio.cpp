@@ -112,7 +112,7 @@ void file_text_writeln(int fileid, const std::string& str) {
   file_text_writeln(fileid);
 }
 
-// Reads a std::string from the file with the given file id and returns this string. A std::string ends at the end of line.
+// Reads a string from the file with the given file id and returns this string. A string ends at the end of line.
 std::string file_text_read_string(int fileid) {
   std::string line;
   if (std::getline(enigma::files[fileid].fs, line)) {
