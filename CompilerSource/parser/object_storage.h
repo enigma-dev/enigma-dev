@@ -293,6 +293,7 @@ struct parsed_object : ParsedScope {
     // Probably the tackiest thing I've done for this new event system,
     // but shouldn't manage to break anything.
     if (!parent) registered_events.insert(event);
+    else Inherit(event);
   }
 
   // These can eventually go away. This was from a time when "auto" was a

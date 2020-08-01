@@ -440,7 +440,7 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object)
   if (!object->parent) {
     // We're the rootmost parent; unlink ourself from the instance list.
     wto << "      enigma::unlink_main(ENOBJ_ITER_me);\n";
-  }else {
+  } else {
     // Let the parent handle the instance unlink (and its own object unlinking).
     wto << "      OBJ_" << object->parent->name << "::deactivate();\n";
   }

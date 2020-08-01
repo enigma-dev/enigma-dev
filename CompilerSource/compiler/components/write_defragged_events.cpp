@@ -92,11 +92,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const ParsedObj
       if (event.RegistersIterator()) used_events.insert({event});
 
       for (parsed_object *obj : parsed_objects) { // Then shell it out into the other objects.
-        if (!obj->has_event(event)) {
-          std::cout << "EVENT SYSTEM: Adding a " << event.HumanName()
-                    << " event with default code.\n";
-          obj->InheritDefaultedEvent(event);
-        }
+        obj->InheritDefaultedEvent(event);
       }
     }
   }
