@@ -136,7 +136,7 @@ bool file_text_eoln(int fileid) {
 }
 
 double file_text_read_real(int fileid) { // Reads a real value from the file and returns this value.
-  double x;
+  double x = 0;
   enigma::files[fileid].fs >> x;
   try_io_and_print(enigma::files[fileid])
   return x;
