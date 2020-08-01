@@ -21,23 +21,19 @@
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <fstream>
-#include <iostream>
 #include <string>
+#include <iomanip>
 
-using std::string;
-
-namespace enigma
-{
+namespace enigma {
   struct file {
-    file(const::string& fName, std::ios_base::openmode mode) : fn(fName) { fs.open(fName, mode); }
+    file(const std::string& fName, std::ios_base::openmode mode) : fn(fName) { fs.open(fName, mode); }
     std::string fn;
     std::fstream fs;  
   };
   
   std::vector<file> files;
-  extern string gameInfoText;
   
-  static inline int file_open(const string& fname, std::ios_base::openmode mode) {
+  static inline int file_open(const std::string& fname, std::ios_base::openmode mode) {
     file f(fname, mode);
     
     if (f.fs.is_open()) {
@@ -45,72 +41,70 @@ namespace enigma
       return files.size()-1;
     } else return -1;
   }
-}
+} // NAMESPACE enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int file_text_open_read(string fname) // Opens the file with the indicated name for reading. The function returns the id of the file that must be used in the other functions. You can open multiple files at the same time (32 max). Don't forget to close them once you are finished with them.
-{
+// Opens the file with the indicated name for reading. The function returns the id of the file that must be used in the other functions. You can open multiple files at the same time (32 max). Don't forget to close them once you are finished with them.
+int file_text_open_read(const std::string& fname) {
   return enigma::file_open(fname, std::ios::in);
 }
 
-int file_text_open_write(string fname) // Opens the indicated file for writing, creating it if it does not exist. The function returns the id of the file that must be used in the other functions.
-{
+// Opens the indicated file for writing, creating it if it does not exist. The function returns the id of the file that must be used in the other functions.
+int file_text_open_write(const std::string& fname) {
   return enigma::file_open(fname, std::ios::out);
 }
 
-int file_text_open_append(string fname) // Opens the indicated file for appending data at the end, creating it if it does not exist. The function returns the id of the file that must be used in the other functions.
-{
-  return enigma::file_open(fname, std::ios::app);
+// Opens the indicated file for appending data at the end, creating it if it does not exist. The function returns the id of the file that must be used in the other functions.
+int file_text_open_append(const std::string& fname) {
+  return enigma::file_open(fname, std::ios::out | std::ios::app);
 }
 
-void file_text_close(int fileid) // Closes the file with the given file id.
-{
-  if (fileid > 0 && fileid < static_cast<int>(enigma::files.size())) {
+// Closes the file with the given file id
+void file_text_close(int fileid) {
+  if (fileid >= 0 && fileid < static_cast<int>(enigma::files.size())) {
     enigma::files[fileid].fs.close();
-  } else DEBUG_MESSAGE("Cannot close an unopened file.", MESSAGE_TYPE::M_USER_ERROR);
-
+  } else DEBUG_MESSAGE("Cannot close an unopened file: " + std::to_string(fileid), MESSAGE_TYPE::M_USER_ERROR);
 }
 
-void file_text_write_string(int fileid, string str) { // Writes the string to the file with the given file id.
+// Writes the std::string to the file with the given file id.
+void file_text_write_string(int fileid, const std::string& str) {
   enigma::files[fileid].fs << str;
 }
 
-void file_text_write_real(int fileid, double x) // Write the real value to the file with the given file id.
-{
-  enigma::files[fileid].fs << x;
+// Write the real value to the file with the given file id.
+void file_text_write_real(int fileid, double x) {
+  enigma::files[fileid].fs << " " << x << std::setprecision(16);
 }
 
-void file_text_writeln(int fileid) // Write a newline character to the file.
-{
+// Write a newline character to the file.
+void file_text_writeln(int fileid) {
   enigma::files[fileid].fs << '\n';
 }
 
-void file_text_writeln(int fileid,string str) // Write a string and newline character to the file.
-{
-  file_text_write_string(fileid,str);
+// Write a string and newline character to the file.
+void file_text_writeln(int fileid, const std::string& str) {
+  file_text_write_string(fileid, str);
   file_text_writeln(fileid);
 }
 
-string file_text_read_string(int fileid) { // Reads a string from the file with the given file id and returns this string. A string ends at the end of line.
-  string line;
-  std::getline(enigma::files[fileid].fs, line);
+// Reads a std::string from the file with the given file id and returns this string. A std::string ends at the end of line.
+std::string file_text_read_string(int fileid) {
+  std::string line;
+  if (std::getline(enigma::files[fileid].fs, line))
+    enigma::files[fileid].fs.unget();
   return line;
 }
 
-string file_text_read_all(int fileid) {
+std::string file_text_read_all(int fileid) {
   std::string all, line;
   while(std::getline(enigma::files[fileid].fs, line)) all += line;
   return all;
 }
 
-bool file_text_eoln(int fileid)
-{
- return (static_cast<char>(enigma::files[fileid].fs.peek()) == '\n');
+bool file_text_eoln(int fileid) {
+  return (static_cast<char>(enigma::files[fileid].fs.peek()) == '\n' || enigma::files[fileid].fs.eof());
 }
-
-inline bool is_whitespace(char x) { return x == ' ' or x == '\t' or x == '\r' or x == '\n'; }
 
 double file_text_read_real(int fileid) { // Reads a real value from the file and returns this value.
   double x;
@@ -118,23 +112,26 @@ double file_text_read_real(int fileid) { // Reads a real value from the file and
   return x;
 }
 
-std::string file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
-{
-  return file_text_read_string(fileid);
+// Skips the rest of the line in the file and starts at the start of the next line.
+std::string file_text_readln(int fileid) {
+  std::string line;
+  std::getline(enigma::files[fileid].fs, line);
+  return line;
 }
 
 bool file_text_eof(int fileid) { // Returns whether we reached the end of the file.
-  return enigma::files[fileid].fs.eof();
+  return (enigma::files[fileid].fs.eof());
 }
 
-void load_info(string fname) {
+void load_info(const std::string& fname) {
 	int file = file_text_open_read(fname);
 	enigma::gameInfoText = file_text_read_all(file);
 	file_text_close(file);
 }
 
-int file_bin_open(string fname, int mode) // Opens the file with the indicated name. The mode indicates what can be done with the file: 0 = reading, 1 = writing, 2 = both reading and writing). When the file does not exist it is created. The function returns the id of the file that must be used in the other functions.
-{
+// Opens the file with the indicated name. The mode indicates what can be done with the file: 0 = reading, 1 = writing, 2 = both reading and writing). When the file does not exist it is created. The function returns the id of the file that must be used in the other functions.
+int file_bin_open(const std::string& fname, int mode) {
+  // TODO: add other modes like trunc / append?
   switch (mode) {
     case 0: return enigma::file_open(fname, std::ios::in  | std::ios::binary);
     case 1: return enigma::file_open(fname, std::ios::out | std::ios::binary);
@@ -143,21 +140,20 @@ int file_bin_open(string fname, int mode) // Opens the file with the indicated n
   }
 }
 
-bool file_bin_rewrite(int fileid) // Rewrites the file with the given file id, that is, clears it and starts writing at the start.
-{
-  enigma::files[fileid].fs.clear();
+// Rewrites the file with the given file id, that is, clears it and starts writing at the start.
+bool file_bin_rewrite(int fileid) {
   enigma::files[fileid].fs.close();
-  enigma::files[fileid].fs.open(enigma::files[fileid].fn, std::ios::in | std::ios::out | std::ios::binary);
+  enigma::files[fileid].fs.open(enigma::files[fileid].fn, std::ios::in | std::ios::out | std::ios::binary | std::ofstream::trunc);
   return enigma::files[fileid].fs.good();
 }
 
-void file_bin_close(int fileid) // Closes the file with the given file id.
-{
+// Closes the file with the given file id.
+void file_bin_close(int fileid) {
   enigma::files[fileid].fs.close();
 }
 
-size_t file_bin_size(int fileid) // Returns the size (in bytes) of the file with the given file id.
-{
+// Returns the size (in bytes) of the file with the given file id.
+size_t file_bin_size(int fileid) {
   size_t currPos = enigma::files[fileid].fs.tellg();
   enigma::files[fileid].fs.seekg(0, enigma::files[fileid].fs.end);
   size_t length = enigma::files[fileid].fs.tellg();
@@ -165,22 +161,27 @@ size_t file_bin_size(int fileid) // Returns the size (in bytes) of the file with
   return length;
 }
 
-size_t file_bin_position(int fileid) { // Returns the current position (in bytes; 0 is the first position) of the file with the given file id.
+// Returns the current position (in bytes; 0 is the first position) of the file with the given file id.
+size_t file_bin_position(int fileid) {
   return enigma::files[fileid].fs.tellg();
 }
 
-void file_bin_seek(int fileid, size_t pos) { // Moves the current position of the file to the indicated position. To append to a file move the position to the size of the file before writing.
+// Moves the current position of the file to the indicated position. To append to a file move the position to the size of the file before writing.
+void file_bin_seek(int fileid, size_t pos) {
   enigma::files[fileid].fs.seekg(pos);
 }
 
-void file_bin_write_byte(int fileid, unsigned char byte) { // Writes a byte of data to the file with the given file id.
+// Writes a byte of data to the file with the given file id.
+void file_bin_write_byte(int fileid, unsigned char byte) {
   enigma::files[fileid].fs << byte;
 }
 
-int file_bin_read_byte(int fileid) { // Reads a byte of data from the file and returns this.
-  int byte;
-  enigma::files[fileid].fs >> byte;
-  return (enigma::files[fileid].fs.good()) ? byte : -1;
+// Reads a byte of data from the file and returns this
+int file_bin_read_byte(int fileid) {
+  enigma::files[fileid].fs.clear(); // we don't care if it's failed before
+  unsigned char byte;
+  enigma::files[fileid].fs >> byte;;
+  return (!enigma::files[fileid].fs.good()) ? -1 : static_cast<int>(byte); 
 }
 
-}
+} // NAMESPACE enigma_user
