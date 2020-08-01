@@ -212,11 +212,11 @@ void file_bin_write_byte(int fileid, unsigned char byte) {
 
 // Reads a byte of data from the file and returns this
 int file_bin_read_byte(int fileid) {
-  enigma::files[fileid].fs.clear(); // we don't care if it's failed before
-  unsigned char byte;
+  unsigned char byte = 0;
   enigma::files[fileid].fs >> byte;
+  bool good = enigma::files[fileid].fs.good();
   try_io_and_print(enigma::files[fileid])
-  return (!enigma::files[fileid].fs.good()) ? -1 : static_cast<int>(byte); 
+  return (good) ? -1 : static_cast<int>(byte);
 }
 
 } // NAMESPACE enigma_user
