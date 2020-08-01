@@ -216,7 +216,7 @@ int file_bin_read_byte(int fileid) {
   enigma::files[fileid].fs >> byte;
   bool good = enigma::files[fileid].fs.good();
   try_io_and_print(enigma::files[fileid])
-  return (good) ? -1 : static_cast<int>(byte);
+  return (!good) ? -1 : static_cast<int>(byte);
 }
 
 } // NAMESPACE enigma_user
