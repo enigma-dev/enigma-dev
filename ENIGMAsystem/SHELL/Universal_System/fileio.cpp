@@ -21,20 +21,40 @@
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <iomanip>
 
+#ifdef DEBUG_MODE
+#define try_io_and_print(f) print_and_clear_fs_status(__FUNCTION__, f);
+#else
+#define try_io_and_print(f)
+#endif
+
 namespace enigma {
+  
   struct file {
     file(const std::string& fName, std::ios_base::openmode mode) : fn(fName) { fs.open(fName, mode); }
     std::string fn;
-    std::fstream fs;  
+    std::fstream fs;
   };
   
   std::vector<file> files;
   
+  static void print_and_clear_fs_status(const std::string& operation, file& f) {
+    if (!f.fs.good()) {
+      DEBUG_MESSAGE("Operation: " + operation + " failed on: " + f.fn + " Failbit: " + std::to_string(f.fs.fail())
+        + " Badbit: " +  std::to_string(f.fs.bad()) + " EOF: " + std::to_string(f.fs.eof()), MESSAGE_TYPE::M_USER_ERROR);
+    }
+    bool eof = f.fs.eof();
+    f.fs.clear();
+    if (eof) f.fs.setstate(std::ios::eofbit);
+  }
+  
   static inline int file_open(const std::string& fname, std::ios_base::openmode mode) {
     file f(fname, mode);
+    
+    try_io_and_print(f)
     
     if (f.fs.is_open()) {
       files.emplace_back(std::move(f));
@@ -42,6 +62,7 @@ namespace enigma {
     } else return -1;
   }
 } // NAMESPACE enigma
+
 
 namespace enigma_user {
 
@@ -70,16 +91,19 @@ void file_text_close(int fileid) {
 // Writes the std::string to the file with the given file id.
 void file_text_write_string(int fileid, const std::string& str) {
   enigma::files[fileid].fs << str;
+  try_io_and_print(enigma::files[fileid])
 }
 
 // Write the real value to the file with the given file id.
 void file_text_write_real(int fileid, double x) {
   enigma::files[fileid].fs << " " << x << std::setprecision(16);
+  try_io_and_print(enigma::files[fileid])
 }
 
 // Write a newline character to the file.
 void file_text_writeln(int fileid) {
   enigma::files[fileid].fs << '\n';
+  try_io_and_print(enigma::files[fileid])
 }
 
 // Write a string and newline character to the file.
@@ -91,14 +115,19 @@ void file_text_writeln(int fileid, const std::string& str) {
 // Reads a std::string from the file with the given file id and returns this string. A std::string ends at the end of line.
 std::string file_text_read_string(int fileid) {
   std::string line;
-  if (std::getline(enigma::files[fileid].fs, line))
+  if (std::getline(enigma::files[fileid].fs, line)) {
     enigma::files[fileid].fs.unget();
+    try_io_and_print(enigma::files[fileid])
+  }
   return line;
 }
 
 std::string file_text_read_all(int fileid) {
   std::string all, line;
-  while(std::getline(enigma::files[fileid].fs, line)) all += line;
+  while(std::getline(enigma::files[fileid].fs, line)) {
+    try_io_and_print(enigma::files[fileid])
+    all += line;
+  }
   return all;
 }
 
@@ -109,6 +138,7 @@ bool file_text_eoln(int fileid) {
 double file_text_read_real(int fileid) { // Reads a real value from the file and returns this value.
   double x;
   enigma::files[fileid].fs >> x;
+  try_io_and_print(enigma::files[fileid])
   return x;
 }
 
@@ -144,6 +174,7 @@ int file_bin_open(const std::string& fname, int mode) {
 bool file_bin_rewrite(int fileid) {
   enigma::files[fileid].fs.close();
   enigma::files[fileid].fs.open(enigma::files[fileid].fn, std::ios::in | std::ios::out | std::ios::binary | std::ofstream::trunc);
+  try_io_and_print(enigma::files[fileid])
   return enigma::files[fileid].fs.good();
 }
 
@@ -158,6 +189,7 @@ size_t file_bin_size(int fileid) {
   enigma::files[fileid].fs.seekg(0, enigma::files[fileid].fs.end);
   size_t length = enigma::files[fileid].fs.tellg();
   enigma::files[fileid].fs.seekg(currPos);
+  try_io_and_print(enigma::files[fileid])
   return length;
 }
 
@@ -169,18 +201,21 @@ size_t file_bin_position(int fileid) {
 // Moves the current position of the file to the indicated position. To append to a file move the position to the size of the file before writing.
 void file_bin_seek(int fileid, size_t pos) {
   enigma::files[fileid].fs.seekg(pos);
+  try_io_and_print(enigma::files[fileid])
 }
 
 // Writes a byte of data to the file with the given file id.
 void file_bin_write_byte(int fileid, unsigned char byte) {
   enigma::files[fileid].fs << byte;
+  try_io_and_print(enigma::files[fileid])
 }
 
 // Reads a byte of data from the file and returns this
 int file_bin_read_byte(int fileid) {
   enigma::files[fileid].fs.clear(); // we don't care if it's failed before
   unsigned char byte;
-  enigma::files[fileid].fs >> byte;;
+  enigma::files[fileid].fs >> byte;
+  try_io_and_print(enigma::files[fileid])
   return (!enigma::files[fileid].fs.good()) ? -1 : static_cast<int>(byte); 
 }
 
