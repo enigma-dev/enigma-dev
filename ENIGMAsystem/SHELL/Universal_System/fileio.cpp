@@ -181,7 +181,7 @@ int file_bin_open(const std::string& fname, int mode) {
 // Rewrites the file with the given file id, that is, clears it and starts writing at the start.
 bool file_bin_rewrite(int fileid) {
   enigma::files.get(fileid).fs.close();
-  enigma::files.get(fileid).fs.open(enigma::files.get(fileid).fn, std::ios::in | std::ios::out | std::ios::binary | std::ofstream::trunc);
+  enigma::files.get(fileid).fs.open(enigma::files.get(fileid).fn, std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
   try_io_and_print(enigma::files.get(fileid))
   return enigma::files.get(fileid).fs.good();
 }
