@@ -38,7 +38,6 @@ namespace enigma {
     file() {}
     file(const std::string& fName, std::ios_base::openmode mode) : fn(fName) { fs.open(fName, mode); }
     file(file&& other) : fn(other.fn) { fs.swap(other.fs); }
-    file(file& other) : fn(other.fn) { fs.swap(other.fs); } 
     std::string fn;
     std::fstream fs;
     // AssArray mandatory
