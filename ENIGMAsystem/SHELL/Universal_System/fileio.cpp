@@ -18,6 +18,7 @@
 // Simple, intuitive, integer based file I/O
 
 #include "fileio.h"
+#include "Resources/AssetArray.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <fstream>
@@ -34,12 +35,19 @@
 namespace enigma {
   
   struct file {
+    file() {}
     file(const std::string& fName, std::ios_base::openmode mode) : fn(fName) { fs.open(fName, mode); }
+    file(file&& other) : fn(other.fn) { fs.swap(other.fs); }
+    file(file& other) : fn(other.fn) { fs.swap(other.fs); } 
     std::string fn;
     std::fstream fs;
+    // AssArray mandatory
+    static const char* getAssetTypeName() { return "FileHandle"; }
+    bool isDestroyed() const { return false; }
+    void destroy() { fs.close(); }
   };
   
-  std::vector<file> files;
+  AssetArray<file> files;
   
   static void print_and_clear_fs_status(const std::string& operation, file& f) {
     if (!f.fs.good()) {
@@ -57,7 +65,7 @@ namespace enigma {
     try_io_and_print(f)
     
     if (f.fs.is_open()) {
-      files.emplace_back(std::move(f));
+      files.add(std::move(f));
       return files.size()-1;
     } else return -1;
   }
@@ -84,26 +92,26 @@ int file_text_open_append(const std::string& fname) {
 // Closes the file with the given file id
 void file_text_close(int fileid) {
   if (fileid >= 0 && fileid < static_cast<int>(enigma::files.size())) {
-    enigma::files[fileid].fs.close();
+    enigma::files.get(fileid).fs.close();
   } else DEBUG_MESSAGE("Cannot close an unopened file: " + std::to_string(fileid), MESSAGE_TYPE::M_USER_ERROR);
 }
 
 // Writes the std::string to the file with the given file id.
 void file_text_write_string(int fileid, const std::string& str) {
-  enigma::files[fileid].fs << str;
-  try_io_and_print(enigma::files[fileid])
+  enigma::files.get(fileid).fs << str;
+  try_io_and_print(enigma::files.get(fileid))
 }
 
 // Write the real value to the file with the given file id.
 void file_text_write_real(int fileid, double x) {
-  enigma::files[fileid].fs << " " << x << std::setprecision(16);
-  try_io_and_print(enigma::files[fileid])
+  enigma::files.get(fileid).fs << " " << x << std::setprecision(16);
+  try_io_and_print(enigma::files.get(fileid))
 }
 
 // Write a newline character to the file.
 void file_text_writeln(int fileid) {
-  enigma::files[fileid].fs << '\n';
-  try_io_and_print(enigma::files[fileid])
+  enigma::files.get(fileid).fs << '\n';
+  try_io_and_print(enigma::files.get(fileid))
 }
 
 // Write a string and newline character to the file.
@@ -115,42 +123,42 @@ void file_text_writeln(int fileid, const std::string& str) {
 // Reads a string from the file with the given file id and returns this string. A string ends at the end of line.
 std::string file_text_read_string(int fileid) {
   std::string line;
-  if (std::getline(enigma::files[fileid].fs, line)) {
-    enigma::files[fileid].fs.unget();
-    try_io_and_print(enigma::files[fileid])
+  if (std::getline(enigma::files.get(fileid).fs, line)) {
+    enigma::files.get(fileid).fs.unget();
+    try_io_and_print(enigma::files.get(fileid))
   }
   return line;
 }
 
 std::string file_text_read_all(int fileid) {
   std::string all, line;
-  while(std::getline(enigma::files[fileid].fs, line)) {
-    try_io_and_print(enigma::files[fileid])
+  while(std::getline(enigma::files.get(fileid).fs, line)) {
+    try_io_and_print(enigma::files.get(fileid))
     all += line;
   }
   return all;
 }
 
 bool file_text_eoln(int fileid) {
-  return (static_cast<char>(enigma::files[fileid].fs.peek()) == '\n' || enigma::files[fileid].fs.eof());
+  return (static_cast<char>(enigma::files.get(fileid).fs.peek()) == '\n' || enigma::files.get(fileid).fs.eof());
 }
 
 double file_text_read_real(int fileid) { // Reads a real value from the file and returns this value.
   double x = 0;
-  enigma::files[fileid].fs >> x;
-  try_io_and_print(enigma::files[fileid])
+  enigma::files.get(fileid).fs >> x;
+  try_io_and_print(enigma::files.get(fileid))
   return x;
 }
 
 // Skips the rest of the line in the file and starts at the start of the next line.
 std::string file_text_readln(int fileid) {
   std::string line;
-  std::getline(enigma::files[fileid].fs, line);
+  std::getline(enigma::files.get(fileid).fs, line);
   return line;
 }
 
 bool file_text_eof(int fileid) { // Returns whether we reached the end of the file.
-  return (enigma::files[fileid].fs.eof());
+  return (enigma::files.get(fileid).fs.eof());
 }
 
 void load_info(const std::string& fname) {
@@ -172,50 +180,50 @@ int file_bin_open(const std::string& fname, int mode) {
 
 // Rewrites the file with the given file id, that is, clears it and starts writing at the start.
 bool file_bin_rewrite(int fileid) {
-  enigma::files[fileid].fs.close();
-  enigma::files[fileid].fs.open(enigma::files[fileid].fn, std::ios::in | std::ios::out | std::ios::binary | std::ofstream::trunc);
-  try_io_and_print(enigma::files[fileid])
-  return enigma::files[fileid].fs.good();
+  enigma::files.get(fileid).fs.close();
+  enigma::files.get(fileid).fs.open(enigma::files.get(fileid).fn, std::ios::in | std::ios::out | std::ios::binary | std::ofstream::trunc);
+  try_io_and_print(enigma::files.get(fileid))
+  return enigma::files.get(fileid).fs.good();
 }
 
 // Closes the file with the given file id.
 void file_bin_close(int fileid) {
-  enigma::files[fileid].fs.close();
+  enigma::files.get(fileid).fs.close();
 }
 
 // Returns the size (in bytes) of the file with the given file id.
 size_t file_bin_size(int fileid) {
-  size_t currPos = enigma::files[fileid].fs.tellg();
-  enigma::files[fileid].fs.seekg(0, enigma::files[fileid].fs.end);
-  size_t length = enigma::files[fileid].fs.tellg();
-  enigma::files[fileid].fs.seekg(currPos);
-  try_io_and_print(enigma::files[fileid])
+  size_t currPos = enigma::files.get(fileid).fs.tellg();
+  enigma::files.get(fileid).fs.seekg(0, enigma::files.get(fileid).fs.end);
+  size_t length = enigma::files.get(fileid).fs.tellg();
+  enigma::files.get(fileid).fs.seekg(currPos);
+  try_io_and_print(enigma::files.get(fileid))
   return length;
 }
 
 // Returns the current position (in bytes; 0 is the first position) of the file with the given file id.
 size_t file_bin_position(int fileid) {
-  return enigma::files[fileid].fs.tellg();
+  return enigma::files.get(fileid).fs.tellg();
 }
 
 // Moves the current position of the file to the indicated position. To append to a file move the position to the size of the file before writing.
 void file_bin_seek(int fileid, size_t pos) {
-  enigma::files[fileid].fs.seekg(pos);
-  try_io_and_print(enigma::files[fileid])
+  enigma::files.get(fileid).fs.seekg(pos);
+  try_io_and_print(enigma::files.get(fileid))
 }
 
 // Writes a byte of data to the file with the given file id.
 void file_bin_write_byte(int fileid, unsigned char byte) {
-  enigma::files[fileid].fs << byte;
-  try_io_and_print(enigma::files[fileid])
+  enigma::files.get(fileid).fs << byte;
+  try_io_and_print(enigma::files.get(fileid))
 }
 
 // Reads a byte of data from the file and returns this
 int file_bin_read_byte(int fileid) {
   unsigned char byte = 0;
-  enigma::files[fileid].fs >> byte;
-  bool good = enigma::files[fileid].fs.good();
-  try_io_and_print(enigma::files[fileid])
+  enigma::files.get(fileid).fs >> byte;
+  bool good = enigma::files.get(fileid).fs.good();
+  try_io_and_print(enigma::files.get(fileid))
   return (!good) ? -1 : static_cast<int>(byte);
 }
 
