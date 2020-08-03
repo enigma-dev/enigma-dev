@@ -179,7 +179,8 @@ int main(int argc, char* argv[])
       if (fs::is_directory(p)) {
         input_file += "/" + p.filename().stem().string() + ".egm";
       }
-      egm::EGM egm;  // TODO: Pass in parsed events file, here.
+      EventData event_data(ParseEventFile("events.ey"));
+      egm::EGM egm(event_data);
       if (!(project = egm.LoadEGM(input_file))) return 1;
       return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext.empty()) {

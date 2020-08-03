@@ -524,7 +524,6 @@ int FlattenProto(const buffers::Project &proj, GameData *gameData) {
 }
 
 void LegacyEventsToEGM(GameData &game, const EventData &evdata) {
-  //std::map<int, ObjectData*> objs;
   std::map<int, NamedObject> objs;
   for (ObjectData &obj : game.objects) objs[obj->id()] = NamedObject(obj.name, obj.get());
   for (const auto &entry : objs) {

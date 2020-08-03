@@ -222,6 +222,7 @@ void EGM::LoadObjectEvents(const fs::path& fPath, google::protobuf::Message *m,
 
       buffers::resources::Object::EgmEvent event_proto;
       event_proto.set_id(event.bare_id());
+      event_proto.set_code(FileToString(f));
       for (const auto &arg : event.arguments)
         event_proto.add_arguments(arg.name);
 
@@ -256,7 +257,7 @@ void EGM::RecursivePackBuffer(google::protobuf::Message *m, int id,
 
     if (ext == ".obj" && depth == 0) {
        // code is loaded from edl files
-      if (key == "events") {
+      if (key == "egm_events") {
         LoadObjectEvents(fPath, m, field);
         continue;
       }
