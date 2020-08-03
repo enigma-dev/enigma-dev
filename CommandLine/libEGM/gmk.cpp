@@ -16,6 +16,7 @@
 **/
 
 #include "gmk.h"
+#include "event_reader/event_parser.h"
 #include "filesystem.h"
 #include "action.h"
 
@@ -1317,6 +1318,9 @@ std::unique_ptr<buffers::Project> LoadGMK(std::string fName) {
   game->set_allocated_root(root.release());
   // ensure all temp data files are written and the paths are set in the protos
   dec.processTempFileFutures();
+  
+  EventData event_data(ParseEventFile("events.ey"));
+  LegacyEventsToEGM(proj.get(), event_data);
 
   return proj;
 }

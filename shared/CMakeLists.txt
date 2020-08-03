@@ -9,6 +9,7 @@ project(${SHARED_LIB} DESCRIPTION ${SHARED_LIB_DESCRIPTION})
 set(SHARED_SOURCES
    "eyaml/eyaml.cpp"
    "event_reader/event_parser.cpp"
+   "event_reader/egm_events.cpp"
    "rectpacker/rectpack.cpp"
    "libpng-util/libpng-util.cpp"
    "ProtoYaml/proto-yaml.cpp"

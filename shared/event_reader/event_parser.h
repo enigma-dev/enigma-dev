@@ -30,10 +30,19 @@
 
 #include <EventDescriptor.pb.h>
 #include <Object.pb.h>
+#include <project.pb.h>
 
 #include <boost/container/small_vector.hpp>
 
 #include <string>
+
+struct NamedObject {
+  std::string_view name;
+  buffers::resources::Object* obj;
+  NamedObject(): obj(nullptr) {}
+  NamedObject(const std::string& obj_name, buffers::resources::Object* obj):
+    name(obj_name), obj(obj) {}
+};
 
 struct LegacyEventPair {
   int mid, id;
@@ -239,5 +248,9 @@ buffers::config::EventFile ParseEventFile(std::istream &file);
 // Reads the given file in as an EventFile proto.
 // This is just a convenience method around ReadYamlFileAs<EventFile>().
 buffers::config::EventFile ParseEventFile(const std::string &filename);
+
+void LegacyEventsToEGM(buffers::Project *project, const EventData &evdata);
+void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData &evdata,
+                       const std::map<int, NamedObject> &objs);
 
 #endif // ENIGMA_EVENT_PARSER_H

@@ -37,6 +37,8 @@ message EventDescriptor {
     // `constant` should be defined with the engine code to be executed
     // (the former for once-per-frame logic, the latter for per-instance logic).
     INLINE = 5;
+    // ?????
+    SYSTEM = 6;
   }
 
   // The type of this event, in terms of its ExecutionStrategy. See above.
