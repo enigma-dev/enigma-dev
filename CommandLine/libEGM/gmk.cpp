@@ -44,7 +44,7 @@ using TypeCase = TreeNode::TypeCase;
 using IdMap = unordered_map<int, std::unique_ptr<google::protobuf::Message> >;
 using TypeMap = unordered_map<TypeCase, IdMap>;
 
-static const std::string gmk_data = gmk_data;
+static const std::string gmk_data = "gmk_data";
 
 namespace gmk {
 ostream out(nullptr);
