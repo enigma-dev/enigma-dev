@@ -60,12 +60,12 @@ static void atexit_tempdata_cleanup() {
 }
 
 std::string writeTempDataFile(char *bytes, size_t length) {
-  std::string name = TempFileName(gmk_data);
+  std::filesystem::path name = TempFileName(gmk_data);
   std::fstream fs(name, std::fstream::out | std::fstream::binary);
   if (!fs.is_open()) return "";
   fs.write(bytes, length);
   fs.close();
-  return name;
+  return name.u8string();
 }
 
 std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {
