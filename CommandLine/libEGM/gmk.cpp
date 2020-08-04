@@ -193,7 +193,7 @@ class Decoder {
   void processTempFileFutures() {
     for (auto &tempFilePair : tempFileFuturesCreated) {
       tempFilePair.second.append(tempFilePair.second.u8string());
-      tempFilesCreated.push_back(tempFilePair.second);
+      tempFilesCreated.push_back(tempFilePair.second.u8string());
     }
   }
 

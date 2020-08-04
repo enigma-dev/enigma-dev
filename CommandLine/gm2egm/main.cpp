@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     return -1;
   }
   
-  const std::string outDir = argv[2];
+  const std::filesystem::path outDir = argv[2];
   if (FolderExists(outDir)) {
     std::cerr << '"' << outDir << '"' << " already exists; would you like to overwrite it? (Y/N)" << std::endl;
     char c;
