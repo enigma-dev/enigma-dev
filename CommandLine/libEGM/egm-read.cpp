@@ -253,6 +253,7 @@ void EGM::RecursivePackBuffer(google::protobuf::Message *m, int id,
       if (key == "instances") key = "instance-layers";
       if (key == "tiles") key = "tile-layers";
       if (key == "code") continue;
+      if (key == "creation_code") continue;
     }
 
     if (ext == ".obj" && depth == 0) {
@@ -351,7 +352,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
     if (f.path().extension() == ".edl") {
       const std::string edlFile = f.path().stem().string();
 
-      if (edlFile == "create") {
+      if (edlFile == "roomcreate") {
         rm->set_creation_code(FileToString(f.path()));
         continue;
       }
