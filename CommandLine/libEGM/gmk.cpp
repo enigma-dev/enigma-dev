@@ -53,38 +53,38 @@ ostream err(nullptr);
 static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
 static void atexit_tempdata_cleanup() {
-  for (const std::string &tempFile : tempFilesCreated) {
-    size_t pos = tempFile.find(gmk_data);
-    if (pos != std::string::npos) { DeleteFolder(tempFile.substr(0, pos + gmk_data.length())); }
+  for (const std::filesystem::path &tempFile : tempFilesCreated) {
+    if (tempFile.parent_path().u8string().find(gmk_data) != std::string::npos)
+      DeleteFolder(tempFile.parent_path());
+    else if (std::filesystem::is_regular_file(tempFile)) DeleteFile(tempFile);
   }
 }
 
-std::string writeTempDataFile(char *bytes, size_t length) {
-  std::filesystem::path name = TempFileName(gmk_data);
-  std::fstream fs(name, std::fstream::out | std::fstream::binary);
-  if (!fs.is_open()) return "";
+void writeTempDataFile(const std::filesystem::path& write_fname, char *bytes, size_t length) {
+  CreateDirectoryRecursive(write_fname);
+  std::fstream fs(write_fname, std::fstream::out | std::fstream::binary);
+  if (!fs.is_open()) return;
   fs.write(bytes, length);
   fs.close();
-  return name.u8string();
 }
 
-std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {
-  return writeTempDataFile(bytes.get(), length);
+void writeTempDataFile(const std::filesystem::path& write_fname, std::unique_ptr<char[]> bytes, size_t length) {
+  writeTempDataFile(write_fname, bytes.get(), length);
 }
 
-std::string writeTempBMPFile(const std::filesystem::path& write_name, std::unique_ptr<char[]> bytes, size_t length, bool transparent=false) {
+void writeTempBMPFile(const std::filesystem::path& write_fname, std::unique_ptr<char[]> bytes, size_t length, bool transparent=false) {
   static const unsigned MINHEADER = 54; //minimum BMP header size
   auto bmp = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
   if (length < MINHEADER) {
     err << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
         << "size '" << MINHEADER << "' for the BMP format" << std::endl;
-    return "";
+    return;
   }
   if (bmp[0] != 'B' || bmp[1] != 'M') {
     err << "Image from the GMK file did not have the correct BMP signature '"
         << bmp[0] << bmp[1] << "'" << std::endl;
-    return "";
+    return;
   }
   unsigned pixeloffset = bmp[10] + 256 * bmp[11]; //where the pixel data starts
   //read width and height from BMP header
@@ -94,7 +94,7 @@ std::string writeTempBMPFile(const std::filesystem::path& write_name, std::uniqu
   if (bmp[28] != 24 && bmp[28] != 32) {
     err << "Image from the GMK file was " << bmp[28] << " bit while this reader "
         << "only supports 24 and 32 bit BMP images" << std::endl;
-    return "";
+    return;
   }
   unsigned numChannels = bmp[28] / 8;
 
@@ -107,7 +107,7 @@ std::string writeTempBMPFile(const std::filesystem::path& write_name, std::uniqu
   if (length < dataSize + pixeloffset) {
     err << "Image from the GMK file had a length '" << length << "' smaller than the estimated "
         << "size '" << (dataSize + pixeloffset) << "' based on the BMP header dimensions" << std::endl;
-    return "";
+    return;
   }
 
   std::vector<unsigned char> rgba(w * h * 4);
@@ -152,13 +152,11 @@ std::string writeTempBMPFile(const std::filesystem::path& write_name, std::uniqu
     }
   }
 
-  CreateDirectoryRecursive(write_name);;
-  libpng_encode32_file(rgba.data(), w, h, write_name.u8string().c_str());
-  
-  return write_name.u8string();
+  CreateDirectoryRecursive(write_fname);
+  libpng_encode32_file(rgba.data(), w, h, write_fname.u8string().c_str());
 }
 
-std::string writeTempBGRAFile(const std::filesystem::path& write_name, std::unique_ptr<char[]> bytes, size_t width, size_t height) {
+void writeTempBGRAFile(const std::filesystem::path& write_fname, std::unique_ptr<char[]> bytes, size_t width, size_t height) {
   auto bgra = reinterpret_cast<unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
   for (unsigned y = 0; y < height; y++) {
@@ -170,10 +168,8 @@ std::string writeTempBGRAFile(const std::filesystem::path& write_name, std::uniq
     }
   }
 
-  CreateDirectoryRecursive(write_name);
-  libpng_encode32_file(bgra, width, height, write_name.u8string().c_str());
-
-  return write_name.u8string();
+  CreateDirectoryRecursive(write_fname);
+  libpng_encode32_file(bgra, width, height, write_fname.u8string().c_str());
 }
 
 class Decoder {
@@ -189,16 +185,15 @@ class Decoder {
   }
 
   template<class Function, class... Args>
-  void threadTempFileWrite(Function&& f, std::string* data_file_path, Args&&... args) {
-    std::future<std::string> tempFileFuture = std::async(std::launch::async, f, std::move(args)...);
-    tempFileFuturesCreated.emplace_back(std::make_pair(std::move(tempFileFuture), data_file_path));
+  void threadTempFileWrite(Function&& f, const std::filesystem::path& write_fname, Args&&... args) {
+    std::future<void> tempFileFuture = std::async(std::launch::async, f, std::move(args)...);
+    tempFileFuturesCreated.emplace_back(std::make_pair(std::move(tempFileFuture), write_fname));
   }
 
   void processTempFileFutures() {
     for (auto &tempFilePair : tempFileFuturesCreated) {
-      std::string temp_file_path = tempFilePair.first.get();
-      tempFilePair.second->append(temp_file_path);
-      tempFilesCreated.push_back(temp_file_path);
+      tempFilePair.second.append(tempFilePair.second.u8string());
+      tempFilesCreated.push_back(tempFilePair.second);
     }
   }
 
@@ -336,35 +331,35 @@ class Decoder {
     return bytes;
   }
 
-  void readData(std::string *data_file_path=nullptr, bool compressed=false) {
+  void readData(const std::filesystem::path& write_fname, bool compressed=false) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = compressed ? decompress(length) : read(length);
-    using WriteTempDataFileManaged = std::string(*)(std::unique_ptr<char[]>, size_t);
-    if (data_file_path && bytes) threadTempFileWrite((WriteTempDataFileManaged)writeTempDataFile, data_file_path, std::move(bytes), length);
+    using WriteTempDataFileManaged = void(*)(const std::filesystem::path& write_fname, std::unique_ptr<char[]>, size_t);
+    if (bytes) threadTempFileWrite((WriteTempDataFileManaged)writeTempDataFile, write_fname, write_fname, std::move(bytes), length);
   }
 
-  void readCompressedData(std::string *data_file_path=nullptr) {
-    readData(data_file_path, true);
+  void readCompressedData(const std::filesystem::path& write_fname) {
+    readData(write_fname, true);
   }
 
-  void readUncompressedData(std::string *data_file_path=nullptr) {
-    readData(data_file_path, false);
+  void readUncompressedData(const std::filesystem::path& write_fname) {
+    readData(write_fname, false);
   }
 
-  void readZlibImage(std::string *data_file_path, const std::filesystem::path& write_fname, bool transparent) {
+  void readZlibImage(const std::filesystem::path& write_fname, bool transparent) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = decompress(length);
-    if (data_file_path && bytes) threadTempFileWrite(writeTempBMPFile, data_file_path, write_fname, std::move(bytes), length, transparent);
+    if (bytes) threadTempFileWrite(writeTempBMPFile, write_fname, write_fname, std::move(bytes), length, transparent);
   }
 
   void readZlibImage(bool transparent=false) {
-    readZlibImage(nullptr, TempFileName(gmk_data), transparent);
+    readZlibImage(TempFileName(gmk_data), transparent);
   }
 
-  void readBGRAImage(std::string *data_file_path=nullptr, const std::filesystem::path& write_fname = TempFileName(gmk_data), size_t width=0, size_t height=0) {
+  void readBGRAImage(const std::filesystem::path& write_fname = TempFileName(gmk_data), size_t width=0, size_t height=0) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = read(length);
-    if (data_file_path && bytes) threadTempFileWrite(writeTempBGRAFile, data_file_path, write_fname, std::move(bytes), width, height);
+    if (bytes) threadTempFileWrite(writeTempBGRAFile, write_fname, write_fname, std::move(bytes), width, height);
   }
 
   void setSeed(int seed) {
@@ -398,7 +393,7 @@ class Decoder {
   int zlibPos, zlibStart;
   std::unique_ptr<int[]> decodeTable;
   std::unordered_map<TypeCase, std::unordered_map<int, std::vector<std::string*> > > postponeds;
-  std::vector<std::pair<std::future<std::string>, std::string*> > tempFileFuturesCreated;
+  std::vector<std::pair<std::future<void>, std::filesystem::path> > tempFileFuturesCreated;
 
   std::unique_ptr<int[]> makeEncodeTable(int seed) {
     auto table = make_unique<int[]>(256);
@@ -604,8 +599,7 @@ int LoadConstants(Decoder &dec) {
   return 1;
 }
 
-std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver, const std::string& /*name*/) {
-  // TODO: write sound data file with proper extension
+std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver, const std::string& name) {
   auto sound = std::make_unique<Sound>();
 
   int kind53 = -1;
@@ -614,11 +608,14 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver, const std::string& /*nam
   else
     sound->set_kind(static_cast<Sound::Kind>(dec.read4())); //normal, background, etc
   sound->set_file_extension(dec.readStr());
+  
+  const std::filesystem::path fName = TempFileName(gmk_data)/(name + sound->file_extension());
 
   if (ver == 440) {
     //-1 = no sound
     if (kind53 != -1) {
-      dec.readCompressedData(sound->mutable_data());
+      dec.readCompressedData(fName);
+      sound->set_data(fName.u8string());
     }
     dec.skip(8);
     sound->set_preload(!dec.readBool());
@@ -626,9 +623,11 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver, const std::string& /*nam
     sound->set_file_name(dec.readStr());
     if (dec.readBool()) {
       if (ver == 600) {
-        dec.readCompressedData(sound->mutable_data());
+        dec.readCompressedData(fName);
+        sound->set_data(fName.u8string());
       } else {
-        dec.readUncompressedData(sound->mutable_data());
+        dec.readUncompressedData(fName);
+        sound->set_data(fName.u8string());
       }
     }
     dec.read4(); // effects flags
@@ -671,7 +670,9 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver, const std::string& nam
   sprite->set_origin_y(dec.read4());
 
   int nosub = dec.read4();
+  std::filesystem::path tempName = TempFileName(gmk_data);
   for (int i = 0; i < nosub; i++) {
+    std::filesystem::path fName = tempName/(name + "_" + std::to_string(i) + ".png");
     if (ver >= 800) {
       int subver = dec.read4();
       if (subver != 800 && subver != 810) {
@@ -681,11 +682,14 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver, const std::string& nam
       }
       w = dec.read4();
       h = dec.read4();
-      if (w != 0 && h != 0)
-        dec.readBGRAImage(sprite->add_subimages(), TempFileName(gmk_data)/name/(std::to_string(i) + ".png"), w, h);
+      if (w != 0 && h != 0) {
+        dec.readBGRAImage(fName, w, h);
+        sprite->add_subimages(fName.u8string());
+      }
     } else {
       if (dec.read4() == -1) continue;
-      dec.readZlibImage(sprite->add_subimages(), TempFileName(gmk_data)/name/(std::to_string(i) + ".png"), transparent);
+      dec.readZlibImage(fName, transparent);
+      sprite->add_subimages(fName.u8string());
     }
   }
   sprite->set_width(w);
@@ -733,10 +737,14 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver, const std::str
     background->set_vertical_spacing(dec.read4());
   }
 
+  const std::filesystem::path fName = TempFileName(gmk_data)/(name + ".png");
+  
   if (ver < 710) {
     if (dec.readBool()) {
-      if (dec.read4() != -1)
-        dec.readZlibImage(background->mutable_image(), TempFileName(gmk_data)/name/"background.png", transparent);
+      if (dec.read4() != -1) {
+        dec.readZlibImage(fName, transparent);
+        background->set_image(fName.u8string());
+      }
     }
   } else { // >= 710
     int dataver = dec.read4();
@@ -747,8 +755,10 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver, const std::str
     }
     w = dec.read4();
     h = dec.read4();
-    if (w != 0 && h != 0)
-      dec.readBGRAImage(background->mutable_image(), TempFileName(gmk_data)/name/"background.png", w, h);
+    if (w != 0 && h != 0) {
+      dec.readBGRAImage(fName, transparent);
+      background->set_image(fName.u8string());
+    }
   }
 
   background->set_width(w);
