@@ -44,6 +44,8 @@ using TypeCase = TreeNode::TypeCase;
 using IdMap = unordered_map<int, std::unique_ptr<google::protobuf::Message> >;
 using TypeMap = unordered_map<TypeCase, IdMap>;
 
+static const std::string gmk_data = gmk_data;
+
 namespace gmk {
 ostream out(nullptr);
 ostream err(nullptr);
@@ -51,12 +53,14 @@ ostream err(nullptr);
 static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
 static void atexit_tempdata_cleanup() {
-  for (const std::string &tempFile : tempFilesCreated)
-    DeleteFile(tempFile);
+  for (const std::string &tempFile : tempFilesCreated) {
+    size_t pos = tempFile.find(gmk_data);
+    if (pos != std::string::npos) { DeleteFolder(tempFile.substr(0, pos + gmk_data.length())); }
+  }
 }
 
 std::string writeTempDataFile(char *bytes, size_t length) {
-  std::string name = TempFileName("gmk_data");
+  std::string name = TempFileName(gmk_data);
   std::fstream fs(name, std::fstream::out | std::fstream::binary);
   if (!fs.is_open()) return "";
   fs.write(bytes, length);
@@ -68,7 +72,7 @@ std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {
   return writeTempDataFile(bytes.get(), length);
 }
 
-std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool transparent=false) {
+std::string writeTempBMPFile(const std::filesystem::path& write_name, std::unique_ptr<char[]> bytes, size_t length, bool transparent=false) {
   static const unsigned MINHEADER = 54; //minimum BMP header size
   auto bmp = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
@@ -148,13 +152,13 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
     }
   }
 
-  std::string temp_file_path = TempFileName("gmk_data");
-  libpng_encode32_file(rgba.data(), w, h, temp_file_path.c_str());
-
-  return temp_file_path;
+  CreateDirectoryRecursive(write_name);;
+  libpng_encode32_file(rgba.data(), w, h, write_name.u8string().c_str());
+  
+  return write_name.u8string();
 }
 
-std::string writeTempBGRAFile(std::unique_ptr<char[]> bytes, size_t width, size_t height) {
+std::string writeTempBGRAFile(const std::filesystem::path& write_name, std::unique_ptr<char[]> bytes, size_t width, size_t height) {
   auto bgra = reinterpret_cast<unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
   for (unsigned y = 0; y < height; y++) {
@@ -166,10 +170,10 @@ std::string writeTempBGRAFile(std::unique_ptr<char[]> bytes, size_t width, size_
     }
   }
 
-  std::string temp_file_path = TempFileName("gmk_data");
-  libpng_encode32_file(bgra, width, height, temp_file_path.c_str());
+  CreateDirectoryRecursive(write_name);
+  libpng_encode32_file(bgra, width, height, write_name.u8string().c_str());
 
-  return temp_file_path;
+  return write_name.u8string();
 }
 
 class Decoder {
@@ -347,20 +351,20 @@ class Decoder {
     readData(data_file_path, false);
   }
 
-  void readZlibImage(std::string *data_file_path, bool transparent) {
+  void readZlibImage(std::string *data_file_path, const std::filesystem::path& write_fname, bool transparent) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = decompress(length);
-    if (data_file_path && bytes) threadTempFileWrite(writeTempBMPFile, data_file_path, std::move(bytes), length, transparent);
+    if (data_file_path && bytes) threadTempFileWrite(writeTempBMPFile, data_file_path, write_fname, std::move(bytes), length, transparent);
   }
 
   void readZlibImage(bool transparent=false) {
-    readZlibImage(nullptr, transparent);
+    readZlibImage(nullptr, TempFileName(gmk_data), transparent);
   }
 
-  void readBGRAImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
+  void readBGRAImage(std::string *data_file_path=nullptr, const std::filesystem::path& write_fname = TempFileName(gmk_data), size_t width=0, size_t height=0) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = read(length);
-    if (data_file_path && bytes) threadTempFileWrite(writeTempBGRAFile, data_file_path, std::move(bytes), width, height);
+    if (data_file_path && bytes) threadTempFileWrite(writeTempBGRAFile, data_file_path, write_fname, std::move(bytes), width, height);
   }
 
   void setSeed(int seed) {
@@ -600,7 +604,8 @@ int LoadConstants(Decoder &dec) {
   return 1;
 }
 
-std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver) {
+std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver, const std::string& /*name*/) {
+  // TODO: write sound data file with proper extension
   auto sound = std::make_unique<Sound>();
 
   int kind53 = -1;
@@ -635,7 +640,7 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver) {
   return sound;
 }
 
-std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
+std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver, const std::string& name) {
   auto sprite = std::make_unique<Sprite>();
 
   int w = 0, h = 0;
@@ -677,10 +682,10 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
       w = dec.read4();
       h = dec.read4();
       if (w != 0 && h != 0)
-        dec.readBGRAImage(sprite->add_subimages(), w, h);
+        dec.readBGRAImage(sprite->add_subimages(), TempFileName(gmk_data)/name/(std::to_string(i) + ".png"), w, h);
     } else {
       if (dec.read4() == -1) continue;
-      dec.readZlibImage(sprite->add_subimages(), transparent);
+      dec.readZlibImage(sprite->add_subimages(), TempFileName(gmk_data)/name/(std::to_string(i) + ".png"), transparent);
     }
   }
   sprite->set_width(w);
@@ -700,7 +705,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
   return sprite;
 }
 
-std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
+std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver, const std::string& name) {
   auto background = std::make_unique<Background>();
 
   int w = 0, h = 0;
@@ -731,7 +736,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   if (ver < 710) {
     if (dec.readBool()) {
       if (dec.read4() != -1)
-        dec.readZlibImage(background->mutable_image(), transparent);
+        dec.readZlibImage(background->mutable_image(), TempFileName(gmk_data)/name/"background.png", transparent);
     }
   } else { // >= 710
     int dataver = dec.read4();
@@ -743,7 +748,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
     w = dec.read4();
     h = dec.read4();
     if (w != 0 && h != 0)
-      dec.readBGRAImage(background->mutable_image(), w, h);
+      dec.readBGRAImage(background->mutable_image(), TempFileName(gmk_data)/name/"background.png", w, h);
   }
 
   background->set_width(w);
@@ -752,7 +757,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   return background;
 }
 
-std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/) {
+std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/, const std::string& /*name*/) {
   auto path = std::make_unique<Path>();
 
   path->set_smooth(dec.readBool());
@@ -772,7 +777,7 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/) {
   return path;
 }
 
-std::unique_ptr<Script> LoadScript(Decoder &dec, int /*ver*/) {
+std::unique_ptr<Script> LoadScript(Decoder &dec, int /*ver*/, const std::string& /*name*/) {
   auto script = std::make_unique<Script>();
 
   script->set_code(dec.readStr());
@@ -780,7 +785,7 @@ std::unique_ptr<Script> LoadScript(Decoder &dec, int /*ver*/) {
   return script;
 }
 
-std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/) {
+std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/, const std::string& /*name*/) {
   auto font = std::make_unique<Font>();
 
   font->set_font_name(dec.readStr());
@@ -886,7 +891,7 @@ int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
   return 1;
 }
 
-std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/) {
+std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/, const std::string& /*name*/) {
   auto timeline = std::make_unique<Timeline>();
 
   int nomoms = dec.read4();
@@ -899,7 +904,7 @@ std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/) {
   return timeline;
 }
 
-std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
+std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/, const std::string& /*name*/) {
   auto object = std::make_unique<Object>();
 
   dec.postponeName(object->mutable_sprite_name(), dec.read4(), TypeCase::kSprite);
@@ -927,7 +932,7 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
   return object;
 }
 
-std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
+std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*/) {
   auto room = std::make_unique<Room>();
 
   room->set_caption(dec.readStr());
@@ -1113,7 +1118,7 @@ int LoadGameInformation(Decoder &dec) {
   return 1;
 }
 
-using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
+using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int, const std::string&)>;
 
 struct GroupFactory {
   TypeCase type;
@@ -1147,7 +1152,7 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
       return 0;
     }
 
-    auto res = groupFactory.loadFunc(dec, ver);
+    auto res = groupFactory.loadFunc(dec, ver, name);
     if (!res) {
       err << "There was a problem reading GMK resource of type '" << type << "' with name '" << name
           << "' and the project cannot be loaded" << std::endl;

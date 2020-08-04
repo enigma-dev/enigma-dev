@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <stack>
 
 bool StartsWith(const string &str, const string &prefix) {
   if (prefix.length() > str.length()) return false;
@@ -23,6 +24,21 @@ bool CreateDirectory(const fs::path &directory) {
   if (fs::create_directory(directory, ec) || !ec) return true;
   std::cerr << "Failed to create directory " << directory << std::endl;
   return false;
+}
+
+bool CreateDirectoryRecursive(const fs::path &directory) {
+  std::stack<fs::path> dirs;
+  fs::path dir = directory;
+  while (directory.has_parent_path() && !FolderExists(dir.parent_path())) {
+    dir = dir.parent_path();
+    dirs.push(dir);
+  }
+  
+  while(!dirs.empty() && CreateDirectory(dirs.top())) {
+    dirs.pop();
+  }
+    
+  return !dirs.empty();
 }
 
 fs::path InternalizeFile(const fs::path &file,
@@ -47,7 +63,7 @@ fs::path InternalizeFile(const fs::path &file,
   return relative;
 }
 
-string TempFileName(const string &pattern) {
+fs::path TempFileName(const string &pattern) {
   static int increment = 0;
   static std::string prefix = "";
   if (prefix.empty()) {
