@@ -756,7 +756,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver, const std::str
     w = dec.read4();
     h = dec.read4();
     if (w != 0 && h != 0) {
-      dec.readBGRAImage(fName, transparent);
+      dec.readBGRAImage(fName, w, h);
       background->set_image(fName.u8string());
     }
   }

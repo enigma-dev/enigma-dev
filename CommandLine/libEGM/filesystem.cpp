@@ -77,12 +77,12 @@ fs::path TempFileName(const string &pattern) {
   return (fs::temp_directory_path().string() + '/' + name);
 }
 
-void DeleteFile(const string &fName) {
-  std::remove(fName.c_str());
+void DeleteFile(const fs::path &fName) {
+  std::remove(fName.u8string().c_str());
 }
 
-void DeleteFolder(const string &fName) {
-  fs::remove_all(fName.c_str());
+void DeleteFolder(const fs::path &fName) {
+  fs::remove_all(fName);
 }
 
 bool FolderExists(const string &folder) {
