@@ -815,6 +815,22 @@ std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/, const std::string& /*n
   return font;
 }
 
+
+struct PostponedAction {
+  PostponedAction(std::string* field, std::vector<std::unique_ptr<Action>>&& actions) : _field(field), _actions(std::move(actions)) {}
+  std::string* _field;
+  std::vector<std::unique_ptr<Action>> _actions;
+  void Parse() {
+    std::vector<Action> actions;
+    for (std::unique_ptr<Action>& action : _actions)
+      actions.emplace_back(*action);
+    _field->append(Actions2Code(actions)); 
+    _actions.clear();
+  }
+};
+
+static std::vector<PostponedAction> postponedActions;
+
 int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
   int ver = dec.read4();
   if (ver != 400) {
@@ -824,20 +840,19 @@ int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
   }
 
   int noacts = dec.read4();
-  std::vector<Action> actions;
-  actions.reserve(noacts);
+  std::vector<std::unique_ptr<Action>> actions;
   for (int k = 0; k < noacts; k++) {
-    Action action;
+    auto action = std::make_unique<Action>();
     dec.skip(4);
-    action.set_libid(dec.read4());
-    action.set_id(dec.read4());
-    action.set_kind(static_cast<ActionKind>(dec.read4()));
-    action.set_use_relative(dec.readBool());
-    action.set_is_question(dec.readBool());
-    action.set_use_apply_to(dec.readBool());
-    action.set_exe_type(static_cast<ActionExecution>(dec.read4()));
-    action.set_function_name(dec.readStr());
-    action.set_code_string(dec.readStr());
+    action->set_libid(dec.read4());
+    action->set_id(dec.read4());
+    action->set_kind(static_cast<ActionKind>(dec.read4()));
+    action->set_use_relative(dec.readBool());
+    action->set_is_question(dec.readBool());
+    action->set_use_apply_to(dec.readBool());
+    action->set_exe_type(static_cast<ActionExecution>(dec.read4()));
+    action->set_function_name(dec.readStr());
+    action->set_code_string(dec.readStr());
 
     int numofargs = dec.read4(); // number of library action's arguments
     int numofargkinds = dec.read4(); // number of library action's argument kinds
@@ -848,15 +863,15 @@ int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
     int applies_to = dec.read4();
     switch (applies_to) {
       case -1:
-        action.set_who_name("self");
+        action->set_who_name("self");
         break;
       case -2:
-        action.set_who_name("other");
+        action->set_who_name("other");
         break;
       default:
-        action.set_who_name(std::to_string(applies_to));
+        dec.postponeName(action->mutable_who_name(), applies_to, TypeCase::kObject);
     }
-    action.set_relative(dec.readBool());
+    action->set_relative(dec.readBool());
 
     int actualnoargs = dec.read4();
     for (int l = 0; l < actualnoargs; l++) {
@@ -864,38 +879,38 @@ int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
         dec.skip(dec.read4());
         continue;
       }
-      auto argument = action.add_arguments();
+      auto argument = action->add_arguments();
       argument->set_kind(static_cast<ArgumentKind>(argkinds[l]));
       std::string strval = dec.readStr();
 
-      using ArgumentMutator = std::function<std::string*(Argument*)>;
+      using ArgumentMutator = std::pair<std::function<std::string*(Argument*)>, TypeCase>;
       using MutatorMap = std::unordered_map<ArgumentKind, ArgumentMutator>;
 
       static const MutatorMap mutatorMap({
-        { ArgumentKind::ARG_SOUND,      &Argument::mutable_sound      },
-        { ArgumentKind::ARG_BACKGROUND, &Argument::mutable_background },
-        { ArgumentKind::ARG_SPRITE,     &Argument::mutable_sprite     },
-        { ArgumentKind::ARG_SCRIPT,     &Argument::mutable_script     },
-        { ArgumentKind::ARG_FONT,       &Argument::mutable_font       },
-        { ArgumentKind::ARG_OBJECT,     &Argument::mutable_object     },
-        { ArgumentKind::ARG_TIMELINE,   &Argument::mutable_timeline   },
-        { ArgumentKind::ARG_ROOM,       &Argument::mutable_room       },
-        { ArgumentKind::ARG_PATH,       &Argument::mutable_path       }
+        { ArgumentKind::ARG_SOUND,      {&Argument::mutable_sound,       TypeCase::kSound      }},
+        { ArgumentKind::ARG_BACKGROUND, {&Argument::mutable_background,  TypeCase::kBackground }},
+        { ArgumentKind::ARG_SPRITE,     {&Argument::mutable_sprite,      TypeCase::kSprite     }},
+        { ArgumentKind::ARG_SCRIPT,     {&Argument::mutable_script,      TypeCase::kScript     }},
+        { ArgumentKind::ARG_FONT,       {&Argument::mutable_font,        TypeCase::kFont       }},
+        { ArgumentKind::ARG_OBJECT,     {&Argument::mutable_object,      TypeCase::kObject     }},
+        { ArgumentKind::ARG_TIMELINE,   {&Argument::mutable_timeline,    TypeCase::kTimeline   }},
+        { ArgumentKind::ARG_ROOM,       {&Argument::mutable_room,        TypeCase::kRoom       }},
+        { ArgumentKind::ARG_PATH,       {&Argument::mutable_path,        TypeCase::kPath       }}
       });
 
       const auto &mutator = mutatorMap.find(argument->kind());
       if (mutator != mutatorMap.end()) {
-        mutator->second(argument)->append(strval);
+        dec.postponeName(mutator->second.first(argument), std::stoi(strval), mutator->second.second);
       } else {
         argument->set_string(strval);
       }
     }
 
-    action.set_is_not(dec.readBool());
-    actions.emplace_back(action);
+    action->set_is_not(dec.readBool());
+    actions.emplace_back(std::move(action));
   }
 
-  code->append(Actions2Code(actions));
+  postponedActions.emplace_back(code, std::move(actions));
 
   return 1;
 }
@@ -1326,6 +1341,10 @@ std::unique_ptr<buffers::Project> LoadGMK(std::string fName, const EventData* ev
   while (rootnodes-- > 0) {
     LoadTree(dec, typeMap, root.get());
   }
+  
+  // Handle postponed DnD conversion
+  for(auto&& a : postponedActions) a.Parse();
+  postponedActions.clear();
 
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
