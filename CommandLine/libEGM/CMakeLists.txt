@@ -7,7 +7,7 @@ set(CMAKE_DEBUG_POSTFIX d)
 
 project(${LIB_EGM} DESCRIPTION ${LIB_EGM_DESCRIPTION})
 
-file(GLOB SRC_FILES *.cpp)
+file(GLOB_RECURSE SRC_FILES *.cpp)
 
 add_library(${LIB_EGM} ${LIB_TYPE} ${SRC_FILES})
 

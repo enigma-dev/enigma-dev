@@ -139,6 +139,12 @@ void parse_ide_settings(const char* eyaml)
   setting::automatic_semicolons   = settree.get("automatic-semicolons").toBool();
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
+  // Path to enigma sources
+  enigma_root = settree.get("enigma-root").toString();
+  if (enigma_root.empty()) {
+    enigma_root = ".";
+  }
+
   // Use a platform-specific make directory.
   eobjs_directory = settree.get("eobjs-directory").toString();
   
@@ -194,7 +200,7 @@ void parse_ide_settings(const char* eyaml)
       extensions::targetAPI.windowLinks = eyscalar(it);
     ifs.close();
   }
-  string platn = tolower(extensions::targetAPI.windowSys);
+  string platn = ToLower(extensions::targetAPI.windowSys);
 
   #define eygl(fn,v) {};
   /*{\

@@ -14,6 +14,6 @@ else
 endif
 
 SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(TESTCASES_DIR)/*.cpp) $(OS_SRCS)
-LDFLAGS += $(OS_LIBS) -lgtest -lpthread -lgtest_main
+LDFLAGS += $(OS_LIBS) -lgtest_main -lgtest -lpthread
 
 include ../../Default.mk

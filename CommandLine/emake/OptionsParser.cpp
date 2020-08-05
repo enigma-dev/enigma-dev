@@ -491,7 +491,7 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
   if (it != std::end(_api[api]))
   {
     //set api
-    std::string lower = tolower(api);
+    std::string lower = ToLower(api);
 
     if (lower == "extensions")
     {

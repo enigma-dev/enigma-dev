@@ -66,7 +66,7 @@ string REFERENCE_POSTFIX(string ref) {
 #include "languages/lang_CPP.h"
 
 struct usedtype { int uc; dectrip original; usedtype(): uc(0) {} }; // uc is the use count, then after polling, the dummy number.
-int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const parsed_object *global, bool treatUninitAs0)
+int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const ParsedScope *global, bool treatUninitAs0)
 {
   ofstream wto;
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h").u8string().c_str(),ios_base::out);

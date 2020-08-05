@@ -1,0 +1,724 @@
+# This file contains a list of all events in ENIGMA and the order in which they
+# are executed.
+#
+# By "contains," I actually mean to imply "dictates." This file will let you
+# re-order events, change the behavior of existing events, and even define new
+# events with new behaviours, so long as the IDE supports this file.
+#
+# This file contains all information necessary to translate events from game
+# files (such as EGM, GMK, GM6, and GMX) into working events within the ENIGMA
+# engine. Event information not detailed in this file can be considered
+# auxiliary (eg, offering a key picker for keyboard constants instead of a
+# dropdown or combobox).
+#
+# That said, DO NOT MODIFY THE CONTENTS OF THIS FILE, UNLESS YOU KNOW WHAT
+# YOU'RE DOING. Modifying this file CAN screw up ENIGMA's behavior.
+#
+
+Events:
+  - ID: GameStart
+    Name: "Game Start"
+    Description: "Start of the game."
+    Type: TriggerAll
+
+  - ID: WindowClose
+    Name: "Window Close"
+    Description: "Window was closed."
+    Type: TriggerAll
+
+  - ID: ImageLoaded
+    Name: "Image Loaded"
+    Description: "Image finished loading."
+    Type: TriggerAll
+
+  - ID: SoundLoaded
+    Name: "Sound Loaded"
+    Description: "Sound finished loading."
+    Type: TriggerAll
+
+  - ID: HTTP
+    Name: "HTTP"
+    Description: "Callback from one of the http_ functions, such as `http_post_string`."
+    Type: TriggerAll
+
+  - ID: Dialog
+    Name: "Dialog"
+    Description: "Dialog resolved"
+    Type: TriggerAll
+
+  - ID: IAP
+    Name: "In App Purchase"
+    Description: "In-App purchase"
+    Type: TriggerAll
+
+  - ID: Cloud
+    Name: "Cloud"
+    Description: "Callback from one of the cloud_ functions, such as `cloud_synchronise`."
+    Type: TriggerAll
+
+  - ID: Networking
+    Name: "Networking"
+    Description: "Network traffic detected."
+    Type: TriggerAll
+
+  - ID: Steam
+    Name: "Steam"
+    Description: "Callback from one of the Steam API functions."
+    Type: TriggerAll
+
+  - ID: Social
+    Name: "Social"
+    Description: "Callback from one of the Social API functions."
+    Type: TriggerAll
+
+  - ID: RoomStart
+    Name: "Room Start"
+    Description: "New room loaded."
+    Type: TriggerAll
+
+  - ID: Create
+    Name: "Create"
+    Description: "Instance constructor (called when the instance is first created)."
+    Type: TriggerOnce
+
+  - ID: Destroy
+    Name: "Destroy"
+    Description: "Instance destructor (called as the instance is destroyed)."
+    Type: TriggerOnce
+
+  - ID: BeginStep
+    Name: "Begin Step"
+    Description: "The first step event executed each frame."
+    Group: "Step"
+    Constant: |
+      {
+        xprevious = x;
+        yprevious = y;
+        if (sprite_index != -1) {
+          int imgnum = image_number;  // Special sauce happens here
+          image_index = fmod(image_index + image_speed + imgnum, imgnum);
+        }
+      }
+
+  - ID: Alarm
+    Name: "Alarm %1"
+    Type: Stacked
+    Parameters:
+      - integer
+    Group: Alarm
+    SubCheck: |
+      {
+        alarm[%1] = (int) alarm[%1];
+        return alarm[%1] < 0 ? false : !((int)--alarm[%1]);
+      }
+
+  - ID: Keyboard
+    Name: "Keyboard %1"
+    Description: "A key was pressed or is being held."
+    Group: "Input"
+    Type: Specialized  # We want the event loop to handle checking each key.
+    Parameters:
+      - Key
+    SuperCheck: |
+      keyboard_check(%1)
+
+  - ID: KeyPressed
+    Name: "Key Pressed %1"
+    Description: "A key was pressed."
+    Group: "Input"
+    Type: Specialized  # We want the event loop to handle checking each key.
+    Parameters:
+      - Key
+    SuperCheck: |
+      keyboard_check_pressed(%1)
+
+  - ID: KeyReleased
+    Name: "Key Released %1"
+    Description: "A key was pressed."
+    Group: "Input"
+    Type: Specialized  # We want the event loop to handle checking each key.
+    Parameters:
+      - Key
+    SuperCheck: |
+      keyboard_check_pressed(%1)
+
+  - ID: MouseButton
+    Name: "Mouse Button %1"
+    Description: "A mouse button is pressed or held and the mouse is hovering this instance."
+    Group: "Input"
+    Type: Specialized  # We want the event loop to handle checking each button.
+    Parameters:
+      - MouseButton
+    SuperCheck: |
+      mouse_check_button(%1)
+    SubCheck: |
+      position_meeting(mouse_x, mouse_y, id)
+
+  - ID: MousePressed
+    Name: "Mouse Button Pressed %1"
+    Description: "A mouse button was pressed while hovering this instance."
+    Group: "Input"
+    Type: Specialized  # We want the event loop to handle checking each button.
+    Parameters:
+      - MouseButton
+    SuperCheck: |
+      mouse_check_button_pressed(%1)
+    SubCheck: |
+      position_meeting(mouse_x, mouse_y, id)
+
+  - ID: MouseReleased
+    Name: "Mouse Button Released %1"
+    Description: "A mouse button was released while hovering this instance."
+    Group: "Input"
+    Type: Specialized  # We want the event loop to handle checking each button.
+    Parameters:
+      - MouseButton
+    SuperCheck: |
+      mouse_check_button_pressed(%1)
+    SubCheck: |
+      position_meeting(mouse_x, mouse_y, id)
+
+  - ID: GlobalMouseButton
+    Name: "Global Mouse Button %1"
+    Description: "A mouse button was pressed or is being held."
+    Type: Specialized  # We want the event loop to handle checking each button.
+    Parameters:
+      - MouseButton
+    SuperCheck: |
+      mouse_check_button(%1)
+
+  - ID: GlobalMousePressed
+    Name: "Global Mouse Button Pressed %1"
+    Description: "A mouse button was pressed."
+    Group: "Input"
+    Type: Specialized  # We want the event loop to handle checking each button.
+    Parameters:
+      - MouseButton
+    SuperCheck: |
+      mouse_check_button_pressed(%1)
+
+  - ID: GlobalMouseReleased
+    Name: "Global Mouse Button Released %1"
+    Description: "A mouse button was released."
+    Group: "Input"
+    Type: Specialized  # We want the event loop to handle checking each button.
+    Parameters:
+      - MouseButton
+    SuperCheck: |
+      mouse_check_button_pressed(%1)
+
+  - ID: MouseWheelUp
+    Name: "Mouse Wheel Up"
+    Description: "Mouse scroll wheel was rotated upwards. See `mouse_vscrolls`."
+    SuperCheck: |
+      mouse_vscrolls > 0
+
+  - ID: MouseWheelDown
+    Name: "Mouse Wheel Down"
+    Description: "Mouse scroll wheel was rotated downwards. See `mouse_vscrolls`."
+    SuperCheck: |
+      mouse_vscrolls < 0
+
+  - ID: MouseEnterWindow
+    Name: "Mouse Enter Window"
+    Description:  "Mouse has entered the window."
+    Locals: bool $innowEnter = false;
+    SubCheck: |
+      {
+        const bool wasin = $innowEnter;
+        $innowEnter = position_meeting(mouse_x, mouse_y, id);
+        return !(!$innowEnter or wasin);
+      }
+
+  - ID: MouseLeaveWindow
+    Name: "Mouse Leave Window"
+    Description: "Mouse has left the window."
+    Locals: |
+      bool $innowLeave = false;
+    SubCheck: |
+      {
+        const bool wasin = $innowLeave;
+        $innowLeave = position_meeting(mouse_x, mouse_y, id);
+        return !($innowLeave or !wasin);
+      }
+
+  - ID: Step
+    Name: "Step"
+    Group: "Step"
+    Description: "Standard step event executed after begin step and input handling."
+    Constant: |
+      if (timeline_running && timeline_speed != 0) {
+        advance_curr_timeline();
+      }
+
+  - ID: LocalSweep
+    Name: "Locals sweep"
+    Description: "Internal event to update local variables."
+    Constant: |
+      enigma::propagate_locals(this);
+
+  - ID: PathEnd
+    Name: "Path End"
+    Description: "Instance has reached the endpoint of a path."
+    SuperCheck: "false" # TODO: Paths are not yet implemented.
+
+  - ID: OutsideRoom
+    Name: "Outside Room"
+    Description: "Instance has move outside the room's bounds."
+    SubCheck: |
+      (bbox_right < 0)  || (bbox_left > room_width) ||
+      (bbox_bottom < 0) || (bbox_top > room_height)
+
+  - ID: InsideRoom
+    Name: "Inside Room"
+    Description: "Instance has moved inside the room's bounds."
+    SubCheck: |
+      (bbox_left < 0) || (bbox_right > room_width) ||
+      (bbox_top < 0)  || (bbox_bottom > room_height)
+
+  - ID: OutsideView
+    Name: "Outside View %1"
+    Description: "Instance has moved outside of the view's bounds."
+    Type: Stacked
+    Parameters:
+      - integer
+    SubCheck: |
+      view_enabled && !view_visible[%1] && (
+        (bbox_right  < view_xview[%1])                  ||
+        (bbox_left   > view_xview[%1] + view_wview[%1]) ||
+        (bbox_bottom < view_yview[%1])                  ||
+        (bbox_top    > view_yview[%1] + view_hview[%1])
+      )
+
+  - ID: InsideView
+    Name: "Inside View %1"
+    Description: "Instance has moved inside of the view's bounds."
+    Type: Stacked
+    Parameters:
+      - integer
+    SubCheck: |
+      view_enabled && view_visible[%1] && (
+        (bbox_right  < view_xview[%1])                  ||
+        (bbox_left   > view_xview[%1] + view_wview[%1]) ||
+        (bbox_bottom < view_yview[%1])                  ||
+        (bbox_top    > view_yview[%1] + view_hview[%1])
+      )
+
+  - ID: NoMoreLives
+    Name: "No More Lives"
+    Description: "Lives variable has dropped to 0."
+    SuperCheck: |
+      enigma::update_lives_status_and_return_zeroless()
+
+  - ID: NoMoreHealth
+    Name: "No More Health"
+    Description: "Health variable has dropped to 0."
+    Type: Specialized
+    Locals: "bool $out_of_health = 0;"
+    SubCheck: |
+      {
+        bool OoH = $out_of_health;
+        $out_of_health = (health <= 0);
+        return $out_of_health && !OoH;
+      }
+    Suffix: |
+      if (health > 0) $out_of_health = 0;
+
+  - ID: BeforeCollisionAutomaticCollisionHandling
+    Name: "Pre-collision automatic collision handling."
+    Description: "Internal event to update collision stuff"
+    Type: Inline
+    Instead: |
+      enigma::perform_callbacks_before_collision_event();
+
+  - ID: Collision
+    Name: "Collision %1"
+    Description: "Instance is colliding (overlapping) with another object."
+    Group: "Collisions"
+    Type: Stacked
+    Parameters:
+      - object
+    # SuperCheck: |
+    #   instance_number(%1)
+    SubCheck: |
+      (instance_other = enigma::place_meeting_inst(x,y,%1))
+    Prefix: |
+      for (enigma::iterator it = enigma::fetch_inst_iter_by_int(%1); it; ++it) {
+        int $$$internal$$$ = %1;
+        instance_other = *it;
+        if (enigma::place_meeting_inst(x,y,instance_other->id)) {
+          if (enigma::glaccess(int(other))->solid &&
+              enigma::place_meeting_inst(x,y,instance_other->id)) {
+            x = xprevious;
+            y = yprevious;
+          }
+      /* [ Begin user code ] */
+
+    
+    Suffix: |
+      /* [ End user code ] */
+          if (enigma::glaccess(int(other))->solid) {
+            x += hspeed;
+            y += vspeed;
+            if (enigma::place_meeting_inst(x, y, $$$internal$$$)) {
+              x = xprevious;
+              y = yprevious;
+            }
+          }
+        }
+      }
+
+  - ID: EndStep
+    Name: "End Step"
+    Description: "The last of the step events."
+    Group: "Step"
+    Constant: |
+      {
+        if (timeline_running && timeline_loop && timeline_speed != 0)
+          loop_curr_timeline();
+      }
+
+  - ID: ParticleSystemsUpdate
+    Name: "Particle systems update."
+    Description: "Internal event to update particles"
+    Type: Inline
+    Instead: |
+      enigma::perform_callbacks_particle_updating();
+
+  - ID: Draw
+    Name: "Draw"
+    Description: "Draw inside the current viewport."
+    Group: "Draw"
+    SubCheck: "visible"
+    IteratorDeclare: "/* Draw is handled by depth */"
+    IteratorInitialize: "/* Draw is initialized in the constructor */"
+    IteratorRemove: "depth.remove();"
+    IteratorDelete: "/* Draw event will destruct with this */"
+    Default: |
+      if (visible && sprite_index != -1) {
+        draw_sprite_ext(sprite_index, image_index, x, y,
+                        image_xscale, image_yscale, image_angle,
+                        image_blend, image_alpha);
+      }
+    Instead: |
+      // We never want to iterate draw; we let screen_redraw() handle it.
+      if (automatic_redraw) screen_redraw();
+
+  - ID: DrawGUI
+    Name: "Draw GUI"
+    Description: "Draw directly on top the window, ignoring any viewports."
+    Group: "Draw"
+    IteratorDeclare: "/* DrawGUI is handled by depth */"
+    IteratorInitialize: "++enigma::gui_used;"
+    IteratorRemove: "--enigma::gui_used;"
+    IteratorDelete: "/* Nothing to do for DrawGUI */"
+    SubCheck: "visible"
+
+  - ID: WindowResize
+    Name: "Window Resize"
+    Description: "Window size has changed."
+    Type: TriggerAll
+
+  - ID: AnimationEnd
+    Name: "Animation End"
+    Description: "Instance sprite has reached the last subimage."
+    SubCheck: |
+      !(image_index + image_speed < sprite_get_number(sprite_index))
+
+  - ID: RoomEnd
+    Name: "Room End"
+    Description: "The current room has changed."
+    Type: TriggerAll
+
+  - ID: GameEnd
+    Name: "Game End"
+    Description: "Game is ending."
+    Type: TriggerAll
+
+  - ID: User
+    Name: "User %1"
+    Description: "Custom user event. Invoked manually."
+    Type: TriggerOnce
+    Parameters:
+      - string
+
+  - ID: Joystick.Axis
+    Name: "Joystick %1 Axis %2"
+    Description: "A joystick button is pressed or held"
+    Group: "Input"
+    Type: Specialized
+    Parameters:
+      - integer
+      - JoystickButton
+    SuperCheck: "false" # TODO: not implemented yet
+
+  - ID: Joystick.Button
+    Name: "Joystick %1 Button %2"
+    Description: "A joystick button is pressed or held"
+    Group: "Input"
+    Type: Specialized
+    Parameters:
+      - integer
+      - JoystickButton
+    SuperCheck: "false" # TODO: not implemented yet
+
+# These are definitions of constants used in the above.
+Aliases:
+  # Keyboard Aliases
+  Key:
+    AnyKey:      {value: 1,   spelling: "vk_anykey"}
+    NoKey:       {value: 0,   spelling: "vk_nokey"}
+    Left:        {value: 37,  spelling: "vk_left"}
+    Right:       {value: 39,  spelling: "vk_right"}
+    Up:          {value: 38,  spelling: "vk_up"}
+    Down:        {value: 40,  spelling: "vk_down"}
+    Tab:         {value: 9,   spelling: "vk_tab"}
+    Enter:       {value: 13,  spelling: "vk_enter"}
+    Shift:       {value: 16,  spelling: "vk_shift"}
+    Control:     {value: 17,  spelling: "vk_control"}
+    Alt:         {value: 18,  spelling: "vk_alt"}
+    Space:       {value: 32,  spelling: "vk_space"}
+    Numpad0:     {value: 96,  spelling: "vk_numpad0"}
+    Numpad1:     {value: 97,  spelling: "vk_numpad1"}
+    Numpad2:     {value: 98,  spelling: "vk_numpad2"}
+    Numpad3:     {value: 99,  spelling: "vk_numpad3"}
+    Numpad4:     {value: 100, spelling: "vk_numpad4"}
+    Numpad5:     {value: 101, spelling: "vk_numpad5"}
+    Numpad6:     {value: 102, spelling: "vk_numpad6"}
+    Numpad7:     {value: 103, spelling: "vk_numpad7"}
+    Numpad8:     {value: 104, spelling: "vk_numpad8"}
+    Numpad9:     {value: 105, spelling: "vk_numpad9"}
+    Multiply:    {value: 106, spelling: "vk_multiply"}
+    Add:         {value: 107, spelling: "vk_add"}
+    Subtract:    {value: 109, spelling: "vk_subtract"}
+    Decimal:     {value: 110, spelling: "vk_decimal"}
+    Divide:      {value: 111, spelling: "vk_divide"}
+    F1:          {value: 112, spelling: "vk_f1"}
+    F2:          {value: 113, spelling: "vk_f2"}
+    F3:          {value: 114, spelling: "vk_f3"}
+    F4:          {value: 115, spelling: "vk_f4"}
+    F5:          {value: 116, spelling: "vk_f5"}
+    F6:          {value: 117, spelling: "vk_f6"}
+    F7:          {value: 118, spelling: "vk_f7"}
+    F8:          {value: 119, spelling: "vk_f8"}
+    F9:          {value: 120, spelling: "vk_f9"}
+    F10:         {value: 121, spelling: "vk_f10"}
+    F11:         {value: 122, spelling: "vk_f11"}
+    F12:         {value: 123, spelling: "vk_f12"}
+    Backspace:   {value: 8,   spelling: "vk_backspace"}
+    Escape:      {value: 27,  spelling: "vk_escape"}
+    PageUp:      {value: 33,  spelling: "vk_pageup"}
+    PageDown:    {value: 34,  spelling: "vk_pagedown"}
+    End:         {value: 35,  spelling: "vk_end"}
+    Home:        {value: 36,  spelling: "vk_home"}
+    Insert:      {value: 45,  spelling: "vk_insert"}
+    Delete:      {value: 46,  spelling: "vk_delete"}
+  # These are for check_direct only
+    LShift:      {value: 160, spelling: "vk_lshift"}
+    RShift:      {value: 161, spelling: "vk_rshift"}
+    LControl:    {value: 162, spelling: "vk_lcontrol"}
+    RControl:    {value: 163, spelling: "vk_rcontrol"}
+    LAlt:        {value: 164, spelling: "vk_lalt"}
+    RAlt:        {value: 165, spelling: "vk_ralt"}
+  # This one's Windows only
+    PrintScreen: {value: 42,  spelling: "vk_printscreen"}
+  # These are ENIGMA-only
+    Caps:        {value: 20,  spelling: "vk_caps"}
+    Scroll:      {value: 145, spelling: "vk_scroll"}
+    Pause:       {value: 19,  spelling: "vk_pause"}
+    LSuper:      {value: 91,  spelling: "vk_lsuper"}
+    RSuper:      {value: 92,  spelling: "vk_rsuper"}
+  # These are a little annoying, but make codegen easier.
+    A:  {value: 65, spelling: "'A'"}
+    B:  {value: 66, spelling: "'B'"}
+    C:  {value: 67, spelling: "'C'"}
+    D:  {value: 68, spelling: "'D'"}
+    E:  {value: 69, spelling: "'E'"}
+    F:  {value: 70, spelling: "'F'"}
+    G:  {value: 71, spelling: "'G'"}
+    H:  {value: 72, spelling: "'H'"}
+    I:  {value: 73, spelling: "'I'"}
+    J:  {value: 74, spelling: "'J'"}
+    K:  {value: 75, spelling: "'K'"}
+    L:  {value: 76, spelling: "'L'"}
+    M:  {value: 77, spelling: "'M'"}
+    N:  {value: 78, spelling: "'N'"}
+    O:  {value: 79, spelling: "'O'"}
+    P:  {value: 80, spelling: "'P'"}
+    Q:  {value: 81, spelling: "'Q'"}
+    R:  {value: 82, spelling: "'R'"}
+    S:  {value: 83, spelling: "'S'"}
+    T:  {value: 84, spelling: "'T'"}
+    U:  {value: 85, spelling: "'U'"}
+    V:  {value: 86, spelling: "'V'"}
+    W:  {value: 87, spelling: "'W'"}
+    X:  {value: 88, spelling: "'X'"}
+    Y:  {value: 89, spelling: "'Y'"}
+    Z:  {value: 90, spelling: "'Z'"}
+
+  # Mouse Button Aliases
+  MouseButton:
+    Any:    {value: -1, spelling: "mb_any"}
+    None:   {value:  0, spelling: "mb_none"}
+    Left:   {value:  1, spelling: "mb_left"}
+    Right:  {value:  2, spelling: "mb_right"}
+    Middle: {value:  3, spelling: "mb_middle"}
+
+  JoystickButton:
+    Left:   {value: 0, spelling: "js_left"}
+    Right:  {value: 1, spelling: "js_right"}
+    Up:     {value: 2, spelling: "js_up"}
+    Down:   {value: 3, spelling: "js_down"}
+
+# Mapping of GM's integer event ids to our event names
+GameMakerEventMappings:
+  0:  # Instance construct event.
+    Single: Create
+
+  1:  # Instance destruct event.
+    Single: Destroy
+
+  2:  # Alarms. GM only supports ten.
+    Parameterized: Alarm[%1]  # Number <1-10>
+
+  3:  # Step events.
+    Specialized:
+      Cases:
+        0: Step
+        1: BeginStep
+        2: EndStep
+
+  4:  # Collision events.
+    Parameterized: Collision[%1]  # <Object>
+
+  5:  # Keyboard events.
+    Parameterized: Keyboard[%1]   # <Key>
+
+  6:  # The "Mouse" group, which somehow inherited joysticks.
+    Specialized:
+      Cases:
+        0: MouseButton[Left]
+        1: MouseButton[Right]
+        2: MouseButton[Middle]
+        3: MouseButton[None]
+        4: MousePressed[Left]
+        5: MousePressed[Right]
+        6: MousePressed[Middle]
+        7: MouseReleased[Right]
+        8: MouseReleased[Left]
+        9: MouseReleased[Middle]
+        10: MouseEnterWindow
+        11: MouseLeaveWindow
+
+        16: Joystick[1]Axis[Left]
+        17: Joystick[1]Axis[Right]
+        18: Joystick[1]Axis[Up]
+        19: Joystick[1]Axis[Down]
+
+        21: Joystick[1]Button[1]
+        22: Joystick[1]Button[2]
+        23: Joystick[1]Button[3]
+        24: Joystick[1]Button[4]
+        25: Joystick[1]Button[5]
+        26: Joystick[1]Button[6]
+        27: Joystick[1]Button[7]
+        28: Joystick[1]Button[8]
+
+        31: JoystickAxis[2][Left]
+        32: JoystickAxis[2][Right]
+        33: JoystickAxis[2][Up]
+        34: JoystickAxis[2][Down]
+
+        36: Joystick[2]Button[1]
+        37: Joystick[2]Button[2]
+        38: Joystick[2]Button[3]
+        39: Joystick[2]Button[4]
+        40: Joystick[2]Button[5]
+        41: Joystick[2]Button[6]
+        42: Joystick[2]Button[7]
+        43: Joystick[2]Button[8]
+        50: GlobalMouseButton[Left]
+        51: GlobalMouseButton[Right]
+        52: GlobalMouseButton[Middle]
+        53: GlobalMousePressed[Left]
+        54: GlobalMousePressed[Right]
+        55: GlobalMousePressed[Middle]
+        56: GlobalMouseReleased[Left]
+        57: GlobalMouseReleased[Right]
+        58: GlobalMouseReleased[Middle]
+        60: MouseWheelUp
+        61: MouseWheelDown
+
+  7:  # The "Other" group, which became a dumping ground.
+    Specialized:
+      Cases:
+        0: OutsideRoom
+        1: InsideRoom
+        2: GameStart
+        3: GameEnd
+        4: RoomStart
+        5: RoomEnd
+        6: NoMoreLives
+        7: AnimationEnd
+        8: PathEnd
+        9: NoMoreHealth
+        10: User[0]
+        11: User[1]
+        12: User[2]
+        13: User[3]
+        14: User[4]
+        15: User[5]
+        16: User[6]
+        17: User[7]
+        18: User[8]
+        19: User[9]
+        20: User[10]
+        21: User[11]
+        22: User[12]
+        23: User[13]
+        24: User[14]
+        25: User[15]
+
+        30: WindowClose
+
+        40: OutsideView[0]
+        41: OutsideView[1]
+        42: OutsideView[2]
+        43: OutsideView[3]
+        44: OutsideView[4]
+        45: OutsideView[5]
+        46: OutsideView[6]
+        47: OutsideView[7]
+
+        50: InsideView[0]
+        51: InsideView[1]
+        52: InsideView[2]
+        53: InsideView[3]
+        54: InsideView[4]
+        55: InsideView[5]
+        56: InsideView[6]
+        57: InsideView[7]
+
+        60: ImageLoaded
+        61: SoundLoaded
+        62: HTTP
+        63: Dialog
+
+        66: IAP
+        67: Cloud
+        68: Networking
+        69: Steam
+        70: Social
+
+  8:  # The "Draw" group.
+    Specialized:
+      Cases:
+        0: Draw
+        64: DrawGUI
+        65: WindowResize
+
+  9:  # The "Key Pressed" group.
+    Parameterized: KeyPressed[%1]  # <KeyCode>
+
+  10: # The "Key Released" group.
+    Parameterized: KeyReleased[%1] # <KeyCode>

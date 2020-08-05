@@ -7,6 +7,7 @@
  */
 
 #include "GameData.h"
+#include "event_reader/event_parser.h"
 
 #include "libpng-util/libpng-util.h"
 
@@ -296,7 +297,7 @@ ObjectData::ObjectData(const deprecated::JavaStruct::GmObject &object, const ESL
 
   for (int i = 0; i < object.mainEventCount; ++i) {
     for (int j = 0; j < object.mainEvents[i].eventCount; ++j) {
-      auto *event = data.add_events();
+      auto *event = data.add_legacy_events();
       event->set_type(object.mainEvents[i].id);
       event->set_number(object.mainEvents[i].events[j].id);
       event->set_code(object.mainEvents[i].events[j].code);
@@ -399,8 +400,16 @@ RoomData::RoomData(const deprecated::JavaStruct::Room &room, const ESLookup &loo
   }
 }
 
-static void ImportSettings(const deprecated::JavaStruct::GameSettings &settings,
-    const ESLookup &lookup, buffers::resources::Settings& set) {
+ImageData::ImageData(const Image &img):
+    width(img.width), height(img.height),
+    pixels(img.data, img.data + img.dataSize){}
+ImageData::ImageData(int w, int h, const uint8_t *data, size_t size):
+    width(w), height(h), pixels(data, data + size) {}
+
+namespace {
+
+void ImportSettings(const deprecated::JavaStruct::GameSettings &settings,
+                    buffers::resources::Settings& set) {
   cout << "Import game settings." << endl;
 
   buffers::resources::General *gen = set.mutable_general();
@@ -453,66 +462,6 @@ static void ImportSettings(const deprecated::JavaStruct::GameSettings &settings,
   sht->set_let_escape_end_game(settings.letEscEndGame);
 }
 
-ImageData::ImageData(const Image &img):
-    width(img.width), height(img.height),
-    pixels(img.data, img.data + img.dataSize){}
-ImageData::ImageData(int w, int h, const uint8_t *data, size_t size):
-    width(w), height(h), pixels(data, data + size) {}
-
-GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es): filename(es->filename ? es->filename : "") {
-  cout << "Translating EnigmaStruct" << endl;
-  cout << "- Indexing names" << endl;
-  ESLookup lookup(es);
-
-  cout << "- Transferring " << es->spriteCount << " sprites" << endl;
-  for (int i = 0; i < es->spriteCount; ++i)
-    sprites.emplace_back(es->sprites[i]);
-  cout << "- Transferring " << es->soundCount << " sounds" << endl;
-  for (int i = 0; i < es->soundCount; ++i)
-    sounds.emplace_back(es->sounds[i]);
-  cout << "- Transferring " << es->backgroundCount << " backgrounds" << endl;
-  for (int i = 0; i < es->backgroundCount; ++i)
-    backgrounds.emplace_back(es->backgrounds[i]);
-  cout << "- Transferring " << es->fontCount << " fonts" << endl;
-  for (int i = 0; i < es->fontCount; ++i)
-    fonts.emplace_back(es->fonts[i]);
-  cout << "- Transferring " << es->pathCount << " paths" << endl;
-  for (int i = 0; i < es->pathCount; ++i)
-    paths.emplace_back(es->paths[i]);
-  cout << "- Transferring " << es->scriptCount << " scripts" << endl;
-  for (int i = 0; i < es->scriptCount; ++i)
-    scripts.emplace_back(es->scripts[i]);
-  cout << "- Transferring " << es->shaderCount << " shaders" << endl;
-  for (int i = 0; i < es->shaderCount; ++i)
-    shaders.emplace_back(es->shaders[i]);
-  cout << "- Transferring " << es->timelineCount << " timelines" << endl;
-  for (int i = 0; i < es->timelineCount; ++i)
-    timelines.emplace_back(es->timelines[i]);
-  cout << "- Transferring " << es->gmObjectCount << " objects" << endl;
-  for (int i = 0; i < es->gmObjectCount; ++i)
-    objects.emplace_back(es->gmObjects[i], lookup);
-  cout << "- Transferring " << es->roomCount << " rooms" << endl;
-  for (int i = 0; i < es->roomCount; ++i)
-    rooms.emplace_back(es->rooms[i], lookup);
-
-  cout << "- Transferring " << es->constantCount <<  " constants" << endl;
-  for (int i = 0; i < es->constantCount; ++i)
-    constants.emplace_back(es->constants[i].name, es->constants[i].value);
-  cout << "- Transferring " << es->extensionCount <<  " extensions" << endl;
-  for (int i = 0; i < es->extensionCount; ++i)
-    extensions.emplace_back(es->extensions[i].name, es->extensions[i].path);
-  cout << "- Transferring " << es->packageCount <<  " packages" << endl;
-  for (int i = 0; i < es->packageCount; ++i)
-    packages.push_back(es->packages[i]);
-
-  cout << "- Not transferring game info" << endl;
-  buffers::resources::GameInformation gameInfo;
-  ImportSettings(es->gameSettings, lookup, settings);
-
-  cout << "Transfer complete." << endl << endl;
-}
-
-GameData::GameData(const buffers::Project &proj): filename("") {}
 
 int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
   int error = 0;
@@ -572,4 +521,76 @@ int FlattenProto(const buffers::Project &proj, GameData *gameData) {
     cout << "Transfer complete." << endl << endl;
 
   return ret; // success
+}
+
+void LegacyEventsToEGM(GameData &game, const EventData &evdata) {
+  std::map<int, NamedObject> objs;
+  for (ObjectData &obj : game.objects) objs[obj->id()] = NamedObject(obj.name, obj.get());
+  for (const auto &entry : objs) {
+    LegacyEventsToEGM(entry.second.obj, evdata, objs);
+  }
+}
+
+}  // namespace
+
+GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es,
+                   const EventData &events):
+    filename(es->filename ? es->filename : "") {
+  cout << "Translating EnigmaStruct" << endl;
+  cout << "- Indexing names" << endl;
+  ESLookup lookup(es);
+
+  cout << "- Transferring " << es->spriteCount << " sprites" << endl;
+  for (int i = 0; i < es->spriteCount; ++i)
+    sprites.emplace_back(es->sprites[i]);
+  cout << "- Transferring " << es->soundCount << " sounds" << endl;
+  for (int i = 0; i < es->soundCount; ++i)
+    sounds.emplace_back(es->sounds[i]);
+  cout << "- Transferring " << es->backgroundCount << " backgrounds" << endl;
+  for (int i = 0; i < es->backgroundCount; ++i)
+    backgrounds.emplace_back(es->backgrounds[i]);
+  cout << "- Transferring " << es->fontCount << " fonts" << endl;
+  for (int i = 0; i < es->fontCount; ++i)
+    fonts.emplace_back(es->fonts[i]);
+  cout << "- Transferring " << es->pathCount << " paths" << endl;
+  for (int i = 0; i < es->pathCount; ++i)
+    paths.emplace_back(es->paths[i]);
+  cout << "- Transferring " << es->scriptCount << " scripts" << endl;
+  for (int i = 0; i < es->scriptCount; ++i)
+    scripts.emplace_back(es->scripts[i]);
+  cout << "- Transferring " << es->shaderCount << " shaders" << endl;
+  for (int i = 0; i < es->shaderCount; ++i)
+    shaders.emplace_back(es->shaders[i]);
+  cout << "- Transferring " << es->timelineCount << " timelines" << endl;
+  for (int i = 0; i < es->timelineCount; ++i)
+    timelines.emplace_back(es->timelines[i]);
+  cout << "- Transferring " << es->gmObjectCount << " objects" << endl;
+  for (int i = 0; i < es->gmObjectCount; ++i)
+    objects.emplace_back(es->gmObjects[i], lookup);
+  cout << "- Transferring " << es->roomCount << " rooms" << endl;
+  for (int i = 0; i < es->roomCount; ++i)
+    rooms.emplace_back(es->rooms[i], lookup);
+
+  cout << "- Transferring " << es->constantCount <<  " constants" << endl;
+  for (int i = 0; i < es->constantCount; ++i)
+    constants.emplace_back(es->constants[i].name, es->constants[i].value);
+  cout << "- Transferring " << es->extensionCount <<  " extensions" << endl;
+  for (int i = 0; i < es->extensionCount; ++i)
+    extensions.emplace_back(es->extensions[i].name, es->extensions[i].path);
+  cout << "- Transferring " << es->packageCount <<  " packages" << endl;
+  for (int i = 0; i < es->packageCount; ++i)
+    packages.push_back(es->packages[i]);
+
+  cout << "- Not transferring game info" << endl;
+  buffers::resources::GameInformation gameInfo;
+  ImportSettings(es->gameSettings, settings);
+  
+  LegacyEventsToEGM(*this, events);
+
+  cout << "Transfer complete." << endl << endl;
+}
+
+GameData::GameData(const buffers::Project &proj, const EventData& /*events*/):
+    filename("") {
+  FlattenProto(proj, this);
 }

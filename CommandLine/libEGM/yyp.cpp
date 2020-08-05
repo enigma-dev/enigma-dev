@@ -211,7 +211,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
   }
 }
 
-buffers::Project *LoadYYP(std::string fName) {
+std::unique_ptr<buffers::Project> LoadYYP(std::string fName) {
   std::ifstream ifs(fName);
   if (!ifs) {
     err << "Could not open YYP for reading: " << fName << std::endl;
@@ -320,7 +320,7 @@ buffers::Project *LoadYYP(std::string fName) {
     }
   }
 
-  buffers::Project *proj = new buffers::Project();
+  auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(roots[0]);
 
