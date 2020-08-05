@@ -211,7 +211,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
   }
 }
 
-std::unique_ptr<buffers::Project> LoadYYP(std::string fName) {
+std::unique_ptr<buffers::Project> LoadYYP(std::string fName, const EventData* event_data) {
   std::ifstream ifs(fName);
   if (!ifs) {
     err << "Could not open YYP for reading: " << fName << std::endl;
@@ -323,6 +323,8 @@ std::unique_ptr<buffers::Project> LoadYYP(std::string fName) {
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(roots[0]);
+  
+  LegacyEventsToEGM(proj.get(), event_data);
 
   return proj;
 }

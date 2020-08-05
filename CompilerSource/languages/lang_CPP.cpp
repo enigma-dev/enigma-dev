@@ -218,5 +218,5 @@ jdi::definition* lang_CPP::look_up(const string &name) {
 }
 
 // TODO: This could use better plumbing.
-lang_CPP::lang_CPP(): evdata_(ParseEventFile("events.ey")) {}
+lang_CPP::lang_CPP(): evdata_(ParseEventFile((enigma_root/"events.ey").u8string())) {}
 

@@ -1,6 +1,5 @@
 #include "SOG.hpp"
 #include "Main.hpp"
-#include "event_reader/event_parser.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -12,8 +11,7 @@ using std::map;
 using std::string;
 using evpair = std::pair<int, int>;
 
-bool ReadSOG(const std::string &input_file, Game *game) {
-  EventData event_data(ParseEventFile("events.ey"));
+bool ReadSOG(const std::string &input_file, Game *game, const EventData* event_data) {
   map<evpair, string> events;
   fs::path targetDir(input_file);
   fs::recursive_directory_iterator iter(targetDir);
@@ -23,10 +21,10 @@ bool ReadSOG(const std::string &input_file, Game *game) {
       std::string evstr = i.filename().string();
       if (evstr.length() > 4 && evstr.substr(evstr.length() - 4) == ".edl")
         evstr.erase(evstr.length() - 4);
-      Event ev = event_data.DecodeEventString(evstr);
+      Event ev = event_data->DecodeEventString(evstr);
       if (ev.IsValid())  {
         if (std::ifstream f{i.string()}) {
-          evpair eid = event_data.reverse_get_event(ev);
+          evpair eid = event_data->reverse_get_event(ev);
           std::string code {
             std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>()
           };
@@ -43,7 +41,7 @@ bool ReadSOG(const std::string &input_file, Game *game) {
       } else {
         errorStream << "Error: unrecognized event file " << i << '.' << std::endl;
         errorStream << "Supported events:" << std::endl;
-        for (auto st : event_data.events()) {
+        for (auto st : event_data->events()) {
           errorStream << " - " << st.ExampleIDStrings();
           errorStream << std::endl;
         }

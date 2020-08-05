@@ -16,7 +16,6 @@
 **/
 
 #include "gmk.h"
-#include "event_reader/event_parser.h"
 #include "filesystem.h"
 #include "action.h"
 
@@ -854,8 +853,11 @@ int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
       case -2:
         action.set_who_name("other");
         break;
-      default:
-        action.set_who_name(std::to_string(applies_to));
+      default: {
+        //auto &resMap = typeMap[type];
+        //action.set_who_name(std::to_string(applies_to));
+        dec.postponeName(action.mutable_who_name(), applies_to, TypeCase::kObject);
+      }
     }
     action.set_relative(dec.readBool());
 
@@ -1228,7 +1230,7 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
   }
 }
 
-std::unique_ptr<buffers::Project> LoadGMK(std::string fName) {
+std::unique_ptr<buffers::Project> LoadGMK(std::string fName, const EventData* event_data) {
   static const vector<GroupFactory> groupFactories({
     { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, LoadSound      },
     { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     },
@@ -1334,7 +1336,6 @@ std::unique_ptr<buffers::Project> LoadGMK(std::string fName) {
   // ensure all temp data files are written and the paths are set in the protos
   dec.processTempFileFutures();
   
-  EventData event_data(ParseEventFile("events.ey"));
   LegacyEventsToEGM(proj.get(), event_data);
 
   return proj;

@@ -249,8 +249,8 @@ buffers::config::EventFile ParseEventFile(std::istream &file);
 // This is just a convenience method around ReadYamlFileAs<EventFile>().
 buffers::config::EventFile ParseEventFile(const std::string &filename);
 
-void LegacyEventsToEGM(buffers::Project *project, const EventData &evdata);
-void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData &evdata,
+void LegacyEventsToEGM(buffers::Project *project, const EventData* evdata);
+void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData* evdata,
                        const std::map<int, NamedObject> &objs);
 
 #endif // ENIGMA_EVENT_PARSER_H
