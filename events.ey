@@ -317,7 +317,6 @@ Events:
     Locals: "bool $out_of_health = 0;"
     SubCheck: |
       {
-        bool $out_of_health = 0;
         bool OoH = $out_of_health;
         $out_of_health = (health <= 0);
         return $out_of_health && !OoH;
