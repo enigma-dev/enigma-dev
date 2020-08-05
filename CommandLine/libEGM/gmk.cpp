@@ -853,11 +853,8 @@ int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
       case -2:
         action.set_who_name("other");
         break;
-      default: {
-        //auto &resMap = typeMap[type];
-        //action.set_who_name(std::to_string(applies_to));
-        dec.postponeName(action.mutable_who_name(), applies_to, TypeCase::kObject);
-      }
+      default:
+        action.set_who_name(std::to_string(applies_to));
     }
     action.set_relative(dec.readBool());
 
