@@ -34,11 +34,7 @@ class EGM {
   bool WriteEGM(std::string fName, buffers::Project* project) const;
   std::unique_ptr<buffers::Project> LoadEGM(std::string fName) const;
 
-  EGM(const EventData &events): events_(events) {}
-  EGM():
-      storage_do_not_use_(
-          std::make_unique<EventData>(ParseEventFile("events.ey"))),
-      events_(*storage_do_not_use_) {}
+  EGM(const EventData* events): events_(events) {}
 
  private:
   // Reading ===================================================================
@@ -67,8 +63,7 @@ class EGM {
   // 'Rithmatic ================================================================
   std::map<std::string, const buffers::TreeNode*> FlattenTree(
       const buffers::TreeNode &tree);
-  std::unique_ptr<EventData> storage_do_not_use_;
-  const EventData &events_;
+  const EventData* events_;
 };
 
 } //namespace egm

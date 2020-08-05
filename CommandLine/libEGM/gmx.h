@@ -16,6 +16,7 @@
 **/
 
 #include "project.pb.h"
+#include "event_reader/event_parser.h"
 
 #include <iostream>
 #include <streambuf>
@@ -30,7 +31,7 @@ inline void bind_output_streams(std::ostream &out, std::ostream &err) {
   errorStream.rdbuf(err.rdbuf());
 }
 
-std::unique_ptr<buffers::Project> LoadGMX(std::string fName);
+std::unique_ptr<buffers::Project> LoadGMX(std::string fName, const EventData* event_data);
 buffers::resources::Background* LoadBackground(std::string fName);
 buffers::resources::Sound* LoadSound(std::string fName);
 buffers::resources::Sprite* LoadSprite(std::string fName);

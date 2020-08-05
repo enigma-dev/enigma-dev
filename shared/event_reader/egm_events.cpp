@@ -1,13 +1,13 @@
 #include "event_parser.h"
 
-void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData &evdata,
+void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData* evdata,
                        const std::map<int, NamedObject> &objs) {
   for (auto &legacy_event : *obj->mutable_legacy_events()) {
     if (!legacy_event.has_type()) {
       std::cerr << "Error: Legacy event missing type!" << std::endl;
     }
     if (legacy_event.has_name()) {
-      auto evd = evdata.get_event(legacy_event.type(), 0);
+      auto evd = evdata->get_event(legacy_event.type(), 0);
       if (evd.IsValid()) {
         auto &egm_event = *obj->add_egm_events();
         egm_event.set_id(evd.bare_id());
@@ -18,7 +18,7 @@ void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData &evdata,
                   << " cannot accept a string parameter." << std::endl;
       }
     } else if (legacy_event.has_number()) {
-      auto evd = evdata.get_event(legacy_event.type(), legacy_event.number());
+      auto evd = evdata->get_event(legacy_event.type(), legacy_event.number());
       if (evd.IsValid()) {
         auto &egm_event = *obj->add_egm_events();
         egm_event.set_id(evd.bare_id());
@@ -62,7 +62,7 @@ void ListObjects(buffers::TreeNode *node, std::map<int, NamedObject> *out) {
     ListObjects(&c, out);
 }
 
-void LegacyEventsToEGM(buffers::Project *project, const EventData &evdata) {
+void LegacyEventsToEGM(buffers::Project *project, const EventData* evdata) {
   std::map<int, NamedObject> objs;
   ListObjects(project->mutable_game()->mutable_root(), &objs);
   for (const auto &entry : objs) {

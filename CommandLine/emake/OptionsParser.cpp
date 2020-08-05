@@ -285,6 +285,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   yaml += "target-networking: " + network + "\n";
   yaml += "extensions: " + _extensions + "\n";
   yaml += std::string("codegen-only: ") + (_rawArgs["codegen-only"].as<bool>() ? "true" : "false") + "\n";
+  yaml += "enigma-root: " + _enigmaRoot + "\n";
 
   return yaml;
 }

@@ -34,13 +34,15 @@ int main(int argc, char *argv[])
   if (dot != std::string::npos) ext = ToLower(input_file.substr(dot + 1));
 
   std::unique_ptr<buffers::Project> project;
+  EventData event_data(ParseEventFile("events.ey"));
+  egm::EGM egm(&event_data);
 
   if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
-    project = gmk::LoadGMK(input_file);
+    project = gmk::LoadGMK(input_file, &event_data);
   } else if (ext == "gmx") {
-    project = gmx::LoadGMX(input_file);
+    project = gmx::LoadGMX(input_file, &event_data);
   } else if (ext == "yyp") {
-    project = yyp::LoadYYP(input_file);
+    project = yyp::LoadYYP(input_file, &event_data);
   } else {
     std::cerr << "Error: Unkown extenstion \"" << ext << "\"." << std::endl; 
     return -2;
@@ -51,8 +53,6 @@ int main(int argc, char *argv[])
     return -3;
   }
 
-  EventData event_data(ParseEventFile("events.ey"));
-  egm::EGM egm(event_data);
   if (!egm.WriteEGM(outDir, project.get())) {
     std::cerr << "Error: Failure writting \"" << argv[2] << std::endl;
     return -4;

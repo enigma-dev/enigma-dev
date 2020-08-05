@@ -146,12 +146,12 @@ inline void write_exe_info(const std::filesystem::path& codegen_directory, const
 #include "System/builtins.h"
 
 DLLEXPORT int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
-  return current_language->compile(GameData(es, current_language->event_data()),
+  return current_language->compile(GameData(es, &current_language->event_data()),
                                    exe_filename, mode);
 }
 
 DLLEXPORT int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
-  GameData gameData(*proj, current_language->event_data());
+  GameData gameData(*proj, &current_language->event_data());
   return current_language->compile(gameData, exe_filename, mode);
 }
 

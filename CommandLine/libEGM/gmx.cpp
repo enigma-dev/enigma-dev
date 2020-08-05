@@ -16,7 +16,6 @@
 **/
 
 #include "gmx.h"
-#include "event_reader/event_parser.h"
 #include "action.h"
 #include "strings_util.h"
 
@@ -512,7 +511,7 @@ void PackBuffer(const LookupMap& resMap, std::string type, std::string res, int 
   }
 }
 
-std::unique_ptr<buffers::Project> LoadGMX(std::string fName) {
+std::unique_ptr<buffers::Project> LoadGMX(std::string fName, const EventData* event_data) {
   pugi::xml_document doc;
   if (!doc.load_file(fName.c_str())) return nullptr;
 
@@ -526,7 +525,6 @@ std::unique_ptr<buffers::Project> LoadGMX(std::string fName) {
   // so that we can skip subtrees for datafiles and such
   walker.traverse(doc, -1, true);
   
-  EventData event_data(ParseEventFile("events.ey"));
   LegacyEventsToEGM(proj.get(), event_data);
 
   return proj;

@@ -523,7 +523,7 @@ int FlattenProto(const buffers::Project &proj, GameData *gameData) {
   return ret; // success
 }
 
-void LegacyEventsToEGM(GameData &game, const EventData &evdata) {
+void LegacyEventsToEGM(GameData &game, const EventData* evdata) {
   std::map<int, NamedObject> objs;
   for (ObjectData &obj : game.objects) objs[obj->id()] = NamedObject(obj.name, obj.get());
   for (const auto &entry : objs) {
@@ -534,7 +534,7 @@ void LegacyEventsToEGM(GameData &game, const EventData &evdata) {
 }  // namespace
 
 GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es,
-                   const EventData &events):
+                   const EventData* events):
     filename(es->filename ? es->filename : "") {
   cout << "Translating EnigmaStruct" << endl;
   cout << "- Indexing names" << endl;
@@ -590,7 +590,7 @@ GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es,
   cout << "Transfer complete." << endl << endl;
 }
 
-GameData::GameData(const buffers::Project &proj, const EventData& /*events*/):
+GameData::GameData(const buffers::Project &proj, const EventData* /*events*/):
     filename("") {
   FlattenProto(proj, this);
 }
