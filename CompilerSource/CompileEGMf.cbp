@@ -86,6 +86,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-Wall" />
+					<Add option="-std=c++1z" />
 					<Add option="-g" />
 					<Add option="-DENIGMA_PARSERS_DEBUG" />
 					<Add option="-DNOT_A_DLL" />
@@ -122,7 +123,44 @@
 			<Add option="-Wall" />
 			<Add directory="." />
 			<Add directory="./JDI/src" />
+			<Add directory="../shared/" />
+			<Add directory="../shared/protos/.eobjs" />
 		</Compiler>
+		<Unit filename="../shared/ProtoYaml/proto-yaml.cpp" />
+		<Unit filename="../shared/ProtoYaml/proto-yaml.h" />
+		<Unit filename="../shared/event_reader/event_parser.cpp" />
+		<Unit filename="../shared/event_reader/event_parser.h" />
+		<Unit filename="../shared/event_reader/events.res" />
+		<Unit filename="../shared/eyaml/Makefile" />
+		<Unit filename="../shared/eyaml/eyaml.cpp" />
+		<Unit filename="../shared/eyaml/eyaml.h" />
+		<Unit filename="../shared/libpng-util/libpng-util.cpp" />
+		<Unit filename="../shared/libpng-util/libpng-util.h" />
+		<Unit filename="../shared/proto_util.h" />
+		<Unit filename="../shared/protos/Action.proto" />
+		<Unit filename="../shared/protos/Background.proto" />
+		<Unit filename="../shared/protos/Configuration/EventDescriptor.proto" />
+		<Unit filename="../shared/protos/Font.proto" />
+		<Unit filename="../shared/protos/GameInformation.proto" />
+		<Unit filename="../shared/protos/Include.proto" />
+		<Unit filename="../shared/protos/Object.proto" />
+		<Unit filename="../shared/protos/Path.proto" />
+		<Unit filename="../shared/protos/Room.proto" />
+		<Unit filename="../shared/protos/Script.proto" />
+		<Unit filename="../shared/protos/Settings.proto" />
+		<Unit filename="../shared/protos/Shader.proto" />
+		<Unit filename="../shared/protos/Sound.proto" />
+		<Unit filename="../shared/protos/Sprite.proto" />
+		<Unit filename="../shared/protos/Timeline.proto" />
+		<Unit filename="../shared/protos/compiler.proto" />
+		<Unit filename="../shared/protos/game.proto" />
+		<Unit filename="../shared/protos/options.proto" />
+		<Unit filename="../shared/protos/project.proto" />
+		<Unit filename="../shared/protos/server.proto" />
+		<Unit filename="../shared/protos/treenode.proto" />
+		<Unit filename="../shared/rectpacker/rectpack.cpp" />
+		<Unit filename="../shared/rectpacker/rectpack.h" />
+		<Unit filename="../shared/strings_util.h" />
 		<Unit filename="JDI/src/API/AST.cpp" />
 		<Unit filename="JDI/src/API/AST.h" />
 		<Unit filename="JDI/src/API/AST_Export.cpp" />

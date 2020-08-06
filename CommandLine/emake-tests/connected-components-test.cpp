@@ -1,7 +1,8 @@
-#include "egm-rooms.cpp"
+#include "algorithm/connected-components.h"
+
 #include <gtest/gtest.h>
 
-using namespace egm::util;
+using namespace egm::algorithm;
 
 Coords A { 0, 0, 0 };
 Coords B { 0, 0, 1 };
@@ -46,7 +47,7 @@ TEST(ConnectedComponentsTest, BridgingComponentConnections) {
   for (const auto &s : comp.components) {
     cout << " - Component " << s.first << " (" << s.second.size() << " items)\n";
     for (const Coords &c : s.second) {
-      cout << "    • (" << c.x << ", " << c.y << ", " << c.z << ")" << endl;
+      cout << "    * (" << c.x << ", " << c.y << ", " << c.z << ")" << endl;
     }
   }
   

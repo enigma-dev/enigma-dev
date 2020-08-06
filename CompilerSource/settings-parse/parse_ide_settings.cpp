@@ -103,6 +103,7 @@ static void reset_ide_editables()
 
 extern const char* establish_bearings(const char *compiler);
 
+bool codegen_only = false;
 std::filesystem::path enigma_root;
 std::filesystem::path eobjs_directory;
 std::filesystem::path codegen_directory;
@@ -138,6 +139,12 @@ void parse_ide_settings(const char* eyaml)
   setting::automatic_semicolons   = settree.get("automatic-semicolons").toBool();
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
+  // Path to enigma sources
+  enigma_root = settree.get("enigma-root").toString();
+  if (enigma_root.empty()) {
+    enigma_root = ".";
+  }
+
   // Use a platform-specific make directory.
   eobjs_directory = settree.get("eobjs-directory").toString();
   
@@ -158,6 +165,9 @@ void parse_ide_settings(const char* eyaml)
   eobjs_directory = escapeEnv(eobjs_directory.u8string());
   codegen_directory = escapeEnv(codegen_directory.u8string());
   enigma_root = escapeEnv(enigma_root.u8string());
+  
+  if (settree.exists("codegen-only"))
+    codegen_only = settree.get("codegen-only").toBool();
 
   #define ey_cp(v,x,y) \
   it = settree.find("target-" #x); \
@@ -190,7 +200,7 @@ void parse_ide_settings(const char* eyaml)
       extensions::targetAPI.windowLinks = eyscalar(it);
     ifs.close();
   }
-  string platn = tolower(extensions::targetAPI.windowSys);
+  string platn = ToLower(extensions::targetAPI.windowSys);
 
   #define eygl(fn,v) {};
   /*{\

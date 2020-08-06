@@ -39,9 +39,9 @@
   #define byte __windows_byte_workaround
   #include <windows.h>
   #undef byte
- #define dllexport extern "C" __declspec(dllexport)
+ #define DLLEXPORT extern "C" __declspec(dllexport)
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <cstdio>
 #endif
 
@@ -70,10 +70,10 @@ static bool toolchain_parseout(string line, string &exename, string &command, st
 
     if (line[pos] == '"' and ++spos)
       while (line[++pos] != '"' and pos<line.length())
-        if (line[pos] == '\\') pos++; else;
+        if (line[pos] == '\\') pos++; else {}
     else if (line[pos] == '\'' and ++spos)
       while (line[++pos] != '\'' and pos<line.length())
-        if (line[pos] == '\\') pos++; else;
+        if (line[pos] == '\\') pos++; else {}
     else while (!is_useless(line[++pos]) and pos<line.length());
 
   exename = line.substr(spos,pos-spos);
@@ -140,9 +140,9 @@ const char* establish_bearings(const char *compiler)
   ** These will help us through parsing available libraries.
   ***********************************************************/
   cmd = compilerInfo.defines_cmd;
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + (codegen_directory/"enigma_defines.txt").string() + "\""));
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + (codegen_directory/"enigma_defines.txt").u8string() + "\""));
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + (codegen_directory/"enigma_defines.txt").string() + "\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + (codegen_directory/"enigma_defines.txt").u8string() + "\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
   else cout << "Call succeeded" << endl;
 
@@ -173,7 +173,9 @@ const char* establish_bearings(const char *compiler)
       }
       pos += idirstart.length();
     }
+  
     jdi::builtin->add_search_directory((enigma_root/"ENIGMAsystem/SHELL").u8string().c_str());
+    jdi::builtin->add_search_directory((enigma_root/"shared").u8string().c_str());
     jdi::builtin->add_search_directory(codegen_directory.u8string().c_str());
 
     while (is_useless(idirs[++pos]));
@@ -221,7 +223,7 @@ const char* establish_bearings(const char *compiler)
   return 0;
 }
 
-/*dllexport const char* gccDefinePath(const char* compiler)
+/*DLLEXPORT const char* gccDefinePath(const char* compiler)
 {
   return establish_bearings(compiler);
 }*/

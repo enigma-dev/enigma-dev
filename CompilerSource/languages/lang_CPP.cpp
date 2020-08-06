@@ -55,12 +55,12 @@ void lang_CPP::load_extension_locals() {
  #define byte __windows_byte_workaround
  #include <windows.h>
  #undef byte
- #define dllexport extern "C" __declspec(dllexport)
+ #define DLLEXPORT extern "C" __declspec(dllexport)
    #define DECLARE_TIME_TYPE clock_t
    #define CURRENT_TIME(t) t = clock()
    #define PRINT_TIME(ts, te) (((te - ts) * 1000)/CLOCKS_PER_SEC)
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <cstdio>
  #include <sys/time.h>
    #define DECLARE_TIME_TYPE timeval
@@ -217,7 +217,6 @@ jdi::definition* lang_CPP::look_up(const string &name) {
   return namespace_enigma_user->find_local(name);
 }
 
-lang_CPP::~lang_CPP() {
-  
-}
+// TODO: This could use better plumbing.
+lang_CPP::lang_CPP(): evdata_(ParseEventFile((enigma_root/"events.ey").u8string())) {}
 

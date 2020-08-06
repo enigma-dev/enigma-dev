@@ -20,17 +20,17 @@
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/GameData.h"
 #include "settings.h"
-
 #include "darray.h"
+#include "treenode.pb.h"
 
 #include <cstdio>
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
- #define dllexport extern "C" __declspec(dllexport)
+ #define DLLEXPORT extern "C" __declspec(dllexport)
  #include <windows.h>
  #define sleep Sleep
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <unistd.h>
  #define sleep(x) usleep(x * 1000)
 #endif
@@ -145,22 +145,21 @@ inline void write_exe_info(const std::filesystem::path& codegen_directory, const
 
 #include "System/builtins.h"
 
-dllexport int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
-  return current_language->compile(GameData(es), exe_filename, mode);
+DLLEXPORT int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
+  return current_language->compile(GameData(es, &current_language->event_data()),
+                                   exe_filename, mode);
 }
 
-dllexport int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
-  GameData gameData(*proj);
-  int error = FlattenProto(*proj, &gameData);
-  if (error) return error;
+DLLEXPORT int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
+  GameData gameData(*proj, &current_language->event_data());
   return current_language->compile(gameData, exe_filename, mode);
 }
 
 static bool run_game = true;
-dllexport void ide_handles_game_launch() { run_game = false; }
+DLLEXPORT void ide_handles_game_launch() { run_game = false; }
 
 static bool redirect_make = true;
-dllexport void log_make_to_console() { redirect_make = false; }
+DLLEXPORT void log_make_to_console() { redirect_make = false; }
 
 template<typename T> void write_resource_meta(ofstream &wto, const char *kind, vector<T> resources, bool gen_names = true) {
   int max = 0;
@@ -182,13 +181,56 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
   }
   wto << "}\n";
   wto << "namespace enigma { size_t " << kind << "_idmax = " << max << "; }\n\n";
+}   
+ 
+void wite_asset_enum(const std::filesystem::path& fName) {
+  std::ofstream wto;
+  wto.open(fName.u8string().c_str());
+  
+  wto<< "#ifndef ASSET_ENUM_H\n#define ASSET_ENUM_H\n\n";
+  
+  wto << "namespace enigma_user {\n\nenum AssetType : int {\n";
+  
+  // "unknown" / "any" need to added manually
+  wto << "  asset_any = -2,\n";
+  wto << "  asset_unknown = -1,\n";
+  
+  buffers::TreeNode tn;
+  google::protobuf::Message *m = &tn;
+  const google::protobuf::Descriptor *desc = m->GetDescriptor();
+  for (int i = 0; i < desc->field_count(); i++) {
+    const google::protobuf::FieldDescriptor *field = desc->field(i);
+    if (field->containing_oneof() && field->cpp_type() == google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE)
+      // NOTE: -1 because protobutt doesn't allow index 0 and we're trying to match GM's values 
+      wto << "  asset_" << field->name() << " = " << field->number()-1 <<  "," << std::endl;
+  }
+  
+  // This one doesn't really exist but added for GM compatibility
+  wto << "  asset_tileset = asset_background\n";
+  wto << "};\n\n}\n\n";
+  
+  wto << "namespace enigma {\n\nstatic const enigma_user::AssetType assetTypes[] = {\n";
+  
+  for (int i = 0; i < desc->field_count(); i++) {
+    const google::protobuf::FieldDescriptor *field = desc->field(i);
+    if (field->containing_oneof() && field->cpp_type() == google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE)
+      wto << "  enigma_user::asset_" << field->name() << "," << std::endl;
+  }
+  
+  wto << "};\n\n}\n\n#endif\n";
+  
+  wto.close();
 }
-
-static bool ends_with(std::string const &fullString, std::string const &ending) {
-    if (fullString.length() < ending.length())
-      return false;
-
-    return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+    
+template<typename T> void write_asset_map(std::string& str, vector<T> resources, const std::string& type) {
+  str += "\n{ enigma_user::" + type + ",\n  {\n";
+  for (const T &res : resources) {
+    str += "    { \"" + res.name  + "\", " + std::to_string(res.id()) + " },\n";
+  }
+  
+  if (resources.size() > 0) { str.pop_back(); str.back() = '\n'; }
+  
+  str += "  }\n},\n";
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
@@ -196,14 +238,16 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   if (exe_filename) {
     exename = exe_filename;
     const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
-    if (!ends_with(exename.u8string(), buildext.u8string())) {
+    if (!string_ends_with(exename.u8string(), buildext.u8string())) {
       exename += buildext;
       exe_filename = exename.u8string().c_str();
     }
   }
 
   cout << "Initializing dialog boxes" << endl;
-  ide_dia_clear();
+  // reset this as IDE will soon enable stop button
+  build_stopping = false;
+  ide_dia_clear(); // <- stop button usually enabled IDE side
   ide_dia_open();
   cout << "Initialized." << endl;
 
@@ -233,11 +277,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
 
-  // Clean up from any previous executions.
-  edbg << "Cleaning up from previous executions" << flushl;
-  event_info_clear();     //Forget event definitions, we'll re-get them
-  edbg << " - Cleared event info." << flushl;
-
   // Re-establish ourself
   // Read the global locals: locals that will be included with each instance
   {
@@ -262,9 +301,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       user << "...Continuing anyway..." << flushl;
     }
   }
-
-  //Read the types of events
-  event_parse_resourcefile();
 
   /**** Segment One: This segment of the compile process is responsible for
   * @ * translating the code into C++. Basically, anything essential to the
@@ -426,6 +462,33 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   write_resource_meta(wto,     "script", game.scripts);
   write_resource_meta(wto,     "shader", game.shaders);
   write_resource_meta(wto,       "room", game.rooms, false);
+  
+  // asset_get_index/type map
+  wite_asset_enum(codegen_directory/"AssetEnum.h");
+  
+  wto << "#include \"AssetEnum.h\"\n";
+  wto << "namespace enigma {\n\n";
+  wto << "std::map<enigma_user::AssetType, std::map<std::string, int>> assetMap = {\n";
+  
+  std::string assets;
+  write_asset_map(assets, game.objects,     "asset_object");
+  write_asset_map(assets, game.sprites,     "asset_sprite");
+  write_asset_map(assets, game.backgrounds, "asset_background");
+  write_asset_map(assets, game.fonts,       "asset_font");
+  write_asset_map(assets, game.timelines,   "asset_timeline");
+  write_asset_map(assets, game.paths,       "asset_path");
+  write_asset_map(assets, game.sounds,      "asset_sound");
+  write_asset_map(assets, game.scripts,     "asset_script");
+  write_asset_map(assets, game.shaders,     "asset_shader");
+  write_asset_map(assets, game.rooms,       "asset_room");
+  while (!assets.empty() && (assets.back() == ',' || assets.back() == '\n')) {
+    assets.pop_back();
+  }
+  
+  wto << assets;
+  
+  wto << "\n};\n";
+  wto << "\n\n}\n";
   wto.close();
 
 
@@ -515,6 +578,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     outputFile.close();
 #endif
 
+  if (codegen_only) {
+    edbg << "The \"codegen-only\" flag was passed. Skipping compile and exiting," << flushl;
+    return 0;
+  }
 
 
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -579,6 +646,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
 
   int makeres = e_execs(compilerInfo.MAKE_location, make, flags);
+  if (build_stopping) { build_stopping = false; return 0; }
 
   // Stop redirecting GCC output
   if (redirect_make)

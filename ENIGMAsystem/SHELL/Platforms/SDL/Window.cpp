@@ -135,12 +135,6 @@ int handleEvents() { return eventHandler.processEvents(); }
 
 namespace enigma_user {
 
-void io_handle() {
-  enigma::input_push();
-  if (enigma::handleEvents() != 0) exit(0);
-  enigma::update_mouse_variables();
-}
-
 static int currentIconIndex = -1;
 static unsigned currentIconFrame;
 
@@ -352,7 +346,9 @@ int display_get_height() {
 
 bool keyboard_check_direct(int key) {
   const Uint8* state = SDL_GetKeyboardState(nullptr);
-  return state[enigma::keyboard::inverse_keymap[key]];
+  const SDL_Keycode keycode = enigma::keyboard::inverse_keymap[key];
+  const SDL_Scancode scancode = SDL_GetScancodeFromKey(keycode);
+  return state[scancode];
 }
 
 void keyboard_key_press(int key) {

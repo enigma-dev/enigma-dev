@@ -1,6 +1,6 @@
 include ../../Config.mk
 
-PROTO_SOURCES := $(wildcard *.proto)
+PROTO_SOURCES := $(wildcard *.proto) $(wildcard Configuration/*.proto)
 SOURCES_GRPC :=
 ifeq ($(CLI_ENABLE_SERVER), TRUE)
 	SOURCES_GRPC += server.proto

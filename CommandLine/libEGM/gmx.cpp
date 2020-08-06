@@ -29,6 +29,7 @@
 #include <vector>
 
 using CppType = google::protobuf::FieldDescriptor::CppType;
+using LookupMap = std::unordered_map<std::string, std::unordered_map<int, std::string>>;
 
 using namespace buffers::resources;
 
@@ -36,8 +37,8 @@ namespace gmx {
 std::ostream outputStream(nullptr);
 std::ostream errorStream(nullptr);
 
-void PackBuffer(std::string type, std::string res, std::unordered_map<std::string, int>& ids, google::protobuf::Message *m, std::string gmxPath);
-void PackRes(std::string &dir, std::unordered_map<std::string, int>& ids, pugi::xml_node &node, google::protobuf::Message *m, int depth);
+void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std::unordered_map<std::string, int>& ids, google::protobuf::Message *m, std::string gmxPath);
+void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::string, int>& ids, pugi::xml_node &node, google::protobuf::Message *m, int depth);
 
 namespace {
 
@@ -66,20 +67,29 @@ class gmx_root_walker {
   // this works similar to pugixml's doc.traverse but allows us
   // to return false from for_each when we just want to skip the subtree
   // and not the rest of the document
-  virtual void traverse(pugi::xml_node &node, size_t depth=-1) {
+  // need to parse the xml once to build lookup map
+  virtual void traverse(pugi::xml_node &node, size_t depth=-1, bool firstRun = false) {
     for (auto &child : node) {
       bool result = for_each(child, depth + 1);
       if (result) {
         traverse(child, depth + 1);
       }
     }
+    
+    if (firstRun) {
+      treeParsed = true;
+      traverse(node, depth);
+    }
   }
+
+  bool treeParsed = false;
 
  private:
   std::vector<buffers::TreeNode *> nodes;
   std::string lastName;
   std::string gmxPath;
   std::unordered_map<std::string, int> idMap;
+  LookupMap idLookup;
 
   void AddResource(buffers::TreeNode *node, std::string resType, pugi::xml_node &xmlNode) {
     using buffers::TreeNode;
@@ -110,9 +120,9 @@ class gmx_root_walker {
           for (auto parent = std::next(nodes.begin()); parent != nodes.end(); ++parent) {
             groupPath += (*parent)->name() + "/";
           }
-          PackRes(groupPath, idMap, xmlNode, res, 0);
+          PackRes(idLookup, groupPath, idMap, xmlNode, res, 0);
         } else {
-          PackBuffer(resType, xmlNode.value(), idMap, res, gmxPath);
+          PackBuffer(idLookup, resType, xmlNode.value(), idMap, res, gmxPath);
         }
         return;
     }
@@ -128,6 +138,7 @@ class gmx_root_walker {
 
   virtual bool for_each(pugi::xml_node &node, int depth) {
     if (node.type() != pugi::node_pcdata && node.name() != std::string("datafile")) {
+      
       std::string name = node.attribute("name").value();
 
       // These nodes don't have name attributes but appear in tree
@@ -142,7 +153,7 @@ class gmx_root_walker {
         nodes.pop_back();
       }
 
-      if (!name.empty()) {
+      if (!name.empty() && treeParsed) {
         if (node.name() == std::string("constant")) return true;  //TODO: add constants here
 
         buffers::TreeNode *n = nodes.back()->add_child();  // adding a folder
@@ -180,11 +191,17 @@ class gmx_root_walker {
       } else {
         resName = node.child_value("name");
       }
-
-      buffers::TreeNode *n = nodes.back()->add_child();  // adding res here
-      n->set_name(resName);
-
-      AddResource(n, resType, node);
+      
+      if (!treeParsed) {
+        int count = idLookup[resType].size();
+        count = idLookup[resType].size();
+        idLookup[resType][count] = resName;
+      } else {
+        // Can't parse resource until lookup map is done
+        buffers::TreeNode *n = nodes.back()->add_child();  // adding res here
+        n->set_name(resName);
+        AddResource(n, resType, node);
+      }
 
       if (resType == "datafile") {
         // we handled the metadata in AddResource
@@ -245,7 +262,7 @@ void PackShader(std::string fName, int id, buffers::resources::Shader *shader) {
   }
 }
 
-void PackRes(std::string &dir, std::unordered_map<std::string, int>& ids, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
+void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::string, int>& ids, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
@@ -270,14 +287,30 @@ void PackRes(std::string &dir, std::unordered_map<std::string, int>& ids, pugi::
 
       if (gmxName == "GMX_DEPRECATED")
         continue;
-
-      if (gmxName == "action") {
+        
+      // NOTE: GMX typically stores resource refs as strings 
+      // but path background rooms seem to be the exception
+      if (gmxName == "backroom") {
+        child = child.child("backroom");
+        child.append_attribute("visited") = "true";
+        std::string roomName = "";
+        if (resMap.count("room") > 0) {
+          if (resMap.at("room").count(child.text().as_int()) > 0) {
+            roomName = resMap.at("room").at(child.text().as_int());
+          }
+        }
+        refl->SetString(m, field, roomName);
+        outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << roomName << std::endl;
+        continue;
+      } 
+        
+      if (string_ends_with(gmxName, "action")) {
         std::vector<Action> actions;
-        for (pugi::xml_node n = child.child("action"); n != nullptr; n = n.next_sibling()) {
+        for (pugi::xml_node n = child.first_element_by_path(gmxName.c_str()); n != nullptr; n = n.next_sibling()) {
           if (strcmp(n.name(), "action") == 0) {  // skip over any siblings that aren't twins <foo/><bar/><foo/> <- bar would be skipped
             n.append_attribute("visited") = "true";
             Action action;
-            PackRes(dir, ids, n, &action, depth + 1);
+            PackRes(resMap, dir, ids, n, &action, depth + 1);
             actions.emplace_back(action);
           }
         }
@@ -324,7 +357,7 @@ void PackRes(std::string &dir, std::unordered_map<std::string, int>& ids, pugi::
                     alias) {  // skip over any siblings that aren't twins <foo/><bar/><foo/> <- bar would be skipped
                   n.append_attribute("visited") = "true";
                   google::protobuf::Message *msg = refl->AddMessage(m, field);
-                  PackRes(dir, ids, n, msg, depth + 1);
+                  PackRes(resMap, dir, ids, n, msg, depth + 1);
                 }
               }
               break;
@@ -375,7 +408,7 @@ void PackRes(std::string &dir, std::unordered_map<std::string, int>& ids, pugi::
             // If field is a singular message we need to recurse into this method again
             case CppType::CPPTYPE_MESSAGE: {
               google::protobuf::Message *msg = refl->MutableMessage(m, field);
-              PackRes(dir, ids, child, msg, depth + 1);
+              PackRes(resMap, dir, ids, child, msg, depth + 1);
               break;
             }
             case CppType::CPPTYPE_INT32: {
@@ -439,7 +472,7 @@ void PackRes(std::string &dir, std::unordered_map<std::string, int>& ids, pugi::
   }
 }
 
-void PackBuffer(std::string type, std::string res, std::unordered_map<std::string, int>& ids, google::protobuf::Message *m, std::string gmxPath) {
+void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std::unordered_map<std::string, int>& ids, google::protobuf::Message *m, std::string gmxPath) {
   // Scripts and Shaders are plain text not xml
   std::string fName = gmxPath + string_replace_all(res, "\\", "/");
   std::string resName = fName.substr(fName.find_last_of('/') + 1, fName.length() - 1);
@@ -468,7 +501,7 @@ void PackBuffer(std::string type, std::string res, std::unordered_map<std::strin
       outputStream << "Parsing " << fName << "..." << std::endl;
       // Start a resource (sprite, object, room)
       std::string dir = fName.substr(0, fName.find_last_of("/"));
-      PackRes(dir, ids, root, m, 0);
+      PackRes(resMap, dir, ids, root, m, 0);
 
       visited_walker walker;
       doc.traverse(walker);
@@ -476,19 +509,21 @@ void PackBuffer(std::string type, std::string res, std::unordered_map<std::strin
   }
 }
 
-buffers::Project *LoadGMX(std::string fName) {
+std::unique_ptr<buffers::Project> LoadGMX(std::string fName, const EventData* event_data) {
   pugi::xml_document doc;
   if (!doc.load_file(fName.c_str())) return nullptr;
 
   fName = string_replace_all(fName, "\\", "/");
   std::string gmxPath = fName.substr(0, fName.find_last_of("/") + 1);
 
-  buffers::Project *proj = new buffers::Project();
+  auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   gmx_root_walker walker(game->mutable_root(), gmxPath);
   // we use our own traverse(...) instead of the pugixml one
   // so that we can skip subtrees for datafiles and such
-  walker.traverse(doc);
+  walker.traverse(doc, -1, true);
+  
+  LegacyEventsToEGM(proj.get(), event_data);
 
   return proj;
 }
@@ -523,7 +558,7 @@ T* LoadResource(std::string fName, std::string type) {
 
   std::unordered_map<std::string, int> ids;
   T* res = new T();
-  PackBuffer(resType, resName, ids, res, dir);
+  PackBuffer(LookupMap(), resType, resName, ids, res, dir);
   return res;
 }
 

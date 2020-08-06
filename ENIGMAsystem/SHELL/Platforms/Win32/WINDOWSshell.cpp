@@ -46,12 +46,9 @@ void execute_program(string fname, string args, bool wait) {
   lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;
   ShellExecuteExW(&lpExecInfo);
   if (wait && lpExecInfo.hProcess != NULL) {
-    while (WaitForSingleObject(lpExecInfo.hProcess, 5) == WAIT_TIMEOUT) {
-      MSG msg;
-      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
+    while (DWORD eventSignalId = MsgWaitForMultipleObjects(1, &lpExecInfo.hProcess, false, INFINITE, QS_ALLEVENTS)) {
+      if (eventSignalId == WAIT_OBJECT_0) break;
+      enigma::handleEvents();
     }
   }
   if (lpExecInfo.hProcess != NULL)
@@ -63,6 +60,7 @@ void execute_shell(string fname, string args) {
 }
 
 string execute_shell_for_output(const string &command) {
+  string output;
   tstring tstr_command = widen(command);
   wchar_t ctstr_command[32768];
   wcsncpy(ctstr_command, tstr_command.c_str(), 32768);
@@ -76,35 +74,30 @@ string execute_shell_for_output(const string &command) {
   if (ok == FALSE) return "";
   ok = CreatePipe(&hStdOutPipeRead, &hStdOutPipeWrite, &sa, 0);
   if (ok == FALSE) return "";
-  STARTUPINFOW si = { };
+  STARTUPINFOW si = { 0 };
   si.cb = sizeof(STARTUPINFOW);
   si.dwFlags = STARTF_USESTDHANDLES;
   si.hStdError = hStdOutPipeWrite;
   si.hStdOutput = hStdOutPipeWrite;
   si.hStdInput = hStdInPipeRead;
-  PROCESS_INFORMATION pi = { };
+  PROCESS_INFORMATION pi = { 0 };
   if (CreateProcessW(NULL, ctstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-    while (WaitForSingleObject(pi.hProcess, 5) == WAIT_TIMEOUT) {
-      MSG msg;
-      if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
-    }
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
-    char buffer[4096] = { };
-    DWORD dwRead = 0;
-    ok = ReadFile(hStdOutPipeRead, buffer, 4095, &dwRead, NULL);
-    while (ok == TRUE) {
-      buffer[dwRead] = 0;
-      ok = ReadFile(hStdOutPipeRead, buffer, 4095, &dwRead, NULL);
+    for (;;) {
+      char buffer[BUFSIZ];
+      DWORD dwRead = 0;
+      BOOL success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
+      if (success || dwRead) {
+        buffer[dwRead] = 0;
+        output.append(buffer, dwRead);
+      } else { break; }
     }
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-    return shorten(widen(buffer));
+    return output;
   }
   return "";
 }
