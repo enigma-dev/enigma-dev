@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "makedir.h"
+#include "settings.h"
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 #include "backend/GameData.h"
@@ -54,9 +54,10 @@ static string esc(string str) {
   return res;
 }
 
-int lang_CPP::compile_writeShaderData(const GameData &game, parsed_object *EGMglobal)
+int lang_CPP::compile_writeShaderData(const GameData &game, ParsedScope *EGMglobal)
 {
-  ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h").c_str(),ios_base::out);
+  (void) EGMglobal;  // Currently not needed.
+  ofstream wto((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h").u8string().c_str(),ios_base::out);
 
   wto << license << "#include \"Universal_System/shaderstruct.h\"\n" << "namespace enigma {\n";
   wto << "  std::vector<ShaderStruct> shaderstructarray = {\n";

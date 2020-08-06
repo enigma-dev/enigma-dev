@@ -24,7 +24,7 @@
  
 */
 
-#include "XDisplayGetters.h"
+#include "Platforms/General/PFwindow.h"
 
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
@@ -71,6 +71,8 @@ static void display_get_size(bool i, int *result) {
   XCloseDisplay(display);
 }
 
+namespace enigma_user {
+
 int display_get_x() {
   if (displayXGetter == displayX && displayX != -1)
     return displayXGetter;
@@ -106,3 +108,5 @@ int display_get_height() {
   displayHeight = result;
   return result;
 }
+
+} // namespace enigma_user

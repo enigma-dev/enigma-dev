@@ -163,7 +163,7 @@ static int show_question_helperfunc(string message) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+static void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -174,13 +174,22 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   #endif
 
   str_echo = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) ? "echo 1" :
-    "x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi";
+    "x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo -1;fi";
 
-  str_command = string("kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
-  string("--warningyesnocancel \"") + add_escaping(errortext, false, "") + string("\" ") +
-  string("--yes-label Abort --no-label Retry --cancel-label Ignore ") +
-  string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
+  if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
+    type == MESSAGE_TYPE::M_FATAL_USER_ERROR) {
+    str_command = string("kdialog ") +
+    string("--attach=") + window_identifier() + string(" ") +
+    string("--sorry \"") + add_escaping(errortext, false, "") + string("\" ") +
+    string("--ok-label Abort ") +
+    string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
+  } else {
+    str_command = string("kdialog ") +
+    string("--attach=") + window_identifier() + string(" ") +
+    string("--warningyesno \"") + add_escaping(errortext, false, "") + string("\" ") +
+    string("--yes-label Abort --no-label Ignore ") +
+    string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
+  }
 
   string str_result = shellscript_evaluate(str_command);
   if (strtod(str_result.c_str(), NULL) == 1) exit(0);
@@ -190,16 +199,7 @@ class KDialogWidgets : public enigma::CommandLineWidgetEngine {
  public:
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) override {
-  if (type != M_INFO && type != M_WARNING) {
-    show_debug_message_helper(errortext, type);
-  } else {
-    #ifndef DEBUG_MODE
-    fputs(errortext.c_str(), stderr);
-    #endif
-    if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
-      type == MESSAGE_TYPE::M_FATAL_USER_ERROR)
-      abort();
-  }
+  show_debug_message_helperfunc(errortext, type);
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) override {

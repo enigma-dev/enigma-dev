@@ -53,7 +53,7 @@ extern "C" int cocoa_get_color(int defcol, const char *title);
 static string dialog_caption;
 static string error_caption;
 
-static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
   #ifdef DEBUG_MODE
   errortext += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
@@ -73,19 +73,6 @@ string widget_get_system() {
 
 void widget_set_system(string sys) {
   // place holder
-}
-
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
-  if (type != M_INFO && type != M_WARNING) {
-    show_debug_message_helper(errortext, type);
-  } else {
-    #ifndef DEBUG_MODE
-    fputs(errortext.c_str(), stderr);
-    #endif
-    if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
-      type == MESSAGE_TYPE::M_FATAL_USER_ERROR)
-      abort();
-  }
 }
 
 void show_info(string text, int bgcolor, int left, int top, int width, int height,
