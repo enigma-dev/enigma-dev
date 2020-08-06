@@ -244,7 +244,7 @@ std::vector<RawImage> image_load(const std::filesystem::path& filename) {
     extension = ".bmp";
   }
   
-  auto handler = image_load_handlers.find(tolower(extension.u8string()));
+  auto handler = image_load_handlers.find(ToLower(extension.u8string()));
   if (handler != image_load_handlers.end()) {
     return (*handler).second(filename);
   } else {
@@ -256,7 +256,7 @@ std::vector<RawImage> image_load(const std::filesystem::path& filename) {
 /// Generic all-purpose image saving call.
 int image_save(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
   std::filesystem::path extension = filename.extension();
-  auto handler = image_save_handlers.find(tolower(extension.u8string()));
+  auto handler = image_save_handlers.find(ToLower(extension.u8string()));
   if (extension.empty() || handler != image_save_handlers.end()) {
     return (*handler).second(filename, data, width, height, fullwidth, fullheight, flipped);
   } else {
