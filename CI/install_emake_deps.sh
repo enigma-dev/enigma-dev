@@ -2,6 +2,16 @@
 
 set -e
 
+install_yaml_cpp () {
+  git clone https://github.com/jbeder/yaml-cpp /tmp/yaml-cpp
+  mkdir /tmp/yaml-cpp/build
+  pushd /tmp/yaml-cpp/build
+  cmake -DYAML_CPP_BUILD_TESTS=OFF -DYAML_CPP_BUILD_TOLLS=OFF -DYAML_CPP_BUILD_SHARED_LIBS=ON -DCMAKE_CXX_FLAGS="-fPIC" ..
+  make
+  sudo make install
+  popd
+}
+
 if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   # new protobuf
   sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
@@ -9,7 +19,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   # new gcc 
   sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
-  # new boost for old travis
+  # new boost & yaml-cpp for old travis
   if [ "$COMPILER" == "Android" ]; then
     sudo add-apt-repository -y ppa:mhier/libboost-latest;
   else
@@ -19,6 +29,8 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
     wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
     sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
   fi
+
+  install_yaml_cpp
 
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
   sudo apt-get -y install gcc-9 g++-9 cpp-9 build-essential libprotobuf-dev protobuf-compiler zlib1g-dev libglm-dev libpng-dev
@@ -56,7 +68,7 @@ fi
 if [ "$COMPILER" == "Android" ]; then
   sudo apt-get -y install libboost1.67-dev
 elif [ "$TRAVIS_OS_NAME" == "linux" ]; then
-  sudo apt-get -y install libboost-program-options-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev
+  sudo apt-get -y install libboost-program-options-dev pulseaudio libpugixml-dev rapidjson-dev
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
   brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
   brew install protobuf pugixml yaml-cpp rapidjson

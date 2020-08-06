@@ -217,7 +217,6 @@ jdi::definition* lang_CPP::look_up(const string &name) {
   return namespace_enigma_user->find_local(name);
 }
 
-lang_CPP::~lang_CPP() {
-  
-}
+// TODO: This could use better plumbing.
+lang_CPP::lang_CPP(): evdata_(ParseEventFile((enigma_root/"events.ey").u8string())) {}
 

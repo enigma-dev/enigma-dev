@@ -146,13 +146,12 @@ inline void write_exe_info(const std::filesystem::path& codegen_directory, const
 #include "System/builtins.h"
 
 DLLEXPORT int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
-  return current_language->compile(GameData(es), exe_filename, mode);
+  return current_language->compile(GameData(es, &current_language->event_data()),
+                                   exe_filename, mode);
 }
 
 DLLEXPORT int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
-  GameData gameData(*proj);
-  int error = FlattenProto(*proj, &gameData);
-  if (error) return error;
+  GameData gameData(*proj, &current_language->event_data());
   return current_language->compile(gameData, exe_filename, mode);
 }
 
@@ -234,19 +233,12 @@ template<typename T> void write_asset_map(std::string& str, vector<T> resources,
   str += "  }\n},\n";
 }
 
-static bool ends_with(std::string const &fullString, std::string const &ending) {
-    if (fullString.length() < ending.length())
-      return false;
-
-    return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
-}
-
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename;
   if (exe_filename) {
     exename = exe_filename;
     const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
-    if (!ends_with(exename.u8string(), buildext.u8string())) {
+    if (!string_ends_with(exename.u8string(), buildext.u8string())) {
       exename += buildext;
       exe_filename = exename.u8string().c_str();
     }
@@ -285,11 +277,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
 
-  // Clean up from any previous executions.
-  edbg << "Cleaning up from previous executions" << flushl;
-  event_info_clear();     //Forget event definitions, we'll re-get them
-  edbg << " - Cleared event info." << flushl;
-
   // Re-establish ourself
   // Read the global locals: locals that will be included with each instance
   {
@@ -314,9 +301,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       user << "...Continuing anyway..." << flushl;
     }
   }
-
-  //Read the types of events
-  event_parse_resourcefile();
 
   /**** Segment One: This segment of the compile process is responsible for
   * @ * translating the code into C++. Basically, anything essential to the

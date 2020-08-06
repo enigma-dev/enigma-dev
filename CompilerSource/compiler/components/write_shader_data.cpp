@@ -54,8 +54,9 @@ static string esc(string str) {
   return res;
 }
 
-int lang_CPP::compile_writeShaderData(const GameData &game, parsed_object *EGMglobal)
+int lang_CPP::compile_writeShaderData(const GameData &game, ParsedScope *EGMglobal)
 {
+  (void) EGMglobal;  // Currently not needed.
   ofstream wto((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h").u8string().c_str(),ios_base::out);
 
   wto << license << "#include \"Universal_System/shaderstruct.h\"\n" << "namespace enigma {\n";

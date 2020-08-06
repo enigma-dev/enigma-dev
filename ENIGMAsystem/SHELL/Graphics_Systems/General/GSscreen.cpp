@@ -88,6 +88,9 @@ gs_scalar viewport_x, viewport_y, viewport_w, viewport_h;
 
 namespace enigma {
 
+// Initialized here; incremented/decremented by instances that use it.
+long gui_used = 0;
+
 std::vector<std::function<void()> > extension_draw_gui_after_hooks;
 
 unsigned gui_width = 0;

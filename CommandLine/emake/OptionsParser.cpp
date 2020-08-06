@@ -285,6 +285,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   yaml += "target-networking: " + network + "\n";
   yaml += "extensions: " + _extensions + "\n";
   yaml += std::string("codegen-only: ") + (_rawArgs["codegen-only"].as<bool>() ? "true" : "false") + "\n";
+  yaml += "enigma-root: " + _enigmaRoot + "\n";
 
   return yaml;
 }
@@ -491,7 +492,7 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
   if (it != std::end(_api[api]))
   {
     //set api
-    std::string lower = tolower(api);
+    std::string lower = ToLower(api);
 
     if (lower == "extensions")
     {

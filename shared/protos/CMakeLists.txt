@@ -28,7 +28,7 @@ else()
   set(GRPC_EXE "/usr/bin/grpc_cpp_plugin")
 endif()
 
-file(GLOB PROTO_FILES *.proto)
+file(GLOB PROTO_FILES *.proto Configuration/*.proto)
 include(FindProtobuf)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 

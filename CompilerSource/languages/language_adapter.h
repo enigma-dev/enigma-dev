@@ -41,12 +41,12 @@ struct language_adapter {
   virtual int link_ambiguous(const GameData &game, CompileState &state) = 0;
   virtual int compile_parseSecondary(CompileState &state) = 0;
 
-  virtual int compile_writeGlobals(const GameData &game, const parsed_object* global, const DotLocalMap &dot_accessed_locals) = 0;
+  virtual int compile_writeGlobals(const GameData &game, const ParsedScope* global, const DotLocalMap &dot_accessed_locals) = 0;
   virtual int compile_writeObjectData(const GameData &game, const CompileState &state, int mode) = 0;
-  virtual int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const parsed_object* global, bool treatUninitAs0) = 0;
+  virtual int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const ParsedScope* global, bool treatUninitAs0) = 0;
   virtual int compile_writeFontInfo(const GameData &game) = 0;
-  virtual int compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, parsed_object *EGMglobal, int mode) = 0;
-  virtual int compile_writeShaderData(const GameData &game, parsed_object *EGMglobal) = 0;
+  virtual int compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, ParsedScope *EGMglobal, int mode) = 0;
+  virtual int compile_writeShaderData(const GameData &game, ParsedScope *EGMglobal) = 0;
   virtual int compile_writeDefraggedEvents(const GameData &game, const ParsedObjectVec &parsed_objects) = 0;
 
   // Resources added to module
@@ -64,13 +64,15 @@ struct language_adapter {
   // Big things
   virtual syntax_error* definitionsModified(const char*, const char*) = 0;
   virtual int compile(const GameData &game, const char* exe_filename, int mode) = 0;
-  
+
+  // Getter to retrieve event data. Sort of arbitrary but idgaf right now.
+  // Lots of loose ends to sort regarding ownership of static state.
+  // Maybe this all belongs in CompileState. Who knows.
+  virtual const EventData &event_data() const = 0;
+
   // ===============================================================================================
   // == Language Integration =======================================================================
   // ===============================================================================================
-  
-  /// Look up a type by its name.
-  jdi::definition* find_typename(string name);
 
   // Returns whether the given definition is a function accepting `enigma::varargs`.
   virtual bool is_variadic_function(jdi::definition *d) = 0;
@@ -81,7 +83,9 @@ struct language_adapter {
   //v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@v&v@
   // FIXME: JDI has leaked into all languages. I've moved that leak here, into the light.  X
   //^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@^&^@
-  
+
+  /// Look up a type by its name.
+  virtual jdi::definition* find_typename(string name) = 0;
   /// Check whether the given definition is callable as a function.
   virtual bool definition_is_function(jdi::definition *d) = 0;
   /// Assuming this definition is a function, retrieve the number of overloads it has.

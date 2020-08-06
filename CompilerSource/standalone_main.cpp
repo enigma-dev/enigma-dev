@@ -95,11 +95,10 @@ syntax_error *definitionsModified(const char*,const char*);
 #include "OS_Switchboard.h"
 #include "general/bettersystem.h"
 #include <System/builtins.h>
-#include "compiler/jdi_utility.h"
 
 void do_cli(jdi::context &ct);
 syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code);
-int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode);
+int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode);
 int main(int argc, char* argv[])
 {
   puts("Attempting to run");
