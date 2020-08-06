@@ -390,13 +390,15 @@ std::vector<RawImage> image_decode_bmp(const string& image_data) {
     fprintf(stderr, "No support for %dbpp bitmaps\n", bmp_info.bitsPerPixel);
     return imgs;
   }
-  const bool rgba = bmp_info.isRGBA();
-  const bool argb = bmp_info.isARGB();
+  bool rgba = bmp_info.isRGBA();
+  bool argb = bmp_info.isARGB();
   if (bmp_info.bitsPerPixel == 32 && !rgba && !argb) {
     fprintf(stderr, "No support for mask format (%08X, %08X, %08X, %08X)\n",
             bmp_info.maskRed, bmp_info.maskGreen, bmp_info.maskBlue,
             bmp_info.maskAlpha);
-    return imgs;
+            
+    argb = true;
+    //return imgs;
   }
   
   unsigned char* bitmap;
@@ -465,7 +467,7 @@ int image_save_bmp(const std::filesystem::path& filename, const unsigned char* d
   for (unsigned i = 0; i < lastbyte; i += fullwidth) {
     unsigned tmp = i;
     if (!flipped) {
-      tmp = lastbyte - i;
+      tmp = lastbyte - fullwidth - i;
     }
     for (unsigned ii = 0; ii < width; ii += bytes) {
       fwrite(&data[tmp + ii + 0],sizeof(char),1,bmp);
