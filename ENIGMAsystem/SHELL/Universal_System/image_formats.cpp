@@ -213,6 +213,16 @@ unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigne
   return result;
 }
 
+unsigned char* mono_to_rgba(unsigned char* pxdata, unsigned width, unsigned height) {
+  unsigned char* rgba = new unsigned char[width * height * 4];
+  for (unsigned i = 0; i < width * height; ++i) {
+    unsigned index_out = i * 4;
+    rgba[index_out] = rgba[index_out + 1] = rgba[index_out + 2] = 255;
+    rgba[index_out + 3] = pxdata[i];
+  }
+  return rgba;
+}
+
 void image_add_loader(const std::filesystem::path& extension, ImageLoadFunction fnc) {
   image_load_handlers[extension] = fnc;
 }

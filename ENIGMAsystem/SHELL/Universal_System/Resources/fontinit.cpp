@@ -66,34 +66,17 @@ void exe_loadfonts(FILE* exe) {
     font.height = 0;
 
     const unsigned int size = twid * thgt;
+    unsigned char* mono = new unsigned char[size];
+    if (!fread(&mono[0], sizeof(char), size, exe)) return;
+    
+    unsigned char* pixels = mono_to_rgba(mono, twid, thgt);
 
-    int* pixels =
-        new int[size + 1];  //FYI: This variable was once called "cpixels." When you do compress them, change it back.
-
-    unsigned int sz2;
-    for (sz2 = 0; !feof(exe) and sz2 < size; sz2++) {
-      pixels[sz2] = 0x00FFFFFF | ((unsigned char)fgetc(exe) << 24);
-      if (pixels[sz2] == 0x00FFFFFF) pixels[sz2] = 0;
-    }
-
-    if (size != sz2) {
-      DEBUG_MESSAGE("Failed to load font: Data is truncated before exe end. Read " + enigma_user::toString(sz2) +
-                     " out of expected " + enigma_user::toString(size), MESSAGE_TYPE::M_ERROR);
-      return;
-    }
     if (!fread(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "done", sizeof(int)) != 0) {
       DEBUG_MESSAGE(std::string("Unexpected end; eof: ") + ((feof(exe) == 0) ? "true" : "false"), MESSAGE_TYPE::M_ERROR);
       return;
     }
-    //unpacked = width*height*4;
-    /*unsigned char* pixels=new unsigned char[unpacked+1];
-    if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
-    {
-      DEBUG_MESSAGE("Background load error: Background does not match expected size", MESSAGE_TYPE::M_ERROR);
-      continue;
-    }
-    delete[] cpixels;*/
+
     int ymin = 100, ymax = -100;
     for (size_t gri = 0; gri < rawfontdata[rf].glyphRangeCount; gri++) {
       fontglyphrange fgr;
@@ -138,7 +121,7 @@ void exe_loadfonts(FILE* exe) {
     font.height = ymax - ymin + 2;
     font.yoffset = -ymin + 1;
 
-    font.texture = graphics_create_texture(RawImage((unsigned char*)pixels, twid, thgt), false);
+    font.texture = graphics_create_texture(RawImage(pixels, twid, thgt), false);
     font.twid = twid;
     font.thgt = thgt;
 

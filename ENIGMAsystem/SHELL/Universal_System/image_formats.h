@@ -59,6 +59,7 @@ std::vector<RawImage> image_split(const RawImage& in, unsigned imgcount);
 RawImage image_pad(const RawImage& in, unsigned newWidth, unsigned newHeight);
 RawImage image_crop(const RawImage& in, unsigned newWidth, unsigned newHeight);
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size = false);
+unsigned char* mono_to_rgba(unsigned char* pxdata, unsigned width, unsigned height);
 
 /// Reverses the scan-lines from top to bottom or vice verse, this is not actually to be used, you should load and save the data correctly to avoid duplicating it
 void image_flip(RawImage& in);
