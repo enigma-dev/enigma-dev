@@ -90,6 +90,12 @@ bool background_replace(int back, std::string filename, bool transparent, bool s
 void background_save(int back, std::string fname) {
   const Background& bkg = backgrounds.get(back);
   
+  if (bkg.textureID < 0) {
+    DEBUG_MESSAGE("Requested background: " + std::to_string(back) +
+                 + " has no loaded texture.", MESSAGE_TYPE::M_USER_ERROR);
+    return;
+  }
+  
   unsigned w, h;
   unsigned char* rgbdata =
       enigma::graphics_copy_texture_pixels(bkg.textureID, &w, &h);

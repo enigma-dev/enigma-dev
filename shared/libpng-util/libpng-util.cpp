@@ -57,13 +57,14 @@ unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, cons
 unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename, bool bgra) {
   (*w) = 0; (*h) = 0;
   FILE *fp = fopen(filename, "rb");
+  if (fp == nullptr) return -1;
 
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if (!png) return -1;
+  if (!png) return -2;
   png_infop info = png_create_info_struct(png);
   if (!info) {
     png_destroy_read_struct(&png, NULL, NULL);
-    return -2;
+    return -3;
   }
 
   png_init_io(png, fp);
