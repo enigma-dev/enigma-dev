@@ -21,25 +21,38 @@
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Universal_System/image_formats.h"
+#include "Universal_System/nlpo2.h"
 
 using namespace enigma::dx11;
 
 namespace enigma {
 
-int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
+int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight)
 {
   ID3D11Texture2D *tex;
   D3D11_TEXTURE2D_DESC tdesc;
   D3D11_SUBRESOURCE_DATA tbsd;
-
-  tbsd.pSysMem = pxdata;
-  tbsd.SysMemPitch = fullwidth*4;
+  
+  unsigned fw, fh;
+  if (fullwidth == nullptr) fullwidth = &fw; 
+  if (fullheight == nullptr) fullheight = &fh;
+  
+  *fullwidth  = nlpo2dc(img.w)+1;
+  *fullheight = nlpo2dc(img.h)+1;
+  
+  if (img.pxdata != nullptr && (img.w != *fullwidth || img.h != *fullheight)) {
+    RawImage padded = image_pad(img, *fullwidth, *fullheight);
+    tbsd.pSysMem = padded.pxdata;
+  } else tbsd.pSysMem = img.pxdata;
+  
+  tbsd.SysMemPitch = *fullwidth*4;
   // not needed since this is a 2d texture,
   // but we can pass size info for debugging
-  tbsd.SysMemSlicePitch = fullwidth*fullheight*4;
+  tbsd.SysMemSlicePitch = *fullwidth*(*fullheight)*4;
 
-  tdesc.Width = fullwidth;
-  tdesc.Height = fullheight;
+  tdesc.Width = *fullwidth;
+  tdesc.Height = *fullheight;
   tdesc.MipLevels = 1;
   tdesc.ArraySize = 1;
 
@@ -67,10 +80,10 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   const int id = textures.size();
   textures.push_back(std::make_unique<DX11Texture>(tex, view));
   auto& textureStruct = textures.back();
-  textureStruct->width = width;
-  textureStruct->height = height;
-  textureStruct->fullwidth = fullwidth;
-  textureStruct->fullheight = fullheight;
+  textureStruct->width = img.w;
+  textureStruct->height = img.h;
+  textureStruct->fullwidth = *fullwidth;
+  textureStruct->fullheight = *fullheight;
   return id;
 }
 

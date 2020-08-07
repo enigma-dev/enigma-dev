@@ -21,6 +21,7 @@
 // Simple Universal libraries
 ///////////////////////////////
 
+#include "Universal_System/image_formats.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/var_array.h"
 #include "Universal_System/dynamic_args.h"
@@ -66,8 +67,6 @@
 #include "Platforms/General/PFmain.h"
 
 extern int amain();
-
-#include "Universal_System/image_formats.h"
 
 #include "Universal_System/Object_Tiers/object.h"
 #include "Universal_System/Instances/instance.h"
