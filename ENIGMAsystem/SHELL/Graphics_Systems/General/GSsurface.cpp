@@ -383,7 +383,9 @@ int background_create_from_surface(int id, int x, int y, int w, int h, bool remo
     enigma::image_swap_color(s, c, enigma::Color {0, 0, 0, 0});
   }
   
-  enigma::Background bkg(w, h, enigma::graphics_create_texture(s, false));
+  unsigned fullwidth, fullheight;
+  int texID = enigma::graphics_create_texture(s, false, &fullwidth, &fullheight);
+  enigma::Background bkg(w, h, fullwidth, fullheight, texID);
 
   return enigma::backgrounds.add(std::move(bkg));
 }

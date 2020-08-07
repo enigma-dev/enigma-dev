@@ -456,7 +456,9 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {
   RawImage img = create_from_screen_helper(x, y, w, h, removeback, true);
-  Background bkg(w, h, graphics_create_texture(img, false));
+  unsigned fullwidth, fullheight;
+  int texID = graphics_create_texture(img, false, &fullwidth, &fullheight);
+  Background bkg(w, h, fullwidth, fullheight, texID);
   return backgrounds.add(std::move(bkg));
 }
 
