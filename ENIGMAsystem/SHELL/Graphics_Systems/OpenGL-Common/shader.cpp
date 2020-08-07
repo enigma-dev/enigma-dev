@@ -265,7 +265,11 @@ void main()
 {
   vec4 TexColor;
   if (en_TexturingEnabled == true){
-    TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;
+    #if __VERSION__ > 120
+        TexColor = texture( en_TexSampler, v_TextureCoord.st ) * v_Color;
+    #else
+        TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;
+    #endif
   }else{
     TexColor = v_Color;
   }
