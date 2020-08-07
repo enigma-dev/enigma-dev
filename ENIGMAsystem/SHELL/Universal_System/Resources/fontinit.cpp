@@ -70,6 +70,7 @@ void exe_loadfonts(FILE* exe) {
     if (!fread(&mono[0], sizeof(char), size, exe)) return;
     
     unsigned char* pixels = mono_to_rgba(mono, twid, thgt);
+    delete[] mono;
 
     if (!fread(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "done", sizeof(int)) != 0) {
