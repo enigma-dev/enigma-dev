@@ -219,7 +219,7 @@ std::vector<RawImage> image_load_gif(const std::filesystem::path& filename)
   std::vector<RawImage> res;
 
   //File input
-  std::unique_ptr<unsigned char> bytes_c(read_entire_file(filename.u8string().c_str(), size));
+  std::unique_ptr<unsigned char[]> bytes_c(read_entire_file(filename.u8string().c_str(), size));
   unsigned char *bytes = bytes_c.get();
   if (!bytes) { errno = ERR_FILE_CANT_OPEN; return res; }
 
