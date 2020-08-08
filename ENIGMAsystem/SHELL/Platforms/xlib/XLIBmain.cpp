@@ -144,10 +144,12 @@ int handleEvents() {
         continue;
       }
       case ConfigureNotify: {
-        enigma::windowWidth = e.xconfigure.width;
-        enigma::windowHeight = e.xconfigure.height;
-
         if (WindowResizedCallback != NULL) {
+          windowX = e.xconfigure.x;
+          windowY = e.xconfigure.y;
+          windowWidth = e.xconfigure.width;
+          windowHeight = e.xconfigure.height;
+          compute_window_scaling();
           WindowResizedCallback();
         }
         continue;
@@ -191,10 +193,3 @@ void handleInput() {
 }
 
 }  // namespace enigma
-
-namespace enigma_user {
-
-int display_get_width() { return XWidthOfScreen(enigma::x11::screen); }
-int display_get_height() { return XHeightOfScreen(enigma::x11::screen); }
-
-}  // namespace enigma_user

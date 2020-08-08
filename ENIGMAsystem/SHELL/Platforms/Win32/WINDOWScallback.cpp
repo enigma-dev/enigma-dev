@@ -20,7 +20,10 @@
 #include <string>
 using std::string;
 using std::map;
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 //#include <winuser.h> // includes windows.h
 
 #include "Platforms/General/PFmain.h" // for keyboard_string
@@ -37,7 +40,7 @@ using std::map;
 namespace enigma_user {
 void draw_clear(int col);
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
-}
+} // namespace enigma_user
 
 namespace enigma
 {
@@ -64,7 +67,10 @@ namespace enigma
   {
     switch (message)
     {
-      case WM_CREATE:
+      case WM_SHOWWINDOW:
+        enigma::windowWidth = enigma_user::window_get_width();
+        enigma::windowHeight = enigma_user::window_get_height();
+        enigma::compute_window_scaling();
         return 0;
       case WM_CLOSE:
         instance_event_iterator = &dummy_event_iterator;
@@ -78,9 +84,6 @@ namespace enigma
         if (treatCloseAsEscape) {
           PostQuitMessage(game_return);
         }
-        return 0;
-
-      case WM_DESTROY:
         return 0;
 
       case WM_SETFOCUS:
@@ -108,6 +111,9 @@ namespace enigma
         if (hWndParameter == hWnd) {
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
+            windowWidth = enigma_user::window_get_width();
+            windowHeight = enigma_user::window_get_height();
+            enigma::compute_window_scaling();
           }
           instance_event_iterator = &dummy_event_iterator;
           for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
@@ -136,7 +142,9 @@ namespace enigma
         windowY += tempWindow.top - tempTop;
         windowWidth = tempWidth;
         windowHeight = tempHeight;
-        compute_window_size();
+        enigma::windowWidth = enigma_user::window_get_width();
+        enigma::windowHeight = enigma_user::window_get_height();
+        enigma::compute_window_scaling();
         return 0;
 
       case WM_GETMINMAXINFO: {
@@ -223,11 +231,11 @@ namespace enigma
          hdeltadelta %= WHEEL_DELTA;
          return 0;
 
-      case WM_LBUTTONUP:   ReleaseCapture(); mousestatus[0]=0; return 0;
+      case WM_LBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[0]=0; return 0; }
       case WM_LBUTTONDOWN: SetCapture(hWnd); mousestatus[0]=1; return 0;
-      case WM_RBUTTONUP:   ReleaseCapture(); mousestatus[1]=0; return 0;
+      case WM_RBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[1]=0; return 0; }
       case WM_RBUTTONDOWN: SetCapture(hWnd); mousestatus[1]=1; return 0;
-      case WM_MBUTTONUP:   ReleaseCapture(); mousestatus[2]=0; return 0;
+      case WM_MBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[2]=0; return 0; }
       case WM_MBUTTONDOWN: SetCapture(hWnd); mousestatus[2]=1; return 0;
 
       case WM_ERASEBKGND:
@@ -236,9 +244,15 @@ namespace enigma
         FillRect((HDC) wParam, &rc, CreateSolidBrush(windowColor));
         return 1L;
 
-      case WM_PAINT:
-        DefWindowProc(hWndParameter, message, wParam, lParam);
-        return 0;
+      case WM_SYSCOMMAND: {
+        if (wParam == SC_MAXIMIZE) {
+          ShowWindow(hWnd, SW_MAXIMIZE);
+          enigma::windowWidth = enigma_user::window_get_width();
+          enigma::windowHeight = enigma_user::window_get_height();
+          enigma::compute_window_scaling();
+        }
+        break;
+      }
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);
   }

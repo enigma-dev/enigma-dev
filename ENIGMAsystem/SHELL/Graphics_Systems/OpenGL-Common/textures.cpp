@@ -31,7 +31,7 @@ namespace enigma {
 
 GLuint get_texture_peer(int texid) {
   return (size_t(texid) >= textures.size() || texid < 0)
-      ? 0 : ((GLTexture*)textures[texid])->peer;
+      ? 0 : static_cast<GLTexture*>(textures[texid].get())->peer;
 }
 
 //This allows GL3 surfaces to bind and hold many different types of data
@@ -51,13 +51,14 @@ int graphics_create_texture_custom(unsigned width, unsigned height, unsigned ful
   }
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  GLTexture* textureStruct = new GLTexture(texture);
+  const int id = textures.size();
+  textures.push_back(std::make_unique<GLTexture>(texture));
+  auto& textureStruct = textures.back();
   textureStruct->width = width;
   textureStruct->height = height;
   textureStruct->fullwidth = fullwidth;
   textureStruct->fullheight = fullheight;
-  const int id = textures.size();
-  textures.push_back(textureStruct);
+  
   return id;
 }
 
@@ -67,8 +68,10 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
 }
 
 void graphics_delete_texture(int texid) {
-  const GLuint peer = get_texture_peer(texid);
-  glDeleteTextures(1, &peer);
+  if (texid >= 0) {
+    const GLuint peer = get_texture_peer(texid);
+    glDeleteTextures(1, &peer);
+  }
 }
 
 unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {

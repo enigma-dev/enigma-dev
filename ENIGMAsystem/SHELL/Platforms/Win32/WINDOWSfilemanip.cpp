@@ -28,7 +28,10 @@
 
 #include <string>
 #include <sstream>
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include "Universal_System/estring.h"
 #include <time.h>
 #include <sys/stat.h>

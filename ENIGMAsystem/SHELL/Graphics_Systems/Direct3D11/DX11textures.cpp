@@ -64,20 +64,22 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   ID3D11ShaderResourceView *view;
   m_device->CreateShaderResourceView(tex, &vdesc, &view);
 
-  DX11Texture* textureStruct = new DX11Texture(tex, view);
+  const int id = textures.size();
+  textures.push_back(std::make_unique<DX11Texture>(tex, view));
+  auto& textureStruct = textures.back();
   textureStruct->width = width;
   textureStruct->height = height;
   textureStruct->fullwidth = fullwidth;
   textureStruct->fullheight = fullheight;
-  const int id = textures.size();
-  textures.push_back(textureStruct);
   return id;
 }
 
 void graphics_delete_texture(int tex) {
-  auto texture = (DX11Texture*)textures[tex];
-  texture->peer->Release(), texture->peer = NULL;
-  texture->view->Release(), texture->view = NULL;
+  if (tex >= 0) {
+    DX11Texture* texture = static_cast<DX11Texture*>(textures[tex].get());
+    texture->peer->Release(), texture->peer = NULL;
+    texture->view->Release(), texture->view = NULL;
+  }
 }
 
 unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {

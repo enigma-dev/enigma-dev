@@ -35,5 +35,5 @@ message Sprite {
   optional uint32 width = 19;
   optional uint32 height = 20;
 
-  repeated string subimages = 21 [(gmx) = "frames/frame", (file_path) = true];
+  repeated string subimages = 21 [(gmx) = "frames/frame", (file_path) = true, (file_kind) = IMAGE];
 }

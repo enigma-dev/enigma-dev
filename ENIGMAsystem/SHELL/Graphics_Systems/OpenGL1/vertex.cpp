@@ -46,11 +46,11 @@ void graphics_prepare_buffer_array(const int buffer, const bool isIndex) {
   if (!dirty) return;
 
   if (isIndex) {
-    IndexBuffer* indexBuffer = indexBuffers[buffer];
+    auto& indexBuffer = indexBuffers[buffer];
     indexBufferArrays[buffer] = indexBuffer->indices;
     indexBuffer->clearData();
   } else {
-    VertexBuffer* vertexBuffer = vertexBuffers[buffer];
+    auto& vertexBuffer = vertexBuffers[buffer];
     vertexBufferArrays[buffer] = vertexBuffer->vertices;
     vertexBuffer->clearData();
   }
@@ -160,7 +160,7 @@ struct ClientState {
 ClientState graphics_apply_vertex_format(int format, const GLvoid* base_pointer) {
   using namespace enigma_user;
 
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
+  const auto& vertexFormat = enigma::vertexFormats[format];
 
   ClientState state;
   size_t offset = 0;
@@ -260,7 +260,7 @@ void vertex_color(int buffer, int color, double alpha) {
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   void* base_pointer = enigma::graphics_prepare_buffer(buffer, false);
   enigma::ClientState state = enigma::graphics_apply_vertex_format(vertexBuffer->format, (GLvoid*)((intptr_t)base_pointer + offset));
@@ -273,8 +273,8 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
-  const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[vertex];
+  const auto& indexBuffer = enigma::indexBuffers[buffer];
 
   void* base_vertex_pointer = enigma::graphics_prepare_buffer(vertex, false);
   void* base_index_pointer = enigma::graphics_prepare_buffer(buffer, true);

@@ -1,49 +1,19 @@
-BINARY := ../../test-runner
-SRC_DIR := .
-OBJ_DIR := .eobjs
-TESTCASES_DIR := $(SRC_DIR)/Tests
+include ../../Config.mk
 
-OS := $(shell uname -s)
+TARGET := ../../test-runner
+TESTCASES_DIR := $(SRC_DIR)/Tests
+SHARED_SRC_DIR := ../../shared
+
 ifeq ($(OS), Linux)
 	OS_SRCS=$(wildcard ./Platform/*-X11.cpp)
-	OS_LIBS=-lX11 -lboost_filesystem -lboost_system
+	OS_LIBS=-lX11 -lstdc++fs
 else ifeq ($(OS), Darwin)
 	OS_SRCS=./Platform/TestHarness-Cocoa.cpp
-	OS_LIBS=-lboost_filesystem -lboost_system
 else
 	OS_SRCS=./Platform/TestHarness-Win32.cpp
-	OS_LIBS=-lboost_filesystem-mt -lboost_system-mt
 endif
 
-CXXFLAGS  := -I$(SRC_DIR) -Wall -Wextra -Wpedantic -g -std=c++11
-LDFLAGS   := $(OS_LIBS) -lgtest -lpthread -lgtest_main
-
 SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(TESTCASES_DIR)/*.cpp) $(OS_SRCS)
-OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURCES)))
-OBJDIRS := $(sort $(OBJ_DIR) $(dir $(OBJECTS)))
-DEPENDS := $(OBJECTS:.o=.d)
+LDFLAGS += $(OS_LIBS) -lgtest_main -lgtest -lpthread
 
-$(BINARY): $(OBJECTS) .FORCE
-	g++ $(filter-out .FORCE, $^) -o $@ $(LDFLAGS)
-
-.PHONY: all clean obj_dirs .FORCE
-
-.FORCE:
-
-all: $(BINARY)
-clean:
-	rm -rf $(BINARY) $(OBJ_DIR)
-
-# Create the object directories
-$(OBJDIRS):
-	mkdir -p $@
-# Old make has a bug which requires this nonsense...
-obj_dirs: $(OBJDIRS)
-
-# Generate rules for new (unbuilt) files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | obj_dirs
-	$(CXX) $(CXXFLAGS) $(CXXFLAGS) -MMD -c -o $(OBJ_DIR)/$*.o $<
-
-# Include rules for known (previously-built) files
--include $(DEPENDS)
-.SUFFIXES:
+include ../../Default.mk

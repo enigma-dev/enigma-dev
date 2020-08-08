@@ -21,7 +21,10 @@
 #include <dsound.h>
 #include <mmsystem.h>
 #include <stddef.h>
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 
 extern IDirectSoundBuffer *primaryBuffer;
 

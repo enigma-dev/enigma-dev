@@ -105,17 +105,13 @@ int cocoa_show_error(const char *errortext, bool fatal, const char *title) {
 
   [alert setInformativeText:myStr];
   [alert addButtonWithTitle:@"Abort"];
-  [alert addButtonWithTitle:@"Retry"];
-  [alert addButtonWithTitle:@"Ignore"];
+  if (!fatal) [alert addButtonWithTitle:@"Ignore"];
   [alert setAlertStyle:2];
   NSModalResponse responseTag = [alert runModal];
   [alert release];
 
   if (responseTag == NSAlertFirstButtonReturn || fatal)
     return 1;
-
-  if (responseTag == NSAlertSecondButtonReturn)
-    return 0;
 
   return -1;
 }
@@ -502,10 +498,10 @@ int cocoa_get_color(int defcol, const char *title) {
 
   [myOKButton setTitle:@"OK"];
   [myOKButton setAlternateTitle:@"OK"];
-  [myOKButton setBezelStyle:NSRoundedBezelStyle];
+  [myOKButton setBezelStyle:1];
   [myCancelButton setTitle:@"Cancel"];
   [myCancelButton setAlternateTitle:@"Cancel"];
-  [myCancelButton setBezelStyle:NSRoundedBezelStyle];
+  [myCancelButton setBezelStyle:1];
   [myButtonView addSubview:myOKButton];
   [myButtonView addSubview:myCancelButton];
   [myOKButton setKeyEquivalent:@"\r"];
@@ -566,7 +562,7 @@ int cocoa_get_color(int defcol, const char *title) {
 
   if (colorOKPressed) {
     myColor = [myColorPanel color];
-    convertedColor = [myColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+    convertedColor = [myColor colorUsingType:NSColorTypeComponentBased];
 
     if (convertedColor) {
       [convertedColor getRed:&r green:&g blue:&b alpha:&a];

@@ -22,7 +22,10 @@
 #include "Widget_Systems/widgets_mandatory.h" // for show_error
 #endif
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <xinput.h>
 
 namespace {

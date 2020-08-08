@@ -4,7 +4,12 @@ package buffers.resources;
 import "options.proto";
 
 message Object {
-  message Event {
+  message EgmEvent {  // RM = Rename me.
+    optional string id = 1;
+    repeated string arguments = 2;
+    optional string code = 3;
+  }
+  message LegacyEvent {
     optional int32 type = 1 [(gmx) = "eventtype"];
     oneof reference {
       int32 number = 2 [(gmx) = "enumb"];
@@ -46,7 +51,8 @@ message Object {
   optional bool visible = 8;
   optional bool persistent = 9;
 
-  repeated Event events = 10 [(gmx) = "events/event", (yyp) = "eventList"];
+  repeated LegacyEvent legacy_events = 10 [(gmx) = "events/event", (yyp) = "eventList"];
+  repeated EgmEvent egm_events = 12;
 
   optional ObjectPhysicsSettings physics_settings = 11 [(gmx) = "EGM_NESTED"];
 }

@@ -7,7 +7,6 @@
 #include "project.pb.h"
 #include "game.pb.h"
 
-#include <functional>
 #include <string>
 
 typedef enum
@@ -31,14 +30,14 @@ class EnigmaPlugin
 public:
   EnigmaPlugin();
   int Load();
-  const char* Init(CallBack *cb);
+  const char* Init(CallBack *cb, const char* enigmaRoot);
   syntax_error* SetDefinitions(const char* def, const char* yaml);
   syntax_error* SetDefinitions(const char* yaml);
   syntax_error* SyntaxCheck(int count, const char** names, const char* code);
   void HandleGameLaunch();
   void LogMakeToConsole();
   int BuildGame(deprecated::JavaStruct::EnigmaStruct* data, GameMode mode, const char* fpath);
-  int BuildGame(buffers::Game* data, GameMode mode, const char* fpath);
+  int BuildGame(const buffers::Game& data, GameMode mode, const char* fpath);
   const char* NextResource();
   const char* FirstResource();
   bool ResourceIsFunction();
@@ -50,28 +49,6 @@ public:
   int ResourceIsGlobal();
   bool ResourcesAtEnd();
   void PrintBuiltins(std::string& fName);
-
-private:
-  std::function<const char*(EnigmaCallbacks*)> plugin_Init = nullptr;
-  std::function<int(deprecated::JavaStruct::EnigmaStruct*, const char*, int)> plugin_CompileEGM = nullptr;
-  std::function<int(const buffers::Project *proj, const char*, int)> plugin_CompileProto = nullptr;
-  std::function<const char*()> plugin_NextResource = nullptr;
-  std::function<const char*()> plugin_FirstResource = nullptr;
-  std::function<bool()> plugin_ResourceIsFunction = nullptr;
-  std::function<int()> plugin_ResourceArgCountMin = nullptr;
-  std::function<int()> plugin_ResourceArgCountMax = nullptr;
-  std::function<int()> plugin_ResourceOverloadCount = nullptr;
-  std::function<const char*(int i)> plugin_ResourceParameters = nullptr;
-  std::function<int()> plugin_ResourceIsTypeName = nullptr;
-  std::function<int()> plugin_ResourceIsGlobal = nullptr;
-  std::function<bool()> plugin_ResourcesAtEnd = nullptr;
-  std::function<void()> plugin_Free = nullptr;
-  std::function<syntax_error*(const char*, const char*)> plugin_DefinitionsModified = nullptr;
-  std::function<syntax_error*(int, const char**, const char*)> plugin_SyntaxCheck = nullptr;
-  std::function<void()> plugin_HandleGameLaunch = nullptr;
-  std::function<void()> plugin_LogMakeToConsole = nullptr;
-
-  void* _handle;
 };
 
 #endif

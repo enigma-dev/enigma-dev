@@ -35,6 +35,7 @@ using namespace std;
 #include "bettersystem.h"
 #include "OS_Switchboard.h"
 #include "general/parse_basics_old.h"
+#include "frontend.h"
 
 
 inline char* scopy(string& str)
@@ -100,7 +101,9 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    #define byte __windows_byte_workaround
     #include <windows.h>
+    #undef byte
 
     int e_exec(const char* fcmd, const char* *Cenviron)
     {
@@ -211,9 +214,15 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       cout << "\n\n********* EXECUTE:\n" << parameters << "\n\n";
 
-      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
+      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE|CREATE_NEW_PROCESS_GROUP,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
-        WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+        while (WaitForSingleObject(ProcessInformation.hProcess, 10) == WAIT_TIMEOUT) {
+          if (!build_stopping) continue;
+          DWORD pId = GetProcessId(ProcessInformation.hProcess);
+          GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, pId);
+          WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+          break;
+        }
         GetExitCodeProcess(ProcessInformation.hProcess, &result);
         CloseHandle(ProcessInformation.hProcess);
         CloseHandle(ProcessInformation.hThread);
@@ -337,9 +346,16 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       int result = -1;
       pid_t fk = fork();
+      setpgid(0,0); // new process group
 
       if (!fk)
       {
+        // Redirect STDIN
+        // Background process groups get SIGTTIN if
+        // reading from the terminal.
+        int infd = open("/dev/null", O_RDONLY);
+        dup2(infd, STDIN_FILENO);
+
         // Redirect STDOUT
         if (redirout == "") {
             int flags = fcntl(STDOUT_FILENO, F_GETFD);
@@ -381,11 +397,21 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         }
         else usenviron = environ;
 
-          execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
+        execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
         exit(-1);
       }
 
-      waitpid(fk,&result,0);
+      while (!waitpid(fk,&result,WNOHANG)) {
+        if (build_stopping) {
+          kill(-fk,SIGINT); // send CTRL+C to process group
+          // wait for entire process group to signal,
+          // important for GNU make to stop outputting
+          // before run buttons are enabled again
+          waitpid(-fk,&result,__WALL);
+          break;
+        }
+        usleep(10000); // hundredth of a second
+      }
       for (char** i = argv+1; *i; i++)
         free(*i);
       free(argv);

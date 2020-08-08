@@ -35,6 +35,7 @@ namespace enigma {
   int enigma_main(int argc, char** argv);
   int game_ending();
   void Sleep(int ms);
+  void compute_window_scaling();
   void compute_window_size();
   void initialize_directory_globals();
   void set_program_args(int argc, char** argv);
@@ -43,7 +44,7 @@ namespace enigma {
   int gameWait();
   void set_room_speed(int rs);
 }
-
+  
 namespace enigma_user {
 
 extern std::string working_directory;
@@ -59,10 +60,6 @@ void sleep(int ms);
 void game_end();
 void game_end(int ret);
 void action_end_game();
-void url_open(std::string url,std::string target="_self",std::string options="");
-void url_open_ext(std::string url, std::string target);
-void url_open_full(std::string url, std::string target,std::string options);
-void action_webpage(const std::string &url);
 
 // Data type could be unsigned for the paramter since the collection is size_t, however this would make the function not behave as GM.
 // show_message(parameter_string(-1)); in GM8.1 will show an empty string, if this function cast the parameter to unsigned that won't be the behavior.
@@ -74,18 +71,19 @@ int parameter_count();
 unsigned long long disk_size(std::string drive);
 unsigned long long disk_free(std::string drive);
 
-void set_program_priority(int value);
 void execute_shell(std::string fname, std::string args);
-void execute_shell(std::string operation, std::string fname, std::string args);
-std::string execute_shell_for_output(const std::string &command);
 void execute_program(std::string fname, std::string args, bool wait);
-void execute_program(std::string operation, std::string fname, std::string args, bool wait);
+std::string execute_shell_for_output(const std::string &command);
+void url_open(std::string url);
+void action_webpage(const std::string &url);
 
+void set_program_priority(int value);
 std::string filename_absolute(std::string fname);
 std::string filename_join(std::string prefix, std::string suffix);
 std::string environment_get_variable(std::string name);
 bool environment_set_variable(const std::string &name, const std::string &value);
 bool set_working_directory(std::string dname);
-}
+
+} // namespace enigma_user
 
 #endif //ENIGMA_PLATFORM_MAIN

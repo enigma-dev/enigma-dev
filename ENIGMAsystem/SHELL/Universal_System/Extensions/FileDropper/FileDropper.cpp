@@ -16,7 +16,10 @@
 **/
 
 #include "FileDropper.h"
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <set>
 #include <string>
 #include <vector>
@@ -27,7 +30,14 @@
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "strings_util.h"
 
-using std::set;
+#ifndef WM_COPYGLOBALDATA
+#define WM_COPYGLOBALDATA 0x0049
+#endif
+
+#ifndef MSGFLT_ADD
+#define MSGFLT_ADD 1
+#endif
+
 using std::size_t;
 using std::string;
 using std::vector;
@@ -38,7 +48,7 @@ HHOOK hook = NULL;
 WNDPROC oldProc = NULL;
 bool file_dnd_enabled = false;
 HDROP hDrop = NULL;
-set<string> dropped_files;
+std::set<string> dropped_files;
 
 string def_pattern;
 bool def_allowfiles = true;
@@ -55,11 +65,9 @@ void UnInstallHook(HHOOK Hook) {
 
 LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   LRESULT rc = CallWindowProc(oldProc, hWnd, uMsg, wParam, lParam);
-
   if (uMsg == WM_DROPFILES) {
     if (!def_allowmulti) dropped_files.clear();
     hDrop = (HDROP)wParam;
-
     UINT nNumOfFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
     vector<wchar_t> fName;
     for (UINT i = 0; i < nNumOfFiles; i += 1) {
@@ -67,27 +75,32 @@ LRESULT CALLBACK HookWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       DragQueryFileW(hDrop, i, fName.data(), fName.size());
       dropped_files.insert(shorten({fName.data(), fName.size() - 1}));
     }
-
-    DragFinish(hDrop);
+    DragFinish(hDrop); DWORD dwProcessId;
+    GetWindowThreadProcessId(enigma::hWnd, &dwProcessId);
+    AllowSetForegroundWindow(dwProcessId);
+    SetForegroundWindow(enigma::hWnd);
+    return 0;
   }
-
   return rc;
 }
 
 LRESULT CALLBACK SetHook(int nCode, WPARAM wParam, LPARAM lParam) {
   if (nCode == HC_ACTION) {
     CWPSTRUCT *pwp = (CWPSTRUCT *)lParam;
-
     if (pwp->message == WM_KILLFOCUS) {
       oldProc = (WNDPROC)SetWindowLongPtrW(enigma::hWnd, GWLP_WNDPROC, (LONG_PTR)HookWndProc);
       UnInstallHook(hook);
     }
   }
-
   return CallNextHookEx(hook, nCode, wParam, lParam);
 }
 
 HHOOK InstallHook() {
+  #if (__MINGW32_MAJOR_VERSION >= 8 || __MINGW64_VERSION_MAJOR >= 8)
+  ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
+  ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
+  ChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
+  #endif
   hook = SetWindowsHookExW(WH_CALLWNDPROC, (HOOKPROC)SetHook, NULL, GetWindowThreadProcessId(enigma::hWnd, NULL));
   return hook;
 }
@@ -97,8 +110,7 @@ string file_dnd_apply_filter(string pattern, bool allowfiles, bool allowdirs, bo
   pattern = string_replace_all(pattern, " ", "");
   pattern = string_replace_all(pattern, "*", "");
   vector<string> extVec = split_string(pattern, ';');
-  set<string> filteredNames;
-
+  std::set<string> filteredNames;
   for (const string &droppedFile : dropped_files) {
     for (const string &ext : extVec) {
       if (ext == "." || ext == filename_ext(droppedFile)) {
@@ -109,7 +121,6 @@ string file_dnd_apply_filter(string pattern, bool allowfiles, bool allowdirs, bo
       }
     }
   }
-
   string fname = "";
   if (filteredNames.empty()) return fname;
   for (const string &filteredName : filteredNames) {

@@ -231,7 +231,7 @@ namespace enigma_user {
 #if __cplusplus > 201402L
 static inline void font_add_search_path_helper(const fs::path& p) {
    
-  auto it = supportedExtensions.find(stringtolower(p.extension()));
+  auto it = supportedExtensions.find(ToLower(p.extension()));
   if (it != supportedExtensions.end()) {
     FT_Face face;
     FT_Error error;

@@ -36,10 +36,12 @@ using enigma_user::filename_name;
 using enigma_user::filename_path;
 
 #include "Platforms/General/PFmain.h"
-using enigma_user::execute_shell_for_output;
+#include "Platforms/General/PFshell.h"
+using enigma_insecure::execute_shell_for_output;
 
 #include "Platforms/General/PFwindow.h"
 using enigma_user::window_get_caption;
+using enigma_user::window_identifier;
 
 #include "Platforms/General/PFfilemanip.h"
 using enigma_user::file_exists;
@@ -70,8 +72,8 @@ static string shellscript_evaluate(string command) {
 }
 
 static string add_escaping(string str, bool is_caption, string new_caption) {
-  string result; if (is_caption && str.empty()) result = new_caption;
-  result = string_replace_all(str, "\"", "\\\""); // zenity needs this for quotes to show
+  string result = str; if (is_caption && str.empty()) result = new_caption;
+  result = string_replace_all(result, "\"", "\\\""); // zenity needs this for quotes to show
   result = string_replace_all(result, "_", "__"); // zenity needs this for underscores to show
   return result;
 }
@@ -121,7 +123,7 @@ static int show_message_helperfunc(string message) {
   }
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   str_cancel + string("--title=\"") + str_title + string("\" --no-wrap --text=\"") +
   add_escaping(message, false, "") + str_icon + str_echo;
 
@@ -142,7 +144,7 @@ static int show_question_helperfunc(string message) {
     str_cancel = "--extra-button=Cancel ";
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--question --ok-label=Yes --cancel-label=No ") + str_cancel +  string("--title=\"") +
   str_title + string("\" --no-wrap --text=\"") + add_escaping(message, false, "") +
   string("\" --icon-name=dialog-question);if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Cancel\" ] ;then echo -1;else echo 0;fi");
@@ -151,7 +153,7 @@ static int show_question_helperfunc(string message) {
   return (int)strtod(str_result.c_str(), NULL);
 }
 
-static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+static void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;
   string str_title;
@@ -162,13 +164,22 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
   #endif
 
   str_echo = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) ? "echo 1" :
-    "if [ $ans = \"Abort\" ] ;then echo 1;elif [ $ans = \"Retry\" ] ;then echo 0;else echo -1;fi";
+    "if [ $ans = \"Abort\" ] ;then echo 1;else echo -1;fi";
 
-  str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
-  string("--error --ok-label=Ignore --extra-button=Retry --extra-button=Abort ") +
-  string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
-  add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
+  if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
+    type == MESSAGE_TYPE::M_FATAL_USER_ERROR) {
+    str_command = string("ans=$(zenity ") +
+    string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
+    string("--error --ok-label=Abort ") +
+    string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
+    add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
+  } else {
+    str_command = string("ans=$(zenity ") +
+    string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
+    string("--error --ok-label=Ignore --extra-button=Abort ") +
+    string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
+    add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
+  }
 
   string str_result = shellscript_evaluate(str_command);
   if (strtod(str_result.c_str(), NULL) == 1) exit(0);
@@ -178,13 +189,7 @@ class ZenityWidgets : public enigma::CommandLineWidgetEngine {
  public:
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) override {
-  if (type != M_INFO && type != M_WARNING) {
-    show_debug_message_helper(errortext, type);
-  } else {
-    #ifndef DEBUG_MODE
-    fputs(errortext.c_str(), stderr);
-    #endif
-  }
+  show_debug_message_helperfunc(errortext, type);
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) override {
@@ -217,7 +222,7 @@ int show_attempt(string errortext) override {
   string str_title;
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--error --ok-label=Cancel --extra-button=Retry ") +  string("--title=\"") +
   add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
   add_escaping(errortext, false, "") +
@@ -236,7 +241,7 @@ string get_string(string message, string def) override {
 
   str_title = add_escaping(dialog_caption, true, " ");
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--entry --title=\"") + str_title + string("\" --text=\"") +
   add_escaping(message, false, "") + string("\" --entry-text=\"") +
   add_escaping(def, false, "") + string("\");echo $ans");
@@ -253,7 +258,7 @@ string get_password(string message, string def) override {
 
   str_title = add_escaping(dialog_caption, true, " ");
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--entry --title=\"") + str_title + string("\" --text=\"") +
   add_escaping(message, false, "") + string("\" --hide-text --entry-text=\"") +
   add_escaping(def, false, "") + string("\");echo $ans");
@@ -279,7 +284,7 @@ string get_open_filename(string filter, string fname) override {
   string str_fname = filename_name(fname);
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
@@ -298,7 +303,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   str_fname = (char *)str_path.c_str();
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
@@ -312,7 +317,7 @@ string get_open_filenames(string filter, string fname) override {
   string str_fname = filename_name(fname);
 
   str_command = string("zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --multiple --separator='\n' --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
 
@@ -339,7 +344,7 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
   str_fname = (char *)str_path.c_str();
 
   str_command = string("zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --multiple --separator='\n' --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
 
@@ -361,7 +366,7 @@ string get_save_filename(string filter, string fname) override {
   string str_fname = filename_name(fname);
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
@@ -379,7 +384,7 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   str_fname = (char *)str_path.c_str();
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
@@ -393,7 +398,7 @@ string get_directory(string dname) override {
   string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_dname, false, "") + str_end;
 
@@ -407,7 +412,7 @@ string get_directory_alt(string capt, string root) override {
   string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_dname, false, "") + str_end;
 
@@ -428,7 +433,7 @@ int get_color(int defcol) override {
   str_defcol = string("rgb(") + std::to_string(red) + string(",") +
   std::to_string(green) + string(",") + std::to_string(blue) + string(")");
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--color-selection --show-palette --title=\"") + str_title + string("\"  --color='") +
   str_defcol + string("');if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
@@ -464,7 +469,7 @@ int get_color_ext(int defcol, string title) override {
   str_defcol = string("rgb(") + std::to_string(red) + string(",") +
   std::to_string(green) + string(",") + std::to_string(blue) + string(")");
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + std::to_string((int)enigma::x11::win) + string(") ") +
+  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--color-selection --show-palette --title=\"") + str_title + string("\" --color='") +
   str_defcol + string("');if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 

@@ -1,0 +1,94 @@
+int bkg1, bkg2;
+
+// add / del
+bkg1 = background_add("../data/sprite.png", false);
+gtest_assert_eq(bkg1, 0);
+gtest_assert_true(background_exists(bkg1));
+gtest_assert_false(background_exists(bkg+1));
+background_delete(bkg1);
+gtest_assert_false(background_exists(bkg1));
+
+bkg1 = background_add("../data/sprite.png", false);
+gtest_assert_eq(bkg1, 1);
+
+bkg2 = background_add("../data/sprite.png", false);
+gtest_assert_eq(bkg2, 2);
+
+gtest_assert_true(background_textures_equal(bkg1, bkg2));
+
+// alpha
+background_delete(bkg2);
+bkg2 = background_add("../data/sprite.png", true);
+gtest_assert_false(background_textures_equal(bkg1, bkg2));
+background_delete(bkg1);
+background_delete(bkg2);
+
+bkg1 = background_create_color(256, 64, c_black);
+gtest_assert_eq(background_get_pixel(bkg1, 0, 0), 255);
+gtest_assert_eq(background_get_pixel(bkg1, 0, 32), 255);
+gtest_assert_eq(background_get_pixel(bkg1, 0, 63), 255);
+
+bkg2 = background_add("../data/alpha.png", false);
+background_set_alpha_from_background(bkg1, bkg2);
+gtest_assert_eq(background_get_pixel(bkg1, 0, 0), 255);
+gtest_assert_eq(background_get_pixel(bkg1, 0, 32), 128);
+gtest_assert_eq(background_get_pixel(bkg1, 0, 63), 0);
+
+background_delete(bkg1);
+background_delete(bkg2);
+
+bkg1 = background_add("../data/sprite.png", false);
+bkg2 = background_add("../data/hugar.png", false);
+
+// uvs
+var uvs = background_get_uvs(bkg1);
+gtest_assert_eq(uvs[0], 0);
+gtest_assert_eq(uvs[1], 0);
+gtest_assert_eq(uvs[2], 1);
+gtest_assert_eq(uvs[3], 1);
+
+// replace / assign / duplicate
+gtest_assert_eq(background_get_width(bkg1), 256);
+gtest_assert_eq(background_get_height(bkg1), 64);
+
+gtest_assert_eq(background_get_width(bkg2), 32);
+gtest_assert_eq(background_get_height(bkg2), 32);
+
+gtest_assert_true(background_get_texture(bkg1) != background_get_texture(bkg2));
+
+// duplicate
+int bkg3 = background_duplicate(bkg1);
+gtest_assert_true(bkg3 > bkg1 && bkg3 > bkg2);
+gtest_assert_eq(background_get_width(bkg3), background_get_width(bkg1));
+gtest_assert_eq(background_get_height(bkg3), background_get_height(bkg1));
+gtest_assert_true(background_textures_equal(bkg1, bkg3));
+
+// replace
+background_replace(bkg1, "../data/hugar.png");
+gtest_assert_eq(background_get_width(bkg1), 32);
+gtest_assert_eq(background_get_height(bkg1), 32);
+gtest_assert_false(background_textures_equal(bkg1, bkg3));
+
+// assign
+background_assign(bkg1, bkg3);
+gtest_assert_eq(background_get_width(bkg1), 256);
+gtest_assert_eq(background_get_height(bkg1), 64);
+gtest_assert_true(background_textures_equal(bkg1, bkg3));
+
+// save
+background_save(bkg3, "/tmp/bkg-save-test.png");
+int bkg4 = background_add("/tmp/bkg-save-test.png", false);
+gtest_assert_true(background_textures_equal(bkg3, bkg4));
+background_delete(bkg4);
+
+gtest_assert_true(background_exists(bkg1));
+gtest_assert_true(background_exists(bkg2));
+gtest_assert_true(background_exists(bkg3));
+background_delete(bkg1);
+background_delete(bkg2);
+background_delete(bkg3);
+gtest_assert_false(background_exists(bkg1));
+gtest_assert_false(background_exists(bkg2));
+gtest_assert_false(background_exists(bkg3));
+
+game_end();

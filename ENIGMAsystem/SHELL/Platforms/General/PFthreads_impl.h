@@ -24,7 +24,10 @@
   #include <SDL2/SDL.h>
   using pltfrm_thread_t = SDL_Thread*;
 #elif ENIGMA_PLATFORM_WINDOWS
-  #include <windows.h>
+  #define byte __windows_byte_workaround
+#include <windows.h>
+#undef byte
+
   using pltfrm_thread_t = HANDLE;
 #else
   #include <pthread.h> // use POSIX threads

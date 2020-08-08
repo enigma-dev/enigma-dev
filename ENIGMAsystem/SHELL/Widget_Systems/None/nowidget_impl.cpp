@@ -20,6 +20,7 @@
 using std::string;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/var4.h"
 #include <cstdlib>
 #include <cstdio>
 
@@ -30,7 +31,9 @@ using std::string;
 using namespace std;
 
 #ifdef _WIN32
+#  define byte __windows_byte_workaround
 #  include <windows.h>
+#  undef byte
 #  define TC_WINDOWS 1
 #else
 #  include <termios.h>
@@ -124,11 +127,12 @@ string get_string(string str, string def) {
   return (input.empty()) ? def : input;
 }
 
-double get_integer(string str, double def) {
+double get_integer(string str, var def) {
+  double val = (strtod(def.c_str(), NULL)) ? : (double)def;
   printf("%s\n", str.c_str());
   string input;
   cin >> input;
-  if (input.empty()) return def;
+  if (input.empty()) return val;
   return strtod(input.c_str(), NULL);
 }
 

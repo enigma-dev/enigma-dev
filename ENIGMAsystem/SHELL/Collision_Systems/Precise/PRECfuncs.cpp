@@ -181,13 +181,13 @@ double distance_to_object(int object)
         return -1;
     double distance = std::numeric_limits<double>::infinity();
     double tempdist;
-    const enigma::bbox_rect_t &box = inst1->$bbox_relative();
+    const enigma::BoundingBox &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
     int left1, top1, right1, bottom1;
 
-    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
+    get_border(&left1, &right1, &top1, &bottom1, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale1, yscale1, ia1);
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
@@ -196,13 +196,13 @@ double distance_to_object(int object)
         if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
             continue;
 
-        const enigma::bbox_rect_t &box2 = inst2->$bbox_relative();
+        const enigma::BoundingBox &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
                      ia2 = inst2->image_angle;
         int left2, top2, right2, bottom2;
 
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
+        get_border(&left2, &right2, &top2, &bottom2, box2.left(), box2.top(), box2.right(), box2.bottom(), x2, y2, xscale2, yscale2, ia2);
 
         const int right  = min(right1, right2),   left = max(left1, left2),
                   bottom = min(bottom1, bottom2), top  = max(top1, top2);
@@ -223,13 +223,13 @@ double distance_to_point(cs_scalar x, cs_scalar y)
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
         return -1;
-    const enigma::bbox_rect_t &box = inst1->$bbox_relative();
+    const enigma::BoundingBox &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
     int left1, top1, right1, bottom1;
 
-    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
+    get_border(&left1, &right1, &top1, &bottom1, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale1, yscale1, ia1);
 
     return fabs(hypot(min(left1 - x, right1 - x),
                     min(top1 - y, bottom1 - y)));
@@ -262,13 +262,13 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
 
     const int quad = int(angle/90.0);
 
-    const enigma::bbox_rect_t &box = inst1->$bbox_relative();
+    const enigma::BoundingBox &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
     int left1, top1, right1, bottom1;
 
-    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
+    get_border(&left1, &right1, &top1, &bottom1, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale1, yscale1, ia1);
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
@@ -277,13 +277,13 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
             continue;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid))
             continue;
-        const enigma::bbox_rect_t &box2 = inst2->$bbox_relative();
+        const enigma::BoundingBox &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
                      ia2 = inst2->image_angle;
         int left2, top2, right2, bottom2;
 
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
+        get_border(&left2, &right2, &top2, &bottom2, box2.left(), box2.top(), box2.right(), box2.bottom(), x2, y2, xscale2, yscale2, ia2);
 
         if (right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1)
         {
@@ -531,13 +531,13 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bo
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
             continue;
 
-        const enigma::bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
 
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
 
         if ((left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) == inside) {
             inst->deactivate();
@@ -556,13 +556,13 @@ void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool
             continue;
         }
 
-        const enigma::bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
 
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
 
         if ((left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) == inside) {
             inst->activate();
@@ -603,13 +603,13 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
             continue;
 
-        const enigma::bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x1 = inst->x, y1 = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
 
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
+        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale, yscale, ia);
 
         const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
                                  line_ellipse_intersects(r, r, right-x, top-y, bottom-y) ||
@@ -647,13 +647,13 @@ void instance_activate_circle(int x, int y, int r, bool inside)
             continue;
         }
 
-        const enigma::bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x1 = inst->x, y1 = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
 
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
+        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale, yscale, ia);
 
         const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
                                  line_ellipse_intersects(r, r, right-x, top-y, bottom-y) ||

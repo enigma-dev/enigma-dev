@@ -49,13 +49,15 @@ namespace enigma_user {
 const int os_type = os_windows;
 }  // namespace enigma_user
 
-namespace enigma  //TODO: Find where this belongs
+namespace enigma
 {
+
 HINSTANCE hInstance;
 HWND hWnd;
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 HDC window_hDC;
 HANDLE mainthread;
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 void (*touch_extension_register)(HWND hWnd);
 
@@ -64,10 +66,6 @@ void windowsystem_write_exename(char *exenamehere) { GetModuleFileName(NULL, exe
 void Sleep(int ms) { ::Sleep(ms); }
 
 void initInput(){};
-
-HWND get_window_handle() {
-  return hWnd;
-}
 
 } // namespace enigma
 
@@ -408,62 +406,6 @@ void set_program_priority(int value) {
   SetPriorityClass(GetCurrentThread(), priorityValue);
 }
 
-void execute_shell(std::string fname, std::string args) {
-  WCHAR cDir[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, cDir);
-  tstring tstr_fname = widen(fname);
-  tstring tstr_args = widen(args);
-  ShellExecuteW(enigma::hWnd, NULL, tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
-}
-
-void execute_shell(std::string operation, std::string fname, std::string args) {
-  WCHAR cDir[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, cDir);
-  tstring tstr_operation = widen(operation);
-  tstring tstr_fname = widen(fname);
-  tstring tstr_args = widen(args);
-  ShellExecuteW(enigma::hWnd, tstr_operation.c_str(), tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
-}
-
-std::string execute_shell_for_output(const std::string &command) {
-  string res;
-  char buffer[BUFSIZ];
-  tstring tstr_command = widen(command);
-  FILE *pf = _wpopen(tstr_command.c_str(), L"r");
-  while (!feof(pf)) {
-    res.append(buffer, fread(&buffer, sizeof(char), BUFSIZ, pf));
-  }
-  _pclose(pf);
-  return res;
-}
-
-void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
-  SHELLEXECUTEINFOW lpExecInfo;
-  tstring tstr_operation = widen(operation);
-  tstring tstr_fname = widen(fname);
-  tstring tstr_args = widen(args);
-  lpExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
-  lpExecInfo.lpFile = tstr_fname.c_str();
-  lpExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
-  lpExecInfo.hwnd = enigma::hWnd;
-  lpExecInfo.lpVerb = tstr_operation.c_str();
-  lpExecInfo.lpParameters = tstr_args.c_str();
-  WCHAR cDir[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, cDir);
-  lpExecInfo.lpDirectory = cDir;
-  lpExecInfo.nShow = SW_SHOW;
-  lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;  //WINSHELLAPI BOOL WINAPI result;
-  ShellExecuteExW(&lpExecInfo);
-
-  //wait until a file is finished printing
-  if (wait && lpExecInfo.hProcess != NULL) {
-    ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
-    ::CloseHandle(lpExecInfo.hProcess);
-  }
-}
-
-void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
-
 // converts a relative path to absolute if the path exists
 std::string filename_absolute(std::string fname) {
   if (string_replace_all(fname, " ", "") == "") fname = ".";
@@ -492,12 +434,6 @@ bool environment_set_variable(const std::string &name, const std::string &value)
   tstring tstr_value = widen(value);
   if (value == "") return (SetEnvironmentVariableW(tstr_name.c_str(), NULL) != 0);
   return (SetEnvironmentVariableW(tstr_name.c_str(), tstr_value.c_str()) != 0);
-}
-
-void action_webpage(const std::string &url) {
-  tstring tstr_url = widen(url);
-  tstring tstr_open = widen("open");
-  ShellExecuteW(NULL, tstr_open.c_str(), tstr_url.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
 }  // namespace enigma_user

@@ -30,6 +30,7 @@ public:
   opt::variable_value GetOption(std::string option);
   bool HasOption(std::string option);
   const APIMap& GetAPI() const;
+  const char* EnigmaRoot() { return _enigmaRoot.c_str(); }
 
 private:
   int find_ey(const char* dir);
@@ -54,6 +55,7 @@ private:
 
   bool _readArgsFail;
   std::string _extensions;
+  std::string _enigmaRoot;
 
   opt::variables_map _rawArgs;
   opt::options_description _desc;

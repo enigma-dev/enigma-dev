@@ -23,7 +23,6 @@
 #include <string>
 
 #ifdef DEBUG_MODE
-#include "Universal_System/var4.h"
 #include "Universal_System/Resources/resource_data.h"
 #include "Universal_System/Object_Tiers/object.h"
 #include "Universal_System/debugscope.h"
@@ -54,7 +53,7 @@ extern "C" int cocoa_get_color(int defcol, const char *title);
 static string dialog_caption;
 static string error_caption;
 
-static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
   #ifdef DEBUG_MODE
   errortext += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
@@ -74,16 +73,6 @@ string widget_get_system() {
 
 void widget_set_system(string sys) {
   // place holder
-}
-
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
-  if (type != M_INFO && type != M_WARNING) {
-    show_debug_message_helper(errortext, type);
-  } else {
-    #ifndef DEBUG_MODE
-    fputs(errortext.c_str(), stderr);
-    #endif
-  }
 }
 
 void show_info(string text, int bgcolor, int left, int top, int width, int height,
@@ -127,15 +116,17 @@ string get_password(string message, string def) {
   return cocoa_password_box(message.c_str(), def.c_str(), dialog_caption.c_str());
 }
 
-double get_integer(string message, double def) {
-  string integer = remove_trailing_zeros(def);
+double get_integer(string message, var def) {
+  double val = (strtod(def.c_str(), NULL)) ? : (double)def;
+  string integer = remove_trailing_zeros(val);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
   string result = cocoa_input_box(message.c_str(), integer.c_str(), dialog_caption.c_str());
   return !result.empty() ? strtod(result.c_str(), NULL) : 0;
 }
 
-double get_passcode(string message, double def) {
-  string integer = remove_trailing_zeros(def);
+double get_passcode(string message, var def) {
+  double val = (strtod(def.c_str(), NULL)) ? : (double)def;
+  string integer = remove_trailing_zeros(val);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
   string result = cocoa_password_box(message.c_str(), integer.c_str(), dialog_caption.c_str());
   return !result.empty() ? strtod(result.c_str(), NULL) : 0;

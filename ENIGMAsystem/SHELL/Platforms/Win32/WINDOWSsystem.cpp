@@ -14,7 +14,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <wininet.h>
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"

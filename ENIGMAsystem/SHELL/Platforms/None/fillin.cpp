@@ -78,6 +78,8 @@ void os_powersave_enable(bool enable) {}
 int display_mouse_get_x() { return -1; }
 int display_mouse_get_y() { return -1; }
 void display_mouse_set(int x, int y) {}
+int display_get_x() { return 0; }
+int display_get_y() { return 0; }
 int display_get_width() { return 0; }
 int display_get_height() { return 0; }
 
@@ -114,7 +116,6 @@ int window_set_cursor(int c) {
   return 0;
 }
 
-void io_handle() {}
 void clipboard_set_text(string text) {}
 string clipboard_get_text() { return ""; }
 bool clipboard_has_text() { return false; }

@@ -19,7 +19,10 @@
 #include "CDfunctions.h"
 
 #include <stdio.h>
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <mmsystem.h>
 
 namespace enigma_user {

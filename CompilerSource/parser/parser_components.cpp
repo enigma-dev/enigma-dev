@@ -31,7 +31,7 @@
 #include <iostream>
 #include <cstdio>
 using namespace std;
-#include "general/darray.h"
+#include "darray.h"
 
 #include "general/parse_basics_old.h"
 #include "general/macro_integration.h"
@@ -987,15 +987,4 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
     }
   }
   return 0;
-}
-
-#include <stack>
-
-// Return whether or not the left hand side of a dot requires an ENIGMA access function
-bool parse_dot(string exp)
-{
-  enum { DT_BRACKET, DT_PAR, DT_LEVEL };
-  stack<int> dts;
-  int level = 0;
-  return !level;
 }

@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "makedir.h"
+#include "settings.h"
 
 #include "backend/GameData.h"
 #include "compiler/compile_common.h"
@@ -41,7 +41,7 @@ using namespace std;
 
 int lang_CPP::compile_writeFontInfo(const GameData &game)
 {
-  ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h").c_str(),ios_base::out);
+  ofstream wto((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h").u8string().c_str(),ios_base::out);
   wto << license
       << "#ifndef JUST_DEFINE_IT_RUN" << endl
       << "#undef INCLUDED_FROM_SHELLMAIN" << endl

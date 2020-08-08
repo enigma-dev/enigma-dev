@@ -35,6 +35,8 @@
 #include "Universal_System/image_formats.h"
 #include <iostream>
 
+#include "../../../../shared/fonts/fonts.cpp"
+
 using std::list;
 using std::string;
 using enigma::rect_packer::pvrect;
@@ -180,8 +182,8 @@ static pvrect get_image_bounds(unsigned char* pxdata, unsigned width, unsigned h
   return rect;
 }
 
-static SpriteFont font_sprite_helper(enigma::sprite* sprite, uint32_t first, bool prop, int sep) {
-  size_t glyphCount = sprite->subcount;
+static SpriteFont font_sprite_helper(const enigma::Sprite& sprite, uint32_t first, bool prop, int sep) {
+  size_t glyphCount = sprite.SubimageCount();
   
   RawFont rawFont;
   rawFont.ranges = { GlyphRange(first, first + glyphCount) };
@@ -192,7 +194,7 @@ static SpriteFont font_sprite_helper(enigma::sprite* sprite, uint32_t first, boo
   for (RawGlyph& g : rawFont.glyphs) {
     g.character = first + index;
     unsigned w, h;
-    g.pxdata = enigma::graphics_copy_texture_pixels(sprite->texturearray[index], &w, &h);
+    g.pxdata = enigma::graphics_copy_texture_pixels(sprite.GetSubimage(index).textureID, &w, &h);
     g.horiBearingX = sep;
     g.horiBearingY = sep;
     (prop) ? g.dimensions = pvrect(0, 0, w, h, -1) : g.dimensions = get_image_bounds(g.pxdata, w, h, true);
@@ -208,18 +210,16 @@ static SpriteFont font_sprite_helper(enigma::sprite* sprite, uint32_t first, boo
   return font;
 }
 
-bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep)
+bool font_replace_sprite(int sprid1, int sprid2, uint32_t first, bool prop, int sep)
 {
-  enigma::sprite *sspr = enigma::spritestructarray[spr];
-  if (!sspr) return false;
-  return (sprite_fonts.replace(ind, font_sprite_helper(sspr, first, prop, sep)) > 0);
+  const enigma::Sprite& spr = enigma::sprites.get(sprid2);
+  return (sprite_fonts.replace(sprid1, font_sprite_helper(spr, first, prop, sep)) > 0);
 }
 
-int font_add_sprite(int spr, uint32_t first, bool prop, int sep)
+int font_add_sprite(int sprid, uint32_t first, bool prop, int sep)
 {
-  enigma::sprite *sspr = enigma::spritestructarray[spr];
-  if (!sspr) return -1;
-  return (sprite_fonts.add(font_sprite_helper(sspr, first, prop, sep)) > 0);
+  const enigma::Sprite& spr = enigma::sprites.get(sprid);
+  return (sprite_fonts.add(font_sprite_helper(spr, first, prop, sep)) > 0);
 }
 
 float font_get_glyph_texture_left(int fnt, uint32_t character) {

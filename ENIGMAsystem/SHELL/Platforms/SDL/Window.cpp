@@ -2,6 +2,7 @@
 #include "Event.h"
 #include "Joystick.h"
 #include "Gamepad.h"
+#include "Icon.h"
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
@@ -46,7 +47,9 @@ bool initGameWindow() {
   if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
   init_sdl_window_bridge_attributes();
   windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
-  return (windowHandle != nullptr);
+  bool notnull = (windowHandle != nullptr);
+  if (notnull) window_init();
+  return notnull;
 }
 
 namespace keyboard {
@@ -132,10 +135,28 @@ int handleEvents() { return eventHandler.processEvents(); }
 
 namespace enigma_user {
 
-void io_handle() {
-  enigma::input_push();
-  if (enigma::handleEvents() != 0) exit(0);
-  enigma::update_mouse_variables();
+static int currentIconIndex = -1;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::SetIconFromSprite(windowHandle, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
 }
 
 int window_get_visible() {
@@ -268,9 +289,9 @@ bool window_get_fullscreen() {
 
 void window_set_fullscreen(bool fullscreen) {
   if (fullscreen) {
-    int r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN);
+    int r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
-    if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN);
 
     if (r != 0) DEBUG_MESSAGE(std::string("Could not set window to fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   } else {
@@ -297,21 +318,37 @@ int window_set_cursor(int cursorID) {
   return 0;
 }
 
+int display_get_x() {
+  SDL_Rect r;
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  return (SDL_GetDisplayBounds(d, &r) == 0) ? r.x : 0;
+}
+
+int display_get_y() {;
+  SDL_Rect r;
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  return (SDL_GetDisplayBounds(d, &r) == 0) ? r.y : 0;
+}
+
 int display_get_width() {
   SDL_DisplayMode DM;
-  SDL_GetCurrentDisplayMode(0, &DM);
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  SDL_GetCurrentDisplayMode(d, &DM);
   return DM.w;
 }
 
 int display_get_height() {
   SDL_DisplayMode DM;
-  SDL_GetCurrentDisplayMode(0, &DM);
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  SDL_GetCurrentDisplayMode(d, &DM);
   return DM.h;
 }
 
 bool keyboard_check_direct(int key) {
   const Uint8* state = SDL_GetKeyboardState(nullptr);
-  return state[enigma::keyboard::inverse_keymap[key]];
+  const SDL_Keycode keycode = enigma::keyboard::inverse_keymap[key];
+  const SDL_Scancode scancode = SDL_GetScancodeFromKey(keycode);
+  return state[scancode];
 }
 
 void keyboard_key_press(int key) {

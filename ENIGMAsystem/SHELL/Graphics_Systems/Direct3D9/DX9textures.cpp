@@ -101,11 +101,11 @@ unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullhe
 }
 
 LPDIRECT3DTEXTURE9 get_texture_peer(int texid) {
-  return (size_t(texid) >= textures.size() || texid < 0) ? NULL : ((DX9Texture*)textures[texid])->peer;
+  return (size_t(texid) >= textures.size() || texid < 0) ? NULL : static_cast<DX9Texture*>(textures[texid].get())->peer;
 }
 
 void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, int fullwidth, int fullheight, unsigned char* pxdata) {
-  auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
+  DX9Texture* d3dtex = static_cast<DX9Texture*>(enigma::textures[texture].get());
   auto peer = d3dtex->peer;
 
   LPDIRECT3DSURFACE9 pBuffer,pRamBuffer=nullptr;
@@ -142,24 +142,26 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
 
   if (mipmap) texture->GenerateMipSubLevels();
 
-  DX9Texture* textureStruct = new DX9Texture(texture);
+  const int id = textures.size();
+  textures.push_back(std::make_unique<DX9Texture>(texture));
+  auto& textureStruct = textures.back();
   textureStruct->width = width;
   textureStruct->height = height;
   textureStruct->fullwidth = fullwidth;
   textureStruct->fullheight = fullheight;
-  const int id = textures.size();
-  textures.push_back(textureStruct);
   if (pxdata != nullptr) graphics_push_texture_pixels(id, 0, 0, width, height, fullwidth, fullheight, (unsigned char*)pxdata);
   return id;
 }
 
 void graphics_delete_texture(int texid) {
-  const auto texture = (DX9Texture*)textures[texid];
-  texture->peer->Release(), texture->peer = NULL;
+  if (texid >= 0) {
+    DX9Texture* texture = static_cast<DX9Texture*>(enigma::textures[texid].get());
+    texture->peer->Release(), texture->peer = NULL;
+  }
 }
 
 unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {
-  auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
+  DX9Texture* d3dtex = static_cast<DX9Texture*>(enigma::textures[texture].get());
   auto peer = d3dtex->peer;
   LPDIRECT3DSURFACE9 pBuffer;
   peer->GetSurfaceLevel(0,&pBuffer);
@@ -167,7 +169,7 @@ unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width
 }
 
 unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {
-  auto d3dtex = ((DX9Texture*)enigma::textures[texture]);
+  DX9Texture* d3dtex = static_cast<DX9Texture*>(enigma::textures[texture].get());
   const unsigned fw = d3dtex->fullwidth, fh = d3dtex->fullheight;
   *fullwidth = fw, *fullheight = fh;
   return graphics_copy_texture_pixels(texture, 0, 0, fw, fh);

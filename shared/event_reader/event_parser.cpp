@@ -1,4 +1,4 @@
-/** Copyright (C) 2008 Josh Ventura
+/** Copyright (C) 2008-2018 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,612 +16,495 @@
 **/
 
 
+#include "event_parser.h"
+
+#include <strings_util.h>
+
+#include <ProtoYaml/proto-yaml.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
 #include <map>
-using namespace std;
-#define tostring to_string
 
-#include "general/darray.h"
-#include "general/parse_basics_old.h"
-inline bool is_letterh(char x) { return is_letter(x) or x == '-' or x == ' '; }
+// Note: there are two kinds of legacy in this file.
+//
+// 1. Legacy event identifiers, from the days of yore. These will forever exist
+//    in the wild, and so we can expect to keep the logic to *read* these.
+//
+// 2. Legacy code in ENIGMA. As of this writing, the compiler still maintains
+//    a static copy of event data, rather than instantiating event information
+//    in a compilation context. Code to handle this will be deleted in time.
 
-#include "event_parser.h"
+// Good luck.
 
-inline bool lc(const string &s, const string &ss)
-{
-  const size_t l = s.length();
-  if (l != ss.length())
-    return false;
-  for (size_t i=0; i<l; i++)
-    if (  (s[i]>='A'&&s[i]<='Z'?s[i]-('A'-'a'):s[i])  !=  (ss[i]>='A'&&ss[i]<='Z'?ss[i]-('A'-'a'):ss[i])  )
-      return false;
+constexpr int kMinInternalID = 1000;
+constexpr int kParameterizedSubId = -1;
+
+// Checks if the given string is an "Expression," which is defined, for the
+// purpose of the events file, as anything not starting with a brace.
+static bool IsExpression(const std::string &str) {
+  return !str.empty() && str[0] != '{';
+}
+
+// -----------------------------------------------------------------------------
+// Safety mechanisms -----------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+namespace cb = buffers::config;
+using cb::EventFile;
+
+static cb::EventDescriptor MakeSentinelDescriptor() {
+  cb::EventDescriptor res;
+  res.set_id("InvalidEvent");
+  res.set_type(cb::EventDescriptor::TRIGGER_ONCE);
+  return res;
+}
+static cb::EventDescriptor kSentinelDescriptor = MakeSentinelDescriptor();
+static EventDescriptor kSentinelEventDesc(&kSentinelDescriptor, -1);
+static Event kSentinelEvent(kSentinelEventDesc);
+
+bool EventDescriptor::IsValid() const { return event != &kSentinelDescriptor; }
+
+
+// End safety mechanisms -------------------------------------------------------
+// -----------------------------------------------------------------------------
+// Begin external parsing API --------------------------------------------------
+
+static EventData *legacy_events = nullptr;
+
+EventFile ParseEventFile(std::istream &file) {
+  EventFile res = egm::ReadYamlAs<EventFile>(file);
+  // This is a nasty hack to keep the static data current while new systems
+  // migrate to use a proper EventData constructor. I expect a CompileContext
+  // class to come to be, and to contain an EventData, parsed from either the
+  // default events.ey or an events.ey contained within the game being built.
+  delete legacy_events;
+  legacy_events = new EventData(EventFile(res));
+  return res;
+}
+EventFile ParseEventFile(const std::string &filename) {
+  EventFile res =  egm::ReadYamlFileAs<EventFile>(filename);
+  delete legacy_events;
+  legacy_events = new EventData(EventFile(res));
+  return res;
+}
+
+void event_parse_resourcefile() {
+  // The side-effects of these routines will take care of the rest.
+  ParseEventFile("events.ey");
+}
+
+
+// End initialization calls ----------------------------------------------------
+// -----------------------------------------------------------------------------
+// Begin class method implementations ------------------------------------------
+
+Event EventData::DecodeEventString(const std::string &evstring) const {
+  std::string id;
+  std::vector<std::string> args;
+  size_t at = 0, lbracket;
+  while ((lbracket = evstring.find_first_of('[', at)) != std::string::npos) {
+    id += evstring.substr(at, lbracket - at);
+    size_t rbracket = evstring.find_first_of(']', ++lbracket);
+    if (rbracket != std::string::npos) {
+      args.push_back(evstring.substr(lbracket, rbracket - lbracket));
+      at = rbracket + 1;
+    } else {
+      at = evstring.length();
+      break;
+    }
+  }
+  id += evstring.substr(at);
+  return get_event(id, args);
+}
+
+Event EventData::get_event(const std::string &id,
+                           const std::vector<std::string> &args) const {
+  auto evi = event_index_.find(ToLower(id));
+  if (evi == event_index_.end() || !evi->second) {
+    std::cerr << "EVENT ERROR: Event `" << id << "` is not known to the system\n";
+    return Event(kSentinelEvent);
+  }
+
+  const EventDescriptor &base_event = *evi->second;
+  Event res(base_event);
+  size_t correct_arg_count = base_event.event->parameters_size();
+  if (args.size() != correct_arg_count) {
+    std::cerr << "EVENT ERROR: Wrong number of arguments given for event " << id
+              << ": wanted " << correct_arg_count << ", got " << args.size()
+              << std::endl;
+  }
+  std::string defv = "0";
+  for (size_t argn = 0; argn < correct_arg_count; ++argn) {
+    const std::string &arg = argn < correct_arg_count ? args[argn] : defv;
+    const std::string &arg_kind = base_event.event->parameters(argn);
+    auto pv = parameter_ids_.find({arg_kind, ToLower(arg)});
+    if (pv == parameter_ids_.end()) {
+      // Assume that spelling == name (this is the case for resource names/ints)
+      res.arguments.emplace_back(arg, arg);
+    } else {
+      res.arguments.emplace_back(pv->second->id(), pv->second->spelling());
+    }
+  }
+  return res;
+}
+
+std::string Event::ParamSubst(const std::string &str) const {
+  std::string res;
+  size_t start = 0;
+  size_t pc = str.find_first_of('%');
+  if (pc == std::string::npos) return str;
+  while (pc != std::string::npos) {
+    if (++pc < str.length() && str[pc] >= '1' && str[pc] <= '9' &&
+        str[pc] <= '0' + (int) arguments.size()) {
+      int pnum = str[pc] - '1';
+      res += str.substr(start, pc - 1 - start);
+      res += arguments[pnum].spelling;
+      start = ++pc;
+    } else {
+      std::cerr << "EVENT ERROR: Ignoring junk parameter " << str[pc] << std::endl;
+    }
+    pc = str.find_first_of('%', pc);
+  }
+  res += str.substr(start);
+  return StrTrim(res);
+}
+
+EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
+  for (const auto &aliases : event_file_.aliases()) {
+    for (const buffers::config::ParameterAlias &alias : aliases.aliases()) {
+      parameter_ids_.insert({{aliases.id(), ToLower(alias.id())}, &alias});
+      parameter_vals_.insert({{aliases.id(), alias.value()}, &alias});
+    }
+  }
+  // Start numbering internal IDs in the new system from 1000, for good measure.
+  for (long i = 0; i < event_file_.events_size(); ++i) {
+    event_wrappers_.emplace_back(&event_file_.events(i), kMinInternalID + i);
+  }
+  for (const EventDescriptor &event_wrapper : event_wrappers_) {
+    const int iid = event_wrapper.internal_id;
+    const std::string evid = StripChar(event_wrapper.event->id(), '.');
+    if (!event_index_.insert({ToLower(evid), &event_wrapper}).second) {
+      std::cerr << "EVENT ERROR: Duplicate event ID " << evid << std::endl;
+    }
+    if (!event_wrapper.IsParameterized() &&  // Only insert non-parameterized events.
+        !event_iid_index_.insert({iid, &event_wrapper}).second) {
+      std::cerr << "EVENT ERROR: Duplicate event IID " << iid
+                << "; how did this even happen!?";
+    }
+  }
+
+  // Now that our index is built, we can populate the legacy maps.
+  for (const auto &mapping : event_file_.game_maker_event_mappings()) {
+    int main_id = mapping.id();
+    if (mapping.has_single()) {
+      Event cev = DecodeEventString(mapping.single());
+      cev.arguments.clear();
+      auto insert = compatability_mapping_.insert({{main_id, 0}, cev});
+      if (!insert.second) {
+        std::cerr << "EVENT ERROR: Duplicate event compatability id ("
+                  << main_id << ")\n";
+      }
+      hacky_reverse_mapping_[cev.internal_id].main_id = main_id;
+    } else if (mapping.has_parameterized()) {
+      Event cev = DecodeEventString(mapping.parameterized());
+      cev.arguments.clear();
+      auto insert =
+          compatability_mapping_.insert({{main_id, kParameterizedSubId}, cev});
+      if (!insert.second) {
+        std::cerr << "EVENT ERROR: Duplicate event compatability id ("
+                  << main_id << ")\n";
+      }
+      hacky_reverse_mapping_[cev.internal_id].main_id = main_id;
+    } else if (mapping.has_specialized()) {
+      for (const auto &ev_case : mapping.specialized().cases()) {
+        const int sub_id = ev_case.first;
+        Event cev = DecodeEventString(ev_case.second);
+        auto insert =
+            compatability_mapping_.insert({{main_id, ev_case.first}, cev});
+        if (!insert.second) {
+          std::cerr << "EVENT ERROR: Duplicate event compatability case ("
+                    << main_id << ", " << sub_id << ")\n";
+        }
+        SubEventCollection &sec = hacky_reverse_mapping_[cev.internal_id];
+        sec.main_id = main_id;
+        sec.subevents[cev] = sub_id;
+      }
+    }
+  }
+}
+
+const Event EventData::get_event(int mid, int sid) const {
+  // Check for a direct mapping (used for specialized ID pairs).
+  auto it = compatability_mapping_.find({mid, sid});
+  if (it != compatability_mapping_.end()) return it->second;
+
+  // Check for parameterized events.
+  it = compatability_mapping_.find({mid, kParameterizedSubId});
+  if (it == compatability_mapping_.end()) {
+    std::cerr << "EVENT ERROR: Legacy event (" << mid << ", " << sid
+              << ") is not known to the system. Using EGM event." << std::endl;
+    // Error case. Default to internal event ID. This will show up funny in the
+    // IDE, but at least the user's code will be intact.
+    auto res = event_iid_index_.find(mid);
+    if (res != event_iid_index_.end()) {
+    std::cerr << "EVENT ERROR: Event (" << mid << ", " << sid
+              << ") is not a known Legacy event nor EGM event." << std::endl;
+      return Event(*res->second);
+    }
+    return kSentinelEvent;
+  }
+
+  Event res = it->second;
+  std::string value, spelling;
+  const std::string &kind = res.ParameterKind(0);
+  auto pit = parameter_vals_.find({kind, sid});
+  if (pit != parameter_vals_.end()) {
+    value = pit->second->id();
+    spelling = pit->second->spelling();
+  } else {
+    if (kind != "object" && kind != "integer") {
+      std::cerr << "Failed to look up " << kind << " parameter " << sid << ".\n";
+    }
+    value = std::to_string(sid);
+    spelling = value;
+  }
+  res.arguments.emplace_back(value, spelling);
+  return res;
+}
+
+Event EventData::get_event(const buffers::resources::Object::EgmEvent &event) const {
+  return get_event(event.id(), {event.arguments().begin(),
+                                event.arguments().end()});
+}
+
+bool Event::IsComplete() const {
+  return arguments.size() == (unsigned) event->parameters_size();
+}
+bool EventDescriptor::IsParameterized() const {
+  return event->parameters_size();
+}
+bool EventDescriptor::IsStacked() const {
+  return event->type() == cb::EventDescriptor::STACKED;
+}
+
+std::string EventDescriptor::ExampleIDStrings() const {
+  Event example(*this);
+  for (const std::string &p : event->parameters()) {
+    example.arguments.push_back({p, p});
+  }
+  return example.IdString();
+}
+
+std::string EventDescriptor::HumanName() const {
+  return event->name();
+}
+std::string Event::HumanName() const {
+  return ParamSubst(event->name());
+}
+std::string EventDescriptor::BaseFunctionName() const {
+  return ToLower(StripChar(event->id(), '.'));
+}
+std::string EventDescriptor::LocalDeclarations() const {
+  return event->locals();
+}
+
+std::string EventDescriptor::DefaultCode() const {
+  return event->has_default_() ? event->default_() : event->constant();
+}
+std::string EventDescriptor::ConstantCode() const {
+  return event->constant();
+}
+std::string Event::PrefixCode() const {
+  return ParamSubst(event->prefix());
+}
+std::string Event::SuffixCode() const {
+  return ParamSubst(event->suffix());
+}
+
+
+bool EventDescriptor::HasSubCheckFunction() const {
+  return HasSubCheck() && !IsExpression(event->sub_check());
+}
+bool EventDescriptor::HasSubCheckExpression() const {
+  return HasSubCheck() && IsExpression(event->sub_check());
+}
+bool EventDescriptor::HasSuperCheckFunction() const {
+  return HasSuperCheck() && !IsExpression(event->super_check());
+}
+bool EventDescriptor::HasSuperCheckExpression() const {
+  return HasSuperCheck() && IsExpression(event->super_check());
+}
+
+std::string EventDescriptor::InsteadCode() const {
+  return event->instead();
+}
+
+
+std::string EventDescriptor::IteratorDeclareCode() const {
+  return event->iterator_declare();
+}
+std::string EventDescriptor::IteratorInitializeCode() const {
+  return event->iterator_initialize();
+}
+std::string EventDescriptor::IteratorRemoveCode() const {
+  return event->iterator_remove();
+}
+std::string EventDescriptor::IteratorDeleteCode() const {
+  return event->iterator_delete();
+}
+
+bool EventDescriptor::UsesEventLoop() const {
+  return event->type() != cb::EventDescriptor::TRIGGER_ONCE &&
+         event->type() != cb::EventDescriptor::TRIGGER_ALL;
+}
+bool EventDescriptor::RegistersIterator() const {
+  return event->type() != cb::EventDescriptor::TRIGGER_ONCE &&
+         event->type() != cb::EventDescriptor::INLINE;
+}
+
+std::string Event::SubCheckExpression() const {
+  return ParamSubst(event->sub_check());
+}
+std::string Event::SubCheckFunction() const {
+  if (HasSubCheckFunction()) return ParamSubst(event->sub_check());
+  return "{ return " + ParamSubst(FirstNotEmpty(event->sub_check(), "true"))
+                     + "; }";
+}
+std::string Event::SuperCheckFunction() const {
+  if (HasSuperCheckFunction()) return ParamSubst(event->super_check());
+  return "{ return " + ParamSubst(FirstNotEmpty(event->super_check(), "true"))
+                     + "; }";
+}
+std::string Event::SuperCheckExpression() const {
+  return ParamSubst(event->super_check());
+}
+
+std::string Event::TrueFunctionName() const {
+  std::string res;
+  std::string ntempl = event->id();
+  size_t arg = 0, at = 0, dot;
+  while (arg < arguments.size() &&
+         (dot = ntempl.find_first_of('.', at)) != std::string::npos) {
+    res += ToLower(ntempl.substr(at, dot - at));
+    res += "_" + arguments[arg++].name + "_";
+    at = dot + 1;
+  }
+  res += ToLower(ntempl.substr(at));
+  while (arg < arguments.size()) {
+    res += "_" + arguments[arg++].name;
+  }
+  return res;
+}
+std::string Event::IdString() const {
+  std::string res;
+  std::string ntempl = event->id();
+  size_t arg = 0, at = 0, dot;
+  while (arg < arguments.size() &&
+         (dot = ntempl.find_first_of('.', at)) != std::string::npos) {
+    res += ntempl.substr(at, dot - at);
+    res += "[" + arguments[arg++].name + "]";
+    at = dot + 1;
+  }
+  res += ntempl.substr(at);
+  while (arg < arguments.size()) {
+    res += "[" + arguments[arg++].name + "]";
+  }
+  return res;
+}
+
+bool Event::operator==(const Event &other) const {
+  if (internal_id != other.internal_id) return false;
+  if (arguments.size() != other.arguments.size()) return false;
+  for (size_t i = 0; i < arguments.size(); ++i) {
+    if (arguments[i].name != other.arguments[i].name) return false;
+  }
   return true;
 }
 
-const char *e_type_strs[] = {
-  "Inline",
-  "Stacked",
-  "Special",
-  "Spec-sys",
-  "System",
-  "None"
-};
-const char *p_type_strs[] = {
-  "Sprite",
-  "Sound",
-  "Background",
-  "Path",
-  "Script",
-  "Font",
-  "Timeline",
-  "Object",
-  "Room",
-  "Key"
-};
-
-event_info::event_info():               name(),  gmid(0), humanname(), par2type(p2t_error), mode(et_error), mmod(0), def(), cons(), super(), sub(), instead() { }
-event_info::event_info(string n,int i): name(n), gmid(i), humanname(), par2type(p2t_error), mode(et_error), mmod(0), def(), cons(), super(), sub(), instead() { }
-
-main_event_info::main_event_info(): name(), is_group(false), specs() { }
-
-varray<main_event_info> main_event_infos;
-typedef pair<int, int> evpair;
-vector<evpair> event_sequence;
-
-inline void event_add(int evid,event_info* last)
-{
-  int lid;
-  if (last->mode == et_special or last->mode == et_spec_sys or last->mmod)
-    lid = last->mmod;
-  else
-    lid = main_event_infos[evid].specs.rbegin() != main_event_infos[evid].specs.rend() ? main_event_infos[evid].specs.rbegin()->first + 1 : 0;
-  if (lid) main_event_infos[evid].is_group = true;
-  main_event_infos[evid].specs[lid] = last;
-  event_sequence.push_back(evpair(evid,lid));
-}
-
-int event_parse_resourcefile()
-{
-  FILE* events = fopen("events.res","rt");
-  if (!events) {
-    puts("events.res: File not found");
-    return -1;
+bool Event::operator<(const Event &other) const {
+  if (internal_id != other.internal_id) return internal_id < other.internal_id;
+  if (arguments.size() != other.arguments.size())
+    return arguments.size() < other.arguments.size();
+  for (size_t i = 0; i < arguments.size(); ++i) {
+    if (arguments[i].name != other.arguments[i].name)
+      return arguments[i].name < other.arguments[i].name;
   }
+  return false;
+}
 
-  char line[4096];
+bool EventGroupKey::operator<(const Event &other) const {
+  if (internal_id != other.internal_id) return internal_id < other.internal_id;
 
-  // Parse modes
-  int evid = -1;            // If we are in an event, this is its ID. Otherwise, it must be -1.
-  event_info *last = NULL; // What we're dealing with thus far
-  int linenum = 0;   // What line we're on, for error reporting
-  int braces = 0;   // Number of curly braces we are in
-  int iq = 0;      // In a quote in an expression
+  // This is the operative difference. We treat stacked events as the same event
+  // group, even if the parameters are different.
+  if (IsStacked()) return false;
 
-  enum {
-    exp_default, exp_constant, exp_sub, exp_super, exp_instead, exp_prefix, exp_suffix,
-    exp_locals, exp_iterdec, exp_iterinit, exp_iterrm, exp_iterdel
-  } last_exp = exp_default; // Whether last EXPRESSION was sub or super
-
-  while (!feof(events) and fgets(line,4096,events))
-  {
-    linenum++;
-    bool lw = false;
-    int pos = 0;
-
-    if (braces) // We're still reading inside {}
-    {
-      int i;
-      for (i = 0; line[i]; i++)
-        if (!iq) { braces += (line[i] == '{') - (line[i] == '}');
-          iq = (line[i] == '"') + ((line[i] == '\'') << 1);
-        } else { iq = (iq == 1 and line[i] != '"') + ((iq == 2 and line[i] != '\'') << 1);
-          i += (line[i] == '\\');
-        }
-      switch (last_exp) {
-        case exp_default:  last->def      += string(line,i); continue;
-        case exp_constant: last->cons     += string(line,i); continue;
-        case exp_sub:      last->super    += string(line,i); continue;
-        case exp_super:    last->sub      += string(line,i); continue;
-        case exp_instead:  last->instead  += string(line,i); continue;
-        case exp_prefix:   last->prefix   += string(line,i); continue;
-        case exp_suffix:   last->suffix   += string(line,i); continue;
-        case exp_locals:   last->locals   += string(line,i); continue;
-        case exp_iterdec:  last->iterdec  += string(line,i); continue;
-        case exp_iterdel:  last->iterdel  += string(line,i); continue;
-        case exp_iterinit: last->iterinit += string(line,i); continue;
-        case exp_iterrm:   last->iterrm   += string(line,i); continue;
-        default: puts("THIS ERROR IS IMPOSSIBLE"); return 2;
-      }
-    }
-
-    // Skip to end of leading whitespace
-    // Lead whitespace means we're adding attributes
-    if (is_useless(line[pos])) {
-      lw = true;
-      while (is_useless(line[++pos]));
-    }
-
-    if (line[pos] == '#' or !line[pos])
-      continue;
-
-    // If we're not adding to an event yet, error.
-    if (lw and evid == -1) {
-      printf("Error on line %d: No event name declared to which attributes should be added.\n",linenum);
-      return 1;
-    }
-
-    // Adding an attribute to the current event, we hope
-    char* nbegin = line + pos;
-    if (!is_letter(*nbegin)) {
-      printf("Error on line %d: Expected attribute name.\n",linenum);
-      return 1;
-    }
-
-    // Find the end of the word
-    if(lw) while (is_letterh(line[++pos]));
-    else   while (is_letter (line[++pos]));
-    if (line[pos] != ':') {
-      printf("Error on line %d: Expected colon following attribute name.\n",linenum);
-      return 1;
-    }
-
-    line[pos] = 0;
-    string str = nbegin;
-    line[pos] = ':';
-
-    //Skip whitespace after :
-    while (is_useless(line[++pos]));
-
-    if (lw) // If the leading character was white
-    {
-      char *begin = line + pos;
-      while (line[pos] and line[pos] != '#') pos++;
-      while (is_useless(line[--pos])); pos++;
-
-      string v(begin,line+pos-begin > 0 ? line+pos-begin : 0);
-
-      if (lc(str,"Mode"))
-      {
-        for (int i=0; i != et_error; i++)
-          if (lc(v,e_type_strs[i]))
-            last->mode = e_type(i);
-        if (last->mode == et_error) {
-          printf("Error on line %d: Unrecognized mode `%s`.\n",linenum,v.c_str());
-          return 1;
-        }
-      }
-
-      else if (lc(str,"Group"))
-        main_event_infos[last->gmid].name = v;
-      else if (lc(str,"Name"))
-        last->humanname = v;
-      else if (lc(str,"Type"))
-      {
-        for (int i=0; i != p2t_error; i++)
-          if (lc(v,p_type_strs[i]))
-            last->par2type = p_type(i);
-        if (last->par2type == p2t_error) {
-          printf("Error on line %d: Unrecognized parameter type `%s`.\n",linenum,v.c_str());
-          return 1;
-        }
-      }
-
-      else if (lc(str,"Default")){
-        last->def = v, last_exp = exp_default;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Constant")){
-        last->cons = v, last_exp = exp_constant;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Sub check")) {
-        last->sub = v, last_exp = exp_sub;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Super check")) {
-        last->super = v, last_exp = exp_super;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Prefix")) {
-        last->prefix = v, last_exp = exp_prefix;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Suffix")) {
-        last->suffix= v, last_exp = exp_suffix;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Instead")) {
-        last->instead = v, last_exp = exp_instead;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Locals")) {
-        last->locals = v, last_exp = exp_locals;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Iterator-declare")) {
-        last->iterdec = v, last_exp = exp_iterdec;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Iterator-init") or lc(str,"Iterator-initialize")) {
-        last->iterinit = v, last_exp = exp_iterinit;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Iterator-remove")) {
-        last->iterrm = v, last_exp = exp_iterrm;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Iterator-delete")) {
-        last->iterdel = v, last_exp = exp_iterdel;
-        goto EXPRESSION;
-      }
-      else if (lc(str,"Case"))
-      {
-        if (last->mode != et_special and last->mode != et_spec_sys) {
-          printf("Error on line %d: Conditional attribute `case` incompatible with mode `%s`.\n",linenum,e_type_strs[last->mode]);
-          return 1;
-        } last->mmod = atol(v.c_str());
-      }
-      else {
-        printf("Warning, line %d: Ignoring unknown attribute `%s`.\n",linenum,str.c_str());
-      }
-
-      continue;
-      EXPRESSION:
-        if (v[0] == '{')
-        {
-          braces = 1;
-          int iq = 0;
-          for (size_t i=1; i<v.length(); i++)
-            if (!iq) { braces += (v[i] == '{') - (v[i] == '}');
-              iq = (v[i] == '"') + ((v[i] == '\'') << 1);
-            } else { iq = (iq == 1 and v[i] != '"') + ((iq == 2 and v[i] != '\'') << 1);
-              i += (v[i] == '\\');
-            }
-        }
-      continue;
-    }
-    else
-    {
-      // This is the declaration of a new event.
-      // So far we have "eventname: "; we now expect an integer
-
-      // First, take care of the old event
-      if (last and evid != -1)
-        event_add(evid,last);
-
-      char *num = line + pos;
-
-      if (!is_digit(line[pos])) {
-        printf("Error on line %d: Expected integer ID following colon.\n",linenum);
-        return 1;
-      }
-
-      while (is_digit(line[++pos]));
-
-      if (!is_useless(line[pos]) and line[pos] != '#' and line[pos]) {
-        printf("Error on line %d: Expected end of line following integer.\n",linenum);
-        return 1;
-      }
-
-      line[pos] = 0;
-      evid = atol(num);
-      last = new event_info(str,evid);
-    }
+  if (arguments.size() != other.arguments.size())
+    return arguments.size() < other.arguments.size();
+  for (size_t i = 0; i < arguments.size(); ++i) {
+    if (arguments[i].name != other.arguments[i].name)
+      return arguments[i].name < other.arguments[i].name;
   }
+  return false;
+}
 
-  if (last and evid != -1)
-    event_add(evid,last);
 
-  for (size_t i=0; i<main_event_infos.size; i++)
-  {
-    for (main_event_info::iter ii = main_event_infos[i].specs.begin(); ii != main_event_infos[i].specs.end(); ii++)
-      if (ii->second->humanname == "")
-        ii->second->humanname = ii->second->name;
+// -----------------------------------------------------------------------------
+// Legacy method implementations -----------------------------------------------
+// -----------------------------------------------------------------------------
 
-    main_event_info::iter ii = main_event_infos[i].specs.begin();
-    if (main_event_infos[i].name == "" and ii != main_event_infos[i].specs.end())
-      main_event_infos[i].name = main_event_infos[i].specs[0]->humanname;
+LegacyEventPair EventData::reverse_get_event(const EventDescriptor &ev) const {
+  auto it = hacky_reverse_mapping_.find(ev.internal_id);
+  if (it == hacky_reverse_mapping_.end()) {
+    std::cerr << "EVENT WARNING: Event " << ev.internal_id
+              << " (" << ev.HumanName() << ") not found; using own ID\n";
+    return {ev.internal_id, 0};
   }
-
-  return 0;
-}
-
-string format_lookup(int id, p_type t)
-{
-  switch (t)
-  {
-    case p2t_sprite:     return "spr_" + tostring(id);
-    case p2t_sound:      return "snd_" + tostring(id);
-    case p2t_background: return "bk_" + tostring(id);
-    case p2t_path:       return "pth_" + tostring(id);
-    case p2t_script:     return "scr_" + tostring(id);
-    case p2t_font:       return "fnt_" + tostring(id);
-    case p2t_timeline:   return "tl_" + tostring(id);
-    case p2t_object:     return "obj_" + tostring(id);
-    case p2t_room:       return "rm_" + tostring(id);
-    case p2t_key:        return "key" + tostring(id);
-    case p2t_error:      return "...";
+  const SubEventCollection &amap = it->second;
+  auto sit = amap.subevents.find(Event(ev));
+  if (sit != amap.subevents.end()) {
+    return {amap.main_id, sit->second};
   }
-  return tostring(id);
-}
-string format_lookup_econstant(int id, p_type t)
-{
-  switch (t)
-  {
-    case p2t_sprite:     return tostring(id);
-    case p2t_sound:      return tostring(id);
-    case p2t_background: return tostring(id);
-    case p2t_path:       return tostring(id);
-    case p2t_script:     return tostring(id);
-    case p2t_font:       return tostring(id);
-    case p2t_timeline:   return tostring(id);
-    case p2t_object:     return tostring(id);
-    case p2t_room:       return tostring(id);
-    case p2t_key:        return tostring(id);
-    case p2t_error:      return tostring(id);
+  if (!amap.subevents.empty() || !ev.event->parameters().empty()) {
+    std::cerr <<  "EVENT ERROR: Event " << ev.internal_id
+              << " (" << ev.HumanName()
+              << ") cannot be looked up in the compatibility map\n";
   }
-  return tostring(id);
+  return {amap.main_id, 0};
 }
 
-inline string autoparam(string x,string y)
-{
-  const size_t p = x.find("%1");
-  if (p != string::npos) return x.replace(p,2,y);
-  return x;
-}
-
-// Query for a name suitable for use as
-// an identifier. No spaces or specials.
-string event_get_function_name(int mid, int id)
-{
-  main_event_info &mei = main_event_infos[mid];
-  if (mei.is_group or mei.specs[0]->mode != et_stacked) {
-    main_event_info::iter i = main_event_infos[mid].specs.find(id);
-    return i != main_event_infos[mid].specs.end() ? i->second->name : "undefinedEventERROR";
+// Look up a legacy ID pair for an event.
+LegacyEventPair EventData::reverse_get_event(const Event &ev) const {
+  auto it = hacky_reverse_mapping_.find(ev.internal_id);
+  if (it == hacky_reverse_mapping_.end()) {
+    std::cerr << "EVENT ERROR: Event " << ev.internal_id
+              << " (" << ev.HumanName() << ") not found; using own ID\n";
+    return {ev.internal_id, 0};
   }
-  string buf = mei.specs[0]->name;
-  size_t pp = buf.find("%1");
-  if (pp != string::npos)
-    buf.replace(pp,2,format_lookup(id, mei.specs[0]->par2type));
-  else
-    buf += "_" + tostring(id);
-  return buf;
-}
-
-string event_stacked_get_root_name(int mid) {
-  main_event_info &mei = main_event_infos[mid];
-  return autoparam(mei.specs[0]->name,"stackroot");
-}
-
-// Fetch a user-friendly name for the event
-// with the given credentials.
-string event_get_human_name(int mid, int id)
-{
-  main_event_info &mei = main_event_infos[mid];
-  if (mei.is_group) {
-    char buf[64];
-    main_event_info::iter i = main_event_infos[mid].specs.find(id);
-    return i != main_event_infos[mid].specs.end() ? i->second->humanname : (sprintf(buf,"Undefined or Unsupported (%d,%d)",mid,id),buf);
+  const SubEventCollection &amap = it->second;
+  auto sit = amap.subevents.find(ev);
+  if (sit != amap.subevents.end()) {
+    return {amap.main_id, sit->second};
   }
-  string buf = mei.specs[0]->humanname;
-  size_t pp = buf.find("%1");
-  if (pp != string::npos)
-    buf.replace(pp,2,format_lookup(id, mei.specs[0]->par2type));
-  return buf;
-}
-string event_get_human_name_min(int mid, int id)
-{
-  main_event_info &mei = main_event_infos[mid];
-  if (mei.is_group) {
-    char buf[64];
-    main_event_info::iter i = main_event_infos[mid].specs.find(id);
-    return i != main_event_infos[mid].specs.end() ? i->second->humanname : (sprintf(buf,"Undefined or Unsupported (%d,%d)",mid,id),buf);
+  if (ev.arguments.empty() || ev.event->parameters().empty()) {
+    return {amap.main_id, 0};
   }
-  if (mei.specs[0]->mode == et_stacked)
-    return mei.name;
-  string buf = mei.specs[0]->humanname;
-  size_t pp = buf.find("%1");
-  if (pp != string::npos)
-    buf.replace(pp,2,format_lookup(id, mei.specs[0]->par2type));
-  return buf;
-}
-
-// Used by the rest of these functions
-event_info *event_access(int mid, int id)
-{
-  main_event_info &mei = main_event_infos[mid];
-  return (mei.is_group) ? mei.specs[id] : mei.specs[0];
-}
-
-// Test whether there is code that will remain
-// active if a user has not declared this event.
-bool event_has_default_code(int mid, int id) {
-  return event_access(mid,id)->def != "" or event_access(mid,id)->cons != "";
-}
-
-string event_get_default_code(int mid, int id) {
-  return event_access(mid,id)->def + event_access(mid,id)->cons;
-}
-
-
-// Test whether there is code that will remain
-// active whether or not a user has declared this event.
-bool event_has_const_code(int mid, int id) {
-  return event_access(mid,id)->cons != "";
-}
-
-string event_get_const_code(int mid, int id) {
-  return event_access(mid,id)->cons;
-}
-
-// Some events have special behavior as placeholders, instead of simple iteration.
-// These two functions will test for and return such.
-
-bool event_has_instead(int mid, int id) {
-  return event_access(mid,id)->instead != "";
-}
-
-string event_get_instead(int mid, int id) {
-  return event_access(mid,id)->instead;
-}
-
-
-
-
-
-bool event_has_suffix_code(int mid, int id) {
-  return event_access(mid,id)->suffix != "";
-}
-
-string event_get_suffix_code(int mid, int id) {
-  return event_access(mid,id)->suffix;
-}
-
-
-// The rest of these functions use this
-string evres_code_substitute(string code, int sid, p_type t)
-{
-  for (size_t i = code.find("%1"); i != string::npos; i = code.find("%1"))
-    code.replace(i, 2, format_lookup_econstant(sid, t));
-  return code;
-}
-
-// Some events have special behavior as placeholders, instead of simple iteration.
-// These two functions will test for and return such.
-
-bool event_has_prefix_code(int mid, int id) {
-  return event_access(mid,id)->prefix != "";
-}
-string event_get_prefix_code(int mid, int id) {
-    event_info* ei = event_access(mid,id);
-    const string res = evres_code_substitute(ei->prefix, id, ei->par2type);
-  return res;//event_access(mid,id)->prefix; //TGMG edit
-}
-
-// Many events check things before executing, some before starting the loop. Deal with them.
-
-bool event_has_super_check(int mid, int id) {
-  return event_access(mid,id)->super != "";
-}
-
-bool event_has_sub_check(int mid, int id) {
-  return event_access(mid,id)->sub != "";
-}
-
-string event_get_super_check_condition(int mid, int id) {
-  event_info* ei = event_access(mid,id);
-  return evres_code_substitute(ei->super, id, ei->par2type);
-}
-
-string event_get_super_check_function(int mid, int id) {
-  event_info *e = event_access(mid,id);
-  return (e->super != "" and e->super[0] == '{') ? "static inline bool supercheck_" + e->name + "() " + e->super + "\n\n" : "";
-}
-
-string event_get_sub_check_condition(int mid, int id) {
-  event_info* ei = event_access(mid,id);
-  const string res = evres_code_substitute(ei->sub, id, ei->par2type);
-  return res[0] == '{' ? res : "return (" + res + ");";
-}
-
-// Does this event belong on the list of events to execute?
-bool event_execution_uses_default(int mid, int id) {
-  event_info *e = event_access(mid,id);
-  return e->mode == et_inline or e->mode == et_special or e->mode == et_stacked;
-}
-
-// Clear all data from previous parses, save
-// main events, which can just be overwritten.
-void event_info_clear()
-{
-  for (unsigned i=0; i<main_event_infos.size; i++)
-    main_event_infos[i].specs.clear();
-  event_sequence.clear();
-}
-
-bool event_is_instance(int mid, int id) { // Returns if the event with the given ID pair is an instance of a stacked event
-  main_event_info &mei = main_event_infos[mid];
-  return !mei.is_group and mei.specs[0]->mode == et_stacked;
-}
-
-string event_forge_sequence_code(int mid, int id, string preferred_name)
-{
-  string base_indent = string(4, ' ');
-  event_info *const ev = event_access(mid,id);
-  if (ev->instead != "")
-  {
-    return base_indent + ev->instead + base_indent + '\n';
+  if (!amap.subevents.empty() || ev.arguments.size() != 1) {
+    std::cerr <<  "EVENT ERROR: Event " << ev.internal_id
+              << " (" << ev.HumanName() << ") missing from subevent map\n";
   }
-  else
-    if (event_execution_uses_default(mid,id))
-    {
-      string ret = "";
-      bool perfsubcheck = event_has_sub_check(mid, id) && !event_is_instance(mid, id);
-      if (event_has_super_check(mid,id) and !event_is_instance(mid,id)) {
-        ret =        base_indent + "if (" + event_get_super_check_condition(mid,id) + ")\n" +
-                     base_indent + "  for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
-        if (perfsubcheck) { ret += "    if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "_subcheck()) {\n"; }
-        ret +=       base_indent + "      ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
-        if (perfsubcheck) { ret += "    }\n"; }
-        ret +=       base_indent + "    if (enigma::room_switching_id != -1) goto after_events;\n" +
-                     base_indent + "  }\n";
-      } else {
-         ret =  base_indent + "for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
-         if (perfsubcheck) { ret += "    if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "_subcheck()) {\n"; }
-         ret += base_indent + "  ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
-         if (perfsubcheck) { ret += "    }\n"; }
-         ret += base_indent + "  if (enigma::room_switching_id != -1) goto after_events;\n" +
-                base_indent + "}\n";
-      }
-      return ret;
-    }
-  return "";
-}
-
-bool event_has_iterator_declare_code(int mid, int id) {
-  return event_access(mid,id)->iterdec != "";
-}
-bool event_has_iterator_initialize_code(int mid, int id) {
-  return event_access(mid,id)->iterinit != "";
-}
-bool event_has_iterator_unlink_code(int mid, int id) {
-  return event_access(mid,id)->iterrm != "";
-}
-bool event_has_iterator_delete_code(int mid, int id) {
-  return event_access(mid,id)->iterdel != "";
-}
-string event_get_iterator_declare_code(int mid, int id) {
-  return event_access(mid,id)->iterdec;
-}
-string event_get_iterator_initialize_code(int mid, int id) {
-  return event_access(mid,id)->iterinit;
-}
-string event_get_iterator_unlink_code(int mid, int id) {
-  return event_access(mid,id)->iterrm;
-}
-string event_get_iterator_delete_code(int mid, int id) {
-  return event_access(mid,id)->iterdel;
-}
-
-string event_get_locals(int mid, int id) {
-  return event_access(mid,id)->locals;
-}
-
-/*
-int main(int,char**)
-{
-  int a = event_parse_resourcefile();
-  if (a) printf("Event Parse: Error %d\n",a);
-  else   puts  ("Event Parse: completed successfully");
-
-  for (size_t i=0; i<main_event_infos.size; i++)
-  {
-    printf("%c %s\n",main_event_infos[i].is_group ? ']' : '+', main_event_infos[i].name.c_str());
-    for (main_event_info::iter ii = main_event_infos[i].specs.begin(); ii != main_event_infos[i].specs.end(); )
-      printf("%s── [%02d] %-25s [%s]\n",++ii != main_event_infos[i].specs.end()?"├":"╰",ii->first,ii->second->humanname.c_str(),ii->second->name.c_str());
+  const std::string &arg = ev.arguments[0].name;
+  const std::string &arg_kind = ev.event->parameters(0);
+  auto pv = parameter_ids_.find({arg_kind, ToLower(arg)});
+  if (pv != parameter_ids_.end()) {
+    return LegacyEventPair{amap.main_id, pv->second->value()};
   }
+  auto iv = SafeAtoL(arg);
+  if (iv.first) return LegacyEventPair{amap.main_id, iv.second};
+  std::cerr << "EVENT ERROR: Unknown " << arg_kind << " parameter value " << arg
+            << ": cannot map argument to event sub-ID\n";
+  return LegacyEventPair{amap.main_id, 0};
 }
-*/

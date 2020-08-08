@@ -32,7 +32,7 @@
 #include "Instances/instance_system.h"
 #include "Instances/instance.h"
 #include "Object_Tiers/planar_object.h"
-#include "Resources/background.h"
+#include "Resources/backgrounds.h"
 
 #include "roomsystem.h"
 #include "depth_draw.h"
@@ -228,10 +228,11 @@ namespace enigma
       view_visible[i] = (bool)views[i].start_vis;
       view_angle[i] = 0;
     }
-
-    //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
-    //if the window size changes.
-    enigma_user::window_default(true);
+    
+    // In pull request 1831, it was decided to adopt GMS behavior instead of GM8.
+    // The window is no longer moved, centered, or resized when switching rooms.
+    // This is always true, even if the room sizes are different.
+    enigma_user::window_default(false);
     // window sized by first room, can make visible now
     enigma_user::window_set_visible(true);
     enigma_user::io_clear();

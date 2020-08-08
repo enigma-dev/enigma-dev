@@ -36,7 +36,7 @@
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
-#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/backgrounds.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/fonts.h"
 
@@ -83,6 +83,7 @@ extern int amain();
 #include "Universal_System/move_functions.h"
 #include "Universal_System/actions.h"
 #include "Universal_System/lives.h"
+#include "Universal_System/Resources/asset_index.h"
 
 namespace enigma_user {}
 

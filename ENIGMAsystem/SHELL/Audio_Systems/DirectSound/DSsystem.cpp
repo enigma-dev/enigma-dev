@@ -17,9 +17,9 @@
 
 #include "Widget_Systems/widgets_mandatory.h"  // DEBUG_MESSAGE
 
-#include "Bridges/Win32/WINDOWShandle.h" //get_window_handle()
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "DSsystem.h"
 struct WaveHeaderType {
@@ -61,8 +61,6 @@ AssetArray<Sound> sounds;
 
 namespace enigma {
 
-extern HWND hWnd;
-
 void eos_callback(void* soundID, unsigned src) {
   //auto snd = sounds.get((ptrdiff_t)soundID);
   //snd.playing = false;
@@ -70,7 +68,7 @@ void eos_callback(void* soundID, unsigned src) {
 }
 
 int audiosystem_initialize() {
-  if (get_window_handle() == NULL) {
+  if (enigma_user::window_handle() == NULL) {
     DEBUG_MESSAGE("Window handle is NULL.", MESSAGE_TYPE::M_ERROR);
     return false;
   }
@@ -171,7 +169,7 @@ int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
   bufferDesc.dwSize = sizeof(DSBUFFERDESC);
   // DSBCAPS_CTRLFX causes all kinds of weird nasty shit, please read #1508 on GitHub
   // before considering whether to readd it to the dwFlags below
-  bufferDesc.dwFlags = DSBCAPS_CTRLPAN | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY;
+  bufferDesc.dwFlags = DSBCAPS_CTRLPAN | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY | DSBCAPS_GLOBALFOCUS;
   bufferDesc.dwBufferBytes = waveHeader->dataSize;
   bufferDesc.dwReserved = 0;
   bufferDesc.lpwfxFormat = &waveFormat;

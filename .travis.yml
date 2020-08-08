@@ -23,7 +23,9 @@ env:
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
 
 before_install: sudo dpkg --add-architecture i386;
-install: ./CI/install_emake_deps.sh && ./CI/split_jobs.sh install
+install: 
+ - ./CI/install_emake_deps.sh && ./CI/split_jobs.sh install
+ - ./CI/build_sdl.sh
 before_script: make -j4 && make -j4 emake
 script: ./CI/split_jobs.sh run
     
@@ -34,9 +36,6 @@ jobs:
     - os: osx
   include:
     - stage: ENIGMA CI
-      env: TEST_HARNESS=true AUDIO=OpenAL 
-      script: ./CI/build_and_run_game.sh
-    - stage: ENIGMA CI
       env: WORKER=0
     - stage: ENIGMA CI
       env: WORKER=1
@@ -44,6 +43,8 @@ jobs:
       env: WORKER=2
     - stage: ENIGMA CI
       env: WORKER=3
+    - stage: ENIGMA CI
+      env: WORKER=4
     - stage: ENIGMA CI
       env: COMPILER=Android GRAPHICS=OpenGLES2 PLATFORM=SDL MODE=Compile ANDROID_API_LEVEL=28 ANDROID_BUILD_TOOLS_VERSION=28.0.3
       before_install: 
@@ -64,6 +65,6 @@ jobs:
     - stage: ENIGMA CI
       env: WORKER=0
       os: osx
-      osx_image: xcode10.2
+      osx_image: xcode11.3
       before_install:
 

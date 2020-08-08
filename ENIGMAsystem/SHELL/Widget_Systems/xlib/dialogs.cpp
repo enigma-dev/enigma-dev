@@ -18,18 +18,33 @@
 #include "dialogs.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
+#include <X11/Xlib.h>
 #include <string>
 using std::string;
 
 namespace enigma {
 
+CommandLineWidgetEngine *current_widget_engine = zenity_widgets;
+
+static bool kwin_running() {
+  Display *d = XOpenDisplay(NULL);
+  Atom aKWinRunning = XInternAtom(d, "KWIN_RUNNING", True);
+  bool bKWinRunning = (aKWinRunning != None);
+  XCloseDisplay(d);
+  return bKWinRunning;
+}
+
 bool widget_system_initialize() {
+  // Defaults to the GUI toolkit (GTK+/Qt) that matches Desktop Environment.
+  current_widget_engine = kwin_running() ? kdialog_widgets : zenity_widgets;
   return true;
 }
 
-CommandLineWidgetEngine *current_widget_engine = zenity_widgets;
-
 } // namespace enigma
+
+void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+  enigma::current_widget_engine->show_debug_message(errortext, type);
+}
 
 namespace enigma_user {
     
@@ -67,10 +82,6 @@ int show_attempt(string errortext) {
   return enigma::current_widget_engine->show_attempt(errortext);
 }
 
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
-  enigma::current_widget_engine->show_debug_message(errortext, type);
-}
-
 string get_string(string message, string def) {
   return enigma::current_widget_engine->get_string(message, def);
 }
@@ -79,12 +90,14 @@ string get_password(string message, string def) {
   return enigma::current_widget_engine->get_password(message, def);
 }
 
-double get_integer(string message, double def) {
-  return enigma::current_widget_engine->get_integer(message, def);
+double get_integer(string message, var def) {
+  double val = (strtod(def.c_str(), NULL)) ? : (double)def;
+  return enigma::current_widget_engine->get_integer(message, val);
 }
 
-double get_passcode(string message, double def) {
-  return enigma::current_widget_engine->get_passcode(message, def);
+double get_passcode(string message, var def) {
+  double val = (strtod(def.c_str(), NULL)) ? : (double)def;
+  return enigma::current_widget_engine->get_passcode(message, val);
 }
 
 string get_open_filename(string filter, string fname) {
