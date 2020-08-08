@@ -29,19 +29,50 @@
 #include "Universal_System/debugscope.h"
 #endif
 
-namespace {
+namespace enigma {
 
-std::vector<SDL_Joystick *> joysticks(0);
+struct JoystickState {
+  bool lastButtonStatus[enigma_user::gp_padr];
+  bool buttonStatus[enigma_user::gp_padr];
+};
+
+struct Joystick {
+  SDL_Joystick *joystick;
+  JoystickState state;
+  float thresh = 0.05f; //FIXME: these do nothing atm because I have no idea how gm behaves
+  float deadzone = 0.0f;
+  void clear();
+  void push();
+};
+
+static std::vector<Joystick> joysticks;
+
+void Joystick::clear() {
+  for (unsigned i = 0; i < enigma_user::gp_padr; ++i) {
+    state.lastButtonStatus[i] = false;
+    state.buttonStatus[i] = false;
+  }
+}
+
+void Joystick::push() {
+  for (unsigned i = 0; i < enigma_user::gp_padr; ++i) {
+    state.lastButtonStatus[i] = state.buttonStatus[i];
+  }
+}
+
+} // namespace enigma
+
+namespace {
 
 SDL_Joystick *joystick_get_handle(int id) {
   // joystick id starts at 1 in GameMaker
   #ifdef DEBUG_MODE
   if (id < 1 || id > joysticks.size())) { 
-    DEBUG_MESSAGE("invalid joystick id: " + std::to_string(id), MESSAGE_TYPE::M_INFO); 
+    DEBUG_MESSAGE("invalid joystick id: " + std::to_string(id - 1), MESSAGE_TYPE::M_INFO); 
     return nullptr
   }
   #endif
-  return joysticks[id - 1];
+  return joysticks.joystick[id - 1];
 }
 
 } // anonymous namespace
@@ -116,48 +147,53 @@ void joystick_uninit() {
   SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
 
-void joysticks_open() {
+void joysticks_open(int id) {
+  #ifdef DEBUG_MODE
+  DEBUG_MESSAGE(std::string("adding joystick ") + std::to_string(i - 1) + std::string("..."), MESSAGE_TYPE::M_INFO);
+  #endif
+  Joystick j 
+  j.clear();
+  j.joystick = SDL_JoystickOpen(i);
   int joystick_count = SDL_NumJoysticks();
   if (joysticks.size() < joystick_count) {
     joysticks.resize(joystick_count, nullptr);
   }
-  for (size_t i = 0; i < joysticks.size(); i++) {
-    if (joysticks[i] == nullptr) {
-      #ifdef DEBUG_MODE
-      DEBUG_MESSAGE(std::string("adding joystick ") + std::to_string(i) + std::string("..."), MESSAGE_TYPE::M_INFO);
-      #endif
-      joysticks[i] = SDL_JoystickOpen(i);
-      #ifdef DEBUG_MODE
-      if (joysticks[i] == nullptr) 
-        DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i) + std::string("(\"")
-          enigma_user::joystick_name(i) + std::string("\") not added!"), MESSAGE_TYPE::M_INFO);
+  if (i < joysticks.size()) {
+    if (j == nullptr) {
+      if (i < gamepads.size()) {
+        joysticks[i] = j;
       } else {
-        DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i) + std::string("(\"")
-          enigma_user::joystick_name(i) + std::string("\") added!"), MESSAGE_TYPE::M_INFO);
+        joysticks.push_back(j);
       }
-      #endif
     }
   }
+  #ifdef DEBUG_MODE
+  if (joysticks[i] == nullptr) 
+    DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i - 1) + std::string("(\"")
+      enigma_user::joystick_name(i) + std::string("\") not added!"), MESSAGE_TYPE::M_INFO);
+  } else {
+    DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i - 1) + std::string("(\"")
+      enigma_user::joystick_name(i) + std::string("\") added!"), MESSAGE_TYPE::M_INFO);
+  }
+  #endif
 }
 
-void joysticks_close() {
-  for (size_t i = 0; i < joysticks.size(); i++) {
-    if (joysticks[i] != nullptr) {
-      #ifdef DEBUG_MODE
-      DEBUG_MESSAGE(std::string("removing joystick ") + std::to_string(i) + std::string(" (\"")
-        enigma_user::joystick_name(i) + std::string("\")..."), MESSAGE_TYPE::M_INFO);
-      #endif
-      SDL_JoystickClose(joysticks[i]);
-    }
+void joysticks_close(int id) {
+  if (joysticks[i] != nullptr) {
     #ifdef DEBUG_MODE
-    if (joysticks[i] == nullptr) {
-      DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i) + std::string(" doesn't exit; cannot close!"), MESSAGE_TYPE::M_INFO);
-    } else {
-      DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i) + std::string(" removed!"), MESSAGE_TYPE::M_INFO);
-    }
+    DEBUG_MESSAGE(std::string("removing joystick ") + std::to_string(i - 1) + std::string(" (\"")
+      enigma_user::joystick_name(i) + std::string("\")..."), MESSAGE_TYPE::M_INFO);
     #endif
-    joysticks[i] = nullptr;
+    SDL_JoystickClose(joysticks[i].joystick);
   }
+  #ifdef DEBUG_MODE
+  if (joysticks[i] == nullptr) {
+    DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i - 1) + std::string(" doesn't exit; cannot close!"), MESSAGE_TYPE::M_INFO);
+  } else {
+    DEBUG_MESSAGE(std::string("joystick ") + std::to_string(i - 1) + std::string(" removed!"), MESSAGE_TYPE::M_INFO);
+  }
+  #endif
+  joysticks[i] = nullptr;
 }
 
 void joystick_update() {
