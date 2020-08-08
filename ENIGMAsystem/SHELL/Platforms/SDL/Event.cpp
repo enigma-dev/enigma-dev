@@ -214,12 +214,12 @@ void SDL_Event_Handler::windowResized(const SDL_Event *event) {
 
 void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) {
   addGamepad(event->cdevice.which);
-  joysticks_open();
+  joysticks_open(event->cdevice.which);
 }
 
 void SDL_Event_Handler::joyDeviceRemoved(const SDL_Event *event) {
   removeGamepad(event->cdevice.which);
-  joysticks_close();
+  joysticks_close(event->cdevice.which);
 }
 
 void SDL_Event_Handler::controllerButtonDown(const SDL_Event *event) {
