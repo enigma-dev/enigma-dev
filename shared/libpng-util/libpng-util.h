@@ -15,5 +15,5 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename);
-unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename);
+unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename, bool bgra = false);
+unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename, bool bgra = false);

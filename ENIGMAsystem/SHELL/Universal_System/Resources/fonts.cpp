@@ -85,11 +85,11 @@ void Texture::init() {
   if (pxdata != nullptr) {
     if (channels == 1) {
       unsigned char* rgba = mono2rgba(pxdata, width, height);
-      ID = graphics_create_texture(width, height, width, height, rgba, false);
-      delete[] rgba;
-    } else ID = graphics_create_texture(width, height, width, height, pxdata, false);
+      ID = enigma::graphics_create_texture(enigma::RawImage(rgba, width, height), false);
+      delete[] pxdata;
+    } else ID = enigma::graphics_create_texture(enigma::RawImage(pxdata, width, height), false);
     
-    delete[] pxdata;
+    //delete[] pxdata;
   } else DEBUG_MESSAGE("Error: trying to intialize texture from empty pixel data", MESSAGE_TYPE::M_ERROR);
 }
 
