@@ -29,7 +29,7 @@
 #include "Universal_System/debugscope.h"
 #endif
 
-namespace enigma {
+namespace {
 
 struct JoystickState {
   bool lastButtonStatus[enigma_user::gp_padr];
@@ -59,10 +59,6 @@ void Joystick::push() {
     state.lastButtonStatus[i] = state.buttonStatus[i];
   }
 }
-
-} // namespace enigma
-
-namespace {
 
 SDL_Joystick *joystick_get_handle(int id) {
   // joystick id starts at 1 in GameMaker
