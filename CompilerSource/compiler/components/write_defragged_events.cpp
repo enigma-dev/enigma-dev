@@ -66,16 +66,16 @@ int lang_CPP::compile_writeDefraggedEvents(
     const bool e_is_inst = event.IsStacked();
     const bool e_has_dispatch = event.HasDispatcher();
     if (event.HasSubCheck() && !e_is_inst) {
-      if (!event.LocalDeclarations().empty()) {
+      if (event.HasLocalDeclarations()) {
         wto << "    virtual bool myevent_" << fname
             << "_subcheck() { return false; }";
-        continue;
-      }
-      wto << "    bool myevent_" << fname << "_subcheck() ";
-      if (event.HasSubCheckFunction()) {
-        wto << event.SubCheckFunction() << "\n";
       } else {
-        wto << "{\n  return " << event.SubCheckExpression() << ";\n}\n";
+        wto << "    bool myevent_" << fname << "_subcheck() ";
+        if (event.HasSubCheckFunction()) {
+          wto << event.SubCheckFunction() << "\n";
+        } else {
+          wto << "{\n  return " << event.SubCheckExpression() << ";\n}\n";
+        }
       }
     }
     const bool e_is_void = e_is_inst || e_has_dispatch;

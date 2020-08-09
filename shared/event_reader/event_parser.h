@@ -88,6 +88,7 @@ struct EventDescriptor {
   std::string BaseFunctionName() const;
   std::string LocalDeclarations() const;
 
+  bool HasLocalDeclarations() const { return event->has_locals(); }
   bool HasDefaultCode() const { return event->has_default_() || HasConstantCode(); }
   bool HasConstantCode() const { return event->has_constant(); }
   bool HasDispatcher() const { return event->has_dispatcher(); }
