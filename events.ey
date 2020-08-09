@@ -321,8 +321,6 @@ Events:
         $out_of_health = (health <= 0);
         return $out_of_health && !OoH;
       }
-    Suffix: |
-      if (health > 0) $out_of_health = 0;
 
   - ID: BeforeCollisionAutomaticCollisionHandling
     Name: "Pre-collision automatic collision handling."
