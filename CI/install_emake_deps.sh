@@ -25,6 +25,9 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   else
     # new lcov
     sudo add-apt-repository -y ppa:cheeseboy16/travis-backports
+    # new clang
+    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
   fi
 
   install_yaml_cpp
@@ -44,6 +47,22 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
               --slave   /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-9;
 
   g++ --version
+
+  if [ "$COMPILER" != "Android" ]; then
+    sudo apt-get -y install clang-10 lldb-10 lld-10 libc++abi-10-dev libc++-10-dev
+    # Remove clang symlinks from the travis base install.
+    # The update-alternatives changes will not change the used clang version without this.
+    # /usr/local is searched for clang binaries before the /usr/bin direcory.
+    sudo rm -rf /usr/local/clang-*
+      
+    sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 20
+    sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 20
+    sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-10 20
+    sudo update-alternatives --install /usr/bin/llvm-link llvm-link /usr/bin/llvm-link-10 20
+    sudo update-alternatives --install /usr/bin/llvm-dis llvm-dis /usr/bin/llvm-dis-10 20
+  fi
+
+  clang++ --version
 fi
 
 if [ "$COMPILER" == "Android" ]; then

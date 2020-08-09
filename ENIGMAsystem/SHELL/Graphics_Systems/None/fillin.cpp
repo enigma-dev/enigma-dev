@@ -57,7 +57,7 @@ namespace enigma
 
 	void graphics_set_viewport(float x, float y, float width, float height) {}
 
-	int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap){return -1;}
+	int graphics_create_texture(const RawImage&, bool mipmap, unsigned* fullwidth, unsigned* fullheight){return -1;}
 	void graphics_delete_texture(int texid){}
 	unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {return nullptr;}
 	unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {return nullptr;}

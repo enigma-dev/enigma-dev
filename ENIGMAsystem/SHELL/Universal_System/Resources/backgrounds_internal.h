@@ -28,12 +28,12 @@
 namespace enigma {
   
 struct Background {
-  Background(unsigned w = 0, unsigned h = 0, int tex = -1, bool ts = false, 
+  Background(unsigned w = 1, unsigned h = 1, unsigned fw = 1, unsigned fh = 1, int tex = -1, bool ts = false, 
     unsigned tw = 0, unsigned th = 0, int ho = 0, int vo = 0, int hs = 0, int vs = 0) : 
     width(w), 
     height(h), 
     textureID(tex),
-    textureBounds({0, 0, 1, 1}), 
+    textureBounds({0, 0, (gs_scalar)w/fw, (gs_scalar)h/fh}), 
     isTileset(ts), 
     tileWidth(tw),
     tileHeight(th),

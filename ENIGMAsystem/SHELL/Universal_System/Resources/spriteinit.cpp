@@ -123,9 +123,8 @@ namespace enigma
           default: collision_data = 0; break;
         };
 
-        spr.AddSubimage(pixels, width, height, coll_type, collision_data);
-
-        delete[] pixels;
+        spr.AddSubimage(RawImage(pixels, width, height), coll_type, collision_data);
+        
         if (!fread(&nullhere,4,1,exe)) return;
 
         if (nullhere)

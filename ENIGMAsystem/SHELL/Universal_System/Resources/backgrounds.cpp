@@ -38,35 +38,30 @@ using enigma::image_load;
 namespace {
 
 Background background_add_helper(std::string filename, bool transparent, bool smooth, bool preload, bool mipmap) {
-  unsigned int width, height, fullwidth, fullheight;
-  int imgnumb = 1;
-  unsigned char *pxdata = image_load(
-      filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
+  unsigned fullwidth, fullheight;
+  std::vector<RawImage> imgs = image_load(filename);
       
   Background nb;
-
-  nb.width = width; 
-  nb.height = height;
   nb.isTileset = false;
   
-  if (pxdata == NULL) {
+  if (imgs.empty()) {
     DEBUG_MESSAGE("ERROR - Failed to append background to index!", MESSAGE_TYPE::M_ERROR);
     return nb;
   }
+  
+  nb.width = imgs[0].w; 
+  nb.height = imgs[0].h;
 
   // If background is transparent, set the alpha to zero for pixels that should be
   // transparent from lower left pixel color
   if (transparent) {
-    Color c = enigma::image_get_pixel_color(pxdata, width, height, 0, height - 1);
-    enigma::image_swap_color(pxdata, width, height, c, Color {0, 0, 0, 0});
+    Color c = enigma::image_get_pixel_color(imgs[0], 0, imgs[0].h - 1);
+    enigma::image_swap_color(imgs[0], c, Color {0, 0, 0, 0});
   }
 
-  RawImage img = image_pad(pxdata, width, height, fullwidth, fullheight);
-  nb.textureID = graphics_create_texture(width, height, fullwidth, fullheight, img.pxdata, mipmap);
-  nb.textureBounds = TexRect(0, 0, static_cast<gs_scalar>(width) / fullwidth, static_cast<gs_scalar>(height) / fullheight);
+  nb.textureID = graphics_create_texture(imgs[0], mipmap, &fullwidth, &fullheight);
+  nb.textureBounds = TexRect(0, 0, static_cast<gs_scalar>(imgs[0].w) / fullwidth, static_cast<gs_scalar>(imgs[0].h) / fullheight);
 
-  delete[] pxdata;
-  
   return nb;
 }
 
@@ -80,11 +75,10 @@ int background_add(std::string filename, bool transparent, bool smooth, bool pre
 
 int background_create_color(unsigned w, unsigned h, int col, bool preload) {
   unsigned int fullwidth = nlpo2dc(w) + 1, fullheight = nlpo2dc(h) + 1;
-  RawImage img;
-  img.pxdata = new unsigned char[fullwidth * fullheight * 4];
+  RawImage img(new unsigned char[fullwidth * fullheight * 4], fullwidth, fullheight);
   std::fill((unsigned*)(img.pxdata), (unsigned*)(img.pxdata) + fullwidth * fullheight, (COL_GET_R(col) | (COL_GET_G(col) << 8) | (COL_GET_B(col) << 16) | 255 << 24));
-  int textureID = graphics_create_texture(w, h, fullwidth, fullheight, img.pxdata, false);
-  return backgrounds.add(std::move(Background(w, h, textureID)));
+  int textureID = graphics_create_texture(img, false);
+  return backgrounds.add(std::move(Background(w, h, fullwidth, fullheight, textureID)));
 }
 
 bool background_replace(int back, std::string filename, bool transparent, bool smooth, bool preload, bool free_texture,
@@ -95,6 +89,12 @@ bool background_replace(int back, std::string filename, bool transparent, bool s
 
 void background_save(int back, std::string fname) {
   const Background& bkg = backgrounds.get(back);
+  
+  if (bkg.textureID < 0) {
+    DEBUG_MESSAGE("Requested background: " + std::to_string(back) +
+                 + " has no loaded texture.", MESSAGE_TYPE::M_USER_ERROR);
+    return;
+  }
   
   unsigned w, h;
   unsigned char* rgbdata =
