@@ -86,32 +86,6 @@ unsigned draw_get_valign(){
 
 }
 
-#ifdef DEBUG_MODE
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_font(fnt,id,r) \
-    if (!enigma::sprite_fonts.exists(id)) { \
-      DEBUG_MESSAGE("Cannot access font with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
-      return r; \
-    } SpriteFont& fnt = sprite_fonts[id];
-  #define get_fontv(fnt,id) \
-    if (!enigma::sprite_fonts.exists(id)) { \
-      DEBUG_MESSAGE("Cannot access font with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
-      return; \
-    } SpriteFont& fnt = sprite_fonts[id];
-  #define get_font_null(fnt,id,r) \
-    if (!enigma::sprite_fonts.exists(id)) { \
-      DEBUG_MESSAGE("Cannot access font with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
-      return r; \
-    } SpriteFont& fnt = sprite_fonts[id];
-#else
-  #define get_font(fnt,id,r) \
-    const SpriteFont& fnt = sprite_fonts[id];
-  #define get_fontv(fnt,id) \
-    const SpriteFont& fnt = sprite_fonts[id];
-  #define get_font_null(fnt,id,r) \
-    const SpriteFont& fnt = sprite_fonts[id];
-#endif
-
 namespace enigma {
   inline float get_space_width(const SpriteFont& fnt) {
     fontglyph g = findGlyph(fnt, ' ');
@@ -133,7 +107,7 @@ namespace enigma_user {
 double string_char_width(variant vstr)
 {
   string str = toString(vstr);
-  get_font(fnt,currentfont,0);
+  SpriteFont& fnt = sprite_fonts[currentfont];
   size_t i = 0;
   uint32_t character = getUnicodeCharacter(str, i);
   if (character == ' ') {
@@ -150,7 +124,7 @@ double string_char_width(variant vstr)
 unsigned int string_width(variant vstr)
 {
   string str = toString(vstr);
-  get_font(fnt,currentfont,0);
+  SpriteFont& fnt = sprite_fonts[currentfont];
   float mlen = 0, tlen = 0, slen = get_space_width(fnt);
   for (size_t i = 0; i < str.length(); i++)
   {
@@ -173,7 +147,7 @@ unsigned int string_width(variant vstr)
 unsigned int string_height(variant vstr)
 {
   string str = toString(vstr);
-  get_font(fnt,currentfont,0);
+  SpriteFont& fnt = sprite_fonts[currentfont];
   float hgt = fnt.height;
   for (size_t i = 0; i < str.length(); i++)
     if (str[i] == '\r' or str[i] == '\n')
@@ -184,7 +158,7 @@ unsigned int string_height(variant vstr)
 unsigned int string_width_ext(variant vstr, gs_scalar sep, gs_scalar w) //here sep doesn't do anything, but I can't make it 'default = ""', because its the second argument
 {
   string str = toString(vstr);
-  get_font(fnt,currentfont,0);
+  SpriteFont& fnt = sprite_fonts[currentfont];
 
   float width = 0, maxwidth = 0, slen = get_space_width(fnt);
   for (size_t i = 0; i < str.length(); i++)
@@ -209,7 +183,7 @@ unsigned int string_width_ext(variant vstr, gs_scalar sep, gs_scalar w) //here s
 unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
 {
   string str = toString(vstr);
-  get_font(fnt,currentfont,0);
+  SpriteFont& fnt = sprite_fonts[currentfont];
 
   float width = 0, tw = 0, height = fnt.height, slen = get_space_width(fnt);
   for (size_t i = 0; i < str.length(); i++)
@@ -244,7 +218,7 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
 unsigned int string_width_line(variant vstr, int line)
 {
   string str = toString(vstr);
-  get_font(fnt,currentfont,0);
+  SpriteFont& fnt = sprite_fonts[currentfont];
   float len = 0, cl = 0, slen = get_space_width(fnt);
   for (size_t i = 0; i < str.length(); i++)
   {
@@ -276,7 +250,7 @@ unsigned int string_width_line(variant vstr, int line)
 unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
 {
   string str = toString(vstr);
-  get_font(fnt, currentfont,0);
+  SpriteFont& fnt = sprite_fonts[currentfont];
 
   float width = 0, tw = 0; int cl = 0, slen = get_space_width(fnt);
   for (size_t i = 0; i < str.length(); i++)
@@ -316,7 +290,7 @@ unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
 unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
 {
   string str = toString(vstr);
-  get_font(fnt,currentfont,0);
+  SpriteFont& fnt = sprite_fonts[currentfont];
 
   float width = 0, tw = 0, slen = get_space_width(fnt);
   unsigned int cl = 1;
@@ -359,7 +333,7 @@ namespace enigma_user
 void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 {
   string str = toString(vstr);
-  get_fontv(fnt,currentfont);
+  SpriteFont& fnt = sprite_fonts[currentfont];
   gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y +fnt.yoffset - string_height(str)/2 : y + fnt.yoffset - string_height(str);
   float slen = get_space_width(fnt);
   if (halign == fa_left){
@@ -488,7 +462,7 @@ void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineW
 void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_scalar bottom)
 {
   string str = toString(vstr);
-  get_fontv(fnt,currentfont);
+  SpriteFont& fnt = sprite_fonts[currentfont];
   gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y +fnt.yoffset - string_height(str)/2 : y + fnt.yoffset - string_height(str);
   float slen = get_space_width(fnt);
   if (halign == fa_left){
@@ -548,7 +522,7 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
 void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w)
 {
   string str = toString(vstr);
-  get_fontv(fnt,currentfont);
+  SpriteFont& fnt = sprite_fonts[currentfont];
 
   gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y + fnt.yoffset - string_height_ext(str,sep,w)/2 : y + fnt.yoffset - string_height_ext(str,sep,w);
   float slen = get_space_width(fnt);
@@ -629,7 +603,7 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
 void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xscale, gs_scalar yscale, double rot)
 {
   string str = toString(vstr);
-  get_fontv(fnt,currentfont);
+  SpriteFont& fnt = sprite_fonts[currentfont];
 
   rot *= M_PI/180;
 
@@ -727,7 +701,7 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
 void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, gs_scalar xscale, gs_scalar yscale, double rot)
 {
   string str = toString(vstr);
-  get_fontv(fnt,currentfont);
+  SpriteFont& fnt = sprite_fonts[currentfont];
 
   rot *= M_PI/180;
 
@@ -862,7 +836,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
 void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a)
 {
   string str = toString(vstr);
-  get_fontv(fnt,currentfont);
+  SpriteFont& fnt = sprite_fonts[currentfont];
 
   rot *= M_PI/180;
 
@@ -972,8 +946,8 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
 void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, gs_scalar xscale, gs_scalar yscale, double rot,int c1, int c2, int c3, int c4, gs_scalar a)
 {
   string str = toString(vstr);
-  get_fontv(fnt,currentfont);
-
+  SpriteFont& fnt = sprite_fonts[currentfont];
+  
   rot *= M_PI/180;
 
   const gs_scalar sv = sin(rot), cv = cos(rot),
@@ -1113,7 +1087,7 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
 void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,int c4,gs_scalar a)
 {
   string str = toString(vstr);
-  get_fontv(fnt,currentfont);
+  SpriteFont& fnt = sprite_fonts[currentfont];
 
   float slen = get_space_width(fnt);
   gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y +fnt.yoffset - string_height(str)/2 : y + fnt.yoffset - string_height(str);
@@ -1193,7 +1167,7 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
 void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs_scalar w, int c1,int c2,int c3,int c4, gs_scalar a)
 {
   string str = toString(vstr);
-  get_fontv(fnt,currentfont);
+  SpriteFont& fnt = sprite_fonts[currentfont];
 
   gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y + fnt.yoffset - string_height_ext(str,sep,w)/2 : y + fnt.yoffset - string_height_ext(str,sep,w);
   gs_scalar width = 0, tw = 0, line = 0, sw = string_width_ext_line(str, w, line);
@@ -1287,24 +1261,24 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
   }
 }
 
-unsigned font_get_texture(int fnt) {
-  get_font_null(f,fnt,-1);
-  return f.texture;
+unsigned font_get_texture(int id) {
+  SpriteFont& fnt = sprite_fonts[id];
+  return fnt.texture;
 }
 
-unsigned font_get_texture_width(int fnt) {
-  get_font_null(f,fnt,-1);
-  return f.twid;
+unsigned font_get_texture_width(int id) {
+  SpriteFont& fnt = sprite_fonts[id];
+  return fnt.twid;
 }
 
-unsigned font_get_texture_height(int fnt) {
-  get_font_null(f,fnt,-1);
-  return f.thgt;
+unsigned font_get_texture_height(int id) {
+  SpriteFont& fnt = sprite_fonts[id];
+  return fnt.thgt;
 }
 
-unsigned font_height(int fnt) {
-  get_font_null(f,fnt,-1);
-  return f.height;
+unsigned font_height(int id) {
+  SpriteFont& fnt = sprite_fonts[id];
+  return fnt.height;
 }
 
 void draw_set_font(int fnt) {
