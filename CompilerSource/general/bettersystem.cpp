@@ -214,9 +214,13 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       cout << "\n\n********* EXECUTE:\n" << parameters << "\n\n";
 
-      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE|CREATE_NEW_PROCESS_GROUP,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
+      DWORD creationFlags = CREATE_DEFAULT_ERROR_MODE;
+      if (build_enable_stop)
+        creationFlags |= CREATE_NEW_PROCESS_GROUP;
+      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,creationFlags,Cenviron_use,NULL,&StartupInfo,&ProcessInformation))
       {
-        while (WaitForSingleObject(ProcessInformation.hProcess, 10) == WAIT_TIMEOUT) {
+        DWORD timeout = build_enable_stop ? 10 : INFINITE;
+        while (WaitForSingleObject(ProcessInformation.hProcess, timeout) == WAIT_TIMEOUT) {
           if (!build_stopping) continue;
           DWORD pId = GetProcessId(ProcessInformation.hProcess);
           GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, pId);
@@ -346,7 +350,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       int result = -1;
       pid_t fk = fork();
-      setpgid(0,0); // new process group
+      if (build_enable_stop)
+        setpgid(0,0); // << new process group
 
       if (!fk)
       {

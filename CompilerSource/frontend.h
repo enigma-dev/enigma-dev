@@ -22,5 +22,7 @@ extern string error_sstring;
 
 /// A way to signal the compilation to stop.
 extern volatile bool build_stopping;
+/// Must be enabled a priori.
+extern volatile bool build_enable_stop;
 
 #endif
