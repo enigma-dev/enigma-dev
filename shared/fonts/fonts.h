@@ -25,7 +25,7 @@ struct GlyphMetrics {
 struct GlyphRange {
   GlyphRange() : start(0) {}
   GlyphRange(unsigned first, unsigned last) : start(first) { glyphs.resize(last-first+1); }
-  GlyphRange(unsigned first, unsigned last, std::initializer_list<GlyphMetrics> glyphs) : start(first), glyphs(glyphs) {}
+  GlyphRange(unsigned first, unsigned /*last*/, std::initializer_list<GlyphMetrics> glyphs) : start(first), glyphs(glyphs) {}
   unsigned int start;
   size_t size() const { return glyphs.size(); }
   std::vector<GlyphMetrics> glyphs;

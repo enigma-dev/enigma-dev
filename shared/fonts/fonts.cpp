@@ -3,7 +3,7 @@
 
 #ifdef ENIGMA_GAME
 #include "Widget_Systems/widgets_mandatory.h"
-#else 
+#else
 #include <iostream>
 #define DEBUG_MESSAGE(msg, severity) std::cerr << msg << std::endl;
 #endif
@@ -20,12 +20,9 @@
 #include <algorithm>
 #include <numeric>
 #include <cstdlib>
-
-#if __cplusplus > 201402L
-  #include <filesystem>
-  namespace fs = std::filesystem;
-#endif
-
+#include <filesystem>
+namespace fs = std::filesystem;
+  
 using namespace enigma::rect_packer;
 
 namespace enigma {
@@ -226,9 +223,7 @@ unsigned char* font_pack(RawFont& font, unsigned& textureW, unsigned& textureH) 
 using namespace enigma::fonts;
 
 namespace enigma_user {
-
-
-#if __cplusplus > 201402L
+  
 static inline void font_add_search_path_helper(const fs::path& p) {
    
   auto it = supportedExtensions.find(ToLower(p.extension()));
@@ -251,11 +246,9 @@ static inline void font_add_search_path_helper(const fs::path& p) {
      fontFamilies[fontFamily] = p;
   }
 }
-#endif
 
 void font_add_search_path(std::string path, bool recursive) {
   fontSearchPaths.emplace_back(path); // TODO: disallow duplicate paths?
-  #if __cplusplus > 201402L
   if (fs::exists(path)) {
     if (recursive) {
       for (auto& p: fs::recursive_directory_iterator(fs::path(path)))
@@ -265,29 +258,38 @@ void font_add_search_path(std::string path, bool recursive) {
         font_add_search_path_helper(p.path());
     }
   } else DEBUG_MESSAGE("Freetype warning searching non-existing directory: " + path, MESSAGE_TYPE::M_WARNING);
-  
-  #endif
 }
 
 std::string font_find(std::string name, bool bold, bool italic, bool exact_match) {
+  // LGM default font
+  if (name == "Dialog.plain")
+    name = "Arial";
+  
   std::string fullName = name + ((bold) ? " Bold" : "") + ((italic) ? " Italic" : "");
+  DEBUG_MESSAGE("fullname: " + name, MESSAGE_TYPE::M_WARNING);
+  
+  for (auto& f : fontNames) {
+    std::cerr << f.first << std::endl;
+  }
+  
   if (fontNames.count(fullName) > 0) {
      return fontNames[fullName];
   } else if (!exact_match) {
+    if (fontNames.count(name) > 0) return fontNames[name];
     // search for name by font family
     if (fontFamilies.count(name) > 0) return fontFamilies[name]; 
   }
-
-  // LGM default font
-  if (name == "Dialog.plain") {
-    // GM's default is Arial
+  
+  // GM's default is Arial
+  if (name != "Arial") {
+    DEBUG_MESSAGE("Freetype error could not find font: \"" + name + "\" attempting fallback to Arial", MESSAGE_TYPE::M_WARNING);
     std::string arial = font_find("Arial", false, false, false);
     if (!arial.empty()) return arial;
-    else return fontNames.begin()->second; // Couldn't find arial. Guess well try to give it some kind of font
   }
   
-  // TODO: include and return a default font?
-  return "";
+  DEBUG_MESSAGE("Freetype error could not find Arial falling back to fist available font: " + fontNames.begin()->second, MESSAGE_TYPE::M_WARNING);
+  
+  return fontNames.begin()->second; // Couldn't find arial. Guess well try to give it some kind of font
 }
 
 } //namespace enigma_user
