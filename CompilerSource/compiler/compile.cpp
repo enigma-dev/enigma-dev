@@ -240,6 +240,69 @@ static bool ends_with(std::string const &fullString, std::string const &ending) 
     return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
 }
 
+// TODO: this doesn't belong here. It doesn't obviously belong anywhere else,
+// though, either, because the rest of the codebase suggests it belongs in
+// lang_CPP, but this isn't language specific! Wherever this ends up living,
+// move generate_robertvecs (from write_object_data.cpp) there, too.
+std::set<EventGroupKey> ListUsedEvents(
+    const std::vector<parsed_object*> &parsed_objects,
+    const EventData &event_data) {
+  /* Generate a new list of events used by the objects in
+  ** this game. Only events on this list will be exported.
+  ***********************************************************/
+  std::set<EventGroupKey> used_events;
+
+  // Defragged events must be written before object data, or object data cannot
+  // determine which events were used.
+  for (const parsed_object *object : parsed_objects) {
+    for (const ParsedEvent &event : object->all_events) {
+      if (event.ev_id.RegistersIterator())
+        used_events.insert({event.ev_id});
+    }
+  }
+
+  /* Some events are included in all objects, even if the user
+  ** hasn't specified code for them. Account for those here.
+  ***********************************************************/
+  for (const EventDescriptor &event_desc : event_data.events()) {
+    // We may not be using this event, but it may have default code.
+    if (event_desc.HasDefaultCode()) {  // (defaulted includes "constant")
+      // Defaulted events may NOT be parameterized.
+      if (event_desc.IsParameterized()) {
+        std::cerr << "INTERNAL ERROR: Event " << event_desc.internal_id
+                  << " (" << event_desc.HumanName()
+                  << ") is parameterized, but has default code.";
+        continue;
+      }
+      // This is a valid construction because we just checked that the event
+      // has no parameters. It's neither stacked nor specialized.
+      Event event{event_desc};
+      if (event.RegistersIterator()) used_events.insert({event});
+
+      for (parsed_object *obj : parsed_objects) { // Then shell it out into the other objects.
+        obj->InheritDefaultedEvent(event);
+      }
+    }
+  }
+
+  /* Lastly, add any events that have Instead code to our used_event map for
+  ** consideration. These will simply have their instead blocks thrown in.
+  *****************************************************************************/
+  for (const EventDescriptor &event_desc : event_data.events()) {
+    if (!event_desc.HasInsteadCode()) continue;
+    // Inlined events may NOT be parameterized.
+    if (event_desc.IsParameterized()) {
+      std::cerr << "INTERNAL ERROR: Event " << event_desc.internal_id
+                << " (" << event_desc.HumanName()
+                << ") is parameterized, but has inlined event loop code.";
+      continue;
+    }
+    used_events.insert({Event{event_desc}});
+  }
+
+  return used_events;
+}
+
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename;
   if (exe_filename) {
@@ -538,9 +601,11 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   edbg << "Running Secondary Parse Passes" << flushl;
   res = current_language->compile_parseSecondary(state);
+  
+  state.used_events = ListUsedEvents(state.parsed_objects, event_data());
 
   edbg << "Writing events" << flushl;
-  res = current_language->compile_writeDefraggedEvents(game, state.parsed_objects);
+  res = current_language->compile_writeDefraggedEvents(game, state.used_events, state.parsed_objects);
   irrr();
 
   edbg << "Writing object data" << flushl;

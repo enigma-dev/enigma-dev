@@ -105,24 +105,28 @@ struct ParsedEventGroup {
   std::vector<ParsedEvent*>::const_iterator end() const { return events.end(); }
 };
 
-template<typename Map> class ValueIterator {
-  typedef typename Map::iterator It;
+template<typename Map, bool is_const> class ValueIterImpl {
+  typedef typename std::conditional<is_const, typename Map::const_iterator,
+                                              typename Map::iterator>::type It;
   It it_;
 
  public:
-  ValueIterator(It it): it_(it) {}
+  ValueIterImpl(It it): it_(it) {}
 
-  ValueIterator &operator++() { ++it_; return *this; }
-  ValueIterator &operator--() { --it_; return *this; }
-  ValueIterator operator++(int) { ValueIterator res = *this; ++it_; return res; }
-  ValueIterator operator--(int) { ValueIterator res = *this; --it_; return res; }
+  ValueIterImpl &operator++() { ++it_; return *this; }
+  ValueIterImpl &operator--() { --it_; return *this; }
+  ValueIterImpl operator++(int) { ValueIterImpl res = *this; ++it_; return res; }
+  ValueIterImpl operator--(int) { ValueIterImpl res = *this; --it_; return res; }
 
-  bool operator==(const ValueIterator &other) const { return it_ == other.it_; }
-  bool operator!=(const ValueIterator &other) const { return it_ != other.it_; }
+  bool operator==(const ValueIterImpl &other) const { return it_ == other.it_; }
+  bool operator!=(const ValueIterImpl &other) const { return it_ != other.it_; }
   
   auto &operator*() const { return it_->second; }
   auto &operator->() const { return it_->second; }
 };
+
+template<typename T> using ValueIterator = ValueIterImpl<T, false>;
+template<typename T> using ConstValueIterator = ValueIterImpl<T, true>;
 
 // Serves as an index over 
 class EventIndex {
@@ -135,8 +139,11 @@ class EventIndex {
   }
 
   typedef ValueIterator<decltype(mapping_)> iterator;
+  typedef ConstValueIterator<decltype(mapping_)> const_iterator;
   iterator begin() { return iterator(mapping_.begin()); }
-  iterator end() { return iterator(mapping_.end()); }
+  iterator end()   { return iterator(mapping_.end()); }
+  const_iterator begin() const { return const_iterator(mapping_.begin()); }
+  const_iterator end()   const { return const_iterator(mapping_.end()); }
 };
 
 // Groups events by their base event. This has a dual purpose:
@@ -171,8 +178,11 @@ class EventGroupIndex {
   }
 
   typedef ValueIterator<decltype(mapping_)> iterator;
+  typedef ConstValueIterator<decltype(mapping_)> const_iterator;
   iterator begin() { return iterator(mapping_.begin()); }
-  iterator end() { return iterator(mapping_.end()); }
+  iterator end()   { return iterator(mapping_.end()); }
+  const_iterator begin() const { return const_iterator(mapping_.begin()); }
+  const_iterator end()   const { return const_iterator(mapping_.end()); }
 };
 
 // Represents a collection of variable name usages detected while parsing code
@@ -391,6 +401,9 @@ struct CompileState {
   TimelineLookupMap timeline_lookup;
   
   ParsedScope global_object;
+
+  // Set of all events used in the game.
+  std::set<EventGroupKey> used_events;
 
   void add_dot_accessed_local(string name);
 };

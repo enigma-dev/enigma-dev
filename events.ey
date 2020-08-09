@@ -342,8 +342,8 @@ Events:
     # SuperCheck: |
     #   instance_number(%1)
     SubCheck: |
-      (instance_other = enigma::place_meeting_inst(x,y,%1))
-    Prefix: |
+      enigma::place_meeting_inst(x, y, %1)
+    Dispatcher: |
       for (enigma::iterator it = enigma::fetch_inst_iter_by_int(%1); it; ++it) {
         int $$$internal$$$ = %1;
         instance_other = *it;
@@ -353,11 +353,7 @@ Events:
             x = xprevious;
             y = yprevious;
           }
-      /* [ Begin user code ] */
-
-    
-    Suffix: |
-      /* [ End user code ] */
+          %event();
           if (enigma::glaccess(int(other))->solid) {
             x += hspeed;
             y += vspeed;

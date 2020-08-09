@@ -79,10 +79,9 @@ struct EventDescriptor {
   std::string BaseFunctionName() const;
   std::string LocalDeclarations() const;
 
-  bool HasPrefixCode() const { return event->has_prefix(); }
-  bool HasSuffixCode() const { return event->has_suffix(); }
   bool HasDefaultCode() const { return event->has_default_() || HasConstantCode(); }
   bool HasConstantCode() const { return event->has_constant(); }
+  bool HasDispatcher() const { return event->has_dispatcher(); }
 
   std::string DefaultCode() const;
   std::string ConstantCode() const;
@@ -103,10 +102,10 @@ struct EventDescriptor {
   bool HasIteratorDeleteCode()     const { return event->has_iterator_delete(); }
   
   bool HasAnyAutomaticCode() const {
-    return HasPrefixCode()          || HasSuffixCode()
-        || HasConstantCode()        || HasDefaultCode()
+    return HasConstantCode()        || HasDefaultCode()
         || HasIteratorRemoveCode()  || HasIteratorDeleteCode()
-        || HasIteratorDeclareCode() || HasIteratorInitializeCode();
+        || HasIteratorDeclareCode() || HasIteratorInitializeCode()
+        || HasDispatcher();
   }
 
   std::string IteratorDeclareCode() const;
@@ -151,8 +150,10 @@ struct Event : EventDescriptor {
   // Identical to BaseFunctionName for non-parameterized events.
   std::string TrueFunctionName() const;
 
-  std::string PrefixCode() const;
-  std::string SuffixCode() const;
+  // Returns the completed code used to handle event dispatch.
+  // The given argument should be the same mangled event function name used to
+  // generate the event's main function.
+  std::string DispatcherCode(std::string_view event_func) const;
 
   // Returns whether all parameters of this event are set.
   bool IsComplete() const;

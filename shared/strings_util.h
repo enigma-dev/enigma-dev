@@ -85,10 +85,10 @@ inline std::string StripChar(std::string str, char c) {
   return str;
 }
 
-inline std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
+inline std::string string_replace_all(std::string str, std::string_view substr,
+                                      std::string_view nstr) {
   size_t pos = 0;
-  while ((pos = str.find(substr, pos)) != std::string::npos)
-  {
+  while ((pos = str.find(substr, pos)) != std::string::npos) {
     str.replace(pos, substr.length(), nstr);
     pos += nstr.length();
   }
