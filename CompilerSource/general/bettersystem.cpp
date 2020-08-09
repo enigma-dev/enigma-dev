@@ -406,7 +406,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      while (!waitpid(fk,&result,WNOHANG)) {
+      while (!waitpid(fk,&result,build_enable_stop?WNOHANG:0)) {
         if (build_stopping) {
           kill(-fk,SIGINT); // send CTRL+C to process group
           // wait for entire process group to signal,
