@@ -74,7 +74,7 @@ extern const char* establish_bearings(const char *compiler);
 #include <cstdlib>
 
 volatile bool build_stopping = false,
-         bool build_enable_stop = false;
+              build_enable_stop = false;
 DLLEXPORT void libStopBuild() { build_stopping = true; }
 DLLEXPORT void libEnableStop() { build_enable_stop = true; } 
 
