@@ -254,7 +254,6 @@ Events:
   - ID: LocalSweep
     Name: "Locals sweep"
     Description: "Internal event to update local variables."
-    Type: System
     Constant: |
       enigma::propagate_locals(this);
 

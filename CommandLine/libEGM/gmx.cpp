@@ -304,10 +304,10 @@ void PackRes(const LookupMap& resMap, std::string &dir, int id, pugi::xml_node &
         continue;
       } 
         
-      if (gmxName == "action") {
+      if (string_ends_with(gmxName, "action")) {
         std::vector<Action> actions;
         int cid = 0;
-        for (pugi::xml_node n = child.child("action"); n != nullptr; n = n.next_sibling()) {
+        for (pugi::xml_node n = child.first_element_by_path(gmxName.c_str()); n != nullptr; n = n.next_sibling()) {
           if (strcmp(n.name(), "action") == 0) {  // skip over any siblings that aren't twins <foo/><bar/><foo/> <- bar would be skipped
             n.append_attribute("visited") = "true";
             Action action;
@@ -511,7 +511,7 @@ void PackBuffer(const LookupMap& resMap, std::string type, std::string res, int 
   }
 }
 
-std::unique_ptr<buffers::Project> LoadGMX(std::string fName) {
+std::unique_ptr<buffers::Project> LoadGMX(std::string fName, const EventData* event_data) {
   pugi::xml_document doc;
   if (!doc.load_file(fName.c_str())) return nullptr;
 
@@ -524,6 +524,8 @@ std::unique_ptr<buffers::Project> LoadGMX(std::string fName) {
   // we use our own traverse(...) instead of the pugixml one
   // so that we can skip subtrees for datafiles and such
   walker.traverse(doc, -1, true);
+  
+  LegacyEventsToEGM(proj.get(), event_data);
 
   return proj;
 }

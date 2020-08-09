@@ -88,18 +88,18 @@ std::map<Type, int> maxID = {
   { Type::kTimeline,   0 }
 };
 
-buffers::resources::Script* LoadScript(const fs::path& fPath) {
-  buffers::resources::Script* scr = new buffers::resources::Script();
-  scr->set_code(FileToString(fPath));
+buffers::resources::Script LoadScript(const fs::path& fPath) {
+  buffers::resources::Script scr;
+  scr.set_code(FileToString(fPath));
   return scr;
 }
 
-buffers::resources::Shader* LoadShader(const fs::path& fPath) {
-  buffers::resources::Shader* shdr = new buffers::resources::Shader();
+buffers::resources::Shader LoadShader(const fs::path& fPath) {
+  buffers::resources::Shader shdr;
 
   const std::string p = fPath.parent_path().string() + "/" + fPath.stem().string();
-  shdr->set_vertex_code(FileToString(p + ".vert"));
-  shdr->set_fragment_code(p + ".frag");
+  shdr.set_vertex_code(FileToString(p + ".vert"));
+  shdr.set_fragment_code(p + ".frag");
 
   return shdr;
 }
@@ -142,8 +142,8 @@ inline void invalidYAMLType(const YAML::Node& yaml, const fs::path& fPath, const
   yamlErrorPosition(yaml[field->name()].Mark());
 }
 
-buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
-  buffers::resources::Timeline* tln = new buffers::resources::Timeline();
+buffers::resources::Timeline LoadTimeLine(const fs::path& fPath) {
+  buffers::resources::Timeline tln;
 
   const std::string delim = "step[";
   for(auto& f : fs::directory_iterator(fPath)) {
@@ -168,7 +168,7 @@ buffers::resources::Timeline* LoadTimeLine(const fs::path& fPath) {
     }
 
     // If we made it this far we can add event to timeline
-    buffers::resources::Timeline_Moment* m = tln->add_moments();
+    buffers::resources::Timeline_Moment* m = tln.add_moments();
     m->set_step(step);
     m->set_code(FileToString(f.path()));
 
@@ -218,10 +218,11 @@ void EGM::LoadObjectEvents(const fs::path& fPath, google::protobuf::Message *m,
   for(auto& f : fs::directory_iterator(fPath)) {
     if (f.path().extension() == ".edl") {
       const std::string eventIdString = f.path().stem().string();
-      auto event = events_.DecodeEventString(eventIdString);
+      auto event = events_->DecodeEventString(eventIdString);
 
       buffers::resources::Object::EgmEvent event_proto;
       event_proto.set_id(event.bare_id());
+      event_proto.set_code(FileToString(f));
       for (const auto &arg : event.arguments)
         event_proto.add_arguments(arg.name);
 
@@ -252,11 +253,12 @@ void EGM::RecursivePackBuffer(google::protobuf::Message *m, int id,
       if (key == "instances") key = "instance-layers";
       if (key == "tiles") key = "tile-layers";
       if (key == "code") continue;
+      if (key == "creation_code") continue;
     }
 
     if (ext == ".obj" && depth == 0) {
        // code is loaded from edl files
-      if (key == "events") {
+      if (key == "egm_events") {
         LoadObjectEvents(fPath, m, field);
         continue;
       }
@@ -350,7 +352,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
     if (f.path().extension() == ".edl") {
       const std::string edlFile = f.path().stem().string();
 
-      if (edlFile == "create") {
+      if (edlFile == "roomcreate") {
         rm->set_creation_code(FileToString(f.path()));
         continue;
       }
@@ -407,16 +409,16 @@ bool EGM::LoadResource(const fs::path& fPath, google::protobuf::Message *m,
 
   // Scripts and shaders are not folders so we exit here
   if (ext == ".edl") {
-    buffers::resources::Script* scr = LoadScript(fPath);
-    scr->set_id(id);
-    m->CopyFrom(*static_cast<google::protobuf::Message*>(scr));
+    buffers::resources::Script scr = LoadScript(fPath);
+    scr.set_id(id);
+    m->CopyFrom(*static_cast<google::protobuf::Message*>(&scr));
     return true;
   }
 
   if (ext == ".shdr") {
-    buffers::resources::Shader* shdr = LoadShader(fPath);
-    shdr->set_id(id);
-    m->CopyFrom(*static_cast<google::protobuf::Message*>(shdr));
+    buffers::resources::Shader shdr = LoadShader(fPath);
+    shdr.set_id(id);
+    m->CopyFrom(*static_cast<google::protobuf::Message*>(&shdr));
     return true;
   }
 
@@ -426,9 +428,9 @@ bool EGM::LoadResource(const fs::path& fPath, google::protobuf::Message *m,
 
   // Timelines are folders but do not have a properties.yaml so we exit here
   if (ext == ".tln") {
-    buffers::resources::Timeline* tln = LoadTimeLine(fPath);
-    tln->set_id(id);
-    m->CopyFrom(*static_cast<google::protobuf::Message*>(tln));
+    buffers::resources::Timeline tln = LoadTimeLine(fPath);
+    tln.set_id(id);
+    m->CopyFrom(*static_cast<google::protobuf::Message*>(&tln));
     return true;
   }
 

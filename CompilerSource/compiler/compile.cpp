@@ -146,12 +146,12 @@ inline void write_exe_info(const std::filesystem::path& codegen_directory, const
 #include "System/builtins.h"
 
 DLLEXPORT int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
-  return current_language->compile(GameData(es, current_language->event_data()),
+  return current_language->compile(GameData(es, &current_language->event_data()),
                                    exe_filename, mode);
 }
 
 DLLEXPORT int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
-  GameData gameData(*proj, current_language->event_data());
+  GameData gameData(*proj, &current_language->event_data());
   return current_language->compile(gameData, exe_filename, mode);
 }
 
@@ -233,13 +233,6 @@ template<typename T> void write_asset_map(std::string& str, vector<T> resources,
   str += "  }\n},\n";
 }
 
-static bool ends_with(std::string const &fullString, std::string const &ending) {
-    if (fullString.length() < ending.length())
-      return false;
-
-    return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
-}
-
 // TODO: this doesn't belong here. It doesn't obviously belong anywhere else,
 // though, either, because the rest of the codebase suggests it belongs in
 // lang_CPP, but this isn't language specific! Wherever this ends up living,
@@ -308,7 +301,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   if (exe_filename) {
     exename = exe_filename;
     const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
-    if (!ends_with(exename.u8string(), buildext.u8string())) {
+    if (!string_ends_with(exename.u8string(), buildext.u8string())) {
       exename += buildext;
       exe_filename = exename.u8string().c_str();
     }
@@ -601,7 +594,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   edbg << "Running Secondary Parse Passes" << flushl;
   res = current_language->compile_parseSecondary(state);
-  
+
   state.used_events = ListUsedEvents(state.parsed_objects, event_data());
 
   edbg << "Writing events" << flushl;
