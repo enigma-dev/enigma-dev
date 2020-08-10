@@ -24,7 +24,6 @@
 #include "libEGMstd.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/General/GSfont.h"
 
 #include <list>
 #include <string>
