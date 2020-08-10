@@ -24,6 +24,7 @@
 #include "libEGMstd.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GSfont.h"
 
 #include <list>
 #include <string>
@@ -224,6 +225,12 @@ string font_get_fontname(int fnt)
 
 void font_delete(int fnt)
 {
+    if (enigma::currentfont == fnt) {
+       enigma::currentfont = -1;
+       #ifdef DEBUG_MODE
+       DEBUG_MESSAGE("Deleted currently in use font " + std::to_string(fnt) , MESSAGE_TYPE::M_USER_ERROR);
+       #endif
+    }
     sprite_fonts.destroy(fnt);
 }
 

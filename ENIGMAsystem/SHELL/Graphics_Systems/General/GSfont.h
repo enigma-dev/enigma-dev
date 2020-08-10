@@ -22,6 +22,10 @@
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
 
+namespace enigma  {
+  extern int currentfont;
+}
+
 namespace enigma_user
 {
   const unsigned fa_left = 0;
