@@ -31,6 +31,24 @@
 using std::string;
 using std::thread;
 
+namespace enigma {
+
+bool string_has_whitespace(string str) {
+  return str.find_first_of("\t\r\n ") != string::npos;
+}
+
+vector<string> string_split_by_first_equalssign(string str) {
+  size_t pos = 0;
+  vector<string> vec;
+  if ((pos = str.find_first_of("=")) != string::npos) {
+    vec.push_back(str.substr(0, pos));
+    vec.push_back(str.substr(pos + 1));
+  }
+  return vec;
+}
+
+} // namespace enigma
+
 namespace enigma_insecure {
 
 void process_execute_async(process_t ind, string command) {
