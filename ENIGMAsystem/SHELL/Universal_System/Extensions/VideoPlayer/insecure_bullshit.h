@@ -33,3 +33,27 @@
 // negative is for error checks
 // lmao i'm so fucking OCD haha
 typedef unsigned long process_t
+
+namespace enigma {
+
+// helper needed for insecure functions
+bool string_has_whitespace(string str);
+
+} // namespace enigma
+
+namespace enigma_insecure {
+
+std::string cmd_from_pid(process_t pid);
+process_t process_execute(process_t ind, std::string command);
+void process_execute_async(process_t ind, std::string command);
+std::string echo(process_t ind, std::string expression);
+process_t process_current(process_t ind);
+process_t process_previous(process_t ind);
+string process_output(process_t ind); // FIXME: don't need this
+string process_evaluate(process_t ind);
+void process_clear_pid(process_t ind);
+void process_clear_out(process_t ind);
+bool pid_exists(process_t pid);
+bool pid_kill(process_t pid);
+
+} // namespace enigma_insecure
