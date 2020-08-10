@@ -111,6 +111,7 @@ process_t process_execute(process_t ind, string command) {
     std::lock_guard<std::mutex> guard(currout_mutex);
     currout[ind] = output;
   }
+  // file paths need to return with no trailing newlines
   while (output.back() == '\r' || output.back() == '\n')
     output.pop_back();
   prevpid.insert(std::make_pair(ind, pid));
