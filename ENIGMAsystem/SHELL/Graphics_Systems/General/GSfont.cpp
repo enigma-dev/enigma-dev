@@ -40,7 +40,7 @@ namespace enigma {
     int _id;
   public:
     CurrentFont(int id=-1): _id(id) {} // << handle currentfont init
-    operator=(int other) { _id = other; } // << handle currentfont assign
+    void operator=(const int& other) { _id = other; } // << handle currentfont assign
     operator int() { // << cast back to int when passing it to function
       if (sprite_fonts.exists(_id)) return _id;
       return -1; // << use default left font when currentfont not exist
