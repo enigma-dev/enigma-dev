@@ -2,10 +2,12 @@
 #include "fonts.h"
 
 #ifdef ENIGMA_GAME
-#include "Widget_Systems/widgets_mandatory.h"
+  #include "Widget_Systems/widgets_mandatory.h"
 #else
-#include <iostream>
-#define DEBUG_MESSAGE(msg, severity) std::cerr << msg << std::endl;
+  #include <iostream>
+  #if !defined(DEBUG_MESSAGE)
+    #define DEBUG_MESSAGE(msg, severity) std::cout << msg << std::endl;
+  #endif
 #endif
 
 #include <ft2build.h>
@@ -108,6 +110,7 @@ bool font_load(std::string fName, unsigned size, RawFont& rawFont) {
   FT_SfntName name;
   FT_Get_Sfnt_Name(face, TT_NAME_ID_FULL_NAME, &name);
   rawFont.name = std::string(reinterpret_cast<char*>(name.string), name.string_len);
+  rawFont.name.erase(std::remove_if(rawFont.name.begin(), rawFont.name.end(), [](auto& c) { return (static_cast<int>(c) > 127 || static_cast<int>(c) < 32); } ), rawFont.name.end());
 
   // GameMaker has always generated fonts at 96 dpi, default Windows dpi since 1980s
   error = FT_Set_Char_Size( face, size * 64, 0, 96, 0); // 96 dpi, 64 is 26.6 fixed point conversion
@@ -238,26 +241,30 @@ static inline void font_add_search_path_helper(const fs::path& p) {
      FT_SfntName name;
      FT_Get_Sfnt_Name(face, TT_NAME_ID_FULL_NAME, &name);
      std::string fontName(reinterpret_cast<char*>(name.string), name.string_len);
+     fontName.erase(std::remove_if(fontName.begin(), fontName.end(), [](auto& c) { return (static_cast<int>(c) > 127 || static_cast<int>(c) < 32); } ), fontName.end());
      fontNames[fontName] = p;
 
      FT_SfntName family;
      FT_Get_Sfnt_Name(face, TT_NAME_ID_FONT_FAMILY, &family);
      std::string fontFamily(reinterpret_cast<char*>(family.string), family.string_len);
+     fontFamily.erase(std::remove_if(fontFamily.begin(), fontFamily.end(), [](auto& c) { return (static_cast<int>(c) > 127 || static_cast<int>(c) < 32); } ), fontFamily.end());
      fontFamilies[fontFamily] = p;
   }
 }
 
 void font_add_search_path(std::string path, bool recursive) {
-  fontSearchPaths.emplace_back(path); // TODO: disallow duplicate paths?
-  if (fs::exists(path)) {
-    if (recursive) {
-      for (auto& p: fs::recursive_directory_iterator(fs::path(path)))
-        font_add_search_path_helper(p.path());
-    } else {
-      for (auto& p: fs::directory_iterator(fs::path(path)))
-        font_add_search_path_helper(p.path());
-    }
-  } else DEBUG_MESSAGE("Freetype warning searching non-existing directory: " + path, MESSAGE_TYPE::M_WARNING);
+  if (std::find(fontSearchPaths.begin(), fontSearchPaths.end(), path) == fontSearchPaths.end()) { 
+    fontSearchPaths.emplace_back(path);
+    if (fs::exists(path)) {
+      if (recursive) {
+        for (auto& p: fs::recursive_directory_iterator(fs::path(path)))
+          font_add_search_path_helper(p.path());
+      } else {
+        for (auto& p: fs::directory_iterator(fs::path(path)))
+          font_add_search_path_helper(p.path());
+      }
+    } else DEBUG_MESSAGE("Freetype warning searching non-existing directory: " + path, MESSAGE_TYPE::M_WARNING);
+  }
 }
 
 std::string font_find(std::string name, bool bold, bool italic, bool exact_match) {
@@ -266,18 +273,21 @@ std::string font_find(std::string name, bool bold, bool italic, bool exact_match
     name = "Arial";
   
   std::string fullName = name + ((bold) ? " Bold" : "") + ((italic) ? " Italic" : "");
-  DEBUG_MESSAGE("fullname: " + name, MESSAGE_TYPE::M_WARNING);
-  
-  for (auto& f : fontNames) {
-    std::cerr << f.first << std::endl;
-  }
+  if (!bold && !italic) fullName += " Regular";
   
   if (fontNames.count(fullName) > 0) {
      return fontNames[fullName];
   } else if (!exact_match) {
-    if (fontNames.count(name) > 0) return fontNames[name];
+    std::string ret;
+    // search for base font name
+    if (fontNames.count(name) > 0) ret = fontNames[name];
     // search for name by font family
-    if (fontFamilies.count(name) > 0) return fontFamilies[name]; 
+    if (fontFamilies.count(name) > 0) ret = fontFamilies[name];
+    
+    if (!ret.empty()) {
+      DEBUG_MESSAGE("Freetype warning couild not find exact match for font: \"" + fullName + "\" using best match: " + ret, MESSAGE_TYPE::M_WARNING);
+      return ret;
+    }
   }
   
   // GM's default is Arial
