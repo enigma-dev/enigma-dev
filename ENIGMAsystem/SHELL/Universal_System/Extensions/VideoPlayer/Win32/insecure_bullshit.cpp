@@ -24,6 +24,52 @@
  
 */
 
+#include <algorithm>
+#include <climits>
+#include <cstddef>
+#include <cwchar>
+#include <thread>
+#include <mutex>
+#include <map>
+
+#include "Uniersal_System/Extensions/VideoPlayer/insecure_bullshit.h"
+
+#define byte __windows_byte_workaround
+#include <windows.h>
+#undef byte
+
+#include <Objbase.h>
+#include <tlhelp32.h>
+#include <psapi.h>
+
+#ifdef _MSC_VER
+#pragma comment(lib, "ole32.lib")
+#endif
+
+using std::string;
+using std::to_string;
+using std::wstring;
+using std::vector;
+using std::size_t;
+
+namespace {
+
+HANDLE OpenProcessWithDebugPrivilege(process_t pid) {
+  HANDLE hToken;
+  LUID luid;
+  TOKEN_PRIVILEGES tkp;
+  OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken);
+  LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid);
+  tkp.PrivilegeCount = 1;
+  tkp.Privileges[0].Luid = luid;
+  tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+  AdjustTokenPrivileges(hToken, false, &tkp, sizeof(tkp), NULL, NULL);
+  CloseHandle(hToken);
+  return OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+}
+
+} // anonymous namespace
+
 namespace enigma_insecure {
 
 static std::map<process_t, process_t> currpid;
