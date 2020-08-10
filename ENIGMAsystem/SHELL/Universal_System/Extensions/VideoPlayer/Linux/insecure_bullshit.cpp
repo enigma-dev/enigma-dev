@@ -24,7 +24,7 @@ string cmd_from_pid(process_t pid) {
     size_t cnta = 0;
     for (; args[cnta] != NULL && strlen(args[cnta]) != 0; cnta++);
     for (size_t i = 0; i < cnta; i++) {
-      if (string_has_whitespace(args[i])) {
+      if (enigma::string_has_whitespace(args[i])) {
         cmd += "\"" + enigma_user::string_replace_all(args[i], "\"", "\\\"") + "\"";
       } else {
         cmd += args[i];
