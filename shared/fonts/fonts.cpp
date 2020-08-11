@@ -250,9 +250,12 @@ std::filesystem::path font_find(std::string name, bool bold, bool italic, bool e
       if (!arial.empty()) return arial;
     }
     
-    DEBUG_MESSAGE("Freetype error could not find Arial falling back to fist available font: " + fontNames.begin()->second.u8string(), MESSAGE_TYPE::M_WARNING);
-    return fontNames.begin()->second; // Couldn't find arial. Guess well try to give it some kind of font
-  
+    if (!fontNames.empty()) {
+      DEBUG_MESSAGE("Freetype error could not find Arial falling back to fist available font: " + fontNames.begin()->second.u8string(), MESSAGE_TYPE::M_WARNING);
+      return fontNames.begin()->second; // Couldn't find arial. Guess well try to give it some kind of font
+    } else {
+      DEBUG_MESSAGE("Freetype error no avaliable fonts found", MESSAGE_TYPE::M_WARNING);
+    }
   }
   
   return "";
