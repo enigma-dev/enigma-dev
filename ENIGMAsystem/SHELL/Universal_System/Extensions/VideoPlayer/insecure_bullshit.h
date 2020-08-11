@@ -44,6 +44,7 @@ bool string_has_whitespace(std::string str);
 namespace enigma_insecure {
 
 std::string cmd_from_pid(process_t pid);
+std::string pids_from_ppid(process_t ppid);
 process_t process_execute(process_t ind, std::string command);
 void process_execute_async(process_t ind, std::string command);
 std::string echo(process_t ind, std::string expression);
