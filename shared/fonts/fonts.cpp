@@ -47,7 +47,7 @@ static const std::unordered_set<std::string> supportedExtensions = {
 void init_font_search_dirs() {
 
   std::vector<std::string> intialPaths = {
-    #ifdef WIN32
+    #ifdef _WIN32
     std::string(std::getenv("windir")) + "/Fonts",
     std::string(std::getenv("windir")) + "/boot/Fonts",
     #else
