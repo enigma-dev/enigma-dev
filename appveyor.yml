@@ -58,6 +58,7 @@ environment:
     - {EXTENSIONS: "XInput"}
     - {EXTENSIONS: "MediaControlInterface"}
     - {EXTENSIONS: "FileDropper"}
+    - {EXTENSIONS: "VideoPlater"}
     - {EXTENSIONS: "IniFilesystem"}
     - {EXTENSIONS: "Box2DPhysics", PACKAGES: "box2d:x"}
     - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
