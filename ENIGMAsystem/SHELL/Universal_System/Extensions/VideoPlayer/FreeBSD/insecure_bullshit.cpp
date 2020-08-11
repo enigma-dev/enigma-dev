@@ -2,9 +2,9 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Uniersal_System/Extensions/VideoPlayer/insecure_bullshit.h"
+#include "Universal_System/Extensions/VideoPlayer/insecure_bullshit.h"
 
-#include "Uniersal_System/estring.h"
+#include "Universal_System/estring.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>

@@ -32,7 +32,7 @@
 #include <mutex>
 #include <map>
 
-#include "Uniersal_System/Extensions/VideoPlayer/insecure_bullshit.h"
+#include "Universal_System/Extensions/VideoPlayer/insecure_bullshit.h"
 
 #define byte __windows_byte_workaround
 #include <windows.h>

@@ -27,11 +27,17 @@
 #include <map>
 #include <climits>
 
-#include "insecure_bullshit.h"
-
 #include "Platforms/General/PFfilemanip.h"
 
+#include "insecure_bullshit.h"
+
 #include "videoplayer.h"
+
+#ifndef WINBLOWS
+#define RESERVED_PIDMIN 1
+#else
+#define RESERVED_PIDMIN 0
+#endif
 
 using std::string;
 
@@ -63,7 +69,7 @@ void video_play(video_t ind, wid_t wid) {
 void video_stop(video_t ind) {
   // process id of 1 is reserved on unix-likes but not on windows
   // process id of 0 is reserved on all platforms even on windows
-  if (enigma_insecure::process_current(ind) <= UNIX_LIKE) {
+  if (enigma_insecure::process_current(ind) <= RESERVED_PIDMIN) {
     return;
   }
   enigma_insecure::pid_kill(process_current(ind));
@@ -72,7 +78,7 @@ void video_stop(video_t ind) {
 bool video_is_playing(video_t ind) {
   // process id of 1 is reserved on unix-likes but not on windows
   // process id of 0 is reserved on all platforms even on windows
-  if (enigma_insecure::process_current(ind) <= UNIX_LIKE) {
+  if (enigma_insecure::process_current(ind) <= RESERVED_PIDMIN) {
     return false;
   }
   return (enigma_insecure::pid_exists(process_current(ind)) && 

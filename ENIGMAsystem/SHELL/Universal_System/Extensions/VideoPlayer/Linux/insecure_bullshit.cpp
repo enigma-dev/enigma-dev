@@ -1,9 +1,9 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "Uniersal_System/Extensions/VideoPlayer/insecure_bullshit.h"
+#include "Universal_System/Extensions/VideoPlayer/insecure_bullshit.h"
 
-#include "Uniersal_System/estring.h"
+#include "Universal_System/estring.h"
 
 #include <proc/readproc.h>
 
