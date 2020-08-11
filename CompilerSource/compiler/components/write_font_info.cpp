@@ -98,10 +98,11 @@ int lang_CPP::compile_writeFontInfo(const GameData &game)
         }
           
        wto << font.raw_font.lineHeight    << ", "
-           << font.raw_font.yOffset        << ", "
-           << font.image_data.width        << ", " 
-           << font.image_data.height  << ", " 
-           << "nullptr" << ", " 
+           << font.raw_font.yOffset       << ", "
+           << font.image_data.width       << ", " 
+           << font.image_data.height      << ", " 
+           << "nullptr"                   << ", "
+           << "1"                         << ", "  
            << ranges.str()                << " }"; // end ranges
 
         wto << ") }"; // end SpriteFont & end map index

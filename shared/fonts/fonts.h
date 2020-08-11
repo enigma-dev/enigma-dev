@@ -51,8 +51,9 @@ struct RawGlyph {
 
 /// Ready to be packed font data
 struct RawFont {
-  RawFont() : name(""), lineHeight(0), yOffset(0) {}
+  RawFont() : name(""), channels(1), lineHeight(0), yOffset(0) {}
   std::string name;
+  unsigned channels;
   unsigned lineHeight; // space between lines
   int yOffset;
   std::vector<RawGlyph> glyphs;
@@ -63,15 +64,15 @@ struct RawFont {
 struct SpriteFont {
   SpriteFont(std::string name, std::string fontName, unsigned fontSize, bool bold, 
     bool italic, unsigned lineHeight, int yOffset, unsigned textureW, unsigned textureH,
-    unsigned char* pxdata, std::initializer_list<GlyphRange> ranges) :
+    unsigned char* pxdata, unsigned channels, std::initializer_list<GlyphRange> ranges) :
      name(name), fontName(fontName), fontSize(fontSize), bold(bold), italic(italic), lineHeight(lineHeight), 
-     yOffset(yOffset), texture(textureW, textureH, pxdata), ranges(ranges) {}
+     yOffset(yOffset), texture(textureW, textureH, pxdata, channels), ranges(ranges) {}
 
   SpriteFont(std::string name = "", std::string fontName = "", unsigned fontSize = 0, bool bold = false, 
     bool italic = false, unsigned lineHeight = 0, int yOffset = 0, unsigned textureW = 0, unsigned textureH = 0,
-    unsigned char* pxdata = nullptr, std::vector<GlyphRange> ranges = {}) :
+    unsigned char* pxdata = nullptr, unsigned channels = 1, std::vector<GlyphRange> ranges = {}) :
      name(name), fontName(fontName), fontSize(fontSize), bold(bold), italic(italic), lineHeight(lineHeight), 
-     yOffset(yOffset), texture(textureW, textureH, pxdata), ranges(ranges) {}
+     yOffset(yOffset), texture(textureW, textureH, pxdata, channels), ranges(ranges) {}
 
   // The folowing functions are for use & implemented exclusively in the engine
   //void init(); // loads our pixel data into memory and deletes it

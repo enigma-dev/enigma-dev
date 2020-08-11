@@ -157,6 +157,7 @@ static SpriteFont font_sprite_helper(const enigma::Sprite& sprite, uint32_t firs
   size_t glyphCount = sprite.SubimageCount();
   
   RawFont rawFont;
+  rawFont.channels = 4;
   rawFont.ranges = { GlyphRange(first, first + glyphCount) };
   
   rawFont.glyphs.resize(glyphCount);
@@ -165,7 +166,7 @@ static SpriteFont font_sprite_helper(const enigma::Sprite& sprite, uint32_t firs
   for (RawGlyph& g : rawFont.glyphs) {
     g.character = first + index;
     unsigned w, h;
-    g.pxdata = enigma::graphics_copy_texture_pixels(sprite.GetSubimage(index).textureID, &w, &h);
+    g.pxdata = enigma::graphics_copy_texture_pixels(sprite.GetSubimage(index++).textureID, &w, &h);
     g.horiBearingX = sep;
     g.horiBearingY = sep;
     (prop) ? g.dimensions = pvrect(0, 0, w, h, -1) : g.dimensions = get_image_bounds(g.pxdata, w, h, true);
@@ -175,7 +176,7 @@ static SpriteFont font_sprite_helper(const enigma::Sprite& sprite, uint32_t firs
   unsigned textureW, textureH;
   unsigned char* pxdata = font_pack(rawFont, textureW, textureH);
   
-  SpriteFont font("SpriteFont", "SpriteFont", 1, false, false, rawFont.yOffset, rawFont.lineHeight, textureW, textureH, pxdata, rawFont.ranges);
+  SpriteFont font("SpriteFont", "SpriteFont", 1, false, false, rawFont.yOffset, rawFont.lineHeight, textureW, textureH, pxdata, 4, rawFont.ranges);
   font.texture.init();
   
   return font;

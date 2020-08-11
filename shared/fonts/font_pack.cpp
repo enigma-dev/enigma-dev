@@ -11,11 +11,12 @@ unsigned char* font_pack(RawFont& font, unsigned& textureW, unsigned& textureH) 
     return nullptr;
 
   // intialize blank image (the caller is responisible for deleting pxdata)
-  unsigned char* pxdata = new unsigned char[textureW * textureH];
+  unsigned char* pxdata = new unsigned char[textureW * textureH * font.channels];
   for (unsigned y = 0; y < textureH; ++y) {
     for (unsigned x = 0; x < textureW; ++x) {
       unsigned index = y * textureW + x;
-      pxdata[index] = 0;
+      for (unsigned i = 0; i < font.channels; ++i)
+        pxdata[index+1] = 0;
     }
   }
 
@@ -34,14 +35,16 @@ unsigned char* font_pack(RawFont& font, unsigned& textureW, unsigned& textureH) 
     glyph.xs = rg.linearHoriAdvance;
 
     // insert our glyph into the glyph range
+    if (rg.range == nullptr) rg.range = &font.ranges[0];
     rg.range->glyphs[rg.character - rg.range->start] = glyph;
 
     // write glyph pixel data to the texture
     for (unsigned y = 0; y < rg.h(); ++y) {
       for (unsigned x = 0; x < rg.w(); ++x) {
-        unsigned index = (y * rg.w() + x);
-        unsigned index_out = ((y + rg.y()) * textureW + (x + rg.x()));
-        pxdata[index_out] = rg.pxdata[index];
+        unsigned index = (y * rg.w() + x) * font.channels;
+        unsigned index_out = ((y + rg.y()) * textureW + (x + rg.x())) * font.channels;
+        for (unsigned i = 0; i < font.channels; ++i)
+          pxdata[index_out + i] = rg.pxdata[index + i];
       }
     }
   }
