@@ -4,7 +4,7 @@
 Name: Video Player
 Identifier: VideoPlayer
 Author: Samuel Venable
-Description: Play video files with mpv media player. Requires mpv package on all platforms. Requires libprocps-dev package on Ubuntu and Debian.
+Description: Play video files with mpv media player. Requires mpv package on Linux and FreeBSD. Requires libprocps-dev package on Ubuntu and Debian.
 Default: false
 Icon: videoplayer.png
 

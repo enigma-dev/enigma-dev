@@ -80,7 +80,7 @@ static std::map<process_t, process_t> prevpid;
 static std::map<process_t, string> currout;
 static std::map<process_t, string> prevout;
 
-std::mutex currout_mutex;
+static std::mutex currout_mutex;
 
 static inline void output_thread(process_t ind, HANDLE handle, string *output) {
   string result;
