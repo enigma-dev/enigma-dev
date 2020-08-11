@@ -27,8 +27,6 @@
 #include <map>
 #include <climits>
 
-#include "insecure_bullshit.h"
-
 #include "Platforms/General/PFfilemanip.h"
 
 #include "videoplayer.h"
