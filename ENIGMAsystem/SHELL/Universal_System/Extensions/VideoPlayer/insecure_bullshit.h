@@ -32,7 +32,7 @@
 // process id are always signed
 // negative is for error checks
 // lmao i'm so fucking OCD haha
-typedef unsigned long process_t
+typedef unsigned long process_t;
 
 namespace enigma {
 
