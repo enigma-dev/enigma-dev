@@ -33,13 +33,6 @@
 
 #include "videoplayer.h"
 
-// FIXME: use Makefile
-#ifndef _WIN32
-#define UNIX_LIKE 1
-#else
-#define UNIX_LIKE 0
-#endif
-
 using std::string;
 
 static std::map<video_t, string> vidmap;
