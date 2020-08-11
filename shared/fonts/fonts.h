@@ -103,6 +103,6 @@ namespace enigma_user {
   void font_add_search_path(const std::filesystem::path& path, bool recursive = false);
   
   /// Returns a ttf file based on the given font name
-  std::string font_find(std::string name, bool bold, bool italic, bool exact_match = false);
+  std::filesystem::path font_find(std::string name, bool bold, bool italic, bool exact_match = false);
 }
 #endif

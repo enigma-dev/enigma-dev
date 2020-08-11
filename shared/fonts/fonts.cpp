@@ -100,7 +100,7 @@ bool font_load(const std::filesystem::path& fName, unsigned size, RawFont& rawFo
   FT_GlyphSlot slot;
   FT_Error error;
 
-  error = FT_New_Face(enigma::fonts::FontManager::GetLibrary(), fName.c_str(), 0, &face);
+  error = FT_New_Face(enigma::fonts::FontManager::GetLibrary(), fName.u8string().c_str(), 0, &face);
 
   if (error != 0)
     return false;
@@ -183,11 +183,11 @@ namespace enigma_user {
   
 static inline void font_add_search_path_helper(const std::filesystem::path& p) {
    
-  auto it = supportedExtensions.find(ToLower(p.extension()));
+  auto it = supportedExtensions.find(ToLower(p.extension().u8string()));
   if (it != supportedExtensions.end()) {
     FT_Face face;
     FT_Error error;
-    error = FT_New_Face(enigma::fonts::FontManager::GetLibrary(), p.c_str(), 0, &face );
+    error = FT_New_Face(enigma::fonts::FontManager::GetLibrary(), p.u8string().c_str(), 0, &face );
 
     if (error != 0)
       DEBUG_MESSAGE("Error opening font: " + p.string(), MESSAGE_TYPE::M_ERROR);
@@ -221,7 +221,7 @@ void font_add_search_path(const std::filesystem::path& path, bool recursive) {
   }
 }
 
-std::string font_find(std::string name, bool bold, bool italic, bool exact_match) {
+std::filesystem::path font_find(std::string name, bool bold, bool italic, bool exact_match) {
   // LGM default font
   if (name == "Dialog.plain")
     name = "Arial";
