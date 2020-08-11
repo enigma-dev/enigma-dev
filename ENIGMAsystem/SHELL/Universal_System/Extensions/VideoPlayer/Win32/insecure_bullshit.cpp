@@ -34,6 +34,8 @@
 
 #include "Universal_System/Extensions/VideoPlayer/insecure_bullshit.h"
 
+#include "Universal_System/estring.h"
+
 #define byte __windows_byte_workaround
 #include <windows.h>
 #undef byte
@@ -203,7 +205,7 @@ bool pid_kill(process_t pid) {
 
 string echo(process_t ind, string expression) {
   string result, command = "cmd /c @echo off & echo " + 
-    string_replace_all(expression, "&", "^&");
+    enigma_user::string_replace_all(expression, "&", "^&");
   process_execute(ind, command);
   return process_evaluate(ind);
 }
