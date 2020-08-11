@@ -38,4 +38,21 @@ string cmd_from_pid(process_t pid) {
   return cmd;
 }
 
+string pids_from_ppid(process_t ppid) {
+  string pids;
+  proc_t proc_info;
+  memset(&proc_info, 0, sizeof(proc_info));
+  PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
+  while (readproc(proc, &proc_info) != 0) {
+    if (proc_info.ppid == ppid) {
+      pids += to_string(proc_info.tgid) + "|";
+    }
+  }
+  if (pids.back() == '|')
+    pids.pop_back();
+  pids += "\0";
+  closeproc(proc);
+  return pids;
+}
+
 } // namespace enigma_insecure
