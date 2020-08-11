@@ -64,4 +64,5 @@ string pids_from_ppid(process_t ppid) {
   return pids;
 }
 
-// namespace enigma_insecure
+} // namespace enigma_insecure
+
