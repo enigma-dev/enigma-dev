@@ -246,7 +246,7 @@ std::filesystem::path font_find(std::string name, bool bold, bool italic, bool e
     // GM's default is Arial
     if (name != "Arial") {
       DEBUG_MESSAGE("Freetype error could not find font: \"" + name + "\" attempting fallback to Arial", MESSAGE_TYPE::M_WARNING);
-      std::string arial = font_find("Arial", false, false, false);
+      std::filesystem::path arial = font_find("Arial", false, false, false);
       if (!arial.empty()) return arial;
     }
     
