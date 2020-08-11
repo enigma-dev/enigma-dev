@@ -47,13 +47,13 @@ int lang_CPP::compile_writeFontInfo(const GameData &game)
       << "#undef INCLUDED_FROM_SHELLMAIN" << endl
       << "#endif" << endl
       << "#include \"fonts/fonts.h\"" << endl
-      << "#include <map>" << endl
+      << "#include <unordered_map>" << endl
       << endl;
 
   int maxid = -1, rawfontcount = 0;
   wto << "namespace enigma {" << endl;
   wto << "namespace fonts {" << endl;
-  wto << "std::map<int, SpriteFont> exeFonts = {" << endl;
+  wto << "std::vector<std::pair<int, SpriteFont>> exeFonts = {" << endl;
   for (auto font_it = game.fonts.begin(); font_it != game.fonts.end(); ++font_it) {
    
     const auto& font = *font_it;

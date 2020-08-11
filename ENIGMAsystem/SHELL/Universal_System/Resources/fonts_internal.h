@@ -31,13 +31,12 @@
 
 #include <string>
 #include <vector>
-#include <map>
 
 namespace enigma {
 namespace fonts {
   GlyphMetrics findGlyph(const fonts::SpriteFont& fnt, uint32_t character);
   extern AssetArray<fonts::SpriteFont, -1> sprite_fonts;
-  extern std::map<int, SpriteFont> exeFonts;
+  extern std::vector<std::pair<int, SpriteFont>> exeFonts;
   extern int exeFontsMaxID;
 } // namespace fonts  
 } //namespace enigma

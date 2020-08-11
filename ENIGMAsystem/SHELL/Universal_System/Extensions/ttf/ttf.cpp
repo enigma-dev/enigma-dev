@@ -5,11 +5,9 @@
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
+#include <filesystem>
 
-#if __cplusplus > 201402L
-  #include <filesystem>
-  namespace fs = std::filesystem;
-#endif
+#include "fonts/fonts.cpp"
 
 using namespace enigma::fonts;
 
@@ -21,12 +19,10 @@ int font_add(std::string name, unsigned size, bool bold, bool italic, unsigned f
     return -1;
   }
   
-  #if __cplusplus > 201402L
-  if (!fs::path(name).extension().empty()) {
+  if (std::filesystem::path(name).extension().empty()) {
     name = font_find(name, bold, italic, false);
     if (name.empty()) return -1;
   }
-  #endif
 
   RawFont rawFont;
   rawFont.ranges = {GlyphRange(first, last)};

@@ -114,9 +114,6 @@ ifeq ($(PLATFORM), Win32)
 	endif
 endif
 
-override CXXFLAGS += $(shell pkg-config --cflags freetype2)
-override LDFLAGS += $(shell pkg-config --libs freetype2)
-
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
 override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)

@@ -614,5 +614,19 @@ GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es,
 
 GameData::GameData(const buffers::Project &proj, const EventData* /*events*/):
     filename("") {
-  FlattenProto(proj, this);
+  
+  buffers::Project copy = proj;
+  
+  // Add default font
+  buffers::TreeNode* fntNode = copy.mutable_game()->mutable_root()->add_child();
+  fntNode->set_name("EnigmaDefault");
+  buffers::resources::Font* fnt = fntNode->mutable_font();
+  buffers::resources::Font::Range* range = fnt->add_ranges();
+  fnt->set_font_name("Dialog.plain");
+  fnt->set_id(-1);
+  fnt->set_size(12);
+  range->set_min(32);
+  range->set_max(128);
+  
+  FlattenProto(copy, this);
 }

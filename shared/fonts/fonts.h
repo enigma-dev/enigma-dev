@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <string>
+#include <filesystem>
 
 namespace enigma {
 
@@ -89,7 +90,7 @@ struct SpriteFont {
 };
 
 /// Loads a ttf file into a RawFont
-bool font_load(std::string fName, unsigned size, RawFont& font);
+bool font_load(const std::filesystem::path& fName, unsigned size, RawFont& font);
 
 /// Packs a vector of RawGlyph(s) on to a single texture and returns that texture
 unsigned char* font_pack(RawFont& font, unsigned& textureW, unsigned& textureH);
@@ -99,7 +100,7 @@ unsigned char* font_pack(RawFont& font, unsigned& textureW, unsigned& textureH);
 
 namespace enigma_user {
   /// Searches and indexes all ttf files by name in the given path 
-  void font_add_search_path(std::string path, bool recursive = false);
+  void font_add_search_path(const std::filesystem::path& path, bool recursive = false);
   
   /// Returns a ttf file based on the given font name
   std::string font_find(std::string name, bool bold, bool italic, bool exact_match = false);

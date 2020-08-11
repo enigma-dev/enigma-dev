@@ -1,5 +1,5 @@
 #ifndef ENIGMA_SHARED_TEXTURE_H
-#define  ENIGMA_SHARED_TEXTURE_H
+#define ENIGMA_SHARED_TEXTURE_H
 
 namespace enigma {
 struct Texture {

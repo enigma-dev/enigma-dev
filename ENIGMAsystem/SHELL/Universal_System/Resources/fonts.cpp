@@ -22,8 +22,6 @@
 #include "rectpacker/rectpack.h"
 #include "Universal_System/image_formats.h"
 #include "libEGMstd.h"
-
-#include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GScolors.h"
 
 #include <list>
@@ -31,11 +29,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <vector>
-
-#include "Universal_System/image_formats.h"
 #include <iostream>
 
-#include "../../../../shared/fonts/fonts.cpp"
+#include "fonts/font_pack.cpp"
 
 using std::list;
 using std::string;
@@ -68,31 +64,6 @@ GlyphMetrics findGlyph(const SpriteFont& fnt, uint32_t character) {
 }
 
 } // namespace fonts
-
-// TODO: move this
-static inline unsigned char* mono2rgba(unsigned char* pxdata, unsigned width, unsigned height) {
-  unsigned char* rgba = new unsigned char[width * height * 4];
-  for (unsigned i = 0; i < width * height; ++i) {
-    unsigned index_out = i * 4;
-    rgba[index_out] = rgba[index_out + 1] = rgba[index_out + 2] = 255;
-    rgba[index_out + 3] = pxdata[i];
-  }
-  return rgba;
-}
-
-// TODO: move this
-void Texture::init() {
-  if (pxdata != nullptr) {
-    if (channels == 1) {
-      unsigned char* rgba = mono2rgba(pxdata, width, height);
-      ID = enigma::graphics_create_texture(enigma::RawImage(rgba, width, height), false);
-      delete[] pxdata;
-    } else ID = enigma::graphics_create_texture(enigma::RawImage(pxdata, width, height), false);
-    
-    //delete[] pxdata;
-  } else DEBUG_MESSAGE("Error: trying to intialize texture from empty pixel data", MESSAGE_TYPE::M_ERROR);
-}
-
 } // namespace enigma
 
 
