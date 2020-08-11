@@ -9,7 +9,7 @@ else ifeq ($(OS), FreeBSD)
 	SOURCES += Universal_System/Extensions/VideoPlayer/POSIX/insecure_bullshit.cpp
 	override CFLAGS += -DUNIX_LIKE=1
 	override CXXFLAGS += -DUNIX_LIKE=1
-	override LDLIBS += -lc -lprocstat
+	override LDLIBS += -lc -lutil -lprocstat
 else
 	SOURCES += Universal_System/Extensions/VideoPlayer/Win32/insecure_bullshit.cpp
 	override CFLAGS += -DUNIX_LIKE=0
