@@ -125,8 +125,8 @@ process_t process_current(process_t ind) {
   // cmndline will say sh regardless of default shell
   // /proc/<pid>/exe should say default shell instead
   if (cmd_from_pid(pid).substr(0, 8) == "/bin/sh ") {
-    // get child process of "/bin/sh" process id
-    string cpid = procinfo::pids_from_ppid(pid);
+    // get child process id of /bin/sh
+    string cpid = pids_from_ppid(pid);
     return (cpid.empty() || !pid) ? pid : stoull(cpid, nullptr, 10);
   }
   return pid;
@@ -138,8 +138,8 @@ process_t process_previous(process_t ind) {
   // cmndline will say sh regardless of default shell
   // /proc/<pid>/exe should say default shell instead
   if (cmd_from_pid(pid).substr(0, 8) == "/bin/sh ") {
-    // get child process of "/bin/sh" process id
-    string cpid = procinfo::pids_from_ppid(pid);
+    // get child process id of /bin/sh
+    string cpid = pids_from_ppid(pid);
     return (cpid.empty() || !pid) ? pid : stoull(cpid, nullptr, 10);
   }
   return pid;
