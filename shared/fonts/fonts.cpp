@@ -232,14 +232,14 @@ std::filesystem::path font_find(std::string name, bool bold, bool italic, bool e
   if (fontNames.count(fullName) > 0) {
      return fontNames[fullName];
   } else if (!exact_match) {
-    std::string ret;
+    std::filesystem::path ret;
     // search for base font name
     if (fontNames.count(name) > 0) ret = fontNames[name];
     // search for name by font family
     if (fontFamilies.count(name) > 0) ret = fontFamilies[name];
     
     if (!ret.empty()) {
-      DEBUG_MESSAGE("Freetype warning couild not find exact match for font: \"" + fullName + "\" using best match: " + ret, MESSAGE_TYPE::M_WARNING);
+      DEBUG_MESSAGE("Freetype warning couild not find exact match for font: \"" + fullName + "\" using best match: " + ret.u8string(), MESSAGE_TYPE::M_WARNING);
       return ret;
     }
   
