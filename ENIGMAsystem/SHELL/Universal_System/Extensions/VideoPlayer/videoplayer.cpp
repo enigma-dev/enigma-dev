@@ -82,7 +82,7 @@ bool video_is_playing(video_t ind) {
   if (enigma_insecure::process_current(ind) <= RESERVED_PIDMIN) {
     return false;
   }
-  return (enigma_insecure::pid_exists(process_current(ind)) && 
+  return (enigma_insecure::pid_exists(enigma_insecure::process_current(ind)) && 
     enigma_insecure::process_previous(ind) != enigma_insecure::process_current(ind));
 }
 
