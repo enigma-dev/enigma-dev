@@ -13,6 +13,7 @@
 #include <sys/queue.h>
 #include <sys/user.h>
 #include <libprocstat.h>
+#include <libutil.h>
 
 using std::string;
 using std::vector;
@@ -44,6 +45,23 @@ string cmd_from_pid(process_t pid) {
   procstat_freeprocs(proc_stat, proc_info);
   procstat_close(proc_stat);
   return cmd;
+}
+
+string pids_from_ppid(process_t ppid) {
+  string pids; int cntp;
+  struct kinfo_proc *proc_info = kinfo_getallproc(&cntp);
+  if (proc_info) {
+    for (size_t i = 0; i < cntp; i++) {
+      if (proc_info[i].ki_ppid == ppid) {
+        pids += to_string(proc_info[i].ki_pid) + "|";
+      }
+    }
+  }
+  if (pids.back() == '|')
+    pids.pop_back();
+  pids += "\0";
+  free(proc_info);
+  return pids;
 }
 
 // namespace enigma_insecure
