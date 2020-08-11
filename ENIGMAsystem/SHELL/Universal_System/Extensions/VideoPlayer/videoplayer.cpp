@@ -27,6 +27,7 @@
 #include <map>
 #include <climits>
 
+#include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFfilemanip.h"
 
 #include "insecure_bullshit.h"
@@ -72,7 +73,7 @@ void video_stop(video_t ind) {
   if (enigma_insecure::process_current(ind) <= RESERVED_PIDMIN) {
     return;
   }
-  enigma_insecure::pid_kill(process_current(ind));
+  enigma_insecure::pid_kill(enigma_insecure::process_current(ind));
 }
 
 bool video_is_playing(video_t ind) {
