@@ -98,7 +98,7 @@ static bool font_load_helper(const buffers::resources::Font& font, ImageData& da
     data = loadImageData(font.image(), error);
     if (error) return false; // image file missing
   } else { // load ttf and generate texture atlas
-    std::string ttf = enigma_user::font_find(font.font_name(), font.bold(), font.italic(), false);
+    std::filesystem::path ttf = enigma_user::font_find(font.font_name(), font.bold(), font.italic(), false);
     if (!ttf.empty()) {
       std::cout << "Loading font file: " << ttf << std::endl;
       for (const buffers::resources::Font::Range& range : font.ranges())
