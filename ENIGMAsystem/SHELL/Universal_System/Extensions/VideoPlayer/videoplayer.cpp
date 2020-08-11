@@ -27,6 +27,8 @@
 #include <map>
 #include <climits>
 
+#include "insecure_bullshit.h"
+
 #include "Platforms/General/PFfilemanip.h"
 
 #include "videoplayer.h"
@@ -73,7 +75,8 @@ bool video_is_playing(video_t ind) {
   if (enigma_insecure::process_current(ind) <= UNIX_LIKE) {
     return false;
   }
-  return (enigma_insecure::pid_exists(process_current(ind)) && enigma_insecure::process_previous(ind) != enigma_insecure::process_current(ind));
+  return (enigma_insecure::pid_exists(process_current(ind)) && 
+    enigma_insecure::process_previous(ind) != enigma_insecure::process_current(ind));
 }
 
 wid_t video_get_winid(video_t ind) {
