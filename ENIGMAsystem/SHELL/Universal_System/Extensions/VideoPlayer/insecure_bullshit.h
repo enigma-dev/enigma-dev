@@ -37,7 +37,7 @@ typedef unsigned long process_t
 namespace enigma {
 
 // helper needed for insecure functions
-bool string_has_whitespace(string str);
+bool string_has_whitespace(std::string str);
 
 } // namespace enigma
 
@@ -49,8 +49,8 @@ void process_execute_async(process_t ind, std::string command);
 std::string echo(process_t ind, std::string expression);
 process_t process_current(process_t ind);
 process_t process_previous(process_t ind);
-string process_output(process_t ind); // FIXME: don't need this
-string process_evaluate(process_t ind);
+std::string process_output(process_t ind); // FIXME: don't need this
+std::string process_evaluate(process_t ind);
 void process_clear_pid(process_t ind);
 void process_clear_out(process_t ind);
 bool pid_exists(process_t pid);
