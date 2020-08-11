@@ -62,6 +62,7 @@ video_t video_add(std::string fname) {
 }
 
 void video_play(video_t ind, wid_t wid) {
+  wid = std::to_string(stoul(wid, nullptr, 10)); // make unsigned
   enigma_insecure::process_execute_async(ind, "mpv --wid=" + wid + " --no-osc \"" + vidmap.find(ind)->second + "\"");
   widmap.insert(std::make_pair(ind, wid));
 }

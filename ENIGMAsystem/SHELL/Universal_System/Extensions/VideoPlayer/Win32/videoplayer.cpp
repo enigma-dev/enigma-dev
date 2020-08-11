@@ -135,7 +135,6 @@ static inline void video_thread(video_t ind, wid_t wid) {
                                       while (ShowCursor(false) >= 0);
                                       hr = pEvent->WaitForCompletion(INFINITE, &evCode);
                                       if (SUCCEEDED(hr)) {
-                                        while (ShowCursor(true) < 0);
                                         hr = pControl->Stop();
                                         if (SUCCEEDED(hr)) {
                                           hr = pVidWin->put_Visible(OAFALSE);
@@ -144,6 +143,7 @@ static inline void video_thread(video_t ind, wid_t wid) {
                                           }
                                         }
                                       }
+                                      while (ShowCursor(true) < 0);
                                     }
                                     std::lock_guard<std::mutex> guard2(finish_mutex);
                                     finmap[ind] = false;
