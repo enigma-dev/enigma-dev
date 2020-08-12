@@ -59,10 +59,10 @@ static std::map<video_t, string> vidmap;
 static std::map<video_t, wid_t> widmap;
 static std::map<video_t, wid_t> cwidmap;
 
-static std::map<video_t, bool> finmap;
+static std::map<video_t, bool> updmap;
 
 static std::mutex window_mutex;
-static std::mutex finish_mutex;
+static std::mutex update_mutex;
 
 static IPin *pin = NULL;
 static IOverlay *pOverlay = NULL;
@@ -73,7 +73,7 @@ static IVideoWindow *pVidWin = NULL;
 static IMediaControl *pControl = NULL;
 static IMediaEvent *pEvent = NULL;
 
-static inline void finish_thread(video_t ind) {
+static inline void update_thread(video_t ind) {
   while (video_is_playing(ind)) {
     RECT rect;
     HWND window = (HWND)stoull(widmap.find(ind)->second;
@@ -132,7 +132,7 @@ static inline void video_thread(video_t ind, wid_t wid) {
                                   if (SUCCEEDED(hr)) {
                                     std::lock_guard<std::mutex> guard1(window_mutex);
                                     cwidmap.insert(std::make_pair(ind, std::to_string((unsigned long long)vidwin)));
-                                    std::thread finthread(finish_thread, ind);
+                                    std::thread finthread(update_thread, ind);
                                     hr = pControl->Run();
                                     if (SUCCEEDED(hr)) {
                                       while (ShowCursor(false) >= 0);
@@ -148,8 +148,8 @@ static inline void video_thread(video_t ind, wid_t wid) {
                                       }
                                       while (ShowCursor(true) < 0);
                                     }
-                                    std::lock_guard<std::mutex> guard2(finish_mutex);
-                                    finmap[ind] = false;
+                                    std::lock_guard<std::mutex> guard2(update_mutex);
+                                    updmap[ind] = false;
                                     finthread.join();
                                   }
                                 }
@@ -191,8 +191,8 @@ video_t video_add(std::string fname) {
 }
 
 void video_play(video_t ind, wid_t wid) {
-  std::lock_guard<std::mutex> guard(finish_mutex);
-  finmap[ind] = true;
+  std::lock_guard<std::mutex> guard(update_mutex);
+  updmap[ind] = true;
   std::thread vidthread(video_thread, ind, wid);  
   vidthread.detach();
 }
@@ -203,7 +203,7 @@ void video_stop(video_t ind) {
 }
 
 bool video_is_playing(video_t ind) {
-  return finmap.find(ind)->second;
+  return updmap.find(ind)->second;
 }
 
 wid_t video_get_winid(video_t ind) {
@@ -218,7 +218,7 @@ void video_delete(video_t ind) {
   vidmap.erase(ind);
   widmap.erase(ind);
   cwidmap.erase(ind);
-  finmap.erase(ind);
+  updmap.erase(ind);
 }
 
 } // namespace enigma_user
