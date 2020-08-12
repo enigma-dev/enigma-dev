@@ -91,19 +91,19 @@ static inline void video_thread(video_t ind, wid_t wid) {
   widmap.insert(std::make_pair(ind, wid));
   HWND window = (HWND)stoull(wid, nullptr, 10);
   wstring wstr_fname = widen(vidmap.find(ind)->second);
-  hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void**)&pGraph);
+  hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void **)&pGraph);
   if (SUCCEEDED(hr)) {
     hr = pGraph->RenderFile(wstr_fname.c_str(), NULL);
     if (SUCCEEDED(hr)) {
-      hr = CoCreateInstance(CLSID_VideoMixingRenderer, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)&pVideoRenderer);
+      hr = CoCreateInstance(CLSID_VideoMixingRenderer, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void **)&pVideoRenderer);
       if (SUCCEEDED(hr)) {
         hr = pGraph->FindFilterByName(L"Video Renderer", &pVideoRenderer);
         if (SUCCEEDED(hr)) {
-          hr = pVideoRenderer->QueryInterface(IID_IVMRAspectRatioControl, (void**)&pAspectRatio);
+          hr = pVideoRenderer->QueryInterface(IID_IVMRAspectRatioControl, (void **)&pAspectRatio);
           if (SUCCEEDED(hr)) {
             hr = pAspectRatio->SetAspectRatioMode(VMR_ARMODE_LETTER_BOX);
             if (SUCCEEDED(hr)) {
-              hr = pGraph->QueryInterface(IID_IVideoWindow, (void**)&pVidWin);
+              hr = pGraph->QueryInterface(IID_IVideoWindow, (void **)&pVidWin);
               if (SUCCEEDED(hr)) {
                 SetWindowLongPtr(window, GWL_STYLE, GetWindowLongPtr(window, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
                 hr = pVidWin->put_Owner((OAHWND)window);
@@ -117,13 +117,13 @@ static inline void video_thread(video_t ind, wid_t wid) {
                       if (SUCCEEDED(hr)) {
                         hr = pVidWin->HideCursor(OATRUE);
                         if (SUCCEEDED(hr)) {
-                          hr = pGraph->QueryInterface(IID_IMediaControl, (void**)&pControl);
+                          hr = pGraph->QueryInterface(IID_IMediaControl, (void **)&pControl);
                           if (SUCCEEDED(hr)) {
                             hr = pVideoRenderer->FindPin(L"VMR Input0", &pin);
                             if (SUCCEEDED(hr)) {
                               hr = pin->QueryInterface(IID_IOverlay, (void **)&pOverlay);
                               if (SUCCEEDED(hr)) {
-                                hr = pGraph->QueryInterface(IID_IMediaEvent, (void**)&pEvent);
+                                hr = pGraph->QueryInterface(IID_IMediaEvent, (void **)&pEvent);
                                 if (SUCCEEDED(hr)) {
                                   hr = pOverlay->GetWindowHandle(&vidwin);
                                   if (SUCCEEDED(hr)) {
