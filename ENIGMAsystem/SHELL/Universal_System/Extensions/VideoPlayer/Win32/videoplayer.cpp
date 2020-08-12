@@ -1,4 +1,4 @@
-﻿/*
+/*
 
  MIT License
  
@@ -105,7 +105,7 @@ static inline void video_thread(video_t ind, wid_t wid) {
             if (SUCCEEDED(hr)) {
               hr = pGraph->QueryInterface(IID_IVideoWindow, (void**)&pVidWin);
               if (SUCCEEDED(hr)) {
-                SetWindowLong(window, GWL_STYLE, GetWindowLong(window, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+                SetWindowLongPtr(window, GWL_STYLE, GetWindowLongPtr(window, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
                 hr = pVidWin->put_Owner((OAHWND)window);
                 if (SUCCEEDED(hr)) {
                   GetClientRect(window, &rect);
