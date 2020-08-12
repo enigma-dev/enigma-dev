@@ -80,7 +80,7 @@ static inline void update_thread(video_t ind) {
     HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second, nullptr, 10);
     GetClientRect(window, &rect);
     SetWindowLongPtr(window, GWL_STYLE, GetWindowLongPtr(window, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-    MoveWindow(cwindow, nullptr, 10), 0, 0, rect.right - rect.left, rect.bottom - rect.top, true);
+    MoveWindow(cwindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, true);
   }
 }
 
