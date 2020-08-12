@@ -17,6 +17,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "sprites.h"
 #include "sprites_internal.h"
 #include "fonts_internal.h"
 #include "rectpacker/rectpack.h"
@@ -149,7 +150,7 @@ static pvrect get_image_bounds(unsigned char* pxdata, unsigned width, unsigned h
       }
     }
   }
-
+  
   return rect;
 }
 
@@ -166,11 +167,14 @@ static SpriteFont font_sprite_helper(const enigma::Sprite& sprite, uint32_t firs
   for (RawGlyph& g : rawFont.glyphs) {
     g.character = first + index;
     unsigned w, h;
-    g.pxdata = enigma::graphics_copy_texture_pixels(sprite.GetSubimage(index++).textureID, &w, &h);
+    g.pxdata = enigma::graphics_copy_texture_pixels(sprite.GetSubimage(index).textureID, &w, &h);
     g.horiBearingX = sep;
     g.horiBearingY = sep;
-    (prop) ? g.dimensions = pvrect(0, 0, w, h, -1) : g.dimensions = get_image_bounds(g.pxdata, w, h, true);
+    (prop) ? g.dimensions = pvrect(0, 0, sprite.width, sprite.height, -1) : g.dimensions = get_image_bounds(g.pxdata, sprite.width, sprite.height, true);
+    g.left = g.dimensions.x;
+    g.top = g.dimensions.y;
     g.linearHoriAdvance = g.dimensions.w + sep;
+    index++;
   }
 
   unsigned textureW, textureH;

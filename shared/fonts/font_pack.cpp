@@ -39,8 +39,8 @@ unsigned char* font_pack(RawFont& font, unsigned& textureW, unsigned& textureH) 
     rg.range->glyphs[rg.character - rg.range->start] = glyph;
 
     // write glyph pixel data to the texture
-    for (unsigned y = 0; y < rg.h(); ++y) {
-      for (unsigned x = 0; x < rg.w(); ++x) {
+    for (unsigned y = rg.top; y < rg.h(); ++y) {
+      for (unsigned x = rg.left; x < rg.w(); ++x) {
         unsigned index = (y * rg.w() + x) * font.channels;
         unsigned index_out = ((y + rg.y()) * textureW + (x + rg.x())) * font.channels;
         for (unsigned i = 0; i < font.channels; ++i)

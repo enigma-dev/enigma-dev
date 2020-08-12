@@ -34,11 +34,12 @@ struct GlyphRange {
 
 /// Struct holding the pixel data and dimensions for individual glyphs
 struct RawGlyph {
-  RawGlyph() : character(0), pxdata(nullptr), dimensions(0,0,0,0,-1), horiBearingX(0), horiBearingY(0), range(nullptr) {}
+  RawGlyph() : character(0), pxdata(nullptr), dimensions(0,0,0,0,-1), left(0), top(0), horiBearingX(0), horiBearingY(0), range(nullptr) {}
   void destroy() { delete[] pxdata; }
   unsigned character; // the letter/character we want to render
   unsigned char* pxdata; // raw pixel data of glyph
   rect_packer::pvrect dimensions; // rectange(x,y,w,h) holding the dimensions of our glyph in pixels
+  unsigned left, top;
   int x() const { return dimensions.x; }
   int y() const { return dimensions.y; }
   unsigned w() const { return dimensions.w; }
