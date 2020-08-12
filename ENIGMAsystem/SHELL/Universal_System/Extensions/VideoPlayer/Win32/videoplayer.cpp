@@ -77,7 +77,7 @@ static inline void finish_thread(video_t ind) {
   while (video_is_playing(ind)) {
     RECT rect;
     HWND window = (HWND)stoull(widmap.find(ind)->second;
-	HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second;
+    HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second;
     GetClientRect(window, nullptr, 10), &rect);
     SetWindowLongPtr(window, GWL_STYLE, GetWindowLongPtr(window, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
     MoveWindow(cwindow, nullptr, 10), 0, 0, rect.right - rect.left, rect.bottom - rect.top, true);
