@@ -77,10 +77,10 @@ static inline void update_thread(video_t ind) {
   while (video_is_playing(ind)) {
     HWND window = (HWND)stoull(widmap.find(ind)->second, nullptr, 10);
     HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second, nullptr, 10);
-	LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
-	if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS))) {
-	  SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-	}
+    LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
+      if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS))) {
+      SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+    }
     RECT rect; GetClientRect(window, &rect);
     MoveWindow(cwindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, true);
   }
