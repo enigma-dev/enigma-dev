@@ -78,7 +78,7 @@ static inline void update_thread(video_t ind) {
     HWND window = (HWND)stoull(widmap.find(ind)->second, nullptr, 10);
     HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second, nullptr, 10);
     LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
-      if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS))) {
+    if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS))) {
       SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
     }
     RECT rect; GetClientRect(window, &rect);
