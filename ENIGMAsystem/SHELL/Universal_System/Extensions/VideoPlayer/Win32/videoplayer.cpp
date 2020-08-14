@@ -233,7 +233,7 @@ video_t video_add(std::string fname) {
     vidmap.insert(std::make_pair(ind, fname)); 
     id++;
   } else {
-    DEBUG_MESSAGE("The specified video file does not exist.", MESSAGE_TYPE::M_ERROR)
+    DEBUG_MESSAGE("The specified video file does not exist.", MESSAGE_TYPE::M_ERROR);
   }
   return ind;
 }
