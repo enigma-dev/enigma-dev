@@ -12,13 +12,7 @@ unsigned char* font_pack(RawFont& font, unsigned& textureW, unsigned& textureH) 
 
   // intialize blank image (the caller is responisible for deleting pxdata)
   unsigned char* pxdata = new unsigned char[textureW * textureH * font.channels];
-  for (unsigned y = 0; y < textureH; ++y) {
-    for (unsigned x = 0; x < textureW; ++x) {
-      unsigned index = y * textureW + x;
-      for (unsigned i = 0; i < font.channels; ++i)
-        pxdata[index+1] = 0;
-    }
-  }
+  memset(pxdata, 0, textureW * textureH * font.channels);
 
   // now we can copy all our glyphs onto single texture
   for (RawGlyph& rg : font.glyphs) {
