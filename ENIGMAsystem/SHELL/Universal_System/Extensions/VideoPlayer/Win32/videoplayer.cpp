@@ -111,10 +111,10 @@ static inline void update_thread(video_t ind) {
   while (video_is_playing(ind)) {
     HWND window = (HWND)stoull(widmap.find(ind)->second, nullptr, 10);
     HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second, nullptr, 10);
-	LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
-	if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS))) {
-	  SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-	}
+    LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
+    if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS))) {
+      SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+    }
     RECT rect; GetClientRect(window, &rect);
     MoveWindow(cwindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, true);
   }
@@ -126,7 +126,7 @@ static inline void video_thread(video_t ind, wid_t wid) {
   HRESULT hr = S_OK;
   switch (0) default: {
     hr = CoInitialize(NULL);
-	ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("CoInitialize", hr);
+    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("CoInitialize", hr);
     HWND vidwin = NULL;
     RECT rect; long evCode;
     widmap.insert(std::make_pair(ind, wid));
@@ -175,8 +175,8 @@ static inline void video_thread(video_t ind, wid_t wid) {
       switch (0) default: {
         hr = pControl->Run();
         ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Run", hr);
-	    while (ShowCursor(false) >= 0);
-	    switch (0) default: {
+        while (ShowCursor(false) >= 0);
+        switch (0) default: {
           hr = pEvent->WaitForCompletion(INFINITE, &evCode);
           ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("WaitForCompletion", hr);
           hr = pControl->Stop();
@@ -184,41 +184,41 @@ static inline void video_thread(video_t ind, wid_t wid) {
           hr = pVidWin->put_Visible(OAFALSE);
           ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("put_Visible", hr);
           hr = pVidWin->put_Owner((OAHWND)NULL);
-		  ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("put_Owner", hr);
-	    }
-	    while (ShowCursor(true) < 0);
-	  }
+          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("put_Owner", hr);
+        }
+        while (ShowCursor(true) < 0);
+      }
       updthread.join();
-	  if (pEvent != NULL) {
+      if (pEvent != NULL) {
         hr = pEvent->Release();
-	    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-	  }
-	  if (pControl != NULL) {
+        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
+      }
+      if (pControl != NULL) {
         hr = pControl->Release();
-	    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-	  }
-	  if (pVidWin != NULL) {
+        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
+      }
+      if (pVidWin != NULL) {
         hr = pVidWin->Release();
-	    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-	  }
-	  if (pAspectRatio != NULL) {
+        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
+      }
+      if (pAspectRatio != NULL) {
         hr = pAspectRatio->Release();
-	    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-	  }
-	  if (pVideoRenderer != NULL) {
+        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
+      }
+      if (pVideoRenderer != NULL) {
         hr = pVideoRenderer->Release();
-	    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-	  }
-	  if (pGraph != NULL) {
+        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
+      }
+      if (pGraph != NULL) {
         hr = pGraph->Release();
-	    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-	  }
+        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
+      }
       if (pin != NULL) {
-	    hr = pin->Release();
-	    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-	  }
+        hr = pin->Release();
+        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
+      }
     }
-	CoUninitialize();
+    CoUninitialize();
   }
   std::lock_guard<std::mutex> guard2(update_mutex);
   updmap[ind] = false;
