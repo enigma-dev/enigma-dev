@@ -1,4 +1,6 @@
 #include "fonts.h"
+#include <cstring> // memset
+
 
 using enigma::rect_packer::pvrect;
 using enigma::rect_packer::pack_rectangles;
