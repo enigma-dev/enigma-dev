@@ -37,7 +37,6 @@
 #include "Platforms/General/PFfilemanip.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/estring.h"
-
 #include "Universal_System/Extensions/VideoPlayer/insecure_bullshit.h"
 #include "Universal_System/Extensions/VideoPlayer/videoplayer.h"
 
@@ -46,10 +45,20 @@
 #undef byte
 
 #include <dshow.h>
-#define ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(func, hr) if (FAILED(hr)) {\
+
+#ifdef _MSC_VER
+#pragma comment(lib, "strmiids.lib")
+#endif
+
+#define ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, func, hr) if (FAILED(hr)) {\
   DEBUG_MESSAGE(GetErrorText(func, hr), MESSAGE_TYPE::M_ERROR);\
   break;\
-}\
+}
+
+#define RELEASE_IF_DIRECTSHOW_SUCCEEDED(ptr, hr, wid) if (ptr != NULL) {\
+  hr = ptr->Release();\
+  ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "Release", hr);\
+}
 
 using std::string;
 using std::wstring;
@@ -90,27 +99,23 @@ static inline string GetErrorText(string func, HRESULT hr) {
 namespace enigma_user {
 
 static std::map<video_t, string> vidmap;
-static std::map<video_t, wid_t> widmap;
+static std::map<video_t, wid_t>  widmap;
 static std::map<video_t, wid_t> cwidmap;
-
-static std::map<video_t, bool> updmap;
+static std::map<video_t, string> updmap;
 
 static std::mutex window_mutex;
 static std::mutex update_mutex;
-
-static IPin *pin = NULL;
-static IOverlay *pOverlay = NULL;
-static IGraphBuilder *pGraph = NULL;
-static IVMRAspectRatioControl *pAspectRatio = NULL;
-static IBaseFilter *pVideoRenderer = NULL;
-static IVideoWindow *pVidWin = NULL;
-static IMediaControl *pControl = NULL;
-static IMediaEvent *pEvent = NULL;
 
 static inline void update_thread(video_t ind) {
   while (video_is_playing(ind)) {
     HWND window = (HWND)stoull(widmap.find(ind)->second, nullptr, 10);
     HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second, nullptr, 10);
+    if (!IsWindow(cwindow)) {
+      std::lock_guard<std::mutex> guard2(update_mutex);
+      updmap.erase(ind);
+      updmap.insert(std::make_pair(ind, std::to_string(0)));
+      return;
+    }
     LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
     if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS))) {
       SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
@@ -123,10 +128,18 @@ static inline void update_thread(video_t ind) {
 // fuck joo bitch !!!
 static inline void video_thread(video_t ind, wid_t wid) {
   // MPEG-2 vidoe codec + MP2 audio codec + *.MPG = werk!
-  HRESULT hr = S_OK;
+  HRESULT                 hr             = S_OK;
+  IGraphBuilder          *pGraph         = NULL;
+  IBaseFilter            *pVideoRenderer = NULL;
+  IVMRAspectRatioControl *pAspectRatio   = NULL;
+  IVideoWindow           *pVidWin        = NULL;
+  IPin                   *pPin           = NULL;
+  IMediaControl          *pControl       = NULL;
+  IOverlay               *pOverlay       = NULL;
+  IMediaEvent            *pEvent         = NULL;
   switch (0) default: {
     hr = CoInitialize(NULL);
-    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("CoInitialize", hr);
+    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "CoInitialize", hr);
     HWND vidwin = NULL;
     RECT rect; long evCode;
     widmap.insert(std::make_pair(ind, wid));
@@ -134,94 +147,74 @@ static inline void video_thread(video_t ind, wid_t wid) {
     wstring wstr_fname = widen(vidmap.find(ind)->second);
     switch (0) default: {
       hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void **)&pGraph);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("CoCreateInstance", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "CoCreateInstance", hr);
       hr = pGraph->RenderFile(wstr_fname.c_str(), NULL);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("RenderFile", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "RenderFile", hr);
       hr = CoCreateInstance(CLSID_VideoMixingRenderer, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void **)&pVideoRenderer);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("CoCreateInstance", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "CoCreateInstance", hr);
       hr = pGraph->FindFilterByName(L"Video Renderer", &pVideoRenderer);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("FindFilterByName", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "FindFilterByName", hr);
       hr = pVideoRenderer->QueryInterface(IID_IVMRAspectRatioControl, (void **)&pAspectRatio);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("QueryInterface", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "QueryInterface", hr);
       hr = pAspectRatio->SetAspectRatioMode(VMR_ARMODE_LETTER_BOX);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("SetAspectRatioMode", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "SetAspectRatioMode", hr);
       hr = pGraph->QueryInterface(IID_IVideoWindow, (void **)&pVidWin);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("QueryInterface", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "QueryInterface", hr);
       SetWindowLongPtr(window, GWL_STYLE, GetWindowLongPtr(window, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
       hr = pVidWin->put_Owner((OAHWND)window);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("put_Owner", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "put_Owner", hr);
       GetClientRect(window, &rect);
       hr = pVidWin->SetWindowPosition(0, 0, rect.right - rect.left, rect.bottom - rect.top);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("SetWindowPosition", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "SetWindowPosition", hr);
       hr = pVidWin->put_WindowStyle(WS_CHILD | WS_CLIPSIBLINGS);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("put_WindowStyle", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "put_WindowStyle", hr);
       hr = pVidWin->SetWindowForeground(OATRUE);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("SetWindowForeground", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "SetWindowForeground", hr);
       hr = pVidWin->HideCursor(OATRUE);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("HideCursor", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "HideCursor", hr);
       hr = pGraph->QueryInterface(IID_IMediaControl, (void **)&pControl);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("QueryInterface", hr);
-      hr = pVideoRenderer->FindPin(L"VMR Input0", &pin);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("FindPin", hr);
-      hr = pin->QueryInterface(IID_IOverlay, (void **)&pOverlay);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("QueryInterface", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "QueryInterface", hr);
+      hr = pVideoRenderer->FindPin(L"VMR Input0", &pPin);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "FindPin", hr);
+      hr = pPin->QueryInterface(IID_IOverlay, (void **)&pOverlay);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "QueryInterface", hr);
       hr = pGraph->QueryInterface(IID_IMediaEvent, (void **)&pEvent);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("QueryInterface", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "QueryInterface", hr);
       hr = pOverlay->GetWindowHandle(&vidwin);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("GetWindowHandle", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "GetWindowHandle", hr);
       std::lock_guard<std::mutex> guard1(window_mutex);
       cwidmap.insert(std::make_pair(ind, std::to_string((unsigned long long)vidwin)));
       std::thread updthread(update_thread, ind);
       switch (0) default: {
         hr = pControl->Run();
-        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Run", hr);
+        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "Run", hr);
         while (ShowCursor(false) >= 0);
         switch (0) default: {
           hr = pEvent->WaitForCompletion(INFINITE, &evCode);
-          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("WaitForCompletion", hr);
+          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "WaitForCompletion", hr);
           hr = pControl->Stop();
-          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Stop", hr);
+          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "Stop", hr);
           hr = pVidWin->put_Visible(OAFALSE);
-          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("put_Visible", hr);
+          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "put_Visible", hr);
           hr = pVidWin->put_Owner((OAHWND)NULL);
-          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("put_Owner", hr);
+          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "put_Owner", hr);
         }
         while (ShowCursor(true) < 0);
       }
       updthread.join();
-      if (pEvent != NULL) {
-        hr = pEvent->Release();
-        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-      }
-      if (pControl != NULL) {
-        hr = pControl->Release();
-        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-      }
-      if (pVidWin != NULL) {
-        hr = pVidWin->Release();
-        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-      }
-      if (pAspectRatio != NULL) {
-        hr = pAspectRatio->Release();
-        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-      }
-      if (pVideoRenderer != NULL) {
-        hr = pVideoRenderer->Release();
-        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-      }
-      if (pGraph != NULL) {
-        hr = pGraph->Release();
-        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-      }
-      if (pin != NULL) {
-        hr = pin->Release();
-        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED("Release", hr);
-      }
     }
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pGraph, hr, wid);
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pVideoRenderer, hr, wid);
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pAspectRatio, hr, wid);
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pVidWin, hr, wid);
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pPin, hr, wid);
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pControl, hr, wid);
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pOverlay, hr, wid);
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pEvent, hr, wid);
     CoUninitialize();
   }
   std::lock_guard<std::mutex> guard2(update_mutex);
-  updmap[ind] = false;
+  updmap.erase(ind);
 }
 
 video_t video_add(std::string fname) {
@@ -232,26 +225,28 @@ video_t video_add(std::string fname) {
   if (file_exists(fname)) {
     vidmap.insert(std::make_pair(ind, fname)); 
     id++;
-  } else {
-    DEBUG_MESSAGE("The specified video file does not exist.", MESSAGE_TYPE::M_ERROR);
   }
   return ind;
 }
 
 void video_play(video_t ind, wid_t wid) {
   std::lock_guard<std::mutex> guard(update_mutex);
-  updmap[ind] = true;
+  updmap.insert(std::make_pair(ind, std::to_string(1)));
   std::thread vidthread(video_thread, ind, wid);  
   vidthread.detach();
 }
 
 void video_stop(video_t ind) {
-  DestroyWindow((HWND)stoull(cwidmap.find(ind)->second));
   ShowWindow((HWND)stoull(cwidmap.find(ind)->second), SW_HIDE);
+  SetParent((HWND)stoull(cwidmap.find(ind)->second), NULL);
+  DestroyWindow((HWND)stoull(cwidmap.find(ind)->second));
 }
 
 bool video_is_playing(video_t ind) {
-  return updmap.find(ind)->second;
+  if (!updmap.find(ind)->second.empty()) {
+    return (bool)stoul(updmap.find(ind)->second, nullptr, 10);
+  }
+  return false;
 }
 
 wid_t video_get_winid(video_t ind) {
@@ -266,7 +261,8 @@ void video_delete(video_t ind) {
   vidmap.erase(ind);
   widmap.erase(ind);
   cwidmap.erase(ind);
-  updmap.erase(ind);
+  widmap.insert(std::make_pair(ind, std::to_string(0)));
+  cwidmap.insert(std::make_pair(ind, std::to_string(0)));
 }
 
 } // namespace enigma_user
