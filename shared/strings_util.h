@@ -92,10 +92,11 @@ inline bool string_ends_with(std::string const &fullString, std::string const &e
     return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
 }
 
-inline std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
+
+inline std::string string_replace_all(std::string str, std::string_view substr,
+                                      std::string_view nstr) {
   size_t pos = 0;
-  while ((pos = str.find(substr, pos)) != std::string::npos)
-  {
+  while ((pos = str.find(substr, pos)) != std::string::npos) {
     str.replace(pos, substr.length(), nstr);
     pos += nstr.length();
   }
