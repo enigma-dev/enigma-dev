@@ -110,12 +110,12 @@ static std::mutex update_mutex;
 
 static inline void update_thread(video_t ind) {
   while (video_is_playing(ind)) {
+	std::lock_guard<std::mutex> guard(window_mutex);
     HWND window = (HWND)stoull(widmap.find(ind)->second, nullptr, 10);
     HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second, nullptr, 10);
     if (!IsWindow(cwindow)) {
       std::lock_guard<std::mutex> guard(update_mutex);
       updmap.erase(ind);
-      updmap.insert(std::make_pair(ind, std::to_string(0)));
       return;
     }
     LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
@@ -219,7 +219,7 @@ void video_stop(video_t ind) {
 }
 
 bool video_is_playing(video_t ind) {
-  return (bool)stoul(updmap.find(ind)->second, nullptr, 10);
+  return (!updmap.find(ind)->second.empty());
 }
 
 wid_t video_get_winid(video_t ind) {
@@ -231,11 +231,10 @@ bool video_exists(video_t ind) {
 }
 
 void video_delete(video_t ind) {
-  std::lock_guard<std::mutex> guard2(window_mutex);
+  vidmap.erase(ind);
+  std::lock_guard<std::mutex> guard(window_mutex);
   widmap.erase(ind);
-  cwidmap.erase(ind);
   widmap.insert(std::make_pair(ind, std::to_string(0)));
-  cwidmap.insert(std::make_pair(ind, std::to_string(0)));
 }
 
 } // namespace enigma_user
