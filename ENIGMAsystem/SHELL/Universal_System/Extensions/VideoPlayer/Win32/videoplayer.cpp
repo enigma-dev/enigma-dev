@@ -110,7 +110,7 @@ static std::mutex update_mutex;
 
 static inline void update_thread(video_t ind) {
   while (video_is_playing(ind)) {
-	std::lock_guard<std::mutex> guard(window_mutex);
+    std::lock_guard<std::mutex> guard(window_mutex);
     HWND window = (HWND)stoull(widmap.find(ind)->second, nullptr, 10);
     HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second, nullptr, 10);
     if (!IsWindow(cwindow)) {
