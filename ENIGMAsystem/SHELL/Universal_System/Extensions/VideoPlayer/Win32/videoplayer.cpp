@@ -215,6 +215,7 @@ static inline void video_thread(video_t ind, wid_t wid) {
   }
   std::lock_guard<std::mutex> guard2(update_mutex);
   updmap.erase(ind);
+  updmap.insert(std::make_pair(ind, std::to_string(0)));
 }
 
 video_t video_add(std::string fname) {
