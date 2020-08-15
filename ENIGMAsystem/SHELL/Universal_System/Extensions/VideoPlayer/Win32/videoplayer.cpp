@@ -50,14 +50,16 @@
 #pragma comment(lib, "strmiids.lib")
 #endif
 
-#define ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, func, hr) if (FAILED(hr)) {\
-  DEBUG_MESSAGE(GetErrorText(func, hr), MESSAGE_TYPE::M_ERROR);\
-  break;\
+#define ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS(func, ...) {\
+  HRESULT hr = (__VA_ARGS__);\
+  if (FAILED(hr)) {\
+    DEBUG_MESSAGE(GetErrorText(func, hr), MESSAGE_TYPE::M_ERROR);\
+    break;\
+  }\
 }
 
-#define RELEASE_IF_DIRECTSHOW_SUCCEEDED(ptr, hr, wid) if (ptr != NULL) {\
-  hr = ptr->Release();\
-  ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "Release", hr);\
+#define RELEASE_IF_DIRECTSHOW_SUCCEEDED(ptr, ...) if (ptr != NULL) {\
+  ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", __VA_ARGS__);\
 }
 
 using std::string;
@@ -128,7 +130,6 @@ static inline void update_thread(video_t ind) {
 // fuck joo bitch !!!
 static inline void video_thread(video_t ind, wid_t wid) {
   // MPEG-2 vidoe codec + MP2 audio codec + *.MPG = werk!
-  HRESULT                 hr             = S_OK;
   IGraphBuilder          *pGraph         = NULL;
   IBaseFilter            *pVideoRenderer = NULL;
   IVMRAspectRatioControl *pAspectRatio   = NULL;
@@ -138,8 +139,7 @@ static inline void video_thread(video_t ind, wid_t wid) {
   IOverlay               *pOverlay       = NULL;
   IMediaEvent            *pEvent         = NULL;
   switch (0) default: {
-    hr = CoInitialize(NULL);
-    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "CoInitialize", hr);
+    ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("CoInitialize", CoInitialize(NULL));
     HWND vidwin = NULL;
     RECT rect; long evCode;
     widmap.erase(ind);
@@ -147,69 +147,47 @@ static inline void video_thread(video_t ind, wid_t wid) {
     HWND window = (HWND)stoull(wid, nullptr, 10);
     wstring wstr_fname = widen(vidmap.find(ind)->second);
     switch (0) default: {
-      hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void **)&pGraph);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "CoCreateInstance", hr);
-      hr = pGraph->RenderFile(wstr_fname.c_str(), NULL);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "RenderFile", hr);
-      hr = CoCreateInstance(CLSID_VideoMixingRenderer, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void **)&pVideoRenderer);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "CoCreateInstance", hr);
-      hr = pGraph->FindFilterByName(L"Video Renderer", &pVideoRenderer);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "FindFilterByName", hr);
-      hr = pVideoRenderer->QueryInterface(IID_IVMRAspectRatioControl, (void **)&pAspectRatio);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "QueryInterface", hr);
-      hr = pAspectRatio->SetAspectRatioMode(VMR_ARMODE_LETTER_BOX);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "SetAspectRatioMode", hr);
-      hr = pGraph->QueryInterface(IID_IVideoWindow, (void **)&pVidWin);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "QueryInterface", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("CoCreateInstance", CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void **)&pGraph));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("RenderFile", pGraph->RenderFile(wstr_fname.c_str(), NULL));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("CoCreateInstance", CoCreateInstance(CLSID_VideoMixingRenderer, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void **)&pVideoRenderer));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("FindFilterByName", pGraph->FindFilterByName(L"Video Renderer", &pVideoRenderer));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("QueryInterface", pVideoRenderer->QueryInterface(IID_IVMRAspectRatioControl, (void **)&pAspectRatio));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("SetAspectRatioMode", pAspectRatio->SetAspectRatioMode(VMR_ARMODE_LETTER_BOX));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("QueryInterface", pGraph->QueryInterface(IID_IVideoWindow, (void **)&pVidWin));
       SetWindowLongPtr(window, GWL_STYLE, GetWindowLongPtr(window, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-      hr = pVidWin->put_Owner((OAHWND)window);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "put_Owner", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("put_Owner", pVidWin->put_Owner((OAHWND)window));
       GetClientRect(window, &rect);
-      hr = pVidWin->SetWindowPosition(0, 0, rect.right - rect.left, rect.bottom - rect.top);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "SetWindowPosition", hr);
-      hr = pVidWin->put_WindowStyle(WS_CHILD | WS_CLIPSIBLINGS);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "put_WindowStyle", hr);
-      hr = pVidWin->SetWindowForeground(OATRUE);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "SetWindowForeground", hr);
-      hr = pVidWin->HideCursor(OATRUE);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "HideCursor", hr);
-      hr = pGraph->QueryInterface(IID_IMediaControl, (void **)&pControl);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "QueryInterface", hr);
-      hr = pVideoRenderer->FindPin(L"VMR Input0", &pPin);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "FindPin", hr);
-      hr = pPin->QueryInterface(IID_IOverlay, (void **)&pOverlay);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "QueryInterface", hr);
-      hr = pGraph->QueryInterface(IID_IMediaEvent, (void **)&pEvent);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "QueryInterface", hr);
-      hr = pOverlay->GetWindowHandle(&vidwin);
-      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "GetWindowHandle", hr);
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("SetWindowPosition", pVidWin->SetWindowPosition(0, 0, rect.right - rect.left, rect.bottom - rect.top));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("put_WindowStyle", pVidWin->put_WindowStyle(WS_CHILD | WS_CLIPSIBLINGS));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("SetWindowForeground", pVidWin->SetWindowForeground(OATRUE));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("HideCursor", pVidWin->HideCursor(OATRUE));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("QueryInterface", pGraph->QueryInterface(IID_IMediaControl, (void **)&pControl));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("FindPin", pVideoRenderer->FindPin(L"VMR Input0", &pPin));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("QueryInterface", pPin->QueryInterface(IID_IOverlay, (void **)&pOverlay));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("QueryInterface", pGraph->QueryInterface(IID_IMediaEvent, (void **)&pEvent));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("GetWindowHandle", pOverlay->GetWindowHandle(&vidwin));
       cwidmap.erase(ind);
       cwidmap.insert(std::make_pair(ind, std::to_string((unsigned long long)vidwin)));
       std::thread updthread(update_thread, ind);
       updthread.detach();
       switch (0) default: {
-        hr = pControl->Run();
-        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "Run", hr);
+        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Run", pControl->Run());
         switch (0) default: {
-          hr = pEvent->WaitForCompletion(INFINITE, &evCode);
-          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "WaitForCompletion", hr);
-          hr = pControl->Stop();
-          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "Stop", hr);
-          hr = pVidWin->put_Visible(OAFALSE);
-          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "put_Visible", hr);
-          hr = pVidWin->put_Owner((OAHWND)NULL);
-          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "put_Owner", hr);
+          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("WaitForCompletion", pEvent->WaitForCompletion(INFINITE, &evCode));
+          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Stop", pControl->Stop());
+          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("put_Visible", pVidWin->put_Visible(OAFALSE));
+          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("put_Owner", pVidWin->put_Owner((OAHWND)NULL));
         }
       }
     }
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pGraph, hr, wid);
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pVideoRenderer, hr, wid);
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pAspectRatio, hr, wid);
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pVidWin, hr, wid);
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pPin, hr, wid);
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pControl, hr, wid);
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pOverlay, hr, wid);
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pEvent, hr, wid);
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pGraph, pGraph->Release());
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pVideoRenderer, pVideoRenderer->Release());
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pAspectRatio, pAspectRatio->Release());
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pVidWin, pVidWin->Release());
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pPin, pPin->Release());
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pControl, pControl->Release());
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pOverlay, pOverlay->Release());
+    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pEvent, pEvent->Release());
     CoUninitialize();
   }
 }
