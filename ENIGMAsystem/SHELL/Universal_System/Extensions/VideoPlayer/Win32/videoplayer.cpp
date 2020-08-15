@@ -111,7 +111,7 @@ static inline void update_thread(video_t ind) {
     HWND window = (HWND)stoull(widmap.find(ind)->second, nullptr, 10);
     HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second, nullptr, 10);
     if (!IsWindow(cwindow)) {
-      std::lock_guard<std::mutex> guard2(update_mutex);
+      std::lock_guard<std::mutex> guard(update_mutex);
       updmap.erase(ind);
       updmap.insert(std::make_pair(ind, std::to_string(0)));
       return;
@@ -142,6 +142,7 @@ static inline void video_thread(video_t ind, wid_t wid) {
     ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "CoInitialize", hr);
     HWND vidwin = NULL;
     RECT rect; long evCode;
+    widmap.erase(ind);
     widmap.insert(std::make_pair(ind, wid));
     HWND window = (HWND)stoull(wid, nullptr, 10);
     wstring wstr_fname = widen(vidmap.find(ind)->second);
@@ -182,13 +183,13 @@ static inline void video_thread(video_t ind, wid_t wid) {
       ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "QueryInterface", hr);
       hr = pOverlay->GetWindowHandle(&vidwin);
       ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "GetWindowHandle", hr);
-      std::lock_guard<std::mutex> guard1(window_mutex);
+      cwidmap.erase(ind);
       cwidmap.insert(std::make_pair(ind, std::to_string((unsigned long long)vidwin)));
       std::thread updthread(update_thread, ind);
+      updthread.detach();
       switch (0) default: {
         hr = pControl->Run();
         ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "Run", hr);
-        while (ShowCursor(false) >= 0);
         switch (0) default: {
           hr = pEvent->WaitForCompletion(INFINITE, &evCode);
           ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "WaitForCompletion", hr);
@@ -199,9 +200,7 @@ static inline void video_thread(video_t ind, wid_t wid) {
           hr = pVidWin->put_Owner((OAHWND)NULL);
           ERROR_AND_BREAK_IF_DIRECTSHOW_FAILED(wid, "put_Owner", hr);
         }
-        while (ShowCursor(true) < 0);
       }
-      updthread.join();
     }
     RELEASE_IF_DIRECTSHOW_SUCCEEDED(pGraph, hr, wid);
     RELEASE_IF_DIRECTSHOW_SUCCEEDED(pVideoRenderer, hr, wid);
@@ -213,9 +212,6 @@ static inline void video_thread(video_t ind, wid_t wid) {
     RELEASE_IF_DIRECTSHOW_SUCCEEDED(pEvent, hr, wid);
     CoUninitialize();
   }
-  std::lock_guard<std::mutex> guard2(update_mutex);
-  updmap.erase(ind);
-  updmap.insert(std::make_pair(ind, std::to_string(0)));
 }
 
 video_t video_add(std::string fname) {
@@ -224,6 +220,7 @@ video_t video_add(std::string fname) {
   enigma_insecure::process_clear_out(UINT_MAX); // grab output right by the pussy
   enigma_insecure::process_clear_pid(UINT_MAX); // grab procid right by the pussy
   if (file_exists(fname)) {
+    vidmap.erase(ind);
     vidmap.insert(std::make_pair(ind, fname)); 
     id++;
   }
@@ -244,10 +241,7 @@ void video_stop(video_t ind) {
 }
 
 bool video_is_playing(video_t ind) {
-  if (!updmap.find(ind)->second.empty()) {
-    return (bool)stoul(updmap.find(ind)->second, nullptr, 10);
-  }
-  return false;
+  return (bool)stoul(updmap.find(ind)->second, nullptr, 10);
 }
 
 wid_t video_get_winid(video_t ind) {
@@ -259,7 +253,7 @@ bool video_exists(video_t ind) {
 }
 
 void video_delete(video_t ind) {
-  vidmap.erase(ind);
+  std::lock_guard<std::mutex> guard2(window_mutex);
   widmap.erase(ind);
   cwidmap.erase(ind);
   widmap.insert(std::make_pair(ind, std::to_string(0)));
