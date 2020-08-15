@@ -68,6 +68,11 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_TRUETYPE_IDS_H
+#include FT_SFNT_NAMES_H
+
 #ifdef WRITE_UNIMPLEMENTED_TXT
 std::map <string, char> unimplemented_function_list;
 #endif
@@ -187,6 +192,9 @@ void wite_asset_enum(const std::filesystem::path& fName) {
   std::ofstream wto;
   wto.open(fName.u8string().c_str());
   
+  FT_Library library;
+  FT_Init_FreeType(&library);
+
   wto<< "#ifndef ASSET_ENUM_H\n#define ASSET_ENUM_H\n\n";
   
   wto << "namespace enigma_user {\n\nenum AssetType : int {\n";

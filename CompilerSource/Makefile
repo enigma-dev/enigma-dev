@@ -21,4 +21,7 @@ ifeq ($(OS), Linux)
 endif
 SOURCES := $(filter-out ./standalone_main.cpp, $(call rwildcard,.,*.cpp))
 
+CXXFLAGS += $(shell pkg-config --cflags freetype2)
+LDFLAGS += $(shell pkg-config --libs freetype2)
+
 include ../Default.mk
