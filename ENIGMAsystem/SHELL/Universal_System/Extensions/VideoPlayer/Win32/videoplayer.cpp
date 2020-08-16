@@ -202,7 +202,7 @@ video_t video_add(std::string fname) {
 void video_play(video_t ind, wid_t wid) {
   std::thread vidthread(video_thread, ind, wid);  
   vidthread.detach();
-  std::this_thread::sleep_for (std::chrono::seconds(1));
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   std::lock_guard<std::mutex> guard(update_mutex);
   updmap.erase(ind);
   updmap.insert(std::make_pair(ind, std::to_string(1)));
