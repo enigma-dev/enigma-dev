@@ -58,10 +58,6 @@
   }\
 }
 
-#define RELEASE_IF_DIRECTSHOW_SUCCEEDED(ptr, ...) if (ptr != NULL) {\
-  ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", __VA_ARGS__);\
-}
-
 using std::string;
 using std::wstring;
 using std::vector;
@@ -110,14 +106,8 @@ static std::mutex update_mutex;
 
 static inline void update_thread(video_t ind) {
   while (video_is_playing(ind)) {
-    std::lock_guard<std::mutex> guard(window_mutex);
     HWND window = (HWND)stoull(widmap.find(ind)->second, nullptr, 10);
     HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second, nullptr, 10);
-    if (!IsWindow(cwindow)) {
-      std::lock_guard<std::mutex> guard(update_mutex);
-      updmap.erase(ind);
-      return;
-    }
     LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
     if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS))) {
       SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
@@ -174,20 +164,21 @@ static inline void video_thread(video_t ind, wid_t wid) {
         ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Run", pControl->Run());
         switch (0) default: {
           ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("WaitForCompletion", pEvent->WaitForCompletion(INFINITE, &evCode));
-          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Stop", pControl->Stop());
-          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("put_Visible", pVidWin->put_Visible(OAFALSE));
-          ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("put_Owner", pVidWin->put_Owner((OAHWND)NULL));
         }
+        ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Stop", pControl->Stop());
       }
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("put_Visible", pVidWin->put_Visible(OAFALSE));
+      ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("put_Owner", pVidWin->put_Owner((OAHWND)NULL));
+      video_stop(ind);
     }
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pGraph, pGraph->Release());
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pVideoRenderer, pVideoRenderer->Release());
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pAspectRatio, pAspectRatio->Release());
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pVidWin, pVidWin->Release());
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pPin, pPin->Release());
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pControl, pControl->Release());
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pOverlay, pOverlay->Release());
-    RELEASE_IF_DIRECTSHOW_SUCCEEDED(pEvent, pEvent->Release());
+    if (pGraph != NULL) ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", pGraph->Release());
+    if (pVideoRenderer != NULL) ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", pVideoRenderer->Release());
+    if (pAspectRatio != NULL) ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", pAspectRatio->Release());
+    if (pVidWin != NULL) ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", pVidWin->Release());
+    if (pPin != NULL) ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", pPin->Release());
+    if (pControl != NULL) ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", pControl->Release());
+    if (pOverlay != NULL) ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", pOverlay->Release());
+    if (pEvent != NULL) ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", pEvent->Release());
     CoUninitialize();
   }
 }
@@ -213,17 +204,30 @@ void video_play(video_t ind, wid_t wid) {
 }
 
 void video_stop(video_t ind) {
-  ShowWindow((HWND)stoull(cwidmap.find(ind)->second), SW_HIDE);
-  SetParent((HWND)stoull(cwidmap.find(ind)->second), NULL);
-  DestroyWindow((HWND)stoull(cwidmap.find(ind)->second));
+  if (video_is_playing(ind)) {
+    ShowWindow((HWND)stoull(cwidmap.find(ind)->second), SW_HIDE);
+    SetParent((HWND)stoull(cwidmap.find(ind)->second), NULL);
+    DestroyWindow((HWND)stoull(cwidmap.find(ind)->second));
+    std::lock_guard<std::mutex> guard(update_mutex);
+    updmap.erase(ind);
+    updmap.insert(std::make_pair(ind, std::to_string(0)));
+  }
 }
 
 bool video_is_playing(video_t ind) {
-  return (!updmap.find(ind)->second.empty());
+  std::lock_guard<std::mutex> guard(update_mutex);
+  if (!updmap.find(ind)->second.empty()) {
+    return (bool)stoul(updmap.find(ind)->second, nullptr, 10);
+  }
+  return false;
 }
 
 wid_t video_get_winid(video_t ind) {
-  return widmap.find(ind)->second;
+  if (video_is_playing(ind)) {
+    std::lock_guard<std::mutex> guard(window_mutex);
+    return widmap.find(ind)->second;
+  }
+  return std::to_string(0);
 }
 
 bool video_exists(video_t ind) {
@@ -231,10 +235,12 @@ bool video_exists(video_t ind) {
 }
 
 void video_delete(video_t ind) {
-  vidmap.erase(ind);
-  std::lock_guard<std::mutex> guard(window_mutex);
-  widmap.erase(ind);
-  widmap.insert(std::make_pair(ind, std::to_string(0)));
+  if (video_exists(ind)) {
+    vidmap.erase(ind);
+    std::lock_guard<std::mutex> guard(window_mutex);
+    widmap.erase(ind);
+    widmap.insert(std::make_pair(ind, std::to_string(0)));
+  }
 }
 
 } // namespace enigma_user
