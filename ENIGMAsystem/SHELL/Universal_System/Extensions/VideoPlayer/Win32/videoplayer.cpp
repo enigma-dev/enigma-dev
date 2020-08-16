@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <chrono>
 #include <mutex>
 #include <map>
 
@@ -105,9 +106,11 @@ static std::mutex window_mutex;
 static std::mutex update_mutex;
 
 static inline void update_thread(video_t ind) {
-  while (video_is_playing(ind)) {
-    HWND window = (HWND)stoull(widmap.find(ind)->second, nullptr, 10);
-    HWND cwindow = (HWND)stoull(cwidmap.find(ind)->second, nullptr, 10);
+  wid_t wid = widmap.find(ind)->second;
+  wid_t cwid = cwidmap.find(ind)->second;
+  while (!cwid.empty() && video_is_playing(ind)) {
+    HWND window = (HWND)stoull(wid, nullptr, 10);
+    HWND cwindow = (HWND)stoull(cwid, nullptr, 10);
     LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
     if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS))) {
       SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
@@ -169,7 +172,6 @@ static inline void video_thread(video_t ind, wid_t wid) {
       }
       ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("put_Visible", pVidWin->put_Visible(OAFALSE));
       ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("put_Owner", pVidWin->put_Owner((OAHWND)NULL));
-      video_stop(ind);
     }
     if (pGraph != NULL) ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", pGraph->Release());
     if (pVideoRenderer != NULL) ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", pVideoRenderer->Release());
@@ -181,6 +183,7 @@ static inline void video_thread(video_t ind, wid_t wid) {
     if (pEvent != NULL) ERROR_AND_BREAK_IF_DIRECTSHOW_FAILS("Release", pEvent->Release());
     CoUninitialize();
   }
+  video_stop(ind);
 }
 
 video_t video_add(std::string fname) {
@@ -197,17 +200,21 @@ video_t video_add(std::string fname) {
 }
 
 void video_play(video_t ind, wid_t wid) {
-  std::lock_guard<std::mutex> guard(update_mutex);
-  updmap.insert(std::make_pair(ind, std::to_string(1)));
   std::thread vidthread(video_thread, ind, wid);  
   vidthread.detach();
+  std::this_thread::sleep_for (std::chrono::seconds(1));
+  std::lock_guard<std::mutex> guard(update_mutex);
+  updmap.erase(ind);
+  updmap.insert(std::make_pair(ind, std::to_string(1)));
 }
 
 void video_stop(video_t ind) {
-  if (video_is_playing(ind)) {
-    ShowWindow((HWND)stoull(cwidmap.find(ind)->second), SW_HIDE);
-    SetParent((HWND)stoull(cwidmap.find(ind)->second), NULL);
-    DestroyWindow((HWND)stoull(cwidmap.find(ind)->second));
+  wid_t cwid = cwidmap.find(ind)->second;
+  if (!cwid.empty() && video_is_playing(ind)) {
+    HWND cwindow = (HWND)stoull(cwid, nullptr, 10);
+    ShowWindow(cwindow, SW_HIDE);
+    SetParent(cwindow, NULL);
+    DestroyWindow(cwindow);
     std::lock_guard<std::mutex> guard(update_mutex);
     updmap.erase(ind);
     updmap.insert(std::make_pair(ind, std::to_string(0)));
@@ -216,8 +223,9 @@ void video_stop(video_t ind) {
 
 bool video_is_playing(video_t ind) {
   std::lock_guard<std::mutex> guard(update_mutex);
-  if (!updmap.find(ind)->second.empty()) {
-    return (bool)stoul(updmap.find(ind)->second, nullptr, 10);
+  string condition = updmap.find(ind)->second;
+  if (!condition.empty()) {
+    return (condition == std::to_string(1));
   }
   return false;
 }
