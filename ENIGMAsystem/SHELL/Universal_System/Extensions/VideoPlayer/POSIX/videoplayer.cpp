@@ -24,12 +24,13 @@
  
 */
 
-#include <map>
 #include <climits>
+#include <chrono>
+#include <thread>
+#include <map>
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFfilemanip.h"
-
 #include "Universal_System/Extensions/VideoPlayer/insecure_bullshit.h"
 #include "Universal_System/Extensions/VideoPlayer/videoplayer.h"
 
@@ -57,8 +58,6 @@ video_t video_add(std::string fname) {
   if (file_exists(fname)) {
     vidmap.insert(std::make_pair(ind, fname)); 
     id++;
-  } else {
-    DEBUG_MESSAGE("The specified video file does not exist.", MESSAGE_TYPE::M_ERROR);
   }
   return ind;
 }
@@ -68,6 +67,7 @@ void video_play(video_t ind, wid_t wid) {
   enigma_insecure::process_execute_async(ind, "mpv --wid=" + wid + 
     " --no-osc --no-input-default-bindings --no-config \"" + vidmap.find(ind)->second + "\"");
   widmap.insert(std::make_pair(ind, wid));
+  std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
 void video_stop(video_t ind) {
