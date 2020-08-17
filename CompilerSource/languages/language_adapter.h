@@ -47,7 +47,7 @@ struct language_adapter {
   virtual int compile_writeFontInfo(const GameData &game) = 0;
   virtual int compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, ParsedScope *EGMglobal, int mode) = 0;
   virtual int compile_writeShaderData(const GameData &game, ParsedScope *EGMglobal) = 0;
-  virtual int compile_writeDefraggedEvents(const GameData &game, const ParsedObjectVec &parsed_objects) = 0;
+  virtual int compile_writeDefraggedEvents(const GameData &game, const std::set<EventGroupKey> &used_events, const ParsedObjectVec &parsed_objects) = 0;
 
   // Resources added to module
   virtual int module_write_sprites(const GameData &game, FILE *gameModule) = 0;

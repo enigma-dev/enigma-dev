@@ -317,11 +317,8 @@ std::string EventDescriptor::DefaultCode() const {
 std::string EventDescriptor::ConstantCode() const {
   return event->constant();
 }
-std::string Event::PrefixCode() const {
-  return ParamSubst(event->prefix());
-}
-std::string Event::SuffixCode() const {
-  return ParamSubst(event->suffix());
+std::string Event::DispatcherCode(std::string_view funcname) const {
+  return ParamSubst(string_replace_all(event->dispatcher(), "%event", funcname));
 }
 
 
