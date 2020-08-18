@@ -43,7 +43,7 @@
 using std::string;
 
 static std::map<video_t, string> vidmap;
-static std::map<video_t, string> widmap;
+static std::map<video_t, wid_t> widmap;
 static video_t id = 1; // starts at one because zero is reserved
 // using "UINT_MAX - id" for index to avoid conflicting procinfo
 
