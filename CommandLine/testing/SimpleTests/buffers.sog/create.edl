@@ -1,0 +1,12 @@
+gtest_expect_false(buffer_exists(-1));
+gtest_expect_false(buffer_exists(0));
+gtest_expect_false(buffer_exists(1));
+
+var buffer_create_test;
+buffer_create_test = buffer_create(137, buffer_fixed, 4);
+gtest_expect_eq(buffer_get_size(buffer_create_test), 137);
+gtest_expect_eq(buffer_get_type(buffer_create_test), buffer_fixed);
+gtest_expect_eq(buffer_get_alignment(buffer_create_test), 4);
+gtest_expect_true(buffer_exists(buffer_create_test));
+buffer_delete(buffer_create_test);
+gtest_expect_false(buffer_exists(buffer_create_test));

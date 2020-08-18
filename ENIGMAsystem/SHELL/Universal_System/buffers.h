@@ -57,6 +57,7 @@ enum {
 };
 
 int buffer_create(unsigned size, int type, unsigned alignment);
+bool buffer_exists(int buffer);
 void buffer_delete(int buffer);
 void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_buffer, unsigned dest_offset);
 void buffer_save(int buffer, std::string filename);

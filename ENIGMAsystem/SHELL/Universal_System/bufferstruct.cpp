@@ -105,6 +105,11 @@ int buffer_create(unsigned size, int type, unsigned alignment) {
 void buffer_delete(int buffer) {
   get_buffer(binbuff, buffer);
   delete binbuff;
+  enigma::buffers[buffer] = nullptr;
+}
+
+bool buffer_exists(int buffer) {
+  return (buffer >= 0 && buffer < enigma::buffers.size() && enigma::buffers[buffer] != nullptr);
 }
 
 void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_buffer, unsigned dest_offset) {
