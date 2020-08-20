@@ -85,6 +85,19 @@ void compute_window_size() {
 
 }  //namespace enigma
 
+#ifdef DEBUG_MODE
+  #include "Widget_Systems/widgets_mandatory.h" // for DEBUG_MESSAGE
+  #define KEY_CHECK(key,ret) \
+    if (key < 0 || key > 255) { \
+      DEBUG_MESSAGE("Keyboard constant " + std::to_string(key) + " is outside the normal 0-255 range.", MESSAGE_TYPE::M_USER_ERROR); \
+      return ret; \
+    }
+  #define KEY_CHECK_V(key) KEY_CHECK(key,)
+#else
+  #define KEY_CHECK(key,ret)
+  #define KEY_CHECK_V(key)
+#endif
+
 namespace enigma_user {
 
 std::string keyboard_lastchar = "";
@@ -118,6 +131,7 @@ bool keyboard_check(int key) {
       if (enigma::keybdstatus[i] == 1) return 0;
     return 1;
   }
+  KEY_CHECK(key,0);
   return enigma::keybdstatus[key & 0xFF];
 }
 
@@ -132,6 +146,7 @@ bool keyboard_check_pressed(int key) {
       if (enigma::keybdstatus[i] && !enigma::last_keybdstatus[i]) return 0;
     return 1;
   }
+  KEY_CHECK(key,0);
   return enigma::keybdstatus[key & 0xFF] && !enigma::last_keybdstatus[key & 0xFF];
 }
 
@@ -146,6 +161,7 @@ bool keyboard_check_released(int key) {
       if (!enigma::keybdstatus[i] && enigma::last_keybdstatus[i]) return 0;
     return 1;
   }
+  KEY_CHECK(key,0);
   return enigma::keybdstatus[key & 0xFF] == 0 && enigma::last_keybdstatus[key & 0xFF] == 1;
 }
 
@@ -162,7 +178,10 @@ void keyboard_wait() {
   }
 }
 
-void keyboard_clear(const int key) { enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0; }
+void keyboard_clear(const int key) {
+  KEY_CHECK_V(key);
+  enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
+}
 
 void keyboard_set_map(int key1, int key2) {
   std::map<int, int>::iterator it = enigma::keybdmap.find(key1);
