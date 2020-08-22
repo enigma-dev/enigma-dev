@@ -146,13 +146,12 @@ inline void write_exe_info(const std::filesystem::path& codegen_directory, const
 #include "System/builtins.h"
 
 DLLEXPORT int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
-  return current_language->compile(GameData(es), exe_filename, mode);
+  return current_language->compile(GameData(es, &current_language->event_data()),
+                                   exe_filename, mode);
 }
 
 DLLEXPORT int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
-  GameData gameData(*proj);
-  int error = FlattenProto(*proj, &gameData);
-  if (error) return error;
+  GameData gameData(*proj, &current_language->event_data());
   return current_language->compile(gameData, exe_filename, mode);
 }
 
@@ -234,11 +233,67 @@ template<typename T> void write_asset_map(std::string& str, vector<T> resources,
   str += "  }\n},\n";
 }
 
-static bool ends_with(std::string const &fullString, std::string const &ending) {
-    if (fullString.length() < ending.length())
-      return false;
+// TODO: this doesn't belong here. It doesn't obviously belong anywhere else,
+// though, either, because the rest of the codebase suggests it belongs in
+// lang_CPP, but this isn't language specific! Wherever this ends up living,
+// move generate_robertvecs (from write_object_data.cpp) there, too.
+std::set<EventGroupKey> ListUsedEvents(
+    const std::vector<parsed_object*> &parsed_objects,
+    const EventData &event_data) {
+  /* Generate a new list of events used by the objects in
+  ** this game. Only events on this list will be exported.
+  ***********************************************************/
+  std::set<EventGroupKey> used_events;
 
-    return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+  // Defragged events must be written before object data, or object data cannot
+  // determine which events were used.
+  for (const parsed_object *object : parsed_objects) {
+    for (const ParsedEvent &event : object->all_events) {
+      if (event.ev_id.RegistersIterator())
+        used_events.insert({event.ev_id});
+    }
+  }
+
+  /* Some events are included in all objects, even if the user
+  ** hasn't specified code for them. Account for those here.
+  ***********************************************************/
+  for (const EventDescriptor &event_desc : event_data.events()) {
+    // We may not be using this event, but it may have default code.
+    if (event_desc.HasDefaultCode()) {  // (defaulted includes "constant")
+      // Defaulted events may NOT be parameterized.
+      if (event_desc.IsParameterized()) {
+        std::cerr << "INTERNAL ERROR: Event " << event_desc.internal_id
+                  << " (" << event_desc.HumanName()
+                  << ") is parameterized, but has default code.";
+        continue;
+      }
+      // This is a valid construction because we just checked that the event
+      // has no parameters. It's neither stacked nor specialized.
+      Event event{event_desc};
+      if (event.RegistersIterator()) used_events.insert({event});
+
+      for (parsed_object *obj : parsed_objects) { // Then shell it out into the other objects.
+        obj->InheritDefaultedEvent(event);
+      }
+    }
+  }
+
+  /* Lastly, add any events that have Instead code to our used_event map for
+  ** consideration. These will simply have their instead blocks thrown in.
+  *****************************************************************************/
+  for (const EventDescriptor &event_desc : event_data.events()) {
+    if (!event_desc.HasInsteadCode()) continue;
+    // Inlined events may NOT be parameterized.
+    if (event_desc.IsParameterized()) {
+      std::cerr << "INTERNAL ERROR: Event " << event_desc.internal_id
+                << " (" << event_desc.HumanName()
+                << ") is parameterized, but has inlined event loop code.";
+      continue;
+    }
+    used_events.insert({Event{event_desc}});
+  }
+
+  return used_events;
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
@@ -246,14 +301,16 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   if (exe_filename) {
     exename = exe_filename;
     const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
-    if (!ends_with(exename.u8string(), buildext.u8string())) {
+    if (!string_ends_with(exename.u8string(), buildext.u8string())) {
       exename += buildext;
       exe_filename = exename.u8string().c_str();
     }
   }
 
   cout << "Initializing dialog boxes" << endl;
-  ide_dia_clear();
+  // reset this as IDE will soon enable stop button
+  build_stopping = false;
+  ide_dia_clear(); // <- stop button usually enabled IDE side
   ide_dia_open();
   cout << "Initialized." << endl;
 
@@ -283,11 +340,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
 
-  // Clean up from any previous executions.
-  edbg << "Cleaning up from previous executions" << flushl;
-  event_info_clear();     //Forget event definitions, we'll re-get them
-  edbg << " - Cleared event info." << flushl;
-
   // Re-establish ourself
   // Read the global locals: locals that will be included with each instance
   {
@@ -312,9 +364,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       user << "...Continuing anyway..." << flushl;
     }
   }
-
-  //Read the types of events
-  event_parse_resourcefile();
 
   /**** Segment One: This segment of the compile process is responsible for
   * @ * translating the code into C++. Basically, anything essential to the
@@ -546,8 +595,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Running Secondary Parse Passes" << flushl;
   res = current_language->compile_parseSecondary(state);
 
+  state.used_events = ListUsedEvents(state.parsed_objects, event_data());
+
   edbg << "Writing events" << flushl;
-  res = current_language->compile_writeDefraggedEvents(game, state.parsed_objects);
+  res = current_language->compile_writeDefraggedEvents(game, state.used_events, state.parsed_objects);
   irrr();
 
   edbg << "Writing object data" << flushl;
@@ -660,6 +711,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
 
   int makeres = e_execs(compilerInfo.MAKE_location, make, flags);
+  if (build_stopping) { build_stopping = false; return 0; }
 
   // Stop redirecting GCC output
   if (redirect_make)

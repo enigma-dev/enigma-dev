@@ -333,8 +333,6 @@ void window_set_sizeable(bool sizeable) {
   }
   XSetWMNormalHints(disp, win, sh);
   XFree(sh);
-
-  XResizeWindow(disp, win, enigma::windowWidth, enigma::windowHeight);
 }
 
 void window_set_min_width(int width) {
@@ -631,15 +629,6 @@ void initkeymap() {
 }  // namespace enigma
 
 namespace enigma_user {
-
-void io_handle() {
-  enigma::input_push();
-  while (XQLength(disp)) {
-    DEBUG_MESSAGE("processing an event...", MESSAGE_TYPE::M_INFO);
-    if (enigma::handleEvents() > 0) exit(0);
-  }
-  enigma::update_mouse_variables();
-}
 
 int window_set_cursor(int c) {
   enigma::cursorInt = c;

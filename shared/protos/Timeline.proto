@@ -6,7 +6,7 @@ import "options.proto";
 message Timeline {
   message Moment {
     optional int32 step = 1;
-    optional string code = 2 [(gmx) = "action"];
+    optional string code = 2 [(gmx) = "event/action"];
   }
 
   optional int32 id = 1 [(gmx) = "GMX_DEPRECATED"];

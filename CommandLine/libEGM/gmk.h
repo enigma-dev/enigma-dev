@@ -16,6 +16,7 @@
 **/
 
 #include "project.pb.h"
+#include "event_reader/event_parser.h"
 
 #include <iostream>
 #include <streambuf>
@@ -30,6 +31,6 @@ inline void bind_output_streams(std::ostream &out, std::ostream &err) {
   gmk::err.rdbuf(err.rdbuf());
 }
 
-buffers::Project* LoadGMK(std::string fName);
+std::unique_ptr<buffers::Project> LoadGMK(std::string fName, const EventData* event_data);
 
 }  //namespace gmk

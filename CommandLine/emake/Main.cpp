@@ -10,6 +10,7 @@
 #include "SOG.hpp"
 
 #ifdef CLI_ENABLE_EGM
+#include "egm.h"
 #include "gmk.h"
 #include "gmx.h"
 #include "yyp.h"
@@ -149,16 +150,20 @@ int main(int argc, char* argv[])
       return OPTIONS_ERROR;
     }
 
+    EventData event_data(ParseEventFile((fs::path(options.EnigmaRoot())/"events.ey").u8string()));
+
+    // FIXME: Remove all occurrences of wrap_unique in the following code.
+    // There is no reason for these projects to be bare pointers.
     std::string ext;
     size_t dot = input_file.find_last_of('.');
+    std::unique_ptr<buffers::Project> project;
     if (dot != std::string::npos) ext = tolower(input_file.substr(dot + 1));
     if (ext == "sog") {
-      if (!ReadSOG(input_file, &game)) return 1;
+      if (!ReadSOG(input_file, &game, &event_data)) return 1;
       return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
 #ifdef CLI_ENABLE_EGM
     } else if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
-      buffers::Project* project;
-      if (!(project = gmk::LoadGMK(input_file))) return 1;
+      if (!(project = gmk::LoadGMK(input_file, &event_data))) return 1;
       return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext == "gmx") {
       fs::path p = input_file;
@@ -166,26 +171,27 @@ int main(int argc, char* argv[])
         input_file += "/" + p.filename().stem().string() + ".project.gmx";
       }
 
-      buffers::Project* project;
-      if (!(project = gmx::LoadGMX(input_file))) return 1;
+      if (!(project = gmx::LoadGMX(input_file, &event_data))) return 1;
       return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext == "yyp") {
-      buffers::Project* project;
-      if (!(project = yyp::LoadYYP(input_file))) return 1;
+      if (!(project = yyp::LoadYYP(input_file, &event_data))) return 1;
       return plugin.BuildGame(project->game(), mode, output_file.c_str());
+    } else if (ext == "egm") {
+      fs::path p = input_file;
+      if (fs::is_directory(p)) {
+        input_file += "/" + p.filename().stem().string() + ".egm";
+      }
+      egm::EGM egm(&event_data);
+      if (!(project = egm.LoadEGM(input_file))) return 1;
+      return plugin.BuildGame(project->game(), mode, output_file.c_str());
+    } else if (ext.empty()) {
+      std::cerr << "Error: Unknown filetype: cannot determine type of file "
+                  << '"' << input_file << "\"." << std::endl;
 #endif
     } else {
-      if (ext == "egm") {
-        std::cerr << "EGM format not yet supported. "
-                       "Please use LateralGM for the time being." << std::endl;
-      } else if (ext.empty()) {
-        std::cerr << "Error: Unknown filetype: cannot determine type of file "
-                    << '"' << input_file << "\"." << std::endl;
-      } else {
-        std::cerr << "Error: Unknown filetype \"" << ext
-                    << "\": cannot read input file \"" << input_file
-                    << "\"." << std::endl;
-      }
+      std::cerr << "Error: Unknown filetype \"" << ext
+                  << "\": cannot read input file \"" << input_file
+                  << "\"." << std::endl;
     }
     return 1;
   }

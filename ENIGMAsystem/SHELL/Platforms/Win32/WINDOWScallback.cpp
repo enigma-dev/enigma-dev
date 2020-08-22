@@ -67,8 +67,6 @@ namespace enigma
   {
     switch (message)
     {
-      case WM_CREATE:
-        return 0;
       case WM_SHOWWINDOW:
         enigma::windowWidth = enigma_user::window_get_width();
         enigma::windowHeight = enigma_user::window_get_height();
@@ -86,9 +84,6 @@ namespace enigma
         if (treatCloseAsEscape) {
           PostQuitMessage(game_return);
         }
-        return 0;
-
-      case WM_DESTROY:
         return 0;
 
       case WM_SETFOCUS: enigma::platform_focus_gained(); return 0;
@@ -232,21 +227,14 @@ namespace enigma
         FillRect((HDC) wParam, &rc, CreateSolidBrush(windowColor));
         return 1L;
 
-      case WM_PAINT:
-        DefWindowProc(hWndParameter, message, wParam, lParam);
-        return 0;
-
       case WM_SYSCOMMAND: {
         if (wParam == SC_MAXIMIZE) {
           ShowWindow(hWnd, SW_MAXIMIZE);
           enigma::windowWidth = enigma_user::window_get_width();
           enigma::windowHeight = enigma_user::window_get_height();
           enigma::compute_window_scaling();
-          break;
-        } else {
-          return DefWindowProc(hWndParameter, message, wParam, lParam);
         }
-        return 0;
+        break;
       }
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);

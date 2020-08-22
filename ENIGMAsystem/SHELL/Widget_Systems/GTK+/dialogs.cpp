@@ -34,11 +34,11 @@
 
 using namespace std;
 
-namespace enigma_user {
-
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
-//TODO: Implement
+void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+  //TODO: Implement
 }
+
+namespace enigma_user {
 
 bool show_question(std::string str) {
 //TODO: Implement

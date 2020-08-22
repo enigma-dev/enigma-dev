@@ -70,10 +70,10 @@ static bool toolchain_parseout(string line, string &exename, string &command, st
 
     if (line[pos] == '"' and ++spos)
       while (line[++pos] != '"' and pos<line.length())
-        if (line[pos] == '\\') pos++; else;
+        if (line[pos] == '\\') pos++; else {}
     else if (line[pos] == '\'' and ++spos)
       while (line[++pos] != '\'' and pos<line.length())
-        if (line[pos] == '\\') pos++; else;
+        if (line[pos] == '\\') pos++; else {}
     else while (!is_useless(line[++pos]) and pos<line.length());
 
   exename = line.substr(spos,pos-spos);

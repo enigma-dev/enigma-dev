@@ -262,6 +262,7 @@ bool window_get_showicons();
 bool window_get_freezeonlosefocus();
 bool window_get_minimized();
 bool window_get_maximized();
+bool window_has_focus();
 
 int window_mouse_get_x();
 int window_mouse_get_y();

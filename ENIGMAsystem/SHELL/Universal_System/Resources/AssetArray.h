@@ -57,7 +57,7 @@ class OffsetVector {
     return size() - 1;
   }
   template<typename... U> size_t emplace_back(U... args) {
-    data_owner_.emplace_back(args...);
+    data_owner_.emplace_back(std::move(args)...);
     data_ = data_owner_.data() - LEFT;
     return size() - 1;
   }
@@ -86,7 +86,7 @@ template<typename T> class OffsetVector<T, 0> {
     return data_owner_.size() - 1;
   }
   template<typename... U> size_t emplace_back(U... args) {
-    data_owner_.emplace_back(args...);
+    data_owner_.emplace_back(std::move(args)...);
     return size() - 1;
   }
   template<typename ind_t> T& operator[](ind_t index) {

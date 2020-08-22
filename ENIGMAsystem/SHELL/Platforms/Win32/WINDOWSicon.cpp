@@ -26,21 +26,22 @@
 
 namespace enigma {
 
+static HICON hIcon = NULL;
+
 void SetIconFromSprite(HWND window, int ind, unsigned subimg) {
   RawImage img = sprite_get_raw(ind, subimg);
-  if (img.pxdata == nullptr) return;
+  if (img.pxdata == nullptr) { return; }
   HBITMAP hBitmap = CreateBitmap(img.w, img.h, 1, 32, img.pxdata);
-
+  if (hIcon != NULL) { DestroyIcon(hIcon); }
+  
   ICONINFO iconinfo;
   iconinfo.fIcon = TRUE;
   iconinfo.xHotspot = 0;
   iconinfo.yHotspot = 0;
   iconinfo.hbmMask = hBitmap;
   iconinfo.hbmColor = hBitmap;
-  HICON hIcon = CreateIconIndirect(&iconinfo);
+  hIcon = CreateIconIndirect(&iconinfo);
   PostMessage(window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-
-  DeleteObject(hIcon);
   DeleteObject(hBitmap);
 }
 

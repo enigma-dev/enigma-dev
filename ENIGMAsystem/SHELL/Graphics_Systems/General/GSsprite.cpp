@@ -38,7 +38,11 @@ using enigma::Sprite;
 using enigma::sprites;
 using enigma::TexRect;
 
-inline int get_usi(const Sprite& spr2d, int subimg) { return subimg >= 0 ? (subimg % spr2d.SubimageCount()) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d.SubimageCount(); }
+inline int get_usi(const Sprite& spr2d, int subimg) { 
+  if (spr2d.SubimageCount() == 0) return 0;
+  return subimg >= 0 ? (subimg % spr2d.SubimageCount()) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d.SubimageCount(); 
+}
+
 // VD: see https://yal.cc/2d-pivot-points/ for math
 inline gs_scalar rotx(gs_scalar qx, gs_scalar qy, gs_scalar rx, gs_scalar ry) { return ((qx) * rx - (qy) * ry); }
 inline gs_scalar roty(gs_scalar qx, gs_scalar qy, gs_scalar rx, gs_scalar ry) { return ((qx) * ry + (qy) * rx); }

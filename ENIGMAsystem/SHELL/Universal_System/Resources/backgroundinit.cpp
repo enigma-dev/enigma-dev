@@ -93,12 +93,10 @@ namespace enigma
       }
       delete[] cpixels;
 
-      RawImage img = image_pad(pixels, width, height, nlpo2dc(width)+1, nlpo2dc(height)+1);
-      int texID = graphics_create_texture(width, height, img.w, img.h, img.pxdata, false);
-      Background bkg(width, height, texID, useAsTileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
+      unsigned fw, fh;
+      int texID = graphics_create_texture(RawImage(pixels, width, height), false, &fw, &fh);
+      Background bkg(width, height, fw, fh, texID, useAsTileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
       backgrounds.assign(bkgid, std::move(bkg));
-
-      delete[] pixels;
     }
   }
 } //namespace enigma

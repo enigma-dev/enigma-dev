@@ -17,7 +17,7 @@
  */
 
 #include "Widget_Systems/widgets_mandatory.h"
-#include "gif_format.h"
+#include "image_formats.h"
 #include "nlpo2.h"
 
 #include <cstring>
@@ -35,6 +35,7 @@ const unsigned int ERR_OUT_OF_BYTES     = 2;
 const unsigned int ERR_BAD_MAG_NUM      = 3;
 const unsigned int ERR_BAD_GIF_VERS     = 4;
 const unsigned int ERR_NONZERO_PIXEL_ASPECT_RATIO = 5;
+const unsigned int ERR_ZERO_IMAGES                = 14;
 const unsigned int ERR_UNKNOWN_CONTROL_CODE       = 6;
 const unsigned int ERR_INTERLACED_IMAGE           = 7;
 const unsigned int ERR_EXPECTED_CLEAR_CODE        = 8;
@@ -209,17 +210,18 @@ unsigned char* read_entire_file(const char* filename, size_t& size)
 
 namespace enigma
 {
-unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned int& gif_width, unsigned int& gif_height, unsigned int& image_width, unsigned int& image_height, int& num_images)
+std::vector<RawImage> image_load_gif(const std::filesystem::path& filename)
 {
-  //Read the entire file into a byte array. This is reasonable because we will output width*height*4 bytes, and the 
+  // Read the entire file into a byte array. This is reasonable because we will output width*height*4 bytes, and the 
   // GIF file will be noticeably less (it's compressed, indexed color, and no alpha).
   size_t pos = 0;
   size_t size = 0;
-  out = 0; //Make sure this starts null.
+  std::vector<RawImage> res;
 
   //File input
-  unsigned char* bytes = read_entire_file(filename, size);
-  if (!bytes) { return ERR_FILE_CANT_OPEN; }
+  std::unique_ptr<unsigned char[]> bytes_c(read_entire_file(filename.u8string().c_str(), size));
+  unsigned char *bytes = bytes_c.get();
+  if (!bytes) { errno = ERR_FILE_CANT_OPEN; return res; }
 
   //
   //Phase 1: A few "check only" things.
@@ -227,23 +229,23 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
   //
 
   //Read the magic number.
-  if (pos+3>size) { return ERR_OUT_OF_BYTES; }
+  if (pos+3>size) { errno = ERR_OUT_OF_BYTES; return res; }
   std::string magNum = "XXX";
   magNum[0] = static_cast<char>(bytes[pos++]);
   magNum[1] = static_cast<char>(bytes[pos++]);
   magNum[2] = static_cast<char>(bytes[pos++]);
-  if (magNum != "GIF") { return ERR_BAD_MAG_NUM; }
+  if (magNum != "GIF") { errno = ERR_BAD_MAG_NUM; return res; }
 
   //Read the gif version
-  if (pos+3>size) { return ERR_OUT_OF_BYTES; }
+  if (pos+3>size) { errno = ERR_OUT_OF_BYTES; return res; }
   std::string gifVers = "XXX";
   gifVers[0] = static_cast<char>(bytes[pos++]);
   gifVers[1] = static_cast<char>(bytes[pos++]);
   gifVers[2] = static_cast<char>(bytes[pos++]);
-  if (gifVers!="87a" && gifVers!="89a") { return ERR_BAD_GIF_VERS; }
+  if (gifVers!="87a" && gifVers!="89a") { errno = ERR_BAD_GIF_VERS; return res; }
 
   //Read the description of the logical screen.
-  if (pos+7>size) { return ERR_OUT_OF_BYTES; }
+  if (pos+7>size) { errno = ERR_OUT_OF_BYTES; return res; }
   LogicalScreen screen;
   screen.canvasWidth = bytes[pos] | (bytes[pos+1]<<8);
   pos += 2;
@@ -253,12 +255,12 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
   screen.gctFlag = pb1&0x80;
   screen.gctSize = 2<<(pb1 & 0x7);
   screen.bgColorIndex = bytes[pos++];
-  if (bytes[pos++] != 0) { return ERR_NONZERO_PIXEL_ASPECT_RATIO; }
+  if (bytes[pos++] != 0) { errno = ERR_NONZERO_PIXEL_ASPECT_RATIO; return res; }
 
   //Read the table of global colors (optional).
   size_t globalColorStart=0;
   if (screen.gctFlag) {
-    if (pos+(screen.gctSize*3)>size) { return ERR_OUT_OF_BYTES; }
+    if (pos+(screen.gctSize*3)>size) { errno = ERR_OUT_OF_BYTES; return res; }
     globalColorStart = pos;
     pos += (screen.gctSize*3);
   }
@@ -267,66 +269,71 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
   //Phase 2: Scan to the end and get the total image count.
   //
 
-  //Just count.
-  num_images = 0;
   {
-  size_t myPos = pos;
-  for (;;) {
-    if (myPos+1>size) { return ERR_OUT_OF_BYTES; }
+  int num_images = 0;
+  for (size_t myPos = pos;;) {
+    if (myPos+1>size) { errno = ERR_OUT_OF_BYTES; return res; }
     unsigned int ctrlCode = bytes[myPos++];
     if (ctrlCode==0x21) { //It's an extension; skip it.
-      if (myPos+2>size) { return ERR_OUT_OF_BYTES; }
+      if (myPos+2>size) { errno = ERR_OUT_OF_BYTES; return res; }
       unsigned int len = bytes[myPos+1]; //Length
       myPos += 2;
-      if (myPos+len>size) { return ERR_OUT_OF_BYTES; }
+      if (myPos+len>size) { errno = ERR_OUT_OF_BYTES; return res; }
       myPos += len;
-      if (!skipSubBlocks(bytes, myPos, size)) { return ERR_OUT_OF_BYTES; }
+      if (!skipSubBlocks(bytes, myPos, size)) { errno = ERR_OUT_OF_BYTES; return res; }
     } else if (ctrlCode==0x3B) { //EOF; done;
       break;
     } else if (ctrlCode==0x2C) { //It's an image; skip and add one.
       num_images++;
-      if (myPos+9>size) { return ERR_OUT_OF_BYTES; }
+      if (myPos+9>size) { errno = ERR_OUT_OF_BYTES; return res; }
       myPos += 9;
       unsigned int pb1 = bytes[myPos-1];
       if (pb1&0x80) { //Skip the local color table.
         unsigned int lctSize = 2<<(pb1 & 0x7);
-        if (myPos+(lctSize*3)>size) { return ERR_OUT_OF_BYTES; }
+        if (myPos+(lctSize*3)>size) { errno = ERR_OUT_OF_BYTES; return res; }
         myPos += lctSize*3;
       }
       //Skip the LZW min. code size.
-      if (myPos+1>size) { return ERR_OUT_OF_BYTES; }
+      if (myPos+1>size) { errno = ERR_OUT_OF_BYTES; return res; }
       myPos++;
-      if (!skipSubBlocks(bytes, myPos, size)) { return ERR_OUT_OF_BYTES; }
+      if (!skipSubBlocks(bytes, myPos, size)) { errno = ERR_OUT_OF_BYTES; return res; }
     } else {
-      return ERR_UNKNOWN_CONTROL_CODE;
+      errno = ERR_UNKNOWN_CONTROL_CODE;
+      return res;
     }
   }
+  if (!num_images) { errno = ERR_ZERO_IMAGES; return {}; }
+  res.resize(num_images);
   }
-
 
   //
   //Phase 3: We now have an image count, so we can create our output buffer (and then write directly into it).
   //
 
   //At the same time, save our output properties.
-  gif_width = screen.canvasWidth * num_images;
-  gif_height = screen.canvasHeight;
-
-  //Need to scale to factors of 2.
-  image_width = nlpo2dc(gif_width) + 1;
-  image_height = nlpo2dc(gif_height) + 1;
+  const unsigned int gif_width  = screen.canvasWidth;
+  const unsigned int gif_height = screen.canvasHeight;
+  const unsigned int final_size = gif_width * gif_height * 4;
+  for (RawImage &frame : res) {
+    frame.w = gif_width;
+    frame.h = gif_height;
+  }
 
   //Create the output buffer.
-  const unsigned int final_size = image_width*image_height*4;
-  out = new unsigned char[final_size](); // Initialize to zero.
+  unsigned char *out;
+  res[0].pxdata = out = new unsigned char[final_size](); // Initialize to zero.
   if (screen.gctFlag) {
     unsigned char r = bytes[globalColorStart + screen.bgColorIndex*3 + 0];
     unsigned char g = bytes[globalColorStart + screen.bgColorIndex*3 + 1];
     unsigned char b = bytes[globalColorStart + screen.bgColorIndex*3 + 2];
     for (size_t y=0; y<gif_height; y++) {
       for (size_t x=0; x<gif_width; x++) {
-        size_t pos2 = y*image_width*4 + x*4;
-        if (pos2+4>final_size) { clearmem(out); return ERR_OVERSCAN; }
+        size_t pos2 = y*gif_width*4 + x*4;
+        if (pos2+4>final_size) {
+          clearmem(out);
+          errno = ERR_OVERSCAN;
+          return res;
+        }
         out[pos2] = b;
         out[pos2+1] = g;
         out[pos2+2] = r;
@@ -334,9 +341,6 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
       }
     }
   }
-
-  //Start output at x=0 (y will always start at 0).
-  unsigned int xOutStart = 0;
 
   //How to dispose
   unsigned int disposalMethod = 0;
@@ -348,25 +352,25 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
 
   unsigned int curr_img = 0;
   for (;;) {
-    if (pos+1>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
+    if (pos+1>size) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; }
     unsigned int ctrlCode = bytes[pos++];
     if (ctrlCode==0x21) { //It's an extension; skip it.
-      if (pos+2>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
+      if (pos+2>size) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; }
       ctrlCode = bytes[pos++]; //Extension control
       unsigned int extLen = bytes[pos++]; //Length
-      if (pos+extLen>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
+      if (pos+extLen>size) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; }
       if (ctrlCode==0xF9) { //Graphics control extension; we need a bit of data.
         disposalMethod = (bytes[pos]&0x1C)>>2;
         transpColor = (bytes[pos]&0x1) ? bytes[pos+3] : -1;
       }
       pos += extLen;
-      if (!skipSubBlocks(bytes, pos, size)) { clearmem(out); return ERR_OUT_OF_BYTES; }
+      if (!skipSubBlocks(bytes, pos, size)) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; }
     } else if (ctrlCode==0x3B) { //EOF; done;
       break;
     } else if (ctrlCode==0x2C) { //It's an image; read and decompress it.
-      DEBUG_MESSAGE("[GIF] Reading image: " + std::to_string(curr_img+1) + " of " + std::to_string(num_images), MESSAGE_TYPE::M_INFO);
+      DEBUG_MESSAGE("[GIF] Reading image: " + std::to_string(curr_img+1) + " of " + std::to_string(res.size()), MESSAGE_TYPE::M_INFO);
       //Read top-level image properties.
-      if (pos+9>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
+      if (pos+9>size) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; }
       unsigned int left = bytes[pos] | (bytes[pos+1]<<8);
       pos += 2;
       unsigned int top = bytes[pos] | (bytes[pos+1]<<8);
@@ -377,29 +381,29 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
       pos += 2;
       unsigned int pb1 = bytes[pos++];
       bool lctFlag = pb1&0x80;
-      if (pb1&0x40) { clearmem(out); return ERR_INTERLACED_IMAGE; }
+      if (pb1&0x40) { clearmem(out); errno = ERR_INTERLACED_IMAGE; return res; }
       unsigned int lctSize = 2<<(pb1 & 0x7);
 
       //Read Local Color Table, if applicable.
       size_t localColorStart = globalColorStart;
       size_t colorTableSize = screen.gctSize;
       if (lctFlag) {
-        if (pos+(lctSize*3)>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
+        if (pos+(lctSize*3)>size) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; }
         localColorStart = pos;
         pos += (lctSize*3);
         colorTableSize = lctSize;
       }
 
       //Read the lzw minimum code size.
-      if (pos+1>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
+      if (pos+1>size) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; }
       unsigned int lzwMinCodeSize = bytes[pos++];
 
       //Prepare to read the image data. We always need at least one byte (we check at the end of the loop).
-      if (pos+1>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
+      if (pos+1>size) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; }
       unsigned int subBlockEnd = pos + bytes[pos];
       pos++;
-      if (pos>subBlockEnd) { clearmem(out); return ERR_OUT_OF_BYTES; } //Might be better as "not enough image data"?
-      if (subBlockEnd+1>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
+      if (pos>subBlockEnd) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; } //Might be better as "not enough image data"?
+      if (subBlockEnd+1>size) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; }
 
       //More stuff.
       const unsigned int clearCode = 1 << lzwMinCodeSize;
@@ -423,7 +427,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
         //Read the next control code
         unsigned int currCode = 0;
         err = readBits2(bytes, pos, size, subBlockEnd, currBit, currCodeSize, currCode);
-        if (err!=ERR_SUCCESS) { clearmem(out); return err; }
+        if (err!=ERR_SUCCESS) { clearmem(out); errno = err; return {}; }
 
         //Clear/EOF are special control codes.
         if (currCode==clearCode) {
@@ -468,8 +472,8 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
         for (std::vector<unsigned int>::const_iterator it=currTuple.begin(); it!=currTuple.end(); it++) {
           //Set1
           if ((*it)!=transpColor) {
-            size_t pos2 = y*image_width*4 + xOutStart*4 + x*4;
-            if (pos2+4>final_size) { clearmem(out); return ERR_OVERSCAN; }
+            size_t pos2 = y*gif_width*4 + x*4;
+            if (pos2+4>final_size) { clearmem(out); errno = ERR_OVERSCAN; return res; }
             out[pos2] = bytes[localColorStart + (*it)*3 + 2];
             out[pos2+1] = bytes[localColorStart + (*it)*3 + 1];
             out[pos2+2] = bytes[localColorStart + (*it)*3 + 0];
@@ -492,38 +496,28 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
       pos = subBlockEnd+1;
 
       //Skip any remaining sub-blocks (should effectively skip a single "0").
-      if (!skipSubBlocks(bytes, pos, size)) { clearmem(out); return ERR_OUT_OF_BYTES; }
+      if (!skipSubBlocks(bytes, pos, size)) { clearmem(out); errno = ERR_OUT_OF_BYTES; return res; }
 
       //Make sure we read enough colors.
       if (nested != width*height) { 
         DEBUG_MESSAGE("[GIF] Index mismatch: " + std::to_string(nested)  + " : " + std::to_string(width*height), MESSAGE_TYPE::M_ERROR);
         clearmem(out);
-        return ERR_INDEX_COUNT_MISMATCH; 
+        errno = ERR_INDEX_COUNT_MISMATCH;
+        return res; 
       }
 
       //We're done! React to the disposal method.
-      if (static_cast<int>(curr_img)+1<num_images) {
+      if (curr_img+1<res.size()) {
+        res[curr_img+1].pxdata = out = new unsigned char[final_size](); // Initialize to zero.
         if (disposalMethod==1) {
           //Leave the background in place (i.e., repaint it).
-          for (size_t y=0; y<screen.canvasHeight; y++) {
-            size_t src = y*image_width*4 + xOutStart*4;
-            size_t dest = y*image_width*4 + (xOutStart+screen.canvasWidth)*4;
-            size_t len = screen.canvasWidth*4;
-            memcpy(&out[dest], &out[src], len);
-          }
+          memcpy(res[curr_img+1].pxdata, res[curr_img].pxdata, final_size);
         } else if (disposalMethod==2) {
           //Restore to background color (NOTE: We initialize to background color, just do nothing.).
         } else if (disposalMethod==3) {
           //Restore to the previous state (image, in this case).
           //NOTE: Mostly untested; few GIFs use this.
-          if (curr_img>0) {
-            for (size_t y=0; y<screen.canvasHeight; y++) {
-              size_t src = y*image_width*4 + (xOutStart-screen.canvasWidth)*4;
-              size_t dest = y*image_width*4 + (xOutStart+screen.canvasWidth)*4;
-              size_t len = screen.canvasWidth*4;
-              memcpy(&out[dest], &out[src], len);
-            }
-          }
+          memcpy(res[curr_img+1].pxdata, res[curr_img-1].pxdata, final_size);
         }
       }
 
@@ -531,18 +525,17 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
       //Finally:
       disposalMethod = 0;
       transpColor = 1<<14;
-      xOutStart += screen.canvasWidth;
       curr_img++;
     } else {
       DEBUG_MESSAGE("[GIF] Unknown control code: " + std::to_string(ctrlCode), MESSAGE_TYPE::M_ERROR);
       clearmem(out);
-      return ERR_UNKNOWN_CONTROL_CODE;
+      errno = ERR_UNKNOWN_CONTROL_CODE;
+      return res;
     }
   }
 
   DEBUG_MESSAGE("[GIF] All GIF sub-images saved.", MESSAGE_TYPE::M_INFO);
-  delete [] bytes; 
-  return ERR_SUCCESS;
+  return res;
 }
 
 const char* load_gif_error_text(unsigned int err)

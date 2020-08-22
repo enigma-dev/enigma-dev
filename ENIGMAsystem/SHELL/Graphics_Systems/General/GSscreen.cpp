@@ -67,28 +67,18 @@ RawImage create_from_screen_helper(int x, int y, int w, int h, bool removeback, 
 
   bool flipped = false;
 
-  unsigned char* rgba = enigma::graphics_copy_screen_pixels(x, y, w, h, &flipped);
+  RawImage i(enigma::graphics_copy_screen_pixels(x, y, w, h, &flipped), w, h);
 
   // FIXME: This logic is duplicated here, backgrounds.cpp, sprites_internal.cpp in this file somewhat and likely 12 other places
   if (flipped)
-    rgba = enigma::image_flip(rgba, w, h, 4);
+    enigma::image_flip(i);
     
   if (removeback) {
-    Color c = enigma::image_get_pixel_color(rgba, w, h, 0, h - 1);
-    enigma::image_swap_color(rgba, w, h, c, Color {0, 0, 0, 0});
+    Color c = enigma::image_get_pixel_color(i, 0, h - 1);
+    enigma::image_swap_color(i, c, Color {0, 0, 0, 0});
   }
   
-  if (pad) {
-    RawImage i = image_pad(rgba, w, h, nlpo2dc(w)+1, nlpo2dc(h)+1);
-    delete[] rgba;
-    return i;
-  } else {
-    RawImage i;
-    i.pxdata = rgba;
-    i.w = w;
-    i.h = h;
-    return i;  
-  }
+  return i;
 }
 
 //These are used to reset the screen viewport for surfaces
@@ -97,6 +87,9 @@ gs_scalar viewport_x, viewport_y, viewport_w, viewport_h;
 } // namespace anonymous
 
 namespace enigma {
+
+// Initialized here; incremented/decremented by instances that use it.
+long gui_used = 0;
 
 std::vector<std::function<void()> > extension_draw_gui_after_hooks;
 
@@ -463,7 +456,9 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {
   RawImage img = create_from_screen_helper(x, y, w, h, removeback, true);
-  Background bkg(w, h, graphics_create_texture(w, h, img.w, img.h, img.pxdata, false));
+  unsigned fullwidth, fullheight;
+  int texID = graphics_create_texture(img, false, &fullwidth, &fullheight);
+  Background bkg(w, h, fullwidth, fullheight, texID);
   return backgrounds.add(std::move(bkg));
 }
 
@@ -482,7 +477,7 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
   RawImage img = create_from_screen_helper(x, y, w, h, removeback, false);
   Sprite& spr = sprites.get(id);
-  spr.AddSubimage(img.pxdata, w, h, enigma::ct_precise, img.pxdata); //TODO: Support toggling of precise.
+  spr.AddSubimage(img, enigma::ct_precise, img.pxdata); //TODO: Support toggling of precise.
 }
 
 int draw_getpixel(int x,int y)

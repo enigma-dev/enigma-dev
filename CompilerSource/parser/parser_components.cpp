@@ -988,14 +988,3 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
   }
   return 0;
 }
-
-#include <stack>
-
-// Return whether or not the left hand side of a dot requires an ENIGMA access function
-bool parse_dot(string exp)
-{
-  enum { DT_BRACKET, DT_PAR, DT_LEVEL };
-  stack<int> dts;
-  int level = 0;
-  return !level;
-}
