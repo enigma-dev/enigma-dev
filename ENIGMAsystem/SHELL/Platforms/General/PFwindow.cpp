@@ -46,6 +46,19 @@ void input_push() {
   enigma_user::mouse_hscrolls = enigma_user::mouse_vscrolls = 0;
 }
 
+void input_key_down(int key) {
+  enigma_user::keyboard_lastkey = key;
+  enigma_user::keyboard_key = key;
+  last_keybdstatus[key]=keybdstatus[key];
+  keybdstatus[key]=1;
+}
+
+void input_key_up(int key) {
+  enigma_user::keyboard_key = 0;
+  last_keybdstatus[key]=keybdstatus[key];
+  keybdstatus[key]=0;
+}
+
 void compute_window_scaling() {
   if (!regionWidth) return;
   parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth;
@@ -89,6 +102,7 @@ namespace enigma_user {
 
 std::string keyboard_lastchar = "";
 int keyboard_lastkey = 0;
+int keyboard_key = 0;
 
 double mouse_x, mouse_y;
 int mouse_button, mouse_lastbutton;

@@ -47,12 +47,11 @@ namespace enigma
   extern HWND hWnd;
   extern HDC window_hDC;
 
-  using enigma_user::keyboard_key;
   using enigma_user::keyboard_lastkey;
   using enigma_user::keyboard_lastchar;
   using enigma_user::keyboard_string;
 
-  extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
+  extern char mousestatus[3],last_mousestatus[3];
   extern int windowX, windowY, windowColor;
   extern HCURSOR currentCursor;
 
@@ -162,25 +161,17 @@ namespace enigma
 
       case WM_KEYDOWN: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_lastkey = key;
-        keyboard_key = key;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=1;
+        input_key_down(key);
         return 0;
       }
       case WM_KEYUP: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_key = 0;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=0;
+        input_key_up(key);
         return 0;
       }
       case WM_SYSKEYDOWN: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_lastkey = key;
-        keyboard_key = key;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=1;
+        input_key_down(key);
         if (key!=18)
         {
           if ((lParam&(1<<29))>0)
@@ -191,9 +182,7 @@ namespace enigma
       }
       case WM_SYSKEYUP: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_key = 0;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=0;
+        input_key_up(key);
         if (key!=(unsigned int)18)
         {
           if ((lParam&(1<<29))>0)

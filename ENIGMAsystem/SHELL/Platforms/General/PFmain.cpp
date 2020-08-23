@@ -119,7 +119,6 @@ std::string program_directory = "";
 std::string temp_directory = "";
 std::string game_save_id = "";
 std::string keyboard_string = "";
-int keyboard_key = 0;
 double fps = 0;
 unsigned long delta_time = 0;
 unsigned long current_time = 0;
