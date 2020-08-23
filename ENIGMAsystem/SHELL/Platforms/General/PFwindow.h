@@ -159,6 +159,7 @@ enum {
 extern double mouse_x, mouse_y;
 extern int mouse_button, mouse_lastbutton;
 extern std::string keyboard_lastchar;
+extern int keyboard_key;
 extern int keyboard_lastkey;
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;

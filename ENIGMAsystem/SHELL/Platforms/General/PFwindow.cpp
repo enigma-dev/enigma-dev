@@ -7,9 +7,6 @@
 
 namespace enigma {
 
-using enigma_user::keyboard_key;
-using enigma_user::keyboard_lastkey;
-
 int window_min_width = -1;
 int window_max_width = -1;
 int window_min_height = -1;
@@ -50,14 +47,14 @@ void input_push() {
 }
 
 void input_key_down(int key) {
-  keyboard_lastkey = key;
-  keyboard_key = key;
+  enigma_user::keyboard_lastkey = key;
+  enigma_user::keyboard_key = key;
   last_keybdstatus[key]=keybdstatus[key];
   keybdstatus[key]=1;
 }
 
 void input_key_up(int key) {
-  keyboard_key = 0;
+  enigma_user::keyboard_key = 0;
   last_keybdstatus[key]=keybdstatus[key];
   keybdstatus[key]=0;
 }
@@ -105,6 +102,7 @@ namespace enigma_user {
 
 std::string keyboard_lastchar = "";
 int keyboard_lastkey = 0;
+int keyboard_key = 0;
 
 double mouse_x, mouse_y;
 int mouse_button, mouse_lastbutton;
