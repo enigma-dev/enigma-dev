@@ -39,6 +39,8 @@ namespace enigma {
   void compute_window_size();
   void initialize_directory_globals();
   void set_program_args(int argc, char** argv);
+  void platform_focus_lost();
+  void platform_focus_gained();
   void initTimer();
   int updateTimer();
   int gameWait();

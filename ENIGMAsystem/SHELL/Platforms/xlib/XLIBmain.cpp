@@ -155,13 +155,11 @@ int handleEvents() {
         continue;
       }
       case FocusIn:
-        input_initialize();
         init_joysticks();
-        game_window_focused = true;
-        pausedSteps = 0;
+        platform_focus_gained();
         continue;
       case FocusOut:
-        game_window_focused = false;
+        platform_focus_lost();
         continue;
       case ClientMessage:
         if ((Atom)e.xclient.data.l[0] ==

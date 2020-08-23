@@ -199,12 +199,11 @@ void SDL_Event_Handler::windowEvent(const SDL_Event *event) {
 }
 
 void SDL_Event_Handler::windowFocusGain(const SDL_Event *event) {
-  game_window_focused = true;
-  pausedSteps = 0;
+  platform_focus_gained();
 }
 
 void SDL_Event_Handler::windowFocusLost(const SDL_Event *event) {
-  game_window_focused = false;
+  platform_focus_lost();
 }
 
 void SDL_Event_Handler::windowResized(const SDL_Event *event) {

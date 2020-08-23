@@ -86,25 +86,8 @@ namespace enigma
         }
         return 0;
 
-      case WM_SETFOCUS:
-        input_initialize();
-        game_window_focused = true;
-        pausedSteps = 0;
-        return 0;
-
-      case WM_KILLFOCUS:
-        for (int i = 0; i < 255; i++)
-        {
-            last_keybdstatus[i] = keybdstatus[i];
-            keybdstatus[i] = 0;
-        }
-        for(int i=0; i < 3; i++)
-        {
-            last_mousestatus[i] = mousestatus[i];
-            mousestatus[i] = 0;
-        }
-        game_window_focused = false;
-        return 0;
+      case WM_SETFOCUS: enigma::platform_focus_gained(); return 0;
+      case WM_KILLFOCUS: enigma::platform_focus_lost(); return 0;
 
       case WM_SIZE:
         // make sure window resized is only processed once per resize because there could possibly be child windows and handles, especially with widgets
