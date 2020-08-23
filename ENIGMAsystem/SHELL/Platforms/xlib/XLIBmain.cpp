@@ -94,7 +94,7 @@ int handleEvents() {
       }
       case ButtonPress: {
         if (e.xbutton.button < 4)
-          enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4 - e.xbutton.button] = 1;
+          input_mouse_down(e.xbutton.button == 1 ? 0 : 4 - e.xbutton.button);
         else
           switch (e.xbutton.button) {
             case 4:
@@ -115,7 +115,7 @@ int handleEvents() {
       }
       case ButtonRelease: {
         if (e.xbutton.button < 4)
-          enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4 - e.xbutton.button] = 0;
+          input_mouse_up(e.xbutton.button == 1 ? 0 : 4 - e.xbutton.button);
         else
           switch (e.xbutton.button) {
             case 4:

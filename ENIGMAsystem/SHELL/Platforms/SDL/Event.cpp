@@ -242,16 +242,14 @@ void SDL_Event_Handler::mouseButtonDown(const SDL_Event *event) {
   int btn = SDL_map_button_enum(event->button.button);
   if (btn < 0) return;
   SDL_CaptureMouse(SDL_TRUE);
-  enigma::last_mousestatus[btn] = enigma::mousestatus[btn];
-  enigma::mousestatus[btn] = true;
+  input_mouse_down(btn);
 }
 
 void SDL_Event_Handler::mouseButtonUp(const SDL_Event *event) {
   int btn = SDL_map_button_enum(event->button.button);
   if (btn < 0) return;
   if (!SDL_GetMouseState(NULL, NULL)) SDL_CaptureMouse(SDL_FALSE);
-  enigma::last_mousestatus[btn] = enigma::mousestatus[btn];
-  enigma::mousestatus[btn] = false;
+  input_mouse_up(btn);
 }
 
 void SDL_Event_Handler::mouseWheel(const SDL_Event *event) {

@@ -42,6 +42,8 @@ void input_initialize();
 void input_push();
 void input_key_down(int key);
 void input_key_up(int key);
+void input_mouse_down(int button);
+void input_mouse_up(int button);
 
 }  // namespace enigma
 

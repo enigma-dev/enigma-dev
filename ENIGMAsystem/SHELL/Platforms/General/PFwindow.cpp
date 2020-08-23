@@ -59,6 +59,19 @@ void input_key_up(int key) {
   keybdstatus[key]=0;
 }
 
+void input_mouse_down(int button) {
+  enigma_user::mouse_lastbutton = button;
+  enigma_user::mouse_button = button;
+  last_mousestatus[button] = mousestatus[button];
+  mousestatus[button] = 1;
+}
+
+void input_mouse_up(int button) {
+  enigma_user::mouse_button = 0;
+  last_mousestatus[button] = mousestatus[button];
+  mousestatus[button] = 0;
+}
+
 void compute_window_scaling() {
   if (!regionWidth) return;
   parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth;
