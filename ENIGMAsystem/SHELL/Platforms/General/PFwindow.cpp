@@ -62,13 +62,11 @@ void input_key_up(int key) {
 void input_mouse_down(int button) {
   enigma_user::mouse_lastbutton = button;
   enigma_user::mouse_button = button;
-  last_mousestatus[button] = mousestatus[button];
   mousestatus[button] = 1;
 }
 
 void input_mouse_up(int button) {
   enigma_user::mouse_button = 0;
-  last_mousestatus[button] = mousestatus[button];
   mousestatus[button] = 0;
 }
 
