@@ -81,7 +81,6 @@ int handleEvents() {
         continue;
       }
       case KeyRelease: {
-        enigma_user::keyboard_key = 0;
         gk = XLookupKeysym(&e.xkey, 0);
         if (gk == NoSymbol) continue;
 
