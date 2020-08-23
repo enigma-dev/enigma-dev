@@ -7,6 +7,9 @@
 
 namespace enigma {
 
+using enigma_user::keyboard_key;
+using enigma_user::keyboard_lastkey;
+
 int window_min_width = -1;
 int window_max_width = -1;
 int window_min_height = -1;
@@ -44,6 +47,19 @@ void input_push() {
     last_keybdstatus[i] = keybdstatus[i];
   }
   enigma_user::mouse_hscrolls = enigma_user::mouse_vscrolls = 0;
+}
+
+void input_key_down(int key) {
+  keyboard_lastkey = key;
+  keyboard_key = key;
+  last_keybdstatus[key]=keybdstatus[key];
+  keybdstatus[key]=1;
+}
+
+void input_key_up(int key) {
+  keyboard_key = 0;
+  last_keybdstatus[key]=keybdstatus[key];
+  keybdstatus[key]=0;
 }
 
 void compute_window_scaling() {

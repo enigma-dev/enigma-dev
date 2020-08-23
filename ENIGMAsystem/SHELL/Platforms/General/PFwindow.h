@@ -40,6 +40,8 @@ extern int window_max_height;
 
 void input_initialize();
 void input_push();
+void input_key_down(int key);
+void input_key_up(int key);
 
 }  // namespace enigma
 

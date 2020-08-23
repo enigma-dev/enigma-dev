@@ -77,14 +77,7 @@ int handleEvents() {
             }
           }
         }
-        enigma_user::keyboard_lastkey = actualKey;
-        enigma_user::keyboard_key = actualKey;
-        if (enigma::last_keybdstatus[actualKey] == 1 && enigma::keybdstatus[actualKey] == 0) {
-          enigma::keybdstatus[actualKey] = 1;
-          continue;
-        }
-        enigma::last_keybdstatus[actualKey] = enigma::keybdstatus[actualKey];
-        enigma::keybdstatus[actualKey] = 1;
+        input_key_down(actualKey);
         continue;
       }
       case KeyRelease: {
@@ -97,8 +90,7 @@ int handleEvents() {
         else
           actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
 
-        enigma::last_keybdstatus[actualKey] = enigma::keybdstatus[actualKey];
-        enigma::keybdstatus[actualKey] = 0;
+        input_key_up(actualKey);
         continue;
       }
       case ButtonPress: {
