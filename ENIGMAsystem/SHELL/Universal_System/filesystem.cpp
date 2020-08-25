@@ -217,58 +217,8 @@ namespace enigma_user {
     }
     return result;
   }
-
-  static string retained_string = "";
-  static size_t retained_length = 0;
-  // this function was written to prevent infinitely copying inside itself
-  static inline bool directory_copy_retained(string dname, string newname) {
-    std::error_code ec;
-    bool result = false;
-    const fs::path path1 = fs::u8path(dname);
-    const fs::path path2 = fs::u8path(newname);
-    const fs::path path3 = fs::u8path(path2.u8string().substr(0, path1.u8string().length()));
-    if (retained_string.empty() && retained_length == 0) {
-      retained_length = path1.u8string().length();
-      retained_string = path2.u8string().substr(retained_length);
-    }
-    if (directory_exists(dname)) {
-      if ((filename_name(path1.u8string()) != filename_name(path2.u8string()) &&
-        filename_path(path1.u8string()) == filename_path(path2.u8string())) ||
-        path1.u8string() != path3.u8string()) {
-        fs::copy(path1, path2, fs::copy_options::recursive, ec);
-        result = (ec.value() == 0);
-      } else if (path1.u8string() == path3.u8string()) {
-        var itemVec = directory_contents(dname, "*.*", true);
-        if (!directory_exists(newname)) {
-          directory_create(newname);
-          for (ssize_t i = 0; i < itemVec.array_len(); i++) {
-            const string &item = itemVec[i];
-            if (directory_exists(filename_remove_slash(item)) && 
-              filename_remove_slash(item).substr(retained_length) != retained_string) {
-              directory_copy_retained(filename_remove_slash(item), filename_add_slash(path2.u8string()) + 
-              filename_name(filename_remove_slash(item)));
-            } else if (file_exists(item)) {
-              fs::copy(item, filename_add_slash(path2.u8string()) + filename_name(item), ec);
-              if (ec.value() == 0) { result = true; } else { result = false; break; }
-            }
-          }
-        }
-      }
-    }
-    return result;
-  }
-
-  bool directory_copy(string dname, string newname) {
-    if (!directory_exists(dname)) return false;
-    if (!directory_exists(newname)) directory_create(newname);
-    dname = filename_remove_slash(dname, true);
-    newname = filename_remove_slash(newname, true);
-    retained_string = "";
-    retained_length = 0;
-    return directory_copy_retained(dname, newname);
-  }
-
-  var directory_contents(string dname, string pattern, bool includedirs) {
+  
+  static inline string directory_contents_helper(string dname, string pattern, bool includedirs) {
     std::error_code ec;
     string result = "";
     if (!directory_exists(dname)) return "";
@@ -307,7 +257,61 @@ namespace enigma_user {
       result += filteredName + "\n";
     }
     result.pop_back();
-    return string_split(result, "\n", true);
+    return result;
+  }
+
+  static string retained_string = "";
+  static size_t retained_length = 0;
+  static std::uintmax_t szSrc   = 0;
+  // this function was written to prevent infinitely copying inside itself
+  static inline bool directory_copy_retained(string dname, string newname) {
+    std::error_code ec;
+    bool result = false;
+    const fs::path path1 = fs::u8path(dname);
+    const fs::path path2 = fs::u8path(newname);
+    const fs::path path3 = fs::u8path(path2.u8string().substr(0, path1.u8string().length()));
+    if (retained_string.empty() && retained_length == 0) {
+      retained_length = path1.u8string().length();
+      retained_string = path2.u8string().substr(retained_length);
+    }
+    if (directory_exists(dname)) {
+      if ((filename_name(path1.u8string()) != filename_name(path2.u8string()) &&
+        filename_path(path1.u8string()) == filename_path(path2.u8string())) ||
+        path1.u8string() != path3.u8string()) {
+        fs::copy(path1, path2, fs::copy_options::recursive, ec);
+        result = (ec.value() == 0);
+      } else if (path1.u8string() == path3.u8string()) {
+        vector<string> itemVec = split_string(directory_contents_helper(dname, "*.*", true), '\n');
+        if (!directory_exists(newname)) {
+          directory_create(newname);
+          for (const string &item : itemVec) {
+            if (directory_exists(filename_remove_slash(item)) && 
+              filename_remove_slash(item).substr(retained_length) != retained_string) {
+              directory_copy_retained(filename_remove_slash(item), filename_add_slash(path2.u8string()) + 
+              filename_name(filename_remove_slash(item)));
+            } else if (file_exists(item)) {
+              fs::copy(item, filename_add_slash(path2.u8string()) + filename_name(item), ec);
+            }
+          }
+          result = (szSrc == directory_size(newname));
+        }
+      }
+    }
+    return result;
+  }
+
+  bool directory_copy(string dname, string newname) {
+    if (!directory_exists(dname)) return false;
+    dname = filename_remove_slash(dname, true);
+    newname = filename_remove_slash(newname, true);
+    retained_string = "";
+    retained_length = 0;
+    std::uintmax_t szSrc = directory_size(dname);
+    return directory_copy_retained(dname, newname);
+  }
+
+  var directory_contents(string dname, string pattern, bool includedirs) {
+    return string_split(directory_contents_helper(dname, pattern, includedirs), "\n", true);
   }
 
 } // namespace enigma_user
