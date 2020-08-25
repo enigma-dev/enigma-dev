@@ -311,6 +311,8 @@ namespace enigma_user {
     newname = filename_remove_slash(newname, true);
     retained_string = "";
     retained_length = 0;
+    // check size to detemine success instead of error code.
+    // comment the line below out if you want stop on error.
     std::uintmax_t szSrc = directory_size(dname);
     return directory_copy_retained(dname, newname);
   }
