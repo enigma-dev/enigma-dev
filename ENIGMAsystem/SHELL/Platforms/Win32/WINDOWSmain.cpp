@@ -305,7 +305,7 @@ void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
 void initialize_directory_globals() {
   // Set the working_directory
-  enigma_user::working_directory = get_working_directory();
+  enigma_user::working_directory = enigma_user::get_working_directory();
 
   // Set the program_directory
   buffer[0] = 0;
@@ -314,7 +314,7 @@ void initialize_directory_globals() {
   enigma_user::program_directory = enigma_user::filename_path(enigma_user::program_directory);
 
   // Set the temp_directory
-  enigma_user::temp_directory = get_remp_directory();
+  enigma_user::temp_directory = enigma_user::get_remp_directory();
   
   // Set the game_save_id
   enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
