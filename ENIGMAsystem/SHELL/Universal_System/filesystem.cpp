@@ -106,8 +106,10 @@ namespace enigma_user {
     #ifdef _WIN32
     string result = string_replace_all(result, "/", "\\");
     #endif
-    if (directory_exists(result)) { return filename_add_slash(result); }
-    return result;
+    if (ec.value() == 0 && directory_exists(result)) {
+      return filename_add_slash(result);
+    }
+    return (ec.value() == 0) ? result : "";
   }
 
   std::uintmax_t file_size(string fname) {
