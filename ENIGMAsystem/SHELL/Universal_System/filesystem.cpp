@@ -177,6 +177,7 @@ namespace enigma_user {
   }
 
   bool directory_destroy(string dname) {
+    exit(0); // remove this line when we add sandbox option
     std::error_code ec;
     dname = filename_remove_slash(dname, true);
     const fs::path path = fs::u8path(dname);
