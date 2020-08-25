@@ -296,8 +296,8 @@ namespace enigma_user {
               // if (ec.value() == 0) { result = true; } else { return false; }
             }
           }
-          // check size to detemine success instead of error code.
-          // comment the line below out if you want stop on error.
+          // check size to determine success instead of error code.
+          // comment the line below out if you want break on error.
           result = (directory_exists(newname) && szSrc == directory_size(newname));
         }
       }
@@ -311,8 +311,8 @@ namespace enigma_user {
     newname = filename_remove_slash(newname, true);
     retained_string = "";
     retained_length = 0;
-    // check size to detemine success instead of error code.
-    // comment the line below out if you want stop on error.
+    // check size to determine success instead of error code.
+    // comment the line below out if you want break on error.
     szSrc = directory_size(dname);
     return directory_copy_retained(dname, newname);
   }
