@@ -21,6 +21,8 @@
 
 #include <string>
 
+#include "Universal_System/filesystem.h"
+
 namespace enigma {
   extern bool game_isending;
   extern int game_return;
