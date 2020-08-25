@@ -291,9 +291,14 @@ namespace enigma_user {
               filename_name(filename_remove_slash(item)));
             } else if (file_exists(item)) {
               fs::copy(item, filename_add_slash(path2.u8string()) + filename_name(item), ec);
+              // ignore and skip errored copies and copy what is left.
+              // uncomment the line below to break if one copy failed.
+              // if (ec == 0) { result = true } else { return false; }
             }
           }
-          result = (szSrc == directory_size(newname));
+          // check size to detemine success instead of error code.
+          // comment the line below out if you want stop on error.
+          result = (directory_exists(newname) && szSrc == directory_size(newname));
         }
       }
     }
