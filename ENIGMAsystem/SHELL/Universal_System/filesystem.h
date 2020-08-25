@@ -48,6 +48,6 @@ namespace enigma_user {
   bool directory_rename(std::string oldname, std::string newname);
   bool directory_copy(std::string dname, std::string newname);
   std::uintmax_t directory_size(std::string dname);
-  var directory_contents(std::string dname, std::string pattern = "*.*", bool includedirs = true);
+  var directory_contents(std::string dname, std::string pattern, bool includedirs);
 
 } // namespace enigma_user
