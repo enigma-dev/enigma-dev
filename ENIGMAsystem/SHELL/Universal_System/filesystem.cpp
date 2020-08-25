@@ -241,7 +241,8 @@ namespace enigma_user {
         var itemVec = directory_contents(dname, "*.*", true);
         if (!directory_exists(newname)) {
           directory_create(newname);
-          for (const string &item : itemVec) {
+          for (ssize_t i = 0; i < itemVec.array_len(); i++) {
+            const string &item = itemVec[i];
             if (directory_exists(filename_remove_slash(item)) && 
               filename_remove_slash(item).substr(retained_length) != retained_string) {
               directory_copy_retained(filename_remove_slash(item), filename_add_slash(path2.u8string()) + 
