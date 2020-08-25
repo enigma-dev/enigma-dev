@@ -69,7 +69,8 @@ namespace enigma_user {
 
   string get_working_directory() {
     std::error_code ec;
-    return filename_add_slash(fs::current_path(ec).u8string());
+    string result = filename_add_slash(fs::current_path(ec).u8string());
+    return (ec.value() == 0) ? result : "";
   }
 
   bool set_working_directory(string dname) {
@@ -84,7 +85,8 @@ namespace enigma_user {
 
   string get_temp_directory() {
     std::error_code ec;
-    return filename_add_slash(fs::temp_directory_path(ec).u8string());
+    string result = filename_add_slash(fs::temp_directory_path(ec).u8string());
+    return (ec.value() == 0) ? result : "";
   }
 
   string filename_absolute(string fname) {
