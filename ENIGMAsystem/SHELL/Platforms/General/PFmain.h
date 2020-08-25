@@ -79,11 +79,9 @@ void url_open(std::string url);
 void action_webpage(const std::string &url);
 
 void set_program_priority(int value);
-std::string filename_absolute(std::string fname);
 std::string filename_join(std::string prefix, std::string suffix);
 std::string environment_get_variable(std::string name);
 bool environment_set_variable(const std::string &name, const std::string &value);
-bool set_working_directory(std::string dname);
 
 } // namespace enigma_user
 
