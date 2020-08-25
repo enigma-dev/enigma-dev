@@ -77,7 +77,7 @@ namespace enigma_user {
     const fs::path path = fs::u8path(dname);
     fs::current_path(path, ec);
     if (ec.value() == 0) {
-      enigma_user::working_directory = get_working_directory();
+      working_directory = get_working_directory();
     }
     return (ec.value() == 0);
   }
