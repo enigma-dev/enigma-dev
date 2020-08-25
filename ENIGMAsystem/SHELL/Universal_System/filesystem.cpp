@@ -110,6 +110,7 @@ namespace enigma_user {
 
   std::uintmax_t file_size(string fname) {
     std::error_code ec;
+    if (!file_exists(fname)) return 0;
     const fs::path path = fs::u8path(fname);
     std::uintmax_t result = fs::file_size(path, ec);
     return (ec.value() == 0) ? result : 0;
@@ -124,12 +125,14 @@ namespace enigma_user {
 
   bool file_delete(string fname) {
     std::error_code ec;
+    if (!file_exists(fname)) return false;
     const fs::path path = fs::u8path(fname);
     return (fs::remove(path, ec) && ec.value() == 0);
   }
 
   bool file_rename(string oldname, string newname) {
     std::error_code ec;
+    if (!file_exists(oldname)) return false;
     if (!directory_exists(filename_path(newname)))
       directory_create(filename_path(newname));
     const fs::path path1 = fs::u8path(oldname);
@@ -140,6 +143,7 @@ namespace enigma_user {
 
   bool file_copy(string fname, string newname) {
     std::error_code ec;
+    if (!file_exists(fname)) return false;
     if (!directory_exists(filename_path(newname)))
       directory_create(filename_path(newname));
     const fs::path path1 = fs::u8path(fname);
@@ -149,7 +153,8 @@ namespace enigma_user {
   }
 
   std::uintmax_t directory_size(string dname) {
-    std::uintmax_t result = 0;                    
+    std::uintmax_t result = 0;
+    if (!directory_exists(dname)) return 0;
     const fs::path path = fs::u8path(filename_remove_slash(dname, true));
     if (fs::exists(path)) {
       fs::directory_iterator end_itr;
@@ -182,6 +187,7 @@ namespace enigma_user {
 
   bool directory_destroy(string dname) {
     std::error_code ec;
+    if (!directory_exists(dname)) return false;
     dname = filename_remove_slash(dname, true);
     const fs::path path = fs::u8path(dname);
     return (fs::remove(path, ec) && ec.value() == 0);
@@ -189,6 +195,7 @@ namespace enigma_user {
 
   bool directory_rename(string oldname, string newname) {
     std::error_code ec;
+    if (!directory_exists(oldname)) return false;
     if (!directory_exists(newname)) directory_create(newname);
     oldname = filename_remove_slash(oldname, true);
     newname = filename_remove_slash(newname, true);
@@ -247,6 +254,7 @@ namespace enigma_user {
   }
 
   bool directory_copy(string dname, string newname) {
+    if (!directory_exists(dname)) return false;
     if (!directory_exists(newname)) directory_create(newname);
     dname = filename_remove_slash(dname, true);
     newname = filename_remove_slash(newname, true);
@@ -258,6 +266,7 @@ namespace enigma_user {
   var directory_contents(string dname, string pattern, bool includedirs) {
     std::error_code ec;
     string result = "";
+    if (!directory_exists(dname)) return "";
     dname = filename_remove_slash(dname, true);
     const fs::path path = fs::u8path(dname);
     if (directory_exists(dname)) {
