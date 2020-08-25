@@ -87,6 +87,8 @@ struct EventDescriptor {
   std::string HumanName() const;
   std::string BaseFunctionName() const;
   std::string LocalDeclarations() const;
+  std::string GroupName() const { return event->group(); }
+  std::string HumanDescription() const { return event->description(); }
 
   bool HasLocalDeclarations() const { return event->has_locals(); }
   bool HasDefaultCode() const { return event->has_default_() || HasConstantCode(); }
