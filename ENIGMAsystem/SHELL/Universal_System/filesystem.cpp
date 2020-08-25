@@ -293,7 +293,7 @@ namespace enigma_user {
               fs::copy(item, filename_add_slash(path2.u8string()) + filename_name(item), ec);
               // ignore and skip errored copies and copy what is left.
               // uncomment the line below to break if one copy failed.
-              // if (ec == 0) { result = true } else { return false; }
+              // if (ec.value() == 0) { result = true; } else { return false; }
             }
           }
           // check size to detemine success instead of error code.
