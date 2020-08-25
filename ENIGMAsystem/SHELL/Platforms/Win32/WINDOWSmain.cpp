@@ -308,7 +308,7 @@ void initialize_directory_globals() {
   enigma_user::working_directory = enigma_user::get_working_directory();
 
   // Set the program_directory
-  buffer[0] = 0;
+  wchar_t buffer[MAX_PATH];
   GetModuleFileNameW(NULL, buffer, MAX_PATH);
   enigma_user::program_directory = shorten(buffer);
   enigma_user::program_directory = enigma_user::filename_path(enigma_user::program_directory);
