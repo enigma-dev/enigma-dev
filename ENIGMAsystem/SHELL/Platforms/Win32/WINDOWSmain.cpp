@@ -28,6 +28,7 @@
 #include "Universal_System/estring.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
+#include "Universal_System/filesystem.h"
 
 #include <mmsystem.h>
 #include <time.h>
@@ -75,20 +76,6 @@ static inline string add_slash(const string& dir) {
 }
 
 namespace enigma_user {
-
-bool set_working_directory(string dname) {
-  tstring tstr_dname = widen(dname);
-  replace(tstr_dname.begin(), tstr_dname.end(), '/', '\\');
-  if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
-    WCHAR wstr_buffer[MAX_PATH];
-    if (GetCurrentDirectoryW(MAX_PATH, wstr_buffer) != 0) {
-      working_directory = add_slash(shorten(wstr_buffer));
-      return true;
-    }
-  }
-
-  return false;
-}
 
 } // enigma_user
 
@@ -318,9 +305,7 @@ void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
 void initialize_directory_globals() {
   // Set the working_directory
-  WCHAR buffer[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, buffer);
-  enigma_user::working_directory = add_slash(shorten(buffer));
+  enigma_user::working_directory = get_working_directory();
 
   // Set the program_directory
   buffer[0] = 0;
@@ -329,9 +314,7 @@ void initialize_directory_globals() {
   enigma_user::program_directory = enigma_user::filename_path(enigma_user::program_directory);
 
   // Set the temp_directory
-  buffer[0] = 0;
-  GetTempPathW(MAX_PATH, buffer);
-  enigma_user::temp_directory = add_slash(shorten(buffer));
+  enigma_user::temp_directory = get_remp_directory();
   
   // Set the game_save_id
   enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
