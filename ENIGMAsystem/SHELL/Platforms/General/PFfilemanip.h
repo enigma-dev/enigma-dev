@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "Universal_System/filesystem.h"
+
 namespace enigma_user {
 
 // File attribute constants
