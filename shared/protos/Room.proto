@@ -123,9 +123,13 @@ message Room {
     optional int32 speed = 13;
   }
 
+  repeated Sprite sprites = 20;
+
   message ParticleSystem {
     //TODO: where? is API for layerelementtype_particlesystem
   }
+
+  //repeated ParticleSystem particles = 21;
 
   message Layer {
     optional int32 depth = 1;
@@ -137,22 +141,10 @@ message Room {
     optional int32 hspeed = 6;
     optional int32 vspeed = 7;
 
-    message Element {
-      oneof type {
-        Background background = 1;
-        Instance instance = 2;
-        Tile tile = 3;
-        Sprite sprite = 4;
-        ParticleSystem particle = 5;
-      }
-    }
-
-    repeated Element elements = 8;
-
-    optional int32 script_begin = 10;
-    optional int32 script_end = 11;
-    optional int32 shader = 12;
-    optional int32 path = 13;
+    optional int32 script_begin = 8;
+    optional int32 script_end = 9;
+    optional int32 shader = 10;
+    optional int32 path = 11;
 
     message EditorSettings {
       optional bool locked = 1;
@@ -161,7 +153,7 @@ message Room {
     optional EditorSettings editor_settings = 31;
   }
 
-  repeated Layer layers = 20;
+  repeated Layer layers = 23;
 
   message RoomPhysicsSettings {
     optional bool use_physics = 1 [(gmx) = "PhysicsWorld"];
