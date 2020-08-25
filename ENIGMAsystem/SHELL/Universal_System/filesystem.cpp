@@ -181,11 +181,10 @@ namespace enigma_user {
   }
 
   bool directory_destroy(string dname) {
-    exit(0); // remove this line when we add sandbox option
     std::error_code ec;
     dname = filename_remove_slash(dname, true);
     const fs::path path = fs::u8path(dname);
-    return (fs::remove_all(path, ec) && ec.value() == 0);
+    return (fs::remove(path, ec) && ec.value() == 0);
   }
 
   bool directory_rename(string oldname, string newname) {
