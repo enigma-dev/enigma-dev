@@ -238,7 +238,7 @@ namespace enigma_user {
         fs::copy(path1, path2, fs::copy_options::recursive, ec);
         result = (ec.value() == 0);
       } else if (path1.u8string() == path3.u8string()) {
-        vector<string> itemVec = split_string(directory_contents(dname), '\n');
+        vector<string> itemVec = split_string(directory_contents(dname, "*.*", true), '\n');
         if (!directory_exists(newname)) {
           directory_create(newname);
           for (const string &item : itemVec) {
