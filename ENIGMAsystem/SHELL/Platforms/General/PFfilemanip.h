@@ -31,18 +31,8 @@ enum {
   fa_all       = fa_files_all | fa_directory
 };
 
-long long file_size(std::string fname);
 time_t file_access_time(std::string fname);
 time_t file_modified_time(std::string fname);
-
-int file_exists(std::string fname);
-int file_delete(std::string fname);
-int file_rename(std::string oldname,std::string newname);
-int file_copy(std::string fname,std::string newname);
-int directory_exists(std::string dname);
-int directory_create(std::string dname);
-int directory_delete(std::string dname);
-inline int directory_destroy(std::string dname) { return directory_delete(dname); }
 
 std::string file_find_next();
 void file_find_close();
