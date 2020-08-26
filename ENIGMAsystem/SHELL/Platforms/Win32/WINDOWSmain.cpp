@@ -315,7 +315,7 @@ void initialize_directory_globals() {
   }
 
   // Set the temp_directory
-  enigma_user::temp_directory = enigma_user::get_remp_directory();
+  enigma_user::temp_directory = enigma_user::get_temp_directory();
   
   // Set the game_save_id
   enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
