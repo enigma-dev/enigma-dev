@@ -310,7 +310,7 @@ void initialize_directory_globals() {
   // Set the program_directory
   wchar_t buffer[MAX_PATH];
   if (GetModuleFileNameW(NULL, buffer, MAX_PATH) != 0) {
-    enigma_user::program_directory = narrow(buffer);
+    enigma_user::program_directory = shorten(buffer);
     enigma_user::program_directory = enigma_user::filename_path(enigma_user::program_directory);
   }
 
