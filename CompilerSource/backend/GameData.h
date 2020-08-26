@@ -16,7 +16,7 @@
 // Legacy constructors.
 #include "EnigmaStruct.h"
 #include "project.pb.h"
-#include "GameInformation.pb.h"
+#include "Information.pb.h"
 #include "event_reader/event_parser.h"
 
 struct ESLookup;
