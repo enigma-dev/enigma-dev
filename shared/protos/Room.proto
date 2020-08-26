@@ -107,26 +107,6 @@ message Room {
 
   repeated Tile tiles = 18 [(gmx) = "tiles/tile"];
 
-  message Sprite {
-    optional string name = 1;
-    optional int32 id = 2 [(id_start) = 0];
-    optional string sprite_type = 3 [(resource_ref)="sprite"];
-    optional double x = 4;
-    optional double y = 5;
-    optional double z = 6;
-    optional double xscale = 7 [default = 1];
-    optional double yscale = 8 [default = 1];
-    optional double zscale = 9 [default = 1];
-    optional double rotation  = 10;
-    optional double zrotation = 11;
-    optional int32 color = 12 [default = 0xFFFFFF];
-    optional int32 speed = 13;
-  }
-
-  message ParticleSystem {
-    //TODO: where? is API for layerelementtype_particlesystem
-  }
-
   message Layer {
     optional int32 depth = 1;
     optional string name = 2;
@@ -137,18 +117,6 @@ message Room {
     optional int32 hspeed = 6;
     optional int32 vspeed = 7;
 
-    message Element {
-      oneof type {
-        Background background = 1;
-        Instance instance = 2;
-        Tile tile = 3;
-        Sprite sprite = 4;
-        ParticleSystem particle = 5;
-      }
-    }
-
-    repeated Element elements = 8;
-
     optional int32 script_begin = 10;
     optional int32 script_end = 11;
     optional int32 shader = 12;
@@ -157,6 +125,9 @@ message Room {
     message EditorSettings {
       optional bool locked = 1;
     }
+
+    repeated Instance instances = 17;
+    repeated Tile tiles = 18 ;
 
     optional EditorSettings editor_settings = 31;
   }
