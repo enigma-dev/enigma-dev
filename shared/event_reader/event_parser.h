@@ -82,7 +82,7 @@ struct EventDescriptor {
 
   // Return the base ID of this event, such as "Collision" or "Draw."
   // Not to be confused with the IdString of an instance of this event.
-  const std::string &bare_id() { return event->id(); }
+  const std::string &bare_id() const { return event->id(); }
 
   std::string HumanName() const;
   std::string BaseFunctionName() const;
