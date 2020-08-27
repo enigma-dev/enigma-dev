@@ -103,7 +103,7 @@ namespace enigma_user {
     const fs::path path = fs::u8path(fname);
     string result = fs::weakly_canonical(path, ec).u8string();
     #ifdef _WIN32
-    string result = string_replace_all(result, "/", "\\");
+    result = string_replace_all(result, "/", "\\");
     #endif
     if (ec.value() == 0 && directory_exists(result)) {
       return filename_add_slash(result);
