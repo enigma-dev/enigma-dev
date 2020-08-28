@@ -108,12 +108,13 @@ message Room {
   repeated Tile tiles = 18 [(gmx) = "tiles/tile"];
 
   message Layer {
-    optional int32 depth = 1;
-    optional string name = 2;
-    optional bool visible = 3;
+    optional string name = 1;
+    optional int32 id = 2;
+    optional int32 depth = 3;
+    optional bool visible = 4;
 
-    repeated Instance instances = 17;
-    repeated Tile tiles = 18 ;
+    repeated Instance instances = 5;
+    repeated Tile tiles = 6;
   }
 
   repeated Layer layers = 20;
