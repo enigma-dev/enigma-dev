@@ -112,24 +112,8 @@ message Room {
     optional string name = 2;
     optional bool visible = 3;
 
-    optional int32 x = 4;
-    optional int32 y = 5;
-    optional int32 hspeed = 6;
-    optional int32 vspeed = 7;
-
-    optional int32 script_begin = 10;
-    optional int32 script_end = 11;
-    optional int32 shader = 12;
-    optional int32 path = 13;
-
-    message EditorSettings {
-      optional bool locked = 1;
-    }
-
     repeated Instance instances = 17;
     repeated Tile tiles = 18 ;
-
-    optional EditorSettings editor_settings = 31;
   }
 
   repeated Layer layers = 20;
