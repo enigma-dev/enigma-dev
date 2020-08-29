@@ -80,8 +80,6 @@ message Room {
     optional EditorSettings editor_settings = 31;
   }
 
-  repeated Instance instances = 17 [(gmx) = "instances/instance"];
-
   message Tile {
     optional string name = 1;
     optional int32 id = 2 [(id_start) = 10000001];
@@ -104,8 +102,6 @@ message Room {
 
     optional EditorSettings editor_settings = 31;
   }
-
-  repeated Tile tiles = 18 [(gmx) = "tiles/tile"];
 
   message Layer {
     optional string name = 1;
