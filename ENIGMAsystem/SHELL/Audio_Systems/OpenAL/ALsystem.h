@@ -26,6 +26,7 @@
 #include "Widget_Systems/widgets_mandatory.h"  // show_error
 #endif
 
+#include <string>
 #include <stddef.h>
 
 #ifdef __APPLE__
