@@ -1016,6 +1016,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*
   }
 
   auto compatibility_instances_layer = room->add_layers();
+  compatibility_instances_layer->set_name("compatibility_instances_layer");
   int noinstances = dec.read4();
   for (int j = 0; j < noinstances; j++) {
     auto instance = room->add_instances();
