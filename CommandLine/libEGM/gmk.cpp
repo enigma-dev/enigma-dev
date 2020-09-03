@@ -1017,17 +1017,23 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*
 
   auto compatibility_instances_layer = room->add_layers();
   compatibility_instances_layer->set_name("compatibility_instances_layer");
+  compatibility_instances_layer->set_depth(0);
+  compatibility_instances_layer->set_visible(true);
   int noinstances = dec.read4();
   for (int j = 0; j < noinstances; j++) {
     auto instance = room->add_instances();
-    auto compatibility_instance = compatibility_instances_layer->add_instances();
     instance->set_x(dec.read4());
     instance->set_y(dec.read4());
-    dec.postponeName(instance->mutable_object_type(), dec.read4(), TypeCase::kObject);
+    int objid = dec.read4();
+    dec.postponeName(instance->mutable_object_type(), objid, TypeCase::kObject);
     instance->set_id(dec.read4());
     instance->set_creation_code(dec.readStr());
     instance->mutable_editor_settings()->set_locked(dec.readBool());
+
+    auto compatibility_instance = compatibility_instances_layer->add_instances();
     compatibility_instance->CopyFrom(*instance);
+    dec.postponeName(compatibility_instance->mutable_object_type(), objid, TypeCase::kObject);
+    
   }
 
   int notiles = dec.read4();
