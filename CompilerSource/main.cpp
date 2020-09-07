@@ -15,13 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <time.h>
+#include <parsing/ast.h>
+
+#include <ctime>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <cstdlib>
-#include <stdio.h>
+#include <cstdio>
 #include <map>
 
 using namespace std;
@@ -31,7 +33,6 @@ using namespace std;
 #include "darray.h"
 #include "settings.h"
 
-#include "syntax/syncheck.h"
 #include "parser/parser.h"
 #include "OS_Switchboard.h"
 
@@ -152,15 +153,14 @@ DLLEXPORT syntax_error *syntaxCheck(int script_count, const char* *script_names,
     current_language->quickmember_script(&globals_scope,script_names[i]);
 
   cout << "Starting syntax check." << endl;
-  std::string newcode;
-  ide_passback_error.absolute_index = syncheck::syntaxcheck(code, newcode);
+  using enigma::parsing::AST;
+  AST ast = AST::Parse(code);
   cout << "Syntax checking complete." << endl;
-  error_sstring = syncheck::syerr;
 
-
-
+  static std::string static_error_text;
   cout << "Copying error pointer." << endl;
-  ide_passback_error.err_str = error_sstring.c_str();
+  static_error_text = ast.ErrorString();
+  ide_passback_error.err_str = static_error_text.c_str();
 
   cout << "Computing position." << endl;
   if (ide_passback_error.absolute_index != -1)

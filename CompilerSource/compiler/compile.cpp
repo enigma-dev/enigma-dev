@@ -53,8 +53,6 @@
 using namespace std;
 
 #include "backend/JavaCallbacks.h"
-#include "syntax/syncheck.h"
-#include "parser/parser.h"
 #include "compile_includes.h"
 #include "compile_common.h"
 

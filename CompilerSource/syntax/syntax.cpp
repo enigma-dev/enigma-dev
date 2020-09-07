@@ -38,6 +38,8 @@
 #include "general/macro_integration.h"
 #include "parser/object_storage.h"
 
+#include "parsing/tokens.h"
+
 #include "../OS_Switchboard.h"
 #ifdef WRITE_UNIMPLEMENTED_TXT
 extern std::map <string, char> unimplemented_function_list;
@@ -55,46 +57,23 @@ extern string tostring(int);
 
 namespace {
   std::set<std::string> blacklist;
+  using namespace enigma::parsing;
 }
 
 namespace syncheck
 {
-
-  struct open_parenth_info {
-    unsigned ind;
-    int macrolevel;
-    char type;
-    open_parenth_info() {}
-    open_parenth_info(unsigned i, int ml, char type): ind(i), macrolevel(ml), type(type) {}
-  };
-  pt pop_open_parenthesis(vector<open_parenth_info> &ops, vector<token>& lex, pt pos, int ind, char opener, string whathavewe) {
-    if (ops.empty()) {
-      syerr = "Unexpected " + whathavewe + ": None open."; return pos;
-    }
-    const char p = ops[ops.size()-1].type;
-    if (p != opener) {
-      syerr = "Expected closing " + string(p == '(' ? "parenthesis" : p == '[' ? "bracket" : p == '{' ? "brace" : "triangle bracket") + " before " + whathavewe;
-      return pos;
-    }
-    const int oi = ops[ops.size()-1].ind;
-    lex[oi].match = ind;
-    lex[ind].match = oi;
-    ops.pop_back();
-    return pt(-1);
-  }
-
   #include "syntaxtools.h"
 
   map<string,int> scripts;
   void addscr(string name) {
     scripts[name]++;
   }
-
+/*
   #define superPos (mymacroind ? mymacrostack[0].pos : pos)
   #define ptrace() for (unsigned i = 0; i < lex.size(); i++) cout << (string)lex[i] << "\t\t" << endl
   #define lexlast (lex.size()-1)
   std::unique_ptr<AST> syntaxcheck(string raw_code) {
-    auto result = std::make_unique<AST>(std::move(raw_code))
+    auto result = std::make_unique<AST>(std::move(raw_code));
 
     //Build our blacklist.
     if (blacklist.empty()) {
@@ -116,372 +95,10 @@ namespace syncheck
     }
 
     pt pos = 0;
-    unsigned mymacroind = 0;
-    macro_stack_t mymacrostack;
-    lex.clear();
-    lex.push_back(Token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
-
     vector<open_parenth_info> open_parenths; // Any open brace, bracket, or parenthesis
 
-    // First, collapse everything into a massive lex vector,
-    // Doing minor syntax checking along the way
-    for (;;)
-    {
-      // Handle end of code
-      if (pos >= code.length()) {
-        if (mymacroind)
-          mymacrostack[--mymacroind].release(code,pos);
-        else break;
-        continue;
-      }
-
-      if (is_useless(code[pos])) {
-        while (is_useless(code[++pos]));
-        continue;
-      }
-
-      if (is_letter(code[pos]))
-      {
-        const pt spos = pos;
-        while (is_letterd(code[++pos]));
-        string name = code.substr(spos,pos-spos);
-
-        //Is this in our blacklist?
-        if (blacklist.find(name) != blacklist.end()) {
-          const string newname = name + "__________"; //There's better ways of doing this.
-          code.replace(spos, pos-spos, newname);
-          pos += newname.size() - name.size();
-          name = newname;
-        }
-
-        // First, check if it's a macro.
-        jdi::macro_iter_c itm = main_context->get_macros().find(name);
-        if (itm != main_context->get_macros().end())
-        {
-          if (!macro_recurses(name,mymacrostack,mymacroind))
-          {
-            string macrostr;
-            if (itm->second->argc != -1) {
-              vector<string> mpvec;
-              jdip::macro_function* mf = (jdip::macro_function*)itm->second;
-              jdip::lexer_cpp::parse_macro_params(mf, main_context->get_macros(), code.c_str(), pos, code.length(), mpvec, jdip::token_t(), jdi::def_error_handler);
-              char *mss, *mse; mf->parse(mpvec, mss, mse, jdip::token_t());
-              macrostr = string (mss, mse);
-            }
-            else
-              macrostr = ((jdip::macro_scalar*)itm->second)->value;
-            mymacrostack[mymacroind++].grab(name,code,pos);
-            code = macrostr; pos = 0;
-            continue;
-          }
-        }
-
-        if (is_wordop(name)) { //this is actually a word-based operator, such as `and', `or', and `not'
-          bool unary = name[0] == 'n'; //not is the only unary word operator.
-          if (unary and (!lex[lexlast].separator and !lex[lexlast].operatorlike)) {
-            syerr = "Unexpected unary keyword `not'";
-            return pos;
-          }
-          if (!unary and (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike)) {
-            syerr = "Expected primary expression before `" + name + "' operator";
-            return pos;
-          }
-          lex.push_back(Token(unary ? TT_UNARYPRE : TT_OPERATOR, name, superPos, name.length(), false, false, true, mymacroind));
-          continue;
-        }
-
-        if (shared_object_locals.find(name) == shared_object_locals.end())
-        {
-          jdi::definition *d = current_language->look_up(name);
-          if (d)
-          {
-            // Handle typenames
-            if (d->flags & jdi::DEF_TYPENAME) {
-              if (lex[lexlast].type == TT_TYPE_NAME)
-                lex[lexlast].length = superPos - lex[lexlast].pos + name.length();
-              else {
-                if (lex[lexlast].breakandfollow)
-                  lex.push_back(Token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
-                lex.push_back(Token(TT_TYPE_NAME, d, name, superPos, name.length(), false, false, false, mymacroind));
-              }
-              continue;
-            }
-
-            if (lex[lexlast].breakandfollow)
-              lex.push_back(Token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
-
-            if (d->flags & jdi::DEF_NAMESPACE) {
-              lex.push_back(Token(TT_NAMESPACE, d, name, superPos, name.length(), false, false, false, mymacroind));
-              continue;
-            }
-
-            if (current_language->definition_is_function(d)) {
-              lex.push_back(Token(TT_FUNCTION, d, name, superPos, name.length(), false, true, false, mymacroind));
-              continue;
-            }
-            // Global variables
-            lex.push_back(Token(TT_VARNAME, d, name, superPos, name.length(), false, true, false, mymacroind));
-            continue;
-          }
-
-          if (is_statement(name)) // Our control statements
-          {
-            if (!lex[lexlast].separator and !lex[lexlast].operatorlike)
-            {
-              if (lex[lexlast].breakandfollow)
-                lex.push_back(Token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
-              else if (lex[lexlast].type != TT_S_ELSE and lex[lexlast].type != TT_S_TRY)
-              {
-                ptrace();
-                syerr = "Unexpected `" + name + "' statement at this point";
-                return superPos;
-              }
-            }
-            TT mt = statement_type(name);
-            lex.push_back(Token(mt, name, superPos, name.length(), false, mt == TT_TINYSTATEMENT, mt != TT_TINYSTATEMENT, mymacroind));
-            continue;
-          }
-        }
-        if (lex[lexlast].breakandfollow)
-          lex.push_back(Token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
-
-        lex.push_back(Token(TT_VARNAME, name, superPos, name.length(), false, true, false, mymacroind));
-        continue;
-      }
-
-      if (is_digit(code[pos]))
-      {
-        if (!lex[lexlast].separator and !lex[lexlast].operatorlike) {
-          lex.push_back(Token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
-        }
-        const pt spos = pos;
-        while (is_digit(code[++pos]));
-        lex.push_back(Token(TT_DIGIT, code.substr(spos,pos-spos), superPos, pos-spos, false, true, false, mymacroind));
-        continue;
-      }
-
-      switch (code[pos]) {
-        case ';':
-            lex.push_back(Token(TT_SEMICOLON, ";", superPos, 1, true, false, false, mymacroind));
-          pos++; continue;
-        case ':':
-            if (code[pos+1] == '=')
-              lex.push_back(Token(TT_ASSOP, ":", superPos, 2, true, false, false, mymacroind)), pos += 2;
-            else if (code[pos+1] == ':') {
-              return (syerr = "Cannot handle :: with current parser configuration. Oops.", superPos);
-
-              lex.push_back(Token(TT_SCOPEACCESS, "::", superPos, 2, false, false, true, mymacroind)), pos += 2;
-            }
-            else
-              lex.push_back(Token(TT_COLON, ":", superPos, 1, true, false, false, mymacroind)), ++pos;
-          continue;
-        case ',':
-            lex.push_back(Token(TT_COMMA, ",", superPos, 1, true, false, true, mymacroind));
-          pos++; continue;
-        case '$': {
-            const pt spos = pos;
-            if (!is_hexdigit(code[++pos])) {
-              syerr = "Hexadecimal literal expected after '$' symbol";
-              return superPos;
-            }
-            while (is_hexdigit(code[++pos]));
-            lex.push_back(Token(TT_DIGIT, code.substr(spos,pos-spos+1), superPos, pos-spos, false, true, false, mymacroind));
-          } continue;
-
-        pt open_error;
-        case '{':
-            if (lex[lexlast].type == TT_OPERATOR)
-              return (syerr = "Expected secondary expression before brace", superPos);
-            lex.push_back(Token(TT_BEGINBRACE, "{", superPos, 1, true, false, false, mymacroind));
-            open_parenths.push_back(open_parenth_info(lexlast, mymacroind, '{'));
-          pos++; continue;
-        case '}':
-            if (lex[lexlast].operatorlike)
-              return (syerr = "Expected identifier before closing brace", superPos);
-            if (open_parenths.size())
-              lex.push_back(Token(TT_ENDBRACE, open_parenths[open_parenths.size()-1].ind, "}", superPos, 1, true, false, false, mymacroind));
-            open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '{', "closing brace");
-            if (open_error != pt(-1)) return open_error;
-          pos++; continue;
-        case '[':
-            if (lex[lexlast].operatorlike)
-              return (syerr = "Expected identifier before bracket; ENIGMA arrays not yet implemented", superPos);
-            lex.push_back(Token(TT_BEGINBRACKET, "[", superPos, 1, true, false, true, mymacroind));
-            open_parenths.push_back(open_parenth_info(lexlast, mymacroind, '['));
-          pos++; continue;
-        case ']':
-            if (lex[lexlast].operatorlike and lex[lexlast].type != TT_BEGINBRACKET)
-              return (syerr = "Expected secondary expression before closing bracket", superPos);
-            if (open_parenths.size())
-              lex.push_back(Token(TT_ENDBRACKET, open_parenths[open_parenths.size()-1].ind, "]",superPos, 1, false, true, false, mymacroind));
-            open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '[', "closing bracket");
-            if (open_error != pt(-1)) return open_error;
-          pos++; continue;
-        case '(':
-            lex.push_back(Token(TT_BEGINPARENTH, "(", superPos, 1, true, false, true, mymacroind));
-            open_parenths.push_back(open_parenth_info(lexlast, mymacroind, '('));
-          pos++; continue;
-        case ')':
-            if (lex[lexlast].operatorlike and lex[lexlast].type != TT_BEGINPARENTH)
-              return (syerr = "Expected secondary expression before closing parenthesis", superPos);
-            if (open_parenths.size())
-              lex.push_back(Token(TT_ENDPARENTH, open_parenths[open_parenths.size()-1].ind, ")", superPos, 1, false, lex[lexlast].type != TT_TYPE_NAME, false, mymacroind));
-            open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '(', "closing parenthesis");
-            if (open_error != pt(-1)) return open_error;
-          pos++; continue;
-
-        case '.': // We can't really do checking on this yet. It's one of the reasons we have two passes.
-            lex.push_back(Token(TT_DECIMAL, ".", superPos, 1, false, true, false, mymacroind)); ++pos;
-          break;
-
-        pt spos;
-        case '"':
-            spos = pos;
-            if (setting::use_cpp_escapes)
-              while (code[++pos]!='"') {
-                if (pos >= code.length()) {
-                  syerr = "Unclosed double quote at this point";
-                  return superPos;
-                }
-                if (code[pos] == '\\')
-                  pos++;
-              }
-            else
-              while (code[++pos]!='"');
-            lex.push_back(Token(TT_STRING, code.substr(spos,pos-spos+1), superPos, pos-spos, false, true, false, mymacroind));
-          pos++; break;
-        case '\'':
-            spos = pos;
-            if (setting::use_cpp_escapes)
-              while (code[++pos] != '\'') {
-                if (pos >= code.length()) {
-                  syerr = "Unclosed quote at this point";
-                  return superPos;
-                }
-                if (code[pos] == '\\')
-                  pos++;
-              }
-            else
-              while (code[++pos]!='\'');
-            lex.push_back(Token(TT_STRING, code.substr(spos,pos-spos+1), superPos, pos-spos, false, true, false, mymacroind));
-          pos++; break;
-
-        case '?':
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike) {
-              syerr = "Primary expression expected before ternary operator";
-              return superPos;
-            }
-            lex.push_back(Token(TT_TERNARY, "?", superPos, 1, false, true, true, mymacroind));
-            pos++;
-          break;
-
-        int sz;
-        case '+': case '-':
-            sz = 1 + (code[pos+1] == code[pos] and setting::use_incrementals);
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike)
-              lex.push_back(Token(TT_UNARYPRE, code.substr(pos,sz), superPos, sz, false, false, true, mymacroind));
-            else if (sz == 2)
-              lex.push_back(Token(TT_UNARYPOST, code.substr(pos,sz), superPos, sz, false, true, false, mymacroind));
-            else if (code[pos+1] == '=')
-              lex.push_back(Token(TT_ASSOP, code.substr(pos,2), superPos, sz = 2, false, false, true, mymacroind));
-            else
-              lex.push_back(Token(TT_OPERATOR, code.substr(pos,sz), superPos, sz, false, false, true, mymacroind));
-            pos += sz;
-          break;
-        case '*':
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike)
-              lex.push_back(Token(TT_UNARYPRE, "*", superPos, 1, false, false, true, mymacroind)), ++pos;
-            else if (code[pos+1] == '=')
-              lex.push_back(Token(TT_ASSOP, "*=", superPos, 2, false, false, true, mymacroind)), pos += 2;
-            else
-              lex.push_back(Token(TT_OPERATOR, "*", superPos, 1, false, false, true, mymacroind)), ++pos;
-          break;
-        case '>': case '<':
-            if (code[pos] == '<')
-              if (lex[lexlast].type == TT_TYPE_NAME) {
-                lex.push_back(Token(TT_BEGINTRIANGLE, "<", superPos, 1, false, false, false, mymacroind)), pos++;
-                open_parenths.push_back(open_parenth_info(lexlast, mymacroind, '<'));
-                continue;
-              } else;
-            else if (open_parenths.size() && open_parenths[open_parenths.size()-1].type == '<') {
-              lex.push_back(Token(TT_ENDTRIANGLE, ">", superPos, 1, false, false, false, mymacroind)), pos++;
-              open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '<', "closing triangle bracket");
-              if (open_error != pt(-1)) return open_error;
-              pos++; continue;
-            }
-        case '&': case '|': case '^':
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike) {
-              if (code[pos] != '&') {
-                syerr = "Expected primary expression before operator";
-                return superPos;
-              }
-              lex.push_back(Token(TT_UNARYPRE, code.substr(pos,1), superPos, 1, false, false, true, mymacroind)), ++pos;
-            }
-            else if (code[pos+1] == code[pos] or (code[pos+1] == '>' and code[pos] == '<')) {
-              if ((code[pos] == '<' or code[pos] == '>') and code[pos] == code[pos+1] and code[pos+2] == '=')
-                lex.push_back(Token(code[pos] != code[pos+1] ? TT_OPERATOR : TT_ASSOP, code.substr(pos,3), superPos, 3, false, false, true, mymacroind)), pos += 3; // <<= >>=
-              else
-                lex.push_back(Token(TT_OPERATOR, code.substr(pos,2), superPos, 2, false, false, true, mymacroind)), pos += 2; // << >> && || ^^ <>
-            }
-            else if (code[pos+1] == '=')
-              lex.push_back(Token((code[pos] == '<' or code[pos] == '>')?TT_OPERATOR:TT_ASSOP, code.substr(pos,2), superPos, 2, false, false, true, mymacroind)), pos += 2; // >= <= &= |= ^=
-            else
-              lex.push_back(Token(TT_OPERATOR, code.substr(pos,1), superPos, 1, false, false, true, mymacroind)), ++pos; // > < & | ^
-          break;
-        case '/':
-            if (code[pos+1] == '/') { // Two-slash comments
-              while (++pos < code.length() and code[pos] != '\n' and code[pos] != '\r');
-              continue;
-            }
-            if (code[pos+1] == '*') { ++pos; // GM /**/ Comments
-              while (++pos < code.length() and (code[pos] != '/' or code[pos-1] != '*'));
-              pos++; continue;
-            }
-          /* Falls through. */
-        case '%':
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike) {
-              syerr = "Primary expression expected before operator";
-              return superPos;
-            }
-            if (code[pos+1] == '=')
-              lex.push_back(Token(TT_ASSOP, "%=", superPos, 2, false, false, true, mymacroind)), pos += 2; // %= /=
-            else
-              lex.push_back(Token(TT_OPERATOR, "%", superPos, 1, false, false, true, mymacroind)), ++pos;
-          break;
-
-        case '!':
-            if (code[pos+1] == '=') {
-              lex.push_back(Token(TT_OPERATOR, "!=", superPos, 2, false, false, true, mymacroind)), pos += 2;
-              continue;
-            }
-          /* Falls through. */
-        case '~':
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike)
-              lex.push_back(Token(TT_UNARYPRE, code.substr(pos,1), superPos, 1, false, false, true, mymacroind)), ++pos; // ~ !
-            else {
-              ptrace();
-              syerr = "Unexpected unary operator at this point";
-              return superPos;
-            }
-          break;
-
-        case '=':
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike) {
-              syerr = "Primary expression expected before operator";
-              return superPos;
-            }
-            if (lex[lexlast].type == TT_OPERATOR) {
-              syerr = "Unexpected = at this point.";
-              return superPos;
-            }
-            sz = (code[pos+1] == '=') + 1;
-            lex.push_back(Token(sz==2 ? TT_OPERATOR : TT_ASSOP, string(sz,'='), superPos, sz, false, false, true, mymacroind)), pos += sz;
-          break;
-        default:
-            syerr = "Unexpected symbol `" + code.substr(pos,1) + "': unknown to compiler";
-          return superPos;
-      }
-    }
+    // First, collapse everything into a massive lex vector.
+    Lexer lex(code);
 
     if (open_parenths.size()) {
       const char p = open_parenths.rbegin()->type;
@@ -560,5 +177,5 @@ namespace syncheck
 
     newcode = code;
     return -1;
-  }
+  }*/
 }
