@@ -22,6 +22,9 @@
 **  or programs made in the environment.
 */
 
+#ifndef ENIGMA_COMPILER_PARSING_TOKENS_h
+#define ENIGMA_COMPILER_PARSING_TOKENS_h
+
 #include <string>
 #include <string_view>
 
@@ -33,12 +36,34 @@ enum TokenType {
   TT_SEMICOLON,       // A semicolon.
   TT_COLON,           // A colon.
   TT_COMMA,           // A comma.
-  TT_ASSOP,           // = += -= *= /= ...
+  TT_ASSIGN,          // The strict := assignment operator. Not to be confused with EQUALS.
+  TT_ASSOP,           // Relative assignment operators += -= *= /= %= <<= >>=
+  TT_EQUALS,          // The = operator, which raises warnings in conditional expressions.
   TT_DECIMAL,         // A dot. '.'. Whether for number or for access is determined in the second pass.
-  TT_OPERATOR,        // Basic operators. = + - *...
-  TT_UNARYPRE,        // Unary prefix operators. + - ! ++(int) --(int)
-  TT_UNARYPOST,       // Unary postfix operators. ++ --
-  TT_TERNARY,         // ?
+  TT_PLUS,            // The + operator.
+  TT_MINUS,           // The - operator.
+  TT_STAR,            // The * operator.
+  TT_SLASH,           // The / operator.
+  TT_PERCENT,         // The % operator.
+  TT_AMPERSAND,       // The & operator.
+  TT_PIPE,            // The | operator.
+  TT_CARET,           // The ^ operator.
+  TT_AND,             // The and/&& operator.
+  TT_OR,              // The or/|| operator.
+  TT_XOR,             // The xor/^^ operator.
+  TT_EQUALTO,         // The == operator. Always checks equality.
+  TT_NOTEQUAL,        // The != or <> operator.
+  TT_BANG,            // The ! operator.
+  TT_TILDE,           // The ~ operator.
+  TT_INCREMENT,       // The ++ operator.
+  TT_DECREMENT,       // The -- operator.
+  TT_LESS,            // The < operator (or opening angle bracket).
+  TT_GREATER,         // The > operator (or closing angle bracket).
+  TT_LESSEQUAL,       // The <= operator.
+  TT_GREATEREQUAL,    // The >= operator.
+  TT_LSH,             // The << operator.
+  TT_RSH,             // The >> operator (or double closing angle bracket).
+  TT_QMARK,           // ?
   TT_BEGINPARENTH,    // (
   TT_ENDPARENTH,      // )
   TT_BEGINBRACKET,    // [
@@ -57,6 +82,7 @@ enum TokenType {
   TT_SHORTSTATEMENT,  // Short statements; return, mostly
   TT_TINYSTATEMENT,   // break, continue, exit...
   TT_S_SWITCH,        // switch
+  TT_S_REPEAT,        // repeat
   TT_S_CASE,          // case
   TT_S_DEFAULT,       // default
   TT_S_FOR,           // for
@@ -70,8 +96,8 @@ enum TokenType {
   TT_S_CATCH,         // catch
   TT_S_NEW,           // new
 
-  TT_IMPLICIT_SEMICOLON,
-  TT_ERROR = -1
+  TT_ERROR,
+  TT_ENDOFCODE
 };
 
 // TODO: Delete. Replace with ENIGMA-specific wrapper class.
@@ -82,22 +108,16 @@ struct Token {
   std::string_view content;
   size_t pos, length;
 
-  struct {
-    bool separator,      // Separator is true for, ie, any of "; , { ( [  }".
-         breakandfollow, // Break and follow is true for "] )" and strings/varnames/digits.
-         operatorlike;   // Operator like is true for OPERATOR, ASSOP, (, [, and statements expecting an expression.
-    int macrolevel;
-  } antiquated;
-
   unsigned match; // The index of the matching parenthesis/bracket/brace in the lex
   jdi::definition* ext;
 
   Token(): type(TT_ERROR) {}
-  Token(TokenType t,                      std::string_view ct, size_t p, size_t l): type(t), content(ct), pos(p), length(l), match(0),     ext(nullptr) {}
-  Token(TokenType t, unsigned match,      std::string_view ct, size_t p, size_t l): type(t), content(ct), pos(p), length(l), match(match), ext(nullptr) {}
-  Token(TokenType t, jdi::definition *ex, std::string_view ct, size_t p, size_t l): type(t), content(ct), pos(p), length(l), match(0),     ext(ex) {}
+  Token(TokenType t,                      std::string_view &&code, size_t p, size_t l): type(t), content(code.substr(p, l)), pos(p), length(l), ext(nullptr) {}
+  Token(TokenType t, jdi::definition *ex, std::string_view &&code, size_t p, size_t l): type(t), content(code.substr(p, l)), pos(p), length(l), ext(ex) {}
   std::string ToString() const;
 };
 
 }  // namespace parsing
 }  // namespace enigma
+
+#endif
