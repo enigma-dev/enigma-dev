@@ -150,6 +150,14 @@ int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidt
   d3ddev->CreateTexture(*fullwidth, *fullheight, 1, usage, D3DFMT_A8R8G8B8, Direct3D9Managed ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &texture, 0);
   
   const int id = textures.size();
+  textures.push_back(std::make_unique<DX9Texture>(texture));
+  auto& textureStruct = textures.back();
+  textureStruct->width = img.w;
+  textureStruct->height = img.h;
+  textureStruct->fullwidth = *fullwidth;
+  textureStruct->fullheight = *fullheight;
+
+  // now that we have an id to the existing ^^ texture struct, we can push pixels to it
   if (img.pxdata != nullptr) {
     if (img.w != *fullwidth || img.h != *fullheight) {
       RawImage padded = image_pad(img, *fullwidth, *fullheight);
@@ -157,14 +165,9 @@ int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidt
     } else graphics_push_texture_pixels(id, 0, 0, img.w, img.h, *fullwidth, *fullheight, img.pxdata);
   }
 
+  // now that the texture contains valid pixel data, we can generate mipmaps
   if (mipmap) texture->GenerateMipSubLevels();
 
-  textures.push_back(std::make_unique<DX9Texture>(texture));
-  auto& textureStruct = textures.back();
-  textureStruct->width = img.w;
-  textureStruct->height = img.h;
-  textureStruct->fullwidth = *fullwidth;
-  textureStruct->fullheight = *fullheight;
   return id;
 }
 
