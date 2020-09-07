@@ -199,12 +199,11 @@ void SDL_Event_Handler::windowEvent(const SDL_Event *event) {
 }
 
 void SDL_Event_Handler::windowFocusGain(const SDL_Event *event) {
-  game_window_focused = true;
-  pausedSteps = 0;
+  platform_focus_gained();
 }
 
 void SDL_Event_Handler::windowFocusLost(const SDL_Event *event) {
-  game_window_focused = false;
+  platform_focus_lost();
 }
 
 void SDL_Event_Handler::windowResized(const SDL_Event *event) {
@@ -225,16 +224,13 @@ void SDL_Event_Handler::controllerButtonUp(const SDL_Event *event) {
 
 void SDL_Event_Handler::keyboardDown(const SDL_Event *event) {
   int key = enigma::keyboard::keymap[event->key.keysym.sym];
-  enigma::last_keybdstatus[key] = enigma::keybdstatus[key];
-  enigma::keybdstatus[key] = true;
-
+  input_key_down(key);
   if (key == enigma_user::vk_backspace && !enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
 }
 
 void SDL_Event_Handler::keyboardUp(const SDL_Event *event) {
   int key = enigma::keyboard::keymap[event->key.keysym.sym];
-  enigma::last_keybdstatus[key] = enigma::keybdstatus[key];
-  enigma::keybdstatus[key] = false;
+  input_key_up(key);
 }
 
 void SDL_Event_Handler::textInput(const SDL_Event *event) {
