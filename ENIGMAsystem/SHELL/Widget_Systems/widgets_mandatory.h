@@ -23,7 +23,11 @@
 
 #include <string>
 
+#ifdef HIDDEN_DEBUG_OUTPUT
+#define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message_hidden(msg, severity)
+#else
 #define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
+#endi
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
@@ -63,6 +67,14 @@ namespace enigma {
       default: return "ERROR";
     }
   }
+
+  #ifdef HIDDEN_DEBUG_OUTPUT
+  inline void show_debug_message_hidden(std::string msg, MESSAGE_TYPE type = M_INFO) {
+    if (type == M_FATAL_USER_ERROR || type == M_USER_ERROR) {
+      exit(1);
+    }
+  }
+  #endif
   
   // This function is called at the beginning of the game to allow the widget system to load.
   bool widget_system_initialize();
