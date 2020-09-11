@@ -23,21 +23,24 @@
 
 #include <string>
 
-#ifdef ABORT_ALL_ERRORS
-  #ifdef HIDE_DEBUG_MESSAGES
-    #define DEBUG_MESSAGE(msg, severity) if (severity >= 2) { exit(1); } \
-    else { ::enigma::show_debug_message_hidden(msg, severity) }
-  #else
-    #define DEBUG_MESSAGE(msg, severity) if (severity >= 2) { exit(1); } \
-    else { ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity)) }
-  #endif
-#else
-  #ifdef HIDE_DEBUG_MESSAGES
-    #define DEBUG_MESSAGE(msg, severity) ::enigma::show_debug_message_hidden(msg, severity)
-  #else
-    #define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
-  #endif
+#ifndef ABORT_ALL_ERRORS
+#define ABORT_ALL_ARRORS false
 #endif
+
+#ifndef HIDE_DEBUG_MESSAGES
+#define HIDE_DEBUG_MESSAGES false
+#endif
+
+#define DEBUG_MESSAGE(msg, severity) \
+if (HIDE_DEBUG_MESSAGES) \
+  ::enigma::show_debug_message_hidden(msg, severity); \
+} else { \
+  ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity)) \
+} \
+if (ABORT_ALL_ERRORS && (severity == M_ERROR || severity == M_USER_ERROR || \
+  severity == M_FATAL_ERROR || severity == M_FATAL_USER_ERROR)) { \
+  exit(1); \
+}
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
