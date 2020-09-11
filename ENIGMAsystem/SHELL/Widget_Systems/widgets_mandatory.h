@@ -27,7 +27,7 @@
 #define DEBUG_MESSAGE(msg, severity) ::enigma::show_debug_message_hidden(msg, severity)
 #else
 #define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
-#endi
+#endif
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
