@@ -85,6 +85,8 @@ namespace enigma {
     }
   }
   #endif
+
+  std::map<message_type, bool> printErrs;
   
   // This function is called at the beginning of the game to allow the widget system to load.
   bool widget_system_initialize();
@@ -98,6 +100,14 @@ namespace enigma_user {
 bool show_question(std::string str);
 
 void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO);
+
+void debug_output_set_enabled(bool enabled, message_type) {
+  enigma::printErrs[message_type] = enabled;
+}
+
+bool debug_output_get_enabled(message_type) {
+  return enigma::printErrs[message_type];
+}
 
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
