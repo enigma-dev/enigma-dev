@@ -7,6 +7,7 @@ void show_debug_message_helper(string errortext, MESSAGE_TYPE type);
 namespace enigma_user {
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
+  if (!debug_output_get_enabled(type)) return;
   if (type != M_INFO && type != M_WARNING) {
     show_debug_message_helper(errortext, type);
   } else {
