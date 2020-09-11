@@ -81,13 +81,11 @@ namespace enigma {
     }
   }
 
-  #ifdef HIDE_DEBUG_MESSAGES
   inline void show_debug_message_hidden(std::string msg, MESSAGE_TYPE type = M_INFO) {
     if (type == M_FATAL_USER_ERROR || type == M_USER_ERROR) {
       exit(1);
     }
   }
-  #endif
 
   std::map<message_type, bool> printErrs;
   
