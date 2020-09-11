@@ -23,10 +23,20 @@
 
 #include <string>
 
-#ifdef HIDDEN_DEBUG_OUTPUT
-#define DEBUG_MESSAGE(msg, severity) ::enigma::show_debug_message_hidden(msg, severity)
+#ifdef ABORT_ALL_ERRORS
+  #ifdef HIDE_DEBUG_MESSAGES
+    #define DEBUG_MESSAGE(msg, severity) if (severity >= 2) { exit(1); } \
+    else { ::enigma::show_debug_message_hidden(msg, severity) }
+  #else
+    #define DEBUG_MESSAGE(msg, severity) if (severity >= 2) { exit(1); } \
+    else { ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity)) }
+  #endif
 #else
-#define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
+  #ifdef HIDE_DEBUG_MESSAGES
+    #define DEBUG_MESSAGE(msg, severity) ::enigma::show_debug_message_hidden(msg, severity)
+  #else
+    #define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
+  #endif
 #endif
 
 enum MESSAGE_TYPE : int {
@@ -68,7 +78,7 @@ namespace enigma {
     }
   }
 
-  #ifdef HIDDEN_DEBUG_OUTPUT
+  #ifdef HIDE_DEBUG_MESSAGES
   inline void show_debug_message_hidden(std::string msg, MESSAGE_TYPE type = M_INFO) {
     if (type == M_FATAL_USER_ERROR || type == M_USER_ERROR) {
       exit(1);
