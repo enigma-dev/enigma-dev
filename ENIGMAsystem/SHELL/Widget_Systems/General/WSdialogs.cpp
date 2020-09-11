@@ -21,5 +21,13 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
       abort();
   }
 }
+  
+void debug_output_set_enabled(bool enabled, message_type) {
+  enigma::printErrs[message_type] = enabled;
+}
+
+bool debug_output_get_enabled(message_type) {
+  return enigma::printErrs[message_type];
+}
 
 }
