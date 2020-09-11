@@ -35,7 +35,7 @@
 if (HIDE_DEBUG_MESSAGES) \
   ::enigma::show_debug_message_hidden(msg, severity); \
 } else { \
-  ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity)) \
+  ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity)); \
 } \
 if (ABORT_ALL_ERRORS && (severity == M_ERROR || severity == M_USER_ERROR || \
   severity == M_FATAL_ERROR || severity == M_FATAL_USER_ERROR)) { \
