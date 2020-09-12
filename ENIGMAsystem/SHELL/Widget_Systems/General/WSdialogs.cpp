@@ -34,11 +34,11 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
 }
   
 void debug_output_set_enabled(bool enabled, MESSAGE_TYPE type) {
-  enigma::printErrs[type] = enabled;
+  enigma::printDebugErrs[type] = enabled;
 }
 
 bool debug_output_get_enabled(MESSAGE_TYPE type) {
-  return enigma::printErrs[type];
+  return enigma::printDebugErrs[type];
 }
 
 }
