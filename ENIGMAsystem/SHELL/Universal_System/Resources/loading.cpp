@@ -76,14 +76,13 @@ namespace enigma
     // Open the exe for resource load
     do { // Allows break
       FILE* resfile;
-      #ifdef _WIN32
       if (resource_file_path != std::string("$exe")) {
+        #ifdef _WIN32
         std::wstring wstr = widen(resource_file_path);
         if (!_wfopen_s(&resfile,wstr.c_str(),L"rb, css=UTF-8")) {
-      #else
-      if (resource_file_path != std::string("$exe")) {
+        #else
         if (!(resfile = fopen(resource_file_path,"rb"))) {
-      #endif
+        #endif
           DEBUG_MESSAGE("Resource load fail: exe unopenable", MESSAGE_TYPE::M_ERROR);
           break;
         }
