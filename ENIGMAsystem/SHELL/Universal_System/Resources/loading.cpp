@@ -18,7 +18,7 @@
 
 #include "resinit.h"
 #include "sprites_internal.h"
-#include "backgrounds_internal.h"
+#include "background_internal.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/Object_Tiers/object.h"
 #include "libEGMstd.h"
