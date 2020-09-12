@@ -94,7 +94,7 @@ namespace enigma
         #else
         char exename[4097];
         windowsystem_write_exename(exename);
-        if (!(resfile = fopen(exename,"rb")) {
+        if (!(resfile = fopen(exename,"rb"))) {
         #endif
           DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
           break;
