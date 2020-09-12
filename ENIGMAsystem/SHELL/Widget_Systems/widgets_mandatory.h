@@ -72,7 +72,7 @@ namespace enigma {
     #ifndef DO_NOT_ABORT_ERRORS
     if (severity == M_ERROR || severity == M_USER_ERROR ||
       severity == M_FATAL_ERROR || severity == M_FATAL_USER_ERROR) {
-      exit(1);
+      abort();
     }
     #endif
     if (type == M_FATAL_USER_ERROR || type == M_USER_ERROR) {
