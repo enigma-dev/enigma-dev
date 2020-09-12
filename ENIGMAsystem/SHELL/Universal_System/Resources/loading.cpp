@@ -90,7 +90,7 @@ namespace enigma
         #ifdef _WIN32
         wchar_t exename[4097];
         windowsystem_write_exename(exename);
-        if (!(resfile = _wfopen_s(&resfile,exename,L"rb"))) {
+        if (!_wfopen_s(&resfile,exename,L"rb")) {
         #else
         char exename[4097];
         windowsystem_write_exename(exename);
