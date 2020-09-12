@@ -1,4 +1,1 @@
-#ifdef DO_NOT_ABORT_ERRORS
-#undef DO_NOT_ABORT_ERRORS
-#endif
-
+ 
