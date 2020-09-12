@@ -27,17 +27,7 @@
 #define DO_NOT_ABORT_ERRORS
 #endif
 
-#ifndef SHOW_DEBUG_MESSAGES
-#define SHOW_DEBUG_MESSAGES
-#endif
-
-#ifndef SHOW_DEBUG_MESSAGES
-#define DEBUG_MESSAGE(msg, severity) \
-::enigma::show_debug_message_hidden(msg, severity)
-#else
-#define DEBUG_MESSAGE(msg, severity) \
-::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
-#endif
+#define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
