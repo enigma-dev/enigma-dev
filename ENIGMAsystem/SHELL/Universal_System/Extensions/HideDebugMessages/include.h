@@ -1,4 +1,8 @@
-#define show_debug_message(msg, severity) show_debug_message_hidden(msg, severity)
+#ifdef DEBUG_MESSAGE
+#undef DEBUG_MESSAGE
+#endif
+
+#define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message_hidden(msg, severity)
 
 namespace enigma_user {
 
