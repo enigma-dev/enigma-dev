@@ -1,5 +1,7 @@
 #define show_debug_message(msg, severity) show_debug_message_hidden(msg, severity)
 
+namespace enigma_user {
+
 inline void show_debug_message_hidden(std::string msg, MESSAGE_TYPE type = M_INFO) {
   #ifndef DO_NOT_ABORT_ERRORS
   if (severity == M_ERROR || severity == M_USER_ERROR ||
@@ -11,3 +13,5 @@ inline void show_debug_message_hidden(std::string msg, MESSAGE_TYPE type = M_INF
     abort();
   }
 }
+
+} // namespace enigma_user
