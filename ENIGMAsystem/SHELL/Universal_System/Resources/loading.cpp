@@ -71,6 +71,7 @@ namespace enigma
     event_system_initialize();
     timeline_system_initialize();
     input_initialize();
+    backgrounds_init();
     widget_system_initialize();
 
     // Open the exe for resource load
