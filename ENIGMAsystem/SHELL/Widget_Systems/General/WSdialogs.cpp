@@ -32,13 +32,15 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
       abort();
   }
 }
+
+static std::map<MESSAGE_TYPE, bool> printDebugErrs;
   
 void debug_output_set_enabled(bool enabled, MESSAGE_TYPE type) {
-  enigma::printDebugErrs[type] = enabled;
+  printDebugErrs[type] = enabled;
 }
 
 bool debug_output_get_enabled(MESSAGE_TYPE type) {
-  return enigma::printDebugErrs[type];
+  return printDebugErrs[type];
 }
 
 }
