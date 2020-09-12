@@ -23,24 +23,21 @@
 
 #include <string>
 
-#ifndef ABORT_ALL_ERRORS
-#define ABORT_ALL_ARRORS false
+#ifndef DO_NOT_ABORT_ERRORS
+#define DO_NOT_ABORT_ERRORS
 #endif
 
-#ifndef HIDE_DEBUG_MESSAGES
-#define HIDE_DEBUG_MESSAGES false
+#ifndef SHOW_DEBUG_MESSAGES
+#define SHOW_DEBUG_MESSAGES
 #endif
 
+#ifndef SHOW_DEBUG_MESSAGES
 #define DEBUG_MESSAGE(msg, severity) \
-if (HIDE_DEBUG_MESSAGES) \
-  ::enigma::show_debug_message_hidden(msg, severity); \
-} else { \
-  ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity)); \
-} \
-if (ABORT_ALL_ERRORS && (severity == M_ERROR || severity == M_USER_ERROR || \
-  severity == M_FATAL_ERROR || severity == M_FATAL_USER_ERROR)) { \
-  exit(1); \
-}
+::enigma::show_debug_message_hidden(msg, severity)
+#else
+#define DEBUG_MESSAGE(msg, severity) \
+::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
+#endif
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
@@ -82,12 +79,18 @@ namespace enigma {
   }
 
   inline void show_debug_message_hidden(std::string msg, MESSAGE_TYPE type = M_INFO) {
-    if (type == M_FATAL_USER_ERROR || type == M_USER_ERROR) {
+    #ifndef DO_NOT_ABORT_ERRORS
+    if (severity == M_ERROR || severity == M_USER_ERROR ||
+      severity == M_FATAL_ERROR || severity == M_FATAL_USER_ERROR) {
       exit(1);
+    }
+    #endif
+    if (type == M_FATAL_USER_ERROR || type == M_USER_ERROR) {
+      abort();
     }
   }
 
-  std::map<message_type, bool> printErrs;
+  std::map<MESSAGE_TYPE, bool> printErrs;
   
   // This function is called at the beginning of the game to allow the widget system to load.
   bool widget_system_initialize();
@@ -102,8 +105,8 @@ bool show_question(std::string str);
 
 void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO);
 
-void debug_output_set_enabled(bool enabled, message_type);
-bool debug_output_get_enabled(message_type);
+void debug_output_set_enabled(bool enabled, MESSAGE_TYPE type);
+bool debug_output_get_enabled(MESSAGE_TYPE type);
 
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
