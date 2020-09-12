@@ -29,6 +29,10 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
+#ifdef _WIN32
+#include "Universal_System/estring.h"
+#endif
+
 #include <ctime>
 #include <cstdio>
 
@@ -41,11 +45,7 @@ namespace enigma_user
 
 namespace enigma
 {
-  #ifdef _WIN32
-  extern const wchar_t* resource_file_path;
-  #else
   extern const char* resource_file_path;
-  #endif
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
   extern void timeline_system_initialize();
   extern int game_settings_initialize();
@@ -77,8 +77,9 @@ namespace enigma
     do { // Allows break
       FILE* resfile;
       #ifdef _WIN32
-      if (resource_file_path != std::wstring(L"$exe")) {
-        if (!_wfopen_s(&resfile,resource_file_path,L"rb")) 
+      if (resource_file_path != std::string("$exe")) {
+        std::wstring wstr = widen(resource_file_path);
+        if (!_wfopen_s(&resfile,wstr.c_str(),L"rb, css=UTF-8")) {
       #else
       if (resource_file_path != std::string("$exe")) {
         if (!(resfile = fopen(resource_file_path,"rb"))) {
@@ -90,11 +91,11 @@ namespace enigma
         #ifdef _WIN32
         wchar_t exename[4097];
         windowsystem_write_exename(exename);
-        if (!_wfopen_s(&resfile,exename,L"rb")) {
+        if (!_wfopen_s(&resfile,exename,L"rb, css=UTF-8")) {
         #else
         char exename[4097];
         windowsystem_write_exename(exename);
-        if (!(resfile = fopen(exename,"rb"))) {
+        if (!fopen(exename,"rb")) {
         #endif
           DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
           break;
