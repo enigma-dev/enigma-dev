@@ -89,8 +89,6 @@ namespace enigma {
       abort();
     }
   }
-
-  std::map<MESSAGE_TYPE, bool> printDebugErrs;
   
   // This function is called at the beginning of the game to allow the widget system to load.
   bool widget_system_initialize();
