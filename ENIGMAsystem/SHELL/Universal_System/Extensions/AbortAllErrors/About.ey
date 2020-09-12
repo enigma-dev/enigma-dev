@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: Abort All Errors
+Identifier: AbortAllErrors
+Author: Samuel Venable
+Description: Abort all errors thrown by the game automatically, even if non-fatal.
+Default: false
+Icon: logo.png
+
+Depends: None
+Dependencies: None
+
