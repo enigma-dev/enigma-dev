@@ -78,7 +78,7 @@ namespace enigma
       FILE* resfile;
       #ifdef _WIN32
       if (resource_file_path != std::wstring(L"$exe")) {
-        if (!(resfile = _wfopen(resource_file_path,L"rb"))) {
+        if (!_wfopen_s(&resfile,resource_file_path,L"rb")) 
       #else
       if (resource_file_path != std::string("$exe")) {
         if (!(resfile = fopen(resource_file_path,"rb"))) {
@@ -90,7 +90,7 @@ namespace enigma
         #ifdef _WIN32
         wchar_t exename[4097];
         windowsystem_write_exename(exename);
-        if (!(resfile = _wfopen(exename,L"rb"))) {
+        if (!(resfile = _wfopen_s(&resfile,exename,L"rb"))) {
         #else
         char exename[4097];
         windowsystem_write_exename(exename);
