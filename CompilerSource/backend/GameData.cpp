@@ -20,7 +20,7 @@
 using std::cout;
 using std::cerr;
 using std::endl;
-
+using namespace enigma::fonts;
 using TypeCase = buffers::TreeNode::TypeCase;
 
 static inline uint32_t javaColor(int c) {
@@ -87,7 +87,36 @@ ImageData loadImageData(const std::string &filePath, int &errorc) {
   delete[] image;
 
   errorc = 0;
-  return ImageData(pngwidth, pngheight, data, dataSize);;
+  return ImageData(pngwidth, pngheight, data, dataSize);
+}
+
+static bool font_load_helper(const buffers::resources::Font& font, ImageData& data, RawFont& raw_font) {
+  int error = 0;
+
+  //FIXME: should be has_image() but lgm writter bugged and always writes a image even if one doesnt exist
+  if (font.glyphs_size() > 0) { // font with pre-rendered texture atlas
+    data = loadImageData(font.image(), error);
+    if (error) return false; // image file missing
+  } else { // load ttf and generate texture atlas
+    std::filesystem::path ttf = enigma_user::font_find(font.font_name(), font.bold(), font.italic(), false);
+    if (!ttf.empty()) {
+      std::cout << "Loading font file: " << ttf << std::endl;
+      for (const buffers::resources::Font::Range& range : font.ranges())
+        raw_font.ranges.emplace_back(range.min(), range.max());
+      
+      if (!font_load(ttf, font.size(), raw_font)) return false; // ttf load error
+      
+      unsigned textureW, textureH;
+      unsigned char* pxdata = font_pack(raw_font, textureW, textureH);
+      int size = textureW * textureH;
+      unsigned char* cpxdata = zlib_compress(pxdata, size);
+      delete[] pxdata;
+      data = ImageData(textureW, textureH, cpxdata, size);
+
+    } else return false; // font load error
+  }
+
+  return true;
 }
 
 struct ESLookup {
@@ -184,8 +213,8 @@ BackgroundData::BackgroundData(const deprecated::JavaStruct::Background &backgro
   data.set_vertical_spacing(background.vSep);
 }
 
-FontData::FontData(const buffers::resources::Font &q, const std::string& name):
-  BaseProtoWrapper(q), name(name) {}
+FontData::FontData(const buffers::resources::Font &q, const std::string& name, const ImageData& image, const RawFont& raw_font):
+  BaseProtoWrapper(q), name(name), image_data(image), raw_font(raw_font) {}
 FontData::FontData(const deprecated::JavaStruct::Font &font):
   name(font.name) {
   data.set_id(font.id);
@@ -196,30 +225,14 @@ FontData::FontData(const deprecated::JavaStruct::Font &font):
   data.set_italic(font.italic);
 
   for (int i = 0; i < font.glyphRangeCount; ++i) {
-    normalized_ranges.emplace_back(font.glyphRanges[i]);
-    for (const auto &glyph : normalized_ranges.back().glyphs) {
-      *data.add_glyphs() = glyph.metrics;
-    }
+    buffers::resources::Font_Range* range = data.add_ranges();
+    range->set_min(font.glyphRanges[i].rangeMin); 
+    range->set_max(font.glyphRanges[i].rangeMax);
   }
-}
 
-FontData::NormalizedRange::NormalizedRange(const deprecated::JavaStruct::GlyphRange &range):
-    min(range.rangeMin), max(range.rangeMax) {
-  const int gcount = range.rangeMax - range.rangeMin + 1;
-  glyphs.reserve(gcount);
-  for (int i = 0; i < gcount; ++i) {
-    glyphs.emplace_back(range.glyphs[i]);
-  }
-}
-
-FontData::GlyphData::GlyphData(const deprecated::JavaStruct::Glyph &glyph):
-    ImageData(glyph.width, glyph.height, glyph.data,
-              glyph.width * glyph.height) { // Glyph images are alpha-only.
-  metrics.set_origin(glyph.origin);
-  metrics.set_baseline(glyph.baseline);
-  metrics.set_advance(glyph.advance);
-  metrics.set_width(glyph.width);
-  metrics.set_height(glyph.height);
+  if (!font_load_helper(data, image_data, raw_font))
+    std::cerr << "Failed to load font: " << font.name << " aka "  << font.fontName << std::endl;
+  
 }
 
 PathData::PathData(const buffers::resources::Path &q, const std::string& name):
@@ -232,7 +245,7 @@ PathData::PathData(const deprecated::JavaStruct::Path &path):
   data.set_closed(path.closed);
   data.set_precision(path.precision);
 
-	// Discarded: backgroundRoomId;
+  // Discarded: backgroundRoomId;
   data.set_hsnap(path.snapX);
   data.set_vsnap(path.snapY);
 
@@ -490,10 +503,19 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
       gameData->backgrounds.emplace_back(root.background(), root.name(), data);
       break;
     }
+    case TypeCase::kFont: {
+      ImageData data;
+      RawFont raw_font;
+      if (!font_load_helper(root.font(), data, raw_font)) {
+        std::cerr << "Failed to load font: " << root.name() << " aka " << root.font().font_name() << std::endl;
+        return -4; // font load error
+      }
+      gameData->fonts.emplace_back(root.font(), root.name(), data, raw_font); break;
+      break;
+    }
     case TypeCase::kPath:     gameData->paths.emplace_back(root.path(), root.name()); break;
     case TypeCase::kScript:   gameData->scripts.emplace_back(root.script(), root.name()); break;
     case TypeCase::kShader:   gameData->shaders.emplace_back(root.shader(), root.name()); break;
-    case TypeCase::kFont:     gameData->fonts.emplace_back(root.font(), root.name()); break;
     case TypeCase::kTimeline: gameData->timelines.emplace_back(root.timeline(), root.name()); break;
     case TypeCase::kObject:   gameData->objects.emplace_back(root.object(), root.name()); break;
     case TypeCase::kRoom:     gameData->rooms.emplace_back(root.room(), root.name()); break;
@@ -592,5 +614,19 @@ GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es,
 
 GameData::GameData(const buffers::Project &proj, const EventData* /*events*/):
     filename("") {
-  FlattenProto(proj, this);
+  
+  buffers::Project copy = proj;
+  
+  // Add default font
+  buffers::TreeNode* fntNode = copy.mutable_game()->mutable_root()->add_child();
+  fntNode->set_name("EnigmaDefault");
+  buffers::resources::Font* fnt = fntNode->mutable_font();
+  buffers::resources::Font::Range* range = fnt->add_ranges();
+  fnt->set_font_name("Dialog.plain");
+  fnt->set_id(-1);
+  fnt->set_size(12);
+  range->set_min(32);
+  range->set_max(128);
+  
+  FlattenProto(copy, this);
 }

@@ -13,6 +13,8 @@ set(SHARED_SOURCES
    "rectpacker/rectpack.cpp"
    "libpng-util/libpng-util.cpp"
    "ProtoYaml/proto-yaml.cpp"
+   "fonts/fonts.cpp"
+   "fonts/font_pack.cpp"
 )
 
 add_library(${SHARED_LIB} ${LIB_TYPE} ${SHARED_SOURCES})
@@ -38,6 +40,10 @@ target_link_libraries(${SHARED_LIB} PRIVATE "Protocols")
 
 include(FindProtobuf)
 target_link_libraries(${SHARED_LIB} PRIVATE ${Protobuf_LIBRARY})
+
+find_package(Freetype REQUIRED)
+target_link_libraries(${SHARED_LIB} PRIVATE ${FREETYPE_LIBRARIES})
+target_include_directories(${SHARED_LIB} PRIVATE ${FREETYPE_INCLUDE_DIRS})
 
 install(TARGETS ${SHARED_LIB} DESTINATION .)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${SHARED_LIB}.dir/Debug/${SHARED_LIB}.pdb" DESTINATION . OPTIONAL)

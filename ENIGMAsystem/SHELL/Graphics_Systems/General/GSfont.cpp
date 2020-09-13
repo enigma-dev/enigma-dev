@@ -34,6 +34,7 @@
 #include <stdint.h>
 
 using namespace std;
+using namespace enigma::fonts;
 
 namespace enigma {
   class CurrentFont {
@@ -97,14 +98,14 @@ unsigned draw_get_valign(){
 
 namespace enigma {
   inline float get_space_width(const SpriteFont& fnt) {
-    fontglyph g = findGlyph(fnt, ' ');
+    GlyphMetrics g = findGlyph(fnt, ' ');
     // Use the width of the space glyph when available,
     // else use the backup.
     // FIXME: Find out why the width is not available on Linux.
     if (!g.empty()) {
-      return g.xs > 1 ? g.xs : fnt.height/3;
+      return g.xs > 1 ? g.xs : fnt.lineHeight/3;
     } else {
-      return fnt.height/3;
+      return fnt.lineHeight/3;
     }
   }
 }
@@ -122,7 +123,7 @@ double string_char_width(variant vstr)
   if (character == ' ') {
     return get_space_width(fnt);
   }
-  fontglyph g = findGlyph(fnt, character);
+  GlyphMetrics g = findGlyph(fnt, character);
   if (g.empty()) {
     return get_space_width(fnt);
   } else {
@@ -141,7 +142,7 @@ unsigned int string_width(variant vstr)
     if (character == '\r' or character == '\n') {
       tlen = 0;
     } else {
-      fontglyph g = findGlyph(fnt, character);
+      GlyphMetrics g = findGlyph(fnt, character);
       if (character == ' ' or g.empty()) {
         tlen += slen;
       } else {
@@ -157,10 +158,10 @@ unsigned int string_height(variant vstr)
 {
   string str = toString(vstr);
   const SpriteFont& fnt = sprite_fonts[currentfont];
-  float hgt = fnt.height;
+  float hgt = fnt.lineHeight;
   for (size_t i = 0; i < str.length(); i++)
     if (str[i] == '\r' or str[i] == '\n')
-      hgt += fnt.height;
+      hgt += fnt.lineHeight;
   return hgt;
 }
 
@@ -174,7 +175,7 @@ unsigned int string_width_ext(variant vstr, gs_scalar sep, gs_scalar w) //here s
   {
     uint32_t character = getUnicodeCharacter(str, i);
 
-    fontglyph g = findGlyph(fnt, character);
+    GlyphMetrics g = findGlyph(fnt, character);
     if (character == ' ' or g.empty()) {
         if (width >= w && w!=-1) {
           (width>maxwidth ? maxwidth=width, width = 0 : width = 0);
@@ -194,14 +195,14 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
   string str = toString(vstr);
   const SpriteFont& fnt = sprite_fonts[currentfont];
 
-  float width = 0, tw = 0, height = fnt.height, slen = get_space_width(fnt);
+  float width = 0, tw = 0, height = fnt.lineHeight, slen = get_space_width(fnt);
   for (size_t i = 0; i < str.length(); i++)
   {
     uint32_t character = getUnicodeCharacter(str, i);
     if (character == '\r' or character == '\n') {
-      width = 0, height +=  (sep+2 ? fnt.height : sep);
+      width = 0, height +=  (sep+2 ? fnt.lineHeight : sep);
     } else {
-      fontglyph g = findGlyph(fnt, character);
+      GlyphMetrics g = findGlyph(fnt, character);
       if (character == ' ' or g.empty()) {
         width += slen;
       }
@@ -215,7 +216,7 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
       }
 
       if (width+tw >= w && w != -1) {
-        height += (sep==-1 ? fnt.height : sep), width = 0, tw = 0;
+        height += (sep==-1 ? fnt.lineHeight : sep), width = 0, tw = 0;
       } else {
         width += g.xs;
       }
@@ -244,7 +245,7 @@ unsigned int string_width_line(variant vstr, int line)
       cl += 1;
       len = 0;
     } else {
-      fontglyph g = findGlyph(fnt, character);
+      GlyphMetrics g = findGlyph(fnt, character);
       if (character == ' ' or g.empty())
         len += slen;
       else {
@@ -270,7 +271,7 @@ unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
     } else if (character == '\n') {
       if (cl == line) return ceil(width); else width = 0, cl +=1;
     } else {
-      fontglyph g = findGlyph(fnt, character);
+      GlyphMetrics g = findGlyph(fnt, character);
       if ((character == ' ' or g.empty()) && w != -1) {
         width += slen, tw = 0;
         for (size_t c = i+1; c < str.length(); c++)
@@ -278,7 +279,7 @@ unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
           uint32_t ct = getUnicodeCharacter(str, c);
           if (ct == ' ' or ct == '\r' or ct == '\n')
             break;
-          fontglyph gt = findGlyph(fnt, ct);
+          GlyphMetrics gt = findGlyph(fnt, ct);
           tw += (!gt.empty() ? g.xs : slen);
         }
         if (width+tw >= w){
@@ -311,7 +312,7 @@ unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
     } else if (character == '\n') {
       width = 0, cl +=1;
     } else {
-      fontglyph g = findGlyph(fnt, character);
+      GlyphMetrics g = findGlyph(fnt, character);
       if ((character == ' ' or g.empty()) && w != -1){
         width += slen, tw = 0;
         for (size_t c = i+1; c < str.length(); c++)
@@ -319,7 +320,7 @@ unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
           uint32_t ct = getUnicodeCharacter(str, c);
           if (ct == ' ' or ct == '\r' or ct == '\n')
             break;
-          fontglyph gt = findGlyph(fnt, ct);
+          GlyphMetrics gt = findGlyph(fnt, ct);
           tw += (!gt.empty() ? g.xs : slen);
         }
         if (width+tw >= w)
@@ -343,7 +344,7 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 {
   string str = toString(vstr);
   const SpriteFont& fnt = sprite_fonts[currentfont];
-  gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y +fnt.yoffset - string_height(str)/2 : y + fnt.yoffset - string_height(str);
+  gs_scalar yy = valign == fa_top ? y+fnt.yOffset : valign == fa_middle ? y + fnt.yOffset - string_height(str)/2 : y + fnt.yOffset - string_height(str);
   float slen = get_space_width(fnt);
   if (halign == fa_left){
       gs_scalar xx = x;
@@ -352,15 +353,15 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
         uint32_t character = getUnicodeCharacter(str, i);
 
         if (character == '\r') {
-          xx = x, yy += fnt.height, i += str[i+1] == '\n';
+          xx = x, yy += fnt.lineHeight, i += str[i+1] == '\n';
         } else if (character == '\n') {
-          xx = x, yy += fnt.height;
+          xx = x, yy += fnt.lineHeight;
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += slen;
           } else {
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
             draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
             draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
@@ -377,17 +378,17 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
         uint32_t character = getUnicodeCharacter(str, i);
 
         if (character == '\r') {
-          line +=1, yy += fnt.height, i += str[i+1] == '\n';
+          line +=1, yy += fnt.lineHeight, i += str[i+1] == '\n';
           xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
         } else if (character == '\n') {
-          line +=1, yy += fnt.height;
+          line +=1, yy += fnt.lineHeight;
           xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += slen;
           } else {
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
             draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
             draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
@@ -472,7 +473,7 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
 {
   string str = toString(vstr);
   const SpriteFont& fnt = sprite_fonts[currentfont];
-  gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y +fnt.yoffset - string_height(str)/2 : y + fnt.yoffset - string_height(str);
+  gs_scalar yy = valign == fa_top ? y + fnt.yOffset : valign == fa_middle ? y + fnt.yOffset - string_height(str)/2 : y + fnt.yOffset - string_height(str);
   float slen = get_space_width(fnt);
   if (halign == fa_left){
     gs_scalar xx = x;
@@ -480,15 +481,15 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
     {
       uint32_t character = getUnicodeCharacter(str, i);
       if (character == '\r') {
-        xx = x, yy += fnt.height, i += str[i+1] == '\n';
+        xx = x, yy += fnt.lineHeight, i += str[i+1] == '\n';
       } else if (character == '\n') {
-        xx = x, yy += fnt.height;
+        xx = x, yy += fnt.lineHeight;
       } else {
-        fontglyph g = findGlyph(fnt, character);
+        GlyphMetrics g = findGlyph(fnt, character);
         if (character == ' ' or g.empty()) {
           xx += slen;
         } else {
-          draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+          draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
           draw_vertex_texture(xx + g.x + top,     yy + g.y + top, g.tx, g.ty);
           draw_vertex_texture(xx + g.x2 + top,    yy + g.y + top, g.tx2, g.ty);
           draw_vertex_texture(xx + g.x + bottom,  yy + g.y2 + bottom, g.tx,  g.ty2);
@@ -505,17 +506,17 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
     {
       uint32_t character = getUnicodeCharacter(str, i);
       if (character == '\r') {
-        line +=1, yy += fnt.height, i += str[i+1] == '\n';
+        line +=1, yy += fnt.lineHeight, i += str[i+1] == '\n';
         xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
       } else if (character == '\n') {
-        line +=1, yy += fnt.height;
+        line +=1, yy += fnt.lineHeight;
         xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
       } else {
-        fontglyph g = findGlyph(fnt, character);
+        GlyphMetrics g = findGlyph(fnt, character);
         if (character == ' ' or g.empty()) {
           xx += slen;
         } else {
-          draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+          draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
           draw_vertex_texture(xx + g.x + top,     yy + g.y + top, g.tx, g.ty);
           draw_vertex_texture(xx + g.x2 + top,    yy + g.y + top, g.tx2, g.ty);
           draw_vertex_texture(xx + g.x + bottom,  yy + g.y2 + bottom, g.tx,  g.ty2);
@@ -533,7 +534,7 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
   string str = toString(vstr);
   const SpriteFont& fnt = sprite_fonts[currentfont];
 
-  gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y + fnt.yoffset - string_height_ext(str,sep,w)/2 : y + fnt.yoffset - string_height_ext(str,sep,w);
+  gs_scalar yy = valign == fa_top ? y+fnt.yOffset : valign == fa_middle ? y + fnt.yOffset - string_height_ext(str,sep,w)/2 : y + fnt.yOffset - string_height_ext(str,sep,w);
   float slen = get_space_width(fnt);
   if (halign == fa_left){
     gs_scalar xx = x, width = 0, tw = 0;
@@ -541,11 +542,11 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
     {
       uint32_t character = getUnicodeCharacter(str, i);
       if (character == '\r') {
-        xx = x, yy += (sep+2 ? fnt.height : sep), i += str[i+1] == '\n';
+        xx = x, yy += (sep+2 ? fnt.lineHeight : sep), i += str[i+1] == '\n';
       } else if (character == '\n') {
-            xx = x, yy += (sep+2 ? fnt.height : sep);
+            xx = x, yy += (sep+2 ? fnt.lineHeight : sep);
       } else {
-        fontglyph g = findGlyph(fnt, character);
+        GlyphMetrics g = findGlyph(fnt, character);
         if (character == ' ' or g.empty()) {
           xx += slen, width = xx-x;
           tw = 0;
@@ -558,9 +559,9 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
             tw += (!g.empty()?g.xs:slen);
           }
           if (width+tw >= w && w != -1)
-          xx = x, yy += (sep==-1 ? fnt.height : sep), width = 0, tw = 0;
+          xx = x, yy += (sep==-1 ? fnt.lineHeight : sep), width = 0, tw = 0;
         } else {
-          draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+          draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
           draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
           draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
           draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
@@ -576,11 +577,11 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
     {
       uint32_t character = getUnicodeCharacter(str, i);
       if (character == '\r') {
-        line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt.height : sep), i += str[i+1] == '\n', width = 0;
+        line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt.lineHeight : sep), i += str[i+1] == '\n', width = 0;
       } else if (character == '\n') {
-        line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt.height : sep), width = 0;
+        line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt.lineHeight : sep), width = 0;
       } else {
-        fontglyph g = findGlyph(fnt, character);
+        GlyphMetrics g = findGlyph(fnt, character);
         if (character == ' ' or g.empty()) {
           xx += slen, width += slen, tw = 0;
           for (size_t c = i+1; c < str.length(); c++)
@@ -593,9 +594,9 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
           }
 
           if (width+tw >= w && w != -1)
-            line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt.height : sep), width = 0, tw = 0;
+            line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt.lineHeight : sep), width = 0, tw = 0;
         } else {
-          draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+          draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
           draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
           draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
           draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
@@ -618,16 +619,16 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
 
   const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
-    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt.height/3 * svx,
-    chi = fnt.height * cvy, shi = fnt.height * svy;
+    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt.lineHeight/3 * svx,
+    chi = fnt.lineHeight * cvy, shi = fnt.lineHeight * svy;
 
   gs_scalar xx, yy, tmpx, tmpy, tmpsize;
   if (valign == fa_top)
-    yy = y + fnt.yoffset * cvy, xx = x + fnt.yoffset * svy;
+    yy = y + fnt.yOffset * cvy, xx = x + fnt.yOffset * svy;
   else if (valign == fa_middle)
-    tmpsize = string_height(str), yy = y + (fnt.yoffset - tmpsize/2) * cvy, xx = x + (fnt.yoffset - tmpsize/2) * svy;
+    tmpsize = string_height(str), yy = y + (fnt.yOffset - tmpsize/2) * cvy, xx = x + (fnt.yOffset - tmpsize/2) * svy;
   else
-    tmpsize = string_height(str), yy = y + (fnt.yoffset - tmpsize) * cvy, xx = x + (fnt.yoffset - tmpsize) * svy;
+    tmpsize = string_height(str), yy = y + (fnt.yOffset - tmpsize) * cvy, xx = x + (fnt.yOffset - tmpsize) * svy;
   tmpx = xx, tmpy = yy;
   if (halign == fa_left){
       int lines = 0, w;
@@ -639,7 +640,7 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
         } else if (character == '\n') {
           lines += 1, xx = tmpx + lines * shi, yy = tmpy + lines * chi;
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += sw,
             yy -= sh;
@@ -648,7 +649,7 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
             const gs_scalar lx = xx + g.y * svy;
             const gs_scalar ly = yy + g.y * cvy;
 
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture(lx, ly, g.tx, g.ty);
             draw_vertex_texture(lx + w * cvx, ly - w * svx, g.tx2, g.ty);
             draw_vertex_texture(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2);
@@ -683,7 +684,7 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
               xx += sw,
             yy -= sh;
@@ -692,7 +693,7 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
             const gs_scalar lx = xx + g.y * svy;
             const gs_scalar ly = yy + g.y * cvy;
 
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture(lx, ly, g.tx, g.ty);
             draw_vertex_texture(lx + w * cvx, ly - w * svx, g.tx2, g.ty);
             draw_vertex_texture(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2);
@@ -716,16 +717,16 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
 
   const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
-    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt.height/3 * svx,
-    chi = fnt.height * cvy, shi = fnt.height * svy;
+    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt.lineHeight/3 * svx,
+    chi = fnt.lineHeight * cvy, shi = fnt.lineHeight * svy;
 
   gs_scalar xx, yy, tmpx, tmpy, wi, tmpsize;
   if (valign == fa_top)
-    yy = y + fnt.yoffset * cvy, xx = x + fnt.yoffset * svy;
+    yy = y + fnt.yOffset * cvy, xx = x + fnt.yOffset * svy;
   else if (valign == fa_middle)
-    tmpsize = string_height_ext(str,sep,w), yy = y + (fnt.yoffset - tmpsize/2) * cvy, xx = x + (fnt.yoffset - tmpsize/2) * svy;
+    tmpsize = string_height_ext(str,sep,w), yy = y + (fnt.yOffset - tmpsize/2) * cvy, xx = x + (fnt.yOffset - tmpsize/2) * svy;
   else
-    tmpsize = string_height_ext(str,sep,w), yy = y + (fnt.yoffset - tmpsize) * cvy, xx = x + (fnt.yoffset - tmpsize) * svy;
+    tmpsize = string_height_ext(str,sep,w), yy = y + (fnt.yOffset - tmpsize) * cvy, xx = x + (fnt.yOffset - tmpsize) * svy;
   tmpx = xx, tmpy = yy;
 
   if (halign == fa_left){
@@ -738,7 +739,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
         } else if (character == '\n') {
           lines += 1, xx = tmpx + lines * shi, width = 0, yy = tmpy + lines * chi;
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += sw,
             yy -= sh;
@@ -761,7 +762,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
             const gs_scalar lx = xx + g.y * svy;
             const gs_scalar ly = yy + g.y * cvy;
 
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture(lx, ly, g.tx,  g.ty);
             draw_vertex_texture(lx + wi * cvx, ly - wi * svx, g.tx2, g.ty);
             draw_vertex_texture(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2);
@@ -797,7 +798,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += sw,
             yy -= sh;
@@ -826,7 +827,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
               const gs_scalar lx = xx + g.y * svy;
               const gs_scalar ly = yy + g.y * cvy;
 
-              draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+              draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
               draw_vertex_texture(lx, ly, g.tx,  g.ty);
               draw_vertex_texture(lx + wi * cvx, ly - wi * svx, g.tx2, g.ty);
               draw_vertex_texture(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2);
@@ -851,17 +852,17 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
 
   const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
-    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt.height/3 * svx,
-    chi = fnt.height * cvy, shi = fnt.height * svy;
+    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt.lineHeight/3 * svx,
+    chi = fnt.lineHeight * cvy, shi = fnt.lineHeight * svy;
 
   gs_scalar xx, yy, tmpx, tmpy, tmpsize;
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4, width = 0;
   if (valign == fa_top)
-    yy = y + fnt.yoffset * cvy, xx = x + fnt.yoffset * svy;
+    yy = y + fnt.yOffset * cvy, xx = x + fnt.yOffset * svy;
   else if (valign == fa_middle)
-    tmpsize = string_height(str), yy = y + (fnt.yoffset - tmpsize/2) * cvy, xx = x + (fnt.yoffset - tmpsize/2) * svy;
+    tmpsize = string_height(str), yy = y + (fnt.yOffset - tmpsize/2) * cvy, xx = x + (fnt.yOffset - tmpsize/2) * svy;
   else
-    tmpsize = string_height(str), yy = y + (fnt.yoffset - tmpsize) * cvy, xx = x + (fnt.yoffset - tmpsize) * svy;
+    tmpsize = string_height(str), yy = y + (fnt.yOffset - tmpsize) * cvy, xx = x + (fnt.yOffset - tmpsize) * svy;
   tmpx = xx, tmpy = yy;
   if (halign == fa_left){
       int lines = 0, w;
@@ -874,7 +875,7 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
         } else if (character == '\n') {
           lines += 1, width = 0, xx = tmpx + lines * shi, yy = tmpy + lines * chi, tmpsize = string_width_line(str,lines);
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += sw, yy -= sh,
             width += sw;
@@ -887,7 +888,7 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
             hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
             hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
 
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture_color(lx, ly, g.tx,  g.ty, hcol1, a);
             draw_vertex_texture_color(lx + w * cvx, ly - w * svx, g.tx2, g.ty, hcol2, a);
             draw_vertex_texture_color(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx, g.ty2, hcol4, a);
@@ -923,7 +924,7 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += sw, yy -= sh,
             width += sw;
@@ -936,7 +937,7 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
             hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
             hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
 
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture_color(lx, ly, g.tx,  g.ty, hcol1, a);
             draw_vertex_texture_color(lx + w * cvx, ly - w * svx, g.tx2, g.ty, hcol2, a);
             draw_vertex_texture_color(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx, g.ty2, hcol4, a);
@@ -961,17 +962,17 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
 
   const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
-    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt.height/3 * svx,
-    chi = fnt.height * cvy, shi = fnt.height * svy;
+    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt.lineHeight/3 * svx,
+    chi = fnt.lineHeight * cvy, shi = fnt.lineHeight * svy;
 
   gs_scalar xx, yy, tmpx, tmpy, tmpsize;
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4, width = 0;
   if (valign == fa_top)
-    yy = y + fnt.yoffset * cvy, xx = x + fnt.yoffset * svy;
+    yy = y + fnt.yOffset * cvy, xx = x + fnt.yOffset * svy;
   else if (valign == fa_middle)
-    tmpsize = string_height_ext(str,sep,w), yy = y + (fnt.yoffset - tmpsize/2) * cvy, xx = x + (fnt.yoffset - tmpsize/2) * svy;
+    tmpsize = string_height_ext(str,sep,w), yy = y + (fnt.yOffset - tmpsize/2) * cvy, xx = x + (fnt.yOffset - tmpsize/2) * svy;
   else
-    tmpsize = string_height_ext(str,sep,w), yy = y + (fnt.yoffset - tmpsize) * cvy, xx = x + (fnt.yoffset - tmpsize) * svy;
+    tmpsize = string_height_ext(str,sep,w), yy = y + (fnt.yOffset - tmpsize) * cvy, xx = x + (fnt.yOffset - tmpsize) * svy;
   tmpx = xx, tmpy = yy;
   if (halign == fa_left){
       int lines = 0, tw = 0, wi;
@@ -984,7 +985,7 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
         } else if (character == '\n') {
           lines += 1, width = 0, xx = tmpx + lines * shi, yy = tmpy + lines * chi, tmpsize = string_width_ext_line(str,w,lines);
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += sw, yy -= sh,
             width += sw;
@@ -1009,7 +1010,7 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
             hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
             hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
 
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture_color(lx, ly, g.tx,  g.ty, hcol1, a);
             draw_vertex_texture_color(lx + wi * cvx, ly - wi * svx, g.tx2, g.ty, hcol2, a);
             draw_vertex_texture_color(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, hcol4, a);
@@ -1046,7 +1047,7 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += sw, yy -= sh,
             width += sw;
@@ -1077,7 +1078,7 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
             hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
             hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
 
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture_color(lx, ly, g.tx,  g.ty, hcol1, a);
             draw_vertex_texture_color(lx + wi * cvx, ly - wi * svx, g.tx2, g.ty, hcol2, a);
             draw_vertex_texture_color(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, hcol4, a);
@@ -1099,7 +1100,7 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
   const SpriteFont& fnt = sprite_fonts[currentfont];
 
   float slen = get_space_width(fnt);
-  gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y +fnt.yoffset - string_height(str)/2 : y + fnt.yoffset - string_height(str);
+  gs_scalar yy = valign == fa_top ? y+fnt.yOffset : valign == fa_middle ? y +fnt.yOffset - string_height(str)/2 : y + fnt.yOffset - string_height(str);
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4,  line = 0;
   gs_scalar tx1, tx2, sw = (gs_scalar)string_width_line(str, line);
   if (halign == fa_left){
@@ -1108,15 +1109,15 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
       {
         uint32_t character = getUnicodeCharacter(str, i);
         if (character == '\r') {
-          xx = x, yy += fnt.height, i += str[i+1] == '\n';
+          xx = x, yy += fnt.lineHeight, i += str[i+1] == '\n';
           line += 1;
           sw = (gs_scalar)string_width_line(str, line);
         } else if (character == '\n') {
-          xx = x, yy += fnt.height;
+          xx = x, yy += fnt.lineHeight;
           line += 1;
           sw = (gs_scalar)string_width_line(str, line);
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += slen;
           } else {
@@ -1126,7 +1127,7 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
             hcol3 = merge_color(c4,c3,tx1);
             hcol4 = merge_color(c4,c3,tx2);
 
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture_color(xx + g.x,  yy + g.y, g.tx, g.ty, hcol1, a);
             draw_vertex_texture_color(xx + g.x2, yy + g.y, g.tx2, g.ty, hcol2, a);
             draw_vertex_texture_color(xx + g.x,  yy + g.y2, g.tx,  g.ty2, hcol4, a);
@@ -1143,13 +1144,13 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
       {
         uint32_t character = getUnicodeCharacter(str, i);
         if (character == '\r') {
-          yy += fnt.height, i += str[i+1] == '\n', line += 1,
+          yy += fnt.lineHeight, i += str[i+1] == '\n', line += 1,
           sw = (gs_scalar)string_width_line(str, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         } else if (character == '\n') {
-          yy += fnt.height, line += 1, sw = (gs_scalar)string_width_line(str, line),
+          yy += fnt.lineHeight, line += 1, sw = (gs_scalar)string_width_line(str, line),
           xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += slen;
           } else {
@@ -1159,7 +1160,7 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
             hcol3 = merge_color(c4,c3,tx1);
             hcol4 = merge_color(c4,c3,tx2);
 
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture_color(xx + g.x,  yy + g.y, g.tx, g.ty, hcol1, a);
             draw_vertex_texture_color(xx + g.x2, yy + g.y, g.tx2, g.ty, hcol2, a);
             draw_vertex_texture_color(xx + g.x,  yy + g.y2, g.tx,  g.ty2, hcol4, a);
@@ -1178,7 +1179,7 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
   string str = toString(vstr);
   const SpriteFont& fnt = sprite_fonts[currentfont];
 
-  gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y + fnt.yoffset - string_height_ext(str,sep,w)/2 : y + fnt.yoffset - string_height_ext(str,sep,w);
+  gs_scalar yy = valign == fa_top ? y+fnt.yOffset : valign == fa_middle ? y + fnt.yOffset - string_height_ext(str,sep,w)/2 : y + fnt.yOffset - string_height_ext(str,sep,w);
   gs_scalar width = 0, tw = 0, line = 0, sw = string_width_ext_line(str, w, line);
   float slen = get_space_width(fnt);
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4;
@@ -1188,11 +1189,11 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
       {
         uint32_t character = getUnicodeCharacter(str, i);
         if (character == '\r') {
-          xx = x, yy +=  (sep+2 ? fnt.height : sep), i += str[i+1] == '\n',  width = 0, line += 1, sw = string_width_ext_line(str, w, line);
+          xx = x, yy +=  (sep+2 ? fnt.lineHeight : sep), i += str[i+1] == '\n',  width = 0, line += 1, sw = string_width_ext_line(str, w, line);
         } else if (character == '\n') {
-          xx = x, yy += (sep+2 ? fnt.height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line);
+          xx = x, yy += (sep+2 ? fnt.lineHeight : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line);
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += slen;
             width = xx-x;
@@ -1207,14 +1208,14 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
             }
 
             if (width+tw >= w && w != -1)
-            xx = x, yy += (sep==-1 ? fnt.height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line);
+            xx = x, yy += (sep==-1 ? fnt.lineHeight : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line);
           } else {
             hcol1 = merge_color(c1,c2,(gs_scalar)(width)/sw);
             hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/sw);
             hcol3 = merge_color(c4,c3,(gs_scalar)(width)/sw);
             hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/sw);
 
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture_color(xx + g.x,  yy + g.y, g.tx, g.ty, hcol1, a);
             draw_vertex_texture_color(xx + g.x2, yy + g.y, g.tx2, g.ty, hcol2, a);
             draw_vertex_texture_color(xx + g.x,  yy + g.y2, g.tx,  g.ty2, hcol4, a);
@@ -1232,11 +1233,11 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
       {
         uint32_t character = getUnicodeCharacter(str, i);
         if (character == '\r') {
-          yy +=  (sep+2 ? fnt.height : sep), i += str[i+1] == '\n',  width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
+          yy +=  (sep+2 ? fnt.lineHeight : sep), i += str[i+1] == '\n',  width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         } else if (character == '\n') {
-          yy += (sep+2 ? fnt.height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
+          yy += (sep+2 ? fnt.lineHeight : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         } else {
-          fontglyph g = findGlyph(fnt, character);
+          GlyphMetrics g = findGlyph(fnt, character);
           if (character == ' ' or g.empty()) {
             xx += slen, width = xx-tmpx, tw = 0;
             for (size_t c = i+1; c < str.length(); c++)
@@ -1248,14 +1249,14 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
               tw += (!g.empty() ? g.xs : slen);
             }
             if (width+tw >= w && w != -1)
-            yy += (sep==-1 ? fnt.height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
+            yy += (sep==-1 ? fnt.lineHeight : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
           } else {
           hcol1 = merge_color(c1,c2,(gs_scalar)(width)/sw);
             hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/sw);
             hcol3 = merge_color(c4,c3,(gs_scalar)(width)/sw);
             hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/sw);
 
-            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture);
+            draw_primitive_begin_texture(pr_trianglestrip, fnt.texture.ID);
             draw_vertex_texture_color(xx + g.x,  yy + g.y, g.tx, g.ty, hcol1, a);
             draw_vertex_texture_color(xx + g.x2, yy + g.y, g.tx2, g.ty, hcol2, a);
             draw_vertex_texture_color(xx + g.x,  yy + g.y2, g.tx,  g.ty2, hcol4, a);
@@ -1272,22 +1273,22 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
 
 unsigned font_get_texture(int id) {
   const SpriteFont& fnt = sprite_fonts.get(id);
-  return fnt.texture;
+  return fnt.texture.ID;
 }
 
 unsigned font_get_texture_width(int id) {
   const SpriteFont& fnt = sprite_fonts.get(id);
-  return fnt.twid;
+  return fnt.texture.width;
 }
 
 unsigned font_get_texture_height(int id) {
   const SpriteFont& fnt = sprite_fonts.get(id);
-  return fnt.thgt;
+  return fnt.texture.height;
 }
 
 unsigned font_height(int id) {
   const SpriteFont& fnt = sprite_fonts.get(id);
-  return fnt.height;
+  return fnt.lineHeight;
 }
 
 void draw_set_font(int fnt) {

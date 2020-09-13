@@ -19,6 +19,8 @@
 #include "GameInformation.pb.h"
 #include "event_reader/event_parser.h"
 
+#include "fonts/fonts.h"
+
 struct ESLookup;
 
 template<class Proto> struct ProtoMessageInheritor {
@@ -44,7 +46,8 @@ struct ImageData {
   int width, height;
   // TODO: std::string filename;
   BinaryData pixels;
-
+  
+  ImageData() : width(0), height(0) {}
   ImageData(const ::Image &image);
   ImageData(int w, int h, const uint8_t *data, size_t size);
 };
@@ -79,24 +82,10 @@ struct BackgroundData : ProtoMessageInheritor<buffers::resources::Background> {
 
 struct FontData : ProtoMessageInheritor<buffers::resources::Font> {
   std::string name;
-  struct GlyphData : ImageData {
-    buffers::resources::Font::Glyph metrics;
+  ImageData image_data;
+  enigma::fonts::RawFont raw_font;
 
-    // TODO: Need to move the font packing logic to allow pre-packed sprite
-    // fonts; cannot construct image here in the meantime
-    GlyphData(const deprecated::JavaStruct::Glyph &glyph);
-  };
-  struct NormalizedRange {
-    int min, max;
-    std::vector<GlyphData> glyphs;
-    NormalizedRange(int min_, int max_): min(min_), max(max_) {
-      glyphs.reserve(max_ - min_ + 1);
-    }
-    NormalizedRange(const deprecated::JavaStruct::GlyphRange &range);
-  };
-  std::vector<NormalizedRange> normalized_ranges;
-
-  FontData(const BaseProtoClass &font, const std::string& name);
+  FontData(const BaseProtoClass &font, const std::string& name, const ImageData& image, const enigma::fonts::RawFont& raw_font);
   FontData(const deprecated::JavaStruct::Font &font);
 };
 
