@@ -24,66 +24,64 @@
  
 */
 
+#include <string>
+#include <thread>
+#include <mutex>
 #include <map>
-#include <climits>
 
 #include "Platforms/General/PFwindow.h"
-#include "Platforms/General/PFfilemanip.h"
-
-#include "insecure_bullshit.h"
 
 #include "videoplayer.h"
 
-#ifndef WINBLOWS
-#define RESERVED_PIDMIN 1
-#else
-#define RESERVED_PIDMIN 0
-#endif
+#include <mpv/client.h>
 
 using std::string;
 
-static std::map<video_t, string> vidmap;
-static std::map<video_t, string> widmap;
-static video_t id = 1; // starts at one because zero is reserved
-// using "UINT_MAX - id" for index to avoid conflicting procinfo
+static std::map<string, string> vidmap;
+static std::map<string, string> widmap;
+
+static std::map<string, string> plymap;
+std::mutex plymap_mutex;
+
+void video_loop(mpv_handle *ctx) {
+  while (1) {
+    mpv_event *event = mpv_wait_event(ctx, 10000);
+    if (event->event_id == MPV_EVENT_END_FILE) break;
+    if (event->event_id == MPV_EVENT_SHUTDOWN) break;
+  }
+  std::lock_guard<std::mutex> guard(plymap_mutex);
+  plymap[std::to_string((unsigned long long)ctx)] = "no";
+  mpv_terminate_destroy(ctx);
+}
 
 namespace enigma_user {
 
-video_t video_add(std::string fname) {
-  video_t ind = UINT_MAX - id;
-  fname = enigma_insecure::echo(UINT_MAX, fname); // expand environment variables
-  enigma_insecure::process_clear_out(UINT_MAX); // grab output right by the pussy
-  enigma_insecure::process_clear_pid(UINT_MAX); // grab procid right by the pussy
-  // prevent hijacking terminal / command prompt by checking for an existent file
-  if (file_exists(fname)) {
-    vidmap.insert(std::make_pair(ind, fname)); 
-    id++;
-  }
+video_t video_add(string fname) {
+  mpv_handle *ctx = mpv_create();
+  string ind = std::to_string((unsigned long long)ctx);
+  vidmap.insert(std::make_pair(ind, fname)); 
   return ind;
 }
 
 void video_play(video_t ind, wid_t wid) {
-  enigma_insecure::process_execute_async(ind, "mpv --wid=" + wid + " --no-osc \"" + vidmap.find(ind)->second + "\"");
+  mpv_handle *ctx = (mpv_handle *)stoull(ind, nullptr, 10);
+  mpv_set_option_string(ctx, "input-default-bindings", "no");
+  mpv_set_option_string(ctx, "config", "no");
+  mpv_set_option_string(ctx, "osc", "no");
+  mpv_set_option_string(ctx, "wid", wid.c_str());
   widmap.insert(std::make_pair(ind, wid));
-}
-
-void video_stop(video_t ind) {
-  // process id of 1 is reserved on unix-likes but not on windows
-  // process id of 0 is reserved on all platforms even on windows
-  if (enigma_insecure::process_current(ind) <= RESERVED_PIDMIN) {
-    return;
-  }
-  enigma_insecure::pid_kill(enigma_insecure::process_current(ind));
+  plymap.erase(ind);
+  plymap.insert(std::make_pair(ind, "yes"));
+  mpv_initialize(ctx);
+  const char *cmd[] = { "loadfile", vidmap.find(ind)->second.c_str(), NULL };
+  mpv_command(ctx, cmd);
+  std::thread stringhread(video_loop, ctx);
+  stringhread.detach();
 }
 
 bool video_is_playing(video_t ind) {
-  // process id of 1 is reserved on unix-likes but not on windows
-  // process id of 0 is reserved on all platforms even on windows
-  if (enigma_insecure::process_current(ind) <= RESERVED_PIDMIN) {
-    return false;
-  }
-  return (enigma_insecure::pid_exists(enigma_insecure::process_current(ind)) && 
-    enigma_insecure::process_previous(ind) != enigma_insecure::process_current(ind));
+  std::lock_guard<std::mutex> guard(plymap_mutex);
+  return (plymap[ind] == "yes");
 }
 
 wid_t video_get_winid(video_t ind) {
@@ -94,9 +92,14 @@ bool video_exists(video_t ind) {
   return (!vidmap.find(ind)->second.empty());
 }
 
+void video_stop(video_t ind) {
+  mpv_handle *ctx = (mpv_handle *)stoull(ind, nullptr, 10);
+  mpv_terminate_destroy(ctx);
+  std::lock_guard<std::mutex> guard(plymap_mutex);
+  plymap[ind] = "no";
+}
+
 void video_delete(video_t ind) {
-  enigma_insecure::process_clear_out(ind);
-  enigma_insecure::process_clear_pid(ind);
   vidmap.erase(ind);
   widmap.erase(ind);
 }
