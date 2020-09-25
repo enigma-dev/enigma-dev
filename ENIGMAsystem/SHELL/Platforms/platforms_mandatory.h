@@ -67,11 +67,7 @@ namespace enigma
   int ENIGMA_events();
 
   // This method should write the name of the running module to exenamehere.
-  #ifdef _WIN32
-  void windowsystem_write_exename(wchar_t* exenamehere);
-  #else
   void windowsystem_write_exename(char* exenamehere);
-  #endif
 
   // This method should take an integer framerate and perform the necessary operations to limit fps to that rate.
   void set_room_speed(int framerate);
