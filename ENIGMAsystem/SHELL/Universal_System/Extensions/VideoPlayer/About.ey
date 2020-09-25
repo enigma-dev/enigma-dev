@@ -4,7 +4,7 @@
 Name: Video Player
 Identifier: VideoPlayer
 Author: Samuel Venable
-Description: Play video files with DirectShow and mpv media player. Requires ffmpeg and mpv packages on Linux and FreeBSD. Requires libprocps-dev package on Ubuntu and Debian.
+Description: Play video files with mpv media player. Requires ffmpeg and mpv packages on all platforms.
 Default: false
 Icon: videoplayer.png
 
