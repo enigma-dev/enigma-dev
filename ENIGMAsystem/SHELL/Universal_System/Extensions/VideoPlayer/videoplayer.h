@@ -26,7 +26,7 @@
 
 #include <string>
 
-typedef unsigned long video_t;
+typedef std::string video_t;
 
 namespace enigma_user {
 
