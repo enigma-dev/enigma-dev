@@ -95,7 +95,8 @@ void video_pause(video_t ind) {
 
 void video_stop(video_t ind) {
   mpv_handle *ctx = (mpv_handle *)stoull(ind, nullptr, 10);
-  mpv_terminate_destroy(ctx);
+  const char *cmd[] = { "cycle", "stop", NULL };
+  mpv_command_async(ctx, 0, cmd);
   plymap[ind] = "no";
 }
 
