@@ -26,7 +26,6 @@
 
 #include <string>
 #include <thread>
-#include <mutex>
 #include <map>
 
 #include "Platforms/General/PFwindow.h"
@@ -39,9 +38,7 @@ using std::string;
 
 static std::map<string, string> vidmap;
 static std::map<string, string> widmap;
-
 static std::map<string, string> plymap;
-std::mutex plymap_mutex;
 
 void video_loop(mpv_handle *ctx) {
   while (1) {
@@ -49,7 +46,6 @@ void video_loop(mpv_handle *ctx) {
     if (event->event_id == MPV_EVENT_END_FILE) break;
     if (event->event_id == MPV_EVENT_SHUTDOWN) break;
   }
-  std::lock_guard<std::mutex> guard(plymap_mutex);
   plymap[std::to_string((unsigned long long)ctx)] = "no";
   mpv_terminate_destroy(ctx);
 }
@@ -80,7 +76,6 @@ void video_play(video_t ind, wid_t wid) {
 }
 
 bool video_is_playing(video_t ind) {
-  std::lock_guard<std::mutex> guard(plymap_mutex);
   return (plymap[ind] == "yes");
 }
 
@@ -101,7 +96,6 @@ void video_pause(video_t ind) {
 void video_stop(video_t ind) {
   mpv_handle *ctx = (mpv_handle *)stoull(ind, nullptr, 10);
   mpv_terminate_destroy(ctx);
-  std::lock_guard<std::mutex> guard(plymap_mutex);
   plymap[ind] = "no";
 }
 
