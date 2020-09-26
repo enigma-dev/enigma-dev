@@ -34,6 +34,7 @@ video_t video_add(std::string fname);
 void video_play(video_t ind, wid_t wid);
 bool video_is_playing(video_t ind);
 wid_t video_get_winid(video_t ind);
+void video_pause(video_t ind);
 void video_stop(video_t ind);
 bool video_exists(video_t ind);
 void video_delete(video_t ind);
