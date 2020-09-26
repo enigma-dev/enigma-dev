@@ -91,6 +91,12 @@ wid_t video_get_winid(video_t ind) {
 bool video_exists(video_t ind) {
   return (!vidmap.find(ind)->second.empty());
 }
+ 
+void video_pause(video_t ind) {
+  mpv_handle *ctx = (mpv_handle *)stoull(ind, nullptr, 10);
+  const char *cmd[] = { "cycle", "pause", NULL };
+  mpv_command_async(ctx, 0, cmd);
+}
 
 void video_stop(video_t ind) {
   mpv_handle *ctx = (mpv_handle *)stoull(ind, nullptr, 10);
