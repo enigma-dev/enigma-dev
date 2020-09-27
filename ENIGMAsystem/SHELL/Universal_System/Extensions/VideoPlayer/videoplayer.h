@@ -44,7 +44,5 @@ void video_pause(std::string ind);
 void video_stop(std::string ind);
 bool video_exists(std::string ind);
 void video_delete(std::string ind);
-void video_set_showerrors(bool showerrors);
-bool video_get_showerrors();
 
 } // namespace enigma_user
