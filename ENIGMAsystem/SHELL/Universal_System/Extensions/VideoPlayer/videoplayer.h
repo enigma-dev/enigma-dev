@@ -26,17 +26,25 @@
 
 #include <string>
 
-typedef std::string video_t;
-
 namespace enigma_user {
 
-video_t video_add(std::string fname);
-void video_play(video_t ind, wid_t wid);
-bool video_is_playing(video_t ind);
-wid_t video_get_winid(video_t ind);
-void video_pause(video_t ind);
-void video_stop(video_t ind);
-bool video_exists(video_t ind);
-void video_delete(video_t ind);
+std::string video_add(std::string fname);
+void video_set_option_string(std::string ind, std::string option, std::string value);
+void video_play(std::string ind);
+bool video_is_playing(std::string ind);
+std::string video_get_graphics_system(std::string ind);
+void video_set_graphics_system(std::string ind, std::string system);
+bool video_get_fullscreen(std::string ind);
+void video_set_fullscreen(std::string ind, bool fullscreen);
+int video_get_volume_percent(std::string ind);
+void video_set_volume_percent(std::string ind, int volume);
+std::string video_get_window_identifier(std::string ind);
+void video_set_window_identifier(std::string ind, std::string wid);
+void video_pause(std::string ind);
+void video_stop(std::string ind);
+bool video_exists(std::string ind);
+void video_delete(std::string ind);
+void video_set_showerrors(bool showerrors);
+bool video_get_showerrors();
 
 } // namespace enigma_user
