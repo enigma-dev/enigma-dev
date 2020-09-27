@@ -28,99 +28,127 @@
 #include <thread>
 #include <map>
 
-#include "Platforms/General/PFwindow.h"
-
 #include "videoplayer.h"
-
-#ifdef _WIN32
-#include <windows.h>
-#endif
 
 #include <mpv/client.h>
 
 using std::string;
 
-static std::map<video_t, string> vidmap;
-static std::map<video_t, wid_t>  widmap;
-static std::map<video_t, string> plymap;
+static std::map<string, string> vidmap;
+static std::map<string, string> widmap;
 
-void video_loop(mpv_handle *ctx) {
-  #ifdef _WIN32
-  video_t ind = std::to_string((unsigned long long)ctx);
-  wid_t wid   = widmap.find(ind)->second;
-  HWND window = (HWND)stoull(wid, nullptr, 10);
-  #endif
+static std::map<string, string> plymap;
+static std::map<string, string> gfxmap;
+
+static std::map<string, bool>   fllmap;
+static std::map<string, int>    volmap;
+
+void video_loop(mpv_handle *mpv) {
   while (true) {
-    #ifdef _WIN32
-    LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
-    if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS)))
-      SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-    #endif
-    mpv_event *event = mpv_wait_event(ctx, 10000);
+    mpv_event *event = mpv_wait_event(mpv, -1);
     if (event->event_id == MPV_EVENT_END_FILE) break;
     if (event->event_id == MPV_EVENT_SHUTDOWN) break;
   }
-  plymap[std::to_string((unsigned long long)ctx)] = "no";
-  mpv_terminate_destroy(ctx);
+  plymap[std::to_string((unsigned long long)mpv)] = "no";
+  mpv_terminate_destroy(mpv);
 }
 
 namespace enigma_user {
 
-video_t video_add(string fname) {
-  mpv_handle *ctx = mpv_create();
-  string ind = std::to_string((unsigned long long)ctx);
+string video_add(string fname) {
+  mpv_handle *mpv = mpv_create();
+  string ind = std::to_string((unsigned long long)mpv);
   vidmap.insert(std::make_pair(ind, fname)); 
   return ind;
 }
 
-void video_play(video_t ind, wid_t wid) {
-  mpv_handle *ctx = (mpv_handle *)stoull(ind, nullptr, 10);
-  mpv_set_option_string(ctx, "input-default-bindings", "no");
-  mpv_set_option_string(ctx, "config", "no");
-  mpv_set_option_string(ctx, "osc", "no");
-  mpv_set_option_string(ctx, "wid", wid.c_str());
-  widmap.insert(std::make_pair(ind, wid));
+void video_set_option_string(string ind, string option, string value) {
+  mpv_handle *mpv = (mpv_handle *)stoull(ind, nullptr, 10);
+  mpv_set_option_string(mpv, option.c_str(), value.c_str());
+}
+
+void video_play(string ind) {
+  mpv_handle *mpv = (mpv_handle *)stoull(ind, nullptr, 10);
+  mpv_set_option_string(mpv, "input-default-bindings", "no");
+  mpv_set_option_string(mpv, "taskbar-progress", "no");
+  mpv_set_option_string(mpv, "ontop", "yes");
+  mpv_set_option_string(mpv, "config", "no");
+  mpv_set_option_string(mpv, "osc", "no");
   plymap.erase(ind);
   plymap.insert(std::make_pair(ind, "yes"));
-  #ifdef _WIN32
-  HWND window = (HWND)stoull(wid, nullptr, 10);
-  LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
-  if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS)))
-    SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-  #endif
-  mpv_initialize(ctx);
+  mpv_initialize(mpv);
   const char *cmd[] = { "loadfile", vidmap.find(ind)->second.c_str(), NULL };
-  mpv_command(ctx, cmd);
-  std::thread stringhread(video_loop, ctx);
+  mpv_command(mpv, cmd);
+  std::thread stringhread(video_loop, mpv);
   stringhread.detach();
 }
 
-bool video_is_playing(video_t ind) {
+bool video_is_playing(string ind) {
   return (plymap[ind] == "yes");
 }
 
-wid_t video_get_winid(video_t ind) {
+string video_get_graphics_system(string ind) {
+  return gfxmap.find(ind)->second;
+}
+
+void video_set_graphics_system(string ind, string system) {
+  mpv_handle *mpv = (mpv_handle *)stoull(ind, nullptr, 10);
+  mpv_set_option_string(mpv, "gpu-api", system.c_str());
+  gfxmap.erase(ind);
+  gfxmap.insert(std::make_pair(ind, system));
+}
+
+bool video_get_fullscreen(string ind) {
+  return fllmap.find(ind)->second;
+}
+
+void video_set_fullscreen(string ind, bool fullscreen) {
+  mpv_handle *mpv = (mpv_handle *)stoull(ind, nullptr, 10);
+  mpv_set_option_string(mpv, "fs", fullscreen ? "yes" : "no");
+  fllmap.erase(ind);
+  fllmap.insert(std::make_pair(ind, fullscreen));
+}
+
+int video_get_volume_percent(string ind) {
+  return volmap.find(ind)->second;
+}
+
+void video_set_volume_percent(string ind, int volume) {
+  mpv_handle *mpv = (mpv_handle *)stoull(ind, nullptr, 10);
+  mpv_set_option_string(mpv, "volume", std::to_string(volume).c_str());
+  volmap.erase(ind);
+  volmap.insert(std::make_pair(ind, volume));
+}
+
+string video_get_window_identifier(string ind) {
   return widmap.find(ind)->second;
 }
 
-bool video_exists(video_t ind) {
-  return (!vidmap.find(ind)->second.empty());
-}
- 
-void video_pause(video_t ind) {
-  mpv_handle *ctx = (mpv_handle *)stoull(ind, nullptr, 10);
-  const char *cmd[] = { "cycle", "pause", NULL };
-  mpv_command_async(ctx, 0, cmd);
+void video_set_window_identifier(string ind, string wid) {
+  mpv_handle *mpv = (mpv_handle *)stoull(ind, nullptr, 10);
+  mpv_set_option_string(mpv, "wid", wid.c_str());
+  widmap.erase(ind);
+  widmap.insert(std::make_pair(ind, wid));
 }
 
-void video_stop(video_t ind) {
-  mpv_handle *ctx = (mpv_handle *)stoull(ind, nullptr, 10);
+bool video_exists(string ind) {
+  return (!vidmap.find(ind)->second.empty());
+}
+
+void video_pause(string ind) {
+  mpv_handle *mpv = (mpv_handle *)stoull(ind, nullptr, 10);
+  const char *cmd[] = { "cycle", "pause", NULL };
+  mpv_command_async(mpv, 0, cmd);
+}
+
+void video_stop(string ind) {
+  mpv_handle *mpv = (mpv_handle *)stoull(ind, nullptr, 10);
   const char *cmd[] = { "quit", NULL, NULL };
-  mpv_command_async(ctx, 0, cmd);
+  mpv_command_async(mpv, 0, cmd);
   plymap[ind] = "no";
 }
 
-void video_delete(video_t ind) {
+void video_delete(string ind) {
   vidmap.erase(ind);
   widmap.erase(ind);
 }
