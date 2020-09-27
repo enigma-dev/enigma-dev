@@ -82,6 +82,12 @@ void video_play(video_t ind, wid_t wid) {
   widmap.insert(std::make_pair(ind, wid));
   plymap.erase(ind);
   plymap.insert(std::make_pair(ind, "yes"));
+  #ifdef _WIN32
+  HWND window = (HWND)stoull(wid, nullptr, 10);
+  LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
+  if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS)))
+    SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+  #endif
   mpv_initialize(ctx);
   const char *cmd[] = { "loadfile", vidmap.find(ind)->second.c_str(), NULL };
   mpv_command(ctx, cmd);
