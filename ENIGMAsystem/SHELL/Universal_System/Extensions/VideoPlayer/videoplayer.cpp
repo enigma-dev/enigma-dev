@@ -32,6 +32,10 @@
 
 #include "videoplayer.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <mpv/client.h>
 
 using std::string;
@@ -41,7 +45,17 @@ static std::map<string, string> widmap;
 static std::map<string, string> plymap;
 
 void video_loop(mpv_handle *ctx) {
-  while (1) {
+  #ifdef _WIN32
+  video_t ind = std::to_string((unsigned long long)ctx);
+  wid_t wid = widmap.find(ind)->second;
+  HWND window = (HWND)stoull(wid, nullptr, 10);
+  #endif
+  while (true) {
+    #ifdef _WIN32
+    LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
+    if (!(style & (WS_CLIPCHILDREN | WS_CLIPSIBLINGS)))
+      SetWindowLongPtr(window, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+    #endif
     mpv_event *event = mpv_wait_event(ctx, 10000);
     if (event->event_id == MPV_EVENT_END_FILE) break;
     if (event->event_id == MPV_EVENT_SHUTDOWN) break;
