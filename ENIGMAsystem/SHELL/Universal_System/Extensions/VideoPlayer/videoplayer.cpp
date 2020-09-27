@@ -69,11 +69,6 @@ void video_set_option_string(string ind, string option, string value) {
 
 void video_play(string ind) {
   mpv_handle *mpv = (mpv_handle *)stoull(ind, nullptr, 10);
-  mpv_set_option_string(mpv, "input-default-bindings", "no");
-  mpv_set_option_string(mpv, "taskbar-progress", "no");
-  mpv_set_option_string(mpv, "ontop", "yes");
-  mpv_set_option_string(mpv, "config", "no");
-  mpv_set_option_string(mpv, "osc", "no");
   plymap.erase(ind);
   plymap.insert(std::make_pair(ind, "yes"));
   mpv_initialize(mpv);
@@ -151,6 +146,10 @@ void video_stop(string ind) {
 void video_delete(string ind) {
   vidmap.erase(ind);
   widmap.erase(ind);
+  plymap.erase(ind);
+  gfxmap.erase(ind);
+  fllmap.erase(ind);
+  volmap.erase(ind);
 }
 
 } // namespace enigma_user
