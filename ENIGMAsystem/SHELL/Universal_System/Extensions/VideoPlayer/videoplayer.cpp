@@ -40,14 +40,14 @@
 
 using std::string;
 
-static std::map<string, string> vidmap;
-static std::map<string, string> widmap;
-static std::map<string, string> plymap;
+static std::map<video_t, string> vidmap;
+static std::map<video_t, wid_t>  widmap;
+static std::map<video_t, string> plymap;
 
 void video_loop(mpv_handle *ctx) {
   #ifdef _WIN32
   video_t ind = std::to_string((unsigned long long)ctx);
-  wid_t wid = widmap.find(ind)->second;
+  wid_t wid   = widmap.find(ind)->second;
   HWND window = (HWND)stoull(wid, nullptr, 10);
   #endif
   while (true) {
