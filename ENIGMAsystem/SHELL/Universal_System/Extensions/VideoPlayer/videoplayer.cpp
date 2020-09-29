@@ -70,11 +70,11 @@ string video_add(string fname) {
   return fname;
 }
 
-void video_get_option_exists(string ind, string option) {
+bool video_get_option_exists(string ind, string option) {
   return (videos[ind].option.find(option) != videos[ind].option.end());
 } 
 
-void video_get_option_string(string ind, string option) {
+string video_get_option_string(string ind, string option) {
   if (videos[ind].option.find(option) != videos[ind].option.end()) {
     return videos[ind].option.find(option)->second;
   } else {
