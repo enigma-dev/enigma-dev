@@ -59,11 +59,11 @@ namespace enigma_user {
 
 string video_add(string fname) {
   VideoData data;
-  data.mpv            = mpv_create();
-  data.window_id      = "-1";
-  data.gpu_api        = "opengl";
-  data.volume         = 100;
-  data.is_playing     = false;
+  data.mpv           = mpv_create();
+  data.window_id     = "-1";
+  data.gpu_api       = "opengl";
+  data.volume        = 100;
+  data.is_playing    = false;
   data.is_fullscreen = false;
   videos.insert(std::make_pair(fname, data)); 
   return fname;
