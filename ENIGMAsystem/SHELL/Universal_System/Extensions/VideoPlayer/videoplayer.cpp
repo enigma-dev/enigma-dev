@@ -36,6 +36,7 @@ using std::string;
 
 struct VideoData {
   mpv_handle *mpv;
+  std::map<string, string> option;
   string window_id;
   string gpu_api;
   int volume;
@@ -67,6 +68,18 @@ string video_add(string fname) {
   data.is_fullscreen = false;
   videos.insert(std::make_pair(fname, data)); 
   return fname;
+}
+
+void video_get_option_exists(string ind, string option) {
+  return (videos[ind].option.find(option) != videos[ind].option.end());
+} 
+
+void video_get_option_string(string ind, string option) {
+  if (videos[ind].option.find(option) != videos[ind].option.end()) {
+    return videos[ind].option.find(option)->second;
+  } else {
+    return "";
+  }
 }
 
 void video_set_option_string(string ind, string option, string value) {
