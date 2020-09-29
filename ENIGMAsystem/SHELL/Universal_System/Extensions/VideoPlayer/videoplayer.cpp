@@ -104,11 +104,11 @@ void splash_set_interupt(bool interupt) {
   splash_get_interupt = interupt;
 }
 
-void splash_set_volume(vol) {
+void splash_set_volume(int vol) {
   splash_get_volume = vol;
 }
 
-void splash_show_video(fname, loop, window_id = "-1") {
+void splash_show_video(string fname, bool loop, window_id = "-1") {
   globalvar video;
   string wid, wstr, hstr, xstr, ystr, size, pstn, geom;
 
