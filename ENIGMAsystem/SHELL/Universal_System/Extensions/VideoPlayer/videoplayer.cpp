@@ -75,11 +75,9 @@ bool video_get_option_was_set(string ind, string option) {
 } 
 
 string video_get_option_string(string ind, string option) {
-  if (video_get_option_was_set(ind, option)) {
+  if (video_get_option_was_set(ind, option))
     return videos[ind].option.find(option)->second;
-  } else {
-    return "";
-  }
+  return "";
 }
 
 void video_set_option_string(string ind, string option, string value) {
