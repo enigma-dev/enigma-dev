@@ -29,6 +29,8 @@
 namespace enigma_user {
 
 std::string video_add(std::string fname);
+bool video_get_option_was_set(std::string ind, std::string option);
+string video_get_option_string(std::string ind, std::string option);
 void video_set_option_string(std::string ind, std::string option, std::string value);
 void video_play(std::string ind);
 bool video_is_playing(std::string ind);
