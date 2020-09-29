@@ -36,8 +36,8 @@ using std::string;
 
 struct VideoData {
   mpv_handle *mpv;
-  std::string window_id;
-  std::string gpu_api;
+  string window_id;
+  string gpu_api;
   int volume;
   bool is_playing;
   bool is_fullscreen;
