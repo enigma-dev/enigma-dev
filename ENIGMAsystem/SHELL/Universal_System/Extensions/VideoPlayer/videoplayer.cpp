@@ -30,6 +30,11 @@
 
 #include "videoplayer.h"
 
+// this is not used by my extension
+#ifndef VIDEO_PLAYER_SELF_CONTAINED
+#include "Platforms/General/PFwindow.h"
+#endif
+
 #include <mpv/client.h>
 
 using std::string;
@@ -46,6 +51,17 @@ struct VideoData {
 
 static std::map<string, VideoData> videos;
 
+static bool splash_get_main       = true;
+static string splash_get_caption  = "";
+static bool splash_get_fullscreen = false;
+static bool splash_get_border     = true;
+static int splash_get_volume      = 100;
+
+static int splash_get_x           = INT_MAX;
+static int splash_get_y           = INT_MAX;
+static unsigned splash_get_width  = 640;
+static unsigned splash_get_height = 480;
+
 static void video_loop(string ind, mpv_handle *mpv) {
   while (true) {
     mpv_event *event = mpv_wait_event(mpv, -1);
@@ -57,6 +73,118 @@ static void video_loop(string ind, mpv_handle *mpv) {
 }
 
 namespace enigma_user {
+
+void splash_set_main(bool main) {
+  splash_get_main = main;
+}
+
+void splash_set_caption(string cap) {
+  splash_get_caption = cap;
+}
+
+void splash_set_fullscreen(bool full) {
+  splash_get_fullscreen = full;
+}
+
+void splash_set_size(unsigned w, unsigned h) {
+  splash_get_width  = w;
+  splash_get_height = h;
+}
+
+void splash_set_position(int x, int y) {
+  splash_get_x = x;
+  splash_get_y = y;
+}
+
+void splash_set_border(bool border) {
+  splash_get_border = border;
+}
+
+void splash_set_interupt(bool interupt) {
+  splash_get_interupt = interupt;
+}
+
+void splash_set_volume(vol) {
+  splash_get_volume = vol;
+}
+
+void splash_show_video(fname, loop, window_id = "-1") {
+  globalvar video;
+  string wid, wstr, hstr, xstr, ystr, size, pstn, geom;
+
+  if (splash_get_main) { // embeds inside game window
+    #ifdef __APPLE__ // Darwin/macOS/iOS/watchOS/tvOS
+      #ifdef __MACH__  // Darwin and macOS specifically
+      // this is not used by my extension
+      #ifndef VIDEO_PLAYER_SELF_CONTAINED
+        wid = std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
+        wid = cocoa_window_get_contentview(wid.c_str());
+      #else // is used by my GM extension
+        wid = cocoa_window_get_contentview(window_id.c_str());
+      #endif
+    #else // all non-Apple-made platforms
+      // this is not used by my extension
+      #ifndef VIDEO_PLAYER_SELF_CONTAINED  
+        wid = window_identifer();
+      #else // is used by my GM extension
+        wid = window_id;
+      #endif
+    #endif
+  } else { 
+    // creates a new window to play splash
+    // -1 is guaranteed to be not a window
+    wid = "-1";
+  }
+
+  if (splash_get_fullscreen) splash_get_fullscreen = "yes";
+  else splash_get_fullscreen = "no";
+
+  if (splash_get_border) splash_get_border = "yes";
+  else splash_get_border = "no";
+
+  if (splash_get_main) splash_get_main = "no";
+  else splash_get_main = "yes";
+
+  if (loop) loop = "yes";
+  else loop = "no";
+
+  wstr = std::to_string(splash_get_width);
+  hstr = std::to_string(splash_get_height);
+  xstr = std::to_string(splash_get_x);
+  ystr = std::to_string(splash_get_y);
+  size = wstr + "x" + hstr;
+  if (splash_get_x == INT_MAX || splash_get_y == INT_MAX) {
+    pstn = "50%+50%";
+    geom = size + "+" + pstn;
+  } else {
+    pstn = xstr + "+" + ystr;
+    geom = size + "+" + pstn;
+  }
+
+  if (video_exists(video)) {
+    video_delete(video);
+  }
+ 
+  video = video_add(fname);
+  video_set_option_string(video, "volume", ztd::to_string(splash_get_volume));
+  video_set_option_string(video, "input-default-bindings", "no");
+  video_set_option_string(video, "title", splash_get_caption);
+  video_set_option_string(video, "fs", splash_get_fullscreen);
+  video_set_option_string(video, "border", splash_get_border);
+  video_set_option_string(video, "keepaspect-window", "no");
+  video_set_option_string(video, "taskbar-progress", "no");
+  video_set_option_string(video, "ontop", splash_get_main);
+  video_set_option_string(video, "geometry", geom);
+  video_set_option_string(video, "config", "no");
+  video_set_option_string(video, "loop", loop);
+  video_set_option_string(video, "osc", "no");
+  video_set_option_string(video, "wid", wid);
+
+  video_play(video);
+  if (splash_get_interupt) {
+    while (video_is_playing(video));
+  }
+}
 
 string video_add(string fname) {
   VideoData data;
