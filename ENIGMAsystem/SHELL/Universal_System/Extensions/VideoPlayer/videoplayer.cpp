@@ -84,6 +84,7 @@ string video_get_option_string(string ind, string option) {
 
 void video_set_option_string(string ind, string option, string value) {
   mpv_set_option_string(videos[ind].mpv, option.c_str(), value.c_str());
+  videos[ind].option[option] = value;
 }
 
 void video_play(string ind) {
