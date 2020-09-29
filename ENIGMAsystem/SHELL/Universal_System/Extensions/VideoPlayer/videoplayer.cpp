@@ -63,6 +63,12 @@ static int splash_get_y           = INT_MAX;
 static unsigned splash_get_width  = 640;
 static unsigned splash_get_height = 480;
 
+#ifdef __APPLE__ // Darwin/macOS/iOS/watchOS/tvOS
+  #ifdef __MACH__  // Darwin & macOS specifically
+     extern "C" const char *cocoa_window_get_contentview(const char *wid);
+  #endif
+#endif
+
 static void video_loop(string ind, mpv_handle *mpv) {
   while (true) {
     mpv_event *event = mpv_wait_event(mpv, -1);
