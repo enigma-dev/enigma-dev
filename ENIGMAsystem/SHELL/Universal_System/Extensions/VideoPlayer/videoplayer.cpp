@@ -24,6 +24,7 @@
  
 */
 
+#include <climits>
 #include <string>
 #include <thread>
 #include <map>
