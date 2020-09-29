@@ -114,7 +114,7 @@ void splash_show_video(fname, loop, window_id = "-1") {
 
   if (splash_get_main) { // embeds inside game window
     #ifdef __APPLE__ // Darwin/macOS/iOS/watchOS/tvOS
-      #ifdef __MACH__  // Darwin and macOS specifically
+      #ifdef __MACH__  // Darwin & macOS specifically
       // this is not used by my extension
       #ifndef VIDEO_PLAYER_SELF_CONTAINED
         wid = std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
