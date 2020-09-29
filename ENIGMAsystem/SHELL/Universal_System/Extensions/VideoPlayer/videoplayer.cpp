@@ -118,7 +118,6 @@ void splash_show_video(string fname, bool loop, window_id = "-1") {
       #ifdef __MACH__  // Darwin & macOS specifically
       // this is not used by my extension
       #ifndef VIDEO_PLAYER_SELF_CONTAINED
-        wid = std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
         wid = cocoa_window_get_contentview(wid.c_str());
       #else // is used by my GM extension
         wid = cocoa_window_get_contentview(window_id.c_str());
@@ -258,7 +257,11 @@ string video_get_window_identifier(string ind) {
 }
 
 void video_set_window_identifier(string ind, string wid) {
-  videos[ind].window_id = wid;
+  #ifdef __APPLE__ // Darwin/macOS/iOS/watchOS/tvOS
+    #ifdef __MACH__  // Darwin & macOS specifically
+      wid = cocoa_window_get_contentview(wid.c_str());
+    #endif
+  #endif
   mpv_set_option_string(videos[ind].mpv, "wid", wid.c_str());
 }
 
