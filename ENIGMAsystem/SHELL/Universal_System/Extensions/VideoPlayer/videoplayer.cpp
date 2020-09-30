@@ -123,11 +123,12 @@ void splash_show_video(string fname, bool loop, string window_id) {
   if (splash_get_main) { // embeds inside game window
     #ifdef __APPLE__
       #ifdef __MACH__
-      // this is not used by my extension
-      #ifndef VIDEO_PLAYER_SELF_CONTAINED
-        wid = cocoa_window_get_contentview(wid.c_str());
-      #else
-        wid = cocoa_window_get_contentview(window_id.c_str());
+        // this is not used by my extension
+        #ifndef VIDEO_PLAYER_SELF_CONTAINED
+          wid = cocoa_window_get_contentview(wid.c_str());
+        #else
+          wid = cocoa_window_get_contentview(window_id.c_str());
+        #endif
       #endif
     #else
       // this is not used by my extension
