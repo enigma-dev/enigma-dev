@@ -63,8 +63,8 @@ static int splash_get_y           = INT_MAX;
 static unsigned splash_get_width  = 640;
 static unsigned splash_get_height = 480;
 
-#ifdef __APPLE__ // Darwin/macOS/iOS/watchOS/tvOS
-  #ifdef __MACH__  // Darwin & macOS specifically
+#ifdef __APPLE__
+  #ifdef __MACH__
      extern "C" const char *cocoa_window_get_contentview(const char *wid);
   #endif
 #endif
@@ -120,19 +120,19 @@ void splash_show_video(string fname, bool loop, string window_id) {
     size, pstn, geom, flls, brdr, ntmn, lpng;
 
   if (splash_get_main) { // embeds inside game window
-    #ifdef __APPLE__ // Darwin/macOS/iOS/watchOS/tvOS
-      #ifdef __MACH__  // Darwin & macOS specifically
+    #ifdef __APPLE__
+      #ifdef __MACH__
       // this is not used by my extension
       #ifndef VIDEO_PLAYER_SELF_CONTAINED
         wid = cocoa_window_get_contentview(wid.c_str());
-      #else // is used by my GM extension
+      #else
         wid = cocoa_window_get_contentview(window_id.c_str());
       #endif
-    #else // all non-Apple-made platforms
+    #else
       // this is not used by my extension
       #ifndef VIDEO_PLAYER_SELF_CONTAINED  
         wid = window_identifer();
-      #else // is used by my GM extension
+      #else
         wid = window_id;
       #endif
     #endif
@@ -256,8 +256,8 @@ string video_get_window_identifier(string ind) {
 }
 
 void video_set_window_identifier(string ind, string wid) {
-  #ifdef __APPLE__ // Darwin/macOS/iOS/watchOS/tvOS
-    #ifdef __MACH__  // Darwin & macOS specifically
+  #ifdef __APPLE__ 
+    #ifdef __MACH__ 
       wid = cocoa_window_get_contentview(wid.c_str());
     #endif
   #endif
