@@ -115,9 +115,9 @@ void splash_set_volume(int vol) {
   splash_get_volume = vol;
 }
 
-void splash_show_video(string fname, bool loop, window_id = "-1") {
-  globalvar video;
-  string wid, wstr, hstr, xstr, ystr, size, pstn, geom;
+void splash_show_video(string fname, bool loop, window_id) {
+  string video, wid, wstr, hstr, xstr, ystr, 
+    size, pstn, geom, flls, brdr, ntmn, lpng;
 
   if (splash_get_main) { // embeds inside game window
     #ifdef __APPLE__ // Darwin/macOS/iOS/watchOS/tvOS
@@ -142,17 +142,10 @@ void splash_show_video(string fname, bool loop, window_id = "-1") {
     wid = "-1";
   }
 
-  if (splash_get_fullscreen) splash_get_fullscreen = "yes";
-  else splash_get_fullscreen = "no";
-
-  if (splash_get_border) splash_get_border = "yes";
-  else splash_get_border = "no";
-
-  if (splash_get_main) splash_get_main = "no";
-  else splash_get_main = "yes";
-
-  if (loop) loop = "yes";
-  else loop = "no";
+  flls = splash_get_fullscreen ? "yes" : "no";
+  brdr = splash_get_border ? "yes" : "no";
+  ntmn = splash_get_main ? "no" : "yes"
+  lpng = loop ? "yes" : "no";
 
   wstr = std::to_string(splash_get_width);
   hstr = std::to_string(splash_get_height);
@@ -175,14 +168,14 @@ void splash_show_video(string fname, bool loop, window_id = "-1") {
   video_set_option_string(video, "volume", ztd::to_string(splash_get_volume));
   video_set_option_string(video, "input-default-bindings", "no");
   video_set_option_string(video, "title", splash_get_caption);
-  video_set_option_string(video, "fs", splash_get_fullscreen);
-  video_set_option_string(video, "border", splash_get_border);
+  video_set_option_string(video, "fs", flls);
+  video_set_option_string(video, "border", brdr);
   video_set_option_string(video, "keepaspect-window", "no");
   video_set_option_string(video, "taskbar-progress", "no");
-  video_set_option_string(video, "ontop", splash_get_main);
+  video_set_option_string(video, "ontop", ntmn);
   video_set_option_string(video, "geometry", geom);
   video_set_option_string(video, "config", "no");
-  video_set_option_string(video, "loop", loop);
+  video_set_option_string(video, "loop", lpng);
   video_set_option_string(video, "osc", "no");
   video_set_option_string(video, "wid", wid);
 
