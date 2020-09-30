@@ -165,7 +165,7 @@ void splash_show_video(string fname, bool loop, window_id) {
   }
  
   video = video_add(fname);
-  video_set_option_string(video, "volume", ztd::to_string(splash_get_volume));
+  video_set_option_string(video, "volume", std::to_string(splash_get_volume));
   video_set_option_string(video, "input-default-bindings", "no");
   video_set_option_string(video, "title", splash_get_caption);
   video_set_option_string(video, "fs", flls);
