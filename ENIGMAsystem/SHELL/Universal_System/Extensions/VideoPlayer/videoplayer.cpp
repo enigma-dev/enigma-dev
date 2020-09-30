@@ -133,7 +133,7 @@ void splash_show_video(string fname, bool loop, string window_id) {
     #else
       // this is not used by my extension
       #ifndef VIDEO_PLAYER_SELF_CONTAINED  
-        wid = window_identifer();
+        wid = window_identifier();
       #else
         wid = window_id;
       #endif
