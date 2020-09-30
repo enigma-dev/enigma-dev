@@ -53,13 +53,12 @@ environment:
     #- {WIDGETS: GTK+, PACKAGES: "gtk2:x"}
 
     # Extensions
-    - {EXTENSIONS: "DirectShow"}
     - {EXTENSIONS: "WindowsTouch"}
     - {EXTENSIONS: "XInput"}
     - {EXTENSIONS: "MediaControlInterface"}
     - {EXTENSIONS: "FileDropper"}
-    - {EXTENSIONS: "VideoPlayer", PACKAGES: "mpv:x"}
     - {EXTENSIONS: "IniFilesystem"}
+    - {EXTENSIONS: "VideoPlayer", PACKAGES: "mpv:x"}
     - {EXTENSIONS: "Box2DPhysics", PACKAGES: "box2d:x"}
     - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
     - {EXTENSIONS: "ExternalFuncs", PACKAGES: "libffi:x"}
