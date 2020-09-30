@@ -58,22 +58,16 @@ struct VideoData {
 };
 
 static std::map<string, VideoData> videos;
-
+static int splash_get_volume       = 100;
 static string splash_get_caption   = "";
-static bool splash_get_main        = true;
-static bool splash_get_fullscreen  = false;
 
+static bool splash_get_fullscreen  = false;
 static bool splash_get_border      = true;
 static bool splash_get_top         = true;
 
+static bool splash_get_main        = true;
 static bool splash_get_interupt    = true;
-static int splash_get_volume       = 100;
-
 static bool splash_get_stop_mouse  = true;
-static bool splash_get_stop_key    = true;
-
-static bool splash_get_pause_mouse = false;
-static bool splash_get_pause_key   = false;
 
 static int splash_get_x            = INT_MAX;
 static int splash_get_y            = INT_MAX;
@@ -130,18 +124,6 @@ void splash_set_interupt(bool interupt) {
 
 void splash_set_stop_mouse(bool stop) {
   splash_get_stop_mouse = stop;
-}
-
-void splash_set_stop_key(bool stop) {
-  splash_get_stop_key = stop;
-}
-
-void splash_set_pause_mouse(bool pause) {
-  splash_get_pause_mouse = pause;
-}
-
-void splash_set_pause_key(bool pause) {
-  splash_get_pause_key = pause;
 }
 
 void splash_set_volume(int vol) {
@@ -203,18 +185,10 @@ void splash_show_video(string fname, bool loop, string window_id) {
 
   std::ofstream file;
   file.open ("input.conf");
-  if (splash_get_stop_key)
-    file << "ESC quit\n";
-  if (splash_get_pause_key) {
-    file << "SPACE cycle pause\n"; 
-    file << "ENTER cycle pause\n";
-  }
+  file << "CLOSE_WIN ignore\n";
   if (splash_get_stop_mouse) {
     file << "MBTN_LEFT quit\n";
     file << "MBTN_RIGHT quit\n";
-  } else if (splash_get_pause_mouse) {
-    file << "MBTN_LEFT cycle pause\n";
-    file << "MBTN_RIGHT cycle pause\n";
   }
   file.close();
 
