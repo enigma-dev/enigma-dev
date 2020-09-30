@@ -212,6 +212,7 @@ void splash_show_video(string fname, bool loop, string window_id) {
     while (video_is_playing(video)) {
       std::this_thread::sleep_for (std::chrono::milliseconds(5));
       #ifdef _WIN32
+        MSG msg;
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
           TranslateMessage(&msg);
           DispatchMessage(&msg);
