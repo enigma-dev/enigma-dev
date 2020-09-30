@@ -144,7 +144,7 @@ void splash_show_video(string fname, bool loop, string window_id) {
 
   flls = splash_get_fullscreen ? "yes" : "no";
   brdr = splash_get_border ? "yes" : "no";
-  ntmn = splash_get_main ? "no" : "yes"
+  ntmn = splash_get_main ? "no" : "yes";
   lpng = loop ? "yes" : "no";
 
   wstr = std::to_string(splash_get_width);
