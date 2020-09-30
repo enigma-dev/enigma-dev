@@ -25,15 +25,22 @@
 */
 
 #include <climits>
+#include <fstream>
+#include <cstdio>
 #include <string>
 #include <thread>
+#include <chrono>
 #include <map>
 
 #include "videoplayer.h"
 
 // this is not used by my extension
 #ifndef VIDEO_PLAYER_SELF_CONTAINED
-#include "Platforms/General/PFwindow.h"
+  #include "Platforms/General/PFwindow.h"
+#endif
+
+#ifdef _WIN32
+  #include <windows.h>
 #endif
 
 #include <mpv/client.h>
@@ -58,6 +65,9 @@ static bool splash_get_fullscreen = false;
 static bool splash_get_border     = true;
 static int splash_get_volume      = 100;
 static bool splash_get_interupt   = true;
+static bool splash_get_top        = true;
+static bool splash_get_stop_key   = true;
+static bool splash_get_stop_mouse = true;
 
 static int splash_get_x           = INT_MAX;
 static int splash_get_y           = INT_MAX;
@@ -112,13 +122,21 @@ void splash_set_interupt(bool interupt) {
   splash_get_interupt = interupt;
 }
 
+void splash_set_stop_mouse(bool stop) {
+  splash_get_stop_mouse = stop;
+}
+
+void splash_set_stop_key(bool stop) {
+  splash_get_stop_key = stop;
+}
+
 void splash_set_volume(int vol) {
   splash_get_volume = vol;
 }
 
 void splash_show_video(string fname, bool loop, string window_id) {
   string video, wid, wstr, hstr, xstr, ystr, 
-    size, pstn, geom, flls, brdr, ntmn, lpng;
+    size, pstn, geom, flls, brdr, ontp, lpng;
 
   if (splash_get_main) { // embeds inside game window
     #ifdef __APPLE__
@@ -144,9 +162,10 @@ void splash_show_video(string fname, bool loop, string window_id) {
     wid = "-1";
   }
 
-  flls = splash_get_fullscreen ? "yes" : "no";
-  brdr = splash_get_border ? "yes" : "no";
-  ntmn = splash_get_main ? "no" : "yes";
+  splash_get_interupt = !splash_get_main ? splash_get_interupt : true;
+  flls = !splash_get_main ? (splash_get_fullscreen ? "yes" : "no") : "no";
+  brdr = !splash_get_main ? (splash_get_border ? "yes" : "no") : "no";
+  ontp = !splash_get_main ? (splash_get_top ? "yes" : "no") : "no";
   lpng = loop ? "yes" : "no";
 
   wstr = std::to_string(splash_get_width);
@@ -167,6 +186,20 @@ void splash_show_video(string fname, bool loop, string window_id) {
   }
  
   video = video_add(fname);
+
+  std::ofstream file;
+  std::remove("input.conf");
+  file.open ("input.conf");
+  if (splash_get_stop_key)
+    file << "ESC quit\n";
+  if (splash_get_stop_mouse) {
+    file << "MBTN_LEFT quit\n";
+    file << "MBTN_RIGHT quit\n";
+    file << "WHEEL_DOWN quit\n";
+  }
+  file.close();
+
+  video_set_option_string(video, "input-conf", "input.conf");
   video_set_option_string(video, "volume", std::to_string(splash_get_volume));
   video_set_option_string(video, "input-default-bindings", "no");
   video_set_option_string(video, "title", splash_get_caption);
@@ -174,7 +207,7 @@ void splash_show_video(string fname, bool loop, string window_id) {
   video_set_option_string(video, "border", brdr);
   video_set_option_string(video, "keepaspect-window", "no");
   video_set_option_string(video, "taskbar-progress", "no");
-  video_set_option_string(video, "ontop", ntmn);
+  video_set_option_string(video, "ontop", ontp);
   video_set_option_string(video, "geometry", geom);
   video_set_option_string(video, "config", "no");
   video_set_option_string(video, "loop", lpng);
@@ -183,7 +216,15 @@ void splash_show_video(string fname, bool loop, string window_id) {
 
   video_play(video);
   if (splash_get_interupt) {
-    while (video_is_playing(video));
+    while (video_is_playing(video)) {
+      std::this_thread::sleep_for (std::chrono::milliseconds(5));
+      #ifdef _WIN32
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+          TranslateMessage(&msg);
+          DispatchMessage(&msg);
+        }
+      #endif
+    }
   }
 }
 
