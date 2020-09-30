@@ -115,7 +115,7 @@ void splash_set_volume(int vol) {
   splash_get_volume = vol;
 }
 
-void splash_show_video(string fname, bool loop, window_id) {
+void splash_show_video(string fname, bool loop, string window_id) {
   string video, wid, wstr, hstr, xstr, ystr, 
     size, pstn, geom, flls, brdr, ntmn, lpng;
 
