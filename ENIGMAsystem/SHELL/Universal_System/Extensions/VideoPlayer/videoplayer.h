@@ -44,7 +44,7 @@ void splash_show_video(std::string fname, bool loop, std::string window_id = "-1
 void splash_set_volume(int vol);
 void splash_set_pause_mouse(bool pause);
 void splash_set_pause_key(bool pause);
-void splash_set_volume_wheel(bool pause);
+void splash_set_volume_wheel(bool wheel);
 std::string video_add(std::string fname);
 bool video_get_option_was_set(std::string ind, std::string option);
 std::string video_get_option_string(std::string ind, std::string option);
