@@ -137,7 +137,7 @@ void splash_set_pause_mouse(bool pause) {
 }
 
 void splash_set_pause_key(bool pause) {
-  splash_get_pause_key = key;
+  splash_get_pause_key = pause;
 }
 
 void splash_set_volume(int vol) {
