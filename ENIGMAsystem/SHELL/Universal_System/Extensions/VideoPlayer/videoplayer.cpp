@@ -57,6 +57,7 @@ static string splash_get_caption  = "";
 static bool splash_get_fullscreen = false;
 static bool splash_get_border     = true;
 static int splash_get_volume      = 100;
+static bool splash_get_interupt   = true;
 
 static int splash_get_x           = INT_MAX;
 static int splash_get_y           = INT_MAX;
