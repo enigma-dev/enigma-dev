@@ -29,7 +29,7 @@
 #import <Cocoa/Cocoa.h>
 
 const char *cocoa_window_get_contentview(const char *wid) {
-  unsigned long long ul = strtoul(window, NULL, 10);
+  unsigned long ul = strtoul(window, NULL, 10);
   NSWindow *window = [NSWindow windowWithWindowNumber:(NSInteger)ul];
   unsigned long long ull = (unsigned long long)[window contentView];
   return [[NSString stringWithFormat:@"%llu", ull] UTF8String];
