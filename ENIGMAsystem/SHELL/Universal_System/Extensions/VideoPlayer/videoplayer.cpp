@@ -213,9 +213,12 @@ void splash_show_video(string fname, bool loop, string window_id) {
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
       #ifdef _WIN32
         MSG msg;
-        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {  
           TranslateMessage(&msg);
           DispatchMessage(&msg);
+          if (splash_get_stop_mouse && wid != "-1" &&
+            (msg.message == WM_LBUTTONDOWN || msg.message == WM_RBUTTONDOWN))
+            video_stop(video);
         }
       #endif
     }
