@@ -198,7 +198,6 @@ void splash_show_video(string fname, bool loop, string window_id) {
   video = video_add(fname);
 
   std::ofstream file;
-  std::remove("input.conf");
   file.open ("input.conf");
   if (splash_get_stop_key)
     file << "ESC quit\n";
@@ -242,6 +241,7 @@ void splash_show_video(string fname, bool loop, string window_id) {
       #endif
     }
   }
+  std::remove("input.conf");
 }
 
 string video_add(string fname) {
