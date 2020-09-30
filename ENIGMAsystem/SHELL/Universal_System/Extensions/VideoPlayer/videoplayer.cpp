@@ -217,8 +217,10 @@ void splash_show_video(string fname, bool loop, string window_id) {
           TranslateMessage(&msg);
           DispatchMessage(&msg);
           if (splash_get_stop_mouse && wid != "-1" &&
-            (msg.message == WM_LBUTTONDOWN || msg.message == WM_RBUTTONDOWN))
+            wid == std::to_string((unsigned long long)msg.hwnd) &&
+            (msg.message == WM_LBUTTONDOWN || msg.message == WM_RBUTTONDOWN)) {
             video_stop(video);
+          }
         }
       #endif
     }
