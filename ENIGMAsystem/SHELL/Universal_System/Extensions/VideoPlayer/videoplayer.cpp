@@ -59,15 +59,19 @@ struct VideoData {
 
 static std::map<string, VideoData> videos;
 
-static bool splash_get_main        = true;
 static string splash_get_caption   = "";
+static bool splash_get_main        = true;
 static bool splash_get_fullscreen  = false;
+
 static bool splash_get_border      = true;
-static int splash_get_volume       = 100;
-static bool splash_get_interupt    = true;
 static bool splash_get_top         = true;
+
+static bool splash_get_interupt    = true;
+static int splash_get_volume       = 100;
+
 static bool splash_get_stop_mouse  = true;
 static bool splash_get_stop_key    = true;
+
 static bool splash_get_pause_mouse = false;
 static bool splash_get_pause_key   = false;
 
