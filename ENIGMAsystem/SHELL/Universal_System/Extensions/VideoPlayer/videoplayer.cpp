@@ -158,10 +158,11 @@ void splash_show_video(string fname, bool loop, string window_id) {
     wid = "-1";
   }
 
-  splash_get_interupt = !splash_get_main ? splash_get_interupt : true;
-  flls = !splash_get_main ? (splash_get_fullscreen ? "yes" : "no") : "no";
-  brdr = !splash_get_main ? (splash_get_border ? "yes" : "no") : "no";
-  ontp = !splash_get_main ? (splash_get_top ? "yes" : "no") : "no";
+  splash_get_main = (wid != "-1");
+  splash_get_interupt = splash_get_main ? true : splash_get_interupt;
+  flls = splash_get_main ? "no" : (splash_get_fullscreen ? "yes" : "no");
+  brdr = splash_get_main ? "no" : (splash_get_border ? "yes" : "no");
+  ontp = splash_get_main ? "no" : (splash_get_top ? "yes" : "no");
   lpng = loop ? "yes" : "no";
 
   wstr = std::to_string(splash_get_width);
