@@ -51,8 +51,8 @@ struct VideoData {
   mpv_handle *mpv;
   std::map<string, string> option;
   string window_id;
-  string gpu_api;
   int volume;
+  bool is_paused;
   bool is_playing;
   bool is_fullscreen;
 };
@@ -233,8 +233,8 @@ string video_add(string fname) {
   VideoData data;
   data.mpv           = mpv_create();
   data.window_id     = "-1";
-  data.gpu_api       = "opengl";
   data.volume        = 100;
+  data.is_paused     = false;
   data.is_playing    = false;
   data.is_fullscreen = false;
   videos.insert(std::make_pair(fname, data)); 
@@ -264,21 +264,22 @@ void video_play(string ind) {
   stringhread.detach();
 }
 
+bool video_is_paused(string ind) {
+  if (videos.find(ind) != videos.end())
+    return videos[ind].is_paused;
+  return false;
+}
+
 bool video_is_playing(string ind) {
-  return videos[ind].is_playing;
-}
-
-string video_get_graphics_system(string ind) {
-  return videos[ind].gpu_api;
-}
-
-void video_set_graphics_system(string ind, string system) {
-  videos[ind].gpu_api = system;
-  mpv_set_option_string(videos[ind].mpv, "gpu-api", system.c_str());
+  if (videos.find(ind) != videos.end())
+    return videos[ind].is_playing;
+  return false;
 }
 
 bool video_get_fullscreen(string ind) {
-  return videos[ind].is_fullscreen;
+  if (video_get_option_was_set(ind, "fs"))
+    return videos[ind].is_fullscreen;
+  return false;
 }
 
 void video_set_fullscreen(string ind, bool fullscreen) {
@@ -287,7 +288,9 @@ void video_set_fullscreen(string ind, bool fullscreen) {
 }
 
 int video_get_volume_percent(string ind) {
-  return videos[ind].volume;
+  if (video_get_option_was_set(ind, "volume"))
+    return videos[ind].volume;
+  return 100;
 }
 
 void video_set_volume_percent(string ind, int volume) {
@@ -296,7 +299,9 @@ void video_set_volume_percent(string ind, int volume) {
 }
 
 string video_get_window_identifier(string ind) {
-  return videos[ind].window_id;
+  if (video_get_option_was_set(ind, "wid"))
+    return videos[ind].window_id;
+  return "-1";
 }
 
 void video_set_window_identifier(string ind, string wid) {
@@ -315,6 +320,7 @@ bool video_exists(string ind) {
 void video_pause(string ind) {
   const char *cmd[] = { "cycle", "pause", NULL };
   mpv_command_async(videos[ind].mpv, 0, cmd);
+  videos[ind].is_paused = !video_is_paused(ind);
 }
 
 void video_stop(string ind) {
