@@ -29,7 +29,12 @@
 #import <Cocoa/Cocoa.h>
 
 const char *cocoa_window_get_contentview(const char *window) {
-  NSWindow *window = (NSWindow *)strtoull(window, NULL, 10);
-  unsigned long long ull2 = (unsigned long long)[window contentView];
+  NSWindow *win = (NSWindow *)strtoull(window, NULL, 10);
+  unsigned long long ull = (unsigned long long)[win contentView];
   return [[NSString stringWithFormat:@"%llu", ull] UTF8String];
+}
+
+void cocoa_process_run_loop() {
+  [[NSRunLoop currentRunLoop] runUntilDate:
+    [NSDate dateWithTimeIntervalSinceNow:1]];
 }
