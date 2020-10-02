@@ -33,3 +33,8 @@ const char *cocoa_window_get_contentview(const char *window) {
   unsigned long long ull = (unsigned long long)[win contentView];
   return [[NSString stringWithFormat:@"%llu", ull] UTF8String];
 }
+
+void cocoa_process_run_loop() {
+  [[NSRunLoop currentRunLoop] runUntilDate:
+    [NSDate dateWithTimeIntervalSinceNow:1]];
+}

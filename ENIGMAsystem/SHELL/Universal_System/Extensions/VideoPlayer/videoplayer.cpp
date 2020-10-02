@@ -77,6 +77,7 @@ static unsigned splash_get_height  = 480;
 #ifdef __APPLE__
   #ifdef __MACH__
      extern "C" const char *cocoa_window_get_contentview(const char *window);
+     extern "C" void cocoa_process_run_loop();
   #endif
 #endif
 
@@ -229,6 +230,11 @@ void splash_show_video(string fname, bool loop) {
           }
         }
       #endif
+      #ifdef __APPLE__
+        #ifdef __MACH__
+          cocoa_process_run_loop();
+        #endif
+      #endif
     }
   }
 }
@@ -336,9 +342,7 @@ void video_pause(string ind) {
 }
 
 void video_seek(string ind, double seek) {
-  static string arg;
-  arg = std::to_string(seek);
-  const char *cmd[] = { "seek", arg.c_str(), NULL };
+  const char *cmd[] = { "seek", std::to_string(seek).c_str(), NULL };
   mpv_command_async(videos[ind].mpv, 0, cmd);
 }
 
