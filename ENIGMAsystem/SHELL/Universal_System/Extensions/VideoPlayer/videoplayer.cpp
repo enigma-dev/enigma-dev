@@ -342,7 +342,9 @@ void video_pause(string ind) {
 }
 
 void video_seek(string ind, double seek) {
-  const char *cmd[] = { "seek", std::to_string(seek).c_str(), NULL };
+  static string arg;
+  arg = std::to_string(seek);
+  const char *cmd[] = { "seek", arg.c_str(), NULL };
   mpv_command_async(videos[ind].mpv, 0, cmd);
 }
 
