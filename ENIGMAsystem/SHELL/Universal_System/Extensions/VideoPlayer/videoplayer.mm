@@ -28,30 +28,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface WaitApplication : NSApplication
-
--(void)waitUntilConditionIsFalse;
-
-@end
-
-@implementation WaitApplication
-
--(void)waitUntilConditionIsFalse {
-  [NSThread sleepForTimeInterval:0.005];
-}
-
-@end
-
 const char *cocoa_window_get_contentview(const char *window) {
   NSWindow *win = (NSWindow *)strtoull(window, NULL, 10);
   unsigned long long ull = (unsigned long long)[win contentView];
   return [[NSString stringWithFormat:@"%llu", ull] UTF8String];
-}
-
-void cocoa_wait_until_done(bool condition) {
-  while (condition) {
-    [NSApp performSelectorOnMainThread:
-      @selector(waitUntilConditionIsFalse:)
-      withObject:nil waitUntilDone:YES];
-  }
 }
