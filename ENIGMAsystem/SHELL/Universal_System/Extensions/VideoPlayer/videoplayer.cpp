@@ -263,6 +263,10 @@ void video_set_option_string(string ind, string option, string value) {
   videos[ind].option[option] = value;
 }
 
+string video_get_property_string(string ind, string property) {
+  return mpv_get_property_string(videos[ind].mpv, property.c_str());
+}
+
 void video_play(string ind) {
   videos[ind].is_playing = true;
   mpv_initialize(videos[ind].mpv);
@@ -331,6 +335,11 @@ void video_pause(string ind) {
   videos[ind].is_paused = !video_is_paused(ind);
 }
 
+void video_seek(string ind, double seek) {
+  const char *cmd[] = { "seek", std::to_string(seek).c_str(), NULL };
+  mpv_command_async(videos[ind].mpv, 0, cmd);
+}
+
 void video_stop(string ind) {
   const char *cmd[] = { "quit", NULL, NULL };
   mpv_command_async(videos[ind].mpv, 0, cmd);
@@ -339,6 +348,18 @@ void video_stop(string ind) {
 
 void video_delete(string ind) {
   videos.erase(ind);
+}
+
+unsigned video_get_width(string ind) {
+  return (unsigned)strtoul(video_get_property_string(ind, "w").c_str(), NULL, 10);
+}
+
+unsigned video_get_height(string ind) {
+  return (unsigned)strtoul(video_get_property_string(ind, "h").c_str(), NULL, 10);
+}
+
+double video_get_duration(string ind) {
+  return strtod(video_get_property_string(ind, "duration").c_str(), NULL);
 }
 
 } // namespace enigma_user
