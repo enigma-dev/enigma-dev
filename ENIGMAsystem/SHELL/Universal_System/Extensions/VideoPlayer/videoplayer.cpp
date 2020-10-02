@@ -76,7 +76,7 @@ static unsigned splash_get_height  = 480;
 
 #ifdef __APPLE__
   #ifdef __MACH__
-     extern "C" const char *cocoa_window_get_contentview(const char *wid);
+     extern "C" const char *cocoa_window_get_contentview(const char *window);
   #endif
 #endif
 
