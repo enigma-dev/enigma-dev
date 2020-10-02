@@ -351,15 +351,21 @@ void video_delete(string ind) {
 }
 
 unsigned video_get_width(string ind) {
-  return (unsigned)strtoul(video_get_property_string(ind, "w").c_str(), NULL, 10);
+  long long result;
+  mpv_get_property(videos[ind].mpv, "width", MPV_FORMAT_INT64, &result);
+  return (unsigned)result;
 }
 
 unsigned video_get_height(string ind) {
-  return (unsigned)strtoul(video_get_property_string(ind, "h").c_str(), NULL, 10);
+  long long result;
+  mpv_get_property(videos[ind].mpv, "height", MPV_FORMAT_INT64, &result);
+  return (unsigned)result;
 }
 
 double video_get_duration(string ind) {
-  return strtod(video_get_property_string(ind, "duration").c_str(), NULL);
+  double result;
+  mpv_get_property(videos[ind].mpv, "duration", MPV_FORMAT_DOUBLE, &result);
+  return result;
 }
 
 } // namespace enigma_user
