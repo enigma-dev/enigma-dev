@@ -77,7 +77,7 @@ static unsigned splash_get_height  = 480;
 #ifdef __APPLE__
   #ifdef __MACH__
      extern "C" const char *cocoa_window_get_contentview(const char *window);
-     extern "C" void cocoa_process_run_loop();
+     extern "C" void cocoa_wait_until_done(bool condition);
   #endif
 #endif
 
@@ -216,6 +216,11 @@ void splash_show_video(string fname, bool loop) {
 
   video_play(video);
   if (splash_get_interupt) {
+    #ifdef __APPLE__
+      #ifdef __MACH__
+        cocoa_wait_until_done(video_is_playing(video));
+      #endif
+    #else
     while (video_is_playing(video)) {
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
       #ifdef _WIN32
@@ -230,12 +235,8 @@ void splash_show_video(string fname, bool loop) {
           }
         }
       #endif
-      #ifdef __APPLE__
-        #ifdef __MACH__
-          cocoa_process_run_loop();
-        #endif
-      #endif
     }
+    #endif
   }
 }
 
