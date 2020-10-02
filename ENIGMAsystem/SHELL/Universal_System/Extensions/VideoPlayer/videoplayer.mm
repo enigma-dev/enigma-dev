@@ -34,7 +34,6 @@
 
 @end
 
-
 @implementation WaitApplication
 
 -(void)waitUntilConditionIsFalse {
