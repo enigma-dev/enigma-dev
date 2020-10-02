@@ -58,14 +58,17 @@ struct VideoData {
 };
 
 static std::map<string, VideoData> videos;
+static string splash_get_window    = "-1";
 static int splash_get_volume       = 100;
 static string splash_get_caption   = "";
+static unsigned splash_get_scale   = 0;
 
 static bool splash_get_fullscreen  = false;
-static bool splash_get_border      = true;
-static bool splash_get_top         = true;
-
 static bool splash_get_main        = true;
+static bool splash_get_adapt       = true;
+static bool splash_get_border      = true;
+
+static bool splash_get_top         = true;
 static bool splash_get_interupt    = true;
 static bool splash_get_stop_mouse  = true;
 
@@ -91,6 +94,10 @@ static void video_loop(string ind, mpv_handle *mpv) {
 }
 
 namespace enigma_user {
+
+void splash_set_window(string wid) {
+  splash_get_window = wid;
+}
 
 void splash_set_main(bool main) {
   splash_get_main = main;
@@ -126,31 +133,29 @@ void splash_set_stop_mouse(bool stop) {
   splash_get_stop_mouse = stop;
 }
 
+void splash_set_scale(unsigned scale) {
+  splash_get_scale = scale;
+}
+
+void splash_set_adapt(bool adapt) {
+  splash_get_adapt = adapt;
+}
+
 void splash_set_volume(int vol) {
   splash_get_volume = vol;
 }
 
-void splash_show_video(string fname, bool loop, string window_id) {
-  string video, wid, wstr, hstr, xstr, ystr, 
-    size, pstn, geom, flls, brdr, ontp, lpng;
+void splash_show_video(string fname, bool loop) {
+  string video, wid, wstr, hstr, xstr, ystr, size, 
+    pstn, geom, flls, brdr, ontp, lpng, adpt;
 
   if (splash_get_main) { // embeds inside game window
     #ifdef __APPLE__
       #ifdef __MACH__
-        // this is not used by my extension
-        #ifndef VIDEO_PLAYER_SELF_CONTAINED
-          wid = cocoa_window_get_contentview(wid.c_str());
-        #else
-          wid = cocoa_window_get_contentview(window_id.c_str());
-        #endif
+        wid = cocoa_window_get_contentview(splash_get_window.c_str());
       #endif
     #else
-      // this is not used by my extension
-      #ifndef VIDEO_PLAYER_SELF_CONTAINED  
-        wid = window_identifier();
-      #else
-        wid = window_id;
-      #endif
+      wid = splash_get_window;
     #endif
   } else { 
     // creates a new window to play splash
@@ -163,6 +168,7 @@ void splash_show_video(string fname, bool loop, string window_id) {
   flls = splash_get_main ? "no" : (splash_get_fullscreen ? "yes" : "no");
   brdr = splash_get_main ? "no" : (splash_get_border ? "yes" : "no");
   ontp = splash_get_main ? "no" : (splash_get_top ? "yes" : "no");
+  adpt = splash_get_main ? "no" : (splash_get_adapt ? "yes" : "no");
   lpng = loop ? "yes" : "no";
 
   wstr = std::to_string(splash_get_width);
@@ -195,11 +201,12 @@ void splash_show_video(string fname, bool loop, string window_id) {
 
   video_set_option_string(video, "input-conf", "input.conf");
   video_set_option_string(video, "volume", std::to_string(splash_get_volume));
+  video_set_option_string(video, "video-zoom", std::to_string(splash_get_scale));
   video_set_option_string(video, "input-default-bindings", "no");
   video_set_option_string(video, "title", splash_get_caption);
   video_set_option_string(video, "fs", flls);
   video_set_option_string(video, "border", brdr);
-  video_set_option_string(video, "keepaspect-window", "no");
+  video_set_option_string(video, "keepaspect-window", adpt);
   video_set_option_string(video, "taskbar-progress", "no");
   video_set_option_string(video, "ontop", ontp);
   video_set_option_string(video, "geometry", geom);

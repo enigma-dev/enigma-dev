@@ -37,9 +37,12 @@ void splash_set_position(int x, int y);
 void splash_set_border(bool border);
 void splash_set_interupt(bool interupt);
 void splash_set_stop_mouse(bool stop);
-void splash_show_video(std::string fname, bool loop, std::string window_id = "-1");
+void splash_set_scale(unsigned scale);
+void splash_set_adapt(bool adapt);
+void splash_show_video(std::string fname, bool loop);
 
 // ENIGMA/GM extension video playback functions
+void splash_set_window(std::string wid);
 void splash_set_volume(int vol);
 std::string video_add(std::string fname);
 bool video_get_option_was_set(std::string ind, std::string option);
