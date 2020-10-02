@@ -34,11 +34,6 @@
 
 #include "videoplayer.h"
 
-// this is not used by my extension
-#ifndef VIDEO_PLAYER_SELF_CONTAINED
-  #include "Platforms/General/PFwindow.h"
-#endif
-
 #ifdef _WIN32
   #include <windows.h>
 #endif
