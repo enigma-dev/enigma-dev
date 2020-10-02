@@ -44,6 +44,7 @@ void splash_show_video(std::string fname, bool loop);
 // ENIGMA/GM extension video playback functions
 void splash_set_window(std::string wid);
 void splash_set_volume(int vol);
+std::string splash_get_video();
 std::string video_add(std::string fname);
 bool video_get_option_was_set(std::string ind, std::string option);
 std::string video_get_option_string(std::string ind, std::string option);
