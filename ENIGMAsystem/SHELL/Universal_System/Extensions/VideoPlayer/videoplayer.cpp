@@ -186,6 +186,7 @@ void splash_show_video(string fname, bool loop) {
   }
  
   video = video_add(fname);
+  std::remove("input.conf");
 
   std::ofstream file;
   file.open ("input.conf");
@@ -230,7 +231,6 @@ void splash_show_video(string fname, bool loop) {
       #endif
     }
   }
-  std::remove("input.conf");
 }
 
 string splash_get_video() {
