@@ -49,6 +49,7 @@ std::string video_add(std::string fname);
 bool video_get_option_was_set(std::string ind, std::string option);
 std::string video_get_option_string(std::string ind, std::string option);
 void video_set_option_string(std::string ind, std::string option, std::string value);
+std::string video_get_property_string(std::string ind, std::string property);
 void video_play(std::string ind);
 bool video_is_paused(std::string ind);
 bool video_is_playing(std::string ind);
@@ -60,6 +61,10 @@ std::string video_get_window_identifier(std::string ind);
 void video_set_window_identifier(std::string ind, std::string wid);
 void video_pause(std::string ind);
 void video_stop(std::string ind);
+void video_seek(std::string ind, double seek);
+unsigned video_get_width(std::string ind);
+unsigned video_get_height(std::string ind);
+double video_get_duration(std::string ind);
 bool video_exists(std::string ind);
 void video_delete(std::string ind);
 
