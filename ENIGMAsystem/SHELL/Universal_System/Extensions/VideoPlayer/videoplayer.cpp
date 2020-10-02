@@ -53,6 +53,8 @@ struct VideoData {
 };
 
 static std::map<string, VideoData> videos;
+static string video;
+
 static string splash_get_window    = "-1";
 static int splash_get_volume       = 100;
 static string splash_get_caption   = "";
@@ -141,7 +143,7 @@ void splash_set_volume(int vol) {
 }
 
 void splash_show_video(string fname, bool loop) {
-  string video, wid, wstr, hstr, xstr, ystr, size, 
+  string wid, wstr, hstr, xstr, ystr, size, 
     pstn, geom, flls, brdr, ontp, lpng, adpt;
 
   if (splash_get_main) { // embeds inside game window
@@ -229,6 +231,10 @@ void splash_show_video(string fname, bool loop) {
     }
   }
   std::remove("input.conf");
+}
+
+string splash_get_video() {
+  return video;
 }
 
 string video_add(string fname) {
