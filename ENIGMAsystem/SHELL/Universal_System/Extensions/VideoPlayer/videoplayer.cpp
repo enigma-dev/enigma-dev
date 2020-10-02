@@ -376,4 +376,4 @@ double video_get_duration(string ind) {
   return result;
 }
 
-} // namespace enigma_userstd::to_string(seek).c_str()
+} // namespace enigma_user
