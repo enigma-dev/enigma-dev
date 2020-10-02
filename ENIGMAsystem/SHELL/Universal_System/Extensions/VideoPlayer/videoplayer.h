@@ -24,6 +24,8 @@
  
 */
 
+#ifdef __cplusplus
+
 #include <string>
 
 namespace enigma_user {
@@ -69,3 +71,9 @@ bool video_exists(std::string ind);
 void video_delete(std::string ind);
 
 } // namespace enigma_user
+
+#else
+
+void video_stop(const char *ind);
+
+#endif

@@ -28,13 +28,26 @@
 
 #import <Cocoa/Cocoa.h>
 
+#import "videoplayer.h"
+
 const char *cocoa_window_get_contentview(const char *window) {
   NSWindow *win = (NSWindow *)strtoull(window, NULL, 10);
   unsigned long long ull = (unsigned long long)[win contentView];
   return [[NSString stringWithFormat:@"%llu", ull] UTF8String];
 }
 
-void cocoa_process_run_loop() {
+void cocoa_process_run_loop(const char *video, const char *window, bool close_mouse) {
   [[NSRunLoop currentRunLoop] runUntilDate:
-    [NSDate dateWithTimeIntervalSinceNow:1]];
+    [NSDate dateWithTimeIntervalSinceNow:0.005]];
+  if (close_mouse && [NSEvent pressedMouseButtons] == 1 << 0 ||
+    [NSEvent pressedMouseButtons] == 1 << 1) {
+    NSPoint mouseLoc; mouseLoc = [NSEvent mouseLocation];
+    CGWindowID windowNumber = [NSWindow
+      windowNumberAtPoint:mouseLoc belowWindowWithWindowNumber:0];
+    NSView *view = (NSView *)strtoull(window, NULL, 10);
+    CGWindowID wid = [[view window] windowNumber];
+    if (windowNumber == wid) {
+      video_stop(video);
+    }
+  }
 }

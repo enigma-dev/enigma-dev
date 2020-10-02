@@ -77,7 +77,8 @@ static unsigned splash_get_height  = 480;
 #ifdef __APPLE__
   #ifdef __MACH__
      extern "C" const char *cocoa_window_get_contentview(const char *window);
-     extern "C" void cocoa_process_run_loop();
+     extern "C" void cocoa_process_run_loop(const char *video, const char *window, bool close_mouse);
+     void video_stop(const char *ind) { enigma_user::video_stop(ind); }
   #endif
 #endif
 
@@ -232,7 +233,8 @@ void splash_show_video(string fname, bool loop) {
       #endif
       #ifdef __APPLE__
         #ifdef __MACH__
-          cocoa_process_run_loop();
+          cocoa_process_run_loop(video.c_str(),
+            wid.c_str(), splash_get_stop_mouse);
         #endif
       #endif
     }
