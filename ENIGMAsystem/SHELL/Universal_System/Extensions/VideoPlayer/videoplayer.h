@@ -45,8 +45,6 @@ void video_set_option_string(std::string ind, std::string option, std::string va
 void video_play(std::string ind);
 bool video_is_paused(std::string ind);
 bool video_is_playing(std::string ind);
-bool video_get_fullscreen(std::string ind);
-void video_set_fullscreen(std::string ind, bool fullscreen);
 int video_get_volume_percent(std::string ind);
 void video_set_volume_percent(std::string ind, int volume);
 std::string video_get_window_identifier(std::string ind);
