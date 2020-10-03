@@ -99,7 +99,7 @@ static bool splash_get_stop_key  = true;
     int actual_format, status;
     unsigned long nitems, bytes_after;
     int screen = XDefaultScreen(display);
-    window = RootWindow(display, screen);
+    Window window = RootWindow(display, screen);
     filter_atom = XInternAtom(display, "_NET_ACTIVE_WINDOW", True);
     status = XGetWindowProperty(display, window, filter_atom, 0, 1000, False,
     AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
@@ -221,7 +221,7 @@ void splash_show_video(string fname, bool loop) {
             }
             POINT point;
             GetCursorPos(&point);
-            if (msg.hwnd == WindowFromPoint(point)) {  
+            if (msg.hwnd == WindowFromPoint(point)) {
               if (!hidden) {
                 ShowCursor(false);
                 hidden = true;
@@ -258,13 +258,13 @@ string video_add(string fname) {
   data.is_paused     = false;
   data.is_playing    = false;
   data.is_fullscreen = false;
-  videos.insert(std::make_pair(fname, data)); 
+  videos.insert(std::make_pair(fname, data));
   return fname;
 }
 
 bool video_get_option_was_set(string ind, string option) {
   return (videos[ind].option.find(option) != videos[ind].option.end());
-} 
+}
 
 string video_get_option_string(string ind, string option) {
   bool was_set = video_get_option_was_set(ind, option);
@@ -327,8 +327,8 @@ string video_get_window_identifier(string ind) {
 
 void video_set_window_identifier(string ind, string wid) {
   wid = std::to_string(strtoull(wid.c_str(), NULL, 10));
-  #ifdef __APPLE__ 
-    #ifdef __MACH__ 
+  #ifdef __APPLE__
+    #ifdef __MACH__
       wid = cocoa_window_get_contentview(wid.c_str());
     #endif
   #endif
