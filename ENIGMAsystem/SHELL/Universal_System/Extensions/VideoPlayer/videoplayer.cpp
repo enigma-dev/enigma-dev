@@ -140,7 +140,8 @@ void splash_set_volume(int vol) {
 }
 
 void splash_show_video(string fname, bool loop) {
-  string wid, lpng;
+  string wid, looping;
+  wid = std::to_string(strtoull(wid.c_str(), NULL, 10));
 
   #ifdef __APPLE__
     #ifdef __MACH__
@@ -150,7 +151,7 @@ void splash_show_video(string fname, bool loop) {
     wid = splash_get_window;
   #endif
 
-  lpng = loop ? "yes" : "no";
+  looping = loop ? "yes" : "no";
 
   if (video_exists(video)) {
     video_delete(video);
@@ -174,7 +175,7 @@ void splash_show_video(string fname, bool loop) {
   video_set_option_string(video, "input-default-bindings", "no");
   video_set_option_string(video, "taskbar-progress", "no");
   video_set_option_string(video, "config", "no");
-  video_set_option_string(video, "loop", lpng);
+  video_set_option_string(video, "loop", looping);
   video_set_option_string(video, "osc", "no");
   video_set_option_string(video, "wid", wid);
 
