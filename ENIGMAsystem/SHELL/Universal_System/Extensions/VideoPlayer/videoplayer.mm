@@ -71,3 +71,4 @@ void cocoa_process_run_loop(const char *video,
     video_stop(video);
   }
 }
+

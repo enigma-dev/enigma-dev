@@ -41,11 +41,6 @@
   #include <windows.h>
 #endif
 
-#if defined(__linux__) || defined(__FreeBSD__)
-  #include <X11/Xlib.h>
-  #define XK_Escape 0xff1b
-#endif
-
 #include <mpv/client.h>
 
 using std::string;
@@ -73,43 +68,10 @@ static bool splash_get_stop_key  = true;
   #ifdef __MACH__
      extern "C" void cocoa_show_cursor();
      extern "C" const char *cocoa_window_get_contentview(const char *window);
-     extern "C" void cocoa_process_run_loop(const char *video, const char *window, bool close_mouse, bool close_key);
+     extern "C" void cocoa_process_run_loop(const char *video, 
+       const char *window, bool close_mouse, bool close_key);
      void video_stop(const char *ind) { enigma_user::video_stop(ind); }
   #endif
-#endif
-
-#if defined(__linux__) || defined(__FreeBSD__)
-  static inline int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
-    return 0;
-  }
-
-  static inline int XIOErrorHandlerImpl(Display *display) {
-    return 0;
-  }
-
-  static inline void SetErrorHandlers() {
-    XSetErrorHandler(XErrorHandlerImpl);
-    XSetIOErrorHandler(XIOErrorHandlerImpl);
-  }
-
-  static inline unsigned long XGetActiveWindow(Display *display) {
-    SetErrorHandlers();
-    unsigned char *prop;
-    unsigned long property;
-    Atom actual_type, filter_atom;
-    int actual_format, status;
-    unsigned long nitems, bytes_after;
-    int screen = XDefaultScreen(display);
-    Window window = RootWindow(display, screen);
-    filter_atom = XInternAtom(display, "_NET_ACTIVE_WINDOW", True);
-    status = XGetWindowProperty(display, window, filter_atom, 0, 1000, False,
-    AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
-    if (status == Success && prop != NULL) {
-      property = prop[0] + (prop[1] << 8) + (prop[2] << 16) + (prop[3] << 24);
-      XFree(prop);
-    }
-    return property;
-  }
 #endif
 
 static void video_loop(string ind, mpv_handle *mpv) {
@@ -118,7 +80,7 @@ static void video_loop(string ind, mpv_handle *mpv) {
     if (event->event_id == MPV_EVENT_END_FILE) break;
     if (event->event_id == MPV_EVENT_SHUTDOWN) break;
   }
-  videos[ind].is_playing = false;
+  enigma_user::video_stop(ind);
   mpv_terminate_destroy(mpv);
 }
 
@@ -143,7 +105,6 @@ void splash_set_volume(int vol) {
 void splash_show_video(string fname, bool loop) {
   string wid, looping;
   wid = std::to_string(strtoull(wid.c_str(), NULL, 10));
-
   #ifdef __APPLE__
     #ifdef __MACH__
       wid = cocoa_window_get_contentview(splash_get_window.c_str());
@@ -151,38 +112,40 @@ void splash_show_video(string fname, bool loop) {
   #else
     wid = splash_get_window;
   #endif
-
   looping = loop ? "yes" : "no";
-
   if (video_exists(video)) {
     video_delete(video);
   }
- 
   video = video_add(fname);
   #if defined(__linux__) || defined(__FreeBSD__)
-    std::remove("/tmp/input.conf");
+    std::remove(("/tmp/mpv-input-" + wid + ".conf").c_str());
     std::ofstream file;
-    file.open ("/tmp/input.conf");
-    file << "CLOSE_WIN ignore\n";
+    file.open(("/tmp/mpv-input-" + wid + ".conf").c_str());
+    if (splash_get_stop_key) {
+      file << "ESC quit\n";
+    }
     if (splash_get_stop_mouse) {
       file << "MBTN_LEFT quit\n";
       file << "MBTN_RIGHT quit\n";
     }
     file.close();
-    video_set_option_string(video, "input-conf", "/tmp/input.conf");
+    video_set_option_string(video, "input-conf", 
+      ("/tmp/mpv-input-" + wid + ".conf").c_str());
   #endif
-
   video_set_option_string(video, "volume", std::to_string(splash_get_volume));
   video_set_option_string(video, "input-default-bindings", "no");
+  video_set_option_string(video, "cursor-autohide", "always");
+  video_set_option_string(video, "input-vo-keyboard", "yes");
   video_set_option_string(video, "taskbar-progress", "no");
-  video_set_option_string(video, "config", "no");
   video_set_option_string(video, "loop", looping);
+  video_set_option_string(video, "config", "no");
   video_set_option_string(video, "osc", "no");
   video_set_option_string(video, "wid", wid);
-
   video_play(video);
-  bool hidden = false;
-  while (video_is_playing(video)) {
+  #ifdef _WIN32
+    bool hidden = false;
+  #endif
+  while (videos[video].is_playing) {
     #ifdef __APPLE__
       #ifdef __MACH__
         cocoa_process_run_loop(video.c_str(), wid.c_str(),
@@ -190,19 +153,6 @@ void splash_show_video(string fname, bool loop) {
       #endif
     #else
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
-      #if defined(__linux__) || defined(__FreeBSD__)
-        XEvent report;
-        Display *disp = XOpenDisplay(NULL);
-        XNextEvent(disp, &report);
-        if (wid == std::to_string(XGetActiveWindow(disp))) {
-          if (report.type == KeyPress) {
-            if (XLookupKeysym(&report.xkey, 0) == XK_Escape) {
-              video_stop(video);
-            }
-          }
-        }
-        XCloseDisplay(disp);
-      #endif
       #ifdef _WIN32
         MSG msg;
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
