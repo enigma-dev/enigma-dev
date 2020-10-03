@@ -62,7 +62,7 @@ static string splash_get_window    = "-1";
 static int splash_get_volume       = 100;
 
 static bool splash_get_stop_mouse  = true;
-static bool splash_get_stop_key  = true;
+static bool splash_get_stop_key    = true;
 
 #ifdef __APPLE__
   #ifdef __MACH__
