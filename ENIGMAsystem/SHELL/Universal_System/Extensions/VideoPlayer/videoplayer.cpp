@@ -29,8 +29,11 @@
 #include <cstdio>
 #include <string>
 #include <thread>
-#include <chrono>
 #include <map>
+
+#ifndef __APPLE__
+  #include <chrono>
+#endif
 
 #include "videoplayer.h"
 
@@ -76,6 +79,7 @@ static unsigned splash_get_height  = 480;
 
 #ifdef __APPLE__
   #ifdef __MACH__
+     extern "C" void cocoa_show_cursor();
      extern "C" const char *cocoa_window_get_contentview(const char *window);
      extern "C" void cocoa_process_run_loop(const char *video, const char *window, bool close_mouse);
      void video_stop(const char *ind) { enigma_user::video_stop(ind); }
@@ -218,26 +222,32 @@ void splash_show_video(string fname, bool loop) {
   video_play(video);
   if (splash_get_interupt) {
     while (video_is_playing(video)) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(5));
-      #ifdef _WIN32
-        MSG msg;
-        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {  
-          TranslateMessage(&msg);
-          DispatchMessage(&msg);
-          if (splash_get_stop_mouse && wid != "-1" &&
-            wid == std::to_string((unsigned long long)msg.hwnd) &&
-            (msg.message == WM_LBUTTONDOWN || msg.message == WM_RBUTTONDOWN)) {
-            video_stop(video);
-          }
-        }
-      #endif
       #ifdef __APPLE__
         #ifdef __MACH__
           cocoa_process_run_loop(video.c_str(),
             wid.c_str(), splash_get_stop_mouse);
         #endif
+      #else
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        #ifdef _WIN32
+          MSG msg;
+          while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+            if (splash_get_stop_mouse && wid != "-1" &&
+              wid == std::to_string((unsigned long long)msg.hwnd) &&
+              (msg.message == WM_LBUTTONDOWN || msg.message == WM_RBUTTONDOWN)) {
+              video_stop(video);
+            }
+          }
+        #endif
       #endif
     }
+    #ifdef __APPLE__
+      #ifdef __MACH__
+        cocoa_show_cursor();
+      #endif
+    #endif
   }
 }
 
