@@ -157,8 +157,7 @@ void splash_show_video(string fname, bool loop) {
   }
  
   video = video_add(fname);
-  #ifndef _WIN32
-    // input.conf is for Linux/BSD
+  #if defined(__linux__) || defined(__FreeBSD__)
     std::remove("/tmp/input.conf");
     std::ofstream file;
     file.open ("/tmp/input.conf");
