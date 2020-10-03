@@ -167,7 +167,7 @@ void splash_show_video(string fname, bool loop) {
             }
             if (splash_get_stop_key) {
               if (msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE) {
-                video_stop(vide);
+                video_stop(video);
               }
             }
             POINT point;
@@ -325,3 +325,4 @@ double video_get_duration(string ind) {
 }
 
 } // namespace enigma_user
+
