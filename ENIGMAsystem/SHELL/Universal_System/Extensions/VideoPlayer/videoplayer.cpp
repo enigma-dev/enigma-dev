@@ -66,10 +66,9 @@ static unsigned splash_get_scale   = 0;
 static bool splash_get_fullscreen  = false;
 static bool splash_get_main        = true;
 static bool splash_get_adapt       = true;
-static bool splash_get_border      = true;
 
+static bool splash_get_border      = true;
 static bool splash_get_top         = true;
-static bool splash_get_interupt    = true;
 static bool splash_get_stop_mouse  = true;
 
 static int splash_get_x            = INT_MAX;
@@ -128,10 +127,6 @@ void splash_set_border(bool border) {
   splash_get_border = border;
 }
 
-void splash_set_interupt(bool interupt) {
-  splash_get_interupt = interupt;
-}
-
 void splash_set_stop_mouse(bool stop) {
   splash_get_stop_mouse = stop;
 }
@@ -167,7 +162,6 @@ void splash_show_video(string fname, bool loop) {
   }
 
   splash_get_main = (wid != "-1");
-  splash_get_interupt = splash_get_main ? true : splash_get_interupt;
   flls = splash_get_main ? "no" : (splash_get_fullscreen ? "yes" : "no");
   brdr = splash_get_main ? "no" : (splash_get_border ? "yes" : "no");
   ontp = splash_get_main ? "no" : (splash_get_top ? "yes" : "no");
@@ -192,18 +186,20 @@ void splash_show_video(string fname, bool loop) {
   }
  
   video = video_add(fname);
-  std::remove("input.conf");
+  #ifndef _WIN32
+    // input.conf is for Linux/BSD
+    std::remove("/tmp/input.conf");
+    std::ofstream file;
+    file.open ("/tmp/input.conf");
+    file << "CLOSE_WIN ignore\n";
+    if (splash_get_stop_mouse) {
+      file << "MBTN_LEFT quit\n";
+      file << "MBTN_RIGHT quit\n";
+    }
+    file.close();
+    video_set_option_string(video, "input-conf", "/tmp/input.conf");
+  #endif
 
-  std::ofstream file;
-  file.open ("input.conf");
-  file << "CLOSE_WIN ignore\n";
-  if (splash_get_stop_mouse) {
-    file << "MBTN_LEFT quit\n";
-    file << "MBTN_RIGHT quit\n";
-  }
-  file.close();
-
-  video_set_option_string(video, "input-conf", "input.conf");
   video_set_option_string(video, "volume", std::to_string(splash_get_volume));
   video_set_option_string(video, "video-zoom", std::to_string(splash_get_scale));
   video_set_option_string(video, "input-default-bindings", "no");
@@ -219,40 +215,61 @@ void splash_show_video(string fname, bool loop) {
   video_set_option_string(video, "osc", "no");
   video_set_option_string(video, "wid", wid);
 
-  video_play(video);
-  if (splash_get_interupt) {
-    while (video_is_playing(video)) {
-      #ifdef __APPLE__
-        #ifdef __MACH__
-          cocoa_process_run_loop(video.c_str(),
-            wid.c_str(), splash_get_stop_mouse);
-        #endif
-      #else
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        #ifdef _WIN32
-          MSG msg;
-          while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-            if (splash_get_stop_mouse && wid != "-1" &&
-              wid == std::to_string((unsigned long long)msg.hwnd) &&
-              (msg.message == WM_LBUTTONDOWN || msg.message == WM_RBUTTONDOWN)) {
-              video_stop(video);
-            }
-          }
-        #endif
-      #endif
-    }
+  videos[video].is_playing = true;
+  mpv_initialize(videos[video].mpv);
+  const char *cmd[] = { "loadfile", video.c_str(), NULL };
+  mpv_command(videos[video].mpv, cmd);
+  bool hidden = false;
+  while (videos[video].is_playing) {
     #ifdef __APPLE__
       #ifdef __MACH__
-        cocoa_show_cursor();
+        cocoa_process_run_loop(video.c_str(),
+          wid.c_str(), splash_get_stop_mouse);
+      #endif
+    #else
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+      #ifdef _WIN32
+        MSG msg;
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+          TranslateMessage(&msg);
+          DispatchMessage(&msg);
+          if (splash_get_stop_mouse && wid != "-1" &&
+            wid == std::to_string((unsigned long long)msg.hwnd)) {
+            if (msg.message == WM_LBUTTONDOWN || msg.message == WM_RBUTTONDOWN ||
+              msg.message == WM_NCLBUTTONDOWN || msg.message == WM_NCRBUTTONDOWN) {
+              video_stop(video);
+            }
+            POINT point;
+            GetCursorPos(&point);
+            if (msg.hwnd == WindowFromPoint(point)) {  
+              if (!hidden) {
+                ShowCursor(false);
+                hidden = true;
+              }
+            } else {
+              if (hidden) {
+                ShowCursor(true);
+                hidden = false;
+              }
+            }
+          }
+        }
       #endif
     #endif
   }
-}
-
-string splash_get_video() {
-  return video;
+  #ifdef _WIN32
+  if (hidden) {
+    ShowCursor(true);
+    hidden = false;
+  }
+  #endif
+  #ifdef __APPLE__
+    #ifdef __MACH__
+      cocoa_show_cursor();
+    #endif
+  #endif
+  videos[video].is_playing = false;
+  mpv_terminate_destroy(videos[video].mpv);
 }
 
 string video_add(string fname) {
@@ -279,10 +296,6 @@ string video_get_option_string(string ind, string option) {
 void video_set_option_string(string ind, string option, string value) {
   mpv_set_option_string(videos[ind].mpv, option.c_str(), value.c_str());
   videos[ind].option[option] = value;
-}
-
-string video_get_property_string(string ind, string property) {
-  return mpv_get_property_string(videos[ind].mpv, property.c_str());
 }
 
 void video_play(string ind) {
@@ -331,10 +344,11 @@ void video_set_volume_percent(string ind, int volume) {
 string video_get_window_identifier(string ind) {
   if (video_get_option_was_set(ind, "wid"))
     return videos[ind].window_id;
-  return "-1";
+  return "0";
 }
 
 void video_set_window_identifier(string ind, string wid) {
+  wid = std::to_string(strtoull(wid.c_str(), NULL, 10));
   #ifdef __APPLE__ 
     #ifdef __MACH__ 
       wid = cocoa_window_get_contentview(wid.c_str());
@@ -351,13 +365,6 @@ void video_pause(string ind) {
   const char *cmd[] = { "cycle", "pause", NULL };
   mpv_command_async(videos[ind].mpv, 0, cmd);
   videos[ind].is_paused = !video_is_paused(ind);
-}
-
-void video_seek(string ind, double seek) {
-  static string arg;
-  arg = std::to_string(seek);
-  const char *cmd[] = { "seek", arg.c_str(), NULL };
-  mpv_command_async(videos[ind].mpv, 0, cmd);
 }
 
 void video_stop(string ind) {
