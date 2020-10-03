@@ -27,6 +27,7 @@
 #import <string.h>
 
 #import <Cocoa/Cocoa.h>
+#import <Carbon/Carbon.h>
 
 #import "videoplayer.h"
 
@@ -45,7 +46,8 @@ void cocoa_show_cursor() {
   }
 }
 
-void cocoa_process_run_loop(const char *video, const char *window, bool close_mouse) {
+void cocoa_process_run_loop(const char *video,
+  const char *window, bool close_mouse, bool close_key) {
   [[NSRunLoop currentRunLoop] runUntilDate:
   [NSDate dateWithTimeIntervalSinceNow:0.005]];
   NSPoint mouseLoc; mouseLoc = [NSEvent mouseLocation];
@@ -55,11 +57,17 @@ void cocoa_process_run_loop(const char *video, const char *window, bool close_mo
   CGWindowID wid = [[view window] windowNumber];
   if (windowNumber == wid) {
     if (!hidden) { [NSCursor hide]; hidden = true; }
-    if (close_mouse && [NSEvent pressedMouseButtons] == 1 << 0 ||
-      [NSEvent pressedMouseButtons] == 1 << 1) {
+    if (close_mouse && ([NSEvent pressedMouseButtons] == 1 << 0 ||
+      [NSEvent pressedMouseButtons] == 1 << 1)) {
       video_stop(video);
     }
   } else {
     cocoa_show_cursor();
+  }
+  NSEvent *keyEvent = [[view window]
+    nextEventMatchingMask:(NSEventMaskKeyDown | NSEventMaskLeftMouseDown |
+    NSEventMaskRightMouseDown | NSEventMaskMouseMoved)];
+  if ([keyEvent type] == 10 && [keyEvent keyCode] == kVK_Escape) {
+    video_stop(video);
   }
 }

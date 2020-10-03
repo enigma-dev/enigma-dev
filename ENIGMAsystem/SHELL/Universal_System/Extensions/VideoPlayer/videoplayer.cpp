@@ -41,6 +41,10 @@
   #include <windows.h>
 #endif
 
+#if defined(__linux__) || defined(__FreeBSD__)
+  #include <X11/Xlib.h>
+#endif
+
 #include <mpv/client.h>
 
 using std::string;
@@ -60,29 +64,51 @@ static string video;
 
 static string splash_get_window    = "-1";
 static int splash_get_volume       = 100;
-static string splash_get_caption   = "";
-static unsigned splash_get_scale   = 0;
 
-static bool splash_get_fullscreen  = false;
-static bool splash_get_main        = true;
-static bool splash_get_adapt       = true;
-
-static bool splash_get_border      = true;
-static bool splash_get_top         = true;
 static bool splash_get_stop_mouse  = true;
-
-static int splash_get_x            = INT_MAX;
-static int splash_get_y            = INT_MAX;
-static unsigned splash_get_width   = 640;
-static unsigned splash_get_height  = 480;
+static bool splash_get_stop_key  = true;
 
 #ifdef __APPLE__
   #ifdef __MACH__
      extern "C" void cocoa_show_cursor();
      extern "C" const char *cocoa_window_get_contentview(const char *window);
-     extern "C" void cocoa_process_run_loop(const char *video, const char *window, bool close_mouse);
+     extern "C" void cocoa_process_run_loop(const char *video, const char *window, bool close_mouse, bool close_key);
      void video_stop(const char *ind) { enigma_user::video_stop(ind); }
   #endif
+#endif
+
+#if defined(__linux__) || defined(__FreeBSD__)
+  static inline int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
+    return 0;
+  }
+
+  static inline int XIOErrorHandlerImpl(Display *display) {
+    return 0;
+  }
+
+  static inline void SetErrorHandlers() {
+    XSetErrorHandler(XErrorHandlerImpl);
+    XSetIOErrorHandler(XIOErrorHandlerImpl);
+  }
+
+  static inline unsigned long XGetActiveWindow(Display *display) {
+    SetErrorHandlers();
+    unsigned char *prop;
+    unsigned long property;
+    Atom actual_type, filter_atom;
+    int actual_format, status;
+    unsigned long nitems, bytes_after;
+    int screen = XDefaultScreen(display);
+    window = RootWindow(display, screen);
+    filter_atom = XInternAtom(display, "_NET_ACTIVE_WINDOW", True);
+    status = XGetWindowProperty(display, window, filter_atom, 0, 1000, False,
+    AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
+    if (status == Success && prop != NULL) {
+      property = prop[0] + (prop[1] << 8) + (prop[2] << 16) + (prop[3] << 24);
+      XFree(prop);
+    }
+    return property;
+  }
 #endif
 
 static void video_loop(string ind, mpv_handle *mpv) {
@@ -101,42 +127,12 @@ void splash_set_window(string wid) {
   splash_get_window = wid;
 }
 
-void splash_set_main(bool main) {
-  splash_get_main = main;
-}
-
-void splash_set_caption(string cap) {
-  splash_get_caption = cap;
-}
-
-void splash_set_fullscreen(bool full) {
-  splash_get_fullscreen = full;
-}
-
-void splash_set_size(unsigned w, unsigned h) {
-  splash_get_width  = w;
-  splash_get_height = h;
-}
-
-void splash_set_position(int x, int y) {
-  splash_get_x = x;
-  splash_get_y = y;
-}
-
-void splash_set_border(bool border) {
-  splash_get_border = border;
-}
-
 void splash_set_stop_mouse(bool stop) {
   splash_get_stop_mouse = stop;
 }
 
-void splash_set_scale(unsigned scale) {
-  splash_get_scale = scale;
-}
-
-void splash_set_adapt(bool adapt) {
-  splash_get_adapt = adapt;
+void splash_set_stop_key(bool stop) {
+  splash_get_stop_key = stop;
 }
 
 void splash_set_volume(int vol) {
@@ -144,42 +140,17 @@ void splash_set_volume(int vol) {
 }
 
 void splash_show_video(string fname, bool loop) {
-  string wid, wstr, hstr, xstr, ystr, size, 
-    pstn, geom, flls, brdr, ontp, lpng, adpt;
+  string wid, lpng;
 
-  if (splash_get_main) { // embeds inside game window
-    #ifdef __APPLE__
-      #ifdef __MACH__
-        wid = cocoa_window_get_contentview(splash_get_window.c_str());
-      #endif
-    #else
-      wid = splash_get_window;
+  #ifdef __APPLE__
+    #ifdef __MACH__
+      wid = cocoa_window_get_contentview(splash_get_window.c_str());
     #endif
-  } else { 
-    // creates a new window to play splash
-    // -1 is guaranteed to be not a window
-    wid = "-1";
-  }
+  #else
+    wid = splash_get_window;
+  #endif
 
-  splash_get_main = (wid != "-1");
-  flls = splash_get_main ? "no" : (splash_get_fullscreen ? "yes" : "no");
-  brdr = splash_get_main ? "no" : (splash_get_border ? "yes" : "no");
-  ontp = splash_get_main ? "no" : (splash_get_top ? "yes" : "no");
-  adpt = splash_get_main ? "no" : (splash_get_adapt ? "yes" : "no");
   lpng = loop ? "yes" : "no";
-
-  wstr = std::to_string(splash_get_width);
-  hstr = std::to_string(splash_get_height);
-  xstr = std::to_string(splash_get_x);
-  ystr = std::to_string(splash_get_y);
-  size = wstr + "x" + hstr;
-  if (splash_get_x == INT_MAX || splash_get_y == INT_MAX) {
-    pstn = "50%+50%";
-    geom = size + "+" + pstn;
-  } else {
-    pstn = xstr + "+" + ystr;
-    geom = size + "+" + pstn;
-  }
 
   if (video_exists(video)) {
     video_delete(video);
@@ -201,43 +172,52 @@ void splash_show_video(string fname, bool loop) {
   #endif
 
   video_set_option_string(video, "volume", std::to_string(splash_get_volume));
-  video_set_option_string(video, "video-zoom", std::to_string(splash_get_scale));
   video_set_option_string(video, "input-default-bindings", "no");
-  video_set_option_string(video, "title", splash_get_caption);
-  video_set_option_string(video, "fs", flls);
-  video_set_option_string(video, "border", brdr);
-  video_set_option_string(video, "keepaspect-window", adpt);
   video_set_option_string(video, "taskbar-progress", "no");
-  video_set_option_string(video, "ontop", ontp);
-  video_set_option_string(video, "geometry", geom);
   video_set_option_string(video, "config", "no");
   video_set_option_string(video, "loop", lpng);
   video_set_option_string(video, "osc", "no");
   video_set_option_string(video, "wid", wid);
 
-  videos[video].is_playing = true;
-  mpv_initialize(videos[video].mpv);
-  const char *cmd[] = { "loadfile", video.c_str(), NULL };
-  mpv_command(videos[video].mpv, cmd);
+  video_play(video);
   bool hidden = false;
-  while (videos[video].is_playing) {
+  while (video_is_playing(video)) {
     #ifdef __APPLE__
       #ifdef __MACH__
-        cocoa_process_run_loop(video.c_str(),
-          wid.c_str(), splash_get_stop_mouse);
+        cocoa_process_run_loop(video.c_str(), wid.c_str(),
+          splash_get_stop_mouse, splash_get_stop_key);
       #endif
     #else
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
+      #if defined(__linux__) || defined(__FreeBSD__)
+        XEvent report;
+        Display *disp = XOpenDisplay(NULL);
+        XNextEvent(dis, &report);
+        if (wid == std::to_string(XGetActiveWindow(disp)) {
+          if (report.type == KeyPress) {
+            if (XLookupKeysym(&report.xkey, 0) == XK_Escape) {
+              video_stop(video);
+            }
+          }
+        }
+        XCloseDisplay(disp);
+      #endif
       #ifdef _WIN32
         MSG msg;
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
           TranslateMessage(&msg);
           DispatchMessage(&msg);
-          if (splash_get_stop_mouse && wid != "-1" &&
-            wid == std::to_string((unsigned long long)msg.hwnd)) {
-            if (msg.message == WM_LBUTTONDOWN || msg.message == WM_RBUTTONDOWN ||
-              msg.message == WM_NCLBUTTONDOWN || msg.message == WM_NCRBUTTONDOWN) {
-              video_stop(video);
+          if (wid == std::to_string((unsigned long long)msg.hwnd)) {
+            if (splash_get_stop_mouse) {
+              if (msg.message == WM_LBUTTONDOWN || msg.message == WM_RBUTTONDOWN ||
+                msg.message == WM_NCLBUTTONDOWN || msg.message == WM_NCRBUTTONDOWN) {
+                video_stop(video);
+              }
+            }
+            if (splash_get_stop_key) {
+              if (msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE) {
+                video_stop(vide);
+              }
             }
             POINT point;
             GetCursorPos(&point);
@@ -268,8 +248,6 @@ void splash_show_video(string fname, bool loop) {
       cocoa_show_cursor();
     #endif
   #endif
-  videos[video].is_playing = false;
-  mpv_terminate_destroy(videos[video].mpv);
 }
 
 string video_add(string fname) {
