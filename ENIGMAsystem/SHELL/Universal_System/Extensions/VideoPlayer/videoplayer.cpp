@@ -43,6 +43,7 @@
 
 #if defined(__linux__) || defined(__FreeBSD__)
   #include <X11/Xlib.h>
+  #define XK_Escape 0xff1b
 #endif
 
 #include <mpv/client.h>
@@ -192,8 +193,8 @@ void splash_show_video(string fname, bool loop) {
       #if defined(__linux__) || defined(__FreeBSD__)
         XEvent report;
         Display *disp = XOpenDisplay(NULL);
-        XNextEvent(dis, &report);
-        if (wid == std::to_string(XGetActiveWindow(disp)) {
+        XNextEvent(disp, &report);
+        if (wid == std::to_string(XGetActiveWindow(disp))) {
           if (report.type == KeyPress) {
             if (XLookupKeysym(&report.xkey, 0) == XK_Escape) {
               video_stop(video);

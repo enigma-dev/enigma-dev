@@ -10,5 +10,5 @@ else ifeq ($(TARGET-PLATFORM), MacOSX)
 else ifeq ($(TARGET-PLATFORM), Android)
 	override LDLIBS += -Wl,-Bdynamic `pkg-config --libs --cflags mpv` -Wl,-Bstatic
 else # Linux, FreeBSD
-	override LDLIBS += `pkg-config --libs --cflags mpv` # mostly-dynamic platforms
+	override LDLIBS += `pkg-config --libs --cflags mpv` -lX11
 endif
