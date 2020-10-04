@@ -86,6 +86,7 @@ static void video_loop(string ind, mpv_handle *mpv) {
 namespace enigma_user {
 
 void splash_set_window(string wid) {
+  wid = std::to_string(strtoull(wid.c_str(), NULL, 10));
   splash_get_window = wid;
 }
 
@@ -103,7 +104,6 @@ void splash_set_volume(int vol) {
 
 void splash_show_video(string fname, bool loop) {
   string wid, looping;
-  wid = std::to_string(strtoull(wid.c_str(), NULL, 10));
   #ifdef __APPLE__
     #ifdef __MACH__
       wid = cocoa_window_get_contentview(splash_get_window.c_str());
@@ -221,6 +221,7 @@ string video_get_option_string(string ind, string option) {
 }
 
 void video_set_option_string(string ind, string option, string value) {
+  if (option == "wid") value = std::to_string(strtoull(value.c_str(), NULL, 10));
   mpv_set_option_string(videos[ind].mpv, option.c_str(), value.c_str());
   videos[ind].option[option] = value;
 }
@@ -312,4 +313,3 @@ double video_get_duration(string ind) {
 }
 
 } // namespace enigma_user
-
