@@ -203,7 +203,7 @@ void splash_show_video(string fname, bool loop) {
 string video_add(string fname) {
   VideoData data;
   data.mpv           = mpv_create();
-  data.window_id     = "-1";
+  data.window_id     = "0";
   data.volume        = 100;
   data.is_paused     = false;
   data.is_playing    = false;
