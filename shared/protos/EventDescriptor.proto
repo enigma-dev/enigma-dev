@@ -59,21 +59,20 @@ message EventDescriptor {
   // ┃ These fields allow augmenting user code for events in various ways.     ┃
   // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-  // This code will be prefixed onto user code, whatever that code may be.
-  optional string prefix = 10;
-  // This code will be appended onto user code, similar to prefix code.
-  // Note that user code may exit early, so effective lines of code included
-  // here may, in fact, never run.
-  optional string suffix = 11;
   // This allows supplying default code for an event. This code will only be
   // executed if the user has not provided their own implementation
   // (similar to virtual code that has been overridden).
-  optional string default = 12;
+  optional string default = 10;
   // Similar to `default`, except the given code will always appear in the event
   // (even if the user supplies an implementation). In other words, this field
   // behaves like `prefix` in the presence of a user-defined implementation,
   // or like `default` in the absence of one.
-  optional string constant = 13;
+  optional string constant = 11;
+  // Describes logic that will be baked into the object as a separate method
+  // intended to invoke the main event method under certain conditions.
+  // This is a generalization of the subcheck and allows the event to fire
+  // multiple times.
+  optional string dispatcher = 12;
 
   // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
   // ┃ These fields allow tuning event execution.                              ┃

@@ -39,6 +39,8 @@ namespace enigma {
   void compute_window_size();
   void initialize_directory_globals();
   void set_program_args(int argc, char** argv);
+  void platform_focus_lost();
+  void platform_focus_gained();
   void initTimer();
   int updateTimer();
   int gameWait();
@@ -51,7 +53,6 @@ extern std::string working_directory;
 extern std::string program_directory;
 extern std::string temp_directory;
 extern std::string keyboard_string;
-extern int keyboard_key;
 extern double fps;
 extern unsigned long delta_time;
 extern unsigned long current_time;

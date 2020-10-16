@@ -46,6 +46,19 @@ inline bool iscomment(const string &n) {
   return true;
 }
 
+// This just pretties up the codegen a fuzz. It's for pre-parsed code in events.ey.
+// Eventually we'll be using the Syntax checker's lexer to build our own tree and
+// print that everywhere. Then this code will be useless.
+void PrintIndentedCode(std::ostream &wto, std::string_view code, int indent) {
+  std::string istr(indent, ' ');
+  for (size_t i = 0, j; i != std::string::npos; i = j + 1) {
+    j = code.find_first_of("\r\n", i);
+    wto << istr << code.substr(i, j - i) << "\n";
+    if (j == std::string::npos) break;
+    if (code[j] == '\r' && j < code.length() - 1 && code[j + 1] != '\n') ++j;
+  }
+}
+
 static inline void declare_scripts(std::ostream &wto, const GameData &game, const CompileState &state) {
   wto << "// Script identifiers\n";
   for (size_t i = 0; i < game.scripts.size(); i++)
@@ -345,52 +358,78 @@ static void write_object_events(std::ostream &wto, parsed_object *object) {
 // Stacked events need a separate virtual event to trigger from the event loop.
 // Otherwise, we'd be writing a great deal of placeholder events, most of them
 // calling into nothing. We'd also be wasting a ton of time on vtable lookups
-// in general, even if every object implemented the same keyboard handlers and
-// the same collision events.
-static void write_stacked_event_groups(std::ostream &wto, parsed_object *object) {
-  wto << "      \n      // Grouped event bases\n";
+// in general, even if every object implemented the same collision events.
+//
+// Also, some events require special dispatcher logic. An example of where this
+// is strictly required is collision events, which must be run in a secondary
+// loop fashion. Regardless of whether they are stacked, dispatched events
+// receive a dispatch routine to handle one or all instances of that event.
+//
+// Because the subchecks and dispatch logic for these event groups can contain
+// variable name lookups, all instances must be declared before we implement the
+// final routines.
+
+static void declare_event_groups(std::ostream &wto, const parsed_object *object) {
+  wto << "    \n    // Stacked event bases and dispatchers\n";
   for (const ParsedEventGroup &event_stack : object->stacked_events) {
-    wto << "      void myevent_"
-        << event_stack.event_key.BaseFunctionName() << "() {\n";
+    wto << "    void myevent_"
+        << event_stack.event_key.BaseFunctionName();
+    if (event_stack.event_key.HasDispatcher()) wto << "_dispatcher";
+    wto << "() override;\n";
+  }
+}
+
+static void implement_event_groups(std::ostream &wto, const parsed_object *object) {
+  wto << "\n// Stacked event bases and dispatchers\n";
+  for (const ParsedEventGroup &event_stack : object->stacked_events) {
+    wto << "void enigma::OBJ_" << object->name << "::myevent_"
+        << event_stack.event_key.BaseFunctionName();
+    if (event_stack.event_key.HasDispatcher()) wto << "_dispatcher";
+    wto << "() {\n";
     for (ParsedEvent *event : event_stack) {
       const auto &ev = event->ev_id;
       // Use the full function name to call individual events in this stack.
       const string evname = ev.TrueFunctionName();
+      int indent = 2;
       if (ev.HasSubCheck()) {
+        indent += 2;
         if (ev.HasSubCheckExpression()) {
-          wto << "        if (" << ev.SubCheckExpression() << ") {\n";
+          wto << "  if (" << ev.SubCheckExpression() << ") {\n";
         } else {
-          wto << "        if (myevent_" + evname + "_subcheck()) {\n";
+          wto << "  if (myevent_" + evname + "_subcheck()) {\n";
         }
       }
-      wto << "          myevent_" + evname + "();\n";
+      const std::string logic = ev.HasDispatcher()
+                                    ? ev.DispatcherCode("myevent_" + evname)
+                                    : "myevent_" + evname + "();";
+      PrintIndentedCode(wto, logic, indent);
       if (ev.HasSubCheck())
-        wto << "        }\n";
+        wto << "  }\n";
     }
-    wto << "      }\n";
+    wto << "}\n";
   }
 }
 
 static inline void write_event_perform(
     std::ostream &wto, const EventData &events, parsed_object *object) {
   /* Event Perform Code */
-  wto << "      // Event Perform Code\n";
-  wto << "      variant myevents_perf(int type, int numb)\n      {\n";
+  wto << "\n    // Event Perform Code\n";
+  wto << "    variant myevents_perf(int type, int numb) override {\n";
 
   for (const auto &event : object->all_events) {
     string evname = event.ev_id.TrueFunctionName();
     auto legacy_pair = events.reverse_get_event(event.ev_id);
-    wto << "        if (type == " << legacy_pair.mid << " && numb == " << legacy_pair.id << ")\n";
-    wto << "          return myevent_" << evname << "();\n";
+    wto << "      if (type == " << legacy_pair.mid << " && numb == " << legacy_pair.id << ")\n";
+    wto << "        return myevent_" << evname << "();\n";
   }
 
   if (object->parent) {
-    wto << "        return OBJ_" << object->parent->name << "::myevents_perf(type,numb);\n";
+    wto << "      return OBJ_" << object->parent->name << "::myevents_perf(type,numb);\n";
   } else {
-    wto << "        return 0;\n";
+    wto << "      return 0;\n";
   }
 
-  wto << "      }\n";
+  wto << "    }\n";
 }
 
 static inline void write_object_unlink(std::ostream &wto, parsed_object *object) {
@@ -576,7 +615,7 @@ static void write_object_class_body(parsed_object* object, language_adapter *lan
   write_object_timelines(wto, game, object, state.timeline_lookup);
   write_object_events(wto, object);
 
-  write_stacked_event_groups(wto, object);
+  declare_event_groups(wto, object);
   write_event_perform(wto, lang->event_data(), object);
   write_object_unlink(wto, object);
   write_object_constructors(wto, object);
@@ -626,11 +665,13 @@ static inline void write_object_data_structs(std::ostream &wto,
   wto << "  int objectcount = " << parsed_objects.size() << ";\n";
 }
 
-static inline void write_object_declarations(lang_CPP* lcpp, const GameData &game, const CompileState &state) {
-  //NEXT FILE ----------------------------------------
-  //Object declarations: object classes/names and locals.
+// [ CODEGEN FILE ] ------------------------------------------------------------
+// Object declarations: object classes/names and locals. -----------------------
+// -----------------------------------------------------------------------------
+static inline void write_object_declarations(
+    lang_CPP* lcpp, const GameData &game, const CompileState &state) {
   ofstream wto;
-  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h").u8string().c_str(),ios_base::out);
+  wto.open(codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out);
   wto << license;
   wto << "#include \"Universal_System/Object_Tiers/collisions_object.h\"\n";
   wto << "#include \"Universal_System/Object_Tiers/object.h\"\n\n";
@@ -663,7 +704,11 @@ static inline void write_event_bodies(ofstream& wto, const GameData &game, int m
 static inline void write_global_script_array(ofstream &wto, const GameData &game, const CompileState &state);
 static inline void write_basic_constructor(ofstream &wto);
 
-static inline void write_object_functionality(const GameData &game, const CompileState &state, int mode) {
+// [ CODEGEN FILE ] ------------------------------------------------------------
+// Object functionality: implements event routines and scripts declared earlier.
+// -----------------------------------------------------------------------------
+static inline void write_object_functionality(
+    const GameData &game, const CompileState &state, int mode) {
   vector<unsigned> parent_undefined;
   ofstream wto((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").u8string().c_str(),ios_base::out);
 
@@ -748,12 +793,18 @@ static void write_object_script_funcs(ofstream& wto, const parsed_object *const 
 static void write_object_timeline_funcs(ofstream& wto, const GameData &game, const parsed_object *const t, const TimelineLookupMap &timeline_lookup);
 static void write_can_cast_func(ofstream& wto, const parsed_object *const pobj);
 
-static void write_event_bodies(ofstream& wto, const GameData &game, int mode, const ParsedObjectVec &parsed_objects, const ScriptLookupMap &script_lookup, const TimelineLookupMap &timeline_lookup) {
-  // Export everything else
+static void write_event_bodies(
+    ofstream& wto, const GameData &game, int mode,
+    const ParsedObjectVec &parsed_objects, const ScriptLookupMap &script_lookup,
+    const TimelineLookupMap &timeline_lookup) {
   for (const auto *obj : parsed_objects) {
+    // Write infrastructure to trigger grouped events (stacked/dispatched)
+    implement_event_groups(wto, obj);
+
+    // Write the user-defined event implementations.
     write_object_event_funcs(wto, obj, mode);
 
-    //Write local object copies of scripts
+    // Write local object copies of scripts
     write_object_script_funcs(wto, obj, script_lookup);
 
     // Write local object copies of timelines
@@ -804,7 +855,8 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
 }
 
 static void write_event_func(ofstream& wto, const ParsedEvent &event, string objname, string evname, int mode) {
-  wto << "variant enigma::OBJ_" << objname << "::myevent_" << evname << "()\n{\n";
+  std::string evfuncname = "myevent_" + evname;
+  wto << "variant enigma::OBJ_" << objname << "::" << evfuncname << "()\n{\n";
   if (mode == emode_debug) {
     wto << "  enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << objname << "'\");\n";
   }
@@ -813,12 +865,8 @@ static void write_event_func(ofstream& wto, const ParsedEvent &event, string obj
     wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
   if (event.ev_id.HasConstantCode())
     wto << event.ev_id.ConstantCode() << endl;
-  if (event.ev_id.HasPrefixCode())
-    wto << event.ev_id.PrefixCode() << endl;
 
   print_to_file(event.code,event.synt,event.strc,event.strs,2,wto);
-  if (event.ev_id.HasSuffixCode())
-    wto << event.ev_id.SuffixCode() << endl;
   wto << "\n  return 0;\n}\n\n";
 }
 

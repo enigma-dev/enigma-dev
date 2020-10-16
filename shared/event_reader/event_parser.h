@@ -82,16 +82,18 @@ struct EventDescriptor {
 
   // Return the base ID of this event, such as "Collision" or "Draw."
   // Not to be confused with the IdString of an instance of this event.
-  const std::string &bare_id() { return event->id(); }
+  const std::string &bare_id() const { return event->id(); }
 
   std::string HumanName() const;
   std::string BaseFunctionName() const;
   std::string LocalDeclarations() const;
+  std::string GroupName() const { return event->group(); }
+  std::string HumanDescription() const { return event->description(); }
 
-  bool HasPrefixCode() const { return event->has_prefix(); }
-  bool HasSuffixCode() const { return event->has_suffix(); }
+  bool HasLocalDeclarations() const { return event->has_locals(); }
   bool HasDefaultCode() const { return event->has_default_() || HasConstantCode(); }
   bool HasConstantCode() const { return event->has_constant(); }
+  bool HasDispatcher() const { return event->has_dispatcher(); }
 
   std::string DefaultCode() const;
   std::string ConstantCode() const;
@@ -112,10 +114,10 @@ struct EventDescriptor {
   bool HasIteratorDeleteCode()     const { return event->has_iterator_delete(); }
   
   bool HasAnyAutomaticCode() const {
-    return HasPrefixCode()          || HasSuffixCode()
-        || HasConstantCode()        || HasDefaultCode()
+    return HasConstantCode()        || HasDefaultCode()
         || HasIteratorRemoveCode()  || HasIteratorDeleteCode()
-        || HasIteratorDeclareCode() || HasIteratorInitializeCode();
+        || HasIteratorDeclareCode() || HasIteratorInitializeCode()
+        || HasDispatcher();
   }
 
   std::string IteratorDeclareCode() const;
@@ -160,8 +162,10 @@ struct Event : EventDescriptor {
   // Identical to BaseFunctionName for non-parameterized events.
   std::string TrueFunctionName() const;
 
-  std::string PrefixCode() const;
-  std::string SuffixCode() const;
+  // Returns the completed code used to handle event dispatch.
+  // The given argument should be the same mangled event function name used to
+  // generate the event's main function.
+  std::string DispatcherCode(std::string_view event_func) const;
 
   // Returns whether all parameters of this event are set.
   bool IsComplete() const;
@@ -181,8 +185,17 @@ struct Event : EventDescriptor {
   bool operator<(const Event &other) const;
 
  private:
-  // Replaces %1 with parameter 1, %2 with parameter 2, etc.
-  std::string ParamSubst(const std::string &str) const;
+  // Replaces %1 with the EDL spelling of parameter 1, %2 with parameter 2, etc.
+  std::string ParamSubst(const std::string &str) const {
+    return ParamSubstImpl(str, true);
+  }
+  // Replaces %1 with the human-readable parameter 1, %2 with parameter 2, etc.
+  std::string NameSubst(const std::string &str) const {
+    return ParamSubstImpl(str, false);
+  }
+  // Kernel for the above two routines. When "code" is set to true, uses the EDL
+  // spelling. When false, uses the human name.
+  std::string ParamSubstImpl(const std::string &str, bool code) const;
 };
 
 struct EventGroupKey : Event {
@@ -207,6 +220,10 @@ class EventData {
   LegacyEventPair reverse_get_event(const Event &) const;
   // Retrieve the sequence of all declared events.
   const std::vector<EventDescriptor> &events() const { return event_wrappers_; }
+  // Get all named values for an event parameter type, by the type's name.
+  // For example, returns all named keys when passed "key".
+  const std::map<std::string, const buffers::config::ParameterAlias*>
+      &value_names_for_type(const std::string &type) const;
 
   // Decodes an Event ID string, such as Keyboard[Left], into an Event object.
   Event DecodeEventString(const std::string &evstring) const;
@@ -217,9 +234,11 @@ class EventData {
   // Raw data read from the event configuration.
   buffers::config::EventFile event_file_;
   // Map of type and constant name pair (eg, {"key", "enter"}) to alias info.
+  // Note that "key" is not a generalization, here; it means keyboard key.
   std::map<std::pair<std::string, std::string>,
            const buffers::config::ParameterAlias*> parameter_ids_;
   // Map of type and constant value pair (eg, {"key", 10}) to alias info.
+  // Note that "key" is not a generalization, here; it means keyboard key.
   std::map<std::pair<std::string, int>,
            const buffers::config::ParameterAlias*> parameter_vals_;
   // Wraps the `EventDescriptor`s read in from the events file.
@@ -228,6 +247,9 @@ class EventData {
   std::map<std::string, const EventDescriptor*> event_index_;
   // Index over event Internal IDs.
   std::map<int, const EventDescriptor*> event_iid_index_;
+  std::map<std::string,
+          std::map<std::string, const buffers::config::ParameterAlias*>>
+      parameter_index_;
 
   // Legacy shit.
 

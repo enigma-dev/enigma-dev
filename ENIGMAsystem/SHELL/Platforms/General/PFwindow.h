@@ -40,6 +40,8 @@ extern int window_max_height;
 
 void input_initialize();
 void input_push();
+void input_key_down(int key);
+void input_key_up(int key);
 
 }  // namespace enigma
 
@@ -157,6 +159,7 @@ enum {
 extern double mouse_x, mouse_y;
 extern int mouse_button, mouse_lastbutton;
 extern std::string keyboard_lastchar;
+extern int keyboard_key;
 extern int keyboard_lastkey;
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
@@ -262,6 +265,7 @@ bool window_get_showicons();
 bool window_get_freezeonlosefocus();
 bool window_get_minimized();
 bool window_get_maximized();
+bool window_has_focus();
 
 int window_mouse_get_x();
 int window_mouse_get_y();

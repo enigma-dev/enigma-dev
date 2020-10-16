@@ -50,7 +50,7 @@ struct lang_CPP: language_adapter {
   int compile_writeFontInfo(const GameData &game) final;
   int compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, ParsedScope *EGMglobal, int mode) final;
   int compile_writeShaderData(const GameData &game, ParsedScope *EGMglobal) final;
-  int compile_writeDefraggedEvents(const GameData &game, const ParsedObjectVec &parsed_objects) final;
+  int compile_writeDefraggedEvents(const GameData &game, const std::set<EventGroupKey> &used_events, const ParsedObjectVec &parsed_objects) final;
 
   // Resources added to module
   int module_write_sprites(const GameData &game, FILE *gameModule) final;
