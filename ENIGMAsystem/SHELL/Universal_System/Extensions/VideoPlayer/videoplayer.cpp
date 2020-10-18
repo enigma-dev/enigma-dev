@@ -92,7 +92,7 @@ void videoplayer_init() {
   #ifndef VIDPLAYER_SELF_CONTAINED
   mpv_wid = enigma_user::window_identfier();
   #endif
-  splash_set_window(mpv_wid);
+  enigma_user::splash_set_window(mpv_wid);
 }
 
 } // namespace enigma

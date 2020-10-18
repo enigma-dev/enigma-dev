@@ -50,7 +50,8 @@ const char *cocoa_prefer_global_windowid(const char *window) {
   unsigned long long ull = strtoull(window, NULL, 10);
   if ([NSApp windowWithWindowNumber:(unsigned long)ull] != nil) {
     return [[NSString stringWithFormat:@"%llu",
-      [NSApp windowWithWindowNumber:(unsigned long)ull]] UTF8String];
+      (unsigned long long)[NSApp windowWithWindowNumber:
+      (unsigned long)ull]] UTF8String];
   }
   return window;
 }
