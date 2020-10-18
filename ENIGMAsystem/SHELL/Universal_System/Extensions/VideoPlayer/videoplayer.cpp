@@ -59,11 +59,9 @@ struct VideoData {
 };
 
 static std::map<string, VideoData> videos;
-static string video, mpv_wid = "0";
-
+static string video, mpv_wid      = "0";
 static string splash_get_window   = "0";
 static int splash_get_volume      = 100;
-
 static bool splash_get_stop_mouse = true;
 static bool splash_get_stop_key   = true;
 
