@@ -25,8 +25,10 @@
 */
 
 #import <string.h>
+#import <unistd.h>
 
 #import <Cocoa/Cocoa.h>
+#import <CoreGraphics/CoreGraphics.h>
 #import <Carbon/Carbon.h>
 
 #import "videoplayer.h"
@@ -58,8 +60,8 @@ const char *cocoa_prefer_global_windowid(const char *window) {
 
 void cocoa_process_run_loop(const char *video,
   const char *window, bool close_mouse, bool close_key) {
-  [[NSRunLoop currentRunLoop] runUntilDate:
-  [NSDate dateWithTimeIntervalSinceNow:0.005]];
+  [[NSRunLoop currentRunLoop] acceptInputForMode:NSModalPanelRunLoopMode
+  beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.005]];
   NSPoint mouseLoc; mouseLoc = [NSEvent mouseLocation];
   CGWindowID windowNumber = [NSWindow
     windowNumberAtPoint:mouseLoc belowWindowWithWindowNumber:0];
@@ -74,10 +76,9 @@ void cocoa_process_run_loop(const char *video,
   } else {
     cocoa_show_cursor();
   }
-  NSEvent *keyEvent = [[view window]
-    nextEventMatchingMask:(NSEventMaskKeyDown | NSEventMaskLeftMouseDown |
-    NSEventMaskRightMouseDown | NSEventMaskMouseMoved)];
-  if ([keyEvent type] == 10 && [keyEvent keyCode] == kVK_Escape) {
+  NSEvent *event = [[view window] nextEventMatchingMask:NSEventMaskAny
+    untilDate:[NSDate distantPast] inMode:NSModalPanelRunLoopMode dequeue:YES];
+  if ([event type] == 10 && [event keyCode] == kVK_Escape) {
     video_stop(video);
   }
 }

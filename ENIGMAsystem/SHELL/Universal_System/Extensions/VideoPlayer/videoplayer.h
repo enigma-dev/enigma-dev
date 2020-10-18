@@ -53,14 +53,22 @@ void video_pause(std::string ind);
 void video_stop(std::string ind);
 unsigned video_get_width(std::string ind);
 unsigned video_get_height(std::string ind);
+double video_get_position(std::string ind);
 double video_get_duration(std::string ind);
 bool video_exists(std::string ind);
 void video_delete(std::string ind);
 
 } // namespace enigma_user
 
+namespace enigma {
+
+void videoplayer_init();
+
+} // namespace enigma
+
 #else
 
 void video_stop(const char *ind);
 
 #endif
+

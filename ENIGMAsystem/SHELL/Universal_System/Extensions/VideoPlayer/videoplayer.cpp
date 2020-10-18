@@ -59,11 +59,11 @@ struct VideoData {
 };
 
 static std::map<string, VideoData> videos;
-static string video, mpv_wid      = "0";
-static string splash_get_window   = "0";
-static int splash_get_volume      = 100;
-static bool splash_get_stop_mouse = true;
-static bool splash_get_stop_key   = true;
+static string video, mpv_wid       = "0";
+static string splash_get_window    = "0";
+static int splash_get_volume       = 100;
+static bool splash_get_stop_mouse  = true;
+static bool splash_get_stop_key    = true;
 
 #ifdef __APPLE__
   #ifdef __MACH__
@@ -72,7 +72,6 @@ static bool splash_get_stop_key   = true;
      extern "C" const char *cocoa_window_get_contentview(const char *window);
      extern "C" void cocoa_process_run_loop(const char *video, 
        const char *window, bool close_mouse, bool close_key);
-     void video_stop(const char *ind) { enigma_user::video_stop(ind); }
   #endif
 #endif
 
@@ -82,7 +81,7 @@ static void video_loop(string ind, mpv_handle *mpv) {
     if (event->event_id == MPV_EVENT_END_FILE) break;
     if (event->event_id == MPV_EVENT_SHUTDOWN) break;
   }
-  enigma_user::video_stop(ind);
+  videos[ind].is_playing = false;
   mpv_terminate_destroy(mpv);
 }
 
@@ -159,7 +158,7 @@ void splash_show_video(string fname, bool loop) {
   #ifdef _WIN32
     bool hidden = false;
   #endif
-  while (videos[video].is_playing) {
+  while (video_is_playing(video)) {
     #ifdef __APPLE__
       #ifdef __MACH__
         cocoa_process_run_loop(video.c_str(), wid.c_str(),
@@ -320,6 +319,12 @@ unsigned video_get_height(string ind) {
   long long result;
   mpv_get_property(videos[ind].mpv, "height", MPV_FORMAT_INT64, &result);
   return (unsigned)result;
+}
+
+double video_get_position(string ind) { 
+  double result;
+  mpv_get_property(videos[ind].mpv, "time-pos", MPV_FORMAT_DOUBLE, &result);
+  return result;
 }
 
 double video_get_duration(string ind) {
