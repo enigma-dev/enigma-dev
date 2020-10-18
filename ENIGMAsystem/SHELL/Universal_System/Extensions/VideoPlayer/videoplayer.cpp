@@ -37,7 +37,9 @@
 
 #include "videoplayer.h"
 
+#ifndef VIDPLAYER_SELF_CONTAINED
 #include "Platforms/General/PFwindow.h"
+#endif
 
 #ifdef _WIN32
   #include <windows.h>
@@ -57,7 +59,7 @@ struct VideoData {
 };
 
 static std::map<string, VideoData> videos;
-static string video, mpv_wid;
+static string video, mpv_wid = "0";
 
 static string splash_get_window   = "0";
 static int splash_get_volume      = 100;
@@ -89,7 +91,9 @@ static void video_loop(string ind, mpv_handle *mpv) {
 namespace enigma {
 
 void videoplayer_init() {
+  #ifndef VIDPLAYER_SELF_CONTAINED
   mpv_wid = enigma_user::window_identfier();
+  #endif
   splash_set_window(mpv_wid);
 }
 
