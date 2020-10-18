@@ -118,8 +118,8 @@ void splash_show_video(string fname, bool loop) {
   string wid, looping;
   #ifdef __APPLE__
     #ifdef __MACH__
-      wid = cocoa_prefer_global_windowid(wid.c_str());
-      wid = cocoa_window_get_contentview(splash_get_window.c_str());
+      wid = cocoa_prefer_global_windowid(splash_get_window.c_str());
+      wid = cocoa_window_get_contentview(wid.c_str());
     #endif
   #else
     wid = splash_get_window;
