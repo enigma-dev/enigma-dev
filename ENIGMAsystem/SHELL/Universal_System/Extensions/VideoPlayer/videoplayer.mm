@@ -25,10 +25,8 @@
 */
 
 #import <string.h>
-#import <unistd.h>
 
 #import <Cocoa/Cocoa.h>
-#import <CoreGraphics/CoreGraphics.h>
 #import <Carbon/Carbon.h>
 
 #import "videoplayer.h"
