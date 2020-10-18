@@ -47,9 +47,11 @@ void cocoa_show_cursor() {
 }
 
 const char *cocoa_prefer_global_windowid(const char *window) {
-  if ([NSApp windowWithWindowNumber:strtoull(window, NULL, 10)] != nil)
+  unsigned long long ull = strtoull(window, NULL, 10);
+  if ([NSApp windowWithWindowNumber:ull] != nil) {
     return [[NSString stringWithFormat:@"%llu",
-      [NSApp windowWithWindowNumber:strtoull(window, NULL, 10)]] UTF8String];
+      [NSApp windowWithWindowNumber:ull]] UTF8String];
+  }
   return window;
 }
 
