@@ -10,3 +10,4 @@ Icon: videoplayer.png
 
 Depends: None
 Dependencies: None
+Init: videoplayer_init
