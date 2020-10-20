@@ -237,7 +237,11 @@ string video_get_option_string(string ind, string option) {
 void video_set_option_string(string ind, string option, string value) {
   if (option == "wid") value = std::to_string(strtoull(value.c_str(), NULL, 10));
   mpv_set_option_string(videos[ind].mpv, option.c_str(), value.c_str());
-  videos[ind].option[option] = value;
+  if (video_get_option_was_set(ind, option)) {
+    videos[ind].option.insert(std::make_pair(option, value));
+  } else {
+    videos[ind].option[option] = value;
+  }
 }
 
 void video_play(string ind) {
@@ -269,7 +273,7 @@ int video_get_volume_percent(string ind) {
 
 void video_set_volume_percent(string ind, int volume) {
   videos[ind].volume = volume;
-  mpv_set_option_string(videos[ind].mpv, "volume", std::to_string(volume).c_str());
+  video_set_option_string(ind, "volume", std::to_string(volume));
 }
 
 string video_get_window_identifier(string ind) {
@@ -286,7 +290,8 @@ void video_set_window_identifier(string ind, string wid) {
       wid = cocoa_window_get_contentview(wid.c_str());
     #endif
   #endif
-  mpv_set_option_string(videos[ind].mpv, "wid", wid.c_str());
+  videos[ind].window_id = wid;
+  video_set_option_string(ind, "wid", wid);
 }
 
 bool video_exists(string ind) {
