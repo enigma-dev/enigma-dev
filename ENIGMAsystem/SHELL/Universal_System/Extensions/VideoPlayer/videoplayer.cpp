@@ -237,7 +237,7 @@ string video_get_option_string(string ind, string option) {
 void video_set_option_string(string ind, string option, string value) {
   if (option == "wid") value = std::to_string(strtoull(value.c_str(), NULL, 10));
   mpv_set_option_string(videos[ind].mpv, option.c_str(), value.c_str());
-  if (video_get_option_was_set(ind, option)) {
+  if (!video_get_option_was_set(ind, option)) {
     videos[ind].option.insert(std::make_pair(option, value));
   } else {
     videos[ind].option[option] = value;
