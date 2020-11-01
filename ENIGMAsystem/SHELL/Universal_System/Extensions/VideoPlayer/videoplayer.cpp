@@ -42,7 +42,9 @@
 #endif
 
 #ifdef _WIN32
-  #include <windows.h>
+  #define byte __windows_byte_workaround
+    #include <windows.h>
+  #undef byte
 #endif
 
 #include <mpv/client.h>
