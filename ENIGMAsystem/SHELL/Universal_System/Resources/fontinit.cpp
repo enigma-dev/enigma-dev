@@ -100,15 +100,15 @@ void exe_loadfonts(FILE* exe) {
         if (!fread(&gty2, 4, 1, exe)) return;
         fontglyph fg;
 
-        fg.x = int(origin + .5);
-        fg.y = int(baseline + .5);
-        fg.x2 = int(origin + .5) + gwid;
-        fg.y2 = int(baseline + .5) + ghgt;
+        fg.x = round(origin);
+        fg.y = round(baseline);
+        fg.x2 = round(origin) + gwid;
+        fg.y2 = round(baseline) + ghgt;
         fg.tx = gtx;
         fg.ty = gty;
         fg.tx2 = gtx2;
         fg.ty2 = gty2;
-        fg.xs = advance + .5;
+        fg.xs = advance;
 
         if (fg.y < ymin) ymin = fg.y;
         if (fg.y2 > ymax) ymax = fg.y2;
