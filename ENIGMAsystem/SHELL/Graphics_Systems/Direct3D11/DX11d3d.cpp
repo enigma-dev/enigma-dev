@@ -42,12 +42,15 @@ const D3D11_BLEND blend_equivs[11] = {
   D3D11_BLEND_INV_DEST_COLOR, D3D11_BLEND_SRC_ALPHA_SAT
 };
 
+// causes HLSL shader to sample white (1,1,1,1) like GLSL when a texture is not set,
+// otherwise primitives without a texture will be invisible or rgba(0,0,0,0)
 ID3D11ShaderResourceView *getDefaultWhiteTexture() {
     static int texid = -1;
     if (texid == -1) {
-      unsigned* data = new unsigned[1];
-      data[0] = 0xFFFFFFFF;
-      texid = enigma::graphics_create_texture(enigma::RawImage((unsigned char*)data, 1, 1) , false);
+      enigma::RawImage ri;
+      ri.resize(1,1);
+      reinterpret_cast<unsigned*>(ri.pxdata)[0] = 0xFFFFFFFF;
+      texid = enigma::graphics_create_texture(ri, false);
     }
     return static_cast<enigma::DX11Texture*>(enigma::textures[texid].get())->view;
 }
