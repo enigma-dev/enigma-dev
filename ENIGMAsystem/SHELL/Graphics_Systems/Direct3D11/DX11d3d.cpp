@@ -45,7 +45,8 @@ const D3D11_BLEND blend_equivs[11] = {
 ID3D11ShaderResourceView *getDefaultWhiteTexture() {
     static int texid = -1;
     if (texid == -1) {
-      unsigned data[1] = {0xFFFFFFFF};
+      unsigned* data = new unsigned[1];
+      data[0] = 0xFFFFFFFF;
       texid = enigma::graphics_create_texture(enigma::RawImage((unsigned char*)data, 1, 1) , false);
     }
     return static_cast<enigma::DX11Texture*>(enigma::textures[texid].get())->view;
