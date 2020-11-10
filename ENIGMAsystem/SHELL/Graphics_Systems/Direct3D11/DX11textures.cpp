@@ -37,13 +37,13 @@ int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidt
   if (fullwidth == nullptr) fullwidth = &fw; 
   if (fullheight == nullptr) fullheight = &fh;
   
-  *fullwidth  = nlpo2dc(img.w)+1;
-  *fullheight = nlpo2dc(img.h)+1;
+  *fullwidth  = nlpo2dc(img.w) + 1;
+  *fullheight = nlpo2dc(img.h) + 1;
 
-  tbsd.SysMemPitch = (*fullwidth)*4;
+  tbsd.SysMemPitch = (*fullwidth) * 4;
   // not needed since this is a 2d texture,
   // but we can pass size info for debugging
-  tbsd.SysMemSlicePitch = (*fullwidth)*(*fullheight)*4;
+  tbsd.SysMemSlicePitch = (*fullwidth) * (*fullheight) * 4;
 
   tdesc.Width = *fullwidth;
   tdesc.Height = *fullheight;
