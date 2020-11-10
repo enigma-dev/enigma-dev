@@ -65,6 +65,7 @@ int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidt
     if (FAILED(m_device->CreateTexture2D(&tdesc,&tbsd,&tex)))
       return 0;
   } else {
+    // surfaces will fall through here to create render target textures
     tbsd.pSysMem = img.pxdata;
     if (FAILED(m_device->CreateTexture2D(&tdesc,&tbsd,&tex)))
       return 0;
