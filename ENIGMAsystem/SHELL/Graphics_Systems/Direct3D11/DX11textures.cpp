@@ -28,8 +28,7 @@ using namespace enigma::dx11;
 
 namespace enigma {
 
-int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight)
-{
+int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight) {
   ID3D11Texture2D *tex;
   D3D11_TEXTURE2D_DESC tdesc;
   D3D11_SUBRESOURCE_DATA tbsd;
@@ -40,16 +39,11 @@ int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidt
   
   *fullwidth  = nlpo2dc(img.w)+1;
   *fullheight = nlpo2dc(img.h)+1;
-  
-  if (img.pxdata != nullptr && (img.w != *fullwidth || img.h != *fullheight)) {
-    RawImage padded = image_pad(img, *fullwidth, *fullheight);
-    tbsd.pSysMem = padded.pxdata;
-  } else tbsd.pSysMem = img.pxdata;
-  
-  tbsd.SysMemPitch = *fullwidth*4;
+
+  tbsd.SysMemPitch = (*fullwidth)*4;
   // not needed since this is a 2d texture,
   // but we can pass size info for debugging
-  tbsd.SysMemSlicePitch = *fullwidth*(*fullheight)*4;
+  tbsd.SysMemSlicePitch = (*fullwidth)*(*fullheight)*4;
 
   tdesc.Width = *fullwidth;
   tdesc.Height = *fullheight;
@@ -65,8 +59,16 @@ int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidt
   tdesc.CPUAccessFlags = 0;
   tdesc.MiscFlags = 0;
 
-  if (FAILED(m_device->CreateTexture2D(&tdesc,&tbsd,&tex)))
-    return 0;
+  if (img.pxdata != nullptr && (img.w != *fullwidth || img.h != *fullheight)) {
+    RawImage padded = image_pad(img, *fullwidth, *fullheight);
+    tbsd.pSysMem = padded.pxdata;
+    if (FAILED(m_device->CreateTexture2D(&tdesc,&tbsd,&tex)))
+      return 0;
+  } else {
+    tbsd.pSysMem = img.pxdata;
+    if (FAILED(m_device->CreateTexture2D(&tdesc,&tbsd,&tex)))
+      return 0;
+  }
 
   D3D11_SHADER_RESOURCE_VIEW_DESC vdesc;
   vdesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
