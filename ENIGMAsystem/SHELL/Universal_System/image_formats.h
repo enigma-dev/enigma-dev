@@ -37,7 +37,7 @@ struct RawImage {
   }
   void resize(unsigned w, unsigned h) {
     delete[] pxdata;
-    pxdata = new unsigned char[w*h];
+    pxdata = new unsigned char[w*h*4];
     this->w = w;
     this->h = h;
   }
