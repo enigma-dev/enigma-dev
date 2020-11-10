@@ -598,8 +598,8 @@ GameMakerEventMappings:
         4: MousePressed[Left]
         5: MousePressed[Right]
         6: MousePressed[Middle]
-        7: MouseReleased[Right]
-        8: MouseReleased[Left]
+        7: MouseReleased[Left]
+        8: MouseReleased[Right]
         9: MouseReleased[Middle]
         10: MouseEnterWindow
         11: MouseLeaveWindow
