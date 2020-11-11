@@ -85,11 +85,7 @@ install:
     bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
   - >
     bash -lc "pacman --noconfirm -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-  - > # Upgrade msys
-    bash -lc "pacman --noconfirm -Syuu"
-  - > # Kill any hanging msys terminals
-    taskkill /f /fi "MODULES eq msys-2.0.dll" || exit /b 0s
-  - > # Finish upgrading packages & install packages common to all builds
+  - > # Install packages common to all builds
     bash -lc "pacboy --noconfirm -Syuu boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x %PACKAGES%"
   - gcc -v
   - ps: |
