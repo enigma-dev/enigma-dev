@@ -35,12 +35,6 @@ struct RawImage {
   RawImage(RawImage &&other): pxdata(other.pxdata), w(other.w), h(other.h) {
     other.pxdata = nullptr;
   }
-  void resize(unsigned w, unsigned h) {
-    delete[] pxdata;
-    pxdata = new unsigned char[w*h*4];
-    this->w = w;
-    this->h = h;
-  }
   unsigned char* pxdata;
   unsigned w, h;
 };
