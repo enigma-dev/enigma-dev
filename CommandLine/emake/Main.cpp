@@ -72,9 +72,7 @@ int main(int argc, char* argv[])
     errorStream.rdbuf(nullptr);
   }
 #ifdef CLI_ENABLE_EGM
-  yyp::bind_output_streams(outputStream, errorStream);
-  gmx::bind_output_streams(outputStream, errorStream);
-  gmk::bind_output_streams(outputStream, errorStream);
+  egm::BindOutputStreams(outputStream, errorStream);
 #endif
 
   std::streambuf* cout_rdbuf = std::cout.rdbuf();
@@ -163,7 +161,8 @@ int main(int argc, char* argv[])
       return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
 #ifdef CLI_ENABLE_EGM
     } else if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
-      if (!(project = gmk::LoadGMK(input_file, &event_data))) return 1;
+      egm::GMKFileFormat f(&event_data);
+      if (!(project = f.LoadProject(input_file))) return 1;
       return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext == "gmx") {
       fs::path p = input_file;
@@ -171,18 +170,20 @@ int main(int argc, char* argv[])
         input_file += "/" + p.filename().stem().string() + ".project.gmx";
       }
 
-      if (!(project = gmx::LoadGMX(input_file, &event_data))) return 1;
+      egm::GMXFileFormat f(&event_data);
+      if (!(project = f.LoadProject(input_file))) return 1;
       return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext == "yyp") {
-      if (!(project = yyp::LoadYYP(input_file, &event_data))) return 1;
+      egm::YYPFileFormat f(&event_data);
+      if (!(project = f.LoadProject(input_file))) return 1;
       return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext == "egm") {
       fs::path p = input_file;
       if (fs::is_directory(p)) {
         input_file += "/" + p.filename().stem().string() + ".egm";
       }
-      egm::EGM egm(&event_data);
-      if (!(project = egm.LoadEGM(input_file))) return 1;
+      egm::EGMFileFormat f(&event_data);
+      if (!(project = f.LoadProject(input_file))) return 1;
       return plugin.BuildGame(project->game(), mode, output_file.c_str());
     } else if (ext.empty()) {
       std::cerr << "Error: Unknown filetype: cannot determine type of file "

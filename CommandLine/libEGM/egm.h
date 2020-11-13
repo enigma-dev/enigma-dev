@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Greg Williamson, Robert B. Colton
+/** Copyright (C) 2018-2020 Greg Williamson, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,30 +15,46 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "project.pb.h"
-#include "event_reader/event_parser.h"
+#ifndef EGM_H
+#define EGM_H
+
+#include "file-format.h"
 
 #include <yaml-cpp/yaml.h>
 
-#include <filesystem>
 #include <map>
-#include <memory>
-#include <string>
 
 namespace egm {
-namespace fs = std::filesystem;
 
 // Reads and writes EGM files
-class EGM {
+class EGMFileFormat : public FileFormat {
  public:
+  EGMFileFormat(const EventData* event_data) : FileFormat(event_data) {}
+  // Read
+  virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
+  virtual std::optional<Background> LoadBackground(const fs::path& fName) const override;
+  virtual std::optional<Sound> LoadSound(const fs::path& fName) const override;
+  virtual std::optional<Sprite> LoadSprite(const fs::path& fName) const override;
+  virtual std::optional<Shader> LoadShader(const fs::path& fName) const override;
+  virtual std::optional<Font> LoadFont(const fs::path& fName) const override;
+  virtual std::optional<Object> LoadObject(const fs::path& fName) const override;
+  virtual std::optional<Timeline> LoadTimeLine(const fs::path& fName) const override;
+  virtual std::optional<Room> LoadRoom(const fs::path& fName) const override;
+  virtual std::optional<Path> LoadPath(const fs::path& fName) const override;
+  virtual std::optional<Script> LoadScript(const fs::path& fName) const override;
+  // Write
   bool WriteEGM(std::string fName, buffers::Project* project) const;
-  std::unique_ptr<buffers::Project> LoadEGM(std::string fName) const;
-
-  EGM(const EventData* events): events_(events) {}
 
  private:
   // Reading ===================================================================
-  bool LoadEGM(const std::string& yaml, buffers::Game* game) const;
+  template<class T>
+  std::optional<T> LoadRes(const fs::path& fName) const {
+    T res;
+    if (!LoadResource(fName, &res, 0)) return {};
+    return res;
+  }
+
+  bool LoadEGM(const fs::path& yamlFile, buffers::Game* game) const;
 
   bool LoadTree(const fs::path& fPath, YAML::Node yaml,
                 buffers::TreeNode* buffer) const;
@@ -67,3 +83,5 @@ class EGM {
 };
 
 } //namespace egm
+
+#endif

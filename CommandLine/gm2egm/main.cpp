@@ -35,14 +35,17 @@ int main(int argc, char *argv[])
 
   std::unique_ptr<buffers::Project> project;
   EventData event_data(ParseEventFile("events.ey"));
-  egm::EGM egm(&event_data);
+  egm::EGMFileFormat egm(&event_data);
 
   if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
-    project = gmk::LoadGMK(input_file, &event_data);
+    egm::GMKFileFormat f(&event_data);
+    project = f.LoadProject(input_file);
   } else if (ext == "gmx") {
-    project = gmx::LoadGMX(input_file, &event_data);
+    egm::GMXFileFormat f(&event_data);
+    project = f.LoadProject(input_file);
   } else if (ext == "yyp") {
-    project = yyp::LoadYYP(input_file, &event_data);
+    egm::YYPFileFormat f(&event_data);
+    project = f.LoadProject(input_file);
   } else {
     std::cerr << "Error: Unkown extenstion \"" << ext << "\"." << std::endl; 
     return -2;

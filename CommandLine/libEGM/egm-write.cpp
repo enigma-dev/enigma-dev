@@ -297,7 +297,7 @@ bool WriteTimeline(const fs::path &/*egm_root*/, const fs::path &dir,
 }  // namespace
 namespace egm {
 
-bool EGM::WriteObject(const fs::path &egm_root, const fs::path &dir,
+bool EGMFileFormat::WriteObject(const fs::path &egm_root, const fs::path &dir,
                       const buffers::resources::Object& object) const {
   buffers::resources::Object cleaned = object;
   auto events = object.egm_events();
@@ -316,7 +316,7 @@ bool EGM::WriteObject(const fs::path &egm_root, const fs::path &dir,
   return true;
 }
 
-bool EGM::WriteRes(buffers::TreeNode* res, const fs::path &dir,
+bool EGMFileFormat::WriteRes(buffers::TreeNode* res, const fs::path &dir,
                    const fs::path &egm_root) const {
   string newDir = (dir/res->name()).string();
   switch (res->type_case()) {
@@ -407,7 +407,7 @@ inline int getResID(buffers::TreeNode* res) {
 
 }  // namespace
 
-bool EGM::WriteNode(buffers::TreeNode* folder, string dir,
+bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
                     const fs::path &egm_root, YAML::Emitter& tree) const {
   tree << YAML::BeginMap << YAML::Key << "folder" << YAML::Value << folder->name();
 
@@ -450,7 +450,7 @@ bool EGM::WriteNode(buffers::TreeNode* folder, string dir,
 
 static const std::string EGM_VERSION = "2.0.0";
 
-bool EGM::WriteEGM(string fName, buffers::Project* project) const {
+bool EGMFileFormat::WriteEGM(string fName, buffers::Project* project) const {
 
   if (fName.back() != '/')
     fName += '/';
