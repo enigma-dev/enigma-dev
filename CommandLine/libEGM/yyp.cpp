@@ -168,7 +168,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
             refl->SetInt64(m, field, (isSplit) ? std::stoi(splitValue) : child->GetInt64());
             break;
           }
-          case CppType::CPPTYPE_UINT32: {outStream
+          case CppType::CPPTYPE_UINT32: {
             refl->SetUInt32(m, field, (isSplit) ? std::stoi(splitValue) : child->GetUint());
             break;
           }
