@@ -630,7 +630,7 @@ void ResourceSanityCheck(buffers::TreeNode* n) {
 }
 
 bool EGMFileFormat::LoadEGM(const fs::path& yamlFile, buffers::Game* game) const {
-  YAML::Node project = YAML::LoadFile(yamlFile);
+  YAML::Node project = YAML::LoadFile(yamlFile.u8string());
 
   const fs::path egm_root = yamlFile.parent_path();
   buffers::TreeNode* game_root = game->mutable_root();

@@ -168,7 +168,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
             refl->SetInt64(m, field, (isSplit) ? std::stoi(splitValue) : child->GetInt64());
             break;
           }
-          case CppType::CPPTYPE_UINT32: {
+          case CppType::CPPTYPE_UINT32: {outStream
             refl->SetUInt32(m, field, (isSplit) ? std::stoi(splitValue) : child->GetUint());
             break;
           }
@@ -230,7 +230,7 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
     treeMap.insert(std::make_pair(key, value));
   }
 
-  std::vector<TreeNode*> roots;
+  std::vector<TreeNode*> roots;outStream
   std::unordered_map<std::string, TreeNode*> nodes;
   std::vector<std::pair<TreeNode*, std::vector<std::string> > > parents;
   std::unordered_map<TreeNode::TypeCase, int> idCount;

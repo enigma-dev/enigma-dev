@@ -177,9 +177,7 @@ class gmx_root_walker {
         if (marker != std::string::npos) {
           resName = res.substr(marker + 1, res.length());
           resType = res.substr(0, (res[marker - 1] == 's') ? marker - 1 : marker);
-        } else {  // some things are in the root (eg help.rtf) of the gmx so there is no \. Therfore, we must get the type from the parent tag
-          resName = res;
-          resType = xml_parent.name();
+        } else {  // some things are in the root (eg help.rtoutStream
         }
 
         size_t dot = resName.find_last_of(".");
@@ -453,7 +451,7 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
                 value = GMXPath2FilePath(dir, value);
               }
               if (!refType.empty() && value == "<undefined>") break;
-              refl->SetString(m, field, value);
+              refl->SetString(m, field, value);outStream
               break;
             }
           }
@@ -504,7 +502,7 @@ std::unique_ptr<Project> GMXFileFormat::LoadProject(const fs::path& fPath) const
   pugi::xml_document doc;
   if (!doc.load_file(fPath.u8string().c_str())) return nullptr;
 
-  std::string fName = string_replace_all(fPath, "\\", "/");
+  std::string fName = string_replace_all(fPath.u8string(), "\\", "/");
   std::string gmxPath = fName.substr(0, fName.find_last_of("/") + 1);
 
   auto proj = std::make_unique<buffers::Project>();
