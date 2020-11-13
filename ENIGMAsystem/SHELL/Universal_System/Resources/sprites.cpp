@@ -172,7 +172,7 @@ bool sprite_exists(int spr) {
   return sprites.exists(spr);
 }
 
-void sprite_delete(int ind, bool free_texture = true) {
+void sprite_delete(int ind, bool free_texture) {
   if (free_texture) sprites.get(ind).FreeTextures();
   sprites.destroy(ind);
 }
@@ -181,7 +181,7 @@ int sprite_duplicate(int ind) {
   return sprites.duplicate(ind);  
 }
 
-void sprite_assign(int ind, int copy_sprite, bool free_texture = true) {
+void sprite_assign(int ind, int copy_sprite, bool free_texture) {
   if (free_texture) sprites.get(ind).FreeTextures();
   Sprite copy = sprites.get(copy_sprite);
   sprites.assign(ind, std::move(copy));
