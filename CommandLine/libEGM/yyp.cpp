@@ -230,7 +230,7 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
     treeMap.insert(std::make_pair(key, value));
   }
 
-  std::vector<TreeNode*> roots;outStream
+  std::vector<TreeNode*> roots;
   std::unordered_map<std::string, TreeNode*> nodes;
   std::vector<std::pair<TreeNode*, std::vector<std::string> > > parents;
   std::unordered_map<TreeNode::TypeCase, int> idCount;

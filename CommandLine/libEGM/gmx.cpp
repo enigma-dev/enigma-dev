@@ -451,7 +451,7 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
                 value = GMXPath2FilePath(dir, value);
               }
               if (!refType.empty() && value == "<undefined>") break;
-              refl->SetString(m, field, value);outStream
+              refl->SetString(m, field, value);
               break;
             }
           }
