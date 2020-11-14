@@ -47,7 +47,7 @@ namespace enigma
 void draw_sprite_pos_raw(const Sprite& spr2d, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar color, gs_scalar alpha)
 {
   alpha = CLAMP_ALPHAF(alpha);
-  int usi = spr2d.GetTextureMod(subimg);
+  int usi = spr2d.ModSubimage(subimg);
 
   const TexRect& texRect = spr2d.GetTextureRect(usi); 
   
@@ -69,7 +69,7 @@ void draw_sprite_pos_part_raw(const Sprite& spr2d, int subimg,
   gs_scalar color, gs_scalar alpha
 ) {
   alpha = CLAMP_ALPHAF(alpha);
-  int usi = spr2d.GetTextureMod(subimg);
+  int usi = spr2d.ModSubimage(subimg);
 
   const TexRect& texRect = spr2d.GetTextureRect(usi); 
   
@@ -142,7 +142,7 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
 {
   const Sprite& spr2d = sprites.get(spr);
   alpha = CLAMP_ALPHAF(alpha);
-  int usi = spr2d.GetTextureMod(subimg);
+  int usi = spr2d.ModSubimage(subimg);
   rot *= M_PI / -180.0;
   
   const TexRect& texRect = spr2d.GetTextureRect(usi);
@@ -181,7 +181,7 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
 {
   alpha=CLAMP_ALPHAF(alpha);
   const Sprite& spr2d = sprites.get(spr);
-  int usi = spr2d.GetTextureMod(subimg);
+  int usi = spr2d.ModSubimage(subimg);
   
   const TexRect& texRect = spr2d.GetTextureRect(usi);
 
@@ -202,7 +202,7 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
 void d3d_draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, gs_scalar z)
 {
   const Sprite& spr2d = sprites.get(spr);
-  int usi = spr2d.GetTextureMod(subimg);
+  int usi = spr2d.ModSubimage(subimg);
 
   const TexRect& texRect = spr2d.GetTextureRect(usi);
 
@@ -224,7 +224,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 {
   alpha=CLAMP_ALPHAF(alpha);
   const Sprite& spr2d = sprites.get(spr);
-  int usi = spr2d.GetTextureMod(subimg);
+  int usi = spr2d.ModSubimage(subimg);
 
   //Order x1,y1,x2,y2 correctly
   if (x1>x2) {gs_scalar tx = x2; x2 = x1, x1 = tx;}
@@ -348,7 +348,7 @@ void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y, int color,
 {
   alpha=CLAMP_ALPHAF(alpha);
   const Sprite& spr2d = sprites.get(spr);
-  int usi = spr2d.GetTextureMod(subimg);
+  int usi = spr2d.ModSubimage(subimg);
 
   x = ((spr2d.xoffset+x)<0?0:spr2d.width)-fmod(spr2d.xoffset+x,spr2d.width);
   y = ((spr2d.yoffset+y)<0?0:spr2d.height)-fmod(spr2d.yoffset+y,spr2d.height);
@@ -387,7 +387,7 @@ void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 {
     alpha=CLAMP_ALPHAF(alpha);
     const Sprite& spr2d = sprites.get(spr);
-    int usi = spr2d.GetTextureMod(subimg);
+    int usi = spr2d.ModSubimage(subimg);
 
   const TexRect& texRect = spr2d.GetTextureRect(usi);
   
