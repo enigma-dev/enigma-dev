@@ -35,8 +35,9 @@ void Sprite::SetTexture(int subimg, int textureID, TexRect texRect) {
 
 const int Sprite::GetTextureMod(int subimg) const {
   if (SubimageCount() == 0) return 0;
-  if (subimg >= 0) return subimg % SubimageCount();
-  return int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % SubimageCount();
+  if (subimg >= 0) subimg %= SubimageCount();
+  else subimg = int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % SubimageCount();
+  return GetTexture(subimg);
 }
 
 Sprite::Sprite(const Sprite& s) {
