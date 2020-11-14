@@ -510,11 +510,11 @@ int LoadSettings(Decoder &dec, Settings& set) {
 
   dec.skip(dec.read4()); // GAME_ICON
 
-  // DISPLAY_errStreamORS, WRITE_TO_LOG, ABORT_ON_errStreamOR
+  // DISPLAY_ERRORS, WRITE_TO_LOG, ABORT_ON_ERROR
   dec.readBool(); dec.readBool(); dec.readBool();
-  dec.read4(); // errStreamors
-  // TREAT_UNINIT_AS_0 = ((errStreamors & 0x01) != 0)
-  // errStreamOR_ON_ARGS = ((errStreamors & 0x02) != 0)
+  dec.read4(); // errors
+  // TREAT_UNINIT_AS_0 = ((errors & 0x01) != 0)
+  // ERROR_ON_ARGS = ((errors & 0x02) != 0)
   inf->set_author_name(dec.readStr());
   if (ver > 600)
     inf->set_version(dec.readStr());
