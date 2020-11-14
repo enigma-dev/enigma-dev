@@ -64,7 +64,7 @@ public:
   
   void FreeTextures() { for (std::pair<int, Subimage&> s : _subimages) s.second.FreeTexture(); }
   const int& GetTexture(int subimg) const { return _subimages.get(subimg).textureID; }
-  const int GetTextureMod(int subimg) const;
+  const int ModSubimage(int subimg) const;
   void SetTexture(int subimg, int textureID, TexRect texRect);
   const TexRect& GetTextureRect(int subimg) const { return _subimages.get(subimg).textureBounds; } 
   
