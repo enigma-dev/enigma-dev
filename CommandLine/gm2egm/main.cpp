@@ -3,7 +3,6 @@
 #include "yyp.h"
 #include "egm.h"
 #include "filesystem.h"
-#include "strings_util.h"
 
 #include <iostream>
 #include <string>
@@ -28,35 +27,18 @@ int main(int argc, char *argv[])
     }
   }
 
-  std::string input_file = argv[1];
-  std::string ext;
-  size_t dot = input_file.find_last_of('.');
-  if (dot != std::string::npos) ext = ToLower(input_file.substr(dot + 1));
-
-  std::unique_ptr<buffers::Project> project;
   EventData event_data(ParseEventFile("events.ey"));
-  egm::EGMFileFormat egm(&event_data);
+  egm::LibEGMInit(&event_data);
 
-  if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
-    egm::GMKFileFormat f(&event_data);
-    project = f.LoadProject(input_file);
-  } else if (ext == "gmx") {
-    egm::GMXFileFormat f(&event_data);
-    project = f.LoadProject(input_file);
-  } else if (ext == "yyp") {
-    egm::YYPFileFormat f(&event_data);
-    project = f.LoadProject(input_file);
-  } else {
-    std::cerr << "Error: Unkown extenstion \"" << ext << "\"." << std::endl; 
-    return -2;
-  }
+  std::unique_ptr<buffers::Project> project = egm::LoadProject(argv[1]);
 
   if (project == nullptr) {
-    std::cerr << "Error: Failure opening file \"" << input_file << "\"" << std::endl;
+    std::cerr << "Error: Failure opening file \"" << argv[1] << "\"" << std::endl;
     return -3;
   }
 
-  if (!egm.WriteEGM(outDir, project.get())) {
+  egm::EGMFileFormat* f = static_cast<egm::EGMFileFormat*>(egm::fileFormats[".egm"].get());
+  if (!f->WriteEGM(outDir, project.get())) {
     std::cerr << "Error: Failure writting \"" << argv[2] << std::endl;
     return -4;
   }

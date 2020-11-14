@@ -16,6 +16,8 @@
 #include "yyp.h"
 #endif
 
+#include "strings_util.h"
+
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -26,14 +28,6 @@ namespace fs = std::filesystem;
 
 std::ostream outputStream(nullptr);
 std::ostream errorStream(nullptr);
-
-static std::string tolower(const std::string &str) {
-  std::string res = str;
-  for (size_t i = 0; i < res.length(); ++i) {
-    if (res[i] >= 'A' && res[i] <= 'Z') res[i] += 'a' - 'A';
-  }
-  return res;
-}
 
 int main(int argc, char* argv[])
 {
@@ -135,69 +129,37 @@ int main(int argc, char* argv[])
   }
 
   Game game;
+
   std::string input_file = options.GetOption("input").as<std::string>();
-  if (!input_file.empty() && input_file.back() == '/') input_file.pop_back();
 
   // Working directory hacks
   if (mode != emode_compile)
     game.SetOutputFile(input_file);
 
-  if (input_file.size()) {
-    if (!fs::exists(input_file)) {
-      std::cerr << "Input file does not exist: " << input_file << std::endl;
-      return OPTIONS_ERROR;
-    }
 
-    EventData event_data(ParseEventFile((fs::path(options.EnigmaRoot())/"events.ey").u8string()));
-
-    // FIXME: Remove all occurrences of wrap_unique in the following code.
-    // There is no reason for these projects to be bare pointers.
-    std::string ext;
-    size_t dot = input_file.find_last_of('.');
-    std::unique_ptr<buffers::Project> project;
-    if (dot != std::string::npos) ext = tolower(input_file.substr(dot + 1));
-    if (ext == "sog") {
-      if (!ReadSOG(input_file, &game, &event_data)) return 1;
-      return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
-#ifdef CLI_ENABLE_EGM
-    } else if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
-      egm::GMKFileFormat f(&event_data);
-      if (!(project = f.LoadProject(input_file))) return 1;
-      return plugin.BuildGame(project->game(), mode, output_file.c_str());
-    } else if (ext == "gmx") {
-      fs::path p = input_file;
-      if (fs::is_directory(p)) {
-        input_file += "/" + p.filename().stem().string() + ".project.gmx";
-      }
-
-      egm::GMXFileFormat f(&event_data);
-      if (!(project = f.LoadProject(input_file))) return 1;
-      return plugin.BuildGame(project->game(), mode, output_file.c_str());
-    } else if (ext == "yyp") {
-      egm::YYPFileFormat f(&event_data);
-      if (!(project = f.LoadProject(input_file))) return 1;
-      return plugin.BuildGame(project->game(), mode, output_file.c_str());
-    } else if (ext == "egm") {
-      fs::path p = input_file;
-      if (fs::is_directory(p)) {
-        input_file += "/" + p.filename().stem().string() + ".egm";
-      }
-      egm::EGMFileFormat f(&event_data);
-      if (!(project = f.LoadProject(input_file))) return 1;
-      return plugin.BuildGame(project->game(), mode, output_file.c_str());
-    } else if (ext.empty()) {
-      std::cerr << "Error: Unknown filetype: cannot determine type of file "
-                  << '"' << input_file << "\"." << std::endl;
-#endif
-    } else {
-      std::cerr << "Error: Unknown filetype \"" << ext
-                  << "\": cannot read input file \"" << input_file
-                  << "\"." << std::endl;
-    }
-    return 1;
+  if (input_file.empty()) {
+    std::cerr << "Warning: No game file specified. "
+                "Building an empty game." << std::endl;
+    return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
   }
 
-  std::cerr << "Warning: No game file specified. "
-               "Building an empty game." << std::endl;
-  return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
+  // Load event data
+  EventData event_data(ParseEventFile((fs::path(options.EnigmaRoot())/"events.ey").u8string()));
+
+  // FIXME: move SOG to libEGM as a format and remove this dup logic
+  if (!input_file.empty() && input_file.back() == '/') input_file.pop_back();
+  std::string ext;
+  size_t dot = input_file.find_last_of('.');
+  if (dot != std::string::npos) ext = ToLower(input_file.substr(dot + 1));
+  if (ext == "sog") {
+    if (!ReadSOG(input_file, &game, &event_data)) return 1;
+    return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
+  }
+#ifdef CLI_ENABLE_EGM
+  egm::LibEGMInit(&event_data);
+  std::unique_ptr<buffers::Project> project;
+  if (!(project = egm::LoadProject(input_file))) return 1;
+    return plugin.BuildGame(project->game(), mode, output_file.c_str());
+#endif
+  return 1;
 }

@@ -25,6 +25,7 @@
 #include <streambuf>
 #include <filesystem>
 #include <optional>
+#include <unordered_map>
 
 namespace egm {
 
@@ -53,6 +54,11 @@ public:
 protected:
   const EventData* _event_data;
 };
+
+// Access file formats based on extensions
+extern std::unordered_map<std::string, std::unique_ptr<FileFormat>> fileFormats;
+void LibEGMInit(const EventData* event_data);
+std::unique_ptr<Project> LoadProject(const fs::path& /*fName*/);
 
 // Debugging output streams for file formats
 extern std::ostream outStream;
