@@ -72,7 +72,7 @@ for (var i = 0; i < 6; ++i) {
 	// also test the negative subimage indexes which should be modulo the subimage count of sprite_index
 	sprite_index = sprNumbers;
 	texidNegative = sprite_get_texture(sprNumbers, -i);
-	var xx, yy, tx, ty, sz;
+	var xx, yy, sz;
 	sz = 8;
 	xx = 150 + i*sz;
 	yy = 250;
