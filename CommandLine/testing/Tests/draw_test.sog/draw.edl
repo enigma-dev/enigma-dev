@@ -69,9 +69,10 @@ for (var i = 0; i < 6; ++i) {
 	var texid, texidNegative;
 	// offset +1 and show 231231 so we don't mix up showing the actual texture which is 123
 	texid = sprite_get_texture(sprNumbers, i+1);
-	// also test the negative subimage indexes which should be modulo the subimage count of sprite_index
+	// also test the negative subimage indexes which should just be the current image_index
 	sprite_index = sprNumbers;
-	texidNegative = sprite_get_texture(sprNumbers, -i);
+	image_index = i;
+	texidNegative = sprite_get_texture(sprNumbers, -1);
 	var xx, yy, sz;
 	sz = 8;
 	xx = 150 + i*sz;
