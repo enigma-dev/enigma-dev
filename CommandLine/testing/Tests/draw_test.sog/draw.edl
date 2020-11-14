@@ -64,6 +64,33 @@ surf_dupx = 32;
 surf_dupy = room_height-64;
 draw_surface(surf_dup,surf_dupx,surf_dupy);
 
+// test sprite subimage index modulation
+for (var i = 0; i < 6; ++i) {
+	var texid, texidNegative;
+	// offset +1 and show 231231 so we don't mix up showing the actual texture which is 123
+	texid = sprite_get_texture(sprNumbers, i+1);
+	sprite_index = sprNumbers;
+	// also test the negative subimage indexes
+	texidNegative = sprite_get_texture(sprNumbers, -i);
+	var xx, yy, tx, ty, sz;
+	sz = 8;
+	xx = 150 + i*sz;
+	yy = 250;
+	draw_primitive_begin_texture(pr_trianglestrip, texid);
+	draw_vertex_texture(xx, yy, 0, 0);
+	draw_vertex_texture(xx, yy+sz, 0, 1);
+	draw_vertex_texture(xx+sz, yy, 1, 0);
+	draw_vertex_texture(xx+sz, yy+sz, 1, 1);
+	draw_primitive_end();
+	yy += sz;
+	draw_primitive_begin_texture(pr_trianglestrip, texidNegative);
+	draw_vertex_texture(xx, yy, 0, 0);
+	draw_vertex_texture(xx, yy+sz, 0, 1);
+	draw_vertex_texture(xx+sz, yy, 1, 0);
+	draw_vertex_texture(xx+sz, yy+sz, 1, 1);
+	draw_primitive_end();
+}
+
 // screen copy tests
 if (screen_spr == -1) {
 	// test reading screen pixels just once
