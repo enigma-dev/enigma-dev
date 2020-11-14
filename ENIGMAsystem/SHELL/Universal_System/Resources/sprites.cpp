@@ -138,7 +138,7 @@ int sprite_get_number(int sprid) {
 }
 
 int sprite_get_texture(int sprid, int subimage) {
-  return sprites.get(sprid).GetTexture(subimage);
+  return sprites.get(sprid).GetTextureMod(subimage);
 }
 
 int sprite_get_xoffset(int sprid) {
