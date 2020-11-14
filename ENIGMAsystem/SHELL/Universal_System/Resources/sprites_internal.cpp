@@ -1,6 +1,8 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Collision_Systems/collision_mandatory.h"
 #include "Universal_System/nlpo2.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Object_Tiers/graphics_object.h"
 #include "sprites_internal.h"
 
 namespace enigma {
@@ -29,6 +31,12 @@ void Sprite::SetTexture(int subimg, int textureID, TexRect texRect) {
   Subimage& s = _subimages.get(subimg);
   s.textureID = textureID;
   s.textureBounds = texRect;
+}
+
+const int Sprite::GetTextureMod(int subimg) const {
+  if (SubimageCount() == 0) return 0;
+  if (subimg >= 0) return subimg % SubimageCount();
+  return int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % SubimageCount();
 }
 
 Sprite::Sprite(const Sprite& s) {
