@@ -64,7 +64,7 @@ surf_dupx = 32;
 surf_dupy = room_height-64;
 draw_surface(surf_dup,surf_dupx,surf_dupy);
 
-// test sprite subimage index modulation
+// test sprite subimage index modulo
 for (var i = 0; i < 6; ++i) {
 	var texid, texidNegative;
 	// offset +1 and show 231231 so we don't mix up showing the actual texture which is 123
