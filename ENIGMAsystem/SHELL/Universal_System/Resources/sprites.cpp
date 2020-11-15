@@ -86,11 +86,13 @@ int sprite_get_height(int sprid) {
 }
 
 gs_scalar sprite_get_texture_width_factor(int sprid, int subimg) {
-  return sprites.get(sprid).GetTextureRect(subimg).w;
+  const auto& spr2d = sprites.get(sprid);
+  return spr2d.GetTextureRect(spr2d.ModSubimage(subimg)).w;
 }
 
 gs_scalar sprite_get_texture_height_factor(int sprid, int subimg) {
-  return sprites.get(sprid).GetTextureRect(subimg).h;
+  const auto& spr2d = sprites.get(sprid);
+  return spr2d.GetTextureRect(spr2d.ModSubimage(subimg)).h;
 }
 
 int sprite_get_bbox_bottom(int sprid) {
