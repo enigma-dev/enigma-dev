@@ -9,6 +9,8 @@ namespace egm {
 
 // Access file formats based on extensions
 std::unordered_map<std::string, std::unique_ptr<FileFormat>> fileFormats;
+extern std::unordered_map<std::string, FileFormat*> resourceFormats;
+
 void LibEGMInit(const EventData* event_data) {
   fileFormats[".egm"] = std::make_unique<EGMFileFormat>(event_data);
   fileFormats[".gmx"] = std::make_unique<GMXFileFormat>(event_data);
@@ -61,6 +63,28 @@ std::unique_ptr<Project> LoadProject(const fs::path& fName) {
   errStream << "Error: Unknown file type: \"" << ext << "\" cannot determine type of file" << std::endl;
   return nullptr;
 
+}
+
+bool FileFormat::WriteResource(TreeNode* res, const fs::path& fName, bool mutate) const {
+  if (!mutate) {
+    TreeNode copy = *res;
+    return DumpResource(&copy, fName);
+  } else return DumpResource(res, fName);
+}
+
+bool WriteProject(Project* project, const fs::path& fName) {
+  std::string ext = ToLower(fName.extension().u8string());
+  if (fileFormats.count(ext) > 0) {
+    return fileFormats[ext]->WriteProject(project, fName);
+  }
+
+  errStream << "No writer avaliable for format: \"" << ext << "\"" << std::endl;
+  return false;
+}
+
+bool WriteResource(TreeNode* res, const fs::path& fName) {
+  // TODO: lookup based on extension, only egm supported right now.
+  return fileFormats[".egm"]->WriteResource(res, fName);
 }
 
 // Debugging output streams for file formats

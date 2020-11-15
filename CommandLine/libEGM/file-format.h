@@ -20,6 +20,7 @@
 
 #include "project.pb.h"
 #include "event_reader/event_parser.h"
+#include "strings_util.h"
 
 #include <iostream>
 #include <streambuf>
@@ -39,26 +40,42 @@ public:
   FileFormat(const EventData* event_data) : _event_data(event_data) {}
   // Read
   virtual std::unique_ptr<Project> LoadProject(const fs::path& /*fName*/) const { return {}; }
-  virtual std::optional<Background> LoadBackground(const fs::path& /*fName*/) const { return {}; }
-  virtual std::optional<Sound> LoadSound(const fs::path& /*fName*/) const { return {}; }
-  virtual std::optional<Sprite> LoadSprite(const fs::path& /*fName*/) const { return {}; }
-  virtual std::optional<Shader> LoadShader(const fs::path& /*fName*/) const { return {}; }
-  virtual std::optional<Font> LoadFont(const fs::path& /*fName*/) const { return {}; }
-  virtual std::optional<Object> LoadObject(const fs::path& /*fName*/) const { return {}; }
-  virtual std::optional<Timeline> LoadTimeLine(const fs::path& /*fName*/) const { return {}; }
-  virtual std::optional<Room> LoadRoom(const fs::path& /*fName*/) const { return {}; }
-  virtual std::optional<Path> LoadPath(const fs::path& /*fName*/) const { return {}; }
-  virtual std::optional<Script> LoadScript(const fs::path& /*fName*/) const { return {}; }
-  // Write
   
+  template <class T>
+  std::optional<T> LoadResource(const fs::path& fName) const {
+    T res;
+    if (!PackResource(fName, &res)) return {};
+    return res;
+  }
+  
+  // Write
+  virtual bool WriteProject(Project* /*project*/, const fs::path& /*fName*/) const { return false; }
+  bool WriteResource(TreeNode* res, const fs::path& fName, bool mutate = false) const;
+
 protected:
+  virtual void PackResource(const fs::path& /*fPath*/, google::protobuf::Message* /*m*/) const {}
+  virtual bool DumpResource(TreeNode* /*res*/, const fs::path& /*fName*/) const { return false; }
   const EventData* _event_data;
 };
 
 // Access file formats based on extensions
 extern std::unordered_map<std::string, std::unique_ptr<FileFormat>> fileFormats;
 void LibEGMInit(const EventData* event_data);
-std::unique_ptr<Project> LoadProject(const fs::path& /*fName*/);
+
+// Loaders
+std::unique_ptr<Project> LoadProject(const fs::path& fName);
+
+template <class T>
+std::optional<T> LoadResource(const fs::path& fName) {  
+  std::string ext = ToLower(fName.extension().u8string()); 
+  if (ext == ".gmx") {
+    return fileFormats[".gmx"]->LoadResource<T>(fName);
+  } else return fileFormats[".egm"]->LoadResource<T>(fName);
+}
+
+// Writers
+bool WriteProject(Project* project, const fs::path& fName);
+bool WriteResource(TreeNode* res, const fs::path& fName);
 
 // Debugging output streams for file formats
 extern std::ostream outStream;

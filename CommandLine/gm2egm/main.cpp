@@ -36,9 +36,7 @@ int main(int argc, char *argv[])
     std::cerr << "Error: Failure opening file \"" << argv[1] << "\"" << std::endl;
     return -3;
   }
-
-  egm::EGMFileFormat* f = static_cast<egm::EGMFileFormat*>(egm::fileFormats[".egm"].get());
-  if (!f->WriteEGM(outDir, project.get())) {
+  if (!egm::WriteProject(project.get(), outDir)) {
     std::cerr << "Error: Failure writting \"" << argv[2] << std::endl;
     return -4;
   }

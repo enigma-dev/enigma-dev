@@ -517,15 +517,14 @@ std::unique_ptr<Project> GMXFileFormat::LoadProject(const fs::path& fPath) const
   return proj;
 }
 
-template<class T>
-std::optional<T> LoadResource(const fs::path& fPath, std::string type) {
+void GMXFileFormat::PackResource(const fs::path& fPath, google::protobuf::Message *m) const {
   std::string fName = fPath.u8string();
 
   size_t dot = fName.find_last_of(".");
   size_t slash = fName.find_last_of("/");
 
   if (dot == std::string::npos || slash == std::string::npos)
-    return {};
+    return;
 
   std::string resType = fName.substr(dot+1, fName.length());
   std::string resName = fName.substr(slash+1, fName.length());
@@ -533,64 +532,22 @@ std::optional<T> LoadResource(const fs::path& fPath, std::string type) {
   dot = resName.find_first_of(".");
 
   if (dot == std::string::npos)
-    return {};
+    return;
 
   resName = resName.substr(0, dot);
   std::string dir = fName.substr(0, slash+1);
 
   if (resType == "gmx") {
     pugi::xml_document doc;
-    if (!doc.load_file(fName.c_str())) return {};
+    if (!doc.load_file(fName.c_str())) return;
     resType = doc.document_element().name(); // get type from root xml element
   }  else if (resType == "gml") resType = "script";
 
-  if (resType != type || resName.empty()) // trying to load wrong type (eg a.gmx has <b> instead of <a> as root xml)
-    return {};
+  if (resName.empty())
+    return;
 
   std::unordered_map<std::string, int> ids;
-  T res;
-  PackBuffer(LookupMap(), resType, resName, ids, &res, dir);
-  return res;
-}
-
-std::optional<Background> GMXFileFormat::LoadBackground(const fs::path& fName) const {
-  return LoadResource<Background>(fName, "background");
-}
-
-std::optional<Sound> GMXFileFormat::LoadSound(const fs::path& fName) const {
-  return LoadResource<Sound>(fName, "sound");
-}
-
-std::optional<Sprite> GMXFileFormat::LoadSprite(const fs::path& fName) const {
-  return LoadResource<Sprite>(fName, "sprite");
-}
-
-std::optional<Shader> GMXFileFormat::LoadShader(const fs::path& fName) const {
-  return LoadResource<Shader>(fName, "shader");
-}
-
-std::optional<Font> GMXFileFormat::LoadFont(const fs::path& fName) const {
-  return LoadResource<Font>(fName, "font");
-}
-
-std::optional<Object> GMXFileFormat::LoadObject(const fs::path& fName) const {
-  return LoadResource<Object>(fName, "object");
-}
-
-std::optional<Timeline> GMXFileFormat::LoadTimeLine(const fs::path& fName) const {
-  return LoadResource<Timeline>(fName, "timeline");
-}
-
-std::optional<Room> GMXFileFormat::LoadRoom(const fs::path& fName) const {
-  return LoadResource<Room>(fName, "room");
-}
-
-std::optional<Path> GMXFileFormat::LoadPath(const fs::path& fName) const {
-  return LoadResource<Path>(fName, "path");
-}
-
-std::optional<Script> GMXFileFormat::LoadScript(const fs::path& fName) const {
-  return LoadResource<Script>(fName, "script");
+  PackBuffer(LookupMap(), resType, resName, ids, m, dir);
 }
 
 } //namespace egm 

@@ -1,4 +1,4 @@
-/** Copyright (C) 2018-2020 Greg Williamson, Robert B. Colton
+/* Copyright (C) 2018-2020 Greg Williamson, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -13,7 +13,7 @@
 ***
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
-**/
+*/
 
 #ifndef EGM_H
 #define EGM_H
@@ -30,30 +30,15 @@ namespace egm {
 class EGMFileFormat : public FileFormat {
  public:
   EGMFileFormat(const EventData* event_data) : FileFormat(event_data) {}
+  
   // Read
   virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
-  virtual std::optional<Background> LoadBackground(const fs::path& fName) const override;
-  virtual std::optional<Sound> LoadSound(const fs::path& fName) const override;
-  virtual std::optional<Sprite> LoadSprite(const fs::path& fName) const override;
-  virtual std::optional<Shader> LoadShader(const fs::path& fName) const override;
-  virtual std::optional<Font> LoadFont(const fs::path& fName) const override;
-  virtual std::optional<Object> LoadObject(const fs::path& fName) const override;
-  virtual std::optional<Timeline> LoadTimeLine(const fs::path& fName) const override;
-  virtual std::optional<Room> LoadRoom(const fs::path& fName) const override;
-  virtual std::optional<Path> LoadPath(const fs::path& fName) const override;
-  virtual std::optional<Script> LoadScript(const fs::path& fName) const override;
+
   // Write
-  bool WriteEGM(std::string fName, buffers::Project* project) const;
+  virtual bool WriteProject(Project* project, const fs::path& fName) const override;
 
  private:
   // Reading ===================================================================
-  template<class T>
-  std::optional<T> LoadRes(const fs::path& fName) const {
-    T res;
-    if (!LoadResource(fName, &res, 0)) return {};
-    return res;
-  }
-
   bool LoadEGM(const fs::path& yamlFile, buffers::Game* game) const;
 
   bool LoadTree(const fs::path& fPath, YAML::Node yaml,
@@ -67,6 +52,7 @@ class EGMFileFormat : public FileFormat {
   void RecursivePackBuffer(google::protobuf::Message *m, int id,
                            YAML::Node& yaml, const fs::path& fPath,
                            int depth) const;
+  virtual void PackResource(const fs::path& fPath, google::protobuf::Message *m) const override;
 
   // Writing ===================================================================
   bool WriteNode(buffers::TreeNode* folder, std::string dir,
@@ -75,6 +61,7 @@ class EGMFileFormat : public FileFormat {
                 const fs::path &egm_root) const;
   bool WriteObject(const fs::path &egm_root, const fs::path &dir,
                    const buffers::resources::Object& object) const;
+  virtual bool DumpResource(TreeNode* res, const fs::path& fName) const override;
 
   // 'Rithmatic ================================================================
   std::map<std::string, const buffers::TreeNode*> FlattenTree(

@@ -42,10 +42,12 @@ using namespace std;
 using TypeCase = TreeNode::TypeCase;
 using IdMap = unordered_map<int, std::unique_ptr<google::protobuf::Message> >;
 using TypeMap = unordered_map<TypeCase, IdMap>;
+using egm::errStream;
+
+
+namespace gmk_internal {
 
 static const std::string gmk_data = "gmk_data";
-
-namespace egm {
 
 static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
@@ -1240,17 +1242,23 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
   }
 }
 
+} //namespace gmk_internal
+
+namespace egm {
+
+using namespace gmk_internal;
+
 std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fName) const {
   static const vector<GroupFactory> groupFactories({
-    { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, egm::LoadSound      },
-    { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, egm::LoadSprite     },
-    { TypeCase::kBackground, { 400, 800      }, { 400, 543, 710      }, egm::LoadBackground },
-    { TypeCase::kPath,       { 420, 800      }, { 530                }, egm::LoadPath       },
-    { TypeCase::kScript,     { 400, 800, 810 }, { 400, 800, 810      }, egm::LoadScript     },
-    { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, egm::LoadFont       },
-    { TypeCase::kTimeline,   { 500, 800      }, { 500                }, egm::LoadTimeline   },
-    { TypeCase::kObject,     { 400, 800      }, { 430                }, egm::LoadObject     },
-    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, egm::LoadRoom       }
+    { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, gmk_internal::LoadSound      },
+    { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, gmk_internal::LoadSprite     },
+    { TypeCase::kBackground, { 400, 800      }, { 400, 543, 710      }, gmk_internal::LoadBackground },
+    { TypeCase::kPath,       { 420, 800      }, { 530                }, gmk_internal::LoadPath       },
+    { TypeCase::kScript,     { 400, 800, 810 }, { 400, 800, 810      }, gmk_internal::LoadScript     },
+    { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, gmk_internal::LoadFont       },
+    { TypeCase::kTimeline,   { 500, 800      }, { 500                }, gmk_internal::LoadTimeline   },
+    { TypeCase::kObject,     { 400, 800      }, { 430                }, gmk_internal::LoadObject     },
+    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, gmk_internal::LoadRoom       }
   });
 
   TypeMap typeMap;

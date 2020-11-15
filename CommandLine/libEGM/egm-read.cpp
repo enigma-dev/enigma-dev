@@ -163,7 +163,7 @@ void RepackLayers(buffers::resources::Room *room, bool tiles, YAML::Node& yaml,
 } // anonymous namespace
 
 // Internal helpers that conflict with the public interface
-namespace internal {
+namespace egm_internal {
 
 buffers::resources::Script LoadScript(const fs::path& fPath) {
   buffers::resources::Script scr;
@@ -405,20 +405,25 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
 
 }  // namespace
 
+
+void EGMFileFormat::PackResource(const fs::path& fPath, google::protobuf::Message *m) const {
+  LoadResource(fPath, m, 0);
+}
+
 bool EGMFileFormat::LoadResource(const fs::path& fPath, google::protobuf::Message *m,
                        int id) const {
   fs::path ext = fPath.extension();
 
   // Scripts and shaders are not folders so we exit here
   if (ext == ".edl") {
-    buffers::resources::Script scr = internal::LoadScript(fPath);
+    buffers::resources::Script scr = egm_internal::LoadScript(fPath);
     scr.set_id(id);
     m->CopyFrom(*static_cast<google::protobuf::Message*>(&scr));
     return true;
   }
 
   if (ext == ".shdr") {
-    buffers::resources::Shader shdr = internal::LoadShader(fPath);
+    buffers::resources::Shader shdr = egm_internal::LoadShader(fPath);
     shdr.set_id(id);
     m->CopyFrom(*static_cast<google::protobuf::Message*>(&shdr));
     return true;
@@ -430,7 +435,7 @@ bool EGMFileFormat::LoadResource(const fs::path& fPath, google::protobuf::Messag
 
   // Timelines are folders but do not have a properties.yaml so we exit here
   if (ext == ".tln") {
-    buffers::resources::Timeline tln = internal::LoadTimeLine(fPath);
+    buffers::resources::Timeline tln = egm_internal::LoadTimeLine(fPath);
     tln.set_id(id);
     m->CopyFrom(*static_cast<google::protobuf::Message*>(&tln));
     return true;
@@ -658,46 +663,6 @@ std::unique_ptr<buffers::Project> EGMFileFormat::LoadProject(const fs::path& fNa
   ResourceSanityCheck(proj->mutable_game()->mutable_root());
 
   return proj;
-}
-
-std::optional<Background> EGMFileFormat::LoadBackground(const fs::path& fName) const {
-  return LoadRes<Background>(fName);
-}
-
-std::optional<Sound> EGMFileFormat::LoadSound(const fs::path& fName) const {
-  return LoadRes<Sound>(fName);
-}
-
-std::optional<Sprite> EGMFileFormat::LoadSprite(const fs::path& fName) const {
-  return LoadRes<Sprite>(fName);
-}
-
-std::optional<Shader> EGMFileFormat::LoadShader(const fs::path& fName) const {
-  return LoadRes<Shader>(fName);
-}
-
-std::optional<Font> EGMFileFormat::LoadFont(const fs::path& fName) const {
-  return LoadRes<Font>(fName);
-}
-
-std::optional<Object> EGMFileFormat::LoadObject(const fs::path& fName) const {
-  return LoadRes<Object>(fName);
-}
-
-std::optional<Timeline> EGMFileFormat::LoadTimeLine(const fs::path& fName) const {
-  return LoadRes<Timeline>(fName);
-}
-
-std::optional<Room> EGMFileFormat::LoadRoom(const fs::path& fName) const {
-  return LoadRes<Room>(fName);
-}
-
-std::optional<Path> EGMFileFormat::LoadPath(const fs::path& fName) const {
-  return LoadRes<Path>(fName);
-}
-
-std::optional<Script> EGMFileFormat::LoadScript(const fs::path& fName) const {
-  return LoadRes<Script>(fName);
 }
 
 } //namespace egm

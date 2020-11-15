@@ -26,16 +26,9 @@ class GMXFileFormat : public FileFormat {
  public:
   GMXFileFormat(const EventData* event_data) : FileFormat(event_data) {}
   virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
-  virtual std::optional<Background> LoadBackground(const fs::path& fName) const override;
-  virtual std::optional<Sound> LoadSound(const fs::path& fName) const override;
-  virtual std::optional<Sprite> LoadSprite(const fs::path& fName) const override;
-  virtual std::optional<Shader> LoadShader(const fs::path& fName) const override;
-  virtual std::optional<Font> LoadFont(const fs::path& fName) const override;
-  virtual std::optional<Object> LoadObject(const fs::path& fName) const override;
-  virtual std::optional<Timeline> LoadTimeLine(const fs::path& fName) const override;
-  virtual std::optional<Room> LoadRoom(const fs::path& fName) const override;
-  virtual std::optional<Path> LoadPath(const fs::path& fName) const override;
-  virtual std::optional<Script> LoadScript(const fs::path& fName) const override;
+
+private:
+  virtual void PackResource(const fs::path& fPath, google::protobuf::Message *m) const override;
 };
 
 } //namespace egm
