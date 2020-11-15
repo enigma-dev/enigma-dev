@@ -523,8 +523,10 @@ void GMXFileFormat::PackResource(const fs::path& fPath, google::protobuf::Messag
   size_t dot = fName.find_last_of(".");
   size_t slash = fName.find_last_of("/");
 
-  if (dot == std::string::npos || slash == std::string::npos)
+  if (dot == std::string::npos || slash == std::string::npos) {
+    errsream << "I dunno; format not recognized? << std::endl;
     return;
+  }
 
   std::string resType = fName.substr(dot+1, fName.length());
   std::string resName = fName.substr(slash+1, fName.length());
