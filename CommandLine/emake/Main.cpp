@@ -145,6 +145,7 @@ int main(int argc, char* argv[])
 
   // Load event data
   EventData event_data(ParseEventFile((fs::path(options.EnigmaRoot())/"events.ey").u8string()));
+  std::cout << "Event data address: " << &event_data << std::endl;
 
   // FIXME: move SOG to libEGM as a format and remove this dup logic
   if (!input_file.empty() && input_file.back() == '/') input_file.pop_back();
