@@ -79,7 +79,6 @@ class EGMFileFormat : public FileFormat {
   // 'Rithmatic ================================================================
   std::map<std::string, const buffers::TreeNode*> FlattenTree(
       const buffers::TreeNode &tree);
-  const EventData* events_;
 };
 
 } //namespace egm

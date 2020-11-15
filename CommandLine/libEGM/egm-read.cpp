@@ -224,7 +224,7 @@ void EGMFileFormat::LoadObjectEvents(const fs::path& fPath, google::protobuf::Me
   for(auto& f : fs::directory_iterator(fPath)) {
     if (f.path().extension() == ".edl") {
       const std::string eventIdString = f.path().stem().string();
-      auto event = events_->DecodeEventString(eventIdString);
+      auto event = _event_data->DecodeEventString(eventIdString);
 
       buffers::resources::Object::EgmEvent event_proto;
       event_proto.set_id(event.bare_id());
