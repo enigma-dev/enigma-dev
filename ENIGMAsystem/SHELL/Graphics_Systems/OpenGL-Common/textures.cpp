@@ -43,8 +43,8 @@ int graphics_create_texture_custom(const RawImage& img, bool mipmap, unsigned* f
   if (fullheight == nullptr) fullheight = &fh;
   
   if (img.pxdata != nullptr) {
-    *fullwidth  = nlpo2dc(img.w);
-    *fullheight = nlpo2dc(img.h);
+    *fullwidth  = nlpo2(img.w);
+    *fullheight = nlpo2(img.h);
   }
   
   bool pad = img.pxdata != nullptr && (img.w != *fullwidth || img.h != *fullheight);
