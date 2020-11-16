@@ -27,7 +27,7 @@
 
 using enigma::Background;
 using enigma::backgrounds;
-using enigma::nlpo2dc;
+using enigma::nlpo2;
 using enigma::TexRect;
 using enigma::Color;
 using enigma::RawImage;
@@ -74,7 +74,7 @@ int background_add(std::string filename, bool transparent, bool smooth, bool pre
 }
 
 int background_create_color(unsigned w, unsigned h, int col, bool preload) {
-  unsigned int fullwidth = nlpo2dc(w) + 1, fullheight = nlpo2dc(h) + 1;
+  unsigned int fullwidth = nlpo2(w), fullheight = nlpo2(h);
   RawImage img(new unsigned char[fullwidth * fullheight * 4], fullwidth, fullheight);
   std::fill((unsigned*)(img.pxdata), (unsigned*)(img.pxdata) + fullwidth * fullheight, (COL_GET_R(col) | (COL_GET_G(col) << 8) | (COL_GET_B(col) << 16) | 255 << 24));
   int textureID = graphics_create_texture(img, false);

@@ -33,12 +33,14 @@ int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidt
   D3D11_TEXTURE2D_DESC tdesc;
   D3D11_SUBRESOURCE_DATA tbsd;
   
-  unsigned fw, fh;
+  unsigned fw = img.w, fh = img.h;
   if (fullwidth == nullptr) fullwidth = &fw; 
   if (fullheight == nullptr) fullheight = &fh;
   
-  *fullwidth  = nlpo2dc(img.w) + 1;
-  *fullheight = nlpo2dc(img.h) + 1;
+  if (img.pxdata != nullptr) {
+    *fullwidth  = nlpo2(img.w);
+    *fullheight = nlpo2(img.h);
+  }
 
   tbsd.SysMemPitch = (*fullwidth) * 4;
   // not needed since this is a 2d texture,
