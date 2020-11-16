@@ -40,7 +40,9 @@ inline unsigned int nlpo2dc(unsigned int x)  // Taking x, returns n such that n 
   x |= x >> 2;
   x |= x >> 4;
   x |= x >> 8;
-  return x | (x >> 16);
+  x |= x >> 16;
+  ++x;
+  return x;
 }
 
 }  //namespace enigma
