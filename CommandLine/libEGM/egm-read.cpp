@@ -406,8 +406,8 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
 }  // namespace
 
 
-void EGMFileFormat::PackResource(const fs::path& fPath, google::protobuf::Message *m) const {
-  LoadResource(fPath, m, 0);
+bool EGMFileFormat::PackResource(const fs::path& fPath, google::protobuf::Message *m) const {
+  return LoadResource(fPath, m, 0);
 }
 
 bool EGMFileFormat::LoadResource(const fs::path& fPath, google::protobuf::Message *m,

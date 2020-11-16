@@ -28,7 +28,7 @@ class GMXFileFormat : public FileFormat {
   virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
 
 private:
-  virtual void PackResource(const fs::path& fPath, google::protobuf::Message *m) const override;
+  virtual bool PackResource(const fs::path& fPath, google::protobuf::Message *m) const override;
 };
 
 } //namespace egm
