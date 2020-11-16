@@ -186,7 +186,7 @@ RawImage image_crop(const RawImage& in, unsigned newWidth, unsigned newHeight) {
 }
 
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size) {
-  unsigned widfull = nlpo2dc(pngwidth) + 1, hgtfull = nlpo2dc(pngheight) + 1, ih, iw;
+  unsigned widfull = nlpo2(pngwidth), hgtfull = nlpo2(pngheight), ih, iw;
   const int bitmap_size = widfull * hgtfull * 4;
   unsigned char *bitmap = new unsigned char[bitmap_size]();
 
