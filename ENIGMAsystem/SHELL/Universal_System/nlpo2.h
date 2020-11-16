@@ -33,7 +33,7 @@
 
 namespace enigma {
 
-inline unsigned int nlpo2dc(unsigned int x)  // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
+inline unsigned int nlpo2(unsigned int x)  // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
 {
   --x;
   x |= x >> 1;
