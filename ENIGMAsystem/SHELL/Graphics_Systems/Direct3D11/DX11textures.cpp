@@ -38,8 +38,8 @@ int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidt
   if (fullheight == nullptr) fullheight = &fh;
   
   if (img.pxdata != nullptr) {
-    *fullwidth  = nlpo2dc(img.w) + 1;
-    *fullheight = nlpo2dc(img.h) + 1;
+    *fullwidth  = nlpo2dc(img.w);
+    *fullheight = nlpo2dc(img.h);
   }
 
   tbsd.SysMemPitch = (*fullwidth) * 4;
