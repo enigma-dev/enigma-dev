@@ -34,33 +34,15 @@ environment:
     - {MODE: Debug}
     - {MODE: Compile}
 
-    # Platforms
-    - {PLATFORM: SDL, PACKAGES: "SDL2:x"}
-
     # Graphics
-    - {GRAPHICS: Direct3D11}
-    - {GRAPHICS: OpenGL1, PACKAGES: "glew:x"}
-    - {GRAPHICS: OpenGLES3, PLATFORM: SDL, PACKAGES: "SDL2:x libepoxy:x" }
+    - {GRAPHICS: Direct3D11, AUDIO: DirectSound}
+    - {GRAPHICS: OpenGL1, PACKAGES: "glew:x", AUDIO: OpenAL, PACKAGES: "openal:x dumb:x alure:x libmodplug:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
+    - {GRAPHICS: OpenGLES3, PLATFORM: SDL, PACKAGES: "SDL2:x libepoxy:x"}
 
-    # Audio
-    - {AUDIO: DirectSound}
-    - {AUDIO: OpenAL, PACKAGES: "openal:x dumb:x alure:x libmodplug:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
-
-    # Widgets
-    - {WIDGETS: Win32}
+    # Widgets / Extensions
+    - {WIDGETS: Win32, EXTENSIONS: "DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFilesystem,Box2DPhysics,StudioPhysics,ExternalFuncs", PACKAGES: "box2d:x libffi:x"}
     #TODO: Fix GTK+ on Windows
     #- {WIDGETS: GTK+, PACKAGES: "gtk2:x"}
-
-    # Extensions
-    - {EXTENSIONS: "DirectShow"}
-    - {EXTENSIONS: "WindowsTouch"}
-    - {EXTENSIONS: "XInput"}
-    - {EXTENSIONS: "MediaControlInterface"}
-    - {EXTENSIONS: "FileDropper"}
-    - {EXTENSIONS: "IniFilesystem"}
-    - {EXTENSIONS: "Box2DPhysics", PACKAGES: "box2d:x"}
-    - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
-    - {EXTENSIONS: "ExternalFuncs", PACKAGES: "libffi:x"}
     #TODO: Fix Bullet Physics on Windows
     #- {EXTENSIONS: "BulletDynamics", PACKAGES: "bullet:x"}
 
