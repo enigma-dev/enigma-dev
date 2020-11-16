@@ -137,12 +137,14 @@ void graphics_push_texture_pixels(int texture, int x, int y, int width, int heig
 
 int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight)
 {
-  unsigned fw, fh;
+  unsigned fw = img.w, fh = img.h;
   if (fullwidth == nullptr) fullwidth = &fw; 
   if (fullheight == nullptr) fullheight = &fh;
   
-  *fullwidth  = nlpo2dc(img.w)+1;
-  *fullheight = nlpo2dc(img.h)+1;
+  if (img.pxdata != nullptr) {
+    *fullwidth  = nlpo2dc(img.w) + 1;
+    *fullheight = nlpo2dc(img.h) + 1;
+  }
   
   LPDIRECT3DTEXTURE9 texture = NULL;
 
