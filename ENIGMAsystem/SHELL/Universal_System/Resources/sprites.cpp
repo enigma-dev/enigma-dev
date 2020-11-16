@@ -19,7 +19,6 @@
 
 #include "sprites_internal.h"
 #include "Universal_System/image_formats.h"
-#include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
@@ -29,7 +28,6 @@
 
 using enigma::Sprite;
 using enigma::sprites;
-using enigma::nlpo2dc;
 using enigma::TexRect;
 using enigma::Color;
 using enigma::RawImage;
