@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Greg Williamson, Robert B. Colton
+/* Copyright (C) 2018-2020 Greg Williamson, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -13,32 +13,33 @@
 ***
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
-**/
+*/
 
-#include "project.pb.h"
-#include "event_reader/event_parser.h"
+#ifndef EGM_H
+#define EGM_H
+
+#include "file-format.h"
 
 #include <yaml-cpp/yaml.h>
 
-#include <filesystem>
 #include <map>
-#include <memory>
-#include <string>
 
 namespace egm {
-namespace fs = std::filesystem;
 
 // Reads and writes EGM files
-class EGM {
+class EGMFileFormat : public FileFormat {
  public:
-  bool WriteEGM(std::string fName, buffers::Project* project) const;
-  std::unique_ptr<buffers::Project> LoadEGM(std::string fName) const;
+  EGMFileFormat(const EventData* event_data) : FileFormat(event_data) {}
+  
+  // Read
+  virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
 
-  EGM(const EventData* events): events_(events) {}
+  // Write
+  virtual bool WriteProject(Project* project, const fs::path& fName) const override;
 
  private:
   // Reading ===================================================================
-  bool LoadEGM(const std::string& yaml, buffers::Game* game) const;
+  bool LoadEGM(const fs::path& yamlFile, buffers::Game* game) const;
 
   bool LoadTree(const fs::path& fPath, YAML::Node yaml,
                 buffers::TreeNode* buffer) const;
@@ -51,6 +52,7 @@ class EGM {
   void RecursivePackBuffer(google::protobuf::Message *m, int id,
                            YAML::Node& yaml, const fs::path& fPath,
                            int depth) const;
+  virtual void PackResource(const fs::path& fPath, google::protobuf::Message *m) const override;
 
   // Writing ===================================================================
   bool WriteNode(buffers::TreeNode* folder, std::string dir,
@@ -59,11 +61,13 @@ class EGM {
                 const fs::path &egm_root) const;
   bool WriteObject(const fs::path &egm_root, const fs::path &dir,
                    const buffers::resources::Object& object) const;
+  virtual bool DumpResource(TreeNode* res, const fs::path& fName) const override;
 
   // 'Rithmatic ================================================================
   std::map<std::string, const buffers::TreeNode*> FlattenTree(
       const buffers::TreeNode &tree);
-  const EventData* events_;
 };
 
 } //namespace egm
+
+#endif

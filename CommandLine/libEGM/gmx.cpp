@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Greg Williamson, Robert B. Colton
+/** Copyright (C) 2018-2020 Greg Williamson, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -33,9 +33,7 @@ using LookupMap = std::unordered_map<std::string, std::unordered_map<int, std::s
 
 using namespace buffers::resources;
 
-namespace gmx {
-std::ostream outputStream(nullptr);
-std::ostream errorStream(nullptr);
+namespace egm {
 
 void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std::unordered_map<std::string, int>& ids, google::protobuf::Message *m, std::string gmxPath);
 void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::string, int>& ids, pugi::xml_node &node, google::protobuf::Message *m, int depth);
@@ -52,7 +50,7 @@ inline std::string GMXPath2FilePath(std::string dir, std::string value) {
 class visited_walker : public pugi::xml_tree_walker {
   virtual bool for_each(pugi::xml_node &node) {
     if (node.type() != pugi::node_pcdata && std::string(node.attribute("visited").value()) != "true")
-      errorStream << "Error: Node at " << node.path() << " was never visited " << std::endl;
+      errStream << "Error: Node at " << node.path() << " was never visited " << std::endl;
     return true;
   }
 };
@@ -126,7 +124,7 @@ class gmx_root_walker {
         }
         return;
     }
-    errorStream << "Unsupported resource type: " << resType << " " << xmlNode.value() << std::endl;
+    errStream << "Unsupported resource type: " << resType << " " << xmlNode.value() << std::endl;
   }
 
   std::string fix_folder_name(const std::string &name) {
@@ -179,9 +177,7 @@ class gmx_root_walker {
         if (marker != std::string::npos) {
           resName = res.substr(marker + 1, res.length());
           resType = res.substr(0, (res[marker - 1] == 's') ? marker - 1 : marker);
-        } else {  // some things are in the root (eg help.rtf) of the gmx so there is no \. Therfore, we must get the type from the parent tag
-          resName = res;
-          resType = xml_parent.name();
+        } else {  // some things are in the root (eg help.rtoutStream
         }
 
         size_t dot = resName.find_last_of(".");
@@ -214,36 +210,29 @@ class gmx_root_walker {
   }
 };
 
-std::string FileToString(const std::string &fName) {
-  std::ifstream t(fName.c_str());
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-  return buffer.str();
-}
-
 }  // Anonymous namespace
 
-void PackScript(std::string fName, int id, buffers::resources::Script *script) {
-  outputStream << "Parsing " << fName << std::endl;
+void PackScript(const fs::path& fName, int id, buffers::resources::Script *script) {
+  outStream << "Parsing " << fName << std::endl;
   std::string code = FileToString(fName);
 
-  outputStream << "Setting id as:" << std::endl << id << std::endl;
+  outStream << "Setting id as:" << std::endl << id << std::endl;
   script->set_id(id);
 
-  if (code.empty()) errorStream << "Warning: " << fName << " empty." << std::endl;
+  if (code.empty()) errStream << "Warning: " << fName << " empty." << std::endl;
 
-  outputStream << "Setting code as:" << std::endl << code << std::endl;
+  outStream << "Setting code as:" << std::endl << code << std::endl;
   script->set_code(code);
 }
 
-void PackShader(std::string fName, int id, buffers::resources::Shader *shader) {
-  outputStream << "Parsing " << fName << std::endl;
+void PackShader(const fs::path& fName, int id, buffers::resources::Shader *shader) {
+  outStream << "Parsing " << fName << std::endl;
   std::string code = FileToString(fName);
 
-  outputStream << "Setting id as:" << std::endl << id << std::endl;
+  outStream << "Setting id as:" << std::endl << id << std::endl;
   shader->set_id(id);
 
-  if (code.empty()) errorStream << "Warning: " << fName << " empty." << std::endl;
+  if (code.empty()) errStream << "Warning: " << fName << " empty." << std::endl;
 
   // GMS 1.4 doesn't care if you have a newline after the marker
   // and before the start of the first line of the fragment shader
@@ -251,12 +240,12 @@ void PackShader(std::string fName, int id, buffers::resources::Shader *shader) {
   size_t markerPos = code.find(marker);
 
   if (markerPos == std::string::npos)
-    errorStream << "Error: missing shader marker." << std::endl;
+    errStream << "Error: missing shader marker." << std::endl;
   else {
     std::string vert = code.substr(0, markerPos);
     std::string frag = code.substr(markerPos + marker.length() - 1, code.length() - 1);
-    outputStream << "Setting vertex code as:" << std::endl << vert << std::endl;
-    outputStream << "Setting fragment code as:" << std::endl << frag << std::endl;
+    outStream << "Setting vertex code as:" << std::endl << vert << std::endl;
+    outStream << "Setting fragment code as:" << std::endl << frag << std::endl;
     shader->set_vertex_code(vert);
     shader->set_fragment_code(frag);
   }
@@ -273,7 +262,7 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
 
     if (field->name() == "id") {
       int id = opts.GetExtension(buffers::id_start) + ids[m->GetTypeName()]++;
-      outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << id << std::endl;
+      outStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << id << std::endl;
       refl->SetInt32(m, field, id);
     } else {
       const std::string gmxName = opts.GetExtension(buffers::gmx);
@@ -300,7 +289,7 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
           }
         }
         refl->SetString(m, field, roomName);
-        outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << roomName << std::endl;
+        outStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << roomName << std::endl;
         continue;
       } 
         
@@ -345,10 +334,10 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
         // ename only exists if etype = 4. Also, etype and enumb don't exist in timeline events
         pugi::xml_attribute a = node.attribute("eventtype");
         if (alias != "ename" && a.as_int() != 4 && node.path() != "/timeline/entry/event")
-          errorStream << "Error: no such element " << node.path() << "/" << alias << std::endl;
+          errStream << "Error: no such element " << node.path() << "/" << alias << std::endl;
       } else {                       // bullshit special cases out of the way, we now look for proto fields in xml
         if (field->is_repeated()) {  // Repeated fields (are usally messages or file_paths(strings)
-          outputStream << "Appending (" << field->type_name() << ") to " << field->name() << std::endl;
+          outStream << "Appending (" << field->type_name() << ") to " << field->name() << std::endl;
 
           switch (field->cpp_type()) {
             case CppType::CPPTYPE_MESSAGE: {
@@ -381,7 +370,7 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
              * BUT incase someone tries to add one to a proto in the future I added this warning to prevent the reader
              * from exploding and gives them a warning of why their shit don't work and a clue where to implement a fix */
             default: {
-              errorStream << "Error: missing condition for repeated type: " << field->type_name()
+              errStream << "Error: missing condition for repeated type: " << field->type_name()
                             << ". Instigated by: " << field->type_name() << std::endl;
               break;
             }
@@ -399,7 +388,7 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
           }
 
           std::string value = (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string();
-          outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << value << std::endl;
+          outStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << value << std::endl;
 
           /* Here we finally set the proto values from the xml (unless it's a message). The same logic above is followed,
            * if datas in attribute use that, else if it's in a split grab the text from a vector we previous split up by
@@ -496,9 +485,9 @@ void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std:
     root.append_attribute("visited") = "true";
 
     if (!result)
-      errorStream << "Error opening: " << fName << " : " << result.description() << std::endl;
+      errStream << "Error opening: " << fName << " : " << result.description() << std::endl;
     else {
-      outputStream << "Parsing " << fName << "..." << std::endl;
+      outStream << "Parsing " << fName << "..." << std::endl;
       // Start a resource (sprite, object, room)
       std::string dir = fName.substr(0, fName.find_last_of("/"));
       PackRes(resMap, dir, ids, root, m, 0);
@@ -509,11 +498,11 @@ void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std:
   }
 }
 
-std::unique_ptr<buffers::Project> LoadGMX(std::string fName, const EventData* event_data) {
+std::unique_ptr<Project> GMXFileFormat::LoadProject(const fs::path& fPath) const {
   pugi::xml_document doc;
-  if (!doc.load_file(fName.c_str())) return nullptr;
+  if (!doc.load_file(fPath.u8string().c_str())) return nullptr;
 
-  fName = string_replace_all(fName, "\\", "/");
+  std::string fName = string_replace_all(fPath.u8string(), "\\", "/");
   std::string gmxPath = fName.substr(0, fName.find_last_of("/") + 1);
 
   auto proj = std::make_unique<buffers::Project>();
@@ -523,18 +512,21 @@ std::unique_ptr<buffers::Project> LoadGMX(std::string fName, const EventData* ev
   // so that we can skip subtrees for datafiles and such
   walker.traverse(doc, -1, true);
   
-  LegacyEventsToEGM(proj.get(), event_data);
+  LegacyEventsToEGM(proj.get(), _event_data);
 
   return proj;
 }
 
-template<class T>
-T* LoadResource(std::string fName, std::string type) {
+void GMXFileFormat::PackResource(const fs::path& fPath, google::protobuf::Message *m) const {
+  std::string fName = fPath.u8string();
+
   size_t dot = fName.find_last_of(".");
   size_t slash = fName.find_last_of("/");
 
-  if (dot == std::string::npos || slash == std::string::npos)
-    return nullptr;
+  if (dot == std::string::npos || slash == std::string::npos) {
+    errStream << "I dunno; format not recognized?" << std::endl;
+    return;
+  }
 
   std::string resType = fName.substr(dot+1, fName.length());
   std::string resName = fName.substr(slash+1, fName.length());
@@ -542,64 +534,22 @@ T* LoadResource(std::string fName, std::string type) {
   dot = resName.find_first_of(".");
 
   if (dot == std::string::npos)
-    return nullptr;
+    return;
 
   resName = resName.substr(0, dot);
   std::string dir = fName.substr(0, slash+1);
 
   if (resType == "gmx") {
     pugi::xml_document doc;
-    if (!doc.load_file(fName.c_str())) return nullptr;
+    if (!doc.load_file(fName.c_str())) return;
     resType = doc.document_element().name(); // get type from root xml element
   }  else if (resType == "gml") resType = "script";
 
-  if (resType != type || resName.empty()) // trying to load wrong type (eg a.gmx has <b> instead of <a> as root xml)
-    return nullptr;
+  if (resName.empty())
+    return;
 
   std::unordered_map<std::string, int> ids;
-  T* res = new T();
-  PackBuffer(LookupMap(), resType, resName, ids, res, dir);
-  return res;
+  PackBuffer(LookupMap(), resType, resName, ids, m, dir);
 }
 
-Background* LoadBackground(std::string fName) {
-  return LoadResource<Background>(fName, "background");
-}
-
-buffers::resources::Sound* LoadSound(std::string fName) {
-  return LoadResource<Sound>(fName, "sound");
-}
-
-buffers::resources::Sprite* LoadSprite(std::string fName) {
-  return LoadResource<Sprite>(fName, "sprite");
-}
-
-buffers::resources::Shader* LoadShader(std::string fName) {
-  return LoadResource<Shader>(fName, "shader");
-}
-
-buffers::resources::Font* LoadFont(std::string fName) {
-  return LoadResource<Font>(fName, "font");
-}
-
-buffers::resources::Object* LoadObject(std::string fName) {
-  return LoadResource<Object>(fName, "object");
-}
-
-buffers::resources::Timeline* LoadTimeLine(std::string fName) {
-  return LoadResource<Timeline>(fName, "timeline");
-}
-
-buffers::resources::Room* LoadRoom(std::string fName) {
-  return LoadResource<Room>(fName, "room");
-}
-
-buffers::resources::Path* LoadPath(std::string fName) {
-  return LoadResource<Path>(fName, "path");
-}
-
-buffers::resources::Script* LoadScript(std::string fName) {
-  return LoadResource<Script>(fName, "script");
-}
-
-}  //namespace gmx
+} //namespace egm 
