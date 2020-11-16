@@ -86,11 +86,13 @@ int sprite_get_height(int sprid) {
 }
 
 gs_scalar sprite_get_texture_width_factor(int sprid, int subimg) {
-  return sprites.get(sprid).GetTextureRect(subimg).w;
+  const auto& spr2d = sprites.get(sprid);
+  return spr2d.GetTextureRect(spr2d.ModSubimage(subimg)).w;
 }
 
 gs_scalar sprite_get_texture_height_factor(int sprid, int subimg) {
-  return sprites.get(sprid).GetTextureRect(subimg).h;
+  const auto& spr2d = sprites.get(sprid);
+  return spr2d.GetTextureRect(spr2d.ModSubimage(subimg)).h;
 }
 
 int sprite_get_bbox_bottom(int sprid) {
@@ -138,7 +140,8 @@ int sprite_get_number(int sprid) {
 }
 
 int sprite_get_texture(int sprid, int subimage) {
-  return sprites.get(sprid).GetTexture(subimage);
+  const auto& spr2d = sprites.get(sprid);
+  return spr2d.GetTexture(spr2d.ModSubimage(subimage));
 }
 
 int sprite_get_xoffset(int sprid) {
@@ -172,7 +175,7 @@ bool sprite_exists(int spr) {
   return sprites.exists(spr);
 }
 
-void sprite_delete(int ind, bool free_texture = true) {
+void sprite_delete(int ind, bool free_texture) {
   if (free_texture) sprites.get(ind).FreeTextures();
   sprites.destroy(ind);
 }
@@ -181,7 +184,7 @@ int sprite_duplicate(int ind) {
   return sprites.duplicate(ind);  
 }
 
-void sprite_assign(int ind, int copy_sprite, bool free_texture = true) {
+void sprite_assign(int ind, int copy_sprite, bool free_texture) {
   if (free_texture) sprites.get(ind).FreeTextures();
   Sprite copy = sprites.get(copy_sprite);
   sprites.assign(ind, std::move(copy));
