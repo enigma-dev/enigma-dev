@@ -26,8 +26,8 @@
 \********************************************************************************/
 
 // This was forged in hell.
-#ifndef ENIGMA_NLPO2DC_H
-#define ENIGMA_NLPO2DC_H
+#ifndef ENIGMA_NLPO2_H
+#define ENIGMA_NLPO2_H
 
 #include <stdio.h>
 
@@ -47,4 +47,4 @@ inline unsigned int nlpo2(unsigned int x)  // Taking x, returns n such that n = 
 
 }  //namespace enigma
 
-#endif  //ENIGMA_NLPO2DC_H
+#endif  //ENIGMA_NLPO2_H
