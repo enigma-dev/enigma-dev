@@ -7,6 +7,13 @@ namespace enigma {
 
 static std::vector<Gamepad> gamepads;
 
+using namespace enigma_user;
+
+int digitalButtons[15] = {
+  gp_face1, gp_face2, gp_face3, gp_face4, gp_select, 0, gp_start, gp_stickl, gp_stickr, gp_shoulderl, gp_shoulderr,
+  gp_padu, gp_padd, gp_padl, gp_padr
+};
+
 void Gamepad::clear() {
   for (unsigned i = 0; i < enigma_user::gp_padr; ++i) {
     state.lastButtonStatus[i] = false;
@@ -33,7 +40,7 @@ void pushGamepads() {
   for (Gamepad& gp : gamepads) gp.push();
 }
 
-void setGamepadButton(int gamepad, int btn, bool pressed) { gamepads[gamepad].state.buttonStatus[btn] = pressed; }
+void setGamepadButton(int gamepad, int btn, bool pressed) { gamepads[gamepad].state.buttonStatus[digitalButtons[btn]] = pressed; }
 
 void addGamepad(unsigned i) {
   if (!SDL_IsGameController(i)) {
