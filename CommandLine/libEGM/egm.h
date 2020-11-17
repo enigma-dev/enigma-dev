@@ -52,7 +52,7 @@ class EGMFileFormat : public FileFormat {
   void RecursivePackBuffer(google::protobuf::Message *m, int id,
                            YAML::Node& yaml, const fs::path& fPath,
                            int depth) const;
-  virtual void PackResource(const fs::path& fPath, google::protobuf::Message *m) const override;
+  virtual bool PackResource(const fs::path& fPath, google::protobuf::Message *m) const override;
 
   // Writing ===================================================================
   bool WriteNode(buffers::TreeNode* folder, std::string dir,
