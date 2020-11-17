@@ -9,4 +9,4 @@ Author: Josh Ventura
 Depends:
 	Build-platforms: Windows, Linux, MacOSX, SDL
 Represents:
-	Build-platforms: Linux, MacOSX, SDL
+	Build-platforms: Windows, Linux, MacOSX, SDL
