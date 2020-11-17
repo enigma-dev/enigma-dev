@@ -10,4 +10,4 @@ Depends:
 	Build-platforms: Windows, SDL
 
 Represents:
-	Build-platforms: Windows
+	Build-platforms: None
