@@ -53,7 +53,7 @@ public:
   bool WriteResource(TreeNode* res, const fs::path& fName, bool mutate = false) const;
 
 protected:
-  virtual void PackResource(const fs::path& /*fPath*/, google::protobuf::Message* /*m*/) const {}
+  virtual bool PackResource(const fs::path& /*fPath*/, google::protobuf::Message* /*m*/) const { return false; }
   virtual bool DumpResource(TreeNode* /*res*/, const fs::path& /*fName*/) const { return false; }
   const EventData* _event_data;
 };

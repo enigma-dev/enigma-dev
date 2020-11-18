@@ -517,7 +517,7 @@ std::unique_ptr<Project> GMXFileFormat::LoadProject(const fs::path& fPath) const
   return proj;
 }
 
-void GMXFileFormat::PackResource(const fs::path& fPath, google::protobuf::Message *m) const {
+bool GMXFileFormat::PackResource(const fs::path& fPath, google::protobuf::Message *m) const {
   std::string fName = fPath.u8string();
 
   size_t dot = fName.find_last_of(".");
@@ -525,7 +525,7 @@ void GMXFileFormat::PackResource(const fs::path& fPath, google::protobuf::Messag
 
   if (dot == std::string::npos || slash == std::string::npos) {
     errStream << "I dunno; format not recognized?" << std::endl;
-    return;
+    return false;
   }
 
   std::string resType = fName.substr(dot+1, fName.length());
@@ -534,22 +534,24 @@ void GMXFileFormat::PackResource(const fs::path& fPath, google::protobuf::Messag
   dot = resName.find_first_of(".");
 
   if (dot == std::string::npos)
-    return;
+    return false;
 
   resName = resName.substr(0, dot);
   std::string dir = fName.substr(0, slash+1);
 
   if (resType == "gmx") {
     pugi::xml_document doc;
-    if (!doc.load_file(fName.c_str())) return;
+    if (!doc.load_file(fName.c_str())) return false;
     resType = doc.document_element().name(); // get type from root xml element
   }  else if (resType == "gml") resType = "script";
 
   if (resName.empty())
-    return;
+    return false;
 
   std::unordered_map<std::string, int> ids;
   PackBuffer(LookupMap(), resType, resName, ids, m, dir);
+
+  return true;
 }
 
 } //namespace egm 
