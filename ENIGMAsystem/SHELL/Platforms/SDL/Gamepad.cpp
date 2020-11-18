@@ -9,9 +9,9 @@ static std::vector<Gamepad> gamepads;
 
 using namespace enigma_user;
 
-int digitalButtons[15] = {
+int digitalButtons[gp_axisrv] = {
   gp_face1, gp_face2, gp_face3, gp_face4, gp_select, 0, gp_start, gp_stickl, gp_stickr, gp_shoulderl, gp_shoulderr,
-  gp_padu, gp_padd, gp_padl, gp_padr
+  gp_padu, gp_padd, gp_padl, gp_padr, 0, 0, 0, 0
 };
 
 void Gamepad::clear() {
