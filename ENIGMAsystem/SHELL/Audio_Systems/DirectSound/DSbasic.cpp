@@ -32,17 +32,12 @@ template <typename EffectInterface, typename EffectParams>
 void set_sound_effect_parameters(int sound, REFGUID rguidObject, DWORD dwIndex, REFGUID rguidInterface, EffectParams* effectParams) {
   const Sound& snd = sounds.get(sound);
 
-  IDirectSoundBuffer8* soundBuffer8 = 0;
+  ComPtr<IDirectSoundBuffer8> soundBuffer8 = 0;
   snd.soundBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&soundBuffer8);
 
-  EffectInterface* sndFX8 = 0;
+  ComPtr<EffectInterface> sndFX8 = 0;
   soundBuffer8->GetObjectInPath(rguidObject, dwIndex, rguidInterface, (void**)&sndFX8);
-  if (sndFX8) {
-    sndFX8->SetAllParameters(effectParams);
-    sndFX8->Release();
-  }
-
-  soundBuffer8->Release();
+  if (sndFX8) sndFX8->SetAllParameters(effectParams);
 }
 
 } // namespace enigma
@@ -386,12 +381,9 @@ void sound_effect_set(int sound, int effect) {
   if (wasPlaying) snd.soundBuffer->Stop();  // pause
 
   // query for the effect interface and set the effects on the sound buffer
-  IDirectSoundBuffer8* soundBuffer8 = 0;
+  ComPtr<IDirectSoundBuffer8> soundBuffer8 = 0;
   snd.soundBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&soundBuffer8);
-  if (soundBuffer8) {
-    soundBuffer8->SetFX(numOfEffects, dsEffects, dwResults);
-    soundBuffer8->Release();
-  }
+  if (soundBuffer8) soundBuffer8->SetFX(numOfEffects, dsEffects, dwResults);
   delete[] dsEffects;
   delete[] dwResults;
 
