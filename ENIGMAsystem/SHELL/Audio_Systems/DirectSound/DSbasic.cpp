@@ -249,8 +249,7 @@ void sound_effect_chorus(int sound, float wetdry, float depth, float feedback, f
 	DSFXChorus effectParams = { };
   effectParams.fWetDryMix = wetdry;
   effectParams.fDepth = depth;
-  // MinGW/WINE bug?
-  //effectParams.fFeedback = Feedback;
+  effectParams.fFeedback = feedback;
   effectParams.fFrequency = frequency;
   effectParams.lWaveform = wave;
   effectParams.fDelay = delay;
