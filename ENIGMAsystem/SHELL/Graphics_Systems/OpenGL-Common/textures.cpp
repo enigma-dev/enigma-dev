@@ -38,12 +38,14 @@ GLuint get_texture_peer(int texid) {
 //This allows GL3 surfaces to bind and hold many different types of data
 int graphics_create_texture_custom(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight, GLint internalFormat, GLenum format, GLenum type)
 {
-  unsigned fw, fh;
+  unsigned fw = img.w, fh = img.h;
   if (fullwidth == nullptr) fullwidth = &fw; 
   if (fullheight == nullptr) fullheight = &fh;
   
-  *fullwidth  = nlpo2dc(img.w)+1;
-  *fullheight = nlpo2dc(img.h)+1;
+  if (img.pxdata != nullptr) {
+    *fullwidth  = nlpo2(img.w);
+    *fullheight = nlpo2(img.h);
+  }
   
   bool pad = img.pxdata != nullptr && (img.w != *fullwidth || img.h != *fullheight);
   

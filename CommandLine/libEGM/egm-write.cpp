@@ -30,8 +30,9 @@ namespace proto = google::protobuf;
 using Type = buffers::TreeNode::TypeCase;
 using CppType = proto::FieldDescriptor::CppType;
 using std::string;
+using egm::errStream;
 
-namespace {
+namespace egm_internal {
 
 string Proto2String(const proto::Message &m, const proto::FieldDescriptor *field) {
   const proto::Reflection *refl = m.GetReflection();
@@ -140,7 +141,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir, proto::Message *m)
   if (std::ofstream out{(dir/"properties.yaml").string()}) {
     out << yaml.c_str();
   } else {
-    std::cerr << "Failed to open resource properties file "
+    errStream << "Failed to open resource properties file "
               << dir/"properties.yaml" << " for write!" << std::endl;
     return false;
   }
@@ -154,7 +155,7 @@ bool WriteScript(string fName, const buffers::resources::Script &scr) {
     fout << scr.code();
     return true;
   }
-  std::cerr << "Failed to open script " << fName << " for write" << std::endl;
+  errStream << "Failed to open script " << fName << " for write" << std::endl;
   return false;
 }
 
@@ -169,7 +170,7 @@ bool WriteShader(string fName, const buffers::resources::Shader &shdr) {
     }
   }
 
-  std::cerr << "Failed to open shader " << fName << " for write" << std::endl;
+  errStream << "Failed to open shader " << fName << " for write" << std::endl;
   return false;
 }
 
@@ -214,7 +215,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   cleaned.set_creation_code(room->creation_code());
 
   if (!proto::util::MessageDifferencer::Equivalent(*room, cleaned)) {
-    std::cerr << "WARNING: Room " << dir << " contained external file "
+    errStream << "WARNING: Room " << dir << " contained external file "
                  "references or has otherwise been modified for no reason. "
                  "Neither possibility is expected. Diff:" << std::endl;
     /* Destruct reporters before modifying protos. */ {
@@ -272,7 +273,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
   if (std::ofstream out{(dir/"properties.yaml").string()}) {
     out << yaml.c_str();
   } else {
-    std::cerr << "Failed to open resource properties file "
+    errStream << "Failed to open resource properties file "
               << dir/"properties.yaml" << " for write!" << std::endl;
     return false;
   }
@@ -297,17 +298,17 @@ bool WriteTimeline(const fs::path &/*egm_root*/, const fs::path &dir,
 }  // namespace
 namespace egm {
 
-bool EGM::WriteObject(const fs::path &egm_root, const fs::path &dir,
+bool EGMFileFormat::WriteObject(const fs::path &egm_root, const fs::path &dir,
                       const buffers::resources::Object& object) const {
   buffers::resources::Object cleaned = object;
   auto events = object.egm_events();
   cleaned.clear_egm_events();
 
-  if (!WriteYaml(egm_root, dir, &cleaned))
+  if (!egm_internal::WriteYaml(egm_root, dir, &cleaned))
     return false;
 
   for (auto &e : events) {
-    auto event = events_->get_event(e.id(), {e.arguments().begin(), e.arguments().end()});
+    auto event = _event_data->get_event(e.id(), {e.arguments().begin(), e.arguments().end()});
     auto edlFile = dir/(event.IdString() + ".edl");
     std::ofstream fout{edlFile};
     fout << e.code();
@@ -316,32 +317,32 @@ bool EGM::WriteObject(const fs::path &egm_root, const fs::path &dir,
   return true;
 }
 
-bool EGM::WriteRes(buffers::TreeNode* res, const fs::path &dir,
+bool EGMFileFormat::WriteRes(buffers::TreeNode* res, const fs::path &dir,
                    const fs::path &egm_root) const {
   string newDir = (dir/res->name()).string();
   switch (res->type_case()) {
    case Type::kBackground:
-    return WriteYaml(egm_root, newDir + ".bkg", res->mutable_background());
+    return egm_internal::WriteYaml(egm_root, newDir + ".bkg", res->mutable_background());
    case Type::kFont:
-    return WriteYaml(egm_root, newDir + ".fnt", res->mutable_font());
+    return egm_internal::WriteYaml(egm_root, newDir + ".fnt", res->mutable_font());
    case Type::kObject:
     return WriteObject(egm_root, newDir + ".obj", res->object());
    case Type::kPath:
-    return WriteYaml(egm_root, newDir + ".pth", res->mutable_path());
+    return egm_internal::WriteYaml(egm_root, newDir + ".pth", res->mutable_path());
    case Type::kRoom:
-    return WriteRoom(egm_root, newDir + ".rm", res->mutable_room());
+    return egm_internal::WriteRoom(egm_root, newDir + ".rm", res->mutable_room());
    case Type::kScript:
-    return WriteScript(newDir + ".edl", res->script());
+    return egm_internal::WriteScript(newDir + ".edl", res->script());
    case Type::kShader:
-    return WriteShader(newDir, res->shader());
+    return egm_internal::WriteShader(newDir, res->shader());
    case Type::kSound:
-    return WriteYaml(egm_root, newDir + ".snd", res->mutable_sound());
+    return egm_internal::WriteYaml(egm_root, newDir + ".snd", res->mutable_sound());
    case Type::kSprite:
-    return WriteYaml(egm_root, newDir + ".spr", res->mutable_sprite());
+    return egm_internal::WriteYaml(egm_root, newDir + ".spr", res->mutable_sprite());
    case Type::kTimeline:
-    return WriteTimeline(egm_root, newDir + ".tln", res->timeline());
+    return egm_internal::WriteTimeline(egm_root, newDir + ".tln", res->timeline());
    default:
-    std::cerr << "Error: Unsupported Resource Type: " << dir << std::endl;
+    errStream << "Error: Unsupported Resource Type: " << dir << std::endl;
   }
 
   return true;
@@ -407,7 +408,7 @@ inline int getResID(buffers::TreeNode* res) {
 
 }  // namespace
 
-bool EGM::WriteNode(buffers::TreeNode* folder, string dir,
+bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
                     const fs::path &egm_root, YAML::Emitter& tree) const {
   tree << YAML::BeginMap << YAML::Key << "folder" << YAML::Value << folder->name();
 
@@ -450,7 +451,8 @@ bool EGM::WriteNode(buffers::TreeNode* folder, string dir,
 
 static const std::string EGM_VERSION = "2.0.0";
 
-bool EGM::WriteEGM(string fName, buffers::Project* project) const {
+bool EGMFileFormat::WriteProject(Project* project, const fs::path& fPath) const {
+  std::string fName = fPath.u8string();
 
   if (fName.back() != '/')
     fName += '/';
@@ -470,7 +472,7 @@ bool EGM::WriteEGM(string fName, buffers::Project* project) const {
     projYAML << YAML::EndMap;
     out << projYAML.c_str();
   } else {
-    std::cerr << "Failed to open project file "
+    errStream << "Failed to open project file "
               << projectFile << " for write!" << std::endl;
     return false;
   }
@@ -488,12 +490,16 @@ bool EGM::WriteEGM(string fName, buffers::Project* project) const {
   if (std::ofstream out{(abs_root/"tree.yaml").string()}) {
     out << tree.c_str();
   } else {
-    std::cerr << "Failed to open resource tree file "
+    errStream << "Failed to open resource tree file "
               << abs_root/"tree.yaml" << " for write!" << std::endl;
     return false;
   }
 
   return true;
+}
+
+bool EGMFileFormat::DumpResource(TreeNode* res, const fs::path& fName) const {
+  return WriteRes(res, fName, fName);
 }
 
 } //namespace egm

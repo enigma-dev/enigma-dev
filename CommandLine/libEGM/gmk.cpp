@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Robert B. Colton
+/** Copyright (C) 2018-2020 Robert B. Colton, Greg Williamson
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -42,12 +42,12 @@ using namespace std;
 using TypeCase = TreeNode::TypeCase;
 using IdMap = unordered_map<int, std::unique_ptr<google::protobuf::Message> >;
 using TypeMap = unordered_map<TypeCase, IdMap>;
+using egm::errStream;
+
+
+namespace gmk_internal {
 
 static const std::string gmk_data = "gmk_data";
-
-namespace gmk {
-ostream out(nullptr);
-ostream err(nullptr);
 
 static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
@@ -76,12 +76,12 @@ void writeTempBMPFile(const std::filesystem::path& write_fname, std::unique_ptr<
   auto bmp = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
   if (length < MINHEADER) {
-    err << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
+    errStream << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
         << "size '" << MINHEADER << "' for the BMP format" << std::endl;
     return;
   }
   if (bmp[0] != 'B' || bmp[1] != 'M') {
-    err << "Image from the GMK file did not have the correct BMP signature '"
+    errStream << "Image from the GMK file did not have the correct BMP signature '"
         << bmp[0] << bmp[1] << "'" << std::endl;
     return;
   }
@@ -91,7 +91,7 @@ void writeTempBMPFile(const std::filesystem::path& write_fname, std::unique_ptr<
   size_t h = bmp[22] + bmp[23] * 256;
   //read number of channels from BMP header
   if (bmp[28] != 24 && bmp[28] != 32) {
-    err << "Image from the GMK file was " << bmp[28] << " bit while this reader "
+    errStream << "Image from the GMK file was " << bmp[28] << " bit while this reader "
         << "only supports 24 and 32 bit BMP images" << std::endl;
     return;
   }
@@ -104,7 +104,7 @@ void writeTempBMPFile(const std::filesystem::path& write_fname, std::unique_ptr<
 
   unsigned dataSize = scanlineBytes * h;
   if (length < dataSize + pixeloffset) {
-    err << "Image from the GMK file had a length '" << length << "' smaller than the estimated "
+    errStream << "Image from the GMK file had a length '" << length << "' smaller than the estimated "
         << "size '" << (dataSize + pixeloffset) << "' based on the BMP header dimensions" << std::endl;
     return;
   }
@@ -177,7 +177,7 @@ class Decoder {
     if (atexit_tempdata_cleanup_registered) return;
     const int ret = std::atexit(atexit_tempdata_cleanup);
     if (ret != 0) {
-      err << "Failed to register cleanup handler for process exit, temporary files will not be removed" << std::endl;
+      errStream << "Failed to register cleanup handler for process exit, temporary files will not be removed" << std::endl;
     } else {
       atexit_tempdata_cleanup_registered = true;
     }
@@ -293,7 +293,7 @@ class Decoder {
 
     z_stream zs = {}; // zero-initialize
     if (inflateInit(&zs) != Z_OK) {
-      err << "Failed to initialize zlib inflate" << std::endl;
+      errStream << "Failed to initialize zlib inflate" << std::endl;
       return nullptr;
     }
 
@@ -319,7 +319,7 @@ class Decoder {
     inflateEnd(&zs);
 
     if (ret != Z_STREAM_END) { // an error occurred that was not EOF
-      err << "There was an error with code '" << ret << "' while using zlib to decompress data" << std::endl;
+      errStream << "There was an error with code '" << ret << "' while using zlib to decompress data" << std::endl;
       return nullptr;
     }
 
@@ -437,7 +437,7 @@ void LoadSettingsIncludes(Decoder &dec) {
 int LoadSettings(Decoder &dec, Settings& set) {
   int ver = dec.read4();
   if (ver != 530 && ver != 542 && ver != 600 && ver != 702 && ver != 800 && ver != 810) {
-    err << "Unsupported GMK Settings version: " << ver << std::endl;
+    errStream << "Unsupported GMK Settings version: " << ver << std::endl;
     return 0;
   }
 
@@ -554,7 +554,7 @@ int LoadSettings(Decoder &dec, Settings& set) {
 int LoadTriggers(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 800) {
-    err << "Unsupported GMK Triggers version: " << ver << std::endl;
+    errStream << "Unsupported GMK Triggers version: " << ver << std::endl;
     return 0;
   }
 
@@ -567,7 +567,7 @@ int LoadTriggers(Decoder &dec) {
     }
     ver = dec.read4();
     if (ver != 800) {
-      err << "Unsupported GMK Trigger version: " << ver << std::endl;
+      errStream << "Unsupported GMK Trigger version: " << ver << std::endl;
       return 0;
     }
     dec.readStr(); // trigger name
@@ -584,7 +584,7 @@ int LoadTriggers(Decoder &dec) {
 int LoadConstants(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 800) {
-    err << "Unsupported GMK Constants version: " << ver << std::endl;
+    errStream << "Unsupported GMK Constants version: " << ver << std::endl;
     return 0;
   }
 
@@ -675,7 +675,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver, const std::string& nam
     if (ver >= 800) {
       int subver = dec.read4();
       if (subver != 800 && subver != 810) {
-        err << "GMK Sprite with inner version '" << ver << "' has a subimage with id '" << i
+        errStream << "GMK Sprite with inner version '" << ver << "' has a subimage with id '" << i
             << "' that has an unsupported version '" << subver << "'" << std::endl;
         return nullptr;
       }
@@ -748,7 +748,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver, const std::str
   } else { // >= 710
     int dataver = dec.read4();
     if (dataver != 800) {
-      err << "GMK Background with inner version '" << ver << "' has image data with "
+      errStream << "GMK Background with inner version '" << ver << "' has image data with "
           << "unsupported version '" << dataver << "'" << std::endl;
       return nullptr;
     }
@@ -834,7 +834,7 @@ static std::vector<PostponedAction> postponedActions;
 int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
   int ver = dec.read4();
   if (ver != 400) {
-    err << "Unsupported GMK actions version '" << ver <<
+    errStream << "Unsupported GMK actions version '" << ver <<
       "' for event '" << eventName << "'" << std::endl;
     return 0;
   }
@@ -1062,7 +1062,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*
 int LoadIncludes(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 430 && ver != 600 && ver != 620 && ver != 800 && ver != 810) {
-    err << "Unsupported GMK Includes version: " << ver << std::endl;
+    errStream << "Unsupported GMK Includes version: " << ver << std::endl;
     return 0;
   }
 
@@ -1074,7 +1074,7 @@ int LoadIncludes(Decoder &dec) {
     }
     ver = dec.read4();
     if (ver != 620 && ver != 800 && ver != 810) {
-      err << "Unsupported GMK Include version: " << ver << std::endl;
+      errStream << "Unsupported GMK Include version: " << ver << std::endl;
       return 0;
     }
 
@@ -1102,7 +1102,7 @@ int LoadIncludes(Decoder &dec) {
 int LoadPackages(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 700) {
-    err << "Unsupported GMK Extension Packages version: " << ver << std::endl;
+    errStream << "Unsupported GMK Extension Packages version: " << ver << std::endl;
     return 0;
   }
 
@@ -1117,7 +1117,7 @@ int LoadPackages(Decoder &dec) {
 int LoadGameInformation(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 430 && ver != 600 && ver != 620 && ver != 800 && ver != 810) {
-    err << "Unsupported GMK Game Information version: " << ver << std::endl;
+    errStream << "Unsupported GMK Game Information version: " << ver << std::endl;
     return 0;
   }
 
@@ -1155,7 +1155,7 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
   TypeCase type = groupFactory.type;
   int groupVer = dec.read4();
   if (!groupFactory.supportedGroupVersions.count(groupVer)) {
-    err << "GMK group '" << type << "' with version '" << groupVer << "' is unsupported" << std::endl;
+    errStream << "GMK group '" << type << "' with version '" << groupVer << "' is unsupported" << std::endl;
     return 0;
   }
 
@@ -1171,14 +1171,14 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
 
     int ver = dec.read4();
     if (!groupFactory.supportedVersions.count(ver)) {
-      err << "GMK resource of type '" << type << "' with name '" << name
+      errStream << "GMK resource of type '" << type << "' with name '" << name
           << "' has an unsupported version '" << ver << "'" << std::endl;
       return 0;
     }
 
     auto res = groupFactory.loadFunc(dec, ver, name);
     if (!res) {
-      err << "There was a problem reading GMK resource of type '" << type << "' with name '" << name
+      errStream << "There was a problem reading GMK resource of type '" << type << "' with name '" << name
           << "' and the project cannot be loaded" << std::endl;
       return 0;
     }
@@ -1224,7 +1224,7 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
 
     auto typeMapIt = typeMap.find(type);
     if (typeMapIt == typeMap.end()) {
-      err << "No map of ids to protocol buffers for GMK kind '" << kind
+      errStream << "No map of ids to protocol buffers for GMK kind '" << kind
           << "' so tree node with name '" << name << "' will not have "
           << "its protocol buffer set" << std::endl;
       return;
@@ -1235,46 +1235,53 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
     const google::protobuf::Reflection *refl = node->GetReflection();
     const google::protobuf::FieldDescriptor *field = desc->FindFieldByNumber(type);
     if (!field) {
-      err << "TreeNode protocol buffer does not have a field for GMK type '" << type << "'" << std::endl;
+      errStream << "TreeNode protocol buffer does not have a field for GMK type '" << type << "'" << std::endl;
       return;
     }
     refl->SetAllocatedMessage(node, resMap[id].release(), field);
   }
 }
 
-std::unique_ptr<buffers::Project> LoadGMK(std::string fName, const EventData* event_data) {
+} //namespace gmk_internal
+
+namespace egm {
+
+using namespace gmk_internal;
+
+std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fName) const {
   static const vector<GroupFactory> groupFactories({
-    { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, LoadSound      },
-    { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     },
-    { TypeCase::kBackground, { 400, 800      }, { 400, 543, 710      }, LoadBackground },
-    { TypeCase::kPath,       { 420, 800      }, { 530                }, LoadPath       },
-    { TypeCase::kScript,     { 400, 800, 810 }, { 400, 800, 810      }, LoadScript     },
-    { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, LoadFont       },
-    { TypeCase::kTimeline,   { 500, 800      }, { 500                }, LoadTimeline   },
-    { TypeCase::kObject,     { 400, 800      }, { 430                }, LoadObject     },
-    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, LoadRoom       }
+    { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, gmk_internal::LoadSound      },
+    { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, gmk_internal::LoadSprite     },
+    { TypeCase::kBackground, { 400, 800      }, { 400, 543, 710      }, gmk_internal::LoadBackground },
+    { TypeCase::kPath,       { 420, 800      }, { 530                }, gmk_internal::LoadPath       },
+    { TypeCase::kScript,     { 400, 800, 810 }, { 400, 800, 810      }, gmk_internal::LoadScript     },
+    { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, gmk_internal::LoadFont       },
+    { TypeCase::kTimeline,   { 500, 800      }, { 500                }, gmk_internal::LoadTimeline   },
+    { TypeCase::kObject,     { 400, 800      }, { 430                }, gmk_internal::LoadObject     },
+    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, gmk_internal::LoadRoom       }
   });
+
   TypeMap typeMap;
   std::ifstream in(fName, std::ios::binary);
   if (!in) {
-    err << "Could not open GMK for reading: " << fName << std::endl;
+    errStream << "Could not open GMK for reading: " << fName << std::endl;
     return nullptr;
   }
   Decoder dec(in);
 
   int identifier = dec.read4();
   if (identifier != 1234321) {
-    err << "Invalid GMK identifier: " << identifier << std::endl;
+    errStream << "Invalid GMK identifier: " << identifier << std::endl;
     return nullptr;
   } else {
-    out << "identifier: " << identifier << std::endl;
+    outStream << "identifier: " << identifier << std::endl;
   }
   int ver = dec.read4();
   if (ver != 530 && ver != 600 && ver != 701 && ver != 800 && ver != 810) {
-    err << "Unsupported GMK version: " << ver << std::endl;
+    errStream << "Unsupported GMK version: " << ver << std::endl;
     return nullptr;
   } else {
-    out << "game version: " << ver << std::endl;
+    outStream << "game version: " << ver << std::endl;
   }
 
   if (ver == 530) dec.skip(4);
@@ -1292,7 +1299,7 @@ std::unique_ptr<buffers::Project> LoadGMK(std::string fName, const EventData* ev
   } else {
     game_id = dec.read4();
   }
-  out << "game id: " << game_id << std::endl;
+  outStream << "game id: " << game_id << std::endl;
   dec.skip(16); //16 bytes GAME_GUID
 
   Settings settings;
@@ -1320,7 +1327,7 @@ std::unique_ptr<buffers::Project> LoadGMK(std::string fName, const EventData* ev
   // Library Creation Code
   ver = dec.read4();
   if (ver != 500) {
-    err << "Unsupported GMK Library Creation Code version: " << ver << std::endl;
+    errStream << "Unsupported GMK Library Creation Code version: " << ver << std::endl;
     return 0;
   }
   int no = dec.read4();
@@ -1330,7 +1337,7 @@ std::unique_ptr<buffers::Project> LoadGMK(std::string fName, const EventData* ev
   // Room Execution Order
   ver = dec.read4();
   if (ver != 500 && ver != 540 && ver != 700) {
-    err << "Unsupported GMK Room Execution Order version: " << ver << std::endl;
+    errStream << "Unsupported GMK Room Execution Order version: " << ver << std::endl;
     return 0;
   }
   dec.skip(dec.read4() * 4);
@@ -1352,9 +1359,9 @@ std::unique_ptr<buffers::Project> LoadGMK(std::string fName, const EventData* ev
   // ensure all temp data files are written and the paths are set in the protos
   dec.processTempFileFutures();
   
-  LegacyEventsToEGM(proj.get(), event_data);
+  LegacyEventsToEGM(proj.get(), _event_data);
 
   return proj;
 }
 
-}  //namespace gmk
+}  //namespace egm
