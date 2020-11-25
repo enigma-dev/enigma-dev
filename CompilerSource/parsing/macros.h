@@ -1,11 +1,29 @@
+/** Copyright (C) 2020 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
 #ifndef ENIGMA_COMPILER_PARSING_MACROS_h
 #define ENIGMA_COMPILER_PARSING_MACROS_h
 
 #include "tokens.h"
 #include "error_reporting.h"
 
-#include <string>
+#include <map>
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace enigma {
@@ -90,8 +108,8 @@ struct Macro {
   std::string NameAndPrototype() const;
 
   /// Default constructor; defines an object-like macro with the given value.
-  Macro(const string &n, TokenVector &&definiens_, ErrorHandler *h):
-      name(n), definiens(std::move(definiens_)), is_variadic(false) {}
+  Macro(const std::string &definiendum, TokenVector &&definiens):
+      name(definiendum), value(std::move(definiens)), is_variadic(false) {}
 
   /** Construct a macro function taking the arguments in arg_list.
       This function parses the given value based on the argument list.
@@ -107,13 +125,16 @@ struct Macro {
         If \p arg_list is empty, and \p variadic is false, the behavior is the
         same as the default constructor. 
   **/
-  Macro(string_view name_, vector<string> &&arg_list, bool variadic,
-        TokenVector &&definiens, ErrorHandler *herr):
-      is_variadic(variadic), name(name_), params(std::move(arg_list)),
-      value(std::move(definiens)), parts(Componentize(value, params, herr)) {}
+  Macro(std::string_view name_, std::vector<std::string> &&arg_list,
+        bool variadic, TokenVector &&definiens, ErrorHandler *herr):
+      name(name_), value(std::move(definiens)),
+      parameters(std::move(arg_list)), is_variadic(variadic),
+      parts(Componentize(value, *parameters, herr)) {}
 
-  ~macro_type() {}
+  ~Macro() {}
 };
+
+typedef std::map<std::string, Macro, std::less<>> MacroMap;
 
 }  // namespace parsing
 }  // namespace enigma

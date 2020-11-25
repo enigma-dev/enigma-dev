@@ -60,7 +60,7 @@ static std::filesystem::path lastcodegen_directory;
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
 static bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
 { 
-  pt pos = 0, spos;
+  size_t pos = 0, spos;
 
   /* Isolate the executable path and filename
   ***********************************************/
@@ -162,7 +162,7 @@ const char* establish_bearings(const char *compiler)
     if (idirs == "")
       return "Invalid search directories returned. Error 6.";
 
-    pt pos = 0;
+    size_t pos = 0;
     string idirstart = compilerInfo.searchdirs_start, idirend = compilerInfo.searchdirs_end;
     cout << "Searching for directories between \"" << idirstart << "\" and \"" << idirend << "\"" << endl;
     if (idirstart != "")
@@ -180,10 +180,10 @@ const char* establish_bearings(const char *compiler)
 
     while (is_useless(idirs[++pos]));
 
-    const pt endpos = (idirend != "")? idirs.find(idirend): string::npos;
+    const size_t endpos = (idirend != "")? idirs.find(idirend): string::npos;
     idirs = idirs.substr(pos, endpos-pos); //Assume the rest of the file is full of these
 
-    pt spos = 0;
+    size_t spos = 0;
     for (pos = 0; pos < idirs.length(); pos++)
     {
       if (idirs[pos] == '\r' or idirs[pos] == '\n')

@@ -74,12 +74,12 @@ static int referencers_varargs_at(ref_stack &refs, jdi::definition *varargs_t) {
   return -1;
 }
 
-bool lang_CPP::is_variadic_function(jdi::definition *d) {
+bool lang_CPP::is_variadic_function(jdi::definition *d) const {
   if (!definition_is_function(d)) return false;
   return function_variadic_after((jdi::definition_function*) d) != -1;
 }
 
-int lang_CPP::function_variadic_after(jdi::definition_function *func) {
+int lang_CPP::function_variadic_after(jdi::definition_function *func) const {
   for (const auto &overload_pair : func->overloads) {
     jdi::definition_overload *ov = overload_pair.second;
     const int rva = referencers_varargs_at(ov->referencers, enigma_type__varargs);
@@ -88,7 +88,7 @@ int lang_CPP::function_variadic_after(jdi::definition_function *func) {
   return -1;
 }
 
-void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigned &max) {
+void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigned &max) const {
   min = (unsigned) SIZE_MAX;
   max = 0;
   
@@ -100,7 +100,7 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
   iterate_overloads((definition_function*) d, min, max, enigma_type__varargs);
 }
 
-bool lang_CPP::definition_is_function(definition *d) {
+bool lang_CPP::definition_is_function(definition *d) const {
   if (d->flags & DEF_FUNCTION) return true;
   if (d->flags & DEF_TEMPLATE) {
     definition_template *dt = (definition_template*) d;
@@ -109,7 +109,7 @@ bool lang_CPP::definition_is_function(definition *d) {
   return false;
 }
 
-size_t lang_CPP::definition_overload_count(jdi::definition *d) {
+size_t lang_CPP::definition_overload_count(jdi::definition *d) const {
   if (!(d->flags & DEF_FUNCTION)) return 0;
   definition_function *df = (definition_function*) d;
   return df->overloads.size() + df->template_overloads.size();
@@ -117,14 +117,14 @@ size_t lang_CPP::definition_overload_count(jdi::definition *d) {
 
 
 #include "languages/lang_CPP.h"
-definition* lang_CPP::find_typename(string n) {
+definition* lang_CPP::find_typename(string n) const {
   definition* d = look_up(n);
   if (!d) return NULL;
   if (d->flags & DEF_TYPENAME) return d;
   return NULL;
 }
 
-bool lang_CPP::global_exists(string n) {
+bool lang_CPP::global_exists(string n) const {
   definition* d = look_up(n);
   return d;
 }

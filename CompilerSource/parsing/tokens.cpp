@@ -1,5 +1,23 @@
+/** Copyright (C) 2020 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
 #include "tokens.h"
 
+#include <iostream>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -12,12 +30,13 @@ using std::string;
 
 static const std::vector<std::string> kTokenNames = [](){
   std::vector<std::string> res;
-  res.resize(TT_ERROR + 1);
+  res.resize(TT_ENDOFCODE + 1);
   #define REGISTER(name) [[fallthrough]]; case name: res[name] = #name
   switch (TT_ENDOFCODE) {
     default:
     REGISTER(TT_ENDOFCODE);
     REGISTER(TT_ERROR);
+    REGISTER(TTM_WHITESPACE);
     REGISTER(TT_VARNAME);
     REGISTER(TT_SEMICOLON);
     REGISTER(TT_COLON);
@@ -46,7 +65,10 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TT_ENDBRACE);
     REGISTER(TT_BEGINTRIANGLE);
     REGISTER(TT_ENDTRIANGLE);
-    REGISTER(TT_DIGIT);
+    REGISTER(TT_DECLITERAL);
+    REGISTER(TT_BINLITERAL);
+    REGISTER(TT_OCTLITERAL);
+    REGISTER(TT_HEXLITERAL);
     REGISTER(TT_STRING);
     REGISTER(TT_SCOPEACCESS);
     REGISTER(TT_FUNCTION);
@@ -74,15 +96,20 @@ static const std::vector<std::string> kTokenNames = [](){
 
 }  // namespace
 
+std::string ToString(TokenType tt) {
+  return kTokenNames[tt];
+}
 string Token::ToString() const {
   std::stringstream str;
-  str << kTokenNames[type] << "{\"" << content << "\", ";
-  str << (antiquated.separator ? "separated, " : "unseparated, ");
-  str << (antiquated.breakandfollow ? "breakandfollow, " : "nobreak, ");
-  str << (antiquated.operatorlike ? "operatorlike, " : "notoperator, ");
-  str << antiquated.macrolevel;
-  str << "}";
+  str << kTokenNames[type] << "(\"" << content << "\")";
   return str.str();
+}
+
+std::ostream &operator<<(std::ostream &os, TokenType tt) {
+  return os << kTokenNames[tt];
+}
+std::ostream &operator<<(std::ostream &os, const Token &t) {
+  return os << t.ToString();
 }
 
 }  // namespace parsing

@@ -1,32 +1,31 @@
-/*  Copyright (C) 2020 Josh Ventura
-**
-**  This file is a part of the ENIGMA Development Environment.
-**
-**
-**  ENIGMA is free software: you can redistribute it and/or modify it under the
-**  terms of the GNU General Public License as published by the Free Software
-**  Foundation, version 3 of the license or any later version.
-**
-**  This application and its source code is distributed AS-IS, WITHOUT ANY
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-**  details.
-**
-**  You should have recieved a copy of the GNU General Public License along
-**  with this code. If not, see <http://www.gnu.org/licenses/>
-**
-**  ENIGMA is an environment designed to create games and other programs with a
-**  high-level, fully compilable language. Developers of ENIGMA or anything
-**  associated with ENIGMA are in no way responsible for its users or
-**  applications created by its users, or damages caused by the environment
-**  or programs made in the environment.
-*/
+/** Copyright (C) 2020 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #ifndef ENIGMA_COMPILER_PARSING_TOKENS_h
 #define ENIGMA_COMPILER_PARSING_TOKENS_h
 
+#include "error_reporting.h"
+
+#include <iosfwd>
 #include <string>
 #include <string_view>
+
+// TODO: Delete. Replace with ENIGMA-specific wrapper class.
+namespace jdi { struct definition; }
 
 namespace enigma {
 namespace parsing {
@@ -51,6 +50,9 @@ enum TokenType {
   TT_AND,             // The and/&& operator.
   TT_OR,              // The or/|| operator.
   TT_XOR,             // The xor/^^ operator.
+  TT_DIV,             // The div operator.
+  TT_MOD,             // The mod (modulo) operator.
+  TT_NOT,             // The not operator. This refers to the keyword, not the bang symbol (!).
   TT_EQUALTO,         // The == operator. Always checks equality.
   TT_NOTEQUAL,        // The != or <> operator.
   TT_BANG,            // The ! operator.
@@ -72,7 +74,10 @@ enum TokenType {
   TT_ENDBRACE,        // }
   TT_BEGINTRIANGLE,   // <
   TT_ENDTRIANGLE,     // >
-  TT_DIGIT,           // 0 1 2... (...)
+  TT_DECLITERAL,      // 0 1 2... 9 10 11... 9876543210...
+  TT_BINLITERAL,      // 0b0 0b1 0b10 0b11 0b100 0b101 0b110 ...
+  TT_OCTLITERAL,      // 0o0 0o1 0o2... 0o6 0o7 0o10 0o11... 0o76543210 ...
+  TT_HEXLITERAL,      // 0x0 $1 0x2... 0x9 0xA... $F $10... $FEDCBA9876543210...
   TT_STRING,          // "", ''
   TT_SCOPEACCESS,     // ::
   TT_FUNCTION,        // game_end
@@ -96,26 +101,48 @@ enum TokenType {
   TT_S_CATCH,         // catch
   TT_S_NEW,           // new
 
+  TTM_WHITESPACE,     // Preprocessing token: whitespace
+  TTM_CONCAT,         // Preprocessing token: ##
+  TTM_STRINGIFY,      // Preprocessing token: #
+
   TT_ERROR,
   TT_ENDOFCODE
 };
 
-// TODO: Delete. Replace with ENIGMA-specific wrapper class.
-namespace jdi { struct definition; }
+namespace internal {
+namespace useless {
 
-struct Token {
+// Allows Token to be a composite of two structs, with access to `type`
+// requiring no pointer arithmetic. This struct in and of itself is useless.
+struct TokenTypeWrapperStruct {
   TokenType type;
-  std::string_view content;
-  size_t pos, length;
+  TokenTypeWrapperStruct(TokenType t): type(t) {}
+};
 
-  unsigned match; // The index of the matching parenthesis/bracket/brace in the lex
-  jdi::definition* ext;
+}  // namespace useless
+}  // namespace internal
 
-  Token(): type(TT_ERROR) {}
-  Token(TokenType t,                      std::string_view &&code, size_t p, size_t l): type(t), content(code.substr(p, l)), pos(p), length(l), ext(nullptr) {}
-  Token(TokenType t, jdi::definition *ex, std::string_view &&code, size_t p, size_t l): type(t), content(code.substr(p, l)), pos(p), length(l), ext(ex) {}
+struct Token:
+    internal::useless::TokenTypeWrapperStruct,
+    CodeSnippet {
+  jdi::definition *ext = nullptr;
+
+  bool PreprocessesAway() const { return type == TTM_WHITESPACE; }
+
+  Token(): TokenTypeWrapperStruct(TT_ERROR) {}
+  Token(TokenType t, CodeSnippet snippet):
+      internal::useless::TokenTypeWrapperStruct(t),
+      CodeSnippet(snippet) {}
+  Token(TokenType t, jdi::definition *ex, CodeSnippet snippet):
+      internal::useless::TokenTypeWrapperStruct(t),
+      CodeSnippet(snippet),
+      ext(ex) {}
   std::string ToString() const;
 };
+
+std::string ToString(TokenType token);
+std::ostream &operator<<(std::ostream &os, TokenType tt);
+std::ostream &operator<<(std::ostream &os, const Token &t);
 
 }  // namespace parsing
 }  // namespace enigma

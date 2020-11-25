@@ -32,7 +32,7 @@
 #include <cstdlib>
 #include <vector>
 #include <iostream>
-
+/*
 #include "settings.h"
 #include "general/parse_basics_old.h"
 #include "general/macro_integration.h"
@@ -68,7 +68,7 @@ namespace syncheck
   void addscr(string name) {
     scripts[name]++;
   }
-/*
+
   #define superPos (mymacroind ? mymacrostack[0].pos : pos)
   #define ptrace() for (unsigned i = 0; i < lex.size(); i++) cout << (string)lex[i] << "\t\t" << endl
   #define lexlast (lex.size()-1)
@@ -177,5 +177,6 @@ namespace syncheck
 
     newcode = code;
     return -1;
-  }*/
+  }
 }
+*/

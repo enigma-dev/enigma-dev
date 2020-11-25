@@ -35,6 +35,8 @@
 
 using namespace std;
 
+#include "parser/parser.h"
+
 #include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
@@ -65,7 +67,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   scripts.resize(game.scripts.size());
   for (size_t i = 0; i < game.scripts.size(); i++) {
     std::string newcode;
-    AST ast = AST::Parse(game.scripts[i]->code());
+    AST ast = AST::Parse(game.scripts[i]->code(), &state.parse_context);
     if (ast.HasError()) {
       user << "Syntax error in script `" << game.scripts[i].name << "'\n"
            << ast.ErrorString() << flushl;
@@ -74,7 +76,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     // Keep a parsed record of this script
     scr_lookup[game.scripts[i].name] = scripts[i] = new ParsedScript;
     scripts[i]->code.code = newcode;
-    // FIXME(new parser) parser_main(&scripts[i]->code, script_names);
+    parser_main(&scripts[i]->code, state, script_names);
     edbg << "Parsed `" << game.scripts[i].name << "': " << scripts[i]->scope.locals.size() << " locals, " << scripts[i]->scope.globals.size() << " globals" << flushl;
 
     // If the script accesses variables from outside its scope implicitly
@@ -86,8 +88,9 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       // locals away; what if a script explicitly declares `local var foo;`?
       ParsedScope temporary_scope = *scripts[i]->code.my_scope;
       scripts[i]->global_code = new ParsedCode(&temporary_scope);
-      // FIXME(new parser) scripts[i]->global_code->code = string("with (self) {\n") + newcode + "\n/* */}";
-      // FIXME(new parser) parser_main(scripts[i]->global_code, script_names);
+      scripts[i]->global_code->code =
+          string("with (self) {\n") + newcode + "\n/* */}";
+      parser_main(scripts[i]->global_code, state, script_names);
       scripts[i]->global_code->my_scope = nullptr;
     }
     fflush(stdout);
@@ -99,7 +102,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     tline_lookup[timeline.name].id = timeline.id();
     for (const auto &moment : timeline->moments())
     {
-      AST ast = AST::Parse(moment.code());
+      AST ast = AST::Parse(moment.code(), &state.parse_context);
       if (ast.HasError()) {
         user << "Syntax error in timeline `" << timeline.name
              << ", moment: " << moment.step() << "'\n"
@@ -115,8 +118,8 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       tlines.push_back(tline);
       tline_lookup[timeline.name].moments.emplace_back(moment.step(), tline);
 
-      // FIXME(new parser) tline->code.code = newcode;
-      // FIXME(new parser) parser_main(&tline->code, script_names);
+      tline->code.code = moment.code();
+      parser_main(&tline->code, state, script_names);
       edbg << "Parsed `" << timeline.name << ", moment: "
            << moment.step() << "': "
            << tline->scope.locals.size() << " locals, "
@@ -129,9 +132,9 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         // Or maybe into one big script made from a switch statement based on the current moment.
         ParsedScope temporary_object = *tline->code.my_scope;
         tline->global_code = new ParsedCode(&temporary_object);
-        // FIXME(new parser): This code applies the AST to self, to make locals work.
-        // tline->global_code->code = string("with (self) {\n") + newcode + "\n/* */}";
-        // FIXME(new parser) parser_main(tline->global_code, script_names);
+        tline->global_code->code =
+            string("with (self) {\n") + tline->code.code + "\n/* */}";
+        parser_main(tline->global_code, state, script_names);
         tline->global_code->my_scope = NULL;
       }
       fflush(stdout);
@@ -275,7 +278,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         edbg << "Check `" << object.name << "::" << pev.ev_id.TrueFunctionName() << "...";
 
         // Check the code
-        AST ast = AST::Parse(event.code());
+        AST ast = AST::Parse(event.code(), &state.parse_context);
         if (ast.HasError()) {
           // Error. Report it.
           user << "Syntax error in object `" << object.name << "', "
@@ -288,7 +291,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
         //Add this to our objects map
         pev.code = newcode;
-        // FIXME(new parser) parser_main(&pev, script_names, setting::compliance_mode!=setting::COMPL_STANDARD); //Format it to C++
+        parser_main(&pev, state, script_names, setting::compliance_mode!=setting::COMPL_STANDARD); //Format it to C++
 
         edbg << " Done." << flushl;
     }
@@ -306,17 +309,17 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     state.parsed_rooms.push_back(pr = new parsed_room);
     pr->creation_code = new ParsedCode(&pr->pseudo_scope);
 
-    AST create = AST::Parse(room->creation_code());
+    AST create = AST::Parse(room->creation_code(), &state.parse_context);
     if (create.HasError()) {
       user << "Syntax error in room creation code for room " << room.id()
            << " (`" << room.name << "'):\n" << create.ErrorString() << flushl;
       return E_ERROR_SYNTAX;
     }
-    // FIXME(new parser) pr->creation_code->code = newcode;
+    pr->creation_code->code = room->creation_code();
 
     for (const auto &instance : room->instances()) {
       if (!instance.creation_code().empty()) {
-        AST ast = AST::Parse(instance.creation_code());
+        AST ast = AST::Parse(instance.creation_code(), &state.parse_context);
         if (ast.HasError()) {
           user << "Syntax error in instance creation code for instance "
                << instance.id() << " in room " << room.id() << " (`" << room.name << "'):\n"
@@ -325,18 +328,17 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         }
 
         pr->instance_create_codes[instance.id()].object_name = instance.object_type();
-        // FIXME(new parser) ParsedCode* icce = 
-        pr->instance_create_codes[instance.id()].code =
+        ParsedCode* icce = pr->instance_create_codes[instance.id()].code =
             new ParsedCode(parsed_objects[instance.object_type()]);
-        ast.ApplyTo(instance.id());
-        // FIXME(new parser) parser_main(icce, script_names);
+        icce->code = string("with (") + to_string(instance.id()) + ") {" + instance.creation_code() + "\n/* */}";
+        parser_main(icce, state, script_names);
       }
     }
 
     //PreCreate code
     for (const auto &instance : room->instances()) {
       if (!instance.initialization_code().empty()) {
-        AST ast = AST::Parse(instance.initialization_code());
+        AST ast = AST::Parse(instance.initialization_code(), &state.parse_context);
         if (ast.HasError()) {
           cout << "Syntax error in instance initialization code for instance "
                << instance.id() <<" in room " << room.id() << " (`" << room.name
@@ -345,11 +347,10 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         }
 
         pr->instance_precreate_codes[instance.id()].object_name = instance.object_type();
-        // FIXME(new parser) ParsedCode* icce =
-        pr->instance_precreate_codes[instance.id()].code =
+        ParsedCode* icce = pr->instance_precreate_codes[instance.id()].code =
             new ParsedCode(parsed_objects[instance.object_type()]);
-        ast.ApplyTo(instance.id());
-        // FIXME(new parser) parser_main(icce, script_names);
+        icce->code = string("with (") + tostring(instance.id()) + ") {" + instance.initialization_code() + "\n/* */}";
+        parser_main(icce, state, script_names);
       }
     }
   }
