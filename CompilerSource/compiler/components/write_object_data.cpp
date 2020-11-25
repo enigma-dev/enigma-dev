@@ -135,7 +135,7 @@ static inline void write_extension_casts(std::ostream &wto,
 
 // TODO(JoshDreamland): Burn this function into ash and launch the ashes into space
 static inline void compute_locals(language_adapter *lang, parsed_object *object, const string addls) {
-  pt pos;
+  size_t pos;
   string type, name, pres, sufs;
   for (pos = 0; pos < addls.length(); pos++)
   {
@@ -143,7 +143,7 @@ static inline void compute_locals(language_adapter *lang, parsed_object *object,
     if (addls[pos] == ';') { object->locals[name] = dectrip(type, pres, sufs); type = pres = sufs = ""; continue; }
     if (addls[pos] == ',') { object->locals[name] = dectrip(type, pres, sufs); pres = sufs = ""; continue; }
     if (is_letter(addls[pos]) or addls[pos] == '$') {
-      const pt spos = pos;
+      const size_t spos = pos;
       while (is_letterdd(addls[++pos]));
       string tn = addls.substr(spos,pos-spos);
       (lang->find_typename(tn) ? type : name) = tn;
@@ -152,7 +152,7 @@ static inline void compute_locals(language_adapter *lang, parsed_object *object,
     if (addls[pos] == '*') { pres += '*'; continue; }
     if (addls[pos] == '[') {
       int cnt = 1;
-      const pt spos = pos;
+      const size_t spos = pos;
       while (cnt and ++pos < addls.length())
         if (addls[pos] == '[' or addls[pos] == '(') cnt++;
         else if (addls[pos] == ')' or addls[pos] == ']') cnt--;
@@ -162,7 +162,7 @@ static inline void compute_locals(language_adapter *lang, parsed_object *object,
     if (addls[pos] == '=') {
       int cnt = 0;
 
-      pt spos = ++pos;
+      size_t spos = ++pos;
       while (is_useless(addls[spos])) spos++;
       pos = spos - 1;
 

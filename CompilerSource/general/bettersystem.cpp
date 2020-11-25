@@ -37,6 +37,7 @@ using namespace std;
 #include "general/parse_basics_old.h"
 #include "frontend.h"
 
+typedef size_t pt;
 
 inline char* scopy(string& str)
 {

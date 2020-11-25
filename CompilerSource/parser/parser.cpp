@@ -151,7 +151,7 @@ void parser_init()
 
 
 
-void parser_main(ParsedCode* pev, const std::set<std::string>& script_names, bool isObject)
+void parser_main(ParsedCode* pev, CompileState &state, const std::set<std::string>& script_names, bool isObject)
 {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
@@ -169,13 +169,13 @@ void parser_main(ParsedCode* pev, const std::set<std::string>& script_names, boo
 
   if (pev) {
     pev->strc = 0; //Number of strings in this code
-    parser_ready_input(code,synt,pev->strc,pev->strs);
+    parser_ready_input(code,synt,pev->strc,pev->strs,state);
   }
   else
   {
     varray<string> strst;
     unsigned int strct = 0;
-    parser_ready_input(code,synt,strct,strst);
+    parser_ready_input(code,synt,strct,strst,state);
   }
   parser_reinterpret(code,synt);
   if (setting::automatic_semicolons) {

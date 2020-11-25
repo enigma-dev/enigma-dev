@@ -174,6 +174,7 @@ struct y_level {
   y_level(y_level* a, ey_data *b, int c): prev(a), s(b), i(c) {}
 };
 
+typedef size_t pt;
 ey_data parse_eyaml(istream &file, string filename)
 {
   ey_data res;

@@ -35,7 +35,9 @@
 #include <vector>
 
 #include "darray.h"
+#include "parsing/ast.h"
 #include "event_reader/event_parser.h"
+#include "parsing/language_frontend.h"
 
 using namespace std;
 
@@ -401,11 +403,14 @@ struct CompileState {
   TimelineLookupMap timeline_lookup;
   
   ParsedScope global_object;
+  enigma::parsing::ParseContext parse_context;
 
   // Set of all events used in the game.
   std::set<EventGroupKey> used_events;
 
   void add_dot_accessed_local(string name);
+
+  CompileState(LanguageFrontend *lang): parse_context(lang) {}
 };
 
 #endif

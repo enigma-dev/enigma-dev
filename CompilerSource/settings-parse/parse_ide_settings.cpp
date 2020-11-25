@@ -115,10 +115,10 @@ void parse_ide_settings(const char* eyaml)
   
   // Read settings info
   setting::use_cpp_strings   = settree.get("inherit-strings-from").toInt();
+  setting::use_cpp_literals  = settree.get("inherit-literals-from").toInt();
   setting::use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
   setting::use_incrementals  = settree.get("inherit-increment-from").toInt();
   setting::use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
-  setting::literal_autocast  = settree.get("treat-literals-as").toInt();
   setting::inherit_objects   = settree.get("inherit-objects").toBool();
   switch (settree.get("compliance-mode").toInt()) {
     case 4:

@@ -12,7 +12,7 @@ else
 	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options-mt -lpthread
 endif
 
-CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR)
+CXXFLAGS  += -I../../CompilerSource -I../../CompilerSource/JDI/src -I$(PROTO_DIR)
 LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lProtocols -lENIGMAShared -lprotobuf -lyaml-cpp -lpng
 
 ifeq ($(TESTS), TRUE)

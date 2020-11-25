@@ -312,7 +312,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   ide_dia_open();
   cout << "Initialized." << endl;
 
-  CompileState state;
+  CompileState state(current_language);
 
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");

@@ -40,18 +40,19 @@ namespace extensions
   api_descriptor targetAPI;
 }
 
-namespace setting
-{
-  //Compatibility / Progess options
-  bool use_cpp_strings = 0;  // Defines what language strings are inherited from.    0 = GML,               1 = C++
-  bool use_cpp_escapes = 0;  // Defines what language strings are inherited from.    0 = GML,               1 = C++
-  bool use_gml_equals = 0;   // Defines what language operator= is inherited from.   0 = C++,               1 = GML
-  bool use_incrementals = 0; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
-  bool literal_autocast = 0; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
-  bool inherit_objects = 0;  // Determines whether objects should automatically inherit locals and events from their parents
-  bool automatic_semicolons = 0; // Determines whether semicolons should automatically be added or if the user wants strict syntax
-  COMPLIANCE_LVL compliance_mode = COMPL_STANDARD;
-  std::string keyword_blacklist = "";
+namespace setting {
+
+//Compatibility / Progess options
+bool use_cpp_strings = 0;
+bool use_cpp_escapes = 0;
+bool use_cpp_literals = 0;
+bool use_gml_equals = 0;
+bool use_incrementals = 0;
+bool inherit_objects = 0;
+bool automatic_semicolons = 0;
+COMPLIANCE_LVL compliance_mode = COMPL_STANDARD;
+std::string keyword_blacklist = "";
+
 }
 
 CompilerInfo compilerInfo;
