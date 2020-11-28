@@ -32,7 +32,6 @@ API:
   # Platform default is OS specific and handled internally but can be overriden here
   # target_platform: xlib
 
-
 Compiler:  
   inherit_strings: 0
   inherit_escapes: 0

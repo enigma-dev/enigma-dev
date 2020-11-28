@@ -260,11 +260,11 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   if (currentConfig != nullptr) {
     const auto &api = currentConfig->api();
     if (api.has_target_audio()) audio = api.target_audio();
-    if (api.has_target_platform()) platform = api.target_platform(); 
-    if (api.has_target_compiler()) compiler = api.target_compiler(); 
-    if (api.has_target_graphics()) graphics = api.target_graphics(); 
-    if (api.has_target_widgets()) widgets = api.target_widgets(); 
-    if (api.has_target_collision()) collision = api.target_collision(); 
+    if (api.has_target_platform()) platform = api.target_platform();
+    if (api.has_target_compiler()) compiler = api.target_compiler();
+    if (api.has_target_graphics()) graphics = api.target_graphics();
+    if (api.has_target_widgets()) widgets = api.target_widgets();
+    if (api.has_target_collision()) collision = api.target_collision();
     if (api.has_target_network()) network = api.target_network();
     
     const auto &compilerSettings = currentConfig->compiler();
