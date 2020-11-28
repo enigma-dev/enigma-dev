@@ -3,6 +3,7 @@
 
 #include "eyaml/eyaml.h"
 #include "strings_util.h"
+#include "ProtoYaml/proto-yaml.h"
 #include "OS_Switchboard.h"
 
 #include <filesystem>
@@ -10,6 +11,8 @@ namespace fs = std::filesystem;
 
 #include <iostream>
 #include <cctype> // std::ispace
+
+using namespace buffers::resources;
 
 inline std::string word_wrap(std::string text, unsigned per_line)
 {
@@ -70,6 +73,16 @@ inline list_t splitString(const std::string &str)
   return list;
 }
 
+inline std::string repeatedStringToDelimit(const google::protobuf::RepeatedPtrField<std::string> f) {
+  std::string ret;
+  for (auto s : f) {
+    ret += s + ",";
+  }
+  
+  if (!ret.empty()) ret.pop_back();
+  return ret;
+}
+
 OptionsParser::OptionsParser() : _desc("Options")
 {
   // Platform Defaults
@@ -87,12 +100,18 @@ OptionsParser::OptionsParser() : _desc("Options")
     def_workdir = "/tmp/ENIGMA/";
     def_compiler = "gcc";
   #endif
-
+  
+  fs::path defaultConfig = fs::current_path()/"emake-defaults.yaml";
+  if (fs::exists(defaultConfig)) _loadedSettings = egm::ReadYamlFileAs<Settings>(defaultConfig.u8string());
+  const API& defAPI = _loadedSettings.api();
+  const Compiler& defComp = _loadedSettings.compiler();
+  
   _desc.add_options()
     ("help,h", "Print help messages")
     ("list,l", "List available types, globals & functions")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
     ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
+    ("config",   opt::value<std::string>()->default_value(""), "Configuration file for emake. Note: All passeed options will override any option set in the config")
     ("quiet,q", opt::bool_switch()->default_value(false), "Suppresses output to std::out and std::err streams.")
 #ifdef CLI_ENABLE_SERVER
     ("server,s", opt::bool_switch()->default_value(false), "Starts the CLI in server mode (ignores input file).")
@@ -100,17 +119,17 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("port", opt::value<int>()->default_value(37818), "The port number to bind when in server mode.")
 #endif
     ("output,o", opt::value<std::string>(), "Output executable file")
-    ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (Win32, xlib, Cocoa, SDL, None)")
-    ("workdir,d", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
-    ("codegen,k", opt::value<std::string>()->default_value(def_workdir), "Codegen Directory")
+    ("platform,p", opt::value<std::string>()->default_value(defAPI.has_target_platform() ? defAPI.target_platform() : def_platform), "Target Platform (Win32, xlib, Cocoa, SDL, None)")
+    ("workdir,d", opt::value<std::string>()->default_value(defAPI.has_target_compiler() ? defAPI.target_compiler() : def_workdir), "Working Directory")
+    ("codegen,k", opt::value<std::string>()->default_value(defComp.has_eobjs_directory() ? defComp.eobjs_directory() : def_workdir), "Codegen Directory")
     ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Compile, Debug, Design)")
-    ("graphics,g", opt::value<std::string>()->default_value("OpenGL1"), "Graphics System (Direct3D9, Direct3D11, OpenGL1, OpenGL3, OpenGLES2, OpenGLES3, None)")
-    ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (DirectSound, OpenAL, XAudio2, None)")
-    ("widgets,w", opt::value<std::string>()->default_value("None"), "Widget System (Win32, xlib, Cocoa, GTK+, None)")
-    ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (DirectPlay, Asynchronous, BerkeleySockets, None)")
-    ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System (Precise, BBox, None)")
-    ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Alarms, Paths, Timelines, Particles, MotionPlanning, ttf, libpng, IniFilesystem, RegistrySpoof, Asynchronous, StudioPhysics, VirtualKeys, XRandR, XTEST, FileDropper, None)")
-    ("compiler,x", opt::value<std::string>()->default_value(def_compiler), "Compiler.ey Descriptor")
+    ("graphics,g", opt::value<std::string>()->default_value(defAPI.has_target_graphics() ? defAPI.target_graphics() : "OpenGL1"), "Graphics System (Direct3D9, Direct3D11, OpenGL1, OpenGL3, OpenGLES2, OpenGLES3, None)")
+    ("audio,a", opt::value<std::string>()->default_value(defAPI.has_target_audio() ? defAPI.target_audio() : "None"), "Audio System (DirectSound, OpenAL, XAudio2, None)")
+    ("widgets,w", opt::value<std::string>()->default_value(defAPI.has_target_widgets() ? defAPI.target_widgets() : "None"), "Widget System (Win32, xlib, Cocoa, GTK+, None)")
+    ("network,n", opt::value<std::string>()->default_value(defAPI.has_target_network() ? defAPI.target_network() : "None"), "Networking System (DirectPlay, Asynchronous, BerkeleySockets, None)")
+    ("collision,c", opt::value<std::string>()->default_value(defAPI.has_target_collision() ? defAPI.target_collision() : "None"), "Collision System (Precise, BBox, None)")
+    ("extensions,e", opt::value<std::string>()->default_value(defAPI.extensions_size() > 0 ? repeatedStringToDelimit(defAPI.extensions()) : "None"), "Extensions (Alarms, Paths, Timelines, Particles, MotionPlanning, ttf, libpng, IniFilesystem, RegistrySpoof, Asynchronous, StudioPhysics, VirtualKeys, XRandR, XTEST, FileDropper, None)")
+    ("compiler,x", opt::value<std::string>()->default_value(defAPI.has_target_compiler() ? defAPI.target_compiler() : def_compiler), "Compiler.ey Descriptor")
     ("enigma-root", opt::value<std::string>()->default_value(fs::current_path().string()), "Path to ENIGMA's sources")
     ("codegen-only", opt::bool_switch()->default_value(false), "Only generate code and exit")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
@@ -175,6 +194,15 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
     return OPTIONS_ERROR;
   }
+  
+  std::string config = _rawArgs["config"].as<std::string>();
+  if (!config.empty()) {
+    if (fs::exists(config)) _loadedSettings = egm::ReadYamlFileAs<Settings>(config);
+    else { 
+      std::cerr << "Error: Configuration file: \"" << config << "\" does not exists" << std::endl;
+      return OPTIONS_ERROR;
+    }
+  }
 
   find_ey("ENIGMAsystem/SHELL/");
 
@@ -217,46 +245,45 @@ int OptionsParser::HandleArgs()
 
 std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentConfig)
 {
-  std::string audio = _rawArgs["audio"].as<std::string>(),
-              platform = _rawArgs["platform"].as<std::string>(),
-              compiler = _rawArgs["compiler"].as<std::string>(),
-              graphics = _rawArgs["graphics"].as<std::string>(),
-              widgets = _rawArgs["widgets"].as<std::string>(),
-              collision = _rawArgs["collision"].as<std::string>(),
-              network = _rawArgs["network"].as<std::string>(),
-              eobjs_directory = fs::absolute(_rawArgs["workdir"].as<std::string>()).string(),
-              codegen_directory = fs::absolute(_rawArgs["codegen"].as<std::string>()).string();
-              
-
-  int inherit_strings = 0,
-      inherit_escapes = 0,
-      inherit_increment = 0,
-      inherit_equivalence = 0,
-      inherit_literals = 0,
-      inherit_negatives = 0;
-  bool inherit_objects = true,
-       automatic_semicolons = true;
-
+  std::string audio = _rawArgs["audio"].as<std::string>();
+  std::string platform = _rawArgs["platform"].as<std::string>();
+  std::string compiler = _rawArgs["compiler"].as<std::string>();
+  std::string graphics = _rawArgs["graphics"].as<std::string>();
+  std::string widgets = _rawArgs["widgets"].as<std::string>();
+  std::string collision = _rawArgs["collision"].as<std::string>();
+  std::string network = _rawArgs["network"].as<std::string>();
+  
+  std::string eobjs_directory = fs::absolute(_rawArgs["workdir"].as<std::string>()).string();
+  std::string codegen_directory = fs::absolute(_rawArgs["codegen"].as<std::string>()).string(); 
+  
+  // Only override passed arguments if passed a configuration
   if (currentConfig != nullptr) {
     const auto &api = currentConfig->api();
     if (api.has_target_audio()) audio = api.target_audio();
-    if (api.has_target_platform()) platform = api.target_platform();
-    if (api.has_target_compiler()) compiler = api.target_compiler();
-    if (api.has_target_graphics()) graphics = api.target_graphics();
-    if (api.has_target_widgets()) widgets = api.target_widgets();
-    if (api.has_target_collision()) collision = api.target_collision();
+    if (api.has_target_platform()) platform = api.target_platform(); 
+    if (api.has_target_compiler()) compiler = api.target_compiler(); 
+    if (api.has_target_graphics()) graphics = api.target_graphics(); 
+    if (api.has_target_widgets()) widgets = api.target_widgets(); 
+    if (api.has_target_collision()) collision = api.target_collision(); 
     if (api.has_target_network()) network = api.target_network();
-
-    const auto &compiler = currentConfig->compiler();
-    if (compiler.has_inherit_strings()) inherit_strings = compiler.inherit_strings();
-    if (compiler.has_inherit_escapes()) inherit_escapes = compiler.inherit_escapes();
-    if (compiler.has_inherit_increment()) inherit_increment = compiler.inherit_increment();
-    if (compiler.has_inherit_equivalence()) inherit_equivalence = compiler.inherit_equivalence();
-    if (compiler.has_inherit_literals()) inherit_literals = compiler.inherit_literals();
-    if (compiler.has_inherit_negatives()) inherit_negatives = compiler.inherit_negatives();
-    if (compiler.has_inherit_objects()) inherit_objects = compiler.inherit_objects();
-    if (compiler.has_automatic_semicolons()) automatic_semicolons = compiler.automatic_semicolons();
+    
+    const auto &compilerSettings = currentConfig->compiler();
+    if (compilerSettings.has_eobjs_directory()) eobjs_directory = compilerSettings.eobjs_directory();
+    if (compilerSettings.has_codegen_directory()) codegen_directory = compilerSettings.codegen_directory();
   }
+
+  // No emake flags to worry about for these
+  if (currentConfig == nullptr) currentConfig = &_loadedSettings;
+  
+  const auto &compilerSettings = currentConfig->compiler();
+  int inherit_strings = compilerSettings.has_inherit_strings() ? compilerSettings.inherit_strings() : 0;
+  int inherit_escapes = compilerSettings.inherit_escapes() ? compilerSettings.inherit_escapes() : 0;
+  int inherit_increment = compilerSettings.has_inherit_increment() ? compilerSettings.inherit_increment() : 0;
+  int inherit_equivalence = compilerSettings.inherit_equivalence() ? compilerSettings.inherit_equivalence() : 0;
+  int inherit_literals = compilerSettings.has_inherit_literals() ? compilerSettings.inherit_literals() : 0;
+  int inherit_negatives = compilerSettings.has_inherit_negatives() ? compilerSettings.inherit_negatives() : 0;
+  bool inherit_objects = compilerSettings.has_inherit_objects() ? compilerSettings.inherit_objects() : 0;
+  bool automatic_semicolons = compilerSettings.has_automatic_semicolons() ? compilerSettings.automatic_semicolons() : 0;
 
   std::string yaml;
   yaml += "%e-yaml\n";
