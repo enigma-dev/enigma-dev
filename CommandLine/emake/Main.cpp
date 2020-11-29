@@ -1,19 +1,17 @@
 #include "Main.hpp"
 #include "OptionsParser.hpp"
 #include "EnigmaPlugin.hpp"
-#include "Game.hpp"
 
 #ifdef CLI_ENABLE_SERVER
 #include "Server.hpp"
 #endif
-
-#include "SOG.hpp"
 
 #ifdef CLI_ENABLE_EGM
 #include "egm.h"
 #include "gmk.h"
 #include "gmx.h"
 #include "yyp.h"
+#include "sog.h"
 #endif
 
 #include "strings_util.h"
@@ -127,22 +125,19 @@ int main(int argc, char* argv[])
     std::cerr << "Invalid game mode: " << _mode << " aborting!" << std::endl;
     return OPTIONS_ERROR;
   }
-
-  Game game;
-
+  
   std::string input_file = options.GetOption("input").as<std::string>();
 
-  // Working directory hacks
-  if (mode != emode_compile)
-    game.SetOutputFile(input_file);
-
+  std::unique_ptr<buffers::Project> project;
 
   if (input_file.empty()) {
+    project = std::make_unique<buffers::Project>();
     std::cerr << "Warning: No game file specified. "
                 "Building an empty game." << std::endl;
-    return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
+    return plugin.BuildGame(project->game(), mode, output_file.c_str());
   }
 
+#ifdef CLI_ENABLE_EGM
   // Load event data
   EventData event_data(ParseEventFile((fs::path(options.EnigmaRoot())/"events.ey").u8string()));
 
@@ -151,13 +146,7 @@ int main(int argc, char* argv[])
   std::string ext;
   size_t dot = input_file.find_last_of('.');
   if (dot != std::string::npos) ext = ToLower(input_file.substr(dot + 1));
-  if (ext == "sog") {
-    if (!ReadSOG(input_file, &game, &event_data)) return 1;
-    return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
-  }
-#ifdef CLI_ENABLE_EGM
   egm::LibEGMInit(&event_data);
-  std::unique_ptr<buffers::Project> project;
   if (!(project = egm::LoadProject(input_file))) return 1;
     return plugin.BuildGame(project->game(), mode, output_file.c_str());
 #endif
