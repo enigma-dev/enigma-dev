@@ -97,7 +97,7 @@ bool SOGFileFormat::WriteProject(Project* project, const fs::path& fName) const 
           } else continue;
         }
       } else {
-        errStream << "Error: Too many resources for a *single* object game" << std::endl;
+        errStream << "Error: Wrong number of resources: \"" << root.child_size() << "\" for a *single* object game" << std::endl;
         return false;
       }
     } else {
