@@ -61,7 +61,7 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   rm->set_height(480);
   rm->set_speed(30);
   rm->set_persistent(false);
-  rm->set_color(0x40C0FFFF);
+  rm->set_color(0xFFFFC040);
   rm->set_show_color(true);
   rm->set_creation_code("");
   
