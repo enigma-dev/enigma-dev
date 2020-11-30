@@ -1205,10 +1205,9 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
   const std::string name = dec.readStr();
   const int children = dec.read4();
 
-  TreeNode *node = root->add_child();
+  TreeNode *node = root->mutable_folder()->add_children();
   node->set_name(name);
-  node->set_folder(status <= 2);
-  if (node->folder()) {
+  if (status <= 2) {
     for (int i = 0; i < children; i++) {
       LoadTree(dec, typeMap, node);
     }

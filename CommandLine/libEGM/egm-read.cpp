@@ -465,12 +465,11 @@ bool EGMFileFormat::LoadTree(const fs::path& fPath, YAML::Node yaml,
   }
 
   for (auto n : yaml) {
-    buffers::TreeNode* b = buffer->add_child();
+    buffers::TreeNode* b = buffer->mutable_folder()->add_children();
 
     if (n["folder"]) {
       const std::string name = n["folder"].as<std::string>();
       b->set_name(name);
-      b->set_folder(true);
       LoadTree(fPath.string() + "/" + name, n["contents"], b);
     } else {
       const std::string name = n["name"].as<std::string>();
@@ -515,7 +514,7 @@ bool EGMFileFormat::LoadDirectory(const fs::path& fPath, buffers::TreeNode* n,
     const std::string ext = p.path().extension().string();
     if (p.is_directory()) {
 
-      buffers::TreeNode* c = n->add_child();
+      buffers::TreeNode* c = n->mutable_folder()->add_children();
 
       c->set_name(p.path().stem().string());
 
@@ -527,11 +526,9 @@ bool EGMFileFormat::LoadDirectory(const fs::path& fPath, buffers::TreeNode* n,
       }
 
       // If directory is just a folder
-      c->set_folder(true);
       LoadDirectory(p, c, depth + 1);
     } else { // is a file
-
-      buffers::TreeNode* c = n->add_child();
+      buffers::TreeNode* c = n->mutable_folder()->add_children();
       c->set_name(p.path().stem().string());
       if (ext == ".edl") { // script
         LoadResource(p.path(), extFactoryMap.at(".edl").func(c), maxID.at(Type::kScript)++);
@@ -546,8 +543,8 @@ bool EGMFileFormat::LoadDirectory(const fs::path& fPath, buffers::TreeNode* n,
 
 void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<int, std::string>>& IDmap) {
 
-  for (int i = 0; i < n->child_size(); ++i) {
-    buffers::TreeNode* c = n->mutable_child(i);
+  for (int i = 0; i < n->mutable_folder()->children_size(); ++i) {
+    buffers::TreeNode* c = n->mutable_folder()->mutable_children(i);
     RecursiveResourceSanityCheck(c, IDmap);
 
     google::protobuf::Message* m = nullptr;

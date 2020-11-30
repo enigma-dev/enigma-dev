@@ -412,10 +412,10 @@ bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
                     const fs::path &egm_root, YAML::Emitter& tree) const {
   tree << YAML::BeginMap << YAML::Key << "folder" << YAML::Value << folder->name();
 
-  if (folder->child_size() > 0) {
+  if (folder->folder().children_size() > 0) {
     tree << YAML::Key << "contents" << YAML::Value << YAML::BeginSeq;
-    for (int i = 0; i < folder->child_size(); i++) {
-      auto child = folder->mutable_child(i);
+    for (int i = 0; i < folder->mutable_folder()->children_size(); i++) {
+      auto child = folder->mutable_folder()->mutable_children(i);
 
       std::string type = type2name(child->type_case());
 
