@@ -46,7 +46,7 @@ jobs:
     - stage: ENIGMA CI
       env: WORKER=4
     - stage: ENIGMA CI
-      env: COMPILER=Android GRAPHICS=OpenGLES2 PLATFORM=SDL MODE=Compile ANDROID_API_LEVEL=28 ANDROID_BUILD_TOOLS_VERSION=29.0.3
+      env: COMPILER=Android GRAPHICS=OpenGLES2 PLATFORM=SDL MODE=Compile ANDROID_API_LEVEL=29 ANDROID_BUILD_TOOLS_VERSION=29.0.3
       before_install: 
         - git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
         - yes | sdkmanager "platforms;android-29"
