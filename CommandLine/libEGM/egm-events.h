@@ -20,7 +20,7 @@
 #include "Object.pb.h"
 
 namespace egm {
-
+/// Used to load events of a single object. Used for both loading Single-Object Game format, and EGM files.
 void LoadObjectEvents(const fs::path& fPath, google::protobuf::Message *m, const google::protobuf::FieldDescriptor *field, const EventData* event_data);
 void WriteObjectEvents(const fs::path& fPath, const google::protobuf::RepeatedPtrField<buffers::resources::Object_EgmEvent>& events, const EventData* event_data);
 
