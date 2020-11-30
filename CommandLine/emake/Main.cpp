@@ -130,7 +130,14 @@ int main(int argc, char* argv[])
 
   std::unique_ptr<buffers::Project> project;
 
-  if (input_file.empty()) {
+// Temporary hack for android ci until we can remove this macro
+bool hasFileSupport = true;
+#ifndef CLI_ENABLE_EGM
+  hasFileSupport = false;
+  std::cerr << "Warning: emake was built without libEGM support and can only build empty games" << std::endl;
+#endif
+  
+  if (!hasFileSupport || input_file.empty()) {
     project = std::make_unique<buffers::Project>();
     std::cerr << "Warning: No game file specified. "
                 "Building an empty game." << std::endl;
