@@ -1,6 +1,6 @@
 #!/bin/bash +x
 
-./emake --compiler "${COMPILER}" \
+ENIGMA_DEBUG=TRUE ./emake --compiler "${COMPILER}" \
         --mode "${MODE}" \
         --platform "${PLATFORM}" \
         --graphics "${GRAPHICS}" \
