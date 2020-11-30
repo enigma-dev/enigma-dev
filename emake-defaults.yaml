@@ -28,6 +28,7 @@ API:
    - Timelines
    - MotionPlanning
    - DateTime
+   - GTest
 
   # Platform default is OS specific and handled internally but can be overriden here
   # target_platform: xlib
