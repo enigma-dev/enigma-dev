@@ -34,27 +34,9 @@
 #include <cstdio>
 #include <iostream>
 
-using namespace std;
-
 #include "nlpo2.h"
 
-// FIXME: as of 05-09-2020 some filesystem stuff like extension() isn't implemented on android
-// https://github.com/android/ndk/issues/609
-#ifdef __ANDROID__
-std::string_view std::__ndk1::__fs::filesystem::path::__extension() const {
-  std::string filename = u8string();
-  size_t fp = filename.find_last_of(".");
-  if (fp == string::npos){
-    return "";
-  }
-  return filename.substr(fp);
-}
-
-int std::__ndk1::__fs::filesystem::path::__compare(std::__ndk1::basic_string_view<char, std::__ndk1::char_traits<char> > other) const {
-  if (u8string() == other) return 0; 
-  if (u8string() > other) return 1; else return -1; 
-}
-#endif
+using namespace std;
 
 namespace enigma
 {
