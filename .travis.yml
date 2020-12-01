@@ -49,7 +49,7 @@ jobs:
       env: COMPILER=Android GRAPHICS=OpenGLES2 PLATFORM=SDL MODE=Compile ANDROID_API_LEVEL=29 ANDROID_BUILD_TOOLS_VERSION=29.0.3
       before_install: 
         - git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
-        - yes | sdkmanager --licenses
+        - yes | sdkmanager "ndk;22.0.6917172-beta1"
       install: ./CI/install_emake_deps.sh 
       before_script: make -j4 && CLI_ENABLE_EGM=FALSE make -j4 emake
       script: ./ci-build.sh
