@@ -151,7 +151,15 @@ Event EventData::get_event(const std::string &id,
   return res;
 }
 
-std::string Event::ParamSubst(const std::string &str) const {
+const std::map<std::string, const cb::ParameterAlias*>
+    &EventData::value_names_for_type(const std::string &type) const {
+  static const std::map<std::string, const cb::ParameterAlias*> kUnknown;
+  auto res_it = parameter_index_.find(type);
+  if (res_it != parameter_index_.end()) return res_it->second;
+  return kUnknown;
+}
+
+std::string Event::ParamSubstImpl(const std::string &str, bool code) const {
   std::string res;
   size_t start = 0;
   size_t pc = str.find_first_of('%');
@@ -161,7 +169,7 @@ std::string Event::ParamSubst(const std::string &str) const {
         str[pc] <= '0' + (int) arguments.size()) {
       int pnum = str[pc] - '1';
       res += str.substr(start, pc - 1 - start);
-      res += arguments[pnum].spelling;
+      res += code ? arguments[pnum].spelling : arguments[pnum].name;
       start = ++pc;
     } else {
       std::cerr << "EVENT ERROR: Ignoring junk parameter " << str[pc] << std::endl;
@@ -177,6 +185,7 @@ EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
     for (const buffers::config::ParameterAlias &alias : aliases.aliases()) {
       parameter_ids_.insert({{aliases.id(), ToLower(alias.id())}, &alias});
       parameter_vals_.insert({{aliases.id(), alias.value()}, &alias});
+      parameter_index_[aliases.id()].insert({ToLower(alias.id()), &alias});
     }
   }
   // Start numbering internal IDs in the new system from 1000, for good measure.
@@ -302,7 +311,7 @@ std::string EventDescriptor::HumanName() const {
   return event->name();
 }
 std::string Event::HumanName() const {
-  return ParamSubst(event->name());
+  return NameSubst(event->name());
 }
 std::string EventDescriptor::BaseFunctionName() const {
   return ToLower(StripChar(event->id(), '.'));

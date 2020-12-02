@@ -97,12 +97,14 @@ void instance_activate_object(int obj) {
 
 void instance_destroy(int id, bool dest_ev)
 {
-  enigma::object_basic* who = enigma::fetch_instance_by_id(id);
-  if (who and enigma::cleanups.find(who) == enigma::cleanups.end()) {
-    if (dest_ev)
-        who->myevent_destroy();
-    if (enigma::cleanups.find(who) == enigma::cleanups.end())
-        who->unlink();
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(id); it; ++it) {
+    enigma::object_basic* who = (*it);
+    if (enigma::cleanups.find(who) == enigma::cleanups.end()) {
+      if (dest_ev)
+          who->myevent_destroy();
+      if (enigma::cleanups.find(who) == enigma::cleanups.end())
+          who->unlink();
+    }
   }
 }
 

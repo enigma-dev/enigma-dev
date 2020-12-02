@@ -1,4 +1,4 @@
-/** Copyright (C) 2018-2020 Greg Williamson, Robert B. Colton
+/* Copyright (C) 2020 Greg Williamson
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -13,24 +13,23 @@
 ***
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
-**/
+*/
 
-#ifndef EGM_GMX_H
-#define EGM_GMX_H
+#ifndef SOG_H
+#define SOG_H
 
 #include "file-format.h"
 
 namespace egm {
 
-class GMXFileFormat : public FileFormat {
+// Reads and writes SOG files
+class SOGFileFormat : public FileFormat {
  public:
-  GMXFileFormat(const EventData* event_data) : FileFormat(event_data) {}
+  SOGFileFormat(const EventData* event_data) : FileFormat(event_data) {}
   virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
-
-private:
-  virtual bool PackResource(const fs::path& fPath, google::protobuf::Message *m) const override;
+  virtual bool WriteProject(Project* project, const fs::path& fName) const override;
 };
 
-} //namespace egm
+}
 
 #endif

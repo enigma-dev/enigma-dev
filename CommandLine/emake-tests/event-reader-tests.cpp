@@ -146,7 +146,7 @@ TEST(EventReaderTest, KeyboardUp) {
   std::istringstream str(kTestEvents);
   EventData events(ParseEventFile(str));
   Event ev = events.DecodeEventString("Keyboard[Up]");
-  EXPECT_EQ(ev.HumanName(), "Keyboard vk_up");
+  EXPECT_EQ(ev.HumanName(), "Keyboard Up");
   EXPECT_EQ(ev.IdString(), "Keyboard[Up]");
   EXPECT_EQ(ev.BaseFunctionName(), "keyboard");
   EXPECT_EQ(ev.TrueFunctionName(), "keyboard_Up");

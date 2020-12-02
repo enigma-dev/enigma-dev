@@ -230,7 +230,7 @@ namespace enigma_user {
     enigma::texture_atlas_array.emplace(id,enigma::texture_atlas());
 
     if (w != -1 && h != -1){ //If we set the size manually
-      unsigned int fullwidth = enigma::nlpo2dc(w)+1, fullheight = enigma::nlpo2dc(h)+1; //We only take power of two
+      unsigned int fullwidth = enigma::nlpo2(w), fullheight = enigma::nlpo2(h); //We only take power of two
       enigma::texture_atlas_array[id].width = fullwidth;
       enigma::texture_atlas_array[id].height = fullheight;
       enigma::texture_atlas_array[id].texture = enigma::graphics_create_texture(enigma::RawImage(nullptr, fullwidth, fullheight), false);

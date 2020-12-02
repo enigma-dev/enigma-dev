@@ -18,6 +18,7 @@
 #include "DX11textures_impl.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -28,9 +29,19 @@
 
 #include "Platforms/platforms_mandatory.h"
 
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/glm.hpp>
+
 using namespace enigma::dx11;
 
 namespace {
+
+struct MatrixBufferType
+{
+  glm::mat4 world;
+  glm::mat4 view;
+  glm::mat4 projection;
+};
 
 const D3D11_FILL_MODE fillmodes[3] = {
   D3D11_FILL_WIREFRAME, D3D11_FILL_WIREFRAME, D3D11_FILL_SOLID
@@ -42,11 +53,15 @@ const D3D11_BLEND blend_equivs[11] = {
   D3D11_BLEND_INV_DEST_COLOR, D3D11_BLEND_SRC_ALPHA_SAT
 };
 
+// causes HLSL shader to sample white (1,1,1,1) like GLSL when a texture is not set,
+// otherwise primitives without a texture will be invisible or rgba(0,0,0,0)
 ID3D11ShaderResourceView *getDefaultWhiteTexture() {
     static int texid = -1;
     if (texid == -1) {
-      unsigned data[1] = {0xFFFFFFFF};
-      texid = enigma::graphics_create_texture(enigma::RawImage((unsigned char*)data, 1, 1) , false);
+      enigma::RawImage ri;
+      ri.resize(1,1);
+      reinterpret_cast<unsigned*>(ri.pxdata)[0] = 0xFFFFFFFF;
+      texid = enigma::graphics_create_texture(ri, false);
     }
     return static_cast<enigma::DX11Texture*>(enigma::textures[texid].get())->view;
 }
@@ -156,6 +171,33 @@ void graphics_state_flush() {
   m_deviceContext->OMSetBlendState(pBlendState, NULL, 0xffffffff);
 
   graphics_state_flush_samplers();
+
+  static ID3D11Buffer* m_matrixBuffer = NULL;
+  if (!m_matrixBuffer) {
+    D3D11_BUFFER_DESC matrixBufferDesc;
+    matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+    matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    matrixBufferDesc.MiscFlags = 0;
+    matrixBufferDesc.StructureByteStride = 0;
+
+    // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+    m_device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
+  }
+
+  D3D11_MAPPED_SUBRESOURCE mappedResource;
+  MatrixBufferType* dataPtr;
+  m_deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  dataPtr = (MatrixBufferType*)mappedResource.pData;
+  // Copy the matrices into the constant buffer.
+  dataPtr->world = glm::transpose(world);
+  dataPtr->view = glm::transpose(view);
+  dataPtr->projection = glm::transpose(projection);
+  m_deviceContext->Unmap(m_matrixBuffer, 0);
+
+  // Finally set the constant buffer in the vertex shader with the updated values.
+  m_deviceContext->VSSetConstantBuffers(0, 1, &m_matrixBuffer);
 }
 
 } // namespace enigma

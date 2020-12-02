@@ -107,6 +107,18 @@ message Room {
 
   repeated Tile tiles = 18 [(gmx) = "tiles/tile"];
 
+  message Layer {
+    optional string name = 1;
+    optional int32 id = 2;
+    optional int32 depth = 3;
+    optional bool visible = 4;
+
+    repeated Instance instances = 5;
+    repeated Tile tiles = 6;
+  }
+
+  repeated Layer layers = 20;
+
   message RoomPhysicsSettings {
     optional bool use_physics = 1 [(gmx) = "PhysicsWorld"];
     optional int32 phy_world_top = 2 [(gmx) = "PhysicsWorldTop"];
