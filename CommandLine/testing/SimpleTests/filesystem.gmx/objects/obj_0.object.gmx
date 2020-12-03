@@ -31,6 +31,7 @@ gtest_expect_ne(working_directory, "");&#13;
 gtest_expect_true(set_working_directory(dir));&#13;
 // gtest_expect_ne(temp_directory, ""); // temp_directroy is still broken by std::filesystem writers&#13;
 gtest_expect_ne(program_directory, "");&#13;
+gtest_expect_true(directory_create(filename_path(dir+file)));&#13;
 gtest_expect_eq(filename_canonical(file), filename_absolute(file));&#13;
 gtest_expect_true(file_exists(file));&#13;
 gtest_expect_true(file_copy(file, file+".dup"));&#13;
