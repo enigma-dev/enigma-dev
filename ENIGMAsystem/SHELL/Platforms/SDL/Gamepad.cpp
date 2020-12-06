@@ -40,7 +40,13 @@ void pushGamepads() {
   for (Gamepad& gp : gamepads) gp.push();
 }
 
-void setGamepadButton(int gamepad, int btn, bool pressed) { gamepads[gamepad].state.buttonStatus[digitalButtons[btn]] = pressed; }
+void setGamepadButton(int gamepad, int btn, bool pressed) {
+#ifdef DEBUG_MODE
+  if (gamepad < 0 || gamepad >= static_cast<int>(gamepads.size())) return;
+  if (btn < 0 || btn >= gp_axisrv) return;
+#endif
+  gamepads[gamepad].state.buttonStatus[digitalButtons[btn]] = pressed;
+}
 
 void addGamepad(unsigned i) {
   if (!SDL_IsGameController(i)) {
