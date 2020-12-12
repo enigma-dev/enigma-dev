@@ -83,9 +83,13 @@ void addGamepad(unsigned i) {
 }
 
 void removeGamepad(unsigned i) {
+  if (gamepads[i].controller == nullptr) return;
+
   DEBUG_MESSAGE("Disconnected gamepad " + std::to_string(i) + ": " + SDL_GameControllerName(gamepads[i].controller), MESSAGE_TYPE::M_INFO);
   if (gamepads[i].haptic != nullptr) SDL_HapticClose(gamepads[i].haptic);
   SDL_GameControllerClose(gamepads[i].controller);
+  gamepads[i].haptic = nullptr;
+  gamepads[i].controller = nullptr;
 }
 
 }  // namespace enigma
