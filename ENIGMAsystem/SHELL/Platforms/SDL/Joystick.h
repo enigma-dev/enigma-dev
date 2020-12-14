@@ -20,5 +20,7 @@ namespace enigma {
 bool joystick_init();
 void joystick_uninit();
 void joystick_update();
+void joysticks_open(int id);
+void joysticks_close(int id);
 
 }

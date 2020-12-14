@@ -1,6 +1,7 @@
 #include "Event.h"
 #include "Window.h"
 #include "Gamepad.h"
+#include "Joystick.h"
 
 #include "Platforms/General/PFmain.h"    //game_end
 #include "Platforms/General/PFwindow.h"  // mouse / keyboard
@@ -210,9 +211,15 @@ void SDL_Event_Handler::windowResized(const SDL_Event *event) {
   enigma_user::draw_clear(enigma_user::window_get_color());
 }
 
-void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) { addGamepad(event->cdevice.which); }
+void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) {
+  addGamepad(event->cdevice.which);
+  joysticks_open(event->cdevice.which);
+}
 
-void SDL_Event_Handler::joyDeviceRemoved(const SDL_Event *event) { removeGamepad(event->cdevice.which); }
+void SDL_Event_Handler::joyDeviceRemoved(const SDL_Event *event) {
+  removeGamepad(event->cdevice.which);
+  joysticks_close(event->cdevice.which);
+}
 
 void SDL_Event_Handler::controllerButtonDown(const SDL_Event *event) {
   setGamepadButton(event->cdevice.which, event->cbutton.button, true);
