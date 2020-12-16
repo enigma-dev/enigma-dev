@@ -35,7 +35,7 @@ environment:
     - {MODE: Compile}
 
     # Catch-all
-    - {GRAPHICS: Direct3D11, AUDIO: DirectSound, WIDGETS: Win32, EXTENSIONS: "DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFilesystem,Box2DPhysics,StudioPhysics,ExternalFuncs", PACKAGES: "box2d:x libffi:x"}
+    - {GRAPHICS: Direct3D11, AUDIO: DirectSound, WIDGETS: Win32, EXTENSIONS: "WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFilesystem,Box2DPhysics,StudioPhysics,ExternalFuncs", PACKAGES: "box2d:x libffi:x"}
     - {GRAPHICS: OpenGL1, AUDIO: OpenAL, PACKAGES: "glew:x openal:x dumb:x alure:x libmodplug:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
     - {GRAPHICS: OpenGLES3, PLATFORM: SDL, PACKAGES: "SDL2:x libepoxy:x"}
     #TODO: Fix GTK+ on Windows
