@@ -16,6 +16,7 @@
 **/
 
 #include "Platforms/General/PFwindow.h"
+#include "Platforms/General/PFsystem.h"
 #include "Platforms/SDL/Window.h"
 // #include <?????.h> FIXME: idk what android-specific header(s) define(s) ANativeWindow * and EGLSurface...
 #include <SDL2/SDL.h>
@@ -41,6 +42,8 @@ void window_init() {
 }
 
 namespace enigma_user {
+
+int os_type = os_android;
 
 /*
 window_t window_handle() {
