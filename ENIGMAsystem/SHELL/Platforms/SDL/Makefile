@@ -28,7 +28,9 @@ else
 		SOURCES += Platforms/SDL/Cocoa/CocoaWindow.m
 	else ifeq ($(TARGET-PLATFORM), Linux)
 		SOURCES += Platforms/SDL/xlib/Window.cpp
+		SOURCES += Platforms/SDL/xlib/Linux/System.cpp
 	else ifeq ($(TARGET-PLATFORM), FreeBSD)
 		SOURCES += Platforms/SDL/xlib/Window.cpp
+		SOURCES += Platforms/SDL/xlib/BSD/System.cpp
 	endif
 endif
