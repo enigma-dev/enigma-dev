@@ -1,7 +1,7 @@
 #include "Platforms/General/PFsystem.h"
 
-enigma_user {
+namespace enigma_user {
 
 int os_type = os_linux;
 
-} // enimga_user
+} // namespace enimga_user
