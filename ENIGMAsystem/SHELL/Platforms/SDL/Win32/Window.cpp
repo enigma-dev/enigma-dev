@@ -16,6 +16,7 @@
 **/
 
 #include "Platforms/General/PFwindow.h"
+#include "Platforms/General/PFsystem.h"
 #include "Platforms/SDL/Window.h"
 #include <windows.h>
 #include <SDL2/SDL.h>
@@ -40,6 +41,8 @@ void window_init() {
 } // namespace enigma
 
 namespace enigma_user {
+
+int os_type = os_windows;
 
 window_t window_handle() {
   return reinterpret_cast<window_t>(enigma::hWnd);
