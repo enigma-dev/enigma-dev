@@ -4,4 +4,4 @@ enigma_user {
 
 int os_type = os_bsd;
 
-} // enimgs_user
+} // enimga_user
