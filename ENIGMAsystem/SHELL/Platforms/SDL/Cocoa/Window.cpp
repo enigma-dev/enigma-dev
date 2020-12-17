@@ -42,7 +42,7 @@ void window_init() {
 
 namespace enigma_user {
 
-int os_type = os_macosx;
+const int os_type = os_macosx;
 
 window_t window_handle() {
   return reinterpret_cast<window_t>(enigma::NSWin);
