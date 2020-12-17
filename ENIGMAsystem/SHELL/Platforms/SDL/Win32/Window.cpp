@@ -42,7 +42,7 @@ void window_init() {
 
 namespace enigma_user {
 
-int os_type = os_windows;
+const int os_type = os_windows;
 
 window_t window_handle() {
   return reinterpret_cast<window_t>(enigma::hWnd);
