@@ -2,6 +2,6 @@
 
 namespace enigma_user {
 
-int os_type = os_bsd;
+const int os_type = os_bsd;
 
 } // namespace enimga_user
