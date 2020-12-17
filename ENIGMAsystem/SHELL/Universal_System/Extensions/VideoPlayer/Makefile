@@ -1,10 +1,10 @@
 SOURCES += Universal_System/Extensions/VideoPlayer/videoplayer.cpp
 ifeq ($(TARGET-PLATFORM), Windows)
-	override CXXFLAGS += `pkg-config --cflags mpv`
+	override CXXFLAGS += $(shell $(PKG-CONFIG) --cflags mpv)
 	override LDLIBS += -Wl,-Bdynamic $(shell $(PKG-CONFIG) --libs mpv) -Wl,-Bstatic
 else ifeq ($(TARGET-PLATFORM), MacOSX)
 	SOURCES += Universal_System/Extensions/VideoPlayer/videoplayer.mm
-	override CXXFLAGS += `pkg-config --cflags mpv`
+	override CXXFLAGS += $(shell $(PKG-CONFIG) --cflags mpv)
 	override LDLIBS += -Wl,-Bdynamic $(shell $(PKG-CONFIG) --libs mpv) -Wl,-Bstatic
 	override CXXFLAGS += -ObjC
 	override CFLAGS += -ObjC
