@@ -43,7 +43,7 @@ void window_init() {
 
 namespace enigma_user {
 
-int os_type = os_android;
+const int os_type = os_android;
 
 /*
 window_t window_handle() {
