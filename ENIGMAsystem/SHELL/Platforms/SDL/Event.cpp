@@ -213,8 +213,6 @@ void SDL_Event_Handler::windowResized(const SDL_Event *event) {
 
 // map of joystick instance ids to device indexes
 std::unordered_map<SDL_JoystickID,int> joystickDevices;
-// give us a reference to map gamepad joy ids
-extern std::vector<Gamepad> gamepads;
 
 void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) {
   addGamepad(event->cdevice.which);
