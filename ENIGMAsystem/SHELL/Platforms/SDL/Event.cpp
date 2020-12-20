@@ -7,6 +7,7 @@
 
 #include "Graphics_Systems/General/GScolors.h"  // draw_clear
 
+#include <unordered_map>
 #include <iostream>
 
 namespace enigma {
@@ -210,16 +211,29 @@ void SDL_Event_Handler::windowResized(const SDL_Event *event) {
   enigma_user::draw_clear(enigma_user::window_get_color());
 }
 
-void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) { addGamepad(event->cdevice.which); }
+// map of joystick instance ids to device indexes
+std::unordered_map<SDL_JoystickID,int> joystickDevices;
+// give us a reference to map gamepad joy ids
+extern std::vector<Gamepad> gamepads;
 
-void SDL_Event_Handler::joyDeviceRemoved(const SDL_Event *event) { removeGamepad(event->cdevice.which); }
+void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) {
+  addGamepad(event->cdevice.which);
+  auto joystick = SDL_GameControllerGetJoystick(gamepads[event->cdevice.which].controller);
+  auto joyId = SDL_JoystickInstanceID(joystick);
+  joystickDevices[joyId] = event->cdevice.which;
+}
+
+void SDL_Event_Handler::joyDeviceRemoved(const SDL_Event *event) {
+  removeGamepad(joystickDevices[event->cdevice.which]);
+  joystickDevices.erase(event->cdevice.which);
+}
 
 void SDL_Event_Handler::controllerButtonDown(const SDL_Event *event) {
-  setGamepadButton(event->cdevice.which, event->cbutton.button, true);
+  setGamepadButton(joystickDevices[event->cdevice.which], event->cbutton.button, true);
 }
 
 void SDL_Event_Handler::controllerButtonUp(const SDL_Event *event) {
-  setGamepadButton(event->cdevice.which, event->cbutton.button, false);
+  setGamepadButton(joystickDevices[event->cdevice.which], event->cbutton.button, false);
 }
 
 void SDL_Event_Handler::keyboardDown(const SDL_Event *event) {
