@@ -10,6 +10,7 @@
 #include "GScolors.h"
 #include "GSblend.h"
 #include "GSd3d.h"
+#include "GSgpu.h"
 #include "GSprimitives.h"
 #include "GStiles.h"
 #include "GSmodel.h"

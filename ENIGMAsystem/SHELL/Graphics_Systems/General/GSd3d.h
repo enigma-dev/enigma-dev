@@ -66,17 +66,6 @@ namespace enigma_user {
   };
 
   enum {
-    rs_never, 	// Always False            D3DCMP_NEVER            GL_NEVER
-    rs_less, 	    // source Z < depth Z      D3DCMP_LESS             GL_LESS
-    rs_equal,	    // source Z = depth Z      D3DCMP_EQUAL            GL_EQUAL
-    rs_lequal, 	// source Z <= depth Z     D3DCMP_LESSEQUAL        GL_LEQUAL
-    rs_greater,	// source Z > depth Z      D3DCMP_GREATER          GL_GREATER
-    rs_notequal, 	// source Z != depth Z     D3DCMP_NOTEQUAL         GL_NOTEQUAL
-    rs_gequal, 	// source Z >= depth Z     D3DCMP_GREATEREQUAL     GL_GEQUAL
-    rs_always     // Always True             D3DCMP_ALWAYS           GL_ALWAYS
-  };
-
-  enum {
     rs_keep,   // GL_KEEP
     rs_zero,      //  GL_ZERO
     rs_replace,     //  GL_REPLACE
@@ -85,14 +74,6 @@ namespace enigma_user {
     rs_decr,  // GL_DECR
     rs_decr_wrap,  // GL_DECR_WRAP
     rs_invert     // GL_INVERT
-  };
-
-  // NOTE: Game Maker uses clockwise culling to define the front face,
-  // OpenGL's mode sets what defines the front face, Direct3D's mode sets what defines the back face
-  enum {
-    rs_none, // No culling
-    rs_cw, // Clockwise culling
-    rs_ccw // Counter-clockwise culling
   };
 
   enum {
