@@ -175,6 +175,10 @@ void gpu_set_fog(bool enable, int color, double start, double end) {
   d3d_set_fog(enable, color, start, end);
 }
 
+void gpu_set_fog(const var& values) {
+  gpu_set_fog(values[0], values[1], values[2], values[3]);
+}
+
 void gpu_set_cullmode(int cullmode) {
   d3d_set_culling(cullmode);
 }
@@ -187,12 +191,24 @@ void gpu_set_blendmode_ext(int src, int dest) {
   draw_set_blend_mode_ext(src, dest);
 }
 
+void gpu_set_blendmode_ext(const var& values) {
+  gpu_set_blendmode_ext(values[0], values[1]);
+}
+
 void gpu_set_blendmode_ext_sepalpha(int src, int dest, int alphasrc, int alphadest) {
   draw_set_blend_mode_ext(src, dest);
 }
 
+void gpu_set_blendmode_ext_sepalpha(const var& values) {
+  gpu_set_blendmode_ext_sepalpha(values[0], values[1], values[2], values[3]);
+}
+
 void gpu_set_colorwriteenable(bool red, bool green, bool blue, bool alpha) {
   draw_set_color_write_enable(red, green, blue, alpha);
+}
+
+void gpu_set_colorwriteenable(const var& values) {
+  gpu_set_colorwriteenable(values[0], values[1], values[2], values[3]);
 }
 
 void gpu_set_alphatestenable(bool enable) {
