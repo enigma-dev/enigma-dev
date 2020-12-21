@@ -92,7 +92,7 @@ int gpu_get_alphatestref() {
 }
 
 bool gpu_get_texfilter() {
-  return false;
+  return gpu_get_texfilter_ext(0);
 }
 
 bool gpu_get_texfilter_ext(int sampler_index) {
@@ -100,7 +100,7 @@ bool gpu_get_texfilter_ext(int sampler_index) {
 }
 
 bool gpu_get_texrepeat() {
-  return false;
+  return gpu_get_texrepeat_ext(0);
 }
 
 bool gpu_get_texrepeat_ext(int sampler_index) {
@@ -108,7 +108,7 @@ bool gpu_get_texrepeat_ext(int sampler_index) {
 }
 
 int gpu_get_tex_mip_filter() {
-  return 0;
+  return gpu_get_tex_mip_filter_ext(0);
 }
 
 int gpu_get_tex_mip_filter_ext(int sampler_index) {
@@ -116,7 +116,7 @@ int gpu_get_tex_mip_filter_ext(int sampler_index) {
 }
 
 int gpu_get_tex_mip_bias() {
-  return 0;
+  return gpu_get_tex_mip_bias_ext(0);
 }
 
 int gpu_get_tex_mip_bias_ext(int sampler_index) {
@@ -124,7 +124,7 @@ int gpu_get_tex_mip_bias_ext(int sampler_index) {
 }
 
 int gpu_get_tex_min_mip() {
-  return 0;
+  return gpu_get_tex_min_mip_ext(0);
 }
 
 int gpu_get_tex_min_mip_ext(int sampler_index) {
@@ -132,7 +132,7 @@ int gpu_get_tex_min_mip_ext(int sampler_index) {
 }
 
 int gpu_get_tex_max_mip() {
-  return 0;
+  return gpu_get_tex_max_mip_ext(0);
 }
 
 int gpu_get_tex_max_mip_ext(int sampler_index) {
@@ -140,7 +140,7 @@ int gpu_get_tex_max_mip_ext(int sampler_index) {
 }
 
 int gpu_get_tex_max_aniso() {
-  return 0;
+  return gpu_get_tex_max_aniso_ext(0);
 }
 
 int gpu_get_tex_max_aniso_ext(int sampler_index) {
@@ -148,7 +148,7 @@ int gpu_get_tex_max_aniso_ext(int sampler_index) {
 }
 
 int gpu_get_tex_mip_enable() {
-  return 0;
+  return gpu_get_tex_mip_enable_ext(0);
 }
 
 int gpu_get_tex_mip_enable_ext(int sampler_index) {
@@ -220,7 +220,7 @@ void gpu_set_texrepeat_ext(int sampler_id, bool enable) {
 }
 
 void gpu_set_tex_mip_filter(int filter) {
-
+  gpu_set_tex_mip_filter_ext(0, filter);
 }
 
 void gpu_set_tex_mip_filter_ext(int sampler_index, int filter) {
@@ -228,7 +228,7 @@ void gpu_set_tex_mip_filter_ext(int sampler_index, int filter) {
 }
 
 void gpu_set_tex_mip_bias(int bias) {
-
+  gpu_set_tex_mip_bias_ext(0, bias);
 }
 
 void gpu_set_tex_mip_bias_ext(int sampler_index, int bias) {
@@ -236,7 +236,7 @@ void gpu_set_tex_mip_bias_ext(int sampler_index, int bias) {
 }
 
 void gpu_set_tex_min_mip(int minmip) {
-
+  gpu_set_tex_min_mip_ext(0, minmip);
 }
 
 void gpu_set_tex_min_mip_ext(int sampler_index, int minmip) {
@@ -244,7 +244,7 @@ void gpu_set_tex_min_mip_ext(int sampler_index, int minmip) {
 }
 
 void gpu_set_tex_max_mip(int maxmip) {
-
+  gpu_set_tex_max_mip_ext(0, maxmip);
 }
 
 void gpu_set_tex_max_mip_ext(int sampler_index, int maxmip) {
@@ -252,7 +252,7 @@ void gpu_set_tex_max_mip_ext(int sampler_index, int maxmip) {
 }
 
 void gpu_set_tex_max_aniso(int maxaniso) {
-
+  gpu_set_tex_max_aniso_ext(0, maxaniso);
 }
 
 void gpu_set_tex_max_aniso_ext(int sampler_index, int maxaniso) {
@@ -260,7 +260,7 @@ void gpu_set_tex_max_aniso_ext(int sampler_index, int maxaniso) {
 }
 
 void gpu_set_tex_mip_enable(int setting) {
-
+  gpu_set_tex_mip_enable_ext(0, setting);
 }
 
 void gpu_set_tex_mip_enable_ext(int sampler_index, int setting) {
