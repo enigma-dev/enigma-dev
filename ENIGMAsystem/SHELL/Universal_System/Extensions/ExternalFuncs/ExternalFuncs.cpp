@@ -111,7 +111,12 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
 
   if (status != FFI_OK)
   {
+    #ifndef _WIN32
     DEBUG_MESSAGE("Defining DLL failed.", MESSAGE_TYPE::M_ERROR);
+    #else
+    // Windows Widgets uses a DLL created from char array. Prevent crash.
+    printf("%s", "Defining DLL failed.");
+    #endif
     return -1;
   }
 
@@ -121,20 +126,35 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   	dllmod = enigma::ExternalLoad(dll.c_str());
   else
   {
+    #ifndef _WIN32
     DEBUG_MESSAGE("LOADING PREEXISTING HANDLE", MESSAGE_TYPE::M_WARNING);
+    #else
+    // Windows Widgets uses a DLL created from char array. Prevent crash.
+    printf("%s", "LOADING PREEXISTING HANDLE");
+    #endif
     dllmod = dllHandles[dll];
   }
 
   if (dllmod == NULL)
   {
+    #ifndef _WIN32
     DEBUG_MESSAGE("Cannot load library \"" + dll + "\"", MESSAGE_TYPE::M_ERROR);
+    #else
+    // Windows Widgets uses a DLL created from char array. Prevent crash.
+    printf("%s", ("Cannot load library \"" + dll + "\"").c_str());
+    #endif
     return -1;
   }
 
   void *funcptr = enigma::ExternalFunc(dllmod,func.c_str());
   if (funcptr==NULL)
   {
+    #ifndef _WIN32
     DEBUG_MESSAGE("No such function" + func, MESSAGE_TYPE::M_ERROR);
+    #else
+    // Windows Widgets uses a DLL created from char array. Prevent crash.
+    printf("%s", ("No such function" + func).c_str());
+    #endif
     return -1;
   }
 
@@ -160,7 +180,12 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
   map<int,external*>::iterator it;
   if ((it=externals.find(id)) == externals.end())
   {
+    #ifndef _WIN32
     DEBUG_MESSAGE("Unknown external function called", MESSAGE_TYPE::M_ERROR);
+    #else
+    // Windows Widgets uses a DLL created from char array. Prevent crash.
+    printf("%s", "Unknown external function called");
+    #endif
     return 0;
   }
   external* a=it->second;
