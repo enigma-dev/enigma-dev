@@ -30,17 +30,6 @@ static string ws_cocoa       = "Cocoa";
 static string ws_x11_zenity  = "Zenity";
 static string ws_x11_kdialog = "KDialog";
 
-} // namespace enigma_user
-
-namespace enigma {
-
-void libdlgmod_init();
-void libdlgmod_uninit();
-
-} // namespace enigma
-
-namespace enigma_user {
-
 // Widget Settings
 string widget_get_system();
 void widget_set_system(string sys);
