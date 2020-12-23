@@ -21,9 +21,15 @@
 
 #include "libEGMstd.h"
 
+#ifdef DEBUG_MODE
+#include "Universal_System/Resources/resource_data.h"
+#include "Universal_System/Object_Tiers/object.h"
+#include "Universal_System/debugscope.h"
+#endif
+
 #include <string>
 
-#define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
+#define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__) + "\n", (severity))
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
@@ -66,33 +72,31 @@ namespace enigma {
   
   // This function is called at the beginning of the game to allow the widget system to load.
   bool widget_system_initialize();
-  extern std::string gameInfoText, gameInfoCaption;
-  extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
-  extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
 }
 
 namespace enigma_user {
 
-bool show_question(std::string str);
-
-void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO);
-
-// This obviously displays an error message.
-// It should offer a button to end the game, and if not fatal, a button to ignore the error.
-inline void show_error(std::string msg, const bool fatal) {
-   show_debug_message(msg, (fatal) ? M_FATAL_USER_ERROR : M_USER_ERROR);
+int show_error(std::string str, bool abort);
+inline void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO) {
+  if (type != M_INFO && type != M_WARNING) {
+    #ifdef DEBUG_MODE
+    msg += "\n\n" + enigma::debug_scope::GetErrors();
+    #endif
+    show_error(msg.c_str(), (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR));
+  } else {
+    #ifndef DEBUG_MODE
+    fputs(msg.c_str(), stderr);
+    #endif
+  }
 }
 
-int show_message(const std::string &msg);
+int show_message(std::string msg);
+int show_question(std::string msg);
 template<typename T> int show_message(T msg) { return show_message(enigma_user::toString(msg)); }
 inline int action_show_message(string msg) {
   return show_message(msg);
 }
-void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBackgroundColor, int left=enigma::gameInfoLeft, int top=enigma::gameInfoTop, int width=enigma::gameInfoWidth, int height=enigma::gameInfoHeight,
-	bool embedGameWindow=enigma::gameInfoEmbedGameWindow, bool showBorder=enigma::gameInfoShowBorder, bool allowResize=enigma::gameInfoAllowResize, bool stayOnTop=enigma::gameInfoStayOnTop,
-	bool pauseGame=enigma::gameInfoPauseGame, string caption=enigma::gameInfoCaption);
-static inline void action_show_info() { show_info(); }
 
-}
+} // namespace enigma_user
 
 #endif
