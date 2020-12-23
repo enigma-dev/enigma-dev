@@ -6,10 +6,11 @@ Identifier: Win32
 Build-Platforms: Windows
 Represents: Windows
 Description: Create Widgets using Win32 API on Windows. License, documentation, and install instructions: https://enigma-dev.org/docs/Wiki/Dialogs#Windows_Widgets
-Author: Josh Ventura, Samuel Venable
+Author: Samuel Venable
 
 Depends:
   Build-Platforms: Windows, SDL
 
 Represents:
   Build-Platforms: Windows
+
