@@ -24,71 +24,58 @@ using std::string;
 
 namespace enigma_user {
 
-enum {
-	text_type,
-	button_type,
-	input_type
-};
+// Widget Systems
+static string ws_win32       = "Win32";
+static string ws_cocoa       = "Cocoa";
+static string ws_x11_zenity  = "Zenity";
+static string ws_x11_kdialog = "KDialog";
 
-// These are constants defined inside one of the win32 headers in mingw, no need to define them 2x
-/*
-enum {
-	ANSI_CHARSET,
-	DEFAULT_CHARSET,
-	EASTEUROPE_CHARSET,
-	RUSSIAN_CHARSET,
-	SYMBOL_CHARSET,
-	SHIFTJIS_CHARSET,
-	HANGEUL_CHARSET,
-	GB2312_CHARSET,
-	CHINESEBIG5_CHARSET,
-	JOHAB_CHARSET,
-	HEBREW_CHARSET,
-	ARABIC_CHARSET,
-	GREEK_CHARSET,
-	TURKISH_CHARSET,
-	VIETNAMESE_CHARSET,
-	THAI_CHARSET,
-	MAC_CHARSET,
-	BALTIC_CHARSET,
-	OEM_CHARSET
-};
-*/
+} // namespace enigma_user
 
-	static string ws_win32       = "Win32";
-	static string ws_cocoa       = "Cocoa";
-	static string ws_x11_zenity  = "Zenity";
-	static string ws_x11_kdialog = "KDialog";
+namespace enigma {
 
-	string widget_get_system();
-	void widget_set_system(string sys);
-	int show_message_cancelable(string message);
-	int show_message_ext(string message, string but1, string but2, string but3);
-	bool show_question(string message);
-	int show_question_cancelable(string message);
-	int show_attempt(string errortext);
-	string get_string(string message, string def);
-	string get_password(string message, string def);
-	double get_integer(string message, var def);
-	double get_passcode(string message, var def);
-	string get_open_filename(string filter, string fname);
-	string get_open_filenames(string filter, string fname);
-	string get_save_filename(string filter, string fname);
-	string get_open_filename_ext(string filter, string fname, string dir, string title);
-	string get_open_filenames_ext(string filter, string fname, string dir, string title);
-	string get_save_filename_ext(string filter, string fname, string dir, string title);
-	string get_directory(string dname);
-	string get_directory_alt(string capt, string root);
-	int get_color(int defcol);
-	int get_color_ext(int defcol, string title);
-	string message_get_caption();
-	void message_set_caption(string title);
-	
-	inline bool action_if_question(string message)
-	{
-		return show_question(message);
-	}
-	
-	string get_login(string username, string password);
-	bool   get_string_canceled();
-}
+void libdlgmod_init();
+void libdlgmod_uninit();
+
+} // namespace enigma
+
+namespace enigma_user {
+
+// Widget Settings
+string widget_get_system();
+void widget_set_system(string sys);
+wid_t widget_get_owner();
+void widget_set_owner(wid_t hwnd);
+string widget_get_icon();
+void widget_set_icon(string icon);
+string widget_get_caption();
+void widget_set_caption(wid_t str);
+string widget_get_button_name(int type);
+void widget_set_button_name(int type, string name);
+
+// GML/EDL Dialogs
+int show_message(string str);
+int show_message_cancelable(string str);
+int show_question(string str);
+int show_question_cancelable(string str);
+int show_attempt(string str);
+int show_error(string str, bool abort);
+string get_string(string str, string def);
+string get_password(string str, string def);
+double get_integer(string str, double def);
+double get_passcode(string str, double def);
+string get_open_filename(string filter, string fname);
+string get_open_filename_ext(string filter, string fname, string dir, string title);
+string get_open_filenames(string filter, string fname);
+string get_open_filenames_ext(string filter, string fname, string dir, string title);
+string get_save_filename(string filter, string fname);
+string get_save_filename_ext(string filter, string fname, string dir, string title);
+string get_directory(string dname);
+string get_directory_alt(string capt, string root);
+int get_color(int defcol);
+int get_color_ext(int defcol, string title);
+
+// DND Actions
+inline bool action_if_question(string message) { return show_question(message); }
+
+} // namespace enigma_user
