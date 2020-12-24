@@ -34,8 +34,24 @@ namespace enigma_user {
 // Widget Systems
 static std::string ws_win32       = "Win32";
 static std::string ws_cocoa       = "Cocoa";
+static std::string ws_x11         = "X11";
 static std::string ws_x11_zenity  = "Zenity";
 static std::string ws_x11_kdialog = "KDialog";
+
+// Button Types
+enum btn_type {
+  btn_abort,
+  btn_ignore,
+  btn_ok,
+  btn_cancel,
+  btn_yes,
+  btn_no,
+  btn_retry
+};
+
+// Compatiblity Macros
+#define hwnd_main window_identifier()
+#define hwnd_default "0"
 
 // Widget Settings
 std::string widget_get_system();
