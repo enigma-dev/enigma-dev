@@ -31,7 +31,6 @@
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
-#include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFexternals.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFmain.h"
