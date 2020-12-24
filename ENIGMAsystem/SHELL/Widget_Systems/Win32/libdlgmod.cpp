@@ -74,12 +74,12 @@ static inline bool IsX86Process(HANDLE process) {
   return isWow;
 }
 
-void show_debug_message_helper(string str, MESSAGE_TYPE type) {
+void show_debug_message_helper(string errormsg, MESSAGE_TYPE type) {
   #ifdef DEBUG_MODE
-  str += "\n\n" + enigma::debug_scope::GetErrors();
+  errormsg += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
   bool abort = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR); 
-  external_call(external_define(libdlgmod, "show_error", dll_cdecl, ty_real, 2, ty_string, ty_real), str, abort);
+  external_call(external_define(libdlgmod, "show_error", dll_cdecl, ty_real, 2, ty_string, ty_real), errormsg, abort);
 }
 
 namespace enigma {
@@ -138,8 +138,8 @@ string widget_get_caption() {
   return external_call(external_define(libdlgmod, "widget_get_caption", dll_cdecl, ty_string, 0));
 }
 
-void widget_set_caption(string str) {
-  external_call(external_define(libdlgmod, "widget_set_caption", dll_cdecl, ty_real, 1, ty_string), str);
+void widget_set_caption(string title) {
+  external_call(external_define(libdlgmod, "widget_set_caption", dll_cdecl, ty_real, 1, ty_string), title);
 }
 
 string widget_get_button_name(int type) {
@@ -150,40 +150,40 @@ void widget_set_button_name(int type, string name) {
   external_call(external_define(libdlgmod, "widget_set_button_name", dll_cdecl, ty_real, 2, ty_real, ty_string), type, name);
 }
 
-int show_message(string str) {
-  return external_call(external_define(libdlgmod, "show_message", dll_cdecl, ty_real, 1, ty_string), str);
+int show_message(const std::string &msg) {
+  return external_call(external_define(libdlgmod, "show_message", dll_cdecl, ty_real, 1, ty_string), msg);
 }
 
-int show_message_cancelable(string str) {
-  return external_call(external_define(libdlgmod, "show_message_cancelable", dll_cdecl, ty_real, 1, ty_string), str);
+int show_message_cancelable(string msg) {
+  return external_call(external_define(libdlgmod, "show_message_cancelable", dll_cdecl, ty_real, 1, ty_string), msg);
 }
 
-int show_question(string str) {
-  return external_call(external_define(libdlgmod, "show_question", dll_cdecl, ty_real, 1, ty_string), str);
+int show_question(string msg) {
+  return external_call(external_define(libdlgmod, "show_question", dll_cdecl, ty_real, 1, ty_string), msg);
 }
 
-int show_question_cancelable(string str) {
-  return external_call(external_define(libdlgmod, "show_question_cancelable", dll_cdecl, ty_real, 1, ty_string), str);
+int show_question_cancelable(string msg) {
+  return external_call(external_define(libdlgmod, "show_question_cancelable", dll_cdecl, ty_real, 1, ty_string), msg);
 }
 
-int show_attempt(string str) {
-  return external_call(external_define(libdlgmod, "show_attempt", dll_cdecl, ty_real, 1, ty_string), str);
+int show_attempt(string msg) {
+  return external_call(external_define(libdlgmod, "show_attempt", dll_cdecl, ty_real, 1, ty_string), msg);
 }
 
-string get_string(string str, string def) {
-  return external_call(external_define(libdlgmod, "get_string", dll_cdecl, ty_string, 2, ty_string, ty_string), str, def);
+string get_string(string msg, string def) {
+  return external_call(external_define(libdlgmod, "get_string", dll_cdecl, ty_string, 2, ty_string, ty_string), msg, def);
 }
 
-string get_password(string str, string def) {
-  return external_call(external_define(libdlgmod, "get_password", dll_cdecl, ty_string, 2, ty_string, ty_string), str, def);
+string get_password(string msg, string def) {
+  return external_call(external_define(libdlgmod, "get_password", dll_cdecl, ty_string, 2, ty_string, ty_string), msg, def);
 }
 
-double get_integer(string str, double def) {
-  return external_call(external_define(libdlgmod, "get_integer", dll_cdecl, ty_real, 2, ty_string, ty_real), str, def);
+double get_integer(string msg, double def) {
+  return external_call(external_define(libdlgmod, "get_integer", dll_cdecl, ty_real, 2, ty_string, ty_real), msg, def);
 }
 
-double get_passcode(string str, double def) {
-  return external_call(external_define(libdlgmod, "get_passcode", dll_cdecl, ty_real, 2, ty_string, ty_real), str, def);
+double get_passcode(string msg, double def) {
+  return external_call(external_define(libdlgmod, "get_passcode", dll_cdecl, ty_real, 2, ty_string, ty_real), msg, def);
 }
 
 string get_open_filename(string filter, string fname) {
