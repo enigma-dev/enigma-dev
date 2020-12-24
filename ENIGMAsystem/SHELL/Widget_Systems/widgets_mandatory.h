@@ -21,15 +21,9 @@
 
 #include "libEGMstd.h"
 
-#ifdef DEBUG_MODE
-#include "Universal_System/Resources/resource_data.h"
-#include "Universal_System/Object_Tiers/object.h"
-#include "Universal_System/debugscope.h"
-#endif
-
 #include <string>
 
-#define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__) + "\n", (severity))
+#define DEBUG_MESSAGE(str, severity) ::enigma_user::show_debug_message((std::string) (str) + " | " __FILE__ ":" + std::to_string(__LINE__) + "\n", (severity))
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
@@ -76,25 +70,19 @@ namespace enigma {
 
 namespace enigma_user {
 
-int show_error(std::string str, bool abort);
-inline void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO) {
-  if (type != M_INFO && type != M_WARNING) {
-    #ifdef DEBUG_MODE
-    msg += "\n\n" + enigma::debug_scope::GetErrors();
-    #endif
-    show_error(msg.c_str(), (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR));
-  } else {
-    #ifndef DEBUG_MODE
-    fputs(msg.c_str(), stderr);
-    #endif
-  }
+void show_debug_message(std::string str, MESSAGE_TYPE type = M_INFO);
+
+// This obviously displays an error message.
+// It should offer a button to end the game, and if not fatal, a button to ignore the error.
+inline void show_error(std::string str, bool abort) {
+  show_debug_message(str, (abort) ? M_FATAL_USER_ERROR : M_USER_ERROR);
 }
 
-int show_message(std::string msg);
-int show_question(std::string msg);
-template<typename T> int show_message(T msg) { return show_message(enigma_user::toString(msg)); }
-inline int action_show_message(string msg) {
-  return show_message(msg);
+int show_message(std::string str);
+int show_question(std::string str);
+template<typename T> int show_message(T str) { return show_message(enigma_user::toString(str)); }
+inline int action_show_message(string str) {
+  return show_message(str);
 }
 
 } // namespace enigma_user
