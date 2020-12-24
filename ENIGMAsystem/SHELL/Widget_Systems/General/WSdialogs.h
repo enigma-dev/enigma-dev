@@ -61,20 +61,18 @@ void widget_set_owner(wid_t hwnd);
 std::string widget_get_icon();
 void widget_set_icon(std::string icon);
 std::string widget_get_caption();
-void widget_set_caption(std::string str);
+void widget_set_caption(std::string title);
 std::string widget_get_button_name(int type);
 void widget_set_button_name(int type, std::string name);
 
 // GML/EDL Dialogs
-int show_message(std::string str);
-int show_message_cancelable(std::string str);
-int show_question(std::string str);
-int show_question_cancelable(std::string str);
-int show_attempt(std::string str);
-std::string get_string(std::string str, std::string def);
-std::string get_password(std::string str, std::string def);
-double get_integer(std::string str, double def);
-double get_passcode(std::string str, double def);
+int show_message_cancelable(std::string msg);
+int show_question_cancelable(std::string msg);
+int show_attempt(std::string msg);
+std::string get_string(std::string msg, std::string def);
+std::string get_password(std::string msg, std::string def);
+double get_integer(std::string msg, double def);
+double get_passcode(std::string msg, double def);
 std::string get_open_filename(std::string filter, std::string fname);
 std::string get_open_filename_ext(std::string filter, std::string fname, std::string dir, std::string title);
 std::string get_open_filenames(std::string filter, std::string fname);
