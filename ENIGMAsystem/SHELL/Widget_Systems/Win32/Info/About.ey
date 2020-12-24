@@ -5,7 +5,7 @@ Name: Windows Widgets
 Identifier: Win32
 Build-Platforms: Windows
 Represents: Windows
-Description: Create Widgets using Win32 API on Windows. License, documentation, and install instructions: https://enigma-dev.org/docs/Wiki/Dialogs#Windows_Widgets
+Description: Create Widgets using Win32 API on Windows. Requires 'External Functions' extension. License, documentation, and install instructions: https://enigma-dev.org/docs/Wiki/Dialogs#Windows_Widgets
 Author: Samuel Venable
 
 Depends:
@@ -13,4 +13,3 @@ Depends:
 
 Represents:
   Build-Platforms: Windows
-
