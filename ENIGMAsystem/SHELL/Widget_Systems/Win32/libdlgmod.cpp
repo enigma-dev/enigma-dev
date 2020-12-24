@@ -31,6 +31,7 @@
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
+#include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFexternals.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFmain.h"
@@ -138,7 +139,7 @@ string widget_get_caption() {
   return external_call(external_define(libdlgmod, "widget_get_caption", dll_cdecl, ty_string, 0));
 }
 
-void widget_set_caption(wid_t str) {
+void widget_set_caption(string str) {
   external_call(external_define(libdlgmod, "widget_set_caption", dll_cdecl, ty_real, 1, ty_string), str);
 }
 
