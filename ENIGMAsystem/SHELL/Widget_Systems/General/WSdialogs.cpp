@@ -28,17 +28,17 @@
 
 using std::string;
 
-void show_debug_message_helper(string str, MESSAGE_TYPE type);
+void show_debug_message_helper(string errormsg, MESSAGE_TYPE type);
 
 namespace enigma_user {
 
-void show_debug_message(string str, MESSAGE_TYPE type) {
+void show_debug_message(string errormsg, MESSAGE_TYPE type) {
   if (type != M_INFO && type != M_WARNING) {
-    show_debug_message_helper(str, type);
+    show_debug_message_helper(errormsg, type);
   } else {
     #ifndef DEBUG_MODE
-    str += "\n";
-    fputs(str.c_str(), stderr);
+    errormsg += "\n";
+    fputs(errormsg.c_str(), stderr);
     fflush(stderr);
     #endif
   }
