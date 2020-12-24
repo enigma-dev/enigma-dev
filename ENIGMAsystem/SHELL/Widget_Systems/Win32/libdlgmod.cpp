@@ -29,10 +29,18 @@
 #include <string>
 #include <cwchar>
 
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/General/WSdialogs.h"
 #include "Platforms/General/PFexternals.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/estring.h"
+
+#ifdef DEBUG_MODE
+#include "Universal_System/Resources/resource_data.h"
+#include "Universal_System/Object_Tiers/object.h"
+#include "Universal_System/debugscope.h"
+#endif
 
 #include "libdlgmod32.h"
 #include "libdlgmod64.h"
@@ -66,9 +74,17 @@ static inline bool IsX86Process(HANDLE process) {
   return isWow;
 }
 
+void show_debug_message_helper(string str, MESSAGE_TYPE type) {
+  #ifdef DEBUG_MODE
+  str += "\n\n" + enigma::debug_scope::GetErrors();
+  #endif
+  bool abort = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR); 
+  external_call(external_define(libdlgmod, "show_error", dll_cdecl, ty_real, 2, ty_string, ty_real), str, abort);
+}
+
 namespace enigma {
 
-void widget_system_initialize() {
+bool widget_system_initialize() {
   if (IsX86Process(GetCurrentProcess())) {
     libdlgmod = environment_get_variable("TEMP") + "\\libdlgmod32.dll";
   } else {
@@ -87,6 +103,7 @@ void widget_system_initialize() {
     fclose(file);
   }
   external_call(external_define(libdlgmod, "widget_set_owner", dll_cdecl, ty_real, 1, ty_string), window_identifier());
+  return true;
 }
 
 } // namespace enigma
@@ -151,10 +168,6 @@ int show_question_cancelable(string str) {
 
 int show_attempt(string str) {
   return external_call(external_define(libdlgmod, "show_attempt", dll_cdecl, ty_real, 1, ty_string), str);
-}
-
-int show_error(string str, bool abort) {
-  return external_call(external_define(libdlgmod, "show_error", dll_cdecl, ty_real, 2, ty_string, ty_real), str, abort);
 }
 
 string get_string(string str, string def) {
