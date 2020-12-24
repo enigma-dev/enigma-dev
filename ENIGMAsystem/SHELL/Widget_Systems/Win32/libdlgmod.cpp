@@ -70,9 +70,9 @@ namespace enigma {
 
 void widget_system_initialize() {
   if (IsX86Process(GetCurrentProcess())) {
-    libdlgmod = environment_get_variable("TEMP") + "libdlgmod32.dll";
+    libdlgmod = environment_get_variable("TEMP") + "\\libdlgmod32.dll";
   } else {
-    libdlgmod = environment_get_variable("TEMP") + "libdlgmod64.dll";
+    libdlgmod = environment_get_variable("TEMP") + "\\libdlgmod64.dll";
   }
   wstring wlibdlgmod = widen(libdlgmod);
   FILE *file = NULL;
