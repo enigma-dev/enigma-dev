@@ -24,54 +24,53 @@
  
 */
 
+#include "Platforms/platforms_mandatory.h"
 #include "Universal_System/var4.h"
 
 #include <string>
-using std::string;
-typedef string wid_t;
 
 namespace enigma_user {
 
 // Widget Systems
-static string ws_win32       = "Win32";
-static string ws_cocoa       = "Cocoa";
-static string ws_x11_zenity  = "Zenity";
-static string ws_x11_kdialog = "KDialog";
+static std::string ws_win32       = "Win32";
+static std::string ws_cocoa       = "Cocoa";
+static std::string ws_x11_zenity  = "Zenity";
+static std::string ws_x11_kdialog = "KDialog";
 
 // Widget Settings
-string widget_get_system();
-void widget_set_system(string sys);
+std::string widget_get_system();
+void widget_set_system(std::string sys);
 wid_t widget_get_owner();
 void widget_set_owner(wid_t hwnd);
-string widget_get_icon();
-void widget_set_icon(string icon);
-string widget_get_caption();
-void widget_set_caption(wid_t str);
-string widget_get_button_name(int type);
-void widget_set_button_name(int type, string name);
+std::string widget_get_icon();
+void widget_set_icon(std::string icon);
+std::string widget_get_caption();
+void widget_set_caption(std::string str);
+std::string widget_get_button_name(int type);
+void widget_set_button_name(int type, std::string name);
 
 // GML/EDL Dialogs
-int show_message(string str);
-int show_message_cancelable(string str);
-int show_question(string str);
-int show_question_cancelable(string str);
-int show_attempt(string str);
-string get_string(string str, string def);
-string get_password(string str, string def);
-double get_integer(string str, double def);
-double get_passcode(string str, double def);
-string get_open_filename(string filter, string fname);
-string get_open_filename_ext(string filter, string fname, string dir, string title);
-string get_open_filenames(string filter, string fname);
-string get_open_filenames_ext(string filter, string fname, string dir, string title);
-string get_save_filename(string filter, string fname);
-string get_save_filename_ext(string filter, string fname, string dir, string title);
-string get_directory(string dname);
-string get_directory_alt(string capt, string root);
+int show_message(std::string str);
+int show_message_cancelable(std::string str);
+int show_question(std::string str);
+int show_question_cancelable(std::string str);
+int show_attempt(std::string str);
+std::string get_string(std::string str, std::string def);
+std::string get_password(std::string str, std::string def);
+double get_integer(std::string str, double def);
+double get_passcode(std::string str, double def);
+std::string get_open_filename(std::string filter, std::string fname);
+std::string get_open_filename_ext(std::string filter, std::string fname, std::string dir, std::string title);
+std::string get_open_filenames(std::string filter, std::string fname);
+std::string get_open_filenames_ext(std::string filter, std::string fname, std::string dir, std::string title);
+std::string get_save_filename(std::string filter, std::string fname);
+std::string get_save_filename_ext(std::string filter, std::string fname, std::string dir, std::string title);
+std::string get_directory(std::string dname);
+std::string get_directory_alt(std::string capt, std::string root);
 int get_color(int defcol);
-int get_color_ext(int defcol, string title);
+int get_color_ext(int defcol, std::string title);
 
 // DND Actions
-inline bool action_if_question(string message) { return show_question(message); }
+inline bool action_if_question(std::string message) { return show_question(message); }
 
 } // namespace enigma_user
