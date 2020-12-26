@@ -78,8 +78,8 @@ void show_debug_message_helper(string errormsg, MESSAGE_TYPE type) {
   #ifdef DEBUG_MODE
   errormsg += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
-  bool abort = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR); 
-  external_call(external_define(libdlgmod, "show_error", dll_cdecl, ty_real, 2, ty_string, ty_real), errormsg, abort);
+  bool fatal = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR);
+  external_call(external_define(libdlgmod, "show_error", dll_cdecl, ty_real, 2, ty_string, ty_real), errormsg, fatal);
 }
 
 namespace enigma {
