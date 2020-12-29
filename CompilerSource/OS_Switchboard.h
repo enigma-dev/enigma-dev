@@ -3,6 +3,7 @@
 #define OS_WINDOWS 0
 #define OS_LINUX   1
 #define OS_MACOSX  2
+#define OS_FREEBSD 3
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
   #define CURRENT_PLATFORM_NAME "Windows"
@@ -15,9 +16,10 @@
   #define CURRENT_PLATFORM_ID   OS_MACOSX
   #define IPHONE_DEVICE 0
   //#define WRITE_UNIMPLEMENTED_TXT 1
+  // linux is not unix dumb linux fanbois
 #elif defined(unix) || defined(__unix) || defined(__unix__)
-  #define CURRENT_PLATFORM_NAME "Linux"
-  #define CURRENT_PLATFORM_ID   OS_LINUX
+  #define CURRENT_PLATFORM_NAME "FreeBSD"
+  #define CURRENT_PLATFORM_ID   OS_FREEBSD
 #else
   #error Unable to determine name of the target platform.
 #endif
