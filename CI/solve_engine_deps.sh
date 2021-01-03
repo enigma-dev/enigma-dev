@@ -58,7 +58,7 @@ if [[ "$EXTENSIONS" =~ "ExternalFuncs" ]]; then
 fi
 
 if [[ "$EXTENSIONS" =~ "VideoPlayer" ]]; then
-  LINUX_DEPS="$LINUX_DEPS ffmpeg mpv"
+  LINUX_DEPS="$LINUX_DEPS mpv youtube-dl"
 fi
 
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then
