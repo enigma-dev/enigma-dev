@@ -1,3 +1,5 @@
+# Latest image
+image: Visual Studio 2019
 # fetch repository as zip archive
 shallow_clone: true
 # disable automatic tests
