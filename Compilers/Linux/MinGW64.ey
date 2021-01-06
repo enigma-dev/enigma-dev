@@ -17,7 +17,7 @@ Make-Vars:
   ldflags: -L../Additional/x86_64-w64-mingw32/lib -L/mingw64/lib -static-libgcc -static-libstdc++ -static
   links:
   windres: x86_64-w64-mingw32-windres
-  pkg-config: x86_64-w64-mingw32-pkg-config
+  pkg_config: x86_64-w64-mingw32-pkg-config
 
 
 Parser-Vars:
