@@ -61,13 +61,13 @@ namespace enigma
       // This algorithm will try to fit as many glyphs as possible into
       // a square space based on the max height of the font.
 
-      sprite *sspr = spritestructarray[spr];
+      Sprite& sspr = sprites.get(spr);
       std::vector<unsigned char*> glyphdata(gcount); // Raw SpriteFont image data
       std::vector<rect_packer::pvrect> glyphmetrics(gcount);
       std::vector<int> glyphx(gcount), glyphy(gcount);
 
-      int gwm = sspr->width, // Glyph width max: sprite width
-          ghm = sspr->height, // Glyph height max: sprite height
+      int gwm = sspr.width, // Glyph width max: sprite width
+          ghm = sspr.height, // Glyph height max: sprite height
           gtw = 0;
 
       font->height = ghm;
@@ -78,11 +78,11 @@ namespace enigma
       {
         fontglyph fg;
         unsigned fw, fh;
-        unsigned char* data = graphics_copy_texture_pixels(sspr->texturearray[i], &fw, &fh);
-        //NOTE: Following line replaced gtw = int((double)sspr->width / sspr->texturewarray[i]);
+        unsigned char* data = graphics_copy_texture_pixels(sspr.GetTexture(i), &fw, &fh);
+        //NOTE: Following line replaced gtw = int((double)sspr.width / sspr.texturewarray[i]);
         //this was to fix non-power of two subimages
         //NTOE2: The commented out code was actually wrong - the width was divided by y instead of x. That is why it only worked with power of two.
-        gtw = int((double)sspr->width / sspr->texturewarray[i]);
+        gtw = int((double)sspr.width / sspr.GetTextureRect(i).w);
         //gtw = fw;
         glyphdata[i] = data;
 
@@ -145,14 +145,14 @@ namespace enigma
         }
       }
 
-      std::vector<int> bigtex(w*h);
+      unsigned char* bigtex = new unsigned char[w*h]();
       for (unsigned i = 0; i < gcount; i++)
       {
         fontglyph& fg = fgr.glyphs[i];
         // Copy the SpriteFont glyph image into the big texture we just allocated
         for (int yy = 0; yy < glyphmetrics[i].h; yy++) {
           for (int xx = 0; xx < glyphmetrics[i].w; xx++) {
-            bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = ((unsigned int*)glyphdata[i])[gtw*(glyphy[i] + yy) + xx + glyphx[i]];
+            bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = (glyphdata[i])[gtw*(glyphy[i] + yy) + xx + glyphx[i]];
           }
         }
         delete[] glyphdata[i]; // Delete the image data we just copied
@@ -163,7 +163,7 @@ namespace enigma
         fg.ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
       }
 
-      font->texture = graphics_create_texture(w,h,w,h,bigtex.data(),false);
+      font->texture = graphics_create_texture(RawImage(bigtex, w, h), false);
       font->twid = w;
       font->thgt = h;
       font->yoffset = 0;
@@ -250,10 +250,9 @@ bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32
 
 bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep)
 {
-  enigma::sprite *sspr = enigma::spritestructarray[spr];
-  if (!sspr) return false;
+  enigma::Sprite& sspr = enigma::sprites.get(spr);
 
-  unsigned char gcount = sspr->subcount;
+  unsigned char gcount = sspr.SubimageCount();
   enigma::SpriteFont *fnt = &sprite_fonts[ind];
   fnt->glyphRanges.clear(); //TODO: Delete glyphs for each range or add it to the destructor?
 
@@ -266,10 +265,9 @@ bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep)
 
 int font_add_sprite(int spr, uint32_t first, bool prop, int sep)
 {
-  enigma::sprite *sspr = enigma::spritestructarray[spr];
-  if (!sspr) return -1;
+  enigma::Sprite& sspr = enigma::sprites.get(spr);
 
-  unsigned char gcount = sspr->subcount;
+  unsigned char gcount = sspr.SubimageCount();
   int id = enigma::font_new(first, gcount);
   enigma::SpriteFont* font = &sprite_fonts[id];
   if (!enigma::font_pack(font, spr, gcount, prop, sep)) return -1;

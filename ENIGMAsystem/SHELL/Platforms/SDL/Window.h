@@ -14,6 +14,7 @@ namespace enigma
     extern std::unordered_map<SDL_Keycode,int> keymap;
     extern std::unordered_map<SDL_Keycode, int> inverse_keymap;
   }
+  void window_init();
 } //namespace enigma
 
 #endif

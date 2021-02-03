@@ -19,7 +19,7 @@
 
 namespace enigma
 { 
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
+  void *get_collision_mask(const Sprite& spr, void* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
   {
     return 0;
   }

@@ -18,17 +18,13 @@
 #include "Direct3D11Headers.h"
 
 #include "Graphics_Systems/General/GSvertex_impl.h"
-#include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 
 #include "Widget_Systems/widgets_mandatory.h" // for show_error
 
-#include <D3Dcompiler.h>
-
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/glm.hpp>
+#include <d3dcompiler.h>
 
 #include <map>
 using std::map;
@@ -36,12 +32,6 @@ using std::map;
 using namespace enigma::dx11;
 
 namespace {
-struct MatrixBufferType
-{
-  glm::mat4 world;
-  glm::mat4 view;
-  glm::mat4 projection;
-};
 
 const char* g_strVS = R"(
 cbuffer MatrixBuffer
@@ -253,13 +243,13 @@ inline ID3D11InputLayout* vertex_format_layout(const enigma::VertexFormat* verte
 }
 
 inline void graphics_apply_vertex_format(int format, size_t &stride) {
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[format];
+  const auto& vertexFormat = enigma::vertexFormats[format];
 
   auto search = vertexFormatPeers.find(format);
   ID3D11InputLayout* vertexLayout = NULL;
   if (search == vertexFormatPeers.end()) {
     stride = vertexFormat->stride_size;
-    vertexLayout = vertex_format_layout(vertexFormat);
+    vertexLayout = vertex_format_layout(vertexFormat.get());
     vertexFormatPeers[format] = std::make_pair(vertexLayout, stride);
   } else {
     vertexLayout = search->second.first;
@@ -290,20 +280,8 @@ void graphics_compile_shader(const char* src, ID3D10Blob** pBlob, const char* na
 void graphics_prepare_default_shader() {
   static ID3D11VertexShader* g_pVertexShader = NULL;
   static ID3D11PixelShader* g_pPixelShader = NULL;
-  static ID3D11Buffer* m_matrixBuffer = NULL;
 
   if (g_pVertexShader == NULL) {
-    D3D11_BUFFER_DESC matrixBufferDesc;
-    matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
-    matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    matrixBufferDesc.MiscFlags = 0;
-    matrixBufferDesc.StructureByteStride = 0;
-
-    // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-    m_device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
-
     // create the vertex shader
     graphics_compile_shader(g_strVS, &pBlobVS, "VS", "VS", "vs_4_0");
     m_device->CreateVertexShader(pBlobVS->GetBufferPointer(), pBlobVS->GetBufferSize(),
@@ -314,19 +292,6 @@ void graphics_prepare_default_shader() {
     m_device->CreatePixelShader(pBlobPS->GetBufferPointer(), pBlobPS->GetBufferSize(),
                                 NULL, &g_pPixelShader);
   }
-
-  D3D11_MAPPED_SUBRESOURCE mappedResource;
-  MatrixBufferType* dataPtr;
-  m_deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-  dataPtr = (MatrixBufferType*)mappedResource.pData;
-  // Copy the matrices into the constant buffer.
-  dataPtr->world = glm::transpose(world);
-  dataPtr->view = glm::transpose(view);
-  dataPtr->projection = glm::transpose(projection);
-  m_deviceContext->Unmap(m_matrixBuffer, 0);
-
-  // Finally set the constant buffer in the vertex shader with the updated values.
-  m_deviceContext->VSSetConstantBuffers(0, 1, &m_matrixBuffer);
 
   m_deviceContext->VSSetShader(g_pVertexShader, NULL, 0);
   m_deviceContext->PSSetShader(g_pPixelShader, NULL, 0);
@@ -359,7 +324,7 @@ void vertex_color(int buffer, int color, double alpha) {
 void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   enigma::graphics_prepare_default_shader();
   enigma::graphics_prepare_buffer(buffer, false);
@@ -377,8 +342,8 @@ void vertex_submit_offset(int buffer, int primitive, unsigned offset, unsigned s
 void index_submit_range(int buffer, int vertex, int primitive, unsigned start, unsigned count) {
   draw_state_flush();
 
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[vertex];
-  const enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[vertex];
+  const auto& indexBuffer = enigma::indexBuffers[buffer];
 
   enigma::graphics_prepare_default_shader();
   enigma::graphics_prepare_buffer(buffer, true);

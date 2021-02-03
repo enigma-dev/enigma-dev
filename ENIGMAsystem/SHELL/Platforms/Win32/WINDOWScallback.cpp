@@ -20,7 +20,10 @@
 #include <string>
 using std::string;
 using std::map;
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 //#include <winuser.h> // includes windows.h
 
 #include "Platforms/General/PFmain.h" // for keyboard_string
@@ -44,12 +47,11 @@ namespace enigma
   extern HWND hWnd;
   extern HDC window_hDC;
 
-  using enigma_user::keyboard_key;
   using enigma_user::keyboard_lastkey;
   using enigma_user::keyboard_lastchar;
   using enigma_user::keyboard_string;
 
-  extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
+  extern char mousestatus[3],last_mousestatus[3];
   extern int windowX, windowY, windowColor;
   extern HCURSOR currentCursor;
 
@@ -64,8 +66,6 @@ namespace enigma
   {
     switch (message)
     {
-      case WM_CREATE:
-        return 0;
       case WM_SHOWWINDOW:
         enigma::windowWidth = enigma_user::window_get_width();
         enigma::windowHeight = enigma_user::window_get_height();
@@ -85,28 +85,8 @@ namespace enigma
         }
         return 0;
 
-      case WM_DESTROY:
-        return 0;
-
-      case WM_SETFOCUS:
-        input_initialize();
-        game_window_focused = true;
-        pausedSteps = 0;
-        return 0;
-
-      case WM_KILLFOCUS:
-        for (int i = 0; i < 255; i++)
-        {
-            last_keybdstatus[i] = keybdstatus[i];
-            keybdstatus[i] = 0;
-        }
-        for(int i=0; i < 3; i++)
-        {
-            last_mousestatus[i] = mousestatus[i];
-            mousestatus[i] = 0;
-        }
-        game_window_focused = false;
-        return 0;
+      case WM_SETFOCUS: enigma::platform_focus_gained(); return 0;
+      case WM_KILLFOCUS: enigma::platform_focus_lost(); return 0;
 
       case WM_SIZE:
         // make sure window resized is only processed once per resize because there could possibly be child windows and handles, especially with widgets
@@ -181,25 +161,17 @@ namespace enigma
 
       case WM_KEYDOWN: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_lastkey = key;
-        keyboard_key = key;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=1;
+        input_key_down(key);
         return 0;
       }
       case WM_KEYUP: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_key = 0;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=0;
+        input_key_up(key);
         return 0;
       }
       case WM_SYSKEYDOWN: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_lastkey = key;
-        keyboard_key = key;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=1;
+        input_key_down(key);
         if (key!=18)
         {
           if ((lParam&(1<<29))>0)
@@ -210,9 +182,7 @@ namespace enigma
       }
       case WM_SYSKEYUP: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_key = 0;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=0;
+        input_key_up(key);
         if (key!=(unsigned int)18)
         {
           if ((lParam&(1<<29))>0)
@@ -233,11 +203,11 @@ namespace enigma
          hdeltadelta %= WHEEL_DELTA;
          return 0;
 
-      case WM_LBUTTONUP:   ReleaseCapture(); mousestatus[0]=0; return 0;
+      case WM_LBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[0]=0; return 0; }
       case WM_LBUTTONDOWN: SetCapture(hWnd); mousestatus[0]=1; return 0;
-      case WM_RBUTTONUP:   ReleaseCapture(); mousestatus[1]=0; return 0;
+      case WM_RBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[1]=0; return 0; }
       case WM_RBUTTONDOWN: SetCapture(hWnd); mousestatus[1]=1; return 0;
-      case WM_MBUTTONUP:   ReleaseCapture(); mousestatus[2]=0; return 0;
+      case WM_MBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[2]=0; return 0; }
       case WM_MBUTTONDOWN: SetCapture(hWnd); mousestatus[2]=1; return 0;
 
       case WM_ERASEBKGND:
@@ -246,21 +216,14 @@ namespace enigma
         FillRect((HDC) wParam, &rc, CreateSolidBrush(windowColor));
         return 1L;
 
-      case WM_PAINT:
-        DefWindowProc(hWndParameter, message, wParam, lParam);
-        return 0;
-
       case WM_SYSCOMMAND: {
         if (wParam == SC_MAXIMIZE) {
           ShowWindow(hWnd, SW_MAXIMIZE);
           enigma::windowWidth = enigma_user::window_get_width();
           enigma::windowHeight = enigma_user::window_get_height();
           enigma::compute_window_scaling();
-          break;
-        } else {
-          return DefWindowProc(hWndParameter, message, wParam, lParam);
         }
-        return 0;
+        break;
       }
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);

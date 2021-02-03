@@ -41,7 +41,7 @@ macro_scalar::macro_scalar(string n, string val): macro_type(n,-1), value(val) {
 macro_scalar::~macro_scalar() {}
 
 macro_function::macro_function(string n, string val): macro_type(n,0), value(), args() {
-  register const size_t bs = val.length();
+  const size_t bs = val.length();
   if (bs) {
     char *buf = new char[bs]; memcpy(buf, val.c_str(), bs);
     value.push_back(mv_chunk(buf, bs));
@@ -106,7 +106,7 @@ inline void jdip::macro_function::preparse(string val, error_handler *herr)
   for (pt i = 0; i < val.length(); ) // Iterate the string
   {
     if (val[i] == '\"' or val[i] == '\'') { // Skip strings
-      register char nc = val[i];
+      char nc = val[i];
       while (++i < val.length() and val[i] != nc) // We're ultimately searching for the matching quote.
         if (val[i] == '\\') ++i; // No need to handle escape sequences; only '\\' and '\"' are of concern.
       continue;
@@ -229,14 +229,14 @@ bool macro_function::parse(vector<string> &arg_list, char* &dest, char* &destend
       if (last_was_arg) {
         while (bufat > buf and is_useless(*--bufat)); ++bufat;
         const string &ts = arg_list[value[i].metric];
-        register const char* argname = ts.c_str();
-        register size_t sz = ts.length();
+        const char* argname = ts.c_str();
+        size_t sz = ts.length();
         while (is_useless(*argname)) ++argname, --sz;
         memcpy(bufat, argname, sz);
         bufat += sz;
       }
       else {
-        register const string& argname = arg_list[value[i].metric];
+        const string& argname = arg_list[value[i].metric];
         memcpy(bufat, argname.c_str(), argname.length());
         bufat += argname.length();
       }

@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Robert B. Colton
+/** Copyright (C) 2018-2020 Robert B. Colton, Greg Williamson
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,7 +19,7 @@
 #include "filesystem.h"
 #include "action.h"
 
-#include "libpng-util.h"
+#include "libpng-util/libpng-util.h"
 
 #include <fstream>
 #include <utility>
@@ -42,44 +42,48 @@ using namespace std;
 using TypeCase = TreeNode::TypeCase;
 using IdMap = unordered_map<int, std::unique_ptr<google::protobuf::Message> >;
 using TypeMap = unordered_map<TypeCase, IdMap>;
+using egm::errStream;
 
-namespace gmk {
-ostream out(nullptr);
-ostream err(nullptr);
+
+namespace gmk_internal {
+
+static const std::string gmk_data = "gmk_data";
 
 static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
 static void atexit_tempdata_cleanup() {
-  for (const std::string &tempFile : tempFilesCreated)
-    DeleteFile(tempFile);
+  for (const std::filesystem::path &tempFile : tempFilesCreated) {
+    if (tempFile.parent_path().u8string().find(gmk_data) != std::string::npos)
+      DeleteFolder(tempFile.parent_path());
+    else if (std::filesystem::is_regular_file(tempFile)) DeleteFile(tempFile);
+  }
 }
 
-std::string writeTempDataFile(char *bytes, size_t length) {
-  std::string name = TempFileName("gmk_data");
-  std::fstream fs(name, std::fstream::out | std::fstream::binary);
-  if (!fs.is_open()) return "";
+void writeTempDataFile(const std::filesystem::path& write_fname, char *bytes, size_t length) {
+  CreateDirectoryRecursive(write_fname);
+  std::fstream fs(write_fname, std::fstream::out | std::fstream::binary);
+  if (!fs.is_open()) return;
   fs.write(bytes, length);
   fs.close();
-  return name;
 }
 
-std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {
-  return writeTempDataFile(bytes.get(), length);
+void writeTempDataFile(const std::filesystem::path& write_fname, std::unique_ptr<char[]> bytes, size_t length) {
+  writeTempDataFile(write_fname, bytes.get(), length);
 }
 
-std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool transparent=false) {
+void writeTempBMPFile(const std::filesystem::path& write_fname, std::unique_ptr<char[]> bytes, size_t length, bool transparent=false) {
   static const unsigned MINHEADER = 54; //minimum BMP header size
   auto bmp = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
   if (length < MINHEADER) {
-    err << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
+    errStream << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
         << "size '" << MINHEADER << "' for the BMP format" << std::endl;
-    return "";
+    return;
   }
   if (bmp[0] != 'B' || bmp[1] != 'M') {
-    err << "Image from the GMK file did not have the correct BMP signature '"
+    errStream << "Image from the GMK file did not have the correct BMP signature '"
         << bmp[0] << bmp[1] << "'" << std::endl;
-    return "";
+    return;
   }
   unsigned pixeloffset = bmp[10] + 256 * bmp[11]; //where the pixel data starts
   //read width and height from BMP header
@@ -87,9 +91,9 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
   size_t h = bmp[22] + bmp[23] * 256;
   //read number of channels from BMP header
   if (bmp[28] != 24 && bmp[28] != 32) {
-    err << "Image from the GMK file was " << bmp[28] << " bit while this reader "
+    errStream << "Image from the GMK file was " << bmp[28] << " bit while this reader "
         << "only supports 24 and 32 bit BMP images" << std::endl;
-    return "";
+    return;
   }
   unsigned numChannels = bmp[28] / 8;
 
@@ -100,9 +104,9 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
 
   unsigned dataSize = scanlineBytes * h;
   if (length < dataSize + pixeloffset) {
-    err << "Image from the GMK file had a length '" << length << "' smaller than the estimated "
+    errStream << "Image from the GMK file had a length '" << length << "' smaller than the estimated "
         << "size '" << (dataSize + pixeloffset) << "' based on the BMP header dimensions" << std::endl;
-    return "";
+    return;
   }
 
   std::vector<unsigned char> rgba(w * h * 4);
@@ -147,13 +151,11 @@ std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length, bool 
     }
   }
 
-  std::string temp_file_path = TempFileName("gmk_data");
-  libpng_encode32_file(rgba.data(), w, h, temp_file_path.c_str());
-
-  return temp_file_path;
+  CreateDirectoryRecursive(write_fname);
+  libpng_encode32_file(rgba.data(), w, h, write_fname.u8string().c_str());
 }
 
-std::string writeTempBGRAFile(std::unique_ptr<char[]> bytes, size_t width, size_t height) {
+void writeTempBGRAFile(const std::filesystem::path& write_fname, std::unique_ptr<char[]> bytes, size_t width, size_t height) {
   auto bgra = reinterpret_cast<unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
   for (unsigned y = 0; y < height; y++) {
@@ -165,10 +167,8 @@ std::string writeTempBGRAFile(std::unique_ptr<char[]> bytes, size_t width, size_
     }
   }
 
-  std::string temp_file_path = TempFileName("gmk_data");
-  libpng_encode32_file(bgra, width, height, temp_file_path.c_str());
-
-  return temp_file_path;
+  CreateDirectoryRecursive(write_fname);
+  libpng_encode32_file(bgra, width, height, write_fname.u8string().c_str());
 }
 
 class Decoder {
@@ -177,23 +177,22 @@ class Decoder {
     if (atexit_tempdata_cleanup_registered) return;
     const int ret = std::atexit(atexit_tempdata_cleanup);
     if (ret != 0) {
-      err << "Failed to register cleanup handler for process exit, temporary files will not be removed" << std::endl;
+      errStream << "Failed to register cleanup handler for process exit, temporary files will not be removed" << std::endl;
     } else {
       atexit_tempdata_cleanup_registered = true;
     }
   }
 
   template<class Function, class... Args>
-  void threadTempFileWrite(Function&& f, std::string* data_file_path, Args&&... args) {
-    std::future<std::string> tempFileFuture = std::async(std::launch::async, f, std::move(args)...);
-    tempFileFuturesCreated.emplace_back(std::make_pair(std::move(tempFileFuture), data_file_path));
+  void threadTempFileWrite(Function&& f, const std::filesystem::path& write_fname, Args&&... args) {
+    std::future<void> tempFileFuture = std::async(std::launch::async, f, std::move(args)...);
+    tempFileFuturesCreated.emplace_back(std::make_pair(std::move(tempFileFuture), write_fname));
   }
 
   void processTempFileFutures() {
     for (auto &tempFilePair : tempFileFuturesCreated) {
-      std::string temp_file_path = tempFilePair.first.get();
-      tempFilePair.second->append(temp_file_path);
-      tempFilesCreated.push_back(temp_file_path);
+      tempFilePair.second.append(tempFilePair.second.u8string());
+      tempFilesCreated.push_back(tempFilePair.second.u8string());
     }
   }
 
@@ -294,7 +293,7 @@ class Decoder {
 
     z_stream zs = {}; // zero-initialize
     if (inflateInit(&zs) != Z_OK) {
-      err << "Failed to initialize zlib inflate" << std::endl;
+      errStream << "Failed to initialize zlib inflate" << std::endl;
       return nullptr;
     }
 
@@ -320,7 +319,7 @@ class Decoder {
     inflateEnd(&zs);
 
     if (ret != Z_STREAM_END) { // an error occurred that was not EOF
-      err << "There was an error with code '" << ret << "' while using zlib to decompress data" << std::endl;
+      errStream << "There was an error with code '" << ret << "' while using zlib to decompress data" << std::endl;
       return nullptr;
     }
 
@@ -331,35 +330,35 @@ class Decoder {
     return bytes;
   }
 
-  void readData(std::string *data_file_path=nullptr, bool compressed=false) {
+  void readData(const std::filesystem::path& write_fname, bool compressed=false) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = compressed ? decompress(length) : read(length);
-    using WriteTempDataFileManaged = std::string(*)(std::unique_ptr<char[]>, size_t);
-    if (data_file_path && bytes) threadTempFileWrite((WriteTempDataFileManaged)writeTempDataFile, data_file_path, std::move(bytes), length);
+    using WriteTempDataFileManaged = void(*)(const std::filesystem::path& write_fname, std::unique_ptr<char[]>, size_t);
+    if (bytes) threadTempFileWrite((WriteTempDataFileManaged)writeTempDataFile, write_fname, write_fname, std::move(bytes), length);
   }
 
-  void readCompressedData(std::string *data_file_path=nullptr) {
-    readData(data_file_path, true);
+  void readCompressedData(const std::filesystem::path& write_fname) {
+    readData(write_fname, true);
   }
 
-  void readUncompressedData(std::string *data_file_path=nullptr) {
-    readData(data_file_path, false);
+  void readUncompressedData(const std::filesystem::path& write_fname) {
+    readData(write_fname, false);
   }
 
-  void readZlibImage(std::string *data_file_path, bool transparent) {
+  void readZlibImage(const std::filesystem::path& write_fname, bool transparent) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = decompress(length);
-    if (data_file_path && bytes) threadTempFileWrite(writeTempBMPFile, data_file_path, std::move(bytes), length, transparent);
+    if (bytes) threadTempFileWrite(writeTempBMPFile, write_fname, write_fname, std::move(bytes), length, transparent);
   }
 
   void readZlibImage(bool transparent=false) {
-    readZlibImage(nullptr, transparent);
+    readZlibImage(TempFileName(gmk_data), transparent);
   }
 
-  void readBGRAImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
+  void readBGRAImage(const std::filesystem::path& write_fname = TempFileName(gmk_data), size_t width=0, size_t height=0) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = read(length);
-    if (data_file_path && bytes) threadTempFileWrite(writeTempBGRAFile, data_file_path, std::move(bytes), width, height);
+    if (bytes) threadTempFileWrite(writeTempBGRAFile, write_fname, write_fname, std::move(bytes), width, height);
   }
 
   void setSeed(int seed) {
@@ -393,7 +392,7 @@ class Decoder {
   int zlibPos, zlibStart;
   std::unique_ptr<int[]> decodeTable;
   std::unordered_map<TypeCase, std::unordered_map<int, std::vector<std::string*> > > postponeds;
-  std::vector<std::pair<std::future<std::string>, std::string*> > tempFileFuturesCreated;
+  std::vector<std::pair<std::future<void>, std::filesystem::path> > tempFileFuturesCreated;
 
   std::unique_ptr<int[]> makeEncodeTable(int seed) {
     auto table = make_unique<int[]>(256);
@@ -438,7 +437,7 @@ void LoadSettingsIncludes(Decoder &dec) {
 int LoadSettings(Decoder &dec, Settings& set) {
   int ver = dec.read4();
   if (ver != 530 && ver != 542 && ver != 600 && ver != 702 && ver != 800 && ver != 810) {
-    err << "Unsupported GMK Settings version: " << ver << std::endl;
+    errStream << "Unsupported GMK Settings version: " << ver << std::endl;
     return 0;
   }
 
@@ -555,7 +554,7 @@ int LoadSettings(Decoder &dec, Settings& set) {
 int LoadTriggers(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 800) {
-    err << "Unsupported GMK Triggers version: " << ver << std::endl;
+    errStream << "Unsupported GMK Triggers version: " << ver << std::endl;
     return 0;
   }
 
@@ -568,7 +567,7 @@ int LoadTriggers(Decoder &dec) {
     }
     ver = dec.read4();
     if (ver != 800) {
-      err << "Unsupported GMK Trigger version: " << ver << std::endl;
+      errStream << "Unsupported GMK Trigger version: " << ver << std::endl;
       return 0;
     }
     dec.readStr(); // trigger name
@@ -585,7 +584,7 @@ int LoadTriggers(Decoder &dec) {
 int LoadConstants(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 800) {
-    err << "Unsupported GMK Constants version: " << ver << std::endl;
+    errStream << "Unsupported GMK Constants version: " << ver << std::endl;
     return 0;
   }
 
@@ -599,7 +598,7 @@ int LoadConstants(Decoder &dec) {
   return 1;
 }
 
-std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver) {
+std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver, const std::string& name) {
   auto sound = std::make_unique<Sound>();
 
   int kind53 = -1;
@@ -608,11 +607,14 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver) {
   else
     sound->set_kind(static_cast<Sound::Kind>(dec.read4())); //normal, background, etc
   sound->set_file_extension(dec.readStr());
+  
+  const std::filesystem::path fName = TempFileName(gmk_data)/(name + sound->file_extension());
 
   if (ver == 440) {
     //-1 = no sound
     if (kind53 != -1) {
-      dec.readCompressedData(sound->mutable_data());
+      dec.readCompressedData(fName);
+      sound->set_data(fName.u8string());
     }
     dec.skip(8);
     sound->set_preload(!dec.readBool());
@@ -620,9 +622,11 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver) {
     sound->set_file_name(dec.readStr());
     if (dec.readBool()) {
       if (ver == 600) {
-        dec.readCompressedData(sound->mutable_data());
+        dec.readCompressedData(fName);
+        sound->set_data(fName.u8string());
       } else {
-        dec.readUncompressedData(sound->mutable_data());
+        dec.readUncompressedData(fName);
+        sound->set_data(fName.u8string());
       }
     }
     dec.read4(); // effects flags
@@ -634,7 +638,7 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver) {
   return sound;
 }
 
-std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
+std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver, const std::string& name) {
   auto sprite = std::make_unique<Sprite>();
 
   int w = 0, h = 0;
@@ -665,21 +669,26 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
   sprite->set_origin_y(dec.read4());
 
   int nosub = dec.read4();
+  std::filesystem::path tempName = TempFileName(gmk_data);
   for (int i = 0; i < nosub; i++) {
+    std::filesystem::path fName = tempName/(name + "_" + std::to_string(i) + ".png");
     if (ver >= 800) {
       int subver = dec.read4();
       if (subver != 800 && subver != 810) {
-        err << "GMK Sprite with inner version '" << ver << "' has a subimage with id '" << i
+        errStream << "GMK Sprite with inner version '" << ver << "' has a subimage with id '" << i
             << "' that has an unsupported version '" << subver << "'" << std::endl;
         return nullptr;
       }
       w = dec.read4();
       h = dec.read4();
-      if (w != 0 && h != 0)
-        dec.readBGRAImage(sprite->add_subimages(), w, h);
+      if (w != 0 && h != 0) {
+        dec.readBGRAImage(fName, w, h);
+        sprite->add_subimages(fName.u8string());
+      }
     } else {
       if (dec.read4() == -1) continue;
-      dec.readZlibImage(sprite->add_subimages(), transparent);
+      dec.readZlibImage(fName, transparent);
+      sprite->add_subimages(fName.u8string());
     }
   }
   sprite->set_width(w);
@@ -699,7 +708,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
   return sprite;
 }
 
-std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
+std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver, const std::string& name) {
   auto background = std::make_unique<Background>();
 
   int w = 0, h = 0;
@@ -727,22 +736,28 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
     background->set_vertical_spacing(dec.read4());
   }
 
+  const std::filesystem::path fName = TempFileName(gmk_data)/(name + ".png");
+  
   if (ver < 710) {
     if (dec.readBool()) {
-      if (dec.read4() != -1)
-        dec.readZlibImage(background->mutable_image(), transparent);
+      if (dec.read4() != -1) {
+        dec.readZlibImage(fName, transparent);
+        background->set_image(fName.u8string());
+      }
     }
   } else { // >= 710
     int dataver = dec.read4();
     if (dataver != 800) {
-      err << "GMK Background with inner version '" << ver << "' has image data with "
+      errStream << "GMK Background with inner version '" << ver << "' has image data with "
           << "unsupported version '" << dataver << "'" << std::endl;
       return nullptr;
     }
     w = dec.read4();
     h = dec.read4();
-    if (w != 0 && h != 0)
-      dec.readBGRAImage(background->mutable_image(), w, h);
+    if (w != 0 && h != 0) {
+      dec.readBGRAImage(fName, w, h);
+      background->set_image(fName.u8string());
+    }
   }
 
   background->set_width(w);
@@ -751,7 +766,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   return background;
 }
 
-std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/) {
+std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/, const std::string& /*name*/) {
   auto path = std::make_unique<Path>();
 
   path->set_smooth(dec.readBool());
@@ -771,7 +786,7 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/) {
   return path;
 }
 
-std::unique_ptr<Script> LoadScript(Decoder &dec, int /*ver*/) {
+std::unique_ptr<Script> LoadScript(Decoder &dec, int /*ver*/, const std::string& /*name*/) {
   auto script = std::make_unique<Script>();
 
   script->set_code(dec.readStr());
@@ -779,7 +794,7 @@ std::unique_ptr<Script> LoadScript(Decoder &dec, int /*ver*/) {
   return script;
 }
 
-std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/) {
+std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/, const std::string& /*name*/) {
   auto font = std::make_unique<Font>();
 
   font->set_font_name(dec.readStr());
@@ -800,29 +815,44 @@ std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/) {
   return font;
 }
 
+
+struct PostponedAction {
+  PostponedAction(std::string* field, std::vector<std::unique_ptr<Action>>&& actions) : _field(field), _actions(std::move(actions)) {}
+  std::string* _field;
+  std::vector<std::unique_ptr<Action>> _actions;
+  void Parse() {
+    std::vector<Action> actions;
+    for (std::unique_ptr<Action>& action : _actions)
+      actions.emplace_back(*action);
+    _field->append(Actions2Code(actions)); 
+    _actions.clear();
+  }
+};
+
+static std::vector<PostponedAction> postponedActions;
+
 int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
   int ver = dec.read4();
   if (ver != 400) {
-    err << "Unsupported GMK actions version '" << ver <<
+    errStream << "Unsupported GMK actions version '" << ver <<
       "' for event '" << eventName << "'" << std::endl;
     return 0;
   }
 
   int noacts = dec.read4();
-  std::vector<Action> actions;
-  actions.reserve(noacts);
+  std::vector<std::unique_ptr<Action>> actions;
   for (int k = 0; k < noacts; k++) {
-    Action action;
+    auto action = std::make_unique<Action>();
     dec.skip(4);
-    action.set_libid(dec.read4());
-    action.set_id(dec.read4());
-    action.set_kind(static_cast<ActionKind>(dec.read4()));
-    action.set_use_relative(dec.readBool());
-    action.set_is_question(dec.readBool());
-    action.set_use_apply_to(dec.readBool());
-    action.set_exe_type(static_cast<ActionExecution>(dec.read4()));
-    action.set_function_name(dec.readStr());
-    action.set_code_string(dec.readStr());
+    action->set_libid(dec.read4());
+    action->set_id(dec.read4());
+    action->set_kind(static_cast<ActionKind>(dec.read4()));
+    action->set_use_relative(dec.readBool());
+    action->set_is_question(dec.readBool());
+    action->set_use_apply_to(dec.readBool());
+    action->set_exe_type(static_cast<ActionExecution>(dec.read4()));
+    action->set_function_name(dec.readStr());
+    action->set_code_string(dec.readStr());
 
     int numofargs = dec.read4(); // number of library action's arguments
     int numofargkinds = dec.read4(); // number of library action's argument kinds
@@ -833,15 +863,15 @@ int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
     int applies_to = dec.read4();
     switch (applies_to) {
       case -1:
-        action.set_who_name("self");
+        action->set_who_name("self");
         break;
       case -2:
-        action.set_who_name("other");
+        action->set_who_name("other");
         break;
       default:
-        action.set_who_name(std::to_string(applies_to));
+        dec.postponeName(action->mutable_who_name(), applies_to, TypeCase::kObject);
     }
-    action.set_relative(dec.readBool());
+    action->set_relative(dec.readBool());
 
     int actualnoargs = dec.read4();
     for (int l = 0; l < actualnoargs; l++) {
@@ -849,43 +879,43 @@ int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
         dec.skip(dec.read4());
         continue;
       }
-      auto argument = action.add_arguments();
+      auto argument = action->add_arguments();
       argument->set_kind(static_cast<ArgumentKind>(argkinds[l]));
       std::string strval = dec.readStr();
 
-      using ArgumentMutator = std::function<std::string*(Argument*)>;
+      using ArgumentMutator = std::pair<std::function<std::string*(Argument*)>, TypeCase>;
       using MutatorMap = std::unordered_map<ArgumentKind, ArgumentMutator>;
 
       static const MutatorMap mutatorMap({
-        { ArgumentKind::ARG_SOUND,      &Argument::mutable_sound      },
-        { ArgumentKind::ARG_BACKGROUND, &Argument::mutable_background },
-        { ArgumentKind::ARG_SPRITE,     &Argument::mutable_sprite     },
-        { ArgumentKind::ARG_SCRIPT,     &Argument::mutable_script     },
-        { ArgumentKind::ARG_FONT,       &Argument::mutable_font       },
-        { ArgumentKind::ARG_OBJECT,     &Argument::mutable_object     },
-        { ArgumentKind::ARG_TIMELINE,   &Argument::mutable_timeline   },
-        { ArgumentKind::ARG_ROOM,       &Argument::mutable_room       },
-        { ArgumentKind::ARG_PATH,       &Argument::mutable_path       }
+        { ArgumentKind::ARG_SOUND,      {&Argument::mutable_sound,       TypeCase::kSound      }},
+        { ArgumentKind::ARG_BACKGROUND, {&Argument::mutable_background,  TypeCase::kBackground }},
+        { ArgumentKind::ARG_SPRITE,     {&Argument::mutable_sprite,      TypeCase::kSprite     }},
+        { ArgumentKind::ARG_SCRIPT,     {&Argument::mutable_script,      TypeCase::kScript     }},
+        { ArgumentKind::ARG_FONT,       {&Argument::mutable_font,        TypeCase::kFont       }},
+        { ArgumentKind::ARG_OBJECT,     {&Argument::mutable_object,      TypeCase::kObject     }},
+        { ArgumentKind::ARG_TIMELINE,   {&Argument::mutable_timeline,    TypeCase::kTimeline   }},
+        { ArgumentKind::ARG_ROOM,       {&Argument::mutable_room,        TypeCase::kRoom       }},
+        { ArgumentKind::ARG_PATH,       {&Argument::mutable_path,        TypeCase::kPath       }}
       });
 
       const auto &mutator = mutatorMap.find(argument->kind());
       if (mutator != mutatorMap.end()) {
-        mutator->second(argument)->append(strval);
+        dec.postponeName(mutator->second.first(argument), std::stoi(strval), mutator->second.second);
       } else {
         argument->set_string(strval);
       }
     }
 
-    action.set_is_not(dec.readBool());
-    actions.emplace_back(action);
+    action->set_is_not(dec.readBool());
+    actions.emplace_back(std::move(action));
   }
 
-  code->append(Actions2Code(actions));
+  postponedActions.emplace_back(code, std::move(actions));
 
   return 1;
 }
 
-std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/) {
+std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/, const std::string& /*name*/) {
   auto timeline = std::make_unique<Timeline>();
 
   int nomoms = dec.read4();
@@ -898,7 +928,7 @@ std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/) {
   return timeline;
 }
 
-std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
+std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/, const std::string& /*name*/) {
   auto object = std::make_unique<Object>();
 
   dec.postponeName(object->mutable_sprite_name(), dec.read4(), TypeCase::kSprite);
@@ -915,7 +945,7 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
       int second = dec.read4();
       if (second == -1) break;
 
-      auto event = object->add_events();
+      auto *event = object->add_legacy_events();
       event->set_type(i);
       event->set_number(second);
 
@@ -926,7 +956,7 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
   return object;
 }
 
-std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
+std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*/) {
   auto room = std::make_unique<Room>();
 
   room->set_caption(dec.readStr());
@@ -1032,7 +1062,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
 int LoadIncludes(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 430 && ver != 600 && ver != 620 && ver != 800 && ver != 810) {
-    err << "Unsupported GMK Includes version: " << ver << std::endl;
+    errStream << "Unsupported GMK Includes version: " << ver << std::endl;
     return 0;
   }
 
@@ -1044,7 +1074,7 @@ int LoadIncludes(Decoder &dec) {
     }
     ver = dec.read4();
     if (ver != 620 && ver != 800 && ver != 810) {
-      err << "Unsupported GMK Include version: " << ver << std::endl;
+      errStream << "Unsupported GMK Include version: " << ver << std::endl;
       return 0;
     }
 
@@ -1072,7 +1102,7 @@ int LoadIncludes(Decoder &dec) {
 int LoadPackages(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 700) {
-    err << "Unsupported GMK Extension Packages version: " << ver << std::endl;
+    errStream << "Unsupported GMK Extension Packages version: " << ver << std::endl;
     return 0;
   }
 
@@ -1087,7 +1117,7 @@ int LoadPackages(Decoder &dec) {
 int LoadGameInformation(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 430 && ver != 600 && ver != 620 && ver != 800 && ver != 810) {
-    err << "Unsupported GMK Game Information version: " << ver << std::endl;
+    errStream << "Unsupported GMK Game Information version: " << ver << std::endl;
     return 0;
   }
 
@@ -1112,7 +1142,7 @@ int LoadGameInformation(Decoder &dec) {
   return 1;
 }
 
-using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
+using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int, const std::string&)>;
 
 struct GroupFactory {
   TypeCase type;
@@ -1125,7 +1155,7 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
   TypeCase type = groupFactory.type;
   int groupVer = dec.read4();
   if (!groupFactory.supportedGroupVersions.count(groupVer)) {
-    err << "GMK group '" << type << "' with version '" << groupVer << "' is unsupported" << std::endl;
+    errStream << "GMK group '" << type << "' with version '" << groupVer << "' is unsupported" << std::endl;
     return 0;
   }
 
@@ -1141,14 +1171,14 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
 
     int ver = dec.read4();
     if (!groupFactory.supportedVersions.count(ver)) {
-      err << "GMK resource of type '" << type << "' with name '" << name
+      errStream << "GMK resource of type '" << type << "' with name '" << name
           << "' has an unsupported version '" << ver << "'" << std::endl;
       return 0;
     }
 
-    auto res = groupFactory.loadFunc(dec, ver);
+    auto res = groupFactory.loadFunc(dec, ver, name);
     if (!res) {
-      err << "There was a problem reading GMK resource of type '" << type << "' with name '" << name
+      errStream << "There was a problem reading GMK resource of type '" << type << "' with name '" << name
           << "' and the project cannot be loaded" << std::endl;
       return 0;
     }
@@ -1194,7 +1224,7 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
 
     auto typeMapIt = typeMap.find(type);
     if (typeMapIt == typeMap.end()) {
-      err << "No map of ids to protocol buffers for GMK kind '" << kind
+      errStream << "No map of ids to protocol buffers for GMK kind '" << kind
           << "' so tree node with name '" << name << "' will not have "
           << "its protocol buffer set" << std::endl;
       return;
@@ -1205,46 +1235,53 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
     const google::protobuf::Reflection *refl = node->GetReflection();
     const google::protobuf::FieldDescriptor *field = desc->FindFieldByNumber(type);
     if (!field) {
-      err << "TreeNode protocol buffer does not have a field for GMK type '" << type << "'" << std::endl;
+      errStream << "TreeNode protocol buffer does not have a field for GMK type '" << type << "'" << std::endl;
       return;
     }
     refl->SetAllocatedMessage(node, resMap[id].release(), field);
   }
 }
 
-buffers::Project *LoadGMK(std::string fName) {
+} //namespace gmk_internal
+
+namespace egm {
+
+using namespace gmk_internal;
+
+std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fName) const {
   static const vector<GroupFactory> groupFactories({
-    { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, LoadSound      },
-    { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     },
-    { TypeCase::kBackground, { 400, 800      }, { 400, 543, 710      }, LoadBackground },
-    { TypeCase::kPath,       { 420, 800      }, { 530                }, LoadPath       },
-    { TypeCase::kScript,     { 400, 800, 810 }, { 400, 800, 810      }, LoadScript     },
-    { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, LoadFont       },
-    { TypeCase::kTimeline,   { 500, 800      }, { 500                }, LoadTimeline   },
-    { TypeCase::kObject,     { 400, 800      }, { 430                }, LoadObject     },
-    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, LoadRoom       }
+    { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, gmk_internal::LoadSound      },
+    { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, gmk_internal::LoadSprite     },
+    { TypeCase::kBackground, { 400, 800      }, { 400, 543, 710      }, gmk_internal::LoadBackground },
+    { TypeCase::kPath,       { 420, 800      }, { 530                }, gmk_internal::LoadPath       },
+    { TypeCase::kScript,     { 400, 800, 810 }, { 400, 800, 810      }, gmk_internal::LoadScript     },
+    { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, gmk_internal::LoadFont       },
+    { TypeCase::kTimeline,   { 500, 800      }, { 500                }, gmk_internal::LoadTimeline   },
+    { TypeCase::kObject,     { 400, 800      }, { 430                }, gmk_internal::LoadObject     },
+    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, gmk_internal::LoadRoom       }
   });
+
   TypeMap typeMap;
   std::ifstream in(fName, std::ios::binary);
   if (!in) {
-    err << "Could not open GMK for reading: " << fName << std::endl;
+    errStream << "Could not open GMK for reading: " << fName << std::endl;
     return nullptr;
   }
   Decoder dec(in);
 
   int identifier = dec.read4();
   if (identifier != 1234321) {
-    err << "Invalid GMK identifier: " << identifier << std::endl;
+    errStream << "Invalid GMK identifier: " << identifier << std::endl;
     return nullptr;
   } else {
-    out << "identifier: " << identifier << std::endl;
+    outStream << "identifier: " << identifier << std::endl;
   }
   int ver = dec.read4();
   if (ver != 530 && ver != 600 && ver != 701 && ver != 800 && ver != 810) {
-    err << "Unsupported GMK version: " << ver << std::endl;
+    errStream << "Unsupported GMK version: " << ver << std::endl;
     return nullptr;
   } else {
-    out << "game version: " << ver << std::endl;
+    outStream << "game version: " << ver << std::endl;
   }
 
   if (ver == 530) dec.skip(4);
@@ -1262,7 +1299,7 @@ buffers::Project *LoadGMK(std::string fName) {
   } else {
     game_id = dec.read4();
   }
-  out << "game id: " << game_id << std::endl;
+  outStream << "game id: " << game_id << std::endl;
   dec.skip(16); //16 bytes GAME_GUID
 
   Settings settings;
@@ -1290,7 +1327,7 @@ buffers::Project *LoadGMK(std::string fName) {
   // Library Creation Code
   ver = dec.read4();
   if (ver != 500) {
-    err << "Unsupported GMK Library Creation Code version: " << ver << std::endl;
+    errStream << "Unsupported GMK Library Creation Code version: " << ver << std::endl;
     return 0;
   }
   int no = dec.read4();
@@ -1300,7 +1337,7 @@ buffers::Project *LoadGMK(std::string fName) {
   // Room Execution Order
   ver = dec.read4();
   if (ver != 500 && ver != 540 && ver != 700) {
-    err << "Unsupported GMK Room Execution Order version: " << ver << std::endl;
+    errStream << "Unsupported GMK Room Execution Order version: " << ver << std::endl;
     return 0;
   }
   dec.skip(dec.read4() * 4);
@@ -1311,14 +1348,20 @@ buffers::Project *LoadGMK(std::string fName) {
   while (rootnodes-- > 0) {
     LoadTree(dec, typeMap, root.get());
   }
+  
+  // Handle postponed DnD conversion
+  for(auto&& a : postponedActions) a.Parse();
+  postponedActions.clear();
 
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(root.release());
   // ensure all temp data files are written and the paths are set in the protos
   dec.processTempFileFutures();
+  
+  LegacyEventsToEGM(proj.get(), _event_data);
 
-  return proj.release();
+  return proj;
 }
 
-}  //namespace gmk
+}  //namespace egm

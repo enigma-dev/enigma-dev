@@ -34,10 +34,15 @@
 
 using namespace std;
 
+void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+  //TODO: Implement
+}
+
 namespace enigma_user {
 
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
+bool show_question(std::string str) {
 //TODO: Implement
+return false;
 }
 
 int get_color(int defcol)

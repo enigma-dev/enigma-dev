@@ -17,10 +17,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// Windows Vista or later for IFileDialog
-#define NTDDI_VERSION NTDDI_VISTA
-#define _WIN32_WINNT _WIN32_WINNT_VISTA
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <shobjidl.h> //for IFileDialog
 #include <shlwapi.h> //for Shell API
 #include <shlobj.h> //for Shell API
@@ -37,6 +37,7 @@ using namespace std;
 #include "GameSettings.h"
 
 #include "Graphics_Systems/General/GScolor_macros.h"
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
 
 #define MONITOR_CENTER 0x0001
 
@@ -53,6 +54,12 @@ static string gs_but1, gs_but2, gs_but3;
 static string message_caption;
 static tstring dialog_caption = L"";
 static tstring error_caption = L"";
+
+// error hook proc
+HHOOK hook_handle = NULL;
+HWND dlg_error = NULL;
+bool init_error = false;
+bool fatal_error = false;
 
 // show cancel button?
 static bool message_cancel = false;
@@ -85,8 +92,6 @@ static inline string add_slash(const string& dir) {
 
 namespace enigma {
 
-extern HINSTANCE hInstance;
-extern HWND hWnd;
 HWND infore;
 
 }
@@ -144,6 +149,35 @@ static inline void CenterWindowToMonitor(HWND hwnd, UINT flags) {
 
 static tstring tstring_replace_all(tstring str, tstring substr, tstring newstr) {
   return widen(string_replace_all(shorten(str), shorten(substr), shorten(newstr)));
+}
+
+
+static LRESULT CALLBACK ShowDebugMessageProc(int nCode, WPARAM wParam, LPARAM lParam) {
+  if (nCode < HC_ACTION)
+    return CallNextHookEx(hook_handle, nCode, wParam, lParam);
+
+  if (nCode == HCBT_CREATEWND) {
+    CBT_CREATEWNDW *cbtcr = (CBT_CREATEWNDW *)lParam;
+    if (cbtcr->lpcs->hwndParent == enigma::hWnd) {
+      dlg_error = (HWND)wParam;
+      init_error = true;
+    }
+    if (dlg_error != NULL && init_error) {
+      SetDlgItemTextW(dlg_error, IDOK, L"Abort");
+      SetDlgItemTextW(dlg_error, IDCANCEL, L"Ignore");
+      wchar_t dlg_abort[32]; wchar_t dlg_ignore[32];
+      GetDlgItemTextW(dlg_error, IDOK, dlg_abort, 32);
+      GetDlgItemTextW(dlg_error, IDCANCEL, dlg_ignore, 32);
+      if (shorten(dlg_abort) == "Abort" && fatal_error) {
+        init_error = false;
+      } else if (shorten(dlg_abort) == "Abort" && 
+        shorten(dlg_ignore) == "Ignore") {
+        init_error = false;
+      }
+    }
+  }
+
+  return CallNextHookEx(hook_handle, nCode, wParam, lParam);
 }
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -428,6 +462,39 @@ static inline string get_save_filename_helper(string filter, string fname, strin
   return "";
 }
 
+#if (__MINGW32_MAJOR_VERSION < 8 || __MINGW64_VERSION_MAJOR < 8)
+static int CALLBACK GetDirectoryProc(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
+  if (uMsg == BFFM_INITIALIZED) {
+    if (!tstr_dir.empty())
+      PostMessageW(hWnd, BFFM_SETEXPANDED, true, (LPARAM)tstr_dir.c_str());
+  }
+  return 0;
+}
+
+static inline string get_directory_helper(string dname, string title) {
+  tstr_title = widen(title);
+  tstr_dir = (!dname.empty()) ? widen(dname) : L"";
+  BROWSEINFOW bi = { 0 };
+  LPITEMIDLIST pidl = NULL;
+  wchar_t buffer[MAX_PATH];
+
+  bi.hwndOwner = enigma::hWnd;
+  bi.pszDisplayName = buffer;
+  bi.pidlRoot = NULL;
+  bi.lpszTitle = tstr_title.c_str();
+  bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON;
+  bi.lpfn = GetDirectoryProc;
+
+  if ((pidl = SHBrowseForFolderW(&bi)) != NULL) {
+    wchar_t full_folder_selection[MAX_PATH];
+    SHGetPathFromIDListW(pidl, full_folder_selection);
+    string result = add_slash(shorten(full_folder_selection));
+    CoTaskMemFree(pidl); return result;
+  }
+
+  return "";
+}
+#else
 static inline string get_directory_helper(string dname, string title) {
   IFileDialog *selectDirectory;
   CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&selectDirectory));
@@ -472,6 +539,7 @@ static inline string get_directory_helper(string dname, string title) {
 
   return "";
 }
+#endif
 
 static inline int get_color_helper(int defcol, string title) {
   CHOOSECOLORW cc;
@@ -496,7 +564,7 @@ static inline int get_color_helper(int defcol, string title) {
   return -1;
 }
 
-static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
+void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
   #ifdef DEBUG_MODE
   errortext += "\n\n" + enigma::debug_scope::GetErrors();
   #endif
@@ -510,10 +578,16 @@ static inline void show_debug_message_helper(string errortext, MESSAGE_TYPE type
     tstrWindowCaption = error_caption;
 
   int result;
-  result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
-  if (result == IDABORT || type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR) exit(0);
+  DWORD ThreadID = GetCurrentThreadId();
+  HINSTANCE ModHwnd = GetModuleHandle(NULL);
+  hook_handle = SetWindowsHookEx(WH_CBT, &ShowDebugMessageProc, ModHwnd, ThreadID);
+  bool fatal = (type == MESSAGE_TYPE::M_FATAL_ERROR || type == MESSAGE_TYPE::M_FATAL_USER_ERROR); 
+  fatal_error = fatal;
 
-  //ABORT_ON_ALL_ERRORS();
+  result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), ((fatal) ? MB_OK : MB_OKCANCEL) | 
+  MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
+  UnhookWindowsHookEx(hook_handle);
+  if (result == IDOK || fatal) exit(0);
 }
 
 static string widget = enigma_user::ws_win32;
@@ -526,19 +600,6 @@ string widget_get_system() {
 
 void widget_set_system(string sys) {
   // place holder
-}
-
-void show_debug_message(string errortext, MESSAGE_TYPE type) {
-  if (type != M_INFO && type != M_WARNING) {
-    show_debug_message_helper(errortext, type);
-  } else {
-    #ifndef DEBUG_MODE
-    fputs(errortext.c_str(), stderr);
-    #endif
-    if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
-      type == MESSAGE_TYPE::M_FATAL_USER_ERROR)
-      abort();
-  }
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {

@@ -1,21 +1,23 @@
 #include "Main.hpp"
 #include "OptionsParser.hpp"
 #include "EnigmaPlugin.hpp"
-#include "Game.hpp"
 
 #ifdef CLI_ENABLE_SERVER
 #include "Server.hpp"
 #endif
 
-#include "SOG.hpp"
-
 #ifdef CLI_ENABLE_EGM
+#include "egm.h"
 #include "gmk.h"
 #include "gmx.h"
 #include "yyp.h"
+#include "sog.h"
 #endif
 
-#include <boost/filesystem.hpp>
+#include "strings_util.h"
+
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <fstream>
 #include <iostream>
@@ -24,18 +26,12 @@
 
 std::ostream outputStream(nullptr);
 std::ostream errorStream(nullptr);
-std::ofstream egmlog("logs/enigma_libegm.log", std::ofstream::out);
-
-static std::string tolower(const std::string &str) {
-  std::string res = str;
-  for (size_t i = 0; i < res.length(); ++i) {
-    if (res[i] >= 'A' && res[i] <= 'Z') res[i] += 'a' - 'A';
-  }
-  return res;
-}
 
 int main(int argc, char* argv[])
 {
+  std::ofstream egmlog(fs::temp_directory_path().string() + "/enigma_libegm.log", std::ofstream::out);
+  std::ofstream elog(fs::temp_directory_path().string() + "/enigma_compiler.log", std::ofstream::out);
+
   std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
   if (ENIGMA_DEBUG == "TRUE") {
     outputStream.rdbuf(std::cout.rdbuf());
@@ -43,7 +39,8 @@ int main(int argc, char* argv[])
   } else {
     outputStream.rdbuf(egmlog.rdbuf());
     errorStream.rdbuf(egmlog.rdbuf());
-    std::cout << "LibEGM parsing log at: logs/enigma_libegm.log" << std::endl;
+    std::cout << "LibEGM parsing log at: " << fs::temp_directory_path().string() << "/enigma_libegm.log" << std::endl;
+    std::cout << "ENIGMA compiler log at: " << fs::temp_directory_path().string() << "/enigma_compiler.log" << std::endl;
   }
   
   
@@ -56,6 +53,9 @@ int main(int argc, char* argv[])
 
   EnigmaPlugin plugin;
   plugin.Load();
+  CallBack ecb;
+  plugin.Init(&ecb, options.EnigmaRoot());
+  
   bool quiet = options.GetOption("quiet").as<bool>();
   if (!quiet) {
     plugin.LogMakeToConsole();
@@ -64,15 +64,26 @@ int main(int argc, char* argv[])
     errorStream.rdbuf(nullptr);
   }
 #ifdef CLI_ENABLE_EGM
-  yyp::bind_output_streams(outputStream, errorStream);
-  gmx::bind_output_streams(outputStream, errorStream);
-  gmk::bind_output_streams(outputStream, errorStream);
+  egm::BindOutputStreams(outputStream, errorStream);
 #endif
-  CallBack ecb;
-  plugin.Init(&ecb);
-  plugin.SetDefinitions(options.APIyaml().c_str());
 
+  std::streambuf* cout_rdbuf = std::cout.rdbuf();
+  std::streambuf* cerr_rdbuf = std::cerr.rdbuf();
+    
+  if (ENIGMA_DEBUG != "TRUE") {
+    // Hijack cout/cerr from plugin to hide jdi startup crap that scares people
+    std::cout.rdbuf(elog.rdbuf());
+    std::cerr.rdbuf(elog.rdbuf());
+  }
+  
+  plugin.SetDefinitions(options.APIyaml().c_str());
   std::string output_file;
+
+  if (ENIGMA_DEBUG != "TRUE") {
+    //Restore cout/cerr
+    std::cout.rdbuf(cout_rdbuf);
+    std::cerr.rdbuf(cerr_rdbuf);
+  }
 
   if (!options.GetOption("output").empty())
     output_file = options.GetOption("output").as<std::string>();
@@ -114,63 +125,37 @@ int main(int argc, char* argv[])
     std::cerr << "Invalid game mode: " << _mode << " aborting!" << std::endl;
     return OPTIONS_ERROR;
   }
-
-  Game game;
+  
   std::string input_file = options.GetOption("input").as<std::string>();
-  if (input_file.back() == '/') input_file.pop_back();
 
-  // Working directory hacks
-  if (mode != emode_compile)
-    game.SetOutputFile(input_file);
+  std::unique_ptr<buffers::Project> project;
 
-  if (input_file.size()) {
-    if (!boost::filesystem::exists(input_file)) {
-      std::cerr << "Input file does not exist: " << input_file << std::endl;
-      return OPTIONS_ERROR;
-    }
-
-    std::string ext;
-    size_t dot = input_file.find_last_of('.');
-    if (dot != std::string::npos) ext = tolower(input_file.substr(dot + 1));
-    if (ext == "sog") {
-      if (!ReadSOG(input_file, &game)) return 1;
-      return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
-#ifdef CLI_ENABLE_EGM
-    } else if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
-      buffers::Project* project;
-      if (!(project = gmk::LoadGMK(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
-    } else if (ext == "gmx") {
-      boost::filesystem::path p = input_file;
-      if (boost::filesystem::is_directory(p)) {
-        input_file += "/" + p.filename().stem().string() + ".project.gmx";
-      }
-
-      buffers::Project* project;
-      if (!(project = gmx::LoadGMX(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
-    } else if (ext == "yyp") {
-      buffers::Project* project;
-      if (!(project = yyp::LoadYYP(input_file))) return 1;
-      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+// Temporary hack for android ci until we can remove this macro
+bool hasFileSupport = true;
+#ifndef CLI_ENABLE_EGM
+  hasFileSupport = false;
+  std::cerr << "Warning: emake was built without libEGM support and can only build empty games" << std::endl;
 #endif
-    } else {
-      if (ext == "egm") {
-        std::cerr << "EGM format not yet supported. "
-                       "Please use LateralGM for the time being." << std::endl;
-      } else if (ext.empty()) {
-        std::cerr << "Error: Unknown filetype: cannot determine type of file "
-                    << '"' << input_file << "\"." << std::endl;
-      } else {
-        std::cerr << "Error: Unknown filetype \"" << ext
-                    << "\": cannot read input file \"" << input_file
-                    << "\"." << std::endl;
-      }
-    }
-    return 1;
+  
+  if (!hasFileSupport || input_file.empty()) {
+    project = std::make_unique<buffers::Project>();
+    std::cerr << "Warning: No game file specified. "
+                "Building an empty game." << std::endl;
+    return plugin.BuildGame(project->game(), mode, output_file.c_str());
   }
 
-  std::cerr << "Warning: No game file specified. "
-               "Building an empty game." << std::endl;
-  return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
+#ifdef CLI_ENABLE_EGM
+  // Load event data
+  EventData event_data(ParseEventFile((fs::path(options.EnigmaRoot())/"events.ey").u8string()));
+
+  // FIXME: move SOG to libEGM as a format and remove this dup logic
+  if (!input_file.empty() && input_file.back() == '/') input_file.pop_back();
+  std::string ext;
+  size_t dot = input_file.find_last_of('.');
+  if (dot != std::string::npos) ext = ToLower(input_file.substr(dot + 1));
+  egm::LibEGMInit(&event_data);
+  if (!(project = egm::LoadProject(input_file))) return 1;
+    return plugin.BuildGame(project->game(), mode, output_file.c_str());
+#endif
+  return 1;
 }

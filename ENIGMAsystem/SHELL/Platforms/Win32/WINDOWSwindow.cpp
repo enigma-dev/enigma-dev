@@ -21,6 +21,8 @@
 #include "Platforms/General/PFmain.h" // For those damn vk_ constants.
 #include "Platforms/General/PFwindow.h"
 
+#include "WINDOWSicon.h"
+
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include "strings_util.h" // For string_replace_all
@@ -28,7 +30,14 @@
 #include "Universal_System/roomsystem.h" // room_caption
 #include "Universal_System/globalupdate.h"
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+// mingw32 cross-compile bug workaround below
+#ifndef MAPVK_VK_TO_VSC_EX
+#define MAPVK_VK_TO_VSC_EX 0x04
+#endif
+
 #include <stdio.h>
 #include <string>
 using namespace std;
@@ -71,15 +80,45 @@ void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
 
 namespace enigma_user {
 
-#if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle() {
-  return (unsigned long long)enigma::hWnd;
+window_t window_handle() {
+  return reinterpret_cast<window_t>(enigma::hWnd);
 }
-#else
-void* window_handle() {
-  return enigma::hWnd;
+
+// returns an identifier for the HWND window
+// this string can be used in shell scripts
+wid_t window_identifier() {
+  return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
 }
-#endif
+
+// returns an identifier for certain window
+// this string can be used in shell scripts
+wid_t window_get_identifier(window_t hwnd) {
+  return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
+}
+
+static int currentIconIndex = -1;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::SetIconFromSprite(enigma::hWnd, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
+}
 
 // GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
 // Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,
@@ -158,9 +197,7 @@ void window_set_position(int x, int y)
 void window_set_size(unsigned int width, unsigned int height)
 {
   if (window_get_fullscreen()) return;
-  enigma::windowWidth = width;
-  enigma::windowHeight = height;
-  enigma::compute_window_size();
+  window_set_rectangle(enigma::windowX, enigma::windowY, width, height);
 }
 
 void window_set_rectangle(int x, int y, int width, int height) {
@@ -196,8 +233,7 @@ void window_set_fullscreen(bool full) {
     tmpHeight = window_get_height();
     window_set_stayontop(false);
     LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
-    style &= ~(WS_CAPTION | WS_BORDER | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
-    style |= WS_SIZEBOX;
+    style &= ~(WS_CAPTION | WS_BORDER | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX);
     SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
     window_set_maximized(full);
   } else {
@@ -318,11 +354,13 @@ void display_mouse_set(int x,int y) {
 }
 
 int display_get_x() {
-  return 0; // TODO
+  // Windows is different than our Unix-like platforms in that this value is always zero...
+  return 0;
 }
 
 int display_get_y() {
-  return 0; // TODO
+  // Windows is different than our Unix-like platforms in that this value is always zero...
+  return 0;
 }
 
 int display_get_width() {
@@ -447,6 +485,13 @@ void window_mouse_set(int x, int y)
 
 }
 
+static void keyboard_set_direct(int key, bool down) {
+  UINT scancode = MapVirtualKey(key, MAPVK_VK_TO_VSC_EX);
+  DWORD flags = ((scancode >> 8) == 0xE0) ? KEYEVENTF_EXTENDEDKEY : 0;
+  if (!down) flags |= KEYEVENTF_KEYUP;
+  keybd_event(key, scancode, flags, 0);
+}
+
 namespace enigma_user
 {
 
@@ -535,63 +580,17 @@ int window_get_cursor()
   return enigma::cursorInt;
 }
 
-void io_handle()
-{
-  MSG msg;
-  enigma::input_push();
-  while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
-  {
-    TranslateMessage (&msg);
-    DispatchMessage (&msg);
-  }
-  enigma::update_mouse_variables();
-}
-
-
 bool keyboard_check_direct(int key)
 {
-   BYTE keyState[256];
-
-   if ( GetKeyboardState( keyState ) )  {
-	  for (int x = 0; x < 256; x++)
-		keyState[x] = (char) (GetKeyState(x) >> 8);
-   } else {
-      //TODO: print error message.
-	  return 0;
-   }
-
-  if (key == vk_anykey) {
-    for(int i = 0; i < 256; i++)
-      if (keyState[i] == 1) return 1;
-    return 0;
-  }
-  if (key == vk_nokey) {
-    for(int i = 0; i < 256; i++)
-      if (keyState[i] == 1) return 0;
-    return 1;
-  }
-  return keyState[key & 0xFF];
+  return GetAsyncKeyState(key) < 0;
 }
 
 void keyboard_key_press(int key) {
-  BYTE keyState[256];
-
-  GetKeyboardState((LPBYTE)&keyState);
-
-  // Simulate a key press
-  keybd_event( key,
-        keyState[key],
-        KEYEVENTF_EXTENDEDKEY | 0,
-        0 );
+  keyboard_set_direct(key, true);
 }
 
 void keyboard_key_release(int key) {
-  BYTE keyState[256];
-
-  GetKeyboardState((LPBYTE)&keyState);
-
-  // Simulate a key release
-  keybd_event( key, keyState[key], KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+  keyboard_set_direct(key, false);
 }
 
 bool keyboard_get_capital() {

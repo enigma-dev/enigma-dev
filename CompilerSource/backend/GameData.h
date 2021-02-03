@@ -17,6 +17,7 @@
 #include "EnigmaStruct.h"
 #include "project.pb.h"
 #include "GameInformation.pb.h"
+#include "event_reader/event_parser.h"
 
 struct ESLookup;
 
@@ -29,12 +30,10 @@ template<class Proto> struct ProtoMessageInheritor {
     return data.id();
   }
 
-  Proto *operator->() {
-    return &data;
-  }
-  const Proto *operator->() const {
-    return &data;
-  }
+  Proto *operator->() { return &data; }
+  const Proto *operator->() const { return &data; }
+  Proto *get() { return &data; }
+  const Proto *get() const { return &data; }
 
   ProtoMessageInheritor() {}
   ProtoMessageInheritor(const Proto &p): data(p) {}
@@ -167,10 +166,8 @@ struct GameData {
   buffers::resources::GameInformation gameInfo;
   buffers::resources::Settings settings;
 
-  GameData(struct deprecated::JavaStruct::EnigmaStruct *es);
-  GameData(const buffers::Project &proj);
+  GameData(struct deprecated::JavaStruct::EnigmaStruct *es, const EventData* events);
+  GameData(const buffers::Project &proj, const EventData* events);
 };
-
-int FlattenProto(const buffers::Project &proj, GameData *gameData);
 
 #endif // ENIGMA_GAMEDATA_H

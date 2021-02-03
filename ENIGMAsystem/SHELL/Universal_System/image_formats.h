@@ -19,12 +19,36 @@
 #ifndef ENIGMA_IMAGEFORMATS_H
 #define ENIGMA_IMAGEFORMATS_H
 
-#include <string>
+#include <vector>
+#include <filesystem>
 
 /// NOTE: These image formats expect the data to be un-aligned and always reads and writes with BGRA full color
 
 namespace enigma
 {
+
+struct RawImage {
+  RawImage(unsigned char* pxdata = nullptr, unsigned w = 0, unsigned h = 0) :
+    pxdata(pxdata), w(w), h(h) {}
+  ~RawImage() { delete[] pxdata; }
+  RawImage(const RawImage&) = delete;
+  RawImage(RawImage &&other): pxdata(other.pxdata), w(other.w), h(other.h) {
+    other.pxdata = nullptr;
+  }
+  void resize(unsigned w, unsigned h) {
+    delete[] pxdata;
+    pxdata = new unsigned char[w*h*4];
+    this->w = w;
+    this->h = h;
+  }
+  unsigned char* pxdata;
+  unsigned w, h;
+};
+
+struct Color {
+  uint8_t b, g, r, a;
+  uint32_t asInt() { return (b << 24) | (g << 16) | (r << 8) | a;  }
+};
 
 /// Color formats
 enum {
@@ -34,24 +58,27 @@ enum {
   color_fmt_bgr
 };
 
-/// Gets the image format, eg. ".bmp", ".png", etc.
-std::string image_get_format(std::string filename);
+Color image_get_pixel_color(const RawImage& in, unsigned x, unsigned y);
+void image_swap_color(RawImage& in, Color oldColor, Color newColor);
+/// Note splits horizontally
+std::vector<RawImage> image_split(const RawImage& in, unsigned imgcount);
+RawImage image_pad(const RawImage& in, unsigned newWidth, unsigned newHeight);
+RawImage image_crop(const RawImage& in, unsigned newWidth, unsigned newHeight);
+unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size = false);
+unsigned char* mono_to_rgba(unsigned char* pxdata, unsigned width, unsigned height);
+
 /// Reverses the scan-lines from top to bottom or vice verse, this is not actually to be used, you should load and save the data correctly to avoid duplicating it
-unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned height, unsigned bytesperpixel);
+void image_flip(RawImage& in);
 
-/// Generic all-purpose image loading call.
-unsigned char* image_load(std::string filename, std::string format, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped);
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
-unsigned char* image_load(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped);
-/// Generic all-purpose image saving call.
-int image_save(std::string filename, const unsigned char* data, std::string format, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
+std::vector<RawImage> image_load(const std::filesystem::path& filename);
 /// Generic all-purpose image saving call that will regexp the filename for the format and call the appropriate function.
-int image_save(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
+int image_save(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 
-unsigned char* image_load_bmp(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped);
-unsigned char* image_decode_bmp(const std::string &image_data, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped);
-unsigned char* image_load_gif(std::string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped);
-int image_save_bmp(std::string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
+std::vector<RawImage> image_load_bmp(const std::filesystem::path& filename);
+std::vector<RawImage> image_decode_bmp(const std::string& image_data);
+std::vector<RawImage> image_load_gif(const std::filesystem::path& filename);
+int image_save_bmp(const std::filesystem::path&, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 
 } //namespace enigma
 

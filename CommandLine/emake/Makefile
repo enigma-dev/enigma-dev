@@ -1,27 +1,24 @@
 include ../../Config.mk
 
 SHARED_SRC_DIR := ../../shared
-include $(SHARED_SRC_DIR)/Makefile
-include $(SHARED_SRC_DIR)/eyaml/Makefile
-include $(SHARED_SRC_DIR)/event_reader/Makefile
 
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
 ifeq ($(OS), Linux)
-	OS_LIBS=-lboost_system -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
+	OS_LIBS=-lboost_program_options -Wl,--no-as-needed -Wl,-rpath,./ -lpthread
 else ifeq ($(OS), Darwin)
-	OS_LIBS=-lboost_system -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
+	OS_LIBS=-lboost_program_options -lpthread
 else
-	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options-mt -lboost_iostreams-mt -lboost_filesystem-mt -lboost_system-mt -lpthread
+	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options-mt -lpthread
 endif
 
 CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR)
-LDFLAGS   += $(OS_LIBS) -L../../ -lProtocols -lprotobuf
+LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lProtocols -lENIGMAShared -lprotobuf -lyaml-cpp -lpng
 
 ifeq ($(TESTS), TRUE)
 	TARGET=../../emake-tests
-	SOURCES := $(call rwildcard, ../libEGM-test,*.cpp)
-	LDFLAGS += -lgtest -lpthread -lgtest_main
+	SOURCES := $(call rwildcard, ../emake-tests,*.cpp)
+	LDFLAGS += -lpthread -lgtest_main -lgtest
 else
 	TARGET = ../../emake
 	SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)

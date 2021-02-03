@@ -49,7 +49,9 @@ namespace enigma
     // Fetch the highest ID we will be using
     int spr_highid;
     if (!fread(&spr_highid,4,1,exe)) return;
-    sprites_init();
+
+    if (sprcount == 0) return;
+    sprites.resize(spr_highid+1);
 
     for (int i = 0; i < sprcount; i++)
     {
@@ -80,7 +82,9 @@ namespace enigma
       int subimages;
       if (!fread(&subimages,4,1,exe)) return; //co//ut << "Subimages: " << subimages << endl;
 
-      sprite_new_empty(sprid, subimages, width, height, xorig, yorig, bbt, bbb, bbl, bbr, 1,0);
+      Sprite spr(width, height, xorig, yorig);
+      spr.SetBBox(bbl, bbt, bbr-bbl, bbb-bbt);
+      
       for (int ii=0;ii<subimages;ii++)
       {
         int unpacked;
@@ -119,9 +123,8 @@ namespace enigma
           default: collision_data = 0; break;
         };
 
-        sprite_set_subimage(sprid, ii, width, height, pixels, collision_data, coll_type);
-
-        delete[] pixels;
+        spr.AddSubimage(RawImage(pixels, width, height), coll_type, collision_data);
+        
         if (!fread(&nullhere,4,1,exe)) return;
 
         if (nullhere)
@@ -130,6 +133,8 @@ namespace enigma
           break;
         }
       }
+      
+      sprites.assign(sprid, std::move(spr));
     }
   }
 }

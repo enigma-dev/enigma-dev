@@ -22,6 +22,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <GL/glxew.h>
 
 namespace enigma {
 
@@ -32,7 +33,7 @@ extern Window win;
 extern Atom wm_delwin;
 }  // namespace x11
 
-XVisualInfo* CreateVisualInfo();
+GLXFBConfig* CreateFBConfig();
 void initkeymap();
 int handleEvents();
 }  // namespace enigma

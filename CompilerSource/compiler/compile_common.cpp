@@ -42,9 +42,9 @@ namespace used_funcs
     object_set_sprite = 0;
   }
 }
-map<string,parsed_script*> scr_lookup;
+map<string, ParsedScript*> scr_lookup;
 
-map<string, vector<parsed_script*> > tline_lookup;
+map<string, vector<ParsedScript*> > tline_lookup;
 
 //string event_get_function_name(int mid, int id) // Implemented in event_reader/event_parser.cpp
 

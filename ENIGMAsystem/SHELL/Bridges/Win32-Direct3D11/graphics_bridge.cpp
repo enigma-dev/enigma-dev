@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/Win32/WINDOWShandle.h" // for get_window_handle()
+#include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -23,14 +23,15 @@
 #include "Graphics_Systems/General/GScolors.h"
 #include "Widget_Systems/widgets_mandatory.h" // for show_error()
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <d3d11.h>
 
 using enigma_user::show_error;
 
 namespace enigma {
-
-extern HWND hWnd;
 
 namespace dx11 {
 
@@ -146,7 +147,6 @@ void WindowResized() {
 }
 
 void EnableDrawing(void* handle) {
-  get_window_handle();
   WindowResizedCallback = &WindowResized;
 
   int screenWidth = enigma_user::window_get_width(),

@@ -1,15 +1,12 @@
 %e-yaml
 ---
 
-Name: Linux X11 Widgets
+Name: X11 Widgets
 Identifier: xlib
-Build-Platforms: Linux
-Represents: Linux
+Build-Platforms: MacOSX, Linux, FreeBSD
+Represents: Linux, FreeBSD
 Description: Use Qt with KDialog Widgets by calling "widget_set_system(ws_x11_kdialog)". Use GTK+ with Zenity Widgets by calling "widget_set_system(ws_x11_zenity)". The default will match your current Desktop Environment. License, documentation, and install instructions: https://enigma-dev.org/docs/Wiki/Dialogs#Zenity_Widgets
 Author: Samuel Venable
 
 Depends:
-  Build-Platforms: Linux
-
-Represents:
-  Build-Platforms: Linux
+  Build-Platforms: MacOSX, Linux, FreeBSD

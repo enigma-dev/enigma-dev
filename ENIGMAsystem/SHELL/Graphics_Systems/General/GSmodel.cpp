@@ -279,7 +279,7 @@ void d3d_model_primitive_end(int id) {
         return;
       } else if (prev.type == pr_trianglestrip && primitive.type == pr_trianglestrip) {
         // use a degenerate triangle to combine the adjacent strips
-        enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[model.vertex_buffer];
+        auto& vertexBuffer = enigma::vertexBuffers[model.vertex_buffer];
         std::vector<enigma::VertexElement>& vertices = vertexBuffer->vertices;
         const size_t stride = vertex_format_get_stride(prev.format);
         const size_t vertex_start = primitive.vertex_offset / sizeof(enigma::VertexElement);

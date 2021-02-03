@@ -31,7 +31,9 @@ using std::string;
 using namespace std;
 
 #ifdef _WIN32
+#  define byte __windows_byte_workaround
 #  include <windows.h>
+#  undef byte
 #  define TC_WINDOWS 1
 #else
 #  include <termios.h>

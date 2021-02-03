@@ -1,8 +1,11 @@
 #ifndef EMAKE_TESTHARNESS_HPP
 #define EMAKE_TESTHARNESS_HPP
 
+#include "strings_util.h"
+
 #include <memory>
 #include <string>
+#include <vector>
 
 const std::string kGamesDir = "CommandLine/testing/Tests/";
 
@@ -11,6 +14,7 @@ struct TestConfig {
   std::string codegen;
   std::string compiler;
   std::string mode;
+  std::string platform;
   std::string graphics;
   std::string audio;
   std::string widgets;
@@ -22,7 +26,23 @@ struct TestConfig {
     std::string mine = this->*option;
     return mine.empty() ? alt : mine;
   }
+  
+  std::string stringify() {
+    std::string str;
+    
+    str += "[" + platform + "]";
+    str += "[" + graphics + "]";
+    str += "[" + audio + "]";
+    str += "[" + collision + "]";
+    str += "[" + widgets + "]";
+    str += "[" + network + "]";
+    str += "[" + string_replace_all(extensions, ",", "_") + "]";
+    
+    return str;
+  }
 };
+
+std::vector<TestConfig> GetValidConfigs(bool platforms, bool graphics, bool audio, bool collisions, bool widgets, bool network);
 
 class TestHarness {
  public:

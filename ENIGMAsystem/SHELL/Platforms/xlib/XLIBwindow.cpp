@@ -22,10 +22,13 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/sprites.h"
+#include "Universal_System/Resources/backgrounds.h"
 
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"
 #include "XLIBwindow.h"  // Type insurance for non-mandatory functions
+#include "XLIBicon.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -66,6 +69,7 @@ void set_net_wm_pid(Window window) {
   Atom net_wm_pid = XInternAtom(disp, "_NET_WM_PID", False);
   XChangeProperty(disp, window, net_wm_pid, cardinal, 32, PropModeReplace, (unsigned char*)&pid, sizeof(pid) / 4);
 }
+
 } // namespace x11;
 
 bool initGameWindow()
@@ -83,13 +87,15 @@ bool initGameWindow()
 
   // Defined in the appropriate graphics bridge.
   // Populates GLX attributes (or other graphics-system-specific properties).
-  XVisualInfo* vi = enigma::CreateVisualInfo();
+  GLXFBConfig* fbc = enigma::CreateFBConfig();
 
   // Window event listening and coloring
   XSetWindowAttributes swa;
   swa.border_pixel = 0;
   swa.background_pixel = (enigma::windowColor & 0xFF000000) | ((enigma::windowColor & 0xFF0000) >> 16) |
                          (enigma::windowColor & 0xFF00) | ((enigma::windowColor & 0xFF) << 16);
+                         
+  XVisualInfo* vi = glXGetVisualFromFBConfig(enigma::x11::disp, fbc[0]);
   swa.colormap = XCreateColormap(disp, root, vi->visual, AllocNone);
   swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
                    FocusChangeMask | StructureNotifyMask;
@@ -142,12 +148,53 @@ void destroyWindow() {
 
 namespace enigma_user {
 
+window_t window_handle() {
+  unsigned long long window_uint64 = enigma::x11::win;
+  return reinterpret_cast<window_t>(window_uint64);
+}
+
+// returns an identifier for the XLIB window
+// this string can be used in shell scripts
+wid_t window_identifier() {
+  return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
+}
+
+// returns an identifier for certain window
+// this string can be used in shell scripts
+wid_t window_get_identifier(window_t hwnd) {
+  return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
+}
+
 void window_set_visible(bool visible) {
   if (visible) {
     XMapRaised(disp, win);
   } else {
     XUnmapWindow(disp, win);
   }
+}
+
+static int currentIconIndex = -1;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::XSetIconFromSprite(disp, win, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
 }
 
 int window_get_visible() {
@@ -286,8 +333,6 @@ void window_set_sizeable(bool sizeable) {
   }
   XSetWMNormalHints(disp, win, sh);
   XFree(sh);
-
-  XResizeWindow(disp, win, enigma::windowWidth, enigma::windowHeight);
 }
 
 void window_set_min_width(int width) {
@@ -317,31 +362,11 @@ void window_set_showborder(bool show) {
   if (window_get_fullscreen()) return;
   if (window_get_showborder() == show) return;
   enigma::showBorder = show;
-  Atom aKWinRunning = XInternAtom(disp, "KWIN_RUNNING", True);
-  bool bKWinRunning = (aKWinRunning != None);
-  XWindowAttributes wa;
-  Window root, parent, *child; uint children;
-  XWindowAttributes pwa;
-  for (;;) {
-    XGetWindowAttributes(disp, win, &wa);
-    XQueryTree(disp, win, &root, &parent, &child, &children);
-    XGetWindowAttributes(disp, parent, &pwa);
-    // allow time for the titlebar and border sizes to be measured for proper window positioning...
-    if ((bKWinRunning ? pwa.x : wa.x) || (bKWinRunning ? pwa.y : wa.y) || !window_get_showborder())
-      break;
-  }
-  static const int xoffset = bKWinRunning ? pwa.x : wa.x;
-  static const int yoffset = bKWinRunning ? pwa.y : wa.y;
   Hints hints;
   Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   hints.flags = 2;
   hints.decorations = show;
   XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
-  int xpos = show ? enigma::windowX - xoffset : enigma::windowX;
-  int ypos = show ? enigma::windowY - yoffset : enigma::windowY;
-  XResizeWindow(disp, win, enigma::windowWidth + 1, enigma::windowHeight + 1); // trigger ConfigureNotify event
-  XResizeWindow(disp, win, enigma::windowWidth - 1, enigma::windowHeight - 1); // set window back to how it was
-  XMoveResizeWindow(disp, win, xpos, ypos, bKWinRunning ? wa.width : wa.width + xoffset, bKWinRunning ? wa.height : wa.height + yoffset);
 }
 
 bool window_get_showborder() {
@@ -464,23 +489,26 @@ void window_set_position(int x, int y) {
   enigma::windowY = y;
   XWindowAttributes wa;
   XGetWindowAttributes(disp, win, &wa);
-  XMoveWindow(disp, win, (int)x - wa.x, (int)y - wa.y);
+  XMoveWindow(disp, win, x - wa.x, y - wa.y);
 }
 
 void window_set_size(unsigned int w, unsigned int h) {
   if (window_get_fullscreen()) return;
   enigma::windowWidth = w;
   enigma::windowHeight = h;
-  enigma::compute_window_size();
+  if (!enigma::isSizeable) {
+    window_set_sizeable(true);
+    XResizeWindow(disp, win, w, h);
+    window_set_sizeable(false);
+  } else {
+    XResizeWindow(disp, win, w, h);
+  }
 }
 
 void window_set_rectangle(int x, int y, int w, int h) {
   if (window_get_fullscreen()) return;
-  enigma::windowX = x;
-  enigma::windowY = y;
-  enigma::windowWidth = w;
-  enigma::windowHeight = h;
-  XMoveResizeWindow(disp, win, x, y, w, h);
+  window_set_position(x, y);
+  window_set_size(w, h);
 }
 
 ////////////////
@@ -601,15 +629,6 @@ void initkeymap() {
 }  // namespace enigma
 
 namespace enigma_user {
-
-void io_handle() {
-  enigma::input_push();
-  while (XQLength(disp)) {
-    DEBUG_MESSAGE("processing an event...", MESSAGE_TYPE::M_INFO);
-    if (enigma::handleEvents() > 0) exit(0);
-  }
-  enigma::update_mouse_variables();
-}
 
 int window_set_cursor(int c) {
   enigma::cursorInt = c;

@@ -53,10 +53,13 @@ enum {
   buffer_f32 = 8,
   buffer_f64 = 9,
   buffer_bool = 10,
-  buffer_string = 11
+  buffer_string = 11,
+  buffer_u64 = 12,
+  buffer_text = 13,
 };
 
 int buffer_create(unsigned size, int type, unsigned alignment);
+bool buffer_exists(int buffer);
 void buffer_delete(int buffer);
 void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_buffer, unsigned dest_offset);
 void buffer_save(int buffer, std::string filename);

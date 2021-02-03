@@ -26,23 +26,25 @@
 \********************************************************************************/
 
 // This was forged in hell.
-#ifndef ENIGMA_NLPO2DC_H
-#define ENIGMA_NLPO2DC_H
+#ifndef ENIGMA_NLPO2_H
+#define ENIGMA_NLPO2_H
 
 #include <stdio.h>
 
 namespace enigma {
 
-inline unsigned int nlpo2dc(unsigned int x)  // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
+inline unsigned int nlpo2(unsigned int x)  // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
 {
   --x;
   x |= x >> 1;
   x |= x >> 2;
   x |= x >> 4;
   x |= x >> 8;
-  return x | (x >> 16);
+  x |= x >> 16;
+  ++x;
+  return x;
 }
 
 }  //namespace enigma
 
-#endif  //ENIGMA_NLPO2DC_H
+#endif  //ENIGMA_NLPO2_H

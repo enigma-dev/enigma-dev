@@ -2,9 +2,11 @@ GCCVER := $(shell gcc -dumpversion | cut -c 1)
 
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
+	LIB_PFX := lib
 	LIB_EXT := .so
 	BIN_EXT :=
 else ifeq ($(OS), Darwin)
+	LIB_PFX := lib
 	LIB_EXT := .dylib
 	BIN_EXT :=
 else
@@ -13,13 +15,8 @@ else
 endif
 
 # Global g++ flags
-CXXFLAGS := -Wall -Wextra -Wpedantic -g -I.
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -g -I.
 LDFLAGS := -g
-
-# For older travis instances
-ifeq ($(shell expr $(GCCVER) \<= 6), 1)
-  CXXFLAGS += -std=c++11
-endif
 
 # These will be relative to the file that includes this Makefile
 SRC_DIR := .

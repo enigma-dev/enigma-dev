@@ -18,7 +18,7 @@
 
 #include "resinit.h"
 #include "sprites_internal.h"
-#include "background_internal.h"
+#include "backgrounds_internal.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/Object_Tiers/object.h"
 #include "libEGMstd.h"
@@ -67,8 +67,6 @@ namespace enigma
     event_system_initialize();
     timeline_system_initialize();
     input_initialize();
-    sprites_init();
-    backgrounds_init();
     widget_system_initialize();
 
     // Open the exe for resource load
@@ -129,7 +127,7 @@ namespace enigma
     if (enigma_user::room_count)
       enigma::game_start();
     else {
-      enigma_user::window_default();
+      enigma_user::window_default(false);
       enigma_user::window_set_visible(true);
     }
 

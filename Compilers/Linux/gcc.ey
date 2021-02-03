@@ -12,9 +12,9 @@ Make-Vars:
   cc: gcc
   cxx: g++
   cppflags:
-  cxxflags: -std=c++11 -fdiagnostics-color=always
+  cxxflags: -fdiagnostics-color=always
   cflags:
-  ldflags:
+  ldflags: -lstdc++fs
   links:
 
 Parser-Vars:

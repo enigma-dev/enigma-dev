@@ -25,57 +25,83 @@
 #ifndef ENIGMA_SPRITESTRUCT
 #define ENIGMA_SPRITESTRUCT
 
+#include "AssetArray.h"
 #include "Collision_Systems/collision_types.h"
-#include "Universal_System/var4.h"
-
-#include <string>
-#include <vector>
+#include "Universal_System/scalar.h"
+#include "Universal_System/image_formats.h"
 
 namespace enigma {
-struct bbox_rect_t {
-  int bottom, left, right, top;
+
+using BoundingBox = Rect<int>;
+
+struct Subimage {
+  
+  Subimage() {}
+  /// Copy constructor that duplicates the texture
+  Subimage(const Subimage &s, bool duplicateTexture = false);
+  void FreeTexture();
+  
+  // AssArray mandatory
+  static const char* getAssetTypeName() { return "Subimage"; }
+  bool isDestroyed() const { return _destroyed; }
+  void destroy() { _destroyed = true; }
+  bool _destroyed = false;
+  
+  int textureID = -1; 
+  TexRect textureBounds;
+  collision_type collisionType = enigma::ct_precise;
+  void* collisionData = nullptr;
 };
 
-struct sprite {
-  int width, height, subcount, xoffset, yoffset, id;
-
-  std::vector<int> texturearray;      //Each subimage has a texture
-  std::vector<double> texturexarray;  //Offset in texture (used in texture atlas, otherwise 0)
-  std::vector<double> textureyarray;
-  std::vector<double> texturewarray;  //width of valid texture space
-  std::vector<double> textureharray;  //ditto height
-  std::vector<void *> colldata;       // Each subimage has collision data
-
-  //void*  *pixeldata;
-  bbox_rect_t bbox, bbox_relative;
+class Sprite {
+public:
+  Sprite() {}
+  Sprite(const Sprite& s);
+  Sprite(int width, int height, int xoffset = 0, int yoffset = 0) : width(width), height(height), xoffset(xoffset), yoffset(yoffset) 
+    { bbox = {0, 0, width, height}; }
+    
+  size_t SubimageCount() const { return _subimages.size(); }
+  
+  void FreeTextures() { for (std::pair<int, Subimage&> s : _subimages) s.second.FreeTexture(); }
+  const int& GetTexture(int subimg) const { return _subimages.get(subimg).textureID; }
+  const int ModSubimage(int subimg) const;
+  void SetTexture(int subimg, int textureID, TexRect texRect);
+  const TexRect& GetTextureRect(int subimg) const { return _subimages.get(subimg).textureBounds; } 
+  
+  /// Add Subimage from existing texture
+  int AddSubimage(int texid, TexRect texRect, collision_type ct = ct_precise, void* collisionData = nullptr, bool mipmap = false);
+  /// Add Subimage from raw pixel data (creating a new texture)
+  int AddSubimage(const RawImage& img, collision_type ct = ct_precise, void* collisionData = nullptr, bool mipmap = false);
+  /// Copy an existing subimage into the sprite (duplicating the texture)
+  void AddSubimage(const Subimage& s);
+  
+  const Subimage& GetSubimage(int index) const { return _subimages.get(index); }
+  
+  void SetBBox(int x, int y, int w, int h) { bbox = {x, y, w, h}; }
+  
+  int width = 0;
+  int height = 0;
+  int xoffset = 0;
+  int yoffset = 0;
+  BoundingBox bbox = {0, 0, 0, 0};
   int bbox_mode = 0;  //Default is automatic
-  bool where, smooth = false;
-
-  sprite();
-  sprite(int);
+  
+  // AssArray mandatory
+  static const char* getAssetTypeName() { return "Sprite"; }
+  bool isDestroyed() const { return _destroyed; }
+  void destroy() { _destroyed = true; }
+  
+protected:
+  bool _destroyed = false;
+  AssetArray<Subimage> _subimages;
 };
-extern sprite **spritestructarray;  // INVARIANT: Should only be modified inside spritestruct.cpp.
-extern size_t sprite_idmax;
 
-/// Called at game start.
-void sprites_init();  /// This should allocate room for sprites and perform any other necessary actions.
+extern AssetArray<Sprite> sprites;
 
-int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr,
-                     bool pl, bool sm);
-void sprite_add_to_index(sprite *ns, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth,
-                         int x_offset, int y_offset, bool mipmap);
-void sprite_add_copy(sprite *spr, sprite *spr_copy);
+const BoundingBox& sprite_get_bbox(int spr);
+BoundingBox sprite_get_bbox_relative(int spr);
+RawImage sprite_get_raw(int spr, unsigned subimg);
 
-//Sets the subimage
-void sprite_set_subimage(int sprid, int imgindex, unsigned int w, unsigned int h, unsigned char *chunk,
-                         unsigned char *collision_data, collision_type ct);
-//Appends a subimage
-void sprite_add_subimage(int sprid, unsigned int w, unsigned int h, unsigned char *chunk, unsigned char *collision_data,
-                         collision_type ct);
-void spritestructarray_reallocate();
-
-extern const bbox_rect_t &sprite_get_bbox(int sprid);
-extern const bbox_rect_t &sprite_get_bbox_relative(int sprid);
 }  //namespace enigma
 
 #endif  // ENIGMA_SPRITESTRUCT

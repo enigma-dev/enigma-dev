@@ -1,7 +1,10 @@
 #include "filesystem.h"
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <string>
+#include <stack>
 
 bool StartsWith(const string &str, const string &prefix) {
   if (prefix.length() > str.length()) return false;
@@ -23,6 +26,21 @@ bool CreateDirectory(const fs::path &directory) {
   return false;
 }
 
+bool CreateDirectoryRecursive(const fs::path &directory) {
+  std::stack<fs::path> dirs;
+  fs::path dir = directory;
+  while (directory.has_parent_path() && !FolderExists(dir.parent_path())) {
+    dir = dir.parent_path();
+    dirs.push(dir);
+  }
+  
+  while(!dirs.empty() && CreateDirectory(dirs.top())) {
+    dirs.pop();
+  }
+    
+  return !dirs.empty();
+}
+
 fs::path InternalizeFile(const fs::path &file,
                          const fs::path &directory, const fs::path &egm_root) {
   const fs::path data = "data";
@@ -37,19 +55,15 @@ fs::path InternalizeFile(const fs::path &file,
   }
   fs::path relative = data/StripPath(file.string());
 
-  #ifdef USE_BOOST_FS
-    fs::copy_file(file, directory/relative);
-  #else
-    if (!fs::copy_file(file, directory/relative)) {
-      std::cerr << "Failed to copy \"" << file << "\" into EGM." << std::endl;
-      return "";
-    }
-  #endif
+  if (!fs::copy_file(file, directory/relative)) {
+    std::cerr << "Failed to copy \"" << file << "\" into EGM." << std::endl;
+    return "";
+  }
 
   return relative;
 }
 
-string TempFileName(const string &pattern) {
+fs::path TempFileName(const string &pattern) {
   static int increment = 0;
   static std::string prefix = "";
   if (prefix.empty()) {
@@ -63,11 +77,20 @@ string TempFileName(const string &pattern) {
   return (fs::temp_directory_path().string() + '/' + name);
 }
 
-void DeleteFile(const string &fName) {
-#ifdef USE_BOOST_FS
-  fs::remove(fName.c_str());
-#else
-  std::remove(fName.c_str());
-#endif
+void DeleteFile(const fs::path &fName) {
+  std::remove(fName.u8string().c_str());
+}
 
+void DeleteFolder(const fs::path &fName) {
+  fs::remove_all(fName);
+}
+
+bool FolderExists(const string &folder) {
+  const fs::path f = folder;
+  return (fs::exists(f) && fs::is_directory(f));
+}
+
+bool FileExists(const string &fName) {
+  const fs::path f = fName;
+  return (fs::exists(f) && fs::is_regular_file(f));
 }

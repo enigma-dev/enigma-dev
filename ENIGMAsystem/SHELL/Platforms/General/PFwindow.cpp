@@ -46,9 +46,21 @@ void input_push() {
   enigma_user::mouse_hscrolls = enigma_user::mouse_vscrolls = 0;
 }
 
+void input_key_down(int key) {
+  enigma_user::keyboard_lastkey = key;
+  enigma_user::keyboard_key = key;
+  last_keybdstatus[key]=keybdstatus[key];
+  keybdstatus[key]=1;
+}
+
+void input_key_up(int key) {
+  enigma_user::keyboard_key = 0;
+  last_keybdstatus[key]=keybdstatus[key];
+  keybdstatus[key]=0;
+}
+
 void compute_window_scaling() {
   if (!regionWidth) return;
-  int isFullScreen = enigma_user::window_get_fullscreen();
   parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth;
   parHeight = isFullScreen ? enigma_user::display_get_height() : windowHeight;
   if (viewScale > 0) {  //Fixed Scale
@@ -72,13 +84,13 @@ void compute_window_scaling() {
 
 void compute_window_size() {
   if (!regionWidth) return;
-  int isFullScreen = enigma_user::window_get_fullscreen();
+  compute_window_scaling();
   if (!isFullScreen) {
     if (windowAdapt && viewScale > 0) {  // If the window is to be adapted and Fixed Scale
       if (scaledWidth > windowWidth) windowWidth = scaledWidth;
       if (scaledHeight > windowHeight) windowHeight = scaledHeight;
     }
-    enigma_user::window_set_rectangle(windowX, windowY, windowWidth, windowHeight);
+    enigma_user::window_set_size(windowWidth, windowHeight);
   } else {
     enigma_user::window_set_rectangle(0, 0, parWidth, parHeight);
   }
@@ -90,12 +102,19 @@ namespace enigma_user {
 
 std::string keyboard_lastchar = "";
 int keyboard_lastkey = 0;
+int keyboard_key = 0;
 
 double mouse_x, mouse_y;
 int mouse_button, mouse_lastbutton;
 int display_aa = 0;
 short mouse_hscrolls = 0;
 short mouse_vscrolls = 0;
+
+void io_handle() {
+  enigma::input_push();
+  if (enigma::handleEvents() != 0) return;
+  enigma::update_mouse_variables();
+}
 
 void io_clear() {
   for (int i = 0; i < 255; i++) enigma::keybdstatus[i] = enigma::last_keybdstatus[i] = 0;
@@ -253,7 +272,7 @@ void window_set_color(int color) { enigma::windowColor = color; }
 
 int window_get_color() { return enigma::windowColor; }
 
-void window_default(bool center_size) {
+void window_default(bool center) {
   int xm = room_width, ym = room_height;
   if (view_enabled) {
     int tx = 0, ty = 0;
@@ -273,10 +292,6 @@ void window_default(bool center_size) {
     // We won't limit those functions like GM, just the default.
     if (xm > screen_width) xm = screen_width;
     if (ym > screen_height) ym = screen_height;
-  }
-  bool center = true;
-  if (center_size) {
-    center = (xm != enigma::windowWidth || ym != enigma::windowHeight);
   }
 
   enigma::windowWidth = enigma::regionWidth = xm;
@@ -326,6 +341,10 @@ void window_set_region_size(int w, int h, bool adaptwindow) {
   enigma::regionHeight = h;
   enigma::windowAdapt = adaptwindow;
   enigma::compute_window_size();
+}
+
+bool window_has_focus() {
+  return enigma::game_window_focused;
 }
 
 }  //namespace enigma_user
