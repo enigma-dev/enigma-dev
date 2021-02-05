@@ -1,5 +1,6 @@
 /// BINARY FILES
 var bin_path = "file_bin_test.bin";
+var bin_white = "file_bin_test_white.bin";
 
 // BINARY WRITE
 var bin_write;
@@ -69,6 +70,18 @@ file_bin_write_byte(bin_read,-1); // underflows to 255
 file_bin_write_byte(bin_read,256); // overflows to 0
 file_bin_close(bin_read);
 
+// Test byte reading exhaustively
+file_text_close(file_text_open_write(bin_white));
+bin_write = file_bin_open(bin_white,2);
+
+for (int bytes0to255=0; bytes0to255<$100; bytes0to255+=1)
+	{
+	file_bin_write_byte(bin_write,bytes0to255);
+	file_bin_seek(bin_write,bytes0to255);
+	gtest_expect_eq(file_bin_read_byte(bin_write),bytes0to255)
+	}
+file_bin_close(bin_write);
+
 // BINARY READ & WRITE
 var bin_read_write;
 bin_read_write = file_bin_open(bin_path,2);
@@ -94,7 +107,7 @@ gtest_expect_eq(file_bin_read_byte(bin_read_write),1);
 gtest_expect_eq(file_bin_read_byte(bin_read_write),2);
 gtest_expect_eq(file_bin_read_byte(bin_read_write),3);
 file_bin_close(bin_read_write);
-
+	
 /// TEXT FILES
 var text_path = "file_text_test.txt";
 
@@ -210,5 +223,6 @@ gtest_expect_eq(filename_change_ext("C:/John/Doe/Smoe.txt",".dingtwo"),"C:/John/
 
 /// We're done!
 file_delete(bin_path);
+file_delete(bin_white);
 file_delete(text_path);
 game_end();
