@@ -1208,6 +1208,7 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
   TreeNode *node = root->mutable_folder()->add_children();
   node->set_name(name);
   if (status <= 2) {
+    node->mutable_folder();
     for (int i = 0; i < children; i++) {
       LoadTree(dec, typeMap, node);
     }

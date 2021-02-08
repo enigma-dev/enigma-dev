@@ -470,6 +470,7 @@ bool EGMFileFormat::LoadTree(const fs::path& fPath, YAML::Node yaml,
     if (n["folder"]) {
       const std::string name = n["folder"].as<std::string>();
       b->set_name(name);
+      b->mutable_folder();
       LoadTree(fPath.string() + "/" + name, n["contents"], b);
     } else {
       const std::string name = n["name"].as<std::string>();

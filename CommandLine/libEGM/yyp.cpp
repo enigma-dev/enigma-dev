@@ -271,6 +271,7 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
       parents.emplace_back(std::make_pair(node, childrenVector));
     } else {
       node->set_name(nodeDoc["name"].GetString());
+      node->mutable_folder();
 
       using FactoryFunction = std::function<google::protobuf::Message *(TreeNode*)>;
       using FactoryMap = std::unordered_map<std::string, FactoryFunction>;

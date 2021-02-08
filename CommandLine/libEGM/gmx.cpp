@@ -159,6 +159,7 @@ class gmx_root_walker {
           name = fix_folder_name(name);
 
         n->set_name(name);
+        n->mutable_folder();
         nodes.push_back(n);
       }
     } else {
