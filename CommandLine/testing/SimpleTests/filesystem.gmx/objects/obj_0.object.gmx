@@ -27,6 +27,7 @@
             <kind>1</kind>
             <string>dir=working_directory+"datafiles/";&#13;
 file="group/hello.txt";&#13;
+show_message(working_directory) // so we know why shits failing&#13;
 gtest_expect_ne(working_directory, "");&#13;
 gtest_expect_true(set_working_directory(dir));&#13;
 // gtest_expect_ne(temp_directory, ""); // temp_directroy is still broken by std::filesystem writers&#13;
