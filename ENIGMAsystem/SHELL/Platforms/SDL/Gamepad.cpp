@@ -5,7 +5,7 @@
 
 namespace enigma {
 
-static std::vector<Gamepad> gamepads;
+std::vector<Gamepad> gamepads;
 
 using namespace enigma_user;
 
