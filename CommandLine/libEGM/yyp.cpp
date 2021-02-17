@@ -294,6 +294,7 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
         auto *res = createFunc->second(node);
         PackRes(resDir, idCount[node->type_case()]++, nodeDoc, res, 0);
       } else {
+        node->mutable_unknown();
         errStream << "Unsupported resource type: " << resourceType << " " << node->name() << std::endl;
       }
     }

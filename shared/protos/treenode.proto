@@ -18,7 +18,10 @@ message TreeNode {
   message Folder {
     repeated TreeNode children = 1;
   }
+  message UnknownResource {
+  }
   oneof type {
+    UnknownResource unknown = 999;
     Folder folder = 100;
     // NOTE: these are all off by 1 cause protobutt don't allow you to set field number to 0
     resources.Object object = 1;

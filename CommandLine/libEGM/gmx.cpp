@@ -124,6 +124,7 @@ class gmx_root_walker {
         }
         return;
     }
+    node->mutable_unknown();
     errStream << "Unsupported resource type: " << resType << " " << xmlNode.value() << std::endl;
   }
 

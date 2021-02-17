@@ -489,9 +489,10 @@ bool EGMFileFormat::LoadTree(const fs::path& fPath, YAML::Node yaml,
           maxID[factory->second.type] = id;
 
         LoadResource(fPath.string() + "/" + name + factory->second.ext, factory->second.func(b), id);
-      }
-      else
+      } else {
+        buffer->mutable_unknown();
         errStream << "Warning: Unsupported resource type: " << n["type"] << std::endl;
+      }
     }
   }
 
