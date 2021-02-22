@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: panoview
+Identifier: panoview
+Author: Samuel Venable
+Default: false
+Description: Create point and click adventure games using the same code base that powers the panoview panoramic image viewer application. Needs SDL platform and libpng extension.
+Icon: panoview.png
+
+Depends: None
+Dependencies: None
+Init: panoview_init
