@@ -36,11 +36,11 @@ unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, cons
   #endif
 
   png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if (!png) return -1;
+  if (!png) return -2;
   png_infop info = png_create_info_struct(png);
   if (!info) {
     png_destroy_write_struct(&png, NULL);
-    return -2;
+    return -3;
   }
 
   png_init_io(png, fp);
