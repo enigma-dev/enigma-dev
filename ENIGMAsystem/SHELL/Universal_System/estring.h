@@ -20,6 +20,8 @@
 
 #include "var4.h"
 
+#include "strings_util.h"
+
 #include <string>
 
 #include "../../../CompilerSource/OS_Switchboard.h"
@@ -29,8 +31,6 @@
 #include <cwchar>
 
 typedef std::basic_string<wchar_t> tstring;
-tstring widen(const std::string &str);
-std::string shorten(tstring str);
 
 #endif
 
