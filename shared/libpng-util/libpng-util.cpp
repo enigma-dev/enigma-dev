@@ -17,8 +17,7 @@
 
 #include <string>
 
-#include "../../CompilerSource/OS_Switchboard.h"
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
+#ifdef _WIN32
 #include <cerrno>
 #endif
 
@@ -27,7 +26,7 @@
 #include <png.h>
 
 unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename, bool bgra) {
-  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+  #ifdef _WIN32
   std::wstring wstr = widen(filename);
   FILE *fp; errno_t err = _wfopen_s(&fp, wstr.c_str(), L"wb");
   if (err || fp == nullptr) return -1;
@@ -70,7 +69,7 @@ unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, cons
 
 unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename, bool bgra) {
   (*w) = 0; (*h) = 0;
-  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+  #ifdef _WIN32
   std::wstring wstr = widen(filename);
   FILE *fp; errno_t err = _wfopen_s(&fp, wstr.c_str(), L"rb");
   if (err || fp == nullptr) return -1;
