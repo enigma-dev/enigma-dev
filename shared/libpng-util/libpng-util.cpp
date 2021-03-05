@@ -20,7 +20,14 @@
 #include <png.h>
 
 unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename, bool bgra) {
+  #ifdef _WIN32
+  std::wstring wstr = widen(filename);
+  FILE *fp; errno_t err = _wfopen_s(&fp, wstr.c_str(), L"wb");
+  if (err || fp == nullptr) return -1;
+  #else
   FILE *fp = fopen(filename, "wb");
+  if (fp == nullptr) return -1;
+  #edif
 
   png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if (!png) return -1;
@@ -56,8 +63,14 @@ unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, cons
 
 unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename, bool bgra) {
   (*w) = 0; (*h) = 0;
+  #ifdef _WIN32
+  std::wstring wstr = widen(filename);
+  FILE *fp; errno_t err = _wfopen_s(&fp, wstr.c_str(), L"rb");
+  if (err || fp == nullptr) return -1;
+  #else
   FILE *fp = fopen(filename, "rb");
   if (fp == nullptr) return -1;
+  #edif
 
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if (!png) return -2;
