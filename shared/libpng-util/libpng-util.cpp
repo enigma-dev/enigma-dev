@@ -17,11 +17,14 @@
 
 #include <string>
 
+#include "../../CompilerSource/OS_Switchboard.h"
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+#include <cerrno>
+#endif
+
 #include "strings_util.h"
 
 #include <png.h>
-
-#include "../../CompilerSource/OS_Switchboard.h"
 
 unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename, bool bgra) {
   #if CURRENT_PLATFORM_ID == OS_WINDOWS
