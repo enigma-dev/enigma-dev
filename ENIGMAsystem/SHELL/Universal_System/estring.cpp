@@ -31,31 +31,6 @@
 
 using std::string;
 
-#include "../../../CompilerSource/OS_Switchboard.h"
-
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-
-#define byte __windows_byte_workaround
-#include <windows.h>
-#undef byte
-
-using std::vector;
-
-tstring widen(const string &str) {
-  // Number of shorts will be <= number of bytes; add one for null terminator
-  const size_t wchar_count = str.size() + 1;
-  vector<WCHAR> buf(wchar_count);
-  return tstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count)};
-}
-
-string shorten(tstring str) {
-  int nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), NULL, 0, NULL, NULL);
-  vector<char> buf((size_t)nbytes);
-  return string{buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), buf.data(), nbytes, NULL, NULL)};
-}
-
-#endif
-
 static const char ldgrs[256] = {
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
