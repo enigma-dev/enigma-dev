@@ -15,8 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "strings_util.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <cstdlib>
