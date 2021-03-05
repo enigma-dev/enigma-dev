@@ -11,6 +11,7 @@
 #include "../../CompilerSource/OS_Switchboard.h"
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 #include <cstddef>
+#include <cwchar>
 #define byte __windows_byte_workaround
 #include <windows.h>
 #undef byte
