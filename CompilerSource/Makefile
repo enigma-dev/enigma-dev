@@ -4,10 +4,11 @@ include ../Config.mk
 SHARED_SRC_DIR := ../shared
 
 BASE = compileEGMf
-ifeq ($(OS), Linux)
-	TARGET := ../lib$(BASE).so
-else ifeq ($(OS), Darwin)
+
+ifeq ($(OS), Darwin)
 	TARGET := ../lib$(BASE).dylib
+else ifeq ($(UNIX_BASED), true)
+	TARGET := ../lib$(BASE).so
 else
 	TARGET := ../$(BASE).dll
 	LDFLAGS += -static-libgcc

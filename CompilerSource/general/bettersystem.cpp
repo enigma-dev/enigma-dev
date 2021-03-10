@@ -257,6 +257,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     #include <sys/wait.h>
     #include <sys/stat.h>
 
+    extern char **environ;
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
 #if CURRENT_PLATFORM_ID ==  OS_MACOSX
