@@ -6,7 +6,7 @@ If you find our tools useful, then please consider supporting ENIGMA on Patreon!
 
 Official Website: http://enigma-dev.org
 
-ENIGMA, the Extensible Non-Interpreted Game Maker Augmentation, is an open-source, cross-platform game development environment based on the popular software, Game Maker. Its intent is to provide users with a quality game creation tool and a bridge between high- and low-level programming languages. It can be used either through an IDE, such as its sister project, [LateralGM](https://github.com/IsmAvatar/LateralGM), or its up-and-coming custom frontend, [RadialGM](https://github.com/enigma-dev/RadialGM), or also through its command line interface, [emake](CommandLine/emake).
+ENIGMA, the Extensible Non-Interpreted Game Maker Augmentation, is an open-source, cross-platform game development environment based on the popular software, Game Maker. Its intent is to provide users with a quality game creation tool and a bridge between high and low-level programming languages. It can be used either through an IDE, such as its sister project, [LateralGM](https://github.com/IsmAvatar/LateralGM), or its up-and-coming custom frontend, [RadialGM](https://github.com/enigma-dev/RadialGM), or also through its command line interface, [emake](CommandLine/emake).
 
 Like Game Maker, ENIGMA comprises an easy to use Drag & Drop system as well as its own programming language. This programming language, known as EDL, is essentially a mix between C++ and Game Maker's GML. Part of ENIGMA's goal is to remain backward-compatible with Game Maker, serving for some intents and purposes as a Game Maker compiler. However, EDL offers many very powerful features which simply aren't present in the alternative. Such features include the ability to compile DLLs and other C/C++ scripts right into the program, and direct access to C++ types, templates, and functions.
 
@@ -20,5 +20,5 @@ We have a community-led Wiki project hosted on our site where users contribute f
 * http://enigma-dev.org/forums/
 * http://enigma-dev.org/docs/Wiki/Main_Page
 
-If you are having trouble registering for an account or looking for an answer to more specific technical questions about ENIGMA, you can visit us on the ``#enigma-dev`` channel on freenode IRC as well:
+If you are having trouble registering for an account or looking for an answer to more specific technical questions about ENIGMA, you can visit us on the ``#enigma`` channel on freenode IRC as well:
 http://webchat.freenode.net/?channels=enigma&uio=d4
