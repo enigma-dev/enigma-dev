@@ -223,13 +223,6 @@ static pid_t modify_dialog(pid_t ppid) {
     
     // force zneity/kdialog to stay on top of the game window.
     wid_set_pwid(window, (Window)strtoul(enigma_user::window_identifier().c_str(), nullptr, 10));
-    
-    // remove "kdialog" from titlebar - only use titlebar text.
-    Atom atom_name = XInternAtom(display,"_NET_WM_NAME", true);
-    Atom atom_utf_type = XInternAtom(display,"UTF8_STRING", true);
-    char *cstr_caption = (char *)enigma_user::message_get_caption().c_str();
-    XChangeProperty(display, window, atom_name, atom_utf_type, 8, 
-      PropModeReplace, (unsigned char *)cstr_caption, strlen(cstr_caption));
   
     XCloseDisplay(display);
     exit(0);
@@ -248,7 +241,7 @@ static void KillFork(pid_t pid) {
   kill(pid, SIGTERM);
   bool died = false;
   for (unsigned i = 0; !died && i < 4; i++) {
-    int status; 
+    int status;
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
     if (waitpid(pid, &status, WNOHANG) == pid) died = true;
   }
