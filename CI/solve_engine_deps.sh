@@ -33,7 +33,7 @@ if [ "$WIDGETS" == "GTK+" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libgtk2.0-dev"
 fi
 if [ "$WIDGETS" == "xlib" ] || [ "$TEST_HARNESS" == true ]; then
-  LINUX_DEPS="$LINUX_DEPS zenity kdialog"
+  LINUX_DEPS="$LINUX_DEPS zenity kdialog libprocps-dev"
 fi
 
 ###### Extensions #######
