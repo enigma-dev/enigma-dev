@@ -225,11 +225,13 @@ static pid_t modify_dialog(pid_t ppid) {
   return pid;
 }
 
+// delete home folder :P jk
 pid_t InitFork() {
   pid_t ppid = getpid();
   return modify_dialog(ppid);
 }
 
+// just in case no window
 void KillFork(pid_t pid) {
   kill(pid, SIGTERM);
   bool died = false;
