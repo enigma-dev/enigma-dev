@@ -133,8 +133,7 @@ static int show_message_helperfunc(string message) {
   if (message_cancel)
     str_cancel = string("--yesno \"") + add_escaping(message, false, "") + string("\" --yes-label Ok --no-label Cancel ");
 
-  str_command = string("kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") + str_cancel +
+  str_command = string("kdialog ") + str_cancel +
   string("--title \"") + str_title + string("\";") + str_echo;
 
   string str_result = shellscript_evaluate(str_command);
@@ -154,7 +153,6 @@ static int show_question_helperfunc(string message) {
     str_cancel = "cancel";
 
   str_command = string("kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--yesno") + str_cancel + string(" \"") + add_escaping(message, false, "") + string("\" ") +
   string("--yes-label Yes --no-label No ") + string("--title \"") + str_title + string("\";") +
   string("x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi");
@@ -179,13 +177,11 @@ static void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
   if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
     type == MESSAGE_TYPE::M_FATAL_USER_ERROR) {
     str_command = string("kdialog ") +
-    string("--attach=") + window_identifier() + string(" ") +
     string("--sorry \"") + add_escaping(errortext, false, "") + string("\" ") +
     string("--ok-label Abort ") +
     string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
   } else {
     str_command = string("kdialog ") +
-    string("--attach=") + window_identifier() + string(" ") +
     string("--warningyesno \"") + add_escaping(errortext, false, "") + string("\" ") +
     string("--yes-label Abort --no-label Ignore ") +
     string("--title \"") + add_escaping(error_caption, true, "Error") + string("\";") + str_echo;
@@ -232,7 +228,6 @@ int show_attempt(string errortext) override {
   string str_title;
 
   str_command = string("kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--warningyesno") + string(" \"") + add_escaping(errortext, false, "") + string("\" ") +
   string("--yes-label Retry --no-label Cancel ") + string("--title \"") +
   add_escaping(error_caption, true, "Error") + string("\";") +
@@ -251,7 +246,6 @@ string get_string(string message, string def) override {
 
   str_title = add_escaping(dialog_caption, true, "KDialog");
   str_command = string("ans=$(kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--inputbox \"") + add_escaping(message, false, "") + string("\" \"") +
   add_escaping(def, false, "") + string("\" --title \"") +
   str_title + string("\");echo $ans");
@@ -268,7 +262,6 @@ string get_password(string message, string def) override {
 
   str_title = add_escaping(dialog_caption, true, "KDialog");
   str_command = string("ans=$(kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--password \"") + add_escaping(message, false, "") + string("\" \"") +
   add_escaping(def, false, "") + string("\" --title \"") +
   str_title + string("\");echo $ans");
@@ -297,7 +290,6 @@ string get_open_filename(string filter, string fname) override {
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
@@ -319,7 +311,6 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
@@ -336,7 +327,6 @@ string get_open_filenames(string filter, string fname) override {
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --multiple --separate-output --title \"") + str_title + string("\"");
 
@@ -367,7 +357,6 @@ string get_open_filenames_ext(string filter,string fname, string dir, string tit
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--getopenfilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --multiple --separate-output --title \"") + str_title + string("\"");
 
@@ -393,7 +382,6 @@ string get_save_filename(string filter, string fname) override {
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--getsavefilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
@@ -414,7 +402,6 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
     add_escaping(str_fname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--getsavefilename ") + pwd + add_escaping(kdialog_filter(filter), false, "") +
   string(" --title \"") + str_title + string("\"") + string(");echo $ans");
 
@@ -431,7 +418,6 @@ string get_directory(string dname) override {
     add_escaping(str_dname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--getexistingdirectory ") + pwd + string(" --title \"") + str_title + str_end;
 
   return shellscript_evaluate(str_command);
@@ -447,7 +433,6 @@ string get_directory_alt(string capt, string root) override {
     add_escaping(str_dname, false, "") + "\""; else pwd = "\"$PWD/\"";
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--getexistingdirectory ") + pwd + string(" --title \"") + str_title + str_end;
 
   return shellscript_evaluate(str_command);
@@ -471,7 +456,6 @@ int get_color(int defcol) override {
   std::transform(str_defcol.begin(), str_defcol.end(), str_defcol.begin(), ::toupper);
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--getcolor --default '") + str_defcol + string("' --title \"") + str_title +
   string("\");if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
@@ -509,7 +493,6 @@ int get_color_ext(int defcol, string title) override {
   std::transform(str_defcol.begin(), str_defcol.end(), str_defcol.begin(), ::toupper);
 
   str_command = string("ans=$(kdialog ") +
-  string("--attach=") + window_identifier() + string(" ") +
   string("--getcolor --default '") + str_defcol + string("' --title \"") + str_title +
   string("\");if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
