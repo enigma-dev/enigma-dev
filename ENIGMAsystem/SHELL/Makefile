@@ -154,7 +154,7 @@ write_src_files:
 	@echo "$(SOURCES)" > $(WORKDIR)/sources.list
 
 android_game: write_src_files
-	@cd ../../android && BASENAME=$(BASENAME) ./gradlew $(GRADLE_TARGET)
+	@cd ../../android && BASENAME=$(BASENAME) CODEGEN=$(CODEGEN) ./gradlew $(GRADLE_TARGET)
 	@cp $(APK_OUT)/$(BASENAME) $(OUTPUTNAME)
 
 compile_game: print_flags $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
