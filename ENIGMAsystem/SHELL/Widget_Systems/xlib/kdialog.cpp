@@ -126,7 +126,7 @@ static int show_message_helperfunc(string message) {
   if (message_cancel)
     str_echo = "if [ $? = 0 ] ;then echo 1;else echo -1;fi";
 
-  str_title = add_escaping(dialog_caption, true, "KDialog");
+  str_title = add_escaping(dialog_caption, true, "");
   str_cancel = string("--msgbox \"") + add_escaping(message, false, "") + string("\" ");
 
   if (message_cancel)
@@ -147,7 +147,7 @@ static int show_question_helperfunc(string message) {
   string str_title;
   string str_cancel = "";
 
-  str_title = add_escaping(dialog_caption, true, "KDialog");
+  str_title = add_escaping(dialog_caption, true, "");
   if (question_cancel)
     str_cancel = "cancel";
 
@@ -243,7 +243,7 @@ string get_string(string message, string def) override {
   string str_command;
   string str_title;
 
-  str_title = add_escaping(dialog_caption, true, "KDialog");
+  str_title = add_escaping(dialog_caption, true, "");
   str_command = string("ans=$(kdialog ") +
   string("--inputbox \"") + add_escaping(message, false, "") + string("\" \"") +
   add_escaping(def, false, "") + string("\" --title \"") +
@@ -259,7 +259,7 @@ string get_password(string message, string def) override {
   string str_command;
   string str_title;
 
-  str_title = add_escaping(dialog_caption, true, "KDialog");
+  str_title = add_escaping(dialog_caption, true, "");
   str_command = string("ans=$(kdialog ") +
   string("--password \"") + add_escaping(message, false, "") + string("\" \"") +
   add_escaping(def, false, "") + string("\" --title \"") +
