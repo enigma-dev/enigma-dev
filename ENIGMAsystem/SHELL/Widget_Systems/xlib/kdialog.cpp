@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 Samuel Venable
+/** Copyright (C) 2019-2021 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -41,7 +41,6 @@ using enigma_insecure::execute_shell_for_output;
 
 #include "Platforms/General/PFwindow.h"
 using enigma_user::window_get_caption;
-using enigma_user::window_identifier;
 
 #include "Platforms/General/PFfilemanip.h"
 using enigma_user::file_exists;
