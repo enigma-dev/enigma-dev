@@ -27,6 +27,7 @@ namespace enigma {
 CommandLineWidgetEngine *current_widget_engine = zenity_widgets;
 
 static bool kwin_running() {
+  setenv("WAYLAND_DISPLAY", "", 1);
   Display *d = XOpenDisplay(NULL);
   Atom aKWinRunning = XInternAtom(d, "KWIN_RUNNING", True);
   bool bKWinRunning = (aKWinRunning != None);
