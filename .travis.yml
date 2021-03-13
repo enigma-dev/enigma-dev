@@ -24,8 +24,8 @@ env:
 
 before_install: sudo dpkg --add-architecture i386;
 install: 
-  - ./CI/install_emake_deps.sh && ./CI/split_jobs.sh install
-  = ./CI/build_sdl.sh
+ - ./CI/install_emake_deps.sh && ./CI/split_jobs.sh install
+ - ./CI/build_sdl.sh
 before_script: make -j4 && make -j4 emake
 script: ./CI/split_jobs.sh run
     
