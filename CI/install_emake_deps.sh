@@ -22,6 +22,9 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
     sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     sudo add-apt-repository -y ppa:mhier/libboost-latest;
     install_yaml_cpp
+  else
+    # new SDL
+    sudo add-apt-repository ppa:savoury1/multimedia
   fi
 
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
