@@ -45,7 +45,7 @@ if [ "$COMPILER" == "Android" ]; then
               --slave   /usr/bin/gcc-nm gcc-nm /usr/bin/gcc-nm-9 \
               --slave   /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-9;
 elif [ "$TRAVIS_OS_NAME" == "linux" ]; then
-  sudo apt-get -y install libboost-program-options-dev pulseaudio libpugixml-dev rapidjson-dev libprotobuf-dev protobuf-compiler zlib1g-dev libglm-dev libpng-dev
+  sudo apt-get -y install libboost-program-options-dev pulseaudio libyaml-cpp-dev libpugixml-dev rapidjson-dev libprotobuf-dev protobuf-compiler zlib1g-dev libglm-dev libpng-dev
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
   brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
   brew install protobuf pugixml yaml-cpp rapidjson
