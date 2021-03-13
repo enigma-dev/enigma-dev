@@ -22,9 +22,6 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
     sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     sudo add-apt-repository -y ppa:mhier/libboost-latest;
     install_yaml_cpp
-  else
-    # new SDL
-    sudo add-apt-repository -y ppa:savoury1/multimedia
   fi
 
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
@@ -36,7 +33,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
 fi
 
 if [ "$COMPILER" == "Android" ]; then
-  sudo apt-get -y install libboost1.67-dev gcc-9 g++-9 cpp-9 build-essential
+  sudo apt-get -y install libboost1.67-dev gcc-9 g++-9 cpp-9 build-essential libprotobuf-dev protobuf-compiler
     sudo update-alternatives --remove-all cpp;
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 \
               15 \
