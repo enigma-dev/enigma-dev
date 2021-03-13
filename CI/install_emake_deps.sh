@@ -15,7 +15,7 @@ install_yaml_cpp () {
 if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   # new boost & yaml-cpp for old travis
   if [ "$COMPILER" == "Android" ]; then
-      # new protobuf
+    # new protobuf
     sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
 
     # new gcc 
@@ -29,10 +29,11 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   if [ "$COMPILER" != "Android" ]; then
     sudo apt-get -y install clang-10 lldb-10 lld-10 libc++abi-10-dev libc++-10-dev
     clang++ --version
+  fi
 fi
 
 if [ "$COMPILER" == "Android" ]; then
-  sudo apt-get -y install libboost1.67-dev gcc-9 g++-9 cpp-9 build-essential libprotobuf-dev protobuf-compiler zlib1g-dev libglm-dev libpng-dev
+  sudo apt-get -y install libboost1.67-dev gcc-9 g++-9 cpp-9 build-essential
     sudo update-alternatives --remove-all cpp;
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 \
               15 \
@@ -44,7 +45,7 @@ if [ "$COMPILER" == "Android" ]; then
               --slave   /usr/bin/gcc-nm gcc-nm /usr/bin/gcc-nm-9 \
               --slave   /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-9;
 elif [ "$TRAVIS_OS_NAME" == "linux" ]; then
-  sudo apt-get -y install libboost-program-options-dev pulseaudio libpugixml-dev rapidjson-dev
+  sudo apt-get -y install libboost-program-options-dev pulseaudio libpugixml-dev rapidjson-dev libprotobuf-dev protobuf-compiler zlib1g-dev libglm-dev libpng-dev
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
   brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
   brew install protobuf pugixml yaml-cpp rapidjson
