@@ -24,7 +24,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
     install_yaml_cpp
   else
     # new SDL
-    sudo add-apt-repository ppa:savoury1/multimedia
+    sudo add-apt-repository -y ppa:savoury1/multimedia
   fi
 
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
