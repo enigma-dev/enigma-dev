@@ -8,10 +8,6 @@
 # PLATFORM { Platforms/* }
 include ../../Config.mk
 
-ifeq ($(TRAVIS_OS_NAME), linux)
-  override CXXFLAGS += -DOLD_UBUNTU
-endif
-
 MAKE_TARGETS :=
 ifeq ($(TARGET-PLATFORM), Android)
 	MAKE_TARGETS += android_game
