@@ -14,7 +14,7 @@ os: linux
 group: travis_latest
 compiler: gcc
 language: cpp
-dist: bionic
+dist: focal
 
 env:
   global:
@@ -23,9 +23,7 @@ env:
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
 
 before_install: sudo dpkg --add-architecture i386;
-install: 
- - ./CI/install_emake_deps.sh && ./CI/split_jobs.sh install
- - ./CI/build_sdl.sh
+install: ./CI/install_emake_deps.sh && ./CI/split_jobs.sh install
 before_script: make -j4 && make -j4 emake
 script: ./CI/split_jobs.sh run
     
