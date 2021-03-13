@@ -17,7 +17,7 @@ fi
 
 ###### Platforms #######
 #if [ "$PLATFORM" == "SDL" ] || [ "$TEST_HARNESS" == true ]; then
-#  LINUX_DEPS="$LINUX_DEPS libsdl2-dev"
+  #LINUX_DEPS="$LINUX_DEPS libsdl2-dev"
 #fi
 
 ###### Graphics #######
