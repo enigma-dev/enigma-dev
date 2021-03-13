@@ -16,9 +16,9 @@ elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
 fi
 
 ###### Platforms #######
-#if [ "$PLATFORM" == "SDL" ] || [ "$TEST_HARNESS" == true ]; then
-  #LINUX_DEPS="$LINUX_DEPS libsdl2-dev"
-#fi
+if [ "$PLATFORM" == "SDL" ] || [ "$TEST_HARNESS" == true ]; then
+  LINUX_DEPS="$LINUX_DEPS libsdl2-dev libdrm-dev libgbm-dev"
+fi
 
 ###### Graphics #######
 LINUX_DEPS="$LINUX_DEPS libepoxy-dev libegl1-mesa-dev libgles2-mesa-dev libglew-dev libxrandr-dev libxinerama-dev"
