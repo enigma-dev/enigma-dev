@@ -147,6 +147,7 @@ jobs:
         set -e
         cd enigma-dev
         ./emake -x MinGW32 -p Win32 -w Win32 -a DirectSound -e DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,ExternalFuncs -o /tmp/test32.exe CommandLine/testing/SimpleTests/clean_exit.sog/
+        pulseaudio --start --verbose
         LIBGL_ALWAYS_SOFTWARE=1 WINEDLLOVERRIDES="mscoree,mshtml=" WINEPREFIX=/tmp/.wine32 WINEARCH=win32 xvfb-run wine /tmp/test32.exe
         EOF
       displayName: 'Engine MinGW32'
