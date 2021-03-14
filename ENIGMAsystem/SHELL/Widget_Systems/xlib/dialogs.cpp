@@ -21,8 +21,8 @@
 #include <climits>
 
 #include <string>
-#include <chrono>
 #include <thread>
+#include <chrono>
 
 #include "dialogs.h"
 
@@ -32,29 +32,20 @@
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFwindow.h"
 
-#include <sys/types.h>
-#if defined (__APPLE__) && defined(__MACH__)
-#include <sys/sysctl.h>
-#include <libproc.h>
-#elif defined(__linux__) && !defined(__ANDROID__)
-#include <proc/readproc.h>
-#elif defined(__FreeBSD__)
-#include <sys/sysctl.h>
-#include <sys/user.h>
-#include <libutil.h>
-#endif
-
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+
 #include <libgen.h>
 #include <unistd.h>
-#include <signal.h>
+#include <fcntl.h>
 
 using std::string;
+using std::vector;
 
 namespace enigma {
 
@@ -82,170 +73,87 @@ static bool kwin_running() {
   return bKWinRunning;
 }
 
-// get path from procId to get filename.
-static string path_from_pid(pid_t pid) {
-  if (kill(pid, 0) != 0) return "";
-  #if defined (__APPLE__) && defined(__MACH__)
-  char exe[PROC_PIDPATHINFO_MAXSIZE];
-  if (proc_pidpath(pid, exe, sizeof(exe)) > 0) {
-    return exe;
-  }
-  #elif defined(__linux__) && !defined(__ANDROID__)
-  char exe[PATH_MAX];
-  string symLink = string("/proc/") + std::to_string(pid) + string("/exe");
-  if (realpath(symLink.c_str(), exe)) {
-    return exe;
-  }
-  #elif defined(__FreeBSD__)
-  int mib[4]; size_t s;
-  mib[0] = CTL_KERN;
-  mib[1] = KERN_PROC;
-  mib[2] = KERN_PROC_PATHNAME;
-  mib[3] = pid;
-  if (sysctl(mib, 4, nullptr, &s, nullptr, 0) == 0) {
-    string str; str.resize(s, '\0');
-    char *exe = str.data();
-    if (sysctl(mib, 4, exe, &s, nullptr, 0) == 0) {
-      return exe;
-    }
-  }
-  #endif
-  return "";
-}
-
-pid_t ppid_from_pid(pid_t pid) {
-  pid_t ppid;
-  #if defined (__APPLE__) && defined(__MACH__)
-  proc_bsdinfo proc_info;
-  if (proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
-    ppid = proc_info.pbi_ppid;
-  }
-  #elif defined(__linux__) && !defined(__ANDROID__)
-  PROCTAB *proc = openproc(PROC_FILLSTATUS | PROC_PID, &pid);
-  if (proc_t *proc_info = readproc(proc, nullptr)) {
-    ppid = proc_info->ppid;
-    freeproc(proc_info);
-  }
-  closeproc(proc);
-  #elif defined(__FreeBSD__)
-  if (kinfo_proc *proc_info = kinfo_getproc(pid)) {
-    ppid = proc_info->ki_ppid;
-    free(proc_info);
-  }
-  #endif
-  return ppid;
-}
-
-// get fname to check if zenity/kdialog.
-static string name_from_pid(pid_t pid) {
-  return enigma_user::filename_name(path_from_pid(pid));
-}
-
-// get top wid / check fname.
-static Window wid_from_top() {
-  SetErrorHandlers();
-  unsigned char *prop; 
-  unsigned long property;
-  Atom actual_type, filter_atom;
-  int actual_format, status;
-  unsigned long nitems, bytes_after;
-  Display *display = XOpenDisplay(nullptr);
-  int screen = XDefaultScreen(display);
-  Window window = RootWindow(display, screen);
-  filter_atom = XInternAtom(display, "_NET_ACTIVE_WINDOW", true);
-  status = XGetWindowProperty(display, window, filter_atom, 0, 1000, false,
-  AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
-  if (status == Success && prop != nullptr) {
-    property = prop[0] + (prop[1] << 8) + (prop[2] << 16) + (prop[3] << 24);
-    XFree(prop);
-  }
-  XCloseDisplay(display);
-  return (Window)property;
-}
-
-// check if wid from child pid.
-pid_t pid_from_wid(Window window) {
+static unsigned long get_wid_or_pid(Display *display, Window window, bool wid) {
   SetErrorHandlers();
   unsigned char *prop;
   unsigned long property;
   Atom actual_type, filter_atom;
   int actual_format, status;
   unsigned long nitems, bytes_after;
-  pid_t pid; if (!window) return pid;
-  Display *display = XOpenDisplay(nullptr);
-  filter_atom = XInternAtom(display, "_NET_WM_PID", true);
+  filter_atom = XInternAtom(display, wid ? "_NET_ACTIVE_WINDOW" : "_NET_WM_PID", true);
   status = XGetWindowProperty(display, window, filter_atom, 0, 1000, false,
   AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
   if (status == Success && prop != nullptr) {
     property = prop[0] + (prop[1] << 8) + (prop[2] << 16) + (prop[3] << 24);
     XFree(prop);
   }
-  XCloseDisplay(display);
-  return (pid_t)property;
+  return property;
 }
 
-// set a window id to be transient for parent id.
-static void wid_set_pwid(Window window, Window parent) {
+static Window wid_from_top(Display *display) {
   SetErrorHandlers();
-  Display *display = XOpenDisplay(nullptr);
-  XSetTransientForHint(display, window, parent);
-  XCloseDisplay(display);
+  int screen = XDefaultScreen(display);
+  Window window = RootWindow(display, screen);
+  return (Window)get_wid_or_pid(display, window, true);
 }
 
-// wait for child process id of parent process id be procreated.
-static bool WaitForChildPidOfPidToExist(pid_t pid, pid_t ppid) {
-  if (pid == ppid) return true;
-  while (pid != ppid) {
-    if (pid <= 1) break;
-    pid = ppid_from_pid(pid);
+static pid_t pid_from_wid(Display *display, Window window) {
+  return (pid_t)get_wid_or_pid(display, window, false);
+}
+
+// create dialog process
+static pid_t process_execute(const char *command, int *infp, int *outfp) {
+  int p_stdin[2];
+  int p_stdout[2];
+  pid_t pid;
+  if (pipe(p_stdin) == -1)
+    return -1;
+  if (pipe(p_stdout) == -1) {
+    close(p_stdin[0]);
+    close(p_stdin[1]);
+    return -1;
   }
-  return (pid != ppid);
-}
-
-// set dialog transient and set caption.
-static pid_t modify_dialog(pid_t ppid) {
-  pid_t pid = 0;
-  // fork gets child procId.
-  if ((pid = fork()) == 0) {
-    SetErrorHandlers();
-    Display *display = XOpenDisplay(nullptr);
-    
-    // get winId from top winId.
-    Window window = wid_from_top();
-    pid_t pid = pid_from_wid(window);
- 
-    // wait for zenity/kdialog to create the window.
-    while (WaitForChildPidOfPidToExist(pid, ppid) && 
-      name_from_pid(pid) != "zenity" && name_from_pid(pid) != "kdialog") {
-      window = wid_from_top();
-      pid = pid_from_wid(window);
-    }
-    
-    // force zneity/kdialog to stay on top of the game window.
-    wid_set_pwid(window, (Window)strtoul(enigma_user::window_identifier().c_str(), nullptr, 10));
-  
-    XCloseDisplay(display);
+  pid = fork();
+  if (pid < 0) {
+    close(p_stdin[0]);
+    close(p_stdin[1]);
+    close(p_stdout[0]);
+    close(p_stdout[1]);
+    return pid;
+  } else if (pid == 0) {
+    close(p_stdin[1]);
+    dup2(p_stdin[0], 0);
+    close(p_stdout[0]);
+    dup2(p_stdout[1], 1);
+    dup2(open("/dev/null", O_RDONLY), 2);
+    for (int i = 3; i < 4096; i++)
+      close(i);
+    setsid();
+    execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
     exit(0);
+  }
+  close(p_stdin[0]);
+  close(p_stdout[1]);
+  if (infp == nullptr) {
+    close(p_stdin[1]);
+  } else {
+    *infp = p_stdin[1];
+  }
+  if (outfp == nullptr) {
+    close(p_stdout[0]);
+  } else {
+    *outfp = p_stdout[0];
   }
   return pid;
 }
 
-// delete home folder :P jk
-static pid_t InitFork() {
-  pid_t ppid = getpid();
-  return modify_dialog(ppid);
-}
-
-// just in case no window
-static void KillFork(pid_t pid) {
-  kill(pid, SIGTERM);
-  bool died = false;
-  for (unsigned i = 0; !died && i < 4; i++) {
-    int status;
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    if (waitpid(pid, &status, WNOHANG) == pid) died = true;
+// set dialog transient.
+static void force_windows_of_pid_to_be_transient(Display *display, pid_t pid) {
+  Window wid = wid_from_top(display);
+  while (pid_from_wid(display, wid) != pid) {
+    wid = wid_from_top(display);
+    XSetTransientForHint(display, wid, (Window)enigma_user::window_handle());
   }
-  if (!died) kill(pid, SIGKILL);
 }
 
 bool widget_system_initialize() {
@@ -255,12 +163,38 @@ bool widget_system_initialize() {
   return true;
 }
 
+string create_shell_dialog(string command) {
+  string output; char buffer[BUFSIZ];
+  int outfp = 0, infp = 0; ssize_t nRead = 0;
+  pid_t pid = process_execute(command.c_str(), &infp, &outfp);
+  pid_t fpid = 0; if ((fpid = fork()) == 0) {
+    SetErrorHandlers();
+    Display *display = XOpenDisplay(nullptr);
+    force_windows_of_pid_to_be_transient(display, pid);
+    XCloseDisplay(display);
+    exit(0);
+  }
+  while ((nRead = read(outfp, buffer, BUFSIZ)) > 0) {
+    buffer[nRead] = '\0';
+    output.append(buffer, nRead);
+  }
+  kill(fpid, SIGTERM);
+  bool died = false;
+  for (unsigned i = 0; !died && i < 4; i++) {
+    int status;
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    if (waitpid(fpid, &status, WNOHANG) == fpid) died = true;
+  }
+  if (!died) kill(fpid, SIGKILL);
+  while (output.back() == '\r' || output.back() == '\n')
+    output.pop_back();
+  return output;
+}
+
 } // namespace enigma
 
 void show_debug_message_helper(string errortext, MESSAGE_TYPE type) {
-  pid_t pid = enigma::InitFork();
   enigma::current_widget_engine->show_debug_message(errortext, type);
-  enigma::KillFork(pid);
 }
 
 namespace enigma_user {
@@ -280,138 +214,81 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 }
 
 int show_message(const string &message) {
-  pid_t pid = enigma::InitFork();
-  int result = enigma::current_widget_engine->show_message(message);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->show_message(message);
 }
 
 int show_message_cancelable(string message) {
-  pid_t pid = enigma::InitFork();
-  int result = enigma::current_widget_engine->show_message_cancelable(message);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->show_message_cancelable(message);
 }
 
 bool show_question(string message) {
-  pid_t pid = enigma::InitFork();
-  bool result = enigma::current_widget_engine->show_question(message);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->show_question(message);
 }
 
 int show_question_cancelable(string message) {
-  pid_t pid = enigma::InitFork();
-  int result = enigma::current_widget_engine->show_question_cancelable(message);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->show_question_cancelable(message);
 }
 
 int show_attempt(string errortext) {
-  pid_t pid = enigma::InitFork();
-  int result = enigma::current_widget_engine->show_attempt(errortext);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->show_attempt(errortext);
 }
 
 string get_string(string message, string def) {
-  pid_t pid = enigma::InitFork();
-  string result = enigma::current_widget_engine->get_string(message, def);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_string(message, def);
 }
 
 string get_password(string message, string def) {
-  pid_t pid = enigma::InitFork();
-  string result = enigma::current_widget_engine->get_password(message, def);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_password(message, def);
 }
 
 double get_integer(string message, var def) {
-  pid_t pid = enigma::InitFork();
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
-  double result = enigma::current_widget_engine->get_integer(message, val);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_integer(message, val);
 }
 
 double get_passcode(string message, var def) {
-  pid_t pid = enigma::InitFork();
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
-  double result = enigma::current_widget_engine->get_passcode(message, val);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_passcode(message, val);
 }
 
 string get_open_filename(string filter, string fname) {
-  pid_t pid = enigma::InitFork();
-  string result = enigma::current_widget_engine->get_open_filename(filter, fname);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_open_filename(filter, fname);
 }
 
 string get_open_filenames(string filter, string fname) {
-  pid_t pid = enigma::InitFork();
-  string result = enigma::current_widget_engine->get_open_filenames(filter, fname);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_open_filenames(filter, fname);
 }
 
 string get_save_filename(string filter, string fname) {
-  pid_t pid = enigma::InitFork();
-  string result = enigma::current_widget_engine->get_save_filename(filter, fname);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_save_filename(filter, fname);
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) {
-  pid_t pid = enigma::InitFork();
-  string result = enigma::current_widget_engine->get_open_filename_ext(filter, fname, dir, title);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_open_filename_ext(filter, fname, dir, title);
 }
 
 string get_open_filenames_ext(string filter, string fname, string dir, string title) {
-  pid_t pid = enigma::InitFork();
-  string result = enigma::current_widget_engine->get_open_filenames_ext(filter, fname, dir, title);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_open_filenames_ext(filter, fname, dir, title);
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) {
-  pid_t pid = enigma::InitFork();
-  string result = enigma::current_widget_engine->get_save_filename_ext(filter, fname, dir, title);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_save_filename_ext(filter, fname, dir, title);
 }
 
 string get_directory(string dname) {
-  pid_t pid = enigma::InitFork();
-  string result = enigma::current_widget_engine->get_directory(dname);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_directory(dname);
 }
 
 string get_directory_alt(string capt, string root) {
-  pid_t pid = enigma::InitFork();
-  string result = enigma::current_widget_engine->get_directory_alt(capt, root);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_directory_alt(capt, root);
 }
 
 int get_color(int defcol) {
-  pid_t pid = enigma::InitFork();
-  int result = enigma::current_widget_engine->get_color(defcol);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_color(defcol);
 }
 
 int get_color_ext(int defcol, string title) {
-  pid_t pid = enigma::InitFork();
-  int result = enigma::current_widget_engine->get_color_ext(defcol, title);
-  enigma::KillFork(pid);
-  return result;
+  return enigma::current_widget_engine->get_color_ext(defcol, title);
 }
 
 string message_get_caption() {
