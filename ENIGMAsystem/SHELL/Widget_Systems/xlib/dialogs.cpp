@@ -45,7 +45,6 @@
 #include <fcntl.h>
 
 using std::string;
-using std::vector;
 
 namespace enigma {
 
