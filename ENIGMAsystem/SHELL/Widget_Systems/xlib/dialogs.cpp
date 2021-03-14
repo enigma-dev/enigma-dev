@@ -148,6 +148,7 @@ static pid_t process_execute(const char *command, int *infp, int *outfp) {
 
 // set dialog transient.
 static void force_windows_of_pid_to_be_transient(Display *display, pid_t pid) {
+  SetErrorHandlers();
   Window wid = wid_from_top(display);
   while (pid_from_wid(display, wid) != pid) {
     wid = wid_from_top(display);
