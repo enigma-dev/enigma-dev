@@ -147,13 +147,13 @@ static pid_t process_execute(const char *command, int *infp, int *outfp) {
 }
 
 // set dialog transient.
-static void force_windows_of_pid_to_be_transient(Display *display, pid_t pid) {
+static void force_window_of_pid_to_be_transient(Display *display, pid_t pid) {
   SetErrorHandlers();
   Window wid = wid_from_top(display);
   while (pid_from_wid(display, wid) != pid) {
     wid = wid_from_top(display);
-    XSetTransientForHint(display, wid, (Window)enigma_user::window_handle());
   }
+  XSetTransientForHint(display, wid, (Window)enigma_user::window_handle());
 }
 
 bool widget_system_initialize() {
@@ -170,7 +170,7 @@ string create_shell_dialog(string command) {
   pid_t fpid = 0; if ((fpid = fork()) == 0) {
     SetErrorHandlers();
     Display *display = XOpenDisplay(nullptr);
-    force_windows_of_pid_to_be_transient(display, pid);
+    force_window_of_pid_to_be_transient(display, pid);
     XCloseDisplay(display);
     exit(0);
   }
