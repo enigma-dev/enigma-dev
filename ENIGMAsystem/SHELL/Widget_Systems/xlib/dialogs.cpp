@@ -23,14 +23,34 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <iostream>
 
 #include "dialogs.h"
+
+#include "../../../../CompilerSource/OS_Switchboard.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
 
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFwindow.h"
+
+#if CURRENT_PLATFORM_ID == OS_MACOS
+#include <sys/sysctl.h>
+#include <sys/proc_info.h>
+#include <libproc.h>
+#elif CURRENT_PLATFORM_ID == OS_LINUX
+#include <proc/readproc.h>
+#elif CURRENT_PLATFORM_ID == OS_FREEBSD
+#include <sys/socket.h>
+#include <sys/sysctl.h>
+#include <sys/param.h>
+#include <sys/queue.h>
+#include <sys/user.h>
+#include <libprocstat.h>
+#include <libutil.h>
+#endif
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -40,11 +60,13 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 
+#include <pthread.h>
 #include <libgen.h>
 #include <unistd.h>
 #include <fcntl.h>
 
 using std::string;
+using std::vector;
 
 namespace enigma {
 
@@ -147,13 +169,16 @@ static pid_t process_execute(const char *command, int *infp, int *outfp) {
 }
 
 // set dialog transient.
-static void force_window_of_pid_to_be_transient(Display *display, pid_t pid) {
+static void *force_window_of_pid_to_be_transient(void *pid) {
   SetErrorHandlers();
+  Display *display = XOpenDisplay(nullptr);
   Window wid = wid_from_top(display);
-  while (pid_from_wid(display, wid) != pid) {
+  while (pid_from_wid(display, wid) != (pid_t)(std::intptr_t)pid) {
     wid = wid_from_top(display);
   }
   XSetTransientForHint(display, wid, (Window)enigma_user::window_handle());
+  XCloseDisplay(display);
+  return nullptr;
 }
 
 bool widget_system_initialize() {
@@ -163,29 +188,131 @@ bool widget_system_initialize() {
   return true;
 }
 
+static bool ProcIdExists(pid_t procId) {
+  return (kill(procId, 0) == 0);
+}
+
+static void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size) {
+  std::vector<pid_t> vec; int i = 0;
+  #if CURRENT_PLATFORM_ID == OS_MACOS
+  int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
+  std::vector<pid_t> proc_info(cntp);
+  std::fill(proc_info.begin(), proc_info.end(), 0);
+  proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
+  for (int j = cntp; j > 0; j--) {
+    if (proc_info[j] == 0) { continue; }
+    pid_t ppid; ParentProcIdFromProcId(proc_info[j], &ppid);
+    if (ppid == parentProcId) {
+      vec.push_back(proc_info[j]); i++;
+    }
+  }
+  #elif CURRENT_PLATFORM_ID == OS_LINUX
+  PROCTAB *proc = openproc(PROC_FILLSTAT);
+  while (proc_t *proc_info = readproc(proc, nullptr)) {
+    if (proc_info->ppid == parentProcId) {
+      vec.push_back(proc_info->tgid); i++;
+    }
+    freeproc(proc_info);
+  }
+  closeproc(proc);
+  #elif CURRENT_PLATFORM_ID == OS_FREEBSD
+  int cntp; if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
+    for (int j = 0; j < cntp; j++) {
+      if (proc_info[j].ki_ppid == parentProcId) {
+        vec.push_back(proc_info[j].ki_pid); i++;
+      }
+    }
+    free(proc_info);
+  }
+  #endif
+  *procId = (pid_t *)malloc(sizeof(pid_t) * vec.size());
+  if (procId) {
+    std::copy(vec.begin(), vec.end(), *procId);
+    *size = i;
+  }
+}
+
+static void FreeCmdline(char **buffer) {
+  delete[] buffer;
+}
+
+static void CmdlineFromProcId(pid_t procId, char ***buffer, int *size) {
+  if (!ProcIdExists(procId)) return;
+  static std::vector<std::string> vec1; int i = 0;
+  #if CURRENT_PLATFORM_ID == OS_MACOS
+  char **cmdline; int cmdsiz;
+  CmdEnvFromProcId(procId, &cmdline, &cmdsiz, MEMCMD);
+  if (cmdline) {
+    for (int j = 0; j < cmdsiz; j++) {
+      vec1.push_back(cmdline[i]); i++;
+    }
+    delete[] cmdline;
+  } else return;
+  #elif CURRENT_PLATFORM_ID == OS_LINUX
+  PROCTAB *proc = openproc(PROC_FILLCOM | PROC_PID, &procId);
+  if (proc_t *proc_info = readproc(proc, nullptr)) {
+    while (proc_info->cmdline[i]) {
+      vec1.push_back(proc_info->cmdline[i]); i++;
+    }
+    freeproc(proc_info);
+  }
+  closeproc(proc);
+  #elif CURRENT_PLATFORM_ID == OS_FREEBSD
+  procstat *proc_stat = procstat_open_sysctl(); unsigned cntp;
+  kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, procId, &cntp);
+  char **cmdline = procstat_getargv(proc_stat, proc_info, 0);
+  if (cmdline) {
+    for (int j = 0; cmdline[j]; j++) {
+      vec1.push_back(cmdline[j]); i++;
+    }
+  }
+  procstat_freeargv(proc_stat);
+  procstat_freeprocs(proc_stat, proc_info);
+  procstat_close(proc_stat);
+  #endif
+  std::vector<char *> vec2;
+  for (int i = 0; i <= vec1.size(); i++)
+    vec2.push_back((char *)vec1[i].c_str());
+  char **arr = new char *[vec2.size()]();
+  std::copy(vec2.begin(), vec2.end(), arr);
+  *buffer = arr; *size = i;
+}
+
+static void ProcIdFromParentProcIdSkipSh(pid_t parentProcId, pid_t **procId, int *size) {
+  char **cmdline; int cmdsize;
+  ProcIdFromParentProcId(parentProcId, procId, size);
+  if (procId) {
+    for (int i; i < *size; i++) {
+      CmdlineFromProcId(*procId[i], &cmdline, &cmdsize);
+      if (cmdline) {
+        if (strcmp(cmdline[0], "/bin/sh") == 0) {
+          ProcIdFromParentProcIdSkipSh(*procId[i], procId, size);
+        }
+        FreeCmdline(cmdline);
+      }
+    }
+  }
+}
+
 string create_shell_dialog(string command) {
   string output; char buffer[BUFSIZ];
   int outfp = 0, infp = 0; ssize_t nRead = 0;
   pid_t pid = process_execute(command.c_str(), &infp, &outfp);
-  pid_t fpid = 0; if ((fpid = fork()) == 0) {
-    SetErrorHandlers();
-    Display *display = XOpenDisplay(nullptr);
-    force_window_of_pid_to_be_transient(display, pid);
-    XCloseDisplay(display);
-    exit(0);
+  std::this_thread::sleep_for (std::chrono::milliseconds(100)); pthread_t thread;
+  pid_t *pids; int size; ProcIdFromParentProcIdSkipSh(pid, &pids, &size);
+  if (pids) {
+    pthread_create(&thread, nullptr,
+    force_window_of_pid_to_be_transient, (void *)(std::intptr_t)pids[0]);
+    free(pids);
+  } else {
+    pthread_create(&thread, nullptr,
+    force_window_of_pid_to_be_transient, (void *)(std::intptr_t)pid);
   }
   while ((nRead = read(outfp, buffer, BUFSIZ)) > 0) {
     buffer[nRead] = '\0';
     output.append(buffer, nRead);
   }
-  kill(fpid, SIGTERM);
-  bool died = false;
-  for (unsigned i = 0; !died && i < 4; i++) {
-    int status;
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    if (waitpid(fpid, &status, WNOHANG) == fpid) died = true;
-  }
-  if (!died) kill(fpid, SIGKILL);
+  pthread_cancel(thread);
   while (output.back() == '\r' || output.back() == '\n')
     output.pop_back();
   return output;
