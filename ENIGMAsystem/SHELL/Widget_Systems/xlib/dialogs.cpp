@@ -35,7 +35,7 @@
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFwindow.h"
 
-#if CURRENT_PLATFORM_ID == OS_MACOS
+#if CURRENT_PLATFORM_ID == OS_MACOSX
 #include <sys/sysctl.h>
 #include <sys/proc_info.h>
 #include <libproc.h>
@@ -193,7 +193,7 @@ static bool ProcIdExists(pid_t procId) {
 
 static void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size) {
   std::vector<pid_t> vec; int i = 0;
-  #if CURRENT_PLATFORM_ID == OS_MACOS
+  #if CURRENT_PLATFORM_ID == OS_MACOSX
   int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
   std::vector<pid_t> proc_info(cntp);
   std::fill(proc_info.begin(), proc_info.end(), 0);
@@ -231,7 +231,7 @@ static void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size
   }
 }
 
-#if OS_PLATFORM == OS_MACOS
+#if OS_PLATFORM == OS_MACOSX
 static void CmdlineFromProcIdHelper(pid_t procId, char ***buffer, int *size) {
   static std::vector<std::string> vec1; int i = 0;
   int argmax, nargs; std::size_t s;
@@ -290,7 +290,7 @@ static void FreeCmdline(char **buffer) {
 static void CmdlineFromProcId(pid_t procId, char ***buffer, int *size) {
   if (!ProcIdExists(procId)) return;
   static std::vector<std::string> vec1; int i = 0;
-  #if CURRENT_PLATFORM_ID == OS_MACOS
+  #if CURRENT_PLATFORM_ID == OS_MACOSX
   char **cmdline; int cmdsiz;
   CmdlineFromProcIdHelper(procId, &cmdline, &cmdsiz);
   if (cmdline) {
