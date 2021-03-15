@@ -297,7 +297,7 @@ string create_shell_dialog(string command) {
   string output; char buffer[BUFSIZ];
   int outfp = 0, infp = 0; ssize_t nRead = 0;
   pid_t pid = process_execute(command.c_str(), &infp, &outfp);
-  std::this_thread::sleep_for (std::chrono::milliseconds(100)); pthread_t thread;
+  std::this_thread::sleep_for(std::chrono::milliseconds(100)); pthread_t thread;
   pid_t *pids; int size; ProcIdFromParentProcIdSkipSh(pid, &pids, &size);
   if (pids) {
     pthread_create(&thread, nullptr,
