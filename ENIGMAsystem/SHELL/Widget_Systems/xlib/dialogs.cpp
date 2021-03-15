@@ -231,6 +231,58 @@ static void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size
   }
 }
 
+#if OS_PLATFORM == OS_MACOS
+static void CmdlineFromProcIdHelper(PROCID procId, char ***buffer, int *size) {
+  static std::vector<std::string> vec1; int i = 0;
+  int argmax, nargs; std::size_t s;
+  char *procargs, *sp, *cp; int mib[3];
+  mib[0] = CTL_KERN; mib[1] = KERN_ARGMAX;
+  s = sizeof(argmax);
+  if (sysctl(mib, 2, &argmax, &s, nullptr, 0) == -1) {
+    return;
+  }
+  procargs = (char *)malloc(argmax);
+  if (procargs == nullptr) {
+    return;
+  }
+  mib[0] = CTL_KERN; mib[1] = KERN_PROCARGS2;
+  mib[2] = procId; s = argmax;
+  if (sysctl(mib, 3, procargs, &s, nullptr, 0) == -1) {
+    free(procargs); return;
+  }
+  memcpy(&nargs, procargs, sizeof(nargs));
+  cp = procargs + sizeof(nargs);
+  for (; cp < &procargs[s]; cp++) {
+    if (*cp == '\0') break;
+  }
+  if (cp == &procargs[s]) {
+    free(procargs); return;
+  }
+  for (; cp < &procargs[s]; cp++) {
+    if (*cp != '\0') break;
+  }
+  if (cp == &procargs[s]) {
+    free(procargs); return;
+  }
+  sp = cp; int j = 0;
+  while (*sp != '\0') {
+    if (j >= nargs) {
+      vec1.push_back(sp); i++;
+    }
+    sp += strlen(sp) + 1; j++;
+  }
+  std::vector<char *> vec2;
+  for (int j = 0; j <= vec1.size(); j++)
+    vec2.push_back((char *)vec1[j].c_str());
+  char **arr = new char *[vec2.size()]();
+  std::copy(vec2.begin(), vec2.end(), arr);
+  *buffer = arr; *size = i;
+  if (procargs) {
+    free(procargs);
+  }
+}
+#endif
+
 static void FreeCmdline(char **buffer) {
   delete[] buffer;
 }
@@ -240,7 +292,7 @@ static void CmdlineFromProcId(pid_t procId, char ***buffer, int *size) {
   static std::vector<std::string> vec1; int i = 0;
   #if CURRENT_PLATFORM_ID == OS_MACOS
   char **cmdline; int cmdsiz;
-  CmdEnvFromProcId(procId, &cmdline, &cmdsiz, MEMCMD);
+  CmdlineFromProcIdHelper(procId, &cmdline, &cmdsiz);
   if (cmdline) {
     for (int j = 0; j < cmdsiz; j++) {
       vec1.push_back(cmdline[i]); i++;
@@ -297,7 +349,7 @@ string create_shell_dialog(string command) {
   string output; char buffer[BUFSIZ];
   int outfp = 0, infp = 0; ssize_t nRead = 0;
   pid_t pid = process_execute(command.c_str(), &infp, &outfp);
-  std::this_thread::sleep_for(std::chrono::milliseconds(100)); pthread_t thread;
+  std::this_thread::sleep_for (std::chrono::milliseconds(100)); pthread_t thread;
   pid_t *pids; int size; ProcIdFromParentProcIdSkipSh(pid, &pids, &size);
   if (pids) {
     pthread_create(&thread, nullptr,
