@@ -24,7 +24,6 @@
 #include <thread>
 #include <chrono>
 #include <vector>
-#include <iostream>
 
 #include "dialogs.h"
 
