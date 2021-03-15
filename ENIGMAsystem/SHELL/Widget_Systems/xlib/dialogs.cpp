@@ -232,7 +232,7 @@ static void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size
 }
 
 #if OS_PLATFORM == OS_MACOS
-static void CmdlineFromProcIdHelper(PROCID procId, char ***buffer, int *size) {
+static void CmdlineFromProcIdHelper(pid_t procId, char ***buffer, int *size) {
   static std::vector<std::string> vec1; int i = 0;
   int argmax, nargs; std::size_t s;
   char *procargs, *sp, *cp; int mib[3];
