@@ -22,6 +22,8 @@ using std::string;
 
 namespace enigma {
 
+std::string create_shell_dialog(std::string command);
+
 class CommandLineWidgetEngine {
  public:
   virtual ~CommandLineWidgetEngine() = default;
