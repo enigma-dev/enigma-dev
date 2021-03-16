@@ -167,8 +167,8 @@ static pid_t process_execute(const char *command, int *infp, int *outfp) {
   return pid;
 }
 
-// set dialog transient.
-static void *force_window_of_pid_to_be_transient(void *pid) {
+// set dialog transient; set title caption.
+static void *modify_shell_dialog(void *pid) {
   SetErrorHandlers();
   Display *display = XOpenDisplay(nullptr);
   Window wid = wid_from_top(display);
@@ -358,11 +358,11 @@ string create_shell_dialog(string command) {
   pid_t *pids; int size; ProcIdFromParentProcIdSkipSh(pid, &pids, &size);
   if (pids) {
     pthread_create(&thread, nullptr,
-    force_window_of_pid_to_be_transient, (void *)(std::intptr_t)pids[0]);
+    modify_shell_dialog, (void *)(std::intptr_t)pids[0]);
     free(pids);
   } else {
     pthread_create(&thread, nullptr,
-    force_window_of_pid_to_be_transient, (void *)(std::intptr_t)pid);
+    modify_shell_dialog, (void *)(std::intptr_t)pid);
   }
   while ((nRead = read(outfp, buffer, BUFSIZ)) > 0) {
     buffer[nRead] = '\0';
