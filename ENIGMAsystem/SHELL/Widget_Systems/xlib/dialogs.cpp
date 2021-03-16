@@ -196,6 +196,27 @@ static bool ProcIdExists(pid_t procId) {
   return (kill(procId, 0) == 0);
 }
 
+static void ParentProcIdFromProcId(pid_t procId, pid_t *parentProcId) {
+  #if CURRENT_PLATFORM_ID == OS_MACOSX
+  proc_bsdinfo proc_info;
+  if (proc_pidinfo(procId, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
+    *parentProcId = proc_info.pbi_ppid;
+  }
+  #elif CURRENT_PLATFORM_ID == OS_LINUX
+  PROCTAB *proc = openproc(PROC_FILLSTATUS | PROC_PID, &procId);
+  if (proc_t *proc_info = readproc(proc, nullptr)) { 
+    *parentProcId = proc_info->ppid;
+    freeproc(proc_info);
+  }
+  closeproc(proc);
+  #elif CURRENT_PLATFORM_ID == OS_FREEBSD
+  if (kinfo_proc *proc_info = kinfo_getproc(procId)) {
+    *parentProcId = proc_info->ki_ppid;
+    free(proc_info);
+  }
+  #endif
+}
+
 static void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size) {
   std::vector<pid_t> vec; int i = 0;
   #if CURRENT_PLATFORM_ID == OS_MACOSX
