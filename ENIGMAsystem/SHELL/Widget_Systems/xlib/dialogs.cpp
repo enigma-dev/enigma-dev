@@ -35,6 +35,19 @@
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFwindow.h"
 
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+
+#include <pthread.h>
+#include <libgen.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
+
 #if CURRENT_PLATFORM_ID == OS_MACOSX
 #include <sys/sysctl.h>
 #include <sys/proc_info.h>
@@ -50,19 +63,6 @@
 #include <libprocstat.h>
 #include <libutil.h>
 #endif
-
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
-
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/stat.h>
-
-#include <pthread.h>
-#include <libgen.h>
-#include <unistd.h>
-#include <fcntl.h>
 
 using std::string;
 using std::vector;
@@ -349,7 +349,7 @@ string create_shell_dialog(string command) {
   string output; char buffer[BUFSIZ];
   int outfp = 0, infp = 0; ssize_t nRead = 0;
   pid_t pid = process_execute(command.c_str(), &infp, &outfp);
-  std::this_thread::sleep_for (std::chrono::milliseconds(100)); pthread_t thread;
+  std::this_thread::sleep_for(std::chrono::milliseconds(100)); pthread_t thread;
   pid_t *pids; int size; ProcIdFromParentProcIdSkipSh(pid, &pids, &size);
   if (pids) {
     pthread_create(&thread, nullptr,
