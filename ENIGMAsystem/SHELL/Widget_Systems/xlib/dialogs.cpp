@@ -176,7 +176,12 @@ static void *force_window_of_pid_to_be_transient(void *pid) {
     wid = wid_from_top(display);
   }
   XSetTransientForHint(display, wid, (Window)enigma_user::window_handle());
-  XCloseDisplay(display);
+  int len = enigma_user::message_get_caption().length() + 1; char *buffer = new char[len]();
+  strcpy(buffer, enigma_user::message_get_caption().c_str()); XChangeProperty(display, wid,
+  XInternAtom(display, "_NET_WM_NAME", false),
+  XInternAtom(display, "UTF8_STRING", false),
+  8, PropModeReplace, (unsigned char *)buffer, len);
+  delete[] buffer; XCloseDisplay(display);
   return nullptr;
 }
 
