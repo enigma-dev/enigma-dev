@@ -30,18 +30,17 @@
 #include <cstring>
 #include <iostream>
 
+#include "bettersystem.h"
+#include "OS_Switchboard.h"
+#include "general/parse_basics_old.h"
+#include "frontend.h"
+
 #if CURRENT_PLATFORM_ID == OS_FREEBSD
     #include <sys/user.h>
     #include <libutil.h>
 #endif
 
 using std::string;
-
-#include "bettersystem.h"
-#include "OS_Switchboard.h"
-#include "general/parse_basics_old.h"
-#include "frontend.h"
-
 
 inline char* scopy(string& str)
 {
@@ -508,7 +507,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       cout << "TRUE\n\n";
       path.insert(0, "PATH=");
       if (path != "PATH=") path += ":";
-      path += getenv("PATH");
+      path += getenv("PATH") ? : "";
       const char *Cenviron[2] = { path.c_str(), NULL };
       return e_exec(cmd, Cenviron);
     }
