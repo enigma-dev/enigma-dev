@@ -422,7 +422,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           #if CURRENT_PLATFORM_ID == OS_LINUX
           waitpid(-fk,&result,__WALL);
           #elif CURRENT_PLATFORM_ID == OS_FREEBSD
-          wait6(P_PGID,-fk,&result,0,nullptr,nullptr);
+          wait6(P_PGID,-fk,&result,WEXITED,nullptr,nullptr);
           #endif
           break;
         }
