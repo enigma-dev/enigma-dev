@@ -258,6 +258,11 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     #include <sys/wait.h>
     #include <sys/stat.h>
 
+#if CURRENT_PLATFORM_ID == OS_FREEBSD
+    #include <sys/time.h>
+    #include <sys/resource.h>
+#endif
+
     extern char **environ;
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
@@ -416,8 +421,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           // before run buttons are enabled again
           #if CURRENT_PLATFORM_ID == OS_LINUX
           waitpid(-fk,&result,__WALL);
-          #else
-          waitpid(-fk,&result,0); // FIXME: Mac/FreeBSD
+          #elif CURRENT_PLATFORM_ID == OS_FREEBSD
+          wait6(P_PGID,-fk,&result,0,nullptr,nullptr);
           #endif
           break;
         }
