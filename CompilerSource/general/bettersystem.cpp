@@ -252,7 +252,11 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       return e_exec(cmd, eCenviron);
     }
 #else
+    #include <vector>
+    #include <algorithm>
+    #include <cstdlib>
     #include <csignal>
+
     #include <fcntl.h>
     #include <unistd.h>
     #include <sys/wait.h>
@@ -260,17 +264,81 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     #include <sys/types.h>
 
 #if CURRENT_PLATFORM_ID == OS_FREEBSD
-    #include <sys/time.h>
-    #include <sys/resource.h>
+    #include <sys/user.h>
+    #include <libutil.h>
 #endif
 
     extern char **environ;
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
 #if CURRENT_PLATFORM_ID == OS_MACOSX
+    #include <libproc.h>
+    #include <sys/proc_info.h>
     #include <crt_externs.h>
     #define environ (*_NSGetEnviron())
     extern char **environ;
+#endif
+
+    using std::vector;
+
+#if CURRENT_PLATFORM_ID == OS_FREEBSD
+    void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size) {
+      vector<pid_t> vec; int i = 0; int cntp;
+      if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
+        for (int j = 0; j < cntp; j++) {
+          if (proc_info[j].ki_ppid == parentProcId) {
+            vec.push_back(proc_info[j].ki_pid); i++;
+          }
+        }
+        free(proc_info);
+      }
+      *procId = (pid_t *)malloc(sizeof(pid_t) * vec.size());
+      if (procId) {
+        std::copy(vec.begin(), vec.end(), *procId);
+        *size = i;
+      }
+    }
+
+#elif CURRENT_PLATFORM_ID == OS_MACOSX
+    void ParentProcIdFromProcId(pid_t procId, pid_t *parentProcId) {
+      proc_bsdinfo proc_info;
+      if (proc_pidinfo(procId, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
+        *parentProcId = proc_info.pbi_ppid;
+      }
+    }
+
+    void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size) {
+      vector<pid_t> vec; int i = 0;
+      int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
+      vector<pid_t> proc_info(cntp);
+      std::fill(proc_info.begin(), proc_info.end(), 0);
+      proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
+      for (int j = cntp; j > 0; j--) {
+        if (proc_info[j] == 0) { continue; }
+        pid_t ppid; ParentProcIdFromProcId(proc_info[j], &ppid);
+        if (ppid == parentProcId) {
+          vec.push_back(proc_info[j]); i++;
+        }
+      }
+      *procId = (pid_t *)malloc(sizeof(pid_t) * vec.size());
+      if (procId) {
+        std::copy(vec.begin(), vec.end(), *procId);
+        *size = i;
+      }
+    }
+
+    void WaitForAllChildren(pid_t pid, int *status, int options) {
+      pid_t *procId; int size;
+      ProcIdFromParentProcId(pid, &procId, &size);
+      if (procId) {
+        for (int i = 0; i < size; i++) {
+          if (procId[i] == 0) { break; }
+          WaitForAllChildren(procId[i]);
+          waitpid(procId[i], status, options);
+        }
+        free(procId);
+      }
+    }
 #endif
 
     void path_coerce(string &ename)
@@ -422,10 +490,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           // before run buttons are enabled again
       #if CURRENT_PLATFORM_ID == OS_LINUX
           waitpid(-fk,&result,__WALL);
-      #elif CURRENT_PLATFORM_ID == OS_FREEBSD
-          wait6(P_ALL, -fk, &result, WEXITED, nullptr, nullptr);
-      #elif CURRENT_PLATFORM_ID == OS_MACOSX
-          // FIXME: need mac equivalent to kill entire pgid
+      #elif CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_MACOSX
+          WaitForAllChildren(-fk,&result,0);
       #endif 
           break;
         }
@@ -442,7 +508,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       cout << "TRUE\n\n";
       path.insert(0, "PATH=");
       if (path != "PATH=") path += ":";
-      path += getenv("PATH");
+      path += getenv("PATH") ? : "";
       const char *Cenviron[2] = { path.c_str(), NULL };
       return e_exec(cmd, Cenviron);
     }
@@ -457,4 +523,5 @@ int e_execsp(string cmd, string path)                                        { r
 int e_execsp(string cmd, string cat1, string path)                           { return e_execp((cmd + " " + cat1).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string path)              { return e_execp((cmd + " " + cat1 + " " + cat2).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string cat3, string path) { return e_execp((cmd + " " + cat1 + " " + cat2 + " " + cat3).c_str(), path); }
+
 
