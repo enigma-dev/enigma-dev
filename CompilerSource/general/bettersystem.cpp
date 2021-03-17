@@ -30,7 +30,12 @@
 #include <cstring>
 #include <iostream>
 
-using namespace std;
+#if CURRENT_PLATFORM_ID == OS_FREEBSD
+    #include <sys/user.h>
+    #include <libutil.h>
+#endif
+
+using std::string
 
 #include "bettersystem.h"
 #include "OS_Switchboard.h"
@@ -263,11 +268,6 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     #include <sys/stat.h>
     #include <sys/types.h>
 
-#if CURRENT_PLATFORM_ID == OS_FREEBSD
-    #include <sys/user.h>
-    #include <libutil.h>
-#endif
-
     extern char **environ;
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
@@ -298,7 +298,6 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         *size = i;
       }
     }
-
 #elif CURRENT_PLATFORM_ID == OS_MACOSX
     void ParentProcIdFromProcId(pid_t procId, pid_t *parentProcId) {
       proc_bsdinfo proc_info;
@@ -326,7 +325,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         *size = i;
       }
     }
-
+#endif
+#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_MACOSX
     void WaitForAllChildren(pid_t pid, int *status, int options) {
       pid_t *procId; int size;
       ProcIdFromParentProcId(pid, &procId, &size);
@@ -508,7 +508,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       cout << "TRUE\n\n";
       path.insert(0, "PATH=");
       if (path != "PATH=") path += ":";
-      path += getenv("PATH") ? : "";
+      path += getenv("PATH");
       const char *Cenviron[2] = { path.c_str(), NULL };
       return e_exec(cmd, Cenviron);
     }
