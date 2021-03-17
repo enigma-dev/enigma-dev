@@ -35,7 +35,6 @@ using namespace std;
 #include "bettersystem.h"
 #include "OS_Switchboard.h"
 #include "general/parse_basics_old.h"
-#include "frontend.h"
 
 
 inline char* scopy(string& str)
@@ -214,19 +213,9 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       cout << "\n\n********* EXECUTE:\n" << parameters << "\n\n";
 
-      DWORD creationFlags = CREATE_DEFAULT_ERROR_MODE;
-      if (build_enable_stop)
-        creationFlags |= CREATE_NEW_PROCESS_GROUP;
-      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,creationFlags,Cenviron_use,NULL,&StartupInfo,&ProcessInformation))
+      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
-        DWORD timeout = build_enable_stop ? 10 : INFINITE;
-        while (WaitForSingleObject(ProcessInformation.hProcess, timeout) == WAIT_TIMEOUT) {
-          if (!build_stopping) continue;
-          DWORD pId = GetProcessId(ProcessInformation.hProcess);
-          GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, pId);
-          WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
-          break;
-        }
+        WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
         GetExitCodeProcess(ProcessInformation.hProcess, &result);
         CloseHandle(ProcessInformation.hProcess);
         CloseHandle(ProcessInformation.hThread);
@@ -351,17 +340,9 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
       int result = -1;
       pid_t fk = fork();
-      if (build_enable_stop)
-        setpgid(0,0); // << new process group
 
       if (!fk)
       {
-        // Redirect STDIN
-        // Background process groups get SIGTTIN if
-        // reading from the terminal.
-        int infd = open("/dev/null", O_RDONLY);
-        dup2(infd, STDIN_FILENO);
-
         // Redirect STDOUT
         if (redirout == "") {
             int flags = fcntl(STDOUT_FILENO, F_GETFD);
@@ -407,17 +388,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         exit(-1);
       }
 
-      while (!waitpid(fk,&result,build_enable_stop?WNOHANG:0)) {
-        if (build_stopping) {
-          kill(-fk,SIGINT); // send CTRL+C to process group
-          // wait for entire process group to signal,
-          // important for GNU make to stop outputting
-          // before run buttons are enabled again
-          waitpid(-fk,&result,__WALL);
-          break;
-        }
-        usleep(10000); // hundredth of a second
-      }
+      waitpid(fk,&result,0);
       for (char** i = argv+1; *i; i++)
         free(*i);
       free(argv);
@@ -444,4 +415,3 @@ int e_execsp(string cmd, string path)                                        { r
 int e_execsp(string cmd, string cat1, string path)                           { return e_execp((cmd + " " + cat1).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string path)              { return e_execp((cmd + " " + cat1 + " " + cat2).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string cat3, string path) { return e_execp((cmd + " " + cat1 + " " + cat2 + " " + cat3).c_str(), path); }
-
