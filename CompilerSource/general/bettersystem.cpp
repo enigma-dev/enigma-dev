@@ -35,7 +35,7 @@
     #include <libutil.h>
 #endif
 
-using std::string
+using std::string;
 
 #include "bettersystem.h"
 #include "OS_Switchboard.h"
@@ -333,7 +333,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       if (procId) {
         for (int i = 0; i < size; i++) {
           if (procId[i] == 0) { break; }
-          WaitForAllChildren(procId[i]);
+          WaitForAllChildren(procId[i], status, options);
           waitpid(procId[i], status, options);
         }
         free(procId);
@@ -523,5 +523,4 @@ int e_execsp(string cmd, string path)                                        { r
 int e_execsp(string cmd, string cat1, string path)                           { return e_execp((cmd + " " + cat1).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string path)              { return e_execp((cmd + " " + cat1 + " " + cat2).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string cat3, string path) { return e_execp((cmd + " " + cat1 + " " + cat2 + " " + cat3).c_str(), path); }
-
 
