@@ -1,7 +1,10 @@
 #ifndef ENIGMA_FRONTEND_H
 #define ENIGMA_FRONTEND_H
 #include <string>
-using namespace std;
+#include <iostream>
+using std::string;
+using std::cout;
+using std::endl;
 
 /// Structure for reporting syntax issues to the IDE.
 struct syntax_error {
