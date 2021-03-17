@@ -423,9 +423,9 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       #if CURRENT_PLATFORM_ID == OS_LINUX
           waitpid(-fk,&result,__WALL);
       #elif CURRENT_PLATFORM_ID == OS_FREEBSD
-         wait6(P_ALL, -fk, &result, WEXITED, nullptr, nullptr);
+          wait6(P_ALL, -fk, &result, WEXITED, nullptr, nullptr);
       #elif CURRENT_PLATFORM_ID == OS_MACOSX
-         // FIXME: need mac equivalent to kill entire pgid
+          // FIXME: need mac equivalent to kill entire pgid
       #endif 
           break;
         }
