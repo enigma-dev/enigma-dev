@@ -252,15 +252,22 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       return e_exec(cmd, eCenviron);
     }
 #else
+    #include <csignal>
     #include <fcntl.h>
     #include <unistd.h>
     #include <sys/wait.h>
     #include <sys/stat.h>
+    #include <sys/types.h>
+
+#if CURRENT_PLATFORM_ID == OS_FREEBSD
+    #include <sys/time.h>
+    #include <sys/resource.h>
+#endif
 
     extern char **environ;
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
-#if CURRENT_PLATFORM_ID ==  OS_MACOSX
+#if CURRENT_PLATFORM_ID == OS_MACOSX
     #include <crt_externs.h>
     #define environ (*_NSGetEnviron())
     extern char **environ;
@@ -413,7 +420,13 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           // wait for entire process group to signal,
           // important for GNU make to stop outputting
           // before run buttons are enabled again
+      #if CURRENT_PLATFORM_ID == OS_LINUX
           waitpid(-fk,&result,__WALL);
+      #elif CURRENT_PLATFORM_ID == OS_FREEBSD
+         wait6(P_ALL, -fk, &result, WEXITED, nullptr, nullptr);
+      #elif CURRENT_PLATFORM_ID == OS_MACOSX
+         // FIXME: need mac equivalent to kill entire pgid
+      #endif 
           break;
         }
         usleep(10000); // hundredth of a second
