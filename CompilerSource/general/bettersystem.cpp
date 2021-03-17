@@ -28,6 +28,7 @@
 #include <string>
 #include <cstdlib>
 #include <cstring>
+#include <csignal>
 #include <iostream>
 
 using namespace std;
@@ -413,7 +414,11 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           // wait for entire process group to signal,
           // important for GNU make to stop outputting
           // before run buttons are enabled again
+          #if CURRENT_PLATFORM_ID == OS_LINUX
           waitpid(-fk,&result,__WALL);
+          #else
+          waitpid(-fk,&result,0); // FIXME: Mac/FreeBSD
+          #endif
           break;
         }
         usleep(10000); // hundredth of a second
@@ -444,4 +449,3 @@ int e_execsp(string cmd, string path)                                        { r
 int e_execsp(string cmd, string cat1, string path)                           { return e_execp((cmd + " " + cat1).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string path)              { return e_execp((cmd + " " + cat1 + " " + cat2).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string cat3, string path) { return e_execp((cmd + " " + cat1 + " " + cat2 + " " + cat3).c_str(), path); }
-
