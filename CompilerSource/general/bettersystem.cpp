@@ -299,6 +299,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       if (proc_pidinfo(procId, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
         return proc_info.pbi_ppid;
       }
+      return -1;
     }
 
     vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
@@ -320,7 +321,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     void WaitForAllChildrenToDie(pid_t pid, int *status) {
       vector<pid_t> procId = ProcIdFromParentProcId(pid);
       if (procId.size()) {
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < procId.size(); i++) {
           if (procId[i] == 0) { break; }
           WaitForAllChildrenToDie(procId[i], status);
           waitpid(procId[i], status, 0);
