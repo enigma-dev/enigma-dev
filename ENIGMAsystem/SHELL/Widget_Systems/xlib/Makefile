@@ -5,5 +5,5 @@ override LDLIBS += $(shell pkg-config x11 --libs) -lz -lpthread
 ifeq ($(OS), Linux)
 	override LDLIBS += -lprocps
 else ifeq ($(OS), FreeBSD)
-	override LDLIBS += -lc -lutil -lprocstat
+	override LDLIBS += -lutil -lc
 endif
