@@ -227,7 +227,7 @@ static pid_t PidFromPpidRecursive(pid_t parentProcId) {
   PidFromPpid(parentProcId, &procId, &size);
   if (procId) {
     if (size > 0)
-      return PidFromPpidRecursive(procId[0]);
+      parentProcId = PidFromPpidRecursive(procId[0]);
     free(procId);
   }
   return parentProcId;
