@@ -32,8 +32,6 @@ script: ./CI/split_jobs.sh run
 jobs:
   # don't wait for OSX
   fast_finish: true
-  allow_failures:
-    - os: osx
   include:
     - stage: ENIGMA CI
       env: WORKER=0
@@ -67,6 +65,6 @@ jobs:
     - stage: ENIGMA CI
       env: WORKER=0
       os: osx
-      osx_image: xcode11.3
+      osx_image: xcode12
       before_install:
 
