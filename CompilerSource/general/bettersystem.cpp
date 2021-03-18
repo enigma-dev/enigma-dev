@@ -281,7 +281,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     using std::vector;
 
 #if CURRENT_PLATFORM_ID == OS_FREEBSD
-    void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size) {
+    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
       vector<pid_t> vec; int i = 0; int cntp;
       if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
         for (int j = 0; j < cntp; j++) {
@@ -291,21 +291,17 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         }
         free(proc_info);
       }
-      *procId = (pid_t *)malloc(sizeof(pid_t) * vec.size());
-      if (procId) {
-        std::copy(vec.begin(), vec.end(), *procId);
-        *size = i;
-      }
+      return vec;
     }
 #elif CURRENT_PLATFORM_ID == OS_MACOSX
-    void ParentProcIdFromProcId(pid_t procId, pid_t *parentProcId) {
+    pid_t ParentProcIdFromProcId(pid_t procId) {
       proc_bsdinfo proc_info;
       if (proc_pidinfo(procId, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
-        *parentProcId = proc_info.pbi_ppid;
+        return proc_info.pbi_ppid;
       }
     }
 
-    void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size) {
+    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
       vector<pid_t> vec; int i = 0;
       int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
       vector<pid_t> proc_info(cntp);
@@ -313,30 +309,27 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
       for (int j = cntp; j > 0; j--) {
         if (proc_info[j] == 0) { continue; }
-        pid_t ppid; ParentProcIdFromProcId(proc_info[j], &ppid);
-        if (ppid == parentProcId) {
+        if (ppid == ParentProcIdFromProcId(proc_info[j])) {
           vec.push_back(proc_info[j]); i++;
         }
       }
-      *procId = (pid_t *)malloc(sizeof(pid_t) * vec.size());
-      if (procId) {
-        std::copy(vec.begin(), vec.end(), *procId);
-        *size = i;
-      }
+      return vec;
     }
 #endif
 #if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_MACOSX
-    void WaitForAllChildren(pid_t pid, int *status, int options) {
-      pid_t *procId; int size;
-      ProcIdFromParentProcId(pid, &procId, &size);
-      if (procId) {
+    void WaitForAllChildrenToDie(pid_t pid, int *status) {
+      vector<pid_t> procId = ProcIdFromParentProcId(pid);
+      if (procId.size()) {
         for (int i = 0; i < size; i++) {
           if (procId[i] == 0) { break; }
-          WaitForAllChildren(procId[i], status, options);
-          waitpid(procId[i], status, options);
+          WaitForAllChildrenToDie(procId[i], status);
+          waitpid(procId[i], status, 0);
         }
-        free(procId);
       }
+    }
+#elif CURRENT_PLATFORM_ID == OS_LINUX
+    void WaitForAllChildrenToDie(pid_t pid, int *status) {
+      waitpid(pid, status, __WALL);
     }
 #endif
 
@@ -487,11 +480,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           // wait for entire process group to signal,
           // important for GNU make to stop outputting
           // before run buttons are enabled again
-      #if CURRENT_PLATFORM_ID == OS_LINUX
-          waitpid(-fk,&result,__WALL);
-      #elif CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_MACOSX
-          WaitForAllChildren(-fk,&result,0);
-      #endif 
+          WaitForAllChildrenToDie(-fk, &result);
           break;
         }
         usleep(10000); // hundredth of a second
