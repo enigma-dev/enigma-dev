@@ -49,18 +49,12 @@
 #include <X11/Xutil.h>
 
 #if CURRENT_PLATFORM_ID == OS_MACOSX
-#include <sys/sysctl.h>
 #include <sys/proc_info.h>
 #include <libproc.h>
 #elif CURRENT_PLATFORM_ID == OS_LINUX
 #include <proc/readproc.h>
 #elif CURRENT_PLATFORM_ID == OS_FREEBSD
-#include <sys/socket.h>
-#include <sys/sysctl.h>
-#include <sys/param.h>
-#include <sys/queue.h>
 #include <sys/user.h>
-#include <libprocstat.h>
 #include <libutil.h>
 #endif
 
@@ -167,36 +161,7 @@ static pid_t process_execute(const char *command, int *infp, int *outfp) {
   return pid;
 }
 
-// set dialog transient; set title caption.
-static void *modify_shell_dialog(void *pid) {
-  SetErrorHandlers();
-  Display *display = XOpenDisplay(nullptr);
-  Window wid = wid_from_top(display);
-  while (pid_from_wid(display, wid) != (pid_t)(std::intptr_t)pid) {
-    wid = wid_from_top(display);
-  }
-  XSetTransientForHint(display, wid, (Window)enigma_user::window_handle());
-  int len = enigma_user::message_get_caption().length() + 1; char *buffer = new char[len]();
-  strcpy(buffer, enigma_user::message_get_caption().c_str()); XChangeProperty(display, wid,
-  XInternAtom(display, "_NET_WM_NAME", false),
-  XInternAtom(display, "UTF8_STRING", false),
-  8, PropModeReplace, (unsigned char *)buffer, len);
-  delete[] buffer; XCloseDisplay(display);
-  return nullptr;
-}
-
-bool widget_system_initialize() {
-  setenv("WAYLAND_DISPLAY", "", 1); // force xwayland fallback prevents bug.
-  // Defaults to the GUI toolkit (GTK+/Qt) that matches Desktop Environment.
-  current_widget_engine = kwin_running() ? kdialog_widgets : zenity_widgets;
-  return true;
-}
-
-static bool ProcIdExists(pid_t procId) {
-  return (kill(procId, 0) == 0);
-}
-
-static void ParentProcIdFromProcId(pid_t procId, pid_t *parentProcId) {
+static void PpidFromPid(pid_t procId, pid_t *parentProcId) {
   #if CURRENT_PLATFORM_ID == OS_MACOSX
   proc_bsdinfo proc_info;
   if (proc_pidinfo(procId, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
@@ -204,7 +169,7 @@ static void ParentProcIdFromProcId(pid_t procId, pid_t *parentProcId) {
   }
   #elif CURRENT_PLATFORM_ID == OS_LINUX
   PROCTAB *proc = openproc(PROC_FILLSTATUS | PROC_PID, &procId);
-  if (proc_t *proc_info = readproc(proc, nullptr)) { 
+  if (proc_t *proc_info = readproc(proc, nullptr)) {
     *parentProcId = proc_info->ppid;
     freeproc(proc_info);
   }
@@ -217,7 +182,7 @@ static void ParentProcIdFromProcId(pid_t procId, pid_t *parentProcId) {
   #endif
 }
 
-static void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size) {
+static void PidFromPpid(pid_t parentProcId, pid_t **procId, int *size) {
   std::vector<pid_t> vec; int i = 0;
   #if CURRENT_PLATFORM_ID == OS_MACOSX
   int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
@@ -226,7 +191,7 @@ static void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size
   proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
   for (int j = cntp; j > 0; j--) {
     if (proc_info[j] == 0) { continue; }
-    pid_t ppid; ParentProcIdFromProcId(proc_info[j], &ppid);
+    pid_t ppid; PpidFromPid(proc_info[j], &ppid);
     if (ppid == parentProcId) {
       vec.push_back(proc_info[j]); i++;
     }
@@ -257,118 +222,44 @@ static void ProcIdFromParentProcId(pid_t parentProcId, pid_t **procId, int *size
   }
 }
 
-#if OS_PLATFORM == OS_MACOSX
-static void CmdlineFromProcIdHelper(pid_t procId, char ***buffer, int *size) {
-  static std::vector<std::string> vec1; int i = 0;
-  int argmax, nargs; std::size_t s;
-  char *procargs, *sp, *cp; int mib[3];
-  mib[0] = CTL_KERN; mib[1] = KERN_ARGMAX;
-  s = sizeof(argmax);
-  if (sysctl(mib, 2, &argmax, &s, nullptr, 0) == -1) {
-    return;
-  }
-  procargs = (char *)malloc(argmax);
-  if (procargs == nullptr) {
-    return;
-  }
-  mib[0] = CTL_KERN; mib[1] = KERN_PROCARGS2;
-  mib[2] = procId; s = argmax;
-  if (sysctl(mib, 3, procargs, &s, nullptr, 0) == -1) {
-    free(procargs); return;
-  }
-  memcpy(&nargs, procargs, sizeof(nargs));
-  cp = procargs + sizeof(nargs);
-  for (; cp < &procargs[s]; cp++) {
-    if (*cp == '\0') break;
-  }
-  if (cp == &procargs[s]) {
-    free(procargs); return;
-  }
-  for (; cp < &procargs[s]; cp++) {
-    if (*cp != '\0') break;
-  }
-  if (cp == &procargs[s]) {
-    free(procargs); return;
-  }
-  sp = cp; int j = 0;
-  while (*sp != '\0') {
-    if (j >= nargs) {
-      vec1.push_back(sp); i++;
-    }
-    sp += strlen(sp) + 1; j++;
-  }
-  std::vector<char *> vec2;
-  for (int j = 0; j <= vec1.size(); j++)
-    vec2.push_back((char *)vec1[j].c_str());
-  char **arr = new char *[vec2.size()]();
-  std::copy(vec2.begin(), vec2.end(), arr);
-  *buffer = arr; *size = i;
-  if (procargs) {
-    free(procargs);
-  }
-}
-#endif
-
-static void FreeCmdline(char **buffer) {
-  delete[] buffer;
-}
-
-static void CmdlineFromProcId(pid_t procId, char ***buffer, int *size) {
-  if (!ProcIdExists(procId)) return;
-  static std::vector<std::string> vec1; int i = 0;
-  #if CURRENT_PLATFORM_ID == OS_MACOSX
-  char **cmdline; int cmdsiz;
-  CmdlineFromProcIdHelper(procId, &cmdline, &cmdsiz);
-  if (cmdline) {
-    for (int j = 0; j < cmdsiz; j++) {
-      vec1.push_back(cmdline[i]); i++;
-    }
-    delete[] cmdline;
-  } else return;
-  #elif CURRENT_PLATFORM_ID == OS_LINUX
-  PROCTAB *proc = openproc(PROC_FILLCOM | PROC_PID, &procId);
-  if (proc_t *proc_info = readproc(proc, nullptr)) {
-    while (proc_info->cmdline[i]) {
-      vec1.push_back(proc_info->cmdline[i]); i++;
-    }
-    freeproc(proc_info);
-  }
-  closeproc(proc);
-  #elif CURRENT_PLATFORM_ID == OS_FREEBSD
-  procstat *proc_stat = procstat_open_sysctl(); unsigned cntp;
-  kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, procId, &cntp);
-  char **cmdline = procstat_getargv(proc_stat, proc_info, 0);
-  if (cmdline) {
-    for (int j = 0; cmdline[j]; j++) {
-      vec1.push_back(cmdline[j]); i++;
-    }
-  }
-  procstat_freeargv(proc_stat);
-  procstat_freeprocs(proc_stat, proc_info);
-  procstat_close(proc_stat);
-  #endif
-  std::vector<char *> vec2;
-  for (int i = 0; i <= vec1.size(); i++)
-    vec2.push_back((char *)vec1[i].c_str());
-  char **arr = new char *[vec2.size()]();
-  std::copy(vec2.begin(), vec2.end(), arr);
-  *buffer = arr; *size = i;
-}
-
-static void ProcIdFromParentProcIdSkipSh(pid_t parentProcId, pid_t **procId, int *size) {
-  char **cmdline; int cmdsize;
-  ProcIdFromParentProcId(parentProcId, procId, size);
+static pid_t PidFromPpidRecursive(pid_t parentProcId) {
+  pid_t *procId; int size;
+  PidFromPpid(parentProcId, &procId, &size);
   if (procId) {
-    for (int i; i < *size; i++) {
-      CmdlineFromProcId(*procId[i], &cmdline, &cmdsize);
-      if (cmdline) {
-        if (strcmp(cmdline[0], "/bin/sh") == 0) {
-          ProcIdFromParentProcIdSkipSh(*procId[i], procId, size);
-        }
-        FreeCmdline(cmdline);
-      }
+    if (size > 0)
+      return PidFromPpidRecursive(procId[0]);
+    free(procId);
+  }
+  return parentProcId;
+}
+
+// set dialog transient; set title caption.
+static void *modify_shell_dialog(void *pid) {
+  SetErrorHandlers();
+  Display *display = XOpenDisplay(nullptr);
+  Window wid = wid_from_top(display);
+  pid_t child = PidFromPpidRecursive((pid_t)(std::intptr_t)pid);
+  while (true) {
+    wid = wid_from_top(display);
+    if (pid_from_wid(display, wid) == child) {
+      break;
     }
   }
+  XSetTransientForHint(display, wid, (Window)enigma_user::window_handle());
+  int len = enigma_user::message_get_caption().length() + 1; char *buffer = new char[len]();
+  strcpy(buffer, enigma_user::message_get_caption().c_str()); XChangeProperty(display, wid,
+  XInternAtom(display, "_NET_WM_NAME", false),
+  XInternAtom(display, "UTF8_STRING", false),
+  8, PropModeReplace, (unsigned char *)buffer, len);
+  delete[] buffer; XCloseDisplay(display);
+  return nullptr;
+}
+
+bool widget_system_initialize() {
+  setenv("WAYLAND_DISPLAY", "", 1); // force xwayland fallback prevents bug.
+  // Defaults to the GUI toolkit (GTK+/Qt) that matches Desktop Environment.
+  current_widget_engine = kwin_running() ? kdialog_widgets : zenity_widgets;
+  return true;
 }
 
 string create_shell_dialog(string command) {
@@ -376,15 +267,7 @@ string create_shell_dialog(string command) {
   int outfp = 0, infp = 0; ssize_t nRead = 0;
   pid_t pid = process_execute(command.c_str(), &infp, &outfp);
   std::this_thread::sleep_for(std::chrono::milliseconds(100)); pthread_t thread;
-  pid_t *pids; int size; ProcIdFromParentProcIdSkipSh(pid, &pids, &size);
-  if (pids) {
-    pthread_create(&thread, nullptr,
-    modify_shell_dialog, (void *)(std::intptr_t)pids[0]);
-    free(pids);
-  } else {
-    pthread_create(&thread, nullptr,
-    modify_shell_dialog, (void *)(std::intptr_t)pid);
-  }
+  pthread_create(&thread, nullptr, modify_shell_dialog, (void *)(std::intptr_t)pid);
   while ((nRead = read(outfp, buffer, BUFSIZ)) > 0) {
     buffer[nRead] = '\0';
     output.append(buffer, nRead);
