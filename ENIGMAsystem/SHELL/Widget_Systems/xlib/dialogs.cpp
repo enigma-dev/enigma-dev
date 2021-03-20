@@ -87,10 +87,10 @@ static bool kwin_running() {
   return bKWinRunning;
 }
 
-static unsigned long get_wid_or_pid(Display *display, Window window, bool wid) {
+static unsigned long GetActiveWidOrWindowPid(Display *display, Window window, bool wid) {
   SetErrorHandlers();
   unsigned char *prop;
-  unsigned long property;
+  unsigned long property = 0;
   Atom actual_type, filter_atom;
   int actual_format, status;
   unsigned long nitems, bytes_after;
@@ -108,15 +108,15 @@ static Window wid_from_top(Display *display) {
   SetErrorHandlers();
   int screen = XDefaultScreen(display);
   Window window = RootWindow(display, screen);
-  return (Window)get_wid_or_pid(display, window, true);
+  return (Window)GetActiveWidOrWindowPid(display, window, true);
 }
 
-static pid_t pid_from_wid(Display *display, Window window) {
-  return (pid_t)get_wid_or_pid(display, window, false);
+static pid_t PidFromWid(Display *display, Window window) {
+  return (pid_t)GetActiveWidOrWindowPid(display, window, false);
 }
 
 // create dialog process
-static pid_t process_execute(const char *command, int *infp, int *outfp) {
+static pid_t ProcessCreate(const char *command, int *infp, int *outfp) {
   int p_stdin[2];
   int p_stdout[2];
   pid_t pid;
@@ -161,26 +161,14 @@ static pid_t process_execute(const char *command, int *infp, int *outfp) {
   return pid;
 }
 
+#if CURRENT_PLATFORM_ID == OS_MACOSX
 static void PpidFromPid(pid_t procId, pid_t *parentProcId) {
-  #if CURRENT_PLATFORM_ID == OS_MACOSX
   proc_bsdinfo proc_info;
   if (proc_pidinfo(procId, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
     *parentProcId = proc_info.pbi_ppid;
   }
-  #elif CURRENT_PLATFORM_ID == OS_LINUX
-  PROCTAB *proc = openproc(PROC_FILLSTATUS | PROC_PID, &procId);
-  if (proc_t *proc_info = readproc(proc, nullptr)) {
-    *parentProcId = proc_info->ppid;
-    freeproc(proc_info);
-  }
-  closeproc(proc);
-  #elif CURRENT_PLATFORM_ID == OS_FREEBSD
-  if (kinfo_proc *proc_info = kinfo_getproc(procId)) {
-    *parentProcId = proc_info->ki_ppid;
-    free(proc_info);
-  }
-  #endif
 }
+#endif
 
 static void PidFromPpid(pid_t parentProcId, pid_t **procId, int *size) {
   std::vector<pid_t> vec; int i = 0;
@@ -241,7 +229,7 @@ static void *modify_shell_dialog(void *pid) {
   pid_t child = PidFromPpidRecursive((pid_t)(std::intptr_t)pid);
   while (true) {
     wid = wid_from_top(display);
-    if (pid_from_wid(display, wid) == child) {
+    if (PidFromWid(display, wid) == child) {
       break;
     }
   }
@@ -265,7 +253,7 @@ bool widget_system_initialize() {
 string create_shell_dialog(string command) {
   string output; char buffer[BUFSIZ];
   int outfp = 0, infp = 0; ssize_t nRead = 0;
-  pid_t pid = process_execute(command.c_str(), &infp, &outfp);
+  pid_t pid = ProcessCreate(command.c_str(), &infp, &outfp);
   std::this_thread::sleep_for(std::chrono::milliseconds(100)); pthread_t thread;
   pthread_create(&thread, nullptr, modify_shell_dialog, (void *)(std::intptr_t)pid);
   while ((nRead = read(outfp, buffer, BUFSIZ)) > 0) {
