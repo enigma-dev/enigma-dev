@@ -24,7 +24,7 @@ struct Gamepad {
   void push();
 };
 
-//extern std::vector<Gamepad> gamepads;
+extern std::vector<Gamepad> gamepads;
 
 void initGamepads();
 void cleanupGamepads();

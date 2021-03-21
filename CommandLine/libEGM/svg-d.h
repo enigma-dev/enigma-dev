@@ -1,3 +1,7 @@
+
+#ifndef EGM_SVG_H
+#define EGM_SVG_H
+
 #include "egm-rooms.h"
 #include <google/protobuf/util/message_differencer.h>
 
@@ -23,3 +27,5 @@ void ParseTiles(
 
 }  // namespace svg_d
 }  // namespace egm
+
+#endif

@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 Samuel Venable
+/** Copyright (C) 2019-2021 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -36,12 +36,8 @@ using enigma_user::filename_name;
 using enigma_user::filename_path;
 
 #include "Platforms/General/PFmain.h"
-#include "Platforms/General/PFshell.h"
-using enigma_insecure::execute_shell_for_output;
-
 #include "Platforms/General/PFwindow.h"
 using enigma_user::window_get_caption;
-using enigma_user::window_identifier;
 
 #include "Platforms/General/PFfilemanip.h"
 using enigma_user::file_exists;
@@ -65,11 +61,7 @@ static string error_caption;
 static bool message_cancel  = false;
 static bool question_cancel = false;
 
-static string shellscript_evaluate(string command) {
-  string result = execute_shell_for_output(command);
-  if (result.back() == '\n') result.pop_back();
-  return result;
-}
+using enigma::create_shell_dialog;
 
 static string add_escaping(string str, bool is_caption, string new_caption) {
   string result = str; if (is_caption && str.empty()) result = new_caption;
@@ -123,11 +115,10 @@ static int show_message_helperfunc(string message) {
   }
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   str_cancel + string("--title=\"") + str_title + string("\" --no-wrap --text=\"") +
   add_escaping(message, false, "") + str_icon + str_echo;
 
-  string str_result = shellscript_evaluate(str_command);
+  string str_result = create_shell_dialog(str_command);
   return (int)strtod(str_result.c_str(), NULL);
 }
 
@@ -144,12 +135,11 @@ static int show_question_helperfunc(string message) {
     str_cancel = "--extra-button=Cancel ";
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--question --ok-label=Yes --cancel-label=No ") + str_cancel +  string("--title=\"") +
   str_title + string("\" --no-wrap --text=\"") + add_escaping(message, false, "") +
   string("\" --icon-name=dialog-question);if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Cancel\" ] ;then echo -1;else echo 0;fi");
 
-  string str_result = shellscript_evaluate(str_command);
+  string str_result = create_shell_dialog(str_command);
   return (int)strtod(str_result.c_str(), NULL);
 }
 
@@ -169,19 +159,17 @@ static void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
   if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
     type == MESSAGE_TYPE::M_FATAL_USER_ERROR) {
     str_command = string("ans=$(zenity ") +
-    string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
     string("--error --ok-label=Abort ") +
     string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
     add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
   } else {
     str_command = string("ans=$(zenity ") +
-    string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
     string("--error --ok-label=Ignore --extra-button=Abort ") +
     string("--title=\"") + add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
     add_escaping(errortext, false, "") + string("\" --icon-name=dialog-error);") + str_echo;
   }
 
-  string str_result = shellscript_evaluate(str_command);
+  string str_result = create_shell_dialog(str_command);
   if (strtod(str_result.c_str(), NULL) == 1) exit(0);
 }
 
@@ -222,13 +210,12 @@ int show_attempt(string errortext) override {
   string str_title;
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--error --ok-label=Cancel --extra-button=Retry ") +  string("--title=\"") +
   add_escaping(error_caption, true, "Error") + string("\" --no-wrap --text=\"") +
   add_escaping(errortext, false, "") +
   string("\" --icon-name=dialog-error);if [ $? = 0 ] ;then echo -1;else echo 0;fi");
 
-  string str_result = shellscript_evaluate(str_command);
+  string str_result = create_shell_dialog(str_command);
   return (int)strtod(str_result.c_str(), NULL);
 }
 
@@ -241,12 +228,11 @@ string get_string(string message, string def) override {
 
   str_title = add_escaping(dialog_caption, true, " ");
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--entry --title=\"") + str_title + string("\" --text=\"") +
   add_escaping(message, false, "") + string("\" --entry-text=\"") +
   add_escaping(def, false, "") + string("\");echo $ans");
 
-  return shellscript_evaluate(str_command);
+  return create_shell_dialog(str_command);
 }
 
 string get_password(string message, string def) override {
@@ -258,12 +244,11 @@ string get_password(string message, string def) override {
 
   str_title = add_escaping(dialog_caption, true, " ");
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--entry --title=\"") + str_title + string("\" --text=\"") +
   add_escaping(message, false, "") + string("\" --hide-text --entry-text=\"") +
   add_escaping(def, false, "") + string("\");echo $ans");
 
-  return shellscript_evaluate(str_command);
+  return create_shell_dialog(str_command);
 }
 
 double get_integer(string message, double def) override {
@@ -284,11 +269,10 @@ string get_open_filename(string filter, string fname) override {
   string str_fname = filename_name(fname);
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
-  string result = shellscript_evaluate(str_command);
+  string result = create_shell_dialog(str_command);
   return file_exists(result) ? result : "";
 }
 
@@ -303,11 +287,10 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   str_fname = (char *)str_path.c_str();
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
-  string result = shellscript_evaluate(str_command);
+  string result = create_shell_dialog(str_command);
   return file_exists(result) ? result : "";
 }
 
@@ -317,11 +300,10 @@ string get_open_filenames(string filter, string fname) override {
   string str_fname = filename_name(fname);
 
   str_command = string("zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --multiple --separator='\n' --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
 
-  string result = shellscript_evaluate(str_command);
+  string result = create_shell_dialog(str_command);
   std::vector<string> stringVec = split_string(result, '\n');
 
   bool success = true;
@@ -344,11 +326,10 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
   str_fname = (char *)str_path.c_str();
 
   str_command = string("zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --multiple --separator='\n' --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
 
-  string result = shellscript_evaluate(str_command);
+  string result = create_shell_dialog(str_command);
   std::vector<string> stringVec = split_string(result, '\n');
 
   bool success = true;
@@ -366,11 +347,10 @@ string get_save_filename(string filter, string fname) override {
   string str_fname = filename_name(fname);
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
-  return shellscript_evaluate(str_command);
+  return create_shell_dialog(str_command);
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) override {
@@ -384,11 +364,10 @@ string get_save_filename_ext(string filter, string fname, string dir, string tit
   str_fname = (char *)str_path.c_str();
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
 
-  return shellscript_evaluate(str_command);
+  return create_shell_dialog(str_command);
 }
 
 string get_directory(string dname) override {
@@ -398,11 +377,10 @@ string get_directory(string dname) override {
   string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_dname, false, "") + str_end;
 
-  return shellscript_evaluate(str_command);
+  return create_shell_dialog(str_command);
 }
 
 string get_directory_alt(string capt, string root) override {
@@ -412,11 +390,10 @@ string get_directory_alt(string capt, string root) override {
   string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
 
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_dname, false, "") + str_end;
 
-  return shellscript_evaluate(str_command);
+  return create_shell_dialog(str_command);
 }
 
 int get_color(int defcol) override {
@@ -433,11 +410,10 @@ int get_color(int defcol) override {
   str_defcol = string("rgb(") + std::to_string(red) + string(",") +
   std::to_string(green) + string(",") + std::to_string(blue) + string(")");
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--color-selection --show-palette --title=\"") + str_title + string("\"  --color='") +
   str_defcol + string("');if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
-  str_result = shellscript_evaluate(str_command);
+  str_result = create_shell_dialog(str_command);
   if (str_result == "-1") return strtod(str_result.c_str(), NULL);
   str_result = string_replace_all(str_result, "rgba(", "");
   str_result = string_replace_all(str_result, "rgb(", "");
@@ -469,11 +445,10 @@ int get_color_ext(int defcol, string title) override {
   str_defcol = string("rgb(") + std::to_string(red) + string(",") +
   std::to_string(green) + string(",") + std::to_string(blue) + string(")");
   str_command = string("ans=$(zenity ") +
-  string("--attach=$(sleep .01;echo ") + window_identifier() + string(") ") +
   string("--color-selection --show-palette --title=\"") + str_title + string("\" --color='") +
   str_defcol + string("');if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
-  str_result = shellscript_evaluate(str_command);
+  str_result = create_shell_dialog(str_command);
   if (str_result == "-1") return strtod(str_result.c_str(), NULL);
   str_result = string_replace_all(str_result, "rgba(", "");
   str_result = string_replace_all(str_result, "rgb(", "");

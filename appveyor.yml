@@ -1,3 +1,5 @@
+# Latest image
+image: Visual Studio 2019
 # fetch repository as zip archive
 shallow_clone: true
 # disable automatic tests
@@ -29,38 +31,17 @@ environment:
   PACKAGES: ""
 
   matrix:
-    # Game Modes
-    - {MODE: Run}
+    # Game Modes 
+    # run mode covered in regular tests
     - {MODE: Debug}
     - {MODE: Compile}
 
-    # Platforms
-    - {PLATFORM: SDL, PACKAGES: "SDL2:x"}
-
-    # Graphics
-    - {GRAPHICS: Direct3D11}
-    - {GRAPHICS: OpenGL1, PACKAGES: "glew:x"}
-    - {GRAPHICS: OpenGLES3, PLATFORM: SDL, PACKAGES: "SDL2:x libepoxy:x" }
-
-    # Audio
-    - {AUDIO: DirectSound}
-    - {AUDIO: OpenAL, PACKAGES: "openal:x dumb:x alure:x libmodplug:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
-
-    # Widgets
-    - {WIDGETS: Win32}
+    # Catch-all
+    - {GRAPHICS: Direct3D11, AUDIO: DirectSound, WIDGETS: Win32, EXTENSIONS: "DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFilesystem,Box2DPhysics,StudioPhysics,ExternalFuncs", PACKAGES: "box2d:x libffi:x"}
+    - {GRAPHICS: OpenGL1, AUDIO: OpenAL, PACKAGES: "glew:x openal:x dumb:x alure:x libmodplug:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
+    - {GRAPHICS: OpenGLES3, PLATFORM: SDL, PACKAGES: "SDL2:x libepoxy:x"}
     #TODO: Fix GTK+ on Windows
     #- {WIDGETS: GTK+, PACKAGES: "gtk2:x"}
-
-    # Extensions
-    - {EXTENSIONS: "DirectShow"}
-    - {EXTENSIONS: "WindowsTouch"}
-    - {EXTENSIONS: "XInput"}
-    - {EXTENSIONS: "MediaControlInterface"}
-    - {EXTENSIONS: "FileDropper"}
-    - {EXTENSIONS: "IniFilesystem"}
-    - {EXTENSIONS: "Box2DPhysics", PACKAGES: "box2d:x"}
-    - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
-    - {EXTENSIONS: "ExternalFuncs", PACKAGES: "libffi:x"}
     #TODO: Fix Bullet Physics on Windows
     #- {EXTENSIONS: "BulletDynamics", PACKAGES: "bullet:x"}
 
@@ -77,20 +58,7 @@ init:
 
 install:
   - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
-  - > # Temp CI fix
-    bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-  - >
-    bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
-  - >
-    bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
-  - >
-    bash -lc "pacman --noconfirm -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-  - > # Upgrade msys
-    bash -lc "pacman --noconfirm -Syuu"
-  - > # Kill any hanging msys terminals
-    taskkill /f /fi "MODULES eq msys-2.0.dll" || exit /b 0s
-  - > # Finish upgrading packages & install packages common to all builds
-    bash -lc "pacboy --noconfirm -Syuu boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x %PACKAGES%"
+  - bash -lc "pacboy --noconfirm -Sy boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x %PACKAGES%"
   - gcc -v
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {

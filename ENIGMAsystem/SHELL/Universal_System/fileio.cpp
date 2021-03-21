@@ -220,7 +220,7 @@ void file_bin_write_byte(int fileid, unsigned char byte) {
 // Reads a byte of data from the file and returns this
 int file_bin_read_byte(int fileid) {
   unsigned char byte = 0;
-  enigma::files.get(fileid).fs >> byte;
+  enigma::files.get(fileid).fs >> std::noskipws >> byte;
   bool good = enigma::files.get(fileid).fs.good();
   try_io_and_print(enigma::files.get(fileid))
   return (!good) ? -1 : static_cast<int>(byte);

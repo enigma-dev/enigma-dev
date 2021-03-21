@@ -6,17 +6,7 @@
 # TODO: better config process based on features rather than OS
 
 # PLATFORM { Platforms/* }
-OS := $(shell uname -s)
-ifeq ($(OS), Linux)
-	PLATFORM := xlib
-	MKDIR := mkdir
-else ifeq ($(OS), Darwin)
-	PLATFORM := Cocoa
-	MKDIR := mkdir
-else
-	PLATFORM := Win32
-	MKDIR := mkdir.exe
-endif
+include ../../Config.mk
 
 ifeq ($(TRAVIS_OS_NAME), linux)
   override CXXFLAGS += -DOLD_UBUNTU
@@ -164,7 +154,7 @@ write_src_files:
 	@echo "$(SOURCES)" > $(WORKDIR)/sources.list
 
 android_game: write_src_files
-	@cd ../../android && BASENAME=$(BASENAME) ./gradlew $(GRADLE_TARGET)
+	@cd ../../android && BASENAME=$(BASENAME) CODEGEN=$(CODEGEN) ./gradlew $(GRADLE_TARGET)
 	@cp $(APK_OUT)/$(BASENAME) $(OUTPUTNAME)
 
 compile_game: print_flags $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)

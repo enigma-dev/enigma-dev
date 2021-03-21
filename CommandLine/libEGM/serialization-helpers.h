@@ -1,3 +1,7 @@
+
+#ifndef EGM_SERIAL_H
+#define EGM_SERIAL_H
+
 #include <string>
 #include <vector>
 #include <sstream>
@@ -27,3 +31,5 @@ ReadQuotedString(const std::string &data, size_t i);
 
 }  // namespace serialization
 }  // namespace egm
+
+#endif

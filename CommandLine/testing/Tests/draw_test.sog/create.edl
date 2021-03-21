@@ -1,5 +1,6 @@
 spr = sprite_add("CommandLine/testing/data/sprite.png", 4, false, false, 16, 10);
 spr2 = sprite_duplicate(spr);
+sprNumbers = sprite_add("CommandLine/testing/data/numbers.png", 3, false, false, 0, 0);
 
 vertex_format_begin();
 vertex_format_add_position();
