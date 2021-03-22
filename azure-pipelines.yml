@@ -29,7 +29,7 @@ jobs:
     TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
     TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-20.04'
   timeoutInMinutes: 360
 
   steps:
@@ -63,7 +63,7 @@ jobs:
 - job: CrossCompile
   displayName: 'Cross Compile'
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-20.04'
 
   steps:
     - checkout: self
