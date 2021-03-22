@@ -4,7 +4,7 @@ set -e  # exit if any command fails
 
 if [[ "$TRAVIS" -eq "true" ]]; then
   export LIBGL_ALWAYS_SOFTWARE=1
-  openbox & # We need a wm for these tests
+  startxfce4 & # We need a wm for these tests
 fi
 
 if [ -z "$1" ]; then
