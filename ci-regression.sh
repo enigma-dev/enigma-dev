@@ -3,7 +3,6 @@
 set -e  # exit if any command fails
 
 if [[ "$TRAVIS" -eq "true" ]]; then
-  export LIBGL_ALWAYS_SOFTWARE=1
   startxfce4 & # We need a wm for these tests
 fi
 
