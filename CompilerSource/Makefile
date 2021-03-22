@@ -20,6 +20,9 @@ LDFLAGS += -shared -g -L../ -Wl,-rpath,./ -lProtocols -lprotobuf -lENIGMAShared 
 ifeq ($(OS), Linux)
 	LDFLAGS += -lstdc++fs
 endif
+ifeq ($(OS), FreeBSD)
+	LDFLAGS += -lc -lutil
+endif
 SOURCES := $(filter-out ./standalone_main.cpp, $(call rwildcard,.,*.cpp))
 
 include ../Default.mk

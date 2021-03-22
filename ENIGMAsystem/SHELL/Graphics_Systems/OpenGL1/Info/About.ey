@@ -11,3 +11,4 @@ Depends:
 
 Represents:
 	Build-platforms: Windows, MacOSX, Linux, FreeBSD, SDL
+  

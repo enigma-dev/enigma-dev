@@ -30,13 +30,17 @@
 #include <cstring>
 #include <iostream>
 
-using namespace std;
-
 #include "bettersystem.h"
 #include "OS_Switchboard.h"
 #include "general/parse_basics_old.h"
 #include "frontend.h"
 
+#if CURRENT_PLATFORM_ID == OS_FREEBSD
+    #include <sys/user.h>
+    #include <libutil.h>
+#endif
+
+using std::string;
 
 inline char* scopy(string& str)
 {
@@ -252,18 +256,82 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       return e_exec(cmd, eCenviron);
     }
 #else
+    #include <vector>
+    #include <algorithm>
+    #include <cstdlib>
+    #include <csignal>
+
     #include <fcntl.h>
     #include <unistd.h>
     #include <sys/wait.h>
     #include <sys/stat.h>
+    #include <sys/types.h>
 
     extern char **environ;
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
-#if CURRENT_PLATFORM_ID ==  OS_MACOSX
+#if CURRENT_PLATFORM_ID == OS_MACOSX
+    #include <libproc.h>
+    #include <sys/proc_info.h>
     #include <crt_externs.h>
     #define environ (*_NSGetEnviron())
     extern char **environ;
+#endif
+
+    using std::vector;
+
+#if CURRENT_PLATFORM_ID == OS_FREEBSD
+    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
+      vector<pid_t> vec; int i = 0; int cntp;
+      if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
+        for (int j = 0; j < cntp; j++) {
+          if (proc_info[j].ki_ppid == parentProcId) {
+            vec.push_back(proc_info[j].ki_pid); i++;
+          }
+        }
+        free(proc_info);
+      }
+      return vec;
+    }
+#elif CURRENT_PLATFORM_ID == OS_MACOSX
+    pid_t ParentProcIdFromProcId(pid_t procId) {
+      proc_bsdinfo proc_info;
+      if (proc_pidinfo(procId, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
+        return proc_info.pbi_ppid;
+      }
+      return -1;
+    }
+
+    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
+      vector<pid_t> vec; int i = 0;
+      int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
+      vector<pid_t> proc_info(cntp);
+      std::fill(proc_info.begin(), proc_info.end(), 0);
+      proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
+      for (int j = cntp; j > 0; j--) {
+        if (proc_info[j] == 0) { continue; }
+        if (ppid == ParentProcIdFromProcId(proc_info[j])) {
+          vec.push_back(proc_info[j]); i++;
+        }
+      }
+      return vec;
+    }
+#endif
+#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_MACOSX
+    void WaitForAllChildrenToDie(pid_t pid, int *status) {
+      vector<pid_t> procId = ProcIdFromParentProcId(pid);
+      if (procId.size()) {
+        for (int i = 0; i < procId.size(); i++) {
+          if (procId[i] == 0) { break; }
+          WaitForAllChildrenToDie(procId[i], status);
+          waitpid(procId[i], status, 0);
+        }
+      }
+    }
+#elif CURRENT_PLATFORM_ID == OS_LINUX
+    void WaitForAllChildrenToDie(pid_t pid, int *status) {
+      waitpid(pid, status, __WALL);
+    }
 #endif
 
     void path_coerce(string &ename)
@@ -413,7 +481,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           // wait for entire process group to signal,
           // important for GNU make to stop outputting
           // before run buttons are enabled again
-          waitpid(-fk,&result,__WALL);
+          WaitForAllChildrenToDie(-fk, &result);
           break;
         }
         usleep(10000); // hundredth of a second
@@ -429,7 +497,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       cout << "TRUE\n\n";
       path.insert(0, "PATH=");
       if (path != "PATH=") path += ":";
-      path += getenv("PATH");
+      path += getenv("PATH") ? : "";
       const char *Cenviron[2] = { path.c_str(), NULL };
       return e_exec(cmd, Cenviron);
     }
