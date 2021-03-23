@@ -2,7 +2,7 @@
 
 ###### Harness #######
 if [ "$TEST_HARNESS" == true ]; then
-  LINUX_DEPS="$LINUX_DEPS openbox libgtest-dev wmctrl xdotool lcov"
+  LINUX_DEPS="$LINUX_DEPS openbox libgtest-dev wmctrl xdotool ffmpeg lcov"
 fi
 
 ###### Compilers #######
