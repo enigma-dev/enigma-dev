@@ -26,7 +26,7 @@ if [[ "$TRAVIS" -eq "true" ]]; then
   Xvfb :99 -s "-screen 0 1024x768x24" &
   openbox-session &
   sleep 5
-  streaming
+  streaming &
   # We need a wm for these tests
 fi
 
