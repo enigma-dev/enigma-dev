@@ -15,7 +15,7 @@ set -e  # exit if any command fails
      STREAM_KEY="live_160175943_ZfI2WfvNIC1NOMvLJgzjz9SYKRz9R6" # use the terminal command Streaming streamkeyhere to stream your video to twitch or justin
      SERVER="live-sjc" # twitch server in California, see https://bashtech.net/twitch/ingest.php to change 
      
-     ffmpeg -f x11grab -s "$INRES" -r "$FPS" -i :0.0 -f alsa -i pulse -f flv -ac 2 -ar $AUDIO_RATE \
+     ffmpeg -f x11grab -s "$INRES" -r "$FPS" -i :99.0 -f alsa -i pulse -f flv -ac 2 -ar $AUDIO_RATE \
        -vcodec libx264 -g $GOP -keyint_min $GOPMIN -b:v $CBR -minrate $CBR -maxrate $CBR -pix_fmt yuv420p\
        -s $OUTRES -preset $QUALITY -tune film -acodec libmp3lame -threads $THREADS -strict normal \
        -bufsize $CBR "rtmp://$SERVER.twitch.tv/app/$STREAM_KEY"
