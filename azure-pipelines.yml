@@ -40,7 +40,7 @@ jobs:
         sudo dpkg --add-architecture i386
         ./CI/install_emake_deps.sh
         ./CI/split_jobs.sh install
-        cp ./CI/asound.conf /etc/asound.conf
+        sudo cp ./CI/asound.conf /etc/asound.conf
       displayName: Install Dependencies
     - script: |
         make -j4
