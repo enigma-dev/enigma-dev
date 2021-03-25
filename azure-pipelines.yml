@@ -179,7 +179,8 @@ jobs:
     COLLISION: None 
     NETWORK: None 
     WIDGETS: None 
-    EXTENSIONS: "None" 
+    EXTENSIONS: "None"
+    OUTPUT: /tmp/test-android-game.apk
     ANDROID_API_LEVEL: 29 
     ANDROID_BUILD_TOOLS_VERSION: 29.0.3
   pool:
