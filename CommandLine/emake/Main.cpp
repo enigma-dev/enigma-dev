@@ -1,18 +1,13 @@
 #include "Main.hpp"
 #include "OptionsParser.hpp"
 #include "EnigmaPlugin.hpp"
-
-#ifdef CLI_ENABLE_SERVER
 #include "Server.hpp"
-#endif
 
-#ifdef CLI_ENABLE_EGM
 #include "egm.h"
 #include "gmk.h"
 #include "gmx.h"
 #include "yyp.h"
 #include "sog.h"
-#endif
 
 #include "strings_util.h"
 
@@ -63,9 +58,8 @@ int main(int argc, char* argv[])
     outputStream.rdbuf(nullptr);
     errorStream.rdbuf(nullptr);
   }
-#ifdef CLI_ENABLE_EGM
+
   egm::BindOutputStreams(outputStream, errorStream);
-#endif
 
   std::streambuf* cout_rdbuf = std::cout.rdbuf();
   std::streambuf* cerr_rdbuf = std::cerr.rdbuf();
@@ -96,14 +90,12 @@ int main(int argc, char* argv[])
   bool run = options.GetOption("run").as<bool>();
   if (!run) plugin.HandleGameLaunch();
 
-#ifdef CLI_ENABLE_SERVER
   bool server = options.GetOption("server").as<bool>();
   if (server) {
     int port = options.GetOption("port").as<int>();
     string ip = options.GetOption("ip").as<std::string>();
     return RunServer(ip + ":" + std::to_string(port), plugin, options, ecb);
   }
-#endif
 
   GameMode mode;
   std::string _mode = options.GetOption("mode").as<std::string>();
@@ -129,22 +121,14 @@ int main(int argc, char* argv[])
   std::string input_file = options.GetOption("input").as<std::string>();
 
   std::unique_ptr<buffers::Project> project;
-
-// Temporary hack for android ci until we can remove this macro
-bool hasFileSupport = true;
-#ifndef CLI_ENABLE_EGM
-  hasFileSupport = false;
-  std::cerr << "Warning: emake was built without libEGM support and can only build empty games" << std::endl;
-#endif
   
-  if (!hasFileSupport || input_file.empty()) {
+  if (input_file.empty()) {
     project = std::make_unique<buffers::Project>();
     std::cerr << "Warning: No game file specified. "
                 "Building an empty game." << std::endl;
     return plugin.BuildGame(project->game(), mode, output_file.c_str());
   }
 
-#ifdef CLI_ENABLE_EGM
   // Load event data
   EventData event_data(ParseEventFile((fs::path(options.EnigmaRoot())/"events.ey").u8string()));
 
@@ -156,6 +140,6 @@ bool hasFileSupport = true;
   egm::LibEGMInit(&event_data);
   if (!(project = egm::LoadProject(input_file))) return 1;
     return plugin.BuildGame(project->game(), mode, output_file.c_str());
-#endif
+    
   return 1;
 }
