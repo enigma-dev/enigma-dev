@@ -29,7 +29,7 @@ jobs:
     TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
     TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
   pool:
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
   timeoutInMinutes: 360
 
   steps:
@@ -40,7 +40,7 @@ jobs:
         sudo dpkg --add-architecture i386
         ./CI/install_emake_deps.sh
         ./CI/split_jobs.sh install
-        ./CI/build_sdl.sh
+        sudo cp ./CI/asound.conf /etc/asound.conf
       displayName: Install Dependencies
     - script: |
         make -j4
@@ -64,7 +64,7 @@ jobs:
 - job: CrossCompile
   displayName: 'Cross Compile'
   pool:
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
 
   steps:
     - checkout: self
