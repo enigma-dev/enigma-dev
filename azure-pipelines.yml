@@ -173,8 +173,13 @@ jobs:
     TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
     COMPILER: Android 
     GRAPHICS: OpenGLES2 
-    PLATFORM: SDL 
-    MODE: Compile 
+    PLATFORM: SDL
+    MODE: Compile
+    AUDIO: None
+    COLLISION: None 
+    NETWORK: None 
+    WIDGETS: None 
+    EXTENSIONS: "None" 
     ANDROID_API_LEVEL: 29 
     ANDROID_BUILD_TOOLS_VERSION: 29.0.3
   pool:
@@ -198,4 +203,4 @@ jobs:
       displayName: 'Build Emake'
 
     - script: ./ci-build.sh
-      displayName: 'Build Emake'
+      displayName: 'Build Game'
