@@ -2,31 +2,11 @@
 
 set -e  # exit if any command fails
 
- streaming() {
-     INRES="1024x768" # input resolution
-     OUTRES="1024x768" # output resolution
-     FPS="39" # target FPS
-     GOP="30" # i-frame interval, should be double of FPS, 
-     GOPMIN="30" # min i-frame interval, should be equal to fps, 
-     THREADS="2" # max 6
-     CBR="1000k" # constant bitrate (should be between 1000k - 3000k)
-     QUALITY="ultrafast"  # one of the many FFMPEG preset
-     AUDIO_RATE="44100"
-     STREAM_KEY="live_160175943_ZfI2WfvNIC1NOMvLJgzjz9SYKRz9R6" # use the terminal command Streaming streamkeyhere to stream your video to twitch or justin
-     SERVER="live-sjc" # twitch server in California, see https://bashtech.net/twitch/ingest.php to change 
-     
-     ffmpeg -f x11grab -s "$INRES" -r "$FPS" -i :99.0 -f lavfi -i anullsrc -f flv -ac 2 -ar $AUDIO_RATE \
-       -vcodec libx264 -g $GOP -keyint_min $GOPMIN -b:v $CBR -minrate $CBR -maxrate $CBR -pix_fmt yuv420p\
-       -s $OUTRES -preset $QUALITY -tune film -acodec libmp3lame -threads $THREADS -strict normal \
-       -bufsize $CBR "rtmp://$SERVER.twitch.tv/app/$STREAM_KEY"
- }
-
 if [[ "$TRAVIS" -eq "true" ]]; then
   export DISPLAY=:99.0
   Xvfb :99 -s "-screen 0 1024x768x24" &
   openbox-session &
   sleep 5
-  streaming &
   # We need a wm for these tests
 fi
 
