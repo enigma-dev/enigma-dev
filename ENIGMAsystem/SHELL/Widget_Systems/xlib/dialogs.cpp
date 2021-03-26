@@ -104,7 +104,7 @@ static unsigned long GetActiveWidOrWindowPid(Display *display, Window window, bo
   return property;
 }
 
-static Window wid_from_top(Display *display) {
+static Window WidFromTop(Display *display) {
   SetErrorHandlers();
   int screen = XDefaultScreen(display);
   Window window = RootWindow(display, screen);
@@ -225,15 +225,15 @@ static pid_t PidFromPpidRecursive(pid_t parentProcId) {
 static void *modify_shell_dialog(void *pid) {
   SetErrorHandlers();
   Display *display = XOpenDisplay(nullptr);
-  Window wid = wid_from_top(display);
+  Window wid = WidFromTop(display);
   pid_t child = PidFromPpidRecursive((pid_t)(std::intptr_t)pid);
   while (true) {
-    wid = wid_from_top(display);
+    wid = WidFromTop(display);
     if (PidFromWid(display, wid) == child) {
       break;
     }
   }
-  XSetTransientForHint(display, wid, (Window)enigma_user::window_handle());
+  XSetTransientForHint(display, wid, (Window)(std::intptr_t)enigma_user::window_handle());
   int len = enigma_user::message_get_caption().length() + 1; char *buffer = new char[len]();
   strcpy(buffer, enigma_user::message_get_caption().c_str()); XChangeProperty(display, wid,
   XInternAtom(display, "_NET_WM_NAME", false),
