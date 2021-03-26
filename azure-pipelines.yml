@@ -85,7 +85,7 @@ jobs:
         echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
         pacman-key --init 
         pacman-key --populate archlinux
-        pacman -Syu --noconfirm base base-devel sudo go git protobuf yaml-cpp pugixml rapidjson boost xorg-server-xvfb
+        pacman -Syu --noconfirm base base-devel sudo go git protobuf grpc yaml-cpp pugixml rapidjson boost xorg-server-xvfb
         echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
         mkdir -p /home/aur/packages/
         useradd -G wheel aur
@@ -162,3 +162,46 @@ jobs:
         LIBGL_ALWAYS_SOFTWARE=1 WINEDLLOVERRIDES="mscoree,mshtml=" WINEPREFIX=/tmp/.wine64 WINEARCH=win64 xvfb-run wine /tmp/test64.exe
         EOF
       displayName: 'Engine MinGW64'
+      
+- job: Android
+  displayName: 'Android'
+  variables:
+    TEST_HARNESS: "true"
+    TRAVIS_OS_NAME: "linux"
+    TRAVIS: "true"
+    TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
+    TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
+    COMPILER: Android 
+    GRAPHICS: OpenGLES2 
+    PLATFORM: SDL
+    MODE: Compile
+    AUDIO: None
+    COLLISION: None 
+    NETWORK: None 
+    WIDGETS: None 
+    EXTENSIONS: "None"
+    OUTPUT: /tmp/test-android-game.apk
+    ANDROID_API_LEVEL: 29 
+    ANDROID_BUILD_TOOLS_VERSION: 29.0.3
+  pool:
+    vmImage: 'ubuntu-20.04'
+
+  steps:
+    - checkout: self
+      persistCredentials: true
+      path: enigma-dev
+      
+    - script: echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --channel=1 --install "tools" "platform-tools" "extras;google;google_play_services" "extras;google;m2repository" "extras;android;m2repository" "build-tools;29.0.3" "platforms;android-29" "ndk;22.0.6917172"
+      displayName: 'Install Android Dependencies'
+      
+    - script: git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
+      displayName: 'Clone Android Repo'
+      
+    - script: ./CI/install_emake_deps.sh
+      displayName: 'Install Emake Dependencies'
+      
+    - script: make -j4 emake
+      displayName: 'Build Emake'
+
+    - script: ./ci-build.sh
+      displayName: 'Build Game'

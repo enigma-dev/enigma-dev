@@ -113,11 +113,9 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
     ("config",   opt::value<std::string>()->default_value(""), "Configuration file for emake. Note: All passeed options will override any option set in the config")
     ("quiet,q", opt::bool_switch()->default_value(false), "Suppresses output to std::out and std::err streams.")
-#ifdef CLI_ENABLE_SERVER
     ("server,s", opt::bool_switch()->default_value(false), "Starts the CLI in server mode (ignores input file).")
     ("ip", opt::value<std::string>()->default_value("localhost"), "The ip address of the server when running in server mode.")
     ("port", opt::value<int>()->default_value(37818), "The port number to bind when in server mode.")
-#endif
     ("output,o", opt::value<std::string>(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(defAPI.has_target_platform() ? defAPI.target_platform() : def_platform), "Target Platform (Win32, xlib, Cocoa, SDL, None)")
     ("workdir,d", opt::value<std::string>()->default_value(defComp.has_eobjs_directory() ? defComp.eobjs_directory() : def_workdir), "Working Directory")
@@ -175,15 +173,10 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
-#ifndef CLI_DISABLE_SERVER
+      
     if (!_rawArgs.count("help") && !_rawArgs.count("list") && !_rawArgs.count("info") && !_rawArgs.count("server") && !_rawArgs.count("output")) {
       throw std::logic_error("Option 'help', 'list', 'info', 'server', or option 'output' is required.");
     }
-#else
-    if (!_rawArgs.count("help") && !_rawArgs.count("list") && !_rawArgs.count("info") && !_rawArgs.count("output")) {
-      throw std::logic_error("Option 'help', 'list', 'info', or option 'output' is required.");
-    }
-#endif
   }
   catch(std::exception& e)
   {
