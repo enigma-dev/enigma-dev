@@ -181,14 +181,14 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
     if (proc_info[j] == 0) { continue; }
     pid_t ppid; PpidFromPid(proc_info[j], &ppid);
     if (ppid == parentProcId) {
-      vec.push_back(proc_info[j]); i++;
+      vec.push_back(proc_info[j]);
     }
   }
   #elif CURRENT_PLATFORM_ID == OS_LINUX
   PROCTAB *proc = openproc(PROC_FILLSTAT);
   while (proc_t *proc_info = readproc(proc, nullptr)) {
     if (proc_info->ppid == parentProcId) {
-      vec.push_back(proc_info->tgid); i++;
+      vec.push_back(proc_info->tgid);
     }
     freeproc(proc_info);
   }
@@ -197,7 +197,7 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
   int cntp; if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
     for (int j = 0; j < cntp; j++) {
       if (proc_info[j].ki_ppid == parentProcId) {
-        vec.push_back(proc_info[j].ki_pid); i++;
+        vec.push_back(proc_info[j].ki_pid);
       }
     }
     free(proc_info);
