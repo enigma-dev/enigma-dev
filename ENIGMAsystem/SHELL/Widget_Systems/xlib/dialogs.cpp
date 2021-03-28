@@ -170,8 +170,8 @@ static void PpidFromPid(pid_t procId, pid_t *parentProcId) {
 }
 #endif
 
-static void PidFromPpid(pid_t parentProcId, pid_t **procId, int *size) {
-  std::vector<pid_t> vec; int i = 0;
+static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
+  std::vector<pid_t> vec;
   #if CURRENT_PLATFORM_ID == OS_MACOSX
   int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
   std::vector<pid_t> proc_info(cntp);
@@ -203,20 +203,13 @@ static void PidFromPpid(pid_t parentProcId, pid_t **procId, int *size) {
     free(proc_info);
   }
   #endif
-  *procId = (pid_t *)malloc(sizeof(pid_t) * vec.size());
-  if (procId) {
-    std::copy(vec.begin(), vec.end(), *procId);
-    *size = i;
-  }
+  return vec;
 }
 
 static pid_t PidFromPpidRecursive(pid_t parentProcId) {
-  pid_t *procId; int size;
-  PidFromPpid(parentProcId, &procId, &size);
-  if (procId) {
-    if (size > 0)
-      parentProcId = PidFromPpidRecursive(procId[0]);
-    free(procId);
+  std::vector<pid_t> pidVec = PidFromPpid(parentProcId);
+  if (pidVec.size()) {
+    parentProcId = PidFromPpidRecursive(procId[0]);
   }
   return parentProcId;
 }
@@ -224,10 +217,10 @@ static pid_t PidFromPpidRecursive(pid_t parentProcId) {
 // set dialog transient; set title caption.
 static void *modify_shell_dialog(void *pid) {
   SetErrorHandlers();
-  Display *display = XOpenDisplay(nullptr);
-  Window wid = WidFromTop(display);
+  Display *display = XOpenDisplay(nullptr); Window wid;
   pid_t child = PidFromPpidRecursive((pid_t)(std::intptr_t)pid);
   while (true) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
     wid = WidFromTop(display);
     if (PidFromWid(display, wid) == child) {
       break;
