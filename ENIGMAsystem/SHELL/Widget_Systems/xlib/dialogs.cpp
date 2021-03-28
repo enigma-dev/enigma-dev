@@ -209,7 +209,7 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
 static pid_t PidFromPpidRecursive(pid_t parentProcId) {
   std::vector<pid_t> pidVec = PidFromPpid(parentProcId);
   if (pidVec.size()) {
-    parentProcId = PidFromPpidRecursive(procId[0]);
+    parentProcId = PidFromPpidRecursive(pidVec[0]);
   }
   return parentProcId;
 }
