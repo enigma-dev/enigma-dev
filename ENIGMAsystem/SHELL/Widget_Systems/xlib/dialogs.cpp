@@ -23,8 +23,11 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <vector>
 
 #include "dialogs.h"
+
+#include "../../../../CompilerSource/OS_Switchboard.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
@@ -32,19 +35,31 @@
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFwindow.h"
 
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
-
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
 
+#include <pthread.h>
 #include <libgen.h>
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
+
+#if CURRENT_PLATFORM_ID == OS_MACOSX
+#include <sys/proc_info.h>
+#include <libproc.h>
+#elif CURRENT_PLATFORM_ID == OS_LINUX
+#include <proc/readproc.h>
+#elif CURRENT_PLATFORM_ID == OS_FREEBSD
+#include <sys/user.h>
+#include <libutil.h>
+#endif
+
 using std::string;
+using std::vector;
 
 namespace enigma {
 
@@ -72,10 +87,10 @@ static bool kwin_running() {
   return bKWinRunning;
 }
 
-static unsigned long get_wid_or_pid(Display *display, Window window, bool wid) {
+static unsigned long GetActiveWidOrWindowPid(Display *display, Window window, bool wid) {
   SetErrorHandlers();
   unsigned char *prop;
-  unsigned long property;
+  unsigned long property = 0;
   Atom actual_type, filter_atom;
   int actual_format, status;
   unsigned long nitems, bytes_after;
@@ -89,19 +104,19 @@ static unsigned long get_wid_or_pid(Display *display, Window window, bool wid) {
   return property;
 }
 
-static Window wid_from_top(Display *display) {
+static Window WidFromTop(Display *display) {
   SetErrorHandlers();
   int screen = XDefaultScreen(display);
   Window window = RootWindow(display, screen);
-  return (Window)get_wid_or_pid(display, window, true);
+  return (Window)GetActiveWidOrWindowPid(display, window, true);
 }
 
-static pid_t pid_from_wid(Display *display, Window window) {
-  return (pid_t)get_wid_or_pid(display, window, false);
+static pid_t PidFromWid(Display *display, Window window) {
+  return (pid_t)GetActiveWidOrWindowPid(display, window, false);
 }
 
 // create dialog process
-static pid_t process_execute(const char *command, int *infp, int *outfp) {
+static pid_t ProcessCreate(const char *command, int *infp, int *outfp) {
   int p_stdin[2];
   int p_stdout[2];
   pid_t pid;
@@ -146,14 +161,79 @@ static pid_t process_execute(const char *command, int *infp, int *outfp) {
   return pid;
 }
 
-// set dialog transient.
-static void force_window_of_pid_to_be_transient(Display *display, pid_t pid) {
-  SetErrorHandlers();
-  Window wid = wid_from_top(display);
-  while (pid_from_wid(display, wid) != pid) {
-    wid = wid_from_top(display);
+#if CURRENT_PLATFORM_ID == OS_MACOSX
+static void PpidFromPid(pid_t procId, pid_t *parentProcId) {
+  proc_bsdinfo proc_info;
+  if (proc_pidinfo(procId, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
+    *parentProcId = proc_info.pbi_ppid;
   }
-  XSetTransientForHint(display, wid, (Window)enigma_user::window_handle());
+}
+#endif
+
+static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
+  std::vector<pid_t> vec;
+  #if CURRENT_PLATFORM_ID == OS_MACOSX
+  int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
+  std::vector<pid_t> proc_info(cntp);
+  std::fill(proc_info.begin(), proc_info.end(), 0);
+  proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
+  for (int j = cntp; j > 0; j--) {
+    if (proc_info[j] == 0) { continue; }
+    pid_t ppid; PpidFromPid(proc_info[j], &ppid);
+    if (ppid == parentProcId) {
+      vec.push_back(proc_info[j]);
+    }
+  }
+  #elif CURRENT_PLATFORM_ID == OS_LINUX
+  PROCTAB *proc = openproc(PROC_FILLSTAT);
+  while (proc_t *proc_info = readproc(proc, nullptr)) {
+    if (proc_info->ppid == parentProcId) {
+      vec.push_back(proc_info->tgid);
+    }
+    freeproc(proc_info);
+  }
+  closeproc(proc);
+  #elif CURRENT_PLATFORM_ID == OS_FREEBSD
+  int cntp; if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
+    for (int j = 0; j < cntp; j++) {
+      if (proc_info[j].ki_ppid == parentProcId) {
+        vec.push_back(proc_info[j].ki_pid);
+      }
+    }
+    free(proc_info);
+  }
+  #endif
+  return vec;
+}
+
+static pid_t PidFromPpidRecursive(pid_t parentProcId) {
+  std::vector<pid_t> pidVec = PidFromPpid(parentProcId);
+  if (pidVec.size()) {
+    parentProcId = PidFromPpidRecursive(pidVec[0]);
+  }
+  return parentProcId;
+}
+
+// set dialog transient; set title caption.
+static void *modify_shell_dialog(void *pid) {
+  SetErrorHandlers();
+  Display *display = XOpenDisplay(nullptr); Window wid;
+  pid_t child = PidFromPpidRecursive((pid_t)(std::intptr_t)pid);
+  while (true) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    wid = WidFromTop(display);
+    if (PidFromWid(display, wid) == child) {
+      break;
+    }
+  }
+  XSetTransientForHint(display, wid, (Window)(std::intptr_t)enigma_user::window_handle());
+  int len = enigma_user::message_get_caption().length() + 1; char *buffer = new char[len]();
+  strcpy(buffer, enigma_user::message_get_caption().c_str()); XChangeProperty(display, wid,
+  XInternAtom(display, "_NET_WM_NAME", false),
+  XInternAtom(display, "UTF8_STRING", false),
+  8, PropModeReplace, (unsigned char *)buffer, len);
+  delete[] buffer; XCloseDisplay(display);
+  return nullptr;
 }
 
 bool widget_system_initialize() {
@@ -166,26 +246,14 @@ bool widget_system_initialize() {
 string create_shell_dialog(string command) {
   string output; char buffer[BUFSIZ];
   int outfp = 0, infp = 0; ssize_t nRead = 0;
-  pid_t pid = process_execute(command.c_str(), &infp, &outfp);
-  pid_t fpid = 0; if ((fpid = fork()) == 0) {
-    SetErrorHandlers();
-    Display *display = XOpenDisplay(nullptr);
-    force_window_of_pid_to_be_transient(display, pid);
-    XCloseDisplay(display);
-    exit(0);
-  }
+  pid_t pid = ProcessCreate(command.c_str(), &infp, &outfp);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100)); pthread_t thread;
+  pthread_create(&thread, nullptr, modify_shell_dialog, (void *)(std::intptr_t)pid);
   while ((nRead = read(outfp, buffer, BUFSIZ)) > 0) {
     buffer[nRead] = '\0';
     output.append(buffer, nRead);
   }
-  kill(fpid, SIGTERM);
-  bool died = false;
-  for (unsigned i = 0; !died && i < 4; i++) {
-    int status;
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    if (waitpid(fpid, &status, WNOHANG) == fpid) died = true;
-  }
-  if (!died) kill(fpid, SIGKILL);
+  pthread_cancel(thread);
   while (output.back() == '\r' || output.back() == '\n')
     output.pop_back();
   return output;
