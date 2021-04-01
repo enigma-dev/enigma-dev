@@ -32,6 +32,9 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
 
+#include "Universal_System/image_formats.h"
+#include "Universal_System/Resources/sprites_internal.h"
+
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFwindow.h"
 
@@ -85,6 +88,18 @@ static bool kwin_running() {
   bool bKWinRunning = (aKWinRunning != None);
   XCloseDisplay(d);
   return bKWinRunning;
+}
+
+static void XSetIconFromSprite(Display *display, Window window, int ind, int subimg) {
+  XSynchronize(display, True);
+  Atom property = XInternAtom(display, "_NET_WM_ICON", False);
+  RawImage img = sprite_get_raw(ind, subimg);
+  if (img.pxdata == nullptr) return;
+  unsigned elem_numb = 2 + img.w * img.h;
+  unsigned long *result = bgra_to_argb(img.pxdata, img.w, img.h, true);
+  XChangeProperty(display, window, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)result, elem_numb);
+  XFlush(display);
+  delete[] result;
 }
 
 static unsigned long GetActiveWidOrWindowPid(Display *display, Window window, bool wid) {
@@ -226,6 +241,7 @@ static void *modify_shell_dialog(void *pid) {
       break;
     }
   }
+  XSetIconFromSprite(display, wid, enigma_user::window_get_icon_index(), enigma_user::window_get_icon_subimg());
   XSetTransientForHint(display, wid, (Window)(std::intptr_t)enigma_user::window_handle());
   int len = enigma_user::message_get_caption().length() + 1; char *buffer = new char[len]();
   strcpy(buffer, enigma_user::message_get_caption().c_str()); XChangeProperty(display, wid,
