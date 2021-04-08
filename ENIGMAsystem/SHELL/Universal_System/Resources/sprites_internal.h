@@ -85,6 +85,7 @@ public:
   int yoffset = 0;
   BoundingBox bbox = {0, 0, 0, 0};
   int bbox_mode = 0;  //Default is automatic
+  int polygon = -1;
   
   // AssArray mandatory
   static const char* getAssetTypeName() { return "Sprite"; }
@@ -101,6 +102,7 @@ extern AssetArray<Sprite> sprites;
 const BoundingBox& sprite_get_bbox(int spr);
 BoundingBox sprite_get_bbox_relative(int spr);
 RawImage sprite_get_raw(int spr, unsigned subimg);
+const int sprite_get_polygon(int spr);
 
 }  //namespace enigma
 
