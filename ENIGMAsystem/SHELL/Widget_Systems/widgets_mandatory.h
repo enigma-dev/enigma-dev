@@ -23,6 +23,10 @@
 
 #include <string>
 
+#ifndef DO_NOT_ABORT_ERRORS
+#define DO_NOT_ABORT_ERRORS
+#endif
+
 #define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
 
 enum MESSAGE_TYPE : int {
@@ -63,6 +67,18 @@ namespace enigma {
       default: return "ERROR";
     }
   }
+
+  inline void show_debug_message_hidden(std::string msg, MESSAGE_TYPE type = M_INFO) {
+    #ifndef DO_NOT_ABORT_ERRORS
+    if (severity == M_ERROR || severity == M_USER_ERROR ||
+      severity == M_FATAL_ERROR || severity == M_FATAL_USER_ERROR) {
+      abort();
+    }
+    #endif
+    if (type == M_FATAL_USER_ERROR || type == M_USER_ERROR) {
+      abort();
+    }
+  }
   
   // This function is called at the beginning of the game to allow the widget system to load.
   bool widget_system_initialize();
@@ -76,6 +92,9 @@ namespace enigma_user {
 bool show_question(std::string str);
 
 void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO);
+
+void debug_output_set_enabled(bool enabled, MESSAGE_TYPE type);
+bool debug_output_get_enabled(MESSAGE_TYPE type);
 
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.

@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: Hide Debug Messages
+Identifier: HideDebugMessages
+Author: Samuel Venable
+Description: Hide all debug messages and printing normally output by exported games.
+Default: false
+Icon: logo.png
+
+Depends: None
+Dependencies: None
+
