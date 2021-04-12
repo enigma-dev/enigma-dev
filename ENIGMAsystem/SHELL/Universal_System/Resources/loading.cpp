@@ -29,6 +29,10 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
+#ifdef _WIN32
+#include "Universal_System/estring.h"
+#endif
+
 #include <ctime>
 #include <cstdio>
 
@@ -73,14 +77,25 @@ namespace enigma
     do { // Allows break
       FILE* resfile;
       if (resource_file_path != std::string("$exe")) {
+        #ifdef _WIN32
+        std::wstring wstr = widen(resource_file_path);
+        if (!_wfopen_s(&resfile,wstr.c_str(),L"rb, css=UTF-8")) {
+        #else
         if (!(resfile = fopen(resource_file_path,"rb"))) {
+        #endif
           DEBUG_MESSAGE("Resource load fail: exe unopenable", MESSAGE_TYPE::M_ERROR);
           break;
         }
       } else {
+        #ifdef _WIN32
+        wchar_t exename[4097];
+        windowsystem_write_exename(exename);
+        if (!_wfopen_s(&resfile,exename,L"rb, css=UTF-8")) {
+        #else
         char exename[4097];
         windowsystem_write_exename(exename);
         if (!(resfile = fopen(exename,"rb"))) {
+        #endif
           DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
           break;
         }
