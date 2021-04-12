@@ -2,6 +2,9 @@
 
 set -e  # exit if any command fails
 
+echo "Writing codegen for current commit"
+./CI/dump_codegen.sh
+
 if [[ "$TRAVIS" -eq "true" ]]; then
   export DISPLAY=:99.0
   Xvfb :99 -s "-screen 0 1024x768x24" &
@@ -84,6 +87,11 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   make all -j$MAKE_JOBS
   echo "Generating regression comparison images..."
   mkdir -p "${PWD}/test-harness-out"
+  
+  echo "Writing codegen for previous commit"
+  mv /tmp/codegen /tmp/codegen_curr
+  ./CI/dump_codegen.sh
+  
   ./test-runner --gtest_filter=Regression.*
 
   popd
