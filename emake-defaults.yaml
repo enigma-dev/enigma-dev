@@ -1,0 +1,44 @@
+# See Settings.proto for more info.
+
+API:
+  # Compiler Descriptor
+  target_compiler: gcc
+
+  # Graphics System
+  target_graphics: OpenGL1
+
+  # Audio System
+  target_audio: OpenAL
+
+  # Widgets System
+  target_widgets: None
+
+  # Network System
+  target_network: None
+
+  # Collision System
+  target_collision: BBox
+
+  # Enabled Extensions
+  extensions: 
+   - Alarms
+   - Paths
+   - libpng
+   - DataStructures
+   - Timelines
+   - MotionPlanning
+   - DateTime
+   - GTest
+
+  # Platform default is OS specific and handled internally but can be overriden here
+  # target_platform: xlib
+
+Compiler:  
+  inherit_strings: 0
+  inherit_escapes: 0
+  inherit_increment: 0
+  inherit_equivalence: 0
+  inherit_literals: 0
+  inherit_negatives: 0
+  inherit_objects: true
+  automatic_semicolons: true

@@ -15,39 +15,42 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Widget_Systems/widgets_mandatory.h"
-#include "Platforms/xlib/XLIBwindow.h"
 #include <string>
-using std::string;
+
+#include "Widget_Systems/widgets_mandatory.h"
+
+#include "Platforms/xlib/XLIBwindow.h"
 
 namespace enigma {
+
+std::string create_shell_dialog(std::string command);
 
 class CommandLineWidgetEngine {
  public:
   virtual ~CommandLineWidgetEngine() = default;
-  virtual void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) = 0;
-  virtual int show_message(const string &message) = 0;
-  virtual int show_message_cancelable(string message) = 0;
-  virtual bool show_question(string message) = 0;
-  virtual int show_question_cancelable(string message) = 0;
-  virtual int show_attempt(string errortext) = 0;
-  virtual void show_debug_message(string errortext, MESSAGE_TYPE type) = 0;
-  virtual string get_string(string message, string def) = 0;
-  virtual string get_password(string message, string def) = 0;
-  virtual double get_integer(string message, double def) = 0;
-  virtual double get_passcode(string message, double def) = 0;
-  virtual string get_open_filename(string filter, string fname) = 0;
-  virtual string get_open_filenames(string filter, string fname) = 0;
-  virtual string get_save_filename(string filter, string fname) = 0;
-  virtual string get_open_filename_ext(string filter, string fname, string dir, string title) = 0;
-  virtual string get_open_filenames_ext(string filter, string fname, string dir, string title) = 0;
-  virtual string get_save_filename_ext(string filter, string fname, string dir, string title) = 0;
-  virtual string get_directory(string dname) = 0;
-  virtual string get_directory_alt(string capt, string root) = 0;
+  virtual void show_info(std::string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, std::string caption) = 0;
+  virtual int show_message(const std::string &message) = 0;
+  virtual int show_message_cancelable(std::string message) = 0;
+  virtual bool show_question(std::string message) = 0;
+  virtual int show_question_cancelable(std::string message) = 0;
+  virtual int show_attempt(std::string errortext) = 0;
+  virtual void show_debug_message(std::string errortext, MESSAGE_TYPE type) = 0;
+  virtual std::string get_string(std::string message, std::string def) = 0;
+  virtual std::string get_password(std::string message, std::string def) = 0;
+  virtual double get_integer(std::string message, double def) = 0;
+  virtual double get_passcode(std::string message, double def) = 0;
+  virtual std::string get_open_filename(std::string filter, std::string fname) = 0;
+  virtual std::string get_open_filenames(std::string filter, std::string fname) = 0;
+  virtual std::string get_save_filename(std::string filter, std::string fname) = 0;
+  virtual std::string get_open_filename_ext(std::string filter, std::string fname, std::string dir, std::string title) = 0;
+  virtual std::string get_open_filenames_ext(std::string filter, std::string fname, std::string dir, std::string title) = 0;
+  virtual std::string get_save_filename_ext(std::string filter, std::string fname, std::string dir, std::string title) = 0;
+  virtual std::string get_directory(std::string dname) = 0;
+  virtual std::string get_directory_alt(std::string capt, std::string root) = 0;
   virtual int get_color(int defcol) = 0;
-  virtual int get_color_ext(int defcol, string title) = 0;
-  virtual string message_get_caption() = 0;
-  virtual void message_set_caption(string title) = 0;
+  virtual int get_color_ext(int defcol, std::string title) = 0;
+  virtual std::string message_get_caption() = 0;
+  virtual void message_set_caption(std::string title) = 0;
 
 }; // class CommandLineWidgetEngine
 

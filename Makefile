@@ -45,13 +45,7 @@ libEGM$(LIB_EXT): libEGM
 libEGM: .FORCE libProtocols$(LIB_EXT) libENIGMAShared$(LIB_EXT)
 	$(MAKE) -C CommandLine/libEGM/
 
-EMAKE_TARGETS = .FORCE ENIGMA
-
-ifneq ($(CLI_ENABLE_EGM), FALSE)
-	EMAKE_TARGETS += libEGM$(LIB_EXT)
-else
-	EMAKE_TARGETS += libProtocols$(LIB_EXT)
-endif
+EMAKE_TARGETS = .FORCE ENIGMA libProtocols$(LIB_EXT) libEGM$(LIB_EXT)
 
 emake: $(EMAKE_TARGETS) $(LIB_PFX)compileEGMf$(LIB_EXT)
 	$(MAKE) -C CommandLine/emake/

@@ -51,11 +51,10 @@ inline int sdl_fgetc(SDL_RWops* context) {
 }
 
 inline char* sdl_fgets(char* str, int num, SDL_RWops* context) {
-  std::vector<char> v(num);
-  if (!SDL_RWread(context, v.data(), sizeof(char), num)) {
+  if (!SDL_RWread(context, str, sizeof(char), num)) {
     return nullptr;
   }
-  return v.data();
+  return str;
 }
 
 inline int sdl_fputc(int character, SDL_RWops* context) {

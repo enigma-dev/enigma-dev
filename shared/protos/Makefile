@@ -1,18 +1,10 @@
 include ../../Config.mk
 
 PROTO_SOURCES := $(wildcard *.proto) $(wildcard Configuration/*.proto)
-SOURCES_GRPC :=
-ifeq ($(CLI_ENABLE_SERVER), TRUE)
-	SOURCES_GRPC += server.proto
-	LDFLAGS += -lgrpc++
-	CXXFLAGS += -D_WIN32_WINNT=0x0600
-
-	GRPC_CPP_PLUGIN_PATH ?= $(shell which grpc_cpp_plugin)$(BIN_EXT)
-else
-	# older protobuf does not even support the RPC syntax
-	# so don't even run protoc on server.proto when off
-	PROTO_SOURCES := $(filter-out server.proto,$(PROTO_SOURCES))
-endif
+SOURCES_GRPC := server.proto
+LDFLAGS += -lgrpc++
+CXXFLAGS += -D_WIN32_WINNT=0x0600
+GRPC_CPP_PLUGIN_PATH ?= $(shell which grpc_cpp_plugin)$(BIN_EXT)
 
 TARGET := ../../libProtocols$(LIB_EXT)
 

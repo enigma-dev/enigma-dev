@@ -20,5 +20,5 @@ We have a community-led Wiki project hosted on our site where users contribute f
 * http://enigma-dev.org/forums/
 * http://enigma-dev.org/docs/Wiki/Main_Page
 
-If you are having trouble registering for an account or looking for an answer to more specific technical questions about ENIGMA, you can visit us on the ``#enigma-dev`` channel on freenode IRC as well:
+If you are having trouble registering for an account or looking for an answer to more specific technical questions about ENIGMA, you can visit us on the ``#enigma`` channel on freenode IRC as well:
 http://webchat.freenode.net/?channels=enigma&uio=d4

@@ -47,8 +47,6 @@ class EGMFileFormat : public FileFormat {
                      int depth) const;
   bool LoadResource(const fs::path& fPath, google::protobuf::Message *m,
                     int id) const;
-  void LoadObjectEvents(const fs::path& fPath, google::protobuf::Message *m,
-                        const google::protobuf::FieldDescriptor *field) const;
   void RecursivePackBuffer(google::protobuf::Message *m, int id,
                            YAML::Node& yaml, const fs::path& fPath,
                            int depth) const;
