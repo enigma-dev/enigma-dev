@@ -73,6 +73,7 @@ std::string buffer_base64_encode(int buffer, unsigned offset, unsigned size);
 std::string buffer_md5(int buffer, unsigned offset, unsigned size);
 std::string buffer_sha1(int buffer, unsigned offset, unsigned size);
 
+void *buffer_get_address(int buffer);
 unsigned buffer_get_size(int buffer);
 unsigned buffer_get_alignment(int buffer);
 int buffer_get_type(int buffer);
