@@ -54,7 +54,7 @@ void BinaryBuffer::Seek(unsigned offset) {
         position -= GetSize();
         return;
       default:
-        position = GetSize() - 1;
+        position = GetSize() - (position - GetSize());
         return;
     }
   }
@@ -105,6 +105,11 @@ int buffer_create(unsigned size, int type, unsigned alignment) {
 void buffer_delete(int buffer) {
   get_buffer(binbuff, buffer);
   delete binbuff;
+  enigma::buffers[buffer] = nullptr;
+}
+
+bool buffer_exists(int buffer) {
+  return (buffer >= 0 && (size_t)buffer < enigma::buffers.size() && enigma::buffers[buffer] != nullptr);
 }
 
 void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_buffer, unsigned dest_offset) {
@@ -229,6 +234,17 @@ void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned 
     }
   }
 }
+  
+void *buffer_get_address(int buffer) {
+  #ifdef DEBUG_MODE
+  if (buffer < 0 or size_t(buffer) >= enigma::buffers.size() or !enigma::buffers[buffer]) {
+    DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buffer), MESSAGE_TYPE::M_USER_ERROR);
+    return nullptr;
+  }
+  #endif
+  enigma::BinaryBuffer *binbuff = enigma::buffers[buffer];
+  return reinterpret_cast<void *>(&binbuff->data[0]);
+}
 
 unsigned buffer_get_size(int buffer) {
   get_bufferr(binbuff, buffer, -1);
@@ -247,6 +263,12 @@ int buffer_get_type(int buffer) {
 
 //NOTE: This function should most likely be added in graphics systems.
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
+  //get_buffer(binbuff, buffer);
+  //TODO: Write this function
+}
+
+//NOTE: This function should most likely be added in graphics systems.
+void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
   //get_buffer(binbuff, buffer);
   //TODO: Write this function
 }
@@ -273,31 +295,18 @@ void buffer_seek(int buffer, int base, unsigned offset) {
 
 unsigned buffer_sizeof(int type) {
   switch (type) {
-    case buffer_u8:
+    case buffer_u8: case buffer_s8: case buffer_bool:
       return 1;
-    case buffer_s8:
-      return 1;
-    case buffer_u16:
+    case buffer_u16: case buffer_s16: case buffer_f16:
       return 2;
-    case buffer_s16:
-      return 2;
-    case buffer_u32:
+    case buffer_u32: case buffer_s32: case buffer_f32:
       return 4;
-    case buffer_s32:
-      return 4;
-    case buffer_f16:
-      return 2;
-    case buffer_f32:
-      return 4;
-    case buffer_f64:
+    case buffer_u64: case buffer_f64:
       return 8;
-    case buffer_bool:
-      return 1;
-    case buffer_string:
-      return 0;
-    default:
-      return 0;
+    case buffer_string: case buffer_text: default:
+      break;
   }
+  return 0;
 }
 
 int buffer_tell(int buffer) {
