@@ -238,7 +238,7 @@ void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned 
 void *buffer_get_address(int buffer) {
   get_bufferr(binbuff, buffer, -1);
   std::vector<unsigned char> b = binbuff->data;
-  return &b[0];
+  return (void *)&b.data();
 }
 
 unsigned buffer_get_size(int buffer) {
