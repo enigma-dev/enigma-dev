@@ -236,7 +236,7 @@ void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned 
 }
   
 void *buffer_get_address(int buffer) {
-  get_bufferr(binbuff, buffer, -1);
+  get_bufferr(binbuff, buffer);
   return reinterpret_cast<void*>(&binbuff->data[0]);
 }
 
