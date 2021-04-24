@@ -256,6 +256,12 @@ void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int 
   //TODO: Write this function
 }
 
+//NOTE: This function should most likely be added in graphics systems.
+void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
+  //get_buffer(binbuff, buffer);
+  //TODO: Write this function
+}
+
 void buffer_resize(int buffer, unsigned size) {
   get_buffer(binbuff, buffer);
   binbuff->Resize(size);
