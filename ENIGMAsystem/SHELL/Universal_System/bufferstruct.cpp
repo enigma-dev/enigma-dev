@@ -239,7 +239,7 @@ void *buffer_get_address(int buffer) {
   #ifdef DEBUG_MODE
   if (buffer < 0 or size_t(buffer) >= enigma::buffers.size() or !enigma::buffers[buffer]) {
     DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buffer), MESSAGE_TYPE::M_USER_ERROR);
-    return r;
+    return;
   }
   #endif
   enigma::BinaryBuffer *binbuff = enigma::buffers[buffer];
