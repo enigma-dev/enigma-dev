@@ -236,7 +236,13 @@ void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned 
 }
   
 void *buffer_get_address(int buffer) {
-  get_buffer(binbuff, buffer);
+  #ifdef DEBUG_MODE
+  if (buffer < 0 or size_t(buffer) >= enigma::buffers.size() or !enigma::buffers[buffer]) {
+    DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buffer), MESSAGE_TYPE::M_USER_ERROR);
+    return r;
+  }
+  #endif
+  enigma::BinaryBuffer *binbuff = enigma::buffers[buffer];
   return reinterpret_cast<void *>(&binbuff->data[0]);
 }
 
