@@ -265,12 +265,14 @@ int buffer_get_type(int buffer) {
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
   //get_buffer(binbuff, buffer);
   //TODO: Write this function
+  DEBUG_MESSAGE("Function unimplemented: buffer_get_surface", MESSAGE_TYPE::M_WARNING);
 }
 
 //NOTE: This function should most likely be added in graphics systems.
 void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
   //get_buffer(binbuff, buffer);
   //TODO: Write this function
+  DEBUG_MESSAGE("Function unimplemented: buffer_set_surface", MESSAGE_TYPE::M_WARNING);
 }
 
 void buffer_resize(int buffer, unsigned size) {
