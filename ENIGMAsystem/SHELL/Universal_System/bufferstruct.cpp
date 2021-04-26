@@ -243,7 +243,7 @@ void *buffer_get_address(int buffer) {
   }
   #endif
   enigma::BinaryBuffer *binbuff = enigma::buffers[buffer];
-  return reinterpret_cast<void *>(&binbuff->data[0]);
+  return reinterpret_cast<void *>(binbuff->data.data());
 }
 
 unsigned buffer_get_size(int buffer) {
