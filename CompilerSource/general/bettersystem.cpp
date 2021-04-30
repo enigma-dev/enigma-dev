@@ -310,7 +310,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
       for (int j = cntp; j > 0; j--) {
         if (proc_info[j] == 0) { continue; }
-        if (ppid == ParentProcIdFromProcId(proc_info[j])) {
+        if (parentProcId == ParentProcIdFromProcId(proc_info[j])) {
           vec.push_back(proc_info[j]); i++;
         }
       }
