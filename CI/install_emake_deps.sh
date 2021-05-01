@@ -6,7 +6,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
 
   if [ "$COMPILER" != "Android" ]; then
-    apt-cache policy clang | nc termbin.com 9999
+    apt-cache policy clang-10 | nc termbin.com 9999
     sudo apt-get -y install clang lldb lld libc++abi-dev libc++-dev
     clang++ --version
   fi
