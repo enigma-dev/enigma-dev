@@ -6,7 +6,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
 
   if [ "$COMPILER" != "Android" ]; then
-    sudo apt-get -y install clang-10 lldb-10 lld-10 libc++abi-10-dev libc++-10-dev
+    sudo apt-get -y install clang lldb lld libc++abi-dev libc++-dev
     clang++ --version
   fi
 fi
