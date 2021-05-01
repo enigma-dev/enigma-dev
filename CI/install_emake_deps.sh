@@ -6,7 +6,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
 
   if [ "$COMPILER" != "Android" ]; then
-    sudo apt-get -y -o Debug::pkgProblemResolver=yes install clang &> /tmp/aptlog; cat /tmp/aptlog | nc termbin.com 9999
+    sudo apt-get -y -o Debug::pkgProblemResolver=yes install clang 2>&1 | curl -F 'f:1=<-' ix.io
     sudo apt-get -y install clang lldb lld libc++abi-dev libc++-dev
     clang++ --version
   fi
