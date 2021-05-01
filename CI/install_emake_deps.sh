@@ -7,7 +7,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
 
   if [ "$COMPILER" != "Android" ]; then
     echo -e "Package: *\nPin: release a=*-proposed\nPin-Priority: 400" | sudo tee /etc/apt/preferences.d/proposed >/dev/null; sudo add-apt-repository -y -u 'deb http://archive.ubuntu.com/ubuntu focal-proposed main universe multiverse'
-    sudo apt-get -y install clang
+    sudo apt-get -t focal-proposed -y install clang lldb lld libc++abi-dev libc++-dev
     clang++ --version
   fi
 fi
