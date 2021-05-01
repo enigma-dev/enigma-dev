@@ -1,12 +1,13 @@
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFfilemanip.h"
+#include "Platforms/General/POSIX/POSIXprogdir.h"
 #include "Universal_System/estring.h"
 #include "Universal_System/filesystem.h"
 
-#include <limits.h>
 #include <unistd.h>
 #include <libgen.h>
 #include <cstdlib>
+#include <climits>
 #include <string>
 
 using std::string;
@@ -23,9 +24,7 @@ void initialize_directory_globals() {
   enigma_user::working_directory = enigma_user::get_working_directory();
 
   // Set the program_directory
-  char *buffer = realpath("/proc/self/exe", NULL);
-  enigma_user::program_directory = buffer ? enigma_user::filename_path(buffer) : "";
-  free(buffer);
+  initialize_program_directory();
 
   // Set the temp_directory
   enigma_user::temp_directory = enigma_user::get_temp_directory();
@@ -35,7 +34,7 @@ void initialize_directory_globals() {
     string(".config/") + add_slash(std::to_string(enigma_user::game_id));
 }
 
-}
+} // namespace enigma
 
 int main(int argc, char** argv) {
   return enigma::enigma_main(argc, argv);

@@ -16,6 +16,7 @@
 **/
 
 #include <string>
+#include <ctime> // Required header for time_t in FreeBSD/Clang
 
 #include "Universal_System/filesystem.h"
 

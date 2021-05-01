@@ -234,6 +234,17 @@ void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned 
     }
   }
 }
+  
+void *buffer_get_address(int buffer) {
+  #ifdef DEBUG_MODE
+  if (buffer < 0 or size_t(buffer) >= enigma::buffers.size() or !enigma::buffers[buffer]) {
+    DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buffer), MESSAGE_TYPE::M_USER_ERROR);
+    return nullptr;
+  }
+  #endif
+  enigma::BinaryBuffer *binbuff = enigma::buffers[buffer];
+  return reinterpret_cast<void *>(binbuff->data.data());
+}
 
 unsigned buffer_get_size(int buffer) {
   get_bufferr(binbuff, buffer, -1);
@@ -254,6 +265,14 @@ int buffer_get_type(int buffer) {
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
   //get_buffer(binbuff, buffer);
   //TODO: Write this function
+  DEBUG_MESSAGE("Function unimplemented: buffer_get_surface", MESSAGE_TYPE::M_WARNING);
+}
+
+//NOTE: This function should most likely be added in graphics systems.
+void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
+  //get_buffer(binbuff, buffer);
+  //TODO: Write this function
+  DEBUG_MESSAGE("Function unimplemented: buffer_set_surface", MESSAGE_TYPE::M_WARNING);
 }
 
 void buffer_resize(int buffer, unsigned size) {

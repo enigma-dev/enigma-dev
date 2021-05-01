@@ -113,17 +113,15 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
     ("config",   opt::value<std::string>()->default_value(""), "Configuration file for emake. Note: All passeed options will override any option set in the config")
     ("quiet,q", opt::bool_switch()->default_value(false), "Suppresses output to std::out and std::err streams.")
-#ifdef CLI_ENABLE_SERVER
     ("server,s", opt::bool_switch()->default_value(false), "Starts the CLI in server mode (ignores input file).")
     ("ip", opt::value<std::string>()->default_value("localhost"), "The ip address of the server when running in server mode.")
     ("port", opt::value<int>()->default_value(37818), "The port number to bind when in server mode.")
-#endif
     ("output,o", opt::value<std::string>(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(defAPI.has_target_platform() ? defAPI.target_platform() : def_platform), "Target Platform (Win32, xlib, Cocoa, SDL, None)")
     ("workdir,d", opt::value<std::string>()->default_value(defComp.has_eobjs_directory() ? defComp.eobjs_directory() : def_workdir), "Working Directory")
     ("codegen,k", opt::value<std::string>()->default_value(defComp.has_codegen_directory() ? defComp.codegen_directory() : def_workdir), "Codegen Directory")
     ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Compile, Debug, Design)")
-    ("graphics,g", opt::value<std::string>()->default_value(defAPI.has_target_graphics() ? defAPI.target_graphics() : "OpenGL1"), "Graphics System (Direct3D9, Direct3D11, OpenGL1, OpenGL3, OpenGLES2, OpenGLES3, None)")
+    ("graphics,g", opt::value<std::string>()->default_value(defAPI.has_target_graphics() ? defAPI.target_graphics() : "OpenGL3"), "Graphics System (Direct3D9, Direct3D11, OpenGL1, OpenGL3, OpenGLES2, OpenGLES3, None)")
     ("audio,a", opt::value<std::string>()->default_value(defAPI.has_target_audio() ? defAPI.target_audio() : "None"), "Audio System (DirectSound, OpenAL, XAudio2, None)")
     ("widgets,w", opt::value<std::string>()->default_value(defAPI.has_target_widgets() ? defAPI.target_widgets() : "None"), "Widget System (Win32, xlib, Cocoa, GTK+, None)")
     ("network,n", opt::value<std::string>()->default_value(defAPI.has_target_network() ? defAPI.target_network() : "None"), "Networking System (DirectPlay, Asynchronous, BerkeleySockets, None)")
@@ -175,15 +173,10 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
-#ifndef CLI_DISABLE_SERVER
+      
     if (!_rawArgs.count("help") && !_rawArgs.count("list") && !_rawArgs.count("info") && !_rawArgs.count("server") && !_rawArgs.count("output")) {
       throw std::logic_error("Option 'help', 'list', 'info', 'server', or option 'output' is required.");
     }
-#else
-    if (!_rawArgs.count("help") && !_rawArgs.count("list") && !_rawArgs.count("info") && !_rawArgs.count("output")) {
-      throw std::logic_error("Option 'help', 'list', 'info', or option 'output' is required.");
-    }
-#endif
   }
   catch(std::exception& e)
   {

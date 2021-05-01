@@ -20,11 +20,11 @@
 **/
 
 #include "XLIBmain.h"
-#include "LINUXjoystick.h"
 #include "XLIBwindow.h"
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
+#include "Platforms/General/PFjoystick.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
@@ -40,10 +40,6 @@
 using std::string;
 
 using namespace enigma::x11;
-
-namespace enigma_user {
-const int os_type = os_linux;
-}  // namespace enigma_user
 
 namespace enigma {
 
