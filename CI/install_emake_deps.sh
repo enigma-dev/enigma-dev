@@ -6,7 +6,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
   sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
 
   if [ "$COMPILER" != "Android" ]; then
-    echo -e "Package: *\nPin: release a=*-proposed\nPin-Priority: 400" | sudo tee /etc/apt/preferences.d/proposed >/dev/null; sudo add-apt-repository -y -u 'deb http://archive.ubuntu.com/ubuntu focal-proposed main universe multiverse
+    echo -e "Package: *\nPin: release a=*-proposed\nPin-Priority: 400" | sudo tee /etc/apt/preferences.d/proposed >/dev/null; sudo add-apt-repository -y -u 'deb http://archive.ubuntu.com/ubuntu focal-proposed main universe multiverse'
     sudo apt-get -y install clang lldb lld libc++abi-dev libc++-dev
     clang++ --version
   fi
