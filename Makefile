@@ -1,4 +1,4 @@
-include Config.mk 
+include Config.mk
 
 PATH := $(eTCpath)$(PATH)
 SHELL=/bin/bash
