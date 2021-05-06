@@ -11,18 +11,18 @@ static int id = -1;
 static std::unordered_map<int, uvpx::Player *> videos;
 static std::unordered_map<int, wp::WebmPlayer *> audios;
 
-static void convert_rgb_to_rgba(const uint8_t *RGB, uint32_t width, uint32_t height, uint8_t **RGBA, uint32_t dispWidth, uint32_t dispHeight) {
-  if ((*RGBA) == nullptr) {
-    *RGBA = (uint8_t *)malloc(4 * dispWidth * dispHeight);
+static void convert_rgb_to_bgra(const uint8_t *RGB, uint32_t width, uint32_t height, uint8_t **BGRA, uint32_t dispWidth, uint32_t dispHeight) {
+  if ((*BGRA) == nullptr) {
+    *BGRA = (uint8_t *)malloc(4 * dispWidth * dispHeight);
   }
   for (uint32_t y = 0; y < height; ++y) {
     if (y > dispHeight) break;
     for (uint32_t x = 0; x < width; ++x) {
       if (x > dispWidth) break;
-      (*RGBA)[(y * dispWidth + x) * 4] = RGB[(y * width + x) * 3];
-      (*RGBA)[(y * dispWidth + x) * 4 + 1] = RGB[(y * width + x) * 3 + 1];
-      (*RGBA)[(y * dispWidth + x) * 4 + 2] = RGB[(y * width + x) * 3 + 2];
-      (*RGBA)[(y * dispWidth + x) * 4 + 3] = 255;
+      (*BGRA)[(y * dispWidth + x) * 4] = RGB[(y * width + x) * 3 + 2];
+      (*BGRA)[(y * dispWidth + x) * 4 + 1] = RGB[(y * width + x) * 3 + 1];
+      (*BGRA)[(y * dispWidth + x) * 4 + 2] = RGB[(y * width + x) * 3];
+      (*BGRA)[(y * dispWidth + x) * 4 + 3] = 255;
     }
   }
 }
@@ -142,13 +142,13 @@ bool video_grab_frame_image(int ind, std::string fname) {
       yuv420_rgb24_std(yuv->width(), yuv->height(), yuv->y(), yuv->u(), yuv->v(), 
       yuv->yPitch(), yuv->uvPitch(), rgb, yuv->width() * 3, YCBCR_JPEG);
       if (rgb) {
-        unsigned char *rgba = nullptr;
-        convert_rgb_to_rgba(rgb, yuv->width(), yuv->height(), &rgba, yuv->displayWidth(), yuv->displayHeight());
+        unsigned char *bgra = nullptr;
+        convert_rgb_to_bgra(rgb, yuv->width(), yuv->height(), &bgra, yuv->displayWidth(), yuv->displayHeight());
         free(rgb);
         videos[ind]->unlockRead();
-        if (rgba) {
-          enigma::image_save(fname, rgba, yuv->displayWidth(), yuv->displayHeight(), yuv->displayWidth(), yuv->displayHeight(), false);
-          free(rgba);
+        if (bgra) {
+          enigma::image_save(fname, bgra, yuv->displayWidth(), yuv->displayHeight(), yuv->displayWidth(), yuv->displayHeight(), false);
+          free(bgra);
           return true;
         }
       }
@@ -167,8 +167,8 @@ bool video_grab_frame_buffer(int ind, void *buffer) {
       yuv420_rgb24_std(yuv->width(), yuv->height(), yuv->y(), yuv->u(), yuv->v(), 
       yuv->yPitch(), yuv->uvPitch(), rgb, yuv->width() * 3, YCBCR_JPEG);
       if (rgb) {
-        unsigned char *rgba = (unsigned char *)buffer;
-        convert_rgb_to_rgba(rgb, yuv->width(), yuv->height(), &rgba, yuv->displayWidth(), yuv->displayHeight());
+        unsigned char *bgra = (unsigned char *)buffer;
+        convert_rgb_to_bgra(rgb, yuv->width(), yuv->height(), &bgra, yuv->displayWidth(), yuv->displayHeight());
         free(rgb);
         videos[ind]->unlockRead();
         return true;
