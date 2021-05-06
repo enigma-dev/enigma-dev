@@ -4,7 +4,7 @@
 #include "webm_player.hpp"
 #include "yuv_rgb.h"
 
-#include "libpng-util/libpng-util.h"
+#include "Universal_System/image_formats.h"
 #include "enigma.h"
 
 static int id = -1;
@@ -147,7 +147,7 @@ bool video_grab_frame_image(int ind, std::string fname) {
         free(rgb);
         videos[ind]->unlockRead();
         if (rgba) {
-          libpng_encode32_file(rgba, yuv->displayWidth(), yuv->displayHeight(), fname.c_str());
+          enigma::image_save(fname, rgba, yuv->displayWidth(), yuv->displayHeight(), yuv->displayWidth(), yuv->displayHeight(), false);
           free(rgba);
           return true;
         }
