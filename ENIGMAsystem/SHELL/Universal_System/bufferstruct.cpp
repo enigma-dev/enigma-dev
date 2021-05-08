@@ -269,7 +269,6 @@ void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int 
 }
 
 void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
-  get_buffer(binbuff, buffer);
   int tex = surface_get_texture(surface);
   int wid = surface_get_width(surface);
   int hgt = surface_get_height(surface);
