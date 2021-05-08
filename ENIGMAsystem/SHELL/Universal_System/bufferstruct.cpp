@@ -21,6 +21,7 @@
 
 #include "Resources/AssetArray.h" // TODO: start actually using for this resource
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GSsurface.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
@@ -261,18 +262,18 @@ int buffer_get_type(int buffer) {
   return binbuff->type;
 }
 
-//NOTE: This function should most likely be added in graphics systems.
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
   //get_buffer(binbuff, buffer);
   //TODO: Write this function
   DEBUG_MESSAGE("Function unimplemented: buffer_get_surface", MESSAGE_TYPE::M_WARNING);
 }
 
-//NOTE: This function should most likely be added in graphics systems.
 void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
-  //get_buffer(binbuff, buffer);
-  //TODO: Write this function
-  DEBUG_MESSAGE("Function unimplemented: buffer_set_surface", MESSAGE_TYPE::M_WARNING);
+  get_buffer(binbuff, buffer);
+  int tex = surface_get_texture(surface);
+  int wid = surface_get_width(surface);
+  int hgt = surface_get_height(surface);
+  enigma::graphics_push_texture_pixels(tex, wid, hgt, (unsigned char *)buffer_get_address(buffer));
 }
 
 void buffer_resize(int buffer, unsigned size) {
