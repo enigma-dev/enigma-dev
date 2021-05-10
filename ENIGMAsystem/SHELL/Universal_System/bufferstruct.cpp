@@ -272,7 +272,11 @@ void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int 
   int tex = surface_get_texture(surface);
   int wid = surface_get_width(surface);
   int hgt = surface_get_height(surface);
-  enigma::graphics_push_texture_pixels(tex, wid, hgt, (unsigned char *)buffer_get_address(buffer));
+  if (buffer_get_size(buffer) == buffer_sizeof(buffer_u64) * wid * hgt) {
+    enigma::graphics_push_texture_pixels(tex, wid, hgt, (unsigned char *)buffer_get_address(buffer));
+  } else { // execution can not continue safely with wrong buffer size
+    DEBUG_MESSAGE("Buffer allocated with wrong length! Cannot continue...", MESSAGE_TYPE::M_FATAL_ERROR);
+  }
 }
 
 void buffer_resize(int buffer, unsigned size) {
