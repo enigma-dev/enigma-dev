@@ -60,35 +60,35 @@ enum {
 	static string ws_x11_zenity  = "Zenity";
 	static string ws_x11_kdialog = "KDialog";
 
-	string widget_get_system();
-	void widget_set_system(string sys);
-	int show_message_cancelable(string message);
-	int show_message_ext(string message, string but1, string but2, string but3);
-	bool show_question(string message);
-	int show_question_cancelable(string message);
-	int show_attempt(string errortext);
-	string get_string(string message, string def);
-	string get_password(string message, string def);
-	double get_integer(string message, var def);
-	double get_passcode(string message, var def);
-	string get_open_filename(string filter, string fname);
-	string get_open_filenames(string filter, string fname);
-	string get_save_filename(string filter, string fname);
-	string get_open_filename_ext(string filter, string fname, string dir, string title);
-	string get_open_filenames_ext(string filter, string fname, string dir, string title);
-	string get_save_filename_ext(string filter, string fname, string dir, string title);
-	string get_directory(string dname);
-	string get_directory_alt(string capt, string root);
-	int get_color(int defcol);
-	int get_color_ext(int defcol, string title);
-	string message_get_caption();
-	void message_set_caption(string title);
+	static string widget_get_system();
+	static void widget_set_system(string sys);
+	static int show_message_cancelable(string message);
+	static int show_message_ext(string message, string but1, string but2, string but3);
+	static bool show_question(string message);
+	static int show_question_cancelable(string message);
+	static int show_attempt(string errortext);
+	static string get_string(string message, string def);
+	static string get_password(string message, string def);
+	static double get_integer(string message, var def);
+	static double get_passcode(string message, var def);
+	static string get_open_filename(string filter, string fname);
+	static string get_open_filenames(string filter, string fname);
+	static string get_save_filename(string filter, string fname);
+	static string get_open_filename_ext(string filter, string fname, string dir, string title);
+	static string get_open_filenames_ext(string filter, string fname, string dir, string title);
+	static string get_save_filename_ext(string filter, string fname, string dir, string title);
+	static string get_directory(string dname);
+	static string get_directory_alt(string capt, string root);
+	static int get_color(int defcol);
+	static int get_color_ext(int defcol, string title);
+	static string message_get_caption();
+	static void message_set_caption(string title);
 	
-	inline bool action_if_question(string message)
+	static inline bool action_if_question(string message)
 	{
 		return show_question(message);
 	}
 	
-	string get_login(string username, string password);
-	bool   get_string_canceled();
+	static string get_login(string username, string password);
+	static bool   get_string_canceled();
 }
