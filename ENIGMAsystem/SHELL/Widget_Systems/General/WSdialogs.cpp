@@ -2,7 +2,7 @@
 
 using std::string;
 
-void show_debug_message_helper(std::string errortext, MESSAGE_TYPE type);
+void show_debug_message_helper(string errortext, MESSAGE_TYPE type);
 
 namespace enigma_user {
 
