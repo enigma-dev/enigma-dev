@@ -1,7 +1,8 @@
-#include "Widget_Systems/General/WSdialogs.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 using std::string;
+
+void show_debug_message_helper(std::string errortext, MESSAGE_TYPE type);
 
 namespace enigma_user {
 
