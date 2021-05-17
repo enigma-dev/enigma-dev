@@ -71,8 +71,6 @@ namespace enigma {
   extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
 }
 
-void show_debug_message_helper(std::string errortext, MESSAGE_TYPE type);
-
 namespace enigma_user {
 
 bool show_question(std::string str);
