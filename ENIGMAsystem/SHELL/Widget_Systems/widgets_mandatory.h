@@ -65,35 +65,35 @@ namespace enigma {
   }
   
   // This function is called at the beginning of the game to allow the widget system to load.
-  static bool widget_system_initialize();
+  bool widget_system_initialize();
   extern std::string gameInfoText, gameInfoCaption;
   extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
   extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
 }
 
-static void show_debug_message_helper(std::string errortext, MESSAGE_TYPE type);
+void show_debug_message_helper(std::string errortext, MESSAGE_TYPE type);
 
 namespace enigma_user {
 
-static bool show_question(std::string str);
+bool show_question(std::string str);
 
-static void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO);
+void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO);
 
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
-static inline void show_error(std::string msg, const bool fatal) {
+inline void show_error(std::string msg, const bool fatal) {
    show_debug_message(msg, (fatal) ? M_FATAL_USER_ERROR : M_USER_ERROR);
 }
 
-static int show_message(const std::string &msg);
+int show_message(const std::string &msg);
 template<typename T> int show_message(T msg) { return show_message(enigma_user::toString(msg)); }
-static inline int action_show_message(string msg) {
+inline int action_show_message(string msg) {
   return show_message(msg);
 }
-static void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBackgroundColor, int left=enigma::gameInfoLeft, int top=enigma::gameInfoTop, int width=enigma::gameInfoWidth, int height=enigma::gameInfoHeight,
+void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBackgroundColor, int left=enigma::gameInfoLeft, int top=enigma::gameInfoTop, int width=enigma::gameInfoWidth, int height=enigma::gameInfoHeight,
 	bool embedGameWindow=enigma::gameInfoEmbedGameWindow, bool showBorder=enigma::gameInfoShowBorder, bool allowResize=enigma::gameInfoAllowResize, bool stayOnTop=enigma::gameInfoStayOnTop,
 	bool pauseGame=enigma::gameInfoPauseGame, string caption=enigma::gameInfoCaption);
-static inline void action_show_info() { show_info(); }
+inline void action_show_info() { show_info(); }
 
 }
 
