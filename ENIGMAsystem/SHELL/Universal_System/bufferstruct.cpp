@@ -275,7 +275,7 @@ void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int 
   if (buffer_get_size(buffer) == buffer_sizeof(buffer_u64) * wid * hgt) {
     enigma::graphics_push_texture_pixels(tex, wid, hgt, (unsigned char *)buffer_get_address(buffer));
   } else { // execution can not continue safely with wrong buffer size
-    DEBUG_MESSAGE("Buffer allocated with wrong length! Cannot continue...", MESSAGE_TYPE::M_FATAL_ERROR);
+    DEBUG_MESSAGE("Buffer allocated with wrong length!", MESSAGE_TYPE::M_WARNING);
   }
 }
 
