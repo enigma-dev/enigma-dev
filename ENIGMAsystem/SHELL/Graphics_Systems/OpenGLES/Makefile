@@ -1,7 +1,7 @@
 SOURCES += $(wildcard Graphics_Systems/OpenGLES/*.cpp) $(wildcard Graphics_Systems/General/*.cpp)
-override CXXFLAGS += -IBridges/OpenGLES
+override CXXFLAGS += -IBridges/OpenGLES -I../../android/external/glad/gles2/include
 
-override LDLIBS += -lepoxy
+#override LDLIBS += -lepoxy
 
 ifeq ($(TARGET-PLATFORM), Windows)
 	override LDLIBS += -lopengl32
