@@ -238,7 +238,9 @@ bool set_working_directory(string dname) {
 
 } // namespace enigma_user
 
-#else
+#endif
+
+#ifndef _WIN32
 } // namespace enigma
 #endif
 
