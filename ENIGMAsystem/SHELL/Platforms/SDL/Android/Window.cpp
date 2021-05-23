@@ -46,6 +46,10 @@ namespace enigma_user {
 window_t window_handle() {
   return reinterpret_cast<window_t>(enigma::ANWin);
 }
+
+window_t window_get_handle(wid_t winId) {
+  return reinterpret_cast<window_t>(strtoull(winId.c_str(), nullptr, 10));
+}
 */
   
 }
