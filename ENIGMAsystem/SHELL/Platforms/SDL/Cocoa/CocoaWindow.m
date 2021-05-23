@@ -27,6 +27,10 @@ void *cocoa_window_handle() {
   return (void *)wmInfo.info.cocoa.window;
 }
 
+void *cocoa_window_get_handle(unsigned long winId) {
+  return (void *)[NSWindow windowWithWindowNumber:(CGWindowID)winId];
+}
+
 unsigned long cocoa_window_identifier() {
   return [(NSWindow *)cocoa_window_handle() windowNubmer];
 }
