@@ -153,6 +153,11 @@ window_t window_handle() {
   return reinterpret_cast<window_t>(window_uint64);
 }
 
+window_t window_get_handle(wid_t winId) {
+  // implementation will be different on MacOSX than Win32/xlib...
+  return reinterpret_cast<window_t>(strtoull(winId, nullptr, 10));
+}
+
 // returns an identifier for the XLIB window
 // this string can be used in shell scripts
 wid_t window_identifier() {
