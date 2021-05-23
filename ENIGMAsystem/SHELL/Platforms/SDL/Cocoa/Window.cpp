@@ -47,7 +47,7 @@ window_t window_handle() {
 }
 
 window_t window_get_handle(wid_t winId) {
-  void *voidp_window = cocoa_window_get_handle(strtoul(winId, nullptr, 10));
+  void *voidp_window = cocoa_window_get_handle(strtoul(winId.c_str(), nullptr, 10));
   return reinterpret_cast<window_t>(voidp_window);
 }
 
