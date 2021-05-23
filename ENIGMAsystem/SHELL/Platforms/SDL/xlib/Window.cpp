@@ -50,6 +50,10 @@ window_t window_handle() {
   return reinterpret_cast<window_t>(window_uint64);
 }
 
+window_t window_get_handle(wid_t winId) {
+  return reinterpret_cast<window_t>(strtoull(winId.c_str(), nullptr, 10));
+}
+
 // returns an identifier for the SDL2 window
 // this string can be used in shell scripts
 wid_t window_identifier() {
