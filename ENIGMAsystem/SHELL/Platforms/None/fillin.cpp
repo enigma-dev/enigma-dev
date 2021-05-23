@@ -28,7 +28,15 @@
 #include <stdio.h>
 #include <stdlib.h>  //malloc
 #include <stdlib.h>  //getenv and system
+
+#ifndef _WIN32
 #include <sys/resource.h>
+#else
+#define byte __windows_byte_workaround
+#include <windows.h>
+#undef byte
+#endif
+
 #include <sys/stat.h>
 #include <time.h>  //clock
 #include <unistd.h>
@@ -82,6 +90,18 @@ int display_get_x() { return 0; }
 int display_get_y() { return 0; }
 int display_get_width() { return 0; }
 int display_get_height() { return 0; }
+
+window_t window_handle() { 
+  #ifdef _WIN32
+  return reinterpret_cast<window_t>(GetDesktopWindow());
+  #else
+  return reinterpret_cast<window_t>(nullptr);
+  #endif
+}
+
+wid_t window_identifier() { 
+  return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
+}
 
 void window_set_visible(bool visible) {}
 int window_get_visible() { return false; }
