@@ -22,8 +22,9 @@
 #include <string>
 
 extern "C" void *cocoa_window_handle();
-extern "C" long cocoa_window_identifier();
-extern "C" long cocoa_window_get_identifier(void *hwnd);
+extern "C" void *void *cocoa_window_get_handle(unsigned long winId);
+extern "C" unsigned long cocoa_window_identifier();
+extern "C" unsigned long cocoa_window_get_identifier(void *hwnd);
 
 namespace enigma {
 
@@ -45,6 +46,11 @@ window_t window_handle() {
   return reinterpret_cast<window_t>(enigma::NSWin);
 }
 
+window_t window_get_handle(wid_t winId) {
+  void *voidp_window = cocoa_window_get_handle(strtoul(winId, nullptr, 10));
+  return reinterpret_cast<window_t>(voidp_window);
+}
+
 // returns an identifier for the SDL2 window
 // this string can be used in shell scripts
 wid_t window_identifier() {
@@ -54,7 +60,7 @@ wid_t window_identifier() {
 // returns an identifier for certain window
 // this string can be used in shell scripts
 wid_t window_get_identifier(window_t hwnd) {
-  return std::to_string(cocoa_window_get_identifier(hwnd));
+  return std::to_string(cocoa_window_get_identifier(reinterpret_cast<void *>(hwnd)));
 }
 
 }
