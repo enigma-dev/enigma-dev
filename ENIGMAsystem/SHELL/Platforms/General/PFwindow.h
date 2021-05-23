@@ -217,6 +217,7 @@ bool display_test_all(int w, int h, int freq, int bitdepth);
 void set_synchronization(bool enable);
 
 window_t window_handle();
+window_t window_get_handle(wid_t winId); // the reverse of window_get_identifier(); converts window id's to window handles
 wid_t window_identifier(); // a string containing the number corresponding to the game's main window handle (shell script)
 wid_t window_get_identifier(window_t hwnd); // a string containing the number corresponding to the specified window handle
   
