@@ -10,7 +10,8 @@ if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
   LINUX_DEPS="$LINUX_DEPS libc6:i386 libc++-dev:i386 libstdc++6:i386\
     libncurses5:i386 libx11-6:i386 libglew-dev:i386 libglu1-mesa-dev:i386\
     libgl1-mesa-dev:i386 lib32z1-dev libxrandr-dev:i386 libxinerama-dev:i386\
-    gcc-multilib g++-multilib libc++abi-dev:i386 libpng-dev:i386 libffi-dev:i386"
+    libclang-common-10-dev gcc-multilib g++-multilib libc++abi-dev:i386\
+    libpng-dev:i386 libffi-dev:i386"
 elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
   LINUX_DEPS="$LINUX_DEPS mingw-w64 wine64 wine32 wine-stable libgl1-mesa-glx:i386"
 fi
