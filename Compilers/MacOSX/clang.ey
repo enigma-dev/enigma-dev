@@ -23,7 +23,7 @@ Parser-Vars:
   searchdirs-end: "End of search list."
 
 EXE-Vars:
-  resources: $exe
+  resources: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode.res
   Build-Extension: .app
   Run-output: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode
   Run-Program: open $game
