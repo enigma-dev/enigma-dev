@@ -12,7 +12,7 @@ if [ "$TRAVIS_OS_NAME" != "osx" ]; then
 fi
 
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-  sudo apt-get -y install libboost-program-options-dev pulseaudio libyaml-cpp-dev libpugixml-dev rapidjson-dev libprotobuf-dev protobuf-compiler protobuf-compiler-grpc libgrpc-dev libgrpc++-dev zlib1g-dev libglm-dev libpng-dev
+  sudo apt-get -y install libclang-common-10-dev libboost-program-options-dev pulseaudio libyaml-cpp-dev libpugixml-dev rapidjson-dev libprotobuf-dev protobuf-compiler protobuf-compiler-grpc libgrpc-dev libgrpc++-dev zlib1g-dev libglm-dev libpng-dev
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
   brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
   brew install protobuf pugixml yaml-cpp rapidjson
