@@ -713,6 +713,7 @@ void glsl_uniformi(int location, int v0, int v1, int v2, int v3) {
   }
 }
 
+//---
 void glsl_uniformui(int location, unsigned v0) {
   get_uniform(it,location,1);
   if (it->second.data[0].ui != v0){
@@ -844,7 +845,7 @@ void glsl_uniform1uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,1);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glUniform1uiv(location, size, value);
+    glUniform1uiv(location, size,(const GLint*) value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
     }
@@ -855,7 +856,7 @@ void glsl_uniform2uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,2);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glUniform2uiv(location, size, value);
+    glUniform2uiv(location, size, (const GLint*)value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
     }
@@ -866,7 +867,7 @@ void glsl_uniform3uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,3);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glUniform3uiv(location, size, value);
+    glUniform3uiv(location, size,(const GLint*) value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
     }
@@ -877,7 +878,7 @@ void glsl_uniform4uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glUniform4uiv(location, size, value);
+    glUniform4uiv(location, size,(const GLint*) value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
     }

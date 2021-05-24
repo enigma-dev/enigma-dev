@@ -130,6 +130,22 @@ void glsl_attribute_enable_all(bool enable);
 void glsl_attribute_enable(int location, bool enable);
 void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, unsigned offset);
 
+
+//------------
+
+void glUniform1ui(int location, unsigned v0);
+void glUniform2ui(int location, unsigned v0, unsigned v1);
+void glUniform3ui(int location, unsigned v0, unsigned v1, unsigned v2);
+void glUniform4ui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3);
+
+void glUniform1uiv(int location, int size, const  GLint* value);
+void glUniform2uiv(int location, int size, const  GLint* value);
+void glUniform3uiv(int location, int size, const  GLint* value);
+void glUniform4uiv(int location, int size, const  GLint* value);
+
+
+//-------------
+
 // Wrap our abstracted version to the GameMaker version
 #define shader_set            glsl_program_set
 #define shader_reset          glsl_program_reset

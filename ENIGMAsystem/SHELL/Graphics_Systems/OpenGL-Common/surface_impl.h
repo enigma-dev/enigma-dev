@@ -41,6 +41,15 @@ struct Surface : BaseSurface
 
 int graphics_create_texture_custom(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight, GLint internalFormat, GLenum format, GLenum type);
 
+
+
+//---------------
+
+
+
+//-----------
+
+
 } // namespace enigma
 
 #endif //ENIGMA_GL_SURFACE_IMPL_H
