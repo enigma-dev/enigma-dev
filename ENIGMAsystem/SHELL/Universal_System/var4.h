@@ -57,7 +57,7 @@ template<typename T, typename U> class CanCast {
   template<typename I, typename O = U> struct Kernel {
     static constexpr bool V = false;
   };
-  template<typename I> struct Kernel<I, decltype((U) *(I*)nullptr)> {
+  template<typename I> struct Kernel<I, decltype((U) std::declval<I>())> {
     static constexpr bool V = true;
   };
 
