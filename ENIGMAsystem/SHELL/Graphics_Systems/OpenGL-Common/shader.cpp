@@ -16,6 +16,9 @@
 **/
 
 #include "version.h"
+#if __has_include("shader_wrappers.h") 
+  #include "shader_wrappers.h"
+#endif
 #include "shader.h"
 #include "GLSLshader.h"
 #include "OpenGLHeaders.h"
@@ -265,7 +268,7 @@ void main()
 {
   vec4 TexColor;
   if (en_TexturingEnabled == true){
-    TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;
+    TexColor = texture( en_TexSampler, v_TextureCoord.st ) * v_Color;
   }else{
     TexColor = v_Color;
   }
@@ -845,7 +848,7 @@ void glsl_uniform1uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,1);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glUniform1uiv(location, size,(const GLint*) value);
+    glUniform1uiv(location, size,value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
     }
@@ -856,7 +859,7 @@ void glsl_uniform2uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,2);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glUniform2uiv(location, size, (const GLint*)value);
+    glUniform2uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
     }
@@ -867,7 +870,7 @@ void glsl_uniform3uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,3);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glUniform3uiv(location, size,(const GLint*) value);
+    glUniform3uiv(location, size,value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
     }
@@ -878,7 +881,7 @@ void glsl_uniform4uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glUniform4uiv(location, size,(const GLint*) value);
+    glUniform4uiv(location, size,value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
     }

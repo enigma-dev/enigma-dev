@@ -3,6 +3,11 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/OpenGL-Common/textures_impl.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GSscreen.h"
+
+
 
 namespace enigma_user {
 
