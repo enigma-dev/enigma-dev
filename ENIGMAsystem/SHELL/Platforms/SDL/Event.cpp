@@ -216,6 +216,7 @@ std::unordered_map<SDL_JoystickID,int> joystickDevices;
 
 void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) {
   addGamepad(event->cdevice.which);
+  if (event->cdevice.which >= gamepads.size()) return;
   auto joystick = SDL_GameControllerGetJoystick(gamepads[event->cdevice.which].controller);
   auto joyId = SDL_JoystickInstanceID(joystick);
   joystickDevices[joyId] = event->cdevice.which;
