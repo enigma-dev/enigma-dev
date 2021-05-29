@@ -32,8 +32,8 @@ Broken in MinGW and Visual Studio since std::fs's conception */
 
 int main(int argc, char* argv[])
 {
-  std::ofstream egmlog(TMPDIR + "/enigma_libegm.log", std::ofstream::out);
-  std::ofstream elog(TMPDIR + "/enigma_compiler.log", std::ofstream::out);
+  std::ofstream egmlog(TEMP_DIRECTORY_PATH + "/enigma_libegm.log", std::ofstream::out);
+  std::ofstream elog(TEMP_DIRECTORY_PATH + "/enigma_compiler.log", std::ofstream::out);
 
   std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
   if (ENIGMA_DEBUG == "TRUE") {
@@ -42,8 +42,8 @@ int main(int argc, char* argv[])
   } else {
     outputStream.rdbuf(egmlog.rdbuf());
     errorStream.rdbuf(egmlog.rdbuf());
-    std::cout << "LibEGM parsing log at: " << TMPDIR << "/enigma_libegm.log" << std::endl;
-    std::cout << "ENIGMA compiler log at: " << TMPDIR << "/enigma_compiler.log" << std::endl;
+    std::cout << "LibEGM parsing log at: " << TEMP_DIRECTORY_PATH << "/enigma_libegm.log" << std::endl;
+    std::cout << "ENIGMA compiler log at: " << TEMP_DIRECTORY_PATH << "/enigma_compiler.log" << std::endl;
   }
   
   
