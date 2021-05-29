@@ -1,5 +1,7 @@
 #include "filesystem.h"
 
+#include "tempfix.h" // remove me when std::fs gets fixed on windows by mingw/msvc guys
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -74,7 +76,7 @@ fs::path TempFileName(const string &pattern) {
       prefix += std::to_string(rand() % 10);
   }
   std::string name = prefix + pattern + std::to_string(increment++);
-  return (fs::temp_directory_path().string() + '/' + name);
+  return (TEMP_DIRECTORY_PATH + '/' + name);
 }
 
 void DeleteFile(const fs::path &fName) {
