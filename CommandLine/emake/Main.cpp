@@ -22,10 +22,18 @@ namespace fs = std::filesystem;
 std::ostream outputStream(nullptr);
 std::ostream errorStream(nullptr);
 
+#ifdef _WIN32
+/* Tempfix for fs::temp_directory_path() on Michaelsoft Binbows
+Broken in MinGW and Visual Studio since std::fs's conception */
+#define TMPDIR fs::path(std::getenv("TMP") ? : "C:/").string()
+#else
+#define TMPDIR fs::temp_directory_path().string()
+#endif
+
 int main(int argc, char* argv[])
 {
-  std::ofstream egmlog(fs::temp_directory_path().string() + "/enigma_libegm.log", std::ofstream::out);
-  std::ofstream elog(fs::temp_directory_path().string() + "/enigma_compiler.log", std::ofstream::out);
+  std::ofstream egmlog(TMPDIR + "/enigma_libegm.log", std::ofstream::out);
+  std::ofstream egmlog(TMPDIR + "/enigma_compiler.log", std::ofstream::out);
 
   std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
   if (ENIGMA_DEBUG == "TRUE") {
@@ -34,8 +42,8 @@ int main(int argc, char* argv[])
   } else {
     outputStream.rdbuf(egmlog.rdbuf());
     errorStream.rdbuf(egmlog.rdbuf());
-    std::cout << "LibEGM parsing log at: " << fs::temp_directory_path().string() << "/enigma_libegm.log" << std::endl;
-    std::cout << "ENIGMA compiler log at: " << fs::temp_directory_path().string() << "/enigma_compiler.log" << std::endl;
+    std::cout << "LibEGM parsing log at: " << TMPDIR << "/enigma_libegm.log" << std::endl;
+    std::cout << "ENIGMA compiler log at: " << TMPDIR << "/enigma_compiler.log" << std::endl;
   }
   
   
