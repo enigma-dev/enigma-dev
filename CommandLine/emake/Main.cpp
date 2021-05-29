@@ -25,9 +25,9 @@ std::ostream errorStream(nullptr);
 #ifdef _WIN32
 /* Tempfix for fs::temp_directory_path() on Michaelsoft Binbows
 Broken in MinGW and Visual Studio since std::fs's conception */
-#define TMPDIR fs::path(std::getenv("TMP") ? : "C:/").string()
+#define TEMP_DIRECTORY_PATH fs::path(getenv("TMP") ? getenv("TMP") : "C:/").string()
 #else
-#define TMPDIR fs::temp_directory_path().string()
+#define TEMP_DIRECTORY_PATH fs::temp_directory_path().string()
 #endif
 
 int main(int argc, char* argv[])
