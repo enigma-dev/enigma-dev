@@ -32,16 +32,16 @@
 #ifndef ENIGMA_RESINIT_H
 #define ENIGMA_RESINIT_H
 
-#include <cstdio>
+#include "Platforms/General/fileio.h"
 
 namespace enigma 
 {
 
-void exe_loadsprs(FILE* exe);
-void exe_loadsounds(FILE* exe);
-void exe_loadbackgrounds(FILE* exe);
-void exe_loadfonts(FILE* exe);
-void exe_loadpaths(FILE* exe);
+void exe_loadsprs(FILE_t* exe);
+void exe_loadsounds(FILE_t* exe);
+void exe_loadbackgrounds(FILE_t* exe);
+void exe_loadfonts(FILE_t* exe);
+void exe_loadpaths(FILE_t* exe);
 
 } //namespace enigma
 
