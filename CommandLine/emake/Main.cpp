@@ -33,7 +33,7 @@ Broken in MinGW and Visual Studio since std::fs's conception */
 int main(int argc, char* argv[])
 {
   std::ofstream egmlog(TMPDIR + "/enigma_libegm.log", std::ofstream::out);
-  std::ofstream egmlog(TMPDIR + "/enigma_compiler.log", std::ofstream::out);
+  std::ofstream elog(TMPDIR + "/enigma_compiler.log", std::ofstream::out);
 
   std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
   if (ENIGMA_DEBUG == "TRUE") {
