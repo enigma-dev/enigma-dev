@@ -8,7 +8,7 @@
 # PLATFORM { Platforms/* }
 include ../../Config.mk
 
-ENIGMA_ROOT := $(shell realpath $$PWD/../../)
+ENIGMA_ROOT := ../../
 
 MAKE_TARGETS :=
 ifeq ($(TARGET-PLATFORM), Android)
@@ -149,12 +149,12 @@ endif
 ############
 
 write_src_files:
-	@echo "$(SOURCES)" > $(WORKDIR)/sources.list
-	@echo "$(CXXFLAGS) $(CPPFLAGS)" > $(WORKDIR)/build.cxxflags
-	@echo "$(CFLAGS)" > $(WORKDIR)/build.cflags
-	@echo "$(ANDROID_SHARED_LIBRARIES)" > $(WORKDIR)/build.libs
-	@echo "$(ANDROIS_LDLIBS)" > $(WORKDIR)/build.ldlibs
-	@$(shell for i in $(ANDROID_MAKEFILES); do echo "include $(ENIGMA_ROOT)/android/external/$$i"; done > $(WORKDIR)/build.makefiles)
+	@echo "$(SOURCES)" > $(WORKDIR)/sources.in
+	@echo "$(CXXFLAGS) $(CPPFLAGS)" > $(WORKDIR)/cxxflags.in
+	@echo "$(CFLAGS)" > $(WORKDIR)/cflags.in
+	@echo "$(ANDROID_SHARED_LIBRARIES)" > $(WORKDIR)/libs.in
+	@echo "$(ANDROIS_LDLIBS)" > $(WORKDIR)/ldlibs.in
+	@echo "$(ANDROID_MAKEFILES)" > $(WORKDIR)/makefiles.in
 
 android_game: write_src_files
 	@cd ../../android && BASENAME=$(BASENAME) CODEGEN=$(CODEGEN) ./gradlew $(GRADLE_TARGET)
