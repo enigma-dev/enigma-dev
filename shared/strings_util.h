@@ -139,7 +139,7 @@ inline bool IsNumber(const std::string& s) {
 
 inline std::string remove_trailing_zeros(double numb) {
   std::string strnumb = std::to_string(numb);
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
+  while (!strnumb.empty() && strnumb.find('.') != std::string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
     strnumb.pop_back();
   return strnumb;
 }
