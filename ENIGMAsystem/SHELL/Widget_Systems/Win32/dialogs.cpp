@@ -35,6 +35,7 @@ using namespace std;
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/estring.h"
 #include "GameSettings.h"
+#include "strings_util.h"
 
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd/hInstance
@@ -100,15 +101,6 @@ static inline string remove_slash(string dir) {
   while (!dir.empty() && (dir.back() == '\\' || dir.back() == '/'))
     dir.pop_back();
   return dir;
-}
-
-static inline string remove_trailing_zeros(double numb) {
-  string strnumb = std::to_string(numb);
-
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-    strnumb.pop_back();
-
-  return strnumb;
 }
 
 static inline void CenterRectToMonitor(LPRECT prc, UINT flags) {
