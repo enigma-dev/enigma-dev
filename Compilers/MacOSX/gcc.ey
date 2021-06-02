@@ -6,10 +6,10 @@ Maintainer: fundies
 Target-platform: MacOSX
 
 Make-Vars:
-  make: gmake
+  make: make
   makeflags:
-  cc: gcc
-  cxx: g++
+  cc: gcc-10
+  cxx: g++-10
   cppflags:
   cxxflags:
   cflags:
