@@ -137,4 +137,11 @@ inline bool IsNumber(const std::string& s) {
   return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
 }
 
+inline string remove_trailing_zeros(double numb) {
+  string strnumb = std::to_string(numb);
+  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
+    strnumb.pop_back();
+  return strnumb;
+}
+
 #endif
