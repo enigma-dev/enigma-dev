@@ -74,17 +74,7 @@ static string shellscript_evaluate(string command) {
 static string add_escaping(string str, bool is_caption, string new_caption) {
   string result = str; if (is_caption && str.empty()) result = new_caption;
   result = string_replace_all(result, "\"", "\\\""); // zenity needs this for quotes to show
-  result = string_replace_all(result, "_", "__"); // zenity needs this for underscores to show
   return result;
-}
-
-static string remove_trailing_zeros(double numb) {
-  string strnumb = std::to_string(numb);
-
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-    strnumb.pop_back();
-
-  return strnumb;
 }
 
 static string zenity_filter(string input) {
