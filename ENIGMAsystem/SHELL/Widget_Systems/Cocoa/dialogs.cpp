@@ -18,6 +18,7 @@
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
+#include "strings_util.h"
 #include <stdlib.h>
 #include <cstdio>
 #include <string>
@@ -31,13 +32,6 @@
 using std::string;
 
 namespace enigma {
-
-static string remove_trailing_zeros(double numb) {
-  string strnumb = std::to_string(numb);
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-    strnumb.pop_back();
-  return strnumb;
-}
 
 bool widget_system_initialize() {
   return true;
