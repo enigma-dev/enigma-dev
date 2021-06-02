@@ -119,7 +119,7 @@ string get_password(string message, string def) {
 
 double get_integer(string message, var def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
-  string integer = enigma::remove_trailing_zeros(val);
+  string integer = remove_trailing_zeros(val);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
   string result = cocoa_input_box(message.c_str(), integer.c_str(), dialog_caption.c_str());
   return !result.empty() ? strtod(result.c_str(), NULL) : 0;
@@ -127,7 +127,7 @@ double get_integer(string message, var def) {
 
 double get_passcode(string message, var def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
-  string integer = enigma::remove_trailing_zeros(val);
+  string integer = remove_trailing_zeros(val);
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
   string result = cocoa_password_box(message.c_str(), integer.c_str(), dialog_caption.c_str());
   return !result.empty() ? strtod(result.c_str(), NULL) : 0;
