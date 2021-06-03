@@ -44,6 +44,13 @@ ifeq ($(OS), FreeBSD)
 	LDFLAGS  += -L/usr/local/lib
 endif
 
+# macOS brew include and lib folders
+ifeq ($(OS), Darwin)
+	CXXFLAGS += -I/usr/local/include
+	CFLAGS   += -I/usr/local/include
+	LDFLAGS  += -L/usr/local/lib
+endif
+
 # These will be relative to the file that includes this Makefile
 SRC_DIR := .
 OBJ_DIR := .eobjs
