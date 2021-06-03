@@ -76,8 +76,6 @@ static wchar_t wstr_fname[4096];
 static tstring tstr_dir;
 static tstring tstr_title;
 
-using enigma_user::string_replace_all;
-
 #ifdef DEBUG_MODE
 #include "Universal_System/Resources/resource_data.h"
 #include "Universal_System/Object_Tiers/object.h"
