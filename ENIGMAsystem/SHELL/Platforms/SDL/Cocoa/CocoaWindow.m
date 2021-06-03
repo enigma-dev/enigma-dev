@@ -15,26 +15,17 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#import "CocoaWindow.h"
 #import <Cocoa/Cocoa.h>
 
-#import <SDL2/SDL.h>
-#import <SDL2/SDL_syswm.h>
-
-void *cocoa_window_handle() {
-  SDL_SysWMinfo wmInfo;
-  SDL_VERSION(&wmInfo.version);
-  SDL_GetWindowWMInfo(enigma::windowHandle, &wmInfo);
-  return (void *)wmInfo.info.cocoa.window;
-}
-
-void *cocoa_window_get_handle(unsigned long winId) {
+void *cocoa_window_get_handle(unsigned int winId) {
   return (void *)[NSWindow windowWithWindowNumber:(CGWindowID)winId];
 }
 
-unsigned long cocoa_window_identifier() {
-  return [(NSWindow *)cocoa_window_handle() windowNubmer];
+unsigned int cocoa_window_identifier() {
+  return [(NSWindow *)cocoa_window_handle() windowNumber];
 }
 
-unsigned long cocoa_window_get_identifier(void *hwnd) {
-  return [(NSWindow *)hwnd windowNubmer];
+unsigned int cocoa_window_get_identifier(void *hwnd) {
+  return [(NSWindow *)hwnd windowNumber];
 }

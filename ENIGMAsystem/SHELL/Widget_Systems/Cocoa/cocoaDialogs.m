@@ -23,7 +23,7 @@ const char *cocoa_dialog_caption() {
   if (window_handle != nil)
     return [[window_handle title] UTF8String];
 
-    return "";
+  return "";
 }
 
 int cocoa_show_message(const char *message, bool has_cancel, const char *title) {

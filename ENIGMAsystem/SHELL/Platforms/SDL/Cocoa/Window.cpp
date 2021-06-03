@@ -15,21 +15,28 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "CocoaWindow.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/SDL/Window.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 #include <string>
 
-extern "C" void *cocoa_window_handle();
-extern "C" void *void *cocoa_window_get_handle(unsigned long winId);
-extern "C" unsigned long cocoa_window_identifier();
-extern "C" unsigned long cocoa_window_get_identifier(void *hwnd);
+extern "C" void *void *cocoa_window_get_handle(unsigned int winId);
+extern "C" unsigned int cocoa_window_identifier();
+extern "C" unsigned int cocoa_window_get_identifier(void *hwnd);
+
+void *cocoa_window_handle() {
+  SDL_SysWMinfo wmInfo;
+  SDL_VERSION(&wmInfo.version);
+  SDL_GetWindowWMInfo(enigma::windowHandle, &wmInfo);
+  return (void *)wmInfo.info.cocoa.window;
+}
 
 namespace enigma {
 
 void *NSWin; // NSWindow * a.k.a CocoaAPI Window Handle
-unsigned long WinNum; // CGWindowID a.k.a [NSWindow windowNumber]
+unsigned int WinNum; // CGWindowID a.k.a [NSWindow windowNumber]
 
 // called from initGameWindow()
 // capture sdl window win/winid
