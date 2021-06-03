@@ -3,10 +3,10 @@ override CXXFLAGS += -IBridges/OpenGLES
 
 override LDLIBS += -lepoxy
 
-ifeq ($(TARGET-PLATFORM), Windows)
+ifeq ($(TARGET_PLATFORM), Windows)
 	override LDLIBS += -lopengl32
-else ifeq ($(TARGET-PLATFORM), Linux)
+else ifeq ($(TARGET_PLATFORM), Linux)
 	override LDLIBS += -lGL
-else ifeq ($(TARGET-PLATFORM), MacOSX)
+else ifeq ($(TARGET_PLATFORM), MacOSX)
 	override LDLIBS += -framework OpenGL
 endif

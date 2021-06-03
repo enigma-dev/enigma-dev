@@ -26,16 +26,11 @@
 \********************************************************************************/
 
 #include <string>
+#include <cstdlib>
 
-int e_exec(const char* fcmd, const char* *Cenviron = NULL);
-int e_execp(const char* cmd, std::string path);
-int e_execs(std::string cmd);
-int e_execs(std::string cmd, std::string cat1);
-int e_execs(std::string cmd, std::string cat1, std::string cat2);
-int e_execs(std::string cmd, std::string cat1, std::string cat2, std::string cat3);
-int e_execsp(std::string cmd, std::string path);
-int e_execsp(std::string cmd, std::string cat1, std::string path);
-int e_execsp(std::string cmd, std::string cat1, std::string cat2, std::string path);
-int e_execsp(std::string cmd, std::string cat1, std::string cat2, std::string cat3, std::string path);
-
-//int better_system(std::string,std::string,std::string="",const char* = NULL);
+inline int actually_bash(const std::string& cmd) {
+  std::string full_cmd = ("bash -c \'" + cmd + "\'");
+  int ret = std::system(full_cmd.c_str());
+  std::cout << "`" << cmd << "`" << " returned: " << ret << std::endl; 
+  return ret;
+}

@@ -18,8 +18,8 @@ Make-Vars:
   links: -lobjc -lz -framework Cocoa
 
 Parser-Vars:
-  defines: x86_64-apple-darwin13-cpp -dM -x c++ -E $blank
-  searchdirs: x86_64-apple-darwin13-clang -E -x c++ -v $blank
+  defines: x86_64-apple-darwin13-cpp -dM -x c++ -E /dev/null
+  searchdirs: x86_64-apple-darwin13-clang -E -x c++ -v /dev/null
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
 

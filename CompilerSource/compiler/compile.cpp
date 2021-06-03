@@ -325,14 +325,13 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     edbg << "Cleaning..." << flushl;
 
   	string make = compilerInfo.make_vars["MAKEFLAGS"];
-    make += " -C \"" + unixfy_path(enigma_root) + "\"";
-    make += " clean-game ";
   	make += "COMPILEPATH=\"" + unixfy_path(compilepath) + "\" ";
   	make += "WORKDIR=\"" + unixfy_path(eobjs_directory) + "\" ";
     make += "CODEGEN=\"" + unixfy_path(codegen_directory) + "\" ";
+    make += "make -C \"" + unixfy_path(enigma_root) + "\"";
+    make += " clean-game ";
 
-  	edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
-    e_execs(compilerInfo.MAKE_location,make);
+    actually_bash(make);
 
     edbg << "Done.\n" << flushl;
   	idpr("Done.", 100);
@@ -658,8 +657,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   string make = compilerInfo.make_vars["MAKEFLAGS"];
 
-  make += "-C \"" + unixfy_path(enigma_root) + "\" ";
-  make += "Game ";
   make += "WORKDIR=\"" + unixfy_path(eobjs_directory) + "\" ";
   make += "CODEGEN=\"" + unixfy_path(codegen_directory) + "\" ";
   make += mode == emode_debug? "GMODE=\"Debug\"" : mode == emode_design? "GMODE=\"Design\"" : mode == emode_compile?"GMODE=\"Compile\"" : "GMODE=\"Run\"";
@@ -670,12 +667,13 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   make += "WIDGETS=\""  + extensions::targetAPI.widgetSys + "\" ";
   make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
   make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
-  make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
+  make += "TARGET_PLATFORM=\"" + compilerInfo.target_platform + "\" ";
 
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")
       make += key.first + "=\"" + key.second + "\" ";
   }
+  
 
   make += "COMPILEPATH=\"" + unixfy_path(compilepath) + "\" ";
 
@@ -689,8 +687,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     if (mfgfn[i] == '\\') mfgfn[i] = '/';
   make += string(" OUTPUTNAME=\"") + mfgfn + "\" ";
 
-  edbg << "Running make from `" << compilerInfo.MAKE_location << "'" << flushl;
-  edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
+  make += "make -C \"" + unixfy_path(enigma_root) + "\" ";
+  make += "Game ";
+
+  edbg << "Full command line: " << make << flushl;
 
   string flags = "";
 
@@ -698,7 +698,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
     std::string dirs = "CODEGEN=" + codegen_directory.u8string() + " ";
     dirs += "WORKDIR=" + eobjs_directory.u8string() + " ";
-    e_execs("make", dirs, "required-directories");
+    actually_bash("make " + dirs + " required-directories");
 
     // Pick a file and flush it
     const std::filesystem::path redirfile = (eobjs_directory/"enigma_compile.log");
@@ -710,7 +710,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     flags += "&> \"" + redirfile.u8string() + "\"";
   }
 
-  int makeres = e_execs(compilerInfo.MAKE_location, make, flags);
+  int makeres = actually_bash(make + " " + flags);
   if (build_stopping) { build_stopping = false; return 0; }
 
   // Stop redirecting GCC output
@@ -822,7 +822,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     rprog = string_replace_all(rprog,"$game",gameFname.u8string());
     rparam = string_replace_all(rparam,"$game",gameFname.u8string());
     user << "Running \"" << rprog << "\" " << rparam << flushl;
-    int gameres = e_execs(rprog, rparam);
+    int gameres = actually_bash(rprog + " " + rparam);
     user << "\n\nGame returned " << gameres << "\n";
 
     // Restore the compilers original working directory.

@@ -56,60 +56,6 @@ static char errbuf[1024];
 static string lastbearings;
 static std::filesystem::path lastcodegen_directory;
 
-// This function parses one command line specified to the eYAML into a filename string and a parameter string,
-// then returns whether or not the output from this call must be manually redirected to the output file ofile.
-static bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
-{ 
-  pt pos = 0, spos;
-
-  /* Isolate the executable path and filename
-  ***********************************************/
-    while (is_useless(line[pos]) and pos<line.length()) pos++; // Skip leading whitespace
-    if (pos == line.length()) return false;
-    spos = pos;
-
-    if (line[pos] == '"' and ++spos)
-      while (line[++pos] != '"' and pos<line.length())
-        if (line[pos] == '\\') pos++; else {}
-    else if (line[pos] == '\'' and ++spos)
-      while (line[++pos] != '\'' and pos<line.length())
-        if (line[pos] == '\\') pos++; else {}
-    else while (!is_useless(line[++pos]) and pos<line.length());
-
-  exename = line.substr(spos,pos-spos);
-  if (pos >= line.length())
-    return (command = "", true);
-
-  /* Isolate the command part of our input line
-  **********************************************/
-  while (is_useless(line[++pos]));
-  command = line.substr(pos);
-
-  /* Parse the command for keywords such as $out and $blank
-  ************************************************************/
-    size_t srp = command.find("$out");
-
-    bool redir = true;
-    while (srp != string::npos) {
-      redir = false;
-      command.replace(srp,4,ofile);
-      srp = command.find("$out");
-    }
-
-    bool mblank = false;
-    srp = command.find("$blank");
-    while (srp != string::npos) {
-      command.replace(srp,6,("\"" + (codegen_directory/"enigma_blank.txt").u8string() + "\"").c_str());
-      srp = command.find("$blank");
-      mblank = true;
-    }
-    if (mblank)
-      fclose(fopen((codegen_directory/"enigma_blank.txt").u8string().c_str(),"wb"));
-
-  /* Return whether or not to redirect */
-  return redir;
-}
-
 // Read info about our compiler configuration and run with it
 const char* establish_bearings(const char *compiler)
 {
@@ -126,34 +72,26 @@ const char* establish_bearings(const char *compiler)
 
   bool got_success = false;
 
-  // Now we begin interfacing with the toolchain.
-  string cmd, toolchainexec, parameters; // Full command line, executable part, parameter part
-  bool redir; // Whether or not to redirect the output manually
-
   std::string MAKE_paths = compilerInfo.make_vars["PATH"];
   
   std::string dirs = "CODEGEN=" + unixfy_path(codegen_directory) + " ";
   dirs += "WORKDIR=" + unixfy_path(eobjs_directory) + " ";
-  e_execs("make", dirs, "required-directories");
+  actually_bash("make " + dirs + " required-directories");
 
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.
   ***********************************************************/
-  cmd = compilerInfo.defines_cmd;
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + (codegen_directory/"enigma_defines.txt").u8string() + "\""));
-  cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + (codegen_directory/"enigma_defines.txt").u8string() + "\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
-  if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
+  cout << "Read key `defines` as `" << compilerInfo.defines_cmd << "`" << std::endl;
+  got_success = actually_bash(compilerInfo.defines_cmd + " > " + (codegen_directory/"enigma_defines.txt").u8string());
+  if (got_success != 0) return "Call to 'defines' toolchain executable returned non-zero!\n";
   else cout << "Call succeeded" << endl;
 
   /* Get a list of all available search directories.
   ** These are where we'll look for headers to parse.
   ****************************************************/
-  cmd = compilerInfo.searchdirs_cmd;
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + (codegen_directory/"enigma_searchdirs.txt").u8string() + "\""));
-  cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + (codegen_directory/"enigma_searchdirs.txt").u8string() + "\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
-  if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
+  cout << "Read key `searchdirs` as `" << compilerInfo.searchdirs_cmd << "`" << std::endl;
+  got_success = actually_bash(compilerInfo.searchdirs_cmd + " &> " + (codegen_directory/"enigma_searchdirs.txt").u8string());
+  if (got_success != 0) return "Call to 'searchdirs' toolchain executable returned non-zero!";
   else cout << "Call succeeded" << endl;
 
   /* Parse include directories
@@ -207,18 +145,6 @@ const char* establish_bearings(const char *compiler)
     jdi::builtin->add_macro("_GLIBCXX_USE_CXX11_ABI", "0");
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
-
-  /* Note `make` location
-  *****************************/
-
-  if (compilerInfo.make_vars.find("MAKE") != compilerInfo.make_vars.end())
-    cmd = compilerInfo.make_vars["MAKE"];
-  else
-    cmd = "make", cout << "WARNING: Compiler descriptor file `" << compiler <<"` does not specify 'make' executable. Using 'make'.\n";
-  toolchain_parseout(cmd, toolchainexec,parameters);
-  compilerInfo.MAKE_location = toolchainexec;
-  if (parameters != "")
-    cout << "WARNING: Discarding parameters `" << parameters << "` to " << compilerInfo.MAKE_location << "." << endl;
 
   return 0;
 }

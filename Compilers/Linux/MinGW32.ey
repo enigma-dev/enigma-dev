@@ -20,8 +20,8 @@ Make-Vars:
   pkg-config: i686-w64-mingw32-pkg-config
 
 Parser-Vars:
-  defines: i686-w64-mingw32-cpp -dM -x c++ --std=c++03 -E $blank
-  searchdirs: i686-w64-mingw32-gcc -E -x c++ --std=c++03 -v $blank
+  defines: i686-w64-mingw32-cpp -dM -x c++ --std=c++03 -E /dev/null
+  searchdirs: i686-w64-mingw32-gcc -E -x c++ --std=c++03 -v /dev/null
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
   

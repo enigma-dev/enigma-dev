@@ -1,4 +1,4 @@
-ifeq ($(TARGET-PLATFORM), Windows)
+ifeq ($(TARGET_PLATFORM), Windows)
 	override LDLIBS += -lffi
 	SOURCES += Universal_System/Extensions/ExternalFuncs/Win32/ExternalFuncs.cpp
 else
