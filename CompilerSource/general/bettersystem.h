@@ -29,8 +29,8 @@
 #include <cstdlib>
 
 inline int actually_bash(const std::string& cmd) {
-  std::string full_cmd = ("bash -c \'" + cmd + "\'");
+  std::string full_cmd = ("bash -c \'{ " + cmd + "; }\'");
   int ret = std::system(full_cmd.c_str());
-  std::cout << "`" << cmd << "`" << " returned: " << ret << std::endl; 
+  std::cout << "`" << full_cmd << "`" << " returned: " << ret << std::endl; 
   return ret;
 }

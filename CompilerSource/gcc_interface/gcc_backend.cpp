@@ -82,7 +82,7 @@ const char* establish_bearings(const char *compiler)
   ** These will help us through parsing available libraries.
   ***********************************************************/
   cout << "Read key `defines` as `" << compilerInfo.defines_cmd << "`" << std::endl;
-  got_success = actually_bash(compilerInfo.defines_cmd + " > " + (codegen_directory/"enigma_defines.txt").u8string());
+  got_success = actually_bash(compilerInfo.defines_cmd + " > " + unixfy_path((codegen_directory).u8string() + "/enigma_defines.txt"));
   if (got_success != 0) return "Call to 'defines' toolchain executable returned non-zero!\n";
   else cout << "Call succeeded" << endl;
 
@@ -90,7 +90,7 @@ const char* establish_bearings(const char *compiler)
   ** These are where we'll look for headers to parse.
   ****************************************************/
   cout << "Read key `searchdirs` as `" << compilerInfo.searchdirs_cmd << "`" << std::endl;
-  got_success = actually_bash(compilerInfo.searchdirs_cmd + " &> " + (codegen_directory/"enigma_searchdirs.txt").u8string());
+  got_success = actually_bash(compilerInfo.searchdirs_cmd + " 2> " + unixfy_path((codegen_directory).u8string() + "/enigma_searchdirs.txt"));
   if (got_success != 0) return "Call to 'searchdirs' toolchain executable returned non-zero!";
   else cout << "Call succeeded" << endl;
 
