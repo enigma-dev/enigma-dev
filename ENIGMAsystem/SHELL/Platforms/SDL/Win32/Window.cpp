@@ -20,6 +20,8 @@
 #include <windows.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
+#include <sstream>
+#include <cstdio>
 #include <string>
 
 namespace enigma {
