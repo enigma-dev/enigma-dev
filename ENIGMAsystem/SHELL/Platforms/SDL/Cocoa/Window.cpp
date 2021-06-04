@@ -22,7 +22,7 @@
 #include <SDL2/SDL_syswm.h>
 #include <string>
 
-extern "C" void *void *cocoa_window_get_handle(unsigned int winId);
+extern "C" void *cocoa_window_get_handle(unsigned int winId);
 extern "C" unsigned int cocoa_window_identifier();
 extern "C" unsigned int cocoa_window_get_identifier(void *hwnd);
 
