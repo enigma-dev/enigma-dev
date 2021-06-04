@@ -38,7 +38,6 @@
 #define MAPVK_VK_TO_VSC_EX 0x04
 #endif
 
-#include <stdio.h>
 #include <sstream>
 #include <cstdio>
 #include <string>
