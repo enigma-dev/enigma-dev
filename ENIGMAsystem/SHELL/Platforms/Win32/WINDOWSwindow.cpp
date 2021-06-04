@@ -39,6 +39,8 @@
 #endif
 
 #include <stdio.h>
+#include <sstream>
+#include <cstdio>
 #include <string>
 using namespace std;
 
