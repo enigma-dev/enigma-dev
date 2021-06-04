@@ -26,7 +26,8 @@ else
 	ifeq ($(TARGET_PLATFORM), MacOSX)
 		SOURCES += Platforms/SDL/Cocoa/Window.cpp
 		SOURCES += Platforms/SDL/Cocoa/CocoaWindow.m
-	else ifeq ($(TARGET_PLATFORM), Linux)
+		override LDLIBS += -lobjc
+	else ifeq ($(TARGET-PLATFORM), Linux)
 		SOURCES += Platforms/SDL/xlib/Window.cpp
 	else ifeq ($(TARGET_PLATFORM), FreeBSD)
 		SOURCES += Platforms/SDL/xlib/Window.cpp

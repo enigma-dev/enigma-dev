@@ -8,8 +8,8 @@ Target-platform: MacOSX
 Make-Vars:
   make: make
   makeflags:
-  cc: gcc-7
-  cxx: g++-7
+  cc: gcc-10
+  cxx: g++-10
   cppflags:
   cxxflags:
   cflags:
@@ -23,7 +23,6 @@ Parser-Vars:
   searchdirs-end: "End of search list."
 
 EXE-Vars:
-  resources: $exe
   resources: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode.res
   Build-Extension: .app
   Run-output: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode
