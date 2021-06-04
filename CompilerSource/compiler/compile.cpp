@@ -669,7 +669,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   make += "WIDGETS=\""  + extensions::targetAPI.widgetSys + "\" ";
   make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
   make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
-  make += "TARGET_PLATFORM=\"" + compilerInfo.target_platform + "\" ";
+  make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
 
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")

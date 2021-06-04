@@ -6,15 +6,15 @@ SOURCES += $(wildcard Platforms/SDL/*.cpp) Platforms/General/POSIX/Utility.cpp
 override CXXFLAGS += $(shell $(PKG-CONFIG) --cflags sdl2) -DENIGMA_PLATFORM_SDL
 override LDLIBS += $(shell $(PKG-CONFIG) --libs --static sdl2)
 
-ifeq ($(TARGET_PLATFORM), Android)
+ifeq ($(TARGET-PLATFORM), Android)
 	SOURCES += Platforms/SDL/Android/Window.cpp
 endif
 
-ifeq ($(TARGET_PLATFORM), Windows)
+ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += Platforms/Win32/WINDOWSfilemanip.cpp
 	SOURCES += Platforms/SDL/Win32/Window.cpp
 else
-	ifneq ($(TARGET_PLATFORM), Android)
+	ifneq ($(TARGET-PLATFORM), Android)
 		SOURCES += Platforms/General/PFshell/PFshell.cpp
 		SOURCES += Platforms/General/POSIX/shell.cpp
 	endif
@@ -23,13 +23,13 @@ else
 	SOURCES += Platforms/General/POSIX/POSIXdirectory.cpp
 	override LDLIBS += -lpthread
 
-	ifeq ($(TARGET_PLATFORM), MacOSX)
+	ifeq ($(TARGET-PLATFORM), MacOSX)
 		SOURCES += Platforms/SDL/Cocoa/Window.cpp
 		SOURCES += Platforms/SDL/Cocoa/CocoaWindow.m
 		override LDLIBS += -lobjc
-	else ifeq ($(TARGET_PLATFORM), Linux)
+	else ifeq ($(TARGET-PLATFORM), Linux)
 		SOURCES += Platforms/SDL/xlib/Window.cpp
-	else ifeq ($(TARGET_PLATFORM), FreeBSD)
+	else ifeq ($(TARGET-PLATFORM), FreeBSD)
 		SOURCES += Platforms/SDL/xlib/Window.cpp
 	endif
 endif

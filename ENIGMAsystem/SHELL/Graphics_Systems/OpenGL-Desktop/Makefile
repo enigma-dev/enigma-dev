@@ -1,12 +1,12 @@
 override CXXFLAGS += -IBridges/OpenGL
 
-ifeq ($(TARGET_PLATFORM), Windows)
+ifeq ($(TARGET-PLATFORM), Windows)
 	override CXXFLAGS += -DGLEW_STATIC
 	override LDLIBS += -lglew32 -lopengl32
-else ifeq ($(TARGET_PLATFORM), Linux)
+else ifeq ($(TARGET-PLATFORM), Linux)
 	override LDLIBS += -lGL -lGLEW
-else ifeq ($(TARGET_PLATFORM), FreeBSD)
+else ifeq ($(TARGET-PLATFORM), FreeBSD)
 	override LDLIBS += -lGL -lGLEW
-else ifeq ($(TARGET_PLATFORM), MacOSX)
+else ifeq ($(TARGET-PLATFORM), MacOSX)
 	override LDLIBS += -framework OpenGL -lGLEW
 endif
