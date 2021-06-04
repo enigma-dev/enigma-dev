@@ -56,7 +56,7 @@ window_t window_get_handle(wid_t winId) {
 // returns an identifier for the HWND window
 // this string can be used in shell scripts
 wid_t window_identifier() {
-  const void *address = static_cast<const void *>(window_handle());
+  const void *address = reinterpret_cast<const void *>(window_handle());
   std::stringstream ss; ss << address;  
   wid_t wid = ss.str();
 }
@@ -64,7 +64,7 @@ wid_t window_identifier() {
 // returns an identifier for certain window
 // this string can be used in shell scripts
 wid_t window_get_identifier(window_t hwnd) {
-  const void *address = static_cast<const void *>(hwnd);
+  const void *address = reinterpret_cast<const void *>(hwnd);
   std::stringstream ss; ss << address;  
   wid_t wid = ss.str();
 }
