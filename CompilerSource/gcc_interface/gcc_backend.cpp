@@ -76,7 +76,7 @@ const char* establish_bearings(const char *compiler)
   
   std::string dirs = "CODEGEN=" + unixfy_path(codegen_directory) + " ";
   dirs += "WORKDIR=" + unixfy_path(eobjs_directory) + " ";
-  actually_bash("make " + dirs + " required-directories");
+  actually_bash("make -C " + unixfy_path(enigma_root) + " " + dirs + " required-directories");
 
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.

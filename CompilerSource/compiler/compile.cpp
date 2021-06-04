@@ -325,10 +325,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     edbg << "Cleaning..." << flushl;
 
   	string make = compilerInfo.make_vars["MAKEFLAGS"];
+    make += "make -C \"" + unixfy_path(enigma_root) + "\"";
   	make += "COMPILEPATH=\"" + unixfy_path(compilepath) + "\" ";
   	make += "WORKDIR=\"" + unixfy_path(eobjs_directory) + "\" ";
     make += "CODEGEN=\"" + unixfy_path(codegen_directory) + "\" ";
-    make += "make -C \"" + unixfy_path(enigma_root) + "\"";
     make += " clean-game ";
 
     actually_bash(make);
@@ -657,6 +657,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   string make = compilerInfo.make_vars["MAKEFLAGS"];
 
+  make += "make -C \"" + unixfy_path(enigma_root) + "\" ";
+
   make += "WORKDIR=\"" + unixfy_path(eobjs_directory) + "\" ";
   make += "CODEGEN=\"" + unixfy_path(codegen_directory) + "\" ";
   make += mode == emode_debug? "GMODE=\"Debug\"" : mode == emode_design? "GMODE=\"Design\"" : mode == emode_compile?"GMODE=\"Compile\"" : "GMODE=\"Run\"";
@@ -687,8 +689,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     if (mfgfn[i] == '\\') mfgfn[i] = '/';
   make += string(" OUTPUTNAME=\"") + mfgfn + "\" ";
 
-  make += "make -C \"" + unixfy_path(enigma_root) + "\" ";
-  make += "Game ";
+  make += "Game";
 
   edbg << "Full command line: " << make << flushl;
 
@@ -698,7 +699,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
     std::string dirs = "CODEGEN=" + codegen_directory.u8string() + " ";
     dirs += "WORKDIR=" + eobjs_directory.u8string() + " ";
-    actually_bash("make " + dirs + " required-directories");
+    actually_bash("make -C " + unixfy_path(enigma_root) + " " + dirs + " required-directories");
 
     // Pick a file and flush it
     const std::filesystem::path redirfile = (eobjs_directory/"enigma_compile.log");
