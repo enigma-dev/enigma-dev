@@ -49,8 +49,7 @@ window_t window_handle() {
 
 window_t window_get_handle(wid_t winId) {
   void *address; sscanf(winId.c_str(), "%p", &address);
-  window_t window = (window_t)address;
-  return reinterpret_cast<window_t>(window);
+  return reinterpret_cast<window_t>(address);
 }
 
 // returns an identifier for the HWND window
