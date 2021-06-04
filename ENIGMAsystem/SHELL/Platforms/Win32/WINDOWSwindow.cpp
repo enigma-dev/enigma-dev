@@ -85,19 +85,25 @@ window_t window_handle() {
 }
 
 window_t window_get_handle(wid_t winId) {
-  return reinterpret_cast<window_t>(strtoull(winId.c_str(), nullptr, 10));
+  void *address; sscanf(winId.c_str(), "%p", &address);
+  WINDOW window = (WINDOW)address;
+  return reinterpret_cast<window_t>(window);
 }
 
 // returns an identifier for the HWND window
 // this string can be used in shell scripts
 wid_t window_identifier() {
-  return std::to_string(reinterpret_cast<unsigned long long>(window_handle()));
+  const void *address = static_cast<const void *>(window_handle());
+  std::stringstream ss; ss << address;  
+  wid_t wid = ss.str();
 }
 
 // returns an identifier for certain window
 // this string can be used in shell scripts
 wid_t window_get_identifier(window_t hwnd) {
-  return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
+  const void *address = static_cast<const void *>(hwnd);
+  std::stringstream ss; ss << address;  
+  wid_t wid = ss.str();
 }
 
 static int currentIconIndex = -1;
