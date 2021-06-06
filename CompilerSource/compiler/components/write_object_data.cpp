@@ -318,7 +318,7 @@ static inline void generate_robertvecs(const ParsedObjectVec &objects) {
   // versions of their parents' events
   for (parsed_object *object : objects) {
     for (ParsedEvent &pev : object->all_events) {
-      if  (!pev.code.empty()) {
+      if  (!pev.ast.empty()) {
         if (pev.ev_id.IsStacked()) {
           object->stacked_events.declare(&pev);
         } else {
@@ -346,7 +346,7 @@ static inline void generate_robertvecs(const ParsedObjectVec &objects) {
 static void write_object_events(std::ostream &wto, parsed_object *object) {
   for (const ParsedEvent &pev : object->all_events) {
     string evname = pev.ev_id.TrueFunctionName();
-    if (!pev.code.empty() || pev.ev_id.HasDefaultCode()) {
+    if (!pev.ast.empty() || pev.ev_id.HasDefaultCode()) {
       wto << "    variant myevent_" << evname << "();\n";
       if (pev.ev_id.HasSubCheck()) {
         wto << "    inline bool myevent_" << evname << "_subcheck();\n";
@@ -742,7 +742,7 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
       wto << "  enigma::debug_scope $current_scope(\"script '" << game.scripts[i].name << "'\");\n";
     }
     wto << "  ";
-    ParsedCode &upev = scr->global_code ? *scr->global_code : scr->code;
+    auto &upev = (scr->global_code ? *scr->global_code : scr->code).ast.junkshit;
 
     // TODO(JoshDreamland): Super-hacky
     string override_code, override_synt;
@@ -768,8 +768,8 @@ static inline void write_timeline_implementations(ofstream& wto, const GameData 
   for (const auto &tline : state.timeline_lookup) {\
     for (const auto &moment : tline.second.moments) {
       wto << "void TLINE_" << tline.first << "_MOMENT_" << moment.step << "() {\n";
-      ParsedCode& upev = moment.script->global_code
-          ? *moment.script->global_code : moment.script->code;
+      auto& upev = (moment.script->global_code
+          ? *moment.script->global_code : moment.script->code).ast.junkshit;
 
       string override_code, override_synt;
       if (upev.code.compare(0, 12, "with((self))") == 0) {
@@ -821,7 +821,7 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
 
     // Inherit default code from object_locals. Don't generate the same default
     // code for all objects.
-    if (event.code.empty()) continue;
+    if (event.ast.empty()) continue;
 
     bool defined_inherited = false;
 
@@ -829,7 +829,7 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
     // for no reason 99% of the time, and it doesn't allow us to give any
     // feedback as to why a call to event_inherited() may not be valid.
     if (object->InheritsSpecifically(event.ev_id) &&
-        event.code.find("event_inherited") != std::string::npos) {
+        event.ast.junkshit.code.find("event_inherited") != std::string::npos) {
       wto << "#define event_inherited OBJ_" + object->parent->name + "::myevent_" + evname + "\n";
       defined_inherited = true;
     }
@@ -866,7 +866,7 @@ static void write_event_func(ofstream& wto, const ParsedEvent &event, string obj
   if (event.ev_id.HasConstantCode())
     wto << event.ev_id.ConstantCode() << endl;
 
-  print_to_file(event.code,event.synt,event.strc,event.strs,2,wto);
+  event.ast.PrettyPrint(wto);
   wto << "\n  return 0;\n}\n\n";
 }
 
@@ -884,7 +884,7 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
       }
 
       wto << ")\n{\n  ";
-      print_to_file(subscr->second->code.code,subscr->second->code.synt,subscr->second->code.strc,subscr->second->code.strs,2,wto);
+      subscr->second->code.ast.PrettyPrint(wto, 2);
       wto << "\n  return 0;\n}\n\n";
     }
   }
@@ -901,7 +901,7 @@ static inline void write_object_timeline_funcs(ofstream& wto, const GameData &ga
         ParsedScript* scr = moment.script;
         wto << "void enigma::OBJ_" << t->name << "::TLINE_" << timit->first
             << "_MOMENT_" << moment.step << "() {\n";
-        print_to_file(scr->code.code, scr->code.synt, scr->code.strc, scr->code.strs, 2, wto);
+        scr->code.ast.PrettyPrint(wto);
         wto << "}\n";
       }
       wto << "\n";

@@ -74,8 +74,8 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       return E_ERROR_SYNTAX;
     }
     // Keep a parsed record of this script
-    scr_lookup[game.scripts[i].name] = scripts[i] = new ParsedScript;
-    scripts[i]->code.code = newcode;
+    scr_lookup[game.scripts[i].name] = scripts[i] =
+        new ParsedScript(newcode, &state.parse_context);
     parser_main(&scripts[i]->code, state, script_names);
     edbg << "Parsed `" << game.scripts[i].name << "': " << scripts[i]->scope.locals.size() << " locals, " << scripts[i]->scope.globals.size() << " globals" << flushl;
 
@@ -87,9 +87,9 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       // TODO: Looking at this now, I'm not sure if we actually want to throw
       // locals away; what if a script explicitly declares `local var foo;`?
       ParsedScope temporary_scope = *scripts[i]->code.my_scope;
-      scripts[i]->global_code = new ParsedCode(&temporary_scope);
-      scripts[i]->global_code->code =
-          string("with (self) {\n") + newcode + "\n/* */}";
+      scripts[i]->global_code = new ParsedCode(
+          &temporary_scope, string("with (self) {\n") + newcode + "\n/* */}",
+          &state.parse_context);
       parser_main(scripts[i]->global_code, state, script_names);
       scripts[i]->global_code->my_scope = nullptr;
     }
@@ -112,14 +112,12 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
       // Add a parsed_script record. We can retrieve this later; its order is well-defined (timeline i, moment j) and can be calculated with a global counter.
       // Note from 2019: yeah, we're not relying on that ordering anymore. Or at least, we're really gonna try not to.
-      auto *tline = new ParsedScript();
+      auto *tline = new ParsedScript(moment.code(), &state.parse_context);
 
       // Two places to log this.
       tlines.push_back(tline);
       tline_lookup[timeline.name].moments.emplace_back(moment.step(), tline);
 
-      tline->code.code = moment.code();
-      parser_main(&tline->code, state, script_names);
       edbg << "Parsed `" << timeline.name << ", moment: "
            << moment.step() << "': "
            << tline->scope.locals.size() << " locals, "
@@ -131,10 +129,10 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         // At some point, timelines should just be refactored into collections of scripts and a controller to call them.
         // Or maybe into one big script made from a switch statement based on the current moment.
         ParsedScope temporary_object = *tline->code.my_scope;
-        tline->global_code = new ParsedCode(&temporary_object);
-        tline->global_code->code =
-            string("with (self) {\n") + tline->code.code + "\n/* */}";
-        parser_main(tline->global_code, state, script_names);
+        tline->global_code = new ParsedCode(
+            &temporary_object,
+            string("with (self) {\n") + moment.code() + "\n/* */}",
+            &state.parse_context);
         tline->global_code->my_scope = NULL;
       }
       fflush(stdout);
@@ -266,34 +264,13 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       abort();
     }
     for (const auto& event : object->egm_events()) {
-        // For each individual event (like begin_step) in the main event (Step), parse the code
-        ParsedEvent &pev = pob->all_events.emplace_back(evdata_.get_event(event), pob);
-
-        //Copy the code into a string, and its attributes elsewhere
-        string newcode = event.code();
-
-        //Syntax check the code
-
-        // Print debug info
-        edbg << "Check `" << object.name << "::" << pev.ev_id.TrueFunctionName() << "...";
-
-        // Check the code
-        AST ast = AST::Parse(event.code(), &state.parse_context);
-        if (ast.HasError()) {
-          // Error. Report it.
-          user << "Syntax error in object `" << object.name << "', "
-               << pev.ev_id.HumanName() << " (" << event.DebugString() << "):\n"
-               << ast.ErrorString() << flushl;
-          return E_ERROR_SYNTAX;
-        }
-
-        edbg << " Done. Parse...";
-
-        //Add this to our objects map
-        pev.code = newcode;
-        parser_main(&pev, state, script_names, setting::compliance_mode!=setting::COMPL_STANDARD); //Format it to C++
-
-        edbg << " Done." << flushl;
+      // For each individual event (like begin_step) in the main event (Step),
+      // parse the code and store the event.
+      const auto ev = evdata_.get_event(event);
+      const string fn = ev.TrueFunctionName();
+      edbg << "Parse `" << object.name << "::" << fn << "..."<< flushl;
+      pob->all_events.emplace_back(ParsedEvent(ev, pob, event.code(), &state.parse_context));
+      edbg << "Done parsing " << object.name << "::" << fn << flushl;
     }
   }
 
@@ -307,7 +284,8 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   for (const auto &room : game.rooms) {
     parsed_room *pr;
     state.parsed_rooms.push_back(pr = new parsed_room);
-    pr->creation_code = new ParsedCode(&pr->pseudo_scope);
+    pr->creation_code = new ParsedCode(&pr->pseudo_scope, room->creation_code(),
+                                       &state.parse_context);
 
     AST create = AST::Parse(room->creation_code(), &state.parse_context);
     if (create.HasError()) {
@@ -315,7 +293,6 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
            << " (`" << room.name << "'):\n" << create.ErrorString() << flushl;
       return E_ERROR_SYNTAX;
     }
-    pr->creation_code->code = room->creation_code();
 
     for (const auto &instance : room->instances()) {
       if (!instance.creation_code().empty()) {
@@ -329,8 +306,12 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
         pr->instance_create_codes[instance.id()].object_name = instance.object_type();
         ParsedCode* icce = pr->instance_create_codes[instance.id()].code =
-            new ParsedCode(parsed_objects[instance.object_type()]);
-        icce->code = string("with (") + to_string(instance.id()) + ") {" + instance.creation_code() + "\n/* */}";
+            new ParsedCode(
+                parsed_objects[instance.object_type()],
+                string("with (") + to_string(instance.id()) + ") {"
+                    + instance.creation_code()
+                    + "\n/* */\n}",
+                &state.parse_context);
         parser_main(icce, state, script_names);
       }
     }
@@ -348,8 +329,10 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
         pr->instance_precreate_codes[instance.id()].object_name = instance.object_type();
         ParsedCode* icce = pr->instance_precreate_codes[instance.id()].code =
-            new ParsedCode(parsed_objects[instance.object_type()]);
-        icce->code = string("with (") + tostring(instance.id()) + ") {" + instance.initialization_code() + "\n/* */}";
+            new ParsedCode(parsed_objects[instance.object_type()],
+                string("with (") + tostring(instance.id()) + ") {" +
+                    instance.initialization_code() + "\n/* */}",
+                &state.parse_context);
         parser_main(icce, state, script_names);
       }
     }

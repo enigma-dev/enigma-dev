@@ -21,7 +21,9 @@
 #include "error_reporting.h"
 #include "lexer.h"
 #include "tokens.h"
+#include "darray.h"
 
+#include <ostream>
 #include <string>
 #include <memory>
 #include <vector>
@@ -36,6 +38,14 @@ struct AST {
   const std::unique_ptr<Lexer> lexer;
   // The raw input code, owned by the lexer.
   const std::string &code;
+  
+  // Original ENIGMA code/synt bufs
+  struct HackyTackyThingyThing {
+    string code;
+    string synt;
+    unsigned int strc;
+    varray<string> strs;
+  } junkshit;
 
   bool HasError() { return !herr.errors.empty(); }
   std::string ErrorString() {
@@ -43,8 +53,17 @@ struct AST {
     return herr.errors.front().ToString();
   }
 
+  // Returns true if there's no actual executable code in this AST.
+  bool empty() const;
+
   // Utility routine: Apply this AST to a specified instance.
   void ApplyTo(int instance_id);
+
+  // Pretty-prints this code to a stream with the given base indentation.
+  // The caller is responsible for having already printed applicable function
+  // declarations and opening braces, statements, etc, and for printing the
+  // closing statements and braces afterward.
+  void PrettyPrint(std::ofstream &of, int base_indent = 2) const;
 
   // Parses the given code, returning an AST*. The resulting AST* is never null.
   // If syntax errors were encountered, they are stored within the AST.
@@ -52,7 +71,7 @@ struct AST {
 
   // Disallow copy. Our tokens point into our code.
   AST(const AST &) = delete;
-  AST(AST &&other);
+  AST(AST &&other) = default;
 
  private:
   // Constructs an AST from the code it will parse. Does not initiate parse.

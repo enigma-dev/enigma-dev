@@ -102,7 +102,7 @@ vector<Macro::FuncComponent> Macro::Componentize(
       if (meaningful_span(tokens, e, i))
         res.push_back(FuncComponent::TokenSpan{e, i});
       res.push_back(FuncComponent::Paste{});
-      while (++i < tokens.size() && tokens[i].PreprocessesAway());
+      while (++i < tokens.size() && tokens[i].PreprocessesAway()) /* pass */;
       e = i--;
       continue;
     }
@@ -187,29 +187,7 @@ static Token PasteTokens(
   }
   return res;
 }
-/*
-TokenVector Macro::EvaluateConcats(const TokenVector &replacement_list,
-                                   const ErrorContext &errc) {
-  TokenVector res;
-  res.reserve(replacement_list.size());
-  for (size_t i = 0; i < replacement_list.size(); ++i) {
-    if (replacement_list[i].type == TTM_CONCAT) {
-      const size_t cat_at = i;
-      while (++i < replacement_list.size() &&
-             replacement_list[i].preprocesses_away());
-      while (!res.empty() && res.back().preprocesses_away()) res.pop_back();
-      if (i >= replacement_list.size() || res.empty()) {
-        herr->error(replacement_list[cat_at], kConcatenationError);
-        break;
-      }
-      res.back() = PasteTokens(res.back(), replacement_list[i], errc);
-    } else {
-      res.push_back(replacement_list[i]);
-    }
-  }
-  return res;
-}
-*/
+
 static void AppendOrPaste(TokenVector &dest,
                           TokenVector::const_iterator begin,
                           TokenVector::const_iterator end,
@@ -250,6 +228,7 @@ TokenVector Macro::SubstituteAndUnroll(
   // Errors from here on out will concern tokens.
   for (const FuncComponent &part : parts) {
     switch (part.tag) {
+      // Copy verbatim from the source macro.
       case FuncComponent::TOKEN_SPAN: {
         AppendOrPaste(res, value.begin() + part.token_span.begin,
                            value.begin() + part.token_span.end,
@@ -257,6 +236,9 @@ TokenVector Macro::SubstituteAndUnroll(
         paste_next = false;
         break;
       }
+      // Various kinds of argument substitutions for macro parameters.
+      // Arguments can be inserted verbatim, inserted after preprocessing
+      // (the default), or converted to a string via #parameter.
       case FuncComponent::RAW_ARGUMENT:
       case FuncComponent::EXPANDED_ARGUMENT:
       case FuncComponent::STRINGIFY: {
@@ -291,9 +273,13 @@ TokenVector Macro::SubstituteAndUnroll(
         paste_next = false;
         break;
       }
+      // The ## operator pasting two tokens together.
       case FuncComponent::PASTE:
         paste_next = true;
         break;
+      // The C++ __VA_OPT__ macro, which is a comma if and only if the variadic
+      // argument list is not empty. When that list is empty, this token
+      // preprocesses away.
       case FuncComponent::VA_OPT: {
         TokenVector opt;
         if (args.size() == parameters->size() + 1 &&

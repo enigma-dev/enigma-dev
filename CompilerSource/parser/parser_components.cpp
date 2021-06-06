@@ -109,7 +109,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
   pt pos = 0, bpos = 0;
   char last_token = ' '; //Space is actually invalid. Heh.
   
-  while (pos >= code.length()) {
+  while (pos < code.length()) {
     //cout << synt.substr(0,bpos) << endl;
     
     if (is_letter(code[pos]))
@@ -135,8 +135,6 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         last_token = '@';
         continue;
       }
-
-      jdi::macro_iter_c itm = main_context->get_macros().find(name);
       
       char c = 'n', cprime = 0;
       
