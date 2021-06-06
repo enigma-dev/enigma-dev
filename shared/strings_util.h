@@ -5,6 +5,7 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
 #include <filesystem>
 
 inline std::string ToLower(std::string str) {
@@ -130,6 +131,17 @@ inline std::string FileToString(const std::string &fName) {
 
 inline std::string FileToString(const std::filesystem::path &path) {
   return FileToString(path.string());
+}
+
+inline bool IsNumber(const std::string& s) {
+  return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+}
+
+inline std::string remove_trailing_zeros(double numb) {
+  std::string strnumb = std::to_string(numb);
+  while (!strnumb.empty() && strnumb.find('.') != std::string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
+    strnumb.pop_back();
+  return strnumb;
 }
 
 #endif

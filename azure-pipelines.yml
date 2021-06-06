@@ -29,7 +29,7 @@ jobs:
     TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
     TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-20.04'
   timeoutInMinutes: 360
 
   steps:
@@ -40,7 +40,7 @@ jobs:
         sudo dpkg --add-architecture i386
         ./CI/install_emake_deps.sh
         ./CI/split_jobs.sh install
-        ./CI/build_sdl.sh
+        sudo cp ./CI/asound.conf /etc/asound.conf
       displayName: Install Dependencies
     - script: |
         make -j4
@@ -64,7 +64,7 @@ jobs:
 - job: CrossCompile
   displayName: 'Cross Compile'
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-20.04'
 
   steps:
     - checkout: self
@@ -85,7 +85,7 @@ jobs:
         echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
         pacman-key --init 
         pacman-key --populate archlinux
-        pacman -Syu --noconfirm base base-devel sudo go git protobuf yaml-cpp pugixml rapidjson boost xorg-server-xvfb
+        pacman -Syu --noconfirm base base-devel sudo go git protobuf grpc yaml-cpp pugixml rapidjson boost xorg-server-xvfb
         echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
         mkdir -p /home/aur/packages/
         useradd -G wheel aur
@@ -122,13 +122,9 @@ jobs:
               Include = /etc/pacman.d/mirrorlist.mingw64
               [msys]
               Include = /etc/pacman.d/mirrorlist.msys"  >> /etc/pacman.conf
-        curl https://raw.githubusercontent.com/msys2/msys2-ci-base/master/usr/share/pacman/keyrings/msys2.gpg -o /usr/share/pacman/keyrings/msys2.gpg
-        curl https://raw.githubusercontent.com/msys2/msys2-ci-base/master/usr/share/pacman/keyrings/msys2-trusted -o /usr/share/pacman/keyrings/msys2-trusted
-        curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
-        curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig
+        curl https://raw.githubusercontent.com/msys2/MSYS2-keyring/master/msys2.gpg -o /usr/share/pacman/keyrings/msys2.gpg
+        curl https://raw.githubusercontent.com/msys2/MSYS2-keyring/master/msys2-trusted -o /usr/share/pacman/keyrings/msys2-trusted
         pacman-key --populate msys2
-        pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig
-        pacman --overwrite='*' --noconfirm -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
         pacman -Sy --noconfirm wine pulseaudio lib32-libpulse mingw-w64-x86_64-openal mingw-w64-x86_64-dumb mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123 mingw-w64-x86_64-libsndfile mingw-w64-x86_64-zlib mingw-w64-x86_64-libffi mingw-w64-x86_64-box2d mingw-w64-x86_64-glew mingw-w64-x86_64-glm mingw-w64-x86_64-alure mingw-w64-x86_64-SDL2 mingw-w64-x86_64-pkg-config
         pacman -S --noconfirm mingw-w64-i686-openal mingw-w64-i686-dumb mingw-w64-i686-libvorbis mingw-w64-i686-libogg mingw-w64-i686-flac mingw-w64-i686-mpg123 mingw-w64-i686-libsndfile mingw-w64-i686-zlib mingw-w64-i686-libffi mingw-w64-i686-box2d mingw-w64-i686-glew mingw-w64-i686-glm mingw-w64-i686-alure mingw-w64-i686-SDL2 mingw-w64-i686-pkg-config
         EOF
@@ -151,6 +147,7 @@ jobs:
         set -e
         cd enigma-dev
         ./emake -x MinGW32 -p Win32 -w Win32 -a DirectSound -e DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,ExternalFuncs -o /tmp/test32.exe CommandLine/testing/SimpleTests/clean_exit.sog/
+        pulseaudio --start --verbose
         LIBGL_ALWAYS_SOFTWARE=1 WINEDLLOVERRIDES="mscoree,mshtml=" WINEPREFIX=/tmp/.wine32 WINEARCH=win32 xvfb-run wine /tmp/test32.exe
         EOF
       displayName: 'Engine MinGW32'
@@ -165,3 +162,46 @@ jobs:
         LIBGL_ALWAYS_SOFTWARE=1 WINEDLLOVERRIDES="mscoree,mshtml=" WINEPREFIX=/tmp/.wine64 WINEARCH=win64 xvfb-run wine /tmp/test64.exe
         EOF
       displayName: 'Engine MinGW64'
+      
+- job: Android
+  displayName: 'Android'
+  variables:
+    TEST_HARNESS: "true"
+    TRAVIS_OS_NAME: "linux"
+    TRAVIS: "true"
+    TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
+    TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
+    COMPILER: Android 
+    GRAPHICS: OpenGLES2 
+    PLATFORM: SDL
+    MODE: Compile
+    AUDIO: None
+    COLLISION: None 
+    NETWORK: None 
+    WIDGETS: None 
+    EXTENSIONS: "None"
+    OUTPUT: /tmp/test-android-game.apk
+    ANDROID_API_LEVEL: 29 
+    ANDROID_BUILD_TOOLS_VERSION: 29.0.3
+  pool:
+    vmImage: 'ubuntu-20.04'
+
+  steps:
+    - checkout: self
+      persistCredentials: true
+      path: enigma-dev
+      
+    - script: echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --channel=1 --install "tools" "platform-tools" "extras;google;google_play_services" "extras;google;m2repository" "extras;android;m2repository" "build-tools;29.0.3" "platforms;android-29" "ndk;22.0.6917172"
+      displayName: 'Install Android Dependencies'
+      
+    - script: git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
+      displayName: 'Clone Android Repo'
+      
+    - script: ./CI/install_emake_deps.sh
+      displayName: 'Install Emake Dependencies'
+      
+    - script: make -j4 emake
+      displayName: 'Build Emake'
+
+    - script: ./ci-build.sh
+      displayName: 'Build Game'

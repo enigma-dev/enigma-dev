@@ -18,7 +18,6 @@
 #include "Direct3D11Headers.h"
 
 #include "Graphics_Systems/General/GSvertex_impl.h"
-#include "Graphics_Systems/General/GSmatrix_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/General/GSstdraw.h"
@@ -27,21 +26,12 @@
 
 #include <d3dcompiler.h>
 
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/glm.hpp>
-
 #include <map>
 using std::map;
 
 using namespace enigma::dx11;
 
 namespace {
-struct MatrixBufferType
-{
-  glm::mat4 world;
-  glm::mat4 view;
-  glm::mat4 projection;
-};
 
 const char* g_strVS = R"(
 cbuffer MatrixBuffer
@@ -290,20 +280,8 @@ void graphics_compile_shader(const char* src, ID3D10Blob** pBlob, const char* na
 void graphics_prepare_default_shader() {
   static ID3D11VertexShader* g_pVertexShader = NULL;
   static ID3D11PixelShader* g_pPixelShader = NULL;
-  static ID3D11Buffer* m_matrixBuffer = NULL;
 
   if (g_pVertexShader == NULL) {
-    D3D11_BUFFER_DESC matrixBufferDesc;
-    matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
-    matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    matrixBufferDesc.MiscFlags = 0;
-    matrixBufferDesc.StructureByteStride = 0;
-
-    // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-    m_device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
-
     // create the vertex shader
     graphics_compile_shader(g_strVS, &pBlobVS, "VS", "VS", "vs_4_0");
     m_device->CreateVertexShader(pBlobVS->GetBufferPointer(), pBlobVS->GetBufferSize(),
@@ -314,19 +292,6 @@ void graphics_prepare_default_shader() {
     m_device->CreatePixelShader(pBlobPS->GetBufferPointer(), pBlobPS->GetBufferSize(),
                                 NULL, &g_pPixelShader);
   }
-
-  D3D11_MAPPED_SUBRESOURCE mappedResource;
-  MatrixBufferType* dataPtr;
-  m_deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-  dataPtr = (MatrixBufferType*)mappedResource.pData;
-  // Copy the matrices into the constant buffer.
-  dataPtr->world = glm::transpose(world);
-  dataPtr->view = glm::transpose(view);
-  dataPtr->projection = glm::transpose(projection);
-  m_deviceContext->Unmap(m_matrixBuffer, 0);
-
-  // Finally set the constant buffer in the vertex shader with the updated values.
-  m_deviceContext->VSSetConstantBuffers(0, 1, &m_matrixBuffer);
 
   m_deviceContext->VSSetShader(g_pVertexShader, NULL, 0);
   m_deviceContext->PSSetShader(g_pPixelShader, NULL, 0);

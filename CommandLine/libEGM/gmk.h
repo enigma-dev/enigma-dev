@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Robert B. Colton
+/** Copyright (C) 2018-2020 Robert B. Colton, Greg Williamson
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,22 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "project.pb.h"
-#include "event_reader/event_parser.h"
+#ifndef EGM_GMK_H
+#define EGM_GMK_H
 
-#include <iostream>
-#include <streambuf>
-#include <string>
+#include "file-format.h"
 
-namespace gmk {
-extern std::ostream out;
-extern std::ostream err;
+namespace egm {
 
-inline void bind_output_streams(std::ostream &out, std::ostream &err) {
-  gmk::out.rdbuf(out.rdbuf());
-  gmk::err.rdbuf(err.rdbuf());
-}
+class GMKFileFormat : public FileFormat {
+public:
+  GMKFileFormat(const EventData* event_data) : FileFormat(event_data) {}
+  virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
+};
 
-std::unique_ptr<buffers::Project> LoadGMK(std::string fName, const EventData* event_data);
+}  //namespace egm
 
-}  //namespace gmk
+#endif

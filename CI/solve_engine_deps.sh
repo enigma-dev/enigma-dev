@@ -2,7 +2,7 @@
 
 ###### Harness #######
 if [ "$TEST_HARNESS" == true ]; then
-  LINUX_DEPS="$LINUX_DEPS xfce4 libgtest-dev wmctrl xdotool lcov"
+  LINUX_DEPS="$LINUX_DEPS openbox libgtest-dev wmctrl xdotool lcov"
 fi
 
 ###### Compilers #######
@@ -16,9 +16,9 @@ elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
 fi
 
 ###### Platforms #######
-#if [ "$PLATFORM" == "SDL" ] || [ "$TEST_HARNESS" == true ]; then
-  #LINUX_DEPS="$LINUX_DEPS libsdl2-dev"
-#fi
+if [ "$PLATFORM" == "SDL" ] || [ "$TEST_HARNESS" == true ]; then
+  LINUX_DEPS="$LINUX_DEPS libsdl2-dev libdrm-dev libgbm-dev"
+fi
 
 ###### Graphics #######
 LINUX_DEPS="$LINUX_DEPS libepoxy-dev libegl1-mesa-dev libgles2-mesa-dev libglew-dev libxrandr-dev libxinerama-dev"
@@ -33,7 +33,7 @@ if [ "$WIDGETS" == "GTK+" ] || [ "$TEST_HARNESS" == true ]; then
   LINUX_DEPS="$LINUX_DEPS libgtk2.0-dev"
 fi
 if [ "$WIDGETS" == "xlib" ] || [ "$TEST_HARNESS" == true ]; then
-  LINUX_DEPS="$LINUX_DEPS zenity kdialog"
+  LINUX_DEPS="$LINUX_DEPS zenity kdialog libprocps-dev"
 fi
 
 ###### Extensions #######

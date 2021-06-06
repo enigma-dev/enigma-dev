@@ -15,6 +15,7 @@
 #include <filesystem>
 #include <memory>
 #include <future>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -159,7 +160,7 @@ class CompilerServiceImpl final : public Compiler::Service {
   }
 
   Status SyntaxCheck(ServerContext* /*context*/, const SyntaxCheckRequest* request, SyntaxError* reply) override {
-    vector<const char*> script_names;
+    std::vector<const char*> script_names;
     script_names.reserve(request->script_names().size());
     for (const std::string &str : request->script_names()) script_names.push_back(str.c_str());
     syntax_error* err = plugin.SyntaxCheck(request->script_count(), script_names.data(), request->code().c_str());

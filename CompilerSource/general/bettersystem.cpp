@@ -37,6 +37,12 @@ using namespace std;
 #include "general/parse_basics_old.h"
 #include "frontend.h"
 
+#if CURRENT_PLATFORM_ID == OS_FREEBSD
+    #include <sys/user.h>
+    #include <libutil.h>
+#endif
+
+using std::string;
 typedef size_t pt;
 
 inline char* scopy(string& str)

@@ -1,3 +1,6 @@
+#ifndef EGM_FILESYS_H
+#define EGM_FILESYS_H
+
 #include <filesystem>
 namespace fs = std::filesystem;
 using errc = std::error_code;
@@ -21,3 +24,5 @@ bool FileExists(const string &fName);
 inline bool FileExists(const fs::path &path) {
   return FileExists(path.string());
 }
+
+#endif

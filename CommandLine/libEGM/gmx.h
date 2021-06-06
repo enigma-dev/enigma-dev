@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Greg Williamson, Robert B. Colton
+/** Copyright (C) 2018-2020 Greg Williamson, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,31 +15,22 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "project.pb.h"
-#include "event_reader/event_parser.h"
+#ifndef EGM_GMX_H
+#define EGM_GMX_H
 
-#include <iostream>
-#include <streambuf>
-#include <string>
+#include "file-format.h"
 
-namespace gmx {
-extern std::ostream outputStream;
-extern std::ostream errorStream;
+namespace egm {
 
-inline void bind_output_streams(std::ostream &out, std::ostream &err) {
-  outputStream.rdbuf(out.rdbuf());
-  errorStream.rdbuf(err.rdbuf());
-}
+class GMXFileFormat : public FileFormat {
+ public:
+  GMXFileFormat(const EventData* event_data) : FileFormat(event_data) {}
+  virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
 
-std::unique_ptr<buffers::Project> LoadGMX(std::string fName, const EventData* event_data);
-buffers::resources::Background* LoadBackground(std::string fName);
-buffers::resources::Sound* LoadSound(std::string fName);
-buffers::resources::Sprite* LoadSprite(std::string fName);
-buffers::resources::Shader* LoadShader(std::string fName);
-buffers::resources::Font* LoadFont(std::string fName);
-buffers::resources::Object* LoadObject(std::string fName);
-buffers::resources::Timeline* LoadTimeLine(std::string fName);
-buffers::resources::Room* LoadRoom(std::string fName);
-buffers::resources::Path* LoadPath(std::string fName);
-buffers::resources::Script* LoadScript(std::string fName);
-}  //namespace gmx
+private:
+  virtual bool PackResource(const fs::path& fPath, google::protobuf::Message *m) const override;
+};
+
+} //namespace egm
+
+#endif
