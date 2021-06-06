@@ -75,11 +75,6 @@ void Sprite::AddSubimage(const Subimage& s) {
 const BoundingBox& sprite_get_bbox(int ind) {
   return sprites.get(ind).bbox;
 }
-
-const int sprite_get_polygon(int ind) {
-  return sprites.get(ind).polygon;
-}
-
 BoundingBox sprite_get_bbox_relative(int ind) {
   const Sprite& spr = sprites.get(ind);
   BoundingBox bbox = spr.bbox;

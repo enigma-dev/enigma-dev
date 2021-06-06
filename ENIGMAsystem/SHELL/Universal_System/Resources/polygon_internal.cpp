@@ -5,67 +5,67 @@
 
 namespace enigma {
 
-    // Point Class Implementation
-    Point::Point() {
+    // Vector2D Class Implementation
+    Vector2D::Vector2D() {
         x = NULL_POINT;
         y = NULL_POINT;
     }
-    Point::Point(const Point& obj) {
+    Vector2D::Vector2D(const Vector2D& obj) {
         copy(obj);
     }
-    Point::Point(double x, double y) {
+    Vector2D::Vector2D(double x, double y) {
         this->x = x;
         this->y = y;
     }
-    void Point::copy(const Point& obj) {
+    void Vector2D::copy(const Vector2D& obj) {
         if (&obj != nullptr) {
             this->x = obj.x; 
             this->y = obj.y;
         }
     }
-    double Point::getX() {
+    double Vector2D::getX() {
         return this->x;
     }
-    double Point::getY() {
+    double Vector2D::getY() {
         return this->y;
     }
-    void Point::setX(double x) {
+    void Vector2D::setX(double x) {
         this->x = x;
     }
-    void Point::setY(double y) {
+    void Vector2D::setY(double y) {
         this->y = y;
     }
-    double Point::getMagnitude() {
+    double Vector2D::getMagnitude() {
         return sqrt(pow(x, 2) + pow(y, 2));
     }
-    double Point::getAngle() {
+    double Vector2D::getAngle() {
         return atan2(y, x);
     }
-    Point Point::getNormR() {
-        return Point(-1 * y, x);
+    Vector2D Vector2D::getNormR() {
+        return Vector2D(-1 * y, x);
     }
-    Point Point::getNormL() {
-        return Point(y, -1 * x);
+    Vector2D Vector2D::getNormL() {
+        return Vector2D(y, -1 * x);
     }
-    Point Point::getUnitVector() {
-        return Point(x / getMagnitude(), y / getMagnitude());
+    Vector2D Vector2D::getUnitVector() {
+        return Vector2D(x / getMagnitude(), y / getMagnitude());
     }
 
-    void Point::setMagnitude(double number) {
+    void Vector2D::setMagnitude(double number) {
         double current_angle = getAngle();
         x = number * cos(current_angle);
         y = number * sin(current_angle);
     }
-    void Point::setAngle(double angle) {
+    void Vector2D::setAngle(double angle) {
         double current_magnitude = getMagnitude();
         x = current_magnitude * cos(angle);
         y = current_magnitude * sin(angle);
     }
-    void Point::scale(double number) {
+    void Vector2D::scale(double number) {
         x *= number;
         y *= number;
     }
-    void Point::invert(bool invert_x, bool invert_y) {
+    void Vector2D::invert(bool invert_x, bool invert_y) {
         if (invert_x) {
             this->x *= -1;
         } 
@@ -74,38 +74,38 @@ namespace enigma {
         }
     }
 
-    Point Point::add(const Point& B) {
-        return Point(x + B.x, y + B.y);
+    Vector2D Vector2D::add(const Vector2D& B) {
+        return Vector2D(x + B.x, y + B.y);
     }
-    Point Point::minus(const Point& B) {
-        return Point(x - B.y, y - B.y);
+    Vector2D Vector2D::minus(const Vector2D& B) {
+        return Vector2D(x - B.y, y - B.y);
     }
-    Point Point::rotate(double angle) {
-        Point B(*this);
+    Vector2D Vector2D::rotate(double angle) {
+        Vector2D B(*this);
         B.x = B.x * cos(angle) - B.y * sin(angle);
         B.y = B.x * sin(angle) + B.y * cos(angle);
         return B;
     }
-    Point Point::interpolate(double number) {
-        return Point(x * number, y * number);
+    Vector2D Vector2D::interpolate(double number) {
+        return Vector2D(x * number, y * number);
     }
 
-    double Point::angleBetween(Point& B) {
-        Point a = getUnitVector();
-        Point b = B.getUnitVector();
+    double Vector2D::angleBetween(Vector2D& B) {
+        Vector2D a = getUnitVector();
+        Vector2D b = B.getUnitVector();
         return acos(a.dotProduct(b));
     }
-    double Point::dotProduct(const Point& B) {
+    double Vector2D::dotProduct(const Vector2D& B) {
         return x * B.x + y * B.y;
     }
-    double Point::perpProduct(const Point& B) {
+    double Vector2D::perpProduct(const Vector2D& B) {
         return y * B.x + x * B.y;
     }
-    double Point::crossProduct(const Point& B) {
+    double Vector2D::crossProduct(const Vector2D& B) {
         return x * B.y - y * B.x;
     }
 
-    bool Point::equal(const Point& B) {
+    bool Vector2D::equal(const Vector2D& B) {
         return (x - B.x < precision && y - B.y < precision);
     }
 
@@ -126,7 +126,7 @@ namespace enigma {
         this->xoffset = x;
         this->yoffset = y;
     }
-    Polygon::Polygon(const Point* points, int size) {
+    Polygon::Polygon(const Vector2D* points, int size) {
         copy(points, size);
     }
     Polygon::Polygon(const Polygon& obj) {
@@ -136,13 +136,13 @@ namespace enigma {
     int Polygon::getNumPoints() {
         return points.size();
     }
-    std::vector<Point> Polygon::getPoints() {
+    std::vector<Vector2D> Polygon::getPoints() {
         return points;
     }
-    std::vector<Point> Polygon::getPoints(double offset_x, double offset_y) {
-        std::vector<Point> temp_points;
+    std::vector<Vector2D> Polygon::getPoints(double offset_x, double offset_y) {
+        std::vector<Vector2D> temp_points;
         for (int i = 0; i < points.size(); ++i) {
-            Point temp_point(
+            Vector2D temp_point(
                 points[i].getX() + offset_x,
                 points[i].getY() + offset_y
             );
@@ -181,19 +181,19 @@ namespace enigma {
             this->yoffset = y;
     }
 
-    void Polygon::addPoint(const Point& point) {
+    void Polygon::addPoint(const Vector2D& point) {
         this->points.push_back(point);
     }
     void Polygon::addPoint(int x, int y) {
-        Point point(x, y);
+        Vector2D point(x, y);
         this->points.push_back(point);
     }
 
     void Polygon::removePoint(int x, int y) {
-
+        // TODO: Implement me
     }
-    void Polygon::removePoint(const Point& point) {
-
+    void Polygon::removePoint(const Vector2D& point) {
+        // TODO: Implement me
     }
 
     void Polygon::copy(const Polygon& obj) {
@@ -204,7 +204,7 @@ namespace enigma {
             }
         }
     }
-    void Polygon::copy(const Point* points, int size) {
+    void Polygon::copy(const Vector2D* points, int size) {
         if (points != nullptr && size > 0) {
             this->points.clear();
             for (int i = 0; i < size; ++i) {
@@ -212,16 +212,16 @@ namespace enigma {
             }
         }
     }
-    std::vector<Point> Polygon::getNorms(double offset_x, double offset_y) {
-        std::vector<Point> normals;
+    std::vector<Vector2D> Polygon::getNorms(double offset_x, double offset_y) {
+        std::vector<Vector2D> normals;
         for (int i = 0; i < points.size(); ++i) {
-            Point currentNormal(
+            Vector2D currentNormal(
                 (offset_x + points[i + 1].getX()) - (offset_x + points[i].getX()),
                 (offset_y + points[i + 1].getY()) - (offset_y + points[i].getY())
             );
             normals.push_back(currentNormal.getNormL());
         }
-        Point lastNormal(
+        Vector2D lastNormal(
             (offset_x + points[0].getX()) - (offset_x + points[points.size() - 1].getX()),
             (offset_y + points[0].getY()) - (offset_y + points[points.size() - 1].getY())
         );

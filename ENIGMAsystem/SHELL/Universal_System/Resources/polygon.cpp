@@ -6,7 +6,7 @@
 #include <string>
 
 using enigma::Polygon;
-using enigma::Point;
+using enigma::Vector2D;
 using enigma::polygons;
 
 namespace enigma_user {

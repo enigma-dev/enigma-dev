@@ -85,7 +85,6 @@ public:
   int yoffset = 0;
   BoundingBox bbox = {0, 0, 0, 0};
   int bbox_mode = 0;  //Default is automatic
-  int polygon = -1;
   
   // AssArray mandatory
   static const char* getAssetTypeName() { return "Sprite"; }

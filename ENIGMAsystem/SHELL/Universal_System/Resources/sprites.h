@@ -75,10 +75,6 @@ var sprite_get_uvs(int ind, int subimg);
 int sprite_create_color(unsigned w, unsigned h, int col); 
 bool sprite_textures_equal(int id1, int subimg1, int id2, int subimg2);
 uint32_t sprite_get_pixel(int id, int subimg, unsigned x, unsigned y);
-
-// Prototype function for Polygons
-int sprite_attach_polygon(int spr_id, int poly_id);
-
 }  //namespace enigma_user
 
 #endif  //ENIGMA_SPRITES_H

@@ -339,7 +339,7 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
     std::vector<enigma::Point> poly1_points = polygon1.getPoints();
     std::vector<enigma::Point> offset_poly1_points;
 
-    printf("-----------------------------------------------------------------------------\n");
+    // printf("-----------------------------------------------------------------------------\n");
     // printf("collide_inst_inst: object = %d, solid_only = %d, notme = %d, x = %d, y = %d\n", object, solid_only, notme, x, y);
     // printf("inst1->polygon_index = %d\n", inst1->polygon_index);
     // printf("size = %d\n", polygon1.getNumPoints());

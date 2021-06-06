@@ -294,11 +294,4 @@ uint32_t sprite_get_pixel(int id, int subimg, unsigned x, unsigned y) {
   // Note: this will need to be amended when atlas support is implemented
   return texture_get_pixel(sprite_get_texture(id, subimg), x, y);
 }
-
-// Collision Detection functions
-int sprite_attach_polygon(int spr_id, int poly_id) {
-  sprites.get(spr_id).polygon = poly_id;
-  return poly_id;
-}
-
 }

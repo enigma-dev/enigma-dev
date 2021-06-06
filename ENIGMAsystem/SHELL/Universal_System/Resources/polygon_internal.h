@@ -13,7 +13,7 @@ namespace enigma
 
 	// The Point class represents a point in a polygon
 	// Resource
-	class Point 
+	class Vector2D 
 	{
 		// Attributes
 		private: 
@@ -22,18 +22,18 @@ namespace enigma
 
 		// Methods
 		public:
-			Point();
-			Point(double x, double y);
-			Point(const Point& obj);
-			void copy(const Point& obj);
+			Vector2D();
+			Vector2D(double x, double y);
+			Vector2D(const Vector2D& obj);
+			void copy(const Vector2D& obj);
 
 			double getX();
 			double getY();
 			double getMagnitude();
 			double getAngle();
-			Point getNormR();
-			Point getNormL();
-			Point getUnitVector();
+			Vector2D getNormR();
+			Vector2D getNormL();
+			Vector2D getUnitVector();
 
 			void setX(double x);
 			void setY(double y);
@@ -42,17 +42,17 @@ namespace enigma
 			void scale(double number);
 			void invert(bool x, bool y);
 
-			Point add(const Point& B);
-			Point minus(const Point& B);
-			Point rotate(double angle);
-			Point interpolate(double number);
+			Vector2D add(const Vector2D& B);
+			Vector2D minus(const Vector2D& B);
+			Vector2D rotate(double angle);
+			Vector2D interpolate(double number);
 
-			double angleBetween(Point& B);
-			double dotProduct(const Point& B);
-			double perpProduct(const Point& B);
-			double crossProduct(const Point& B);
+			double angleBetween(Vector2D& B);
+			double dotProduct(const Vector2D& B);
+			double perpProduct(const Vector2D& B);
+			double crossProduct(const Vector2D& B);
 
-			bool equal(const Point& B);
+			bool equal(const Vector2D& B);
 	};
 
 	// The Polygon class represents the polygon that will be used
@@ -61,7 +61,7 @@ namespace enigma
 	class Polygon {
 		// Attributes
 		private:
-			std::vector<Point> points;
+			std::vector<Vector2D> points;
 			int height;
 			int width;
 			int xoffset;
@@ -72,12 +72,12 @@ namespace enigma
 			Polygon();
 			Polygon(int size);
 			Polygon(int h, int w, int x, int y);
-			Polygon(const Point* points, int size);
+			Polygon(const Vector2D* points, int size);
 			Polygon(const Polygon& obj);
 
 			int getNumPoints();
-			std::vector<Point> getPoints();
-			std::vector<Point> getPoints(double offset_x, double offset_y);
+			std::vector<Vector2D> getPoints();
+			std::vector<Vector2D> getPoints(double offset_x, double offset_y);
 
 			int getHeight();
 			int getWidth();
@@ -89,16 +89,16 @@ namespace enigma
 			void setXOffset(int x);
 			void setYOffset(int y);
 
-			void addPoint(const Point& point);
+			void addPoint(const Vector2D& point);
 			void addPoint(int x, int y);
 
 			void removePoint(int x, int y);
-			void removePoint(const Point& point);
+			void removePoint(const Vector2D& point);
 
 			void copy(const Polygon& obj);
-			void copy(const Point* points, int size);
+			void copy(const Vector2D* points, int size);
 
-			std::vector<Point> getNorms(double offset_x, double offset_y);
+			std::vector<Vector2D> getNorms(double offset_x, double offset_y);
 	};
 
 	// MinMax Projection class to determine 
