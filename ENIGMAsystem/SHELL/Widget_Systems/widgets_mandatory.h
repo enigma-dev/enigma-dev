@@ -23,7 +23,7 @@
 
 #include <string>
 
-#define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__) + "\n", (severity))
+#define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
@@ -91,7 +91,7 @@ inline int action_show_message(string msg) {
 void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBackgroundColor, int left=enigma::gameInfoLeft, int top=enigma::gameInfoTop, int width=enigma::gameInfoWidth, int height=enigma::gameInfoHeight,
 	bool embedGameWindow=enigma::gameInfoEmbedGameWindow, bool showBorder=enigma::gameInfoShowBorder, bool allowResize=enigma::gameInfoAllowResize, bool stayOnTop=enigma::gameInfoStayOnTop,
 	bool pauseGame=enigma::gameInfoPauseGame, string caption=enigma::gameInfoCaption);
-static inline void action_show_info() { show_info(); }
+inline void action_show_info() { show_info(); }
 
 }
 
