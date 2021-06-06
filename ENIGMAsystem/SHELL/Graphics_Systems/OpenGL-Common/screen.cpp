@@ -32,9 +32,14 @@ unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetInteg
 
 void graphics_set_viewport(float x, float y, float width, float height) {
   //NOTE: OpenGL viewports are bottom left unlike Direct3D viewports which are top left
-  y = enigma_user::window_get_height() - y - height;
-  glViewport(x,y,width,height);
-  glScissor(x,y,width,height);
+ 
+  //y = enigma_user::window_get_height() - y - height;
+ 
+ 
+ glViewport(x,y,width,height);
+ glScissor(x,y,width,height);
+// glViewport(0,0,width,height);
+// glScissor(0,0,width,height);
 }
 
 void scene_begin() {}

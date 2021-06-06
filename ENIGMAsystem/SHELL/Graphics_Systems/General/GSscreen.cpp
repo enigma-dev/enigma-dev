@@ -277,13 +277,16 @@ unsigned int display_get_gui_height(){
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
   draw_batch_flush(batch_flush_deferred);
 
-  x = (x / window_get_region_width()) * window_get_region_width_scaled();
-  y = (y / window_get_region_height()) * window_get_region_height_scaled();
-  width = (width / window_get_region_width()) * window_get_region_width_scaled();
-  height = (height / window_get_region_height()) * window_get_region_height_scaled();
-  gs_scalar sx, sy;
-  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
-  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+ x = (x / window_get_region_width()) * window_get_region_width_scaled();
+ y = (y / window_get_region_height()) * window_get_region_height_scaled();
+
+ 
+
+width = display_get_width() - int(window_get_region_width() / 10);
+height = display_get_height() - int(window_get_region_height() / 6);
+
+  gs_scalar sx=0, sy=0;
+
   viewport_x = sx + x;
   viewport_y = sy + y;
   viewport_w = width;
@@ -313,8 +316,7 @@ void screen_init() {
       if (view_visible[(int)view_current])
       {
         int vc = (int)view_current;
-
-        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
+                screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
         d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
         break;
       }
@@ -374,7 +376,7 @@ void screen_redraw()
       int vc = (int)view_current;
       if (!view_visible[vc])
         continue;
-
+   
       screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
 
       clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc], background_showcolor && draw_backs);
