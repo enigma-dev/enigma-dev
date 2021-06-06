@@ -35,7 +35,7 @@ struct AST {
   // Used to adapt to current single-error syntax checking interface.
   ErrorCollector herr;
   // A lexed (tokenized) view of the code.
-  const std::unique_ptr<Lexer> lexer;
+  const std::shared_ptr<Lexer> lexer;
   // The raw input code, owned by the lexer.
   const std::string &code;
   
