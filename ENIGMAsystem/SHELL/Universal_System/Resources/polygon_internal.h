@@ -1,4 +1,6 @@
-// Nabeel Danish
+/** Copyright (C) 2021 Nabeel Danish
+*** Nabeel Danish
+**/
 
 #ifndef ENIGMA_POLYGON_INTERNAL_H
 #define ENIGMA_POLYGON_INTERNAL_H

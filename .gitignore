@@ -31,6 +31,8 @@
 /CompilerSource/JDI/test/defines_linux.txt
 /CompilerSource/JDI/test/defines_mingw.txt
 /CompilerSource/stupidity-buffer/obj
+/ENIGMAsystem/SHELL/.vs
+/ENIGMAsystem/SHELL/.vscode
 
 .DS_Store
 

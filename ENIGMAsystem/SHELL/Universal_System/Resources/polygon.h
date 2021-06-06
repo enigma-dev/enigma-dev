@@ -1,6 +1,5 @@
-/** Copyright (C) 2008 Josh Ventura
-/**
-*** Nabeel Danish 
+/** Copyright (C) 2021 Nabeel Danish
+/** 
 **/
 
 #ifndef ENIGMA_POLYGON_H

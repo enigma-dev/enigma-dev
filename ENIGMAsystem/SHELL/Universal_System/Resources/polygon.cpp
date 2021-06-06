@@ -1,6 +1,6 @@
-/*
-*	Nabeel Danish
-*/
+/** Copyright (C) 2021 Nabeel Danish
+***
+***/
 
 #include "polygon_internal.h"
 #include <string>
