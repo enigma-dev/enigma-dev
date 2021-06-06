@@ -42,3 +42,26 @@ TEST(LexerTest, NumericLiterals) {
   EXPECT_EQ(lex->ReadToken().type, TT_VARNAME);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
+
+TEST(LexerTest, Comments) {
+  LexerTester lex("// This is a \"comment' /*\n{/* more // */}");
+  EXPECT_EQ(lex->ReadToken().type, TT_BEGINBRACE);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDBRACE);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, AnnoyingCommentsA) {
+  LexerTester lex("test/*'*/endtest");
+  EXPECT_EQ(lex->ReadToken().type, TT_VARNAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_VARNAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, AnnoyingCommentsB) {
+  LexerTester lex("{}/* comment */{}");
+  EXPECT_EQ(lex->ReadToken().type, TT_BEGINBRACE);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDBRACE);
+  EXPECT_EQ(lex->ReadToken().type, TT_BEGINBRACE);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDBRACE);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}

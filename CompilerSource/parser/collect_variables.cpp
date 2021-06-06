@@ -61,8 +61,8 @@ void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
   darray<scope_ignore*> igstack;
   igstack[igpos] = new scope_ignore(0);
 
-  std::string &code = parsed_code->code;
-  std::string &synt = parsed_code->synt;
+  std::string &code = parsed_code->ast.junkshit.code;
+  std::string &synt = parsed_code->ast.junkshit.synt;
 
   cout << "\nCollecting some variables...\n";
   pt dec_start_pos = 0;

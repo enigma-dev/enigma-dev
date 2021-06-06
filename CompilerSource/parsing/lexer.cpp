@@ -319,7 +319,8 @@ Token Lexer::ReadRawToken() {
         ++pos;  // Optimization: skip the whitespace
         return ReadRawToken();
       }
-      if (code[pos+1] == '*') { ++pos; // GM /**/ Comments
+      if (code[pos] == '*') {
+        ++pos; // GM /**/ Comments
         while (pos < code.length() and (code[pos] != '/' or code[pos-1] != '*'))
           ++pos;
         ++pos;  // Important: skip the trailing slash

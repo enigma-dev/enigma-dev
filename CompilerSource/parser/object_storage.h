@@ -47,22 +47,22 @@ typedef pair<string,string> initpair;
 //These parallel ism's structs, but offer additional properties we need to finish compile
 struct ParsedScope;
 struct ParsedCode {
-  string code;
-  string synt;
-  unsigned int strc;
-  varray<string> strs;
+  enigma::parsing::AST ast;
   // Redirects this code to apply to another object (wraps in with()).
   int otherObjId;
   // Allows us to add to locals when parsing the code.
   ParsedScope *my_scope;
 
-  ParsedCode(ParsedScope *scope): my_scope(scope) {}
+  ParsedCode(ParsedScope *scope, const std::string &code,
+             enigma::parsing::ParseContext *ctex)
+      : ast(enigma::parsing::AST::Parse(code, ctex)), my_scope(scope) {}
 };
 struct ParsedEvent : ParsedCode {
   Event ev_id;
 
-  ParsedEvent(Event ev_id, ParsedScope *scope):
-    ParsedCode(scope), ev_id(ev_id) {}
+  ParsedEvent(Event ev_id, ParsedScope *scope, const std::string &code,
+              enigma::parsing::ParseContext *ctex)
+      : ParsedCode(scope, code, ctex), ev_id(ev_id) {}
 };
 
 // Leverages EDL's direct use of C++ declaration syntax to represent type
@@ -334,7 +334,8 @@ struct ParsedScript {
   ParsedCode *global_code;
   int globargs; // The maximum number of arguments with which this was invoked from all contexts.
   // Automatically link our event to our object.
-  ParsedScript(): scope(), code(&scope), global_code(nullptr), globargs(0) {};
+  ParsedScript(const std::string &code, enigma::parsing::ParseContext *ctex)
+      : scope(), code(&scope, code, ctex), global_code(nullptr), globargs(0) {}
 };
 
 struct parsed_moment {

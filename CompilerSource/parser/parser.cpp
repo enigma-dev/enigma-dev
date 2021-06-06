@@ -158,8 +158,8 @@ void parser_main(ParsedCode* pev, CompileState &state, const std::set<std::strin
 
   //For the sake of efficiency, however, we will reduce the number of passes by replacing multiple things at once.
 
-  string &code = pev->code;
-  string &synt = pev->synt;
+  string &code = pev->ast.junkshit.code;
+  string &synt = pev->ast.junkshit.synt;
 
   //Reset things
     //Nothing to reset :trollface:
@@ -168,8 +168,8 @@ void parser_main(ParsedCode* pev, CompileState &state, const std::set<std::strin
   initscope("script scope");
 
   if (pev) {
-    pev->strc = 0; //Number of strings in this code
-    parser_ready_input(code,synt,pev->strc,pev->strs,state);
+    pev->ast.junkshit.strc = 0; //Number of strings in this code
+    parser_ready_input(code,synt,pev->ast.junkshit.strc,pev->ast.junkshit.strs,state);
   }
   else
   {
@@ -280,7 +280,7 @@ int make_hash(const lexpair& lp, ParsedCode* pev) {
   // Now we assume it's a string and apply a simple hash
   int r = 0;
   for (int i = 0; i < lp.strc; i++) {
-    string a = pev->strs[lp.stri + i];
+    string a = pev->ast.junkshit.strs[lp.stri + i];
     if (a.length() > 1) {
       if (a[0] == '"' and a[a.length() - 1] == '"') a = a.substr(1,a.length()-2);
       else if (a[0] == '\'' and a[a.length() - 1] == '\'') a = a.substr(1,a.length()-2);
@@ -327,8 +327,8 @@ bool skip_paren(string& res, pt& pos, const string& code, const string& synt, ch
 }  // namespace
 
 int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
-  string &code = parsed_code->code;
-  string &synt = parsed_code->synt;
+  string &code = parsed_code->ast.junkshit.code;
+  string &synt = parsed_code->ast.junkshit.synt;
 
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
@@ -879,7 +879,7 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
           const int lower_bound = cases[0].stri, upper_bound = cases[cases.size()-1].stri + cases[cases.size()-1].strc - 1;
           map<int,string> reorder;
           for (int i = lower_bound; i <= upper_bound; i++)
-            reorder[i] = parsed_code->strs[i];
+            reorder[i] = parsed_code->ast.junkshit.strs[i];
 
           int overwrite_at = lower_bound;
           for (map<int,vector<int> >::iterator i = hashes.begin(); i != hashes.end(); i++)
@@ -904,7 +904,7 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
               for (int iii = 0; iii < cases[casenum].strc; iii++)
               {
                 int indx = cases[casenum].stri + iii;
-                parsed_code->strs[overwrite_at++] = reorder[indx];
+                parsed_code->ast.junkshit.strs[overwrite_at++] = reorder[indx];
                 reorder.erase(indx);
               }
             }
@@ -919,7 +919,7 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
           }
 
           for (map<int,string>::iterator i = reorder.begin(); i != reorder.end(); i++)
-            parsed_code->strs[overwrite_at++] = i->second;
+            parsed_code->ast.junkshit.strs[overwrite_at++] = i->second;
         }
         icode += deflcode + deflsufcode;
         isynt += deflsynt + deflsufsynt;
