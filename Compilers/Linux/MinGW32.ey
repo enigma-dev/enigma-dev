@@ -17,7 +17,7 @@ Make-Vars:
   ldflags: -L../Additional/i686-w64-mingw32/lib -L/mingw32/lib -static-libgcc -static-libstdc++ -static
   links:
   windres: i686-w64-mingw32-windres
-  pkg-config: i686-w64-mingw32-pkg-config
+  pkg_config: i686-w64-mingw32-pkg-config
 
 Parser-Vars:
   defines: i686-w64-mingw32-cpp -dM -x c++ --std=c++03 -E $blank

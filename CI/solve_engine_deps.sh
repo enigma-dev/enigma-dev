@@ -12,7 +12,7 @@ if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
     libgl1-mesa-dev:i386 lib32z1-dev libxrandr-dev:i386 libxinerama-dev:i386\
     gcc-multilib g++-multilib libc++abi-dev:i386 libpng-dev:i386 libffi-dev:i386"
 elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
-  LINUX_DEPS="$LINUX_DEPS mingw-w64 wine64 wine32 wine-stable libgl1-mesa-glx:i386"
+  LINUX_DEPS="$LINUX_DEPS mingw-w64 mingw-w64-pkg-config mingw-w64-i686-pkgconf wine64 wine32 wine-stable libgl1-mesa-glx:i386"
 fi
 
 ###### Platforms #######
@@ -55,6 +55,10 @@ fi
 
 if [[ "$EXTENSIONS" =~ "ExternalFuncs" ]]; then
   LINUX_DEPS="$LINUX_DEPS libffi-dev"
+fi
+
+if [[ "$EXTENSIONS" =~ "VideoPlayer" ]]; then
+  LINUX_DEPS="$LINUX_DEPS mpv youtube-dl"
 fi
 
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then
