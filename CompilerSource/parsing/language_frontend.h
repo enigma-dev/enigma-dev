@@ -3,6 +3,7 @@
 
 #include <frontend.h>
 #include <Storage/definition.h>
+#include <settings.h>
 
 #include <string>
 
@@ -25,6 +26,11 @@ class LanguageFrontend {
 
   /// Retrieves a map of built-in macros, preprocessed into ENIGMA format.
   virtual const enigma::parsing::MacroMap &builtin_macros() const = 0;
+
+  // TODO: This doesn't really belong here, except definitionsModified is passed
+  // the IDE settings right now... and putting it here meant ParseContext needed
+  // only one parameter to its constructor.
+  virtual const setting::CompatibilityOptions &compatibility_opts() const = 0;
 
   // TODO: This stuff all depends directly on JDI storage structures, rather
   // than on some ENIGMA-centric representation of these definitions.

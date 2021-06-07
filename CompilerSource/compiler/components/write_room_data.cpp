@@ -55,7 +55,7 @@ inline string resname(string name) {
   return name.empty() ? "-1" : name;
 }
 
-int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, ParsedScope *EGMglobal, int mode)
+int lang_CPP::compile_writeRoomData(const GameData &game, const CompileState &state, int mode)
 {
   ofstream wto((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").u8string().c_str(),ios_base::out);
 
@@ -169,8 +169,6 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
     if (room.id() > room_highid)
       room_highid = room.id();
-
-    (void)EGMglobal; // No need to know globals, here.
   }
 
   wto << "  };\n  \n"; // End of all rooms
@@ -204,7 +202,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
   for (size_t room_index = 0; room_index < game.rooms.size(); ++room_index) {
     const auto &room = game.rooms[room_index];
-    parsed_room *pr = parsed_rooms[room_index];
+    parsed_room *pr = state.parsed_rooms[room_index];
     for (const auto &int_ev_pair : pr->instance_create_codes) {
       wto << "variant room_" << room.id()
           << "_instancecreate_" << int_ev_pair.first << "()\n{\n  ";
@@ -223,6 +221,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
       }
 
       print_to_file(
+        state.parse_context,
         codeOvr.empty() ? junkshit.code : codeOvr,
         syntOvr.empty() ? junkshit.synt : syntOvr,
         junkshit.strc, junkshit.strs, 2, wto
@@ -248,6 +247,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
       }
 
       print_to_file(
+        state.parse_context,
         codeOvr.empty() ? junkshit.code : codeOvr,
         syntOvr.empty() ? junkshit.synt : syntOvr,
         junkshit.strc, junkshit.strs, 2, wto
@@ -270,12 +270,11 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
     wto << "\n  return 0;\n}\n\n";
 
+    // TODO: Don't write empty room creation codes
     wto << "variant roomcreate" << room.id() << "()\n{\n";
     if (mode == emode_debug) {
       wto << "  enigma::debug_scope $current_scope(\"'room creation' for room '" << room.name << "'\");\n";
     }
-    wto << "\n  >>>" << pr->creation_code->ast.junkshit.code;
-    wto << "\n  >>>" << pr->creation_code->ast.junkshit.synt << "\n\n";
     pr->creation_code->ast.PrettyPrint(wto);
 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)

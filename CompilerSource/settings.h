@@ -66,15 +66,17 @@ enum COMPLIANCE_LVL {
 };
 
 //Compatibility / Progess options
-extern bool use_cpp_strings;  // Defines what language strings are inherited from.  0 = GML, 1 = C++
-extern bool use_cpp_literals; // Defines what language strings are inherited from.  0 = GML, 1 = C++
-extern bool use_cpp_escapes;  // Defines what language strings are inherited from.  0 = GML, 1 = C++
-extern bool use_gml_equals;   // Defines what language operator= is inherited from. 0 = GML, 1 = C++
-extern bool use_incrementals; // Defines how operators ++ and -- are treated.       0 = GML, 1 = C++
-extern bool inherit_objects;  // Determines whether objects should automatically inherit locals and events from their parents
-extern bool automatic_semicolons; // Determines whether semicolons should automatically be added or if the user wants strict syntax
-extern COMPLIANCE_LVL compliance_mode; // How to resolve differences between GM versions.
-extern std::string keyword_blacklist; //Words to blacklist from user scripts, separated by commas.
+struct CompatibilityOptions {
+  bool use_cpp_strings =  0; //< Defines what language single-quote strings are inherited from.     0 = GML, 1 = C++
+  bool use_cpp_literals = 0; //< Defines what language numeric literals are inherited from.         0 = GML, 1 = C++
+  bool use_cpp_escapes =  0; //< Defines what language string escape sequences are inherited from.  0 = GML, 1 = C++
+  bool use_gml_equals =   0; //< Defines what language operator= is inherited from.                 0 = GML, 1 = C++
+  bool use_incrementals = 0; //< Defines how operators ++ and -- are treated (assuming GM6).        0 = GML, 1 = C++
+  bool inherit_objects =  0; //< Determines whether objects should automatically inherit locals and events from their parents
+  bool strict_syntax =    0; //< Determines whether semicolons and parentheses should be inferred or if the user prefers strict syntax.
+  COMPLIANCE_LVL compliance_mode  = COMPL_STANDARD; //< How to resolve differences between GM versions.
+  std::string keyword_blacklist;  //< Words to blacklist from user scripts, separated by commas.
+};
 
 }  // namespace setting
 

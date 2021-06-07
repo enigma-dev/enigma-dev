@@ -79,7 +79,7 @@ void parser_init();
 syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targetYaml)
 {
   cout << "Parsing settings..." << endl;
-    parse_ide_settings(targetYaml);
+  parse_ide_settings(targetYaml, &compatibility_opts_);
   
   cout << targetYaml << endl;
   

@@ -178,7 +178,7 @@ void parser_main(ParsedCode* pev, CompileState &state, const std::set<std::strin
     parser_ready_input(code,synt,strct,strst,state);
   }
   parser_reinterpret(code,synt);
-  if (setting::automatic_semicolons) {
+  if (!state.parse_context.compatibility_opts.strict_syntax) {
     parser_add_semicolons(code,synt);
   }
 
@@ -329,6 +329,7 @@ bool skip_paren(string& res, pt& pos, const string& code, const string& synt, ch
 int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
   string &code = parsed_code->ast.junkshit.code;
   string &synt = parsed_code->ast.junkshit.synt;
+  auto &compat_opts = state.parse_context.compatibility_opts;
 
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
@@ -652,7 +653,7 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
         break;
       case '=':
         deceq |= indecl;
-        if (setting::use_gml_equals and (level or rhs))
+        if (compat_opts.use_gml_equals and (level or rhs))
         {
           if (infor != 3 and infor != 1 and synt[pos-1] != '=' and synt[pos+1] != '=') {
             pos++;

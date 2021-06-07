@@ -15,14 +15,14 @@ void AST::ApplyTo(int instance_id) {
 }
 
 void AST::PrettyPrint(std::ofstream &of, int base_indent) const {
-  print_to_file(junkshit.code, junkshit.synt, junkshit.strc, junkshit.strs,
-                base_indent, of);
+  print_to_file(lexer->GetContext(), junkshit.code, junkshit.synt,
+                junkshit.strc, junkshit.strs, base_indent, of);
 }
 
 AST AST::Parse(std::string code, const ParseContext *ctex) {
   AST res(std::move(code), ctex);
   std::cerr << "TODO: implement me: AST::Parse" << std::endl;
-  return std::move(res);
+  return res;
 }
 
 }  // namespace enigma::parsing

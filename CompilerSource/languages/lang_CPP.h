@@ -48,7 +48,7 @@ struct lang_CPP: language_adapter {
   int compile_writeObjectData(const GameData &game, const CompileState &state, int mode) final;
   int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const ParsedScope* global, bool treatUninitAs0) final;
   int compile_writeFontInfo(const GameData &game) final;
-  int compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, ParsedScope *EGMglobal, int mode) final;
+  int compile_writeRoomData(const GameData &game, const CompileState &state, int mode) final;
   int compile_writeShaderData(const GameData &game, ParsedScope *EGMglobal) final;
   int compile_writeDefraggedEvents(const GameData &game, const std::set<EventGroupKey> &used_events, const ParsedObjectVec &parsed_objects) final;
 
@@ -68,6 +68,7 @@ struct lang_CPP: language_adapter {
 
   const EventData &event_data() const final { return evdata_; }
   const enigma::parsing::MacroMap &builtin_macros() const final { return builtin_macros_; }
+  const setting::CompatibilityOptions &compatibility_opts() const final { return compatibility_opts_; }
 
   // ===============================================================================================
   // == The following methods are implemented in jdi_utility.cpp ===================================
@@ -110,6 +111,8 @@ struct lang_CPP: language_adapter {
   EventData evdata_;
   // Cache of all built-in macros computed just after JDI parse finishes.
   enigma::parsing::MacroMap builtin_macros_;
+  // Settings stuffed here instead of the global scope...
+  setting::CompatibilityOptions compatibility_opts_;
 };
 
 #endif

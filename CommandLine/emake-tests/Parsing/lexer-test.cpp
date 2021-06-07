@@ -30,7 +30,7 @@ struct LexerTester {
   Lexer *operator->() { return &lexer; }
 
   LexerTester(std::string code):
-      context(nullptr),
+      context(ParseContext::EmptyLanguage()),
       lexer(std::move(code), &context, &herr) {}
 };
 
