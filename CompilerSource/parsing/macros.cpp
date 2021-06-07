@@ -176,7 +176,7 @@ static string TokContentCat(const Token &left, const Token &right) {
 static Token PasteTokens(
     const Token &left, const Token &right, const ErrorContext &errc) {
   static const MacroMap no_macros;
-  static const ParseContext empty_context(nullptr);
+  static const ParseContext empty_context(ParseContext::EmptyLanguage{});
   Lexer l(std::move(TokContentCat(left, right)), &empty_context, errc.herr);
   Token res = l.ReadRawToken();
   Token end = l.ReadRawToken();
@@ -209,19 +209,15 @@ TokenVector Macro::SubstituteAndUnroll(
     ErrorContext errc) const {
   TokenVector res;
   bool paste_next = false;
-  if (args.size() < parameters->size()) {
+  if (args.size() != parameters->size()) {
     if (!is_variadic || args.size() + 1 < parameters->size()) {
-      errc.Error() << "Too few arguments to macro " << NameAndPrototype()
-                   << ": wanted " << parameters->size()
-                   << ", got " << args.size();
-    }
-  }
-  if (args.size() > parameters->size()) {
-    if (!is_variadic) {
-      errc.Error() << "Too many arguments to macro " << NameAndPrototype()
-                   << ": wanted " << parameters->size()
-                   << ", got " << args.size();
-    } else {
+      errc.Error()
+          << (args.size() > parameters->size()
+                  ? "Too many arguments to macro "
+                  : "Too few arguments to macro ")
+          << NameAndPrototype() << ": wanted " << parameters->size()
+          << ", got " << args.size();
+    } else if (args.size() > parameters->size()) {
       errc.Error() << "Internal error: variadic macro passed too many arguments";
     }
   }

@@ -108,36 +108,36 @@ std::filesystem::path enigma_root;
 std::filesystem::path eobjs_directory;
 std::filesystem::path codegen_directory;
 
-void parse_ide_settings(const char* eyaml)
+void parse_ide_settings(const char* eyaml, setting::CompatibilityOptions *out)
 {
   ey_data settree = parse_eyaml_str(eyaml);
   eyit it;
   
   // Read settings info
-  setting::use_cpp_strings   = settree.get("inherit-strings-from").toInt();
-  setting::use_cpp_literals  = settree.get("inherit-literals-from").toInt();
-  setting::use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
-  setting::use_incrementals  = settree.get("inherit-increment-from").toInt();
-  setting::use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
-  setting::inherit_objects   = settree.get("inherit-objects").toBool();
+  out->use_cpp_strings   = settree.get("inherit-strings-from").toInt();
+  out->use_cpp_literals  = settree.get("inherit-literals-from").toInt();
+  out->use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
+  out->use_incrementals  = settree.get("inherit-increment-from").toInt();
+  out->use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
+  out->inherit_objects   = settree.get("inherit-objects").toBool();
   switch (settree.get("compliance-mode").toInt()) {
     case 4:
-      setting::compliance_mode = setting::COMPL_GM8;
+      out->compliance_mode = setting::COMPL_GM8;
       break;
     case 3:
-      setting::compliance_mode = setting::COMPL_GM7;
+      out->compliance_mode = setting::COMPL_GM7;
       break;
     case 2:
-      setting::compliance_mode = setting::COMPL_GM6;
+      out->compliance_mode = setting::COMPL_GM6;
       break;
     case 1:
-      setting::compliance_mode = setting::COMPL_GM5;
+      out->compliance_mode = setting::COMPL_GM5;
       break;
     default:
-      setting::compliance_mode = setting::COMPL_STANDARD;
+      out->compliance_mode = setting::COMPL_STANDARD;
   }
-  setting::automatic_semicolons   = settree.get("automatic-semicolons").toBool();
-  setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
+  out->strict_syntax =    !settree.get("automatic-semicolons").toBool();
+  out->keyword_blacklist = settree.get("keyword-blacklist").toString();
 
   // Path to enigma sources
   enigma_root = settree.get("enigma-root").toString();

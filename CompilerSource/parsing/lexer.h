@@ -22,6 +22,7 @@
 #include "macros.h"
 #include "error_reporting.h"
 #include "language_frontend.h"
+#include "settings.h"
 
 #include <deque>
 #include <map>
@@ -35,16 +36,24 @@ struct ParseContext {
   /// provides actual definitions for globals, functions, macros, etc, and
   /// implements pretty-printing.
   const LanguageFrontend *language_fe;
-  // All macros built-in or declared in user's Definitions pages.
+  /// All macros built-in or declared in user's Definitions pages.
   const MacroMap macro_map;
-  // Variables that are inherited by all objects.
+  /// Variables that are inherited by all objects.
   std::set<std::string, std::less<>> shared_locals;
+  /// Options controlling how code is interpreted.
+  setting::CompatibilityOptions compatibility_opts;
 
-  ParseContext(nullptr_t);
+  struct EmptyLanguage {};
+  /// Used for expanding macros. Also used for testing.
+  ParseContext(const EmptyLanguage &);
+  /// Disallow null construction.
+  ParseContext(nullptr_t) = delete;
+  /// Used by everyone else.
   ParseContext(const LanguageFrontend *lang):
       language_fe(lang),
       macro_map(lang->builtin_macros()),
-      shared_locals(/*FIXME: what the fuck, really? lang->shared_locals()*/) {}
+      shared_locals(/*FIXME: what the fuck, really? lang->shared_locals()*/),
+      compatibility_opts(lang->compatibility_opts()) {}
 };
 
 class Lexer {
@@ -53,7 +62,8 @@ class Lexer {
   Token ReadRawToken();
   TokenVector PreprocessBuffer(const TokenVector &tokens);
 
-  const std::string &GetCode() { return code; }
+  const std::string &GetCode() const { return code; }
+  const ParseContext &GetContext() const { return *context; }
   size_t LineNumber() const { return line_number; }
 
   Lexer(std::string &&code_, const ParseContext *ctx, ErrorHandler *herr_):

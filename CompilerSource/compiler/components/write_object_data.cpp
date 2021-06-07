@@ -702,7 +702,7 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
 static inline void write_timeline_implementations(ofstream& wto, const GameData &game, const CompileState &state);
 static inline void write_event_bodies(ofstream& wto, const GameData &game, int mode, const ParsedObjectVec &parsed_objects, const ScriptLookupMap &script_lookup, const TimelineLookupMap &timeline_lookup);
 static inline void write_global_script_array(ofstream &wto, const GameData &game, const CompileState &state);
-static inline void write_basic_constructor(ofstream &wto);
+static inline void write_basic_constructor(ofstream &wto, const CompileState &state);
 
 // [ CODEGEN FILE ] ------------------------------------------------------------
 // Object functionality: implements event routines and scripts declared earlier.
@@ -722,7 +722,7 @@ static inline void write_object_functionality(
   write_timeline_implementations(wto, game, state);
   write_event_bodies(wto, game, mode, state.parsed_objects, state.script_lookup, state.timeline_lookup);
   write_global_script_array(wto, game, state);
-  write_basic_constructor(wto);
+  write_basic_constructor(wto, state);
 
   wto.close();
 }
@@ -751,6 +751,7 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
       override_synt = upev.synt.substr(12);
     }
     print_to_file(
+      state.parse_context,
       override_code.empty() ? upev.code : override_code,
       override_synt.empty() ? upev.synt : override_synt,
       upev.strc,
@@ -777,6 +778,7 @@ static inline void write_timeline_implementations(ofstream& wto, const GameData 
         override_synt = upev.synt.substr(12);
       }
       print_to_file(
+          state.parse_context,
           override_code.empty() ? upev.code : override_code,
           override_synt.empty() ? upev.synt : override_synt,
           upev.strc,
@@ -973,7 +975,8 @@ static inline void write_global_script_array(ofstream &wto, const GameData &game
   wto << "  };\n  \n";
 }
 
-static inline void write_basic_constructor(ofstream &wto) {
+static inline void write_basic_constructor(ofstream &wto, const CompileState &state) {
+  auto &copts = state.parse_context.compatibility_opts;
   wto <<
       "  void constructor(object_basic* instance_b) {\n"
       "    //This is the universal create event code\n"
@@ -989,7 +992,7 @@ static inline void write_basic_constructor(ofstream &wto) {
       "    instance->friction=0;\n    \n"
       "    \n"
       "    instance->timeline_index = -1;\n"
-      "    instance->timeline_running = " << (setting::compliance_mode <= setting::COMPL_GM7? "true" : "false") << ";\n"
+      "    instance->timeline_running = " << (copts.compliance_mode <= setting::COMPL_GM7 ? "true" : "false") << ";\n"
       "    instance->timeline_speed = 1;\n"
       "    instance->timeline_position = 0;\n"
       "    instance->timeline_loop = false;\n"

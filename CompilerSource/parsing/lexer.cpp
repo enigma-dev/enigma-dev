@@ -138,6 +138,7 @@ static std::map<std::string, TokenType, std::less<>> keyword_lookup {
 }
 
 static const MacroMap kNoMacros;
+static const setting::CompatibilityOptions kDefaultCompatibility;
 
 // Used for preprocessing parses. Not the prettiest solution, but works for now.
 struct NullLanguageFrontend : LanguageFrontend {
@@ -152,6 +153,7 @@ struct NullLanguageFrontend : LanguageFrontend {
 
   bool global_exists(string) const final { return false; }
   const MacroMap &builtin_macros() const final { return kNoMacros; }
+  const setting::CompatibilityOptions &compatibility_opts() const final { return kDefaultCompatibility; }
   jdi::definition* look_up(const string&) const final { return nullptr; }
   jdi::definition* find_typename(string) const final { return nullptr; }
 
@@ -165,7 +167,8 @@ struct NullLanguageFrontend : LanguageFrontend {
 
 }  // namespace
 
-ParseContext::ParseContext(nullptr_t): ParseContext(&kNullLanguage) {}
+ParseContext::ParseContext(const ParseContext::EmptyLanguage &):
+    ParseContext(&kNullLanguage) {}
 
 bool Lexer::MacroRecurses(std::string_view name) const {
   for (const auto &macro : open_macros) if (macro.name == name) return true;
@@ -260,7 +263,7 @@ Token Lexer::ReadRawToken() {
     }
 
     case '"': {
-      if (setting::use_cpp_escapes) {
+      if (context->compatibility_opts.use_cpp_escapes) {
         while (code[++pos]!='"') {
           if (pos >= code.length()) {
             herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
@@ -276,7 +279,7 @@ Token Lexer::ReadRawToken() {
     }
 
     case '\'': {
-      if (setting::use_cpp_escapes) {
+      if (context->compatibility_opts.use_cpp_escapes) {
         while (code[++pos] != '\'') {
           if (pos >= code.length()) {
             herr->Error(Mark(spos, 1)) << "Unclosed quote at this point";
@@ -292,7 +295,7 @@ Token Lexer::ReadRawToken() {
     }
 
     case '0': {
-      if (setting::use_cpp_literals) {
+      if (context->compatibility_opts.use_cpp_literals) {
         if (code[pos] == 'x') {
           while (is_nybble(code[++pos]));
           return Token(TT_HEXLITERAL, Mark(spos, pos - spos));

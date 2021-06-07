@@ -92,6 +92,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
     std::cerr << "Error collector has " << herr.errors.size()
               << " errors, but syntax check succeeded?" << std::endl;
   }
+  auto &copts = state.parse_context.compatibility_opts;
 
   // Rebuild the code from the lex, so we can do the old lex.
   // This whole routine should go away next cycle.
@@ -201,8 +202,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
     if (code[pos] == '"')
     {
       string str;
-      const pt spos = pos;
-      if (setting::use_cpp_escapes)
+      const size_t spos = pos;
+      if (copts.use_cpp_escapes)
       {
         while (code[++pos] != '"')
           if (code[pos] == '\\') pos++;
@@ -222,7 +223,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
     {
       string str;
       const pt spos = pos;
-      if (setting::use_cpp_escapes)
+      if (copts.use_cpp_escapes)
       {
         while (code[++pos] != '\'')
           if (code[pos] == '\\') pos++;
@@ -234,7 +235,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         str = (code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
-      codo[bpos] = synt[bpos] = last_token = setting::use_cpp_strings? '\'' : '\"';
+      codo[bpos] = synt[bpos] = last_token = copts.use_cpp_strings? '\'' : '\"';
       bpos++;
       continue;
     }
@@ -771,9 +772,9 @@ const char * indent_chars   =  "\n                                \
                                                                   \
                                                                   \
                                                                   ";
-static inline string string_settings_escape(string n)
-{
-  if (!setting::use_cpp_strings) {
+static inline string string_settings_escape(
+    string n, const setting::CompatibilityOptions &compat_opts) {
+  if (!compat_opts.use_cpp_strings) {
     if (!n.length()) return "\"\"";
     if (n[0] == '\'' and n[n.length()-1] == '\'')
       n[0] = n[n.length() - 1] = '"';
@@ -814,8 +815,7 @@ static inline string string_settings_escape(string n)
   return n;
 }
 
-void print_to_file(string code,string synt,const unsigned int strc, const varray<string> &string_in_code,int indentmin_b4,ofstream &of)
-{
+void print_to_file(const enigma::parsing::ParseContext &ctex, string code,string synt,const unsigned int strc, const varray<string> &string_in_code,int indentmin_b4,ofstream &of) {
   //FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
   FILE* of_ = fopen("/home/josh/Desktop/parseout.txt","ab");
   if (of_) { fprintf(of_,"%s\n%s\n\n\n",code.c_str(), synt.c_str()); fclose(of_); }
@@ -876,7 +876,7 @@ void print_to_file(string code,string synt,const unsigned int strc, const varray
       case '"': case '\'':
           if (pars) pars--;
             if (str_ind >= strc) cout << "What the string literal.\n";
-            of << string_settings_escape(string_in_code[str_ind]).c_str();
+            of << string_settings_escape(string_in_code[str_ind], ctex.compatibility_opts).c_str();
             str_ind++;
             if (synt[pos+1] == '+' and synt[pos+2] == '"')
               synt[pos+1] = code[pos+1] = ' ';

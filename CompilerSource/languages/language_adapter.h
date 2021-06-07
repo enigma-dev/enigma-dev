@@ -46,7 +46,7 @@ struct language_adapter : LanguageFrontend {
   virtual int compile_writeObjectData(const GameData &game, const CompileState &state, int mode) = 0;
   virtual int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const ParsedScope* global, bool treatUninitAs0) = 0;
   virtual int compile_writeFontInfo(const GameData &game) = 0;
-  virtual int compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, ParsedScope *EGMglobal, int mode) = 0;
+  virtual int compile_writeRoomData(const GameData &game, const CompileState &state, int mode) = 0;
   virtual int compile_writeShaderData(const GameData &game, ParsedScope *EGMglobal) = 0;
   virtual int compile_writeDefraggedEvents(const GameData &game, const std::set<EventGroupKey> &used_events, const ParsedObjectVec &parsed_objects) = 0;
 

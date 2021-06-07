@@ -34,25 +34,9 @@
 #include <fstream>
 #include <iostream>
 
-namespace extensions
-{
+namespace extensions {
   sdk_descriptor targetSDK;
   api_descriptor targetAPI;
-}
-
-namespace setting {
-
-//Compatibility / Progess options
-bool use_cpp_strings = 0;
-bool use_cpp_escapes = 0;
-bool use_cpp_literals = 0;
-bool use_gml_equals = 0;
-bool use_incrementals = 0;
-bool inherit_objects = 0;
-bool automatic_semicolons = 0;
-COMPLIANCE_LVL compliance_mode = COMPL_STANDARD;
-std::string keyword_blacklist = "";
-
 }
 
 CompilerInfo compilerInfo;
