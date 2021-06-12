@@ -59,6 +59,7 @@ void input_key_up(int key) {
   keybdstatus[key]=0;
 }
 
+
 void compute_window_scaling() {
   if (!regionWidth) return;
   parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth;

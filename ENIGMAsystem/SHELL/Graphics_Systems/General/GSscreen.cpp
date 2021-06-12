@@ -26,6 +26,7 @@
 #include "GSprimitives.h"
 #include "GSvertex.h"
 #include "GScolors.h"
+#include <SDL2/SDL.h>
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/image_formats.h"
@@ -38,6 +39,7 @@
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "../../../Platforms/SDL/Window.h"
 
 #include <string>
 #include <cstdio>
@@ -274,28 +276,23 @@ unsigned int display_get_gui_height(){
   return enigma::gui_height;
 }
 
+
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
   draw_batch_flush(batch_flush_deferred);
 
- x = (x / window_get_region_width()) * window_get_region_width_scaled();
- y = (y / window_get_region_height()) * window_get_region_height_scaled();
-
- 
-
-width = display_get_width() - int(window_get_region_width() / 10);
-height = display_get_height() - int(window_get_region_height() / 6);
-
-  gs_scalar sx=0, sy=0;
-
-  viewport_x = sx + x;
-  viewport_y = sy + y;
-  viewport_w = width;
-  viewport_h = height;
+  viewport_x = 0;
+  viewport_y = 0;
+  int viewportWidth;
+  int viewportHeight;
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  viewport_w = viewportWidth;
+  viewport_h = viewportHeight;
 
   screen_reset_viewport();
 }
-
 void screen_reset_viewport() {
+	
+  //enigma_user::show_debug_message(" width: " + std::to_string(viewport_w) + " height: " + std::to_string(viewport_h) +" dgw: " + std::to_string(display_get_width()) + " dgh: " + std::to_string(display_get_height()) );	
   graphics_set_viewport(viewport_x, viewport_y, viewport_w, viewport_h);
 }
 

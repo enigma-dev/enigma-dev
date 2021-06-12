@@ -44,7 +44,7 @@ bool initGameWindow() {
   SDL_Init(SDL_INIT_VIDEO);
   #ifdef __ANDROID__
     // If you set window'd window on android it spazzes out
-    sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
+    sdl_window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     // Lanscape oreintation for android by default
     SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
   #else
@@ -53,12 +53,13 @@ bool initGameWindow() {
     if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
   #endif
   init_sdl_window_bridge_attributes();
-  windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
+  SDL_DisplayMode mode;
+  SDL_GetDisplayMode(0,0,&mode);
+  windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode.w, mode.h, sdl_window_flags);
   bool notnull = (windowHandle != nullptr);
   if (notnull) window_init();
   return notnull;
 }
-
 namespace keyboard {
   using namespace enigma_user;
   std::unordered_map<int,SDL_Keycode> keymap = {
@@ -338,13 +339,25 @@ int display_get_y() {;
 }
 
 int display_get_width() {
+#ifdef __ANDROID__
+  int viewportWidth;
+  int viewportHeight;
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  return viewportWidth;
+#endif
   SDL_DisplayMode DM;
   int d = SDL_GetWindowDisplayIndex(windowHandle);
   SDL_GetCurrentDisplayMode(d, &DM);
   return DM.w;
 }
-
+ 
 int display_get_height() {
+#ifdef __ANDROID__
+  int viewportWidth;
+  int viewportHeight;
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  return viewportHeight;
+#endif
   SDL_DisplayMode DM;
   int d = SDL_GetWindowDisplayIndex(windowHandle);
   SDL_GetCurrentDisplayMode(d, &DM);
