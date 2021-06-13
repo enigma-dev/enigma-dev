@@ -40,22 +40,14 @@ unsigned sdl_window_flags = SDL_WINDOW_HIDDEN;
 // (e.g, SDL's OpenGL context attributes)
 void init_sdl_window_bridge_attributes();
 
+
 bool initGameWindow() {
   SDL_Init(SDL_INIT_VIDEO);
-  #ifdef __ANDROID__
-    // If you set window'd window on android it spazzes out
-    sdl_window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    // Lanscape oreintation for android by default
-    SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
-  #else
-    if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
-    if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
-    if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
-  #endif
+  if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
+  if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
+  if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
   init_sdl_window_bridge_attributes();
-  SDL_DisplayMode mode;
-  SDL_GetDisplayMode(0,0,&mode);
-  windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode.w, mode.h, sdl_window_flags);
+  windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
   bool notnull = (windowHandle != nullptr);
   if (notnull) window_init();
   return notnull;
@@ -277,18 +269,32 @@ void window_set_rectangle(int x, int y, int w, int h) {
 }
 
 int window_get_width() {
-  int w;
-  SDL_GetWindowSize(windowHandle, &w, nullptr);
-  return w;
+  //int w;
+  //SDL_GetWindowSize(windowHandle, &w, nullptr);
+  //return w;
+  int viewportWidth;
+  int viewportHeight;
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  return viewportWidth;
+
 }
 
 int window_get_height() {
-  int h;
-  SDL_GetWindowSize(windowHandle, nullptr, &h);
-  return h;
+  //int h;
+ //SDL_GetWindowSize(windowHandle, nullptr, &h);
+ // return h;
+  int viewportWidth;
+  int viewportHeight;
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  return viewportHeight;
+
 }
 
-void window_set_size(unsigned w, unsigned h) { SDL_SetWindowSize(windowHandle, w, h); }
+void window_set_size(unsigned w, unsigned h) { 
+ #ifndef _ANDROID_
+ SDL_SetWindowSize(windowHandle, w, h);
+ #endif
+ }
 
 bool window_get_fullscreen() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);
@@ -338,26 +344,15 @@ int display_get_y() {;
   return (SDL_GetDisplayBounds(d, &r) == 0) ? r.y : 0;
 }
 
+
 int display_get_width() {
-#ifdef __ANDROID__
-  int viewportWidth;
-  int viewportHeight;
-  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
-  return viewportWidth;
-#endif
   SDL_DisplayMode DM;
   int d = SDL_GetWindowDisplayIndex(windowHandle);
   SDL_GetCurrentDisplayMode(d, &DM);
   return DM.w;
 }
- 
+
 int display_get_height() {
-#ifdef __ANDROID__
-  int viewportWidth;
-  int viewportHeight;
-  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
-  return viewportHeight;
-#endif
   SDL_DisplayMode DM;
   int d = SDL_GetWindowDisplayIndex(windowHandle);
   SDL_GetCurrentDisplayMode(d, &DM);

@@ -276,23 +276,25 @@ unsigned int display_get_gui_height(){
   return enigma::gui_height;
 }
 
-
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
   draw_batch_flush(batch_flush_deferred);
 
-  viewport_x = 0;
-  viewport_y = 0;
-  int viewportWidth;
-  int viewportHeight;
-  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
-  viewport_w = viewportWidth;
-  viewport_h = viewportHeight;
+  x = (x / window_get_region_width()) * window_get_region_width_scaled();
+  y = (y / window_get_region_height()) * window_get_region_height_scaled();
+  width = (width / window_get_region_width()) * window_get_region_width_scaled();
+  height = (height / window_get_region_height()) * window_get_region_height_scaled();
+  gs_scalar sx, sy;
+  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+  viewport_x = sx + x;
+  viewport_y = sy + y;
+  viewport_w = width;
+  viewport_h = height;
 
   screen_reset_viewport();
 }
+
 void screen_reset_viewport() {
-	
-  //enigma_user::show_debug_message(" width: " + std::to_string(viewport_w) + " height: " + std::to_string(viewport_h) +" dgw: " + std::to_string(display_get_width()) + " dgh: " + std::to_string(display_get_height()) );	
   graphics_set_viewport(viewport_x, viewport_y, viewport_w, viewport_h);
 }
 
