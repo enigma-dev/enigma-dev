@@ -54,15 +54,14 @@ struct scope_ignore {
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
 
-void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
-                       const std::set<std::string> &script_names,
-                       bool trackGotos) {
+void collect_variables(const LanguageFrontend *lang, enigma::parsing::AST *ast,
+                       ParsedScope *parsed_scope, const NameSet &script_names) {
   int igpos = 0;
   darray<scope_ignore*> igstack;
   igstack[igpos] = new scope_ignore(0);
 
-  std::string &code = parsed_code->ast.junkshit.code;
-  std::string &synt = parsed_code->ast.junkshit.synt;
+  std::string &code = ast->junkshit.code;
+  std::string &synt = ast->junkshit.synt;
 
   cout << "\nCollecting some variables...\n";
   pt dec_start_pos = 0;
@@ -135,9 +134,9 @@ void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
             //Declare this as a specific type
             cout << "Declared " << dec_type << " " << dec_prefixes << dec_name << dec_suffixes << " as " << (dec_out_of_scope-1 ? "global" : "local") << endl;
             if (dec_out_of_scope - 1) //to be placed at global scope
-              parsed_code->my_scope->globals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
+              parsed_scope->globals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
             else
-              parsed_code->my_scope->locals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
+              parsed_scope->locals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
 
             if (!dec_initializing) //If this statement does nothing other than declare, remove it
             {
@@ -277,16 +276,9 @@ void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
 
       //Special case; "exit"
       if (nname=="exit") {
-        stringstream newName;
-        if (trackGotos) {
-          newName <<"goto enigma_block_end_" <<currGotoBlock <<";";
-          foundGoto = true;
-        } else {
-          newName <<"return 0;";
-        }
-        code.replace(spos, 4, newName.str());
-        synt.replace(spos, 4, string(newName.str().size(), 'X'));
-        pos += (newName.str().size()-4 - 1);
+        code.replace(spos, 4, "return 0;");
+        synt.replace(spos, 4, "XXXXXXXX;");
+        pos += 4;  // above:   exit01234
         continue;
       }
       
@@ -307,7 +299,7 @@ void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
         //If we're currently looking for a timeline variable, check if this is it.
         if (grab_tline_index) {
           cout << "  Potentially calls timeline `" << nname << "'\n";
-          parsed_code->my_scope->tlines.insert(pair<string,int>(nname,1));
+          parsed_scope->tlines.insert(pair<string,int>(nname,1));
           grab_tline_index = false;
         }
 
@@ -317,8 +309,8 @@ void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
         }
         
         //First, check shared locals to see if we already have one
-        if (shared_object_locals.find(nname) != shared_object_locals.end()) {
-          parsed_code->my_scope->globallocals[nname]++;
+        if (lang->is_shared_local(nname)) {
+          parsed_scope->globallocals[nname]++;
           if (with_until_semi or igstack[igpos]->is_with) {
             pos += 5;
             cout << "Add a self. before " << nname;
@@ -329,7 +321,7 @@ void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
         }
         
         //Second, check that it's not a global
-        if (lang->global_exists(nname) or parsed_code->my_scope->globals.find(nname) != parsed_code->my_scope->globals.end()) {
+        if (lang->global_exists(nname) or parsed_scope->globals.find(nname) != parsed_scope->globals.end()) {
           cout << "Ignoring `" << nname << "' because it's a global.\n";
           continue;
         }
@@ -352,7 +344,7 @@ void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
         }
         
         //Of course, we also don't want to risk overwriting a typed version
-        if (parsed_code->my_scope->locals.find(nname) != parsed_code->my_scope->locals.end()) {
+        if (parsed_scope->locals.find(nname) != parsed_scope->locals.end()) {
           if (with_until_semi or igstack[igpos]->is_with) {
             pos += 5;
             cout << "Add a self. before " << nname;
@@ -371,12 +363,12 @@ void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
         }
         
         //Make sure it's not already an ambiguous usage
-        if (parsed_code->my_scope->ambiguous.find(nname) != parsed_code->my_scope->ambiguous.end()) {
+        if (parsed_scope->ambiguous.find(nname) != parsed_scope->ambiguous.end()) {
           cout << "Ignoring `" << nname << "' because it's already ambiguous.\n"; continue;
         }
         
         cout << "Delaying `" << nname << "' because it's either a local or a global.\n";
-        parsed_code->my_scope->ambiguous[nname] = dectrip();
+        parsed_scope->ambiguous[nname] = dectrip();
         continue_2: continue;
       }
       else //Since a syntax check already completed, we assume this is a valid function
@@ -390,7 +382,7 @@ void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
             if (nextSep != std::string::npos) {
               const string pname = code.substr(pos+2,nextSep-(pos+2));
               cout << "  Potentially calls timeline `" << pname << "'\n";
-              parsed_code->my_scope->tlines.insert(pair<string,int>(pname,1));
+              parsed_scope->tlines.insert(pair<string,int>(pname,1));
             }
         }
 
@@ -425,7 +417,7 @@ void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
           }
         }
         args += contented; //Final arg for closing parentheses
-        pair<parsed_object::funcit,bool> a = parsed_code->my_scope->funcs.insert(pair<string,int>(nname,args));
+        pair<parsed_object::funcit,bool> a = parsed_scope->funcs.insert(pair<string,int>(nname,args));
         if (!a.second and a.first->second < signed(args))
           a.first->second = args;
         cout << "  Calls script `" << nname << "'\n";

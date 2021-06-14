@@ -137,6 +137,7 @@ static std::map<std::string, TokenType, std::less<>> keyword_lookup {
   abort(); \
 }
 
+static const NameSet kNoNames;
 static const MacroMap kNoMacros;
 static const setting::CompatibilityOptions kDefaultCompatibility;
 
@@ -153,6 +154,7 @@ struct NullLanguageFrontend : LanguageFrontend {
 
   bool global_exists(string) const final { return false; }
   const MacroMap &builtin_macros() const final { return kNoMacros; }
+  const NameSet &shared_object_locals() const final { return kNoNames; }
   const setting::CompatibilityOptions &compatibility_opts() const final { return kDefaultCompatibility; }
   jdi::definition* look_up(const string&) const final { return nullptr; }
   jdi::definition* find_typename(string) const final { return nullptr; }
@@ -168,7 +170,7 @@ struct NullLanguageFrontend : LanguageFrontend {
 }  // namespace
 
 ParseContext::ParseContext(const ParseContext::EmptyLanguage &):
-    ParseContext(&kNullLanguage) {}
+    ParseContext(&kNullLanguage, kNoNames) {}
 
 bool Lexer::MacroRecurses(std::string_view name) const {
   for (const auto &macro : open_macros) if (macro.name == name) return true;
@@ -395,7 +397,7 @@ Token &Lexer::TranslateNameToken(Token &token) {
     return token;
   }
 
-  if (context->shared_locals.find(name) == context->shared_locals.end()) {
+  if (!context->language_fe->is_shared_local(name)) {
     // TODO: REMOVEME
     std::string slow_ass_conversion{name};
     jdi::definition *d = context->language_fe->look_up(slow_ass_conversion);

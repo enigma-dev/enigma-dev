@@ -23,10 +23,13 @@
 #include "tokens.h"
 #include "darray.h"
 
+#include <memory>
+#include <optional>
 #include <ostream>
 #include <string>
-#include <memory>
 #include <vector>
+
+struct ParsedScope;  // object_storage.h
 
 namespace enigma {
 namespace parsing {
@@ -59,6 +62,9 @@ struct AST {
   // Utility routine: Apply this AST to a specified instance.
   void ApplyTo(int instance_id);
 
+  // Extract declarations from this AST into the specified scope.
+  void ExtractDeclarations(ParsedScope *destination_scope);
+
   // Pretty-prints this code to a stream with the given base indentation.
   // The caller is responsible for having already printed applicable function
   // declarations and opening braces, statements, etc, and for printing the
@@ -74,6 +80,8 @@ struct AST {
   AST(AST &&other) = default;
 
  private:
+  // When specified, emits code to apply to a specific instance.
+  std::optional<int> apply_to_;
   // Constructs an AST from the code it will parse. Does not initiate parse.
   AST(std::string &&code_, const ParseContext *ctex):
       lexer(std::make_unique<Lexer>(std::move(code_), ctex, &herr)),

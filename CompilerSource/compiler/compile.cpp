@@ -294,6 +294,12 @@ std::set<EventGroupKey> ListUsedEvents(
   return used_events;
 }
 
+static NameSet ScriptNames(const GameData &game) {
+  NameSet names;
+  for (auto &script : game.scripts) names.insert(script.name);
+  return names;
+}
+
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename;
   if (exe_filename) {
@@ -312,7 +318,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   ide_dia_open();
   cout << "Initialized." << endl;
 
-  CompileState state(current_language);
+  CompileState state(current_language, ScriptNames(game));
 
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
