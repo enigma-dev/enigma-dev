@@ -149,17 +149,14 @@ void parser_init()
   edl_tokens["operator"] = 'o';
 }
 
-
-
-void parser_main(ParsedCode* pev, CompileState &state, const std::set<std::string>& script_names, bool isObject)
-{
+void parser_main(enigma::parsing::AST *ast, const enigma::parsing::ParseContext &ctex) {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
 
   //For the sake of efficiency, however, we will reduce the number of passes by replacing multiple things at once.
 
-  string &code = pev->ast.junkshit.code;
-  string &synt = pev->ast.junkshit.synt;
+  string &code = ast->junkshit.code = ast->code;
+  string &synt = ast->junkshit.synt;
 
   //Reset things
     //Nothing to reset :trollface:
@@ -167,23 +164,11 @@ void parser_main(ParsedCode* pev, CompileState &state, const std::set<std::strin
   //Initialize us a spot in the global scope
   initscope("script scope");
 
-  if (pev) {
-    pev->ast.junkshit.strc = 0; //Number of strings in this code
-    parser_ready_input(code,synt,pev->ast.junkshit.strc,pev->ast.junkshit.strs,state);
-  }
-  else
-  {
-    varray<string> strst;
-    unsigned int strct = 0;
-    parser_ready_input(code,synt,strct,strst,state);
-  }
-  parser_reinterpret(code,synt);
-  if (!state.parse_context.compatibility_opts.strict_syntax) {
+  ast->junkshit.strc = 0; //Number of strings in this code
+  parser_ready_input(code,synt,ast->junkshit.strc,ast->junkshit.strs,ctex);
+  parser_reinterpret(code, synt);
+  if (!ctex.compatibility_opts.strict_syntax) {
     parser_add_semicolons(code,synt);
-  }
-
-  if (pev) { cout << "collecting variables..."; fflush(stdout);
-    collect_variables(current_language, pev, script_names, isObject); cout << " done>"; fflush(stdout);
   }
 }
 
@@ -398,8 +383,7 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
             expsynt = "nnnn";
           }
         }
-        if (shared_object_locals.find(member) != shared_object_locals.end())
-        {
+        if (state.parse_context.language_fe->is_shared_local(member)) {
           repstr = "enigma::glaccess(int("   + exp +   "))->" + member;
           repsyn = "nnnnnnnnnnnnnnnn(ccc(" + expsynt + "))->" + string(member.length(),'n');
         }

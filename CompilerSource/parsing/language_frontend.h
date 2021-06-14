@@ -7,6 +7,14 @@
 
 #include <string>
 
+typedef set<string, std::less<>> NameSet;
+
+// The main idea here is that ENIGMA's EDL can be pretty language-agnostic,
+// despite inheriting some of C++'s traits. A language frontend tells ENIGMA
+// what functions are available in some implementation of the engine, be it the
+// main C++ engine or EGMJS. The backend is how ENIGMA emits code back into that
+// language. So the backend requires information from the frontend to carry out
+// a code generation operation. The frontend just requires some config settings.
 class LanguageFrontend {
  public:
   // Called any time definitions from the engine must be reindexed.
@@ -26,6 +34,14 @@ class LanguageFrontend {
 
   /// Retrieves a map of built-in macros, preprocessed into ENIGMA format.
   virtual const enigma::parsing::MacroMap &builtin_macros() const = 0;
+
+  /// Retrieves the set of shared local variables, inherited by all instances.
+  virtual const NameSet &shared_object_locals() const = 0;
+
+  bool is_shared_local(std::string_view varname) const {
+    const auto &shared = shared_object_locals();  // Cache for vtable skip
+    return shared.find(varname) != shared.end();
+  }
 
   // TODO: This doesn't really belong here, except definitionsModified is passed
   // the IDE settings right now... and putting it here meant ParseContext needed

@@ -149,10 +149,14 @@ DLLEXPORT syntax_error *syntaxCheck(int script_count, const char* *script_names,
   jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
 
   cout << "Checkpoint." << endl;
-  for (int i = 0; i < script_count; i++)
-    current_language->quickmember_script(&globals_scope,script_names[i]);
+  NameSet script_name_set;
+  for (int i = 0; i < script_count; i++) {
+    std::string name = script_names[i];
+    current_language->quickmember_script(&globals_scope, name);
+    script_name_set.insert(std::move(name));
+  }
 
-  enigma::parsing::ParseContext ctex(current_language);
+  enigma::parsing::ParseContext ctex(current_language, std::move(script_name_set));
 
   cout << "Starting syntax check." << endl;
   using enigma::parsing::AST;

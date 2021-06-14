@@ -83,16 +83,16 @@ int quicktype(unsigned flags, string name)
 ///And lex code into synt.
 //Compatibility considerations:
 //'123.45' with '000.00', then '.0' with '00'. Do *not* replace '0.' with '00'.
-int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<string> &string_in_code, CompileState &state)
+int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<string> &string_in_code, const enigma::parsing::ParseContext &ctex)
 {
   size_t reserve_size = code.length();
   enigma::parsing::ErrorCollector herr;
-  enigma::parsing::Lexer lex(std::move(code), &state.parse_context, &herr);
+  enigma::parsing::Lexer lex(std::move(code), &ctex, &herr);
   if (herr.errors.size()) {
     std::cerr << "Error collector has " << herr.errors.size()
               << " errors, but syntax check succeeded?" << std::endl;
   }
-  auto &copts = state.parse_context.compatibility_opts;
+  auto &copts = ctex.compatibility_opts;
 
   // Rebuild the code from the lex, so we can do the old lex.
   // This whole routine should go away next cycle.

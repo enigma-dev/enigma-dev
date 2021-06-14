@@ -39,7 +39,9 @@ struct ParseContext {
   /// All macros built-in or declared in user's Definitions pages.
   const MacroMap macro_map;
   /// Variables that are inherited by all objects.
-  std::set<std::string, std::less<>> shared_locals;
+  const NameSet *shared_locals;
+  /// Scripts that are available for execution.
+  const NameSet script_names;
   /// Options controlling how code is interpreted.
   setting::CompatibilityOptions compatibility_opts;
 
@@ -49,10 +51,11 @@ struct ParseContext {
   /// Disallow null construction.
   ParseContext(nullptr_t) = delete;
   /// Used by everyone else.
-  ParseContext(const LanguageFrontend *lang):
+  ParseContext(const LanguageFrontend *lang, NameSet script_names):
       language_fe(lang),
       macro_map(lang->builtin_macros()),
-      shared_locals(/*FIXME: what the fuck, really? lang->shared_locals()*/),
+      shared_locals(&lang->shared_object_locals()),
+      script_names(std::move(script_names)),
       compatibility_opts(lang->compatibility_opts()) {}
 };
 

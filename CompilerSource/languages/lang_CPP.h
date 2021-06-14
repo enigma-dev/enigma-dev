@@ -69,6 +69,7 @@ struct lang_CPP: language_adapter {
   const EventData &event_data() const final { return evdata_; }
   const enigma::parsing::MacroMap &builtin_macros() const final { return builtin_macros_; }
   const setting::CompatibilityOptions &compatibility_opts() const final { return compatibility_opts_; }
+  const NameSet &shared_object_locals() const final { return shared_object_locals_; }
 
   // ===============================================================================================
   // == The following methods are implemented in jdi_utility.cpp ===================================
@@ -113,6 +114,8 @@ struct lang_CPP: language_adapter {
   enigma::parsing::MacroMap builtin_macros_;
   // Settings stuffed here instead of the global scope...
   setting::CompatibilityOptions compatibility_opts_;
+  // Cache of object locals mined from object_basic and the object tiers.
+  NameSet shared_object_locals_;
 };
 
 #endif

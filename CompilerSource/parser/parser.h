@@ -31,6 +31,6 @@
 
 void parser_init();
 string file_parse(string filename,string outname);
-void parser_main(ParsedCode* x, CompileState &state, const std::set<std::string>& script_names=std::set<std::string>(), bool isObject=false);
+void parser_main(enigma::parsing::AST *ast, const enigma::parsing::ParseContext &ctex);
 int parser_secondary(CompileState &state, ParsedCode *pev);
 void print_to_file(const enigma::parsing::ParseContext &ctex,string,string,const unsigned int,const varray<string>&,int,ofstream&);
