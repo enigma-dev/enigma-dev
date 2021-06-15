@@ -25,6 +25,7 @@
 #include "GSsprite.h"
 
 #include "Universal_System/var4.h"
+#include "Universal_System/estring.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/Resources/fonts_internal.h"
 #include "Universal_System/Resources/sprites.h"
@@ -341,7 +342,7 @@ namespace enigma_user
 
 void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 {
-  string str = toString(vstr);
+  string str = string_replace_all(toString(vstr), "\r", "");
   const SpriteFont& fnt = sprite_fonts[currentfont];
   gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y +fnt.yoffset - string_height(str)/2 : y + fnt.yoffset - string_height(str);
   float slen = get_space_width(fnt);
