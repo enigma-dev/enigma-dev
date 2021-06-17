@@ -609,7 +609,7 @@ void CwdFromProcId(PROCID procId, char **buffer) {
     std::string exe; std::string tmp;
     wchar_t tempPath[MAX_PATH + 1]; 
     if (!GetTempPathW(MAX_PATH + 1, tempPath))
-    return; tmp = narrow(tempPath);
+    { CloseHandle(proc); return; } tmp = narrow(tempPath);
     if (IsX86Process(proc)) exe = tmp + "\\crossprocess32.exe";
     else exe = tmp + "\\crossprocess64.exe";
     std::wstring wexe = widen(exe);
@@ -704,11 +704,10 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
   if (proc == nullptr) return;
   #if defined(XPROCESS_WIN32EXE_INCLUDES)
   if (IsX86Process(GetCurrentProcess()) != IsX86Process(proc)) {
-    if (proc == nullptr) return;
     std::string exe; std::string tmp;
     wchar_t tempPath[MAX_PATH + 1]; 
     if (!GetTempPathW(MAX_PATH + 1, tempPath))
-    return; tmp = narrow(tempPath);
+    { CloseHandle(proc); return; } tmp = narrow(tempPath);
     if (IsX86Process(proc)) exe = tmp + "\\crossprocess32.exe";
     else exe = tmp + "\\crossprocess64.exe";
     std::wstring wexe = widen(exe);
@@ -880,11 +879,10 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
   if (proc == nullptr) return;
   #if defined(XPROCESS_WIN32EXE_INCLUDES)
   if (IsX86Process(GetCurrentProcess()) != IsX86Process(proc)) {
-    if (proc == nullptr) return;
     std::string exe; std::string tmp;
     wchar_t tempPath[MAX_PATH + 1]; 
     if (!GetTempPathW(MAX_PATH + 1, tempPath))
-    return; tmp = narrow(tempPath);
+    { CloseHandle(proc); return; } tmp = narrow(tempPath);
     if (IsX86Process(proc)) exe = tmp + "\\crossprocess32.exe";
     else exe = tmp + "\\crossprocess64.exe";
     std::wstring wexe = widen(exe);
