@@ -4,11 +4,11 @@ ifeq ($(UNIX_BASED), true)
 	ifeq ($(OS), Darwin)
 		override LDLIBS += -framework CoreFoundation -framework CoreGraphics
 	else ifeq ($(OS), Linux)
-		override CXXFLAGS +=  $(shell pkg-config x11 --cflags)
+		override CXXFLAGS += $(shell pkg-config x11 --cflags)
 		override CFLAGS += $(shell pkg-config x11 --cflags)
 		override LDLIBS += $(shell pkg-config x11 --libs) -lprocps
 	else ifeq ($(OS), FreeBSD)
-		override CXXFLAGS +=  $(shell pkg-config x11 --cflags)
+		override CXXFLAGS += $(shell pkg-config x11 --cflags)
 		override CFLAGS += $(shell pkg-config x11 --cflags)
 		override LDLIBS += $(shell pkg-config x11 --libs) -lprocstat -lutil -lc
 	endif
