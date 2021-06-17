@@ -1,10 +1,16 @@
 override CXXFLAGS += -DXPROCESS_GUIWINDOW_IMPL
 override CFLAGS += -DXPROCESS_GUIWINDOW_IMPL
 ifeq ($(UNIX_BASED), true)
-	ifeq ($(OS), Linux)
-		override LDLIBS += -lprocps
+	ifeq ($(OS), Darwin)
+		override LDLIBS += -framework CoreFoundation -framework CoreGraphics
+	else ifeq ($(OS), Linux)
+		override CXXFLAGS +=  $(shell pkg-config x11 --cflags)
+		override CFLAGS += $(shell pkg-config x11 --cflags)
+		override LDLIBS += $(shell pkg-config x11 --libs) -lprocps
 	else ifeq ($(OS), FreeBSD)
-		override LDLIBS += -lprocstat -lutil -lc
+		override CXXFLAGS +=  $(shell pkg-config x11 --cflags)
+		override CFLAGS += $(shell pkg-config x11 --cflags)
+		override LDLIBS += $(shell pkg-config x11 --libs) -lprocstat -lutil -lc
 	endif
 else
 	CROSSPROCESS := $(shell "FILE=xProcess/crossprocess32.h;if test -f "$FILE"; then echo $FILE exists;else $(dirname $MINGW_PREFIX)/msys2_shell.cmd" -defterm -mingw32 -no-start -here -lc "g++ xProcess/crossprocess.cpp -o xProcess/crossprocess32.exe -std=c++17 -static-libgcc -static-libstdc++ -static -lShlwapi -m32";fi)
