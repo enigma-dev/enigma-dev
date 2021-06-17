@@ -158,9 +158,6 @@ void parser_main(enigma::parsing::AST *ast, const enigma::parsing::ParseContext 
   string &code = ast->junkshit.code = ast->code;
   string &synt = ast->junkshit.synt;
 
-  //Reset things
-    //Nothing to reset :trollface:
-
   //Initialize us a spot in the global scope
   initscope("script scope");
 

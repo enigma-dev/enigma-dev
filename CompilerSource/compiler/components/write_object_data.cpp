@@ -857,17 +857,18 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
 }
 
 static void write_event_func(ofstream& wto, const ParsedEvent &event, string objname, string evname, int mode) {
-  std::string evfuncname = "myevent_" + evname;
-  wto << "variant enigma::OBJ_" << objname << "::" << evfuncname << "()\n{\n";
+  wto << "variant enigma::OBJ_" << objname << "::myevent_" << evname << "() {\n";
   if (mode == emode_debug) {
-    wto << "  enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << objname << "'\");\n";
+    wto << "  enigma::debug_scope $current_scope(\"event '" << evname
+        << "' for object '" << objname << "'\");\n";
   }
-  wto << "  ";
   if (!event.ev_id.UsesEventLoop())
-    wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
+    wto << "  enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n";
   if (event.ev_id.HasConstantCode())
-    wto << event.ev_id.ConstantCode() << endl;
+    PrintIndentedCode(wto, event.ev_id.ConstantCode(), 2);
 
+  wto << "  // " << event.ast.junkshit.code << "\n";
+  wto << "  // " << event.ast.junkshit.synt << "\n";
   event.ast.PrettyPrint(wto);
   wto << "\n  return 0;\n}\n\n";
 }

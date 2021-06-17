@@ -176,8 +176,8 @@ static string TokContentCat(const Token &left, const Token &right) {
 static Token PasteTokens(
     const Token &left, const Token &right, const ErrorContext &errc) {
   static const MacroMap no_macros;
-  static const ParseContext empty_context(ParseContext::EmptyLanguage{});
-  Lexer l(std::move(TokContentCat(left, right)), &empty_context, errc.herr);
+  Lexer l(std::move(TokContentCat(left, right)),
+          &ParseContext::ForPreprocessorEvaluation(), errc.herr);
   Token res = l.ReadRawToken();
   Token end = l.ReadRawToken();
   if (end.type != TT_ENDOFCODE) {

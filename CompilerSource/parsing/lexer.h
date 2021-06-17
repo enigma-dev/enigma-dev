@@ -45,9 +45,9 @@ struct ParseContext {
   /// Options controlling how code is interpreted.
   setting::CompatibilityOptions compatibility_opts;
 
-  struct EmptyLanguage {};
-  /// Used for expanding macros. Also used for testing.
-  ParseContext(const EmptyLanguage &);
+  static const ParseContext &ForTesting(bool use_cpp);
+  static const ParseContext &ForPreprocessorEvaluation();
+
   /// Disallow null construction.
   ParseContext(nullptr_t) = delete;
   /// Used by everyone else.
