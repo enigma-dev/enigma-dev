@@ -68,8 +68,6 @@ static TokenTrie token_lookup {
   { "&&",  TT_AND          },
   { "(",   TT_BEGINPARENTH },
   { ")",   TT_ENDPARENTH   },
-  { "*",   TT_STAR         },
-  { "*=",  TT_ASSOP        },
   { "+",   TT_PLUS         },
   { "++",  TT_INCREMENT    },
   { "+=",  TT_ASSOP        },
@@ -77,6 +75,10 @@ static TokenTrie token_lookup {
   { "-",   TT_MINUS        },
   { "--",  TT_DECREMENT    },
   { "-=",  TT_ASSOP        },
+  { "*",   TT_STAR         },
+  { "*=",  TT_ASSOP        },
+  { "/",   TT_SLASH        },
+  { "/=",  TT_ASSOP        },
   { ".",   TT_DECIMAL      },
   { ":",   TT_COLON,       },
   { "::",  TT_SCOPEACCESS  },
@@ -140,9 +142,17 @@ static std::map<std::string, TokenType, std::less<>> keyword_lookup {
 static const NameSet kNoNames;
 static const MacroMap kNoMacros;
 static const setting::CompatibilityOptions kDefaultCompatibility;
+static const setting::CompatibilityOptions kCppCompatibility {
+  .use_cpp_strings = true,
+  .use_cpp_literals = true,
+  .use_cpp_escapes = true,
+  .use_gml_equals = false,
+  .keyword_blacklist = "",
+};
 
 // Used for preprocessing parses. Not the prettiest solution, but works for now.
-struct NullLanguageFrontend : LanguageFrontend {
+class NullLanguageFrontend : public LanguageFrontend {
+ public:
   PURE_VIRTUAL(syntax_error*, definitionsModified(const char*, const char*));
 
   PURE_VIRTUAL(int,  load_shared_locals());
@@ -155,7 +165,10 @@ struct NullLanguageFrontend : LanguageFrontend {
   bool global_exists(string) const final { return false; }
   const MacroMap &builtin_macros() const final { return kNoMacros; }
   const NameSet &shared_object_locals() const final { return kNoNames; }
-  const setting::CompatibilityOptions &compatibility_opts() const final { return kDefaultCompatibility; }
+  const setting::CompatibilityOptions &compatibility_opts() const final {
+    return compatibility_opts_;
+  }
+
   jdi::definition* look_up(const string&) const final { return nullptr; }
   jdi::definition* find_typename(string) const final { return nullptr; }
 
@@ -164,13 +177,41 @@ struct NullLanguageFrontend : LanguageFrontend {
   bool definition_is_function(jdi::definition *) const final { return false; }
   size_t definition_overload_count(jdi::definition *) const final { return 0; }
 
+  NullLanguageFrontend(const setting::CompatibilityOptions c = {}):
+      compatibility_opts_(c) {}
   ~NullLanguageFrontend() {}
-} const kNullLanguage;
+
+ private:
+  setting::CompatibilityOptions compatibility_opts_;
+} const kNullLanguageCpp(kCppCompatibility),
+        kNullLanguageGml(kDefaultCompatibility);
+
+struct TestingContext : ParseContext {
+  // We never need to destruct either of these, so just pocket them.
+  union { setting::CompatibilityOptions compat; };
+  union { NullLanguageFrontend nfe; };
+
+  NullLanguageFrontend *InitAndReturnLanguage(setting::CompatibilityOptions c) {
+    new(&compat) setting::CompatibilityOptions(c);
+    new(&nfe) NullLanguageFrontend(compat);
+    return &nfe;
+  }
+
+  TestingContext(setting::CompatibilityOptions c):
+      ParseContext(InitAndReturnLanguage(c), kNoNames) {}
+  ~TestingContext() {}
+};
 
 }  // namespace
 
-ParseContext::ParseContext(const ParseContext::EmptyLanguage &):
-    ParseContext(&kNullLanguage, kNoNames) {}
+static ParseContext kEmptyContextCpp(&kNullLanguageCpp, kNoNames);
+static ParseContext kEmptyContextGml(&kNullLanguageGml, kNoNames);
+const ParseContext &ParseContext::ForTesting(bool use_cpp) {
+  return use_cpp ? kEmptyContextCpp : kEmptyContextGml;
+}
+const ParseContext &ParseContext::ForPreprocessorEvaluation() {
+  return kEmptyContextCpp;
+}
 
 bool Lexer::MacroRecurses(std::string_view name) const {
   for (const auto &macro : open_macros) if (macro.name == name) return true;
@@ -265,55 +306,56 @@ Token Lexer::ReadRawToken() {
     }
 
     case '"': {
-      if (context->compatibility_opts.use_cpp_escapes) {
-        while (code[++pos]!='"') {
-          if (pos >= code.length()) {
-            herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
-            return Token(TT_STRING, Mark(spos, pos - spos));
-          }
-          if (code[pos] == '\\')
-            pos++;
+      const bool use_escapes = context->compatibility_opts.use_cpp_escapes;
+      for (;; ++pos) {
+        if (pos >= code.length()) {
+          herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
+          return Token(TT_STRING, Mark(spos, pos - spos));
         }
-      } else {
-        while (code[++pos]!='"');
+        if (use_escapes && code[pos] == '\\') ++pos;
+        if (code[pos] == '"') {
+          return Token(TT_STRING, Mark(spos, ++pos - spos));
+        }
       }
-      return Token(TT_STRING, Mark(spos, pos - spos));
     }
 
     case '\'': {
-      if (context->compatibility_opts.use_cpp_escapes) {
-        while (code[++pos] != '\'') {
-          if (pos >= code.length()) {
-            herr->Error(Mark(spos, 1)) << "Unclosed quote at this point";
-            return Token(TT_STRING, Mark(spos, pos - spos));
-          }
-          if (code[pos] == '\\')
-            pos++;
+      const bool use_escapes = context->compatibility_opts.use_cpp_escapes;
+      for (;; ++pos) {
+        if (pos >= code.length()) {
+          herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
+          return Token(TT_STRING, Mark(spos, pos - spos));
         }
-      } else {
-        while (code[++pos]!='\'');
+        if (use_escapes && code[pos] == '\\') ++pos;
+        if (code[pos] == '\'') {
+          return Token(TT_STRING, Mark(spos, ++pos - spos));
+        }
       }
-      return Token(TT_STRING, Mark(spos, ++pos - spos));
     }
 
     case '0': {
       if (context->compatibility_opts.use_cpp_literals) {
+        if (pos >= code.length())
+          return Token(TT_DECLITERAL, Mark(spos, pos - spos));
         if (code[pos] == 'x') {
-          while (is_nybble(code[++pos]));
+          while (++pos < code.length() && is_nybble(code[pos]));
           return Token(TT_HEXLITERAL, Mark(spos, pos - spos));
         }
         if (code[pos] == 'b') {
-          while (is_bit(code[++pos]));
+          while (++pos < code.length() && is_bit(code[pos]));
           return Token(TT_BINLITERAL, Mark(spos, pos - spos));
         }
         if (code[pos] == 'o') {
-          while (is_octal(code[++pos]));
+          while (++pos < code.length() && is_octal(code[pos]));
           return Token(TT_OCTLITERAL, Mark(spos, pos - spos));
         }
       }
       [[fallthrough]]; case '1': case '2': case '3': case '4': case '5':
                        case '6': case '7': case '8': case '9':
-      while (is_digit(code[++pos]));
+      while (pos < code.length() && is_digit(code[pos])) ++pos;
+      if (pos < code.length() && code[pos] == '.') {
+        while (++pos < code.length() && is_digit(code[pos]));
+      }
       return Token(TT_DECLITERAL, Mark(spos, pos - spos));
     }
 
