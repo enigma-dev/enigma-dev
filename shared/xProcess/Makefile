@@ -13,8 +13,8 @@ ifeq ($(UNIX_BASED), true)
 		override LDLIBS += $(shell pkg-config x11 --libs) -lprocstat -lutil -lc
 	endif
 else
-	CROSSPROCESS := $(shell "FILE=xProcess/crossprocess32.h;if test -f "$FILE"; then echo $FILE exists;else $(dirname $MINGW_PREFIX)/msys2_shell.cmd" -defterm -mingw32 -no-start -here -lc "g++ xProcess/crossprocess.cpp -o xProcess/crossprocess32.exe -std=c++17 -static-libgcc -static-libstdc++ -static -lShlwapi -m32";fi)
-	CROSSPROCESS += $(shell "FILE=xProcess/crossprocess64.h;if test -f "$FILE"; then echo $FILE exists;else $(dirname $MINGW_PREFIX)/msys2_shell.cmd" -defterm -mingw64 -no-start -here -lc "g++ xProcess/crossprocess.cpp -o xProcess/crossprocess64.exe -std=c++17 -static-libgcc -static-libstdc++ -static -lShlwapi -m64";fi)
+	CROSSPROCESS := $(shell FILE=xProcess/crossprocess32.h;if test -f "$FILE"; then echo $FILE exists;else "$(dirname $MSYSTEM_PREFIX)/msys2_shell.cmd" -defterm -mingw32 -no-start -here -lc "g++ xProcess/crossprocess.cpp -o xProcess/crossprocess32.exe -std=c++17 -static-libgcc -static-libstdc++ -static -lShlwapi -m32";fi)
+	CROSSPROCESS += $(shell FILE=xProcess/crossprocess64.h;if test -f "$FILE"; then echo $FILE exists;else "$(dirname $MSYSTEM_PREFIX)/msys2_shell.cmd" -defterm -mingw64 -no-start -here -lc "g++ xProcess/crossprocess.cpp -o xProcess/crossprocess64.exe -std=c++17 -static-libgcc -static-libstdc++ -static -lShlwapi -m64";fi)
 	CROSSPROCESS += $(shell FILE=xProcess/crossprocess32.h;if test -f "$FILE"; then echo $FILE exists;else cd xProcess/;xxd -i crossprocess32 > crossprocess32.h;fi)
 	CROSSPROCESS += $(shell FILE=xProcess/crossprocess64.h;if test -f "$FILE"; then echo $FILE exists;else cd xProcess/;xxd -i crossprocess64 > crossprocess64.h;fi)
 	CROSSPROCESS += $(shell rm -f "xProcess/crossprocess32.exe" "xProcess/crossprocess64.exe")
