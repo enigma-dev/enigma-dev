@@ -404,7 +404,7 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 
 void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineWidth, int sprite, int firstChar, int scale)
 {
-  string str = toString(vstr);
+  string str = string_replace_all(toString(vstr), "\r", "");
 
   //Easy lookup of width/height, accounting for scale.
   int w = sprite_get_width(sprite)  * scale;
@@ -471,7 +471,7 @@ void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineW
 
 void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_scalar bottom)
 {
-  string str = toString(vstr);
+  string str = string_replace_all(toString(vstr), "\r", "");
   const SpriteFont& fnt = sprite_fonts[currentfont];
   gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y +fnt.yoffset - string_height(str)/2 : y + fnt.yoffset - string_height(str);
   float slen = get_space_width(fnt);
@@ -531,7 +531,7 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
 
 void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w)
 {
-  string str = toString(vstr);
+  string str = string_replace_all(toString(vstr), "\r", "");
   const SpriteFont& fnt = sprite_fonts[currentfont];
 
   gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y + fnt.yoffset - string_height_ext(str,sep,w)/2 : y + fnt.yoffset - string_height_ext(str,sep,w);
@@ -612,7 +612,7 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
 
 void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xscale, gs_scalar yscale, double rot)
 {
-  string str = toString(vstr);
+  string str = string_replace_all(toString(vstr), "\r", "");
   const SpriteFont& fnt = sprite_fonts[currentfont];
 
   rot *= M_PI/180;
@@ -710,7 +710,7 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
 
 void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, gs_scalar xscale, gs_scalar yscale, double rot)
 {
-  string str = toString(vstr);
+  string str = string_replace_all(toString(vstr), "\r", "");
   const SpriteFont& fnt = sprite_fonts[currentfont];
 
   rot *= M_PI/180;
@@ -845,7 +845,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
 
 void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a)
 {
-  string str = toString(vstr);
+  string str = string_replace_all(toString(vstr), "\r", "");
   const SpriteFont& fnt = sprite_fonts[currentfont];
 
   rot *= M_PI/180;
@@ -955,7 +955,7 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
 
 void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, gs_scalar xscale, gs_scalar yscale, double rot,int c1, int c2, int c3, int c4, gs_scalar a)
 {
-  string str = toString(vstr);
+  string str = string_replace_all(toString(vstr), "\r", "");
   const SpriteFont& fnt = sprite_fonts[currentfont];
   
   rot *= M_PI/180;
@@ -1096,7 +1096,7 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
 
 void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,int c4,gs_scalar a)
 {
-  string str = toString(vstr);
+  string str = string_replace_all(toString(vstr), "\r", "");
   const SpriteFont& fnt = sprite_fonts[currentfont];
 
   float slen = get_space_width(fnt);
@@ -1176,7 +1176,7 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
 
 void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs_scalar w, int c1,int c2,int c3,int c4, gs_scalar a)
 {
-  string str = toString(vstr);
+  string str = string_replace_all(toString(vstr), "\r", "");
   const SpriteFont& fnt = sprite_fonts[currentfont];
 
   gs_scalar yy = valign == fa_top ? y+fnt.yoffset : valign == fa_middle ? y + fnt.yoffset - string_height_ext(str,sep,w)/2 : y + fnt.yoffset - string_height_ext(str,sep,w);
