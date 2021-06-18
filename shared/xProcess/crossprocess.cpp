@@ -6,7 +6,6 @@
  Copyright © 2021 Lars Nilsson
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
@@ -521,14 +520,22 @@ void ExeFromProcId(PROCID procId, char **buffer) {
   *buffer = nullptr;
   if (!ProcIdExists(procId)) return;
   #if defined(_WIN32)
-  HANDLE proc = OpenProcessWithDebugPrivilege(procId);
-  if (proc == nullptr) return;
-  wchar_t exe[MAX_PATH]; DWORD size = MAX_PATH;
-  if (QueryFullProcessImageNameW(proc, 0, exe, &size)) {
-    static std::string str; str = narrow(exe);
-    *buffer = (char *)str.c_str();
+  if (procId == ProcIdFromSelf()) {
+    wchar_t exe[MAX_PATH];
+    if (GetModuleFileNameW(nullptr, exe, MAX_PATH) != 0) {
+      static std::string str; str = narrow(exe);
+      *buffer = (char *)str.c_str();
+    }
+  } else {
+    HANDLE proc = OpenProcessWithDebugPrivilege(procId);
+    if (proc == nullptr) return;
+    wchar_t exe[MAX_PATH]; DWORD size = MAX_PATH;
+    if (QueryFullProcessImageNameW(proc, 0, exe, &size) != 0) {
+      static std::string str; str = narrow(exe);
+      *buffer = (char *)str.c_str();
+    }
+    CloseHandle(proc);
   }
-  CloseHandle(proc);
   #elif (defined(__APPLE__) && defined(__MACH__))
   char exe[PROC_PIDPATHINFO_MAXSIZE];
   if (proc_pidpath(procId, exe, sizeof(exe)) > 0) {
