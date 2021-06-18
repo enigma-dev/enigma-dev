@@ -12,6 +12,11 @@
 namespace enigma_user {
 	int polygon_add(int height, int width);
 	int polygon_add_point(int id, int x, int y);
+	int polygon_get_width(int id);
+	int polygon_get_height(int id);
+	int polygon_get_xoffset(int id);
+	int polygon_get_yoffset(int id);
+	bool polygon_exists(int id);
 }
 
 #endif  // !ENIGMA_POLYGON_H

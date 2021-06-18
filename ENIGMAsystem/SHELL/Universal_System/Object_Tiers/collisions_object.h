@@ -41,9 +41,12 @@ namespace enigma
 {
   struct object_collisions: object_transform
   {
-    //Bit Mask
+    // Bit Mask
       int mask_index;
       bool solid;
+
+    // Polygon Index
+    int polygon_index;
 
     //Bounding box
       #ifdef JUST_DEFINE_IT_RUN
@@ -60,10 +63,7 @@ namespace enigma
         #define bbox_top    $bbox_top()
         #define bbox_bottom $bbox_bottom()
       #endif
-
-    // Polygon
-    int polygon_index;
-
+      
     //Constructors
       object_collisions();
       object_collisions(unsigned, int);

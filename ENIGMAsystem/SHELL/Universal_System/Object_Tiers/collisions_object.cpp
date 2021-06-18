@@ -125,7 +125,7 @@ namespace enigma
          return (mask_index >= 0 ? sprite_get_bbox(mask_index) : sprite_get_bbox(sprite_index));
     }
 
-    object_collisions::object_collisions(): object_transform() {
+    object_collisions::object_collisions(): object_transform() { 
         polygon_index = -1;
     }
     object_collisions::object_collisions(unsigned _id,int _objid): object_transform(_id,_objid) {

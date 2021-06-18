@@ -69,6 +69,9 @@ namespace enigma
 			int xoffset;
 			int yoffset;
 
+			// Asset Array mandatory attributes
+			bool _destroyed = false;
+
 		// Methods
 		public:
 			Polygon();
@@ -76,6 +79,11 @@ namespace enigma
 			Polygon(int h, int w, int x, int y);
 			Polygon(const Vector2D* points, int size);
 			Polygon(const Polygon& obj);
+			
+			// Asset Array mandatory functions
+			static const char* getAssetTypeName() { return "Polygon"; }
+ 			bool isDestroyed() const { return _destroyed; }
+  			void destroy() { _destroyed = true; }
 
 			int getNumPoints();
 			std::vector<Vector2D> getPoints();

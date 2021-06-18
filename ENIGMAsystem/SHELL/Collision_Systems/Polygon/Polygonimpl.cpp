@@ -43,7 +43,7 @@
 // Returns:
 //      min_max_proj -- MinMaxProjection object that stores information
 
-enigma::MinMaxProjection getMinMaxProjection(std::vector<enigma::Point>& vecs_box, enigma::Point axis) {
+enigma::MinMaxProjection getMinMaxProjection(std::vector<enigma::Vector2D>& vecs_box, enigma::Vector2D axis) {
     
     // Preparing
     double min_proj_box = vecs_box[0].dotProduct(axis);
@@ -328,15 +328,14 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
 
     // If instance cannot collide with anything, stop.
-    inst1->polygon_index = enigma::sprite_get_polygon(inst1->sprite_index);
     if (inst1->sprite_index == -1 && inst1->mask_index == -1 && inst1->polygon_index == -1) {
         return NULL;
     }
 
     // Preparing the first polygon
     enigma::Polygon& polygon1(enigma::polygons.get(inst1->polygon_index));
-    std::vector<enigma::Point> poly1_points = polygon1.getPoints();
-    std::vector<enigma::Point> offset_poly1_points;
+    std::vector<enigma::Vector2D> poly1_points = polygon1.getPoints();
+    std::vector<enigma::Vector2D> offset_poly1_points;
 
     // printf("-----------------------------------------------------------------------------\n");
     // printf("collide_inst_inst: object = %d, solid_only = %d, notme = %d, x = %d, y = %d\n", object, solid_only, notme, x, y);
@@ -352,7 +351,6 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
         // Selecting the instance
         enigma::object_collisions* const inst2 = (enigma::object_collisions*)*it;
-        inst2->polygon_index = enigma::sprite_get_polygon(inst2->sprite_index);
 
         // Initial Checks
         if (notme && inst2->id == inst1->id)
@@ -371,12 +369,12 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
             enigma::Polygon polygon2 = enigma::polygons.get(inst2->polygon_index);
             
             // Preparing Points
-            std::vector<enigma::Point> points_poly1 = polygon1.getPoints(inst1->x, inst1->y);
-            std::vector<enigma::Point> points_poly2 = polygon2.getPoints(inst2->x, inst2->y);
+            std::vector<enigma::Vector2D> points_poly1 = polygon1.getPoints(inst1->x, inst1->y);
+            std::vector<enigma::Vector2D> points_poly2 = polygon2.getPoints(inst2->x, inst2->y);
 
             // Preparing Normals
-            std::vector<enigma::Point> normals_poly1 = polygon1.getNorms(inst1->x, inst1->y);
-            std::vector<enigma::Point> normals_poly2 = polygon2.getNorms(inst2->x, inst2->y);
+            std::vector<enigma::Vector2D> normals_poly1 = polygon1.getNorms(inst1->x, inst1->y);
+            std::vector<enigma::Vector2D> normals_poly2 = polygon2.getNorms(inst2->x, inst2->y);
 
             // Using polygon1 normals
             for (int i = 0; i < normals_poly1.size(); ++i) {
