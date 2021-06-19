@@ -55,6 +55,8 @@ namespace enigma
 			double crossProduct(const Vector2D& B);
 
 			bool equal(const Vector2D& B);
+
+			void print();
 	};
 
 	// The Polygon class represents the polygon that will be used
@@ -64,10 +66,12 @@ namespace enigma
 		// Attributes
 		private:
 			std::vector<Vector2D> points;
+			std::vector<std::vector<Vector2D>> subpolygons;
 			int height;
 			int width;
 			int xoffset;
 			int yoffset;
+			int numSubPolygons;
 
 			// Asset Array mandatory attributes
 			bool _destroyed = false;
@@ -109,6 +113,10 @@ namespace enigma
 			void copy(const Vector2D* points, int size);
 
 			std::vector<Vector2D> getNorms(double offset_x, double offset_y);
+
+			void print();
+			
+			void decomposeConcave();
 	};
 
 	// MinMax Projection class to determine 

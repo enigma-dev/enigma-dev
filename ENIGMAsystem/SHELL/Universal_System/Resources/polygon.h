@@ -17,6 +17,7 @@ namespace enigma_user {
 	int polygon_get_xoffset(int id);
 	int polygon_get_yoffset(int id);
 	bool polygon_exists(int id);
+	void polygon_decompose(int id);
 }
 
 #endif  // !ENIGMA_POLYGON_H

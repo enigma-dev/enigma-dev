@@ -3,6 +3,7 @@
 **/
 
 #include "polygon_internal.h"
+#include "earcut.hpp"
 #include <math.h>
 
 namespace enigma {
@@ -109,6 +110,10 @@ namespace enigma {
 
     bool Vector2D::equal(const Vector2D& B) {
         return (x - B.x < precision && y - B.y < precision);
+    }
+
+    void Vector2D::print() {
+        printf("( %f, %f )", x, y);
     }
 
     // Polygon class implementation
@@ -229,6 +234,51 @@ namespace enigma {
         );
         normals.push_back(lastNormal.getNormL());
         return normals;
+    }
+    void Polygon::print() {
+        printf("Points = ");
+        std::vector<Vector2D>::iterator it = points.begin();
+        while (it != points.end()) {
+            printf("(%f, %f), ", (*it).getX(), (*it).getY());
+            ++it;
+        }
+        printf("\nheight = %d width = %d\n", height, width);
+    }
+    void Polygon::decomposeConcave() {
+        std::vector<std::vector<std::array<double, 2>>> polygonToSend;
+        std::vector<Vector2D>::iterator it = points.begin();
+
+        std::vector<std::array<double, 2>> temp_points;
+        while (it != points.end()) {
+            std::array<double, 2> temp_point;
+            temp_point[0] = (*it).getX();
+            temp_point[1] = (*it).getY();
+
+            temp_points.push_back(temp_point);
+            ++it;
+        }
+        polygonToSend.push_back(temp_points);
+        std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(polygonToSend);
+
+        std::vector<uint32_t>::iterator jt = indices.begin();
+
+        numSubPolygons = 0;
+        int i = 0, j = 1, k = 2;
+        while (k < indices.size()) {
+            std::vector<Vector2D> subpolygon;
+            
+            for (int n = i; n <= k; ++n) {
+                Vector2D point(polygonToSend[0][indices[n]][0], polygonToSend[0][indices[n]][1]);
+                subpolygon.push_back(point);
+            }
+
+            this->subpolygons.push_back(subpolygon);
+            ++(this->numSubPolygons);
+
+            ++i;
+            ++j;
+            ++k;
+        }
     }
 
     // Asset Array Implementation

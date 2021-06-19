@@ -34,4 +34,7 @@ namespace enigma_user {
 	bool polygon_exists(int id) {
 		return polygons.exists(id);
 	}
+	void polygon_decompose(int id) {
+		polygons.get(id).decomposeConcave();
+	}
 }
