@@ -36,6 +36,10 @@
 // DEFING GLOBAL CONSTANTS FOR CASES
 enum collision_cases {POLYGON_VS_POLYGON, POLYGON_VS_BBOX, BBOX_VS_POLYGON, BBOX_VS_BBOX, POLYGON_VS_PREC, PREC_VS_POLYGON};
 
+// Simple Mathematical Functions
+template<typename T> static inline T min(T x, T y) { return x < y? x : y; }
+template<typename T> static inline T max(T x, T y) { return x > y? x : y; }
+
 // -------------------------------------------------------------------------
 // Function that returns the Minimum and Maximum
 // Projection along an axis of a given normal
@@ -70,6 +74,8 @@ enigma::MinMaxProjection getMinMaxProjection(std::vector<enigma::Vector2D>& vecs
             max_dot_box = j;
         }
     }
+
+    // Filling return data
     enigma::MinMaxProjection minMaxProjection;
     minMaxProjection.min_projection = min_proj_box;
     minMaxProjection.max_projection = max_proj_box;
@@ -84,23 +90,23 @@ enigma::MinMaxProjection getMinMaxProjection(std::vector<enigma::Vector2D>& vecs
 // colliding or not
 //
 // Args: 
-//      inst1       -- a pointer to object_collisions specifying the first instance
-//      inst2       -- a pointer to object_collisions specifying the second instance
+//      x1, y1      -- position of instance 1
+//      x2, y2      -- position of instance 2
 //      polygon1    -- Polygon object of the first instance
 //      polygon2    -- Polygon object of the second instance
 // Returns:
 //      inst2       -- object_collision if the collision is happening otherwise NULL
 // -------------------------------------------------------------------------
-enigma::object_collisions* const get_polygon_polygon_collision(enigma::object_collisions* const inst1, enigma::object_collisions* const inst2, enigma::Polygon &polygon1, enigma::Polygon &polygon2) {
+bool get_polygon_polygon_collision(double x1, double y1, double x2, double y2, enigma::Polygon &polygon1, enigma::Polygon &polygon2) {
     bool isSeparated = false;
     
     // Preparing Points
-    std::vector<enigma::Vector2D> points_poly1 = polygon1.getPoints(inst1->x, inst1->y);
-    std::vector<enigma::Vector2D> points_poly2 = polygon2.getPoints(inst2->x, inst2->y);
+    std::vector<enigma::Vector2D> points_poly1 = polygon1.getPoints(x1, y1);
+    std::vector<enigma::Vector2D> points_poly2 = polygon2.getPoints(x2, y2);
 
     // Preparing Normals
-    std::vector<enigma::Vector2D> normals_poly1 = polygon1.getNorms(inst1->x, inst1->y);
-    std::vector<enigma::Vector2D> normals_poly2 = polygon2.getNorms(inst2->x, inst2->y);
+    std::vector<enigma::Vector2D> normals_poly1 = polygon1.getNorms(x1, y1);
+    std::vector<enigma::Vector2D> normals_poly2 = polygon2.getNorms(x2, y2);
 
     // Using polygon1 normals
     for (int i = 0; i < normals_poly1.size(); ++i) {
@@ -142,10 +148,10 @@ enigma::object_collisions* const get_polygon_polygon_collision(enigma::object_co
 
     if (!isSeparated) {
         // printf("Collision Detected!\n");
-        return inst2;
+        return true;
     } else {
         // printf("No Collision Detected!\n");
-        return NULL;
+        return false;
     }
 
     // Debugging Part Starts
@@ -160,6 +166,27 @@ enigma::object_collisions* const get_polygon_polygon_collision(enigma::object_co
     // Debugging Part Ends
 }
 
+enigma::Polygon get_bbox_from_dimensions(double x1, double y1, int width, int height) {
+    // Creating bbox vectors
+    enigma::Vector2D top_left(0, 0);
+    enigma::Vector2D top_right(width, 0);
+    enigma::Vector2D bottom_left(0, height);
+    enigma::Vector2D bottom_right(width, height);
+
+    // Creating bbox polygons
+    enigma::Polygon bbox_polygon;
+    bbox_polygon.setWidth(width);
+    bbox_polygon.setHeight(height);
+
+    // Adding Polygon points
+    bbox_polygon.addPoint(top_left);
+    bbox_polygon.addPoint(top_right);
+    bbox_polygon.addPoint(bottom_right);
+    bbox_polygon.addPoint(bottom_left);
+
+    return bbox_polygon;
+}
+
 enigma::object_collisions* const get_polygon_bbox_collision(enigma::object_collisions* const inst1, enigma::object_collisions* const inst2, enigma::Polygon &polygon1) {
     // polygon vs bbox
     const int collsprite_index2 = inst2->mask_index != -1 ? inst2->mask_index : inst2->sprite_index;
@@ -169,24 +196,11 @@ enigma::object_collisions* const get_polygon_bbox_collision(enigma::object_colli
     int w2 = sprite2.width;
     int h2 = sprite2.height;
 
-    // Creating bbox vectors
-    enigma::Vector2D top_left(0, 0);
-    enigma::Vector2D top_right(w2, 0);
-    enigma::Vector2D bottom_left(0, h2);
-    enigma::Vector2D bottom_right(w2, h2);
+    // Getting bbox polygon
+    enigma::Polygon bbox_polygon = get_bbox_from_dimensions(0, 0, w2, h2);
 
-    // Creating bbox polygons
-    enigma::Polygon bbox_polygon;
-    bbox_polygon.setWidth(w2);
-    bbox_polygon.setHeight(h2);
-
-    // Adding Polygon points
-    bbox_polygon.addPoint(top_left);
-    bbox_polygon.addPoint(top_right);
-    bbox_polygon.addPoint(bottom_right);
-    bbox_polygon.addPoint(bottom_left);
-
-    return get_polygon_polygon_collision(inst1, inst2, polygon1, bbox_polygon);
+    // Collision Detection
+    return get_polygon_polygon_collision(inst1->x, inst1->y, inst2->x, inst2->y, polygon1, bbox_polygon)? inst2: NULL;
 }
 
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
@@ -218,8 +232,13 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
     }
 }
 
-template<typename T> static inline T min(T x, T y) { return x<y? x : y; }
-template<typename T> static inline T max(T x, T y) { return x>y? x : y; }
+void get_bbox_border(int &left, int &top, int &right, int &bottom, enigma::object_collisions* const inst) {
+    const enigma::BoundingBox &box = inst->$bbox_relative();
+    const double x = inst->x, y = inst->y,
+                    xscale = inst->image_xscale, yscale = inst->image_yscale,
+                    ia = inst->image_angle;
+    get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
+}
 
 static bool precise_collision_single(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
                                 double x1, double y1,
@@ -293,14 +312,14 @@ static bool precise_collision_pair(int intersection_left, int intersection_right
             for(int colindex = intersection_left; colindex <= intersection_right; colindex++)
             {
 
-                //Test for first image.
+                // Test for first image.
                 const int bx1 = (colindex - x1);
                 const int by1 = (rowindex - y1);
                 const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
                 const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
                 const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
 
-                //Test for second image.
+                // Test for second image.
                 const int bx2 = (colindex - x2);
                 const int by2 = (rowindex - y2);
                 const int px2 = (int)((bx2*cosa2 + by2*sina2)/xscale2 + xoffset2);
@@ -491,14 +510,9 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
             collision_case = BBOX_VS_BBOX;
         }
         
-
         // Getting the Bounding box for the second polygon for sweep and prune check
-        const enigma::BoundingBox &box2 = inst2->$bbox_relative();
-        const double x2 = inst2->x, y2 = inst2->y,
-                     xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia2 = inst2->image_angle;
-        int left2, top2, right2, bottom2;
-        get_border(&left2, &right2, &top2, &bottom2, box2.left(), box2.top(), box2.right(), box2.bottom(), x2, y2, xscale2, yscale2, ia2);
+        int left2, right2, top2, bottom2;
+        get_bbox_border(left2, right2, top2, bottom2, inst2);
 
         // Main Sweep and Prune Check
         if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1) {
@@ -517,7 +531,7 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
         case POLYGON_VS_POLYGON: {
             enigma::Polygon& polygon1(enigma::polygons.get(inst1->polygon_index));
             enigma::Polygon& polygon2 = enigma::polygons.get(inst2->polygon_index);
-            return get_polygon_polygon_collision(inst1, inst2, polygon1, polygon2);
+            return get_polygon_polygon_collision(inst1->x, inst1->y, inst2->x, inst2->y, polygon1, polygon2)? inst2: NULL;
         }
         case POLYGON_VS_BBOX: {
             enigma::Polygon& polygon1(enigma::polygons.get(inst1->polygon_index));
@@ -536,75 +550,52 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
 enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool prec, bool notme, int x1, int y1, int x2, int y2)
 {
+    // Swapping incorrectly sent values
     if (x1 > x2)
-        std::swap(x1, x2);
+        std::swap(x1, x2);  
     if (y1 > y2)
         std::swap(y1, y2);
 
+    // Calculating width and height
+    int width = x2 - x1;
+    int height = y2 - y1;
+
+    // Creating a polygon for the region
+    enigma::Polygon bbox_main = get_bbox_from_dimensions(0, 0, width, height);
+
+    // Iterating over instances to find any object that is colliding with
+    // this rectangle
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
+        // Getting the instance
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
+
+        // Preliminary checks for collision
         if (notme && inst->id == enigma::instance_event_iterator->inst->id)
             continue;
         if (solid_only && !inst->solid)
             continue;
-         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
+         if (inst->sprite_index == -1 && inst->mask_index == -1 && inst->polygon_index == -1) //no sprite/mask/polygon then no collision
             continue;
 
-        const enigma::BoundingBox &box = inst->$bbox_relative();
-        const double x = inst->x, y = inst->y,
-                     xscale = inst->image_xscale, yscale = inst->image_yscale,
-                     ia = inst->image_angle;
+        // Getting the bounding box for the instance 
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
+        get_bbox_border(left, top, right, bottom, inst);
 
+        // Doing a Sweep and Prune Check
         if (left <= x2 && x1 <= right && top <= y2 && y1 <= bottom) {
 
-            //Only do precise if prec is true AND the sprite is precise.
+            // Only do polygon if prec is true AND we have a polygon.
             if (!prec) {
                 return inst;
             }
-
-            const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
-
-            enigma::Sprite& sprite = enigma::sprites.get(collsprite_index);
-
-            const int usi = ((int) inst->image_index) % sprite.SubimageCount();
-
-            unsigned char* pixels = (unsigned char*) (sprite.GetSubimage(usi).collisionData);
-
-            if (pixels == 0) { //bbox.
+            if (inst->polygon_index == -1) {
                 return inst;
             }
-            else { //precise.
-                //Intersection.
-                const int ins_left = max(left, x1);
-                const int ins_right = min(right, x2);
-                const int ins_top = max(top, y1);
-                const int ins_bottom = min(bottom, y2);
 
-                //Check per pixel.
-
-                const int w = sprite.width;
-                const int h = sprite.height;
-
-                const double xoffset = sprite.xoffset;
-                const double yoffset = sprite.yoffset;
-
-                const bool coll_result = precise_collision_single(
-                    ins_left, ins_right, ins_top, ins_bottom,
-                    x, y,
-                    xscale, yscale,
-                    ia,
-                    pixels,
-                    w, h,
-                    xoffset, yoffset
-                );
-
-                if (coll_result) {
-                    return inst;
-                }
-            }
+            // Polygon collision check
+            enigma::Polygon polygon2 = enigma::polygons.get(inst->polygon_index);
+            return get_polygon_polygon_collision(x1, y1, inst->x, inst->y, bbox_main, polygon2)? inst : NULL;
         }
     }
     return NULL;
@@ -616,23 +607,26 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
     if (x1 == x2 && y1 == y2)
         return collide_inst_point(object, solid_only, prec, notme, x1, y1);
 
+    // Iterating over instances 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
+        // Retrieving the instance
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
+
+        // Preliminary checks
         if (notme && inst->id == enigma::instance_event_iterator->inst->id)
             continue;
         if (solid_only && !inst->solid)
             continue;
-        if (inst->sprite_index == -1 && inst->mask_index == -1) // No sprite/mask then no collision.
+        if (inst->sprite_index == -1 && inst->mask_index == -1 && inst->polygon_index == -1) // No sprite/mask/polygon then no collision.
             continue;
 
-        const enigma::BoundingBox &box = inst->$bbox_relative();
-        const double x = inst->x, y = inst->y,
-                     xscale = inst->image_xscale, yscale = inst->image_yscale,
-                     ia = inst->image_angle;
+        // Getting the Bounding box for instance
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
+        get_bbox_border(left, top, right, bottom, inst);
 
+        // Doing a Sweep and Prune Check using bounding box and the 
+        // Line. Using line projections.
         double minX = max(min(x1,x2),left);
         double maxX = min(max(x1,x2),right);
         if (minX > maxX)
@@ -665,54 +659,35 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
         if (minY < top)
             minY = top;
 
-        if (minY <= maxY) { // If Y-projections do not intersect then no collision.
+        if (minY <= maxY) { 
+            // If Y-projections do not intersect then no collision.
             // At this point, the line segment intersects the bounding box.
+
+            // We do a further polygon check if both the prec is true AND 
+            // we have a polygon for this sprite
             if (!prec) {
+                return inst;
+            } else if (inst->polygon_index == -1) {
                 return inst;
             }
             else {
-                const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
+                // Converting the line to a polygon
+                int width = x2 - x1;
+                int height = y2 - y1;
 
-                enigma::Sprite& sprite = enigma::sprites.get(collsprite_index);
+                enigma::Vector2D point1(0, 0);
+                enigma::Vector2D point2(width, height);
 
-                const int usi = ((int) inst->image_index) % sprite.SubimageCount();
+                enigma::Polygon polygon1;
+                polygon1.setWidth(width);
+                polygon1.setHeight(height);
+                polygon1.addPoint(point1);
+                polygon1.addPoint(point2);
 
-                unsigned char* pixels = (unsigned char*) (sprite.GetSubimage(usi).collisionData);
+                // doing a polygon polygon check
+                enigma::Polygon polygon2 = enigma::polygons.get(inst->polygon_index);
 
-                if (pixels == NULL) { // Bounding box.
-                    return inst;
-                }
-                else { // Precise.
-                    // Intersection.
-                    int ins_left = max(left, min(x1, x2));
-                    int ins_right = min(right, max(x1, x2));
-                    int ins_top = max(top, min(y1, y2));
-                    int ins_bottom = min(bottom, max(y1, y2));
-
-                    // Check per pixel.
-
-                    const int w = sprite.width;
-                    const int h = sprite.height;
-
-                    const double xoffset = sprite.xoffset;
-                    const double yoffset = sprite.yoffset;
-
-                    // x1 != x2 || y1 != y2 is true here.
-                    const bool coll_result = precise_collision_line(
-                        ins_left, ins_right, ins_top, ins_bottom,
-                        x, y,
-                        xscale, yscale,
-                        ia,
-                        pixels,
-                        w, h,
-                        xoffset, yoffset,
-                        x1, y1, x2, y2
-                    );
-
-                    if (coll_result) {
-                        return inst;
-                    }
-                }
+                return get_polygon_polygon_collision(x1, y1, inst->x, inst->y, polygon1, polygon2)? inst : NULL;
             }
         }
     }
@@ -721,70 +696,40 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
 
 enigma::object_collisions* const collide_inst_point(int object, bool solid_only, bool prec, bool notme, int x1, int y1)
 {
+    // Iterating over the instances to detect collision
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
+        // Retrieving the instance
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
+
+        // Doing some Preliminary Checks
         if (notme && inst->id == enigma::instance_event_iterator->inst->id)
             continue;
         if (solid_only && !inst->solid)
             continue;
-        if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
+        if (inst->sprite_index == -1 && inst->mask_index == -1 && inst->polygon_index == -1) //no sprite/mask/polygon then no collision
             continue;
 
-        const enigma::BoundingBox &box = inst->$bbox_relative();
-        const double x = inst->x, y = inst->y,
-                     xscale = inst->image_xscale, yscale = inst->image_yscale,
-                     ia = inst->image_angle;
+        // Finding the Bounding box of the instance
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
+        get_bbox_border(left, top, right, bottom, inst);
 
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) {
 
-            //Only do precise if prec is true AND the sprite is precise.
+            // Only do polygon if prec is true AND the polygon is set.
             if (!prec) {
                 return inst;
-            }
-
-            const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
-
-            enigma::Sprite& sprite = enigma::sprites.get(collsprite_index);
-
-            const int usi = ((int) inst->image_index) % sprite.SubimageCount();
-
-            unsigned char* pixels = (unsigned char*) (sprite.GetSubimage(usi).collisionData);
-
-            if (pixels == 0) { //bbox.
+            } else if (inst->polygon_index == -1) {
                 return inst;
             }
-            else { //precise.
-                //Intersection.
-                const int ins_left = max(left, x1);
-                const int ins_right = min(right, x1);
-                const int ins_top = max(top, y1);
-                const int ins_bottom = min(bottom, y1);
 
-                //Check per pixel.
+            // Converting the point to a small box
+            enigma::Polygon polygon1 = get_bbox_from_dimensions(0, 0, 1, 1);
 
-                const int w = sprite.width;
-                const int h = sprite.height;
+            // Collision detection
+            enigma::Polygon polygon2 = enigma::polygons.get(inst->polygon_index);
 
-                const double xoffset = sprite.xoffset;
-                const double yoffset = sprite.yoffset;
-
-                const bool coll_result = precise_collision_single(
-                    ins_left, ins_right, ins_top, ins_bottom,
-                    x, y,
-                    xscale, yscale,
-                    ia,
-                    pixels,
-                    w, h,
-                    xoffset, yoffset
-                );
-
-                if (coll_result) {
-                    return inst;
-                }
-            }
+            return get_polygon_polygon_collision(x1, y1, inst->x, inst->y, polygon1, polygon2)? inst : NULL;
         }
     }
     return NULL;
