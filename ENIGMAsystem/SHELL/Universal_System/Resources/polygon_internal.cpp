@@ -96,7 +96,7 @@ namespace enigma {
     double Vector2D::angleBetween(Vector2D& B) {
         Vector2D a = getUnitVector();
         Vector2D b = B.getUnitVector();
-        return acos(a.dotProduct(b));
+        return acos(1.0 / a.dotProduct(b));
     }
     double Vector2D::dotProduct(const Vector2D& B) {
         return x * B.x + y * B.y;
