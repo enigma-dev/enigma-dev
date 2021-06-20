@@ -170,6 +170,12 @@ namespace enigma {
     int Polygon::getYOffset() {
         return yoffset;
     }
+    double Polygon::getScale() {
+        return scale;
+    }
+    double Polygon::getAngle() {
+        return angle;
+    }
 
     void Polygon::setHeight(int h) {
         if (h > 0)
@@ -186,6 +192,10 @@ namespace enigma {
     void Polygon::setYOffset(int y) {
         if (y > 0)
             this->yoffset = y;
+    }
+    void Polygon::setScale(double s) {
+        if (s > 0)
+            this->scale = s;
     }
 
     void Polygon::addPoint(const Vector2D& point) {

@@ -72,6 +72,8 @@ namespace enigma
 			int xoffset;
 			int yoffset;
 			int numSubPolygons;
+			double scale;
+			double angle;
 
 			// Asset Array mandatory attributes
 			bool _destroyed = false;
@@ -89,6 +91,7 @@ namespace enigma
  			bool isDestroyed() const { return _destroyed; }
   			void destroy() { _destroyed = true; }
 
+			// Getters and Setters
 			int getNumPoints();
 			std::vector<Vector2D> getPoints();
 			std::vector<Vector2D> getPoints(double offset_x, double offset_y);
@@ -97,11 +100,15 @@ namespace enigma
 			int getWidth();
 			int getXOffset();
 			int getYOffset();
+			double getScale();
+			double getAngle();
 
 			void setHeight(int h);
 			void setWidth(int w);
 			void setXOffset(int x);
 			void setYOffset(int y);
+			void setScale(double s);
+			void setAngle(double a);
 
 			void addPoint(const Vector2D& point);
 			void addPoint(int x, int y);
