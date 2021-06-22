@@ -59,8 +59,6 @@ void input_key_up(int key) {
   keybdstatus[key]=0;
 }
 
-
-
 void compute_window_scaling() {
   if (!regionWidth) return;
   parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth;
@@ -94,11 +92,9 @@ void compute_window_size() {
     }
     enigma_user::window_set_size(windowWidth, windowHeight);
   } else {
-	
     enigma_user::window_set_rectangle(0, 0, parWidth, parHeight);
   }
 }
-
 
 }  //namespace enigma
 

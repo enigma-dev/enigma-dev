@@ -285,7 +285,6 @@ std::string clipboard_get_text();
 void clipboard_set_text(std::string text);
 bool clipboard_has_text();
 
-
 }  // namespace enigma_user
 
 #endif

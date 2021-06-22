@@ -269,9 +269,6 @@ void window_set_rectangle(int x, int y, int w, int h) {
 }
 
 int window_get_width() {
-  //int w;
-  //SDL_GetWindowSize(windowHandle, &w, nullptr);
-  //return w;
   int viewportWidth;
   int viewportHeight;
   SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
@@ -280,9 +277,6 @@ int window_get_width() {
 }
 
 int window_get_height() {
-  //int h;
- //SDL_GetWindowSize(windowHandle, nullptr, &h);
- // return h;
   int viewportWidth;
   int viewportHeight;
   SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
@@ -344,7 +338,6 @@ int display_get_y() {;
   return (SDL_GetDisplayBounds(d, &r) == 0) ? r.y : 0;
 }
 
-
 int display_get_width() {
   SDL_DisplayMode DM;
   int d = SDL_GetWindowDisplayIndex(windowHandle);
@@ -381,6 +374,5 @@ void keyboard_key_release(int key) {
 
   SDL_PushEvent(&sdlevent);
 }
-
 
 }  // namespace enigma_user
