@@ -41,6 +41,7 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "../../../Platforms/SDL/Window.h"
 
+
 #include <string>
 #include <cstdio>
 #include <limits>
@@ -219,6 +220,7 @@ void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
     enigma_user::d3d_clear_depth();
 }
 
+
 static inline void draw_gui()
 {
   // turn some state off automatically for the user to draw the GUI
@@ -290,11 +292,13 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   viewport_y = sy + y;
   viewport_w = width;
   viewport_h = height;
-
+ 
+  
   screen_reset_viewport();
 }
 
 void screen_reset_viewport() {
+  enigma_user::show_debug_message("inside reset vp : x : " + std::to_string(viewport_x) + " y : " + std::to_string(viewport_y) + " w : " + std::to_string(viewport_w) + " h : " + std::to_string(viewport_h));
   graphics_set_viewport(viewport_x, viewport_y, viewport_w, viewport_h);
 }
 
@@ -377,9 +381,7 @@ void screen_redraw()
         continue;
    
       screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
-
       clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc], background_showcolor && draw_backs);
-
       if (draw_backs)
         draw_back();
 

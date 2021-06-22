@@ -285,6 +285,11 @@ std::string clipboard_get_text();
 void clipboard_set_text(std::string text);
 bool clipboard_has_text();
 
+void os_lock_orientation(float x ,float y ,float w ,float h , bool lock);
+int display_get_orientation();
+float device_get_tilt_x();
+float device_get_tilt_y();
+float device_get_tilt_z();
 }  // namespace enigma_user
 
 #endif

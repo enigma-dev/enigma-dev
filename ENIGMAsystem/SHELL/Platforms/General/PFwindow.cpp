@@ -94,6 +94,7 @@ void compute_window_size() {
     }
     enigma_user::window_set_size(windowWidth, windowHeight);
   } else {
+	
     enigma_user::window_set_rectangle(0, 0, parWidth, parHeight);
   }
 }

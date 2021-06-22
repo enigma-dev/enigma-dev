@@ -209,6 +209,10 @@ void SDL_Event_Handler::windowFocusLost(const SDL_Event *event) {
 
 void SDL_Event_Handler::windowResized(const SDL_Event *event) {
   enigma_user::draw_clear(enigma_user::window_get_color());
+  enigma::windowWidth = enigma_user::window_get_width();
+  enigma::windowHeight = enigma_user::window_get_height();
+  enigma::compute_window_scaling();
+
 }
 
 // map of joystick instance ids to device indexes
