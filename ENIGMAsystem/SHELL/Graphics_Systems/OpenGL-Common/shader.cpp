@@ -280,8 +280,6 @@ uniform float en_FogStart;
 uniform float en_RcpFogRange;
 uniform vec4 en_FogColor;
 
-varying float wtf2;
-
 float linearstep(float A, float B, float X) {
   float t = (X - A) / (B - A);
 
