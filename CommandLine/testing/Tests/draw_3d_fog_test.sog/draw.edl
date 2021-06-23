@@ -1,4 +1,5 @@
 // look down the y axis at rows of spheres
+// all spheres in a row should be the same color because we use planar fog not range based
 d3d_set_projection_ext(0,-10,15,0,0,15,0,0,1,60,640/480,0,300);
 var sep;
 sep = 10;
