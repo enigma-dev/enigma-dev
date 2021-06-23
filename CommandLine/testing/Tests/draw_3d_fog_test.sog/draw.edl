@@ -1,6 +1,6 @@
 // look down the y axis at rows of spheres
 // all spheres in a row should be the same color because we use planar fog not range based
-d3d_set_projection_ext(0,-10,15,0,0,15,0,0,1,60,(float)640/480,0,300);
+d3d_set_projection_ext(0,-10,15,0,0,15,0,0,1,60,640.0f/480.0f,0,300);
 // if the floor is all red, it's vertex fog
 // if the floor is normal, it's pixel fog
 d3d_draw_floor(-1000,-1000,0,1000,1000,0,-1,1,1);
