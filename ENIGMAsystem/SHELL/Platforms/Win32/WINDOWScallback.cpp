@@ -52,12 +52,10 @@ namespace enigma
   using enigma_user::keyboard_string;
 
   extern char mousestatus[3],last_mousestatus[3];
-  extern int windowX, windowY, windowColor;
+  extern int windowColor;
   extern HCURSOR currentCursor;
 
-  static RECT tempWindow;
   static short hdeltadelta = 0, vdeltadelta = 0;
-  static int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
 
   LRESULT (CALLBACK *touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
   void (*WindowResizedCallback)();
@@ -107,23 +105,7 @@ namespace enigma
         }
         return 0;
 
-      case WM_ENTERSIZEMOVE:
-        GetWindowRect(hWndParameter,&tempWindow);
-        tempLeft = tempWindow.left;
-        tempTop = tempWindow.top;
-        tempRight = tempWindow.right;
-        tempBottom = tempWindow.bottom;
-        return 0;
-
       case WM_EXITSIZEMOVE:
-        GetWindowRect(hWndParameter,&tempWindow);
-        tempWidth = windowWidth + (tempWindow.right - tempWindow.left) - (tempRight - tempLeft);
-        tempHeight = windowHeight + (tempWindow.bottom - tempWindow.top) - (tempBottom - tempTop);
-
-        windowX += tempWindow.left - tempLeft;
-        windowY += tempWindow.top - tempTop;
-        windowWidth = tempWidth;
-        windowHeight = tempHeight;
         enigma::windowWidth = enigma_user::window_get_width();
         enigma::windowHeight = enigma_user::window_get_height();
         enigma::compute_window_scaling();
