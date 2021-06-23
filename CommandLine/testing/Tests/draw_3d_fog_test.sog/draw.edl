@@ -9,8 +9,8 @@ for (i = 0; i < 20; i += 1) {
         xx = i * sep - 10 * sep;
         yy = j * sep;
         d3d_draw_ellipsoid(
-            xx, yy, 5,
-            xx + 2, yy + 2, 7,
+            xx - 1, yy - 1, 5,
+            xx + 1, yy + 1, 7,
             -1, 1, 1, 10
         );
     }
