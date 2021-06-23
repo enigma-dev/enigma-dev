@@ -1,0 +1,16 @@
+// look down the y axis at rows of spheres
+d3d_set_projection_ext(0,-10,15,0,0,15,0,0,1,60,640/480,0,300);
+var sep;
+sep = 10;
+for (i = 0; i < 20; i += 1) {
+    for (j = 0; j < 20; j += 1) {
+        var xx, yy;
+        xx = i * sep - 10 * sep;
+        yy = j * sep;
+        d3d_draw_ellipsoid(
+            xx, yy, 5,
+            xx + 2, yy + 2, 7,
+            -1, 1, 1, 10
+        );
+    }
+}
