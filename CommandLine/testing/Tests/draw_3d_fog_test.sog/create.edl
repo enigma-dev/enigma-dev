@@ -1,4 +1,3 @@
 d3d_start();
-d3d_set_fog(true, c_purple, 0, 300);
 d3d_set_hidden(true);
 draw_set_color(c_white);
