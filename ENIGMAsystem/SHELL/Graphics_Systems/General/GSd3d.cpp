@@ -72,9 +72,6 @@ void d3d_start() {
   enigma::d3dCulling = rs_none;
   enigma::alphaTest = true;
 
-  // Switch to perspective projection mode
-  d3d_set_perspective(true);
-
   // Set up modelview matrix
   d3d_transform_set_identity();
 
