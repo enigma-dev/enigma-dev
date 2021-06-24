@@ -75,7 +75,7 @@ void d3d_start() {
   enigma::alphaTest = true;
 
   // Set up projection matrix
-  d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
+  d3d_set_perspective(true);
 
   // Set up modelview matrix
   d3d_transform_set_identity();
