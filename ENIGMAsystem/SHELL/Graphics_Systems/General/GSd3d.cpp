@@ -23,8 +23,6 @@
 #include "GScolors.h"
 #include "GScolor_macros.h"
 
-#include "Universal_System/roomsystem.h" // for view variables
-
 #include <unordered_map>
 #include <vector>
 #include <algorithm>
@@ -75,7 +73,7 @@ void d3d_start() {
   enigma::alphaTest = true;
 
   // Set up projection matrix
-  d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
+  d3d_set_perspective(true);
 
   // Set up modelview matrix
   d3d_transform_set_identity();
@@ -92,8 +90,6 @@ void d3d_end() {
   enigma::d3dZWriteEnable = false;
   enigma::d3dCulling = rs_none;
   enigma::alphaTest = false;
-
-  d3d_set_projection_ortho(0, 0, view_wview[view_current], view_hview[view_current], 0); //This should probably be changed not to use views
 }
 
 void d3d_set_perspective(bool enable) {
