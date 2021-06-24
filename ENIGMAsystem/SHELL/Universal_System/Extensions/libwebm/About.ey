@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: libwebm
+Identifier: libwebm
+Author: Samuel Venable
+Description: Play *.webm video files with libwebm.
+Default: false
+Icon: libwebm.png
+
+Depends: None
+Dependencies: None

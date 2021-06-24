@@ -146,7 +146,7 @@ jobs:
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
         cd enigma-dev
-        ./emake -x MinGW32 -p Win32 -w Win32 -a DirectSound -e DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,ExternalFuncs -o /tmp/test32.exe CommandLine/testing/SimpleTests/clean_exit.sog/
+        ./emake -x MinGW32 -p Win32 -w Win32 -a DirectSound -e libwebm,WindowsTouch,XInput,MediaControlInterface,FileDropper,ExternalFuncs -o /tmp/test32.exe CommandLine/testing/SimpleTests/clean_exit.sog/
         pulseaudio --start --verbose
         LIBGL_ALWAYS_SOFTWARE=1 WINEDLLOVERRIDES="mscoree,mshtml=" WINEPREFIX=/tmp/.wine32 WINEARCH=win32 xvfb-run wine /tmp/test32.exe
         EOF
@@ -158,7 +158,7 @@ jobs:
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
         cd enigma-dev
-        ./emake -x MinGW64 -p Win32 -w Win32 -a DirectSound -e DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,ExternalFuncs -o /tmp/test64.exe CommandLine/testing/SimpleTests/clean_exit.sog/
+        ./emake -x MinGW64 -p Win32 -w Win32 -a DirectSound -e libwebm,WindowsTouch,XInput,MediaControlInterface,FileDropper,ExternalFuncs -o /tmp/test64.exe CommandLine/testing/SimpleTests/clean_exit.sog/
         LIBGL_ALWAYS_SOFTWARE=1 WINEDLLOVERRIDES="mscoree,mshtml=" WINEPREFIX=/tmp/.wine64 WINEARCH=win64 xvfb-run wine /tmp/test64.exe
         EOF
       displayName: 'Engine MinGW64'
