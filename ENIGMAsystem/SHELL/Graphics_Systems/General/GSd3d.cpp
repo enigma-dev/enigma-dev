@@ -74,9 +74,6 @@ void d3d_start() {
 
   // Set up modelview matrix
   d3d_transform_set_identity();
-
-  draw_clear(enigma_user::c_black);
-  d3d_clear_depth(1.0f);
 }
 
 void d3d_end() {
