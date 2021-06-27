@@ -87,7 +87,7 @@ static inline void generate_working_directory() {
   if (!success) { // if the app bundle is not structured correctly
     // then assume set working directory to the Unix working directory
     char buffer[PATH_MAX];
-    if (getcwd(buffer, PATH_MAX) != NULL)
+    if (getcwd(buffer, PATH_MAX) != nullptr)
       success = set_working_directory(buffer);
   }
   
