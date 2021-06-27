@@ -68,15 +68,15 @@ static inline void generate_working_directory() {
   */
   
   bool success = false; 
-  string exe_pname = enigma_user::program_directory;      // = "/Path/To/YourAppBundle.app/Contents/MacOS/";
-  string macos_dname = filename_dir(exe_pname);           // = "/Path/To/YourAppBundle.app/Contents/MacOS";
-  string macos_bname = filename_name(macos_dname);        // = "MacOS";
-  string contents_dname = filename_dir(macos_dname);      // = "/Path/To/YourAppBundle.app/Contents";
-  string contents_bname = filename_name(contents_dname);  // = "Contents";
-  string app_dname = filename_dir(contents_dname);        // = "/Path/To/YourAppBundle.app";
-  string app_ename = filename_ext(app_dname);             // = ".app";
-  string contents_pname = filename_path(macos_dname);     // = "/Path/To/YourAppBundle.app/Contents/";
-  string resources_pname = contents_pname + "Resources/"; // = "/Path/To/YourAppBundle.app/Contents/Resources/";
+  const string exe_pname = enigma_user::program_directory;      // = "/Path/To/YourAppBundle.app/Contents/MacOS/";
+  const string macos_dname = filename_dir(exe_pname);           // = "/Path/To/YourAppBundle.app/Contents/MacOS";
+  const string macos_bname = filename_name(macos_dname);        // = "MacOS";
+  const string contents_dname = filename_dir(macos_dname);      // = "/Path/To/YourAppBundle.app/Contents";
+  const string contents_bname = filename_name(contents_dname);  // = "Contents";
+  const string app_dname = filename_dir(contents_dname);        // = "/Path/To/YourAppBundle.app";
+  const string app_ename = filename_ext(app_dname);             // = ".app";
+  const string contents_pname = filename_path(macos_dname);     // = "/Path/To/YourAppBundle.app/Contents/";
+  const string resources_pname = contents_pname + "Resources/"; // = "/Path/To/YourAppBundle.app/Contents/Resources/";
   
   // if "/Path/To/YourAppBundle.app/Contents/MacOS/YourExe" and "/Path/To/YourAppBundle.app/Contents/Resources/" exists
   if (macos_bname == "MacOS" && contents_bname == "Contents" && app_ename == ".app" && directory_exists(resources_pname)) {
