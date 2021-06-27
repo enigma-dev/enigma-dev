@@ -38,7 +38,6 @@
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Platforms/SDL/Window.h"
 
 #include <string>
 #include <cstdio>
