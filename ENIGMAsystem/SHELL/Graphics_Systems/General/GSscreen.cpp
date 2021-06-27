@@ -26,7 +26,6 @@
 #include "GSprimitives.h"
 #include "GSvertex.h"
 #include "GScolors.h"
-#include <SDL2/SDL.h>
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/image_formats.h"
@@ -294,7 +293,7 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
 }
 
 void screen_reset_viewport() {
-   graphics_set_viewport(viewport_x, viewport_y, viewport_w, viewport_h);
+  graphics_set_viewport(viewport_x, viewport_y, viewport_w, viewport_h);
 }
 
 void screen_init() {
@@ -373,8 +372,7 @@ void screen_redraw()
     {
       int vc = (int)view_current;
       if (!view_visible[vc])
-        continue;
-   
+        continue;  
       screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
       clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc], background_showcolor && draw_backs);
       if (draw_backs)
