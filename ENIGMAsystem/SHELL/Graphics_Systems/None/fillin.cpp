@@ -130,6 +130,7 @@ namespace enigma_user
 
 	void draw_clear_alpha(int col,float alpha){}
 	void draw_clear(int col){}
+	void d3d_enable_scissor_test(bool enable) {}
 	void d3d_clear_depth(double value){}
 	void d3d_stencil_clear_value(int value) {}
 	void d3d_stencil_clear() {}

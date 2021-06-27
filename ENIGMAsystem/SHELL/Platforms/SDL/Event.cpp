@@ -6,6 +6,8 @@
 #include "Platforms/General/PFwindow.h"  // mouse / keyboard
 
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSd3d.h"
 
 #include <unordered_map>
 #include <iostream>
@@ -276,4 +278,11 @@ void SDL_Event_Handler::mouseWheel(const SDL_Event *event) {
 }
 
 void SDL_Event_Handler::quit(const SDL_Event *event) { enigma_user::game_end(); }
+
+void graphics_remove_garbage(float x,float y, float width,float height){
+  graphics_set_viewport(x,y,width,height);
+  enigma_user::d3d_enable_scissor_test(false);
+  enigma_user::draw_clear(enigma_user::window_get_color());	  
+}
+
 }  // namespace enigma

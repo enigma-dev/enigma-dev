@@ -21,7 +21,6 @@
 #include "screen.h"
 #include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSscreen.h"
-#include "Graphics_Systems/General/GScolors.h"
 #include "Platforms/General/PFwindow.h"
 
 using namespace enigma;
@@ -38,20 +37,12 @@ void graphics_set_viewport(float x, float y, float width, float height) {
   
 }
 
-void graphics_remove_garbage(float x,float y, float width,float height){
-  graphics_set_viewport(x,y,width,height);
-  glDisable(GL_SCISSOR_TEST);
-  enigma_user::draw_clear(enigma_user::window_get_color());	  
-}
-
 void scene_begin() {}
 
 void scene_end() {
   gpuprof.end_frame();
   msaa_fbo_blit();
 }
-
-
 
 unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
   if (flipped) *flipped = true;
