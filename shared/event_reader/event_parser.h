@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008-2020 Josh Ventura                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,110 +25,254 @@
 **                                                                              **
 \********************************************************************************/
 
-enum e_type {
-  et_inline,
-  et_stacked,
-  et_special,
-  et_spec_sys,
-  et_system,
-  et_none,
-  et_error
-};
+#ifndef ENIGMA_EVENT_PARSER_H
+#define ENIGMA_EVENT_PARSER_H
 
-enum p_type {
-  p2t_sprite,
-  p2t_sound,
-  p2t_background,
-  p2t_path,
-  p2t_script,
-  p2t_font,
-  p2t_timeline,
-  p2t_object,
-  p2t_room,
-  p2t_key,
-  p2t_error
-};
+#include <EventDescriptor.pb.h>
+#include <Object.pb.h>
+#include <project.pb.h>
+
+#include <boost/container/small_vector.hpp>
 
 #include <string>
-#include <vector>
-#include <map>
 
-using std::map;
-using std::string;
-using std::vector;
-using std::pair;
-
-struct event_info
-{
-  string name; // The identifier-compliant name of this event.
-  int    gmid; // The ID used in the popular Game Maker format.
-  
-  string humanname; // The name the user sees
-  p_type par2type; // The type of any parameters in the name; a resource name? keyboard key?
-  
-  e_type mode; // Executed each step in-line? System called?
-  int    mmod; // Specialization ID, or other generic integer info
-  
-  string def;  // Default code -- In place if nothing else is given
-  string cons; // Constant code -- Added whether the event exists or not
-  string super; // Check made before iteration begins
-  string sub;   // Check made by each instance in each execution
-  string prefix; // Inserted at the beginning of existing events
-  string suffix; // Appended to the end of existing events
-  string instead; // Overrides all other options: Replaces the event loop for this event
-  
-  string locals; // Any variables that the event requires to perform correctly
-  string iterdec, iterdel, iterinit, iterrm; // Overrides iterator code
-  
-  event_info();
-  event_info(string n,int i);
+struct NamedObject {
+  std::string_view name;
+  buffers::resources::Object* obj;
+  NamedObject(): obj(nullptr) {}
+  NamedObject(const std::string& obj_name, buffers::resources::Object* obj):
+    name(obj_name), obj(obj) {}
 };
 
-struct main_event_info
-{
-  string name; // The name of this event. Set by "Group:", defaults to first sub event name.
-  bool is_group; // Whether or not this event 
-  map<int,event_info*> specs;
-  typedef map<int,event_info*>::iterator iter;
-  main_event_info();
+struct LegacyEventPair {
+  int mid, id;
+  operator std::pair<int, int>() const { return {mid, id}; }
 };
 
-int event_parse_resourcefile();
-void event_info_clear();
+// C++ wrapper around the EventDescriptor proto.
+// Implements basic introspection functions.
+struct EventDescriptor {
+  // Raw data stored in our event file proto.
+  const buffers::config::EventDescriptor *event;
+  // An ID arbitrarily assigned to this event for identification purposes
+  // during a particular compilation. These IDs are not stable, but can be
+  // used to test two events for being of the same kind.
+  int internal_id;
 
-extern string event_get_function_name(int mid, int id);
-extern string event_get_human_name(int mid, int id);
-extern bool   event_has_default_code(int mid, int id);
-extern string event_get_default_code(int mid, int id);
-extern bool   event_has_instead(int mid, int id);
-extern string event_get_instead(int mid, int id);
-extern bool   event_has_super_check(int mid, int id);
-extern string event_get_super_check_condition(int mid, int id);
-extern string event_get_super_check_function(int mid, int id);
-extern bool   event_has_sub_check(int mid, int id);
-extern string event_get_sub_check_condition(int mid, int id);
-extern bool   event_has_const_code(int mid, int id);
-extern string event_get_const_code(int mid, int id);
-extern bool   event_has_prefix_code(int mid, int id);
-extern string event_get_prefix_code(int mid, int id);
-extern bool   event_has_suffix_code(int mid, int id);
-extern string event_get_suffix_code(int mid, int id);
-extern bool   event_execution_uses_default(int mid, int id);
-bool event_is_instance(int mid, int id);
-string event_stacked_get_root_name(int mid);
+  EventDescriptor(const buffers::config::EventDescriptor *ev, int iid):
+      event(ev), internal_id(iid) {}
 
-string event_forge_sequence_code(int mid,int id, string preferred_name);
+  // Returns whether this event is an instance of a parameterized event.
+  bool IsParameterized() const;
+  // Returns whether this event is a "stacked" event—a parameterized event whose
+  // different parameterizations are fired at the same time.
+  bool IsStacked() const;
 
-typedef pair<int, int> evpair;
-extern  vector<evpair> event_sequence;
+  int ParameterCount() const {
+    return event->parameters_size();
+  }
+  const std::string &ParameterKind(int n) const {
+    if (n < event->parameters_size()) return event->parameters(n);
+    static std::string BAD_PARAMETER_INDEX = "N/A";
+    return BAD_PARAMETER_INDEX;
+  }
 
-bool event_has_iterator_declare_code(int mid, int id);
-bool event_has_iterator_initialize_code(int mid, int id);
-bool event_has_iterator_unlink_code(int mid, int id);
-bool event_has_iterator_delete_code(int mid, int id);
-string event_get_iterator_declare_code(int mid, int id);
-string event_get_iterator_initialize_code(int mid, int id);
-string event_get_iterator_unlink_code(int mid, int id);
-string event_get_iterator_delete_code(int mid, int id);
+  // Returns human-readable examples of ID strings belonging to this event.
+  std::string ExampleIDStrings() const;
 
-string event_get_locals(int mid, int id);
+  // Return the base ID of this event, such as "Collision" or "Draw."
+  // Not to be confused with the IdString of an instance of this event.
+  const std::string &bare_id() const { return event->id(); }
+
+  std::string HumanName() const;
+  std::string BaseFunctionName() const;
+  std::string LocalDeclarations() const;
+  std::string GroupName() const { return event->group(); }
+  std::string HumanDescription() const { return event->description(); }
+
+  bool HasLocalDeclarations() const { return event->has_locals(); }
+  bool HasDefaultCode() const { return event->has_default_() || HasConstantCode(); }
+  bool HasConstantCode() const { return event->has_constant(); }
+  bool HasDispatcher() const { return event->has_dispatcher(); }
+
+  std::string DefaultCode() const;
+  std::string ConstantCode() const;
+
+  bool HasSubCheck() const { return event->has_sub_check(); }
+  bool HasSubCheckFunction() const;
+  bool HasSubCheckExpression() const;
+  bool HasSuperCheck() const { return event->has_super_check(); }
+  bool HasSuperCheckFunction() const;
+  bool HasSuperCheckExpression() const;
+  bool HasInsteadCode() const { return event->has_instead(); }
+
+  std::string InsteadCode() const;
+
+  bool HasIteratorDeclareCode()    const { return event->has_iterator_declare(); }
+  bool HasIteratorInitializeCode() const { return event->has_iterator_initialize(); }
+  bool HasIteratorRemoveCode()     const { return event->has_iterator_remove(); }
+  bool HasIteratorDeleteCode()     const { return event->has_iterator_delete(); }
+  
+  bool HasAnyAutomaticCode() const {
+    return HasConstantCode()        || HasDefaultCode()
+        || HasIteratorRemoveCode()  || HasIteratorDeleteCode()
+        || HasIteratorDeclareCode() || HasIteratorInitializeCode()
+        || HasDispatcher();
+  }
+
+  std::string IteratorDeclareCode() const;
+  std::string IteratorInitializeCode() const;
+  std::string IteratorRemoveCode() const;
+  std::string IteratorDeleteCode() const;
+
+  // Returns whether this event will be included in the main event loop.
+  // This will be true for all events not marked as triggered manually.
+  bool UsesEventLoop() const;
+  // Returns whether this event should be registered for iteration.
+  // This will be true for all events except TRIGGER_ONCE and INLINE.
+  bool RegistersIterator() const;
+
+  // Explicitly checks this event for validity.
+  bool IsValid() const;
+};
+
+struct Event : EventDescriptor {
+  struct Argument {
+    std::string name;
+    std::string spelling;
+
+    // TODO: Delete these... use {.name = name, .spelling = spelling}
+    Argument() = default;
+    Argument(std::string name_, std::string spelling_):
+        name(std::move(name_)), spelling(std::move(spelling_)) {}
+  };
+  // Any arguments to this event, using EGM spelling.
+  boost::container::small_vector<Argument, 4> arguments;
+
+  // Construct with a base EventDescriptor.
+  explicit Event(const EventDescriptor &edesc): EventDescriptor(edesc) {}
+
+  // Represents this Event as a unique string, including any parameters.
+  std::string IdString() const;
+
+  // Formats any arguments into the human name returned by EventDescriptor.
+  std::string HumanName() const;
+
+  // Returns a function name specific to this instance of an event.
+  // Identical to BaseFunctionName for non-parameterized events.
+  std::string TrueFunctionName() const;
+
+  // Returns the completed code used to handle event dispatch.
+  // The given argument should be the same mangled event function name used to
+  // generate the event's main function.
+  std::string DispatcherCode(std::string_view event_func) const;
+
+  // Returns whether all parameters of this event are set.
+  bool IsComplete() const;
+  // This should have been obtained from the EventDescriptor.
+  // It's not applicable to a user event.
+  bool HasInsteadCode() const = delete;
+
+  std::string SubCheckFunction() const;
+  std::string SubCheckExpression() const;
+  std::string SuperCheckFunction() const;
+  std::string SuperCheckExpression() const;
+
+  // Renders this event invalid.
+  void Clear();
+
+  bool operator==(const Event &other) const;
+  bool operator<(const Event &other) const;
+
+ private:
+  // Replaces %1 with the EDL spelling of parameter 1, %2 with parameter 2, etc.
+  std::string ParamSubst(const std::string &str) const {
+    return ParamSubstImpl(str, true);
+  }
+  // Replaces %1 with the human-readable parameter 1, %2 with parameter 2, etc.
+  std::string NameSubst(const std::string &str) const {
+    return ParamSubstImpl(str, false);
+  }
+  // Kernel for the above two routines. When "code" is set to true, uses the EDL
+  // spelling. When false, uses the human name.
+  std::string ParamSubstImpl(const std::string &str, bool code) const;
+};
+
+struct EventGroupKey : Event {
+  bool operator<(const Event &other) const;
+  std::string FunctionName() const {
+    if (IsStacked()) return BaseFunctionName();
+    return TrueFunctionName();
+  }
+};
+
+class EventData {
+ public:
+  // Look up an event by its legacy ID pair.
+  const Event get_event(int mid, int sid) const;
+  // Retrieves an Event with the given ID and arguments.
+  Event get_event(const std::string &id, const std::vector<std::string> &args) const;
+  // Retrieves an Event from the proto representation.
+  Event get_event(const buffers::resources::Object::EgmEvent &event) const;
+  // Look up a legacy ID pair for a non-parameterized event.
+  LegacyEventPair reverse_get_event(const EventDescriptor &) const;
+  // Look up a legacy ID pair for an event.
+  LegacyEventPair reverse_get_event(const Event &) const;
+  // Retrieve the sequence of all declared events.
+  const std::vector<EventDescriptor> &events() const { return event_wrappers_; }
+  // Get all named values for an event parameter type, by the type's name.
+  // For example, returns all named keys when passed "key".
+  const std::map<std::string, const buffers::config::ParameterAlias*>
+      &value_names_for_type(const std::string &type) const;
+
+  // Decodes an Event ID string, such as Keyboard[Left], into an Event object.
+  Event DecodeEventString(const std::string &evstring) const;
+
+  EventData(buffers::config::EventFile&&);
+
+ private:
+  // Raw data read from the event configuration.
+  buffers::config::EventFile event_file_;
+  // Map of type and constant name pair (eg, {"key", "enter"}) to alias info.
+  // Note that "key" is not a generalization, here; it means keyboard key.
+  std::map<std::pair<std::string, std::string>,
+           const buffers::config::ParameterAlias*> parameter_ids_;
+  // Map of type and constant value pair (eg, {"key", 10}) to alias info.
+  // Note that "key" is not a generalization, here; it means keyboard key.
+  std::map<std::pair<std::string, int>,
+           const buffers::config::ParameterAlias*> parameter_vals_;
+  // Wraps the `EventDescriptor`s read in from the events file.
+  std::vector<EventDescriptor> event_wrappers_;
+  // Index over event ID strings.
+  std::map<std::string, const EventDescriptor*> event_index_;
+  // Index over event Internal IDs.
+  std::map<int, const EventDescriptor*> event_iid_index_;
+  std::map<std::string,
+          std::map<std::string, const buffers::config::ParameterAlias*>>
+      parameter_index_;
+
+  // Legacy shit.
+
+  // Index into the event file by Game Maker ID pair.
+  std::map<std::pair<int, int>, Event> compatability_mapping_;
+  struct SubEventCollection {
+    int main_id;
+    std::map<Event, int> subevents;
+  };
+  // Reverse of the above index, keyed by internal_id.
+  std::map<int, SubEventCollection> hacky_reverse_mapping_;
+};
+
+// Reads the given file in as an EventFile proto.
+// This is just a convenience method around ReadYamlFileAs<EventFile>().
+buffers::config::EventFile ParseEventFile(std::istream &file);
+
+// Reads the given file in as an EventFile proto.
+// This is just a convenience method around ReadYamlFileAs<EventFile>().
+buffers::config::EventFile ParseEventFile(const std::string &filename);
+
+void LegacyEventsToEGM(buffers::Project *project, const EventData* evdata);
+void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData* evdata,
+                       const std::map<int, NamedObject> &objs);
+
+#endif // ENIGMA_EVENT_PARSER_H

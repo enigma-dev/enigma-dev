@@ -1,10 +1,10 @@
 %e-yaml
 ---
 
-Name: GTK+
+Name: GTK+ (Currently Broken)
 Identifier: GTK+
-Build-Platforms: MacOSX, Windows, Linux, SDL
-Represents: Linux
+Build-Platforms: Windows, MacOSX, Linux, FreeBSD, SDL
+Represents: None
 Description: Create Widgets using GTK+, the primary widget toolkit of GNOME.
 Author: Josh Ventura
 

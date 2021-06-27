@@ -21,57 +21,34 @@
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Universal_System/image_formats.h"
+#include "Universal_System/nlpo2.h"
 
 using namespace enigma::dx11;
 
-namespace {
-
-inline unsigned int lgpp2(unsigned int x) {//Trailing zero count. lg for perfect powers of two
-	x =  (x & -x) - 1;
-	x -= ((x >> 1) & 0x55555555);
-	x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
-	x =  ((x >> 4) + x) & 0x0f0f0f0f;
-	x += x >> 8;
-	return (x + (x >> 16)) & 63;
-}
-
-ID3D11ShaderResourceView *getDefaultWhiteTexture() {
-    static int texid = -1;
-    if (texid == -1) {
-      unsigned data[1] = {0xFFFFFFFF};
-      texid = enigma::graphics_create_texture(1, 1, 1, 1, (void*)data, false);
-    }
-    return ((enigma::DX11Texture*)enigma::textures[texid])->view;
-}
-
-D3D11_SAMPLER_DESC samplerDesc = { };
-
-void update_sampler_state() {
-  static ID3D11SamplerState *pSamplerState = NULL;
-  if (pSamplerState) { pSamplerState->Release(); pSamplerState = NULL; }
-  m_device->CreateSamplerState(&samplerDesc, &pSamplerState);
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-  m_deviceContext->PSSetSamplers(0, 1, &pSamplerState);
-}
-
-} // namespace anonymous
-
 namespace enigma {
 
-int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
-{
+int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight) {
   ID3D11Texture2D *tex;
   D3D11_TEXTURE2D_DESC tdesc;
   D3D11_SUBRESOURCE_DATA tbsd;
+  
+  unsigned fw = img.w, fh = img.h;
+  if (fullwidth == nullptr) fullwidth = &fw; 
+  if (fullheight == nullptr) fullheight = &fh;
+  
+  if (img.pxdata != nullptr) {
+    *fullwidth  = nlpo2(img.w);
+    *fullheight = nlpo2(img.h);
+  }
 
-  tbsd.pSysMem = pxdata;
-  tbsd.SysMemPitch = fullwidth*4;
+  tbsd.SysMemPitch = (*fullwidth) * 4;
   // not needed since this is a 2d texture,
   // but we can pass size info for debugging
-  tbsd.SysMemSlicePitch = fullwidth*fullheight*4;
+  tbsd.SysMemSlicePitch = (*fullwidth) * (*fullheight) * 4;
 
-  tdesc.Width = fullwidth;
-  tdesc.Height = fullheight;
+  tdesc.Width = *fullwidth;
+  tdesc.Height = *fullheight;
   tdesc.MipLevels = 1;
   tdesc.ArraySize = 1;
 
@@ -84,8 +61,17 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   tdesc.CPUAccessFlags = 0;
   tdesc.MiscFlags = 0;
 
-  if (FAILED(m_device->CreateTexture2D(&tdesc,&tbsd,&tex)))
-    return 0;
+  if (img.pxdata != nullptr && (img.w != *fullwidth || img.h != *fullheight)) {
+    RawImage padded = image_pad(img, *fullwidth, *fullheight);
+    tbsd.pSysMem = padded.pxdata;
+    if (FAILED(m_device->CreateTexture2D(&tdesc,&tbsd,&tex)))
+      return 0;
+  } else {
+    // surfaces will fall through here to create render target textures
+    tbsd.pSysMem = img.pxdata;
+    if (FAILED(m_device->CreateTexture2D(&tdesc,&tbsd,&tex)))
+      return 0;
+  }
 
   D3D11_SHADER_RESOURCE_VIEW_DESC vdesc;
   vdesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -96,64 +82,42 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   ID3D11ShaderResourceView *view;
   m_device->CreateShaderResourceView(tex, &vdesc, &view);
 
-  DX11Texture* textureStruct = new DX11Texture(tex, view);
-  textureStruct->width = width;
-  textureStruct->height = height;
-  textureStruct->fullwidth = fullwidth;
-  textureStruct->fullheight = fullheight;
   const int id = textures.size();
-  textures.push_back(textureStruct);
+  textures.push_back(std::make_unique<DX11Texture>(tex, view));
+  auto& textureStruct = textures.back();
+  textureStruct->width = img.w;
+  textureStruct->height = img.h;
+  textureStruct->fullwidth = *fullwidth;
+  textureStruct->fullheight = *fullheight;
   return id;
 }
 
-int graphics_duplicate_texture(int tex, bool mipmap)
-{
-  return -1; //TODO: implement
+void graphics_delete_texture(int tex) {
+  if (tex >= 0) {
+    DX11Texture* texture = static_cast<DX11Texture*>(textures[tex].get());
+    texture->peer->Release(), texture->peer = NULL;
+    texture->view->Release(), texture->view = NULL;
+  }
 }
 
-void graphics_copy_texture(int source, int destination, int x, int y)
-{
+unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {
+  *fullwidth = textures[texture]->fullwidth;
+  *fullheight = textures[texture]->fullheight;
 
+  unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
+
+  return ret;
 }
 
-void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y)
-{
-
+unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width, int height) {
+  unsigned fw, fh;
+  unsigned char* pxdata = graphics_copy_texture_pixels(texture, &fw, &fh);
+  return pxdata;
 }
 
-void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
-{
+void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {}
 
-}
-
-void graphics_delete_texture(int tex)
-{
-  auto texture = (DX11Texture*)textures[tex];
-  texture->peer->Release(), texture->peer = NULL;
-  texture->view->Release(), texture->view = NULL;
-}
-
-unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
-{
-  return NULL; //TODO: implement
-}
-
-void init_sampler_state() {
-  samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-  samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-  samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-  samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-  samplerDesc.MipLODBias = 0.0f;
-  samplerDesc.MaxAnisotropy = 1;
-  samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-  samplerDesc.BorderColor[0] = 0;
-  samplerDesc.BorderColor[1] = 0;
-  samplerDesc.BorderColor[2] = 0;
-  samplerDesc.BorderColor[3] = 0;
-  samplerDesc.MinLOD = 0;
-  samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-  update_sampler_state();
-}
+void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {}
 
 } // namespace enigma
 
@@ -162,64 +126,6 @@ namespace enigma_user {
 void texture_set_priority(int texid, double prio)
 {
   // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-}
-
-void texture_set_enabled(bool enable)
-{
-
-}
-
-void texture_set_blending(bool enable)
-{
-
-}
-
-void texture_set_stage(int stage, int texid) {
-  draw_batch_flush(batch_flush_deferred);
-  ID3D11ShaderResourceView *view = (texid == -1)?
-    getDefaultWhiteTexture():((enigma::DX11Texture*)enigma::textures[texid])->view;
-
-  m_deviceContext->PSSetShaderResources(stage, 1, &view);
-}
-
-void texture_reset() {
-  ID3D11ShaderResourceView *nullView = getDefaultWhiteTexture();
-  m_deviceContext->PSSetShaderResources(0, 1, &nullView);
-}
-
-void texture_set_interpolation_ext(int sampler, bool enable)
-{
-  samplerDesc.Filter = enable ? D3D11_FILTER_MIN_MAG_MIP_LINEAR : D3D11_FILTER_MIN_MAG_MIP_POINT;
-  update_sampler_state();
-}
-
-void texture_set_repeat_ext(int sampler, bool repeat)
-{
-  D3D11_TEXTURE_ADDRESS_MODE addressMode = repeat ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
-  samplerDesc.AddressU = addressMode;
-  samplerDesc.AddressV = addressMode;
-  samplerDesc.AddressW = addressMode;
-  update_sampler_state();
-}
-
-void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
-{
-
-}
-
-void texture_set_border_ext(int sampler, int r, int g, int b, double a)
-{
-
-}
-
-void texture_set_filter_ext(int sampler, int filter)
-{
-
-}
-
-void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel)
-{
-
 }
 
 bool texture_mipmapping_supported()
@@ -235,11 +141,6 @@ bool texture_anisotropy_supported()
 float texture_anisotropy_maxlevel()
 {
   return 0.0f; //TODO: implement
-}
-
-void texture_anisotropy_filter(int sampler, gs_scalar levels)
-{
-
 }
 
 } // namespace enigma_user

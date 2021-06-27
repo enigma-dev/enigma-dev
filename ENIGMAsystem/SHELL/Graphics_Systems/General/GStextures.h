@@ -30,10 +30,17 @@
 #include <string>
 using std::string;
 
-namespace enigma
-{
-  extern bool interpolate_textures;
-}
+namespace enigma {
+
+struct Sampler {
+  int texture=-1; // GML texture id, NOT GL texture id!
+  bool wrapu=false, wrapv=false, wrapw=false;
+  bool interpolate=false;
+};
+
+extern Sampler samplers[8];
+
+} // namespace enigma
 
 namespace enigma_user {
   enum {
@@ -57,11 +64,14 @@ namespace enigma_user
   gs_scalar texture_get_texel_height(int texid);
   void texture_set_priority(int texid, double prio);
   void texture_set_enabled(bool enable);
+  void texture_set_blending(bool enable);
   void texture_set(int texid);
   void texture_set_stage(int stage, int texid);
+  int texture_get();
+  int texture_get_stage(int stage);
   #define texture_set(texid) texture_set_stage(0, texid)
+  #define texture_get(texid) texture_get_stage(0)
   void texture_reset();
-  void texture_set_blending(bool enable);
 
   void texture_set_repeat(bool repeat);
   void texture_set_repeat_ext(int sampler, bool repeat);
@@ -83,6 +93,11 @@ namespace enigma_user
   bool  texture_anisotropy_supported();
   float texture_anisotropy_maxlevel();
   void  texture_anisotropy_filter(int samplerid, gs_scalar level);
+  
+  // Used in testing
+  bool textures_equal(int textureID1, int textureID2);
+  bool textures_regions_equal(int textureID1, int textureID2, unsigned xOff1, unsigned yOff1, unsigned xOff2, unsigned yOff2, unsigned w, unsigned h);
+  uint32_t texture_get_pixel(int texid, unsigned x, unsigned y);
 }
 
 #endif //ENIGMA_GSTEXTURES_H

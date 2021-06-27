@@ -19,12 +19,16 @@
 #ifndef ENIGMA_AS_UTIL_H
 #define ENIGMA_AS_UTIL_H
 
+#include "Widget_Systems/widgets_mandatory.h"
+
+#include <cstdio>
 #include <string>
+
 using std::string;
 
 namespace enigma {
 
-inline char* read_all_bytes(string fname, size_t &flen) {
+inline char* read_all_bytes(std::string fname, size_t &flen) {
   FILE *afile = fopen(fname.c_str(),"rb");
   if (!afile)
     return NULL;
@@ -35,7 +39,7 @@ inline char* read_all_bytes(string fname, size_t &flen) {
   char *fdata = new char[flen];
   fseek(afile,0,SEEK_SET);
   if (fread(fdata,1,flen,afile) != flen)
-    puts("WARNING: Resource stream cut short while loading sound data");
+    DEBUG_MESSAGE("WARNING: Resource stream cut short while loading sound data", MESSAGE_TYPE::M_ERROR);
   fclose(afile);
 
   return fdata;

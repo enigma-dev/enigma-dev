@@ -54,12 +54,16 @@ struct scope_ignore {
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
 
-void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev, const std::set<std::string>& script_names, bool trackGotos)
-{
+void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
+                       const std::set<std::string> &script_names,
+                       bool trackGotos) {
   int igpos = 0;
   darray<scope_ignore*> igstack;
   igstack[igpos] = new scope_ignore(0);
-  
+
+  std::string &code = parsed_code->code;
+  std::string &synt = parsed_code->synt;
+
   cout << "\nCollecting some variables...\n";
   pt dec_start_pos = 0;
   
@@ -131,9 +135,9 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
             //Declare this as a specific type
             cout << "Declared " << dec_type << " " << dec_prefixes << dec_name << dec_suffixes << " as " << (dec_out_of_scope-1 ? "global" : "local") << endl;
             if (dec_out_of_scope - 1) //to be placed at global scope
-              pev->myObj->globals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
+              parsed_code->my_scope->globals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
             else
-              pev->myObj->locals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
+              parsed_code->my_scope->locals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
 
             if (!dec_initializing) //If this statement does nothing other than declare, remove it
             {
@@ -154,7 +158,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           else //Add to this scope
           {
             igstack[igpos]->ignore[dec_name] = pos;
-            pos++; //cout << "Added `" << dec_name << "' to ig\n";
+            //pos++; //cout << "Added `" << dec_name << "' to ig\n";
           }
         }
         
@@ -164,6 +168,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         dec_prefixes = dec_suffixes = "";
         dec_initializing = false;
         dec_name_givn = false;
+        continue;
       }
       if (!dec_initializing)
       {
@@ -302,7 +307,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         //If we're currently looking for a timeline variable, check if this is it.
         if (grab_tline_index) {
           cout << "  Potentially calls timeline `" << nname << "'\n";
-          pev->myObj->tlines.insert(pair<string,int>(nname,1));
+          parsed_code->my_scope->tlines.insert(pair<string,int>(nname,1));
           grab_tline_index = false;
         }
 
@@ -313,7 +318,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         
         //First, check shared locals to see if we already have one
         if (shared_object_locals.find(nname) != shared_object_locals.end()) {
-          pev->myObj->globallocals[nname]++;
+          parsed_code->my_scope->globallocals[nname]++;
           if (with_until_semi or igstack[igpos]->is_with) {
             pos += 5;
             cout << "Add a self. before " << nname;
@@ -324,7 +329,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         }
         
         //Second, check that it's not a global
-        if (lang->global_exists(nname) or pev->myObj->globals.find(nname) != pev->myObj->globals.end()) {
+        if (lang->global_exists(nname) or parsed_code->my_scope->globals.find(nname) != parsed_code->my_scope->globals.end()) {
           cout << "Ignoring `" << nname << "' because it's a global.\n";
           continue;
         }
@@ -347,7 +352,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         }
         
         //Of course, we also don't want to risk overwriting a typed version
-        if (pev->myObj->locals.find(nname) != pev->myObj->locals.end()) {
+        if (parsed_code->my_scope->locals.find(nname) != parsed_code->my_scope->locals.end()) {
           if (with_until_semi or igstack[igpos]->is_with) {
             pos += 5;
             cout << "Add a self. before " << nname;
@@ -366,12 +371,12 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         }
         
         //Make sure it's not already an ambiguous usage
-        if (pev->myObj->ambiguous.find(nname) != pev->myObj->ambiguous.end()) {
+        if (parsed_code->my_scope->ambiguous.find(nname) != parsed_code->my_scope->ambiguous.end()) {
           cout << "Ignoring `" << nname << "' because it's already ambiguous.\n"; continue;
         }
         
         cout << "Delaying `" << nname << "' because it's either a local or a global.\n";
-        pev->myObj->ambiguous[nname] = dectrip();
+        parsed_code->my_scope->ambiguous[nname] = dectrip();
         continue_2: continue;
       }
       else //Since a syntax check already completed, we assume this is a valid function
@@ -385,7 +390,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
             if (nextSep != std::string::npos) {
               const string pname = code.substr(pos+2,nextSep-(pos+2));
               cout << "  Potentially calls timeline `" << pname << "'\n";
-              pev->myObj->tlines.insert(pair<string,int>(pname,1));
+              parsed_code->my_scope->tlines.insert(pair<string,int>(pname,1));
             }
         }
 
@@ -420,7 +425,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           }
         }
         args += contented; //Final arg for closing parentheses
-        pair<parsed_object::funcit,bool> a = pev->myObj->funcs.insert(pair<string,int>(nname,args));
+        pair<parsed_object::funcit,bool> a = parsed_code->my_scope->funcs.insert(pair<string,int>(nname,args));
         if (!a.second and a.first->second < signed(args))
           a.first->second = args;
         cout << "  Calls script `" << nname << "'\n";
@@ -445,9 +450,5 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
     synt.insert(synt.size(), string(newName.str().size(), 'X'));
   } 
  
-  //cout << "**Finished collections in " << (pev==NULL ? "some event for some unspecified object" : pev->myObj->name + ", event " + event_get_human_name(pev->mainId,pev->id))<< "\n";
-  
-  //Store these for later.
-  pev->code = code;
-  pev->synt = synt;
+  //cout << "**Finished collections in " << (pev==NULL ? "some event for some unspecified object" : parsed_code->my_scope->name + ", event " + event_get_human_name(pev->mainId,pev->id))<< "\n";
 }

@@ -1,0 +1,27 @@
+#undef fread
+#undef fopen
+#undef freopen
+#undef fseek
+#undef fclose
+#undef fgetc
+#undef fgets
+#undef fputc
+#undef feof
+#undef ftell
+#undef fwrite
+#undef FILE
+
+#define fread fread
+#define fopen fopen
+#define freopen freopen
+#define fseek fseek
+#define fclose fclose
+#define fgetc fgetc
+#define fgets fgets
+#define fputc fputc
+#define feof feof
+#define ftell ftell
+#define fwrite fwrite
+#define FILE FILE
+
+#include_next <fstream>

@@ -1,4 +1,8 @@
-# ENIGMA [![Travis CI Build Status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)](https://travis-ci.org/enigma-dev/enigma-dev/) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/4j4hklw0ned5wbys?svg=true)](https://ci.appveyor.com/project/enigma-dev/enigma-dev) [![codecov](https://codecov.io/gh/enigma-dev/enigma-dev/branch/master/graph/badge.svg)](https://codecov.io/gh/enigma-dev/enigma-dev)
+# ENIGMA [![Travis CI Build Status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)](https://travis-ci.org/enigma-dev/enigma-dev/) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/4j4hklw0ned5wbys?svg=true)](https://ci.appveyor.com/project/enigma-dev/enigma-dev) [![Build Status](https://dev.azure.com/enigma-dev/ENIGMA/_apis/build/status/enigma-dev.enigma-dev?branchName=master)](https://dev.azure.com/enigma-dev/ENIGMA/_build/latest?definitionId=6&branchName=master) [![codecov](https://codecov.io/gh/enigma-dev/enigma-dev/branch/master/graph/badge.svg)](https://codecov.io/gh/enigma-dev/enigma-dev)
+
+If you find our tools useful, then please consider supporting ENIGMA on Patreon!
+
+[![Patreon](https://enigma-dev.org/site/images/v4/patreon.png)](https://www.patreon.com/m/enigma_dev) 
 
 Official Website: http://enigma-dev.org
 
@@ -16,5 +20,5 @@ We have a community-led Wiki project hosted on our site where users contribute f
 * http://enigma-dev.org/forums/
 * http://enigma-dev.org/docs/Wiki/Main_Page
 
-If you are having trouble registering for an account or looking for an answer to more specific technical questions about ENIGMA, you can visit us on the ``#enigma-dev`` channel on freenode IRC as well:
+If you are having trouble registering for an account or looking for an answer to more specific technical questions about ENIGMA, you can visit us on the ``#enigma`` channel on freenode IRC as well:
 http://webchat.freenode.net/?channels=enigma&uio=d4

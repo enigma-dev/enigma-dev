@@ -16,6 +16,7 @@
 **/
 
 #include <string>
+#include <ctime> // Required header for time_t in FreeBSD/Clang
 
 namespace enigma_user {
 
@@ -26,7 +27,9 @@ enum {
   fa_sysfile   = 4,
   fa_volumeid  = 8,
   fa_directory = 16,
-  fa_archive   = 32
+  fa_archive   = 32,
+  fa_files_all = fa_readonly | fa_hidden | fa_sysfile | fa_volumeid | fa_archive,
+  fa_all       = fa_files_all | fa_directory
 };
 
 long long file_size(std::string fname);
@@ -40,6 +43,7 @@ int file_copy(std::string fname,std::string newname);
 int directory_exists(std::string dname);
 int directory_create(std::string dname);
 int directory_delete(std::string dname);
+inline int directory_destroy(std::string dname) { return directory_delete(dname); }
 
 std::string file_find_next();
 void file_find_close();
@@ -55,5 +59,6 @@ extern unsigned game_id;
 extern std::string working_directory;
 extern std::string program_directory;
 extern std::string temp_directory;
+extern std::string game_save_id;
 
 } //namespace enigma_user

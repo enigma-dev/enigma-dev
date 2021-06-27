@@ -22,6 +22,7 @@
 #ifndef ENIGMA_LANG_CPP_H
 #define ENIGMA_LANG_CPP_H
 #include "language_adapter.h"
+#include "event_reader/event_parser.h"
 #include <Storage/definition.h>
 #include <System/builtins.h>
 #include <API/context.h>
@@ -31,7 +32,7 @@ struct lang_CPP: language_adapter {
   jdi::context definitions;
 
   /// The ENIGMA namespace.
-  jdi::definition_scope *namespace_enigma;
+  jdi::definition_scope *namespace_enigma, *namespace_enigma_user;
   jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
 
   // Utility
@@ -43,13 +44,13 @@ struct lang_CPP: language_adapter {
   int link_ambiguous(const GameData &game, CompileState &state) final;
   int compile_parseSecondary(CompileState &state) final;
 
-  int compile_writeGlobals(const GameData &game, const parsed_object* global, const DotLocalMap &dot_accessed_locals) final;
+  int compile_writeGlobals(const GameData &game, const ParsedScope* global, const DotLocalMap &dot_accessed_locals) final;
   int compile_writeObjectData(const GameData &game, const CompileState &state, int mode) final;
-  int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const parsed_object* global, bool treatUninitAs0) final;
+  int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const ParsedScope* global, bool treatUninitAs0) final;
   int compile_writeFontInfo(const GameData &game) final;
-  int compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, parsed_object *EGMglobal, int mode) final;
-  int compile_writeShaderData(const GameData &game, parsed_object *EGMglobal) final;
-  int compile_writeDefraggedEvents(const GameData &game, const ParsedObjectVec &parsed_objects) final;
+  int compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, ParsedScope *EGMglobal, int mode) final;
+  int compile_writeShaderData(const GameData &game, ParsedScope *EGMglobal) final;
+  int compile_writeDefraggedEvents(const GameData &game, const std::set<EventGroupKey> &used_events, const ParsedObjectVec &parsed_objects) final;
 
   // Resources added to module
   int module_write_sprites(const GameData &game, FILE *gameModule) final;
@@ -64,6 +65,8 @@ struct lang_CPP: language_adapter {
 
   virtual syntax_error* definitionsModified(const char*, const char*) final;
   virtual int compile(const GameData &game, const char* exe_filename, int mode) final;
+
+  virtual const EventData &event_data() const final { return evdata_; }
 
 
   // ===============================================================================================
@@ -91,12 +94,19 @@ struct lang_CPP: language_adapter {
   void quickmember_integer(jdi::definition_scope* scope, string name) {
     return quickmember_variable(scope, jdi::builtin_type__int, name);
   }
+  /// Look up an enigma_user definition by its name.
+  jdi::definition* look_up(const string &name);
 
-  virtual ~lang_CPP();
+  // Reads in event data automatically. This isn't great, but is better than
+  // accessing everything statically (for future refactors).
+  lang_CPP();
+  virtual ~lang_CPP() = default;
 
  private:
   /// Create a standard variable member in the given scope.
   void quickmember_variable(jdi::definition_scope* scope, jdi::definition* type, string name);
+  // Stores event data loaded from events.ey.
+  EventData evdata_;
 };
 
 #endif

@@ -43,12 +43,12 @@ extern vector<B2DJoint*> b2djoints;
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_jointr(j,id,r) \
     if (unsigned(id) >= b2djoints.size() || id < 0) { \
-      show_error("Cannot access Box2D physics joint with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access Box2D physics joint with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } B2DJoint* j = b2djoints[id];
   #define get_joint(j,id) \
     if (unsigned(id) >= b2djoints.size() || id < 0) { \
-      show_error("Cannot access Box2D physics joint with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access Box2D physics joint with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } B2DJoint* j = b2djoints[id];
 #else

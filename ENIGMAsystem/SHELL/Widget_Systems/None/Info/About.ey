@@ -3,8 +3,8 @@
 
 Name: None
 Identifier: None
-Build-Platforms: MacOSX, Windows, Linux, SDL
-Represents: All
+Build-Platforms: Windows, MacOSX, Linux, FreeBSD, SDL
+Represents: None
 Description: Console based output and filler functions.
 Author: Josh Ventura
 

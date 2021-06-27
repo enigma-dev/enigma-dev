@@ -1,15 +1,16 @@
-#include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
+#include "TestHarness.hpp"
+
 #include <gtest/gtest.h>
+
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
 
-#include "TestHarness.hpp"
-
 namespace {
-
 
 using std::map;
 using std::string;
@@ -21,9 +22,10 @@ const char *const kDrivenTestDirectory = "CommandLine/testing/Tests";
 
 void read_files(string directory,
                 NameMap *games, NameMap *sources, NameMap *others) {
-  boost::filesystem::path targetDir(directory);
-  boost::filesystem::directory_iterator iter(targetDir), eod;
-  BOOST_FOREACH(boost::filesystem::path const& i, std::make_pair(iter, eod)) {
+  fs::path targetDir(directory);
+  fs::directory_iterator iter(targetDir);
+  for(auto& p : iter) {
+    fs::path i = p.path();
     string fullname = i.filename().string();
     string filename = i.filename().stem().string();
     string ext = i.filename().extension().string();
@@ -101,30 +103,34 @@ class SimpleTestHarness : public testing::TestWithParam<string> {};
 
 TEST_P(SimpleTestHarness, SimpleTestRunner) {
   string game = GetParam();
-  TestConfig tc;
-  tc.extensions = "Paths,GTest,libpng,DataStructures";
-  int ret = TestHarness::run_to_completion(game, tc);
-  if (!ret) return;
-  switch (ret) {
-    case TestHarness::ErrorCodes::BUILD_FAILED:
-      FAIL() << "Building game \"" << game << "\" failed!";
-    case TestHarness::ErrorCodes::LAUNCH_FAILED:
-      FAIL() << "Could not launch game \"" << game << "\"! Linkage error? "
-                "Shift in the spacetime continuum?";
-    case TestHarness::ErrorCodes::SYSCALL_FAILED:
-      FAIL() << "Universe collapsed while running game \"" << game << "\"! "
-                "Job pre-empted? PCR? Shift in the spacetime continuum?";
-    case TestHarness::ErrorCodes::GAME_CRASHED:
-      FAIL() << "Game \"" << game << "\" did not exit normally! "
-                "Access violation?";
-    case TestHarness::ErrorCodes::TIMED_OUT:
-      FAIL() << "Game \"" << game << "\" did not finish running in the time "
-                "allotted, and has therefore been killed.";
-    case 42:
-      FAIL() << "Game \"" << game << "\" had failing tests.";
-    default:
-      FAIL() << "Game \"" << game << "\" returned " << ret << ". "
-                "Check log for other errors (possibly gTest-flavored).";
+    
+  // Iterate only platforms, graphics & collision systems for now
+  for (TestConfig tc : GetValidConfigs(true, true, false, true, false, false)) {
+  
+    tc.extensions = "Alarms,Timelines,Paths,MotionPlanning,IniFilesystem,ParticleSystems,DateTime,DataStructures,libpng,GTest";
+    int ret = TestHarness::run_to_completion(game, tc);
+    if (!ret) continue;
+    switch (ret) {
+      case TestHarness::ErrorCodes::BUILD_FAILED:
+        FAIL() << "Building game \"" << game << "\" failed!";
+      case TestHarness::ErrorCodes::LAUNCH_FAILED:
+        FAIL() << "Could not launch game \"" << game << "\"! Linkage error? "
+                  "Shift in the spacetime continuum?";
+      case TestHarness::ErrorCodes::SYSCALL_FAILED:
+        FAIL() << "Universe collapsed while running game \"" << game << "\"! "
+                  "Job pre-empted? PCR? Shift in the spacetime continuum?";
+      case TestHarness::ErrorCodes::GAME_CRASHED:
+        FAIL() << "Game \"" << game << "\" did not exit normally! "
+                  "Access violation?";
+      case TestHarness::ErrorCodes::TIMED_OUT:
+        FAIL() << "Game \"" << game << "\" did not finish running in the time "
+                  "allotted, and has therefore been killed.";
+      case 42:
+        FAIL() << "Game \"" << game << "\" had failing tests.";
+      default:
+        FAIL() << "Game \"" << game << "\" returned " << ret << ". "
+                  "Check log for other errors (possibly gTest-flavored).";
+    }
   }
 }
 

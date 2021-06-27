@@ -31,7 +31,7 @@
 #include <iostream>
 #include <cstdio>
 using namespace std;
-#include "general/darray.h"
+#include "darray.h"
 
 #include "general/parse_basics_old.h"
 #include "general/macro_integration.h"
@@ -157,7 +157,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       if (itt != edl_tokens.end()) {
         c = itt->second;
       }
-      else if ((d = main_context->get_global()->look_up(name)))
+      else if ((d = current_language->look_up(name)))
       {
         if (d->flags & jdi::DEF_TYPENAME)
           c = 't';
@@ -364,10 +364,16 @@ int parser_reinterpret(string &code,string &synt)
       synt[pos-1] = '0';
     else if (synt[pos] == 't')
     {
-      if (synt[pos-1] == '(')
-      {
+      pt rp = pos;
+      while (synt[++rp] == 't'); // find the right end
+
+      if (synt[rp] == '(') { // constructor e.g, string("test")
+        for (pt i = pos; i < rp; i++)
+          synt[i] = 'c';
+        pos = rp;
+      } else if (synt[pos-1] == '(') { // traditional cast e.g, (string)"test"
         const pt sp = pos-1;
-        while (synt[++pos] == 't');
+        pos = rp;
         if (synt[pos] == ')')
           for (pt i = sp; i <= pos; i++)
             synt[i] = 'c';
@@ -398,7 +404,7 @@ int parser_reinterpret(string &code,string &synt)
     {
       const pt spos = pos;
       while ((synt[pos] = 'n', synt[++pos] == 'V'));
-      jdi::definition_function *d = (jdi::definition_function*)main_context->get_global()->look_up(code.substr(spos,pos-spos));
+      jdi::definition_function *d = (jdi::definition_function*)current_language->look_up(code.substr(spos,pos-spos));
       const pt epos = pos;
       int en = current_language->function_variadic_after(d);
       if (en == -1) continue;
@@ -936,7 +942,7 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
   cout << " <" << ((synt && code.length()) == (synt && synt->length()) ? "equivalent" : "UNEQUAL") << "> [" << (pos > code.length()) << "]";
   cout << "ass: " << spos << ", " << epos << ": " << code.length() << endl;
   string ptname = code.substr(spos,epos-spos+1); // Isolate the potential template's name
-  jdi::definition* a = main_context->get_global()->look_up(ptname);
+  jdi::definition* a = current_language->look_up(ptname);
   if (!a) return 0;
   
   if (a->flags & jdi::DEF_TEMPLATE)
@@ -981,15 +987,4 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
     }
   }
   return 0;
-}
-
-#include <stack>
-
-// Return whether or not the left hand side of a dot requires an ENIGMA access function
-bool parse_dot(string exp)
-{
-  enum { DT_BRACKET, DT_PAR, DT_LEVEL };
-  stack<int> dts;
-  int level = 0;
-  return !level;
 }

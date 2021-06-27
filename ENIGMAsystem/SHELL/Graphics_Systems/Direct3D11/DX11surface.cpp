@@ -21,17 +21,6 @@
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-
-#include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites_internal.h"
-#include "Universal_System/background_internal.h"
-#include "Collision_Systems/collision_types.h"
-
-#include <iostream>
-#include <cstddef>
-#include <math.h>
-#include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
 using namespace enigma::dx11;
@@ -104,9 +93,8 @@ int surface_create(int width, int height, bool depthbuffer, bool, bool)
   }
 
   enigma::Surface* surface = new enigma::Surface();
-  enigma::DX11Texture* gmTexture = new enigma::DX11Texture(renderTargetTexture, shaderResourceView);
   const int texid = enigma::textures.size();
-  enigma::textures.push_back(gmTexture);
+  enigma::textures.push_back(std::make_unique<enigma::DX11Texture>(renderTargetTexture, shaderResourceView));
   surface->renderTargetView = renderTargetView;
   surface->texture = texid;
   surface->width = width; surface->height = height;
@@ -142,74 +130,6 @@ int surface_get_target()
 void surface_free(int id)
 {
   delete enigma::surfaces[id];
-}
-
-int surface_getpixel(int id, int x, int y)
-{
-  return 0; //TODO: implement
-}
-
-int surface_getpixel_ext(int id, int x, int y)
-{
-  return 0; //TODO: implement
-}
-
-int surface_getpixel_alpha(int id, int x, int y)
-{
-  return 0; //TODO: implement
-}
-
-}
-
-//////////////////////////////////////SAVE TO FILE AND CTEATE SPRITE FUNCTIONS/////////
-//Fuck whoever did this to the spec
-#ifndef DX_BGR
-  #define DX_BGR 0x80E0
-#endif
-
-#include "Universal_System/estring.h"
-
-namespace enigma_user
-{
-
-int surface_save(int id, string filename)
-{
-  return -1; //TODO: implement
-}
-
-int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
-{
-  return -1; //TODO: implement
-}
-
-int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
-{
-  return -1; //TODO: implement
-}
-
-int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
-{
-  return -1; //TODO: implement
-}
-
-int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
-{
-  return sprite_create_from_surface(id, x, y, w, h, removeback, smooth, true, xorig, yorig);
-}
-
-void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
-{
-
-}
-
-void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)
-{
-
-}
-
-void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
-{
-
 }
 
 }

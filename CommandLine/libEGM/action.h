@@ -15,9 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef EGM_ACTION_H
+#define EGM_ACTION_H
+
 #include "Action.pb.h"
 
 #include <vector>
 
 std::string Argument2Code(const buffers::resources::Argument& arg);
 std::string Actions2Code(const std::vector< buffers::resources::Action >& actions);
+
+#endif

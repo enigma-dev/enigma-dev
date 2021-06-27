@@ -20,13 +20,13 @@
 **/
 
 #include "XLIBmain.h"
-#include "LINUXjoystick.h"
 #include "XLIBwindow.h"
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
+#include "Platforms/General/PFjoystick.h"
 #include "Platforms/platforms_mandatory.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
@@ -40,10 +40,6 @@
 using std::string;
 
 using namespace enigma::x11;
-
-namespace enigma_user {
-const int os_type = os_linux;
-}  // namespace enigma_user
 
 namespace enigma {
 
@@ -71,25 +67,16 @@ int handleEvents() {
           if (len > 0) {
             enigma_user::keyboard_lastchar = string(1, str[0]);
             if (actualKey == enigma_user::vk_backspace) {
-              enigma_user::keyboard_string =
-                  enigma_user::keyboard_string.substr(0, enigma_user::keyboard_string.length() - 1);
+              if (!enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
             } else {
               enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
             }
           }
         }
-        enigma_user::keyboard_lastkey = actualKey;
-        enigma_user::keyboard_key = actualKey;
-        if (enigma::last_keybdstatus[actualKey] == 1 && enigma::keybdstatus[actualKey] == 0) {
-          enigma::keybdstatus[actualKey] = 1;
-          continue;
-        }
-        enigma::last_keybdstatus[actualKey] = enigma::keybdstatus[actualKey];
-        enigma::keybdstatus[actualKey] = 1;
+        input_key_down(actualKey);
         continue;
       }
       case KeyRelease: {
-        enigma_user::keyboard_key = 0;
         gk = XLookupKeysym(&e.xkey, 0);
         if (gk == NoSymbol) continue;
 
@@ -98,8 +85,7 @@ int handleEvents() {
         else
           actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
 
-        enigma::last_keybdstatus[actualKey] = enigma::keybdstatus[actualKey];
-        enigma::keybdstatus[actualKey] = 0;
+        input_key_up(actualKey);
         continue;
       }
       case ButtonPress: {
@@ -145,22 +131,22 @@ int handleEvents() {
         continue;
       }
       case ConfigureNotify: {
-        enigma::windowWidth = e.xconfigure.width;
-        enigma::windowHeight = e.xconfigure.height;
-
         if (WindowResizedCallback != NULL) {
+          windowX = e.xconfigure.x;
+          windowY = e.xconfigure.y;
+          windowWidth = e.xconfigure.width;
+          windowHeight = e.xconfigure.height;
+          compute_window_scaling();
           WindowResizedCallback();
         }
         continue;
       }
       case FocusIn:
-        input_initialize();
         init_joysticks();
-        game_window_focused = true;
-        pausedSteps = 0;
+        platform_focus_gained();
         continue;
       case FocusOut:
-        game_window_focused = false;
+        platform_focus_lost();
         continue;
       case ClientMessage:
         if ((Atom)e.xclient.data.l[0] ==
@@ -169,7 +155,7 @@ int handleEvents() {
         //else fall through
       default:
 #ifdef DEBUG_MODE
-        printf("Unhandled xlib event: %d\n", e.type);
+        DEBUG_MESSAGE("Unhandled xlib event: " + std::to_string(e.type), MESSAGE_TYPE::M_INFO);
 #endif
         continue;
     }
@@ -192,10 +178,3 @@ void handleInput() {
 }
 
 }  // namespace enigma
-
-namespace enigma_user {
-
-int display_get_width() { return XWidthOfScreen(enigma::x11::screen); }
-int display_get_height() { return XHeightOfScreen(enigma::x11::screen); }
-
-}  // namespace enigma_user

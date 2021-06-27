@@ -1,5 +1,5 @@
 /** Copyright (C) 2008-2013 Josh Ventura
-*** Copyright (C) 2013, 2019 Robert B. Colton
+*** Copyright (C) 2013, 2018-2019 Robert Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -17,26 +17,31 @@
 **/
 
 #include "GSblend.h"
+#include "GSstdraw.h"
 
 namespace enigma {
 
-int currentblendmode[2] = {0,0};
-int currentblendtype = 0;
+int blendMode[2]={enigma_user::bm_src_alpha,enigma_user::bm_inv_src_alpha};
 
 } // namespace enigma
 
 namespace enigma_user {
 
-int draw_get_blend_mode() {
-  return enigma::currentblendmode[0];
+void draw_set_blend_mode(int mode) {
+  enigma::draw_set_state_dirty();
+  const static int dest_modes[] = {bm_inv_src_alpha,bm_one,bm_inv_src_color,bm_inv_src_color};
+
+  enigma::blendMode[0] = (mode == bm_subtract) ? bm_zero : bm_src_alpha;
+  enigma::blendMode[1] = dest_modes[mode % 4];
 }
 
-int draw_get_blend_mode_ext(bool src) {
-  return enigma::currentblendmode[(src==true?0:1)];
+void draw_set_blend_mode_ext(int src, int dest) {
+  enigma::draw_set_state_dirty();
+  enigma::blendMode[0] = src;
+  enigma::blendMode[1] = dest;
 }
 
-int draw_get_blend_mode_type() {
-  return enigma::currentblendtype;
-}
+int draw_get_blend_mode_src() { return enigma::blendMode[0]; }
+int draw_get_blend_mode_dest() { return enigma::blendMode[1]; }
 
 } // namespace enigma_user

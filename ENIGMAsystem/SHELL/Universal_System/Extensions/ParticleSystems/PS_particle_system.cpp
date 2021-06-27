@@ -35,7 +35,7 @@
 #include "PS_particle_system.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "PS_particle_type.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 #include "Universal_System/math_consts.h"
 
@@ -494,8 +494,8 @@ namespace enigma
       pi.pt = pt;
       // Shape.
       if (!pt->is_particle_sprite) {
-        const enigma::sprite *const spr = enigma::spritestructarray[pt->sprite_id];
-        const int subimage_count = spr->subcount;
+        const enigma::Sprite& spr = enigma::sprites.get(pt->sprite_id);
+        const int subimage_count = spr.SubimageCount();
         int subimageindex_initial;
         if (pt->sprite_random) {
           subimageindex_initial = int(subimage_count*1.0*rand()/(RAND_MAX-1)) % subimage_count;
@@ -560,7 +560,7 @@ namespace enigma
       }
       default:
         #if DEBUG_MODE
-          show_error("Interal error: particle color type not known", false)
+          DEBUG_MESSAGE("Interal error: particle color type not known " + std::to_string(pt->c_mode), MESSAGE_TYPE::M_ERROR)
         #endif
         ;
       }
@@ -643,4 +643,3 @@ namespace enigma
     return changer_max_id;
   }
 }
-

@@ -19,7 +19,8 @@
 #include <string>
 using std::string;
 #include "Widget_Systems/widgets_mandatory.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/var4.h"
 #include <cstdlib>
 #include <cstdio>
 
@@ -30,13 +31,15 @@ using std::string;
 using namespace std;
 
 #ifdef _WIN32
+#  define byte __windows_byte_workaround
 #  include <windows.h>
+#  undef byte
 #  define TC_WINDOWS 1
 #else
 #  include <termios.h>
 #  include <unistd.h>
 #endif
- 
+
 class PasswordContext {
 # ifdef TC_WINDOWS
   DWORD old_attrs = 0;
@@ -44,7 +47,7 @@ class PasswordContext {
 # else
   termios old_attrs;
 # endif
- 
+
  public:
   PasswordContext() {
 #   ifdef TC_WINDOWS
@@ -58,7 +61,7 @@ class PasswordContext {
       tcsetattr(STDIN_FILENO, TCSANOW, &new_attrs);
 #   endif
   }
- 
+
   ~PasswordContext() {
 #   ifdef TC_WINDOWS
       SetConsoleMode(hStdin, old_attrs);
@@ -69,26 +72,11 @@ class PasswordContext {
 };
 
 namespace enigma {
+
   bool widget_system_initialize() {
     return 0;
   }
 }
-
-void show_error(string err, const bool fatal)
-{
-  printf("ERROR in some action of some event for object %d, instance id %d: %s\n",
-         (enigma::instance_event_iterator == NULL? enigma_user::global :
-            enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
-              enigma::instance_event_iterator->inst->object_index),
-         (enigma::instance_event_iterator == NULL? enigma_user::global :
-            enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
-              enigma::instance_event_iterator->inst->id),
-         err.c_str()
-    );
-  if (fatal) exit(0);
-  ABORT_ON_ALL_ERRORS();
-}
-
 
 namespace enigma_user {
 
@@ -109,7 +97,7 @@ void show_info() {
 
 bool show_question(string str) {
   cout << str;
-  char answer;
+  char answer = 0;
   while (answer != 'N' && answer != 'Y') {
     cout << endl << "[Y/N]:";
     cin >> answer;
@@ -118,8 +106,7 @@ bool show_question(string str) {
   return (answer == 'Y');
 }
 
-string get_login(string username, string password, string cap="") {
-  cout << cap << endl;
+string get_login(string username, string password) {
   string input;
   cout << "Username: " << flush;
   cin >> input;
@@ -133,19 +120,20 @@ string get_login(string username, string password, string cap="") {
   return input;
 }
 
-string get_string(string message, string def, string cap="") {
-  printf("%s\n%s\n", cap.c_str(), message.c_str());
+string get_string(string str, string def) {
+  printf("%s\n", str.c_str());
   string input;
   cin >> input;
   return (input.empty()) ? def : input;
 }
 
-int get_integer(string message, string def, string cap="") {
-  printf("%s\n%s\n", cap.c_str(), message.c_str());
+double get_integer(string str, var def) {
+  double val = (strtod(def.c_str(), NULL)) ? : (double)def;
+  printf("%s\n", str.c_str());
   string input;
   cin >> input;
-  if (input.empty()) input = def;
-  return stoi(input);
+  if (input.empty()) return val;
+  return strtod(input.c_str(), NULL);
 }
 
 }

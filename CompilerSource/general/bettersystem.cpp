@@ -28,14 +28,19 @@
 #include <string>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
-
-using namespace std;
+#include <iostream>
 
 #include "bettersystem.h"
 #include "OS_Switchboard.h"
 #include "general/parse_basics_old.h"
+#include "frontend.h"
 
+#if CURRENT_PLATFORM_ID == OS_FREEBSD
+    #include <sys/user.h>
+    #include <libutil.h>
+#endif
+
+using std::string;
 
 inline char* scopy(string& str)
 {
@@ -100,7 +105,9 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    #define byte __windows_byte_workaround
     #include <windows.h>
+    #undef byte
 
     int e_exec(const char* fcmd, const char* *Cenviron)
     {
@@ -179,14 +186,14 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           if (!StartupInfo.hStdInput or StartupInfo.hStdInput == INVALID_HANDLE_VALUE)
           {
             HANDLE conin = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, FALSE, OPEN_EXISTING, 0, NULL);
-              if (!conin || conin == INVALID_HANDLE_VALUE) { printf("CreateFile(CONIN$) failed (Error%d)\n", (int)GetLastError()); }
+              if (!conin || conin == INVALID_HANDLE_VALUE) { cerr << "CreateFile(CONIN$) failed (Error" << (int)GetLastError() << ")" << std::endl; }
             StartupInfo.hStdInput = conin;
           }
 
           if (!StartupInfo.hStdOutput or StartupInfo.hStdOutput == INVALID_HANDLE_VALUE or !StartupInfo.hStdError or StartupInfo.hStdError == INVALID_HANDLE_VALUE)
           {
             HANDLE conout = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, FALSE, OPEN_EXISTING, 0, NULL);
-              if (!conout || conout == INVALID_HANDLE_VALUE) { printf("CreateFile(CONOUT$) failed (Error %d)\n", (int)GetLastError()); }
+              if (!conout || conout == INVALID_HANDLE_VALUE) { cerr << "CreateFile(CONIN$) failed (Error" << (int)GetLastError() << ")" << std::endl; }
 
             if (!StartupInfo.hStdOutput or StartupInfo.hStdOutput == INVALID_HANDLE_VALUE)  StartupInfo.hStdInput = conout;
             if (!StartupInfo.hStdError  or StartupInfo.hStdError  == INVALID_HANDLE_VALUE)  StartupInfo.hStdError = conout;
@@ -209,12 +216,21 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         Cenviron_use = (void*)Cenviron_flat.c_str();
       }
 
-      printf("\n\n********* EXECUTE:\n%s\n\n",parameters.c_str());
-      fflush(stdout);
+      cout << "\n\n********* EXECUTE:\n" << parameters << "\n\n";
 
-      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
+      DWORD creationFlags = CREATE_DEFAULT_ERROR_MODE;
+      if (build_enable_stop)
+        creationFlags |= CREATE_NEW_PROCESS_GROUP;
+      if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,creationFlags,Cenviron_use,NULL,&StartupInfo,&ProcessInformation))
       {
-        WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+        DWORD timeout = build_enable_stop ? 10 : INFINITE;
+        while (WaitForSingleObject(ProcessInformation.hProcess, timeout) == WAIT_TIMEOUT) {
+          if (!build_stopping) continue;
+          DWORD pId = GetProcessId(ProcessInformation.hProcess);
+          GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, pId);
+          WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+          break;
+        }
         GetExitCodeProcess(ProcessInformation.hProcess, &result);
         CloseHandle(ProcessInformation.hProcess);
         CloseHandle(ProcessInformation.hThread);
@@ -224,7 +240,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       else {
         CloseHandle(handleout);
         if (handleerr != handleout) CloseHandle(handleerr);
-        printf("ENIGMA: Failed to create process `%s': error %d.\nCommand line: `%s`", ename.c_str(), (int)GetLastError(), parameters.c_str());
+        cerr << "ENIGMA: Failed to create process `" << ename << "`: error " << (int)GetLastError() << ".\nCommand line: `" << parameters.c_str() << "`";
         return -1;
       }
       return (int)result;
@@ -240,17 +256,82 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       return e_exec(cmd, eCenviron);
     }
 #else
+    #include <vector>
+    #include <algorithm>
+    #include <cstdlib>
+    #include <csignal>
+
     #include <fcntl.h>
     #include <unistd.h>
     #include <sys/wait.h>
     #include <sys/stat.h>
+    #include <sys/types.h>
 
+    extern char **environ;
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
-#if CURRENT_PLATFORM_ID ==  OS_MACOSX
+#if CURRENT_PLATFORM_ID == OS_MACOSX
+    #include <libproc.h>
+    #include <sys/proc_info.h>
     #include <crt_externs.h>
     #define environ (*_NSGetEnviron())
     extern char **environ;
+#endif
+
+    using std::vector;
+
+#if CURRENT_PLATFORM_ID == OS_FREEBSD
+    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
+      vector<pid_t> vec; int i = 0; int cntp;
+      if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
+        for (int j = 0; j < cntp; j++) {
+          if (proc_info[j].ki_ppid == parentProcId) {
+            vec.push_back(proc_info[j].ki_pid); i++;
+          }
+        }
+        free(proc_info);
+      }
+      return vec;
+    }
+#elif CURRENT_PLATFORM_ID == OS_MACOSX
+    pid_t ParentProcIdFromProcId(pid_t procId) {
+      proc_bsdinfo proc_info;
+      if (proc_pidinfo(procId, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
+        return proc_info.pbi_ppid;
+      }
+      return -1;
+    }
+
+    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
+      vector<pid_t> vec; int i = 0;
+      int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
+      vector<pid_t> proc_info(cntp);
+      std::fill(proc_info.begin(), proc_info.end(), 0);
+      proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
+      for (int j = cntp; j > 0; j--) {
+        if (proc_info[j] == 0) { continue; }
+        if (parentProcId == ParentProcIdFromProcId(proc_info[j])) {
+          vec.push_back(proc_info[j]); i++;
+        }
+      }
+      return vec;
+    }
+#endif
+#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_MACOSX
+    void WaitForAllChildrenToDie(pid_t pid, int *status) {
+      vector<pid_t> procId = ProcIdFromParentProcId(pid);
+      if (procId.size()) {
+        for (int i = 0; i < procId.size(); i++) {
+          if (procId[i] == 0) { break; }
+          WaitForAllChildrenToDie(procId[i], status);
+          waitpid(procId[i], status, 0);
+        }
+      }
+    }
+#elif CURRENT_PLATFORM_ID == OS_LINUX
+    void WaitForAllChildrenToDie(pid_t pid, int *status) {
+      waitpid(pid, status, __WALL);
+    }
 #endif
 
     void path_coerce(string &ename)
@@ -331,17 +412,24 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       // Cap our parameters
       argv[argc] = NULL;
 
-      printf("\n\n*********** EXECUTE \n");
+      cout << "\n\n*********** EXECUTE \n";
       for (char **i = argv; *i; i++)
-        printf("  `%s`\n",*i);
-      puts("\n\n");
-      fflush(stdout);
+        cout << "  `" << *i << "`\n";
+      cout << ("\n\n");
 
       int result = -1;
       pid_t fk = fork();
+      if (build_enable_stop)
+        setpgid(0,0); // << new process group
 
       if (!fk)
       {
+        // Redirect STDIN
+        // Background process groups get SIGTTIN if
+        // reading from the terminal.
+        int infd = open("/dev/null", O_RDONLY);
+        dup2(infd, STDIN_FILENO);
+
         // Redirect STDOUT
         if (redirout == "") {
             int flags = fcntl(STDOUT_FILENO, F_GETFD);
@@ -383,11 +471,21 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         }
         else usenviron = environ;
 
-          execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
+        execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
         exit(-1);
       }
 
-      waitpid(fk,&result,0);
+      while (!waitpid(fk,&result,build_enable_stop?WNOHANG:0)) {
+        if (build_stopping) {
+          kill(-fk,SIGINT); // send CTRL+C to process group
+          // wait for entire process group to signal,
+          // important for GNU make to stop outputting
+          // before run buttons are enabled again
+          WaitForAllChildrenToDie(-fk, &result);
+          break;
+        }
+        usleep(10000); // hundredth of a second
+      }
       for (char** i = argv+1; *i; i++)
         free(*i);
       free(argv);
@@ -396,10 +494,10 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
     int e_execp(const char* cmd, string path)
     {
-      puts ("TRUE\n\n");
+      cout << "TRUE\n\n";
       path.insert(0, "PATH=");
       if (path != "PATH=") path += ":";
-      path += getenv("PATH");
+      path += getenv("PATH") ? : "";
       const char *Cenviron[2] = { path.c_str(), NULL };
       return e_exec(cmd, Cenviron);
     }

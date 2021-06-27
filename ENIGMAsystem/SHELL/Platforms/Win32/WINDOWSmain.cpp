@@ -21,8 +21,10 @@
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
+#include "Platforms/General/PFfilemanip.h"
 #include "Platforms/platforms_mandatory.h"
 
+#include "Universal_System/mathnc.h" // enigma_user::clamp
 #include "Universal_System/estring.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
@@ -39,18 +41,23 @@
 using std::string;
 using std::vector;
 
+using enigma_user::file_exists;
+using enigma_user::directory_exists;
+
 namespace enigma_user {
 
 const int os_type = os_windows;
 }  // namespace enigma_user
 
-namespace enigma  //TODO: Find where this belongs
+namespace enigma
 {
+
 HINSTANCE hInstance;
 HWND hWnd;
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 HDC window_hDC;
 HANDLE mainthread;
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 void (*touch_extension_register)(HWND hWnd);
 
@@ -60,25 +67,21 @@ void Sleep(int ms) { ::Sleep(ms); }
 
 void initInput(){};
 
-HWND get_window_handle() {
-  return hWnd;
-}
-
 } // namespace enigma
-  
+
 static inline string add_slash(const string& dir) {
   if (dir.empty() || dir.back() != '\\') return dir + '\\';
   return dir;
 }
 
 namespace enigma_user {
-  
+
 bool set_working_directory(string dname) {
   tstring tstr_dname = widen(dname);
   replace(tstr_dname.begin(), tstr_dname.end(), '/', '\\');
   if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
-    WCHAR wstr_buffer[MAX_PATH + 1];
-    if (GetCurrentDirectoryW(MAX_PATH + 1, wstr_buffer) != 0) {
+    WCHAR wstr_buffer[MAX_PATH];
+    if (GetCurrentDirectoryW(MAX_PATH, wstr_buffer) != 0) {
       working_directory = add_slash(shorten(wstr_buffer));
       return true;
     }
@@ -86,7 +89,7 @@ bool set_working_directory(string dname) {
 
   return false;
 }
-  
+
 } // enigma_user
 
 namespace enigma {
@@ -127,17 +130,17 @@ void update_current_time() {
 }
 long get_current_offset_difference_mcs() {
   if (use_pc) {
-    return clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0, 1000000);
+    return enigma_user::clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0, 1000000);
   } else {
-    return clamp((time_current_ft.QuadPart - time_offset_ft.QuadPart) / 10, 0, 1000000);
+    return enigma_user::clamp((time_current_ft.QuadPart - time_offset_ft.QuadPart) / 10, 0, 1000000);
   }
 }
 long get_current_offset_slowing_difference_mcs() {
   if (use_pc) {
-    return clamp((time_current_pc.QuadPart - time_offset_slowing_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0,
+    return enigma_user::clamp((time_current_pc.QuadPart - time_offset_slowing_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0,
                  1000000);
   } else {
-    return clamp((time_current_ft.QuadPart - time_offset_slowing_ft.QuadPart) / 10, 0, 1000000);
+    return enigma_user::clamp((time_current_ft.QuadPart - time_offset_slowing_ft.QuadPart) / 10, 0, 1000000);
   }
 }
 void increase_offset_slowing(long increase_mcs) {
@@ -315,21 +318,24 @@ void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
 void initialize_directory_globals() {
   // Set the working_directory
-  WCHAR buffer[MAX_PATH + 1];
-  GetCurrentDirectoryW(MAX_PATH + 1, buffer);
+  WCHAR buffer[MAX_PATH];
+  GetCurrentDirectoryW(MAX_PATH, buffer);
   enigma_user::working_directory = add_slash(shorten(buffer));
 
   // Set the program_directory
   buffer[0] = 0;
-  GetModuleFileNameW(NULL, buffer, MAX_PATH + 1);
+  GetModuleFileNameW(NULL, buffer, MAX_PATH);
   enigma_user::program_directory = shorten(buffer);
-  enigma_user::program_directory =
-    enigma_user::program_directory.substr(0, enigma_user::program_directory.find_last_of("\\/"));
-  
+  enigma_user::program_directory = enigma_user::filename_path(enigma_user::program_directory);
+
   // Set the temp_directory
   buffer[0] = 0;
-  GetTempPathW(MAX_PATH + 1, buffer);
+  GetTempPathW(MAX_PATH, buffer);
   enigma_user::temp_directory = add_slash(shorten(buffer));
+  
+  // Set the game_save_id
+  enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
+    add_slash(std::to_string(enigma_user::game_id));
 }
 
 }  // namespace enigma
@@ -400,62 +406,34 @@ void set_program_priority(int value) {
   SetPriorityClass(GetCurrentThread(), priorityValue);
 }
 
-void execute_shell(std::string fname, std::string args) {
-  WCHAR cDir[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, cDir);
+// converts a relative path to absolute if the path exists
+std::string filename_absolute(std::string fname) {
+  if (string_replace_all(fname, " ", "") == "") fname = ".";
+  wchar_t rpath[MAX_PATH];
   tstring tstr_fname = widen(fname);
-  tstring tstr_args = widen(args);
-  ShellExecuteW(enigma::hWnd, NULL, tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
+  tstring result(rpath, GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL));
+  if (directory_exists(shorten(result))) return add_slash(shorten(result));
+  if (file_exists(shorten(result))) return shorten(result);
+  return "";
 }
 
-void execute_shell(std::string operation, std::string fname, std::string args) {
-  WCHAR cDir[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, cDir);
-  tstring tstr_operation = widen(operation);
-  tstring tstr_fname = widen(fname);
-  tstring tstr_args = widen(args);
-  ShellExecuteW(enigma::hWnd, tstr_operation.c_str(), tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
+std::string filename_join(std::string prefix, std::string suffix) {
+  return add_slash(prefix) + suffix;
 }
-
-void execute_program(std::string operation, std::string fname, std::string args, bool wait) {
-  SHELLEXECUTEINFOW lpExecInfo;
-  tstring tstr_operation = widen(operation);
-  tstring tstr_fname = widen(fname);
-  tstring tstr_args = widen(args);
-  lpExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
-  lpExecInfo.lpFile = tstr_fname.c_str();
-  lpExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
-  lpExecInfo.hwnd = enigma::hWnd;
-  lpExecInfo.lpVerb = tstr_operation.c_str();
-  lpExecInfo.lpParameters = tstr_args.c_str();
-  WCHAR cDir[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, cDir);
-  lpExecInfo.lpDirectory = cDir;
-  lpExecInfo.nShow = SW_SHOW;
-  lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;  //WINSHELLAPI BOOL WINAPI result;
-  ShellExecuteExW(&lpExecInfo);
-
-  //wait until a file is finished printing
-  if (wait && lpExecInfo.hProcess != NULL) {
-    ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
-    ::CloseHandle(lpExecInfo.hProcess);
-  }
-}
-
-void execute_program(std::string fname, std::string args, bool wait) { execute_program("open", fname, args, wait); }
 
 std::string environment_get_variable(std::string name) {
   WCHAR buffer[1024];
   tstring tstr_name = widen(name);
   GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
-
   return shorten(buffer);
 }
 
-void action_webpage(const std::string &url) {
-  tstring tstr_url = widen(url);
-  tstring tstr_open = widen("open");
-  ShellExecuteW(NULL, tstr_open.c_str(), tstr_url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+// deletes the environment variable if set to empty string
+bool environment_set_variable(const std::string &name, const std::string &value) {
+  tstring tstr_name = widen(name);
+  tstring tstr_value = widen(value);
+  if (value == "") return (SetEnvironmentVariableW(tstr_name.c_str(), NULL) != 0);
+  return (SetEnvironmentVariableW(tstr_name.c_str(), tstr_value.c_str()) != 0);
 }
 
 }  // namespace enigma_user

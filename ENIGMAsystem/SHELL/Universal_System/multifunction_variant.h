@@ -29,46 +29,50 @@
 #define ENIGMA_MULTIFUNCTION_VARIANT_H
 
 #include "var4.h"
-#include "var_te.h"
 
 namespace enigma
 {
-  struct multifunction_variant: variant
-  {
-    #undef  types_extrapolate_alldec
-    #define types_extrapolate_alldec(prefix)\
-     types_extrapolate_real_p  (prefix,;)\
-     types_extrapolate_string_p(prefix,;)\
-     prefix (const variant &x);\
-     prefix (const var &x);
-    
-    virtual void function(variant oldvalue);
-    
+  template<class Kernel> struct multifunction_variant: variant {
     //These are assignment operators and require a reference to be passed
-    multifunction_variant& operator=(multifunction_variant&); // Stop shit from happening
-    types_extrapolate_alldec(multifunction_variant& operator=)
-    types_extrapolate_alldec(multifunction_variant& operator+=)
-    types_extrapolate_alldec(multifunction_variant& operator-=)
-    types_extrapolate_alldec(multifunction_variant& operator*=)
-    types_extrapolate_alldec(multifunction_variant& operator/=)
-    types_extrapolate_alldec(multifunction_variant& operator%=)
-    types_extrapolate_alldec(multifunction_variant& operator<<=)
-    types_extrapolate_alldec(multifunction_variant& operator>>=)
-    types_extrapolate_alldec(multifunction_variant& operator&=)
-    types_extrapolate_alldec(multifunction_variant& operator|=)
-    types_extrapolate_alldec(multifunction_variant& operator^=)
+    template<class T> multifunction_variant& operator=(const T &nv) {
+      variant old = std::move(*this);
+      *(variant*) this = nv;
+      static_cast<Kernel*>(this)->function(old);
+      return *this;
+    }
     
-    multifunction_variant(); // Assigns default type to real
-    types_extrapolate_alldecc(multifunction_variant) // Other constructors outsource to variant's
-    virtual ~multifunction_variant();
-    #undef  types_extrapolate_alldec
+    #define declare_relative_assign(op) template<class T>                      \
+    multifunction_variant<Kernel> &operator op##=(const T &value) {            \
+      variant old = std::move(*(variant*) this);                               \
+      *(variant*) this = old op value;                                         \
+      static_cast<Kernel*>(this)->function(old);                               \
+      return *this;                                                            \
+    }
+
+    declare_relative_assign(+)
+    declare_relative_assign(-)
+    declare_relative_assign(*)
+    declare_relative_assign(/)
+    declare_relative_assign(%)
+    declare_relative_assign(<<)
+    declare_relative_assign(>>)
+    declare_relative_assign(&)
+    declare_relative_assign(|)
+    declare_relative_assign(^)
+
+    #undef declare_relative_assign
+
+    multifunction_variant() = default;
+    template<typename T> explicit multifunction_variant(T t): variant(t) {}
   };
+
 } //namespace enigma
 
-#define INHERIT_OPERATORS(t)\
-  using multifunction_variant::operator=;\
-  t &operator=(t&);
-#define INTERCEPT_DEFAULT_COPY(t)\
-  t &t::operator=(t& x) { *this = (variant&)x; return *this; }
+#define INHERIT_OPERATORS(T)\
+  using multifunction_variant<T>::operator=; \
+  T &operator=(const T &x) {                 \
+    *this = (const variant&) x;              \
+    return *this;                            \
+  }
 
 #endif //ENIGMA_MULTIFUNCTION_VARIANT_H

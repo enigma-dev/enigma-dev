@@ -35,11 +35,6 @@
 #undef yn
 
 #include "dynamic_args.h"
-#include "generic_args.h"
-
-#ifndef INCLUDED_FROM_SHELLMAIN
-#error ln2math and stop including this damn header.
-#endif
 
 #include "math_consts.h"
 #include "scalar.h"
@@ -51,10 +46,12 @@
 #  define WITH_ARITHMETIC_TYPES(...)
 #  define WITH_RETURN_TYPE(type) type
 #  define ARITHMETIC_OPERATION(guess_type, ...) guess_type
+#  define TEMPLATE_FN(...) template<__VA_ARGS__>
 #else
 #  define WITH_ARITHMETIC_TYPES(...) typename enigma::ArithmeticTypes<__VA_ARGS__>
 #  define WITH_RETURN_TYPE(type) ::template returns<type>::T
 #  define ARITHMETIC_OPERATION(guess_type, ...) decltype(__VA_ARGS__)
+#  define TEMPLATE_FN(...)
 #endif
 #define STL_ARITHMETIC(func)                                                  \
   using ::func;                                                               \

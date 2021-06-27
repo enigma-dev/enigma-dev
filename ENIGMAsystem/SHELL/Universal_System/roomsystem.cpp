@@ -27,12 +27,12 @@
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/callbacks_events.h"
+#include "Universal_System/Instances/callbacks_events.h"
 #include "libEGMstd.h"
-#include "instance_system.h"
-#include "instance.h"
-#include "planar_object.h"
-#include "background.h"
+#include "Instances/instance_system.h"
+#include "Instances/instance.h"
+#include "Object_Tiers/planar_object.h"
+#include "Resources/backgrounds.h"
 
 #include "roomsystem.h"
 #include "depth_draw.h"
@@ -55,7 +55,6 @@ int room_last = 0;
 
 int room_persistent = 0;
 var room_caption = "";
-var current_caption = "";
 
 int background_color = 0xFFFFFF;
 int background_showcolor=1;
@@ -229,10 +228,11 @@ namespace enigma
       view_visible[i] = (bool)views[i].start_vis;
       view_angle[i] = 0;
     }
-
-    //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
-    //if the window size changes.
-    enigma_user::window_default(true);
+    
+    // In pull request 1831, it was decided to adopt GMS behavior instead of GM8.
+    // The window is no longer moved, centered, or resized when switching rooms.
+    // This is always true, even if the room sizes are different.
+    enigma_user::window_default(false);
     // window sized by first room, can make visible now
     enigma_user::window_set_visible(true);
     enigma_user::io_clear();
@@ -316,8 +316,7 @@ namespace enigma
 
 
 //Implement the "room" global before we continue
-INTERCEPT_DEFAULT_COPY(enigma::roomv)
-void enigma::roomv::function(variant oldval) {
+void enigma::roomv::function(const variant &oldval) {
   enigma_user::room_goto((int)rval.d);
   rval.d = oldval.rval.d;
 }
@@ -325,13 +324,13 @@ namespace enigma_user {
   enigma::roomv room;
 }
 
-#if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
-  #define errcheck(indx,err,v) \
+#if DEBUG_MODE
+#define errcheck(indx,err,v) \
   if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]) \
-    return (show_error(err,0), (v))
+    return (DEBUG_MESSAGE(err, MESSAGE_TYPE::M_USER_ERROR), (v))
   #define errcheck_o(indx,err) \
   if (unsigned(indx) >= unsigned(enigma::room_loadtimecount)) \
-    return (show_error(err,0), 0)
+    return (DEBUG_MESSAGE(err,MESSAGE_TYPE::M_USER_ERROR), 0)
 #else
   #define errcheck(indx,err,v)
   #define errcheck_o(indx,err)

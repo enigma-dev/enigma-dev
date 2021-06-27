@@ -20,14 +20,16 @@
 #include <string>
 using std::string;
 using std::map;
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 //#include <winuser.h> // includes windows.h
 
-#include "../General/PFwindow.h"
-
-#include "Platforms/General/PFmain.h" // For those damn vk_ constants.
-#include "Universal_System/instance_system.h"
-#include "Universal_System/instance.h"
+#include "Platforms/General/PFmain.h" // for keyboard_string
+#include "Platforms/General/PFwindow.h" // For those damn vk_ constants.
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Instances/instance.h"
 
 #include "Platforms/platforms_mandatory.h"
 
@@ -36,31 +38,24 @@ using std::map;
 #endif
 
 namespace enigma_user {
-extern int keyboard_key;
-extern int keyboard_lastkey;
-extern string keyboard_lastchar;
-extern string keyboard_string;
 void draw_clear(int col);
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
-}
+} // namespace enigma_user
 
 namespace enigma
 {
   extern HWND hWnd;
   extern HDC window_hDC;
 
-  using enigma_user::keyboard_key;
   using enigma_user::keyboard_lastkey;
   using enigma_user::keyboard_lastchar;
   using enigma_user::keyboard_string;
 
-  extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
-  extern int windowX, windowY, windowColor;
+  extern char mousestatus[3],last_mousestatus[3];
+  extern int windowColor;
   extern HCURSOR currentCursor;
 
-  static RECT tempWindow;
   static short hdeltadelta = 0, vdeltadelta = 0;
-  static int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
 
   LRESULT (CALLBACK *touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
   void (*WindowResizedCallback)();
@@ -69,7 +64,10 @@ namespace enigma
   {
     switch (message)
     {
-      case WM_CREATE:
+      case WM_SHOWWINDOW:
+        enigma::windowWidth = enigma_user::window_get_width();
+        enigma::windowHeight = enigma_user::window_get_height();
+        enigma::compute_window_scaling();
         return 0;
       case WM_CLOSE:
         instance_event_iterator = &dummy_event_iterator;
@@ -81,38 +79,21 @@ namespace enigma
         // so the user can execute something before the escape is processed, no sense in an override if user is going to call game_end() anyway.
         // - Robert
         if (treatCloseAsEscape) {
-          PostQuitMessage (0);
+          PostQuitMessage(game_return);
         }
         return 0;
 
-      case WM_DESTROY:
-        return 0;
-
-      case WM_SETFOCUS:
-        input_initialize();
-        game_window_focused = true;
-        pausedSteps = 0;
-        return 0;
-
-      case WM_KILLFOCUS:
-        for (int i = 0; i < 255; i++)
-        {
-            last_keybdstatus[i] = keybdstatus[i];
-            keybdstatus[i] = 0;
-        }
-        for(int i=0; i < 3; i++)
-        {
-            last_mousestatus[i] = mousestatus[i];
-            mousestatus[i] = 0;
-        }
-        game_window_focused = false;
-        return 0;
+      case WM_SETFOCUS: enigma::platform_focus_gained(); return 0;
+      case WM_KILLFOCUS: enigma::platform_focus_lost(); return 0;
 
       case WM_SIZE:
         // make sure window resized is only processed once per resize because there could possibly be child windows and handles, especially with widgets
         if (hWndParameter == hWnd) {
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
+            windowWidth = enigma_user::window_get_width();
+            windowHeight = enigma_user::window_get_height();
+            enigma::compute_window_scaling();
           }
           instance_event_iterator = &dummy_event_iterator;
           for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
@@ -124,24 +105,10 @@ namespace enigma
         }
         return 0;
 
-      case WM_ENTERSIZEMOVE:
-        GetWindowRect(hWndParameter,&tempWindow);
-        tempLeft = tempWindow.left;
-        tempTop = tempWindow.top;
-        tempRight = tempWindow.right;
-        tempBottom = tempWindow.bottom;
-        return 0;
-
       case WM_EXITSIZEMOVE:
-        GetWindowRect(hWndParameter,&tempWindow);
-        tempWidth = windowWidth + (tempWindow.right - tempWindow.left) - (tempRight - tempLeft);
-        tempHeight = windowHeight + (tempWindow.bottom - tempWindow.top) - (tempBottom - tempTop);
-
-        windowX += tempWindow.left - tempLeft;
-        windowY += tempWindow.top - tempTop;
-        windowWidth = tempWidth;
-        windowHeight = tempHeight;
-        compute_window_size();
+        enigma::windowWidth = enigma_user::window_get_width();
+        enigma::windowHeight = enigma_user::window_get_height();
+        enigma::compute_window_scaling();
         return 0;
 
       case WM_GETMINMAXINFO: {
@@ -168,7 +135,7 @@ namespace enigma
       case WM_CHAR:
         keyboard_lastchar = string(1,wParam);
         if (keyboard_lastkey == enigma_user::vk_backspace) {
-          keyboard_string = keyboard_string.substr(0, keyboard_string.length() - 1);
+          if (!keyboard_string.empty()) keyboard_string.pop_back();
         } else {
           keyboard_string += keyboard_lastchar;
         }
@@ -176,25 +143,17 @@ namespace enigma
 
       case WM_KEYDOWN: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_lastkey = key;
-        keyboard_key = key;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=1;
+        input_key_down(key);
         return 0;
       }
       case WM_KEYUP: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_key = 0;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=0;
+        input_key_up(key);
         return 0;
       }
       case WM_SYSKEYDOWN: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_lastkey = key;
-        keyboard_key = key;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=1;
+        input_key_down(key);
         if (key!=18)
         {
           if ((lParam&(1<<29))>0)
@@ -205,9 +164,7 @@ namespace enigma
       }
       case WM_SYSKEYUP: {
         int key = enigma_user::keyboard_get_map(wParam);
-        keyboard_key = 0;
-        last_keybdstatus[key]=keybdstatus[key];
-        keybdstatus[key]=0;
+        input_key_up(key);
         if (key!=(unsigned int)18)
         {
           if ((lParam&(1<<29))>0)
@@ -228,12 +185,12 @@ namespace enigma
          hdeltadelta %= WHEEL_DELTA;
          return 0;
 
-      case WM_LBUTTONUP:   mousestatus[0]=0; return 0;
-      case WM_LBUTTONDOWN: mousestatus[0]=1; return 0;
-      case WM_RBUTTONUP:   mousestatus[1]=0; return 0;
-      case WM_RBUTTONDOWN: mousestatus[1]=1; return 0;
-      case WM_MBUTTONUP:   mousestatus[2]=0; return 0;
-      case WM_MBUTTONDOWN: mousestatus[2]=1; return 0;
+      case WM_LBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[0]=0; return 0; }
+      case WM_LBUTTONDOWN: SetCapture(hWnd); mousestatus[0]=1; return 0;
+      case WM_RBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[1]=0; return 0; }
+      case WM_RBUTTONDOWN: SetCapture(hWnd); mousestatus[1]=1; return 0;
+      case WM_MBUTTONUP:   { if (!wParam) ReleaseCapture(); mousestatus[2]=0; return 0; }
+      case WM_MBUTTONDOWN: SetCapture(hWnd); mousestatus[2]=1; return 0;
 
       case WM_ERASEBKGND:
         RECT rc;
@@ -241,9 +198,15 @@ namespace enigma
         FillRect((HDC) wParam, &rc, CreateSolidBrush(windowColor));
         return 1L;
 
-      case WM_PAINT:
-        DefWindowProc(hWndParameter, message, wParam, lParam);
-        return 0;
+      case WM_SYSCOMMAND: {
+        if (wParam == SC_MAXIMIZE) {
+          ShowWindow(hWnd, SW_MAXIMIZE);
+          enigma::windowWidth = enigma_user::window_get_width();
+          enigma::windowHeight = enigma_user::window_get_height();
+          enigma::compute_window_scaling();
+        }
+        break;
+      }
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);
   }

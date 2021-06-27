@@ -28,6 +28,8 @@
 #include "PS_particle_system.h"
 #include "PS_particle.h"
 
+#include "Graphics_Systems/General/GSblend.h"
+
 namespace enigma {
   namespace particle_bridge {
     void initialize_particle_bridge() {}; // Do nothing, nothing to initialize.
@@ -67,8 +69,8 @@ namespace enigma {
             subimg = it->sprite_subimageindex_initial;
           }
           else {
-            const sprite *const spr = spritestructarray[pt->sprite_id];
-            const int subimage_count = spr->subcount;
+            const Sprite& spr = sprites.get(pt->sprite_id);
+            const int subimage_count = spr.SubimageCount();
             if (pt->sprite_stretched) {
               subimg = int(subimage_count*(1.0 - 1.0*it->life_current/it->life_start));
               subimg = subimg >= subimage_count ? subimage_count - 1 : subimg;
@@ -81,7 +83,7 @@ namespace enigma {
           const double x = it->x, y = it->y;
           const double xscale = pt->xscale*size, yscale = pt->yscale*size;
 
-          if (pt->blend_additive != enigma::currentblendmode[0]){
+          if (pt->blend_additive != enigma::blendMode[0]){
               if (pt->blend_additive) {
                 enigma_user::draw_set_blend_mode(enigma_user::bm_add);
               }
@@ -101,7 +103,7 @@ namespace enigma {
 
           int sprite_id = get_particle_actual_sprite(ps->shape);
 
-          if (pt->blend_additive != enigma::currentblendmode[0]){
+          if (pt->blend_additive != enigma::blendMode[0]){
               if (pt->blend_additive) {
                 draw_set_blend_mode(enigma_user::bm_add);
               } else {
@@ -120,7 +122,7 @@ namespace enigma {
         particle_sprite* ps = get_particle_sprite(pt_sh_pixel);
         if (ps == NULL) return; // NOTE: Skip to next particle.
 
-        if (enigma::currentblendmode[0] != 0){
+        if (enigma::blendMode[0] != 0){
             draw_set_blend_mode(enigma_user::bm_normal);
         }
 
@@ -142,9 +144,8 @@ namespace enigma {
         y_offset = a_y_offset;
 
         // Draw the particle system either from oldest to youngest or reverse.
-        int blend_type = enigma::currentblendtype;
-        int blend_src  = enigma::currentblendmode[0];
-        int blend_dest = enigma::currentblendmode[1];
+        int blend_src  = enigma::blendMode[0];
+        int blend_dest = enigma::blendMode[1];
 
         if (oldtonew) {
           const std::vector<particle_instance>::iterator end = pi_list.end();
@@ -160,16 +161,11 @@ namespace enigma {
           }
         }
 
-        if (enigma::currentblendtype != blend_type || enigma::currentblendmode[0] != blend_src || enigma::currentblendmode[1] != blend_dest){
-            if (blend_type == 0){
-                enigma_user::draw_set_blend_mode(blend_src);
-            }else{
-                enigma_user::draw_set_blend_mode_ext(blend_src, blend_dest);
-            }
+        if (enigma::blendMode[0] != blend_src || enigma::blendMode[1] != blend_dest){
+          enigma_user::draw_set_blend_mode_ext(blend_src, blend_dest);
         }
     }
   }
 }
 
 #endif // ENIGMA_PS_PARTICLE_BRIDGE_FALLBACK_H
-

@@ -21,7 +21,14 @@
 
 #ifndef ENIGMA_AL_SYSTEM_H
 #define ENIGMA_AL_SYSTEM_H
-#include <stddef.h>
+
+#ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h"  // show_error
+#endif
+
+#include <cstddef>
+#include <list>
+#include <string>
 
 #ifdef __APPLE__
 #include "../../../additional/alure/include/AL/alure.h"
@@ -36,7 +43,6 @@ extern ALfloat listenerPos[];
 extern ALfloat listenerVel[];
 extern ALfloat listenerOri[];
 
-#include <list>
 using std::list;
 extern list<ALuint> garbageBuffers;
 
@@ -50,13 +56,13 @@ int get_free_channel(double priority);
 #ifdef DEBUG_MODE
 #define get_sound(snd, id, failure)                                                          \
   if (id < 0 or sound_resources.find(id) == sound_resources.end() or !sound_resources[id]) { \
-    show_error("Sound " + enigma_user::toString(id) + " does not exist", false);             \
+    DEBUG_MESSAGE("Sound " + enigma_user::toString(id) + " does not exist", MESSAGE_TYPE::M_USER_ERROR);\
     return failure;                                                                          \
   }                                                                                          \
   SoundResource *const snd = sound_resources[id];
 #define get_soundv(snd, id)                                                                  \
   if (id < 0 or sound_resources.find(id) == sound_resources.end() or !sound_resources[id]) { \
-    show_error("Sound " + enigma_user::toString(id) + " does not exist", false);             \
+    DEBUG_MESSAGE("Sound " + enigma_user::toString(id) + " does not exist", MESSAGE_TYPE::M_USER_ERROR);\
     return;                                                                                  \
   }                                                                                          \
   SoundResource *const snd = sound_resources[id];

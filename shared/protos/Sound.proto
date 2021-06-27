@@ -20,7 +20,7 @@ message Sound {
 
   optional Type type = 9 [(gmx) = "types/type"];
 
-  optional string data = 10 [(gmx) = "origname", (file_path) = true];
+  optional string data = 10 [(gmx) = "origname", (file_path) = true, (file_kind) = AUDIO];
 
   optional int32 effects = 11;
   optional uint32 bit_rate = 12 [(gmx) = "bitRates/bitRate"];

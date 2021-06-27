@@ -18,18 +18,17 @@
 #ifndef ENIGMA_SOUND_RESOURCE_H
 #define ENIGMA_SOUND_RESOURCE_H
 
-#ifdef DEBUG_MODE
-#include "Widget_Systems/widgets_mandatory.h"  // show_error
-#include "libEGMstd.h"
-#endif
+#include "Universal_System/Resources/AssetArray.h"
 
-#include <vector>
-using std::vector;
+#include <wrl/client.h> // ComPtr
+
+using enigma::AssetArray;
+using Microsoft::WRL::ComPtr;
 
 enum load_state { LOADSTATE_NONE, LOADSTATE_INDICATED, LOADSTATE_COMPLETE };
 
-struct SoundResource {
-  IDirectSoundBuffer *soundBuffer;
+struct Sound {
+  ComPtr<IDirectSoundBuffer> soundBuffer;
   void (*cleanup)(void *userdata);               // optional cleanup callback for streams
   void *userdata;                                // optional userdata for streams
   void (*seek)(void *userdata, float position);  // optional seeking
@@ -41,15 +40,15 @@ struct SoundResource {
   bool idle;          // True if this sound is not being used, false if playing or paused.
   bool playing;       // True if this sound is playing; not paused or idle.
 
-  SoundResource() : soundBuffer(0), cleanup(0), userdata(0), seek(0), type(0), kind(0),
+  Sound() : soundBuffer(0), cleanup(0), userdata(0), seek(0), type(0), kind(0),
     loaded(LOADSTATE_NONE), idle(1), playing(0) {}
 
-  ~SoundResource() {
-    soundBuffer->Release();
-    soundBuffer = 0;
-  }
+  void destroy() { soundBuffer.Reset(); }
+  bool isDestroyed() const { return !soundBuffer; }
+
+  static const char* getAssetTypeName() { return "sound"; }
 };
 
-extern vector<SoundResource *> sound_resources;
+extern AssetArray<Sound> sounds;
 
 #endif

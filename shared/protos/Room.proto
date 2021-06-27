@@ -59,7 +59,7 @@ message Room {
 
   message Instance {
     optional string name = 1;
-    optional int32 id = 2 [(id_start) = 100000];
+    optional int32 id = 2 [(id_start) = 100001];
     optional string object_type = 3 [(resource_ref)="object", (gmx) = "objName"];
     optional double x = 4;
     optional double y = 5;
@@ -84,7 +84,7 @@ message Room {
 
   message Tile {
     optional string name = 1;
-    optional int32 id = 2 [(id_start) = 10000000];
+    optional int32 id = 2 [(id_start) = 10000001];
     optional string background_name = 3 [(resource_ref)="background", (gmx) = "bgName"];
     optional double x = 4;
     optional double y = 5;
@@ -106,6 +106,18 @@ message Room {
   }
 
   repeated Tile tiles = 18 [(gmx) = "tiles/tile"];
+
+  message Layer {
+    optional string name = 1;
+    optional int32 id = 2;
+    optional int32 depth = 3;
+    optional bool visible = 4;
+
+    repeated Instance instances = 5;
+    repeated Tile tiles = 6;
+  }
+
+  repeated Layer layers = 20;
 
   message RoomPhysicsSettings {
     optional bool use_physics = 1 [(gmx) = "PhysicsWorld"];

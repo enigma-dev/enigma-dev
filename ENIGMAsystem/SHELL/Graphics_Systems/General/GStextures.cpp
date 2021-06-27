@@ -17,46 +17,117 @@
 **/
 
 #include "GStextures.h"
+#include "GSstdraw.h"
 #include "GStextures_impl.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/image_formats.h"
+
+#include <string.h> // for memcpy
+
+namespace {
+
+inline unsigned int lgpp2(unsigned int x) { // Trailing zero count. lg for perfect powers of two
+  x =  (x & -x) - 1;
+  x -= ((x >> 1) & 0x55555555);
+  x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
+  x =  ((x >> 4) + x) & 0x0f0f0f0f;
+  x += x >> 8;
+  return (x + (x >> 16)) & 63;
+}
+
+} // namespace anonymous
 
 namespace enigma {
 
-vector<Texture*> textures;
+vector<std::unique_ptr<Texture>> textures;
+Sampler samplers[8];
+
+int graphics_duplicate_texture(int tex, bool mipmap) {
+  unsigned w = textures[tex]->width, h = textures[tex]->height,
+           fw = textures[tex]->fullwidth, fh = textures[tex]->fullheight;
+
+  unsigned char* bitmap = graphics_copy_texture_pixels(tex, &fw, &fh);
+  unsigned dup_tex = graphics_create_texture(RawImage(bitmap, fw, fh), mipmap);
+  textures[dup_tex]->width = w;
+  textures[dup_tex]->height = h;
+  return dup_tex;
+}
+
+void graphics_copy_texture(int source, int destination, int x, int y) {
+  unsigned sw = textures[source]->width, sh = textures[source]->height,
+           sfw = textures[source]->fullwidth, sfh = textures[source]->fullheight;
+  unsigned char* bitmap = graphics_copy_texture_pixels(source, &sfw, &sfh);
+
+  unsigned char* cropped_bitmap = new unsigned char[sw*sh*4];
+  for (unsigned int i=0; i<sh; ++i){
+    memcpy(cropped_bitmap+sw*i*4, bitmap+sfw*i*4, sw*4);
+  }
+
+  unsigned dw = textures[destination]->width, dh = textures[destination]->height;
+  graphics_push_texture_pixels(destination, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), cropped_bitmap);
+
+  delete[] bitmap;
+  delete[] cropped_bitmap;
+}
+
+void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y) {
+  unsigned sw = textures[source]->width, sh = textures[source]->height,
+           sfw = textures[source]->fullwidth, sfh = textures[source]->fullheight;
+  unsigned char* bitmap = graphics_copy_texture_pixels(source, &sfw, &sfh);
+
+  if (xoff+sw>sfw) sw = sfw-xoff;
+  if (yoff+sh>sfh) sh = sfh-yoff;
+  unsigned char* cropped_bitmap = new unsigned char[sw*sh*4];
+  for (unsigned int i=0; i<sh; ++i){
+    memcpy(cropped_bitmap+sw*i*4, bitmap+xoff*4+sfw*(i+yoff)*4, sw*4);
+  }
+
+  unsigned dw = textures[destination]->width, dh = textures[destination]->height;
+  graphics_push_texture_pixels(destination, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), cropped_bitmap);
+
+  delete[] bitmap;
+  delete[] cropped_bitmap;
+}
+
+void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex) {
+  unsigned fw = textures[tex]->fullwidth, fh = textures[tex]->fullheight;
+  unsigned size = (fh<<(lgpp2(fw)+2))|2;
+  unsigned char* bitmap = graphics_copy_texture_pixels(tex, &fw, &fh);
+  unsigned char* bitmap2 = graphics_copy_texture_pixels(copy_tex, &fw, &fh);
+
+  for (unsigned i = 3; i < size; i += 4) {
+    bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
+  }
+
+  graphics_push_texture_pixels(tex, fw, fh, bitmap);
+
+  delete[] bitmap;
+  delete[] bitmap2;
+}
 
 } // namespace enigma
 
 namespace enigma_user {
 
 int texture_add(string filename, bool mipmap) {
-  unsigned int w, h, fullwidth, fullheight;
-  int img_num;
-
-  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,&img_num,false);
-  if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
-  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
-  delete[] pxdata;
+  std::vector<enigma::RawImage> imgs = enigma::image_load(filename);
+  if (imgs.empty()) { DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR); return -1; }
+  unsigned texture = enigma::graphics_create_texture(imgs[0], mipmap);
 
   return texture;
 }
 
 void texture_save(int texid, string fname) {
-  unsigned w, h;
-  unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(texid, &w, &h);
-
-  string ext = enigma::image_get_format(fname);
-
+  unsigned w = 0, h = 0;
+  unsigned char* rgbdata = enigma::graphics_copy_texture_pixels(texid, &w, &h);
   enigma::image_save(fname, rgbdata, w, h, w, h, false);
-
   delete[] rgbdata;
 }
 
 void texture_delete(int texid) {
   enigma::graphics_delete_texture(texid); // delete the peer
-  delete enigma::textures[texid];         // now delete the user object
-  enigma::textures[texid] = NULL;         // GM ids are forever!
+  enigma::textures[texid] = nullptr;         // GM ids are forever!
 }
 
 bool texture_exists(int texid) {
@@ -85,6 +156,91 @@ gs_scalar texture_get_texel_width(int texid)
 gs_scalar texture_get_texel_height(int texid)
 {
   return 1.0/enigma::textures[texid]->height;
+}
+
+void texture_set_stage(int stage, int texid) {
+  if (enigma::samplers[stage].texture == texid) return;
+  enigma::draw_set_state_dirty();
+  enigma::samplers[stage].texture = texid;
+}
+
+int texture_get_stage(int stage) {
+  return enigma::samplers[stage].texture;
+}
+
+void texture_reset() {
+  if (enigma::samplers[0].texture == -1) return;
+  enigma::draw_set_state_dirty();
+  enigma::samplers[0].texture = -1;
+}
+
+void texture_set_enabled(bool enable){}
+
+void texture_set_blending(bool enable){}
+
+void texture_set_interpolation_ext(int sampler, bool enable) {
+  enigma::draw_set_state_dirty();
+  enigma::samplers[sampler].interpolate = enable;
+}
+
+void texture_set_repeat_ext(int sampler, bool repeat) {
+  enigma::draw_set_state_dirty();
+  enigma::samplers[sampler].wrapu = repeat;
+  enigma::samplers[sampler].wrapv = repeat;
+  enigma::samplers[sampler].wrapw = repeat;
+}
+
+void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw) {
+  enigma::draw_set_state_dirty();
+  enigma::samplers[sampler].wrapu = wrapu;
+  enigma::samplers[sampler].wrapv = wrapv;
+  enigma::samplers[sampler].wrapw = wrapw;
+}
+
+void texture_set_border_ext(int sampler, int r, int g, int b, double a) {
+  enigma::draw_set_state_dirty();
+}
+
+void texture_set_filter_ext(int sampler, int filter) {
+  enigma::draw_set_state_dirty();
+}
+
+void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel) {
+  enigma::draw_set_state_dirty();
+}
+
+void texture_anisotropy_filter(int sampler, gs_scalar levels) {
+  enigma::draw_set_state_dirty();
+}
+
+bool textures_equal(int textureID1, int textureID2) {
+  return textures_regions_equal(textureID1, textureID2, 0, 0, 0, 0, enigma::textures[textureID1]->width, enigma::textures[textureID1]->height);
+}
+
+bool textures_regions_equal(int textureID1, int textureID2, unsigned xOff1, unsigned yOff1, unsigned xOff2, unsigned yOff2, unsigned w, unsigned h) {
+  enigma::RawImage i1;
+  i1.pxdata = enigma::graphics_copy_texture_pixels(textureID1, &i1.w, &i1.h);
+  
+  enigma::RawImage i2;
+  i2.pxdata = enigma::graphics_copy_texture_pixels(textureID2, &i2.w, &i2.h);
+  
+  unsigned stride = 4;
+  for (unsigned i = 0; i < h; ++i) {
+    for (unsigned j = 0; j < w; ++j) {
+      for (unsigned k = 0; k < stride; ++k) {
+        unsigned index1 = (i + yOff1) * w + (j + xOff1) + k;
+        unsigned index2 = (i + yOff2) * w + (j + xOff2) + k;
+        if (i1.pxdata[index1] != i2.pxdata[index2]) return false; 
+      }
+    }
+  }
+  return true;
+}
+
+uint32_t texture_get_pixel(int texid, unsigned x, unsigned y) {
+  enigma::RawImage i;
+  i.pxdata = enigma::graphics_copy_texture_pixels(texid, &i.w, &i.h);
+  return enigma::image_get_pixel_color(i, x, y).asInt();
 }
 
 } // namespace enigma_user

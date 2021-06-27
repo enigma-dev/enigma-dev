@@ -26,10 +26,10 @@
  **                                                                              **
  \********************************************************************************/
 
-#include "Universal_System/random.h"
-
 #include <float.h>
+#include <random>
 #include <algorithm>
+#include <iterator>
 #include <map>
 #include <deque>
 #include <vector>
@@ -43,21 +43,18 @@ using namespace std;
 
 #include "include.h"
 
-static inline double maxv(double a, double b) { return (a > b) ? a : b; }
-static inline double minv(double a, double b) { return (a < b) ? a : b; }
-static inline unsigned maxv(unsigned a, unsigned b) { return (a > b) ? a : b; }
-static inline unsigned minv(unsigned a, unsigned b) { return (a < b) ? a : b; }
-static inline int maxv(int a, int b) { return (a > b) ? a : b; }
-static inline int minv(int a, int b) { return (a < b) ? a : b; }
+template<typename T> static inline T maxv(T a, T b) { return (a > b) ? a : b; }
+template<typename T> static inline T minv(T a, T b) { return (a < b) ? a : b; }
 
 template<typename t> bool tequal(t v1, t v2) { return v1 == v2; }
 template<> bool tequal(float v1, float v2)   { return fequal(v1, v2); }
 template<> bool tequal(double v1, double v2) { return fequal(v1, v2); }
 
-namespace enigma {
-  static inline int random_integer(int x) {
-    return int(enigma_user::random(x));
-  }
+template<class RandomIt>
+void mt_random_shuffle(RandomIt first, RandomIt last) {
+  std::random_device rd;
+  std::mt19937 g(rd());
+  std::shuffle(first, last, g);
 }
 
 template <typename t>
@@ -474,7 +471,7 @@ class grid
     }
     void shuffle()
     {
-        random_shuffle(grid_array, grid_array + (xgrid*ygrid - 1), enigma::random_integer);
+        mt_random_shuffle(grid_array, grid_array + (xgrid*ygrid - 1));
     }
 };
 
@@ -751,10 +748,10 @@ std::string ds_grid_write(const unsigned int id)
       }
       else
       {
-        ss.width(4); ss << vari.sval.length();
+        ss.width(4); ss << vari.string_length();
         ss.width(1);
-        for (size_t j = 0; j < vari.sval.length(); ++j)
-          ss << vari.sval[j];
+        for (size_t j = 0; j < vari.string_length(); ++j)
+          ss << vari.char_at(j);
       }
     }
   }
@@ -826,7 +823,7 @@ void ds_grid_read(const unsigned int id, std::string value)
         ss.clear();
         i += 4;
 
-        vari.sval = value.substr(i, len);
+        vari.sval() = value.substr(i, len);
         i += len;
 
         ds_grids[id].add(xx, yy, vari);
@@ -892,12 +889,12 @@ void ds_map_replace(const unsigned int id, const variant key, const variant val)
 {
   //TODO: Studio made it so this function will add the value if it is not in the map.
   //GM 8.1 does not have this behaviour. This has also been tested.
-  //We will probably not add support for that, but it may cause issues down the road.
-  //If a decision is made, you should probably ask Josh for clarification, but when the
-  //decision is made, please replace my comment here whether or not we support it.
+  //Possible solution is to check compatibility setting once it's fixed for sources.
+  //https://github.com/enigma-dev/enigma-dev/issues/1461
   //If this function is changed to behave this way, please fix it in the Asynchronous dialog
   //extension which had to create a special function to replace a value adding it if it does
   //not exist in the global async_load map.
+
   //Replaces the value corresponding with the key with a new value
   multimap<variant, variant>::iterator it = ds_maps[id].find(key);
   if (it != ds_maps[id].end())
@@ -908,7 +905,7 @@ void ds_map_replace(const unsigned int id, const variant key, const variant val)
 }
 
 //NOTE: Special function, see todo comment above.
-void ds_map_replaceanyway(const unsigned int id, const variant key, const variant val)
+void ds_map_overwrite(const unsigned int id, const variant key, const variant val)
 {
   //Replaces the value corresponding with the key with a new value, adding it if it was not found in the map.
   multimap<variant, variant>::iterator it = ds_maps[id].find(key);
@@ -964,7 +961,7 @@ variant ds_map_find_previous(const unsigned int id, const variant key)
       return key_check;
     }
   }
-  return 0;
+  return variant();
 }
 
 variant ds_map_find_next(const unsigned int id, const variant key)
@@ -979,7 +976,7 @@ variant ds_map_find_next(const unsigned int id, const variant key)
       return key_check;
     }
   }
-  return 0;
+  return variant();
 }
 
 variant ds_map_find_first(const unsigned int id)
@@ -1039,10 +1036,10 @@ std::string ds_map_write(const unsigned int id)
     }
     else
     {
-      ss.width(4); ss << (*it).first.sval.length();
+      ss.width(4); ss << (*it).first.string_length();
       ss.width(1);
-      for (size_t j = 0; j < (*it).first.sval.length(); ++j)
-        ss << (*it).first.sval[j];
+      for (size_t j = 0; j < (*it).first.string_length(); ++j)
+        ss << (*it).first.char_at(j);
     }
 
     // Write type
@@ -1058,10 +1055,10 @@ std::string ds_map_write(const unsigned int id)
         ss << b[i];    }
     else
     {
-      ss.width(4); ss << (*it).second.sval.length();
+      ss.width(4); ss << (*it).second.string_length();
       ss.width(1);
-      for (size_t j = 0; j < (*it).second.sval.length(); ++j)
-        ss << (*it).second.sval[j];
+      for (size_t j = 0; j < (*it).second.string_length(); ++j)
+        ss << (*it).second.char_at(j);
     }
 
     ++it;
@@ -1115,8 +1112,7 @@ void ds_map_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      variKey.type = ty_string;
-      variKey.sval = value.substr(i, len);
+      variKey = value.substr(i, len);
       i += len;
     }
 
@@ -1149,8 +1145,7 @@ void ds_map_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      variValue.type = ty_string;
-      variValue.sval = value.substr(i, len);
+      variValue = value.substr(i, len);
       i += len;
     }
 
@@ -1246,7 +1241,7 @@ void ds_list_delete(const unsigned int id, const unsigned int first, const unsig
   //Deletes the values in the range between first and last
   if (first < ds_lists[id].size() && last < ds_lists[id].size())
   {
-    ds_lists[id].erase(ds_lists[id].begin() + first, ds_lists[id].begin() + last);
+    ds_lists[id].erase(ds_lists[id].begin() + first, ds_lists[id].begin() + last+1);
   }
 }
 
@@ -1285,7 +1280,7 @@ void ds_list_sort(const unsigned int id, const bool ascend)
 void ds_list_shuffle(const unsigned int id)
 {
   //shuffles the values in the list into a random order
-  random_shuffle(ds_lists[id].begin(), ds_lists[id].end(), enigma::random_integer);
+  mt_random_shuffle(ds_lists[id].begin(), ds_lists[id].end());
 }
 
 bool ds_list_exists(const unsigned int id)
@@ -1329,10 +1324,10 @@ std::string ds_list_write(const unsigned int id)
     }
     else
     {
-      ss.width(4); ss << dsList[i].sval.length();
+      ss.width(4); ss << dsList[i].string_length();
       ss.width(1);
-      for (size_t j = 0; j < dsList[i].sval.length(); ++j)
-        ss << dsList[i].sval[j];
+      for (size_t j = 0; j < dsList[i].string_length(); ++j)
+        ss << dsList[i].char_at(j);
     }
   }
 
@@ -1379,7 +1374,6 @@ void ds_list_read(const unsigned int id, std::string value)
     else
     {
       variant vari;
-      vari.type = ty_string;
       int len;
 
       // Read length
@@ -1388,7 +1382,7 @@ void ds_list_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      vari.sval = value.substr(i, len);
+      vari = value.substr(i, len);
       i += len;
 
       ds_lists[id].push_back(vari);
@@ -1503,7 +1497,7 @@ variant ds_priority_find_min(const unsigned int id)
 {
   //Returns the value with the smallest priority but does not delete it from the priority queue
   multimap<variant, variant>::iterator it = ds_prioritys[id].begin(), it_check;
-  if (it == ds_prioritys[id].end()) {return 0;}
+  if (it == ds_prioritys[id].end()) {return variant();}
   it_check = it++;
   while (it != ds_prioritys[id].end())
   {
@@ -1517,7 +1511,7 @@ variant ds_priority_delete_max(const unsigned int id)
 {
   //Returns the value with the smallest priority but does not delete it from the priority queue
   multimap<variant, variant>::iterator it = ds_prioritys[id].begin(), it_check;
-  if (it == ds_prioritys[id].end()) {return 0;}
+  if (it == ds_prioritys[id].end()) {return variant();}
   it_check = it++;
   while (it != ds_prioritys[id].end())
   {
@@ -1533,7 +1527,7 @@ variant ds_priority_find_max(const unsigned int id)
 {
   //Returns the value with the smallest priority but does not delete it from the priority queue
   multimap<variant, variant>::iterator it = ds_prioritys[id].begin(), it_check;
-  if (it == ds_prioritys[id].end()) {return 0;}
+  if (it == ds_prioritys[id].end()) {return variant();}
   it_check = it++;
   while (it != ds_prioritys[id].end())
   {
@@ -1590,10 +1584,10 @@ std::string ds_priority_write(const unsigned int id)
     }
     else
     {
-      ss.width(4); ss << (*it).first.sval.length();
+      ss.width(4); ss << (*it).first.string_length();
       ss.width(1);
-      for (size_t j = 0; j < (*it).first.sval.length(); ++j)
-        ss << (*it).first.sval[j];
+      for (size_t j = 0; j < (*it).first.string_length(); ++j)
+        ss << (*it).first.char_at(j);
     }
 
     ++it;
@@ -1659,8 +1653,7 @@ void ds_priority_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      vari.type = ty_string;
-      vari.sval = value.substr(i, len);
+      vari = value.substr(i, len);
       i += len;
     }
 
@@ -1789,10 +1782,10 @@ std::string ds_queue_write(const unsigned int id)
     }
     else
     {
-      ss.width(4); ss << dsQueue[i].sval.length();
+      ss.width(4); ss << dsQueue[i].string_length();
       ss.width(1);
-      for (size_t j = 0; j < dsQueue[i].sval.length(); ++j)
-        ss << dsQueue[i].sval[j];
+      for (size_t j = 0; j < dsQueue[i].string_length(); ++j)
+        ss << dsQueue[i].char_at(j);
     }
   }
 
@@ -1844,8 +1837,7 @@ void ds_queue_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      vari.type = ty_string;
-      vari.sval = value.substr(i, len);
+      vari = value.substr(i, len);
       i += len;
     }
 
@@ -1967,10 +1959,10 @@ std::string ds_stack_write(const unsigned int id)
     }
     else
     {
-      ss.width(4); ss << dsStack[i].sval.length();
+      ss.width(4); ss << dsStack[i].string_length();
       ss.width(1);
-      for (size_t j = 0; j < dsStack[i].sval.length(); ++j)
-        ss << dsStack[i].sval[j];
+      for (size_t j = 0; j < dsStack[i].string_length(); ++j)
+        ss << dsStack[i].char_at(j);
     }
   }
 
@@ -2022,8 +2014,7 @@ void ds_stack_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      vari.type = ty_string;
-      vari.sval = value.substr(i, len);
+      vari = value.substr(i, len);
       i += len;
     }
 

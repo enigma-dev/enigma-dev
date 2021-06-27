@@ -12,10 +12,12 @@
 #include <grpc++/server_builder.h>
 #include <grpc++/server_context.h>
 
-#include <boost/filesystem.hpp>
-
+#include <filesystem>
 #include <memory>
 #include <future>
+#include <vector>
+
+namespace fs = std::filesystem;
 
 using namespace grpc;
 using namespace buffers;
@@ -27,9 +29,8 @@ class CompilerServiceImpl final : public Compiler::Service {
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
     // use lambda capture to contain compile logic
-    auto fnc = [=] {
-      const CompileRequest req = *request;
-      plugin.BuildGame(const_cast<buffers::Game*>(&req.game()), emode_run, req.name().c_str());
+    auto fnc = [&] {
+      plugin.BuildGame(request->game(), emode_run, request->name().c_str());
     };
     // asynchronously launch the compile request
     std::future<void> future = std::async(fnc);
@@ -116,7 +117,7 @@ class CompilerServiceImpl final : public Compiler::Service {
           id = about.get("id"); // allow alias
         if (id.empty()) {
           // compilers use filename minus ext as id
-          boost::filesystem::path ey(subsystem);
+          fs::path ey(subsystem);
           id = ey.stem().string();
         }
 
@@ -159,7 +160,7 @@ class CompilerServiceImpl final : public Compiler::Service {
   }
 
   Status SyntaxCheck(ServerContext* /*context*/, const SyntaxCheckRequest* request, SyntaxError* reply) override {
-    vector<const char*> script_names;
+    std::vector<const char*> script_names;
     script_names.reserve(request->script_names().size());
     for (const std::string &str : request->script_names()) script_names.push_back(str.c_str());
     syntax_error* err = plugin.SyntaxCheck(request->script_count(), script_names.data(), request->code().c_str());

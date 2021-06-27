@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Robert B. Colton
+/** Copyright (C) 2018-2020 Robert B. Colton, Greg Williamson
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,21 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "project.pb.h"
+#ifndef EGM_YYP_H
+#define EGM_YYP_H
 
-#include <iostream>
-#include <streambuf>
-#include <string>
+#include "file-format.h"
 
-namespace yyp {
-extern std::ostream out;
-extern std::ostream err;
+namespace egm {
 
-inline void bind_output_streams(std::ostream &out, std::ostream &err) {
-  yyp::out.rdbuf(out.rdbuf());
-  yyp::err.rdbuf(err.rdbuf());
-}
+class YYPFileFormat : public FileFormat {
+public:
+  YYPFileFormat(const EventData* event_data) : FileFormat(event_data) {}
+  virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
+};
 
-buffers::Project* LoadYYP(std::string fName);
+}  //namespace egm
 
-}  //namespace yyp
+#endif
