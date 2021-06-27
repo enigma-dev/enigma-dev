@@ -30,8 +30,10 @@
 #include <algorithm>
 
 using namespace std;
+#include "Widget_Systems/Win32/dialogs.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
+#include "Platforms/General/PFregistry.h"
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/estring.h"
 #include "GameSettings.h"
@@ -50,6 +52,12 @@ static string gs_password;
 static bool   gs_form_canceled;
 static string gs_str_submitted;
 static string gs_but1, gs_but2, gs_but3;
+
+// highscore table
+int highscore_array[10] = { };
+int highscore_prev[10] = { };
+int highscore_index = 0;
+int highscore = 0;
 
 // message and error captions
 static string message_caption;
@@ -252,6 +260,89 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
   }
 
   return 0;
+}
+
+static INT_PTR CALLBACK HighscoreShowProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
+  if (uMsg == WM_INITDIALOG) {
+    for (int i = 9; i >= 0; i--) {
+      HWND did1 = GetDlgItem(hwndDlg, 1000 + 9 - i);
+      HWND did2 = GetDlgItem(hwndDlg, 1010 + 9 - i);
+
+      PostMessage(did1, EM_SETREADONLY, TRUE, 0);
+      PostMessage(did2, EM_SETREADONLY, TRUE, 0);
+
+      string str1 = "entry" + std::to_string(9 - i);
+      string str2 = "entry" + std::to_string(9 - i + 10);
+      SetWindowText(did1, (enigma_user::registry_exists(str1)) ? enigma_user::registry_read_string(str1).c_str() : "<nobody>");
+      SetWindowText(did2, (enigma_user::registry_exists(str2)) ? std::to_string(enigma_user::registry_read_real(str2)).c_str() : "0");
+      highscore_array[i] = (enigma_user::registry_exists(str2)) ? enigma_user::registry_read_real(str2) : 0;
+
+      if (highscore >= highscore_array[9 - i] && highscore >= 0) {
+        highscore_prev[9 - i] = highscore_array[9 - i];
+        did1 = GetDlgItem(hwndDlg, 1000 + 9 - i);
+        did2 = GetDlgItem(hwndDlg, 1010 + 9 - i);
+        string str1 = "entry" + std::to_string(9 - i);
+        string str2 = "entry" + std::to_string(9 - i + 10);
+        tstring tstr = (enigma_user::registry_exists(str1)) ? widen(enigma_user::registry_read_string(str1)) : L"<nobody>";
+        SetWindowText(did2, (enigma_user::registry_exists(str2)) ? std::to_string(enigma_user::registry_read_real(str2)).c_str() : "0");
+        SetWindowTextW(did1, tstr.c_str());
+      }
+    }
+
+    for (int i = 9; i >= 0; i--) {
+      if (highscore >= highscore_array[9 - i] && highscore >= 0) {
+        HWND did3 = GetDlgItem(hwndDlg, 1000 + 9 - i);
+        HWND did4 = GetDlgItem(hwndDlg, 1010 + 9 - i);
+
+        if (highscore > 0) {
+          PostMessage(did3, EM_SETREADONLY, FALSE, 0);
+          SetWindowTextW(did3, L"");
+        }
+
+        SetWindowText(did4, std::to_string(highscore_array[9 - i]).c_str());
+        highscore_index = 9 - i;
+        break;
+      }
+    }
+
+    CenterWindowToMonitor(hwndDlg, MONITOR_CENTER);
+    PostMessageW(hwndDlg, WM_SETFOCUS, 0, 0);
+  }
+
+  if(GetAsyncKeyState(VK_ESCAPE))
+    PostMessageW(hwndDlg, WM_CLOSE, 0, 0);
+
+  if (uMsg == WM_CLOSE) {
+    wchar_t wtxt1[256];
+    wchar_t wtxt2[256];
+
+    for (int i = 9; i >= 0; i--) {
+      if (1000 + i <= 1000) {
+        GetWindowTextW(GetDlgItem(hwndDlg, 1000 + 9 - i), wtxt1, 256);
+        enigma_user::registry_write_string("entry" + std::to_string(9 - i), shorten(wtxt1));
+      }
+
+      if (1020 + i <= 1010) {
+        GetWindowTextW(GetDlgItem(hwndDlg, 1010 + 9 - i), wtxt2, 256);
+        enigma_user::registry_write_real("entry" + std::to_string(9 - i + 10), (int)stol(shorten(wtxt2)));
+      }
+    }
+
+    if (highscore >= highscore_prev[highscore_index]) {
+      HWND did1 = GetDlgItem(hwndDlg, 1000 + highscore_index);
+      HWND did2 = GetDlgItem(hwndDlg, 1010 + highscore_index);
+      GetWindowTextW(GetDlgItem(hwndDlg, 1000 + highscore_index), wtxt1, 256);
+      enigma_user::registry_write_string("entry" + std::to_string(highscore_index), std::to_string(highscore_index));
+      GetWindowTextW(GetDlgItem(hwndDlg, 1010 + highscore_index), wtxt2, 256);
+      enigma_user::registry_write_real("entry" + std::to_string(highscore_index + 10), highscore);
+    }
+
+    EndDialog(hwndDlg, 0);
+  }
+
+  return 0;
+
 }
 
 static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -770,6 +861,11 @@ int show_attempt(string errortext) {
   result = MessageBoxW(enigma::hWnd, tstrStr.c_str(), tstrWindowCaption.c_str(), MB_RETRYCANCEL | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL);
   if (result == IDRETRY) return 0;
   return -1;
+}
+
+void highscore_show(int numb) {
+  highscore = numb;
+  DialogBoxW(enigma::hInstance, L"highscoretable", enigma::hWnd, HighscoreShowProc);
 }
 
 int show_message_ext(string message, string but1, string but2, string but3) {
