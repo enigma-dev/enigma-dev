@@ -41,7 +41,7 @@ namespace enigma
   /// Set a scissored rectangle as the viewport.
   void graphics_set_viewport(float x, float y, float width, float height);
 
-  void graphics_remove_garbage(float x,float y, float width,float height);
+  static void graphics_remove_garbage(float x, float y, float width, float height);
 
   /// Generate a texture from image data. Preserves input pixbuf.
   int graphics_create_texture(const RawImage& img, bool mipmap=false, unsigned* fullwidth = nullptr, unsigned* fullheight = nullptr);

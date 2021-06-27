@@ -145,9 +145,9 @@ namespace enigma_user {
 
 void d3d_enable_scissor_test(bool enable) {
   if(enable==true)
-  glEnable(GL_SCISSOR_TEST);
+     glEnable(GL_SCISSOR_TEST);
   else
-  glDisable(GL_SCISSOR_TEST);
+     glDisable(GL_SCISSOR_TEST);
 }	  
 
 void d3d_clear_depth(double value) {
