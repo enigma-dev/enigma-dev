@@ -53,7 +53,7 @@ namespace enigma {
 
 void SetResizeFptr();
 
-static inline void generate_working_directory() {
+static inline void initialize_working_directory() {
   /*
     This function will set the working directory to the app bundle's Resources folder 
     like GM4Mac 7.5, GMStudio 1.4, GMS 2.x and most Mac apps do, if the executable is in
@@ -127,7 +127,7 @@ void initialize_directory_globals() {
   }
   
   // Set the working_directory
-  generate_working_directory();
+  initialize_working_directory();
 
   // Set the temp_directory
   char *env = getenv("TMPDIR");
