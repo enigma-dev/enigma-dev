@@ -17,6 +17,7 @@
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/SDL/Window.h"
+#include "Widget_Systems/widgets_mandatory.h"
 // #include <?????.h> FIXME: idk what android-specific header(s) define(s) ANativeWindow * and EGLSurface...
 #include <SDL2/SDL.h>
 // #include <SDL2/SDL_syswm.h> // FIXME: pussy not found !
@@ -47,5 +48,9 @@ window_t window_handle() {
   return reinterpret_cast<window_t>(enigma::ANWin);
 }
 */
-  
+
+void window_set_size(unsigned w, unsigned h) {
+  DEBUG_MESSAGE("resizing window is not possible on android", MESSAGE_TYPE::M_WARNING);
+}
+
 }

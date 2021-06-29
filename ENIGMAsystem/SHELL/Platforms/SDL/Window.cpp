@@ -42,23 +42,15 @@ void init_sdl_window_bridge_attributes();
 
 bool initGameWindow() {
   SDL_Init(SDL_INIT_VIDEO);
-  #ifdef __ANDROID__
-    // If you set window'd window on android it spazzes out
-    sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
-    // Lanscape oreintation for android by default
-    SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
-  #else
-    if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
-    if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
-    if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
-  #endif
+  if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
+  if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
+  if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
   init_sdl_window_bridge_attributes();
   windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
   bool notnull = (windowHandle != nullptr);
   if (notnull) window_init();
   return notnull;
 }
-
 namespace keyboard {
   using namespace enigma_user;
   std::unordered_map<int,SDL_Keycode> keymap = {
@@ -276,18 +268,20 @@ void window_set_rectangle(int x, int y, int w, int h) {
 }
 
 int window_get_width() {
-  int w;
-  SDL_GetWindowSize(windowHandle, &w, nullptr);
-  return w;
+  int viewportWidth;
+  int viewportHeight;
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  return viewportWidth;
+
 }
 
 int window_get_height() {
-  int h;
-  SDL_GetWindowSize(windowHandle, nullptr, &h);
-  return h;
-}
+  int viewportWidth;
+  int viewportHeight;
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  return viewportHeight;
 
-void window_set_size(unsigned w, unsigned h) { SDL_SetWindowSize(windowHandle, w, h); }
+}
 
 bool window_get_fullscreen() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);

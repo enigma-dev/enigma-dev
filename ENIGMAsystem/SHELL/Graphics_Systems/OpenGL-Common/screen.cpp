@@ -44,8 +44,6 @@ void scene_end() {
   msaa_fbo_blit();
 }
 
-
-
 unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
   if (flipped) *flipped = true;
 

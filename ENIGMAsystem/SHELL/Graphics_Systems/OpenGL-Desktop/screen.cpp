@@ -25,11 +25,6 @@ void msaa_fbo_blit() {
   // glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
 }
 
-
-
-
-
-//added from opengl-common
 unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {
   if (flipped) *flipped = true;
 
@@ -45,7 +40,6 @@ unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, 
   glBindFramebuffer(GL_READ_FRAMEBUFFER, prevFbo);
   return pxdata;
 }
-
 
 } // namespace enigma
 

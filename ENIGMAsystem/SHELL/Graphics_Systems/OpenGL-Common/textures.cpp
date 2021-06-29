@@ -101,6 +101,4 @@ unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width
   return cropped;
 }
 
-
-
 } // namespace enigma

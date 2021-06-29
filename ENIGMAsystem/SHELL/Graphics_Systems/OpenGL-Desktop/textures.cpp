@@ -21,12 +21,6 @@
 #include "Graphics_Systems/OpenGL-Common/textures_impl.h"
 #include "Universal_System/image_formats.h"
 namespace enigma{
-	
-	
-	
-
-//added from opengl-common
-
 
 void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {
   glBindTexture(GL_TEXTURE_2D, get_texture_peer(texture));
@@ -34,12 +28,10 @@ void graphics_push_texture_pixels(int texture, int width, int height, unsigned c
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
 }
 
-
 int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight)
 {
   return graphics_create_texture_custom(img, mipmap, fullwidth, fullheight, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE);
 }
-
 
 void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {
   glBindTexture(GL_TEXTURE_2D, get_texture_peer(texture));
@@ -47,12 +39,6 @@ void graphics_push_texture_pixels(int texture, int x, int y, int width, int heig
   glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
 }
 
-
-
-	
-	
-	
-	
 } //namespace enigma
 
 namespace enigma_user {
@@ -82,7 +68,5 @@ float texture_anisotropy_maxlevel()
   glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maximumAnisotropy);
   return maximumAnisotropy;
 }
-
-
 
 }//namespace enigma_user

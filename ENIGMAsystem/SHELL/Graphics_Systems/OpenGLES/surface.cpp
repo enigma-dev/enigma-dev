@@ -13,10 +13,8 @@
 #include "Widget_Systems/widgets_mandatory.h" // for show_error
 #endif
 
-
 namespace enigma_user{
-	
-	
+
 void surface_add_colorbuffer(int id, int index, int internalFormat, unsigned format, unsigned type){
   get_surface(surf,id);
   glBindFramebuffer(GL_FRAMEBUFFER, surf.fbo);
@@ -52,14 +50,12 @@ void surface_set_target(int id)
 void surface_reset_target(void)
 {
   draw_batch_flush(batch_flush_deferred);
-
   enigma::bound_framebuffer = 0;
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   d3d_transform_stack_pop();
   d3d_projection_stack_pop();
   screen_reset_viewport();
 }
-
 
 void surface_free(int id)
 {
@@ -76,8 +72,4 @@ void surface_free(int id)
   delete enigma::surfaces[id];
 }
 
-
-	
-	
-	
 }// namespace enigma_user
