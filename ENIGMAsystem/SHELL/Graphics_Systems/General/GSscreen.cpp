@@ -371,7 +371,7 @@ void screen_redraw()
     {
       int vc = (int)view_current;
       if (!view_visible[vc])
-        continue;  
+        continue;
       screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
       clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc], background_showcolor && draw_backs);
       if (draw_backs)

@@ -284,12 +284,6 @@ int window_get_height() {
 
 }
 
-void window_set_size(unsigned w, unsigned h) { 
- #ifndef _ANDROID_
- SDL_SetWindowSize(windowHandle, w, h);
- #endif
- }
-
 bool window_get_fullscreen() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);
   return (flags & SDL_WINDOW_FULLSCREEN || flags & SDL_WINDOW_FULLSCREEN_DESKTOP);

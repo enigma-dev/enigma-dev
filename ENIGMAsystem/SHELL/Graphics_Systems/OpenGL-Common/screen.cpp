@@ -34,7 +34,6 @@ void graphics_set_viewport(float x, float y, float width, float height) {
   y = enigma_user::window_get_height() - y - height;
   glViewport(x,y,width,height);
   glScissor(x,y,width,height);
-  
 }
 
 void scene_begin() {}
