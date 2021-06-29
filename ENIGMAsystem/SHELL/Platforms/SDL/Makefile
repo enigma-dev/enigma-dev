@@ -15,7 +15,7 @@ endif
 
 ifeq ($(TARGET-PLATFORM), Android)
 	SOURCES += Platforms/SDL/Android/Window.cpp
-  override ANDROID_MAKEFILES += SDL2/Android.mk
+	override ANDROID_MAKEFILES += SDL2/Android.mk
 	override ANDROID_SHARED_LIBRARIES += SDL2
 else
 	SOURCES += Platforms/SDL/Desktop/Window.cpp

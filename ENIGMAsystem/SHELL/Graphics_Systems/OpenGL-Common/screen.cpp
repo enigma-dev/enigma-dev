@@ -21,6 +21,7 @@
 #include "screen.h"
 #include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSscreen.h"
+
 #include "Platforms/General/PFwindow.h"
 
 using namespace enigma;
@@ -30,7 +31,7 @@ namespace enigma {
 unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
 
 void graphics_set_viewport(float x, float y, float width, float height) {
-  //NOTE: OpenGL viewports are bottom left unlike Direct3D viewports which are top left 		
+  //NOTE: OpenGL viewports are bottom left unlike Direct3D viewports which are top left
   y = enigma_user::window_get_height() - y - height;
   glViewport(x,y,width,height);
   glScissor(x,y,width,height);

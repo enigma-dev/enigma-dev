@@ -7,8 +7,6 @@
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GSscreen.h"
 
-
-
 namespace enigma_user {
 
 bool surface_is_supported()
@@ -129,8 +127,6 @@ int surface_create_msaa(int width, int height, int samples)
   return id;
 }
 
-//added from opengl-common surface.cpp
-
 void surface_add_colorbuffer(int id, int index, int internalFormat, unsigned format, unsigned type){
   get_surface(surf,id);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, surf.fbo);
@@ -189,7 +185,5 @@ void surface_free(int id)
   glDeleteFramebuffers(1, &surf.fbo);
   delete enigma::surfaces[id];
 }
-
-
 
 } // namespace enigma_user

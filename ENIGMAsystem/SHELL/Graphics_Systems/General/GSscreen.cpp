@@ -288,6 +288,7 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   viewport_y = sy + y;
   viewport_w = width;
   viewport_h = height;
+
   screen_reset_viewport();
 }
 
@@ -312,6 +313,7 @@ void screen_init() {
       if (view_visible[(int)view_current])
       {
         int vc = (int)view_current;
+
         screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
         d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
         break;
@@ -372,10 +374,14 @@ void screen_redraw()
       int vc = (int)view_current;
       if (!view_visible[vc])
         continue;
+
       screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
+
       clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc], background_showcolor && draw_backs);
+
       if (draw_backs)
         draw_back();
+
       draw_insts();
 
       if (draw_tiles())

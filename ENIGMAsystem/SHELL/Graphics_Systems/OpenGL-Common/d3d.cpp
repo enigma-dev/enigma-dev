@@ -148,7 +148,7 @@ void d3d_enable_scissor_test(bool enable) {
      glEnable(GL_SCISSOR_TEST);
   else
      glDisable(GL_SCISSOR_TEST);
-}	  
+}
 
 void d3d_clear_depth(double value) {
   draw_batch_flush(batch_flush_deferred);

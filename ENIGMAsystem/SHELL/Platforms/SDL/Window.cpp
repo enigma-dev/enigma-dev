@@ -40,7 +40,6 @@ unsigned sdl_window_flags = SDL_WINDOW_HIDDEN;
 // (e.g, SDL's OpenGL context attributes)
 void init_sdl_window_bridge_attributes();
 
-
 bool initGameWindow() {
   SDL_Init(SDL_INIT_VIDEO);
   if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
