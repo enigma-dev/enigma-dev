@@ -29,6 +29,7 @@
 
 namespace enigma
 {
+  extern std::string texColorString;
   extern unsigned bound_vbo;
   extern unsigned bound_vboi;
   extern unsigned bound_shader;
