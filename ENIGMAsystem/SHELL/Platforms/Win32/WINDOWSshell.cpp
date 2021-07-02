@@ -16,11 +16,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <thread>
 #define byte __windows_byte_workaround
 #include <windows.h>
 #undef byte
 
 #include "Bridges/Win32/WINDOWShandle.h" // enigma::hWnd
+#include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFshell.h"
 #include "Universal_System/estring.h"
@@ -59,6 +61,17 @@ void execute_shell(string fname, string args) {
   execute_program(fname, args, false);
 }
 
+static inline void output_thread(HANDLE handle, string *output) {
+  string result;
+  DWORD dwRead = 0;
+  char buffer[BUFSIZ];
+  while (ReadFile(handle, buffer, BUFSIZ, &dwRead, NULL) && dwRead) {
+    buffer[dwRead] = '\0';
+    result.append(buffer, dwRead);
+  }
+  *(output) = result;
+}
+
 string execute_shell_for_output(const string &command) {
   string output;
   tstring tstr_command = widen(command);
@@ -82,24 +95,20 @@ string execute_shell_for_output(const string &command) {
   si.hStdInput = hStdInPipeRead;
   PROCESS_INFORMATION pi = { 0 };
   if (CreateProcessW(NULL, ctstr_command, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
-    for (;;) {
-      char buffer[BUFSIZ];
-      DWORD dwRead = 0;
-      BOOL success = ReadFile(hStdOutPipeRead, buffer, BUFSIZ, &dwRead, NULL);
-      if (success || dwRead) {
-        buffer[dwRead] = 0;
-        output.append(buffer, dwRead);
-      } else { break; }
+    HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
+    std::thread outthrd(output_thread, hStdOutPipeRead, &output);
+    while (MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+      enigma::handleEvents();
     }
+    outthrd.join();
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
-    return output;
   }
-  return "";
+  return output;
 }
 
 } // namespace enigma_insecure
