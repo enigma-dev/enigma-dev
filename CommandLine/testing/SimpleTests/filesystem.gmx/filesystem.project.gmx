@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<assets>
+  <Configs name="configs">
+    <Config>Configs\Default</Config>
+  </Configs>
+  <objects name="objects">
+    <object>objects\obj_0</object>
+  </objects>
+  <rooms name="rooms">
+    <room>rooms\rm_0</room>
+  </rooms>
+  <datafiles name="datafiles">
+    <datafiles name="group">
+      <datafile>
+        <name>hello</name>
+        <filename>hello.txt</filename>
+        <size>7</size>
+        <exportDir/>
+        <exportAction>2</exportAction>
+        <overwrite>0</overwrite>
+        <store>0</store>
+        <freeData>-1</freeData>
+        <removeEnd>0</removeEnd>
+      </datafile>
+    </datafiles>
+  </datafiles>
+  <constants number="0"/>
+  <help>
+    <rtf>help.rtf</rtf>
+  </help>
+</assets>

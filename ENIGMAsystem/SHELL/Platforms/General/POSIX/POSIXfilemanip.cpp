@@ -39,39 +39,6 @@ static string fff_mask, fff_path;
 static int fff_attrib;
 }  // namespace
 
-int file_exists(string fname) {
-  struct stat st;
-  return (stat(fname.c_str(), &st) == 0) and !(S_ISDIR(st.st_mode));
-}
-
-int file_delete(string fname) { return remove(fname.c_str()); }
-
-int file_rename(string oldname, string newname) { return rename(oldname.c_str(), newname.c_str()); }
-
-int file_copy(string fname, string newname) {
-  std::ifstream from(fname);
-  if (!from.good()) return false;
-  std::ofstream to(newname);
-  if (!to.good()) return false;
-  to << from.rdbuf();
-  return true;
-}
-
-int directory_exists(string dname) {
-  struct stat st;
-  return (stat(dname.c_str(), &st) == 0) and (S_ISDIR(st.st_mode));
-}
-
-int directory_create(string dname) {
-#ifdef _WIN32
-  return mkdir(dname.c_str());
-#else
-  return mkdir(dname.c_str(), S_IRUSR | S_IWUSR | S_IXUSR);
-#endif
-}
-
-int directory_delete(string dname) { return rmdir(dname.c_str()); }
-
 string file_find_next() {
   if (fff_dir_open == NULL) return "";
 

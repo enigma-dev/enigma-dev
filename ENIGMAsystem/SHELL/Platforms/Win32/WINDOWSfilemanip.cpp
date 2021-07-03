@@ -41,97 +41,6 @@ using namespace std;
 namespace enigma_user
 {
 
-/* OS Specific; should be moved */
-
-int file_exists(std::string fname) {
-  DWORD file_attr;
-  tstring tstr_fname = widen(fname);
-  file_attr = GetFileAttributesW(tstr_fname.c_str());
-  return (file_attr != INVALID_FILE_ATTRIBUTES &&
-    !(file_attr & FILE_ATTRIBUTE_DIRECTORY));
-}
-
-int file_delete(std::string fname) {
-    DWORD result = DeleteFileA(fname.c_str());
-
-    switch(result) {
-        case 0:
-            return 0;
-            break;
-        case ERROR_FILE_NOT_FOUND:
-            return 0;
-            break;
-        case ERROR_ACCESS_DENIED:
-            return 0;
-            break;
-        default:
-            return 1;
-            break;
-    }
-}
-
-int file_rename(std::string oldname, std::string newname) {
-    DWORD result = MoveFileA(oldname.c_str(), newname.c_str());
-
-    switch(result) {
-        case 0:
-            return 0;
-            break;
-        default:
-            return 1;
-            break;
-    }
-}
-
-int file_copy(std::string fname, std::string newname) {
-    DWORD result = CopyFileA(fname.c_str(), newname.c_str(), false);
-
-    switch(result) {
-        case 0:
-            return 0;
-            break;
-        default:
-            return 1;
-            break;
-    }
-}
-
-int directory_exists(std::string dname) {
-  DWORD file_attr;
-  tstring tstr_dname = widen(dname);
-  file_attr = GetFileAttributesW(tstr_dname.c_str());
-  return (file_attr != INVALID_FILE_ATTRIBUTES &&
-    (file_attr & FILE_ATTRIBUTE_DIRECTORY));
-}
-
-// NOTICE: May behave differently than GM. May fail if there are
-// directories in the path missing, whereas GM would create them all
-int directory_create(std::string dname) {
-    DWORD result = CreateDirectoryA(dname.c_str(), NULL);
-
-    switch(result) {
-        case 0:
-            return 0;
-            break;
-        case ERROR_ALREADY_EXISTS:
-            return 0;
-            break;
-        case ERROR_PATH_NOT_FOUND:
-            return 0;
-            break;
-        default:
-            return 1;
-            break;
-    }
-}
-
-int directory_delete(std::string dname) {
-  BOOL result = RemoveDirectory(dname.c_str());
-  if (result) return 1;
-  else return 0;
-}
-
-
 // Maintainer: If this segment errors, it is an error of philosophy.
 // The Game Maker constants do not have a standard, but line up with
 // their Windows equivalents. Should either change, we have an issue.
@@ -216,15 +125,6 @@ extern unsigned game_id;
 extern std::string working_directory;
 extern std::string program_directory;
 extern std::string temp_directory;
-
-long long file_size(std::string fname)
-{
-    struct stat sb;
-    if (stat(fname.c_str(), &sb) == -1) {
-        return -1;
-    }
-    return (long long) sb.st_size;
-}
 
 time_t file_access_time(std::string fname)
 {
