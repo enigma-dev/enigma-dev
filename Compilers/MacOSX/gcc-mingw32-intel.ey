@@ -16,8 +16,8 @@ Make-Vars:
   links: 
 
 Parser-Vars:
-  defines: /usr/local/i386-mingw32-4.3.0/bin/i386-mingw32-cpp -dM -x c++ -E $blank
-  searchdirs: /usr/local/i386-mingw32-4.3.0/bin/i386-mingw32-gcc -E -x c++ -v $blank
+  defines: /usr/local/i386-mingw32-4.3.0/bin/i386-mingw32-cpp -dM -x c++ -E /dev/null
+  searchdirs: /usr/local/i386-mingw32-4.3.0/bin/i386-mingw32-gcc -E -x c++ -v /dev/null
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
   

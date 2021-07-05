@@ -93,8 +93,6 @@ struct CompilerInfo {
 
   std::map<std::string, std::string> make_vars;
   std::map<std::string, std::string> exe_vars;
-
-  std::string MAKE_location;
 };
 
 extern CompilerInfo compilerInfo;

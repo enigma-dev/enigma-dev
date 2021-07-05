@@ -16,8 +16,8 @@ Make-Vars:
   links:
 
 Parser-Vars:
-  defines: gcc -dM -x c++ -E $blank
-  searchdirs: gcc -E -x c++ -v $blank
+  defines: gcc -dM -x c++ -E /dev/null
+  searchdirs: gcc -E -x c++ -v /dev/null
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
 

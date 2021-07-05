@@ -31,7 +31,7 @@ include(FindProtobuf)
 target_link_libraries(${LIB_EGM} PRIVATE ${Protobuf_LIBRARY})
 
 #Linux is a turd
-if(NOT WIN32)
+if(NOT WIN32 AND NOT APPLE)
   find_library(LIB_FS NAMES stdc++fs)
   target_link_libraries(${LIB_EGM} PRIVATE ${LIB_FS})
 endif()
