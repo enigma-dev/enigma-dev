@@ -17,6 +17,7 @@
 **/
 
 #include "GSd3d.h"
+#include "GSgpu.h"
 #include "GSstdraw.h"
 #include "GSmatrix.h"
 #include "GSprimitives.h"
@@ -38,7 +39,7 @@ namespace enigma {
 
 bool d3dMode=false, d3dHidden=false, d3dClipPlane=false, d3dZWriteEnable=true,
      d3dPerspective=true, d3dLighting=false, d3dShading=true;
-int d3dCulling=0, d3dDepthOperator=enigma_user::rs_lequal;
+int d3dCulling=0, d3dDepthOperator=enigma_user::cmpfunc_lessequal;
 
 bool d3dFogEnabled=false;
 int d3dFogColor=enigma_user::c_gray, d3dFogMode=enigma_user::rs_linear, d3dFogHint=enigma_user::rs_nicest;
@@ -55,7 +56,7 @@ const Light& get_active_light(int id) {
 
 bool d3dStencilTest = false;
 unsigned int d3dStencilMask = 0x0;
-int d3dStencilFunc = enigma_user::rs_always, d3dStencilFuncRef = 0, d3dStencilFuncMask = -1,
+int d3dStencilFunc = enigma_user::cmpfunc_always, d3dStencilFuncRef = 0, d3dStencilFuncMask = -1,
     d3dStencilOpStencilFail = enigma_user::rs_keep, d3dStencilOpDepthFail = enigma_user::rs_keep,
     d3dStencilOpPass = enigma_user::rs_keep;
 
@@ -69,7 +70,7 @@ void d3d_start() {
   enigma::d3dPerspective = true;
   enigma::d3dHidden = true;
   enigma::d3dZWriteEnable = true;
-  enigma::d3dCulling = rs_none;
+  enigma::d3dCulling = cull_noculling;
   enigma::alphaTest = true;
 
   // Set up modelview matrix
@@ -85,7 +86,7 @@ void d3d_end() {
   enigma::d3dPerspective = false;
   enigma::d3dHidden = false;
   enigma::d3dZWriteEnable = false;
-  enigma::d3dCulling = rs_none;
+  enigma::d3dCulling = cull_noculling;
   enigma::alphaTest = false;
 }
 
@@ -240,7 +241,7 @@ void d3d_stencil_start_mask() {
   draw_set_color_write_enable(false, false, false, false);
   d3d_set_zwriteenable(false);
   d3d_stencil_mask(0x1);
-  d3d_stencil_function(rs_always, 0x1, 0x1);
+  d3d_stencil_function(cmpfunc_always, 0x1, 0x1);
   d3d_stencil_operator(rs_keep, rs_keep, rs_replace);
   d3d_stencil_clear();
 }
@@ -250,7 +251,7 @@ void d3d_stencil_continue_mask() {
   draw_set_color_write_enable(false, false, false, false);
   d3d_set_zwriteenable(false);
   d3d_stencil_mask(0x1);
-  d3d_stencil_function(rs_always, 0x1, 0x1);
+  d3d_stencil_function(cmpfunc_always, 0x1, 0x1);
   d3d_stencil_operator(rs_keep, rs_keep, rs_replace);
 }
 
@@ -259,7 +260,7 @@ void d3d_stencil_use_mask() {
   draw_set_color_write_enable(true, true, true, true);
   d3d_set_zwriteenable(true);
   d3d_stencil_mask(0x0);
-  d3d_stencil_function(rs_equal, 0x1, 0x1);
+  d3d_stencil_function(cmpfunc_equal, 0x1, 0x1);
 }
 
 void d3d_stencil_end_mask() {

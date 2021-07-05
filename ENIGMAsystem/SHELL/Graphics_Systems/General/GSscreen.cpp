@@ -26,6 +26,7 @@
 #include "GSprimitives.h"
 #include "GSvertex.h"
 #include "GScolors.h"
+#include "GSgpu.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/image_formats.h"
@@ -225,7 +226,7 @@ static inline void draw_gui()
   bool hidden = enigma::d3dHidden;
   bool zwrite = enigma::d3dZWriteEnable;
   d3d_set_zwriteenable(false);
-  d3d_set_culling(rs_none);
+  d3d_set_culling(cull_noculling);
   d3d_set_hidden(false);
 
   bool stop_loop = false;
@@ -322,7 +323,7 @@ void screen_init() {
   }
 
   enigma::d3dHidden = false;
-  enigma::d3dCulling = rs_none;
+  enigma::d3dCulling = cull_noculling;
   enigma::alphaBlend = true;
   texture_reset();
 
