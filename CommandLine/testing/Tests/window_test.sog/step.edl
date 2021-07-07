@@ -1,0 +1,1 @@
+room_caption = window_get_minimized() ? "Minimized" : window_get_maximized() ? "Maximized" : "Normal";

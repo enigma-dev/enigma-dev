@@ -1,0 +1,270 @@
+float f = (float) -.5;
+double d = -.5;
+long double ld = -.5;
+int i = -30;
+unsigned u = 30;
+long l = -60;
+unsigned lu = 60;
+variant v = -120;
+var a = -150;
+
+var five = 5; // These just save us a var cast, below
+var five_point_two = 5.2;
+var five_point_five = 5.5;
+var five_point_eight = 5.8;
+var negative_five_point_two = -5.2;
+var negative_five_point_five = -5.5;
+var negative_five_point_eight = -5.8;
+var twenty_five = 25;
+
+var pi_over_3 = pi / 3;
+var pi_over_4 = pi / 4;
+var pi_over_6 = pi / 6;
+
+cons_show_message("Test start!");
+
+gtest_assert_true(f && d && ld && i && u && l && lu && (v != 0) && (a != 0),
+                  "Someone zeroed one of the inputs.");
+
+// The abs() function has a lot of overloads.
+gtest_assert_eq(abs(f),  -f);
+gtest_assert_eq(abs(d),  -d);
+gtest_assert_eq(abs(ld), -ld);
+gtest_assert_eq(abs(i),  -i);
+gtest_assert_eq(abs(l),  -l);
+gtest_assert_eq(abs(u),   u);
+gtest_assert_eq(abs(lu),  lu);
+gtest_assert_eq(abs(v),  -v);
+gtest_assert_eq(abs(a),  -a);
+
+// Simple tests of sqr
+gtest_assert_eq(sqr(f), f * f);
+gtest_assert_eq(sqr(d), d * d);
+gtest_assert_eq(sqr(l), l * l);
+gtest_assert_eq(sqr(u), u * u);
+gtest_assert_eq(sqr(5), 25);
+gtest_assert_eq(sqr(-5), 25);
+
+// Simple tests of equal
+gtest_assert_true(equal(d, -.5));
+gtest_assert_true(equal(d,   d));
+gtest_assert_true(equal(-.5, d));
+gtest_assert_true(equal(f, -.5));
+gtest_assert_true(equal(f,   f));
+gtest_assert_true(equal(-.5, f));
+gtest_assert_true(equal(d,   f));
+gtest_assert_true(equal(.1 + .1 + .1, .3));  // Epsilon is important, here!
+
+// Simple tests of cmp
+gtest_assert_eq(cmp(f, d), 0)
+gtest_assert_eq(cmp(1.5, 1.5), 0)
+gtest_assert_eq(cmp(1.5, 1.25), 1)
+gtest_assert_eq(cmp(1.5, 1.75), -1)
+gtest_assert_eq(cmp(100, 50), 1)
+gtest_assert_eq(cmp(100, 100), 0)
+gtest_assert_eq(cmp(100, 150), -1)
+
+// sign is just an extension of cmp
+gtest_assert_eq(sign(-10000),   -1);
+gtest_assert_eq(sign(-1),       -1);
+gtest_assert_eq(sign(-.0001),   -1);
+gtest_assert_eq(sign(0),         0);
+gtest_assert_eq(sign((float) 0), 0);
+gtest_assert_eq(sign(0.0),       0);
+gtest_assert_eq(sign(.0001),     1);
+gtest_assert_eq(sign(1),         1);
+gtest_assert_eq(sign(10000),     1);
+
+// Tests for STL math functions using var
+// ceil
+gtest_assert_eq(ceil(five_point_two), 6);
+gtest_assert_eq(ceil(negative_five_point_two), -5);
+// floor
+gtest_assert_eq(floor(five_point_eight), 5);
+gtest_assert_eq(floor(negative_five_point_eight), -6);
+// round
+gtest_assert_eq(round(five_point_two), 5);
+gtest_assert_eq(round(five_point_five), 6);
+gtest_assert_eq(round(five_point_eight), 6);
+gtest_assert_eq(round(negative_five_point_two), -5);
+gtest_assert_eq(round(negative_five_point_five), -6);
+gtest_assert_eq(round(negative_five_point_eight), -6);
+// sqrt - C++ overloads this for double and float.
+gtest_assert_eq(sqrt(twenty_five), 5);
+gtest_assert_eq(sqrt(36.0), 6);
+gtest_assert_eq(sqrt((float) 49), 7);
+gtest_assert_eq(sqrt(64), 8);
+gtest_assert_eq(sqrt((unsigned) 81), 9);
+// exp/log/log2/log10/ln
+gtest_assert_eq_eps(exp(pi) - pi, 19.999099979189475767266442984669);
+gtest_assert_eq_eps(log(exp(five)), 5);
+gtest_assert_eq_eps(log2((var) 1024), 10);
+gtest_assert_eq_eps(log10((var) 1000), 3);
+gtest_assert_eq_eps(ln(exp(five)), 5);
+// sin/cos/tan
+gtest_assert_eq_eps(sin(pi_over_6), .5);
+gtest_assert_eq_eps(cos(pi_over_3), .5);
+gtest_assert_eq_eps(tan(pi_over_4), 1);
+gtest_assert_eq_eps(sin(pi_over_4), cos(pi_over_4));
+
+// trig aliases using "arc" instead of "a"
+gtest_assert_eq_eps(arcsin(.5), pi / 6);
+gtest_assert_eq_eps(arccos(.5), pi / 3);
+gtest_assert_eq_eps(arctan(1),  pi / 4);
+gtest_assert_eq_eps(arctan2(45, 45), pi / 4);
+// power/logn
+gtest_assert_eq_eps(power(3, 3), 27);
+gtest_assert_eq_eps(power(five, five), 3125);
+gtest_assert_eq_eps(logn(3, 81), 4);
+gtest_assert_eq_eps(logn(81, 3), 1/4);
+
+// Scripting language int64; accepts real or string
+gtest_assert_eq(int64(1234567890.5), (long) 1234567890);
+gtest_assert_eq(int64("1234567890"), (long) 1234567890);
+gtest_assert_eq(int64(five), (long) 5);
+
+gtest_assert_eq_eps(sind(30), .5);
+gtest_assert_eq_eps(cosd(60), .5);
+gtest_assert_eq_eps(tand(45), 1);
+gtest_assert_eq_eps(asind(.5), 30);
+gtest_assert_eq_eps(acosd(.5), 60);
+gtest_assert_eq_eps(atand(1),  45);
+gtest_assert_eq_eps(arcsind(.5), 30);
+gtest_assert_eq_eps(arccosd(.5), 60);
+gtest_assert_eq_eps(arctand(1),  45);
+gtest_assert_eq_eps(atand2(45, 45), 45);
+gtest_assert_eq_eps(arctand2(45, 45), 45);
+
+// Tests for min and max: two args
+gtest_assert_eq(max(15.0, 3), 15.0);
+gtest_assert_eq(max(2, 3.0),  3.0);
+gtest_assert_eq(max(9, 3.0),  9);
+gtest_assert_eq(min(15.0, 3), 3);
+gtest_assert_eq(min(2, 3.0),  2);
+gtest_assert_eq(min(9, 3.0),  3.0);
+// Tests for min and max: variadic args
+gtest_assert_eq(max(1, 2.0, 3.0, five, 2.5),  5);
+gtest_assert_eq(min(-1, -2.0, -3.0, -4, -2.5),  -4);
+
+gtest_assert_eq_eps(lengthdir_x(10, 60), 5);
+gtest_assert_eq_eps(lengthdir_y(10, -30), 5);
+
+// Tests for clamping values in range
+gtest_assert_eq(clamp(2, 0, 1), 1);
+gtest_assert_eq(clamp(1, 0, 1), 1);
+gtest_assert_eq(clamp(0.5, 0, 1), 0.5);
+gtest_assert_eq(clamp(0, 0, 1), 0);
+gtest_assert_eq(clamp(-0.1, 0, 1), 0);
+gtest_assert_eq(clamp(-1, 0, 1), 0);
+gtest_assert_eq(clamp(-2, 0, 1), 0);
+
+// A more complicated helper, angle_difference
+gtest_assert_eq(angle_difference(359, 1), -2);
+gtest_assert_eq(angle_difference(1, 359), +2);
+gtest_assert_eq(angle_difference(270, 0), -90);
+gtest_assert_eq(angle_difference(0, 270), +90);
+gtest_assert_eq(angle_difference(3, 2), 1);
+
+// Simple tests of point_distance
+// types alternated to confuse compiler; values chosen to confuse cheeseboy
+gtest_assert_eq(point_distance(1, 2, 1 + 3, 2 + 4), 5);
+gtest_assert_eq(point_distance(5.0, 5, 10, 17.0),   13);
+// Same strategy for _3d
+gtest_assert_eq(point_distance_3d(1, 2, 3, 2, 4, 5),       3);
+gtest_assert_eq(point_distance_3d(1.0, 2, 3.0, 3, 5.0, 9), 7);
+// Similar strategy for point_direction
+gtest_assert_eq(point_direction(0, -1, 2, -3), 45);
+gtest_assert_eq(point_direction(3.0, 2, 1, 0.0), 135);
+
+// point_in_rectangle test, values expected from GMS v1.4.1804
+gtest_assert_false(point_in_rectangle(0, 0, 1, 1, 3, 3));
+gtest_assert_false(point_in_rectangle(0, 1, 1, 1, 3, 3));
+gtest_assert_false(point_in_rectangle(1, 0, 1, 1, 3, 3));
+gtest_assert_true(point_in_rectangle(1, 1, 1, 1, 3, 3));
+gtest_assert_true(point_in_rectangle(2, 2, 1, 1, 3, 3));
+gtest_assert_true(point_in_rectangle(3, 3, 1, 1, 3, 3));
+gtest_assert_false(point_in_rectangle(4, 4, 1, 1, 3, 3));
+
+// test negative point_in_rectangle values
+gtest_assert_false(point_in_rectangle(0, 0, -3, -3, -1, -1));
+gtest_assert_false(point_in_rectangle(0, -1, -3, -3, -1, -1));
+gtest_assert_false(point_in_rectangle(-1, 0, -3, -3, -1, -1));
+gtest_assert_true(point_in_rectangle(-1, -1, -3, -3, -1, -1));
+gtest_assert_true(point_in_rectangle(-2, -2, -3, -3, -1, -1));
+gtest_assert_true(point_in_rectangle(-3, -3, -3, -3, -1, -1));
+gtest_assert_false(point_in_rectangle(-4, -4, -3, -3, -1, -1));
+
+// Simple array function tests
+var user_array = array_create(5, 555);
+gtest_assert_true(is_array(user_array));
+for (i = 0; i < 5; i += 1) {
+  gtest_assert_eq(user_array[i], 555);
+}
+var user_array_smaller = array_create(3, 555);
+gtest_assert_eq(array_length_1d(user_array_smaller), 3);
+gtest_assert_false(array_equals(user_array, user_array_smaller));
+var user_array_larger = array_create(7, 555);
+gtest_assert_eq(array_length_1d(user_array_larger), 7);
+gtest_assert_false(array_equals(user_array, user_array_larger));
+var user_array_same = array_create(5, 555);
+gtest_assert_eq(array_length_1d(user_array_same), 5);
+gtest_assert_true(array_equals(user_array, user_array_same));
+var user_array_copy = array_create(3, 24);
+var user_array_copy2 = array_create(7, 347);
+array_copy(user_array_same, 0, user_array_copy, 0, 3);
+array_copy(user_array_same, 3, user_array_copy2, 6, 1);
+gtest_assert_eq(user_array_same[0], 24);
+gtest_assert_eq(user_array_same[1], 24);
+gtest_assert_eq(user_array_same[2], 24);
+gtest_assert_eq(user_array_same[3], 347);
+gtest_assert_eq(user_array_same[4], 555);
+array_set(user_array_smaller, 1, "Giorno Giovanna");
+array_set(user_array_smaller, 25, 10);
+array_set(user_array_smaller, 50, "Doppio");
+gtest_assert_eq(user_array_smaller[1], "Giorno Giovanna");
+gtest_assert_eq(user_array_smaller[25], 10);
+gtest_assert_eq(user_array_smaller[50], "Doppio");
+
+// Simple 2D array tests
+var user_array_2d = array_create_2d(3, 5, 256);
+gtest_assert_true(is_array(user_array_2d));
+gtest_assert_eq(array_length_2d(user_array_2d, 0), 3);
+gtest_assert_eq(array_length_2d(user_array_2d, 1), 3);
+gtest_assert_eq(array_length_2d(user_array_2d, 2), 3);
+gtest_assert_eq(array_length_2d(user_array_2d, 3), 3);
+gtest_assert_eq(array_length_2d(user_array_2d, 4), 3);
+gtest_assert_eq(array_height_2d(user_array_2d), 5);
+for (i = 0; i < 5; i += 1) {
+  for (j = 0; j < 3; j += 1) {
+    gtest_assert_eq(user_array_2d[i,j], 256);
+  }
+}
+
+// These are common variable names that happen to conflict with Bessel functions.
+j0 = 1;
+y0 = 2;
+y1 = 3;
+yn = 4;
+
+// This one conflicts with the Linux time() function
+time = 5;
+// This one conflicts with the Win32 CreateFont macro
+CreateFont = 5;
+
+// Random Tests
+// Seeds & Values from Delphi
+random_set_seed(236732942);
+gtest_expect_eq(irandom(10), 3);
+gtest_expect_eq(random_get_seed(), 1493992007);
+gtest_expect_eq(irandom(10), 5);
+gtest_expect_eq(random_get_seed(), 2057512804);
+gtest_expect_eq(irandom(10), 9);
+gtest_expect_eq(random_get_seed(), -526428939);
+gtest_expect_eq(irandom(10), 9);
+gtest_expect_eq(random_get_seed(), -627901238);
+gtest_expect_eq(irandom(10), 2);
+gtest_expect_eq(random_get_seed(), 1166481395);
+
+cons_show_message("Test end!");
+
+game_end();

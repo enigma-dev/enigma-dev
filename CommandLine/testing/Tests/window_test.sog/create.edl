@@ -1,0 +1,5 @@
+var start_time = get_timer();
+sleep(100); // 100 milliseconds = 100000 microseconds
+var end_time = get_timer();
+var diff_time = end_time - start_time;
+gtest_assert_gt(diff_time, 100000);

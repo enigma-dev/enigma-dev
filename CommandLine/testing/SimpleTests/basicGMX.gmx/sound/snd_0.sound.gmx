@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<sound>
+  <extension>.wav</extension>
+  <origname>sound\audio\snd_0.wav</origname>
+  <kind>0</kind>
+  <volume>
+    <volume>1.0</volume>
+  </volume>
+  <bitRates>
+    <bitRate>192</bitRate>
+  </bitRates>
+  <sampleRates>
+    <sampleRate>44100</sampleRate>
+  </sampleRates>
+  <types>
+    <type>0</type>
+  </types>
+  <bitDepths>
+    <bitDepth>16</bitDepth>
+  </bitDepths>
+  <pan>0.0</pan>
+  <preload>-1</preload>
+  <compressed>0</compressed>
+  <streamed>0</streamed>
+  <uncompressOnLoad>0</uncompressOnLoad>
+  <effects>0</effects>
+  <data>snd_0.wav</data>
+</sound>
