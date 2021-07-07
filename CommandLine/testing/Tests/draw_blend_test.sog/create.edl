@@ -1,1 +1,0 @@
-spr_hugar = sprite_add("CommandLine/testing/data/hugar.png", 1, false, false, 0, 0);
