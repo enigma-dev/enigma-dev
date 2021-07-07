@@ -1,0 +1,195 @@
+int spr1, spr2;
+int xoff = 16;
+int yoff = 10;
+
+// add / del
+spr1 = sprite_add("../data/sprite.png", 1, false, false, xoff, yoff);
+gtest_assert_eq(spr1, 0);
+gtest_assert_true(sprite_exists(spr1));
+gtest_assert_false(sprite_exists(spr+1));
+sprite_delete(spr1);
+gtest_assert_false(sprite_exists(spr1));
+spr1 = sprite_add("../data/sprite.png", 4, false, false, xoff, yoff); // same spr but split into 4 subimg
+gtest_assert_eq(spr1, 1);
+
+// uvs
+var uvs = sprite_get_uvs(spr1, 1);
+gtest_assert_eq(uvs[0], 0);
+gtest_assert_eq(uvs[1], 0);
+gtest_assert_eq(uvs[2], 1);
+gtest_assert_eq(uvs[3], 1);
+
+spr2 = sprite_add("../data/sprite.png", 1, false, false, xoff+4, yoff+4);
+
+uvs = sprite_get_uvs(spr2, 0);
+gtest_assert_eq(uvs[0], 0);
+gtest_assert_eq(uvs[1], 0);
+gtest_assert_eq(uvs[2], 1);
+gtest_assert_eq(uvs[3], 1);
+
+// replace / assign / duplicate
+sprite_assign(spr2, spr1);
+
+for (unsigned i = 0; i < 2; i+=1)  {
+  gtest_assert_eq(sprite_get_width(spr1), sprite_get_width(spr2));
+  gtest_assert_eq(sprite_get_height(spr1), sprite_get_height(spr2));
+  gtest_assert_eq(sprite_get_number(spr1), sprite_get_number(spr2));
+
+  for (int j = 0 ; j < sprite_get_number(spr1)-1; j+=1) {
+    gtest_assert_eq(sprite_get_texture_width_factor(spr1, i), sprite_get_texture_width_factor(spr2, i));
+    gtest_assert_eq(sprite_get_texture_height_factor(spr1, i), sprite_get_texture_height_factor(spr2, i));
+    gtest_assert_true(sprite_get_texture(spr1, i) != sprite_get_texture(spr2, i));
+    i++;
+  }
+
+  gtest_assert_eq(sprite_get_bbox_top(spr1), sprite_get_bbox_top(spr2));
+  gtest_assert_eq(sprite_get_bbox_bottom(spr1), sprite_get_bbox_bottom(spr2));
+  gtest_assert_eq(sprite_get_bbox_left(spr1), sprite_get_bbox_left(spr2));
+  gtest_assert_eq(sprite_get_bbox_right(spr1), sprite_get_bbox_right(spr2));
+
+  gtest_assert_eq(sprite_get_bbox_top_relative(spr1), sprite_get_bbox_top_relative(spr2));
+  gtest_assert_eq(sprite_get_bbox_bottom_relative(spr1), sprite_get_bbox_bottom_relative(spr2));
+  gtest_assert_eq(sprite_get_bbox_left_relative(spr1), sprite_get_bbox_left_relative(spr2));
+  gtest_assert_eq(sprite_get_bbox_right_relative(spr1), sprite_get_bbox_right_relative(spr2));
+
+  gtest_assert_eq(sprite_get_xoffset(spr1), sprite_get_xoffset(spr2));
+  gtest_assert_eq(sprite_get_yoffset(spr1), sprite_get_yoffset(spr2));
+  
+  if (i == 0) { // duplicate
+    int spr3 = sprite_duplicate(spr1);
+    gtest_assert_true(spr3 > spr1 && spr3 > spr2);
+    sprite_delete(spr2);
+    spr2 = spr3;
+  }
+  
+  if (i == 1) { // replace
+    sprite_replace(spr2, "../data/sprite.png", 1, false, false, xoff+4, yoff+4);
+    gtest_assert_false(sprite_exists(spr2+1));
+  }
+}
+
+sprite_delete(spr1);
+sprite_delete(spr2);
+
+// merge
+spr1 = sprite_add("../data/sprite.png", 4, false, false, xoff, yoff);
+spr2 = sprite_add("../data/sprite.png", 1, false, false, xoff+4, yoff+4);
+
+repeat (2) {
+int count = sprite_get_number(spr1) + sprite_get_number(spr2);
+int w, h; 
+if (sprite_get_width(spr1) > sprite_get_width(spr2))
+  w = sprite_get_width(spr1);
+else
+  w = sprite_get_width(spr2);
+  
+if (sprite_get_height(spr1) > sprite_get_height(spr2))
+  h = sprite_get_height(spr1);
+else
+  h = sprite_get_height(spr2);
+  
+int bbt = sprite_get_bbox_top(spr1);
+int bbl = sprite_get_bbox_left(spr1);
+int bbr = sprite_get_bbox_right(spr1);
+int bbb = sprite_get_bbox_bottom(spr1);
+
+int bbtr = sprite_get_bbox_top_relative(spr1);
+int bblr = sprite_get_bbox_left_relative(spr1);
+int bbrr = sprite_get_bbox_right_relative(spr1);
+int bbbr = sprite_get_bbox_bottom_relative(spr1);
+  
+sprite_merge(spr1, spr2);
+
+gtest_assert_eq(sprite_get_width(spr1), w);
+gtest_assert_eq(sprite_get_height(spr1), h);
+gtest_assert_eq(sprite_get_number(spr1), count); 
+
+gtest_assert_eq(sprite_get_xoffset(spr1), xoff);
+gtest_assert_eq(sprite_get_yoffset(spr1), yoff);
+
+gtest_assert_eq(sprite_get_bbox_top(spr1), bbt);
+gtest_assert_eq(sprite_get_bbox_bottom(spr1), bbb);
+gtest_assert_eq(sprite_get_bbox_left(spr1), bbl);
+gtest_assert_eq(sprite_get_bbox_right(spr1), bbr);
+
+gtest_assert_eq(sprite_get_bbox_top_relative(spr1), bbtr);
+gtest_assert_eq(sprite_get_bbox_bottom_relative(spr1), bbbr);
+gtest_assert_eq(sprite_get_bbox_left_relative(spr1), bblr);
+gtest_assert_eq(sprite_get_bbox_right_relative(spr1), bbrr);
+
+sprite_delete(spr1);
+sprite_delete(spr2);
+
+// reverse order
+spr1 = sprite_add("../data/sprite.png", 1, false, false, xoff, yoff);
+spr2 = sprite_add("../data/sprite.png", 4, false, false, xoff+4, yoff+4);
+}
+
+// setters
+for (unsigned i = 0; i < 2; i+=1) {
+int spr;
+if (i == 0) {
+  sprite_set_offset(spr1, 25, 32);
+  sprite_set_bbox(spr1, 12, 13, 45, 76);
+  spr = spr1;
+} else {
+  sprite_set_offset(spr2, 25, 32);
+  sprite_collision_mask(spr2, false, 0, 12, 13, 45, 76, 0, 0);
+  spr = spr2;
+}
+  
+gtest_assert_eq(sprite_get_xoffset(spr), 25);
+gtest_assert_eq(sprite_get_yoffset(spr), 32);
+
+gtest_assert_eq(sprite_get_bbox_left(spr), 12);
+gtest_assert_eq(sprite_get_bbox_top(spr), 13);
+gtest_assert_eq(sprite_get_bbox_right(spr), 45);
+gtest_assert_eq(sprite_get_bbox_bottom(spr), 76);
+gtest_assert_eq(sprite_get_bbox_left_relative(spr), 12-25);
+gtest_assert_eq(sprite_get_bbox_top_relative(spr), 13-32);
+gtest_assert_eq(sprite_get_bbox_right_relative(spr), 45-25);
+gtest_assert_eq(sprite_get_bbox_bottom_relative(spr), 76-32);
+}
+
+sprite_set_bbox_mode(spr1, 2);
+gtest_assert_eq(sprite_get_bbox_mode(spr1), 2);
+
+sprite_delete(spr1);
+sprite_delete(spr2);
+
+// alpha
+spr1 = sprite_create_color(256, 64, c_black);
+int spr_alpha = sprite_add("../data/alpha.png", 1, true, false, 0, 0, false);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 0), 255);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 32), 255);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 63), 255);
+sprite_set_alpha_from_sprite(spr1, spr_alpha);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 0), 255);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 32), 128);
+gtest_assert_eq(sprite_get_pixel(spr1, 0, 0, 63), 0);
+
+// save
+// Also checks our load / replace overloads
+spr1 = sprite_add("../data/sprite.png", 4, true, false, xoff, yoff, false);
+gtest_assert_eq(sprite_get_number(spr1), 4);
+
+for (int i = 0; i < sprite_get_number(spr1); i+=1) {
+  sprite_save(spr1, i, "/tmp/sprite.png");
+  int spr_frame = sprite_add("/tmp/sprite.png", 1, true, false, xoff, yoff, false);
+  gtest_assert_true(sprite_textures_equal(spr_frame, 0, spr1, i));
+}
+
+spr2 = sprite_add("/tmp/sprite.png", 1, false, false, xoff, yoff, false);
+gtest_assert_eq(sprite_get_width(spr2), sprite_get_width(spr1));
+gtest_assert_eq(sprite_get_height(spr2), sprite_get_height(spr1));
+gtest_assert_eq(sprite_get_number(spr2), 1);
+int spr_frame = sprite_add("/tmp/sprite.png", 1, true, false, xoff, yoff, false);
+gtest_assert_true(sprite_textures_equal(spr_frame, 0, spr2, 0));
+
+/*sprite_save_strip(spr1, "/tmp/sprite2.png");
+sprite_replace(spr2, "/tmp/sprite2.png", 1, false, false, xoff, yoff, false);
+gtest_assert_eq(sprite_get_width(spr2), sprite_get_width(spr1) * 4);
+gtest_assert_eq(sprite_get_height(spr2), sprite_get_height(spr1));
+gtest_assert_eq(sprite_get_number(spr2), 1);*/
+
+game_end();
