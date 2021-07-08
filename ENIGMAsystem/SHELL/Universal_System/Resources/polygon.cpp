@@ -3,6 +3,7 @@
 ***/
 
 #include "polygon_internal.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 #include <string>
 
 using enigma::Polygon;
@@ -36,5 +37,11 @@ namespace enigma_user {
 	}
 	void polygon_decompose(int id) {
 		polygons.get(id).decomposeConcave();
+	}
+	void polygon_set_scale(int id, double scale) {
+		polygons.get(id).setScale(scale);
+	}
+	void polygon_set_angle(int id, double angle) {
+		polygons.get(id).setAngle(angle);
 	}
 }

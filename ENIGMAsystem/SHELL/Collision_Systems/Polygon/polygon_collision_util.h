@@ -141,6 +141,18 @@ bool get_polygon_polygon_collision(double x1, double y1, double x2, double y2, e
     std::vector<enigma::Vector2D> normals_poly1 = polygon1.getNorms(x1, y1);
     std::vector<enigma::Vector2D> normals_poly2 = polygon2.getNorms(x2, y2);
 
+    // Debugging Part Starts
+    printf("\nScaled ( Height, Width ) = ( %f, %f )\n", polygon2.getScaledHeight(), polygon2.getScaledWidth());
+    printf("\nPolygon 2 Points inside get_polygon_polygon_collision:\n");
+    std::vector<enigma::Vector2D>::iterator it = points_poly2.begin();
+    while (it != points_poly2.end()) {
+        (*it).print();
+        printf("\t");
+        ++it;
+    }
+    printf("\n");
+    // Debugging Part Ends
+
     // Using polygon1 normals
     for (int i = 0; i < normals_poly1.size(); ++i) {
         enigma::MinMaxProjection result1, result2;

@@ -260,26 +260,12 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
     }
 
     // Getting Bounding Box for first polygon for Sweep and Prune
-    const enigma::BoundingBox &box = inst1->$bbox_relative();
-    const double xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
-                 ia1 = inst1->image_angle;
     int left1, top1, right1, bottom1;
-    get_border(&left1, &right1, &top1, &bottom1, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale1, yscale1, ia1);
-
-    // Debugging Part Starts
-    // printf("-----------------------------------------------------------------------------\n");
-    // printf("collide_inst_inst: object = %d, solid_only = %d, notme = %d, x = %d, y = %d\n", object, solid_only, notme, x, y);
-    // printf("inst1->polygon_index = %d\n", inst1->polygon_index);
-    // printf("size = %d\n", polygon1.getNumPoints());
-    // Debugging Part Ends
-
-    int num_instances = 0;
+    get_bbox_border(left1, top1, right1, bottom1, inst1);
 
     // Iterating over instances in the room to detect collision
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
-        ++num_instances;
-
         // Selecting the instance
         enigma::object_collisions* const inst2 = (enigma::object_collisions*)*it;
 
@@ -306,16 +292,15 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
         
         // Getting the Bounding box for the second polygon for sweep and prune check
         int left2, right2, top2, bottom2;
-        get_bbox_border(left2, right2, top2, bottom2, inst2);
+        get_bbox_border(left2, top2, right2, bottom2, inst2);
 
         // Main Sweep and Prune Check
         if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1) {
-            // printf("Bounding Box Collision is deteted!");
+            // printf("Bounding Box Collision is deteted!\n");
             if (collision_case == BBOX_VS_BBOX) {
                 return inst2;
             }
         } else {
-            // printf("Collision Check Pruned!\n");
             continue;
         }
 
@@ -338,7 +323,6 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
             break;
         } 
     }
-    // printf("num instances = %d\n", num_instances);
     return NULL;
 }
 

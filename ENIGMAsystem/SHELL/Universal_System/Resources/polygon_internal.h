@@ -11,7 +11,7 @@
 namespace enigma 
 {
 	#define NULL_POINT -1;
-	#define precision pow(4, -10)
+	// #define precision pow(4, -10);
 
 	// The Point class represents a point in a polygon
 	// Resource
@@ -46,7 +46,7 @@ namespace enigma
 
 			Vector2D add(const Vector2D& B);
 			Vector2D minus(const Vector2D& B);
-			Vector2D rotate(double angle);
+			Vector2D rotate(double angle, Vector2D origin);
 			Vector2D interpolate(double number);
 
 			double angleBetween(Vector2D& B);
@@ -69,6 +69,8 @@ namespace enigma
 			std::vector<std::vector<Vector2D>> subpolygons;
 			int height;
 			int width;
+			int scaledHeight;
+			int scaledWidth;
 			int xoffset;
 			int yoffset;
 			int numSubPolygons;
@@ -98,6 +100,8 @@ namespace enigma
 
 			int getHeight();
 			int getWidth();
+			int getScaledHeight();
+			int getScaledWidth();
 			int getXOffset();
 			int getYOffset();
 			double getScale();
@@ -105,6 +109,8 @@ namespace enigma
 
 			void setHeight(int h);
 			void setWidth(int w);
+			void setScaledHeight(int h);
+			void setScaledWidth(int w);
 			void setXOffset(int x);
 			void setYOffset(int y);
 			void setScale(double s);
