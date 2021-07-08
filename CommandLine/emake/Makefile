@@ -8,9 +8,6 @@ ifeq ($(OS), Darwin)
 	OS_LIBS=-lboost_program_options -lpthread -ldl
 else ifeq ($(UNIX_BASED), true)
 	OS_LIBS=-lboost_program_options -Wl,--no-as-needed -Wl,-rpath,./ -lpthread -ldl
-	ifeq ($(OS), DragonFly)
-		OS_LIBS+=-lstdc++fs
-	endif
 else
 	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options-mt -lpthread
 endif
