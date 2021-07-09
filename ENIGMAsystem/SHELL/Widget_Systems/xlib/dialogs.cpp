@@ -176,6 +176,10 @@ static void PpidFromPid(pid_t procId, pid_t *parentProcId) {
 }
 #endif
 
+#if defined(__DragonFly__)
+static kvm_t *kd = nullptr;
+#endif
+
 static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
   std::vector<pid_t> vec;
   #if CURRENT_PLATFORM_ID == OS_MACOSX
