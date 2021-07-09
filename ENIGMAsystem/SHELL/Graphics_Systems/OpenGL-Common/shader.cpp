@@ -32,7 +32,7 @@
 
 #include <cstring>      /* memcpy */
 #include <math.h>
-
+#include <string>
 #include <stdio.h>      /* printf, scanf, NULL */
 #include <stdlib.h>     /* malloc, free, rand */
 
@@ -257,27 +257,27 @@ void main()
 }
             )CODE";
   }
-  string getDefaultFragmentShader(){
-    return  R"CODE(
-
-in vec2 v_TextureCoord;
-in vec4 v_Color;
-out vec4 out_FragColor;
-
-void main()
-{
-  vec4 TexColor;
-  if (en_TexturingEnabled == true){
-    TexColor = texture( en_TexSampler, v_TextureCoord.st ) * v_Color;
-  }else{
-    TexColor = v_Color;
-  }
-  if (en_AlphaTestEnabled == true){
-    if (TexColor.a<=en_AlphaTestValue) discard;
-  }
-  out_FragColor = TexColor;
-}
-            )CODE";
+  string getDefaultFragmentShader() {
+    std::string returnstring = R"CODE(
+    in vec2 v_TextureCoord;
+    in vec4 v_Color;
+    out vec4 out_FragColor;
+    void main() {
+      vec4 TexColor;
+      if (en_TexturingEnabled == true) {
+        )CODE";
+        returnstring += enigma::texColorString;
+        returnstring += R"CODE(
+        } else {
+          TexColor = v_Color;
+        }
+        if (en_AlphaTestEnabled == true) {
+          if (TexColor.a<=en_AlphaTestValue) discard;
+        }
+        out_FragColor = TexColor;
+    }
+    )CODE";
+    return returnstring;
   }
   void getUniforms(int prog_id){
     int uniform_count, max_length, uniform_count_arr = 0;
