@@ -2,9 +2,11 @@
 #include "Graphics_Systems/OpenGL-Common/textures_impl.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/OpenGL-Common/shader.h"
+#include <string>
 
 namespace enigma {
-
+  std::string texColorString = "TexColor.bgra = texture( en_TexSampler, v_TextureCoord.st ).rgba * v_Color;";
 void graphics_state_flush_samplers() {
   for (int i = 0; i < 8; ++i) {
     const Sampler& sampler = samplers[i];

@@ -26,7 +26,7 @@ Parser-Vars:
 EXE-Vars:
   resources: android/enigma/src/main/assets/resources.res
   resources_in: resources.res
-  Build-Extension:
-  Run-output:
+  Build-Extension: .apk
+  Run-output: $tempfile
   Run-Program:
   Run-Params:

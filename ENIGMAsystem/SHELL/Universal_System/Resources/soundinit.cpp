@@ -21,9 +21,9 @@
 #include "libEGMstd.h"
 #include "resinit.h"
 #include "Universal_System/zlib.h"
+#include "Platforms/General/fileio.h"
 
 #include <cstring>
-#include <cstdio>
 
 namespace enigma_user {
   void sound_play(int sound);
@@ -36,32 +36,32 @@ namespace enigma
 
   }
 
-  void exe_loadsounds(FILE *exe)
+  void exe_loadsounds(FILE_t *exe)
   {
     int nullhere;
 
-    if (!fread(&nullhere,4,1,exe)) return;
+    if (!fread_wrapper(&nullhere,4,1,exe)) return;
     if (memcmp(&nullhere, "SND ", sizeof(int)) != 0)
       return;
 
     // Determine how many sprites we have
     int sndcount;
-    if (!fread(&sndcount,4,1,exe)) return;
+    if (!fread_wrapper(&sndcount,4,1,exe)) return;
 
     // Fetch the highest ID we will be using
     int snd_highid;
-    if (!fread(&snd_highid,4,1,exe)) return;
+    if (!fread_wrapper(&snd_highid,4,1,exe)) return;
 
     for (int i = 0; i < sndcount; i++)
     {
       int id;
-      if (!fread(&id,1,4,exe)) return;
+      if (!fread_wrapper(&id,1,4,exe)) return;
 
       unsigned size;
-      if (!fread(&size,1,4,exe)) return;
+      if (!fread_wrapper(&size,1,4,exe)) return;
 
       char* fdata = new char[size];
-      if (!fread(fdata,1,size,exe)) return;
+      if (!fread_wrapper(fdata,1,size,exe)) return;
 
       int e = sound_add_from_buffer(id,fdata,size);
       if (e) DEBUG_MESSAGE("Failed to load sound " + std::to_string(i) + " error " + std::to_string(e), MESSAGE_TYPE::M_ERROR);

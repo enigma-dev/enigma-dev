@@ -970,7 +970,7 @@
 		<Unit filename="Universal_System/estring.cpp" />
 		<Unit filename="Universal_System/estring.h" />
 		<Unit filename="Universal_System/fileio.cpp" />
-		<Unit filename="Universal_System/fileio.h" />
+		<Unit filename="Universal_System/Platforms/General/fileio.h" />
 		<Unit filename="Universal_System/Resources/fontinit.cpp" />
 		<Unit filename="Universal_System/Resources/fontstruct.cpp" />
 		<Unit filename="Universal_System/fontstruct.h" />

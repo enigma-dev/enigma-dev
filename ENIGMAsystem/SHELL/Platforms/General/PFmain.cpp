@@ -67,7 +67,7 @@ void set_program_args(int argc, char** argv) {
 int enigma_main(int argc, char** argv) {
   // Initialize directory globals
   initialize_directory_globals();
-
+  
   // Copy our parameters
   set_program_args(argc, argv);
 

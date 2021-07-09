@@ -77,11 +77,6 @@ int graphics_create_texture_custom(const RawImage& img, bool mipmap, unsigned* f
   return id;
 }
 
-int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight)
-{
-  return graphics_create_texture_custom(img, mipmap, fullwidth, fullheight, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE);
-}
-
 void graphics_delete_texture(int texid) {
   if (texid >= 0) {
     const GLuint peer = get_texture_peer(texid);
@@ -104,18 +99,6 @@ unsigned char* graphics_copy_texture_pixels(int texture, int x, int y, int width
   delete[] pxdata;
 
   return cropped;
-}
-
-void graphics_push_texture_pixels(int texture, int x, int y, int width, int height, unsigned char* pxdata) {
-  glBindTexture(GL_TEXTURE_2D, get_texture_peer(texture));
-
-  glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
-}
-
-void graphics_push_texture_pixels(int texture, int width, int height, unsigned char* pxdata) {
-  glBindTexture(GL_TEXTURE_2D, get_texture_peer(texture));
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
 }
 
 } // namespace enigma

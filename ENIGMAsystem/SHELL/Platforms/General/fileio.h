@@ -15,9 +15,24 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/* Simple, intuitive, integer based file I/O */
-#ifndef ENIGMA_FILEIO_H
-#define ENIGMA_FILEIO_H
+#ifndef FILEIO_H
+#define FILEIO_H
+
+#include  "file_t.h"
+
+#include <cstdint>
+
+size_t fread_wrapper(void* ptr, size_t size, size_t maxnum, FILE_t* context);
+FILE_t* fopen_wrapper(const char* fname, const char* mode);
+FILE_t* freopen_wrapper(const char* fname, const char* mode, FILE_t* context);
+int64_t fseek_wrapper(FILE_t* context, int64_t offset, int whence);
+int fclose_wrapper(FILE_t* context);
+int fgetc_wrapper(FILE_t* context);
+char* fgets_wrapper(char* str, int num, FILE_t* context);
+int fputc_wrapper(int character, FILE_t* context);
+int feof_wrapper(FILE_t* context);
+int64_t ftell_wrapper(FILE_t* context);
+size_t fwrite_wrapper(const void *ptr, size_t size, size_t count, FILE_t* context);
 
 #include <string>
 
@@ -48,4 +63,4 @@ int file_bin_read_byte(int fileid);
 
 } //namespace enigma_user
 
-#endif //ENIGMA_FILEIO_H
+#endif

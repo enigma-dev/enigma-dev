@@ -1,7 +1,7 @@
-SOURCES += $(wildcard Graphics_Systems/OpenGLES/*.cpp) $(wildcard Graphics_Systems/General/*.cpp)
-override CXXFLAGS += -IBridges/OpenGLES
+SOURCES += $(wildcard Graphics_Systems/OpenGLES/*.cpp) $(wildcard Graphics_Systems/OpenGLES/wrappers/*.cpp) $(wildcard Graphics_Systems/General/*.cpp)
 
-override LDLIBS += -lepoxy
+override CXXFLAGS += -IBridges/OpenGLES -IGraphics_Systems/OpenGLES/wrappers
+override CFLAGS += -I$(ENIGMA_ROOT)/android/external/glm
 
 ifeq ($(TARGET-PLATFORM), Windows)
 	override LDLIBS += -lopengl32

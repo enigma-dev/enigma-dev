@@ -1,3 +1,5 @@
+include Platforms/General/Makefile
+
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	SOURCES += $(wildcard Platforms/General/POSIX/Linux/*.cpp)

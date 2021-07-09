@@ -8,11 +8,12 @@
 # PLATFORM { Platforms/* }
 include ../../Config.mk
 
+ENIGMA_ROOT := ../../
+
 MAKE_TARGETS :=
 ifeq ($(TARGET-PLATFORM), Android)
 	MAKE_TARGETS += android_game
 	BASENAME := $(shell basename $(OUTPUTNAME))
-	SDL_CSTDIO := TRUE
 	ifeq ($(GMODE), Compile)
 		GRADLE_TARGET := build
 		APK_OUT := $(WORKDIR)/android/enigma/outputs/apk/release
@@ -142,12 +143,18 @@ else
 	RESOURCEBINARY := $(OBJDIR)/resources.res
 endif
 
+
 ############
 # building #
 ############
 
 write_src_files:
-	@echo "$(SOURCES)" > $(WORKDIR)/sources.list
+	@echo "$(SOURCES)" > $(WORKDIR)/sources.in
+	@echo "$(CXXFLAGS) $(CPPFLAGS)" > $(WORKDIR)/cxxflags.in
+	@echo "$(CFLAGS)" > $(WORKDIR)/cflags.in
+	@echo "$(ANDROID_SHARED_LIBRARIES)" > $(WORKDIR)/libs.in
+	@echo "$(ANDROIS_LDLIBS)" > $(WORKDIR)/ldlibs.in
+	@echo "$(ANDROID_MAKEFILES)" > $(WORKDIR)/makefiles.in
 
 android_game: write_src_files
 	@cd ../../android && BASENAME=$(BASENAME) CODEGEN=$(CODEGEN) ./gradlew $(GRADLE_TARGET)

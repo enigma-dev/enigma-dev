@@ -197,4 +197,8 @@ void d3d_set_software_vertex_processing(bool software) {
   d3ddev->SetSoftwareVertexProcessing(software);
 }
 
+void d3d_enable_scissor_test(bool enable) {
+  enigma_user::DEBUG_MESSAGE("d3d_enable_scissor_test is not implemented yet",MESSAGE_TYPE::M_WARNING);
+} 
+
 } // namespace enigma_user
