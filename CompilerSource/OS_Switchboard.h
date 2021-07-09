@@ -21,7 +21,7 @@
   #define CURRENT_PLATFORM_NAME "FreeBSD"
   #define CURRENT_PLATFORM_ID   OS_FREEBSD
 #elif defined(__DragonFly__)
-  #define CURRENT_PLATFORM_NAME "DragonFly"
+  #define CURRENT_PLATFORM_NAME "DragonFlyBSD"
   #define CURRENT_PLATFORM_ID   OS_DRAGONFLY
 #elif defined(unix) || defined(__unix) || defined(__unix__)
   #define CURRENT_PLATFORM_NAME "Linux"
