@@ -27,26 +27,32 @@
 #ifndef PARSE_BASICS_OLD_H
 #define PARSE_BASICS_OLD_H
 
-typedef size_t pt;
-
-inline bool is_letter(char x)
-{
-  return (x>='a' and x<='z') or (x>='A' and x<='Z') or (x=='_');
+inline bool is_letter(char x) {
+  return (x>='a' && x<='z') || (x>='A' && x<='Z') || (x=='_');
 }
 
-inline bool is_digit(char x)
-{
-  return x>='0' and x<='9';
+inline bool is_digit(char x) {
+  return x>='0' && x<='9';
 }
 
-inline bool is_hexdigit(char x)
-{
-  return (x>='0' and x<='9') or (x>='A' and x<='F') or (x>='a' and x<='f');
+inline bool is_hexdigit(char x) {
+  return (x>='0' && x<='9') || (x>='A' && x<='F') || (x>='a' && x<='f');
 }
 
-inline bool is_letterd(char x)
-{
-  return  (x>='a' and x<='z') or (x>='A' and x<='Z') or (x=='_') or (x>='0' and x<='9');
+inline bool is_nybble(char x) {
+  return is_hexdigit(x);
+}
+
+inline bool is_octal(char x) {
+  return (x>='0' && x<='7');
+}
+
+inline bool is_bit(char x) {
+  return x == '0' || x == '1';
+}
+
+inline bool is_letterd(char x) {
+  return is_letter(x) || is_digit(x);
 }
 inline bool is_letterdd(char x)
 {

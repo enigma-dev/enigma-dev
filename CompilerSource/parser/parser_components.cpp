@@ -34,7 +34,6 @@ using namespace std;
 #include "darray.h"
 
 #include "general/parse_basics_old.h"
-#include "general/macro_integration.h"
 #include "compiler/output_locals.h"
 #include "languages/language_adapter.h"
 
@@ -84,23 +83,34 @@ int quicktype(unsigned flags, string name)
 ///And lex code into synt.
 //Compatibility considerations:
 //'123.45' with '000.00', then '.0' with '00'. Do *not* replace '0.' with '00'.
-int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<string> &string_in_code)
+int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<string> &string_in_code, const enigma::parsing::ParseContext &ctex)
 {
+  size_t reserve_size = code.length();
+  enigma::parsing::ErrorCollector herr;
+  enigma::parsing::Lexer lex(std::move(code), &ctex, &herr);
+  if (herr.errors.size()) {
+    std::cerr << "Error collector has " << herr.errors.size()
+              << " errors, but syntax check succeeded?" << std::endl;
+  }
+  auto &copts = ctex.compatibility_opts;
+
+  // Rebuild the code from the lex, so we can do the old lex.
+  // This whole routine should go away next cycle.
+  code.clear();
+  code.reserve(reserve_size);
+  std::string_view last_content;
+  for (enigma::parsing::Token t; (t = lex.ReadToken()).type != enigma::parsing::TT_ENDOFCODE; ) {
+    if (code.size() && t.content.data() != last_content.data() + last_content.length())
+      code.append(" ");
+    last_content = t.content;
+    code.append(t.content);
+  }
+
   string codo = synt = code;
   pt pos = 0, bpos = 0;
   char last_token = ' '; //Space is actually invalid. Heh.
   
-  unsigned mymacroind = 0;
-  macro_stack_t mymacrostack;
-  
-  for (;;)
-  { if (pos >= code.length()) {
-      if (mymacroind)
-        mymacrostack[--mymacroind].release(code,pos);
-      else break;
-      continue;
-    }
-    
+  while (pos < code.length()) {
     //cout << synt.substr(0,bpos) << endl;
     
     if (is_letter(code[pos]))
@@ -125,29 +135,6 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         codo[bpos] = 'd', synt[bpos++] = '@';
         last_token = '@';
         continue;
-      }
-
-      jdi::macro_iter_c itm = main_context->get_macros().find(name);
-      if (itm != main_context->get_macros().end())
-      {
-        if (!macro_recurses(name,mymacrostack,mymacroind))
-        {
-          string macrostr;
-          if (itm->second->argc != -1) {
-            vector<string> mpvec;
-            jdip::macro_function* mf = (jdip::macro_function*)itm->second;
-            jdip::lexer_cpp::parse_macro_params(mf, main_context->get_macros(), code.c_str(), pos, code.length(), mpvec, jdip::token_t(), jdi::def_error_handler);
-            char *mss, *mse; mf->parse(mpvec, mss, mse, jdip::token_t());
-            macrostr = string (mss, mse);
-          }
-          else
-            macrostr = ((jdip::macro_scalar*)itm->second)->value;
-          mymacrostack[mymacroind++].grab(name,code,pos);
-          code = macrostr; pos = 0;
-          codo.append(macrostr.length(),' ');
-          synt.append(macrostr.length(),' ');
-          continue;
-        }
       }
       
       char c = 'n', cprime = 0;
@@ -215,8 +202,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
     if (code[pos] == '"')
     {
       string str;
-      const pt spos = pos;
-      if (setting::use_cpp_escapes)
+      const size_t spos = pos;
+      if (copts.use_cpp_escapes)
       {
         while (code[++pos] != '"')
           if (code[pos] == '\\') pos++;
@@ -236,7 +223,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
     {
       string str;
       const pt spos = pos;
-      if (setting::use_cpp_escapes)
+      if (copts.use_cpp_escapes)
       {
         while (code[++pos] != '\'')
           if (code[pos] == '\\') pos++;
@@ -248,7 +235,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         str = (code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
-      codo[bpos] = synt[bpos] = last_token = setting::use_cpp_strings? '\'' : '\"';
+      codo[bpos] = synt[bpos] = last_token = copts.use_cpp_strings? '\'' : '\"';
       bpos++;
       continue;
     }
@@ -785,9 +772,9 @@ const char * indent_chars   =  "\n                                \
                                                                   \
                                                                   \
                                                                   ";
-static inline string string_settings_escape(string n)
-{
-  if (!setting::use_cpp_strings) {
+static inline string string_settings_escape(
+    string n, const setting::CompatibilityOptions &compat_opts) {
+  if (!compat_opts.use_cpp_strings) {
     if (!n.length()) return "\"\"";
     if (n[0] == '\'' and n[n.length()-1] == '\'')
       n[0] = n[n.length() - 1] = '"';
@@ -828,8 +815,7 @@ static inline string string_settings_escape(string n)
   return n;
 }
 
-void print_to_file(string code,string synt,const unsigned int strc, const varray<string> &string_in_code,int indentmin_b4,ofstream &of)
-{
+void print_to_file(const enigma::parsing::ParseContext &ctex, string code,string synt,const unsigned int strc, const varray<string> &string_in_code,int indentmin_b4,ofstream &of) {
   //FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
   FILE* of_ = fopen("/home/josh/Desktop/parseout.txt","ab");
   if (of_) { fprintf(of_,"%s\n%s\n\n\n",code.c_str(), synt.c_str()); fclose(of_); }
@@ -890,7 +876,7 @@ void print_to_file(string code,string synt,const unsigned int strc, const varray
       case '"': case '\'':
           if (pars) pars--;
             if (str_ind >= strc) cout << "What the string literal.\n";
-            of << string_settings_escape(string_in_code[str_ind]).c_str();
+            of << string_settings_escape(string_in_code[str_ind], ctex.compatibility_opts).c_str();
             str_ind++;
             if (synt[pos+1] == '+' and synt[pos+2] == '"')
               synt[pos+1] = code[pos+1] = ' ';

@@ -46,7 +46,7 @@ void lang_CPP::load_extension_locals() {
     jdi::definition_scope *const iscope = (jdi::definition_scope*) implements;
     for (jdi::definition_scope::defiter it = iscope->members.begin(); it != iscope->members.end(); ++it) {
       if ((!it->second->flags) & jdi::DEF_TYPED) { cout << "WARNING: Non-scalar `" << it->first << "' ignored." << endl; continue; }
-        shared_object_locals.insert(it->second->name);
+        shared_object_locals_.insert(it->second->name);
     }
   }
 }
@@ -79,7 +79,7 @@ void parser_init();
 syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targetYaml)
 {
   cout << "Parsing settings..." << endl;
-    parse_ide_settings(targetYaml);
+  parse_ide_settings(targetYaml, &compatibility_opts_);
   
   cout << targetYaml << endl;
   
@@ -197,21 +197,21 @@ int lang_CPP::load_shared_locals() {
   // Find the parent object
   cout << "Found parent scope" << endl;
 
-  shared_object_locals.clear();
+  shared_object_locals_.clear();
 
   //Iterate the tiers of the parent object
   for (jdi::definition_class *cs = pclass; cs; cs = (cs->ancestors.size() ? cs->ancestors[0].def : NULL) )
   {
     cout << " >> Checking ancestor " << cs->name << endl;
     for (jdi::definition_scope::defiter mem = cs->members.begin(); mem != cs->members.end(); ++mem)
-      shared_object_locals.insert(mem->first);
+      shared_object_locals_.insert(mem->first);
   }
 
   load_extension_locals();
   return 0;
 }
 
-jdi::definition* lang_CPP::look_up(const string &name) {
+jdi::definition* lang_CPP::look_up(const string &name) const {
   auto builtin = jdip::builtin_declarators.find(name);
   if (builtin != jdip::builtin_declarators.end()) return builtin->second->def;
   return namespace_enigma_user->find_local(name);
