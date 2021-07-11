@@ -30,11 +30,7 @@
 #include <API/compile_settings.h>
 #include <iostream>
 
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-
-#if !defined(__APPLE__) && !defined(BSD)
+#if !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(__DragonFly__)
 #include <malloc.h>
 #endif
 
