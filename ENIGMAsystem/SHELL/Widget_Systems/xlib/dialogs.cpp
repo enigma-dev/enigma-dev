@@ -90,16 +90,17 @@ static bool kwin_running() {
   return bKWinRunning;
 }
 
+static unsigned long *widget_icon = nullptr;
 static void XSetIconFromSprite(Display *display, Window window, int ind, int subimg) {
+  if (widget_icon) delete[] widget_icon;
   XSynchronize(display, True);
   Atom property = XInternAtom(display, "_NET_WM_ICON", False);
   RawImage img = sprite_get_raw(ind, subimg);
   if (img.pxdata == nullptr) return;
   unsigned elem_numb = 2 + img.w * img.h;
-  unsigned long *result = bgra_to_argb(img.pxdata, img.w, img.h, true);
-  XChangeProperty(display, window, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)result, elem_numb);
+  unsigned long *widget_icon = bgra_to_argb(img.pxdata, img.w, img.h, true);
+  XChangeProperty(display, window, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)widget_icon, elem_numb);
   XFlush(display);
-  delete[] result;
 }
 
 static unsigned long GetActiveWidOrWindowPid(Display *display, Window window, bool wid) {
