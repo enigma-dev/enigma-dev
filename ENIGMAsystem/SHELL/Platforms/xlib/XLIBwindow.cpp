@@ -177,7 +177,7 @@ void window_set_visible(bool visible) {
       XSynchronize(disp, True);
       unsigned elem_numb = 2 + 256 * 256;
       Atom property = XInternAtom(disp, "_NET_WM_ICON", False);
-      XChangeProperty(disp, win, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)joshcontroller, elem_numb);
+      XChangeProperty(disp, win, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)window_icon_default, elem_numb);
       XFlush(disp);
     }
   } else {
