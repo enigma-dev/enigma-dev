@@ -1,12 +1,17 @@
 OS := $(shell uname -s)
-XLIB_ICON := $(shell /bin/bash -c 'cd Platforms/xlib/;chmod 777 ./joshcontroller.sh')
-XLIB_ICON += $(shell /bin/bash -c 'cd Platforms/xlib/;./joshcontroller.sh joshcontroller.png > joshcontroller.h')
+XLIB_ICON := $(shell /bin/sh -c 'cd Platforms/xlib/;chmod 777 xicon.sh')
+XLIB_ICON += $(shell /bin/sh -c 'cd Platforms/xlib/;./xicon.sh')
 ifeq ($(OS), Linux)
 	SOURCES += $(wildcard Platforms/General/POSIX/Linux/*.cpp)
 	SOURCES += $(wildcard Platforms/xlib/Linux/*.cpp)
 	override CXXFLAGS += -IPlatforms/xlib/Linux/
 	override CFLAGS += -IPlatforms/xlib/Linux/
 else ifeq ($(OS), FreeBSD)
+	SOURCES += $(wildcard Platforms/General/POSIX/BSD/*.cpp)
+	SOURCES += $(wildcard Platforms/xlib/BSD/*.cpp)
+	override CXXFLAGS += -IPlatforms/xlib/BSD/
+	override CFLAGS += -IPlatforms/xlib/BSD/
+else ifeq ($(OS), DragonFly)
 	SOURCES += $(wildcard Platforms/General/POSIX/BSD/*.cpp)
 	SOURCES += $(wildcard Platforms/xlib/BSD/*.cpp)
 	override CXXFLAGS += -IPlatforms/xlib/BSD/

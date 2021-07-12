@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "joshcontroller.h"
+#include "out.h"
 
 #include <X11/Xlib.h>
 
