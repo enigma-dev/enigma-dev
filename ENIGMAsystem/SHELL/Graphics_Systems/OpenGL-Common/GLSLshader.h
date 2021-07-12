@@ -108,6 +108,11 @@ namespace enigma {
         GLint uni_textureEnable;
         GLint uni_colorEnable;
         GLint uni_lightEnable;
+        GLint uni_fogVSEnable;
+        GLint uni_fogPSEnable;
+        GLint uni_fogColor;
+        GLint uni_fogStart;
+        GLint uni_fogRange;
         GLint uni_alphaTestEnable;
 
         GLint uni_color;

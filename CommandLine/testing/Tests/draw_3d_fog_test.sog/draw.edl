@@ -1,0 +1,22 @@
+// look down the y axis at rows of spheres
+// all spheres in a row should be the same color because we use planar fog not range based
+d3d_set_projection_ext(0,-10,15,0,0,15,0,0,1,60,1.333,0,300);
+// if the floor is all purple, it's vertex fog
+// if the floor is normal, it's pixel fog
+d3d_set_fog(true, c_purple, 0, 300);
+d3d_draw_floor(-1000,-1000,0,1000,1000,0,-1,1,1);
+d3d_set_fog(true, c_black, 0, 300);
+var sep;
+sep = 10;
+for (i = 0; i < 20; i += 1) {
+    for (j = 0; j < 20; j += 1) {
+        var xx, yy;
+        xx = i * sep - 10 * sep;
+        yy = j * sep;
+        d3d_draw_ellipsoid(
+            xx - 1, yy - 1, 5,
+            xx + 1, yy + 1, 7,
+            -1, 1, 1, 10
+        );
+    }
+}

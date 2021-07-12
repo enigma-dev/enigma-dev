@@ -90,6 +90,15 @@ void graphics_state_flush_lighting(const glm::mat4& mv_matrix, const glm::mat3& 
   enigma_user::glsl_uniformi(current_shader->uni_lights_active, d3dLightsActive);
 }
 
+void graphics_state_flush_fog() {
+  const auto& current_shader = enigma::shaderprograms[enigma::bound_shader];
+
+  const float glFogColor[] = {COL_GET_Rf(d3dFogColor),COL_GET_Gf(d3dFogColor),COL_GET_Bf(d3dFogColor),1.0f};
+  enigma_user::glsl_uniform4fv(current_shader->uni_fogColor, 1, glFogColor);
+  enigma_user::glsl_uniformf(current_shader->uni_fogStart, d3dFogStart);
+  enigma_user::glsl_uniformf(current_shader->uni_fogRange, d3dFogEnd);
+}
+
 void graphics_state_flush_stencil() {
   glStencilMask(d3dStencilMask);
   glStencilFunc(depthoperators[d3dStencilFunc], d3dStencilFuncRef, d3dStencilFuncMask);
@@ -137,6 +146,8 @@ void graphics_state_flush() {
 
   enigma_user::glsl_uniformi(current_shader->uni_lightEnable, d3dLighting);
   if (d3dLighting) graphics_state_flush_lighting(mv_matrix, normal_matrix);
+  enigma_user::glsl_uniformi(current_shader->uni_fogPSEnable, d3dFogEnabled);
+  if (d3dFogEnabled) graphics_state_flush_fog();
 }
 
 } // namespace enigma
