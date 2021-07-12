@@ -234,7 +234,7 @@ static void *modify_shell_dialog(void *pid) {
     XSynchronize(display, True);
     unsigned elem_numb = 2 + 256 * 256;
     Atom property = XInternAtom(display, "_NET_WM_ICON", False);
-    XChangeProperty(display, wid, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)joshcontroller, elem_numb);
+    XChangeProperty(display, wid, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)window_icon_default, elem_numb);
     XFlush(display);
   }
   XSetTransientForHint(display, wid, (Window)(std::intptr_t)enigma_user::window_handle());
