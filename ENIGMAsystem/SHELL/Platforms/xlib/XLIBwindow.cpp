@@ -22,15 +22,18 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/image_formats.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/backgrounds.h"
 
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"
 #include "XLIBwindow.h"  // Type insurance for non-mandatory functions
+#include "joshcontroller.h"
 #include "XLIBicon.h"
 
 #include <X11/Xlib.h>
+#include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <stdio.h>   //printf, NULL
 #include <stdlib.h>  //malloc
@@ -165,16 +168,25 @@ wid_t window_get_identifier(window_t hwnd) {
   return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
 }
 
+static int currentIconIndex = -1;
+static unsigned currentIconFrame;
+static std::unique_ptr<unsigned long> window_icon = nullptr;
+
 void window_set_visible(bool visible) {
   if (visible) {
     XMapRaised(disp, win);
+    if (!sprite_exists(currentIconIndex)) {
+      XSynchronize(disp, True);
+      unsigned elem_numb = 2 + 256 * 256;
+      Atom property = XInternAtom(disp, "_NET_WM_ICON", False);
+      window_icon.reset(enigma::bgra_to_argb(joshcontroller, 256, 256, true));
+      XChangeProperty(disp, win, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)window_icon.get(), elem_numb);
+      XFlush(disp);
+    }
   } else {
     XUnmapWindow(disp, win);
   }
 }
-
-static int currentIconIndex = -1;
-static unsigned currentIconFrame;
 
 int window_get_icon_index() {
   return currentIconIndex;
