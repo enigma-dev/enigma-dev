@@ -1,4 +1,6 @@
 OS := $(shell uname -s)
+XLIB_ICON := $(shell /bin/bash -c 'cd Platforms/xlib/;chmod 777 ./joshcontroller.sh')
+XLIB_ICON += $(shell /bin/bash -c 'cd Platforms/xlib/;./joshcontroller.sh joshcontroller.png > joshcontroller.h')
 ifeq ($(OS), Linux)
 	SOURCES += $(wildcard Platforms/General/POSIX/Linux/*.cpp)
 	SOURCES += $(wildcard Platforms/xlib/Linux/*.cpp)
