@@ -34,6 +34,7 @@
 #include "Widget_Systems/General/WSdialogs.h"
 
 #include "Universal_System/image_formats.h"
+#include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/sprites_internal.h"
 
 #include "Universal_System/estring.h"
