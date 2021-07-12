@@ -93,12 +93,17 @@ static bool kwin_running() {
 
 static std::unique_ptr<unsigned long> widget_icon = nullptr;
 static void XSetIconFromSprite(Display *display, Window window, int ind, int subimg) {
+  unsigned elem_numb = 3;
   XSynchronize(display, True);
+  unsigned long emptyspr[3] = { 1, 1, 0 };
+  widget_icon.reset(emptyspr);
   Atom property = XInternAtom(display, "_NET_WM_ICON", False);
-  RawImage img = sprite_get_raw(ind, subimg);
-  if (img.pxdata == nullptr) return;
-  unsigned elem_numb = 2 + img.w * img.h;
-  widget_icon.reset(bgra_to_argb(img.pxdata, img.w, img.h, true));
+  if (enigma_user::sprite_exists(ind)) {
+    RawImage img = sprite_get_raw(ind, subimg);
+    if (img.pxdata == nullptr) return;
+    elem_numb = 2 + img.w * img.h;
+    widget_icon.reset(bgra_to_argb(img.pxdata, img.w, img.h, true));
+  }
   XChangeProperty(display, window, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)widget_icon.get(), elem_numb);
   XFlush(display);
 }
