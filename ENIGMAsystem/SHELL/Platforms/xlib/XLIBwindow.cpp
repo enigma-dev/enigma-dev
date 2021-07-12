@@ -176,12 +176,10 @@ void window_set_visible(bool visible) {
     XMapRaised(disp, win);
     if (!sprite_exists(currentIconIndex)) {
       XSynchronize(disp, True);
-      unsigned elem_numb = 2 + 128 * 128;
+      unsigned elem_numb = 2 + 256 * 256;
       Atom property = XInternAtom(disp, "_NET_WM_ICON", False);
-      unsigned long *res = enigma::bgra_to_argb((unsigned char *)joshcontroller, 128, 128, true);
-      XChangeProperty(disp, win, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)res, elem_numb);
+      XChangeProperty(disp, win, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)joshcontroller, elem_numb);
       XFlush(disp);
-      delete[] res;
     }
   } else {
     XUnmapWindow(disp, win);
