@@ -294,9 +294,9 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
       vector<pid_t> vec; int cntp;
       if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
-        for (int j = 0; j < cntp; j++) {
-          if (proc_info[j].ki_ppid == parentProcId) {
-            vec.push_back(proc_info[j].ki_pid);
+        for (int i = 0; i < cntp; i++) {
+          if (proc_info[i].ki_ppid == parentProcId) {
+            vec.push_back(proc_info[i].ki_pid);
           }
         }
         free(proc_info);
@@ -308,12 +308,12 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       char errbuf[_POSIX2_LINE_MAX];
       vector<pid_t> vec; kinfo_proc *proc_info = nullptr; 
       const char *nlistf, *memf; nlistf = memf = "/dev/null";
-      kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return vec;
+      kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return vec;
       int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
-        for (int j = 0; j < cntp; j++) {
-          if (proc_info[j].kp_pid >= 0 && proc_info[j].kp_ppid >= 0 && 
-            proc_info[j].kp_ppid == parentProcId) {
-            vec.push_back(proc_info[j].kp_pid);
+        for (int i = 0; i < cntp; i++) {
+          if (proc_info[i].kp_pid >= 0 && proc_info[i].kp_ppid >= 0 && 
+            proc_info[i].kp_ppid == parentProcId) {
+            vec.push_back(proc_info[i].kp_pid);
           }
         }
         free(proc_info);
@@ -335,10 +335,10 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       vector<pid_t> proc_info(cntp);
       std::fill(proc_info.begin(), proc_info.end(), 0);
       proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
-      for (int j = cntp; j > 0; j--) {
-        if (proc_info[j] == 0) { continue; }
-        if (parentProcId == ParentProcIdFromProcId(proc_info[j])) {
-          vec.push_back(proc_info[j]);
+      for (int i = cntp; i > 0; i--) {
+        if (proc_info[i] == 0) { continue; }
+        if (parentProcId == ParentProcIdFromProcId(proc_info[i])) {
+          vec.push_back(proc_info[i]);
         }
       }
       return vec;
