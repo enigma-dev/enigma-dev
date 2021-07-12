@@ -9,6 +9,11 @@ else ifeq ($(OS), FreeBSD)
 	SOURCES += $(wildcard Platforms/xlib/BSD/*.cpp)
 	override CXXFLAGS += -IPlatforms/xlib/BSD/
 	override CFLAGS += -IPlatforms/xlib/BSD/
+else ifeq ($(OS), DragonFly)
+	SOURCES += $(wildcard Platforms/General/POSIX/BSD/*.cpp)
+	SOURCES += $(wildcard Platforms/xlib/BSD/*.cpp)
+	override CXXFLAGS += -IPlatforms/xlib/BSD/
+	override CFLAGS += -IPlatforms/xlib/BSD/
 endif
 SOURCES += $(wildcard Platforms/xlib/*.cpp) $(wildcard Platforms/General/POSIX/*.cpp) Platforms/General/PFshell/PFshell.cpp
 override CXXFLAGS += $(shell pkg-config x11 --cflags)
