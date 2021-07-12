@@ -16,6 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <memory>
+
 #include "XLIBicon.h"
 
 #include "Universal_System/image_formats.h"
@@ -30,8 +32,7 @@ static std::unique_ptr<unsigned long> window_icon = nullptr;
 void XSetIconFromSprite(Display *display, Window window, int ind, int subimg) {
   unsigned elem_numb = 3;
   XSynchronize(display, True);
-  unsigned long emptyspr[3] = { 1, 1, 0 };
-  window_icon.reset(emptyspr);
+  window_icon.reset(nullptr);
   Atom property = XInternAtom(display, "_NET_WM_ICON", False);
   if (enigma_user::sprite_exists(ind)) {
     RawImage img = sprite_get_raw(ind, subimg);
