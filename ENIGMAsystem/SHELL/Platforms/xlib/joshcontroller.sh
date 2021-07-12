@@ -9,7 +9,7 @@ echo ""
 echo "  #!/bin/sh"
 echo '  cd "${0%/*}"'
 echo "  echo 'static unsigned long joshcontroller[] = {'"
-echo "  identify -format '%w, %h,\\\n' \$1"
+echo "  identify -format '%w, %h,\n' \$1"
 echo "  convert \$1 -color-matrix '0 0 1 0, 0 1 0 0, 1 0 0 0, 0 0 0 1' RGBA:- | hexdump -v -e '1/4 "0x%08x,\\\n"'"
 echo "  echo '};'"
 echo ""
