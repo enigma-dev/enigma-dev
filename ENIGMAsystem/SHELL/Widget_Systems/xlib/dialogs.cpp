@@ -24,7 +24,6 @@
 #include <thread>
 #include <chrono>
 #include <vector>
-#include <memory>
 
 #include "dialogs.h"
 
@@ -33,11 +32,8 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
 
-#include "Universal_System/image_formats.h"
-#include "Universal_System/Resources/sprites.h"
-#include "Universal_System/Resources/sprites_internal.h"
-
 #include "Universal_System/estring.h"
+#include "Platforms/xlib/XLIBicon.h"
 #include "Platforms/General/PFwindow.h"
 
 #include <sys/types.h>
@@ -90,23 +86,6 @@ static bool kwin_running() {
   bool bKWinRunning = (aKWinRunning != None);
   XCloseDisplay(d);
   return bKWinRunning;
-}
-
-static std::unique_ptr<unsigned long> widget_icon = nullptr;
-static void XSetIconFromSprite(Display *display, Window window, int ind, int subimg) {
-  unsigned elem_numb = 3;
-  XSynchronize(display, True);
-  unsigned long emptyspr[3] = { 1, 1, 0 };
-  widget_icon.reset(emptyspr);
-  Atom property = XInternAtom(display, "_NET_WM_ICON", False);
-  if (enigma_user::sprite_exists(ind)) {
-    RawImage img = sprite_get_raw(ind, subimg);
-    if (img.pxdata == nullptr) return;
-    elem_numb = 2 + img.w * img.h;
-    widget_icon.reset(bgra_to_argb(img.pxdata, img.w, img.h, true));
-  }
-  XChangeProperty(display, window, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)widget_icon.get(), elem_numb);
-  XFlush(display);
 }
 
 static unsigned long GetActiveWidOrWindowPid(Display *display, Window window, bool wid) {
