@@ -18,9 +18,9 @@ int main(int argc, char **argv) {
   hgtfull = nlpo2(pngheight) + 1, ih, iw;
   const int bitmap_size = widfull * hgtfull * 4;
   unsigned char *bitmap = new unsigned char[bitmap_size]();
-  std::cout << "static unsigned long window_icon_default[] = {" << std::endl;
-  std::cout << pngwidth       << "," << std::endl;
-  std::cout << pngheight      << "," << std::endl;
+  std::cout << "unsigned long xwindow_icon_default[] = {" << std::endl;
+  std::cout << "  " << pngwidth       << "," << std::endl;
+  std::cout << "  " << pngheight      << "," << std::endl;
   for (ih = 0; ih < pngheight; ih++) {
     unsigned tmp = ih * widfull * 4;
     for (iw = 0; iw < pngwidth; iw++) {
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
       bitmap[tmp + 1] = data[4 * pngwidth * ih + iw * 4 + 1];
       bitmap[tmp + 2] = data[4 * pngwidth * ih + iw * 4 + 2];
       bitmap[tmp + 3] = data[4 * pngwidth * ih + iw * 4 + 3];
-      printf("0x%lX,\n", bitmap[tmp + 0] | (bitmap[tmp + 1] << 8) | (bitmap[tmp + 2] << 16) | (bitmap[tmp + 3] << 24));
+      printf("  0x%lX,\n", bitmap[tmp + 0] | (bitmap[tmp + 1] << 8) | (bitmap[tmp + 2] << 16) | (bitmap[tmp + 3] << 24));
       tmp += 4;
     }
   }
