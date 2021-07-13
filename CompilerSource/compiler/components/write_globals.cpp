@@ -123,7 +123,7 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
   wto << "  bool gameInfoStayOnTop = " << gameInfo.stay_on_top() << ";" << endl;
   wto << "  bool gameInfoPauseGame = " << gameInfo.pause_game() << ";" << endl;
   wto << "#ifdef X_PROTOCOL" << endl;
-  wto << "  unsigned long xwindow_icon_default[] = {
+  wto << "  unsigned long xwindow_icon_default[] = {" << endl;
   wto << "    64," << endl;
   wto << "    64," << endl;
   wto << "    0x0," << endl;
