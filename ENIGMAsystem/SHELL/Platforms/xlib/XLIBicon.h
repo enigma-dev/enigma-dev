@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <X11/X.h>
 #include <X11/Xlib.h>
 
 namespace enigma {
