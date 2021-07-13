@@ -15,12 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "out.h"
-
+#include <X11/X.h>
 #include <X11/Xlib.h>
+
+#include "Preprocessor_Environment_Editable/IDE_EDIT_globals.h"
 
 namespace enigma {
 
+extern unsigned long xwindow_icon_default[];
 void XSetIconFromSprite(Display *display, Window window, int ind, int subimg);
 
 } // namespace enigma
