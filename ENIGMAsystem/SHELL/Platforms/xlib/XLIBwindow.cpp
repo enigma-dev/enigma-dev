@@ -175,9 +175,8 @@ void window_set_visible(bool visible) {
     XMapRaised(disp, win);
     if (!sprite_exists(currentIconIndex)) {
       XSynchronize(disp, True);
-      unsigned elem_numb = 2 + 256 * 256;
       Atom property = XInternAtom(disp, "_NET_WM_ICON", False);
-      XChangeProperty(disp, win, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)xwindow_icon_default, elem_numb);
+      XChangeProperty(disp, win, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)xwindow_icon_default, 3);
       XFlush(disp);
     }
   } else {
