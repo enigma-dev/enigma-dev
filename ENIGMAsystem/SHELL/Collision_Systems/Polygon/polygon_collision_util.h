@@ -134,24 +134,14 @@ bool get_polygon_polygon_collision(double x1, double y1, double x2, double y2, e
     bool isSeparated = false;
     
     // Preparing Points
-    std::vector<enigma::Vector2D> points_poly1 = polygon1.getPoints(x1, y1);
-    std::vector<enigma::Vector2D> points_poly2 = polygon2.getPoints(x2, y2);
+    std::vector<enigma::Vector2D> points_poly1 = polygon1.getTransformedPoints();
+    enigma::addOffsets(points_poly1, x1, y1);
+    std::vector<enigma::Vector2D> points_poly2 = polygon2.getTransformedPoints();
+    enigma::addOffsets(points_poly2, x2, y2);
 
     // Preparing Normals
-    std::vector<enigma::Vector2D> normals_poly1 = polygon1.getNorms(x1, y1);
-    std::vector<enigma::Vector2D> normals_poly2 = polygon2.getNorms(x2, y2);
-
-    // Debugging Part Starts
-    printf("\nScaled ( Height, Width ) = ( %f, %f )\n", polygon2.getScaledHeight(), polygon2.getScaledWidth());
-    printf("\nPolygon 2 Points inside get_polygon_polygon_collision:\n");
-    std::vector<enigma::Vector2D>::iterator it = points_poly2.begin();
-    while (it != points_poly2.end()) {
-        (*it).print();
-        printf("\t");
-        ++it;
-    }
-    printf("\n");
-    // Debugging Part Ends
+    std::vector<enigma::Vector2D> normals_poly1 = polygon1.getNormals();
+    std::vector<enigma::Vector2D> normals_poly2 = polygon2.getNormals();
 
     // Using polygon1 normals
     for (int i = 0; i < normals_poly1.size(); ++i) {
@@ -216,10 +206,11 @@ bool get_polygon_ellipse_collision(double x1, double y1, double x2, double y2, e
     bool isSeparated = false;
     
     // Preparing Points
-    std::vector<enigma::Vector2D> points_poly = polygon.getPoints(x1, y1);
+    std::vector<enigma::Vector2D> points_poly = polygon.getTransformedPoints();
+    enigma::addOffsets(points_poly, x1, y1);
 
     // Preparing Normals
-    std::vector<enigma::Vector2D> normals_poly = polygon.getNorms(x1, y1);
+    std::vector<enigma::Vector2D> normals_poly = polygon.getNormals();
 
     // Using polygon1 normals
     for (int i = 0; i < normals_poly.size(); ++i) {
@@ -363,10 +354,25 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
 //      inst                        -- instance for which to compute the 
 //                                     bbox values
 // -------------------------------------------------------------------------
-void get_bbox_border(int &left, int &top, int &right, int &bottom, enigma::object_collisions* const inst) {
-    const enigma::BoundingBox &box = inst->$bbox_relative();
-    const double x = inst->x, y = inst->y,
-                    xscale = inst->image_xscale, yscale = inst->image_yscale,
-                    ia = inst->image_angle;
-    get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
+void get_bbox_border(int &left, int &top, int &right, int &bottom, enigma::object_collisions* const inst) 
+{
+    if (inst->sprite_index != -1)
+    {
+        const enigma::BoundingBox &box = inst->$bbox_relative();
+        const double x = inst->x, y = inst->y,
+                        xscale = inst->image_xscale, yscale = inst->image_yscale,
+                        ia = inst->image_angle;
+        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
+    } else if (inst->polygon_index != -1)
+    {
+        enigma::Polygon polygon = enigma::polygons.get(inst->polygon_index);
+        enigma::BoundingBox box = polygon.getBBOX();
+        left = inst->x + box.left() - 5;
+        top = inst->y + box.top() - 5;
+        right = left + box.right() + 5;
+        bottom = top + box.bottom() + 5;
+        // printf("box.left = %d box.top = %d box.right = %d box.bottom = %d\n"
+        //             , box.left(), box.top(), box.right(), box.bottom());
+        // printf("left = %d top = %d right = %d bottom = %d\n", left, top, right, bottom);
+    }
 }

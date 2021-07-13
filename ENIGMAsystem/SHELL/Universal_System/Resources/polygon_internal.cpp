@@ -155,12 +155,25 @@ namespace enigma {
     int Polygon::getNumPoints() {
         return points.size();
     }
+    
     std::vector<Vector2D> Polygon::getPoints() {
         return points;
     }
-    std::vector<Vector2D> Polygon::getPoints(double offset_x, double offset_y) {
-        std::vector<Vector2D> temp_points;
 
+    std::vector<Vector2D> Polygon::getTransformedPoints() {
+        return transformedPoints;
+    }
+
+    std::vector<Vector2D> Polygon::getNormals() {
+        return normals;
+    }
+
+    void Polygon::computeTransformedPoints() {
+        // Clearing points
+        transformedPoints.clear();
+
+        // Setting variables for finding
+        // Min Max Points
         double max_x = DBL_MIN;
         double min_x = DBL_MAX;
         double max_y = DBL_MIN;
@@ -170,127 +183,134 @@ namespace enigma {
         Vector2D origin( width / 2.0, height / 2.0 );
 
         for (int i = 0; i < points.size(); ++i) {
-            // Getting rotated point
-            // TODO (NABEEL) : FIX ROTATION POINTS BUG
-            Vector2D point = points[i]; //.rotate(this->angle, origin);
-            
-            // Debugging Part Starts
-            // if (this->angle != 0) {
-            //     printf("point before rotation : ");
-            //     points[i].print();
-            //     printf("\tpoint after rotation : ");
-            //     point.print();
-            //     printf("\torigin : ");
-            //     origin.print();
-            //     printf("\n");
-            // }
-            // Debugging Part Ends
+            // Getting point
+            Vector2D point = points[i];
 
             // Applying Scale
-            double x = (point.getX() * scale); //  + offset_x;
-            double y = (point.getY() * scale); //  + offset_y;
+            double x = (point.getX() * scale);
+            double y = (point.getY() * scale);
 
             // Applying Rotation
             Vector2D temp_point(x, y);
             temp_point = temp_point.rotate(this->angle, origin);
 
-            // Applying Offset
-            temp_point.setX(temp_point.getX() + offset_x);
-            temp_point.setY(temp_point.getY() + offset_y);
-            
             // For height and width recalculation
+            x = temp_point.getX();
+            y = temp_point.getY();
+
             max_x = x > max_x? x : max_x;
             min_x = x < min_x? x : min_x;
             max_y = y > max_y? y : max_y;
             min_y = y < min_y? y : min_y;
             
             // Adding to the points
-            temp_points.push_back(temp_point);
+            transformedPoints.push_back(temp_point);
         }
 
         // Recalculating height and width
-        // TODO (NABEEL) : FIX BUG FOR WRONG HEIGHT AND WIDTH CALCULATION
-        this->setScaledWidth(abs(max_x - min_x));
-        this->setScaledHeight(abs(max_y - min_y));
+        scaledWidth = abs(max_x - min_x);
+        scaledHeight = abs(max_y - min_y);
 
-        // Debugging Part Starts
-        // printf("Points when sending from the getPoints(double, double) function:\n");
-        // for (int i = 0; i < temp_points.size(); ++i) {
-        //     printf("( %f, %f ) ", temp_points[i].getX(), temp_points[i].getY());
-        // }
-        // printf("\n");
-        // Debugging Part Ends
-
-        return temp_points;
+        // Setting the BBOX
+        bbox.x = min_x;
+        bbox.y = min_y;
+        bbox.w = scaledWidth;
+        bbox.h = scaledHeight;
+        // printf("bbox.left = %d bbox.top = %d bbox.right = %d bbox.bottom = %d\n"
+        //             ,bbox.left(), bbox.top(), bbox.right(), bbox.bottom());
     }
 
     int Polygon::getHeight() {
         return height;
     }
+
     int Polygon::getWidth() {
         return width;
     }
+
     int Polygon::getScaledHeight() {
         return scaledHeight;
     }
+
     int Polygon::getScaledWidth() {
         return scaledWidth;
     }
+
     int Polygon::getXOffset() {
         return xoffset;
     }
+
     int Polygon::getYOffset() {
         return yoffset;
     }
+
     double Polygon::getScale() {
         return scale;
     }
+
     double Polygon::getAngle() {
         return angle;
+    }
+
+    BoundingBox Polygon::getBBOX() {
+        return bbox;
     }
 
     void Polygon::setHeight(int h) {
         if (h > 0)
             this->height = h;
     }
+
     void Polygon::setWidth(int w) {
         if (w > 0)
             this->width = w;
     }
+
     void Polygon::setScaledHeight(int h) {
         if (h > 0) {
             scaledHeight = h;
-            // setScale(scaledHeight / height);
         }
     }
+
     void Polygon::setScaledWidth(int w) {
         if (w > 0) {
             scaledWidth = w;
-            // setScale(scaledWidth / width);
         }
     }
+
     void Polygon::setXOffset(int x) {
         if (x > 0)
             this->xoffset = x;
     }
+
     void Polygon::setYOffset(int y) {
         if (y > 0)
             this->yoffset = y;
     }
+
     void Polygon::setScale(double s) {
-        if (s > 0)
-            this->scale = s;
+        this->scale = s;
+        computeTransformedPoints();
+        computeNormals();
     }
+
     void Polygon::setAngle(double a) {
         this->angle = a;
+        computeTransformedPoints();
+        computeNormals();
     }
 
     void Polygon::addPoint(const Vector2D& point) {
         this->points.push_back(point);
+        computeTransformedPoints();
+        computeNormals();
     }
+
     void Polygon::addPoint(int x, int y) {
         Vector2D point(x, y);
         this->points.push_back(point);
+        computeTransformedPoints();
+        computeNormals();
     }
 
     void Polygon::removePoint(int x, int y) {
@@ -301,46 +321,54 @@ namespace enigma {
     }
 
     void Polygon::copy(const Polygon& obj) {
-        if (&points != nullptr) {
-            this->points.clear();
-            for (int i = 0; i < obj.points.size(); ++i) {
-                this->points.push_back(obj.points[i]);
-            }
-        }
+        this->points = obj.points;
+        this->transformedPoints = obj.transformedPoints;
+        this->normals = obj.normals;
         this->height = obj.height;
         this->width = obj.width;
         this->scale = obj.scale;
         this->angle = obj.angle;
-        scaledHeight = height;
-        scaledWidth = width;
+        this->scaledHeight = obj.scaledHeight;
+        this->scaledWidth = obj.scaledWidth;
+        this->bbox = obj.bbox;
     }
+
     void Polygon::copy(const Vector2D* points, int size) {
-        if (points != nullptr && size > 0) {
+        if (size > 0) {
             this->points.clear();
             for (int i = 0; i < size; ++i) {
                 this->points.push_back(points[i]);
             }
+            computeTransformedPoints();
+            computeNormals();
         }
     }
-    std::vector<Vector2D> Polygon::getNorms(double offset_x, double offset_y) {
-        std::vector<Vector2D> normals;
-        std::vector<Vector2D> temp_points = getPoints(offset_x, offset_y);
+    
+    void Polygon::computeNormals() {
+        normals.clear();
 
-        // Calculating normals
-        for (int i = 0; i < temp_points.size(); ++i) {
-            Vector2D currentNormal(
-                (temp_points[i + 1].getX()) - (temp_points[i].getX()),
-                (temp_points[i + 1].getY()) - (temp_points[i].getY())
+        // Only compute normals if we have
+        // more than 1 points
+        if (transformedPoints.size() >= 3) 
+        {
+            // Calculating normals
+            for (int i = 0; i < transformedPoints.size(); ++i) {
+                Vector2D currentNormal(
+                    (transformedPoints[i + 1].getX()) - (transformedPoints[i].getX()),
+                    (transformedPoints[i + 1].getY()) - (transformedPoints[i].getY())
+                );
+                normals.push_back(currentNormal.getNormL());
+            }
+
+            // Adding the last normal
+            Vector2D lastNormal(
+                (transformedPoints[0].getX()) - (transformedPoints[transformedPoints.size() - 1].getX()),
+                (transformedPoints[0].getY()) - (transformedPoints[transformedPoints.size() - 1].getY())
             );
-            normals.push_back(currentNormal.getNormL());
+            normals.push_back(lastNormal.getNormL());
         }
-        Vector2D lastNormal(
-            (temp_points[0].getX()) - (temp_points[temp_points.size() - 1].getX()),
-            (temp_points[0].getY()) - (temp_points[temp_points.size() - 1].getY())
-        );
-        normals.push_back(lastNormal.getNormL());
-        return normals;
     }
+
     void Polygon::print() {
         printf("Points = ");
         std::vector<Vector2D>::iterator it = points.begin();
@@ -350,6 +378,7 @@ namespace enigma {
         }
         printf("\nheight = %d width = %d\n", height, width);
     }
+
     void Polygon::decomposeConcave() {
         std::vector<std::vector<std::array<double, 2>>> polygonToSend;
         std::vector<Vector2D>::iterator it = points.begin();
@@ -389,4 +418,15 @@ namespace enigma {
 
     // Asset Array Implementation
     AssetArray<Polygon> polygons;
+
+    // External Function
+    void addOffsets(std::vector<Vector2D>& points, double x, double y) 
+    {
+        std::vector<Vector2D>::iterator it = points.begin();
+        while (it != points.end()) {
+            it->setX(it->getX() + x);
+            it->setY(it->getY() + y);
+            ++it;
+        }
+    }
 }

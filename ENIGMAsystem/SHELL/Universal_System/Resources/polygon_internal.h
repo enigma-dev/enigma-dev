@@ -7,10 +7,12 @@
 
 #include <vector>
 #include "AssetArray.h"
+#include "Universal_System/scalar.h"
 
 namespace enigma 
 {
 	#define NULL_POINT -1;
+	using BoundingBox = Rect<int>;
 	// #define precision pow(4, -10);
 
 	// The Point class represents a point in a polygon
@@ -66,6 +68,8 @@ namespace enigma
 		// Attributes
 		private:
 			std::vector<Vector2D> points;
+			std::vector<Vector2D> transformedPoints;
+			std::vector<Vector2D> normals;
 			std::vector<std::vector<Vector2D>> subpolygons;
 			int height;
 			int width;
@@ -76,6 +80,7 @@ namespace enigma
 			int numSubPolygons;
 			double scale;
 			double angle;
+			BoundingBox bbox;
 
 			// Asset Array mandatory attributes
 			bool _destroyed = false;
@@ -93,11 +98,11 @@ namespace enigma
  			bool isDestroyed() const { return _destroyed; }
   			void destroy() { _destroyed = true; }
 
-			// Getters and Setters
+			// Getters
 			int getNumPoints();
 			std::vector<Vector2D> getPoints();
-			std::vector<Vector2D> getPoints(double offset_x, double offset_y);
-
+			std::vector<Vector2D> getTransformedPoints();
+			std::vector<Vector2D> getNormals();
 			int getHeight();
 			int getWidth();
 			int getScaledHeight();
@@ -106,7 +111,9 @@ namespace enigma
 			int getYOffset();
 			double getScale();
 			double getAngle();
+			BoundingBox getBBOX();
 
+			// Setters
 			void setHeight(int h);
 			void setWidth(int w);
 			void setScaledHeight(int h);
@@ -116,20 +123,25 @@ namespace enigma
 			void setScale(double s);
 			void setAngle(double a);
 
+			// Insertion and Deletion
 			void addPoint(const Vector2D& point);
 			void addPoint(int x, int y);
 
 			void removePoint(int x, int y);
 			void removePoint(const Vector2D& point);
 
+			// Deep-copying functions
 			void copy(const Polygon& obj);
 			void copy(const Vector2D* points, int size);
 
-			std::vector<Vector2D> getNorms(double offset_x, double offset_y);
-
+			// Displays all points
 			void print();
 			
+			// Mathematical computations for caching
+		private:	
 			void decomposeConcave();
+			void computeTransformedPoints();
+			void computeNormals();
 	};
 
 	// MinMax Projection class to determine 
@@ -143,6 +155,10 @@ namespace enigma
 	// Main Asset Array is used for storing Polygon 
 	// Assets in the game 
 	extern AssetArray<Polygon> polygons;
+
+	// Function to mutate a vector of Vector2D
+	// to add offsets
+	void addOffsets(std::vector<Vector2D>& points, double x, double y);
 }
 
 #endif  // !ENIGMA_POLYGON_INTERNAL_H

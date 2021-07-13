@@ -36,7 +36,7 @@ namespace enigma_user {
 		return polygons.exists(id);
 	}
 	void polygon_decompose(int id) {
-		polygons.get(id).decomposeConcave();
+		// polygons.get(id).decomposeConcave();
 	}
 	void polygon_set_scale(int id, double scale) {
 		polygons.get(id).setScale(scale);

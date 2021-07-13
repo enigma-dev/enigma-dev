@@ -296,7 +296,7 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
         // Main Sweep and Prune Check
         if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1) {
-            // printf("Bounding Box Collision is deteted!\n");
+            printf("Bounding Box Collision is deteted!\n");
             if (collision_case == BBOX_VS_BBOX) {
                 return inst2;
             }

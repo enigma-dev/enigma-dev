@@ -31,14 +31,19 @@
 
 namespace enigma_user {
   void draw_polygon(int polygon_id, gs_scalar x, gs_scalar y) {
-    std::vector<enigma::Vector2D> points = enigma::polygons.get(polygon_id).getPoints(x, y);
+    std::vector<enigma::Vector2D> points = enigma::polygons.get(polygon_id).getTransformedPoints();
+    enigma::addOffsets(points, x, y);
     int N = points.size();
+
+    // Drawing from point i to i + 1
     for (int i = 0; i < N - 1; ++i) {
       draw_primitive_begin(pr_linestrip);
       draw_vertex(points[i].getX(), points[i].getY());
       draw_vertex(points[i + 1].getX(), points[i + 1].getY());
       draw_primitive_end();
     }
+
+    // Drawing the last line to complete the polygon
     draw_primitive_begin(pr_linestrip);
     draw_vertex(points[N - 1].getX(), points[N - 1].getY());
     draw_vertex(points[0].getX(), points[0].getY());
