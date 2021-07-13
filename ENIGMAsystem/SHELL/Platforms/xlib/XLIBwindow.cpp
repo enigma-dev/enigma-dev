@@ -22,6 +22,7 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/image_formats.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/backgrounds.h"
 
@@ -31,6 +32,7 @@
 #include "XLIBicon.h"
 
 #include <X11/Xlib.h>
+#include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <stdio.h>   //printf, NULL
 #include <stdlib.h>  //malloc
@@ -165,16 +167,22 @@ wid_t window_get_identifier(window_t hwnd) {
   return std::to_string(reinterpret_cast<unsigned long long>(hwnd));
 }
 
+static int currentIconIndex = -1;
+static unsigned currentIconFrame;
+
 void window_set_visible(bool visible) {
   if (visible) {
     XMapRaised(disp, win);
+    if (!sprite_exists(currentIconIndex)) {
+      XSynchronize(disp, True);
+      Atom property = XInternAtom(disp, "_NET_WM_ICON", False);
+      XChangeProperty(disp, win, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)xwindow_icon_default, 3);
+      XFlush(disp);
+    }
   } else {
     XUnmapWindow(disp, win);
   }
 }
-
-static int currentIconIndex = -1;
-static unsigned currentIconFrame;
 
 int window_get_icon_index() {
   return currentIconIndex;

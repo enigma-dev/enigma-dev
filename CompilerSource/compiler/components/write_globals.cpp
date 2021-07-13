@@ -122,6 +122,11 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
   wto << "  bool gameInfoAllowResize = " << gameInfo.allow_resize() << ";" << endl;
   wto << "  bool gameInfoStayOnTop = " << gameInfo.stay_on_top() << ";" << endl;
   wto << "  bool gameInfoPauseGame = " << gameInfo.pause_game() << ";" << endl;
+  wto << "  unsigned long xwindow_icon_default[] = {" << endl;
+  wto << "    1," << endl;
+  wto << "    1," << endl;
+  wto << "    0x0," << endl;
+  wto << "  };" << endl;
   wto << "}" << endl;
 
   for (parsed_object::cglobit i = global->globals.begin(); i != global->globals.end(); i++)
