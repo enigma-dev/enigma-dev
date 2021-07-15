@@ -8,118 +8,6 @@
 #include <cfloat>
 
 namespace enigma {
-
-    // Vector2D Class Implementation
-    Vector2D::Vector2D() {
-        x = NULL_POINT;
-        y = NULL_POINT;
-    }
-    Vector2D::Vector2D(const Vector2D& obj) {
-        copy(obj);
-    }
-    Vector2D::Vector2D(double x, double y) {
-        this->x = x;
-        this->y = y;
-    }
-    void Vector2D::copy(const Vector2D& obj) {
-        if (&obj != nullptr) {
-            this->x = obj.x; 
-            this->y = obj.y;
-        }
-    }
-    double Vector2D::getX() {
-        return this->x;
-    }
-    double Vector2D::getY() {
-        return this->y;
-    }
-    void Vector2D::setX(double x) {
-        this->x = x;
-    }
-    void Vector2D::setY(double y) {
-        this->y = y;
-    }
-    double Vector2D::getMagnitude() {
-        return sqrt(pow(x, 2) + pow(y, 2));
-    }
-    double Vector2D::getAngle() {
-        return atan2(y, x);
-    }
-    Vector2D Vector2D::getNormR() {
-        return Vector2D(-1 * y, x);
-    }
-    Vector2D Vector2D::getNormL() {
-        return Vector2D(y, -1 * x);
-    }
-    Vector2D Vector2D::getUnitVector() {
-        return Vector2D(x / getMagnitude(), y / getMagnitude());
-    }
-
-    void Vector2D::setMagnitude(double number) {
-        double current_angle = getAngle();
-        x = number * cos(current_angle);
-        y = number * sin(current_angle);
-    }
-    void Vector2D::setAngle(double angle) {
-        double current_magnitude = getMagnitude();
-        x = current_magnitude * cos(angle);
-        y = current_magnitude * sin(angle);
-    }
-    void Vector2D::scale(double number) {
-        x *= number;
-        y *= number;
-    }
-    void Vector2D::invert(bool invert_x, bool invert_y) {
-        if (invert_x) {
-            this->x *= -1;
-        } 
-        if (invert_y) {
-            this->y *= -1;
-        }
-    }
-
-    Vector2D Vector2D::add(const Vector2D& B) {
-        return Vector2D(x + B.x, y + B.y);
-    }
-    Vector2D Vector2D::minus(const Vector2D& B) {
-        return Vector2D(x - B.y, y - B.y);
-    }
-    Vector2D Vector2D::rotate(double angle, Vector2D origin) {
-        Vector2D B(*this);
-        double x = B.x - origin.getX();
-        double y = B.y - origin.getY();
-        B.x = ((x - origin.getX()) * cos(angle) - (y - origin.getY()) * sin(angle)) + origin.getX();
-        B.y = ((x - origin.getX()) * sin(angle) + (y - origin.getY()) * cos(angle)) + origin.getY();
-        return B;
-    }
-    Vector2D Vector2D::interpolate(double number) {
-        return Vector2D(x * number, y * number);
-    }
-
-    double Vector2D::angleBetween(Vector2D& B) {
-        Vector2D a = getUnitVector();
-        Vector2D b = B.getUnitVector();
-        return acos(1.0 / a.dotProduct(b));
-    }
-    double Vector2D::dotProduct(const Vector2D& B) {
-        return x * B.x + y * B.y;
-    }
-    double Vector2D::perpProduct(const Vector2D& B) {
-        return y * B.x + x * B.y;
-    }
-    double Vector2D::crossProduct(const Vector2D& B) {
-        return x * B.y - y * B.x;
-    }
-
-    bool Vector2D::equal(const Vector2D& B) {
-        double precision = pow(4, -10);
-        return (x - B.x < precision && y - B.y < precision);
-    }
-
-    void Vector2D::print() {
-        printf("( %f, %f )", x, y);
-    }
-
     // Polygon class implementation
     Polygon::Polygon() {
         points.clear();
@@ -145,7 +33,7 @@ namespace enigma {
         scaledHeight = height;
         scaledWidth = width;
     }
-    Polygon::Polygon(const Vector2D* points, int size) {
+    Polygon::Polygon(const glm::vec2* points, int size) {
         copy(points, size);
     }
     Polygon::Polygon(const Polygon& obj) {
@@ -156,15 +44,15 @@ namespace enigma {
         return points.size();
     }
     
-    std::vector<Vector2D> Polygon::getPoints() {
+    std::vector<glm::vec2> Polygon::getPoints() {
         return points;
     }
 
-    std::vector<Vector2D> Polygon::getTransformedPoints() {
+    std::vector<glm::vec2> Polygon::getTransformedPoints() {
         return transformedPoints;
     }
 
-    std::vector<Vector2D> Polygon::getNormals() {
+    std::vector<glm::vec2> Polygon::getNormals() {
         return normals;
     }
 
@@ -180,23 +68,23 @@ namespace enigma {
         double min_y = DBL_MAX;
 
         // Getting origin for rotation
-        Vector2D origin( width / 2.0, height / 2.0 );
+        glm::vec2 origin( width / 2.0, height / 2.0 );
 
         for (int i = 0; i < points.size(); ++i) {
             // Getting point
-            Vector2D point = points[i];
+            glm::vec2 point = points[i];
 
             // Applying Scale
-            double x = (point.getX() * scale);
-            double y = (point.getY() * scale);
+            double x = (point.x * scale);
+            double y = (point.y * scale);
 
             // Applying Rotation
-            Vector2D temp_point(x, y);
-            temp_point = temp_point.rotate(this->angle, origin);
+            glm::vec2 temp_point(x, y);
+            temp_point = rotateVector(temp_point, this->angle, origin);
 
             // For height and width recalculation
-            x = temp_point.getX();
-            y = temp_point.getY();
+            x = temp_point.x;
+            y = temp_point.y;
 
             max_x = x > max_x? x : max_x;
             min_x = x < min_x? x : min_x;
@@ -212,12 +100,10 @@ namespace enigma {
         scaledHeight = abs(max_y - min_y);
 
         // Setting the BBOX
-        bbox.x = min_x;
-        bbox.y = min_y;
-        bbox.w = scaledWidth;
-        bbox.h = scaledHeight;
-        // printf("bbox.left = %d bbox.top = %d bbox.right = %d bbox.bottom = %d\n"
-        //             ,bbox.left(), bbox.top(), bbox.right(), bbox.bottom());
+        bbox.x = min_x - 0.5;
+        bbox.y = min_y - 0.5;
+        bbox.w = scaledWidth + 0.5;
+        bbox.h = scaledHeight + 0.5;
     }
 
     int Polygon::getHeight() {
@@ -300,14 +186,14 @@ namespace enigma {
         computeNormals();
     }
 
-    void Polygon::addPoint(const Vector2D& point) {
+    void Polygon::addPoint(const glm::vec2& point) {
         this->points.push_back(point);
         computeTransformedPoints();
         computeNormals();
     }
 
     void Polygon::addPoint(int x, int y) {
-        Vector2D point(x, y);
+        glm::vec2 point(x, y);
         this->points.push_back(point);
         computeTransformedPoints();
         computeNormals();
@@ -316,7 +202,7 @@ namespace enigma {
     void Polygon::removePoint(int x, int y) {
         // TODO: Implement me
     }
-    void Polygon::removePoint(const Vector2D& point) {
+    void Polygon::removePoint(const glm::vec2& point) {
         // TODO: Implement me
     }
 
@@ -333,7 +219,7 @@ namespace enigma {
         this->bbox = obj.bbox;
     }
 
-    void Polygon::copy(const Vector2D* points, int size) {
+    void Polygon::copy(const glm::vec2* points, int size) {
         if (size > 0) {
             this->points.clear();
             for (int i = 0; i < size; ++i) {
@@ -352,28 +238,28 @@ namespace enigma {
         if (transformedPoints.size() >= 3) 
         {
             // Calculating normals
-            for (int i = 0; i < transformedPoints.size(); ++i) {
-                Vector2D currentNormal(
-                    (transformedPoints[i + 1].getX()) - (transformedPoints[i].getX()),
-                    (transformedPoints[i + 1].getY()) - (transformedPoints[i].getY())
+            for (int i = 0; i < transformedPoints.size() - 1; ++i) {
+                glm::vec2 currentNormal(
+                    (transformedPoints[i + 1].x) - (transformedPoints[i].x),
+                    (transformedPoints[i + 1].y) - (transformedPoints[i].y)
                 );
-                normals.push_back(currentNormal.getNormL());
+                normals.push_back(computeLeftNormal(currentNormal));
             }
 
             // Adding the last normal
-            Vector2D lastNormal(
-                (transformedPoints[0].getX()) - (transformedPoints[transformedPoints.size() - 1].getX()),
-                (transformedPoints[0].getY()) - (transformedPoints[transformedPoints.size() - 1].getY())
+            glm::vec2 lastNormal(
+                (transformedPoints[0].x) - (transformedPoints[transformedPoints.size() - 1].x),
+                (transformedPoints[0].y) - (transformedPoints[transformedPoints.size() - 1].y)
             );
-            normals.push_back(lastNormal.getNormL());
+            normals.push_back(computeLeftNormal(lastNormal));
         }
     }
 
     void Polygon::print() {
         printf("Points = ");
-        std::vector<Vector2D>::iterator it = points.begin();
+        std::vector<glm::vec2>::iterator it = points.begin();
         while (it != points.end()) {
-            printf("(%f, %f), ", (*it).getX(), (*it).getY());
+            printf("(%f, %f), ", it->x, it->y);
             ++it;
         }
         printf("\nheight = %d width = %d\n", height, width);
@@ -381,13 +267,13 @@ namespace enigma {
 
     void Polygon::decomposeConcave() {
         std::vector<std::vector<std::array<double, 2>>> polygonToSend;
-        std::vector<Vector2D>::iterator it = points.begin();
+        std::vector<glm::vec2>::iterator it = points.begin();
 
         std::vector<std::array<double, 2>> temp_points;
         while (it != points.end()) {
             std::array<double, 2> temp_point;
-            temp_point[0] = (*it).getX();
-            temp_point[1] = (*it).getY();
+            temp_point[0] = it->x;
+            temp_point[1] = it->y;
 
             temp_points.push_back(temp_point);
             ++it;
@@ -400,10 +286,10 @@ namespace enigma {
         numSubPolygons = 0;
         int i = 0, j = 1, k = 2;
         while (k < indices.size()) {
-            std::vector<Vector2D> subpolygon;
+            std::vector<glm::vec2> subpolygon;
             
             for (int n = i; n <= k; ++n) {
-                Vector2D point(polygonToSend[0][indices[n]][0], polygonToSend[0][indices[n]][1]);
+                glm::vec2 point(polygonToSend[0][indices[n]][0], polygonToSend[0][indices[n]][1]);
                 subpolygon.push_back(point);
             }
 
@@ -420,13 +306,35 @@ namespace enigma {
     AssetArray<Polygon> polygons;
 
     // External Function
-    void addOffsets(std::vector<Vector2D>& points, double x, double y) 
+    void addOffsets(std::vector<glm::vec2>& points, double x, double y) 
     {
-        std::vector<Vector2D>::iterator it = points.begin();
+        std::vector<glm::vec2>::iterator it = points.begin();
         while (it != points.end()) {
-            it->setX(it->getX() + x);
-            it->setY(it->getY() + y);
+            it->x += x;
+            it->y += y;
             ++it;
         }
+    }
+
+    glm::vec2 rotateVector(glm::vec2 vector, double angle, glm::vec2 pivot)
+    {
+        glm::vec2 rotated(vector.x, vector.y);
+        double x = rotated.x - pivot.x;
+        double y = rotated.y - pivot.y;
+        rotated.x = ((x - pivot.x) * cos(angle) - (y - pivot.y) * sin(angle)) + pivot.x;
+        rotated.y = ((x - pivot.x) * sin(angle) + (y - pivot.y) * cos(angle)) + pivot.y;
+        return rotated;
+    }
+
+    glm::vec2 computeLeftNormal(glm::vec2 vector)
+    {
+        return glm::vec2(vector.y, -1 * vector.x);
+    }
+
+    double angleBetweenVectors(glm::vec2 vector1, glm::vec2 vector2)
+    {
+        glm::vec2 da = glm::normalize(vector1);
+        glm::vec2 db = glm::normalize(vector2);
+        return glm::acos(glm::dot(da, db));
     }
 }

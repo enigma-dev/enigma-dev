@@ -296,7 +296,9 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
         // Main Sweep and Prune Check
         if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1) {
-            printf("Bounding Box Collision is deteted!\n");
+            // Debugging Part Starts
+            // return inst2;
+            // Debugging Part Ends
             if (collision_case == BBOX_VS_BBOX) {
                 return inst2;
             }
@@ -453,8 +455,8 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
                 int width = x2 - x1;
                 int height = y2 - y1;
 
-                enigma::Vector2D point1(0, 0);
-                enigma::Vector2D point2(width, height);
+                glm::vec2 point1(0, 0);
+                glm::vec2 point2(width, height);
 
                 enigma::Polygon polygon1;
                 polygon1.setWidth(width);

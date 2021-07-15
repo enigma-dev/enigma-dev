@@ -7,7 +7,6 @@
 #include <string>
 
 using enigma::Polygon;
-using enigma::Vector2D;
 using enigma::polygons;
 
 namespace enigma_user {

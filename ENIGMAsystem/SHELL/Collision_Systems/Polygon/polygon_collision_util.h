@@ -48,17 +48,17 @@ template<typename T> static inline T max(T x, T y) { return x > y? x : y; }
 // Returns:
 //      min_max_proj -- MinMaxProjection object that stores minmax information
 // -------------------------------------------------------------------------
-enigma::MinMaxProjection getMinMaxProjection(std::vector<enigma::Vector2D>& vecs_box, enigma::Vector2D axis) {
+enigma::MinMaxProjection getMinMaxProjection(std::vector<glm::vec2>& vecs_box, glm::vec2 axis) {
     
     // Preparing
-    double min_proj_box = vecs_box[0].dotProduct(axis);
-    double max_proj_box = vecs_box[0].dotProduct(axis);
+    double min_proj_box = glm::dot(vecs_box[0], axis);
+    double max_proj_box = glm::dot(vecs_box[0], axis);
     int min_dot_box = 0;
     int max_dot_box = 0;
 
     // Iterating over the points
     for (int j = 1; j < vecs_box.size(); ++j) {
-        double current_proj = vecs_box[j].dotProduct(axis);
+        double current_proj = glm::dot(vecs_box[j], axis);
 
         // Selecting Min
         if (min_proj_box > current_proj) {
@@ -99,18 +99,18 @@ enigma::MinMaxProjection getMinMaxProjection(std::vector<enigma::Vector2D>& vecs
 //      ellipse_points      -- vector of Vector2D points containing the line segment that is formed
 //                              by the points on the projection
 // -------------------------------------------------------------------------
-std::vector<enigma::Vector2D> getEllipseProjectionPoints(double angleOfAxis, double eps_x, double eps_y, double rx, double ry) {
+std::vector<glm::vec2> getEllipseProjectionPoints(double angleOfAxis, double eps_x, double eps_y, double rx, double ry) {
     // Using the angle to calculate slew radii.
     // This assumes that the ellipse is perfectly horizontal with zero rotation
     double r_theta = (rx * ry) / ((pow(rx, 2) * pow(sin(angleOfAxis), 2)) + (pow(ry, 2) * pow(cos(angleOfAxis), 2)));
 
     // Using the offsets, the angle, and the new radius to find
     // the points for projections
-    enigma::Vector2D min_proj_point(r_theta * cos(angleOfAxis) - eps_x, r_theta * sin(angleOfAxis) - eps_y);
-    enigma::Vector2D max_proj_point(r_theta * cos(angleOfAxis) + eps_x, r_theta * sin(angleOfAxis) + eps_y);
+    glm::vec2 min_proj_point(r_theta * cos(angleOfAxis) - eps_x, r_theta * sin(angleOfAxis) - eps_y);
+    glm::vec2 max_proj_point(r_theta * cos(angleOfAxis) + eps_x, r_theta * sin(angleOfAxis) + eps_y);
 
     // Finalizing the polygon
-    std::vector<enigma::Vector2D> ellipse_points;
+    std::vector<glm::vec2> ellipse_points;
     ellipse_points.push_back(min_proj_point);
     ellipse_points.push_back(max_proj_point);
 
@@ -134,14 +134,14 @@ bool get_polygon_polygon_collision(double x1, double y1, double x2, double y2, e
     bool isSeparated = false;
     
     // Preparing Points
-    std::vector<enigma::Vector2D> points_poly1 = polygon1.getTransformedPoints();
+    std::vector<glm::vec2> points_poly1 = polygon1.getTransformedPoints();
     enigma::addOffsets(points_poly1, x1, y1);
-    std::vector<enigma::Vector2D> points_poly2 = polygon2.getTransformedPoints();
+    std::vector<glm::vec2> points_poly2 = polygon2.getTransformedPoints();
     enigma::addOffsets(points_poly2, x2, y2);
 
     // Preparing Normals
-    std::vector<enigma::Vector2D> normals_poly1 = polygon1.getNormals();
-    std::vector<enigma::Vector2D> normals_poly2 = polygon2.getNormals();
+    std::vector<glm::vec2> normals_poly1 = polygon1.getNormals();
+    std::vector<glm::vec2> normals_poly2 = polygon2.getNormals();
 
     // Using polygon1 normals
     for (int i = 0; i < normals_poly1.size(); ++i) {
@@ -206,27 +206,27 @@ bool get_polygon_ellipse_collision(double x1, double y1, double x2, double y2, e
     bool isSeparated = false;
     
     // Preparing Points
-    std::vector<enigma::Vector2D> points_poly = polygon.getTransformedPoints();
+    std::vector<glm::vec2> points_poly = polygon.getTransformedPoints();
     enigma::addOffsets(points_poly, x1, y1);
 
     // Preparing Normals
-    std::vector<enigma::Vector2D> normals_poly = polygon.getNormals();
+    std::vector<glm::vec2> normals_poly = polygon.getNormals();
 
     // Using polygon1 normals
     for (int i = 0; i < normals_poly.size(); ++i) {
         enigma::MinMaxProjection result1, result2;
 
         // Getting the Ellipse on this axis
-        enigma::Vector2D point2 = points_poly[i];
-        enigma::Vector2D point1;
+        glm::vec2 point2 = points_poly[i];
+        glm::vec2 point1;
         if (i == normals_poly.size() - 1) {
-            point1.copy(points_poly[0]);
+            point1 = points_poly[0];
         } else {
             point1 = points_poly[i + 1];
         }
-        double angleOfAxis = -(point1.angleBetween(point2));
+        double angleOfAxis = -enigma::angleBetweenVectors(point1, point2);
 
-        std::vector<enigma::Vector2D> ellipse_points = getEllipseProjectionPoints(angleOfAxis, x2, y2, rx, ry);
+        std::vector<glm::vec2> ellipse_points = getEllipseProjectionPoints(angleOfAxis, x2, y2, rx, ry);
 
         // Get Min Max Projection of all the points on 
         // this normal vector
@@ -263,10 +263,10 @@ bool get_polygon_ellipse_collision(double x1, double y1, double x2, double y2, e
 // -------------------------------------------------------------------------
 enigma::Polygon get_bbox_from_dimensions(double x1, double y1, int width, int height) {
     // Creating bbox vectors
-    enigma::Vector2D top_left(x1, y1);
-    enigma::Vector2D top_right(width, y1);
-    enigma::Vector2D bottom_left(x1, height);
-    enigma::Vector2D bottom_right(width, height);
+    glm::vec2 top_left(x1, y1);
+    glm::vec2 top_right(width, y1);
+    glm::vec2 bottom_left(x1, height);
+    glm::vec2 bottom_right(width, height);
 
     // Creating bbox polygons
     enigma::Polygon bbox_polygon;
@@ -367,12 +367,9 @@ void get_bbox_border(int &left, int &top, int &right, int &bottom, enigma::objec
     {
         enigma::Polygon polygon = enigma::polygons.get(inst->polygon_index);
         enigma::BoundingBox box = polygon.getBBOX();
-        left = inst->x + box.left() - 5;
-        top = inst->y + box.top() - 5;
-        right = left + box.right() + 5;
-        bottom = top + box.bottom() + 5;
-        // printf("box.left = %d box.top = %d box.right = %d box.bottom = %d\n"
-        //             , box.left(), box.top(), box.right(), box.bottom());
-        // printf("left = %d top = %d right = %d bottom = %d\n", left, top, right, bottom);
+        left = inst->x + box.left();
+        top = inst->y + box.top();
+        right = inst->x + box.right();
+        bottom = inst->y + box.bottom();
     }
 }
