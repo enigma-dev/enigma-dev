@@ -75,7 +75,7 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
 
 namespace enigma_user {
 
-int sprite_get_width(int sprid) {
+int sprite_get_width(int sprid) { 
   return sprites.get(sprid).width;
 }
 
@@ -294,5 +294,4 @@ uint32_t sprite_get_pixel(int id, int subimg, unsigned x, unsigned y) {
   // Note: this will need to be amended when atlas support is implemented
   return texture_get_pixel(sprite_get_texture(id, subimg), x, y);
 }
-
 }

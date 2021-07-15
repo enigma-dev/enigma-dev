@@ -651,6 +651,7 @@ static inline void write_object_data_structs(std::ostream &wto,
   for (parsed_object *object : parsed_objects) {
     wto << "    { "
         << resname(object->sprite_name)  << ", "
+        << resname(object->polygon_name) << ", "
         << object->solid                 << ", "
         << object->visible               << ", "
         << object->depth                 << ", "

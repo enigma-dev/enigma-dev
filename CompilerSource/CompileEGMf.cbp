@@ -151,6 +151,7 @@
 		<Unit filename="../shared/protos/Shader.proto" />
 		<Unit filename="../shared/protos/Sound.proto" />
 		<Unit filename="../shared/protos/Sprite.proto" />
+		<Unit filename="../shared/protos/Polygon.proto"/>
 		<Unit filename="../shared/protos/Timeline.proto" />
 		<Unit filename="../shared/protos/compiler.proto" />
 		<Unit filename="../shared/protos/game.proto" />
@@ -256,6 +257,7 @@
 		<Unit filename="backend/resources/Shader.h" />
 		<Unit filename="backend/resources/Sound.h" />
 		<Unit filename="backend/resources/Sprite.h" />
+		<Unit filename="backend/resources/Polygon.h"/>
 		<Unit filename="backend/resources/Timeline.h" />
 		<Unit filename="backend/resources/Whitespace.h" />
 		<Unit filename="backend/sub/Action.h" />
