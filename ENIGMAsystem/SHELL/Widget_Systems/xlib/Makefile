@@ -6,4 +6,6 @@ ifeq ($(OS), Linux)
 	override LDLIBS += -lprocps
 else ifeq ($(OS), FreeBSD)
 	override LDLIBS += -lutil -lc
+else ifeq ($(OS), DragonFly)
+	override LDLIBS += -lkvm -lutil -lc
 endif

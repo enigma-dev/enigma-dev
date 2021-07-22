@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include <string>
+#include <climits>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -35,12 +36,21 @@
 #include "general/parse_basics_old.h"
 #include "frontend.h"
 
-#if CURRENT_PLATFORM_ID == OS_FREEBSD
+#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY
     #include <sys/user.h>
     #include <libutil.h>
+    #if CURRENT_PLATFORM_ID == OS_DRAGONFLY
+        #include <sys/param.h>
+        #include <sys/sysctl.h>
+        #include <kvm.h>
+    #endif
 #endif
 
 using std::string;
+
+#if CURRENT_PLATFORM_ID == OS_DRAGONFLY
+kvm_t *kd = nullptr;
+#endif
 
 inline char* scopy(string& str)
 {
@@ -282,11 +292,28 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
 #if CURRENT_PLATFORM_ID == OS_FREEBSD
     vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
-      vector<pid_t> vec; int i = 0; int cntp;
+      vector<pid_t> vec; int cntp;
       if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
-        for (int j = 0; j < cntp; j++) {
-          if (proc_info[j].ki_ppid == parentProcId) {
-            vec.push_back(proc_info[j].ki_pid); i++;
+        for (int i = 0; i < cntp; i++) {
+          if (proc_info[i].ki_ppid == parentProcId) {
+            vec.push_back(proc_info[i].ki_pid);
+          }
+        }
+        free(proc_info);
+      }
+      return vec;
+    }
+#elif CURRENT_PLATFORM_ID == OS_DRAGONFLY
+    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
+      char errbuf[_POSIX2_LINE_MAX];
+      vector<pid_t> vec; kinfo_proc *proc_info = nullptr; 
+      const char *nlistf, *memf; nlistf = memf = "/dev/null";
+      kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return vec;
+      int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
+        for (int i = 0; i < cntp; i++) {
+          if (proc_info[i].kp_pid >= 0 && proc_info[i].kp_ppid >= 0 && 
+            proc_info[i].kp_ppid == parentProcId) {
+            vec.push_back(proc_info[i].kp_pid);
           }
         }
         free(proc_info);
@@ -303,21 +330,21 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     }
 
     vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
-      vector<pid_t> vec; int i = 0;
+      vector<pid_t> vec;
       int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
       vector<pid_t> proc_info(cntp);
       std::fill(proc_info.begin(), proc_info.end(), 0);
       proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
-      for (int j = cntp; j > 0; j--) {
-        if (proc_info[j] == 0) { continue; }
-        if (parentProcId == ParentProcIdFromProcId(proc_info[j])) {
-          vec.push_back(proc_info[j]); i++;
+      for (int i = cntp; i > 0; i--) {
+        if (proc_info[i] == 0) { continue; }
+        if (parentProcId == ParentProcIdFromProcId(proc_info[i])) {
+          vec.push_back(proc_info[i]);
         }
       }
       return vec;
     }
 #endif
-#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_MACOSX
+#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_MACOSX
     void WaitForAllChildrenToDie(pid_t pid, int *status) {
       vector<pid_t> procId = ProcIdFromParentProcId(pid);
       if (procId.size()) {
