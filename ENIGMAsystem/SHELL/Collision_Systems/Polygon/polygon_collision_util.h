@@ -123,28 +123,23 @@ std::vector<glm::vec2> getEllipseProjectionPoints(double angleOfAxis, double eps
 // colliding or not
 //
 // Args: 
-//      x1, y1      -- position of polygon 1
-//      x2, y2      -- position of polygon 2
-//      polygon1    -- Polygon object of the first instance
-//      polygon2    -- Polygon object of the second instance
+//      points_poly1 -- points of first polygon
+//      points_poly2 -- points of second polygon
 // Returns:
-//      bool        -- true if collision otherwise false
+//      bool         -- true if collision otherwise false
 // -------------------------------------------------------------------------
-bool get_polygon_polygon_collision(double x1, double y1, double x2, double y2, enigma::Polygon &polygon1, enigma::Polygon &polygon2) {
+bool get_polygon_polygon_collision(std::vector<glm::vec2> points_poly1, std::vector<glm::vec2> points_poly2) 
+{
     bool isSeparated = false;
-    
-    // Preparing Points
-    std::vector<glm::vec2> points_poly1 = polygon1.getTransformedPoints();
-    enigma::addOffsets(points_poly1, x1, y1);
-    std::vector<glm::vec2> points_poly2 = polygon2.getTransformedPoints();
-    enigma::addOffsets(points_poly2, x2, y2);
 
     // Preparing Normals
-    std::vector<glm::vec2> normals_poly1 = polygon1.getNormals();
-    std::vector<glm::vec2> normals_poly2 = polygon2.getNormals();
+    std::vector<glm::vec2> normals_poly1 = enigma::computeNormals(points_poly1);
+    std::vector<glm::vec2> normals_poly2 = enigma::computeNormals(points_poly2);
 
-    // Using polygon1 normals
-    for (int i = 0; i < normals_poly1.size(); ++i) {
+    // Using polygon1 normals to see if there is an axis 
+    // on which collision is occuring
+    for (int i = 0; i < normals_poly1.size(); ++i) 
+    {
         enigma::MinMaxProjection result1, result2;
 
         // Get Min Max Projection of all the points on 
@@ -156,14 +151,18 @@ bool get_polygon_polygon_collision(double x1, double y1, double x2, double y2, e
         isSeparated = result1.max_projection < result2.min_projection || result2.max_projection < result1.min_projection;
 
         // Break if Separated
-        if (isSeparated) {
+        if (isSeparated) 
+        {
             break;
         }
     }
 
-    // Using polygon2 normals
-    if (!isSeparated) {
-        for (int i = 0; i < normals_poly2.size(); ++i) {
+    // Using polygon2 normals to see if there is an 
+    // axis on which collision is occuring
+    if (!isSeparated) 
+    {
+        for (int i = 0; i < normals_poly2.size(); ++i) 
+        {
             enigma::MinMaxProjection result1, result2;
 
             // Get Min Max Projection of all the points on 
@@ -175,16 +174,21 @@ bool get_polygon_polygon_collision(double x1, double y1, double x2, double y2, e
             isSeparated = result1.max_projection < result2.min_projection || result2.max_projection < result1.min_projection;
 
             // Break if Separated
-            if (isSeparated) {
+            if (isSeparated) 
+            {
                 break;
             }
         }
     }
 
-    if (!isSeparated) {
+    // If there is a single axis where the separation is happening, than the polygons are 
+    // not colliding
+    if (!isSeparated) 
+    {
         // printf("Collision Detected!\n");
         return true;
-    } else {
+    } else 
+    {
         // printf("No Collision Detected!\n");
         return false;
     }
@@ -195,41 +199,44 @@ bool get_polygon_polygon_collision(double x1, double y1, double x2, double y2, e
 // colliding or not
 //
 // Args: 
-//      x1, y1      -- position of polygon
+//      points_poly -- points of the polygon
 //      x2, y2      -- position of ellipse
-//      polygon     -- Polygon object of the instance
 //      rx, ry      -- radii of the ellipse (x-axis and y-axis)
 // Returns:
 //      bool        -- true if collision otherwise false
 // -------------------------------------------------------------------------
-bool get_polygon_ellipse_collision(double x1, double y1, double x2, double y2, enigma::Polygon &polygon, double rx, double ry) {
+bool get_polygon_ellipse_collision(std::vector<glm::vec2> &points_poly, double x2, double y2, double rx, double ry) 
+{
     bool isSeparated = false;
-    
-    // Preparing Points
-    std::vector<glm::vec2> points_poly = polygon.getTransformedPoints();
-    enigma::addOffsets(points_poly, x1, y1);
 
     // Preparing Normals
-    std::vector<glm::vec2> normals_poly = polygon.getNormals();
+    std::vector<glm::vec2> normals_poly = enigma::computeNormals(points_poly);
 
     // Using polygon1 normals
-    for (int i = 0; i < normals_poly.size(); ++i) {
+    for (int i = 0; i < normals_poly.size(); ++i) 
+    {
         enigma::MinMaxProjection result1, result2;
 
-        // Getting the Ellipse on this axis
+        // First determine the points between which we wish to compute the angle on
+        // These points correlate with the normals of the polygons that we computed 
+        // above
         glm::vec2 point2 = points_poly[i];
         glm::vec2 point1;
-        if (i == normals_poly.size() - 1) {
+
+        // The point is either the next one in the list, or the first one
+        if (i == normals_poly.size() - 1) 
+        {
             point1 = points_poly[0];
-        } else {
+        } else 
+        {
             point1 = points_poly[i + 1];
         }
-        double angleOfAxis = -enigma::angleBetweenVectors(point1, point2);
 
+        // Computing the angle and using that angle to get the projection of the ellipse
+        double angleOfAxis = -enigma::angleBetweenVectors(point1, point2);
         std::vector<glm::vec2> ellipse_points = getEllipseProjectionPoints(angleOfAxis, x2, y2, rx, ry);
 
-        // Get Min Max Projection of all the points on 
-        // this normal vector
+        // Get Min Max Projection of all the points on this normal vector
         result1 = getMinMaxProjection(points_poly, normals_poly[i]);
         result2 = getMinMaxProjection(ellipse_points, normals_poly[i]);
 
@@ -237,15 +244,19 @@ bool get_polygon_ellipse_collision(double x1, double y1, double x2, double y2, e
         isSeparated = result1.max_projection < result2.min_projection || result2.max_projection < result1.min_projection;
 
         // Break if Separated
-        if (isSeparated) {
+        if (isSeparated) 
+        {
             break;
         }
     }
 
-    if (!isSeparated) {
+    if (!isSeparated) 
+    {
         // printf("Collision Detected!\n");
         return true;
-    } else {
+    } 
+    else 
+    {
         // printf("No Collision Detected!\n");
         return false;
     }
@@ -261,7 +272,8 @@ bool get_polygon_ellipse_collision(double x1, double y1, double x2, double y2, e
 // Returns:
 //      bbox_polygon    -- a polygon object made from the parameter values
 // -------------------------------------------------------------------------
-enigma::Polygon get_bbox_from_dimensions(double x1, double y1, int width, int height) {
+enigma::Polygon get_bbox_from_dimensions(double x1, double y1, int width, int height) 
+{
     // Creating bbox vectors
     glm::vec2 top_left(x1, y1);
     glm::vec2 top_right(width, y1);
@@ -288,13 +300,13 @@ enigma::Polygon get_bbox_from_dimensions(double x1, double y1, int width, int he
 // or not
 //
 // Args: 
-//      inst1       -- object collisions for the instance that has a polygoo
+//      inst1       -- object collisions for the instance that has a polygon
 //      inst2       -- object collisions for the instance that uses the bbox
-//      polygon1    -- Polygon object of the first instance
 // Returns:
 //      inst2       -- if collision otherwise NULL
 // -------------------------------------------------------------------------
-enigma::object_collisions* const get_polygon_bbox_collision(enigma::object_collisions* const inst1, enigma::object_collisions* const inst2, enigma::Polygon &polygon1) {
+enigma::object_collisions* const get_polygon_bbox_collision(enigma::object_collisions* const inst1, enigma::object_collisions* const inst2) 
+{
     // polygon vs bbox
     const int collsprite_index2 = inst2->mask_index != -1 ? inst2->mask_index : inst2->sprite_index;
     enigma::Sprite& sprite2 = enigma::sprites.get(collsprite_index2);
@@ -303,11 +315,22 @@ enigma::object_collisions* const get_polygon_bbox_collision(enigma::object_colli
     int w2 = sprite2.width;
     int h2 = sprite2.height;
 
-    // Getting bbox polygon
+    // Getting bbox points
+    // TODO : optimize this please
     enigma::Polygon bbox_polygon = get_bbox_from_dimensions(0, 0, w2, h2);
+    std::vector<glm::vec2> bbox_points = bbox_polygon.getPoints();
+    enigma::offsetPoints(bbox_points, inst2->x, inst2->y);
+
+    // Getting polygon points
+    std::vector<glm::vec2> points_poly = enigma::polygons.get(inst1->polygon_index).getPoints();
+    glm::vec2 pivot = enigma::polygons.get(inst1->polygon_index).computeCenter();
+    enigma::transformPoints(points_poly, 
+                                inst1->x, inst1->y, 
+                                inst1->polygon_angle, pivot,
+                                inst1->polygon_xscale, inst1->polygon_yscale);
 
     // Collision Detection
-    return get_polygon_polygon_collision(inst1->x, inst1->y, inst2->x, inst2->y, polygon1, bbox_polygon)? inst2: NULL;
+    return get_polygon_polygon_collision(points_poly, bbox_points)? inst2: NULL;
 }
 
 // -------------------------------------------------------------------------
@@ -356,20 +379,31 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
 // -------------------------------------------------------------------------
 void get_bbox_border(int &left, int &top, int &right, int &bottom, enigma::object_collisions* const inst) 
 {
-    if (inst->sprite_index != -1)
+    // Compute the bbox from the polygon 
+    if (inst->polygon_index != -1)
+    {
+        // Fetching transformed points
+        std::vector<glm::vec2> points = enigma::polygons.get(inst->polygon_index).getPoints();
+        glm::vec2 pivot = enigma::polygons.get(inst->polygon_index).computeCenter();
+        enigma::transformPoints(points, 
+                                inst->x, inst->y, 
+                                inst->polygon_angle, pivot,
+                                inst->polygon_xscale, inst->polygon_yscale);
+        
+        // Computing bbox
+        enigma::BoundingBox box = enigma::computeBBOXFromPoints(points);
+        left = box.left();
+        top = box.top();
+        right = box.right();
+        bottom = box.bottom();
+    }
+    // If the polygon is not availble, the bbox is computed from the polygon
+    else if (inst->sprite_index != -1)
     {
         const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                         xscale = inst->image_xscale, yscale = inst->image_yscale,
                         ia = inst->image_angle;
         get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
-    } else if (inst->polygon_index != -1)
-    {
-        enigma::Polygon polygon = enigma::polygons.get(inst->polygon_index);
-        enigma::BoundingBox box = polygon.getBBOX();
-        left = inst->x + box.left();
-        top = inst->y + box.top();
-        right = inst->x + box.right();
-        bottom = inst->y + box.bottom();
     }
 }

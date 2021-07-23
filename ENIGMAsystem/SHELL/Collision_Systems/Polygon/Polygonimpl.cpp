@@ -59,7 +59,7 @@ static bool precise_collision_single(int intersection_left, int intersection_rig
             for(int colindex = intersection_left; colindex <= intersection_right; colindex++)
             {
 
-                //Test for single image.
+                // Test for single image.
                 const int bx1 = (colindex - x1);
                 const int by1 = (rowindex - y1);
                 const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
@@ -280,13 +280,20 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
         // Finding the Collision Type
         collision_cases collision_case = POLYGON_VS_POLYGON;
 
-        if (inst1->polygon_index != -1 && inst2->polygon_index != -1) {
+        if (inst1->polygon_index != -1 && inst2->polygon_index != -1) 
+        {
             collision_case = POLYGON_VS_POLYGON;
-        } else if (inst1->polygon_index != -1 && inst2->polygon_index == -1) {
+        } 
+        else if (inst1->polygon_index != -1 && inst2->polygon_index == -1) 
+        {
             collision_case = POLYGON_VS_BBOX;
-        } else if (inst1->polygon_index == -1 && inst2->polygon_index != -1) {
+        } 
+        else if (inst1->polygon_index == -1 && inst2->polygon_index != -1) 
+        {
             collision_case = BBOX_VS_POLYGON;
-        } else {
+        } 
+        else 
+        {
             collision_case = BBOX_VS_BBOX;
         }
         
@@ -296,33 +303,52 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
         // Main Sweep and Prune Check
         if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1) {
-            // Debugging Part Starts
-            // return inst2;
-            // Debugging Part Ends
-            if (collision_case == BBOX_VS_BBOX) {
+            if (collision_case == BBOX_VS_BBOX) 
+            {
                 return inst2;
             }
-        } else {
+        } 
+        else {
             continue;
         }
 
         // Main Collision Detection check
         switch (collision_case)
         {
-        case POLYGON_VS_POLYGON: {
-            enigma::Polygon& polygon1(enigma::polygons.get(inst1->polygon_index));
-            enigma::Polygon& polygon2 = enigma::polygons.get(inst2->polygon_index);
-            return get_polygon_polygon_collision(inst1->x, inst1->y, inst2->x, inst2->y, polygon1, polygon2)? inst2: NULL;
-        }
-        case POLYGON_VS_BBOX: {
-            enigma::Polygon& polygon1(enigma::polygons.get(inst1->polygon_index));
-            return get_polygon_bbox_collision(inst1, inst2, polygon1);
-        } case BBOX_VS_POLYGON: {
-            enigma::Polygon& polygon2(enigma::polygons.get(inst2->polygon_index));
-            return get_polygon_bbox_collision(inst2, inst1, polygon2);
-        }
-        default:
-            break;
+            case POLYGON_VS_POLYGON: 
+            {
+                // Fetching Points
+                std::vector<glm::vec2> points_poly1 = enigma::polygons.get(inst1->polygon_index).getPoints();
+                std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst2->polygon_index).getPoints();
+
+                // Computing Pivots
+                glm::vec2 pivot1 = enigma::polygons.get(inst1->polygon_index).computeCenter();
+                glm::vec2 pivot2 = enigma::polygons.get(inst1->polygon_index).computeCenter();
+
+                // Applying transformations
+                enigma::transformPoints(points_poly1, 
+                                        inst1->x, inst1->y, 
+                                        inst1->polygon_angle, pivot1,
+                                        inst1->polygon_xscale, inst1->polygon_yscale);
+
+                enigma::transformPoints(points_poly2, 
+                                        inst2->x, inst2->y, 
+                                        inst2->polygon_angle, pivot2,
+                                        inst2->polygon_xscale, inst2->polygon_yscale);
+                
+                // Collision function call
+                return get_polygon_polygon_collision(points_poly1, points_poly2)? inst2: NULL;
+            }
+            case POLYGON_VS_BBOX: 
+            {
+                return get_polygon_bbox_collision(inst1, inst2);
+            } 
+            case BBOX_VS_POLYGON: 
+            {
+                return get_polygon_bbox_collision(inst2, inst1);
+            }
+            default:
+                break;
         } 
     }
     return NULL;
@@ -373,9 +399,20 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
                 return inst;
             }
 
+            // Fetching points
+            std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst->polygon_index).getPoints();
+            std::vector<glm::vec2> bbox_points = bbox_main.getPoints();
+
+            // Applying Transformations
+            glm::vec2 pivot2 = enigma::polygons.get(inst->polygon_index).computeCenter();
+            enigma::transformPoints(points_poly2, 
+                                        inst->x, inst->y, 
+                                        inst->polygon_angle, pivot2,
+                                        inst->polygon_xscale, inst->polygon_yscale);
+            enigma::offsetPoints(bbox_points, x1, y1);
+
             // Polygon collision check
-            enigma::Polygon polygon2 = enigma::polygons.get(inst->polygon_index);
-            return get_polygon_polygon_collision(x1, y1, inst->x, inst->y, bbox_main, polygon2)? inst : NULL;
+            return get_polygon_polygon_collision(bbox_points, points_poly2)? inst : NULL;
         }
     }
     return NULL;
@@ -450,24 +487,26 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
             } else if (inst->polygon_index == -1) {
                 return inst;
             }
-            else {
+            else 
+            {
                 // Converting the line to a polygon
-                int width = x2 - x1;
-                int height = y2 - y1;
+                std::vector<glm::vec2> line_points;
+                line_points.push_back(glm::vec2(x1, y1));
+                line_points.push_back(glm::vec2(x2, y2));
 
-                glm::vec2 point1(0, 0);
-                glm::vec2 point2(width, height);
+                // Fetching points
+                std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst->polygon_index).getPoints();
 
-                enigma::Polygon polygon1;
-                polygon1.setWidth(width);
-                polygon1.setHeight(height);
-                polygon1.addPoint(point1);
-                polygon1.addPoint(point2);
+                // Applying Transformations
+                // Applying Transformations
+                glm::vec2 pivot2 = enigma::polygons.get(inst->polygon_index).computeCenter();
+                enigma::transformPoints(points_poly2, 
+                                        inst->x, inst->y, 
+                                        inst->polygon_angle, pivot2,
+                                        inst->polygon_xscale, inst->polygon_yscale);
 
                 // doing a polygon polygon check
-                enigma::Polygon polygon2 = enigma::polygons.get(inst->polygon_index);
-
-                return get_polygon_polygon_collision(x1, y1, inst->x, inst->y, polygon1, polygon2)? inst : NULL;
+                return get_polygon_polygon_collision(line_points, points_poly2)? inst : NULL;
             }
         }
     }
@@ -504,12 +543,23 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
             }
 
             // Converting the point to a small box
-            enigma::Polygon polygon1 = get_bbox_from_dimensions(0, 0, 1, 1);
+            enigma::Polygon bbox_main = get_bbox_from_dimensions(0, 0, 1, 1);
+
+            // Fetching points
+            std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst->polygon_index).getPoints();
+            std::vector<glm::vec2> bbox_points = bbox_main.getPoints();
+
+            // Applying Transformations
+            // Applying Transformations
+            glm::vec2 pivot2 = enigma::polygons.get(inst->polygon_index).computeCenter();
+            enigma::transformPoints(points_poly2, 
+                                        inst->x, inst->y, 
+                                        inst->polygon_angle, pivot2,
+                                        inst->polygon_xscale, inst->polygon_yscale);
+            enigma::offsetPoints(bbox_points, x1, y1);
 
             // Collision detection
-            enigma::Polygon polygon2 = enigma::polygons.get(inst->polygon_index);
-
-            return get_polygon_polygon_collision(x1, y1, inst->x, inst->y, polygon1, polygon2)? inst : NULL;
+            return get_polygon_polygon_collision(bbox_points, points_poly2)? inst : NULL;
         }
     }
     return NULL;
@@ -579,11 +629,19 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
             }
             
             // Actual polygon collision detection
-            // Retrieving the polygon
-            enigma::Polygon polygon1 = enigma::polygons.get(inst->polygon_index);
+            // Fetching points
+            std::vector<glm::vec2> points_poly = enigma::polygons.get(inst->polygon_index).getPoints();
+
+            // Applying Transformations
+            // Applying Transformations
+            glm::vec2 pivot = enigma::polygons.get(inst->polygon_index).computeCenter();
+            enigma::transformPoints(points_poly, 
+                                        inst->x, inst->y, 
+                                        inst->polygon_angle, pivot,
+                                        inst->polygon_xscale, inst->polygon_yscale);
 
             // Collision Detection
-            return get_polygon_ellipse_collision(inst->x, inst->y, x1, y1, polygon1, rx, ry)? inst : NULL;
+            return get_polygon_ellipse_collision(points_poly, x1, y1, rx, ry)? inst : NULL;
         }
     }
     return NULL;
@@ -593,7 +651,7 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
 {
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
-        enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
+        enigma::object_collisions* const inst = (enigma::object_collisions*) *it;
         if (solid_only && !inst->solid)
             continue;
         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
@@ -667,7 +725,8 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
         int left, top, right, bottom;
         get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
 
-        if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) {
+        if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) 
+        {
 
             const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
 
@@ -677,18 +736,19 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
 
             unsigned char* pixels = (unsigned char*) (sprite.GetSubimage(usi).collisionData);
 
-            if (pixels == 0) { //bbox.
+            if (pixels == 0) 
+            {   // bbox.
                 enigma::instance_change_inst(obj, perf, inst);
             }
-            else { //precise.
+            else 
+            {   // precise.
                 //Intersection.
                 const int ins_left = max(left, x1);
                 const int ins_right = min(right, x1);
                 const int ins_top = max(top, y1);
                 const int ins_bottom = min(bottom, y1);
 
-                //Check per pixel.
-
+                // Check per pixel.
                 const int w = sprite.width;
                 const int h = sprite.height;
 

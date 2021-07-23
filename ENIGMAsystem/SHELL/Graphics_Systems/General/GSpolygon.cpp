@@ -30,11 +30,12 @@
 #include <string>
 
 namespace enigma_user {
-  void draw_polygon(int polygon_id, gs_scalar x, gs_scalar y) 
+  void draw_polygon(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale) 
   {
     // Retrieving points of the polygon
-    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getTransformedPoints();
-    enigma::addOffsets(points, x, y);
+    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
+    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     int N = points.size();
 
     // Drawing from point i to i + 1
@@ -52,25 +53,33 @@ namespace enigma_user {
     draw_primitive_end();
   }
 
-  void draw_polygon_bbox(int polygon_id, gs_scalar x, gs_scalar y) 
+  void draw_polygon_bbox(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale) 
   {
-    enigma::Rect<int> bbox = enigma::polygons.get(polygon_id).getBBOX();
+    // Computing BBOX
+    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
+    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
+    enigma::Rect<int> bbox = enigma::computeBBOXFromPoints(points);
+
+    // Drawing
     draw_primitive_begin(pr_linestrip);
-    draw_vertex(bbox.left() + x, bbox.top() + y);
-    draw_vertex(bbox.right() + x, bbox.top() + y);
-    draw_vertex(bbox.right() + x, bbox.bottom() + y);
-    draw_vertex(bbox.left() + x, bbox.bottom() + y);
-    draw_vertex(bbox.left() + x, bbox.top() + y);
+    draw_vertex(bbox.left(), bbox.top());
+    draw_vertex(bbox.right(), bbox.top());
+    draw_vertex(bbox.right(), bbox.bottom());
+    draw_vertex(bbox.left(), bbox.bottom());
+    draw_vertex(bbox.left(), bbox.top());
     draw_primitive_end();
   }
 
-  void draw_polygon_color(int polygon_id, gs_scalar x, gs_scalar y, int color)
+  void draw_polygon_color(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale, int color)
   {
-    // Retrieving the points of the polygon
-    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getTransformedPoints();
-    enigma::addOffsets(points, x, y);
+    // Retrieving points of the polygon
+    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
+    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     int N = points.size();
 
+    // Getting the alpha of the drawing
     gs_scalar alpha = draw_get_alpha();
 
     // Drawing from point i to i + 1
@@ -88,16 +97,24 @@ namespace enigma_user {
     draw_primitive_end();
   }
 
-  void draw_polygon_bbox_color(int polygon_id, gs_scalar x, gs_scalar y, int color)
+  void draw_polygon_bbox_color(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale, int color)
   {
+    // Computing BBOX
+    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
+    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
+    enigma::Rect<int> bbox = enigma::computeBBOXFromPoints(points); 
+
+    // Setting Alpha
     gs_scalar alpha = draw_get_alpha();
-    enigma::Rect<int> bbox = enigma::polygons.get(polygon_id).getBBOX();
+
+    // Drawing
     draw_primitive_begin(pr_linestrip);
-    draw_vertex_color(bbox.left() + x, bbox.top() + y, color, alpha);
-    draw_vertex_color(bbox.right() + x, bbox.top() + y, color, alpha);
-    draw_vertex_color(bbox.right() + x, bbox.bottom() + y, color, alpha);
-    draw_vertex_color(bbox.left() + x, bbox.bottom() + y, color, alpha);
-    draw_vertex_color(bbox.left() + x, bbox.top() + y, color, alpha);
+    draw_vertex_color(bbox.left(), bbox.top(), color, alpha);
+    draw_vertex_color(bbox.right(), bbox.top(), color, alpha);
+    draw_vertex_color(bbox.right(), bbox.bottom(), color, alpha);
+    draw_vertex_color(bbox.left(), bbox.bottom(), color, alpha);
+    draw_vertex_color(bbox.left(), bbox.top(), color, alpha);
     draw_primitive_end();
   }
 }

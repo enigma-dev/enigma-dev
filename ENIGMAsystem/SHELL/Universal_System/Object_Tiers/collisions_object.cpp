@@ -120,6 +120,7 @@ namespace enigma
     {
         return (mask_index >= 0 ? sprite_get_bbox_relative(mask_index) : sprite_get_bbox_relative(sprite_index));
     }
+    
     const BoundingBox& object_collisions::$bbox() const
     {
          return (mask_index >= 0 ? sprite_get_bbox(mask_index) : sprite_get_bbox(sprite_index));
@@ -127,9 +128,15 @@ namespace enigma
 
     object_collisions::object_collisions(): object_transform() { 
         polygon_index = -1;
+        polygon_xscale = polygon_yscale = 1;
+        polygon_angle = 0;
     }
+
     object_collisions::object_collisions(unsigned _id,int _objid): object_transform(_id,_objid) {
         polygon_index = -1;
+        polygon_xscale = polygon_yscale = 1;
+        polygon_angle = 0;
     }
+
     object_collisions::~object_collisions() {}
 }

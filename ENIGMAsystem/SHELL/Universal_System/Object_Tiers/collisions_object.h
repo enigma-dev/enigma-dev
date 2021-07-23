@@ -45,8 +45,10 @@ namespace enigma
       int mask_index;
       bool solid;
 
-    // Polygon Index
+    // Polygon related attributes
     int polygon_index;
+    gs_scalar polygon_xscale, polygon_yscale;
+    gs_scalar polygon_angle;
 
     //Bounding box
       #ifdef JUST_DEFINE_IT_RUN

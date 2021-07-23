@@ -18,8 +18,6 @@ namespace enigma_user {
 	int polygon_get_yoffset(int id);
 	bool polygon_exists(int id);
 	void polygon_decompose(int id);
-	void polygon_set_scale(int id, double scale);
-	void polygon_set_angle(int id, double angle);
 }
 
 #endif  // !ENIGMA_POLYGON_H
