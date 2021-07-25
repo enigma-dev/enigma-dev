@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 IsmAvatar <ismavatar@gmail.com>
+/** Copyright (C) 2021 Nabeel Danish  <nabeelben@gmail.com>
+*** Copyright (C) 2008-2013 IsmAvatar <ismavatar@gmail.com>
 *** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
@@ -29,43 +30,9 @@
 #include "Collision_Systems/collision_mandatory.h" //iter
 #include "Universal_System/Instances/instance.h"
 #include "Universal_System/math_consts.h"
-
 #include "../General/CSfuncs.h"
 #include "PRECimpl.h"
-
-static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, cs_scalar x, cs_scalar y, double xscale, double yscale, double angle)
-{
-    if (angle == 0)
-    {
-        const bool xsp = (xscale >= 0), ysp = (yscale >= 0);
-        const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
-
-        *leftv   = (xsp ? lsc : rsc) + x + .5;
-        *rightv  = (xsp ? rsc : lsc) + x + .5;
-        *topv    = (ysp ? tsc : bsc) + y + .5;
-        *bottomv = (ysp ? bsc : tsc) + y + .5;
-    }
-    else
-    {
-        const double arad = angle*(M_PI/180.0);
-        const double sina = sin(arad), cosa = cos(arad);
-        const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
-        const int quad = int(fmod(fmod(angle, 360) + 360, 360)/90.0);
-        const bool xsp = (xscale >= 0), ysp = (yscale >= 0),
-                   q12 = (quad == 1 || quad == 2), q23 = (quad == 2 || quad == 3),
-                   xs12 = xsp^q12, sx23 = xsp^q23, ys12 = ysp^q12, ys23 = ysp^q23;
-
-        *leftv   = cosa*(xs12 ? lsc : rsc) + sina*(ys23 ? tsc : bsc) + x + .5;
-        *rightv  = cosa*(xs12 ? rsc : lsc) + sina*(ys23 ? bsc : tsc) + x + .5;
-        *topv    = cosa*(ys12 ? tsc : bsc) - sina*(sx23 ? rsc : lsc) + y + .5;
-        *bottomv = cosa*(ys12 ? bsc : tsc) - sina*(sx23 ? lsc : rsc) + y + .5;
-    }
-}
-
-template<typename T> static inline T min(T x, T y) { return x<y? x : y; }
-template<typename T> static inline T max(T x, T y) { return x>y? x : y; }
-static inline double angle_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;}
-static inline double point_direction(cs_scalar x1, cs_scalar y1,cs_scalar x2, cs_scalar y2) {return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);}
+#include "../General/collisions_general.h"
 
 namespace enigma_user
 {
@@ -181,13 +148,9 @@ double distance_to_object(int object)
         return -1;
     double distance = std::numeric_limits<double>::infinity();
     double tempdist;
-    const enigma::BoundingBox &box = inst1->$bbox_relative();
-    const double x1 = inst1->x, y1 = inst1->y,
-                 xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
-                 ia1 = inst1->image_angle;
-    int left1, top1, right1, bottom1;
 
-    get_border(&left1, &right1, &top1, &bottom1, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale1, yscale1, ia1);
+    int left1, top1, right1, bottom1;
+    get_bbox_border(left1, top1, right1, bottom1, inst1);
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
@@ -196,13 +159,8 @@ double distance_to_object(int object)
         if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
             continue;
 
-        const enigma::BoundingBox &box2 = inst2->$bbox_relative();
-        const double x2 = inst2->x, y2 = inst2->y,
-                     xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia2 = inst2->image_angle;
         int left2, top2, right2, bottom2;
-
-        get_border(&left2, &right2, &top2, &bottom2, box2.left(), box2.top(), box2.right(), box2.bottom(), x2, y2, xscale2, yscale2, ia2);
+        get_bbox_border(left2, top2, right2, bottom2, inst2);
 
         const int right  = min(right1, right2),   left = max(left1, left2),
                   bottom = min(bottom1, bottom2), top  = max(top1, top2);
@@ -223,13 +181,9 @@ double distance_to_point(cs_scalar x, cs_scalar y)
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
         return -1;
-    const enigma::BoundingBox &box = inst1->$bbox_relative();
-    const double x1 = inst1->x, y1 = inst1->y,
-                 xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
-                 ia1 = inst1->image_angle;
-    int left1, top1, right1, bottom1;
 
-    get_border(&left1, &right1, &top1, &bottom1, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale1, yscale1, ia1);
+    int left1, top1, right1, bottom1;
+    get_bbox_border(left1, top1, right1, bottom1, inst1);
 
     return fabs(hypot(min(left1 - x, right1 - x),
                     min(top1 - y, bottom1 - y)));
@@ -259,16 +213,10 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
     const double sin_angle = sin(radang), cos_angle = cos(radang);
 
     // Subtraction.
-
     const int quad = int(angle/90.0);
 
-    const enigma::BoundingBox &box = inst1->$bbox_relative();
-    const double x1 = inst1->x, y1 = inst1->y,
-                 xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
-                 ia1 = inst1->image_angle;
     int left1, top1, right1, bottom1;
-
-    get_border(&left1, &right1, &top1, &bottom1, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale1, yscale1, ia1);
+    get_bbox_border(left1, top1, right1, bottom1, inst1);
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
@@ -277,13 +225,9 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
             continue;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid))
             continue;
-        const enigma::BoundingBox &box2 = inst2->$bbox_relative();
-        const double x2 = inst2->x, y2 = inst2->y,
-                     xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia2 = inst2->image_angle;
-        int left2, top2, right2, bottom2;
 
-        get_border(&left2, &right2, &top2, &bottom2, box2.left(), box2.top(), box2.right(), box2.bottom(), x2, y2, xscale2, yscale2, ia2);
+        int left2, top2, right2, bottom2;
+        get_bbox_border(left2, top2, right2, bottom2, inst2);
 
         if (right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1)
         {
@@ -531,13 +475,8 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bo
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
             continue;
 
-        const enigma::BoundingBox &box = inst->$bbox_relative();
-        const double x = inst->x, y = inst->y,
-        xscale = inst->image_xscale, yscale = inst->image_yscale,
-        ia = inst->image_angle;
-
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
+        get_bbox_border(left, top, right, bottom, inst);
 
         if ((left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) == inside) {
             inst->deactivate();
@@ -556,13 +495,8 @@ void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool
             continue;
         }
 
-        const enigma::BoundingBox &box = inst->$bbox_relative();
-        const double x = inst->x, y = inst->y,
-        xscale = inst->image_xscale, yscale = inst->image_yscale,
-        ia = inst->image_angle;
-
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
+        get_bbox_border(left, top, right, bottom, inst);
 
         if ((left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) == inside) {
             inst->activate();
@@ -603,13 +537,8 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
             continue;
 
-        const enigma::BoundingBox &box = inst->$bbox_relative();
-        const double x1 = inst->x, y1 = inst->y,
-        xscale = inst->image_xscale, yscale = inst->image_yscale,
-        ia = inst->image_angle;
-
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale, yscale, ia);
+        get_bbox_border(left, top, right, bottom, inst);
 
         const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
                                  line_ellipse_intersects(r, r, right-x, top-y, bottom-y) ||
@@ -647,13 +576,8 @@ void instance_activate_circle(int x, int y, int r, bool inside)
             continue;
         }
 
-        const enigma::BoundingBox &box = inst->$bbox_relative();
-        const double x1 = inst->x, y1 = inst->y,
-        xscale = inst->image_xscale, yscale = inst->image_yscale,
-        ia = inst->image_angle;
-
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale, yscale, ia);
+        get_bbox_border(left, top, right, bottom, inst);
 
         const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
                                  line_ellipse_intersects(r, r, right-x, top-y, bottom-y) ||
