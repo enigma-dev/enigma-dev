@@ -25,14 +25,49 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include <time.h>
+#include <ctime>
 #include <string>
-using std::string;
 
 #include "include.h"
 
+#include <sys/stat.h>
+
+using std::string;
+
+namespace {
+
+enum dt_type {
+  dt_year, 
+  dt_month, 
+  dt_day, 
+  dt_hour, 
+  dt_minute, 
+  dt_second
+};
+
+int file_get_date_modified(const char *fname, int type) {
+  int result = -1;
+  struct stat info = { 0 }; stat(fname, &info);
+  struct tm *timeinfo = localtime(&info.st_mtime);
+  struct tm *timeinfo = std::localtime(&cftime);
+  if      (type == dt_year)   result = timeinfo->tm_year + 1900;
+  else if (type == dt_month)  result = timeinfo->tm_mon + 1;
+  else if (type == dt_day)    result = timeinfo->tm_mday;
+  else if (type == dt_hour)   result = timeinfo->tm_hour;
+  else if (type == dt_minute) result = timeinfo->tm_min;
+  else if (type == dt_second) result = timeinfo->tm_sec;
+  else result = -1; // error; invalid type...
+  std::error_code ec;
+  auto ftime = std::filesystem::last_write_time(p, ec);
+  get_last_write_time(ftime, fname, type);
+  return result;
+}
+
+} // anonymous namepsace
+
 namespace enigma_user
 {
+
 time_t date_current_datetime()
 {
     return time(NULL);
@@ -476,5 +511,30 @@ string date_datetime_stringf(time_t date,string format)
     strftime(buffer,80,format.c_str(),localtime(&date));
     return string(buffer);
 }
+
+int file_get_date_modified_year(string fname) {
+  return file_get_date_modified(fname.c_str(), dt_year);
 }
+
+int file_get_date_modified_month(string fname) {
+  return file_get_date_modified(fname.c_str(), dt_month);
+}
+
+int file_get_date_modified_day(string fname) {
+  return file_get_date_modified(fname.c_str(), dt_day);
+}
+
+int file_get_date_modified_hour(string fname) {
+  return file_get_date_modified(fname.c_str(), dt_hour);
+}
+
+int file_get_date_modified_minute(string fname) {
+  return file_get_date_modified(fname.c_str(), dt_minute);
+}
+
+int file_get_date_modified_second(string fname) {
+  return file_get_date_modified(fname.c_str(), dt_second);
+}
+
+} // namespace enigma_user
 
