@@ -57,9 +57,6 @@ int file_get_date_modified(const char *fname, int type) {
   else if (type == dt_minute) result = timeinfo->tm_min;
   else if (type == dt_second) result = timeinfo->tm_sec;
   else result = -1; // error; invalid type...
-  std::error_code ec;
-  auto ftime = std::filesystem::last_write_time(p, ec);
-  get_last_write_time(fname, type);
   return result;
 }
 
