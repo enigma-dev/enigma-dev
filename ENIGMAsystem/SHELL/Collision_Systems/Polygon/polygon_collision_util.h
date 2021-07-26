@@ -26,6 +26,7 @@
 #include "Universal_System/math_consts.h"
 #include "Universal_System/Resources/polygon.h"
 #include "Universal_System/Resources/polygon_internal.h"
+#include "../General/collisions_general.h"
 
 #include <cmath>
 #include <utility>
@@ -33,18 +34,14 @@
 // DEFING GLOBAL CONSTANTS FOR CASES
 enum collision_cases {POLYGON_VS_POLYGON, POLYGON_VS_BBOX, BBOX_VS_POLYGON, BBOX_VS_BBOX, POLYGON_VS_PREC, PREC_VS_POLYGON};
 
-// Simple Mathematical Functions
-template<typename T> static inline T min(T x, T y) { return x < y? x : y; }
-template<typename T> static inline T max(T x, T y) { return x > y? x : y; }
-
 // -------------------------------------------------------------------------
 // Function that returns the Minimum and Maximum
 // Projection along an axis of a given normal
 // set of points
 //
 // Args: 
-//      vecs_box -- a vector array of Vector2D points from a polygon normals
-//      axis     -- a Vector2D specifying the axis
+//      vecs_box     -- a vector array of Vector2D points from a polygon normals
+//      axis         -- a Vector2D specifying the axis
 // Returns:
 //      min_max_proj -- MinMaxProjection object that stores minmax information
 // -------------------------------------------------------------------------
@@ -334,76 +331,31 @@ enigma::object_collisions* const get_polygon_bbox_collision(enigma::object_colli
 }
 
 // -------------------------------------------------------------------------
-// Function to get the bbox border. Not made by Nabeel Danish
+// Function to detect collision between a point and a polygon
+// Args:
+//      inst    - instance that has a polygon to detect collision with
+//      x1, y1  - position of the point
+// Returns:
+//              - true if collision otherwise false
 // -------------------------------------------------------------------------
-static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
+bool get_polygon_point_collision(enigma::object_collisions* inst, int x1, int y1)
 {
-    if (angle == 0)
-    {
-        const bool xsp = (xscale >= 0), ysp = (yscale >= 0);
-        const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
+    // Converting the point to a small box
+    enigma::Polygon bbox_main = get_bbox_from_dimensions(0, 0, 0.2, 0.2);
 
-        *leftv   = (xsp ? lsc : rsc) + x + .5;
-        *rightv  = (xsp ? rsc : lsc) + x + .5;
-        *topv    = (ysp ? tsc : bsc) + y + .5;
-        *bottomv = (ysp ? bsc : tsc) + y + .5;
-    }
-    else
-    {
-        const double arad = angle*(M_PI/180.0);
-        const double sina = sin(arad), cosa = cos(arad);
-        const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
-        const int quad = int(fmod(fmod(angle, 360) + 360, 360)/90.0);
-        const bool xsp = (xscale >= 0), ysp = (yscale >= 0),
-                   q12 = (quad == 1 || quad == 2), q23 = (quad == 2 || quad == 3),
-                   xs12 = xsp^q12, sx23 = xsp^q23, ys12 = ysp^q12, ys23 = ysp^q23;
+    // Fetching points
+    std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst->polygon_index).getPoints();
+    std::vector<glm::vec2> bbox_points = bbox_main.getPoints();
 
-        *leftv   = cosa*(xs12 ? lsc : rsc) + sina*(ys23 ? tsc : bsc) + x + .5;
-        *rightv  = cosa*(xs12 ? rsc : lsc) + sina*(ys23 ? bsc : tsc) + x + .5;
-        *topv    = cosa*(ys12 ? tsc : bsc) - sina*(sx23 ? rsc : lsc) + y + .5;
-        *bottomv = cosa*(ys12 ? bsc : tsc) - sina*(sx23 ? lsc : rsc) + y + .5;
-    }
-}
-
-
-// -------------------------------------------------------------------------
-// Function to compute the bbox values used in many collision detection 
-// functions
-//
-// Args: 
-//      left, top, right, bottom    -- int values specifying the box, send 
-//                                     them as reference since they get 
-//                                     updated and returned 
-//      inst                        -- instance for which to compute the 
-//                                     bbox values
-// -------------------------------------------------------------------------
-void get_bbox_border(int &left, int &top, int &right, int &bottom, enigma::object_collisions* const inst) 
-{
-    // Compute the bbox from the polygon 
-    if (inst->polygon_index != -1)
-    {
-        // Fetching transformed points
-        std::vector<glm::vec2> points = enigma::polygons.get(inst->polygon_index).getPoints();
-        glm::vec2 pivot = enigma::polygons.get(inst->polygon_index).computeCenter();
-        enigma::transformPoints(points, 
+    // Applying Transformations
+    // Applying Transformations
+    glm::vec2 pivot2 = enigma::polygons.get(inst->polygon_index).computeCenter();
+    enigma::transformPoints(points_poly2, 
                                 inst->x, inst->y, 
-                                inst->polygon_angle, pivot,
+                                inst->polygon_angle, pivot2,
                                 inst->polygon_xscale, inst->polygon_yscale);
-        
-        // Computing bbox
-        enigma::BoundingBox box = enigma::computeBBOXFromPoints(points);
-        left = box.left();
-        top = box.top();
-        right = box.right();
-        bottom = box.bottom();
-    }
-    // If the polygon is not availble, the bbox is computed from the polygon
-    else if (inst->sprite_index != -1)
-    {
-        const enigma::BoundingBox &box = inst->$bbox_relative();
-        const double x = inst->x, y = inst->y,
-                        xscale = inst->image_xscale, yscale = inst->image_yscale,
-                        ia = inst->image_angle;
-        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
-    }
+    enigma::offsetPoints(bbox_points, x1, y1);
+
+    // Collision detection
+    return get_polygon_polygon_collision(bbox_points, points_poly2) != NULL;
 }
