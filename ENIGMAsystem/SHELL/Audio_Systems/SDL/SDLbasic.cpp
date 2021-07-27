@@ -107,7 +107,29 @@ bool sound_ispaused(int sound) {
 
 float sound_get_volume(int sound) {
   const Sound& snd = sounds.get(sound);
-  return (float)snd.mc->volume;
+  return (float)snd.mc->volume / MIX_MAX_VOLUME;
+}
+
+float sound_get_length(int sound) {
+  const Sound& snd = sounds.get(sound);
+  Uint32 points = 0;
+  Uint32 frames = 0;
+  int freq = 0;
+  Uint16 fmt = 0;
+  int chans = 0;
+  if (!Mix_QuerySpec(&freq, &fmt, &chans)) { return 0; }
+  points = (snd.mc->alen / ((fmt & 0xFF) / 8));
+  frames = (points / chans);
+  return ((frames * 1000) / freq);
+}
+
+void sound_volume(int sound, float value) {
+  const Sound& snd = sounds.get(sound);
+  Mix_VolumeChunk(snd.mc,(int)value * MIX_MAX_VOLUME);
+}
+
+void sound_global_volume(float mastervolume) {
+  Mix_Volume(-1, (int)mastervolume * MIX_MAX_VOLUME);
 }
 
 }
