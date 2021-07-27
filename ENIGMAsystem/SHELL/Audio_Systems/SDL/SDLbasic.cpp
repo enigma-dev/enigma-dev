@@ -125,11 +125,11 @@ float sound_get_length(int sound) {
 
 void sound_volume(int sound, float value) {
   const Sound& snd = sounds.get(sound);
-  Mix_VolumeChunk(snd.mc,(int)value * MIX_MAX_VOLUME);
+  Mix_VolumeChunk(snd.mc,(int)(value * MIX_MAX_VOLUME));
 }
 
 void sound_global_volume(float mastervolume) {
-  Mix_Volume(-1, (int)mastervolume * MIX_MAX_VOLUME);
+  Mix_Volume(-1, (int)(mastervolume * MIX_MAX_VOLUME));
 }
 
 }
