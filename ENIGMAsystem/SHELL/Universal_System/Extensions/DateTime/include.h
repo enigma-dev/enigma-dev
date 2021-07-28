@@ -109,5 +109,13 @@ string date_datetime_string(time_t date);
 string date_date_string(time_t date);
 string date_time_string(time_t date);
 string date_datetime_stringf(time_t date,string format);
+
+int file_get_date_modified_year(string fname);
+int file_get_date_modified_month(string fname);
+int file_get_date_modified_day(string fname);
+int file_get_date_modified_hour(string fname);
+int file_get_date_modified_minute(string fname);
+int file_get_date_modified_second(string fname);
+
 }
 
