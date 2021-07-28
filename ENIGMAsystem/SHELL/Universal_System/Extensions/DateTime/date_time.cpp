@@ -49,7 +49,7 @@ int file_get_date_modified(const char *fname, int type) {
   int result = -1; struct stat info = { 0 }; stat(fname, &info);
   struct tm *timeinfo = std::localtime(&info.st_mtime);
   if      (type == dt_year)   result = timeinfo->tm_year + 1900;
-  else if (type == dt_month)  result = timeinfo->tm_mon + 1;
+  else if (type == dt_month)  result = timeinfo->tm_mon  + 1;
   else if (type == dt_day)    result = timeinfo->tm_mday;
   else if (type == dt_hour)   result = timeinfo->tm_hour;
   else if (type == dt_minute) result = timeinfo->tm_min;
