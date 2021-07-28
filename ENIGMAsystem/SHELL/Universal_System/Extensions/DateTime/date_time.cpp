@@ -28,11 +28,11 @@
 #include <ctime>
 #include <string>
 
+using std::string;
+
 #include "include.h"
 
 #include <sys/stat.h>
-
-using std::string;
 
 namespace {
 
