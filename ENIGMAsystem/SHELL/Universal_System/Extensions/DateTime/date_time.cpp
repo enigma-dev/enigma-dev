@@ -51,23 +51,24 @@ enum dt_type {
 };
 
 int file_get_date_accessed_modified(const char *fname, bool modified, int type) {
-  int result = -1;
+  int result = -1; // returns -1 on failure
   #if defined(_WIN32)
   std::wstring wfname = widen(fname);
-  struct _stat info = { 0 }; _wstat(wfname.c_str(), &info);
+  struct _stat info = { 0 }; result = _wstat(wfname.c_str(), &info);
   time_t time = modified ? info.st_mtime : info.st_atime;
   #else
-  struct stat info = { 0 }; stat(fname, &info);
+  struct stat info = { 0 }; result = stat(fname, &info);
   time_t time = modified ? info.st_mtime : info.st_atime;
   #endif
+  if (result == -1) return result; // failure: stat errored
   struct tm *timeinfo = std::localtime(&time);
-  if      (type == dt_year)   result = timeinfo->tm_year + 1900;
-  else if (type == dt_month)  result = timeinfo->tm_mon  + 1;
-  else if (type == dt_day)    result = timeinfo->tm_mday;
-  else if (type == dt_hour)   result = timeinfo->tm_hour;
-  else if (type == dt_minute) result = timeinfo->tm_min;
-  else if (type == dt_second) result = timeinfo->tm_sec;
-  return result;
+  if      (type == dt_year)   return timeinfo->tm_year + 1900;
+  else if (type == dt_month)  return timeinfo->tm_mon  + 1;
+  else if (type == dt_day)    return timeinfo->tm_mday;
+  else if (type == dt_hour)   return timeinfo->tm_hour;
+  else if (type == dt_minute) return timeinfo->tm_min;
+  else if (type == dt_second) return timeinfo->tm_sec;
+  else return result; // failure: enum value not found
 }
 
 } // anonymous namepsace
