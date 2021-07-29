@@ -262,7 +262,7 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
     // Getting Bounding Box for first polygon for Sweep and Prune
     int left1, top1, right1, bottom1;
-    get_bbox_border(left1, top1, right1, bottom1, inst1);
+    enigma::get_bbox_border(left1, top1, right1, bottom1, inst1);
 
     // Iterating over instances in the room to detect collision
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
@@ -279,32 +279,32 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
             continue;
 
         // Finding the Collision Type
-        collision_cases collision_case = POLYGON_VS_POLYGON;
+        enigma::collision_cases collision_case = enigma::POLYGON_VS_POLYGON;
 
         if (inst1->polygon_index != -1 && inst2->polygon_index != -1) 
         {
-            collision_case = POLYGON_VS_POLYGON;
+            collision_case = enigma::POLYGON_VS_POLYGON;
         } 
         else if (inst1->polygon_index != -1 && inst2->polygon_index == -1) 
         {
-            collision_case = POLYGON_VS_BBOX;
+            collision_case = enigma::POLYGON_VS_BBOX;
         } 
         else if (inst1->polygon_index == -1 && inst2->polygon_index != -1) 
         {
-            collision_case = BBOX_VS_POLYGON;
+            collision_case = enigma::BBOX_VS_POLYGON;
         } 
         else 
         {
-            collision_case = BBOX_VS_BBOX;
+            collision_case = enigma::BBOX_VS_BBOX;
         }
         
         // Getting the Bounding box for the second polygon for sweep and prune check
         int left2, right2, top2, bottom2;
-        get_bbox_border(left2, top2, right2, bottom2, inst2);
+        enigma::get_bbox_border(left2, top2, right2, bottom2, inst2);
 
         // Main Sweep and Prune Check
         if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1) {
-            if (collision_case == BBOX_VS_BBOX) 
+            if (collision_case == enigma::BBOX_VS_BBOX) 
             {
                 return inst2;
             }
@@ -316,7 +316,7 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
         // Main Collision Detection check
         switch (collision_case)
         {
-            case POLYGON_VS_POLYGON: 
+            case enigma::POLYGON_VS_POLYGON: 
             {
                 // Fetching Points
                 std::vector<glm::vec2> points_poly1 = enigma::polygons.get(inst1->polygon_index).getPoints();
@@ -338,15 +338,15 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
                                         inst2->polygon_xscale, inst2->polygon_yscale);
                 
                 // Collision function call
-                return get_polygon_polygon_collision(points_poly1, points_poly2)? inst2: NULL;
+                return enigma::get_polygon_polygon_collision(points_poly1, points_poly2)? inst2: NULL;
             }
-            case POLYGON_VS_BBOX: 
+            case enigma::POLYGON_VS_BBOX: 
             {
-                return get_polygon_bbox_collision(inst1, inst2);
+                return enigma::get_polygon_bbox_collision(inst1, inst2);
             } 
-            case BBOX_VS_POLYGON: 
+            case enigma::BBOX_VS_POLYGON: 
             {
-                return get_polygon_bbox_collision(inst2, inst1);
+                return enigma::get_polygon_bbox_collision(inst2, inst1);
             }
             default:
                 break;
@@ -368,7 +368,7 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
     int height = y2 - y1;
 
     // Creating a polygon for the region
-    enigma::Polygon bbox_main = get_bbox_from_dimensions(0, 0, width, height);
+    enigma::Polygon bbox_main = enigma::get_bbox_from_dimensions(0, 0, width, height);
 
     // Iterating over instances to find any object that is colliding with
     // this rectangle
@@ -387,7 +387,7 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
 
         // Getting the bounding box for the instance 
         int left, top, right, bottom;
-        get_bbox_border(left, top, right, bottom, inst);
+        enigma::get_bbox_border(left, top, right, bottom, inst);
 
         // Doing a Sweep and Prune Check
         if (left <= x2 && x1 <= right && top <= y2 && y1 <= bottom) {
@@ -413,7 +413,7 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
             enigma::offsetPoints(bbox_points, x1, y1);
 
             // Polygon collision check
-            return get_polygon_polygon_collision(bbox_points, points_poly2)? inst : NULL;
+            return enigma::get_polygon_polygon_collision(bbox_points, points_poly2)? inst : NULL;
         }
     }
     return NULL;
@@ -441,7 +441,7 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
 
         // Getting the Bounding box for instance
         int left, top, right, bottom;
-        get_bbox_border(left, top, right, bottom, inst);
+        enigma::get_bbox_border(left, top, right, bottom, inst);
 
         // Doing a Sweep and Prune Check using bounding box and the 
         // Line. Using line projections.
@@ -507,7 +507,7 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
                                         inst->polygon_xscale, inst->polygon_yscale);
 
                 // doing a polygon polygon check
-                return get_polygon_polygon_collision(line_points, points_poly2)? inst : NULL;
+                return enigma::get_polygon_polygon_collision(line_points, points_poly2)? inst : NULL;
             }
         }
     }
@@ -532,7 +532,7 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
 
         // Finding the Bounding box of the instance
         int left, top, right, bottom;
-        get_bbox_border(left, top, right, bottom, inst);
+        enigma::get_bbox_border(left, top, right, bottom, inst);
 
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) {
 
@@ -544,7 +544,7 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
             }
 
             // Collision detection
-            return get_polygon_point_collision(inst, x1, y1)? inst : NULL;
+            return enigma::get_polygon_point_collision(inst, x1, y1)? inst : NULL;
         }
     }
     return NULL;
@@ -594,7 +594,7 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
 
         // Getting Bounding box of the instance
         int left, top, right, bottom;
-        get_bbox_border(left, top, right, bottom, inst);
+        enigma::get_bbox_border(left, top, right, bottom, inst);
 
         // Checking for bounding box collision
         const bool intersects = line_ellipse_intersects(rx, ry, left-x1, top-y1, bottom-y1) ||
@@ -626,7 +626,7 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
                                         inst->polygon_xscale, inst->polygon_yscale);
 
             // Collision Detection
-            return get_polygon_ellipse_collision(points_poly, x1, y1, rx, ry)? inst : NULL;
+            return enigma::get_polygon_ellipse_collision(points_poly, x1, y1, rx, ry)? inst : NULL;
         }
     }
     return NULL;
@@ -646,7 +646,7 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
 
         // Bounding Box retrieval and collision check
         int left, top, right, bottom;
-        get_bbox_border(left, top, right, bottom, inst);
+        enigma::get_bbox_border(left, top, right, bottom, inst);
 
         // Main Sweep and Prune collision check
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) 
@@ -661,7 +661,7 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
             {
                 // Otherwise, check for a polygon collision with this point
                 // If Polygon and point colliding, than destroy instance
-                if (get_polygon_point_collision(inst, x1, y1)) 
+                if (enigma::get_polygon_point_collision(inst, x1, y1)) 
                 {
                     enigma_user::instance_destroy(inst->id);
                 }
@@ -684,7 +684,7 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
 
         // Computing BBOX for sweep and prune check
         int left, top, right, bottom;
-        get_bbox_border(left, top, right, bottom, inst);
+        enigma::get_bbox_border(left, top, right, bottom, inst);
 
         // Sweep and Prune check
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) 
@@ -699,7 +699,7 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
             {
                 // Otherwise, check for a polygon collision with this point
                 // If Polygon and point colliding, than change instance
-                if (get_polygon_point_collision(inst, x1, y1)) 
+                if (enigma::get_polygon_point_collision(inst, x1, y1)) 
                 {
                     enigma::instance_change_inst(obj, perf, inst);
                 }

@@ -146,61 +146,70 @@ namespace enigma_user
 
     double distance_to_object(int object)
     {
+        // Fetching the instance of the calling object
         const enigma::object_collisions* inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+        
+        // If no sprite/mask/polygon than distance cannot be computed
         if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
             return -1;
+        
+        // Set the initial distance as infinity, since we are computing the lowest distance
+        // to the instance
         double distance = std::numeric_limits<double>::infinity();
         double tempdist;
-        const enigma::BoundingBox &box = inst1->$bbox_relative();
-        const double x1 = inst1->x, y1 = inst1->y,
-                    xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
-                    ia1 = inst1->image_angle;
+
+        // Computing BBOX of the calling instance
         int left1, top1, right1, bottom1;
+        enigma::get_bbox_border(left1, top1, right1, bottom1, inst1);
 
-        get_border(&left1, &right1, &top1, &bottom1, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale1, yscale1, ia1);
-
+        // Iterating over the instances of the specified object
         for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
         {
-            const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
-            if (inst1 == inst2) continue;
-            if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
+            const enigma::object_collisions* inst2 = (enigma::object_collisions*) *it;
+
+            // If same instance than no distance
+            if (inst1 == inst2) 
                 continue;
 
-            const enigma::BoundingBox &box2 = inst2->$bbox_relative();
-            const double x2 = inst2->x, y2 = inst2->y,
-                        xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                        ia2 = inst2->image_angle;
+            // If no sprite/mask/polygon than no collision
+            if (inst2->sprite_index == -1 && inst2->mask_index == -1 && inst2->polygon_index)
+                continue;
+
+            // Computing the BBOX of the second instance
             int left2, top2, right2, bottom2;
+            enigma::get_bbox_border(left2, top2, right2, bottom2, inst2);
 
-            get_border(&left2, &right2, &top2, &bottom2, box2.left(), box2.top(), box2.right(), box2.bottom(), x2, y2, xscale2, yscale2, ia2);
-
+            // Computing the distance
             const int right  = min(right1, right2),   left = max(left1, left2),
                     bottom = min(bottom1, bottom2), top  = max(top1, top2);
 
             tempdist = hypot((left > right ? left - right : 0),
                             (top > bottom ? top - bottom : 0));
 
+            // If distance is min set as new distance
             if (tempdist < distance)
             {
                 distance = tempdist;
             }
         }
+        // If the distance was not computed than it is returned as -1
         return (distance == std::numeric_limits<double>::infinity() ? -1 : distance);
     }
 
     double distance_to_point(cs_scalar x, cs_scalar y)
     {
+        // Fetching the instance
         enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+        
+        // If no sprite/mask/polygon than cannot compute distance
         if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
             return -1;
-        const enigma::BoundingBox &box = inst1->$bbox_relative();
-        const double x1 = inst1->x, y1 = inst1->y,
-                    xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
-                    ia1 = inst1->image_angle;
+
+        // Computing the BBOX of the instance
         int left1, top1, right1, bottom1;
+        enigma::get_bbox_border(left1, top1, right1, bottom1, inst1);
 
-        get_border(&left1, &right1, &top1, &bottom1, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale1, yscale1, ia1);
-
+        // Computing the distance and returning
         return fabs(hypot(min(left1 - x, right1 - x),
                         min(top1 - y, bottom1 - y)));
     }
@@ -511,7 +520,7 @@ namespace enigma_user
 
             // Bounding Box retrieval and collision check
             int left, top, right, bottom;
-            get_bbox_border(left, top, right, bottom, inst);
+            enigma::get_bbox_border(left, top, right, bottom, inst);
 
             // Sweep and Prune Check
             if ((left <= (rleft + rwidth) && rleft <= right && top <= (rtop + rheight) && rtop <= bottom) == inside) 
@@ -539,7 +548,7 @@ namespace enigma_user
 
             // Bounding Box retrieval and collision check
             int left, top, right, bottom;
-            get_bbox_border(left, top, right, bottom, inst);
+            enigma::get_bbox_border(left, top, right, bottom, inst);
 
             if ((left <= (rleft + rwidth) && rleft <= right && top <= (rtop + rheight) && rtop <= bottom) == inside) 
             {
@@ -590,7 +599,7 @@ namespace enigma_user
 
             // Doing a Sweep and Prune check using BBOX
             int left, top, right, bottom;
-            get_bbox_border(left, top, right, bottom, inst);
+            enigma::get_bbox_border(left, top, right, bottom, inst);
 
             // TODO (Nabeel) : Does this needs a polygon collision check?
 
@@ -637,7 +646,7 @@ namespace enigma_user
 
             // Doing a Sweep and Prune check using BBOX
             int left, top, right, bottom;
-            get_bbox_border(left, top, right, bottom, inst);
+            enigma::get_bbox_border(left, top, right, bottom, inst);
 
             const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
                                     line_ellipse_intersects(r, r, right-x, top-y, bottom-y) ||
@@ -670,5 +679,64 @@ namespace enigma_user
             }
         }
     }
+ 
+    void instance_get_mtv(int object)
+    {
+        // Fetching the instance
+        enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
 
+        // If no polygon than no MTV
+        if (inst1->polygon_index == -1)
+            return;
+        
+        // Computing BBOX of the calling instance
+        int left1, top1, right1, bottom1;
+        enigma::get_bbox_border(left1, top1, right1, bottom1, inst1);
+
+        // Iterating over the instances of the specified object
+        for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
+        {
+            // Selecting the instance
+            enigma::object_collisions* const inst2 = (enigma::object_collisions*) *it;
+
+            // If no polygon than no collision
+            if (inst2->polygon_index == -1)
+                continue;
+            
+            // Computing the BBOX of the second instance
+            int left2, top2, right2, bottom2;
+            enigma::get_bbox_border(left2, top2, right2, bottom2, inst2);
+
+            // Main Sweep and Prune Check
+            if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1)
+            {
+                // Fetching Points
+                std::vector<glm::vec2> points_poly1 = enigma::polygons.get(inst1->polygon_index).getPoints();
+                std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst2->polygon_index).getPoints();
+
+                // Computing Pivots
+                glm::vec2 pivot1 = enigma::polygons.get(inst1->polygon_index).computeCenter();
+                glm::vec2 pivot2 = enigma::polygons.get(inst1->polygon_index).computeCenter();
+
+                // Applying transformations
+                enigma::transformPoints(points_poly1, 
+                                        inst1->x, inst1->y, 
+                                        inst1->polygon_angle, pivot1,
+                                        inst1->polygon_xscale, inst1->polygon_yscale);
+
+                enigma::transformPoints(points_poly2, 
+                                        inst2->x, inst2->y, 
+                                        inst2->polygon_angle, pivot2,
+                                        inst2->polygon_xscale, inst2->polygon_yscale);
+
+                // Computing MTV
+                glm::vec2 mtv = enigma::compute_MTV(points_poly1, points_poly2);
+                if (mtv.x != 0 and mtv.y != 0)
+                {
+                    printf("MTV = ( %f, %f )\n", mtv.x, mtv.y);
+                    return;
+                }
+            }
+        }
+    }
 }
