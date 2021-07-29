@@ -32,6 +32,11 @@ using std::string;
 
 #include "include.h"
 
+#if defined(_WIN32)
+#include "Universal_System/estring.h"
+#endif
+
+#include <sys/types.h>
 #include <sys/stat.h>
 
 namespace {
@@ -46,8 +51,15 @@ enum dt_type {
 };
 
 int file_get_date_accessed_modified(const char *fname, bool modified, int type) {
-  int result = -1; struct stat info = { 0 }; stat(fname, &info);
+  int result = 0;
+  #if defined(_WIN32)
+  std::wstring wfname = widen(fname);
+  struct _stat info = { 0 }; _wstat(wfname.c_str(), &info);
   time_t time = modified ? info.st_mtime : info.st_atime;
+  #else
+  struct stat info = { 0 }; stat(fname, &info);
+  time_t time = modified ? info.st_mtime : info.st_atime;
+  #endif
   struct tm *timeinfo = std::localtime(&time);
   if      (type == dt_year)   result = timeinfo->tm_year + 1900;
   else if (type == dt_month)  result = timeinfo->tm_mon  + 1;
