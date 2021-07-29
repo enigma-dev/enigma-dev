@@ -45,9 +45,10 @@ enum dt_type {
   dt_second
 };
 
-int file_get_date_modified(const char *fname, int type) {
+int file_get_date_accessed_modified(const char *fname, bool modified, int type) {
   int result = -1; struct stat info = { 0 }; stat(fname, &info);
-  struct tm *timeinfo = std::localtime(&info.st_mtime);
+  time_t time = modified ? info.st_mtime : info.st_atime;
+  struct tm *timeinfo = std::localtime(&time);
   if      (type == dt_year)   result = timeinfo->tm_year + 1900;
   else if (type == dt_month)  result = timeinfo->tm_mon  + 1;
   else if (type == dt_day)    result = timeinfo->tm_mday;
@@ -506,28 +507,52 @@ string date_datetime_stringf(time_t date,string format)
     return string(buffer);
 }
 
+int file_get_date_accessed_year(string fname) {
+  return file_get_date_modified(fname.c_str(), false, dt_year);
+}
+
+int file_get_date_accessed_month(string fname) {
+  return file_get_date_modified(fname.c_str(), false, dt_month);
+}
+
+int file_get_date_accessed_day(string fname) {
+  return file_get_date_modified(fname.c_str(), false, dt_day);
+}
+
+int file_get_date_accessed_hour(string fname) {
+  return file_get_date_modified(fname.c_str(), false, dt_hour);
+}
+
+int file_get_date_accessed_minute(string fname) {
+  return file_get_date_modified(fname.c_str(), false, dt_minute);
+}
+
+int file_get_date_accessed_second(string fname) {
+  return file_get_date_modified(fname.c_str(), false, dt_second);
+}
+
 int file_get_date_modified_year(string fname) {
-  return file_get_date_modified(fname.c_str(), dt_year);
+  return file_get_date_modified(fname.c_str(), true, dt_year);
 }
 
 int file_get_date_modified_month(string fname) {
-  return file_get_date_modified(fname.c_str(), dt_month);
+  return file_get_date_modified(fname.c_str(), true, dt_month);
 }
 
 int file_get_date_modified_day(string fname) {
-  return file_get_date_modified(fname.c_str(), dt_day);
+  return file_get_date_modified(fname.c_str(), true, dt_day);
 }
 
 int file_get_date_modified_hour(string fname) {
-  return file_get_date_modified(fname.c_str(), dt_hour);
+  return file_get_date_modified(fname.c_str(), true, dt_hour);
 }
 
 int file_get_date_modified_minute(string fname) {
-  return file_get_date_modified(fname.c_str(), dt_minute);
+  return file_get_date_modified(fname.c_str(), true, dt_minute);
 }
 
 int file_get_date_modified_second(string fname) {
-  return file_get_date_modified(fname.c_str(), dt_second);
+  return file_get_date_modified(fname.c_str(), true, dt_second);
 }
 
 } // namespace enigma_user
