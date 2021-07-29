@@ -51,7 +51,7 @@ enum dt_type {
 };
 
 int file_get_date_accessed_modified(const char *fname, bool modified, int type) {
-  int result = 0;
+  int result = -1;
   #if defined(_WIN32)
   std::wstring wfname = widen(fname);
   struct _stat info = { 0 }; _wstat(wfname.c_str(), &info);
