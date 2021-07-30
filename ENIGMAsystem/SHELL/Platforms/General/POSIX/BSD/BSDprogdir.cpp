@@ -21,7 +21,7 @@ namespace enigma {
         path = string(buffer) + "\0";
       }
     }
-    enigma_user::program_directory = enigma_user::filename_path(path);
+    enigma_user::program_directory = path;
   }
 
 } // namespace enigma
