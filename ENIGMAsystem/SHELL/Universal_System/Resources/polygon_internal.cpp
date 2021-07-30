@@ -5,6 +5,8 @@
 #include <math.h>
 #include <cfloat>
 #include <algorithm>
+#include <array>
+#include <vector>
 
 #include "polygon_internal.h"
 #include "earcut.hpp"

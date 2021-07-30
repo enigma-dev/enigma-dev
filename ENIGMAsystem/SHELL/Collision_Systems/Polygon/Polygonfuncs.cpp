@@ -216,14 +216,19 @@ namespace enigma_user
 
     double move_contact_object(int object, double angle, double max_dist, bool solid_only)
     {
+        // Fetching the calling instance
         enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-        if (inst1->sprite_index == -1 && (inst1->mask_index == -1)) {
+        
+        // If no sprite/mask/polygon than no collision
+        if (inst1->sprite_index == -1 && inst1->mask_index == -1 && inst1->polygon_index == -1) 
+        {
             return -4;
         }
 
+        // If no collision than no movement after contact
         const double x = inst1->x, y = inst1->y;
-
-        if (collide_inst_inst(object, solid_only, true, x, y) != NULL) {
+        if (collide_inst_inst(object, solid_only, true, x, y) != NULL) 
+        {
             return 0;
         }
 
@@ -237,33 +242,34 @@ namespace enigma_user
         const double radang = (fmod(fmod(angle, 360) + 360, 360))*(M_PI/180.0);
         const double sin_angle = sin(radang), cos_angle = cos(radang);
 
-        // Subtraction.
-
+        // --------------------------------
+        // Subtraction Starts
+        // --------------------------------
         const int quad = int(angle/90.0);
 
-        const enigma::BoundingBox &box = inst1->$bbox_relative();
-        const double x1 = inst1->x, y1 = inst1->y,
-                    xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
-                    ia1 = inst1->image_angle;
+        // Getting the bounding box of the instance
         int left1, top1, right1, bottom1;
+        enigma::get_bbox_border(left1, top1, right1, bottom1, inst1);
 
-        get_border(&left1, &right1, &top1, &bottom1, box.left(), box.top(), box.right(), box.bottom(), x1, y1, xscale1, yscale1, ia1);
-
+        // Iterating over the instances to find the one with the collision
         for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
         {
             const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
-            if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
+            
+            // If no sprite/mask/polygon than no collision
+            if (inst2->sprite_index == -1 && inst2->mask_index == -1 && inst2->polygon_index == -1)
                 continue;
+
+            // If the second instance is not solid given the solid check, or same instance, than no 
+            // collision
             if (inst2->id == inst1->id || (solid_only && !inst2->solid))
                 continue;
-            const enigma::BoundingBox &box2 = inst2->$bbox_relative();
-            const double x2 = inst2->x, y2 = inst2->y,
-                        xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                        ia2 = inst2->image_angle;
+
+            // Computing BBOX for the second instance
             int left2, top2, right2, bottom2;
+            enigma::get_bbox_border(left2, top2, right2, bottom2, inst2);
 
-            get_border(&left2, &right2, &top2, &bottom2, box2.left(), box2.top(), box2.right(), box2.bottom(), x2, y2, xscale2, yscale2, ia2);
-
+            // If no sweep and prune collision
             if (right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1)
             {
                 mid_dist = DMIN;
@@ -347,7 +353,9 @@ namespace enigma_user
             }
         }
 
+        // -------------------------
         // Subtraction end.
+        // -------------------------
 
         for (; current_dist <= max_dist; current_dist++)
         {
@@ -368,13 +376,17 @@ namespace enigma_user
 
     double move_outside_object(int object, double angle, double max_dist, bool solid_only)
     {
+        // Fetching the calling instance
         enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-        if (inst1->sprite_index == -1 && (inst1->mask_index == -1)) {
+        
+        // If no sprite/mask/polygon than no collision
+        if (inst1->sprite_index == -1 && inst1->mask_index == -1 && inst1->polygon_index == -1) 
+        {
             return -4;
         }
 
+        // Determing collision
         double x = inst1->x, y = inst1->y;
-
         if (collide_inst_inst(object, solid_only, true, x, y) == NULL) {
             return 0;
         }

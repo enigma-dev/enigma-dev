@@ -647,7 +647,8 @@ static inline string resname(string name) {
 
 static inline void write_object_data_structs(std::ostream &wto,
       const ParsedObjectVec &parsed_objects) {
-  wto << "  std::vector<objectstruct> objs = {\n" << std::fixed;
+  wto << "  std::vector<objectstruct> object_array() {\n"; 
+  wto << "    static std::vector<objectstruct> objs = {\n" << std::fixed;
   for (parsed_object *object : parsed_objects) {
     wto << "    { "
         << resname(object->sprite_name)  << ", "
@@ -663,6 +664,8 @@ static inline void write_object_data_structs(std::ostream &wto,
   }
   wto.unsetf(ios_base::floatfield);
   wto << "  };\n";
+  wto << "  return objs;\n}\n";
+  wto << "  std::vector<objectstruct> objs = object_array();\n";
   wto << "  int objectcount = " << parsed_objects.size() << ";\n";
 }
 
