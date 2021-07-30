@@ -42,12 +42,6 @@ using enigma_user::window_get_caption;
 #include "Platforms/General/PFfilemanip.h"
 using enigma_user::file_exists;
 
-#include "Graphics_Systems/General/GScolors.h"
-using enigma_user::color_get_red;
-using enigma_user::color_get_green;
-using enigma_user::color_get_blue;
-using enigma_user::make_color_rgb;
-
 #ifdef DEBUG_MODE
 #include "Universal_System/var4.h"
 #include "Universal_System/Resources/resource_data.h"
