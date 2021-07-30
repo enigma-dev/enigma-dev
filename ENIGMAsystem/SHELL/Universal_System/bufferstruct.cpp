@@ -21,7 +21,9 @@
 
 #include "Resources/AssetArray.h" // TODO: start actually using for this resource
 #include "Graphics_Systems/graphics_mandatory.h"
+#if !defined(GRAPHICS_NONE)
 #include "Graphics_Systems/General/GSsurface.h"
+#endif
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>

@@ -21,7 +21,7 @@
 #include "GScolor_macros.h"
 #include "GSstdraw.h"
 
-#include <math.h>
+#include <cmath>
 
 static inline int min(int x,int y){return x<y ? x:y;}
 static inline int max(int x,int y){return x>y ? x:y;}
@@ -36,45 +36,6 @@ bool colorWriteEnable[4] = {true,true,true,true};
 
 namespace enigma_user {
 
-void draw_set_color(int color)
-{
-  enigma::draw_set_state_dirty();
-  enigma::currentcolor[0] = COL_GET_R(color);
-  enigma::currentcolor[1] = COL_GET_G(color);
-  enigma::currentcolor[2] = COL_GET_B(color);
-}
-
-void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
-{
-  enigma::draw_set_state_dirty();
-  enigma::currentcolor[0] = red;
-  enigma::currentcolor[1] = green;
-  enigma::currentcolor[2] = blue;
-}
-
-void draw_set_alpha(float alpha)
-{
-  enigma::draw_set_state_dirty();
-  enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
-}
-
-void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
-{
-  enigma::draw_set_state_dirty();
-  enigma::currentcolor[0] = red;
-  enigma::currentcolor[1] = green;
-  enigma::currentcolor[2] = blue;
-  enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
-}
-
-void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha) {
-  enigma::draw_set_state_dirty();
-  enigma::colorWriteEnable[0] = red;
-  enigma::colorWriteEnable[1] = green;
-  enigma::colorWriteEnable[2] = blue;
-  enigma::colorWriteEnable[3] = alpha;
-}
-
 int merge_color(int c1,int c2,double amount)
 {
   amount = amount > 1 ? 1 : (amount < 0 ? 0 : amount);
@@ -83,9 +44,6 @@ int merge_color(int c1,int c2,double amount)
   |      (unsigned char)(fabs(COL_GET_B(c1)+(COL_GET_B(c2)-COL_GET_B(c1))*amount))<<16;
 }
 
-int draw_get_color(){
-  return enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
-}
 int draw_get_red(){return enigma::currentcolor[0];}
 int draw_get_green(){return enigma::currentcolor[1];}
 int draw_get_blue(){return enigma::currentcolor[2];}

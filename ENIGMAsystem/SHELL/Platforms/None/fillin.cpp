@@ -19,32 +19,33 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <map>
+#include <string>
+
+#include <ctime>
+#include <cstdio>
+#include <cstdlib>
+
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/include.h"
 
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
-#include <stdio.h>
-#include <stdlib.h>  //malloc
-#include <stdlib.h>  //getenv and system
 #include <sys/resource.h>
 #include <sys/stat.h>
-#include <time.h>  //clock
 #include <unistd.h>
-#include <cstdlib>
-#include <map>
-#include <string>
-#include <time.h>
 
 namespace enigma {
   bool initGameWindow() { return true; }
   void destroyWindow() {}
+  void WindowResized() {}
   void initInput() {}
   void handleInput() { input_push(); }
   void EnableDrawing(void* handle) {};
   void DisableDrawing(void* handle) {};
   int handleEvents() { return 0; }
+  void ScreenRefresh() {}
 }
 
 namespace enigma_user {
@@ -83,6 +84,8 @@ int display_get_y() { return 0; }
 int display_get_width() { return 0; }
 int display_get_height() { return 0; }
 
+window_t window_handle() { return reinterpret_cast<window_t>(nullptr); }
+wid_t window_identifier() { return "0"; }
 void window_set_visible(bool visible) {}
 int window_get_visible() { return false; }
 void window_set_caption(const string &caption) {}
@@ -119,6 +122,6 @@ int window_set_cursor(int c) {
 void clipboard_set_text(string text) {}
 string clipboard_get_text() { return ""; }
 bool clipboard_has_text() { return false; }
-
+void set_synchronization(bool enable) {}
 
 }  // namespace enigma_user
