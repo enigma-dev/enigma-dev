@@ -21,7 +21,9 @@
 
 #include "Resources/AssetArray.h" // TODO: start actually using for this resource
 #include "Graphics_Systems/graphics_mandatory.h"
+#if !defined(GRAPHICS_NONE)
 #include "Graphics_Systems/General/GSsurface.h"
+#endif
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
@@ -269,6 +271,7 @@ void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int 
 }
 
 void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
+  #if !defined(GRAPHICS_NONE)
   int tex = surface_get_texture(surface);
   int wid = surface_get_width(surface);
   int hgt = surface_get_height(surface);
@@ -277,6 +280,7 @@ void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int 
   } else { // execution can not continue safely with wrong buffer size
     DEBUG_MESSAGE("Buffer allocated with wrong length!", MESSAGE_TYPE::M_WARNING);
   }
+  #endif
 }
 
 void buffer_resize(int buffer, unsigned size) {
