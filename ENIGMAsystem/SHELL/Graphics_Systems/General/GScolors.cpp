@@ -36,6 +36,7 @@ bool colorWriteEnable[4] = {true,true,true,true};
 
 namespace enigma_user {
 
+#if !defined(GRAPHICS_NONE)
 void draw_set_color(int color)
 {
   enigma::draw_set_state_dirty();
@@ -74,6 +75,7 @@ void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha) {
   enigma::colorWriteEnable[2] = blue;
   enigma::colorWriteEnable[3] = alpha;
 }
+#endif
 
 int merge_color(int c1,int c2,double amount)
 {
@@ -83,9 +85,12 @@ int merge_color(int c1,int c2,double amount)
   |      (unsigned char)(fabs(COL_GET_B(c1)+(COL_GET_B(c2)-COL_GET_B(c1))*amount))<<16;
 }
 
+#if !defined(GRAPHICS_NONE)
 int draw_get_color(){
   return enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
 }
+#endif
+
 int draw_get_red(){return enigma::currentcolor[0];}
 int draw_get_green(){return enigma::currentcolor[1];}
 int draw_get_blue(){return enigma::currentcolor[2];}
