@@ -180,11 +180,13 @@ wid_t window_get_identifier(window_t hwnd) {
 }
 
 void window_set_visible(bool visible) {
+  #if !defined(GRAPHICS_NONE)
   if (visible) {
     XMapRaised(disp, win);
   } else {
     XUnmapWindow(disp, win);
   }
+  #endif
 }
 
 static int currentIconIndex = -1;
