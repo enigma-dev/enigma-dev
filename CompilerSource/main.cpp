@@ -29,6 +29,7 @@ using namespace std;
 #define flushs flush
 
 #include "darray.h"
+#include "settings.h"
 
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
@@ -39,14 +40,14 @@ int m_prog_loop_cfp();
 #ifdef _WIN32
  #define byte __windows_byte_workaround
  #include <windows.h>
- #define dllexport extern "C" __declspec(dllexport)
+ #define DLLEXPORT extern "C" __declspec(dllexport)
    #define DECLARE_TIME() clock_t cs, ce
    #define START_TIME() cs = clock()
    #define STOP_TIME() ce = clock()
    #define PRINT_TIME() (((ce - cs) * 1000)/CLOCKS_PER_SEC)
   #undef byte
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <cstdio>
    #define DECLARE_TIME()  timeval ts, tn
    #define START_TIME() gettimeofday(&ts,NULL);
@@ -61,26 +62,25 @@ extern const char* establish_bearings(const char *compiler);
 #include "backend/JavaCallbacks.h"
 
 #ifdef NOT_A_DLL
-#  undef dllexport
-#  define dllexport
+#  undef DLLEXPORT
+#  define DLLEXPORT
 #endif
 
+#include "general/bettersystem.h"
 #include "languages/lang_CPP.h"
 #include <System/builtins.h>
 #include <API/jdi.h>
 
-#include "makedir.h"
-
 #include <cstdlib>
 
-//FIXME: remove this function from enigma.jar and here
-dllexport void libSetMakeDirectory(const char* /*dir*/) {} 
+volatile bool build_stopping = false,
+              build_enable_stop = false;
+DLLEXPORT void libStopBuild() { build_stopping = true; }
+DLLEXPORT void libEnableStopAPI() { build_enable_stop = true; } 
 
-dllexport const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path) 
+DLLEXPORT const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path) 
 {
   enigma_root = enigma_path;
-  if (enigma_root.back() != '/')
-    enigma_root += '/';
   
   if (ecs)
   {
@@ -113,12 +113,12 @@ dllexport const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path
   return 0;
 }
 
-dllexport const char* libInit(EnigmaCallbacks* ecs)
+DLLEXPORT const char* libInit(EnigmaCallbacks* ecs)
 {
   return libInit_path(ecs, ".");
 }
 
-dllexport void libFree() {
+DLLEXPORT void libFree() {
   delete main_context;
   delete current_language;
   jdi::clean_up();
@@ -134,13 +134,13 @@ extern void print_definition(string n);
 
 #include "languages/language_adapter.h"
 
-dllexport syntax_error *definitionsModified(const char* wscode, const char* targetYaml)
+DLLEXPORT syntax_error *definitionsModified(const char* wscode, const char* targetYaml)
 {
   current_language->definitionsModified(wscode, targetYaml);
   return &ide_passback_error;
 }
 
-dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
+DLLEXPORT syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {
   cout << "******** Compiling Initialized ********" << endl;
 

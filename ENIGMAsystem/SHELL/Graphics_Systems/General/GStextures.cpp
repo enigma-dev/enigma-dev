@@ -48,9 +48,9 @@ int graphics_duplicate_texture(int tex, bool mipmap) {
            fw = textures[tex]->fullwidth, fh = textures[tex]->fullheight;
 
   unsigned char* bitmap = graphics_copy_texture_pixels(tex, &fw, &fh);
-  unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
-  delete[] bitmap;
-
+  unsigned dup_tex = graphics_create_texture(RawImage(bitmap, fw, fh), mipmap);
+  textures[dup_tex]->width = w;
+  textures[dup_tex]->height = h;
   return dup_tex;
 }
 
@@ -111,13 +111,9 @@ void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex) {
 namespace enigma_user {
 
 int texture_add(string filename, bool mipmap) {
-  unsigned int w, h, fullwidth, fullheight;
-  int img_num;
-
-  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,&img_num,false);
-  if (pxdata == NULL) { DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR); return -1; }
-  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
-  delete[] pxdata;
+  std::vector<enigma::RawImage> imgs = enigma::image_load(filename);
+  if (imgs.empty()) { DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR); return -1; }
+  unsigned texture = enigma::graphics_create_texture(imgs[0], mipmap);
 
   return texture;
 }
@@ -125,11 +121,7 @@ int texture_add(string filename, bool mipmap) {
 void texture_save(int texid, string fname) {
   unsigned w = 0, h = 0;
   unsigned char* rgbdata = enigma::graphics_copy_texture_pixels(texid, &w, &h);
-
-  string ext = enigma::image_get_format(fname);
-
   enigma::image_save(fname, rgbdata, w, h, w, h, false);
-
   delete[] rgbdata;
 }
 
@@ -219,6 +211,36 @@ void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel
 
 void texture_anisotropy_filter(int sampler, gs_scalar levels) {
   enigma::draw_set_state_dirty();
+}
+
+bool textures_equal(int textureID1, int textureID2) {
+  return textures_regions_equal(textureID1, textureID2, 0, 0, 0, 0, enigma::textures[textureID1]->width, enigma::textures[textureID1]->height);
+}
+
+bool textures_regions_equal(int textureID1, int textureID2, unsigned xOff1, unsigned yOff1, unsigned xOff2, unsigned yOff2, unsigned w, unsigned h) {
+  enigma::RawImage i1;
+  i1.pxdata = enigma::graphics_copy_texture_pixels(textureID1, &i1.w, &i1.h);
+  
+  enigma::RawImage i2;
+  i2.pxdata = enigma::graphics_copy_texture_pixels(textureID2, &i2.w, &i2.h);
+  
+  unsigned stride = 4;
+  for (unsigned i = 0; i < h; ++i) {
+    for (unsigned j = 0; j < w; ++j) {
+      for (unsigned k = 0; k < stride; ++k) {
+        unsigned index1 = (i + yOff1) * w + (j + xOff1) + k;
+        unsigned index2 = (i + yOff2) * w + (j + xOff2) + k;
+        if (i1.pxdata[index1] != i2.pxdata[index2]) return false; 
+      }
+    }
+  }
+  return true;
+}
+
+uint32_t texture_get_pixel(int texid, unsigned x, unsigned y) {
+  enigma::RawImage i;
+  i.pxdata = enigma::graphics_copy_texture_pixels(texid, &i.w, &i.h);
+  return enigma::image_get_pixel_color(i, x, y).asInt();
 }
 
 } // namespace enigma_user

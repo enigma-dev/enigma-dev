@@ -8,7 +8,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2014 Josh Ventura
+ * Copyright (C) 2011-2021 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -177,6 +177,7 @@ string lexer_cpp::_flatten(const string param, const macro_map& macros, const to
   const char* s;
   string result = param;
   const char* begin = param.c_str();
+  int resOffset = 0;
   for (const char* i = begin; *i; ) {
     bool id = is_letterd(*i);
     s = i; while (is_letterd(*i)) ++i;
@@ -192,10 +193,11 @@ string lexer_cpp::_flatten(const string param, const macro_map& macros, const to
             size_t p = i - begin;
             const macro_function* mf = (macro_function*)mac->second;
             parse_macro_params(mf, macros, begin, p, param.length(), arguments, errep, herr);
-            char *buf, *bufe;
+            char *buf = 0, *bufe = 0;
             mf->parse(arguments, buf, bufe, errep, herr);
             i = begin + p;
-            result.replace(s-begin, i-s, buf, bufe-buf);
+            result.replace(s-begin+resOffset, i-s, buf, bufe-buf);
+            resOffset += (bufe-buf) - (i-s);
             delete[] buf;
           }
         }

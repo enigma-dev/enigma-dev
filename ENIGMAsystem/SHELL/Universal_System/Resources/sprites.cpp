@@ -19,16 +19,15 @@
 
 #include "sprites_internal.h"
 #include "Universal_System/image_formats.h"
-#include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
-#include <iostream>
 
 using enigma::Sprite;
 using enigma::sprites;
-using enigma::nlpo2dc;
 using enigma::TexRect;
 using enigma::Color;
 using enigma::RawImage;
@@ -36,32 +35,38 @@ using enigma::RawImage;
 namespace {
 
 Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool mipmap) {
-  unsigned int width, height, fullwidth, fullheight;
-  unsigned char *pxdata = enigma::image_load(
-      filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
+  std::vector<RawImage> imgs = enigma::image_load(filename);
   
-  unsigned cellwidth = width / imgnumb;
-  Sprite ns(cellwidth, height, x_offset, y_offset);
-  ns.SetBBox(0, 0, cellwidth, height);
-
-  if (pxdata == NULL) {
+  if (imgs.empty()) {
     DEBUG_MESSAGE("ERROR - Failed to append sprite to index!", MESSAGE_TYPE::M_ERROR);
-    return ns;
+    return Sprite();
   }
+  
+  unsigned cellwidth = ((imgs.size() > 1) ? imgs[0].w : imgs[0].w / imgnumb);
+  Sprite ns(cellwidth, imgs[0].h, x_offset, y_offset);
+  ns.SetBBox(0, 0, cellwidth, imgs[0].h);
 
   // If sprite transparent, set the alpha to zero for pixels that should be
   // transparent from lower left pixel color
-  if (transparent) {
-    Color c = enigma::image_get_pixel_color(pxdata, width, height, 0, height - 1);
-    enigma::image_swap_color(pxdata, width, height, c, Color {0, 0, 0, 0});
-  }
+  Color c = enigma::image_get_pixel_color(imgs[0], 0, imgs[0].h - 1);
   
-  std::vector<RawImage> rawSubimages = enigma::image_split(pxdata, width, height, imgnumb);
-  for (const RawImage& i : rawSubimages) {
-    ns.AddSubimage(i.pxdata, i.w, i.h, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
-  }
+  if (imgs.size() == 1 && imgnumb > 1) {
+    if (transparent) {      
+      enigma::image_swap_color(imgs[0], c, Color {0, 0, 0, 0});
+    }
   
-  delete[] pxdata;
+    std::vector<RawImage> rawSubimages = enigma::image_split(imgs[0], imgnumb);
+    for (const RawImage& i : rawSubimages) {
+      ns.AddSubimage(i, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
+    }
+  } else {
+    for (RawImage& i : imgs) {
+      if (transparent) {
+        enigma::image_swap_color(i, c, Color {0, 0, 0, 0});
+      }
+      ns.AddSubimage(i, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
+    }
+  }
   
   return ns;
 }
@@ -79,11 +84,13 @@ int sprite_get_height(int sprid) {
 }
 
 gs_scalar sprite_get_texture_width_factor(int sprid, int subimg) {
-  return sprites.get(sprid).GetTextureRect(subimg).w;
+  const auto& spr2d = sprites.get(sprid);
+  return spr2d.GetTextureRect(spr2d.ModSubimage(subimg)).w;
 }
 
 gs_scalar sprite_get_texture_height_factor(int sprid, int subimg) {
-  return sprites.get(sprid).GetTextureRect(subimg).h;
+  const auto& spr2d = sprites.get(sprid);
+  return spr2d.GetTextureRect(spr2d.ModSubimage(subimg)).h;
 }
 
 int sprite_get_bbox_bottom(int sprid) {
@@ -131,7 +138,8 @@ int sprite_get_number(int sprid) {
 }
 
 int sprite_get_texture(int sprid, int subimage) {
-  return sprites.get(sprid).GetTexture(subimage);
+  const auto& spr2d = sprites.get(sprid);
+  return spr2d.GetTexture(spr2d.ModSubimage(subimage));
 }
 
 int sprite_get_xoffset(int sprid) {
@@ -165,7 +173,7 @@ bool sprite_exists(int spr) {
   return sprites.exists(spr);
 }
 
-void sprite_delete(int ind, bool free_texture = true) {
+void sprite_delete(int ind, bool free_texture) {
   if (free_texture) sprites.get(ind).FreeTextures();
   sprites.destroy(ind);
 }
@@ -174,7 +182,7 @@ int sprite_duplicate(int ind) {
   return sprites.duplicate(ind);  
 }
 
-void sprite_assign(int ind, int copy_sprite, bool free_texture = true) {
+void sprite_assign(int ind, int copy_sprite, bool free_texture) {
   if (free_texture) sprites.get(ind).FreeTextures();
   Sprite copy = sprites.get(copy_sprite);
   sprites.assign(ind, std::move(copy));
@@ -239,7 +247,7 @@ var sprite_get_uvs(int ind, int subimg) {
   const enigma::Subimage& s = sprites.get(ind).GetSubimage(subimg);
 
   uvs[0] = s.textureBounds.left();
-  uvs[1] = s.textureBounds.right();
+  uvs[1] = s.textureBounds.top();
   uvs[2] = s.textureBounds.right();
   uvs[3] = s.textureBounds.bottom();
   return uvs;
@@ -247,6 +255,13 @@ var sprite_get_uvs(int ind, int subimg) {
 
 void sprite_save(int ind, unsigned subimg, std::string fname) {
   const Sprite& spr = sprites.get(ind);
+  
+  if (spr.SubimageCount() <= subimg) {
+    DEBUG_MESSAGE("Requested subimage: " + std::to_string(subimg) + " out of range. Sprite: " 
+                 +  std::to_string(ind) + " only has " + std::to_string(spr.SubimageCount()) 
+                 + " subimages.", MESSAGE_TYPE::M_USER_ERROR);
+    return;
+  }
   
   unsigned w, h;
   unsigned char* rgbdata =
@@ -259,4 +274,25 @@ void sprite_save(int ind, unsigned subimg, std::string fname) {
 
 //void sprite_set_precise(int ind, bool precise); //FIXME: We don't support this yet
 //void sprite_save_strip(int ind, std::string fname); //FIXME: We don't support this yet
+
+int sprite_create_color(unsigned w, unsigned h, int col) {
+  RawImage img(new unsigned char[w * h * 4], w, h);
+  std::fill((unsigned*)(img.pxdata), (unsigned*)(img.pxdata) + w * h, (COL_GET_R(col) | (COL_GET_G(col) << 8) | (COL_GET_B(col) << 16) | 255 << 24));
+
+  Sprite s(w, h, 0, 0);
+  s.SetBBox(0, 0, w, h);
+  s.AddSubimage(img, enigma::ct_bbox, img.pxdata, false);
+  return sprites.add(std::move(s));
+}
+
+bool sprite_textures_equal(int id1, int subimg1, int id2, int subimg2) {
+  // Note: this will need to be amended to use textures_regions_equal when atlas support is implemented
+  return textures_equal(sprite_get_texture(id1, subimg1), sprite_get_texture(id2, subimg2));
+}
+
+uint32_t sprite_get_pixel(int id, int subimg, unsigned x, unsigned y) {
+  // Note: this will need to be amended when atlas support is implemented
+  return texture_get_pixel(sprite_get_texture(id, subimg), x, y);
+}
+
 }

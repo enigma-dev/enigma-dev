@@ -15,11 +15,17 @@ else
 endif
 
 PROTO_DIR := $(SHARED_SRC_DIR)/protos
-CXXFLAGS += -fPIC -I./JDI/src -I$(PROTO_DIR)/.eobjs $(addprefix -I$(SHARED_SRC_DIR)/, $(SHARED_INCLUDES))
-LDFLAGS += -shared -g -L../ -Wl,-rpath,./ -lProtocols -lprotobuf -lENIGMAShared -lz 
-SOURCES := $(filter-out ./standalone_main.cpp, $(call rwildcard,.,*.cpp))
+CXXFLAGS += -fPIC -I./JDI/src -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/libpng-util -I$(PROTO_DIR)/.eobjs $(addprefix -I$(SHARED_SRC_DIR)/, $(SHARED_INCLUDES))
+LDFLAGS += -shared -g -L../ -Wl,-rpath,./ -lProtocols -lprotobuf -lENIGMAShared -lz
 ifeq ($(OS), Linux)
 	LDFLAGS += -lstdc++fs
 endif
+ifeq ($(OS), FreeBSD)
+	LDFLAGS += -lc -lutil
+endif
+ifeq ($(OS), DragonFly)
+	LDFLAGS += -lc -lutil -lkvm
+endif
+SOURCES := $(filter-out ./standalone_main.cpp, $(call rwildcard,.,*.cpp))
 
 include ../Default.mk

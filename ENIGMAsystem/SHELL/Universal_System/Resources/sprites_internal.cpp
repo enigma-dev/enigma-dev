@@ -1,6 +1,8 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Collision_Systems/collision_mandatory.h"
 #include "Universal_System/nlpo2.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Object_Tiers/graphics_object.h"
 #include "sprites_internal.h"
 
 namespace enigma {
@@ -21,7 +23,7 @@ Subimage::Subimage(const Subimage &s, bool duplicateTexture) {
 }
 
 void Subimage::FreeTexture() {
-  if (textureID != -1) enigma::graphics_delete_texture(textureID);
+  enigma::graphics_delete_texture(textureID);
   textureID = -1;
 }
 
@@ -29,6 +31,12 @@ void Sprite::SetTexture(int subimg, int textureID, TexRect texRect) {
   Subimage& s = _subimages.get(subimg);
   s.textureID = textureID;
   s.textureBounds = texRect;
+}
+
+const int Sprite::ModSubimage(int subimg) const {
+  if (SubimageCount() == 0) return 0;
+  if (subimg >= 0) return subimg % SubimageCount();
+  return int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % SubimageCount();
 }
 
 Sprite::Sprite(const Sprite& s) {
@@ -53,11 +61,10 @@ int Sprite::AddSubimage(int texid, TexRect texRect, collision_type ct, void* col
   return _subimages.add(std::move(subimg));
 }
 
-int Sprite::AddSubimage(unsigned char* pxdata, int w, int h, collision_type ct, void* collisionData, bool mipmap) {
-  unsigned fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
-  RawImage img = image_pad(pxdata, w, h, fullwidth, fullheight);
-  int texID = graphics_create_texture(w, h, fullwidth, fullheight, img.pxdata, mipmap);
-  return AddSubimage(texID, TexRect(0, 0, static_cast<gs_scalar>(w) / fullwidth, static_cast<gs_scalar>(h) / fullheight), ct, collisionData);
+int Sprite::AddSubimage(const RawImage& img, collision_type ct, void* collisionData, bool mipmap) {
+  unsigned fullwidth, fullheight;
+  int texID = graphics_create_texture(img, mipmap, &fullwidth, &fullheight);
+  return AddSubimage(texID, TexRect(0, 0, static_cast<gs_scalar>(img.w) / fullwidth, static_cast<gs_scalar>(img.h) / fullheight), ct, collisionData);
 }
 
 void Sprite::AddSubimage(const Subimage& s) {

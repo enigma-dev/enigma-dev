@@ -16,11 +16,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "background_internal.h"
+#include "backgrounds_internal.h"
 #include "libEGMstd.h"
-#include "Universal_System/zlib.h"
 #include "resinit.h"
-
+#include "Universal_System/zlib.h"
+#include "Universal_System/image_formats.h"
+#include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
@@ -43,11 +44,13 @@ namespace enigma
     if (!fread(&bkgcount,4,1,exe))
       return;
 
-
     // Fetch the highest ID we will be using
     int bkg_highid;
     if (!fread(&bkg_highid,4,1,exe))
       return;
+    
+    if (bkgcount == 0) return;
+    backgrounds.resize(bkg_highid+1);
 
     for (int i = 0; i < bkgcount; i++)
     {
@@ -65,8 +68,6 @@ namespace enigma
       if (!fread(&vOffset,4,1,exe)) return;
       if (!fread(&hSep,4,1,exe)) return;
       if (!fread(&vSep,4,1,exe)) return;
-
-      //need to add: transparent, smooth, preload, tileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep
 
       unpacked = width*height*4;
 
@@ -92,9 +93,10 @@ namespace enigma
       }
       delete[] cpixels;
 
-      background_new(bkgid, width, height, pixels, false, false, true, false, 32, 32, 0, 0, 1,1);
-
-      delete[] pixels;
+      unsigned fw, fh;
+      int texID = graphics_create_texture(RawImage(pixels, width, height), false, &fw, &fh);
+      Background bkg(width, height, fw, fh, texID, useAsTileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
+      backgrounds.assign(bkgid, std::move(bkg));
     }
   }
 } //namespace enigma

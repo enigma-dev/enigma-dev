@@ -18,12 +18,11 @@
 **/
 
 #include "image_formats.h"
+#include "strings_util.h"
 #include "image_formats_exts.h"
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/nlpo2.h"
-
-#include "gif_format.h"
 
 #include <map>
 #include <fstream>      // std::ofstream
@@ -33,51 +32,53 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
-
-using namespace std;
+#include <iostream>
 
 #include "nlpo2.h"
-inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
-  x =  (x & -x) - 1;
-  x -= ((x >> 1) & 0x55555555);
-  x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
-  x =  ((x >> 4) + x) & 0x0f0f0f0f;
-  x += x >> 8;
-  return (x + (x >> 16)) & 63;
-}
+
+using namespace std;
 
 namespace enigma
 {
 
-std::map<std::string, ImageLoadFunction> image_load_handlers;
-std::map<std::string, ImageSaveFunction> image_save_handlers;
+std::map<std::filesystem::path, ImageLoadFunction> image_load_handlers = {{".bmp", image_load_bmp}, {".gif", image_load_gif}};
+std::map<std::filesystem::path, ImageSaveFunction> image_save_handlers = {{".bmp", image_save_bmp}};
 
-Color image_get_pixel_color(unsigned char* pxdata, unsigned w, unsigned h, unsigned x, unsigned y) {
+Color image_get_pixel_color(const RawImage& in, unsigned x, unsigned y) {
   Color c;
-  size_t index = 4 * (y * w + x);
-  c.b = pxdata[index];
-  c.g = pxdata[index + 1];
-  c.r = pxdata[index + 2];
-  c.a = pxdata[index + 3];
+  size_t index = 4 * (y * in.w + x);
+  c.b = in.pxdata[index];
+  c.g = in.pxdata[index + 1];
+  c.r = in.pxdata[index + 2];
+  c.a = in.pxdata[index + 3];
   return c;
 }
 
-void image_swap_color(unsigned char* pxdata, unsigned w, unsigned h, Color oldColor, Color newColor) {  
+void image_swap_color(RawImage& in, Color oldColor, Color newColor) {  
+  #ifdef DEBUG_MODE
+  if (in.pxdata == nullptr) {
+    in.pxdata = new unsigned char[in.w * in.h * 4];
+    std::fill(in.pxdata, in.pxdata + (in.w * in.h * 4), 255);
+    DEBUG_MESSAGE("Attempt to access a null pointer" , MESSAGE_TYPE::M_ERROR);
+    return;
+  }
+  #endif
+  
   unsigned int ih, iw;
-  for (ih = 0; ih < h; ih++) {
-    int index = ih * w * 4;
+  for (ih = 0; ih < in.h; ih++) {
+    int index = ih * in.w * 4;
     
-    for (iw = 0; iw < w; iw++) {
+    for (iw = 0; iw < in.w; iw++) {
       if (
-           pxdata[index]     == oldColor.b
-        && pxdata[index + 1] == oldColor.g
-        && pxdata[index + 2] == oldColor.r
-        && pxdata[index + 3] == oldColor.a
+           in.pxdata[index]     == oldColor.b
+        && in.pxdata[index + 1] == oldColor.g
+        && in.pxdata[index + 2] == oldColor.r
+        && in.pxdata[index + 3] == oldColor.a
         ) {
-          pxdata[index]     = newColor.b;
-          pxdata[index + 1] = newColor.g;
-          pxdata[index + 2] = newColor.r;
-          pxdata[index + 3] = newColor.a;
+          in.pxdata[index]     = newColor.b;
+          in.pxdata[index + 1] = newColor.g;
+          in.pxdata[index + 2] = newColor.r;
+          in.pxdata[index + 3] = newColor.a;
       }
 
       index += 4;
@@ -85,28 +86,28 @@ void image_swap_color(unsigned char* pxdata, unsigned w, unsigned h, Color oldCo
   }
 }
 
-std::vector<RawImage> image_split(unsigned char* pxdata, unsigned w, unsigned h, unsigned imgcount) {
+std::vector<RawImage> image_split(const RawImage& in, unsigned imgcount) {
   std::vector<RawImage> imgs(imgcount);
-  unsigned splitWidth = w / imgcount;
+  unsigned splitWidth = in.w / imgcount;
   
   for (unsigned i = 0; i < imgcount; ++i) {
     
-    imgs[i].pxdata = new unsigned char[splitWidth * h * 4]();
+    imgs[i].pxdata = new unsigned char[splitWidth * in.h * 4]();
     imgs[i].w = splitWidth;
-    imgs[i].h = h;
+    imgs[i].h = in.h;
     
     unsigned ih,iw;
     unsigned xcelloffset = i * splitWidth * 4;
     
-    for (ih = 0; ih < h; ih++) {
-      unsigned tmp = ih * w * 4 + xcelloffset;
+    for (ih = 0; ih < in.h; ih++) {
+      unsigned tmp = ih * in.w * 4 + xcelloffset;
       unsigned tmpcell = ih * splitWidth * 4;
       
       for (iw = 0; iw < splitWidth; iw++) {
-        imgs[i].pxdata[tmpcell]     = pxdata[tmp];
-        imgs[i].pxdata[tmpcell + 1] = pxdata[tmp + 1];
-        imgs[i].pxdata[tmpcell + 2] = pxdata[tmp + 2];
-        imgs[i].pxdata[tmpcell + 3] = pxdata[tmp + 3];
+        imgs[i].pxdata[tmpcell]     = in.pxdata[tmp];
+        imgs[i].pxdata[tmpcell + 1] = in.pxdata[tmp + 1];
+        imgs[i].pxdata[tmpcell + 2] = in.pxdata[tmp + 2];
+        imgs[i].pxdata[tmpcell + 3] = in.pxdata[tmp + 3];
         tmp += 4;
         tmpcell += 4;
       }
@@ -116,7 +117,7 @@ std::vector<RawImage> image_split(unsigned char* pxdata, unsigned w, unsigned h,
   return imgs;
 }
 
-RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeight, unsigned newWidth, unsigned newHeight) {
+RawImage image_pad(const RawImage& in, unsigned newWidth, unsigned newHeight) {
   RawImage padded;
   padded.w = newWidth;
   padded.h = newHeight;
@@ -124,26 +125,50 @@ RawImage image_pad(unsigned char* pxdata, unsigned origWidth, unsigned origHeigh
   padded.pxdata = new unsigned char[4 * newWidth * newHeight + 1];
   
   unsigned char* imgpxptr = padded.pxdata;
+  const unsigned char* inpxdata = in.pxdata;
   unsigned rowindex, colindex;
-  for (rowindex = 0; rowindex < origHeight; rowindex++) {
-    for (colindex = 0; colindex < origWidth; colindex++) {
-      *imgpxptr++ = *pxdata++;
-      *imgpxptr++ = *pxdata++;
-      *imgpxptr++ = *pxdata++;
-      *imgpxptr++ = *pxdata++;
+  for (rowindex = 0; rowindex < in.h; rowindex++) {
+    for (colindex = 0; colindex < in.w; colindex++) {
+      *imgpxptr++ = *inpxdata++;
+      *imgpxptr++ = *inpxdata++;
+      *imgpxptr++ = *inpxdata++;
+      *imgpxptr++ = *inpxdata++;
     }
     
     std::memset(imgpxptr, 0, (newWidth - colindex) << 2);
     imgpxptr += (newWidth - colindex) << 2;
   }
   
-  std::memset(imgpxptr, 0, (newHeight - origHeight) * newWidth);
+  std::memset(imgpxptr, 0, (newHeight - in.h) * newWidth);
   
   return padded;
 }
 
+RawImage image_crop(const RawImage& in, unsigned newWidth, unsigned newHeight) {
+  RawImage img;
+  img.w = newWidth;
+  img.h = newHeight;
+  img.pxdata = new unsigned char[newWidth * newHeight * 4];
+  
+  unsigned stride = 4;
+  for (unsigned i = 0; i < newHeight; i++) {
+    unsigned tmp = i;
+    unsigned bmp = i;
+    tmp *= stride * in.w;
+    bmp *= stride * newWidth;
+    for (unsigned ii = 0; ii < newWidth*stride; ii += stride) {
+      img.pxdata[bmp + ii + 2] = in.pxdata[tmp + ii + 0];
+      img.pxdata[bmp + ii + 1] = in.pxdata[tmp + ii + 1];
+      img.pxdata[bmp + ii + 0] = in.pxdata[tmp + ii + 2];
+      img.pxdata[bmp + ii + 3] = in.pxdata[tmp + ii + 3];
+    }
+  }
+  
+  return img;
+}
+
 unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigned pngheight, bool prepend_size) {
-  unsigned widfull = nlpo2dc(pngwidth) + 1, hgtfull = nlpo2dc(pngheight) + 1, ih, iw;
+  unsigned widfull = nlpo2(pngwidth), hgtfull = nlpo2(pngheight), ih, iw;
   const int bitmap_size = widfull * hgtfull * 4;
   unsigned char *bitmap = new unsigned char[bitmap_size]();
 
@@ -170,92 +195,75 @@ unsigned long *bgra_to_argb(unsigned char *bgra_data, unsigned pngwidth, unsigne
   return result;
 }
 
-void image_add_loader(std::string format, ImageLoadFunction fnc) {
-  image_load_handlers[format] = fnc;
+unsigned char* mono_to_rgba(unsigned char* pxdata, unsigned width, unsigned height) {
+  unsigned char* rgba = new unsigned char[width * height * 4];
+  for (unsigned i = 0; i < width * height; ++i) {
+    unsigned index_out = i * 4;
+    rgba[index_out] = rgba[index_out + 1] = rgba[index_out + 2] = 255;
+    rgba[index_out + 3] = pxdata[i];
+  }
+  return rgba;
 }
 
-void image_add_saver(std::string format, ImageSaveFunction fnc) {
-  image_save_handlers[format] = fnc;
+void image_add_loader(const std::filesystem::path& extension, ImageLoadFunction fnc) {
+  image_load_handlers[extension] = fnc;
 }
 
-unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned height, unsigned bytes) {
+void image_add_saver(const std::filesystem::path& extension, ImageSaveFunction fnc) {
+  image_save_handlers[extension] = fnc;
+}
+
+void image_flip(RawImage& in) {
   //flipped upside down
-  unsigned sz = width * height;
-  unsigned char* rgbdata = new unsigned char[sz * bytes];
-  for (unsigned int i = 0; i < height; i++) { // Doesn't matter the order now
-    memcpy(&rgbdata[i*width*bytes*sizeof(unsigned char)],           // address of destination
-           &data[(height-i-1)*width*bytes*sizeof(unsigned char)],   // address of source
-           width*bytes*sizeof(unsigned char) );                     // number of bytes to copy
+  unsigned bytes = 4;
+  unsigned sz = in.w * in.h * bytes;
+  unsigned char* rgbdata = new unsigned char[sz];
+  for (unsigned int i = 0; i < in.h; i++) { // Doesn't matter the order now
+    memcpy(&rgbdata[i*in.w*bytes*sizeof(unsigned char)],           // address of destination
+           &in.pxdata[(in.h-i-1)*in.w*bytes*sizeof(unsigned char)],   // address of source
+           in.w*bytes*sizeof(unsigned char) );                     // number of bytes to copy
   }
-
-  return rgbdata;
+  
+  delete[] in.pxdata;
+  in.pxdata = rgbdata;
 }
-
-string image_get_format(string filename) {
-  size_t fp = filename.find_last_of(".");
-  if (fp == string::npos){
-    return "";
-  }
-  string ext = filename.substr(fp);
-  transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-  return ext;
-}
-
-/// Generic all-purpose image loading call.
-unsigned char* image_load(string filename, string format, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped) {
-  if (format.compare(".bmp") == 0) {
-    return image_load_bmp(filename, width, height, fullwidth, fullheight, flipped);
-  } else if (format.compare(".gif") == 0) {
-    return image_load_gif(filename, width, height, fullwidth, fullheight, imgnumb, flipped);
-  }
-  auto handler = image_load_handlers.find(format);
-  if (handler != image_load_handlers.end()) {
-    return (*handler).second(filename, width, height, fullwidth, fullheight, flipped);
-  }
-  return image_load_bmp(filename, width, height, fullwidth, fullheight, flipped);
-}
-
 
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
-unsigned char* image_load(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped) {
-  string format = image_get_format(filename);
-  if (format.empty()) {
-    format = ".bmp";
+std::vector<RawImage> image_load(const std::filesystem::path& filename) {
+  std::filesystem::path extension = filename.extension();
+  if (extension.empty()) {
+    DEBUG_MESSAGE("No extension in image filename: " + filename.u8string() + ". Assumimg .bmp", MESSAGE_TYPE::M_WARNING);
+    extension = ".bmp";
   }
-  return image_load(filename, format, width, height, fullwidth, fullheight, imgnumb, flipped);
+  
+  auto handler = image_load_handlers.find(ToLower(extension.u8string()));
+  if (handler != image_load_handlers.end()) {
+    return (*handler).second(filename);
+  } else {
+    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() , MESSAGE_TYPE::M_ERROR);
+    return std::vector<RawImage>();
+  }
 }
 
 /// Generic all-purpose image saving call.
-int image_save(string filename, const unsigned char* data, string format, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
-  if (format.compare(".bmp") == 0) {
+int image_save(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
+  std::filesystem::path extension = filename.extension();
+  auto handler = image_save_handlers.find(ToLower(extension.u8string()));
+  if (extension.empty() || handler != image_save_handlers.end()) {
+    return (*handler).second(filename, data, width, height, fullwidth, fullheight, flipped);
+  } else {
+    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() + " saving as BMP" , MESSAGE_TYPE::M_WARNING);
     return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
   }
-  auto handler = image_save_handlers.find(format);
-  if (handler != image_save_handlers.end()) {
-    return (*handler).second(filename, data, width, height, fullwidth, fullheight, flipped);
-  }
-  return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
 }
 
-/// Generic all-purpose image saving call that will regexp the filename for the format and call the appropriate function.
-int image_save(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
-  string format = image_get_format(filename);
-  if (format.empty()) {
-    format = ".bmp";
-  }
-  return image_save(filename, data, format, width, height, fullwidth, fullheight, flipped);
-}
-
-unsigned char* image_load_bmp(
-    string filename, unsigned int* width, unsigned int* height,
-    unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
-  if (std::ifstream bmp{filename}) {
+std::vector<RawImage> image_load_bmp(const std::filesystem::path& filename) {
+  if (std::ifstream bmp{filename.u8string(), ios::in | ios::binary}) {
     std::stringstream buffer;
     buffer << bmp.rdbuf();
-    return image_decode_bmp(buffer.str(), width, height,
-                            fullwidth, fullheight, flipped);
+    return image_decode_bmp(buffer.str());
   }
-  return nullptr;
+  return std::vector<RawImage>();
 }
 
 namespace {
@@ -349,13 +357,13 @@ struct BMPInfoHeader {
 }  // namespace
 
 
-unsigned char* image_decode_bmp(
-    const string &image_data, unsigned int* width, unsigned int* height,
-    unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
+std::vector<RawImage> image_decode_bmp(const string& image_data) {
+  std::vector<RawImage> imgs;
+  
   // Check file size against bitmap header size
   if (image_data.length() < sizeof(BMPFileHeader)) {
     fprintf(stderr, "Junk bitmap of size %lu", image_data.size());
-    return nullptr;
+    return imgs;
   }
 
   const BMPFileHeader &bmp_file = *(BMPFileHeader*) image_data.data();
@@ -364,7 +372,7 @@ unsigned char* image_decode_bmp(
   if (bmp_file.magic_b != 'B' || bmp_file.magic_m != 'M' ||
       bmp_file.dataStart + sizeof(BMPInfoHeader) > image_data.length()) {
     fprintf(stderr, "Junk bitmap of size %lu", image_data.size());
-    return nullptr;
+    return imgs;
   }
 
   const BMPInfoHeader &bmp_info =
@@ -372,22 +380,24 @@ unsigned char* image_decode_bmp(
 
   if(bmp_info.bitsPerPixel != 32 && bmp_info.bitsPerPixel != 24) {
     fprintf(stderr, "No support for %dbpp bitmaps\n", bmp_info.bitsPerPixel);
-    return nullptr;
+    return imgs;
   }
-  const bool rgba = bmp_info.isRGBA();
-  const bool argb = bmp_info.isARGB();
+  bool rgba = bmp_info.isRGBA();
+  bool argb = bmp_info.isARGB();
   if (bmp_info.bitsPerPixel == 32 && !rgba && !argb) {
     fprintf(stderr, "No support for mask format (%08X, %08X, %08X, %08X)\n",
             bmp_info.maskRed, bmp_info.maskGreen, bmp_info.maskBlue,
             bmp_info.maskAlpha);
-    return nullptr;
+            
+    argb = true;
+    //return imgs;
   }
-
-  const unsigned widfull = nlpo2dc(bmp_info.width) + 1;
-  const unsigned hgtfull = nlpo2dc(bmp_info.height) + 1;
-  const unsigned bitmap_size = widfull*hgtfull*4;
-
-  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to 0.
+  
+  unsigned char* bitmap;
+  auto &img = imgs.emplace_back();
+  img.w = bmp_info.width;
+  img.h = bmp_info.height;
+  img.pxdata = bitmap = new unsigned char[img.w * img.h * 4](); // Initialize to 0.
 
   // Calculate the number of nulls that follows each line.
   const int overlap = bmp_info.width * (bmp_info.bitsPerPixel / 8) % 4;
@@ -397,12 +407,7 @@ unsigned char* image_decode_bmp(
   const char *bmp_it = image_data.data() + bmp_file.dataStart;
 
   for (unsigned ih = 0; ih < bmp_info.height; ih++) {
-    unsigned tmp = 0;
-    if (flipped) {
-      tmp = ih * widfull * 4;
-    } else {
-      tmp = (bmp_info.height - 1 - ih) * widfull * 4;
-    }
+    unsigned tmp = (bmp_info.height - 1 - ih) * bmp_info.width * 4;
     for (unsigned iw = 0; iw < bmp_info.width; iw++) {
       if (bmp_info.bitsPerPixel == 24) {
         bitmap[tmp+0] = *bmp_it++;
@@ -427,29 +432,13 @@ unsigned char* image_decode_bmp(
     }
     bmp_it += pad;
   }
-  *width  = bmp_info.width;
-  *height = bmp_info.height;
-  *fullwidth  = widfull;
-  *fullheight = hgtfull;
-  return bitmap;
+
+  return imgs;
 }
 
-unsigned char* image_load_gif(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped) {
-  unsigned int error = 0;
-  unsigned char* image = 0;
-
-  error = load_gif_file(filename.c_str(), image, *width, *height, *fullwidth, *fullheight, *imgnumb);
-  if (error) {
-    DEBUG_MESSAGE(load_gif_error_text(error), MESSAGE_TYPE::M_ERROR);
-    return NULL;
-  }
-
-  return image;
-}
-
-int image_save_bmp(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
+int image_save_bmp(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
   unsigned sz = width * height;
-  FILE *bmp = fopen(filename.c_str(), "wb");
+  FILE *bmp = fopen(filename.u8string().c_str(), "wb");
   if (!bmp) return -1;
   fwrite("BM", 2, 1, bmp);
 
@@ -470,7 +459,7 @@ int image_save_bmp(string filename, const unsigned char* data, unsigned width, u
   for (unsigned i = 0; i < lastbyte; i += fullwidth) {
     unsigned tmp = i;
     if (!flipped) {
-      tmp = lastbyte - i;
+      tmp = lastbyte - fullwidth - i;
     }
     for (unsigned ii = 0; ii < width; ii += bytes) {
       fwrite(&data[tmp + ii + 0],sizeof(char),1,bmp);

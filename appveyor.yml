@@ -1,3 +1,5 @@
+# Latest image
+image: Visual Studio 2019
 # fetch repository as zip archive
 shallow_clone: true
 # disable automatic tests
@@ -27,42 +29,21 @@ environment:
   WIDGETS: None
   EXTENSIONS: "None"
   PACKAGES: ""
-  PACKAGES_LATEST: ""
 
   matrix:
-    # Game Modes
-    - {MODE: Run}
+    # Game Modes 
+    # run mode covered in regular tests
     - {MODE: Debug}
     - {MODE: Compile}
 
-    # Platforms
-    - {PLATFORM: SDL, PACKAGES: "SDL2:x"}
-
-    # Graphics
-    - {GRAPHICS: Direct3D11}
-    - {GRAPHICS: OpenGL1, PACKAGES: "glew:x"}
-    - {GRAPHICS: OpenGLES3, PLATFORM: SDL, PACKAGES_LATEST: "libepoxy:x", PACKAGES: "SDL2:x" }
-
-    # Audio
-    - {AUDIO: DirectSound}
-    - {AUDIO: OpenAL, PACKAGES: "openal:x dumb:x alure:x libmodplug:x libvorbis:x libogg:x flac:x mpg123:x libsndfile:x libgme:x"}
-
-    # Widgets
-    - {WIDGETS: Win32}
+    # Catch-all
+    - {GRAPHICS: Direct3D11, AUDIO: DirectSound, WIDGETS: Win32, EXTENSIONS: "DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFilesystem,Box2DPhysics,StudioPhysics,ExternalFuncs", PACKAGES: "mingw-w64-x86_64-box2d mingw-w64-x86_64-libffi"}
+    - {GRAPHICS: OpenGL1, AUDIO: OpenAL, PACKAGES: "mingw-w64-x86_64-glew mingw-w64-x86_64-openal mingw-w64-x86_64-dumb mingw-w64-x86_64-alure mingw-w64-x86_64-libmodplug mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123 mingw-w64-x86_64-libsndfile mingw-w64-x86_64-libgme"}
+    - {GRAPHICS: OpenGLES3, PLATFORM: SDL, PACKAGES: "mingw-w64-x86_64-SDL2 mingw-w64-x86_64-libepoxy"}
     #TODO: Fix GTK+ on Windows
-    #- {WIDGETS: GTK+, PACKAGES: "gtk2:x"}
-
-    # Extensions
-    - {EXTENSIONS: "DirectShow"}
-    - {EXTENSIONS: "WindowsTouch"}
-    - {EXTENSIONS: "XInput"}
-    - {EXTENSIONS: "MediaControlInterface"}
-    - {EXTENSIONS: "FileDropper"}
-    - {EXTENSIONS: "IniFilesystem"}
-    - {EXTENSIONS: "Box2DPhysics", PACKAGES: "box2d:x"}
-    - {EXTENSIONS: "StudioPhysics", PACKAGES: "box2d:x"}
+    #- {WIDGETS: GTK+, PACKAGES: "mingw-w64-x86_64-gtk2"}
     #TODO: Fix Bullet Physics on Windows
-    #- {EXTENSIONS: "BulletDynamics", PACKAGES: "bullet:x"}
+    #- {EXTENSIONS: "BulletDynamics", PACKAGES: "mingw-w64-x86_64-bullet"}
 
 init:
   - echo "%APPVEYOR_JOB_ID%"
@@ -77,15 +58,12 @@ init:
 
 install:
   - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
-  - > # Install packages common to all builds
-    bash -lc "pacboy --noconfirm -S boost:x pugixml:x rapidjson:x yaml-cpp:x grpc:x protobuf:x glm:x libpng:x %PACKAGES%"
-  - > # Install latest packages (OpenGLES needs fundies' patched libepoxy)
-    bash -lc "pacboy --noconfirm -Sy %PACKAGES_LATEST%"
+  - bash -lc "pacman --noconfirm -Sy mingw-w64-x86_64-boost mingw-w64-x86_64-pugixml mingw-w64-x86_64-rapidjson mingw-w64-x86_64-yaml-cpp mingw-w64-x86_64-grpc mingw-w64-x86_64-protobuf mingw-w64-x86_64-glm mingw-w64-x86_64-libpng mingw-w64-x86_64-re2 %PACKAGES%"
   - gcc -v
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         # use our first job to build JDI and the CLI
-        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "make -j 4; CLI_ENABLE_EGM=FALSE make -j 4 emake"
+        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "make -j 4; make -j 4 emake"
 
         # create a daemon PowerShell "job" (not the same as an AppVeyor build job) to zip and upload
         # the blobs artifact while we start building the engine

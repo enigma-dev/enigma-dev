@@ -25,7 +25,7 @@
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/Resources/sprites_internal.h"
-#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/backgrounds_internal.h"
 #include "Collision_Systems/collision_types.h"
 #include "Universal_System/math_consts.h"
 
@@ -376,14 +376,18 @@ int background_create_from_surface(int id, int x, int y, int w, int h, bool remo
   get_surfacev(surf,id,-1);
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
 
-  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+  enigma::RawImage s(enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h), w, h);
+  
+  if (removeback) {
+    enigma::Color c = enigma::image_get_pixel_color(s, 0, h - 1);
+    enigma::image_swap_color(s, c, enigma::Color {0, 0, 0, 0});
+  }
+  
+  unsigned fullwidth, fullheight;
+  int texID = enigma::graphics_create_texture(s, false, &fullwidth, &fullheight);
+  enigma::Background bkg(w, h, fullwidth, fullheight, texID);
 
-  enigma::backgroundstructarray_reallocate();
-  int bckid=enigma::background_idmax;
-  enigma::background_new(bckid, w, h, surfbuf, removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
-  delete[] surfbuf;
-  enigma::background_idmax++;
-  return bckid;
+  return enigma::backgrounds.add(std::move(bkg));
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
@@ -393,14 +397,12 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
   get_surfacev(surf,id,-1);
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
 
-  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+  enigma::RawImage surfImg(enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h), w, h);
   
   Sprite spr(w, h, xorig, yorig);
-  spr.AddSubimage(surfbuf, w, h, enigma::ct_precise, surfbuf); //TODO: Support toggling of precise.
+  spr.AddSubimage(surfImg, enigma::ct_precise, surfImg.pxdata); //TODO: Support toggling of precise.
   
-  delete[] surfbuf;
-  
-  return sprites.add(std::move(spr));;
+  return sprites.add(std::move(spr));
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
@@ -415,12 +417,10 @@ void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool r
   get_surface(surf,id);
   const enigma::BaseSurface& base = ((enigma::BaseSurface&)surf);
 
-  unsigned char *surfbuf=enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h);
+  enigma::RawImage surfImg(enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h), w, h);
 
   Sprite& spr = sprites.get(ind);
-  spr.AddSubimage(surfbuf, w, h, enigma::ct_precise, surfbuf); //TODO: Support toggling of precise.
-  
-  delete[] surfbuf;
+  spr.AddSubimage(surfImg, enigma::ct_precise, surfImg.pxdata); //TODO: Support toggling of precise.
 }
 
 void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)

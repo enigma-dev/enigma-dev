@@ -21,8 +21,6 @@
 
 #include "XLIBmain.h"
 #include "XLIBwindow.h"
-#include "XLIBsystem.h"
-#include "XDisplayGetters.h"
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
@@ -75,18 +73,10 @@ int handleEvents() {
             }
           }
         }
-        enigma_user::keyboard_lastkey = actualKey;
-        enigma_user::keyboard_key = actualKey;
-        if (enigma::last_keybdstatus[actualKey] == 1 && enigma::keybdstatus[actualKey] == 0) {
-          enigma::keybdstatus[actualKey] = 1;
-          continue;
-        }
-        enigma::last_keybdstatus[actualKey] = enigma::keybdstatus[actualKey];
-        enigma::keybdstatus[actualKey] = 1;
+        input_key_down(actualKey);
         continue;
       }
       case KeyRelease: {
-        enigma_user::keyboard_key = 0;
         gk = XLookupKeysym(&e.xkey, 0);
         if (gk == NoSymbol) continue;
 
@@ -95,8 +85,7 @@ int handleEvents() {
         else
           actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
 
-        enigma::last_keybdstatus[actualKey] = enigma::keybdstatus[actualKey];
-        enigma::keybdstatus[actualKey] = 0;
+        input_key_up(actualKey);
         continue;
       }
       case ButtonPress: {
@@ -153,13 +142,11 @@ int handleEvents() {
         continue;
       }
       case FocusIn:
-        input_initialize();
         init_joysticks();
-        game_window_focused = true;
-        pausedSteps = 0;
+        platform_focus_gained();
         continue;
       case FocusOut:
-        game_window_focused = false;
+        platform_focus_lost();
         continue;
       case ClientMessage:
         if ((Atom)e.xclient.data.l[0] ==
@@ -191,24 +178,3 @@ void handleInput() {
 }
 
 }  // namespace enigma
-  
-
-namespace enigma_user {
-
-int display_get_x() {
-  return ::display_get_x();
-}
-
-int display_get_y() { 
-  return ::display_get_y();
-}
-
-int display_get_width() {
-  return ::display_get_width();
-}
-
-int display_get_height() { 
-  return ::display_get_height();
-}
-
-}  // namespace enigma_user

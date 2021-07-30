@@ -31,6 +31,9 @@
 
 #include "object_storage.h"
 #include "languages/language_adapter.h"
-void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev = NULL, const std::set<std::string>& script_names=std::set<std::string>(), bool trackGotos=false);
+
+void collect_variables(language_adapter *lang, ParsedCode *code,
+                       const std::set<std::string> &script_names = {},
+                       bool trackGotos = false);
 
 #endif

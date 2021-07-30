@@ -26,7 +26,6 @@
 #define ENIGMA_SPRITESTRUCT
 
 #include "AssetArray.h"
-#include "rect.h"
 #include "Collision_Systems/collision_types.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/image_formats.h"
@@ -34,7 +33,6 @@
 namespace enigma {
 
 using BoundingBox = Rect<int>;
-using TexRect = Rect<gs_scalar>;
 
 struct Subimage {
   
@@ -66,13 +64,14 @@ public:
   
   void FreeTextures() { for (std::pair<int, Subimage&> s : _subimages) s.second.FreeTexture(); }
   const int& GetTexture(int subimg) const { return _subimages.get(subimg).textureID; }
+  const int ModSubimage(int subimg) const;
   void SetTexture(int subimg, int textureID, TexRect texRect);
   const TexRect& GetTextureRect(int subimg) const { return _subimages.get(subimg).textureBounds; } 
   
   /// Add Subimage from existing texture
   int AddSubimage(int texid, TexRect texRect, collision_type ct = ct_precise, void* collisionData = nullptr, bool mipmap = false);
   /// Add Subimage from raw pixel data (creating a new texture)
-  int AddSubimage(unsigned char* pxdata, int w, int h, collision_type ct = ct_precise, void* collisionData = nullptr, bool mipmap = false);
+  int AddSubimage(const RawImage& img, collision_type ct = ct_precise, void* collisionData = nullptr, bool mipmap = false);
   /// Copy an existing subimage into the sprite (duplicating the texture)
   void AddSubimage(const Subimage& s);
   

@@ -34,7 +34,7 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Universal_System/depth_draw.h"
-#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/backgrounds_internal.h"
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
@@ -57,7 +57,7 @@ namespace enigma
 
 	void graphics_set_viewport(float x, float y, float width, float height) {}
 
-	int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap){return -1;}
+	int graphics_create_texture(const RawImage&, bool mipmap, unsigned* fullwidth, unsigned* fullheight){return -1;}
 	void graphics_delete_texture(int texid){}
 	unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {return nullptr;}
 	unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {return nullptr;}
@@ -141,4 +141,7 @@ namespace enigma_user
 	void draw_text(float, float, variant) {}
 	void draw_sprite_ext(int, int, float, float, float, float, double, int, float) {}
 	void draw_healthbar(float, float, float, float, float, int, int, int, int, bool, bool) {}
+  
+  uint32_t texture_get_pixel(int, unsigned int, unsigned int) {return 0;}
+  bool textures_equal(int, int) {return false;}
 }

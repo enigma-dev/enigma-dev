@@ -40,5 +40,3 @@ namespace enigma {
 }
 
 void io_clear();
-
-#define enigmacatchmouse() //Linux should hopefully do that automatically.

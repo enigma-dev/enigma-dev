@@ -23,7 +23,7 @@
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/Resources/sprites.h"
-#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/backgrounds.h"
 
 #include "GameSettings.h"  // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBmain.h"
@@ -308,7 +308,7 @@ bool window_get_stayontop() {
 
 void window_set_sizeable(bool sizeable) {
   if (window_get_maximized()) return;
-  if (enigma::isFullScreen) return;
+  if (window_get_fullscreen()) return;
   enigma::isSizeable = sizeable;
   XSizeHints *sh = XAllocSizeHints();
   sh->flags = PMinSize | PMaxSize;
@@ -333,8 +333,6 @@ void window_set_sizeable(bool sizeable) {
   }
   XSetWMNormalHints(disp, win, sh);
   XFree(sh);
-
-  XResizeWindow(disp, win, enigma::windowWidth, enigma::windowHeight);
 }
 
 void window_set_min_width(int width) {
@@ -495,7 +493,7 @@ void window_set_position(int x, int y) {
 }
 
 void window_set_size(unsigned int w, unsigned int h) {
-  if (enigma::isFullScreen) return;
+  if (window_get_fullscreen()) return;
   enigma::windowWidth = w;
   enigma::windowHeight = h;
   if (!enigma::isSizeable) {
@@ -518,24 +516,12 @@ void window_set_rectangle(int x, int y, int w, int h) {
 ////////////////
 
 void window_set_fullscreen(bool full) {
-  static bool prefer_sizeable = false;
-  static bool initial_fullscreen = true;
-  if (enigma::isFullScreen != full && full) {
-    window_set_size(enigma::windowWidth, enigma::windowHeight);
-    if (initial_fullscreen) {
-      window_center();
-      initial_fullscreen = false;
-    }
-  }
   if (enigma::isFullScreen == full && !full) return;
-  enigma::isFullScreen = false;
+  enigma::isFullScreen = full;
   if (full) {
-    prefer_sizeable = window_get_sizeable();
     tmpSize::tmpW = enigma::windowWidth;
     tmpSize::tmpH = enigma::windowHeight;
-    window_set_sizeable(true);
   }
-  enigma::isFullScreen = full;
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aFullScreen = XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False);
   XEvent xev;
@@ -549,10 +535,7 @@ void window_set_fullscreen(bool full) {
   xev.xclient.data.l[1] = aFullScreen;
   xev.xclient.data.l[2] = 0;
   XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
-  if (!full) {
-    window_set_size(tmpSize::tmpW, tmpSize::tmpH);
-    window_set_sizeable(prefer_sizeable);
-  }
+  if (!full) XResizeWindow(disp, win, tmpSize::tmpW, tmpSize::tmpH);
 }
 
 bool window_get_fullscreen() {
@@ -646,15 +629,6 @@ void initkeymap() {
 }  // namespace enigma
 
 namespace enigma_user {
-
-void io_handle() {
-  enigma::input_push();
-  while (XQLength(disp)) {
-    DEBUG_MESSAGE("processing an event...", MESSAGE_TYPE::M_INFO);
-    if (enigma::handleEvents() > 0) exit(0);
-  }
-  enigma::update_mouse_variables();
-}
 
 int window_set_cursor(int c) {
   enigma::cursorInt = c;

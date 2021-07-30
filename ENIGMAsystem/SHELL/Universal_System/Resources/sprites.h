@@ -71,6 +71,11 @@ void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int top, 
                            unsigned char tolerance); //FIXME: This only updates the bbox currently
 var sprite_get_uvs(int ind, int subimg);
 
+// Used for testing
+int sprite_create_color(unsigned w, unsigned h, int col); 
+bool sprite_textures_equal(int id1, int subimg1, int id2, int subimg2);
+uint32_t sprite_get_pixel(int id, int subimg, unsigned x, unsigned y);
+
 }  //namespace enigma_user
 
 #endif  //ENIGMA_SPRITES_H

@@ -21,25 +21,34 @@
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Universal_System/image_formats.h"
+#include "Universal_System/nlpo2.h"
 
 using namespace enigma::dx11;
 
 namespace enigma {
 
-int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
-{
+int graphics_create_texture(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight) {
   ID3D11Texture2D *tex;
   D3D11_TEXTURE2D_DESC tdesc;
   D3D11_SUBRESOURCE_DATA tbsd;
+  
+  unsigned fw = img.w, fh = img.h;
+  if (fullwidth == nullptr) fullwidth = &fw; 
+  if (fullheight == nullptr) fullheight = &fh;
+  
+  if (img.pxdata != nullptr) {
+    *fullwidth  = nlpo2(img.w);
+    *fullheight = nlpo2(img.h);
+  }
 
-  tbsd.pSysMem = pxdata;
-  tbsd.SysMemPitch = fullwidth*4;
+  tbsd.SysMemPitch = (*fullwidth) * 4;
   // not needed since this is a 2d texture,
   // but we can pass size info for debugging
-  tbsd.SysMemSlicePitch = fullwidth*fullheight*4;
+  tbsd.SysMemSlicePitch = (*fullwidth) * (*fullheight) * 4;
 
-  tdesc.Width = fullwidth;
-  tdesc.Height = fullheight;
+  tdesc.Width = *fullwidth;
+  tdesc.Height = *fullheight;
   tdesc.MipLevels = 1;
   tdesc.ArraySize = 1;
 
@@ -52,8 +61,17 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   tdesc.CPUAccessFlags = 0;
   tdesc.MiscFlags = 0;
 
-  if (FAILED(m_device->CreateTexture2D(&tdesc,&tbsd,&tex)))
-    return 0;
+  if (img.pxdata != nullptr && (img.w != *fullwidth || img.h != *fullheight)) {
+    RawImage padded = image_pad(img, *fullwidth, *fullheight);
+    tbsd.pSysMem = padded.pxdata;
+    if (FAILED(m_device->CreateTexture2D(&tdesc,&tbsd,&tex)))
+      return 0;
+  } else {
+    // surfaces will fall through here to create render target textures
+    tbsd.pSysMem = img.pxdata;
+    if (FAILED(m_device->CreateTexture2D(&tdesc,&tbsd,&tex)))
+      return 0;
+  }
 
   D3D11_SHADER_RESOURCE_VIEW_DESC vdesc;
   vdesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -67,17 +85,19 @@ int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth,
   const int id = textures.size();
   textures.push_back(std::make_unique<DX11Texture>(tex, view));
   auto& textureStruct = textures.back();
-  textureStruct->width = width;
-  textureStruct->height = height;
-  textureStruct->fullwidth = fullwidth;
-  textureStruct->fullheight = fullheight;
+  textureStruct->width = img.w;
+  textureStruct->height = img.h;
+  textureStruct->fullwidth = *fullwidth;
+  textureStruct->fullheight = *fullheight;
   return id;
 }
 
 void graphics_delete_texture(int tex) {
-  DX11Texture* texture = static_cast<DX11Texture*>(textures[tex].get());
-  texture->peer->Release(), texture->peer = NULL;
-  texture->view->Release(), texture->view = NULL;
+  if (tex >= 0) {
+    DX11Texture* texture = static_cast<DX11Texture*>(textures[tex].get());
+    texture->peer->Release(), texture->peer = NULL;
+    texture->view->Release(), texture->view = NULL;
+  }
 }
 
 unsigned char* graphics_copy_texture_pixels(int texture, unsigned* fullwidth, unsigned* fullheight) {
