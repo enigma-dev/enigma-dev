@@ -24,7 +24,7 @@
 inline static int color_get_red  (int c) { return COL_GET_R(c); }
 inline static int color_get_green(int c) { return COL_GET_G(c); }
 inline static int color_get_blue (int c) { return COL_GET_B(c); }
-inline static int make_color_rgb(unsigned char r, unsigned char g, unsigned char b){
+inline static int make_color_rgb(unsigned char r, unsigned char g, unsigned char b) {
   return r | (g << 8) | (b << 16);
 }
 
