@@ -87,19 +87,25 @@ bool initGameWindow()
 
   // Defined in the appropriate graphics bridge.
   // Populates GLX attributes (or other graphics-system-specific properties).
+  #if !defined(GRAPHICS_NONE)
   GLXFBConfig* fbc = enigma::CreateFBConfig();
+  #endif
 
   // Window event listening and coloring
   XSetWindowAttributes swa;
+  #if !defined(GRAPHICS_NONE)
   swa.border_pixel = 0;
   swa.background_pixel = (enigma::windowColor & 0xFF000000) | ((enigma::windowColor & 0xFF0000) >> 16) |
                          (enigma::windowColor & 0xFF00) | ((enigma::windowColor & 0xFF) << 16);
-                         
+  
+
   XVisualInfo* vi = glXGetVisualFromFBConfig(enigma::x11::disp, fbc[0]);
   swa.colormap = XCreateColormap(disp, root, vi->visual, AllocNone);
+
   swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
                    FocusChangeMask | StructureNotifyMask;
   unsigned long valmask = CWColormap | CWEventMask | CWBackPixel;  // | CWBorderPixel;
+  #endif
 
   // Prepare window for display (center, caption, etc)
   screen = DefaultScreenOfDisplay(disp);
@@ -113,7 +119,15 @@ bool initGameWindow()
   if (winh > screen->height) winh = screen->height;
 
   // Make the window
+  #if !defined(GRAPHICS_NONE)
   win = XCreateWindow(disp, root, 0, 0, winw, winh, 0, vi->depth, InputOutput, vi->visual, valmask, &swa);
+  #else
+  int scr    = XDefaultScreen(disp);
+  Visual *vi = XDefaultVisual(disp, scr);
+  int depth  = XDefaultDepth(disp,  scr);
+  win = XCreateWindow(disp, root, 0, 0, winw, winh, 0, depth, InputOutput, vi, CWBackPixel, &swa);
+  #endif
+
   set_net_wm_pid(win);
   XMoveWindow(disp, win, (screen->width - winw) / 2, (screen->height - winh) / 2);
 
