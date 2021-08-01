@@ -22,6 +22,7 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/globalupdate.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/image_formats.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/backgrounds.h"
 
@@ -31,6 +32,7 @@
 #include "XLIBicon.h"
 
 #include <X11/Xlib.h>
+#include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <stdio.h>   //printf, NULL
 #include <stdlib.h>  //malloc
@@ -39,6 +41,8 @@
 #include <climits>
 #include <map>
 #include <string>  //Return strings without needing a GC
+#include <thread>
+#include <chrono>
 
 //////////
 // INIT //
@@ -71,6 +75,9 @@ void set_net_wm_pid(Window window) {
 }
 
 } // namespace x11;
+
+int currentIconIndex = -1;
+unsigned currentIconFrame;
 
 bool initGameWindow()
 {
@@ -137,6 +144,7 @@ bool initGameWindow()
     XFreePixmap(disp, blank);
   }
 
+  enigma_user::window_set_icon(currentIconIndex, currentIconFrame);
   return true;
 }
 
@@ -173,28 +181,30 @@ void window_set_visible(bool visible) {
   }
 }
 
-static int currentIconIndex = -1;
-static unsigned currentIconFrame;
-
 int window_get_icon_index() {
-  return currentIconIndex;
+  return enigma::currentIconIndex;
 }
 
 unsigned window_get_icon_subimg() {
-  return currentIconFrame;
+  return enigma::currentIconFrame;
 }
 
 void window_set_icon(int ind, unsigned subimg) {
-  // the line below prevents glitchy minimizing when 
-  // icons are changed rapidly (i.e. for animation).
-  if (window_get_minimized()) return;
-
-  // needs to be visible first to prevent segfault
-  if (!window_get_visible()) window_set_visible(true);
-  enigma::XSetIconFromSprite(disp, win, ind, subimg);
-
-  currentIconIndex = ind;
-  currentIconFrame = subimg;
+  if (window_get_minimized()) return;                  // prevents glitchy behaviours
+  if (!window_get_visible()) window_set_visible(true); // prevents segmentation fault
+  if (enigma_user::sprite_exists(ind)) {
+    enigma::XSetIconFromSprite(disp, win, ind, subimg);
+    enigma::currentIconIndex =    ind;
+    enigma::currentIconFrame = subimg;
+  } else {
+    XSynchronize(disp, true); 
+    unsigned long xwindow_icon_default[] = { 1, 1, 0x0 };
+    Atom property = XInternAtom(disp, "_NET_WM_ICON", false);
+    XChangeProperty(disp, win, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)xwindow_icon_default, 3);
+    enigma::currentIconIndex = -1;
+    enigma::currentIconFrame =  0;
+    XFlush(disp);
+  }
 }
 
 int window_get_visible() {
