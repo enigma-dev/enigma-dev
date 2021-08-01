@@ -41,8 +41,6 @@
 #include <climits>
 #include <map>
 #include <string>  //Return strings without needing a GC
-#include <thread>
-#include <chrono>
 
 //////////
 // INIT //
