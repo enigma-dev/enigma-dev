@@ -214,6 +214,20 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
     }
     free(proc_info);
   }
+  #elif CURRENT_PLATFORM_ID == OS_DRAGONFLY
+  char errbuf[_POSIX2_LINE_MAX];
+  kinfo_proc *proc_info = nullptr; 
+  const char *nlistf, *memf; nlistf = memf = "/dev/null";
+  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return vec;
+  int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
+    for (int j = 0; j < cntp; j++) {
+      if (proc_info[j].kp_pid >= 0 && proc_info[j].kp_ppid >= 0 && 
+        proc_info[j].kp_ppid == parentProcId) {
+        vec.push_back(proc_info[j].kp_pid);
+      }
+    }
+    free(proc_info);
+  }
   #endif
   return vec;
 }
