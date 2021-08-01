@@ -58,6 +58,12 @@
 #elif CURRENT_PLATFORM_ID == OS_FREEBSD
 #include <sys/user.h>
 #include <libutil.h>
+#elif CURRENT_PLATFORM_ID == OS_DRAGONFLY
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/user.h>
+#include <libutil.h>
+#include <kvm.h>
 #endif
 
 using std::string;
