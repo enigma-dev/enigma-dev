@@ -33,6 +33,8 @@
 #include "Widget_Systems/General/WSdialogs.h"
 
 #include "Universal_System/estring.h"
+#include "Platforms/xlib/XLIBicon.h"
+#include "Universal_System/Resources/sprites.h"
 #include "Platforms/General/PFwindow.h"
 
 #include <sys/types.h>
@@ -56,12 +58,6 @@
 #elif CURRENT_PLATFORM_ID == OS_FREEBSD
 #include <sys/user.h>
 #include <libutil.h>
-#elif CURRENT_PLATFORM_ID == OS_DRAGONFLY
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <sys/user.h>
-#include <libutil.h>
-#include <kvm.h>
 #endif
 
 using std::string;
@@ -176,10 +172,6 @@ static void PpidFromPid(pid_t procId, pid_t *parentProcId) {
 }
 #endif
 
-#if CURRENT_PLATFORM_ID == OS_DRAGONFLY
-static kvm_t *kd = nullptr;
-#endif
-
 static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
   std::vector<pid_t> vec;
   #if CURRENT_PLATFORM_ID == OS_MACOSX
@@ -212,20 +204,6 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
     }
     free(proc_info);
   }
-  #elif CURRENT_PLATFORM_ID == OS_DRAGONFLY
-  char errbuf[_POSIX2_LINE_MAX];
-  kinfo_proc *proc_info = nullptr; 
-  const char *nlistf, *memf; nlistf = memf = "/dev/null";
-  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return vec;
-  int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
-    for (int j = 0; j < cntp; j++) {
-      if (proc_info[j].kp_pid >= 0 && proc_info[j].kp_ppid >= 0 && 
-        proc_info[j].kp_ppid == parentProcId) {
-        vec.push_back(proc_info[j].kp_pid);
-      }
-    }
-    free(proc_info);
-  }
   #endif
   return vec;
 }
@@ -249,6 +227,15 @@ static void *modify_shell_dialog(void *pid) {
     if (PidFromWid(display, wid) == child) {
       break;
     }
+  }
+  if (enigma_user::sprite_exists(enigma_user::window_get_icon_index())) {
+    XSetIconFromSprite(display, wid, enigma_user::window_get_icon_index(), enigma_user::window_get_icon_subimg());
+  } else {
+    XSynchronize(display, true);
+    unsigned long xwindow_icon_default[] = { 1, 1, 0x0 };
+    Atom property = XInternAtom(display, "_NET_WM_ICON", false);
+    XChangeProperty(display, wid, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)xwindow_icon_default, 3);
+    XFlush(display);
   }
   XSetTransientForHint(display, wid, (Window)(std::intptr_t)enigma_user::window_handle());
   int len = enigma_user::message_get_caption().length() + 1; char *buffer = new char[len]();
