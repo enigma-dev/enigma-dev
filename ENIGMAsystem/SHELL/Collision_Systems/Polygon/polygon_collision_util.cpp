@@ -33,7 +33,6 @@ namespace enigma
 {
     MinMaxProjection getMinMaxProjection(std::vector<glm::vec2>& vecs_box, glm::vec2 axis) 
     {
-        
         // Preparing
         double min_proj_box = glm::dot(vecs_box[0], axis);
         double max_proj_box = glm::dot(vecs_box[0], axis);
@@ -419,11 +418,8 @@ namespace enigma
     // --------------------------------------------------------------------------------
     double compute_overlap(const MinMaxProjection& pA, const MinMaxProjection& pB)
     {
-        int sign = -1;
-        if ((pA.max_projection - pB.min_projection) > (pB.max_projection - pA.min_projection))
-            sign = 1;
-
-        return sign * std::min(pA.max_projection - pB.min_projection, pB.max_projection - pA.min_projection);
+        auto left_overlap = pA.max_projection - pB.min_projection, right_overlap = pB.max_projection - pA.min_projection;
+        return left_overlap < right_overlap ? left_overlap : -right_overlap;
     }
 
     // --------------------------------------------------------------------------------
@@ -505,7 +501,6 @@ namespace enigma
                 }
             } 
         }
-        
         // Projecting the overlap
         smallest_axis.x *= overlap;
         smallest_axis.y *= overlap;

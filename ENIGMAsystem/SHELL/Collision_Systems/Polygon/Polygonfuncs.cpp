@@ -28,6 +28,7 @@
 #include "Collision_Systems/collision_mandatory.h" //iter
 #include "Universal_System/Instances/instance.h"
 #include "Universal_System/math_consts.h"
+#include "Universal_System/var_array.h"
 
 #include "../General/CSfuncs.h"
 #include "../General/collisions_general.h"
@@ -695,14 +696,18 @@ namespace enigma_user
         }
     }
  
-    void instance_get_mtv(int object)
+    var instance_get_mtv(int object)
     {
+        var MTV_return;
+        MTV_return[0] = 0;
+        MTV_return[1] = 1;
+
         // Fetching the instance
         enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
 
         // If no polygon than no MTV
         if (inst1->polygon_index == -1)
-            return;
+            return MTV_return;
         
         // Computing BBOX of the calling instance
         int left1, top1, right1, bottom1;
@@ -746,12 +751,14 @@ namespace enigma_user
 
                 // Computing MTV
                 glm::vec2 mtv = enigma::compute_MTV(points_poly1, points_poly2);
-                if (mtv.x != 0 and mtv.y != 0)
-                {
-                    printf("MTV = ( %f, %f )\n", mtv.x, mtv.y);
-                    return;
-                }
+                
+                // Packing in var and return
+                var MTV_return = array_create(2);
+                array_set(MTV_return, 0, mtv.x);
+                array_set(MTV_return, 1, mtv.y);
+                return MTV_return;
             }
         }
+        return MTV_return;
     }
 }

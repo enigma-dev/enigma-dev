@@ -219,7 +219,7 @@ namespace enigma
     // Computing left normal of a glm::vec2 vector
     glm::vec2 computeLeftNormal(glm::vec2 vector)
     {
-        return glm::vec2(vector.y, -1 * vector.x);
+        return glm::normalize(glm::vec2(vector.y, -1 * vector.x));
     }
 
     // Calculating the angle between two glm::vec2 vectors
@@ -236,9 +236,6 @@ namespace enigma
             angle = 4 * quad + angle;
         }
         return angle;
-        // glm::vec2 da = glm::normalize(vector1);
-        // glm::vec2 db = glm::normalize(vector2);
-        // return glm::acos(glm::dot(da, db));
     }
 
     // Functions for computing tranformations on polygon points
