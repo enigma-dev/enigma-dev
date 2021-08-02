@@ -65,6 +65,6 @@ static inline double point_direction(cs_scalar x1, cs_scalar y1,cs_scalar x2, cs
 
 namespace enigma
 {
-    void get_bbox_border(int &left, int &top, int &right, int &bottom, const enigma::object_collisions* inst);
+    void get_bbox_border(int &left, int &top, int &right, int &bottom, const enigma::object_collisions* inst, double x = -1, double y = -1);
 }
 #endif // ~COLLISION_GENERAL_H

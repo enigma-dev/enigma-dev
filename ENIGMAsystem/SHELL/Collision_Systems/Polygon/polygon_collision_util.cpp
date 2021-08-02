@@ -86,17 +86,63 @@ namespace enigma
     std::vector<glm::vec2> getEllipseProjectionPoints(double angleOfAxis, double eps_x, double eps_y, double rx, double ry) {
         // Using the angle to calculate slew radii.
         // This assumes that the ellipse is perfectly horizontal with zero rotation
-        double r_theta = (rx * ry) / ((pow(rx, 2) * pow(sin(angleOfAxis), 2)) + (pow(ry, 2) * pow(cos(angleOfAxis), 2)));
+        double r_theta = (rx * ry) / sqrt((pow(rx, 2) * pow(sin(angleOfAxis), 2)) + (pow(ry, 2) * pow(cos(angleOfAxis), 2)));
+
+        // Computing the angle of axis from the correct quadrant
+        double quad = 1.5708;
+        int quadrant = 0;
+        if (angleOfAxis > quad && angleOfAxis <= 2 * quad) {
+            angleOfAxis = 2 * quad - angleOfAxis;
+            quadrant = 1;
+        } else if (angleOfAxis > 2 * quad && angleOfAxis <= 3 * quad) {
+            angleOfAxis -= 2 * quad;
+            quadrant = 2;
+        } else if (angleOfAxis > 3 * quad) {
+            angleOfAxis = 4 * quad - angleOfAxis;
+            quadrant = 3;
+        }
+
 
         // Using the offsets, the angle, and the new radius to find
         // the points for projections
-        glm::vec2 min_proj_point(r_theta * cos(angleOfAxis) - eps_x, r_theta * sin(angleOfAxis) - eps_y);
-        glm::vec2 max_proj_point(r_theta * cos(angleOfAxis) + eps_x, r_theta * sin(angleOfAxis) + eps_y);
+        double x_component = r_theta * cos(angleOfAxis);
+        double y_component = r_theta * sin(angleOfAxis);
+
+        // Adding Offsets according to quadrant
+        double min_x, min_y, max_x, max_y;
+        switch (quadrant)
+        {
+        case 0:
+        case 2: {
+            min_x = eps_x - x_component;
+            min_y = eps_y + y_component;
+            max_x = eps_x + x_component;
+            max_y = eps_y - y_component;
+            break;
+        }
+        case 1:
+        case 3: {
+            min_x = eps_x - x_component;
+            min_y = eps_y - y_component;
+            max_x = eps_x + x_component;
+            max_y = eps_y + y_component;
+            break;
+        }
+        default:
+            break;
+        }
+
+        glm::vec2 min_proj_point(min_x, min_y);
+        glm::vec2 max_proj_point(max_x, max_y);
 
         // Finalizing the polygon
         std::vector<glm::vec2> ellipse_points;
         ellipse_points.push_back(min_proj_point);
         ellipse_points.push_back(max_proj_point);
+
+        // Debugging Part Starts
+        // printf("min_proj_point = (%f, %f), max_proj_point = (%f, %f)\n", min_proj_point.x, min_proj_point.y, max_proj_point.x, max_proj_point.y);
+        // Debugging Part Ends
 
         return ellipse_points;
     }
@@ -217,8 +263,14 @@ namespace enigma
             }
 
             // Computing the angle and using that angle to get the projection of the ellipse
-            double angleOfAxis = -angleBetweenVectors(point1, point2);
+            double angleOfAxis = angleBetweenVectors(point1, point2);
+            angleOfAxis -= 1.5708;
+
             std::vector<glm::vec2> ellipse_points = getEllipseProjectionPoints(angleOfAxis, x2, y2, rx, ry);
+
+            // printf("( %f, %f ) ( %f, %f ) ", point1.x, point1.y, point2.x, point2.y);
+            // printf("angleOfAxis = %f ", angleOfAxis);
+            // printf("( %f, %f ) ( %f, %f )\n", ellipse_points[0].x, ellipse_points[0].y, ellipse_points[1].x, ellipse_points[1].y);
 
             // Get Min Max Projection of all the points on this normal vector
             result1 = getMinMaxProjection(points_poly, normals_poly[i]);
@@ -233,15 +285,14 @@ namespace enigma
                 break;
             }
         }
+        printf("\n\n");
 
         if (!isSeparated) 
         {
-            // printf("Collision Detected!\n");
             return true;
         } 
         else 
         {
-            // printf("No Collision Detected!\n");
             return false;
         }
     }
@@ -289,7 +340,7 @@ namespace enigma
     // Returns:
     //      inst2       -- if collision otherwise NULL
     // -------------------------------------------------------------------------
-    object_collisions* const get_polygon_bbox_collision(object_collisions* const inst1, object_collisions* const inst2) 
+    object_collisions* const get_polygon_bbox_collision(object_collisions* const inst1, object_collisions* const inst2, double x, double y) 
     {
         // polygon vs bbox
         const int collsprite_index2 = inst2->mask_index != -1 ? inst2->mask_index : inst2->sprite_index;
@@ -305,13 +356,23 @@ namespace enigma
         std::vector<glm::vec2> bbox_points = bbox_polygon.getPoints();
         offsetPoints(bbox_points, inst2->x, inst2->y);
 
+        // Using parameterized offsets, if passed
+        double x1, y1;
+        if (x == -1 && y == -1) {
+            x1 = inst1->x;
+            y1 = inst1->y;
+        } else {
+            x1 = x;
+            y1 = y;
+        }
+
         // Getting polygon points
         std::vector<glm::vec2> points_poly = polygons.get(inst1->polygon_index).getPoints();
         glm::vec2 pivot = polygons.get(inst1->polygon_index).computeCenter();
         transformPoints(points_poly, 
-                                    inst1->x, inst1->y, 
-                                    inst1->polygon_angle, pivot,
-                                    inst1->polygon_xscale, inst1->polygon_yscale);
+                        x1, y1, 
+                        inst1->polygon_angle, pivot,
+                        inst1->polygon_xscale, inst1->polygon_yscale);
 
         // Collision Detection
         return get_polygon_polygon_collision(points_poly, bbox_points)? inst2: NULL;

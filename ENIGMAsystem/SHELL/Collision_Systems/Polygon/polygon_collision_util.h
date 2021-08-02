@@ -30,7 +30,7 @@ namespace enigma
     bool get_polygon_polygon_collision(std::vector<glm::vec2> points_poly1, std::vector<glm::vec2> points_poly2);
     bool get_polygon_ellipse_collision(std::vector<glm::vec2> &points_poly, double x2, double y2, double rx, double ry);
     bool get_polygon_point_collision(object_collisions* inst, int x1, int y1);
-    object_collisions* const get_polygon_bbox_collision(object_collisions* const inst1, object_collisions* const inst2);
+    object_collisions* const get_polygon_bbox_collision(object_collisions* const inst1, object_collisions* const inst2, double x = -1, double y = -1);
 
     // BBOX
     Polygon get_bbox_from_dimensions(double x1, double y1, int width, int height);

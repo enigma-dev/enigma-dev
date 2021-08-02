@@ -414,8 +414,11 @@ namespace enigma_user
 
     bool move_bounce_object(int object, bool adv, bool solid_only)
     {
+        // Fetching the calling instance
         enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-        if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        
+        // If no sprite/mask/polygon than no collision
+        if (inst1->sprite_index == -1 && inst1->mask_index == -1 && inst1->polygon_index == -1)
             return false;
 
         if (collide_inst_inst(object, solid_only, true, inst1->x, inst1->y) == NULL &&

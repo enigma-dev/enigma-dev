@@ -17,18 +17,30 @@ namespace enigma
     //      inst                        -- instance for which to compute the 
     //                                     bbox values
     // -------------------------------------------------------------------------
-    void get_bbox_border(int &left, int &top, int &right, int &bottom, const enigma::object_collisions* inst) 
+    void get_bbox_border(int &left, int &top, int &right, int &bottom, 
+        const enigma::object_collisions* inst, double x, double y) 
     {
         // Compute the bbox from the polygon 
         // TODO (Nabeel) : Merge this IF condition when the polygon collision system 
         //                  is merged
         if (inst->polygon_index != -1)
         {
+            // Using parameterized points if sent
+            double x1, y1;
+            if (x == -1 && y == -1)
+            {
+                x1 = inst->x;
+                y1 = inst->y;
+            } else {
+                x1 = x;
+                y1 = y;
+            }
+
             // Fetching transformed points
             std::vector<glm::vec2> points = enigma::polygons.get(inst->polygon_index).getPoints();
             glm::vec2 pivot = enigma::polygons.get(inst->polygon_index).computeCenter();
             enigma::transformPoints(points, 
-                                    inst->x, inst->y, 
+                                    x1, y1, 
                                     inst->polygon_angle, pivot,
                                     inst->polygon_xscale, inst->polygon_yscale);
             

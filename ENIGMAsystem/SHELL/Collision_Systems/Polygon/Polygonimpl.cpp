@@ -262,7 +262,7 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
     // Getting Bounding Box for first polygon for Sweep and Prune
     int left1, top1, right1, bottom1;
-    enigma::get_bbox_border(left1, top1, right1, bottom1, inst1);
+    enigma::get_bbox_border(left1, top1, right1, bottom1, inst1, x, y);
 
     // Iterating over instances in the room to detect collision
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
@@ -328,7 +328,7 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
                 // Applying transformations
                 enigma::transformPoints(points_poly1, 
-                                        inst1->x, inst1->y, 
+                                        x, y, 
                                         inst1->polygon_angle, pivot1,
                                         inst1->polygon_xscale, inst1->polygon_yscale);
 
@@ -342,11 +342,11 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
             }
             case enigma::POLYGON_VS_BBOX: 
             {
-                return enigma::get_polygon_bbox_collision(inst1, inst2);
+                return enigma::get_polygon_bbox_collision(inst1, inst2, x, y);
             } 
             case enigma::BBOX_VS_POLYGON: 
             {
-                return enigma::get_polygon_bbox_collision(inst2, inst1);
+                return enigma::get_polygon_bbox_collision(inst2, inst1, x, y);
             }
             default:
                 break;
@@ -570,13 +570,14 @@ static bool line_ellipse_intersects(double rx, double ry, double x, double ly1, 
 
 enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool prec, bool notme, int x1, int y1, double rx, double ry)
 {
+    // Debugging Starts
+    // printf("collide_inst_ellipse(object = %d, solid_only = %d, prec = %d, notme = %d, x1 = %d, y1 = %d, rx = %f, ry = %f\n", 
+    //                                 object, solid_only, prec, notme, x1, y1, rx, ry);
+    // Debugging Ends
+    
     // If wrong arguments return
     if (rx == 0 || ry == 0)
         return 0;
-
-    // Debugging Part Starts
-    // printf("Ellipse = (x1 = %d, y1 = %d, rx = %f, ry = %f)\n", x1, y1, rx, ry);
-    // Debugging Part Ends
 
     // Iterate over the instances for the collision check
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)

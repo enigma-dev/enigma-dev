@@ -225,9 +225,20 @@ namespace enigma
     // Calculating the angle between two glm::vec2 vectors
     double angleBetweenVectors(glm::vec2 vector1, glm::vec2 vector2)
     {
-        glm::vec2 da = glm::normalize(vector1);
-        glm::vec2 db = glm::normalize(vector2);
-        return glm::acos(glm::dot(da, db));
+        glm::vec2 point(vector2.x - vector1.x, vector1.y - vector2.y);
+        double angle = glm::atan(point.y / point.x);
+        double quad = 1.5708;
+        if (point.x < 0 && point.y > 0) {
+            angle = 2 * quad + angle;
+        } else if (point.x < 0 && point.y < 0) {
+            angle += 2 * quad;
+        } else if (point.x > 0 && point.y < 0) {
+            angle = 4 * quad + angle;
+        }
+        return angle;
+        // glm::vec2 da = glm::normalize(vector1);
+        // glm::vec2 db = glm::normalize(vector2);
+        // return glm::acos(glm::dot(da, db));
     }
 
     // Functions for computing tranformations on polygon points
