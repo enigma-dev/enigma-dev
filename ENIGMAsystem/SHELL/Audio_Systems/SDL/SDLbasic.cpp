@@ -1,11 +1,14 @@
+#include<iostream>
 #include <stdio.h>
 #include <string>
 #include "../General/ASbasic.h"
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Universal_System/mathnc.h"
 #include "../General/ASutil.h"
 #include "Universal_System/estring.h"
 #include "SoundResource.h"
+#include "SDLsystem.h"
 #include <SDL_mixer.h>
 
 namespace enigma_user {
@@ -17,16 +20,26 @@ int sound_add(string fname, int kind, bool preload) {
   // Open sound
   size_t flen = 0;
   char* fdata = enigma::read_all_bytes(fname, flen);
-  if (!fdata) return -1;
-
+  if (!fdata) {
+    DEBUG_MESSAGE(std::string("The Sound file failed - ") + std::string(fname) + std::string(" failed to open"), MESSAGE_TYPE::M_ERROR);
+    return -1;
+  }
   // Decode sound
   int rid = sounds.size();
   bool fail = enigma::sound_add_from_buffer(rid, fdata, flen);
   delete[] fdata;
-
-  if (fail) return -1;
+  
+  if (fail) {
+    DEBUG_MESSAGE(std::string("The Sound file failed - ") + std::string(fname) + std::string(" failed to open"), MESSAGE_TYPE::M_ERROR);
+    return -1;
+  }
   return rid;	
 
+}
+
+void sound_delete(int sound) {
+  sound_stop(sound);
+  sounds.destroy(sound);
 }
 
 bool sound_play(int sound) {
@@ -105,6 +118,16 @@ bool sound_ispaused(int sound) {
   return false;
 }
 
+void sound_pan(int sound, float value) {
+  const Sound& snd = sounds.get(sound);
+  int channel_count = Mix_AllocateChannels(-1);
+  for(int i=0;i<=channel_count;i++) {
+    if(Mix_GetChunk(i) == snd.mc) {
+      Mix_SetPanning(i, (Uint8)(value*254), (Uint8)(254 - (value * 254)));
+      DEBUG_MESSAGE( Mix_GetError(), MESSAGE_TYPE::M_ERROR);
+    }
+  }
+}
 float sound_get_volume(int sound) {
   const Sound& snd = sounds.get(sound);
   return (float)snd.mc->volume / MIX_MAX_VOLUME;
@@ -130,6 +153,31 @@ void sound_volume(int sound, float value) {
 
 void sound_global_volume(float mastervolume) {
   Mix_Volume(-1, (int)(mastervolume * MIX_MAX_VOLUME));
+}
+
+void sound_3d_set_sound_position(int snd, float x, float y, float z) {
+  Sound& sound = sounds.get(snd);
+  sound.X = x;
+  sound.Y = y;
+  sound.Z = z;
+  int channel_count = Mix_AllocateChannels(-1);
+  for(int i=0;i<=channel_count;i++) {
+    if(Mix_GetChunk(i) == sound.mc) {
+      sound.update(i);
+    }
+  }
+}
+
+void sound_3d_set_sound_distance(int snd, float mindist, float maxdist) {
+  Sound& sound = sounds.get(snd);
+  sound.minD = mindist;
+  sound.maxD = maxdist;
+  int channel_count = Mix_AllocateChannels(-1);
+  for(int i=0;i<=channel_count;i++) {
+    if(Mix_GetChunk(i) == sound.mc) {
+      sound.update(i);
+    }
+  }
 }
 
 }
