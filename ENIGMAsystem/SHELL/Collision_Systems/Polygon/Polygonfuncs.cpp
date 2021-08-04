@@ -151,7 +151,7 @@ namespace enigma_user
         const enigma::object_collisions* inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
         
         // If no sprite/mask/polygon than distance cannot be computed
-        if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        if (inst1->sprite_index == -1 && inst1->mask_index == -1 && inst1->polygon_index == -1)
             return -1;
         
         // Set the initial distance as infinity, since we are computing the lowest distance
@@ -173,7 +173,7 @@ namespace enigma_user
                 continue;
 
             // If no sprite/mask/polygon than no collision
-            if (inst2->sprite_index == -1 && inst2->mask_index == -1 && inst2->polygon_index)
+            if (inst2->sprite_index == -1 && inst2->mask_index == -1 && inst2->polygon_index == -1)
                 continue;
 
             // Computing the BBOX of the second instance
@@ -203,7 +203,7 @@ namespace enigma_user
         enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
         
         // If no sprite/mask/polygon than cannot compute distance
-        if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        if (inst1->sprite_index == -1 && inst1->mask_index == -1 && inst1->polygon_index == -1)
             return -1;
 
         // Computing the BBOX of the instance
@@ -610,7 +610,7 @@ namespace enigma_user
             enigma::object_collisions* const inst = (enigma::object_collisions*) *it;
 
             // If no sprite/mask/polygon then no collision
-            if (inst->sprite_index == -1 && (inst->mask_index == -1)) 
+            if (inst->sprite_index == -1 && inst->mask_index == -1 && inst->polygon_index == -1) 
                 continue;
 
             // Doing a Sweep and Prune check using BBOX

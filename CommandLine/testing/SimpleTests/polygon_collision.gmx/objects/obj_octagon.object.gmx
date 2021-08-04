@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<object>
+  <spriteName>&lt;undefined&gt;</spriteName>
+  <solid>0</solid>
+  <visible>-1</visible>
+  <depth>0</depth>
+  <persistent>0</persistent>
+  <maskName>&lt;undefined&gt;</maskName>
+  <parentName>&lt;undefined&gt;</parentName>
+  <events>
+    <event enumb="0" eventtype="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>{&#13;
+	int inst_id = 100001;&#13;
+	// Creating the octagon polygon&#13;
+	local int oct_id = polygon_add(124, 124);&#13;
+	polygon_add_point(oct_id, 120, 27);&#13;
+	polygon_add_point(oct_id, 123, 79);&#13;
+	polygon_add_point(oct_id, 116, 100);&#13;
+	polygon_add_point(oct_id, 55, 122);&#13;
+	polygon_add_point(oct_id, 5, 113);&#13;
+	polygon_add_point(oct_id, 0, 77);&#13;
+	polygon_add_point(oct_id, 14, 8);&#13;
+	&#13;
+	// Scale&#13;
+	polygon_xscale = 0.5;&#13;
+	polygon_yscale = 0.5;&#13;
+	&#13;
+	// Setting the polygon with transformations&#13;
+	polygon_index = oct_id;&#13;
+	&#13;
+	// Polygon Tests&#13;
+	gtest_expect_eq(polygon_exists(oct_id), 1, "OCTAGON: polygon_add/polygon_exists");&#13;
+	&#13;
+	// =========================================&#13;
+	// Simple Collision Tests&#13;
+	// =========================================&#13;
+	// Point and posititon outside the octagon&#13;
+	// to check for no collisions&#13;
+	int out_x = 10;&#13;
+	int out_y = 10;&#13;
+	&#13;
+	// Place Functions&#13;
+	gtest_expect_eq(place_free(out_x, out_y), 1, "OCTAGON: place_free 0");&#13;
+	gtest_expect_eq(place_empty(out_x, out_y), 1, "OCTAGON: place_empty 0");&#13;
+	gtest_expect_eq(place_meeting(out_x, out_y, obj_octagon_against), 0, "OCTAGON: place_meeting 0");&#13;
+	gtest_expect_eq(instance_place(out_x, out_y, obj_octagon_against), noone, "OCTAGON: instance_place 0");&#13;
+	&#13;
+	// Position Functions&#13;
+	gtest_expect_eq(position_free(out_x, out_y), 1, "OCTAGON: position_free 0");&#13;
+	gtest_expect_eq(position_empty(out_x, out_y), 1, "OCTAGON: position_empty 0");&#13;
+	gtest_expect_eq(position_meeting(out_x, out_y, obj_octagon_against), 0, "OCTAGON: position_meeting 0");&#13;
+	gtest_expect_eq(instance_position(out_x, out_y, obj_octagon_against), noone, "OCTAGON: instance_position 0");&#13;
+	&#13;
+	// Distance Functions&#13;
+	gtest_expect_eq(int(distance_to_point(out_x, out_y)), 64, "OCTAGON: distance_to_point");&#13;
+	&#13;
+	// ========================================&#13;
+	// Primitive Collision Tests&#13;
+	// ========================================&#13;
+	// Rectangle&#13;
+	gtest_expect_eq(collision_rectangle(0, 0, out_x, out_y, all, true, true), noone, "OCTAGON: collision_rectangle 0");&#13;
+	gtest_expect_eq(collision_rectangle(0, 0, x, y, all, true, true), noone, "OCTAGON: collision_rectangle 1");&#13;
+	gtest_expect_eq(collision_rectangle(0, 0, x, y, all, true, false), inst_id, "OCTAGON: collision_rectangle 2");&#13;
+	&#13;
+	// Line&#13;
+	gtest_expect_eq(collision_line(0, 0, out_x, out_y, all, true, true), noone, "OCTAGON: collision_line 0");&#13;
+	gtest_expect_eq(collision_line(0, 0, x, y, all, true, true), noone, "OCTAGON: collision_line 1");&#13;
+	gtest_expect_eq(collision_line(0, 0, x, y, all, true, false), inst_id, "OCTAGON: collision_line 2");&#13;
+	&#13;
+	// Point&#13;
+	gtest_expect_eq(collision_point(out_x, out_y, all, true, true), noone, "OCTAGON: collision_point 0");&#13;
+	gtest_expect_eq(collision_point(x - 30, y - 30, all, true, true), noone, "OCTAGON: collision_point 1");&#13;
+	gtest_expect_eq(collision_point(x - 30, y - 30, all, true, false), inst_id, "OCTAGON: collision_point 2");&#13;
+	&#13;
+	// Circle&#13;
+	gtest_expect_eq(collision_circle(out_x, out_y, 5.0, all, true, true), noone, "OCTAGON: collision_circle 0");&#13;
+	gtest_expect_eq(collision_circle(x, y, 15.0, all, true, true), noone, "OCTAGON: collision_circle 1");&#13;
+	gtest_expect_eq(collision_circle(x, y, 15.0, all, true, false), inst_id, "OCTAGON: collision_circle 2");&#13;
+	&#13;
+	// Ellipse&#13;
+	gtest_expect_eq(collision_ellipse(0, 0, out_x, out_y, all, true, true), noone, "OCTAGON: collision_ellipse 0");&#13;
+	gtest_expect_eq(collision_ellipse(0, 0, x + 5.0, y + 5.0, all, true, true), noone, "OCTAGON: collision_ellipse 1");&#13;
+	gtest_expect_eq(collision_ellipse(0, 0, x + 5.0, y + 5.0, all, true, false), inst_id, "OCTAGON: collision_ellipse 2");&#13;
+	&#13;
+	// =======================================&#13;
+	// Setting Alarm&#13;
+	alarm[0] = 1;&#13;
+}</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="3" eventtype="2">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>{&#13;
+	// original x and y values are saved to reset position&#13;
+	int org_x = 96;&#13;
+	int org_y = 48;&#13;
+	&#13;
+	// =================================&#13;
+	// Continuing the Move Bounce Test&#13;
+	// =================================&#13;
+	&#13;
+	// Stopping the instance&#13;
+	hspeed = 0;&#13;
+	vspeed = 0;&#13;
+	&#13;
+	// Position of the object should be this&#13;
+	int after_bounce_x = 72;&#13;
+	int after_bounce_y = 243;&#13;
+	&#13;
+	// Check&#13;
+	gtest_expect_eq(int(x), after_bounce_x);&#13;
+	gtest_expect_eq(int(y), after_bounce_y);&#13;
+	&#13;
+	// =========================================&#13;
+	// Instance Activate/Deactivate Region Test&#13;
+	// =========================================&#13;
+	&#13;
+	// Position of the colliding instance&#13;
+	int enemy_x = 96;&#13;
+	int enemy_y = 300;&#13;
+	&#13;
+	// Deactivating the region of the triangle_against instance&#13;
+	instance_deactivate_region(enemy_x, enemy_y, 16, 16, true, true);&#13;
+	gtest_expect_eq(place_meeting(enemy_x, enemy_y, obj_octagon_against), 0); // Should not collide&#13;
+	&#13;
+	// Activating the region&#13;
+	instance_activate_region(enemy_x, enemy_y, 16, 16, true);&#13;
+	gtest_expect_eq(place_meeting(enemy_x, enemy_y, obj_octagon_against), 1); // Should collide&#13;
+	&#13;
+	// ==========================================&#13;
+	// Instance Activate/Deactivate Circle Test&#13;
+	// ==========================================&#13;
+	&#13;
+	// Deactivating Circle&#13;
+	instance_deactivate_circle(enemy_x, enemy_y, 64, true, true);&#13;
+	gtest_expect_eq(place_meeting(enemy_x, enemy_y, obj_octagon_against), 0); // Should not collide&#13;
+	&#13;
+	// Activating Circle&#13;
+	instance_activate_circle(enemy_x, enemy_y, 64, true);&#13;
+	gtest_expect_eq(place_meeting(enemy_x, enemy_y, obj_octagon_against), 1); // Should collide&#13;
+	&#13;
+	// =============&#13;
+	// GAME END&#13;
+	// =============&#13;
+	game_end();&#13;
+}</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="2" eventtype="2">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>{&#13;
+	// original x and y values are saved to reset position&#13;
+	int org_x = x;&#13;
+	int org_y = y;&#13;
+	&#13;
+	// ===================================================&#13;
+	// Move Contact Test&#13;
+	// ===================================================&#13;
+	// This is the position after successful move contact&#13;
+	int after_contact_x = 95;&#13;
+	int after_contact_y = 248;&#13;
+	&#13;
+	// Moving and testing&#13;
+	move_contact_object(obj_octagon_against, 270, 1000, true);&#13;
+	gtest_expect_eq(int(x), after_contact_x);&#13;
+	gtest_expect_eq(y, after_contact_y);&#13;
+	&#13;
+	// Resetting the position&#13;
+	x = org_x;&#13;
+	y = org_y;&#13;
+	&#13;
+	// =====================================================&#13;
+	// Move Outside Test&#13;
+	// =====================================================&#13;
+	// This should move this instance inside the colliding&#13;
+	// triangle&#13;
+	x = 90;&#13;
+	y = 270;&#13;
+	&#13;
+	// Position after successful move contact&#13;
+	int after_outside_x = 90;&#13;
+	int after_outside_y = 252;&#13;
+	&#13;
+	// Moving and testing&#13;
+	move_outside_object(obj_octagon_against, 90, 1000, true);&#13;
+	gtest_expect_eq(x, after_outside_x);&#13;
+	gtest_expect_eq(y, after_outside_y);&#13;
+	&#13;
+	// Resetting the position&#13;
+	x = org_x;&#13;
+	y = org_y;&#13;
+	&#13;
+	// ===============================================&#13;
+	// Move Bounce Test&#13;
+	// ===============================================&#13;
+	// Setting vertical speed to move&#13;
+	vspeed = 8;&#13;
+	&#13;
+	// Now the instance is moving, the test will run after a&#13;
+	// collision is detected&#13;
+}</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="1" eventtype="2">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>{&#13;
+	// ==========================================&#13;
+	// Instance Destroy and Change Tests&#13;
+	// ==========================================&#13;
+	// These are the smaller triangle instances&#13;
+	int inst1 = 100006;&#13;
+	int inst2 = 100007;&#13;
+	&#13;
+	// These are the intersecting points of the above instances&#13;
+	int point1_x = 300;&#13;
+	int point1_y = 35;&#13;
+	int point2_x = 300;&#13;
+	int point2_y = 100;&#13;
+	&#13;
+	// This point is for the intersection of the new instance&#13;
+	int point3_x = 235;&#13;
+	int point3_y = 120;&#13;
+	&#13;
+	// Destory object&#13;
+	position_destroy_object(point1_x, point1_y, obj_octagon_against, false);&#13;
+	gtest_expect_eq(instance_position(point1_x, point1_y, obj_octagon_destroy), inst1); // Should not destroy&#13;
+	&#13;
+	position_destroy_object(point1_x, point1_y, obj_octagon_destroy, true);&#13;
+	gtest_expect_eq(instance_position(point1_x, point1_y, obj_octagon_destroy), inst1); // Should not destroy&#13;
+	&#13;
+	position_destroy_object(point1_x, point1_y, obj_octagon_destroy, false);&#13;
+	gtest_expect_eq(instance_position(point1_x, point1_y, obj_octagon_destroy), noone); // Should destroy&#13;
+	&#13;
+	// Change object&#13;
+	position_change(point2_x, point2_y, obj_octagon_against, true);&#13;
+	gtest_expect_eq(instance_position(point3_x, point3_y, obj_octagon_against), inst2);&#13;
+	&#13;
+	// Setting the next alarm&#13;
+	alarm[2] = 1;&#13;
+}</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="0" eventtype="2">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>{&#13;
+	int inst_id = 100005;&#13;
+	&#13;
+	// =====================================================&#13;
+	// COLLISION TESTS&#13;
+	// =====================================================&#13;
+	// Position of this triangle where the collision &#13;
+	// is detected with the obj_octagon_against. &#13;
+	// This position is NOT inside the obj_octagon_against, &#13;
+	// and therefore checks for overlapping collisions&#13;
+	int enemy_x = 96;&#13;
+	int enemy_y = 300;&#13;
+	&#13;
+	// Place Functions&#13;
+	gtest_expect_eq(place_free(enemy_x, enemy_y), 0);&#13;
+	gtest_expect_eq(place_empty(enemy_x, enemy_y), 0);&#13;
+	gtest_expect_eq(place_meeting(enemy_x, enemy_y, obj_octagon_against), 1);&#13;
+	gtest_expect_eq(instance_place(enemy_x, enemy_y, obj_octagon_against), inst_id);&#13;
+	&#13;
+	// Position of the point that is inside the obj_octagon_against&#13;
+	// used to check collision with the instance and the point&#13;
+	int point_in_x = 96;&#13;
+	int point_in_y = 300;&#13;
+	&#13;
+	// Position Functions&#13;
+	gtest_expect_eq(position_free(point_in_x, point_in_y), 0);&#13;
+	gtest_expect_eq(position_empty(point_in_x, point_in_y), 0);&#13;
+	gtest_expect_eq(position_meeting(point_in_x, point_in_y, obj_octagon_against), 1);&#13;
+	gtest_expect_eq(instance_position(point_in_x, point_in_y, obj_octagon_against), inst_id);	&#13;
+	&#13;
+	// Distance Functions&#13;
+	gtest_expect_eq(distance_to_object(obj_octagon_against), 111);&#13;
+	&#13;
+	// =======================================================&#13;
+	// Setting the next alarm&#13;
+	alarm[1] = 1;&#13;
+}</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event ename="obj_octagon_against" eventtype="4">
+      <action>
+        <libid>1</libid>
+        <id>115</id>
+        <kind>0</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>1</exetype>
+        <functionname>action_bounce</functionname>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>4</kind>
+            <string>1</string>
+          </argument>
+          <argument>
+            <kind>4</kind>
+            <string>0</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>605</id>
+        <kind>0</kind>
+        <userelative>0</userelative>
+        <useapplyto>0</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>0</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>This sets the alarm for stopping and testing the instance</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>301</id>
+        <kind>0</kind>
+        <userelative>-1</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>1</exetype>
+        <functionname>action_set_alarm</functionname>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>0</kind>
+            <string>3</string>
+          </argument>
+          <argument>
+            <kind>4</kind>
+            <string>3</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="0" eventtype="8">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>{&#13;
+	draw_polygon_color(polygon_index, x, y, polygon_angle, polygon_xscale, polygon_yscale, c_blue);&#13;
+	draw_point_color(x, y, c_red);&#13;
+}</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+  </events>
+  <PhysicsObject>0</PhysicsObject>
+  <PhysicsObjectSensor>0</PhysicsObjectSensor>
+  <PhysicsObjectShape>0</PhysicsObjectShape>
+  <PhysicsObjectDensity>0.5</PhysicsObjectDensity>
+  <PhysicsObjectRestitution>0.1</PhysicsObjectRestitution>
+  <PhysicsObjectGroup>0</PhysicsObjectGroup>
+  <PhysicsObjectLinearDamping>0.1</PhysicsObjectLinearDamping>
+  <PhysicsObjectAngularDamping>0.1</PhysicsObjectAngularDamping>
+  <PhysicsObjectFriction>0.2</PhysicsObjectFriction>
+  <PhysicsObjectAwake>-1</PhysicsObjectAwake>
+  <PhysicsObjectKinematic>0</PhysicsObjectKinematic>
+  <PhysicsShapePoints/>
+</object>

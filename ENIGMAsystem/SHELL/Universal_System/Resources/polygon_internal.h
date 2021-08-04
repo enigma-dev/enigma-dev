@@ -13,7 +13,6 @@
 
 namespace enigma 
 {
-	#define NULL_POINT -1;
 	using BoundingBox = Rect<int>;
 
 	// The Polygon class represents the polygon that will be used
