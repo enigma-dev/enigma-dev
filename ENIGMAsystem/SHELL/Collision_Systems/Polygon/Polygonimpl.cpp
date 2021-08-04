@@ -35,221 +35,6 @@
 #include <cmath>
 #include <utility>
 
-static bool precise_collision_single(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
-                                double x1, double y1,
-                                double xscale1, double yscale1,
-                                double ia1,
-                                unsigned char* pixels1,
-                                int w1, int h1,
-                                int xoffset1, int yoffset1)
-{
-
-    if (xscale1 != 0.0 && yscale1 != 0.0) {
-
-        const double pi_half = M_PI/2.0;
-
-        const double arad1 = ia1*M_PI/180.0;
-
-        const double cosa1 = cos(-arad1);
-        const double sina1 = sin(-arad1);
-        const double cosa90_1 = cos(-arad1 + pi_half);
-        const double sina90_1 = sin(-arad1 + pi_half);
-
-        for (int rowindex = intersection_top; rowindex <= intersection_bottom; rowindex++)
-        {
-            for(int colindex = intersection_left; colindex <= intersection_right; colindex++)
-            {
-
-                // Test for single image.
-                const int bx1 = (colindex - x1);
-                const int by1 = (rowindex - y1);
-                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
-                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
-                const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
-
-                if (p1) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-static bool precise_collision_pair(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
-                                double x1, double y1, double x2, double y2,
-                                double xscale1, double yscale1, double xscale2, double yscale2,
-                                double ia1, double ia2,
-                                unsigned char* pixels1, unsigned char* pixels2,
-                                int w1, int h1, int w2, int h2,
-                                int xoffset1, int yoffset1, int xoffset2, int yoffset2)
-{
-
-    if (xscale1 != 0.0 && yscale1 != 0.0 && xscale2 != 0.0 && yscale2 != 0.0) {
-
-        const double pi_half = M_PI/2.0;
-
-        const double arad1 = ia1*M_PI/180.0;
-        const double arad2 = ia2*M_PI/180.0;
-
-        const double cosa1 = cos(-arad1);
-        const double sina1 = sin(-arad1);
-        const double cosa90_1 = cos(-arad1 + pi_half);
-        const double sina90_1 = sin(-arad1 + pi_half);
-
-        const double cosa2 = cos(-arad2);
-        const double sina2 = sin(-arad2);
-        const double cosa90_2 = cos(-arad2 + pi_half);
-        const double sina90_2 = sin(-arad2 + pi_half);
-
-        for (int rowindex = intersection_top; rowindex <= intersection_bottom; rowindex++)
-        {
-            for(int colindex = intersection_left; colindex <= intersection_right; colindex++)
-            {
-
-                // Test for first image.
-                const int bx1 = (colindex - x1);
-                const int by1 = (rowindex - y1);
-                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
-                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
-                const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
-
-                // Test for second image.
-                const int bx2 = (colindex - x2);
-                const int by2 = (rowindex - y2);
-                const int px2 = (int)((bx2*cosa2 + by2*sina2)/xscale2 + xoffset2);
-                const int py2 = (int)((bx2*cosa90_2 + by2*sina90_2)/yscale2 + yoffset2);
-                const bool p2 = px2 >= 0 && py2 >= 0 && px2 < w2 && py2 < h2 && pixels2[py2*w2 + px2] != 0;
-
-                //Final test.
-                if (p1 && p2) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-// Assumes lx1 != lx2 || ly1 != ly2.
-static bool precise_collision_line(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
-                                double x1, double y1,
-                                double xscale1, double yscale1,
-                                double ia1,
-                                unsigned char* pixels1,
-                                int w1, int h1,
-                                int xoffset1, int yoffset1,
-                                int lx1, int ly1, int lx2, int ly2)
-{
-    if (xscale1 != 0.0 && yscale1 != 0.0) {
-
-        const double pi_half = M_PI/2.0;
-
-        const double arad1 = ia1*M_PI/180.0;
-
-        const double cosa1 = cos(-arad1);
-        const double sina1 = sin(-arad1);
-        const double cosa90_1 = cos(-arad1 + pi_half);
-        const double sina90_1 = sin(-arad1 + pi_half);
-
-        if (lx1 != lx2 && abs(lx1-lx2) >= abs(ly1-ly2)) { // The slope is defined and in [-1;1].
-            const int minX = max(min(lx1, lx2), intersection_left),
-                       maxX = min(max(lx1, lx2), intersection_right);
-
-            const double denom = lx2 - lx1;
-            for (int gx = minX; gx <= maxX; gx++)
-            {
-                int gy = (int)round((gx - lx1)*(ly2-ly1)/denom + ly1);
-                if (gy < intersection_top || gy > intersection_bottom) {
-                    continue;
-                }
-                // Test for single image.
-                const int bx1 = (gx - x1);
-                const int by1 = (gy - y1);
-                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
-                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
-                const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
-
-                if (p1) {
-                    return true;
-                }
-            }
-        }
-        else { // ly1 != ly2.
-            const int minY = max(min(ly1, ly2), intersection_top),
-                       maxY = min(max(ly1, ly2), intersection_bottom);
-
-            const double denom = ly2 - ly1;
-            for (int gy = minY; gy <= maxY; gy++)
-            {
-                int gx = (int)round((gy - ly1)*(lx2-lx1)/denom + lx1);
-                if (gx < intersection_left || gx > intersection_right) {
-                    continue;
-                }
-                // Test for single image.
-                const int bx1 = (gx - x1);
-                const int by1 = (gy - y1);
-                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
-                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
-                const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
-
-                if (p1) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-// rx > 0, ry > 0.
-static bool precise_collision_ellipse(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
-                                double x1, double y1,
-                                double xscale1, double yscale1,
-                                double ia1,
-                                unsigned char* pixels1,
-                                int w1, int h1,
-                                int xoffset1, int yoffset1,
-                                int ex, int ey, int rx, int ry)
-{
-
-    if (xscale1 != 0.0 && yscale1 != 0.0) {
-
-        const double pi_half = M_PI/2.0;
-
-        const double arad1 = ia1*M_PI/180.0;
-
-        const double cosa1 = cos(-arad1);
-        const double sina1 = sin(-arad1);
-        const double cosa90_1 = cos(-arad1 + pi_half);
-        const double sina90_1 = sin(-arad1 + pi_half);
-
-        const double rx_2 = rx*rx, ry_2 = ry*ry;
-
-        for (int rowindex = intersection_top; rowindex <= intersection_bottom; rowindex++)
-        {
-            for(int colindex = intersection_left; colindex <= intersection_right; colindex++)
-            {
-                const double px = colindex - ex;
-                const double py = rowindex - ey;
-                if (px*px/rx_2 + py*py/ry_2 > 1.0) continue;
-
-                // Test for single image.
-                const int bx1 = (colindex - x1);
-                const int by1 = (rowindex - y1);
-                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
-                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
-                const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
-
-                if (p1) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
 enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, bool notme, double x, double y)
 {
     // Obtain the first Object
@@ -633,8 +418,10 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
     return NULL;
 }
 
-void destroy_inst_point(int object, bool solid_only, int x1, int y1)
+std::vector<enigma::object_collisions*> get_colliding_bbox_instances(int x1, int y1, int object, bool solid_only)
 {
+    std::vector<enigma::object_collisions*> instances;
+
     // Iterating over instances
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
@@ -642,7 +429,9 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
         enigma::object_collisions* const inst = (enigma::object_collisions*) *it;
         if (solid_only && !inst->solid)
             continue;
-        if (inst->sprite_index == -1 && inst->mask_index == -1 && inst->polygon_index == -1) //no sprite/mask/polygon then no collision
+
+        // If no sprite/mask/polygon then no collision
+        if (inst->sprite_index == -1 && inst->mask_index == -1 && inst->polygon_index == -1) 
             continue;
 
         // Bounding Box retrieval and collision check
@@ -652,20 +441,37 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
         // Main Sweep and Prune collision check
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) 
         {
-            // Destroy the instance for the bbox check if it does not have a 
-            // polygon associated
-            if (inst->polygon_index == -1) 
+            instances.push_back(inst);
+        }
+    }
+
+    return instances;
+}
+
+void destroy_inst_point(int object, bool solid_only, int x1, int y1)
+{
+    std::vector<enigma::object_collisions*> instances = get_colliding_bbox_instances(x1, y1, object, solid_only);
+    std::vector<enigma::object_collisions*>::iterator it;
+    
+    // Iterating over instances
+    for (it = instances.begin(); it != instances.end(); ++it)
+    {
+        // Preliminary checks before collisions
+        enigma::object_collisions* const inst = *it;
+
+        // Destroy the instance for the bbox check if it does not have a 
+        // polygon associated
+        if (inst->polygon_index == -1) 
+        {
+            enigma_user::instance_destroy(inst->id);
+        }
+        else 
+        {
+            // Otherwise, check for a polygon collision with this point
+            // If Polygon and point colliding, than destroy instance
+            if (enigma::get_polygon_point_collision(inst, x1, y1)) 
             {
                 enigma_user::instance_destroy(inst->id);
-            }
-            else 
-            {
-                // Otherwise, check for a polygon collision with this point
-                // If Polygon and point colliding, than destroy instance
-                if (enigma::get_polygon_point_collision(inst, x1, y1)) 
-                {
-                    enigma_user::instance_destroy(inst->id);
-                }
             }
         }
     }
@@ -673,37 +479,28 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
 
 void change_inst_point(int obj, bool perf, int x1, int y1)
 {
+    std::vector<enigma::object_collisions*> instances = get_colliding_bbox_instances(x1, y1, enigma_user::all, false);
+    std::vector<enigma::object_collisions*>::iterator it;
+    
     // Iterating over instances
-    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(enigma_user::all); it; ++it)
+    for (it = instances.begin(); it != instances.end(); ++it)
     {
-        // Finding the instance
-        enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
-
-        // If no sprite/mask/polygon then no collision
-        if (inst->sprite_index == -1 && inst->mask_index == -1 && inst->polygon_index == -1) 
-            continue;
-
-        // Computing BBOX for sweep and prune check
-        int left, top, right, bottom;
-        enigma::get_bbox_border(left, top, right, bottom, inst);
-
-        // Sweep and Prune check
-        if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) 
+        // Preliminary checks before collisions
+        enigma::object_collisions* const inst = *it;
+        
+        // Change the instance for the bbox check if it does not have a 
+        // polygon associated
+        if (inst->polygon_index == -1) 
         {
-            // Change the instance for the bbox check if it does not have a 
-            // polygon associated
-            if (inst->polygon_index == -1) 
+            enigma::instance_change_inst(obj, perf, inst);
+        }
+        else 
+        {
+            // Otherwise, check for a polygon collision with this point
+            // If Polygon and point colliding, than change instance
+            if (enigma::get_polygon_point_collision(inst, x1, y1)) 
             {
                 enigma::instance_change_inst(obj, perf, inst);
-            }
-            else 
-            {
-                // Otherwise, check for a polygon collision with this point
-                // If Polygon and point colliding, than change instance
-                if (enigma::get_polygon_point_collision(inst, x1, y1)) 
-                {
-                    enigma::instance_change_inst(obj, perf, inst);
-                }
             }
         }
     }

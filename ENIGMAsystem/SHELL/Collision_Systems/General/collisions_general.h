@@ -1,4 +1,6 @@
 /** Copyright (C) 2021 Nabeel Danish  <nabeelben@gmail.com>
+*** Copyright (C) 2008-2013 IsmAvatar <ismavatar@gmail.com>
+*** Copyright (C) 2014 Seth N. Hetu
 *** This file is part of the ENIGMA Development Environment
 **/
 
@@ -21,7 +23,7 @@
 #include <utility>
 
 // -------------------------------------------------------------------------
-// Function to get the bbox border. Not made by Nabeel Danish
+// Function to get the bbox border from a sprite image. 
 // -------------------------------------------------------------------------
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
 {
