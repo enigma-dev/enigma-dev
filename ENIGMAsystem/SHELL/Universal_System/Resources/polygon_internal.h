@@ -15,6 +15,14 @@ namespace enigma
 {
 	using BoundingBox = Rect<int>;
 
+	struct Diagonal
+	{
+		glm::vec2 a;
+		glm::vec2 b;
+		int i;
+		int j;
+	};
+
 	// The Polygon class represents the polygon that will be used
 	// for detecting collisions in 2D space by the collision detection 
 	// system
@@ -23,12 +31,12 @@ namespace enigma
 		// Attributes
 		private:
 			std::vector<glm::vec2> points;
-			std::vector<std::vector<glm::vec2>> subpolygons;
+			std::vector<Diagonal> diagonals;
 			int height;
 			int width;
 			int xoffset;
 			int yoffset;
-			int numSubPolygons;
+			bool concave;
 
 			// Asset Array mandatory attributes
 			bool _destroyed = false;
@@ -49,10 +57,12 @@ namespace enigma
 
 			// Getters
 			std::vector<glm::vec2> getPoints();
+			std::vector<Diagonal> getDiagonals();
 			int getHeight();
 			int getWidth();
 			int getXOffset();
 			int getYOffset();
+			bool isConcave();
 
 			// Computational Getters
 			int getNumPoints();
@@ -63,6 +73,7 @@ namespace enigma
 			void setWidth(int w);
 			void setXOffset(int x);
 			void setYOffset(int y);
+			void setConcave(bool c);
 
 			// Insertion and Deletion
 			void addPoint(const glm::vec2& point);
@@ -78,8 +89,7 @@ namespace enigma
 			// Displays all points
 			void print();
 			
-			// Mathematical computations for caching
-		private:	
+			// Mathematical computations for caching	
 			void decomposeConcave();
 	};
 
@@ -121,6 +131,25 @@ namespace enigma
 
 	// Function to compute the bbox from the points
 	BoundingBox computeBBOXFromPoints(std::vector<glm::vec2>& points);
+
+	// Mathematical Functions for Polygon triangulation
+	bool Xor(bool x, bool y);
+	double areaOfTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c);
+
+	bool pointLeft(glm::vec2 a, glm::vec2 b, glm::vec2 point);
+	bool pointLeftOn(glm::vec2 a, glm::vec2 b, glm::vec2 point);
+	bool pointCollinear(glm::vec2 a, glm::vec2 b, glm::vec2 point);
+	bool pointBetween(glm::vec2 a, glm::vec2 b, glm::vec2 point);
+
+	bool properIntersection(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d);
+	bool intersection(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d);
+	
+	bool diagonal(std::vector<glm::vec2>& points, int i, int j);
+	bool diagonalInCone(std::vector<glm::vec2>& points, int a, int b);
+	bool internalDiagonal(std::vector<glm::vec2>& points, int i, int j);
+
+	void clipEar(std::vector<glm::vec2>& points, int i);
+	void triangulate(std::vector<glm::vec2>& points, std::vector<Diagonal>& diagonals);
 }
 
 #endif  // !ENIGMA_POLYGON_INTERNAL_H

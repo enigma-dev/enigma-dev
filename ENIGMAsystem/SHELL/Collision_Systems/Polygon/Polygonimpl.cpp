@@ -103,27 +103,8 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
         {
             case enigma::POLYGON_VS_POLYGON: 
             {
-                // Fetching Points
-                std::vector<glm::vec2> points_poly1 = enigma::polygons.get(inst1->polygon_index).getPoints();
-                std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst2->polygon_index).getPoints();
-
-                // Computing Pivots
-                glm::vec2 pivot1 = enigma::polygons.get(inst1->polygon_index).computeCenter();
-                glm::vec2 pivot2 = enigma::polygons.get(inst1->polygon_index).computeCenter();
-
-                // Applying transformations
-                enigma::transformPoints(points_poly1, 
-                                        x, y, 
-                                        inst1->polygon_angle, pivot1,
-                                        inst1->polygon_xscale, inst1->polygon_yscale);
-
-                enigma::transformPoints(points_poly2, 
-                                        inst2->x, inst2->y, 
-                                        inst2->polygon_angle, pivot2,
-                                        inst2->polygon_xscale, inst2->polygon_yscale);
-                
                 // Collision function call
-                return enigma::get_polygon_polygon_collision(points_poly1, points_poly2)? inst2: NULL;
+                return enigma::get_polygon_inst_collision(inst1, inst2, x, y)? inst2: NULL;
             }
             case enigma::POLYGON_VS_BBOX: 
             {

@@ -18,6 +18,7 @@ namespace enigma_user {
 	int polygon_get_yoffset(int id);
 	bool polygon_exists(int id);
 	void polygon_decompose(int id);
+	void polygon_set_concave(int id, bool concave);
 }
 
 #endif  // !ENIGMA_POLYGON_H

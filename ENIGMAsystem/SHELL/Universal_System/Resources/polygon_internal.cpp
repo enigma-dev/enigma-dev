@@ -18,10 +18,12 @@ namespace enigma
     Polygon::Polygon() 
     {
         points.clear();
+        diagonals.clear();
         xoffset = 0;
         width = 0;
         height = 0;
         yoffset = 0;
+        concave = false;
     }
 
     // Constructor
@@ -33,10 +35,13 @@ namespace enigma
     // Parameterized Constructor 
     Polygon::Polygon(int h, int w, int x, int y) 
     {
+        points.clear();
+        diagonals.clear();
         this->height = h;
         this->width = w;
         this->xoffset = x;
         this->yoffset = y;
+        concave = false;
     }
 
     // Constructor to initialize with points
@@ -69,6 +74,11 @@ namespace enigma
         return points;
     }
 
+    std::vector<Diagonal> Polygon::getDiagonals()
+    {
+        return diagonals;
+    }
+
     int Polygon::getHeight() 
     {
         return height;
@@ -87,6 +97,11 @@ namespace enigma
     int Polygon::getYOffset() 
     {
         return yoffset;
+    }
+
+    bool Polygon::isConcave()
+    {
+        return concave;
     }
 
     void Polygon::setHeight(int h) 
@@ -111,6 +126,11 @@ namespace enigma
     {
         if (y > 0)
             this->yoffset = y;
+    }
+
+    void Polygon::setConcave(bool c)
+    {
+        this->concave = c;
     }
 
     void Polygon::addPoint(const glm::vec2& point) 
@@ -139,6 +159,10 @@ namespace enigma
         this->points = obj.points;
         this->height = obj.height;
         this->width = obj.width;
+        this->diagonals = obj.diagonals;
+        this->concave = obj.concave;
+        this->xoffset = obj.xoffset;
+        this->yoffset = obj.yoffset;
     }
 
     void Polygon::copy(const glm::vec2* points, int size) 
@@ -164,40 +188,27 @@ namespace enigma
 
     void Polygon::decomposeConcave() 
     {
-        std::vector<std::vector<std::array<double, 2>>> polygonToSend;
-        std::vector<glm::vec2>::iterator it = points.begin();
-
-        std::vector<std::array<double, 2>> temp_points;
-        while (it != points.end()) {
-            std::array<double, 2> temp_point;
-            temp_point[0] = it->x;
-            temp_point[1] = it->y;
-
-            temp_points.push_back(temp_point);
-            ++it;
+        std::vector<glm::vec2> temp_points = points;
+        std::vector<Diagonal> temp_diagonals;
+        triangulate(temp_points, temp_diagonals);
+        
+        std::vector<Diagonal>::iterator it;
+        for (it = temp_diagonals.begin(); it != temp_diagonals.end(); ++it)
+        {
+            Diagonal d;
+            d.a = it->a;
+            d.b = it->b;
+            d.i = find(points.begin(), points.end(), it->a) - points.begin();
+            d.j = find(points.begin(), points.end(), it->b) - points.begin();
+            this->diagonals.push_back(d);
         }
-        polygonToSend.push_back(temp_points);
-        std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(polygonToSend);
 
-        std::vector<uint32_t>::iterator jt = indices.begin();
-
-        numSubPolygons = 0;
-        int i = 0, j = 1, k = 2;
-        while (k < indices.size()) {
-            std::vector<glm::vec2> subpolygon;
-            
-            for (int n = i; n <= k; ++n) {
-                glm::vec2 point(polygonToSend[0][indices[n]][0], polygonToSend[0][indices[n]][1]);
-                subpolygon.push_back(point);
-            }
-
-            this->subpolygons.push_back(subpolygon);
-            ++(this->numSubPolygons);
-
-            ++i;
-            ++j;
-            ++k;
-        }
+        // Debugging Starts
+        // for (it = this->diagonals.begin(); it != this->diagonals.end(); ++it)
+        // {
+        //     printf("%d = ( %f, %f ) -> %d = ( %f, %f )\n", it->i, it->a.x, it->a.y, it->j, it->b.x, it->b.y);
+        // }
+        // Debugging Ends
     }
 
     // Asset Array Implementation
@@ -344,5 +355,180 @@ namespace enigma
         bbox.h = max_y - min_y;
 
         return bbox;
+    }
+
+    // ==========================================================
+    // Mathematical Functions for Polygon triangulation
+    // ==========================================================
+
+    // Xor function for booleans
+    bool Xor(bool x, bool y)
+    {
+        return !x ^ !y;
+    }
+
+    // Area bounded by a triangle
+	double areaOfTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c) 
+    {
+        return ((b.x - a.x) * (c.y - a.y)) - ((c.x - a.x) * (b.y - a.y));
+    }
+
+    // Returns true if the point is stricly to the left of the 
+    // line segment made by A and B
+    bool pointLeft(glm::vec2 a, glm::vec2 b, glm::vec2 point)
+    {
+        return areaOfTriangle(a, b, point) > 0;
+    }
+
+    // Returns true if the point is either to the left or on 
+    // the line segment made by A and B
+	bool pointLeftOn(glm::vec2 a, glm::vec2 b, glm::vec2 point)
+    {
+        return areaOfTriangle(a, b, point) >= 0;
+    }
+
+    // Returns true if the point is on the line segment made by 
+    // A and B
+	bool pointCollinear(glm::vec2 a, glm::vec2 b, glm::vec2 point)
+    {
+        return areaOfTriangle(a, b, point) == 0;
+    }
+
+    // Returns true if the points (a, b, point) are collinear and 
+    // point lies on the closed segment of (a, b)
+    bool pointBetween(glm::vec2 a, glm::vec2 b, glm::vec2 point)
+    {
+        if (!pointCollinear(a, b, point))
+            return false;
+        
+        if (a.x != b.x) 
+            return ((a.x <= point.x) && (point.x <= b.x)) || ((a.x >= point.x) && (point.x >= b.x));
+        else
+            return ((a.y <= point.y) && (point.y <= b.y)) || ((a.y >= point.y) && (point.y >= b.y));
+    }
+
+    // Returns true if the line segments (a, b) and (c, d) are properly 
+    // intersecting each other
+    bool properIntersection(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d)
+    {
+        // Eliminating improper cases
+        if  (  
+                pointCollinear(a, b, c) || 
+                pointCollinear(a, b, d) || 
+                pointCollinear(c, d, a) ||
+                pointCollinear(c, d, b)
+            )
+            {
+                return false;
+            }
+        
+        return     Xor(pointLeft(a, b, c), pointLeft(a, b, d)) 
+                && Xor(pointLeft(c, d, a), pointLeft(c, d, b));
+    }
+
+    // Returns true if the line segments (a, b) and (c, d) are intersecting
+    // , properly or improperly
+    bool intersection(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d)
+    {
+        if (properIntersection(a, b, c, d))
+            return true;
+        
+        else if (
+                    pointBetween(a, b, c) ||
+                    pointBetween(a, b, d) ||
+                    pointBetween(c, d, a) ||
+                    pointBetween(c, d, b)
+                )
+                return true;
+        else
+            return false;
+    }
+
+    // Returns true if the line segment (points[i], points[j]) is a 
+    // proper diagonal of polygon, whether internal or external
+    bool diagonal(std::vector<glm::vec2>& points, int i, int j)
+    {
+        int n = points.size();
+
+        // Iterating over the edges
+        for (int k = 0; k < n; ++k)
+        {
+            int k1 = (k + 1) % n;
+            // Skip the edge that is incident
+            if (k == i || k1 == i || k == j || k1 == j)
+                continue;
+            else
+            {
+                // If an intersection is found between line segment 
+                // (i, j) and (k, k1) than i, j is not a diagonal
+                if (intersection(points[i], points[j], points[k], points[k1]))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    // Returns true if the diagonal formed by A and B is inside the 
+    // cone that is formed by the point points[A - 1], points[A], 
+    // and points[A + 1]
+    bool diagonalInCone(std::vector<glm::vec2>& points, int a, int b)
+    {
+        int n = points.size();
+
+        // Points before and after A
+        int a0 = (a + n - 1) % n;
+        int a1 = (a + 1) % n;
+
+        // If the cone formed is convex. We check this if a1 is 
+        // left or on the line (a0, a)
+        if (pointLeftOn(points[a0], points[a], points[a1])) 
+        {
+            // In Cone if a0 is left of (a, b) and a1 is left of (b, a)
+            return pointLeft(points[a], points[b], points[a0]) 
+                && pointLeft(points[b], points[a], points[a1]);
+        }
+        else
+        {
+            return !(   pointLeftOn(points[a], points[b], points[a1]) 
+                     && pointLeftOn(points[b], points[a], points[a0]));
+        }
+    }
+
+    // Returns true if the line segment (i, j) is a proper internal diagonal
+    bool internalDiagonal(std::vector<glm::vec2>& points, int i, int j)
+    {
+        return diagonalInCone(points, i, j) && diagonal(points, i, j);
+    }
+
+    // Function removes point i from points
+    void clipEar(std::vector<glm::vec2>& points, int i)
+    {
+        points.erase(points.begin() + i);
+    }
+
+    // Function to triangulate a polygon. It returns a vector of diagonals
+    // that are triangulasing the polygon
+    void triangulate(std::vector<glm::vec2>& points, std::vector<Diagonal>& diagonals)
+    {
+        int n = points.size();
+        if (n > 3)
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                int i1 = (i + 1) % n;
+                int i2 = (i + 2) % n;
+                if (internalDiagonal(points, i, i2))
+                {
+                    Diagonal d;
+                    d.a = points[i];
+                    d.b = points[i2];
+                    diagonals.push_back(d);
+
+                    clipEar(points, i1);
+                    triangulate(points, diagonals);
+                    break;
+                }
+            }
+        }
     }
 }

@@ -52,7 +52,11 @@ namespace enigma_user
 
 	void polygon_decompose(int id) 
 	{
-		// polygons.get(id).decomposeConcave();
+		polygons.get(id).decomposeConcave();
 	}
 
+	void polygon_set_concave(int id, bool concave)
+	{
+		polygons.get(id).setConcave(concave);
+	}
 }
