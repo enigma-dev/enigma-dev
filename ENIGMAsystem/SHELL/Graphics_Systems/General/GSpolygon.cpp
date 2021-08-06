@@ -71,6 +71,39 @@ namespace enigma_user {
     draw_primitive_end();
   }
 
+  void draw_polygon_sub(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale)
+  {
+    // Retrieving points of the polygon
+    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
+    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
+    int N = points.size();
+
+    // Drawing from point i to i + 1
+    for (int i = 0; i < N - 1; ++i) {
+      draw_primitive_begin(pr_linestrip);
+      draw_vertex(points[i].x, points[i].y);
+      draw_vertex(points[i + 1].x, points[i + 1].y);
+      draw_primitive_end();
+    }
+
+    // Drawing the last line to complete the polygon
+    draw_primitive_begin(pr_linestrip);
+    draw_vertex(points[N - 1].x, points[N - 1].y);
+    draw_vertex(points[0].x, points[0].y);
+    draw_primitive_end();
+
+    // Drawing diagonals
+    std::vector<enigma::Diagonal> diagonals = enigma::polygons.get(polygon_id).getDiagonals();
+    std::vector<enigma::Diagonal>::iterator it;
+    for (it = diagonals.begin(); it != diagonals.end(); ++it) {
+      draw_primitive_begin(pr_linestrip);
+      draw_vertex(points[it->i].x, points[it->i].y);
+      draw_vertex(points[it->j].x, points[it->j].y);
+      draw_primitive_end();
+    }
+  }
+
   void draw_polygon_color(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale, int color)
   {
     // Retrieving points of the polygon
@@ -116,5 +149,41 @@ namespace enigma_user {
     draw_vertex_color(bbox.left(), bbox.bottom(), color, alpha);
     draw_vertex_color(bbox.left(), bbox.top(), color, alpha);
     draw_primitive_end();
+  }
+
+  void draw_polygon_sub_color(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale, int c1, int c2)
+  {
+    // Retrieving points of the polygon
+    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
+    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
+    int N = points.size();
+
+    // Getting the alpha of the drawing
+    gs_scalar alpha = draw_get_alpha();
+
+    // Drawing from point i to i + 1
+    for (int i = 0; i < N - 1; ++i) {
+      draw_primitive_begin(pr_linestrip);
+      draw_vertex_color(points[i].x, points[i].y, c1, alpha);
+      draw_vertex_color(points[i + 1].x, points[i + 1].y, c1, alpha);
+      draw_primitive_end();
+    }
+
+    // Drawing the last line to complete the polygon
+    draw_primitive_begin(pr_linestrip);
+    draw_vertex_color(points[N - 1].x, points[N - 1].y, c1, alpha);
+    draw_vertex_color(points[0].x, points[0].y, c1, alpha);
+    draw_primitive_end();
+
+    // Drawing diagonals
+    std::vector<enigma::Diagonal> diagonals = enigma::polygons.get(polygon_id).getDiagonals();
+    std::vector<enigma::Diagonal>::iterator it;
+    for (it = diagonals.begin(); it != diagonals.end(); ++it) {
+      draw_primitive_begin(pr_linestrip);
+      draw_vertex_color(points[it->i].x, points[it->i].y, c2, alpha);
+      draw_vertex_color(points[it->j].x, points[it->j].y, c2, alpha);
+      draw_primitive_end();
+    }
   }
 }

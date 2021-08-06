@@ -197,7 +197,15 @@ namespace enigma
     void Polygon::decomposeConcave() 
     {
         std::vector<glm::vec2> temp_points = points;
-        triangulate(temp_points, subpolygons);
+        triangulate(temp_points, subpolygons, diagonals);
+
+        // Computing and storing the indices of the diagonals
+        std::vector<Diagonal>::iterator it;
+        for (it = diagonals.begin(); it != diagonals.end(); ++it)
+        {
+            it->i = find(points.begin(), points.end(), it->a) - points.begin();
+            it->j = find(points.begin(), points.end(), it->b) - points.begin();
+        }
 
         // Debugging Starts
         // std::vector<std::vector<glm::vec2>>::iterator it;
@@ -510,7 +518,7 @@ namespace enigma
 
     // Function to triangulate a polygon. It returns a vector of diagonals
     // that are triangulasing the polygon
-    void triangulate(std::vector<glm::vec2>& points, std::vector<std::vector<glm::vec2>>& subpolygons)
+    void triangulate(std::vector<glm::vec2>& points, std::vector<std::vector<glm::vec2>>& subpolygons, std::vector<Diagonal>& diagonals)
     {
         int n = points.size();
         if (n > 3)
@@ -521,6 +529,8 @@ namespace enigma
                 int i2 = (i + 2) % n;
                 if (internalDiagonal(points, i, i2))
                 {
+                    // Storing the Subpolygon that is formed between 
+                    // i and i2
                     std::vector<glm::vec2> subpolygon;
                     int j = i;
                     while (j != i2)
@@ -530,13 +540,21 @@ namespace enigma
                     }
                     subpolygon.push_back(points[i2]);
                     subpolygons.push_back(subpolygon);
+                    
+                    // Storing Diagonals
+                    Diagonal d;
+                    d.a = points[i];
+                    d.b = points[i2];
+                    diagonals.push_back(d);
 
+                    // Clipping the ear and calling triangualation
                     clipEar(points, i1);
-                    triangulate(points, subpolygons);
+                    triangulate(points, subpolygons, diagonals);
                     break;
                 }
             }
         } else {
+            // Storing the last subpolygon that is formed
             subpolygons.push_back(points);
         }
     }

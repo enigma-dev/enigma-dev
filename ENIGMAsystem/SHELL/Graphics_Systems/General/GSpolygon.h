@@ -31,8 +31,10 @@ namespace enigma_user
 {
   void draw_polygon(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale);
   void draw_polygon_bbox(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale);
+  void draw_polygon_sub(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale);
   void draw_polygon_color(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale, int color);
   void draw_polygon_bbox_color(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale, int color);
+  void draw_polygon_sub_color(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale, int c1, int c2);
 }
 
 #undef DEFAULT_ALPHA

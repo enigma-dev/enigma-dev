@@ -151,7 +151,7 @@ namespace enigma
 	bool internalDiagonal(std::vector<glm::vec2>& points, int i, int j);
 
 	void clipEar(std::vector<glm::vec2>& points, int i);
-	void triangulate(std::vector<glm::vec2>& points, std::vector<std::vector<glm::vec2>>& subpolygons);
+	void triangulate(std::vector<glm::vec2>& points, std::vector<std::vector<glm::vec2>>& subpolygons, std::vector<Diagonal>& diagonals);
 }
 
 #endif  // !ENIGMA_POLYGON_INTERNAL_H
