@@ -112,7 +112,7 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
             } 
             case enigma::BBOX_VS_POLYGON: 
             {
-                return enigma::get_polygon_bbox_collision(inst2, inst1, x, y);
+                return enigma::get_polygon_bbox_collision(inst2, inst1, x, y, false);
             }
             default:
                 break;

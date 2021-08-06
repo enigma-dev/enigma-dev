@@ -45,7 +45,7 @@ namespace enigma
 
     // Interface Collision functions
     bool get_polygon_point_collision(object_collisions* inst, int x1, int y1);
-    object_collisions* const get_polygon_bbox_collision(object_collisions* const inst1, object_collisions* const inst2, double x = -1, double y = -1);
+    object_collisions* const get_polygon_bbox_collision(object_collisions* const inst1, object_collisions* const inst2, double x = -1, double y = -1, bool first_one = true);
     bool get_polygon_inst_collision(object_collisions* inst1, object_collisions* inst2, double x1, double y1);
 
     // BBOX
