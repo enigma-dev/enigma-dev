@@ -19,6 +19,7 @@ namespace enigma
     {
         points.clear();
         diagonals.clear();
+        subpolygons.clear();
         xoffset = 0;
         width = 0;
         height = 0;
@@ -37,6 +38,7 @@ namespace enigma
     {
         points.clear();
         diagonals.clear();
+        subpolygons.clear();
         this->height = h;
         this->width = w;
         this->xoffset = x;
@@ -74,9 +76,14 @@ namespace enigma
         return points;
     }
 
-    std::vector<Diagonal> Polygon::getDiagonals()
+    std::vector<Diagonal>& Polygon::getDiagonals()
     {
         return diagonals;
+    }
+
+    std::vector<std::vector<glm::vec2>>& Polygon::getSubpolygons()
+    {
+        return subpolygons;
     }
 
     int Polygon::getHeight() 
@@ -160,6 +167,7 @@ namespace enigma
         this->height = obj.height;
         this->width = obj.width;
         this->diagonals = obj.diagonals;
+        this->subpolygons = obj.subpolygons;
         this->concave = obj.concave;
         this->xoffset = obj.xoffset;
         this->yoffset = obj.yoffset;
@@ -189,24 +197,18 @@ namespace enigma
     void Polygon::decomposeConcave() 
     {
         std::vector<glm::vec2> temp_points = points;
-        std::vector<Diagonal> temp_diagonals;
-        triangulate(temp_points, temp_diagonals);
-        
-        std::vector<Diagonal>::iterator it;
-        for (it = temp_diagonals.begin(); it != temp_diagonals.end(); ++it)
-        {
-            Diagonal d;
-            d.a = it->a;
-            d.b = it->b;
-            d.i = find(points.begin(), points.end(), it->a) - points.begin();
-            d.j = find(points.begin(), points.end(), it->b) - points.begin();
-            this->diagonals.push_back(d);
-        }
+        triangulate(temp_points, subpolygons);
 
         // Debugging Starts
-        // for (it = this->diagonals.begin(); it != this->diagonals.end(); ++it)
+        // std::vector<std::vector<glm::vec2>>::iterator it;
+        // for (it = subpolygons.begin(); it != subpolygons.end(); ++it)
         // {
-        //     printf("%d = ( %f, %f ) -> %d = ( %f, %f )\n", it->i, it->a.x, it->a.y, it->j, it->b.x, it->b.y);
+        //     std::vector<glm::vec2>::iterator jt;
+        //     for (jt = it->begin(); jt != it->end(); ++jt)
+        //     {
+        //         printf("( %f, %f ) ", jt->x, jt->y);
+        //     }
+        //     printf("\n");
         // }
         // Debugging Ends
     }
@@ -508,7 +510,7 @@ namespace enigma
 
     // Function to triangulate a polygon. It returns a vector of diagonals
     // that are triangulasing the polygon
-    void triangulate(std::vector<glm::vec2>& points, std::vector<Diagonal>& diagonals)
+    void triangulate(std::vector<glm::vec2>& points, std::vector<std::vector<glm::vec2>>& subpolygons)
     {
         int n = points.size();
         if (n > 3)
@@ -519,16 +521,23 @@ namespace enigma
                 int i2 = (i + 2) % n;
                 if (internalDiagonal(points, i, i2))
                 {
-                    Diagonal d;
-                    d.a = points[i];
-                    d.b = points[i2];
-                    diagonals.push_back(d);
+                    std::vector<glm::vec2> subpolygon;
+                    int j = i;
+                    while (j != i2)
+                    {
+                        subpolygon.push_back(points[j]);
+                        j = (j + 1) % n;
+                    }
+                    subpolygon.push_back(points[i2]);
+                    subpolygons.push_back(subpolygon);
 
                     clipEar(points, i1);
-                    triangulate(points, diagonals);
+                    triangulate(points, subpolygons);
                     break;
                 }
             }
+        } else {
+            subpolygons.push_back(points);
         }
     }
 }

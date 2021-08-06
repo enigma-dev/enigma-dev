@@ -32,6 +32,7 @@ namespace enigma
 		private:
 			std::vector<glm::vec2> points;
 			std::vector<Diagonal> diagonals;
+			std::vector<std::vector<glm::vec2>> subpolygons;
 			int height;
 			int width;
 			int xoffset;
@@ -57,7 +58,8 @@ namespace enigma
 
 			// Getters
 			std::vector<glm::vec2> getPoints();
-			std::vector<Diagonal> getDiagonals();
+			std::vector<Diagonal>& getDiagonals();
+			std::vector<std::vector<glm::vec2>>& getSubpolygons();
 			int getHeight();
 			int getWidth();
 			int getXOffset();
@@ -149,7 +151,7 @@ namespace enigma
 	bool internalDiagonal(std::vector<glm::vec2>& points, int i, int j);
 
 	void clipEar(std::vector<glm::vec2>& points, int i);
-	void triangulate(std::vector<glm::vec2>& points, std::vector<Diagonal>& diagonals);
+	void triangulate(std::vector<glm::vec2>& points, std::vector<std::vector<glm::vec2>>& subpolygons);
 }
 
 #endif  // !ENIGMA_POLYGON_INTERNAL_H
