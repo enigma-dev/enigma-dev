@@ -37,12 +37,17 @@ namespace enigma_user
 
 	int polygon_get_xoffset(int id) 
 	{
-		return polygons.get(id).getXOffset();
+		return polygons.get(id).getOffset().x;
 	}
 
 	int polygon_get_yoffset(int id) 
 	{
-		return polygons.get(id).getYOffset();
+		return polygons.get(id).getOffset().y;
+	}
+
+	void polygon_set_offset(int id, int x, int y)
+	{
+		polygons.get(id).setOffset(glm::vec2(x, y));
 	}
 
 	bool polygon_exists(int id) 
@@ -58,5 +63,10 @@ namespace enigma_user
 	void polygon_set_concave(int id, bool concave)
 	{
 		polygons.get(id).setConcave(concave);
+	}
+
+	bool polygon_get_concave(int id)
+	{
+		return polygons.get(id).isConcave();
 	}
 }

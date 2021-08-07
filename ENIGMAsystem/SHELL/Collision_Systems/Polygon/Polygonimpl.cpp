@@ -172,7 +172,7 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
             std::vector<glm::vec2> bbox_points = bbox_main.getPoints();
 
             // Applying Transformations
-            glm::vec2 pivot2 = poly.computeCenter();
+            glm::vec2 pivot2 = poly.getOffset();
             enigma::offsetPoints(bbox_points, x1, y1);
 
             // Polygon collision check
@@ -267,7 +267,7 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
                 std::vector<glm::vec2> points_poly2 = poly.getPoints();
 
                 // Applying Transformations
-                glm::vec2 pivot2 = poly.computeCenter();
+                glm::vec2 pivot2 = poly.getOffset();
 
                 // doing a polygon polygon check
                 return enigma::get_complex_polygon_collision(points_poly2, inst->x, inst->y, inst->polygon_angle, pivot2, 
@@ -388,7 +388,7 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
             std::vector<glm::vec2> points_poly = poly.getPoints();
 
             // Applying Transformations
-            glm::vec2 pivot = poly.computeCenter();
+            glm::vec2 pivot = poly.getOffset();
 
             // Collision Detection
             return enigma::get_complex_ellipse_collision(points_poly, inst->x, inst->y, inst->polygon_angle, pivot,

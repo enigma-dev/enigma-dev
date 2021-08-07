@@ -735,8 +735,8 @@ namespace enigma_user
                 std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst2->polygon_index).getPoints();
 
                 // Computing Pivots
-                glm::vec2 pivot1 = enigma::polygons.get(inst1->polygon_index).computeCenter();
-                glm::vec2 pivot2 = enigma::polygons.get(inst1->polygon_index).computeCenter();
+                glm::vec2 pivot1 = enigma::polygons.get(inst1->polygon_index).getOffset();
+                glm::vec2 pivot2 = enigma::polygons.get(inst1->polygon_index).getOffset();
 
                 // Applying transformations
                 enigma::transformPoints(points_poly1, 

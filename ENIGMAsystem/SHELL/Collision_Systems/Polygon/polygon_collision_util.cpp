@@ -582,7 +582,7 @@ namespace enigma
         std::vector<glm::vec2> points_poly = poly1.getPoints();
 
         // Computing Pivot
-        glm::vec2 pivot = poly1.computeCenter();
+        glm::vec2 pivot = poly1.getOffset();
 
         // Collision Detection
         return get_complex_polygon_collision(points_poly, x1, y1, inst1->polygon_angle, pivot, 
@@ -613,8 +613,8 @@ namespace enigma
         std::vector<glm::vec2> points_poly2 = poly2.getPoints();
 
         // Computing Pivots
-        glm::vec2 pivot1 = poly1.computeCenter();
-        glm::vec2 pivot2 = poly2.computeCenter();
+        glm::vec2 pivot1 = poly1.getOffset();
+        glm::vec2 pivot2 = poly2.getOffset();
 
         return enigma::get_complex_polygon_collision(points_poly1, x1, y1, 
                                                      inst1->polygon_angle, pivot1, inst1->polygon_xscale, inst1->polygon_yscale,
@@ -642,7 +642,7 @@ namespace enigma
         std::vector<glm::vec2> bbox_points = bbox_main.getPoints();
 
         // Computing Pivot and offset the bbox
-        glm::vec2 pivot = poly.computeCenter();
+        glm::vec2 pivot = poly.getOffset();
         offsetPoints(bbox_points, x1, y1);
 
         // Collision detection

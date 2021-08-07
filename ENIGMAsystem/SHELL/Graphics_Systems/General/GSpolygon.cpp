@@ -33,8 +33,9 @@ namespace enigma_user {
   void draw_polygon(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale) 
   {
     // Retrieving points of the polygon
-    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
-    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::Polygon poly = enigma::polygons.get(polygon_id);
+    std::vector<glm::vec2> points = poly.getPoints();
+    glm::vec2 pivot = poly.getOffset();
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     int N = points.size();
 
@@ -56,8 +57,9 @@ namespace enigma_user {
   void draw_polygon_bbox(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale) 
   {
     // Computing BBOX
-    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
-    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::Polygon poly = enigma::polygons.get(polygon_id);
+    std::vector<glm::vec2> points = poly.getPoints();
+    glm::vec2 pivot = poly.getOffset();
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     enigma::Rect<int> bbox = enigma::computeBBOXFromPoints(points);
 
@@ -74,8 +76,9 @@ namespace enigma_user {
   void draw_polygon_sub(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale)
   {
     // Retrieving points of the polygon
-    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
-    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::Polygon poly = enigma::polygons.get(polygon_id);
+    std::vector<glm::vec2> points = poly.getPoints();
+    glm::vec2 pivot = poly.getOffset();
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     int N = points.size();
 
@@ -107,8 +110,9 @@ namespace enigma_user {
   void draw_polygon_color(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale, int color)
   {
     // Retrieving points of the polygon
-    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
-    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::Polygon poly = enigma::polygons.get(polygon_id);
+    std::vector<glm::vec2> points = poly.getPoints();
+    glm::vec2 pivot = poly.getOffset();
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     int N = points.size();
 
@@ -133,8 +137,9 @@ namespace enigma_user {
   void draw_polygon_bbox_color(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale, int color)
   {
     // Computing BBOX
-    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
-    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::Polygon poly = enigma::polygons.get(polygon_id);
+    std::vector<glm::vec2> points = poly.getPoints();
+    glm::vec2 pivot = poly.getOffset();
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     enigma::Rect<int> bbox = enigma::computeBBOXFromPoints(points); 
 
@@ -154,8 +159,9 @@ namespace enigma_user {
   void draw_polygon_sub_color(int polygon_id, gs_scalar x, gs_scalar y, double angle, gs_scalar xscale, gs_scalar yscale, int c1, int c2)
   {
     // Retrieving points of the polygon
-    std::vector<glm::vec2> points = enigma::polygons.get(polygon_id).getPoints();
-    glm::vec2 pivot = enigma::polygons.get(polygon_id).computeCenter();
+    enigma::Polygon poly = enigma::polygons.get(polygon_id);
+    std::vector<glm::vec2> points = poly.getPoints();
+    glm::vec2 pivot = poly.getOffset();
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     int N = points.size();
 

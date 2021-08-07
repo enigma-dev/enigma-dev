@@ -35,8 +35,7 @@ namespace enigma
 			std::vector<std::vector<glm::vec2>> subpolygons;
 			int height;
 			int width;
-			int xoffset;
-			int yoffset;
+			glm::vec2 offset;
 			bool concave;
 
 			// Asset Array mandatory attributes
@@ -62,8 +61,7 @@ namespace enigma
 			std::vector<std::vector<glm::vec2>>& getSubpolygons();
 			int getHeight();
 			int getWidth();
-			int getXOffset();
-			int getYOffset();
+			glm::vec2 getOffset();
 			bool isConcave();
 
 			// Computational Getters
@@ -73,8 +71,7 @@ namespace enigma
 			// Setters
 			void setHeight(int h);
 			void setWidth(int w);
-			void setXOffset(int x);
-			void setYOffset(int y);
+			void setOffset(glm::vec2 off);
 			void setConcave(bool c);
 
 			// Insertion and Deletion

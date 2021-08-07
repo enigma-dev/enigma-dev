@@ -32,6 +32,7 @@
 	polygon_add_point(tri_id, 33, 0);&#13;
 	polygon_add_point(tri_id, 47, 47);&#13;
 	polygon_add_point(tri_id, 0, 23);&#13;
+	polygon_set_offset(tri_id, -24, -24);&#13;
 	&#13;
 	// Setting the polygon with transformations&#13;
 	polygon_index = tri_id;&#13;
@@ -92,7 +93,7 @@
 	&#13;
 	// =======================================&#13;
 	// Setting Alarm&#13;
-	alarm[0] = 1;&#13;
+	// alarm[0] = 1;&#13;
 }</string>
           </argument>
         </arguments>

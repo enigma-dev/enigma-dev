@@ -14,6 +14,11 @@
       <object>objects\obj_octagon_against</object>
       <object>objects\obj_octagon_destroy</object>
     </objects>
+    <objects name="Concave">
+      <object>objects\obj_concave</object>
+      <object>objects\obj_concave_against</object>
+      <object>objects\obj_concave_destroy</object>
+    </objects>
   </objects>
   <rooms name="rooms">
     <room>rooms\rm_0</room>

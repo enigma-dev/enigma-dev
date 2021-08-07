@@ -27,35 +27,9 @@
             <kind>1</kind>
             <string>{&#13;
 	// Setting the polygon&#13;
-	local int tri_id = 0;&#13;
-	polygon_index = tri_id;&#13;
-	polygon_xscale = 2;&#13;
-	polygon_yscale = 3;&#13;
+	local int conv_id = 2;&#13;
+	polygon_index = conv_id;&#13;
 	polygon_angle = 0.3;&#13;
-}</string>
-          </argument>
-        </arguments>
-      </action>
-    </event>
-    <event enumb="0" eventtype="3">
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <useapplyto>-1</useapplyto>
-        <isquestion>0</isquestion>
-        <exetype>2</exetype>
-        <functionname/>
-        <codestring/>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>{&#13;
-	polygon_angle -= 0.01;&#13;
 }</string>
           </argument>
         </arguments>

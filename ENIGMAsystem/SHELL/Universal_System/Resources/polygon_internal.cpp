@@ -19,10 +19,9 @@ namespace enigma
         points.clear();
         diagonals.clear();
         subpolygons.clear();
-        xoffset = 0;
+        offset = glm::vec2(0, 0);
         width = 0;
         height = 0;
-        yoffset = 0;
         concave = false;
     }
 
@@ -40,8 +39,7 @@ namespace enigma
         subpolygons.clear();
         this->height = h;
         this->width = w;
-        this->xoffset = x;
-        this->yoffset = y;
+        this->offset = glm::vec2(x, y);
         concave = false;
     }
 
@@ -95,14 +93,9 @@ namespace enigma
         return width;
     }
 
-    int Polygon::getXOffset() 
+    glm::vec2 Polygon::getOffset()
     {
-        return xoffset;
-    }
-
-    int Polygon::getYOffset() 
-    {
-        return yoffset;
+        return offset;
     }
 
     bool Polygon::isConcave()
@@ -122,16 +115,9 @@ namespace enigma
             this->width = w;
     }
 
-    void Polygon::setXOffset(int x) 
+    void Polygon::setOffset(glm::vec2 off)
     {
-        if (x > 0)
-            this->xoffset = x;
-    }
-
-    void Polygon::setYOffset(int y) 
-    {
-        if (y > 0)
-            this->yoffset = y;
+        this->offset = off;
     }
 
     void Polygon::setConcave(bool c)
@@ -168,8 +154,7 @@ namespace enigma
         this->diagonals = obj.diagonals;
         this->subpolygons = obj.subpolygons;
         this->concave = obj.concave;
-        this->xoffset = obj.xoffset;
-        this->yoffset = obj.yoffset;
+        this->offset = obj.offset;
     }
 
     void Polygon::copy(const glm::vec2* points, int size) 
@@ -295,12 +280,12 @@ namespace enigma
         std::vector<glm::vec2>::iterator it = points.begin();
         while (it != points.end()) 
         {
+            // Applying rotation
+            *it = rotateVector(*it, angle, pivot);
+
             // Applying scale
             it->x *= xscale;
             it->y *= yscale;
-
-            // Applying rotation
-            *it = rotateVector(*it, angle, pivot);
 
             // Applying Offset
             it->x += offset_x;

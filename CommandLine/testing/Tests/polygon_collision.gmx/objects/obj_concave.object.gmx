@@ -27,25 +27,29 @@
             <kind>1</kind>
             <string>{&#13;
 	int inst_id = 100001;&#13;
-	// Creating the octagon polygon&#13;
-	local int oct_id = polygon_add(124, 124);&#13;
-	polygon_add_point(oct_id, 120, 27);&#13;
-	polygon_add_point(oct_id, 123, 79);&#13;
-	polygon_add_point(oct_id, 116, 100);&#13;
-	polygon_add_point(oct_id, 55, 122);&#13;
-	polygon_add_point(oct_id, 5, 113);&#13;
-	polygon_add_point(oct_id, 0, 77);&#13;
-	polygon_add_point(oct_id, 14, 8);&#13;
 	&#13;
-	// Scale&#13;
-	polygon_xscale = 0.5;&#13;
-	polygon_yscale = 0.5;&#13;
+	// Creating the concave polygon&#13;
+	local int conv_id = polygon_add(250, 260);&#13;
+	polygon_add_point(conv_id, 95, 0);&#13;
+	polygon_add_point(conv_id, 250, 47);&#13;
+	polygon_add_point(conv_id, 176, 97);&#13;
+	polygon_add_point(conv_id, 140, 147);&#13;
+	polygon_add_point(conv_id, 246, 255);&#13;
+	polygon_add_point(conv_id, 0, 227);&#13;
+	polygon_add_point(conv_id, 78, 102);&#13;
+	polygon_add_point(conv_id, 4, 69);&#13;
 	&#13;
+	// Decomposing&#13;
+	polygon_decompose(conv_id);&#13;
+	polygon_set_concave(conv_id, true);&#13;
+		&#13;
 	// Setting the polygon with transformations&#13;
-	polygon_index = oct_id;&#13;
+	polygon_index = conv_id;&#13;
+	polygon_xscale = 0.2;&#13;
+	polygon_yscale = 0.2;&#13;
 	&#13;
 	// Polygon Tests&#13;
-	gtest_expect_eq(polygon_exists(oct_id), 1, "OCTAGON: polygon_add/polygon_exists");&#13;
+	gtest_expect_eq(polygon_exists(conv_id), 1, "CONCAVE: polygon_add/polygon_exists");&#13;
 	&#13;
 	// =========================================&#13;
 	// Simple Collision Tests&#13;
@@ -56,51 +60,51 @@
 	int out_y = 10;&#13;
 	&#13;
 	// Place Functions&#13;
-	gtest_expect_eq(place_free(out_x, out_y), 1, "OCTAGON: place_free 0");&#13;
-	gtest_expect_eq(place_empty(out_x, out_y), 1, "OCTAGON: place_empty 0");&#13;
-	gtest_expect_eq(place_meeting(out_x, out_y, obj_octagon_against), 0, "OCTAGON: place_meeting 0");&#13;
-	gtest_expect_eq(instance_place(out_x, out_y, obj_octagon_against), noone, "OCTAGON: instance_place 0");&#13;
+	gtest_expect_eq(place_free(out_x, out_y), 1, "CONCAVE: place_free 0");&#13;
+	gtest_expect_eq(place_empty(out_x, out_y), 1, "CONCAVE: place_empty 0");&#13;
+	gtest_expect_eq(place_meeting(out_x, out_y, obj_concave_against), 0, "CONCAVE: place_meeting 0");&#13;
+	gtest_expect_eq(instance_place(out_x, out_y, obj_concave_against), noone, "CONCAVE: instance_place 0");&#13;
 	&#13;
 	// Position Functions&#13;
-	gtest_expect_eq(position_free(out_x, out_y), 1, "OCTAGON: position_free 0");&#13;
-	gtest_expect_eq(position_empty(out_x, out_y), 1, "OCTAGON: position_empty 0");&#13;
-	gtest_expect_eq(position_meeting(out_x, out_y, obj_octagon_against), 0, "OCTAGON: position_meeting 0");&#13;
-	gtest_expect_eq(instance_position(out_x, out_y, obj_octagon_against), noone, "OCTAGON: instance_position 0");&#13;
+	gtest_expect_eq(position_free(out_x, out_y), 1, "CONCAVE: position_free 0");&#13;
+	gtest_expect_eq(position_empty(out_x, out_y), 1, "CONCAVE: position_empty 0");&#13;
+	gtest_expect_eq(position_meeting(out_x, out_y, obj_concave_against), 0, "CONCAVE: position_meeting 0");&#13;
+	gtest_expect_eq(instance_position(out_x, out_y, obj_concave_against), noone, "CONCAVE: instance_position 0");&#13;
 	&#13;
 	// Distance Functions&#13;
-	gtest_expect_eq(int(distance_to_point(out_x, out_y)), 64, "OCTAGON: distance_to_point");&#13;
+	gtest_expect_eq(int(distance_to_point(out_x, out_y)), 64, "CONCAVE: distance_to_point");&#13;
 	&#13;
 	// ========================================&#13;
 	// Primitive Collision Tests&#13;
 	// ========================================&#13;
 	// Rectangle&#13;
-	gtest_expect_eq(collision_rectangle(0, 0, out_x, out_y, all, true, true), noone, "OCTAGON: collision_rectangle 0");&#13;
-	gtest_expect_eq(collision_rectangle(0, 0, x, y, all, true, true), noone, "OCTAGON: collision_rectangle 1");&#13;
-	gtest_expect_eq(collision_rectangle(0, 0, x, y, all, true, false), inst_id, "OCTAGON: collision_rectangle 2");&#13;
+	gtest_expect_eq(collision_rectangle(0, 0, out_x, out_y, all, true, true), noone, "CONCAVE: collision_rectangle 0");&#13;
+	gtest_expect_eq(collision_rectangle(0, 0, x, y, all, true, true), noone, "CONCAVE: collision_rectangle 1");&#13;
+	gtest_expect_eq(collision_rectangle(0, 0, x, y, all, true, false), inst_id, "CONCAVE: collision_rectangle 2");&#13;
 	&#13;
 	// Line&#13;
-	gtest_expect_eq(collision_line(0, 0, out_x, out_y, all, true, true), noone, "OCTAGON: collision_line 0");&#13;
-	gtest_expect_eq(collision_line(0, 0, x, y, all, true, true), noone, "OCTAGON: collision_line 1");&#13;
-	gtest_expect_eq(collision_line(0, 0, x, y, all, true, false), inst_id, "OCTAGON: collision_line 2");&#13;
+	gtest_expect_eq(collision_line(0, 0, out_x, out_y, all, true, true), noone, "CONCAVE: collision_line 0");&#13;
+	gtest_expect_eq(collision_line(0, 0, x, y, all, true, true), noone, "CONCAVE: collision_line 1");&#13;
+	gtest_expect_eq(collision_line(0, 0, x, y, all, true, false), inst_id, "CONCAVE: collision_line 2");&#13;
 	&#13;
 	// Point&#13;
-	gtest_expect_eq(collision_point(out_x, out_y, all, true, true), noone, "OCTAGON: collision_point 0");&#13;
-	gtest_expect_eq(collision_point(x - 30, y - 30, all, true, true), noone, "OCTAGON: collision_point 1");&#13;
-	gtest_expect_eq(collision_point(x - 30, y - 30, all, true, false), inst_id, "OCTAGON: collision_point 2");&#13;
+	gtest_expect_eq(collision_point(out_x, out_y, all, true, true), noone, "CONCAVE: collision_point 0");&#13;
+	gtest_expect_eq(collision_point(x - 30, y - 30, all, true, true), noone, "CONCAVE: collision_point 1");&#13;
+	gtest_expect_eq(collision_point(x - 30, y - 30, all, true, false), inst_id, "CONCAVE: collision_point 2");&#13;
 	&#13;
 	// Circle&#13;
-	gtest_expect_eq(collision_circle(out_x, out_y, 5.0, all, true, true), noone, "OCTAGON: collision_circle 0");&#13;
-	gtest_expect_eq(collision_circle(x, y, 15.0, all, true, true), noone, "OCTAGON: collision_circle 1");&#13;
-	gtest_expect_eq(collision_circle(x, y, 15.0, all, true, false), inst_id, "OCTAGON: collision_circle 2");&#13;
+	gtest_expect_eq(collision_circle(out_x, out_y, 5.0, all, true, true), noone, "CONCAVE: collision_circle 0");&#13;
+	gtest_expect_eq(collision_circle(x, y, 15.0, all, true, true), noone, "CONCAVE: collision_circle 1");&#13;
+	gtest_expect_eq(collision_circle(x, y, 15.0, all, true, false), inst_id, "CONCAVE: collision_circle 2");&#13;
 	&#13;
 	// Ellipse&#13;
-	gtest_expect_eq(collision_ellipse(0, 0, out_x, out_y, all, true, true), noone, "OCTAGON: collision_ellipse 0");&#13;
-	gtest_expect_eq(collision_ellipse(0, 0, x + 5.0, y + 5.0, all, true, true), noone, "OCTAGON: collision_ellipse 1");&#13;
-	gtest_expect_eq(collision_ellipse(0, 0, x + 5.0, y + 5.0, all, true, false), inst_id, "OCTAGON: collision_ellipse 2");&#13;
+	gtest_expect_eq(collision_ellipse(0, 0, out_x, out_y, all, true, true), noone, "CONCAVE: collision_ellipse 0");&#13;
+	gtest_expect_eq(collision_ellipse(0, 0, x + 5.0, y + 5.0, all, true, true), noone, "CONCAVE: collision_ellipse 1");&#13;
+	gtest_expect_eq(collision_ellipse(0, 0, x + 5.0, y + 5.0, all, true, false), inst_id, "CONCAVE: collision_ellipse 2");&#13;
 	&#13;
 	// =======================================&#13;
 	// Setting Alarm&#13;
-	alarm[0] = 1;&#13;
+	// alarm[0] = 1;&#13;
 }</string>
           </argument>
         </arguments>
@@ -172,18 +176,10 @@
 	instance_activate_circle(enemy_x, enemy_y, 64, true);&#13;
 	gtest_expect_eq(place_meeting(enemy_x, enemy_y, obj_octagon_against), 1); // Should collide&#13;
 	&#13;
-	// ==========================================&#13;
-	// Cleanup and restart to another test cases&#13;
-	// ==========================================&#13;
-	x = 196;&#13;
-	y = 128;&#13;
-	&#13;
-	instance_destroy(obj_octagon_destroy);&#13;
-	instance_destroy(obj_octagon_against);&#13;
-	instance_create(196, 320, obj_concave_against);&#13;
-	instance_create(240, 332, obj_concave_destroy);&#13;
-	instance_create(240, 496, obj_concave_destroy);&#13;
-	instance_change(obj_concave, true);&#13;
+	// =============&#13;
+	// GAME END&#13;
+	// =============&#13;
+	game_end();&#13;
 }</string>
           </argument>
         </arguments>
@@ -375,7 +371,7 @@
         </arguments>
       </action>
     </event>
-    <event ename="obj_octagon_against" eventtype="4">
+    <event ename="obj_concave_against" eventtype="4">
       <action>
         <libid>1</libid>
         <id>115</id>

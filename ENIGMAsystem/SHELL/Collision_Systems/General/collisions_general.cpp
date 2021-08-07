@@ -37,8 +37,9 @@ namespace enigma
             }
 
             // Fetching transformed points
-            std::vector<glm::vec2> points = enigma::polygons.get(inst->polygon_index).getPoints();
-            glm::vec2 pivot = enigma::polygons.get(inst->polygon_index).computeCenter();
+            enigma::Polygon poly = enigma::polygons.get(inst->polygon_index);
+            std::vector<glm::vec2> points = poly.getPoints();
+            glm::vec2 pivot = poly.getOffset();
             enigma::transformPoints(points, 
                                     x1, y1, 
                                     inst->polygon_angle, pivot,
