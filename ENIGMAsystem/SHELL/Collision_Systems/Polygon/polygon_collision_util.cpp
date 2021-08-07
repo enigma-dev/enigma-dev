@@ -284,7 +284,6 @@ namespace enigma
                 break;
             }
         }
-        printf("\n\n");
 
         if (!isSeparated) 
         {
@@ -439,6 +438,61 @@ namespace enigma
         }
     }
 
+    // -----------------------------------------------------------------------------------------------
+    // Function to get collision between a polygon and ellipse. This function serves as the main couple 
+    // between all the interface collision functions and simple collision functions. It combines the 
+    // logic of the transformations and concavity.
+    //
+    // Args:
+    //      points_poly1, points_poly2      --  polygon points of the first and the second polygon
+    //      offset1_x, offset1_y            --  offset coordinates to add with polygon1
+    //      angle1, pivot1                  --  angle of rotation and pivot of polygon1
+    //      concave1                        --  bool to indicate concavity of polygon1
+    //      center_x, center_y              --  coordinates of the ellipse center
+    //      r_x, r_y                        --  the x and y radius of the ellipse
+    //
+    // Returns:
+    //                                      --  true if collision otherwise false
+    // -----------------------------------------------------------------------------------------------
+    bool get_complex_ellipse_collision(std::vector<glm::vec2>& points_poly1, 
+                                       double offset1_x, double offset1_y, 
+                                       double angle1, glm::vec2 pivot1, 
+                                       double xscale1, double yscale1, 
+                                       bool concave1, std::vector<std::vector<glm::vec2>> subpolygon1,
+                                       double center_x, double center_y, double rx, double ry)
+    {
+        // If polygon is not concave, run simple polygon vs ellipse collision
+        if (!concave1)
+        {
+            // Applying transformations
+            enigma::transformPoints(points_poly1, 
+                                    offset1_x, offset1_y, 
+                                    angle1, pivot1,
+                                    xscale1, yscale1);
+       
+            // Collision function call
+            return enigma::get_polygon_ellipse_collision(points_poly1, center_x, center_y, rx, ry);
+        }
+        // Concave vs ellipse 
+        else
+        {
+            // Iterating over subpolygons from polygon1
+            std::vector<std::vector<glm::vec2>>::iterator it;
+            for (it = subpolygon1.begin(); it != subpolygon1.end(); ++it)
+            {
+                // Applying transformations to the subpolygon
+                enigma::transformPoints(*it, 
+                                    offset1_x, offset1_y, 
+                                    angle1, pivot1,
+                                    xscale1, yscale1);
+                
+                // If collision detected than return
+                if (enigma::get_polygon_ellipse_collision(*it, center_x, center_y, rx, ry));
+                    return true;
+            }
+            return false;
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Function that makes a polygon from the given bbox dimensions
@@ -581,22 +635,22 @@ namespace enigma
     {
         // Converting the point to a small box
         Polygon bbox_main = get_bbox_from_dimensions(0, 0, 0.2, 0.2);
+        Polygon poly = polygons.get(inst->polygon_index);
 
         // Fetching points
-        std::vector<glm::vec2> points_poly2 = polygons.get(inst->polygon_index).getPoints();
+        std::vector<glm::vec2> points_poly2 = poly.getPoints();
         std::vector<glm::vec2> bbox_points = bbox_main.getPoints();
 
-        // Applying Transformations
-        // Applying Transformations
-        glm::vec2 pivot2 = polygons.get(inst->polygon_index).computeCenter();
-        transformPoints(points_poly2, 
-                                    inst->x, inst->y, 
-                                    inst->polygon_angle, pivot2,
-                                    inst->polygon_xscale, inst->polygon_yscale);
+        // Computing Pivot and offset the bbox
+        glm::vec2 pivot = poly.computeCenter();
         offsetPoints(bbox_points, x1, y1);
 
         // Collision detection
-        return get_polygon_polygon_collision(bbox_points, points_poly2) != NULL;
+        return get_complex_polygon_collision(points_poly2, inst->x, inst->y, inst->polygon_angle, pivot, 
+                                             inst->polygon_xscale, inst->polygon_yscale,
+                                             poly.isConcave(), poly.getSubpolygons(), 
+                                             bbox_points, NULL, NULL, NULL, pivot, NULL, NULL, false, poly.getSubpolygons(),
+                                             "BBOX") != NULL;
     }
 
     // --------------------------------------------------------------------------------

@@ -167,19 +167,20 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
             }
 
             // Fetching points
-            std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst->polygon_index).getPoints();
+            enigma::Polygon poly = enigma::polygons.get(inst->polygon_index);
+            std::vector<glm::vec2> points_poly2 = poly.getPoints();
             std::vector<glm::vec2> bbox_points = bbox_main.getPoints();
 
             // Applying Transformations
-            glm::vec2 pivot2 = enigma::polygons.get(inst->polygon_index).computeCenter();
-            enigma::transformPoints(points_poly2, 
-                                        inst->x, inst->y, 
-                                        inst->polygon_angle, pivot2,
-                                        inst->polygon_xscale, inst->polygon_yscale);
+            glm::vec2 pivot2 = poly.computeCenter();
             enigma::offsetPoints(bbox_points, x1, y1);
 
             // Polygon collision check
-            return enigma::get_polygon_polygon_collision(bbox_points, points_poly2)? inst : NULL;
+            return enigma::get_complex_polygon_collision(points_poly2, inst->x, inst->y, inst->polygon_angle, pivot2, 
+                                             inst->polygon_xscale, inst->polygon_yscale,
+                                             poly.isConcave(), poly.getSubpolygons(), 
+                                             bbox_points, NULL, NULL, NULL, pivot2, NULL, NULL, false, poly.getSubpolygons(),
+                                             "BBOX")? inst: NULL;
         }
     }
     return NULL;
@@ -262,18 +263,18 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
                 line_points.push_back(glm::vec2(x2, y2));
 
                 // Fetching points
-                std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst->polygon_index).getPoints();
+                enigma::Polygon poly = enigma::polygons.get(inst->polygon_index);
+                std::vector<glm::vec2> points_poly2 = poly.getPoints();
 
                 // Applying Transformations
-                // Applying Transformations
-                glm::vec2 pivot2 = enigma::polygons.get(inst->polygon_index).computeCenter();
-                enigma::transformPoints(points_poly2, 
-                                        inst->x, inst->y, 
-                                        inst->polygon_angle, pivot2,
-                                        inst->polygon_xscale, inst->polygon_yscale);
+                glm::vec2 pivot2 = poly.computeCenter();
 
                 // doing a polygon polygon check
-                return enigma::get_polygon_polygon_collision(line_points, points_poly2)? inst : NULL;
+                return enigma::get_complex_polygon_collision(points_poly2, inst->x, inst->y, inst->polygon_angle, pivot2, 
+                                             inst->polygon_xscale, inst->polygon_yscale,
+                                             poly.isConcave(), poly.getSubpolygons(), 
+                                             line_points, NULL, NULL, NULL, pivot2, NULL, NULL, false, poly.getSubpolygons(),
+                                             "BBOX")? inst: NULL;
             }
         }
     }
@@ -381,19 +382,19 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
             }
             
             // Actual polygon collision detection
+            enigma::Polygon poly = enigma::polygons.get(inst->polygon_index);
+
             // Fetching points
-            std::vector<glm::vec2> points_poly = enigma::polygons.get(inst->polygon_index).getPoints();
+            std::vector<glm::vec2> points_poly = poly.getPoints();
 
             // Applying Transformations
-            // Applying Transformations
-            glm::vec2 pivot = enigma::polygons.get(inst->polygon_index).computeCenter();
-            enigma::transformPoints(points_poly, 
-                                        inst->x, inst->y, 
-                                        inst->polygon_angle, pivot,
-                                        inst->polygon_xscale, inst->polygon_yscale);
+            glm::vec2 pivot = poly.computeCenter();
 
             // Collision Detection
-            return enigma::get_polygon_ellipse_collision(points_poly, x1, y1, rx, ry)? inst : NULL;
+            return enigma::get_complex_ellipse_collision(points_poly, inst->x, inst->y, inst->polygon_angle, pivot,
+                                                         inst->polygon_xscale, inst->polygon_yscale, 
+                                                         poly.isConcave(), poly.getSubpolygons(),
+                                                         x1, y1, rx, ry)? inst : NULL;
         }
     }
     return NULL;

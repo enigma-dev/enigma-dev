@@ -42,6 +42,13 @@ namespace enigma
                                        double xscale2, double yscale2, 
                                        bool concave2, std::vector<std::vector<glm::vec2>> subpolygon2,
                                        std::string CASE = "");
+    
+    bool get_complex_ellipse_collision(std::vector<glm::vec2>& points_poly1, 
+                                       double offset1_x, double offset1_y, 
+                                       double angle1, glm::vec2 pivot1, 
+                                       double xscale1, double yscale1, 
+                                       bool concave1, std::vector<std::vector<glm::vec2>> subpolygon1,
+                                       double center_x, double center_y, double rx, double ry);
 
     // Interface Collision functions
     bool get_polygon_point_collision(object_collisions* inst, int x1, int y1);

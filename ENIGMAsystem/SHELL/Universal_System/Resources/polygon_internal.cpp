@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "polygon_internal.h"
-#include "earcut.hpp"
 
 // Polygon class implementation
 namespace enigma 
