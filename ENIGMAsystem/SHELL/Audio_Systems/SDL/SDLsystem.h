@@ -1,9 +1,6 @@
 #ifndef ENIGMA_SDL_SYSTEM_H
 #define ENIGMA_SDL_SYSTEM_H
 
-#include <cstddef>
-#include <list>
-#include <string>
 #include <SDL_mixer.h>
 #include "SoundResource.h"
 

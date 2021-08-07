@@ -1,8 +1,6 @@
 #ifndef ENIGMA_SOUND_CHANNEL_H
 #define ENIGMA_SOUND_CHANNEL_H
 
-#include "SDLsystem.h"
-#include <SDL.h>
 #include <vector>
 #include <SDL_mixer.h>
 using std::vector;

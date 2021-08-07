@@ -14,21 +14,20 @@ struct Sound {
   Mix_Music *mm;
   float X=0, Y=0, Z=0 , minD=1, maxD=1000000000;
   
-static const char* getAssetTypeName() { return "sound"; }
+  static const char* getAssetTypeName() { return "sound"; }
 
-const void update(int channel) {
-  float dist3d = enigma_user::point_distance_3d(0,0,0,X,Y,Z);
-  if(dist3d >= maxD) { dist3d = maxD; }
-  else if(dist3d <= minD) { dist3d = minD; }
-
-  dist3d = 0 + (dist3d - minD) * (255 / (maxD - minD));
-  Mix_SetPosition(channel ,(Sint16)(enigma_user::point_direction(0,0,X,Y)),(Uint8)dist3d);
+  const void update(int channel) {
+    float dist3d = enigma_user::point_distance_3d(0,0,0,X,Y,Z);
+    if (dist3d >= maxD) { dist3d = maxD; }
+    else if (dist3d <= minD) { dist3d = minD; }
+    dist3d = 0 + (dist3d - minD) * (255 / (maxD - minD));
+    Mix_SetPosition(channel ,(Sint16)(enigma_user::point_direction(0,0,X,Y)),(Uint8)dist3d);
   }
 
   bool isDestroyed() const { return !mc; }
   
   void destroy() {
-    if(!isDestroyed()) {
+    if (!isDestroyed()) {
       Mix_FreeChunk(mc);
     }
   }
