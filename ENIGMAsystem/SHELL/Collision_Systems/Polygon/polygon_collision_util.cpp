@@ -550,7 +550,7 @@ namespace enigma
         // Getting bbox points
         // TODO : optimize this please
         Polygon bbox_polygon = get_bbox_from_dimensions(0, 0, w2, h2);
-        std::vector<glm::vec2> bbox_points = bbox_polygon.getPoints();
+        std::vector<glm::vec2> bbox_points = bbox_polygon.getOffsetPoints();
     
         // Using parameterized offsets, if passed
         double x1, y1;
@@ -579,10 +579,10 @@ namespace enigma
 
         // Getting polygon points
         Polygon poly1 = polygons.get(inst1->polygon_index);
-        std::vector<glm::vec2> points_poly = poly1.getPoints();
+        std::vector<glm::vec2> points_poly = poly1.getOffsetPoints();
 
         // Computing Pivot
-        glm::vec2 pivot = poly1.getOffset();
+        glm::vec2 pivot(0, 0);
 
         // Collision Detection
         return get_complex_polygon_collision(points_poly, x1, y1, inst1->polygon_angle, pivot, 
@@ -609,12 +609,12 @@ namespace enigma
         enigma::Polygon& poly2 = enigma::polygons.get(inst2->polygon_index);
 
         // Fetching Points
-        std::vector<glm::vec2> points_poly1 = poly1.getPoints();
-        std::vector<glm::vec2> points_poly2 = poly2.getPoints();
+        std::vector<glm::vec2> points_poly1 = poly1.getOffsetPoints();
+        std::vector<glm::vec2> points_poly2 = poly2.getOffsetPoints();
 
         // Computing Pivots
-        glm::vec2 pivot1 = poly1.getOffset();
-        glm::vec2 pivot2 = poly2.getOffset();
+        glm::vec2 pivot1(0, 0);
+        glm::vec2 pivot2(0, 0);
 
         return enigma::get_complex_polygon_collision(points_poly1, x1, y1, 
                                                      inst1->polygon_angle, pivot1, inst1->polygon_xscale, inst1->polygon_yscale,
@@ -638,11 +638,11 @@ namespace enigma
         Polygon poly = polygons.get(inst->polygon_index);
 
         // Fetching points
-        std::vector<glm::vec2> points_poly2 = poly.getPoints();
-        std::vector<glm::vec2> bbox_points = bbox_main.getPoints();
+        std::vector<glm::vec2> points_poly2 = poly.getOffsetPoints();
+        std::vector<glm::vec2> bbox_points = bbox_main.getOffsetPoints();
 
         // Computing Pivot and offset the bbox
-        glm::vec2 pivot = poly.getOffset();
+        glm::vec2 pivot(0, 0);
         offsetPoints(bbox_points, x1, y1);
 
         // Collision detection

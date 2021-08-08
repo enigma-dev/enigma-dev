@@ -34,8 +34,8 @@ namespace enigma_user {
   {
     // Retrieving points of the polygon
     enigma::Polygon poly = enigma::polygons.get(polygon_id);
-    std::vector<glm::vec2> points = poly.getPoints();
-    glm::vec2 pivot = poly.getOffset();
+    std::vector<glm::vec2> points = poly.getOffsetPoints();
+    glm::vec2 pivot(0, 0);
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     int N = points.size();
 
@@ -58,8 +58,8 @@ namespace enigma_user {
   {
     // Computing BBOX
     enigma::Polygon poly = enigma::polygons.get(polygon_id);
-    std::vector<glm::vec2> points = poly.getPoints();
-    glm::vec2 pivot = poly.getOffset();
+    std::vector<glm::vec2> points = poly.getOffsetPoints();
+    glm::vec2 pivot(0, 0);
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     enigma::Rect<int> bbox = enigma::computeBBOXFromPoints(points);
 
@@ -77,8 +77,8 @@ namespace enigma_user {
   {
     // Retrieving points of the polygon
     enigma::Polygon poly = enigma::polygons.get(polygon_id);
-    std::vector<glm::vec2> points = poly.getPoints();
-    glm::vec2 pivot = poly.getOffset();
+    std::vector<glm::vec2> points = poly.getOffsetPoints();
+    glm::vec2 pivot(0, 0);
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     int N = points.size();
 
@@ -111,8 +111,8 @@ namespace enigma_user {
   {
     // Retrieving points of the polygon
     enigma::Polygon poly = enigma::polygons.get(polygon_id);
-    std::vector<glm::vec2> points = poly.getPoints();
-    glm::vec2 pivot = poly.getOffset();
+    std::vector<glm::vec2> points = poly.getOffsetPoints();
+    glm::vec2 pivot(0, 0);
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     int N = points.size();
 
@@ -138,8 +138,8 @@ namespace enigma_user {
   {
     // Computing BBOX
     enigma::Polygon poly = enigma::polygons.get(polygon_id);
-    std::vector<glm::vec2> points = poly.getPoints();
-    glm::vec2 pivot = poly.getOffset();
+    std::vector<glm::vec2> points = poly.getOffsetPoints();
+    glm::vec2 pivot(0, 0);
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     enigma::Rect<int> bbox = enigma::computeBBOXFromPoints(points); 
 
@@ -160,8 +160,8 @@ namespace enigma_user {
   {
     // Retrieving points of the polygon
     enigma::Polygon poly = enigma::polygons.get(polygon_id);
-    std::vector<glm::vec2> points = poly.getPoints();
-    glm::vec2 pivot = poly.getOffset();
+    std::vector<glm::vec2> points = poly.getOffsetPoints();
+    glm::vec2 pivot(0, 0);
     enigma::transformPoints(points, x, y, angle, pivot, xscale, yscale);
     int N = points.size();
 

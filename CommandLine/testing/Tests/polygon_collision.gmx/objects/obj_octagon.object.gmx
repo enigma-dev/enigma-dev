@@ -27,8 +27,11 @@
             <kind>1</kind>
             <string>{&#13;
 	int inst_id = 100001;&#13;
+	&#13;
 	// Creating the octagon polygon&#13;
 	local int oct_id = polygon_add(124, 124);&#13;
+	polygon_set_offset(oct_id, -62, -62);&#13;
+	&#13;
 	polygon_add_point(oct_id, 120, 27);&#13;
 	polygon_add_point(oct_id, 123, 79);&#13;
 	polygon_add_point(oct_id, 116, 100);&#13;
@@ -68,7 +71,7 @@
 	gtest_expect_eq(instance_position(out_x, out_y, obj_octagon_against), noone, "OCTAGON: instance_position 0");&#13;
 	&#13;
 	// Distance Functions&#13;
-	gtest_expect_eq(int(distance_to_point(out_x, out_y)), 64, "OCTAGON: distance_to_point");&#13;
+	gtest_expect_eq(int(distance_to_point(out_x, out_y)), 106, "OCTAGON: distance_to_point");&#13;
 	&#13;
 	// ========================================&#13;
 	// Primitive Collision Tests&#13;
@@ -85,8 +88,8 @@
 	&#13;
 	// Point&#13;
 	gtest_expect_eq(collision_point(out_x, out_y, all, true, true), noone, "OCTAGON: collision_point 0");&#13;
-	gtest_expect_eq(collision_point(x - 30, y - 30, all, true, true), noone, "OCTAGON: collision_point 1");&#13;
-	gtest_expect_eq(collision_point(x - 30, y - 30, all, true, false), inst_id, "OCTAGON: collision_point 2");&#13;
+	gtest_expect_eq(collision_point(x, y, all, true, true), noone, "OCTAGON: collision_point 1");&#13;
+	gtest_expect_eq(collision_point(x, y, all, true, false), inst_id, "OCTAGON: collision_point 2");&#13;
 	&#13;
 	// Circle&#13;
 	gtest_expect_eq(collision_circle(out_x, out_y, 5.0, all, true, true), noone, "OCTAGON: collision_circle 0");&#13;
@@ -137,8 +140,8 @@
 	vspeed = 0;&#13;
 	&#13;
 	// Position of the object should be this&#13;
-	int after_bounce_x = 72;&#13;
-	int after_bounce_y = 243;&#13;
+	int after_bounce_x = 96;&#13;
+	int after_bounce_y = 136;&#13;
 	&#13;
 	// Check&#13;
 	gtest_expect_eq(int(x), after_bounce_x);&#13;
@@ -175,14 +178,14 @@
 	// ==========================================&#13;
 	// Cleanup and restart to another test cases&#13;
 	// ==========================================&#13;
-	x = 196;&#13;
-	y = 128;&#13;
+	x = 144;&#13;
+	y = 32;&#13;
 	&#13;
 	instance_destroy(obj_octagon_destroy);&#13;
 	instance_destroy(obj_octagon_against);&#13;
-	instance_create(196, 320, obj_concave_against);&#13;
-	instance_create(240, 332, obj_concave_destroy);&#13;
-	instance_create(240, 496, obj_concave_destroy);&#13;
+	instance_create(244, 250, obj_concave_against);&#13;
+	instance_create(540, 132, obj_concave_destroy);&#13;
+	instance_create(540, 296, obj_concave_destroy);&#13;
 	instance_change(obj_concave, true);&#13;
 }</string>
           </argument>
@@ -216,7 +219,7 @@
 	// ===================================================&#13;
 	// This is the position after successful move contact&#13;
 	int after_contact_x = 95;&#13;
-	int after_contact_y = 248;&#13;
+	int after_contact_y = 229;&#13;
 	&#13;
 	// Moving and testing&#13;
 	move_contact_object(obj_octagon_against, 270, 1000, true);&#13;
@@ -237,7 +240,7 @@
 	&#13;
 	// Position after successful move contact&#13;
 	int after_outside_x = 90;&#13;
-	int after_outside_y = 252;&#13;
+	int after_outside_y = 227;&#13;
 	&#13;
 	// Moving and testing&#13;
 	move_outside_object(obj_octagon_against, 90, 1000, true);&#13;
@@ -245,7 +248,7 @@
 	gtest_expect_eq(y, after_outside_y);&#13;
 	&#13;
 	// Resetting the position&#13;
-	x = org_x;&#13;
+	x = 240;&#13;
 	y = org_y;&#13;
 	&#13;
 	// ===============================================&#13;
@@ -287,14 +290,14 @@
 	int inst2 = 100007;&#13;
 	&#13;
 	// These are the intersecting points of the above instances&#13;
-	int point1_x = 300;&#13;
-	int point1_y = 35;&#13;
-	int point2_x = 300;&#13;
-	int point2_y = 100;&#13;
+	int point1_x = 240;&#13;
+	int point1_y = 132;&#13;
+	int point2_x = 240;&#13;
+	int point2_y = 196;&#13;
 	&#13;
 	// This point is for the intersection of the new instance&#13;
-	int point3_x = 235;&#13;
-	int point3_y = 120;&#13;
+	int point3_x = 240;&#13;
+	int point3_y = 196;&#13;
 	&#13;
 	// Destory object&#13;
 	position_destroy_object(point1_x, point1_y, obj_octagon_against, false);&#13;
@@ -365,7 +368,7 @@
 	gtest_expect_eq(instance_position(point_in_x, point_in_y, obj_octagon_against), inst_id);	&#13;
 	&#13;
 	// Distance Functions&#13;
-	gtest_expect_eq(distance_to_object(obj_octagon_against), 111);&#13;
+	gtest_expect_eq(distance_to_object(obj_octagon_against), 96);&#13;
 	&#13;
 	// =======================================================&#13;
 	// Setting the next alarm&#13;
@@ -436,7 +439,7 @@
         <arguments>
           <argument>
             <kind>0</kind>
-            <string>3</string>
+            <string>1</string>
           </argument>
           <argument>
             <kind>4</kind>

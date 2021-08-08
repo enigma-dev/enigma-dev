@@ -19,6 +19,7 @@ namespace enigma
         points.clear();
         diagonals.clear();
         subpolygons.clear();
+        offsetPoints.clear();
         offset = glm::vec2(0, 0);
         width = 0;
         height = 0;
@@ -37,6 +38,7 @@ namespace enigma
         points.clear();
         diagonals.clear();
         subpolygons.clear();
+        offsetPoints.clear();
         this->height = h;
         this->width = w;
         this->offset = glm::vec2(x, y);
@@ -71,6 +73,11 @@ namespace enigma
     std::vector<glm::vec2> Polygon::getPoints() 
     {
         return points;
+    }
+
+    std::vector<glm::vec2> Polygon::getOffsetPoints()
+    {
+        return offsetPoints;
     }
 
     std::vector<Diagonal>& Polygon::getDiagonals()
@@ -118,6 +125,9 @@ namespace enigma
     void Polygon::setOffset(glm::vec2 off)
     {
         this->offset = off;
+        recomputeOffsetPoints();
+        if (concave)
+            decomposeConcave();
     }
 
     void Polygon::setConcave(bool c)
@@ -128,27 +138,34 @@ namespace enigma
     void Polygon::addPoint(const glm::vec2& point) 
     {
         this->points.push_back(point);
+        this->offsetPoints.push_back(glm::vec2(point.x + offset.x, point.y + offset.y));
     }
 
     void Polygon::addPoint(int x, int y) 
     {
         glm::vec2 point(x, y);
         this->points.push_back(point);
+        this->offsetPoints.push_back(glm::vec2(x + offset.x, y + offset.y));
     }
 
     void Polygon::removePoint(int x, int y) 
     {
         glm::vec2 point(x, y);
         points.erase(std::remove(points.begin(), points.end(), point), points.end());
+        glm::vec2 point2(x + offset.x, y + offset.y);
+        offsetPoints.erase(std::remove(offsetPoints.begin(), offsetPoints.end(), point2), offsetPoints.end());
     }
     void Polygon::removePoint(const glm::vec2& point) 
     {
         points.erase(std::remove(points.begin(), points.end(), point), points.end());
+        glm::vec2 point2(point.x + offset.x, point.y + offset.y);
+        offsetPoints.erase(std::remove(offsetPoints.begin(), offsetPoints.end(), point2), offsetPoints.end());
     }
 
     void Polygon::copy(const Polygon& obj) 
     {
         this->points = obj.points;
+        this->offsetPoints = obj.offsetPoints;
         this->height = obj.height;
         this->width = obj.width;
         this->diagonals = obj.diagonals;
@@ -180,7 +197,12 @@ namespace enigma
 
     void Polygon::decomposeConcave() 
     {
-        std::vector<glm::vec2> temp_points = points;
+        // Clearing already existed points
+        diagonals.clear();
+        subpolygons.clear();
+
+        // Calling triangulate from offset points
+        std::vector<glm::vec2> temp_points = offsetPoints;
         triangulate(temp_points, subpolygons, diagonals);
 
         // Computing and storing the indices of the diagonals
@@ -203,6 +225,17 @@ namespace enigma
         //     printf("\n");
         // }
         // Debugging Ends
+    }
+
+    void Polygon::recomputeOffsetPoints()
+    {
+        offsetPoints.clear();
+        std::vector<glm::vec2>::iterator it;
+        for (it = points.begin(); it != points.end(); ++it)
+        {
+            glm::vec2 temp(it->x + offset.x, it->y + offset.y);
+            offsetPoints.push_back(temp);
+        }
     }
 
     // Asset Array Implementation

@@ -31,6 +31,7 @@ namespace enigma
 		// Attributes
 		private:
 			std::vector<glm::vec2> points;
+			std::vector<glm::vec2> offsetPoints;
 			std::vector<Diagonal> diagonals;
 			std::vector<std::vector<glm::vec2>> subpolygons;
 			int height;
@@ -57,6 +58,7 @@ namespace enigma
 
 			// Getters
 			std::vector<glm::vec2> getPoints();
+			std::vector<glm::vec2> getOffsetPoints();
 			std::vector<Diagonal>& getDiagonals();
 			std::vector<std::vector<glm::vec2>>& getSubpolygons();
 			int getHeight();
@@ -90,6 +92,9 @@ namespace enigma
 			
 			// Mathematical computations for caching	
 			void decomposeConcave();
+		
+		private:
+			void recomputeOffsetPoints();
 	};
 
 	// MinMax Projection class; to determine collision

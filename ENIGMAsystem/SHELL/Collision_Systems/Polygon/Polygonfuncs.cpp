@@ -731,12 +731,12 @@ namespace enigma_user
             if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1)
             {
                 // Fetching Points
-                std::vector<glm::vec2> points_poly1 = enigma::polygons.get(inst1->polygon_index).getPoints();
-                std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst2->polygon_index).getPoints();
+                std::vector<glm::vec2> points_poly1 = enigma::polygons.get(inst1->polygon_index).getOffsetPoints();
+                std::vector<glm::vec2> points_poly2 = enigma::polygons.get(inst2->polygon_index).getOffsetPoints();
 
                 // Computing Pivots
-                glm::vec2 pivot1 = enigma::polygons.get(inst1->polygon_index).getOffset();
-                glm::vec2 pivot2 = enigma::polygons.get(inst1->polygon_index).getOffset();
+                glm::vec2 pivot1(0, 0);
+                glm::vec2 pivot2(0, 0);
 
                 // Applying transformations
                 enigma::transformPoints(points_poly1, 

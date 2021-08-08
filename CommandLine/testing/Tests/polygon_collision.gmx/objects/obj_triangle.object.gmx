@@ -27,6 +27,7 @@
             <kind>1</kind>
             <string>{&#13;
 	int inst_id = 100001;&#13;
+	&#13;
 	// Creating the triangle polygon&#13;
 	local int tri_id = polygon_add(48, 48);&#13;
 	polygon_add_point(tri_id, 33, 0);&#13;
@@ -93,7 +94,7 @@
 	&#13;
 	// =======================================&#13;
 	// Setting Alarm&#13;
-	// alarm[0] = 1;&#13;
+	alarm[0] = 1;&#13;
 }</string>
           </argument>
         </arguments>
@@ -131,7 +132,7 @@
 	&#13;
 	// Position of the object should be this&#13;
 	int after_bounce_x = 75;&#13;
-	int after_bounce_y = 204;&#13;
+	int after_bounce_y = 148;&#13;
 	&#13;
 	// Check&#13;
 	gtest_expect_eq(int(x), after_bounce_x);&#13;
@@ -209,7 +210,7 @@
 	// ===================================================&#13;
 	// This is the position after successful move contact&#13;
 	int after_contact_x = 95;&#13;
-	int after_contact_y = 218;&#13;
+	int after_contact_y = 160;&#13;
 	&#13;
 	// Moving and testing&#13;
 	move_contact_object(obj_triangle_against, 270, 1000, true);&#13;
@@ -230,7 +231,7 @@
 	&#13;
 	// Position after successful move contact&#13;
 	int after_outside_x = 90;&#13;
-	int after_outside_y = 221;&#13;
+	int after_outside_y = 163;&#13;
 	&#13;
 	// Moving and testing&#13;
 	move_outside_object(obj_triangle_against, 90, 1000, true);&#13;
@@ -280,10 +281,10 @@
 	int inst2 = 100004;&#13;
 	&#13;
 	// These are the intersecting points of the above instances&#13;
-	int point1_x = 230;&#13;
-	int point1_y = 20;&#13;
-	int point2_x = 225;&#13;
-	int point2_y = 80;&#13;
+	int point1_x = 240;&#13;
+	int point1_y = 32;&#13;
+	int point2_x = 240;&#13;
+	int point2_y = 96;&#13;
 &#13;
 	// This point is for the intersection of the new instance&#13;
 	int point3_x = 260;&#13;
@@ -358,7 +359,7 @@
 	gtest_expect_eq(instance_position(point_in_x, point_in_y, obj_triangle_against), inst_id);	&#13;
 	&#13;
 	// Distance Functions&#13;
-	gtest_expect_eq(distance_to_object(obj_triangle_against), 152);&#13;
+	gtest_expect_eq(distance_to_object(obj_triangle_against), 108);&#13;
 	&#13;
 	// =======================================================&#13;
 	// Setting the next alarm&#13;

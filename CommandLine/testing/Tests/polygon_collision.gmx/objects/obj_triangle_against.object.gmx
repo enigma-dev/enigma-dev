@@ -37,30 +37,6 @@
         </arguments>
       </action>
     </event>
-    <event enumb="0" eventtype="3">
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <useapplyto>-1</useapplyto>
-        <isquestion>0</isquestion>
-        <exetype>2</exetype>
-        <functionname/>
-        <codestring/>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>{&#13;
-	polygon_angle -= 0.01;&#13;
-}</string>
-          </argument>
-        </arguments>
-      </action>
-    </event>
     <event enumb="0" eventtype="8">
       <action>
         <libid>1</libid>

@@ -168,11 +168,11 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
 
             // Fetching points
             enigma::Polygon poly = enigma::polygons.get(inst->polygon_index);
-            std::vector<glm::vec2> points_poly2 = poly.getPoints();
-            std::vector<glm::vec2> bbox_points = bbox_main.getPoints();
+            std::vector<glm::vec2> points_poly2 = poly.getOffsetPoints();
+            std::vector<glm::vec2> bbox_points = bbox_main.getOffsetPoints();
 
             // Applying Transformations
-            glm::vec2 pivot2 = poly.getOffset();
+            glm::vec2 pivot2(0, 0);
             enigma::offsetPoints(bbox_points, x1, y1);
 
             // Polygon collision check
@@ -264,10 +264,10 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
 
                 // Fetching points
                 enigma::Polygon poly = enigma::polygons.get(inst->polygon_index);
-                std::vector<glm::vec2> points_poly2 = poly.getPoints();
+                std::vector<glm::vec2> points_poly2 = poly.getOffsetPoints();
 
                 // Applying Transformations
-                glm::vec2 pivot2 = poly.getOffset();
+                glm::vec2 pivot2(0, 0);
 
                 // doing a polygon polygon check
                 return enigma::get_complex_polygon_collision(points_poly2, inst->x, inst->y, inst->polygon_angle, pivot2, 
@@ -385,10 +385,10 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
             enigma::Polygon poly = enigma::polygons.get(inst->polygon_index);
 
             // Fetching points
-            std::vector<glm::vec2> points_poly = poly.getPoints();
+            std::vector<glm::vec2> points_poly = poly.getOffsetPoints();
 
             // Applying Transformations
-            glm::vec2 pivot = poly.getOffset();
+            glm::vec2 pivot(0, 0);
 
             // Collision Detection
             return enigma::get_complex_ellipse_collision(points_poly, inst->x, inst->y, inst->polygon_angle, pivot,
