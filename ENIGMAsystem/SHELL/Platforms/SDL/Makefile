@@ -14,7 +14,8 @@ ifneq ($(TARGET-PLATFORM), Android)
 endif
 
 ifeq ($(TARGET-PLATFORM), Android)
-	SOURCES += Platforms/SDL/Android/Window.cpp
+    override CXXFLAGS += -I$(ENIGMA_ROOT)/android/external/SDL2/src/core/android/
+	SOURCES += $(wildcard Platforms/SDL/Android/*.cpp)
 	override ANDROID_MAKEFILES += SDL2/Android.mk
 	override ANDROID_SHARED_LIBRARIES += SDL2
 else
