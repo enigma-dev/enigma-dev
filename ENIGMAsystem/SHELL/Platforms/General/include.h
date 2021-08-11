@@ -12,3 +12,4 @@
 #include "PFsystem.h"
 #include "PFjoystick.h"
 #include "PFgamepad.h"
+#include "PFdevice.h"
