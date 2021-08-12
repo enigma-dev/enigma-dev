@@ -17,10 +17,17 @@
 
 #include <string>
 
+#include "../strings_util.h"
+
 #include <png.h>
 
 unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, const unsigned h, const char* filename, bool bgra) {
+  #if !defined(_WIN32)
   FILE *fp = fopen(filename, "wb");
+  #else
+  std::wstring wfname = strings_util::widen(filename);
+  FILE *fp = _wfopen(wfname.c_str(), L"wb");
+  #endif
 
   png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if (!png) return -1;
@@ -56,7 +63,12 @@ unsigned libpng_encode32_file(const unsigned char* image, const unsigned w, cons
 
 unsigned libpng_decode32_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename, bool bgra) {
   (*w) = 0; (*h) = 0;
+  #if !defined(_WIN32)
   FILE *fp = fopen(filename, "rb");
+  #else
+  std::wstring wfname = strings_util::widen(filename);
+  FILE *fp = _wfopen(wfname.c_str(), L"rb");
+  #endif
   if (fp == nullptr) return -1;
 
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);

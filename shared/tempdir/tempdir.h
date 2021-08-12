@@ -10,6 +10,4 @@ namespace enigma_user {
 
 std::string get_temp_directory();
 
-#define temp_directory get_temp_directory()
-
 } // namespace enigma_user

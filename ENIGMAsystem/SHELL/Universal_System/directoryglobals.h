@@ -16,5 +16,6 @@ std::string get_program_pathname();
 #define program_directory get_program_directory()
 #define program_filename get_program_filename()
 #define program_pathname get_program_pathname()
+#define temp_directory get_temp_directory()
 
 } // namespace enigma_user
