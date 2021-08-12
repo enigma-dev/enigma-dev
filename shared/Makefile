@@ -20,7 +20,7 @@ SHARED_SOURCES := $(call rwildcard,event_reader,*.cpp) $(call rwildcard,eyaml,*.
 PROTO_DIR := ./protos/.eobjs
 
 CXXFLAGS += -fPIC -I../CompilerSource -I$(PROTO_DIR)
-LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols -lprotobuf
+LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf
 
 ifeq ($(UNIX_BASED), false)
 	CROSSPROCESS := $(shell CROSSPROCESS=crossprocess32.h;if test -f "$CROSSPROCESS"; then echo $CROSSPROCESS exists;else "$(dirname $MSYSTEM_PREFIX)/msys2_shell.cmd" -defterm -mingw32 -no-start -here -lc "g++ crossprocess/crossprocess.cpp -o crossprocess/crossprocess32.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m32";fi)
