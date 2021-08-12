@@ -6,7 +6,7 @@ using std::string;
 namespace enigma_user {
 
 void url_open(string url) {
-  enigma_insecure::execute_program("xdg-open", url, false);
+  enigma_user::execute_program("xdg-open", url, false);
 }
 
 void action_webpage(const string& url) {
