@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "spatialHash.h"
 
 // Methods
@@ -78,11 +79,11 @@ int SpatialHash::computeHash(int x, int y)
 	return (x / cellSize) + ((y / cellSize) * cols);
 }
 
-std::vector<int>& SpatialHash::computeBuckets(int x1, int y1, int x2, int y2)
+std::vector<int>& SpatialHash::computeBuckets(BBOX bbox)
 {
 	std::vector<int> buckets;
-	int minHash = computeHash(x1, y1);
-	int maxHash = computeHash(x2, y2);
+	int minHash = computeHash(bbox.x1, bbox.y1);
+	int maxHash = computeHash(bbox.x2, bbox.y2);
 	for (int i = minHash; i <= maxHash; ++i)
 	{
 		buckets.push_back(i);
@@ -90,9 +91,14 @@ std::vector<int>& SpatialHash::computeBuckets(int x1, int y1, int x2, int y2)
 	return buckets;
 }
 
-void SpatialHash::registerObject(int obj_id, int x1, int y1, int x2, int y2)
+void SpatialHash::registerObject(int obj_id, int x, int y)
 {
-	std::vector<int> buckets = computeBuckets(x1, y1, x2, y2);
+	hashmap[computeHash(x, y)].push_back(obj_id);
+}
+
+void SpatialHash::registerObject(int obj_id, BBOX bbox)
+{
+	std::vector<int> buckets = computeBuckets(bbox);
 	std::vector<int>::iterator it;
 	for (it = buckets.begin(); it != buckets.end(); ++it)
 	{
@@ -102,18 +108,49 @@ void SpatialHash::registerObject(int obj_id, int x1, int y1, int x2, int y2)
 
 std::vector<int> SpatialHash::getNearby(int obj_id, int x, int y)
 {
-	int hash = computeHash(x, y);
-	return hashmap[hash];
+	return hashmap[computeHash(x, y)];
 }
 
-std::vector<int> SpatialHash::getNearby(int obj_id, int x1, int y1, int x2, int y2)
+std::vector<int> SpatialHash::getNearby(int obj_id, BBOX bbox)
 {
 	std::vector<int> buckets;
-	int minHash = computeHash(x1, y1);
-	int maxHash = computeHash(x2, y2);
+	int minHash = computeHash(bbox.x1, bbox.y1);
+	int maxHash = computeHash(bbox.x2, bbox.y2);
 	for (int i = minHash; i <= maxHash; ++i)
 	{
 		buckets.insert(buckets.end(), hashmap[i].begin(), hashmap[i].end());
 	}
 	return buckets;
+}
+
+void SpatialHash::removeObject(int obj_id, int x, int y)
+{
+	int hash = computeHash(x, y);
+	std::vector<int>::iterator position = std::find(hashmap[hash].begin(), hashmap[hash].end(), obj_id);
+	if (position != hashmap[hash].end())
+		hashmap[hash].erase(position);
+}
+
+void SpatialHash::removeObject(int obj_id, BBOX bbox)
+{
+	int minHash = computeHash(bbox.x1, bbox.y1);
+	int maxHash = computeHash(bbox.x1, bbox.y1);
+	for (int i = minHash; i <= maxHash; ++i)
+	{
+		std::vector<int>::iterator position = std::find(hashmap[i].begin(), hashmap[i].end(), obj_id);
+		if (position != hashmap[i].end())
+			hashmap[i].erase(position);
+	}
+}
+
+void SpatialHash::updateHash(int obj_id, int x_prev, int y_prev, int x_new, int y_new)
+{
+	removeObject(obj_id, x_prev, y_prev);
+	registerObject(obj_id, x_new, y_new);
+}
+
+void SpatialHash::updateHash(int obj_id, BBOX bbox_prev, BBOX bbox_new)
+{
+	removeObject(obj_id, bbox_prev);
+	registerObject(obj_id, bbox_new);
 }

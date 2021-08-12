@@ -5,6 +5,11 @@
 #include <unordered_map>
 #include <vector>
 
+struct BBOX
+{
+	int x1, y1, x2, y2;
+};
+
 class SpatialHash
 {
 	private:
@@ -39,10 +44,19 @@ class SpatialHash
 
 		// Hashing functions
 		int computeHash(int x, int y);
-		std::vector<int>& computeBuckets(int x1, int y1, int x2, int y2);
-		void registerObject(int obj_id, int x1, int y1, int x2, int y2);
+		std::vector<int>& computeBuckets(BBOX bbox);
+
+		void registerObject(int obj_id, int x, int y);
+		void registerObject(int obj_id, BBOX bbox);
+
 		std::vector<int> getNearby(int obj_id, int x, int y);
-		std::vector<int> getNearby(int obj_id, int x1, int y1, int x2, int y2);
+		std::vector<int> getNearby(int obj_id, BBOX bbox);
+
+		void removeObject(int obj_id, int x, int y);
+		void removeObject(int obj_id, BBOX bbox);
+
+		void updateHash(int obj_id, int x_prev, int y_prev, int x_new, int y_new);
+		void updateHash(int obj_id, BBOX bbox_prev, BBOX bbox_new);
 };
 
 #endif // !SPATIAL_HASH_H
