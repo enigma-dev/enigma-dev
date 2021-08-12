@@ -12,6 +12,18 @@ else
 	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options-mt -lpthread
 endif
 
+ifeq ($(UNIX_BASED), true)
+	ifeq ($(OS), Darwin)
+		OS_LIBS += -framework CoreFoundation -framework CoreGraphics -framework Cocoa
+	else ifeq ($(OS), Linux)
+		OS_LIBS += -lprocps
+	else ifeq ($(OS), FreeBSD)
+		OS_LIBS += -lprocstat -lutil -lc
+	else ifeq ($(OS), DragonFly)
+		OS_LIBS += -lkvm -lutil -lc
+	endif
+endif
+
 CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) -I../libEGM -I../libEGM
 LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf$(SUFFIX) -lEGM$(SUFFIX) -lProtocols$(SUFFIX) -lENIGMAShared$(SUFFIX) -lgrpc++ -lprotobuf -lyaml-cpp -lpng 
 
